@@ -24,6 +24,7 @@ package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Enumeration;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -33,6 +34,7 @@ import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.Derby;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.NetworkServerTestSetup;
+import org.apache.derbyTesting.junit.SecurityManagerSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
@@ -59,42 +61,54 @@ public class AutoloadTest extends BaseJDBCTestCase
 
         boolean embeddedAutoLoad = false;
         boolean clientAutoLoad = false;
+        boolean jdbc4Autoload = false;
         
         if (JDBC.vmSupportsJDBC4() && TestConfiguration.loadingFromJars())
         {
-            // test client & embedded
-            embeddedAutoLoad = true;
-            clientAutoLoad = true;
+            // test client & embedded,but the JDBC 4 auto boot is not
+            // a full boot of the engine. Thus while there is no
+            // need to explicitly load the driver, the embedded engine
+            // does not start up. Unlike when the embedded driver is
+            // put in jdbc.drivers.
+            
+            jdbc4Autoload = true;
         }
-        else
-        {
-            // Simple test to see if the driver class is
-            // in the value. Could get fancy and see if it is
-            // correctly formatted but not worth it.
 
-            try {
-                String jdbcDrivers = getSystemProperty("jdbc.drivers");
-                if (jdbcDrivers == null)
-                    jdbcDrivers = "";
 
-                embeddedAutoLoad = jdbcDrivers
-                        .indexOf("org.apache.derby.jdbc.EmbeddedDriver") != -1;
+        // Simple test to see if the driver class is
+        // in the value. Could get fancy and see if it is
+        // correctly formatted but not worth it.
 
-                clientAutoLoad = jdbcDrivers
-                        .indexOf("org.apache.derby.jdbc.ClientDriver") != -1;
+        try {
+            String jdbcDrivers = getSystemProperty("jdbc.drivers");
+            if (jdbcDrivers == null)
+                jdbcDrivers = "";
 
-            } catch (SecurityException se) {
-                // assume there is no autoloading if
-                // we can't read the value of jdbc.drivers.
-            }
+            embeddedAutoLoad = jdbcDrivers
+                    .indexOf("org.apache.derby.jdbc.EmbeddedDriver") != -1;
+
+            clientAutoLoad = jdbcDrivers
+                    .indexOf("org.apache.derby.jdbc.ClientDriver") != -1;
+
+        } catch (SecurityException se) {
+            // assume there is no autoloading if
+            // we can't read the value of jdbc.drivers.
         }
+
         
-        if (embeddedAutoLoad || clientAutoLoad)
+        if (jdbc4Autoload || embeddedAutoLoad || clientAutoLoad)
         {
             TestSuite suite = new TestSuite("AutoloadTest");
-            if (embeddedAutoLoad)
+            
+            if (jdbc4Autoload && !embeddedAutoLoad)
+            {
+                suite.addTest(SecurityManagerSetup.noSecurityManager(
+                        new AutoloadTest("testEmbeddedNotStarted")));
+            }
+            
+            if (jdbc4Autoload || embeddedAutoLoad)
                 suite.addTest(baseAutoLoadSuite("embedded"));
-            if (clientAutoLoad)
+            if (jdbc4Autoload || clientAutoLoad)
                 suite.addTest(
                   TestConfiguration.clientServerDecorator(
                           baseAutoLoadSuite("client")));
@@ -106,6 +120,7 @@ public class AutoloadTest extends BaseJDBCTestCase
         // not loaded implicitly by some other means.
         TestSuite suite = new TestSuite("AutoloadTest: no autoloading expected");
         
+        suite.addTest(new AutoloadTest("testEmbeddedNotStarted"));
         suite.addTest(new AutoloadTest("noloadTestNodriverLoaded"));
         suite.addTest(TestConfiguration.clientServerDecorator(
                 new AutoloadTest("noloadTestNodriverLoaded")));
@@ -129,8 +144,14 @@ public class AutoloadTest extends BaseJDBCTestCase
                 suite.addTest(new AutoloadTest("testAutoNetworkServerBoot"));
 
         }
-            
+        
         suite.addTest(new AutoloadTest("testSuccessfulConnect"));
+        
+        if ("embedded".equals(which)) {
+            suite.addTest(SecurityManagerSetup.noSecurityManager(
+                new AutoloadTest("testEmbeddedStarted")));
+        }
+
         suite.addTest(new AutoloadTest("testUnsuccessfulConnect"));
         suite.addTest(new AutoloadTest("testExplicitLoad"));
         return suite;
@@ -150,7 +171,7 @@ public class AutoloadTest extends BaseJDBCTestCase
     {
         String protocol =
             getTestConfiguration().getJDBCClient().getUrlBase();
-                    
+                         
         Driver driver = DriverManager.getDriver(protocol);
         assertNotNull("Expected registered driver", driver);
     }
@@ -272,6 +293,60 @@ public class AutoloadTest extends BaseJDBCTestCase
     {
         String jdbcDrivers = getSystemProperty("jdbc.drivers");
         return jdbcDrivers.indexOf("org.apache.derby.jdbc.EmbeddedDriver") != -1;
+    }
+    
+    /**
+     * Test indirect artifiacts through public apis that
+     * the embedded engine has not been started.
+     */
+    
+    public void testEmbeddedNotStarted()
+    {
+        assertFalse(hasDerbyThreadGroup());
+    }
+    
+    /**
+     * Check the test(s) we use to determine if the embedded driver
+     * is not up indicate the opposite once the driver has been
+     * fully booted.
+     *
+     */
+    public void testEmbeddedStarted()
+    {
+        assertTrue(hasDerbyThreadGroup());
+    }
+    
+    /**
+     * Return true if a ThreadGroup exists that has a name
+     * starting with derby.
+     * @return
+     */
+    private boolean hasDerbyThreadGroup() {
+        ThreadGroup tg = Thread.currentThread().getThreadGroup();
+        
+        while (tg.getParent() != null)
+        {
+            tg = tg.getParent();
+        }
+        
+        // estimate of groups        
+        ThreadGroup[] allGroups = new ThreadGroup[tg.activeGroupCount()];
+        int actual;
+        for (;;)
+        {
+            actual = tg.enumerate(allGroups, true);
+            if (actual < allGroups.length)
+                break;
+            // just double the size
+            allGroups = new ThreadGroup[allGroups.length * 2];
+        }
+
+        for (int i = 0; i < actual; i++)
+        {
+            if (allGroups[i].getName().startsWith("derby."))
+                return true;
+        }
+        return false;
     }
 }
 
