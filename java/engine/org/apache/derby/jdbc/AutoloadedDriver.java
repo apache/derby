@@ -92,7 +92,7 @@ public class AutoloadedDriver implements Driver
 		// the application is looking for a connection from some other
 		// driver.
 		//
-		return ( isBooted() && InternalDriver.embeddedDriverAcceptsURL(url) );
+		return InternalDriver.embeddedDriverAcceptsURL(url);
 	}
 
    
