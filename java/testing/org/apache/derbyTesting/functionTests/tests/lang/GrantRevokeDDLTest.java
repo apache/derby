@@ -1092,6 +1092,11 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         assertStatementError("42504", cSt);
         cSt.close();
         
+        cSt = samConnection.prepareCall(
+        "CALL SYSCS_UTIL.SYSCS_EMPTY_STATEMENT_CACHE()");
+            assertStatementError("42504", cSt);
+        cSt.close();
+        
         
         
         // set connection satConnection
