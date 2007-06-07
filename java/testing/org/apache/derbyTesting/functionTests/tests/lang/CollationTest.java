@@ -733,29 +733,37 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     JDBC.assertFullResultSet(rs,new String[][] {{"SYSCOLUMNS"}});
 
     //Do parameter testing with IN and subquery
-    //Won't work in territory based database because in 
-    //? IN (SELECT TABLENAME FROM SYS.SYSTABLES)
-    //? will get the collation of the current schema which is a user
-    //schema and hence the collation type of ? will be territory based. 
-    //But the rhs will have collation of system schema which UCS_BASIC. So the 
-    //comparison between left hand side with terriotry based and right hand 
-    //side with UCS_BASIC will fail.
-    checkPreparedStatementError(conn, "SELECT COUNT(*) FROM CUSTOMER WHERE " +
-    		" ? IN (SELECT TABLENAME FROM SYS.SYSTABLES)", "42818");
-    //To fix the problem above, we need to CAST TABLENAME so that the result 
-    //of CAST will pick up the collation of the current schema and this will
-    //cause both the operands of ? IN (SELECT TABLENAME FROM SYS.SYSTABLES) 
-    //to have same collation
-    ps = conn.prepareStatement("SELECT COUNT(*) FROM CUSTOMER WHERE " + 
-		" ? IN (SELECT CAST(TABLENAME AS CHAR(10)) FROM SYS.SYSTABLES)");
+    //Following will work just fine because ? will take it's collation from the
+    //context which in this case will be collation of TABLENAME which has 
+    //collation type of UCS_BASIC. 
+    ps = conn.prepareStatement("SELECT COUNT(*) FROM CUSTOMER WHERE ? IN " +
+    		" (SELECT TABLENAME FROM SYS.SYSTABLES)");
     ps.setString(1, "SYSCOLUMNS");
     rs = ps.executeQuery();
     JDBC.assertFullResultSet(rs,new String[][] {{"7"}});
 
-    //Similar testing for NOT IN
+    //Testing for NOT IN. Following won't work becuase ? is taking the 
+    //collation type from context which will be from the character string
+    //literal 'SYSCOLUMNS'. That literal will have the collation type of the
+    //current schema which is the user schema and hence it's collation type
+    //will be territory based. But that collation does not match the left hand
+    //side on IN clause and hence it results in compliation error.
     checkPreparedStatementError(conn, "SELECT TABLENAME FROM SYS.SYSTABLES " +
     		" WHERE TABLENAME NOT IN (?, ' SYSCOLUMNS ') AND " +
 			" CAST(TABLENAME AS CHAR(10)) = 'SYSCOLUMNS' ", "42818");
+    //We can make the query work in 2 ways
+    //1)Be in the SYS schema and then ? will take the collation of UCS_BASIC
+    //because that is what the character string literal ' SYSCOLUMNS ' has.
+    s.executeUpdate("set schema SYS");
+    ps = conn.prepareStatement("SELECT TABLENAME FROM SYS.SYSTABLES " +
+    		" WHERE TABLENAME NOT IN (?, ' SYSCOLUMNS ') AND " +
+			" CAST(TABLENAME AS CHAR(10)) = 'SYSCOLUMNS' ");
+    ps.setString(1, "aSYSCOLUMNS");
+    rs = ps.executeQuery();
+    JDBC.assertFullResultSet(rs,new String[][] {{"SYSCOLUMNS"}});
+    //2)The other way to fix the query would be to do a CAST on TABLENAME so
+    //it will have the collation of current schema which is APP 
+    s.executeUpdate("set schema APP");
     ps = conn.prepareStatement("SELECT TABLENAME FROM SYS.SYSTABLES WHERE " + 
 	" CAST(TABLENAME AS CHAR(10)) NOT IN (?, ' SYSCOLUMNS ') AND " +
 	" CAST(TABLENAME AS CHAR(10)) = 'SYSCOLUMNS' ");

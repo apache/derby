@@ -21,8 +21,6 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.services.context.ContextManager;
-
 import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.sql.compile.CompilerContext;
@@ -36,22 +34,9 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.reference.ClassName;
 
 import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.types.StringDataValue;
-
-import org.apache.derby.iapi.sql.execute.ExecRow;
-
-import org.apache.derby.iapi.sql.Activation;
-import org.apache.derby.iapi.types.DataValueDescriptor;
-import org.apache.derby.iapi.sql.Row;
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.sql.ResultSet;
-import org.apache.derby.iapi.types.TypeId;
-
-import org.apache.derby.iapi.services.loader.GeneratedMethod;
 
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.compiler.LocalField;
-
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
@@ -64,10 +49,8 @@ import org.apache.derby.impl.sql.compile.ActivationClassBuilder;
 import org.apache.derby.impl.sql.execute.OnceResultSet;
 
 import org.apache.derby.iapi.util.JBitSet;
-import org.apache.derby.iapi.util.ReuseFactory;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 
-import java.util.Properties;
 import java.util.Vector;
 
 /**
@@ -532,9 +515,6 @@ public class SubqueryNode extends ValueNode
 		{
 			leftOperand.setType(
 				((ResultColumn) resultColumns.elementAt(0)).getTypeServices());
-			//collation of ? operand should be same as the compilation schema
-			leftOperand.setCollationUsingCompilationSchema(
-					StringDataValue.COLLATION_DERIVATION_IMPLICIT);
 		}
 
 		// Set the DataTypeServices

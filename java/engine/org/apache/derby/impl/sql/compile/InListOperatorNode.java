@@ -25,12 +25,8 @@ import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
 import org.apache.derby.iapi.error.StandardException;
 
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.reference.ClassName;
 
-import org.apache.derby.iapi.types.StringDataValue;
 import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataValueDescriptor;
@@ -44,7 +40,6 @@ import org.apache.derby.iapi.sql.compile.Optimizable;
 
 import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
 
-import org.apache.derby.iapi.util.JBitSet;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 
 import java.lang.reflect.Modifier;
@@ -320,12 +315,6 @@ public final class InListOperatorNode extends BinaryListOperatorNode
 					getContextManager());
 
 			DataTypeDescriptor pType = srcVal.getTypeServices();
-			//collation of ? operand should be same as the current schema
-			pType.setCollationDerivation(
-					StringDataValue.COLLATION_DERIVATION_IMPLICIT);
-			pType.setCollationType(
-					getLanguageConnectionContext().getDefaultSchema()
-							.getCollationType());
 			pNode.setDescriptors(new DataTypeDescriptor [] { pType });
 			pNode.setType(pType);
 
