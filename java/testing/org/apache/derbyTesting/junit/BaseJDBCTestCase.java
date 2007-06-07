@@ -643,7 +643,11 @@ public abstract class BaseJDBCTestCase
                  * error should occur before the execution-time error
                  * about unbound parameters.
                  */
-                pSt.execute();
+                try {
+                    pSt.execute();
+                } finally {
+                    pSt.close();
+                }
             }
             fail("expected compile error: " + sqlState);
         } catch (SQLException se) {

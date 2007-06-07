@@ -187,42 +187,35 @@ public class StaticMethodCallNode extends MethodCallNode
 			CompilerContext cc = getCompilerContext();
 
 			// look for a routine
-			if (ad == null) {
 
-				String schemaName = procedureName != null ?
-									procedureName.getSchemaName() : null;
-									
-				boolean noSchema = schemaName == null;
+			String schemaName = procedureName.getSchemaName();
+								
+			boolean noSchema = schemaName == null;
 
-				SchemaDescriptor sd = getSchemaDescriptor(schemaName, schemaName != null);
+			SchemaDescriptor sd = getSchemaDescriptor(schemaName, schemaName != null);
 
-
-				resolveRoutine(fromList, subqueryList, aggregateVector, sd);
+            // The field methodName is used by resolveRoutine and
+            // is set to the name of the routine (procedureName.getTableName()).
+			resolveRoutine(fromList, subqueryList, aggregateVector, sd);
+			
+			if (ad == null && noSchema && !forCallStatement)
+			{
+				// Resolve to a built-in SYSFUN function but only
+				// if this is a function call and the call
+				// was not qualified. E.g. COS(angle). The
+				// SYSFUN functions are not in SYSALIASES but
+				// an in-memory table, set up in DataDictioanryImpl.
+				sd = getSchemaDescriptor("SYSFUN", true);
 				
-				if (ad == null && noSchema && !forCallStatement)
-				{
-					// Resolve to a built-in SYSFUN function but only
-					// if this is a function call and the call
-					// was not qualified. E.g. COS(angle). The
-					// SYSFUN functions are not in SYSALIASES but
-					// an in-memory table, set up in DataDictioanryImpl.
-					sd = getSchemaDescriptor("SYSFUN", true);
-					
-					resolveRoutine(fromList, subqueryList, aggregateVector, sd);
-				}
-	
+				resolveRoutine(fromList, subqueryList, aggregateVector, sd);
 			}
+	
 
-			/* Throw exception if no alias found */
+			/* Throw exception if no routine found */
 			if (ad == null)
 			{
-				Object errName;
-				if (procedureName == null)
-					errName = methodName;
-				else
-					errName = procedureName;
-
-				throw StandardException.newException(SQLState.LANG_NO_SUCH_METHOD_ALIAS, errName);
+				throw StandardException.newException(
+                        SQLState.LANG_NO_SUCH_METHOD_ALIAS, procedureName);
 			}
 	
 
@@ -233,8 +226,24 @@ public class StaticMethodCallNode extends MethodCallNode
 
 			methodName = ad.getAliasInfo().getMethodName();
 			javaClassName = ad.getJavaClassName();
+            
+            // DERBY-2330 Do not allow a routine to resolve to
+            // a Java method that is part of the Derby runtime code base.
+            // This is a security measure to stop user-defined routines
+            // bypassing security by making calls directly to Derby's
+            // internal methods. E.g. open a table's conglomerate
+            // directly and read the file, bypassing any authorization.
+            // This is a simpler mechanism than analyzing all of
+            // Derby's public static methods and ensuring they have
+            // no Security holes.
+            if (javaClassName.startsWith("org.apache.derby."))
+            {
+                if (!sd.isSystemSchema())
+                    throw StandardException.newException(
+                        SQLState.LANG_TYPE_DOESNT_EXIST2, (Throwable) null,
+                        javaClassName);
+            }
 		}
-
 
 		verifyClassExist(javaClassName);
 

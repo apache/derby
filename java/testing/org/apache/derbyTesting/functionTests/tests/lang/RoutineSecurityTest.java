@@ -170,6 +170,42 @@ public class RoutineSecurityTest extends BaseJDBCTestCase {
     }
     
     /**
+     * Check that a user routine cannot resolve to a
+     * internal derby class, currently limited to not
+     * resolving to any class in the org.apache.derby namespace.
+     */
+    public void testInternalClass() throws SQLException
+    {
+        Statement s = createStatement();
+        
+        s.executeUpdate(
+                "CREATE FUNCTION HACK_DERBY(PROPERTY_KEY VARCHAR(60)) " +
+                "RETURNS VARCHAR(60) " +
+                "EXTERNAL NAME 'org.apache.derby.catalog.SystemProcedures.SYSCS_GET_DATABASE_PROPERTY' " +
+                "LANGUAGE JAVA PARAMETER STYLE JAVA");
+        
+        s.executeUpdate(
+                "CREATE PROCEDURE HACK_DERBY_2() " +
+                "EXTERNAL NAME 'org.apache.derby.catalog.SystemProcedures.SYSCS_UNFREEZE_DATABASE' " +
+                "LANGUAGE JAVA PARAMETER STYLE JAVA");
+        
+        // Some random potential Derby class to ensure the checks
+        // are not limited to the catalog class.
+        s.executeUpdate(
+                "CREATE PROCEDURE HACK_DERBY_3() " +
+                "EXTERNAL NAME 'org.apache.derby.any.clazz.method' " +
+                "LANGUAGE JAVA PARAMETER STYLE JAVA");
+
+
+        s.close();
+        
+        assertCompileError("42X51", "VALUES HACK_DERBY(?)");
+        assertCompileError("42X51", "CALL HACK_DERBY_2()");
+        assertCompileError("42X51", "CALL HACK_DERBY_3()");       
+
+    }
+    
+    /**
      * Test for a security exception within a routine.
      * Current test is that the SQLException returned
      * to the client has SQLState 38000 and wraps a
