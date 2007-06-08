@@ -92,7 +92,7 @@ public class AutoloadedDriver implements Driver
 		// the application is looking for a connection from some other
 		// driver.
 		//
-		return InternalDriver.embeddedDriverAcceptsURL(url);
+		return !_engineForcedDown && InternalDriver.embeddedDriverAcceptsURL(url);
 	}
 
    
@@ -176,7 +176,7 @@ public class AutoloadedDriver implements Driver
 	** Retrieve the driver which is specific to our JDBC level.
 	** We defer real work to this specific driver.
 	*/
-	public static	Driver getDriverModule() throws SQLException {
+	static	Driver getDriverModule() throws SQLException {
 
 		if ( _engineForcedDown )
 		{
@@ -193,7 +193,7 @@ public class AutoloadedDriver implements Driver
 	/*
 	** Record which driver module actually booted.
 	*/
-	protected	static	void	registerDriverModule( Driver driver )
+	static	void	registerDriverModule( Driver driver )
 	{
 		_driverModule = driver;
 		_engineForcedDown = false;
@@ -203,7 +203,7 @@ public class AutoloadedDriver implements Driver
 	** Unregister the driver. This happens when the engine is
 	** forcibly shut down.
 	*/
-	protected	static	void	unregisterDriverModule()
+	static	void	unregisterDriverModule()
 	{
 		_driverModule = null;
 		_engineForcedDown = true;
