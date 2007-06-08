@@ -753,7 +753,13 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     rs = ps.executeQuery();
     JDBC.assertEmpty(rs);
 
-    
+    //Do parameter testing for LENGTH
+    //Following query will fail because LENGTH operator is not allowed to take
+    //a parameter. I just wanted to have a test case out for the changes that
+    //are going into engine code (ie LengthOperatorNode)
+    checkPreparedStatementError(conn, "SELECT COUNT(*) FROM CUSTOMER WHERE " +
+    		" LENGTH(?) != 0", "42X36");   
+
     //Do parameter testing with COALESCE
     //following will pass because the ? inside the COALESCE will take the 
     //collation type of the other operand which is TABLENAME. The result of

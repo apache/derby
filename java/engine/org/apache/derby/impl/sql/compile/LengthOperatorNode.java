@@ -144,13 +144,13 @@ public final class LengthOperatorNode extends UnaryOperatorNode
 		** According to the SQL standard, if XXX_length has a ? operand,
 		** its type is varchar with the implementation-defined maximum length
 		** for a varchar.
+		** Also, for XXX_length, it doesn't matter what is VARCHAR's collation 
+		** (since for XXX_length, no collation sensitive processing is 
+		** is required) and hence we will not worry about the collation setting
 		*/
 
 		operand.setType(DataTypeDescriptor.getBuiltInDataTypeDescriptor(parameterType, true, 
 												parameterWidth));
-		//collation of ? operand should be same as the compilation schema
-		operand.setCollationUsingCompilationSchema(
-				StringDataValue.COLLATION_DERIVATION_IMPLICIT);
 	}
 
 	/**
