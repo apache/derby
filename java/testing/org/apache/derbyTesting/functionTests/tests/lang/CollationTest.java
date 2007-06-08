@@ -529,7 +529,12 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     //aggregate method has operands with different collations, then the 
     //result will have collation derivation of NONE. The right side of =
     //operation has collation type of territory based and hence the following
-    //sql fails.
+    //sql fails. DERBY-2678 This query should not fail because even though 
+    //left hand side of = has collation derivation of NONE, the right hand
+    //side has collation derivation of IMPLICIT, and so we should just pick the
+    //collation of the rhs as per SQL standard. Once DERBY-2678 is fixed, we
+    //don't need to use the CAST on this query to make it work (we are doing
+    //that in the next test).
     assertStatementError("42818", s, "SELECT TABLENAME FROM SYS.SYSTABLES WHERE CASE " +
     		" WHEN 1=1 THEN TABLENAME ELSE 'c' END = 'SYSCOLUMNS'");
     //CASTing the result of the CASE expression will solve the problem in the
@@ -547,7 +552,12 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     //but constant character string ' ' has collation type of territory based
     //So the left hand side of = operator has collation derivation of NONE
     //and right hand side has collation derivation of territory based and
-    //that causes the = comparison to fail
+    //that causes the = comparison to fail. DERBY-2678 This query should not 
+    //fail because even though left hand side of = has collation derivation of 
+    //NONE, the right hand side has collation derivation of IMPLICIT, and so we 
+    //should just pick the collation of the rhs as per SQL standard. Once 
+    //DERBY-2678 is fixed, we don't need to use the CAST on this query to make 
+    //it work (we are doing that in the next test).
     assertStatementError("42818", s, "SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
     		" TABLENAME || ' ' = 'SYSCOLUMNS '");   
     //CASTing the result of the concat expression will solve the problem in 
@@ -565,7 +575,12 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     //but constant character string 'c' has collation type of territory based
     //So the left hand side of = operator has collation derivation of NONE
     //and right hand side has collation derivation of territory based and
-    //that causes the = comparison to fail
+    //that causes the = comparison to fail. DERBY-2678 This query should not 
+    //fail because even though left hand side of = has collation derivation of 
+    //NONE, the right hand side has collation derivation of IMPLICIT, and so we 
+    //should just pick the collation of the rhs as per SQL standard. Once 
+    //DERBY-2678 is fixed, we don't need to use the CAST on this query to make 
+    //it work (we are doing that in the next test).
     assertStatementError("42818", s, "SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
     		" COALESCE(TABLENAME, 'c') = 'SYSCOLUMNS'");   
     //CASTing the result of the COALESCE expression will solve the problem in 
@@ -583,7 +598,12 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     //but constant character string 'c' has collation type of territory based
     //So the left hand side of = operator has collation derivation of NONE
     //and right hand side has collation derivation of territory based and
-    //that causes the = comparison to fail
+    //that causes the = comparison to fail. DERBY-2678 This query should not 
+    //fail because even though left hand side of = has collation derivation of 
+    //NONE, the right hand side has collation derivation of IMPLICIT, and so 
+    //we should just pick the collation of the rhs as per SQL standard. Once 
+    //DERBY-2678 is fixed, we don't need to use the CAST on this query to make 
+    //it work (we are doing that in the next test).
     assertStatementError("42818", s, "SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
 		" NULLIF(TABLENAME, 'c') = 'SYSCOLUMNS'");   
     //CASTing the result of the NULLIF expression will solve the problem in 
