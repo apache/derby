@@ -319,7 +319,6 @@ public class AutoloadTest extends BaseJDBCTestCase
     /**
      * Return true if a ThreadGroup exists that has a name
      * starting with derby.
-     * @return
      */
     private boolean hasDerbyThreadGroup() {
         ThreadGroup tg = Thread.currentThread().getThreadGroup();

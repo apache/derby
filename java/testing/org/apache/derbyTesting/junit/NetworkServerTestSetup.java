@@ -224,9 +224,7 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
     }
 
     /**
-     * Returns the <code>Process</code> object for the server process.
-     *
-     * @param a <code>Process</code> object, or <code>null</code> if the
+     * Returns the <code>Process</code> object for the server process or <code>null</code> if the
      * network server does not run in a separate process
      */
     public Process getServerProcess() {
