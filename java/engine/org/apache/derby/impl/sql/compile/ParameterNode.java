@@ -159,10 +159,6 @@ public class ParameterNode extends ValueNode
 
 	public void setType(DataTypeDescriptor descriptor) throws StandardException
 	{
-		if (SanityManager.DEBUG)
-		SanityManager.ASSERT(userParameterTypes != null,
-			"typeServices not initialized");
-
 		/* Make sure the type is nullable. */
 
 		/*
