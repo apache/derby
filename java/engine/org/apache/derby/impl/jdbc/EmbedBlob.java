@@ -457,7 +457,7 @@ final class EmbedBlob extends ConnectionChild implements Blob
                         setupContextStack();
 
                     setPosition(0);
-                    return biStream;
+                    return new UpdateableBlobStream (this, biStream);
                 }
             }
         }
@@ -954,5 +954,13 @@ final class EmbedBlob extends ConnectionChild implements Blob
         getEmbedConnection().checkIfClosed();
         if(!isValid)
             throw newSQLException(SQLState.LOB_OBJECT_INVALID);
+    }
+    
+    /**
+     * Returns if blob data is stored locally (using LOBStreamControl).
+     * @return true if materialized else false
+     */
+    boolean isMaterialized () {
+        return materialized;
     }
 }

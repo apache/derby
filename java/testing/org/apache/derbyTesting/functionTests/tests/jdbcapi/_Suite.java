@@ -76,6 +76,7 @@ public class _Suite extends BaseTestCase  {
 		suite.addTest(AuthenticationTest.suite());
 		suite.addTest(DriverTest.suite());
         suite.addTest(ClobTest.suite());
+        suite.addTest(BlobUpdateableStreamTest.suite());
 
         // Old harness .java tests that run using the HarnessJavaTest
         // adapter and continue to use a single master file.
