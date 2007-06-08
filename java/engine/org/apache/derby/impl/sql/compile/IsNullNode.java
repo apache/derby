@@ -143,12 +143,12 @@ public final class IsNullNode extends UnaryComparisonOperatorNode
 		** If IS [NOT] NULL has a ? operand, we assume
 		** its type is varchar with the implementation-defined maximum length
 		** for a varchar.
+		** Also, for IS [NOT] NULL, it doesn't matter what is VARCHAR's 
+		** collation (since for NULL check, no collation sensitive processing
+		** is required) and hence we will not worry about the collation setting
 		*/
 
 		operand.setType(new DataTypeDescriptor(TypeId.getBuiltInTypeId(Types.VARCHAR), true));
-		//collation of ? operand should be same as the compilation schema
-		operand.setCollationUsingCompilationSchema(
-				StringDataValue.COLLATION_DERIVATION_IMPLICIT);
 	}
 
 	/* RelationalOperator interface */

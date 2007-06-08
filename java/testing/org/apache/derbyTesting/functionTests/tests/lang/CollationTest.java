@@ -26,6 +26,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
 
 import javax.sql.DataSource;
 
@@ -725,17 +726,32 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     //result of concatenation will have collation type of it's 2 operands,
     //namely UCS_BASIC
     checkPreparedStatementError(conn, "SELECT TABLENAME FROM SYS.SYSTABLES " +
-    		" WHERE TABLENAME || ? = 'SYSCOLUMNS '", "42818");   
+    		" WHERE TABLENAME || ? LIKE 'SYSCOLUMNS '", "42ZA2");   
     //The query above can be made to work if we are in SYS schema or if we use
     //CAST while we are trying to run the query is user schema
     //Let's try CAST first
     ps = conn.prepareStatement("SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
-    		" CAST(TABLENAME || ? AS CHAR(10)) = 'SYSCOLUMNS '");   
+    		" CAST((TABLENAME || ?) AS CHAR(20)) LIKE 'SYSCOLUMNS'");   
     //try switching to SYS schema and then run the original query without CAST
     s.executeUpdate("set schema SYS");
-    checkPreparedStatementError(conn, "SELECT TABLENAME FROM SYS.SYSTABLES " +
-    		" WHERE TABLENAME || ? = 'SYSCOLUMNS '", "42818");   
+    ps = conn.prepareStatement("SELECT TABLENAME FROM SYS.SYSTABLES " +
+    		" WHERE TABLENAME || ? LIKE 'SYSCOLUMNS'");   
     s.executeUpdate("set schema APP");
+
+    //Do parameter testing for IS NULL
+    //Following query will pass because it doesn't matter what the collation of
+    //? is when doing a NULL check
+    ps = conn.prepareStatement("SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
+    		" ? IS NULL");   
+    ps.setString(1, " ");
+    rs = ps.executeQuery();
+	JDBC.assertEmpty(rs);
+	//Now do the testing for IS NOT NULL
+    ps = conn.prepareStatement("SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
+    		" ? IS NOT NULL");
+    ps.setNull(1, java.sql.Types.VARCHAR);
+    rs = ps.executeQuery();
+    JDBC.assertEmpty(rs);
 
     
     //Do parameter testing with COALESCE
