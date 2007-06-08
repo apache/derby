@@ -54,7 +54,7 @@ public class DatabasePrincipal implements Principal, Serializable {
      * @param other principal to compare with
      * @return true if the principal passed in is the same as that
      *         encapsulated by this principal, and false otherwise
-     * @see Principal.equal()
+     * @see Principal#equals
      */
     public boolean equals(Object other) {
         if (other == null) {
@@ -71,7 +71,7 @@ public class DatabasePrincipal implements Principal, Serializable {
      * Returns the name of this principal.
      *
      * @return the name of this principal
-     * @see Principal.getName()
+     * @see Principal#getName()
      */
     public String getName() {
         return userName;
@@ -81,7 +81,7 @@ public class DatabasePrincipal implements Principal, Serializable {
      * Returns a hashcode for this principal.
      *
      * @return a hashcode for this principal
-     * @see Principal.hashCode()
+     * @see Principal#hashCode()
      */
     public int hashCode() {
         return getName().hashCode();
@@ -91,7 +91,7 @@ public class DatabasePrincipal implements Principal, Serializable {
      * Returns a string representation of this principal.
      *
      * @return a string representation of this principal
-     * @see Principal.toString()
+     * @see Principal#toString()
      */
     public String toString() {
         return this.getClass().getName() + "(" + getName() + ")";

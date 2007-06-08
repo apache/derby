@@ -71,7 +71,7 @@ public class SystemPermission extends BasicPermission {
      * @param name the name of the SystemPermission
      * @throws NullPointerException if name is null
      * @throws IllegalArgumentException if name is empty or not a legal SystemPermission
-     * @see BasicPermission(String)
+     * @see BasicPermission#BasicPermission(String)
      */
     public SystemPermission(String name) {
         super(name);

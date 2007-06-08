@@ -47,7 +47,7 @@ import java.io.ObjectOutputStream;
  * The database location URL may contain certain wildcard characters.
  * The currently only supported database action is <i>create</i>.
  *
- * @see DatabasePermission(String,String)
+ * @see DatabasePermission#DatabasePermission(String,String)
  * @see SystemPermission
  * @see java.io.FilePermission
  */
@@ -188,8 +188,8 @@ public class DatabasePermission extends Permission {
      * @throws NullPointerException if an argument is null
      * @throws IllegalArgumentException if an argument is not legal
      * @throws IOException if the location URL cannot be canonicalized
-     * @see Permission(String)
-     * @see FilePermission(String,String)
+     * @see Permission#Permission(String)
+     * @see java.io.FilePermission#FilePermission(String,String)
      */
     public DatabasePermission(String url, String actions)
         throws IOException {
@@ -333,7 +333,7 @@ public class DatabasePermission extends Permission {
      * @param p the permission to check against
      * @return true if the specified permission is implied by this object,
      * false if not
-     * @see Permission.implies(Permission)
+     * @see Permission#implies(Permission)
      */
     public boolean implies(Permission p) {
         //System.out.println("this = " + this);
@@ -388,7 +388,7 @@ public class DatabasePermission extends Permission {
      * @return true if obj is a DatabasePermission, and has the same URL and
      * actions as this DatabasePermission object, false if not
      *
-     * @see Permission.equals(Object)
+     * @see Permission#equals(Object)
      */
     public boolean equals(Object obj) {
         if (obj == this) {
@@ -408,7 +408,7 @@ public class DatabasePermission extends Permission {
      * Returns the hash code value for this object.
      *
      * @return a hash code value for this object
-     * @see Permission.hashCode()
+     * @see Permission#hashCode()
      */
     public int hashCode() {
         // hash canonicalized URL
@@ -419,7 +419,7 @@ public class DatabasePermission extends Permission {
      * Returns the "canonical string representation" of the actions.
      *
      * @return the canonical string representation of the actions
-     * @see Permission.getActions()
+     * @see Permission#getActions()
      */
     public String getActions() {
         // currently, the only supported action
