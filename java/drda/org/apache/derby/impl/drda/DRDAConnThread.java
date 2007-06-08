@@ -280,7 +280,7 @@ class DRDAConnThread extends Thread {
                                 // only when timeSlice is set.
                             }
 							currentTimeSlice = getTimeSlice();
-						} while ((currentTimeSlice == 0)  || 
+						} while ((currentTimeSlice <= 0)  || 
 							(System.currentTimeMillis() - timeStart < currentTimeSlice));
 
 						break;

@@ -73,7 +73,7 @@ final class ClientThread extends Thread {
                         
                         // Set time out: Stops DDMReader.fill() from
                         // waiting indefinitely when timeSlice is set.
-                        if (timeSlice != 0)
+                        if (timeSlice > 0)
                             clientSocket.setSoTimeout(timeSlice);
                         
                         //create a new Session for this socket
