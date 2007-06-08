@@ -185,6 +185,12 @@ public class GroupByExpressionTest extends BaseJDBCTestCase
                 " group by (case when c1 = 1 then 2 else 1 end)",
                 new int[][] {{1,32}, {2, 21}});
         
+        // Conditional Derby-2230.
+        verifyQueryResults(
+                "cond",
+                "select case when 1 = 1 then 'z' else substr('abc',1,1) end from test",
+                new String[][] {{"z"}});
+
         // length
         verifyQueryResults(
                 "length",
