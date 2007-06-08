@@ -252,6 +252,7 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 											isNullable,
 											maximumWidth);
 	}
+    
 	/*
 	** Instance fields & methods
 	*/
@@ -910,6 +911,21 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 	{
 		typeDescriptor.setNullability(nullable);
 	}
+    
+    /**
+     * Return a type descriptor identical to the this type
+     * with the exception of its nullability. If the nullablity
+     * required matches the nullability of this then this is returned.
+     * 
+     * @param isNullable True to return a nullable type, false otherwise.
+     */
+    public DataTypeDescriptor getNullabilityType(boolean isNullable)
+    {
+        if (isNullable() == isNullable)
+            return this;
+        
+        return new DataTypeDescriptor(this, isNullable);
+    }
 
 	/**
 	  Compare if two TypeDescriptors are exactly the same

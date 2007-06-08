@@ -2275,14 +2275,7 @@ public class SubqueryNode extends ValueNode
 			dts = getTrueNode().getTypeServices();
 		}
 
-		/* If datatype of underlying resultSet is nullable, reuse it, otherwise
-		 * we need to generate a new one.
-		 */
-		if (! dts.isNullable())
-		{
-			dts = new DataTypeDescriptor(dts, true);
-		}
-		setType(dts);
+		setType(dts.getNullabilityType(true));
 	}
         
     /**

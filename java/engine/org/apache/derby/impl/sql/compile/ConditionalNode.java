@@ -383,8 +383,7 @@ public class ConditionalNode extends ValueNode
 			QueryTreeNode cast = getNodeFactory().getNode(
 						C_NodeTypes.CAST_NODE,
 						thenElseList.elementAt(0), 
-						new DataTypeDescriptor(
-								bcon.getLeftOperand().getTypeServices(), true),
+						bcon.getLeftOperand().getTypeServices().getNullabilityType(true),
 						getContextManager());
 			thenElseList.setElementAt(cast,0);
 		} else {

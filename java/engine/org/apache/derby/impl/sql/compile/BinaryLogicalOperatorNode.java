@@ -240,7 +240,7 @@ abstract class BinaryLogicalOperatorNode extends BinaryOperatorNode
 			throw StandardException.newException(SQLState.LANG_BINARY_LOGICAL_NON_BOOLEAN);
 		}
 
-		return new DataTypeDescriptor(leftType,
+		return leftType.getNullabilityType(
 					leftType.isNullable() || rightType.isNullable());
 	}
 }

@@ -164,14 +164,13 @@ public class ParameterNode extends ValueNode
 			"typeServices not initialized");
 
 		/* Make sure the type is nullable. */
-		if ( ! descriptor.isNullable())
-		{
-			/*
-			** Generate a new descriptor with all the same properties as
-			** the given one, except that it is nullable.
-			*/
-			descriptor = new DataTypeDescriptor(descriptor, true);
-		}
+
+		/*
+		 ** Generate a new descriptor with all the same properties as
+		 ** the given one, except that it is nullable.
+		 */
+		descriptor = descriptor.getNullabilityType(true);
+		
 
         if (userParameterTypes != null)
 		    userParameterTypes[parameterNumber] = descriptor;
