@@ -166,11 +166,16 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         assertConnectionWOUPOK(dbName, "system", ("admin"));
         assertConnectionOK(dbName, "dan", ("dan" + PASSWORD_SUFFIX));
         assertConnectionWOUPOK(dbName, "dan", ("dan" + PASSWORD_SUFFIX));
-        // try shutdown (but only dbo can do it)
-        assertShutdownFail("08004", dbName, "dan", ("dan" + PASSWORD_SUFFIX));
-        assertShutdownWOUPFail("08004", dbName, "dan", ("dan" + PASSWORD_SUFFIX));
-        assertShutdownFail("08004", dbName, "system", "admin");
-        assertShutdownWOUPFail("08004", dbName, "system", "admin");
+        // try shutdown as non-owner
+        assertShutdownOK(dbName, "dan", ("dan" + PASSWORD_SUFFIX));
+        assertConnectionOK(dbName, "system", ("admin"));
+        assertShutdownWOUPOK(dbName, "dan", ("dan" + PASSWORD_SUFFIX));
+        assertConnectionOK(dbName, "system", ("admin"));
+        assertShutdownOK(dbName, "system", "admin");
+        assertConnectionOK(dbName, "system", ("admin"));
+        assertShutdownWOUPOK(dbName, "system", "admin");
+        assertConnectionOK(dbName, "system", ("admin"));
+        // try shutdown as owner
         assertShutdownUsingConnAttrsOK(dbName, "APP", ("APP" + PASSWORD_SUFFIX));
         
         // ensure that a password is encrypted
@@ -199,9 +204,10 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         // check the non-existent, but allowed user
         assertConnectionFail("08004", dbName, "nomen", "nescio");
         assertConnectionWOUPFail("08004", dbName, "nomen", "nescio");
-        // attempt to shutdown db as one of the allowed users, will fail...
-        assertShutdownFail("08004", dbName, "francois", ("francois" + PASSWORD_SUFFIX));
-        // ...for only dbowner can shutdown db.
+        // attempt to shutdown db as one of the allowed users, but not db owner
+        assertShutdownOK(dbName, "francois", ("francois" + PASSWORD_SUFFIX));
+        // attempt shutdown as db owner
+        assertConnectionOK(dbName, "system", "admin");
         assertShutdownWOUPOK(dbName, "APP", ("APP" + PASSWORD_SUFFIX));
         // check simple connect ok as another allowed user, also revive db
         assertConnectionOK(dbName, "jeff", ("jeff" + PASSWORD_SUFFIX));
@@ -216,9 +222,10 @@ public class AuthenticationTest extends BaseJDBCTestCase {
             "jeff,dan,francois,jamie", conn1);
         conn1.commit();
         conn1.close();
+        assertConnectionOK(dbName, "dan", ("dan" + PASSWORD_SUFFIX));
+        assertShutdownOK(dbName, "dan", ("dan" + PASSWORD_SUFFIX));
         assertConnectionOK(dbName, "dan", ("dan" + PASSWORD_SUFFIX)); 
-        assertShutdownFail("08004", dbName, "dan", ("dan" + PASSWORD_SUFFIX));
-        // but dbo was not on list...
+         // but dbo was not on list...
         assertShutdownFail("08004", dbName, "APP", ("APP" + PASSWORD_SUFFIX));
         // now add dbo back in...
         conn1 = openDefaultConnection("francois", ("francois" + PASSWORD_SUFFIX));
@@ -681,11 +688,15 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         else {
             assertConnectionOK(dbName, zeus, apollo);
             assertConnectionFail("08004", dbName, apollo, apollo);
-            // shutdown only allowd by DBO
-            assertShutdownFail("08004", dbName, zeus, apollo);
+            // shutdown as non-dbo
+            assertShutdownOK(dbName, zeus, apollo);
             assertConnectionOK(dbName, apollo, zeus);
+            // wrong credentials
             assertShutdownFail("08004", dbName, zeus, zeus);
-            assertShutdownFail("08004", dbName, apollo, zeus);
+             // shutdown as non-dbo
+            assertShutdownOK(dbName, apollo, zeus);
+            assertConnectionOK(dbName, apollo, zeus);
+            // shutdown as dbo
             assertShutdownUsingSetShutdownOK(
                 dbName, "APP", ("APP" + PASSWORD_SUFFIX));
 
@@ -951,6 +962,20 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         }
     }
     
+    protected void assertShutdownOK(
+        String dbName, String user, String password)
+    throws SQLException
+    {
+        DataSource ds = JDBCDataSource.getDataSource(dbName);
+        JDBCDataSource.setBeanProperty(ds, "shutdownDatabase", "shutdown");
+        try {
+            ds.getConnection(user, password);
+            fail("expected shutdown to fail");
+        } catch (SQLException e) {
+            assertSQLState("08006", e);
+        }
+    }
+
     protected void assertShutdownWOUPFail(
         String expectedSqlState, String dbName, String user, String password) 
     throws SQLException

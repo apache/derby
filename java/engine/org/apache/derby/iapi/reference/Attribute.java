@@ -239,6 +239,18 @@ public interface Attribute {
     String DRDA_SECTKN_OUT = "drdaSecTokenOut";
 
 	/**
+	 * Internal attribute. Used to always allow soft upgrade for
+	 * authentication purposes in a two phase hard upgrade (to check
+	 * database owner power before proceeding.  The purpose is to
+	 * avoid failing soft upgrade due to a feature being set but not
+	 * supported until after hard upgrade has taken place (e.g. during
+	 * hard upgrade from 10.1 -> 10.3 or higher if
+	 * derby.database.sqlAuthorization is set,
+	 * cf. DD_Version#checkVersion).
+	 */
+	 String SOFT_UPGRADE_NO_FEATURE_CHECK = "softUpgradeNoFeatureCheck";
+
+	/**
 		Optional JDBC url attribute (at the database create time only) It can 
 		be set to one of the following 2 values
 		1) UCS_BASIC (This means codepoint based collation. This will also be 

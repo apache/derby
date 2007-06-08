@@ -145,9 +145,7 @@ public class DboPowersTest extends BaseJDBCTestCase
      */
     final static String[][] users = {
         /* authLevel == AUTHENTICATION: dbo is APP/APP for db 'wombat',
-         * so use that as first user.  Otherwise,
-         * builtinAuthentication decorator's db shutdown fails to
-         * work after DERBY-2264(!).
+         * so use that as first user.
          */
         {"APP", "U1"},
         /* authLevel == SQLAUTHORIZATION: sqlAuthorizationDecorator
@@ -290,14 +288,13 @@ public class DboPowersTest extends BaseJDBCTestCase
                            "08006", e);
             break;
         case AUTHENTICATION:
-            if ("APP".equals(user)) {
-                assertSQLState("database shutdown, authentication, db owner",
-                               "08006", e);
-            } else {
-                assertSQLState("database shutdown restriction, " +
-                               "authentication,  not db owner",
-                               "08004", e);
-            }
+            /* We don't enforce dbo powers if only connection level
+             * authentication is used, for now. This leniency was
+             * introduced late in 10.3 release cycle for compatibility
+             * reasons.
+             */
+            assertSQLState("database shutdown, authentication",
+                           "08006", e);
             break;
         case SQLAUTHORIZATION:
             if ("TEST_DBO".equals(user)) {
@@ -735,12 +732,12 @@ public class DboPowersTest extends BaseJDBCTestCase
             assertEquals(operation + ", no authentication", null, e);
             break;
         case AUTHENTICATION:
-            if ("APP".equals(user)) {
-                assertEquals(operation + ", authentication, db owner", null, e);
-            } else {
-                assertSQLState(operation + ", authentication, not db owner",
-                               state, e);
-            }
+            /* We don't enforce dbo powers if only connection level
+             * authentication is used, for now. This leniency was
+             * introduced late in 10.3 release cycle for compatibility
+             * reasons.
+             */
+            assertEquals(operation + ", authentication", null, e);
             break;
         case SQLAUTHORIZATION:
             if ("TEST_DBO".equals(user)) {

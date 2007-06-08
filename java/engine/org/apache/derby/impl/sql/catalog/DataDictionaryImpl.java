@@ -753,11 +753,42 @@ public final class	DataDictionaryImpl
 				authorizationDatabaseOwner = sd.getAuthorizationId();
 				String sqlAuth = PropertyUtil.getDatabaseProperty(bootingTC,
 										Property.SQL_AUTHORIZATION_PROPERTY);
-				if (Boolean.valueOf(sqlAuth).booleanValue())
-				{
-					// SQL authorization requires 10.2 or higher database
-					checkVersion(DataDictionary.DD_VERSION_DERBY_10_2, "sqlAuthorization");
-					usesSqlAuthorization=true;
+
+				// Feature compatibility check.
+				if (Boolean.valueOf
+						(startParams.getProperty(
+							Attribute.SOFT_UPGRADE_NO_FEATURE_CHECK))
+						.booleanValue()) {
+					// Do not perform check if this boot is the first
+					// phase (soft upgrade boot) of a hard upgrade,
+					// which happens in two phases beginning with
+					// DERBY-2264. In this case, we need to always be
+					// able to boot to authenticate, notwithstanding
+					// any feature properties set
+					// (e.g. derby.database.sqlAuthorization) which
+					// may not yet be supported until that hard
+					// upgrade has happened, normally causing an error
+					// below.
+					//
+					// Feature sqlAuthorization is a special case:
+					// Since database ownership checking only happens
+					// when sqlAuthorization is true, we can't afford
+					// to *not* use it for upgrades from 10.2 or
+					// later, lest we lose the database owner check.
+					// For upgrades from 10.1 and earlier there is no
+					// database owner check at a hard upgrade.
+					if (dictionaryVersion.majorVersionNumber >=
+						DataDictionary.DD_VERSION_DERBY_10_2) {
+						usesSqlAuthorization = Boolean.valueOf(sqlAuth).
+							booleanValue();
+					}
+				} else {
+					if (Boolean.valueOf(sqlAuth).booleanValue()) {
+						// SQL authorization requires 10.2 or higher database
+						checkVersion(DataDictionary.DD_VERSION_DERBY_10_2,
+									 "sqlAuthorization");
+						usesSqlAuthorization=true;
+					}
 				}
 			}
 					

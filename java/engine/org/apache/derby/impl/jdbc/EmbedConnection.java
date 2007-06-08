@@ -252,7 +252,7 @@ public abstract class EmbedConnection implements EngineConnection
 				// type indicated by the proptocol within the name.  If that's
 				// the case then we are the wrong driver.
 
-				if (!bootDatabase(info))
+				if (!bootDatabase(info, isTwoPhaseUpgradeBoot))
 				{
 					tr.clearContextInError();
 					setInactive();
@@ -305,10 +305,12 @@ public abstract class EmbedConnection implements EngineConnection
 			tr.startTransaction();
 
 			if (isTwoPhaseEncryptionBoot || isTwoPhaseUpgradeBoot) {
+
 				// DERBY-2264: shutdown and boot again with encryption or
 				// upgrade attributes active. This is restricted to the
-				// database owner.
-				if (!usingNoneAuth) {
+				// database owner if authentication and sqlAuthorization is on.
+				if (!usingNoneAuth &&
+						getLanguageConnection().usesSqlAuthorization()) {
 					// a failure here leaves database booted, but no
 					// (re)encryption has taken place and the connection is
 					// rejected.
@@ -325,7 +327,7 @@ public abstract class EmbedConnection implements EngineConnection
 				active = true;
 				setupContextStack();
 
-				if (!bootDatabase(info))
+				if (!bootDatabase(info, false))
 				{
 					if (SanityManager.DEBUG) {
 						SanityManager.THROWASSERT(
@@ -343,9 +345,10 @@ public abstract class EmbedConnection implements EngineConnection
 
 			// now we have the database connection, we can shut down
 			if (shutdown) {
-				if (!usingNoneAuth) {
+				if (!usingNoneAuth &&
+						getLanguageConnection().usesSqlAuthorization()) {
 					// DERBY-2264: Only allow database owner to shut down if
-					// authentication is on.
+					// authentication and sqlAuthorization is on.
 					checkIsDBOwner(OP_SHUTDOWN);
 				}
 				throw tr.shutdownDatabaseException();
@@ -1824,14 +1827,23 @@ public abstract class EmbedConnection implements EngineConnection
 
 
 	/**
-		Return false iff the monitor cannot handle a service
-		of the type indicated by the protocol within the name.
-		If that's the case then we are the wrong driver.
-
-		Throw exception if anything else is wrong.
+	 * Boot database.
+	 *
+	 * @param info boot properties
+	 *
+	 * @param softAuthenticationBoot If true, don't fail soft upgrade due
+	 * to missing features (phase one of two phased hard upgrade boot).
+	 *
+	 * @return false iff the monitor cannot handle a service
+	 * of the type indicated by the protocol within the name.
+	 * If that's the case then we are the wrong driver.
+	 *
+	 * @throws Throwable if anything else is wrong.
 	 */
 
-	private boolean bootDatabase(Properties info) throws Throwable
+	private boolean bootDatabase(Properties info,
+								 boolean softAuthenticationBoot
+								 ) throws Throwable
 	{
 		String dbname = tr.getDBName();
 
@@ -1839,6 +1851,13 @@ public abstract class EmbedConnection implements EngineConnection
 		try {
 
 			info = filterProperties(info);
+
+			if (softAuthenticationBoot) {
+				info.setProperty(Attribute.SOFT_UPGRADE_NO_FEATURE_CHECK,
+								 "true");
+			} else {
+				info.remove(Attribute.SOFT_UPGRADE_NO_FEATURE_CHECK);
+			}
 			
 			// try to start the service if it doesn't already exist
 			if (!Monitor.startPersistentService(dbname, info)) {
