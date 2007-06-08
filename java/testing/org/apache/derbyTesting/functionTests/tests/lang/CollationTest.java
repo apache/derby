@@ -716,6 +716,28 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     rs = ps.executeQuery();
     JDBC.assertFullResultSet(rs,new String[][] {{"SYSCOLUMNS"}});      
 
+    //Do parameter testing with CONCATENATION operator
+    //Following will fail because the result of concatenation will have 
+    //collation type of UCS_BASIC whereas the right hand side of = operator
+    //will have collation type current schema which is territory based.
+    //The reason CONCAT will have collation type of UCS_BASIC is because ? will
+    //take collation from context which here will be TABLENAME and hence the
+    //result of concatenation will have collation type of it's 2 operands,
+    //namely UCS_BASIC
+    checkPreparedStatementError(conn, "SELECT TABLENAME FROM SYS.SYSTABLES " +
+    		" WHERE TABLENAME || ? = 'SYSCOLUMNS '", "42818");   
+    //The query above can be made to work if we are in SYS schema or if we use
+    //CAST while we are trying to run the query is user schema
+    //Let's try CAST first
+    ps = conn.prepareStatement("SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
+    		" CAST(TABLENAME || ? AS CHAR(10)) = 'SYSCOLUMNS '");   
+    //try switching to SYS schema and then run the original query without CAST
+    s.executeUpdate("set schema SYS");
+    checkPreparedStatementError(conn, "SELECT TABLENAME FROM SYS.SYSTABLES " +
+    		" WHERE TABLENAME || ? = 'SYSCOLUMNS '", "42818");   
+    s.executeUpdate("set schema APP");
+
+    
     //Do parameter testing with COALESCE
     //following will pass because the ? inside the COALESCE will take the 
     //collation type of the other operand which is TABLENAME. The result of
