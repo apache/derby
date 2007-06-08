@@ -494,7 +494,7 @@ public class ConditionalNode extends ValueNode
 			ValueNode cast = (ValueNode) getNodeFactory().getNode(
 								C_NodeTypes.CAST_NODE,
 								thenElseList.elementAt(0), 
-								dataTypeServices,	// cast to dominant type
+                                getTypeServices(),	// cast to dominant type
 								getContextManager());
 			cast = cast.bindExpression(fromList, 
 											subqueryList,
@@ -508,7 +508,7 @@ public class ConditionalNode extends ValueNode
 			ValueNode cast = (ValueNode) getNodeFactory().getNode(
 								C_NodeTypes.CAST_NODE,
 								thenElseList.elementAt(1), 
-								dataTypeServices,	// cast to dominant type
+                                getTypeServices(),	// cast to dominant type
 								getContextManager());
 			cast = cast.bindExpression(fromList, 
 											subqueryList,

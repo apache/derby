@@ -21,42 +21,23 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.types.TypeId;
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.sql.compile.TypeCompiler;
-import org.apache.derby.iapi.types.DataValueFactory;
-
-import org.apache.derby.iapi.types.SQLChar;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.sql.compile.CompilerContext;
-import org.apache.derby.iapi.sql.compile.Optimizable;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-import org.apache.derby.iapi.sql.compile.NodeFactory;
-
-import org.apache.derby.iapi.reference.SQLState;
-
-import org.apache.derby.iapi.store.access.Qualifier;
-
-import org.apache.derby.impl.sql.compile.ActivationClassBuilder;
-import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
-
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
-
-import org.apache.derby.iapi.util.JBitSet;
-import org.apache.derby.iapi.services.i18n.MessageService;
-
-import java.lang.reflect.Modifier;
-
-import java.sql.Date;
-import java.sql.Time;
-import java.sql.Timestamp;
-
 import java.util.Vector;
+
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.sql.compile.CompilerContext;
+import org.apache.derby.iapi.sql.compile.NodeFactory;
+import org.apache.derby.iapi.sql.compile.Optimizable;
+import org.apache.derby.iapi.sql.compile.TypeCompiler;
+import org.apache.derby.iapi.store.access.Qualifier;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.DataValueFactory;
+import org.apache.derby.iapi.types.TypeId;
+import org.apache.derby.iapi.util.JBitSet;
 
 /**
  * A ValueNode is an abstract class for all nodes that can represent data
@@ -66,8 +47,11 @@ import java.util.Vector;
 
 public abstract class ValueNode extends QueryTreeNode
 {
+    /**
+     * The data type for this node.
+     */
 	protected DataTypeDescriptor	dataTypeServices;
-	private TypeId typeId;	   
+   
 	private TypeCompiler typeCompiler;
 
 	// Whether or not additional predicates have been created from this one.
@@ -83,6 +67,44 @@ public abstract class ValueNode extends QueryTreeNode
 	public ValueNode()
 	{
 	}
+    
+    /**
+     * Set this node's type from type components.
+     */
+    final void setType(TypeId typeId,
+            boolean isNullable,
+            int maximumWidth)
+       throws StandardException
+       
+       {
+        setType(
+                new DataTypeDescriptor(
+                            (TypeId) typeId,
+                            isNullable,
+                            maximumWidth
+                        )
+                    );           
+       }
+
+    /**
+     * Set this node's type from type components.
+     */
+    final void setType(TypeId typeId,
+            int precision, int scale,
+            boolean isNullable,
+            int maximumWidth)
+       throws StandardException
+    {
+        setType(
+                new DataTypeDescriptor(
+                            (TypeId) typeId,
+                            precision,
+                            scale,
+                            isNullable,
+                            maximumWidth
+                        )
+                    );   
+    }
 
 	/**
 	 * Initializer for numeric types.
@@ -186,7 +208,10 @@ public abstract class ValueNode extends QueryTreeNode
 	 */
 	public TypeId getTypeId() throws StandardException
 	{
-		return typeId;
+        DataTypeDescriptor dtd = getTypeServices();
+        if (dtd != null)
+            return dtd.getTypeId();
+		return null;
 	}
 
 
@@ -198,23 +223,15 @@ public abstract class ValueNode extends QueryTreeNode
 	}
 
 	/**
-	 * Get the TypeCompiler from this ValueNode, based on its TypeId.
+	 * Get the TypeCompiler from this ValueNode, based on its TypeId
+     * using getTypeId().
 	 *
 	 * @return	This ValueNode's TypeCompiler
 	 *
 	 */
-	public TypeCompiler getTypeCompiler() throws StandardException
+	public final TypeCompiler getTypeCompiler() throws StandardException
 	{
-		if (typeCompiler == null)
-		{
-			/*
-			** getTypeId() is overriddend by parameter node so
-			** don't get smart and remove the extra method call.
-			*/
-			typeCompiler = getTypeCompiler(getTypeId());
-		}
-
-		return typeCompiler;
+		return getTypeCompiler(getTypeId());
 	}
 
 	/**
@@ -228,12 +245,6 @@ public abstract class ValueNode extends QueryTreeNode
 	public void setType(DataTypeDescriptor dataTypeServices) throws StandardException
 	{
 		this.dataTypeServices = dataTypeServices;
-
-		/* Get this now so we only have to cast it once */
-		if (dataTypeServices == null)
-			typeId = null;
-		else
-			typeId = dataTypeServices.getTypeId();
 
 		// Clear the typeCompiler, just in case type has changed
 		typeCompiler = null;
@@ -256,9 +267,9 @@ public abstract class ValueNode extends QueryTreeNode
 	 */
 	protected void setCollationUsingCompilationSchema(int collationDerivation)
 	throws StandardException {
-		dataTypeServices.setCollationType(
+        getTypeServices().setCollationType(
 	    	     getSchemaDescriptor(null, false).getCollationType());
-		dataTypeServices.setCollationDerivation(collationDerivation);
+        getTypeServices().setCollationDerivation(collationDerivation);
 	}
 
 
@@ -356,9 +367,9 @@ public abstract class ValueNode extends QueryTreeNode
 	{
 		if (SanityManager.DEBUG)
 		{
-			SanityManager.ASSERT(typeId != null,
+			SanityManager.ASSERT(getTypeId() != null,
 				"genSQLJavaSQLTree() only expected to be called on a bound node");
-			SanityManager.ASSERT(typeId.userType(),
+			SanityManager.ASSERT(getTypeId().userType(),
 				"genSQLJavaSQLTree() only expected to be called on user types");
 		}
 
@@ -426,10 +437,9 @@ public abstract class ValueNode extends QueryTreeNode
 		/* bind() has ensured that this node's type is SQLBoolean */
 		if (SanityManager.DEBUG)
 		SanityManager.ASSERT(
-				dataTypeServices.getTypeId().equals(
-												TypeId.BOOLEAN_ID),
+				getTypeId().isBooleanTypeId(),
 					"Node's type (" +
-					dataTypeServices.getTypeId().getSQLTypeName() +
+					getTypeId().getSQLTypeName() +
 					") is expected to be boolean");
 
 		/* Return ValueNode = false */
@@ -462,7 +472,7 @@ public abstract class ValueNode extends QueryTreeNode
 								this,
 								falseNode,
 								getContextManager());
-		nullableResult = dataTypeServices.isNullable();
+		nullableResult = getTypeServices().isNullable();
 		equalsNode.setType(new DataTypeDescriptor(
 									TypeId.BOOLEAN_ID,
 									nullableResult)
@@ -742,7 +752,6 @@ public abstract class ValueNode extends QueryTreeNode
 	public void copyFields(ValueNode oldVN) throws StandardException
 	{
 		dataTypeServices = oldVN.getTypeServices();
-		typeId = oldVN.getTypeId();
 	}
 
 	/**

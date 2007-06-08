@@ -152,7 +152,7 @@ public class AndNode extends BinaryLogicalOperatorNode
 												leftOperand,
 												rightOperand,
 												getContextManager());
-		orNode.setType(dataTypeServices);
+		orNode.setType(getTypeServices());
 		return orNode;
 	}
 

@@ -179,14 +179,14 @@ public final class NumericConstantNode extends ConstantNode
 			break;
 		}
 		
-		super.init(
+		setType(
 				   (typeId != null) ?  typeId :
 				     TypeId.getBuiltInTypeId(typeid),
 
-				   ReuseFactory.getInteger(precision), 
-				   ReuseFactory.getInteger(scal), 
-				   isNullable, 
-				   ReuseFactory.getInteger(maxwidth));
+				   precision, 
+				   scal, 
+				   isNullable.booleanValue(), 
+				   maxwidth);
 	}
 
 	/**

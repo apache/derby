@@ -22,6 +22,7 @@
 package	org.apache.derby.impl.sql.compile;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
+import org.apache.derby.iapi.types.TypeId;
 
 import org.apache.derby.iapi.error.StandardException;
 
@@ -82,13 +83,10 @@ abstract class ConstantNode extends ValueNode
 			Object maximumWidth)
 		throws StandardException
 	{
-		/* Fill in the type information in the parent ValueNode */
-		init(
-							typeId,
-							ReuseFactory.getInteger(0),
-							ReuseFactory.getInteger(0),
-							nullable,
-							maximumWidth);
+        setType((TypeId) typeId,
+                ((Boolean) nullable).booleanValue(),
+                ((Integer) maximumWidth).intValue());
+
 	}
 
 	/**

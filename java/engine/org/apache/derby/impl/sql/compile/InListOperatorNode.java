@@ -315,7 +315,6 @@ public final class InListOperatorNode extends BinaryListOperatorNode
 					getContextManager());
 
 			DataTypeDescriptor pType = srcVal.getTypeServices();
-			pNode.setDescriptors(new DataTypeDescriptor [] { pType });
 			pNode.setType(pType);
 
 			/* If we choose to use the new predicate for execution-time

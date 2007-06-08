@@ -107,7 +107,7 @@ public final class IsNullNode extends UnaryComparisonOperatorNode
 
 		if (SanityManager.DEBUG)
 		{
-			SanityManager.ASSERT(dataTypeServices != null,
+			SanityManager.ASSERT(getTypeServices() != null,
 						"dataTypeServices is expected to be non-null");
 		}
 

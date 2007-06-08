@@ -953,14 +953,14 @@ public class BinaryRelationalOperatorNode
 	{
 		BinaryOperatorNode negation;
 		if (SanityManager.DEBUG)
-			SanityManager.ASSERT(dataTypeServices != null,
+			SanityManager.ASSERT(getTypeServices() != null,
 								 "dataTypeServices is expected to be non-null");
 		/* xxxRESOLVE: look into doing this in place instead of allocating a new node */
 		negation = (BinaryOperatorNode)
 			getNodeFactory().getNode(getNegationNode(),
 									 leftOperand, rightOperand,
 									 getContextManager());
-		negation.setType(dataTypeServices);
+		negation.setType(getTypeServices());
 		return negation;
 	}
 

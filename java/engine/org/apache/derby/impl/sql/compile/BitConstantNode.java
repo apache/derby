@@ -85,29 +85,6 @@ public class BitConstantNode extends ConstantNode
 		setValue(dvd);
 	}
 
-	/**
-	 * Initializer for non-numeric types.  Needed for our subclasses
-	 *
-	 * @param typeId	The Type ID of the datatype
-	 * @param nullable	True means the constant is nullable
-	 * @param maximumWidth	The maximum number of bytes in the data value
-	 *
-	 * @exception StandardException
-	 */
-	public void init(
-			Object typeId,
-			Object nullable,
-			Object maximumWidth)
-		throws StandardException
-	{
-		init(
-					typeId,
-					ReuseFactory.getInteger(0),
-					ReuseFactory.getInteger(0),
-					nullable,
-					maximumWidth);
-	}
-
 
 	/**
 	 * Return an Object representing the bind time value of this

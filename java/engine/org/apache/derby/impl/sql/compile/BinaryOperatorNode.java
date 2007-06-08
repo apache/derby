@@ -630,12 +630,12 @@ public class BinaryOperatorNode extends ValueNode
 			 * result set scale consistent, beetle 3901
 			 */
 			int jdbcType;
-			if ((dataTypeServices != null) &&
-				((jdbcType = dataTypeServices.getJDBCTypeId()) == java.sql.Types.DECIMAL ||
+			if ((getTypeServices() != null) &&
+				((jdbcType = getTypeServices().getJDBCTypeId()) == java.sql.Types.DECIMAL ||
 				 jdbcType == java.sql.Types.NUMERIC) &&
 				operator.equals("/"))
 			{
-				mb.push(dataTypeServices.getScale());		// 4th arg
+				mb.push(getTypeServices().getScale());		// 4th arg
 				mb.callMethod(VMOpcode.INVOKEINTERFACE, receiverType, methodName, resultTypeName, 4);
 			}
 			else if (xmlGen) {

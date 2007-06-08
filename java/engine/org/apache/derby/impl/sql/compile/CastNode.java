@@ -376,7 +376,7 @@ public class CastNode extends ValueNode
 		*/
 		if (destCTI.userType())
 		{
-			String className = dataTypeServices.getTypeId().getCorrespondingJavaTypeName();
+			String className = getTypeId().getCorrespondingJavaTypeName();
 
 			verifyClassExist(className);
 

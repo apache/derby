@@ -1739,27 +1739,6 @@ public class ResultColumn extends ValueNode
 	}
 
 	/**
-	 * Get the TypeId from this Node.
-	 *
-	 * @return	The TypeId from this Node.  This
-	 *		may be null if the node isn't bound yet.
-	 */
-	public TypeId getTypeId() throws StandardException
-	{
-        TypeId t = super.getTypeId();
-        if( t == null)
-        {
-            if( expression != null)
-            {
-                DataTypeDescriptor dtd = getTypeServices();
-                if( dtd != null)
-                    t = dtd.getTypeId();
-            }
-        }
-        return t;
-	} // end of getTypeId
-
-	/**
 	 * Get the DataTypeServices from this Node.
 	 *
 	 * @return	The DataTypeServices from this Node.  This

@@ -51,15 +51,22 @@ public class ParameterNode extends ValueNode
 	*/
 	private int	parameterNumber;
 
-	/*
-	** Pointer to the array in the DMLStatementNode that holds the
-	** DataTypeServices for the parameters.  When each parameter is
+	/**
+	** Pointer to the array in the CompilerContext that holds array
+    * of types for all the user-visible paramerers..  When each parameter is
 	** bound, it fills in its type descriptor in this array.  Note that
 	** the array is allocated in the parser, but the individual elements
 	** are not filled in until their corresponding parameters are bound.
+    *
+    * This array is not read in this class, but is read from the
+    * CompilerContext on completion of compiling the statement.
+    * 
+    *  In some case a parameter node may exist but is not a visble
+    *  user parameter, in this case typeServices will be null
+    *  so that setting its type will not modify the user's set.
 	*/
 
-	private DataTypeDescriptor[]	typeServices;
+	private DataTypeDescriptor[]	userParameterTypes;
 
 	/*
 	** The default value for this parameter.  Currently, the only
@@ -141,17 +148,7 @@ public class ParameterNode extends ValueNode
 
 	void setDescriptors(DataTypeDescriptor[] descriptors)
 	{
-
-        // The following is commented out for #3546, for create publication 
-        // or target ddl creations there could be multiple statements trying
-        // to bind their own parameters. So the following assumptions does not
-        // hold true. 
-
-	//	if (SanityManager.DEBUG)
-	//	SanityManager.ASSERT(typeServices == null,
-	//		"Attempt to re-set typeServices");
-
-		typeServices = descriptors;
+		userParameterTypes = descriptors;
 	}
 
 	/**
@@ -163,7 +160,7 @@ public class ParameterNode extends ValueNode
 	public void setType(DataTypeDescriptor descriptor) throws StandardException
 	{
 		if (SanityManager.DEBUG)
-		SanityManager.ASSERT(typeServices != null,
+		SanityManager.ASSERT(userParameterTypes != null,
 			"typeServices not initialized");
 
 		/* Make sure the type is nullable. */
@@ -176,7 +173,8 @@ public class ParameterNode extends ValueNode
 			descriptor = new DataTypeDescriptor(descriptor, true);
 		}
 
-		typeServices[parameterNumber] = descriptor;
+        if (userParameterTypes != null)
+		    userParameterTypes[parameterNumber] = descriptor;
 
 		//make sure we are calling super's setType. We will get into
 		//an infinite loop if this setType ends up calling the local

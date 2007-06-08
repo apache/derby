@@ -462,7 +462,7 @@ public class SQLToJavaValueNode extends JavaValueNode
 	  *
 	  * @exception StandardException		Thrown on error
 	  */
-	public	String	getSQLValueInterfaceName()
+	private	String	getSQLValueInterfaceName()
 		throws StandardException
 	{
 		return value.getTypeCompiler().interfaceName();
