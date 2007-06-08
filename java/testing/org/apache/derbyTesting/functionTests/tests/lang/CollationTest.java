@@ -683,6 +683,14 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
         		" xmlTable, SYS.SYSTABLES WHERE XMLSERIALIZE(x as CHAR(10)) = " + 
     			" CAST(TABLENAME AS CHAR(10))",
         		null);
+        //Do some parameter testing for XMLSERIALIZE. ? is not supported inside
+        //the XMLSERIALIZE function and hence following will result in errors.
+        checkPreparedStatementError(conn, "SELECT XMLSERIALIZE(x as CHAR(10)) " +
+        		" FROM xmlTable, SYS.SYSTABLES WHERE " +
+				" XMLSERIALIZE(? as CHAR(10)) = TABLENAME", "42Z70");
+        checkPreparedStatementError(conn, "SELECT XMLSERIALIZE(x as CHAR(10)) FROM " +
+        		" xmlTable, SYS.SYSTABLES WHERE XMLSERIALIZE(? as CHAR(10)) = " + 
+    			" CAST(TABLENAME AS CHAR(10))", "42Z70");
     }
 
     //Start of parameter testing
