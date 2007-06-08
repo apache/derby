@@ -21,37 +21,22 @@
 
 package org.apache.derby.iapi.types;
 
-import org.apache.derby.iapi.services.io.Formatable;
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.services.loader.ClassFactory;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+import java.sql.Types;
+import java.text.RuleBasedCollator;
 
 import org.apache.derby.catalog.TypeDescriptor;
 import org.apache.derby.catalog.types.TypeDescriptorImpl;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.services.io.StoredFormatIds;
-import org.apache.derby.iapi.services.io.FormatIdUtil;
-import org.apache.derby.iapi.services.io.Formatable;
-
 import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.types.RowLocation;
-
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.io.Formatable;
+import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.loader.ClassFactory;
 import org.apache.derby.iapi.services.loader.ClassInspector;
+import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.conn.ConnectionUtil;
-
-import java.text.RuleBasedCollator;
-
-import org.apache.derby.iapi.reference.JDBC30Translation;
-import org.apache.derby.iapi.reference.SQLState;
-
-import java.io.ObjectOutput;
-import java.io.ObjectInput;
-import java.io.IOException;
-
-import java.sql.Types;
 
 /**
  * This is an implementation of DataTypeDescriptor from the generic language
@@ -868,8 +853,15 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
         return(typeDescriptor.getCollationName());
 	}
 
-	/** @see TypeDescriptor#setCollationType(int) */
-	public void	setCollationType(int collationTypeValue)
+    /**
+     * Set the collation type of this TypeDescriptor
+     * @param collationTypeValue This will be COLLATION_TYPE_UCS_BASIC
+     * or COLLATION_TYPE_TERRITORY_BASED
+     * 
+     * @see StringDataValue#COLLATION_TYPE_UCS_BASIC
+     * @see StringDataValue#COLLATION_TYPE_TERRITORY_BASED
+     */
+    public void	setCollationType(int collationTypeValue)
 	{
 		typeDescriptor.setCollationType(collationTypeValue);
 	}
@@ -880,7 +872,17 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 		return typeDescriptor.getCollationDerivation();
 	}
 
-	/** @see TypeDescriptor#setCollationDerivation(int) */
+    /**
+     * Set the collation derivation of this DTD
+     * @param collationDerivationValue This will be 
+     * COLLATION_DERIVATION_NONE/COLLATION_DERIVATION_IMPLICIT/COLLATION_DERIVATION_EXPLICIT
+     * In Derby 10.3, we do not expect to get value COLLATION_DERIVATION_EXPLICIT.
+     * 
+     * @see StringDataValue#COLLATION_DERIVATION_NONE
+     * @see StringDataValue#COLLATION_DERIVATION_IMPLICIT
+     * @see StringDataValue#COLLATION_DERIVATION_EXPLICIT
+
+     */
 	public void	setCollationDerivation(int collationDerivationValue)
 	{
 		typeDescriptor.setCollationDerivation(collationDerivationValue);

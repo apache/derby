@@ -160,16 +160,6 @@ public interface TypeDescriptor
 	public int getCollationType();
 
 	/**
-	 * Set the collation type of this TypeDescriptor
-	 * @param collationTypeValue This will be COLLATION_TYPE_UCS_BASIC
-     * or COLLATION_TYPE_TERRITORY_BASED
-     * 
-     * @see StringDataValue#COLLATION_TYPE_UCS_BASIC
-     * @see StringDataValue#COLLATION_TYPE_TERRITORY_BASED
-	 */
-	public void setCollationType(int collationTypeValue);
-
-	/**
 	 * Get the collation derivation for this type. This applies only for
 	 * character string types. For the other types, this api should be
 	 * ignored.
@@ -206,19 +196,6 @@ public interface TypeDescriptor
      * @see StringDataValue#COLLATION_DERIVATION_EXPLICIT
 	 */
 	public int getCollationDerivation();
-
-	/**
-	 * Set the collation derivation of this DTD
-	 * @param collationDerivationValue This will be 
-	 * COLLATION_DERIVATION_NONE/COLLATION_DERIVATION_IMPLICIT/COLLATION_DERIVATION_EXPLICIT
-	 * In Derby 10.3, we do not expect to get value COLLATION_DERIVATION_EXPLICIT.
-     * 
-     * @see StringDataValue#COLLATION_DERIVATION_NONE
-     * @see StringDataValue#COLLATION_DERIVATION_IMPLICIT
-     * @see StringDataValue#COLLATION_DERIVATION_EXPLICIT
-
-	 */
-	public void setCollationDerivation(int collationDerivationValue);
 
 	/**
 	 * Gets the name of the collation type in this descriptor.
