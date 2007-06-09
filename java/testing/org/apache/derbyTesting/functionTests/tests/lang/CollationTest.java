@@ -768,6 +768,19 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     checkPreparedStatementError(conn, "SELECT COUNT(*) FROM CUSTOMER WHERE " +
     		" LENGTH(?) != 0", "42X36");   
 
+    //Do parameter testing for BETWEEN
+    //Following should pass for ? will take the collation from the context and
+    //hence, it will be UCS_BASIC
+    ps = conn.prepareStatement("SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
+	" TABLENAME NOT BETWEEN ? AND TABLENAME");   
+    ps.setString(1, " ");
+    rs = ps.executeQuery();
+	JDBC.assertEmpty(rs);
+	//Following will fail because ? will take collation of territory based but
+	//the left hand side has collation of UCS_BASIC
+    checkPreparedStatementError(conn, "SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
+    		" TABLENAME NOT BETWEEN ? AND 'SYSCOLUMNS'", "42818");   
+    
     //Do parameter testing with COALESCE
     //following will pass because the ? inside the COALESCE will take the 
     //collation type of the other operand which is TABLENAME. The result of
