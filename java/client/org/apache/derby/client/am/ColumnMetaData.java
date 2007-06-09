@@ -177,6 +177,9 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
         {
             checkForClosedStatement();
             checkForValidColumnIndex(column);
+            if( sqlxGenerated_[column - 1] == 2) {
+                return true;
+            }
             return false;
         }
         catch ( SqlException e )

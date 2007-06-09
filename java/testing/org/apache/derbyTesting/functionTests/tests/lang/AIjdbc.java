@@ -133,7 +133,7 @@ public class AIjdbc
 			if (rsmd.isAutoIncrement(2))
 				throw new SQLException("column 2 is NOT ai!");
 			if (rsmd.isAutoIncrement(3))
-				throw new SQLException("column 2 is NOT ai!");
+				throw new SQLException("column 3 is NOT ai!");
 			rs.close();
             s.close();
 		}

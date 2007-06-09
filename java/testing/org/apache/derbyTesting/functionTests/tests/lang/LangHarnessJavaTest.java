@@ -22,7 +22,7 @@ package org.apache.derbyTesting.functionTests.tests.lang;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
-
+import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.functionTests.util.HarnessJavaTest;
 
 /**
@@ -43,6 +43,7 @@ public class LangHarnessJavaTest extends HarnessJavaTest {
      */
     private static final String[] LANG_TESTS_BOTH =
     {
+        "AIjdbc",
     };
     
     /**
@@ -51,7 +52,7 @@ public class LangHarnessJavaTest extends HarnessJavaTest {
     private static final String[] LANG_TESTS_EMEBDDED=
     {
         // old derbylang.runall suite
-        "AIjdbc",
+        //"AIjdbc",
         // "AggregateClassLoading", TODO: investigate/convert
         "CharUTF8",
         "bug4356",
@@ -103,8 +104,8 @@ public class LangHarnessJavaTest extends HarnessJavaTest {
         suite.addTest(baseSuite("embedded", LANG_TESTS_BOTH));
         suite.addTest(baseSuite("embedded", LANG_TESTS_EMEBDDED));
         
-        //suite.addTest(TestConfiguration.clientServerDecorator(
-        //        baseSuite("clientserver", LANG_TESTS_BOTH)));
+        suite.addTest(TestConfiguration.clientServerDecorator(
+                baseSuite("clientserver", LANG_TESTS_BOTH)));
         return suite;
     }
    
