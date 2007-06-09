@@ -140,8 +140,12 @@ public class ValueNodeList extends QueryTreeNodeVector
 	}
 
 	/**
-	 * Get the dominant DataTypeServices from the elements in the list. This 
-	 * method will also check if it is dealing with character string datatypes.
+	 * Get the dominant DataTypeServices from the elements in the list. This
+	 * method will also set the correct collation information on the dominant
+	 * DataTypeService.
+	 *  
+	 * Algorithm for determining collation information
+	 * This method will check if it is dealing with character string datatypes.
 	 * If yes, then it will check if all the character string datatypes have
 	 * the same collation derivation and collation type associated with them.
 	 * If not, then the resultant DTD from this method will have collation
@@ -151,7 +155,7 @@ public class ValueNodeList extends QueryTreeNodeVector
 	 * 
 	 * eg consider we are dealing with a database with territory based 
 	 * collation. Now consider following example first
-	 * sysCharColumn || userCharColumn
+	 * sysCharColumn1 || userCharColumn
 	 * The result of this concatenation will have collation derivation of NONE
 	 * because the first operand has collation derivation of IMPLICIT and 
 	 * collation type of UCS_BASIC whereas the 2nd opernad has collation 
@@ -165,6 +169,35 @@ public class ValueNodeList extends QueryTreeNodeVector
 	 * derivation of IMPLICIT and same collation type of UCS_BASIC, the 
 	 * resultant type will have collation derivation of IMPLICIT and collation 
 	 * type of UCS_BASIC
+	 * 
+	 * Note that this method calls DTD.getDominantType and that method returns
+	 * the dominant type of the 2 DTDs involved in this method. The method also
+	 * sets the collation info on the dominant type following the algorithm
+	 * mentioned in the comments of 
+	 * @see DataTypeDescriptor#getDominantType(DataTypeDescriptor, ClassFactory)
+	 * But when there are more than 2 DTDs involved in this ValueNodeList, we
+	 * can't determine the collation info using only 2 DTDs at a time which is
+	 * what TD.getDominantType does. Consider following eg
+	 * sysCharColumn1 || userCharColumn || sysCharColumn2
+	 * If we let the DataTypeDescriptor.getDominantType determine the collation
+	 * of the eg above, then DataTypeDescriptor.getDominantType will first set 
+	 * collation derivation of NONE for the following. This intermediate DTD is 
+	 * tracked by dominantDTS 
+	 * sysCharColumn1 || userCharColumn
+	 * Next, DataTypeDescriptor.getDominantType gets called for the intermediate
+	 * DTD (dominantDTS) and sysCharColumn2
+	 * dominantDTS || sysCharColumn2
+	 * For these two DTDs, DataTypeDescriptor.getDominantType will set 
+	 * collation type of UCS_BASIC and collation derivation of IMPLICIT. So, the
+	 * result string of the sysCharColumn1 || userCharColumn || sysCharColumn2
+	 * will have collation type of UCS_BASIC and collation derivation of 
+	 * IMPLICIT, but that is not correct. The reason for this is 
+	 * DataTypeDescriptor.getDominantType deals with only 2 DTDs at a time. To
+	 * fix this problem, we basically ignore the collation type and derivation 
+	 * picked by DataTypeDescriptor.getDominantType. Instead we let 
+	 * getDominantTypeServices use the simple algorithm listed at the top of
+	 * this method's comments to determine the collation type and derivation for 
+	 * this ValueNodeList object.
 	 * 
 	 * @return DataTypeServices		The dominant DataTypeServices.
 	 *
@@ -233,7 +266,7 @@ public class ValueNodeList extends QueryTreeNodeVector
 				//NONE.
 				dominantDTS.setCollationDerivation(StringDataValue.COLLATION_DERIVATION_NONE);
 			}			
-			//if we didn't fine any collation mismatch, then resultant dominant
+			//if we didn't find any collation mismatch, then resultant dominant
 			//DTD already has the correct collation information on it and hence
 			//we don't need to do anything.
 		}

@@ -484,6 +484,38 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 	 * For variable length types, the resulting type will have the
 	 * biggest max length of the 2.
 	 * If either side is nullable, then the result will also be nullable.
+	 * 
+	 * If dealing with character string types, then make sure to set the
+	 * collation info on the dominant type. Following algorithm will be used 
+	 * for dominant DTD's collation determination. Each of the steps of the 
+	 * algorithem have been numbered in the comments below and those same 
+	 * numbers are used in the actual algorithm below so it is easier to 
+	 * understand and maintain.
+	 * 
+	 * Step 1
+	 * If the DTD for "this" node has the same collation derivation as the 
+	 * otherDTS, then check if their collation types match too. If the 
+	 * collation types match too, then DTD for dominant type will get the same 
+	 * collation derivation and type.
+	 *  
+	 * Step 2
+	 * If the collation derivation for DTD for "this" node and otherDTS do not 
+	 * match, then check if one of them has the collation derivation of NONE. 
+	 * If that is the case, then dominant DTD will get the collation type and 
+	 * derivation of DTD whose collation derivation is not NONE.
+	 * 
+	 * Step 3
+	 * If the collation derivation for DTD for "this" node and otherDTS do not 
+	 * match, and none of them have the derivation of NONE then it means that 
+	 * we are dealing with collation derivation of IMPLICIT and EXPLICIT and 
+	 * hence the dominant DTD should get collation derivation of NONE. This is 
+	 * not a possibility in Derby 10.3 because the only 2 possible collation 
+	 * derivation supported are IMPLICIT and NONE.
+	 * 
+	 * Step 4
+	 * If the collation derivation for DTD for "this" node and otherDTS match, 
+	 * then check if the collation types match too. If not, then the dominant 
+	 * DTD should get collation derivation of NONE. 
 	 *
 	 * @param otherDTS	DataTypeDescriptor to compare with.
 	 * @param cf		A ClassFactory
@@ -692,6 +724,32 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 
 		higherType = new DataTypeDescriptor(higherType, 
 				precision, scale, nullable, maximumWidth);
+
+		//Set collation info on the DTD for dominant type if it is string type
+		//The algorithm used is explained in this method's javadoc
+		if (higherType.getTypeId().isStringTypeId()) {
+			if (getCollationDerivation() != otherDTS.getCollationDerivation()) {
+				if (getCollationDerivation() == StringDataValue.COLLATION_DERIVATION_NONE) {
+					//Step 2
+					higherType.setCollationDerivation(otherDTS.getCollationDerivation());					
+					higherType.setCollationType(otherDTS.getCollationType());					
+				} else if (otherDTS.getCollationDerivation() == StringDataValue.COLLATION_DERIVATION_NONE) {
+					//Step 2
+					higherType.setCollationDerivation(getCollationDerivation());					
+					higherType.setCollationType(getCollationType());										
+				} else {
+					//Step 3
+					higherType.setCollationDerivation(StringDataValue.COLLATION_DERIVATION_NONE);					
+				}
+			} else if (getCollationType() != otherDTS.getCollationType())
+				//Step 4
+				higherType.setCollationDerivation(StringDataValue.COLLATION_DERIVATION_NONE);	
+			else {
+				//Step 1
+				higherType.setCollationDerivation(getCollationDerivation());					
+				higherType.setCollationType(getCollationType());									
+			}
+		}
 
 		return higherType;
 	}
