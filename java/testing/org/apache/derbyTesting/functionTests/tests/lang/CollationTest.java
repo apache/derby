@@ -871,6 +871,11 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     s.executeUpdate("INSERT INTO APP.CUSTOMER(NAME) VALUES('abc')");
     rs = s.executeQuery("SELECT COUNT(*) FROM APP.CUSTOMER ");
     JDBC.assertFullResultSet(rs,new String[][] {{"9"}});
+    //following will fail because NAME has collation type of territory based
+    //but 'abc' has collation type of UCS_BASIC
+    assertStatementError("42818", s, "DELETE FROM APP.CUSTOMER WHERE NAME = 'abc'");
+    //changing to APP schema will fix the problem
+    s.executeUpdate("set schema APP");
     s.executeUpdate("DELETE FROM APP.CUSTOMER WHERE NAME = 'abc'");
     rs = s.executeQuery("SELECT COUNT(*) FROM APP.CUSTOMER ");
     JDBC.assertFullResultSet(rs,new String[][] {{"8"}});
