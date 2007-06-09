@@ -90,16 +90,10 @@ public class TimestampOperatorNode extends BinaryOperatorNode
 		//Set the type if there is a parameter involved here 
 		if (leftOperand.requiresTypeFromContext()) {
 			leftOperand.setType(DataTypeDescriptor.getBuiltInDataTypeDescriptor( Types.DATE));
-			//collation of ? operand should be same as the compilation schema
-			leftOperand.setCollationUsingCompilationSchema(
-					StringDataValue.COLLATION_DERIVATION_IMPLICIT);
 		}
 		//Set the type if there is a parameter involved here 
 		if (rightOperand.requiresTypeFromContext()) {
 			rightOperand.setType(DataTypeDescriptor.getBuiltInDataTypeDescriptor( Types.TIME));
-			//collation of ? operand should be same as the compilation schema
-			rightOperand.setCollationUsingCompilationSchema(
-					StringDataValue.COLLATION_DERIVATION_IMPLICIT);
 		}
 
 		TypeId leftTypeId = leftOperand.getTypeId();
