@@ -49,8 +49,7 @@ public class ProcedureInTriggerTest extends BaseJDBCTestCase {
      * @throws SQLException
      */
     public void testTriggerNoSql() throws SQLException {
-        Connection conn = getConnection();
-        Statement s = conn.createStatement();
+        Statement s = createStatement();
         s.execute("create trigger after_stmt_trig_no_sql AFTER insert on t2 for each STATEMENT call proc_no_sql()");
         //insert 2 rows. check that trigger is fired - procedure should be called once
         zeroArgCount = 0;
@@ -104,7 +103,7 @@ public class ProcedureInTriggerTest extends BaseJDBCTestCase {
         s.execute("drop trigger before_stmt_trig_no_sql");
         s.execute("drop trigger before_row_trig_no_sql");
         s.execute("insert into t2 values (1,2), (2,4)");
-        
+        s.close();
     }
     
     /**
@@ -114,8 +113,7 @@ public class ProcedureInTriggerTest extends BaseJDBCTestCase {
      * @throws SQLException
      */
     public void testTriggerContainsSql() throws SQLException{
-        Connection conn = getConnection();
-        Statement s = conn.createStatement();
+        Statement s = createStatement();
         s.execute("create trigger after_row_trig_contains_sql AFTER update on t2 for each ROW call proc_contains_sql()");
         // --- update 2 rows. check that trigger is fired - procedure should be called twice
         s.execute("update t2 set x = x*2");
@@ -132,7 +130,7 @@ public class ProcedureInTriggerTest extends BaseJDBCTestCase {
         JDBC.assertEmpty(rs);
         s.execute("drop trigger after_row_trig_contains_sql");
         s.execute("drop trigger before_stmt_trig_contains_sql");
-       
+        s.close();
     }
    
     /**
@@ -140,8 +138,7 @@ public class ProcedureInTriggerTest extends BaseJDBCTestCase {
      * @throws SQLException
      */
     public void testTriggerReadsSql() throws SQLException {
-        Connection conn = getConnection();
-        Statement s = conn.createStatement();
+        Statement s = createStatement();
         //--- create a row in t1 for use in select in the procedure
         s.execute("insert into t1 values (1, 'one')");
         s.execute("create trigger after_stmt_trig_reads_sql AFTER insert on t2 for each STATEMENT call proc_reads_sql(1)");
@@ -163,8 +160,7 @@ public class ProcedureInTriggerTest extends BaseJDBCTestCase {
         s.execute("drop trigger before_row_trig_reads_sql");
         //--- empty t1
         s.execute("delete from t1");
-            
-                        
+        s.close();
     }
     
     /**
@@ -173,8 +169,7 @@ public class ProcedureInTriggerTest extends BaseJDBCTestCase {
      * @throws SQLException
      */
     public void testModifiesSql() throws SQLException {
-        Connection conn = getConnection();
-        Statement s = conn.createStatement();
+        Statement s = createStatement();
         s.execute("create trigger after_stmt_trig_modifies_sql_insert_op AFTER insert on t2 for each STATEMENT call proc_modifies_sql_insert_op(1, 'one')");
         //--- insert 2 rows
         s.execute("insert into t2 values (1,2), (2,4)");
@@ -300,7 +295,7 @@ public class ProcedureInTriggerTest extends BaseJDBCTestCase {
       rs = s.executeQuery("select * from t2");
       JDBC.assertEmpty(rs);
       s.execute("drop trigger call_proc_in_new_schema");
-      
+      s.close();
     }
 
   
@@ -310,8 +305,7 @@ public class ProcedureInTriggerTest extends BaseJDBCTestCase {
      * @throws SQLException
      */
     public void testTriggerNegative() throws SQLException {
-        Connection conn = getConnection();
-        Statement s = conn.createStatement();
+        Statement s = createStatement();
         ResultSet rs;
         assertStatementError("42Y03",s,"create trigger call_non_existent_proc1 AFTER insert on t2 for each ROW call non_existent_proc()");
           rs = s.executeQuery("select count(*) from SYS.SYSTRIGGERS where triggername='CALL_NON_EXISTENT_PROC1'");
@@ -455,7 +449,7 @@ public class ProcedureInTriggerTest extends BaseJDBCTestCase {
          // -- check index is not dropped
          rs = s.executeQuery("select count(*) from SYS.SYSCONGLOMERATES where CONGLOMERATENAME='IX' and ISINDEX=1");
          JDBC.assertFullResultSet(rs, new String[][] {{"1"}});
-         
+         s.close();
     }
     
     
