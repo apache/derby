@@ -50,6 +50,7 @@ public class deadlockMode {
 	private static boolean passed = false;
 	private Object syncObject = new Object();
 	private int doneCount;
+	private int startedCount;
 	private deadlockMode() {}
 
 	public static void main(String[] args) {
@@ -133,6 +134,16 @@ public class deadlockMode {
 			// make the initial connection.
 			conn = ij.startJBMS();
 			System.out.println("Starting thread");
+
+			// Don't start until all threads are up and running. Otherwise, the
+			// output may come out in the wrong order (DERBY-2799).
+			synchronized (syncObject) {
+				startedCount++;
+				syncObject.notifyAll();
+				while (startedCount < THREAD_COUNT) {
+					syncObject.wait();
+				}
+			}
 
 			Statement stmt = conn.createStatement();
 			// execute a query to load cache

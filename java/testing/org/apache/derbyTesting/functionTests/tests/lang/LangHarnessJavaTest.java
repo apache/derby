@@ -97,6 +97,16 @@ public class LangHarnessJavaTest extends HarnessJavaTest {
     protected String getArea() {
         return "lang";
     }
+
+    /**
+     * Run a set of language tests (.java files).
+     *
+     * @param args names of the tests to run (the .java suffix should not be
+     * included in the name of a test)
+     */
+    public static void main(String[] args) {
+        junit.textui.TestRunner.run(baseSuite("main()", args));
+    }
     
     public static Test suite()
     {
