@@ -1259,7 +1259,7 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
             //The same SQLState String BLOB_ACCESSED_AFTER_COMMIT
             //is used for LOB's(Both Clob and Blob). Ensure that
             //we get the expected exception by comparing the SQLState.
-            checkException(BLOB_ACCESSED_AFTER_COMMIT, e);
+            checkException(INVALID_LOB, e);
             //In the embedded clobs of small size are
             //accessible after commit. Hence ensure that
             //we are dealing with the Embedded side here.
@@ -1278,7 +1278,11 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
             //The same SQLState String BLOB_ACCESSED_AFTER_COMMIT
             //is used for LOB's(Both Clob and Blob). Ensure that
             //we get the expected exception by comparing the SQLState.
-            checkException(BLOB_ACCESSED_AFTER_COMMIT, e);
+            if (usingEmbedded()) {
+                checkException(BLOB_ACCESSED_AFTER_COMMIT, e);
+            } else {
+                checkException(INVALID_LOB, e);
+            }
         }
         try {
             clob.getSubString(2,3);
@@ -1290,7 +1294,11 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
             //The same SQLState String BLOB_ACCESSED_AFTER_COMMIT
             //is used for LOB's(Both Clob and Blob). Ensure that
             //we get the expected exception by comparing the SQLState.
-            checkException(BLOB_ACCESSED_AFTER_COMMIT, e);
+            if (usingEmbedded()) {
+                checkException(BLOB_ACCESSED_AFTER_COMMIT, e);
+            } else {
+                checkException(INVALID_LOB, e);
+            }
         }
         try {
             clob.getAsciiStream();
@@ -1302,7 +1310,11 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
             //The same SQLState String BLOB_ACCESSED_AFTER_COMMIT
             //is used for LOB's(Both Clob and Blob). Ensure that
             //we get the expected exception by comparing the SQLState.
-            checkException(BLOB_ACCESSED_AFTER_COMMIT, e);
+            if (usingEmbedded()) {
+                checkException(BLOB_ACCESSED_AFTER_COMMIT, e);
+            } else {
+                checkException(INVALID_LOB, e);
+            }
         }
         try {
             clob.position("foo",2);
@@ -1314,7 +1326,11 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
             //The same SQLState String BLOB_ACCESSED_AFTER_COMMIT
             //is used for LOB's(Both Clob and Blob). Ensure that
             //we get the expected exception by comparing the SQLState.
-            checkException(BLOB_ACCESSED_AFTER_COMMIT, e);
+            if (usingEmbedded()) {
+                checkException(BLOB_ACCESSED_AFTER_COMMIT, e);
+            } else {
+                checkException(INVALID_LOB, e);
+            }
         }
         try {
             clob.position(clob,2);
@@ -1326,7 +1342,11 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
             //The same SQLState String BLOB_ACCESSED_AFTER_COMMIT
             //is used for LOB's(Both Clob and Blob). Ensure that
             //we get the expected exception by comparing the SQLState.
-            checkException(BLOB_ACCESSED_AFTER_COMMIT, e);
+            if (usingEmbedded()) {
+                checkException(BLOB_ACCESSED_AFTER_COMMIT, e);
+            } else {
+                checkException(INVALID_LOB, e);
+            }
         }
     }
 
@@ -2285,11 +2305,7 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
             shortBlob.length();
             fail("FAIL - should not be able to access Blob after commit");
         } catch (SQLException e) {
-            if (usingEmbedded()) {
-                checkException(INVALID_BLOB, e);
-            } else {
-                checkException(INVALID_LOCATOR, e);
-            }
+            checkException(INVALID_LOB, e);
         }
 
         assertTrue("FAIL - blob is NULL", blob != null);
@@ -2298,51 +2314,31 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
             blob.length();
             fail("FAIL - should not be able to access large Blob after commit");
         } catch (SQLException e) {
-            if (usingEmbedded()) {
-                checkException(INVALID_BLOB, e);
-            } else {
-                checkException(INVALID_LOCATOR, e);
-            }
+            checkException(INVALID_LOB, e);
         }
         try {
             blob.getBytes(2,3);
             fail("FAIL - should not be able to access large Blob after commit");
         } catch (SQLException e) {
-            if (usingEmbedded()) {
-                checkException(INVALID_BLOB, e);
-            } else {
-                checkException(INVALID_LOCATOR, e);
-            }
+            checkException(INVALID_LOB, e);
         }
         try {
             blob.getBinaryStream();
             fail("FAIL - should not be able to access large Blob after commit");
         } catch (SQLException e) {
-            if (usingEmbedded()) {
-                checkException(INVALID_BLOB, e);
-            } else {
-                checkException(INVALID_LOCATOR, e);
-            }
+            checkException(INVALID_LOB, e);
         }
         try {
             blob.position("foo".getBytes("US-ASCII"),2);
             fail("FAIL - should not be able to access large Blob after commit");
         } catch (SQLException e) {
-            if (usingEmbedded()) {
-                checkException(INVALID_BLOB, e);
-            } else {
-                checkException(INVALID_LOCATOR, e);
-            }
+            checkException(INVALID_LOB, e);
         }
         try {
             blob.position(blob,2);
             fail("FAIL - should not be able to access large Blob after commit");
         } catch (SQLException e) {
-            if (usingEmbedded()) {
-                checkException(INVALID_BLOB, e);
-            } else {
-                checkException(INVALID_LOCATOR, e);
-            }
+            checkException(INVALID_LOB, e);
         }
     }
 
@@ -3245,7 +3241,7 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
     private static final String LOCK_TIMEOUT = "40XL1";
     private static final String BLOB_ACCESSED_AFTER_COMMIT = "XJ073";
     private static final String NO_CURRENT_CONNECTION = "08003";
-    private static final String INVALID_BLOB = "XJ215";
+    private static final String INVALID_LOB = "XJ215";
     private static final String INVALID_LOCATOR = "XJ217";
 
 }

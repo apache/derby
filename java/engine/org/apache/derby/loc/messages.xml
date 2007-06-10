@@ -4497,7 +4497,7 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
 
             <msg>
                 <name>XJ215.S</name>
-                <text>You cannot invoke other java.sql.Clob/java.sql.Blob methods after calling the free() method.</text>
+                <text>You cannot invoke other java.sql.Clob/java.sql.Blob methods after calling the free() method or after the Blob/Clob's transaction has been committed or rolled back.</text>
             </msg>
 	    
 	    <msg>

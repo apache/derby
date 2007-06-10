@@ -1047,30 +1047,29 @@ class CallableLocatorProcedures
      * If the given exception indicates that locator was not valid, we
      * assume the locator has been garbage-collected due to
      * transaction commit, and wrap the exception in an exception with
-     * SQL state <code>BLOB_ACCESSED_AFTER_COMMIT</code>.
+     * SQL state <code>LOB_OBJECT_INVALID</code>.
      * @param sqle Exception to be checked
      * @return If <code>sqle</code> indicates that locator was
      *         invalid, an <code>SqlException</code> with SQL state
-     *         <code>BLOB_ACCESSED_AFTER_COMMIT</code>. Otherwise, the
+     *         <code>LOB_OBJECT_INVALID</code>. Otherwise, the
      *         incoming exception is returned.
      */
     private SqlException handleInvalidLocator(SqlException sqle)
     {
-        if ((sqle.getMessage().indexOf(ExceptionUtil
-                .getSQLStateFromIdentifier(SQLState.LOB_LOCATOR_INVALID)) >= 0)
-            // With Java 6, the reason for the failure of the
-            // procedure call is not reported, just
-            // LANG_UNEXPECTED_USER_EXCEPTION (see DERBY-1629).
-            // Until this is fixed, treat all such errors as INVALID_LOCATOR
-            || (sqle.getSQLState().compareTo
+        SqlException ex = sqle;
+        while (ex != null) {
+            if (ex.getSQLState().compareTo
                 (ExceptionUtil.getSQLStateFromIdentifier
-                 (SQLState.LANG_UNEXPECTED_USER_EXCEPTION)) == 0)) {
-            return new SqlException(connection.agent_.logWriter_,
-                    new ClientMessageId(SQLState.BLOB_ACCESSED_AFTER_COMMIT),
-                    null,
-                    sqle);
-        } else {
-            return sqle;
+                 (SQLState.LOB_LOCATOR_INVALID)) == 0) {
+                return new SqlException(connection.agent_.logWriter_,
+                               new ClientMessageId(SQLState.LOB_OBJECT_INVALID),
+                               null,
+                               sqle);
+            }
+            ex = ex.getNextException();
         }
+
+        // LOB_LOCATOR_INVALID not found, return original exception
+        return sqle;
     }
 }
