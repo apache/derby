@@ -288,9 +288,14 @@ public class ImportExportLobTest extends ImportExportBaseTest
         doExportTableLobsToExtFile("APP", "BOOKS", fileName, 
                                     "\t", "|", "UTF-16", 
                                    "unql_books_lobs.dat");
-	    doImportTableLobsFromExtFile("APP", "BOOKS_IMP", fileName, 
-                                     "\t", "|", "UTF-16", 0);
-        verifyData(" * ");
+        // DERBY-2546 - with JSR this hits a JVM issue
+        if (JDBC.vmSupportsJDBC3()) 
+        {
+            doImportTableLobsFromExtFile("APP", "BOOKS_IMP", fileName, 
+                "\t", "|", "UTF-16", 0);
+            verifyData(" * ");
+        }
+        
     }
 
 
