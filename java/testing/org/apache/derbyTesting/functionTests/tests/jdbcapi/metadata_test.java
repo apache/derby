@@ -526,6 +526,16 @@ public abstract class metadata_test {
 				new String [] {"", null, "REFTAB", "", "APP", "REFTAB"},
 				null, null, null));
 
+			// DERBY-2758 start - getCrossReference with table name
+			// value '%' should be treated as a wildcard for ODBC but
+			// not for JDBC. I.e., only odbc_metadata.out, not
+			// metadata.out, should have returned rows here.
+			System.out.println(
+						"\ngetCrossReference('', 'APP', '%','','APP', '%'):");
+			dumpRS(GET_CROSS_REFERENCE, getMetaDataRS(met, GET_CROSS_REFERENCE,
+				new String [] {"", "APP", "%", "", "APP", "%"},
+				null, null, null));
+
 			System.out.println("\ngetImportedKeys('',null,null,'','APP','reftab' ):");
 			dumpRS(GET_IMPORTED_KEYS, getMetaDataRS(met, GET_IMPORTED_KEYS,
 				new String [] {"", "APP", "REFTAB"},
