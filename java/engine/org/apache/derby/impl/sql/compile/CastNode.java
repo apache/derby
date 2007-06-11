@@ -802,12 +802,6 @@ public class CastNode extends ValueNode
 					throws StandardException
 	{
 		castOperand.setType(castTarget);
-		//collation of ? operand should be same as the current schema
-		castOperand.getTypeServices().setCollationDerivation(
-				StringDataValue.COLLATION_DERIVATION_IMPLICIT);
-		castOperand.getTypeServices().setCollationType(
-				getLanguageConnectionContext().getDefaultSchema()
-						.getCollationType());
 	}
 
 	/**
