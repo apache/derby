@@ -2474,4 +2474,243 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         }
     }
  
+    /**
+     * Execute and check the ODBC variant of getImported/Exported keys, which
+     * uses the SQLFOREIGNKEYS system procedure to provide the same information
+     * to ODBC clients.  Note that for "correctness" we just compare the results
+     * to those of the equivalent JDBC calls; this fixture assumes that the
+     * the JDBC calls return correct results (testing of the JDBC results occurs
+     * elsewhere, esp. jdbcapi/metadata_test.java).
+     */
+    public void testGetXXportedKeysODBC() throws SQLException, IOException
+    {
+        Statement st = createStatement();
+
+        // Create some simple tables with primary/foreign keys.
+
+        st.execute("create table pkt1 (i int not null, c char(1) not null)");
+        st.execute("create table pkt2 (i int not null, c char(1) not null)");
+        st.execute("create table pkt3 (i int not null, c char(1) not null)");
+
+        st.execute("alter table pkt1 add constraint pk1 primary key (i)");
+        st.execute("alter table pkt2 add constraint pk2 primary key (c)");
+        st.execute("alter table pkt3 add constraint pk3 primary key (i, c)");
+
+        st.execute("create table fkt1 (fi int, fc char(1), vc varchar(80))");
+        st.execute("create table fkt2 (fi int, fc char(1), vc varchar(80))");
+
+        st.execute("alter table fkt1 add constraint fk1 foreign key (fi) " +
+            "references pkt1(i)");
+
+        st.execute("alter table fkt1 add constraint fk2 foreign key (fc) " +
+            "references pkt2(c)");
+
+        st.execute("alter table fkt2 add constraint fk3 foreign key (fi, fc) " +
+            "references pkt3(i, c)");
+
+        /* Check for all arguments NULL; SQLFOREIGNKEYS allows this, though
+         * there is no equivalent in JDBC.
+         */
+        checkODBCKeys(null, null, null, null, null, null);
+
+        /* Run equivalent of getImportedKeys(), getExportedKeys(),
+         * and getCrossReference for each of the primary/foreign
+         * key pairs.
+         */
+
+        checkODBCKeys(null, null, null, null, null, "FKT1");
+        checkODBCKeys(null, null, "PKT1", null, null, null);
+        checkODBCKeys(null, null, "PKT1", null, null, "FKT1");
+
+        checkODBCKeys(null, null, null, null, null, "FKT2");
+        checkODBCKeys(null, null, "PKT2", null, null, null);
+        checkODBCKeys(null, null, "PKT2", null, null, "FKT2");
+
+        checkODBCKeys(null, null, null, null, null, "FKT3");
+        checkODBCKeys(null, null, "PKT3", null, null, null);
+        checkODBCKeys(null, null, "PKT3", null, null, "FKT3");
+
+        // Reverse primary and foreign tables.
+
+        checkODBCKeys(null, null, "FKT1", null, null, null);
+        checkODBCKeys(null, null, null, null, null, "PKT3");
+        checkODBCKeys(null, null, "FKT1", null, null, "PKT1");
+        checkODBCKeys(null, null, "FKT2", null, null, "PKT2");
+        checkODBCKeys(null, null, "FKT3", null, null, "PKT3");
+
+        // Mix-and-match primary key tables and foreign key tables.
+
+        checkODBCKeys(null, null, "PKT1", null, null, "FKT2");
+        checkODBCKeys(null, null, "PKT1", null, null, "FKT3");
+        checkODBCKeys(null, null, "PKT2", null, null, "FKT3");
+
+        checkODBCKeys(null, null, "FKT1", null, null, "PKT2");
+        checkODBCKeys(null, null, "FKT1", null, null, "PKT3");
+        checkODBCKeys(null, null, "FKT2", null, null, "PKT3");
+
+        // Cleanup.
+
+        st.execute("drop table fkt1");
+        st.execute("drop table fkt2");
+        st.execute("drop table pkt1");
+        st.execute("drop table pkt2");
+        st.execute("drop table pkt3");
+        st.close();
+    }
+
+    /**
+     * Execute a call to the ODBC system procedure "SQLFOREIGNKEYS"
+     * and verify the results by comparing them with the results of
+     * an equivalent JDBC call (if one exists).
+     */
+    private void checkODBCKeys(String pCatalog, String pSchema,
+        String pTable, String fCatalog, String fSchema, String fTable)
+        throws SQLException, IOException
+    {
+        /* To mimic the behavior of the issue which prompted this test
+         * (DERBY-2758) we only send the "ODBC" option; we do *not*
+         * explicitly send the "IMPORTEDKEY=1" nor "EXPORTEDKEY=1"
+         * options, as DB2 Runtime Client does not send those, either.
+         * This effectively means that the SQLFOREIGNKEYS function
+         * will always be mapped to getCrossReference() internally.
+         * Since that worked fine prior to 10.3, we need to preserve
+         * that behavior if we want to maintina backward compatibility.
+         */
+        CallableStatement cs = prepareCall(
+            "CALL SYSIBM.SQLFOREIGNKEYS(?, ?, ?, ?, ?, ?, " +
+            "'DATATYPE=''ODBC''')");
+
+        cs.setString(1, pCatalog);
+        cs.setString(2, pSchema);
+        cs.setString(3, pTable);
+        cs.setString(4, fCatalog);
+        cs.setString(5, fSchema);
+        cs.setString(6, fTable);
+        
+        cs.execute();
+        ResultSet odbcrs = cs.getResultSet();
+        assertNotNull(odbcrs);
+        
+        /* Returned ResultSet will have the same shape as
+         * DatabaseMetaData.getImportedKeys()
+         */
+        checkODBCKeysShape(odbcrs);
+        
+        /* Expect the contents of JDBC and ODBC metadata to be the same,
+         * except if both pTable and cTable are null.  In that case
+         * ODBC treats everything as a wildcard (and so effectively
+         * returns all foreign key columns), while JDBC throws
+         * an error.
+         */
+
+        ResultSet dmdrs = null;
+        if ((pTable != null) && (fTable == null))
+            dmdrs = getDMD().getExportedKeys(pCatalog, pSchema, pTable);
+        else if ((pTable == null) && (fTable != null))
+            dmdrs = getDMD().getImportedKeys(fCatalog, fSchema, fTable);
+        else if (pTable != null)
+        {
+            dmdrs = getDMD().getCrossReference(
+                pCatalog, pSchema, pTable, fCatalog, fSchema, fTable);
+        }
+        else
+        {
+            /* Must be the case of pTable and fTable both null.  Check
+             * results for ODBC (one row for each foreign key column)
+             * and assert error for JDBC.
+             */
+
+            JDBC.assertFullResultSet(odbcrs,
+                new String [][] {
+                    {"","APP","PKT1","I","","APP","FKT1","FI",
+                        "1","3","3","FK1","PK1","7"},
+                    {"","APP","PKT2","C","","APP","FKT1","FC",
+                        "1","3","3","FK2","PK2","7"},
+                    {"","APP","PKT3","I","","APP","FKT2","FI",
+                        "1","3","3","FK3","PK3","7"},
+                    {"","APP","PKT3","C","","APP","FKT2","FC",
+                        "2","3","3","FK3","PK3","7"}
+                });
+
+            try {
+
+                getDMD().getCrossReference(
+                    pCatalog, pSchema, pTable, fCatalog, fSchema, fTable);
+
+                fail("Expected error from call to DMD.getCrossReference() " +
+                    "with NULL primary and foreign key tables.");
+
+            } catch (SQLException se) {
+
+                /* Looks like embedded and client have different (but similar)
+                 * errors for this...
+                 */
+                assertSQLState(usingEmbedded() ? "XJ103" : "XJ110", se);
+
+            }
+            
+        }
+                
+        /* If both pTable and fTable are null then dmdrs will be null, as
+         * well.  So nothing to compare in that case.
+         */
+        if (dmdrs != null)
+        {
+            // Next call closes both results sets as a side effect.
+            JDBC.assertSameContents(odbcrs, dmdrs);
+        }
+        
+        cs.close();
+    }
+
+    /**
+     * Check the shape of the ResultSet from a call to the ODBC function
+     * SQLForeignKeys.
+     */
+    private void checkODBCKeysShape(ResultSet rs) throws SQLException
+    {
+        assertMetaDataResultSet(rs,
+
+            // ODBC and JDBC agree on column names and types.
+
+            new String[] {
+                "PKTABLE_CAT", "PKTABLE_SCHEM", "PKTABLE_NAME", "PKCOLUMN_NAME",
+                "FKTABLE_CAT", "FKTABLE_SCHEM", "FKTABLE_NAME", "FKCOLUMN_NAME",
+                "KEY_SEQ", "UPDATE_RULE", "DELETE_RULE", "FK_NAME",
+                "PK_NAME", "DEFERRABILITY"
+            },
+
+            new int[] {
+                Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR,
+                Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR,
+                Types.SMALLINT, Types.SMALLINT, Types.SMALLINT, Types.VARCHAR,
+                Types.VARCHAR, Types.SMALLINT
+            },
+
+            // Nullability comes from ODBC spec, not JDBC.
+
+            /* DERBY-2797: Nullability of columns in ODBC's SQLForeignKey
+             * result set is incorrect.  Un-comment the correct boolean array
+             * when DERBY-2797 has been fixed.
+             */
+
+            // incorrect
+            new boolean[] {
+                true, false, false, false,
+                true, false, false, false,
+                true, true, true, false,
+                false, true
+            }
+
+            // correct
+            /* new boolean[] {
+                true, true, false, false,
+                true, true, false, false,
+                false, true, true, true,
+                true, true
+            } */
+
+        );        
+    }
+    
 }
