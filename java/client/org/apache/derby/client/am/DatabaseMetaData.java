@@ -2253,7 +2253,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
 
     public boolean locatorsUpdateCopy() throws SQLException {
         checkForClosedConnection();
-        return false;
+        return true;
     }
 
     public boolean supportsStatementPooling() throws SQLException {

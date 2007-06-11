@@ -492,7 +492,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         
         assertFalse(dmd.isCatalogAtStart()); 
         
-        assertFalse(dmd.locatorsUpdateCopy());
+        assertTrue(dmd.locatorsUpdateCopy());
         
         assertTrue(dmd.usesLocalFilePerTable());
         assertTrue(dmd.usesLocalFiles());

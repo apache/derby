@@ -3278,6 +3278,9 @@ public class EmbedDatabaseMetaData extends ConnectionChild
     *
     * Indicates whether updates made to a LOB are made on a copy or
     * directly to the LOB.
+    * <p>
+    * For the embedded driver, all updates will be made to a copy.
+    * Hence, this call will always return <code>true</code>
     *
     * @return true if updates are made to a copy of the LOB; false if
     * updates are made directly to the LOB
@@ -3286,7 +3289,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 	public boolean locatorsUpdateCopy()
     throws SQLException
 	{
-		return false;
+		return true;
 	}
 
 	/**
