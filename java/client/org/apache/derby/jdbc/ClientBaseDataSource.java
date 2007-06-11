@@ -177,7 +177,10 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
     public final static int SSL_BASIC = 1;
     public final static int SSL_PEER_AUTHENTICATION = 2;
 
-    public static final int getSSLModeFromString(String s) {
+    public static final int getSSLModeFromString(String s) 
+        throws SqlException
+    {
+        
 		if (s != null){
 			if (s.equalsIgnoreCase("off")) {
 				return SSL_OFF;
@@ -186,8 +189,9 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
 			} else if (s.equalsIgnoreCase("peerAuthentication")) {
 				return SSL_PEER_AUTHENTICATION;
 			} else {
-				// Default
-				return SSL_OFF;
+                throw new SqlException(null, 
+                                       new ClientMessageId(SQLState.INVALID_ATTRIBUTE),
+                                       Attribute.SSL_ATTR, s, "off, basic, peerAuthentication");
 			}
 		} else {
 			// Default
@@ -196,6 +200,7 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
     }
     
     public static final int getClientSSLMode(Properties properties)
+        throws SqlException
     {
         return getSSLModeFromString(properties.getProperty(Attribute.SSL_ATTR));
     }
@@ -872,7 +877,9 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
 
     private int sslMode;
 
-    public void setSsl(String mode) {
+    public void setSsl(String mode) 
+        throws SqlException
+    {
         sslMode = getSSLModeFromString(mode);
     }
 
@@ -1057,7 +1064,9 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
      * The dataSource keeps individual fields for the values that are relevant to the client. These need to be updated
      * when set connection attributes is called.
      */
-    void updateDataSourceValues(Properties prop) {
+    void updateDataSourceValues(Properties prop) 
+        throws SqlException
+    {
         if (prop == null) {
             return;
         }

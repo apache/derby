@@ -2824,15 +2824,20 @@ public final class NetworkServerControlImpl {
 	 **/
 
 	private int getSSLModeValue(String s)
+        throws Exception
 	{
 		if (s != null){
 			if (StringUtil.SQLEqualsIgnoreCase(s,"off")) {
 				return SSL_OFF;
 			} else if (StringUtil.SQLEqualsIgnoreCase(s,"basic")) {
 				return SSL_BASIC;
-			} else if (StringUtil.SQLEqualsIgnoreCase(s,"peerAuthentication")) {				return SSL_PEER_AUTHENTICATION;
+			} else if (StringUtil.SQLEqualsIgnoreCase(s,"peerAuthentication")) {
+                return SSL_PEER_AUTHENTICATION;
 			} else {
-				// Default
+				// Unknown value
+                consolePropertyMessage("DRDA_InvalidValue.U", 
+                                       new String [] {s, Property.DRDA_PROP_SSL_MODE});
+                
 				return SSL_OFF;
 			}
 		} else {
