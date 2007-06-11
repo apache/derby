@@ -634,12 +634,6 @@ public class StaticMethodCallNode extends MethodCallNode
 		  				pn = ((UnaryOperatorNode)sql2j.getSQLValueNode()).getParameterOperand();
 		  			else
 		  				pn = (ParameterNode) (sql2j.getSQLValueNode());
-					//collation of ? operand should be same as the current schema
-					pn.getTypeServices().setCollationDerivation(
-							StringDataValue.COLLATION_DERIVATION_IMPLICIT);
-					pn.getTypeServices().setCollationType(
-							getLanguageConnectionContext().getDefaultSchema()
-									.getCollationType());
 
 					// applicationParameterNumbers is only set up for a procedure.
 					int applicationParameterNumber = pn.getParameterNumber();
