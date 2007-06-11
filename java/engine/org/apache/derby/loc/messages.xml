@@ -618,7 +618,13 @@ Guide.
                 <arg>sequenceName</arg>
             </msg>
 
-            <msg>
+			<msg>
+				<name>22020</name>
+				<text>Invalid trim string, '{0}'. The trim string must be exactly one character or NULL. It cannot be more than one character.</text>
+				<arg>string</arg>
+			</msg>
+
+			<msg>
                 <name>22025</name>
                 <text>Escape character must be followed by escape character, '_', or '%'. It cannot be followed by any other character or be at the end of the pattern.</text>
             </msg>

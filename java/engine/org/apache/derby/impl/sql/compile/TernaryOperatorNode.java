@@ -82,7 +82,7 @@ public class TernaryOperatorNode extends ValueNode
 	public static final int TIMESTAMPADD = 4;
 	public static final int TIMESTAMPDIFF = 5;
 	static final String[] TernaryOperators = {"trim", "LOCATE", "substring", "like", "TIMESTAMPADD", "TIMESTAMPDIFF"};
-	static final String[] TernaryMethodNames = {"trim", "locate", "substring", "like", "timestampAdd", "timestampDiff"};
+	static final String[] TernaryMethodNames = {"ansiTrim", "locate", "substring", "like", "timestampAdd", "timestampDiff"};
 	static final String[] TernaryResultType = {ClassName.StringDataValue, 
 			ClassName.NumberDataValue,
 			ClassName.ConcatableDataValue,
@@ -206,8 +206,9 @@ public class TernaryOperatorNode extends ValueNode
 	{
 		receiver = receiver.bindExpression(fromList, subqueryList, 
 			aggregateVector);
-		leftOperand = leftOperand.bindExpression(fromList, subqueryList, 
-			aggregateVector);
+
+		leftOperand = leftOperand.bindExpression(fromList, subqueryList,
+			    aggregateVector);
 
 		if (rightOperand != null)
 		{
@@ -288,8 +289,11 @@ public class TernaryOperatorNode extends ValueNode
 		if (operatorType == TRIM)
 		{
 			mb.push(trimType);
+			leftOperand.generateExpression(acb, mb);
+			mb.upCast(leftInterfaceType);
+
 			mb.getField(field);
-			nargs = 2;
+			nargs = 3;
 			receiverType = receiverInterfaceType;
 		}
 		else if (operatorType == LOCATE)

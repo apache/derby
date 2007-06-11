@@ -1363,7 +1363,9 @@ ERROR 42Y03: 'BIT_LENGTH' is not recognized as a function or procedure.
 ij> values OCTET_LENGTH('asdfasdfasdf');
 ERROR 42Y03: 'OCTET_LENGTH' is not recognized as a function or procedure.
 ij> values TRIM('x' FROM 'xasdf x');
-ERROR 42X01: Syntax error: Encountered "FROM" at line 1, column 17.
+1      
+-------
+asdf   
 ij> values SUBSTRING('12345' FROM 3 FOR 2);
 ERROR 42X80: VALUES clause must contain at least one element. Empty elements are not allowed. 
 ij> -- Tests for explicit nulls. Not allowed in DB2, defect 5589 

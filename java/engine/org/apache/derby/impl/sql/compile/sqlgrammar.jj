@@ -851,6 +851,39 @@ public class SQLParser
 		return retval;
 	}
 
+    /**
+     * Generate a trim operator node
+     * @param trimSpec one of Leading, Trailing or Both.
+     * @param trimChar the character to trim. Can be null in which case it defaults
+     * to ' '.
+     * @param trimSource expression to be trimmed.
+     */
+    private ValueNode getTrimOperatorNode(Integer trimSpec, ValueNode trimChar,
+        ValueNode trimSource, ContextManager cm) throws StandardException
+    {
+        if (trimChar == null)
+        {
+        	trimChar = (CharConstantNode) nodeFactory.getNode(
+							C_NodeTypes.CHAR_CONSTANT_NODE,
+							" ",
+							getContextManager());
+        }
+        return (ValueNode) nodeFactory.getNode(
+							C_NodeTypes.TRIM_OPERATOR_NODE,
+							trimSource, // receiver
+							trimChar,   // leftOperand.
+							null,
+							ReuseFactory.getInteger(TernaryOperatorNode.TRIM),
+							trimSpec,
+							cm == null ? getContextManager() : cm);
+    }
+
+    private boolean ansiTrimSpecFollows()
+    {
+        return (getToken(2).kind == LEADING || getToken(2).kind == TRAILING
+                || getToken(2).kind == BOTH);
+    }
+    
 	/**
 	 * Determine whether the next sequence of tokens can be the beginning
 	 * of a remainingPredicate() rule.
@@ -1857,7 +1890,7 @@ SKIP :
 //found -- DERBY-PROPERTIES. Treat rest of the characters on the line
 //as one big token and then fetch keyname=value pairs from that token.
 <PROPERTIES_LIST> TOKEN :
-{	
+{
 	<CHECK_PROPERTIES: (~["\n","\r"])* ("\n"|"\r"|"\r\n")?> : DEFAULT
 }
 
@@ -1981,6 +2014,7 @@ TOKEN [IGNORE_CASE] :
 |	<JOIN: "join">
 |	<KEY: "key">
 |	<LAST: "last">
+|	<LEADING: "leading">
 |	<LEFT: "left">
 |	<LIKE: "like">
 |	<LOWER: "lower">
@@ -2051,6 +2085,8 @@ TOKEN [IGNORE_CASE] :
 |	<TRANSACTION: "transaction">
 |	<TRANSLATE: "translate">
 |	<TRANSLATION: "translation">
+|	<TRAILING: "trailing">
+|	<TRIM: "trim">
 |	<TRUE: "true">
 |	<TS: "ts">
 |	<UNION: "union">
@@ -5687,6 +5723,7 @@ methodParameter(Vector parameterList) throws StandardException :
 	}
 }
 
+
 /*
  * <A NAME="primary">primary</A>
  * 
@@ -6237,20 +6274,85 @@ trimFunction() throws StandardException :
 {
 	ValueNode	source;
 	Integer		trimType;
+	ValueNode	ansiTrimNode;
 }
 {
 	trimType = trimType() <LEFT_PAREN> source = additiveExpression(null,0,false) <RIGHT_PAREN>
 	{
-		return (ValueNode) nodeFactory.getNode(
-									C_NodeTypes.TRIM_OPERATOR_NODE,
-									source,
-									source,
-									null,
-									ReuseFactory.getInteger(TernaryOperatorNode.TRIM),
-									trimType,
-									getContextManager());
+		return getTrimOperatorNode(trimType, null, source, null);
+	}
+|
+	<TRIM> ansiTrimNode = ansiTrim()
+	{
+		return ansiTrimNode;
+	}
+
+}
+
+
+ValueNode
+ansiTrim() throws StandardException  :
+{
+    Integer trimSpec = ReuseFactory.getInteger(StringDataValue.BOTH);
+    ValueNode trimChar = null;
+    ValueNode trimSource = null;
+}
+{
+    LOOKAHEAD ({ansiTrimSpecFollows()})
+    <LEFT_PAREN> trimSpec = ansiTrimSpec()
+    (
+         // LEADING FROM <source>
+         LOOKAHEAD(<FROM>)
+         <FROM> trimSource = additiveExpression(null,0,false) <RIGHT_PAREN>
+         {
+             return getTrimOperatorNode(trimSpec, trimChar, trimSource, null);
+         }
+     |
+         // LEADING <char> FROM <source>
+         trimChar = additiveExpression(null,0,false) <FROM> trimSource = additiveExpression(null,0,false) <RIGHT_PAREN>
+         {
+             return getTrimOperatorNode(trimSpec, trimChar, trimSource, null);
+         }
+    )
+|
+    LOOKAHEAD ({!ansiTrimSpecFollows()})
+    <LEFT_PAREN> trimChar = additiveExpression(null,0,false)
+    (
+        <FROM> trimSource = additiveExpression(null,0,false) <RIGHT_PAREN>
+        {
+            return getTrimOperatorNode(trimSpec, trimChar, trimSource, null);
+        }
+    |
+        <RIGHT_PAREN>
+        {
+            // expr was trim(e)-- we assigned e to trimChar but it is really the trimSource
+            return getTrimOperatorNode(trimSpec, null, trimChar, null);
+        }
+    )
+}
+
+Integer
+ansiTrimSpec() :
+{
+}
+{
+	<TRAILING>
+	{
+		return ReuseFactory.getInteger(StringDataValue.TRAILING);
+	}
+|
+	<LEADING>
+	{
+		return ReuseFactory.getInteger(StringDataValue.LEADING);
+	}
+|
+	<BOTH>
+	{
+		return ReuseFactory.getInteger(StringDataValue.BOTH);
 	}
 }
+
+
 Integer
 trimType() :
 {
@@ -6410,6 +6512,7 @@ miscBuiltins() throws StandardException :
                 getToken(1).kind == LCASE ||
                 getToken(1).kind == LTRIM ||
                 getToken(1).kind == RTRIM ||
+                getToken(1).kind == TRIM ||
                 getToken(1).kind == DATE ||
                 getToken(1).kind == TIME ||
                 getToken(1).kind == TIMESTAMP ||
@@ -6516,14 +6619,11 @@ miscBuiltinsCore( boolean isJDBCEscape) throws StandardException :
                 if( isJDBCEscape)
                         return (ValueNode) nodeFactory.getNode(
 								C_NodeTypes.CHAR_LENGTH_OPERATOR_NODE,
-								(ValueNode) nodeFactory.getNode(
-								        C_NodeTypes.TRIM_OPERATOR_NODE,
-								        value,
-										value,
-										null,
-								        ReuseFactory.getInteger(TernaryOperatorNode.TRIM),
-								        ReuseFactory.getInteger(StringDataValue.TRAILING),
-                                        localCM),
+								getTrimOperatorNode(
+									ReuseFactory.getInteger(StringDataValue.TRAILING),
+									null,
+									value,
+									localCM),
 								localCM);
 		return (ValueNode) nodeFactory.getNode(
 							C_NodeTypes.DB2_LENGTH_OPERATOR_NODE,
@@ -12679,6 +12779,7 @@ reservedKeyword() :
 |	tok = <JOIN>
 |	tok = <KEY>
 |	tok = <LAST>
+|	tok = <LEADING>
 |	tok = <LEFT>
 |	tok = <LIKE>
 |	tok = <LOWER>
@@ -12747,6 +12848,7 @@ reservedKeyword() :
 |	tok = <TIMEZONE_HOUR>
 |	tok = <TIMEZONE_MINUTE>
 |	tok = <TO>
+|	tok = <TRAILING>
 |	tok = <TRANSACTION>
 |	tok = <TRANSLATE>
 |	tok = <TRANSLATION>
@@ -12775,6 +12877,7 @@ reservedKeyword() :
 |	tok = <LONGINT>
 |	tok = <LTRIM>
 |	tok = <RTRIM>
+|	tok = <TRIM>
 |	tok = <SUBSTR>
 |	tok = <XML>
 |	tok = <XMLPARSE>

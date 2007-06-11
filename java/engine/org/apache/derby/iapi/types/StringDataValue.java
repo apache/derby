@@ -130,6 +130,23 @@ public interface StringDataValue extends ConcatableDataValue
 				StringDataValue result)
 		throws StandardException;
 
+	/**
+	 * The SQL Ansi trim function.
+
+	 * @param trimType type of trim. Possible values are {@link #LEADING}, {@link #TRAILING}
+	 *        or {@link #BOTH}.
+	 * @param trimChar  The character to trim from <em>this</em>
+	 * @param result The result of a previous call to this method,
+	 *					null if not called yet.
+	 * @return A StringDataValue containing the result of the trim().
+	 * @throws StandardException
+	 */
+	public StringDataValue ansiTrim(
+			int trimType,
+			StringDataValue trimChar,
+			StringDataValue result)
+		throws StandardException;
+
 	/** 
 	 * Convert the string to upper case.
 	 *

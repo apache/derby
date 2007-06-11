@@ -692,6 +692,7 @@ public interface SQLState {
     String LOSS_OF_PRECISION_EXCEPTION                                 = "22015.S.1";
 	String LANG_FORMAT_EXCEPTION                                       = "22018";
 	String LANG_INVALID_ESCAPE_CHARACTER                               = "22019";
+	String LANG_INVALID_TRIM_CHARACTER                                 = "22020";
 	String LANG_INVALID_ESCAPE_SEQUENCE                                = "22025";
 	String LANG_INVALID_TRIM_SET                                       = "22027";
     String LANG_STRING_TOO_LONG                                        = "22028";

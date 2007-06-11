@@ -2082,7 +2082,77 @@ readingLoop:
 		return result;
 	}
 
-	/** @see StringDataValue#upper 
+	/**
+	 * This function public for testing purposes.
+	 * @param trimType
+	 * @param trimChar
+	 * @param source
+	 * @return
+	 */
+	private String trimInternal(int trimType, char trimChar, String source)
+	{
+		if (source == null) {
+			return null;
+		}
+		
+		int len = source.length();
+		int start = 0;
+		if (trimType == LEADING || trimType == BOTH)
+		{
+			for (; start < len; start++)
+				if (trimChar != source.charAt(start))
+					break;
+		}
+
+		if (start == len)
+			return "";
+
+		int end = len - 1;
+		if (trimType == TRAILING || trimType == BOTH)
+		{
+			for (; end >= 0; end--)
+				if (trimChar != source.charAt(end))
+					break;
+		}
+		if (end == -1)
+			return "";
+
+		return source.substring(start, end + 1);
+	}
+	/**
+	 * 
+	 * @param trimType
+	 * @param trimChar
+	 * @param result
+	 * @return
+	 */
+	public StringDataValue ansiTrim(int trimType, StringDataValue trimChar, StringDataValue result)
+			throws StandardException {
+
+		if (result == null)
+		{
+			result = getNewVarchar();
+		}
+
+		if (trimChar == null || trimChar.getString() == null)
+		{
+			result.setToNull();
+			return result;
+		}
+
+
+		if (trimChar.getString().length() != 1)
+		{
+			throw StandardException.newException(SQLState.LANG_INVALID_TRIM_CHARACTER, trimChar.getString());			
+		}
+
+		char trimCharacter = trimChar.getString().charAt(0);
+
+		result.setValue(trimInternal(trimType, trimCharacter, getString()));
+		return result; 
+	}
+
+	/** @see StringDataValue#upper
 	 *
 	 * @exception StandardException		Thrown on error
 	 */

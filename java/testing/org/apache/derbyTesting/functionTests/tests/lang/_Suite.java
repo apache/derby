@@ -59,7 +59,7 @@ public class _Suite extends BaseTestCase  {
         // the nightly runs.
         // suite.addTest(largeCodeGen.suite());
 
-
+        suite.addTest(AnsiTrimTest.suite());
         suite.addTest(CreateTableFromQueryTest.suite());
         suite.addTest(DatabaseClassLoadingTest.suite());
         suite.addTest(DynamicLikeOptimizationTest.suite());
