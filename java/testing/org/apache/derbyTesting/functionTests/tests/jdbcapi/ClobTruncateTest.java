@@ -40,11 +40,11 @@ import org.apache.derbyTesting.junit.TestConfiguration;
  * Test case for Clob.truncate
  */
 public class ClobTruncateTest extends BaseJDBCTestCase {
-    
+
     public ClobTruncateTest (String name) {
         super (name);
     }
-    
+
     private void insertClobs () throws SQLException, IOException {
         PreparedStatement ps = prepareStatement (
                 "insert into truncateclob" +
@@ -58,24 +58,25 @@ public class ClobTruncateTest extends BaseJDBCTestCase {
         ps.setCharacterStream (2, new StringReader (sb.toString()), length);
         ps.setInt (3, length/2);
         ps.execute();
-        
+
         //insert a large clob
         LoopingAlphabetReader reader = new LoopingAlphabetReader (1024 * 1024);
         ps.setInt (1, 1024 * 1024);
         ps.setCharacterStream (2, reader, 1024 * 1024);
         ps.setInt (3, 1024 * 1024 / 2);
         ps.execute();
-        
+
         //insert a non ascii clob
-        LoopingAlphabetReader uReader = 
-                new LoopingAlphabetReader (300000, CharAlphabet.tamil());        
+        LoopingAlphabetReader uReader =
+                new LoopingAlphabetReader (300000, CharAlphabet.tamil());
         ps.setInt (1, 300000);
         ps.setCharacterStream (2, uReader, 300000);
         ps.setInt (3, 150000);
-        ps.execute();        
+        ps.execute();
     }
-    
-    private void checkTruncate (int size, Clob clob, int newSize) throws SQLException {
+
+    private void checkTruncate (int size, Clob clob, int newSize)
+            throws SQLException {
         assertEquals ("unexpected clob size", size, clob.length());
         clob.truncate (newSize);
         assertEquals ("truncate failed ", newSize, clob.length());
@@ -83,7 +84,7 @@ public class ClobTruncateTest extends BaseJDBCTestCase {
         clob.truncate (newSize/2);
         assertEquals ("truncate failed ", newSize/2, clob.length());
     }
-    
+
     public void testTruncateOnClob () throws SQLException, IOException {
         insertClobs();
         getConnection().setAutoCommit (false);
@@ -112,9 +113,9 @@ public class ClobTruncateTest extends BaseJDBCTestCase {
         stmt.executeUpdate ("create table truncateclob " +
                 "(size integer, data clob, newSize integer)");
     }
-    
+
     public static Test suite() {
         //client code is caching clob length so this test will fail
         return TestConfiguration.embeddedSuite(ClobTruncateTest.class);
-    }       
+    }
 }

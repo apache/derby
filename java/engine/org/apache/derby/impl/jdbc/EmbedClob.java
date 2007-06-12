@@ -108,7 +108,8 @@ final class EmbedClob extends ConnectionChild implements Clob
         // if the underlying column is null, ResultSet.getClob will return null,
         // never should get this far
         if (SanityManager.DEBUG)
-            SanityManager.ASSERT(!dvd.isNull(), "clob is created on top of a null column");
+            SanityManager.ASSERT(!dvd.isNull(),
+                                 "clob is created on top of a null column");
 
         InputStream storeStream = dvd.getStream();
         // See if a String or a stream will be the source of the Clob.
@@ -178,9 +179,11 @@ final class EmbedClob extends ConnectionChild implements Clob
      * designated by this <code>Clob</code> object.
      * <p>
      * The substring begins at position <code>pos</code> and has up to
-     * * <code>length</code> consecutive characters. The starting position must be
-     * between 1 and the length of the CLOB plus 1. This allows for zero-length
-     * CLOB values, from which only zero-length substrings can be returned.
+     * * <code>length</code> consecutive characters. The starting position must
+     * be between 1 and the length of the CLOB plus 1. This allows for 
+     * zero-length CLOB values, from which only zero-length substrings can be
+     * returned.
+     * <p>
      * If a larger length is requested than there are characters available,
      * characters from the start position to the end of the CLOB are returned.
      * <p>
@@ -190,9 +193,9 @@ final class EmbedClob extends ConnectionChild implements Clob
      * @param pos the first character of the substring to be extracted.
      *    The first character is at position 1.
      * @param length the number of consecutive characters to be copied
-     * @return a <code>String</code> that is the specified substring in
-     *    the <code>CLOB</code> value designated by this <code>Clob</code> object
-     * @exception SQLException if there is an error accessing the 
+     * @return A <code>String</code> that is the specified substring in the
+     *    <code>CLOB</code> value designated by this <code>Clob</code> object
+     * @exception SQLException if there is an error accessing the
      *    <code>CLOB</code>
      */
     public String getSubString(long pos, int length) throws SQLException
@@ -259,8 +262,8 @@ final class EmbedClob extends ConnectionChild implements Clob
     /**
      * Gets the <code>CLOB</code> value designated by this <code>Clob</code>
      * object as a stream of Ascii bytes.
-     * @return An Ascii stream containing the <code>CLOB</code> data. Valid values
-     *    in the stream are 0 - 255.
+     * @return An Ascii stream containing the <code>CLOB</code> data. Valid
+     *      values in the stream are 0 - 255.
      * @exception SQLException if there is an error accessing the
      *    <code>CLOB</code> value
      */
@@ -272,22 +275,23 @@ final class EmbedClob extends ConnectionChild implements Clob
 
     /**
      * Determines the character position at which the specified substring
-     * <code>searchStr</code> appears in the <code>CLOB</code> value.  The search
-     * begins at position <code>start</code>. The method uses the following
-     * algorithm for the search:
+     * <code>searchStr</code> appears in the <code>CLOB</code> value.
+     * <p>
+     * The search begins at position <code>start</code>. The method uses the
+     * following algorithm for the search:
      * <p>
      * If the <code>CLOB</code> value is materialized as a string, use
      * <code>String.indexOf</code>.
      * <p>
-     * If the <code>CLOB</code> value is represented as a stream, read a block of
-     * chars from the start position and compare the chars with
+     * If the <code>CLOB</code> value is represented as a stream, read a block
+     * of chars from the start position and compare the chars with
      * <code>searchStr</code>. Then:
      * <ul> <li>If a matching char is found, increment <code>matchCount</code>.
      *      <li>If <code>matchCount</code> is equal to the length of
      *          <code>searchStr</code>, return with the current start position.
      *      <li>If no match is found, and there is more data, restart search
      *          (see below).
-     *      <li>If all data is processed without a match, return <code>-1</code>.
+     *      <li>If no match is found, return <code>-1</code>.
      * </ul>
      * <p>
      * The position where the stream has a char equal to the first char of
@@ -440,11 +444,13 @@ restartScan:
                     Reader patternReader = searchClob.getCharacterStream();
                         for (;;) {
 
-                            int read = patternReader.read(subPatternChar, 0, subPatternChar.length);
+                            int read = patternReader.read(subPatternChar, 0,
+                                                        subPatternChar.length);
                             if (read == -1) {
                                 //empty pattern
                                 if (!seenOneCharacter)
-                                    return start; // matches DB2 SQL LOCATE function
+                                    // matches DB2 SQL LOCATE function
+                                    return start;
                                 return firstPosition;
                             }
                             if (read == 0) {
@@ -452,7 +458,8 @@ restartScan:
                             }
                             seenOneCharacter = true;
 
-                            String subPattern = new String(subPatternChar, 0, read);
+                            String subPattern =
+                                new String(subPatternChar, 0, read);
                             long position = position(subPattern, start);
                             if (position == -1) {
                                 // never seen any match
@@ -466,7 +473,7 @@ restartScan:
                             if (firstPosition == -1)
                                 firstPosition = position;
                             else if (position != start) {
-                                // must match at the first character of the segment
+                                // must match at the first character of segment
                                 start = firstPosition + 1;
                                 continue restartScan;
                             }
@@ -502,13 +509,13 @@ restartScan:
     /**
      * JDBC 3.0
      *
-     * Writes the given Java String to the CLOB value that this Clob object designates
-     * at the position pos.
+     * Writes the given Java String to the CLOB value that this Clob object
+     * designates at the position pos.
      *
-     * @param pos - the position at which to start writing to the CLOB value that
-     * this Clob object represents
+     * @param pos the position at which to start writing to the CLOB value that
+     *      this Clob object represents
      * @return the number of characters written
-     * @exception SQLException Feature not implemented for now.
+     * @throws SQLException if writing the string fails
      */
     public int setString(long pos, String str) throws SQLException {
             return setString (pos, str, 0, str.length());
@@ -517,15 +524,17 @@ restartScan:
     /**
      * JDBC 3.0
      *
-     * Writes len characters of str, starting at character offset, to the CLOB value
-     * that this Clob represents.
+     * Writes len characters of str, starting at character offset, to the CLOB
+     * value that this Clob represents.
      *
-     * @param pos - the position at which to start writing to this Clob object
-     * @param str - the string to be written to the CLOB value that this Clob designates
-     * @param offset - the offset into str to start reading the characters to be written
-     * @param len - the number of characters to be written
+     * @param pos the position at which to start writing to this Clob object
+     * @param str the string to be written to the CLOB value that this Clob
+     *      designates
+     * @param offset the offset into str to start reading the characters to be
+     *      written
+     * @param len the number of characters to be written
      * @return the number of characters written
-     * @exception SQLException Feature not implemented for now.
+     * @exception SQLException if writing the string fails
      */
     public int setString(long pos, String str, int offset, int len)
             throws SQLException {
@@ -558,9 +567,9 @@ restartScan:
      * Retrieves a stream to be used to write Ascii characters to the CLOB
      * value that this Clob object represents, starting at position pos.
      *
-     * @param pos - the position at which to start writing to this Clob object
+     * @param pos the position at which to start writing to this Clob object
      * @return the stream to which ASCII encoded characters can be written
-     * @exception SQLException Feature not implemented for now.
+     * @exception SQLException if obtaining the stream fails
      */
     public java.io.OutputStream setAsciiStream(long pos) throws SQLException {
         checkValidity();
@@ -574,12 +583,12 @@ restartScan:
     /**
      * JDBC 3.0
      *
-     * Retrieves a stream to be used to write a stream of Unicode characters to the
-     * CLOB value that this Clob object represents, starting at position pos.
+     * Retrieves a stream to be used to write a stream of characters to the CLOB
+     * value that this Clob object represents, starting at position pos.
      *
-     * @param pos - the position at which to start writing to this Clob object
+     * @param pos the position at which to start writing to this Clob object
      * @return the stream to which Unicode encoded characters can be written
-     * @exception SQLException Feature not implemented for now.
+     * @exception SQLException if obtaining the stream fails
      */
     public java.io.Writer setCharacterStream(long pos) throws SQLException {
         checkValidity();
@@ -596,11 +605,12 @@ restartScan:
     /**
      * JDBC 3.0
      *
-     * Truncates the CLOB value that this Clob designates to have a length of len characters
+     * Truncates the CLOB value that this Clob designates to have a length of
+     * len characters
      *
-     * @param len - the length, in bytes, to which the CLOB value that this Blob
-     * value should be truncated
-     * @exception SQLException Feature not implemented for now.
+     * @param len the length, in characters, to which the CLOB value should be
+     *      truncated
+     * @exception SQLException if truncating the CLOB value fails
      */
     public void truncate(long len) throws SQLException
     {
@@ -691,15 +701,16 @@ restartScan:
                         this, toBeAbandoned);
         toBeAbandoned.release();
     }
-    
+
     /**
      * Makes a writable clone of the current Clob.
      * <p>
      * This is called when we have a {@link StoreStreamClob} and the user calls
      * a method updating the content of the Clob. A temporary Clob will then be
      * created to hold the updated content.
-     * @param len number of chars to be cloned (should be smaller 
-     *      than clob lenght)
+     *
+     * @param len number of characters to be cloned (should be smaller
+     *      than clob length)
      * @throws IOException if accessing underlying I/O resources fail
      * @throws SQLException if accessing underlying resources fail
      */
@@ -710,5 +721,5 @@ restartScan:
                         getEmbedConnection().getDBName(),
                         this, toBeAbandoned, len);
         toBeAbandoned.release();
-    }    
+    }
 }
