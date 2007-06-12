@@ -92,36 +92,29 @@ public class ModifyColumnNode extends ColumnDefinitionNode
 	public void checkUserType(TableDescriptor td)
 		throws StandardException
 	{
-		ColumnDescriptor cd;
-		TypeDescriptor oldType;
-		DataTypeDescriptor newType = dataTypeServices;
-		TypeId oldTypeId;
-		TypeId newTypeId;
-
 		if (getNodeType() != C_NodeTypes.MODIFY_COLUMN_TYPE_NODE)
 			return;				// nothing to do if user not changing length
 
-		cd = td.getColumnDescriptor(name);
+        ColumnDescriptor cd = td.getColumnDescriptor(name);
 		if (cd == null)
 		{
 			throw StandardException.newException(
 				SQLState.LANG_COLUMN_NOT_FOUND_IN_TABLE, name, td.getName());
 		}
 		
-		oldType = cd.getType();
-		oldTypeId = cd.getType().getTypeId();
-		newTypeId = dataTypeServices.getTypeId();
-		newType.setNullability(oldType.isNullable());
+		DataTypeDescriptor oldType = cd.getType();
+        dataTypeServices = 
+            getDataTypeServices().getNullabilityType(oldType.isNullable());
 
 		// can't change types yet.
-		if (!(oldTypeId.equals(newTypeId)))
+		if (!(oldType.getTypeId().equals(getDataTypeServices().getTypeId())))
 		{
 			throw StandardException.newException(
 					 SQLState.LANG_MODIFY_COLUMN_CHANGE_TYPE, name);
 		}			
 		
 		// can only alter the length of varchar, nvarchar, bitvarying columns
-		String typeName = dataTypeServices.getTypeName();
+		String typeName = getDataTypeServices().getTypeName();
 		if (!(typeName.equals(TypeId.NATIONAL_VARCHAR_NAME)) &&
 			!(typeName.equals(TypeId.VARCHAR_NAME)) &&
 			!(typeName.equals(TypeId.VARBIT_NAME)))
@@ -131,7 +124,7 @@ public class ModifyColumnNode extends ColumnDefinitionNode
 		}
 		
 		// cannot decrease the length of a column
-		if (newType.getMaximumWidth() < oldType.getMaximumWidth())
+		if (getDataTypeServices().getMaximumWidth() < oldType.getMaximumWidth())
 		{
 			throw StandardException.newException(
 						 SQLState.LANG_MODIFY_COLUMN_INVALID_LENGTH, name);
@@ -362,7 +355,7 @@ public class ModifyColumnNode extends ColumnDefinitionNode
 			return;
 		
 		super.validateAutoincrement(dd, td, tableType);
-		if (dataTypeServices.isNullable())
+		if (getDataTypeServices().isNullable())
 			throw StandardException.newException(SQLState.LANG_AI_CANNOT_ADD_AI_TO_NULLABLE,
 												getColumnName());
 	}

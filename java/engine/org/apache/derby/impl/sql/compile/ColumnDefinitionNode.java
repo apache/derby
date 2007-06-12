@@ -66,7 +66,12 @@ import java.sql.Types;
 public class ColumnDefinitionNode extends TableElementNode
 {
 	boolean						isAutoincrement;
-	DataTypeDescriptor			dataTypeServices;
+	
+    /**
+     * The data type of this column.
+     */
+    DataTypeDescriptor			dataTypeServices;
+    
 	DataValueDescriptor			defaultValue;
 	DefaultInfoImpl				defaultInfo;
 	DefaultNode					defaultNode;
@@ -201,7 +206,7 @@ public class ColumnDefinitionNode extends TableElementNode
 	 *
 	 * @return	the data type services of the column
 	 */
-	public DataTypeDescriptor getDataTypeServices()
+	public final DataTypeDescriptor getDataTypeServices()
 	{
 		return this.dataTypeServices;
 	}

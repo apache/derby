@@ -1029,10 +1029,11 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		ColumnDescriptor columnDescriptor = 
 			td.getColumnDescriptor(colName),
 			newColumnDescriptor = null;
-		DataTypeDescriptor dataType = columnDescriptor.getType();
+        
+        // Get the type and change the nullability
+		DataTypeDescriptor dataType =
+            columnDescriptor.getType().getNullabilityType(nullability);
 
-		// set nullability
-		dataType.setNullability(nullability);
 
 		newColumnDescriptor = 
 			 new ColumnDescriptor(colName,
