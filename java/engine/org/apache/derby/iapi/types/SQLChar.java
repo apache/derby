@@ -2084,10 +2084,12 @@ readingLoop:
 
 	/**
 	 * This function public for testing purposes.
-	 * @param trimType
-	 * @param trimChar
-	 * @param source
-	 * @return
+	 *
+	 * @param trimType  Type of trim (LEADING, TRAILING, or BOTH)
+	 * @param trimChar  Character to trim
+	 * @param source    String from which to trim trimChar
+	 *
+	 * @return A String containing the result of the trim.
 	 */
 	private String trimInternal(int trimType, char trimChar, String source)
 	{
@@ -2119,12 +2121,14 @@ readingLoop:
 
 		return source.substring(start, end + 1);
 	}
+
 	/**
-	 * 
-	 * @param trimType
-	 * @param trimChar
-	 * @param result
-	 * @return
+	 * @param trimType  Type of trim (LEADING, TRAILING, or BOTH)
+	 * @param trimChar  Character to trim from this SQLChar (may be null)
+	 * @param result    The result of a previous call to this method,
+	 *                  null if not called yet.
+	 *
+	 * @return A StringDataValue containing the result of the trim.
 	 */
 	public StringDataValue ansiTrim(int trimType, StringDataValue trimChar, StringDataValue result)
 			throws StandardException {
