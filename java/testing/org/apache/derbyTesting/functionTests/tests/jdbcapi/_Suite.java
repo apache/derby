@@ -114,6 +114,9 @@ public class _Suite extends BaseTestCase  {
 
             //suite to test updateable reader for clob in embedded driver
             suite.addTest (ClobUpdateableReaderTest.suite());
+            
+            //truncate test for clob
+            suite.addTest (ClobTruncateTest.suite());
         }
 		
         return suite;

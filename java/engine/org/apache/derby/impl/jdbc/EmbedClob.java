@@ -604,7 +604,25 @@ restartScan:
      */
     public void truncate(long len) throws SQLException
     {
-        throw Util.notImplemented();
+        checkValidity();
+        if (len < 1)
+            throw Util.generateCsSQLException(
+                SQLState.BLOB_BAD_POSITION, new Long(len));
+        try {
+            if (!clob.isWritable()) {
+                makeWritableClobClone(len);
+            }
+            else {
+                clob.truncate (len);
+            }
+        }
+        catch (EOFException eofe) {
+            throw Util.generateCsSQLException(
+                        SQLState.BLOB_POSITION_TOO_LARGE,
+                        new Long(len));
+        } catch (IOException e) {
+            throw Util.setStreamFailure(e);
+        }
     }
 
     /////////////////////////////////////////////////////////////////////////
@@ -673,4 +691,24 @@ restartScan:
                         this, toBeAbandoned);
         toBeAbandoned.release();
     }
+    
+    /**
+     * Makes a writable clone of the current Clob.
+     * <p>
+     * This is called when we have a {@link StoreStreamClob} and the user calls
+     * a method updating the content of the Clob. A temporary Clob will then be
+     * created to hold the updated content.
+     * @param len number of chars to be cloned (should be smaller 
+     *      than clob lenght)
+     * @throws IOException if accessing underlying I/O resources fail
+     * @throws SQLException if accessing underlying resources fail
+     */
+    private void makeWritableClobClone(long len)
+            throws IOException, SQLException {
+        InternalClob toBeAbandoned = this.clob;
+        this.clob = ClobStreamControl.cloneClobContent(
+                        getEmbedConnection().getDBName(),
+                        this, toBeAbandoned, len);
+        toBeAbandoned.release();
+    }    
 }

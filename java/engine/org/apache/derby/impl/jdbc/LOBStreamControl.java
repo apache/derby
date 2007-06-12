@@ -384,7 +384,10 @@ class LOBStreamControl {
         long sz = 0;
         while (sz < length) {
             int len = (int) Math.min (length - sz, bufferSize);
-            inStream.read(data, 0, len);
+            len = inStream.read(data, 0, len);
+            if (len < 0)
+                throw new EOFException("Reached end-of-stream " +
+                        "prematurely at " + sz);
             write(data, 0, len, sz);
             sz += len;
         }

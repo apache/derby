@@ -77,6 +77,27 @@ final class ClobStreamControl implements InternalClob {
         newClob.copyClobContent(clob);
         return newClob;
     }
+    
+    /**
+     * Clones the content of another internal Clob.
+     *
+     * @param dbName name of the assoicated database
+     * @param conChild assoiated connection child
+     * @param clob the Clob whose content to clone
+     * @param length number of chars in new InternalClob
+     * @return A read-write Clob.
+     * @throws IOException if accessing the I/O resources fail (read or write)
+     * @throws SQLException if accessing underlying resources fail
+     */
+    static InternalClob cloneClobContent(String dbName,
+                                         ConnectionChild conChild,
+                                         InternalClob clob,
+                                         long length)
+            throws IOException, SQLException {
+        ClobStreamControl newClob = new ClobStreamControl(dbName, conChild);
+        newClob.copyClobContent(clob, length);
+        return newClob;
+    }
 
     /**
      * Constructs a <code>ClobStreamControl</code> object used to perform
@@ -314,16 +335,20 @@ final class ClobStreamControl implements InternalClob {
 
     /**
      * Truncate the Clob to the specifiec size.
-     *
-     * @param newLength the new length, in characters, of the Clob
+     * 
+     * 
+     * @param newCharLength the new length, in characters, of the Clob
      * @throws IOException if accessing the underlying I/O resources fails
      */
-    public synchronized void truncate(long newLength)
+    public synchronized void truncate(long newCharLength)
             throws IOException, SQLException {
         checkIfValid();
         try {
-            this.bytes.truncate(newLength);
-            if (newLength <= this.posCache.getCharPos()) {
+            //get the byteLength in bytes
+            long byteLength = UTF8Util.skipFully (
+                    new BufferedInputStream (getRawByteStream()), newCharLength);
+            this.bytes.truncate(byteLength);
+            if (newCharLength <= this.posCache.getCharPos()) {
                 // Reset the cache if last cached position has been cut away.
                 this.posCache.reset();
             }
@@ -378,6 +403,26 @@ final class ClobStreamControl implements InternalClob {
             throw Util.generateCsSQLException(se);
         }
     }
+    
+    /**
+     * Copies the content of another Clob into this one.
+     * 
+     * @param clob the Clob to copy from
+     * @param charLength number of chars to copy
+     * @throws IOException if accessing I/O resources fail (both read and write)
+     * @throws SQLException if accessing underlying resources fail
+     */
+    private void copyClobContent(InternalClob clob, long charLength)
+            throws IOException, SQLException {
+        try {
+            long byteLength = UTF8Util.skipFully (
+                    new BufferedInputStream(clob.getRawByteStream()), charLength);
+            this.bytes.copyData(
+                    new BufferedInputStream(clob.getRawByteStream()), byteLength);
+        } catch (StandardException se) {
+            throw Util.generateCsSQLException(se);
+        }
+    }    
 
     /**
      * Makes sure the Clob has not been released.
