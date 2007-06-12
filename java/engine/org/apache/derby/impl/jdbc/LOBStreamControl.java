@@ -447,10 +447,11 @@ class LOBStreamControl {
         long finalLength = length - endPos + stPos + buf.length;
         if (isBytes) {
             if (finalLength > bufferSize) {
-                init (dataBytes, stPos);
+                byte [] tmpBytes = dataBytes;
+                init (tmpBytes, stPos);
                 write (buf, 0, buf.length, getLength());
                 if (endPos < length)
-                    write (dataBytes, (int) endPos, 
+                    write (tmpBytes, (int) endPos, 
                             (int) (length - endPos), getLength());
             }
             else {
