@@ -43,7 +43,7 @@ public class LangHarnessJavaTest extends HarnessJavaTest {
      */
     private static final String[] LANG_TESTS_BOTH =
     {
-        "AIjdbc",
+        //"AIjdbc",
     };
     
     /**
