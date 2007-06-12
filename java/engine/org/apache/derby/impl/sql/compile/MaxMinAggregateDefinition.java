@@ -64,7 +64,7 @@ public class MaxMinAggregateDefinition
 	 * @return the output Class (null if cannot operate on
 	 *	value expression of this type.
 	 */
-	public final TypeDescriptor	getAggregator(TypeDescriptor inputType, 
+	public final DataTypeDescriptor	getAggregator(DataTypeDescriptor inputType, 
 				StringBuffer aggregatorClass) 
 	{
 		LanguageConnectionContext lcc = (LanguageConnectionContext)
@@ -73,7 +73,7 @@ public class MaxMinAggregateDefinition
 			/*
 			** MIN and MAX may return null
 			*/
-		DataTypeDescriptor dts = new DataTypeDescriptor((DataTypeDescriptor) inputType, true);
+		DataTypeDescriptor dts = inputType.getNullabilityType(true);
 		TypeId compType = dts.getTypeId();
 
 		/*

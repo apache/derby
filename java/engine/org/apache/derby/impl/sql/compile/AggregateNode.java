@@ -276,14 +276,7 @@ public class AggregateNode extends UnaryOperatorNode
 					Vector				aggregateVector)
 			throws StandardException
 	{
-		TypeId	outType;
-		TypeId	inputType = null;
-		Class				inputClass = null;
-		String				inputTypeName = null;
-		Class				inputInterfaceClass = null;
-		String				inputInterfaceName = null;
 		DataTypeDescriptor 	dts = null;
-		TypeDescriptor 		resultType = null;
 		ClassFactory		cf;
 
 		cf = getClassFactory();
@@ -298,6 +291,7 @@ public class AggregateNode extends UnaryOperatorNode
 				fromList, subqueryList,
 				aggregateVector);
 
+        // operand being null means a count(*)
 		if (operand != null)
 		{
 			/*
@@ -359,22 +353,10 @@ public class AggregateNode extends UnaryOperatorNode
 
 		/*
 		** Ask the aggregate definition whether it can handle
-	 	** the input datatype.  If an exception is thrown,
-		** barf.
+	 	** the input datatype.
 	 	*/
-		try
-		{
-			aggregatorClassName = new StringBuffer();
-			resultType = uad.getAggregator(dts, aggregatorClassName);
-		} catch (Exception e)
-		{
-			//RESOLVE: would be a good idea to add some additional text to
-			// this error, like during getResultDataType on aggregate x
-			// maybe enhance this error everywhere (seems like execution
-			// should also add some text, at the very least saying during
-			// execution.  see Compiltion/Generator/UserExpressionBuilder.java
-			throw StandardException.unexpectedUserException(e);
-		}
+        aggregatorClassName = new StringBuffer();
+        DataTypeDescriptor resultType = uad.getAggregator(dts, aggregatorClassName);
 
 		if (resultType == null)
 		{
@@ -385,35 +367,7 @@ public class AggregateNode extends UnaryOperatorNode
 
 		checkAggregatorClassName(aggregatorClassName.toString());
 
-		/*
-		** Try for a built in type matching the
-		** type name.  
-		*/
-		TypeId compTypeId = TypeId.getBuiltInTypeId(resultType.getTypeName());
-		/*
-		** If not built in, it is probably a java type.
-		** Get the sql type descriptor for that.  
-		*/
-		if (compTypeId == null)
-		{
-			compTypeId = TypeId.getSQLTypeForJavaType(resultType.getTypeName());
-		}
-
-		/*
-		** Now set the type.  Get a new descriptor
-		** in case the user returned the same descriptor
-		** as was passed in.
-		*/
-		setType(new DataTypeDescriptor(
-							compTypeId,
-							resultType.getPrecision(),
-							resultType.getScale(),
-							resultType.isNullable(),
-							resultType.getMaximumWidth(),
-							resultType.getCollationType(),
-							resultType.getCollationDerivation()
-						)
-				);
+		setType(resultType);
 
 		return this;
 	}

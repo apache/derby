@@ -21,9 +21,9 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import java.lang.StringBuffer;
-import org.apache.derby.catalog.TypeDescriptor;
 import java.sql.SQLException;
+
+import org.apache.derby.iapi.types.DataTypeDescriptor;
 
 /**
  * An AggregateDefinition defines an aggregate.
@@ -80,9 +80,7 @@ interface AggregateDefinition
 	 *
 	 * @see org.apache.derby.catalog.TypeDescriptor
 	 *
-	 * @exception SQLException Thrown on error.
 	 */
-	public	TypeDescriptor getAggregator(TypeDescriptor inputType,
-							StringBuffer aggregatorClassName)
-							throws SQLException;
+	public	DataTypeDescriptor getAggregator(DataTypeDescriptor inputType,
+							StringBuffer aggregatorClassName);
 }

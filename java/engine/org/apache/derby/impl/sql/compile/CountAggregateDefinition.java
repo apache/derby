@@ -54,7 +54,7 @@ public class CountAggregateDefinition
 	 * @return the output Class (null if cannot operate on
 	 *	value expression of this type.
 	 */
-	public final TypeDescriptor	getAggregator(TypeDescriptor inputType,
+	public final DataTypeDescriptor	getAggregator(DataTypeDescriptor inputType,
 				StringBuffer aggregatorClass) 
 	{
 		aggregatorClass.append( ClassName.CountAggregator);

@@ -68,16 +68,12 @@ public class SumAvgAggregateDefinition
 	 * @return the output Class (null if cannot operate on
 	 *	value expression of this type.
 	 */
-	public final TypeDescriptor	getAggregator(TypeDescriptor inputType, 
+	public final DataTypeDescriptor	getAggregator(DataTypeDescriptor inputType, 
 				StringBuffer aggregatorClass) 
 	{
 		try
 		{
-			LanguageConnectionContext lcc = (LanguageConnectionContext)
-				ContextService.getContext(LanguageConnectionContext.CONTEXT_ID);
-
-			DataTypeDescriptor dts = new DataTypeDescriptor( (DataTypeDescriptor)inputType, inputType.isNullable());
-			TypeId compType = dts.getTypeId();
+			TypeId compType = inputType.getTypeId();
 		
 			CompilerContext cc = (CompilerContext)
 				ContextService.getContext(CompilerContext.CONTEXT_ID);
@@ -94,12 +90,11 @@ public class SumAvgAggregateDefinition
 				aggregatorClass.append(getAggregatorClassName());
 
 				DataTypeDescriptor outDts = tc.resolveArithmeticOperation( 
-															dts, dts, getOperator());
+                        inputType, inputType, getOperator());
 				/*
 				** SUM and AVG may return null
 				*/
-				outDts.setNullability(true);
-				return outDts;
+				return outDts.getNullabilityType(true);
 			}
 		}
 		catch (StandardException e)
