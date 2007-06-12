@@ -29,7 +29,6 @@ import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.daemon.Serviceable;
 import org.apache.derby.iapi.services.locks.LockFactory;
 import org.apache.derby.iapi.services.locks.Limit;
-import org.apache.derby.iapi.services.monitor.Monitor;
 
 import org.apache.derby.iapi.store.raw.ContainerHandle;
 import org.apache.derby.iapi.store.raw.Compensation;
@@ -2707,10 +2706,7 @@ public class Xact extends RawTransaction implements Limit  {
     public DataValueFactory getDataValueFactory()
 		throws StandardException
     {
-        return((DataValueFactory) 
-            Monitor.findServiceModule(
-                xactFactory,
-                org.apache.derby.iapi.reference.ClassName.DataValueFactory));
+        return dataValueFactory;
     }
 
 
