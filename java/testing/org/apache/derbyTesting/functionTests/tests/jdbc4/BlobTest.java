@@ -388,12 +388,11 @@ public class BlobTest
 
     /**
      * Tests the implementation of the method
-     * getBinaryStream(long pos, long length)
-     * in the NetworkClient.
+     * getBinaryStream(long pos, long length).
      *
      * @throws Exception
      */
-    public void clientTestGetBinaryStreamLong()
+    public void testGetBinaryStreamLong()
     throws Exception {
         byte[] BYTES1 = {
             0x65, 0x66, 0x67, 0x68, 0x69,
@@ -436,7 +435,7 @@ public class BlobTest
      *
      * @throws SQLException.
      */
-    public void clientTestGetBinaryStreamLongExceptionConditions()
+    public void testGetBinaryStreamLongExceptionConditions()
     throws SQLException {
         byte[] BYTES1 = {
             0x65, 0x66, 0x67, 0x68, 0x69,
@@ -517,40 +516,13 @@ public class BlobTest
 
     
     /**
-     * Tests the getBinaryStream(long pos, long length) on the Embedded side.
-     * @throws SQLException
-     */
-    public void embeddedTestGetBinaryStringLongNotImplemented()
-    throws SQLException {
-        try {
-            blob.getBinaryStream(5l, 10l);
-            fail("Blob.getBinaryStream(long,long) should not be implemented");
-        } catch (SQLFeatureNotSupportedException sfnse) {
-            // Do nothing, we are fine
-        }
-    }
-
-    /**
      * Create test suite for this test.
      */
     public static Test suite() {
-        TestSuite btSuite = new TestSuite("BlobTest suite");
-
-        TestSuite embedded = new TestSuite("BlobTest:embedded");
-        embedded.addTestSuite(BlobTest.class);
-        embedded.addTest(new BlobTest(
-                    "embeddedTestGetBinaryStringLongNotImplemented"));
-        btSuite.addTest(new BlobClobTestSetup(embedded));
-
-        TestSuite client = new TestSuite("BlobTest:client");
-        client.addTestSuite(BlobTest.class);
-        client.addTest(new BlobTest("clientTestGetBinaryStreamLong"));
-        client.addTest(new BlobTest("clientTestGetBinaryStreamLong" +
-                "ExceptionConditions"));
-        btSuite.addTest(TestConfiguration.clientServerDecorator(
-            new BlobClobTestSetup(client)));
-
-        return btSuite;
+        return  new BlobClobTestSetup(
+                TestConfiguration.defaultSuite(
+                BlobTest.class,
+                false));
     }
 
 } // End class BlobTest

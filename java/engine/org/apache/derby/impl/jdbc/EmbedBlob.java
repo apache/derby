@@ -938,7 +938,30 @@ final class EmbedBlob extends ConnectionChild implements Blob
      */
     public InputStream getBinaryStream(long pos, long length)
         throws SQLException {
-        throw Util.notImplemented();
+        //call checkValidity to exit by throwing a SQLException if
+        //the Blob object has been freed by calling free() on it
+        checkValidity();
+        
+        if (pos <= 0) {
+            throw Util.generateCsSQLException(
+                    SQLState.BLOB_BAD_POSITION,
+                    new Long(pos));
+        }
+        if (length < 0) {
+            throw Util.generateCsSQLException(
+                    SQLState.BLOB_NONPOSITIVE_LENGTH,
+                    new Long(length));
+        }
+        if (length > (this.length() - pos)) {
+            throw Util.generateCsSQLException(
+                    SQLState.POS_AND_LENGTH_GREATER_THAN_LOB,
+                    new Long(pos), new Long(length));
+        }
+        
+        return new UpdateableBlobStream(this,
+                                        getBinaryStream(),
+                                        pos-1,
+                                        length);
     }
     
     /*
