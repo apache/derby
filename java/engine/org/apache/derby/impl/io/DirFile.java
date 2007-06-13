@@ -196,6 +196,19 @@ class DirFile extends File implements StorageFile
 		}
 	} // End of releaseExclusiveFileLock
 
+    
+    /**
+     * Return Random Acess file to the lock file, that is used to 
+     * get the exclusing file lock.  File locks are not acquired on 
+     * jvms before jdk14, this method just return <code> null </code>. 
+     *
+     * @return null, there is opened lock file. 
+     */
+    public StorageRandomAccessFile getLockedFile() {
+        return null;
+    }
+
+
     /**
      * Get a random access (read/write) file.
      *
@@ -254,13 +267,19 @@ class DirFile extends File implements StorageFile
         {
             String[] childList = super.list();
             String parentName = getPath();
-            for( int i = 0; i < childList.length; i++)
-            {
-                if( childList[i].equals( ".") || childList[i].equals( ".."))
-                    continue;
-                DirFile child = new DirFile( parentName, childList[i]);
-                if( ! child.deleteAll())
-                    return false;
+            // temporary workaround for DERBY-2649. check for null, 
+            // if a directory disappears after checking if it is 
+            // a directory but before the list() is called. list() call will
+            // return null if directory does not exist.
+            if (childList != null) {
+                for( int i = 0; i < childList.length; i++)
+                {
+                    if( childList[i].equals( ".") || childList[i].equals( ".."))
+                        continue;
+                    DirFile child = new DirFile( parentName, childList[i]);
+                    if( ! child.deleteAll())
+                        return false;
+                }
             }
         }
         return delete();

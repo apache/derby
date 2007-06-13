@@ -150,7 +150,7 @@ class DirFile4 extends DirFile
 			//If we can acquire a reliable exclusive lock , try to get it.
 			if(validExclusiveLock)
 			{
-				lockFileOpen = new RandomAccessFile((File) this, "rw");
+				lockFileOpen = new DirRandomAccessFile4((File) this, "rw");
 				lockFileChannel = lockFileOpen.getChannel();
 				dbLock =lockFileChannel.tryLock();
 				if(dbLock == null)
@@ -163,8 +163,6 @@ class DirFile4 extends DirFile
 				}
 				else
 				{	
-					lockFileOpen.writeInt(EXCLUSIVE_FILE_LOCK);
-					lockFileChannel.force(true);
 					status = EXCLUSIVE_FILE_LOCK;
 				}
 			}
@@ -221,6 +219,20 @@ class DirFile4 extends DirFile
 			// problem is
 		}
 	} // End of releaseExclusiveFileLock
+    /**
+     * Return Random Acess file to the lock file, that is used to 
+     * get the exclusing e lock obtained with getExclusiveFileLock(). It can be used  read/write data 
+     * from/to the lock file. 
+     * @return Random access File object used to get the exclusive lock or null 
+     * <code> null </code> if there was no call to getExclusiveFile() lock or 
+     * the call to getExcclusiveFileLock was not successful
+     * 
+     * @see #getExclusiveFileLock
+     */
+    public StorageRandomAccessFile getLockedFile() {    	
+        return (StorageRandomAccessFile) lockFileOpen;
+    }
+
 
     /**
      * Get a random access (read/write) file.

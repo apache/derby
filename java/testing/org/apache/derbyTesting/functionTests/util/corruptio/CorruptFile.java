@@ -339,6 +339,19 @@ class CorruptFile implements StorageFile {
 
 	} // End of releaseExclusiveFileLock
 
+    
+    /**
+     * Return Random Acess file to the lock file, that is used to 
+     * get the exclusing e lock. It can be used  read/write data 
+     * from/to the lock file. 
+     * @return Random access File object used to get the exclusive lock.
+     */
+    public StorageRandomAccessFile getLockedFile() {
+        return realFile.getLockedFile();
+    }
+
+
+
 
     /**
      * Get a random access (read/write) file.

@@ -22,6 +22,7 @@
 package org.apache.derby.shared.common.reference;
 
 
+
 /**
 	List of error message identifiers.
 	This is the set of message identifiers. The message identifier
@@ -491,7 +492,9 @@ public interface SQLState {
 	String DATA_MULTIPLE_JBMS_FORCE_LOCK                        = "XSDB8.D";
 	String DATA_CORRUPT_STREAM_CONTAINER                        = "XSDB9.D";
 	String DATA_OBJECT_ALLOCATION_FAILED                        = "XSDBA.D";
-
+    String DATA_MULTIPLE_CLASSLOADERS_ON_DB                     = "XSDBB.D";
+    String DATA_JVM_ID_PROPERTY_ACCESS			            	= "XSDBC.D";
+    
 	/*
 	** RawStore - Data.Filesystem statement exceptions
 	*/

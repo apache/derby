@@ -296,7 +296,6 @@ final class TopService {
 
 		synchronized (this) {
 
-
 			// add it to the protocol table, if this returns false then we can't use
 			// this module, shut it down.
 			if (addToProtocol(key, module)) {

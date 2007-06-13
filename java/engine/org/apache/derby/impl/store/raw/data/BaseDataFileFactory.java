@@ -147,8 +147,8 @@ public class BaseDataFileFactory
 
 	private     RawStoreFactory	rawStoreFactory; // associated raw store factory
 
-	private     String			dataDirectory;	 // root directory of files.
 
+	private     String			dataDirectory;	 // root directory of files.
     private     boolean         throwDBlckException; // if true throw db.lck
                                                  // exception, even on systems
                                                  // where lock file is not
@@ -234,6 +234,11 @@ public class BaseDataFileFactory
     private String          backupPath;
     private File            backupRoot;
     private String[]        bfilelist;
+
+
+    /* derby jvm instance id used to prevent concurrent intra-jvm 
+     * boots of a database */   
+    private static final String DERBY_JVM_ID = "derby.storage.jvmInstanceId";
 
 	/*
 	** Constructor
@@ -1855,7 +1860,7 @@ public class BaseDataFileFactory
             
             try
             {
-                AccessController.doPrivileged( this);
+               AccessController.doPrivileged( this);
             }
             catch (PrivilegedActionException pae) 
             { 
@@ -1874,7 +1879,10 @@ public class BaseDataFileFactory
 		// fileLockOnDB is not null in this case
 	}
 
-    // Called from within a privilege block
+  
+    /**
+     * @throws StandardException
+     */
     private void privGetJBMSLockOnDB() throws StandardException
     {
         boolean fileLockExisted = false;
@@ -1976,8 +1984,8 @@ public class BaseDataFileFactory
             //about applying exclusive file lock mechanism 
             if(!throwDBlckException)
             {
-                exFileLock   = 
-                    storageFactory.newStorageFile( DB_EX_LOCKFILE_NAME);
+            		exFileLock   = 
+            			storageFactory.newStorageFile( DB_EX_LOCKFILE_NAME);
                 exLockStatus = exFileLock.getExclusiveFileLock();
             }
 
@@ -2004,7 +2012,7 @@ public class BaseDataFileFactory
                 }
             }
 
-            // filelock is unreliable, but we should at least leave a file
+             // filelock is unreliable, but we should at least leave a file
             // there to warn the next person
             try
             {
@@ -2053,7 +2061,23 @@ public class BaseDataFileFactory
                     databaseDirectory);
             }
 
+            /* if it reached here means, db is protected from 
+             * being booted by multiple jvm instances. But file lock method 
+             * used to do that does not protect a db being booted by another 
+             * class loader in the same jvm. Get a lock that will
+             * protect the db being booted by another class loader, if 
+             * it is not booted by another class loader already.
+             */
+            try {
+                getIntraJvmDbLock();
+            }catch (IOException ioe) {
+                throw StandardException.newException(
+                   SQLState.DATA_MULTIPLE_CLASSLOADERS_ON_DB, 
+                   ioe, databaseDirectory);
+            }
         }
+
+
     } // end of privGetJBMSLockOnDB
 
 	private void releaseJBMSLockOnDB()
@@ -2080,7 +2104,7 @@ public class BaseDataFileFactory
         }
 	}
 
-    private void privReleaseJBMSLockOnDB() throws IOException
+    private void privReleaseJBMSLockOnDB() throws IOException, StandardException
     {
         if (fileLockOnDB != null)
             fileLockOnDB.close();
@@ -2092,12 +2116,16 @@ public class BaseDataFileFactory
 
             fileLock.delete();
         }
-
-		//release the lock that is acquired using tryLock() to prevent
-		//multiple jvm booting the same database on Unix environments.
-		if(exFileLock != null)
+        
+		// release the lock that is acquired using tryLock() to prevent
+		// multiple jvm booting the same database on Unix environments.
+		if(exFileLock != null) {
+            // release the intra-jvm lock, that is used 
+            // to prevent database boots from a different class 
+            // loaders in the same jvm.
+            releaseIntraJvmDbLock();
 			exFileLock.releaseExclusiveFileLock();
-
+        }
         return;
     } // end of privReleaseJBMSLockOnDB
         
@@ -2820,7 +2848,12 @@ public class BaseDataFileFactory
         }
 
         case GET_LOCK_ON_DB_ACTION:
-            privGetJBMSLockOnDB();
+        	File dataDir = new File (dataDirectory);
+        	String baseName= dataDir.getName().intern();
+            synchronized(baseName) 
+            {   
+            	privGetJBMSLockOnDB();
+            }
             return null;
 
         case RELEASE_LOCK_ON_DB_ACTION:
@@ -2844,4 +2877,175 @@ public class BaseDataFileFactory
 		}
         return null;
     } // end of run
+
+
+
+
+    /**
+     * get a unique JVM ID
+     */
+    private UUID getJvmId () 
+    {
+        // synchronize across class loaders.
+        synchronized(DERBY_JVM_ID.intern()) 
+        {
+        	String jvmidStr = null;
+        	try {
+        		jvmidStr = System.getProperty(DERBY_JVM_ID);
+        	}catch (SecurityException se)
+        	{
+        		String[] args = { se.getMessage()};
+              	 String warningMsg = 
+                       MessageService.getCompleteMessage(                        		 
+                           SQLState.DATA_JVM_ID_PROPERTY_ACCESS, args);
+                     logMsg(warningMsg);
+        	
+        	}
+            UUID jvmid = null;
+            // if jvm id does not already exist, generate one
+            // and save it into the "derby.storage.jvmid" system
+            // property.
+            if (jvmidStr == null) {
+                //generate a new UUID based on the time  ..etc.
+                // and store it in a system property to be accessble by 
+                // other instances of derby engine booting inside the 
+                // current jvm instance.
+                jvmid = uuidFactory.createUUID();
+                jvmidStr = jvmid.toString();
+                try {
+                	System.setProperty(DERBY_JVM_ID, jvmidStr);
+                }
+                catch (SecurityException se)
+                {
+                Object[] args = new Exception[] { se};
+               	 String warningMsg = 
+                        MessageService.getCompleteMessage(                        		 
+                            SQLState.DATA_JVM_ID_PROPERTY_ACCESS, args);
+
+                      logMsg(warningMsg);
+                      jvmid = uuidFactory.recreateUUID(jvmidStr);
+                }
+            } else {
+                jvmid = uuidFactory.recreateUUID(jvmidStr);
+            }
+            return jvmid;
+        }
+    }
+
+    /**
+     * 
+     * Get a lock, that will protect the database being booted by 
+     * by multiple class loaders in the same jvm. This is not 
+     * real lock. Lock is simulated by writing down the jvm id 
+     * generated by derby, which is unique across class loaders 
+     * to the dbex.lck file. If the current jvm id matches the one
+     * in the dbex.lck file , database is considered as booted; otherwise 
+     * the jvm id is written to the file to prevent booting by another 
+     * class loader.
+     * 
+     * Pre-cond: should be called only after acquiring the file lock.
+     *  
+     */
+    private void getIntraJvmDbLock() throws StandardException, IOException{
+
+        // file lock can be acquired even if the database is already
+        // booted by a different class loader. Check if another class
+        // loader has booted the DB. This is done by checking the
+        // JVMID written in the dbex.lck file. If the JVMID is same
+        // as what is stored in the system property,
+        // then database is already booted , throw the error.
+        UUID currentJvmId = getJvmId();
+        // synchronizing across the same database, by using interned 
+        // version of the database name
+       
+        
+        	StorageRandomAccessFile lckFileRaf = exFileLock.getLockedFile();
+            if (lckFileRaf == null) {
+            	// could not get exclusive lock
+                throw StandardException.newException(
+                   SQLState.DATA_MULTIPLE_CLASSLOADERS_ON_DB,
+                        databaseDirectory);
+             }
+
+            UUID onDiskJvmId = null; 
+            // read ID from the dbex.lck file.
+            try 
+            {
+                if (exFileLock.length() != 0)
+                    onDiskJvmId = uuidFactory.recreateUUID(lckFileRaf.readUTF());
+            }   
+            catch (Exception e)
+            {
+                // The previous owner of the lock may have died before we
+                // finish writing its UUID down. Assume uuid file is invalid
+                // Set the id on the disk to null value.
+                onDiskJvmId = null;
+            }
+
+            if (onDiskJvmId != null && onDiskJvmId.equals(currentJvmId))
+            {
+                throw StandardException.newException(
+                           SQLState.DATA_MULTIPLE_CLASSLOADERS_ON_DB, databaseDirectory);
+            } else {
+                
+               
+                // write the the jvm id to the dbex.lck file, to prevent 
+                // another loader  booting the same database before it 
+                // is shutdown by the currtent loader. 
+                lckFileRaf.seek(0);
+                lckFileRaf.writeUTF(currentJvmId.toString()); 
+                lckFileRaf.sync(false);
+                  
+            }
+    }
+
+
+    
+    /*
+     * Relelease the intra-jvm db lock. Locking is simulated by writing 
+     * the  derby jvm instance id to the dbex.lck file. This method writes 
+     * an invalid jvm instance id to the dbex.lck file to indicate that 
+     * the database is not booted any more. 
+     * 
+     * Synchronization is provided across class loaders using the interened 
+     * version of the database directory string.
+     */
+    private void releaseIntraJvmDbLock() throws IOException, StandardException
+    {
+        // write a uuid, that would have never been a jvm id generated by derby. 
+        String invalidJvmId = "00000000-0000-0000-0000-000000000000"; 
+        StorageRandomAccessFile lckFileRaf = null;
+        /*
+         * I think following synchronization is needed, because If any part 
+         * of the above UUID gets written to the file, then other loaders 
+         * might assume db  not booted any more, Other  Loader might boot 
+         * and overwrite part of what is writen and result in an corrupted
+         * id in the dbex.lck file , which can cause expected format errors
+         * or allow another loader to boot the database , that is already
+         * booted.
+         */
+        // synchronizing across the same database, by using interened 
+        // version of the database name
+                
+        synchronized(dataDirectory.intern()) {
+        lckFileRaf = exFileLock.getLockedFile();
+        if (lckFileRaf != null) 
+        {
+    
+        	// update the jvmid in the dbex.lck file to an invalid one, 
+        	// to indicate this db is shutdown. Becuase current jvmid will not 
+        	// match with the invalid one on the disk, db can booted
+        	// succcessfully.
+        	lckFileRaf.seek(0);
+        	lckFileRaf.writeUTF(invalidJvmId); 
+        	lckFileRaf.sync(false);
+            	
+        }
+        else
+        {
+            throw StandardException.newException(
+                SQLState.DATA_MULTIPLE_CLASSLOADERS_ON_DB, databaseDirectory);
+        	}
+        }
+    }
 }

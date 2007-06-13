@@ -261,6 +261,19 @@ public interface StorageFile
 	public void releaseExclusiveFileLock();
 
     /**
+     * Return Random Acess file to the lock file, that is used to 
+     * get the exclusing e lock obtained with getExclusiveFileLock(). It can be used  read/write data 
+     * from/to the lock file. 
+     * @return Random access File object used to get the exclusive lock or null 
+     * <code> null </code> if there was no call to getExclusiveFile() lock or 
+     * the call to getExcclusiveFileLock was not successful
+     * 
+     * @see #getExclusiveFileLock
+     */
+    public StorageRandomAccessFile getLockedFile();
+
+
+    /**
      * Get a random access file.
      *
      * This method is not called if the StorageFactory is read only. It is unspecified if the StorageFactory
