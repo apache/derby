@@ -69,6 +69,7 @@ public class TestConfiguration {
     public final static int    DEFAULT_PORT = 1527;
     private final static String DEFAULT_FRAMEWORK = "embedded";
     public final static String DEFAULT_HOSTNAME = "localhost";
+    public final static String DEFAULT_SSL = "off";
 
     public  final   static  String  TEST_DBO = "TEST_DBO";
             
@@ -82,6 +83,7 @@ public class TestConfiguration {
     private final static String KEY_HOSTNAME = "hostName";
     private final static String KEY_PORT = "port";
     private final static String KEY_VERBOSE = "derby.tests.debug";    
+    private final static String KEY_SSL = "ssl";
     
     /**
      * Simple count to provide a unique number for database
@@ -615,6 +617,20 @@ public class TestConfiguration {
     }
     
     /**
+     * Decorate a test changing the default ssl mode.
+     * The tearDown method resets the default user and password value to
+     * their previous settings.
+     * 
+     * @param test Test to decorate
+     * @param ssl New ssl mode
+     * @return decorated test
+     */
+    public static Test changeSSLDecorator(Test test, String ssl)
+    {
+        return new ChangeSSLSetup(test, ssl);
+    }   
+    
+    /**
      * Default embedded configuration
      *
      */
@@ -631,6 +647,7 @@ public class TestConfiguration {
             booleanValue();
         
         this.jdbcClient = JDBCClient.getDefaultEmbedded();
+        this.ssl = null;
         url = createJDBCUrlWithDatabaseName(defaultDbName);
         initConnector(null);
  
@@ -653,6 +670,8 @@ public class TestConfiguration {
         this.jdbcClient = copy.jdbcClient;
         this.hostName = copy.hostName;
         
+        this.ssl = copy.ssl;
+
         this.url = copy.url;
         initConnector(copy.connector);
     }
@@ -671,6 +690,8 @@ public class TestConfiguration {
         
         this.jdbcClient = client;
         this.hostName = hostName;
+
+        this.ssl = copy.ssl;
         
         this.url = createJDBCUrlWithDatabaseName(defaultDbName);
         initConnector(copy.connector);
@@ -699,9 +720,23 @@ public class TestConfiguration {
         
         this.jdbcClient = copy.jdbcClient;
         this.hostName = copy.hostName;
+
+        this.ssl = copy.ssl;
         
         this.url = copy.url;
         initConnector(copy.connector);
+    }
+
+    /**
+     * Obtain a new configuration identical to the passed in
+     * one except for the default user and password.
+     * @param copy Configuration to copy.
+     * @param ssl New default ssl mode
+     */
+    TestConfiguration(TestConfiguration copy, String ssl)
+    {
+        this(copy);
+        this.ssl = ssl;
     }
 
     /**
@@ -742,6 +777,8 @@ public class TestConfiguration {
         
         this.jdbcClient = copy.jdbcClient;
         this.hostName = copy.hostName;
+
+        this.ssl = copy.ssl;
         
         this.url = createJDBCUrlWithDatabaseName(this.defaultDbName);
         initConnector(copy.connector);
@@ -775,6 +812,8 @@ public class TestConfiguration {
         } else {
             port = DEFAULT_PORT;
         }
+
+        ssl = props.getProperty(KEY_SSL);
         
         String framework = props.getProperty(KEY_FRAMEWORK, DEFAULT_FRAMEWORK);
         
@@ -944,6 +983,16 @@ public class TestConfiguration {
     public int getPort() {
         return port;
     }
+
+    /**
+     * Get ssl mode for network server
+     * 
+     * @return ssl mode
+     */
+    public String getSsl() {
+        return ssl;
+    }
+
     
     /**
      * Open connection to the default database.
@@ -1131,6 +1180,7 @@ public class TestConfiguration {
     private final String hostName;
     private final JDBCClient jdbcClient;
     private boolean isVerbose;
+    private String ssl;
     
     /**
      * Password token used by the builtin authentication decorators.

@@ -266,13 +266,25 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
     {
         TestConfiguration config = TestConfiguration.getCurrent();
         
-        return new String[] {
-            "start",
-            "-h",
-            config.getHostName(),
-            "-p",
-            Integer.toString(config.getPort())
-        };
+        if (config.getSsl() == null) {
+            return new String[] {
+                "start",
+                "-h",
+                config.getHostName(),
+                "-p",
+                Integer.toString(config.getPort())
+            };
+        } else {
+            return new String[] {
+                "start",
+                "-h",
+                config.getHostName(),
+                "-p",
+                Integer.toString(config.getPort()),
+                "-ssl",
+                config.getSsl()
+            };
+        }
     }
     
     /* Network Server Control */
@@ -289,8 +301,27 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
         throws Exception
     {
         TestConfiguration config = TestConfiguration.getCurrent();
-        return new NetworkServerControl
-        (InetAddress.getByName(config.getHostName()), config.getPort());
+        if (config.getSsl() == null) {
+            return new NetworkServerControl
+                (InetAddress.getByName(config.getHostName()), 
+                 config.getPort());
+        } else {
+            // This is a hack. A NetworkServerControl constructor with
+            // the needed interface to control sslMode (and possibly
+            // more) would be better.
+            String oldValue = 
+                System.setProperty("derby.drda.sslMode", config.getSsl());
+            NetworkServerControl control = new NetworkServerControl
+                (InetAddress.getByName(config.getHostName()), 
+                 config.getPort());
+            if (oldValue == null) {
+                // JDK 1.4 does not have clearProperty....
+                System.getProperties().remove("derby.drda.sslMode");
+            } else {
+                System.setProperty("derby.drda.sslMode", oldValue);
+            }
+            return control;
+        }
     }
     
     /**
