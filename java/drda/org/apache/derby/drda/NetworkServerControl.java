@@ -40,52 +40,53 @@ import org.apache.derby.impl.drda.NetworkServerControlImpl;
 
 	<P>
 	<UL>
-	<LI>start [-h &lt;host>] [-p &lt;portnumber>]:  This starts the network
+	<LI>start [-h &lt;host>] [-p &lt;portnumber>] [-ssl &lt;sslmode&gt;]:  This starts the network
 	server on the port/host specified or on localhost, port 1527 if no
 	host/port is specified and no properties are set to override the 
 	defaults. By default Network Server will only listen for 
 	connections from the machine on which it is running. 
 	Use -h 0.0.0.0 to listen on all interfaces or -h &lt;hostname> to listen 
-	on a specific interface on a  multiple IP machine. </LI>
+	on a specific interface on a  multiple IP machine. 
+    For documentation on &lt;sslmode&gt;, consult the Server and Administration Guide.</LI>
 
-	<LI>shutdown [-h &lt;host>][-p &lt;portnumber>]: This shutdowns the network 	server on the host and port specified or on the local host and port 
+	<LI>shutdown [-h &lt;host>][-p &lt;portnumber>] [-ssl &lt;sslmode&gt;]: This shutdowns the network 	server on the host and port specified or on the local host and port 
 	1527(default) if no host or port is specified.  </LI> 
 
-	<LI>ping [-h &lt;host>] [-p &lt;portnumber>] 
+	<LI>ping [-h &lt;host>] [-p &lt;portnumber>] [-ssl &lt;sslmode&gt;]
 	This will test whether the Network Server is up.
 	</LI>
 
-	<LI>sysinfo [-h &lt;host>] [-p &lt;portnumber>]:  This prints 
+	<LI>sysinfo [-h &lt;host>] [-p &lt;portnumber>] [-ssl &lt;sslmode&gt;]:  This prints 
 	classpath and version information about the Network Server, 
 	the JVM and the Derby engine. 
 
-	<LI>runtimeinfo [-h &lt;host] [-p &lt;portnumber]: This prints
+	<LI>runtimeinfo [-h &lt;host] [-p &lt;portnumber] [-ssl &lt;sslmode&gt;]: This prints
 	extensive debbugging information about sessions, threads, 
 	prepared statements, and memory usage for the running Network Server.
 	</LI>
 
-	<LI>logconnections {on | off} [-h &lt;host>] [-p &lt;portnumber>]:  
+	<LI>logconnections {on | off} [-h &lt;host>] [-p &lt;portnumber>] [-ssl &lt;sslmode&gt;]:  
 	This turns logging of connections on or off.  
 	Connections are logged to derby.log. 
 	Default is off.</LI>
 
-	<LI>maxthreads &lt;max> [-h &lt;host>][-p &lt;portnumber>]:  
+	<LI>maxthreads &lt;max> [-h &lt;host>][-p &lt;portnumber>] [-ssl &lt;sslmode&gt;]:  
 	This sets the maximum number of threads that can be used for connections. 
 	Default 0 (unlimitted).
 	</LI>
 
-	<LI>timeslice &lt;milliseconds> [-h &lt;host>][-p &lt;portnumber>]: 
+	<LI>timeslice &lt;milliseconds> [-h &lt;host>][-p &lt;portnumber>] [-ssl &lt;sslmode&gt;]: 
 	This sets the time each session can have using a connection thread 
 	before yielding to a waiting session. Default is 0 (no yeild).
 	
 	</LI>
 
-	<LI>trace {on | off} [-s &lt;session id>] [-h &lt;host>] [-p &lt;portnumber>]: 
+	<LI>trace {on | off} [-s &lt;session id>] [-h &lt;host>] [-p &lt;portnumber>]  [-ssl &lt;sslmode&gt;]: 
 	This turns drda tracing on or off for the specified session or if no 
 	session is  specified for all sessions. Default is off</LI>
 
 
-	<LI>tracedirectory &lt;tracedirectory> [-h &lt;host>] [-p &lt;portnumber>]: 
+	<LI>tracedirectory &lt;tracedirectory> [-h &lt;host>] [-p &lt;portnumber>]  [-ssl &lt;sslmode&gt;]: 
 	This changes where new trace files will be placed. 
 	For sessions with tracing already turned on,  
 	trace files remain in the previous location. 
@@ -130,6 +131,9 @@ import org.apache.derby.impl.drda.NetworkServerControlImpl;
 	current session has been working for &lt;milliseconds>.  
 	A value of 0 causes the thread to work on the current session until the 
 	session exits. If this property is not set, the default value is 0. </LI>
+
+    <LI>derby.drda.sslMode=&lt;sslmode&gt: This property sets the SSL
+    mode of the server.
 	
 </LI>
 
