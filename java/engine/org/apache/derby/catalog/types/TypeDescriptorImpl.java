@@ -26,6 +26,7 @@ import org.apache.derby.iapi.services.io.Formatable;
 
 import org.apache.derby.catalog.TypeDescriptor;
 
+import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.StringDataValue;
 
 import java.io.ObjectOutput;
@@ -395,7 +396,7 @@ public class TypeDescriptorImpl implements TypeDescriptor, Formatable
 		return collationType;
 	}
 
-	/** @see TypeDescriptor#setCollationType(int) */
+	/** @see DataTypeDescriptor#setCollationType(int) */
 	public void	setCollationType(int collationTypeValue)
 	{
 		collationType = collationTypeValue;
@@ -407,7 +408,7 @@ public class TypeDescriptorImpl implements TypeDescriptor, Formatable
 		return collationDerivation;
 	}
 
-	/** @see TypeDescriptor#setCollationDerivation(int) */
+	/** @see DataTypeDescriptor#setCollationDerivation(int) */
 	public void	setCollationDerivation(int collationDerivationValue)
 	{
 		collationDerivation = collationDerivationValue;
