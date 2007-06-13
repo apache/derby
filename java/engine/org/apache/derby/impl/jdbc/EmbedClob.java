@@ -253,7 +253,7 @@ final class EmbedClob extends ConnectionChild implements Clob
         //the Clob object has been freed by calling free() on it
         checkValidity();
         try {
-            return this.clob.getReader(1L);
+            return new ClobUpdateableReader (this);
         } catch (IOException ioe) {
             throw Util.setStreamFailure(ioe);
         }
@@ -721,5 +721,33 @@ restartScan:
                         getEmbedConnection().getDBName(),
                         this, toBeAbandoned, len);
         toBeAbandoned.release();
+    }
+
+    /**
+     * Returns if the internal clob is a writable clob.
+     * @return true if internal clob is writable
+     */
+    boolean isWritable() {
+        return clob.isWritable();
+    }
+
+    /**
+     * Returns the internal InputStream associated with this clob.
+     * @return internal InputStream
+     * @throws IOException
+     */
+    InputStream getInternalStream () 
+                    throws IOException, SQLException  {
+        return clob.getRawByteStream();
+    }
+
+    /**
+     * Returns byte length of the clob
+     * @return byte length of the clob
+     * @throws IOException
+     * @throws SQLException
+     */
+    long getByteLength() throws IOException, SQLException {
+        return clob.getByteLength();
     }
 }

@@ -47,6 +47,60 @@ public class ClobUpdateableReaderTest extends BaseJDBCTestCase {
     }
     
     /**
+     * Test updating a large clob
+     */
+    public void testUpdateableStoreReader () throws Exception {
+        Connection con = getConnection();
+        try {
+            con.setAutoCommit (false);
+            PreparedStatement ps = con.prepareStatement ("insert into updateClob " +
+                    "(id , data) values (? ,?)");
+            ps.setInt (1, 2);
+            StringBuffer sb = new StringBuffer ();
+            String base = "SampleSampleSample";
+            for (int i = 0; i < 100000; i++) {
+                sb.append (base);
+            }
+            //insert a large enough data to ensure stream is created in dvd
+            ps.setCharacterStream (2, new StringReader (sb.toString()), 
+                                                sb.length());
+            ps.execute();
+            ps.close();
+            Statement stmt = con.createStatement ();
+            ResultSet rs = stmt.executeQuery("select data from " +
+                    "updateClob where id = 2");
+            rs.next();
+            Clob clob = rs.getClob (1);            
+            rs.close();
+            stmt.close();
+            assertEquals (sb.length(), clob.length());
+            Reader r = clob.getCharacterStream();
+            String newString = "this is a new string";
+            //access reader before modifying the clob
+            long l = r.skip (100);
+            clob.setString (1001, newString);
+            //l chars are already skipped
+            long toSkip = 1000 - l;
+            while (toSkip > 0) {
+                long skipped = r.skip (toSkip);
+                toSkip -= skipped;
+            }
+            char [] newdata = new char [newString.length()];
+            int len = r.read(newdata);
+            assertEquals ("updated not reflected", newString, 
+                                    new String (newdata, 0, len));
+            r.close();
+        }
+        finally {
+            if (con != null) {
+                con.commit ();
+                con.close ();
+            }
+        }
+
+    }
+
+    /**
      * Tests updates on reader.
      */
     public void testUpdateableReader () throws Exception {

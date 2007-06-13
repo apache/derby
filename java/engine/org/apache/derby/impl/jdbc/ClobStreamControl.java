@@ -398,7 +398,8 @@ final class ClobStreamControl implements InternalClob {
     private void copyClobContent(InternalClob clob)
             throws IOException, SQLException {
         try {
-            this.bytes.copyData(clob.getRawByteStream(), clob.getByteLength());
+            long byteLength = clob.getByteLength();
+            this.bytes.copyData(clob.getRawByteStream(), byteLength);
         } catch (StandardException se) {
             throw Util.generateCsSQLException(se);
         }
