@@ -88,6 +88,7 @@ final class EmbedClob extends ConnectionChild implements Clob
     EmbedClob(EmbedConnection con) throws SQLException {
         super(con);
         this.clob = new ClobStreamControl (con.getDBName(), this);
+        con.addLOBMapping (this);
     }
 
     /**
@@ -153,6 +154,7 @@ final class EmbedClob extends ConnectionChild implements Clob
             }
             this.clob = new StoreStreamClob(storeStream, this);
         }
+        con.addLOBMapping (this);
     }
 
     /**
@@ -678,9 +680,9 @@ restartScan:
      * @throws SQLException if the Clob is not valid
      */
     private void checkValidity() throws SQLException{
+        localConn.checkIfClosed();        
         if(!isValid)
             throw newSQLException(SQLState.LOB_OBJECT_INVALID);
-        localConn.checkIfClosed();
     }
 
     /**

@@ -1248,105 +1248,70 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         // this should give blob/clob unavailable exceptions on client
         try {
             shortClob.length();
-            //Check to see if we are running in the client
-            //and a SQLException has not been thrown.
-            if (usingDerbyNetClient()) {
-                //Should have thrown an SQLException in the
-                //Network Client.
-                fail("FAIL - should not be able to access Clob after commit");
-            }
+            //Should have thrown an SQLException in the
+            fail("FAIL - should not be able to access Clob after commit");
         } catch (SQLException e) {
-            //The same SQLState String BLOB_ACCESSED_AFTER_COMMIT
+            //The same SQLState String INVALID_LOB
             //is used for LOB's(Both Clob and Blob). Ensure that
             //we get the expected exception by comparing the SQLState.
             checkException(INVALID_LOB, e);
-            //In the embedded clobs of small size are
-            //accessible after commit. Hence ensure that
-            //we are dealing with the Embedded side here.
-            assertTrue("FAIL - method should not fail when using embedded",
-                       usingDerbyNetClient());
         }
 
         // these should all give blob/clob data unavailable exceptions
         try {
             clob.length();
-            //Large Clobs on the Embedded side and the NetworkClient
-            //side are not accessible after commit. Should have thrown
-            //an SQLException here.
+            //Large Clobs not accessible after commit. 
+            //Should have thrown an SQLException here.
             fail("FAIL - should not be able to access large Clob after commit");
         } catch (SQLException e) {
-            //The same SQLState String BLOB_ACCESSED_AFTER_COMMIT
+            //The same SQLState String INVALID_LOB
             //is used for LOB's(Both Clob and Blob). Ensure that
             //we get the expected exception by comparing the SQLState.
-            if (usingEmbedded()) {
-                checkException(BLOB_ACCESSED_AFTER_COMMIT, e);
-            } else {
-                checkException(INVALID_LOB, e);
-            }
+            checkException(INVALID_LOB, e);
         }
         try {
             clob.getSubString(2,3);
-            //Large Clobs on the Embedded side and the NetworkClient
-            //side are not accessible after commit. Should have thrown
-            //an SQLException here.
+            //Large Clobs are not accessible after commit. 
+            //Should have thrown an SQLException here.
             fail("FAIL - should not be able to access large Clob after commit");
         } catch (SQLException e) {
-            //The same SQLState String BLOB_ACCESSED_AFTER_COMMIT
+            //The same SQLState String INVALID_LOB
             //is used for LOB's(Both Clob and Blob). Ensure that
             //we get the expected exception by comparing the SQLState.
-            if (usingEmbedded()) {
-                checkException(BLOB_ACCESSED_AFTER_COMMIT, e);
-            } else {
-                checkException(INVALID_LOB, e);
-            }
+            checkException(INVALID_LOB, e);
         }
         try {
             clob.getAsciiStream();
-            //Large Clobs on the Embedded side and the NetworkClient
-            //side are not accessible after commit. Should have thrown
-            //an SQLException here.
+            //Large Clobs are not accessible after commit. 
+            //Should have thrown an SQLException here.
             fail("FAIL - should not be able to access large Clob after commit");
         } catch (SQLException e) {
-            //The same SQLState String BLOB_ACCESSED_AFTER_COMMIT
+            //The same SQLState String INVALID_LOB
             //is used for LOB's(Both Clob and Blob). Ensure that
             //we get the expected exception by comparing the SQLState.
-            if (usingEmbedded()) {
-                checkException(BLOB_ACCESSED_AFTER_COMMIT, e);
-            } else {
-                checkException(INVALID_LOB, e);
-            }
+            checkException(INVALID_LOB, e);
         }
         try {
             clob.position("foo",2);
-            //Large Clobs on the Embedded side and the NetworkClient
-            //side are not accessible after commit. Should have thrown
-            //an SQLException here.
+            //Large Clobs are not accessible after commit. 
+            //Should have thrown an SQLException here.
             fail("FAIL - should not be able to access large Clob after commit");
         } catch (SQLException e) {
-            //The same SQLState String BLOB_ACCESSED_AFTER_COMMIT
+            //The same SQLState String INVALID_LOB
             //is used for LOB's(Both Clob and Blob). Ensure that
             //we get the expected exception by comparing the SQLState.
-            if (usingEmbedded()) {
-                checkException(BLOB_ACCESSED_AFTER_COMMIT, e);
-            } else {
-                checkException(INVALID_LOB, e);
-            }
+            checkException(INVALID_LOB, e);
         }
         try {
             clob.position(clob,2);
-            //Large Clobs on the Embedded side and the NetworkClient
-            //side are not accessible after commit. Should have thrown
-            //an SQLException here.
+            //Large Clobs are not accessible after commit. 
+            //Should have thrown an SQLException here.
             fail("FAIL - should not be able to access large Clob after commit");
         } catch (SQLException e) {
-            //The same SQLState String BLOB_ACCESSED_AFTER_COMMIT
+            //The same SQLState String INVALID_LOB
             //is used for LOB's(Both Clob and Blob). Ensure that
             //we get the expected exception by comparing the SQLState.
-            if (usingEmbedded()) {
-                checkException(BLOB_ACCESSED_AFTER_COMMIT, e);
-            } else {
-                checkException(INVALID_LOB, e);
-            }
+            checkException(INVALID_LOB, e);
         }
     }
 

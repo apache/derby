@@ -139,7 +139,7 @@ public class ClobStoredProcedureTest extends BaseJDBCTestCase {
         //remember in setup a locator is already created
         //hence expected value is 2
         assertEquals("The locator values returned by " +
-            "SYSIBM.CLOBCREATELOCATOR() are incorrect", 2, locator);
+            "SYSIBM.CLOBCREATELOCATOR() are incorrect", 4, locator);
         cs.close();
     }
 
