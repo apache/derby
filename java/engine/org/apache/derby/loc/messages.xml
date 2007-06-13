@@ -5037,17 +5037,6 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
                 <text>Attempt to allocate object {0} failed.</text>
                 <arg>object</arg>
             </msg>
-            <msg>
-                 <name>XSDBB.D</name>
-                 <text> >Another instance of Derby within the same JVM may have already booted the database {0}. Only a single classloader within the same JVM can boot the database.</text>
-                 <arg>databaseName</arg>
-           </msg>
-
-           <msg>
-                <name> XSDBC.D </name>
-               <text> WARNING: {0}. Derby cannot acess  the system property derby.storage.jvmInstanceId. This permission is necessary for Derby to detect multiple Classloader boot of the database.  Without this permission corruption could occur. Add the permission permission: java.util.PropertyPermision "derby.storage.jvmInstanceId", "read,write"  to your policy file. </text>
-          <arg> exception </arg>
-           </msg>
 
         </family>
 

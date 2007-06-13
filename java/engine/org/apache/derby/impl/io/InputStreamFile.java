@@ -383,18 +383,6 @@ abstract class InputStreamFile implements StorageFile
     {}
 
     /**
-     * Return Random Acess file to the lock file, that is used to 
-     * get the exclusing file lock.  File locks are not supported 
-     * for this type of file, his method just return <code> null </code>. 
-     *
-     * @return null, there is no locked file. 
-     */
-    public StorageRandomAccessFile getLockedFile() {
-        return null;
-    }
-
-
-    /**
      * Get a random access file.
      *
      * @param mode "r", "rw", "rws", or "rwd". The "rws" and "rwd" modes specify
