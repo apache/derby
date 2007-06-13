@@ -54,6 +54,11 @@ grant principal org.apache.derby.authentication.DatabasePrincipal "authorizedSys
   permission org.apache.derby.security.DatabasePermission "directory:/level0/level1/-", "create";
 };
 
+// specific test authorizations for System Privileges
+grant principal org.apache.derby.authentication.DatabasePrincipal "*" {
+  permission org.apache.derby.security.DatabasePermission "directory:dir", "create";
+};
+
 //
 // Permissions for the tests (derbyTesting.jar)
 // We are liberal here, it's not a goal to make the test harness

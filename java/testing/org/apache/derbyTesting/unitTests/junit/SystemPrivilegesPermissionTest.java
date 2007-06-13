@@ -189,19 +189,58 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
      * Tests SystemPermissions.
      */
     public void execute() throws IOException {
+        checkDatabasePrincipal();
         checkSystemPermission();
         checkDatabasePermission();
+    }
+    
+    /**
+     * Tests DatabasePrincipal.
+     */
+    private void checkDatabasePrincipal() throws IOException {
+        // test DatabasePrincipal with null name argument
+        try {
+            new DatabasePrincipal(null);
+            fail("expected NullPointerException");
+        } catch (NullPointerException ex) {
+            // expected exception
+        }
+
+        // test DatabasePrincipal with empty name argument
+        try {
+            new DatabasePrincipal("");
+            fail("expected IllegalArgumentException");
+        } catch (IllegalArgumentException ex) {
+            // expected exception
+        }
+        
+        // test DatabasePrincipal with illegal name argument
+        try {
+            new DatabasePrincipal("disallowed: unescaped *");
+            fail("expected IllegalArgumentException");
+        } catch (IllegalArgumentException ex) {
+            // expected exception
+        }
+
+        // test DatabasePrincipal with illegal name argument
+        try {
+            new DatabasePrincipal("not yet supported: userName@databaseName");
+            fail("expected IllegalArgumentException");
+        } catch (IllegalArgumentException ex) {
+            // expected exception
+        }
+
+        // test DatabasePrincipal with legal name argument
+        new DatabasePrincipal("supported: userNameWith\\\\character");
+        new DatabasePrincipal("supported: userNameWith\\*character");
+        new DatabasePrincipal("supported: userNameWith\\@character");
+        new DatabasePrincipal("*");
     }
     
     /**
      * Tests SystemPermission.
      */
     private void checkSystemPermission() throws IOException {
-        final DatabasePrincipal authorizedUser
-            = new DatabasePrincipal("authorizedSystemUser");
-        final DatabasePrincipal unAuthorizedUser
-            = new DatabasePrincipal("unAuthorizedSystemUser");
-
         // test SystemPermission with null name argument
         try {
             new SystemPermission(null);
@@ -249,9 +288,13 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
         assertTrue(sp1.implies(sp0));
 
         // test SystemPermission for authorized user against policy file
+        final DatabasePrincipal authorizedUser
+            = new DatabasePrincipal("authorizedSystemUser");
         execute(authorizedUser, new ShutdownEngineAction(sp0), true);
         
         // test SystemPermission for unauthorized user against policy file
+        final DatabasePrincipal unAuthorizedUser
+            = new DatabasePrincipal("unAuthorizedSystemUser");
         execute(unAuthorizedUser, new ShutdownEngineAction(sp0), false);
     }
     
@@ -259,11 +302,6 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
      * Tests DatabasePermission.
      */
     private void checkDatabasePermission() throws IOException {
-        final DatabasePrincipal authorizedUser
-            = new DatabasePrincipal("authorizedSystemUser");
-        final DatabasePrincipal unAuthorizedUser
-            = new DatabasePrincipal("unAuthorizedSystemUser");
-
         // test DatabasePermission with null url
         try {
             new DatabasePermission(null, DatabasePermission.CREATE);
@@ -399,6 +437,8 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
         
 
         // test DatabasePermission for authorized user against policy file
+        final DatabasePrincipal authorizedUser
+            = new DatabasePrincipal("authorizedSystemUser");
         execute(authorizedUser,
                 new CreateDatabaseAction(relDirPathPermissions[2]), true);
         execute(authorizedUser,
@@ -409,6 +449,8 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
                 new CreateDatabaseAction(relDirPathPermissions[7]), true);
 
         // test DatabasePermission for unauthorized user against policy file
+        final DatabasePrincipal unAuthorizedUser
+            = new DatabasePrincipal("unAuthorizedSystemUser");
         execute(unAuthorizedUser,
                 new CreateDatabaseAction(relDirPathPermissions[2]), false);
         execute(unAuthorizedUser,
@@ -417,6 +459,15 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
                 new CreateDatabaseAction(relDirPathPermissions[6]), false);
         execute(unAuthorizedUser,
                 new CreateDatabaseAction(relDirPathPermissions[7]), false);
+
+        // test DatabasePermission for authorized user against policy file
+        final DatabasePrincipal anyUser
+            = new DatabasePrincipal("anyUser");
+        final DatabasePermission dbPerm
+            = new DatabasePermission("directory:dir",
+                                     DatabasePermission.CREATE);
+        execute(anyUser,
+                new CreateDatabaseAction(dbPerm), true);
     }
 
     /**
@@ -567,7 +618,10 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
             final Set principalSet = new HashSet();
             final Set noPublicCredentials = new HashSet();
             final Set noPrivateCredentials = new HashSet();
+            // add the given principal
             principalSet.add(principal);
+            // add a principal that matches an "all user names" grant
+            principalSet.add(DatabasePrincipal.ANY_DATABASE_PRINCIPAL);
             final Subject subject = new Subject(true, principalSet,
                                                 noPublicCredentials,
                                                 noPrivateCredentials);
