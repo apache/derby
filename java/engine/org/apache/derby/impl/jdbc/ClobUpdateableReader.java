@@ -55,6 +55,11 @@ final class ClobUpdateableReader extends Reader {
     private boolean materialized;
     /** clob object this object is associated */
     private final EmbedClob clob;
+    /**
+     * Position in Clob where to stop reading.
+     */
+    private final long maxPos;
+    
     
     /**
      * Constructs a <code>Reader</code> over a <code>LOBInputStream</code>.
@@ -69,6 +74,9 @@ final class ClobUpdateableReader extends Reader {
         this.conChild = conChild;
         this.stream = stream;
         init (stream, 0);
+        //The subset of the Clob has not been requested. 
+        //Hence set maxPos to -1.
+        this.maxPos = -1;
     }
 
     /**
@@ -86,6 +94,43 @@ final class ClobUpdateableReader extends Reader {
         long byteLength = clob.getByteLength();
         this.stream = clob.getInternalStream ();
         init (0, byteLength);
+        //The subset of the Clob
+        //has not been requested.
+        //Hence set maxPos to -1.
+        this.maxPos = -1;
+    }
+    
+    /**
+     * Construct an <code>ClobUpdateableReader<code> using the 
+     * <code>EmbedClob</code> received as parameter. The initial
+     * position in the stream is set to <code>pos</code> and the
+     * stream is restricted to a length of <code>len</code>.
+     *
+     * @param clob EmbedClob this stream is associated with.
+     * @param pos initial position. The position starts from 0.
+     * @param len The length to which the underlying <code>InputStream</code>
+     *            has to be restricted.
+     * @throws IOException
+     * @throws SQLException
+     */
+    ClobUpdateableReader (EmbedClob clob, long pos, long len) 
+    throws IOException, SQLException {
+        materialized = clob.isWritable();        
+        this.clob = clob;
+        this.conChild = clob;
+        //Get the Byte length from the Clob which can be 
+        //passes to the init method.
+        long byteLength = clob.getByteLength();
+        //Initialize the InputStream with the underlying 
+        //InputStream of the Clob.
+        this.stream = clob.getInternalStream ();
+        //position the stream on pos using the init method.
+        init (pos, byteLength);
+        //The length requested cannot exceed the length
+        //of the underlying Clob object. Hence chose the
+        //minimum of the length of the underlying Clob
+        //object and requested length.
+        maxPos = Math.min(clob.length(), pos + len);
     }
         
     /**
@@ -99,7 +144,26 @@ final class ClobUpdateableReader extends Reader {
      */
     public int read(char[] cbuf, int off, int len) throws IOException {        
         updateIfRequired();
-        int ret = streamReader.read (cbuf, off, len);
+        
+        //If maxPos is not invalid and the current position inside the 
+        //stream has exceeded maxPos the read sould return -1 signifying
+        //end of stream.
+        if (maxPos != -1 && pos >= maxPos) {
+            return -1;
+        }
+
+        int actualLength = 0;
+        //If maxPos is not invalid then ensure that the length(len) 
+        //that is requested falls within the restriction set by maxPos.
+        if(maxPos != -1) {
+            actualLength 
+                    = (int )Math.min(len, maxPos - pos);
+        }
+        else {
+            //maxPos has not been set. Make maxPos the length requested.
+            actualLength = len;
+        }
+        int ret = streamReader.read (cbuf, off, actualLength);
         if (ret >= 0) {
             pos += ret;
         }

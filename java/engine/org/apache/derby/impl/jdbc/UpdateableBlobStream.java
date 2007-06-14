@@ -82,9 +82,10 @@ class UpdateableBlobStream extends InputStream {
      * @param len The length to which the underlying <code>InputStream</code>
      *            has to be restricted.
      * @throws IOException
+     * @throws SQLException
      */
     UpdateableBlobStream (EmbedBlob blob, InputStream is, long pos, long len) 
-    throws SQLException {
+    throws IOException, SQLException {
         this(blob, is);
         //The length requested cannot exceed the length
         //of the underlying Blob object. Hence chose the
@@ -92,20 +93,9 @@ class UpdateableBlobStream extends InputStream {
         //object and requested length.
         maxPos = Math.min(blob.length(), pos + len);
         
-        try {
-            //Skip to the requested position
-            //inside the stream.
-            skip(pos);
-        }
-        catch(IOException ioe) {
-            //Skip throws an IOException. Wrap the
-            //exception inside a SQLException and 
-            //throw it to the caller.
-            
-            SQLException sqle = new SQLException();
-            sqle.initCause(ioe);
-            throw sqle;
-        }
+        //Skip to the requested position
+        //inside the stream.
+        skip(pos);
     }
 
     /**

@@ -666,9 +666,54 @@ restartScan:
         }
     }
 
+    /**
+     * Returns a <code>Reader</code> object that contains a partial
+     * <code>Clob</code> value, starting with the character specified by pos,
+     * which is length characters in length.
+     *
+     * @param pos the offset to the first character of the partial value to
+     * be retrieved.  The first character in the Clob is at position 1.
+     * @param length the length in characters of the partial value to be
+     * retrieved.
+     * @return <code>Reader</code> through which the partial <code>Clob</code>
+     * value can be read.
+     * @throws SQLException if pos is less than 1 or if pos is greater than the
+     * number of
+     * characters in the <code>Clob</code> or if pos + length is greater than
+     * the number of
+     * characters in the <code>Clob</code>
+     *
+     * @throws SQLException.
+     */
     public java.io.Reader getCharacterStream(long pos, long length)
         throws SQLException {
-        throw Util.notImplemented();
+        //call checkValidity to exit by throwing a SQLException if
+        //the Clob object has been freed by calling free() on it
+        checkValidity();
+        
+        if (pos <= 0) {
+            throw Util.generateCsSQLException(
+                    SQLState.BLOB_BAD_POSITION,
+                    new Long(pos));
+        }
+        if (length < 0) {
+            throw Util.generateCsSQLException(
+                    SQLState.BLOB_NONPOSITIVE_LENGTH,
+                    new Long(length));
+        }
+        if (length > (this.length() - pos)) {
+            throw Util.generateCsSQLException(
+                    SQLState.POS_AND_LENGTH_GREATER_THAN_LOB,
+                    new Long(pos), new Long(length));
+        }
+        
+        try {
+            return new ClobUpdateableReader(this,
+                                            pos-1,
+                                            length);
+        } catch (IOException ioe) {
+            throw Util.setStreamFailure(ioe);
+        } 
     }
 
     /*

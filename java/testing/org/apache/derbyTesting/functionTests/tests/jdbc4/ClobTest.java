@@ -375,28 +375,11 @@ public class ClobTest
     }
     
     /**
-     * Tests the getCharacterStream(long pos, long length) on the
-     * Embedded side.
-     *
-     * @throws SQLException
-     */
-    public void embeddedTestGetCharacterStreamLongNotImplemented()
-    throws SQLException {
-        try {
-            clob.getCharacterStream(5l, 10l);
-            fail("Clob.getCharacterStream(long,long)" +
-                 "should not be implemented");
-        } catch (SQLFeatureNotSupportedException sfnse) {
-            // Do nothing, we are fine
-        }
-    }
-
-    /**
-     * Tests the implementation of getCharacterStream(long pos, long length)
-     * in the NetworkClient.
+     * Tests the implementation of getCharacterStream(long pos, long length).
+     * 
      * @throws Exception
      */
-    public void clientTestGetCharacterStreamLong()
+    public void testGetCharacterStreamLong()
     throws Exception {
         String str1 = "This is a test String. This is a test String";
 
@@ -437,7 +420,7 @@ public class ClobTest
      *
      * @throws SQLException.
      */
-    public void clientTestGetCharacterStreamLongExceptionConditions()
+    public void testGetCharacterStreamLongExceptionConditions()
     throws SQLException {
         String str1 = "This is a test String. This is a test String";
 
@@ -518,23 +501,10 @@ public class ClobTest
      * Create test suite for this test.
      */
     public static Test suite() {
-        TestSuite ctSuite = new TestSuite("ClobTest suite");
-
-        TestSuite embedded = new TestSuite("ClobTest:embedded");
-        embedded.addTestSuite(ClobTest.class);
-        embedded.addTest(new ClobTest(
-                    "embeddedTestGetCharacterStreamLongNotImplemented"));
-        ctSuite.addTest(new BlobClobTestSetup(embedded));
-
-        TestSuite client = new TestSuite("ClobTest:client");
-        client.addTestSuite(ClobTest.class);
-        client.addTest(new ClobTest("clientTestGetCharacterStreamLong"));
-        client.addTest(new ClobTest("clientTestGetCharacterStreamLong" +
-                 "ExceptionConditions"));
-        ctSuite.addTest(TestConfiguration.clientServerDecorator(
-            new BlobClobTestSetup(client)));
-
-        return ctSuite;
+        return  new BlobClobTestSetup(
+                TestConfiguration.defaultSuite(
+                ClobTest.class,
+                false));
     }
 
 } // End class ClobTest

@@ -958,10 +958,14 @@ final class EmbedBlob extends ConnectionChild implements Blob
                     new Long(pos), new Long(length));
         }
         
-        return new UpdateableBlobStream(this,
-                                        getBinaryStream(),
-                                        pos-1,
-                                        length);
+        try {
+            return new UpdateableBlobStream(this,
+                                            getBinaryStream(),
+                                            pos-1,
+                                            length);
+        } catch (IOException ioe) {
+            throw Util.setStreamFailure(ioe);
+        }
     }
     
     /*
