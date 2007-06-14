@@ -294,7 +294,7 @@ inner:		for (;;) {
 						Lock gl = (Lock) grants.get(j);
 
 						sb.append("{");
-						sb.append(gl.getCompatabilitySpace());
+						sb.append(gl.getCompatabilitySpace().getOwner());
 						sb.append(", ");
 						sb.append(gl.getQualifier());
 						sb.append("} ");
@@ -325,7 +325,8 @@ inner:		for (;;) {
 			addInfo(sb, ", ", attributes.get(VirtualLockTable.LOCKNAME));
 			sb.append('\n');
 
-			String xid = space.toString();
+			String xid =
+				String.valueOf(lock.getCompatabilitySpace().getOwner());
 			if (i == 0)
 				victimXID = xid;
 
