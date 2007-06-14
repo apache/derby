@@ -27,12 +27,18 @@ import java.sql.Clob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import junit.framework.Test;
 import junit.framework.TestSuite;
+import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetReader;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.Decorator;
 import org.apache.derbyTesting.junit.TestConfiguration;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
 
 /**
  * Test class to test <code>UpdateableReader</code> for <code>Clob</code> in
@@ -181,6 +187,88 @@ public class ClobUpdateableReaderTest extends BaseJDBCTestCase {
         }
     }   
     
+    /**
+     * Tests that the Clob can handle multiple streams and the length call
+     * multiplexed.
+     * <p>
+     * This test was written after bug DERBY-2806 was reported, where getting
+     * the length of the Clob after fetching a stream from it would exhaust
+     * the stream and cause the next read to return -1.
+     * <p>
+     * The test is written to work on a Clob that operates on streams from
+     * the store, which currently means that it must be over a certain size
+     * and that no modifying methods can be called on it.
+     */
+    public void testMultiplexedOperationProblem()
+            throws IOException, SQLException {
+        int length = 266000;
+        PreparedStatement ps = prepareStatement(
+                "insert into updateClob (id, data) values (?,?)");
+        ps.setInt(1, length);
+        ps.setCharacterStream(2, new LoopingAlphabetReader(length), length);
+        assertEquals(1, ps.executeUpdate());
+        ps.close();
+        PreparedStatement psFetchClob = prepareStatement(
+                "select data from updateClob where id = ?");
+        psFetchClob.setInt(1, length);
+        ResultSet rs = psFetchClob.executeQuery();
+        assertTrue("No Clob of length " + length + " in database", rs.next());
+        Clob clob = rs.getClob(1);
+        assertEquals(length, clob.length());
+        Reader r = clob.getCharacterStream();
+        int lastReadChar = r.read();
+        lastReadChar = assertCorrectChar(lastReadChar, r.read());
+        lastReadChar = assertCorrectChar(lastReadChar, r.read());
+        assertEquals(length, clob.length());
+        // Must be bigger than internal buffers might be.
+        int nextChar;
+        for (int i = 2; i < 160000; i++) {
+            nextChar = r.read();
+            // Check manually to report position where it fails.
+            if (nextChar == -1) {
+                fail("Failed at position " + i + ", stream should not be" +
+                        " exhausted now");
+            }
+            lastReadChar = assertCorrectChar(lastReadChar, nextChar);
+        }
+        lastReadChar = assertCorrectChar(lastReadChar, r.read());
+        lastReadChar = assertCorrectChar(lastReadChar, r.read());
+        InputStream ra = clob.getAsciiStream();
+        assertEquals(length, clob.length());
+        int lastReadAscii = ra.read();
+        lastReadAscii = assertCorrectChar(lastReadAscii, ra.read());
+        lastReadAscii = assertCorrectChar(lastReadAscii, ra.read());
+        assertEquals(length, clob.length());
+        lastReadAscii = assertCorrectChar(lastReadAscii, ra.read());
+        lastReadChar = assertCorrectChar(lastReadChar, r.read());
+    }
+
+
+    /**
+     * Asserts that the two specified characters follow each other in the
+     * modern latin lowercase alphabet.
+     */
+    private int assertCorrectChar(int prevChar, int nextChar)
+            throws IOException {
+        assertTrue("Reached EOF unexpectedly", nextChar != -1);
+        if (nextChar < 97 && nextChar > 122) {
+            fail("Char out of range: " + nextChar);
+        }
+        if (prevChar < 97 && prevChar > 122) {
+            fail("Char out of range: " + prevChar);
+        }
+        if (prevChar > -1) {
+            // Work with modern latin lowercase: 97 - 122
+            if (prevChar == 122) {
+                assertTrue(prevChar + " -> " + nextChar,
+                        nextChar == 97);
+            } else {
+                assertTrue(prevChar + " -> " + nextChar,
+                        nextChar == prevChar +1);
+            }
+        }
+        return nextChar;
+    }
     /**
      * Generates a (static) string containing various Unicode characters.
      *

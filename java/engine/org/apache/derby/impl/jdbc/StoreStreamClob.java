@@ -66,7 +66,7 @@ final class StoreStreamClob
      * {@link Resetable}.
      */
     //@GuardedBy("synchronizationObject")
-    private final InputStream storeStream;
+    private final PositionedStoreStream positionedStoreStream;
     /** The connection (child) this Clob belongs to. */
     private final ConnectionChild conChild;
     /** Object used for synchronizing access to the store stream. */
@@ -96,10 +96,10 @@ final class StoreStreamClob
      */
     public StoreStreamClob(InputStream stream, ConnectionChild conChild)
             throws StandardException {
-        this.storeStream = stream;
+        this.positionedStoreStream = new PositionedStoreStream(stream);
         this.conChild = conChild;
         this.synchronizationObject = conChild.getConnectionSynchronization();
-        ((Resetable)this.storeStream).initStream();
+        this.positionedStoreStream.initStream();
     }
 
     /**
@@ -107,7 +107,7 @@ final class StoreStreamClob
      */
     public void release() {
         if (!released) {
-            ((Resetable)this.storeStream).closeStream();
+            this.positionedStoreStream.closeStream();
             this.released = true;
         }
     }
@@ -126,11 +126,15 @@ final class StoreStreamClob
         long byteLength = 0;
         try {
             this.conChild.setupContextStack();
+            this.positionedStoreStream.reposition(0L);
             // See if length is encoded in the stream.
-            byteLength = resetStoreStream(true);
+            int us1 = this.positionedStoreStream.read();
+            int us2 = this.positionedStoreStream.read();
+            byteLength = (us1 << 8) + (us2 << 0);
             if (byteLength == 0) {
                 while (true) {
-                    long skipped = this.storeStream.skip(SKIP_BUFFER_SIZE);
+                    long skipped =
+                        this.positionedStoreStream.skip(SKIP_BUFFER_SIZE);
                     if (skipped <= 0) {
                         break;
                     }
@@ -140,6 +144,8 @@ final class StoreStreamClob
                 byteLength -= 3;
             }
             return byteLength;
+        } catch (StandardException se) {
+            throw Util.generateCsSQLException(se);
         } finally {
             this.conChild.restoreContextStack();
         }
@@ -183,8 +189,13 @@ final class StoreStreamClob
     public InputStream getRawByteStream()
             throws IOException, SQLException {
         checkIfValid();
-        resetStoreStream(true);
-        return this.storeStream;
+        try {
+            // Skip the encoded length.
+            this.positionedStoreStream.reposition(2L);
+        } catch (StandardException se) {
+            throw Util.generateCsSQLException(se);
+        }
+        return this.positionedStoreStream;
     }
 
     /**
@@ -200,9 +211,14 @@ final class StoreStreamClob
     public Reader getReader(long pos)
             throws IOException, SQLException  {
         checkIfValid();
-        resetStoreStream(false);
-        Reader reader = new UTF8Reader(this.storeStream, TypeId.CLOB_MAXWIDTH,
-            this.conChild, this.synchronizationObject);
+        try {
+            this.positionedStoreStream.reposition(0L);
+        } catch (StandardException se) {
+            throw Util.generateCsSQLException(se);
+        }
+        Reader reader = new UTF8Reader(this.positionedStoreStream,
+                                TypeId.CLOB_MAXWIDTH, this.conChild,
+                                this.synchronizationObject);
         long leftToSkip = pos -1;
         long skipped;
         while (leftToSkip > 0) {
@@ -302,39 +318,5 @@ final class StoreStreamClob
             throw new IllegalStateException(
                 "The Clob has been released and is not valid");
         }
-    }
-
-    /**
-     * Reset the store stream, skipping two bytes of length encoding if
-     * requested.
-     *
-     * @param skipEncodedLength <code>true</code> will cause length encoding to
-     *      be skipped. Note that the length is not always recorded when data is
-     *      written to store, and therefore it is ignored.
-     * @return The length encoded in the stream, or <code>-1</code> if the
-     *      length information is not decoded. A return value of <code>0</code>
-     *      means the stream is ended with a Derby end-of-stream marker.
-     * @throws IOException if skipping the two bytes fails
-     * @throws SQLException if resetting the stream fails in store
-     */
-    private long resetStoreStream(boolean skipEncodedLength)
-            throws IOException, SQLException {
-        try {
-            ((Resetable)this.storeStream).resetStream();
-        } catch (StandardException se) {
-            throw noStateChangeLOB(se);
-        }
-        long encodedLength = -1L;
-        if (skipEncodedLength) {
-            int b1 = this.storeStream.read();
-            int b2 = this.storeStream.read();
-            if (b1 == -1 || b2 == -1) {
-                throw Util.setStreamFailure(
-                    new IOException("Reached end-of-stream prematurely"));
-            }
-            // Length is currently written as an unsigned short.
-            encodedLength = (b1 << 8) + (b2 << 0);
-        }
-        return encodedLength;
     }
 } // End class StoreStreamClob

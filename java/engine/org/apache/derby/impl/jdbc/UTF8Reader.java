@@ -29,12 +29,20 @@ import java.io.UTFDataFormatException;
 import java.io.EOFException;
 import java.sql.SQLException;
 
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.types.Resetable;
+
 /**
 */
 public final class UTF8Reader extends Reader
 {
 
 	private InputStream in;
+    /** Stream store that can reposition itself on request. */
+    private final PositionedStoreStream positionedIn;
+    /** Store last visited position in the store stream. */
+    private long rawStreamPos = 0L;
 	private final long         utfLen;	// bytes
 	private long        utfCount;		// bytes
 	private long		readerCharCount; // characters
@@ -55,17 +63,46 @@ public final class UTF8Reader extends Reader
 	long maxFieldSize,
     ConnectionChild      parent,
 	Object synchronization) 
-        throws IOException
+        throws IOException, SQLException
 	{
 		super(synchronization);
-
-		this.in     = new BufferedInputStream (in);
 		this.maxFieldSize = maxFieldSize;
 		this.parent = parent;
 
-		synchronized (lock) {
-			this.utfLen = readUnsignedShort();
-		}
+        parent.setupContextStack();
+        try {
+            synchronized (lock) { // Synchronize access to store.
+                if (in instanceof PositionedStoreStream) {
+                    this.positionedIn = (PositionedStoreStream)in;
+                    // This stream is already buffered, and buffering it again
+                    // this high up complicates the handling a lot. Must
+                    // implement a special buffered reader to buffer again.
+                    // Note that buffering this UTF8Reader again, does not
+                    // cause any trouble...
+                    this.in = in;
+                    try {
+                        this.positionedIn.resetStream();
+                    } catch (StandardException se) {
+                        IOException ioe = new IOException(se.getMessage());
+                        ioe.initCause(se);
+                        throw ioe;
+                    }
+                } else {
+                    this.positionedIn = null;
+                    // Buffer this for improved performance.
+                    this.in = new BufferedInputStream (in);
+                }
+                this.utfLen = readUnsignedShort();
+                // Even if we are reading the encoded length, the stream may
+                // not be a positioned stream. This is currently true when a
+                // stream is passed in after a ResetSet.getXXXStream method.
+                if (this.positionedIn != null) {
+                    this.rawStreamPos = this.positionedIn.getPosition();
+                }
+            } // End synchronized block
+        } finally {
+            parent.restoreContextStack();
+        }
 	}
 
     /**
@@ -88,11 +125,19 @@ public final class UTF8Reader extends Reader
                 Object synchronization)
                 throws IOException {
         super(synchronization);
-
-        this.in = new BufferedInputStream(in);
         this.maxFieldSize = maxFieldSize;
         this.parent = parent;
         this.utfLen = streamSize;
+        this.positionedIn = null;
+
+        if (SanityManager.DEBUG) {
+            // Do not allow the inputstream here to be a Resetable, as this
+            // means (currently, not by design...) that the length is encoded in
+            // the stream and we can't pass that out as data to the user.
+            SanityManager.ASSERT(!(in instanceof Resetable));
+        }
+        // Buffer this for improved performance.
+        this.in = new BufferedInputStream(in);
     }
 
 	/*
@@ -270,6 +315,7 @@ public final class UTF8Reader extends Reader
 	/**
 		Fill the buffer, return true if eof has been reached.
 	*/
+    //@GuardedBy("lock")
 	private boolean fillBuffer() throws IOException
 	{
 		if (in == null)
@@ -281,7 +327,15 @@ public final class UTF8Reader extends Reader
 		try {
 		
 			parent.setupContextStack();
-
+            // If we are operating on a positioned stream, reposition it to
+            // continue reading at the position we stopped last time.
+            if (this.positionedIn != null) {
+                try {
+                    this.positionedIn.reposition(this.rawStreamPos);
+                } catch (StandardException se) {
+                    throw Util.generateCsSQLException(se);
+                }
+            }
 readChars:
 		while (
 				(charactersInBuffer < buffer.length) &&
@@ -361,8 +415,14 @@ readChars:
 		if (utfLen != 0 && utfCount > utfLen) 
 			throw utfFormatException("utfCount " + utfCount + " utfLen " + utfLen);		  
 
-		if (charactersInBuffer != 0)
+        if (charactersInBuffer != 0) {
+            if (this.positionedIn != null) {
+                // Save the last visisted position so we can start reading where
+                // we let go the next time we fill the buffer.
+                this.rawStreamPos = this.positionedIn.getPosition();
+            }
 			return false;
+        }
 
 		closeIn();
 		return true;
@@ -370,7 +430,10 @@ readChars:
 			parent.restoreContextStack();
 		}
 		} catch (SQLException sqle) {
-			throw new IOException(sqle.getSQLState() + ":" + sqle.getMessage());
+            IOException ioe =
+                new IOException(sqle.getSQLState() + ": " + sqle.getMessage());
+            ioe.initCause(sqle);
+            throw ioe;
 		}
 	}
 
