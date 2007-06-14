@@ -511,6 +511,11 @@ public final class util implements java.security.PrivilegedAction {
 	    if (dsName == null)
 	    	return null;
 	    
+	    // if we have no URL at this point, we should not attempt to get a
+	    // connection. Just start ij without connection. 
+	    if (databaseURL == null && defaultURL == null)
+	    	return null;
+        
 	    //First connection - pass firstTime=true, dbName=null. For database name, 
 	    //value in ij.dataSource.databaseName will be used. 
 	    con = getDataSourceConnection(dsName,user,password,null,true);
