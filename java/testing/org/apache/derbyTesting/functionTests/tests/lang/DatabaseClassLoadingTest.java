@@ -859,15 +859,45 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
         installJar("dcl_ot1.jar", "OT.OT1");
         installJar("dcl_ot2.jar", "OT.OT2");
         installJar("dcl_ot3.jar", "OT.OT3");
+              
+        checkLoading("123");
+        checkLoading("132");
+        checkLoading("213");
+        checkLoading("231");
+        checkLoading("321");
+        checkLoading("312");
+
+        s.close();
         
+    }
+    
+    /**
+     * Run a number of tests to ensure classes are loaded
+     * from the correct class loader. The order of loading
+     * the entry point classes is set by order. 123 will
+     * load the entry point classes in order OrderTest1, OrderTest2,
+     * OrderTest3. Since loading these entry point classes and
+     * the order of execution will determine the loading order
+     * of the other classes, we change the order to ensure
+     * that classes are loaded from the correct jar regardless
+     * of which class loaded it. Ie. Loading OrderTest2 first, which
+     * loads indirectly OrderObject1,2,3 ensures that even though
+     * OrderTest2 is loaded from OT2 that the others are loaded
+     * from their correct jar.
+     * 
+     * @param order Order the entry point classes will be loaded.
+     * 
+     */
+    private void checkLoading(String order) throws SQLException
+    {
         setDBClasspath("OT.OT1:OT.OT2:OT.OT3");
         
         PreparedStatement ps1 = prepareStatement(
-            "VALUES OT.WHICH_LOADER1(?)");
+            "VALUES OT.WHICH_LOADER" + order.charAt(0) +"(?)");
         PreparedStatement ps2 = prepareStatement(
-            "VALUES OT.WHICH_LOADER2(?)");
+                "VALUES OT.WHICH_LOADER" + order.charAt(1) +"(?)");
         PreparedStatement ps3 = prepareStatement(
-            "VALUES OT.WHICH_LOADER3(?)");
+                "VALUES OT.WHICH_LOADER" + order.charAt(2) +"(?)");
         
         // Tests the classes loaded as a direct entry point for a routine
         checkCorrectLoader("OrderTest1", ps1, ps2, ps3);
@@ -879,12 +909,20 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
         checkCorrectLoader("OrderLoad1", ps1, ps2, ps3);
         checkCorrectLoader("OrderLoad2", ps1, ps2, ps3);
         checkCorrectLoader("OrderLoad3", ps1, ps2, ps3);
-               
+        
+        // Tests the classes loaded indirectly by
+        // code in an installed jar file.
+        checkCorrectLoader("OrderObject1", ps1, ps2, ps3);
+        checkCorrectLoader("OrderObject2", ps1, ps2, ps3);
+        checkCorrectLoader("OrderObject3", ps1, ps2, ps3);
+                
         ps1.close();
         ps2.close();
         ps3.close();
-        s.close();
         
+        // reset the classpath to enforce the classes are loaded again
+        // on the next attempt.
+        setDBClasspath(null);
     }
     
     private void checkCorrectLoader(String className,
