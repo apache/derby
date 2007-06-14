@@ -771,30 +771,17 @@ restartScan:
     }
 
     /**
-     * Returns if the internal clob is a writable clob.
-     * @return true if internal clob is writable
+     * Returns the current internal Clob representation.
+     * <p>
+     * Care should be taken, as the representation can change when the user
+     * performs operations on the Clob. An example is if the Clob content is
+     * served from a store stream and the user updates the content. The
+     * internal representation will then be changed to a temporary Clob copy
+     * that allows updates.
+     *
+     * @return The current internal Clob representation.
      */
-    boolean isWritable() {
-        return clob.isWritable();
-    }
-
-    /**
-     * Returns the internal InputStream associated with this clob.
-     * @return internal InputStream
-     * @throws IOException
-     */
-    InputStream getInternalStream () 
-                    throws IOException, SQLException  {
-        return clob.getRawByteStream();
-    }
-
-    /**
-     * Returns byte length of the clob
-     * @return byte length of the clob
-     * @throws IOException
-     * @throws SQLException
-     */
-    long getByteLength() throws IOException, SQLException {
-        return clob.getByteLength();
+    InternalClob getInternalClob() {
+        return this.clob;
     }
 }
