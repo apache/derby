@@ -66,7 +66,13 @@ public class BlobLocatorInputStream extends java.io.InputStream
         this.connection = connection;
         this.blob = blob;
         this.currentPos = 1;
-        this.maxPos = blob.sqlLength();
+        
+        //In this case a subset of the Blob has
+        //not been requested for. We set maxPos 
+        //to -1 and instead will call 
+        //blob.sqlLength() each time we want 
+        //the maximum length.
+        this.maxPos = -1;
     }
     
     /**
@@ -94,7 +100,12 @@ public class BlobLocatorInputStream extends java.io.InputStream
         this.connection = connection;
         this.blob = blob;
         this.currentPos = position;
-        this.maxPos = Math.min(blob.sqlLength(), position + length - 1);
+        if (length != -1) {//verify if length is -1
+            this.maxPos = Math.min(blob.sqlLength(), position + length - 1);
+        }
+        else {
+            this.maxPos = -1;
+        }
     }
     
     /**
@@ -144,8 +155,26 @@ public class BlobLocatorInputStream extends java.io.InputStream
     private byte[] readBytes(int len) throws IOException
     {
         try {
-            int actualLength 
-                = (int )Math.min(len, maxPos - currentPos + 1);
+            //stores the actual length that can be read
+            //based on the value of the current position
+            //in the stream(currentPos) and the length of
+            //the stream.
+            int actualLength = -1;
+            //check if maxPos has been set and calculate actualLength
+            //based on that.
+            if(maxPos != -1) {
+                //maxPos has been set. use maxPos to calculate the
+                //actual length based on the value set for maxPos.
+                actualLength 
+                    = (int )Math.min(len, maxPos - currentPos + 1);
+            }
+            else {
+                //The subset of the Blob was not requested for
+                //hence maxPos is -1. Here we use blob.sqllength
+                //instead.
+                actualLength 
+                    = (int )Math.min(len, blob.sqlLength() - currentPos + 1);
+            }
             byte[] result = connection.locatorProcedureCall()
                 .blobGetBytes(blob.getLocator(), currentPos, actualLength);
             currentPos += result.length;

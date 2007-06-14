@@ -267,8 +267,12 @@ public class Blob extends Lob implements java.sql.Blob {
         {
             return binaryStream_;
         } else if (isLocator()) {
-            return new BufferedInputStream(
-                    new BlobLocatorInputStream(agent_.connection_, this));
+            //The Blob is locator enabled. Return a instance of the 
+            //UpdateSensitive stream which wraps inside it a 
+            //Buffered Locator stream. The wrapper watches out 
+            //for updates.
+            return new UpdateSensitiveBlobLocatorInputStream
+                    (agent_.connection_, this);
         } else {  // binary string
             return new java.io.ByteArrayInputStream(binaryString_, dataOffset_,
                                            binaryString_.length - dataOffset_);
@@ -487,6 +491,11 @@ public class Blob extends Lob implements java.sql.Blob {
                 // Update length
                 setSqlLength(pos + length - 1);
             } 
+            //The Blob value has been
+            //modified. Increment the
+            //updateCount to reflect the
+            //change.
+            incrementUpdateCount();
         } else {
             if ((binaryString_.length - dataOffset_ - (int)pos + 1) < length) {
                 byte newbuf[] = new byte[(int) pos + length + dataOffset_ - 1];
@@ -562,6 +571,11 @@ public class Blob extends Lob implements java.sql.Blob {
                     agent_.connection_.locatorProcedureCall()
                         .blobTruncate(locator_, len);
                     setSqlLength(len);
+                    //The Blob value has been
+                    //updated Increment the
+                    //update count to reflect
+                    //the change.
+                    incrementUpdateCount();
                 } else {
                     long newLength = (int) len + dataOffset_;
                     byte newbuf[] = new byte[(int) len + dataOffset_];
@@ -655,11 +669,16 @@ public class Blob extends Lob implements java.sql.Blob {
                 
                 InputStream retVal;
                 if (isLocator()) {
-                    retVal = new BufferedInputStream(
-                            new BlobLocatorInputStream(agent_.connection_,
+                    //The Blob is locator enabled. Return an
+                    //instance of the update sensitive stream
+                    //that wraps inside it a Buffered InputStream.
+                    //The wrapper watches out for updates to the
+                    //underlying Blob.
+                    retVal = new UpdateSensitiveBlobLocatorInputStream
+                                                      (agent_.connection_,
                                                        this,
                                                        pos,
-                                                       length));
+                                                       length);
                 } else {  // binary string
                     retVal = new java.io.ByteArrayInputStream
                         (binaryString_, 

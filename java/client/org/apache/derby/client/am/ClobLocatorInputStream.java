@@ -63,12 +63,6 @@ public class ClobLocatorInputStream extends java.io.InputStream {
     private long currentPos;
     
     /**
-     * Position in Clob where to stop reading.
-     * maxPos starts counting from 1.
-     */
-    private final long maxPos;
-
-    /**
      * Create an <code>InputStream</code> for reading the
      * <code>Clob</code> value represented by the given locator based
      * <code>Clob</code> object.
@@ -86,7 +80,23 @@ public class ClobLocatorInputStream extends java.io.InputStream {
         this.connection = connection;
         this.clob = clob;
         this.currentPos = 1;
-        this.maxPos = clob.sqlLength();
+    }
+    
+    /**
+     * Create an <code>InputStream</code> for reading the
+     * <code>Clob</code> value represented by the given locator based
+     * <code>Clob</code> object.
+     * @param connection connection to be used to read the
+     *        <code>Clob</code> value from the server
+     * @param clob <code>Clob</code> object that contains locator for
+     *        the <code>Clob</code> value on the server.
+     * @param pos the position inside the <code>Clob<code> from which
+     *            the reading must begin.
+     */
+    public ClobLocatorInputStream(Connection connection, Clob clob, long pos)
+    throws SqlException{
+        this(connection, clob);
+        this.currentPos = pos;
     }
     
     /**
@@ -134,7 +144,7 @@ public class ClobLocatorInputStream extends java.io.InputStream {
     private byte[] readBytes(int len) throws IOException {
         try {
             int actualLength
-                    = (int )Math.min(len, maxPos - currentPos + 1);
+                    = (int )Math.min(len, clob.sqlLength() - currentPos + 1);
             String resultStr = connection.locatorProcedureCall().
                     clobGetSubString(clob.getLocator(),
                     currentPos, actualLength);

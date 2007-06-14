@@ -495,6 +495,170 @@ public class ClobTest
             assertSQLState("XJ087", sqle);
         }
     }
+    
+    /**
+     * Tests that the InputStream got from
+     * a empty Clob reflects new data in the
+     * underlying Clob.
+     *
+     * @throws Exception
+     */
+     public void testGetAsciiStreamCreateClob() throws Exception {
+         //The String that will be used
+         //to do the inserts into the
+         //Clob.
+         String str = "Hi I am the insert String";
+         
+         //Create the InputStream that will
+         //be used for comparing the Stream
+         //that is obtained from the Blob after
+         //the update.
+         ByteArrayInputStream str_is = new ByteArrayInputStream
+                 (str.getBytes());
+         
+         //create the empty Clob.
+         Clob clob = getConnection().createClob();
+         
+         //Get the InputStream from this
+         //Clob
+         InputStream is = clob.getAsciiStream();
+         
+         //set the String into the clob.
+         clob.setString(1, str);
+         
+         //Ensure that the Stream obtained from
+         //the clob contains the expected bytes
+         assertEquals(str_is, is);
+     }
+     
+     /**
+     * Tests that the Reader got from
+     * a empty Clob reflects new data in the
+     * underlying Clob.
+     *
+     * @throws Exception
+     */
+     public void testGetCharacterStreamCreateClob() throws Exception {
+         //The String that will be used
+         //to do the inserts into the
+         //Clob.
+         String str = "Hi I am the insert String";
+
+         //The string reader corresponding to this
+         //string that will be used in the comparison.
+         StringReader r_string = new StringReader(str);
+         
+         //create the empty Clob.
+         Clob clob = getConnection().createClob();
+         
+         //Get the Reader from this
+         //Clob
+         Reader r_clob = clob.getCharacterStream();
+         
+         //set the String into the clob.
+         clob.setString(1, str);
+         
+         //Now compare the reader corresponding
+         //to the string and the reader obtained
+         //form the clob to see if they match.
+         assertEquals(r_string, r_clob);
+     }
+     
+    /**
+     * Tests that the data updated in a Clob
+     * is always reflected in the InputStream
+     * got. Here the updates into the Clob are
+     * done using both an OutputStream obtained
+     * from this Clob as well as using Clob.setString.
+     *
+     * @throws Exception
+     */
+     public void testGetAsciiStreamClobUpdates() throws Exception {
+         //The String that will be used
+         //to do the inserts into the
+         //Clob.
+         String str1 = "Hi I am the insert string";
+         
+         //Stores the byte array representation of 
+         //the insert string.
+         byte[] str1_bytes = str1.getBytes();
+         
+         //The String that will be used in the
+         //second series of updates
+         String str2 = "Hi I am the update string";
+         
+         //create the empty Clob.
+         Clob clob = getConnection().createClob();
+         
+         //Get the InputStream from this
+         //Clob before any writes happen.
+         InputStream is_BeforeWrite = clob.getAsciiStream();
+         
+         //Get an OutputStream from this Clob
+         //into which the data can be written
+         OutputStream os = clob.setAsciiStream(1);
+         os.write(str1_bytes);
+         
+         //Doing a setString now on the Clob
+         //should reflect the same extension
+         //in the InputStream also.
+         clob.setString((str1_bytes.length)+1, str2);
+         
+         //Get the input stream from the
+         //Clob after the update
+         InputStream is_AfterWrite = clob.getAsciiStream();
+         
+         //Now check if the two InputStreams
+         //match
+         assertEquals(is_BeforeWrite, is_AfterWrite);
+     }
+     
+    /**
+     * Tests that the data updated in a Clob
+     * is always reflected in the Reader
+     * got. Here the updates are done using
+     * both a Writer obtained from this Clob
+     * and using Clob.setString.
+     *
+     * @throws Exception
+     */
+     public void testGetCharacterStreamClobUpdates() throws Exception {
+         //The String that will be used
+         //to do the inserts into the
+         //Clob.
+         String str1 = "Hi I am the insert string";
+         
+         //The String that will be used in the
+         //second series of updates
+         String str2 = "Hi I am the update string";
+         
+         //create the empty Clob.
+         Clob clob = getConnection().createClob();
+         
+         //Get the Reader from this
+         //Clob
+         Reader r_BeforeWrite = clob.getCharacterStream();
+         
+         //Get a writer from this Clob
+         //into which the data can be written
+         Writer w = clob.setCharacterStream(1);
+         char [] chars_str1 = new char[str1.length()];
+         str2.getChars(0, str1.length(), chars_str1, 0);
+         w.write(chars_str1);
+         
+         //Doing a setString now on the Clob
+         //should reflect the same extension
+         //in the InputStream also.
+         clob.setString((str1.getBytes().length)+1, str2);
+         
+         //Now get the reader from the Clob after
+         //the update has been done.
+         Reader r_AfterWrite = clob.getCharacterStream();
+         
+         //Now compare the two readers to see that they
+         //contain the same data.
+         assertEquals(r_BeforeWrite, r_AfterWrite);
+     }
 
 
     /**

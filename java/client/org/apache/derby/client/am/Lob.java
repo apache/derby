@@ -54,6 +54,17 @@ public abstract class Lob implements UnitOfWorkListener {
     private boolean lengthObtained_;
     
     final private boolean willBeLayerBStreamed_;
+    
+        
+    //A running counter that keeps track
+    //of whether a update has been done
+    //on this LOB value. We do not need
+    //to bother about the limit imposed
+    //by this counter because we just check
+    //whether its latest value matches hence
+    //for all practical purposes there is no 
+    //limit imposed.
+    private long updateCount;
 
     //-----------------------------messageId------------------------------------------
     final static protected ClientMessageId LOB_OBJECT_LENGTH_UNKNOWN_YET =
@@ -317,5 +328,49 @@ public abstract class Lob implements UnitOfWorkListener {
                 new ClientMessageId(SQLState.POS_AND_LENGTH_GREATER_THAN_LOB),
                 new Long(pos), new Long(length)).getSQLException();
         }
+    }
+    
+        
+    /**
+     * Increments and returns the new updateCount 
+     * of this <code>Lob</code>. The method needs to be 
+     * synchronized since multiple updates can 
+     * happen on this <code>Lob</code> simultaneously. 
+     * It will be called from the
+     * 1) Locator Writers
+     * 2) Locator OutputStreams
+     * 3) From the update methods
+     *    within the Lobs like setString, truncate.
+     * since all of the above acesses are inside
+     * the am package, this method will have
+     * default access. We do not need to worry
+     * about the non-locator streams since
+     * non-locator InputStreams would not
+     * depend on updateCount for invalidation
+     */
+    protected synchronized void incrementUpdateCount() {
+        updateCount++;
+    }
+    
+    /**
+     * Returns the current updateCount of the Clob.
+     */
+    long getUpdateCount() {
+        return updateCount;
+    }
+    
+    /**
+     * Calls SqlLength() to check if the Locator associated
+     * with the underlying Lob is valid. If it is not
+     * it throws an exception.
+     *
+     * @throws SqlException
+     * 
+     */
+    void checkForLocatorValidity() throws SqlException {
+        // As of now there is no other way of determining that
+        //the locator associated with the underlying LOB is not
+        //valid
+        sqlLength();
     }
 }

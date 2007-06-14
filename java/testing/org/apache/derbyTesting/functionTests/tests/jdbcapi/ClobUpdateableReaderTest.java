@@ -216,7 +216,7 @@ public class ClobUpdateableReaderTest extends BaseJDBCTestCase {
     
     public static Test suite() {
         TestSuite ts = new TestSuite ("ClobUpdateableReaderTest");
-        ts.addTest(TestConfiguration.embeddedSuite(
+        ts.addTest(TestConfiguration.defaultSuite(
                     ClobUpdateableReaderTest.class));
         TestSuite encSuite = new TestSuite ("ClobUpdateableReaderTest:encrypted");
         encSuite.addTestSuite (ClobUpdateableReaderTest.class);

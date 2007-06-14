@@ -84,7 +84,13 @@ public class ClobLocatorReader extends java.io.Reader {
         this.connection = connection;
         this.clob = clob;
         this.currentPos = 1;
-        this.maxPos = clob.sqlLength();
+       
+        //In this case a subset of the Clob has
+        //not been requested for. We set maxPos 
+        //to -1 and instead will call 
+        //clob.sqlLength() each time we want 
+        //the maximum length.
+        this.maxPos = -1;
     }
     
     /**
@@ -108,7 +114,12 @@ public class ClobLocatorReader extends java.io.Reader {
         this.connection = connection;
         this.clob = clob;
         this.currentPos = pos;
-        this.maxPos = Math.min(clob.sqlLength(), pos + len - 1);
+        if(len != -1) {
+            this.maxPos = Math.min(clob.sqlLength(), pos + len - 1);
+        }
+        else {
+            this.maxPos = -1;
+        }
     }
     
     /**
@@ -188,8 +199,26 @@ public class ClobLocatorReader extends java.io.Reader {
      */
     private char[] readCharacters(int len) throws IOException {
         try {
-            int actualLength
+            //stores the actual length that can be read
+            //based on the value of the current position
+            //in the stream(currentPos) and the length of
+            //the stream.
+            int actualLength = -1;
+            //check if maxPos has been set and calculate actualLength
+            //based on that.
+            if(maxPos != -1) {
+                //maxPos has been set. use maxPos to calculate the
+                //actual length based on the value set for maxPos.
+                actualLength 
                     = (int )Math.min(len, maxPos - currentPos + 1);
+            }
+            else {
+                //The subset of the Blob was not requested for
+                //hence maxPos is -1. Here we use clob.sqllength
+                //instead.
+                actualLength 
+                    = (int )Math.min(len, clob.sqlLength() - currentPos + 1);
+            }
             String resultStr = connection.locatorProcedureCall().
                     clobGetSubString(clob.getLocator(),
                     currentPos, actualLength);

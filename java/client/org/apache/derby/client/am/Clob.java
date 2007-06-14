@@ -368,10 +368,12 @@ public class Clob extends Lob implements java.sql.Clob {
 
         //check is this Lob is locator enabled
         if (isLocator()) {
-            //The Lob is locator enabled. Return an instance of the Locator
-            //enabled Writer implementation
-            return new BufferedReader
-                    (new ClobLocatorReader(agent_.connection_, this));
+            //The Lob is locator enabled. Return an instance of the
+            //update sensitive Reader that wraps inside it a
+            //Buffered Locator Reader. The wrapper class
+            //watches out for updates.
+            return new UpdateSensitiveClobLocatorReader
+                    (agent_.connection_, this);
         }
         else if (isCharacterStream())  // this Lob is used for input
         {
@@ -416,10 +418,12 @@ public class Clob extends Lob implements java.sql.Clob {
         }
         else if(isLocator()) { // Check to see if this Lob is locator enabled
             //The Lob is locator enabled. Return an instance
-            //of the Locator enabled Clob specific InputStream
-            //implementation.
-            return new BufferedInputStream(
-                    new ClobLocatorInputStream(agent_.connection_,this));
+            //of the update sensitive wrappers that wrap inside
+            //it a Buffered Locator enabled InputStream. The
+            //wrapper watches out for updates to the underlying
+            //Clob.
+            return new UpdateSensitiveClobLocatorInputStream
+                    (agent_.connection_,this);
         }
         else {
             return new AsciiStream(string_, new java.io.StringReader(string_));
@@ -662,6 +666,10 @@ public class Clob extends Lob implements java.sql.Clob {
                 // Update length
                 setSqlLength(pos + length - 1);
             }
+            //The Clob value has been
+            //updated. Increment the
+            //update count.
+            incrementUpdateCount();
         }
         else {
             //The Clob is not locator enabled.
@@ -781,6 +789,10 @@ public class Clob extends Lob implements java.sql.Clob {
                     //procedure CLOBTRUNCATE to truncate this Lob.
                     agent_.connection_.locatorProcedureCall().
                             clobTruncate(locator_, len);
+                    //The Clob value has been
+                    //modified. Increment the
+                    //update count.
+                    incrementUpdateCount();
                 }
                 else {
                     //The Lob is not locator enabled.
@@ -892,17 +904,20 @@ public class Clob extends Lob implements java.sql.Clob {
             Reader retVal = null;
             //check if the Lob is locator enabled.
             if(isLocator()) {
-                //1) The Lob is locator enabled. Return the locator
-                //   enabled Implementation of a Clob Reader.
+                //1) The Lob is locator enabled. Return the update
+                //   sensitive wrapper that wraps inside it a
+                //   locator enabled Clob Reader. The wrapper
+                //   watches out for updates to the underlying
+                //   Clob.
                 //2) len is the number of characters in the
                 //   stream starting from pos.
                 //3) checkPosAndLength will ensure that pos and
                 //   length fall within the boundaries of the
                 //   Clob object.
                 try {
-                    retVal = new BufferedReader(
-                            new ClobLocatorReader(agent_.connection_, this,
-                            pos, length));
+                    retVal = new UpdateSensitiveClobLocatorReader
+                            (agent_.connection_, this,
+                            pos, length);
                 }
                 catch(SqlException sqle) {
                     throw sqle.getSQLException();

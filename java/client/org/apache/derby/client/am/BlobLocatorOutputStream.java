@@ -118,13 +118,8 @@ public class BlobLocatorOutputStream extends java.io.OutputStream {
     private void writeBytes(byte[] b) throws IOException
     {
         try {         
-            connection.locatorProcedureCall()
-                .blobSetBytes(blob.locator_, currentPos, b.length, b);
+            blob.setBytesX(currentPos, b, 0, b.length);
             currentPos += b.length;
-            if (currentPos-1 > blob.sqlLength()) {
-                // Wrote past the old end of the Blob value, update length
-                blob.setSqlLength(currentPos - 1);
-            }
         } catch (SqlException ex) {
             IOException ioEx= new IOException();
             ioEx.initCause(ex);

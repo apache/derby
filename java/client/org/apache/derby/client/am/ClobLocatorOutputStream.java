@@ -133,13 +133,8 @@ public class ClobLocatorOutputStream extends java.io.OutputStream {
     private void writeBytes(byte[] b) throws IOException {
         try {
             String clobStr = new String(b, "ISO-8859-1");
-            connection.locatorProcedureCall().clobSetString
-                    (clob.locator_, currentPos, b.length, clobStr);
+            clob.setStringX(currentPos, clobStr, 0, clobStr.length());
             currentPos += b.length;
-            if (currentPos-1 > clob.sqlLength()) {
-                // Wrote past the old end of the Clob value, update length
-                clob.setSqlLength(currentPos - 1);
-            }
         } catch (SqlException ex) {
             IOException ioEx= new IOException();
             ioEx.initCause(ex);

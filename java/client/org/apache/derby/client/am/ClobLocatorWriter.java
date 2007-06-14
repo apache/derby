@@ -162,14 +162,8 @@ public class ClobLocatorWriter extends java.io.Writer {
     private void writeCharacters(char[] c, int off, int len)
     throws IOException {
         try {
-            connection.locatorProcedureCall().clobSetString
-                    (clob.locator_, currentPos, len,
-                    new String(c, off, len));
+            clob.setStringX(currentPos, new String(c, off, len), 0, len);
             currentPos += len;
-            if (currentPos-1 > clob.sqlLength()) {
-                // Wrote past the old end of the Clob value, update length
-                clob.setSqlLength(currentPos - 1);
-            }
         } catch (SqlException ex) {
             IOException ioEx= new IOException();
             ioEx.initCause(ex);

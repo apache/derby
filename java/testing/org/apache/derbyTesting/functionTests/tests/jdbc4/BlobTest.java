@@ -516,6 +516,96 @@ public class BlobTest
 
     
     /**
+     * Tests that the InputStream got from
+     * a empty Blob reflects new data in the
+     * underlying Blob.
+     *
+     * @throws Exception
+     */
+     public void testGetBinaryStreamCreateBlob() throws Exception {
+         //The bytes that will be used
+         //to do the inserts into the
+         //Blob.
+         byte[] bytes1 = {
+            0x65, 0x66, 0x67, 0x68, 0x69,
+            0x69, 0x68, 0x67, 0x66, 0x65
+         };
+         
+         //The InputStream corresponding to the
+         //Byte array
+         ByteArrayInputStream is_bytes1 = new ByteArrayInputStream(bytes1);
+         
+         //create the empty Blob.
+         Blob blob = getConnection().createBlob();
+         
+         //Get the InputStream from this
+         //Blob
+         InputStream is = blob.getBinaryStream();
+         
+         //set the bytes into the blob.
+         blob.setBytes(1, bytes1);
+         
+         //Now compare the ByteArrayInputStream
+         //and the stream from the Blob to
+         //ensure that they are equal
+         assertEquals(is_bytes1, is);
+     }
+     
+    /**
+     * Tests that the data updated in a Blob
+     * is always reflected in the InputStream
+     * got. Here we do updates in the Blob
+     * both using Blob.setBytes and
+     * using the OutputStream obtained from
+     * the Blob.
+     *
+     * @throws Exception
+     */
+     public void testGetBinaryStreamBlobUpdates() throws Exception {
+         //The bytes that will be used
+         //to do the inserts into the
+         //Blob using Blob.setBytes.
+         byte[] bytes1 = {
+            0x65, 0x66, 0x67, 0x68, 0x69,
+            0x69, 0x68, 0x67, 0x66, 0x65
+         };
+         
+         //The Byte array that will be used to do the
+         //updates into the Blob using the OutputStream
+         //obtained from the Blob
+         byte[] bytes2 = {
+            0x65, 0x66, 0x67, 0x68, 0x69,
+            0x65, 0x66, 0x67, 0x68, 0x69
+         };
+         
+         //create the empty Blob.
+         Blob blob = getConnection().createBlob();
+         
+         //Get the InputStream from this
+         //Blob
+         InputStream is_BeforeWrite = blob.getBinaryStream();
+         
+         //Get an OutputStream from this Blob
+         //into which the data can be written
+         OutputStream os = blob.setBinaryStream(1);
+         os.write(bytes1);
+         
+         //Doing a setBytes now on the Blob
+         //should reflect the same extension
+         //in the InputStream also.
+         blob.setBytes(bytes1.length+1, bytes2);
+         
+         //Get the InputStream from this Blob
+         //after the update has happened.
+         InputStream is_AfterWrite = blob.getBinaryStream();
+         
+         //Compare the two streams to check that they
+         //match
+         assertEquals(is_BeforeWrite, is_AfterWrite);
+     }
+    
+
+    /**
      * Create test suite for this test.
      */
     public static Test suite() {

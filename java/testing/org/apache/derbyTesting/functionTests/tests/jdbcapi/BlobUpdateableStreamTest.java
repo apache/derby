@@ -82,7 +82,7 @@ public class BlobUpdateableStreamTest extends BaseJDBCTestCase {
     }
     
     public static Test suite () {
-        return TestConfiguration.embeddedSuite (
+        return TestConfiguration.defaultSuite (
                 BlobUpdateableStreamTest.class);
     }
     
