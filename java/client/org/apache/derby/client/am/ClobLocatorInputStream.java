@@ -64,8 +64,9 @@ public class ClobLocatorInputStream extends java.io.InputStream {
     
     /**
      * Position in Clob where to stop reading.
+     * maxPos starts counting from 1.
      */
-    private long maxPos;
+    private final long maxPos;
 
     /**
      * Create an <code>InputStream</code> for reading the

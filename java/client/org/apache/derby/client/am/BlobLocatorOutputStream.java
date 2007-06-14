@@ -135,12 +135,12 @@ public class BlobLocatorOutputStream extends java.io.OutputStream {
     /**
      * Connection used to read Blob from server.
      */
-    private Connection connection;
+    private final Connection connection;
 
     /**
      * The Blob to be accessed.
      */
-    private Blob blob;
+    private final Blob blob;
 
     /**
      * Current position in the underlying Blob.

@@ -539,7 +539,7 @@ public class Clob extends Lob implements java.sql.Clob {
         }
 
         // if the searchstr is longer than the source, no match
-        int index;
+        long index;
         try {
             if (searchstr.length() > sqlLength()) {
                 return -1;
@@ -550,7 +550,7 @@ public class Clob extends Lob implements java.sql.Clob {
                 //Locator support is available. Hence call
                 //CLOBGETPOSITIONFROMLOCATOR to determine the position
                 //of the given Clob inside the LOB.
-                index = (int)agent_.connection_.locatorProcedureCall()
+                index = agent_.connection_.locatorProcedureCall()
                     .clobGetPositionFromLocator(locator_,
                         ((Clob)searchstr).getLocator(),
                         start);
@@ -559,18 +559,16 @@ public class Clob extends Lob implements java.sql.Clob {
                 index = string_.indexOf(searchstr.getSubString(1L,
                                                     (int) searchstr.length()),
                                         (int) start - 1);
+                //increase the index by one since String positions are
+                //0-based and Clob positions are 1-based
+                if (index != -1) {
+                    index++;
+                }
             }
         } catch (java.sql.SQLException e) {
             throw new SqlException(e);
         }
-        //When the LOB is locator enabled then
-        //the stored procedure call returns the
-        //correct position. There is no need
-        //to increment by 1
-        if (index != -1 && !isLocator()) {
-            index++; // api index starts at 1
-        }
-        return (long) index;
+        return index;
     }
 
     //---------------------------- jdbc 3.0 -----------------------------------

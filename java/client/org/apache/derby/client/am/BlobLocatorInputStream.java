@@ -161,12 +161,12 @@ public class BlobLocatorInputStream extends java.io.InputStream
     /**
      * Connection used to read Blob from server.
      */
-    private Connection connection;
+    private final Connection connection;
     
     /**
      * The Blob to be accessed.
      */
-    private Blob blob;
+    private final Blob blob;
 
     /**
      * Current position in the underlying Blob.
@@ -176,6 +176,7 @@ public class BlobLocatorInputStream extends java.io.InputStream
 
     /**
      * Position in Blob where to stop reading.
+     * maxPos starts counting from 1.
      */
-    private long maxPos;
+    private final long maxPos;
 }

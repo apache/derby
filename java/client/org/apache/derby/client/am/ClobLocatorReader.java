@@ -55,8 +55,9 @@ public class ClobLocatorReader extends java.io.Reader {
     
     /**
      * Position in Clob where to stop reading.
+     * maxPos starts counting from 1.
      */
-    private long maxPos;
+    private final long maxPos;
     
     /**
      * Stores the information to whether this Reader has been
@@ -100,7 +101,12 @@ public class ClobLocatorReader extends java.io.Reader {
      */
     public ClobLocatorReader(Connection connection, Clob clob, 
             long pos, long len) throws SqlException {
-        this(connection, clob);
+        if (SanityManager.DEBUG) {
+            SanityManager.ASSERT(clob.isLocator());
+        }
+
+        this.connection = connection;
+        this.clob = clob;
         this.currentPos = pos;
         this.maxPos = Math.min(clob.sqlLength(), pos + len - 1);
     }
