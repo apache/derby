@@ -397,6 +397,26 @@ class LOBStreamControl {
         free();
     }
 
+    private void deleteFile (StorageFile file) throws IOException {
+        try {
+            final StorageFile sf = file;
+            AccessController.doPrivileged(new PrivilegedExceptionAction() {
+                public Object run() throws IOException {
+                    sf.delete();
+                    return null;
+                }
+            });
+        } catch (PrivilegedActionException pae) {
+            Exception e = pae.getException();
+            if (e instanceof IOException)
+                throw (IOException) e;
+            if (e instanceof RuntimeException)
+                throw (RuntimeException) e;
+            IOException ioe = new IOException(e.getMessage());
+            ioe.initCause(e);
+            throw ioe;
+        }
+    }
     /**
      * Invalidates all the variables and closes file handle if open.
      * @throws IOexception
@@ -405,24 +425,8 @@ class LOBStreamControl {
         dataBytes = null;
         if (tmpFile != null) {
             tmpFile.close();
-            try {
-                AccessController.doPrivileged (new PrivilegedExceptionAction() {
-                    public Object run() throws IOException {
-                        lobFile.delete();
-                        return null;
-                    }
-                });
-            }
-            catch (PrivilegedActionException pae) {
-                Exception e = pae.getException();
-                if (e instanceof IOException)
-                    throw (IOException) e;
-                if (e instanceof RuntimeException)
-                    throw (RuntimeException) e;
-                IOException ioe = new IOException (e.getMessage());
-                ioe.initCause (e);
-                throw ioe;
-            }
+            deleteFile(lobFile);
+            tmpFile = null;
         }
     }
     
@@ -470,6 +474,7 @@ class LOBStreamControl {
             
             byte tmp [] = new byte [0];
             LOBFile oldFile = tmpFile;
+            StorageFile oldStoreFile = lobFile;
             init (tmp, 0);
             byte [] tmpByte = new byte [1024];
             long sz = stPos;
@@ -492,6 +497,8 @@ class LOBStreamControl {
                         break;
                     tmpFile.write (tmpByte, 0, rdLen);
                 }while (true);
+                oldFile.close();
+                deleteFile(oldStoreFile);
             }            
         }
         updateCount++;
