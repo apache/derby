@@ -311,6 +311,27 @@ public class FromVTI extends FromTable implements VTIEnvironment
 	}
 
 	/**
+	 * @see ResultSetNode#adjustForSortElimination()
+	 */
+	public void adjustForSortElimination()
+	{
+		/* It's possible that we have an ORDER BY on the columns for this
+		 * VTI but that the sort was eliminated during preprocessing (see
+		 * esp. SelectNode.preprocess()).  Take as an example the following
+		 * query:
+		 *
+		 *   select distinct * from
+		 *      table(syscs_diag.space_table('T1')) X order by 3
+		 *
+		 * For this query we will merge the ORDER BY and the DISTINCT and
+		 * thereby eliminate the sort for the ORDER BY.  As a result we
+		 * will end up here--but we don't need to do anything special to
+		 * return VTI rows in the correct order, so this method is a no-op.
+		 * DERBY-2805.
+		 */
+	}
+
+	/**
 	 * @see Optimizable#modifyAccessPath
 	 *
 	 * @exception StandardException		Thrown on error

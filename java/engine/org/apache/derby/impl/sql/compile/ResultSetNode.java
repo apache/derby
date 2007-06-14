@@ -1870,16 +1870,38 @@ public abstract class ResultSetNode extends QueryTreeNode
 	}
 
 	/**
-	 * Notify the underlying result set tree that the result is
-	 * ordering dependent.  (For example, no bulk fetch on an index
-	 * if under an IndexRowToBaseRow.)
+	 * Notify the underlying result set tree that the optimizer has chosen
+	 * to "eliminate" a sort.  Sort elimination can happen as part of
+	 * preprocessing (see esp. SelectNode.preprocess(...)) or it can happen
+	 * if the optimizer chooses an access path that inherently returns the
+	 * rows in the correct order (also known as a "sort avoidance" plan).
+	 * In either case we drop the sort and rely on the underlying result set
+	 * tree to return its rows in the correct order.
+	 *
+	 * For most types of ResultSetNodes we automatically get the rows in the
+	 * correct order if the sort was eliminated. One exception to this rule,
+	 * though, is the case of an IndexRowToBaseRowNode, for which we have
+	 * to disable bulk fetching on the underlying base table.  Otherwise
+	 * the index scan could return rows out of order if the base table is
+	 * updated while the scan is "in progress" (i.e. while the result set
+	 * is open).
+	 *
+	 * In order to account for this (and potentially other, similar issues
+	 * in the future) this method exists to notify the result set node that
+	 * it is expected to return rows in the correct order.  The result set
+	 * can then take necessary action to satsify this requirement--such as
+	 * disabling bulk fetch in the case of IndexRowToBaseRowNode.
+	 *
+	 * All of that said, any ResultSetNodes for which we could potentially
+	 * eliminate sorts should override this method accordingly.  So we don't
+	 * ever expect to get here.
 	 */
-	void markOrderingDependent()
+	void adjustForSortElimination()
 	{
 		if (SanityManager.DEBUG)
 		{
 			SanityManager.THROWASSERT(
-				"markOrderingDependent() not expected to be called for " +
+				"adjustForSortElimination() not expected to be called for " +
 				getClass().getName());
 		}
 	}

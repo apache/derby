@@ -349,11 +349,9 @@ public class IndexToBaseRowNode extends FromTable
 	}
 
 	/**
-	 * Notify the underlying result set tree that the result is
-	 * ordering dependent.  (For example, no bulk fetch on an index
-	 * if under an IndexRowToBaseRow.)
+	 * @see ResultSetNode#adjustForSortElimination
 	 */
-	void markOrderingDependent()
+	void adjustForSortElimination()
 	{
 		/* NOTE: We use a different method to tell a FBT that
 		 * it cannot do a bulk fetch as the ordering issues are

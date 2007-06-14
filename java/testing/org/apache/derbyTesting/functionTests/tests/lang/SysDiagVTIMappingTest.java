@@ -564,6 +564,91 @@ public final class SysDiagVTIMappingTest extends BaseJDBCTestCase {
         st.close();
     }
 
+    /**
+     * Test that diagnostic VTIs will work correctly when an ORDER BY
+     * clause appears and/or sort elimination occurs.  DERBY-2805.
+     */
+    public void testOrderBy() throws SQLException
+    {
+        Statement st = createStatement();
+        st.executeUpdate("set schema APP");
+
+        // Create a single testing table for this fixture only.
+
+        st.execute("create table ob_t1 (i int, c char(250))");
+        st.execute("create index i_ix on ob_t1 (i)");
+        st.execute("create index c_ix on ob_t1 (c desc)");
+
+        /* Several queries to make sure ORDER BY actually takes effect.
+         * First execute with just the ORDER BY, then execute with the
+         * ORDER BY *and* a DISTINCT. The latter leads to sort elimination
+         * but should still run without error and return the same results
+         * (prior to the fix for DERBY-2805 the sort elimination would
+         * lead to an ASSERT failure with sane builds).
+         */
+
+        String [][] expRS = new String [][]
+        {
+            {"C_IX", "1", "0"},
+            {"I_IX", "1", "0"},
+            {"OB_T1", "0", "0"},
+        };
+
+        ResultSet rs = st.executeQuery(
+            "select CONGLOMERATENAME, ISINDEX, NUMFREEPAGES from " +
+            "table(syscs_diag.space_table('OB_T1')) X order by 1");
+
+        JDBC.assertFullResultSet(rs, expRS);
+
+        rs = st.executeQuery(
+            "select distinct CONGLOMERATENAME, ISINDEX, NUMFREEPAGES from " +
+            "table(syscs_diag.space_table('OB_T1')) X order by 1");
+
+        JDBC.assertFullResultSet(rs, expRS);
+
+        expRS = new String [][]
+        {
+            {"OB_T1", "0", "0"},
+            {"C_IX", "1", "0"},
+            {"I_IX", "1", "0"},
+        };
+
+        rs = st.executeQuery(
+            "select CONGLOMERATENAME, ISINDEX, NUMFREEPAGES from " +
+            "table(syscs_diag.space_table('OB_T1')) X order by 2, 1");
+
+        JDBC.assertFullResultSet(rs, expRS);
+
+        rs = st.executeQuery(
+            "select distinct CONGLOMERATENAME, ISINDEX, NUMFREEPAGES from " +
+            "table(syscs_diag.space_table('OB_T1')) X order by 2, 1");
+
+        JDBC.assertFullResultSet(rs, expRS);
+        expRS = new String [][]
+        {
+            {"OB_T1", "0", "0"},
+            {"I_IX", "1", "0"},
+            {"C_IX", "1", "0"},
+        };
+
+        rs = st.executeQuery(
+            "select CONGLOMERATENAME, ISINDEX, NUMFREEPAGES from " +
+            "table(syscs_diag.space_table('OB_T1')) X order by 2, 1 desc");
+
+        JDBC.assertFullResultSet(rs, expRS);
+
+        rs = st.executeQuery(
+            "select distinct CONGLOMERATENAME, ISINDEX, NUMFREEPAGES from " +
+            "table(syscs_diag.space_table('OB_T1')) X order by 2, 1 desc");
+
+        JDBC.assertFullResultSet(rs, expRS);
+
+        // Cleanup.
+
+        st.execute("drop table ob_t1");
+        st.close();
+    }
+
     /* All statements in this method should fail because a VTI table-
      * mapping that takes arguments can only be used as part of the TABLE 
      * constructor.  Any other uses of, or attempts to modify, such a

@@ -1206,7 +1206,7 @@ public class SelectNode extends ResultSetNode
 	public ResultSetNode genProjectRestrict(int origFromListSize)
 				throws StandardException
 	{
-		boolean				orderingDependent = false;
+		boolean				eliminateSort = false;
 		PredicateList		restrictionList;
 		ResultColumnList	prRCList;
 		ResultSetNode		prnRSN;
@@ -1255,8 +1255,8 @@ public class SelectNode extends ResultSetNode
 			groupByList = null;
 			prnRSN  = gbn.getParent();
 
-			// Remember if the result is dependent on the ordering
-			orderingDependent = orderingDependent || gbn.getIsInSortedOrder();
+			// Remember whether or not we can eliminate the sort.
+			eliminateSort = eliminateSort || gbn.getIsInSortedOrder();
 		}
 
 		// if it is distinct, that must also be taken care of.
@@ -1322,8 +1322,8 @@ public class SelectNode extends ResultSetNode
 											getContextManager());
 				prnRSN.costEstimate = costEstimate.cloneMe();
 
-				// Remember if the result is dependent on the ordering
-				orderingDependent = orderingDependent || inSortedOrder;
+				// Remember whether or not we can eliminate the sort.
+				eliminateSort = eliminateSort || inSortedOrder;
 			}
 		}
 
@@ -1395,18 +1395,18 @@ public class SelectNode extends ResultSetNode
 
 		if (!(orderByList != null && orderByList.getSortNeeded()) && orderByQuery)
 		{
-			// Remember if the result is dependent on the ordering
-			orderingDependent = true;
+			// Remember whether or not we can eliminate the sort.
+			eliminateSort = true;
 		}
 
-		/* If the result is ordering dependent, then we must
-		 * tell the underlying tree.  At minimum, this means no
-		 * group fetch on an index under an IndexRowToBaseRow
-		 * since that could lead to incorrect results.  (Bug 2347.)
+		/* If we were able to eliminate the sort during optimization then
+		 * we must tell the underlying tree.  At minimum, this means no
+		 * group fetch on an index under an IndexRowToBaseRow since that
+		 * that could lead to incorrect results.  (Bug 2347.)
 		 */
-		if (orderingDependent)
+		if (eliminateSort)
 		{
-			prnRSN.markOrderingDependent();
+			prnRSN.adjustForSortElimination();
 		}
 
 		/* Set the cost of this node in the generated node */
