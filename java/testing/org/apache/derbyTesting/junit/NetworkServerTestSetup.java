@@ -28,6 +28,7 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.util.ArrayList;
 import junit.extensions.TestSetup;
 import junit.framework.Test;
 import org.apache.derby.drda.NetworkServerControl;
@@ -56,6 +57,8 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
     
     /** Sleep for 500 ms before pinging the network server (again) */
     private static final int SLEEP_TIME = 500;
+
+    public static final String HOST_OPTION = "-h";
 
     private static  long    waitTime = WAIT_TIME;
     
@@ -157,7 +160,7 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
         new Runnable() {
             public void run() {
 
-                String[]    args = getDefaultStartupArgs();
+                String[]    args = getDefaultStartupArgs( false );
                 
                 org.apache.derby.drda.NetworkServerControl.main( args );
             }
@@ -169,6 +172,7 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
     {
         StringBuffer    buffer = new StringBuffer();
         String              classpath = BaseTestCase.getSystemProperty( "java.class.path" );
+        boolean         skipHostName = false;
 
         buffer.append( "java -classpath " );
         buffer.append( classpath );
@@ -183,7 +187,15 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
 
         buffer.append( " org.apache.derby.drda.NetworkServerControl " );
 
-        String[]    defaultArgs = getDefaultStartupArgs();
+        count = startupArgs.length;
+        for ( int i = 0; i < count; i++ )
+        {
+            // if the special startup args override the hostname, then don't
+            // specify it twice
+            if ( HOST_OPTION.equals( startupArgs[ i ] ) ) { skipHostName = true; }
+        }
+
+        String[]    defaultArgs = getDefaultStartupArgs( skipHostName );
 
         count = defaultArgs.length;
         for ( int i = 0; i < count; i++ )
@@ -200,6 +212,8 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
         }
 
         final   String  command = buffer.toString();
+
+        //System.out.println( "XXX server startup command = " + command );
 
         Process     serverProcess = (Process) AccessController.doPrivileged
             (
@@ -246,7 +260,14 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
             }
       
             if (running)
-                networkServerController.shutdown();
+            {
+                try {
+                    networkServerController.shutdown();
+                } catch (Throwable t)
+                {
+                    t.printStackTrace( System.out );
+                }
+            }
  
             if ( serverOutput != null ) { serverOutput.close(); }
             networkServerController = null;
@@ -262,29 +283,31 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
     /**
      * Get the default command arguments for booting the network server.
      */
-    public  static String[] getDefaultStartupArgs()
+    public  static String[] getDefaultStartupArgs( boolean skipHostName )
     {
         TestConfiguration config = TestConfiguration.getCurrent();
-        
-        if (config.getSsl() == null) {
-            return new String[] {
-                "start",
-                "-h",
-                config.getHostName(),
-                "-p",
-                Integer.toString(config.getPort())
-            };
-        } else {
-            return new String[] {
-                "start",
-                "-h",
-                config.getHostName(),
-                "-p",
-                Integer.toString(config.getPort()),
-                "-ssl",
-                config.getSsl()
-            };
+        ArrayList               argsList = new ArrayList();
+
+        argsList.add( "start" );
+
+        if ( !skipHostName )
+        {
+            argsList.add( HOST_OPTION );
+            argsList.add( config.getHostName() );
         }
+        argsList.add( "-p" );
+        argsList.add( Integer.toString(config.getPort() ) );
+
+        if (config.getSsl() != null) {
+            argsList.add( "-ssl" );
+            argsList.add( config.getSsl( ) );
+        }
+
+        String[]    retval = new String[ argsList.size() ];
+
+        argsList.toArray( retval );
+
+        return retval;
     }
     
     /* Network Server Control */
@@ -364,7 +387,17 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
             try {
                 networkServerController.ping();
                 return true;
-            } catch (Exception e) {
+            } catch (Throwable e) {
+                if ( !vetPing( e ) )
+                {
+                    e.printStackTrace( System.out );
+
+                    // at this point, we don't have the usual "server not up
+                    // yet" error. get out. at this point, you may have to
+                    // manually kill the server.
+
+                    return false;
+                }
                 if (System.currentTimeMillis() - startTime > waitTime) {
                     return false;
                 }
@@ -381,11 +414,31 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
                 } catch (IllegalThreadStateException e) {
                     // This exception is thrown by Process.exitValue() if the
                     // process has not terminated. Keep on pinging the server.
+                } catch (Throwable t) {
+                    // something unfortunate happened
+                    t.printStackTrace( System.out );
+                    return false;
                 }
             }
         }
     }
 
+    // return false if ping returns an error other than "server not up yet"
+    private static  boolean vetPing( Throwable t )
+    {
+        if ( !t.getClass().getName().equals( "java.lang.Exception" ) ) { return false; }
+        
+        return ( t.getMessage().startsWith( "DRDA_NoIO.S:Could not connect to Derby Network Server" ) );
+    }
+    
+    // return true if this is a drda error
+    private static  boolean isDRDAerror( Throwable t )
+    {
+        if ( !t.getClass().getName().equals( "java.lang.Exception" ) ) { return false; }
+        
+        return ( t.getMessage().startsWith( "DRDA" ) );
+    }
+    
     public static boolean pingForServerStart(NetworkServerControl control)
         throws InterruptedException
     {

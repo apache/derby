@@ -25,6 +25,8 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.URL;
+import java.sql.Connection;
+import java.sql.DriverManager;
 import java.util.ArrayList;
 import java.util.Properties;
 
@@ -32,6 +34,7 @@ import junit.extensions.TestSetup;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.Derby;
 import org.apache.derbyTesting.junit.NetworkServerTestSetup;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
@@ -47,14 +50,22 @@ import org.apache.derby.drda.NetworkServerControl;
  * manager as expected.
  */
 
-public class SecureServerTest extends BaseTestCase
+public class SecureServerTest extends BaseJDBCTestCase
 {
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // CONSTANTS
     //
     ///////////////////////////////////////////////////////////////////////////////////
+
+    // basic properties file which tests that properties are picked up from derby.properties
+    private static  final   String  BASIC = "functionTests/tests/derbynet/SecureServerTest.derby.properties";
+
+    private static  final   String  SST_USER_NAME="MARY";
+    private static  final   String  SST_PASSWORD = "marypwd";
     
+    private static  final   String  DERBY_HOSTNAME_WILDCARD = "0.0.0.0";
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // INNER CLASSES
@@ -100,7 +111,8 @@ public class SecureServerTest extends BaseTestCase
     // startup state
     private boolean _unsecureSet;
     private boolean _authenticationRequired;
-    private boolean _useCustomDerbyProperties;
+    private String   _customDerbyProperties;
+    private boolean _useWildCardHost;
 
     // expected outcomes
     private Outcome _outcome;
@@ -119,7 +131,8 @@ public class SecureServerTest extends BaseTestCase
         (
          boolean unsecureSet,
          boolean authenticationRequired,
-         boolean useCustomDerbyProperties,
+         String     customDerbyProperties,
+         boolean    useWildCardHost,
 
          Outcome    outcome
         )
@@ -128,7 +141,8 @@ public class SecureServerTest extends BaseTestCase
 
          _unsecureSet =  unsecureSet;
          _authenticationRequired =  authenticationRequired;
-         _useCustomDerbyProperties = useCustomDerbyProperties;
+         _customDerbyProperties = customDerbyProperties;
+         _useWildCardHost = useWildCardHost;
 
          _outcome = outcome;
 
@@ -159,16 +173,18 @@ public class SecureServerTest extends BaseTestCase
 
         // O = Overriden
         // A = Authenticated
-        // C = using Custom properties
+        // C = Custom properties
+        // W = Use wildcard host
         //
-        //      .addTest( decorateTest( O,        A,       C,    Outcome ) );
+        //      .addTest( decorateTest( O,        A,       C,    W,    Outcome ) );
         //
 
-        suite.addTest( decorateTest( false,  false, false, RUNNING_SECURITY_BOOTED ) );
-        suite.addTest( decorateTest( false,  false, true, RUNNING_SECURITY_BOOTED ) );
-        suite.addTest( decorateTest( false,  true, false, RUNNING_SECURITY_BOOTED ) );
-        suite.addTest( decorateTest( true,  false, false, RUNNING_SECURITY_NOT_BOOTED ) );
-        suite.addTest( decorateTest( true,  true, false, RUNNING_SECURITY_NOT_BOOTED ) );
+        suite.addTest( decorateTest( false,  false, null, false, RUNNING_SECURITY_BOOTED ) );
+        suite.addTest( decorateTest( false,  false, BASIC, false, RUNNING_SECURITY_BOOTED ) );
+        suite.addTest( decorateTest( false,  true, null, false, RUNNING_SECURITY_BOOTED ) );
+        suite.addTest( decorateTest( false,  true, null, true, RUNNING_SECURITY_BOOTED ) );
+        suite.addTest( decorateTest( true,  false, null, false, RUNNING_SECURITY_NOT_BOOTED ) );
+        suite.addTest( decorateTest( true,  true, null, false, RUNNING_SECURITY_NOT_BOOTED ) );
         
         return suite;
     }
@@ -198,7 +214,8 @@ public class SecureServerTest extends BaseTestCase
         (
          boolean unsecureSet,
          boolean authenticationRequired,
-         boolean useCustomDerbyProperties,
+         String customDerbyProperties,
+         boolean    useWildCardHost,
          
          Outcome outcome
         )
@@ -207,13 +224,14 @@ public class SecureServerTest extends BaseTestCase
             (
              unsecureSet,
              authenticationRequired,
-             useCustomDerbyProperties,
+             customDerbyProperties,
+             useWildCardHost,
 
              outcome
             );
 
-        String[]        startupProperties = getStartupProperties( authenticationRequired, useCustomDerbyProperties );
-        String[]        startupArgs = getStartupArgs( unsecureSet );
+        String[]        startupProperties = getStartupProperties( authenticationRequired, customDerbyProperties );
+        String[]        startupArgs = getStartupArgs( unsecureSet, useWildCardHost );
 
         NetworkServerTestSetup networkServerTestSetup =
                 new NetworkServerTestSetup
@@ -232,7 +250,7 @@ public class SecureServerTest extends BaseTestCase
             SecurityManagerSetup.noSecurityManager(networkServerTestSetup);
 
         // if using the custom derby.properties, copy the custom properties to a visible place
-        if ( useCustomDerbyProperties )
+        if ( customDerbyProperties != null )
         {
             testSetup = new SupportFilesSetup
                 (
@@ -251,16 +269,22 @@ public class SecureServerTest extends BaseTestCase
 
     /**
      * <p>
-     * Return n array of startup args suitable for booting a server.
+     * Return an array of startup args suitable for booting a server.
      * </p>
      */
-    private static  String[]    getStartupArgs( boolean setUnsecureOption )
+    private static  String[]    getStartupArgs( boolean setUnsecureOption, boolean useWildCardHost )
     {
         ArrayList       list = new ArrayList();
 
         if ( setUnsecureOption )
         {
             list.add( "-noSecurityManager" );
+        }
+        
+        if ( useWildCardHost )
+        {
+            list.add( NetworkServerTestSetup.HOST_OPTION );
+            list.add( DERBY_HOSTNAME_WILDCARD );
         }
         
         String[]    result = new String[ list.size() ];
@@ -275,16 +299,18 @@ public class SecureServerTest extends BaseTestCase
      * Return a set of startup properties suitable for SystemPropertyTestSetup.
      * </p>
      */
-    private static  String[]  getStartupProperties( boolean authenticationRequired, boolean useCustomDerbyProperties )
+    private static  String[]  getStartupProperties( boolean authenticationRequired, String customDerbyProperties )
     {
         ArrayList       list = new ArrayList();
 
         if ( authenticationRequired )
         {
             list.add( "derby.connection.requireAuthentication=true" );
+            list.add( "derby.authentication.provider=BUILTIN" );
+            list.add( "derby.user." + SST_USER_NAME + "=" + SST_PASSWORD );
         }
 
-        if ( useCustomDerbyProperties )
+        if ( customDerbyProperties != null )
         {
             list.add( "derby.system.home=extinout" );
         }
@@ -316,6 +342,31 @@ public class SecureServerTest extends BaseTestCase
         assertEquals( myName + ": serverCameUp = " + serverCameUp, _outcome.serverShouldComeUp(), serverCameUp );
         
         assertTrue( myName + "\nExpected: " + _outcome.expectedServerOutput() + "\nBut saw: " + serverOutput , outputOK );
+
+        //
+        // make sure that the default policy lets us connect to the server if the hostname was
+        // wildcarded (DERBY-2811)
+        //
+        if ( _authenticationRequired && _useWildCardHost ) { connectToServer(); }
+    }
+
+    private void    connectToServer()
+        throws Exception
+    {
+        String  url =
+            "jdbc:derby://localhost:" + getTestConfiguration().getPort() + "/" + "wombat;create=true" +
+            ";user=" + SST_USER_NAME + ";password=" + SST_PASSWORD;
+
+        println( "XXX in connectToServer(). url = " + url );
+
+        // just try to get a connection
+        Class.forName( "org.apache.derby.jdbc.ClientDriver" );
+        
+        Connection  conn = DriverManager.getConnection(  url );
+
+        assertNotNull( "Connection should not be null...", conn );
+
+        conn.close();
     }
 
     ///////////////////////////////////////////////////////////////////////////////////
@@ -331,7 +382,8 @@ public class SecureServerTest extends BaseTestCase
         buffer.append( "SecureServerTest( " );
         buffer.append( "Opened = " ); buffer.append( _unsecureSet);
         buffer.append( ", Authenticated= " ); buffer.append( _authenticationRequired );
-        buffer.append( ", CustomDerbyProperties= " ); buffer.append( _useCustomDerbyProperties );
+        buffer.append( ", CustomDerbyProperties= " ); buffer.append( _customDerbyProperties );
+        buffer.append( ", UsingWildCardHost= " ); buffer.append( _useWildCardHost );
         buffer.append( " )" );
 
         return buffer.toString();

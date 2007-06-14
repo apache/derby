@@ -177,6 +177,8 @@ public class NetworkServerControl{
 	private final static String DERBYNET_JAR = "derbynet.jar";
 	private final static String POLICY_FILENAME = "server.policy";
 	private final static String POLICY_FILE_PROPERTY = "java.security.policy";
+	private final static String DERBY_HOSTNAME_WILDCARD = "0.0.0.0";
+	private final static String SOCKET_PERMISSION_HOSTNAME_WILDCARD = "*";
 
     private NetworkServerControlImpl serverImpl;
 
@@ -581,8 +583,14 @@ public class NetworkServerControl{
         if ( PropertyUtil.getSystemProperty( Property.SYSTEM_HOME_PROPERTY ) == null )
         { System.setProperty( Property.SYSTEM_HOME_PROPERTY, PropertyUtil.getSystemProperty( "user.dir" ) ); }
 
-        if ( PropertyUtil.getSystemProperty( Property.DRDA_PROP_HOSTNAME ) == null )
-        { System.setProperty( Property.DRDA_PROP_HOSTNAME, server.getHost() ); }
+        //
+        // Forcibly set the following property so that it will be correctly
+        // substituted into the default policy file. It is ok to force this
+        // property at this time because it has already been read
+        // (and if necessary overridden) by server.getPropertyInfo()
+        // followed by server.parseArgs().
+        //
+        System.setProperty( Property.DRDA_PROP_HOSTNAME, getHostNameForSocketPermission( server ) );
 
         //
         // Forcibly set the following property. This is the parameter in
@@ -613,6 +621,27 @@ public class NetworkServerControl{
         server.consoleMessage( successMessage );
     }
 
+    /**
+     * Get the hostname as a value suitable for substituting into the
+     * default server policy file. The special
+     * wildcard value "0.0.0.0" is forced to be "*" since that is the wildcard
+     * hostname understood by SocketPermission. SocketPermission does
+     * not understand the "0.0.0.0" wildcard.
+     */
+    private static String  getHostNameForSocketPermission( NetworkServerControlImpl server )
+        throws Exception
+    {
+        //
+        // By now, server.getPropertyInfo() has been called, followed by
+        // server.parseArgs(). So the server knows its hostname.
+        //
+        String  hostname = server.getHost();
+        
+        if ( DERBY_HOSTNAME_WILDCARD.equals( hostname ) ) { hostname = SOCKET_PERMISSION_HOSTNAME_WILDCARD; }
+
+        return hostname;
+    }
+    
     /**
      *<p>
      * Find the url of the library directory which holds derby.jar and
