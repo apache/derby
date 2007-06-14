@@ -255,7 +255,7 @@ final class EmbedClob extends ConnectionChild implements Clob
         //the Clob object has been freed by calling free() on it
         checkValidity();
         try {
-            return new ClobUpdateableReader (this);
+            return new ClobUpdatableReader (this);
         } catch (IOException ioe) {
             throw Util.setStreamFailure(ioe);
         }
@@ -708,7 +708,7 @@ restartScan:
         }
         
         try {
-            return new ClobUpdateableReader(this,
+            return new ClobUpdatableReader(this,
                                             pos-1,
                                             length);
         } catch (IOException ioe) {

@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.impl.jdbc.ClobUpdateableReader
+   Derby - Class org.apache.derby.impl.jdbc.ClobUpdatableReader
 
    Licensed to the Apache Software Foundation (ASF) under one
    or more contributor license agreements.  See the NOTICE file
@@ -32,16 +32,16 @@ import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 /**
- * <code>ClobUpdateableReader</code> is used to create a <code>Reader</code>
+ * <code>ClobUpdatableReader</code> is used to create a <code>Reader</code>
  * over a <code>LOBInputStream</code>.
  * <p>
  * This class is aware that the underlying stream can be modified and
  * reinitializes itself if it detects any change in the stream. This
  * invalidates the cache so the changes are reflected immediately.
- *
+ * 
  * @see LOBInputStream
  */
-final class ClobUpdateableReader extends Reader {
+final class ClobUpdatableReader extends Reader {
     
     /** Reader accessing the Clob data and doing the work. */
     private Reader streamReader;
@@ -67,7 +67,7 @@ final class ClobUpdateableReader extends Reader {
      * @param conChild a connection object used to obtain synchronization-object
      * @throws IOException
      */
-    ClobUpdateableReader (LOBInputStream stream, ConnectionChild conChild)
+    ClobUpdatableReader (LOBInputStream stream, ConnectionChild conChild)
                                                         throws IOException {
         clob = null;
         materialized = true;
@@ -86,7 +86,7 @@ final class ClobUpdateableReader extends Reader {
      * @throws IOException
      * @throws SQLException
      */
-    ClobUpdateableReader (EmbedClob clob) throws IOException, SQLException {
+    ClobUpdatableReader (EmbedClob clob) throws IOException, SQLException {
         this.clob = clob;
         this.conChild = clob;
         // A subset of the Clob has not been requested.
@@ -114,11 +114,11 @@ final class ClobUpdateableReader extends Reader {
     }
     
     /**
-     * Construct an <code>ClobUpdateableReader<code> using the 
+     * Construct an <code>ClobUpdatableReader<code> using the 
      * <code>EmbedClob</code> received as parameter. The initial
      * position in the stream is set to <code>pos</code> and the
      * stream is restricted to a length of <code>len</code>.
-     *
+     * 
      * @param clob EmbedClob this stream is associated with.
      * @param pos initial position. The position starts from 0.
      * @param len The length to which the underlying <code>InputStream</code>
@@ -126,7 +126,7 @@ final class ClobUpdateableReader extends Reader {
      * @throws IOException
      * @throws SQLException
      */
-    ClobUpdateableReader (EmbedClob clob, long pos, long len) 
+    ClobUpdatableReader (EmbedClob clob, long pos, long len) 
     throws IOException, SQLException {
         this.clob = clob;
         this.conChild = clob;

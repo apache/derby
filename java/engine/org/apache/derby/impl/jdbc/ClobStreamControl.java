@@ -234,7 +234,7 @@ final class ClobStreamControl implements InternalClob {
             throw new IllegalArgumentException(
                 "Position must be positive: " + pos);
         }
-        Reader isr = new ClobUpdateableReader (
+        Reader isr = new ClobUpdatableReader (
                 (LOBInputStream) getRawByteStream(), conChild);
 
         long leftToSkip = pos -1;

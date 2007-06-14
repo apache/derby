@@ -114,8 +114,8 @@ public class _Suite extends BaseTestCase  {
             // an inner class implements ConnectionEventListener.
             suite.addTest(DataSourceTest.suite());
 
-            //suite to test updateable reader for clob in embedded driver
-            suite.addTest (ClobUpdateableReaderTest.suite());
+            //suite to test updatable reader for clob in embedded driver
+            suite.addTest (ClobUpdatableReaderTest.suite());
             
             //truncate test for clob
             suite.addTest (ClobTruncateTest.suite());

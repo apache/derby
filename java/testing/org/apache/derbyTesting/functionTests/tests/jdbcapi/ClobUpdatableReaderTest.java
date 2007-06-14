@@ -1,6 +1,6 @@
 /*
  *
- * Derby - Class org.apache.derbyTesting.functionTests.tests.jdbcapi.ClobUpdateableReaderTest
+ * Derby - Class org.apache.derbyTesting.functionTests.tests.jdbcapi.ClobUpdatableReaderTest
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -44,11 +44,11 @@ import java.io.Reader;
  * Test class to test <code>UpdateableReader</code> for <code>Clob</code> in
  * embedded driver.
  */
-public class ClobUpdateableReaderTest extends BaseJDBCTestCase {
+public class ClobUpdatableReaderTest extends BaseJDBCTestCase {
     
     private final String dummy = "This is a new String";
         
-    public ClobUpdateableReaderTest (String name) {
+    public ClobUpdatableReaderTest (String name) {
         super (name);
     }
     
@@ -303,11 +303,11 @@ public class ClobUpdateableReaderTest extends BaseJDBCTestCase {
     }
     
     public static Test suite() {
-        TestSuite ts = new TestSuite ("ClobUpdateableReaderTest");
+        TestSuite ts = new TestSuite ("ClobUpdatableReaderTest");
         ts.addTest(TestConfiguration.defaultSuite(
-                    ClobUpdateableReaderTest.class));
-        TestSuite encSuite = new TestSuite ("ClobUpdateableReaderTest:encrypted");
-        encSuite.addTestSuite (ClobUpdateableReaderTest.class);
+                    ClobUpdatableReaderTest.class));
+        TestSuite encSuite = new TestSuite ("ClobUpdatableReaderTest:encrypted");
+        encSuite.addTestSuite (ClobUpdatableReaderTest.class);
         ts.addTest(Decorator.encryptedDatabase (encSuite));
         return ts;
     }        
