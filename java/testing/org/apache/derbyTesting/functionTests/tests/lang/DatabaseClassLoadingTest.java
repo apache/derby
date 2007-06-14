@@ -104,7 +104,6 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
                 "testLoadJavaClassDirectly2",
                 "testLoadJavaClassDirectly3",
                 "testLoadDerbyClassIndirectly",
- 
             };
             
             for (int i = 0; i < orderedTests.length; i++)
@@ -116,7 +115,14 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
                    new DatabaseClassLoadingTest("testDatabaseInJar"))); 
 
            suite.addTest(SecurityManagerSetup.noSecurityManager(
-                   new DatabaseClassLoadingTest("testDatabaseInClasspath"))); 
+                   new DatabaseClassLoadingTest("testDatabaseInClasspath")));
+           
+           // No security manager because the test uses getClass().getClassLoader()
+           // in an installed jar to ensure that the class loader for
+           // specific classes is correct. This operation is not allowed in general.
+           suite.addTest(SecurityManagerSetup.noSecurityManager(
+                   new DatabaseClassLoadingTest("testClassLoadOrdering")));
+           
 
            test = new SupportFilesSetup(suite,
                    new String[] {
@@ -127,6 +133,9 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
                    "functionTests/tests/lang/dcl_emc2sm.jar",
                    "functionTests/tests/lang/dcl_emc2l.jar",
                    "functionTests/tests/lang/dcl_java.jar",
+                   "functionTests/tests/lang/dcl_ot1.jar",
+                   "functionTests/tests/lang/dcl_ot2.jar",
+                   "functionTests/tests/lang/dcl_ot3.jar",
                    });
            
            }
@@ -806,6 +815,98 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
         }
     }
     
+    /**
+     * Test ordering of class loading.
+     * @throws MalformedURLException 
+     */
+    public void testClassLoadOrdering() throws SQLException, MalformedURLException
+    {
+        Statement s = createStatement();
+        
+        s.executeUpdate("CREATE SCHEMA OT");
+        
+        // Functions to get the class loader of a specific class.
+        // Thre variants that are loaded out of each installed jar
+        // file to ensure that loading is delegated from one jar
+        // to another correctly.
+        // We use the added feature that the toString() of the
+        // ClassLoader for installed jars returns the jar name
+        // first. The RETURNS VARCHAR(10) trims the string to
+        // the correct length for our compare purposes, ie. the
+        // length of "OT"."OT{1,2,3}"
+        s.execute("create function OT.WHICH_LOADER1(classname VARCHAR(256)) " +
+        "RETURNS VARCHAR(10) " +
+        "NO SQL " +
+        "external name " +
+        "'org.apache.derbyTesting.databaseclassloader.ot.OrderTest1.whichLoader' " +
+        "language java parameter style java");
+        
+        s.execute("create function OT.WHICH_LOADER2(classname VARCHAR(256)) " +
+                "RETURNS VARCHAR(10) " +
+                "NO SQL " +
+                "external name " +
+                "'org.apache.derbyTesting.databaseclassloader.ot.OrderTest2.whichLoader' " +
+                "language java parameter style java");
+
+        s.execute("create function OT.WHICH_LOADER3(classname VARCHAR(256)) " +
+                "RETURNS VARCHAR(10) " +
+                "NO SQL " +
+                "external name " +
+                "'org.apache.derbyTesting.databaseclassloader.ot.OrderTest3.whichLoader' " +
+                "language java parameter style java");
+
+
+        installJar("dcl_ot1.jar", "OT.OT1");
+        installJar("dcl_ot2.jar", "OT.OT2");
+        installJar("dcl_ot3.jar", "OT.OT3");
+        
+        setDBClasspath("OT.OT1:OT.OT2:OT.OT3");
+        
+        PreparedStatement ps1 = prepareStatement(
+            "VALUES OT.WHICH_LOADER1(?)");
+        PreparedStatement ps2 = prepareStatement(
+            "VALUES OT.WHICH_LOADER2(?)");
+        PreparedStatement ps3 = prepareStatement(
+            "VALUES OT.WHICH_LOADER3(?)");
+        
+        // Tests the classes loaded as a direct entry point for a routine
+        checkCorrectLoader("OrderTest1", ps1, ps2, ps3);
+        checkCorrectLoader("OrderTest2", ps1, ps2, ps3);
+        checkCorrectLoader("OrderTest3", ps1, ps2, ps3);
+        
+        // Tests the classes loaded directly (Class.forName()) by
+        // code in an installed jar file.
+        checkCorrectLoader("OrderLoad1", ps1, ps2, ps3);
+        checkCorrectLoader("OrderLoad2", ps1, ps2, ps3);
+        checkCorrectLoader("OrderLoad3", ps1, ps2, ps3);
+               
+        ps1.close();
+        ps2.close();
+        ps3.close();
+        s.close();
+        
+    }
+    
+    private void checkCorrectLoader(String className,
+            PreparedStatement ps1,
+            PreparedStatement ps2,
+            PreparedStatement ps3)
+       throws SQLException
+    {
+        className = "org.apache.derbyTesting.databaseclassloader.ot." + className;
+        String expectedLoader = 
+            "\"OT\".\"OT" + className.charAt(className.length() -1) + "\"";
+        
+        ps1.setString(1, className);
+        JDBC.assertSingleValueResultSet(ps1.executeQuery(), expectedLoader);
+        
+        ps2.setString(1, className);
+        JDBC.assertSingleValueResultSet(ps2.executeQuery(), expectedLoader);
+
+        ps3.setString(1, className);
+        JDBC.assertSingleValueResultSet(ps3.executeQuery(), expectedLoader);
+    }
+            
   
     private void installJar(String resource, String jarName) throws SQLException, MalformedURLException
     {        

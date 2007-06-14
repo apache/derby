@@ -47,7 +47,22 @@ import org.apache.derby.iapi.reference.Module;
 import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.services.locks.CompatibilitySpace;
 
-class UpdateLoader {
+/**
+ * UpdateLoader implements then functionality of
+ * derby.database.classpath. It manages the ClassLoaders
+ * (instances of JarLoader) for each installed jar file.
+ * Jar files are installed through the sqlj.install_jar procedure.
+ * <BR>
+ * Each JarLoader delegates any request through standard mechanisms
+ * to load a class to this object, which will then ask each jarLoader in order of
+ * derby.database.classpath to load the class through an internal api.
+ * This means if the third jar in derby.database.classpath tries to load
+ * a class, say from the class for a procedure's method making some
+ * reference to it, then the request is delegated to UpdateLoader.
+ * UpdateLoader will then try to load the class from each of the jars
+ * in order of derby.database.classpath using the jar's installed JarLoader.
+ */
+final class UpdateLoader {
     
     /**
      * List of packages that Derby will not support being loaded
@@ -129,13 +144,29 @@ class UpdateLoader {
 	}
 
 	/**
-		Load the class from the class path.
+		Load the class from the class path. Called by JarLoader
+        when it has a request to load a class to fulfill
+        the sematics of derby.database.classpath.
+        <P>
+        Enforces two restrictions:
+        <UL>
+        <LI> Do not allow classes in certain name spaces to be loaded
+        from installed jars, see RESTRICTED_PACKAGES for the list.
+        <LI> Referencing Derby's internal classes (those outside the
+        public api) from installed is disallowed. This is to stop
+        user defined routines bypassing security or taking advantage
+        of security holes in Derby. E.g. allowing a routine to
+        call a public method in derby would allow such routines
+        to call public static methods for system procedures without
+        having been granted permission on them, such as setting database
+        properties.
+        </UL>
 
-		@exception ClassNotFoundException Class can not be found
+		@exception ClassNotFoundException Class can not be found or
+        the installed jar is restricted from loading it.
 	*/
 	Class loadClass(String className, boolean resolve) 
 		throws ClassNotFoundException {
-
 
 		JarLoader jl = null;
 

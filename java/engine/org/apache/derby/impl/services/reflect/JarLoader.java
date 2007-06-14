@@ -51,7 +51,7 @@ import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.io.StorageFile;
 
 
-class JarLoader extends SecureClassLoader {
+final class JarLoader extends SecureClassLoader {
     
     /**
      * Two part name for the jar file.
@@ -148,7 +148,7 @@ class JarLoader extends SecureClassLoader {
 	 * @exception ClassNotFoundException
 	 *                Class can not be found
 	 */
-	public Class loadClass(String className, boolean resolve) 
+	protected Class loadClass(String className, boolean resolve) 
 		throws ClassNotFoundException {
 
 		// we attempt the system class load even if we
@@ -497,5 +497,14 @@ class JarLoader extends SecureClassLoader {
                 MessageId.CM_SECURITY_EXCEPTION, className, getJarName(), e
                         .getLocalizedMessage());
         return new SecurityException(msg);
+    }
+    
+    /**
+     * Return the jar name if toString() is called
+     * on this class loader.
+     */
+    public String toString()
+    {
+        return getJarName() + ":" + super.toString();
     }
 }
