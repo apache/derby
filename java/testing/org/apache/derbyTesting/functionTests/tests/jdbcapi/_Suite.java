@@ -75,6 +75,7 @@ public class _Suite extends BaseTestCase  {
 		suite.addTest(SetTransactionIsolationTest.suite());
 		suite.addTest(AuthenticationTest.suite());
 		suite.addTest(DriverTest.suite());
+		suite.addTest(ParameterMetaDataJdbc30Test.suite());
         suite.addTest(ClobTest.suite());
         suite.addTest(BlobUpdateableStreamTest.suite());
         suite.addTest(AIjdbcTest.suite());
