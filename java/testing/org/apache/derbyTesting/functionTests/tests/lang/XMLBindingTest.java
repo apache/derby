@@ -137,7 +137,7 @@ public class XMLBindingTest extends BaseJDBCTestCase {
         // into xTable.t1 as part of XBindTestSetup setup.  A "0"
         // means empty string; a "-1" means we inserted a null.
         int [] expectedCharCounts =
-            new int [] { 39441, 37925, 1161, 1155, 1180, 922, 22, -1, -1 };
+            new int [] { 40228, 38712, 1948, 1942, 1967, 1709, 22, -1, -1 };
 
         int rowCount = 0;
         ResultSet rs = createStatement().executeQuery(
