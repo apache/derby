@@ -21,39 +21,28 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.services.loader.ClassInspector;
-
-import org.apache.derby.iapi.services.context.ContextManager;
-
-import org.apache.derby.iapi.sql.compile.CompilerContext;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.reference.Limits;
 
-import org.apache.derby.iapi.sql.ResultSet;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
 
 import org.apache.derby.iapi.types.TypeId;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.StringDataValue;
 
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 
 import org.apache.derby.iapi.error.StandardException;
 
-import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.impl.sql.compile.ActivationClassBuilder;
-import org.apache.derby.impl.sql.execute.BaseActivation;
 
 import org.apache.derby.catalog.AliasInfo;
 import org.apache.derby.catalog.TypeDescriptor;
 import org.apache.derby.catalog.types.RoutineAliasInfo;
 import org.apache.derby.catalog.types.SynonymAliasInfo;
+import org.apache.derby.catalog.types.TypeDescriptorImpl;
 
-import java.lang.reflect.Member;
 import java.util.Vector;
 
 /**
@@ -231,6 +220,79 @@ public class CreateAliasNode extends DDLStatementNode
 		}
 	}
 
+	/**
+	 * CreateAliasNode creates the RoutineAliasInfo for a user defined function
+	 * in it's init method, which is called by the parser. But at that time, we
+	 * do not have the SchemaDescriptor ready to determine the collation
+	 * type. Hence, at the bind time, when we do have the SchemaDescriptor
+	 * available, we should go back and fix the RoutineAliasIno to have correct
+	 * collation for it's character string parameters and also fix it's return
+	 * type's collation if the return type is a character string.
+	 * 
+	 * This method here checks if the RoutineAliasInfo has any character string
+	 * types associated with it. If not, then the RoutineAliasInfo that got
+	 * created at parsing time is just fine. But if not, then we should take
+	 * care of the collation type of it's character string types. 
+	 * 
+	 * @return true if it has a parameter or return type of character string
+	 */
+	private boolean anyStringTypeDescriptor() {
+		RoutineAliasInfo rai = (RoutineAliasInfo)aliasInfo;
+		TypeDescriptor aType = rai.getReturnType();
+		/*
+		** Try for a built in type matching the
+		** type name.  
+		*/
+		TypeId compTypeId = TypeId.getBuiltInTypeId(aType.getTypeName());
+		if (compTypeId != null && compTypeId.isStringTypeId()) 
+			return true;
+		if (rai.getParameterCount() != 0) {
+			int paramCount = rai.getParameterCount();
+			TypeDescriptor[] paramTypes = rai.getParameterTypes();
+			for (int i = 0; i < paramCount; i++) {
+				compTypeId = TypeId.getBuiltInTypeId(paramTypes[i].getTypeName());
+				if (compTypeId != null && compTypeId.isStringTypeId()) 
+					return true;
+			}
+		}
+		return false;		
+	}
+	
+	/**
+	 * Take the passed TypeDescriptor and check if it corresponds to a 
+	 * character string type. If yes, then create a new one based on it's 
+	 * typeid, length and nullability to create a new DataTypeDescriptor and 
+	 * then have it take the collation type of the schema in which the method 
+	 * is getting defined in. This is because all the character strings 
+	 * associated with the definition of the user defined function should take  
+	 * the collation of the schema in which this user defined function is 
+	 * getting created.
+	 * 
+	 * @param changeTD TypeDescriptor with incorrect collation setting
+	 * @return New TypeDescriptor with collation of the schema in which 
+	 *   the function is getting created.
+	 * @throws StandardException
+	 */
+	private TypeDescriptor typeDescriptorWithCorrectCollation(TypeDescriptor changeTD)
+	throws StandardException {
+		TypeId compTypeId = TypeId.getBuiltInTypeId(changeTD.getTypeName());
+		//No work to do if type id does not correspond to a character string
+		if (compTypeId != null && compTypeId.isStringTypeId()) {
+			DataTypeDescriptor newTDWithCorrectCollation = 
+				new DataTypeDescriptor(compTypeId, 
+						changeTD.isNullable(),
+						changeTD.getMaximumWidth());
+			//Use the collation type and info of the schema in which this
+			//function is defined for the return value of the function
+			newTDWithCorrectCollation.setCollationType(
+		    	     getSchemaDescriptor(getObjectName().getSchemaName(), false).getCollationType());
+			newTDWithCorrectCollation.setCollationDerivation(
+	        		StringDataValue.COLLATION_DERIVATION_IMPLICIT);
+			return newTDWithCorrectCollation;
+		}
+		return changeTD;
+	}
+	
 	// We inherit the generate() method from DDLStatementNode.
 
 	/**
@@ -245,6 +307,39 @@ public class CreateAliasNode extends DDLStatementNode
 
 	public void bindStatement() throws StandardException
 	{
+		//Are we dealing with user defined function?
+		if (aliasType == AliasInfo.ALIAS_TYPE_FUNCTION_AS_CHAR) {
+			//Does the user defined function have any character string types
+			//in it's definition
+			if (anyStringTypeDescriptor()){
+				RoutineAliasInfo oldAliasInfo = (RoutineAliasInfo)aliasInfo;  
+				TypeDescriptor[] newParamTypes = null;
+				int paramCount = oldAliasInfo.getParameterCount();
+				//Does the user defined functio has any parameters to it?
+				if (paramCount > 0) {
+					newParamTypes = new TypeDescriptor[paramCount];
+					TypeDescriptor[] oldParamTypes = oldAliasInfo.getParameterTypes();
+					//Go through the parameters and pick the character string
+					//type and set their collation to the collation of the
+					//schema in which the function is getting defined.
+					for (int i = 0; i < paramCount; i++) 
+						newParamTypes[i] = typeDescriptorWithCorrectCollation(oldParamTypes[i]);
+				}
+				//Now create the RoutineAliasInfo again with it's character
+				//strings associated with correct collation type
+				aliasInfo = new RoutineAliasInfo(
+						oldAliasInfo.getMethodName(),
+						oldAliasInfo.getParameterCount(),
+						oldAliasInfo.getParameterNames(), 
+						newParamTypes, 
+						oldAliasInfo.getParameterModes(), 
+						oldAliasInfo.getMaxDynamicResultSets(),
+						oldAliasInfo.getParameterStyle(),
+						oldAliasInfo.getSQLAllowed(),
+						oldAliasInfo.calledOnNullInput(), 
+						typeDescriptorWithCorrectCollation(oldAliasInfo.getReturnType()));
+			}
+		}
 		// Procedures and functions do not check class or method validity until
 		// runtime execution. Synonyms do need some validity checks.
 		if (aliasType != AliasInfo.ALIAS_TYPE_SYNONYM_AS_CHAR)

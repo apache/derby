@@ -692,6 +692,16 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
         		" xmlTable, SYS.SYSTABLES WHERE XMLSERIALIZE(? as CHAR(10)) = " + 
     			" CAST(TABLENAME AS CHAR(10))", "42Z70");
     }
+    
+    //Start of user defined function testing
+    //At this point, just create a function which involves character strings
+    //in it's definition. In subsequent checkin, there will be collation 
+    //related testing using this function's return value
+    s.executeUpdate("set schema APP");
+    s.executeUpdate("CREATE FUNCTION CONCAT_NOCALL(VARCHAR(10), VARCHAR(10)) "+
+    		" RETURNS VARCHAR(20) RETURNS NULL ON NULL INPUT EXTERNAL NAME " + 
+			"'org.apache.derbyTesting.functionTests.tests.lang.RoutineTest.concat' "+
+			" LANGUAGE JAVA PARAMETER STYLE JAVA");
 
     //Start of parameter testing
     //Start with simple ? param in a string comparison
