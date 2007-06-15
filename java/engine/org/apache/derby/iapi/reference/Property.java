@@ -325,6 +325,15 @@ public interface Property {
      **/
     public static final String DERBY_INSTALL_URL = "derby.install.url";
 
+    /**
+     * Ths property is private to Derby.
+     * This property is forcibly set by the Network Server to override
+     * any values which the user may have set. This property is only used to
+     * parameterize the Basic security policy used by the Network Server.
+     * This property is the hostname which the server uses.
+     **/
+    public static final String DERBY_SECURITY_HOST = "derby.security.host";
+
 	/*
 	** derby.storage.*
 	*/

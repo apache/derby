@@ -25,6 +25,6 @@ grant codeBase "${derby.install.url}derbynet.jar"
 //
 // This permission lets the Network Server manage connections from clients.
 //
-  permission java.net.SocketPermission "${derby.drda.host}:*", "accept"; 
+  permission java.net.SocketPermission "${derby.security.host}:*", "accept"; 
 };
 

@@ -64,7 +64,8 @@ public class SecureServerTest extends BaseJDBCTestCase
     private static  final   String  SST_USER_NAME="MARY";
     private static  final   String  SST_PASSWORD = "marypwd";
     
-    private static  final   String  DERBY_HOSTNAME_WILDCARD = "0.0.0.0";
+    private static  final   String  HOSTW = "0.0.0.0";
+    private static  final   String  IPV6W = "::";
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -112,7 +113,7 @@ public class SecureServerTest extends BaseJDBCTestCase
     private boolean _unsecureSet;
     private boolean _authenticationRequired;
     private String   _customDerbyProperties;
-    private boolean _useWildCardHost;
+    private String _wildCardHost;
 
     // expected outcomes
     private Outcome _outcome;
@@ -132,7 +133,7 @@ public class SecureServerTest extends BaseJDBCTestCase
          boolean unsecureSet,
          boolean authenticationRequired,
          String     customDerbyProperties,
-         boolean    useWildCardHost,
+         String     wildCardHost,
 
          Outcome    outcome
         )
@@ -142,7 +143,7 @@ public class SecureServerTest extends BaseJDBCTestCase
          _unsecureSet =  unsecureSet;
          _authenticationRequired =  authenticationRequired;
          _customDerbyProperties = customDerbyProperties;
-         _useWildCardHost = useWildCardHost;
+         _wildCardHost = wildCardHost;
 
          _outcome = outcome;
 
@@ -174,17 +175,21 @@ public class SecureServerTest extends BaseJDBCTestCase
         // O = Overriden
         // A = Authenticated
         // C = Custom properties
-        // W = Use wildcard host
+        // W = Wildcard host
         //
         //      .addTest( decorateTest( O,        A,       C,    W,    Outcome ) );
         //
 
-        suite.addTest( decorateTest( false,  false, null, false, RUNNING_SECURITY_BOOTED ) );
-        suite.addTest( decorateTest( false,  false, BASIC, false, RUNNING_SECURITY_BOOTED ) );
-        suite.addTest( decorateTest( false,  true, null, false, RUNNING_SECURITY_BOOTED ) );
-        suite.addTest( decorateTest( false,  true, null, true, RUNNING_SECURITY_BOOTED ) );
-        suite.addTest( decorateTest( true,  false, null, false, RUNNING_SECURITY_NOT_BOOTED ) );
-        suite.addTest( decorateTest( true,  true, null, false, RUNNING_SECURITY_NOT_BOOTED ) );
+        suite.addTest( decorateTest( false,  false, null, null, RUNNING_SECURITY_BOOTED ) );
+        suite.addTest( decorateTest( false,  false, BASIC, null, RUNNING_SECURITY_BOOTED ) );
+        suite.addTest( decorateTest( false,  true, null, null, RUNNING_SECURITY_BOOTED ) );
+        suite.addTest( decorateTest( false,  true, null, HOSTW, RUNNING_SECURITY_BOOTED ) );
+
+        // this wildcard port is rejected by the server right now
+        //suite.addTest( decorateTest( false,  true, null, IPV6W, RUNNING_SECURITY_BOOTED ) );
+        
+        suite.addTest( decorateTest( true,  false, null, null, RUNNING_SECURITY_NOT_BOOTED ) );
+        suite.addTest( decorateTest( true,  true, null, null, RUNNING_SECURITY_NOT_BOOTED ) );
         
         return suite;
     }
@@ -215,7 +220,7 @@ public class SecureServerTest extends BaseJDBCTestCase
          boolean unsecureSet,
          boolean authenticationRequired,
          String customDerbyProperties,
-         boolean    useWildCardHost,
+         String wildCardHost,
          
          Outcome outcome
         )
@@ -225,13 +230,13 @@ public class SecureServerTest extends BaseJDBCTestCase
              unsecureSet,
              authenticationRequired,
              customDerbyProperties,
-             useWildCardHost,
+             wildCardHost,
 
              outcome
             );
 
         String[]        startupProperties = getStartupProperties( authenticationRequired, customDerbyProperties );
-        String[]        startupArgs = getStartupArgs( unsecureSet, useWildCardHost );
+        String[]        startupArgs = getStartupArgs( unsecureSet, wildCardHost );
 
         NetworkServerTestSetup networkServerTestSetup =
                 new NetworkServerTestSetup
@@ -272,7 +277,7 @@ public class SecureServerTest extends BaseJDBCTestCase
      * Return an array of startup args suitable for booting a server.
      * </p>
      */
-    private static  String[]    getStartupArgs( boolean setUnsecureOption, boolean useWildCardHost )
+    private static  String[]    getStartupArgs( boolean setUnsecureOption, String wildCardHost )
     {
         ArrayList       list = new ArrayList();
 
@@ -281,10 +286,10 @@ public class SecureServerTest extends BaseJDBCTestCase
             list.add( "-noSecurityManager" );
         }
         
-        if ( useWildCardHost )
+        if ( wildCardHost != null )
         {
             list.add( NetworkServerTestSetup.HOST_OPTION );
-            list.add( DERBY_HOSTNAME_WILDCARD );
+            list.add( wildCardHost );
         }
         
         String[]    result = new String[ list.size() ];
@@ -347,7 +352,7 @@ public class SecureServerTest extends BaseJDBCTestCase
         // make sure that the default policy lets us connect to the server if the hostname was
         // wildcarded (DERBY-2811)
         //
-        if ( _authenticationRequired && _useWildCardHost ) { connectToServer(); }
+        if ( _authenticationRequired && ( _wildCardHost != null ) ) { connectToServer(); }
     }
 
     private void    connectToServer()
@@ -383,7 +388,7 @@ public class SecureServerTest extends BaseJDBCTestCase
         buffer.append( "Opened = " ); buffer.append( _unsecureSet);
         buffer.append( ", Authenticated= " ); buffer.append( _authenticationRequired );
         buffer.append( ", CustomDerbyProperties= " ); buffer.append( _customDerbyProperties );
-        buffer.append( ", UsingWildCardHost= " ); buffer.append( _useWildCardHost );
+        buffer.append( ", WildCardHost= " ); buffer.append( _wildCardHost );
         buffer.append( " )" );
 
         return buffer.toString();

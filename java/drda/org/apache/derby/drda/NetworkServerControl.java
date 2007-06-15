@@ -178,6 +178,7 @@ public class NetworkServerControl{
 	private final static String POLICY_FILENAME = "server.policy";
 	private final static String POLICY_FILE_PROPERTY = "java.security.policy";
 	private final static String DERBY_HOSTNAME_WILDCARD = "0.0.0.0";
+	private final static String IPV6_HOSTNAME_WILDCARD = "::";
 	private final static String SOCKET_PERMISSION_HOSTNAME_WILDCARD = "*";
 
     private NetworkServerControlImpl serverImpl;
@@ -585,13 +586,14 @@ public class NetworkServerControl{
 
         //
         // Forcibly set the following property so that it will be correctly
-        // substituted into the default policy file. It is ok to force this
-        // property at this time because it has already been read
-        // (and if necessary overridden) by server.getPropertyInfo()
-        // followed by server.parseArgs().
+        // substituted into the default policy file. This is the hostname for
+        // SocketPermissions. This is an internal property which customers
+        // may not override.
         //
-        System.setProperty( Property.DRDA_PROP_HOSTNAME, getHostNameForSocketPermission( server ) );
+        System.setProperty( Property.DERBY_SECURITY_HOST, getHostNameForSocketPermission( server ) );
 
+        server.consoleMessage( "XXX " + Property.DERBY_SECURITY_HOST + " = " + PropertyUtil.getSystemProperty( Property.DERBY_SECURITY_HOST )  );
+        
         //
         // Forcibly set the following property. This is the parameter in
         // the Basic policy which points at the directory where the embedded and
@@ -624,9 +626,9 @@ public class NetworkServerControl{
     /**
      * Get the hostname as a value suitable for substituting into the
      * default server policy file. The special
-     * wildcard value "0.0.0.0" is forced to be "*" since that is the wildcard
+     * wildcard valuse "0.0.0.0" and "::" are forced to be "*" since that is the wildcard
      * hostname understood by SocketPermission. SocketPermission does
-     * not understand the "0.0.0.0" wildcard.
+     * not understand the "0.0.0.0" and "::" wildcards.
      */
     private static String  getHostNameForSocketPermission( NetworkServerControlImpl server )
         throws Exception
@@ -637,7 +639,11 @@ public class NetworkServerControl{
         //
         String  hostname = server.getHost();
         
-        if ( DERBY_HOSTNAME_WILDCARD.equals( hostname ) ) { hostname = SOCKET_PERMISSION_HOSTNAME_WILDCARD; }
+        if (
+            DERBY_HOSTNAME_WILDCARD.equals( hostname ) ||
+            IPV6_HOSTNAME_WILDCARD.equals( hostname ) 
+            )
+        { hostname = SOCKET_PERMISSION_HOSTNAME_WILDCARD; }
 
         return hostname;
     }
