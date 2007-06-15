@@ -35,7 +35,7 @@ import org.apache.derby.iapi.services.i18n.MessageService;
  * Writer implementation for <code>Clob</code>.
  */
 final class ClobUtf8Writer extends Writer {
-    private ClobStreamControl control;    
+    private TemporaryClob control;    
     private long pos; // Position in characters.
     private boolean closed;
     
@@ -45,7 +45,7 @@ final class ClobUtf8Writer extends Writer {
      * @param control worker object for the CLOB value
      * @param pos initial <b>byte</b> position in the CLOB value
      */
-    ClobUtf8Writer(ClobStreamControl control, long pos) {
+    ClobUtf8Writer(TemporaryClob control, long pos) {
         this.control = control;
         this.pos = pos;
         closed = false;

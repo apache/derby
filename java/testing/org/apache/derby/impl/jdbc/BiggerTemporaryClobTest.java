@@ -52,7 +52,7 @@ public class BiggerTemporaryClobTest
         super.bytesPerChar = BYTES_PER_CHAR;
         EmbedStatement embStmt = (EmbedStatement)createStatement();
         EmbedConnection embCon =(EmbedConnection)getConnection();
-        iClob = new ClobStreamControl(embCon.getDBName(), embStmt);
+        iClob = new TemporaryClob(embCon.getDBName(), embStmt);
         transferData(
             new LoopingAlphabetReader(CLOBLENGTH, CharAlphabet.cjkSubset()),
             iClob.getWriter(1L),

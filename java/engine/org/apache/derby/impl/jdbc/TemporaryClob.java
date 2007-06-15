@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.impl.jdbc.ClobStreamControl
+   Derby - Class org.apache.derby.impl.jdbc.TemporaryClob
 
    Licensed to the Apache Software Foundation (ASF) under one
    or more contributor license agreements.  See the NOTICE file
@@ -38,7 +38,7 @@ import org.apache.derby.iapi.util.UTF8Util;
  * Character positions given as input to methods in this class are always
  * 1-based. Byte positions are always 0-based.
  */
-final class ClobStreamControl implements InternalClob {
+final class TemporaryClob implements InternalClob {
 
     /**
      * Connection child assoicated with this Clob.
@@ -73,7 +73,7 @@ final class ClobStreamControl implements InternalClob {
                                          ConnectionChild conChild,
                                          InternalClob clob)
             throws IOException, SQLException {
-        ClobStreamControl newClob = new ClobStreamControl(dbName, conChild);
+        TemporaryClob newClob = new TemporaryClob(dbName, conChild);
         newClob.copyClobContent(clob);
         return newClob;
     }
@@ -94,21 +94,21 @@ final class ClobStreamControl implements InternalClob {
                                          InternalClob clob,
                                          long length)
             throws IOException, SQLException {
-        ClobStreamControl newClob = new ClobStreamControl(dbName, conChild);
+        TemporaryClob newClob = new TemporaryClob(dbName, conChild);
         newClob.copyClobContent(clob, length);
         return newClob;
     }
 
     /**
-     * Constructs a <code>ClobStreamControl</code> object used to perform
+     * Constructs a <code>TemporaryClob</code> object used to perform
      * operations on a CLOB value.
-     *
+     * 
      * @param dbName name of the database the CLOB value belongs to
      * @param conChild connection object used to obtain synchronization object
      * @throws NullPointerException if <code>conChild</code> is
      *      <code>null</code>
      */
-    ClobStreamControl (String dbName, ConnectionChild conChild) {
+    TemporaryClob (String dbName, ConnectionChild conChild) {
         if (conChild == null) {
             throw new NullPointerException("conChild cannot be <null>");
         }
@@ -146,14 +146,14 @@ final class ClobStreamControl implements InternalClob {
     }
 
     /**
-     * Constructs a <code>ClobStreamControl</code> object and
+     * Constructs a <code>TemporaryClob</code> object and
      * initializes with a initial String.
-     *
+     * 
      * @param dbName name of the database the CLOB value belongs to
      * @param data initial value in String
      * @param conChild connection object used to obtain synchronization object
      */
-    ClobStreamControl (String dbName, String data, ConnectionChild conChild)
+    TemporaryClob (String dbName, String data, ConnectionChild conChild)
                           throws IOException, SQLException, StandardException {
         if (conChild == null) {
             throw new NullPointerException("conChild cannot be <null>");

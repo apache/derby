@@ -87,7 +87,7 @@ final class EmbedClob extends ConnectionChild implements Clob
      */
     EmbedClob(EmbedConnection con) throws SQLException {
         super(con);
-        this.clob = new ClobStreamControl (con.getDBName(), this);
+        this.clob = new TemporaryClob (con.getDBName(), this);
         con.addLOBMapping (this);
     }
 
@@ -116,7 +116,7 @@ final class EmbedClob extends ConnectionChild implements Clob
         // See if a String or a stream will be the source of the Clob.
         if (storeStream == null) {
             try {
-                clob = new ClobStreamControl(con.getDBName(),
+                clob = new TemporaryClob(con.getDBName(),
                         dvd.getString(), this);
             }
             catch (SQLException sqle) {
@@ -743,7 +743,7 @@ restartScan:
     private void makeWritableClobClone()
             throws IOException, SQLException {
         InternalClob toBeAbandoned = this.clob;
-        this.clob = ClobStreamControl.cloneClobContent(
+        this.clob = TemporaryClob.cloneClobContent(
                         getEmbedConnection().getDBName(),
                         this, toBeAbandoned);
         toBeAbandoned.release();
@@ -764,7 +764,7 @@ restartScan:
     private void makeWritableClobClone(long len)
             throws IOException, SQLException {
         InternalClob toBeAbandoned = this.clob;
-        this.clob = ClobStreamControl.cloneClobContent(
+        this.clob = TemporaryClob.cloneClobContent(
                         getEmbedConnection().getDBName(),
                         this, toBeAbandoned, len);
         toBeAbandoned.release();
