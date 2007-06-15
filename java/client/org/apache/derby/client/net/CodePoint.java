@@ -673,6 +673,9 @@ public class CodePoint {
     // XA Return Value
     public static final int XARETVAL = 0x1904;
 
+	// XA Timeout Value;
+	public static final int TIMEOUT = 0x1907;
+
     // new unit of work for XA
     public static final int SYNCTYPE_NEW_UOW = 0x09;
 

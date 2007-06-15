@@ -161,8 +161,10 @@ public class NetConnectionRequest extends Request implements ConnectionRequestIn
     void writeXID(int codepoint, Xid xid) throws SqlException {
     }
 
-
     void writeXAFlags(int codepoint, int xaFlags) {
+    }
+
+    void writeXATimeout(int codepoint, long xaTimeout) {
     }
 
 

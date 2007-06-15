@@ -22,6 +22,11 @@
 package org.apache.derby.jdbc;
 
 
+import java.sql.SQLException;
+import java.util.Timer;
+import java.util.TimerTask;
+import org.apache.derby.iapi.services.monitor.Monitor;
+import org.apache.derby.iapi.services.timer.TimerFactory;
 import org.apache.derby.impl.jdbc.EmbedConnection;
 import javax.transaction.xa.XAResource;
 import org.apache.derby.iapi.services.context.ContextImpl;
@@ -37,6 +42,8 @@ import javax.transaction.xa.XAException;
 */
 final class XATransactionState extends ContextImpl {
 
+    /** Rollback-only due to timeout */
+    final static int TRO_TIMEOUT                = -3;
 	/** Rollback-only due to deadlock */
 	final static int TRO_DEADLOCK				= -2;
 	/** Rollback-only due to end(TMFAIL) */
@@ -74,6 +81,34 @@ final class XATransactionState extends ContextImpl {
 	*/
 	boolean isPrepared;
 
+    /** Has this transaction been finished (committed
+      * or rolled back)? */
+    boolean isFinished;
+
+    /** A timer task scheduled for the time when the transaction will timeout. */
+    CancelXATransactionTask timeoutTask = null;
+
+
+    /** The implementation of TimerTask to cancel a global transaction. */
+    private class CancelXATransactionTask extends TimerTask {
+
+        /** Creates the cancelation object to be passed to a timer. */
+        public CancelXATransactionTask() {
+            XATransactionState.this.timeoutTask = this;
+        }
+
+        /** Runs the cancel task of the global transaction */
+        public void run() {
+            try {
+                XATransactionState.this.cancel();
+            } catch (XAException ex) {
+                Monitor.logThrowable(ex);
+            }
+        }
+    }
+
+
+
 	XATransactionState(ContextManager cm, EmbedConnection conn, 
                 EmbedXAResource resource, XAXactId xid) {
 
@@ -83,6 +118,7 @@ final class XATransactionState extends ContextImpl {
 		this.creatingResource = resource;
 		this.associationState = XATransactionState.T1_ASSOCIATED;
 		this.xid = xid;
+        this.isFinished = false;
 
 	}
 
@@ -147,6 +183,8 @@ final class XATransactionState extends ContextImpl {
 			case XATransactionState.T0_NOT_ASSOCIATED:
 				break;
 
+            case XATransactionState.TRO_DEADLOCK:
+            case XATransactionState.TRO_TIMEOUT:
 			case XATransactionState.TRO_FAIL:
 				throw new XAException(rollbackOnlyCode);
 
@@ -163,6 +201,7 @@ final class XATransactionState extends ContextImpl {
 
 			associationState = XATransactionState.T1_ASSOCIATED;
 			associatedResource = resource;
+
 		}
 	}
 
@@ -262,4 +301,93 @@ final class XATransactionState extends ContextImpl {
 		}
 	}
 
+   /**
+    * Schedule a timeout task wich will rollback the global transaction
+    * after the specified time will elapse.
+    *
+    * @param timeoutMillis The number of milliseconds to be elapsed before
+    *                      the transaction will be rolled back.
+    */
+    synchronized void scheduleTimeoutTask(long timeoutMillis) {
+        // schedule a time out task if the timeout was specified
+        if (timeoutMillis > 0) {
+            // take care of the transaction timeout
+            TimerTask cancelTask = new CancelXATransactionTask();
+            TimerFactory timerFactory = Monitor.getMonitor().getTimerFactory();
+            Timer timer = timerFactory.getCancellationTimer();
+            timer.schedule(cancelTask, timeoutMillis);
+        } else {
+            timeoutTask = null;
+        }
+    }
+
+   /**
+     * Rollback the global transaction and cancel the timeout task.
+     */
+    synchronized void xa_rollback() throws SQLException {
+        conn.xa_rollback();
+        xa_finalize();
+    }
+
+   /**
+     * Commit the global transaction and cancel the timeout task.
+     * @param onPhase Indicates whether to use one phase commit protocol.
+     *                Otherwise two phase commit protocol will be used.
+     */
+    synchronized void xa_commit(boolean onePhase) throws SQLException {
+        conn.xa_commit(onePhase);
+        xa_finalize();
+    }
+
+   /**
+     * Prepare the global transaction for commit.
+     */
+    synchronized int xa_prepare() throws SQLException {
+        int retVal = conn.xa_prepare();
+        return retVal;
+    }
+
+    /** This method cancels timeoutTask and marks the transaction
+      * as finished by assigning 'isFinished = true'.
+      */
+    synchronized void xa_finalize() {
+        if (timeoutTask != null) {
+            timeoutTask.cancel();
+        }
+        isFinished = true;
+    }
+
+    /**
+     * This function is called from the timer task when the transaction
+     * times out.
+     *
+     * @see CancelXATransactionTask
+     */
+    private synchronized void cancel() throws XAException {
+        // Check isFinished just to be sure that
+        // the cancellation task was not started
+        // just before the xa_commit/rollback
+        // obtained this object's monitor.
+        if (!isFinished) {
+            // Check whether the transaction is associated
+            // with any EmbedXAResource instance.
+            if (associationState == XATransactionState.T1_ASSOCIATED) {
+                conn.cancelRunningStatement();
+                EmbedXAResource assocRes = associatedResource;
+                end(assocRes, XAResource.TMFAIL, true);
+            }
+
+            // Rollback the global transaction
+            try {
+                conn.xa_rollback();
+            } catch (SQLException sqle) {
+                XAException ex = new XAException(XAException.XAER_RMERR);
+                ex.initCause(sqle);
+                throw ex;
+            }
+
+            // Do the cleanup on the resource
+            creatingResource.returnConnectionToResource(this, xid);
+        }
+    }
 }

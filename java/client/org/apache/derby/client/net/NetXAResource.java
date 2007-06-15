@@ -113,6 +113,9 @@ public class NetXAResource implements XAResource {
 
     private List specialRegisters_ = Collections.synchronizedList(new LinkedList());
 
+    /** The value of the transaction timeout in seconds. */
+    private int timeoutSeconds = 0;
+
     public NetXAResource(XAConnection xaconn, int rmId,
                          String userId, String password,
                          org.apache.derby.client.net.NetXAConnection conn) {
@@ -312,14 +315,13 @@ public class NetXAResource implements XAResource {
     }
 
     /**
-     * Obtain the current transaction timeout value set for this XAResource instance. If
-     * <CODE>XAResource.setTransactionTimeout</CODE> was not use prior to invoking this method, the return value is the
-     * default timeout set for the resource manager; otherwise, the value used in the previous
-     * <CODE>setTransactionTimeout</CODE> call is returned.
+     * Obtain the current transaction timeout value set for this XAResource
+     * instance. If XAResource.setTransactionTimeout was not use prior to
+     * invoking this method, the return value is 0; otherwise, the value
+     * used in the previous setTransactionTimeout call is returned.
      *
-     * @return the transaction timeout value in seconds.
-     *
-     * @throws XAException An error has occurred. Possible exception values are XAER_RMERR, XAER_RMFAIL.
+     * @return the transaction timeout value in seconds. If the returned value
+     * is equal to Integer.MAX_VALUE it means no timeout.
      */
     public int getTransactionTimeout() throws XAException {
         if (conn_.agent_.loggingEnabled()) {
@@ -331,9 +333,9 @@ public class NetXAResource implements XAResource {
         }
 
         if (conn_.agent_.loggingEnabled()) {
-            conn_.agent_.logWriter_.traceExit(this, "getTransactionTimeout", 0);
+            conn_.agent_.logWriter_.traceExit(this, "getTransactionTimeout", timeoutSeconds);
         }
-        return 0; // we don't support transaction timeout
+        return timeoutSeconds;
     }
 
     /**
@@ -521,23 +523,38 @@ public class NetXAResource implements XAResource {
     }
 
     /**
-     * <P>Set the current transaction timeout value for this <CODE>XAResource</CODE> instance. This value overwrites the
-     * default transaction timeout value in the resource manager. The newly assigned timeout value is effective for the
-     * life of this <CODE>XAResource</CODE> instance unless a new value is set.<P>
+     * Set the current transaction timeout value for this XAResource
+     * instance. Once set, this timeout value is effective until
+     * setTransactionTimeout is invoked again with a different value. To reset
+     * the timeout value to the default value used by the resource manager,
+     * set the value to zero. If the timeout operation is performed
+     * successfully, the method returns true; otherwise false. If a resource
+     * manager does not support transaction timeout value to be set
+     * explicitly, this method returns false.
      *
      * @param seconds the transaction timeout value in seconds.
+     *                Value of 0 means the reasource manager's default value.
+     *                Value of Integer.MAX_VALUE means no timeout.
+     * @return true if transaction timeout value is set successfully;
+     * otherwise false.
      *
-     * @throws XAException An error has occurred. Possible exception values are XAER_RMERR, XAER_RMFAIL, or XAER_INVAL.
+     * @exception XAException - An error has occurred. Possible exception
+     * values are XAER_RMERR, XAER_RMFAIL, or XAER_INVAL.
      */
     public boolean setTransactionTimeout(int seconds) throws XAException {
         if (conn_.agent_.loggingEnabled()) {
-            conn_.agent_.logWriter_.traceExit(this, "setTransactionTimeout", false);
+            conn_.agent_.logWriter_.traceEntry(this, "setTransactionTimeout");
+        }
+        if (seconds < 0) {
+            // throw an exception if invalid value was specified
+            throw new XAException(XAException.XAER_INVAL);
         }
         exceptionsOnXA = null;
-        return false; // we don't support transaction timeout in our layer.
-        /* int rc = xaSetTransTimeOut(seconds);
-           if (rc != XAResource.XA_OK)
-             throwXAException(rc); */
+        timeoutSeconds = seconds;
+        if (conn_.agent_.loggingEnabled()) {
+            conn_.agent_.logWriter_.traceExit(this, "setTransactionTimeout", true);
+        }
+        return true;
     }
 
     /**
@@ -579,6 +596,26 @@ public class NetXAResource implements XAResource {
         callInfo.xid_ = xid;
         callInfo.xaResource_ = this;
         callInfo.xaRetVal_ = XAResource.XA_OK; // initialize XARETVAL
+
+        // check and setup the transaction timeout settings
+        if (flags == TMNOFLAGS) {
+            if (timeoutSeconds == Integer.MAX_VALUE) {
+                // Disable the transaction timeout.
+                callInfo.xaTimeoutMillis_ = 0;
+            } else if (timeoutSeconds > 0) {
+                // Use the timeout value specified.
+                callInfo.xaTimeoutMillis_ = 1000*timeoutSeconds;
+            } else if (timeoutSeconds == 0) {
+                // The -1 value means that the timeout codepoint
+                // will not be sent in the request and thus the server
+                // will use the default value.
+                callInfo.xaTimeoutMillis_ = -1;
+            } else {
+                // This should not ever happen due that setTransactionTimeout
+                // does not allow a negative value
+                throwXAException(XAException.XAER_RMERR);
+            }
+        }
         try {
             netAgent.beginWriteChainOutsideUOW();
             netAgent.netConnectionRequest_.writeXaStartUnitOfWork(conn_);

@@ -22,6 +22,8 @@
 package org.apache.derby.jdbc;
 
 import java.sql.SQLException;
+
+
 import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
 import javax.transaction.xa.XAException;
@@ -34,12 +36,16 @@ import org.apache.derby.iapi.reference.JDBC30Translation;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.services.info.JVMInfo;
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
+import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.store.access.XATransactionController;
 import org.apache.derby.iapi.store.access.xa.XAResourceManager;
 import org.apache.derby.iapi.store.access.xa.XAXactId;
 import org.apache.derby.impl.jdbc.EmbedConnection;
 import org.apache.derby.impl.jdbc.TransactionResourceImpl;
 import org.apache.derby.shared.common.sanity.SanityManager;
+import org.apache.derby.iapi.services.property.PropertyUtil;
+import org.apache.derby.iapi.reference.Property;
 
 /**
  * Implements XAResource
@@ -49,10 +55,14 @@ class EmbedXAResource implements XAResource {
     private EmbedPooledConnection con;
     private ResourceAdapter ra;
     private XAXactId currentXid;    
+    /** The value of the transaction timeout on this resource. */
+    private int timeoutSeconds;
     
     EmbedXAResource (EmbedPooledConnection con, ResourceAdapter ra) {
         this.con = con;
         this.ra = ra;
+        // Setup the default value for the transaction timeout.
+        this.timeoutSeconds = 0;
     }
     
     /**
@@ -60,7 +70,7 @@ class EmbedXAResource implements XAResource {
      * @param xid A global transaction identifier
      * @param onePhase If true, the resource manager should use a one-phase
      * commit protocol to commit the work done on behalf of xid.
-
+     *
      * @exception XAException An error has occurred. Possible XAExceptions are
      * XA_HEURHAZ, XA_HEURCOM, XA_HEURRB, XA_HEURMIX, XAER_RMERR,
      * XAER_RMFAIL, XAER_NOTA, XAER_INVAL, or XAER_PROTO.  
@@ -126,10 +136,8 @@ class EmbedXAResource implements XAResource {
             if (tranState.isPrepared == onePhase)
                 throw new XAException(XAException.XAER_PROTO);
             
-            EmbedConnection conn = tranState.conn;
-            
             try {
-                conn.xa_commit(onePhase);
+                tranState.xa_commit(onePhase);
             } catch (SQLException sqle) {
                 throw wrapInXAException(sqle);
             } finally {
@@ -270,11 +278,9 @@ class EmbedXAResource implements XAResource {
             if (tranState.isPrepared)
                 throw new XAException(XAException.XAER_PROTO);
             
-            EmbedConnection conn = tranState.conn;
-            
             try {
                 
-                int ret = conn.xa_prepare();
+                int ret = tranState.xa_prepare();
                 
                 if (ret == XATransactionController.XA_OK) {
                     tranState.isPrepared = true;
@@ -283,8 +289,7 @@ class EmbedXAResource implements XAResource {
                 } else {
                     
                     returnConnectionToResource(tranState, xid_im);
-					if (SanityManager.DEBUG)
-					{
+					if (SanityManager.DEBUG) {
 						if (con.realConnection != null)
 							SanityManager.ASSERT(con.realConnection.transactionIsIdle(),
 									"real connection should have been idle at this point"); 			
@@ -301,14 +306,14 @@ class EmbedXAResource implements XAResource {
     /**
      * Obtain the current transaction timeout value set for this XAResource
      * instance. If XAResource.setTransactionTimeout was not use prior to
-     * invoking this method, the return value is the default timeout set for
-     * the resource manager; otherwise, the value used in the previous
-     * setTransactionTimeout call is returned.
+     * invoking this method, the return value is 0; otherwise, the value
+     * used in the previous setTransactionTimeout call is returned.
      *
-     * @return the transaction timeout value in seconds.
+     * @return the transaction timeout value in seconds. If the returned value
+     * is equal to Integer.MAX_VALUE it means no timeout.
      */
-    public int getTransactionTimeout() {
-        return 0;
+    public synchronized int getTransactionTimeout() {
+        return timeoutSeconds;
     }
 
     /**
@@ -477,7 +482,7 @@ class EmbedXAResource implements XAResource {
             
             try {
                 
-                tranState.conn.xa_rollback();
+                tranState.xa_rollback();
             } catch (SQLException sqle) {
                 throw wrapInXAException(sqle);
             } finally {
@@ -498,14 +503,49 @@ class EmbedXAResource implements XAResource {
      * explicitly, this method returns false.
      *
      * @param seconds the transaction timeout value in seconds.
+     *                Value of 0 means the reasource manager's default value.
+     *                Value of Integer.MAX_VALUE means no timeout.
      * @return true if transaction timeout value is set successfully;
      * otherwise false.
      *
      * @exception XAException - An error has occurred. Possible exception
      * values are XAER_RMERR, XAER_RMFAIL, or XAER_INVAL.
      */
-    public boolean setTransactionTimeout(int seconds) {
-        return false;
+    public synchronized boolean setTransactionTimeout(int seconds)
+    throws XAException {
+        if (seconds < 0) {
+            // throw an exception if invalid value was specified
+            throw new XAException(XAException.XAER_INVAL);
+        }
+        timeoutSeconds = seconds;
+        return true;
+    }
+
+    /** Returns the default value for the transaction timeout in milliseconds
+     *  setted up by the system properties.
+     *
+     *  @see Property.PROP_XA_TRANSACTION_TIMEOUT
+     *  @see Property.DEFAULT_XA_TRANSACTION_TIMEOUT
+     */
+    private long getDefaultXATransactionTimeout() throws XAException {
+        try {
+            LanguageConnectionContext lcc = con.getLanguageConnection();
+            TransactionController tc = lcc.getTransactionExecute();
+
+            long timeoutMillis = 1000 * (long) PropertyUtil.getServiceInt(
+                tc,
+                Property.PROP_XA_TRANSACTION_TIMEOUT,
+                0,
+                Integer.MAX_VALUE,
+                Property.DEFAULT_XA_TRANSACTION_TIMEOUT
+                );
+
+            return timeoutMillis;
+        } catch (SQLException sqle) {
+            throw wrapInXAException(sqle);
+        } catch (StandardException se) {
+            throw wrapInXAException(se);
+        }
     }
 
     /**
@@ -616,13 +656,32 @@ class EmbedXAResource implements XAResource {
                     throw wrapInXAException(sqle);
                 }
                 
-                
-                if (!ra.addConnection(xid_im, 
-                        new XATransactionState(
-                        con.realConnection.getContextManager(), 
-                        con.realConnection, this, xid_im)))
+                tranState = new XATransactionState(
+                    con.realConnection.getContextManager(),
+                    con.realConnection, this, xid_im);
+                if (!ra.addConnection(xid_im, tranState))
                     throw new XAException(XAException.XAER_DUPID);
                 
+                currentXid = xid_im;
+
+                // If the the timeout specified is equal to Integer.MAX_VALUE
+                // it means that transaction timeout is disabled.
+                if (timeoutSeconds != Integer.MAX_VALUE) {
+                    // Find out the value of the transaction timeout
+                    long timeoutMillis;
+                    if (timeoutSeconds > 0) {
+                        timeoutMillis = 1000*timeoutSeconds;
+                    } else {
+                        timeoutMillis = getDefaultXATransactionTimeout();
+                    }
+                    // If we have non-zero transaction timeout schedule a timeout task.
+                    // The only way how timeoutMillis might be equeal to 0 is that
+                    // it was specified as a default transaction timeout
+                    if (timeoutMillis > 0) {
+                        tranState.scheduleTimeoutTask(timeoutMillis);
+                    }
+                }
+
                 break;
                 
             case XAResource.TMRESUME:
@@ -780,7 +839,7 @@ class EmbedXAResource implements XAResource {
      * @param tranState 
      * @param xid_im 
      */
-    private void returnConnectionToResource(XATransactionState tranState, 
+    void returnConnectionToResource(XATransactionState tranState,
                                                             XAXactId xid_im) {
         
         removeXATransaction(xid_im);    
@@ -841,11 +900,15 @@ class EmbedXAResource implements XAResource {
      * Removes the xid from currently active transactions
      * @param xid_im 
      */
-    private void removeXATransaction(XAXactId xid_im) {
+    void removeXATransaction(XAXactId xid_im) {
         XATransactionState tranState = 
                 (XATransactionState) ra.removeConnection(xid_im);
         if (tranState != null)
             tranState.popMe();
     }
     
+    void setCurrentXid(XAXactId aCurrentXid) {
+        currentXid = aCurrentXid;
+    }
+
 }

@@ -45,6 +45,9 @@ import org.apache.derby.client.am.Connection;
 public class NetXACallInfo {
     Xid xid_;                         // current xid
     int xaFlags_;                     // current xaFlags
+    /** XA transaction timeout in milliseconds. The value less than 0 means
+      * that the time out is not specified. The value 0 means infinite timeout. */
+    long xaTimeoutMillis_;
     // may not be needed!!!~~~
     int xaFunction_;                  // queued XA function being performed
     int xaRetVal_;                    // xaretval from server
@@ -74,6 +77,7 @@ public class NetXACallInfo {
     public NetXACallInfo() {
         xid_ = null;
         xaFlags_ = XAResource.TMNOFLAGS;
+        xaTimeoutMillis_ = -1;
         xaInProgress_ = false;
         currConnection_ = false;
         freeEntry_ = true;
@@ -88,6 +92,7 @@ public class NetXACallInfo {
     public NetXACallInfo(Xid xid, int flags, NetXAResource xares, NetXAConnection actualConn) {
         xid_ = xid;
         xaFlags_ = flags;
+        xaTimeoutMillis_ = -1;
         xaInProgress_ = false;
         currConnection_ = false;
         freeEntry_ = true;

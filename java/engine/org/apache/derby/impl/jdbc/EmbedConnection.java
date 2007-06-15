@@ -2052,6 +2052,11 @@ public abstract class EmbedConnection implements EngineConnection
 	** XA support
 	*/
 
+    /**
+     * Do not use this method directly use XATransactionState.xa_prepare
+     * instead because it also maintains/cancels the timout task which is
+     * scheduled to cancel/rollback the global transaction.
+     */
 	public final int xa_prepare() throws SQLException {
 
 		synchronized (getConnectionSynchronization())
@@ -2090,6 +2095,11 @@ public abstract class EmbedConnection implements EngineConnection
 	}
 
 
+    /**
+     * Do not use this method directly use XATransactionState.xa_commit
+     * instead because it also maintains/cancels the timout task which is
+     * scheduled to cancel/rollback the global transaction.
+     */
 	public final void xa_commit(boolean onePhase) throws SQLException {
 
 		synchronized (getConnectionSynchronization())
@@ -2108,8 +2118,14 @@ public abstract class EmbedConnection implements EngineConnection
 			}
 		}
 	}
-	public final void xa_rollback() throws SQLException {
 
+
+    /**
+     * Do not use this method directly use XATransactionState.xa_rollback
+     * instead because it also maintains/cancels the timout task which is
+     * scheduled to cancel/rollback the global transaction.
+     */
+	public final void xa_rollback() throws SQLException {
 		synchronized (getConnectionSynchronization())
 		{
             setupContextStack();
@@ -2126,6 +2142,8 @@ public abstract class EmbedConnection implements EngineConnection
 			}
 		}
 	}
+
+
 	/**
 	 * returns false if there is an underlying transaction and that transaction
 	 * has done work.  True if there is no underlying transaction or that
@@ -2374,4 +2392,9 @@ public abstract class EmbedConnection implements EngineConnection
 		}
 		return rootConnection.lobHashMap;
 	}
+
+    /** Cancels the current running statement. */
+    public void cancelRunningStatement() {
+        getLanguageConnection().getStatementContext().cancel();
+    }
 }

@@ -53,6 +53,7 @@ public class NetXAConnectionRequest extends NetResultSetRequest {
         NetXACallInfo callInfo = conn.xares_.callInfoArray_[conn.currXACallInfoOffset_];
         Xid xid = callInfo.xid_;
         int xaFlags = callInfo.xaFlags_;
+        long xaTimeout = callInfo.xaTimeoutMillis_;
 
         // create DSS command with reply.
         createCommand();
@@ -72,6 +73,11 @@ public class NetXAConnectionRequest extends NetResultSetRequest {
         }
 
         writeXAFlags(CodePoint.XAFLAGS, xaFlags);
+        // Check whether the timeout value was specified.
+        // Value less than 0 means no timeout is specified.
+        if (xaTimeout >= 0) {
+            writeXATimeout(CodePoint.TIMEOUT, xaTimeout);
+        }
         updateLengthBytes();
     }
 
@@ -254,6 +260,11 @@ public class NetXAConnectionRequest extends NetResultSetRequest {
 
     void writeXAFlags(int codepoint, int xaFlags) {
         writeScalar4Bytes(codepoint, xaFlags);
+    }
+
+
+    void writeXATimeout(int codepoint, long xaTimeout) {
+        writeScalar8Bytes(codepoint, xaTimeout);
     }
 
 

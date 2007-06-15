@@ -25,6 +25,7 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.error.ExceptionSeverity;
 import org.apache.derby.iapi.reference.JDBC30Translation;
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 
 /* import impl class */
 import org.apache.derby.impl.jdbc.Util;
@@ -298,6 +299,17 @@ class EmbedPooledConnection implements javax.sql.PooledConnection, BrokeredConne
 		checkActive();
 
 		return realConnection;
+	}
+
+    /**
+     * @return The underlying language connection.
+     */
+	public synchronized LanguageConnectionContext getLanguageConnection()
+       throws SQLException
+	{
+		checkActive();
+
+		return realConnection.getLanguageConnection();
 	}
 
 

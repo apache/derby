@@ -23,9 +23,11 @@ package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import javax.sql.XAConnection;
 import javax.sql.XADataSource;
+import javax.transaction.xa.XAException;
 import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
 
@@ -34,6 +36,9 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.apache.derby.client.ClientXid;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.reference.SQLState;
+
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.J2EEDataSource;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
@@ -132,7 +137,157 @@ public class XATransactionTest extends BaseJDBCTestCase {
         xaConn.close();
     }
 
+
+    /** Tests the functionality of the XA transaction timeout.
+      * <p>
+      * It executes 1000 global transactions during the test. Everyone
+      * of them just inserts a row into XATT table. The rows inserted
+      * by the transactions are different. Some of these transactions
+      * are committed and some of them are left in different stages.
+      * The stage of the transaction in which it is left is chosed
+      * depending on division remainders.
+      * </p>
+      * <p>
+      * After finishing these 1000 transactions a select statement is executed
+      * on that table. However, if there are still some unfinished transactions
+      * that were not aborted they will hold a lock on a XATT table until they
+      * will get rolled back by the transaction timeout. The number of rows
+      * in the XATT table is calculated. It is then compared with the excepted
+      * number of rows (the transaction we know we have committed).
+      * </p>
+      * <p>
+      * The call to xaRes.setTransactionTimeout(5) before the call
+      * to xaRes.start() makes the transactions to be rolled back
+      * due to timeout.
+      * </p>
+      */
+    public void testXATransactionTimeout() throws Exception {
+
+        /* The number of statements to execute in timeout related test. */
+        int timeoutStatementsToExecute = 1000;
+
+        /* Specifies the number of total executed statements per one
+           commited statement in timout related test. */
+        int timeoutCommitEveryStatement = 3;
+
+        /* Specifies the number of statements that should be commited
+           during a timout related test. */
+        int timeoutStatementsCommitted
+            = (timeoutStatementsToExecute + timeoutCommitEveryStatement - 1)
+                / timeoutCommitEveryStatement;
+
+        Statement stm = getConnection().createStatement();
+        stm.execute("create table XATT (i int, text char(10))");
+
+        XADataSource xaDataSource = J2EEDataSource.getXADataSource();
+        XAConnection xaConn = null;
+        XAResource xaRes = null;
+        Connection conn = null;
+
+        for (int i=0; i < timeoutStatementsToExecute; i++) {
+            xaConn = xaDataSource.getXAConnection();
+            xaRes = xaConn.getXAResource();
+            conn = xaConn.getConnection();
+
+            Xid xid = createXid(123, i);
+            xaRes.setTransactionTimeout(5);
+            xaRes.start(xid, XAResource.TMNOFLAGS);
+
+            stm = conn.createStatement();
+            stm.execute("insert into XATT values (" + i + ", 'Test_Entry')");
+
+            if (i % timeoutCommitEveryStatement == 0) {
+                stm.close();
+                xaRes.end(xid, XAResource.TMSUCCESS);
+                xaRes.prepare(xid);
+                xaRes.commit(xid, false);
+                xaConn.close();
+            } else if (i % 11 != 0) {
+                // check the timout for transactions disassociated
+                // with failure.
+                try {
+                    xaRes.end(xid, XAResource.TMFAIL);
+                    Assert.fail();
+                } catch (XAException ex) {
+                    if (ex.errorCode < XAException.XA_RBBASE
+                        || ex.errorCode > XAException.XA_RBEND)
+                    {
+                        throw ex;
+                    }
+                }
+                stm.close();
+                xaConn.close();
+            } else if (i % 2 == 0) {
+                // check the timout for transactions disassociated
+                // with success.
+                xaRes.end(xid, XAResource.TMSUCCESS);
+                stm.close();
+                xaConn.close();
+            } else {
+                // check the timout for associated transactions
+                ;
+            }
+        }
+
+        stm = getConnection().createStatement();
+        ResultSet rs = stm.executeQuery("select count(*) from XATT");
+        rs.next();
+
+        // Check whether the correct number of transactions
+        // was rolled back
+        Assert.assertTrue(rs.getInt(1) == timeoutStatementsCommitted);
+
+        // test the timout during the statement is run
+        xaConn = xaDataSource.getXAConnection();
+        xaRes = xaConn.getXAResource();
+        conn = xaConn.getConnection();
+
+        Xid xid = createXid(124, 100);
+        xaRes.setTransactionTimeout(10);
+        xaRes.start(xid, XAResource.TMNOFLAGS);
+
+        stm = conn.createStatement();
+
+        // Check whether the statement was correctly timed out
+        // and the appropriate exception was thrown
+        boolean exceptionThrown = false;
+        try {
+            rs = stm.executeQuery(
+                 "select * from XATT a, XATT b, XATT c, XATT d, XATT e "
+               + "order by a.i");
+        } catch (SQLException ex) {
+            // Check the sql state of the thrown exception
+            assertSQLState(
+                SQLState.LANG_STATEMENT_CANCELLED_OR_TIMED_OUT.substring(0,5),
+                ex
+            );
+            exceptionThrown = true;
+        }
+        Assert.assertTrue(exceptionThrown);
+
+        stm = getConnection().createStatement();
+        rs = stm.executeQuery("select count(*) from XATT");
+        rs.next();
+
+        // Again, check whether the correct number of transactions
+        // was rolled back
+        Assert.assertTrue(rs.getInt(1) == timeoutStatementsCommitted);
+    }
+
+
     /* ------------------- end helper methods  -------------------------- */
+
+    /** Create the Xid object for global transaction identification
+      * with the specified identification values.
+      * @param gtrid Global Transaction ID
+      * @param bqual Branch Qualifier
+      */
+    static Xid createXid(int gtrid, int bqual) throws XAException {
+        byte[] gid = new byte[2]; gid[0]= (byte) (gtrid % 256); gid[1]= (byte) (gtrid / 256);
+        byte[] bid = new byte[2]; bid[0]= (byte) (bqual % 256); bid[1]= (byte) (bqual / 256);
+        Xid xid = new ClientXid(0x1234, gid, bid);
+        return xid;
+    }
 
     /** Parses the xid value from the string. The format of the input string is
       * the same as the global_xid column in syscs_diag.transaction_table table -

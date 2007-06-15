@@ -788,4 +788,11 @@ public class Monitor {
 		// database must already exist
 		return isDesiredType(p, type);
 	}
+
+    /**
+     * Logs the stack trace of the specified throwable object.
+     */
+    public static void logThrowable(Throwable t) {
+        t.printStackTrace(getStream().getPrintWriter());
+    }
 }

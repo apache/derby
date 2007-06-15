@@ -625,6 +625,21 @@ public interface Property {
 	String STATEMENT_CACHE_SIZE = "derby.language.statementCacheSize";
 	int STATEMENT_CACHE_SIZE_DEFAULT = 100;
 
+	/*
+	** Transactions
+	*/
+
+    /** The property name used to get the default value for XA transaction
+      * timeout in seconds. Zero means no timout.
+      */
+    String PROP_XA_TRANSACTION_TIMEOUT = "derby.jdbc.xaTransactionTimeout";
+
+    /** The default value for XA transaction timeout if the corresponding
+      * property is not found in system properties. Zero means no timeout.
+      */
+    int DEFAULT_XA_TRANSACTION_TIMEOUT = 0;
+
+
   /* some static fields */
 	public static final String DEFAULT_USER_NAME = "APP";
 	public static final String DATABASE_MODULE = "org.apache.derby.database.Database";

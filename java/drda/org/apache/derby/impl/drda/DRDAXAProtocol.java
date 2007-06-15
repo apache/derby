@@ -67,6 +67,9 @@ class DRDAXAProtocol {
 		int xaflags = 0;
 		boolean readXAFlags = false;
 		Xid xid = null;
+		// The value -1 means no value of timeout received
+		long xaTimeout = -1;
+		boolean readXATimeout = false;
 
 		codePoint = reader.getCodePoint();
 		while (codePoint != -1)
@@ -81,8 +84,8 @@ class DRDAXAProtocol {
 					readXAFlags =true;
 					break;
 				case CodePoint.TIMEOUT:
-					// optional/ignorable.
-					reader.skipBytes();
+					xaTimeout = parseXATimeout();
+					readXATimeout = true;
 					break;
 				case CodePoint.RLSCONV:
 					connThread.codePointNotSupported(codePoint);	  
@@ -117,7 +120,7 @@ class DRDAXAProtocol {
 			case CodePoint.SYNCTYPE_NEW_UOW:
 				// new unit of work for XA
 				// formatId -1 is just a local connection
-				startXATransaction(xid,xaflags);
+				startXATransaction(xid, xaflags, xaTimeout);
 				break;
 			case CodePoint.SYNCTYPE_END_UOW:
 				// End unit of work
@@ -226,23 +229,63 @@ class DRDAXAProtocol {
 		return reader.readNetworkInt();
 	}
 
+	/**
+	 * Parses a XA transaction timout value.
+	 *
+	 * @return A timeout value.
+	 * @throws DRDAProtocolException
+	 */
+	private long parseXATimeout() throws DRDAProtocolException
+	{
+		return reader.readNetworkLong();
+	}
+
 
 	/**
 	 *  Start the xa transaction. Send SYNCRRD response
 	 * 
 	 *  @param xid - XID (formatId = -1 for local transaction)
 	 *  @param xaflags - xaflags
+	 *  @param xaTimeout - The timeout for the global transaction in millis
+     *                     (or -1 if not specified)
 	 *  @throws DRDAProtocolException
 	 */
-	private void startXATransaction(Xid xid, int xaflags) throws DRDAProtocolException
+	private void startXATransaction(Xid xid, int xaflags, long xaTimeout)
+												throws DRDAProtocolException
 	{
 		XAResource xaResource = getXAResource();
 		int xaRetVal = xaResource.XA_OK;
 
 		try {
-			if (xid.getFormatId() != -1)
-				xaResource.start(xid,xaflags);
-            this.xid = xid;
+			if (xid.getFormatId() == -1 && xaTimeout != -1) {
+				// The value of timeout might be specified only for global transactions
+				throw new XAException(XAException.XAER_PROTO);
+			} else if (xaTimeout != -1 && xaflags != XAResource.TMNOFLAGS) {
+				// According the DRDA spec if the value of timeout was specified
+				// a TMNOFLAGS have to be used
+				throw new XAException(XAException.XAER_PROTO);
+			} else {
+				if (xaTimeout == 0) {
+                    // According the DRDA specification
+                    // value 0 means the unlimited timeout
+                    // Integer.MAX_VALUE is used in derby
+                    // to set up the infinite timeout.
+                    // In JDBC spec the value 0 means the resource
+                    // manager's default value.
+                    xaResource.setTransactionTimeout(Integer.MAX_VALUE);
+				} else if (xaTimeout == -1) {
+                    // The timeout value was not specified, so use the default
+                    // timeout - see javadoc for XAResource.setTransactionTimeout
+					xaResource.setTransactionTimeout(0);
+                } else {
+                    // The value of timeout was specified
+                    xaResource.setTransactionTimeout((int) (xaTimeout/1000));
+                }
+				if (xid.getFormatId() != -1) {
+					xaResource.start(xid,xaflags);
+				}
+            	this.xid = xid;
+			}
 		} catch (XAException xe)
 		{
 			xaRetVal = processXAException(xe);
