@@ -148,7 +148,6 @@ public class Sed
         searchStrings.addElement("^  Granted XID : .*$");
         searchStrings.addElement("^The selected victim is XID : .*");
         // Filters for build numbers
-        searchStrings.addElement("(beta - )\\(([0-9]*)\\)");
         searchStrings.addElement("Level2CostEstimateImpl: .*");
         // Filter for xa tests for the numbers representing the db name (it can change)
         searchStrings.addElement("^Transaction ([0-9])* : \\(([0-9]*)\\,([0-9a-f]*)\\,([0-9a-f]*)\\)");
@@ -218,7 +217,6 @@ public class Sed
         subStrings.addElement("  Granted XID : {GGG.QQQ}...");
         subStrings.addElement("The selected victim is XID : VVV");
         // sub build numbers
-        subStrings.addElement("$1(xxXXxxFILTERED-BUILD-NUMBERxxXXxx)");
         subStrings.addElement("Level2CostEstimateImpl: xxXXxxFILTERED-INFORMATIONxxXXxx");
         // sub for db name in xa tests (it can change)
         subStrings.addElement("Transaction $1 : ($2,FILTERED,FILTERED)");
