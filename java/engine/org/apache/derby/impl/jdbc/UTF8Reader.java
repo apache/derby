@@ -43,27 +43,27 @@ public final class UTF8Reader extends Reader
     private final PositionedStoreStream positionedIn;
     /** Store last visited position in the store stream. */
     private long rawStreamPos = 0L;
-    private final long         utfLen;    // bytes
-    private long        utfCount;        // bytes
-    private long        readerCharCount; // characters
-    private long        maxFieldSize;    // characeters
+    private final long utfLen;          // bytes
+    private long       utfCount;        // bytes
+    private long       readerCharCount; // characters
+    private long       maxFieldSize;    // characeters
 
-    private char[]        buffer = new char[8 * 1024];
-    private int            charactersInBuffer;    // within buffer
+    private char[]         buffer = new char[8 * 1024];
+    private int            charactersInBuffer; // within buffer
     private int            readPositionInBuffer;
 
-    private boolean        noMoreReads;
+    private boolean noMoreReads;
 
-    // maintain a reference to the parent object so that it can't get 
+    // maintain a reference to the parent object so that it can't get
     // garbage collected until we are done with the stream.
-    private ConnectionChild      parent;
+    private ConnectionChild parent;
 
     public UTF8Reader(
-    InputStream in,
-    long maxFieldSize,
-    ConnectionChild      parent,
-    Object synchronization) 
-        throws IOException, SQLException
+        InputStream in,
+        long maxFieldSize,
+        ConnectionChild parent,
+        Object synchronization)
+            throws IOException, SQLException
     {
         super(synchronization);
         this.maxFieldSize = maxFieldSize;
@@ -118,11 +118,11 @@ public final class UTF8Reader extends Reader
      * @param synchronization object to synchronize on
      */
     public UTF8Reader(
-                InputStream in,
-                long maxFieldSize,
-                long streamSize,
-                ConnectionChild parent,
-                Object synchronization)
+            InputStream in,
+            long maxFieldSize,
+            long streamSize,
+            ConnectionChild parent,
+            Object synchronization)
                 throws IOException {
         super(synchronization);
         this.maxFieldSize = maxFieldSize;
@@ -191,7 +191,7 @@ public final class UTF8Reader extends Reader
     public long skip(long len) throws IOException {
         if (len < 0) {
             throw new IllegalArgumentException(
-                "Number of characters to skip must be positive:" + len);
+                "Number of characters to skip must be positive: " + len);
         }
         synchronized (lock) {
             // check if closed..
@@ -230,7 +230,6 @@ public final class UTF8Reader extends Reader
     /*
     ** Methods just for Derby's JDBC driver
     */
-
     public int readInto(StringBuffer sb, int len) throws IOException {
 
         synchronized (lock) {
@@ -252,6 +251,7 @@ public final class UTF8Reader extends Reader
             return len;
         }
     }
+
     int readAsciiInto(byte[] abuf, int off, int len) throws IOException {
 
         synchronized (lock) {
@@ -289,7 +289,6 @@ public final class UTF8Reader extends Reader
     ** internal implementation
     */
 
-
     private void closeIn() {
         if (in != null) {
             try {
@@ -300,6 +299,7 @@ public final class UTF8Reader extends Reader
             }
         }
     }
+
     private IOException utfFormatException(String s) {
         noMoreReads = true;
         closeIn();
@@ -325,7 +325,6 @@ public final class UTF8Reader extends Reader
 
         try {
         try {
-        
             parent.setupContextStack();
             // If we are operating on a positioned stream, reposition it to
             // continue reading at the position we stopped last time.
@@ -353,7 +352,7 @@ readChars:
             }
 
             int finalChar;
-            switch (c >> 4) { 
+            switch (c >> 4) {
                 case 0: case 1: case 2: case 3: case 4: case 5: case 6: case 7:
                     // 0xxxxxxx
                     utfCount++;
@@ -369,7 +368,7 @@ readChars:
                         throw utfFormatException();
 
                     if ((char2 & 0xC0) != 0x80)
-                        throw utfFormatException();          
+                        throw utfFormatException();
                     finalChar = (((c & 0x1F) << 6) | (char2 & 0x3F));
                     break;
                     }
@@ -396,7 +395,7 @@ readChars:
                     }
 
                     if (((char2 & 0xC0) != 0x80) || ((char3 & 0xC0) != 0x80))
-                        throw utfFormatException();    
+                        throw utfFormatException();
 
                     finalChar = (((c & 0x0F) << 12) |
                                ((char2 & 0x3F) << 6) |
@@ -406,14 +405,14 @@ readChars:
 
                 default:
                     // 10xx xxxx,  1111 xxxx
-                    throw utfFormatException();          
+                    throw utfFormatException();
             }
 
             buffer[charactersInBuffer++] = (char) finalChar;
             readerCharCount++;
         }
-        if (utfLen != 0 && utfCount > utfLen) 
-            throw utfFormatException("utfCount " + utfCount + " utfLen " + utfLen);          
+        if (utfLen != 0 && utfCount > utfLen)
+            throw utfFormatException("utfCount " + utfCount + " utfLen " + utfLen);
 
         if (charactersInBuffer != 0) {
             if (this.positionedIn != null) {
@@ -436,7 +435,6 @@ readChars:
             throw ioe;
         }
     }
-
 
     // this method came from java.io.DataInputStream
     private final int readUnsignedShort() throws IOException {
