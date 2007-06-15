@@ -37,7 +37,23 @@ ERROR 40XL1: A lock could not be obtained within the time requested
 ij(C2)> set connection C1;
 ij(C1)> -- verify that we still have the lock
 run resource 'LockTableQuery.subsql';
-ij(C1)> select 
+ij(C1)> --
+--   Licensed to the Apache Software Foundation (ASF) under one or more
+--   contributor license agreements.  See the NOTICE file distributed with
+--   this work for additional information regarding copyright ownership.
+--   The ASF licenses this file to You under the Apache License, Version 2.0
+--   (the "License"); you may not use this file except in compliance with
+--   the License.  You may obtain a copy of the License at
+--
+--      http://www.apache.org/licenses/LICENSE-2.0
+--
+--   Unless required by applicable law or agreed to in writing, software
+--   distributed under the License is distributed on an "AS IS" BASIS,
+--   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+--   See the License for the specific language governing permissions and
+--   limitations under the License.
+--
+select 
     cast(username as char(8)) as username,
     cast(t.type as char(8)) as trantype,
     cast(l.type as char(8)) as type,
@@ -74,7 +90,23 @@ ERROR 40XL1: A lock could not be obtained within the time requested
 ij(C2)> set connection C1;
 ij(C1)> -- verify that we still have the lock
 run resource 'LockTableQuery.subsql';
-ij(C1)> select 
+ij(C1)> --
+--   Licensed to the Apache Software Foundation (ASF) under one or more
+--   contributor license agreements.  See the NOTICE file distributed with
+--   this work for additional information regarding copyright ownership.
+--   The ASF licenses this file to You under the Apache License, Version 2.0
+--   (the "License"); you may not use this file except in compliance with
+--   the License.  You may obtain a copy of the License at
+--
+--      http://www.apache.org/licenses/LICENSE-2.0
+--
+--   Unless required by applicable law or agreed to in writing, software
+--   distributed under the License is distributed on an "AS IS" BASIS,
+--   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+--   See the License for the specific language governing permissions and
+--   limitations under the License.
+--
+select 
     cast(username as char(8)) as username,
     cast(t.type as char(8)) as trantype,
     cast(l.type as char(8)) as type,
@@ -112,7 +144,23 @@ ERROR 40XL1: A lock could not be obtained within the time requested
 ij(C2)> set connection C1;
 ij(C1)> -- verify that we still have the lock
 run resource 'LockTableQuery.subsql';
-ij(C1)> select 
+ij(C1)> --
+--   Licensed to the Apache Software Foundation (ASF) under one or more
+--   contributor license agreements.  See the NOTICE file distributed with
+--   this work for additional information regarding copyright ownership.
+--   The ASF licenses this file to You under the Apache License, Version 2.0
+--   (the "License"); you may not use this file except in compliance with
+--   the License.  You may obtain a copy of the License at
+--
+--      http://www.apache.org/licenses/LICENSE-2.0
+--
+--   Unless required by applicable law or agreed to in writing, software
+--   distributed under the License is distributed on an "AS IS" BASIS,
+--   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+--   See the License for the specific language governing permissions and
+--   limitations under the License.
+--
+select 
     cast(username as char(8)) as username,
     cast(t.type as char(8)) as trantype,
     cast(l.type as char(8)) as type,
@@ -150,7 +198,23 @@ ij(C2)> lock table u1.t1 in share mode;
 ij(C2)> set connection C1;
 ij(C1)> -- verify that we still have the lock
 run resource 'LockTableQuery.subsql';
-ij(C1)> select 
+ij(C1)> --
+--   Licensed to the Apache Software Foundation (ASF) under one or more
+--   contributor license agreements.  See the NOTICE file distributed with
+--   this work for additional information regarding copyright ownership.
+--   The ASF licenses this file to You under the Apache License, Version 2.0
+--   (the "License"); you may not use this file except in compliance with
+--   the License.  You may obtain a copy of the License at
+--
+--      http://www.apache.org/licenses/LICENSE-2.0
+--
+--   Unless required by applicable law or agreed to in writing, software
+--   distributed under the License is distributed on an "AS IS" BASIS,
+--   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+--   See the License for the specific language governing permissions and
+--   limitations under the License.
+--
+select 
     cast(username as char(8)) as username,
     cast(t.type as char(8)) as trantype,
     cast(l.type as char(8)) as type,
@@ -199,7 +263,23 @@ ERROR 40XL1: A lock could not be obtained within the time requested
 ij(C2)> set connection C1;
 ij(C1)> -- verify that other user still has the lock
 run resource 'LockTableQuery.subsql';
-ij(C1)> select 
+ij(C1)> --
+--   Licensed to the Apache Software Foundation (ASF) under one or more
+--   contributor license agreements.  See the NOTICE file distributed with
+--   this work for additional information regarding copyright ownership.
+--   The ASF licenses this file to You under the Apache License, Version 2.0
+--   (the "License"); you may not use this file except in compliance with
+--   the License.  You may obtain a copy of the License at
+--
+--      http://www.apache.org/licenses/LICENSE-2.0
+--
+--   Unless required by applicable law or agreed to in writing, software
+--   distributed under the License is distributed on an "AS IS" BASIS,
+--   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+--   See the License for the specific language governing permissions and
+--   limitations under the License.
+--
+select 
     cast(username as char(8)) as username,
     cast(t.type as char(8)) as trantype,
     cast(l.type as char(8)) as type,
