@@ -77,7 +77,7 @@ public class _Suite extends BaseTestCase  {
 		suite.addTest(DriverTest.suite());
 		suite.addTest(ParameterMetaDataJdbc30Test.suite());
         suite.addTest(ClobTest.suite());
-        suite.addTest(BlobUpdateableStreamTest.suite());
+        suite.addTest(BlobUpdatableStreamTest.suite());
         suite.addTest(AIjdbcTest.suite());
 
         // Old harness .java tests that run using the HarnessJavaTest

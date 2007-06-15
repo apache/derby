@@ -458,7 +458,7 @@ final class EmbedBlob extends ConnectionChild implements Blob
                         setupContextStack();
 
                     ((Resetable)myStream).resetStream();
-                    return new UpdateableBlobStream (this, 
+                    return new UpdatableBlobStream (this, 
                             new AutoPositioningStream (this, myStream, this));
                 }
             }
@@ -961,7 +961,7 @@ final class EmbedBlob extends ConnectionChild implements Blob
         }
         
         try {
-            return new UpdateableBlobStream(this,
+            return new UpdatableBlobStream(this,
                                             getBinaryStream(),
                                             pos-1,
                                             length);

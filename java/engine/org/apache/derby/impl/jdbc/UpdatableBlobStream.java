@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.impl.jdbc.UpdateableBlobStream
+   Derby - Class org.apache.derby.impl.jdbc.UpdatableBlobStream
 
    Licensed to the Apache Software Foundation (ASF) under one
    or more contributor license agreements.  See the NOTICE file
@@ -30,13 +30,13 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.i18n.MessageService;
 
 /**
- * Updateable blob stream is a wrapper stream over dvd stream
+ * Updatable blob stream is a wrapper stream over dvd stream
  * and LOBInputStream.
  * It detects if blob data has moved from dvd to clob control. If this happens,
  * it will update itself to point to LOBInputStream and reflect changes made to
  * the Blob after the current position of the stream.
  */
-class UpdateableBlobStream extends InputStream {
+class UpdatableBlobStream extends InputStream {
     /**
      * Flag to check if it is using stream from LOBStreamControl or from DVD.
      * <code>true</code> means data is read from LOBStreamControl,
@@ -55,12 +55,13 @@ class UpdateableBlobStream extends InputStream {
     
 
     /**
-     * Constructs UpdateableBlobStream using the the InputStream receives as the
+     * Constructs UpdatableBlobStream using the the InputStream receives as the
      * parameter. The initial position is set to the <code>0</code>.
+     * 
      * @param blob EmbedBlob this stream is associated with.
      * @param is InputStream this class is going to use internally.
      */
-    UpdateableBlobStream (EmbedBlob blob, InputStream is) {
+    UpdatableBlobStream (EmbedBlob blob, InputStream is) {
         stream = is;
         this.pos = 0;
         this.blob = blob;
@@ -71,11 +72,11 @@ class UpdateableBlobStream extends InputStream {
     }
     
     /**
-     * Construct an <code>UpdateableBlobStream<code> using the 
+     * Construct an <code>UpdatableBlobStream<code> using the 
      * <code>InputStream</code> received as parameter. The initial
      * position in the stream is set to <code>pos</code> and the
      * stream is restricted to a length of <code>len</code>.
-     *
+     * 
      * @param blob EmbedBlob this stream is associated with.
      * @param is InputStream this class is going to use internally.
      * @param pos initial position
@@ -84,7 +85,7 @@ class UpdateableBlobStream extends InputStream {
      * @throws IOException
      * @throws SQLException
      */
-    UpdateableBlobStream (EmbedBlob blob, InputStream is, long pos, long len) 
+    UpdatableBlobStream (EmbedBlob blob, InputStream is, long pos, long len) 
     throws IOException, SQLException {
         this(blob, is);
         //The length requested cannot exceed the length

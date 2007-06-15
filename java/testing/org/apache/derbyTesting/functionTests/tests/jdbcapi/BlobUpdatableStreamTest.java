@@ -1,7 +1,7 @@
 /*
  *
  * Derby - Class 
- *   org.apache.derbyTesting.functionTests.tests.jdbcapi.BlobUpdateableStreamTest
+ *   org.apache.derbyTesting.functionTests.tests.jdbcapi.BlobUpdatableStreamTest
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -31,19 +31,19 @@ import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
- * Test if blob stream updates itself to point to LOBInputStream 
+ * Test if blob stream updates itself to point to LOBInputStream
  * if the blob is updated after fetching the stream.
  */
-public class BlobUpdateableStreamTest extends BaseJDBCTestCase {
-    public BlobUpdateableStreamTest (String name) {
+public class BlobUpdatableStreamTest extends BaseJDBCTestCase {
+    public BlobUpdatableStreamTest (String name) {
         super (name);
     }
-    
-    public void testUpdateableBlob () throws Exception {
+
+    public void testUpdatableBlob () throws Exception {
         getConnection().setAutoCommit (false);
         PreparedStatement ps = prepareStatement ("insert into testblob " +
                 "values (?)");
-        //insert a large blob to ensure dvd gives out a stream and not 
+        //insert a large blob to ensure dvd gives out a stream and not
         //a byte array
         ps.setBinaryStream (1, new LoopingAlphabetStream (1024 * 1024), 1024 * 1024);
         ps.executeUpdate();
@@ -58,7 +58,7 @@ public class BlobUpdateableStreamTest extends BaseJDBCTestCase {
         blob.truncate (l);
         int ret = is.read();
         //should not be able to read after truncated value
-        assertEquals ("stream update falield", -1, ret);
+        assertEquals ("stream update failed", -1, ret);
         byte [] buffer = new byte [1024];
         for (int i = 0; i < buffer.length; i++)
             buffer [i] = (byte) (i % 255);
@@ -80,17 +80,17 @@ public class BlobUpdateableStreamTest extends BaseJDBCTestCase {
         stmt.close();
         commit();
     }
-    
+
     public static Test suite () {
         return TestConfiguration.defaultSuite (
-                BlobUpdateableStreamTest.class);
+                BlobUpdatableStreamTest.class);
     }
-    
+
     public void setUp() throws  Exception {
         Statement stmt = createStatement();
         stmt.execute ("create table testblob (data blob)");
         stmt.close();
-    }    
+    }
 
     protected void tearDown() throws Exception {
         Statement stmt = createStatement();
@@ -98,5 +98,5 @@ public class BlobUpdateableStreamTest extends BaseJDBCTestCase {
         stmt.close();
         commit ();
         super.tearDown();
-    }       
+    }
 }
