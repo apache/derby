@@ -45,7 +45,6 @@ import org.apache.derby.iapi.reference.SQLState;
 	if your application runs in the following environments:
 	<UL>
 	<LI> JDBC 3.0 - Java 2 - JDK 1.4, J2SE 5.0
-	<LI> JDBC 2.0 - Java 2 - JDK 1.2,1.3
 	</UL>
 
 	<P>EmbeddedXADataSource40 object only works on a local database.  There is no

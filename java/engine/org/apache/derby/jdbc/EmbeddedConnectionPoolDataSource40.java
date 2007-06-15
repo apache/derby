@@ -43,7 +43,6 @@ import org.apache.derby.iapi.reference.SQLState;
 	following environments:
 	<UL>
 	<LI> JDBC 3.0 - Java 2 - JDK 1.4, J2SE 5.0
-	<LI> JDBC 2.0 - Java 2 - JDK 1.2,1.3
 	</UL>	
 
 	<P>EmbeddedConnectionPoolDataSource40 is serializable and referenceable.

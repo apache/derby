@@ -44,7 +44,7 @@ import org.apache.derby.impl.jdbc.Util;
 /** 
 	
 
-	EmbeddedDataSource is Derby's DataSource implementation for JDBC3.0 and JDBC2.0.
+	EmbeddedDataSource is Derby's DataSource implementation for JDBC3.0.
 	
 
 	<P>A DataSource  is a factory for Connection objects. An object that
@@ -55,7 +55,6 @@ import org.apache.derby.impl.jdbc.Util;
 	for the Java Virtual Machine's environment.
 	<UL>
 	<LI> JDBC 3.0 - Java 2 - JDK 1.4, J2SE 5.0
-	<LI> JDBC 2.0 - Java 2 - JDK 1.2,1.3
 	</UL>
 
 	<P>The following is a list of properties that can be set on a Derby

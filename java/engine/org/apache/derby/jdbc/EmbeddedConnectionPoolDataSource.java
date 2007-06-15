@@ -29,7 +29,7 @@ import javax.sql.PooledConnection;
 
 /** 
 	EmbeddedConnectionPoolDataSource is Derby's ConnectionPoolDataSource
-	implementation for the JDBC3.0 and JDBC2.0 environments.
+	implementation for the JDBC3.0 environment.
 	
 
 	<P>A ConnectionPoolDataSource is a factory for PooledConnection
@@ -40,7 +40,6 @@ import javax.sql.PooledConnection;
 	for the Java Virtual Machine's environment.
 	<UL>
 	<LI> JDBC 3.0 - Java 2 - JDK 1.4, J2SE 5.0
-	<LI> JDBC 2.0 - Java 2 - JDK 1.2,1.3
 	</UL>
 
 	<P>EmbeddedConnectionPoolDataSource is serializable and referenceable.
