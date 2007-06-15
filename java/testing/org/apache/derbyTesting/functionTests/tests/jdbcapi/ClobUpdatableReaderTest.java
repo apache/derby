@@ -45,148 +45,129 @@ import java.io.Reader;
  * embedded driver.
  */
 public class ClobUpdatableReaderTest extends BaseJDBCTestCase {
-    
+
     private final String dummy = "This is a new String";
-        
+
     public ClobUpdatableReaderTest (String name) {
         super (name);
     }
-    
+
     /**
      * Test updating a large clob
      */
     public void testUpdateableStoreReader () throws Exception {
-        Connection con = getConnection();
-        try {
-            con.setAutoCommit (false);
-            PreparedStatement ps = con.prepareStatement ("insert into updateClob " +
-                    "(id , data) values (? ,?)");
-            ps.setInt (1, 2);
-            StringBuffer sb = new StringBuffer ();
-            String base = "SampleSampleSample";
-            for (int i = 0; i < 100000; i++) {
-                sb.append (base);
-            }
-            //insert a large enough data to ensure stream is created in dvd
-            ps.setCharacterStream (2, new StringReader (sb.toString()), 
-                                                sb.length());
-            ps.execute();
-            ps.close();
-            Statement stmt = con.createStatement ();
-            ResultSet rs = stmt.executeQuery("select data from " +
-                    "updateClob where id = 2");
-            rs.next();
-            Clob clob = rs.getClob (1);            
-            rs.close();
-            stmt.close();
-            assertEquals (sb.length(), clob.length());
-            Reader r = clob.getCharacterStream();
-            String newString = "this is a new string";
-            //access reader before modifying the clob
-            long l = r.skip (100);
-            clob.setString (1001, newString);
-            //l chars are already skipped
-            long toSkip = 1000 - l;
-            while (toSkip > 0) {
-                long skipped = r.skip (toSkip);
-                toSkip -= skipped;
-            }
-            char [] newdata = new char [newString.length()];
-            int len = r.read(newdata);
-            assertEquals ("updated not reflected", newString, 
-                                    new String (newdata, 0, len));
-            r.close();
+        getConnection().setAutoCommit (false);
+        PreparedStatement ps = prepareStatement ("insert into updateClob " +
+                "(id , data) values (? ,?)");
+        ps.setInt (1, 2);
+        StringBuffer sb = new StringBuffer ();
+        String base = "SampleSampleSample";
+        for (int i = 0; i < 100000; i++) {
+            sb.append (base);
         }
-        finally {
-            if (con != null) {
-                con.commit ();
-                con.close ();
-            }
+        //insert a large enough data to ensure stream is created in dvd
+        ps.setCharacterStream (2, new StringReader (sb.toString()),
+                                            sb.length());
+        ps.execute();
+        ps.close();
+        Statement stmt = createStatement ();
+        ResultSet rs = stmt.executeQuery("select data from " +
+                "updateClob where id = 2");
+        rs.next();
+        Clob clob = rs.getClob (1);
+        rs.close();
+        stmt.close();
+        assertEquals (sb.length(), clob.length());
+        Reader r = clob.getCharacterStream();
+        String newString = "this is a new string";
+        //access reader before modifying the clob
+        long l = r.skip (100);
+        clob.setString (1001, newString);
+        //l chars are already skipped
+        long toSkip = 1000 - l;
+        while (toSkip > 0) {
+            long skipped = r.skip (toSkip);
+            toSkip -= skipped;
         }
-
+        char [] newdata = new char [newString.length()];
+        int len = r.read(newdata);
+        assertEquals ("updated not reflected", newString,
+                                new String (newdata, 0, len));
+        r.close();
     }
 
     /**
      * Tests updates on reader.
      */
     public void testUpdateableReader () throws Exception {
-        Connection con = getConnection();
-        try {
-            con.setAutoCommit (false);
-            PreparedStatement ps = con.prepareStatement ("insert into updateClob " +
-                    "(id , data) values (? ,?)");
-            ps.setInt (1, 1);
-            StringBuffer sb = new StringBuffer ();
-            String base = "SampleSampleSample";
-            for (int i = 0; i < 100; i++) {
-                sb.append (base);
-            }
-            ps.setCharacterStream (2, new StringReader (sb.toString()), 
-                                                sb.length());
-            ps.execute();
-            ps.close();
-            Statement stmt = con.createStatement ();
-            ResultSet rs = stmt.executeQuery("select data from " +
-                    "updateClob where id = 1");
-            rs.next();
-            Clob clob = rs.getClob (1);
-            rs.close();
-            stmt.close();
-            assertEquals (sb.length(), clob.length());
-            Reader r = clob.getCharacterStream();
-            char [] clobData = new char [sb.length()];
-            r.read (clobData);
-            assertEquals ("mismatch from inserted string", 
-                                String.valueOf (clobData), sb.toString());
-            r.close();
-            //update before gettting the reader
-            clob.setString (50, dummy);        
-            r = clob.getCharacterStream();
-            r.skip (49);
-            char [] newChars = new char [dummy.length()];
-            r.read (newChars);
-            assertEquals ("update not reflected", dummy,
-                                        String.valueOf (newChars));
-            //update again and see if stream is refreshed
-            clob.setString (75, dummy);
-            r.skip (75 - 50 - dummy.length());
-            char [] testChars = new char [dummy.length()];
-            r.read (testChars);
-            assertEquals ("update not reflected", dummy,
-                                        String.valueOf (newChars));
-            r.close();
-            //try inserting some unicode string
-            String unicodeStr = getUnicodeString();
-            clob.setString (50, unicodeStr);
-            char [] utf16Chars = new char [unicodeStr.length()];
-            r = clob.getCharacterStream();
-            r.skip(49);
-            r.read(utf16Chars);
-            assertEquals ("update not reflected",  unicodeStr,
-                                        String.valueOf (utf16Chars));
-            r.close();
-            Writer w = clob.setCharacterStream (1);
-            //write enough data to switch the data to file
-            r = clob.getCharacterStream ();
-            for (int i = 0; i < 10000; i++) {
-                w.write (dummy);
-            }
-            w.close();            
-            clob.setString (500, unicodeStr);
-            r.skip (499);
-            char [] unicodeChars = new char [unicodeStr.length()];
-            r.read (unicodeChars);
-            assertEquals ("update not reflected",  unicodeStr,
-                                        String.valueOf (unicodeChars));            
+        getConnection().setAutoCommit (false);
+        PreparedStatement ps = prepareStatement ("insert into updateClob " +
+                "(id , data) values (? ,?)");
+        ps.setInt (1, 1);
+        StringBuffer sb = new StringBuffer ();
+        String base = "SampleSampleSample";
+        for (int i = 0; i < 100; i++) {
+            sb.append (base);
         }
-        finally {
-            if (con != null) {
-                con.commit ();
-                con.close();
-            }
+        ps.setCharacterStream (2, new StringReader (sb.toString()),
+                                            sb.length());
+        ps.execute();
+        ps.close();
+        Statement stmt = createStatement ();
+        ResultSet rs = stmt.executeQuery("select data from " +
+                "updateClob where id = 1");
+        rs.next();
+        Clob clob = rs.getClob (1);
+        rs.close();
+        stmt.close();
+        assertEquals (sb.length(), clob.length());
+        Reader r = clob.getCharacterStream();
+        char [] clobData = new char [sb.length()];
+        r.read (clobData);
+        assertEquals ("mismatch from inserted string",
+                            String.valueOf (clobData), sb.toString());
+        r.close();
+        //update before gettting the reader
+        clob.setString (50, dummy);
+        r = clob.getCharacterStream();
+        r.skip (49);
+        char [] newChars = new char [dummy.length()];
+        r.read (newChars);
+        assertEquals ("update not reflected", dummy,
+                                    String.valueOf (newChars));
+        //update again and see if stream is refreshed
+        clob.setString (75, dummy);
+        r.skip (75 - 50 - dummy.length());
+        char [] testChars = new char [dummy.length()];
+        r.read (testChars);
+        assertEquals ("update not reflected", dummy,
+                                    String.valueOf (newChars));
+        r.close();
+        //try inserting some unicode string
+        String unicodeStr = getUnicodeString();
+        clob.setString (50, unicodeStr);
+        char [] utf16Chars = new char [unicodeStr.length()];
+        r = clob.getCharacterStream();
+        r.skip(49);
+        r.read(utf16Chars);
+        assertEquals ("update not reflected",  unicodeStr,
+                                    String.valueOf (utf16Chars));
+        r.close();
+        Writer w = clob.setCharacterStream (1);
+        //write enough data to switch the data to file
+        r = clob.getCharacterStream ();
+        for (int i = 0; i < 10000; i++) {
+            w.write (dummy);
         }
-    }   
-    
+        w.close();
+        clob.setString (500, unicodeStr);
+        r.skip (499);
+        char [] unicodeChars = new char [unicodeStr.length()];
+        r.read (unicodeChars);
+        assertEquals ("update not reflected",  unicodeStr,
+                                    String.valueOf (unicodeChars));
+    }
+
     /**
      * Tests that the Clob can handle multiple streams and the length call
      * multiplexed.
@@ -201,6 +182,7 @@ public class ClobUpdatableReaderTest extends BaseJDBCTestCase {
      */
     public void testMultiplexedOperationProblem()
             throws IOException, SQLException {
+        getConnection().setAutoCommit(false);
         int length = 266000;
         PreparedStatement ps = prepareStatement(
                 "insert into updateClob (id, data) values (?,?)");
@@ -241,6 +223,11 @@ public class ClobUpdatableReaderTest extends BaseJDBCTestCase {
         assertEquals(length, clob.length());
         lastReadAscii = assertCorrectChar(lastReadAscii, ra.read());
         lastReadChar = assertCorrectChar(lastReadChar, r.read());
+        // Close resources.
+        r.close();
+        ra.close();
+        rs.close();
+        psFetchClob.close();
     }
 
 
@@ -284,24 +271,22 @@ public class ClobUpdatableReaderTest extends BaseJDBCTestCase {
         for (int i = 0; i < 4; i++) {
             sb.append (fill);
         }
-        return sb.toString();        
+        return sb.toString();
     }
-    
+
     /**
      * Setup the test.
      *
      * @throws SQLException if database access fails
      */
     public void setUp() throws Exception {
-        Connection con = getConnection ();
-        Statement stmt = con.createStatement ();
+        Statement stmt = createStatement ();
         stmt.execute ("create table updateClob " +
                 "(id integer primary key, data clob)");
         stmt.close();
-        con.commit();
-        con.close();
+        commit();
     }
-    
+
     public static Test suite() {
         TestSuite ts = new TestSuite ("ClobUpdatableReaderTest");
         ts.addTest(TestConfiguration.defaultSuite(
@@ -310,16 +295,17 @@ public class ClobUpdatableReaderTest extends BaseJDBCTestCase {
         encSuite.addTestSuite (ClobUpdatableReaderTest.class);
         ts.addTest(Decorator.encryptedDatabase (encSuite));
         return ts;
-    }        
+    }
 
     /**
      * Cleans up the database.
      */
     protected void tearDown() throws java.lang.Exception {
-        Connection con = getConnection ();
-        Statement stmt = con.createStatement ();
+        rollback();
+        Statement stmt = createStatement ();
         stmt.execute ("drop table updateClob");
         stmt.close();
-        con.close();
+        commit();
+        super.tearDown();
     }
 }
