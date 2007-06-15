@@ -592,8 +592,6 @@ public class NetworkServerControl{
         //
         System.setProperty( Property.DERBY_SECURITY_HOST, getHostNameForSocketPermission( server ) );
 
-        server.consoleMessage( "XXX " + Property.DERBY_SECURITY_HOST + " = " + PropertyUtil.getSystemProperty( Property.DERBY_SECURITY_HOST )  );
-        
         //
         // Forcibly set the following property. This is the parameter in
         // the Basic policy which points at the directory where the embedded and
