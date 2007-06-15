@@ -65,6 +65,7 @@ public class SecureServerTest extends BaseJDBCTestCase
     private static  final   String  SST_PASSWORD = "marypwd";
     
     private static  final   String  HOSTW = "0.0.0.0";
+    private static  final   String  ALTW = "0.00.000.0";
     private static  final   String  IPV6W = "::";
 
     ///////////////////////////////////////////////////////////////////////////////////
@@ -184,6 +185,7 @@ public class SecureServerTest extends BaseJDBCTestCase
         suite.addTest( decorateTest( false,  false, BASIC, null, RUNNING_SECURITY_BOOTED ) );
         suite.addTest( decorateTest( false,  true, null, null, RUNNING_SECURITY_BOOTED ) );
         suite.addTest( decorateTest( false,  true, null, HOSTW, RUNNING_SECURITY_BOOTED ) );
+        suite.addTest( decorateTest( false,  true, null, ALTW, RUNNING_SECURITY_BOOTED ) );
 
         // this wildcard port is rejected by the server right now
         //suite.addTest( decorateTest( false,  true, null, IPV6W, RUNNING_SECURITY_BOOTED ) );

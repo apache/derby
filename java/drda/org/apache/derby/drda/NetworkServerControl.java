@@ -638,12 +638,24 @@ public class NetworkServerControl{
         String  hostname = server.getHost();
         
         if (
-            DERBY_HOSTNAME_WILDCARD.equals( hostname ) ||
+            hostnamesEqual( DERBY_HOSTNAME_WILDCARD, hostname ) ||
             IPV6_HOSTNAME_WILDCARD.equals( hostname ) 
             )
         { hostname = SOCKET_PERMISSION_HOSTNAME_WILDCARD; }
 
         return hostname;
+    }
+
+    // return true if the two hostnames are equivalent
+    private static  boolean hostnamesEqual( String left, String right )
+    {
+        try {
+            InetAddress leftAddress = InetAddress.getByName( left );
+            InetAddress rightAddress = InetAddress.getByName( right );
+
+            return leftAddress.equals( rightAddress );
+            
+        } catch (Exception e) { return false; }
     }
     
     /**
