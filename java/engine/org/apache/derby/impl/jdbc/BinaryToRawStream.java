@@ -32,7 +32,7 @@ import java.io.EOFException;
 	to one that just contains the application's data.
 	Simply read and save the length information.
 */
-final class BinaryToRawStream
+class BinaryToRawStream
 extends java.io.FilterInputStream
 {
     /**

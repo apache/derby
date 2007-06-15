@@ -174,7 +174,8 @@ final class EmbedBlob extends ConnectionChild implements Blob
              */
             if (SanityManager.DEBUG)
                 SanityManager.ASSERT(myStream instanceof Resetable);
-
+            //make myStream a position aware stream
+            myStream = new PositionedStoreStream (myStream);
             try {
                 ((Resetable) myStream).initStream();
             } catch (StandardException se) {
@@ -456,8 +457,9 @@ final class EmbedBlob extends ConnectionChild implements Blob
                     if (pushStack)
                         setupContextStack();
 
-                    setPosition(0);
-                    return new UpdateableBlobStream (this, biStream);
+                    ((Resetable)myStream).resetStream();
+                    return new UpdateableBlobStream (this, 
+                            new AutoPositioningStream (this, myStream, this));
                 }
             }
         }

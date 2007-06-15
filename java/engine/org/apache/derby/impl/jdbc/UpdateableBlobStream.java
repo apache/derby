@@ -212,7 +212,7 @@ class UpdateableBlobStream extends InputStream {
             //maxPos the length requested.
             actualLength = len;
         }
-        int retValue = super.read(b, off, actualLength);
+        int retValue = stream.read(b, off, actualLength);
         if (retValue > 0)
             pos += retValue;
         return retValue;
