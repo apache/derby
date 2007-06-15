@@ -320,7 +320,9 @@ public final class Timeout
         }
         
         attributes.put( VirtualLockTable.LOCKOBJ, currentLock );
-        attributes.put( VirtualLockTable.XACTID, currentLock.getCompatabilitySpace().toString() );
+        attributes.put( VirtualLockTable.XACTID,
+                        String.valueOf(
+                            currentLock.getCompatabilitySpace().getOwner()));
         attributes.put( VirtualLockTable.LOCKMODE, lock_type.toString() );
         attributes.put( VirtualLockTable.LOCKCOUNT, Integer.toString( currentLock.getCount() ) );
         attributes.put( VirtualLockTable.STATE, (currentLock.getCount() != 0 ) ? "GRANT" : "WAIT" );
