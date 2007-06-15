@@ -63,7 +63,6 @@ public class JDBCHarnessJavaTest extends HarnessJavaTest {
             "rsgetXXXcolumnNames",
             
             // from old jdk14.runall
-            // "parameterMetaDataJdbc30", TODO: passes embedded, fails client - investigate failure/convert
             // "statementJdbc30", runs in embedded only
             // "savepointJdbc30_JSR169", TODO: convert - different canon for client
             // "savepointJdbc30_XA", TODO: convert - different canon for client
@@ -93,9 +92,6 @@ public class JDBCHarnessJavaTest extends HarnessJavaTest {
     {
         // Tests that run ok in embedded but have a different client master file.
         "savepointJdbc30_XA",
-        
-        // Tests that pass on embedded but fail on client
-        "parameterMetaDataJdbc30",
     };
     
     
