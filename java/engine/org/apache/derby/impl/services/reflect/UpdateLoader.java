@@ -185,6 +185,8 @@ final class UpdateLoader {
 					return clazz;
                 
                 // Refuse to load classes from restricted name spaces
+                // That is classes in those name spaces can be not
+                // loaded from installed jar files.
                 for (int i = 0; i < RESTRICTED_PACKAGES.length; i++)
                 {
                     if (className.startsWith(RESTRICTED_PACKAGES[i]))

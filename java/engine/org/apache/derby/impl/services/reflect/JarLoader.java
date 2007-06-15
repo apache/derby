@@ -150,6 +150,37 @@ final class JarLoader extends SecureClassLoader {
 	 */
 	protected Class loadClass(String className, boolean resolve) 
 		throws ClassNotFoundException {
+        
+        // Classes in installed jars cannot reference
+        // Derby internal code. This is to avoid
+        // code in installed jars bypassing SQL
+        // authorization by calling Derby's internal methods.
+        //
+        // Any classes in the org.apache.derby.jdbc package
+        // are allowed as it allows routines to make JDBC
+        // connections to other databases. This does expose
+        // public classes in that package that are not part
+        // of the public api to attacks. One could attempt
+        // further limiting allowed classes to those starting
+        // with Embedded (and Client) but when fetching the
+        // default connection in a routine (jdbc:default:connection)
+        // the DriverManager attempts a load of the already loaded
+        // AutoloadDriver, I think to establish the calling class
+        // has access to the driver.
+        //
+        // This check in addition to the one in UpdateLoader
+        // that prevents restricted classes from being loaded
+        // from installed jars. The checks should be seen as
+        // independent, ie. the restricted load check should
+        // not make assumptions about this check reducing the
+        // number of classes it has to check for.
+        if (className.startsWith("org.apache.derby.")
+                && !className.startsWith("org.apache.derby.jdbc."))
+        {
+            ClassNotFoundException cnfe = new ClassNotFoundException(className);
+            //cnfe.printStackTrace(System.out);
+            throw cnfe;
+        }
 
 		// we attempt the system class load even if we
 		// are stale because otherwise we will fail
