@@ -622,7 +622,7 @@ public class ReleaseNotesGenerator extends Task
             JiraIssue       issue = bugs[ i ];
             Document    releaseNote = getReleaseNote( gs, issue );
             String          key = "Note for " + issue.getKey();
-            String          summary = getReleaseNoteSummary( releaseNote );
+            String          summary = getReleaseNoteSummary( issue, releaseNote );
             String          tocEntry = key + ": " + summary;
 
             insertLine( issuesSection );
@@ -682,7 +682,7 @@ public class ReleaseNotesGenerator extends Task
      * Get the summary for a release note
      * </p>
      */
-    private String   getReleaseNoteSummary( Document releaseNote )
+    private String   getReleaseNoteSummary( JiraIssue issue, Document releaseNote )
         throws Exception
     {
         if ( releaseNote != null )
@@ -695,11 +695,18 @@ public class ReleaseNotesGenerator extends Task
             //  Summary text
             // </p>
             //
-            Element     root = releaseNote.getDocumentElement();
-            Element     summaryParagraph = getFirstChild( root, PARAGRAPH );
-            String          summaryText = squeezeText( summaryParagraph );
+            try {
+                Element     root = releaseNote.getDocumentElement();
+                Element     summaryParagraph = getFirstChild( root, PARAGRAPH );
+                String          summaryText = squeezeText( summaryParagraph );
 
-            return summaryText;
+                return summaryText;
+            }
+            catch (Throwable t)
+            {
+                throw new BuildException
+                    ( "Badly formatted summary for " + issue.getKey() + ": " + t.toString(), t );
+            }
         }
         else { return "???"; }
     }
