@@ -216,6 +216,7 @@ public class ReleaseNotesGenerator extends Task
         private Document    _releaseNotesList;
 
         private ArrayList       _missingReleaseNotes;
+        private ArrayList       _errors;
 
         public  GeneratorState
             (
@@ -233,11 +234,17 @@ public class ReleaseNotesGenerator extends Task
             _releaseNotesList = releaseNotesList;
 
             _missingReleaseNotes = new ArrayList();
+            _errors = new ArrayList();
         }
 
         public  void    addMissingReleaseNote( JiraIssue issue )
         {
             _missingReleaseNotes.add( issue );
+        }
+
+        public  void    addError( String message )
+        {
+            _errors.add( message );
         }
 
         public  DocumentBuilder getDocumentBuilder() { return _documentBuilder; }
@@ -253,6 +260,15 @@ public class ReleaseNotesGenerator extends Task
             _missingReleaseNotes.toArray( missingNotes );
 
             return missingNotes;
+        }
+
+        public  String[]     getErrors()
+        {
+            String[]        squeezed = new String[ _errors.size() ];
+
+            _errors.toArray( squeezed );
+
+            return squeezed;
         }
     }
 
@@ -366,6 +382,7 @@ public class ReleaseNotesGenerator extends Task
             printPamphlet( gs );
 
             printMissingReleaseNotes( gs );
+            printErrors( gs );
         }
         catch ( Throwable t )
         {
@@ -620,17 +637,25 @@ public class ReleaseNotesGenerator extends Task
         for ( int i = 0; i < count; i++ )
         {
             JiraIssue       issue = bugs[ i ];
+            
             Document    releaseNote = getReleaseNote( gs, issue );
+
+            // skip this note if we were unable to read it
+            if ( releaseNote == null )
+            {
+                gs.addMissingReleaseNote( issue );
+                continue;
+            }
+            
             String          key = "Note for " + issue.getKey();
-            String          summary = getReleaseNoteSummary( issue, releaseNote );
+            String          summary = getReleaseNoteSummary( gs, issue, releaseNote );
             String          tocEntry = key + ": " + summary;
 
             insertLine( issuesSection );
             
             Element     issueSection = createSection( issuesSection, ISSUE_DETAIL_LEVEL, toc, key, tocEntry );
 
-            if ( releaseNote != null )
-            {
+            try {
                 Element     root = releaseNote.getDocumentElement();
                 Element     details = getFirstChild( root, BODY );
 
@@ -638,9 +663,9 @@ public class ReleaseNotesGenerator extends Task
                 // pamphlet
                 cloneChildren( details, issueSection );
             }
-            else
+            catch (Throwable t)
             {
-                gs.addMissingReleaseNote( issue );
+                gs.addError( formatError( "Could not read required sections out of issue " + issue.getKey(), t ) );
             }
 
         }
@@ -669,9 +694,10 @@ public class ReleaseNotesGenerator extends Task
             catch (Exception e)
             {
                 processThrowable( e );
-                
-                throw new BuildException
-                    ( "Unable to read or parse release note for " + issue.getKey() + ": " + e.toString(), e );
+
+                gs.addError( formatError( "Unable to read or parse release note for " + issue.getKey(), e ) );
+
+                return null;
             }
         }
         else { return null; }
@@ -682,7 +708,7 @@ public class ReleaseNotesGenerator extends Task
      * Get the summary for a release note
      * </p>
      */
-    private String   getReleaseNoteSummary( JiraIssue issue, Document releaseNote )
+    private String   getReleaseNoteSummary( GeneratorState gs, JiraIssue issue, Document releaseNote )
         throws Exception
     {
         if ( releaseNote != null )
@@ -704,8 +730,8 @@ public class ReleaseNotesGenerator extends Task
             }
             catch (Throwable t)
             {
-                throw new BuildException
-                    ( "Badly formatted summary for " + issue.getKey() + ": " + t.toString(), t );
+                gs.addError( formatError( "Badly formatted summary for " + issue.getKey(), t ) );
+                return "Unreadable summary line";
             }
         }
         else { return "???"; }
@@ -786,13 +812,13 @@ public class ReleaseNotesGenerator extends Task
     
     //////////////////////////////////
     //
-    //  Print missing Release Notes
+    //  Print errors
     //
     //////////////////////////////////
 
     /**
      * <p>
-     * Build the Overview section.
+     * Print missing release notes
      * </p>
      */
     private void printMissingReleaseNotes( GeneratorState gs )
@@ -803,13 +829,37 @@ public class ReleaseNotesGenerator extends Task
 
         if ( count > 0 )
         {
-            println( "The following JIRA issues still need release notes:" );
+            println( "The following JIRA issues still need release notes or the release notes provided are unreadable:" );
 
             for ( int i = 0; i < count; i++ )
             {
                 JiraIssue   issue = missingReleaseNotes[ i ];
                 
                 println( "\t" + issue.getKey() + "\t" + issue.getTitle() );
+            }
+        }
+    }
+    
+    /**
+     * <p>
+     * Print errors.
+     * </p>
+     */
+    private void printErrors( GeneratorState gs )
+        throws Exception
+    {
+        String[]     errors = gs.getErrors();
+        int                 count = errors.length;
+
+        if ( count > 0 )
+        {
+            println( "The following other errors occurred:" );
+
+            for ( int i = 0; i < count; i++ )
+            {
+                String  error = errors[ i ];
+                
+                println( "\n" + error );
             }
         }
     }
@@ -1330,7 +1380,36 @@ public class ReleaseNotesGenerator extends Task
         }
     }
 
-    ////////////////////////////////////////////////////////
+    /**
+     * <p>
+     * Format an error for later reporting.
+     * </p>
+     */
+    private  String    formatError( String text, Throwable t )
+    {
+        text = text + ": " + t.toString() + "\n" + stringifyStackTrace( t );
+
+        return text;
+    }
+
+    /**
+     * <p>
+     * Print a stack trace as a string.
+     * </p>
+     */
+    private  String stringifyStackTrace( Throwable t )
+    {
+        StringWriter    sw = new StringWriter();
+        PrintWriter     pw = new PrintWriter( sw, true );
+
+        t.printStackTrace( pw );
+        pw.flush();
+        sw.flush();
+
+        return sw.toString();        
+    }
+
+     ////////////////////////////////////////////////////////
     //
     // MISC MINIONS
     //
