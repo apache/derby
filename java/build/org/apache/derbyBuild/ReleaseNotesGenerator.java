@@ -214,6 +214,7 @@ public class ReleaseNotesGenerator extends Task
         private Document    _summary;
         private Document    _bugList;
         private Document    _releaseNotesList;
+        private ReleaseNoteReader   _releaseNoteReader;
 
         private ArrayList       _missingReleaseNotes;
         private ArrayList       _errors;
@@ -235,6 +236,8 @@ public class ReleaseNotesGenerator extends Task
 
             _missingReleaseNotes = new ArrayList();
             _errors = new ArrayList();
+
+            _releaseNoteReader = new ReleaseNoteReader( documentBuilder );
         }
 
         public  void    addMissingReleaseNote( JiraIssue issue )
@@ -252,6 +255,7 @@ public class ReleaseNotesGenerator extends Task
         public  Document    getSummary() { return _summary; }
         public  Document    getBugList() { return _bugList; }
         public  Document    getReleaseNotesList() { return _releaseNotesList; }
+        public  ReleaseNoteReader   getReleaseNoteReader() { return _releaseNoteReader; }
         
         public  JiraIssue[]     getMissingReleaseNotes()
         {
@@ -621,6 +625,7 @@ public class ReleaseNotesGenerator extends Task
         Document    pamphlet = gs.getPamphlet();
         Element     issuesSection = getSection( pamphlet, MAIN_SECTION_LEVEL, ISSUES_SECTION );
         Document    issuesList = gs.getReleaseNotesList();
+        ReleaseNoteReader   releaseNoteReader = gs.getReleaseNoteReader();
         JiraIssue[]    bugs = getJiraIssues( issuesList );
         int                 count = bugs.length;
         String          releaseID = getReleaseID( gs );
@@ -638,7 +643,15 @@ public class ReleaseNotesGenerator extends Task
         {
             JiraIssue       issue = bugs[ i ];
             
-            Document    releaseNote = getReleaseNote( gs, issue );
+            Document    releaseNote = null;
+
+            try {
+                releaseNote = getReleaseNote( gs, issue );
+            }
+            catch (Throwable t)
+            {
+                gs.addError( formatError( "Unable to read or parse release note for " + issue.getKey(), t ) );
+            }
 
             // skip this note if we were unable to read it
             if ( releaseNote == null )
@@ -648,7 +661,17 @@ public class ReleaseNotesGenerator extends Task
             }
             
             String          key = "Note for " + issue.getKey();
-            String          summary = getReleaseNoteSummary( gs, issue, releaseNote );
+            String          summary = null;
+
+            try {
+                summary = releaseNoteReader.getReleaseNoteSummary( releaseNote );
+            }
+            catch (Throwable t)
+            {
+                gs.addError( formatError( "Badly formatted summary for " + issue.getKey(), t ) );
+                summary = "Unreadable summary line";
+            }
+            
             String          tocEntry = key + ": " + summary;
 
             insertLine( issuesSection );
@@ -656,8 +679,7 @@ public class ReleaseNotesGenerator extends Task
             Element     issueSection = createSection( issuesSection, ISSUE_DETAIL_LEVEL, toc, key, tocEntry );
 
             try {
-                Element     root = releaseNote.getDocumentElement();
-                Element     details = getFirstChild( root, BODY );
+                Element     details = releaseNoteReader.getReleaseNoteDetails( releaseNote );
 
                 // copy the details out of the release note into this section of the
                 // pamphlet
@@ -671,6 +693,7 @@ public class ReleaseNotesGenerator extends Task
         }
     }
     
+    
     /**
      * <p>
      * Get the release note for an issue.
@@ -681,60 +704,24 @@ public class ReleaseNotesGenerator extends Task
     {
         if ( issue.hasReleaseNote() )
         {
-            URL                                 url = new URL( issue.getReleaseNoteAddress() );
-
+            URL             url = null;
+            InputStream is = null;
+            
             try {
-                InputStream                     is = url.openStream();
-                Document        doc = gs.getDocumentBuilder().parse( is );
-
-                is.close();
-
-                return doc;
-            }
-            catch (Exception e)
-            {
-                processThrowable( e );
-
-                gs.addError( formatError( "Unable to read or parse release note for " + issue.getKey(), e ) );
-
-                return null;
-            }
-        }
-        else { return null; }
-    }
-
-    /**
-     * <p>
-     * Get the summary for a release note
-     * </p>
-     */
-    private String   getReleaseNoteSummary( GeneratorState gs, JiraIssue issue, Document releaseNote )
-        throws Exception
-    {
-        if ( releaseNote != null )
-        {
-            //
-            // The release note has the following structure:
-            //
-            // <h4>Summary of Change</h4>
-            // <p>
-            //  Summary text
-            // </p>
-            //
-            try {
-                Element     root = releaseNote.getDocumentElement();
-                Element     summaryParagraph = getFirstChild( root, PARAGRAPH );
-                String          summaryText = squeezeText( summaryParagraph );
-
-                return summaryText;
+                url = new URL( issue.getReleaseNoteAddress() );
+                is = url.openStream();
             }
             catch (Throwable t)
             {
-                gs.addError( formatError( "Badly formatted summary for " + issue.getKey(), t ) );
-                return "Unreadable summary line";
+                processThrowable( t );
+                return null;
             }
+
+            Document        doc = gs.getReleaseNoteReader().getReleaseNote( is );
+
+            return doc;
         }
-        else { return "???"; }
+        else { return null; }
     }
 
     //////////////////////////////////
