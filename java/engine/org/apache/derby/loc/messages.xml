@@ -7242,7 +7242,7 @@ Shutting down instance {0}</text>
 
             <msg>
                 <name>J131</name>
-                <text>A PROTOCOL Data Stream Syntax Error was detected.  Reason: 0x{0}.</text>
+                <text>A PROTOCOL Data Stream Syntax Error was detected.  Reason: 0x{0}. Plaintext connection attempt to an SSL enabled server?</text>
                 <arg>hexNumber</arg>
             </msg>
 
