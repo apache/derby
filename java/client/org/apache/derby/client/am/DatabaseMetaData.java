@@ -1769,6 +1769,11 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
                                        String table) throws SqlException {
         checkForClosedConnectionX();
 
+        // validate the table name       
+        if (table == null) {
+            throw new SqlException(agent_.logWriter_,
+                new ClientMessageId(SQLState.TABLE_NAME_CANNOT_BE_NULL)); 
+        }
         PreparedStatement cs = prepareMetaDataQuery("SYSIBM.SQLFOREIGNKEYS(?,?,?,?,?,?,?)");
 
         cs.setStringX(1, "");
@@ -1821,6 +1826,11 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
         checkForClosedConnectionX();
         ;
 
+        // validate the table name
+        if (table == null) {
+            throw new SqlException(agent_.logWriter_,
+                new ClientMessageId(SQLState.TABLE_NAME_CANNOT_BE_NULL)); 
+        }        
         PreparedStatement cs = prepareMetaDataQuery("SYSIBM.SQLFOREIGNKEYS(?,?,?,?,?,?,?)");
 
         cs.setStringX(1, catalog);
