@@ -104,6 +104,7 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
                 "testLoadJavaClassDirectly2",
                 "testLoadJavaClassDirectly3",
                 "testLoadDerbyClassIndirectly",
+                "testIndirectLoading",
             };
             
             for (int i = 0; i < orderedTests.length; i++)
@@ -136,6 +137,7 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
                    "functionTests/tests/lang/dcl_ot1.jar",
                    "functionTests/tests/lang/dcl_ot2.jar",
                    "functionTests/tests/lang/dcl_ot3.jar",
+                   "functionTests/tests/lang/dcl_id.jar",
                    });
            
            }
@@ -944,6 +946,52 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
         ps3.setString(1, className);
         JDBC.assertSingleValueResultSet(ps3.executeQuery(), expectedLoader);
     }
+    
+    /**
+     * Test that loading of Derby's internal classes from
+     * an installed jar file is disallowed.
+     */
+    public void testIndirectLoading() throws SQLException, MalformedURLException
+    {
+        Statement s = createStatement();
+        
+        s.executeUpdate("CREATE SCHEMA ID");
+ /*       
+        s.execute("create function OT.WHICH_LOADER1(classname VARCHAR(256)) " +
+        "RETURNS VARCHAR(10) " +
+        "NO SQL " +
+        "external name " +
+        "'org.apache.derbyTesting.databaseclassloader.ot.OrderTest1.whichLoader' " +
+        "language java parameter style java");
+*/
+        installJar("dcl_id.jar", "ID.IDCODE");
+        
+        setDBClasspath("ID.IDCODE");
+        
+        // Create a procedure that is a method in an installed jar file
+        // that calls the internal static method to set a database property.
+        // If a user could do this then they bypass the grant/revoke on
+        // the system procedure and instead are able to control the database
+        // as they please.
+        s.execute("CREATE PROCEDURE ID.SETDB(pkey VARCHAR(256), pvalue VARCHAR(256)) " +
+                "NO SQL " +
+                "external name " +
+                "'org.apache.derbyTesting.databaseclassloader.id.IndirectLoad.setDB' " +
+                "language java parameter style java");
+        
+        PreparedStatement ps = prepareCall("CALL ID.SETDB(?, ?)");
+
+        ps.close();
+
+        
+        setDBClasspath(null);
+
+              
+
+        s.close();
+        
+    }
+
             
   
     private void installJar(String resource, String jarName) throws SQLException, MalformedURLException
