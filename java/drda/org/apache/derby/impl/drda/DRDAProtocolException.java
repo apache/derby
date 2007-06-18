@@ -275,6 +275,9 @@ class DRDAProtocolException extends Exception
 				+ messageid +
 				"; CODPNT arg  = " + java.lang.Integer.toHexString(cpArg)  +
 				"; Error Code Value = " + java.lang.Integer.toHexString(errCdArg);
+			if (msgid.equals(DRDA_Proto_SYNTAXRM)) {
+				msg += ". Plaintext connection attempt from an SSL enabled client?";
+			}
 		}
 		
 		

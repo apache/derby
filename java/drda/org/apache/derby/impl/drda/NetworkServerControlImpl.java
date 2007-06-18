@@ -36,6 +36,7 @@ import java.net.Socket;
 import javax.net.SocketFactory;
 import javax.net.ServerSocketFactory;
 import javax.net.ssl.SSLServerSocket;
+import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.SSLServerSocketFactory;
 import java.net.UnknownHostException;
@@ -2244,20 +2245,26 @@ public final class NetworkServerControlImpl {
 										else
 											connectAddress = hostAddress;
 
-										SocketFactory sf;
 										switch(getSSLMode()) {
 										case SSL_BASIC:
-											sf = NaiveTrustManager.getSocketFactory();
-											break;
+											SSLSocket s1 = (SSLSocket)NaiveTrustManager.getSocketFactory().
+												createSocket(connectAddress, portNumber);
+											// Need to handshake now to get proper error reporting.
+											s1.startHandshake();
+											return s1;
+
 										case SSL_PEER_AUTHENTICATION:
-											sf = SSLSocketFactory.getDefault();
-											break;
+											SSLSocket s2 = (SSLSocket)SSLSocketFactory.getDefault().
+												createSocket(connectAddress, portNumber);
+											// Need to handshake now to get proper error reporting.
+											s2.startHandshake();
+											return s2;
+
 										case SSL_OFF:
 										default:
-											sf = SocketFactory.getDefault();
-											break;
+											return SocketFactory.getDefault().
+												createSocket(connectAddress, portNumber);
 										}
-										return sf.createSocket(connectAddress, portNumber);
 									}
 								}
 							);
@@ -2268,7 +2275,9 @@ public final class NetworkServerControlImpl {
 			}
 			else if (e1 instanceof IOException) {
 					consolePropertyMessage("DRDA_NoIO.S",
-						new String [] {hostArg, (new Integer(portNumber)).toString()});
+										   new String [] {hostArg, 
+														  (new Integer(portNumber)).toString(), 
+														  e1.getMessage()});
 			}
 		} catch (Exception e) {
 		// If we find other (unexpected) errors, we ultimately exit--so make
@@ -2276,9 +2285,9 @@ public final class NetworkServerControlImpl {
 			throwUnexpectedException(e);
 		}
 
-        try
-        {
-	       clientIs = clientSocket.getInputStream();
+		try
+		{
+		   clientIs = clientSocket.getInputStream();
 	       clientOs = clientSocket.getOutputStream();
 		} catch (IOException e) {
 			consolePropertyMessage("DRDA_NoInputStream.I");
