@@ -245,7 +245,9 @@ public interface StorageFile
 
     /**
      * Get an exclusive lock with this name. This is used to ensure that two or more JVMs do not open the same database
-     * at the same time.
+     * at the same time. ny StorageFile that has getExclusiveFileLock() called on it is not intended to be read from or written to. It's sole purpose is to provide
+     * a locked entity to avoid multiple instances of Derby accessing the same database.
+     * getExclusiveFileLock() may delete or overwrite any existing file. 
      *
      * @return EXCLUSIVE_FILE_LOCK_NOT_AVAILABLE if the lock cannot be acquired because it is already held.<br>
      *    EXCLUSIVE_FILE_LOCK if the lock was successfully acquired.<br>
@@ -255,7 +257,8 @@ public interface StorageFile
 
 	/**
      * Release the resource associated with an earlier acquired exclusive lock
-     *
+     * releaseExclusiveFileLock() may delete the file
+
      * @see #getExclusiveFileLock
      */
 	public void releaseExclusiveFileLock();
