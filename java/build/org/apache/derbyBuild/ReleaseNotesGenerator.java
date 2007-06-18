@@ -381,6 +381,7 @@ public class ReleaseNotesGenerator extends Task
             buildBugList( gs );
             buildIssuesList( gs );
             buildEnvironment( gs );
+            replaceVariables( gs );
             endPamphlet( gs );
             
             printPamphlet( gs );
@@ -772,6 +773,26 @@ public class ReleaseNotesGenerator extends Task
 
         String          jsr169Text = squeezeText( getFirstChild( summaryRoot, SUM_JSR169 ) );
         addHeadlinedItem( list, JSR169_HEADLINE, jsr169Text );
+    }
+    
+    //////////////////////////////////
+    //
+    //  REPLACE VARIABLES
+    //
+    //////////////////////////////////
+
+    /**
+     * <p>
+     * Replace the known parameters with their corresponding text values.
+     * </p>
+     */
+    private void replaceVariables( GeneratorState gs )
+        throws Exception
+    {
+        Document    pamphlet = gs.getPamphlet();
+
+        replaceTag( pamphlet, SUM_RELEASE_ID, getReleaseID( gs ) );
+        replaceTag( pamphlet, SUM_PREVIOUS_RELEASE_ID, getPreviousReleaseID( gs ) );
     }
     
    //////////////////////////////////
@@ -1259,6 +1280,43 @@ public class ReleaseNotesGenerator extends Task
             Node    targetChild = targetDoc.importNode( sourceChild, true );
 
             target.appendChild( targetChild );
+        }
+    }
+
+    /**
+     * <p>
+     * Replace all instances of the tag with the indicated text.
+     * </p>
+     */
+    private void replaceTag( Document doc, String tag, String replacementText )
+        throws Exception
+    {
+        NodeList        sourceChildren = doc.getElementsByTagName( tag );
+        int                 count = sourceChildren.getLength();
+
+        for ( int i = 0; i < count; i++ )
+        {
+            Node    oldChild = sourceChildren.item( i );
+            Node    newChild = doc.createTextNode( replacementText );
+
+            if ( oldChild != null )
+            {
+                Node    parent = oldChild.getParentNode();
+            
+                if ( parent != null ) { parent.insertBefore( newChild, oldChild ); }
+            }
+        }
+
+        for ( int i = count-1; i > -1; i-- )
+        {
+            Node    oldChild = sourceChildren.item( i );
+
+            if ( oldChild != null )
+            {
+                Node    parent = oldChild.getParentNode();
+            
+                if ( parent != null ) { parent.removeChild( oldChild ); }
+            }
         }
     }
 
