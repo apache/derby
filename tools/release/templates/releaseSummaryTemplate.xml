@@ -88,7 +88,11 @@ with real information.
 </buildInfo>
 
 <!--
-    Here include a freeform section, describing the release. E.g.:
+    Here include a freeform section, describing the release. In this
+    section, all instances of the special tags <releaseID/> and
+    <previousReleaseID/> will be replaced with the values specified above.
+
+    E.g.:
 
 <p>
 Derby is a pure Java relational database engine using standard SQL and
