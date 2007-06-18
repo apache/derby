@@ -13,7 +13,7 @@ DECIMAL(10,2) -- precision: 10 scale: 2 display size: 12 type name: DECIMAL
 Column result scale after division is: 23
 dc / 2 = 5.55000000000000000000000
 dc / 2 = 5.55500000000000000000000
-JDBC Driver 'Apache Derby Embedded JDBC Driver', version 10.3 (10.3.1.0 beta -(EXPECTED SUBVERSION INFO))
+JDBC Driver 'Apache Derby Embedded JDBC Driver', version 10.3 (10.3.1.1 beta -(EXPECTED SUBVERSION INFO))
 getProcedures():
 PROCEDURE_CAT[VARCHAR],PROCEDURE_SCHEM[VARCHAR],PROCEDURE_NAME[VARCHAR],RESERVED1[INTEGER],RESERVED2[INTEGER],RESERVED3[INTEGER],REMARKS[VARCHAR],PROCEDURE_TYPE[SMALLINT],SPECIFIC_NAME[VARCHAR]
 ,APP,GETPCTEST1,null,null,null,org.apache.derbyTesting.functionTests.tests.jdbcapi.metadata.getpc,1,xxxxGENERATED-IDxxxx
