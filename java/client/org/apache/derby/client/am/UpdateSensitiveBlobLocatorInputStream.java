@@ -42,7 +42,7 @@ public class UpdateSensitiveBlobLocatorInputStream
      * and and calls the super class constructors with 
      * appropriate initializers.
      *
-     * @param connection connection to be used to read the
+     * @param con connection to be used to read the
      *        <code>Blob</code> value from the server
      * @param blob <code>Blob</code> object that contains locator for
      *        the <code>Blob</code> value on the server.
@@ -59,7 +59,7 @@ public class UpdateSensitiveBlobLocatorInputStream
     /**
      * Creates an instance of the BlobLocatorInputStream.
      *
-     * @param connection connection to be used to read the
+     * @param con connection to be used to read the
      *        <code>Blob</code> value from the server
      * @param blob <code>Blob</code> object that contains locator for
      *        the <code>Blob</code> value on the server.

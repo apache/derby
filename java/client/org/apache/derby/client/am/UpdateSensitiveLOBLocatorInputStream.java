@@ -77,7 +77,7 @@ public abstract class UpdateSensitiveLOBLocatorInputStream extends InputStream {
      * Initializes the InputStream, updateCount, currentPos
      * and the connection to the appropriate values.
      *
-     * @param connection connection to be used to read the
+     * @param con connection to be used to read the
      *        <code>Lob</code> value from the server
      * @param lob <code>Lob</code> object which could be a
      *            <code>Blob</code> or a <code>Clob</code>.
@@ -109,7 +109,7 @@ public abstract class UpdateSensitiveLOBLocatorInputStream extends InputStream {
      * Initializes the InputStream, updateCount, currentPos,
      * length and the connection to the appropriate values.
      *
-     * @param connection connection to be used to read the
+     * @param con connection to be used to read the
      *        <code>Lob</code> value from the server
      * @param lob <code>Lob</code> object which could be a
      *            <code>Blob</code> or a <code>Clob</code>.

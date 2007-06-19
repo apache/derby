@@ -523,9 +523,6 @@ class EmbedXAResource implements XAResource {
 
     /** Returns the default value for the transaction timeout in milliseconds
      *  setted up by the system properties.
-     *
-     *  @see Property.PROP_XA_TRANSACTION_TIMEOUT
-     *  @see Property.DEFAULT_XA_TRANSACTION_TIMEOUT
      */
     private long getDefaultXATransactionTimeout() throws XAException {
         try {

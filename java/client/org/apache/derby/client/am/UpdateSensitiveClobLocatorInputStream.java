@@ -42,7 +42,7 @@ public class UpdateSensitiveClobLocatorInputStream
      * wrapped in a BufferedInputStream and and calls the 
      * super class constructor with appropriate initializers.
      *
-     * @param connection connection to be used to read the
+     * @param con connection to be used to read the
      *        <code>Clob</code> value from the server
      * @param clob <code>Clob</code> object that contains locator for
      *        the <code>Clob</code> value on the server.
