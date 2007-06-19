@@ -122,12 +122,6 @@ public class _Suite extends BaseTestCase  {
         // file (ie. partially converted).
         suite.addTest(LangHarnessJavaTest.suite());
         		
-		// Tests that are compiled using 1.4 target need to
-		// be added this way, otherwise creating the suite
-		// will throw an invalid class version error
-		if (JDBC.vmSupportsJDBC3() || JDBC.vmSupportsJSR169())
-		{
-		}
         suite.addTest(ResultSetsFromPreparedStatementTest.suite());
 
         // tests that do not run with JSR169
