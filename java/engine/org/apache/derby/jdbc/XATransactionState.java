@@ -331,7 +331,7 @@ final class XATransactionState extends ContextImpl {
 
    /**
      * Commit the global transaction and cancel the timeout task.
-     * @param onPhase Indicates whether to use one phase commit protocol.
+     * @param onePhase Indicates whether to use one phase commit protocol.
      *                Otherwise two phase commit protocol will be used.
      */
     synchronized void xa_commit(boolean onePhase) throws SQLException {

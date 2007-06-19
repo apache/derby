@@ -62,12 +62,10 @@ public class UpdateSensitiveClobLocatorReader extends Reader {
      * Initializes the Reader, updateCount, currentPos
      * and the connection to the appropriate values.
      *
-     * @param connection connection to be used to read the
+     * @param con connection to be used to read the
      *        <code>Clob</code> value from the server
      * @param clob the <code>Clob</code> object associated with
      *            this stream.
-     * @param r a <code>Reader</code> that contains an instance
-     *          of <code>ClobLocatorReader</code>.
      */
     protected UpdateSensitiveClobLocatorReader(Connection con, Clob clob) 
     throws SqlException {
@@ -96,12 +94,10 @@ public class UpdateSensitiveClobLocatorReader extends Reader {
      * Initializes the Reader, updateCount, currentPos,
      * length and the connection to the appropriate values.
      *
-     * @param connection connection to be used to read the
+     * @param con connection to be used to read the
      *        <code>Clob</code> value from the server
      * @param clob the <code>Clob</code> object associated with
      *             this reader.
-     * @param r an <code>Reader</code> that contains the
-     *           <code>ClobLocatorReader</code> instance.
      * @param pos the position from which the first read begins.
      * @param len the length in bytes of the partial value to be
      *            retrieved.
