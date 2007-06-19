@@ -77,7 +77,7 @@ public class SimpleStringOperatorNode extends UnaryOperatorNode
 	{
 		TypeId	operandType;
 
-		super.bindExpression(fromList, subqueryList, 
+		bindOperand(fromList, subqueryList, 
 				aggregateVector);
 
 		/*

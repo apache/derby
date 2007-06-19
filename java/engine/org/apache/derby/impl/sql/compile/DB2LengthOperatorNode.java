@@ -81,7 +81,7 @@ public final class DB2LengthOperatorNode extends UnaryOperatorNode
 		Vector	aggregateVector)
 			throws StandardException
 	{
-        ValueNode boundExpression = super.bindExpression( fromList, subqueryList, aggregateVector);
+        bindOperand( fromList, subqueryList, aggregateVector);
 
         // This operator is not allowed on XML types.
         TypeId operandType = operand.getTypeId();
@@ -93,7 +93,7 @@ public final class DB2LengthOperatorNode extends UnaryOperatorNode
 
         setType( new DataTypeDescriptor( TypeId.getBuiltInTypeId( Types.INTEGER),
                                          operand.getTypeServices().isNullable()));
-        return boundExpression;
+        return this;
     }
 
 	/**

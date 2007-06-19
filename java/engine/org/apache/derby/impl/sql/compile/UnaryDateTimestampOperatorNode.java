@@ -97,7 +97,7 @@ public class UnaryDateTimestampOperatorNode extends UnaryOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	protected ValueNode bindUnaryOperator(
+	public ValueNode bindExpression (
 					FromList fromList, SubqueryList subqueryList,
 					Vector aggregateVector)
 				throws StandardException
@@ -105,7 +105,7 @@ public class UnaryDateTimestampOperatorNode extends UnaryOperatorNode
         boolean isIdentity = false; // Is this function the identity operator?
         boolean operandIsNumber = false;
         
-        super.bindUnaryOperator( fromList, subqueryList, aggregateVector);
+        bindOperand( fromList, subqueryList, aggregateVector);
         DataTypeDescriptor operandType = operand.getTypeServices();
         switch( operandType.getJDBCTypeId())
         {

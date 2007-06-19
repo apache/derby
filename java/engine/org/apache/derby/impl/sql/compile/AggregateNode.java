@@ -287,13 +287,11 @@ public class AggregateNode extends UnaryOperatorNode
 		/* Add ourselves to the aggregateVector before we do anything else */
 		aggregateVector.addElement(this);
 
-		super.bindExpression(
-				fromList, subqueryList,
-				aggregateVector);
-
         // operand being null means a count(*)
 		if (operand != null)
 		{
+            bindOperand(fromList, subqueryList, aggregateVector);
+            
 			/*
 			** Make sure that we don't have an aggregate 
 			** IMMEDIATELY below us.  Don't search below

@@ -74,7 +74,7 @@ public class UnaryComparisonOperatorNode extends UnaryOperatorNode
 		Vector	aggregateVector)
 			throws StandardException
 	{
-		super.bindExpression(fromList, subqueryList, 
+		bindOperand(fromList, subqueryList, 
 							 aggregateVector);
 
 		/* Set type info for this node */

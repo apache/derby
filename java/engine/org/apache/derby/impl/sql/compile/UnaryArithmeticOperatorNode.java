@@ -154,7 +154,7 @@ public class UnaryArithmeticOperatorNode extends UnaryOperatorNode
 				&& operand.getTypeServices() == null)
 				return this;
 
-		super.bindExpression(fromList, subqueryList,
+		bindOperand(fromList, subqueryList,
 				aggregateVector);
 
 		if (operatorType == SQRT || operatorType == ABSOLUTE)
