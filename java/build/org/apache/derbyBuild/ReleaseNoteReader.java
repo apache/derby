@@ -105,7 +105,7 @@ public class ReleaseNoteReader
 
         // here are the checks we perform
         Document                        doc = me.getReleaseNote( fis );
-        String                              summary = me.getReleaseNoteSummary( doc );
+        Element                           summary = me.getReleaseNoteSummary( doc );
         Element                         details = me.getReleaseNoteDetails( doc );
 
         // if you get this far, then everything worked
@@ -136,10 +136,10 @@ public class ReleaseNoteReader
 
     /**
      * <p>
-     * Get the summary for a release note
+     * Get the summary paragraph for a release note
      * </p>
      */
-    public String   getReleaseNoteSummary( Document releaseNote )
+    public Element   getReleaseNoteSummary( Document releaseNote )
         throws Exception
     {
         //
@@ -152,9 +152,8 @@ public class ReleaseNoteReader
         //
         Element     root = releaseNote.getDocumentElement();
         Element     summaryParagraph = getFirstChild( root, PARAGRAPH );
-        String          summaryText = squeezeText( summaryParagraph );
 
-        return summaryText;
+        return summaryParagraph;
     }
  
     /**

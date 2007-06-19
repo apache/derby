@@ -477,11 +477,11 @@ public class ReleaseNotesGenerator extends Task
         
         Element     toc = createList( body );
 
-        createSection( body, MAIN_SECTION_LEVEL, toc, OVERVIEW_SECTION, null );
-        createSection( body, MAIN_SECTION_LEVEL, toc, NEW_FEATURES_SECTION, null );
-        createSection( body, MAIN_SECTION_LEVEL, toc, BUG_FIXES_SECTION, null );
-        createSection( body, MAIN_SECTION_LEVEL, toc, ISSUES_SECTION, null );
-        createSection( body, MAIN_SECTION_LEVEL, toc, BUILD_ENVIRONMENT_SECTION, null );
+        createSection( body, MAIN_SECTION_LEVEL, toc, OVERVIEW_SECTION, OVERVIEW_SECTION );
+        createSection( body, MAIN_SECTION_LEVEL, toc, NEW_FEATURES_SECTION, NEW_FEATURES_SECTION );
+        createSection( body, MAIN_SECTION_LEVEL, toc, BUG_FIXES_SECTION, BUG_FIXES_SECTION );
+        createSection( body, MAIN_SECTION_LEVEL, toc, ISSUES_SECTION, ISSUES_SECTION );
+        createSection( body, MAIN_SECTION_LEVEL, toc, BUILD_ENVIRONMENT_SECTION, BUILD_ENVIRONMENT_SECTION );
     }
     
     /**
@@ -662,22 +662,25 @@ public class ReleaseNotesGenerator extends Task
             }
             
             String          key = "Note for " + issue.getKey();
-            String          summary = null;
+            Node     summaryText = null;
 
             try {
-                summary = releaseNoteReader.getReleaseNoteSummary( releaseNote );
+                summaryText = releaseNoteReader.getReleaseNoteSummary( releaseNote );
             }
             catch (Throwable t)
             {
                 gs.addError( formatError( "Badly formatted summary for " + issue.getKey(), t ) );
-                summary = "Unreadable summary line";
+                summaryText = pamphlet.createTextNode( "Unreadable summary line" );
             }
             
-            String          tocEntry = key + ": " + summary;
+            Element         paragraph = pamphlet.createElement( PARAGRAPH );
+
+            paragraph.appendChild(  pamphlet.createTextNode( key + ": ") );
+            cloneChildren( summaryText, paragraph );
 
             insertLine( issuesSection );
             
-            Element     issueSection = createSection( issuesSection, ISSUE_DETAIL_LEVEL, toc, key, tocEntry );
+            Element     issueSection = createSection( issuesSection, ISSUE_DETAIL_LEVEL, toc, key, paragraph );
 
             try {
                 Element     details = releaseNoteReader.getReleaseNoteDetails( releaseNote );
@@ -947,7 +950,22 @@ public class ReleaseNotesGenerator extends Task
         throws Exception
     {
         Document        doc = parent.getOwnerDocument();
-        Element             link = createLocalLink( doc, sectionName, tocEntry );
+        Text                textNode = doc.createTextNode( tocEntry );
+
+        return createSection( parent, sectionLevel, toc, sectionName, textNode );
+    }
+    
+    /**
+     * <p>
+     * Create a section at the end of a parent element and link to it from a
+     * table of contents.
+     * </p>
+     */
+    private Element createSection( Element parent, int sectionLevel, Element toc, String sectionName, Node visibleText )
+        throws Exception
+    {
+        Document        doc = parent.getOwnerDocument();
+        Element             link = createLocalLink( doc, sectionName, visibleText );
 
         addListItem( toc, link );
 
@@ -1002,9 +1020,20 @@ public class ReleaseNotesGenerator extends Task
     private Element createLocalLink( Document doc, String anchor, String text )
         throws Exception
     {
-        if ( text == null ) { text = anchor; }
-        
-        return createLink( doc, "#" + anchor, text );
+        Text        textNode = doc.createTextNode( text );
+
+        return createLocalLink( doc, anchor, textNode );
+    }
+    
+    /**
+     * <p>
+     * Create a standard link to a local label.
+     * </p>
+     */
+    private Element createLocalLink( Document doc, String anchor, Node visibleText )
+        throws Exception
+    {
+        return createLink( doc, "#" + anchor, visibleText );
     }
     
     /**
@@ -1015,11 +1044,23 @@ public class ReleaseNotesGenerator extends Task
     private Element createLink( Document doc, String label, String text )
         throws Exception
     {
-        Element hotlink = doc.createElement( ANCHOR );
         Text        textNode = doc.createTextNode( text );
 
+        return createLink( doc, label, textNode );
+    }
+    
+    /**
+     * <p>
+     * Create a hotlink.
+     * </p>
+     */
+    private Element createLink( Document doc, String label, Node visibleText )
+        throws Exception
+    {
+        Element hotlink = doc.createElement( ANCHOR );
+
         hotlink.setAttribute( "href", label );
-        hotlink.appendChild( textNode );
+        hotlink.appendChild( visibleText );
 
         return hotlink;
     }
@@ -1267,7 +1308,7 @@ public class ReleaseNotesGenerator extends Task
      * of a target node.
      * </p>
      */
-    private void cloneChildren( Element source, Element target )
+    private void cloneChildren( Node source, Node target )
         throws Exception
     {
         Document    targetDoc = target.getOwnerDocument();
