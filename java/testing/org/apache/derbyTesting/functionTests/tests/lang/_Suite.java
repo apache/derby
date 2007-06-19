@@ -139,6 +139,9 @@ public class _Suite extends BaseTestCase  {
             // also, test calls procedures which use DriverManager
             // to get the default connection.
             suite.addTest(GrantRevokeDDLTest.suite());
+
+            // test uses regex classes that are not available in Foundation 1.1
+            suite.addTest(ErrorMessageTest.suite());
         }
 
         return suite;
