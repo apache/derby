@@ -1,5 +1,5 @@
 /*
-     Derby - WwdEmbedded.java ( described in the document Working With Derby)
+     Derby - WwdEmbedded.java
 
        Licensed to the Apache Software Foundation (ASF) under one
            or more contributor license agreements.  See the NOTICE file
@@ -20,7 +20,7 @@
 
 */
 /*											 
- **  This sample program is described in the document Working With Derby
+ **  This sample program is described in the Getting Started With Derby Manual
 */
 //   ## INITIALIZATION SECTION ##
 //  Include the java SQL classes 
@@ -145,7 +145,7 @@ public class WwdEmbedded
             System.out.println(" . . . exception thrown:");
             errorPrint(e);
          }
-         System.out.println("Working With Derby JDBC program ending.");
+         System.out.println("Getting Started With Derby JDBC program ending.");
       }
      //   ## DERBY EXCEPTION REPORTING CLASSES  ## 
     /***     Exception reporting methods
