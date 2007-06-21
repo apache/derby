@@ -513,10 +513,11 @@ public final class NetworkServerControlImpl {
 	public void consoleExceptionPrintTrace(Throwable e)
 	{
 		consoleMessage(e.getMessage());
-		if (logWriter != null)
+		PrintWriter lw = logWriter;
+		if (lw != null)
 		{
-			synchronized (logWriter) {
-				e.printStackTrace(logWriter);
+			synchronized (lw) {
+				e.printStackTrace(lw);
 			}
 		}
 		else
@@ -524,10 +525,11 @@ public final class NetworkServerControlImpl {
 			e.printStackTrace();
 		}
 		
-		if (cloudscapeLogWriter != null)
+		lw = cloudscapeLogWriter;
+		if (lw != null)
 		{
-			synchronized(cloudscapeLogWriter) {
-				e.printStackTrace(cloudscapeLogWriter);
+			synchronized(lw) {
+				e.printStackTrace(lw);
 			}
 		}
 	}
@@ -543,15 +545,17 @@ public final class NetworkServerControlImpl {
 	public void consoleMessage(String msg)
 	{
 		// print to console if we have one
-		if (logWriter != null)
+		PrintWriter lw = logWriter;
+		if (lw != null)
 		{
-			synchronized(logWriter) {
-				logWriter.println(msg);
+			synchronized(lw) {
+				lw.println(msg);
 			}
 		}
 		// always print to derby.log
-		if (cloudscapeLogWriter != null)
-			synchronized(cloudscapeLogWriter)
+		lw = cloudscapeLogWriter;
+		if (lw != null)
+			synchronized(lw)
 			{
 				Monitor.logMessage(msg);
 			}
