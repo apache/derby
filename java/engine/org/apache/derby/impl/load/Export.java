@@ -54,7 +54,7 @@ public class Export extends ExportAbstract{
 				doAllTheWork();
 			} catch (IOException iex) {
 				//in case of ioexception, catch it and throw it as our own exception
-				throw LoadError.errorWritingData();
+				throw LoadError.errorWritingData(iex);
 			}
 		} catch (Exception ex) {
 			throw LoadError.unexpectedError(ex);
