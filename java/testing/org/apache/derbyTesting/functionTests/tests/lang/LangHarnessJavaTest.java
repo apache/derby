@@ -53,8 +53,6 @@ public class LangHarnessJavaTest extends HarnessJavaTest {
     {
         // old derbylang.runall suite
         //"AIjdbc",
-        // "AggregateClassLoading", TODO: investigate/convert
-        "CharUTF8",
         "bug4356",
         "bug5052rts",
         "bug5054",
