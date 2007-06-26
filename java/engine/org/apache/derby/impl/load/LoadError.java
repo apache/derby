@@ -21,6 +21,7 @@
 
 package org.apache.derby.impl.load;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import org.apache.derby.iapi.error.ExceptionSeverity;
 import org.apache.derby.iapi.reference.SQLState;
@@ -153,9 +154,9 @@ class LoadError {
 	/**
 	   Raised if, got IOException while writing data to the file.
 	*/
-	static SQLException errorWritingData() {
+	static SQLException errorWritingData(IOException ioe) {
 		return PublicAPI.wrapStandardException(
-			   StandardException.newException(SQLState.ERROR_WRITING_DATA));
+			StandardException.newException(SQLState.ERROR_WRITING_DATA, ioe));
 	}
 
 
