@@ -14,6 +14,7 @@ default_app.properties
 default_derby.properties
 iepnegativetests_ES.sql
 iepnegativetests_ES_app.properties
+iepnegativetests_ES_sed.properties
 messageLocale.sql
 messageLocale_app.properties
 urlLocale.sql

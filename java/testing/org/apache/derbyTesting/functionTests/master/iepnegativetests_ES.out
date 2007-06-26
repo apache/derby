@@ -46,7 +46,7 @@ ij> --export error cases
 call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'T1' , 'extout/nodir/t1.dat' , 
                                  null, null, null) ;
 ERROR XIE0I: Se ha producido una excepci EnC:>243< n de E/S al grabar datos en el archivo.
-ERROR XJ001: Excepci EnC:>243< n de Java: 'extout/nodir/t1.dat (No such file or directory): java.io.FileNotFoundException'.
+ERROR XJ001: Excepci EnC:>243< n de Java: ': java.io.FileNotFoundException'.
 ij> --export table not found
 call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'NOTABLE' , 'extinout/t1.dat' , 
                                  null, null, null) ;
@@ -66,7 +66,7 @@ ij> --export codeset is invalid
 call SYSCS_UTIL.SYSCS_EXPORT_QUERY('select * from iep.t1', 
                                     'extinout/t1.dat' , null, null, 'NOSUCHCODESET') ;
 ERROR XIE0I: Se ha producido una excepci EnC:>243< n de E/S al grabar datos en el archivo.
-ERROR XJ001: Excepci EnC:>243< n de Java: 'NOSUCHCODESET: java.io.UnsupportedEncodingException'.
+ERROR XJ001: Excepci EnC:>243< n de Java: ': java.io.UnsupportedEncodingException'.
 ij> call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('XXXX', 'T1' , 'extinout/t1.dat' , 
                                  null, null, null) ;
 ERROR 38000: Se he generado la excepci EnC:>243< n 'java.sql.SQLException: El esquema 'XXXX' no existe.' al evaluar una expresi EnC:>243< n.
