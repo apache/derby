@@ -167,6 +167,9 @@ To create a single zip file for both UI and Doc plug-ins:
    Eclipse 3.1:
    In the Export Destination, select the Archive File option
 
+   Eclipse 3.2:
+   Make sure the Option 'Package plug-ins as individual JAR archives is not checked.
+
 3) Browse to a Destination where you would like to put the zip file and provide    a file name, for example: derby_ui_plugin_1.1.0.zip,  to represent the name 
    and version of the plug-in.
 
