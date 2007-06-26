@@ -45,6 +45,12 @@
 
   <property name="src.excludes" value="tools/**/db2jcc*,tools/**/osgi.jar,tools/**/junit.jar,tools/**/jdbc2_0*,tools/java/jce*,tools/**/packaging.properties,java/demo/toursdb/toursdb/**,java/demo/toursdb/toursdb.out,java/demo/toursdb/toursdb.jar,tools/testing/derby/**,**/derby.log"/>
 
+  <!-- Doc Source Files to be included with and excluded from the source distribution -->
+  <property name="src.docstop.includes" value="COPYRIGHT,LICENSE,NOTICE,build.xml,docs.properties"/>
+  <property name="src.docssrc.includes" value="src/conrefs.dita, src/adminguide/**,src/devguide/**,src/getstart/**,src/images/**,src/ref/**,src/tools/**,src/tuning/**"/>
+  <property name="src.docslib.includes" value="lib/*.jar,lib/*.xsl,lib/*.html,templates/*.dita"/>
+  <property name="src.docs.includes" value="${src.docstop.includes},${src.docssrc.includes},${src.docslib.includes}"/>
+
 <!-- These properties are used by the Release Notes Generator. -->
 
   <property name="relnotes.src.summary" value="${basedir}/releaseSummary.xml" />
@@ -77,6 +83,7 @@
     <property name="derby.lib" value="${derby.basename}-lib"/>
     <property name="derby.lib-debug" value="${derby.basename}-lib-debug"/>
     <property name="derby.src" value="${derby.basename}-src"/> 
+    <property name="derby.docssrc" value="${derby.basename}-doc-src"/> 
 
     <property name="crlf.dir" value="${basedir}/tools/release/crlf"/>
     <property name="lf.dir" value="${basedir}/tools/release/lf"/>
@@ -284,6 +291,8 @@
       <zipfileset dir="${basedir}" prefix="${derby.src}"
          includes="${src.includes}"
          excludes="${src.excludes}"/>
+      <zipfileset dir="${docs.out}/.." prefix="${derby.docssrc}" 
+         includes="${src.docs.includes}"/>
     </zip>
   </target>
   <target name="src.tgz">
@@ -292,6 +301,8 @@
       <tarfileset dir="${basedir}" prefix="${derby.src}"
          includes="${src.includes}"
          excludes="${src.excludes}"/>
+      <tarfileset dir="${docs.out}/.." prefix="${derby.docssrc}" 
+         includes="${src.docs.includes}"/>
     </tar>
   </target>
 
