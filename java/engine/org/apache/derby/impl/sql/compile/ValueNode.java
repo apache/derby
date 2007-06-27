@@ -1324,7 +1324,9 @@ public abstract class ValueNode extends QueryTreeNode
 
 	/**
 	 * Returns TRUE if the type of this node will be determined from the
-	 * context in which it is getting used.
+	 * context in which it is getting used. If true is returned then
+     * after bindExpression() is called on the node, its type
+     * must be set (from the relevant context) using setType().
 	 *
 	 * @return Whether this node's type will be determined from the context
 	 */

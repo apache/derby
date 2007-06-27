@@ -76,11 +76,6 @@ public class UnaryOperatorNode extends ValueNode
 	 */
 	ValueNode	operand;
 
-	public final static int UNARY_PLUS	= 1;
-	public final static int UNARY_MINUS	= 2;
-	public final static int NOT		= 3;
-	public final static int IS_NULL		= 4;
-
 	// At the time of adding XML support, it was decided that
 	// we should avoid creating new OperatorNodes where possible.
 	// So for the XML-related unary operators we just add the
@@ -334,16 +329,18 @@ public class UnaryOperatorNode extends ValueNode
 					Vector	aggregateVector)
 				throws StandardException
 	{
-
-		//Return with no binding, if the type of unary minus/plus parameter is not set yet.
-		if (operand.requiresTypeFromContext() && ((operator.equals("-") || operator.equals("+"))) && operand.getTypeServices() == null)
-			return;
-
 		operand = operand.bindExpression(fromList, subqueryList,
 								aggregateVector);
 
-		if (operand.requiresTypeFromContext())
+		if (operand.requiresTypeFromContext()) {
 			bindParameter();
+            // If not bound yet then just return.
+            // The node type will be set by either
+            // this class' bindExpression() or a by
+            // a node that contains this expression.
+            if (operand.getTypeServices() == null)
+                return;
+        }
 
 		/* If the operand is not a built-in type, then generate a bound conversion
 		 * tree to a built-in type.
@@ -362,7 +359,7 @@ public class UnaryOperatorNode extends ValueNode
      *
      * @exception StandardException Thrown on error
      */
-    public void bindXMLParse() throws StandardException
+    private void bindXMLParse() throws StandardException
     {
         // Check the type of the operand - this function is allowed only on
         // string value (char) types.
@@ -402,7 +399,7 @@ public class UnaryOperatorNode extends ValueNode
      *
      * @exception StandardException Thrown on error
      */
-    public void bindXMLSerialize() throws StandardException
+    private void bindXMLSerialize() throws StandardException
     {
         TypeId operandType;
 
@@ -554,18 +551,6 @@ public class UnaryOperatorNode extends ValueNode
 					true :
 					operand.constantExpression(whereClause);
 	}
-
-	/**
-	 * @see ValueNode#requiresTypeFromContext
-	 */
-	public boolean requiresTypeFromContext()
-	{
-		if (operand == null)
-			return false;
-		else
-			return (operand.requiresTypeFromContext()); 
-	}
-
 
 	/**
 	 * Returns true if this UnaryOperatorNode is for -?/+?.
