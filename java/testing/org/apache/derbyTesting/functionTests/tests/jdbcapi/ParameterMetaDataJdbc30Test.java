@@ -47,15 +47,27 @@ import junit.framework.TestResult;
 import junit.framework.TestSuite;
 
 /**
- *
+ * Test the ParameterMetaData class in JDBC 30.
+ * This test converts the old jdbcapi/parameterMetaDataJdbc30.java 
+ * test to JUnit. 
  */
+
 public class ParameterMetaDataJdbc30Test extends BaseJDBCTestCase {
 
-        public ParameterMetaDataJdbc30Test(String arg0) {
-                super(arg0);
+	/**
+         * Create a test with the given name.
+         *
+         * @param name name of the test.
+         */
+
+        public ParameterMetaDataJdbc30Test(String name) {
+                super(name);
         }
         
-      	// to run all tests in this class
+	/**
+         * Create suite containing client and embedded tests and to run
+	 * all tests in this class
+         */
 	public static Test suite() {
         	TestSuite suite = new TestSuite("ParameterMetaDataJdbc30Test");
 		 if (JDBC.vmSupportsJSR169())
@@ -79,6 +91,7 @@ public class ParameterMetaDataJdbc30Test extends BaseJDBCTestCase {
 			/**
              		 * Creates the tables and the stored procedures used in the test
              		 * cases.
+			 *
              		 * @exception SQLException if a database error occurs
              		 */
             		protected void decorateSQL(Statement stmt) throws SQLException {
@@ -106,7 +119,10 @@ public class ParameterMetaDataJdbc30Test extends BaseJDBCTestCase {
   	}
 
        /**
-     	* testing a callable statement.
+     	* Testing a callable statement by calling a SQL procedure with 
+	* IN parameters, OUT parameters and IN_OUT parameters.
+        *
+	* @exception SQLException if error occurs
      	*/
 	public void testCallableStatement () throws SQLException {
 
@@ -144,17 +160,18 @@ public class ParameterMetaDataJdbc30Test extends BaseJDBCTestCase {
 			
 		testParameterMetaData(paramMetaData, parameterMetaDataArray0);
 
-      		// TODO: Some of the OUT params are getting reported as IN_OUT for embedded.
-      		// Network server reports it correctly.
       		cs.execute();
 
-		//bug 4450 - parameter meta data info for the return parameter was giving
-      		//null pointer exception. In the past, we didn't need to keep the return
-      		//parameter info for callable statement execution and hence we never
-      		//generated the meta data for it. To fix the problem, at the parsing time,
-      		//I set a flag if the call statement is of ? = form. If so, the first
-      		//parameter is a return parameter and save it's meta data rather than
-      		//discarding it.
+		/*
+		/* bug 4450 - parameter meta data info for the return parameter was giving
+      		/* null pointer exception. In the past, we didn't need to keep the return
+      		/* parameter info for callable statement execution and hence we never
+      		/* generated the meta data for it. To fix the problem, at the parsing time,
+      		/* I set a flag if the call statement is of ? = form. If so, the first
+      		/* parameter is a return parameter and save it's meta data rather than
+      		/* discarding it.
+	 	 */	
+	
       		cs = prepareCall("? = call RDB(?)");
       		paramMetaData = cs.getParameterMetaData();
 		assertEquals("Unexpected parameter count", 2, paramMetaData.getParameterCount());
@@ -171,8 +188,10 @@ public class ParameterMetaDataJdbc30Test extends BaseJDBCTestCase {
 		cs.close();
 	}
 	/**
-        * testing a prepared statement.
-        */
+         * Testing a prepared statement.
+     	 *
+	 * @exception SQLException if database access errors or other errors occur
+         */
 	public void testPreparedStatement () throws SQLException {
 		//next testing a prepared statement
       		PreparedStatement ps = prepareStatement("insert into t values(?, ?, ?, ?, ?)");
@@ -195,17 +214,21 @@ public class ParameterMetaDataJdbc30Test extends BaseJDBCTestCase {
                 {"PARAMETER_NULLABLE", "false", "10", "0", "91", "DATE", "java.sql.Date", "PARAMETER_MODE_IN"}};
 
                 testParameterMetaData(paramMetaData, parameterMetaDataArray0);
-
-      		// JCC seems to report these parameters as MODE_UNKNOWN, where as Derby uses MODE_IN
-      		// JCC behaviour with network server matches its behaviour with DB2
-      		// getPrecision() returns 0 for CHAR/DATE/BIT types for Derby. JCC shows maxlen
+	
+		/*
+      		 *  JCC seems to report these parameters as MODE_UNKNOWN, where as Derby uses MODE_IN
+      		 *  JCC behaviour with network server matches its behaviour with DB2
+      		 *  getPrecision() returns 0 for CHAR/DATE/BIT types for Derby. JCC shows maxlen
+		 */
       		ps.execute();
 
-		//bug 4533 - associated parameters should not be included in the parameter meta data list
-      		//Following statement systab will generate 4 associated parameters for the 2
-      		//user parameters. This results in total 6 parameters for the prepared statement
-      		//internally. But we should only show 2 user visible parameters through
-      		//getParameterMetaData().
+		/*
+		 * bug 4533 - associated parameters should not be included in the parameter meta data list
+      		 * Following statement systab will generate 4 associated parameters for the 2
+      		 * user parameters. This results in total 6 parameters for the prepared statement
+      		 * internally. But we should only show 2 user visible parameters through
+      		 * getParameterMetaData().
+		 */
       		ps = prepareStatement("select * from sys.systables where " +
              			      " tablename like ? and tableID like ?");
       		ps.setString (1, "SYS%");
@@ -226,12 +249,15 @@ public class ParameterMetaDataJdbc30Test extends BaseJDBCTestCase {
 		ps.close();
 	}
 
-	/** DERBY-44 added support for SELECT ... WHERE column LIKE ? ESCAPE ?
-         *  This test case tests
+	/** 
+	 * DERBY-44 added support for SELECT ... WHERE column LIKE ? ESCAPE ?
+         * This test case tests
          *   a) that such a statement compiles, and
          *   b) that we get the correct error message if the escape
          *      sequence is an empty string (at one point this would
          *      lead to a StringIndexOutOfBoundsException)`
+	 *
+	 * @exception SQLException if error occurs
 	 */
 	public void testLikeEscaleStatement () throws SQLException {
 
@@ -262,14 +288,21 @@ public class ParameterMetaDataJdbc30Test extends BaseJDBCTestCase {
 		ps.close();
 	}
 
-	 /** the test no longer tests 4552, but kept as an interesting test scenario
-          * bug 4552 - no parameters would be returned for execute statement using
-          * System.out.println("Bug 4552 - no parameters would be returned for execute statement using");
-          * orig: ps = con.prepareStatement("execute statement systab using values('SYS%','8000001%')");
+	 /** 
+          * test execute statements that no parameters would be returned if 
+          * prepareStatement("execute statement systab using values('SYS%','8000001%')");
+	  *
+	  * @exception SQLException if error occurs
           */
 
 	public void testExecuteStatementUsing () throws SQLException {
-
+	
+		/*
+		 * the test no longer tests 4552, but kept as an interesting test scenario
+                 * bug 4552 - no parameters would be returned for execute statement using
+                 * System.out.println("Bug 4552 - no parameters would be returned for execute statement using");
+                 * orig: ps = con.prepareStatement("execute statement systab using values('SYS%','8000001%')");
+		 */
       		PreparedStatement ps = prepareStatement("select * from sys.systables " + 
 							"where tablename like 'SYS%' and " + 
 							"tableID like '8000001%'");
@@ -282,21 +315,25 @@ public class ParameterMetaDataJdbc30Test extends BaseJDBCTestCase {
 
                 testParameterMetaData(paramMetaData, parameterMetaDataArray0);
 
-
       		ps.execute();
 
 		ps.close();
 	}
-	/** Bug 4654 - Null Pointer exception while executuing a select with a
-         *  where clause parameter of type 'TRUE' or 'FALSE' constants. The existing prior to
-         *  exposing parameter metadata didn't need to fill in metadata information for where
-         *  clause parameter in the example above.
-         *  This no longer makes sense, for we cannot take BOOLEANs anymore.
-         *  replace with a simple where 1 = ?. Which would take either 1 for true, or 0 for false
+	/** 
+         * testing SELECT statements for BOOLEANs (1 for true, 0 for false) 
+	 *
+	 * @exception SQLException if error occurs
 	 */ 
 	public void testSelectStatementUsingBoolean () throws SQLException {
 
-      		//Bug 4654 - fill in where clause parameter type info
+		/*
+		 * Bug 4654 - Null Pointer exception while executuing a select with a
+         	 * where clause parameter of type 'TRUE' or 'FALSE' constants. The existing prior to
+         	 * exposing parameter metadata didn't need to fill in metadata information for where
+         	 * clause parameter in the example above.
+         	 * This no longer makes sense, for we cannot take BOOLEANs anymore.
+         	 * replace with a simple where 1 = ?. Which would take either 1 for true, or 0 for false
+		 */
       		PreparedStatement ps = prepareStatement("select * from t "+  
 							"where 1=? for update");
 
@@ -317,7 +354,9 @@ public class ParameterMetaDataJdbc30Test extends BaseJDBCTestCase {
 		ps.close();
 	}
 	/** 
-         *  test: no parameter for the statement and then do getParameterMetaData() 
+         * test: no parameter for the statement and then do getParameterMetaData() 
+	 *
+	 * @exception SQLException if error occurs
          */
 	public void testSelectStatementUsingNoParameter () throws SQLException {
 
@@ -335,11 +374,13 @@ public class ParameterMetaDataJdbc30Test extends BaseJDBCTestCase {
 		ps.close();
 	}
 	/**
-         *  test: the scale returned should be the one set by registerOutParameter 
+         * test: the scale returned should be the one set by registerOutParameter 
+	 *
+ 	 * @exception SQLException
          */
 	public void testCallableStatementReturnedScale () throws SQLException {
 
-		/**
+		/*
                  *  DERBY-2810 - getParameterType behavior is different in Embedded and 
                  *  Network Client when set by registerOutParameter 
                  *  temporarily disabling Network Client.
@@ -365,7 +406,9 @@ public class ParameterMetaDataJdbc30Test extends BaseJDBCTestCase {
 		}
 	}
 	/**
-         *  test behaviour of meta data and out params after re-compile 
+         * test behaviour of meta data and out params after re-compile 
+	 *
+	 * @exception SQLException if error occurs
          */
 	public void testMetatdataAfterProcRecompile () throws SQLException {
 
@@ -390,7 +433,7 @@ public class ParameterMetaDataJdbc30Test extends BaseJDBCTestCase {
           	cs.execute();
 		assertEquals("Unexpected DUMMYINT alias returned", 11111, cs.getInt(4));
 
-		/** 
+		/* 
 		 *  DERBY-2786 - Behaviour of inout parameters in Embedded and Network client is
          	 *  different if parameters are set but the CallableStatment is not executed.
 		 *  temporarily disabling Network Client. 
@@ -420,7 +463,9 @@ public class ParameterMetaDataJdbc30Test extends BaseJDBCTestCase {
       		cs.close();
 	}
 	/**
-         *  test ParameterMetaData for Java procedures with INTEGER parameters 
+         * test ParameterMetaData for Java procedures with INTEGER parameters 
+	 * 
+	 * @exception SQLException if error occurs
          */
 	public void testParameterMetadataWithINTParameters () throws SQLException {
 
@@ -457,7 +502,9 @@ public class ParameterMetaDataJdbc30Test extends BaseJDBCTestCase {
             stmt.close();
 	}
 	/**
-         *  test ParameterMetaData for Java procedures with CHAR parameters
+         * test ParameterMetaData for Java procedures with CHAR parameters
+	 *
+	 * @exception SQLException if error occurs
          */
 	 public void testParameterMetadataWithCHARParameters () throws SQLException {
 
@@ -493,6 +540,8 @@ public class ParameterMetaDataJdbc30Test extends BaseJDBCTestCase {
 	}
 	/**
          *  test ParameterMetaData for Java procedures with DECIMAL parameters
+	 *
+	 * @exception SQLException if error occurs
          */
 	public void testParameterMetadataWithDECIMALParameters () throws SQLException {
 
@@ -526,7 +575,9 @@ public class ParameterMetaDataJdbc30Test extends BaseJDBCTestCase {
        		cs.close();
 	}
 	/**
-         *  test ParameterMetaData for Java procedures with some literal parameters
+         * test ParameterMetaData for Java procedures with some literal parameters
+	 *
+	 * @exception SQLException if error occurs
          */
 	public void testParameterMetadataWithLITERALParameters () throws SQLException {
 
@@ -599,14 +650,16 @@ public class ParameterMetaDataJdbc30Test extends BaseJDBCTestCase {
 
                 testParameterMetaData(cs.getParameterMetaData(), parameterMetaDataArray2);
 
-
           	cs.close();
           	stmt.execute("DROP PROCEDURE PMDD");
             stmt.close();
 	}
 	/**
-         *  print the parameter isNullable value in human readable form
+         * print the parameter isNullable value in human readable form
+	 *
+	 * @param nullabilityValue 
          */
+	// @return the nullability status of the given parameter
 	static String parameterIsNullableInStringForm(int nullabilityValue){
 		if (nullabilityValue ==  ParameterMetaData.parameterNoNulls)
 				  return("PARAMETER_NO_NULLS");
@@ -618,7 +671,13 @@ public class ParameterMetaDataJdbc30Test extends BaseJDBCTestCase {
 				  return("ERROR: donot recognize this parameter isNullable() value");
   	}
 
-	//print the parameter mode in human readable form
+	/**
+         * print the parameter mode in human readable form
+         *
+         * @param mode identifies parameter's mode (IN, OUT, or IN_OUT)
+	 * @return     the parameter mode in readable form
+         *             
+         */
 	static String parameterModeInStringForm(int mode){
 		if (mode ==  ParameterMetaData.parameterModeIn)
 				  return("PARAMETER_MODE_IN");
@@ -631,6 +690,14 @@ public class ParameterMetaDataJdbc30Test extends BaseJDBCTestCase {
 		else
 				  return("ERROR: donot recognize this parameter mode");
   	}
+	/**
+         * tests parameterMetaData and reports error if the ParameterMetaData results
+	 * does not match the expected results.
+         *
+         * @param paramMetaData ParameterMetadata object
+	 * @param paramMetaDataArray 2 dimensional array containing expected test results. 
+	 * @exception SQLException if any error occurs
+         */
 	static void testParameterMetaData(ParameterMetaData paramMetaData, String [][] paramMetaDataArray) throws SQLException {
 		int numParam = paramMetaData.getParameterCount();
 		
@@ -647,6 +714,12 @@ public class ParameterMetaDataJdbc30Test extends BaseJDBCTestCase {
 			j=0;
 		}
 	}
+ 	/**
+         * ParameterMetaData Negative Test 
+         *
+         * @param paramMetaData ParameterMetadata object
+         * @exception SQLException if any error occurs
+         */	
 	static void dumpParameterMetaDataNegative(ParameterMetaData paramMetaData) throws SQLException {
 
                 int numParam = paramMetaData.getParameterCount();
@@ -673,23 +746,69 @@ public class ParameterMetaDataJdbc30Test extends BaseJDBCTestCase {
                 }
 
 	}
-	//A really simple method to test callable statement
+	/**
+         * A simple method to test callable statement. This is the Java method 
+	 * for procedure dummyint.
+         *
+         * @param in_param 
+	 * @param in_param2  
+	 * @param in_param3 
+	 * @param in_param4
+         * @exception SQLException
+         */
         public static void dummyint (int in_param, int in_param2, int[] in_param3, int[] in_param4)
                                                                    throws SQLException {
 
                 in_param4[0] = 11111;
         }
+
+	/**
+         *  This is the Java method for procedure dummyint.
+         *
+         * @param in_param  
+         * @param in_param2 
+         * @param in_param3 
+         * @param in_param4 
+         * @exception SQLException
+         */
         public static void dummyint2 (int in_param, int in_param2, int[] in_param3, int[] in_param4)
                                                                    throws SQLException {
                 in_param4[0] = 22222;
         }
 
+	/**
+	 * A really simple method to test callable statement. This is the Java method
+         * for procedure dummy_numeric_Proc.
+         *
+         * @param max_param  
+         * @param min_param  
+         * @exception SQLException
+         */
         public static void dummy_numeric_Proc (BigDecimal[] max_param,BigDecimal[] min_param)
                                                                  throws SQLException {
         }
-
+	
+	/**
+         * Java method for procedure PMDC which tests ParameterMetaData for Java procedures 
+         * with CHAR parameters.  
+	 * 
+         * @param in_param 
+         * @param in_param2
+         * @param in_param3 
+         * @param in_param4 
+         */
         public static void dummyString (String in_param, String in_param2, String[] in_param3, String[] in_param4) {
         }
+	
+	/**
+         * Java method for procedure PMDD which tests ParameterMetaData for Java procedures
+	 * with DECIMAL parameters. 
+         *
+         * @param in_param  
+         * @param in_param2 
+         * @param in_param3 
+         * @param in_param4 
+         */
         public static void dummyDecimal(BigDecimal in_param, BigDecimal in_param2, BigDecimal[] in_param3, BigDecimal[] in_param4) {
         }
 }

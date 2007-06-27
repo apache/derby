@@ -113,11 +113,11 @@
       <exclude name="${this.dir}/checkDataSource.java"/>
       <exclude name="${this.dir}/checkDataSource30.java"/>
       <exclude name="${this.dir}/dataSourcePermissions.java"/>
-      <exclude name="${this.dir}/parameterMetaDataJdbc30.java"/>
       <exclude name="${this.dir}/ResultSetJDBC30Test.java"/>
       <exclude name="${this.dir}/statementJdbc30.java"/>
       <exclude name="${this.dir}/savepointJdbc30_JSR169.java"/>
       <exclude name="${this.dir}/savepointJdbc30_XA.java"/>
+      <exclude name="${this.dir}/ParameterMetaDataJdbc30Test.java"/>
       <exclude name="${this.dir}/xaJNDI.java"/>
       <exclude name="${this.dir}/LobStreamsTest.java"/>
       <exclude name="${this.dir}/XATest.java"/>
@@ -153,7 +153,7 @@
       <include name="${this.dir}/checkDataSource30.java"/>
       <include name="${this.dir}/savepointJdbc30_JSR169.java"/>
       <include name="${this.dir}/savepointJdbc30_XA.java"/>
-      <include name="${this.dir}/parameterMetaDataJdbc30.java"/>
+      <include name="${this.dir}/ParameterMetaDataJdbc30Test.java"/>
       <include name="${this.dir}/ResultSetJDBC30Test.java"/>
       <include name="${this.dir}/statementJdbc30.java"/>
       <include name="${this.dir}/LobStreamsTest.java"/>
