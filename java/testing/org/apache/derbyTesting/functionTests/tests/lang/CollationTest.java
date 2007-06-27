@@ -545,6 +545,21 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     		" ((CASE WHEN 1=1 THEN TABLENAME ELSE 'c' END) AS CHAR(12)) = " +
 			" 'SYSCOLUMNS'",
     		new String[][] {{"SYSCOLUMNS"} });   
+    //Another test for CASE WHEN THEN ELSE DERBY-2776
+    //The data type for THEN is not same as the data type for ELSE.
+    //THEN is of type CHAR and ELSE is of type VARCHAR. VARCHAR has higher
+    //precedence hence the type associated with the return type of CASE will
+    //be VARCHAR. Also, since the collation type of THEN and ELSE match,
+    //which is TERRITORY BASED, the return type of CASE will have the collation
+    //of TERRITORY BASED. This collation is same as the rhs of the = operation
+    //and hence following sql will pass. 
+    checkLangBasedQuery(s, "SELECT count(*) FROM CUSTOMER WHERE CASE WHEN " +
+    		" 1=1 THEN NAMECHAR ELSE NAME END = NAMECHAR",
+    		new String[][] {{"7"} });   
+    //The query below will work for the same reason. 
+    checkLangBasedQuery(s, "SELECT count(*) FROM SYS.SYSTABLES WHERE CASE " +
+    		" WHEN 1=1 THEN TABLENAME ELSE TABLEID END = TABLENAME",
+    		new String[][] {{"21"} });   
 
     //Do some testing using CONCATENATION
     //following will fail because result string of concatenation has 
@@ -894,15 +909,16 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
 
 private void setUpTable(Statement s) throws SQLException {
 
-    s.execute("CREATE TABLE CUSTOMER(ID INT, NAME VARCHAR(40))");
+    s.execute("CREATE TABLE CUSTOMER(ID INT, NAME VARCHAR(40), NAMECHAR CHAR(40))");
     
     Connection conn = s.getConnection();
 
-    PreparedStatement ps = conn.prepareStatement("INSERT INTO CUSTOMER VALUES(?,?)");
+    PreparedStatement ps = conn.prepareStatement("INSERT INTO CUSTOMER VALUES(?,?,?)");
     for (int i = 0; i < NAMES.length; i++)
     {
             ps.setInt(1, i);
             ps.setString(2, NAMES[i]);
+            ps.setString(3, NAMES[i]);
             ps.executeUpdate();
     }
 
