@@ -74,7 +74,7 @@ public class Driver30 extends Driver20 {
 		Methods to be overloaded in sub-implementations such as
 		a tracing driver.
   */
-	public EmbedConnection getNewEmbedConnection(String url, Properties info)
+	protected EmbedConnection getNewEmbedConnection(String url, Properties info)
 		 throws SQLException 
 	{
 		return new EmbedConnection30(this, url, info);

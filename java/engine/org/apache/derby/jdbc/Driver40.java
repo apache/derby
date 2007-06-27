@@ -63,7 +63,7 @@ public class Driver40 extends Driver30 {
     }
     
     
-    public EmbedConnection getNewEmbedConnection(String url, Properties info)
+    protected EmbedConnection getNewEmbedConnection(String url, Properties info)
     throws SQLException {
         return new EmbedConnection40(this, url, info);
     }

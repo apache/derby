@@ -38,7 +38,9 @@ import org.apache.derby.iapi.jdbc.JDBCBoot;
 
 /**
    This is the dummy driver which is registered with the DriverManager and
-   which is autoloaded by JDBC4. Loading this class will NOT automatically boot the Derby engine.
+   which is autoloaded by JDBC4. Loading this class will NOT automatically
+   boot the Derby engine, but it will register this class as a valid
+   Driver with the DriverManager.
    Instead, the engine boots lazily when you ask for a
    Connection. Alternatively, you can force the engine to boot as follows:
 
