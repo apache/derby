@@ -219,16 +219,6 @@ The downloaded file should be copied to directory
 
 
 
-Note: After following the steps in sections 2.2.4-2.2.8 of this
-document, you should have the following:
-
-${derby.source}/tools/java/empty.jar
-${derby.source}/tools/java/geronimo-spec-servlet-2.4-rc4.jar
-${derby.source}/tools/java/jakarta-oro-2.0.8.jar
-${derby.source}/tools/java/javacc.jar
-${derby.source}/tools/java/osgi.jar
-
-
 2.2.8 Download J2ME/CDC/Foundation and JSR 169 jars
 
 This is an optional section.
@@ -247,6 +237,19 @@ Once you have obtained these jars and set the jsr169compile.classpath
 for the embedded engine. The resulting jar file (derby.jar) can be used
 on J2ME, or J2SE, write once run anywhere.
 
+
+
+Note: After following the steps in sections 2.2.4-2.2.8 of this
+document, you should have the following:
+
+${derby.source}/tools/java/empty.jar
+${derby.source}/tools/java/geronimo-spec-servlet-2.4-rc4.jar
+${derby.source}/tools/java/jakarta-oro-2.0.8.jar
+${derby.source}/tools/java/javacc.jar
+${derby.source}/tools/java/junit.jar
+${derby.source}/tools/java/osgi.jar
+${derby.source}/tools/java/xercesImpl.jar
+${derby.source}/tools/java/xml-apis.jar
 
 ---------------------------------------------------------------
 3     Build instructions
