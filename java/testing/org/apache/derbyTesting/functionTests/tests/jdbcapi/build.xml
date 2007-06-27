@@ -110,9 +110,6 @@
       <include name="${this.dir}/*.java"/>
       <exclude name="${this.dir}/AutoGenJDBC30Test.java"/>
       <exclude name="${this.dir}/dbMetaDataJdbc30.java"/>
-      <exclude name="${this.dir}/checkDataSource.java"/>
-      <exclude name="${this.dir}/checkDataSource30.java"/>
-      <exclude name="${this.dir}/dataSourcePermissions.java"/>
       <exclude name="${this.dir}/ResultSetJDBC30Test.java"/>
       <exclude name="${this.dir}/statementJdbc30.java"/>
       <exclude name="${this.dir}/savepointJdbc30_JSR169.java"/>
@@ -150,7 +147,6 @@
       <!--exclude name=""/-->
       <include name="${this.dir}/AutoGenJDBC30Test.java"/>
       <include name="${this.dir}/dbMetaDataJdbc30.java"/>
-      <include name="${this.dir}/checkDataSource30.java"/>
       <include name="${this.dir}/savepointJdbc30_JSR169.java"/>
       <include name="${this.dir}/savepointJdbc30_XA.java"/>
       <include name="${this.dir}/ParameterMetaDataJdbc30Test.java"/>
@@ -184,8 +180,6 @@
         <pathelement location="${oro}"/>
       </classpath>
       <!--exclude name=""/-->
-      <include name="${this.dir}/checkDataSource.java"/>
-      <include name="${this.dir}/dataSourcePermissions.java"/>
       <include name="${this.dir}/xaJNDI.java"/>
     </javac>
   </target>
