@@ -58,13 +58,14 @@ public class ParameterMetaDataJdbc30Test extends BaseJDBCTestCase {
       	// to run all tests in this class
 	public static Test suite() {
         	TestSuite suite = new TestSuite("ParameterMetaDataJdbc30Test");
-
-        	suite.addTest(baseSuite("ParameterMetaDataJdbc30Test:embedded"));
-
-        	suite.addTest(
-                	TestConfiguration.clientServerDecorator(
-                        	baseSuite("ParameterMetaDataJdbc30Test:client")));
-		
+		 if (JDBC.vmSupportsJSR169())
+			return new TestSuite("Empty ParameterMetaDataJDBC30. JSR169 does not support ParameterMetaData");
+		else {	
+        		suite.addTest(baseSuite("ParameterMetaDataJdbc30Test:embedded"));
+        		suite.addTest(
+                		TestConfiguration.clientServerDecorator(
+                        		baseSuite("ParameterMetaDataJdbc30Test:client")));
+		}
         	return suite;
     	}
 
