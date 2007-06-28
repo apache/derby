@@ -456,25 +456,6 @@ public class HashScanResultSet extends ScanResultSet
 
 				if (columns != null)
 				{
-					if (SanityManager.DEBUG)
-					{
-						// There used to be an assertion here that the columns
-						// array was the same size as the number of columns
-						// in the compact row. This assertion no longer holds
-						// now that we're doing sparse rows, so I deleted it.
-
-						// Columns is really a Storable[]
-						for (int i = 0; i < columns.length; i++)
-						{
-							if (columns[i] != null &&
-								! (columns[i] instanceof Storable))
-							{
-								SanityManager.THROWASSERT(
-								"columns[" + i + "] expected to be Storable, not " +
-								columns[i].getClass().getName());
-							}
-						}
-					}
 
 					// See if the entry satisfies all of the other qualifiers
 

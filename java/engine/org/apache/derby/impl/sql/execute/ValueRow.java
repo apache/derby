@@ -274,19 +274,6 @@ public class ValueRow implements ExecRow, Formatable
 	{
 		column = value;
 	}
-
-	public void setRowArray(Storable[] value) {
-		if (value instanceof DataValueDescriptor[]) {
-			column = (DataValueDescriptor[]) value;
-			return;
-		}
-
-		if ((column == null) || (column.length != value.length))
-			column = new DataValueDescriptor[value.length];
-
-
-		System.arraycopy(value, 0, column, 0, column.length);
-	}
 		
 	// Set the number of columns in the row to ncols, preserving
 	// the existing contents.

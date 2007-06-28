@@ -63,10 +63,6 @@ class IndexValueRow implements ExecIndexRow {
 	{
 		valueRow.setRowArray(value);
 	}
-	public void setRowArray(Storable[] value) 
-	{
-		valueRow.setRowArray(value);
-	}
 
 	/**
 		Get a clone of the array form of the row that Access expects.

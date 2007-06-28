@@ -989,7 +989,7 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 		System.arraycopy(sourceRowArray, 0, hashRowArray, extraColumns, 
 				sourceRowArray.length);
 
-		ht.put(true, hashRowArray);
+		ht.putRow(true, hashRowArray);
 
 		numToHashTable++;
 	}
@@ -1158,7 +1158,7 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 			hashRowArray[i].setToNull();
 		}
 
-		ht.put(true, hashRowArray);
+		ht.putRow(true, hashRowArray);
 	}
 
 	/**

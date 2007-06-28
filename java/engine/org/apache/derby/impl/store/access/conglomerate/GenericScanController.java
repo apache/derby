@@ -800,7 +800,7 @@ public abstract class GenericScanController
                     }
                     else
                     {
-                        if (hash_table.put(false, fetch_row))
+                        if (hash_table.putRow(false, fetch_row))
                         {
                             // The row was inserted into the hash table so we
                             // need to create a new row next time through.

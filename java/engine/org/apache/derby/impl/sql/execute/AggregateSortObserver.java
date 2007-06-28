@@ -21,24 +21,11 @@
 
 package org.apache.derby.impl.sql.execute;
 
-import org.apache.derby.iapi.store.access.SortObserver;
-import org.apache.derby.iapi.services.io.Storable;
-
-import org.apache.derby.iapi.types.UserDataValue;
-
-import org.apache.derby.iapi.types.CloneableObject;
-
-import org.apache.derby.iapi.services.io.Storable;
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
 import org.apache.derby.iapi.error.StandardException;
-
+import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.execute.ExecRow;
-
 import org.apache.derby.iapi.types.DataValueDescriptor;
-
-
-import java.util.Vector;
+import org.apache.derby.iapi.types.UserDataValue;
 
 /**
  * This sort observer performs aggregation.
@@ -128,7 +115,7 @@ public class AggregateSortObserver extends BasicSortObserver
 		** initialized, then initialize the entire row now.	
 		*/
 		if (aggsToInitialize.length > 0 &&
-			((Storable)returnRow[firstAggregatorColumn]).isNull())
+			returnRow[firstAggregatorColumn].isNull())
 		{
 			for (int i = 0; i < aggsToInitialize.length; i++)
 			{
@@ -182,7 +169,7 @@ public class AggregateSortObserver extends BasicSortObserver
 		for (int i = 0; i < aggsToProcess.length; i++)
 		{
 			GenericAggregator aggregator = aggsToProcess[i];
-			if (((Storable)insertRow[aggregator.getColumnId()]).isNull())
+			if (insertRow[aggregator.getColumnId()].isNull())
 			{
 				aggregator.accumulate(insertRow, existingRow);
 			}
