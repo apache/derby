@@ -240,6 +240,11 @@ public class parameterMapping {
 /*10 Timestamp */       { _, _, _, _, _, _, _, _, _, _, _, X, X, X, _, _, _, X, X, X, _, _},
 /*11 Blob   */          { _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, X},
 /*12 Clob */            { _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, X, _},
+
+// Byte and Short were added to this table in JDBC 4.0. (See DERBY-1500.)
+
+/*13 Byte */            { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
+/*14 Short */           { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
 	};
 
 
@@ -2491,9 +2496,17 @@ public class parameterMapping {
 		System.out.println(worked ? " FAIL " : (" OK " + sqleResult.getMessage()));
 		}
 
+
 		setXXX_setObject(s, psi, psq, type, "46", "java.lang.String", 0, executeBatchTests);
 		setXXX_setObject(s, psi, psq, type, BigDecimal.valueOf(72L), "java.math.BigDecimal", 1, executeBatchTests);
 		setXXX_setObject(s, psi, psq, type, Boolean.TRUE, "java.lang.Boolean", 2, executeBatchTests);
+
+		// DERBY-1500: setObject() should work for Byte and Short too.
+		setXXX_setObject(s, psi, psq, type, new Byte((byte) 2),
+						 "java.lang.Byte", 13,executeBatchTests);
+		setXXX_setObject(s, psi, psq, type, new Short((short) 11),
+						 "java.lang.Short", 14,executeBatchTests);
+
 		setXXX_setObject(s, psi, psq, type, new Integer(74), "java.lang.Integer", 3, executeBatchTests);
 		setXXX_setObject(s, psi, psq, type, new Long(79), "java.lang.Long", 4, executeBatchTests);
 		setXXX_setObject(s, psi, psq, type, new Float(76.3f), "java.lang.Float", 5, executeBatchTests);
