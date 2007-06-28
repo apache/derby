@@ -6666,6 +6666,7 @@ ValueNode
 									dts,
 									getContextManager());
 			((CastNode) value).setForDataTypeFunction(true);
+			((CastNode) value).setForExternallyGeneratedCASTnode();
 
 			return value;
 	  }
@@ -6681,6 +6682,7 @@ ValueNode
 												getContextManager());
 
 		((CastNode) value).setForDataTypeFunction(true);
+		((CastNode) value).setForExternallyGeneratedCASTnode();
 		return value;
 	}
 }
@@ -7229,11 +7231,13 @@ dateTimeScalarFunction() throws StandardException :
      */
         <TIME> <LEFT_PAREN> value = additiveExpression(null,0, false) <RIGHT_PAREN>
 	{
-		return (ValueNode) nodeFactory.getNode(
+		ValueNode castValue = (ValueNode) nodeFactory.getNode(
 							C_NodeTypes.CAST_NODE,
                                                         value,
                                                         DataTypeDescriptor.getBuiltInDataTypeDescriptor( Types.TIME),
                                                         getContextManager());
+		((CastNode) castValue).setForExternallyGeneratedCASTnode();
+		return castValue;
         }
 |
         <DATE> <LEFT_PAREN> value = additiveExpression(null,0, false) <RIGHT_PAREN>
@@ -9308,6 +9312,7 @@ castSpecification() throws StandardException :
 									value,
 									dts,
 									getContextManager());
+		((CastNode) treeTop).setForExternallyGeneratedCASTnode();
 
 		/* We need to generate a SQL->Java conversion tree above us if
 		 * the dataTypeCast is a user type.
@@ -11308,12 +11313,14 @@ caseExpression() throws StandardException :
 {
 	<END>
 	{
-		return ((ValueNode) nodeFactory.getNode(
+		ValueNode value = (ValueNode) nodeFactory.getNode(
 										C_NodeTypes.CAST_NODE,
 										(ValueNode) nodeFactory.getNode(C_NodeTypes.UNTYPED_NULL_CONSTANT_NODE,
 																		getContextManager()),
 										DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.CHAR, 1),	
-										getContextManager()));
+										getContextManager());
+		((CastNode) value).setForExternallyGeneratedCASTnode();
+		return value;
 	}
 |
 	<ELSE> expr = thenElseExpression() <END>
@@ -11368,12 +11375,14 @@ thenElseExpression() throws StandardException :
 	LOOKAHEAD ( {getToken(1).kind == NULL} )
 	<NULL>
 	{
-		return((ValueNode) nodeFactory.getNode(
+		ValueNode value = (ValueNode) nodeFactory.getNode(
 										C_NodeTypes.CAST_NODE,
 										(ValueNode) nodeFactory.getNode(C_NodeTypes.UNTYPED_NULL_CONSTANT_NODE,
 																		getContextManager()),
 										DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.CHAR, 1),	
-										getContextManager()));
+										getContextManager());
+		((CastNode) value).setForExternallyGeneratedCASTnode();
+		return value;
 	}
 |
 	expr = additiveExpression(null, 0, false)
