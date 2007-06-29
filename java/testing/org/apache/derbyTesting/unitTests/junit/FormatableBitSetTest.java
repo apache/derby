@@ -21,6 +21,7 @@
 
 package org.apache.derbyTesting.unitTests.junit;
 
+import org.apache.derbyTesting.junit.BaseTestCase;
 import junit.framework.*;
 
 import org.apache.derby.iapi.services.io.FormatableBitSet;
@@ -39,7 +40,7 @@ import java.lang.reflect.Method;
 /**
  * This class is used to test the FormatableBitSet implementation.
  */
-public class FormatableBitSetTest extends TestCase {
+public class FormatableBitSetTest extends BaseTestCase {
     private byte[] bits24;
     private byte[] bits24C;
 
