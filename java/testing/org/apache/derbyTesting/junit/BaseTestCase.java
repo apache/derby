@@ -74,6 +74,12 @@ public abstract class BaseTestCase
      * setUp, tearDown methods and decorators.
      */
     public void runBare() throws Throwable {
+        boolean trace = TestConfiguration.getCurrent().doTrace();
+        long startTime = 0;
+        if ( trace )
+        {
+            startTime = System.currentTimeMillis();
+        }
 
         // install a default security manager if one has not already been
         // installed
@@ -85,7 +91,17 @@ public abstract class BaseTestCase
             }
         }
     	 
-    	super.runBare();   
+        try {
+            super.runBare();   
+        }
+        finally{
+            if ( trace )
+            {
+                long timeUsed = System.currentTimeMillis() - startTime;
+                out.println();
+                out.print(getName() + " used " + timeUsed + " ms ");
+            }
+        }
     }
 
     /**
