@@ -718,7 +718,12 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
 			"'org.apache.derbyTesting.functionTests.tests.lang.RoutineTest.concat' "+
 			" LANGUAGE JAVA PARAMETER STYLE JAVA");
     //DERBY-2831 Creating a function inside a non-existent schema should not
-    //fail when it's return type is of character string type.
+    //fail when it's return type is of character string type. Following is a
+    //simple test case copied from DERBY-2831
+    s.executeUpdate("CREATE FUNCTION AA.B() RETURNS VARCHAR(10) NO SQL " +
+    		"PARAMETER STYLE JAVA LANGUAGE JAVA EXTERNAL NAME 'aaa.bbb.ccc' ");
+    //following fails as expected because aaa.bbb.ccc doesn't exist 
+    assertStatementError("XJ001", s, "SELECT AA.B() FROM CUSTOMER ");
 
     //Start of parameter testing
     //Start with simple ? param in a string comparison
