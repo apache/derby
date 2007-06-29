@@ -285,7 +285,7 @@ public class CreateAliasNode extends DDLStatementNode
 			//Use the collation type and info of the schema in which this
 			//function is defined for the return value of the function
 			newTDWithCorrectCollation.setCollationType(
-		    	     getSchemaDescriptor(getObjectName().getSchemaName(), false).getCollationType());
+					getSchemaDescriptor().getCollationType());
 			newTDWithCorrectCollation.setCollationDerivation(
 	        		StringDataValue.COLLATION_DERIVATION_IMPLICIT);
 			return newTDWithCorrectCollation;
