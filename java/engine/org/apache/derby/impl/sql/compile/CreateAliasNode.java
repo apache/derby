@@ -222,12 +222,13 @@ public class CreateAliasNode extends DDLStatementNode
 
 	/**
 	 * CreateAliasNode creates the RoutineAliasInfo for a user defined function
-	 * in it's init method, which is called by the parser. But at that time, we
-	 * do not have the SchemaDescriptor ready to determine the collation
-	 * type. Hence, at the bind time, when we do have the SchemaDescriptor
-	 * available, we should go back and fix the RoutineAliasIno to have correct
-	 * collation for it's character string parameters and also fix it's return
-	 * type's collation if the return type is a character string.
+	 * or procedure in it's init method, which is called by the parser. But at 
+	 * that time, we do not have the SchemaDescriptor ready to determine the 
+	 * collation type. Hence, at the bind time, when we do have the 
+	 * SchemaDescriptor available, we should go back and fix the 
+	 * RoutineAliasInfo to have correct collation for its character string 
+	 * parameters and also fix its return type (for functions) so as to have 
+	 * correct collation if it is returning character string type. 
 	 * 
 	 * This method here checks if the RoutineAliasInfo has any character string
 	 * types associated with it. If not, then the RoutineAliasInfo that got
@@ -239,13 +240,17 @@ public class CreateAliasNode extends DDLStatementNode
 	private boolean anyStringTypeDescriptor() {
 		RoutineAliasInfo rai = (RoutineAliasInfo)aliasInfo;
 		TypeDescriptor aType = rai.getReturnType();
+		TypeId compTypeId;
 		/*
 		** Try for a built in type matching the
 		** type name.  
 		*/
-		TypeId compTypeId = TypeId.getBuiltInTypeId(aType.getTypeName());
-		if (compTypeId != null && compTypeId.isStringTypeId()) 
-			return true;
+		if (aType != null) //that means we are not dealing with a procedure
+		{
+			compTypeId = TypeId.getBuiltInTypeId(aType.getTypeName());
+			if (compTypeId != null && compTypeId.isStringTypeId()) 
+				return true;			
+		}
 		if (rai.getParameterCount() != 0) {
 			int paramCount = rai.getParameterCount();
 			TypeDescriptor[] paramTypes = rai.getParameterTypes();
@@ -264,17 +269,23 @@ public class CreateAliasNode extends DDLStatementNode
 	 * typeid, length and nullability to create a new DataTypeDescriptor and 
 	 * then have it take the collation type of the schema in which the method 
 	 * is getting defined in. This is because all the character strings 
-	 * associated with the definition of the user defined function should take  
-	 * the collation of the schema in which this user defined function is 
-	 * getting created.
+	 * associated with the definition of the user defined function/procedure 
+	 * should take the collation of the schema in which this user defined 
+	 * function is getting created.
 	 * 
 	 * @param changeTD TypeDescriptor with incorrect collation setting
 	 * @return New TypeDescriptor with collation of the schema in which 
-	 *   the function is getting created.
+	 *   the function/procedure is getting created.
 	 * @throws StandardException
 	 */
 	private TypeDescriptor typeDescriptorWithCorrectCollation(TypeDescriptor changeTD)
 	throws StandardException {
+		//We could have been called for the return type but for procedures 
+		//there is no return type and hence we should be careful that we
+		//don't run into null ptr exception. So before doing anything, check if
+		//the passed parameter is null and if so, then simply return.
+		if (changeTD == null) 
+			return changeTD;
 		TypeId compTypeId = TypeId.getBuiltInTypeId(changeTD.getTypeName());
 		//No work to do if type id does not correspond to a character string
 		if (compTypeId != null && compTypeId.isStringTypeId()) {
@@ -307,10 +318,11 @@ public class CreateAliasNode extends DDLStatementNode
 
 	public void bindStatement() throws StandardException
 	{
-		//Are we dealing with user defined function?
-		if (aliasType == AliasInfo.ALIAS_TYPE_FUNCTION_AS_CHAR) {
-			//Does the user defined function have any character string types
-			//in it's definition
+		//Are we dealing with user defined function or procedure?
+		if (aliasType == AliasInfo.ALIAS_TYPE_FUNCTION_AS_CHAR ||
+				aliasType == AliasInfo.ALIAS_TYPE_PROCEDURE_AS_CHAR) {
+			//Does the user defined function/procedure have any character 
+			//string types in it's definition
 			if (anyStringTypeDescriptor()){
 				RoutineAliasInfo oldAliasInfo = (RoutineAliasInfo)aliasInfo;  
 				TypeDescriptor[] newParamTypes = null;
@@ -321,7 +333,7 @@ public class CreateAliasNode extends DDLStatementNode
 					TypeDescriptor[] oldParamTypes = oldAliasInfo.getParameterTypes();
 					//Go through the parameters and pick the character string
 					//type and set their collation to the collation of the
-					//schema in which the function is getting defined.
+					//schema in which the function/procedure is getting defined.
 					for (int i = 0; i < paramCount; i++) 
 						newParamTypes[i] = typeDescriptorWithCorrectCollation(oldParamTypes[i]);
 				}
