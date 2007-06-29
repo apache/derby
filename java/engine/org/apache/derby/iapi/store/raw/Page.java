@@ -139,6 +139,14 @@ public interface Page
 	public RecordHandle getInvalidRecordHandle();
 
     /**
+     * Get a record id protection handle.
+     *
+     * @return a record id protection handle
+     * @see RecordHandle#RECORD_ID_PROTECTION_HANDLE
+     */
+    public RecordHandle getProtectionRecordHandle();
+
+    /**
      * Return a record handle for the given constant record id.
      * <p>
      * Return a record handle that doesn't represent a record but rather has 

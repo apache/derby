@@ -665,8 +665,7 @@ class B2IRowLocking3 implements BTreeLockingPolicy
         // The scan page lock is implemented as a row lock on the reserved
         // row id on the page (RecordHandle.RECORD_ID_PROTECTION_HANDLE).
         RecordHandle scan_lock_rh = 
-            current_leaf.getPage().makeRecordHandle(
-                RecordHandle.RECORD_ID_PROTECTION_HANDLE);
+            current_leaf.getPage().getProtectionRecordHandle();
 
         // First try to get the lock NOWAIT, while latch is held.
         boolean ret_status = 
@@ -730,8 +729,7 @@ class B2IRowLocking3 implements BTreeLockingPolicy
         // The scan page lock is implemented as a row lock on the reserved
         // row id on the page (RecordHandle.RECORD_ID_PROTECTION_HANDLE).
         RecordHandle scan_lock_rh = 
-            current_leaf.getPage().makeRecordHandle(
-                RecordHandle.RECORD_ID_PROTECTION_HANDLE);
+            current_leaf.getPage().getProtectionRecordHandle();
 
         // First try to get the lock NOWAIT, while latch is held.
         return(

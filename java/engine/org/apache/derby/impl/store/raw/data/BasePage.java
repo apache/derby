@@ -106,6 +106,13 @@ abstract class BasePage implements Page, Observer, TypedFormat
 	private int   recordCount;
 
 	/**
+	 * A record handle that, when locked, protects all the record ids on the
+	 * page.
+	 * @see RecordHandle#RECORD_ID_PROTECTION_HANDLE
+	 */
+	private RecordId protectionHandle;
+
+	/**
 		Page owner during exclusive access.
 
 		MT - mutable : single thread required, provided by Lockable single thread required. 
@@ -219,6 +226,7 @@ abstract class BasePage implements Page, Observer, TypedFormat
 	{
 		setAuxObject(null);
 		identity = null;
+		protectionHandle = null;
 		recordCount = 0;
 		clearLastLogInstant();
 
@@ -260,6 +268,7 @@ abstract class BasePage implements Page, Observer, TypedFormat
 	protected void fillInIdentity(PageKey key) {
 		if (SanityManager.DEBUG) {
 			SanityManager.ASSERT(identity == null);
+			SanityManager.ASSERT(protectionHandle == null);
 		}
 
 		identity = key;
@@ -283,6 +292,7 @@ abstract class BasePage implements Page, Observer, TypedFormat
 	protected void cleanPageForReuse()
 	{
 		setAuxObject(null);
+		protectionHandle = null;
 		recordCount = 0;
 	}
 
@@ -309,6 +319,29 @@ abstract class BasePage implements Page, Observer, TypedFormat
 		// a static invalid record handle
 		return InvalidRecordHandle;
 	}
+
+    /**
+     * Get the record id protection handle for the page.
+     *
+     * @return protection handle
+     * @see RecordHandle#RECORD_ID_PROTECTION_HANDLE
+     */
+    public final RecordHandle getProtectionRecordHandle() {
+        // only allocate a new handle the first time the method is called
+        if (protectionHandle == null) {
+            protectionHandle =
+                new RecordId(getPageId(),
+                             RecordHandle.RECORD_ID_PROTECTION_HANDLE);
+        }
+
+        if (SanityManager.DEBUG) {
+            SanityManager.ASSERT(
+                getPageId().equals(protectionHandle.getPageId()),
+                "PageKey for cached protection handle doesn't match identity");
+        }
+
+        return protectionHandle;
+    }
 
 	public static final RecordHandle MakeRecordHandle(PageKey pkey, int recordHandleConstant)
 		 throws StandardException
