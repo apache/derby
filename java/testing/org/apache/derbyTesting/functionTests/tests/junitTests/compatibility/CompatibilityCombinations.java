@@ -58,6 +58,9 @@ import junit.framework.TestSuite;
  *     The following is an example and explanation of the 
  *     <CODE>compatibilitytest.properties</CODE> file:
  *     <font size="-1"><PRE>
+ * #############################
+ * # The test suite to be run for compatibility testing:
+ * test.testSuite=org.apache.derbyTesting.functionTests.tests.junitTests.compatibility.CompatibilitySuite
  * # Optional, default false
  * # test.printDebug=false
  * 
@@ -188,7 +191,7 @@ public class CompatibilityCombinations extends BaseTestCase
     
     private final static int DERBY_JAR = 0; // Index of derby.jar in derbyLib[DerbyVersion][]
     private final static int DERBYCLIENT_JAR = DERBY_JAR +1; // ditto
-  private final static int DERBYNET_JAR = DERBYCLIENT_JAR +1; // ditto
+    private final static int DERBYNET_JAR = DERBYCLIENT_JAR +1; // ditto
     private final static int DERBYTESTING_JAR = DERBYNET_JAR +1; // ditto
     private final static int DERBYMAX_JAR = DERBYTESTING_JAR;
     
@@ -202,11 +205,15 @@ public class CompatibilityCombinations extends BaseTestCase
     private       static String test_jars = null; // Path for derbyTesting.jar:junit_jar:jce_jar
     
     private       static String serverHost = "localhost"; // Currently only handles localhost!
-  private       static int serverPort = 1527; // Since  CompatibilitySuite and JDBCDriverTest only handles default.. 
+    private       static int serverPort = 1527; // Since  CompatibilitySuite and JDBCDriverTest only handles default..
     
-    
-    private final static String jdbcSuite = "org.apache.derbyTesting.functionTests.tests.junitTests.compatibility.CompatibilitySuite";
-                                // The suite of tests run for each compatibility combination.
+    /////////////
+    ////
+    //// Which suite to run for compatibility testing is read from 'compatibilitytest.properties'.'
+    ////
+    /////////////
+    private static String compatibilityTestSuite = null;
+    //                             // The suite of tests run for each compatibility combination.
     private final static String embeddedDriver = "org.apache.derby.jdbc.EmbeddedDriver";
     private final static String networkServerControl = "org.apache.derby.drda.NetworkServerControl";
     private       static String specialTestingJar = null;
@@ -223,6 +230,8 @@ public class CompatibilityCombinations extends BaseTestCase
     private final static String PS = File.separator;
     private final static String JVMloc = PS+".."+PS+"bin"+PS+"java"; // "/../bin/java"
     
+    private static boolean runEmbedded = true;
+    private static boolean runSrvrClnt = false;
     private static boolean printDebug = false;
     private static boolean showSysinfo = false;
     private static boolean includeUpgrade = false;
@@ -230,7 +239,7 @@ public class CompatibilityCombinations extends BaseTestCase
     private static long SLEEP_TIME_MILLIS = 5000L;
     
     /**
-   * Creates a new instance of CompatibilityCombinations
+     * Creates a new instance of CompatibilityCombinations
      * @param testcaseName Identifying the test.
      */
     public CompatibilityCombinations(String testcaseName)
@@ -244,7 +253,7 @@ public class CompatibilityCombinations extends BaseTestCase
      * @throws java.lang.Exception .
      */
     protected void setUp() throws Exception
-  {
+    {
         super.setUp();
     }
     
@@ -272,7 +281,7 @@ public class CompatibilityCombinations extends BaseTestCase
     {
         TestSuite	testSuite = new TestSuite();
         
-      testSuite.addTestSuite( CompatibilityCombinations.class );
+        testSuite.addTestSuite( CompatibilityCombinations.class );
         
         return testSuite;
     }
@@ -310,11 +319,12 @@ public class CompatibilityCombinations extends BaseTestCase
         initEnvironment();
         
         boolean debugVal = true;
-        String testName = jdbcSuite;
-        String databaseName = "compatDB";
+        String testName = compatibilityTestSuite;
+        String databaseName = "wombat"; // Is hardwired in several tests....
         
-        String workingDirName = System.getProperty("derby.system.home");
-      PrintWriter summaryFile = new PrintWriter(new FileWriter(workingDirName+PS
+        if ( !runEmbedded ) {DEBUG("--- testEmbeddedTrunk ignored"); return;}
+        String workingDirName = System.getProperty("user.dir");
+        PrintWriter summaryFile = new PrintWriter(new FileWriter(workingDirName+PS
                 +"Embedded_"+databaseName+"_summary.log"));
         PrintWriter failFile = new PrintWriter(new FileWriter(workingDirName+PS
                 +"Embedded_"+databaseName+"_failed"));
@@ -351,7 +361,6 @@ public class CompatibilityCombinations extends BaseTestCase
                     +":"+derbyTestingJar
                     +":"+junit_jar
                     +":"+jce_jar
-                    // +":"+jdbc2_0_stdext_jar
                     ;
             recreateDB(trunkVersion
                     , creatorJvm
@@ -370,7 +379,7 @@ public class CompatibilityCombinations extends BaseTestCase
                 clientVmLow = Integer.parseInt(singleClientVM);
                 clientVmHigh = clientVmLow;
             }
-          for (int clientVM=clientVmLow;clientVM<=clientVmHigh;clientVM++)
+            for (int clientVM=clientVmLow;clientVM<=clientVmHigh;clientVM++)
             {
                 for (int clientVersion=derbyLib.length-1;clientVersion<derbyLib.length;clientVersion++ )
                 {
@@ -384,7 +393,7 @@ public class CompatibilityCombinations extends BaseTestCase
                         clientName = "10.0.DB2JCC"; // Pre-pend 10.0. to get a "natural" sorting of log files...
                     }
                     DEBUG("derbyClientJar: "+derbyClientJar);
-                  String clientJvm = VM_Ids[clientVM]+JVMloc;
+                    String clientJvm = VM_Ids[clientVM]+JVMloc;
                     
                     String clientClassPath = derbyClientJar
                             +":"+derbyTestingJar
@@ -398,7 +407,7 @@ public class CompatibilityCombinations extends BaseTestCase
                             +"ClientVM-"+vmNames[clientVM]+"_client"+clientName
                             ;
                     
-                  if ( showSysinfo )
+                    if ( showSysinfo )
                         sysinfoEmbedded(clientVM, clientVersion,combinationName);
                     
                     DEBUG("**************** oneTest("+combinationName+")");
@@ -426,7 +435,7 @@ public class CompatibilityCombinations extends BaseTestCase
                         }
                     }
                     catch (Exception e)
-                  {
+                   {
                         e.printStackTrace();
                     }
                                         
@@ -480,10 +489,11 @@ public class CompatibilityCombinations extends BaseTestCase
         initEnvironment();
         
         boolean debugVal = true;
-        String testName = jdbcSuite;
-        String databaseName = "compatDB";
+        String testName = compatibilityTestSuite;
+        String databaseName = "wombat"; // Is hardwired in several tests....
       
-        String workingDirName = System.getProperty("derby.system.home");
+        if ( !runSrvrClnt ) {DEBUG("--- testLoopThruAllCombinations ignored"); return;}
+        String workingDirName = System.getProperty("user.dir");
         PrintWriter summaryFile = new PrintWriter(new FileWriter(workingDirName+PS
                 +"ServerClient_"+databaseName+"_summary.log"));
         PrintWriter failFile = new PrintWriter(new FileWriter(workingDirName+PS
@@ -531,14 +541,13 @@ public class CompatibilityCombinations extends BaseTestCase
                         +":"+derbyTestingJar
                         +":"+junit_jar
                         +":"+jce_jar
-                        // +":"+jdbc2_0_stdext_jar
                         ;
                 boolean deleteDatabaseFiles = !includeUpgrade;
                 if ( serverVersion == 0 ) deleteDatabaseFiles = true; // Always remove when starting from the initial Derby version.
                 recreateDB(serverVersion
                         , creatorJvm
                         , creatorClassPath
-                      , true
+                        , true
                         , databaseName
                         , deleteDatabaseFiles
                         // , true // Always remove database files. Otherwise attempts to do upgrade
@@ -552,7 +561,7 @@ public class CompatibilityCombinations extends BaseTestCase
                 {
                     clientVmLow = Integer.parseInt(singleClientVM);
                     clientVmHigh = clientVmLow;
-              }
+                }
                 for (int clientVM=clientVmLow;clientVM<=clientVmHigh;clientVM++)
                 {
                     int clientVersionLow = 0;
@@ -580,7 +589,7 @@ public class CompatibilityCombinations extends BaseTestCase
                                 +":"+derbyTestingJar
                                 +":"+junit_jar
                                 +":"+jce_jar
-                              +":"+jdbc2_0_stdext_jar
+                                +":"+jdbc2_0_stdext_jar
                                 ;
                         String combinationName =
                                 "ServerVM-"+vmNames[serverVM]+"_server"+derbyVersionNames[serverVersion]
@@ -608,7 +617,7 @@ public class CompatibilityCombinations extends BaseTestCase
                             {
                                 successFullTests++;
                             }
-                          else
+                            else
                             {
                                 System.out.println("************ " + combinationName + " failed!");
                                 failFile.println(combinationName);
@@ -636,7 +645,7 @@ public class CompatibilityCombinations extends BaseTestCase
                 ;
         summaryFile.println();
         summaryFile.println(summary);
-      summaryFile.close();
+        summaryFile.close();
         failFile.close();
         System.out.println(summary);
         DEBUG("--- testLoopThruAllCombinations");
@@ -648,7 +657,7 @@ public class CompatibilityCombinations extends BaseTestCase
      * Run the compatibility tests for one given combination of
      * Derby client version, client jvm version, server jvm version and Derby server version.
      * @param clientJvm Path for client Jvm to be used.
-     * @param clientClassPath Class path for client.
+     * @param clientClassPath Class path for Derby client.
      * @param debug Print debug.
      * @param testName The test suite to be used for the compatibility test. 
      * Currently only using <code>org.apache.derbyTesting.functionTests.tests.junitTests.compatibility.CompatibilitySuite</code>.
@@ -664,7 +673,7 @@ public class CompatibilityCombinations extends BaseTestCase
             , boolean debug
             , String testName
             , String driverName
-          , String databaseName
+            , String databaseName
             , String combinationName
             , PrintWriter summaryFile
             )
@@ -678,7 +687,7 @@ public class CompatibilityCombinations extends BaseTestCase
         DEBUG("testName:        " + testName);
         DEBUG("driverName:      " + driverName);
         DEBUG("databaseName:    " + databaseName);
-      DEBUG("combinationName: " + combinationName);
+        DEBUG("combinationName: " + combinationName);
         
         boolean testOK = false;
         
@@ -686,17 +695,19 @@ public class CompatibilityCombinations extends BaseTestCase
 
         if ( driverName == null ) driverName = ""; // Not null is used for embedded only!
         final String[] commandElements = {clientJvm
-                , " -Ddrb.tests.debug=true"
+                , " -Ddrb.tests.debug=true" // Used by JDBCDriverTest.
+                // , " -Dderby.tests.debug=true" // Used by DerbyJUnitTest
+                , " -Dderby.tests.trace=true" // Used by DerbyJUnitTest
                 , " -cp ", clientClassPath
                 , " " + testName
                 , " " + databaseName
-                , " " + driverName // Specified for embedded only! Other wise find default.
+                , " " + driverName // Specified for embedded only! Otherwise find default.
             };
-      final String[] envElements = {"CLASS_PATH="+clientClassPath
+        final String[] envElements = {"CLASS_PATH="+clientClassPath
             };
         
-        String workingDirName = System.getProperty("derby.system.home");
-        DEBUG("derby.system.home: " + workingDirName);
+        String workingDirName = System.getProperty("user.dir");
+        DEBUG("user.dir: " + workingDirName);
         String tmp ="";
         for ( int i=0;i<commandElements.length;i++)
         {tmp = tmp + commandElements[i];}
@@ -706,7 +717,7 @@ public class CompatibilityCombinations extends BaseTestCase
         tmp ="";
         for ( int i=0;i<envElements.length;i++)
         {tmp = tmp + envElements[i] + " ";}
-      DEBUG("envElements: " + tmp);
+        DEBUG("envElements: " + tmp);
         final File workingDir = new File(workingDirName);
         
         DEBUG(
@@ -720,7 +731,7 @@ public class CompatibilityCombinations extends BaseTestCase
             String result = testOutput(proc, out); // Scans test report for OK and Time...
             if ( result.indexOf(" OK ") != -1 ) testOK = true;
             result= combinationName+":" + result;
-          summaryFile.println(result);
+            summaryFile.println(result);
         }
         catch (Exception ex)
         {
@@ -748,25 +759,32 @@ public class CompatibilityCombinations extends BaseTestCase
         InputStreamReader isr = new InputStreamReader(serveInputStream);
         InputStreamReader esr = new InputStreamReader(serveErrorStream);
         BufferedReader bir = new BufferedReader(isr);
-      BufferedReader ber = new BufferedReader(isr);
+        BufferedReader ber = new BufferedReader(isr);
         String line=null;
         
         String result = "";
+        boolean foundTime = false;
+        boolean foundOK = false;
+        boolean foundFail = false;
         while ( (line = bir.readLine()) != null)
         {
             out.println(line);
-            if ( line.indexOf("Time:",0) != -1 )
+            if ( (!foundTime) && (line.indexOf("Time:",0) != -1) )
             {
-                result = result + " " +line;
-            }
-            if ( line.indexOf("OK ",0) != -1 )
-            {
+                foundTime = true;
                 result = result +  " " + line;
-          }
-        }
-        while ( (line = ber.readLine()) != null)
-        {
-            out.println(line);
+            }
+            else if ( (!foundOK) && (!foundFail) && (line.indexOf("OK ",0) != -1) )
+            {
+                foundOK = true;
+                result = result +  " " + line;
+            }
+            else if ( (!foundFail) && (!foundFail) && (line.indexOf("Failures:",0) != -1) )
+            {
+                foundFail = true;
+                result = result +  " " + line;
+            }
+
         }
         out.close();
         return result;
@@ -812,13 +830,16 @@ public class CompatibilityCombinations extends BaseTestCase
         
         System.out.println("*** Properties -----------------------------------------");
         String userDir = System.getProperty("user.dir");
+        System.out.println("user.dir:          " + userDir);
         
+        System.out.println("derby.system.home: " + System.getProperty("derby.system.home"));
+
         String realPropertyFile = COMPATIBILITYTEST_PROPFILE; // Is just the plain file name in ${user.dir}
         System.out.println("realPropertyFile: " + realPropertyFile);
         
         InputStream isCp =  new FileInputStream(userDir + PS + realPropertyFile);
         Properties cp = new Properties();
-      cp.load(isCp);
+        cp.load(isCp);
         // Now we can get the derby versions, jvm versions paths etc.
         
         printDebug = cp.getProperty("test.printDebug","false").equalsIgnoreCase("true");
@@ -830,6 +851,16 @@ public class CompatibilityCombinations extends BaseTestCase
         serverPort = Integer.parseInt(cp.getProperty("test.serverPort","1527"));
         System.out.println("serverPort: " + serverPort);
         
+        compatibilityTestSuite = cp.getProperty("test.testSuite",
+                "org.apache.derbyTesting.functionTests.tests.junitTests.compatibility.CompatibilitySuite");
+        System.out.println("testSuite: " + compatibilityTestSuite);
+
+        runEmbedded = cp.getProperty("test.runEmbedded","true").equalsIgnoreCase("true");
+        System.out.println("runEmbedded: " + runEmbedded);
+
+        runSrvrClnt = cp.getProperty("test.runServerClient","true").equalsIgnoreCase("true");
+        System.out.println("runSrvrClnt: " + runSrvrClnt);
+
         includeUpgrade = cp.getProperty("test.includeUpgrade","false").equalsIgnoreCase("true");
         System.out.println("includeUpgrade: " + includeUpgrade);
       
@@ -846,7 +877,7 @@ public class CompatibilityCombinations extends BaseTestCase
         System.out.println("singleServerVM: " + singleServerVM);
         
         specialTestingJar = cp.getProperty("test.derbyTestingJar", null);
-      System.out.println("specialTestingJar: " + specialTestingJar);
+        System.out.println("specialTestingJar: " + specialTestingJar);
         
         securityProperty = cp.getProperty("test.securityOption");
         System.out.println("securityProperty: " + securityProperty);
@@ -860,7 +891,7 @@ public class CompatibilityCombinations extends BaseTestCase
             // E.g. jvm.0 = j13lib, ..., jvm.3 = j16lib
             System.out.println(vm + ": " + vmNames[vm]);
         }
-      for (int vm=0;vm<jvmVersions;vm++)
+        for (int vm=0;vm<jvmVersions;vm++)
         {
             VM_Ids[vm] = cp.getProperty(vmNames[vm]);
             // E.g. j13lib = /usr/local/java/jdk1.3/jre/lib
@@ -902,7 +933,7 @@ public class CompatibilityCombinations extends BaseTestCase
             derbyLib[drbV][DERBY_JAR] =        derbyVerLibs[drbV] + PS+"derby.jar";
             derbyLib[drbV][DERBYCLIENT_JAR] =  derbyVerLibs[drbV] + PS+"derbyclient.jar";
             derbyLib[drbV][DERBYTESTING_JAR] = derbyVerLibs[drbV] + PS+"derbyTesting.jar";
-          derbyLib[drbV][DERBYNET_JAR] =     derbyVerLibs[drbV] + PS+"derbynet.jar";
+            derbyLib[drbV][DERBYNET_JAR] =     derbyVerLibs[drbV] + PS+"derbynet.jar";
         }
         
         db2jcc_lib = cp.getProperty("db2jcc_lib");
@@ -958,21 +989,21 @@ public class CompatibilityCombinations extends BaseTestCase
         final String[] commandElements = {serverJvm
                 , " -Dderby.infolog.append=true"
                 , " -cp ", serverClassPath
-              , " " + networkServerControl
+                , " " + networkServerControl
                 , " " + command
                 , " -h ", allowedClients
                 , " -p ", serverPort+""
                 , " " + securityOption
-            };
+                };
         final String[] envElements = {"CLASS_PATH="+serverClassPath
                 , "PATH="+VM_Ids[serverVM]+PS+".."+PS+"bin" // "/../bin"
-            };
+                };
         
-        String workingDirName = System.getProperty("derby.system.home");
-        DEBUG("derby.system.home: " + workingDirName);
+        String workingDirName = System.getProperty("user.dir");
+        DEBUG("user.dir: " + workingDirName);
         String tmp ="";
         for ( int i=0;i<commandElements.length;i++)
-      {tmp = tmp + commandElements[i];}
+        {tmp = tmp + commandElements[i];}
         DEBUG("commandElements: " + tmp);
         final String fullCmd = tmp;
         tmp ="";
@@ -986,7 +1017,7 @@ public class CompatibilityCombinations extends BaseTestCase
         {
             DEBUG(
                     "proc = Runtime.getRuntime().exec(commandElements,envElements,workingDir);"
-                );
+                 );
 
             Thread serverThread = new Thread(
                     new Runnable()
@@ -1000,7 +1031,7 @@ public class CompatibilityCombinations extends BaseTestCase
                         proc = Runtime.getRuntime().exec(fullCmd,envElements,workingDir);
                         // proc = Runtime.getRuntime().exec(commandElements,envElements,workingDir);
                         DEBUG("************** Done exec().");
-                  }
+                    }
                     catch (Exception ex)
                     {
                         ex.printStackTrace();
@@ -1014,7 +1045,7 @@ public class CompatibilityCombinations extends BaseTestCase
             pingServer(5); // Wait for the server to come up in a reasonable time....
             serverThread.join();
             DEBUG("************** Done .join().");
-      }
+        }
         else
         {
             throw new UnsupportedOperationException
@@ -1056,7 +1087,7 @@ public class CompatibilityCombinations extends BaseTestCase
         DEBUG("");
         DEBUG("+++ recreateDB");
         
-      String creator = jdbcSuite + "$Creator";
+        String creator = compatibilityTestSuite + "$Creator";
         
         String securityOption = "";
         if ( (securityProperty.length() != 0) && derbySecurityEnabled[serverVersion] )
@@ -1064,18 +1095,20 @@ public class CompatibilityCombinations extends BaseTestCase
             securityOption = "-"+securityProperty;
         }
         final String[] commandElements = {clientJvm
-                , " -Ddrb.tests.debug=true"
+                , " -Ddrb.tests.debug=true" // Used by JDBCDriverTest.
+                // , " -Dderby.tests.debug=true" // Used by DerbyJUnitTest
+                , " -Dderby.tests.trace=true" // Used by DerbyJUnitTest
                 , " -cp ", clientClassPath
                 , " " + creator
                 , " " + databaseName
                 , " " + securityOption
-        };
-      final String[] envElements = {"CLASS_PATH="+clientClassPath
+                };
+        final String[] envElements = {"CLASS_PATH="+clientClassPath
                 // , "PATH="+VM_Ids[clientVM]+"/../bin"
-        };
+                };
         
-        String workingDirName = System.getProperty("derby.system.home");
-        DEBUG("derby.system.home: " + workingDirName);
+        String workingDirName = System.getProperty("user.dir");
+        DEBUG("user.dir: " + workingDirName);
         
         String fullPath = workingDirName+PS+databaseName;
         
@@ -1084,7 +1117,7 @@ public class CompatibilityCombinations extends BaseTestCase
         // Can NOT upgrade to a alpha/beta, i.e. normal trunk version!
         
         if ( removeDBfiles )
-      {
+        {
             File databaseDir = new File(fullPath);
             if ( deleteDir(databaseDir) )
             {
@@ -1098,7 +1131,7 @@ public class CompatibilityCombinations extends BaseTestCase
         else
         {
             DEBUG("Keeping database dir '" + fullPath +"'");
-      }
+        }
         
         String tmp = "";
         for ( int i=0;i<commandElements.length;i++)
@@ -1112,7 +1145,7 @@ public class CompatibilityCombinations extends BaseTestCase
         DEBUG("envElements: " + tmp);
         final File workingDir = new File(workingDirName);
         
-      DEBUG(
+        DEBUG(
                 "proc = Runtime.getRuntime().exec(fullCmd,envElements,workingDir);"
               );
         
@@ -1126,7 +1159,7 @@ public class CompatibilityCombinations extends BaseTestCase
         catch (Exception ex)
         {
             ex.printStackTrace();
-      }
+        }
         
         
         DEBUG("--- recreateDB");
@@ -1182,7 +1215,7 @@ public class CompatibilityCombinations extends BaseTestCase
     private void stopServer(int serverVM, int serverVersion)
     {
         DEBUG("");
-      DEBUG("+++ stopServer");
+        DEBUG("+++ stopServer");
         DEBUG("stopServer: " + serverVersion + " / " + serverVM);
         DEBUG("stopServer: " + derbyVersionNames[serverVersion] + " on " + VM_Ids[serverVM] );
         
@@ -1196,21 +1229,21 @@ public class CompatibilityCombinations extends BaseTestCase
         int port = serverPort;
         
         final String[] commandElements = {serverJvm
-              , " -Dderby.infolog.append=true"
+                , " -Dderby.infolog.append=true"
                 , " -cp ", serverClassPath
                 , " " + networkServerControl
                 , " " + command
                 , " -p ", serverPort+""
                 // , " " + securityOption
-            };
+                };
         final String[] envElements = {"CLASS_PATH="+serverClassPath
                 , "PATH="+VM_Ids[serverVM]+PS+".."+PS+"bin" // "/../bin"
-            };
+                };
         
-        String workingDirName = System.getProperty("derby.system.home");
-        DEBUG("derby.system.home: " + workingDirName);
+        String workingDirName = System.getProperty("user.dir");
+        DEBUG("user.dir: " + workingDirName);
         String tmp ="";
-      for ( int i=0;i<commandElements.length;i++)
+        for ( int i=0;i<commandElements.length;i++)
         {tmp = tmp + commandElements[i];}
         DEBUG("commandElements: " + tmp);
         final String fullCmd = tmp;
@@ -1252,7 +1285,7 @@ public class CompatibilityCombinations extends BaseTestCase
             , String combinationName)
             throws Exception
     {
-      DEBUG("");
+        DEBUG("");
         DEBUG("+++ sysinfoServerFromClient ++++++++++++++++++++++++++++++++++++++");
         DEBUG("    sysinfoServerFromClient: " + clientVersion + " / " + clientVM);
         DEBUG("    sysinfoServerFromClient: " + derbyVersionNames[clientVersion] + " on " + VM_Ids[clientVM]);
@@ -1266,22 +1299,22 @@ public class CompatibilityCombinations extends BaseTestCase
         int port = serverPort;
         
         final String[] commandElements = {clientJvm
-              , " -Dderby.infolog.append=true"
+                , " -Dderby.infolog.append=true"
                 , " -cp ", clientClassPath
                 , " " + networkServerControl
                 , " " + command
                 , " -h ", serverHost
                 , " -p ", serverPort+""
                 // , " " + securityOption
-        };
+                };
         final String[] envElements = {"CLASS_PATH="+clientClassPath
                 , "PATH="+VM_Ids[clientVM]+PS+".."+PS+"bin" // "/../bin""
-        };
+                };
         
-        String workingDirName = System.getProperty("derby.system.home");
+        String workingDirName = System.getProperty("user.dir");
         PrintWriter out = new PrintWriter(new FileWriter(workingDirName+PS+combinationName+".sys"));
-      DEBUG(combinationName+" sys:", out);
-        DEBUG("derby.system.home: " + workingDirName, out);
+        DEBUG(combinationName+" sys:", out);
+        DEBUG("user.dir: " + workingDirName, out);
         String tmp ="";
         for ( int i=0;i<commandElements.length;i++)
         {tmp = tmp + commandElements[i];}
@@ -1308,7 +1341,7 @@ public class CompatibilityCombinations extends BaseTestCase
         }
         out.close();
         
-      DEBUG("--- sysinfoServerFromClient --------------------------------------");
+        DEBUG("--- sysinfoServerFromClient --------------------------------------");
         DEBUG("");
         
         
@@ -1322,7 +1355,7 @@ public class CompatibilityCombinations extends BaseTestCase
         DEBUG("");
         DEBUG("+++ sysinfoEmbedded ++++++++++++++++++++++++++++++++++++++");
         DEBUG("    sysinfoEmbedded: " + clientVersion + " / " + clientVM);
-      DEBUG("    sysinfoEmbedded: " + derbyVersionNames[clientVersion] + " on " + VM_Ids[clientVM]);
+        DEBUG("    sysinfoEmbedded: " + derbyVersionNames[clientVersion] + " on " + VM_Ids[clientVM]);
         
         String clientJvm = VM_Ids[clientVM]+JVMloc;
         String clientClassPath = derbyVerLibs[clientVersion] + PS+"derby.jar"
@@ -1333,15 +1366,15 @@ public class CompatibilityCombinations extends BaseTestCase
                 , " -Dderby.infolog.append=true"
                 , " -cp ", clientClassPath
                 , " " + "org.apache.derby.tools.sysinfo"
-        };
+                };
         final String[] envElements = {"CLASS_PATH="+clientClassPath
                 , "PATH="+VM_Ids[clientVM]+PS+".."+PS+"bin" // "/../bin""
-      };
+                };
         
-        String workingDirName = System.getProperty("derby.system.home");
+        String workingDirName = System.getProperty("user.dir");
         PrintWriter out = new PrintWriter(new FileWriter(workingDirName+PS+combinationName+".sys"));
         DEBUG(combinationName+" sys:", out);
-        DEBUG("derby.system.home: " + workingDirName, out);
+        DEBUG("user.dir: " + workingDirName, out);
         String tmp ="";
         for ( int i=0;i<commandElements.length;i++)
         {tmp = tmp + commandElements[i];}
@@ -1350,7 +1383,7 @@ public class CompatibilityCombinations extends BaseTestCase
         tmp ="";
         for ( int i=0;i<envElements.length;i++)
         {tmp = tmp + envElements[i] + " ";}
-      DEBUG("envElements: " + tmp, out);
+        DEBUG("envElements: " + tmp, out);
         final File workingDir = new File(workingDirName);
         
         DEBUG(
