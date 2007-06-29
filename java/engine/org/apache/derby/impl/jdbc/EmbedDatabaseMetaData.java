@@ -1633,17 +1633,11 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 		throws SQLException {
 		PreparedStatement s = getPreparedQuery("getFunctionColumns");
 
-		// Cannot use doGetProcCols() because our query requires
-		// parameterNamePattern twice, because both LIKE and = is
-		// required to select parameters with an empty parameter
-		// name. That is, WHERE paramName LIKE ? will not match an
-		// empty paramName, but WHERE paramName LIKE ? OR paramName =
-		// ? will.
-		s.setString(1, swapNull(schemaPattern));
-		s.setString(2, swapNull(functionNamePattern));
-		s.setString(3, swapNull(parameterNamePattern));
-		s.setString(4, swapNull(parameterNamePattern));
-		return s.executeQuery();
+        return doGetProcCols(catalog, 
+                             schemaPattern,
+                             functionNamePattern, 
+                             parameterNamePattern,	
+                             "getFunctionColumns");
 	}
 
 	/**
