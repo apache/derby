@@ -45,6 +45,22 @@ import org.apache.derby.iapi.reference.Module;
 import org.apache.derby.iapi.services.i18n.MessageService;
 
 public class UpdateLoader {
+    
+    /**
+     * List of packages that Derby will not support being loaded
+     * from an installed jar file.
+     */
+    private static final String[] RESTRICTED_PACKAGES = {
+        // While loading java. classes is blocked by the standard
+        // class loading mechanism, javax. ones are not. However
+        // allowing database applications to override jvm classes
+        // seems a bad idea.
+        "javax.",
+        
+        // Allowing an application to possible override the engine's
+        // own classes also seems dangerous.
+        "org.apache.derby.",
+    };
 
 	private JarLoader[] jarList;
 	private HeaderPrintWriter vs;
@@ -121,6 +137,13 @@ public class UpdateLoader {
 				Class clazz = checkLoaded(className, resolve);
 				if (clazz != null)
 					return clazz;
+                
+                // Refuse to load classes from restricted name spaces
+                for (int i = 0; i < RESTRICTED_PACKAGES.length; i++)
+                {
+                    if (className.startsWith(RESTRICTED_PACKAGES[i]))
+                        throw new ClassNotFoundException(className);
+                }
 
 				String jvmClassName = className.replace('.', '/').concat(".class");
 
@@ -221,24 +244,12 @@ public class UpdateLoader {
 
 		if (!initDone)
 			return;
+        
+        // first close the existing jar file opens
+        close();
 
 		if (reload) {
-			//first close the existing jar file opens
-			close();
 			initializeFromClassPath(thisClasspath);
-			return;
-		}
-
-		// first thing to do is to remove all Class entries
-		// and then get a complete set of loaders ...
-		synchronized (this) {
-
-			for (int i = 0; i < jarList.length; i++) {
-
-				JarLoader jl = jarList[i];
-
-				JarFile newJarFile = jl.setInvalid(reload);
-			}
 		}
 	}
 
@@ -280,7 +291,7 @@ public class UpdateLoader {
 	public void close() {
 
 		for (int i = 0; i < jarList.length; i++) {
-			jarList[i].setInvalid(false);
+			jarList[i].setInvalid();
 		}
 
 	}

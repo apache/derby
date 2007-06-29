@@ -38,24 +38,20 @@ import org.apache.derby.iapi.sql.depend.DependencyManager;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.store.access.FileResource;
 import org.apache.derby.catalog.UUID;
-import org.apache.derby.iapi.services.io.FileUtil;
-import org.apache.derby.io.StorageFile;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.CallableStatement;
-import java.sql.Connection;
-import java.sql.SQLException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
 
-public class JarUtil
+
+class JarUtil
 {
-	public static final String ADD_JAR_DDL = "ADD JAR";
-	public static final String DROP_JAR_DDL = "DROP JAR";
-	public static final String REPLACE_JAR_DDL = "REPLACE JAR";
-	public static final String READ_JAR = "READ JAR";
 	//
 	//State passed in by the caller
-	private UUID id; //For add null means create a new id.
 	private String schemaName;
 	private String sqlName;
 
@@ -67,10 +63,9 @@ public class JarUtil
 	
 	//
 	//State derived from the caller's context
-	public JarUtil(UUID id, String schemaName, String sqlName)
+	private JarUtil(String schemaName, String sqlName)
 		 throws StandardException
 	{
-		this.id = id;
 		this.schemaName = schemaName;
 		this.sqlName = sqlName;
 
@@ -92,15 +87,15 @@ public class JarUtil
 
 	  @exception StandardException Opps
 	  */
-	static public long
-	add(UUID id, String schemaName, String sqlName, String externalPath)
+	static long
+	add(String schemaName, String sqlName, String externalPath)
 		 throws StandardException
 	{
-		JarUtil jutil = new JarUtil(id, schemaName, sqlName);
+		JarUtil jutil = new JarUtil(schemaName, sqlName);
 		InputStream is = null;
 		
 		try {
-			is = FileUtil.getInputStream(externalPath, 0);
+			is = openJarURL(externalPath);
 			return jutil.add(is);
 		} catch (java.io.IOException fnfe) {
 			throw StandardException.newException(SQLState.SQLJ_INVALID_JAR, fnfe, externalPath);
@@ -120,7 +115,7 @@ public class JarUtil
 	  @param is A stream for reading the content of the file to add.
 	  @exception StandardException Opps
 	  */
-	public long add(InputStream is) throws StandardException
+	private long add(final InputStream is) throws StandardException
 	{
 		//
 		//Like create table we say we are writing before we read the dd
@@ -131,40 +126,46 @@ public class JarUtil
 				StandardException.newException(SQLState.LANG_OBJECT_ALREADY_EXISTS_IN_OBJECT, 
 											   fid.getDescriptorType(), sqlName, fid.getSchemaDescriptor().getDescriptorType(), schemaName);
 
-		try {
-			notifyLoader(false);
-			dd.invalidateAllSPSPlans();
-			long generationId = fr.add(JarDDL.mkExternalName(schemaName, sqlName, fr.getSeparatorChar()),is);
+        SchemaDescriptor sd = dd.getSchemaDescriptor(schemaName, null, true);
+        try {
+            notifyLoader(false);
+            dd.invalidateAllSPSPlans();
+            final String jarExternalName = JarDDL.mkExternalName(schemaName,
+                    sqlName, fr.getSeparatorChar());
 
-			SchemaDescriptor sd = dd.getSchemaDescriptor(schemaName, null, true);
+            long generationId = setJar(jarExternalName, is, true, 0L);
 
-			fid = ddg.newFileInfoDescriptor(id, sd,
-							sqlName, generationId);
-			dd.addDescriptor(fid, sd, DataDictionary.SYSFILES_CATALOG_NUM,
-							 false, lcc.getTransactionExecute());
-			return generationId;
-		} finally {
-			notifyLoader(true);
-		}
+            fid = ddg.newFileInfoDescriptor(/*DJD*/null, sd, sqlName, generationId);
+            dd.addDescriptor(fid, sd, DataDictionary.SYSFILES_CATALOG_NUM,
+                    false, lcc.getTransactionExecute());
+            return generationId;
+        } finally {
+            notifyLoader(true);
+        }
 	}
 
 	/**
-	  Drop a jar file from the current connection's database.
-
-	  @param id The id for the jar file we drop. Ignored if null.
-	  @param schemaName the name for the schema that holds the jar file.
-	  @param sqlName the sql name for the jar file.
-	  @param purgeOnCommit True means purge the old jar file on commit. False
-	    means leave it around for use by replication.
-
-	  @exception StandardException Opps
-	  */
-	static public void
-	drop(UUID id, String schemaName, String sqlName,boolean purgeOnCommit)
+     * Drop a jar file from the current connection's database.
+     * 
+     * @param id
+     *            The id for the jar file we drop. Ignored if null.
+     * @param schemaName
+     *            the name for the schema that holds the jar file.
+     * @param sqlName
+     *            the sql name for the jar file.
+     * @param purgeOnCommit
+     *            True means purge the old jar file on commit. False means leave
+     *            it around for use by replication.
+     * 
+     * @exception StandardException
+     *                Opps
+     */
+	static void
+	drop(String schemaName, String sqlName)
 		 throws StandardException
 	{
-		JarUtil jutil = new JarUtil(id, schemaName,sqlName);
-		jutil.drop(purgeOnCommit);
+		JarUtil jutil = new JarUtil(schemaName,sqlName);
+		jutil.drop();
 	}
 
 	/**
@@ -173,12 +174,10 @@ public class JarUtil
 	  <P> The reason for dropping  the jar file in this private instance
 	  method is that it allows us to share set up logic with add and
 	  replace.
-	  @param purgeOnCommit True means purge the old jar file on commit. False
-	    means leave it around for use by replication.
 
 	  @exception StandardException Opps
 	  */
-	public void drop(boolean purgeOnCommit) throws StandardException
+	private void drop() throws StandardException
 	{
 		//
 		//Like create table we say we are writing before we read the dd
@@ -186,15 +185,6 @@ public class JarUtil
 		FileInfoDescriptor fid = getInfo();
 		if (fid == null)
 			throw StandardException.newException(SQLState.LANG_FILE_DOES_NOT_EXIST, sqlName,schemaName);
-
-		if (SanityManager.DEBUG)
-		{
-			if (id != null && !fid.getUUID().equals(id))
-			{
-				SanityManager.THROWASSERT("Drop id mismatch want="+id+
-						" have "+fid.getUUID());
-			}
-		}
 
 		String dbcp_s = PropertyUtil.getServiceProperty(lcc.getTransactionExecute(),Property.DATABASE_CLASSPATH);
 		if (dbcp_s != null)
@@ -227,7 +217,7 @@ public class JarUtil
 			dd.dropFileInfoDescriptor(fid);
 
 			fr.remove(JarDDL.mkExternalName(schemaName, sqlName, fr.getSeparatorChar()),
-				fid.getGenerationId(), true /*purgeOnCommit*/);
+				fid.getGenerationId());
 		} finally {
 			notifyLoader(true);
 		}
@@ -238,29 +228,26 @@ public class JarUtil
 	  external file. 
 
 
-	  @param id The id for the jar file we add. Ignored if null.
 	  @param schemaName the name for the schema that holds the jar file.
 	  @param sqlName the sql name for the jar file.
 	  @param externalPath the path for the jar file to add.
-	  @param purgeOnCommit True means purge the old jar file on commit. False
-	    means leave it around for use by replication.
 	  @return The new generationId for the jar file we replace.
 
 	  @exception StandardException Opps
 	  */
-	static public long
-	replace(UUID id,String schemaName, String sqlName,
-			String externalPath,boolean purgeOnCommit)
+	static long
+	replace(String schemaName, String sqlName,
+			String externalPath)
 		 throws StandardException
 	{
-		JarUtil jutil = new JarUtil(id,schemaName,sqlName);
+		JarUtil jutil = new JarUtil(schemaName,sqlName);
 		InputStream is = null;
 		
 
 		try {
-			is = FileUtil.getInputStream(externalPath, 0);
+			is = openJarURL(externalPath);
 
-			return jutil.replace(is,purgeOnCommit);
+			return jutil.replace(is);
 		} catch (java.io.IOException fnfe) {
 			throw StandardException.newException(SQLState.SQLJ_INVALID_JAR, fnfe, externalPath);
 		}
@@ -282,7 +269,7 @@ public class JarUtil
 	    means leave it around for use by replication.
 	  @exception StandardException Opps
 	  */
-	public long replace(InputStream is,boolean purgeOnCommit) throws StandardException
+	private long replace(InputStream is) throws StandardException
 	{
 		//
 		//Like create table we say we are writing before we read the dd
@@ -294,27 +281,19 @@ public class JarUtil
 		if (fid == null)
 			throw StandardException.newException(SQLState.LANG_FILE_DOES_NOT_EXIST, sqlName,schemaName);
 
-		if (SanityManager.DEBUG)
-		{
-			if (id != null && !fid.getUUID().equals(id))
-			{
-				SanityManager.THROWASSERT("Replace id mismatch want="+
-					id+" have "+fid.getUUID());
-			}
-		}
-
 		try {
 			// disable loads from this jar
 			notifyLoader(false);
 			dd.invalidateAllSPSPlans();
 			dd.dropFileInfoDescriptor(fid);
+            final String jarExternalName =
+                JarDDL.mkExternalName(schemaName, sqlName, fr.getSeparatorChar());
 
 			//
 			//Replace the file.
-			long generationId = 
-				fr.replace(JarDDL.mkExternalName(schemaName, sqlName, fr.getSeparatorChar()),
-					fid.getGenerationId(), is, purgeOnCommit);
-
+			long generationId = setJar(jarExternalName, is, false,
+					fid.getGenerationId());
+            
 			//
 			//Re-add the descriptor to the data dictionary.
 			FileInfoDescriptor fid2 = 
@@ -332,22 +311,6 @@ public class JarUtil
 	}
 
 	/**
-	  Get the FileInfoDescriptor for a jar file from the current connection's database or
-	  null if it does not exist.
-
-	  @param schemaName the name for the schema that holds the jar file.
-	  @param sqlName the sql name for the jar file.
-	  @return The FileInfoDescriptor.
-	  @exception StandardException Opps
-	  */
-	public static FileInfoDescriptor getInfo(String schemaName, String sqlName, String statementType)
-		 throws StandardException
-	{
-		JarUtil jUtil = new JarUtil(null,schemaName,sqlName);
-		return jUtil.getInfo();
-	}
-
-	/**
 	  Get the FileInfoDescriptor for the Jar file or null if it does not exist.
 	  @exception StandardException Ooops
 	  */
@@ -358,36 +321,6 @@ public class JarUtil
 		return dd.getFileInfoDescriptor(sd,sqlName);
 	}
 
-	// get the current version of the jar file as a File or InputStream
-	public static Object getAsObject(String schemaName, String sqlName)
-		 throws StandardException
-	{
-		JarUtil jUtil = new JarUtil(null,schemaName,sqlName);
-
-		FileInfoDescriptor fid = jUtil.getInfo();
-		if (fid == null)
-			throw StandardException.newException(SQLState.LANG_FILE_DOES_NOT_EXIST, sqlName,schemaName);
-
-		long generationId = fid.getGenerationId();
-
-		StorageFile f = jUtil.getAsFile(generationId);
-		if (f != null)
-			return f;
-
-		return jUtil.getAsStream(generationId);
-	}
-
-	private StorageFile getAsFile(long generationId) {
-		return fr.getAsFile(JarDDL.mkExternalName(schemaName, sqlName, fr.getSeparatorChar()), generationId);
-	}
-
-	public static InputStream getAsStream(String schemaName, String sqlName,
-		long generationId) throws StandardException {
-		JarUtil jUtil = new JarUtil(null,schemaName,sqlName);
-
-		return jUtil.getAsStream(generationId);		
-	}
-
 	private InputStream getAsStream(long generationId) throws StandardException {
 		try {
 			return fr.getAsStream(JarDDL.mkExternalName(schemaName, sqlName, fr.getSeparatorChar()), generationId);
@@ -396,8 +329,76 @@ public class JarUtil
 		}
 	}
 
+
 	private void notifyLoader(boolean reload) throws StandardException {
 		ClassFactory cf = lcc.getLanguageConnectionFactory().getClassFactory();
 		cf.notifyModifyJar(reload);
 	}
+
+    /**
+     * Open an input stream to read a URL or a file.
+     * URL is attempted first, if the string does not conform
+     * to a URL then an attempt to open it as a regular file
+     * is tried.
+     * <BR>
+     * Attempting the file first can throw a security execption
+     * when a valid URL is passed in.
+     * The security exception is due to not have the correct permissions
+     * to access the bogus file path. To avoid this the order was reversed
+     * to attempt the URL first and only attempt a file open if creating
+     * the URL throws a MalformedURLException.
+     */
+    private static InputStream openJarURL(final String externalPath)
+        throws IOException
+    {
+        try {
+            return (InputStream) AccessController.doPrivileged
+            (new java.security.PrivilegedExceptionAction(){
+                
+                public Object run() throws IOException {    
+                    try {
+                        return new URL(externalPath).openStream();
+                    } catch (MalformedURLException mfurle)
+                    {
+                        return new FileInputStream(externalPath);
+                    }
+                }
+            });
+        } catch (PrivilegedActionException e) {
+            throw (IOException) e.getException();
+        }
+    }
+    
+    /**
+     * Copy the jar from the externally obtained 
+     * input stream into the database
+     * @param jarExternalName Name of jar with database structure.
+     * @param contents Contents of jar file.
+     * @param add true to add, false to replace
+     * @param currentGenerationId generation id of existing version, ignored when adding.
+     */
+    private long setJar(final String jarExternalName,
+            final InputStream contents,
+            final boolean add,
+            final long currentGenerationId)
+            throws StandardException {
+        try {
+            return ((Long) AccessController
+                    .doPrivileged(new java.security.PrivilegedExceptionAction() {
+
+                        public Object run() throws StandardException {
+                            long generationId;
+                            
+                            if (add)
+                                generationId = fr.add(jarExternalName, contents);
+                            else
+                                generationId =  fr.replace(jarExternalName,
+                                        currentGenerationId, contents);
+                            return new Long(generationId);
+                        }
+                    })).longValue();
+        } catch (PrivilegedActionException e) {
+            throw (StandardException) e.getException();
+        }
+    }
 }

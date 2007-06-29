@@ -25,7 +25,6 @@ import org.apache.derby.io.WritableStorageFactory;
 import org.apache.derby.io.StorageFile;
 
 import java.io.*;
-import java.net.*;
 
 /**
 	A set of public static methods for dealing with File objects.
@@ -487,40 +486,5 @@ nextFile:	for (int i = 0; i < list.length; i++) {
 			return new File(name);
 		else
 			return new File(parent, name);
-	}
-
-	/**
-	 * Open an input stream to read a file or a URL
-	 * @param fileOrURL	The file or URL to open.
-	 * @param bufferSize 0 => no buffering.
-	 * @return	an InputStream
-	 * @exception StandardException	Thrown on failure
-	 */
-	public static InputStream getInputStream(String fileOrURL,int bufferSize)
-		 throws IOException
-	{
-		InputStream is;
-		try {
-			is = new FileInputStream( fileOrURL );
-		}
-
-		catch (FileNotFoundException fnfe){
-			try {
-				is = new URL( fileOrURL ).openStream();
-			} catch (MalformedURLException mfurle) {
-
-				// if it looks like an url throw this exception
-				// otherwise throw the file not found exception
-				// If there is no : or an early colon then it's
-				// probably a file (e.g. /foo/myjar.jar or a:/foo/myjar.jar)
-				if (fileOrURL.indexOf(':') > 2)
-					throw mfurle;
-				throw fnfe;
-			}
-		}
-		if (bufferSize > 0)
-			is = new BufferedInputStream(is,bufferSize);
-
-		return is;
 	}
 }

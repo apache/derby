@@ -41,7 +41,7 @@ public class JarDDL
 
 		GenericConstantActionFactory caf = getConstantActionFactory();
 		ConstantAction ca =
-			caf.getAddJarConstantAction(null,schemaName,sqlName,externalPath);
+			caf.getAddJarConstantAction(schemaName,sqlName,externalPath);
 		ca.executeConstantAction(null);
 	}
 
@@ -59,7 +59,7 @@ public class JarDDL
 
 		GenericConstantActionFactory caf = getConstantActionFactory();
 		ConstantAction ca =
-			caf.getDropJarConstantAction(null,schemaName,sqlName);
+			caf.getDropJarConstantAction(schemaName,sqlName);
 		ca.executeConstantAction(null);
 	}
 
@@ -77,7 +77,7 @@ public class JarDDL
 
 		GenericConstantActionFactory caf = getConstantActionFactory();
 		ConstantAction ca =
-			caf.getReplaceJarConstantAction(null,schemaName,sqlName,externalPath);
+			caf.getReplaceJarConstantAction(schemaName,sqlName,externalPath);
 		ca.executeConstantAction(null);
 	}
 

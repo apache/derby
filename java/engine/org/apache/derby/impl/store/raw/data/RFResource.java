@@ -41,12 +41,16 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 
 public class RFResource implements FileResource {
 
-	protected final BaseDataFileFactory factory;
+	private final BaseDataFileFactory factory;
 
-	public RFResource(BaseDataFileFactory dataFactory) {
+	RFResource(BaseDataFileFactory dataFactory) {
 		this.factory = dataFactory;
 	}
 
@@ -129,7 +133,7 @@ public class RFResource implements FileResource {
 	  @see FileResource#remove
 	  @exception StandardException Oops
 	  */
-	public void remove(String name, long currentGenerationId, boolean purgeOnCommit)
+	public void remove(String name, long currentGenerationId)
 		throws StandardException
 	{
 		if (factory.isReadOnly())
@@ -142,27 +146,24 @@ public class RFResource implements FileResource {
             factory.getRawStoreFactory().findUserTransaction(
                 cm, AccessFactoryGlobals.USER_TRANS_NAME);
 
-		tran.logAndDo(privRemoveFileOperation(name, currentGenerationId, purgeOnCommit));
+		tran.logAndDo(privRemoveFileOperation(name, currentGenerationId, true));
 
-		if (purgeOnCommit) {
+		Serviceable s = new RemoveFile(getAsFile(name, currentGenerationId));
 
-			Serviceable s = privRemoveFile(getAsFile(name, currentGenerationId));
-
-			tran.addPostCommitWork(s);
-		}
+	    tran.addPostCommitWork(s);
 	}
 
 	/**
 	  @see FileResource#replace
 	  @exception StandardException Oops
 	  */
-	public long replace(String name, long currentGenerationId, InputStream source, boolean purgeOnCommit)
+	public long replace(String name, long currentGenerationId, InputStream source)
 		throws StandardException
 	{
 		if (factory.isReadOnly())
 			throw StandardException.newException(SQLState.FILE_READ_ONLY);
 
-		remove(name, currentGenerationId, purgeOnCommit);
+		remove(name, currentGenerationId);
 
 		long generationId = add(name, source);
 
@@ -181,6 +182,7 @@ public class RFResource implements FileResource {
 	}
 
 	/**
+<<<<<<< .working
 	  @see FileResource#getAsFile
 	  */
 	public StorageFile getAsFile(String name)
@@ -189,6 +191,8 @@ public class RFResource implements FileResource {
 	}
 
 	/**
+=======
+>>>>>>> .merge-right.r551252
 	  @see FileResource#getAsStream
 	  @exception IOException trouble accessing file.
 	  */
@@ -240,7 +244,7 @@ public class RFResource implements FileResource {
 } // end of class RFResource
 
 
-class RemoveFile implements Serviceable
+final class RemoveFile implements Serviceable, PrivilegedExceptionAction
 {
 	private final StorageFile fileToGo;
 
@@ -252,15 +256,11 @@ class RemoveFile implements Serviceable
 	public int performWork(ContextManager context)
         throws StandardException
     {
-        // SECURITY PERMISSION - MP1, OP5
-        if (fileToGo.exists())
-        {
-            if (!fileToGo.delete())
-            {
-                throw StandardException.newException(
-                    SQLState.FILE_CANNOT_REMOVE_FILE, fileToGo);
-            }
-        }
+        try {
+            AccessController.doPrivileged(this);
+        } catch (PrivilegedActionException e) {
+            throw (StandardException) (e.getException());
+         }
         return Serviceable.DONE;
 	}
 
@@ -274,5 +274,16 @@ class RemoveFile implements Serviceable
 	public boolean serviceImmediately()
 	{
 		return false;
-	}	
+	}
+
+    public Object run() throws StandardException {
+        // SECURITY PERMISSION - MP1, OP5
+        if (fileToGo.exists()) {
+            if (!fileToGo.delete()) {
+                throw StandardException.newException(
+                        SQLState.FILE_CANNOT_REMOVE_FILE, fileToGo);
+            }
+        }
+        return null;
+    }	
 }

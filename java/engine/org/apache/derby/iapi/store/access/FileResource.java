@@ -21,7 +21,6 @@
 package org.apache.derby.iapi.store.access;
 
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.store.access.DatabaseInstant;
 import org.apache.derby.io.StorageFile;
 
 import java.io.FileNotFoundException;
@@ -78,13 +77,10 @@ public interface FileResource {
 	  the database.
 
 	  @param name the name of the fileResource to remove.
-	  @param purgeOnCommit true means purge the fileResource 
-	         when the current transaction commits. false means retain
-	         the file resource for use by replication. 
 	  
 	  @exception StandardException some error occured.
 	  */
-	public void remove(String name, long currentGenerationId, boolean purgeOnCommit)
+	public void remove(String name, long currentGenerationId)
 		throws StandardException;
 
 	/**
@@ -95,14 +91,11 @@ public interface FileResource {
 	  @param name the name of the file resource.
 	  @param source an input stream for reading the content of
 	  the file resource.
-	  @param purgeOnCommit true means purge the existing version of
-	         fileResource when the current transaction commits. false 
-	         means retain the existing version for use by replication. 
 	  @return the generationId for the new 'current' version of the
 	          file resource. 
 	  @exception StandardException some error occured.
 	*/
-	public long replace(String name, long currentGenerationId, InputStream source,boolean purgeOnCommit)
+	public long replace(String name, long currentGenerationId, InputStream source)
 		throws StandardException;
 
 	/**
