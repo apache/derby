@@ -1631,7 +1631,6 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 										   String functionNamePattern,
 										   String parameterNamePattern) 
 		throws SQLException {
-		PreparedStatement s = getPreparedQuery("getFunctionColumns");
 
         return doGetProcCols(catalog, 
                              schemaPattern,
