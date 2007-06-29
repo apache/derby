@@ -44,76 +44,72 @@ public class PrepStmtMetaDataTest extends BaseJDBCTestCase {
      * ResultSet
      */
     public void testNoResultSetMeta() throws SQLException {
-        Connection conn = getConnection();
-        conn.setAutoCommit(true);
 
         // test MetaData with statements that
         // do not return a ResultSet
-        checkEmptyMetaData(conn, "create table ab(a int)", true);
-        checkEmptyMetaData(conn, "alter table ab add column b int", true);
+        checkEmptyMetaData("create table ab(a int)", true);
+        checkEmptyMetaData("alter table ab add column b int", true);
 
-        Statement s = conn.createStatement();
+        Statement s = createStatement();
         s
                 .execute("create procedure testproc() language java external name "
                         + "'org.apache.derbyTesting.functionTests.tests.jdbcapi.PrepStmtMetaDataTest.tstmeth'"
                         + " parameter style java");
 
         // test call statement - shouldn't have meta data
-        checkEmptyMetaData(conn, "call testproc()", false);
+        checkEmptyMetaData("call testproc()", false);
 
         // test drop procedure - meta data should be null
-        checkEmptyMetaData(conn, "drop procedure testproc", true);
+        checkEmptyMetaData("drop procedure testproc", true);
 
         // test create schema - meta data should be null
-        checkEmptyMetaData(conn, "create schema myschema", true);
+        checkEmptyMetaData("create schema myschema", true);
 
         // test drop schema - meta data should be null
-        checkEmptyMetaData(conn, "drop schema myschema restrict", true);
+        checkEmptyMetaData("drop schema myschema restrict", true);
 
         s.execute("CREATE TABLE TRIGTAB (i int)");
         // test create trigger - meta data should be null
         checkEmptyMetaData(
-                conn,
                 "create trigger mytrig after insert on ab for each row insert into trigtab values(1)",
                 true);
 
         // test drop trigger - meta data should be null
-        checkEmptyMetaData(conn, "drop trigger mytrig", true);
+        checkEmptyMetaData("drop trigger mytrig", true);
 
         // test create view - meta data should be null
-        checkEmptyMetaData(conn, "create view myview as select * from ab", true);
+        checkEmptyMetaData("create view myview as select * from ab", true);
 
         // test drop view - meta data should be null
-        checkEmptyMetaData(conn, "drop view myview", true);
+        checkEmptyMetaData("drop view myview", true);
 
         // test drop table - meta data should be null
-        checkEmptyMetaData(conn, "drop table ab", false);
+        checkEmptyMetaData("drop table ab", false);
 
         // test create index - meta data should be null
-        checkEmptyMetaData(conn, "create index aindex on ab(a)", true);
+        checkEmptyMetaData("create index aindex on ab(a)", true);
 
         // test drop index - meta data should be null
-        checkEmptyMetaData(conn, "drop index aindex", false);
+        checkEmptyMetaData("drop index aindex", false);
 
         // test insert - meta data should be null
-        checkEmptyMetaData(conn, "insert into ab values(1,1)", true);
+        checkEmptyMetaData("insert into ab values(1,1)", true);
 
         // test update - meta data should be null
-        checkEmptyMetaData(conn, "update ab set a = 2", false);
+        checkEmptyMetaData("update ab set a = 2", false);
 
         // test delete - meta data should be null
-        checkEmptyMetaData(conn, "delete from ab", false);
+        checkEmptyMetaData("delete from ab", false);
         s.executeUpdate("drop table ab");
         s.close();
     }
 
     public void testAlterTableMeta() throws SQLException {
 
-        Connection conn = getConnection();
-        Statement s = conn.createStatement();
+       Statement s = createStatement();
         s.executeUpdate("create table bug4579 (c11 int)");
         s.executeUpdate("insert into bug4579 values (1)");
-        PreparedStatement ps = conn.prepareStatement("select * from bug4579");
+        PreparedStatement ps = prepareStatement("select * from bug4579");
         ResultSetMetaData rsmd = ps.getMetaData();
         assertEquals(1, rsmd.getColumnCount());
         assertEquals(java.sql.Types.INTEGER, rsmd.getColumnType(1));
@@ -164,12 +160,10 @@ public class PrepStmtMetaDataTest extends BaseJDBCTestCase {
      *            execute PreparedStatement if true
      * @throws SQLException
      */
-    private void checkEmptyMetaData(Connection conn, String sql, boolean execute)
+    private void checkEmptyMetaData(String sql, boolean execute)
             throws SQLException {
-        PreparedStatement ps;
-        ResultSetMetaData rsmd;
-        ps = conn.prepareStatement(sql);
-        rsmd = ps.getMetaData();
+        PreparedStatement ps = prepareStatement(sql);
+        ResultSetMetaData rsmd = ps.getMetaData();
         assertEmptyResultSetMetaData(rsmd);
         if (execute)
             ps.executeUpdate();
@@ -178,10 +172,10 @@ public class PrepStmtMetaDataTest extends BaseJDBCTestCase {
 
     public void testAllDataTypesMetaData()  throws SQLException
     {
-        Connection conn = getConnection();
-        Statement s = conn.createStatement();
+        Statement s = createStatement();
         SQLUtilities.createAndPopulateAllDataTypesTable(s);
-        PreparedStatement ps = conn.prepareStatement("SELECT * from AllDataTypesTable");
+        s.close();
+        PreparedStatement ps = prepareStatement("SELECT * from AllDataTypesTable");
         ResultSetMetaData rsmd = ps.getMetaData();
         int colCount = rsmd.getColumnCount();
         assertEquals(17, colCount);
@@ -352,6 +346,8 @@ public class PrepStmtMetaDataTest extends BaseJDBCTestCase {
         assertEquals("BLOB", rsmd.getColumnTypeName(17));
         assertEquals(1024,rsmd.getPrecision(17));
         assertEquals(0, rsmd.getScale(17));
+        
+        ps.close();
     
     }
     

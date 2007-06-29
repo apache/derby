@@ -105,8 +105,6 @@ public class SQLUtilities {
             
             s.executeUpdate(createSQL.toString());
         }
-
-        s.close();
     }
     
     /**
