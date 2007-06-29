@@ -717,6 +717,8 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     		" RETURNS VARCHAR(20) RETURNS NULL ON NULL INPUT EXTERNAL NAME " + 
 			"'org.apache.derbyTesting.functionTests.tests.lang.RoutineTest.concat' "+
 			" LANGUAGE JAVA PARAMETER STYLE JAVA");
+    //DERBY-2831 Creating a function inside a non-existent schema should not
+    //fail when it's return type is of character string type.
 
     //Start of parameter testing
     //Start with simple ? param in a string comparison
