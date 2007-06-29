@@ -43,8 +43,6 @@ import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 
 public class ForBitDataTest extends BaseJDBCTestCase {
 
-	public Statement stmt = null;
-
         private static String[] TABLES = { 
         	"CREATE TABLE FBDOK.T001 (C001 CHAR FOR BIT DATA)",
         	"CREATE TABLE FBDOK.T002 (C002 CHAR(1) FOR BIT DATA)",
@@ -529,19 +527,6 @@ public class ForBitDataTest extends BaseJDBCTestCase {
 	public ForBitDataTest(String name) {
 		super(name);
 	}
-
-	
-	/* Set up fixture */ 
-	protected void setUp() throws SQLException {
-	    stmt = createStatement();
-	}
-
-
-	/* Tear down the fixture */
-	protected void tearDown() throws Exception {
-                stmt.close();
-		super.tearDown();
-	}
 	
 	/**
         Negative for bit data tests. 
@@ -550,11 +535,11 @@ public class ForBitDataTest extends BaseJDBCTestCase {
         FBD009 maximum varchar length
         */
 	public void testNegative() throws SQLException {		
-		assertStatementError("42611", stmt, "CREATE TABLE FBDFAIL.T001 (C001 CHAR(255) FOR BIT DATA)");
-		assertStatementError("42611", stmt, "CREATE TABLE FBDFAIL.T001 (C001 CHAR(255) FOR BIT DATA)");
-		assertStatementError("42611", stmt, "CREATE TABLE FBDFAIL.T002 (C002 VARCHAR(32673) FOR BIT DATA)");
-		assertStatementError("42X01", stmt, "CREATE TABLE FBDFAIL.T003 (C003 VARCHAR FOR BIT DATA)");	
-		assertStatementError("42X01", stmt, "CREATE TABLE FBDFAIL.T004 (C004 LONG VARCHAR(100) FOR BIT DATA)");
+		assertCompileError("42611", "CREATE TABLE FBDFAIL.T001 (C001 CHAR(255) FOR BIT DATA)");
+        assertCompileError("42611", "CREATE TABLE FBDFAIL.T001 (C001 CHAR(255) FOR BIT DATA)");
+        assertCompileError("42611", "CREATE TABLE FBDFAIL.T002 (C002 VARCHAR(32673) FOR BIT DATA)");
+        assertCompileError("42X01", "CREATE TABLE FBDFAIL.T003 (C003 VARCHAR FOR BIT DATA)");	
+        assertCompileError("42X01", "CREATE TABLE FBDFAIL.T004 (C004 LONG VARCHAR(100) FOR BIT DATA)");
 	}
 
 	/**
@@ -735,7 +720,10 @@ public class ForBitDataTest extends BaseJDBCTestCase {
 		space12[11] = (byte) 0x20;
 		insertData(psI, 210, space12, 10, true);
 		showData(psS, 210, space12, "ORG cafe20202020cafe20202020 (12) CHR <NULL> VAR <NULL> LVC cafe20202020cafe20202020 (12) BLOB <NULL> ");
+        
+        psI.close();
 
+        Statement stmt = createStatement();
 
 		String sql = "INSERT INTO FBDVAL.T001 VALUES(80, X'2020202020', X'2020202020', X'2020202020', null)";
 		stmt.executeUpdate(sql);
@@ -777,11 +765,16 @@ public class ForBitDataTest extends BaseJDBCTestCase {
 		sql = "INSERT INTO FBDVAL.T001 SELECT * FROM FBDVAL.X001";
 		stmt.executeUpdate(sql);
 		showData(psS, 200, space12, "ORG cafe20202020cafe20202020 (12) CHR cafe20202020cafe2020 (10) VAR <NULL> LVC <NULL> BLOB <NULL> ");
+        
+        psS.close();
+        
+        stmt.close();
 	}
 
 
         /* testCompare fixture */
 	public void testCompare() throws SQLException {
+        Statement stmt = createStatement();
 		stmt.execute("delete from FBDVAL.T001");
 		PreparedStatement psI = prepareStatement("INSERT INTO FBDVAL.T001 VALUES(?, ?, ?, ?, ?)");
 		PreparedStatement psI2 = prepareStatement("INSERT INTO FBDVAL.T002 VALUES(?, ?, ?, ?, ?)");
@@ -848,6 +841,7 @@ public class ForBitDataTest extends BaseJDBCTestCase {
 			}
 		    }
 		}
+        stmt.close();
 	}
 
 	/**

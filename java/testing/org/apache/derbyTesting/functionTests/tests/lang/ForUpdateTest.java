@@ -46,28 +46,17 @@ import junit.framework.TestSuite;
  */
 public class ForUpdateTest extends BaseJDBCTestCase {
 
-	public Statement stmt = null;
-	public Connection c = null;
-
 	/* Public constructor required for running test as standalone JUnit. */    
 	public ForUpdateTest(String name) {
 		super(name);
 	}
-
-
-	/* Set up fixture */ 
-	protected void setUp() throws SQLException {
-	    stmt = createStatement();
-	    c = getConnection();		
-	    c.setAutoCommit(false);
-	}
-
-
-	/* Tear down the fixture */
-	protected void tearDown() throws Exception {
-                stmt.close();
-		super.tearDown();
-	}
+    
+    /**
+     * Sets the auto commit to false.
+     */
+    protected void initializeConnection(Connection conn) throws SQLException {
+        conn.setAutoCommit(false);
+    }
 
 	/**
          * Create a suite of tests.
@@ -95,18 +84,22 @@ public class ForUpdateTest extends BaseJDBCTestCase {
     	} 
 
         public void testNegative() throws SQLException {    
-		assertStatementError("42X01", stmt, "select i, v from t1 for");
-		assertStatementError("42X01", stmt, "select i, v from t1 for read");
-		assertStatementError("42X01", stmt, "select i, v from t1 for only");
-		assertStatementError("42X01", stmt, "select i, v from t1 for update of");
-		assertStatementError("42X01", stmt, "select i, v from t1 update");
-		assertStatementError("42X01", stmt, "select i, v from t1 only");
-		assertStatementError("42X01", stmt, "select i, v from t1 read");
+		assertCompileError("42X01", "select i, v from t1 for");
+        assertCompileError("42X01", "select i, v from t1 for read");
+        assertCompileError("42X01", "select i, v from t1 for only");
+        assertCompileError("42X01", "select i, v from t1 for update of");
+        assertCompileError("42X01", "select i, v from t1 update");
+        assertCompileError("42X01", "select i, v from t1 only");
+        assertCompileError("42X01", "select i, v from t1 read");
+        
+        Statement stmt = createStatement();
 		JDBC.assertEmpty(stmt.executeQuery("select i, v from t1 for update"));
+        stmt.close();
         }
 
 
 	public void testCursor() throws SQLException {	
+        Statement stmt = createStatement();
  		stmt.setCursorName("C");
 		stmt.executeQuery("select i, v from t1, t2");
                 Statement stmt2 = createStatement();
@@ -127,10 +120,12 @@ public class ForUpdateTest extends BaseJDBCTestCase {
                      assertSQLState("X0X60", e);
                 }
                 stmt2.close();
+                stmt.close();
         }
 
          
         public void testCursor1() throws SQLException {	
+            Statement stmt = createStatement();
 		stmt.setCursorName("C1");
 		ResultSet rs = stmt.executeQuery("select i, v from t1 where i is not null");
 		Statement stmt2 = createStatement();
@@ -149,6 +144,7 @@ public class ForUpdateTest extends BaseJDBCTestCase {
 
 
         public void testCursor2() throws SQLException {	
+            Statement stmt = createStatement();
 		stmt.setCursorName("C2");
 		ResultSet rs = stmt.executeQuery("select i, v from t1, t2 for read only");
 		Statement stmt2 = createStatement();
@@ -163,11 +159,13 @@ public class ForUpdateTest extends BaseJDBCTestCase {
 		}
 		stmt2.close();
                 rs.close();
+                stmt.close();
         }
 
 
 
 	public void testCursor3() throws SQLException {	
+        Statement stmt = createStatement();
 		stmt.setCursorName("C3");
 		ResultSet rs = stmt.executeQuery("select i, v from t1 where i is not null for read only");
 		Statement stmt2 = createStatement();
@@ -182,11 +180,13 @@ public class ForUpdateTest extends BaseJDBCTestCase {
 		}
 		stmt2.close();
                 rs.close();
+                stmt.close();
         }
 
  
         
 	public void testUpdates() throws SQLException {	
+        Statement stmt = createStatement();
 		JDBC.assertEmpty(stmt.executeQuery("select i, v from t1 for update of t"));
 		JDBC.assertEmpty(stmt.executeQuery("select i, v from t1 for update of i"));
 
@@ -206,10 +206,12 @@ public class ForUpdateTest extends BaseJDBCTestCase {
 		assertStatementError("42Y90", stmt, "select * from (values (1, 2, 3)) a for update");
 		assertStatementError("42Y90", stmt, "values (1, 2, 3) for update");
 		assertStatementError("42Y90", stmt, "select * from t1 union all select * from t1 for update");
+        stmt.close();
         }
 
  
         public void testUpdates2() throws SQLException {	
+            Statement stmt = createStatement();
 		stmt.executeUpdate("insert into t1 (i) values (1)");
 		stmt.setCursorName("C4");
 		ResultSet rs = stmt.executeQuery("select i from t1 s1 for update");
@@ -234,10 +236,12 @@ public class ForUpdateTest extends BaseJDBCTestCase {
 		JDBC.assertEmpty(stmt.executeQuery("select i from t1 for update of t, v"));
 		JDBC.assertEmpty(stmt.executeQuery("select i from t1 for update of d"));
 		assertStatementError("42X04", stmt, "select i as z from t1 for update of z");
+        stmt.close();
          }
 		
 
 	 public void testCursor5() throws SQLException {
+         Statement stmt = createStatement();
 		stmt.setCursorName("C5");
 		stmt.executeQuery("select i as v from t1 for update of v");
 		try {
@@ -250,14 +254,16 @@ public class ForUpdateTest extends BaseJDBCTestCase {
 		JDBC.assertEmpty(stmt.executeQuery("select i from t1 for update of i, v, v, t"));		
 		assertStatementError("42X01", stmt, "select i from t1 for update of t1.v, t1.i, t1.d");
 		JDBC.assertEmpty(stmt.executeQuery("select a.i+10, d, d from t1 a for update"));
+        stmt.close();
          }
 
  
-	public void testStatistics() throws SQLException {  
+	public void testStatistics() throws SQLException {
+        Statement stmt = createStatement();
 		stmt.execute("create index t3bi on t3(b)");
 		stmt.execute("insert into t3 values (1, 'hhhh'), (2, 'uuuu'), (3, 'yyyy'), (4, 'aaaa'), (5, 'jjjj'), (6, 'rrrr')");
 		stmt.execute("insert into t3 values (7, 'iiii'), (8, 'wwww'), (9, 'rrrr'), (10, 'cccc'), (11, 'hhhh'), (12, 'rrrr')");
-		c.commit();
+		commit();
 
 		String [][] expectedValues = { {"1", "hhhh"}, 
 				               {"2", "uuuu"}, 
@@ -276,7 +282,7 @@ public class ForUpdateTest extends BaseJDBCTestCase {
 		RuntimeStatisticsParser rtsp = SQLUtilities.getRuntimeStatisticsParser(stmt);
 		assertTrue(rtsp.usedTableScan());
 		assertFalse(rtsp.usedDistinctScan());
-		c.commit();
+		commit();
 
 		PreparedStatement p = prepareStatement("select i, b from t3  where i = ? FOR UPDATE");
                 p.setString(1, "7");
@@ -287,7 +293,7 @@ public class ForUpdateTest extends BaseJDBCTestCase {
 		assertFalse(rtsp2.usedTableScan());
 		assertFalse(rtsp2.usedDistinctScan());
 		p.close();
-		c.commit();
+		commit();
 
 
 		p = prepareStatement("select i, b from t3 where i < ? FOR UPDATE");
@@ -304,7 +310,7 @@ public class ForUpdateTest extends BaseJDBCTestCase {
 		assertFalse(rtsp3.usedTableScan());
 		assertFalse(rtsp3.usedDistinctScan());              
 		p.close();
-		c.commit();
+		commit();
 
 
 		p = prepareStatement("select i, b from t3  where b = ? FOR UPDATE");
@@ -316,9 +322,10 @@ public class ForUpdateTest extends BaseJDBCTestCase {
 		assertFalse(rtsp4.usedTableScan());
 		assertFalse(rtsp4.usedDistinctScan());
 		p.close();
-		c.commit();
+		commit();
 
 	        stmt.execute("call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(0)");	
+            stmt.close();
         }
 
         public void testCursors() throws SQLException {  

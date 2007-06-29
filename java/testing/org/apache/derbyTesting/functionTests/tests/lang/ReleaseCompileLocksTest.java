@@ -42,21 +42,23 @@ import junit.framework.TestSuite;
  */
 public class ReleaseCompileLocksTest extends BaseJDBCTestCase {
 
-	public Statement stmt = null;
-	Connection conn = null;
-
 
 	/* Public constructor required for running test as standalone JUnit. */    
 	public ReleaseCompileLocksTest(String name) {
 		super(name);
 	}
+    
+    /**
+     * Sets the auto commit to false.
+     */
+    protected void initializeConnection(Connection conn) throws SQLException {
+        conn.setAutoCommit(false);
+    }
 
 
 	/* Set up fixture */ 
 	protected void setUp() throws SQLException {
-	    stmt = createStatement();
-	    conn = getConnection();
-	    conn.setAutoCommit(false);
+	    Statement stmt = createStatement();
 
 	    stmt.execute("create function dmlstatic() returns INT parameter style java language java external name " +							  "'org.apache.derbyTesting.functionTests.tests.lang." + 
                  	this.getANumber() +
@@ -65,14 +67,12 @@ public class ReleaseCompileLocksTest extends BaseJDBCTestCase {
 	    stmt.execute("create function insertstatic() returns INT parameter style java language java external name " +					"'org.apache.derbyTesting.functionTests.tests.lang." +
 			this.getANumber() +
 			"' no sql");
+        
+        stmt.close();
+        commit();
 	}
 
 
-	/* Tear down the fixture */
-	protected void tearDown() throws Exception {
-                stmt.close();
-		super.tearDown();
-	}
 
 	/**
          * Create a suite of tests.
@@ -99,7 +99,8 @@ public class ReleaseCompileLocksTest extends BaseJDBCTestCase {
 
         /*Fixtures*/
         public void testReleaseCompileLocks() throws Exception {
-        	conn.commit();
+            
+            Statement stmt = createStatement();
 
 		try {
                 	stmt.executeQuery("select (dmlstatic()) from sys.systables where tablename = 'SYSCONGLOMERATES'");          
@@ -109,11 +110,11 @@ public class ReleaseCompileLocksTest extends BaseJDBCTestCase {
 		
 
                 JDBC.assertEmpty(stmt.executeQuery("select TYPE, MODE, TABLENAME, LOCKNAME, STATE from syscs_diag.lock_table order by 1"));
-		conn.commit();
+		commit();
 
 		stmt.execute("drop table t1");
 		stmt.execute("create table t1 (s int)");
-		conn.commit();
+		commit();
 
 		
 		try {
@@ -127,14 +128,14 @@ public class ReleaseCompileLocksTest extends BaseJDBCTestCase {
 
 		JDBC.assertEmpty(stmt.executeQuery("select * from t1"));
 		stmt.execute("drop table t1");
-		conn.commit();
+		commit();
 	
 		JDBC.assertEmpty(stmt.executeQuery("select TYPE, MODE, TABLENAME, LOCKNAME, STATE from syscs_diag.lock_table order by 1"));
-		conn.commit();
+		commit();
 
 		stmt.execute("create table test_tab (x int)");
 		stmt.executeUpdate("insert into test_tab values (1)");
-		conn.commit();
+		commit();
 
 		JDBC.assertSingleValueResultSet(stmt.executeQuery("select count(*) from syscs_diag.lock_table"), "0");
 		JDBC.assertSingleValueResultSet(stmt.executeQuery("select count(*) from sys.sysviews"), "0");
@@ -152,7 +153,7 @@ public class ReleaseCompileLocksTest extends BaseJDBCTestCase {
 			assertSQLState("42Y55", e);
 		}
 		stmt.execute("create table t1 (x int)");
-		conn.commit();
+		commit();
 		
 		JDBC.assertEmpty(stmt.executeQuery("select * from t1"));
 
@@ -161,12 +162,13 @@ public class ReleaseCompileLocksTest extends BaseJDBCTestCase {
 		stmt2.execute("create table t2 (x int)");
 		stmt2.execute("drop table t2");
 		stmt2.close();
+        conn1.commit();
 		conn1.close();
 
 		stmt.execute("drop table test_tab");
 		stmt.execute("create table test_tab (x int)");
 		stmt.execute("insert into test_tab values (1)");
-		conn.commit();
+		commit();
 
 		PreparedStatement ps = prepareStatement("update test_tab set x=2 where x=?");
 		ps.setCursorName("cursor1");
@@ -178,13 +180,13 @@ public class ReleaseCompileLocksTest extends BaseJDBCTestCase {
 		rs = stmt.executeQuery("select TYPE, MODE, TABLENAME, LOCKNAME, STATE from syscs_diag.lock_table order by 1");
 		String expectedValues1[][] = {{"ROW", "X", "TEST_TAB", "(1,7)", "GRANT" }, {"TABLE", "IX", "TEST_TAB", "Tablelock","GRANT"}};
                 JDBC.assertFullResultSet(rs, expectedValues1);
-		conn.commit();
+		commit();
 
 		
 		stmt.execute("create table t (c1 int not null primary key, c2 int references t)");
 		stmt.executeUpdate("insert into t values (1,1)");
 		stmt.executeUpdate("insert into t values (2,1)");
-		conn.commit();
+		commit();
 
 		ps = prepareStatement("select * from t where c1 = ? and c2 = ?");
 		ps.setCursorName("ps");
@@ -193,41 +195,41 @@ public class ReleaseCompileLocksTest extends BaseJDBCTestCase {
 		
 		stmt.execute("create table x(c1 int)");
 		stmt.execute("drop table x");
-		conn.commit();
+		commit();
 
 		ps = prepareStatement("insert into t values (3,2)");
 		ps.setCursorName("pi");
 		JDBC.assertEmpty(stmt.executeQuery("select * from syscs_diag.lock_table"));
-		conn.commit();
+		commit();
 
 
 		stmt.execute("create table x(c1 int)");
 		stmt.execute("drop table x");
-		conn.commit();
+		commit();
 
 		ps = prepareStatement("update t set c2 = c1, c1 = c2");
 		ps.setCursorName("p1");
 		JDBC.assertEmpty(stmt.executeQuery("select * from syscs_diag.lock_table"));
-		conn.commit();
+		commit();
 
 		
 		stmt.execute("create table x(c1 int)");
 		stmt.execute("drop table x");
-		conn.commit();
+		commit();
 
 		ps = prepareStatement("delete from t");
 		ps.setCursorName("p1");
 		JDBC.assertEmpty(stmt.executeQuery("select * from syscs_diag.lock_table"));
-		conn.commit();
+		commit();
 		
 		stmt.execute("create trigger update_of_t after update on t for each row values 2");
 		stmt.execute("create trigger insert_of_t after insert on t for each row values 3");
-		conn.commit();
+		commit();
 	
 		ps = prepareStatement("update t set c2=2 where c1=2");
 		ps.setCursorName("pu");
 		JDBC.assertEmpty(stmt.executeQuery("select * from syscs_diag.lock_table"));
-		conn.commit();
+		commit();
 
 		rs.close();
 		ps.close();
