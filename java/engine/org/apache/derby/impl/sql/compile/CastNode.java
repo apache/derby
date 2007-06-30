@@ -397,9 +397,12 @@ public class CastNode extends ValueNode
 													));
 		}
 
+        // Obviously the type of a parameter that
+        // requires its type from context (a parameter)
+        // gets its type from the type of the CAST.
 		if (castOperand.requiresTypeFromContext())
 		{
-			bindParameter();
+            castOperand.setType(getTypeServices());
 		}
 
 		/*
@@ -798,20 +801,6 @@ public class CastNode extends ValueNode
 	public boolean constantExpression(PredicateList whereClause)
 	{
 		return castOperand.constantExpression(whereClause);
-	}
-
-	/**
-	 * By default unary operators don't accept ? parameters as operands.
-	 * This can be over-ridden for particular unary operators.
-	 *
-	 * @exception StandardException		Always thrown to indicate a
-	 *									? parameter where it isn't allowed.
-	 */
-
-	void bindParameter()
-					throws StandardException
-	{
-		castOperand.setType(getTypeServices());
 	}
 
 	/**
