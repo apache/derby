@@ -10,6 +10,8 @@ permission java.io.FilePermission "${derby.system.home}${/}-",
 permission java.util.PropertyPermission "derby.debug.false", "read, write";
 permission java.util.PropertyPermission "derby.debug.true", "read, write";
 permission java.util.PropertyPermission "derby.*", "read, write";
+permission java.util.PropertyPermission "derby.storage.jvmInstanceId", 
+      "write"; 
 
 permission java.lang.RuntimePermission "createClassLoader";
 

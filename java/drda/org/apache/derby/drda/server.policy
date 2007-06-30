@@ -5,6 +5,8 @@ grant codeBase "${derby.install.url}derby.jar"
 //
   permission java.lang.RuntimePermission "createClassLoader";
   permission java.util.PropertyPermission "derby.*", "read";
+  permission java.util.PropertyPermission "derby.storage.jvmInstanceId", 
+      "write"; 
   permission java.io.FilePermission "${derby.system.home}","read";
   permission java.io.FilePermission "${derby.system.home}${/}-", "read,write,delete";
 
