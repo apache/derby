@@ -103,7 +103,9 @@ public class UnaryArithmeticOperatorNode extends UnaryOperatorNode
      */
     public boolean isParameterNode()
     {
-        return requiresTypeFromContext();
+        if (operatorType == UNARY_PLUS || operatorType == UNARY_MINUS)
+            return operand.isParameterNode(); 
+        return false;
     }
 
 	/**
