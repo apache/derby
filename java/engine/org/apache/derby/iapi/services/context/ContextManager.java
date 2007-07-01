@@ -65,7 +65,10 @@ public class ContextManager
 	 * synchronized).
 	 */
 	private static final class CtxStack {
-		private ArrayList stack_ = new ArrayList();
+		/** Internal list with all the elements of the stack. */
+		private final ArrayList stack_ = new ArrayList();
+		/** Read-only view of the internal list. */
+		private final List view_ = Collections.unmodifiableList(stack_);
 
 		// Keeping a reference to the top element on the stack
 		// optimizes the frequent accesses to this element. The
@@ -94,7 +97,7 @@ public class ContextManager
 		}
 		boolean isEmpty() { return stack_.isEmpty(); }
 		List getUnmodifiableList() { 
-		    return Collections.unmodifiableList(stack_); 
+			return view_;
 		}
 	}
 
