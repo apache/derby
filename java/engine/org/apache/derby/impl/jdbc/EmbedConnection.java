@@ -2357,20 +2357,19 @@ public abstract class EmbedConnection implements EngineConnection
 		//free all the lob resources in the HashMap
 		//initialize the locator value to 0 and
 		//the hash table object to null.
-		if (rootConnection.lobHashMap != null) {
-			for (Iterator e = getlobHMObj().values().iterator();
-				e.hasNext() ;) {
-				Object obj = e.next();
-				if (obj instanceof Clob)  {
-					EmbedClob temp = (EmbedClob)obj;
-					temp.free();
-				}
-				if (obj instanceof Blob) {
-					EmbedBlob temp = (EmbedBlob)obj;
-					temp.free();
+		HashMap map = rootConnection.lobHashMap;
+		if (map != null) {
+			for (Iterator it = map.values().iterator(); it.hasNext(); ) {
+				Object obj = it.next();
+				if (obj instanceof EmbedClob) {
+					((EmbedClob) obj).free();
+				} else if (obj instanceof EmbedBlob) {
+					((EmbedBlob) obj).free();
+				} else if (SanityManager.DEBUG) {
+					SanityManager.THROWASSERT("Unexpected value: " + obj);
 				}
 			}
-			getlobHMObj().clear();
+			map.clear();
 		}
 	}
 
