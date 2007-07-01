@@ -2357,7 +2357,7 @@ public abstract class EmbedConnection implements EngineConnection
 		//free all the lob resources in the HashMap
 		//initialize the locator value to 0 and
 		//the hash table object to null.
-		if (lobHashMap != null) {
+		if (rootConnection.lobHashMap != null) {
 			for (Iterator e = getlobHMObj().values().iterator();
 				e.hasNext() ;) {
 				Object obj = e.next();
@@ -2370,8 +2370,8 @@ public abstract class EmbedConnection implements EngineConnection
 					temp.free();
 				}
 			}
+			getlobHMObj().clear();
 		}
-		getlobHMObj().clear();
 	}
 
 	/**
