@@ -72,7 +72,7 @@ class UpdatableBlobStream extends InputStream {
     }
     
     /**
-     * Construct an <code>UpdatableBlobStream<code> using the 
+     * Construct an <code>UpdatableBlobStream</code> using the 
      * <code>InputStream</code> received as parameter. The initial
      * position in the stream is set to <code>pos</code> and the
      * stream is restricted to a length of <code>len</code>.
