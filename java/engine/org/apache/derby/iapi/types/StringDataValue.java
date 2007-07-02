@@ -65,11 +65,6 @@ public interface StringDataValue extends ConcatableDataValue
 	/** @see StringDataValue#COLLATION_TYPE_UCS_BASIC */
 	public	static final int COLLATION_TYPE_TERRITORY_BASED = 1;
 
-    public  static final String COLLATION_TYPE_UCS_BASIC_STRING = 
-        "USC_BASIC";
-    public  static final String COLLATION_TYPE_TERRITORY_BASED_STRING = 
-        "TERRITORY_BASED";
-
 	/**
 	 * The SQL concatenation '||' operator.
 	 *

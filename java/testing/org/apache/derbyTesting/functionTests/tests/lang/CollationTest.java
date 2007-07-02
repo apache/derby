@@ -912,6 +912,16 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     rs = s.executeQuery("SELECT COUNT(*) FROM APP.CUSTOMER ");
     JDBC.assertFullResultSet(rs,new String[][] {{"8"}});
     //End of parameter testing
+    
+    //The user table has to adhere to the collation type of the schema in which
+    //it resides. If the table creation breaks that rule, then an exception 
+    //will be thrown. DERBY-2879
+    s.executeUpdate("set schema APP");
+    //following fails as expected because otherwise character types in T will
+    //have collation type of UCS_BASIC but the APP schema has collation of
+    //territory based
+    assertStatementError("42ZA3", s, "CREATE TABLE T AS SELECT TABLENAME " +
+    		" FROM SYS.SYSTABLES WITH NO DATA");
 }
 
 private void setUpTable(Statement s) throws SQLException {

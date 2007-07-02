@@ -2477,6 +2477,13 @@ Guide.
                 <arg>value</arg>
             </msg>
 
+            <msg>
+                <name>42ZA3</name>
+                <text>The table will have collation type {0} which is different than the collation of the schema {1} hence this operation is not supported .</text>
+                <arg>type</arg>
+                <arg>type</arg>
+            </msg>
+
         </family>
 
 
