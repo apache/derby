@@ -28,6 +28,7 @@ import org.apache.derby.catalog.TypeDescriptor;
 
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.StringDataValue;
+import org.apache.derby.iapi.reference.Property;
 
 import java.io.ObjectOutput;
 import java.io.ObjectInput;
@@ -426,8 +427,8 @@ public class TypeDescriptorImpl implements TypeDescriptor, Formatable
     {
         return(
             collationType == StringDataValue.COLLATION_TYPE_UCS_BASIC ? 
-                StringDataValue.COLLATION_TYPE_UCS_BASIC_STRING : 
-                StringDataValue.COLLATION_TYPE_TERRITORY_BASED_STRING);
+                Property.UCS_BASIC_COLLATION : 
+                Property.TERRITORY_BASED_COLLATION);
     }
 
 	/**

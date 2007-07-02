@@ -290,6 +290,9 @@ public class CreateTableNode extends DDLStatementNode
 				qeRCL.copyResultColumnNames(resultColumns);
 			}
 			
+			SchemaDescriptor sd = getSchemaDescriptor();
+			int schemaCollationType = sd.getCollationType();
+	    
 			/* Create table element list from columns in query expression */
 			tableElementList = new TableElementList();
 			
@@ -314,6 +317,30 @@ public class CreateTableNode extends DDLStatementNode
 							SQLState.LANG_INVALID_COLUMN_TYPE_CREATE_TABLE,
 							dtd.getFullSQLTypeName(),
 							rc.getName());
+				}
+				//DERBY-2879  CREATE TABLE AS <subquery> does not maintain the 
+				//collation for character types. 
+				//eg for a territory based collation database
+				//create table t as select tablename from sys.systables with no data;
+				//Derby at this point does not support for a table's character 
+				//columns to have a collation different from it's schema's
+				//collation. Which means that in a territory based database, 
+				//the query above will cause table t's character columns to
+				//have collation of UCS_BASIC but the containing schema of t
+				//has collation of territory based. This is not supported and
+				//hence we will throw an exception below for the query above in
+				//a territory based database. 
+				if (dtd.getCollationType() != schemaCollationType)
+				{
+					String schemaCollationName =
+			        	(schemaCollationType == 
+			        		StringDataValue.COLLATION_TYPE_UCS_BASIC ? 
+			                Property.UCS_BASIC_COLLATION : 
+			                Property.TERRITORY_BASED_COLLATION);
+					throw StandardException.newException(
+							SQLState.LANG_CAN_NOT_CREATE_TABLE,
+							dtd.getCollationName(),
+							schemaCollationName);
 				}
 
 				ColumnDefinitionNode column = new ColumnDefinitionNode();

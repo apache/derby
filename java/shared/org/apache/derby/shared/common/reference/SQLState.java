@@ -1047,6 +1047,7 @@ public interface SQLState {
     String LANG_QUERY_TOO_COMPLEX                                     = "42ZA0";
     String LANG_INVALID_SQL_IN_BATCH                                  = "42ZA1";
     String LANG_LIKE_COLLATION_MISMATCH                               = "42ZA2";
+    String LANG_CAN_NOT_CREATE_TABLE                               = "42ZA3";
 
 	//following 3 matches the DB2 sql states
 	String LANG_DECLARED_GLOBAL_TEMP_TABLE_ONLY_IN_SESSION_SCHEMA = "428EK";
