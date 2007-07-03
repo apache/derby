@@ -21,15 +21,9 @@
 
 package org.apache.derby.iapi.sql.execute;
 
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.types.DataValueDescriptor;
-
-import org.apache.derby.iapi.sql.Row;
-
-import org.apache.derby.iapi.services.io.Storable;
-
 import org.apache.derby.iapi.services.io.FormatableBitSet;
+import org.apache.derby.iapi.sql.Row;
+import org.apache.derby.iapi.types.DataValueDescriptor;
 
 /**
  * Execution sees this extension of Row that provides connectivity
@@ -93,9 +87,6 @@ public interface ExecRow extends Row {
 	/**
 		Set the array of objects
 	*/
-	public void setRowArray(Storable[] rowArray);
-
-	// temp overload
 	public void setRowArray(DataValueDescriptor[] rowArray);
 
 	/**

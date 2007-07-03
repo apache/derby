@@ -216,8 +216,6 @@ public class BackingStoreHashtable
         this.tc = tc;
         this.keepAfterCommit = keepAfterCommit;
 
-        Object[] row;
-
         // use passed in capacity and loadfactor if not -1, you must specify
         // capacity if you want to specify loadfactor.
         if (initialCapacity != -1)
@@ -266,6 +264,7 @@ public class BackingStoreHashtable
         {
             boolean needsToClone = row_source.needsToClone();
 
+            DataValueDescriptor[] row;
             while ((row = getNextRowFromRowSource()) != null)
             {
                 // If we haven't initialized the hash_table yet then that's
@@ -313,10 +312,10 @@ public class BackingStoreHashtable
      *
 	 * @exception  StandardException  Standard exception policy.
 	 */
-	private Object[] getNextRowFromRowSource()
+	private DataValueDescriptor[] getNextRowFromRowSource()
 		throws StandardException
 	{
-		Object[] row = row_source.getNextRowFromRowSource();
+		DataValueDescriptor[] row = row_source.getNextRowFromRowSource();
 
 		if (skipNullKeyColumns)
 		{
@@ -326,17 +325,7 @@ public class BackingStoreHashtable
 				int index = 0;
 				for ( ; index < key_column_numbers.length; index++)
 				{
-					if (SanityManager.DEBUG)
-					{
-						if (! (row[key_column_numbers[index]] instanceof Storable))
-						{
-							SanityManager.THROWASSERT(
-								"row[key_column_numbers[index]] expected to be Storable, not " +
-								row[key_column_numbers[index]].getClass().getName());
-						}
-					}
-					Storable storable = (Storable) row[key_column_numbers[index]];
-					if (storable.isNull())
+					if (row[key_column_numbers[index]].isNull())
 					{
 						break;
 					}
@@ -360,17 +349,17 @@ public class BackingStoreHashtable
      *
 	 * @exception  StandardException  Standard exception policy.
      **/
-    static Object[] cloneRow(Object[] old_row)
+    private static DataValueDescriptor[] cloneRow(DataValueDescriptor[] old_row)
         throws StandardException
     {
-        Object[] new_row = new DataValueDescriptor[old_row.length];
+        DataValueDescriptor[] new_row = new DataValueDescriptor[old_row.length];
 
 		// the only difference between getClone and cloneObject is cloneObject does
 		// not objectify a stream.  We use getClone here.  Beetle 4896.
         for (int i = 0; i < old_row.length; i++)
         {
             if( old_row[i] != null)
-                new_row[i] = ((DataValueDescriptor) old_row[i]).getClone();
+                new_row[i] = old_row[i].getClone();
         }
 
         return(new_row);
@@ -408,7 +397,7 @@ public class BackingStoreHashtable
      *
 	 * @exception  StandardException  Standard exception policy.
      **/
-    private void add_row_to_hash_table(Object[] row, boolean needsToClone)
+    private void add_row_to_hash_table(DataValueDescriptor[] row, boolean needsToClone)
 		throws StandardException
     {
         if (spillToDisk(row))
@@ -458,7 +447,7 @@ public class BackingStoreHashtable
         row = null;
     }
 
-    private void doSpaceAccounting( Object[] row,
+    private void doSpaceAccounting(DataValueDescriptor[] row,
                                     boolean firstDuplicate)
     {
         inmemory_rowcnt++;
@@ -479,7 +468,7 @@ public class BackingStoreHashtable
      *
      * @exception  StandardException  Standard exception policy.
      */
-    private boolean spillToDisk(Object[] row) throws StandardException {
+    private boolean spillToDisk(DataValueDescriptor[] row) throws StandardException {
         // Once we have started spilling all new rows will go to disk, even if we have freed up some
         // memory by moving duplicates to disk. This simplifies handling of duplicates and accounting.
         if( diskHashtable == null)
@@ -493,17 +482,11 @@ public class BackingStoreHashtable
                 
                 return false;
             // Want to start spilling
-            if( ! (row instanceof DataValueDescriptor[]))
-            {
-                if( SanityManager.DEBUG)
-                    SanityManager.THROWASSERT( "BackingStoreHashtable row is not DataValueDescriptor[]");
-                // Do not know how to put it on disk
-                return false;
-            }
+ 
             diskHashtable = 
                 new DiskHashtable(
                        tc,
-                       (DataValueDescriptor[]) row,
+                       row,
                        (int[]) null, //TODO-COLLATION, set non default collation if necessary.
                        key_column_numbers,
                        remove_duplicates,
@@ -522,12 +505,12 @@ public class BackingStoreHashtable
                 List duplicateVec = (List) duplicateValue;
                 for( int i = duplicateVec.size() - 1; i >= 0; i--)
                 {
-                    Object[] dupRow = (Object[]) duplicateVec.get(i);
+                    DataValueDescriptor[] dupRow = (DataValueDescriptor[]) duplicateVec.get(i);
                     diskHashtable.put( key, dupRow);
                 }
             }
             else
-                diskHashtable.put( key, (Object []) duplicateValue);
+                diskHashtable.put( key, (DataValueDescriptor[]) duplicateValue);
             hash_table.remove( key);
         }
         diskHashtable.put( key, row);
@@ -542,13 +525,12 @@ public class BackingStoreHashtable
      * @return A guess as to how much memory the current row will
      *  use.
      */
-    private long getEstimatedMemUsage(Object [] row)
+    private long getEstimatedMemUsage(DataValueDescriptor[] row)
     {
         long rowMem = 0;
         for( int i = 0; i < row.length; i++)
         {
-            if (row[i] instanceof DataValueDescriptor)
-                rowMem += ((DataValueDescriptor) row[i]).estimateMemoryUsage();
+            rowMem += row[i].estimateMemoryUsage();
             rowMem += ClassSize.refSize;
         }
 
@@ -720,9 +702,9 @@ public class BackingStoreHashtable
      *
 	 * @exception  StandardException  Standard exception policy.
      **/
-    public boolean put(
+    public boolean putRow(
     boolean     needsToClone,
-    Object[]    row)
+    DataValueDescriptor[]    row)
 		throws StandardException
     {
 		// Are any key columns null?
@@ -731,17 +713,7 @@ public class BackingStoreHashtable
 			int index = 0;
 			for ( ; index < key_column_numbers.length; index++)
 			{
-				if (SanityManager.DEBUG)
-				{
-					if (! (row[key_column_numbers[index]] instanceof Storable))
-					{
-						SanityManager.THROWASSERT(
-							"row[key_column_numbers[index]] expected to be Storable, not " +
-							row[key_column_numbers[index]].getClass().getName());
-					}
-				}
-				Storable storable = (Storable) row[key_column_numbers[index]];
-				if (storable.isNull())
+				if (row[key_column_numbers[index]].isNull())
 				{
 					return false;
 				}

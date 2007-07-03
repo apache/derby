@@ -448,7 +448,7 @@ public class BTreeForwardScan extends BTreeScan
 
                     if (hash_table != null)
                     {
-                        if (hash_table.put(false, fetch_row))
+                        if (hash_table.putRow(false, fetch_row))
                             fetch_row = null;
                     }
                     else
