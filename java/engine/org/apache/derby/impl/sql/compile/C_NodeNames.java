@@ -208,8 +208,6 @@ public interface C_NodeNames
 
 	static final String PROJECT_RESTRICT_NODE_NAME = "org.apache.derby.impl.sql.compile.ProjectRestrictNode";
 
-	static final String READ_CURSOR_NODE_NAME = "org.apache.derby.impl.sql.compile.ReadCursorNode";
-
 	static final String RENAME_NODE_NAME = "org.apache.derby.impl.sql.compile.RenameNode";
 
 	static final String RESULT_COLUMN_NAME = "org.apache.derby.impl.sql.compile.ResultColumn";
@@ -231,8 +229,6 @@ public interface C_NodeNames
 	static final String SET_SCHEMA_NODE_NAME = "org.apache.derby.impl.sql.compile.SetSchemaNode";
 
 	static final String SET_TRANSACTION_ISOLATION_NODE_NAME = "org.apache.derby.impl.sql.compile.SetTransactionIsolationNode";
-
-	static final String SET_TRIGGERS_NODE_NAME = "org.apache.derby.impl.sql.compile.SetTriggersNode";
 
 	static final String SIMPLE_STRING_OPERATOR_NODE_NAME = "org.apache.derby.impl.sql.compile.SimpleStringOperatorNode";
 
