@@ -89,14 +89,13 @@ public class TestConstraintNode extends UnaryLogicalOperatorNode
 		Vector	aggregateVector)
 			throws StandardException
 	{
-		bindUnaryOperator(fromList, subqueryList, aggregateVector);
+		bindOperand(fromList, subqueryList, aggregateVector);
 
 		/*
 		** If the operand is not boolean, cast it.
 		*/
 
-		if ( ! operand.getTypeServices().getTypeId().getSQLTypeName().equals(
-														TypeId.BOOLEAN_NAME))
+		if (!operand.getTypeServices().getTypeId().isBooleanTypeId())
 		{
 			operand = (ValueNode)
 				getNodeFactory().getNode(

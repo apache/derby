@@ -283,24 +283,20 @@ public class ValueNodeList extends QueryTreeNodeVector
 	 */
 	public DataTypeDescriptor getTypeServices() throws StandardException
 	{
-		DataTypeDescriptor	firstDTS = null;
 		int size = size();
 
 		for (int index = 0; index < size; index++)
 		{
-			ValueNode			valueNode;
-
-			valueNode = (ValueNode) elementAt(index);
+			ValueNode valueNode = (ValueNode) elementAt(index);
 			DataTypeDescriptor valueNodeDTS = valueNode.getTypeServices();
 
-			if ((firstDTS == null) && (valueNodeDTS != null))
+			if (valueNodeDTS != null)
 			{
-				firstDTS = valueNodeDTS;
-				break;
+				return valueNodeDTS;
 			}
 		}
 
-		return firstDTS;
+		return null;
 	}
 
 	/**
@@ -574,11 +570,10 @@ public class ValueNodeList extends QueryTreeNodeVector
 						throws StandardException
 	{
 		int size = size();
-		ValueNode	valueNode;
 
 		for (int index = 0; index < size; index++)
 		{
-			valueNode = (ValueNode) elementAt(index);
+			ValueNode valueNode = (ValueNode) elementAt(index);
 			if (valueNode.requiresTypeFromContext())
 			{
 				valueNode.setType(descriptor);

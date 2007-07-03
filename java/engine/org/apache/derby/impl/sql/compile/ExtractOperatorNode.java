@@ -90,7 +90,7 @@ public class ExtractOperatorNode extends UnaryOperatorNode {
 		int	operandType;
 		TypeId opTypeId;
 
-		super.bindExpression(fromList, subqueryList,
+		bindOperand(fromList, subqueryList,
 				aggregateVector);
 
 		opTypeId = operand.getTypeId();

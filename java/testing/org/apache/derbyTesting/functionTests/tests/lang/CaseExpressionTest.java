@@ -113,6 +113,28 @@ public class CaseExpressionTest extends BaseJDBCTestCase {
     public CaseExpressionTest(String name) {
         super(name);
     }
+    
+    /**
+     * Test various statements that 
+     *
+     */
+    public void testWhenNonBoolean() {
+        
+        // DERBY-2809: BOOLEAN datatype was forced upon
+        // unary expressions that were not BOOLEAN, such
+        // as SQRT(?)
+        String[] unaryOperators = {
+                "SQRT(?)", "SQRT(9)",
+                "UPPER(?)", "UPPER('haight')",
+                "LOWER(?)", "LOWER('HAIGHT')",
+        };
+        for (int i = 0; i < unaryOperators.length; i++)
+        {
+            assertCompileError("42X88",
+               "VALUES CASE WHEN " + unaryOperators[i] +
+               " THEN 3 ELSE 4 END");
+        }
+    }
 
     public void testAllDatatypesCombinationsForCaseExpressions()
     throws SQLException

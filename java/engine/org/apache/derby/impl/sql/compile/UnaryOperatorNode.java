@@ -62,7 +62,11 @@ public class UnaryOperatorNode extends ValueNode
 {
 	String	operator;
 	String	methodName;
-	int operatorType;
+    
+    /**
+     * Operator type, only valid for XMLPARSE and XMLSERIALIZE.
+     */
+	private int operatorType;
 
 	String		resultInterfaceType;
 	String		receiverInterfaceType;
@@ -72,11 +76,6 @@ public class UnaryOperatorNode extends ValueNode
 	 */
 	ValueNode	operand;
 
-	public final static int UNARY_PLUS	= 1;
-	public final static int UNARY_MINUS	= 2;
-	public final static int NOT		= 3;
-	public final static int IS_NULL		= 4;
-
 	// At the time of adding XML support, it was decided that
 	// we should avoid creating new OperatorNodes where possible.
 	// So for the XML-related unary operators we just add the
@@ -84,6 +83,12 @@ public class UnaryOperatorNode extends ValueNode
 	// TernarnyOperatorNode. Subsequent unary operators (whether
 	// XML-related or not) should follow this example when
 	// possible.
+    //
+    // This has lead to this class having somewhat of
+    // a confused personality. In one mode it is really
+    // a parent (abstract) class for various unary operator
+    // node implementations, in its other mode it is a concrete
+    // class for XMLPARSE and XMLSERIALIZE.
 
 	public final static int XMLPARSE_OP = 0;
 	public final static int XMLSERIALIZE_OP = 1;
@@ -286,6 +291,9 @@ public class UnaryOperatorNode extends ValueNode
 	/**
 	 * Bind this expression.  This means binding the sub-expressions,
 	 * as well as figuring out what the return type is for this expression.
+     * This method is the implementation for XMLPARSE and XMLSERIALIZE.
+     * Sub-classes need to implement their own bindExpression() method
+     * for their own specific rules.
 	 *
 	 * @param fromList		The FROM list for the query this
 	 *				expression is in, for binding columns.
@@ -302,36 +310,37 @@ public class UnaryOperatorNode extends ValueNode
 					Vector	aggregateVector)
 				throws StandardException
 	{
-		return bindUnaryOperator(fromList, subqueryList, aggregateVector);
+		bindOperand(fromList, subqueryList, aggregateVector);
+        if (operatorType == XMLPARSE_OP)
+            bindXMLParse();
+        else if (operatorType == XMLSERIALIZE_OP)
+            bindXMLSerialize();
+        return this;
 	}
 
 	/**
-	 * Workhorse for bindExpression. This exists so it can be called
-	 * by child classes.
+	 * Bind the operand for this unary operator.
+     * Binding the operator may change the operand node.
+     * Sub-classes bindExpression() methods need to call this
+     * method to bind the operand.
 	 */
-	protected ValueNode bindUnaryOperator(
+	protected void bindOperand(
 					FromList fromList, SubqueryList subqueryList,
 					Vector	aggregateVector)
 				throws StandardException
 	{
-		/*
-		** Operand can be null for COUNT(*) which
-		** is treated like a normal aggregate.
-		*/
-		if (operand == null)
-		{
-			return this;
-		}
-
-		//Return with no binding, if the type of unary minus/plus parameter is not set yet.
-		if (operand.requiresTypeFromContext() && ((operator.equals("-") || operator.equals("+"))) && operand.getTypeServices() == null)
-			return this;
-
 		operand = operand.bindExpression(fromList, subqueryList,
 								aggregateVector);
 
-		if (operand.requiresTypeFromContext())
+		if (operand.requiresTypeFromContext()) {
 			bindParameter();
+            // If not bound yet then just return.
+            // The node type will be set by either
+            // this class' bindExpression() or a by
+            // a node that contains this expression.
+            if (operand.getTypeServices() == null)
+                return;
+        }
 
 		/* If the operand is not a built-in type, then generate a bound conversion
 		 * tree to a built-in type.
@@ -342,13 +351,6 @@ public class UnaryOperatorNode extends ValueNode
 		{
 			operand = operand.genSQLJavaSQLTree();
 		}
-
-		if (operatorType == XMLPARSE_OP)
-			bindXMLParse();
-		else if (operatorType == XMLSERIALIZE_OP)
-			bindXMLSerialize();
-
-		return this;
 	}
 
     /**
@@ -357,7 +359,7 @@ public class UnaryOperatorNode extends ValueNode
      *
      * @exception StandardException Thrown on error
      */
-    public void bindXMLParse() throws StandardException
+    private void bindXMLParse() throws StandardException
     {
         // Check the type of the operand - this function is allowed only on
         // string value (char) types.
@@ -397,7 +399,7 @@ public class UnaryOperatorNode extends ValueNode
      *
      * @exception StandardException Thrown on error
      */
-    public void bindXMLSerialize() throws StandardException
+    private void bindXMLSerialize() throws StandardException
     {
         TypeId operandType;
 
@@ -549,18 +551,6 @@ public class UnaryOperatorNode extends ValueNode
 					true :
 					operand.constantExpression(whereClause);
 	}
-
-	/**
-	 * @see ValueNode#requiresTypeFromContext
-	 */
-	public boolean requiresTypeFromContext()
-	{
-		if (operand == null)
-			return false;
-		else
-			return (operand.requiresTypeFromContext()); 
-	}
-
 
 	/**
 	 * Returns true if this UnaryOperatorNode is for -?/+?.

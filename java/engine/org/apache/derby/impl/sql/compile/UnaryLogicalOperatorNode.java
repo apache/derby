@@ -71,7 +71,7 @@ public abstract class UnaryLogicalOperatorNode extends UnaryOperatorNode
 		Vector	aggregateVector)
 			throws StandardException
 	{
-		super.bindExpression(fromList, subqueryList,
+		bindOperand(fromList, subqueryList,
 							 aggregateVector);
 
 		/*
@@ -84,9 +84,8 @@ public abstract class UnaryLogicalOperatorNode extends UnaryOperatorNode
 		** the grammar, so this test will become useful.
 		*/
 
-		if ( ! operand.getTypeServices().getTypeId().equals(TypeId.BOOLEAN_ID))
+		if ( ! operand.getTypeServices().getTypeId().isBooleanTypeId())
 		{
-operand.treePrint();
 			throw StandardException.newException(SQLState.LANG_UNARY_LOGICAL_NON_BOOLEAN);
 		}
 

@@ -52,23 +52,6 @@ public class UnaryArithmeticOperatorNode extends UnaryOperatorNode
 	private final static String[] UNARY_METHODS = {"plus","minus","sqrt", "absolute"};
 
 	private int operatorType;
-
-	//when the bindExpression method is called during the normal binding phase,
-	//unary minus and unary plus dynamic parameters are not ready for
-	//binding because the type of these dynamic parameters is not yet set.
-	//For eg, consider sql select * from t1 where c1 = -?
-	//bindExpression on -? gets called from BinaryComparisonOperatorNode's
-	//bindExpression but the parameter type has not been set yet for -?
-	//Later on, in BinaryComparisonOperatorNode's bindExpression, the type
-	//of the -? gets set to the type of c1 by the setType call. 
-	//Now, at this point, we are ready to finish binding phase for -? 
-	//(This class's setType method calls the bindExpression to finish binding)
-	//In order to accomplish binding later on, we need to save the following 
-	//3 objects during first call to bindExpression and then later this 
-	//gets used in setType method when it calls the bindExpression method.
-	FromList localCopyFromList;
-	SubqueryList localCopySubqueryList;
-	Vector localAggregateVector;
   
 	/**
 	 * Initializer for a UnaryArithmeticOperatorNode
@@ -101,13 +84,26 @@ public class UnaryArithmeticOperatorNode extends UnaryOperatorNode
 		init(operand, UNARY_OPERATORS[this.operatorType], 
 				UNARY_METHODS[this.operatorType]);
 	}
+    
+    /**
+     * Unary + and - require their type to be set if
+     * they wrap another node (e.g. a parameter) that
+     * requires type from its context.
+     * @see ValueNode#requiresTypeFromContext
+     */
+    public boolean requiresTypeFromContext()
+    {
+        if (operatorType == UNARY_PLUS || operatorType == UNARY_MINUS)
+            return operand.requiresTypeFromContext(); 
+        return false;
+    }
 
 	/**
-	 * By default unary operators don't accept ? parameters as operands.
-	 * This can be over-ridden for particular unary operators.
-	 *
-	 *	We throw an exception if the parameter doesn't have a datatype
-	 *	assigned to it yet.
+     * For SQRT and ABS the parameter becomes a DOUBLE.
+     * For unary + and - no change is made to the
+     * underlying node. Once this node's type is set
+     * using setType, then the underlying node will have
+     * its type set.
 	 *
 	 * @exception StandardException		Thrown if ?  parameter doesn't
 	 *									have a type bound to it yet.
@@ -120,15 +116,19 @@ public class UnaryArithmeticOperatorNode extends UnaryOperatorNode
 		{
 			operand.setType(
 				new DataTypeDescriptor(TypeId.getBuiltInTypeId(Types.DOUBLE), true));
+            return;
 		}
+        
 		//Derby-582 add support for dynamic parameter for unary plus and minus
-		else if (operatorType == UNARY_MINUS || operatorType == UNARY_PLUS) 
+		if (operatorType == UNARY_MINUS || operatorType == UNARY_PLUS) 
 			return;
-		else if (operand.getTypeServices() == null)
-		{
-			throw StandardException.newException(SQLState.LANG_UNARY_OPERAND_PARM, operator);
-		}
+        
+        // Not expected to get here since only the above types are supported
+        // but the super-class method will throw an exception
+        super.bindParameter();
+        
 	}
+    
 	/**
 	 * Bind this operator
 	 *
@@ -146,15 +146,12 @@ public class UnaryArithmeticOperatorNode extends UnaryOperatorNode
 		Vector	aggregateVector)
 			throws StandardException
 	{
-		localCopyFromList = fromList;
-		localCopySubqueryList = subqueryList;
-		localAggregateVector = aggregateVector;
 		//Return with no binding, if the type of unary minus/plus parameter is not set yet.
 		if (operand.requiresTypeFromContext() && ((operatorType == UNARY_PLUS || operatorType == UNARY_MINUS))
 				&& operand.getTypeServices() == null)
 				return this;
 
-		super.bindExpression(fromList, subqueryList,
+		bindOperand(fromList, subqueryList,
 				aggregateVector);
 
 		if (operatorType == SQRT || operatorType == ABSOLUTE)
@@ -163,21 +160,29 @@ public class UnaryArithmeticOperatorNode extends UnaryOperatorNode
 		}
 		else if (operatorType == UNARY_PLUS || operatorType == UNARY_MINUS)
 		{
-			TypeId operandType = operand.getTypeId();
-
-			if ( ! operandType.isNumericTypeId())
-			{
-			
-				throw StandardException.newException(SQLState.LANG_UNARY_ARITHMETIC_BAD_TYPE, 
-					(operatorType == UNARY_PLUS) ? "+" : "-", 
-					operandType.getSQLTypeName());
-			}
+            checkOperandIsNumeric(operand.getTypeId());
 		}
 		/*
 		** The result type of a +, -, SQRT, ABS is the same as its operand.
 		*/
 		super.setType(operand.getTypeServices());
 		return this;
+	}
+    
+    /**
+     * Only called for Unary +/-.
+     *
+     */
+	private void checkOperandIsNumeric(TypeId operandType) throws StandardException
+	{
+	    if (!operandType.isNumericTypeId())
+	    {
+	        throw StandardException.newException(
+                    SQLState.LANG_UNARY_ARITHMETIC_BAD_TYPE, 
+	                (operatorType == UNARY_PLUS) ? "+" : "-", 
+	                        operandType.getSQLTypeName());
+	    }
+	    
 	}
 
 	/**
@@ -245,18 +250,17 @@ public class UnaryArithmeticOperatorNode extends UnaryOperatorNode
 		}
 	}
 
-	/** @see ValueNode#setType */
-	/* We are overwriting this method here because for -?/+?, we now know
+	/** We are overwriting this method here because for -?/+?, we now know
 	the type of these dynamic parameters and hence we can do the parameter
 	binding. The setType method will call the binding code after setting
 	the type of the parameter*/
 	public void setType(DataTypeDescriptor descriptor) throws StandardException
 	{
-		operand.setType(descriptor);
+        if (operand.requiresTypeFromContext() && operand.getTypeServices() == null)
+        {
+            checkOperandIsNumeric(descriptor.getTypeId());
+		    operand.setType(descriptor);
+        }
 		super.setType(descriptor);
-		//Derby-582 add support for dynamic parameters for unary plus and minus
-		//Now that we know the type of this parameter node, we can do the
-		//binding.
-		bindExpression(localCopyFromList, localCopySubqueryList, localAggregateVector);
 	}
 }

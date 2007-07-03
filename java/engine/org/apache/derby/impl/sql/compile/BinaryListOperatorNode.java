@@ -146,8 +146,6 @@ public abstract class BinaryListOperatorNode extends ValueNode
 		/* Is there a ? parameter on the left? */
 		if (leftOperand.requiresTypeFromContext())
 		{
-			ValueNode rightOperand = (ValueNode) rightOperandList.elementAt(0);
-
 			/*
 			** It's an error if both operands are all ? parameters.
 			*/
