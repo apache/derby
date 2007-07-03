@@ -718,8 +718,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
                 pos, init_forUpdate);
         }
 
-        this.getLockingPolicy().unlockScan(
-            pos.current_leaf.page.getPageNumber());
+        unlockCurrentScan(pos);
         pos.current_leaf.release();
         pos.current_leaf        = pos.next_leaf;
 
@@ -804,11 +803,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
         // has a null locking policy so the close of that container does not
         // release this lock, need to explicitly unlock it here or when the
         // scan is closed as part of the abort the lock will not be released.
-        if (pos.current_scan_pageno != 0)
-        {
-            this.getLockingPolicy().unlockScan(pos.current_scan_pageno);
-            pos.current_scan_pageno = 0;
-        }
+        unlockCurrentScan(pos);
 
         pos.current_slot = Page.INVALID_SLOT_NUMBER;
         pos.current_rh   = null;
@@ -842,11 +837,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
         // has a null locking policy so the close of that container does not
         // release this lock, need to explicitly unlock it here or when the
         // scan is closed as part of the abort the lock will not be released.
-        if (pos.current_scan_pageno != 0)
-        {
-            this.getLockingPolicy().unlockScan(pos.current_scan_pageno);
-            pos.current_scan_pageno = 0;
-        }
+        unlockCurrentScan(pos);
 
         pos.current_slot        = Page.INVALID_SLOT_NUMBER;
         pos.current_rh          = null;
@@ -1152,6 +1143,18 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
 
         return(true);
 	}
+
+    /**
+     * Unlock the scan protection row for the current scan.
+     *
+     * @param pos position of the scan
+     */
+    private void unlockCurrentScan(BTreeRowPosition pos) {
+        if (pos.current_scan_pageno != 0L) {
+            getLockingPolicy().unlockScan(pos.current_scan_pageno);
+            pos.current_scan_pageno = 0L;
+        }
+    }
 
 	/*
 	** Public Methods of BTreeScan
@@ -2120,12 +2123,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
         // has a null locking policy so the close of that container does not
         // release this lock, need to explicitly unlock it here or when the
         // scan is closed as part of the abort the lock will not be released.
-        if (scan_position.current_scan_pageno != 0)
-        {
-            this.getLockingPolicy().unlockScan(
-                scan_position.current_scan_pageno);
-            scan_position.current_scan_pageno = 0;
-        }
+        unlockCurrentScan(scan_position);
 
         scan_position.current_slot = Page.INVALID_SLOT_NUMBER;
         scan_position.current_rh   = null;
@@ -2344,13 +2342,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
                         scan_position.current_slot = Page.INVALID_SLOT_NUMBER;
 
                         // release scan lock now that the row is saved away.
-
-                        if (scan_position.current_scan_pageno != 0)
-                        {
-                            this.getLockingPolicy().unlockScan(
-                                scan_position.current_scan_pageno);
-                            scan_position.current_scan_pageno = 0;
-                        }
+                        unlockCurrentScan(scan_position);
 
                     }
                     else
@@ -2465,13 +2457,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
                 scan_position.current_slot = Page.INVALID_SLOT_NUMBER;
 
                 // release the scan lock now that we have saved away the row.
-
-                if (scan_position.current_scan_pageno != 0)
-                {
-                    this.getLockingPolicy().unlockScan(
-                        scan_position.current_scan_pageno);
-                    scan_position.current_scan_pageno = 0;
-                }
+                unlockCurrentScan(scan_position);
             }
         }
 	}
