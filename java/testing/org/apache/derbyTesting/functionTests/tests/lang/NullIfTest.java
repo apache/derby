@@ -21,12 +21,11 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
-import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.ResultSet;
 import java.sql.Time;
 import java.sql.Timestamp;
 
@@ -35,11 +34,8 @@ import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
-import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.SQLUtilities;
 import org.apache.derbyTesting.junit.TestConfiguration;
-
-import org.apache.derbyTesting.functionTests.tests.lang.CastingTest;
 
 public class NullIfTest extends BaseJDBCTestCase {
        
@@ -138,9 +134,7 @@ public class NullIfTest extends BaseJDBCTestCase {
      * @throws SQLException
      */
     public void testAllDatatypesCombinations() throws SQLException {
-        Connection conn = getConnection();
-
-        Statement s = conn.createStatement();
+        Statement s = createStatement();
         for (int firstColumnType = 0; firstColumnType < CastingTest.SQLTypes.length; firstColumnType++) {
 
             StringBuffer nullIfString = new StringBuffer("SELECT NULLIF("
@@ -167,6 +161,7 @@ public class NullIfTest extends BaseJDBCTestCase {
                         row++;
                     }
                     assertTrue(CastingTest.T_147b[firstColumnType][secondColumnType]);
+                    rs.close();
 
                 } catch (SQLException e) {
                     for (int r = row; r < 4; r++) {
@@ -188,6 +183,7 @@ public class NullIfTest extends BaseJDBCTestCase {
             }
 
         }
+        s.close();
     }
 
     /**
@@ -196,9 +192,6 @@ public class NullIfTest extends BaseJDBCTestCase {
      * @throws SQLException
      */
     public void testParameterForFirstOperandToNullIf() throws SQLException {
-        Connection conn = getConnection();
-
-        PreparedStatement ps;
         for (int secondColumnType = 0; secondColumnType < CastingTest.SQLTypes.length; secondColumnType++) {
 
             String nullIfString = new String("SELECT NULLIF(?,"
@@ -206,7 +199,7 @@ public class NullIfTest extends BaseJDBCTestCase {
                     + ") from AllDataTypesTable");
             int row = 0;
             try {
-                ps = conn.prepareStatement(nullIfString);
+                PreparedStatement ps = prepareStatement(nullIfString);
                 switch (secondColumnType) {
                 case 0:
                 case 1:
@@ -265,6 +258,7 @@ public class NullIfTest extends BaseJDBCTestCase {
                     row++;
                 }
                 rs.close();
+                ps.close();
 
             } catch (SQLException e) {
                 for (int r = row; r < 4; r++) {

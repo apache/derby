@@ -130,6 +130,7 @@ public class DistinctTest extends BaseJDBCTestCase {
 				               0, 0, 0, 0, 0, 0, 0 };
 		
 		checkDistinctRows(expectedRows);
+        s.close();
 	}
 	
 	public void testOneRow() throws SQLException {
@@ -142,6 +143,7 @@ public class DistinctTest extends BaseJDBCTestCase {
 				               1, 1, 1, 2, 1, 1, 1, 1 };
 		
 		checkDistinctRows(expectedRows);
+        s.close();
 	}
 	
 	public void testIdenticalRows() throws SQLException {
@@ -155,6 +157,7 @@ public class DistinctTest extends BaseJDBCTestCase {
 				               2, 2, 1, 2, 1, 1, 1, 1 };
 		
 		checkDistinctRows(expectedRows);
+        s.close();
 	}
 	
 	public void testDistinctIdenticalAndDifferingRows() throws SQLException {
@@ -169,6 +172,7 @@ public class DistinctTest extends BaseJDBCTestCase {
 				               3, 3, 2, 4, 2, 2, 2, 2 };
 		
 		checkDistinctRows(expectedRows);
+        s.close();
 	}
 	
 	public void testDistinctTwoVaryingRows() throws SQLException {
@@ -182,6 +186,7 @@ public class DistinctTest extends BaseJDBCTestCase {
 				               2, 2, 2, 2, 1, 2, 2, 4 };
 		
 		checkDistinctRows(expectedRows);
+        s.close();
 	}
 	
 	public void testDistinctIdenticalNullRows() throws SQLException {
@@ -962,11 +967,6 @@ public class DistinctTest extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void assertRowCount(int count, ResultSet rs) throws SQLException {
-		int rowcount = 0;
-		while (rs.next()) {
-			rowcount++;
-		}
-		rs.close();
-		assertEquals(count, rowcount);
+        JDBC.assertDrainResults(rs, count);
 	}
 } 
