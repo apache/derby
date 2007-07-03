@@ -97,6 +97,14 @@ public class UnaryArithmeticOperatorNode extends UnaryOperatorNode
             return operand.requiresTypeFromContext(); 
         return false;
     }
+    
+    /**
+     * A +? or a -? is considered a parameter.
+     */
+    public boolean isParameterNode()
+    {
+        return requiresTypeFromContext();
+    }
 
 	/**
      * For SQRT and ABS the parameter becomes a DOUBLE.

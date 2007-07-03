@@ -475,9 +475,6 @@ public class SelectNode extends ResultSetNode
 			 */
 			if (whereClause.isParameterNode())
 				throw StandardException.newException(SQLState.LANG_NON_BOOLEAN_WHERE_CLAUSE, "PARAMETER" );
-			if ((whereClause instanceof UnaryOperatorNode) &&
-					((UnaryOperatorNode)whereClause).isUnaryMinusOrPlusWithParameter())
-				throw StandardException.newException(SQLState.LANG_NON_BOOLEAN_WHERE_CLAUSE, "PARAMETER" );
 			
 			whereClause = whereClause.checkIsBoolean();
 			getCompilerContext().popCurrentPrivType();

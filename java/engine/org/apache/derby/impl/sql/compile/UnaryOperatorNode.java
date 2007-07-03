@@ -553,22 +553,6 @@ public class UnaryOperatorNode extends ValueNode
 	}
 
 	/**
-	 * Returns true if this UnaryOperatorNode is for -?/+?.
-	 * This is required to check -?/+? say in the following sql
-	 * select * from t1 where -? and c11=c11 or +?
-	 * 
-	 * @return	True if this +?/-? node
-	 */
-	public boolean isUnaryMinusOrPlusWithParameter()
-	{
-		if (operand !=null && operand instanceof ParameterNode && operand.requiresTypeFromContext() && 
-				(operator!= null && (operator.equals("-") || operator.equals("+"))))
-			return true;
-		else
-			return false;
-	}
-
-	/**
 	 * By default unary operators don't accept ? parameters as operands.
 	 * This can be over-ridden for particular unary operators.
 	 *
@@ -640,9 +624,6 @@ public class UnaryOperatorNode extends ValueNode
 											MethodBuilder mb)
 									throws StandardException
 	{
-		if (operand == null)
-			return;
-
 		// For XML operator we do some extra work.
 		boolean xmlGen = (operatorType == XMLPARSE_OP) ||
 			(operatorType == XMLSERIALIZE_OP);

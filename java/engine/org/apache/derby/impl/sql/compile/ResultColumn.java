@@ -1315,9 +1315,6 @@ public class ResultColumn extends ValueNode
 	{
 		if ((expression != null) && (expression.isParameterNode()))
 			throw StandardException.newException(SQLState.LANG_PARAM_IN_SELECT_LIST);
-		if ((expression != null) && (expression instanceof UnaryOperatorNode) &&
-				((UnaryOperatorNode)expression).isUnaryMinusOrPlusWithParameter())
-			throw StandardException.newException(SQLState.LANG_PARAM_IN_SELECT_LIST);
 	}
 
 	/*
