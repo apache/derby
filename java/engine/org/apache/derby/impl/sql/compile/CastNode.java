@@ -31,6 +31,7 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
 import org.apache.derby.iapi.types.DataTypeUtilities;
+import org.apache.derby.iapi.types.StringDataValue;
 import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.reference.Limits;
 
@@ -376,11 +377,10 @@ public class CastNode extends ValueNode
 		//If the result type of cast is string data type, then that data type 
 		//should get it's collation type from the current schema. 
 		if (externallyGeneratedCastNode && getTypeId().isStringTypeId()) {
-			//set the collation type to be same as the current schema's 
-			//collation type. Collation derivation is already initialized
-			//to correct value by default which is "IMPLICIT"
-			getTypeServices().setCollationType(
-					getLanguageConnectionContext().getDefaultSchema().getCollationType());
+			//set the collation type to be same as the compilation schema's 
+			//collation type. Collation derivation will be set to "IMPLICIT".
+			setCollationUsingCompilationSchema(
+					StringDataValue.COLLATION_DERIVATION_IMPLICIT);
 		}
 		/* 
 		** If it is a java cast, do some work to make sure
