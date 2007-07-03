@@ -152,7 +152,7 @@ interface InternalClob {
     /**
      * Tells if the Clob representation is intended to be writable.
      * <p>
-     * Note that even if this method returns <code>true</true>, it might not be
+     * Note that even if this method returns <code>true</code>, it might not be
      * possible to write to the Clob. If this happens, it is because the
      * assoicated database is read-only, and the internal Clob representation is
      * unable to obtain the resources it require (could be an area on disk to
