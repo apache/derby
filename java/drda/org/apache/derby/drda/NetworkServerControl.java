@@ -23,6 +23,7 @@ package org.apache.derby.drda;
 
 import java.io.PrintWriter;
 import java.net.InetAddress;
+import java.net.Inet6Address;
 import java.net.URL;
 import java.util.Properties;
 import org.apache.derby.iapi.reference.Property;
@@ -626,7 +627,9 @@ public class NetworkServerControl{
      * default server policy file. The special
      * wildcard valuse "0.0.0.0" and "::" are forced to be "*" since that is the wildcard
      * hostname understood by SocketPermission. SocketPermission does
-     * not understand the "0.0.0.0" and "::" wildcards.
+     * not understand the "0.0.0.0" and "::" wildcards. IPV6 addresses are
+     * enclosed in square brackets. This logic arose from two JIRAs:
+     * DERBY-2811 and DERBY-2874.
      */
     private static String  getHostNameForSocketPermission( NetworkServerControlImpl server )
         throws Exception
@@ -642,6 +645,8 @@ public class NetworkServerControl{
             IPV6_HOSTNAME_WILDCARD.equals( hostname ) 
             )
         { hostname = SOCKET_PERMISSION_HOSTNAME_WILDCARD; }
+        else if ( isIPV6Address( hostname ) )
+        { hostname = '[' + hostname + "]:0-"; }
 
         return hostname;
     }
@@ -658,6 +663,39 @@ public class NetworkServerControl{
         } catch (Exception e) { return false; }
     }
     
+    // return true if the host address is an IPV6 address
+    private static  boolean isIPV6Address( String hostname )
+    {
+        if ( hostname == null ) { return false; }
+
+        //
+        // First make sure that the address is composed entirely
+        // of hex digits and colons.
+        //
+        int         count = hostname.length();
+
+        for ( int i = 0; i < count; i++ )
+        {
+            char    currentChar = hostname.charAt( i );
+
+            if ( currentChar == ':' ) { continue; }
+            if ( Character.digit( currentChar, 16 ) >= 0 ) { continue; }
+
+            return false;
+        }
+
+        //
+        // OK, now see whether the address is parsed as an IPV6 address.
+        //
+        
+        try {
+            InetAddress address = InetAddress.getByName( hostname );
+
+            return (address instanceof Inet6Address);
+            
+        } catch (Exception e) { return false; }
+    }
+
     /**
      *<p>
      * Find the url of the library directory which holds derby.jar and
