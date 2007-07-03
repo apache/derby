@@ -207,10 +207,12 @@ public class JDBC {
 		Statement s = dmd.getConnection().createStatement();
         
         // Functions - not supported by JDBC meta data until JDBC 4
+        // Need to use the CHAR() function on A.ALIASTYPE
+        // so that the compare will work in any schema.
         PreparedStatement psf = conn.prepareStatement(
                 "SELECT ALIAS FROM SYS.SYSALIASES A, SYS.SYSSCHEMAS S" +
                 " WHERE A.SCHEMAID = S.SCHEMAID " +
-                " AND A.ALIASTYPE = 'F' " +
+                " AND CHAR(A.ALIASTYPE) = 'F' " +
                 " AND S.SCHEMANAME = ?");
         psf.setString(1, schema);
         ResultSet rs = psf.executeQuery();

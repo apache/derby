@@ -33,6 +33,7 @@ import javax.sql.DataSource;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.apache.derbyTesting.functionTests.tests.jdbcapi.DatabaseMetaDataTest;
 import org.apache.derbyTesting.junit.XML;
 //import org.apache.derby.iapi.types.XML;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
@@ -982,6 +983,9 @@ private void checkLangBasedQuery(Statement s, String query, String[][] expectedR
   {
       TestSuite suite = new TestSuite("CollationTest:territory="+locale);
       suite.addTest(new CollationTest(baseFixture));
+      
+      // DERBY-2986 - DMD.getTables() fails
+      // suite.addTest(DatabaseMetaDataTest.suite());
       return Decorator.territoryCollatedDatabase(suite, locale);
   }
 
