@@ -57,7 +57,26 @@ public class ClassHolder {
 	/*
 	** Fields
 	*/
+    
+    /**
+     * Minor class format number defaults to 
+     * VMDescriptor.JAVA_CLASS_FORMAT_MINOR_VERSION
+     * which currently corresponds to a really old (JDK 1.0.2) setting.
+     * The default major and minor value is used by the generated code for Derby's
+     * SQL statements. Currently there is no need to bump the version
+     * number as the generated code does not take advantage of any of the
+     * new elements in the class file format. If such a need exists then
+     * this can be bumped. One issue is that the change in format numbers
+     * is not well documented.
+     */
+    protected int minor_version = VMDescriptor.JAVA_CLASS_FORMAT_MINOR_VERSION;
 
+    /**
+     * Minor class format number defaults to 
+     * VMDescriptor.JAVA_CLASS_FORMAT_MAJOR_VERSION
+     */
+    protected int major_version = VMDescriptor.JAVA_CLASS_FORMAT_MAJOR_VERSION;
+    
 	protected int access_flags;
 	protected int this_class;
 	protected int super_class;
@@ -118,8 +137,8 @@ public class ClassHolder {
 
 		/* Write out the header */
 		out.putU4(VMDescriptor.JAVA_CLASS_FORMAT_MAGIC);
-		out.putU2(VMDescriptor.JAVA_CLASS_FORMAT_MINOR_VERSION);
-		out.putU2(VMDescriptor.JAVA_CLASS_FORMAT_MAJOR_VERSION);
+		out.putU2(minor_version);
+		out.putU2(major_version);
 
 		// special case checking that the number of constant
 		// pool entries does not exceed the limit of 65535
