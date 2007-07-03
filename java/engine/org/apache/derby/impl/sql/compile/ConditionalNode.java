@@ -132,9 +132,10 @@ public class ConditionalNode extends ValueNode
 	 * @param node	The CastNode to check.
 	 * @return		True if this CastNode's target type is CHAR,
 	 *              false otherwise.
+	 * @throws StandardException 
 	 */
-	private boolean isCastToChar(CastNode node) {
-		if (node.castTarget.getTypeName().equals(TypeId.CHAR_NAME))
+	private boolean isCastToChar(ValueNode node) throws StandardException {
+		if (node.getTypeServices().getTypeName().equals(TypeId.CHAR_NAME))
 			return true;
 		else
 			return false;
@@ -235,8 +236,8 @@ public class ConditionalNode extends ValueNode
 		/* If it's not cast to CHAR it isn't a SQL parsed NULL, so
 		 * we can use it.
 		 */
-		if (isCastNode(thenNode) && !isCastToChar((CastNode)thenNode))
-			return ((CastNode)thenNode).castTarget;
+		if (isCastNode(thenNode) && !isCastToChar(thenNode))
+			return thenNode.getTypeServices();
 
 		/* If we get here, we can't use the THEN node type, so we'll
 		 * use the ELSE node type
@@ -247,8 +248,8 @@ public class ConditionalNode extends ValueNode
 			return elseType;
 		}
 
-		if (isCastNode(elseNode) && !isCastToChar((CastNode)elseNode))
-			return ((CastNode)elseNode).castTarget;
+		if (isCastNode(elseNode) && !isCastToChar(elseNode))
+			return elseNode.getTypeServices();
 
 		/* If we get here, it means that we've got a conditional and a
 		 * SQL parsed NULL or two conditionals.
