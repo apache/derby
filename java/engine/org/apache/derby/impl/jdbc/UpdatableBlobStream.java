@@ -49,9 +49,9 @@ class UpdatableBlobStream extends InputStream {
     private final EmbedBlob blob;
     
     /**
-     * Position in Blob where to stop reading.
+     * Position in Blob where to stop reading unless EOF is reached first.
      */
-    private long maxPos;
+    private final long maxPos;
     
 
     /**
@@ -60,15 +60,13 @@ class UpdatableBlobStream extends InputStream {
      * 
      * @param blob EmbedBlob this stream is associated with.
      * @param is InputStream this class is going to use internally.
+     * @throws IOException if an I/O error occurs
      */
-    UpdatableBlobStream (EmbedBlob blob, InputStream is) {
-        stream = is;
-        this.pos = 0;
-        this.blob = blob;
-        //The subset of the Blob
-        //has not been requested.
-        //Hence set maxPos to -1.
-        this.maxPos = -1;
+    UpdatableBlobStream (EmbedBlob blob, InputStream is)
+            throws IOException {
+        // The entire Blob has been requested, hence set length to infinity (or
+        // as close as we get).
+        this(blob, is, 0L, Long.MAX_VALUE);
     }
     
     /**
@@ -83,20 +81,18 @@ class UpdatableBlobStream extends InputStream {
      * @param len The length to which the underlying <code>InputStream</code>
      *            has to be restricted.
      * @throws IOException
-     * @throws SQLException
      */
     UpdatableBlobStream (EmbedBlob blob, InputStream is, long pos, long len) 
-    throws IOException, SQLException {
-        this(blob, is);
-        //The length requested cannot exceed the length
-        //of the underlying Blob object. Hence chose the
-        //minimum of the length of the underlying Blob
-        //object and requested length.
-        maxPos = Math.min(blob.length(), pos + len);
+            throws IOException {
+        this.blob = blob;
+        stream = is;
+        maxPos = pos + len;
         
         //Skip to the requested position
         //inside the stream.
-        skip(pos);
+        if (pos > 0) {
+            skip(pos);
+        }
     }
 
     /**
@@ -158,11 +154,9 @@ class UpdatableBlobStream extends InputStream {
     public int read() throws IOException {
         updateIfRequired();
         
-        //If maxPos is not invalid and the current
-        //position inside the stream has exceeded
-        //maxPos the read sould return -1 signifying
-        //end of stream.
-        if (maxPos != -1 && pos >= maxPos) {
+        //If the current position inside the stream has exceeded maxPos, the
+        //read should return -1 signifying end of stream.
+        if (pos >= maxPos) {
             return -1;
         }
         int ret = stream.read();
@@ -197,22 +191,8 @@ class UpdatableBlobStream extends InputStream {
      * @see java.io.InputStream#read(byte[],int,int)
      */
     public int read(byte[] b, int off, int len) throws IOException {
-        int actualLength = 0;
         updateIfRequired();
-        
-        //If maxPos is not invalid then
-        //ensure that the length(len) 
-        //that is requested falls within
-        //the restriction set by maxPos.
-        if(maxPos != -1) {
-            actualLength 
-                    = (int )Math.min(len, maxPos - pos);
-        }
-        else {
-            //maxPos has not been set. Make
-            //maxPos the length requested.
-            actualLength = len;
-        }
+        int actualLength = (int) Math.min(len, maxPos - pos);
         int retValue = stream.read(b, off, actualLength);
         if (retValue > 0)
             pos += retValue;
@@ -240,21 +220,7 @@ class UpdatableBlobStream extends InputStream {
      */
     public int read(byte[] b) throws IOException {
         updateIfRequired();
-        int actualLength = 0;
-        //If maxPos is not invalid
-        //then ensure that the length
-        //(len of the byte array b) 
-        //falls within the restriction 
-        //set by maxPos.
-        if(maxPos != -1) {
-            actualLength 
-                    = (int )Math.min(b.length, maxPos - pos);
-        }
-        else {
-            //maxPos has not been set. Make
-            //maxPos the length requested.
-            actualLength = b.length;
-        }
+        int actualLength = (int) Math.min(b.length, maxPos - pos);
         int retValue = stream.read(b, 0, actualLength);
         if (retValue > 0)
             pos += retValue;
