@@ -1063,6 +1063,7 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
             rs.close();
             command.append(")");
     	    int i = s.executeUpdate(command.toString());
+            // DERBY-2893 INSERT seems to succeed.
             //if (!hasPrivilege)
             //    fail("expected no INSERT permission on table");
 
@@ -1128,6 +1129,8 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
         	    	// update count should equal select count
         	        assertEquals(columnCount, actualCount);
         	    }
+                
+                // DERBY-2893 UPDATE seems to succeed.
                 //if (!hasPrivilege)
                 //    fail("expected no UPDATE permission on table");
 
