@@ -218,18 +218,27 @@ public class GenericPreparedStatement
 	 *
 	 * @exception StandardException thrown if finished.
 	 */
-	public synchronized Activation	getActivation(LanguageConnectionContext lcc, boolean scrollable) throws StandardException 
+	public Activation getActivation(LanguageConnectionContext lcc,
+									boolean scrollable)
+		throws StandardException
 	{
-		GeneratedClass gc = getActivationClass();
+		Activation ac;
+		synchronized (this) {
+			GeneratedClass gc = getActivationClass();
 
-		if (gc == null) {
-			rePrepare(lcc);
-			gc = getActivationClass();
+			if (gc == null) {
+				rePrepare(lcc);
+				gc = getActivationClass();
+			}
+
+			ac = new GenericActivationHolder(lcc, gc, this, scrollable);
+
+			inUseCount++;
 		}
-
-		Activation ac = new GenericActivationHolder(lcc, gc, this, scrollable);
-
-		inUseCount++;
+		// DERBY-2689. Close unused activations-- this method should be called
+		// when I'm not holding a lock on a prepared statement to avoid
+		// deadlock.
+		lcc.closeUnusedActivations();
 
 		return ac;
 	}

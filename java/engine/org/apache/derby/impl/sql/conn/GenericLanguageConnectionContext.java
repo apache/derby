@@ -414,7 +414,11 @@ public class GenericLanguageConnectionContext
 		if (acts.size() > maxActsSize) {
 			maxActsSize = acts.size();
 		}
+	}
 
+	public void closeUnusedActivations()
+			throws StandardException
+	{
 		// DERBY-418. Activations which are marked unused,
 		// are closed here. Activations Vector is iterated 
 		// to identify and close unused activations, only if 
@@ -422,6 +426,7 @@ public class GenericLanguageConnectionContext
 		// size exceeds 20.
 		if( (unusedActs) && (acts.size() > 20) ) {
 			unusedActs = false;
+
 			for (int i = acts.size() - 1; i >= 0; i--) {
 
 				// it maybe the case that a Activation's reset() ends up

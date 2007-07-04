@@ -1053,4 +1053,9 @@ public interface LanguageConnectionContext extends Context {
 	 * @return True if SQL standard permissions are being used
 	 */
 	public boolean usesSqlAuthorization();
+
+	/**
+	 * Close any unused activations in this connection context.
+	 */
+	public void closeUnusedActivations() throws StandardException;
 }
