@@ -87,30 +87,9 @@ final class ClobUpdatableReader extends Reader {
      * @throws SQLException
      */
     ClobUpdatableReader (EmbedClob clob) throws IOException, SQLException {
-        this.clob = clob;
-        this.conChild = clob;
         // A subset of the Clob has not been requested.
-        // Hence set maxPos to infinity (or as close as we get).
-        this.maxPos = Long.MAX_VALUE;
-
-        InternalClob internalClob = clob.getInternalClob();
-        materialized = internalClob.isWritable();        
-        if (materialized) {
-            long byteLength = internalClob.getByteLength();
-            this.stream = internalClob.getRawByteStream();
-            init ((LOBInputStream)stream, 0);
-        } else {
-            if (SanityManager.DEBUG) {
-                SanityManager.ASSERT(internalClob instanceof StoreStreamClob,
-                        "Wrong type of internal clob representation: " +
-                        internalClob.toString());
-            }
-            // Since this representation is read-only, the stream never has to
-            // update itself, until the Clob representation itself has been
-            // changed. That even will be detected by {@link #updateIfRequired}.
-            this.streamReader = internalClob.getReader(1L);
-            this.pos = 0L;
-        }
+        // Hence set length to infinity (or as close as we get).
+        this(clob, 0L, Long.MAX_VALUE);
     }
     
     /**
@@ -148,8 +127,8 @@ final class ClobUpdatableReader extends Reader {
             // Since this representation is read-only, the stream never has to
             // update itself, until the Clob representation itself has been
             // changed. That even will be detected by {@link #updateIfRequired}.
-            this.streamReader = internalClob.getReader(1L);
-            this.pos = 0L;
+            this.streamReader = internalClob.getReader(pos + 1);
+            this.pos = pos;
         }
     }
         

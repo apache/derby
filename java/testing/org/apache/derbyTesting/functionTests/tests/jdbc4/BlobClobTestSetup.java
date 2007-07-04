@@ -80,8 +80,8 @@ public class BlobClobTestSetup
         Connection con = getConnection();
         Statement stmt = con.createStatement();
         stmt.execute("create table BLOBCLOB (ID int primary key, " +
-                                            "BLOBDATA blob(1k)," + 
-                                            "CLOBDATA clob(1k))");
+                                            "BLOBDATA blob," +
+                                            "CLOBDATA clob)");
         stmt.execute("insert into BLOBCLOB VALUES " +
                 "(" + ID_NULLVALUES + ", null, null)");
         // Actual data is inserted in the getSample* methods.
