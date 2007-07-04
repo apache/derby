@@ -56,7 +56,7 @@ final class ClobUpdatableReader extends Reader {
     /** clob object this object is associated */
     private final EmbedClob clob;
     /**
-     * Position in Clob where to stop reading.
+     * Position in Clob where to stop reading unless EOF is reached first.
      */
     private final long maxPos;
     
@@ -74,8 +74,8 @@ final class ClobUpdatableReader extends Reader {
         this.conChild = conChild;
         this.stream = stream;
         //The subset of the Clob has not been requested. 
-        //Hence set maxPos to -1.
-        this.maxPos = -1;
+        //Hence set maxPos to infinity (or as close as we get).
+        this.maxPos = Long.MAX_VALUE;
 
         init (stream, 0);
     }
@@ -90,8 +90,8 @@ final class ClobUpdatableReader extends Reader {
         this.clob = clob;
         this.conChild = clob;
         // A subset of the Clob has not been requested.
-        // Hence set maxPos to -1.
-        this.maxPos = -1;
+        // Hence set maxPos to infinity (or as close as we get).
+        this.maxPos = Long.MAX_VALUE;
 
         InternalClob internalClob = clob.getInternalClob();
         materialized = internalClob.isWritable();        
@@ -165,24 +165,13 @@ final class ClobUpdatableReader extends Reader {
     public int read(char[] cbuf, int off, int len) throws IOException {        
         updateIfRequired();
         
-        //If maxPos is not invalid and the current position inside the 
-        //stream has exceeded maxPos the read sould return -1 signifying
-        //end of stream.
-        if (maxPos != -1 && pos >= maxPos) {
+        //If the stream has exceeded maxPos the read should return -1
+        //signifying end of stream.
+        if (pos >= maxPos) {
             return -1;
         }
 
-        int actualLength = 0;
-        //If maxPos is not invalid then ensure that the length(len) 
-        //that is requested falls within the restriction set by maxPos.
-        if(maxPos != -1) {
-            actualLength 
-                    = (int )Math.min(len, maxPos - pos);
-        }
-        else {
-            //maxPos has not been set. Make maxPos the length requested.
-            actualLength = len;
-        }
+        int actualLength = (int) Math.min(len, maxPos - pos);
         int ret = streamReader.read (cbuf, off, actualLength);
         if (ret >= 0) {
             pos += ret;
