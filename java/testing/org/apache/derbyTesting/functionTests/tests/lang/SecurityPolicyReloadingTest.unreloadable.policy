@@ -46,6 +46,8 @@
 //
 grant codeBase "${derbyTesting.codejar}derby.jar" {
   permission java.util.PropertyPermission "derby.*", "read";
+permission java.util.PropertyPermission "derby.storage.jvmInstanceId", 
+      "write"; 
   permission java.util.PropertyPermission "java.class.path", "read";//sysinfo
   
   // unit tests (e.g. store/T_RecoverFullLog) set this property 
@@ -109,6 +111,9 @@ grant codeBase "${derbyTesting.clientjar}derbyclient.jar" {
   // derby.* properties to avoid failures when it is listed before derby.jar in
   // the classpath.
   permission java.util.PropertyPermission "derby.*", "read";
+// DERBY-700 property used to prevent dual boot
+permission java.util.PropertyPermission "derby.storage.jvmInstanceId", 
+      "write"; 
 
   // DERBY-2302: derbyclient.jar needs to be able to read the user.dir property in order to
   // do tracing in that directory. Also, it needs read/write permissions in user.dir in order
