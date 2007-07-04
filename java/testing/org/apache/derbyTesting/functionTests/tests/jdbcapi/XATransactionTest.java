@@ -190,21 +190,7 @@ public class XATransactionTest extends BaseJDBCTestCase {
             conn = xaConn.getConnection();
 
             Xid xid = createXid(123, i);
-
-            if (i % timeoutCommitEveryStatement == 0) {
-                // Setup the higher value for the transaction timeout
-                // if the transaction is going to be committed
-                // just to be sure that it would not be rolled back
-                // before commit due to a garbage collection
-                // in progress, etc.
-                xaRes.setTransactionTimeout(60);
-            } else {
-                // We will set the transaction timeout value low
-                // for transactions going to be rolled back to keep
-                // the number of pending transactions low
-                xaRes.setTransactionTimeout(8);
-            }
-
+            xaRes.setTransactionTimeout(5);
             xaRes.start(xid, XAResource.TMNOFLAGS);
 
             stm = conn.createStatement();
