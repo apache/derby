@@ -56,7 +56,7 @@ import org.apache.derby.impl.store.access.conglomerate.TemplateRow;
 
   A b-tree controller corresponds to an instance of an open b-tree conglomerate.
   <P>
-  <B>Concurrency Notes<\B>
+  <B>Concurrency Notes</B>
   <P>
   The concurrency rules are derived from OpenBTree.
   <P>

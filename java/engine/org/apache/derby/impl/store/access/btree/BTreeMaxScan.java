@@ -46,7 +46,7 @@ import org.apache.derby.iapi.store.access.BackingStoreHashtable;
 
   A b-tree scan controller corresponds to an instance of an open b-tree scan.
   <P>
-  <B>Concurrency Notes<\B>
+  <B>Concurrency Notes</B>
   <P>
   The concurrency rules are derived from OpenBTree.
   <P>

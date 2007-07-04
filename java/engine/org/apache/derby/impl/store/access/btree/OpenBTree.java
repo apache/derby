@@ -47,7 +47,7 @@ import org.apache.derby.impl.store.access.conglomerate.OpenConglomerateScratchSp
 
   An open b-tree contains fields and methods common to scans and controllers.
   <P>
-  <B>Concurrency Notes<\B>
+  <B>Concurrency Notes</B>
   <P>
   An instance of an open b-tree is owned by a single context.  The b-tree code
   assumes that the context ensures that only one thread at a time is using
