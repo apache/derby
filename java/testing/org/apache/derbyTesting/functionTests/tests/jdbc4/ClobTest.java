@@ -411,6 +411,45 @@ public class ClobTest
     }
 
     /**
+     * Test that <code>Clob.getCharacterStream(long,long)</code> works on CLOBs
+     * that are streamed from store. (DERBY-2891)
+     */
+    public void testGetCharacterStreamLongOnLargeClob() throws Exception {
+        getConnection().setAutoCommit(false);
+
+        // create large (>32k) clob that can be read from store
+        final int size = 33000;
+        StringBuilder sb = new StringBuilder(size);
+        for (int i = 0; i < size; i += 10) {
+            sb.append("1234567890");
+        }
+
+        final int id = BlobClobTestSetup.getID();
+        PreparedStatement ps = prepareStatement(
+            "insert into blobclob(id, clobdata) values (?,cast(? as clob))");
+        ps.setInt(1, id);
+        ps.setString(2, sb.toString());
+        ps.executeUpdate();
+        ps.close();
+
+        Statement s = createStatement();
+        ResultSet rs = s.executeQuery(
+            "select clobdata from blobclob where id = " + id);
+        assertTrue(rs.next());
+        Clob c = rs.getClob(1);
+
+        // request a small region of the clob
+        BufferedReader r = new BufferedReader(c.getCharacterStream(4L, 3L));
+        assertEquals("456", r.readLine());
+
+        r.close();
+        c.free();
+        rs.close();
+        s.close();
+        rollback();
+    }
+
+    /**
      * Tests the exceptions thrown by the getCharacterStream
      * (long pos, long length) for the following conditions
      * a) pos <= 0
