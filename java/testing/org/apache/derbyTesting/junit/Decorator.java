@@ -108,29 +108,14 @@ public class Decorator {
      */
     public static Test encryptedDatabase(Test test, final String algorithm)
     {
-        test = new BaseTestSetup(test) {
-            
-            /**
-             * Create an encrypted database using a
-             * JDBC data source.
-             */
-            protected void setUp() throws SQLException
-            {
-                String bootPhrase = getBootPhrase(64);
-                DataSource ds = JDBCDataSource.getDataSource();
-                        
-                JDBCDataSource.setBeanProperty(ds,
-                        "createDatabase", "create");
-                JDBCDataSource.setBeanProperty(ds,
-                        "connectionAttributes",
-                        "dataEncryption=true;bootPassword=" + bootPhrase +
-                        ";encryptionAlgorithm=" + algorithm);
-                
-                ds.getConnection().close();
-            }
-        };
+        String bootPhrase = getBootPhrase(64);
         
-        return TestConfiguration.singleUseDatabaseDecorator(test);
+        String attributes =
+            "dataEncryption=true;bootPassword=" + bootPhrase +
+             ";encryptionAlgorithm=" + algorithm;
+
+        return attributesDatabase(attributes, test);
+        
     }
     
     private static String getBootPhrase(int length)
@@ -147,5 +132,56 @@ public class Decorator {
         }
         
         return new String(bp);
+    }
+    
+    /**
+     * Decorate a set of tests to use an single
+     * use database with TERRITORY_BASED collation
+     * set to the passed in locale. Database is created
+     * on by the setUp method of the decorator.
+     */
+    public static Test territoryCollatedDatabase(Test test, final String locale)
+    {
+        
+        String attributes = "collation=TERRITORY_BASED;territory=" + locale;
+        
+        return attributesDatabase(attributes, test);
+    }
+    
+    /**
+     * Decorate a test (or suite of tests) to use a single use database
+     * as the default database. The database is created by the setUp
+     * method of the decorator. The database will be created using
+     * a JDBC data source with createDatabase set to create and
+     * connectionAttributes set to the passed in attributes.
+     * 
+     * 
+     * @param attributes Value to set connectionAttributes to when creating
+     * the database.
+     * @param test Test to decorate
+     * @return Decorated test
+     */
+    private static Test attributesDatabase(final String attributes, Test test)
+    {
+        test = new BaseTestSetup(test) {
+            
+            /**
+             * Create a  database
+             * using a JDBC data source with connectionAttributes set.
+             */
+            protected void setUp() throws SQLException
+            {
+                DataSource ds = JDBCDataSource.getDataSource();
+                               
+                JDBCDataSource.setBeanProperty(ds,
+                        "createDatabase", "create");
+                JDBCDataSource.setBeanProperty(ds,
+                        "connectionAttributes", attributes);
+                                
+                ds.getConnection().close();
+            }
+        };
+        
+        return TestConfiguration.singleUseDatabaseDecorator(test);
     }
 }

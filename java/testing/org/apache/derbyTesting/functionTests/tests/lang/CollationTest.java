@@ -31,10 +31,14 @@ import java.sql.Types;
 import javax.sql.DataSource;
 
 import junit.framework.Test;
+import junit.framework.TestSuite;
 
+import org.apache.derbyTesting.functionTests.tests.jdbcapi.DatabaseMetaDataTest;
 import org.apache.derbyTesting.junit.XML;
 //import org.apache.derby.iapi.types.XML;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
+import org.apache.derbyTesting.junit.Decorator;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.JDBCDataSource;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -88,14 +92,9 @@ public class CollationTest extends BaseJDBCTestCase {
    * @throws SQLException
    */
 public void testDefaultCollation() throws SQLException {
-      DataSource ds = JDBCDataSource.getDataSourceLogical("defaultdb");
-      JDBCDataSource.setBeanProperty(ds, "connectionAttributes", 
-                  "create=true");
 
-      
-      Connection conn = ds.getConnection();
-      conn.setAutoCommit(false);
-      Statement s = conn.createStatement();
+      getConnection().setAutoCommit(false);
+      Statement s = createStatement();
       PreparedStatement ps;
       ResultSet rs;
       
@@ -231,7 +230,7 @@ public void testDefaultCollation() throws SQLException {
       //Since all schemas (ie user and system) have the same collation, the 
       //following test won't fail.
       s.executeUpdate("set schema APP");
-      ps = conn.prepareStatement("SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
+      ps = prepareStatement("SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
       		" ? = TABLENAME");
       ps.setString(1, "SYSCOLUMNS");
       rs = ps.executeQuery();
@@ -239,7 +238,7 @@ public void testDefaultCollation() throws SQLException {
 
       //Since all schemas (ie user and system) have the same collation, the 
       //following test won't fail.
-      ps = conn.prepareStatement("SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
+      ps = prepareStatement("SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
 		" SUBSTR(?,2) = TABLENAME");
       ps.setString(1, " SYSCOLUMNS");
       rs = ps.executeQuery();
@@ -247,12 +246,12 @@ public void testDefaultCollation() throws SQLException {
 
       //Since all schemas (ie user and system) have the same collation, the 
       //following test won't fail.
-      ps = conn.prepareStatement("SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
+      ps = prepareStatement("SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
 		" LTRIM(?) = TABLENAME");
       ps.setString(1, " SYSCOLUMNS");
       rs = ps.executeQuery();
       JDBC.assertFullResultSet(rs,new String[][] {{"SYSCOLUMNS"}});
-      ps = conn.prepareStatement("SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
+      ps = prepareStatement("SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
 		" RTRIM(?) = TABLENAME");
       ps.setString(1, "SYSCOLUMNS  ");
       rs = ps.executeQuery();
@@ -260,18 +259,14 @@ public void testDefaultCollation() throws SQLException {
 
       //Since all schemas (ie user and system) have the same collation, the 
       //following test won't fail.
-      ps = conn.prepareStatement("SELECT COUNT(*) FROM CUSTOMER WHERE " + 
+      ps = prepareStatement("SELECT COUNT(*) FROM CUSTOMER WHERE " + 
       		" ? IN (SELECT TABLENAME FROM SYS.SYSTABLES)");
       ps.setString(1, "SYSCOLUMNS");
       rs = ps.executeQuery();
       JDBC.assertFullResultSet(rs,new String[][] {{"7"}});
       //End of parameter testing
       
-      conn.commit();
-
-      dropTable(s);
       s.close();
-      conn.close();
       }
       
   /**
@@ -279,16 +274,9 @@ public void testDefaultCollation() throws SQLException {
    * @throws SQLException
    */
 public void testPolishCollation() throws SQLException {
-      DataSource ds = JDBCDataSource.getDataSourceLogical("poldb");
-      JDBCDataSource.setBeanProperty(ds, "connectionAttributes", 
-                  "create=true;territory=pl;collation=TERRITORY_BASED");
 
-      
-      Connection conn = ds.getConnection();
-      conn.setAutoCommit(false);
-      PreparedStatement ps;
-      ResultSet rs;
-      Statement s = conn.createStatement();
+      getConnection().setAutoCommit(false);
+      Statement s = createStatement();
       
       setUpTable(s);
 
@@ -341,11 +329,7 @@ public void testPolishCollation() throws SQLException {
       		new String[][] {{"aacorn"}});   
 
       commonTestingForTerritoryBasedDB(s);
-
-      conn.commit();
-      dropTable(s);
-      conn.close();
-      
+    
       }    
   
 
@@ -355,16 +339,10 @@ public void testPolishCollation() throws SQLException {
    * @throws SQLException
    */
 public void testNorwayCollation() throws SQLException {
-      DataSource ds = JDBCDataSource.getDataSourceLogical("nordb");
-      JDBCDataSource.setBeanProperty(ds, "connectionAttributes", 
-                  "create=true;territory=no;collation=TERRITORY_BASED");
 
-      
-      Connection conn = ds.getConnection();
-      conn.setAutoCommit(false);
-      Statement s = conn.createStatement();
-      PreparedStatement ps;
-      ResultSet rs;
+      getConnection().setAutoCommit(false);
+      Statement s = createStatement();
+
       setUpTable(s);
 
       //The collation should be TERRITORY_BASED for this database
@@ -414,11 +392,8 @@ public void testNorwayCollation() throws SQLException {
 
       commonTestingForTerritoryBasedDB(s);
 
-      conn.commit();
-
-      dropTable(s);
       s.close();
-      conn.close();
+
       }
   
 
@@ -428,15 +403,9 @@ public void testNorwayCollation() throws SQLException {
   * @throws SQLException
   */
 public void testEnglishCollation() throws SQLException {
-      DataSource ds = JDBCDataSource.getDataSourceLogical("endb");
-      JDBCDataSource.setBeanProperty(ds, "connectionAttributes", 
-                  "create=true;territory=en;collation=TERRITORY_BASED");
-      
-      Connection conn = ds.getConnection();
-      conn.setAutoCommit(false);
-      Statement s = conn.createStatement();
-      PreparedStatement ps;
-      ResultSet rs;
+
+      getConnection().setAutoCommit(false);
+      Statement s = createStatement();
       setUpTable(s);
 
       //The collation should be TERRITORY_BASED for this database
@@ -489,11 +458,7 @@ public void testEnglishCollation() throws SQLException {
 
       commonTestingForTerritoryBasedDB(s);
 
-      conn.commit();
-      
-      dropTable(s);
       s.close();
-      conn.close();
       }
 
 private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
@@ -1006,13 +971,33 @@ private void checkLangBasedQuery(Statement s, String query, String[][] expectedR
    * is a server side operation.
    */
   public static Test suite() {
+      
+      TestSuite suite = new TestSuite("CollationTest");
 
-        Test test =  TestConfiguration.embeddedSuite(CollationTest.class);
-        test = TestConfiguration.additionalDatabaseDecorator(test, "defaultdb");
-        test = TestConfiguration.additionalDatabaseDecorator(test, "endb");
-        test = TestConfiguration.additionalDatabaseDecorator(test, "nordb");
-        test = TestConfiguration.additionalDatabaseDecorator(test, "poldb");
-        return test;
+        suite.addTest(new CleanDatabaseTestSetup(
+                new CollationTest("testDefaultCollation")));
+        suite.addTest(collatedSuite("en", "testEnglishCollation"));
+        suite.addTest(collatedSuite("no", "testNorwayCollation"));
+        suite.addTest(collatedSuite("pl", "testPolishCollation"));
+        return suite;
     }
+  
+  /**
+   * Return a suite that uses a single use database with
+   * a primary fixture from this test plus potentially other
+   * fixtures.
+   * @param locale Locale to use for the database
+   * @param baseFixture Base fixture from this test.
+   * @return
+   */
+  private static Test collatedSuite(String locale, String baseFixture)
+  {
+      TestSuite suite = new TestSuite("CollationTest:territory="+locale);
+      suite.addTest(new CollationTest(baseFixture));
+      
+      // DERBY-2986 - DMD.getTables() fails
+      // suite.addTest(DatabaseMetaDataTest.suite());
+      return Decorator.territoryCollatedDatabase(suite, locale);
+  }
 
 }

@@ -342,9 +342,6 @@ public class NodeFactoryImpl extends NodeFactory implements ModuleControl, Modul
 		  case C_NodeTypes.DROP_TRIGGER_NODE:
 		  	return C_NodeNames.DROP_TRIGGER_NODE_NAME;
 
-		  case C_NodeTypes.READ_CURSOR_NODE:
-		  	return C_NodeNames.READ_CURSOR_NODE_NAME;
-
 		  case C_NodeTypes.TINYINT_CONSTANT_NODE:
 		  case C_NodeTypes.SMALLINT_CONSTANT_NODE:
 		  case C_NodeTypes.INT_CONSTANT_NODE:

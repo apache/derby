@@ -96,7 +96,7 @@ public interface C_NodeTypes
 	static final int DROP_INDEX_NODE = 63;
 	// 64 available;
 	static final int DROP_TRIGGER_NODE = 65;
-	static final int READ_CURSOR_NODE = 66;
+	// 66 available;
 	static final int DECIMAL_CONSTANT_NODE = 67;
 	static final int DOUBLE_CONSTANT_NODE = 68;
 	static final int FLOAT_CONSTANT_NODE = 69;

@@ -49,12 +49,21 @@ public class ClassInvestigator extends ClassHolder {
 		ClassInput classInput = new ClassInput(is);
 
 		// Check the header
-		checkHeader(classInput);
+        int magic = classInput.getU4();
+        int minor_version = classInput.getU2();
+        int major_version = classInput.getU2();
+
+        if (magic != VMDescriptor.JAVA_CLASS_FORMAT_MAGIC)
+               throw new ClassFormatError();
 
 		//	Read in the Constant Pool
 		int constantPoolCount = classInput.getU2();
 
 		ClassInvestigator ci = new ClassInvestigator(constantPoolCount);
+        
+        ci.minor_version = minor_version;
+        ci.major_version = major_version;      
+        
 		// Yes, index starts at 1, The '0'th constant pool entry
 		// is reserved for the JVM and is not present in the class file.
 		for (int i = 1; i < constantPoolCount; ) {
@@ -451,25 +460,13 @@ public class ClassInvestigator extends ClassHolder {
 		CONSTANT_Utf8_info newCpe = new CONSTANT_Utf8_info(newName);
 
 		cptHashTable.remove(cpe.getKey());
-		cptHashTable.put(cpe.getKey(), cpe);
+		cptHashTable.put(newCpe.getKey(), newCpe);
 
 		newCpe.index = index;
 
 		cptEntries.setElementAt(newCpe, index);
 	}
 
-	/*
-	**
-	*/
-	static private void checkHeader(ClassInput in) throws IOException {
-		int magic = in.getU4();
-		int minor_version = in.getU2();
-		int major_version = in.getU2();
-
-
-		if (magic != VMDescriptor.JAVA_CLASS_FORMAT_MAGIC)
-			   throw new ClassFormatError();
-   	}
 	private static ConstantPoolEntry getConstant(ClassInput in)
 		throws IOException {
 
