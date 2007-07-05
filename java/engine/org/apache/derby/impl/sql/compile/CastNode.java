@@ -1010,8 +1010,6 @@ public class CastNode extends ValueNode
 	 * that this CAST node has been an internally generated node and we should
 	 * not touch the collation of this CAST node because it has been already 
 	 * set correctly by the class that generated this CAST node. 
-	 * 
-	 * @param b true to use function conversion rules
 	 */
 	void setForExternallyGeneratedCASTnode()
 	{
