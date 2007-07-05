@@ -482,7 +482,7 @@ public class ConcatenationOperatorNode extends BinaryOperatorNode {
 				.getBuiltInTypeId(higherType), nullable, resultLength);
 
 		//Check if collation derivations and collation types of 2 operands
-		// match?
+		//match?
 		//If they do, then the result of the concatenation will get the smae
 		//collation information. But if not, then the collation derivation of
 		//the result will be NONE.

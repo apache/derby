@@ -313,9 +313,13 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
          *                collation types here.
          */
 
-        // The left and the pattern of the LIKE must be same collation type.
+        // The left and the pattern of the LIKE must be same collation type
+        // and derivation.
         if (receiver.getTypeServices().getCollationType() !=
-                leftOperand.getTypeServices().getCollationType())
+                leftOperand.getTypeServices().getCollationType() ||
+                receiver.getTypeServices().getCollationDerivation() !=
+                	leftOperand.getTypeServices().getCollationDerivation()
+                )
         {
             // throw error.
             throw StandardException.newException(

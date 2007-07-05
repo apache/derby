@@ -742,6 +742,17 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     ps = conn.prepareStatement("SELECT TABLENAME FROM SYS.SYSTABLES " +
     		" WHERE TABLENAME || ? LIKE 'SYSCOLUMNS'");   
     s.executeUpdate("set schema APP");
+    //The following will fail because the left hand side of LIKE has collation
+    //derivation of NONE where as the right hand side has collation derivation
+    //of IMPLICIT
+    assertStatementError("42ZA2", s, "SELECT TABLENAME FROM SYS.SYSTABLES " +
+    		" WHERE TABLENAME || 'AA' LIKE 'SYSCOLUMNS '");   
+    //To fix the problem, we can use CAST on the left hand side so it's 
+    //collation will be picked up from the compilation schema which is same as
+    //what happens for the right hand operand.
+    checkLangBasedQuery(s, "SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
+    		" CAST ((TABLENAME || 'AA') AS CHAR(12)) LIKE 'SYSCOLUMNS '",
+    		null );   
 
     //Do parameter testing for IS NULL
     //Following query will pass because it doesn't matter what the collation of
