@@ -988,7 +988,7 @@ private void checkLangBasedQuery(Statement s, String query, String[][] expectedR
    * fixtures.
    * @param locale Locale to use for the database
    * @param baseFixture Base fixture from this test.
-   * @return
+   * @return suite of tests to run for the given locale
    */
   private static Test collatedSuite(String locale, String baseFixture)
   {
