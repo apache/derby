@@ -382,9 +382,14 @@ public abstract class BaseJDBCTestCase
     }
     
     /**
-     * Run a set of SQL commands from a String discarding the output.
+     * Run a set of SQL commands from a String discarding the output,
+     * intended for setup code, not testing (assert) code.
      * Commands are separated by a semi-colon. Connection used
-     * is this objects default connection.
+     * is this objects default connection. Note that assertions
+     * are not performed by this method. Code may assert the number
+     * of failures returned, typically as zero. Exceptions
+     * thrown by statements are not thrown through this method.
+     * For single statements a Statement object should be used directly.
      * @param sqlCommands
      * @return Number of errors executing the script.
      * @throws UnsupportedEncodingException

@@ -22,6 +22,7 @@ limitations under the License.
 package org.apache.derbyTesting.functionTests.tests.lang;
 
 import java.io.UnsupportedEncodingException;
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
@@ -466,7 +467,7 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
         assertFunctionPrivilege(false, users[4], "S1", "F1", false);
         
         // clean up
-        revoke("execute", "function s1", "t1", users[2]);
+        revoke("execute", "function s1", "f1", users[2]);
         assertFunctionPrivilege(false, users[2], "s1", "F1", false);
     }
     
@@ -586,18 +587,10 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
     	} catch (SQLException e) {
             	assertSQLState("42X01", e);
     	}
+        
+        assertCompileError("42X01", "grant select on schema t1 to " + users[1]);
 
-    	try {
-            runSQLCommands("grant select on schema t1 to " + users[1]);
-    	} catch (SQLException e) {
-            	assertSQLState("42X01", e);
-    	}
-    	
-    	try {
-            runSQLCommands("grant select on decimal t1 to " + users[1]);
-    	} catch (SQLException e) {
-            	assertSQLState("42X01", e);
-    	} 
+        assertCompileError("42X01",  "grant select on decimal t1 to " + users[1]);
     }
 
     public void testGrantOnNonexistantColumn() throws Exception {
@@ -673,52 +666,34 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
     }
     
     public void testGrantExecuteOnTable() throws Exception {
-    	try {
-            runSQLCommands("grant execute on table s1.t1 to " + users[1]);
-    	} catch (SQLException e) {
-        	assertSQLState("42X01", e);
-        }
-    }
+        assertCompileError("42X01",
+                "grant execute on table s1.t1 to " + users[1]);
+     }
     
     public void testGrantSelectOnRoutine() throws Exception {
-    	try {
-            runSQLCommands("grant select on function s1.f1 to " + users[1]);
-    	} catch (SQLException e) {
-        	assertSQLState("42X01", e);
-        }
-    	
-    	try {
-            runSQLCommands("grant select on procedure s1.p1 to " + users[1]);
-    	} catch (SQLException e) {
-        	assertSQLState("42X01", e);
-        }
-    }
+        assertCompileError("42X01",
+                "grant select on function s1.f1 to " + users[1]);
+   	
+        assertCompileError("42X01",
+                "grant select on procedure s1.p1 to " + users[1]);
+   }
     
     public void testGrantExecuteWithRestrict() throws Exception {
     	// restrict invalid in grant statement
-    	try {
-            runSQLCommands("grant execute on function s1.f1 to " + users[1] + " restrict");
-    	} catch (SQLException e) {
-        	assertSQLState("42X01", e);
-        }
+        assertCompileError("42X01",
+                "grant execute on function s1.f1 to " + users[1] + " restrict");
     }
     
     public void testGrantRevokeWithoutRestrict() throws Exception {
     	// restrict invalid in grant statement
-    	try {
-            runSQLCommands("revoke execute on function s1.f1 from " + users[0]);
-    	} catch (SQLException e) {
-        	assertSQLState("42X01", e);
-        }
+        assertCompileError("42X01",
+               "revoke execute on function s1.f1 from " + users[0]);
     }
     
     public void testGrantRevokeSelectWithRestrict() throws Exception {
     	// restrict invalid in grant statement
-    	try {
-            runSQLCommands("revoke select on s1.t1 from " + users[0] + " restrict");
-    	} catch (SQLException e) {
-        	assertSQLState("42X01", e);
-        }
+        assertCompileError("42X01",
+    	     "revoke select on s1.t1 from " + users[0] + " restrict");
     }
     
     public void testGrantDeleteWithColumnList() throws Exception {
@@ -897,11 +872,10 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
 		//add restrict to revoke execute... 
 		if (perm.equalsIgnoreCase("execute"))
 			command.append(" restrict");
-		try {
-			runSQLCommands(command.toString());
-		} catch (UnsupportedEncodingException e) {
-			fail(e.getMessage());
-		}
+        
+        Statement s = createStatement();
+        s.executeUpdate(command.toString());
+        s.close();
 	}
 
     /**
@@ -1008,10 +982,10 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
     	Statement s = c.createStatement();
     	try {
     	    boolean b = s.execute("select " + columnListAsString(columns) + " from " + schema + "." + table);
-    	    if (hasPrivilege)
-    	    {
-    	        assertEquals(true, b);
-    	    }
+            
+            if (!hasPrivilege)
+                fail("expected no SELECT permission on table");
+
     	} catch (SQLException e) {
     		if (!hasPrivilege) {
     			assertSQLState("42502", e);
@@ -1040,10 +1014,9 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
     	Statement s = c.createStatement();
     	try {
     	    boolean b = s.execute("delete from " + schema + "." + table);
-    	    if (hasPrivilege)
-    	    {
-    	        // b is false if no rows updated.
-    	    }
+            if (!hasPrivilege)
+                fail("expected no DELETE permission on table");
+
     	} catch (SQLException e) {
     		if (!hasPrivilege) {
     			assertSQLState("42500", e);
@@ -1090,10 +1063,10 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
             rs.close();
             command.append(")");
     	    int i = s.executeUpdate(command.toString());
-    	    if (hasPrivilege)
-    	    {
-    	        assertEquals(1, i);
-    	    }
+            // DERBY-2893 INSERT seems to succeed.
+            //if (!hasPrivilege)
+            //    fail("expected no INSERT permission on table");
+
     	} catch (SQLException e) {
     		if (!hasPrivilege) {
     			assertSQLState("42502", e);
@@ -1156,6 +1129,11 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
         	    	// update count should equal select count
         	        assertEquals(columnCount, actualCount);
         	    }
+                
+                // DERBY-2893 UPDATE seems to succeed.
+                //if (!hasPrivilege)
+                //    fail("expected no UPDATE permission on table");
+
     		} catch (SQLException e) {
         		if (!hasPrivilege) {
         			assertSQLState("42502", e);
@@ -1241,6 +1219,9 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
     	    {
     	        assertEquals(0, i); 
     	    }
+            if (!hasPrivilege)
+                fail("expected no TRIGGER permission on table");
+
     	} catch (SQLException e) {
     		if (!hasPrivilege) {
     			assertSQLState("42500", e);
@@ -1278,6 +1259,9 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
 		try {
 		    ps = c.prepareStatement(functioncall);
 		    rs = ps.executeQuery();
+            if (!hasPrivilege)
+                fail("expected no EXECUTE permission on function");
+
 		} catch (SQLException e) {
 			if (!hasPrivilege){
 				if (forProcedure) 
@@ -1309,11 +1293,14 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
         
         String procedurecall = "call " + schema + "." + procedure + "()";
         
-		PreparedStatement ps = c.prepareStatement(procedurecall);
+		CallableStatement ps = c.prepareCall(procedurecall);
 		ResultSet rs = null;
 		try {
 			ps.execute();
 			rs = ps.getResultSet();
+            if (!hasPrivilege)
+                fail("expected no EXECUTE permission on procedure");
+
 		} catch (SQLException e) {
 			if (!hasPrivilege)
 				assertSQLState("42504", e);
@@ -1327,6 +1314,7 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
 		{
 				rs.close();
 		}
+        c.close();
     }
     
     /**
