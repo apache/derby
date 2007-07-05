@@ -152,8 +152,6 @@ public class PrepStmtMetaDataTest extends BaseJDBCTestCase {
      * Check the metatdata for a prepared statement that does not return a
      * ResultSet is empty
      * 
-     * @param conn
-     *            connection to use
      * @param sql
      *            sql for prepared statement
      * @param execute
