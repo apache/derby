@@ -189,9 +189,23 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
             receiver.setType(
                 new DataTypeDescriptor(
                     TypeId.getBuiltInTypeId(Types.VARCHAR), true));
-			//collation of ? operand should be same as the compilation schema
-			receiver.setCollationUsingCompilationSchema(
-					StringDataValue.COLLATION_DERIVATION_IMPLICIT);
+            //check if this parameter can pick up it's collation from pattern
+            //or escape clauses in that order. If not, then it will take it's
+            //collation from the compilation schema.
+            if (!leftOperand.requiresTypeFromContext()) {
+            	receiver.getTypeServices().setCollationDerivation(
+            			leftOperand.getTypeServices().getCollationDerivation());
+            	receiver.getTypeServices().setCollationType(
+            			leftOperand.getTypeServices().getCollationType());
+            } else if (rightOperand != null && !rightOperand.requiresTypeFromContext()) {
+            	receiver.getTypeServices().setCollationDerivation(
+            			rightOperand.getTypeServices().getCollationDerivation());
+            	receiver.getTypeServices().setCollationType(
+            			rightOperand.getTypeServices().getCollationType());            	
+            } else {
+    			receiver.setCollationUsingCompilationSchema(
+    					StringDataValue.COLLATION_DERIVATION_IMPLICIT);            	
+            }
         }
 
         /* 
@@ -217,9 +231,14 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
                     new DataTypeDescriptor(
                         TypeId.getBuiltInTypeId(Types.VARCHAR), true));
             }
-			//collation of ? operand should be same as the compilation schema
-			leftOperand.setCollationUsingCompilationSchema(
-					StringDataValue.COLLATION_DERIVATION_IMPLICIT);
+			//collation of ? operand should be picked up from the context.
+            //By the time we come here, receiver will have correct collation
+            //set on it and hence we can rely on it to get correct collation
+            //for the other ? in LIKE clause
+			leftOperand.getTypeServices().setCollationDerivation(
+					receiver.getTypeServices().getCollationDerivation());
+			leftOperand.getTypeServices().setCollationType(
+        			receiver.getTypeServices().getCollationType());            	
         }
 
         /* 
@@ -244,9 +263,14 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
                     new DataTypeDescriptor(
                         TypeId.getBuiltInTypeId(Types.VARCHAR), true));
             }
-			//collation of ? operand should be same as the compilation schema
-			rightOperand.setCollationUsingCompilationSchema(
-					StringDataValue.COLLATION_DERIVATION_IMPLICIT);
+			//collation of ? operand should be picked up from the context.
+            //By the time we come here, receiver will have correct collation
+            //set on it and hence we can rely on it to get correct collation
+            //for the other ? in LIKE clause
+			rightOperand.getTypeServices().setCollationDerivation(
+					receiver.getTypeServices().getCollationDerivation());
+			rightOperand.getTypeServices().setCollationType(
+        			receiver.getTypeServices().getCollationType());            	
         }
 
         bindToBuiltIn();
