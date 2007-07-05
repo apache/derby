@@ -585,16 +585,20 @@ public class CollationTest2 extends BaseJDBCTestCase
         s.close();
     }
 
-    private void checkOneParamQuery(
+    private void checkParamQuery(
     Connection  conn,
     String      query, 
-    String      param,
+    String[]      param,
+    int    paramNumber,
     String[][]  expectedResult, 
     boolean     ordered) 
         throws SQLException 
     {
         PreparedStatement   ps = conn.prepareStatement(query);
-        ps.setString(1, param);
+        for (int i=0; i < paramNumber;i++)
+        {
+        	ps.setString(i+1, param[i]);
+        }
         ResultSet           rs = ps.executeQuery();
 
         if (expectedResult == null) //expecting empty resultset from the query
@@ -611,7 +615,10 @@ public class CollationTest2 extends BaseJDBCTestCase
 
 
         // re-execute it to test path through the cache
-        ps.setString(1, param);
+        for (int i=0; i < paramNumber;i++)
+        {
+        	ps.setString(i+1, param[i]);
+        }
         rs = ps.executeQuery();
 
         if (expectedResult == null) //expecting empty resultset from the query
@@ -1165,10 +1172,11 @@ public class CollationTest2 extends BaseJDBCTestCase
             // now check prepared query
 
             // '<' test
-            checkOneParamQuery(
+            checkParamQuery(
                 conn, 
                 "SELECT ID, NAME FROM CUSTOMER where NAME < ? ORDER BY NAME",
-                NAMES[expected_order[i]],
+                new String[] {NAMES[expected_order[i]]},
+                1,
                 full_row_set(
                     expected_order, 
                     0, 
@@ -1177,10 +1185,11 @@ public class CollationTest2 extends BaseJDBCTestCase
                 true);
 
             // '<=' test
-            checkOneParamQuery(
+            checkParamQuery(
                 conn, 
                 "SELECT ID, NAME FROM CUSTOMER where NAME <= ? ORDER BY NAME",
-                NAMES[expected_order[i]],
+                new String[] {NAMES[expected_order[i]]},
+                1,
                 full_row_set(
                     expected_order, 
                     0, 
@@ -1189,10 +1198,11 @@ public class CollationTest2 extends BaseJDBCTestCase
                 true);
 
             // '=' test
-            checkOneParamQuery(
+            checkParamQuery(
                 conn, 
                 "SELECT ID, NAME FROM CUSTOMER where NAME = ? ORDER BY NAME",
-                NAMES[expected_order[i]],
+                new String[] {NAMES[expected_order[i]]},
+                1,
                 full_row_set(
                     expected_order, 
                     i, 
@@ -1201,10 +1211,11 @@ public class CollationTest2 extends BaseJDBCTestCase
                 true);
 
             // '>=' test
-            checkOneParamQuery(
+            checkParamQuery(
                 conn, 
                 "SELECT ID, NAME FROM CUSTOMER where NAME >= ? ORDER BY NAME",
-                NAMES[expected_order[i]],
+                new String[] {NAMES[expected_order[i]]},
+                1,
                 full_row_set(
                     expected_order, 
                     i, 
@@ -1213,10 +1224,11 @@ public class CollationTest2 extends BaseJDBCTestCase
                 true);
 
             // '>' test
-            checkOneParamQuery(
+            checkParamQuery(
                 conn, 
                 "SELECT ID, NAME FROM CUSTOMER where NAME > ? ORDER BY NAME",
-                NAMES[expected_order[i]],
+                new String[] {NAMES[expected_order[i]]},
+                1,
                 full_row_set(
                     expected_order, 
                     i + 1, 
@@ -1415,11 +1427,12 @@ public class CollationTest2 extends BaseJDBCTestCase
                 true);
 
             // varchar column - parameter pattern
-            checkOneParamQuery(
+            checkParamQuery(
                 conn,
                 "SELECT ID, NAME_VARCHAR FROM CUSTOMER " + 
                     "WHERE NAME_VARCHAR LIKE ?",
-                LIKE_TEST_CASES[i],
+                new String[] {LIKE_TEST_CASES[i]},
+                1,
                 full_row_single_value(
                     EXPECTED_LIKE_RESULTS[db_index][i],
                     LIKE_NAMES),
@@ -1436,11 +1449,12 @@ public class CollationTest2 extends BaseJDBCTestCase
                 true);
 
             // long varchar column - parameter
-            checkOneParamQuery(
+            checkParamQuery(
                 conn,
                 "SELECT ID, NAME_LONGVARCHAR FROM CUSTOMER " + 
                     "WHERE NAME_LONGVARCHAR LIKE ?",
-                LIKE_TEST_CASES[i],
+                new String[] {LIKE_TEST_CASES[i]},
+                1,
                 full_row_single_value(
                     EXPECTED_LIKE_RESULTS[db_index][i],
                     LIKE_NAMES),
@@ -1457,10 +1471,11 @@ public class CollationTest2 extends BaseJDBCTestCase
                 true);
 
             // clob column - parameter
-            checkOneParamQuery(
+            checkParamQuery(
                 conn,
                 "SELECT ID, NAME_CLOB FROM CUSTOMER WHERE NAME_CLOB LIKE ?",
-                LIKE_TEST_CASES[i],
+                new String[] {LIKE_TEST_CASES[i]},
+                1,
                 full_row_single_value(
                     EXPECTED_LIKE_RESULTS[db_index][i],
                     LIKE_NAMES),
@@ -1479,10 +1494,11 @@ public class CollationTest2 extends BaseJDBCTestCase
 
             // char column, char includes blank padding so alter all these
             // tests cases to match for blanks at end also.
-            checkOneParamQuery(
+            checkParamQuery(
                 conn,
                 "SELECT ID, NAME_CHAR FROM CUSTOMER WHERE NAME_CHAR LIKE ?",
-                LIKE_CHAR_TEST_CASES[i] + "%",
+                new String[] {LIKE_CHAR_TEST_CASES[i] + "%"},
+                1,
                 full_row_single_value(
                     EXPECTED_LIKE_RESULTS[db_index][i],
                     LIKE_NAMES),
@@ -1498,6 +1514,8 @@ public class CollationTest2 extends BaseJDBCTestCase
             "SELECT * from SYS.SYSCOLUMNS where COLUMNNAME like ?";
         String zero_row_syscat_query_param2 = 
             "SELECT * from SYS.SYSCOLUMNS where ? like COLUMNNAME";
+        String zero_row_syscat_query_param3 = 
+            "SELECT count(*) from SYS.SYSCOLUMNS where ? like ?";
 
         if (!isDatabaseBasicCollation(conn))
         {
@@ -1507,17 +1525,35 @@ public class CollationTest2 extends BaseJDBCTestCase
 
             assertCompileError(conn, "42ZA2", zero_row_syscat_query1);
             assertCompileError(conn, "42ZA2", zero_row_syscat_query2);
-            assertCompileError(conn, "42ZA2", zero_row_syscat_query_param1);
-            assertCompileError(conn, "42ZA2", zero_row_syscat_query_param2);
+            //The following 2 queries will work because ? in the query will
+            //take it's collation from the context, which in this case would
+            //mean from COLUMNNAME column in SYS.SYSCOLUMNS
+            //
+            checkParamQuery(
+                    conn, zero_row_syscat_query_param1, 
+                    new String[] {"nonmatchiing"}, 1, null, true);
+            checkParamQuery(
+                    conn, zero_row_syscat_query_param2, 
+                    new String[] {"nonmatchiing"}, 1, null, true);
+            checkParamQuery(
+                    conn, zero_row_syscat_query_param3, 
+                    new String[] {"nonmatching", "nonmatching"}, 2, 
+                    new String[][] {{"124"}}, true);
         }
         else
         {
             checkLangBasedQuery(conn, zero_row_syscat_query1, null, true);
             checkLangBasedQuery(conn, zero_row_syscat_query2, null, true);
-            checkOneParamQuery(
-                conn, zero_row_syscat_query_param1, "nonmatchiing", null, true);
-            checkOneParamQuery(
-                conn, zero_row_syscat_query_param2, "nonmatchiing", null, true);
+            checkParamQuery(
+                    conn, zero_row_syscat_query_param1, 
+                    new String[] {"nonmatchiing"}, 1, null, true);
+            checkParamQuery(
+                    conn, zero_row_syscat_query_param2, 
+                    new String[] {"nonmatchiing"}, 1, null, true);
+            checkParamQuery(
+                    conn, zero_row_syscat_query_param3, 
+                    new String[] {"nonmatching", "nonmatching"}, 2, 
+                    new String[][] {{"124"}}, true);
         }
 
         dropLikeTable(conn);
