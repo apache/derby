@@ -875,11 +875,16 @@ public interface Property {
 	public static final String SERVICE_LOCALE = "derby.serviceLocale";
 
 	public static final String COLLATION = "derby.database.collation";
-	// These are the 2 possible values for collation
+	// These are the 2 possible values for collation type if the collation 
+	// derivation is not NONE. If collation derivation is NONE, then collation
+	// type should be ignored.
 	public static final String UCS_BASIC_COLLATION =
 								"UCS_BASIC";
 	public static final String TERRITORY_BASED_COLLATION =
 								"TERRITORY_BASED";
+	// Define a static string for collation derivation NONE
+	public static final String COLLATION_NONE =
+		"NONE";
 
     /**
      * db2j.storage.dataNotSyncedAtCheckPoint

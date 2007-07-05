@@ -416,9 +416,12 @@ public class TypeDescriptorImpl implements TypeDescriptor, Formatable
 	}
 
 	/**
-	 * Gets the name of the collation type in this descriptor.
+	 * Gets the name of the collation type in this descriptor if the collation
+	 * derivation is not NONE. If the collation derivation is NONE, then this
+	 * method will return "NONE".
      * <p>
-     * Used to generate strings decribing collation type for error messages.
+     * This method is used for generating error messages which will use correct
+     * string describing collation type/derivation.
 	 * 
 	 *
 	 *  @return	the name of the collation being used in this type.
@@ -426,9 +429,11 @@ public class TypeDescriptorImpl implements TypeDescriptor, Formatable
 	public String getCollationName()
     {
         return(
-            collationType == StringDataValue.COLLATION_TYPE_UCS_BASIC ? 
-                Property.UCS_BASIC_COLLATION : 
-                Property.TERRITORY_BASED_COLLATION);
+        		collationDerivation == StringDataValue.COLLATION_DERIVATION_NONE ?
+        				Property.COLLATION_NONE :
+        		collationType == StringDataValue.COLLATION_TYPE_UCS_BASIC ?
+        				Property.UCS_BASIC_COLLATION :
+        				Property.TERRITORY_BASED_COLLATION);
     }
 
 	/**

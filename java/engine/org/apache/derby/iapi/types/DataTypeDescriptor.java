@@ -488,7 +488,7 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 	 * If dealing with character string types, then make sure to set the
 	 * collation info on the dominant type. Following algorithm will be used 
 	 * for dominant DTD's collation determination. Each of the steps of the 
-	 * algorithem have been numbered in the comments below and those same 
+	 * algorithm have been numbered in the comments below and those same 
 	 * numbers are used in the actual algorithm below so it is easier to 
 	 * understand and maintain.
 	 * 
