@@ -104,6 +104,7 @@ public void testGetBytes() throws SQLException {
  */
 public void testGetBinaryStream() throws SQLException, IOException {
 		int numBytes = 0;
+		getConnection().setAutoCommit(false);
 	  Statement stmt=createStatement();		
 		String sql = "SELECT bincol from t1" ;
 		ResultSet rs = stmt.executeQuery(sql);
@@ -206,7 +207,8 @@ public int countLocks() throws SQLException
     public static Test suite() {
         TestSuite suite = new TestSuite("LargeDataLocksTest");
         suite.addTest(baseSuite("LargeDataLocksTest:embedded"));
-        suite.addTest(TestConfiguration.clientServerDecorator(baseSuite("LargeDataLocksTest:client")));
+       // Disable for client until DERBY-2892 is fixed
+        //suite.addTest(TestConfiguration.clientServerDecorator(baseSuite("LargeDataLocksTest:client")));
         return suite;
 
     }
