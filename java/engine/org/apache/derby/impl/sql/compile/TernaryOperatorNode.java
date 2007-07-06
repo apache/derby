@@ -599,9 +599,9 @@ public class TernaryOperatorNode extends ValueNode
 		** The result type of trim is varchar.
 		*/
 		setResultType(resultType);
-		//Result of TRIM should pick up the collation of the 1st argument
-		//to TRIM. The 1st argument to TRIM is represented by the variable
-		//receiver in this class.
+		//Result of TRIM should pick up the collation of the character string
+		//that is getting trimmed (which is variable receiver) because it has
+		//correct collation set on it.
 		getTypeServices().setCollationDerivation(
 				receiver.getTypeServices().getCollationDerivation());
 		getTypeServices().setCollationType(
@@ -687,9 +687,6 @@ public class TernaryOperatorNode extends ValueNode
 		{
 			rightOperand.setType(
 				new DataTypeDescriptor(TypeId.INTEGER_ID, true)); 
-			//collation of ? operand should be same as the compilation schema
-			rightOperand.setCollationUsingCompilationSchema(
-					StringDataValue.COLLATION_DERIVATION_IMPLICIT);
 		}
 
 		bindToBuiltIn();
