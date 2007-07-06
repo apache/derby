@@ -830,6 +830,34 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     rs = ps.executeQuery();
     JDBC.assertFullResultSet(rs,new String[][] {{"SYSCOLUMNS"}});
 
+    //Similar testing for TRIM
+    //Following won't work because the character string constant 'a' is 
+    //picking up the collation of the current schema which is territory based.
+    //And the ? in TRIM will pick up it's collation from 'a' and hence the
+    //comparison between territory based character string returned from TRIM
+    //function will fail against UCS_BASIC based TABLENAME on the right
+    checkPreparedStatementError(conn, "SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
+    		" TRIM('a' FROM ?) = TABLENAME", "42818");
+    //The problem can be fixed by using CAST on TABLENAME so the resultant of
+    //CAST string will compare fine with the output of TRIM. Note CAST always
+    //picks up the collation of the compilation schema.
+    ps = conn.prepareStatement("SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
+    		" TRIM('a' FROM ?) = CAST(TABLENAME AS CHAR(10))");
+    ps.setString(1, "aSYSCOLUMNS");
+    rs = ps.executeQuery();
+    JDBC.assertFullResultSet(rs,new String[][] {{"SYSCOLUMNS"}});
+    //Another test for TRIM
+    //Following will not fail because the ? in TRIM will pick up collation
+    //from it's first parameter which is a SUBSTR on TABLENAME and hence the 
+    //result of TRIM will have UCS_BASIC collation which matches the collation
+    //on the right.
+    ps = conn.prepareStatement("SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
+    		" TRIM(LEADING SUBSTR(TABLENAME, LENGTH(TABLENAME)) FROM ?) = TABLENAME");
+    ps.setString(1, "SYSCOLUMNS");
+    rs = ps.executeQuery();
+    //No rows returned because the result of TRIM is going to be 'YSCOLUMNS'
+    JDBC.assertEmpty(rs);
+    
     //Do parameter testing with IN and subquery
     //Following will work just fine because ? will take it's collation from the
     //context which in this case will be collation of TABLENAME which has 
