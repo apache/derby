@@ -302,7 +302,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
     public void testDuplicates() throws SQLException {
         Connection conn = getConnection();
 
-        Statement s = conn.createStatement();
+        Statement s = createStatement();
 
         s.execute("create schema S1");
         s.execute("create schema S2");
@@ -354,7 +354,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
     public void testAmbigiousMethods() throws SQLException {
         Connection conn = getConnection();
 
-        Statement s = conn.createStatement();
+        Statement s = createStatement();
 
         // ambiguous resolution - with result sets
         s
@@ -434,36 +434,36 @@ public class LangProcedureTest extends BaseJDBCTestCase {
     public void testZeroArgProcedures() throws SQLException {
         Connection conn = getConnection();
 
-        Statement s = conn.createStatement();
+        Statement s = createStatement();
         s
                 .execute("create procedure za() language java external name 'org.apache.derbyTesting.functionTests.tests.lang.LangProcedureTest.zeroArg' parameter style java");
 
         s.execute("call za()");
         assertUpdateCountForProcedureWithNoResults(s);
 
-        PreparedStatement ps = conn.prepareStatement("call za()");
+        PreparedStatement ps = prepareStatement("call za()");
         ps.execute();
         assertUpdateCountForProcedureWithNoResults(ps);
         ps.close();
 
-        ps = conn.prepareStatement("{call za()}");
+        ps = prepareStatement("{call za()}");
         ps.execute();
         assertUpdateCountForProcedureWithNoResults(ps);
         ps.close();
 
         try {
-            ps = conn.prepareStatement("call za(?)");
+            ps = prepareStatement("call za(?)");
             fail("FAIL - prepareStatement call za(?)");
         } catch (SQLException sqle) {
             assertSQLState("42Y03", sqle);
         }
 
-        CallableStatement cs = conn.prepareCall("call za()");
+        CallableStatement cs = prepareCall("call za()");
         cs.execute();
         assertUpdateCountForProcedureWithNoResults(cs);
         cs.close();
 
-        cs = conn.prepareCall("{call za()}");
+        cs = prepareCall("{call za()}");
         cs.execute();
         assertUpdateCountForProcedureWithNoResults(cs);
         cs.close();
@@ -480,7 +480,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
 
     public void testSqlProcedures() throws SQLException {
         Connection conn = getConnection();
-        Statement s = conn.createStatement();
+        Statement s = createStatement();
 
         s.execute("create table t1(i int not null primary key, b char(15))");
         s
@@ -572,7 +572,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         Connection conn = getConnection();
         Connection conn2 = openDefaultConnection();
 
-        Statement s = conn.createStatement();
+        Statement s = createStatement();
 
         assertStatementError(
                 "42X01",
@@ -752,40 +752,34 @@ public class LangProcedureTest extends BaseJDBCTestCase {
 
     public void testResultSetsWithLobs() throws SQLException {
             Connection conn = getConnection();
-            Statement s = null;
 
                 // Create objects.
-                try {
-                        s = conn.createStatement();
+                Statement s = createStatement();
                         
-                        // Clob.
-                        s.execute("create table lobCheckOne (c clob(30))");
-                        s.execute("insert into lobCheckOne values (cast " +
-                                          "('yayorsomething' as clob(30)))");
-                        s.execute("insert into lobCheckOne values (cast " +
-                                                  "('yayorsomething2' as clob(30)))");
-                        s.execute("create procedure clobproc () parameter style java " +
-                                "language java external name " +
-                                          "'org.apache.derbyTesting.functionTests.util.ProcedureTest.clobselect' " +
-                                          "dynamic result sets 3 reads sql data");
-                        // Blob.
-                        s.execute("create table lobCheckTwo (b blob(30))");
-                        s.execute("insert into lobCheckTwo values (cast " + "(" + 
-                                          TestUtil.stringToHexLiteral("101010001101") +
-                                          " as blob(30)))");
-                        s.execute("insert into lobCheckTwo values (cast " +
-                                          "(" +
-                                          TestUtil.stringToHexLiteral("101010001101") +
-                                          " as blob(30)))");
-                        s.execute("create procedure blobproc () parameter style java " +
-                                "language java external name " +
-                                "'org.apache.derbyTesting.functionTests.util.ProcedureTest.blobselect' " +
-                                "dynamic result sets 1 reads sql data");
+                // Clob.
+                s.execute("create table lobCheckOne (c clob(30))");
+                s.execute("insert into lobCheckOne values (cast " +
+                                  "('yayorsomething' as clob(30)))");
+                s.execute("insert into lobCheckOne values (cast " +
+                                          "('yayorsomething2' as clob(30)))");
+                s.execute("create procedure clobproc () parameter style java " +
+                        "language java external name " +
+                                  "'org.apache.derbyTesting.functionTests.util.ProcedureTest.clobselect' " +
+                                  "dynamic result sets 3 reads sql data");
+                // Blob.
+                s.execute("create table lobCheckTwo (b blob(30))");
+                s.execute("insert into lobCheckTwo values (cast " + "(" + 
+                                  TestUtil.stringToHexLiteral("101010001101") +
+                                  " as blob(30)))");
+                s.execute("insert into lobCheckTwo values (cast " +
+                                  "(" +
+                                  TestUtil.stringToHexLiteral("101010001101") +
+                                  " as blob(30)))");
+                s.execute("create procedure blobproc () parameter style java " +
+                        "language java external name " +
+                        "'org.apache.derbyTesting.functionTests.util.ProcedureTest.blobselect' " +
+                        "dynamic result sets 1 reads sql data");
 
-                } catch (SQLException e) {
-                        fail("FAIL: Couldn't create required objects:");
-                        
-                }
 
                 try {
 
@@ -1099,7 +1093,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
     public void testParameterTypes() throws SQLException {
 
         Connection conn = getConnection();
-        Statement s = conn.createStatement();
+        Statement s = createStatement();
 
         s
                 .execute("create table PT1(A INTEGER not null primary key, B CHAR(10), C VARCHAR(20))");
@@ -1270,7 +1264,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
 
     public void testOutparams() throws SQLException {
         Connection conn = getConnection();
-        Statement s = conn.createStatement();
+        Statement s = createStatement();
 
         s
                 .execute("create procedure OP1(OUT a int, IN b int) parameter style java language java external name 'org.apache.derbyTesting.functionTests.tests.lang.LangProcedureTest.outparams1'");
@@ -1308,7 +1302,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
 
             }
 
-        CallableStatement op = conn.prepareCall("CALL OP1(?, ?)");
+        CallableStatement op = prepareCall("CALL OP1(?, ?)");
 
         op.registerOutParameter(1, Types.INTEGER);
         op.setInt(2, 7);
@@ -1352,7 +1346,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
             }
         }
 
-        op = conn.prepareCall("CALL OP2(?, ?)");
+        op = prepareCall("CALL OP2(?, ?)");
 
         op.registerOutParameter(1, Types.INTEGER);
         op.setInt(1, 3);
@@ -1366,7 +1360,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         s
                 .execute("create procedure OP3(INOUT a CHAR(10), IN b int) parameter style java language java external name 'org.apache.derbyTesting.functionTests.tests.lang.LangProcedureTest.inoutparams3'");
 
-        op = conn.prepareCall("CALL OP3(?, ?)");
+        op = prepareCall("CALL OP3(?, ?)");
 
         op.registerOutParameter(1, Types.CHAR);
         op.setString(1, "dan");
@@ -1387,7 +1381,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         checkMatchingProcedures(conn, "OP4", sysaliasDefinition,
                 dbMetadataDefinition, columnDefinition);
 
-        op = conn.prepareCall("CALL OP4(?, ?)");
+        op = prepareCall("CALL OP4(?, ?)");
         op.registerOutParameter(1, Types.DECIMAL);
         op.setString(2, null);
         op.execute();
@@ -1596,7 +1590,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
 
     public void testSQLControl() throws SQLException {
         Connection conn = getConnection();
-        Statement s = conn.createStatement();
+        Statement s = createStatement();
 
         s.execute("CREATE SCHEMA SQLC");
         s.execute("CREATE TABLE SQLC.SQLCONTROL_DML(I INT)");
