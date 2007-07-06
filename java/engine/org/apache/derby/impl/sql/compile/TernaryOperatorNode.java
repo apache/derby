@@ -623,6 +623,9 @@ public class TernaryOperatorNode extends ValueNode
 	}
 	/**
 	 * Bind locate operator
+	 * The variable receiver is the string which will searched
+	 * The variable leftOperand is the search character that will looked in the
+	 *     receiver variable.
 	 *
 	 * @return	The new top of the expression tree.
 	 *
@@ -643,18 +646,22 @@ public class TernaryOperatorNode extends ValueNode
 			if( leftOperand.requiresTypeFromContext())
 			{
 				receiver.setType(getVarcharDescriptor());
+	            //Since both receiver and leftOperands are parameters, use the
+				//collation of compilation schema for receiver.
+				receiver.setCollationUsingCompilationSchema(
+						StringDataValue.COLLATION_DERIVATION_IMPLICIT);            	
 			}
 			else
 			{
 				if( leftOperand.getTypeId().isStringTypeId() )
 				{
+					//Since the leftOperand is not a parameter, receiver will
+					//get it's collation from leftOperand through following
+					//setType method
 					receiver.setType(
 							         leftOperand.getTypeServices());
 				}
 			}
-			//collation of ? operand should be same as the compilation schema
-			receiver.setCollationUsingCompilationSchema(
-					StringDataValue.COLLATION_DERIVATION_IMPLICIT);
 		}
 							                            
 		/*
@@ -675,9 +682,14 @@ public class TernaryOperatorNode extends ValueNode
 							         receiver.getTypeServices());
 				}
 			}
-			//collation of ? operand should be same as the compilation schema
-			leftOperand.setCollationUsingCompilationSchema(
-					StringDataValue.COLLATION_DERIVATION_IMPLICIT);
+			//collation of ? operand should be picked up from the context.
+            //By the time we come here, receiver will have correct collation
+            //set on it and hence we can rely on it to get correct collation
+            //for this ? 
+			leftOperand.getTypeServices().setCollationDerivation(
+					receiver.getTypeServices().getCollationDerivation());
+			leftOperand.getTypeServices().setCollationType(
+        			receiver.getTypeServices().getCollationType());            	
 		}
 
 		/*

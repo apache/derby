@@ -858,6 +858,22 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     //No rows returned because the result of TRIM is going to be 'YSCOLUMNS'
     JDBC.assertEmpty(rs);
     
+    //Do parameter testing for LOCATE
+    //Following will fail because 'LOOKFORME' has collation of territory based
+    //but TABLENAME has collation of UCS_BASIC and hence LOCATE will fail 
+    //because the collation types of it's two operands do not match
+    ps = conn.prepareStatement("SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
+    		" LOCATE(?, TABLENAME) != 0");
+    ps.setString(1, "ABC");
+    rs = ps.executeQuery();
+    JDBC.assertEmpty(rs);
+    //Just switch the parameter position and try the sql again
+    ps = conn.prepareStatement("SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
+    		" LOCATE(TABLENAME, ?) != 0");
+    ps.setString(1, "ABC");
+    rs = ps.executeQuery();
+    JDBC.assertEmpty(rs);
+    
     //Do parameter testing with IN and subquery
     //Following will work just fine because ? will take it's collation from the
     //context which in this case will be collation of TABLENAME which has 
