@@ -505,6 +505,10 @@ public class TernaryOperatorNode extends ValueNode
 	}
 	/**
 	 * Bind trim expression. 
+	 * The variable receiver is the string that needs to be trimmed.
+	 * The variable leftOperand is the character that needs to be trimmed from
+	 *     receiver.
+	 *     
 	 * @return	The new top of the expression tree.
 	 *
 	 * @exception StandardException		Thrown on error
@@ -528,9 +532,19 @@ public class TernaryOperatorNode extends ValueNode
 			*/
 	
 			receiver.setType(getVarcharDescriptor());
-			//collation of ? operand should be same as the compilation schema
-			receiver.setCollationUsingCompilationSchema(
-					StringDataValue.COLLATION_DERIVATION_IMPLICIT);
+            //check if this parameter can pick up it's collation from the 
+			//character that will be used for trimming. If not(meaning the
+			//character to be trimmed is also a parameter), then it will take 
+			//it's collation from the compilation schema.
+            if (!leftOperand.requiresTypeFromContext()) {
+            	receiver.getTypeServices().setCollationDerivation(
+            			leftOperand.getTypeServices().getCollationDerivation());
+            	receiver.getTypeServices().setCollationType(
+            			leftOperand.getTypeServices().getCollationType());
+            } else {
+    			receiver.setCollationUsingCompilationSchema(
+    					StringDataValue.COLLATION_DERIVATION_IMPLICIT);            	
+            }
 		}
 
 		/* Is there a ? parameter on the left? */
@@ -538,9 +552,14 @@ public class TernaryOperatorNode extends ValueNode
 		{
 			/* Set the left operand type to varchar. */
 			leftOperand.setType(getVarcharDescriptor());
-			//collation of ? operand should be same as the compilation schema
-			leftOperand.setCollationUsingCompilationSchema(
-					StringDataValue.COLLATION_DERIVATION_IMPLICIT);
+			//collation of ? operand should be picked up from the context.
+            //By the time we come here, receiver will have correct collation
+            //set on it and hence we can rely on it to get correct collation
+            //for the ? for the character that needs to be used for trimming.
+			leftOperand.getTypeServices().setCollationDerivation(
+					receiver.getTypeServices().getCollationDerivation());
+			leftOperand.getTypeServices().setCollationType(
+        			receiver.getTypeServices().getCollationType());            	
 		}
 
 		bindToBuiltIn();
