@@ -54,7 +54,7 @@ public class VirtualColumnNode extends ValueNode
 	 */
 	int columnId;
 
-	boolean correlated = false;
+	private boolean correlated = false;
 
 
 	/**
@@ -275,15 +275,13 @@ public class VirtualColumnNode extends ValueNode
 	 */
 	public DataTypeDescriptor getTypeServices() throws StandardException
 	{
-        DataTypeDescriptor dtd = super.getTypeServices();
-        if( dtd == null && sourceColumn != null)
-        {
-            dtd = sourceColumn.getTypeServices();
-            if( dtd != null)
-                setType( dtd);
-        }
-        return dtd;
-    } // end of getTypeServices
+        return sourceColumn.getTypeServices();
+    }
+    
+    public void setType(DataTypeDescriptor dtd) throws StandardException
+    {
+        sourceColumn.setType(dtd);
+    }
     
     protected boolean isEquivalent(ValueNode o) throws StandardException
     {

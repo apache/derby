@@ -625,7 +625,7 @@ public class GroupByNode extends SingleChildResultSetNode
 					null,
 					getContextManager());
 			newColumnRef.setSource(newRC);
-			newColumnRef.setType(newRC.getExpressionType());
+			newColumnRef.setType(newRC.getExpression().getTypeServices());
 			newColumnRef.setNestingLevel(this.getLevel());
 			newColumnRef.setSourceLevel(this.getLevel());
 			tmpRC = (ResultColumn) getNodeFactory().getNode(
@@ -1087,7 +1087,7 @@ public class GroupByNode extends SingleChildResultSetNode
 											null,
 											getContextManager());
 		tmpColumnRef.setSource(targetRC);
-		tmpColumnRef.setType(targetRC.getExpressionType());
+		tmpColumnRef.setType(targetRC.getExpression().getTypeServices());
 		tmpColumnRef.setNestingLevel(this.getLevel());
 		tmpColumnRef.setSourceLevel(this.getLevel());
 		newRC = (ResultColumn) getNodeFactory().getNode(

@@ -71,6 +71,10 @@ import java.util.Vector;
  * statements, the result column represents an column in a stored table.
  * So, a ResultColumn has to be bound differently depending on the type of
  * statement it appears in.
+ * 
+ * The type of the ResultColumn can differ from its underlying expression,
+ * for example in certain joins the ResultColumn can be nullable even if
+ * its underlying column is not.
  *
  */
 
@@ -292,13 +296,6 @@ public class ResultColumn extends ValueNode
 	public DataTypeDescriptor getType()
 	{
 		return dataTypeServices;
-	}
-
-	public DataTypeDescriptor getExpressionType() throws StandardException
-	{
-		return (expression == null) ?
-			dataTypeServices :
-			expression.getTypeServices();
 	}
 
 	public int getColumnPosition()
@@ -864,12 +861,11 @@ public class ResultColumn extends ValueNode
 	public void checkStorableExpression()
 					throws StandardException
 	{
-		TypeId columnTypeId = getTypeId();
-		TypeId toStoreTypeId = getExpressionType().getTypeId();
+		TypeId toStoreTypeId = getExpression().getTypeId();
 
 		if (! getTypeCompiler().storable(toStoreTypeId, getClassFactory()))
 			throw StandardException.newException(SQLState.LANG_NOT_STORABLE, 
-				columnTypeId.getSQLTypeName(),
+                getTypeId().getSQLTypeName(),
 				toStoreTypeId.getSQLTypeName() );
 	}
 

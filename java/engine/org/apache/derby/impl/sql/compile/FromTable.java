@@ -824,7 +824,7 @@ abstract class FromTable extends ResultSetNode implements Optimizable
                 if (refCols.isSet(i))
                 {
                     ResultColumn rc = (ResultColumn) resultColumns.elementAt(i);
-                    DataTypeDescriptor expressionType = rc.getExpressionType();
+                    DataTypeDescriptor expressionType = rc.getExpression().getTypeServices();
                     if( expressionType != null)
                         perRowUsage += expressionType.estimatedMemoryUsage();
                 }

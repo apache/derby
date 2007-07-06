@@ -688,7 +688,7 @@ abstract class SetOperatorNode extends TableOperatorNode
 					(ResultColumn) rrsn.getResultColumns().elementAt(i);
 				if ( ! (rc.getExpression().requiresTypeFromContext()))
 				{
-					types[i] = rc.getExpressionType();
+					types[i] = rc.getExpression().getTypeServices();
 					numTypes++;
 				}
 			}

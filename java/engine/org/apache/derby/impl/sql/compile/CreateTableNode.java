@@ -310,7 +310,7 @@ public class CreateTableNode extends DDLStatementNode
 							SQLState.LANG_TABLE_REQUIRES_COLUMN_NAMES);
 				}
 
-				DataTypeDescriptor dtd = rc.getExpressionType();
+				DataTypeDescriptor dtd = rc.getExpression().getTypeServices();
 				if ((dtd != null) && !dtd.isUserCreatableType())
 				{
 					throw StandardException.newException(
