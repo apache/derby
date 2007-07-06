@@ -1046,6 +1046,12 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
     		//If both the types are string types, then we need to make sure
     		//they have the same collation set on them
     		if (compareWithTypeID.isStringTypeId() && typeId.isStringTypeId()) {
+    			//both the operands can not have the collation derivation of 
+    			//NONE. This is because in that case, we do not know what kind 
+    			//of collation to use for comparison.
+    			if (getCollationDerivation() == compareWithDTD.getCollationDerivation() &&
+    					getCollationDerivation() == StringDataValue.COLLATION_DERIVATION_NONE)
+    				return false;
     			if (getCollationDerivation() == compareWithDTD.getCollationDerivation() &&
     					getCollationType() == compareWithDTD.getCollationType())
     				return true;//collation matches
