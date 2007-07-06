@@ -905,14 +905,25 @@ public class TernaryOperatorNode extends ValueNode
         }
     } // end of bindDateTimeArg
 
+    /**
+     * This method gets called for non-character string types and hence no need 
+     * to set any collation info. Collation applies only to character string
+     * types.
+     *  
+     * @param arg Check if arg is a ? param and if yes, then set it's type to
+     *    jdbcType if arg doesn't have a type associated with it.
+     *    
+     * @param jdbcType Associate this type with arg if arg is a ? param with no
+     *    type associated with it
+     *    
+     * @return true if arg is a ? param with no type associated with it
+     * @throws StandardException
+     */
     private boolean bindParameter( ValueNode arg, int jdbcType) throws StandardException
     {
         if( arg.requiresTypeFromContext() && arg.getTypeId() == null)
         {
             arg.setType( new DataTypeDescriptor(TypeId.getBuiltInTypeId( jdbcType), true));
-			//collation of ? operand should be same as the compilation schema
-			arg.setCollationUsingCompilationSchema(
-					StringDataValue.COLLATION_DERIVATION_IMPLICIT);
             return true;
         }
         return false;
