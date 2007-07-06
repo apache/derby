@@ -547,7 +547,11 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     checkLangBasedQuery(s, "SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
     		" CAST (TABLENAME || ' ' AS CHAR(12)) = " +
 			" 'SYSCOLUMNS '",
-    		new String[][] {{"SYSCOLUMNS"} });   
+    		new String[][] {{"SYSCOLUMNS"} });
+    //Following will fail because both sides of the = operator have collation
+    //derivation of NONE. DERBY-2725
+    assertStatementError("42818", s, "SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
+    		" TABLENAME || ' ' = TABLENAME || 'SYSCOLUMNS '");   
 
     //Do some testing using COALESCE
     //following will fail because result string of COALESCE has 
