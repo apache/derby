@@ -1537,8 +1537,8 @@ public class CollationTest2 extends BaseJDBCTestCase
                     new String[] {"nonmatchiing"}, 1, null, true);
             checkParamQuery(
                     conn, zero_row_syscat_query_param3, 
-                    new String[] {"nonmatching", "nonmatching"}, 2, 
-                    new String[][] {{"124"}}, true);
+                    new String[] {"nonmatching", "matching"}, 2, 
+                    new String[][] {{"0"}}, true);
         }
         else
         {
@@ -1552,8 +1552,8 @@ public class CollationTest2 extends BaseJDBCTestCase
                     new String[] {"nonmatchiing"}, 1, null, true);
             checkParamQuery(
                     conn, zero_row_syscat_query_param3, 
-                    new String[] {"nonmatching", "nonmatching"}, 2, 
-                    new String[][] {{"124"}}, true);
+                    new String[] {"nonmatching", "123"}, 2, 
+                    new String[][] {{"0"}}, true);
         }
 
         dropLikeTable(conn);
