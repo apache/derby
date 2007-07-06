@@ -26,7 +26,7 @@
   <target name="toursdb" depends="compile,buildschema,loadtables,jarup"/>
 
   <target name="compile">
-    <echo level=""info" message="Begin building toursdb"/>
+    <echo level="info" message="Begin building toursdb"/>
     <javac srcdir="..">
       <include name="toursdb/insertMaps.java"/>
     </javac>
