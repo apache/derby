@@ -774,7 +774,10 @@ public class TernaryOperatorNode extends ValueNode
 			*/
 	
 			receiver.setType(getVarcharDescriptor());
-			//collation of ? operand should be same as the compilation schema
+			//collation of ? operand should be same as the compilation schema 
+			//because that is the only context available for us to pick up the
+			//collation. There are no other character operands to SUBSTR method
+			//to pick up the collation from.
 			receiver.setCollationUsingCompilationSchema(
 					StringDataValue.COLLATION_DERIVATION_IMPLICIT);
 		}
