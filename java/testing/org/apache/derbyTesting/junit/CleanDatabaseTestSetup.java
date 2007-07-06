@@ -29,7 +29,10 @@ import junit.framework.Test;
 /**
  * Test decorator that cleans a database on setUp and
  * tearDown to provide a test with a consistent empty
- * database as a starting point.
+ * database as a starting point. The obejcts are cleaned
+ * (dropped) on tearDown to ensure any filures dropping
+ * the objects can easily be associated with the test
+ * fixtures that created them.
  * <P>
  * Tests can extend to provide a decorator that defines
  * some schema items and then have CleanDatabaseTestSetup
@@ -64,7 +67,10 @@ public class CleanDatabaseTestSetup extends BaseJDBCTestSetup {
     protected void setUp() throws Exception {
         Connection conn = getConnection();
         conn.setAutoCommit(false);
-        CleanDatabaseTestSetup.cleanDatabase(conn);  
+        
+        // compress as well to allow the fixtures wrapped in
+        // this decorator to start with a clean database.
+        CleanDatabaseTestSetup.cleanDatabase(conn, true);  
         
         Statement s = conn.createStatement();
         decorateSQL(s);
@@ -97,19 +103,31 @@ public class CleanDatabaseTestSetup extends BaseJDBCTestSetup {
     protected void tearDown() throws Exception {
         Connection conn = getConnection();
         conn.setAutoCommit(false);
-        CleanDatabaseTestSetup.cleanDatabase(conn);       
+        
+        // Clean the database, ensures that any failure dropping
+        // objects can easily be linked to test fixtures that
+        // created them
+        //
+        // No need to compress, any test requiring such a clean
+        // setup should not assume it is following another test
+        // with this decorator, it should wrap itself in a CleanDatabaseTestSetup.
+        // Compress is a somewhat expensive operation so avoid it if possible.
+        CleanDatabaseTestSetup.cleanDatabase(conn, false);       
         super.tearDown();
     }
 
     /**
      * Clean a complete database
      * @param conn Connection to be used, must not be in auto-commit mode.
+     * @param compress True if selected system tables are to be compressed
+     * to avoid potential ordering differences in test output.
      * @throws SQLException database error
      */
-     public static void cleanDatabase(Connection conn) throws SQLException {
+     public static void cleanDatabase(Connection conn, boolean compress) throws SQLException {
          clearProperties(conn);
          removeObjects(conn);
-         compressObjects(conn);
+         if (compress)
+             compressObjects(conn);
      }
      
      /**
