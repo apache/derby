@@ -438,7 +438,7 @@ public class MessageBuilder extends Task
                         (
                          "p",
                          "The following tables list <i>SQLStates</i> for exceptions. Exceptions " +
-                         "that begin with an <i>X</i> are specific to <ph conref=\"refconrefs.dita#prod/productshortname\"></ph>."
+                         "that begin with an <i>X</i> are specific to <ph conref=\"../conrefs.dita#prod/productshortname\"></ph>."
                          );
                 }
                 ditaWriter.endTag();
