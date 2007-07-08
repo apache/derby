@@ -44,15 +44,14 @@ public class JiraConnector {
 
 	public static String jira_releaseNotesSource =
 		"http://issues.apache.org/jira/secure/IssueNavigator.jspa?view=rss" +
-		"&pid=10594&sorter/field=issuekey&sorter/order=DESC&tempMax=50" +
-		"&reset=true&decorator=none&customfield_12310090=" +
-		"Existing+Application+Impact&customfield_12310090=Release+Note+Needed";
+		"&pid=10594&sorter/field=issuekey&sorter/order=DESC&tempMax=100" +
+		"&reset=true&decorator=none&customfield_12310090=Release+Note+Needed";
 
 	public static String jira_fixedBugsSource =
 		"http://issues.apache.org/jira/sr/jira.issueviews:" +
 		"searchrequest-xml/temp/SearchRequest.xml?&pid=10594&resolution=1&" +
-		"fixVersion=10.3.0.0&sorter/field=issuekey&sorter/order=DESC&" +
-		"tempMax=1000&reset=true&decorator=none";
+		"fixVersion=10.3.0.0&fixVersion=10.3.1.0&fixVersion=10.3.1.1&sorter/field=issuekey&sorter/order=DESC&" +
+		"tempMax=2000&reset=true&decorator=none";
 
 	// other urls to some cute jira reports in xml.
 	// all 
