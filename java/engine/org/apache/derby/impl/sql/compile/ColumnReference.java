@@ -391,17 +391,6 @@ public class ColumnReference extends ValueNode
 	}
 
 	/**
-	 * Set the name of this column
-	 *
-	 * @param columnName	The name of this column
-	 */
-
-	public void setColumnName(String columnName)
-	{
-		this.columnName = columnName;
-	}
-
-	/**
 	 * Get the table number for this ColumnReference.
 	 *
 	 * @return	int The table number for this ColumnReference
@@ -1009,22 +998,17 @@ public class ColumnReference extends ValueNode
 	}
 
 	/**
-	 * Get the DataTypeServices from this Node.
-	 *
-	 * @return	The DataTypeServices from this Node.  This
-	 *		may be null if the node isn't bound yet.
+	 * The type of a ColumnReference is the type of its
+     * source unless the source is null then it is
+     * the type that has been set on this node.
 	 */
-	public DataTypeDescriptor getTypeServices() throws StandardException
-	{
-        DataTypeDescriptor dtd = super.getTypeServices();
-        if( dtd == null && source != null)
-        {
-            dtd = source.getTypeServices();
-            if( dtd != null)
-                setType( dtd);
-        }
-        return dtd;
-    } // end of getTypeServices
+	public DataTypeDescriptor getTypeServices()
+	{        
+        if (source == null)
+            return super.getTypeServices();
+       
+        return source.getTypeServices();
+    }
 
 	/**
 	 * Find the source result set for this ColumnReference and

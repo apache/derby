@@ -3477,8 +3477,9 @@ public class ResultColumnList extends QueryTreeNodeVector
 		return mapArray;
 	}
 
-	/** Set the nullability of every ResultColumn in this list */
-	public void setNullability(boolean nullability)
+	/** Set the nullability of every ResultColumn in this list 
+	 * @throws StandardException */
+	public void setNullability(boolean nullability) throws StandardException
 	{
 		int size = size();
 

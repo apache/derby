@@ -50,9 +50,7 @@ public abstract class ValueNode extends QueryTreeNode
     /**
      * The data type for this node.
      */
-	protected DataTypeDescriptor	dataTypeServices;
-   
-	private TypeCompiler typeCompiler;
+	private DataTypeDescriptor	dataTypeServices;
 
 	// Whether or not additional predicates have been created from this one.
 	boolean	transformed;
@@ -195,10 +193,19 @@ public abstract class ValueNode extends QueryTreeNode
 	 * @return	The DataTypeServices from this ValueNode.  This
 	 *		may be null if the node isn't bound yet.
 	 */
-	public DataTypeDescriptor getTypeServices() throws StandardException
+	public DataTypeDescriptor getTypeServices()
 	{
 		return dataTypeServices;
 	}
+    
+    /**
+     * Set the nullability of this value.
+     * @throws StandardException 
+     */
+    public void setNullability(boolean nullability) throws StandardException
+    {
+        setType(getTypeServices().getNullabilityType(nullability));
+    }
 
 	/**
 	 * Get the TypeId from this ValueNode.
@@ -245,9 +252,6 @@ public abstract class ValueNode extends QueryTreeNode
 	public void setType(DataTypeDescriptor dataTypeServices) throws StandardException
 	{
 		this.dataTypeServices = dataTypeServices;
-
-		// Clear the typeCompiler, just in case type has changed
-		typeCompiler = null;
 	}
 	
 	/**

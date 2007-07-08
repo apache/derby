@@ -613,7 +613,6 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 					 */
 					matchingRC = resultColumn;
 					columnReference.setSource(resultColumn);
-					columnReference.setType(resultColumn.getTypeServices());
 					/* Set the nesting level at which the CR appears and the nesting level
 					 * of its source RC.
 					 */

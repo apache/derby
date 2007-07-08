@@ -1178,7 +1178,7 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 				 */
 				if (restriction.getTypeServices().isNullable())
 				{
-					nextAnd.getTypeServices().setNullability(true);
+					nextAnd.setNullability(true);
 				}
 			}
 			restriction = nextAnd;
@@ -1263,7 +1263,7 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 				 */
 				if (restriction.getTypeServices().isNullable())
 				{
-					nextAnd.getTypeServices().setNullability(true);
+					nextAnd.setNullability(true);
 				}
 			}
 			restriction = nextAnd;

@@ -139,20 +139,15 @@ public class CastNode extends ValueNode
 
 	public String toString()
 	{
-		if (SanityManager.DEBUG)
-		{
-			try {
-                return "castTarget: " + getTypeServices() + "\n" +
-                	super.toString();
-            } catch (StandardException e) {
-                // TEMP - getTypeServices() should not be throwing an exception
-                return "";
-            }
-		}
-		else
-		{
-			return "";
-		}
+	    if (SanityManager.DEBUG)
+	    {
+	        return "castTarget: " + getTypeServices() + "\n" +
+	        super.toString();
+	    }
+	    else
+	    {
+	        return "";
+	    }
 	}
 
 	/**

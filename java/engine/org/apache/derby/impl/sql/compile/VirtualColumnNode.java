@@ -273,7 +273,7 @@ public class VirtualColumnNode extends ValueNode
 	 * @return	The DataTypeServices from this Node.  This
 	 *		may be null if the node isn't bound yet.
 	 */
-	public DataTypeDescriptor getTypeServices() throws StandardException
+	public DataTypeDescriptor getTypeServices()
 	{
         return sourceColumn.getTypeServices();
     }

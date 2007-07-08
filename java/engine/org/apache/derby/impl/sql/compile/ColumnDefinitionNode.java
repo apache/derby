@@ -164,8 +164,8 @@ public class ColumnDefinitionNode extends TableElementNode
 				// you could create a column with ai default, add data, drop 
 				// the default, and try to add it back again you'll get an
 				// error because the column is marked nullable.
-				if (dataTypeServices != null)
-					(this.dataTypeServices).setNullability(false);
+                if (dataTypeServices != null)
+                    this.dataTypeServices = getDataTypeServices().getNullabilityType(false);
 			}
 		}
 	}
@@ -572,7 +572,7 @@ public class ColumnDefinitionNode extends TableElementNode
 							(SubqueryList) null,
 							(Vector) null);
 
-			TypeId columnTypeId = (TypeId) dataTypeServices.getTypeId();
+			TypeId columnTypeId = dataTypeServices.getTypeId();
 			TypeId defaultTypeId = defaultTree.getTypeId();
 
 			// Check for 'invalid default' errors (42894)

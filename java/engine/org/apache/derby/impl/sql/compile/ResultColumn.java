@@ -21,48 +21,27 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.services.context.ContextManager;
-
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.types.DataValueDescriptor;
-import org.apache.derby.iapi.types.StringDataValue;
-import org.apache.derby.iapi.sql.ResultColumnDescriptor;
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.types.DataValueDescriptor;
-import org.apache.derby.iapi.types.TypeId;
-import org.apache.derby.iapi.services.io.StoredFormatIds;
-import org.apache.derby.iapi.types.DataValueFactory;
-
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
-import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
-
-import org.apache.derby.iapi.sql.compile.CompilerContext;
-import org.apache.derby.iapi.sql.compile.RowOrdering;
-import org.apache.derby.iapi.sql.compile.Visitable;
-import org.apache.derby.iapi.sql.compile.Visitor;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-
-import org.apache.derby.impl.sql.compile.ActivationClassBuilder;
-import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
-
-import org.apache.derby.iapi.store.access.Qualifier;
+import java.util.Vector;
 
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.reference.ClassName;
-
-import org.apache.derby.iapi.util.JBitSet;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.io.StoredFormatIds;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.ResultColumnDescriptor;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.sql.compile.Visitable;
+import org.apache.derby.iapi.sql.compile.Visitor;
+import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
+import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
+import org.apache.derby.iapi.store.access.Qualifier;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.DataValueDescriptor;
+import org.apache.derby.iapi.types.DataValueFactory;
+import org.apache.derby.iapi.types.StringDataValue;
+import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.util.StringUtil;
-
-import java.sql.Types;
-
-import java.util.Vector;
 
 /**
  * A ResultColumn represents a result column in a SELECT, INSERT, or UPDATE
@@ -181,12 +160,10 @@ public class ResultColumn extends ValueNode
 		else if (arg1 instanceof ColumnDescriptor)
 		{
 			ColumnDescriptor coldes = (ColumnDescriptor) arg1;
-			DataTypeDescriptor colType = coldes.getType();
 
 			this.name = coldes.getColumnName();
 			this.exposedName = name;
-			/* Clone the type info here, so we can change nullability if needed */
-			setType(new DataTypeDescriptor(colType, colType.isNullable()));
+			setType(coldes.getType());
 			this.columnDescriptor = coldes;
 			this.expression = (ValueNode) arg2;
 			this.autoincrement = coldes.isAutoincrement();
@@ -295,7 +272,7 @@ public class ResultColumn extends ValueNode
 
 	public DataTypeDescriptor getType()
 	{
-		return dataTypeServices;
+		return getTypeServices();
 	}
 
 	public int getColumnPosition()
@@ -496,7 +473,7 @@ public class ResultColumn extends ValueNode
 				"tableName: " + tableName + "\n" +
 				"isNameGenerated: " + isNameGenerated + "\n" +
 				"sourceTableName: " + sourceTableName + "\n" +
-				"type: " + dataTypeServices + "\n" +
+				"type: " + getTypeServices() + "\n" +
 				"columnDescriptor: " + columnDescriptor + "\n" +
 				"isGenerated: " + isGenerated + "\n" +
 				"isGeneratedForUnmatchedColumnInInsert: " + isGeneratedForUnmatchedColumnInInsert + "\n" +
@@ -833,19 +810,21 @@ public class ResultColumn extends ValueNode
 	public void checkStorableExpression(ResultColumn toStore)
 					throws StandardException
 	{
-		TypeId columnTypeId, toStoreTypeId;
-
-		toStoreTypeId = toStore.getTypeId();
-        if( toStoreTypeId == null)
-            return;
-        
-		columnTypeId = getTypeId();
-
-		if (! getTypeCompiler().storable(toStoreTypeId, getClassFactory()))
-			throw StandardException.newException(SQLState.LANG_NOT_STORABLE, 
-				columnTypeId.getSQLTypeName(),
-				toStoreTypeId.getSQLTypeName() );
+        checkStorableExpression((ValueNode) toStore);
 	}
+    
+    private void checkStorableExpression(ValueNode source)
+        throws StandardException
+    {
+        TypeId toStoreTypeId = source.getTypeId();
+        
+        if (!getTypeCompiler().storable(toStoreTypeId, getClassFactory()))
+        {
+           throw StandardException.newException(SQLState.LANG_NOT_STORABLE, 
+                    getTypeId().getSQLTypeName(),
+                    toStoreTypeId.getSQLTypeName() );
+        }   
+    }
 
 	/**
 		This verifies that the expression is storable into the result column.
@@ -861,12 +840,7 @@ public class ResultColumn extends ValueNode
 	public void checkStorableExpression()
 					throws StandardException
 	{
-		TypeId toStoreTypeId = getExpression().getTypeId();
-
-		if (! getTypeCompiler().storable(toStoreTypeId, getClassFactory()))
-			throw StandardException.newException(SQLState.LANG_NOT_STORABLE, 
-                getTypeId().getSQLTypeName(),
-				toStoreTypeId.getSQLTypeName() );
+        checkStorableExpression(getExpression());
 	}
 
 	/**
@@ -955,28 +929,15 @@ public class ResultColumn extends ValueNode
 	boolean columnTypeAndLengthMatch()
 		throws StandardException
 	{
-		DataTypeDescriptor	resultColumnType;
-		DataTypeDescriptor	expressionType = expression.getTypeServices();
 
 		/*
 		** We can never make any assumptions about
 		** parameters.  So don't even bother in this
 		** case.
 		*/
-		if (expression.requiresTypeFromContext())
+		if (getExpression().requiresTypeFromContext())
 		{
 			return false;
-		}
-
-		resultColumnType = getType();
-
-		if (SanityManager.DEBUG)
-		{
-			if (! (resultColumnType != null))
-			{
-				SanityManager.THROWASSERT("Type is null for column " + 
-										  this);
-			}
 		}
 
 		// Are we inserting/updating an XML column?  If so, we always
@@ -985,38 +946,20 @@ public class ResultColumn extends ValueNode
 		// and we need to make sure they match--but we don't know
 		// the "kind" until execution time.  See the "normalize"
 		// method in org.apache.derby.iapi.types.XML for more.
-		if (resultColumnType.getTypeId().isXMLTypeId())
+		if (getTypeId().isXMLTypeId())
 			return false;
-
-		/* Are they the same type? */
-		if ( ! resultColumnType.getTypeId().getSQLTypeName().equals(
-			expressionType.getTypeId().getSQLTypeName()
-				)
-			)
-		{
-			return false;
-		}
-
-		/* Are they the same precision? */
-		if (resultColumnType.getPrecision() != expressionType.getPrecision())
-		{
-			return false;
-		}
-
-		/* Are they the same scale? */
-		if (resultColumnType.getScale() != expressionType.getScale())
-		{
-			return false;
-		}
-
-		/* Are they the same width? */
-		if (resultColumnType.getMaximumWidth() != expressionType.getMaximumWidth())
-		{
-			return false;
-		}
+        
+        
+        DataTypeDescriptor  expressionType = getExpression().getTypeServices();
+        
+        if (expressionType == null)
+            System.out.println(getExpression().getClass());
+        
+        if (!getTypeServices().isExactTypeAndLengthMatch(expressionType))
+            return false;
 
 		/* Is the source nullable and the target non-nullable? */
-		if ((! resultColumnType.isNullable()) && expressionType.isNullable())
+		if ((! getTypeServices().isNullable()) && expressionType.isNullable())
 		{
 			return false;
 		}
@@ -1027,12 +970,10 @@ public class ResultColumn extends ValueNode
 	boolean columnTypeAndLengthMatch(ResultColumn otherColumn)
 		throws StandardException
 	{
-		DataTypeDescriptor	resultColumnType;
-		DataTypeDescriptor	otherResultColumnType;
 		ValueNode otherExpression = otherColumn.getExpression();
 
-		resultColumnType = getType();
-		otherResultColumnType = otherColumn.getType();
+        DataTypeDescriptor resultColumnType = getTypeServices();
+        DataTypeDescriptor otherResultColumnType = otherColumn.getTypeServices();
 
 		if (SanityManager.DEBUG)
 		{
@@ -1464,9 +1405,21 @@ public class ResultColumn extends ValueNode
 	 */
 	public int getMaximumColumnSize()
 	{
-		return dataTypeServices.getTypeId()
-			.getApproximateLengthInBytes(dataTypeServices);
+		return getTypeServices().getTypeId()
+			.getApproximateLengthInBytes(getTypeServices());
 	}
+    
+    public DataTypeDescriptor getTypeServices()
+    {
+        DataTypeDescriptor type = super.getTypeServices();
+        if (type != null)
+            return type;
+        
+        if (getExpression() != null)
+            return getExpression().getTypeServices();
+        
+        return null;
+    }
 
 	/**
 	 * Return the variant type for the underlying expression.
@@ -1534,14 +1487,6 @@ public class ResultColumn extends ValueNode
 			expression = (ValueNode)expression.accept(v);
 		}
 		return returnNode;
-	}
-
-	/**
-	 * Set the nullability of this ResultColumn.
-	 */
-	public void setNullability(boolean nullability)
-	{
-		dataTypeServices.setNullability(nullability);
 	}
 
 	/**
@@ -1727,24 +1672,6 @@ public class ResultColumn extends ValueNode
 
 		}
 	}
-
-	/**
-	 * Get the DataTypeServices from this Node.
-	 *
-	 * @return	The DataTypeServices from this Node.  This
-	 *		may be null if the node isn't bound yet.
-	 */
-	public DataTypeDescriptor getTypeServices() throws StandardException
-	{
-        DataTypeDescriptor dtd = super.getTypeServices();
-        if( dtd == null && expression != null)
-        {
-            dtd = expression.getTypeServices();
-            if( dtd != null)
-                setType( dtd);
-        }
-        return dtd;
-    } // end of getTypeServices
 
     public TableName getTableNameObject() {
         return null;
