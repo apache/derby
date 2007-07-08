@@ -120,7 +120,7 @@ public class AutoloadTest extends BaseJDBCTestCase
         // not loaded implicitly by some other means.
         TestSuite suite = new TestSuite("AutoloadTest: no autoloading expected");
         
-        suite.addTest(new AutoloadTest("testEmbeddedNotStarted"));
+        suite.addTest(SecurityManagerSetup.noSecurityManager(new AutoloadTest("testEmbeddedNotStarted")));
         suite.addTest(new AutoloadTest("noloadTestNodriverLoaded"));
         suite.addTest(TestConfiguration.clientServerDecorator(
                 new AutoloadTest("noloadTestNodriverLoaded")));
@@ -318,7 +318,11 @@ public class AutoloadTest extends BaseJDBCTestCase
     
     /**
      * Return true if a ThreadGroup exists that has a name
-     * starting with derby.
+     * starting with 'derby.'. This needs to run without a security
+     * manager as it requires permissions to see all active
+     * thread groups. Since this not testing Derby functionality
+     * there's harm to not having a security manager, since
+     * no code is executed against Derby.
      */
     private boolean hasDerbyThreadGroup() {
         ThreadGroup tg = Thread.currentThread().getThreadGroup();
