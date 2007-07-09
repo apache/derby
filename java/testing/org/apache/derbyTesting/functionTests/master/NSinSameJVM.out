@@ -1,6 +1,6 @@
 main-NSinSameJVM: Derby drivers loaded
-Apache Derby Network Server - 10.3.1.1 -(EXPECTED SUBVERSION INFO)  started and ready to accept connections on port 20000 at xxxxxxFILTERED-TIMESTAMPxxxxxGMT 
+Apache Derby Network Server - 10.3.1.2 -(EXPECTED SUBVERSION INFO)  started and ready to accept connections on port 20000 at xxxxxxFILTERED-TIMESTAMPxxxxxGMT 
 main-NSinSameJVM: NetworkServer started
 main-NSinSameJVM: Connected to database NSinSameJVMTestDB;create=true
 getting ready to shutdown
-Apache Derby Network Server - 10.3.1.1 -(EXPECTED SUBVERSION INFO)  shutdown at xxxxxxFILTERED-TIMESTAMPxxxxxGMT
+Apache Derby Network Server - 10.3.1.2 -(EXPECTED SUBVERSION INFO)  shutdown at xxxxxxFILTERED-TIMESTAMPxxxxxGMT
