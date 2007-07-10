@@ -1185,6 +1185,17 @@ Guide.
             </msg>
 
             <msg>
+                <name>42879</name>
+                <text>The ORDER BY clause may not contain column '{0}', since the query specifies DISTINCT and that column does not appear in the query result.</text>
+                <arg>columnName</arg>
+            </msg>
+            <msg>
+                <name>4287A</name>
+                <text>The ORDER BY clause may not specify an expression, since the query specifies DISTINCT.</text>
+            </msg>
+
+
+            <msg>
                 <name>42884</name>
                 <text>No authorized routine named '{0}' of type '{1}' having compatible arguments was found.</text>
                 <arg>routineName</arg>
