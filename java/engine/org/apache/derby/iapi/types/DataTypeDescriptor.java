@@ -89,6 +89,21 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 	{
 		return DataTypeDescriptor.getBuiltInDataTypeDescriptor(jdbcType, true, length);
 	}
+    
+    /**
+     * Return a nullable catalog type for a JDBC builtin type and length.
+     */
+    public static TypeDescriptor getCatalogType(int jdbcType, int length)
+    {
+        return getBuiltInDataTypeDescriptor(jdbcType, length).getCatalogType();
+    }
+    /**
+     * Return a nullable catalog type for a fixed length JDBC builtin type.
+     */
+    public static TypeDescriptor getCatalogType(int jdbcType)
+    {
+        return getBuiltInDataTypeDescriptor(jdbcType).getCatalogType();
+    }
 
 	/**
 	 * Get a descriptor that corresponds to a builtin JDBC type.

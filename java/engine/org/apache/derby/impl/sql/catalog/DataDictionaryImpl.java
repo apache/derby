@@ -6186,7 +6186,7 @@ public final class	DataDictionaryImpl
 				{
 					// details[1] Return type
 					TypeDescriptor rt =
-						DataTypeDescriptor.getBuiltInDataTypeDescriptor(details[1]);
+						DataTypeDescriptor.getBuiltInDataTypeDescriptor(details[1]).getCatalogType();
 
 					// details[4] - zero or single argument type
 					String paramType = details[4];
@@ -6201,7 +6201,7 @@ public final class	DataDictionaryImpl
 						paramModes = DataDictionaryImpl.SYSFUN_PMODE;
 						pt = new TypeDescriptor[1];
 						pt[0] =
-							DataTypeDescriptor.getBuiltInDataTypeDescriptor(paramType);
+							DataTypeDescriptor.getBuiltInDataTypeDescriptor(paramType).getCatalogType();
 					}
 					else
 					{
@@ -8740,9 +8740,9 @@ public final class	DataDictionaryImpl
     TransactionController   tc)
         throws StandardException
     {
-        TypeDescriptor integerType = DataTypeDescriptor.INTEGER.getCatalogType();
-        TypeDescriptor varchar128Type =
-            DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 128).getCatalogType();
+        // Types used for routine parameters and return types, all nullable.
+        TypeDescriptor varchar32672Type = DataTypeDescriptor.getCatalogType(
+                Types.VARCHAR, 32672);
         /*
 		** SYSCS_UTIL routines.
 		*/
@@ -8763,8 +8763,8 @@ public final class	DataDictionaryImpl
 
             // procedure argument types
             TypeDescriptor[] arg_types = {
-                    varchar128Type,
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    TypeDescriptor.VARCHAR128,
+                DataTypeDescriptor.getCatalogType(
                     Types.VARCHAR, Limits.DB2_VARCHAR_MAXWIDTH)
             };
 
@@ -8788,10 +8788,9 @@ public final class	DataDictionaryImpl
 
             // procedure argument types
             TypeDescriptor[] arg_types = {
-                    varchar128Type,
-                    varchar128Type,
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                    Types.SMALLINT)
+                    TypeDescriptor.VARCHAR128,
+                    TypeDescriptor.VARCHAR128,
+                    TypeDescriptor.SMALLINT
 
             };
 
@@ -8858,7 +8857,7 @@ public final class	DataDictionaryImpl
 
             // procedure argument types
             TypeDescriptor[] arg_types = {
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                DataTypeDescriptor.getCatalogType(
                     Types.VARCHAR, Limits.DB2_VARCHAR_MAXWIDTH)
             };
 
@@ -8882,10 +8881,9 @@ public final class	DataDictionaryImpl
 
             // procedure argument types
             TypeDescriptor[] arg_types = {
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                DataTypeDescriptor.getCatalogType(
                     Types.VARCHAR, Limits.DB2_VARCHAR_MAXWIDTH),
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                    Types.SMALLINT)
+                    TypeDescriptor.SMALLINT
             };
 
             createSystemProcedureOrFunction(
@@ -8906,10 +8904,7 @@ public final class	DataDictionaryImpl
             String[] arg_names = {"DELETE_ARCHIVED_LOG_FILES"};
 
             // procedure argument types
-            TypeDescriptor[] arg_types = {
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                    Types.SMALLINT)
-            };
+            TypeDescriptor[] arg_types = {TypeDescriptor.SMALLINT};
 
             createSystemProcedureOrFunction(
                 "SYSCS_DISABLE_LOG_ARCHIVE_MODE",
@@ -8929,10 +8924,7 @@ public final class	DataDictionaryImpl
             String[] arg_names = {"ENABLE"};
 
             // procedure argument types
-            TypeDescriptor[] arg_types = {
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                    Types.SMALLINT)
-            };
+            TypeDescriptor[] arg_types = {TypeDescriptor.SMALLINT};
 
             routine_uuid = createSystemProcedureOrFunction(
                 "SYSCS_SET_RUNTIMESTATISTICS",
@@ -8954,10 +8946,7 @@ public final class	DataDictionaryImpl
             String[] arg_names = {"ENABLE"};
 
             // procedure argument types
-            TypeDescriptor[] arg_types = {
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                    Types.SMALLINT)
-            };
+            TypeDescriptor[] arg_types = {TypeDescriptor.SMALLINT};
 
             routine_uuid = createSystemProcedureOrFunction(
                 "SYSCS_SET_STATISTICS_TIMING",
@@ -8988,9 +8977,7 @@ public final class	DataDictionaryImpl
             String[] arg_names = {"KEY"};
 
             // procedure argument types
-            TypeDescriptor[] arg_types = {
-                    varchar128Type
-            };
+            TypeDescriptor[] arg_types = {TypeDescriptor.VARCHAR128};
 
             createSystemProcedureOrFunction(
                 "SYSCS_GET_DATABASE_PROPERTY",
@@ -9000,7 +8987,7 @@ public final class	DataDictionaryImpl
 				0,
 				0,
                 RoutineAliasInfo.READS_SQL_DATA,
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                DataTypeDescriptor.getCatalogType(
                     Types.VARCHAR, Limits.DB2_VARCHAR_MAXWIDTH),
                 tc);
         }
@@ -9012,8 +8999,8 @@ public final class	DataDictionaryImpl
 
             // procedure argument types
             TypeDescriptor[] arg_types = {
-                    varchar128Type,
-                    varchar128Type
+                    TypeDescriptor.VARCHAR128,
+                    TypeDescriptor.VARCHAR128
             };
 
             createSystemProcedureOrFunction(
@@ -9024,8 +9011,7 @@ public final class	DataDictionaryImpl
 				0,
 				0,
                 RoutineAliasInfo.READS_SQL_DATA,
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                    Types.INTEGER),
+                TypeDescriptor.INTEGER,
                 tc);
         }
 
@@ -9040,13 +9026,13 @@ public final class	DataDictionaryImpl
 				0,
 				0,
                 RoutineAliasInfo.CONTAINS_SQL,
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                DataTypeDescriptor.getCatalogType(
                     Types.VARCHAR, Limits.DB2_VARCHAR_MAXWIDTH),
 
                 /*
                 TODO - mikem, wants to be a CLOB, but don't know how to do 
                 that yet.  Testing it with varchar for now.
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                DataTypeDescriptor.getCatalogType(
                     Types.CLOB, Limits.DB2_LOB_MAXWIDTH),
                 */
                 tc);
@@ -9068,10 +9054,10 @@ public final class	DataDictionaryImpl
             String[] arg_names = {"URL", "JAR", "DEPLOY"};
 
             TypeDescriptor[] arg_types = {
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+				DataTypeDescriptor.getCatalogType(
                     Types.VARCHAR, 256),
-                    varchar128Type,
-                    integerType
+                    TypeDescriptor.VARCHAR128,
+                    TypeDescriptor.INTEGER
             };
 
             createSystemProcedureOrFunction(
@@ -9091,9 +9077,9 @@ public final class	DataDictionaryImpl
             String[] arg_names = {"URL", "JAR"};
 
             TypeDescriptor[] arg_types = {
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+				DataTypeDescriptor.getCatalogType(
                     Types.VARCHAR, 256),
-                    varchar128Type
+                    TypeDescriptor.VARCHAR128
             };
 
             createSystemProcedureOrFunction(
@@ -9113,8 +9099,8 @@ public final class	DataDictionaryImpl
             String[] arg_names = {"JAR", "UNDEPLOY"};
 
             TypeDescriptor[] arg_types = {
-                    varchar128Type,
-                    integerType
+                    TypeDescriptor.VARCHAR128,
+                    TypeDescriptor.INTEGER
             };
 
             createSystemProcedureOrFunction(
@@ -9144,15 +9130,14 @@ public final class	DataDictionaryImpl
 
             // procedure argument types
             TypeDescriptor[] arg_types = {
-                    varchar128Type, 
-                    varchar128Type,
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-				Types.VARCHAR, 32672),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    TypeDescriptor.VARCHAR128, 
+                    TypeDescriptor.VARCHAR128,
+                    varchar32672Type,
+				DataTypeDescriptor.getCatalogType(
 				Types.CHAR, 1),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+				DataTypeDescriptor.getCatalogType(
 				Types.CHAR, 1),
-                varchar128Type
+                TypeDescriptor.VARCHAR128
             };
 
             createSystemProcedureOrFunction(
@@ -9181,15 +9166,13 @@ public final class	DataDictionaryImpl
 
             // procedure argument types
             TypeDescriptor[] arg_types = {
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-				Types.VARCHAR, 32672), 
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-				Types.VARCHAR, 32672),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    varchar32672Type, 
+                    varchar32672Type,
+				DataTypeDescriptor.getCatalogType(
 				Types.CHAR, 1),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+				DataTypeDescriptor.getCatalogType(
 				Types.CHAR, 1),
-                varchar128Type
+                TypeDescriptor.VARCHAR128
             };
 
             createSystemProcedureOrFunction(
@@ -9220,17 +9203,15 @@ public final class	DataDictionaryImpl
 			
             // procedure argument types
             TypeDescriptor[] arg_types = {
-                    varchar128Type, 
-                    varchar128Type,
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-				Types.VARCHAR, 32672),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    TypeDescriptor.VARCHAR128, 
+                    TypeDescriptor.VARCHAR128,
+                    varchar32672Type,
+				DataTypeDescriptor.getCatalogType(
 				Types.CHAR, 1),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+				DataTypeDescriptor.getCatalogType(
 				Types.CHAR, 1),
-                varchar128Type,
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-				Types.SMALLINT),
+                TypeDescriptor.VARCHAR128,
+                TypeDescriptor.SMALLINT,
             };
 
 
@@ -9263,21 +9244,17 @@ public final class	DataDictionaryImpl
 			
             // procedure argument types
             TypeDescriptor[] arg_types = {
-                    varchar128Type, 
-                    varchar128Type,
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-				Types.VARCHAR, 32672),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-				Types.VARCHAR, 32672),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-				Types.VARCHAR, 32672),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    TypeDescriptor.VARCHAR128, 
+                    TypeDescriptor.VARCHAR128,
+                    varchar32672Type,
+                    varchar32672Type,
+                    varchar32672Type,
+				DataTypeDescriptor.getCatalogType(
 				Types.CHAR, 1),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+				DataTypeDescriptor.getCatalogType(
 				Types.CHAR, 1),
-                varchar128Type,
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-				Types.SMALLINT),
+                TypeDescriptor.VARCHAR128,
+                TypeDescriptor.SMALLINT,
             };
 
 
@@ -9308,12 +9285,10 @@ public final class	DataDictionaryImpl
 			
             // procedure argument types
             TypeDescriptor[] arg_types = {
-                    varchar128Type, 
-                    varchar128Type,
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-				Types.VARCHAR, 32672),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-				Types.VARCHAR, 32672),
+                    TypeDescriptor.VARCHAR128, 
+                    TypeDescriptor.VARCHAR128,
+                    varchar32672Type,
+                    varchar32672Type,
             };
 
 
@@ -9386,23 +9361,23 @@ public final class	DataDictionaryImpl
 
             // procedure argument types
             TypeDescriptor[] arg_types = {
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.INTEGER),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.SMALLINT),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    TypeDescriptor.INTEGER,
+                    TypeDescriptor.SMALLINT,
+				DataTypeDescriptor.getCatalogType(
 						Types.VARCHAR, Limits.DB2_JCC_MAX_EXCEPTION_PARAM_LENGTH),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.CHAR, 8),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.INTEGER),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.INTEGER),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.INTEGER),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.INTEGER),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.INTEGER),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.INTEGER),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.CHAR, 11),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.CHAR, 5),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 50),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.CHAR, 5),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 2400),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.INTEGER)
+				DataTypeDescriptor.getCatalogType(Types.CHAR, 8),
+                TypeDescriptor.INTEGER,
+                TypeDescriptor.INTEGER,
+                TypeDescriptor.INTEGER,
+                TypeDescriptor.INTEGER,
+                TypeDescriptor.INTEGER,
+                TypeDescriptor.INTEGER,
+				DataTypeDescriptor.getCatalogType(Types.CHAR, 11),
+				DataTypeDescriptor.getCatalogType(Types.CHAR, 5),
+				DataTypeDescriptor.getCatalogType(Types.VARCHAR, 50),
+				DataTypeDescriptor.getCatalogType(Types.CHAR, 5),
+				DataTypeDescriptor.getCatalogType(Types.VARCHAR, 2400),
+                TypeDescriptor.INTEGER
             };
 
             createSystemProcedureOrFunction(
@@ -9429,10 +9404,10 @@ public final class	DataDictionaryImpl
 
             // procedure argument types
             TypeDescriptor[] arg_types = {
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 128),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 128),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 128),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 4000)};
+                    TypeDescriptor.VARCHAR128,
+                    TypeDescriptor.VARCHAR128,
+                    TypeDescriptor.VARCHAR128,
+				DataTypeDescriptor.getCatalogType(Types.VARCHAR, 4000)};
 
             createSystemProcedureOrFunction(
                 "SQLPROCEDURES",
@@ -9458,10 +9433,10 @@ public final class	DataDictionaryImpl
 
             // procedure argument types
             TypeDescriptor[] arg_types = {
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 128),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 128),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 128),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 4000)};
+                    TypeDescriptor.VARCHAR128,
+                    TypeDescriptor.VARCHAR128,
+                    TypeDescriptor.VARCHAR128,
+				DataTypeDescriptor.getCatalogType(Types.VARCHAR, 4000)};
 
             createSystemProcedureOrFunction(
                 "SQLTABLEPRIVILEGES",
@@ -9487,10 +9462,10 @@ public final class	DataDictionaryImpl
 
             // procedure argument types
             TypeDescriptor[] arg_types = {
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 128),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 128),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 128),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 4000)};
+                    TypeDescriptor.VARCHAR128,
+                    TypeDescriptor.VARCHAR128,
+                    TypeDescriptor.VARCHAR128,
+				DataTypeDescriptor.getCatalogType(Types.VARCHAR, 4000)};
 
             createSystemProcedureOrFunction(
                 "SQLPRIMARYKEYS",
@@ -9517,11 +9492,11 @@ public final class	DataDictionaryImpl
 
             // procedure argument types
             TypeDescriptor[] arg_types = {
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 128),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 128),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 128),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 4000),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 4000)};
+                    TypeDescriptor.VARCHAR128,
+                    TypeDescriptor.VARCHAR128,
+                    TypeDescriptor.VARCHAR128,
+				DataTypeDescriptor.getCatalogType(Types.VARCHAR, 4000),
+				DataTypeDescriptor.getCatalogType(Types.VARCHAR, 4000)};
 
             createSystemProcedureOrFunction(
                 "SQLTABLES",
@@ -9549,11 +9524,11 @@ public final class	DataDictionaryImpl
 
             // procedure argument types
             TypeDescriptor[] arg_types = {
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 128),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 128),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 128),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 128),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 4000)};
+				TypeDescriptor.VARCHAR128,
+				TypeDescriptor.VARCHAR128,
+				TypeDescriptor.VARCHAR128,
+				TypeDescriptor.VARCHAR128,
+				DataTypeDescriptor.getCatalogType(Types.VARCHAR, 4000)};
 
             createSystemProcedureOrFunction(
                 "SQLPROCEDURECOLS",
@@ -9580,11 +9555,11 @@ public final class	DataDictionaryImpl
 
             // procedure argument types
             TypeDescriptor[] arg_types = {
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 128),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 128),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 128),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 128),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 4000)};
+				TypeDescriptor.VARCHAR128,
+				TypeDescriptor.VARCHAR128,
+				TypeDescriptor.VARCHAR128,
+				TypeDescriptor.VARCHAR128,
+				DataTypeDescriptor.getCatalogType(Types.VARCHAR, 4000)};
 
             createSystemProcedureOrFunction(
                 "SQLCOLUMNS",
@@ -9611,11 +9586,11 @@ public final class	DataDictionaryImpl
 
             // procedure argument types
             TypeDescriptor[] arg_types = {
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 128),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 128),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 128),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 128),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 4000)};
+				TypeDescriptor.VARCHAR128,
+				TypeDescriptor.VARCHAR128,
+				TypeDescriptor.VARCHAR128,
+				TypeDescriptor.VARCHAR128,
+				DataTypeDescriptor.getCatalogType(Types.VARCHAR, 4000)};
 
             createSystemProcedureOrFunction(
                 "SQLCOLPRIVILEGES",
@@ -9642,11 +9617,11 @@ public final class	DataDictionaryImpl
 
             // procedure argument types
             TypeDescriptor[] arg_types = {
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 128),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 128),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 128),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 128),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 4000)};
+				TypeDescriptor.VARCHAR128,
+				TypeDescriptor.VARCHAR128,
+				TypeDescriptor.VARCHAR128,
+				TypeDescriptor.VARCHAR128,
+				DataTypeDescriptor.getCatalogType(Types.VARCHAR, 4000)};
 
             createSystemProcedureOrFunction(
                 "SQLUDTS",
@@ -9676,13 +9651,13 @@ public final class	DataDictionaryImpl
 
             // procedure argument types
             TypeDescriptor[] arg_types = {
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 128),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 128),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 128),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 128),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 128),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 128),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 4000)};
+				TypeDescriptor.VARCHAR128,
+				TypeDescriptor.VARCHAR128,
+				TypeDescriptor.VARCHAR128,
+				TypeDescriptor.VARCHAR128,
+				TypeDescriptor.VARCHAR128,
+				TypeDescriptor.VARCHAR128,
+				DataTypeDescriptor.getCatalogType(Types.VARCHAR, 4000)};
 
             createSystemProcedureOrFunction(
                 "SQLFOREIGNKEYS",
@@ -9712,13 +9687,13 @@ public final class	DataDictionaryImpl
 
             // procedure argument types
             TypeDescriptor[] arg_types = {
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.SMALLINT),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 128),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 128),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 128),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.SMALLINT),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.SMALLINT),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 4000)};
+                    TypeDescriptor.SMALLINT,
+				TypeDescriptor.VARCHAR128,
+				TypeDescriptor.VARCHAR128,
+				TypeDescriptor.VARCHAR128,
+                TypeDescriptor.SMALLINT,
+                TypeDescriptor.SMALLINT,
+				DataTypeDescriptor.getCatalogType(Types.VARCHAR, 4000)};
 
             createSystemProcedureOrFunction(
                 "SQLSPECIALCOLUMNS",
@@ -9742,8 +9717,8 @@ public final class	DataDictionaryImpl
 
             // procedure argument types
             TypeDescriptor[] arg_types = {
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.SMALLINT),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 4000)};
+                    TypeDescriptor.SMALLINT,
+				DataTypeDescriptor.getCatalogType(Types.VARCHAR, 4000)};
 
             createSystemProcedureOrFunction(
                 "SQLGETTYPEINFO",
@@ -9772,12 +9747,12 @@ public final class	DataDictionaryImpl
 
             // procedure argument types
             TypeDescriptor[] arg_types = {
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 128),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 128),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 128),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.SMALLINT),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.SMALLINT),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 4000)};
+				TypeDescriptor.VARCHAR128,
+				TypeDescriptor.VARCHAR128,
+				TypeDescriptor.VARCHAR128,
+                TypeDescriptor.SMALLINT,
+                TypeDescriptor.SMALLINT,
+				DataTypeDescriptor.getCatalogType(Types.VARCHAR, 4000)};
 
             createSystemProcedureOrFunction(
                 "SQLSTATISTICS",
@@ -9926,8 +9901,7 @@ public final class	DataDictionaryImpl
     TransactionController   tc,
     UUID                    sysUtilUUID)
 		throws StandardException
-    {
-
+    { 
 		UUID routine_uuid = null;
 
         // void SYSCS_UTIL.SYSCS_INPLACE_COMPRESS_TABLE(
@@ -9948,16 +9922,11 @@ public final class	DataDictionaryImpl
 
             // procedure argument types
             TypeDescriptor[] arg_types = {
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                    Types.VARCHAR, 128),
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                    Types.VARCHAR, 128),
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                    Types.SMALLINT),
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                    Types.SMALLINT),
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                    Types.SMALLINT)
+                TypeDescriptor.VARCHAR128,
+                TypeDescriptor.VARCHAR128,
+                TypeDescriptor.SMALLINT,
+                TypeDescriptor.SMALLINT,
+                TypeDescriptor.SMALLINT
             };
 
             routine_uuid = createSystemProcedureOrFunction(
@@ -10003,7 +9972,7 @@ public final class	DataDictionaryImpl
 
             // procedure argument types
             TypeDescriptor[] arg_types = {
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                DataTypeDescriptor.getCatalogType(
                     Types.VARCHAR, Limits.DB2_VARCHAR_MAXWIDTH)
             };
 
@@ -10031,10 +10000,9 @@ public final class	DataDictionaryImpl
 
             // procedure argument types
             TypeDescriptor[] arg_types = {
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                DataTypeDescriptor.getCatalogType(
                     Types.VARCHAR, Limits.DB2_VARCHAR_MAXWIDTH),
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                    Types.SMALLINT)
+                    TypeDescriptor.SMALLINT
             };
 
             createSystemProcedureOrFunction(
@@ -10062,10 +10030,10 @@ public final class	DataDictionaryImpl
 
             // procedure argument types
             TypeDescriptor[] arg_types = {
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 128),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 128),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 128),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 4000)};
+                    TypeDescriptor.VARCHAR128,
+                    TypeDescriptor.VARCHAR128,
+                    TypeDescriptor.VARCHAR128,
+				DataTypeDescriptor.getCatalogType(Types.VARCHAR, 4000)};
 
             createSystemProcedureOrFunction(
                 "SQLFUNCTIONS",
@@ -10093,11 +10061,11 @@ public final class	DataDictionaryImpl
 
             // procedure argument types
             TypeDescriptor[] arg_types = {
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 128),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 128),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 128),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 128),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 4000)};
+                    TypeDescriptor.VARCHAR128,
+                    TypeDescriptor.VARCHAR128,
+                    TypeDescriptor.VARCHAR128,
+                    TypeDescriptor.VARCHAR128,
+				DataTypeDescriptor.getCatalogType(Types.VARCHAR, 4000)};
 
             createSystemProcedureOrFunction(
                 "SQLFUNCTIONPARAMS",
@@ -10141,8 +10109,7 @@ public final class	DataDictionaryImpl
                 0,
                 0,
                 RoutineAliasInfo.CONTAINS_SQL,
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                    Types.INTEGER, Integer.MAX_VALUE),
+                TypeDescriptor.INTEGER,
                 tc,
                 "org.apache.derby.impl.jdbc.LOBStoredProcedure");
         }
@@ -10150,9 +10117,7 @@ public final class	DataDictionaryImpl
             UUID routine_uuid = null;
             String[] arg_names = {"LOCATOR"};
 
-            TypeDescriptor[] arg_types = {
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                    Types.INTEGER)};
+            TypeDescriptor[] arg_types = {TypeDescriptor.INTEGER};
 
             routine_uuid = createSystemProcedureOrFunction(
                 "CLOBRELEASELOCATOR",
@@ -10172,11 +10137,10 @@ public final class	DataDictionaryImpl
 
             // procedure argument types
             TypeDescriptor[] arg_types = {
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                    Types.INTEGER),
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    TypeDescriptor.INTEGER,
+                DataTypeDescriptor.getCatalogType(
                     Types.VARCHAR),
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                DataTypeDescriptor.getCatalogType(
                     Types.BIGINT)
             };
             routine_uuid = createSystemProcedureOrFunction(
@@ -10187,8 +10151,8 @@ public final class	DataDictionaryImpl
                 0,
                 0,
                 RoutineAliasInfo.CONTAINS_SQL,
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                    Types.BIGINT, Limits.DB2_LOB_MAXWIDTH),
+                DataTypeDescriptor.getCatalogType(
+                    Types.BIGINT),
                 tc,
                 "org.apache.derby.impl.jdbc.LOBStoredProcedure");
         }
@@ -10198,11 +10162,9 @@ public final class	DataDictionaryImpl
 
             // procedure argument types
             TypeDescriptor[] arg_types = {
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                    Types.INTEGER),
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                    Types.INTEGER),
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    TypeDescriptor.INTEGER,
+                    TypeDescriptor.INTEGER,
+                DataTypeDescriptor.getCatalogType(
                     Types.BIGINT)
             };
             routine_uuid = createSystemProcedureOrFunction(
@@ -10213,8 +10175,8 @@ public final class	DataDictionaryImpl
                 0,
                 0,
                 RoutineAliasInfo.CONTAINS_SQL,
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                    Types.BIGINT, Limits.DB2_LOB_MAXWIDTH),
+                DataTypeDescriptor.getCatalogType(
+                    Types.BIGINT),
                 tc,
                 "org.apache.derby.impl.jdbc.LOBStoredProcedure");
         }
@@ -10223,10 +10185,7 @@ public final class	DataDictionaryImpl
             String[] arg_names = {"LOCATOR"};
 
             // procedure argument types
-            TypeDescriptor[] arg_types = {
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                    Types.INTEGER)
-            };
+            TypeDescriptor[] arg_types = {TypeDescriptor.INTEGER};
             routine_uuid = createSystemProcedureOrFunction(
                 "CLOBGETLENGTH",
                 schema_uuid,
@@ -10235,8 +10194,8 @@ public final class	DataDictionaryImpl
                 0,
                 0,
                 RoutineAliasInfo.CONTAINS_SQL,
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                    Types.BIGINT, Limits.DB2_LOB_MAXWIDTH),
+                DataTypeDescriptor.getCatalogType(
+                    Types.BIGINT),
                 tc,
                 "org.apache.derby.impl.jdbc.LOBStoredProcedure");
         }
@@ -10246,12 +10205,10 @@ public final class	DataDictionaryImpl
 
             // procedure argument types
             TypeDescriptor[] arg_types = {
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                    Types.INTEGER),
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    TypeDescriptor.INTEGER,
+                DataTypeDescriptor.getCatalogType(
                     Types.BIGINT),
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                    Types.INTEGER)
+                    TypeDescriptor.INTEGER
             };
             routine_uuid = createSystemProcedureOrFunction(
                 "CLOBGETSUBSTRING",
@@ -10261,7 +10218,7 @@ public final class	DataDictionaryImpl
                 0,
                 0,
                 RoutineAliasInfo.CONTAINS_SQL,
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                DataTypeDescriptor.getCatalogType(
                     Types.VARCHAR, Limits.DB2_VARCHAR_MAXWIDTH),
                 tc,
                 "org.apache.derby.impl.jdbc.LOBStoredProcedure");
@@ -10272,13 +10229,11 @@ public final class	DataDictionaryImpl
 
             // procedure argument types
             TypeDescriptor[] arg_types = {
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                    Types.INTEGER),
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    TypeDescriptor.INTEGER,
+                DataTypeDescriptor.getCatalogType(
                     Types.BIGINT),
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                    Types.INTEGER),
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    TypeDescriptor.INTEGER,
+                DataTypeDescriptor.getCatalogType(
                     Types.VARCHAR)
             };
             routine_uuid = createSystemProcedureOrFunction(
@@ -10299,9 +10254,8 @@ public final class	DataDictionaryImpl
 
             // procedure argument types
             TypeDescriptor[] arg_types = {
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                    Types.INTEGER),
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    TypeDescriptor.INTEGER,
+                DataTypeDescriptor.getCatalogType(
                     Types.BIGINT)
             };
             routine_uuid = createSystemProcedureOrFunction(
@@ -10332,8 +10286,7 @@ public final class	DataDictionaryImpl
                 0,
                 0,
                 RoutineAliasInfo.CONTAINS_SQL,
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                    Types.INTEGER, Integer.MAX_VALUE),
+                TypeDescriptor.INTEGER,
                 tc,
                 "org.apache.derby.impl.jdbc.LOBStoredProcedure");
         }
@@ -10341,9 +10294,7 @@ public final class	DataDictionaryImpl
             UUID routine_uuid = null;
             String[] arg_names = {"LOCATOR"};
 
-            TypeDescriptor[] arg_types = {
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                    Types.INTEGER)};
+            TypeDescriptor[] arg_types = {TypeDescriptor.INTEGER};
 
             routine_uuid = createSystemProcedureOrFunction(
                 "BLOBRELEASELOCATOR",
@@ -10363,11 +10314,10 @@ public final class	DataDictionaryImpl
 
             // procedure argument types
             TypeDescriptor[] arg_types = {
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                    Types.INTEGER),
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    TypeDescriptor.INTEGER,
+                DataTypeDescriptor.getCatalogType(
                     Types.VARBINARY),
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                DataTypeDescriptor.getCatalogType(
                     Types.BIGINT)
             };
             routine_uuid = createSystemProcedureOrFunction(
@@ -10378,8 +10328,8 @@ public final class	DataDictionaryImpl
                 0,
                 0,
                 RoutineAliasInfo.CONTAINS_SQL,
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                    Types.BIGINT, Limits.DB2_LOB_MAXWIDTH),
+                DataTypeDescriptor.getCatalogType(
+                    Types.BIGINT),
                 tc,
                 "org.apache.derby.impl.jdbc.LOBStoredProcedure");
         }
@@ -10389,11 +10339,9 @@ public final class	DataDictionaryImpl
 
             // procedure argument types
             TypeDescriptor[] arg_types = {
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                    Types.INTEGER),
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                    Types.INTEGER),
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    TypeDescriptor.INTEGER,
+                    TypeDescriptor.INTEGER,
+                DataTypeDescriptor.getCatalogType(
                     Types.BIGINT)
             };
             routine_uuid = createSystemProcedureOrFunction(
@@ -10404,8 +10352,8 @@ public final class	DataDictionaryImpl
                 0,
                 0,
                 RoutineAliasInfo.CONTAINS_SQL,
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                    Types.BIGINT, Limits.DB2_LOB_MAXWIDTH),
+                DataTypeDescriptor.getCatalogType(
+                    Types.BIGINT),
                 tc,
                 "org.apache.derby.impl.jdbc.LOBStoredProcedure");
         }
@@ -10415,8 +10363,7 @@ public final class	DataDictionaryImpl
 
             // procedure argument types
             TypeDescriptor[] arg_types = {
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                    Types.INTEGER)
+                    TypeDescriptor.INTEGER
             };
             routine_uuid = createSystemProcedureOrFunction(
                 "BLOBGETLENGTH",
@@ -10426,8 +10373,8 @@ public final class	DataDictionaryImpl
                 0,
                 0,
                 RoutineAliasInfo.CONTAINS_SQL,
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                    Types.BIGINT, Limits.DB2_LOB_MAXWIDTH),
+                DataTypeDescriptor.getCatalogType(
+                    Types.BIGINT),
                 tc,
                 "org.apache.derby.impl.jdbc.LOBStoredProcedure");
         }
@@ -10437,12 +10384,10 @@ public final class	DataDictionaryImpl
 
             // procedure argument types
             TypeDescriptor[] arg_types = {
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                    Types.INTEGER),
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    TypeDescriptor.INTEGER,
+                DataTypeDescriptor.getCatalogType(
                     Types.BIGINT),
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                    Types.INTEGER)
+                    TypeDescriptor.INTEGER
             };
             routine_uuid = createSystemProcedureOrFunction(
                 "BLOBGETBYTES",
@@ -10452,7 +10397,7 @@ public final class	DataDictionaryImpl
                 0,
                 0,
                 RoutineAliasInfo.CONTAINS_SQL,
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                DataTypeDescriptor.getCatalogType(
                     Types.VARBINARY, Limits.DB2_VARCHAR_MAXWIDTH),
                 tc,
                 "org.apache.derby.impl.jdbc.LOBStoredProcedure");
@@ -10463,13 +10408,11 @@ public final class	DataDictionaryImpl
 
             // procedure argument types
             TypeDescriptor[] arg_types = {
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                    Types.INTEGER),
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    TypeDescriptor.INTEGER,
+                DataTypeDescriptor.getCatalogType(
                     Types.BIGINT),
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                    Types.INTEGER),
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    TypeDescriptor.INTEGER,
+                DataTypeDescriptor.getCatalogType(
                     Types.VARBINARY)
             };
             routine_uuid = createSystemProcedureOrFunction(
@@ -10490,9 +10433,8 @@ public final class	DataDictionaryImpl
 
             // procedure argument types
             TypeDescriptor[] arg_types = {
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                    Types.INTEGER),
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    TypeDescriptor.INTEGER,
+                DataTypeDescriptor.getCatalogType(
                     Types.BIGINT)
             };
             routine_uuid = createSystemProcedureOrFunction(
@@ -10537,12 +10479,6 @@ public final class	DataDictionaryImpl
     TransactionController   tc)
         throws StandardException
     {
-        // Safe to re-use a TypeDescriptor here as they are
-        // not modified during the creation of the routine
-        TypeDescriptor varchar128 =
-            DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                    Types.VARCHAR, 128);
-
         UUID  sysUtilUUID = getSystemUtilSchemaDescriptor().getUUID();
         /* SYSCS_EXPORT_TABLE_LOBS_TO_EXTFILE(IN SCHEMANAME  VARCHAR(128), 
          * IN TABLENAME    VARCHAR(128), IN FILENAME VARCHAR(32672) , 
@@ -10559,19 +10495,16 @@ public final class	DataDictionaryImpl
 
             // procedure argument types
             TypeDescriptor[] arg_types = {
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                Types.VARCHAR, 128), 
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                Types.VARCHAR, 128),
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    TypeDescriptor.VARCHAR128, 
+                    TypeDescriptor.VARCHAR128,
+                DataTypeDescriptor.getCatalogType(
                 Types.VARCHAR, 32672),
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                DataTypeDescriptor.getCatalogType(
                 Types.CHAR, 1),
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                DataTypeDescriptor.getCatalogType(
                 Types.CHAR, 1),
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                Types.VARCHAR, 128),
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                TypeDescriptor.VARCHAR128,
+                DataTypeDescriptor.getCatalogType(
                 Types.VARCHAR, 32672)
             };
 
@@ -10602,17 +10535,16 @@ public final class	DataDictionaryImpl
 
             // procedure argument types
             TypeDescriptor[] arg_types = {
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                DataTypeDescriptor.getCatalogType(
                 Types.VARCHAR, 32672), 
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                DataTypeDescriptor.getCatalogType(
                 Types.VARCHAR, 32672),
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                DataTypeDescriptor.getCatalogType(
                 Types.CHAR, 1),
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                DataTypeDescriptor.getCatalogType(
                 Types.CHAR, 1),
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                Types.VARCHAR, 128),
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                TypeDescriptor.VARCHAR128,
+                DataTypeDescriptor.getCatalogType(
                 Types.VARCHAR, 32672)
             };
 
@@ -10642,20 +10574,16 @@ public final class	DataDictionaryImpl
 
             // procedure argument types
             TypeDescriptor[] arg_types = {
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                Types.VARCHAR, 128), 
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                Types.VARCHAR, 128),
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    TypeDescriptor.VARCHAR128, 
+                    TypeDescriptor.VARCHAR128,
+                DataTypeDescriptor.getCatalogType(
                 Types.VARCHAR, 32672),
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                DataTypeDescriptor.getCatalogType(
                 Types.CHAR, 1),
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                DataTypeDescriptor.getCatalogType(
                 Types.CHAR, 1),
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                Types.VARCHAR,	128),
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                Types.SMALLINT),
+                TypeDescriptor.VARCHAR128,
+                TypeDescriptor.SMALLINT,
             };
 
             createSystemProcedureOrFunction(
@@ -10686,24 +10614,20 @@ public final class	DataDictionaryImpl
 
             // procedure argument types
             TypeDescriptor[] arg_types = {
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                Types.VARCHAR, 128), 
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                Types.VARCHAR, 128),
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                    TypeDescriptor.VARCHAR128, 
+                    TypeDescriptor.VARCHAR128,
+                DataTypeDescriptor.getCatalogType(
                 Types.VARCHAR, 32672),
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                DataTypeDescriptor.getCatalogType(
                 Types.VARCHAR, 32672),
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                DataTypeDescriptor.getCatalogType(
                 Types.VARCHAR, 32672),
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                DataTypeDescriptor.getCatalogType(
                 Types.CHAR, 1),
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                DataTypeDescriptor.getCatalogType(
                 Types.CHAR, 1),
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                Types.VARCHAR,	128),
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                Types.SMALLINT),
+                TypeDescriptor.VARCHAR128,
+                TypeDescriptor.SMALLINT,
             };
 
 
@@ -10737,7 +10661,7 @@ public final class	DataDictionaryImpl
         // void SYSCS_UTIL.SYSCS_SET_USER_ACCESS(USER_NAME VARCHAR(128),
         // CONNECTION_PERMISSION VARCHAR(128))
         {
-            TypeDescriptor[] arg_types = {varchar128, varchar128};
+            TypeDescriptor[] arg_types = {TypeDescriptor.VARCHAR128, TypeDescriptor.VARCHAR128};
 
             createSystemProcedureOrFunction(
                 "SYSCS_SET_USER_ACCESS",
@@ -10753,7 +10677,7 @@ public final class	DataDictionaryImpl
         
         // VARCHAR(128) SYSCS_UTIL.SYSCS_SET_USER_ACCESS(USER_NAME VARCHAR(128))
         {               
-            TypeDescriptor[] arg_types = { varchar128 };
+            TypeDescriptor[] arg_types = { TypeDescriptor.VARCHAR128 };
 
             createSystemProcedureOrFunction(
                 "SYSCS_GET_USER_ACCESS",
@@ -10763,7 +10687,7 @@ public final class	DataDictionaryImpl
                 0,
                 0,
                 RoutineAliasInfo.READS_SQL_DATA,
-                varchar128,
+                TypeDescriptor.VARCHAR128,
                 tc);
         }
         

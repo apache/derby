@@ -725,8 +725,10 @@ public class SystemProcedures  {
 			" compress" +  (sequential != 0 ? " sequential" : "");
 
 		Connection conn = getDefaultConn();
-
-		conn.prepareStatement(query).executeUpdate();
+        
+        PreparedStatement ps = conn.prepareStatement(query);
+		ps.executeUpdate();
+        ps.close();
 
 		conn.close();
     }

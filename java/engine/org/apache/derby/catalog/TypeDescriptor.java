@@ -21,6 +21,9 @@
 
 package org.apache.derby.catalog;
 
+import java.sql.Types;
+
+import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.StringDataValue;
 
 /**
@@ -43,7 +46,27 @@ public interface TypeDescriptor
 	 */
 
 	public	static	int MAXIMUM_WIDTH_UNKNOWN = -1;
+    
+    /**
+     * Catalog type for nullable INTEGER
+     */
+    TypeDescriptor INTEGER = DataTypeDescriptor.INTEGER.getCatalogType();
 
+    /**
+     * Catalog type for nullable SMALLINT
+     */
+    TypeDescriptor SMALLINT = 
+        DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+            Types.SMALLINT).getCatalogType();
+ 
+    
+    /**
+     * Catalog type for nullable VARCHAR(128) used for types representing
+     * system catalogs.
+     */
+    TypeDescriptor VARCHAR128 =
+        DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                Types.VARCHAR, 128).getCatalogType();
 
 	///////////////////////////////////////////////////////////////////////
 	//
