@@ -165,8 +165,8 @@ public class TableElementList extends QueryTreeNodeVector
 			{
 				ColumnDefinitionNode cdn = (ColumnDefinitionNode) elementAt(index);
 				if (tableType == TableDescriptor.GLOBAL_TEMPORARY_TABLE_TYPE &&
-					(cdn.getDataTypeServices().getTypeId().isLongConcatableTypeId() ||
-					cdn.getDataTypeServices().getTypeId().isUserDefinedTypeId()))
+					(cdn.getType().getTypeId().isLongConcatableTypeId() ||
+					cdn.getType().getTypeId().isUserDefinedTypeId()))
 				{
 					throw StandardException.newException(SQLState.LANG_LONG_DATA_TYPE_NOT_ALLOWED, cdn.getColumnName());
 				}
@@ -399,7 +399,7 @@ public class TableElementList extends QueryTreeNodeVector
 
 			colInfos[index - numConstraints] = 
 				new ColumnInfo(coldef.getColumnName(),
-							   coldef.getDataTypeServices(),
+							   coldef.getType(),
 							   coldef.getDefaultValue(),
 							   coldef.getDefaultInfo(),
 							   (UUID) null,
@@ -449,12 +449,12 @@ public class TableElementList extends QueryTreeNodeVector
 											C_NodeTypes.BASE_COLUMN_NODE,
 											cdn.getColumnName(),
 									  		exposedName,
-											cdn.getDataTypeServices(),
+											cdn.getType(),
 											getContextManager());
 
 				resultColumn = (ResultColumn) getNodeFactory().getNode(
 												C_NodeTypes.RESULT_COLUMN,
-												cdn.getDataTypeServices(), 
+												cdn.getType(), 
 												valueNode,
 												getContextManager());
 				resultColumn.setName(cdn.getColumnName());
@@ -938,7 +938,7 @@ public class TableElementList extends QueryTreeNodeVector
                 ColumnDefinitionNode cdn = (ColumnDefinitionNode) tableElement;
                 if (colName.equals(cdn.getColumnName()))
                 {
-                    return cdn.getDataTypeServices();
+                    return cdn.getType();
                 }
             }
         }

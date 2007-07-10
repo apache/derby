@@ -103,18 +103,17 @@ public class ModifyColumnNode extends ColumnDefinitionNode
 		}
 		
 		DataTypeDescriptor oldType = cd.getType();
-        dataTypeServices = 
-            getDataTypeServices().getNullabilityType(oldType.isNullable());
+        setNullability(oldType.isNullable());
 
 		// can't change types yet.
-		if (!(oldType.getTypeId().equals(getDataTypeServices().getTypeId())))
+		if (!(oldType.getTypeId().equals(getType().getTypeId())))
 		{
 			throw StandardException.newException(
 					 SQLState.LANG_MODIFY_COLUMN_CHANGE_TYPE, name);
 		}			
 		
 		// can only alter the length of varchar, nvarchar, bitvarying columns
-		String typeName = getDataTypeServices().getTypeName();
+		String typeName = getType().getTypeName();
 		if (!(typeName.equals(TypeId.NATIONAL_VARCHAR_NAME)) &&
 			!(typeName.equals(TypeId.VARCHAR_NAME)) &&
 			!(typeName.equals(TypeId.VARBIT_NAME)))
@@ -124,7 +123,7 @@ public class ModifyColumnNode extends ColumnDefinitionNode
 		}
 		
 		// cannot decrease the length of a column
-		if (getDataTypeServices().getMaximumWidth() < oldType.getMaximumWidth())
+		if (getType().getMaximumWidth() < oldType.getMaximumWidth())
 		{
 			throw StandardException.newException(
 						 SQLState.LANG_MODIFY_COLUMN_INVALID_LENGTH, name);
@@ -302,7 +301,7 @@ public class ModifyColumnNode extends ColumnDefinitionNode
 			autoincrementStart = cd.getAutoincStart();
 
 		/* Fill in the DataTypeServices from the DataDictionary */
-		dataTypeServices = cd.getType();
+		type = cd.getType();
 
 		// Now validate the default
 		validateDefault(dd, td);
@@ -355,7 +354,7 @@ public class ModifyColumnNode extends ColumnDefinitionNode
 			return;
 		
 		super.validateAutoincrement(dd, td, tableType);
-		if (getDataTypeServices().isNullable())
+		if (getType().isNullable())
 			throw StandardException.newException(SQLState.LANG_AI_CANNOT_ADD_AI_TO_NULLABLE,
 												getColumnName());
 	}

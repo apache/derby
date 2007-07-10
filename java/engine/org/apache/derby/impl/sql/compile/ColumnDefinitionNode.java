@@ -70,7 +70,7 @@ public class ColumnDefinitionNode extends TableElementNode
     /**
      * The data type of this column.
      */
-    DataTypeDescriptor			dataTypeServices;
+    DataTypeDescriptor type;
     
 	DataValueDescriptor			defaultValue;
 	DefaultInfoImpl				defaultInfo;
@@ -117,7 +117,7 @@ public class ColumnDefinitionNode extends TableElementNode
 		throws StandardException
 	{
 		super.init(name);
-		this.dataTypeServices = (DataTypeDescriptor) dataTypeServices;
+		this.type = (DataTypeDescriptor) dataTypeServices;
 		if (defaultNode instanceof UntypedNullConstantNode)
 		{
 			/* No DTS yet for MODIFY DEFAULT */
@@ -125,7 +125,7 @@ public class ColumnDefinitionNode extends TableElementNode
 			{
 				defaultValue = 
 					((UntypedNullConstantNode) defaultNode).
-									convertDefaultNode(this.dataTypeServices);
+									convertDefaultNode(this.type);
 			}
 		}
 		else
@@ -165,7 +165,7 @@ public class ColumnDefinitionNode extends TableElementNode
 				// the default, and try to add it back again you'll get an
 				// error because the column is marked nullable.
                 if (dataTypeServices != null)
-                    this.dataTypeServices = getDataTypeServices().getNullabilityType(false);
+                    setNullability(false);
 			}
 		}
 	}
@@ -181,7 +181,7 @@ public class ColumnDefinitionNode extends TableElementNode
 	{
 		if (SanityManager.DEBUG)
 		{
-			return "dataTypeServices: " + dataTypeServices.toString() + "\n" +
+			return "type: " + getType().toString() + "\n" +
 				"defaultValue: " + defaultValue + "\n" +
 				super.toString();
 		}
@@ -202,14 +202,22 @@ public class ColumnDefinitionNode extends TableElementNode
 	}
 
 	/**
-	 * Returns the data type services of the column being defined.
+	 * Returns the data type of the column being defined.
 	 *
-	 * @return	the data type services of the column
+	 * @return	the data type of the column
 	 */
-	public final DataTypeDescriptor getDataTypeServices()
+	public final DataTypeDescriptor getType()
 	{
-		return this.dataTypeServices;
+		return type;
 	}
+    
+    /**
+     * Set the nullability of the column definition node.
+      */
+    void setNullability(boolean nullable)
+    {
+        type = getType().getNullabilityType(nullable);
+    }
 
 	/**
 	 * Return the DataValueDescriptor containing the default value for this
@@ -338,13 +346,13 @@ public class ColumnDefinitionNode extends TableElementNode
 		String			columnTypeName;
 
 		/* Built-in types need no checking */
-		if (!dataTypeServices.getTypeId().userType())
+		if (!getType().getTypeId().userType())
 			return;
 
 		ClassInspector classInspector = getClassFactory().getClassInspector();
 
 		columnTypeName =
-			dataTypeServices.getTypeId().getCorrespondingJavaTypeName();
+			getType().getTypeId().getCorrespondingJavaTypeName();
 
 
 
@@ -410,7 +418,7 @@ public class ColumnDefinitionNode extends TableElementNode
 		throws StandardException
 	{
 		/* DB2 requires non-nullable columns to have a default in ALTER TABLE */
-		if (td != null && !dataTypeServices.isNullable() && defaultNode == null)
+		if (td != null && !getType().isNullable() && defaultNode == null)
 		{
 			if (!isAutoincrement)
 				throw StandardException.newException(SQLState.LANG_DB2_NOT_NULL_COLUMN_INVALID_DEFAULT, getColumnName());
@@ -464,7 +472,7 @@ public class ColumnDefinitionNode extends TableElementNode
 				(autoinc_create_or_modify_Start_Increment == ColumnDefinitionNode.CREATE_AUTOINCREMENT ||
 						autoinc_create_or_modify_Start_Increment == ColumnDefinitionNode.MODIFY_AUTOINCREMENT_INC_VALUE))
 			throw StandardException.newException(SQLState.LANG_AI_INVALID_INCREMENT, getColumnName());
-		int jdbctype = dataTypeServices.getTypeId().getJDBCTypeId();
+		int jdbctype = getType().getTypeId().getJDBCTypeId();
 		switch (jdbctype)
 		{
 		case Types.TINYINT:
@@ -572,12 +580,12 @@ public class ColumnDefinitionNode extends TableElementNode
 							(SubqueryList) null,
 							(Vector) null);
 
-			TypeId columnTypeId = dataTypeServices.getTypeId();
+			TypeId columnTypeId = getType().getTypeId();
 			TypeId defaultTypeId = defaultTree.getTypeId();
 
 			// Check for 'invalid default' errors (42894)
 			// before checking for 'not storable' errors (42821).
-			if (!defaultTypeIsValid(columnTypeId, dataTypeServices,
+			if (!defaultTypeIsValid(columnTypeId, getType(),
 					defaultTypeId, defaultTree, defaultNode.getDefaultText()))
 			{
 					throw StandardException.newException(

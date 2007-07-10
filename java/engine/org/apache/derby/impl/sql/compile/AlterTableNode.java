@@ -240,13 +240,13 @@ public class AlterTableNode extends DDLStatementNode
 					if (tableElementList.elementAt(i) instanceof ColumnDefinitionNode) {
 						ColumnDefinitionNode cdn = (ColumnDefinitionNode) tableElementList.elementAt(i);
 						//check if we are dealing with add character column
-						if (cdn.getDataTypeServices().getTypeId().isStringTypeId()) {
+						if (cdn.getType().getTypeId().isStringTypeId()) {
 							//we found what we are looking for. Set the 
 							//collation type of this column to be the same as
 							//schema descriptor's collation. Set the collation
 							//derivation as implicit
-							cdn.getDataTypeServices().setCollationType(schemaDescriptor.getCollationType());
-							cdn.getDataTypeServices().setCollationDerivation(StringDataValue.COLLATION_DERIVATION_IMPLICIT);
+							cdn.getType().setCollationType(schemaDescriptor.getCollationType());
+							cdn.getType().setCollationDerivation(StringDataValue.COLLATION_DERIVATION_IMPLICIT);
 			        	}						
 					}
 				}
