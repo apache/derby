@@ -25,11 +25,11 @@ import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.depend.DependencyManager;
 import org.apache.derby.iapi.sql.depend.Provider;
 import org.apache.derby.iapi.store.access.TransactionController;
-
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import	org.apache.derby.catalog.AliasInfo;
+import org.apache.derby.catalog.types.RoutineAliasInfo;
 
 import org.apache.derby.catalog.UUID;
 
@@ -330,6 +330,19 @@ public final class AliasDescriptor
     public boolean isPersistent()
     {
         return !getSchemaUUID().toString().equals(SchemaDescriptor.SYSFUN_SCHEMA_UUID);
+    }
+   
+    /**
+     * Report whether this descriptor describes a Table Function.
+     *
+     */
+    public boolean isTableFunction()
+    {
+        if ( getAliasType() != AliasInfo.ALIAS_TYPE_FUNCTION_AS_CHAR ) { return false; }
+
+        RoutineAliasInfo    rai = (RoutineAliasInfo) getAliasInfo();
+
+        return rai.getReturnType().isRowMultiSet();
     }
    
     /**

@@ -528,6 +528,8 @@ String[] TwoByte = {
         /* 464 */   "org.apache.derby.iapi.types.SqlXmlUtil",        
 		/* 465 */   "org.apache.derby.impl.store.raw.data.CompressSpacePageOperation",
         /* 466 */   "org.apache.derby.impl.store.access.btree.index.B2I",
-        /* 467 */   "org.apache.derby.impl.store.access.heap.Heap"
+        /* 467 */   "org.apache.derby.impl.store.access.heap.Heap",
+        /* 468 */       "org.apache.derby.iapi.types.DTSClassInfo",
+        /* 469 */       "org.apache.derby.catalog.types.RowMultiSetImpl"
 };
 }

@@ -100,10 +100,10 @@ public final class SysDiagVTIMappingTest extends BaseJDBCTestCase {
         // Should fail because SPACE_TABLE is not defined in APP 
         // schema.
         
-        assertStatementError("42Y03", st,
+        assertStatementError("42ZB4", st,
             "select * from TABLE(SPACE_TABLE('APP')) x");
         
-        assertStatementError("42Y03", st,
+        assertStatementError("42ZB4", st,
             "select * from TABLE(APP.SPACE_TABLE('APP', 'T1')) x");
         
         // Should fail due to extra "TABLE" keyword.
@@ -126,7 +126,7 @@ public final class SysDiagVTIMappingTest extends BaseJDBCTestCase {
         // Should fail because SPACE_TABLE is not defined in APP schema.
         
         st.executeUpdate("set schema SYSCS_DIAG");
-        assertStatementError("42Y03", st,
+        assertStatementError("42ZB4", st,
             "select * from TABLE(APP.SPACE_TABLE('APP', 'T1')) x");
         
         // All remaining test cases in this method should succeed.
@@ -530,7 +530,7 @@ public final class SysDiagVTIMappingTest extends BaseJDBCTestCase {
         // Use of TABLE constructor with regular tables should fail.
 
         assertStatementError("42X01", st, "select * from table (app.t1) x");
-        assertStatementError("42Y03", st, "select * from table (app.t1()) x");
+        assertStatementError("42ZB4", st, "select * from table (app.t1()) x");
 
         // Use of TABLE constructor with VTI tables (as opposed to VTI
         // table *functions*) should fail.

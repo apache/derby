@@ -1759,6 +1759,21 @@ public interface DataDictionary
 		throws StandardException;
 
 	/**
+	 * Return the Java class to use for a builtin VTI to which the received
+	 * table descriptor maps.
+	 *
+	 *
+	 * @param td Table descriptor used for the VTI look-up.
+	 * @param asTableFunction If false then treat td's descriptor name as a
+	 *  VTI "table name"; if true, treat the descriptor name as a VTI "table
+	 *  function name".
+	 * @return Java class name of builtin VTI to which "td" maps, or null if no mapping
+	 *  is found.
+	 */
+	public String getBuiltinVTIClass(TableDescriptor td, boolean asTableFunction)
+		throws StandardException;
+
+	/**
 	 * Adds a descriptor to a system catalog identified by the catalogNumber. 
 	 *
 	 * @param tuple			   descriptor to insert.

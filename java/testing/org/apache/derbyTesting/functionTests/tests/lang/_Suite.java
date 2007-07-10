@@ -111,6 +111,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(CaseExpressionTest.suite());
         suite.addTest(CharUTF8Test.suite());
         suite.addTest(AggregateClassLoadingTest.suite());
+        suite.addTest(TableFunctionTest.suite());
 
         // Add the XML tests, which exist as a separate suite
         // so that users can "run all XML tests" easily.

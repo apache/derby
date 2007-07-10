@@ -879,6 +879,12 @@ public interface StoredFormatIds {
     static public final int XML_TYPE_ID_IMPL =
             (MIN_ID_2 + 457);
 
+    public static final int ROW_MULTISET_CATALOG_ID = 
+            (MIN_ID_2 + 468);
+
+    public static final int ROW_MULTISET_TYPE_ID_IMPL = 
+            (MIN_ID_2 + 469);
+    
     /******************************************************************
     **
     **      Execution MODULE CLASSES
@@ -1873,7 +1879,7 @@ public interface StoredFormatIds {
      * Make sure this is updated when a new module is added
      */
     public static final int MAX_ID_2 =
-            (MIN_ID_2 + 467);
+            (MIN_ID_2 + 469);
 
     // DO NOT USE 4 BYTE IDS ANYMORE
     static public final int MAX_ID_4 =

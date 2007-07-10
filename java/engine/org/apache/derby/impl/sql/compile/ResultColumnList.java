@@ -836,7 +836,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 			{
 				throw StandardException.newException(SQLState.LANG_COLUMN_NOT_FOUND_IN_TABLE, 
 													 rc.getName(), 
-													 targetVTI.getNewInvocation().getJavaClassName());
+													 targetVTI.getMethodCall().getJavaClassName());
 			}
 
 			/* We have a match.  We need to create a dummy ColumnDescriptor
@@ -3286,19 +3286,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 											scale, 
 											nullableResult, 
 											maxWidth);
-				ValueNode bcn = (ValueNode) getNodeFactory().getNode(
-											C_NodeTypes.BASE_COLUMN_NODE,
-											rsmd.getColumnName(index),
-									  		tableName,
-											dts,
-											getContextManager());
-				ResultColumn rc = (ResultColumn) getNodeFactory().getNode(
-										C_NodeTypes.RESULT_COLUMN,
-										rsmd.getColumnName(index),
-										bcn,
-										getContextManager());
-				rc.setType(dts);
-				addResultColumn(rc);
+				addColumn( tableName, rsmd.getColumnName(index), dts );
 			}
 		}
 		catch (Throwable t)
@@ -3314,6 +3302,28 @@ public class ResultColumnList extends QueryTreeNodeVector
 		}
 	}
 
+    /** 
+     * Add a column to the list given a tablename, columnname, and datatype.
+     *
+     */
+    public void addColumn( TableName tableName, String columnName, DataTypeDescriptor dts )
+        throws StandardException
+    {
+        ValueNode bcn = (ValueNode) getNodeFactory().getNode(
+                                                             C_NodeTypes.BASE_COLUMN_NODE,
+                                                             columnName,
+                                                             tableName,
+                                                             dts,
+                                                             getContextManager());
+        ResultColumn rc = (ResultColumn) getNodeFactory().getNode(
+                                                                  C_NodeTypes.RESULT_COLUMN,
+                                                                  columnName,
+                                                                  bcn,
+                                                                  getContextManager());
+        rc.setType(dts);
+        addResultColumn(rc);
+    }
+    
 	/**
 	 * Add an RC to the end of the list for the RID from an index.
 	 * NOTE: RC.expression is a CurrentRowLocationNode.  This was previously only used

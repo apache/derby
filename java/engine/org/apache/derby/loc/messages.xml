@@ -2484,6 +2484,28 @@ Guide.
                 <arg>type</arg>
             </msg>
 
+            <msg>
+                <name>42ZB1</name>
+                <text>Parameter style DERBY_JDBC_RESULT_SET is only allowed for table functions.</text>
+            </msg>
+
+            <msg>
+                <name>42ZB2</name>
+                <text>Table functions can only have parameter style DERBY_JDBC_RESULT_SET.</text>
+            </msg>
+
+            <msg>
+                <name>42ZB3</name>
+                <text>XML is not allowed as the datatype of a column returned by a table function.</text>
+            </msg>
+
+            <msg>
+                <name>42ZB4</name>
+                <text>'{0}'.{1}' does not identify a table function.</text>
+                <arg>schemaName</arg>
+                <arg>functionName</arg>
+            </msg>
+
         </family>
 
 

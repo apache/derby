@@ -1204,6 +1204,17 @@ public final class TypeId implements Formatable
                return (formatId == StoredFormatIds.XML_TYPE_ID);
         }
 
+        /** 
+         *Is this a ROW MULTISET?
+         * @return true if this is XML
+         */
+        public boolean isRowMultiSetTypeId()
+        {
+               return (formatId == StoredFormatIds.ROW_MULTISET_CATALOG_ID);
+        }
+
+
+	
         /**
          * Tell whether this type is orderable, that is, can participate
          * in comparisons.

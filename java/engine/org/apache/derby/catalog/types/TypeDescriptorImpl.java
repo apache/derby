@@ -391,6 +391,14 @@ public class TypeDescriptorImpl implements TypeDescriptor, Formatable
 		isNullable = nullable;
 	}
 
+	/**
+	* @see TypeDescriptor#isRowMultiSet
+	 */
+	public	boolean isRowMultiSet()
+	{
+		return false;
+	}
+
 	/** @see TypeDescriptor#getCollationType() */
 	public int	getCollationType()
 	{

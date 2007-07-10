@@ -92,6 +92,8 @@ class VTIResultSet extends NoPutResultSetImpl
 
 	private boolean[] runtimeNullableColumn;
 
+	private boolean isDerbyStyleTableFunction;
+
 	/**
 		Specified isolation level of SELECT (scan). If not set or
 		not application, it will be set to ExecutionContext.UNSPECIFIED_ISOLATION_LEVEL
@@ -111,7 +113,9 @@ class VTIResultSet extends NoPutResultSetImpl
 				 boolean isTarget,
 				 int scanIsolationLevel,
 			     double optimizerEstimatedRowCount,
-				 double optimizerEstimatedCost) 
+				 double optimizerEstimatedCost,
+				 boolean isDerbyStyleTableFunction
+                 ) 
 		throws StandardException
 	{
 		super(activation, resultSetNumber, 
@@ -124,6 +128,7 @@ class VTIResultSet extends NoPutResultSetImpl
 		this.isTarget = isTarget;
 		this.pushedQualifiers = pushedQualifiers;
 		this.scanIsolationLevel = scanIsolationLevel;
+		this.isDerbyStyleTableFunction = isDerbyStyleTableFunction;
 
 		if (erdNumber != -1)
 		{
@@ -218,10 +223,22 @@ class VTIResultSet extends NoPutResultSetImpl
 		openTime += getElapsedMillis(beginTime);
 	}
 
-	private boolean[] setNullableColumnList() throws SQLException {
+	private boolean[] setNullableColumnList() throws SQLException, StandardException {
 
 		if (runtimeNullableColumn != null)
 			return runtimeNullableColumn;
+
+		// Derby-style table functions return SQL rows which don't have not-null
+		// constraints bound to them
+		if ( isDerbyStyleTableFunction )
+		{
+		    int         count = getAllocatedRow().nColumns() + 1;
+            
+		    runtimeNullableColumn = new boolean[ count ];
+		    for ( int i = 0; i < count; i++ )   { runtimeNullableColumn[ i ] = true; }
+            
+		    return runtimeNullableColumn;
+		}
 
 		if (userVTI == null)
 			return null;

@@ -11233,43 +11233,59 @@ public final class	DataDictionaryImpl
 	public String getVTIClass(TableDescriptor td, boolean asTableFunction)
 		throws StandardException
 	{
+		if (SchemaDescriptor.STD_SYSTEM_DIAG_SCHEMA_NAME.equals(
+			td.getSchemaName()))
+		{ return getBuiltinVTIClass( td, asTableFunction ); }
+		else // see if it's a user-defined table function
+		{
+		    String                          schemaName = td.getSchemaName();
+		    String                          functionName = td.getDescriptorName();
+		    SchemaDescriptor     sd = getSchemaDescriptor( td.getSchemaName(), null, true );
+
+		    if ( sd != null )
+		    {
+		        AliasDescriptor         ad = getAliasDescriptor( sd.getUUID().toString(), functionName, AliasInfo.ALIAS_TYPE_FUNCTION_AS_CHAR );
+
+		        if ( (ad != null) && ad.isTableFunction() ) { return ad.getJavaClassName(); }
+
+		        throw StandardException.newException
+		        ( SQLState.LANG_NOT_TABLE_FUNCTION, schemaName, functionName );
+		    }
+		}
+		
+		return null;
+	}
+
+	/**
+	 * @see DataDictionary#getBuiltinVTIClass(TableDescriptor, boolean)
+	 */
+	public String getBuiltinVTIClass(TableDescriptor td, boolean asTableFunction)
+		throws StandardException
+	{
 		if (SanityManager.DEBUG)
 		{
 			if (td.getTableType() != TableDescriptor.VTI_TYPE)
 				SanityManager.THROWASSERT("getVTIClass: Invalid table type " + td);
 		}
 		
-		/* For now we only recognize VTI table (or table function) names
-		 * that are in the "SYSCS_DIAG" schema; for anything else just
-		 * return null.  Note that if no schema was specified then the
+		/* First check to see if this is a system VTI. Note that if no schema was specified then the
 		 * call to "td.getSchemaName()" will return the current schema.
 		 */
-		if (!SchemaDescriptor.STD_SYSTEM_DIAG_SCHEMA_NAME.equals(
+		if (SchemaDescriptor.STD_SYSTEM_DIAG_SCHEMA_NAME.equals(
 			td.getSchemaName()))
 		{
-			return null;
+		    String [][] vtiMappings = asTableFunction
+		        ? DIAG_VTI_TABLE_FUNCTION_CLASSES
+		        : DIAG_VTI_TABLE_CLASSES;
+
+		    for (int i = 0; i < vtiMappings.length; i++)
+		    {
+		        String[] entry = vtiMappings[i];
+		        if (entry[0].equals(td.getDescriptorName()))
+		            return entry[1];	
+		    }	
 		}
-
-		String [][] vtiMappings = asTableFunction
-			? DIAG_VTI_TABLE_FUNCTION_CLASSES
-			: DIAG_VTI_TABLE_CLASSES;
-
-		for (int i = 0; i < vtiMappings.length; i++)
-		{
-			String[] entry = vtiMappings[i];
-			if (entry[0].equals(td.getDescriptorName()))
-				return entry[1];	
-		}	
 		
 		return null;
 	}
 }
-
-
-
-
-
-
-
-
-

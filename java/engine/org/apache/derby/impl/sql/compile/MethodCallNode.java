@@ -58,6 +58,7 @@ import org.apache.derby.catalog.types.RoutineAliasInfo;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Member;
 
+import java.util.Enumeration;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
@@ -139,6 +140,14 @@ abstract class MethodCallNode extends JavaValueNode
         return javaClassName;
     }
 
+    /**
+     * Get the details on the invoked routines.
+     */
+    public RoutineAliasInfo getRoutineInfo()
+    {
+        return routineInfo;
+    }
+
 	/**
 	 * Add the parameter list
 	 *
@@ -172,6 +181,61 @@ abstract class MethodCallNode extends JavaValueNode
 			}
 
 			methodParms[index] = (JavaValueNode) qt;
+		}
+	}
+
+	/**
+	  *	Get the resolved Classes of our parameters
+	  *
+	  *	@return	the Classes of our parameters
+	  */
+	public	Class[]	getMethodParameterClasses() 
+	{ 
+		ClassInspector ci = getClassFactory().getClassInspector();
+
+		Class[]	parmTypeClasses = new Class[methodParms.length];
+		for (int i = 0; i < methodParms.length; i++)
+		{
+			String className = methodParameterTypes[i];
+			try
+			{
+				parmTypeClasses[i] = ci.getClass(className);
+			}
+			catch (ClassNotFoundException cnfe)
+			{
+				/* We should never get this exception since we verified 
+				 * that the classes existed at bind time.  Just return null.
+				 */
+				if (SanityManager.DEBUG)
+				{
+					SanityManager.THROWASSERT("Unexpected exception", cnfe);
+				}
+				return null;
+			}
+		}
+
+		return parmTypeClasses;
+	}
+
+	/**
+	 * Build a JBitSet of all of the tables that we are
+	 * correlated with.
+	 *
+	 * @param correlationMap	The JBitSet of the tables that we are correlated with.
+	 */
+	void getCorrelationTables(JBitSet correlationMap)
+		throws StandardException
+	{
+		CollectNodesVisitor getCRs = new CollectNodesVisitor(ColumnReference.class);
+		super.accept(getCRs);
+		Vector colRefs = getCRs.getList();
+		for (Enumeration e = colRefs.elements(); e.hasMoreElements(); )
+		{
+			ColumnReference ref = (ColumnReference)e.nextElement();
+			if (ref.getCorrelated())
+			{
+				correlationMap.set(ref.getTableNumber());
+			}
 		}
 	}
 
@@ -705,25 +769,35 @@ abstract class MethodCallNode extends JavaValueNode
 
 				
 				TypeId returnTypeId = TypeId.getBuiltInTypeId(returnType.getJDBCTypeId());
-				switch (returnType.getJDBCTypeId()) {
-				case java.sql.Types.SMALLINT:
-				case java.sql.Types.INTEGER:
-				case java.sql.Types.BIGINT:
-				case java.sql.Types.REAL:
-				case java.sql.Types.DOUBLE:
-					TypeCompiler tc = getTypeCompiler(returnTypeId);
-					requiredType = tc.getCorrespondingPrimitiveTypeName();
-					if (!routineInfo.calledOnNullInput() && routineInfo.getParameterCount() != 0)
-					{
-						promoteName = returnTypeId.getCorrespondingJavaTypeName();
-					}
 
-					break;
-				default:
-					requiredType = returnTypeId.getCorrespondingJavaTypeName();
-					break;
+				if (
+				    returnType.isRowMultiSet() &&
+				    ( routineInfo.getParameterStyle() == RoutineAliasInfo.PS_DERBY_JDBC_RESULT_SET )
+				)
+				{
+				    requiredType = "java.sql.ResultSet";
 				}
+				else
+				{
+				    switch (returnType.getJDBCTypeId()) {
+				    case java.sql.Types.SMALLINT:
+				    case java.sql.Types.INTEGER:
+				    case java.sql.Types.BIGINT:
+				    case java.sql.Types.REAL:
+				    case java.sql.Types.DOUBLE:
+				    	TypeCompiler tc = getTypeCompiler(returnTypeId);
+				    	requiredType = tc.getCorrespondingPrimitiveTypeName();
+				    	if (!routineInfo.calledOnNullInput() && routineInfo.getParameterCount() != 0)
+				    	{
+				    		promoteName = returnTypeId.getCorrespondingJavaTypeName();
+				    	}
 
+				    	break;
+				    default:
+				    	requiredType = returnTypeId.getCorrespondingJavaTypeName();
+				    	break;
+				    }
+				}
 			}
 
 			if (!requiredType.equals(typeName))

@@ -64,6 +64,7 @@ public class DTSClassInfo extends FormatableInstanceGetter {
                 case StoredFormatIds.CLOB_TYPE_ID:
                 case StoredFormatIds.NCLOB_TYPE_ID:
                 case StoredFormatIds.XML_TYPE_ID:
+                case StoredFormatIds.ROW_MULTISET_CATALOG_ID:
                         return new TypeId(fmtId);
                 default:
                         return null;

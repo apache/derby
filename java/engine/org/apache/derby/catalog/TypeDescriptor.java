@@ -203,5 +203,10 @@ public interface TypeDescriptor
 	 *  @return	the name of the collation being used in this type.
 	 */
 	public String getCollationName();
+
+	/**
+	 * Return true if this is a Row Multiset type
+	  */
+	public	boolean isRowMultiSet();
 }
 

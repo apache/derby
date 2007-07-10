@@ -63,6 +63,8 @@ public class NewInvocationNode extends MethodCallNode
 
 	private boolean delimitedIdentifier;
 
+	private boolean isBuiltinVTI = false;
+
 	/**
 	 * Initializer for a NewInvocationNode. Parameters are:
 	 *
@@ -161,6 +163,9 @@ public class NewInvocationNode extends MethodCallNode
 		this.javaClassName = getDataDictionary().getVTIClass(
 			td, isTableFunctionVTI);
 
+		this.isBuiltinVTI =
+		    ( getDataDictionary().getBuiltinVTIClass( td, isTableFunctionVTI) != null);
+
 		/* If javaClassName is still null at this point then we
 		 * could not find the target class for the received table
 		 * (or table function) name.  So throw the appropriate
@@ -190,6 +195,11 @@ public class NewInvocationNode extends MethodCallNode
 	}
 
 	/**
+	 * Report whether this node represents a builtin VTI.
+	 */
+	public  boolean isBuiltinVTI()  { return isBuiltinVTI; }
+
+	/**
 	 * Mark this node as only needing to
 	 * to a single instantiation.  (We can
 	 * reuse the object after newing it.)
@@ -197,39 +207,6 @@ public class NewInvocationNode extends MethodCallNode
 	void setSingleInstantiation()
 	{
 		singleInstantiation = true;
-	}
-
-	/**
-	  *	Get the resolved Classes of our parameters
-	  *
-	  *	@return	the Classes of our parameters
-	  */
-	public	Class[]	getMethodParameterClasses() 
-	{ 
-		ClassInspector ci = getClassFactory().getClassInspector();
-
-		Class[]	parmTypeClasses = new Class[methodParms.length];
-		for (int i = 0; i < methodParms.length; i++)
-		{
-			String className = methodParameterTypes[i];
-			try
-			{
-				parmTypeClasses[i] = ci.getClass(className);
-			}
-			catch (ClassNotFoundException cnfe)
-			{
-				/* We should never get this exception since we verified 
-				 * that the classes existed at bind time.  Just return null.
-				 */
-				if (SanityManager.DEBUG)
-				{
-					SanityManager.THROWASSERT("Unexpected exception", cnfe);
-				}
-				return null;
-			}
-		}
-
-		return parmTypeClasses;
 	}
 
 	/**
@@ -378,28 +355,6 @@ public class NewInvocationNode extends MethodCallNode
 		pushable = pushable && super.categorize(referencedTabs, simplePredsOnly);
 
 		return pushable;
-	}
-
-	/**
-	 * Build a JBitSet of all of the tables that we are
-	 * correlated with.
-	 *
-	 * @param correlationMap	The JBitSet of the tables that we are correlated with.
-	 */
-	void getCorrelationTables(JBitSet correlationMap)
-		throws StandardException
-	{
-		CollectNodesVisitor getCRs = new CollectNodesVisitor(ColumnReference.class);
-		super.accept(getCRs);
-		Vector colRefs = getCRs.getList();
-		for (Enumeration e = colRefs.elements(); e.hasMoreElements(); )
-		{
-			ColumnReference ref = (ColumnReference)e.nextElement();
-			if (ref.getCorrelated())
-			{
-				correlationMap.set(ref.getTableNumber());
-			}
-		}
 	}
 
 	/**

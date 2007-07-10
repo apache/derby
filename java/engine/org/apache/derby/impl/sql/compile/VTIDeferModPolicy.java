@@ -70,7 +70,7 @@ class VTIDeferModPolicy implements Visitor
             deferralControl = targetVTI.getDeferralControl();
             if( deferralControl == null)
             {
-                String VTIClassName = targetVTI.getNewInvocation().getJavaClassName();
+                String VTIClassName = targetVTI.getMethodCall().getJavaClassName();
                 deferralControl = new DefaultVTIModDeferPolicy( VTIClassName,
                                                                 ResultSet.TYPE_SCROLL_SENSITIVE == resultSetType);
             }
@@ -182,7 +182,7 @@ class VTIDeferModPolicy implements Visitor
                     {
                         FromVTI fromVTI = (FromVTI) fromTable;
                         if( deferralControl.subselectRequiresDefer( statementType,
-                                                                    fromVTI.getNewInvocation().getJavaClassName()))
+                                                                    fromVTI.getMethodCall().getJavaClassName()))
                             deferred = true;
                     }
                 }

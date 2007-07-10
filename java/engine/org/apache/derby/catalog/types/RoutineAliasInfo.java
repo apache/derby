@@ -52,6 +52,9 @@ public class RoutineAliasInfo extends MethodAliasInfo
 	/** PARAMETER STYLE JAVA */
 	public static final short PS_JAVA = 0;
 
+	/** PARAMETER STYLE DERBY_JDBC_RESULT_SET */
+	public static final short PS_DERBY_JDBC_RESULT_SET = PS_JAVA + 1;
+
 	private int parameterCount;
 
 	private TypeDescriptor[]	parameterTypes;
@@ -315,7 +318,12 @@ public class RoutineAliasInfo extends MethodAliasInfo
 			sb.append(" RETURNS " + returnType.getSQLstring());
 		}
 
-		sb.append(" LANGUAGE JAVA PARAMETER STYLE JAVA ");
+		sb.append(" LANGUAGE JAVA PARAMETER STYLE " );
+		switch( parameterStyle )
+		{
+		    case PS_JAVA:    sb.append( "JAVA " ); break;
+		    case PS_DERBY_JDBC_RESULT_SET:    sb.append( "DERBY_JDBC_RESULT_SET " ); break;
+		}
 		sb.append(RoutineAliasInfo.SQL_CONTROL[getSQLAllowed()]);
 		if ((returnType == null) &&
 			(dynamicResultSets != 0))

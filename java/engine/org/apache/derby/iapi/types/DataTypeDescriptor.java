@@ -28,6 +28,8 @@ import java.sql.Types;
 import java.text.RuleBasedCollator;
 
 import org.apache.derby.catalog.TypeDescriptor;
+import org.apache.derby.catalog.types.BaseTypeIdImpl;
+import org.apache.derby.catalog.types.RowMultiSetImpl;
 import org.apache.derby.catalog.types.TypeDescriptorImpl;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
@@ -252,6 +254,26 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 											maximumWidth);
 	}
     
+	/**
+	 * Get a DataTypeServices that corresponds to a SQL Row Multiset
+	 *
+	 * @param columnNames   Names of the columns in the Row Muliset
+	 * @param types                 Types of the columns in the Row Muliset
+	 *
+	 * @return	A new DataTypeDescriptor describing the SQL Row Multiset
+	 */
+	public static DataTypeDescriptor getRowMultiSet
+	(
+		String[]	                        columnNames,
+		DataTypeDescriptor[]	types
+	)
+	{
+		RowMultiSetImpl       rms = new RowMultiSetImpl( columnNames, types );
+		TypeId              typeID = new TypeId( StoredFormatIds.ROW_MULTISET_CATALOG_ID, rms );
+
+		return new DataTypeDescriptor( typeID, true);
+	}
+
 	/*
 	** Instance fields & methods
 	*/
@@ -928,6 +950,14 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 	public int	getCollationDerivation()
 	{
 		return typeDescriptor.getCollationDerivation();
+	}
+
+	/**
+	* @see TypeDescriptor#isRowMultiSet
+	 */
+	public	boolean isRowMultiSet()
+	{
+		return getTypeId().isRowMultiSetTypeId();
 	}
 
     /**

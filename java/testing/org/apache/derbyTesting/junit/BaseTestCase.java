@@ -148,6 +148,7 @@ public abstract class BaseTestCase
     {
         while ( t!= null) {
             t.printStackTrace(out);
+            out.flush();
             
             if (t instanceof SQLException)  {
                 t = ((SQLException) t).getNextException();

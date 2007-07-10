@@ -443,7 +443,9 @@ public class GenericResultSetFactory implements ResultSetFactory
 									 boolean isTarget,
 									 int scanIsolationLevel,
 									 double optimizerEstimatedRowCount,
-									 double optimizerEstimatedCost)
+									 double optimizerEstimatedCost,
+									 boolean isDerbyStyleTableFunction
+                                          )
 		throws StandardException
 	{
 		return new VTIResultSet(activation, row, resultSetNumber, 
@@ -456,7 +458,9 @@ public class GenericResultSetFactory implements ResultSetFactory
 								isTarget,
 								scanIsolationLevel,
 							    optimizerEstimatedRowCount,
-								optimizerEstimatedCost);
+								optimizerEstimatedCost,
+								isDerbyStyleTableFunction
+                                );
 	}
 
 	/**

@@ -195,7 +195,7 @@ public class BaseTypeIdImpl implements Formatable
     public String   toString()
     {
         return MessageService.getTextMessage(SQLState.TI_SQL_TYPE_NAME) +
-                ": " + SQLTypeName;
+                ": " + getSQLTypeName();
     }
 
     /**
@@ -205,7 +205,7 @@ public class BaseTypeIdImpl implements Formatable
     {
         if (that instanceof BaseTypeIdImpl)
         {
-            return this.SQLTypeName.equals(((BaseTypeIdImpl)that).getSQLTypeName());
+            return this.getSQLTypeName().equals(((BaseTypeIdImpl)that).getSQLTypeName());
         }
         else
         {
@@ -218,7 +218,7 @@ public class BaseTypeIdImpl implements Formatable
       */
     public int hashCode()
     {
-        return this.SQLTypeName.hashCode();
+        return this.getSQLTypeName().hashCode();
     }
 
     /**

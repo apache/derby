@@ -51,6 +51,7 @@ import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptorList;
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
 
 import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.reference.JDBC20Translation;
@@ -58,7 +59,10 @@ import org.apache.derby.iapi.reference.SQLState;
 
 import org.apache.derby.iapi.sql.Activation;
 
+import org.apache.derby.catalog.TypeDescriptor;
 import org.apache.derby.catalog.UUID;
+import org.apache.derby.catalog.types.RoutineAliasInfo;
+import org.apache.derby.catalog.types.RowMultiSetImpl;
 
 import org.apache.derby.vti.DeferModification;
 import org.apache.derby.vti.VTICosting;
@@ -97,13 +101,14 @@ public class FromVTI extends FromTable implements VTIEnvironment
 
 	JBitSet				correlationMap;
 	JBitSet				dependencyMap;
-	NewInvocationNode	newInvocation;
+	MethodCallNode	methodCall;
 	TableName			exposedName;
 	SubqueryList subqueryList;
 	boolean				implementsVTICosting;
 	boolean				optimized;
 	boolean				materializable;
 	boolean				isTarget;
+	boolean				isDerbyStyleTableFunction;
 	ResultSet			rs;
 
 	private	FormatableHashtable	compileTimeConstants;
@@ -147,7 +152,7 @@ public class FromVTI extends FromTable implements VTIEnvironment
     private int resultSetType = ResultSet.TYPE_FORWARD_ONLY;
 
     /**
-	 * @param newInvocation		The constructor for the VTI
+	 * @param invocation		The constructor or static method for the VTI
 	 * @param correlationName	The correlation name
 	 * @param derivedRCL		The derived column list
 	 * @param tableProperties	Properties list associated with the table
@@ -155,13 +160,13 @@ public class FromVTI extends FromTable implements VTIEnvironment
 	 * @exception StandardException		Thrown on error
 	 */
 	public void init(
-					Object newInvocation,
+					Object invocation,
 					Object correlationName,
 					Object derivedRCL,
 					Object tableProperties)
 		throws StandardException
 	{
-        init( newInvocation,
+        init( invocation,
               correlationName,
               derivedRCL,
               tableProperties,
@@ -169,7 +174,7 @@ public class FromVTI extends FromTable implements VTIEnvironment
 	}
 
     /**
-	 * @param newInvocation		The constructor for the VTI
+	 * @param invocation		The constructor or static method for the VTI
 	 * @param correlationName	The correlation name
 	 * @param derivedRCL		The derived column list
 	 * @param tableProperties	Properties list associated with the table
@@ -178,7 +183,7 @@ public class FromVTI extends FromTable implements VTIEnvironment
 	 * @exception StandardException		Thrown on error
 	 */
 	public void init(
-					Object newInvocation,
+					Object invocation,
 					Object correlationName,
 					Object derivedRCL,
 					Object tableProperties,
@@ -186,7 +191,9 @@ public class FromVTI extends FromTable implements VTIEnvironment
 		throws StandardException
 	{
 		super.init(correlationName, tableProperties);
-		this.newInvocation = (NewInvocationNode) newInvocation;
+
+		this.methodCall = (MethodCallNode) invocation;
+
 		resultColumns = (ResultColumnList) derivedRCL;
 		subqueryList = (SubqueryList) getNodeFactory().getNode(
 											C_NodeTypes.SUBQUERY_LIST,
@@ -408,10 +415,10 @@ public class FromVTI extends FromTable implements VTIEnvironment
 		if (SanityManager.DEBUG) {
 			super.printSubNodes(depth);
 
-			if (newInvocation != null)
+			if (methodCall != null)
 			{
-				printLabel(depth, "newInvocation: ");
-				newInvocation.treePrint(depth + 1);
+				printLabel(depth, "methodCall: ");
+				methodCall.treePrint(depth + 1);
 			}
 
 			if (exposedName != null)
@@ -429,13 +436,19 @@ public class FromVTI extends FromTable implements VTIEnvironment
 	}
 
 	/** 
-	 * Return the new invocation from this node.
-	 *
-	 * @return ResultSetNode	The new invocation from this node.
+	 * Return true if this VTI is a constructor. Otherwise, it is a static method.
 	 */
-	public NewInvocationNode getNewInvocation()
+	public boolean  isConstructor()
 	{
-		return newInvocation;
+		return ( methodCall instanceof NewInvocationNode );
+	}
+
+	/** 
+	 * Return the constructor or static method invoked from this node
+	 */
+	public MethodCallNode getMethodCall()
+	{
+		return methodCall;
 	}
 
 	/**
@@ -496,7 +509,7 @@ public class FromVTI extends FromTable implements VTIEnvironment
      */
     String getVTIName()
     {
-        return newInvocation.getJavaClassName();
+        return methodCall.getJavaClassName();
     } // end of getVTIName
 
 	/**
@@ -521,54 +534,59 @@ public class FromVTI extends FromTable implements VTIEnvironment
 		 * parameters.
 		 */
 
-		/* Bind the constructor - does basic error checking.
+		/* Bind the constructor or static method - does basic error checking.
 		 * Correlated subqueries are not allowed as parameters to
 		 * a VTI, so pass an empty FromList.
 		 */
 		Vector aggregateVector = new Vector();
-		newInvocation.bindExpression(fromListParam,
+		methodCall.bindExpression(fromListParam,
 									 subqueryList,
 									 aggregateVector);
 
-		/* We have a valid constructor.  Does class implement the correct interface? 
+		/* If we have a valid constructor, does class implement the correct interface? 
 		 * If version2 is true, then it must implement PreparedStatement, otherwise
 		 * it can implement either PreparedStatement or ResultSet.  (We check for
 		 * PreparedStatement first.)
 		 */
 
-		if (!newInvocation.assignableTo("java.sql.PreparedStatement"))
+		if ( isConstructor() )
 		{
+		    NewInvocationNode   constructor = (NewInvocationNode) methodCall;
+                
+		    if (!constructor.assignableTo("java.sql.PreparedStatement"))
+		    {
 			if (version2)
 			{
 				throw StandardException.newException(SQLState.LANG_DOES_NOT_IMPLEMENT, 
 										getVTIName(),
 										"java.sql.PreparedStatement");
 			}
-			else if (! newInvocation.assignableTo("java.sql.ResultSet"))
+			else if (! constructor.assignableTo("java.sql.ResultSet"))
 			{
 				throw StandardException.newException(SQLState.LANG_DOES_NOT_IMPLEMENT, 
 										getVTIName(),
 										"java.sql.ResultSet");
 			}
-		}
-		else
-		{
-			version2 = true;
-		}
+		    }
+		    else
+		    {
+			    version2 = true;
+		    }
         
-		/* If this is a version 2 VTI */
-		if (version2)
-		{
+		    /* If this is a version 2 VTI */
+		    if (version2)
+		    {
 			// Does it support predicates
-			implementsPushable = newInvocation.assignableTo("org.apache.derby.vti.IQualifyable");
+			implementsPushable = constructor.assignableTo("org.apache.derby.vti.IQualifyable");
+		    }
+		    // Remember whether or not the VTI implements the VTICosting interface
+		    implementsVTICosting = constructor.assignableTo(ClassName.VTICosting);
 		}
 
-		// Remember whether or not the VTI implements the VTICosting interface
-		implementsVTICosting = newInvocation.assignableTo(ClassName.VTICosting);
 
 
 		// Is the parameter list to the constructor valid for a VTI?
-		methodParms = newInvocation.getMethodParms();
+		methodParms = methodCall.getMethodParms();
 
 		/* Build the RCL for this VTI.  We instantiate an object in order
 		 * to get the ResultSetMetaData.
@@ -578,7 +596,7 @@ public class FromVTI extends FromTable implements VTIEnvironment
 		 * the compiler context.
 		 */
 		UUID triggerTableId;
-		if ((triggerTableId = getSpecialTriggerVTITableName(lcc, newInvocation.getJavaClassName())) != null)	
+		if ((isConstructor()) && ((triggerTableId = getSpecialTriggerVTITableName(lcc, methodCall.getJavaClassName())) != null)  )
 		{
 			TableDescriptor td = getDataDictionary().getTableDescriptor(triggerTableId);
 			resultColumns = genResultColList(td);
@@ -591,32 +609,49 @@ public class FromVTI extends FromTable implements VTIEnvironment
 		}
 		else
 		{	
-			ResultSetMetaData rsmd = getResultSetMetaData();
-	
-			/* Wouldn't it be nice if we knew that the class/object would never
-			 * return a null ResultSetMetaData.
-			 */
-			if (rsmd == null)
-			{
-				throw StandardException.newException(SQLState.LANG_NULL_RESULT_SET_META_DATA, 
-											getVTIName());
-			}
-	
-			// Remember how many columns VTI returns for partial row calculation
-			try
-			{
-				numVTICols = rsmd.getColumnCount();
-			}
-			catch (SQLException sqle)
-			{
-				numVTICols = 0;
-			}
-
 			resultColumns = (ResultColumnList) getNodeFactory().getNode(
 												C_NodeTypes.RESULT_COLUMN_LIST,
 												getContextManager());
-			resultColumns.createListFromResultSetMetaData(rsmd, exposedName, 
-														  newInvocation.getJavaClassName());
+
+			// if this is a Derby-style Table Function, then build the result
+			// column list from the RowMultiSetImpl return datatype
+			RoutineAliasInfo    routineInfo = methodCall.getRoutineInfo();
+
+			if (
+			     (routineInfo !=null) &&
+			     routineInfo.getReturnType().isRowMultiSet() &&
+			     (routineInfo.getParameterStyle() == RoutineAliasInfo.PS_DERBY_JDBC_RESULT_SET)
+			    )			{
+			    isDerbyStyleTableFunction = true;
+			    createResultColumnsForTableFunction( routineInfo.getReturnType() );
+			}
+			else
+			{
+            
+			    ResultSetMetaData rsmd = getResultSetMetaData();
+	
+			    /* Wouldn't it be nice if we knew that the class/object would never
+			     * return a null ResultSetMetaData.
+			     */
+			    if (rsmd == null)
+			    {
+				throw StandardException.newException(SQLState.LANG_NULL_RESULT_SET_META_DATA, 
+											getVTIName());
+			    }
+	
+			    // Remember how many columns VTI returns for partial row calculation
+			    try
+			    {
+				numVTICols = rsmd.getColumnCount();
+			    }
+			    catch (SQLException sqle)
+			    {
+				numVTICols = 0;
+			    }
+
+			    resultColumns.createListFromResultSetMetaData(rsmd, exposedName, 
+														  getVTIName() );
+			}
 		}
 		numVTICols = resultColumns.size();
 	
@@ -705,7 +740,8 @@ public class FromVTI extends FromTable implements VTIEnvironment
     private Object getNewInstance()
         throws StandardException
     {
-		Class[]  paramTypeClasses = newInvocation.getMethodParameterClasses();
+		NewInvocationNode   constructor = (NewInvocationNode) methodCall;
+		Class[]  paramTypeClasses = constructor.getMethodParameterClasses();
 		Object[] paramObjects = null;
 
 		if (paramTypeClasses != null)
@@ -781,10 +817,10 @@ public class FromVTI extends FromTable implements VTIEnvironment
         try
         {
             ClassInspector classInspector = getClassFactory().getClassInspector();
-            String javaClassName = newInvocation.getJavaClassName();
-            Constructor constructor = classInspector.getClass(javaClassName).getConstructor(paramTypeClasses);
+            String javaClassName = methodCall.getJavaClassName();
+            Constructor constr = classInspector.getClass(javaClassName).getConstructor(paramTypeClasses);
 
-            return constructor.newInstance(paramObjects);
+            return constr.newInstance(paramObjects);
         }
 		catch(Throwable t)
 		{
@@ -846,7 +882,7 @@ public class FromVTI extends FromTable implements VTIEnvironment
 		 * then the VTI is a candidate for materialization at execution time
 		 * if it is the inner table of a join or in a subquery.
 		 */
-		materializable = newInvocation.areParametersQueryInvariant();
+		materializable = methodCall.areParametersQueryInvariant();
 
 		/* NOTE: We need to rebind any ColumnReferences that are parameters and are
 		 * from other VTIs that appear after this one in the FROM list.
@@ -887,7 +923,7 @@ public class FromVTI extends FromTable implements VTIEnvironment
 		throws StandardException
 	{
 		CollectNodesVisitor getCRs = new CollectNodesVisitor(nodeClass);
-		newInvocation.accept(getCRs);
+		methodCall.accept(getCRs);
 		return getCRs.getList();
 	}
 
@@ -1025,7 +1061,7 @@ public class FromVTI extends FromTable implements VTIEnvironment
 									FromList fromList)
 								throws StandardException
 	{
-		newInvocation.preprocess(
+		methodCall.preprocess(
 								numTables,
 								(FromList) getNodeFactory().getNode(
 									C_NodeTypes.FROM_LIST,
@@ -1040,7 +1076,7 @@ public class FromVTI extends FromTable implements VTIEnvironment
 		/* Generate the referenced table map */
 		referencedTableMap = new JBitSet(numTables);
 		referencedTableMap.set(tableNumber);
-		newInvocation.categorize(referencedTableMap, false);
+		methodCall.categorize(referencedTableMap, false);
 
 		// Create the dependency map
 		dependencyMap = new JBitSet(numTables);
@@ -1054,7 +1090,7 @@ public class FromVTI extends FromTable implements VTIEnvironment
 
 		// Get a JBitSet of the outer tables represented in the parameter list
 		correlationMap = new JBitSet(numTables);
-		newInvocation.getCorrelationTables(correlationMap);
+		methodCall.getCorrelationTables(correlationMap);
 
 		return genProjectRestrict(numTables);
 	}
@@ -1168,7 +1204,7 @@ public class FromVTI extends FromTable implements VTIEnvironment
 		 * join row since the join row hasn't been filled in yet.
 		 */
 		RemapCRsVisitor rcrv = new RemapCRsVisitor(true);
-		newInvocation.accept(rcrv);
+		methodCall.accept(rcrv);
 
 		/* Get the next ResultSet #, so that we can number this ResultSetNode, its
 		 * ResultColumnList and ResultSet.
@@ -1239,7 +1275,7 @@ public class FromVTI extends FromTable implements VTIEnvironment
 		generateConstructor(acb, mb, reuseablePs); // arg 4
 
 		// Pass in the class name
-		mb.push(newInvocation.getJavaClassName()); // arg 5
+		mb.push(methodCall.getJavaClassName()); // arg 5
 
 		if (restrictionList != null) {
 			restrictionList.generateQualifiers(acb, mb, this, true);
@@ -1269,7 +1305,10 @@ public class FromVTI extends FromTable implements VTIEnvironment
 		// estimated cost
 		mb.push(costEstimate.getEstimatedCost());
 
-		return 14;
+		// Whether or not this is a Derby-style Table Function
+		mb.push(isDerbyStyleTableFunction);
+
+		return 15;
 	}
 
 	private void generateConstructor(ActivationClassBuilder acb,
@@ -1296,7 +1335,7 @@ public class FromVTI extends FromTable implements VTIEnvironment
 			userExprFun.conditionalIfNull();
 		}
 
-		newInvocation.generateExpression(acb, userExprFun);
+		methodCall.generateExpression(acb, userExprFun);
         userExprFun.upCast(vtiType);
 
 		if (reuseablePs) {
@@ -1314,7 +1353,7 @@ public class FromVTI extends FromTable implements VTIEnvironment
 
 
 
-		// newInvocation knows it is returning its value;
+		// methodCall knows it is returning its value;
 
 		/* generates:
 		 *    return <newInvocation.generate(acb)>;
@@ -1365,7 +1404,7 @@ public class FromVTI extends FromTable implements VTIEnvironment
 	public boolean referencesTarget(String name, boolean baseTable)
 		throws StandardException
 	{
-		return (! baseTable) && name.equals(newInvocation.getJavaClassName());
+		return (! baseTable) && name.equals(methodCall.getJavaClassName());
 	}
 
 	/**
@@ -1388,7 +1427,7 @@ public class FromVTI extends FromTable implements VTIEnvironment
 
 		if (!v.stopTraversal())
 		{
-			newInvocation = (NewInvocationNode) newInvocation.accept(v);
+			methodCall = (MethodCallNode) methodCall.accept(v);
 		}
 
 		return returnNode;
@@ -1539,4 +1578,24 @@ public class FromVTI extends FromTable implements VTIEnvironment
 
 		return compileTimeConstants.get(key);
 	}
+
+    /**
+     * Add result columns for a Derby-style Table Function
+     */
+    private void    createResultColumnsForTableFunction
+        (TypeDescriptor td)
+        throws StandardException
+    {
+        DataTypeDescriptor      returnType = (DataTypeDescriptor) td;
+        RowMultiSetImpl         rmsi = (RowMultiSetImpl) returnType.getTypeId().getBaseTypeId();
+        String[]                        columnNames = rmsi.getColumnNames();
+        DataTypeDescriptor[]    types = rmsi.getTypes();
+        int                                     count = columnNames.length;
+        
+        for ( int i = 0; i < count; i++ )
+        {
+            resultColumns.addColumn( exposedName, columnNames[ i ], types[ i ] );
+        }
+
+    }
 }

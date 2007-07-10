@@ -735,4 +735,9 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
         // TODO Auto-generated method stub
         return null;
     }
+
+    public String getBuiltinVTIClass(TableDescriptor td, boolean asTableFunction) throws StandardException {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }

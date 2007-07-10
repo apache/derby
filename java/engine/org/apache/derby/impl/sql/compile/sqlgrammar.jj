@@ -2256,6 +2256,7 @@ TOKEN [IGNORE_CASE] :
 |   <CS: "cs">
 |	<CURSORS: "cursors">
 |	<DB2SQL: "db2sql">
+|	<DERBY_JDBC_RESULT_SET: "derby_jdbc_result_set">
 |       <DIRTY: "dirty">
 |	<DOCUMENT: "document">
 |	<EACH: "each">
@@ -7436,9 +7437,12 @@ newInvocation() throws StandardException :
 JavaToSQLValueNode
 vtiTableConstruct() throws StandardException :
 {
-    QueryTreeNode newNode = null;
+    NewInvocationNode newNode = null;
+    QueryTreeNode invocationNode = null;
     Vector parameterList = new Vector();
     TableName vtiTableName = null;
+    TableDescriptor td;
+    MethodCallNode	methodNode;
 }
 {
     <TABLE> <LEFT_PAREN>
@@ -7446,19 +7450,35 @@ vtiTableConstruct() throws StandardException :
         methodCallParameterList(parameterList)
     <RIGHT_PAREN>
     {
-		/* The fact that we pass a NULL table descriptor to the
-		 * following call is an indication that we are mapping to a
-		 * VTI table function (i.e. one that accepts arguments).
-		 * Since we have the table name we do not need to pass in a
-		 * TableDescriptor--we'll just create one from the table
-		 * name. See NewInvocationNode for more.
-		 */
-        newNode = nodeFactory.getNode(C_NodeTypes.NEW_INVOCATION_NODE,
-                    vtiTableName,  // TableName
-                    null,          // TableDescriptor
-                    parameterList, 
-                    lastTokenDelimitedIdentifier,
-                    getContextManager());
+        /* The fact that we pass a NULL table descriptor to the
+        * following call is an indication that we are mapping to a
+        * VTI table function (i.e. one that accepts arguments).
+        * Since we have the table name we do not need to pass in a
+        * TableDescriptor--we'll just create one from the table
+        * name. See NewInvocationNode for more.
+        */
+        newNode = (NewInvocationNode) nodeFactory.getNode
+        (
+            C_NodeTypes.NEW_INVOCATION_NODE,
+            vtiTableName,  // TableName
+            null,          // TableDescriptor
+            parameterList, 
+            lastTokenDelimitedIdentifier,
+            getContextManager());
+
+        if ( newNode.isBuiltinVTI() ) { invocationNode = newNode; }
+        else
+        {
+            methodNode = (MethodCallNode) nodeFactory.getNode(
+                C_NodeTypes.STATIC_METHOD_CALL_NODE,
+                vtiTableName,
+                null,
+                getContextManager());
+            methodNode.addParms(parameterList);
+
+            invocationNode = methodNode;
+        }
+
 
         /*
         ** Assume this is being returned to the SQL domain.  If it turns
@@ -7467,7 +7487,7 @@ vtiTableConstruct() throws StandardException :
         */
         return (JavaToSQLValueNode) nodeFactory.getNode(
                     C_NodeTypes.JAVA_TO_SQL_VALUE_NODE,
-                    newNode,
+                    invocationNode,
                     getContextManager());
     }
 }
@@ -7526,7 +7546,6 @@ routineInvocation() throws StandardException :
 	routineName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
 		methodCallParameterList(parameterList)
 	{
-
 		methodNode = (MethodCallNode) nodeFactory.getNode(
 								C_NodeTypes.STATIC_METHOD_CALL_NODE,
 								routineName,
@@ -9800,7 +9819,7 @@ procedureDefinition() throws StandardException :
 {
 		<PROCEDURE> procedureName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
 		procedureElements[0] = procedureParameterList()
-		( routineElement(true, procedureElements) ) +
+		( routineElement(true, false, procedureElements) ) +
 		{
 		    checkRequiredRoutineClause(JAVA_ROUTINE_CLAUSES, procedureElements);
 
@@ -9813,7 +9832,7 @@ procedureDefinition() throws StandardException :
 		}
 }
 
-void routineElement(boolean isProcedure, Object[] routineElements) throws StandardException :
+void routineElement(boolean isProcedure, boolean isTableFunction, Object[] routineElements) throws StandardException :
 {
 	int drs;
 	int clausePosition = -1;
@@ -9835,7 +9854,7 @@ void routineElement(boolean isProcedure, Object[] routineElements) throws Standa
 	|
 		<EXTERNAL> <NAME> clauseValue = string() { clausePosition = 4; }
 	|
-		<PARAMETER> <STYLE> clauseValue = parameterStyle() { clausePosition = 5; }
+		<PARAMETER> <STYLE> clauseValue = parameterStyle( isTableFunction ) { clausePosition = 5; }
 
 	|	<NO> <SQL>				{ clauseValue = ReuseFactory.getShort(RoutineAliasInfo.NO_SQL); clausePosition = 6; }
 	|	<CONTAINS> <SQL>		{ clauseValue = ReuseFactory.getShort(RoutineAliasInfo.CONTAINS_SQL); clausePosition = 6; }
@@ -9885,12 +9904,26 @@ Boolean calledOnNullInput(boolean isProcedure) throws StandardException :
 	}
 }
 
-Short parameterStyle() :
+Short parameterStyle( boolean isTableFunction ) throws StandardException :
 {
 }
 {
-	  <JAVA>               { return ReuseFactory.getShort(RoutineAliasInfo.PS_JAVA); }
-	}
+	  <JAVA>
+	  {
+	      if ( isTableFunction )
+	      { throw StandardException.newException( SQLState.LANG_MUST_BE_DJRS ); }
+
+	      return ReuseFactory.getShort(RoutineAliasInfo.PS_JAVA);
+	  }
+|
+	  <DERBY_JDBC_RESULT_SET>
+	  {
+	      if ( !isTableFunction )
+	      { throw StandardException.newException( SQLState.LANG_NO_DJRS ); }
+
+	      return ReuseFactory.getShort(RoutineAliasInfo.PS_DERBY_JDBC_RESULT_SET);
+	  }
+}
 
 Object[]
 procedureParameterList() throws StandardException :
@@ -9969,14 +10002,16 @@ StatementNode
 functionDefinition() throws StandardException :
 {
 	TableName functionName;
+	DataTypeDescriptor  returnType;
 	Object[] functionElements = new Object[9];
 }
 {
 		<FUNCTION> functionName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
 		functionElements[0] = functionParameterList()
-		<RETURNS> functionElements[8] = dataTypeCommon() 
-		( routineElement(false, functionElements) ) +
+		<RETURNS> returnType = functionReturnDataType() 
+		( routineElement(false, returnType.getTypeId().isRowMultiSetTypeId(), functionElements) ) +
 		{
+		    functionElements[8] = returnType;
 		    checkRequiredRoutineClause(JAVA_ROUTINE_CLAUSES, functionElements);
 		    
 			return getCreateAliasNode(
@@ -10026,6 +10061,91 @@ functionParameterDefinition(Vector[] list) throws StandardException :
 		list[0].addElement(parameterName);
 		list[1].addElement(typeDescriptor);
 		list[2].addElement(ReuseFactory.getInteger(JDBC30Translation.PARAMETER_MODE_IN));
+	}
+}
+
+/*
+ * <A NAME="functionReturnDataType">functionReturnDataType</A>
+ */
+DataTypeDescriptor
+functionReturnDataType() throws StandardException :
+{
+    DataTypeDescriptor	typeDescriptor;
+}
+{
+    (
+        typeDescriptor = dataTypeCommon()
+         |
+        typeDescriptor = functionTableType()
+    )
+    {
+        return typeDescriptor;
+    }
+}
+
+/*
+ * <A NAME="functionTableType">functionTableType</A>
+ */
+DataTypeDescriptor
+functionTableType() throws StandardException :
+{
+	DataTypeDescriptor      typeDescriptor;
+	ArrayList                       names = new ArrayList();
+	ArrayList                         types = new ArrayList();
+	String[]                          nameArray;
+	DataTypeDescriptor[]        typeArray;
+	int                                     columnCount;
+}
+{
+	<TABLE>
+	<LEFT_PAREN>
+	    functionTableReturnColumn( names, types )
+	    ( <COMMA> functionTableReturnColumn( names, types ) ) *
+	<RIGHT_PAREN>
+	{
+		columnCount = names.size();
+		nameArray = new String[ columnCount ];
+		names.toArray( nameArray );
+		typeArray = new DataTypeDescriptor[ columnCount ];
+		types.toArray( typeArray );
+
+		//
+		// We do not allow XML as a column datatype because
+		// Derby does not yet support the streaming JDBC4
+		// interfaces to XML values.
+		//
+		for ( int i = 0; i < columnCount; i++ )
+		{
+		    if ( typeArray[ i ].getTypeId().isXMLTypeId() )
+		    { throw StandardException.newException( SQLState.LANG_XML_NOT_ALLOWED_DJRS ); }
+		}
+
+		typeDescriptor = DataTypeDescriptor.getRowMultiSet( nameArray, typeArray );
+
+		return typeDescriptor;
+	}
+}
+
+/*
+ * <A NAME="functionTableReturnColumn">functionTableReturnColumn</A>
+ */
+void
+functionTableReturnColumn
+(
+    ArrayList names,
+    ArrayList types
+)
+throws StandardException :
+{
+	String                          name;
+	DataTypeDescriptor	typeDescriptor;
+}
+{
+	name = identifier( Limits.MAX_IDENTIFIER_LENGTH, true )
+	typeDescriptor = dataTypeDDL()
+	{
+		names.add( name );
+		types.add( typeDescriptor );
 	}
 }
 
@@ -12961,6 +13081,7 @@ nonReservedKeyword()  :
 	|	tok = <DYNAMIC>
     |   tok = <DATABASE>
 	|	tok = <DB2SQL>
+	|	tok = <DERBY_JDBC_RESULT_SET>
 	|	tok = <DOCUMENT>
 	|	tok = <EACH>
 	|	tok = <EMPTY>

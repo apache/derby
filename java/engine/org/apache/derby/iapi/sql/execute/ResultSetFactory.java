@@ -641,6 +641,7 @@ public interface ResultSetFactory {
 		@param optimizerEstimatedRowCount	Estimated total # of rows by
 											optimizer
 		@param optimizerEstimatedCost		Estimated total cost by optimizer
+		@param isDerbyStyleTableFunction    True if this is a Derby-style table function
 		@return the row as a result set.
 		@exception StandardException thrown when unable to create the
 			result set
@@ -656,7 +657,9 @@ public interface ResultSetFactory {
 									 boolean isTarget,
 									 int scanIsolationLevel,
 									 double optimizerEstimatedRowCount,
-									 double optimizerEstimatedCost)
+									 double optimizerEstimatedCost,
+									 boolean isDerbyStyleTableFunction
+                                          )
 		 throws StandardException;
 
 	/**
