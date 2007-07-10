@@ -48,13 +48,17 @@ import org.apache.derby.iapi.reference.JDBC30Translation;
 import java.sql.Types;
 
 /**
- * The TypeId interface provides methods to get information about datatype ids.
- 
+ * TypeId describes the static information about a SQL type
+ * independent of any specific attributes of the type such
+ * as length. So the TypeId for CHARACTER describes the
+ * fundamental information about CHARACTER. A specific
+ * type (e.g. CHARACTER(10)) is described by a DataTypeDescriptor.
    <P>
  * The equals(Object) method can be used to determine if two typeIds are for the same type,
  * which defines type id equality.
 
- *
+
+   @see DataTypeDescriptor
  */
 
 public final class TypeId implements Formatable
@@ -330,14 +334,13 @@ public final class TypeId implements Formatable
                           ret = DECIMAL_ID;
                           if (ret == null)
                                   ret = DECIMAL_ID = new TypeId(StoredFormatIds.DECIMAL_TYPE_ID,
-                                                                        new DecimalTypeIdImpl());
+                                                                        new DecimalTypeIdImpl(false));
                           break;
 
                   case Types.NUMERIC:
                           ret = NUMERIC_ID;
                           if (ret == null) {
-                                  DecimalTypeIdImpl numericTypeIdImpl = new DecimalTypeIdImpl();
-                                  numericTypeIdImpl.setNumericType();
+                                  DecimalTypeIdImpl numericTypeIdImpl = new DecimalTypeIdImpl(true);
                                   ret = NUMERIC_ID = new TypeId(StoredFormatIds.DECIMAL_TYPE_ID, numericTypeIdImpl);
                           }
                           break;

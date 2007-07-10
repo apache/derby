@@ -39,10 +39,7 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.conn.ConnectionUtil;
 
 /**
- * This is an implementation of DataTypeDescriptor from the generic language
- * datatype module interface.
- *
- * @version 1.0
+ * DataTypeDescriptor describes a runtime SQL type.
  */
 
 public final class DataTypeDescriptor implements TypeDescriptor, Formatable
@@ -60,12 +57,14 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 	**	method.
 	**
 	********************************************************/
+    
+    public static final DataTypeDescriptor INTEGER = new DataTypeDescriptor(TypeId.INTEGER_ID, true);
 
 	/*
 	** Static creators
 	*/
 	/**
-	 * Get a descriptor that corresponds to a builtin JDBC type.
+	 * Get a descriptor that corresponds to a nullable builtin JDBC type.
 	 *
 	 * @param jdbcType	The int type of the JDBC type for which to get
 	 *						a corresponding SQL DataTypeDescriptor
@@ -1144,7 +1143,7 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 	 * Get the simplified type descriptor that is intended to be stored
 	 * in the system tables.
 	 */
-	public TypeDescriptorImpl getCatalogType()
+	public TypeDescriptor getCatalogType()
 	{
 		return typeDescriptor;
 	}

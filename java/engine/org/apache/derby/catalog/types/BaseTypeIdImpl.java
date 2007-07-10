@@ -69,11 +69,16 @@ public class BaseTypeIdImpl implements Formatable
     **      getTypeFormatId() method.
     **
     ********************************************************/
+    
+    private int   formatId;
 
     String        SQLTypeName;
-    int           JDBCTypeId;
-    int           formatId;
-    int           wrapperTypeFormatId;
+    /**
+     * JDBC type - derived from the format identifier.
+     */
+    transient int           JDBCTypeId;
+
+    private int   wrapperTypeFormatId;
 
     /**
      * niladic constructor. Needed for Formatable interface to work.
@@ -99,7 +104,7 @@ public class BaseTypeIdImpl implements Formatable
      * @param SQLTypeName   The SQL name of the type
      */
 
-    protected BaseTypeIdImpl(String SQLTypeName)
+    BaseTypeIdImpl(String SQLTypeName)
     {
         this.SQLTypeName = SQLTypeName;
     }

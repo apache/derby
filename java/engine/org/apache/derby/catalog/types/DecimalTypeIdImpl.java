@@ -34,9 +34,11 @@ public class DecimalTypeIdImpl extends BaseTypeIdImpl
 	   the readExternal needs to know the formatId atleast for decimal types
 	   to read the extra information.
 	*/
-	public DecimalTypeIdImpl() 
+	public DecimalTypeIdImpl(boolean isNumeric) 
 	{
 		super(StoredFormatIds.DECIMAL_TYPE_ID_IMPL);
+        if (isNumeric)
+            setNumericType();
 	}
 	
 	/**
@@ -71,12 +73,12 @@ public class DecimalTypeIdImpl extends BaseTypeIdImpl
 	public void writeExternal( ObjectOutput out )
 		 throws IOException
 	{
-		out.writeBoolean(JDBCTypeId == Types.NUMERIC);
+		out.writeBoolean(getJDBCTypeId() == Types.NUMERIC);
 
 		super.writeExternal(out);
 	}
 
-	public void setNumericType()
+	private void setNumericType()
 	{
 		SQLTypeName = "NUMERIC";
 		JDBCTypeId = Types.NUMERIC;

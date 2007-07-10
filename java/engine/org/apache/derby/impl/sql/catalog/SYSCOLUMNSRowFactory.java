@@ -21,60 +21,37 @@
 
 package org.apache.derby.impl.sql.catalog;
 
-import org.apache.derby.iapi.reference.Property;
+import java.util.Properties;
 
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.types.TypeId;
-import org.apache.derby.iapi.types.DataValueDescriptor;
-
-import org.apache.derby.iapi.store.raw.RawStoreFactory;
-
-import org.apache.derby.iapi.types.DataValueFactory;
-import org.apache.derby.iapi.sql.dictionary.SystemColumn;
 import org.apache.derby.catalog.TypeDescriptor;
+import org.apache.derby.catalog.UUID;
 import org.apache.derby.catalog.types.BaseTypeIdImpl;
-
-import org.apache.derby.iapi.types.DataValueDescriptor;
-
-import org.apache.derby.iapi.types.SQLVarchar;
-import org.apache.derby.iapi.types.TypeId;
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.types.DataValueFactory;
-import org.apache.derby.iapi.types.RowLocation;
-
+import org.apache.derby.catalog.types.DefaultInfoImpl;
+import org.apache.derby.catalog.types.TypeDescriptorImpl;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.iapi.services.monitor.Monitor;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.services.uuid.UUIDFactory;
 import org.apache.derby.iapi.sql.dictionary.CatalogRowFactory;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDescriptorGenerator;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
+import org.apache.derby.iapi.sql.dictionary.SystemColumn;
 import org.apache.derby.iapi.sql.dictionary.TupleDescriptor;
-import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.UniqueTupleDescriptor;
-
-import org.apache.derby.iapi.sql.execute.ExecutionContext;
-import org.apache.derby.iapi.sql.execute.ExecutionFactory;
-import org.apache.derby.iapi.sql.execute.ExecIndexRow;
 import org.apache.derby.iapi.sql.execute.ExecRow;
-
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.services.monitor.Monitor;
-import org.apache.derby.catalog.types.TypeDescriptorImpl;
-import org.apache.derby.catalog.DefaultInfo;
-import org.apache.derby.iapi.services.uuid.UUIDFactory;
-import org.apache.derby.catalog.UUID;
-
+import org.apache.derby.iapi.sql.execute.ExecutionFactory;
+import org.apache.derby.iapi.store.raw.RawStoreFactory;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.DataValueDescriptor;
+import org.apache.derby.iapi.types.DataValueFactory;
+import org.apache.derby.iapi.types.SQLChar;
+import org.apache.derby.iapi.types.SQLInteger;
+import org.apache.derby.iapi.types.SQLLongint;
+import org.apache.derby.iapi.types.SQLVarchar;
+import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.impl.sql.compile.ColumnDefinitionNode;
-
-import org.apache.derby.catalog.types.DefaultInfoImpl;
-
-import org.apache.derby.iapi.types.*;
-
-import java.io.Serializable;
-
-import java.util.Properties;
 
 /**
  * Factory for creating a SYSCOLUMNS row.
@@ -182,13 +159,12 @@ public class SYSCOLUMNSRowFactory extends CatalogRowFactory
 					throws StandardException
 	{
 		ExecRow    				row;
-		DataValueDescriptor		col;
 
 		String					colName = null;
 		String					defaultID = null;
 		String					tabID = null;
 		Integer					colID = null;
-		TypeDescriptorImpl		typeDesc = null;
+		TypeDescriptor 		    typeDesc = null;
 		Object					defaultSerializable = null;
 		long					autoincStart = 0;
 		long					autoincInc = 0;
@@ -354,8 +330,6 @@ public class SYSCOLUMNSRowFactory extends CatalogRowFactory
 		String defaultID;
 		DefaultInfoImpl		defaultInfo = null;
 		ColumnDescriptor colDesc;
-		BaseTypeIdImpl		typeId;
-		TypeId	wrapperTypeId;
 		DataValueDescriptor	defaultValue = null;
 		UUID				defaultUUID = null;
 		UUID				uuid = null;
@@ -430,16 +404,13 @@ public class SYSCOLUMNSRowFactory extends CatalogRowFactory
 		*/
 		TypeDescriptorImpl typeDescriptor = (TypeDescriptorImpl) row.getColumn(SYSCOLUMNS_COLUMNDATATYPE).
 													getObject();
-		typeId = typeDescriptor.getTypeId();
+        BaseTypeIdImpl typeId = typeDescriptor.getTypeId();
 
 		/*
 		** The BaseTypeIdImpl tells what type of TypeId it is supposed to
 		** be wrapped in.
 		*/
-		wrapperTypeId =
-			(TypeId) Monitor.newInstanceFromIdentifier(typeId.wrapperTypeFormatId());
-		/* Wrap the BaseTypeIdImpl in a full type id */
-		wrapperTypeId.setNestedTypeId(typeId);
+        TypeId wrapperTypeId = new TypeId(typeId.wrapperTypeFormatId(), typeId);
 
 		/* Wrap the TypeDescriptorImpl in a full DataTypeDescriptor */
 		DataTypeDescriptor dataTypeServices = new DataTypeDescriptor(typeDescriptor,

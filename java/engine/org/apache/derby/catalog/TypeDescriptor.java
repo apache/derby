@@ -24,12 +24,9 @@ package org.apache.derby.catalog;
 import org.apache.derby.iapi.types.StringDataValue;
 
 /**
- *
- * An interface for describing types in Derby systems.
- *	
- *	
- *	<p>The values in system catalog DATATYPE columns are of type
- *	TypeDescriptor.
+ * TypeDescriptor represents a type in a system catalog, a
+ * persistent type. Examples are columns in tables and parameters
+ * for routines. A TypeDescriptor is immutable.
  */
 
 public interface TypeDescriptor

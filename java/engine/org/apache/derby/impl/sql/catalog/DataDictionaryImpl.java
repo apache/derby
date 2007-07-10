@@ -8740,6 +8740,9 @@ public final class	DataDictionaryImpl
     TransactionController   tc)
         throws StandardException
     {
+        TypeDescriptor integerType = DataTypeDescriptor.INTEGER.getCatalogType();
+        TypeDescriptor varchar128Type =
+            DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, 128).getCatalogType();
         /*
 		** SYSCS_UTIL routines.
 		*/
@@ -8760,8 +8763,7 @@ public final class	DataDictionaryImpl
 
             // procedure argument types
             TypeDescriptor[] arg_types = {
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                    Types.VARCHAR, 128),
+                    varchar128Type,
                 DataTypeDescriptor.getBuiltInDataTypeDescriptor(
                     Types.VARCHAR, Limits.DB2_VARCHAR_MAXWIDTH)
             };
@@ -8786,10 +8788,8 @@ public final class	DataDictionaryImpl
 
             // procedure argument types
             TypeDescriptor[] arg_types = {
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                    Types.VARCHAR, 128),
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                    Types.VARCHAR, 128),
+                    varchar128Type,
+                    varchar128Type,
                 DataTypeDescriptor.getBuiltInDataTypeDescriptor(
                     Types.SMALLINT)
 
@@ -8989,8 +8989,7 @@ public final class	DataDictionaryImpl
 
             // procedure argument types
             TypeDescriptor[] arg_types = {
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                    Types.VARCHAR, 128)
+                    varchar128Type
             };
 
             createSystemProcedureOrFunction(
@@ -9013,10 +9012,8 @@ public final class	DataDictionaryImpl
 
             // procedure argument types
             TypeDescriptor[] arg_types = {
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                    Types.VARCHAR, 128),
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                    Types.VARCHAR, 128)
+                    varchar128Type,
+                    varchar128Type
             };
 
             createSystemProcedureOrFunction(
@@ -9073,10 +9070,8 @@ public final class	DataDictionaryImpl
             TypeDescriptor[] arg_types = {
 				DataTypeDescriptor.getBuiltInDataTypeDescriptor(
                     Types.VARCHAR, 256),
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                    Types.VARCHAR, 128),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                    Types.INTEGER)
+                    varchar128Type,
+                    integerType
             };
 
             createSystemProcedureOrFunction(
@@ -9098,8 +9093,7 @@ public final class	DataDictionaryImpl
             TypeDescriptor[] arg_types = {
 				DataTypeDescriptor.getBuiltInDataTypeDescriptor(
                     Types.VARCHAR, 256),
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                    Types.VARCHAR, 128)
+                    varchar128Type
             };
 
             createSystemProcedureOrFunction(
@@ -9119,10 +9113,8 @@ public final class	DataDictionaryImpl
             String[] arg_names = {"JAR", "UNDEPLOY"};
 
             TypeDescriptor[] arg_types = {
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                    Types.VARCHAR, 128),
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                    Types.INTEGER)
+                    varchar128Type,
+                    integerType
             };
 
             createSystemProcedureOrFunction(
@@ -9152,18 +9144,15 @@ public final class	DataDictionaryImpl
 
             // procedure argument types
             TypeDescriptor[] arg_types = {
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-				Types.VARCHAR, 128), 
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-				Types.VARCHAR, 128),
+                    varchar128Type, 
+                    varchar128Type,
 				DataTypeDescriptor.getBuiltInDataTypeDescriptor(
 				Types.VARCHAR, 32672),
 				DataTypeDescriptor.getBuiltInDataTypeDescriptor(
 				Types.CHAR, 1),
 				DataTypeDescriptor.getBuiltInDataTypeDescriptor(
 				Types.CHAR, 1),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-				Types.VARCHAR, 128)
+                varchar128Type
             };
 
             createSystemProcedureOrFunction(
@@ -9200,8 +9189,7 @@ public final class	DataDictionaryImpl
 				Types.CHAR, 1),
 				DataTypeDescriptor.getBuiltInDataTypeDescriptor(
 				Types.CHAR, 1),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-				Types.VARCHAR, 128)
+                varchar128Type
             };
 
             createSystemProcedureOrFunction(
@@ -9232,18 +9220,15 @@ public final class	DataDictionaryImpl
 			
             // procedure argument types
             TypeDescriptor[] arg_types = {
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-				Types.VARCHAR, 128), 
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-				Types.VARCHAR, 128),
+                    varchar128Type, 
+                    varchar128Type,
 				DataTypeDescriptor.getBuiltInDataTypeDescriptor(
 				Types.VARCHAR, 32672),
 				DataTypeDescriptor.getBuiltInDataTypeDescriptor(
 				Types.CHAR, 1),
 				DataTypeDescriptor.getBuiltInDataTypeDescriptor(
 				Types.CHAR, 1),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-				Types.VARCHAR,	128),
+                varchar128Type,
 				DataTypeDescriptor.getBuiltInDataTypeDescriptor(
 				Types.SMALLINT),
             };
@@ -9278,10 +9263,8 @@ public final class	DataDictionaryImpl
 			
             // procedure argument types
             TypeDescriptor[] arg_types = {
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-				Types.VARCHAR, 128), 
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-				Types.VARCHAR, 128),
+                    varchar128Type, 
+                    varchar128Type,
 				DataTypeDescriptor.getBuiltInDataTypeDescriptor(
 				Types.VARCHAR, 32672),
 				DataTypeDescriptor.getBuiltInDataTypeDescriptor(
@@ -9292,8 +9275,7 @@ public final class	DataDictionaryImpl
 				Types.CHAR, 1),
 				DataTypeDescriptor.getBuiltInDataTypeDescriptor(
 				Types.CHAR, 1),
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-				Types.VARCHAR,	128),
+                varchar128Type,
 				DataTypeDescriptor.getBuiltInDataTypeDescriptor(
 				Types.SMALLINT),
             };
@@ -9326,10 +9308,8 @@ public final class	DataDictionaryImpl
 			
             // procedure argument types
             TypeDescriptor[] arg_types = {
-                DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-				Types.VARCHAR, 128), 
-				DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-				Types.VARCHAR, 128),
+                    varchar128Type, 
+                    varchar128Type,
 				DataTypeDescriptor.getBuiltInDataTypeDescriptor(
 				Types.VARCHAR, 32672),
 				DataTypeDescriptor.getBuiltInDataTypeDescriptor(
