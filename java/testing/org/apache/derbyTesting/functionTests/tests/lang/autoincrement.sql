@@ -1077,3 +1077,21 @@ insert into D1644_B (c1) values default, 10;
 insert into D1644_B values default, 10;
 select * from D1644_B;
 
+-- Derby-2902: can't use LONG.MIN_VALUE as the start value for
+-- an identity column. These tests verify that values less than MIN_VALUE
+-- or greater than MAX_VALUE are rejected, but MIN_VALUE and MAX_VALUE
+-- themeselves are accepted.
+create table t2902_a (c1 bigint generated always as identity
+(start with -9223372036854775807));
+create table t2902_b (c1 bigint generated always as identity
+(start with +9223372036854775807));
+create table t2902_c (c1 bigint generated always as identity
+(start with -9223372036854775808));
+create table t2902_d (c1 bigint generated always as identity
+(start with 9223372036854775808));
+create table t2902_e (c1 bigint generated always as identity
+(start with -9223372036854775809));
+drop table t2902_a;
+drop table t2902_b;
+drop table t2902_c;
+
