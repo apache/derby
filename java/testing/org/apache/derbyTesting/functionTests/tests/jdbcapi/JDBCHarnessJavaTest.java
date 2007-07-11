@@ -52,7 +52,6 @@ public class JDBCHarnessJavaTest extends HarnessJavaTest {
             
             // from old jdbcapi.runall
             "derbyStress",
-            // "nullSQLText",  TODO: investigate failure/convert
             // "prepStmtMetaData",  TODO: convert - different canon for client
             // "resultsetStream", TODO: investigate failure/convert needs ext files
             "maxfieldsize",

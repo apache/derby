@@ -17,7 +17,6 @@
 # lang/optimizerOverrides.sql - fails...
 # lang/big.sql - checks depend on dir structure
 # lang/wisconsin.java - checks depend on dir structure
-# jdbcapi/nullSQLText.java - fails...?? (but not when run by itself)
 # jdbcapi/maxfieldsize.java - fails...??? (but not when run by itself)
 #
 jdbcapi/maxfieldsize.java
