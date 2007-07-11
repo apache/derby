@@ -782,25 +782,6 @@ public class CollationTest2 extends BaseJDBCTestCase
         return(ret_order);
     }
 
-	private boolean is142JVM() 
-	{
-        // bug shows up in ibm142, sun142, 
-        // and j9 (J2ME Foundation Specification v1.1)
-	    String java_version = System.getProperty("java.version");
-
-        // only match java versions with leading 1.4.2
-        String leading_version_no = java_version.substring(0, 5);
-
-        /*
-        System.out.println("java_version = " + java_version);
-        System.out.println("leading_version_no = " + leading_version_no);
-        */
-
-
-        return(leading_version_no.equals("1.4.2") || 
-               java_version.equals("J2ME Foundation Specification v1.1"));
-	}
-
     private boolean isDatabaseBasicCollation(Connection conn)
         throws SQLException
     {
@@ -1055,11 +1036,6 @@ public class CollationTest2 extends BaseJDBCTestCase
     private void runDERBY_2703(Connection conn, int db_index)
         throws SQLException
     {
-        // DERBY-2703, get columns does not work in collated dbs under sun
-        // and ibm 142 jvm's.
-        if (is142JVM())
-            return;
-
         setUpTable(conn);
 
         ResultSet rs = 
@@ -1694,11 +1670,6 @@ public class CollationTest2 extends BaseJDBCTestCase
     int         db_index)
         throws SQLException 
     {
-        // DERBY-2703, get columns does not work in collated dbs under sun
-        // and ibm 142 jvm's.
-        if (is142JVM())
-            return;
-
         Statement s = conn.createStatement();
 
         setUpTable(conn);
