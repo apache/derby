@@ -167,7 +167,7 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
 		assertSelectPrivilege(false, users[4], "s1", "t1", new String[] {"c3"});
 		assertSelectPrivilege(false, users[4], "s1", "t1", null);
 		assertUpdatePrivilege(false, users[4], "S1", "T1", new String[] {"C1"});
-		assertUpdatePrivilege(false, users[4], "S1", "T1", new String[] {"C2", "C3"});
+		assertUpdatePrivilege(true, users[4], "S1", "T1", new String[] {"C2", "C3"});
 		assertReferencesPrivilege(true, users[4], "s1", "t1", new String[] {"c1","c2","c3"});
 		revoke("select(c1),update(c3,c2),references(c3,c1,c2)", "s1", "t1", users[4]);
 	}
@@ -1045,7 +1045,7 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
     	// NOTE - getColumns returns empty result set if schema / table names not capitalized.
         // TODO - should implement asserting insert privilege on a subset of columns at some point
     	
-    	Connection c = openUserConnection(users[0]);
+    	Connection c = openUserConnection(user);
 
     	Statement s = c.createStatement();
     	try {
@@ -1063,13 +1063,13 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
             rs.close();
             command.append(")");
     	    int i = s.executeUpdate(command.toString());
-            // DERBY-2893 INSERT seems to succeed.
-            //if (!hasPrivilege)
-            //    fail("expected no INSERT permission on table");
 
-    	} catch (SQLException e) {
+            if (!hasPrivilege)
+               fail("expected no INSERT permission on table");
+
+        } catch (SQLException e) {
     		if (!hasPrivilege) {
-    			assertSQLState("42502", e);
+    			assertSQLState("42500", e);
     		} else {
     			fail("Unexpected lack of insert privilege on " + schema + "." + table + " by " + user);
     		}
@@ -1130,9 +1130,8 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
         	        assertEquals(columnCount, actualCount);
         	    }
                 
-                // DERBY-2893 UPDATE seems to succeed.
-                //if (!hasPrivilege)
-                //    fail("expected no UPDATE permission on table");
+                if (!hasPrivilege)
+                  fail("expected no UPDATE permission on table");
 
     		} catch (SQLException e) {
         		if (!hasPrivilege) {
