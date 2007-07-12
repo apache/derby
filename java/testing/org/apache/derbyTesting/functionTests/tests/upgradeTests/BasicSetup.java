@@ -22,10 +22,13 @@ package org.apache.derbyTesting.functionTests.tests.upgradeTests;
 
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
 import org.apache.derby.iapi.services.io.DerbyIOException;
+import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -128,6 +131,58 @@ public class BasicSetup extends UpgradeChange {
         ps.close();
         commit();
     }
+
+    /**
+     * Make sure table created in soft upgrade mode can be 
+     * accessed after shutdown.  DERBY-2931
+     * @throws SQLException
+     */
+    public void testCreateTable() throws SQLException
+    {
+        
+        Statement stmt = createStatement();
+        try {
+            stmt.executeUpdate("DROP table t");
+        } catch (SQLException se) {
+            // ignore table does not exist error on
+            // on drop table.
+            assertSQLState("42Y55",se ); 
+        }
+        stmt.executeUpdate("CREATE TABLE T (I INT)");
+        TestConfiguration.getCurrent().shutdownDatabase();
+        stmt = createStatement();
+        ResultSet rs = stmt.executeQuery("SELECT * from t");
+        JDBC.assertEmpty(rs);  
+        rs.close();
+    }
+    
+
+    /**
+     * Test table with index can be read after
+     * shutdown DERBY-2931
+     * @throws SQLException
+     */
+    public void testIndex() throws SQLException 
+    {
+        Statement stmt = createStatement();
+        try {
+            stmt.executeUpdate("DROP table ti");
+        } catch (SQLException se) {
+            // ignore table does not exist error on
+            // on drop table.
+            assertSQLState("42Y55",se ); 
+        }
+        stmt.executeUpdate("CREATE TABLE TI (I INT primary key not null)");
+        stmt.executeUpdate("INSERT INTO  TI values(1)");
+        stmt.executeUpdate("INSERT INTO  TI values(2)");
+        stmt.executeUpdate("INSERT INTO  TI values(3)");
+        TestConfiguration.getCurrent().shutdownDatabase();
+        stmt = createStatement();
+        ResultSet rs = stmt.executeQuery("SELECT * from TI ORDER BY I");
+        JDBC.assertFullResultSet(rs, new String[][] {{"1"},{"2"},{"3"}});
+        rs.close();        
+    }
+
     
     /**
      * Ensure that after hard upgrade (with the old version)
