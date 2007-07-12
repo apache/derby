@@ -25,6 +25,8 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import org.apache.derby.iapi.services.io.DerbyIOException;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -139,9 +141,12 @@ public class BasicSetup extends UpgradeChange {
             try {
                     getConnection();
                 } catch (SQLException e) {
-                    // Other SQL states might be valid,
-                    // once the beta flag is dropped.
-                    assertSQLState("XSLAP", e);
+                    // Check the innermost of the nested exceptions
+                    SQLException sqle = getLastSQLException(e);
+                    String sqlState = sqle.getSQLState();
+                	// while beta, XSLAP is expected, if not beta, XSLAN
+                	if (!(sqlState.equals("XSLAP")) && !(sqlState.equals("XSLAN")))
+                		fail("expected an error indicating no connection");
                 }
             break;
         }
