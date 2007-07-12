@@ -31,6 +31,8 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
 import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.JDBCDataSource;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 import org.apache.derbyTesting.functionTests.tests.jdbcapi.BlobStoredProcedureTest;
 import org.apache.derbyTesting.functionTests.tests.jdbcapi.ClobStoredProcedureTest;
@@ -80,7 +82,50 @@ public class Changes10_3 extends UpgradeChange {
     }
     
 
+    /**
+     * Make sure table created in soft upgrade mode can be 
+     * accessed after shutdown.  DERBY-2931
+     * @throws SQLException
+     */
+    public void testCreateTable() throws SQLException
+    {
+        
+        Statement stmt = createStatement();
+        try {
+            stmt.executeUpdate("DROP table t");
+        } catch (SQLException se) {
+            // ignore table does not exist error on
+            // on drop table.
+            assertSQLState("42Y55",se ); 
+        }
+        stmt.executeUpdate("CREATE TABLE T (I INT)");
+        TestConfiguration.getCurrent().shutdownDatabase();
+        stmt = createStatement();
+        ResultSet rs = stmt.executeQuery("SELECT * from t");
+        JDBC.assertEmpty(rs);  
+        rs.close();
+    }
     
+    public void testIndex() throws SQLException 
+    {
+        Statement stmt = createStatement();
+        try {
+            stmt.executeUpdate("DROP table ti");
+        } catch (SQLException se) {
+            // ignore table does not exist error on
+            // on drop table.
+            assertSQLState("42Y55",se ); 
+        }
+        stmt.executeUpdate("CREATE TABLE TI (I INT primary key not null)");
+        stmt.executeUpdate("INSERT INTO  TI values(1)");
+        stmt.executeUpdate("INSERT INTO  TI values(2)");
+        stmt.executeUpdate("INSERT INTO  TI values(3)");
+        TestConfiguration.getCurrent().shutdownDatabase();
+        stmt = createStatement();
+        ResultSet rs = stmt.executeQuery("SELECT * from TI ORDER BY I");
+        JDBC.assertFullResultSet(rs, new String[][] {{"1"},{"2"},{"3"}});
+        rs.close();        
+    }
     /**
      * Verify the compilation schema is nullable after upgrade to 10.3
      * or later. (See DERBY-630)
@@ -360,6 +405,125 @@ public class Changes10_3 extends UpgradeChange {
         }
 
         assertEquals( "Reloading results.", shouldSucceed, didSucceed );
+    }
+
+    /**
+     * Check if we can open the heap.
+     * <p>
+     * This test just does a simple select to verify that 10.3 heap conglomerate
+     * format id's are working right for all the various upgrade scenarios.
+     **/
+    private void checkNewHeap(
+    String  tableName,
+    String  value)
+        throws SQLException
+    {
+        // verify table has correct data after performing import/export.
+        Statement s = createStatement();
+        ResultSet rs = s.executeQuery("select * from " + tableName);
+        JDBC.assertFullResultSet(rs, new String[][] {{value}});
+        s.close();
+        rs.close();
+    }
+
+    /**
+     * Test that new format id for Heap is not used in soft upgrade.
+     **/
+    public void testNewHeap()
+        throws SQLException
+    {
+        // create tables in all 3 phases: boot old db, after 1st soft upgrade,
+        // and after hard upgrade.
+        switch (getPhase())
+        {
+            case PH_CREATE: 
+            {
+                // setup create of testNewHeap1 in old db
+
+                Statement s = createStatement();
+                s.execute("create table testNewHeap1(keycol char(20))");
+                s.close();
+                PreparedStatement insert_stmt = 
+                    prepareStatement("insert into testNewHeap1 values(?)");;
+                insert_stmt.setString(1, "create"); 
+                insert_stmt.execute();
+                insert_stmt.close();
+
+                break;
+            }
+
+            case PH_SOFT_UPGRADE:
+            {
+                // setup create of testNewHeap2 once soft upgrade to current
+                // version has happened.
+
+                Statement s = createStatement();
+                s.execute("create table testNewHeap2(keycol char(20))");
+                s.close();
+                PreparedStatement insert_stmt = 
+                    prepareStatement("insert into testNewHeap2 values(?)");;
+                insert_stmt.setString(1, "soft"); 
+                insert_stmt.execute();
+                insert_stmt.close();
+
+                break;
+            }
+
+            case PH_HARD_UPGRADE:
+            {
+                // setup create of testNewHeap3 once hard upgrade to current
+                // version has happened.
+
+                Statement s = createStatement();
+                s.execute("create table testNewHeap3(keycol char(20))");
+                s.close();
+                PreparedStatement insert_stmt = 
+                    prepareStatement("insert into testNewHeap3 values(?)");
+                insert_stmt.setString(1, "hard"); 
+                insert_stmt.execute();
+                insert_stmt.close();
+
+                break;
+            }
+        }
+
+        // Now verify you can access the tables 
+        switch (getPhase())
+        {
+            case PH_CREATE: 
+            {
+                checkNewHeap("testNewHeap1", "create");
+                break;
+            }
+            case PH_SOFT_UPGRADE:
+            {
+                checkNewHeap("testNewHeap1", "create");
+                checkNewHeap("testNewHeap2", "soft");
+                break;
+            }
+            case PH_POST_SOFT_UPGRADE:
+            {
+                checkNewHeap("testNewHeap1", "create");
+                checkNewHeap("testNewHeap2", "soft");
+                break;
+            }
+            case PH_HARD_UPGRADE:
+            {
+                checkNewHeap("testNewHeap1", "create");
+                checkNewHeap("testNewHeap2", "soft");
+                checkNewHeap("testNewHeap3", "hard");
+                break;
+            }
+
+            case PH_POST_HARD_UPGRADE:
+            {
+                checkNewHeap("testNewHeap1", "create");
+                checkNewHeap("testNewHeap2", "soft");
+                checkNewHeap("testNewHeap3", "hard");
+                break;
+            }
+        }
+
     }
     
 }
