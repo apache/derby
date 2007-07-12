@@ -35,18 +35,46 @@ import java.lang.ClassNotFoundException;
  * @format_id ACCESS_HEAP_V2_ID
  *
  * @purpose   The tag that describes the on disk representation of the Heap
- *            conglomerate object.  The Heap conglomerate object is stored in
- *            a field of a row in the Conglomerate directory.
+ *            conglomerate object.  Access contains no "directory" of 
+ *            conglomerate information.  In order to bootstrap opening a file
+ *            it encodes the factory that can open the conglomerate in the 
+ *            conglomerate id itself.  There exists a single HeapFactory which
+ *            must be able to read all heap format id's.  
+ *
+ *            This format was used for all Derby database Heap's in version
+ *            10.2 and previous versions.
  *
  * @upgrade   The format id of this object is currently always read from disk
- *            as a separate column in the conglomerate directory.  To read
- *            A conglomerate object from disk and upgrade it to the current
- *            version do the following:
+ *            as the first field of the conglomerate itself.  A bootstrap
+ *            problem exists as we don't know the format id of the heap 
+ *            until we are in the "middle" of reading the Heap.  Thus the
+ *            base Heap implementation must be able to read and write 
+ *            all formats based on the reading the 
+ *            "format_of_this_conglomerate". 
  *
- *                format_id = get format id from a separate column
- *                Upgradable conglom_obj = instantiate empty obj(format_id)
- *                read in conglom_obj from disk
- *                conglom = conglom_obj.upgradeToCurrent();
+ *            soft upgrade to ACCESS_HEAP_V3_ID:
+ *                read:
+ *                    old format is readable by current Heap implementation,
+ *                    with automatic in memory creation of default collation
+ *                    id needed by new format.  No code other than
+ *                    readExternal and writeExternal need know about old format.
+ *                write:
+ *                    will never write out new format id in soft upgrade mode.
+ *                    Code in readExternal and writeExternal handles writing
+ *                    correct version.  Code in the factory handles making
+ *                    sure new conglomerates use the Heap_v10_2 class
+ *                    that will write out old format info.
+ *
+ *            hard upgrade to ACCESS_HEAP_V3_ID:
+ *                read:
+ *                    old format is readable by current Heap implementation,
+ *                    with automatic in memory creation of default collation
+ *                    id needed by new format.
+ *                write:
+ *                    Only "lazy" upgrade will happen.  New format will only
+ *                    get written for new conglomerate created after the 
+ *                    upgrade.  Old conglomerates continue to be handled the
+ *                    same as soft upgrade.
  *
  * @disk_layout
  *     format_of_this_conlgomerate(byte[])
@@ -79,17 +107,17 @@ public class Heap_v10_2 extends Heap
     /**
      * Return my format identifier.
      * <p>
-     * This identifier was used for Heap in all Derby versions prior to and
-     * including 10.2.  Databases hard upgraded to a version subsequent
-     * to 10.2 will write the new format, see Heap.  Databases created in
-     * a version subsequent to 10.2 will also write the new formate, see
-     * Heap.
+     * This identifier was used for Heap in all Derby versions prior to 10.3.
+     * Databases hard upgraded to a version 10.3 and later will write the new 
+     * format, see Heap.  Databases created in 10.3 and later will also write 
+     * the new format, see Heap.
      *
      * @see org.apache.derby.iapi.services.io.TypedFormat#getTypeFormatId
      **/
 	public int getTypeFormatId() 
     {
-		return StoredFormatIds.ACCESS_HEAP_V3_ID;
+        // return identifier used for Heap in all derby versions prior to 10.3
+		return StoredFormatIds.ACCESS_HEAP_V2_ID;
 	}
 
     /**
