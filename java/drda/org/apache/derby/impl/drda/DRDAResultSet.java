@@ -310,7 +310,7 @@ class DRDAResultSet
 		
 	}
 	
-	/*
+	/**
 	 * Is lob object nullable
 	 * @param index - offset starting with 0
 	 * @return true if object is nullable
