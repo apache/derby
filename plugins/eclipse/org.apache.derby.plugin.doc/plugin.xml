@@ -19,7 +19,7 @@
 <plugin 
    id="org.apache.derby.plugin.doc" 
    name="Apache Derby Plug-in Documentation for Eclipse" 
-   version="1.1.0" 
+   version="1.1.1" 
    provider-name="The Apache Software Foundation">
 
   <runtime>
