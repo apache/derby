@@ -112,19 +112,18 @@ class CallableLocatorProcedures
             return INVALID_LOCATOR;
         }
         
-        if (blobCreateLocatorCall == null) {
-            blobCreateLocatorCall = connection.prepareCallX
-                ("? = CALL SYSIBM.BLOBCREATELOCATOR()",
-                 java.sql.ResultSet.TYPE_FORWARD_ONLY, 
-                 java.sql.ResultSet.CONCUR_READ_ONLY, 
-                 connection.holdability());
-            blobCreateLocatorCall
-                .registerOutParameterX(1, java.sql.Types.INTEGER);
-            // Make sure this statement does not commit user transaction
-            blobCreateLocatorCall.isAutoCommittableStatement_ = false;
-        }
-        
         try {
+            if (blobCreateLocatorCall == null) {
+                blobCreateLocatorCall = connection.prepareCallX
+                        ("? = CALL SYSIBM.BLOBCREATELOCATOR()",
+                        java.sql.ResultSet.TYPE_FORWARD_ONLY,
+                        java.sql.ResultSet.CONCUR_READ_ONLY,
+                        connection.holdability());
+                blobCreateLocatorCall
+                        .registerOutParameterX(1, java.sql.Types.INTEGER);
+                // Make sure this statement does not commit user transaction
+                blobCreateLocatorCall.isAutoCommittableStatement_ = false;
+            }
             blobCreateLocatorCall.executeX();
         }
         catch(SqlException sqle) {
@@ -590,19 +589,18 @@ class CallableLocatorProcedures
             return INVALID_LOCATOR;
         }
         
-        if (clobCreateLocatorCall == null) {
-            clobCreateLocatorCall = connection.prepareCallX
-                ("? = CALL SYSIBM.CLOBCREATELOCATOR()",
-                 java.sql.ResultSet.TYPE_FORWARD_ONLY, 
-                 java.sql.ResultSet.CONCUR_READ_ONLY, 
-                 java.sql.ResultSet.CLOSE_CURSORS_AT_COMMIT);
-            clobCreateLocatorCall
-                .registerOutParameterX(1, java.sql.Types.INTEGER);
-            // Make sure this statement does not commit user transaction
-            clobCreateLocatorCall.isAutoCommittableStatement_ = false;
-        }
-
         try {
+            if (clobCreateLocatorCall == null) {
+                clobCreateLocatorCall = connection.prepareCallX
+                        ("? = CALL SYSIBM.CLOBCREATELOCATOR()",
+                        java.sql.ResultSet.TYPE_FORWARD_ONLY,
+                        java.sql.ResultSet.CONCUR_READ_ONLY,
+                        java.sql.ResultSet.CLOSE_CURSORS_AT_COMMIT);
+                clobCreateLocatorCall
+                        .registerOutParameterX(1, java.sql.Types.INTEGER);
+                // Make sure this statement does not commit user transaction
+                clobCreateLocatorCall.isAutoCommittableStatement_ = false;
+            }
             clobCreateLocatorCall.executeX();
         }
         catch(SqlException sqle) {
