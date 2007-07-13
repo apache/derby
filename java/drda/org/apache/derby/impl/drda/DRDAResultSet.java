@@ -322,9 +322,10 @@ class DRDAResultSet
 			return false;
 		
 
-		int colnum = ((Integer) rsExtPositions.get(index)).intValue();
+		// Column number is starting on 1
+		int colnum = ((Integer) rsExtPositions.get(index)).intValue() + 1;
 		
-		if (FdocaConstants.isNullable((getRsDRDATypes())[colnum]))
+		if (FdocaConstants.isNullable(getRsDRDAType(colnum)))
 			return true;
 		else 
 			return false;
