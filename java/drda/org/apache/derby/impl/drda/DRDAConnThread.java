@@ -6830,7 +6830,7 @@ class DRDAConnThread extends Thread {
 				"one bug?). QRYDTA blocksize: " + blksize);
 		stmt.setSplitQRYDTA(temp);
 	}
-	/*
+	/**
 	 * Process remainder data resulting from a split.
 	 *
 	 * This routine is called at the start of building each QRYDTA block.
