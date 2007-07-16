@@ -33,6 +33,7 @@ import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
 /**
 	The DDMWriter is used to write DRDA protocol.   The DRDA Protocol is
@@ -57,11 +58,18 @@ class DDMWriter
 	private static final byte MULTI_BYTE_MASK = (byte) 0xC0;
 	private static final byte CONTINUATION_BYTE = (byte) 0x80;
 
-	// output buffer
+	/**
+	 * Output buffer.
+	 * @see #bytes
+	 */
 	private byte[] bytes;
-
-	// offset into output buffer
-	private int offset;
+	/**
+	 * Wrapper around the output buffer (<code>bytes</code>) which enables the
+	 * use of utility methods for easy encoding of primitive values and
+	 * strings. Changes to the output buffer are visible in the wrapper, and
+	 * vice versa.
+	 */
+	private ByteBuffer buffer;
 
 	// A saved mark in the stream is saved temporarily to revisit the location.
 	private int[] markStack = new int[MAX_MARKS_NESTING];
@@ -115,6 +123,7 @@ class DDMWriter
 	DDMWriter (int minSize, CcsidManager ccsidManager, DRDAConnThread agent, DssTrace dssTrace)
 	{
 		this.bytes = new byte[minSize];
+		this.buffer = ByteBuffer.wrap(bytes);
 		this.ccsidManager = ccsidManager;
 		this.agent = agent;
 		this.prevHdrLocation = -1;
@@ -128,6 +137,7 @@ class DDMWriter
 	DDMWriter (CcsidManager ccsidManager, DRDAConnThread agent, DssTrace dssTrace)
 	{
 		this.bytes = new byte[DEFAULT_BUFFER_SIZE];
+		this.buffer = ByteBuffer.wrap(bytes);
 		this.ccsidManager = ccsidManager;
 		this.agent = agent;
 		this.prevHdrLocation = -1;
@@ -144,7 +154,7 @@ class DDMWriter
 	 */
 	protected void reset(DssTrace dssTrace)
 	{
-		offset = 0;
+		buffer.clear();
 		top = 0;
 		dssLengthLocation = 0;
 		nextCorrelationID = 1;
@@ -321,7 +331,7 @@ class DDMWriter
 	protected byte [] copyDSSDataToEnd(int start)
 	{
 		start = start + dssLengthLocation;
-		int length = offset - start;
+		int length = buffer.position() - start;
 		byte [] temp = new byte[length];
 		System.arraycopy(bytes,start,temp,0,length);
 		return temp;
@@ -338,12 +348,12 @@ class DDMWriter
 	{
 		// save the location of the beginning of the collection so
 		// that we can come back and fill in the length bytes
+		final int offset = buffer.position();
 		markStack[top++] = offset;
 		ensureLength (4); // verify space for length bytes and code point
-		offset += 2; // move past the length bytes before writing the code point
-		bytes[offset] = (byte) ((codePoint >>> 8) & 0xff);
-		bytes[offset + 1] = (byte) (codePoint & 0xff);
-		offset += 2;
+		// move past the length bytes before writing the code point
+		buffer.position(offset + 2);
+		buffer.putShort((short) codePoint);
 	}
 
 	/**
@@ -352,7 +362,7 @@ class DDMWriter
 	 */
 	protected void clearDdm ()
 	{
-		offset = markStack[top--];
+		buffer.position(markStack[top--]);
 	}
 
 	/**
@@ -361,7 +371,7 @@ class DDMWriter
 	 */
 	protected void clearBuffer()
 	{
-		offset = 0;
+		buffer.clear();
 		top = 0;
 		dssLengthLocation = 0;
 		correlationID = DssConstants.CORRELATION_ID_UNKNOWN;
@@ -378,6 +388,7 @@ class DDMWriter
 		// remove the top length location offset from the mark stack
 		// calculate the length based on the marked location and end of data.
 		int lengthLocation = markStack[--top];
+		final int offset = buffer.position();
 		int length = offset - lengthLocation;
 
 		// determine if any extended length bytes are needed.	the value returned
@@ -412,7 +423,7 @@ class DDMWriter
 			}
 
 			// adjust the offset to account for the shift and insert
-			offset += extendedLengthByteCount;
+			buffer.position(offset + extendedLengthByteCount);
 
 			// the two byte length field before the codepoint contains the length
 			// of itself, the length of the codepoint, and the number of bytes used
@@ -439,7 +450,7 @@ class DDMWriter
     */
     protected int getDSSLength()
     {
-        return offset - dssLengthLocation;
+        return buffer.position() - dssLengthLocation;
     }
  
     /**
@@ -451,7 +462,7 @@ class DDMWriter
     */
     protected void truncateDSS(int value)
     {
-        offset = dssLengthLocation + value;
+        buffer.position(dssLengthLocation + value);
     }
 
 
@@ -473,7 +484,7 @@ class DDMWriter
 		}
 
 		ensureLength (1);
-		bytes[offset++] = (byte) (value & 0xff);
+		buffer.put((byte) value);
 	}
 
 
@@ -485,9 +496,7 @@ class DDMWriter
 	protected void writeNetworkShort (int value)
 	{
 		ensureLength (2);
-		bytes[offset] = (byte) ((value >>> 8) & 0xff);
-		bytes[offset + 1] = (byte) (value & 0xff);
-		offset += 2;
+		buffer.putShort((short) value);
 	}
 
 	/**
@@ -498,11 +507,7 @@ class DDMWriter
 	protected void writeNetworkInt (int value)
 	{
 		ensureLength (4);
-		bytes[offset] = (byte) ((value >>> 24) & 0xff);
-		bytes[offset + 1] = (byte) ((value >>> 16) & 0xff);
-		bytes[offset + 2] = (byte) ((value >>> 8) & 0xff);
-		bytes[offset + 3] = (byte) (value & 0xff);
-		offset += 4;
+		buffer.putInt(value);
 	}
 
 
@@ -538,8 +543,7 @@ class DDMWriter
 
 		}
 		ensureLength (length);
-		System.arraycopy(buf,start,bytes,offset,length);
-		offset += length;
+		buffer.put(buf, start, length);
 	}
 	/**
 	 * Write byte array
@@ -579,11 +583,8 @@ class DDMWriter
 	void writeCodePoint4Bytes (int codePoint, int value)
 	{
 		ensureLength (4);
-		bytes[offset] = (byte) ((codePoint >>> 8) & 0xff);
-		bytes[offset + 1] = (byte) (codePoint & 0xff);
-		bytes[offset + 2] = (byte) ((value >>> 8) & 0xff);
-		bytes[offset + 3] = (byte) (value & 0xff);
-		offset += 4;
+		buffer.putShort((short) codePoint);
+		buffer.putShort((short) value);
 	}
 
 	/**
@@ -595,12 +596,9 @@ class DDMWriter
 	void writeScalar1Byte (int codePoint, int value)
 	{
 		ensureLength (5);
-		bytes[offset] = 0x00;
-		bytes[offset + 1] = 0x05;
-		bytes[offset + 2] = (byte) ((codePoint >>> 8) & 0xff);
-		bytes[offset + 3] = (byte) (codePoint & 0xff);
-		bytes[offset + 4] = (byte) (value & 0xff);
-		offset += 5;
+		buffer.putShort((short) 0x0005);
+		buffer.putShort((short) codePoint);
+		buffer.put((byte) value);
 	}
 
 	/**
@@ -612,21 +610,15 @@ class DDMWriter
 	protected void writeScalar2Bytes (int codePoint, int value)
 	{
 		ensureLength (6);
-		bytes[offset] = 0x00;
-		bytes[offset + 1] = 0x06;
-		bytes[offset + 2] = (byte) ((codePoint >>> 8) & 0xff);
-		bytes[offset + 3] = (byte) (codePoint & 0xff);
-		bytes[offset + 4] = (byte) ((value >>> 8) & 0xff);
-		bytes[offset + 5] = (byte) (value & 0xff);
-		offset += 6;
+		buffer.putShort((short) 0x0006);
+		buffer.putShort((short) codePoint);
+		buffer.putShort((short) value);
 	}
 
 	protected void writeScalar2Bytes ( int value)
 	{
 		ensureLength (2);
-		bytes[offset] = (byte) ((value >>> 8) & 0xff);
-		bytes[offset + 1] = (byte) (value & 0xff);
-		offset += 2;
+		buffer.putShort((short) value);
 	}
 
 	/**
@@ -638,11 +630,8 @@ class DDMWriter
 	protected void startDdm (int length, int codePoint)
 	{
 		ensureLength (4);
-		bytes[offset] = (byte) ((length >>> 8) & 0xff);
-		bytes[offset + 1] = (byte) (length & 0xff);
-		bytes[offset + 2] = (byte) ((codePoint >>> 8) & 0xff);
-		bytes[offset + 3] = (byte) (codePoint & 0xff);
-		offset += 4;
+		buffer.putShort((short) length);
+		buffer.putShort((short) codePoint);
 	}
 
 	/**
@@ -662,12 +651,9 @@ class DDMWriter
 		    	SanityManager.THROWASSERT("Not enough bytes in buffer");
 		}
 		ensureLength (length + 4);
-		bytes[offset] = (byte) (((length+4) >>> 8) & 0xff);
-		bytes[offset + 1] = (byte) ((length+4) & 0xff);
-		bytes[offset + 2] = (byte) ((codePoint >>> 8) & 0xff);
-		bytes[offset + 3] = (byte) (codePoint & 0xff);
-		System.arraycopy(buf,0,bytes,offset + 4, length);
-		offset += length + 4;
+		buffer.putShort((short) length);
+		buffer.putShort((short) codePoint);
+		buffer.put(buf, 0, length);
 	}
 
 
@@ -699,21 +685,22 @@ class DDMWriter
 		
 		while( !isLastSegment ){
 		    
-		    int spareBufferLength = bytes.length - offset;
+		    int spareBufferLength = buffer.remaining();
 		    
 		    if( SanityManager.DEBUG ){
 		
 			if( PropertyUtil.getSystemBoolean("derby.debug.suicideOfLayerBStreaming") )
 			    throw new IOException();
 				}
-		    
+
+			final int offset = buffer.position();
 		    bytesRead = in.read(bytes,
 					offset,
 					Math.min(spareDssLength,
 						 spareBufferLength));
 		    
-					totalBytesRead += bytesRead;
-					offset += bytesRead;
+			totalBytesRead += bytesRead;
+			buffer.position(offset + bytesRead);
 		    spareDssLength -= bytesRead;
 		    spareBufferLength -= bytesRead;
 
@@ -782,7 +769,7 @@ class DDMWriter
                                    boolean writeNullByte) throws DRDAProtocolException
   {
 
-      ensureLength( DEFAULT_BUFFER_SIZE - offset );
+      ensureLength( DEFAULT_BUFFER_SIZE - buffer.position() );
       
       final int nullIndicatorSize = writeNullByte ? 1:0;
 
@@ -825,7 +812,7 @@ class DDMWriter
   // this indicates there is a dss object already in the buffer.
 	protected boolean doesRequestContainData()
 	{
-		return offset != 0;
+		return buffer.position() != 0;
 	}
 
 
@@ -856,9 +843,8 @@ class DDMWriter
 
 
 			// Prepare a DSS continuation header for next DSS.
-			dssLengthLocation = offset;
-			bytes[offset++] = (byte) (0xff);
-			bytes[offset++] = (byte) (0xff);
+			dssLengthLocation = buffer.position();
+			buffer.putShort((short) 0xFFFF);
 			isContinuationDss = true;
 	    }else{
 		// we're done writing the data, so end the DSS.
@@ -873,10 +859,9 @@ class DDMWriter
 	{
 	int shiftSize = (extendedLengthByteCount -1) * 8;
     for (int i = 0; i < extendedLengthByteCount; i++) {
-      bytes[offset + i] = (byte) ((length >>> shiftSize) & 0xff);
+      buffer.put((byte) (length >>> shiftSize));
       shiftSize -= 8;
     }
-	offset += extendedLengthByteCount;
   }
 
 
@@ -888,11 +873,8 @@ class DDMWriter
   void writeLengthCodePoint (int length, int codePoint)
   {
     ensureLength (4);
-    bytes[offset] = (byte) ((length >>> 8) & 0xff);
-    bytes[offset + 1] = (byte) (length & 0xff);
-    bytes[offset + 2] = (byte) ((codePoint >>> 8) & 0xff);
-    bytes[offset + 3] = (byte) (codePoint & 0xff);
-	offset +=4;
+	buffer.putShort((short) length);
+	buffer.putShort((short) codePoint);
   }
 
 	/**
@@ -904,11 +886,8 @@ class DDMWriter
 	protected void writeScalarHeader (int codePoint, int dataLength)
 	{
 		ensureLength (dataLength + 4);
-		bytes[offset] = (byte) (((dataLength+4) >>> 8) & 0xff);
-		bytes[offset + 1] = (byte) ((dataLength+4) & 0xff);
-		bytes[offset + 2] = (byte) ((codePoint >>> 8) & 0xff);
-		bytes[offset + 3] = (byte) (codePoint & 0xff);
-		offset += 4;
+		buffer.putShort((short) (dataLength + 4));
+		buffer.putShort((short) codePoint);
 	}
 
 	/**
@@ -922,11 +901,10 @@ class DDMWriter
 	{
 		int stringLength = string.length();
 		ensureLength ((stringLength * 2)  + 4);
-		bytes[offset] = (byte) (((stringLength+4) >>> 8) & 0xff);
-		bytes[offset + 1] = (byte) ((stringLength+4) & 0xff);
-		bytes[offset + 2] = (byte) ((codePoint >>> 8) & 0xff);
-		bytes[offset + 3] = (byte) (codePoint & 0xff);
-		offset = ccsidManager.convertFromUCS2 (string, bytes, offset + 4);
+		buffer.putShort((short) (stringLength + 4));
+		buffer.putShort((short) codePoint);
+		buffer.position(
+			ccsidManager.convertFromUCS2(string, bytes, buffer.position()));
 	}
 
 	/**
@@ -942,13 +920,13 @@ class DDMWriter
 		int stringLength = string.length();
 		int fillLength = paddedLength - stringLength;
 		ensureLength (paddedLength + 4);
-		bytes[offset] = (byte) (((paddedLength+4) >>> 8) & 0xff);
-		bytes[offset + 1] = (byte) ((paddedLength+4) & 0xff);
-		bytes[offset + 2] = (byte) ((codePoint >>> 8) & 0xff);
-		bytes[offset + 3] = (byte) (codePoint & 0xff);
-		offset = ccsidManager.convertFromUCS2 (string, bytes, offset + 4);
-		Arrays.fill(bytes,offset, offset + fillLength,ccsidManager.space);
-		offset += fillLength;
+		buffer.putShort((short) (paddedLength + 4));
+		buffer.putShort((short) codePoint);
+		final int offset =
+			ccsidManager.convertFromUCS2(string, bytes, buffer.position());
+		final int end = offset + fillLength;
+		Arrays.fill(bytes, offset, end, ccsidManager.space);
+		buffer.position(end);
 	}
 
 	/**
@@ -964,9 +942,11 @@ class DDMWriter
 
 		int fillLength = paddedLength -stringLength;
 		ensureLength (paddedLength);
-		offset = ccsidManager.convertFromUCS2 (string, bytes, offset);
-		Arrays.fill(bytes,offset, offset + fillLength,ccsidManager.space);
-		offset += fillLength;
+		final int offset =
+			ccsidManager.convertFromUCS2(string, bytes, buffer.position());
+		final int end = offset + fillLength;
+		Arrays.fill(bytes, offset, end, ccsidManager.space);
+		buffer.position(end);
 	}
 
 	/**
@@ -981,10 +961,11 @@ class DDMWriter
 		int stringLength = drdaString.length();
 		int fillLength = paddedLength - stringLength;
 		ensureLength(paddedLength);
-		System.arraycopy(drdaString.getBytes(), 0, bytes, offset, stringLength);
-		offset += stringLength;
-		Arrays.fill(bytes, offset, offset + fillLength, ccsidManager.space);
-		offset += fillLength;
+		buffer.put(drdaString.getBytes(), 0, stringLength);
+		final int offset = buffer.position();
+		final int end = offset + fillLength;
+		Arrays.fill(bytes, offset, end, ccsidManager.space);
+		buffer.position(end);
 	}
 
 	/**
@@ -997,18 +978,14 @@ class DDMWriter
 	 */
 	protected void writeScalarPaddedBytes (int codePoint, byte[] buf, int paddedLength, byte padByte)
 	{
-		int bufLength = buf.length;
 		ensureLength (paddedLength + 4);
-		bytes[offset] = (byte) (((paddedLength+4) >>> 8) & 0xff);
-		bytes[offset + 1] = (byte) ((paddedLength+4) & 0xff);
-		bytes[offset + 2] = (byte) ((codePoint >>> 8) & 0xff);
-		bytes[offset + 3] = (byte) (codePoint & 0xff);
-		offset += 4;
-		System.arraycopy(buf,0,bytes,offset,bufLength);
-		offset += bufLength;
-		int fillLength = paddedLength - bufLength;
-		Arrays.fill(bytes,offset,offset + fillLength,padByte);
-		offset += fillLength;
+		buffer.putShort((short) (paddedLength + 4));
+		buffer.putShort((short) codePoint);
+		buffer.put(buf);
+		final int offset = buffer.position();
+		final int end = offset + (paddedLength - buf.length);
+		Arrays.fill(bytes, offset, end, padByte);
+		buffer.position(end);
 	}
 
 	/**
@@ -1020,13 +997,12 @@ class DDMWriter
 	 */
 	protected void writeScalarPaddedBytes (byte[] buf, int paddedLength, byte padByte)
 	{
-		int bufLength = buf.length;
-		int fillLength = paddedLength - bufLength;
 		ensureLength (paddedLength);
-		System.arraycopy(buf,0,bytes,offset,bufLength);
-		offset +=bufLength;
-		Arrays.fill(bytes,offset,offset + fillLength,padByte);
-		offset += fillLength;
+		buffer.put(buf);
+		final int offset = buffer.position();
+		final int end = offset + (paddedLength - buf.length);
+		Arrays.fill(bytes, offset, end, padByte);
+		buffer.position(end);
 	}
 
 	/**
@@ -1037,14 +1013,10 @@ class DDMWriter
 	 */
 	protected void writeScalarBytes (int codePoint, byte[] buf)
 	{
-		int bufLength = buf.length;
-		ensureLength (bufLength + 4);
-		bytes[offset] = (byte) (((bufLength+4) >>> 8) & 0xff);
-		bytes[offset + 1] = (byte) ((bufLength+4) & 0xff);
-		bytes[offset + 2] = (byte) ((codePoint >>> 8) & 0xff);
-		bytes[offset + 3] = (byte) (codePoint & 0xff);
-		System.arraycopy(buf,0,bytes,offset + 4,bufLength);
-		offset += bufLength + 4;
+		ensureLength(buf.length + 4);
+		buffer.putShort((short) (buf.length + 4));
+		buffer.putShort((short) codePoint);
+		buffer.put(buf);
 	}
 
 	/**
@@ -1066,13 +1038,9 @@ class DDMWriter
 		}
 		int numBytes = length - start;
 		ensureLength (numBytes + 4);
-		bytes[offset] = (byte) (((numBytes+4) >>> 8) & 0xff);
-		bytes[offset + 1] = (byte) ((numBytes+4) & 0xff);
-		bytes[offset + 2] = (byte) ((codePoint >>> 8) & 0xff);
-		bytes[offset + 3] = (byte) (codePoint & 0xff);
-		offset += 4;
-		System.arraycopy(buf,start,bytes,offset,numBytes);
-		offset += numBytes;
+		buffer.putShort((short) (numBytes + 4));
+		buffer.putShort((short) codePoint);
+		buffer.put(buf, start, length);
 	}
 	// The following methods write data in the platform format
 	// The platform format was indicated during connection time as ASC since
@@ -1116,15 +1084,7 @@ class DDMWriter
 	protected void writeLong (long v)
 	{
 		ensureLength (8);
-		bytes[offset] =	(byte) ((v >>> 56) & 0xff);
-		bytes[offset + 1] =	(byte) ((v >>> 48) & 0xff);
-		bytes[offset + 2] =	(byte) ((v >>> 40) & 0xff);
-		bytes[offset + 3] =	(byte) ((v >>> 32) & 0xff);
-		bytes[offset + 4] =	(byte) ((v >>> 24) & 0xff);
-		bytes[offset + 5] =	(byte) ((v >>> 16) & 0xff);
-		bytes[offset + 6] =	(byte) ((v >>>  8) & 0xff);
-		bytes[offset + 7] =	(byte) ((v >>>  0) & 0xff);
-		offset += 8;
+		buffer.putLong(v);
 	}
 
 	/**
@@ -1159,9 +1119,9 @@ class DDMWriter
 		throws SQLException
 	{
 		int length = precision / 2 + 1;
-		ensureLength (offset + length);
+		ensureLength(length);
 		bigDecimalToPackedDecimalBytes (v,precision, scale);
-		offset += length;
+		buffer.position(buffer.position() + length);
 	}
 
 	/**
@@ -1171,8 +1131,7 @@ class DDMWriter
 	 */
 	protected void writeBoolean (boolean v)
 	{
-		ensureLength (1);
-		bytes[offset++] = (byte) ((v ? 1 : 0) & 0xff);
+		writeByte(v ? 1 : 0);
 	}
 
 	/**
@@ -1299,8 +1258,10 @@ class DDMWriter
 	 */
 	protected void padBytes (byte val, int length)
 	{
-		Arrays.fill(bytes,offset, offset + length,val);
-		offset += length;
+		final int offset = buffer.position();
+		final int end = offset + length;
+		Arrays.fill(bytes, offset, end, val);
+		buffer.position(end);
 	}
 
 	/**
@@ -1324,6 +1285,7 @@ class DDMWriter
 	protected void flush(OutputStream socketOutputStream)
 		throws java.io.IOException
 	{
+		final int offset = buffer.position();
 		try {
 			socketOutputStream.write (bytes, 0, offset);
 			socketOutputStream.flush();
@@ -1370,34 +1332,31 @@ class DDMWriter
 	{
 
 		// save length position, the length will be written at the end
-		dssLengthLocation = offset;
+		dssLengthLocation = buffer.position();
 
 		// Should this really only be for non-stream DSSes?
 		if (ensureLen)
 			ensureLength(6);
 
 		// Skip past length; we'll come back and set it later.
-		offset += 2;
+		buffer.position(dssLengthLocation + 2);
 
 		// write gds info
-		bytes[offset] = (byte) 0xD0;
+		buffer.put((byte) 0xD0);
 
 		// Write DSS type, and default chain bit to be 
 		// DssConstants.DSSCHAIN_SAME_ID.  This default
 		// will be overridden by calls to "finalizeChain()"
 		// and/or calls to "beginDss(boolean, int)" for
 		// writing LOB data.
-		bytes[offset + 1] = (byte) dssType;
-		bytes[offset + 1] |= DssConstants.DSSCHAIN_SAME_ID;
+		buffer.put((byte) (dssType | DssConstants.DSSCHAIN_SAME_ID));
 
 		// save correlationID for use in error messages while processing
 		// this DSS
 		correlationID = getCorrelationID();
 
 		// write the reply correlation id
-		bytes[offset + 2] = (byte) ((correlationID >>> 8) & 0xff);
-		bytes[offset + 3] = (byte) (correlationID & 0xff);
-		offset += 4;
+		buffer.putShort((short) correlationID);
 	}
 
 	/**
@@ -1411,6 +1370,9 @@ class DDMWriter
 	 */
 	private void finalizeDssLength ()
 	{
+		// initial position in the byte buffer
+		final int offset = buffer.position();
+
 		// calculate the total size of the dss and the number of bytes which would
 		// require continuation dss headers.	The total length already includes the
 		// the 6 byte dss header located at the beginning of the dss.	It does not
@@ -1442,7 +1404,7 @@ class DDMWriter
 			int dataByte = offset - 1;
 			int shiftSize = contDssHeaderCount * 2;
 			ensureLength (shiftSize);
-			offset += shiftSize;
+			buffer.position(offset + shiftSize);
 
 			// Notes on the behavior of the Layer B segmenting loop below:
 			//
@@ -1544,8 +1506,7 @@ class DDMWriter
 		}
 
 		// insert the length bytes in the 6 byte dss header.
-		bytes[dssLengthLocation] = (byte) ((totalSize >>> 8) & 0xff);
-		bytes[dssLengthLocation + 1] = (byte) (totalSize & 0xff);
+		buffer.putShort(dssLengthLocation, (short) totalSize);
 	}
 
 	protected void writeExtendedLength(long size)
@@ -1593,15 +1554,18 @@ class DDMWriter
 	 */
 	private void ensureLength (int length)
 	{
-		length += offset;
-		if (length > bytes.length) {
+		if (buffer.remaining() < length) {
 			if (SanityManager.DEBUG)
 			{
 				agent.trace("DANGER - Expensive expansion of  buffer");
 			}
-			byte newBytes[] = new byte[Math.max (bytes.length << 1, length)];
-			System.arraycopy (bytes, 0, newBytes, 0, offset);
-			bytes = newBytes;
+			int newLength =
+				Math.max(buffer.capacity() << 1, buffer.position() + length);
+			// copy the old buffer into a new one
+			buffer.flip();
+			buffer = ByteBuffer.allocate(newLength).put(buffer);
+			// update the reference to the new backing array
+			bytes = buffer.array();
 		}
 	}
 
@@ -1670,6 +1634,8 @@ class DDMWriter
 
         // start index in source big decimal.
         int bigIndex;
+
+        final int offset = buffer.position();
 
         if (bigScale >= declaredScale) {
           // If target scale is less than source scale,
@@ -1788,6 +1754,7 @@ class DDMWriter
       throws java.io.IOException
   {
 	resetChainState();
+	final int offset = buffer.position();
     try {
       socketOutputStream.write (bytes, 0, offset);
       if(flashStream)
@@ -1920,7 +1887,7 @@ class DDMWriter
 	{
 
 		lastDSSBeforeMark = prevHdrLocation;
-		return offset;
+		return buffer.position();
 
 	}
 
@@ -1939,7 +1906,7 @@ class DDMWriter
 	{
 
 		// Logical clear.
-		offset = mark;
+		buffer.position(mark);
 
 		// Because we've just cleared out the most recently-
 		// written DSSes, we have to make sure the next thing
