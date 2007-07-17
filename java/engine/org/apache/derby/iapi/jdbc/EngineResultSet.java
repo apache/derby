@@ -21,6 +21,9 @@
 package org.apache.derby.iapi.jdbc;
 
 import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import org.apache.derby.iapi.error.StandardException;
 /**
  * Additional methods the embedded engine exposes on its ResultSet object
  * implementations. An internal api only, mainly for the network
@@ -32,4 +35,26 @@ public interface EngineResultSet extends ResultSet {
      * Is this result set from a select for update statement?
      */
     public boolean isForUpdate();
+    
+    /**
+     * Is the designated columnIndex a null data value?
+     * This is used by EXTDTAInputStream to get the null value without 
+     * retrieving the underlying data value.
+     * @param columnIndex
+     * @return true if the data value at columnIndex for the current row is null 
+     * @throws SQLException 
+     */
+    public boolean isNull(int columnIndex) throws SQLException;
+    
+    /**
+     * Return the length of the designated columnIndex data value.
+     * Implementation is type dependent.
+     * 
+     * @param columnIndex  column to access
+     * @return length of data value
+     * @throws SQLException
+     * @see org.apache.derby.iapi.types.DataValueDescriptor#getLength() 
+     */
+    public int getLength(int columnIndex) throws SQLException;
+    
 }
