@@ -5051,4 +5051,26 @@ public abstract class EmbedResultSet extends ConnectionChild
        checkIfClosed("updateClob");
        updateClob(findColumnName(columnName), x);
     }
+    
+    /* 
+     * @see org.apache.derby.iapi.jdbc.EngineResultSet#isNull(int)
+     */
+    public boolean isNull(int columnIndex) throws SQLException{
+        try {
+            DataValueDescriptor dvd = getColumn(columnIndex);
+            return dvd.isNull();
+        } catch (StandardException t) {
+                throw noStateChangeException(t);
+        }
+    }
+    
+    public int getLength(int columnIndex) throws SQLException {
+        try {
+            DataValueDescriptor dvd = getColumn(columnIndex);
+            return dvd.getLength();            
+        } catch (StandardException t) {
+                throw noStateChangeException(t);
+        }
+    }
+    
 }

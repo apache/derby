@@ -23,11 +23,13 @@ package org.apache.derby.impl.drda;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.BufferedInputStream;
+import java.io.Reader;
 import java.sql.ResultSet;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.SQLException;
 
+import org.apache.derby.iapi.jdbc.EngineResultSet;
 import org.apache.derby.iapi.reference.DRDAConstants;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.impl.jdbc.Util;
@@ -45,35 +47,33 @@ import org.apache.derby.impl.jdbc.Util;
 class EXTDTAInputStream extends InputStream {
 
     private InputStream binaryInputStream = null;
-
-    private boolean isEmptyStream;
-	
-    private ResultSet dataResultSet = null;
-    private Blob blob = null;
-    private Clob clob = null;
+ 
+    
+    /** ResultSet that contains the stream*/
+    EngineResultSet rs;
+    /** Column index starting with 1 */
+    int columnNumber;
+    /** DRDA Type of column */
+    int ndrdaType;
+      
 	
 	private EXTDTAInputStream(ResultSet rs,
 				  int columnNumber,
 				  int ndrdaType) 
-	    throws SQLException, IOException
     {
 	
-	    this.dataResultSet = rs;
-	    this.isEmptyStream = ! initInputStream(rs,
-						   columnNumber,
-						   ndrdaType);
-		
-	}
+        this.rs = (EngineResultSet) rs;
+	    this.columnNumber = columnNumber;
+	    this.ndrdaType = ndrdaType;
+        }
 
     
-    
 	/**
-	 * Retrieve stream from the ResultSet and column specified.  Create an
-	 * input stream for the large object being retrieved. Do not hold
-	 * locks until end of transaction. DERBY-255.
+	 * Create a new EXTDTAInputStream.  Before read the stream must be 
+     * initialized by the user with {@link #initInputStream()} 
 	 * 
-	 * 
-	 * See DDMWriter.writeScalarStream
+	 * @see DDMWriter#writeScalarStream
+     * @see #initInputStream()
 	 * 
 	 * @param rs
 	 *            result set from which to retrieve the lob
@@ -92,61 +92,25 @@ class EXTDTAInputStream extends InputStream {
 	 * @throws SQLException
 	 */
 	public static EXTDTAInputStream getEXTDTAStream(ResultSet rs, int column, int drdaType) 
-			throws SQLException {
- 	    try{
+		{
+ 	    
 		int ndrdaType = drdaType | 1; //nullable drdaType
 			
 		return new EXTDTAInputStream(rs,
 					     column,
 					     ndrdaType);
 		
- 	    }catch(IOException e){
- 		throw new SQLException(e.getMessage());
-		}
-		
 	}
 
 	
-	/**
-	 * Get the length of the InputStream 
-	 * This method is currently not used because there seems to be no way to 
-	 * reset the she stream.
-	 *   
-	 * @param binaryInputStream
-	 *            an InputStream whose length needs to be calclulated
-	 * @return length of stream
-	 */
-	private static long getInputStreamLength(InputStream binaryInputStream)
-			throws SQLException {
-		long length = 0;
-		if (binaryInputStream == null)
-			return length;
-		
-		try {
-			for (;;) {
-				int avail = binaryInputStream.available();
-				binaryInputStream.skip(avail);
-				if (avail == 0)
-					break;
-				length += avail;
-				
-			}
-			//binaryInputStream.close();
-		} catch (IOException ioe) {
-			throw Util.javaException(ioe);
-		}
-
-		return length;
-
-	}
-	
 	
 	/**
-	 * 
+	 * Requires {@link #initInputStream()} be called before we can read from the stream
 	 * 
 	 * @see java.io.InputStream#read()
 	 */
 	public int read() throws IOException {
+                       
 		return binaryInputStream.read();
 	}
 
@@ -166,17 +130,9 @@ class EXTDTAInputStream extends InputStream {
 	 */
 	public void close() throws IOException {
 	    
-	    try{
 		if (binaryInputStream != null)
 			binaryInputStream.close();	
 		binaryInputStream = null;
-
-	    }finally{
-		
-		blob = null;
-		clob = null;
-		dataResultSet = null;
-	    }
 	    
 	}
 
@@ -256,60 +212,51 @@ class EXTDTAInputStream extends InputStream {
 	}
 
 
-    protected boolean isEmptyStream(){
-	return isEmptyStream;
-    }
+    protected boolean isEmptyStream() throws SQLException{
+            return (rs.getLength(columnNumber) == 0);
+        
+        }
     
     
     /**
      * This method takes information of ResultSet and 
-     * initialize binaryInputStream variable of this object with not empty stream and return true.
-     * If the stream was empty, this method remain binaryInputStream null and return false.
+     * initializes the binaryInputStream variable of this object with not empty stream 
+     * by calling getBinaryStream or getCharacterStream() as appropriate.
+     * The Reader returned from getCharacterStream() will be encoded in binarystream.
      *
-     * @param rs        ResultSet object to get stream from.
-     * @param column    index number of column in ResultSet to get stream.
-     * @param ndrdaType describe type column to get stream.
-     *
-     * @return          true if the stream was not empty, false if the stream was empty.
      *
      */
-    private boolean initInputStream(ResultSet rs,
-				    int column,
-				    int ndrdaType)
-	throws SQLException,
-	       IOException
+    public  void initInputStream()
+	throws SQLException
     {
 
 	InputStream is = null;
-	try{
-	    // BLOBS
-	    if (ndrdaType == DRDAConstants.DRDA_TYPE_NLOBBYTES) 
-		{
-		    blob = rs.getBlob(column);
-		    if(blob == null){
-			return false;
-		    }
-		    
-		    is = blob.getBinaryStream();
-		    
-		}
+	Reader r = null;
+	// BLOBS
+	if (ndrdaType == DRDAConstants.DRDA_TYPE_NLOBBYTES) 
+	{ 	    	
+	    is = this.rs.getBinaryStream(this.columnNumber);
+	    if (is == null) 
+              return;
+	}
 	    // CLOBS
-	    else if (ndrdaType ==  DRDAConstants.DRDA_TYPE_NLOBCMIXED)
-		{	
-		    try {
-			clob = rs.getClob(column);
-			
-			if(clob == null){
-			    return false;
-			}
+	else if (ndrdaType ==  DRDAConstants.DRDA_TYPE_NLOBCMIXED)
+	{	
+	    try {
+	        
+	        r = this.rs.getCharacterStream(this.columnNumber);
+		    	
+	        if(r == null){	            
+                    return;
+	        }
 
-			is = new ReEncodedInputStream(clob.getCharacterStream());
+			is = new ReEncodedInputStream(r);
 			
 		    }catch (java.io.UnsupportedEncodingException e) {
-			throw new SQLException (e.getMessage());
+			throw Util.javaException(e);
 			
 		    }catch (IOException e){
-			throw new SQLException (e.getMessage());
+			throw Util.javaException(e);
 			
 		    }
 		    
@@ -322,74 +269,29 @@ class EXTDTAInputStream extends InputStream {
 						      " not valid EXTDTA object type");
 			}
 		}
-	    
-	    boolean exist = is.read() > -1;
-	    
-	    is.close();
-	    is = null;
-	    
-	    if(exist){
-		openInputStreamAgain();
-	    }
-
-	    return exist;
-	    
-	}catch(IllegalStateException e){
-	    throw Util.javaException(e);
-
-	}finally{
-	    if(is != null)
-		is.close();
-	    
-	}
-	
-    }
-    
-    
-    /**
-     *
-     * This method is called from initInputStream and 
-     * opens inputstream again to stream actually.
-     *
-     */
-    private void openInputStreamAgain() throws IllegalStateException,SQLException {
-	
-	if(this.binaryInputStream != null){
-	    return;
-	}
-		
-	InputStream is = null;
-	try{
-	    
-	    if(SanityManager.DEBUG){
-		SanityManager.ASSERT( ( blob != null && clob == null ) ||
-				      ( clob != null && blob == null ),
-				      "One of blob or clob must be non-null.");
-	    }
-
-	    if(blob != null){
-		is = blob.getBinaryStream();
-		
-	    }else if(clob != null){
-		is = new ReEncodedInputStream(clob.getCharacterStream());
-	    }
-	    
-	}catch(IOException e){
-	    throw new IllegalStateException(e.getMessage());
-	}
-	
-	if(! is.markSupported() ){
+	if (! is.markSupported()) {
 	    is = new BufferedInputStream(is);
-	}
-
-	this.binaryInputStream = is;
-
+	    }
+	    
+ 	this.binaryInputStream=is;
     }
     
-    
+        
     protected void finalize() throws Throwable{
 	close();
 	}
 
-
+    /**
+     * Is the value null?  Null status is obtained from the underlying 
+     * EngineResultSet, so that it can be determined before the stream
+     * is retrieved.
+     * 
+     * @return true if this value is null
+     * 
+     */
+    public boolean isNull() throws SQLException
+    {
+        return this.rs.isNull(columnNumber);
+     
+    }
 }

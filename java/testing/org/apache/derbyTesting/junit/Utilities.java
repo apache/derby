@@ -81,6 +81,27 @@ public class Utilities {
                 return str.toString() +"'";
         }
 
+    	/**
+    	 * repeatChar is used to create strings of varying lengths.
+    	 * called from various tests to test edge cases and such.
+    	 *
+    	 * @param c             character to repeat
+    	 * @param repeatCount   Number of times to repeat character
+    	 * @return              String of repeatCount characters c
+    	 */
+       public static String repeatChar(String c, int repeatCount)
+       {
+    	   char ch = c.charAt(0);
+
+    	   char[] chArray = new char[repeatCount];
+    	   for (int i = 0; i < repeatCount; i++)
+    	   {
+    		   chArray[i] = ch;
+    	   }
+
+    	   return new String(chArray);
+
+       }
 
         /**
          * Print out resultSet in two dimensional array format, for use by

@@ -6656,7 +6656,7 @@ class DRDAConnThread extends Thread {
 
 					if (SanityManager.DEBUG)
 						trace("!!drdaType = " + java.lang.Integer.toHexString(drdaType) + 
-					 			 "precision = " + precision +" scale = " + scale);
+					 			 " precision=" + precision +" scale = " + scale);
 					switch (ndrdaType)
 					{
 						case DRDAConstants.DRDA_TYPE_NLOBBYTES:
@@ -6664,7 +6664,7 @@ class DRDAConnThread extends Thread {
 							EXTDTAInputStream extdtaStream=  
 								EXTDTAInputStream.getEXTDTAStream(rs, i, drdaType);
 							writeFdocaVal(i,extdtaStream, drdaType,
-										  precision,scale,rs.wasNull(),stmt);
+										  precision,scale,extdtaStream.isNull(),stmt);
 							break;
 						case DRDAConstants.DRDA_TYPE_NINTEGER:
 							int ival = rs.getInt(i);
@@ -7946,7 +7946,9 @@ class DRDAConnThread extends Thread {
 		Object o  = extdtaValues.get(i);
         if (o instanceof EXTDTAInputStream) {
 			EXTDTAInputStream stream = (EXTDTAInputStream) o;
+                        
 			try{
+                        stream.initInputStream();
 			writer.writeScalarStream (chainedWithSameCorrelator,
 									  CodePoint.EXTDTA,
 									  stream,
