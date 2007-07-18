@@ -46,21 +46,14 @@ import org.apache.derby.iapi.sql.execute.ResultSetStatisticsFactory;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 
 /**
- * This implementation of ResultSet
- * is meant to be overridden by subtypes
- * in the execution engine. Its primary users
- * will be DDL, which only need to define a
- * constructor to create the DDL object being
- * defined. All other ResultSet operations will
- * be handled by this superclass -- i.e., nothing
- * is allowed to be done to a DDL Result Set, since
- * it has no rows to provide.
- * <p>
- * This abstract class does not define the entire ResultSet
- * interface, but leaves the 'get' half of the interface
- * for subtypes to implement. It is package-visible only,
- * with its methods being public for exposure by its subtypes.
- * <p>
+ * Abstract ResultSet for implementations that do not return rows.
+ * Examples are DDL statements, CALL statements and DML.
+ * <P>
+ * An implementation must provide a ResultSet.open() method
+ * that performs the required action. 
+ * <P>
+ * ResultSet.returnsRows() returns false and any method
+ * that fetches a row will throw an exception.
  *
  */
 abstract class NoRowsResultSetImpl implements ResultSet
@@ -109,10 +102,7 @@ abstract class NoRowsResultSetImpl implements ResultSet
 		sc.setTopResultSet(this, (NoPutResultSet[]) null);
 
 		// Pick up any materialized subqueries
-		if (subqueryTrackingArray == null)
-		{
-			subqueryTrackingArray = sc.getSubqueryTrackingArray();
-		}
+		subqueryTrackingArray = sc.getSubqueryTrackingArray();
 	}
 
 	/**
@@ -163,7 +153,7 @@ abstract class NoRowsResultSetImpl implements ResultSet
 	 * @exception StandardException		Thrown on failure
 	 * @see Row
 	 */
-	public ExecRow	getAbsoluteRow(int row) throws StandardException
+	public final ExecRow	getAbsoluteRow(int row) throws StandardException
 	{
 		/*
 			The JDBC use of this class will never call here.
@@ -189,7 +179,7 @@ abstract class NoRowsResultSetImpl implements ResultSet
 	 * @exception StandardException		Thrown on failure
 	 * @see Row
 	 */
-	public ExecRow	getRelativeRow(int row) throws StandardException
+	public final ExecRow	getRelativeRow(int row) throws StandardException
 	{
 		/*
 			The JDBC use of this class will never call here.
@@ -207,7 +197,7 @@ abstract class NoRowsResultSetImpl implements ResultSet
 	 * @exception StandardException		Thrown on failure
 	 * @see Row
 	 */
-	public ExecRow	setBeforeFirstRow() 
+	public final ExecRow	setBeforeFirstRow() 
 		throws StandardException
 	{
 		/*
@@ -226,7 +216,7 @@ abstract class NoRowsResultSetImpl implements ResultSet
 	 * @exception StandardException		Thrown on failure
 	 * @see Row
 	 */
-	public ExecRow	getFirstRow() 
+	public final ExecRow	getFirstRow() 
 		throws StandardException
 	{
 		/*
@@ -244,7 +234,7 @@ abstract class NoRowsResultSetImpl implements ResultSet
 	 *									that this method is not intended to
 	 *									be used.
 	 */
-	public ExecRow	getNextRow() throws StandardException
+	public final ExecRow	getNextRow() throws StandardException
 	{
 		/*
 			The JDBC use of this class will never call here.
@@ -262,7 +252,7 @@ abstract class NoRowsResultSetImpl implements ResultSet
 	 * @exception StandardException		Thrown on failure
 	 * @see Row
 	 */
-	public ExecRow	getPreviousRow() 
+	public final ExecRow	getPreviousRow() 
 		throws StandardException
 	{
 		/*
@@ -281,7 +271,7 @@ abstract class NoRowsResultSetImpl implements ResultSet
 	 * @exception StandardException		Thrown on failure
 	 * @see Row
 	 */
-	public ExecRow	getLastRow()
+	public final ExecRow	getLastRow()
 		throws StandardException
 	{
 		/*
@@ -300,7 +290,7 @@ abstract class NoRowsResultSetImpl implements ResultSet
 	 * @exception StandardException		Thrown on failure
 	 * @see Row
 	 */
-	public ExecRow	setAfterLastRow() 
+	public final ExecRow	setAfterLastRow() 
 		throws StandardException
 	{
 		/*
@@ -327,7 +317,7 @@ abstract class NoRowsResultSetImpl implements ResultSet
      * @return true if before the first row, false otherwise. Returns
      * false when the result set contains no rows.
      */
-    public boolean checkRowPosition(int isType)
+    public final boolean checkRowPosition(int isType)
 	{
 		return false;
 	}
@@ -341,7 +331,7 @@ abstract class NoRowsResultSetImpl implements ResultSet
 	 * @return	the row number, or 0 if not on a row
 	 *
 	 */
-	public int getRowNumber()
+	public final int getRowNumber()
 	{
 		return 0;
 	}

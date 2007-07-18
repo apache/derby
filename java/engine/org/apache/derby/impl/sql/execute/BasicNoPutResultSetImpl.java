@@ -74,7 +74,6 @@ implements NoPutResultSet
     protected boolean finished;
 	protected ExecRow	  currentRow;
 	protected boolean isTopResultSet;
-	protected LanguageConnectionContext	lcc;
 	private SQLWarning	warnings;
 
 	/* Run time statistics variables */
@@ -98,12 +97,11 @@ implements NoPutResultSet
 	ExecRow compactRow;
 
 	// Set in the constructor and not modified
-	protected Activation	    activation;
+	protected final Activation	    activation;
 	private boolean				statisticsTimingOn;
 
 	ResultDescription resultDescription;
 
-	private transient ExecutionFactory			exFactory;
 	private transient TransactionController	tc;
 
 	private int[] baseColumnMap;
@@ -127,7 +125,7 @@ implements NoPutResultSet
 							double optimizerEstimatedCost)
 	{
 		this.activation = activation;
-		statisticsTimingOn = (activation != null && getLanguageConnectionContext().getStatisticsTiming());
+		statisticsTimingOn = getLanguageConnectionContext().getStatisticsTiming();
 		beginTime = startExecutionTime = getCurrentTimeMillis();
 		this.resultDescription = resultDescription;
 		this.optimizerEstimatedRowCount = optimizerEstimatedRowCount;
@@ -844,22 +842,7 @@ implements NoPutResultSet
 	  */
 	protected	final LanguageConnectionContext	getLanguageConnectionContext()
 	{
-		if ( lcc == null )
-		{
-			/* We don't always have an activation.  Get the LCC
-			 * from the activation when we have one.
-			 */
-			if (activation != null)
-			{
-				lcc = activation.getLanguageConnectionContext();
-			}
-			else
-			{
-				lcc = (LanguageConnectionContext) ContextService.getContext(LanguageConnectionContext.CONTEXT_ID); 
-			}
-		}
-
-		return	lcc;
+        return getActivation().getLanguageConnectionContext();
 	}
 
 	/** @see NoPutResultSet#resultSetNumber() */
@@ -887,12 +870,7 @@ implements NoPutResultSet
 	 */
 	final ExecutionFactory getExecutionFactory() 
 	{
-		if (exFactory == null) {
-			exFactory = activation.getExecutionFactory();
-		}
-		if (SanityManager.DEBUG)
-			SanityManager.ASSERT(exFactory!=null,"unable to get execution factory");
-		return exFactory;
+		return activation.getExecutionFactory();
 	}
 
 	/**
@@ -966,7 +944,7 @@ implements NoPutResultSet
 
 			if (compactRow == null)
 			{
-				ExecutionFactory ex = lcc.getLanguageConnectionFactory().getExecutionFactory();
+				ExecutionFactory ex = getLanguageConnectionContext().getLanguageConnectionFactory().getExecutionFactory();
 
 				if (isKeyed)
 				{

@@ -77,7 +77,7 @@ abstract class ScanResultSet extends NoPutResultSetImpl {
 
         if (isolationLevel == ExecutionContext.UNSPECIFIED_ISOLATION_LEVEL) {
             unspecifiedIsolationLevel = true;
-            isolationLevel = lcc.getCurrentIsolationLevel();
+            isolationLevel = getLanguageConnectionContext().getCurrentIsolationLevel();
         } else {
             unspecifiedIsolationLevel = false;
         }
@@ -98,7 +98,7 @@ abstract class ScanResultSet extends NoPutResultSetImpl {
      */
     void initIsolationLevel() {
         if (isolationLevelNeedsUpdate) {
-            int languageLevel = lcc.getCurrentIsolationLevel();
+            int languageLevel = getLanguageConnectionContext().getCurrentIsolationLevel();
             lockMode = getLockMode(languageLevel);
             isolationLevel = translateLanguageIsolationLevel(languageLevel);
             isolationLevelNeedsUpdate = false;

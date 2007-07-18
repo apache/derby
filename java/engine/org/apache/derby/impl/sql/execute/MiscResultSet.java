@@ -62,7 +62,7 @@ class MiscResultSet extends NoRowsResultSetImpl
 	{
 		setup();
 		activation.getConstantAction().executeConstantAction(activation);
-		super.close();
+		close();
 	}
 
 	// Does not override close() (no action required)
