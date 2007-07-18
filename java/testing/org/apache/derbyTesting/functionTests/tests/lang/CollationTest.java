@@ -1043,8 +1043,8 @@ private void checkLangBasedQuery(Statement s, String query, String[][] expectedR
       TestSuite suite = new TestSuite("CollationTest:territory="+locale);
       suite.addTest(new CollationTest(baseFixture));
       
-      // DERBY-2986 - DMD.getTables() fails
-      // suite.addTest(DatabaseMetaDataTest.suite());
+      // DMD.getTables() should not fail after the fix to DERBY-2896
+      suite.addTest(DatabaseMetaDataTest.suite());
       return Decorator.territoryCollatedDatabase(suite, locale);
   }
 
