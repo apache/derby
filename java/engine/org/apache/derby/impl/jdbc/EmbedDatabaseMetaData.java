@@ -1714,55 +1714,67 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      */
 	public ResultSet getTables(String catalog, String schemaPattern,
 		String tableNamePattern, String types[]) throws SQLException {
-		synchronized (getConnectionSynchronization()) {
-                        setupContextStack();
-			ResultSet rs = null;
-			try {
-			
-			String queryText =
-				getQueryDescriptions(false).getProperty("getTables");
-
-			/*
-			 * The query text is assumed to end with a "where" clause, so
-			 * that we can safely append
-			 * "and table_Type in ('xxx','yyy','zzz', ...)" and
-			 * have it become part of the where clause.
-			 *
-			 * Let's assume for now that the table type first char corresponds
-			 * to JBMS table type identifiers.
-			 */
-			StringBuffer whereClauseTail = new StringBuffer(queryText);
-
-			if (types != null  &&  types.length >= 1) {
-				whereClauseTail.append(" AND TABLETYPE IN ('");
-				whereClauseTail.append(types[0].substring(0, 1));
-
-				for (int i=1; i<types.length; i++) {
-					whereClauseTail.append("','");
-					whereClauseTail.append(types[i].substring(0, 1));
-				}
-				whereClauseTail.append("')");
+		PreparedStatement s = getPreparedQuery("getTables");
+		s.setString(1, swapNull(catalog));
+		s.setString(2, swapNull(schemaPattern));
+		s.setString(3, swapNull(tableNamePattern));
+		//IMPORTANT
+		//Whenever a new table type is added to Derby, the sql for 
+		//getTables in metadata.properties will have to change and the 
+		//following if else will need to be modified too. 
+		//
+		//The getTables sql in metadata.properties has following clause 
+		//TABLETYPE IN (?, ?, ?, ?)
+		//There are 4?s for IN list because Derby supports 4 tables types 
+		//at the moment which are 'T','S','V' and 'A'.
+		//Anytime a new table type is added, an additional ? should be
+		//added to the above clause. In addition, the following code will 
+		//have to change too because it will need to set value for that 
+		//additional ?.
+		//
+		//Following explains the logic for table types handling.
+		//If the user has asked for specific table types in getTables,
+		//then the "if" statement below will use those types values
+		//for ?s. If there are still some ?s in the IN list that are left 
+		//with unassigned values, then we will set those ? to NULL.
+		//eg if getTables is called to only look for table types 'S' and 
+		//'A', then 'S' will be used for first ? in TABLETYPE IN (?, ?, ?, ?)
+		//'A' will be used for second ? in TABLETYPE IN (?, ?, ?, ?) and
+		//NULL will be used for third and fourth ?s in 
+		//TABLETYPE IN (?, ?, ?, ?)
+		//If the user hasn't asked for any specific table types, then the
+		//"else" statement below will kick in. When the control comes to 
+		//"else" statement, it means that the user wants to see all the
+		//table types supported by Derby. And hence, we simply set first
+		//? to 'T', second ? to 'S', third ? to 'V' and fourth ? to 'A'.
+		//When a new table type is added to Derby in future, we will have
+		//to do another setString for that in the "else" statement for that
+		//new table type.
+		if (types != null  &&  types.length >= 1) {
+			int i=0;
+			final int numberOfTableTypesInDerby = 4;
+			for (; i<types.length; i++){
+				/*
+				 * Let's assume for now that the table type first char 
+				 * corresponds to JBMS table type identifiers.
+				 * 
+				 * The reason I have i+4 is because there are already 3 ?s in
+				 * the getTables sql before the ?s in the IN clause. Hence
+				 * setString for table types should be done starting 4th 
+				 * parameter.
+				 */
+				s.setString(i+4, types[i].substring(0, 1));					
 			}
-			// Add the order by clause after the 'in' list.
-			whereClauseTail.append(
-				" ORDER BY TABLE_TYPE, TABLE_SCHEM, TABLE_NAME");
-
-			PreparedStatement s =
-				getEmbedConnection().prepareMetaDataStatement(whereClauseTail.toString());
-
-			s.setString(1, swapNull(catalog));
-			s.setString(2, swapNull(schemaPattern));
-			s.setString(3, swapNull(tableNamePattern));
-
-			rs = s.executeQuery();
-		    } catch (Throwable t) {
-				throw handleException(t);
-			} finally {
-			    restoreContextStack();
+			for (; i<numberOfTableTypesInDerby; i++) {
+				s.setNull(i+4, Types.CHAR);
 			}
-
-			return rs;
+		} else {
+			s.setString(4, "T");
+			s.setString(5, "S");
+			s.setString(6, "V");
+			s.setString(7, "A");				
 		}
+		return s.executeQuery();
 	}
 
     /**
@@ -3045,40 +3057,26 @@ public class EmbedDatabaseMetaData extends ConnectionChild
     public ResultSet getUDTs(String catalog, String schemaPattern, 
 		      String typeNamePattern, int[] types)
       throws SQLException {
-      //we don't have support for catalog names
-      //we don't have java class types per schema, instead it's per database and hence
-      //we ignore schemapattern.
-      //the only type of user-named types we support are JAVA_OBJECT
-      synchronized (getConnectionSynchronization()) {
-      setupContextStack();
-      ResultSet rs = null;
-      int getClassTypes = 0;
-      try {
-        String queryText = getQueryDescriptions(false).getProperty("getUDTs");
+        //we don't have support for catalog names
+        //we don't have java class types per schema, instead it's per database and hence
+        //we ignore schemapattern.
+        //the only type of user-named types we support are JAVA_OBJECT
+        int getClassTypes = 0;
+          if (types != null  &&  types.length >= 1) {
+            for (int i=0; i<types.length; i++){
+              if (types[i] == java.sql.Types.JAVA_OBJECT)
+                getClassTypes = 1;
+            }
+          } else
+            getClassTypes = 1;
 
-        if (types != null  &&  types.length >= 1) {
-          for (int i=0; i<types.length; i++){
-            if (types[i] == java.sql.Types.JAVA_OBJECT)
-              getClassTypes = 1;
-          }
-        } else
-          getClassTypes = 1;
-
-        PreparedStatement s =
-          getEmbedConnection().prepareMetaDataStatement(queryText);
-
-        s.setInt(1, java.sql.Types.JAVA_OBJECT);
-        s.setString(2, catalog);
-        s.setString(3, schemaPattern);
-        s.setString(4, swapNull(typeNamePattern));
-        s.setInt(5, getClassTypes);
-
-        rs = s.executeQuery();
-      } finally {
-        restoreContextStack();
-      }
-      return rs;
-    }
+  		PreparedStatement s = getPreparedQuery("getUDTs");
+  		s.setInt(1, java.sql.Types.JAVA_OBJECT);
+  		s.setString(2, catalog);
+  		s.setString(3, schemaPattern);
+  		s.setString(4, swapNull(typeNamePattern));
+  		s.setInt(5, getClassTypes);
+        return s.executeQuery();
 	}
 
     /**
