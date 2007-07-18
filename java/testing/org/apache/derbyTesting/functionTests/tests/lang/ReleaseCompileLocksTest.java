@@ -31,7 +31,6 @@ import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
-import junit.framework.Assert;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -60,13 +59,15 @@ public class ReleaseCompileLocksTest extends BaseJDBCTestCase {
 	protected void setUp() throws SQLException {
 	    Statement stmt = createStatement();
 
-	    stmt.execute("create function dmlstatic() returns INT parameter style java language java external name " +							  "'org.apache.derbyTesting.functionTests.tests.lang." + 
-                 	this.getANumber() +
-			"' no sql");
+	    stmt.execute("create function dmlstatic() returns INT " +
+	    	"parameter style java language java external name " +
+	    	"'org.apache.derbyTesting.functionTests.util.StaticInitializers." +
+	    	"DMLInStaticInitializer.getANumber' no sql");
                   
-	    stmt.execute("create function insertstatic() returns INT parameter style java language java external name " +					"'org.apache.derbyTesting.functionTests.tests.lang." +
-			this.getANumber() +
-			"' no sql");
+	    stmt.execute("create function insertstatic() returns INT " +
+	    	"parameter style java language java external name " +
+	    	"'org.apache.derbyTesting.functionTests.util.StaticInitializers." +
+	    	"InsertInStaticInitializer.getANumber' no sql");
         
         stmt.close();
         commit();
@@ -78,9 +79,9 @@ public class ReleaseCompileLocksTest extends BaseJDBCTestCase {
          * Create a suite of tests.
          **/
         public static Test suite() {
-        	TestSuite suite = new TestSuite("ForUpdateTest");
+        	TestSuite suite = new TestSuite("ReleasecompileLocksTest");
         	suite.addTest(baseSuite("ReleaseCompileLocksTest:embedded"));
-                suite.addTest(TestConfiguration.clientServerDecorator(baseSuite("ReleaseCompileLocksTest:client")));
+        	suite.addTest(TestConfiguration.clientServerDecorator(baseSuite("ReleaseCompileLocksTest:client")));
         	return suite;
     	}
 
@@ -102,12 +103,13 @@ public class ReleaseCompileLocksTest extends BaseJDBCTestCase {
             
             Statement stmt = createStatement();
 
-		try {
-                	stmt.executeQuery("select (dmlstatic()) from sys.systables where tablename = 'SYSCONGLOMERATES'");          
-		} catch (SQLException sqle) {
-			assertSQLState("42X51", sqle);
-		}
-		
+        	try {    
+        		JDBC.assertFullResultSet(stmt.executeQuery(
+        			"select (dmlstatic()) from sys.systables where " +
+        			"tablename = 'SYSCONGLOMERATES'"), new String[][] {{"1"}});
+        	} catch (Throwable ie) {
+        		fail("unexpected problem, cause: " +ie.getCause());
+        	}
 
                 JDBC.assertEmpty(stmt.executeQuery("select TYPE, MODE, TABLENAME, LOCKNAME, STATE from syscs_diag.lock_table order by 1"));
 		commit();
@@ -116,13 +118,13 @@ public class ReleaseCompileLocksTest extends BaseJDBCTestCase {
 		stmt.execute("create table t1 (s int)");
 		commit();
 
-		
 		try {
-                	stmt.executeQuery("select (insertstatic()) from sys.systables where tablename = 'SYSCONGLOMERATES'"); 
-		} catch (SQLException sqle) {
-			assertSQLState("42X51", sqle);
-		}
-		
+        		JDBC.assertFullResultSet(stmt.executeQuery(
+        			"select (insertstatic()) from sys.systables where " +
+        			"tablename = 'SYSCONGLOMERATES'"), new String[][] {{"1"}});
+        	} catch (Throwable ie) {
+        		fail("unexpected problem; cause: " + ie.getCause());
+        	}
 
                 JDBC.assertEmpty(stmt.executeQuery("select TYPE, MODE, TABLENAME, LOCKNAME, STATE from syscs_diag.lock_table order by 1"));
 
@@ -149,6 +151,7 @@ public class ReleaseCompileLocksTest extends BaseJDBCTestCase {
 
 		try { 
 		  	stmt.execute("drop table t1");
+		  	fail ("expected SQLException; table t should not exist");
 		} catch (SQLException e) {
 			assertSQLState("42Y55", e);
 		}
@@ -235,11 +238,5 @@ public class ReleaseCompileLocksTest extends BaseJDBCTestCase {
 		ps.close();
 		stmt.close();
        }
-
        
-        private static int getANumber()
-	{
-		return 1;
-	}
-        
 }

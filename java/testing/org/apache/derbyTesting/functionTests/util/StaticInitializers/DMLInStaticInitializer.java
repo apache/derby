@@ -64,8 +64,9 @@ public class DMLInStaticInitializer
 		}
 		catch (SQLException se)
 		{
-			System.out.println("Caught exception " + se);
-			se.printStackTrace(System.out);
+			if (!se.getSQLState().equals("38001")){
+				throw new ExceptionInInitializerError(se);
+			}
 		}
 		finally
 		{
@@ -76,8 +77,9 @@ public class DMLInStaticInitializer
 			}
 			catch (SQLException se)
 			{
-				System.out.println("Caught exception " + se);
-				se.printStackTrace(System.out);
+				if (!se.getSQLState().equals("38001")) {
+					throw new ExceptionInInitializerError(se);
+				}
 			}
 		}
 	}

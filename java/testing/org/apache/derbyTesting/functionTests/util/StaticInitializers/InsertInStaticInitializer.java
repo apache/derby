@@ -67,8 +67,10 @@ public class InsertInStaticInitializer
 		}
 		catch (SQLException se)
 		{
-			System.out.println("Caught exception " + se);
-			se.printStackTrace(System.out);
+			// we expected the above s.execute(INSERT) to fail
+			if (!se.getSQLState().equals("38001")) {
+				throw new ExceptionInInitializerError(se);
+			}
 		}
 		finally
 		{
@@ -79,8 +81,8 @@ public class InsertInStaticInitializer
 			}
 			catch (SQLException se)
 			{
-				System.out.println("Caught exception " + se);
-				se.printStackTrace(System.out);
+				if (!se.getSQLState().equals("38001"))
+					throw new ExceptionInInitializerError(se);
 			}
 		}
 	}
