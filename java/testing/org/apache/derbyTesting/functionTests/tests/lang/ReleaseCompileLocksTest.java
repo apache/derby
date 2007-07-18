@@ -103,13 +103,9 @@ public class ReleaseCompileLocksTest extends BaseJDBCTestCase {
             
             Statement stmt = createStatement();
 
-        	try {    
-        		JDBC.assertFullResultSet(stmt.executeQuery(
-        			"select (dmlstatic()) from sys.systables where " +
-        			"tablename = 'SYSCONGLOMERATES'"), new String[][] {{"1"}});
-        	} catch (Throwable ie) {
-        		fail("unexpected problem, cause: " +ie.getCause());
-        	}
+        	JDBC.assertFullResultSet(stmt.executeQuery(
+        		"select (dmlstatic()) from sys.systables where " +
+        		"tablename = 'SYSCONGLOMERATES'"), new String[][] {{"1"}});
 
                 JDBC.assertEmpty(stmt.executeQuery("select TYPE, MODE, TABLENAME, LOCKNAME, STATE from syscs_diag.lock_table order by 1"));
 		commit();
@@ -118,13 +114,9 @@ public class ReleaseCompileLocksTest extends BaseJDBCTestCase {
 		stmt.execute("create table t1 (s int)");
 		commit();
 
-		try {
-        		JDBC.assertFullResultSet(stmt.executeQuery(
-        			"select (insertstatic()) from sys.systables where " +
-        			"tablename = 'SYSCONGLOMERATES'"), new String[][] {{"1"}});
-        	} catch (Throwable ie) {
-        		fail("unexpected problem; cause: " + ie.getCause());
-        	}
+		JDBC.assertFullResultSet(stmt.executeQuery(
+        		"select (insertstatic()) from sys.systables where " +
+        		"tablename = 'SYSCONGLOMERATES'"), new String[][] {{"1"}});
 
                 JDBC.assertEmpty(stmt.executeQuery("select TYPE, MODE, TABLENAME, LOCKNAME, STATE from syscs_diag.lock_table order by 1"));
 
