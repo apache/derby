@@ -566,50 +566,6 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 		return databaseID;
 	}
 
-	/**
-	 * Drop all Stored Prepared Statements that
-	 * have been created for JDBC MetaData queries.
-	 * Does NOT commit the current transaction
-	 * upon completation.  
-	 *
-	 * @exception SQLException on error, most likely
-	 *			a deadlock or timeout.
-	 */
-	public void dropAllJDBCMetaDataSPSes() throws SQLException
-	{
-		try
-		{
-			LanguageConnectionContext lcc = ConnectionUtil.getCurrentLCC();
-
-			DataDictionary dd = lcc.getDataDictionary();
-
-			TransactionController tc = lcc.getTransactionExecute();
-
-			/*
-			** Inform the data dictionary we are going
-			** to perform some DDL
-			*/
-			dd.startWriting(lcc);
-
-			for (java.util.ListIterator li = dd.getAllSPSDescriptors().listIterator(); li.hasNext(); )
-			{
-				SPSDescriptor spsd = (SPSDescriptor) li.next();
-
-				/*
-				** Is it in SYS? if so, zap it. Can't drop metadata SPS in SYSIBM, JCC depends on it.
-				*/
-				if (spsd.getSchemaDescriptor().isSystemSchema() && !spsd.getSchemaDescriptor().isSYSIBM())
-				{
-					dd.dropSPSDescriptor(spsd, tc);
-					dd.dropDependentsStoredDependencies(spsd.getUUID(), tc);
-				}
-			}
-		} catch (StandardException se)
-		{
-			throw PublicAPI.wrapStandardException(se);
-		}
-	}
-
 	/*
 	** Return an Object instead of a ResourceAdapter
 	** so that XA classes are only used where needed;

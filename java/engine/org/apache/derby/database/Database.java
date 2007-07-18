@@ -57,17 +57,6 @@ public interface Database
 	 */
 	public boolean		isReadOnly();
 
-	/**
-	 * Delete all stored prepared statements that were
-	 * created for JDBC MetaData queries.
-	 *
-	 * @exception SQLException thrown on error deleting
-	 *		the stored prepared statements, most likely
-	 *		a deadlock or timeout.
-	 */
-	public void dropAllJDBCMetaDataSPSes()
-		throws SQLException;
-
     /**
      * Backup the database to a backup directory.  See online documentation
      * for more detail about how to use this feature.
