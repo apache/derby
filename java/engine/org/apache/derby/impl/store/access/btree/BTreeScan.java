@@ -348,7 +348,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
                 (scan_state == SCAN_INIT) || (scan_state == SCAN_HOLD_INIT));
             SanityManager.ASSERT(pos.current_rh          == null);
             SanityManager.ASSERT(pos.current_positionKey == null);
-            SanityManager.ASSERT(pos.current_scan_pageno == 0);
+            SanityManager.ASSERT(pos.current_scan_protectionHandle == null);
         }
 
         // Loop until you can lock the row previous to the first row to be
@@ -481,7 +481,8 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
         }
 
         this.scan_state         = SCAN_INPROGRESS;
-        pos.current_scan_pageno = pos.current_leaf.page.getPageNumber();
+        pos.current_scan_protectionHandle =
+            pos.current_leaf.page.getProtectionRecordHandle();
 		pos.current_slot        = pos.current_slot;
 
         if (SanityManager.DEBUG)
@@ -514,7 +515,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
 
             SanityManager.ASSERT(pos.current_rh          == null);
             SanityManager.ASSERT(pos.current_positionKey         == null);
-            SanityManager.ASSERT(pos.current_scan_pageno == 0);
+            SanityManager.ASSERT(pos.current_scan_protectionHandle == null);
         }
 
         // Loop until you can lock the row previous to the first row to be
@@ -639,7 +640,8 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
         }
 
         this.scan_state          = SCAN_INPROGRESS;
-        pos.current_scan_pageno = pos.current_leaf.page.getPageNumber();
+        pos.current_scan_protectionHandle =
+            pos.current_leaf.page.getProtectionRecordHandle();
 
         if (SanityManager.DEBUG)
             SanityManager.ASSERT(pos.current_leaf != null);
@@ -668,7 +670,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
         // assert may not be true, but for now we always have the scan
         // lock when we call this routine.
         if (SanityManager.DEBUG)
-            SanityManager.ASSERT(pos.current_scan_pageno != 0);
+            SanityManager.ASSERT(pos.current_scan_protectionHandle != null);
 
         while (true)
         {
@@ -705,10 +707,13 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
         // there is no next leaf we can release scan and latch on current page.
         if (SanityManager.DEBUG)
         {
-			if (pos.current_scan_pageno != pos.current_leaf.page.getPageNumber())
+			if (pos.current_scan_protectionHandle.getPageNumber() !=
+                         pos.current_leaf.page.getPageNumber()) {
 				SanityManager.THROWASSERT(
-                "pos.current_scan_pageno = " + pos.current_scan_pageno +
+                "pos.current_scan_protectionHandle = " +
+                pos.current_scan_protectionHandle +
                 "pos.current_leaf = " + pos.current_leaf);
+            }
         }
 
         // unlock the previous row if doing read.
@@ -722,8 +727,9 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
         pos.current_leaf.release();
         pos.current_leaf        = pos.next_leaf;
 
-        pos.current_scan_pageno = 
-            (pos.next_leaf == null) ? 0 : pos.next_leaf.page.getPageNumber();
+        pos.current_scan_protectionHandle =
+            (pos.current_leaf == null) ?
+            null : pos.current_leaf.page.getProtectionRecordHandle();
 
         // set up for scan to continue at beginning of next page.
         pos.current_slot        = Page.FIRST_SLOT_NUMBER;
@@ -1065,7 +1071,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
         {
             // Reposition to remembered spot on page.
             if (SanityManager.DEBUG)
-                SanityManager.ASSERT(pos.current_scan_pageno != 0);
+                SanityManager.ASSERT(pos.current_scan_protectionHandle != null);
 
             pos.current_leaf = (LeafControlRow)
                 ControlRow.get(this, pos.current_rh.getPageNumber());
@@ -1078,7 +1084,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
             // assert may not be true, but for now we always release the 
             // scan lock when we save the row away as the current position.
             if (SanityManager.DEBUG)
-                SanityManager.ASSERT(pos.current_scan_pageno == 0);
+                SanityManager.ASSERT(pos.current_scan_protectionHandle == null);
 
             SearchParameters sp =
                 new SearchParameters(
@@ -1136,7 +1142,8 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
 
             } while (latch_released);
 
-            pos.current_scan_pageno = pos.current_leaf.page.getPageNumber();
+            pos.current_scan_protectionHandle =
+                pos.current_leaf.page.getProtectionRecordHandle();
             pos.current_slot        = sp.resultSlot;
             pos.current_positionKey = null;
         }
@@ -1150,9 +1157,9 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
      * @param pos position of the scan
      */
     private void unlockCurrentScan(BTreeRowPosition pos) {
-        if (pos.current_scan_pageno != 0L) {
-            getLockingPolicy().unlockScan(pos.current_scan_pageno);
-            pos.current_scan_pageno = 0L;
+        if (pos.current_scan_protectionHandle != null) {
+            getLockingPolicy().unlockScan(pos.current_scan_protectionHandle);
+            pos.current_scan_protectionHandle = null;
         }
     }
 

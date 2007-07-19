@@ -24,6 +24,7 @@ package org.apache.derby.impl.store.access.btree;
 import org.apache.derby.iapi.error.StandardException; 
 
 import org.apache.derby.iapi.store.raw.FetchDescriptor;
+import org.apache.derby.iapi.store.raw.RecordHandle;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.RowLocation;
@@ -253,10 +254,12 @@ public interface BTreeLockingPolicy
      * end of transaction.
      * <p>
      *
-     * @param page_number   page number of page that lockScan was called on.
+     * @param protectionHandle a <code>RecordHandle</code> that, when locked,
+     * protects all the record ids on a page
+     * @see RecordHandle#RECORD_ID_PROTECTION_HANDLE
      *
      **/
-    abstract public void unlockScan(long page_number);
+    abstract public void unlockScan(RecordHandle protectionHandle);
 
 
     /**************************************************************************

@@ -28,6 +28,7 @@ import org.apache.derby.iapi.types.RowLocation;
 
 import org.apache.derby.iapi.store.raw.FetchDescriptor;
 import org.apache.derby.iapi.store.raw.LockingPolicy;
+import org.apache.derby.iapi.store.raw.RecordHandle;
 import org.apache.derby.iapi.store.raw.Transaction;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
@@ -215,8 +216,7 @@ public class B2INoLocking implements BTreeLockingPolicy
      * See BTree.unlockScan() for more info.
      *
      **/
-    public void unlockScan(
-    long    page_number)
+    public void unlockScan(RecordHandle protectionHandle)
     {
     }
 

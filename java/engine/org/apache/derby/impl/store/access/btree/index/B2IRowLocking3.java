@@ -861,17 +861,12 @@ class B2IRowLocking3 implements BTreeLockingPolicy
      * See BTree.unlockScan() for more info.
      *
      **/
-    public void unlockScan(
-    long            page_number)
+    public void unlockScan(RecordHandle scan_lock_rh)
     {
         // This is first row in table, lock the special key that 
         // represents the key previous to the first key of the table.
         try
         {
-            RecordHandle scan_lock_rh = 
-                open_btree.makeRecordHandle(
-                    page_number, RecordHandle.RECORD_ID_PROTECTION_HANDLE);
-
             scan_locking_policy.unlockRecordAfterRead(
                 rawtran, open_btree.getContainerHandle(), 
                 scan_lock_rh, false, true);

@@ -577,16 +577,6 @@ public class OpenBTree
         }
     }
 
-    public RecordHandle makeRecordHandle(
-    long    page_number,
-    int     rec_id)
-        throws StandardException
-    {
-        return(
-            container.makeRecordHandle(
-                page_number, rec_id));
-    }
-
     /**
      * Dump information about tree into the log.
      * <p>
@@ -656,7 +646,7 @@ public class OpenBTree
                     if (release_scan_lock)
                     {
                         btree_locking_policy.unlockScan(
-                            leaf.page.getPageNumber());
+                            leaf.page.getProtectionRecordHandle());
                     }
                     leaf.release();
 

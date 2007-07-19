@@ -285,7 +285,7 @@ public class BTreeMaxScan extends BTreeScan
             SanityManager.ASSERT(this.scan_state          == SCAN_INIT);
             SanityManager.ASSERT(pos.current_rh          == null);
             SanityManager.ASSERT(pos.current_positionKey         == null);
-            SanityManager.ASSERT(pos.current_scan_pageno == 0);
+            SanityManager.ASSERT(pos.current_scan_protectionHandle == null);
         }
 
         // Loop until you can lock the row previous to the first row to be
@@ -363,7 +363,8 @@ public class BTreeMaxScan extends BTreeScan
         }
 
         this.scan_state          = SCAN_INPROGRESS;
-        pos.current_scan_pageno = pos.current_leaf.page.getPageNumber();
+        pos.current_scan_protectionHandle =
+            pos.current_leaf.page.getProtectionRecordHandle();
 
         if (SanityManager.DEBUG)
             SanityManager.ASSERT(pos.current_leaf != null);

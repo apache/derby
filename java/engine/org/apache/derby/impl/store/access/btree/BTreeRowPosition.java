@@ -25,6 +25,7 @@ package org.apache.derby.impl.store.access.btree;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.store.raw.Page;
+import org.apache.derby.iapi.store.raw.RecordHandle;
 
 import org.apache.derby.iapi.store.access.RowUtil;
 
@@ -45,7 +46,7 @@ public class BTreeRowPosition extends RowPosition
      **************************************************************************
      */
     public    DataValueDescriptor[] current_positionKey;
-    public    long                  current_scan_pageno;
+    public    RecordHandle          current_scan_protectionHandle;
     public    LeafControlRow        current_leaf;
     protected LeafControlRow        next_leaf;
     public    DataValueDescriptor[] current_lock_template;
@@ -97,7 +98,8 @@ public class BTreeRowPosition extends RowPosition
                 super.toString() + 
                 "current_positionKey = " + current_positionKey + 
                 ";key = " + RowUtil.toString(current_positionKey) + 
-                ";current_scan_pageno" + current_scan_pageno + 
+                ";current_scan_protectionHandle" +
+                current_scan_protectionHandle +
                 ";next_leaf" + next_leaf + 
                 ";current_leaf" + current_leaf;
         }
