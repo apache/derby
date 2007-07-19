@@ -50,7 +50,7 @@ public class JiraConnector {
 	public static String jira_fixedBugsSource =
 		"http://issues.apache.org/jira/sr/jira.issueviews:" +
 		"searchrequest-xml/temp/SearchRequest.xml?&pid=10594&resolution=1&" +
-		"fixVersion=10.3.0.0&fixVersion=10.3.1.0&fixVersion=10.3.1.1&sorter/field=issuekey&sorter/order=DESC&" +
+		"fixVersion=10.3.0.0&fixVersion=10.3.1.1&fixVersion=10.3.1.2&fixVersion=10.3.1.3&sorter/field=issuekey&sorter/order=DESC&" +
 		"tempMax=2000&reset=true&decorator=none";
 
 	// other urls to some cute jira reports in xml.

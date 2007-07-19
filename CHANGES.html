@@ -1,15 +1,21 @@
 <html>
-<title>Changes for Derby 10.3.1.2</title>
+<title>Changes for Derby 10.3.1.3</title>
 <body>
 <h1>
-<a name="Changes for Derby 10.3.1.2"></a>Changes for Derby 10.3.1.2</h1>
+<a name="Changes for Derby 10.3.1.3"></a>Changes for Derby 10.3.1.3</h1>
 <blockquote>
-<p>This table lists the issues in JIRA which were fixed between Derby release 10.3.1.2 and the preceding release 10.2.2.0. This includes issues for the product source, documentation and tests.</p>
+<p>This table lists the issues in JIRA which were fixed between Derby release 10.3.1.3 and the preceding release 10.2.2.0. This includes issues for the product source, documentation and tests.</p>
 </blockquote>
 <blockquote>
 <table border="2">
 <tr>
 <td><b>Issue Id</b></td><td><b>Description</b></td>
+</tr>
+<tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-2951">DERBY-2951</a></td><td>BatchUpdateTest.testAssociatedParams test fails with collation with exception: Java exception: 'ASSERT FAILED type of inserted column[0] = org.apache.derby.iapi.types.CollatorSQLChartype of template column[0] = org.apache.derby.iapi.types.SQLChar:</td>
+</tr>
+<tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-2941">DERBY-2941</a></td><td>With 10.2, Closing a resultset after retrieving a large > 32665 bytes value with Network Server does not release locks</td>
 </tr>
 <tr>
 <td><a href="http://issues.apache.org/jira/browse/DERBY-2932">DERBY-2932</a></td><td>Connection.createClob() and Connection.createBlob() throw a procedure not found exception and do not switch to non-locator code upon soft upgrade</td>
@@ -31,6 +37,9 @@
 </tr>
 <tr>
 <td><a href="http://issues.apache.org/jira/browse/DERBY-2908">DERBY-2908</a></td><td>10.3.1.0 / 1.1.0 Derby eclipse plugin gives security error referring to user.dir read permission because derby.system.home is set to '.'</td>
+</tr>
+<tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-2896">DERBY-2896</a></td><td>DatabaseMetaData.getTables() fails in TERRORITY_BASED collation database with SQLState 42818: Comparisions between CHAR and CHAR not allowed.</td>
 </tr>
 <tr>
 <td><a href="http://issues.apache.org/jira/browse/DERBY-2891">DERBY-2891</a></td><td>Clob.getCharacterStream(long,long) ignores position parameter for large (&gt;32k) CLOBs</td>

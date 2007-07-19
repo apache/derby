@@ -1505,7 +1505,7 @@ public class ReleaseNotesGenerator extends Task
         		}
         		// if the first fixVersion does not match the current release, or the beta,
         		// check the next one
-        		if ( (!_releaseID.equals(fixVersion)) && (!"10.3.0.0".equals(fixVersion)) && (!"10.3.1.1".equals(fixVersion))) {
+        		if ( (!_releaseID.equals(fixVersion)) && (!"10.3.0.0".equals(fixVersion)) && (!"10.3.1.1".equals(fixVersion)) && (!"10.3.1.2".equals(fixVersion))) {
         			try {
         				fixVersion = squeezeText(getNextChild( itemElement, JIRA_FIXIN, i+1));
         				continue;
