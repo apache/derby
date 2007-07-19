@@ -24,7 +24,6 @@ package org.apache.derby.impl.drda;
 import java.io.OutputStream;
 import java.io.InputStream;
 import java.io.BufferedOutputStream;
-import java.io.UnsupportedEncodingException;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import java.sql.SQLException;
 import java.math.BigDecimal;
@@ -34,6 +33,10 @@ import org.apache.derby.iapi.services.property.PropertyUtil;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.CharsetEncoder;
+import java.nio.charset.CoderResult;
+import java.nio.charset.CodingErrorAction;
 
 /**
 	The DDMWriter is used to write DRDA protocol.   The DRDA Protocol is
@@ -51,12 +54,6 @@ class DDMWriter
 
 	// Default buffer size
 	private final static int DEFAULT_BUFFER_SIZE = 32767;
-
-
-	static final BigDecimal ZERO = BigDecimal.valueOf(0L);
-        
-	private static final byte MULTI_BYTE_MASK = (byte) 0xC0;
-	private static final byte CONTINUATION_BYTE = (byte) 0x80;
 
 	/**
 	 * Output buffer.
@@ -119,20 +116,8 @@ class DDMWriter
 	// that immediately precedes the mark.
 	private int lastDSSBeforeMark;
 
-	// Constructors
-	DDMWriter (int minSize, CcsidManager ccsidManager, DRDAConnThread agent, DssTrace dssTrace)
-	{
-		this.bytes = new byte[minSize];
-		this.buffer = ByteBuffer.wrap(bytes);
-		this.ccsidManager = ccsidManager;
-		this.agent = agent;
-		this.prevHdrLocation = -1;
-		this.previousCorrId = DssConstants.CORRELATION_ID_UNKNOWN;
-		this.previousChainByte = DssConstants.DSS_NOCHAIN;
-		this.isContinuationDss = false;
-		this.lastDSSBeforeMark = -1;
-		reset(dssTrace);
-	}
+	/** Encoder which encodes strings with the server's default encoding. */
+	private final CharsetEncoder encoder;
 
 	DDMWriter (CcsidManager ccsidManager, DRDAConnThread agent, DssTrace dssTrace)
 	{
@@ -146,6 +131,11 @@ class DDMWriter
 		this.isContinuationDss = false;
 		this.lastDSSBeforeMark = -1;
 		reset(dssTrace);
+		// create an encoder which inserts the charset's default replacement
+		// character for characters it can't encode
+		encoder = NetworkServerControlImpl.DEFAULT_CHARSET.newEncoder()
+			.onMalformedInput(CodingErrorAction.REPLACE)
+			.onUnmappableCharacter(CodingErrorAction.REPLACE);
 	}
 
 	/**
@@ -1146,6 +1136,20 @@ class DDMWriter
 		writeLDString(s,0);
 	}
 
+	/**
+	 * Find the maximum number of bytes needed to represent the string in the
+	 * default encoding.
+	 *
+	 * @param s the string to encode
+	 * @return an upper limit for the number of bytes needed to encode the
+	 * string
+	 */
+	private int maxEncodedLength(String s) {
+		// maxBytesPerChar() returns a float, which can only hold 24 bits of an
+		// integer. Therefore, promote the float to a double so that all bits
+		// are preserved in the intermediate result.
+		return (int) (s.length() * (double) encoder.maxBytesPerChar());
+	}
 
 	/**
 	 * Write length delimited string
@@ -1156,54 +1160,39 @@ class DDMWriter
 	 */
 	protected void writeLDString(String s, int index) throws DRDAProtocolException
 	{
-		try {
-			byte [] byteval = s.getBytes(NetworkServerControlImpl.DEFAULT_ENCODING);
-			int origLen = byteval.length;
-			int writeLen =
-				java.lang.Math.min(FdocaConstants.LONGVARCHAR_MAX_LEN,
-								   origLen);
-			/*
-			Need to make sure we truncate on character boundaries.
-			We are assuming
-			http://www.sun.com/developers/gadc/technicalpublications/articles/utf8.html
-			To find the beginning of a multibyte character:
-			1) Does the current byte start with the bit pattern 10xxxxxx?
-			2) If yes, move left and go to step #1.
-			3) Finished
-			We assume that NetworkServerControlImpl.DEFAULT_ENCODING remains UTF-8
-			*/
+		// Position on which to write the length of the string (in bytes). The
+		// actual writing of the length is delayed until we have encoded the
+		// string.
+		final int lengthPos = buffer.position();
+		// Position on which to start writing the string (right after length,
+		// which is 2 bytes long).
+		final int stringPos = lengthPos + 2;
+		// don't send more than LONGVARCHAR_MAX_LEN bytes
+		final int maxStrLen =
+			Math.min(maxEncodedLength(s), FdocaConstants.LONGVARCHAR_MAX_LEN);
 
-			if (SanityManager.DEBUG)
-			{
-				if (!(NetworkServerControlImpl.DEFAULT_ENCODING.equals("UTF8")))
-					SanityManager.THROWASSERT("Encoding assumed to be UTF8, but is actually" + NetworkServerControlImpl.DEFAULT_ENCODING);
-			}
+		ensureLength(2 + maxStrLen);
 
-			if (writeLen != origLen) {
-				//find the first byte of the multibyte char in case
-				//the last byte is part of a multibyte char
-				while (isContinuationChar (byteval [writeLen])) {
-					writeLen--;
-				}
-				//
-				// Now byteval[ writeLen ] is either a standalone 1-byte char
-				// or the first byte of a multi-byte character. That means that
-				// byteval[ writeLen -1 ] is the last (perhaps only) byte of the
-				// previous character.
-				//
-			}
-                        
+		// limit the writable area of the output buffer
+		buffer.position(stringPos);
+		buffer.limit(stringPos + maxStrLen);
 
-			writeShort(writeLen);
-			writeBytes(byteval,writeLen);
+		// encode the string
+		CharBuffer input = CharBuffer.wrap(s);
+		CoderResult res = encoder.encode(input, buffer, true);
+		if (SanityManager.DEBUG) {
+			// UNDERFLOW is returned if the entire string was encoded, OVERFLOW
+			// is returned if the string was truncated at LONGVARCHAR_MAX_LEN
+			SanityManager.ASSERT(
+				res == CoderResult.UNDERFLOW || res == CoderResult.OVERFLOW,
+				"Unexpected coder result: " + res);
 		}
-		catch (UnsupportedEncodingException e) {
-			//this should never happen
-			agent.agentError("Encoding " + NetworkServerControlImpl.DEFAULT_ENCODING + " not supported");
-		}
-	}
-	private boolean isContinuationChar( byte b ) {    
-		return ( (b & MULTI_BYTE_MASK) == CONTINUATION_BYTE );
+
+		// write the length in bytes
+		buffer.putShort(lengthPos, (short) (maxStrLen - buffer.remaining()));
+
+		// remove the limit on the output buffer
+		buffer.limit(buffer.capacity());
 	}
 
 	/**
@@ -1215,38 +1204,12 @@ class DDMWriter
 	 */
 	protected void writeString(String s) throws DRDAProtocolException
 	{
-		try {
-			writeBytes(s.getBytes(NetworkServerControlImpl.DEFAULT_ENCODING));
-		} catch (UnsupportedEncodingException e) {
-			//this should never happen
-			agent.agentError("Encoding " + NetworkServerControlImpl.DEFAULT_ENCODING + " not supported");
-		}
-	}
-
-	/**
-	 * Write string with default encoding and specified length
-	 *
-	 * @param s value to be written
-	 * @param length number of bytes to be written
-	 *
-	 * @exception DRDAProtocolException
-	 */
-	protected void writeString(String s, int length) throws DRDAProtocolException
-	{
-		byte[] bs = null;
-		try {
-			bs = s.getBytes(NetworkServerControlImpl.DEFAULT_ENCODING);
-		} catch (UnsupportedEncodingException e) {
-			//this should never happen
-			agent.agentError("Encoding " + NetworkServerControlImpl.DEFAULT_ENCODING + " not supported");
-		}
-		int len = bs.length;
-		if (len >= length)
-			writeBytes(bs, length);
-		else
-		{
-			writeBytes(bs);
-			padBytes(NetworkServerControlImpl.SPACE_CHAR, length-len);
+		ensureLength(maxEncodedLength(s));
+		CharBuffer input = CharBuffer.wrap(s);
+		CoderResult res = encoder.encode(input, buffer, true);
+		if (SanityManager.DEBUG) {
+			SanityManager.ASSERT(res == CoderResult.UNDERFLOW,
+								 "CharBuffer was not exhausted: res = " + res);
 		}
 	}
 

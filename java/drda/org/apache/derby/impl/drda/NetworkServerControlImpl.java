@@ -40,6 +40,7 @@ import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.SSLServerSocketFactory;
 import java.net.UnknownHostException;
+import java.nio.charset.Charset;
 import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
@@ -169,6 +170,7 @@ public final class NetworkServerControlImpl {
 	protected final static int CCSIDSBC = 1208; //use UTF8
 	protected final static int CCSIDMBC = 1208; //use UTF8
 	protected final static String DEFAULT_ENCODING = "UTF8"; // use UTF8 for writing
+	final static Charset DEFAULT_CHARSET = Charset.forName(DEFAULT_ENCODING);
 	protected final static int DEFAULT_CCSID = 1208;
 	protected final static byte SPACE_CHAR = 32;
 														
