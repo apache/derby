@@ -996,7 +996,7 @@ public class B2I extends BTree
 	*/
 	public int getTypeFormatId() 
     {
-		return StoredFormatIds.ACCESS_B2I_V3_ID;
+		return StoredFormatIds.ACCESS_B2I_V4_ID;
 	}
 
 
