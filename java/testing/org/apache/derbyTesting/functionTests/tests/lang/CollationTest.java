@@ -946,6 +946,21 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     //territory based
     assertStatementError("42ZA3", s, "CREATE TABLE T AS SELECT TABLENAME " +
     		" FROM SYS.SYSTABLES WITH NO DATA");
+    //But following will work because there is no character string type
+    //involved.
+    s.executeUpdate("CREATE TABLE T AS SELECT COLUMNNUMBER FROM " +
+    		" SYS.SYSCOLUMNS WITH NO DATA");
+    
+    //DERBY-2951
+    //Following was giving Assert failure in store code because we were not
+    //writing and reading the collation information from the disk.
+    s.execute("create table assoc (x char(10) not null primary key, "+
+    		" y char(100))");
+    s.execute("create table assocout(x char(10))");
+    ps = conn.prepareStatement("insert into assoc values (?, 'hello')");
+    ps.setString(1, new Integer(10).toString());
+    ps.executeUpdate();     
+
 }
 
 private void setUpTable(Statement s) throws SQLException {

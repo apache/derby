@@ -330,7 +330,8 @@ public class CreateTableNode extends DDLStatementNode
 				//has collation of territory based. This is not supported and
 				//hence we will throw an exception below for the query above in
 				//a territory based database. 
-				if (dtd.getCollationType() != schemaCollationType)
+				if (dtd.getTypeId().isStringTypeId() && 
+						dtd.getCollationType() != schemaCollationType)
 				{
 					String schemaCollationName =
 			        	(schemaCollationType == 
