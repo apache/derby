@@ -29,6 +29,7 @@ import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
 import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.StringDataValue;
 
 import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
@@ -104,6 +105,29 @@ public class TableElementList extends QueryTreeNodeVector
 		else
 		{
 			return "";
+		}
+	}
+
+	/**
+	 * Use the passed schema descriptor's collation type to set the collation
+	 * of the character string types in create table node
+	 * @param sd
+	 */
+	void setCollationTypesOnCharacterStringColumns(SchemaDescriptor sd) {
+		int			size = size();
+		int collationType = sd.getCollationType();
+		for (int index = 0; index < size; index++)
+		{
+			TableElementNode tableElement = (TableElementNode) elementAt(index);
+
+			if (tableElement instanceof ColumnDefinitionNode)
+			{
+				ColumnDefinitionNode cdn = (ColumnDefinitionNode) elementAt(index);
+				if (cdn.getDataTypeServices().getTypeId().isStringTypeId()) {
+					cdn.getDataTypeServices().setCollationType(collationType);
+					cdn.getDataTypeServices().setCollationDerivation(StringDataValue.COLLATION_DERIVATION_IMPLICIT);
+				}
+			}
 		}
 	}
 

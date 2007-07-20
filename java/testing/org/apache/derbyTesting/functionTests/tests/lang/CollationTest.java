@@ -947,7 +947,7 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     assertStatementError("42ZA3", s, "CREATE TABLE T AS SELECT TABLENAME " +
     		" FROM SYS.SYSTABLES WITH NO DATA");
     //But following will work because there is no character string type
-    //involved.
+    //involved. (DERBY-2959)
     s.executeUpdate("CREATE TABLE T AS SELECT COLUMNNUMBER FROM " +
     		" SYS.SYSCOLUMNS WITH NO DATA");
     
@@ -960,7 +960,13 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     ps = conn.prepareStatement("insert into assoc values (?, 'hello')");
     ps.setString(1, new Integer(10).toString());
     ps.executeUpdate();     
-
+    
+    //DERBY-2955
+    //We should set the collation type in the bind phase of create table rather
+    //than in code generation phase. Otherwise, following sql will give 
+    //incorrect exception about collation mismatch for the LIKE clause
+    s.execute("CREATE TABLE DERBY_2955 (EMPNAME CHAR(20), CONSTRAINT " +
+    		" STAFF9_EMPNAME CHECK (EMPNAME NOT LIKE 'T%'))");
 }
 
 private void setUpTable(Statement s) throws SQLException {
