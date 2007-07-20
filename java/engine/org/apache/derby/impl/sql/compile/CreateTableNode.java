@@ -348,6 +348,24 @@ public class CreateTableNode extends DDLStatementNode
 				column.init(rc.getName(), null, rc.getType(), null);
 				tableElementList.addTableElement(column);
 			}
+		} else {
+			//Set the collation type and collation derivation of all the 
+			//character type columns. Their collation type will be same as the 
+			//collation of the schema they belong to. Their collation 
+			//derivation will be "implicit". 
+			//Earlier we did this in makeConstantAction but that is little too 
+			//late (DERBY-2955)
+			//eg 
+			//CREATE TABLE STAFF9 (EMPNAME CHAR(20),
+			//  CONSTRAINT STAFF9_EMPNAME CHECK (EMPNAME NOT LIKE 'T%'))
+			//For the query above, when run in a territory based db, we need 
+			//to have the correct collation set in bind phase of create table 
+			//so that when LIKE is handled in LikeEscapeOperatorNode, we have 
+			//the correct collation set for EMPNAME otherwise it will throw an 
+			//exception for 'T%' having collation of territory based and 
+			//EMPNAME having the default collation of UCS_BASIC
+			tableElementList.setCollationTypesOnCharacterStringColumns(
+					getSchemaDescriptor());
 		}
 
 		tableElementList.validate(this, dataDictionary, (TableDescriptor) null);
@@ -464,18 +482,6 @@ public class CreateTableNode extends DDLStatementNode
 
 		SchemaDescriptor sd = getSchemaDescriptor();
 		
-		//Set the collation type and collation derivation of all the character
-		//type columns. Their collation type will be same as the collation of
-		//the schema they belong to. Theie collation derivation will be 
-		//"implicit".
-        for (int i = 0; i < colInfos.length; i++) {
-        	DataTypeDescriptor dts = colInfos[i].dataType;
-        	if (dts.getTypeId().isStringTypeId()) {
-        		dts.setCollationType(sd.getCollationType());
-        		dts.setCollationDerivation(StringDataValue.COLLATION_DERIVATION_IMPLICIT);
-        	}
-        }
-
 		if (numConstraints > 0)
 		{
 			conActions =
