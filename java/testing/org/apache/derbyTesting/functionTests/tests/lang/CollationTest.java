@@ -967,6 +967,15 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     //incorrect exception about collation mismatch for the LIKE clause
     s.execute("CREATE TABLE DERBY_2955 (EMPNAME CHAR(20), CONSTRAINT " +
     		" STAFF9_EMPNAME CHECK (EMPNAME NOT LIKE 'T%'))");
+    
+    //DERBY-2960
+    //Following group by was failing earlier because we were generating
+    //SQLVarchar rather than CollatorSQLVarchar in territory based db 
+    s.execute("CREATE TABLE DERBY_2960 (C CHAR(10), V VARCHAR(50))");
+    s.execute("INSERT INTO DERBY_2960 VALUES ('duplicate', 'is duplicated')");
+    rs = s.executeQuery("SELECT SUBSTR(c||v, 1, 4), COUNT(*) FROM DERBY_2960" +
+    		" GROUP BY SUBSTR(c||v, 1, 4)");
+    JDBC.assertFullResultSet(rs,new String[][] {{"dupl","1"}});
 }
 
 private void setUpTable(Statement s) throws SQLException {
