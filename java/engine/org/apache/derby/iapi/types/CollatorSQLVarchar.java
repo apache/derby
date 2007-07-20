@@ -120,6 +120,13 @@ class CollatorSQLVarchar extends SQLVarchar implements CollationElementsInterfac
 		return result;
 	}
 
+	protected StringDataValue getNewVarchar() throws StandardException
+	{
+		CollatorSQLVarchar result = new CollatorSQLVarchar(
+				holderForCollationSensitiveInfo.getCollatorForCollation());
+		return result;
+	}
+
 	/**
 	 * We do not anticipate this method on collation sensitive DVD to be
 	 * ever called in Derby 10.3 In future, when Derby will start supporting
