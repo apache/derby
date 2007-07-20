@@ -3,21 +3,21 @@ Testing derby.properties Port 1528
 org.apache.derby.drda.NetworkServerControl start -noSecurityManager 
 Successfully Connected
 org.apache.derby.drda.NetworkServerControl shutdown 
-Apache Derby Network Server - 10.3.1.3 -(EXPECTED SUBVERSION INFO)  shutdown at xxxxxxFILTERED-TIMESTAMPxxxxxGMT
+Apache Derby Network Server - 10.3.1.4 -(EXPECTED SUBVERSION INFO)  shutdown at xxxxxxFILTERED-TIMESTAMPxxxxxGMT
 Testing System properties  Port 1529 
 -----Dderby.drda.portNumber=1529 org.apache.derby.drda.NetworkServerControl start -noSecurityManager 
 Successfully Connected
 org.apache.derby.drda.NetworkServerControl shutdown -p 1529 
-Apache Derby Network Server - 10.3.1.3 -(EXPECTED SUBVERSION INFO)  shutdown at xxxxxxFILTERED-TIMESTAMPxxxxxGMT
+Apache Derby Network Server - 10.3.1.4 -(EXPECTED SUBVERSION INFO)  shutdown at xxxxxxFILTERED-TIMESTAMPxxxxxGMT
 Testing command line option. Port 1530
 org.apache.derby.drda.NetworkServerControl start -p 1530 -noSecurityManager 
 Successfully Connected
 org.apache.derby.drda.NetworkServerControl shutdown -p 1530 
-Apache Derby Network Server - 10.3.1.3 -(EXPECTED SUBVERSION INFO)  shutdown at xxxxxxFILTERED-TIMESTAMPxxxxxGMT
+Apache Derby Network Server - 10.3.1.4 -(EXPECTED SUBVERSION INFO)  shutdown at xxxxxxFILTERED-TIMESTAMPxxxxxGMT
 Testing start server by specifying system properties without values
 First shutdown server started on default port by the test harness
 org.apache.derby.drda.NetworkServerControl shutdown -p 1527 
-Apache Derby Network Server - 10.3.1.3 -(EXPECTED SUBVERSION INFO)  shutdown at xxxxxxFILTERED-TIMESTAMPxxxxxGMT
+Apache Derby Network Server - 10.3.1.4 -(EXPECTED SUBVERSION INFO)  shutdown at xxxxxxFILTERED-TIMESTAMPxxxxxGMT
 -----Dderby.drda.logConnections -Dderby.drda.traceAll -Dderby.drda.traceDirectory -Dderby.drda.keepAlive -Dderby.drda.timeSlice -Dderby.drda.host -Dderby.drda.portNumber -Dderby.drda.minThreads -Dderby.drda.maxThreads -Dderby.drda.startNetworkServer -Dderby.drda.debug org.apache.derby.drda.NetworkServerControl start -noSecurityManager 
 ----- listing properties --
 derby.drda.maxThreads=0
@@ -61,7 +61,7 @@ derby.drda.startNetworkServer=false
 derby.drda.host=xxxFILTERED_HOSTNAMExxx
 derby.drda.traceAll=false
 org.apache.derby.drda.NetworkServerControl shutdown -p 1527 
-Apache Derby Network Server - 10.3.1.3 -(EXPECTED SUBVERSION INFO)  shutdown at xxxxxxFILTERED-TIMESTAMPxxxxxGMT
+Apache Derby Network Server - 10.3.1.4 -(EXPECTED SUBVERSION INFO)  shutdown at xxxxxxFILTERED-TIMESTAMPxxxxxGMT
 org.apache.derby.drda.NetworkServerControl 
 No arguments given.
 Usage: NetworkServerControl <commands> 
