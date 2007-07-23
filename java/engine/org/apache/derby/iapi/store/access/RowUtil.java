@@ -566,7 +566,7 @@ public class RowUtil
 	 * @exception  StandardException  Standard exception policy.
      **/
 	public static final boolean qualifyRow(
-    Object[]        row, 
+    DataValueDescriptor[]        row, 
     Qualifier[][]   qual_list)
 		 throws StandardException
 	{
@@ -598,8 +598,7 @@ public class RowUtil
 
             // Get the column from the possibly partial row, of the 
             // q.getColumnId()'th column in the full row.
-            DataValueDescriptor columnValue = 
-                    (DataValueDescriptor) row[q.getColumnId()];
+            DataValueDescriptor columnValue = row[q.getColumnId()];
 
             row_qualifies =
                 columnValue.compare(
@@ -645,8 +644,7 @@ public class RowUtil
 
                 // Get the column from the possibly partial row, of the 
                 // q.getColumnId()'th column in the full row.
-                DataValueDescriptor columnValue = 
-                    (DataValueDescriptor) row[q.getColumnId()];
+                DataValueDescriptor columnValue = row[q.getColumnId()];
 
                 if (SanityManager.DEBUG)
                 {
