@@ -186,7 +186,7 @@ ij> -- PASS:0278 If 1 row is updated?
 
           SELECT COUNT(*)
           FROM STAFF
-          WHERE EMPNAME IN (USER,'Betty','Carmen');
+          WHERE EMPNAME IN (CAST(USER AS VARCHAR(128)),'Betty','Carmen');
 1          
 -----------
 3          

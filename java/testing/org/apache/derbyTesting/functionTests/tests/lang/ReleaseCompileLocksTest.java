@@ -105,7 +105,7 @@ public class ReleaseCompileLocksTest extends BaseJDBCTestCase {
 
         	JDBC.assertFullResultSet(stmt.executeQuery(
         		"select (dmlstatic()) from sys.systables where " +
-        		"tablename = 'SYSCONGLOMERATES'"), new String[][] {{"1"}});
+        		"CAST(tablename AS VARCHAR(128))= 'SYSCONGLOMERATES'"), new String[][] {{"1"}});
 
                 JDBC.assertEmpty(stmt.executeQuery("select TYPE, MODE, TABLENAME, LOCKNAME, STATE from syscs_diag.lock_table order by 1"));
 		commit();
@@ -116,7 +116,7 @@ public class ReleaseCompileLocksTest extends BaseJDBCTestCase {
 
 		JDBC.assertFullResultSet(stmt.executeQuery(
         		"select (insertstatic()) from sys.systables where " +
-        		"tablename = 'SYSCONGLOMERATES'"), new String[][] {{"1"}});
+        		"CAST(tablename AS VARCHAR(128)) = 'SYSCONGLOMERATES'"), new String[][] {{"1"}});
 
                 JDBC.assertEmpty(stmt.executeQuery("select TYPE, MODE, TABLENAME, LOCKNAME, STATE from syscs_diag.lock_table order by 1"));
 

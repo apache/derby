@@ -85,7 +85,7 @@ public final class ErrorCodeTest extends BaseJDBCTestCase {
        // -- test ErrorMessages VTI        
         rs = s.executeQuery(
             "select * from SYSCS_DIAG.error_Messages  where "
-            + "sql_state = '07000'");
+            + "CAST(sql_state AS CHAR(5)) = '07000'");
          
         String [][] expRS = new String [][]
         {

@@ -154,7 +154,7 @@ drop table mydoubleprecision;
 create table myfloat( a float, b float(23) );
 select abs(a), abs(b) from myfloat;
 select columnname, columndatatype
-from sys.syscolumns c, sys.systables t where c.referenceid = t.tableid and t.tablename='MYFLOAT';
+from sys.syscolumns c, sys.systables t where c.referenceid = t.tableid and CAST(t.tablename AS VARCHAR(128)) ='MYFLOAT';
 insert into myfloat values (null, null), (+0, +0), (-0, -0), (+1, +1), (-1, -1),
 (100000000, 100000000), (-100000000, -100000000), (null, null),
 (1.79769E+308, 3.402E+38),
@@ -966,7 +966,7 @@ drop table mydoubleprecision;
 create table myfloat( a float, b float(23) );
 select sqrt(a), sqrt(b) from myfloat;
 select columnname, columndatatype
-from sys.syscolumns c, sys.systables t where c.referenceid = t.tableid and t.tablename='MYFLOAT';
+from sys.syscolumns c, sys.systables t where c.referenceid = t.tableid and CAST(t.tablename AS VARCHAR(128)) = 'MYFLOAT';
 insert into myfloat values (null, null), (+0, +0), (-0, -0), (+1, +1), (100000000, 100000000), (null, null),
 (1.79769E+308, 3.402E+38),
 (2.225E-307, 1.175E-37);

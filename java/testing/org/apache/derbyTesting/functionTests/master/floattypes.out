@@ -30,7 +30,7 @@ ij> create table tmp (tmpcoldecimal dec(8,4), tmpcolnumeric numeric);
 0 rows inserted/updated/deleted
 ij> select columndatatype 
 	from sys.syscolumns 
-	where columnname like 'TMPCOL%';
+	where CAST(columnname AS VARCHAR(128)) like 'TMPCOL%';
 COLUMNDATATYPE 
 ---------------
 DECIMAL(8,4)   
@@ -366,7 +366,7 @@ ij> insert into tmp values (1);
 1 row inserted/updated/deleted
 ij> select columnname, columndatatype 
        from sys.syscolumns c, sys.systables t 
-       where c.referenceid = t .tableid and t.tablename='TMP';
+       where c.referenceid = t .tableid and CAST(t.tablename AS VARCHAR(128)) ='TMP';
 COLUMNNAME                                                                                                                      |COLUMNDATATYPE 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 X                                                                                                                               |DOUBLE         
@@ -1626,7 +1626,7 @@ create table t (d double precision, r real, f float, f1 float(1),
 0 rows inserted/updated/deleted
 ij> select columnname, columndatatype 
 from sys.syscolumns c, sys.systables t
-where c.referenceid = t.tableid and t.tablename='T';
+where c.referenceid = t.tableid and CAST(t.tablename AS VARCHAR(128)) ='T';
 COLUMNNAME                                                                                                                      |COLUMNDATATYPE 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 D                                                                                                                               |DOUBLE         

@@ -230,7 +230,7 @@ public class ParameterMetaDataJdbc30Test extends BaseJDBCTestCase {
       		 * getParameterMetaData().
 		 */
       		ps = prepareStatement("select * from sys.systables where " +
-             			      " tablename like ? and tableID like ?");
+             			      " CAST(tablename AS VARCHAR(128)) like ? and CAST(tableID AS CHAR(36)) like ?");
       		ps.setString (1, "SYS%");
       		ps.setString (2, "8000001%");
       		paramMetaData = ps.getParameterMetaData();
@@ -263,7 +263,7 @@ public class ParameterMetaDataJdbc30Test extends BaseJDBCTestCase {
 
       		//variation 1, testing DERBY-44 
       		PreparedStatement ps = prepareStatement("select * from sys.systables " +
-							"where tablename like ? escape ?");
+							"where CAST(tablename AS VARCHAR(128)) like ? escape CAST(? AS VARCHAR(128))");
       		ps.setString (1, "SYS%");
       		ps.setString (2, "");
       		ParameterMetaData paramMetaData = ps.getParameterMetaData();
@@ -304,8 +304,8 @@ public class ParameterMetaDataJdbc30Test extends BaseJDBCTestCase {
                  * orig: ps = con.prepareStatement("execute statement systab using values('SYS%','8000001%')");
 		 */
       		PreparedStatement ps = prepareStatement("select * from sys.systables " + 
-							"where tablename like 'SYS%' and " + 
-							"tableID like '8000001%'");
+							"where CAST(tablename AS VARCHAR(128)) like 'SYS%' and " + 
+							"CAST(tableID AS VARCHAR(128)) like '8000001%'");
 
       		ParameterMetaData paramMetaData = ps.getParameterMetaData();
 		assertEquals("Unexpected parameter count", 0, paramMetaData.getParameterCount());

@@ -246,10 +246,10 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         int expectedCount[] = {0,0,0};
         assertBatchUpdateCounts(expectedCount, stmt.executeBatch());
         ResultSet rs = stmt.executeQuery(
-            "select count(*) from SYS.SYSTABLES where tablename like 'DDL%'");
+            "select count(*) from SYS.SYSTABLES where CAST(tablename AS VARCHAR(128)) like 'DDL%'");
         JDBC.assertSingleValueResultSet(rs, "2");
         rs = stmt.executeQuery(
-            "select count(*) from SYS.SYSALIASES where alias like 'DDL%'");
+            "select count(*) from SYS.SYSALIASES where CAST(alias AS VARCHAR(128)) like 'DDL%'");
         JDBC.assertSingleValueResultSet(rs, "1");
         stmt.close();
 

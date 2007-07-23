@@ -238,7 +238,7 @@ ij> -- Making sure the table is empty
 
 -- setup
      INSERT INTO T4
-          VALUES(USER,100,'good','luck');
+          VALUES(CAST(USER AS VARCHAR(128)),100,'good','luck');
 1 row inserted/updated/deleted
 ij> -- PASS:0255 If 1 row is inserted?
 
@@ -257,7 +257,7 @@ ij> -- PASS:0255 If STR110 = 'HU'?
 ij> -- PASS:0255 If 1 row is inserted?
 
      UPDATE T4
-          SET STR110 = USER
+          SET STR110 = CAST(USER AS VARCHAR(128))
           WHERE NUM6 = 101;
 1 row inserted/updated/deleted
 ij> -- PASS:0255 If 1 row is updated?
@@ -291,7 +291,7 @@ ij> -- PASS:0256 If 1 row is inserted?
 
      SELECT STR110 
           FROM T4
-          WHERE STR110 = USER;
+          WHERE STR110 = CAST(USER AS VARCHAR(128));
 STR110                                                                                                        
 --------------------------------------------------------------------------------------------------------------
 HU                                                                                                            
@@ -304,7 +304,7 @@ ij> -- PASS:0256 If STR110 = 'HU'?
 ij> -- PASS:0256 If 1 row is inserted?
 
      DELETE FROM T4
-            WHERE STR110 = USER;
+            WHERE STR110 = CAST(USER AS VARCHAR(128));
 1 row inserted/updated/deleted
 ij> -- PASS:0256 If 1 row is deleted?
 

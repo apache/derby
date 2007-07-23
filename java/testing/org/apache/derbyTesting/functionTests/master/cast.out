@@ -1659,20 +1659,20 @@ ij> select cast (aliasinfo as BLOB) from sys.sysaliases;
 1                                                                                                                               
 --------------------------------------------------------------------------------------------------------------------------------
 ERROR XCL12: An attempt was made to put a data value of type 'org.apache.derby.catalog.types.RoutineAliasInfo' into a data value of type 'BLOB'.
-ij> select cast (aliasinfo as CLOB) from sys.sysaliases where alias = 'INSTALL_JAR';
+ij> select cast (aliasinfo as CLOB) from sys.sysaliases where CAST(alias AS VARCHAR(128))  = 'INSTALL_JAR';
 1                                                                                                                               
 --------------------------------------------------------------------------------------------------------------------------------
 ERROR XCL12: An attempt was made to put a data value of type 'org.apache.derby.catalog.types.RoutineAliasInfo' into a data value of type 'CLOB'.
 ij> -- Java casts to character types excluding CLOB are supported using Object.toString
-select cast (aliasinfo as CHAR(240)) from sys.sysaliases where alias = 'INSTALL_JAR';
+select cast (aliasinfo as CHAR(240)) from sys.sysaliases where CAST(alias AS VARCHAR(128)) = 'INSTALL_JAR';
 1                                                                                                                               
 --------------------------------------------------------------------------------------------------------------------------------
 INSTALL_JAR(IN URL VARCHAR(256),IN JAR VARCHAR(128),IN DEPLOY INTEGER) LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA    &
-ij> select cast (aliasinfo as VARCHAR(240)) from sys.sysaliases where alias = 'INSTALL_JAR';
+ij> select cast (aliasinfo as VARCHAR(240)) from sys.sysaliases where CAST(alias AS VARCHAR(128)) = 'INSTALL_JAR';
 1                                                                                                                               
 --------------------------------------------------------------------------------------------------------------------------------
 INSTALL_JAR(IN URL VARCHAR(256),IN JAR VARCHAR(128),IN DEPLOY INTEGER) LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA     
-ij> select cast (aliasinfo as LONG VARCHAR) from sys.sysaliases where alias = 'INSTALL_JAR';
+ij> select cast (aliasinfo as LONG VARCHAR) from sys.sysaliases where CAST(alias AS VARCHAR(128)) = 'INSTALL_JAR';
 1                                                                                                                               
 --------------------------------------------------------------------------------------------------------------------------------
 INSTALL_JAR(IN URL VARCHAR(256),IN JAR VARCHAR(128),IN DEPLOY INTEGER) LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA     

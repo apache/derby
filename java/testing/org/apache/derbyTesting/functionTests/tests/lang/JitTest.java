@@ -54,7 +54,7 @@ public class JitTest {
     } catch (Exception e) {
     	System.out.println("FAIL -- unexpected exception "+e);
     	JDBCDisplayUtil.ShowException(System.out, e);
-      	e.printStackTrace();
+      	e.printStackTrace(System.out);
     }
   }
   
@@ -128,7 +128,7 @@ public class JitTest {
   		Statement stmt = conn.createStatement();
   		ResultSet rs =stmt.executeQuery("select count(autoincrementstart) from"+
   				" sys.syscolumns c, sys.systables t, sys.sysschemas s WHERE"+
-				" t.schemaid =  s.schemaid and s.schemaname = 'APP' and"+
+				" t.schemaid =  s.schemaid and CAST(s.schemaname AS VARCHAR(128))= 'APP' and"+
 				" autoincrementstart > " +  maxautoincrementstart);
 
   		rs.next();
@@ -141,8 +141,8 @@ public class JitTest {
   		{
   			rs =stmt.executeQuery("select tablename, columnname,"+
   					" autoincrementstart from sys.syscolumns c, sys.systables t,"+
-					" sys.sysschemas s WHERE t.schemaid = s.schemaid and"+
-					" s.schemaname = 'APP' and autoincrementstart > 2 ORDER"+
+					" CAST(sys.sysschemas AS VARCHAR(128)) s WHERE t.schemaid = s.schemaid and"+
+					" CAST(s.schemaname AS VARCHAR(128)) = 'APP' and autoincrementstart > 2 ORDER"+
 					" BY tablename");
   			while (rs.next())
   			{
@@ -169,7 +169,7 @@ public class JitTest {
   		System.out.println("Drop all tables in APP schema");
   		ResultSet rs = stmt1.executeQuery("SELECT tablename from sys.systables"+
   				" t, sys.sysschemas s where t.schemaid = s.schemaid and"+
-				" s.schemaname = 'APP'");
+				" CAST(s.schemaname AS VARCHAR(128)) = 'APP'");
 
   		while (rs.next())
   		{

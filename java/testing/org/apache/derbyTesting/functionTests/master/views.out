@@ -252,7 +252,7 @@ ij> drop index i;
 0 rows inserted/updated/deleted
 ij> -- verify the consistency of the indexes on the system catalogs
 select tablename, SYSCS_UTIL.SYSCS_CHECK_TABLE('SYS', tablename)
-from sys.systables where tabletype = 'S' and tablename != 'SYSDUMMY1';
+from sys.systables where CAST(tabletype AS CHAR(1)) = 'S' and CAST(tablename AS VARCHAR(128)) != 'SYSDUMMY1';
 TABLENAME                                                                                                                       |2          
 --------------------------------------------------------------------------------------------------------------------------------------------
 SYSCONGLOMERATES                                                                                                                |1          
@@ -318,7 +318,7 @@ ij> drop table insert_test;
 0 rows inserted/updated/deleted
 ij> -- verify the consistency of the indexes on the system catalogs
 select tablename, SYSCS_UTIL.SYSCS_CHECK_TABLE('SYS', tablename)
-from sys.systables where tabletype = 'S' and tablename != 'SYSDUMMY1';
+from sys.systables where CAST(tabletype as CHAR(1)) = 'S' and CAST(tablename  as VARCHAR(128)) != 'SYSDUMMY1';
 TABLENAME                                                                                                                       |2          
 --------------------------------------------------------------------------------------------------------------------------------------------
 SYSCONGLOMERATES                                                                                                                |1          

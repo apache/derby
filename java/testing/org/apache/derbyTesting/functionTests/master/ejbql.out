@@ -715,7 +715,7 @@ ij> select abs(a), abs(b) from myfloat;
 1                     |2            
 ------------------------------------
 ij> select columnname, columndatatype
-from sys.syscolumns c, sys.systables t where c.referenceid = t.tableid and t.tablename='MYFLOAT';
+from sys.syscolumns c, sys.systables t where c.referenceid = t.tableid and CAST(t.tablename AS VARCHAR(128)) ='MYFLOAT';
 COLUMNNAME                                                                                                                      |COLUMNDATATYPE 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 A                                                                                                                               |DOUBLE         
@@ -3236,7 +3236,7 @@ ij> select sqrt(a), sqrt(b) from myfloat;
 1                     |2                     
 ---------------------------------------------
 ij> select columnname, columndatatype
-from sys.syscolumns c, sys.systables t where c.referenceid = t.tableid and t.tablename='MYFLOAT';
+from sys.syscolumns c, sys.systables t where c.referenceid = t.tableid and CAST(t.tablename AS VARCHAR(128)) = 'MYFLOAT';
 COLUMNNAME                                                                                                                      |COLUMNDATATYPE 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 A                                                                                                                               |DOUBLE         

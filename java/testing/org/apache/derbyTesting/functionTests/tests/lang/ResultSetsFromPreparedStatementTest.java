@@ -416,7 +416,7 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
     private boolean hasTableXLock(String table) throws SQLException {
         PreparedStatement ps = prepareStatement(
             "select count(*) from syscs_diag.lock_table where tablename=? " +
-            "and type='TABLE' and mode='X'");
+            "and CAST(type AS CHAR(5))='TABLE' and CAST(mode AS CHAR(1))='X'");
         ps.setString(1, table);
         ResultSet rs = ps.executeQuery();
         assertTrue(rs.next());

@@ -188,7 +188,7 @@ AUTOCOMMIT OFF;
 
 -- setup
      INSERT INTO T4
-          VALUES(USER,100,'good','luck');
+          VALUES(CAST(USER AS VARCHAR(128)),100,'good','luck');
 -- PASS:0255 If 1 row is inserted?
 
      SELECT STR110 
@@ -202,7 +202,7 @@ AUTOCOMMIT OFF;
 -- PASS:0255 If 1 row is inserted?
 
      UPDATE T4
-          SET STR110 = USER
+          SET STR110 = CAST(USER AS VARCHAR(128))
           WHERE NUM6 = 101;
 -- PASS:0255 If 1 row is updated?
 
@@ -230,7 +230,7 @@ AUTOCOMMIT OFF;
 
      SELECT STR110 
           FROM T4
-          WHERE STR110 = USER;
+          WHERE STR110 = CAST(USER AS VARCHAR(128));
 -- PASS:0256 If STR110 = 'HU'?
 
 -- setup
@@ -239,7 +239,7 @@ AUTOCOMMIT OFF;
 -- PASS:0256 If 1 row is inserted?
 
      DELETE FROM T4
-            WHERE STR110 = USER;
+            WHERE STR110 = CAST(USER AS VARCHAR(128));
 -- PASS:0256 If 1 row is deleted?
 
      SELECT COUNT(*)

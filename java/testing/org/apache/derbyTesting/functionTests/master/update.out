@@ -438,7 +438,7 @@ ij> autocommit off;
 ij> -- default read committed isolation level
 update tab1 set c2 = c2 + 3 where c1 = 1;
 1 row inserted/updated/deleted
-ij> select type, mode from syscs_diag.lock_table where tablename = 'TAB1' order by type;
+ij> select type, mode from syscs_diag.lock_table where CAST(tablename AS VARCHAR(128)) = 'TAB1' order by type;
 TYPE |MODE
 ----------
 ROW  |X   
@@ -449,7 +449,7 @@ set current isolation to SERIALIZABLE;
 0 rows inserted/updated/deleted
 ij> update tab1 set c2 = c2 + 3 where c1 = 1;
 1 row inserted/updated/deleted
-ij> select type, mode from syscs_diag.lock_table where tablename = 'TAB1' order by type;
+ij> select type, mode from syscs_diag.lock_table where CAST(tablename AS VARCHAR(128))  = 'TAB1' order by type;
 TYPE |MODE
 ----------
 ROW  |X   

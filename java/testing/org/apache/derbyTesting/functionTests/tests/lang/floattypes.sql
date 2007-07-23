@@ -28,7 +28,7 @@ drop table tmp;
 create table tmp (tmpcoldecimal dec(8,4), tmpcolnumeric numeric);
 select columndatatype 
 	from sys.syscolumns 
-	where columnname like 'TMPCOL%';
+	where CAST(columnname AS VARCHAR(128)) like 'TMPCOL%';
 drop table tmp;
 
 -- Negative tests, bad precision/scale
@@ -176,7 +176,7 @@ create table tmp (x double);
 insert into tmp values (1);
 select columnname, columndatatype 
        from sys.syscolumns c, sys.systables t 
-       where c.referenceid = t .tableid and t.tablename='TMP';
+       where c.referenceid = t .tableid and CAST(t.tablename AS VARCHAR(128)) ='TMP';
 drop table tmp;
 
 -- cast dec as as a numeric type in a select list
@@ -742,7 +742,7 @@ create table t (d double precision, r real, f float, f1 float(1),
 
 select columnname, columndatatype 
 from sys.syscolumns c, sys.systables t
-where c.referenceid = t.tableid and t.tablename='T';
+where c.referenceid = t.tableid and CAST(t.tablename AS VARCHAR(128)) ='T';
 
 -- invalid float values
 insert into t(r) values 'NaN';

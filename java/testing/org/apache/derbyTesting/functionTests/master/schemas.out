@@ -400,7 +400,7 @@ ERROR X0Y68: Schema 'TEST' already exists.
 ij> -- verify it
 select schemaname, authorizationid 
 	from sys.sysschemas 
-	where schemaname = 'TEST';
+	where CAST(schemaname AS VARCHAR(128)) = 'TEST';
 SCHEMANAME                                                                                                                      |AUTHORIZATIONID                                                                                                                 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 TEST                                                                                                                            |APP                                                                                                                             
@@ -416,7 +416,7 @@ ij> insert into sampletab values (2,'in schema: TEST');
 ij> -- verify it
 select schemaname, tablename, descriptor
 	from sys.sysschemas s, sys.sysconglomerates c , sys.systables t
-	where t.tablename = 'SAMPLETAB' 
+	where CAST(t.tablename AS VARCHAR(128)) = 'SAMPLETAB' 
 		and s.schemaid = c.schemaid
 		and c.tableid = t.tableid;
 SCHEMANAME                                                                                                                      |TABLENAME                                                                                                                       |DESCRIPTOR     
@@ -446,7 +446,7 @@ ij> -- verify it
 --
 select schemaname, tablename, descriptor as descr
 from sys.sysschemas s, sys.sysconglomerates c , sys.systables t
-where t.tablename = 'SAMPLETAB' 
+where CAST(t.tablename AS VARCHAR(128)) = 'SAMPLETAB' 
 	and s.schemaid = c.schemaid
 	and c.tableid = t.tableid
 order by schemaname, tablename;
@@ -931,7 +931,7 @@ ij> drop schema ISC restrict;
 ij> -- check declare of a temp table does not create a SESSION schema.
 DECLARE GLOBAL TEMPORARY TABLE SESSION.ISCT(c21 int) on commit delete rows not logged;
 0 rows inserted/updated/deleted
-ij> select count(*) from SYS.SYSSCHEMAS WHERE SCHEMANAME = 'SESSION';
+ij> select count(*) from SYS.SYSSCHEMAS WHERE CAST(SCHEMANAME AS VARCHAR(128)) = 'SESSION';
 1          
 -----------
 0          

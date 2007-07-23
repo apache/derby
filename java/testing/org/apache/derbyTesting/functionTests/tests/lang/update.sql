@@ -256,13 +256,13 @@ autocommit off;
 
 -- default read committed isolation level
 update tab1 set c2 = c2 + 3 where c1 = 1;
-select type, mode from syscs_diag.lock_table where tablename = 'TAB1' order by type;
+select type, mode from syscs_diag.lock_table where CAST(tablename AS VARCHAR(128)) = 'TAB1' order by type;
 rollback;
 
 -- serializable isolation level
 set current isolation to SERIALIZABLE;
 update tab1 set c2 = c2 + 3 where c1 = 1;
-select type, mode from syscs_diag.lock_table where tablename = 'TAB1' order by type;
+select type, mode from syscs_diag.lock_table where CAST(tablename AS VARCHAR(128))  = 'TAB1' order by type;
 rollback;
 
 autocommit on;

@@ -44,23 +44,23 @@ AUTOCOMMIT OFF;
    COMMIT WORK;
 
 --O   SELECT  COUNT(*)  
-   SELECT   tablename 
+   SELECT   CAST(tablename AS VARCHAR(128))
 --O         FROM INFORMATION_SCHEMA.TABLES
 	from sys.systables
 --O         WHERE TABLE_SCHEMA = 'CTS1' 
 	where
 --O         AND TABLE_TYPE = 'BASE TABLE'
-          TABLETYPE = 'T'
+          CAST(TABLETYPE AS CHAR(1)) = 'T'
 --O         AND ( TABLE_NAME = 'LONGIDENTIFIERSAAAA'
 --O            OR TABLE_NAME = 'longidentifiersaaab'
 --O            OR TABLE_NAME = '0"LONGIDENTIFIERS_1'
 --O            OR TABLE_NAME = '0"LONGIDENTIFIERS_2'
 --O            OR TABLE_NAME = 'lngIDENTIFIER% .,()' );
-         AND ( TABLENAME = 'LONGIDENTIFIERSAAAA'
-            OR TABLENAME = 'longidentifiersaaab'
-            OR TABLENAME = '0"LONGIDENTIFIERS_1'
-            OR TABLENAME = '0"LONGIDENTIFIERS_2'
-            OR TABLENAME = 'lngIDENTIFIER% .,()' );
+         AND ( CAST(TABLENAME AS VARCHAR(128)) = 'LONGIDENTIFIERSAAAA'
+            OR CAST(TABLENAME AS VARCHAR(128)) = 'longidentifiersaaab'
+            OR CAST(TABLENAME AS VARCHAR(128)) = '0"LONGIDENTIFIERS_1'
+            OR CAST(TABLENAME AS VARCHAR(128)) = '0"LONGIDENTIFIERS_2'
+            OR CAST(TABLENAME AS VARCHAR(128)) = 'lngIDENTIFIER% .,()' );
 -- PASS:7030 If COUNT = 5?
 
 --O   SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES

@@ -721,9 +721,9 @@ select cast (aliasinfo as CHAR(30) FOR BIT DATA) from sys.sysaliases;
 select cast (aliasinfo as VARCHAR(30) FOR BIT DATA) from sys.sysaliases;
 select cast (aliasinfo as LONG VARCHAR FOR BIT DATA) from sys.sysaliases;
 select cast (aliasinfo as BLOB) from sys.sysaliases;
-select cast (aliasinfo as CLOB) from sys.sysaliases where alias = 'INSTALL_JAR';
+select cast (aliasinfo as CLOB) from sys.sysaliases where CAST(alias AS VARCHAR(128))  = 'INSTALL_JAR';
 
 -- Java casts to character types excluding CLOB are supported using Object.toString
-select cast (aliasinfo as CHAR(240)) from sys.sysaliases where alias = 'INSTALL_JAR';
-select cast (aliasinfo as VARCHAR(240)) from sys.sysaliases where alias = 'INSTALL_JAR';
-select cast (aliasinfo as LONG VARCHAR) from sys.sysaliases where alias = 'INSTALL_JAR';
+select cast (aliasinfo as CHAR(240)) from sys.sysaliases where CAST(alias AS VARCHAR(128)) = 'INSTALL_JAR';
+select cast (aliasinfo as VARCHAR(240)) from sys.sysaliases where CAST(alias AS VARCHAR(128)) = 'INSTALL_JAR';
+select cast (aliasinfo as LONG VARCHAR) from sys.sysaliases where CAST(alias AS VARCHAR(128)) = 'INSTALL_JAR';

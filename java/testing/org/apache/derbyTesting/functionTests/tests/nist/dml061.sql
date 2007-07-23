@@ -155,7 +155,7 @@ AUTOCOMMIT OFF;
 
           SELECT COUNT(*)
           FROM STAFF
-          WHERE EMPNAME IN (USER,'Betty','Carmen'); 
+          WHERE EMPNAME IN (CAST(USER AS VARCHAR(128)),'Betty','Carmen'); 
 -- PASS:0278 If count = 3?
 
 -- restore

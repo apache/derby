@@ -244,7 +244,7 @@ create schema test;
 -- verify it
 select schemaname, authorizationid 
 	from sys.sysschemas 
-	where schemaname = 'TEST';
+	where CAST(schemaname AS VARCHAR(128)) = 'TEST';
 
 -- create a table in test
 set schema test;
@@ -255,7 +255,7 @@ insert into sampletab values (2,'in schema: TEST');
 -- verify it
 select schemaname, tablename, descriptor
 	from sys.sysschemas s, sys.sysconglomerates c , sys.systables t
-	where t.tablename = 'SAMPLETAB' 
+	where CAST(t.tablename AS VARCHAR(128)) = 'SAMPLETAB' 
 		and s.schemaid = c.schemaid
 		and c.tableid = t.tableid;
 
@@ -277,7 +277,7 @@ insert into sampletab values (2,'in schema: APP');
 --
 select schemaname, tablename, descriptor as descr
 from sys.sysschemas s, sys.sysconglomerates c , sys.systables t
-where t.tablename = 'SAMPLETAB' 
+where CAST(t.tablename AS VARCHAR(128)) = 'SAMPLETAB' 
 	and s.schemaid = c.schemaid
 	and c.tableid = t.tableid
 order by schemaname, tablename;
@@ -570,7 +570,7 @@ drop schema ISC restrict;
 
 -- check declare of a temp table does not create a SESSION schema.
 DECLARE GLOBAL TEMPORARY TABLE SESSION.ISCT(c21 int) on commit delete rows not logged;
-select count(*) from SYS.SYSSCHEMAS WHERE SCHEMANAME = 'SESSION';
+select count(*) from SYS.SYSSCHEMAS WHERE CAST(SCHEMANAME AS VARCHAR(128)) = 'SESSION';
 drop table SESSION.ISCT;
 
 drop table B5146.DT;

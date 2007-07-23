@@ -308,25 +308,25 @@ public class ProcedureInTriggerTest extends BaseJDBCTestCase {
         Statement s = createStatement();
         ResultSet rs;
         assertStatementError("42Y03",s,"create trigger call_non_existent_proc1 AFTER insert on t2 for each ROW call non_existent_proc()");
-          rs = s.executeQuery("select count(*) from SYS.SYSTRIGGERS where triggername='CALL_NON_EXISTENT_PROC1'");
+          rs = s.executeQuery("select count(*) from SYS.SYSTRIGGERS where CAST(triggername AS VARCHAR(128))='CALL_NON_EXISTENT_PROC1'");
           JDBC.assertFullResultSet(rs, new String[][] {{"0"}});
           assertStatementError("42Y03",s,"create trigger call_proc_with_non_existent_proc2 AFTER insert on t2 for each ROW call new_schema.non_existent_proc()");
-          rs = s.executeQuery("select count(*) from SYS.SYSTRIGGERS where triggername='CALL_NON_EXISTENT_PROC2'");
+          rs = s.executeQuery("select count(*) from SYS.SYSTRIGGERS where CAST(triggername AS VARCHAR(128))='CALL_NON_EXISTENT_PROC2'");
           JDBC.assertFullResultSet(rs, new String[][] {{"0"}});
           assertStatementError("42Y07",s,"create trigger call_proc_in_non_existent_schema AFTER insert on t2 for each ROW call non_existent_schema.non_existent_proc()");
-          rs = s.executeQuery("select count(*) from SYS.SYSTRIGGERS where triggername='CALL_PROC_IN_NON_EXISTENT_SCHEMA'");
+          rs = s.executeQuery("select count(*) from SYS.SYSTRIGGERS where CAST(triggername AS VARCHAR(128))='CALL_PROC_IN_NON_EXISTENT_SCHEMA'");
           JDBC.assertFullResultSet(rs, new String[][] {{"0"}});
           assertStatementError("42X50",s,"create trigger call_proc_using_non_existent_method AFTER insert on t2 for each ROW call proc_using_non_existent_method()");
-          rs = s.executeQuery("select count(*) from SYS.SYSTRIGGERS where triggername='CALL_PROC_WITH_NON_EXISTENT_METHOD'");
+          rs = s.executeQuery("select count(*) from SYS.SYSTRIGGERS where CAST(triggername as VARCHAR(128))='CALL_PROC_WITH_NON_EXISTENT_METHOD'");
           JDBC.assertFullResultSet(rs, new String[][] {{"0"}});
           assertStatementError("42Y03",s,"create trigger call_non_existent_proc1 no cascade BEFORE insert on t2 for each ROW call non_existent_proc()");
-          rs = s.executeQuery("select count(*) from SYS.SYSTRIGGERS where triggername='CALL_NON_EXISTENT_PROC1'");
+          rs = s.executeQuery("select count(*) from SYS.SYSTRIGGERS where CAST(triggername AS VARCHAR(128))='CALL_NON_EXISTENT_PROC1'");
           JDBC.assertFullResultSet(rs, new String[][] {{"0"}});
           assertStatementError("42Y07",s,"create trigger call_proc_in_non_existent_schema no cascade BEFORE insert on t2 for each ROW call non_existent_schema.non_existent_proc()");
-          rs = s.executeQuery("select count(*) from SYS.SYSTRIGGERS where triggername='CALL_PROC_IN_NON_EXISTENT_SCHEMA'");
+          rs = s.executeQuery("select count(*) from SYS.SYSTRIGGERS where CAST(triggername AS VARCHAR(128))='CALL_PROC_IN_NON_EXISTENT_SCHEMA'");
           JDBC.assertFullResultSet(rs, new String[][] {{"0"}});      
           assertStatementError("42X50",s,"create trigger call_proc_using_non_existent_method no cascade BEFORE insert on t2 for each ROW call proc_using_non_existent_method()");
-          rs = s.executeQuery("select count(*) from SYS.SYSTRIGGERS where triggername='CALL_PROC_WITH_NON_EXISTENT_METHOD'");
+          rs = s.executeQuery("select count(*) from SYS.SYSTRIGGERS where CAST(triggername AS VARCHAR(128))='CALL_PROC_WITH_NON_EXISTENT_METHOD'");
           JDBC.assertFullResultSet(rs, new String[][] {{"0"}});
           //--- triggers must not allow dynamic parameters (?)
           
@@ -413,7 +413,7 @@ public class ProcedureInTriggerTest extends BaseJDBCTestCase {
          expectedRows = new String[][] { {"5","two"},{"6","four"},{"8","eight"}};
          JDBC.assertFullResultSet(rs, expectedRows);
          //--- check trigger is not created
-         rs = s.executeQuery("select count(*) from SYS.SYSTRIGGERS where triggername='TEST_TRIG'");
+         rs = s.executeQuery("select count(*) from SYS.SYSTRIGGERS where  CAST(triggername AS VARCHAR(128))='TEST_TRIG'");
          JDBC.assertFullResultSet(rs, new String[][] {{"0"}});
          s.execute("drop trigger create_trigger_trig");
          //--- create a trigger to test we cannot drop it from a procedure called by a trigger
@@ -424,7 +424,7 @@ public class ProcedureInTriggerTest extends BaseJDBCTestCase {
          rs = s.executeQuery("select * from t2");
          JDBC.assertFullResultSet(rs,new String[][] {{"1","2"}, {"2","4"}});
          //--- check trigger is not dropped
-         rs = s.executeQuery("select count(*) from SYS.SYSTRIGGERS where triggername='TEST_TRIG'");
+         rs = s.executeQuery("select count(*) from SYS.SYSTRIGGERS where CAST(triggername AS VARCHAR(128))='TEST_TRIG'");
          JDBC.assertFullResultSet(rs, new String[][] {{"1"}});
          s.execute("drop trigger drop_trigger_trig");
          //- use procedures which create/drop index on trigger table and some other table
@@ -435,7 +435,7 @@ public class ProcedureInTriggerTest extends BaseJDBCTestCase {
          rs = s.executeQuery("select * from t2");
          JDBC.assertFullResultSet(rs,new String[][] {{"1","2"}, {"2","4"}});
          // -- check index is not created
-         rs = s.executeQuery("select count(*) from SYS.SYSCONGLOMERATES where CONGLOMERATENAME='IX' and ISINDEX=1");
+         rs = s.executeQuery("select count(*) from SYS.SYSCONGLOMERATES where CAST(CONGLOMERATENAME AS VARCHAR(128))='IX' and ISINDEX=1");
          JDBC.assertFullResultSet(rs, new String [][] {{"0"}});
          s.execute("drop trigger create_index_trig");
          //--- create an index to test we cannot drop it from a procedure called by a trigger
@@ -447,7 +447,7 @@ public class ProcedureInTriggerTest extends BaseJDBCTestCase {
          expectedRows = new String[][] { {"5","two"},{"6","four"},{"8","eight"}};
          JDBC.assertFullResultSet(rs, expectedRows);
          // -- check index is not dropped
-         rs = s.executeQuery("select count(*) from SYS.SYSCONGLOMERATES where CONGLOMERATENAME='IX' and ISINDEX=1");
+         rs = s.executeQuery("select count(*) from SYS.SYSCONGLOMERATES where CAST(CONGLOMERATENAME AS VARCHAR(128))='IX' and ISINDEX=1");
          JDBC.assertFullResultSet(rs, new String[][] {{"1"}});
          s.close();
     }

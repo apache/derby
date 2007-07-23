@@ -38,9 +38,6 @@ public class FullCollationTests extends CollationTest {
     /**
      * Return a suite that uses a single use database with
      * a primary fixture from this test plus all tests
-     * @param locale Locale to use for the database
-     * @param baseFixture Base fixture from this test.
-     * @return suite of tests to run for the given locale
      */
     public static Test suite() 
     {
@@ -49,6 +46,7 @@ public class FullCollationTests extends CollationTest {
         suite.addTest(org.apache.derbyTesting.functionTests.tests.lang._Suite.suite());
         suite.addTest(org.apache.derbyTesting.functionTests.tests.jdbcapi._Suite.suite());
         suite.addTest(org.apache.derbyTesting.functionTests.tests.store._Suite.suite());
+        
         return Decorator.territoryCollatedDatabase(suite, "no_NO");
     }
 

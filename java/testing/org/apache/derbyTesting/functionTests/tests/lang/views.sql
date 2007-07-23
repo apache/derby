@@ -132,7 +132,7 @@ drop index i;
 
 -- verify the consistency of the indexes on the system catalogs
 select tablename, SYSCS_UTIL.SYSCS_CHECK_TABLE('SYS', tablename)
-from sys.systables where tabletype = 'S' and tablename != 'SYSDUMMY1';
+from sys.systables where CAST(tabletype AS CHAR(1)) = 'S' and CAST(tablename AS VARCHAR(128)) != 'SYSDUMMY1';
 
 -- test inserts from a view
 insert into insert_test select * from sv5;
@@ -160,7 +160,7 @@ drop table insert_test;
 
 -- verify the consistency of the indexes on the system catalogs
 select tablename, SYSCS_UTIL.SYSCS_CHECK_TABLE('SYS', tablename)
-from sys.systables where tabletype = 'S' and tablename != 'SYSDUMMY1';
+from sys.systables where CAST(tabletype as CHAR(1)) = 'S' and CAST(tablename  as VARCHAR(128)) != 'SYSDUMMY1';
 
 -- bug 2745
 CREATE TABLE orgtable (
