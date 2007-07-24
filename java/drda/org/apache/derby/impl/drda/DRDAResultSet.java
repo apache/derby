@@ -110,16 +110,12 @@ class DRDAResultSet
 	 * 
 	 */
 
-	protected void setResultSet(ResultSet value) throws SQLException
+	void setResultSet(ResultSet value) throws SQLException
 	{
-		int numCols;
 		rs = value;
 		gotPrctyp = false;
-		if (value != null)
-		{
-		    numCols= rs.getMetaData().getColumnCount();
-			rsDRDATypes = new int[numCols];
-		}
+		int numCols= rs.getMetaData().getColumnCount();
+		rsDRDATypes = new int[numCols];
 		explicitlyClosed = false;
 	}
 
@@ -150,16 +146,6 @@ class DRDAResultSet
 	public byte[]getSplitQRYDTA()
 	{
 		return splitQRYDTA;
-	}
-
-	/** 
-	 * Set ResultSet DRDA DataTypes
-	 * @param value drdaTypes for columns.
-	 **/
-	protected void setRsDRDATypes(int [] value)
-	{
-		rsDRDATypes = value;
-
 	}
 
 	/**
@@ -253,20 +239,6 @@ class DRDAResultSet
         return rsDRDATypes[index -1];
 	}
 	
-
-	/**
-	 * set resultset DRDA Len
-	 *
-	 * @param index - starting with 1
-	 * @param value
-	 */
-	protected  void setRsLen(int index, int value)
-	{
-		if (rsLens == null)
-			rsLens = new int[rsDRDATypes.length];
-		rsLens[index -1] = value;
-		
-	}
 	
 	/**
 	 * get  resultset  DRDALen

@@ -63,17 +63,6 @@ public interface EngineConnection extends Connection {
         throws SQLException;
 
     /**
-     * Prepare a statement with holdability.
-     * Identical to JDBC 3.0 method, to allow holdabilty
-     * to be supported in JDK 1.3 by the network server,
-     * e.g. when the client is jdk 1.4 or above.
-     * Can be removed once JDK 1.3 is no longer supported.
-     */
-    public PreparedStatement prepareStatement(String sql, int resultSetType,
-            int resultSetConcurrency, int resultSetHoldability)
-            throws SQLException;
-
-    /**
      * Get the holdability of the connection. 
      * Identical to JDBC 3.0 method, to allow holdabilty
      * to be supported in JDK 1.3 by the network server,

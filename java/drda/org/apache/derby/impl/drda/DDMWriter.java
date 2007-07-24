@@ -21,22 +21,21 @@
 
 package org.apache.derby.impl.drda;
 
-import java.io.OutputStream;
-import java.io.InputStream;
 import java.io.BufferedOutputStream;
-import org.apache.derby.iapi.services.sanity.SanityManager;
-import java.sql.SQLException;
-import java.math.BigDecimal;
-import java.util.Arrays;
-import org.apache.derby.iapi.reference.Property;
-import org.apache.derby.iapi.services.property.PropertyUtil;
-
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.CoderResult;
 import java.nio.charset.CodingErrorAction;
+import java.sql.SQLException;
+import java.util.Arrays;
+
+import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.iapi.services.property.PropertyUtil;
+import org.apache.derby.iapi.services.sanity.SanityManager;
 
 /**
 	The DDMWriter is used to write DRDA protocol.   The DRDA Protocol is
@@ -554,8 +553,6 @@ class DDMWriter
 
 	protected void writeLDBytes(byte[] buf, int index)
 	{
-
-		int length = buf.length;
 		int writeLen =  buf.length;
 
 		writeShort(writeLen);
@@ -842,16 +839,6 @@ class DDMWriter
 
 	}
 
-  }
-
-
-	private void writeExtendedLengthBytes (int extendedLengthByteCount, long length)
-	{
-	int shiftSize = (extendedLengthByteCount -1) * 8;
-    for (int i = 0; i < extendedLengthByteCount; i++) {
-      buffer.put((byte) (length >>> shiftSize));
-      shiftSize -= 8;
-    }
   }
 
 
@@ -1248,16 +1235,16 @@ class DDMWriter
 	protected void flush(OutputStream socketOutputStream)
 		throws java.io.IOException
 	{
-		final int offset = buffer.position();
+		final int length = buffer.position();
 		try {
-			socketOutputStream.write (bytes, 0, offset);
+			socketOutputStream.write (bytes, 0, length);
 			socketOutputStream.flush();
 		}
 		finally {
 			if ((dssTrace != null) && dssTrace.isComBufferTraceOn()) {
 			  dssTrace.writeComBufferData (bytes,
 			                               0,
-			                               offset,
+                                           length,
 			                               DssTrace.TYPE_TRACE_SEND,
 			                               "Reply",
 			                               "flush",
@@ -1523,7 +1510,7 @@ class DDMWriter
 				agent.trace("DANGER - Expensive expansion of  buffer");
 			}
 			int newLength =
-				Math.max(buffer.capacity() << 1, buffer.position() + length);
+				Math.max(buffer.capacity() * 2, buffer.position() + length);
 			// copy the old buffer into a new one
 			buffer.flip();
 			buffer = ByteBuffer.allocate(newLength).put(buffer);
