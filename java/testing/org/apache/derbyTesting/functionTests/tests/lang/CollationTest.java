@@ -976,6 +976,16 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     rs = s.executeQuery("SELECT SUBSTR(c||v, 1, 4), COUNT(*) FROM DERBY_2960" +
     		" GROUP BY SUBSTR(c||v, 1, 4)");
     JDBC.assertFullResultSet(rs,new String[][] {{"dupl","1"}});
+    
+    //DERBY-2966
+    //Moving to insert row in a territory based db should not cause exception
+    ps = conn.prepareStatement("SELECT * FROM CUSTOMER FOR UPDATE",
+    		ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
+    rs = ps.executeQuery();
+    rs.moveToInsertRow();
+    rs.close();
+    ps.close();
+
 }
 
 private void setUpTable(Statement s) throws SQLException {

@@ -3924,6 +3924,13 @@ public abstract class EmbedResultSet extends ConnectionChild
 
 		synchronized (getConnectionSynchronization()) {
 			try {
+				//we need to set the context because the getNull call below 
+				//(if dealing with territory based database) might need to 
+				//look up the current context to get the correct 
+				//RuleBasedCollator. This RuleBasedCollator will be used to
+				//construct a CollatorSQL... type rather than SQL...Char type 
+				//when dealing with character string datatypes.
+				setupContextStack();
 				// initialize state corresponding to insertRow/updateRow impl.
 				initializeUpdateRowModifiers();
  				isOnInsertRow = true;
@@ -3934,6 +3941,8 @@ public abstract class EmbedResultSet extends ConnectionChild
 				}
 			} catch (Throwable ex) {
 				handleException(ex);
+			} finally {
+				restoreContextStack(); 
 			}
 		}
 	}
