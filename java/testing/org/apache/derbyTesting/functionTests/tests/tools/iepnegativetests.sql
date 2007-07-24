@@ -25,88 +25,93 @@ call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'T1' , 'extout/nodir/t1.dat' ,
 --export table not found
 call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'NOTABLE' , 'extinout/t1.dat' , 
                                  null, null, null) ;
+--export table is null
+call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', null, 'extinout/t1.dat' ,
+                                 null, null, null) ;
 ---export schema is not valid
 call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('XXXX', 'T1' , 'extinout/t1.dat' , 
                                  null, null, null) ;
 --export query is invalid (syntax error)
 call SYSCS_UTIL.SYSCS_EXPORT_QUERY('select from t1', 
                                     'extinout/t1.dat' , null, null, null) ;
-
+--export query is null 
+call SYSCS_UTIL.SYSCS_EXPORT_QUERY(null,
+                                    'extinout/t1.dat' , null, null, null) ;
 --export codeset is invalid
 call SYSCS_UTIL.SYSCS_EXPORT_QUERY('select * from iep.t1', 
                                     'extinout/t1.dat' , null, null, 'NOSUCHCODESET') ;
 
-call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('XXXX', 'T1' , 'extinout/t1.dat' , 
+call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('XXXX', 'T1' , 'extinout/t2.dat' , 
                                  null, null, null) ;
 --export delimiter errror cases
 --period can not be used as character ot column delimiter
-call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'T1' , 'extinout/t1.dat' , 
+call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'T1' , 'extinout/t2.dat' , 
                                  null, '.', null) ;
-call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'T1' , 'extinout/t1.dat' , 
+call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'T1' , 'extinout/t2.dat' , 
                                  '.', null, null) ;
 
 --same delimter can not be used as character and column delimters
-call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'T1' , 'extinout/t1.dat' , 
+call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'T1' , 'extinout/t2.dat' , 
                                  ';', ';', null) ;
 
 --space character can not be a delimiter
-call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'T1' , 'extinout/t1.dat' , 
+call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'T1' , 'extinout/t2.dat' , 
                                  ' ', ';', null) ;
 
-call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'T1' , 'extinout/t1.dat' , 
+call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'T1' , 'extinout/t2.dat' , 
                                  null, ' ', null) ;
 
 --if emtry strinng is passed actual value delimiter should be space
 --and the that should become a invalid delimiter 
-call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'T1' , 'extinout/t1.dat' , 
+call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'T1' , 'extinout/t2.dat' , 
                                  '', ';', null) ;
 
-call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'T1' , 'extinout/t1.dat' , 
+call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'T1' , 'extinout/t2.dat' , 
                                  null, '', null) ;
 
 
 --more than one character passed to the delimiters get truncated to one
 --following one should give error because eventually '\' delimiter 
 --is used a both for char and col
-call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'T1' , 'extinout/t1.dat' , 
+call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'T1' , 'extinout/t2.dat' , 
                                  '\a', '\', null) ;
 
 
 --DO A VALID EXPORT AND  IMPORT 
 set schema iep;
-call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'T1' , 'extinout/t1.dat' , 
+call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'T1' , 'extinout/t2.dat' , 
                                  null, null, 'utf-8') ;
 delete from t1 ;
 
-call SYSCS_UTIL.SYSCS_IMPORT_TABLE('IEP', 'T1' , 'extinout/t1.dat' , 
+call SYSCS_UTIL.SYSCS_IMPORT_TABLE('IEP', 'T1' , 'extinout/t2.dat' , 
                                  null, null, 'utf-8', 0) ;
 select * from t1;
 
 --import error cases
 --import can not find input file
-call SYSCS_UTIL.SYSCS_IMPORT_TABLE('IEP', 'T1' , 'extin/nodir/t1.dat' , 
+call SYSCS_UTIL.SYSCS_IMPORT_TABLE('IEP', 'T1' , 'extin/nodir/t2.dat' , 
                                  null, null, null, 0) ;
 --import table not found
-call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('IEP', 'NOTABLE' , 'extinout/t1.dat' , 
+call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('IEP', 'NOTABLE' , 'extinout/t2.dat' , 
                                  null, null, null, 0) ;
 --import schema is not valid
-call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('XXXX', 'T1' , 'extinout/t1.dat' , 
+call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('XXXX', 'T1' , 'extinout/t2.dat' , 
                                  null, null, null, 0) ;
 
-call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('IEP', 'T1' , 'extinout/t1.dat' , 
+call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('IEP', 'T1' , 'extinout/t2.dat' , 
                                  null, null, 'INCORRECTCODESET', 0) ;
 
 --check import with invalid delimiter usage
 --if emtry strinng is passed actual value delimiter should be space
 --and the that should become a invalid delimiter 
-call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('IEP', 'T1' , 'extinout/t1.dat' , 
+call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('IEP', 'T1' , 'extinout/t2.dat' , 
                                  '', ';', null, 0) ;
 
-call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('IEP', 'T1' , 'extinout/t1.dat' , 
+call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('IEP', 'T1' , 'extinout/t2.dat' , 
                                  null, '', null, 0) ;
 
 --same delimter can not be used as character and column delimters
-call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('IEP', 'T1' , 'extinout/t1.dat' , 
+call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('IEP', 'T1' , 'extinout/t2.dat' , 
                                  ';', ';', null, 1) ;
 
 
@@ -173,35 +178,35 @@ call SYSCS_UTIL.SYSCS_IMPORT_DATA('IEP', 'T3' , null, '11,22,12,24',
 
 --repeat the above type cases with empty file and minor variation to paramters
 delete from t3 ;
-call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'T3' , 'extinout/t3.dat' , 
+call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'T3' , 'extinout/t3_1.dat' , 
                                   ';', '^', 'utf-16') ;
 --import data column names are incorrect
 call SYSCS_UTIL.SYSCS_IMPORT_DATA('IEP', 'T3' , 'X1, X2, X3, X4', null, 
-                                 'extinout/t3.dat' , 
+                                 'extinout/t3_1.dat' , 
                                  ';', '^', 'utf-16', 1) ;
 
 call SYSCS_UTIL.SYSCS_IMPORT_DATA('IEP', 'T3' , 'X1, X2, X3', '1,2,3,4', 
-                                 'extinout/t3.dat' , 
+                                 'extinout/t3_1.dat' , 
 				    ';', '^', 'utf-16', 1) ;
 
 --import data insert column names count < column indexes does not match
 call SYSCS_UTIL.SYSCS_IMPORT_DATA('IEP', 'T3' , 'C1, C2, C3', null, 
-                                 'extinout/t3.dat' , 
+                                 'extinout/t3_1.dat' , 
 				    ';', '^', 'utf-16', 1) ;
 --import data column indexes count > insert columns count
 call SYSCS_UTIL.SYSCS_IMPORT_DATA('IEP', 'T3' , null, '1,2', 
-                                 'extinout/t3.dat' , 
+                                 'extinout/t3_1.dat' , 
 				    ';', '^', 'utf-16', 1) ;
 
 
 --specify column indexes that are not there in the file that is being  imported
 call SYSCS_UTIL.SYSCS_IMPORT_DATA('IEP', 'T3' , null, '11,22,12,24', 
-                                 'extinout/t3.dat' , 
+                                 'extinout/t3_1.dat' , 
 				    ';', '^', 'utf-16', 1) ;
 
 
 --import to a system table shoud fail
-call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('SYS', 'SYSTABLES' , 'extinout/t3.dat' , 
+call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('SYS', 'SYSTABLES' , 'extinout/t3_1.dat' , 
                                       ';', '^', 'utf-16', 1) ;
 
 --import should aquire a lock on the table

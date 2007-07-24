@@ -3958,6 +3958,17 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
                 <arg>details</arg>
             </msg>
 
+	    <msg>
+                <name>XIE0S.S</name>
+		<text>The export operation was not performed, because the specified output file ({0}) already exists. Export processing will not overwrite an existing file, even if the process has permissions to write to that file, due to security concerns, and to avoid accidental file damage. Please either change the output file name in the export procedure arguments to specify a file which does not exist, or delete the existing file, then retry the export operation.</text>
+                <arg>fileName</arg>
+            </msg>
+
+	    <msg>
+                <name>XIE0T.S</name>
+		<text>The export operation was not performed, because the specified large object auxiliary file ({0}) already exists. Export processing will not overwrite an existing file, even if the process has permissions to write to that file, due to security concerns, and to avoid accidental file damage. Please either change the large object auxiliary file name in the export procedure arguments to specify a file which does not exist, or delete the existing file, then retry the export operation.</text> 
+                <arg>fileName</arg>
+            </msg>
 
         </family>
 

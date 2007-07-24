@@ -651,6 +651,9 @@ public class CollationTest2 extends BaseJDBCTestCase
     String      codeset) 
         throws SQLException 
     {
+	//DERBY-2925: need to delete existing files first.
+        SupportFilesSetup.deleteFile(fileName);
+
         CallableStatement ps = 
             conn.prepareCall(
                 "call SYSCS_UTIL.SYSCS_EXPORT_TABLE (? , ? , ? , ?, ? , ?)");
