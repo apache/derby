@@ -28,6 +28,16 @@ grant codeBase "${derby.install.url}derbynet.jar"
 //
 // This permission lets the Network Server manage connections from clients.
 //
-  permission java.net.SocketPermission "${derby.security.host}", "accept"; 
+
+// Accept connections from any host. Derby is listening to the host
+// interface specified via the -h option to "NetworkServerControl
+// start" on the command line, via the address parameter to the
+// org.apache.derby.drda.NetworkServerControl constructor in the API
+// or via the property derby.drda.host; the default is localhost.
+// You may want to restrict allowed hosts, e.g. to hosts in a specific
+// subdomain, e.g. "*.acme.com".
+
+  permission java.net.SocketPermission "*", "accept"; 
+
 };
 
