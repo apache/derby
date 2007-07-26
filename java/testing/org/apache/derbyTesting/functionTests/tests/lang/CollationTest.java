@@ -33,7 +33,9 @@ import javax.sql.DataSource;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.apache.derbyTesting.functionTests.tests.jdbcapi.BatchUpdateTest;
 import org.apache.derbyTesting.functionTests.tests.jdbcapi.DatabaseMetaDataTest;
+import org.apache.derbyTesting.functionTests.tests.nist.NistScripts;
 import org.apache.derbyTesting.junit.XML;
 //import org.apache.derby.iapi.types.XML;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
@@ -1085,6 +1087,10 @@ private void checkLangBasedQuery(Statement s, String query, String[][] expectedR
       
       // DMD.getTables() should not fail after the fix to DERBY-2896
       suite.addTest(DatabaseMetaDataTest.suite());
+      suite.addTest(BatchUpdateTest.embeddedSuite());
+      suite.addTest(GroupByExpressionTest.suite());
+      suite.addTest(UpdatableResultSetTest.suite());
+      
       return Decorator.territoryCollatedDatabase(suite, locale);
   }
 
