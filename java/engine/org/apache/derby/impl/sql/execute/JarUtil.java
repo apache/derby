@@ -321,15 +321,6 @@ class JarUtil
 		return dd.getFileInfoDescriptor(sd,sqlName);
 	}
 
-	private InputStream getAsStream(long generationId) throws StandardException {
-		try {
-			return fr.getAsStream(JarDDL.mkExternalName(schemaName, sqlName, fr.getSeparatorChar()), generationId);
-		} catch (IOException ioe) {
-			throw StandardException.newException(SQLState.LANG_FILE_ERROR, ioe.toString(),ioe);	
-		}
-	}
-
-
 	private void notifyLoader(boolean reload) throws StandardException {
 		ClassFactory cf = lcc.getLanguageConnectionFactory().getClassFactory();
 		cf.notifyModifyJar(reload);

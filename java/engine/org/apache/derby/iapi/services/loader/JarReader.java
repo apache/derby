@@ -21,6 +21,7 @@
 package org.apache.derby.iapi.services.loader;
 
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.io.StorageFile;
 
 /**
 	Abstract out the loading of JarFiles.
@@ -29,12 +30,9 @@ import org.apache.derby.iapi.error.StandardException;
 public interface JarReader {
 
 	/**
-		Load the contents of a Jarfile. The return is either
-		an java.io.InputStream representing the contents of the JarFile
-		or a java.io.File representing the location of the file.
-		If the jar does not exist an exception is thrown.
+	 * Get the StorageFile for an installed jar file.
 	*/
-	Object readJarFile(String schemaName, String sqlName)
+	StorageFile getJarFile(String schemaName, String sqlName)
 		throws StandardException;
 }
 

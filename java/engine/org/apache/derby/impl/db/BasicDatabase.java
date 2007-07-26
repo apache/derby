@@ -69,6 +69,7 @@ import org.apache.derby.iapi.services.property.PropertySetCallback;
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.jdbc.AuthenticationService;
 import org.apache.derby.iapi.services.uuid.UUIDFactory;
+import org.apache.derby.io.StorageFile;
 import org.apache.derby.catalog.UUID;
 
 import java.io.InputStream;
@@ -801,7 +802,7 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 	/*
 	** Methods of JarReader
 	*/
-	public Object readJarFile(String schemaName, String sqlName)
+	public StorageFile getJarFile(String schemaName, String sqlName)
 		throws StandardException {
 
 		DataDictionaryContext ddc =
@@ -819,15 +820,8 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 
 		String externalName = org.apache.derby.impl.sql.execute.JarDDL.mkExternalName(schemaName, sqlName, fr.getSeparatorChar());
 
-		Object f = fr.getAsFile(externalName, generationId);
-		if (f instanceof java.io.File)
-			return f;
 
-		try {
-			return fr.getAsStream(externalName, generationId);
-		} catch (java.io.IOException ioe) {
-			throw StandardException.newException(SQLState.LANG_FILE_ERROR, ioe.toString(),ioe);	
-		}
+		return fr.getAsFile(externalName, generationId);
 	}
 
 }
