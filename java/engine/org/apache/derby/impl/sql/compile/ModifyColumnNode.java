@@ -37,6 +37,7 @@ import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptor;
 
 import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.StringDataValue;
 
 import org.apache.derby.iapi.reference.SQLState;
 
@@ -211,8 +212,39 @@ public class ModifyColumnNode extends ColumnDefinitionNode
 				getCompilerContext().createDependency(existingConstraint);
 			}
 		}
+    }
 
-	}
+	/**
+	 * If the column being modified is of character string type, then it should
+	 * get it's collation from the corresponding column in the TableDescriptor.
+	 * This will ensure that at alter table time, the existing character string
+	 * type columns do not loose their collation type. If the alter table is 
+	 * doing a drop column, then we do not need to worry about collation info.
+	 * 
+	 * @param td Table Descriptor that holds the column which is being altered
+	 * @throws StandardException
+	 */
+	public void useExistingCollation(TableDescriptor td)
+    throws StandardException
+    {
+		ColumnDescriptor cd;
+
+		// First verify that the column exists
+		cd = td.getColumnDescriptor(name);
+		if (cd == null)
+		{
+			throw StandardException.newException(SQLState.LANG_COLUMN_NOT_FOUND_IN_TABLE, name, td.getName());
+		}
+		//getType() == null means we are dealing with drop column and hence 
+		//no need to worry about collation info
+		if (getType() != null) {
+			if (getType().getTypeId().isStringTypeId()) {
+				this.getType().setCollationType(cd.getType().getCollationType());
+				this.getType().setCollationDerivation(StringDataValue.COLLATION_DERIVATION_IMPLICIT);
+			
+			}
+		}
+    }
 	/**
 	 * Get the action associated with this node.
 	 *

@@ -987,7 +987,15 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     rs.moveToInsertRow();
     rs.close();
     ps.close();
-
+    
+    //DERBY-2973
+    //alter table modify column should not give an error
+    s.execute("CREATE TABLE DERBY_2973 (V VARCHAR(40))");
+    s.execute("CREATE INDEX DERBY_2973_I1 ON DERBY_2973 (V)");
+    s.execute("ALTER TABLE DERBY_2973 ALTER V SET DATA TYPE VARCHAR(4096)");
+    s.execute("INSERT INTO DERBY_2973 VALUES('hello')");
+    s.close();
+ 
 }
 
 private void setUpTable(Statement s) throws SQLException {
