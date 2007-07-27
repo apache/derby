@@ -155,7 +155,7 @@ public class StatementJdbc30Test extends BaseJDBCTestCase {
                     columnIndexes);
             fail("FAIL -- executeUpdate should have failed...");
         } catch (SQLException ex) {
-            assertFailedExecuteUpdate(ex);
+            assertFailedExecuteUpdateForColumnIndex(ex);
         }
     }
 
@@ -177,7 +177,7 @@ public class StatementJdbc30Test extends BaseJDBCTestCase {
                     columnNames);
             fail("FAIL -- executeUpdate should have failed...");
         } catch (SQLException ex) {
-            assertFailedExecuteUpdate(ex);
+            assertFailedExecuteUpdateForColumnName(ex);
         }
     }
 
@@ -213,17 +213,17 @@ public class StatementJdbc30Test extends BaseJDBCTestCase {
             stmt.execute("insert into tab1 values(2, 3, 4.1)", columnIndexes);
             fail("FAIL -- executeUpdate should have failed...");
         } catch (SQLException ex) {
-            assertFailedExecuteUpdate(ex);
+            assertFailedExecuteUpdateForColumnIndex(ex);
         }
     }
 
     /**
-     * Assert executeUpdate failed. There are different SQLStates for 
-     * client and server.
+     * Assert executeUpdateForColumnIndex failed. There are different SQLStates 
+     * for ColumnName(X0X0E) and ColumnIndex(X0X0F) as well as client and server
      * 
      * @param ex
      */
-    private void assertFailedExecuteUpdate(SQLException ex) {
+    private void assertFailedExecuteUpdateForColumnIndex(SQLException ex) {
         /*
          * DERBY-2943 -- execute() and executeUpdate() return different
          * SQLState in embedded and network client
@@ -236,6 +236,24 @@ public class StatementJdbc30Test extends BaseJDBCTestCase {
         }
     }
 
+    /**
+     * Assert executeUpdateForColumnName failed. There are different SQLStates 
+     * for ColumnIndex(X0X0F) and ColumnNam(X0X0E) as well as client and server.
+     *
+     * @param ex
+     */
+    private void assertFailedExecuteUpdateForColumnName(SQLException ex) {
+        /*
+         * DERBY-2943 -- execute() and executeUpdate() return different
+         * SQLState in embedded and network client
+         *
+         */
+        if (usingDerbyNetClient()) {
+            assertSQLState("0A000", ex);
+        } else {
+            assertSQLState("X0X0F", ex);
+        }
+    }
     /**
      * After doing an insert into a table that doesn't have a generated column,
      * the test should fail.
@@ -254,7 +272,7 @@ public class StatementJdbc30Test extends BaseJDBCTestCase {
                         columnNames);
                 fail("FAIL -- executeUpdate should have failed...");
             } catch (SQLException ex) {
-                assertFailedExecuteUpdate(ex);
+                assertFailedExecuteUpdateForColumnName(ex);
             }
         
     }
