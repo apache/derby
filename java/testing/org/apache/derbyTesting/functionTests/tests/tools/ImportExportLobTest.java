@@ -52,6 +52,7 @@ public class ImportExportLobTest extends ImportExportBaseTest
 
     String fileName; // main file used to perform import/export.
     String lobsFileName; // file name used to store lobs.
+    String lobsFileName2; // file name used to store lobs.
 
     public ImportExportLobTest(String name) throws SQLException {
         super(name);
@@ -60,6 +61,8 @@ public class ImportExportLobTest extends ImportExportBaseTest
             (SupportFilesSetup.getReadWrite("books.del")).getPath();
         lobsFileName = 
             (SupportFilesSetup.getReadWrite("books_lobs.dat")).getPath();
+	lobsFileName2 =
+            (SupportFilesSetup.getReadWrite("unql_books_lobs.dat")).getPath();
     }
 
     /**
@@ -299,10 +302,13 @@ public class ImportExportLobTest extends ImportExportBaseTest
         // lob data file should get crated at the same location, where
         // the main export file is created. And also perform import/export
         // using "UTF-16" code set.
-        
+       
+	// delete the export files.
+        SupportFilesSetup.deleteFile(lobsFileName2);
+ 
         doExportTableLobsToExtFile("APP", "BOOKS", fileName, 
                                     "\t", "|", "UTF-16", 
-                                   "unql_books_lobs.dat");
+                                   lobsFileName2);
         // DERBY-2546 - with JSR this hits a JVM issue
         if (JDBC.vmSupportsJDBC3()) 
         {
