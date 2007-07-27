@@ -204,6 +204,7 @@ public class TableElementList extends QueryTreeNodeVector
 				{
 					ModifyColumnNode mcdn = (ModifyColumnNode)cdn;
 					mcdn.checkExistingConstraints(td);
+					mcdn.useExistingCollation(td);
 				} else if (cdn.isAutoincrementColumn())
 					numAutoCols ++;
 			}
