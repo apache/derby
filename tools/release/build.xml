@@ -57,11 +57,19 @@
   <property name="relnotes.src.buglist" value="${relnotes.src.reports}/fixedBugsList.xml" />
   <property name="relnotes.src.notes" value="${relnotes.src.reports}/releaseNotesList.xml" />
   <property name="relnotes.out.pamphlet" value="${basedir}/RELEASE-NOTES.html" />
+  <property name="changesfile.out.pamphlet" value="${basedir}/CHANGES.html" />
 
 <!-- Define the task which generates the release notes -->
   <taskdef
     name="generateReleaseNotes"
     classname="org.apache.derbyBuild.ReleaseNotesGenerator"
+    classpath="${out.dir}"
+  />
+
+<!-- Define the task which generates the release notes -->
+  <taskdef
+    name="generateChangesFile"
+    classname="org.apache.derbyBuild.ChangesFileGenerator"
     classpath="${out.dir}"
   />
 
@@ -113,6 +121,25 @@
        bugListFileName="${relnotes.src.buglist}"
        releaseNotesListFileName="${relnotes.src.notes}"
        pamphletFileName="${relnotes.out.pamphlet}"
+     />
+
+  </target>
+
+<!--
+   Generate the Changes File Notes
+
+   The ${relnotes.src.reports} property must point at a
+   directory containing the following JIRA report:
+
+     fixedBugsList.xml  - This is a JIRA xml report of issues fixed in the release.
+
+-->
+  <target name="genchanges">
+
+     <generateChangesFile
+       summaryFileName="${relnotes.src.summary}"
+       bugListFileName="${relnotes.src.buglist}"
+       pamphletFileName="${changesfile.out.pamphlet}"
      />
 
   </target>

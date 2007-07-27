@@ -1,6 +1,4 @@
-/*
-
-   Derby - Class org.apache.derbyBuild.ReleaseNotesGenerator
+/*  Derby - Class org.apache.derbyBuild.ReleaseNotesGenerator
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -37,10 +35,9 @@ import org.apache.tools.ant.taskdefs.Echo;
 
 /**
  * <p>
- * This tool generates Release Notes for a Derby release. See the USAGE
+ * This tool generates the Changes file for a Derby release. See the USAGE
  * constant for details on how to run this tool standalone. It is recommended
- * that you freshly regenerate your BUG_LIST and NOTES_LIST just before
- * you run this tool.
+ * that you freshly regenerate your BUG_LIST just before you run this tool.
  * </p>
  *
  * <p>
@@ -54,22 +51,22 @@ import org.apache.tools.ant.taskdefs.Echo;
  * <li>Put your xml JIRA reports in that directory. They should have the
  * following names:
  *  <ul>
- *  <li>fixedBugsList.xml - This is the list of issues addressed by the release.</li>
- *  <li>releaseNotesList.xml - This is the list of issues which have detailed
- *  release notes.</li>
+ *  <li>fixedBugsList.xml - This is the list of issues fixed by the release.</li>
  *  </ul>
  * </li>
- * <li>Then cd to tools/release and run ant thusly: "ant genrelnotes"</li>
+ * <li>You can use java org.apache.derbyBuild.JiraConnector to create this file.
+ * </li>
+ * <li>Then cd to tools/release and run ant thusly: "ant genchanges"</li>
  * </ul>
  *
- * <p>For more information on this tool, please see the JIRA which introduced it:
+ * <p>For more information on this tool, please see the JIRA which introduce its companion, ReleaseNotesGenerator:
  * </p>
  *
  * <p>
  * <a href="http://issues.apache.org/jira/browse/DERBY-2570">DERBY-2570</a>
  * </p>
  */
-public class ReleaseNotesGenerator extends Task
+public class ChangesFileGenerator extends Task
 {
     /////////////////////////////////////////////////////////////////////////
     //
@@ -80,27 +77,20 @@ public class ReleaseNotesGenerator extends Task
     private static  final   String  USAGE =
         "Usage:\n" +
         "\n" +
-        "  java org.apache.derbyBuild.ReleaseNotesGenerator SUMMARY BUG_LIST NOTES_LIST OUTPUT_PAMPHLET\n" +
+        "  java org.apache.derbyBuild.ChangesFileGenerator SUMMARY BUG_LIST OUTPUT_PAMPHLET\n" +
         "\n" +
         "    where\n" +
-        "                  SUMMARY                    Summary, a filled-in copy of releaseSummaryTemplate.xml.\n" +
         "                  BUG_LIST                     An xml JIRA report of issues addressed by this release.\n" +
-        "                  NOTES_LIST                An xml JIRA report listing issues which have detailed releaseNotes.html attachments.\n" +
-        "                  OUTPUT_PAMPHLET  The output file to generate, typically RELEASE-NOTES.html.\n" +
+        "                  OUTPUT_PAMPHLET  The output file to generate, typically CHANGES.html.\n" +
         "\n" +
-        "The ReleaseNoteGenerator attempts to connect to issues.apache.org in\n" +
-        "order to read the detailed release notes that have been clipped to\n" +
-        "individual JIRAs. Before running this program, make sure that you can\n" +
+        "The ChangesFileGenerator attempts to connect to issues.apache.org in\n" +
+        "order to find the individual JIRAs. Before running this program, make sure that you can\n" +
         "ping issues.apache.org.\n" +
         "\n" +
-        "The ReleaseNoteGenerator assumes that the two JIRA reports contain\n" +
-        "key, title, and attachments elements for each Derby issue. For each\n" +
-        "issue in NOTES_LIST, the ReleaseNotesGenerator looks through the\n" +
-        "attachments block in that report and grabs the latest reported\n" +
-        "releaseNote.html.\n" +
-        "\n" +
+        "The ChangesFileGenerator assumes that the two JIRA reports contain\n" +
+        "key, title, and attachments elements for each Derby issue.\n" +
         "For this reason, it is recommended that you freshly generate BUG_LIST\n" +
-        "and NOTES_LIST just before you run this tool.\n"
+        "just before you run this tool.\n"
         ;
 
     // header levels
@@ -109,23 +99,12 @@ public class ReleaseNotesGenerator extends Task
     private static  final   int     ISSUE_DETAIL_LEVEL = MAIN_SECTION_LEVEL + 1;
     
     // major sections
-    private static  final   String  OVERVIEW_SECTION = "Overview";
-    private static  final   String  NEW_FEATURES_SECTION = "New Features";
     private static  final   String  BUG_FIXES_SECTION = "CHANGES";
-    private static  final   String  ISSUES_SECTION = "Issues";
-    private static  final   String  BUILD_ENVIRONMENT_SECTION = "Build Environment";
 
     // headlines
-    private static  final   String  ANT_HEADLINE = "Ant";
     private static  final   String  BRANCH_HEADLINE = "Branch";
-    private static  final   String  COMPILER_HEADLINE = "Compiler";
     private static  final   String  DESCRIPTION_HEADLINE = "Description";
     private static  final   String  ISSUE_ID_HEADLINE = "Issue Id";
-    private static  final   String  JAVA6_HEADLINE = "Java 6";
-    private static  final   String  JDK14_HEADLINE = "JDK 1.4";
-    private static  final   String  JSR169_HEADLINE = "JSR 169";
-    private static  final   String  MACHINE_HEADLINE = "Machine";
-    private static  final   String  OSGI_HEADLINE = "OSGi";
 
     // formatting tags
     private static  final   String  ANCHOR = "a";
@@ -144,22 +123,12 @@ public class ReleaseNotesGenerator extends Task
     private static  final   String  TABLE = "table";
 
     // tags in summary xml
-    private static  final   String  SUM_ANT_VERSION = "antVersion";
     private static  final   String  SUM_BRANCH = "branch";
-    private static  final   String  SUM_COMPILER = "compilers";
-    private static  final   String  SUM_JAVA6 = "java6";
-    private static  final   String  SUM_JDK14 = "jdk1.4";
-    private static  final   String  SUM_JSR169 = "jsr169";
-    private static  final   String  SUM_MACHINE = "machine";
-    private static  final   String  SUM_NEW_FEATURES = "newFeatures";
-    private static  final   String  SUM_OSGI = "osgi";
     private static  final   String  SUM_OVERVIEW = "overview";
     private static  final   String  SUM_PREVIOUS_RELEASE_ID = "previousReleaseID";
     private static  final   String  SUM_RELEASE_ID = "releaseID";
 
     // tags in JIRA reports
-    private static  final   String  JIRA_ATTACHMENT = "attachment";
-    private static  final   String  JIRA_ATTACHMENTS = "attachments";
     private static  final   String  JIRA_ID = "id";
     private static  final   String  JIRA_ITEM = "item";
     private static  final   String  JIRA_KEY = "key";
@@ -171,7 +140,6 @@ public class ReleaseNotesGenerator extends Task
     private static  final   String  RN_SUMMARY_OF_CHANGE = "Summary of Change";
 
     // other JIRA control
-    private static  final   String  RELEASE_NOTE_NAME = "releaseNote.html";
     private static  final   String  RN_H4 = "h4";
     
     // other html control
@@ -187,7 +155,6 @@ public class ReleaseNotesGenerator extends Task
     // set on the command line or by ant
     private String  _summaryFileName;
     private String  _bugListFileName;
-    private String  _releaseNotesListFileName;
     private String  _pamphletFileName;
 
     // computed at run time
@@ -214,10 +181,6 @@ public class ReleaseNotesGenerator extends Task
         private Document    _pamphlet;
         private Document    _summary;
         private Document    _bugList;
-        private Document    _releaseNotesList;
-        private ReleaseNoteReader   _releaseNoteReader;
-
-        private ArrayList       _missingReleaseNotes;
         private ArrayList       _errors;
 
         public  GeneratorState
@@ -225,25 +188,15 @@ public class ReleaseNotesGenerator extends Task
              DocumentBuilder    documentBuilder,
              Document   pamphlet,
              Document   summary,
-             Document   bugList,
-             Document   releaseNotesList
+             Document   bugList
              )
         {
             _documentBuilder = documentBuilder;
             _pamphlet = pamphlet;
             _summary = summary;
             _bugList = bugList;
-            _releaseNotesList = releaseNotesList;
 
-            _missingReleaseNotes = new ArrayList();
             _errors = new ArrayList();
-
-            _releaseNoteReader = new ReleaseNoteReader( documentBuilder );
-        }
-
-        public  void    addMissingReleaseNote( JiraIssue issue )
-        {
-            _missingReleaseNotes.add( issue );
         }
 
         public  void    addError( String message )
@@ -255,18 +208,7 @@ public class ReleaseNotesGenerator extends Task
         public  Document    getPamphlet() { return _pamphlet; }
         public  Document    getSummary() { return _summary; }
         public  Document    getBugList() { return _bugList; }
-        public  Document    getReleaseNotesList() { return _releaseNotesList; }
-        public  ReleaseNoteReader   getReleaseNoteReader() { return _releaseNoteReader; }
         
-        public  JiraIssue[]     getMissingReleaseNotes()
-        {
-            JiraIssue[]     missingNotes = new JiraIssue[ _missingReleaseNotes.size() ];
-
-            _missingReleaseNotes.toArray( missingNotes );
-
-            return missingNotes;
-        }
-
         public  String[]     getErrors()
         {
             String[]        squeezed = new String[ _errors.size() ];
@@ -284,38 +226,27 @@ public class ReleaseNotesGenerator extends Task
      */
     public  static  class   JiraIssue
     {
-        public  static  final   long NO_RELEASE_NOTE = -1L;
-
         private String  _key;
         private String  _title;
-        private long         _releaseNoteAttachmentID;
 
         public  JiraIssue
             (
              String key,
-             String title,
-             long       releaseNoteAttachmentID
+             String title
              )
         {
             _key = key;
             _title = title;
-            _releaseNoteAttachmentID = releaseNoteAttachmentID;
         }
 
         public  String  getKey() { return _key; }
         public  String  getTitle() { return _title; }
-        public  long         getReleaseNoteAttachmentID() { return _releaseNoteAttachmentID; }
-        public  boolean hasReleaseNote() { return (_releaseNoteAttachmentID > NO_RELEASE_NOTE); }
         
         public  String  getJiraAddress()
         {
             return "http://issues.apache.org/jira/browse/" + _key;
         }
 
-        public  String  getReleaseNoteAddress()
-        {
-            return "http://issues.apache.org/jira/secure/attachment/" + _releaseNoteAttachmentID + "/releaseNote.html";
-        }
     }
     
     /////////////////////////////////////////////////////////////////////////
@@ -332,14 +263,14 @@ public class ReleaseNotesGenerator extends Task
 
     /**
      * <p>
-     * Generate the release notes (for details on how to invoke this tool, see
+     * Generate the changes file (for details on how to invoke this tool, see
      * the header comment on this class).
      * </p>
      */
     public  static  void    main( String[] args )
         throws Exception
     {
-        ReleaseNotesGenerator   me = new ReleaseNotesGenerator();
+        ChangesFileGenerator   me = new ChangesFileGenerator();
 
         me._invokedByAnt = false;
         
@@ -359,9 +290,6 @@ public class ReleaseNotesGenerator extends Task
     /** Ant accessor to set the name of the JIRA-generated list of bugs addressed by this release */
     public   void    setBugListFileName( String bugListFileName ) { _bugListFileName = bugListFileName; }     
 
-    /** Ant accessor to set the name of the JIRA-generated list of bugs which have release notes */
-    public   void    setReleaseNotesListFileName( String releaseNotesListFileName ) { _releaseNotesListFileName = releaseNotesListFileName; }     
-
     /** Ant accessor to set the name of the generated output file */
     public   void    setPamphletFileName( String pamphletFileName ) { _pamphletFileName = pamphletFileName; }     
         
@@ -377,24 +305,18 @@ public class ReleaseNotesGenerator extends Task
             GeneratorState                  gs = initialize();
 
             beginPamphlet( gs );
-            buildOverview( gs );
-            buildNewFeatures( gs );
             buildBugList( gs );
-            buildIssuesList( gs );
-            buildEnvironment( gs );
             replaceVariables( gs );
             endPamphlet( gs );
             
             printPamphlet( gs );
-
-            printMissingReleaseNotes( gs );
             printErrors( gs );
         }
         catch ( Throwable t )
         {
             t.printStackTrace();
             
-            throw new BuildException( "Error running ReleaseNotesGenerator: " + t.getMessage(), t );
+            throw new BuildException( "Error running ChangeFileGenerator: " + t.getMessage(), t );
         }
     }
     
@@ -464,7 +386,7 @@ public class ReleaseNotesGenerator extends Task
     {
         Document    pamphlet = gs.getPamphlet();
         String          releaseID = getReleaseID( gs );
-        String          titleText = "Release Notes for Derby " + releaseID;
+        String          titleText = "Changes for Derby " + releaseID;
         Element     html = pamphlet.createElement( HTML );
         Element     title = createTextElement( pamphlet, "title", titleText );
         Element     body = pamphlet.createElement( BODY );
@@ -478,11 +400,7 @@ public class ReleaseNotesGenerator extends Task
         
         Element     toc = createList( body );
 
-        createSection( body, MAIN_SECTION_LEVEL, toc, OVERVIEW_SECTION, OVERVIEW_SECTION );
-        createSection( body, MAIN_SECTION_LEVEL, toc, NEW_FEATURES_SECTION, NEW_FEATURES_SECTION );
         createSection( body, MAIN_SECTION_LEVEL, toc, BUG_FIXES_SECTION, BUG_FIXES_SECTION );
-        createSection( body, MAIN_SECTION_LEVEL, toc, ISSUES_SECTION, ISSUES_SECTION );
-        createSection( body, MAIN_SECTION_LEVEL, toc, BUILD_ENVIRONMENT_SECTION, BUILD_ENVIRONMENT_SECTION );
     }
     
     /**
@@ -515,55 +433,7 @@ public class ReleaseNotesGenerator extends Task
             "These notes describe the difference between Derby release " + releaseID +
             " and the preceding release " + previousReleaseID + ".";
 
-        addParagraph( parent, deltaStatement );
-    }
-    
-    //////////////////////////////////
-    //
-    //  Overview SECTION
-    //
-    //////////////////////////////////
-
-    /**
-     * <p>
-     * Build the Overview section.
-     * </p>
-     */
-    private void buildOverview( GeneratorState gs )
-        throws Exception
-    {
-        Document    pamphlet = gs.getPamphlet();
-        Element     overviewSection = getSection( pamphlet, MAIN_SECTION_LEVEL, OVERVIEW_SECTION );
-        Document    summary = gs.getSummary();
-        Element     summaryRoot = summary.getDocumentElement();
-        Element     details = getFirstChild( summaryRoot, SUM_OVERVIEW );
-
-        // copy the details out of the summary file into the overview section
-        cloneChildren( details, overviewSection );
-    }
-    
-    //////////////////////////////////
-    //
-    //  New Features SECTION
-    //
-    //////////////////////////////////
-
-    /**
-     * <p>
-     * Build the New Features section.
-     * </p>
-     */
-    private void buildNewFeatures( GeneratorState gs )
-        throws Exception
-    {
-        Document    pamphlet = gs.getPamphlet();
-        Element     newFeaturesSection = getSection( pamphlet, MAIN_SECTION_LEVEL, NEW_FEATURES_SECTION );
-        Document    summary = gs.getSummary();
-        Element     summaryRoot = summary.getDocumentElement();
-        Element     details = getFirstChild( summaryRoot, SUM_NEW_FEATURES );
-
-        // copy the details out of the summary file into the overview section
-        cloneChildren( details, newFeaturesSection );
+//        addParagraph( parent, deltaStatement );
     }
     
     //////////////////////////////////
@@ -588,13 +458,10 @@ public class ReleaseNotesGenerator extends Task
         String          releaseID = getReleaseID( gs );
         String          previousReleaseID = getPreviousReleaseID( gs );
         String          deltaStatement =
-            "The following issues are addressed by Derby release " + releaseID +
-            ". These issues are not addressed in the preceding " + 
-              previousReleaseID + " release." +
-            "Note that some of these issues were discovered during development" +
-            " of the release and may not affect earlier releases. " +
-            "This list includes bugs, improvements and new features, including sub-tasks," +
-            " but not issues with only test or web content changes.";
+            "The following table lists issues in JIRA which were fixed between " +
+            "Derby release " + releaseID + " and the preceding release " + 
+            previousReleaseID + ". This includes issues for the product " +
+            "source, documentation and tests";
 
         addParagraph( bugListSection, deltaStatement );
 
@@ -615,179 +482,6 @@ public class ReleaseNotesGenerator extends Task
             linkColumn.appendChild( hotlink );
             descriptionColumn.appendChild( title );
         }
-    }
-    
-    //////////////////////////////////
-    //
-    //  Issues SECTION
-    //
-    //////////////////////////////////
-
-    /**
-     * <p>
-     * Build the Issues section.
-     * </p>
-     */
-    private void buildIssuesList( GeneratorState gs )
-        throws Exception
-    {
-        Document    pamphlet = gs.getPamphlet();
-        Element     issuesSection = getSection( pamphlet, MAIN_SECTION_LEVEL, ISSUES_SECTION );
-        Document    issuesList = gs.getReleaseNotesList();
-        ReleaseNoteReader   releaseNoteReader = gs.getReleaseNoteReader();
-        JiraIssue[]    bugs = getJiraIssues( issuesList );
-        int                 count = bugs.length;
-        String          releaseID = getReleaseID( gs );
-        String          previousReleaseID = getPreviousReleaseID( gs );
-        String          greleaseID = releaseID;
-        String          gpreviousReleaseID = previousReleaseID;
-        String          deltaStatement =
-            "Compared with the previous release (" + previousReleaseID +
-            "), Derby release " + releaseID + " introduces the following new features " +
-            "and incompatibilities. These merit your special attention.";
-        
-        addParagraph( issuesSection, deltaStatement );
-
-        Element     toc = createList( issuesSection );
-
-        for ( int i = 0; i < count; i++ )
-        {
-        	if (bugs[ i ] == null)
-        		continue;
-        	JiraIssue       issue = bugs[ i ];
-            
-            Document    releaseNote = null;
-
-            try {
-                releaseNote = getReleaseNote( gs, issue );
-            }
-            catch (Throwable t)
-            {
-                gs.addError( formatError( "Unable to read or parse release note for " + issue.getKey(), t ) );
-            }
-
-            // skip this note if we were unable to read it
-            if ( releaseNote == null )
-            {
-                gs.addMissingReleaseNote( issue );
-                continue;
-            }
-            
-            String          key = "Note for " + issue.getKey();
-            Node     summaryText = null;
-
-            try {
-                summaryText = releaseNoteReader.getReleaseNoteSummary( releaseNote );
-            }
-            catch (Throwable t)
-            {
-                gs.addError( formatError( "Badly formatted summary for " + issue.getKey(), t ) );
-                summaryText = pamphlet.createTextNode( "Unreadable summary line" );
-            }
-            
-            Element         paragraph = pamphlet.createElement( PARAGRAPH );
-
-            paragraph.appendChild(  pamphlet.createTextNode( key + ": ") );
-            cloneChildren( summaryText, paragraph );
-
-            insertLine( issuesSection );
-            
-            Element     issueSection = createSection( issuesSection, ISSUE_DETAIL_LEVEL, toc, key, paragraph );
-
-            try {
-                Element     details = releaseNoteReader.getReleaseNoteDetails( releaseNote );
-
-                // copy the details out of the release note into this section of the
-                // pamphlet
-                cloneChildren( details, issueSection );
-            }
-            catch (Throwable t)
-            {
-                gs.addError( formatError( "Could not read required sections out of issue " + issue.getKey(), t ) );
-            }
-
-        }
-    }
-    
-    
-    /**
-     * <p>
-     * Get the release note for an issue.
-     * </p>
-     */
-    private Document   getReleaseNote( GeneratorState gs, JiraIssue issue )
-        throws Exception
-    {
-        if ( issue.hasReleaseNote() )
-        {
-            URL             url = null;
-            InputStream is = null;
-            
-            try {
-                url = new URL( issue.getReleaseNoteAddress() );
-                is = url.openStream();
-            }
-            catch (Throwable t)
-            {
-                processThrowable( t );
-                return null;
-            }
-
-            Document        doc = gs.getReleaseNoteReader().getReleaseNote( is );
-
-            return doc;
-        }
-        else { return null; }
-    }
-
-    //////////////////////////////////
-    //
-    //  Build Environment SECTION
-    //
-    //////////////////////////////////
-
-    /**
-     * <p>
-     * Build the section describing the build environment.
-     * </p>
-     */
-    private void buildEnvironment( GeneratorState gs )
-        throws Exception
-    {
-        Document    pamphlet = gs.getPamphlet();
-        Element         environmentSection = getSection( pamphlet, MAIN_SECTION_LEVEL, BUILD_ENVIRONMENT_SECTION );
-        Document    summary = gs.getSummary();
-        Element     summaryRoot = summary.getDocumentElement();
-        String          releaseID = getReleaseID( gs );
-        String          desc = "Derby release " + releaseID + " was built using the following environment:";
-
-        addParagraph( environmentSection, desc );
-
-        Element     list = createList( environmentSection );
-        String          branchName = squeezeText( getFirstChild( summaryRoot, SUM_BRANCH ) );
-        String          branchText = "Source code came from the " + branchName + " branch.";
-        addHeadlinedItem( list, BRANCH_HEADLINE, branchText );
-
-        String          machine = squeezeText( getFirstChild( summaryRoot, SUM_MACHINE ) );
-        addHeadlinedItem( list, MACHINE_HEADLINE, machine );
-
-        String          antVersion = squeezeText( getFirstChild( summaryRoot, SUM_ANT_VERSION ) );
-        addHeadlinedItem( list, ANT_HEADLINE, antVersion );
-
-        String          jdk14Version = squeezeText( getFirstChild( summaryRoot, SUM_JDK14 ) );
-        addHeadlinedItem( list, JDK14_HEADLINE, jdk14Version );
-
-        String          java6Version = squeezeText( getFirstChild( summaryRoot, SUM_JAVA6 ) );
-        addHeadlinedItem( list, JAVA6_HEADLINE, java6Version );
-
-        String          osgiText = squeezeText( getFirstChild( summaryRoot, SUM_OSGI ) );
-        addHeadlinedItem( list, OSGI_HEADLINE, osgiText );
-
-        String          compilerText = squeezeText( getFirstChild( summaryRoot, SUM_COMPILER ) );
-        addHeadlinedItem( list, COMPILER_HEADLINE, compilerText );
-
-        String          jsr169Text = squeezeText( getFirstChild( summaryRoot, SUM_JSR169 ) );
-        addHeadlinedItem( list, JSR169_HEADLINE, jsr169Text );
     }
     
     //////////////////////////////////
@@ -841,30 +535,6 @@ public class ReleaseNotesGenerator extends Task
 
     /**
      * <p>
-     * Print missing release notes
-     * </p>
-     */
-    private void printMissingReleaseNotes( GeneratorState gs )
-        throws Exception
-    {
-        JiraIssue[]     missingReleaseNotes = gs.getMissingReleaseNotes();
-        int                 count = missingReleaseNotes.length;
-
-        if ( count > 0 )
-        {
-            println( "The following JIRA issues still need release notes or the release notes provided are unreadable:" );
-
-            for ( int i = 0; i < count; i++ )
-            {
-                JiraIssue   issue = missingReleaseNotes[ i ];
-                
-                println( "\t" + issue.getKey() + "\t" + issue.getTitle() );
-            }
-        }
-    }
-    
-    /**
-     * <p>
      * Print errors.
      * </p>
      */
@@ -907,7 +577,6 @@ public class ReleaseNotesGenerator extends Task
 
         setSummaryFileName( args[ idx++ ] );
         setBugListFileName( args[ idx++ ] );
-        setReleaseNotesListFileName( args[ idx++ ] );
         setPamphletFileName( args[ idx++ ] );
 
         return true;
@@ -931,18 +600,15 @@ public class ReleaseNotesGenerator extends Task
         Document                          pamphlet = builder.newDocument();
         File                                    summaryFile = new File( _summaryFileName );
         File                                    bugListFile = new File( _bugListFileName );
-        File                                    releaseNotesListFile = new File( _releaseNotesListFileName);
         Document                        summary = builder.parse( summaryFile );
         Document                        bugList = builder.parse( bugListFile );
-        Document                        releaseNotesList = builder.parse( releaseNotesListFile );
         
         return new GeneratorState
             (
              builder,
              pamphlet,
              summary,
-             bugList,
-             releaseNotesList
+             bugList
              );
     }
 
@@ -1430,7 +1096,6 @@ public class ReleaseNotesGenerator extends Task
     {
         String  key = squeezeText( getFirstChild( itemElement, JIRA_KEY ) );
         String  title = squeezeText( getFirstChild( itemElement, JIRA_TITLE ) );
-        long         releaseNoteAttachmentID = getReleaseNoteAttachmentID( itemElement );
 
         //
         // A JIRA title has the following form:
@@ -1444,29 +1109,6 @@ public class ReleaseNotesGenerator extends Task
 
         //return new JiraIssue( key, title, releaseNoteAttachmentID );
         String type=squeezeText(getFirstChild(itemElement, "type"));
-        if (!(type.equals("Bug") || type.equals("New Feature") || type.equals("Improvement") || type.equals("Sub-task")))
-        	return null;
-
-        try {
-        	String component=squeezeText(getOptionalChild(itemElement, "component"));
-        	if (component != null)
-        	{   
-        		NodeList        subItemList = itemElement.getElementsByTagName( "component" );
-        		int             compcount = subItemList.getLength();
-        		for (int i=0; i<compcount; i++)
-        		{
-        			if (component.equals("Test") || component.equals("Web content"))
-        				return null;
-        			try {
-        				component = squeezeText(getNextChild(itemElement, "component", i+1));
-        			} catch (Exception e) {
-        				// nothing...
-        			}
-        		}
-        	}
-        } catch (NullPointerException e) {
-        	// do nothing, now...
-        }
 
         try {
         	String resolution=squeezeText(getOptionalChild(itemElement, "resolution"));
@@ -1505,7 +1147,11 @@ public class ReleaseNotesGenerator extends Task
         		}
         		// if the first fixVersion does not match the current release, or the beta,
         		// check the next one
-        		if ( (!_releaseID.equals(fixVersion)) && (!"10.3.0.0".equals(fixVersion)) && (!"10.3.1.1".equals(fixVersion)) && (!"10.3.1.2".equals(fixVersion)) && (!"10.3.1.3".equals(fixVersion))) {
+        		if ( (!_releaseID.equals(fixVersion)) &&
+        				(!"10.3.0.0".equals(fixVersion)) &&
+        				(!"10.3.1.1".equals(fixVersion)) &&
+        				(!"10.3.1.2".equals(fixVersion)) &&
+        				(!"10.3.1.3".equals(fixVersion))) {
         			try {
         				fixVersion = squeezeText(getNextChild( itemElement, JIRA_FIXIN, i+1));
         				continue;
@@ -1515,46 +1161,9 @@ public class ReleaseNotesGenerator extends Task
         			}
         		}
         	}
-        	return new JiraIssue( key, title, releaseNoteAttachmentID );
+        	return new JiraIssue( key, title );
         }
         return null;
-    }
-
-    /**
-     * <p>
-     * Get the highest attachment id of all of the "releaseNote.html" documents
-     * attached to this JIRA.
-     * </p>
-     */
-    private long   getReleaseNoteAttachmentID( Element itemElement )
-        throws Exception
-    {
-        long         releaseNoteAttachmentID = JiraIssue.NO_RELEASE_NOTE;
-
-        Element     attachments = getOptionalChild( itemElement, JIRA_ATTACHMENTS );
-
-        if ( attachments != null )
-        {
-            NodeList    attachmentsList = attachments.getElementsByTagName( JIRA_ATTACHMENT );
-            int             count = attachmentsList.getLength();
-
-            for ( int i = 0; i < count; i++ )
-            {
-                Element     attachment = (Element) attachmentsList.item( i );
-                String          name = attachment.getAttribute( JIRA_NAME );
-
-                if ( RELEASE_NOTE_NAME.equals( name ) )
-                {
-                    String      stringID = attachment.getAttribute( JIRA_ID );
-                    int             id = Long.decode( stringID ).intValue();
-
-                    if ( id > releaseNoteAttachmentID ) { releaseNoteAttachmentID = id; }
-                }
-            }
-
-        }
-
-        return releaseNoteAttachmentID;
     }
     
     ////////////////////////////////////////////////////////
@@ -1624,3 +1233,4 @@ public class ReleaseNotesGenerator extends Task
     }
     
 }
+
