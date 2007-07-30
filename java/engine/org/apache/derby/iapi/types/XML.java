@@ -139,6 +139,8 @@ public class XML
      */
     private boolean containsTopLevelAttr;
 
+    private SqlXmlUtil tmpUtil;
+
     /**
      * Default constructor.
      */
@@ -303,7 +305,72 @@ public class XML
     {
         if (xmlStringValue == null)
             xmlStringValue = new SQLChar();
-        xmlStringValue.setValue(resultSet.getString(colNumber));
+
+        String valAsStr = resultSet.getString(colNumber);
+
+        /* As there is no guarantee that the specified column within
+         * resultSet is well-formed XML (is there??), we have to try
+         * to parse it in order to set the "xType" field correctly.
+         * This is required to ensure that we only store well-formed
+         * XML on disk (see "normalize()" method of this class).  So
+         * create an instance of SqlXmlUtil and use that to see if the
+         * text satisifies the requirements of a well-formed DOCUMENT.
+         *
+         * RESOLVE: If there is anyway to guarantee that the column
+         * is in fact well-formed XML then we can skip all of this
+         * logic and simply set xType to XML_DOC_ANY.  But do we
+         * have such a guarantee...?
+         */
+        if (tmpUtil == null)
+        {
+            try {
+
+                tmpUtil = new SqlXmlUtil();
+
+            } catch (StandardException se) {
+
+                if (SanityManager.DEBUG)
+                {
+                    SanityManager.THROWASSERT(
+                        "Failed to instantiate SqlXmlUtil for XML parsing.");
+                }
+
+                /* If we failed to get a SqlXmlUtil then we can't parse
+                 * the string, which means we don't know if it constitutes
+                 * a well-formed XML document or not.  In this case we
+                 * set the value, but intentionally leave xType as -1
+                 * so that the resultant value canNOT be stored on disk.
+                 */
+                xmlStringValue.setValue(valAsStr);
+                setXType(-1);
+                return;
+
+            }
+        }
+
+        try {
+
+            /* The following call parses the string into a DOM and
+             * then serializes it, which is exactly what we do for
+             * normal insertion of XML values.  If the parse finishes
+             * with no error then we know the type is XML_DOC_ANY,
+             * so set it.
+             */
+            valAsStr = tmpUtil.serializeToString(valAsStr);
+            xmlStringValue.setValue(valAsStr);
+            setXType(XML_DOC_ANY);
+
+        } catch (Throwable t) {
+
+            /* It's possible that the string value was either 1) an
+             * XML SEQUENCE or 2) not XML at all.  We don't know
+             * which one it was, so make xType invalid to ensure this
+             * field doesn't end up on disk.
+             */
+            xmlStringValue.setValue(valAsStr);
+            setXType(-1);
+
+        }
     }
 
     /**

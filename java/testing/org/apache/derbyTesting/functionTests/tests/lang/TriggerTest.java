@@ -548,10 +548,6 @@ public class TriggerTest extends BaseJDBCTestCase {
         int jdbcType = DatabaseMetaDataTest.getJDBCType(type);
         int precision = DatabaseMetaDataTest.getPrecision(jdbcType, type);
 
-        // BUG DERBY-2350  - remove this check & return to see the issue.      
-        if (jdbcType == JDBC.SQLXML)
-            return;
-        
         // BUG DERBY-2349 - remove this check & return to see the issue.
         if (jdbcType == Types.BLOB)
             return; 
@@ -602,10 +598,6 @@ public class TriggerTest extends BaseJDBCTestCase {
         int jdbcType = DatabaseMetaDataTest.getJDBCType(type);
         int precision = DatabaseMetaDataTest.getPrecision(jdbcType, type);
 
-        // BUG DERBY-2350 - need insert case to work first
-        if (jdbcType == JDBC.SQLXML)
-            return;
-
         // BUG DERBY-2349 - need insert case to work first
         if (jdbcType == Types.BLOB)
             return;
@@ -619,7 +611,11 @@ public class TriggerTest extends BaseJDBCTestCase {
         Random r = new Random();
         
         PreparedStatement ps = prepareStatement(
-            "UPDATE T_MAIN SET V = ? WHERE ID >= ? AND ID <= ?");
+            (jdbcType == JDBC.SQLXML
+                ? "UPDATE T_MAIN SET V = " +
+                  "XMLPARSE(DOCUMENT CAST (? AS CLOB) PRESERVE WHITESPACE)"
+                : "UPDATE T_MAIN SET V = ?")
+            + " WHERE ID >= ? AND ID <= ?");
         
         // Single row update of row 3
         setRandomValue(r, ps, 1, jdbcType, precision);
@@ -716,10 +712,6 @@ public class TriggerTest extends BaseJDBCTestCase {
     {
         int jdbcType = DatabaseMetaDataTest.getJDBCType(type);
         int precision = DatabaseMetaDataTest.getPrecision(jdbcType, type);
-
-        // BUG DERBY-2350 - need insert case to work first
-        if (jdbcType == JDBC.SQLXML)
-            return;
 
         // BUG DERBY-2349 - need insert case to work first
         if (jdbcType == Types.BLOB)
