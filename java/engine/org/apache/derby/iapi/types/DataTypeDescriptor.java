@@ -38,7 +38,7 @@ import org.apache.derby.iapi.services.loader.ClassInspector;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.conn.ConnectionUtil;
 
-/**
+/** 
  * This is an implementation of DataTypeDescriptor from the generic language
  * datatype module interface.
  *
@@ -1046,17 +1046,7 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
     		//If both the types are string types, then we need to make sure
     		//they have the same collation set on them
     		if (compareWithTypeID.isStringTypeId() && typeId.isStringTypeId()) {
-    			//both the operands can not have the collation derivation of 
-    			//NONE. This is because in that case, we do not know what kind 
-    			//of collation to use for comparison.
-    			if (getCollationDerivation() == compareWithDTD.getCollationDerivation() &&
-    					getCollationDerivation() == StringDataValue.COLLATION_DERIVATION_NONE)
-    				return false;
-    			if (getCollationDerivation() == compareWithDTD.getCollationDerivation() &&
-    					getCollationType() == compareWithDTD.getCollationType())
-    				return true;//collation matches
-    			else
-    				return false;//collation does not match
+    			return compareCollationInfo(compareWithDTD);    			
     		} else
     			return false;//can't be compared			
 		}
@@ -1121,7 +1111,39 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 		return false;
 	}
 	
-		
+	/**
+	 * Compare the collation info on this DTD with the passed DTD. The rules
+	 * are as follows
+	 * 1)If both the DTDs have collation derivation of NONE, then they can't be
+	 * compared and we return false.
+	 * 2)If both the DTDs have same collation derivation (which in Derby's case
+	 * at this point will mean collation derivation of IMPLICIT), then check
+	 * the collation types. If they match, then return true. If they do not 
+	 * match, then they can't be compared and hence return false.
+	 * 
+	 * In future, when we do support collation derivation of EXPLICIT, we will
+	 * need to change this method so that we follow the correct SQL standard
+	 * rules about what should happen if one collation derivation is EXPLICIT
+	 * and other is NONE/IMPLICIT.
+	 * 
+	 * @param compareWithDTD compare this DTD's collation info
+	 *  
+	 * @return value depends on the algorithm above.
+	 */
+	public boolean compareCollationInfo(DataTypeDescriptor compareWithDTD){
+		//both the operands can not have the collation derivation of
+		//NONE. This is because in that case, we do not know what kind
+		//of collation to use for comparison.
+		if (getCollationDerivation() == compareWithDTD.getCollationDerivation() &&
+				getCollationDerivation() == StringDataValue.COLLATION_DERIVATION_NONE)
+			return false;
+		if (getCollationDerivation() == compareWithDTD.getCollationDerivation() &&
+				getCollationType() == compareWithDTD.getCollationType())
+			return true;//collation matches
+		else
+			return false;//collation does not match
+		}
+		 				
 	/**
 	 * Converts this data type descriptor (including length/precision)
 	 * to a string. E.g.
