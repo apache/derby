@@ -91,7 +91,7 @@ public abstract class Connection implements java.sql.Connection,
     // ------------------------dynamic properties---------------------------------
 
     protected boolean open_ = true;
-    protected boolean availableForReuse_ = false;
+    private boolean availableForReuse_ = false;
 
     public int isolation_ = Configuration.defaultIsolation;
     public boolean autoCommit_ = true;
@@ -141,7 +141,7 @@ public abstract class Connection implements java.sql.Connection,
     public int portNumber_;
     public int clientSSLMode_ = ClientBaseDataSource.SSL_OFF;
 
-    public java.util.Hashtable clientCursorNameCache_ = new java.util.Hashtable();
+    java.util.Hashtable clientCursorNameCache_ = new java.util.Hashtable();
     public boolean canUseCachedConnectBytes_ = false;
     public int commBufferSize_ = 32767;
 

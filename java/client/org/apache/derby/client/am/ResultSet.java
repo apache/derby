@@ -186,9 +186,9 @@ public abstract class ResultSet implements java.sql.ResultSet,
     // between column not updated and column updated to null.
     private boolean columnUpdated_[];
 
-    public PreparedStatement preparedStatementForUpdate_;
-    public PreparedStatement preparedStatementForDelete_;
-    public PreparedStatement preparedStatementForInsert_;
+    private PreparedStatement preparedStatementForUpdate_;
+    private PreparedStatement preparedStatementForDelete_;
+    private PreparedStatement preparedStatementForInsert_;
 
     // Nesting level of the result set in a stored procedure
     public int nestingLevel_ = -1;

@@ -1795,7 +1795,7 @@ public class PreparedStatement extends Statement
         materialPreparedStatement_.readExecute_();
     }
 
-    public void writeOpenQuery(Section section,
+    private void writeOpenQuery(Section section,
                                int fetchSize,
                                int resultSetType,
                                int numInputColumns,
@@ -1954,10 +1954,10 @@ public class PreparedStatement extends Statement
         }
     }
 
-    void flowExecute(int executeType) throws SqlException {
-        super.checkForClosedStatement();
-        super.clearWarningsX();
-        super.checkForAppropriateSqlMode(executeType, sqlMode_);
+    private void flowExecute(int executeType) throws SqlException {
+        checkForClosedStatement();
+        clearWarningsX();
+        checkForAppropriateSqlMode(executeType, sqlMode_);
         checkThatAllParametersAreSet();
 
         if (sqlMode_ == isUpdate__) {
@@ -1977,7 +1977,7 @@ public class PreparedStatement extends Statement
 
             agent_.beginWriteChain(this);
 
-            boolean piggybackedAutocommit = super.writeCloseResultSets(true);  // true means permit auto-commits
+            boolean piggybackedAutocommit = writeCloseResultSets(true);  // true means permit auto-commits
 
             int numInputColumns;
             boolean outputExpected;
@@ -2091,7 +2091,7 @@ public class PreparedStatement extends Statement
                 connection_.completeTransactionStart();
             }
 
-            super.markResultSetsClosed(true); // true means remove from list of commit and rollback listeners
+            markResultSetsClosed(true); // true means remove from list of commit and rollback listeners
 
             if (timeoutSent) {
                 readSetSpecialRegister(); // Read response to the EXCSQLSET

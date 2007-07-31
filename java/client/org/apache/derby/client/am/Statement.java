@@ -46,11 +46,11 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
 
     public MaterialStatement materialStatement_ = null;
 
-    public Connection connection_;
+    Connection connection_;
     public Section section_;
-    public Agent agent_;
+    Agent agent_;
 
-    public ResultSet resultSet_ = null;
+    ResultSet resultSet_;
 
     // Use -1, if there is no update count returned, ie. when result set is returned. 0 is a valid update count for DDL.
     int updateCount_ = -1;
@@ -71,7 +71,7 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
     static final int isUpdate__ = 0x4; // All other sql is categorized as a update DML or DDL.
 
     // sqlUpdateMode_ is only set when the sqlMode_ == isUpdate__
-    public int sqlUpdateMode_ = 0;
+    int sqlUpdateMode_ = 0;
     // Enum for sqlUpdateMode_:
     public final static int isCommitSql__ = 0x1;
     public final static int isRollbackSql__ = 0x2;
@@ -81,7 +81,7 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
     final static int isUpdateSql__ = 0x80;        // used to recognize "update" for parsing cursorname
 
 
-    public ColumnMetaData resultSetMetaData_; // type information for output sqlda
+    ColumnMetaData resultSetMetaData_; // type information for output sqlda
 
     // these two are used during parsing of literals for call statement.
     // please add a comment desribing what why you can't reuse inputs_ and parameterMetaData_
@@ -90,8 +90,7 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
     // Caching the Cursor object for reuse.
     public Cursor cachedCursor_ = null;
     public Cursor cachedSingletonRowData_ = null;
-    public boolean isPreparedStatement_ = false;
-    public boolean isCallableStatement_ = false; // we can get rid of this member once we define polymorphic reset() on S/PS/CS
+    boolean isPreparedStatement_ = false;
 
     //---------------------navigational cheat-links-------------------------------
     // Cheat-links are for convenience only, and are not part of the conceptual model.
@@ -99,8 +98,6 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
     //   Cheat-links should only be defined for invariant state data.
     //   That is, state data that is set by the constructor and never changes.
 
-    // Alias for connection_.databaseMetaData
-    public DatabaseMetaData databaseMetaData_;
 
     //-----------------------------state------------------------------------------
 
@@ -210,7 +207,6 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
         materialStatement_ = null;
         connection_ = null;
         agent_ = null;
-        databaseMetaData_ = null;
         resultSetType_ = java.sql.ResultSet.TYPE_FORWARD_ONLY;
         resultSetConcurrency_ = java.sql.ResultSet.CONCUR_READ_ONLY;
         resultSetHoldability_ = 0;
@@ -300,7 +296,6 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
     private void initStatement(Agent agent, Connection connection) {
         agent_ = agent;
         connection_ = connection;
-        databaseMetaData_ = connection.databaseMetaData_;
     }
 
     // For jdbc 2 statements with scroll attributes
@@ -760,7 +755,7 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
     }
 
     // An untraced version of clearWarnings()
-    public void clearWarningsX() {
+    final void clearWarningsX() {
         warnings_ = null;
     }
 
@@ -1580,7 +1575,7 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
         readCloseResultSets(allowAutoCommits);
     }
 
-    boolean writeCloseResultSets(boolean allowAutoCommits) throws SqlException {
+    final boolean writeCloseResultSets(boolean allowAutoCommits) throws SqlException {
         int numberOfResultSetsToClose = (resultSetList_ == null) ? 0 : resultSetList_.length;
         return writeCloseResultSets(numberOfResultSetsToClose, allowAutoCommits);
     }
@@ -1636,7 +1631,7 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
     }
 
     // Helper method for S.flowCloseResultSets() and PS.flowExecute()
-    void readCloseResultSets(boolean allowAutoCommits) throws SqlException {
+    final void readCloseResultSets(boolean allowAutoCommits) throws SqlException {
         int numberOfResultSetsToClose = (resultSetList_ == null) ? 0 : resultSetList_.length;
         readCloseResultSets(numberOfResultSetsToClose, allowAutoCommits);
     }
@@ -1811,7 +1806,7 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
      * from the commit and rollback listeners list in
      * <code>org.apache.derby.client.am.Connection</code>.
      */
-    void markResultSetsClosed(boolean removeListener) {
+    final void markResultSetsClosed(boolean removeListener) {
         if (resultSetList_ != null) {
             for (int i = 0; i < resultSetList_.length; i++) {
                 if (resultSetList_[i] != null) {
@@ -2335,7 +2330,7 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
         return new String(charArray);
     }
 
-    void checkForAppropriateSqlMode(int executeType, int sqlMode) throws SqlException {
+    final void checkForAppropriateSqlMode(int executeType, int sqlMode) throws SqlException {
         if (executeType == executeQueryMethod__ && sqlMode == isUpdate__) {
             throw new SqlException(agent_.logWriter_, 
                 new ClientMessageId(SQLState.CANT_USE_EXEC_QUERY_FOR_UPDATE));
@@ -2416,7 +2411,7 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
         }
     }
 
-    void checkForClosedStatement() throws SqlException {
+    final void checkForClosedStatement() throws SqlException {
         // For some odd reason, there was a JVM hotspot error with Sun's 1.4 JDK
         // when the code was written like this:
         // agent_checkForDeferredExceptions();
