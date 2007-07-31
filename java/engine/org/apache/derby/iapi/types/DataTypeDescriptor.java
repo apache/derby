@@ -1155,6 +1155,25 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 		return false;
 	}
 	
+	/**
+	 * Compare the collation info on this DTD with the passed DTD. The rules
+	 * are as follows
+	 * 1)If both the DTDs have collation derivation of NONE, then they can't be
+	 * compared and we return false.
+	 * 2)If both the DTDs have same collation derivation (which in Derby's case
+	 * at this point will mean collation derivation of IMPLICIT), then check
+	 * the collation types. If they match, then return true. If they do not 
+	 * match, then they can't be compared and hence return false.
+	 * 
+	 * In future, when we do support collation derivation of EXPLICIT, we will
+	 * need to change this method so that we follow the correct SQL standard
+	 * rules about what should happen if one collation derivation is EXPLICIT
+	 * and other is NONE/IMPLICIT.
+	 * 
+	 * @param compareWithDTD compare this DTD's collation info
+	 *  
+	 * @return value depends on the algorithm above.
+	 */
 	public boolean compareCollationInfo(DataTypeDescriptor compareWithDTD){
 		//both the operands can not have the collation derivation of
 		//NONE. This is because in that case, we do not know what kind
