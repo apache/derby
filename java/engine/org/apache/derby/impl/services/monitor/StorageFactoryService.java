@@ -229,9 +229,6 @@ final class StorageFactoryService implements PersistentService
     /**
 		Open the service properties in the directory identified by the service name.
 
-		The property SERVICE_ROOT (db2j.rt.serviceRoot) is added
-		by this method and set to the service directory.
-
 		@return A Properties object or null if serviceName does not represent a valid service.
 
 		@exception StandardException Service appears valid but the properties cannot be created.
