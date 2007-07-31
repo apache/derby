@@ -570,15 +570,17 @@ public class CreateTriggerNode extends DDLStatementNode
 	) throws StandardException
 	{
 		ColumnDescriptor colDesc = null;
-		if ((colDesc = triggerTableDescriptor.getColumnDescriptor(colName)) == null)
+		if ((colDesc = triggerTableDescriptor.getColumnDescriptor(colName)) == 
+                null)
 		{
-			throw StandardException.newException(SQLState.LANG_COLUMN_NOT_FOUND, tabName+"."+colName);
+			throw StandardException.newException(
+                SQLState.LANG_COLUMN_NOT_FOUND, tabName+"."+colName);
 		}
 
 		/*
 		** Generate something like this:
 		**
-		** 		cast (org.apache.derby.iapi.db.Factory::
+		** 		CAST (org.apache.derby.iapi.db.Factory::
 		**			getTriggerExecutionContext().getNewRow().
 		**				getObject(<colPosition>) AS DECIMAL(6,2))
         **
@@ -594,27 +596,73 @@ public class CreateTriggerNode extends DDLStatementNode
 		** something like
 		**
 		**		CREATE TRIGGER ... INSERT INTO T length(Column), ...
-		*/
-		StringBuffer methodCall = new StringBuffer();
-		methodCall.append("CAST (org.apache.derby.iapi.db.Factory::getTriggerExecutionContext().");
-		methodCall.append(isOldTable ? "getOldRow()" : "getNewRow()");
-		methodCall.append(".getObject(");
-        methodCall.append(colDesc.getPosition());
-        methodCall.append(") AS ");
-		DataTypeDescriptor dts = colDesc.getType();
-		TypeId typeId = dts.getTypeId();
+        **
+        */
 
-		/*
-		** getSQLString() returns <typeName> 
-		** for user types, so call getSQLTypeName in that
-		** case.
-		*/
-		methodCall.append(
-		  (typeId.userType() ? typeId.getSQLTypeName() : dts.getSQLstring()));
-        
-        methodCall.append(") ");
+		DataTypeDescriptor  dts     = colDesc.getType();
+		TypeId              typeId  = dts.getTypeId();
 
-		return methodCall.toString();
+        if (!typeId.isXMLTypeId())
+        {
+
+            StringBuffer methodCall = new StringBuffer();
+            methodCall.append(
+                "CAST (org.apache.derby.iapi.db.Factory::getTriggerExecutionContext().");
+            methodCall.append(isOldTable ? "getOldRow()" : "getNewRow()");
+            methodCall.append(".getObject(");
+            methodCall.append(colDesc.getPosition());
+            methodCall.append(") AS ");
+
+            /*
+            ** getSQLString() returns <typeName> 
+            ** for user types, so call getSQLTypeName in that
+            ** case.
+            */
+            methodCall.append(
+                (typeId.userType() ? 
+                     typeId.getSQLTypeName() : dts.getSQLstring()));
+            
+            methodCall.append(") ");
+
+            return methodCall.toString();
+        }
+        else
+        {
+            /*  DERBY-2350
+            **
+            **  Triggers currently use jdbc 1.2 to access columns.  The default
+            **  uses getObject() which is not supported for an XML type until
+            **  jdbc 4.  In the meantime use getString() and then call 
+            **  XMLPARSE() on the string to get the type.  See Derby issue and
+            **  http://wiki.apache.org/db-derby/TriggerImplementation , for
+            **  better long term solutions.  Long term I think changing the
+            **  trigger architecture to not rely on jdbc, but instead on an
+            **  internal direct access interface to execution nodes would be
+            **  best future direction, but believe such a change appropriate
+            **  for a major release, not a bug fix.
+            **
+            **  Rather than the above described code generation, use the 
+            **  following for XML types to generate an XML column from the
+            **  old or new row.
+            ** 
+            **          XMLPARSE(DOCUMENT
+            **              CAST (org.apache.derby.iapi.db.Factory::
+            **                  getTriggerExecutionContext().getNewRow().
+            **                      getString(<colPosition>) AS CLOB)  
+            **                        PRESERVE WHITESPACE)
+            */
+
+            StringBuffer methodCall = new StringBuffer();
+            methodCall.append("XMLPARSE(DOCUMENT CAST( ");
+            methodCall.append(
+                "org.apache.derby.iapi.db.Factory::getTriggerExecutionContext().");
+            methodCall.append(isOldTable ? "getOldRow()" : "getNewRow()");
+            methodCall.append(".getString(");
+            methodCall.append(colDesc.getPosition());
+            methodCall.append(") AS CLOB) PRESERVE WHITESPACE ) ");
+
+            return methodCall.toString();
+        }
 	}
 
 	/*
