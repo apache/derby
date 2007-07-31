@@ -40,7 +40,7 @@ import org.apache.derby.iapi.services.loader.ClassInspector;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.conn.ConnectionUtil;
 
-/**
+/** 
  * DataTypeDescriptor describes a runtime SQL type.
  */
 
@@ -1090,17 +1090,7 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
     		//If both the types are string types, then we need to make sure
     		//they have the same collation set on them
     		if (compareWithTypeID.isStringTypeId() && typeId.isStringTypeId()) {
-    			//both the operands can not have the collation derivation of 
-    			//NONE. This is because in that case, we do not know what kind 
-    			//of collation to use for comparison.
-    			if (getCollationDerivation() == compareWithDTD.getCollationDerivation() &&
-    					getCollationDerivation() == StringDataValue.COLLATION_DERIVATION_NONE)
-    				return false;
-    			if (getCollationDerivation() == compareWithDTD.getCollationDerivation() &&
-    					getCollationType() == compareWithDTD.getCollationType())
-    				return true;//collation matches
-    			else
-    				return false;//collation does not match
+    			return compareCollationInfo(compareWithDTD);    			
     		} else
     			return false;//can't be compared			
 		}
@@ -1165,7 +1155,20 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 		return false;
 	}
 	
-		
+	public boolean compareCollationInfo(DataTypeDescriptor compareWithDTD){
+		//both the operands can not have the collation derivation of
+		//NONE. This is because in that case, we do not know what kind
+		//of collation to use for comparison.
+		if (getCollationDerivation() == compareWithDTD.getCollationDerivation() &&
+				getCollationDerivation() == StringDataValue.COLLATION_DERIVATION_NONE)
+			return false;
+		if (getCollationDerivation() == compareWithDTD.getCollationDerivation() &&
+				getCollationType() == compareWithDTD.getCollationType())
+			return true;//collation matches
+		else
+			return false;//collation does not match
+		}
+		 				
 	/**
 	 * Converts this data type descriptor (including length/precision)
 	 * to a string. E.g.
