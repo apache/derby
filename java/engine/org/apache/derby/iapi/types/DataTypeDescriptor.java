@@ -1157,18 +1157,27 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 	
 	/**
 	 * Compare the collation info on this DTD with the passed DTD. The rules
-	 * are as follows
+	 * for comparison are as follows (these are as per SQL standard 2003 
+	 * Section 9.13)
+	 * 
 	 * 1)If both the DTDs have collation derivation of NONE, then they can't be
 	 * compared and we return false.
 	 * 2)If both the DTDs have same collation derivation (which in Derby's case
 	 * at this point will mean collation derivation of IMPLICIT), then check
 	 * the collation types. If they match, then return true. If they do not 
 	 * match, then they can't be compared and hence return false.
-	 * 
-	 * In future, when we do support collation derivation of EXPLICIT, we will
-	 * need to change this method so that we follow the correct SQL standard
-	 * rules about what should happen if one collation derivation is EXPLICIT
-	 * and other is NONE/IMPLICIT.
+	 * 3)If one DTD has collation derivation of IMPLICIT and other DTD has
+	 * collation derivation of NONE, then 2 DTDs are comparable using the
+	 * collation type of DTD with collation derivation of IMPLICIT. Derby does
+	 * not implement this rule currently and it is being traked as DERBY-2678.
+	 * Derby's current behavior is to throw an exception if both the DTDs 
+	 * involved in collation operation do not have collation derivation of 
+	 * IMPLICIT. This behavior is a subset of SQL standard.
+	 * 4)Derby currently does not support collation derivation of EXPLICIT and
+	 * hence we do not have the code to enforce rules as mentioned in Section
+	 * 9.13 of SQL spec for collation derivation of EXPLICIT. When we implement
+	 * collation derivation of EXPLICIT, we should make sure that we follow the
+	 * rules as specified in the SQL spec for comparability.
 	 * 
 	 * @param compareWithDTD compare this DTD's collation info
 	 *  
