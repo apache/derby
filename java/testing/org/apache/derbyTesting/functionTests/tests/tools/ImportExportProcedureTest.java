@@ -95,7 +95,10 @@ public final class ImportExportProcedureTest extends BaseJDBCTestCase {
             + "'tennis\"p,l,ayer\"', 190.55) ");
         
         // Perform Export:
-        
+
+	//DERBY-2925: need to delete existing files first.
+        SupportFilesSetup.deleteFile("extinout/emp.dat");        
+
         cSt = prepareCall(
             "call SYSCS_UTIL.SYSCS_EXPORT_TABLE (null, 'EX_EMP' "
             + ", 'extinout/emp.dat' , null, null, null) ");
@@ -152,6 +155,9 @@ public final class ImportExportProcedureTest extends BaseJDBCTestCase {
         
         // Perform Export:
         
+	//DERBY-2925: need to delete existing files first.
+        SupportFilesSetup.deleteFile("extinout/emp.dat");
+
         cSt = prepareCall(
             "call SYSCS_UTIL.SYSCS_EXPORT_TABLE (null, 'EX_EMP' "
             + ", 'extinout/emp.dat' , null, null, null) ");
@@ -231,7 +237,10 @@ public final class ImportExportProcedureTest extends BaseJDBCTestCase {
         
         assertUpdateCount(st, 7,
             " delete from imp_emp where id < 105");
-        
+
+        //DERBY-2925: need to delete existing files first.
+        SupportFilesSetup.deleteFile("extinout/emp.dat");
+
         //export from ex_emp using the a query only rows that got 
         // deleted in imp_emp
         
@@ -264,6 +273,9 @@ public final class ImportExportProcedureTest extends BaseJDBCTestCase {
         
         JDBC.assertFullResultSet(rs, expRS, true);
         
+	//DERBY-2925: need to delete existing files first.
+        SupportFilesSetup.deleteFile("extinout/emp.dat");
+
         //export the columns in different column order than in the 
         // table.
         
@@ -352,6 +364,9 @@ public final class ImportExportProcedureTest extends BaseJDBCTestCase {
         
         JDBC.assertFullResultSet(rs, expRS, true);
         
+	//DERBY-2925: need to delete existing files first.
+        SupportFilesSetup.deleteFile("extinout/emp.dat");
+
         //-testing with different delimiters single quote(') as 
         // character delimiter
         
@@ -388,6 +403,9 @@ public final class ImportExportProcedureTest extends BaseJDBCTestCase {
         
         JDBC.assertFullResultSet(rs, expRS, true);
         
+	//DERBY-2925: need to delete existing files first.
+        SupportFilesSetup.deleteFile("extinout/emp.dat");
+
         // single quote(') as column delimiter
         
         cSt = prepareCall(
@@ -425,7 +443,10 @@ public final class ImportExportProcedureTest extends BaseJDBCTestCase {
         };
         
         JDBC.assertFullResultSet(rs, expRS, true);
-        
+       
+	//DERBY-2925: need to delete existing files first.
+        SupportFilesSetup.deleteFile("extinout/emp.dat");
+ 
         cSt = prepareCall(
             " call SYSCS_UTIL.SYSCS_EXPORT_TABLE (null, 'EX_EMP' "
             + ", 'extinout/emp.dat' , '*', '%', null) ");
@@ -474,7 +495,10 @@ public final class ImportExportProcedureTest extends BaseJDBCTestCase {
         
         st.executeUpdate(
             " insert into noncast values(2.5 , 8.999) ");
-        
+       
+	//DERBY-2925: need to delete existing files first.
+        SupportFilesSetup.deleteFile("extinout/noncast.dat");
+ 
         cSt = prepareCall(
             " call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('APP' , "
             + "'NONCAST' , 'extinout/noncast.dat'  , null , null , null) ");
@@ -535,6 +559,9 @@ public final class ImportExportProcedureTest extends BaseJDBCTestCase {
         st.executeUpdate(
             " insert into ttypes values(null , null , null)");
         
+	//DERBY-2925: need to delete existing files first.
+        SupportFilesSetup.deleteFile("extinout/ttypes.del");
+
         cSt = prepareCall(
             " call SYSCS_UTIL.SYSCS_EXPORT_TABLE (null, 'TTYPES' "
             + ", 'extinout/ttypes.del' , null, null, null) ");
@@ -581,6 +608,9 @@ public final class ImportExportProcedureTest extends BaseJDBCTestCase {
         st.executeUpdate(
             " insert into t1 values(2) ");
         
+	//DERBY-2925: need to delete existing files first.
+        SupportFilesSetup.deleteFile("extinout/t1.del");
+
         cSt = prepareCall(
             " call SYSCS_UTIL.SYSCS_EXPORT_TABLE (null, 'T1' , "
             + "'extinout/t1.del' , null, null, null) ");
@@ -683,6 +713,9 @@ public final class ImportExportProcedureTest extends BaseJDBCTestCase {
         st.executeUpdate(
             " insert into t1 values(2) ");
         
+	//DERBY-2925: need to delete existing files first.
+        SupportFilesSetup.deleteFile("extinout/t1.del");
+
         cSt = prepareCall(
             " call SYSCS_UTIL.SYSCS_EXPORT_TABLE (null, 'T1' , "
             + "'extinout/t1.del' , null, null, null) ");
@@ -800,6 +833,9 @@ public final class ImportExportProcedureTest extends BaseJDBCTestCase {
         st.executeUpdate(
             " insert into t1 values(2) ");
         
+	//DERBY-2925: need to delete existing files first.
+        SupportFilesSetup.deleteFile("extinout/t1.del");
+
         cSt = prepareCall(
             " call SYSCS_UTIL.SYSCS_EXPORT_TABLE (null, 'T1' , "
             + "'extinout/t1.del' , null, null, null) ");
@@ -994,6 +1030,9 @@ public final class ImportExportProcedureTest extends BaseJDBCTestCase {
             + "10E3, 32767, '09.39.43', "
             + "'2004-09-09 11:14:11', '\"varchar\" testing')");
         
+	//DERBY-2925: need to delete existing files first.
+        SupportFilesSetup.deleteFile("extinout/alltypes.del");
+
         cSt = prepareCall(
             " call SYSCS_UTIL.SYSCS_EXPORT_TABLE (null, "
             + "'ALLTYPES' , 'extinout/alltypes.del' , null, null, null) ");
@@ -1115,6 +1154,9 @@ public final class ImportExportProcedureTest extends BaseJDBCTestCase {
         st.executeUpdate(
             " insert into table2 values('Leo',102, 23.4, 'I')");
         
+	//DERBY-2925: need to delete existing files first.
+        SupportFilesSetup.deleteFile("extinout/import.del");
+
         cSt = prepareCall(
             " call SYSCS_UTIL.SYSCS_EXPORT_QUERY('select "
             + "c1,c3,c4 from table2' , 'extinout/import.del' , "
@@ -1143,7 +1185,10 @@ public final class ImportExportProcedureTest extends BaseJDBCTestCase {
         
         assertUpdateCount(st, 3,
             " delete from table1");
-        
+       
+	//DERBY-2925: need to delete existing files first.
+        SupportFilesSetup.deleteFile("extinout/import.del");
+ 
         cSt = prepareCall(
             " call SYSCS_UTIL.SYSCS_EXPORT_TABLE(null , 'TABLE2' "
             + ", 'extinout/import.del',  null, null, null) ");
@@ -1185,7 +1230,10 @@ public final class ImportExportProcedureTest extends BaseJDBCTestCase {
         
         //check null values import to identity columns should also 
         // fail
-        
+       
+	//DERBY-2925: need to delete existing files first.
+        SupportFilesSetup.deleteFile("extinout/import.del");
+ 
         cSt = prepareCall(
             "call SYSCS_UTIL.SYSCS_EXPORT_TABLE(null , 'TABLE2' "
             + ", 'extinout/import.del' , null, null, null) ");
@@ -1226,6 +1274,9 @@ public final class ImportExportProcedureTest extends BaseJDBCTestCase {
         st.executeUpdate(
             " insert into child values (1) , (2) , (3) , (4) ");
         
+	//DERBY-2925: need to delete existing files first.
+        SupportFilesSetup.deleteFile("extinout/parent.del");
+
         cSt = prepareCall(
             " call SYSCS_UTIL.SYSCS_EXPORT_QUERY('select * from "
             + "parent where a < 3' , 'extinout/parent.del' , null, "
@@ -1335,6 +1386,9 @@ public final class ImportExportProcedureTest extends BaseJDBCTestCase {
         String expected = rs.getString(1);
         assertTrue(expected.startsWith("Essential Duties and Responsibilities (include"));
         
+	//DERBY-2925: need to delete existing files first.
+        SupportFilesSetup.deleteFile("extinout/pinfo.del");
+
         cSt = prepareCall(
             " CALL SYSCS_UTIL.SYSCS_EXPORT_TABLE ('APP', "
             + "'POSITION_INFO', 'extinout/pinfo.del', null, null, null)");
@@ -1371,7 +1425,10 @@ public final class ImportExportProcedureTest extends BaseJDBCTestCase {
         rs.next();
         expected = rs.getString(1);
         assertTrue(expected.startsWith("Essential Duties and Responsibilities (include"));
-        
+      
+	//DERBY-2925: need to delete existing files first.
+        SupportFilesSetup.deleteFile("extinout/autoinc.dat");
+	
         //test for autoincrement values
         
         cSt = prepareCall(
@@ -1494,7 +1551,10 @@ public final class ImportExportProcedureTest extends BaseJDBCTestCase {
         
         st.executeUpdate(
             " insert into \"Group\".\"Order\" values(5, 6, 'mouse') ");
-        
+       
+	//DERBY-2925: need to delete existing files first.
+        SupportFilesSetup.deleteFile("extinout/order.dat");
+ 
         //following export should fail because schema name is not 
         // matching the way it is defined using delimited quotes.
         
@@ -1502,7 +1562,10 @@ public final class ImportExportProcedureTest extends BaseJDBCTestCase {
             "call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('GROUP', "
             + "'Order' , 'extinout/order.dat', null, null, null) ");
         assertStatementError("38000", cSt);
-        
+       
+	//DERBY-2925: need to delete existing files first.
+        SupportFilesSetup.deleteFile("extinout/order.dat");
+ 
         //following export should fail because table name is not 
         // matching the way it is defined in the quotes.
         
@@ -1511,6 +1574,9 @@ public final class ImportExportProcedureTest extends BaseJDBCTestCase {
             + "'ORDER' , 'extinout/order.dat', null, null, null) ");
         assertStatementError("38000", cSt);
         
+	//DERBY-2925: need to delete existing files first.
+        SupportFilesSetup.deleteFile("extinout/order.dat");
+
         //following export should fail because of unquoted table 
         // name that is a reserved word.
         
@@ -1519,6 +1585,9 @@ public final class ImportExportProcedureTest extends BaseJDBCTestCase {
             + "\"Group\".Order' , 'extinout/order.dat' ,    null , "
             + "null , null ) ");
         assertStatementError("38000", cSt);
+
+	//DERBY-2925: need to delete existing files first.
+        SupportFilesSetup.deleteFile("extinout/order.dat");
         
         //following exports should pass.
         
@@ -1526,12 +1595,18 @@ public final class ImportExportProcedureTest extends BaseJDBCTestCase {
             "call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('Group', "
             + "'Order' , 'extinout/order.dat', null, null, null) ");
         assertUpdateCount(cSt, 0);
+
+	//DERBY-2925: need to delete existing files first.
+        SupportFilesSetup.deleteFile("extinout/order.dat");
         
         cSt = prepareCall(
             " call SYSCS_UTIL.SYSCS_EXPORT_QUERY('select * from "
             + "\"Group\".\"Order\"' , 'extinout/order.dat' ,    "
             + "null , null , null ) ");
         assertUpdateCount(cSt, 0);
+
+	//DERBY-2925: need to delete existing files first.
+        SupportFilesSetup.deleteFile("extinout/order.dat");
         
         cSt = prepareCall(
             " call SYSCS_UTIL.SYSCS_EXPORT_QUERY('select "
@@ -1539,7 +1614,7 @@ public final class ImportExportProcedureTest extends BaseJDBCTestCase {
             + "\"Group\".\"Order\"' , 'extinout/order.dat' ,    "
             + "null , null , null ) ");
         assertUpdateCount(cSt, 0);
-        
+
         //following import should fail because schema name is not 
         // matching the way it is defined using delimited quotes.
         
@@ -1694,7 +1769,10 @@ public final class ImportExportProcedureTest extends BaseJDBCTestCase {
         st.executeUpdate(
             " insert into inventory.orderTable values(104, 8, "
             + "'buffolo wings') ");
-        
+       
+	//DERBY-2925: need to delete existing files first.
+        SupportFilesSetup.deleteFile("extinout/order.dat");
+ 
         //following export should fail because schema name is not 
         // in upper case.
         
@@ -1702,6 +1780,9 @@ public final class ImportExportProcedureTest extends BaseJDBCTestCase {
             "call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('inventory', "
             + "'ORDERTABLE' , 'extinout/order.dat', null, null, null) ");
         assertStatementError("38000", cSt);
+
+	//DERBY-2925: need to delete existing files first.
+        SupportFilesSetup.deleteFile("extinout/order.dat");
         
         //following export should fail because table name is not 
         // in upper case.
@@ -1710,6 +1791,9 @@ public final class ImportExportProcedureTest extends BaseJDBCTestCase {
             "call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('INVENTORY', "
             + "'ordertable' , 'extinout/order.dat', null, null, null) ");
         assertStatementError("38000", cSt);
+
+	//DERBY-2925: need to delete existing files first.
+        SupportFilesSetup.deleteFile("extinout/order.dat");
         
         //following export should pass.
         
@@ -1717,7 +1801,7 @@ public final class ImportExportProcedureTest extends BaseJDBCTestCase {
             "call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('INVENTORY', "
             + "'ORDERTABLE' , 'extinout/order.dat', null, null, null) ");
         assertUpdateCount(cSt, 0);
-        
+
         //following import should fail because schema name is not 
         // in upper case
         
@@ -1827,6 +1911,9 @@ public final class ImportExportProcedureTest extends BaseJDBCTestCase {
         st.executeUpdate(
             " insert into iep.t1 values(100) , (101) , (102) , "
             + "(103) , (104) , (105) , (106)");
+
+	//DERBY-2925: need to delete existing files first.
+        SupportFilesSetup.deleteFile("extout/nodir/t1.dat");
         
         //export error casesexport can not create file
         
@@ -1834,27 +1921,39 @@ public final class ImportExportProcedureTest extends BaseJDBCTestCase {
             "call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'T1' , "
             + "'extout/nodir/t1.dat' , null, null, null) ");
         assertStatementError("XIE0I", cSt);
-        
+	
+	//DERBY-2925: need to delete existing files first.
+        SupportFilesSetup.deleteFile("extinout/t1.dat");
+
         //export table not found
         
         cSt = prepareCall(
             "call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', "
             + "'NOTABLE' , 'extinout/t1.dat' , null, null, null) ");
         assertStatementError("38000", cSt);
-        
+       
+	//DERBY-2925: need to delete existing files first.
+        SupportFilesSetup.deleteFile("extinout/t1.dat");
+ 
         //-export schema is not valid
         
         cSt = prepareCall(
             "call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('XXXX', 'T1' , "
             + "'extinout/t1.dat' , null, null, null) ");
         assertStatementError("38000", cSt);
-        
+       
+	//DERBY-2925: need to delete existing files first.
+        SupportFilesSetup.deleteFile("extout/t1.dat");
+ 
         //export query is invalid (syntax error)
         
         cSt = prepareCall(
             "call SYSCS_UTIL.SYSCS_EXPORT_QUERY('select from "
             + "t1', 'extinout/t1.dat' , null, null, null) ");
         assertStatementError("38000", cSt);
+
+	//DERBY-2925: need to delete existing files first.
+        SupportFilesSetup.deleteFile("extinout/t1.dat");
         
         //export codeset is invalid
         
@@ -1862,12 +1961,18 @@ public final class ImportExportProcedureTest extends BaseJDBCTestCase {
             "call SYSCS_UTIL.SYSCS_EXPORT_QUERY('select * from "
             + "iep.t1', 'extinout/t1.dat' , null, null, 'NOSUCHCODESET') ");
         assertStatementError("XIE0I", cSt);
-        
+       
+	//DERBY-2925: need to delete existing files first.
+        SupportFilesSetup.deleteFile("extinout/t1.dat");
+ 
         cSt = prepareCall(
             " call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('XXXX', 'T1' , "
             + "'extinout/t1.dat' , null, null, null) ");
         assertStatementError("38000", cSt);
-        
+       
+	//DERBY-2925: need to delete existing files first.
+        SupportFilesSetup.deleteFile("extinout/t1.dat");
+ 
         //export delimiter errror casesperiod can not be used as 
         // character ot column delimiter
         
@@ -1875,11 +1980,17 @@ public final class ImportExportProcedureTest extends BaseJDBCTestCase {
             "call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'T1' , "
             + "'extinout/t1.dat' , null, '.', null) ");
         assertStatementError("XIE0K", cSt);
-        
+       
+	//DERBY-2925: need to delete existing files first.
+        SupportFilesSetup.deleteFile("extinout/t1.dat");
+ 
         cSt = prepareCall(
             " call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'T1' , "
             + "'extinout/t1.dat' , '.', null, null) ");
         assertStatementError("XIE0J", cSt);
+
+	//DERBY-2925: need to delete existing files first.
+        SupportFilesSetup.deleteFile("extinout/t1.dat");
         
         //same delimter can not be used as character and column 
         // delimters
@@ -1888,6 +1999,9 @@ public final class ImportExportProcedureTest extends BaseJDBCTestCase {
             "call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'T1' , "
             + "'extinout/t1.dat' , ';', ';', null) ");
         assertStatementError("XIE0J", cSt);
+
+	//DERBY-2925: need to delete existing files first.
+        SupportFilesSetup.deleteFile("extinout/t1.dat");
         
         //space character can not be a delimiter
         
@@ -1895,11 +2009,17 @@ public final class ImportExportProcedureTest extends BaseJDBCTestCase {
             "call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'T1' , "
             + "'extinout/t1.dat' , ' ', ';', null) ");
         assertStatementError("XIE0J", cSt);
+
+	//DERBY-2925: need to delete existing files first.
+        SupportFilesSetup.deleteFile("extinout/t1.dat");
         
         cSt = prepareCall(
             " call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'T1' , "
             + "'extinout/t1.dat' , null, ' ', null) ");
         assertStatementError("XIE0J", cSt);
+
+	//DERBY-2925: need to delete existing files first.
+        SupportFilesSetup.deleteFile("extinout/t1.dat");
         
         //if emtry strinng is passed actual value delimiter should 
         // be spaceand the that should become a invalid delimiter
@@ -1908,11 +2028,17 @@ public final class ImportExportProcedureTest extends BaseJDBCTestCase {
             "call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'T1' , "
             + "'extinout/t1.dat' , '', ';', null) ");
         assertStatementError("XIE0J", cSt);
+
+	//DERBY-2925: need to delete existing files first.
+        SupportFilesSetup.deleteFile("extinout/t1.dat");
         
         cSt = prepareCall(
             " call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'T1' , "
             + "'extinout/t1.dat' , null, '', null) ");
         assertStatementError("XIE0J", cSt);
+
+	//DERBY-2925: need to delete existing files first.
+        SupportFilesSetup.deleteFile("extinout/t1.dat");
         
         //more than one character passed to the delimiters get 
         // truncated to onefollowing one should give error because 
@@ -1927,6 +2053,9 @@ public final class ImportExportProcedureTest extends BaseJDBCTestCase {
         
         st.executeUpdate(
             "set schema iep");
+
+	//DERBY-2925: need to delete existing files first.
+        SupportFilesSetup.deleteFile("extinout/t1.dat");
         
         cSt = prepareCall(
             " call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'T1' , "
@@ -1935,7 +2064,7 @@ public final class ImportExportProcedureTest extends BaseJDBCTestCase {
         
         assertUpdateCount(st, 7,
             " delete from t1 ");
-        
+
         cSt = prepareCall(
             " call SYSCS_UTIL.SYSCS_IMPORT_TABLE('IEP', 'T1' , "
             + "'extinout/t1.dat' , null, null, 'utf-8', 0) ");
@@ -1959,6 +2088,9 @@ public final class ImportExportProcedureTest extends BaseJDBCTestCase {
         };
         
         JDBC.assertFullResultSet(rs, expRS, true);
+
+	//DERBY-2925: need to delete existing files first.
+        SupportFilesSetup.deleteFile("extin/nodir/t1.dat");
         
         //import error casesimport can not find input file
         
@@ -1966,14 +2098,14 @@ public final class ImportExportProcedureTest extends BaseJDBCTestCase {
             "call SYSCS_UTIL.SYSCS_IMPORT_TABLE('IEP', 'T1' , "
             + "'extin/nodir/t1.dat' , null, null, null, 0) ");
         assertStatementError("38000", cSt);
-        
+       
         //import table not found
         
         cSt = prepareCall(
             "call SYSCS_UTIL.SYSCS_IMPORT_TABLE ('IEP', "
             + "'NOTABLE' , 'extinout/t1.dat' , null, null, null, 0) ");
         assertStatementError("XIE0M", cSt);
-        
+       
         //import schema is not valid
         
         cSt = prepareCall(
@@ -2039,7 +2171,10 @@ public final class ImportExportProcedureTest extends BaseJDBCTestCase {
         };
         
         JDBC.assertFullResultSet(rs, expRS, true);
-        
+       
+	//DERBY-2925: need to delete existing files first.
+        SupportFilesSetup.deleteFile("extinout/temp1.dat");
+ 
         //export to from a temporary table
         
         cSt = prepareCall(
@@ -2131,7 +2266,10 @@ public final class ImportExportProcedureTest extends BaseJDBCTestCase {
         
         st.executeUpdate(
             " insert into t3 values(4 , 3.5 , 8.6 , 'test strings')");
-        
+
+	//DERBY-2925: need to delete existing files first.
+        SupportFilesSetup.deleteFile("extinout/t3.dat");
+
         cSt = prepareCall(
             " call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'T3' , "
             + "'extinout/t3.dat' , null, null, null) ");
@@ -2204,7 +2342,10 @@ public final class ImportExportProcedureTest extends BaseJDBCTestCase {
         
         assertUpdateCount(st, 12,
             "delete from t3 ");
-        
+       
+	//DERBY-2925: need to delete existing files first.
+        SupportFilesSetup.deleteFile("extinout/t3.dat");
+ 
         cSt = prepareCall(
             " call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'T3' , "
             + "'extinout/t3.dat' , ';', '^', 'utf-16') ");
@@ -2263,7 +2404,10 @@ public final class ImportExportProcedureTest extends BaseJDBCTestCase {
         
         st.executeUpdate(
             " insert into parent values (1) , (2) , (3) , (4) ");
-        
+       
+	//DERBY-2925: need to delete existing files first.
+        SupportFilesSetup.deleteFile("extinout/parent.del");
+ 
         cSt = prepareCall(
             " call SYSCS_UTIL.SYSCS_EXPORT_QUERY('select * from "
             + "parent where a < 3' , 'extinout/parent.del' , null, "

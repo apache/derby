@@ -52,6 +52,7 @@ public class ImportExportLobTest extends ImportExportBaseTest
 
     String fileName; // main file used to perform import/export.
     String lobsFileName; // file name used to store lobs.
+    String lobsFileName2; // file name used to store lobs.
 
     public ImportExportLobTest(String name) throws SQLException {
         super(name);
@@ -60,6 +61,8 @@ public class ImportExportLobTest extends ImportExportBaseTest
             (SupportFilesSetup.getReadWrite("books.del")).getPath();
         lobsFileName = 
             (SupportFilesSetup.getReadWrite("books_lobs.dat")).getPath();
+	lobsFileName2 =
+            (SupportFilesSetup.getReadWrite("unql_books_lobs.dat")).getPath();
     }
 
     /**
@@ -92,6 +95,9 @@ public class ImportExportLobTest extends ImportExportBaseTest
                               "C1 varchar(20)," + 
                               "C2 varchar(20)," +
                               "C3 varchar(20))");
+		    s.execute("CREATE TABLE derby_2925_lob(id int," +
+			      "name varchar(30), content clob," +
+			      "pic blob)");
                 }
             };
     }
@@ -111,8 +117,6 @@ public class ImportExportLobTest extends ImportExportBaseTest
         SupportFilesSetup.deleteFile(fileName);
         SupportFilesSetup.deleteFile(lobsFileName);
     }
-
-    
 
     /**
      * Test import/export of a table, using 
@@ -144,6 +148,9 @@ public class ImportExportLobTest extends ImportExportBaseTest
         doImportData(null, "BOOKS_IMP", "PIC, CONTENT, NAME, ID", 
                      "4, 3, 2, 1",  fileName, null, null, null, 1);
         verifyData("PIC, CONTENT, NAME, ID");
+	
+	//DERBY-2925: need to delete export files first
+	SupportFilesSetup.deleteFile(fileName);
 
         // test with  non-default delimiters. 
         doExportQuery("select * from BOOKS_IMP", fileName,
@@ -172,6 +179,9 @@ public class ImportExportLobTest extends ImportExportBaseTest
         doImportData(null, "BOOKS_IMP", "ID, CONTENT, NAME", "1, 3, 2",
                      fileName, null, null, null, 1);
         verifyData("ID, CONTENT, NAME");
+
+	//DERBY-2925: need to delete export files first
+        SupportFilesSetup.deleteFile(fileName);
 
         // test with  non-default delimiters. 
         doExportQuery("select id, name, content, pic from BOOKS",  
@@ -214,6 +224,8 @@ public class ImportExportLobTest extends ImportExportBaseTest
         // export the invalid hex strings from the table to a file. 
         doExportTable("APP", "HEX_TAB", fileName, null, null , null);
 
+	//DERBY-2925: need to delete export files first
+        SupportFilesSetup.deleteFile(fileName);
 
         // attempt to import the invalid hex string data into a table 
         // with binary columns. It should fail.
@@ -229,6 +241,9 @@ public class ImportExportLobTest extends ImportExportBaseTest
              assertSQLState("XIE0N", e);
         }
 
+	//DERBY-2925: need to delete export files first
+        SupportFilesSetup.deleteFile(fileName);
+
         try {
             doExportQuery("select * from hex_tab where id = 3",  
                           fileName,  null, null, null);
@@ -240,6 +255,9 @@ public class ImportExportLobTest extends ImportExportBaseTest
         } catch (SQLException e) {
             assertSQLState("XIE0N", e);
         }
+
+	//DERBY-2925: need to delete export files first
+        SupportFilesSetup.deleteFile(fileName);
 
         try {
             doExportQuery("select * from hex_tab where id = 4",  
@@ -284,10 +302,13 @@ public class ImportExportLobTest extends ImportExportBaseTest
         // lob data file should get crated at the same location, where
         // the main export file is created. And also perform import/export
         // using "UTF-16" code set.
-        
+       
+	// delete the export files.
+        SupportFilesSetup.deleteFile(lobsFileName2);
+ 
         doExportTableLobsToExtFile("APP", "BOOKS", fileName, 
                                     "\t", "|", "UTF-16", 
-                                   "unql_books_lobs.dat");
+                                   lobsFileName2);
         // DERBY-2546 - with JSR this hits a JVM issue
         if (JDBC.vmSupportsJDBC3()) 
         {
@@ -319,6 +340,10 @@ public class ImportExportLobTest extends ImportExportBaseTest
                                   "4, 3, 2, 1", fileName, null, null, null, 1);
         verifyData("PIC, CONTENT, NAME, ID");
 
+	//DERBY-2925: need to delete export files first
+        SupportFilesSetup.deleteFile(fileName);
+        SupportFilesSetup.deleteFile(lobsFileName);
+
         // test with  non-default delimiters. 
         doExportQueryLobsToExtFile("select * from BOOKS_IMP", fileName,
                                    ";", "%" , null, lobsFileName);
@@ -348,6 +373,10 @@ public class ImportExportLobTest extends ImportExportBaseTest
                                   "1, 3, 2", fileName, null, null, null, 1);
         verifyData("ID, CONTENT, NAME");
 
+	//DERBY-2925: need to delete export files first
+        SupportFilesSetup.deleteFile(fileName);
+        SupportFilesSetup.deleteFile(lobsFileName);
+
         // test with  non-default delimiters. 
         doExportQueryLobsToExtFile("select id, name, content, pic from BOOKS",  
                                    fileName,  "$", "!" , null, lobsFileName);
@@ -370,12 +399,20 @@ public class ImportExportLobTest extends ImportExportBaseTest
             assertSQLState("XIE0J", e);
         }
 
+	//DERBY-2925: need to delete export files first
+        SupportFilesSetup.deleteFile(fileName);
+        SupportFilesSetup.deleteFile(lobsFileName);
+
         try {
             doExportQueryLobsToExtFile("select * from BOOKS", fileName,
                                        "|", "f", null, lobsFileName);
         } catch (SQLException e) {
             assertSQLState("XIE0J", e);
         }
+
+	//DERBY-2925: need to delete export files first
+        SupportFilesSetup.deleteFile(fileName);
+        SupportFilesSetup.deleteFile(lobsFileName);
 
         doExportQueryLobsToExtFile("select * from BOOKS where id < 10", 
                                    fileName, null, null, null, lobsFileName);
@@ -416,6 +453,9 @@ public class ImportExportLobTest extends ImportExportBaseTest
             assertSQLState("XIE0Q", e);
         }
 
+	//DERBY-2925: need to delete export files first
+        SupportFilesSetup.deleteFile(fileName);
+
         // export of lob data into an external file.
         doExportTableLobsToExtFile("APP", "BOOKS", fileName, 
                                    null, null , null, 
@@ -431,6 +471,46 @@ public class ImportExportLobTest extends ImportExportBaseTest
             assertSQLState("XIE0P", e);
         }
     }
+
+    public void testDerby2955ExportQueryLobs()
+	throws SQLException
+    {
+	doExportTableLobsToExtFile("APP", "DERBY_2925_LOB", fileName,
+                                   "\t", "|", "UTF-16",
+                                   lobsFileName);
+	try {
+       	    doExportTableLobsToExtFile("APP", "DERBY_2925_LOB", fileName,
+                                   "\t", "|", "UTF-16",
+                                   lobsFileName);
+	    fail("export should have failed as the data file exists.");
+	}
+	catch (SQLException e) {
+            assertSQLState("XIE0S", e);
+        }
+
+	//DERBY-2925: need to delete export files first
+        SupportFilesSetup.deleteFile(fileName);
+        SupportFilesSetup.deleteFile(lobsFileName);
+
+	doExportTableLobsToExtFile("APP", "DERBY_2925_LOB", fileName,
+                                   "\t", "|", "UTF-16",
+                                   lobsFileName);
+        // delete the data file, and then perform export
+	// export should fail with lob file already exists error. 
+	SupportFilesSetup.deleteFile(fileName);
+
+        try {
+            doExportTableLobsToExtFile("APP", "DERBY_2925_LOB", fileName,
+                                   "\t", "|", "UTF-16",
+                                   lobsFileName);
+            fail("export should have failed as the data file exists.");
+        }
+        catch (SQLException e) {
+            assertSQLState("XIE0T", e);
+        }
+    }
+
+
 
 
 

@@ -70,7 +70,7 @@ permission java.util.PropertyPermission "derby.storage.jvmInstanceId",
   // Import/export and other support files from these locations in tests
   permission java.io.FilePermission "${user.dir}${/}extin${/}-", "read";
   permission java.io.FilePermission "${user.dir}${/}extinout${/}-", "read,  write, delete";
-  permission java.io.FilePermission "${user.dir}${/}extout${/}-", "write";
+  permission java.io.FilePermission "${user.dir}${/}extout${/}-", "read,write";
   permission java.io.FilePermission "${user.dir}${/}extinout", "read,write";
   
   // These permissions are needed to load the JCE for encryption with Sun and IBM JDK131.

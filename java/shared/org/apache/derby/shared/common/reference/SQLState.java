@@ -1725,6 +1725,8 @@ public interface SQLState {
 	String LOB_DATA_FILE_NOT_FOUND                                 ="XIE0P.S";
 	String LOB_DATA_FILE_NULL                                      ="XIE0Q.S";
 	String UNEXPECTED_IMPORT_ERROR                       ="XIE0R.S";
+	String DATA_FILE_EXISTS		                     ="XIE0S.S";
+	String LOB_DATA_FILE_EXISTS                          ="XIE0T.S";
 
 
 

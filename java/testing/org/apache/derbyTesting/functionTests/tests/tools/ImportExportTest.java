@@ -217,6 +217,8 @@ public class ImportExportTest extends BaseJDBCTestCase {
 			 String charDel, 
 			 String codeset) throws SQLException 
 	{
+		 //DERBY-2925: need to delete existing files first.
+        	 SupportFilesSetup.deleteFile("extinout/" + fromTable + ".dat");
 		 String expsql = "call SYSCS_UTIL.SYSCS_EXPORT_TABLE (? , ? , ? , ?, ? , ?)";
 		 PreparedStatement ps = c.prepareStatement(expsql);
 		 ps.setString(1 , "APP");

@@ -347,23 +347,23 @@ public final class XMLTypeAndOpsTest extends BaseJDBCTestCase {
 
         CallableStatement cSt = prepareCall(
             "CALL SYSCS_UTIL.SYSCS_EXPORT_TABLE ("
-            + "  null, 'T1', 'xmlexport.del', null, null, null)");
+            + "  null, 'T1', 'extinout/xmlexport.del', null, null, null)");
 
         assertStatementError("42Z71", cSt);
         
         cSt = prepareCall(
             " CALL SYSCS_UTIL.SYSCS_EXPORT_QUERY("
-            + "  'select x from t1', 'xmlexport.del', null, null, null)");
+            + "  'select x from t1', 'extinout/xmlexport.del', null, null, null)");
         assertStatementError("42Z71", cSt);
 
         cSt = prepareCall(
             " CALL SYSCS_UTIL.SYSCS_IMPORT_TABLE ("
-            + "  null, 'T1', 'shouldntmatter.del', null, null, null, 0)");
+            + "  null, 'T1', 'extinout/shouldntmatter.del', null, null, null, 0)");
         assertStatementError("XIE0B", cSt);
         
         cSt = prepareCall(
             " CALL SYSCS_UTIL.SYSCS_IMPORT_DATA ("
-            + "  NULL, 'T1', null, '2', 'shouldntmatter.del', "
+            + "  NULL, 'T1', null, '2', 'extinout/shouldntmatter.del', "
             + "null, null, null,0)");
         assertStatementError("XIE0B", cSt);
 

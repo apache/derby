@@ -82,6 +82,11 @@ public class ImportExportBinaryDataTest extends ImportExportBaseTest {
                               "C1 varchar(20)," + 
                               "C2 varchar(20)," +
                               "C3 varchar(20))");
+		    // Create a table to test
+		    // DERBY-2925: Prevent export from overwriting existing files
+		    s.execute("create table derby_2925_tab(a varchar( 50 )," +
+			      "b varchar( 50 ))");
+
                 }
             };
     }
@@ -98,7 +103,15 @@ public class ImportExportBinaryDataTest extends ImportExportBaseTest {
         s.executeUpdate("DELETE FROM BIN_TAB_IMP");
         s.close();
     }
-    
+    /**
+     * delete export/import files. 
+     * @throws Exception
+     */
+    protected void tearDown() throws Exception {
+	SupportFilesSetup.deleteFile(fileName);
+        super.tearDown();
+
+    }
 
     /**
      * Test import/export of a table, using 
@@ -130,6 +143,9 @@ public class ImportExportBinaryDataTest extends ImportExportBaseTest {
         doImportData(null, "BIN_TAB_IMP", "C_LVBD, C_VBD, C_BD, ID", 
                      "4, 3, 2, 1",  fileName, null, null, null, 1);
         verifyData("C_LVBD, C_VBD, C_BD, ID");
+	
+	//DERBY-2925: need to delete existing files first.
+	SupportFilesSetup.deleteFile(fileName);
 
         // test with  non-default delimiters. 
         doExportQuery("select * from BIN_TAB", fileName,
@@ -158,7 +174,9 @@ public class ImportExportBinaryDataTest extends ImportExportBaseTest {
         doImportData(null, "BIN_TAB_IMP", "ID, C_VBD, C_BD", "1, 3, 2",
                      fileName, null, null, null, 1);
         verifyData("ID, C_VBD, C_BD");
-
+	
+	//DERBY-2925: need to delete the file first
+	SupportFilesSetup.deleteFile(fileName);
         // test with  non-default delimiters. 
         doExportQuery("select id, c_bd, c_vbd, c_lvbd from BIN_TAB",  
                       fileName,  "$", "!" , null);
@@ -179,20 +197,20 @@ public class ImportExportBinaryDataTest extends ImportExportBaseTest {
         } catch (SQLException e) {
             assertSQLState("XIE0J", e);
         }
-
+	SupportFilesSetup.deleteFile(fileName);
         try {
             doExportQuery("select * from BIN_TAB", fileName,
                           "|", "f", null);
         } catch (SQLException e) {
             assertSQLState("XIE0J", e);
         }
-
+	SupportFilesSetup.deleteFile(fileName);
         try {
             doExportTable("APP", "BIN_TAB", fileName, "B", null , null);
         } catch (SQLException e) {
             assertSQLState("XIE0J", e);
         }
-
+	SupportFilesSetup.deleteFile(fileName);
         doExportTable("APP", "BIN_TAB", fileName, null, null , null);
 
         try {
@@ -273,8 +291,45 @@ public class ImportExportBinaryDataTest extends ImportExportBaseTest {
             assertSQLState("XIE0N", e);
         }
     }
+    /*
+     * DERBY-2925: Prevent export from overwriting existing files
+     * Tests for preventing overwriting existing files
+     * when exporting tables.
+     */
+    public void testDerby2925ExportTable()
+        throws SQLException
+    {
+	doExportTable("APP", "DERBY_2925_TAB", fileName, null, null , null);
+	
+	try {
+	    doExportTable("APP", "DERBY_2925_TAB", fileName, null, null , null);
+	    fail("export should have failed on existing data file.");
+	}
+	catch (SQLException e) {
+	    assertSQLState("XIE0S", e);
+	}
 
+    }
+    /*
+     * DERBY-2925: Prevent export from overwriting existing files
+     * Tests for preventing overwriting existing files
+     * when exporting tables.
+     */
+    public void testDerby2925ExportQuery()
+        throws SQLException
+    {
+	doExportQuery("select * from DERBY_2925_TAB", fileName,
+                      null, null , null);
+        try {
+	    doExportQuery("select * from DERBY_2925_TAB", fileName,
+                      	  null, null , null);
+            fail("exportQuery should have failed on existing data file.");
+        }
+        catch (SQLException e) {
+            assertSQLState("XIE0S", e);
+        }
 
+    }
     /* 
      * Verifies data in the import test table (BIN_TAB_IMP) is same 
      * as the test table from which the data was exported earlier(BIN_TAB). 
@@ -336,5 +391,5 @@ public class ImportExportBinaryDataTest extends ImportExportBaseTest {
         s.executeUpdate("insert into bin_tab values " + 
                         "(13, X'212C3B24', X'2422412221', " + 
                         "  X'212421222C23B90A2124')");
-    }
+	}
 }

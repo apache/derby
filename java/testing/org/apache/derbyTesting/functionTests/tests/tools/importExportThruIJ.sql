@@ -337,5 +337,84 @@ select * from derby_2193_lineNumber;
 -- end test case for derby-2193:
 --
 
+--
+-- begin test case for derby-2925:
+--
+-- Prevent export from overwriting existing files 
+--
 
+create table derby_2925_tab
+(
+    a  varchar( 50 ),
+    b  varchar( 50 )
+);
 
+--
+-- Testing SYSCS_UTIL.SYSCS_EXPORT_TABLE
+--
+
+CALL SYSCS_UTIL.SYSCS_EXPORT_TABLE
+( null, 'DERBY_2925_TAB', 'extout/derby-2925.txt', null, null, null);
+--
+-- Errors should should happen in the second
+-- call to SYSCS_UTIL.SYSCS_EXPORT_TABLE
+-- since extout/derby-2925.txt already exists. 
+--
+CALL SYSCS_UTIL.SYSCS_EXPORT_TABLE
+( null, 'DERBY_2925_TAB', 'extout/derby-2925.txt', null, null, null);
+
+--
+-- Testing SYSCS_UTIL.SYSCS_EXPORT_QUERY
+--
+
+CALL SYSCS_UTIL.SYSCS_EXPORT_QUERY
+('select * from DERBY_2925_TAB', 'extout/derby-2925-query.dat', null , null , null ) ;
+--
+-- Errors should should happen in the second
+-- call to SYSCS_UTIL.SYSCS_EXPORT_QUERY
+-- since extout/derby-2925-query.dat already exists.
+--
+CALL SYSCS_UTIL.SYSCS_EXPORT_QUERY
+('select * from DERBY_2925_TAB', 'extout/derby-2925-query.dat', null , null , null ) ;
+
+--
+-- Testing SYSCS_UTIL.SYSCS_EXPORT_QUERY_LOBS_TO_EXTFILE
+--
+
+create table derby_2925_lob
+(
+	id 	int,
+        name 	varchar(30),
+        content clob, 
+        pic 	blob 
+);
+
+--
+-- Testing SYSCS_UTIL.SYSCS_EXPORT_QUERY_LOBS_TO_EXTFILE
+-- where data file exists.
+--
+
+CALL SYSCS_UTIL.SYSCS_EXPORT_QUERY_LOBS_TO_EXTFILE
+('SELECT * FROM DERBY_2925_LOB','extout/derby-2925_data.dat', '\t' ,'|','UTF-16','extout/derby-2925_lobs.dat');
+--
+-- Errors should should happen in the second
+-- call to SYSCS_UTIL.SYSCS_EXPORT_QUERY_LOBS_TO_EXTFILE
+-- since extout/derby-2925_data.dat already exists.
+--
+CALL SYSCS_UTIL.SYSCS_EXPORT_QUERY_LOBS_TO_EXTFILE
+('SELECT * FROM DERBY_2925_LOB','extout/derby-2925_data.dat', '\t' ,'|','UTF-16','extout/derby-2925_lobs.dat');
+
+--
+-- Testing SYSCS_UTIL.SYSCS_EXPORT_QUERY_LOBS_TO_EXTFILE
+-- where lob file exists.
+--
+-- Errors should should happen in the 
+-- call to SYSCS_UTIL.SYSCS_EXPORT_QUERY_LOBS_TO_EXTFILE
+-- since extout/derby-2925_lobs.dat already exists.
+--
+
+CALL SYSCS_UTIL.SYSCS_EXPORT_QUERY_LOBS_TO_EXTFILE
+('SELECT * FROM DERBY_2925_LOB','extout/derby-2925_data1.dat', '\t' ,'|','UTF-16','extout/derby-2925_lobs.dat');
+
+--
+-- end test case for derby-2925:

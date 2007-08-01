@@ -36,6 +36,7 @@ import org.apache.derbyTesting.junit.TestConfiguration;
 
 import org.apache.derbyTesting.functionTests.tests.jdbcapi.BlobStoredProcedureTest;
 import org.apache.derbyTesting.functionTests.tests.jdbcapi.ClobStoredProcedureTest;
+import org.apache.derbyTesting.junit.SupportFilesSetup;
 
 
 /**
@@ -312,6 +313,11 @@ public class Changes10_3 extends UpgradeChange {
                 (SupportFilesSetup.getReadWrite("iet1_lobs.dat")).getPath();
 
             Statement s = createStatement();
+
+	    //DERBY-2925: need to delete existing files first.
+            SupportFilesSetup.deleteFile(fileName);
+            SupportFilesSetup.deleteFile(lobsFileName);
+
             s.execute(
                 "call SYSCS_UTIL.SYSCS_EXPORT_TABLE_LOBS_TO_EXTFILE" +  
                 "(null , 'IET1' , '"  +  fileName  + 
@@ -319,6 +325,11 @@ public class Changes10_3 extends UpgradeChange {
             s.execute("call SYSCS_UTIL.SYSCS_IMPORT_TABLE_LOBS_FROM_EXTFILE(" + 
                       "null, 'IET1' , '" + fileName + 
                       "', null, null, null, 0)");
+
+	    //DERBY-2925: need to delete existing files first.
+            SupportFilesSetup.deleteFile(fileName);
+            SupportFilesSetup.deleteFile(lobsFileName);
+
             s.execute("call SYSCS_UTIL.SYSCS_EXPORT_QUERY_LOBS_TO_EXTFILE(" +
                       "'select * from IET1', '" +  fileName + 
                       "' , null, null, null, '" + lobsFileName + "')");

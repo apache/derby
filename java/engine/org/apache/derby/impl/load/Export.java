@@ -26,6 +26,8 @@ import java.sql.ResultSet;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.*;    
+import org.apache.derby.iapi.util.PrivilegedFileOps;
+import java.io.File;
 import org.apache.derby.iapi.error.PublicAPI;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.error.StandardException;
@@ -41,7 +43,7 @@ public class Export extends ExportAbstract{
 	private String outputFileName;
 	/* Name of the file to  which large object data has to be exported */
 	private String lobsFileName;
-
+          
 	private void doExport() throws SQLException
 	{
 		try {
@@ -50,6 +52,15 @@ public class Export extends ExportAbstract{
 			
 			if (outputFileName == null)
 				throw LoadError.dataFileNull();
+                        else
+                        {
+                            if (dataFileExists(outputFileName))
+                                throw LoadError.dataFileExists(outputFileName);
+                        }
+
+			if (lobsFileName != null && lobsFileExists(lobsFileName))
+                                throw LoadError.lobsFileExists(lobsFileName);
+                        
 			try {
 				doAllTheWork();
 			} catch (IOException iex) {
@@ -59,7 +70,6 @@ public class Export extends ExportAbstract{
 		} catch (Exception ex) {
 			throw LoadError.unexpectedError(ex);
 		}
-
 	}
 	
 	private Export(Connection con, String schemaName , 
@@ -102,7 +112,39 @@ public class Export extends ExportAbstract{
 		lobsInExtFile = true;
 	}
 
+    /**
+     * Checks whether the lobs file exists .
+     * @param fileName  the file to to which lob data has to be exported.
+     * @exception SQLException  if file name is null.	
+     */
+	private boolean lobsFileExists(String fileName) throws SQLException {
 
+            if (fileName == null) {
+            throw PublicAPI.wrapStandardException(
+                      StandardException.newException(
+		      SQLState.LOB_DATA_FILE_NULL));
+        }
+            File file = new File(fileName);
+
+            return PrivilegedFileOps.exists(file);
+
+        }
+    /**
+     * Checks whether the data file exists .
+     * @param fileName  the file to to which lob data has to be exported.
+     * @exception SQLException  if file name is null.
+     */ 
+	private boolean dataFileExists(String fileName) throws SQLException {
+            
+            if (fileName == null) {
+            throw PublicAPI.wrapStandardException(
+                      StandardException.newException(
+                      SQLState.DATA_FILE_NULL));
+        }
+            File file = new File(fileName);
+            
+           return PrivilegedFileOps.exists(file); 
+        }
 
 	/**
 	 * SYSCS_EXPORT_TABLE  system Procedure from ij or from a Java application

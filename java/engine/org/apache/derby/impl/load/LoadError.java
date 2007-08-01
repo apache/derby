@@ -76,7 +76,20 @@ class LoadError {
     return PublicAPI.wrapStandardException(
 			   StandardException.newException(SQLState.DATA_FILE_NULL));
 	}
-
+        /**
+	   Raised if, data file exists.
+	*/
+	static SQLException dataFileExists(String fileName) {
+    return PublicAPI.wrapStandardException(
+			   StandardException.newException(SQLState.DATA_FILE_EXISTS, fileName));
+	}
+	/**
+           Raised if, lob file exists.
+        */
+        static SQLException lobsFileExists(String fileName) {
+    return PublicAPI.wrapStandardException(
+                           StandardException.newException(SQLState.LOB_DATA_FILE_EXISTS, fileName));
+        }
 	/**
 	   Raised if, the entity (ie table/view) for import/export is missing in the database.
 	*/
