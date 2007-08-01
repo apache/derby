@@ -184,6 +184,9 @@ This list includes bugs and improvements, and sub-tasks if the super-task is not
 <td><a href="http://issues.apache.org/jira/browse/DERBY-2941">DERBY-2941</a></td><td>With 10.2, Closing a resultset after retrieving a large > 32665 bytes value with Network Server does not release locks</td>
 </tr>
 <tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-2925">DERBY-2925</a></td><td>Prevent export from overwriting existing files</td>
+</tr>
+<tr>
 <td><a href="http://issues.apache.org/jira/browse/DERBY-2882">DERBY-2882</a></td><td>Remove references to JDK 1.2 and 1.3 in the documentation</td>
 </tr>
 <tr>
@@ -206,6 +209,9 @@ This list includes bugs and improvements, and sub-tasks if the super-task is not
 </tr>
 <tr>
 <td><a href="http://issues.apache.org/jira/browse/DERBY-2794">DERBY-2794</a></td><td>Document ansi trim functionality</td>
+</tr>
+<tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-2793">DERBY-2793</a></td><td>Ensure LIKE predicate follows correct rules for determing collation</td>
 </tr>
 <tr>
 <td><a href="http://issues.apache.org/jira/browse/DERBY-2789">DERBY-2789</a></td><td>DatabaseMetaData .locatorsUpdateCopy() should return true</td>
@@ -422,6 +428,9 @@ This list includes bugs and improvements, and sub-tasks if the super-task is not
 </tr>
 <tr>
 <td><a href="http://issues.apache.org/jira/browse/DERBY-2355">DERBY-2355</a></td><td>Wrong URL in Eclipse-Plugin Lab Example Jays.java</td>
+</tr>
+<tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-2350">DERBY-2350</a></td><td>Use of XML values in the action statement of a trigger throw exceptions.</td>
 </tr>
 <tr>
 <td><a href="http://issues.apache.org/jira/browse/DERBY-2331">DERBY-2331</a></td><td>Disallow code in installed jars from resolving classes in the org.apache.derby.* namespace except for public apis.</td>
@@ -917,6 +926,13 @@ This list includes bugs and improvements, and sub-tasks if the super-task is not
 <p>Compared with the previous release (10.2.2.0), Derby release 10.3.1.4 introduces the following new features and incompatibilities. These merit your special attention.</p>
 <ul>
 <li>
+<a href="#Note for DERBY-2925">
+<p>Note for DERBY-2925: 
+Prevent export from overwriting existing files
+</p>
+</a>
+</li>
+<li>
 <a href="#Note for DERBY-2757">
 <p>Note for DERBY-2757: 
 Security enhancements to the Network Server may slow down Derby's runtime performance, and
@@ -1104,6 +1120,93 @@ operations.
 </a>
 </li>
 </ul>
+<hr>
+<h3>
+<a name="Note for DERBY-2925"></a>Note for DERBY-2925</h3>
+<blockquote>
+<!-- 
+  SUMMARIZE THE ISSUE. This is a one line summary of the issue.
+
+  For instance:
+
+  Applications may no longer open two InputStreams on the same ResultSet column.
+-->
+
+<h4>Summary of Change</h4>
+<p>
+Prevent export from overwriting existing files
+</p>
+
+
+<!-- 
+  DESCRIBE WHAT IT IS THAT THE USER ACTUALLY SEES WHEN THE PROBLEM OCCURS.
+
+  For instance:
+
+  In the previous release, applications were able to open two
+  InputStreams on the same column. Depending on how these streams
+  interacted, the value siphoned out of the column was erratic. Now
+  Derby raises a SQLException when the application attempts to create
+  the second InputStream.
+-->
+
+<h4>Symptoms Seen by Applications Affected by Change</h4>
+<p>
+Due to security concerns, and to avoid accidental file damage, Export processing
+will not overwrite existing files. As a result, applications may observe some behavioral changes with respect to Export operations.
+</p>
+
+
+<!-- 
+  OPTIONAL: DESCRIBE INCOMPATIBILITIES WITH PREVIOUS RELEASE, IF ANY.
+
+  For instance:
+
+  Applications which open two InputStreams on the ResultSet column now
+  fail.
+-->
+
+<h4>Incompatibilities with Previous Release</h4>
+<p>
+<OL>
+	<LI>SYSCS_UTIL.SYSCS_EXPORT_TABLE: Exports of all the data from a table to an existing file is no longer possible and the user/application must remove the existing file, otherwise ERROR XIE0S will be returned. </LI>
+	 <LI>SYSCS_UTIL.SYSCS_EXPORT_QUERY: Exports of all the data returned from the SELECT statement to an existing file is no longer possible and the user/application must remove the existing file, otherwise ERROR XIE0S will be returned. </LI>
+	<LI>SYSCS_UTIL.SYSCS_EXPORT_QUERY_LOBS_TO_EXTFILE: Export of the result of a SELECT statement to a main data output file, and the LOB data into a large object auxiliary file to an existing file is no longer possible and the user/application must remove the existing data file and/or large object auxiliary file, otherwise ERROR XIE0S will be returned if the data file exists or ERROR XIE0T will be returned if the large object auxiliary file exists.</LI>
+
+</OL>
+</p>
+
+
+<!-- 
+  DESCRIBE WHY THE CHANGE WAS MADE.
+
+  For instance:
+
+  The previous behavior violated the JDBC standard. The new behavior
+  is correct.
+-->
+
+<h4>Rationale for Change</h4>
+<p>
+Due to security concerns and to avoid accidental file damage, Export processing will no longer overwrite an existing file.
+</p>
+
+
+<!-- 
+  OPTIONAL: DESCRIBE HOW TO REVERT TO THE PREVIOUS BEHAVIOR OR
+  OTHERWISE AVOID THE INCOMPATIBILITIES INTRODUCED BY THIS CHANGE.
+
+  For instance:
+
+  Users must recode applications which open multiple streams on the same column.
+-->
+
+<h4>Application Changes Required</h4>
+<p>
+The application needs to specify a different filename which does not exist or delete the existing file before performing the Export operation.
+</p>
+
+</blockquote>
 <hr>
 <h3>
 <a name="Note for DERBY-2757"></a>Note for DERBY-2757</h3>
