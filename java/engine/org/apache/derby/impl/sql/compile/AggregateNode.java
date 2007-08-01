@@ -498,18 +498,14 @@ public class AggregateNode extends UnaryOperatorNode
 	{
 		String	className = aggregatorClassName.toString();
 
-		TypeId compTypeId = TypeId.getSQLTypeForJavaType(className);
+		DataTypeDescriptor compType =
+            DataTypeDescriptor.getSQLDataTypeDescriptor(className);
 
 		/*
 		** Create a null of the right type.  The proper aggregators
 		** are created dynamically by the SortObservers
 		*/
-		ConstantNode nullNode = getNullNode(
-				compTypeId,
-				getContextManager(),
-				getTypeServices().getCollationType(),
-				getTypeServices().getCollationDerivation()
-				); // no params
+		ConstantNode nullNode = getNullNode(compType);
 
 		nullNode.bindExpression(
 						null,	// from
@@ -574,9 +570,7 @@ public class AggregateNode extends UnaryOperatorNode
 		** Create a result column with the aggrergate operand
 		** it.
 		*/
-		return getNullNode(this.getTypeId(),
-							getContextManager(), this.getTypeServices().getCollationType(),
-							this.getTypeServices().getCollationDerivation());
+		return getNullNode(getTypeServices());
 	}
 
 	/**

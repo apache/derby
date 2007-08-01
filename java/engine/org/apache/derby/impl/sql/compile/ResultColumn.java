@@ -319,9 +319,7 @@ public class ResultColumn extends ValueNode
 	void setExpressionToNullNode()
 		throws StandardException
 	{
-		expression = getNullNode(getTypeId(), 
-									getContextManager(), getTypeServices().getCollationType(),
-									getTypeServices().getCollationDerivation());
+		expression = getNullNode(getTypeServices());
 	}
 
 	/**
@@ -680,9 +678,7 @@ public class ResultColumn extends ValueNode
         	//eg insert into table1 values(1,null)
         	//When this method is executed for the sql above, we don't know
         	//the type of the null at this point.
-            expression = getNullNode( typeId, getContextManager(),
-            		StringDataValue.COLLATION_TYPE_UCS_BASIC,
-					StringDataValue.COLLATION_DERIVATION_IMPLICIT);
+            expression = getNullNode(bindingRC.getTypeServices());
         else if( ( expression instanceof ColumnReference) && expression.getTypeServices() == null)
         {
             // The expression must be a reference to a null column in a values table.

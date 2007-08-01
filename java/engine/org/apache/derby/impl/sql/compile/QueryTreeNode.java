@@ -743,177 +743,117 @@ public abstract class QueryTreeNode implements Visitable
 	}
 
 	/**
-	 * Get a ConstantNode to represent a typed null value. Then set it's 
-	 * collation type and derivation
+	 * Get a ConstantNode to represent a typed null value. 
 	 *
-	 * @param typeId	The TypeId of the datatype of the null value
-	 * @param cm		The ContextManager
-	 * @param collationType The collation type of the ConstantNode
-	 * @param collationDerivation The Collation Derivation of the ConstantNode
+	 * @param type Type of the null node.
 	 *
 	 * @return	A ConstantNode with the specified type, and a value of null
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public  ConstantNode getNullNode(TypeId typeId,
-			ContextManager cm, int collationType, int collationDerivation)
+	public  ConstantNode getNullNode(DataTypeDescriptor type)
 		throws StandardException
 	{
-		QueryTreeNode constantNode = null;
-		NodeFactory nf = getNodeFactory();
-
-		switch (typeId.getJDBCTypeId())
+        int constantNodeType;
+		switch (type.getTypeId().getJDBCTypeId())
 		{
 		  case Types.VARCHAR:
-			constantNode =  nf.getNode(
-										C_NodeTypes.VARCHAR_CONSTANT_NODE,
-										typeId,
-										cm);
+              constantNodeType = C_NodeTypes.VARCHAR_CONSTANT_NODE;
 			break;
 
 		  case Types.CHAR:
-			constantNode = nf.getNode(
-										C_NodeTypes.CHAR_CONSTANT_NODE,
-										typeId,
-										cm);
+              constantNodeType = C_NodeTypes.CHAR_CONSTANT_NODE;
 			break;
 
 		  case Types.TINYINT:
-			constantNode = nf.getNode(
-										C_NodeTypes.TINYINT_CONSTANT_NODE,
-										typeId,
-										cm);
+              constantNodeType = C_NodeTypes.TINYINT_CONSTANT_NODE;
 			break;
 
 		  case Types.SMALLINT:
-			constantNode = nf.getNode(
-										C_NodeTypes.SMALLINT_CONSTANT_NODE,
-										typeId,
-										cm);
+              constantNodeType = C_NodeTypes.SMALLINT_CONSTANT_NODE;
 			break;
 
 		  case Types.INTEGER:
-			constantNode = nf.getNode(
-										C_NodeTypes.INT_CONSTANT_NODE,
-										typeId,
-										cm);
+              constantNodeType = C_NodeTypes.INT_CONSTANT_NODE;
 			break;
 
 		  case Types.BIGINT:
-			constantNode = nf.getNode(
-										C_NodeTypes.LONGINT_CONSTANT_NODE,
-										typeId,
-										cm);
+              constantNodeType = C_NodeTypes.LONGINT_CONSTANT_NODE;
 			break;
 
 		  case Types.REAL:
-			constantNode = nf.getNode(
-										C_NodeTypes.FLOAT_CONSTANT_NODE,
-										typeId,
-										cm);
+              constantNodeType = C_NodeTypes.FLOAT_CONSTANT_NODE;
 			break;
 
 		  case Types.DOUBLE:
-			constantNode = nf.getNode(
-										C_NodeTypes.DOUBLE_CONSTANT_NODE,
-										typeId,
-										cm);
+              constantNodeType = C_NodeTypes.DOUBLE_CONSTANT_NODE;
 			break;
 
 		  case Types.NUMERIC:
 		  case Types.DECIMAL:
-			constantNode = nf.getNode(
-										C_NodeTypes.DECIMAL_CONSTANT_NODE,
-										typeId,
-										cm);
+              constantNodeType = C_NodeTypes.DECIMAL_CONSTANT_NODE;
 			break;
 
 		  case Types.DATE:
 		  case Types.TIME:
 		  case Types.TIMESTAMP:
-			constantNode = nf.getNode(
-										C_NodeTypes.USERTYPE_CONSTANT_NODE,
-										typeId,
-										cm);
+              constantNodeType = C_NodeTypes.USERTYPE_CONSTANT_NODE;
 			break;
 
 		  case Types.BINARY:
-			constantNode = nf.getNode(
-										C_NodeTypes.BIT_CONSTANT_NODE,
-										typeId,
-										cm);
+              constantNodeType = C_NodeTypes.BIT_CONSTANT_NODE;
 			break;
 
 		  case Types.VARBINARY:
-			constantNode = nf.getNode(
-										C_NodeTypes.VARBIT_CONSTANT_NODE,
-										typeId,
-										cm);
+              constantNodeType = C_NodeTypes.VARBIT_CONSTANT_NODE;
 			break;
 
 		  case Types.LONGVARCHAR:
-			constantNode = nf.getNode(
-										C_NodeTypes.LONGVARCHAR_CONSTANT_NODE,
-										typeId,
-										cm);
+              constantNodeType = C_NodeTypes.LONGVARCHAR_CONSTANT_NODE;
 			break;
 
 		  case Types.CLOB:
-			constantNode = nf.getNode(
-										C_NodeTypes.CLOB_CONSTANT_NODE,
-										typeId,
-										cm);
+              constantNodeType = C_NodeTypes.CLOB_CONSTANT_NODE;
 			break;
 
 		  case Types.LONGVARBINARY:
-			constantNode = nf.getNode(
-										C_NodeTypes.LONGVARBIT_CONSTANT_NODE,
-										typeId,
-										cm);
+              constantNodeType = C_NodeTypes.LONGVARBIT_CONSTANT_NODE;
 			break;
 
 		  case Types.BLOB:
-			constantNode = nf.getNode(
-										C_NodeTypes.BLOB_CONSTANT_NODE,
-										typeId,
-										cm);
+              constantNodeType = C_NodeTypes.BLOB_CONSTANT_NODE;
 			break;
 
 		  case StoredFormatIds.XML_TYPE_ID:
-			constantNode = nf.getNode(
-										C_NodeTypes.XML_CONSTANT_NODE,
-										typeId,
-										cm);
+              constantNodeType = C_NodeTypes.XML_CONSTANT_NODE;
 			break;
+            
+          case Types.BOOLEAN:
+              constantNodeType = C_NodeTypes.BOOLEAN_CONSTANT_NODE;
+              break;
 
 		  default:
-			if (typeId.getSQLTypeName().equals("BOOLEAN"))
+			if (type.getTypeId().userType())
 			{
-				constantNode = nf.getNode(
-										C_NodeTypes.BOOLEAN_CONSTANT_NODE,
-										typeId,
-										cm);
-			}
-			else if (typeId.userType())
-			{
-				constantNode = nf.getNode(
-										C_NodeTypes.USERTYPE_CONSTANT_NODE,
-										typeId,
-										cm);
+                constantNodeType = C_NodeTypes.USERTYPE_CONSTANT_NODE;
 			}
 			else
 			{
 				if (SanityManager.DEBUG)
 				SanityManager.THROWASSERT( "Unknown type " + 
-						typeId.getSQLTypeName() + " in getNullNode");
+                        type.getTypeId().getSQLTypeName() + " in getNullNode");
 				return null;
 			}
 		}
+        
+        ConstantNode constantNode = (ConstantNode) getNodeFactory().getNode(
+                constantNodeType,
+                type.getTypeId(),
+                cm);
 
-		ConstantNode cn = (ConstantNode) constantNode;
-		cn.getTypeServices().setCollationType(collationType);
-		cn.getTypeServices().setCollationDerivation(collationDerivation);
-		return cn;
+        constantNode.setType(type.getNullabilityType(true));
+
+		return constantNode;
 	}
 
 	/**

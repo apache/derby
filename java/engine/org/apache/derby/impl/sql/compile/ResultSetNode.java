@@ -1184,12 +1184,7 @@ public abstract class ResultSetNode extends QueryTreeNode
                 newResultColumn = (ResultColumn) getNodeFactory().getNode(
                     C_NodeTypes.RESULT_COLUMN,
                     colType,
-                    getNullNode(
-                        colType.getTypeId(),
-                        getContextManager(), 
-						colType.getCollationType(),
-                        colType.getCollationDerivation()
-                        ),
+                    getNullNode(colType),
                     getContextManager()
                     );
             }
