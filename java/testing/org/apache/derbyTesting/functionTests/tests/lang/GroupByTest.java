@@ -21,6 +21,7 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -110,5 +111,28 @@ public class GroupByTest extends BaseJDBCTestCase {
 		s.close();
 		rollback();
 	}
+    
+    /**
+     * DERBY-2397 showed incorrect typing of aggregate nodes
+     * that lead to a SUBSTR throwing an exception that its
+     * position/length were out of range.
+     * @throws SQLException
+     */
+    public void testDERBY2937() throws SQLException {
+        Statement s = createStatement();
+        
+        s.executeUpdate("CREATE TABLE A2937 (C CHAR(10) NOT NULL, " +
+                "D DATE NOT NULL, DC DECIMAL(6,2))");
+        s.executeUpdate("INSERT INTO A2937 VALUES ('aaa', " +
+                "DATE('2007-07-10'), 500.00)");
+        
+        ResultSet rs = s.executeQuery("SELECT A.C, SUBSTR (MAX(CAST(A.D AS CHAR(10)) || " +
+                "CAST(A.DC AS CHAR(8))), 11, 8) AS BUG " +
+                "FROM A2937 A GROUP BY A.C");
+        JDBC.assertFullResultSet(rs,
+                new String[][] {{"aaa","500.00"}});
+        s.executeUpdate("DROP TABLE A2937");
+        
+    }
 }
 

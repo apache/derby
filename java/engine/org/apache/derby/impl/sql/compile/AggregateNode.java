@@ -168,26 +168,17 @@ public class AggregateNode extends UnaryOperatorNode
 			/*
 			** Parse time.	
 			*/
-			if (getTypeServices() == null)
-			{
-				generatedRef = (ColumnReference) getNodeFactory().getNode(
-												C_NodeTypes.COLUMN_REFERENCE,
-												generatedColName,
-												null,
-												getContextManager());
-			}
-			else
-			{
-				generatedRef = (ColumnReference) getNodeFactory().getNode(
+			generatedRef = (ColumnReference) getNodeFactory().getNode(
 												C_NodeTypes.COLUMN_REFERENCE,
 												generatedRC.getName(),
 												null,
 												getContextManager());
-				generatedRef.setType(this.getTypeServices());
-			}
+
 			// RESOLVE - unknown nesting level, but not correlated, so nesting levels must be 0
+            generatedRef.setSource(generatedRC);
 			generatedRef.setNestingLevel(0);
 			generatedRef.setSourceLevel(0);
+            
 			if (tableNumber != -1)
 			{
 				generatedRef.setTableNumber(tableNumber);
