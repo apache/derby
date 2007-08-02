@@ -63,9 +63,8 @@ ij> SELECT * FROM BILL932432;
 ERROR 42X05: Table/View 'BILL932432' does not exist.
 ij> SELECT 932432;
 ERROR 42X01: Syntax error: Encountered "<EOF>" at line 1, column 13.
-ij> select SQL_TEXT from syscs_diag.statement_cache where CAST(SQL_TEXT  AS LONG VARCHAR) LIKE '%932432%';
+ij> select SQL_TEXT from syscs_diag.statement_cache where CAST(SQL_TEXT AS LONG VARCHAR) LIKE '%932432%';
 SQL_TEXT                                                                                                                        
 --------------------------------------------------------------------------------------------------------------------------------
 select SQL_TEXT from syscs_diag.statement_cache where CAST(SQL_TEXT AS LONG VARCHAR) LIKE '%932432%'                            
-select SQL_TEXT from syscs_diag.statement_cache where CAST(SQL_TEXT  AS LONG VARCHAR) LIKE '%932432%'                           
 ij> 

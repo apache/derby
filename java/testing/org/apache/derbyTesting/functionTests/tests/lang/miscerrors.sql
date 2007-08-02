@@ -54,4 +54,4 @@ VALUES FRED932432;
 SELECT * FROM BILL932432;
 SELECT 932432;
 
-select SQL_TEXT from syscs_diag.statement_cache where CAST(SQL_TEXT  AS LONG VARCHAR) LIKE '%932432%';
+select SQL_TEXT from syscs_diag.statement_cache where CAST(SQL_TEXT AS LONG VARCHAR) LIKE '%932432%';
