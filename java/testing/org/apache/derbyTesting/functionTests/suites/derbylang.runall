@@ -17,7 +17,6 @@ lang/cursorerrors.sql
 lang/datetime.sql
 lang/db2Compatibility.sql
 lang/ddlTableLockMode.sql
-lang/declareGlobalTempTableJava.java
 lang/declareGlobalTempTableJavaJDBC30.java
 lang/desc_index.sql
 lang/dropTable.sql
