@@ -1694,9 +1694,14 @@
         <isset property="derby.junit.classpath"/>
       </not>
     </condition>
+         <!--
+         Specifying max heap size (maxmemory) for JVMs spawned by this
+         target, since the default max heap size on most systems is
+         currently too low for some of the test suites. See DERBY-2988.
+         -->
   	 <junit printsummary="on"
            fork="yes" forkmode="perTest"
-           jvm="${derby.junit.jvm}"
+           jvm="${derby.junit.jvm}" maxmemory="512m"
            showoutput="yes"
            dir="junit_${derby.junit.timestamp}"
   	 	   errorproperty="tests.failed"
