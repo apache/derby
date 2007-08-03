@@ -450,10 +450,40 @@ class DRDAConnThread extends Thread {
 	protected void markCommunicationsFailure(String arg1, String arg2, String arg3,
 		String arg4) throws DRDAProtocolException
 	{
-		Object[] oa = {arg1,arg2,arg3,arg4};
-		throw DRDAProtocolException.newDisconnectException(this,oa);
+	    markCommunicationsFailure(null,arg1,arg2,arg3, arg4);
 
 	}
+        
+        
+        /**
+         * Indicate a communications failure. Log to derby.log
+         * 
+         * @param e  - Source exception that was thrown
+         * @param arg1 - info about the communications failure
+         * @param arg2 - info about the communications failure
+         * @param arg3 - info about the communications failure
+         * @param arg4 - info about the communications failure
+         *
+         * @exception DRDAProtocolException  disconnect exception always thrown
+         */
+        protected void markCommunicationsFailure(Exception e, String arg1, String arg2, String arg3,
+                String arg4) throws DRDAProtocolException
+        {
+            String dbname = null;
+   
+            if (database != null)
+            {
+                dbname = database.dbName;
+            }
+            if (e != null) {
+                println2Log(dbname,session.drdaID, e.getMessage());
+                server.consoleExceptionPrintTrace(e);
+            }
+        
+            Object[] oa = {arg1,arg2,arg3,arg4};
+            throw DRDAProtocolException.newDisconnectException(this,oa);
+        }
+
 	/**
 	 * Syntax error
 	 *

@@ -709,7 +709,7 @@ class DDMWriter
 		out.flush();
 		
 	    }catch(IOException e){
-		agent.markCommunicationsFailure ("DDMWriter.writeScalarStream()",
+		agent.markCommunicationsFailure (e,"DDMWriter.writeScalarStream()",
 						 "",
 						 e.getMessage(),
 						 "*");
