@@ -1124,19 +1124,19 @@ COLONE
 50                                                                                                                              
 ij> -- these select statements should raise an error but are successful in cloudscape
 select * from testoperatorclob where colone > 10;
-ERROR 42818: Comparisons between 'CLOB' and 'INTEGER' are not supported.
+ERROR 42818: Comparisons between 'CLOB (UCS_BASIC)' and 'INTEGER' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select * from testoperatorclob where colone < 70;
-ERROR 42818: Comparisons between 'CLOB' and 'INTEGER' are not supported.
+ERROR 42818: Comparisons between 'CLOB (UCS_BASIC)' and 'INTEGER' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select * from testoperatorclob where colone = 50;
-ERROR 42818: Comparisons between 'CLOB' and 'INTEGER' are not supported.
+ERROR 42818: Comparisons between 'CLOB (UCS_BASIC)' and 'INTEGER' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select * from testoperatorclob where colone != 10;
-ERROR 42818: Comparisons between 'CLOB' and 'INTEGER' are not supported.
+ERROR 42818: Comparisons between 'CLOB (UCS_BASIC)' and 'INTEGER' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select * from testoperatorclob where colone <= 70;
-ERROR 42818: Comparisons between 'CLOB' and 'INTEGER' are not supported.
+ERROR 42818: Comparisons between 'CLOB (UCS_BASIC)' and 'INTEGER' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select * from testoperatorclob where colone >= 10;
-ERROR 42818: Comparisons between 'CLOB' and 'INTEGER' are not supported.
+ERROR 42818: Comparisons between 'CLOB (UCS_BASIC)' and 'INTEGER' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select * from testoperatorclob where colone <> 10;
-ERROR 42818: Comparisons between 'CLOB' and 'INTEGER' are not supported.
+ERROR 42818: Comparisons between 'CLOB (UCS_BASIC)' and 'INTEGER' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> drop table testoperatorclob;
 0 rows inserted/updated/deleted
 ij> -- beetle 5282
@@ -1149,19 +1149,19 @@ COLONE
 --------------------------------------------------------------------------------------------------------------------------------
 ij> -- these select statements should raise an error but are successful in cloudscape
 select * from testoperatorblob where colone > 10;
-ERROR 42818: Comparisons between 'CLOB' and 'INTEGER' are not supported.
+ERROR 42818: Comparisons between 'CLOB (UCS_BASIC)' and 'INTEGER' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select * from testoperatorblob where colone < 999999;
-ERROR 42818: Comparisons between 'CLOB' and 'INTEGER' are not supported.
+ERROR 42818: Comparisons between 'CLOB (UCS_BASIC)' and 'INTEGER' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select * from testoperatorblob where colone = 00350030;
-ERROR 42818: Comparisons between 'CLOB' and 'INTEGER' are not supported.
+ERROR 42818: Comparisons between 'CLOB (UCS_BASIC)' and 'INTEGER' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select * from testoperatorblob where colone != 10;
-ERROR 42818: Comparisons between 'CLOB' and 'INTEGER' are not supported.
+ERROR 42818: Comparisons between 'CLOB (UCS_BASIC)' and 'INTEGER' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select * from testoperatorblob where colone <= 999999;
-ERROR 42818: Comparisons between 'CLOB' and 'INTEGER' are not supported.
+ERROR 42818: Comparisons between 'CLOB (UCS_BASIC)' and 'INTEGER' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select * from testoperatorblob where colone >= 10;
-ERROR 42818: Comparisons between 'CLOB' and 'INTEGER' are not supported.
+ERROR 42818: Comparisons between 'CLOB (UCS_BASIC)' and 'INTEGER' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select * from testoperatorblob where colone <> 10;
-ERROR 42818: Comparisons between 'CLOB' and 'INTEGER' are not supported.
+ERROR 42818: Comparisons between 'CLOB (UCS_BASIC)' and 'INTEGER' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> drop table testoperatorblob;
 0 rows inserted/updated/deleted
 ij> -- beetle 5283

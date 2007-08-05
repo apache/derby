@@ -693,7 +693,7 @@ select i from t1 where i = (values 1 union all values 1);
 ERROR 21000: Scalar subquery is only allowed to return a single row.
 ij> -- both sides of union have same type, which is incompatible with LHS
 select i from t1 where i in (select date('1999-02-04') from t2 union all select date('1999-03-08') from t2);
-ERROR 42818: Comparisons between 'INTEGER' and 'DATE' are not supported.
+ERROR 42818: Comparisons between 'INTEGER' and 'DATE' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> -- positive tests
 
 -- expression subquery

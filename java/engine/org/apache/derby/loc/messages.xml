@@ -1124,7 +1124,7 @@ Guide.
 
             <msg>
                 <name>42818</name>
-                <text>Comparisons between '{0}' and '{1}' are not supported.</text>
+                <text>Comparisons between '{0}' and '{1}' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')</text>
                 <arg>type</arg>
                 <arg>type</arg>
             </msg>

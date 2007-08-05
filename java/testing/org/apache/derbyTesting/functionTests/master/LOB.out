@@ -88,27 +88,27 @@ ij> select b.blob, b.clob, b.nclob from b;
 ERROR 42X04: Column 'B.NCLOB' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'B.NCLOB' is not a column in the target table.
 ij> -- equal tests are not allowed
 select 1 from b where cast(X'e0' as blob(5))=cast(X'e0' as blob(5));
-ERROR 42818: Comparisons between 'BLOB' and 'BLOB' are not supported.
+ERROR 42818: Comparisons between 'BLOB' and 'BLOB' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select 1 from b where cast(X'e0' as blob(5))=cast(X'e0' as blob(7));
-ERROR 42818: Comparisons between 'BLOB' and 'BLOB' are not supported.
+ERROR 42818: Comparisons between 'BLOB' and 'BLOB' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select 1 from b where cast(X'e0' as blob(5))=cast(X'e0' as blob(7));
-ERROR 42818: Comparisons between 'BLOB' and 'BLOB' are not supported.
+ERROR 42818: Comparisons between 'BLOB' and 'BLOB' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select 1 from b where cast(X'e0' as blob(5))=cast(X'e0' as blob(7));
-ERROR 42818: Comparisons between 'BLOB' and 'BLOB' are not supported.
+ERROR 42818: Comparisons between 'BLOB' and 'BLOB' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select 1 from b where cast(X'e0' as blob(5))=cast(X'e000' as blob(7));
-ERROR 42818: Comparisons between 'BLOB' and 'BLOB' are not supported.
+ERROR 42818: Comparisons between 'BLOB' and 'BLOB' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select 1 from b where X'80' = cast(X'80' as blob(1));
-ERROR 42818: Comparisons between 'CHAR () FOR BIT DATA' and 'BLOB' are not supported.
+ERROR 42818: Comparisons between 'CHAR () FOR BIT DATA' and 'BLOB' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select 1 from b where cast(X'80' as blob(1)) = X'80';
-ERROR 42818: Comparisons between 'BLOB' and 'CHAR () FOR BIT DATA' are not supported.
+ERROR 42818: Comparisons between 'BLOB' and 'CHAR () FOR BIT DATA' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select 1 from b where cast(X'80' as blob(1)) = cast(X'80' as blob(1));
-ERROR 42818: Comparisons between 'BLOB' and 'BLOB' are not supported.
+ERROR 42818: Comparisons between 'BLOB' and 'BLOB' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select 1 from b where '1' = cast('1' as clob(1));
-ERROR 42818: Comparisons between 'CHAR' and 'CLOB' are not supported.
+ERROR 42818: Comparisons between 'CHAR (UCS_BASIC)' and 'CLOB (UCS_BASIC)' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select 1 from b where cast('1' as clob(1)) = '1';
-ERROR 42818: Comparisons between 'CLOB' and 'CHAR' are not supported.
+ERROR 42818: Comparisons between 'CLOB (UCS_BASIC)' and 'CHAR (UCS_BASIC)' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select 1 from b where cast('1' as clob(1)) = cast('1' as clob(1));
-ERROR 42818: Comparisons between 'CLOB' and 'CLOB' are not supported.
+ERROR 42818: Comparisons between 'CLOB (UCS_BASIC)' and 'CLOB (UCS_BASIC)' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select 1 from b where '1' = cast('1' as nclob(1));
 ERROR 0A000: Feature not implemented: NCLOB.
 ij> select 1 from b where cast('1' as nclob(1)) = '1';
@@ -123,26 +123,26 @@ ij> select 1 from b where cast('1' as clob(10)) = cast('1' as nclob(10));
 ERROR 0A000: Feature not implemented: NCLOB.
 ij> -- comparsion using tables
 select * from b as b1, b as b2 where b1.blob=b2.blob;
-ERROR 42818: Comparisons between 'BLOB' and 'BLOB' are not supported.
+ERROR 42818: Comparisons between 'BLOB' and 'BLOB' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select * from b as b1, b as b2 where b1.blob!=b2.blob;
-ERROR 42818: Comparisons between 'BLOB' and 'BLOB' are not supported.
+ERROR 42818: Comparisons between 'BLOB' and 'BLOB' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select * from b as b1, b as b2 where b1.blob=X'20';
-ERROR 42818: Comparisons between 'BLOB' and 'CHAR () FOR BIT DATA' are not supported.
+ERROR 42818: Comparisons between 'BLOB' and 'CHAR () FOR BIT DATA' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select * from b as b1, b as b2 where X'20'=b1.blob;
-ERROR 42818: Comparisons between 'CHAR () FOR BIT DATA' and 'BLOB' are not supported.
+ERROR 42818: Comparisons between 'CHAR () FOR BIT DATA' and 'BLOB' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select * from b as b1, b as b2 where X'20'!=b1.blob;
-ERROR 42818: Comparisons between 'CHAR () FOR BIT DATA' and 'BLOB' are not supported.
+ERROR 42818: Comparisons between 'CHAR () FOR BIT DATA' and 'BLOB' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select * from b as b1, b as b2 where b1.blob=X'7575';
-ERROR 42818: Comparisons between 'BLOB' and 'CHAR () FOR BIT DATA' are not supported.
+ERROR 42818: Comparisons between 'BLOB' and 'CHAR () FOR BIT DATA' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select * from b as b1, b as b2 where X'7575'=b1.blob;
-ERROR 42818: Comparisons between 'CHAR () FOR BIT DATA' and 'BLOB' are not supported.
+ERROR 42818: Comparisons between 'CHAR () FOR BIT DATA' and 'BLOB' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select b.blob, b.clob, b.nclob from b where b.blob = '1' and b.clob = '2' and b.nclob = '3';
 ERROR 42X04: Column 'B.NCLOB' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'B.NCLOB' is not a column in the target table.
 ij> select b.blob from b where b.blob = '1';
-ERROR 42818: Comparisons between 'BLOB' and 'CHAR' are not supported.
+ERROR 42818: Comparisons between 'BLOB' and 'CHAR (UCS_BASIC)' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> -- however it works for types which cloudscape autocasts to char
 select b.clob from b where b.clob = '2';
-ERROR 42818: Comparisons between 'CLOB' and 'CHAR' are not supported.
+ERROR 42818: Comparisons between 'CLOB (UCS_BASIC)' and 'CHAR (UCS_BASIC)' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select b.nclob from b where b.nclob = '3';
 ERROR 42X04: Column 'B.NCLOB' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'B.NCLOB' is not a column in the target table.
 ij> -- test insert of NULL
@@ -236,11 +236,11 @@ values cast('12' as clob(2)) || cast('34' as clob(2));
 ij> values cast('12' as nclob(2)) || cast('34' as nclob(2));
 ERROR 0A000: Feature not implemented: NCLOB.
 ij> select 1 from b where cast('12' as clob(2)) || cast('34' as clob(2)) = '1234';
-ERROR 42818: Comparisons between 'CLOB' and 'CHAR' are not supported.
+ERROR 42818: Comparisons between 'CLOB (UCS_BASIC)' and 'CHAR (UCS_BASIC)' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select 1 from b where cast('12' as nclob(2)) || cast('34' as nclob(2)) = '1234';
 ERROR 0A000: Feature not implemented: NCLOB.
 ij> select 1 from b where cast('12' as clob(2)) || cast('34' as clob(2)) = cast('1234' as clob(4));
-ERROR 42818: Comparisons between 'CLOB' and 'CLOB' are not supported.
+ERROR 42818: Comparisons between 'CLOB (UCS_BASIC)' and 'CLOB (UCS_BASIC)' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select 1 from b where cast('12' as nclob(2)) || cast('34' as nclob(2)) = cast('1234' as clob(4));
 ERROR 0A000: Feature not implemented: NCLOB.
 ij> -- like
@@ -302,29 +302,29 @@ ij> drop table d;
 0 rows inserted/updated/deleted
 ij> -- ORDER tests on LOB types (not allowed)
 select 1 from b where cast(X'e0' as blob(5))=cast(X'e0' as blob(5));
-ERROR 42818: Comparisons between 'BLOB' and 'BLOB' are not supported.
+ERROR 42818: Comparisons between 'BLOB' and 'BLOB' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select 1 from b where cast(X'e0' as blob(5))!=cast(X'e0' as blob(5));
-ERROR 42818: Comparisons between 'BLOB' and 'BLOB' are not supported.
+ERROR 42818: Comparisons between 'BLOB' and 'BLOB' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select 1 from b where cast(X'e0' as blob(5))<cast(X'e0' as blob(5));
-ERROR 42818: Comparisons between 'BLOB' and 'BLOB' are not supported.
+ERROR 42818: Comparisons between 'BLOB' and 'BLOB' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select 1 from b where cast(X'e0' as blob(5))>cast(X'e0' as blob(7));
-ERROR 42818: Comparisons between 'BLOB' and 'BLOB' are not supported.
+ERROR 42818: Comparisons between 'BLOB' and 'BLOB' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select 1 from b where cast(X'e0' as blob(5))<=cast(X'e0' as blob(7));
-ERROR 42818: Comparisons between 'BLOB' and 'BLOB' are not supported.
+ERROR 42818: Comparisons between 'BLOB' and 'BLOB' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select 1 from b where cast(X'e0' as blob(5))>=cast(X'e0' as blob(7));
-ERROR 42818: Comparisons between 'BLOB' and 'BLOB' are not supported.
+ERROR 42818: Comparisons between 'BLOB' and 'BLOB' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select 1 from b where cast('fish' as clob(5))=cast('fish' as clob(5));
-ERROR 42818: Comparisons between 'CLOB' and 'CLOB' are not supported.
+ERROR 42818: Comparisons between 'CLOB (UCS_BASIC)' and 'CLOB (UCS_BASIC)' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select 1 from b where cast('fish' as clob(5))!=cast('fish' as clob(5));
-ERROR 42818: Comparisons between 'CLOB' and 'CLOB' are not supported.
+ERROR 42818: Comparisons between 'CLOB (UCS_BASIC)' and 'CLOB (UCS_BASIC)' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select 1 from b where cast('fish' as clob(5))<cast('fish' as clob(5));
-ERROR 42818: Comparisons between 'CLOB' and 'CLOB' are not supported.
+ERROR 42818: Comparisons between 'CLOB (UCS_BASIC)' and 'CLOB (UCS_BASIC)' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select 1 from b where cast('fish' as clob(5))>cast('fish' as clob(7));
-ERROR 42818: Comparisons between 'CLOB' and 'CLOB' are not supported.
+ERROR 42818: Comparisons between 'CLOB (UCS_BASIC)' and 'CLOB (UCS_BASIC)' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select 1 from b where cast('fish' as clob(5))<=cast('fish' as clob(7));
-ERROR 42818: Comparisons between 'CLOB' and 'CLOB' are not supported.
+ERROR 42818: Comparisons between 'CLOB (UCS_BASIC)' and 'CLOB (UCS_BASIC)' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select 1 from b where cast('fish' as clob(5))>=cast('fish' as clob(7));
-ERROR 42818: Comparisons between 'CLOB' and 'CLOB' are not supported.
+ERROR 42818: Comparisons between 'CLOB (UCS_BASIC)' and 'CLOB (UCS_BASIC)' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select 1 from b where cast('fish' as nclob(5))=cast('fish' as nclob(5));
 ERROR 0A000: Feature not implemented: NCLOB.
 ij> select 1 from b where cast('fish' as nclob(5))!=cast('fish' as nclob(5));
@@ -356,37 +356,37 @@ COLONE
 50                                                                                                                              
 ij> -- these select statements should raise an error but are successful in cloudscape
 select * from testoperatorclob where colone > 10;
-ERROR 42818: Comparisons between 'CLOB' and 'INTEGER' are not supported.
+ERROR 42818: Comparisons between 'CLOB (UCS_BASIC)' and 'INTEGER' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select * from testoperatorclob where colone > 5;
-ERROR 42818: Comparisons between 'CLOB' and 'INTEGER' are not supported.
+ERROR 42818: Comparisons between 'CLOB (UCS_BASIC)' and 'INTEGER' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select * from testoperatorclob where colone < 70;
-ERROR 42818: Comparisons between 'CLOB' and 'INTEGER' are not supported.
+ERROR 42818: Comparisons between 'CLOB (UCS_BASIC)' and 'INTEGER' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select * from testoperatorclob where colone = 50;
-ERROR 42818: Comparisons between 'CLOB' and 'INTEGER' are not supported.
+ERROR 42818: Comparisons between 'CLOB (UCS_BASIC)' and 'INTEGER' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select * from testoperatorclob where colone != 10;
-ERROR 42818: Comparisons between 'CLOB' and 'INTEGER' are not supported.
+ERROR 42818: Comparisons between 'CLOB (UCS_BASIC)' and 'INTEGER' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select * from testoperatorclob where colone <= 70;
-ERROR 42818: Comparisons between 'CLOB' and 'INTEGER' are not supported.
+ERROR 42818: Comparisons between 'CLOB (UCS_BASIC)' and 'INTEGER' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select * from testoperatorclob where colone >= 10;
-ERROR 42818: Comparisons between 'CLOB' and 'INTEGER' are not supported.
+ERROR 42818: Comparisons between 'CLOB (UCS_BASIC)' and 'INTEGER' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select * from testoperatorclob where colone <> 10;
-ERROR 42818: Comparisons between 'CLOB' and 'INTEGER' are not supported.
+ERROR 42818: Comparisons between 'CLOB (UCS_BASIC)' and 'INTEGER' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select * from testoperatorclob where colone > '10';
-ERROR 42818: Comparisons between 'CLOB' and 'CHAR' are not supported.
+ERROR 42818: Comparisons between 'CLOB (UCS_BASIC)' and 'CHAR (UCS_BASIC)' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select * from testoperatorclob where colone > '5';
-ERROR 42818: Comparisons between 'CLOB' and 'CHAR' are not supported.
+ERROR 42818: Comparisons between 'CLOB (UCS_BASIC)' and 'CHAR (UCS_BASIC)' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select * from testoperatorclob where colone < '70';
-ERROR 42818: Comparisons between 'CLOB' and 'CHAR' are not supported.
+ERROR 42818: Comparisons between 'CLOB (UCS_BASIC)' and 'CHAR (UCS_BASIC)' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select * from testoperatorclob where colone = '50';
-ERROR 42818: Comparisons between 'CLOB' and 'CHAR' are not supported.
+ERROR 42818: Comparisons between 'CLOB (UCS_BASIC)' and 'CHAR (UCS_BASIC)' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select * from testoperatorclob where colone != '10';
-ERROR 42818: Comparisons between 'CLOB' and 'CHAR' are not supported.
+ERROR 42818: Comparisons between 'CLOB (UCS_BASIC)' and 'CHAR (UCS_BASIC)' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select * from testoperatorclob where colone <= '70';
-ERROR 42818: Comparisons between 'CLOB' and 'CHAR' are not supported.
+ERROR 42818: Comparisons between 'CLOB (UCS_BASIC)' and 'CHAR (UCS_BASIC)' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select * from testoperatorclob where colone >= '10';
-ERROR 42818: Comparisons between 'CLOB' and 'CHAR' are not supported.
+ERROR 42818: Comparisons between 'CLOB (UCS_BASIC)' and 'CHAR (UCS_BASIC)' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select * from testoperatorclob where colone <> '10';
-ERROR 42818: Comparisons between 'CLOB' and 'CHAR' are not supported.
+ERROR 42818: Comparisons between 'CLOB (UCS_BASIC)' and 'CHAR (UCS_BASIC)' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> drop table testoperatorclob;
 0 rows inserted/updated/deleted
 ij> -- BLOB testing
@@ -401,37 +401,37 @@ COLONE
 --------------------------------------------------------------------------------------------------------------------------------
 ij> -- these select statements should raise an error but are successful in cloudscape
 select * from testoperatorblob where colone > 10;
-ERROR 42818: Comparisons between 'BLOB' and 'INTEGER' are not supported.
+ERROR 42818: Comparisons between 'BLOB' and 'INTEGER' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select * from testoperatorblob where colone > 5;
-ERROR 42818: Comparisons between 'BLOB' and 'INTEGER' are not supported.
+ERROR 42818: Comparisons between 'BLOB' and 'INTEGER' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select * from testoperatorblob where colone < 999999;
-ERROR 42818: Comparisons between 'BLOB' and 'INTEGER' are not supported.
+ERROR 42818: Comparisons between 'BLOB' and 'INTEGER' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select * from testoperatorblob where colone = 00350030;
-ERROR 42818: Comparisons between 'BLOB' and 'INTEGER' are not supported.
+ERROR 42818: Comparisons between 'BLOB' and 'INTEGER' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select * from testoperatorblob where colone != 10;
-ERROR 42818: Comparisons between 'BLOB' and 'INTEGER' are not supported.
+ERROR 42818: Comparisons between 'BLOB' and 'INTEGER' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select * from testoperatorblob where colone <= 999999;
-ERROR 42818: Comparisons between 'BLOB' and 'INTEGER' are not supported.
+ERROR 42818: Comparisons between 'BLOB' and 'INTEGER' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select * from testoperatorblob where colone >= 10;
-ERROR 42818: Comparisons between 'BLOB' and 'INTEGER' are not supported.
+ERROR 42818: Comparisons between 'BLOB' and 'INTEGER' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select * from testoperatorblob where colone <> 10;
-ERROR 42818: Comparisons between 'BLOB' and 'INTEGER' are not supported.
+ERROR 42818: Comparisons between 'BLOB' and 'INTEGER' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select * from testoperatorblob where colone > '10';
-ERROR 42818: Comparisons between 'BLOB' and 'CHAR' are not supported.
+ERROR 42818: Comparisons between 'BLOB' and 'CHAR (UCS_BASIC)' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select * from testoperatorblob where colone > '5';
-ERROR 42818: Comparisons between 'BLOB' and 'CHAR' are not supported.
+ERROR 42818: Comparisons between 'BLOB' and 'CHAR (UCS_BASIC)' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select * from testoperatorblob where colone < '70';
-ERROR 42818: Comparisons between 'BLOB' and 'CHAR' are not supported.
+ERROR 42818: Comparisons between 'BLOB' and 'CHAR (UCS_BASIC)' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select * from testoperatorblob where colone = '50';
-ERROR 42818: Comparisons between 'BLOB' and 'CHAR' are not supported.
+ERROR 42818: Comparisons between 'BLOB' and 'CHAR (UCS_BASIC)' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select * from testoperatorblob where colone != '10';
-ERROR 42818: Comparisons between 'BLOB' and 'CHAR' are not supported.
+ERROR 42818: Comparisons between 'BLOB' and 'CHAR (UCS_BASIC)' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select * from testoperatorblob where colone <= '70';
-ERROR 42818: Comparisons between 'BLOB' and 'CHAR' are not supported.
+ERROR 42818: Comparisons between 'BLOB' and 'CHAR (UCS_BASIC)' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select * from testoperatorblob where colone >= '10';
-ERROR 42818: Comparisons between 'BLOB' and 'CHAR' are not supported.
+ERROR 42818: Comparisons between 'BLOB' and 'CHAR (UCS_BASIC)' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select * from testoperatorblob where colone <> '10';
-ERROR 42818: Comparisons between 'BLOB' and 'CHAR' are not supported.
+ERROR 42818: Comparisons between 'BLOB' and 'CHAR (UCS_BASIC)' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> drop table testoperatorblob;
 0 rows inserted/updated/deleted
 ij> -- NCLOB testing
@@ -560,10 +560,10 @@ select * from testPredicate1 union select * from testPredicate2;
 ERROR X0X67: Columns of type 'LONG VARCHAR' may not be used in CREATE INDEX, ORDER BY, GROUP BY, UNION, INTERSECT, EXCEPT or DISTINCT statements because comparisons are not supported for that type.
 ij> -- IN predicate
 select c1 from testPredicate1 where c1 IN (select c1 from testPredicate2);
-ERROR 42818: Comparisons between 'LONG VARCHAR' and 'LONG VARCHAR' are not supported.
+ERROR 42818: Comparisons between 'LONG VARCHAR (UCS_BASIC)' and 'LONG VARCHAR (UCS_BASIC)' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> -- NOT IN predicate
 select c1 from testPredicate1 where c1 NOT IN (select c1 from testPredicate2);
-ERROR 42818: Comparisons between 'LONG VARCHAR' and 'LONG VARCHAR' are not supported.
+ERROR 42818: Comparisons between 'LONG VARCHAR (UCS_BASIC)' and 'LONG VARCHAR (UCS_BASIC)' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> -- ORDER BY clause
 select * from testPredicate1 order by c1;
 ERROR X0X67: Columns of type 'LONG VARCHAR' may not be used in CREATE INDEX, ORDER BY, GROUP BY, UNION, INTERSECT, EXCEPT or DISTINCT statements because comparisons are not supported for that type.
@@ -572,9 +572,9 @@ select substr(c1,1,2) from testPredicate1 group by c1;
 ERROR X0X67: Columns of type 'LONG VARCHAR' may not be used in CREATE INDEX, ORDER BY, GROUP BY, UNION, INTERSECT, EXCEPT or DISTINCT statements because comparisons are not supported for that type.
 ij> -- JOIN
 select * from testPredicate1 t1, testPredicate2 t2 where t1.c1=t2.c1;
-ERROR 42818: Comparisons between 'LONG VARCHAR' and 'LONG VARCHAR' are not supported.
+ERROR 42818: Comparisons between 'LONG VARCHAR (UCS_BASIC)' and 'LONG VARCHAR (UCS_BASIC)' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> select * from testPredicate1 LEFT OUTER JOIN testPredicate2 on testPredicate1.c1=testPredicate2.c1;
-ERROR 42818: Comparisons between 'LONG VARCHAR' and 'LONG VARCHAR' are not supported.
+ERROR 42818: Comparisons between 'LONG VARCHAR (UCS_BASIC)' and 'LONG VARCHAR (UCS_BASIC)' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
 ij> -- PRIMARY KEY
 create table testConst1(c1 long varchar not null primary key);
 ERROR X0X67: Columns of type 'LONG VARCHAR' may not be used in CREATE INDEX, ORDER BY, GROUP BY, UNION, INTERSECT, EXCEPT or DISTINCT statements because comparisons are not supported for that type.
