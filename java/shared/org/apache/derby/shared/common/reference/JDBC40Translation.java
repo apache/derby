@@ -55,6 +55,10 @@ public interface JDBC40Translation {
     public static final int FUNCTION_NULLABLE          = 1;
     public static final int FUNCTION_NULLABLE_UNKNOWN  = 2;
 
+    public static final int FUNCTION_RESULT_UNKNOWN          = 0;
+    public static final int FUNCTION_NO_TABLE          = 1;
+    public static final int FUNCTION_RETURNS_TABLE  = 2;
+
     // constants from java.sql.Types
     public static final int NCHAR = -15;
     public static final int NVARCHAR = -9;

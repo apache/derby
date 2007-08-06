@@ -67,6 +67,21 @@ public class JDBC40TranslationTest extends BaseTestCase {
                      JDBC40Translation.FUNCTION_RETURN);
     }
 
+    public void testDatabaseMetaDataFUNCTION_RESULT_UNKNOWN() {
+        assertEquals(DatabaseMetaData.functionResultUnknown,
+                     JDBC40Translation.FUNCTION_RESULT_UNKNOWN);
+    }
+
+    public void testDatabaseMetaDataFUNCTION_NO_TABLE() {
+        assertEquals(DatabaseMetaData.functionNoTable,
+                     JDBC40Translation.FUNCTION_NO_TABLE);
+    }
+
+    public void testDatabaseMetaDataFUNCTION_RETURNS_TABLE() {
+        assertEquals(DatabaseMetaData.functionReturnsTable,
+                     JDBC40Translation.FUNCTION_RETURNS_TABLE);
+    }
+
     public void testDatabaseMetaDataFUNCTION_NO_NULLS() {
         assertEquals(DatabaseMetaData.functionNoNulls,
                      JDBC40Translation.FUNCTION_NO_NULLS);

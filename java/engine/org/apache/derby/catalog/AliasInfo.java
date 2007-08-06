@@ -67,4 +67,10 @@ public interface AliasInfo
 	 * represents at the source database.
 	 */
 	public String getMethodName();
+
+	/**
+	 * Return true if this alias is a Table Function.
+	 */
+	public boolean isTableFunction();
+
 }

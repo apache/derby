@@ -58,6 +58,8 @@ public class SynonymAliasInfo implements AliasInfo, Formatable
 		return schemaName;
 	}
 
+	public boolean isTableFunction() {return false; }
+
 	// Formatable methods
 
 	/**

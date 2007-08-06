@@ -115,6 +115,8 @@ implements AliasInfo, Formatable
 		return methodName;
 	}
 
+	public boolean isTableFunction() {return false; }
+
 	/**
 	  @see java.lang.Object#toString
 	  */

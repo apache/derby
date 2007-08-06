@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derbyTesting.functionTests.tests.jdbc.TestDbMetaData
+   Derby - Class org.apache.derbyTesting.functionTests.tests.jdbc4.TestDbMetaData
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -27,6 +27,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -42,6 +43,8 @@ import org.apache.derbyTesting.junit.TestConfiguration;
  */
 public class TestDbMetaData extends BaseJDBCTestCase {
 
+    private static  final   Integer FUNCTION_NO_TABLE_VALUE = new Integer( DatabaseMetaData.functionNoTable );
+    
     private DatabaseMetaData meta;
 
     public TestDbMetaData(String name) {
@@ -125,59 +128,62 @@ public class TestDbMetaData extends BaseJDBCTestCase {
     private void assertGetFunctionsRs(ResultSet rs) throws SQLException {
         JDBC.assertColumnNames(rs, new String[] {
             "FUNCTION_CAT", "FUNCTION_SCHEM", "FUNCTION_NAME", "REMARKS",
-            "SPECIFIC_NAME" });
+            "FUNCTION_TYPE", "SPECIFIC_NAME" });
+        JDBC.assertColumnTypes(rs, new int[] {
+            Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR,
+            Types.SMALLINT, Types.VARCHAR });
     }
     
     private static final GeneratedId GENERIC_NAME = new GeneratedId();
 
     /** Expected rows from getFunctions() when all functions match. */
     private static final Object[][] ALL_FUNCTIONS = {
-        { null, "APP", "DUMMY1", "java.some.func", GENERIC_NAME },
-        { null, "APP", "DUMMY2", "java.some.func", GENERIC_NAME },
-        { null, "APP", "DUMMY3", "java.some.func", GENERIC_NAME },
-        { null, "APP", "DUMMY4", "java.some.func", GENERIC_NAME },
+        { null, "APP", "DUMMY1", "java.some.func", FUNCTION_NO_TABLE_VALUE, GENERIC_NAME },
+        { null, "APP", "DUMMY2", "java.some.func", FUNCTION_NO_TABLE_VALUE, GENERIC_NAME },
+        { null, "APP", "DUMMY3", "java.some.func", FUNCTION_NO_TABLE_VALUE, GENERIC_NAME },
+        { null, "APP", "DUMMY4", "java.some.func", FUNCTION_NO_TABLE_VALUE, GENERIC_NAME },
         { null, "SYSCS_UTIL", "SYSCS_CHECK_TABLE",
           "org.apache.derby.catalog.SystemProcedures.SYSCS_CHECK_TABLE",
-          GENERIC_NAME },
+          FUNCTION_NO_TABLE_VALUE, GENERIC_NAME },
         { null, "SYSCS_UTIL", "SYSCS_GET_DATABASE_PROPERTY",
           "org.apache.derby.catalog.SystemProcedures." +
-          "SYSCS_GET_DATABASE_PROPERTY", GENERIC_NAME },
+          "SYSCS_GET_DATABASE_PROPERTY", FUNCTION_NO_TABLE_VALUE, GENERIC_NAME },
         { null, "SYSCS_UTIL", "SYSCS_GET_RUNTIMESTATISTICS",
           "org.apache.derby.catalog.SystemProcedures." +
-          "SYSCS_GET_RUNTIMESTATISTICS", GENERIC_NAME },
+          "SYSCS_GET_RUNTIMESTATISTICS", FUNCTION_NO_TABLE_VALUE, GENERIC_NAME },
           { null, "SYSCS_UTIL", "SYSCS_GET_USER_ACCESS",
               "org.apache.derby.catalog.SystemProcedures." +
-              "SYSCS_GET_USER_ACCESS", GENERIC_NAME },
+              "SYSCS_GET_USER_ACCESS", FUNCTION_NO_TABLE_VALUE, GENERIC_NAME },
         { null, "SYSIBM", "BLOBCREATELOCATOR",
           "org.apache.derby.impl.jdbc.LOBStoredProcedure." +
-          "BLOBCREATELOCATOR", GENERIC_NAME },
+          "BLOBCREATELOCATOR", FUNCTION_NO_TABLE_VALUE, GENERIC_NAME },
         { null, "SYSIBM", "BLOBGETBYTES",
           "org.apache.derby.impl.jdbc.LOBStoredProcedure." +
-          "BLOBGETBYTES", GENERIC_NAME },
+          "BLOBGETBYTES", FUNCTION_NO_TABLE_VALUE, GENERIC_NAME },
         { null, "SYSIBM", "BLOBGETLENGTH",
           "org.apache.derby.impl.jdbc.LOBStoredProcedure." +
-          "BLOBGETLENGTH", GENERIC_NAME },
+          "BLOBGETLENGTH", FUNCTION_NO_TABLE_VALUE, GENERIC_NAME },
         { null, "SYSIBM", "BLOBGETPOSITIONFROMBYTES",
           "org.apache.derby.impl.jdbc.LOBStoredProcedure." +
-          "BLOBGETPOSITIONFROMBYTES", GENERIC_NAME },
+          "BLOBGETPOSITIONFROMBYTES", FUNCTION_NO_TABLE_VALUE, GENERIC_NAME },
         { null, "SYSIBM", "BLOBGETPOSITIONFROMLOCATOR",
           "org.apache.derby.impl.jdbc.LOBStoredProcedure." +
-          "BLOBGETPOSITIONFROMLOCATOR", GENERIC_NAME },
+          "BLOBGETPOSITIONFROMLOCATOR", FUNCTION_NO_TABLE_VALUE, GENERIC_NAME },
         { null, "SYSIBM", "CLOBCREATELOCATOR",
           "org.apache.derby.impl.jdbc.LOBStoredProcedure." +
-          "CLOBCREATELOCATOR", GENERIC_NAME },
+          "CLOBCREATELOCATOR", FUNCTION_NO_TABLE_VALUE, GENERIC_NAME },
         { null, "SYSIBM", "CLOBGETLENGTH",
           "org.apache.derby.impl.jdbc.LOBStoredProcedure." +
-          "CLOBGETLENGTH", GENERIC_NAME },
+          "CLOBGETLENGTH", FUNCTION_NO_TABLE_VALUE, GENERIC_NAME },
         { null, "SYSIBM", "CLOBGETPOSITIONFROMLOCATOR",
           "org.apache.derby.impl.jdbc.LOBStoredProcedure." +
-          "CLOBGETPOSITIONFROMLOCATOR", GENERIC_NAME },
+          "CLOBGETPOSITIONFROMLOCATOR", FUNCTION_NO_TABLE_VALUE, GENERIC_NAME },
         { null, "SYSIBM", "CLOBGETPOSITIONFROMSTRING",
           "org.apache.derby.impl.jdbc.LOBStoredProcedure." +
-          "CLOBGETPOSITIONFROMSTRING", GENERIC_NAME },
+          "CLOBGETPOSITIONFROMSTRING", FUNCTION_NO_TABLE_VALUE, GENERIC_NAME },
         { null, "SYSIBM", "CLOBGETSUBSTRING",
           "org.apache.derby.impl.jdbc.LOBStoredProcedure." +
-          "CLOBGETSUBSTRING", GENERIC_NAME },
+          "CLOBGETSUBSTRING", FUNCTION_NO_TABLE_VALUE, GENERIC_NAME },
 
     };
 

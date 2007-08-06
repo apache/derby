@@ -209,6 +209,10 @@ public class RoutineAliasInfo extends MethodAliasInfo
 		return returnType;
 	}
 
+	public boolean isTableFunction() {
+		return returnType.isRowMultiSet();
+	}
+
 
 	// Formatable methods
 
