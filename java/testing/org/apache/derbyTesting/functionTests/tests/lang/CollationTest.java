@@ -95,7 +95,8 @@ public class CollationTest extends BaseJDBCTestCase {
    */
 public void testDefaultCollation() throws SQLException {
 
-      getConnection().setAutoCommit(false);
+      Connection conn = getConnection();
+      conn.setAutoCommit(false);
       Statement s = createStatement();
       PreparedStatement ps;
       ResultSet rs;
@@ -269,9 +270,59 @@ public void testDefaultCollation() throws SQLException {
       //End of parameter testing
       
       s.close();
+      compareAgrave(conn,1);
       }
       
-  /**
+
+public void testFrenchCollation() throws SQLException {
+    Connection conn = getConnection();
+    compareAgrave(conn,2);    
+}
+
+
+
+ /**
+ * For a TERRITORY_BASED collation french database, differences between pre-composed accents such 
+ * as "\u00C0" (A-grave) and combining accents such as "A\u0300" (A, combining-grave) should match
+ * for = and like. But they do not match for UCS_BASIC. We insert both into a table and search
+ * based on equal and like. 
+ *  
+ * @param conn
+ * @param expectedMatchCount  number of rows we expect back. 2 for french, 1 for English 
+ * @throws SQLException
+ */
+private void compareAgrave(Connection conn, int expectedMatchCount) throws SQLException {
+      
+      String agrave = "\u00C0";
+      String agraveCombined ="A\u0300";
+      Statement s = conn.createStatement();
+      
+      try {
+          s.executeUpdate("DROP TABLE T");
+      }catch (SQLException se) {}
+      s.executeUpdate("CREATE TABLE T (vc varchar(30))");
+      PreparedStatement ps = conn.prepareStatement("INSERT INTO T VALUES (?)");
+      ps.setString(1,agrave);
+      ps.executeUpdate();
+      ps.setString(1,agraveCombined);
+      ps.executeUpdate();
+      ps.close();
+        
+      ps = conn.prepareStatement("SELECT COUNT(*) FROM T WHERE VC = ?");
+      ps.setString(1, agrave);
+      ResultSet rs = ps.executeQuery();
+      JDBC.assertSingleValueResultSet(rs, Integer.toString(expectedMatchCount));
+      ps = conn.prepareStatement("SELECT COUNT(*) FROM T WHERE VC LIKE ?");
+      ps.setString(1, agrave);
+      rs = ps.executeQuery();
+      JDBC.assertSingleValueResultSet(rs, Integer.toString(expectedMatchCount));
+      rs.close();
+      ps.close();
+      s.close();
+  }
+
+
+/**
    * Test order by with polish collation
    * @throws SQLException
    */
@@ -1077,6 +1128,7 @@ private void checkLangBasedQuery(Statement s, String query, String[][] expectedR
         suite.addTest(collatedSuite("en", "testEnglishCollation"));
         suite.addTest(collatedSuite("no", "testNorwayCollation"));
         suite.addTest(collatedSuite("pl", "testPolishCollation"));
+        suite.addTest(collatedSuite("fr", "testFrenchCollation"));
         return suite;
     }
   
