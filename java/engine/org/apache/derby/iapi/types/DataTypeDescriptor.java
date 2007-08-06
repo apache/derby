@@ -1567,5 +1567,16 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 
         return sbuf.toString();
     }
+
+    /* Return the typename with the collation name for 
+     * String types.
+     */
+    public String getSQLTypeNameWithCollation() {
+        String name = typeId.getSQLTypeName();
+        if (typeId.isStringTypeId()) {
+            name = name + " (" + getCollationName() + ")";
+        }
+        return name;    
+    }
 }
 

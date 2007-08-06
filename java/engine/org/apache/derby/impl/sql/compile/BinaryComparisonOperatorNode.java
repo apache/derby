@@ -248,9 +248,9 @@ public abstract class BinaryComparisonOperatorNode extends BinaryOperatorNode
 		// optimizer.  We will assume Mr. Optimizer knows what he is doing.
           if (!cmp && !forQueryRewrite) {
 			throw StandardException.newException(SQLState.LANG_NOT_COMPARABLE, 
-					leftType.getSQLTypeName(),
-					rightType.getSQLTypeName()
-				);
+					leftOperand.getTypeServices().getSQLTypeNameWithCollation() ,
+					rightOperand.getTypeServices().getSQLTypeNameWithCollation());
+				
 		  }
 
 		

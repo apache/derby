@@ -402,8 +402,8 @@ public class ValueNodeList extends QueryTreeNodeVector
 									getClassFactory()))
 			{
 				throw StandardException.newException(SQLState.LANG_NOT_COMPARABLE, 
-						leftType.getSQLTypeName(),
-						valueNode.getTypeId().getSQLTypeName()
+						leftOperand.getTypeServices().getSQLTypeNameWithCollation(),
+						valueNode.getTypeServices().getSQLTypeNameWithCollation()
 						);
 			}
 		}
