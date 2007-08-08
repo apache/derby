@@ -123,7 +123,7 @@ class ScalarAggregateResultSet extends GenericAggregateResultSet
 			SanityManager.DEBUG("AggregateTrace","execution time: "+ 
 					a.getPreparedStatement().getSavedObject(aggregateItem));
 		}
-		constructorTime += getElapsedMillis(beginTime);
+		recordConstructorTime();
     }
 
 

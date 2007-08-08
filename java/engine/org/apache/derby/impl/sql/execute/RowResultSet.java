@@ -80,7 +80,7 @@ class RowResultSet extends NoPutResultSetImpl
 
         this.row = row;
 		this.canCacheRow = canCacheRow;
-		constructorTime += getElapsedMillis(beginTime);
+		recordConstructorTime();
     }
 
 	/* This constructor takes in a constant row value, as the cache row.  See the
@@ -102,7 +102,7 @@ class RowResultSet extends NoPutResultSetImpl
 		beginTime = getCurrentTimeMillis();
         this.cachedRow = constantRow;
 		this.canCacheRow = canCacheRow;
-		constructorTime += getElapsedMillis(beginTime);
+		recordConstructorTime();
     }
 
 	//

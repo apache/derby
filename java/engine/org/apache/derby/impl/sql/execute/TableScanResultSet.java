@@ -219,13 +219,13 @@ class TableScanResultSet extends ScanResultSet
 
 		runTimeStatisticsOn = (activation != null &&
 							   activation.getLanguageConnectionContext().getRunTimeStatisticsMode());
-
-		constructorTime += getElapsedMillis(beginTime);
 		
 		/* Always qualify the first time a row is being read */
 		qualify = true;
 		currentRowIsValid = false;
 		scanRepositioned = false;
+		
+		recordConstructorTime();
     }
 
 	//

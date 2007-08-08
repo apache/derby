@@ -194,7 +194,7 @@ class IndexRowToBaseRowResultSet extends NoPutResultSetImpl
 				}
 			}
 		}
-		constructorTime += getElapsedMillis(beginTime);
+		recordConstructorTime();
 	}
 
 	//

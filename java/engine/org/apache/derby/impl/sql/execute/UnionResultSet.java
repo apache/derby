@@ -82,7 +82,7 @@ class UnionResultSet extends NoPutResultSetImpl
 			  optimizerEstimatedRowCount, optimizerEstimatedCost);
         this.source1 = source1;
         this.source2 = source2;
-		constructorTime += getElapsedMillis(beginTime);
+        recordConstructorTime();
     }
 
 	//

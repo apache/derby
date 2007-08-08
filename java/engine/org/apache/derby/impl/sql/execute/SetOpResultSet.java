@@ -92,7 +92,7 @@ class SetOpResultSet extends NoPutResultSetImpl
         ExecPreparedStatement eps = activation.getPreparedStatement();
         intermediateOrderByColumns = (int[]) eps.getSavedObject(intermediateOrderByColumnsSavedObject);
         intermediateOrderByDirection = (int[]) eps.getSavedObject(intermediateOrderByDirectionSavedObject);
-		constructorTime += getElapsedMillis(beginTime);
+        recordConstructorTime();
     }
 
 	/**

@@ -93,8 +93,10 @@ abstract class JoinResultSet extends NoPutResultSetImpl
         this.restriction = restriction;
 		this.oneRowRightSide = oneRowRightSide;
 		this.notExistsRightSide = notExistsRightSide;
-		constructorTime += getElapsedMillis(beginTime);
+
 		this.userSuppliedOptimizerOverrides = userSuppliedOptimizerOverrides;
+		
+		recordConstructorTime();
     }
 
 	//

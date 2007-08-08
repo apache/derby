@@ -108,7 +108,7 @@ class DistinctScalarAggregateResultSet extends ScalarAggregateResultSet
 
 		this.maxRowSize = maxRowSize;
 
-		constructorTime += getElapsedMillis(beginTime);
+		recordConstructorTime();
     }
 
 

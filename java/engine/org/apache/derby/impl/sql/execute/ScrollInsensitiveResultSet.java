@@ -173,8 +173,6 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 				"maxRows not expected to be -1");
 		}
 
-		constructorTime += getElapsedMillis(beginTime);
-
 		positionInHashTable = new SQLInteger();
 		needsRepositioning = false;
 		if (isForUpdate()) {
@@ -184,6 +182,8 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 			target = null;
 			extraColumns = 1;
 		}
+		
+		recordConstructorTime();
 	}
 
 

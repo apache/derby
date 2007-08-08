@@ -85,7 +85,7 @@ class MaterializedResultSet extends NoPutResultSetImpl
         // Get the current transaction controller
         tc = activation.getTransactionController();
 
-		constructorTime += getElapsedMillis(beginTime);
+        recordConstructorTime();
 	}
 
 

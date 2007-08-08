@@ -205,7 +205,7 @@ public class HashScanResultSet extends ScanResultSet
 
 		compactRow =
 				getCompactRow(candidate, accessedCols, (FormatableBitSet) null, false);
-		constructorTime += getElapsedMillis(beginTime);
+		recordConstructorTime();
     }
 
 	//

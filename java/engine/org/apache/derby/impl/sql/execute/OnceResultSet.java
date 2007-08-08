@@ -87,7 +87,7 @@ public class OnceResultSet extends NoPutResultSetImpl
 		this.cardinalityCheck = cardinalityCheck;
 		this.subqueryNumber = subqueryNumber;
 		this.pointOfAttachment = pointOfAttachment;
-		constructorTime += getElapsedMillis(beginTime);
+		recordConstructorTime();
     }
 
 	//

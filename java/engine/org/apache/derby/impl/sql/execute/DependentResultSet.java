@@ -217,7 +217,7 @@ class DependentResultSet extends ScanResultSet implements CursorResultSet
 										 getSavedObject(rltItem));
 		numFkColumns = fkColArray.length;
 		indexQualifierRow = new IndexRow(numFkColumns);
-		constructorTime += getElapsedMillis(beginTime);
+		recordConstructorTime();
 	}
 
 

@@ -133,8 +133,6 @@ class LastIndexKeyResultSet extends ScanResultSet
 
 		runTimeStatisticsOn = getLanguageConnectionContext().getRunTimeStatisticsMode();
 
-		constructorTime += getElapsedMillis(beginTime);
-
 		/*
 		** If scan tracing is turned on, print information about this
 		** LastIndexKeyResultSet when it is first opened.  
@@ -148,6 +146,8 @@ class LastIndexKeyResultSet extends ScanResultSet
 		}
 
 		activation.informOfRowCount(this, 1);
+		
+		recordConstructorTime();
     }
 
 	/////////////////////////////////////////////////////

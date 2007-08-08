@@ -61,6 +61,11 @@ public interface NoPutResultSet extends ResultSet, RowLocationRetRowSource
 	 * openCore() can only be called on a closed result
 	 * set.  see reopenCore if you want to reuse an open
 	 * result set.
+	 * <p>
+	 * For NoPutResultSet open() must only be called on
+	 * the top ResultSet. Opening of NoPutResultSet's
+	 * below the top result set are implemented by calling
+	 * openCore.
 	 *
 	 * @exception StandardException thrown if cursor finished.
 	 */

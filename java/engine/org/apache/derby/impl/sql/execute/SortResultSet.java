@@ -209,7 +209,7 @@ class SortResultSet extends NoPutResultSetImpl
 		*/
 		observer = new BasicSortObserver(true, distinct, sortTemplateRow, true);
 
-		constructorTime += getElapsedMillis(beginTime);
+		recordConstructorTime();
     }
 
 

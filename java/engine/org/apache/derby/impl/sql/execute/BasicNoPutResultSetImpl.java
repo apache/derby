@@ -21,37 +21,27 @@
 
 package org.apache.derby.impl.sql.execute;
 
-import org.apache.derby.iapi.services.context.ContextService;
+import java.sql.SQLWarning;
+import java.sql.Timestamp;
+
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
-import org.apache.derby.iapi.services.stream.InfoStreams;
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.services.i18n.MessageService;
-
-import org.apache.derby.iapi.store.access.TransactionController;
-
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-import org.apache.derby.iapi.sql.conn.StatementContext;
-
-import org.apache.derby.iapi.reference.SQLState;
-
-import org.apache.derby.iapi.sql.execute.ExecRow;
-import org.apache.derby.iapi.sql.execute.NoPutResultSet;
-import org.apache.derby.iapi.sql.execute.ExecutionFactory;
 import org.apache.derby.iapi.sql.Activation;
-
-
 import org.apache.derby.iapi.sql.ResultDescription;
 import org.apache.derby.iapi.sql.ResultSet;
 import org.apache.derby.iapi.sql.Row;
-
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
+import org.apache.derby.iapi.sql.conn.StatementContext;
+import org.apache.derby.iapi.sql.execute.ExecRow;
+import org.apache.derby.iapi.sql.execute.ExecutionFactory;
+import org.apache.derby.iapi.sql.execute.NoPutResultSet;
+import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.types.DataValueDescriptor;
-
-import org.apache.derby.iapi.services.io.FormatableBitSet;
-
-import java.sql.Timestamp;
-import java.sql.SQLWarning;
 
 /**
  * Abstract ResultSet for for operations that return rows but
@@ -98,7 +88,7 @@ implements NoPutResultSet
 
 	// Set in the constructor and not modified
 	protected final Activation	    activation;
-	private boolean				statisticsTimingOn;
+	private final boolean				statisticsTimingOn;
 
 	ResultDescription resultDescription;
 
@@ -125,11 +115,22 @@ implements NoPutResultSet
 							double optimizerEstimatedCost)
 	{
 		this.activation = activation;
-		statisticsTimingOn = getLanguageConnectionContext().getStatisticsTiming();
-		beginTime = startExecutionTime = getCurrentTimeMillis();
+		if (statisticsTimingOn = getLanguageConnectionContext().getStatisticsTiming())
+		    beginTime = startExecutionTime = getCurrentTimeMillis();
 		this.resultDescription = resultDescription;
 		this.optimizerEstimatedRowCount = optimizerEstimatedRowCount;
 		this.optimizerEstimatedCost = optimizerEstimatedCost;
+	}
+	
+	/**
+	 * Allow sub-classes to record the total
+	 * time spent in their constructor time.
+	 *
+	 */
+	protected final void recordConstructorTime()
+	{
+		if (statisticsTimingOn)
+		    constructorTime = getElapsedMillis(beginTime);
 	}
 	
 	public final Activation getActivation()
@@ -138,12 +139,6 @@ implements NoPutResultSet
 	}
 
 	// NoPutResultSet interface
-
-	/**
-	 * @see NoPutResultSet#openCore
-	 * @exception StandardException thrown if cursor finished.
-     */
-	public abstract void openCore() throws StandardException;
 
 	/**
 	 * This is the default implementation of reopenCore().

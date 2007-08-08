@@ -115,7 +115,7 @@ class NormalizeResultSet extends NoPutResultSetImpl
 	*/
 		startCol = (forUpdate) ? ((numCols - 1)/ 2) + 1 : 1;
 		normalizedRow = activation.getExecutionFactory().getValueRow(numCols);
-		constructorTime += getElapsedMillis(beginTime);
+		recordConstructorTime();
 	}
 
 

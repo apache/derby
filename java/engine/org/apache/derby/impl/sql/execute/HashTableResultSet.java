@@ -152,10 +152,11 @@ class HashTableResultSet extends NoPutResultSetImpl
 		{
 			mappedResultRow = activation.getExecutionFactory().getValueRow(projectMapping.length);
 		}
-		constructorTime += getElapsedMillis(beginTime);
 
 		/* Remember whether or not RunTimeStatistics is on */
 		runTimeStatsOn = getLanguageConnectionContext().getRunTimeStatisticsMode();
+		
+		recordConstructorTime();
     }
 
 	//

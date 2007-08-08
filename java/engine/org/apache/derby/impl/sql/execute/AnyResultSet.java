@@ -77,7 +77,7 @@ public class AnyResultSet extends NoPutResultSetImpl
 		this.emptyRowFun = emptyRowFun;
 		this.subqueryNumber = subqueryNumber;
 		this.pointOfAttachment = pointOfAttachment;
-		constructorTime += getElapsedMillis(beginTime);
+		recordConstructorTime();
     }
 
 	//

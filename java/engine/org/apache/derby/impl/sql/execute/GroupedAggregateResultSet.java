@@ -128,7 +128,7 @@ class GroupedAggregateResultSet extends GenericAggregateResultSet
 					a.getPreparedStatement().getSavedObject(aggregateItem));
 		}
 
-		constructorTime += getElapsedMillis(beginTime);
+		recordConstructorTime();
     }
 
 

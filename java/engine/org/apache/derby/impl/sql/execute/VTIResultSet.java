@@ -140,7 +140,7 @@ class VTIResultSet extends NoPutResultSetImpl
 		compileTimeConstants = (FormatableHashtable) (activation.getPreparedStatement().
 								getSavedObject(ctcNumber));
 
-		constructorTime += getElapsedMillis(beginTime);
+		recordConstructorTime();
     }
 
 	//
