@@ -1578,26 +1578,18 @@ public final class	DataDictionaryImpl
 						false);
 	}
 
-	/**
-	 * Get the descriptor for the named schema. If the schemaId
-	 * parameter is NULL, it gets the descriptor for the current (default)
-	 * schema. Schema descriptors include authorization ids and schema ids.
-	 * SQL92 allows a schema to specify a default character set - we will
-	 * not support this.  Will check default schema for a match
-	 * before scanning a system table.
-	 * 
-	 * @param schemaId	The id of the schema we're interested in.
-	 *			If the name is NULL, get the descriptor for the
-	 *			current schema.
-	 * @param tc			TransactionController
-	 *
-	 *
-	 * @return	The descriptor for the schema.  <I> Warning: <\I> may
-	 * 			return NULL if schemaName is non-NULL and doesn't exist
-	 *			in SYSSCHEMAS
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
+    /**
+     * Get the SchemaDescriptor for the given schema identifier. 
+     *
+     * @param schemaId  The id of the schema we're interested in.
+     *
+     * @param tc        The transaction controller to us when scanning
+     *                  SYSSCHEMAS
+     *
+     * @return  The descriptor for the schema, null if no such schema exists.
+     *
+     * @exception StandardException     Thrown on failure
+     */
 	public SchemaDescriptor	getSchemaDescriptor(UUID schemaId,
 									TransactionController tc)
 		throws StandardException

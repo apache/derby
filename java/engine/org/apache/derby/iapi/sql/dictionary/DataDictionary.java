@@ -313,20 +313,14 @@ public interface DataDictionary
 						throws StandardException;
 
 	/**
-	 * Get the descriptor for the named schema. If the schemaId
-	 * parameter is NULL, it gets the descriptor for the current (default)
-	 * schema. Schema descriptors include authorization ids and schema ids.
-	 * SQL92 allows a schema to specify a default character set - we will
-	 * not support this.
+	 * Get the SchemaDescriptor for the given schema identifier. 
 	 *
 	 * @param schemaId	The id of the schema we're interested in.
-	 *			If the name is NULL, get the descriptor for the
-	 *			current schema.
 	 *
 	 * @param tc		The transaction controller to us when scanning
 	 *					SYSSCHEMAS
 	 *
-	 * @return	The descriptor for the schema.
+	 * @return	The descriptor for the schema, null if no such schema exists.
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
