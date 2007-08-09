@@ -114,6 +114,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(TableFunctionTest.suite());
         suite.addTest(DeclareGlobalTempTableJavaTest.suite());
         suite.addTest(PrimaryKeyTest.suite());
+        suite.addTest(RenameTableTest.suite());
 
         // Add the XML tests, which exist as a separate suite
         // so that users can "run all XML tests" easily.
