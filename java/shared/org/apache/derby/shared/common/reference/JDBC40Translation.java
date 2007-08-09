@@ -50,6 +50,7 @@ public interface JDBC40Translation {
     public static final int FUNCTION_PARAMETER_INOUT   = 2;
     public static final int FUNCTION_PARAMETER_OUT     = 3;
     public static final int FUNCTION_RETURN            = 4;
+    public static final int FUNCTION_COLUMN_RESULT            = 5;
     
     public static final int FUNCTION_NO_NULLS          = 0;
     public static final int FUNCTION_NULLABLE          = 1;

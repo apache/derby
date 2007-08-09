@@ -33,6 +33,7 @@ import org.apache.derby.iapi.types.DataTypeUtilities;
 import org.apache.derby.iapi.sql.ResultColumnDescriptor;
 import org.apache.derby.impl.jdbc.EmbedResultSetMetaData;
 import org.apache.derby.catalog.types.RoutineAliasInfo;
+import org.apache.derby.catalog.types.RowMultiSetImpl;
 
 import org.apache.derby.shared.common.reference.JDBC40Translation;
 /**
@@ -84,7 +85,6 @@ import org.apache.derby.shared.common.reference.JDBC40Translation;
 
 public class GetProcedureColumns extends org.apache.derby.vti.VTITemplate 
 {
-	private boolean isFunction;
 	private int translate(int val) {
 		if (!isFunction) { return val; }
 		switch (val) {
@@ -104,6 +104,11 @@ public class GetProcedureColumns extends org.apache.derby.vti.VTITemplate
     }
 
 	private boolean isProcedure;
+	private boolean isFunction;
+	private int          rowCount;
+	private int          returnedTableColumnCount;
+	private RowMultiSetImpl tableFunctionReturnType;
+    
 	// state for procedures.
 	private RoutineAliasInfo procedure;
 	private int paramCursor;
@@ -134,6 +139,13 @@ public class GetProcedureColumns extends org.apache.derby.vti.VTITemplate
 			isFunction = aliasType.equals("F");
 			procedure = (RoutineAliasInfo) aliasInfo;
 			method_count = (short) procedure.getParameterCount();
+            
+			rowCount = procedure.getParameterCount();
+			if ( procedure.isTableFunction() ) {
+			    tableFunctionReturnType = (RowMultiSetImpl) ((DataTypeDescriptor) procedure.getReturnType()).getTypeId().getBaseTypeId();
+			    returnedTableColumnCount = tableFunctionReturnType.getColumnNames().length;
+			    rowCount += returnedTableColumnCount;
+		        }
 		}
 		if (aliasType == null) { 
 			nullable = 0;
@@ -154,16 +166,25 @@ public class GetProcedureColumns extends org.apache.derby.vti.VTITemplate
     }
 
     public boolean next() throws SQLException {
-		if (++paramCursor >= procedure.getParameterCount())
+		if (++paramCursor >= rowCount)
 			return false;
 
-		if (paramCursor > -1) {
+		if ( procedure.isTableFunction() && (  paramCursor >= procedure.getParameterCount() ) ) {
+			int     idx = paramCursor - procedure.getParameterCount();
+            
+			sqlType      = tableFunctionReturnType.getTypes()[ idx ];
+			columnName   = tableFunctionReturnType.getColumnNames()[ idx ];
+			columnType   = (short) JDBC40Translation.FUNCTION_COLUMN_RESULT;
+		}
+		else if (paramCursor > -1) {
 			sqlType      = procedure.getParameterTypes()[paramCursor];
 			columnName   = procedure.getParameterNames()[paramCursor];
 			columnType   = 
 				(short)translate(procedure.getParameterModes()[paramCursor]);
 		}
+        
 		param_number = (short) paramCursor;
+
 		return true;
 	}   
 

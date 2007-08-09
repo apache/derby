@@ -134,7 +134,7 @@ public class TestDbMetaData extends BaseJDBCTestCase {
             Types.SMALLINT, Types.VARCHAR });
     }
     
-    private static final GeneratedId GENERIC_NAME = new GeneratedId();
+    private static final JDBC.GeneratedId GENERIC_NAME = new JDBC.GeneratedId();
 
     /** Expected rows from getFunctions() when all functions match. */
     private static final Object[][] ALL_FUNCTIONS = {
@@ -523,17 +523,4 @@ public class TestDbMetaData extends BaseJDBCTestCase {
         }
     }
 
-    /**
-     * Helper class whose <code>equals()</code> method returns
-     * <code>true</code> for all strings on this format: SQL061021105830900
-     */
-    private static class GeneratedId {
-        public boolean equals(Object o) {
-            return o instanceof String &&
-                ((String) o).matches("SQL[0-9]{15}");
-        }
-        public String toString() {
-            return "xxxxGENERATED-IDxxxx";
-        }
-    }
 }

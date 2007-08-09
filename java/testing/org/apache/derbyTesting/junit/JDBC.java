@@ -41,6 +41,20 @@ import junit.framework.Assert;
 public class JDBC {
     
     /**
+     * Helper class whose <code>equals()</code> method returns
+     * <code>true</code> for all strings on this format: SQL061021105830900
+     */
+    public static class GeneratedId {
+        public boolean equals(Object o) {
+            return o instanceof String &&
+                ((String) o).matches("SQL[0-9]{15}");
+        }
+        public String toString() {
+            return "xxxxGENERATED-IDxxxx";
+        }
+    }
+
+    /**
      * Constant to pass to DatabaseMetaData.getTables() to fetch
      * just tables.
      */

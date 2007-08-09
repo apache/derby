@@ -21,9 +21,11 @@ limitations under the License.
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
+import java.lang.reflect.*;
 import java.sql.*;
 import java.util.ArrayList;
 
+import org.apache.derby.shared.common.reference.JDBC40Translation;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
@@ -87,7 +89,662 @@ public class TableFunctionTest extends BaseJDBCTestCase
             null,   // VARCHAR FOR BIT DATA
         },
     };
+
+    private static  final   String  SFT_RETURN_TYPE = "ROW ( INTCOL INTEGER, VARCHARCOL VARCHAR(10) ) MULTISET";
+    private static  final   String  RADT_RETURN_TYPE = "ROW ( COLUMN0 BIGINT, COLUMN1 BLOB(2147483647), COLUMN2 CHAR(10), COLUMN3 CHAR (10) FOR BIT DATA, COLUMN4 CLOB(2147483647), COLUMN5 DATE, COLUMN6 DECIMAL(5,0), COLUMN7 DOUBLE, COLUMN8 DOUBLE, COLUMN9 REAL, COLUMN10 DOUBLE, COLUMN11 INTEGER, COLUMN12 LONG VARCHAR, COLUMN13 LONG VARCHAR FOR BIT DATA, COLUMN14 NUMERIC(5,0), COLUMN15 REAL, COLUMN16 SMALLINT, COLUMN17 TIME, COLUMN18 TIMESTAMP, COLUMN19 VARCHAR(10), COLUMN20 VARCHAR (10) FOR BIT DATA ) MULTISET";
     
+    private static  final   Integer FUNCTION_COLUMN_IN = new Integer( JDBC40Translation.FUNCTION_PARAMETER_IN );
+    private static  final   Integer FUNCTION_RETURN_VALUE = new Integer( JDBC40Translation.FUNCTION_RETURN );
+    private static  final   Integer FUNCTION_RESULT_COLUMN = new Integer( JDBC40Translation.FUNCTION_COLUMN_RESULT );
+
+    private static  final   Integer FUNCTION_RETURNS_TABLE = new Integer( JDBC40Translation.FUNCTION_RETURNS_TABLE );
+
+
+    private static  final   Integer JDBC_TYPE_OTHER = new Integer( Types.OTHER );
+    private static  final   Integer JDBC_TYPE_INT = new Integer( Types.INTEGER );
+    private static  final   Integer JDBC_TYPE_VARCHAR = new Integer( Types.VARCHAR );
+    private static  final   Integer JDBC_TYPE_BIGINT = new Integer( Types.BIGINT );
+    private static  final   Integer JDBC_TYPE_BLOB = new Integer( Types.BLOB );
+    private static  final   Integer JDBC_TYPE_CHAR = new Integer( Types.CHAR );
+    private static  final   Integer JDBC_TYPE_CLOB = new Integer( Types.CLOB );
+    private static  final   Integer JDBC_TYPE_DATE = new Integer( Types.DATE );
+    private static  final   Integer JDBC_TYPE_DECIMAL = new Integer( Types.DECIMAL );
+    private static  final   Integer JDBC_TYPE_DOUBLE = new Integer( Types.DOUBLE );
+    private static  final   Integer JDBC_TYPE_REAL = new Integer( Types.REAL );
+    private static  final   Integer JDBC_TYPE_NUMERIC = new Integer( Types.NUMERIC );
+    private static  final   Integer JDBC_TYPE_SMALLINT = new Integer( Types.SMALLINT );
+    private static  final   Integer JDBC_TYPE_TIME = new Integer( Types.TIME );
+    private static  final   Integer JDBC_TYPE_TIMESTAMP = new Integer( Types.TIMESTAMP );
+    private static  final   Integer JDBC_TYPE_BINARY = new Integer( Types.BINARY );
+    private static  final   Integer JDBC_TYPE_LONGVARBINARY = new Integer( Types.LONGVARBINARY );
+    private static  final   Integer JDBC_TYPE_LONGVARCHAR = new Integer( Types.LONGVARCHAR );
+    private static  final   Integer JDBC_TYPE_VARBINARY = new Integer( Types.VARBINARY );
+
+    private static  final   Integer PRECISION_NONE = new Integer( 0 );
+    private static  final   Integer PRECISION_INTEGER = new Integer( 10 );
+    private static  final   Integer PRECISION_BIGINT = new Integer( 19 );
+    private static  final   Integer PRECISION_MAX = new Integer( 2147483647 );
+
+    private static  final   Integer LENGTH_UNDEFINED = new Integer( -1 );
+    private static  final   Integer LENGTH_INTEGER = new Integer( 4 );
+    private static  final   Integer LENGTH_BIGINT = new Integer( 40 );
+    private static  final   Integer LENGTH_MAX = new Integer( 2147483647 );
+
+    private static  final   Integer  SCALE_UNDEFINED = null;
+    private static  final   Integer  SCALE_INTEGER = new Integer( 0 );
+
+    private static  final   Integer  RADIX_UNDEFINED = null;
+    private static  final   Integer  RADIX_INTEGER = new Integer( 10 );
+
+    private static  final   Object  NO_CATALOG = null;
+    private static  final   String  RETURN_VALUE_NAME = "";
+    private static  final   Integer ALLOWS_NULLS = new Integer( JDBC40Translation.FUNCTION_NULLABLE );
+    private static  final   Object  EMPTY_REMARKS = null;
+    private static  final   Object  UNDEFINED_CHAR_OCTET_LENGTH = null;
+    private static  final   String  IS_NULLABLE = "YES";
+    
+    private static  final   Integer ROW_ORDER_RETURN_VALUE = new Integer( -1 );
+    private static  final   Integer ROW_ORDER_1 = new Integer( 0 );
+    private static  final   Integer ROW_ORDER_2 = new Integer( 1 );
+    
+    private static  final   Integer POSITION_RETURN_VALUE = new Integer( 0 );
+    private static  final   Integer POSITION_ARG_1 = new Integer( 1 );
+    private static  final   Integer POSITION_ARG_2 = new Integer( 2 );
+
+    private static  final   Integer ARG_COUNT_0 = new Integer( 0 );
+    private static  final   Integer ARG_COUNT_1 = new Integer( 1 );
+    private static  final   Integer ARG_COUNT_2 = new Integer( 2 );
+    private static  final   Integer ARG_COUNT_3 = new Integer( 3 );
+
+    private static final JDBC.GeneratedId GENERIC_NAME = new JDBC.GeneratedId();
+
+    /** Expected rows from getFunctions() for  SIMPLEFUNCTIONTABLE */
+    private static final Object[][]  GF_SFT= {
+        { NO_CATALOG, "APP", "SIMPLEFUNCTIONTABLE", "com.scores.proc.Functions.weighQuestion", FUNCTION_RETURNS_TABLE,  GENERIC_NAME }
+    };
+
+    /** Expected rows from getFunctionColumns() for  SIMPLEFUNCTIONTABLE */
+    private static final Object[][]  GFC_SFT= {
+        {
+            NO_CATALOG,
+            "APP",
+            "SIMPLEFUNCTIONTABLE",
+            RETURN_VALUE_NAME,
+            FUNCTION_RETURN_VALUE,
+            JDBC_TYPE_OTHER,
+            SFT_RETURN_TYPE,
+            PRECISION_NONE,
+            LENGTH_UNDEFINED,
+            SCALE_UNDEFINED,
+            RADIX_UNDEFINED,
+            ALLOWS_NULLS,
+            EMPTY_REMARKS,
+            UNDEFINED_CHAR_OCTET_LENGTH,
+            POSITION_RETURN_VALUE,
+            IS_NULLABLE,
+            GENERIC_NAME,
+            ARG_COUNT_0,
+            ROW_ORDER_RETURN_VALUE
+        },
+        {
+            NO_CATALOG,
+            "APP",
+            "SIMPLEFUNCTIONTABLE",
+            "INTCOL",
+            FUNCTION_RESULT_COLUMN,
+            JDBC_TYPE_INT,
+            "INTEGER",
+            PRECISION_INTEGER,
+            LENGTH_INTEGER,
+            SCALE_INTEGER,
+            RADIX_INTEGER,
+            ALLOWS_NULLS,
+            EMPTY_REMARKS,
+            UNDEFINED_CHAR_OCTET_LENGTH,
+            new Integer( 1 ),           // ORDINAL_POSITION
+            IS_NULLABLE,
+            GENERIC_NAME,
+            ARG_COUNT_0,
+            ROW_ORDER_1
+        },
+        {
+            NO_CATALOG,
+            "APP",
+            "SIMPLEFUNCTIONTABLE",
+            "VARCHARCOL",
+            FUNCTION_RESULT_COLUMN,
+            JDBC_TYPE_VARCHAR,
+            "VARCHAR",
+            new Integer( 10 ),               // PRECISION
+            new Integer( 20 ),              // LENGTH
+            SCALE_UNDEFINED,
+            RADIX_UNDEFINED,
+            ALLOWS_NULLS,
+            EMPTY_REMARKS,
+            new Integer( 20 ),          // CHAR_OCTET_LENGTH
+            new Integer( 2 ),           // ORDINAL_POSITION
+            IS_NULLABLE,
+            GENERIC_NAME,
+            ARG_COUNT_0,
+            ROW_ORDER_2
+        },
+    };
+
+    /** Expected rows from getFunctions() for  returnsAllLegalDatatypes */
+    private static final Object[][]  GF_RADT= {
+        { NO_CATALOG, "APP", "RETURNSALLLEGALDATATYPES", "org.apache.derbyTesting.functionTests.tests.lang.TableFunctionTest.returnsAllLegalDatatypes", FUNCTION_RETURNS_TABLE,  GENERIC_NAME }
+    };
+
+    /** Expected rows from getFunctionColumns() for  returnsAllLegalDatatypes */
+    private static final Object[][]  GFC_RADT= {
+        {
+            NO_CATALOG,
+            "APP",
+            "RETURNSALLLEGALDATATYPES",
+            RETURN_VALUE_NAME,
+            FUNCTION_RETURN_VALUE,
+            JDBC_TYPE_OTHER,
+            RADT_RETURN_TYPE,
+            PRECISION_NONE,
+            LENGTH_UNDEFINED,
+            SCALE_UNDEFINED,
+            RADIX_UNDEFINED,
+            ALLOWS_NULLS,
+            EMPTY_REMARKS,
+            UNDEFINED_CHAR_OCTET_LENGTH,
+            POSITION_RETURN_VALUE,
+            IS_NULLABLE,
+            GENERIC_NAME,
+            ARG_COUNT_2,
+            ROW_ORDER_RETURN_VALUE
+        },
+
+        {
+            NO_CATALOG,
+            "APP",
+            "RETURNSALLLEGALDATATYPES",
+            "INTARGUMENT",
+            FUNCTION_COLUMN_IN,
+            JDBC_TYPE_INT,
+            "INTEGER",
+            PRECISION_INTEGER,
+            LENGTH_INTEGER,
+            SCALE_INTEGER,
+            RADIX_INTEGER,
+            ALLOWS_NULLS,
+            EMPTY_REMARKS,
+            UNDEFINED_CHAR_OCTET_LENGTH,
+            POSITION_ARG_1,
+            IS_NULLABLE,
+            GENERIC_NAME,
+            ARG_COUNT_2,
+            ROW_ORDER_1
+        },
+        {
+            NO_CATALOG,
+            "APP",
+            "RETURNSALLLEGALDATATYPES",
+            "VARCHARARGUMENT",
+            FUNCTION_COLUMN_IN,
+            JDBC_TYPE_VARCHAR,
+            "VARCHAR",
+            new Integer( 10 ),               // PRECISION
+            new Integer( 20 ),              // LENGTH
+            SCALE_UNDEFINED,
+            RADIX_UNDEFINED,
+            ALLOWS_NULLS,
+            EMPTY_REMARKS,
+            new Integer( 20 ),          // CHAR_OCTET_LENGTH
+            POSITION_ARG_2,
+            IS_NULLABLE,
+            GENERIC_NAME,
+            ARG_COUNT_2,
+            ROW_ORDER_2
+        },
+
+        {
+            NO_CATALOG,
+            "APP",
+            "RETURNSALLLEGALDATATYPES",
+            "COLUMN0",
+            FUNCTION_RESULT_COLUMN,
+            JDBC_TYPE_BIGINT,
+            "BIGINT",
+            PRECISION_BIGINT,
+            LENGTH_BIGINT,
+            SCALE_INTEGER,
+            RADIX_INTEGER,
+            ALLOWS_NULLS,
+            EMPTY_REMARKS,
+            UNDEFINED_CHAR_OCTET_LENGTH,
+            new Integer( 1 ),           // ORDINAL_POSITION
+            IS_NULLABLE,
+            GENERIC_NAME,
+            ARG_COUNT_2,
+            new Integer( 2 )
+        },
+        {
+            NO_CATALOG,
+            "APP",
+            "RETURNSALLLEGALDATATYPES",
+            "COLUMN1",
+            FUNCTION_RESULT_COLUMN,
+            JDBC_TYPE_BLOB,
+            "BLOB",
+            PRECISION_MAX ,
+            LENGTH_MAX,
+            SCALE_UNDEFINED,
+            RADIX_UNDEFINED,
+            ALLOWS_NULLS,
+            EMPTY_REMARKS,
+            UNDEFINED_CHAR_OCTET_LENGTH,
+            new Integer( 2 ),           // ORDINAL_POSITION
+            IS_NULLABLE,
+            GENERIC_NAME,
+            ARG_COUNT_2,
+            new Integer( 3 )
+        },
+        {
+            NO_CATALOG,
+            "APP",
+            "RETURNSALLLEGALDATATYPES",
+            "COLUMN2",
+            FUNCTION_RESULT_COLUMN,
+            JDBC_TYPE_CHAR,
+            "CHAR",
+            new Integer( 10 ) ,     // PRECISION
+            new Integer( 20 ),         // LENGTH
+            SCALE_UNDEFINED,
+            RADIX_UNDEFINED,
+            ALLOWS_NULLS,
+            EMPTY_REMARKS,
+            new Integer( 20 ),    // CHAR_OCTET_LENGTH
+            new Integer( 3 ),           // ORDINAL_POSITION
+            IS_NULLABLE,
+            GENERIC_NAME,
+            ARG_COUNT_2,
+            new Integer( 4 )
+        },
+        {
+            NO_CATALOG,
+            "APP",
+            "RETURNSALLLEGALDATATYPES",
+            "COLUMN3",
+            FUNCTION_RESULT_COLUMN,
+            JDBC_TYPE_BINARY,
+            "CHAR () FOR BIT DATA",
+            new Integer( 10 ) ,     // PRECISION
+            new Integer( 10 ),         // LENGTH
+            SCALE_UNDEFINED,
+            RADIX_UNDEFINED,
+            ALLOWS_NULLS,
+            EMPTY_REMARKS,
+            new Integer( 10 ),    // CHAR_OCTET_LENGTH
+            new Integer( 4 ),           // ORDINAL_POSITION
+            IS_NULLABLE,
+            GENERIC_NAME,
+            ARG_COUNT_2,
+            new Integer( 5 )
+        },
+        {
+            NO_CATALOG,
+            "APP",
+            "RETURNSALLLEGALDATATYPES",
+            "COLUMN4",
+            FUNCTION_RESULT_COLUMN,
+            JDBC_TYPE_CLOB,
+            "CLOB",
+            PRECISION_MAX ,     // PRECISION
+            LENGTH_MAX,         // LENGTH
+            SCALE_UNDEFINED,
+            RADIX_UNDEFINED,
+            ALLOWS_NULLS,
+            EMPTY_REMARKS,
+            UNDEFINED_CHAR_OCTET_LENGTH,
+            new Integer( 5 ),           // ORDINAL_POSITION
+            IS_NULLABLE,
+            GENERIC_NAME,
+            ARG_COUNT_2,
+            new Integer( 6 )
+        },
+        {
+            NO_CATALOG,
+            "APP",
+            "RETURNSALLLEGALDATATYPES",
+            "COLUMN5",
+            FUNCTION_RESULT_COLUMN,
+            JDBC_TYPE_DATE,
+            "DATE",
+            new Integer( 10 ) ,     // PRECISION
+            new Integer( 6 ),         // LENGTH
+            new Integer( 0 ),       // SCALE
+            new Integer( 10 ),    // RADIX
+            ALLOWS_NULLS,
+            EMPTY_REMARKS,
+            UNDEFINED_CHAR_OCTET_LENGTH,
+            new Integer( 6 ),           // ORDINAL_POSITION
+            IS_NULLABLE,
+            GENERIC_NAME,
+            ARG_COUNT_2,
+            new Integer( 7 )
+        },
+        {
+            NO_CATALOG,
+            "APP",
+            "RETURNSALLLEGALDATATYPES",
+            "COLUMN6",
+            FUNCTION_RESULT_COLUMN,
+            JDBC_TYPE_DECIMAL,
+            "DECIMAL",
+            new Integer( 5 ) ,     // PRECISION
+            new Integer( 14 ),         // LENGTH
+            new Integer( 0 ),       // SCALE
+            new Integer( 10 ),    // RADIX
+            ALLOWS_NULLS,
+            EMPTY_REMARKS,
+            UNDEFINED_CHAR_OCTET_LENGTH,
+            new Integer( 7 ),           // ORDINAL_POSITION
+            IS_NULLABLE,
+            GENERIC_NAME,
+            ARG_COUNT_2,
+            new Integer( 8 )
+        },
+        {
+            NO_CATALOG,
+            "APP",
+            "RETURNSALLLEGALDATATYPES",
+            "COLUMN7",
+            FUNCTION_RESULT_COLUMN,
+            JDBC_TYPE_DOUBLE,
+            "DOUBLE",
+            new Integer( 52 ) ,     // PRECISION
+            new Integer( 8 ),         // LENGTH
+            SCALE_UNDEFINED,       // SCALE
+            new Integer( 2 ),    // RADIX
+            ALLOWS_NULLS,
+            EMPTY_REMARKS,
+            UNDEFINED_CHAR_OCTET_LENGTH,
+            new Integer( 8 ),           // ORDINAL_POSITION
+            IS_NULLABLE,
+            GENERIC_NAME,
+            ARG_COUNT_2,
+            new Integer( 9 )
+        },
+        {
+            NO_CATALOG,
+            "APP",
+            "RETURNSALLLEGALDATATYPES",
+            "COLUMN8",
+            FUNCTION_RESULT_COLUMN,
+            JDBC_TYPE_DOUBLE,
+            "DOUBLE",
+            new Integer( 52 ) ,     // PRECISION
+            new Integer( 8 ),         // LENGTH
+            SCALE_UNDEFINED,       // SCALE
+            new Integer( 2 ),    // RADIX
+            ALLOWS_NULLS,
+            EMPTY_REMARKS,
+            UNDEFINED_CHAR_OCTET_LENGTH,
+            new Integer( 9 ),           // ORDINAL_POSITION
+            IS_NULLABLE,
+            GENERIC_NAME,
+            ARG_COUNT_2,
+            new Integer( 10 )
+        },
+        {
+            NO_CATALOG,
+            "APP",
+            "RETURNSALLLEGALDATATYPES",
+            "COLUMN9",
+            FUNCTION_RESULT_COLUMN,
+            JDBC_TYPE_REAL,
+            "REAL",
+            new Integer( 23 ) ,     // PRECISION
+            new Integer( 4 ),         // LENGTH
+            SCALE_UNDEFINED,       // SCALE
+            new Integer( 2 ),    // RADIX
+            ALLOWS_NULLS,
+            EMPTY_REMARKS,
+            UNDEFINED_CHAR_OCTET_LENGTH,
+            new Integer( 10 ),           // ORDINAL_POSITION
+            IS_NULLABLE,
+            GENERIC_NAME,
+            ARG_COUNT_2,
+            new Integer( 11 )
+        },
+        {
+            NO_CATALOG,
+            "APP",
+            "RETURNSALLLEGALDATATYPES",
+            "COLUMN10",
+            FUNCTION_RESULT_COLUMN,
+            JDBC_TYPE_DOUBLE,
+            "DOUBLE",
+            new Integer( 52 ) ,     // PRECISION
+            new Integer( 8 ),         // LENGTH
+            SCALE_UNDEFINED,       // SCALE
+            new Integer( 2 ),    // RADIX
+            ALLOWS_NULLS,
+            EMPTY_REMARKS,
+            UNDEFINED_CHAR_OCTET_LENGTH,
+            new Integer( 11 ),           // ORDINAL_POSITION
+            IS_NULLABLE,
+            GENERIC_NAME,
+            ARG_COUNT_2,
+            new Integer( 12 )
+        },
+        {
+            NO_CATALOG,
+            "APP",
+            "RETURNSALLLEGALDATATYPES",
+            "COLUMN11",
+            FUNCTION_RESULT_COLUMN,
+            JDBC_TYPE_INT,
+            "INTEGER",
+            PRECISION_INTEGER ,     // PRECISION
+            LENGTH_INTEGER,         // LENGTH
+            SCALE_INTEGER,       // SCALE
+            RADIX_INTEGER,    // RADIX
+            ALLOWS_NULLS,
+            EMPTY_REMARKS,
+            UNDEFINED_CHAR_OCTET_LENGTH,
+            new Integer( 12 ),           // ORDINAL_POSITION
+            IS_NULLABLE,
+            GENERIC_NAME,
+            ARG_COUNT_2,
+            new Integer( 13 )
+        },
+        {
+            NO_CATALOG,
+            "APP",
+            "RETURNSALLLEGALDATATYPES",
+            "COLUMN12",
+            FUNCTION_RESULT_COLUMN,
+            JDBC_TYPE_LONGVARCHAR,
+            "LONG VARCHAR",
+            new Integer( 32700 ),     // PRECISION
+            new Integer( 65400 ),         // LENGTH
+            SCALE_UNDEFINED,       // SCALE
+            RADIX_UNDEFINED,    // RADIX
+            ALLOWS_NULLS,
+            EMPTY_REMARKS,
+            UNDEFINED_CHAR_OCTET_LENGTH,
+            new Integer( 13 ),           // ORDINAL_POSITION
+            IS_NULLABLE,
+            GENERIC_NAME,
+            ARG_COUNT_2,
+            new Integer( 14 )
+        },
+        {
+            NO_CATALOG,
+            "APP",
+            "RETURNSALLLEGALDATATYPES",
+            "COLUMN13",
+            FUNCTION_RESULT_COLUMN,
+            JDBC_TYPE_LONGVARBINARY,
+            "LONG VARCHAR FOR BIT DATA",
+            new Integer( 32700 ),     // PRECISION
+            new Integer( 32700 ),         // LENGTH
+            SCALE_UNDEFINED,       // SCALE
+            RADIX_UNDEFINED,    // RADIX
+            ALLOWS_NULLS,
+            EMPTY_REMARKS,
+            UNDEFINED_CHAR_OCTET_LENGTH,
+            new Integer( 14 ),           // ORDINAL_POSITION
+            IS_NULLABLE,
+            GENERIC_NAME,
+            ARG_COUNT_2,
+            new Integer( 15 )
+        },
+        {
+            NO_CATALOG,
+            "APP",
+            "RETURNSALLLEGALDATATYPES",
+            "COLUMN14",
+            FUNCTION_RESULT_COLUMN,
+            JDBC_TYPE_NUMERIC,
+            "NUMERIC",
+            new Integer( 5 ),     // PRECISION
+            new Integer( 14 ),         // LENGTH
+            new Integer( 0 ),       // SCALE
+            new Integer( 10 ),    // RADIX
+            ALLOWS_NULLS,
+            EMPTY_REMARKS,
+            UNDEFINED_CHAR_OCTET_LENGTH,
+            new Integer( 15 ),           // ORDINAL_POSITION
+            IS_NULLABLE,
+            GENERIC_NAME,
+            ARG_COUNT_2,
+            new Integer( 16 )
+        },
+        {
+            NO_CATALOG,
+            "APP",
+            "RETURNSALLLEGALDATATYPES",
+            "COLUMN15",
+            FUNCTION_RESULT_COLUMN,
+            JDBC_TYPE_REAL,
+            "REAL",
+            new Integer( 23 ),     // PRECISION
+            new Integer( 4 ),         // LENGTH
+            SCALE_UNDEFINED,       // SCALE
+            new Integer( 2 ),    // RADIX
+            ALLOWS_NULLS,
+            EMPTY_REMARKS,
+            UNDEFINED_CHAR_OCTET_LENGTH,
+            new Integer( 16 ),           // ORDINAL_POSITION
+            IS_NULLABLE,
+            GENERIC_NAME,
+            ARG_COUNT_2,
+            new Integer( 17 )
+        },
+        {
+            NO_CATALOG,
+            "APP",
+            "RETURNSALLLEGALDATATYPES",
+            "COLUMN16",
+            FUNCTION_RESULT_COLUMN,
+            JDBC_TYPE_SMALLINT,
+            "SMALLINT",
+            new Integer( 5 ),     // PRECISION
+            new Integer( 2 ),         // LENGTH
+            SCALE_INTEGER,       // SCALE
+            RADIX_INTEGER,    // RADIX
+            ALLOWS_NULLS,
+            EMPTY_REMARKS,
+            UNDEFINED_CHAR_OCTET_LENGTH,
+            new Integer( 17 ),           // ORDINAL_POSITION
+            IS_NULLABLE,
+            GENERIC_NAME,
+            ARG_COUNT_2,
+            new Integer( 18 )
+        },
+        {
+            NO_CATALOG,
+            "APP",
+            "RETURNSALLLEGALDATATYPES",
+            "COLUMN17",
+            FUNCTION_RESULT_COLUMN,
+            JDBC_TYPE_TIME,
+            "TIME",
+            new Integer( 8 ),     // PRECISION
+            new Integer( 6 ),         // LENGTH
+            SCALE_INTEGER,       // SCALE
+            RADIX_INTEGER,    // RADIX
+            ALLOWS_NULLS,
+            EMPTY_REMARKS,
+            UNDEFINED_CHAR_OCTET_LENGTH,
+            new Integer( 18 ),           // ORDINAL_POSITION
+            IS_NULLABLE,
+            GENERIC_NAME,
+            ARG_COUNT_2,
+            new Integer( 19 )
+        },
+        {
+            NO_CATALOG,
+            "APP",
+            "RETURNSALLLEGALDATATYPES",
+            "COLUMN18",
+            FUNCTION_RESULT_COLUMN,
+            JDBC_TYPE_TIMESTAMP,
+            "TIMESTAMP",
+            new Integer( 26 ),     // PRECISION
+            new Integer( 16 ),         // LENGTH
+            new Integer( 6 ),       // SCALE
+            RADIX_INTEGER,    // RADIX
+            ALLOWS_NULLS,
+            EMPTY_REMARKS,
+            UNDEFINED_CHAR_OCTET_LENGTH,
+            new Integer( 19 ),           // ORDINAL_POSITION
+            IS_NULLABLE,
+            GENERIC_NAME,
+            ARG_COUNT_2,
+            new Integer( 20 )
+        },
+        {
+            NO_CATALOG,
+            "APP",
+            "RETURNSALLLEGALDATATYPES",
+            "COLUMN19",
+            FUNCTION_RESULT_COLUMN,
+            JDBC_TYPE_VARCHAR,
+            "VARCHAR",
+            new Integer( 10 ),     // PRECISION
+            new Integer( 20 ),         // LENGTH
+            SCALE_UNDEFINED,       // SCALE
+            RADIX_UNDEFINED,    // RADIX
+            ALLOWS_NULLS,
+            EMPTY_REMARKS,
+            new Integer( 20 ),    // CHAR_OCTET_LENGTH
+            new Integer( 20 ),           // ORDINAL_POSITION
+            IS_NULLABLE,
+            GENERIC_NAME,
+            ARG_COUNT_2,
+            new Integer( 21 )
+        },
+        {
+            NO_CATALOG,
+            "APP",
+            "RETURNSALLLEGALDATATYPES",
+            "COLUMN20",
+            FUNCTION_RESULT_COLUMN,
+            JDBC_TYPE_VARBINARY,
+            "VARCHAR () FOR BIT DATA",
+            new Integer( 10 ),     // PRECISION
+            new Integer( 10 ),         // LENGTH
+            SCALE_UNDEFINED,       // SCALE
+            RADIX_UNDEFINED,    // RADIX
+            ALLOWS_NULLS,
+            EMPTY_REMARKS,
+            new Integer( 10 ),    // CHAR_OCTET_LENGTH
+            new Integer( 21 ),           // ORDINAL_POSITION
+            IS_NULLABLE,
+            GENERIC_NAME,
+            ARG_COUNT_2,
+            new Integer( 22 )
+        },
+    };
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // INNER CLASSES
@@ -99,6 +756,8 @@ public class TableFunctionTest extends BaseJDBCTestCase
     // STATE
     //
     ///////////////////////////////////////////////////////////////////////////////////
+
+    private DatabaseMetaData _databaseMetaData;
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -136,6 +795,8 @@ public class TableFunctionTest extends BaseJDBCTestCase
         throws Exception
     {
         super.setUp();
+
+        _databaseMetaData = getConnection().getMetaData();
 
         dropSchema();
     }
@@ -263,9 +924,11 @@ public class TableFunctionTest extends BaseJDBCTestCase
             (
              "SIMPLEFUNCTIONTABLE",
              "weighQuestion() " +
-             "RETURNS ROW ( INTCOL INTEGER, VARCHARCOL VARCHAR(10) ) MULTISET " +
-             "LANGUAGE JAVA PARAMETER STYLE DERBY_JDBC_RESULT_SET NO SQL CALLED ON NULL INPUT"
+             "RETURNS " + SFT_RETURN_TYPE +
+             " LANGUAGE JAVA PARAMETER STYLE DERBY_JDBC_RESULT_SET NO SQL CALLED ON NULL INPUT"
              );
+
+        assertFunctionDBMD( "SIMPLEFUNCTIONTABLE", GF_SFT , GFC_SFT );
     }
     
     /**
@@ -332,7 +995,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
     {
         goodDDL
             (
-             "create function returnsAllLegalDatatypes()\n" +
+             "create function returnsAllLegalDatatypes( intArgument int, varcharArgument varchar( 10 ) )\n" +
              "returns TABLE\n" +
              "  (\n" +
              "column0 BIGINT,\n" +
@@ -366,7 +1029,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
         assertResults
             (
              "select s.*\n" +
-             "    from TABLE( returnsAllLegalDatatypes() ) s\n",
+             "    from TABLE( returnsAllLegalDatatypes( 1, 'one' ) ) s\n",
              ALL_TYPES_ROWS,
              new int[]
                 {
@@ -393,6 +1056,8 @@ public class TableFunctionTest extends BaseJDBCTestCase
                     Types.VARBINARY,
                 }
              );
+        
+        assertFunctionDBMD( "RETURNSALLLEGALDATATYPES", GF_RADT , GFC_RADT );
     }
     
     ///////////////////////////////////////////////////////////////////////////////////
@@ -420,7 +1085,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
     /**
      * A VTI which returns rows having columns of all legal datatypes.
      */
-    public  static  ResultSet returnsAllLegalDatatypes()
+    public  static  ResultSet returnsAllLegalDatatypes( int intArg, String varcharArg )
     {
         return makeVTI( ALL_TYPES_ROWS );
     }
@@ -513,6 +1178,67 @@ public class TableFunctionTest extends BaseJDBCTestCase
         {
             unexpectedThrowable( e );
         }
+    }
+
+    /**
+     * Assert that the function has the correct database metadata.
+     */
+    public void assertFunctionDBMD
+        ( String functionName, Object[][] expectedGetFunctionsResult, Object[][] expectedGetFunctionColumnsResult )
+        throws Exception
+    {
+        // skip this test if using the DB2 client, which does not support the
+        // JDBC4 metadata calls.
+        if (  usingDerbyNet() ) { return; }
+        
+        try {
+            println( "\nExpecting correct function metadata from " + functionName );
+            ResultSet                   rs = getFunctions(  null, "APP", functionName );
+            JDBC.assertFullResultSet( rs, expectedGetFunctionsResult, false );
+            rs.close();
+            
+            println( "\nExpecting correct function column metadata from " + functionName );
+            rs = getFunctionColumns(  null, "APP", functionName, "%" );
+            //prettyPrint( getConnection(), getFunctionColumns(  null, "APP", functionName, "%" ) );
+            JDBC.assertFullResultSet( rs, expectedGetFunctionColumnsResult, false );
+            rs.close();
+        }
+        catch (Exception e)
+        {
+            unexpectedThrowable( e );
+        }
+    }
+
+    /**
+     * Call DatabaseMetaData.getFunctions(). We do this by reflection because
+     * the calls exist in our JDBC3.0 implementations even though they don't
+     * appear in the JDBC 3.0 java.sql.DatabaseMetaData api.
+     */
+    public ResultSet    getFunctions( String catalog, String schemaPattern, String functionNamePattern )
+        throws Exception
+    {
+        Class       metadataClass = _databaseMetaData.getClass();
+        Method  method = metadataClass.getMethod( "getFunctions", new Class[] { String.class, String.class, String.class } );
+        ResultSet   result = (ResultSet) method.invoke( _databaseMetaData, new Object[] { catalog, schemaPattern, functionNamePattern } );
+
+        return result;
+    }
+
+    /**
+     * Call DatabaseMetaData.getFunctionColumnss(). We do this by reflection because
+     * the calls exist in our JDBC3.0 implementations even though they don't
+     * appear in the JDBC 3.0 java.sql.DatabaseMetaData api.
+     */
+    public ResultSet    getFunctionColumns
+        ( String catalog, String schemaPattern, String functionNamePattern, String columnNamePattern )
+        throws Exception
+    {
+        Class       metadataClass = _databaseMetaData.getClass();
+        Method  method = metadataClass.getMethod( "getFunctionColumns", new Class[] { String.class, String.class, String.class, String.class } );
+        ResultSet   result = (ResultSet) method.invoke
+            ( _databaseMetaData, new Object[] { catalog, schemaPattern, functionNamePattern, columnNamePattern } );
+
+        return result;
     }
 
     /**
@@ -785,4 +1511,15 @@ public class TableFunctionTest extends BaseJDBCTestCase
         return names;
     }
     
+    /**
+     * <p>
+     * Print a ResultSet, using Derby's pretty-printing tool.
+     * </p>
+     */
+    public  static  void    prettyPrint( Connection conn, ResultSet rs )
+        throws SQLException
+    {
+        org.apache.derby.tools.JDBCDisplayUtil.DisplayResults
+            ( System.out, rs, conn );
+    }
 }
