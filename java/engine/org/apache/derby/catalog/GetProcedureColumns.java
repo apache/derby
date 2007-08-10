@@ -133,6 +133,8 @@ public class GetProcedureColumns extends org.apache.derby.vti.VTITemplate
     //
     public GetProcedureColumns(AliasInfo aliasInfo, String aliasType) throws SQLException
     {
+		int     functionParamCursor = -2;
+
 		// compile time aliasInfo will be null.
 		if (aliasInfo != null) {
 			isProcedure = aliasType.equals("P");
@@ -145,6 +147,7 @@ public class GetProcedureColumns extends org.apache.derby.vti.VTITemplate
 			    tableFunctionReturnType = (RowMultiSetImpl) ((DataTypeDescriptor) procedure.getReturnType()).getTypeId().getBaseTypeId();
 			    returnedTableColumnCount = tableFunctionReturnType.getColumnNames().length;
 			    rowCount += returnedTableColumnCount;
+			    functionParamCursor = -1;
 		        }
 		}
 		if (aliasType == null) { 
@@ -157,7 +160,7 @@ public class GetProcedureColumns extends org.apache.derby.vti.VTITemplate
 			sqlType = procedure.getReturnType();
 			columnName = "";  // COLUMN_NAME is VARCHAR NOT NULL
 			columnType = (short) JDBC40Translation.FUNCTION_RETURN;
-			paramCursor = -2;
+			paramCursor = functionParamCursor;
 			return;
 		}
 		nullable = (short) DatabaseMetaData.procedureNullable;

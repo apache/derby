@@ -169,27 +169,6 @@ public class TableFunctionTest extends BaseJDBCTestCase
             NO_CATALOG,
             "APP",
             "SIMPLEFUNCTIONTABLE",
-            RETURN_VALUE_NAME,
-            FUNCTION_RETURN_VALUE,
-            JDBC_TYPE_OTHER,
-            SFT_RETURN_TYPE,
-            PRECISION_NONE,
-            LENGTH_UNDEFINED,
-            SCALE_UNDEFINED,
-            RADIX_UNDEFINED,
-            ALLOWS_NULLS,
-            EMPTY_REMARKS,
-            UNDEFINED_CHAR_OCTET_LENGTH,
-            POSITION_RETURN_VALUE,
-            IS_NULLABLE,
-            GENERIC_NAME,
-            ARG_COUNT_0,
-            ROW_ORDER_RETURN_VALUE
-        },
-        {
-            NO_CATALOG,
-            "APP",
-            "SIMPLEFUNCTIONTABLE",
             "INTCOL",
             FUNCTION_RESULT_COLUMN,
             JDBC_TYPE_INT,
@@ -237,28 +216,6 @@ public class TableFunctionTest extends BaseJDBCTestCase
 
     /** Expected rows from getFunctionColumns() for  returnsAllLegalDatatypes */
     private static final Object[][]  GFC_RADT= {
-        {
-            NO_CATALOG,
-            "APP",
-            "RETURNSALLLEGALDATATYPES",
-            RETURN_VALUE_NAME,
-            FUNCTION_RETURN_VALUE,
-            JDBC_TYPE_OTHER,
-            RADT_RETURN_TYPE,
-            PRECISION_NONE,
-            LENGTH_UNDEFINED,
-            SCALE_UNDEFINED,
-            RADIX_UNDEFINED,
-            ALLOWS_NULLS,
-            EMPTY_REMARKS,
-            UNDEFINED_CHAR_OCTET_LENGTH,
-            POSITION_RETURN_VALUE,
-            IS_NULLABLE,
-            GENERIC_NAME,
-            ARG_COUNT_2,
-            ROW_ORDER_RETURN_VALUE
-        },
-
         {
             NO_CATALOG,
             "APP",
