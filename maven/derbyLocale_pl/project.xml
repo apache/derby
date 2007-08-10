@@ -19,7 +19,10 @@
 <!-- $Rev: 111629 $ $Date: 2004-12-11 19:52:51 -0800 (Sat, 11 Dec 2004) $ -->
 
 <project>
+    <pomVersion>3</pomVersion>
+    <extend>../project.xml</extend>
 
-    <goal name="clean" prereqs="multiproject:clean"/>
-    
+    <name>Derby I18N pl</name>
+    <id>derbyLocale_pl</id>
+
 </project>
