@@ -200,36 +200,10 @@ public class SYSKEYSRowFactory extends CatalogRowFactory
 	 */
 	public SystemColumn[]	buildColumnList()
 	{
-		int						index = 0;
-		SystemColumn[]			columnList = new SystemColumn[SYSKEYS_COLUMN_COUNT];
-
-		// describe columns
-
-		columnList[index++] = 
-					new SystemColumnImpl(	
-							convertIdCase( "CONSTRAINTID"),			// column name
-							SYSKEYS_CONSTRAINTID,	// column number
-							0,					// precision
-							0,					// scale
-							false,				// nullability
-							"CHAR",				// dataType
-							true,				// built-in type
-							36					// maxLength
-			               );
-
-		columnList[index++] = 
-					new SystemColumnImpl(	
-							convertIdCase( "CONGLOMERATEID"),	// column name
-							SYSKEYS_CONGLOMERATEID,	// column number
-							0,					// precision
-							0,					// scale
-							false,				// nullability
-							"CHAR",				// dataType
-							true,				// built-in type
-							36					// maxLength
-			               );
-
-		return	columnList;
-	}
+            return new SystemColumn[] {
+                SystemColumnImpl.getUUIDColumn("CONSTRAINTID", false),
+                SystemColumnImpl.getUUIDColumn("CONGLOMERATEID", false),
+            };
+        }
 
 }

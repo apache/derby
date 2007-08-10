@@ -223,36 +223,10 @@ public class SYSSCHEMASRowFactory extends CatalogRowFactory
 	 */
 	public SystemColumn[]	buildColumnList() 
 	{
-		int						index = 0;
-		SystemColumn[]			columnList = new SystemColumn[SYSSCHEMAS_COLUMN_COUNT];
-
-		// describe columns
-
-		columnList[index++] = new SystemColumnImpl(	
-							convertIdCase( "SCHEMAID"),			// name 
-							SYSSCHEMAS_SCHEMAID,	// column number
-							0,					// precision
-							0,					// scale
-							false,				// nullability
-							"CHAR",				// dataType
-							true,				// built-in type
-							36					// maxLength
-			                );
-		columnList[index++] = 
-					new SystemColumnImpl(		// SQL IDENTIFIER
-							convertIdCase( "SCHEMANAME"),		// column name
-							SYSSCHEMAS_SCHEMANAME,	// column number
-							false				// nullability
-							);
-
-		columnList[index++] = 
-					new SystemColumnImpl(		// SQL IDENTIFIER
-							convertIdCase( "AUTHORIZATIONID"),	// column name
-							SYSSCHEMAS_SCHEMAAID,	// column number
-							false				// nullability
-							);
-
-
-		return	columnList;
+            return new SystemColumn[] {
+                SystemColumnImpl.getUUIDColumn("SCHEMAID", false),
+                SystemColumnImpl.getIdentifierColumn("SCHEMANAME", false),
+                SystemColumnImpl.getIdentifierColumn("AUTHORIZATIONID", false),
+            };
 	}
 }

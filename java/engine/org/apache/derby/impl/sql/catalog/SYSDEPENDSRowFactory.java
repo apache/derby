@@ -21,6 +21,8 @@
 
 package org.apache.derby.impl.sql.catalog;
 
+import java.sql.Types;
+
 import org.apache.derby.catalog.DependableFinder;
 import org.apache.derby.catalog.TypeDescriptor;
 import org.apache.derby.catalog.UUID;
@@ -231,59 +233,13 @@ public class SYSDEPENDSRowFactory extends CatalogRowFactory
 	 */
 	public SystemColumn[]	buildColumnList()
 	{
-		int						index = 0;
-		SystemColumn[]			columnList = new SystemColumn[SYSDEPENDS_COLUMN_COUNT];
-
-		// describe columns
-
-		columnList[index++] = 
-					new SystemColumnImpl(	
-							convertIdCase( "DEPENDENTID"),			// column name
-							SYSDEPENDS_DEPENDENTID,	// column number
-							0,					// precision
-							0,					// scale
-							false,				// nullability
-							"CHAR",				// dataType
-							true,				// built-in type
-							36					// maxLength
-			               );
-
-		columnList[index++] = 
-					new SystemColumnImpl(	
-							convertIdCase( "DEPENDENTFINDER"),		// column name
-							SYSDEPENDS_DEPENDENTTYPE,	// column number
-							0,					// precision
-							0,					// scale
-							false,				// nullability
-							"org.apache.derby.catalog.DependableFinder",	    // dataType
-							false,				// built-in type
-							TypeDescriptor.MAXIMUM_WIDTH_UNKNOWN // maxLength
-			               );
-
-		columnList[index++] =
-					new SystemColumnImpl(
-							convertIdCase( "PROVIDERID"),		// column name
-							SYSDEPENDS_PROVIDERID,
-							0,					// precision
-							0,					// scale
-							false,				// nullability
-							"CHAR",				// datatype
-							true,				// built-in type
-							36					// maxLength
-							);
-
-		columnList[index++] = 
-					new SystemColumnImpl(	
-							convertIdCase( "PROVIDERFINDER"),			// column name
-							SYSDEPENDS_PROVIDERTYPE,	// column number
-							0,					// precision
-							0,					// scale
-							false,				// nullability
-							"org.apache.derby.catalog.DependableFinder",	    // dataType
-							false,				// built-in type
-							TypeDescriptor.MAXIMUM_WIDTH_UNKNOWN // maxLength
-			               );
-
-		return	columnList;
+            return new SystemColumn[] {
+                SystemColumnImpl.getUUIDColumn("DEPENDENTID", false),
+                SystemColumnImpl.getJavaColumn("DEPENDENTFINDER",
+                        "org.apache.derby.catalog.DependableFinder", false),
+                SystemColumnImpl.getUUIDColumn("PROVIDERID", false),
+                SystemColumnImpl.getJavaColumn("PROVIDERFINDER",
+                        "org.apache.derby.catalog.DependableFinder", false),
+           };
 	}
 }

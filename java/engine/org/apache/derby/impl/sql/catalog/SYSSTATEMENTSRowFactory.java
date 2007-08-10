@@ -59,6 +59,7 @@ import org.apache.derby.iapi.types.*;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import java.sql.Timestamp;
+import java.sql.Types;
 import java.util.Properties;
 
 /**
@@ -384,113 +385,19 @@ public class SYSSTATEMENTSRowFactory extends CatalogRowFactory
 	 */
 	public SystemColumn[] buildColumnList()
 	{
-		/*
-		** Create one less than the number of columns, we
-		** skip the last one deliberately.
-		*/	
-		SystemColumn[]	columnList = new SystemColumn[SYSSTATEMENTS_COLUMN_COUNT - SYSSTATEMENTS_HIDDEN_COLUMN_COUNT];
-
-
-		// describe columns
-		columnList[0] = new SystemColumnImpl(	
-							convertIdCase( "STMTID"),			// name 
-							SYSSTATEMENTS_STMTID,	// column number
-							0,					// precision
-							0,					// scale
-							false,				// nullability
-							"CHAR",				// dataType
-							true,				// built-in type
-							36					// maxLength
-			                );
-
-		columnList[1] = 
-					new SystemColumnImpl(		// SQL IDENTIFIER
-							convertIdCase( "STMTNAME"),			// column name
-							SYSSTATEMENTS_STMTNAME,	// column number
-							false				// nullability
-							);
-
-		columnList[2] = new SystemColumnImpl(	
-							convertIdCase( "SCHEMAID"),				// name 
-							SYSSTATEMENTS_SCHEMAID,	// column number
-							0,					// precision
-							0,					// scale
-							false,				// nullability
-							"CHAR",				// dataType
-							true,				// built-in type
-							36					// maxLength
-			                );
-
-		columnList[3] = 
-					new SystemColumnImpl(		
-							convertIdCase( "TYPE"),				// name 
-							SYSSTATEMENTS_TYPE,	// column number
-							0,					// precision
-							0,					// scale
-							false,				// nullability
-							"CHAR",				// dataType
-							true,				// built-in type
-							1					// maxLength
-			                );
-
-		columnList[4] = 
-					new SystemColumnImpl(		
-							convertIdCase( "VALID"),			// name 
-							SYSSTATEMENTS_VALID,// column number
-							0,					// precision
-							0,					// scale
-							false,				// nullability
-							"BOOLEAN",			// dataType
-							true,				// built-in type
-							1					// maxLength
-			                );
-
-		columnList[5] = 
-					new SystemColumnImpl(		
-							convertIdCase( "TEXT"),				// name 
-							SYSSTATEMENTS_TEXT,	// column number
-							0,					// precision
-							0,					// scale
-							false,				// nullability
-							"LONG VARCHAR",	// dataType
-							true,				// built-in type
-							TypeId.LONGVARCHAR_MAXWIDTH	// maxLength
-			                );
-
-		columnList[6] = 
-					new SystemColumnImpl(		
-							convertIdCase( "LASTCOMPILED"),				// name 
-							SYSSTATEMENTS_LASTCOMPILED,	// column number
-							0,							// precision
-							0,							// scale
-							true,						// nullability
-							"TIMESTAMP",				// dataType
-							true,						// built-in type
-							TypeId.TIMESTAMP_MAXWIDTH	// maxLength
-			                );
-
-		columnList[7] = new SystemColumnImpl(	
-							convertIdCase( "COMPILATIONSCHEMAID"),				// name 
-							SYSSTATEMENTS_COMPILATION_SCHEMAID,	// column number
-							0,					// precision
-							0,					// scale
-							true,				// nullability
-							"CHAR",				// dataType
-							true,				// built-in type
-							36					// maxLength
-			                );
-
-		columnList[8] = 
-					new SystemColumnImpl(		
-							convertIdCase( "USINGTEXT"),		// name 
-							SYSSTATEMENTS_USINGTEXT,// column number
-							0,					// precision
-							0,					// scale
-							true,				// nullability
-							"LONG VARCHAR",	// dataType
-							true,				// built-in type
-							TypeId.LONGVARCHAR_MAXWIDTH	// maxLength
-			                );
+            return new SystemColumn[] {
+                SystemColumnImpl.getUUIDColumn("STMTID", false),
+                SystemColumnImpl.getIdentifierColumn("STMTNAME", false),
+                SystemColumnImpl.getUUIDColumn("SCHEMAID", false),
+                SystemColumnImpl.getIndicatorColumn("TYPE"),
+                SystemColumnImpl.getColumn("VALID", Types.BOOLEAN, false),
+                SystemColumnImpl.getColumn("TEXT", Types.LONGVARCHAR, false,
+                        TypeId.LONGVARCHAR_MAXWIDTH),
+                SystemColumnImpl.getColumn("LASTCOMPILED", Types.TIMESTAMP, true),
+                SystemColumnImpl.getUUIDColumn("COMPILATIONSCHEMAID", false),
+                SystemColumnImpl.getColumn("USINGTEXT", Types.LONGVARCHAR, false,
+                        TypeId.LONGVARCHAR_MAXWIDTH),         
+            };
 		/*
 		** This column is deliberately left out.  It
 	 	** is effectively 'hidden' from users.  The code
@@ -527,8 +434,6 @@ public class SYSSTATEMENTSRowFactory extends CatalogRowFactory
 		//					1					// maxLength
 		//	                );
 
-
-		return	columnList;
 	}
 
 	/**

@@ -21,6 +21,8 @@
 
 package org.apache.derby.impl.sql.catalog;
 
+import java.sql.Types;
+
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.sanity.SanityManager;
@@ -669,91 +671,15 @@ public class SYSCONSTRAINTSRowFactory extends CatalogRowFactory
 	 */
 	public SystemColumn[]	buildColumnList()
 	{
-		int						index = 0;
-		SystemColumn[]			columnList = new SystemColumn[SYSCONSTRAINTS_COLUMN_COUNT];
-
-		// describe columns
-
-		columnList[index++] = 
-					new SystemColumnImpl(	
-							convertIdCase( "CONSTRAINTID"),			// column name
-							SYSCONSTRAINTS_CONSTRAINTID,	// column number
-							0,					// precision
-							0,					// scale
-							false,				// nullability
-							"CHAR",				// dataType
-							true,				// built-in type
-							36					// maxLength
-			               );
-
-		columnList[index++] = 
-					new SystemColumnImpl(	
-							convertIdCase( "TABLEID"),			// column name
-							SYSCONSTRAINTS_TABLEID,	// column number
-							0,					// precision
-							0,					// scale
-							false,				// nullability
-							"CHAR",				// dataType
-							true,				// built-in type
-							36					// maxLength
-			               );
-
-		columnList[index++] =
-					new SystemColumnImpl(		// SQL IDENTIFIER
-							convertIdCase( "CONSTRAINTNAME"),	// column name
-							SYSCONSTRAINTS_CONSTRAINTNAME,
-							false				// nullability
-							);
-
-		columnList[index++] = 
-					new SystemColumnImpl(	
-							convertIdCase( "TYPE"),			// column name
-							SYSCONSTRAINTS_TYPE,	// column number
-							0,					// precision
-							0,					// scale
-							false,				// nullability
-							"CHAR",				// dataType
-							true,				// built-in type
-							1					// maxLength
-			               );
-
-
-		columnList[index++] = 
-					new SystemColumnImpl(	
-							convertIdCase( "SCHEMAID"),		// column name
-							SYSCONSTRAINTS_SCHEMAID,	// column number
-							0,					// precision
-							0,					// scale
-							false,				// nullability
-							"CHAR",				// dataType
-							true,				// built-in type
-							36					// maxLength
-			               );
-
-		columnList[index++] = 
-					new SystemColumnImpl(	
-							convertIdCase( "STATE"),		// column name
-							SYSCONSTRAINTS_STATE,	// column number
-							0,					// precision
-							0,					// scale
-							false,				// nullability
-							"CHAR",				// dataType
-							true,				// built-in type
-							1					// maxLength
-			               );
-
-		columnList[index++] = 
-					new SystemColumnImpl(	
-							convertIdCase( "REFERENCECOUNT"),		// column name
-							SYSCONSTRAINTS_REFERENCECOUNT,	// column number
-							0,					// precision
-							0,					// scale
-							false,				// nullability
-							"INTEGER",				// dataType
-							true,				// built-in type
-							1					// maxLength
-			               );
-		return	columnList;
+            return new SystemColumn[] {
+               SystemColumnImpl.getUUIDColumn("CONSTRAINTID", false),
+               SystemColumnImpl.getUUIDColumn("TABLEID", false),
+               SystemColumnImpl.getIdentifierColumn("CONSTRAINTNAME", false),
+               SystemColumnImpl.getIndicatorColumn("TYPE"),
+               SystemColumnImpl.getUUIDColumn("SCHEMAID", false),
+               SystemColumnImpl.getIndicatorColumn("STATE"),
+               SystemColumnImpl.getColumn("REFERENCECOUNT", Types.INTEGER, false) 
+            };
 	}
 
 }
