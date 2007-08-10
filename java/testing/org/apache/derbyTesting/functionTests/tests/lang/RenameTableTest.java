@@ -21,14 +21,12 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.PreparedStatement;
-import java.sql.Connection;
 
 import junit.framework.Test;
-import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -36,7 +34,6 @@ import org.apache.derbyTesting.junit.TestConfiguration;
 /**
  * Various tests for RENAME TABLE
  * 
- * @exception SQLException
  */
 public class RenameTableTest extends BaseJDBCTestCase {
     public RenameTableTest(String name) {

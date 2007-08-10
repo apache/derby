@@ -165,7 +165,7 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
     /**
      * embeddedSuite runs tests only in embedded mode. 
      * Used by CollationTest
-     * @return
+     * @return embedded Test suite
      */
     public static Test embeddedSuite() {
         
