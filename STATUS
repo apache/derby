@@ -28,8 +28,9 @@ Project info
 
 Releases from trunk:
 
- * 10.3.0.0 : In development 
- * 10.2.2.0 : Released 10/19/2006
+ * 10.4.0.0 : In development 
+ * 10.3.1.4 : Released 8/10/2007
+ * 10.2.2.0 : Released 12/19/2006
  * 10.2.1.6 : Released 10/05/2006
  * 10.1.3.1 : Released 06/30/2006
  * 10.1.2.1 : Released 11/18/2005
@@ -70,7 +71,7 @@ OTHER NEWS
 RELEASE STATUS
 ==============
 
-Derby 10.3.0.0 is open for development.
+Derby 10.4.0.0 is open for development.
 
 No currently outstanding issues.
 
