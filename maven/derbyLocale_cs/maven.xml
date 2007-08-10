@@ -18,8 +18,10 @@
 
 <!-- $Rev: 111629 $ $Date: 2004-12-11 19:52:51 -0800 (Sat, 11 Dec 2004) $ -->
 
-<project>
-
-    <goal name="clean" prereqs="multiproject:clean"/>
-    
+<project
+    xmlns:ant="jelly:ant"
+    >
+    <goal name="jar:jar">
+        <ant:copy tofile="${maven.build.dir}/${maven.final.name}.jar" file="${derby.jars}/${pom.artifactId}.jar"/>
+    </goal>
 </project>
