@@ -25,12 +25,9 @@ import java.util.Properties;
 
 import org.apache.derby.catalog.TypeDescriptor;
 import org.apache.derby.catalog.UUID;
-import org.apache.derby.catalog.types.BaseTypeIdImpl;
 import org.apache.derby.catalog.types.DefaultInfoImpl;
-import org.apache.derby.catalog.types.TypeDescriptorImpl;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.Property;
-import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.uuid.UUIDFactory;
 import org.apache.derby.iapi.sql.dictionary.CatalogRowFactory;
@@ -402,19 +399,10 @@ public class SYSCOLUMNSRowFactory extends CatalogRowFactory
 		** and TypeId objects that contain the full implementations for
 		** language processing.
 		*/
-		TypeDescriptorImpl typeDescriptor = (TypeDescriptorImpl) row.getColumn(SYSCOLUMNS_COLUMNDATATYPE).
+		TypeDescriptor catalogType = (TypeDescriptor) row.getColumn(SYSCOLUMNS_COLUMNDATATYPE).
 													getObject();
-        BaseTypeIdImpl typeId = typeDescriptor.getTypeId();
-
-		/*
-		** The BaseTypeIdImpl tells what type of TypeId it is supposed to
-		** be wrapped in.
-		*/
-        TypeId wrapperTypeId = new TypeId(typeId.wrapperTypeFormatId(), typeId);
-
-		/* Wrap the TypeDescriptorImpl in a full DataTypeDescriptor */
-		DataTypeDescriptor dataTypeServices = new DataTypeDescriptor(typeDescriptor,
-													wrapperTypeId);
+		DataTypeDescriptor dataTypeServices = 
+			DataTypeDescriptor.getType(catalogType);
 
 		/* 7th column is AUTOINCREMENTVALUE, not cached in descriptor (long) */
 

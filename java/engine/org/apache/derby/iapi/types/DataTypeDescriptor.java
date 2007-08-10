@@ -89,6 +89,22 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 	{
 		return DataTypeDescriptor.getBuiltInDataTypeDescriptor(jdbcType, true, length);
 	}
+	
+	/**
+	 * Return a runtime type for a catalog type.
+	 */
+	public static DataTypeDescriptor getType(TypeDescriptor catalogType)
+	{
+		TypeDescriptorImpl typeDescriptor = (TypeDescriptorImpl) catalogType;
+        BaseTypeIdImpl typeId = typeDescriptor.getTypeId();
+
+		/*
+		** The BaseTypeIdImpl tells what type of TypeId it is supposed to
+		** be wrapped in.
+		*/
+        TypeId wrapperTypeId = new TypeId(typeId.wrapperTypeFormatId(), typeId);
+		return new DataTypeDescriptor(typeDescriptor, wrapperTypeId);
+	}
     
     /**
      * Return a nullable catalog type for a JDBC builtin type and length.
@@ -457,10 +473,10 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 	 *
 	 * @param source	The TypeDescriptorImpl to construct this DTSI from
 	 */
-	public DataTypeDescriptor(TypeDescriptorImpl source, TypeId typeId)
+	private DataTypeDescriptor(TypeDescriptorImpl source, TypeId typeId)
 	{
 		typeDescriptor = source;
-		this.typeId = typeId;;
+		this.typeId = typeId;
 	}
 
 	/* DataTypeDescriptor Interface */
