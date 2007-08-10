@@ -118,8 +118,9 @@ class SetSchemaConstantAction implements ConstantAction
 		{
 			thisSchemaName = lcc.getAuthorizationId();
 		}
-		// if schemaName is null, sd will be null and default schema will be used
-		SchemaDescriptor sd = dd.getSchemaDescriptor(thisSchemaName, null, true);
+
+                SchemaDescriptor sd = dd.getSchemaDescriptor(thisSchemaName,
+                        lcc.getTransactionExecute(), true);
 		lcc.setDefaultSchema(sd);
 	}
 }
