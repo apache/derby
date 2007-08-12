@@ -4373,14 +4373,25 @@ exactNumber() throws StandardException :
 	{
 		try 
 		{
-			long longvalue = Long.parseLong(longToken.image);
+			/*
+			 * Note that it's important to re-concatenate
+			 * the - sign (if present) into the number
+			 * before converting it to a long value so
+			 * that we can successfully handle any value
+			 * in the range Long.MIN_VALUE ... Long.MAX_VALUE.
+			 * Unfortunately, we can't simply do:
+			 *     return Long.parseLong(sign+longToken.image);
+			 * because Long.parseLong() doesn't accept a
+			 * leading + sign.
+			 */
+
 			if (sign.equals("-"))
 			{
-				return -longvalue;
+				return Long.parseLong("-"+longToken.image);
 			}
 			else
 			{
-				return longvalue;
+				return Long.parseLong(longToken.image);
 			}
 		}
 		catch (NumberFormatException nfe)
