@@ -636,3 +636,51 @@ select id, id i from D2459_A1 union select id j, id from D2459_A2 order by id;
 select id, id i from D2459_A1 union select id j, id from D2459_A2 order by 2;
 select id, ref from D2459_A1 union select ref, id from D2459_A2;
 select id i, ref j from D2459_A1 union select ref i, id j from D2459_A2;
+
+-- Some test cases for DERBY-2351. The issue in DERBY-2351 involves whether
+-- pulled-up ORDER BY columns appear in the result set or not, and how
+-- DISCTINCT interacts with that decision. The point is that DISTINCT should
+-- apply only to the columns specified by the user in the result column list,
+-- not to the extra columns pulled up into the result by the ORDER BY. This
+-- means that some queries should throw an error, but due to DERBY-2351
+-- the queries instead display erroneous results.
+
+create table t1 (c1 int, c2 varchar(10));
+create table t2 (t2c1 int);
+insert into t1 values (3, 'a'), (4, 'c'), (2, 'b'), (1, 'c');
+insert into t2 values (4), (3);
+-- This query should return 4 distinct rows, ordered by column c1:
+select distinct c1, c2 from t1 order by c1;
+-- DERBY-2351 causes this statement to return 4 rows, which it should
+-- instead show an error:
+select distinct c1, c2 from t1 order by c1+1;
+-- DERBY-2351 causes this statement to return 4 rows, which it should
+-- instead show an error. Note that the rows returned are not distinct!
+select distinct c2 from t1 order by c1;
+-- This query should return 3 distinct rows, ordered by column c2
+select distinct c2 from t1 order by c2;
+-- This query should work because * will be expanded to include c2:
+select distinct * from t1 order by c2;
+-- This query should not work because the expanded * does not include c1+1:
+select distinct * from t1 order by c1+1;
+-- This query also should not work because the order by col is not in result:
+select distinct t1.* from t1, t2 where t1.c1=t2.t2c1 order by t2c1;
+-- But without the distinct it should be fine:
+select t1.* from t1, t2 where t1.c1=t2.t2c1 order by t2c1;
+drop table t1;
+
+create table person (name varchar(10), age int);
+insert into person values ('John', 10);
+insert into person values ('John', 30);
+insert into person values ('Mary', 20);
+-- DERBY-2351 causes this statement to display 3 rows, when it should
+-- instead show an error. Again, note that the rows returned are not distinct.
+SELECT DISTINCT name FROM person ORDER BY age;
+-- This query should return two rows, ordered by name.
+SELECT DISTINCT name FROM person ORDER BY name;
+-- This query should return two rows, ordered by name descending:
+SELECT DISTINCT name FROM person ORDER BY name desc;
+drop table person;
+
+
+

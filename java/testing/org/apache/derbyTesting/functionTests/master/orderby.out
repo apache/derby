@@ -1674,4 +1674,91 @@ a   |e
 b   |NULL
 g   |c   
 NULL|d   
+ij> -- Some test cases for DERBY-2351. The issue in DERBY-2351 involves whether
+-- pulled-up ORDER BY columns appear in the result set or not, and how
+-- DISCTINCT interacts with that decision. The point is that DISTINCT should
+-- apply only to the columns specified by the user in the result column list,
+-- not to the extra columns pulled up into the result by the ORDER BY. This
+-- means that some queries should throw an error, but due to DERBY-2351
+-- the queries instead display erroneous results.
+
+create table t1 (c1 int, c2 varchar(10));
+0 rows inserted/updated/deleted
+ij> create table t2 (t2c1 int);
+0 rows inserted/updated/deleted
+ij> insert into t1 values (3, 'a'), (4, 'c'), (2, 'b'), (1, 'c');
+4 rows inserted/updated/deleted
+ij> insert into t2 values (4), (3);
+2 rows inserted/updated/deleted
+ij> -- This query should return 4 distinct rows, ordered by column c1:
+select distinct c1, c2 from t1 order by c1;
+C1         |C2        
+----------------------
+1          |c         
+2          |b         
+3          |a         
+4          |c         
+ij> -- DERBY-2351 causes this statement to return 4 rows, which it should
+-- instead show an error:
+select distinct c1, c2 from t1 order by c1+1;
+ERROR 4287A: The ORDER BY clause may not specify an expression, since the query specifies DISTINCT.
+ij> -- DERBY-2351 causes this statement to return 4 rows, which it should
+-- instead show an error. Note that the rows returned are not distinct!
+select distinct c2 from t1 order by c1;
+ERROR 42879: The ORDER BY clause may not contain column 'C1', since the query specifies DISTINCT and that column does not appear in the query result.
+ij> -- This query should return 3 distinct rows, ordered by column c2
+select distinct c2 from t1 order by c2;
+C2        
+----------
+a         
+b         
+c         
+ij> -- This query should work because * will be expanded to include c2:
+select distinct * from t1 order by c2;
+C1         |C2        
+----------------------
+3          |a         
+2          |b         
+1          |c         
+4          |c         
+ij> -- This query should not work because the expanded * does not include c1+1:
+select distinct * from t1 order by c1+1;
+ERROR 4287A: The ORDER BY clause may not specify an expression, since the query specifies DISTINCT.
+ij> -- This query also should not work because the order by col is not in result:
+select distinct t1.* from t1, t2 where t1.c1=t2.t2c1 order by t2c1;
+ERROR 42879: The ORDER BY clause may not contain column 'T2C1', since the query specifies DISTINCT and that column does not appear in the query result.
+ij> -- But without the distinct it should be fine:
+select t1.* from t1, t2 where t1.c1=t2.t2c1 order by t2c1;
+C1         |C2        
+----------------------
+3          |a         
+4          |c         
+ij> drop table t1;
+0 rows inserted/updated/deleted
+ij> create table person (name varchar(10), age int);
+0 rows inserted/updated/deleted
+ij> insert into person values ('John', 10);
+1 row inserted/updated/deleted
+ij> insert into person values ('John', 30);
+1 row inserted/updated/deleted
+ij> insert into person values ('Mary', 20);
+1 row inserted/updated/deleted
+ij> -- DERBY-2351 causes this statement to display 3 rows, when it should
+-- instead show an error. Again, note that the rows returned are not distinct.
+SELECT DISTINCT name FROM person ORDER BY age;
+ERROR 42879: The ORDER BY clause may not contain column 'AGE', since the query specifies DISTINCT and that column does not appear in the query result.
+ij> -- This query should return two rows, ordered by name.
+SELECT DISTINCT name FROM person ORDER BY name;
+NAME      
+----------
+John      
+Mary      
+ij> -- This query should return two rows, ordered by name descending:
+SELECT DISTINCT name FROM person ORDER BY name desc;
+NAME      
+----------
+Mary      
+John      
+ij> drop table person;
+0 rows inserted/updated/deleted
 ij> 
