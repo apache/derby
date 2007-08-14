@@ -394,8 +394,8 @@ public class SYSSTATEMENTSRowFactory extends CatalogRowFactory
                 SystemColumnImpl.getColumn("TEXT", Types.LONGVARCHAR, false,
                         TypeId.LONGVARCHAR_MAXWIDTH),
                 SystemColumnImpl.getColumn("LASTCOMPILED", Types.TIMESTAMP, true),
-                SystemColumnImpl.getUUIDColumn("COMPILATIONSCHEMAID", false),
-                SystemColumnImpl.getColumn("USINGTEXT", Types.LONGVARCHAR, false,
+                SystemColumnImpl.getUUIDColumn("COMPILATIONSCHEMAID", true),
+                SystemColumnImpl.getColumn("USINGTEXT", Types.LONGVARCHAR, true,
                         TypeId.LONGVARCHAR_MAXWIDTH),         
             };
 		/*
