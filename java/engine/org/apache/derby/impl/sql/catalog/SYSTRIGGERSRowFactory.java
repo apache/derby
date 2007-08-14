@@ -54,6 +54,7 @@ import org.apache.derby.iapi.services.uuid.UUIDFactory;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.types.SQLTimestamp;
 import java.sql.Timestamp;
+import java.sql.Types;
 
 /**
  * Factory for creating a SYSTRIGGERS row.
@@ -432,197 +433,28 @@ public class SYSTRIGGERSRowFactory extends CatalogRowFactory
 	 */
 	public SystemColumn[] buildColumnList()
 	{
-		SystemColumn[]	columnList = new SystemColumn[SYSTRIGGERS_COLUMN_COUNT];
-
-		// describe columns
-		columnList[SYSTRIGGERS_TRIGGERID-1] = new SystemColumnImpl(	
-							convertIdCase( "TRIGGERID"),			// name 
-							SYSTRIGGERS_TRIGGERID,	// column number
-							0,					// precision
-							0,					// scale
-							false,				// nullability
-							"CHAR",				// dataType
-							true,				// built-in type
-							36					// maxLength
-			                );
-
-		columnList[SYSTRIGGERS_TRIGGERNAME-1] = 
-					new SystemColumnImpl(		// SQL IDENTIFIER
-							convertIdCase( "TRIGGERNAME"),			// column name
-							SYSTRIGGERS_TRIGGERNAME,	// column number
-							false				// nullability
-							);
-
-		columnList[SYSTRIGGERS_SCHEMAID-1] = new SystemColumnImpl(	
-							convertIdCase( "SCHEMAID"),				// name 
-							SYSTRIGGERS_SCHEMAID,	// column number
-							0,					// precision
-							0,					// scale
-							false,				// nullability
-							"CHAR",				// dataType
-							true,				// built-in type
-							36					// maxLength
-			                );
-
-		columnList[SYSTRIGGERS_CREATIONTIMESTAMP-1] = 
-					new SystemColumnImpl(		
-							convertIdCase( "CREATIONTIMESTAMP"),		// name 
-							SYSTRIGGERS_CREATIONTIMESTAMP,	// column number
-							0,							// precision
-							0,							// scale
-							false,						// nullability
-							"TIMESTAMP",				// dataType
-							true,						// built-in type
-							TypeId.TIMESTAMP_MAXWIDTH	// maxLength
-			                );
-
-		columnList[SYSTRIGGERS_EVENT-1] = 
-					new SystemColumnImpl(		
-							convertIdCase( "EVENT"),			// name 
-							SYSTRIGGERS_EVENT,	// column number
-							0,					// precision
-							0,					// scale
-							false,				// nullability
-							"CHAR",				// dataType
-							true,				// built-in type
-							1					// maxLength
-			                );
-
-		columnList[SYSTRIGGERS_FIRINGTIME-1] = 
-					new SystemColumnImpl(		
-							convertIdCase( "FIRINGTIME"),		// name 
-							SYSTRIGGERS_FIRINGTIME, // column number
-							0,					// precision
-							0,					// scale
-							false,				// nullability
-							"CHAR",				// dataType
-							true,				// built-in type
-							1					// maxLength
-			                );
-
-		columnList[SYSTRIGGERS_TYPE-1] = 
-					new SystemColumnImpl(		
-							convertIdCase( "TYPE"),				// name 
-							SYSTRIGGERS_TYPE,	// column number
-							0,					// precision
-							0,					// scale
-							false,				// nullability
-							"CHAR",				// dataType
-							true,				// built-in type
-							1					// maxLength
-			                );
-
-		columnList[SYSTRIGGERS_STATE-1] = 
-					new SystemColumnImpl(		
-							convertIdCase( "STATE"),			// name 
-							SYSTRIGGERS_STATE,// column number
-							0,					// precision
-							0,					// scale
-							false,				// nullability
-							"CHAR",				// dataType
-							true,				// built-in type
-							1					// maxLength
-			                );
-
-		columnList[SYSTRIGGERS_TABLEID-1] = 
-					new SystemColumnImpl(	
-							convertIdCase( "TABLEID"),			// name 
-							SYSTRIGGERS_TABLEID,	// column number
-							0,					// precision
-							0,					// scale
-							false,				// nullability
-							"CHAR",				// dataType
-							true,				// built-in type
-							36					// maxLength
-			                );
-
-		columnList[SYSTRIGGERS_WHENSTMTID-1] = 
-					new SystemColumnImpl(	
-							convertIdCase( "WHENSTMTID"),				// name 
-							SYSTRIGGERS_WHENSTMTID,		// column number
-							0,							// precision
-							0,							// scale
-							true,						// nullability
-							"CHAR",						// dataType
-							true,						// built-in type
-							36							// maxLength
-			                );
-
-		columnList[SYSTRIGGERS_ACTIONSTMTID-1] = 
-					new SystemColumnImpl(	
-							convertIdCase( "ACTIONSTMTID"),				// name 
-							SYSTRIGGERS_ACTIONSTMTID,	// column number
-							0,							// precision
-							0,							// scale
-							true,						// nullability
-							"CHAR",						// dataType
-							true,						// built-in type
-							36							// maxLength
-			                );
-
-		columnList[SYSTRIGGERS_REFERENCEDCOLUMNS-1] = 
-					new SystemColumnImpl(		
-							convertIdCase( "REFERENCEDCOLUMNS"),			// name 
-							SYSTRIGGERS_REFERENCEDCOLUMNS,	// column number
-							0,								// precision
-							0,								// scale
-							true,							// nullability
-							"org.apache.derby.catalog.ReferencedColumns",	//datatype
-							false,							// built-in type
-							DataTypeDescriptor.MAXIMUM_WIDTH_UNKNOWN // maxLength
-			                );
-
-		columnList[SYSTRIGGERS_TRIGGERDEFINITION-1] = 
-					new SystemColumnImpl(	
-							convertIdCase( "TRIGGERDEFINITION"),				// name 
-							SYSTRIGGERS_TRIGGERDEFINITION,	// column number
-							0,							// precision
-							0,							// scale
-							true,						// nullability
-							"LONG VARCHAR",			// dataType
-							true,				// built-in type
-							Integer.MAX_VALUE	// maxLength
-			                );
-
-		columnList[SYSTRIGGERS_REFERENCINGOLD-1] = 
-					new SystemColumnImpl(		
-							convertIdCase( "REFERENCINGOLD"),			// name 
-							SYSTRIGGERS_REFERENCINGOLD,// column number
-							0,					// precision
-							0,					// scale
-							true,				// nullability
-							"BOOLEAN",			// dataType
-							true,				// built-in type
-							1					// maxLength
-			                );
-
-		columnList[SYSTRIGGERS_REFERENCINGNEW-1] = 
-					new SystemColumnImpl(		
-							convertIdCase( "REFERENCINGNEW"),			// name 
-							SYSTRIGGERS_REFERENCINGNEW,// column number
-							0,					// precision
-							0,					// scale
-							true,				// nullability
-							"BOOLEAN",			// dataType
-							true,				// built-in type
-							1					// maxLength
-			                );
-
-		columnList[SYSTRIGGERS_OLDREFERENCINGNAME-1] = 
-					new SystemColumnImpl(		// SQL IDENTIFIER
-							convertIdCase( "OLDREFERENCINGNAME"),			// column name
-							SYSTRIGGERS_OLDREFERENCINGNAME,	// column number
-							true				// nullability
-							);
-
-		columnList[SYSTRIGGERS_NEWREFERENCINGNAME-1] = 
-					new SystemColumnImpl(		// SQL IDENTIFIER
-							convertIdCase( "NEWREFERENCINGNAME"),			// column name
-							SYSTRIGGERS_NEWREFERENCINGNAME,	// column number
-							true				// nullability
-							);
-
-		return	columnList;
+        return new SystemColumn[] {
+            SystemColumnImpl.getUUIDColumn("TRIGGERID", false),
+            SystemColumnImpl.getIdentifierColumn("TRIGGERNAME", false),
+            SystemColumnImpl.getUUIDColumn("SCHEMAID", false),
+            SystemColumnImpl.getColumn("CREATIONTIMESTAMP", Types.TIMESTAMP, false),
+            SystemColumnImpl.getIndicatorColumn("EVENT"),
+            SystemColumnImpl.getIndicatorColumn("FIRINGTIME"),
+            SystemColumnImpl.getIndicatorColumn("TYPE"),
+            SystemColumnImpl.getIndicatorColumn("STATE"),
+            SystemColumnImpl.getUUIDColumn("TABLEID", false),
+            SystemColumnImpl.getUUIDColumn("WHENSTMTID", true),
+            SystemColumnImpl.getUUIDColumn("ACTIONSTMTID", true),
+            SystemColumnImpl.getJavaColumn("REFERENCEDCOLUMNS",
+                    "org.apache.derby.catalog.ReferencedColumns", true),
+            SystemColumnImpl.getColumn("TRIGGERDEFINITION",
+                    Types.LONGVARCHAR, true, Integer.MAX_VALUE),
+            SystemColumnImpl.getColumn("REFERENCINGOLD", Types.BOOLEAN, true),
+            SystemColumnImpl.getColumn("REFERENCINGNEW", Types.BOOLEAN, true),
+            SystemColumnImpl.getIdentifierColumn("OLDREFERENCINGNAME", true),
+            SystemColumnImpl.getIdentifierColumn("NEWREFERENCINGNAME", true),
+            
+           };
 	}
 
 	// a little helper

@@ -37,10 +37,6 @@ import org.apache.derby.iapi.types.StringDataValue;
 
 abstract class PermissionsCatalogRowFactory extends CatalogRowFactory
 {
-    static final String AUTHORIZATION_ID_TYPE = "VARCHAR";
-    static final boolean AUTHORIZATION_ID_IS_BUILTIN_TYPE = true;
-    static final int AUTHORIZATION_ID_LENGTH = Limits.MAX_IDENTIFIER_LENGTH;
-
     PermissionsCatalogRowFactory(UUIDFactory uuidf, ExecutionFactory ef, DataValueFactory dvf,
                                         boolean convertIdToLower)
     {

@@ -21,6 +21,7 @@
 
 package org.apache.derby.impl.sql.catalog;
 
+import java.sql.Types;
 import java.util.Properties;
 
 import org.apache.derby.catalog.TypeDescriptor;
@@ -61,11 +62,6 @@ public class SYSCOLUMNSRowFactory extends CatalogRowFactory
 {
 	static final String		TABLENAME_STRING = "SYSCOLUMNS";
 
-	/**
-	 * Old name for REFERENCEID, used by upgrade
-	 */
-	public static final String		OLD_REFERENCEID_NAME = "TABLEID";
-
 	protected static final int		SYSCOLUMNS_COLUMN_COUNT = 9;
 	/* Column #s for syscolumns (1 based) */
 
@@ -87,10 +83,6 @@ public class SYSCOLUMNSRowFactory extends CatalogRowFactory
 
 	//private static final String	SYSCOLUMNS_INDEX2_NAME = "SYSCOLUMNS_INDEX2";
 	protected static final int		SYSCOLUMNS_INDEX2_ID = 1;
-
-	protected	static	final	String	REFERENCEDID_STRING = "REFERENCEID";
-	protected	static	final	String	COLUMNNAME_STRING = "COLUMNNAME";
-	protected	static	final	String	COLUMNDEFAULTID_STRING = "COLUMNDEFAULTID";
 
     private	static	final	boolean[]	uniqueness = {
 		                                               true,
@@ -116,8 +108,6 @@ public class SYSCOLUMNSRowFactory extends CatalogRowFactory
 	//	STATE
 	//
 	/////////////////////////////////////////////////////////////////////////////
-
-	private	SystemColumn[]		columnList;
 
 	/////////////////////////////////////////////////////////////////////////////
 	//
@@ -443,116 +433,21 @@ public class SYSCOLUMNSRowFactory extends CatalogRowFactory
 	 */
 	public SystemColumn[]	buildColumnList()
 	{
-		if ( columnList != null ) { return columnList; }
+        
+        return new SystemColumn[] {
+            SystemColumnImpl.getUUIDColumn("REFERENCEID", false),
+            SystemColumnImpl.getIdentifierColumn("COLUMNNAME", false),
+            SystemColumnImpl.getColumn("COLUMNNUMBER", Types.INTEGER, false),
+            SystemColumnImpl.getJavaColumn("COLUMNDATATYPE",
+                "org.apache.derby.catalog.TypeDescriptor", false),
+            SystemColumnImpl.getJavaColumn("COLUMNDEFAULT",
+                "java.io.Serializable", true),
+            SystemColumnImpl.getUUIDColumn("COLUMNDEFAULTID", true),
+            
+            SystemColumnImpl.getColumn("AUTOINCREMENTVALUE", Types.BIGINT, true),
+            SystemColumnImpl.getColumn("AUTOINCREMENTSTART", Types.BIGINT, true),
+            SystemColumnImpl.getColumn("AUTOINCREMENTINC", Types.BIGINT, true),
 
-		columnList = new SystemColumn[SYSCOLUMNS_COLUMN_COUNT];
-
-		// describe columns
-
-		columnList[0] = 
-					new SystemColumnImpl(
-								convertIdCase( REFERENCEDID_STRING),			// column name
-								SYSCOLUMNS_REFERENCEID,// column number
-								0,					// precision
-								0,					// scale
-								false,				// nullability
-								"CHAR",				// dataType
-								true,				// built-in type
-								36					// maxLength
-			                   );
-
-		columnList[1] = 
-					new SystemColumnImpl(			// SQL IDENTIFIER
-								convertIdCase( COLUMNNAME_STRING),		// column name
-								SYSCOLUMNS_COLUMNNAME,	// column number
-								false				// nullability
-			                   );
-
-		columnList[2] = 
-					new SystemColumnImpl(
-								convertIdCase( "COLUMNNUMBER"),	// column name
-								SYSCOLUMNS_COLUMNNUMBER,	// column number
-								0,					// precision
-								0,					// scale
-								false,				// nullability
-								"INTEGER",				// dataType
-								true,				// built-in type
-								4					// maxLength
-							   );
-
-		columnList[3] = 
-					new SystemColumnImpl(	
-							convertIdCase( "COLUMNDATATYPE"),			// column name
-							SYSCOLUMNS_COLUMNDATATYPE,	// column number
-							0,					// precision
-							0,					// scale
-							false,				// nullability
-							"org.apache.derby.catalog.TypeDescriptor",	    // dataType
-							false,				// built-in type
-							TypeDescriptor.MAXIMUM_WIDTH_UNKNOWN // maxLength
-			               );
-
-		columnList[4] = 
-					new SystemColumnImpl(	
-							convertIdCase( "COLUMNDEFAULT"),			// column name
-							SYSCOLUMNS_COLUMNDEFAULT,	// column number
-							0,					// precision
-							0,					// scale
-							true,				// nullability
-							"java.io.Serializable",	    // dataType
-							false,				// built-in type
-							TypeDescriptor.MAXIMUM_WIDTH_UNKNOWN // maxLength
-			               );
-
-		columnList[5] = 
-					new SystemColumnImpl(
-								convertIdCase( COLUMNDEFAULTID_STRING),			// column name
-								SYSCOLUMNS_COLUMNDEFAULTID,// column number
-								0,					// precision
-								0,					// scale
-								true,				// nullability
-								"CHAR",				// dataType
-								true,				// built-in type
-								36					// maxLength
-			                   );
-
-		// new columns for autoincrement.
-		columnList[6] = 
-			        new SystemColumnImpl(
-							    convertIdCase( "AUTOINCREMENTVALUE"), // column name
-								SYSCOLUMNS_AUTOINCREMENTVALUE,
-								0,
-								0, 
-								true,
-								"BIGINT",
-								true,
-								TypeId.LONGINT_MAXWIDTH
-							   );
-		
-		columnList[7] = 
-			        new SystemColumnImpl(
-							    convertIdCase( "AUTOINCREMENTSTART"), // column name
-								SYSCOLUMNS_AUTOINCREMENTSTART,
-								0,
-								0, 
-								true,
-								"BIGINT",
-								true,
-								TypeId.LONGINT_MAXWIDTH
-							   );
-
-		columnList[8] = 
-			        new SystemColumnImpl(
-							    convertIdCase( "AUTOINCREMENTINC"), // column name
-								SYSCOLUMNS_AUTOINCREMENTINC,
-								0,
-								0, 
-								true,
-								"BIGINT",
-								true,
-								TypeId.LONGINT_MAXWIDTH
-							   );
-
-		return	columnList;
+       };
 	}
 }

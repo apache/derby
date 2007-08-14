@@ -90,8 +90,6 @@ class SYSCOLPERMSRowFactory extends PermissionsCatalogRowFactory
 		,"80220011-010c-bc85-060d-000000109ab8" //index3
     };
 
-    private SystemColumn[] columnList;
-
     SYSCOLPERMSRowFactory(UUIDFactory uuidf, ExecutionFactory ef, DataValueFactory dvf,
                                  boolean convertIdToLower)
 	{
