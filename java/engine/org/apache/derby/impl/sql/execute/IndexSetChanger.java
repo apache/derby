@@ -88,7 +88,7 @@ public class IndexSetChanger
 	private int whatIsOpen = NO_INDEXES;
 
 	private int isolationLevel;
-	private Activation activation;
+	private final Activation activation;
 
 	/**
 	  Create a new IndexSetChanger

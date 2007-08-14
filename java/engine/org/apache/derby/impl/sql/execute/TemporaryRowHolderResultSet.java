@@ -32,7 +32,6 @@ import org.apache.derby.iapi.sql.ResultSet;
 import org.apache.derby.iapi.sql.Row;
 import org.apache.derby.iapi.sql.execute.CursorResultSet;
 import org.apache.derby.iapi.sql.execute.ExecRow;
-import org.apache.derby.iapi.sql.execute.ExecutionFactory;
 import org.apache.derby.iapi.sql.execute.NoPutResultSet;
 import org.apache.derby.iapi.sql.execute.TargetResultSet;
 import org.apache.derby.iapi.store.access.ConglomerateController;
@@ -59,7 +58,6 @@ class TemporaryRowHolderResultSet implements CursorResultSet, NoPutResultSet, Cl
 	private boolean 				finished;
 	private ExecRow					currentRow;
 	private ResultDescription		resultDescription;
-	private ExecutionFactory		ef;
 	private boolean                 isAppendable = false;
 	private long                    positionIndexConglomId;
 	private boolean 				isVirtualMemHeap;

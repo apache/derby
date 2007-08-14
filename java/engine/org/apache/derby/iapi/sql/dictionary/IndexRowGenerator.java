@@ -21,36 +21,24 @@
 
 package org.apache.derby.iapi.sql.dictionary;
 
-import org.apache.derby.iapi.sql.dictionary.ColumnDescriptorList;
-
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-
-import org.apache.derby.iapi.sql.execute.ExecutionContext;
-import org.apache.derby.iapi.sql.execute.ExecIndexRow;
-import org.apache.derby.iapi.sql.execute.ExecRow;
-import org.apache.derby.iapi.sql.execute.ExecutionFactory;
-
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.types.RowLocation;
-import org.apache.derby.iapi.types.StringDataValue;
-
-import org.apache.derby.iapi.services.io.Formatable;
-import org.apache.derby.iapi.services.io.FormatIdUtil;
-import org.apache.derby.iapi.services.io.StoredFormatIds;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.services.context.ContextService;
-
-import org.apache.derby.iapi.error.StandardException;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 
 import org.apache.derby.catalog.IndexDescriptor;
 import org.apache.derby.catalog.types.IndexDescriptorImpl;
-
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
-import java.io.IOException;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.services.context.ContextService;
+import org.apache.derby.iapi.services.io.Formatable;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
+import org.apache.derby.iapi.services.io.StoredFormatIds;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.execute.ExecIndexRow;
+import org.apache.derby.iapi.sql.execute.ExecRow;
+import org.apache.derby.iapi.sql.execute.ExecutionContext;
+import org.apache.derby.iapi.sql.execute.ExecutionFactory;
+import org.apache.derby.iapi.types.RowLocation;
+import org.apache.derby.iapi.types.StringDataValue;
 
 /**
  * This class extends IndexDescriptor for internal use by the
@@ -58,7 +46,7 @@ import org.apache.derby.iapi.services.io.FormatableBitSet;
  */
 public class IndexRowGenerator implements IndexDescriptor, Formatable
 {
-	IndexDescriptor	id;
+	private IndexDescriptor	id;
 	private ExecutionFactory ef;
 
 	/**
@@ -190,58 +178,6 @@ public class IndexRowGenerator implements IndexDescriptor, Formatable
 
 		/* Set the row location in the last column of the index row */
 		indexRow.setColumn(colCount + 1, rowLocation);
-	}
-
-	/**
-	 * Get a NULL Index Row for this index. This is useful to create objects 
-	 * that need to be passed to ScanController.
-	 *
-	 * @param columnList ColumnDescriptors describing the base table.
-	 * @param rowLocation	empty row location.
-	 *
-	 * @exception StandardException thrown on error.
-	 */
-	public ExecIndexRow getNullIndexRow(ColumnDescriptorList columnList,
-										RowLocation rowLocation)
-				throws StandardException				
-	{
-		int[] baseColumnPositions = id.baseColumnPositions();
-		int i;
-		ExecIndexRow indexRow = getIndexRowTemplate();
-
-		for (i = 0; i < baseColumnPositions.length; i++)
-		{
-			DataTypeDescriptor dtd =
-				columnList.elementAt(baseColumnPositions[i] - 1).getType();
-			indexRow.setColumn(i + 1, dtd.getNull());
-		}
-
-		indexRow.setColumn(i + 1, rowLocation);
-		return indexRow;
-	}
-
-	/**
-	 * Return true iff a change to a set of columns changes the index for this
-	 * IndexRowGenerator.
-	 *
-	 * @param changedColumnIds - holds the 1 based column ids for the changed
-	 *		columns.
-	 * @return	true iff a change to one of the columns in changedColumnIds
-	 *          effects this index. 
-	 */
-	public boolean indexChanged(int[] changedColumnIds)
-	{
-		int[] baseColumnPositions = id.baseColumnPositions();
-
-		for (int ix = 0; ix < changedColumnIds.length; ix++)
-		{
-			for (int iy = 0; iy < baseColumnPositions.length; iy++)
-			{
-				if (changedColumnIds[ix] == baseColumnPositions[iy])
-					return true;
-			}
-		}
-		return false;
 	}
 
     /**

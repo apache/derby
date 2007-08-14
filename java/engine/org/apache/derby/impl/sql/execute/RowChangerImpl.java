@@ -66,7 +66,7 @@ class RowChangerImpl	implements	RowChanger
 	DynamicCompiledOpenConglomInfo[] indexDCOCIs;
 	StaticCompiledOpenConglomInfo[] indexSCOCIs;
 	IndexRowGenerator[] irgs = null;
-	Activation		activation;
+	private final Activation		activation;
 	TransactionController	tc;
 	FormatableBitSet 	changedColumnBitSet;	
 	FormatableBitSet 	baseRowReadList;	

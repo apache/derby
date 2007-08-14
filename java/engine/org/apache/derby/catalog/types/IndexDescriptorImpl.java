@@ -185,9 +185,6 @@ public class IndexDescriptorImpl implements IndexDescriptor, Formatable
 
 	public String toString()
 	{
-		String	uniqueness;
-		String	cols;
-
 		StringBuffer	sb = new StringBuffer(60);
 
 		if (isUnique)

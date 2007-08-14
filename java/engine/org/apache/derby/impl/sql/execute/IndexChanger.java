@@ -68,8 +68,6 @@ public class IndexChanger
 	private ConglomerateController indexCC = null;
 	private ScanController indexSC = null;
 
-	private LanguageConnectionContext lcc;
-
 	//
 	//Index rows used by this module to perform DML.
 	private ExecIndexRow ourIndexRow = null;
@@ -78,7 +76,7 @@ public class IndexChanger
 	private TemporaryRowHolderImpl	rowHolder = null;
 	private boolean					rowHolderPassedIn;
 	private int						isolationLevel;
-	private Activation				activation;
+	private final Activation				activation;
 	private boolean					ownIndexSC = true;
 
 	/**
@@ -226,19 +224,6 @@ public class IndexChanger
 			}
 		}
 		return false;
-	}
-
-	private ExecIndexRow getDeferredIndexRowTemplate(ExecRow baseRow,
-													RowLocation baseRowLoc)
-		 throws StandardException
-	{
-		ExecIndexRow	template;
-
-		template = irg.getIndexRowTemplate();
-
-		irg.getIndexRow(baseRow, baseRowLoc, template, baseRowReadMap);
-
-		return template;
 	}
 
 	/**
