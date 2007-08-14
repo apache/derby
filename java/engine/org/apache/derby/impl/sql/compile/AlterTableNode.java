@@ -375,7 +375,7 @@ public class AlterTableNode extends DDLStatementNode
 	  *
 	  * @exception StandardException		Thrown on failure
 	  */
-	public void	prepConstantAction() throws StandardException
+	private void	prepConstantAction() throws StandardException
 	{
 		if (tableElementList != null)
 		{
@@ -388,7 +388,7 @@ public class AlterTableNode extends DDLStatementNode
 		{
 			conActions = new ConstraintConstantAction[numConstraints];
 
-			tableElementList.genConstraintActions(conActions, getRelativeName(), schemaDescriptor,
+			tableElementList.genConstraintActions(false, conActions, getRelativeName(), schemaDescriptor,
 												  getDataDictionary());
 		}
 	}

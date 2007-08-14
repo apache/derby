@@ -616,6 +616,7 @@ public class TableElementList extends QueryTreeNodeVector
 	/**
 	 * Fill in the ConstraintConstantAction[] for this create/alter table.
 	 * 
+     * @param forCreateTable ConstraintConstantAction is for a create table.
 	 * @param conActions	The ConstraintConstantAction[] to be filled in.
 	 * @param tableName		The name of the Table being created.
 	 * @param tableSd		The schema for that table.
@@ -623,7 +624,7 @@ public class TableElementList extends QueryTreeNodeVector
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	void genConstraintActions(
+	void genConstraintActions(boolean forCreateTable,
 				ConstraintConstantAction[] conActions,
 				String tableName,
 				SchemaDescriptor tableSd,
@@ -680,6 +681,11 @@ public class TableElementList extends QueryTreeNodeVector
 
 			if (constraintType == DataDictionary.DROP_CONSTRAINT)
 			{
+                if (SanityManager.DEBUG)
+                {
+                    // Can't drop constraints on a create table.
+                    SanityManager.ASSERT(!forCreateTable);
+                }
 				conActions[conActionIndex] = 
 					getGenericConstantActionFactory().
 						getDropConstraintConstantAction(
@@ -723,7 +729,8 @@ public class TableElementList extends QueryTreeNodeVector
 						getCreateConstraintConstantAction(
 												 constraintName, 
 											     constraintType,
-												 tableName,
+                                                 forCreateTable,
+												 tableName, 
 												 ((td != null) ? td.getUUID() : (UUID) null),
 												 tableSd.getSchemaName(),
 												 columnNames,

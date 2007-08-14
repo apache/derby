@@ -156,6 +156,7 @@ public class GenericConstantActionFactory
 	 *
 	 *  @param constraintName	Constraint name.
 	 *  @param constraintType	Constraint type.
+     *  @param forCreateTable   True if for a CREATE TABLE
 	 *  @param tableName		Table name.
 	 *	@param tableId			UUID of table.
 	 *  @param schemaName		Schema that table lives in.
@@ -171,6 +172,7 @@ public class GenericConstantActionFactory
 	(
 		String				constraintName,
 		int					constraintType,
+        boolean             forCreateTable,
 		String				tableName,
 		UUID				tableId,
 		String				schemaName,
@@ -183,7 +185,7 @@ public class GenericConstantActionFactory
 	)
 	{
 		return new CreateConstraintConstantAction
-			( constraintName, constraintType, tableName, 
+			( constraintName, constraintType, forCreateTable, tableName, 
 			  tableId, schemaName, columnNames, indexAction, constraintText, 
 			  enabled, otherConstraint, providerInfo );
 	}

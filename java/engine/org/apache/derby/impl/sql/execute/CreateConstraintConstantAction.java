@@ -65,7 +65,9 @@ import org.apache.derby.iapi.services.loader.ClassFactory;
 
 public class CreateConstraintConstantAction extends ConstraintConstantAction
 {
-	String[]		columnNames;
+    private final boolean forCreateTable;
+    
+	private String[]		columnNames;
 	private	String			constraintText;
 
 	private ConstraintInfo	otherConstraintInfo;
@@ -87,6 +89,7 @@ public class CreateConstraintConstantAction extends ConstraintConstantAction
 	 *
 	 *  @param constraintName	Constraint name.
 	 *  @param constraintType	Constraint type.
+     *  @param forCreateTable   Constraint is being added for a CREATE TABLE
 	 *  @param tableName		Table name.
 	 *	@param tableId			UUID of table.
 	 *  @param schemaName		the schema that table and constraint lives in.
@@ -103,6 +106,7 @@ public class CreateConstraintConstantAction extends ConstraintConstantAction
 	CreateConstraintConstantAction(
 		               String	constraintName,
 					   int		constraintType,
+                       boolean  forCreateTable,
 		               String	tableName,
 					   UUID		tableId,
 					   String	schemaName,
@@ -115,6 +119,7 @@ public class CreateConstraintConstantAction extends ConstraintConstantAction
 	{
 		super(constraintName, constraintType, tableName, 
 			  tableId, schemaName, indexAction);
+        this.forCreateTable = forCreateTable;
 		this.columnNames = columnNames;
 		this.constraintText = constraintText;
 		this.enabled = enabled;
@@ -154,7 +159,6 @@ public class CreateConstraintConstantAction extends ConstraintConstantAction
 	public void	executeConstantAction( Activation activation )
 						throws StandardException
 	{
-		boolean						forCreateTable;
 		ConglomerateDescriptor		conglomDesc = null;
 		ConglomerateDescriptor[]	conglomDescs = null;
 		ConstraintDescriptor		conDesc = null;
@@ -175,9 +179,6 @@ public class CreateConstraintConstantAction extends ConstraintConstantAction
 		TransactionController tc = lcc.getTransactionExecute();
 
 		cf = lcc.getLanguageConnectionFactory().getClassFactory();
-
-		/* Remember whether or not we are doing a create table */
-		forCreateTable = activation.getForCreateTable();
 
 		/*
 		** Inform the data dictionary that we are about to write to it.

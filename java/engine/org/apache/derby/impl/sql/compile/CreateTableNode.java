@@ -487,7 +487,7 @@ public class CreateTableNode extends DDLStatementNode
 			conActions =
                 new CreateConstraintConstantAction[numConstraints];
 
-			coldefs.genConstraintActions(
+			coldefs.genConstraintActions(true,
                 conActions, getRelativeName(), sd, getDataDictionary());
 		}
 
