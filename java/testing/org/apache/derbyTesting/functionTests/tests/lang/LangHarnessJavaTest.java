@@ -53,9 +53,9 @@ public class LangHarnessJavaTest extends HarnessJavaTest {
     {
         // old derbylang.runall suite
         //"AIjdbc",
-        "bug4356",
-        "bug5052rts",
-        "bug5054",
+        //"bug4356",
+        //"bug5052rts",
+        //"bug5054",
         //"casting", TODO: investigate/convert, uses TestUtil.isNetFramework()
         //"closed", TODO: investigate/convert
         "concateTests",

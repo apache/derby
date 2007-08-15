@@ -98,7 +98,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(UpdateCursorTest.suite());
         suite.addTest(CoalesceTest.suite());
         suite.addTest(ProcedureInTriggerTest.suite());
-	suite.addTest(ForUpdateTest.suite());
+        suite.addTest(ForUpdateTest.suite());
         suite.addTest(CollationTest.suite());
         suite.addTest(CollationTest2.suite());
         suite.addTest(ScrollCursors1Test.suite());
@@ -116,6 +116,9 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(PrimaryKeyTest.suite());
         suite.addTest(RenameTableTest.suite());
         suite.addTest(RenameIndexTest.suite());
+        suite.addTest(Bug5052rtsTest.suite());
+        suite.addTest(Bug5054Test.suite());
+        suite.addTest(Bug4356Test.suite());
 
         // Add the XML tests, which exist as a separate suite
         // so that users can "run all XML tests" easily.
