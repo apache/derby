@@ -77,7 +77,8 @@ public class DropViewNode extends DDLStatementNode
 		CompilerContext cc = getCompilerContext();
 				
 		TableDescriptor td = dd.getTableDescriptor(getRelativeName(), 
-					getSchemaDescriptor());
+					getSchemaDescriptor(),
+                    getLanguageConnectionContext().getTransactionCompile());
 	
 		/* 
 		 * Statement is dependent on the TableDescriptor 

@@ -138,8 +138,8 @@ public class SpaceTable extends VTITemplate implements VTICosting {
 			schemaName = lcc.getCurrentSchemaName();
 
         // if schemaName is null, it gets the default schema
-        SchemaDescriptor sd = dd.getSchemaDescriptor(schemaName, lcc.getTransactionExecute(), true);
-        TableDescriptor td = dd.getTableDescriptor(tableName,sd);
+        SchemaDescriptor sd = dd.getSchemaDescriptor(schemaName, tc, true);
+        TableDescriptor td = dd.getTableDescriptor(tableName,sd, tc);
         if (td == null)  // table does not exist
         {
             conglomTable = new ConglomInfo[0];   // make empty conglom table
@@ -191,8 +191,9 @@ public class SpaceTable extends VTITemplate implements VTICosting {
      		if (!initialized)
     		{
 				LanguageConnectionContext lcc = ConnectionUtil.getCurrentLCC();
-               getConglomInfo(lcc);
                 tc = lcc.getTransactionExecute();
+               getConglomInfo(lcc);
+                
 			    initialized = true;
 			    currentRow = -1;
 		    }

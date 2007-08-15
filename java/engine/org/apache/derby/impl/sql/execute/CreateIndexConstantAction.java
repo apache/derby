@@ -216,7 +216,7 @@ class CreateIndexConstantAction extends IndexConstantAction
 			}
 			else
 			{
-				td = dd.getTableDescriptor(tableName, sd);
+				td = dd.getTableDescriptor(tableName, sd, tc);
 			}
 		}
 

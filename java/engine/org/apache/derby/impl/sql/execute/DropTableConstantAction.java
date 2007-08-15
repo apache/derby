@@ -139,7 +139,7 @@ class DropTableConstantAction extends DDLSingleTableConstantAction
 			td = lcc.getTableDescriptorForDeclaredGlobalTempTable(tableName); //check if this is a temp table before checking data dictionary
 
 			if (td == null) //td null here means it is not a temporary table. Look for table in physical SESSION schema
-				td = dd.getTableDescriptor(tableName, sd);
+				td = dd.getTableDescriptor(tableName, sd, tc);
 
 			if (td == null) //td null means tableName is not a temp table and it is not a physical table in SESSION schema
 			{

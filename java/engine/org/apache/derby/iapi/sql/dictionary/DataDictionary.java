@@ -415,14 +415,14 @@ public interface DataDictionary
 	 * @param tableName	The name of the table to get the descriptor for
 	 * @param schema	The descriptor for the schema the table lives in.
 	 *			If null, use the current (default) schema.
-	 *
+	 * @param tc Transaction context.
 	 * @return	The descriptor for the table, null if table does not
 	 *		existe.
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
 	public TableDescriptor		getTableDescriptor(String tableName,
-					SchemaDescriptor schema)
+					SchemaDescriptor schema, TransactionController tc)
 						throws StandardException;
 
 	/**

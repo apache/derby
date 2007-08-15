@@ -140,7 +140,7 @@ public class TestPropertyInfo
 		if ( !isIndex)
 		{
 			// get the TableDescriptor for the table
-			td = dd.getTableDescriptor(conglomerateName, sd);
+			td = dd.getTableDescriptor(conglomerateName, sd, tc);
 
 			// Return an empty Properties if table does not exist or if it is for a view.
 			if ((td == null) || td.getTableType() == TableDescriptor.VIEW_TYPE) { return new Properties(); }

@@ -229,7 +229,7 @@ public class ConstraintInfo implements ConsInfo
 		}
 	
 		return dd.getTableDescriptor(tableName, 
-				getReferencedTableSchemaDescriptor(dd));
+				getReferencedTableSchemaDescriptor(dd), null);
 	}
 
 	/**

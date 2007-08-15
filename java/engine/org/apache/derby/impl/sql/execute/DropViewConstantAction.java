@@ -115,7 +115,8 @@ class DropViewConstantAction extends DDLConstantAction
 		/* Get the table descriptor.  We're responsible for raising
 		 * the error if it isn't found 
 		 */
-		td = dd.getTableDescriptor(tableName, sd);
+		td = dd.getTableDescriptor(tableName, sd,
+                lcc.getTransactionExecute());
 
 		if (td == null)
 		{

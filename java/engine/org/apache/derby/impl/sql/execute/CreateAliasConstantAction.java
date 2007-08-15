@@ -242,7 +242,7 @@ class CreateAliasConstantAction extends DDLConstantAction
 		break;
 		case AliasInfo.ALIAS_TYPE_SYNONYM_AS_CHAR:
 			// If target table/view exists already, error.
-			TableDescriptor targetTD = dd.getTableDescriptor(aliasName, sd);
+			TableDescriptor targetTD = dd.getTableDescriptor(aliasName, sd, tc);
 			if (targetTD != null)
 			{
 				throw StandardException.newException(
@@ -277,7 +277,7 @@ class CreateAliasConstantAction extends DDLConstantAction
 
 			// If synonym final target is not present, raise a warning
 			if (nextSD != null)
-				targetTD = dd.getTableDescriptor(nextSynTable, nextSD);
+				targetTD = dd.getTableDescriptor(nextSynTable, nextSD, tc);
 			if (nextSD == null || targetTD == null)
 				activation.addWarning(
 					StandardException.newWarning(SQLState.LANG_SYNONYM_UNDEFINED,

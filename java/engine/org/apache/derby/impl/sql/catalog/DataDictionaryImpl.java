@@ -1769,14 +1769,13 @@ public final class	DataDictionaryImpl
 	 * @param tableName	The name of the table to get the descriptor for
 	 * @param schema	The descriptor for the schema the table lives in.
 	 *			If null, use the system schema.
-	 *
 	 * @return	The descriptor for the table, null if table does not
 	 *		exist.
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
 	public TableDescriptor		getTableDescriptor(String tableName,
-					SchemaDescriptor schema)
+					SchemaDescriptor schema, TransactionController tc)
 			throws StandardException
 	{
 		TableDescriptor		retval = null;
@@ -6664,7 +6663,7 @@ public final class	DataDictionaryImpl
 		SchemaDescriptor	sd = getSystemSchemaDescriptor();
 		String columnName;
 
-		TableDescriptor td = getTableDescriptor(rowFactory.getCatalogName(), sd);
+		TableDescriptor td = getTableDescriptor(rowFactory.getCatalogName(), sd, tc);
 
 		theColumn = columns[columnNumber - 1];	// from 1 to 0 based
 		ColumnDescriptor cd = makeColumnDescriptor(theColumn, columnNumber, td );
@@ -6732,7 +6731,7 @@ public final class	DataDictionaryImpl
 		}
 		else
 		{
-			td = getTableDescriptor( rowFactory.getCatalogName(), sd );
+			td = getTableDescriptor( rowFactory.getCatalogName(), sd, tc );
 			conglomID = td.getHeapConglomerateId();
 		}
 
@@ -6770,7 +6769,7 @@ public final class	DataDictionaryImpl
 	{
 		ExecRow				templateRow = rowFactory.makeEmptyRow();
 		SchemaDescriptor	sd = getSystemSchemaDescriptor( );
-		long				conglomID = getTableDescriptor( rowFactory.getCatalogName(), sd ).getHeapConglomerateId();
+		long				conglomID = getTableDescriptor( rowFactory.getCatalogName(), sd, tc ).getHeapConglomerateId();
 
 		widenConglomerate( templateRow, newColumnIDs, conglomID, tc );
 	}
@@ -8044,7 +8043,7 @@ public final class	DataDictionaryImpl
 			}
 
 			TableDescriptor td = getTableDescriptor(ti.getTableName(),
-													getSystemSchemaDescriptor());
+													getSystemSchemaDescriptor(), null);
 
 			// It's possible that the system table is not there right
 			// now. This can happen, for example, if we're in the

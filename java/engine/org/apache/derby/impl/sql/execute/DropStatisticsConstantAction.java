@@ -73,7 +73,7 @@ class DropStatisticsConstantAction extends DDLConstantAction
 
 		if (forTable)
 		{
-			td = dd.getTableDescriptor(objectName, sd);
+			td = dd.getTableDescriptor(objectName, sd, tc);
 		}
 		
 		else

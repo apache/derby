@@ -220,7 +220,7 @@ public class CreateConstraintConstantAction extends ConstraintConstantAction
 			}
 			else
 			{
-				td = dd.getTableDescriptor(tableName, sd);
+				td = dd.getTableDescriptor(tableName, sd, tc);
 			}
 
 			if (td == null)

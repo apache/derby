@@ -272,7 +272,7 @@ public class OnlineCompress
                 data_dictionary.getSchemaDescriptor(
                     schemaName, nested_tc, true);
             TableDescriptor td = 
-                data_dictionary.getTableDescriptor(tableName, sd);
+                data_dictionary.getTableDescriptor(tableName, sd, nested_tc);
             nested_tc = 
                 tc.startNestedUserTransaction(false);
 
@@ -474,7 +474,7 @@ public class OnlineCompress
         SchemaDescriptor sd = 
             data_dictionary.getSchemaDescriptor(schemaName, tc, true);
         TableDescriptor  td = 
-            data_dictionary.getTableDescriptor(tableName, sd);
+            data_dictionary.getTableDescriptor(tableName, sd, tc);
 
         if (td == null)
         {
@@ -533,7 +533,7 @@ public class OnlineCompress
         SchemaDescriptor sd = 
             data_dictionary.getSchemaDescriptor(schemaName, tc, true);
         TableDescriptor  td = 
-            data_dictionary.getTableDescriptor(tableName, sd);
+            data_dictionary.getTableDescriptor(tableName, sd, tc);
 
         if (td == null)
         {

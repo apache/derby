@@ -559,7 +559,7 @@ public	class DD_Version implements	Formatable
 		SchemaDescriptor		sd = bootingDictionary.getSystemSchemaDescriptor();
 		TableDescriptor			td = bootingDictionary.getTableDescriptor(
 											crf.getCatalogName(),
-											sd);
+											sd, tc);
 		ConglomerateDescriptor[]	cds = td.getConglomerateDescriptors();
 		for (int index = 0; index < cds.length; index++)
 		{

@@ -1224,7 +1224,8 @@ public abstract class QueryTreeNode implements Visitable
 			return null;
 
 		//it is not a temporary table, so go through the data dictionary to find the physical persistent table
-		TableDescriptor td = getDataDictionary().getTableDescriptor(tableName, schema);
+		TableDescriptor td = getDataDictionary().getTableDescriptor(tableName, schema,
+                this.getLanguageConnectionContext().getTransactionCompile());
 		if (td == null || td.isSynonymDescriptor())
 			return null;
 		return td;

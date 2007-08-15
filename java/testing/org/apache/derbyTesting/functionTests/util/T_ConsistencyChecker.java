@@ -250,7 +250,7 @@ public class T_ConsistencyChecker
 		throws StandardException
 	{
 		sd = dd.getSchemaDescriptor(schemaName, tc, true);
-		td = dd.getTableDescriptor(tableName, sd);
+		td = dd.getTableDescriptor(tableName, sd, tc);
 
 		if (td == null)
 		{

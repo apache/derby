@@ -169,7 +169,7 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
 	}
 
 	public TableDescriptor getTableDescriptor(String tableName,
-			SchemaDescriptor schema) throws StandardException {
+			SchemaDescriptor schema, TransactionController tc) throws StandardException {
 		// TODO Auto-generated method stub
 		return null;
 	}
