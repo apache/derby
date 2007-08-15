@@ -51,13 +51,10 @@ import org.apache.derby.iapi.services.io.StreamStorable;
 
 import org.apache.derby.iapi.services.io.LimitInputStream;
 import org.apache.derby.iapi.services.io.NewByteArrayInputStream;
-import org.apache.derby.iapi.services.io.LimitReader;
 import org.apache.derby.iapi.error.ExceptionSeverity;
 import org.apache.derby.iapi.reference.JDBC20Translation;
 import org.apache.derby.iapi.reference.JDBC30Translation;
 import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.util.StringUtil;
-import org.apache.derby.iapi.util.ReuseFactory;
 
 /* can't import these due to name overlap:
 import java.sql.ResultSet;
@@ -78,8 +75,6 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.net.URL;
 
-import java.util.Map;
-import java.util.HashMap;
 import java.util.Arrays;
 import java.util.Calendar;
 
@@ -106,10 +101,9 @@ public abstract class EmbedResultSet extends ConnectionChild
 
 	/** 
 	 * The currentRow contains the data of the current row of the resultset.
-	 * If the containing row array is null, the cursor is not postioned on a 
-	 * row 
+	 * If currentRow is null, the cursor is not postioned on a row 
 	 */
-	private final ExecRow currentRow;	
+	private ExecRow currentRow;	
 	protected boolean wasNull;
     
     /**
@@ -257,16 +251,15 @@ public abstract class EmbedResultSet extends ConnectionChild
 
 		// Fill in the column types
 		resultDescription = theResults.getResultDescription();
-		final ExecutionFactory factory = conn.getLanguageConnection().
-			getLanguageConnectionFactory().getExecutionFactory();
-		final int columnCount = resultDescription.getColumnCount();
-		this.currentRow = factory.getValueRow(columnCount);
-		currentRow.setRowArray(null);
-
+		
 		// Only incur the cost of allocating and maintaining
 		// updated column information if the columns can be updated.
 		if (concurrencyOfThisResultSet == JDBC20Translation.CONCUR_UPDATABLE)
 		{
+            final int columnCount = resultDescription.getColumnCount();
+            final ExecutionFactory factory = conn.getLanguageConnection().
+            getLanguageConnectionFactory().getExecutionFactory();
+            
 			try{
 				//initialize arrays related to updateRow implementation
 				columnGotUpdated = new boolean[columnCount];
@@ -279,9 +272,11 @@ public abstract class EmbedResultSet extends ConnectionChild
 			} catch (StandardException t) {
 				throw noStateChangeException(t);
 			}
-		} else {
-			updateRow = null;
 		}
+        else
+        {
+            updateRow = null;
+        }
 
         // assign the max rows and maxfiled size limit for this result set
         if (stmt != null)
@@ -324,7 +319,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	// or milder problems due to not having a row.
 	protected final void checkOnRow() throws SQLException 
 	{
-		if (currentRow.getRowArray() == null) {
+		if (currentRow == null) {
 			throw newSQLException(SQLState.NO_CURRENT_ROW);
 		} 
 	}
@@ -491,13 +486,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 					topWarning.setNextWarning(w);
 			}
 			
-			boolean onRow = (newRow!=null);
-			if (onRow) {
-				currentRow.setRowArray(newRow.getRowArray());
-			} else {
-				currentRow.setRowArray(null);
-			}
-			
+            boolean onRow = (currentRow = newRow) != null;			
 
 			//if (onRow && !(currentRow instanceof org.apache.derby.impl.sql.execute.ValueRow))
 			//	System.out.println(currentRow.getClass());
@@ -636,7 +625,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 			}
 
 			// the idea is to release resources, so:
-			currentRow.setRowArray(null);
+			currentRow = null;
 
 			// we hang on to theResults and messenger
 			// in case more calls come in on this resultSet
@@ -3753,7 +3742,7 @@ public abstract class EmbedResultSet extends ConnectionChild
             act.close();
             //For forward only resultsets, after a update, the ResultSet will be positioned right before the next row.
             if (getType() == TYPE_FORWARD_ONLY) {
-                currentRow.setRowArray(null);
+                currentRow = null;
             } else {
                 movePosition(RELATIVE, 0, "relative");
             }
@@ -3817,7 +3806,7 @@ public abstract class EmbedResultSet extends ConnectionChild
                 act.close();
                 //After a delete, the ResultSet will be positioned right before 
                 //the next row.
-                currentRow.setRowArray(null);
+                currentRow = null;
                 lcc.popStatementContext(statementContext, null);
             } catch (StandardException t) {
                     throw closeOnTransactionError(t);
@@ -4380,7 +4369,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 
 	  closeCurrentStream();
 
-	  if (columnIndex < 1 || columnIndex > currentRow.nColumns()) {
+	  if (columnIndex < 1 || columnIndex > resultDescription.getColumnCount()) {
 		  throw newSQLException(SQLState.COLUMN_NOT_FOUND, 
 								new Integer(columnIndex));
 	  }
