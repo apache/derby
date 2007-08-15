@@ -21,20 +21,14 @@
 
 package org.apache.derby.impl.sql.execute;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 
+import org.apache.derby.iapi.services.io.StoredFormatIds;
+import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.execute.ExecIndexRow;
 import org.apache.derby.iapi.sql.execute.ExecRow;
-
-import org.apache.derby.iapi.services.io.Formatable;
-import org.apache.derby.iapi.services.io.StoredFormatIds;
-import org.apache.derby.iapi.services.io.FormatIdUtil;
-
-import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
-
-import java.io.ObjectOutput;
-import java.io.ObjectInput;
-import java.io.IOException;
 
 
 /**
@@ -78,7 +72,7 @@ public class IndexRow extends ValueRow implements ExecIndexRow
 	 */
     public	IndexRow() {}
 
-	public IndexRow(int ncols) {
+	IndexRow(int ncols) {
 		 super(ncols);
 		 orderedNulls = new boolean[ncols];	/* Initializes elements to false */
 	}

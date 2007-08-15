@@ -629,7 +629,6 @@ public class IndexChanger
 		throws StandardException
 	{
 		ExecRow			deferredRow;
-		ExecIndexRow	deferredIndexRow = new IndexRow();
 
 		/* Deferred processing only necessary for unique indexes */
 		if (rowHolder != null)
