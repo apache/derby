@@ -123,7 +123,11 @@ public class Utilities {
                 
                 for (int i = 0; i < nocols; i++)
                 {
-                    System.out.print("\"" + rs.getString(i+1) + "\"");
+                	String val = rs.getString(i+1);
+                	if (val == null)
+                		System.out.print("null");
+                	else
+                		System.out.print("\"" + rs.getString(i+1) + "\"");
                     if (i == (nocols -1))
                         System.out.print("}");
                     else
@@ -135,7 +139,7 @@ public class Utilities {
                 if (next)
                     System.out.println(",");
                 else
-                    System.out.println("};");
+                    System.out.println("};\n");
             }
         }       
 
