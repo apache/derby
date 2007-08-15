@@ -1730,43 +1730,44 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 		//then the "if" statement below will use those types values
 		//for ?s. If there are still some ?s in the IN list that are left 
 		//with unassigned values, then we will set those ? to NULL.
-		//eg if getTables is called to only look for table types 'S' and 
-		//'A', then 'S' will be used for first ? in TABLETYPE IN (?, ?, ?, ?)
-		//'A' will be used for second ? in TABLETYPE IN (?, ?, ?, ?) and
-		//NULL will be used for third and fourth ?s in 
+		// So paramter 4 will be "T" for TABLE, 5 will be "V" for VIEW, 6 will be
+		// "A" for SYNONYM, 7 will be "S" for system table in 
 		//TABLETYPE IN (?, ?, ?, ?)
-		//If the user hasn't asked for any specific table types, then the
-		//"else" statement below will kick in. When the control comes to 
-		//"else" statement, it means that the user wants to see all the
-		//table types supported by Derby. And hence, we simply set first
-		//? to 'T', second ? to 'S', third ? to 'V' and fourth ? to 'A'.
-		//When a new table type is added to Derby in future, we will have
-		//to do another setString for that in the "else" statement for that
-		//new table type.
-		if (types != null  &&  types.length >= 1) {
-			int i=0;
-			final int numberOfTableTypesInDerby = 4;
-			for (; i<types.length; i++){
-				/*
-				 * Let's assume for now that the table type first char 
-				 * corresponds to JBMS table type identifiers.
-				 * 
-				 * The reason I have i+4 is because there are already 3 ?s in
-				 * the getTables sql before the ?s in the IN clause. Hence
-				 * setString for table types should be done starting 4th 
-				 * parameter.
-				 */
-				s.setString(i+4, types[i].substring(0, 1));					
-			}
-			for (; i<numberOfTableTypesInDerby; i++) {
-				s.setNull(i+4, Types.CHAR);
-			}
-		} else {
-			s.setString(4, "T");
-			s.setString(5, "S");
-			s.setString(6, "V");
-			s.setString(7, "A");				
+		// If the user hasn't asked for any specific table types then all
+		// four values will be set.
+		// When a new table type is added to Derby we will have to add a 
+		// parameter to the metadata statement and handle it here.
+		
+		// Array for type parameters
+		final int numberOfTableTypesInDerby = 4;
+		if (types == null)  {// null means all types 
+			types = new String[] {"TABLE","VIEW","SYNONYM","SYSTEM TABLE"};
 		}
+		String[] typeParams = new String[numberOfTableTypesInDerby];
+		for (int i=0; i < numberOfTableTypesInDerby;i++)
+			typeParams[i] = null;
+		
+		for (int i = 0; i<types.length; i++){
+			if ("TABLE".equals(types[i]))
+				typeParams[0] = "T";
+			else if ("VIEW".equals(types[i]))
+				typeParams[1] = "V";
+			else if ("SYNONYM".equals(types[i]))
+				typeParams[2] = "A";
+			else if ("SYSTEM TABLE".equals(types[i]) ||
+					"SYSTEM_TABLE".equals(types[i])) // Keep SYSTEM_TABLE since this is how we have been testing
+					typeParams[3] = "S";
+			// If user puts in other types we simply ignore.
+			}
+		
+		// 	TABLETYPE IN (?,?,?,?) starts at parameter 4 so we add 4
+		// Set to value passed in or null if no value was given.
+		for (int i=0; i < numberOfTableTypesInDerby; i++)
+			if (typeParams[i] == null)
+				s.setNull(i+4,Types.CHAR);
+			else
+				s.setString(i+4,typeParams[i]);	
+					
 		return s.executeQuery();
 	}
 

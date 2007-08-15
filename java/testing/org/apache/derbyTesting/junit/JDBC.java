@@ -66,11 +66,10 @@ public class JDBC {
     public static final String[] GET_TABLES_VIEW = new String[] {"VIEW"};
     /**
      * Constant to pass to DatabaseMetaData.getTables() to fetch
-     * just synonyms. Need work around for DERBY-1790 where
-     * passing a table type of SYNONYM fails.
+     * just synonyms.
      */
     public static final String[] GET_TABLES_SYNONYM =
-        new String[] {"AA_DERBY-1790-SYNONYM"};
+        new String[] {"SYNONYM"};
     
     /**
      * Types.SQLXML value without having to compile with JDBC4.
