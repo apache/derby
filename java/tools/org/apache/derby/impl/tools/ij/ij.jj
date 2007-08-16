@@ -1747,7 +1747,7 @@ throws SQLException
 		else if(v!=null)
 			types = new String[] { "VIEW" };
 		else
-			types = new String[] { "ALIAS" };
+			types = new String[] { "SYNONYM" };
 		return showTables(schema, types);
 	}
 |	<SHOW> <INDEXES> 
