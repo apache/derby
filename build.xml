@@ -1391,10 +1391,8 @@
       <fileset dir="${derby.jar.dir}/lists" includes="**/*"/>
     </delete>
 
-    <mkdir dir="${derby.jar.dir}/lists/META-INF"/>
-    <copy todir="${derby.jar.dir}/lists/META-INF">
-      <fileset dir="${basedir}" includes="LICENSE*,NOTICE*"/>
-    </copy>
+    <!-- copy boilerplate common to derby jar files -->
+    <antcall target="meta-inf-common"/>
     
     <manifest file="${derby.jar.dir}/lists/smfcmd.mf">
       <attribute name="Main-Class" value="org.apache.derby.iapi.tools.run"/>
