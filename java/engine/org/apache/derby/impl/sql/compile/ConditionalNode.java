@@ -206,7 +206,8 @@ public class ConditionalNode extends ValueNode
 	 * @exception             StandardException Thrown on error.
 	 */
 	private DataTypeDescriptor findType(ValueNodeList thenElseList,
-		FromList fromList) throws StandardException
+		FromList fromList, SubqueryList subqueryList, Vector aggregateVector)
+		throws StandardException
 	{
 		/* We need to "prebind" because we want the Types.  Provide
 		 * dummy SubqueryList and AggreateList (we don't care)
@@ -214,11 +215,11 @@ public class ConditionalNode extends ValueNode
 
 		ValueNode thenNode =
 			((ValueNode)thenElseList.elementAt(0)).bindExpression(
-				fromList, new SubqueryList(), new Vector());
+				fromList, subqueryList, aggregateVector);
 
 		ValueNode elseNode =
 			((ValueNode)thenElseList.elementAt(1)).bindExpression(
-				fromList, new SubqueryList(), new Vector());
+				fromList, subqueryList, aggregateVector);
 
 		DataTypeDescriptor thenType = thenNode.getTypeServices();
 		DataTypeDescriptor elseType = elseNode.getTypeServices();
@@ -257,7 +258,8 @@ public class ConditionalNode extends ValueNode
 		if (isConditionalNode(thenNode))
 		{
 			theType =
-				findType(((ConditionalNode)thenNode).thenElseList, fromList);
+				findType(((ConditionalNode)thenNode).thenElseList, fromList,
+					subqueryList, aggregateVector);
 		}
 
 		if (theType != null) return theType;
@@ -266,7 +268,8 @@ public class ConditionalNode extends ValueNode
 		if (isConditionalNode(elseNode))
 		{
 			theType =
-				findType(((ConditionalNode)elseNode).thenElseList, fromList);
+				findType(((ConditionalNode)elseNode).thenElseList, fromList,
+					subqueryList, aggregateVector);
 		}
 
 		if (theType != null) return theType;
@@ -386,14 +389,21 @@ public class ConditionalNode extends ValueNode
 						thenElseList.elementAt(0), 
 						bcon.getLeftOperand().getTypeServices().getNullabilityType(true),
 						getContextManager());
-			thenElseList.setElementAt(cast,0);
-		} else {
-			recastNullNodes(thenElseList, findType(thenElseList, fromList));
- 		}
 
-		thenElseList.bindExpression(fromList,
-			subqueryList,
-			aggregateVector);
+			thenElseList.setElementAt(cast,0);
+			thenElseList.bindExpression(fromList,
+				subqueryList,
+				aggregateVector);
+
+		} else {
+			/* Following call to "findType()" will indirectly bind the
+			 * expressions in the thenElseList, so no need to call
+			 * "thenElseList.bindExpression(...)" after we do this.
+			 * DERBY-2986.
+			 */
+			recastNullNodes(thenElseList,
+				findType(thenElseList, fromList, subqueryList, aggregateVector));
+ 		}
 
 		// Can't get the then and else expressions until after they've been bound
 		ValueNode thenExpression = (ValueNode) thenElseList.elementAt(0);

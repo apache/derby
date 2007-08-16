@@ -31,6 +31,7 @@ import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
+import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.SQLUtilities;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
@@ -183,6 +184,43 @@ public class CaseExpressionTest extends BaseJDBCTestCase {
             "SELECT CASE WHEN 1 = 1 THEN NULL " +
             "ELSE (CASE WHEN 1 = 1 THEN NULL ELSE ",
             " END) END from AllDataTypesTable");
+
+        s.close();
+    }
+
+    /**
+     * Test a query that has many WHEN conditions in it.  This is mostly
+     * checking for the performance regression filed as DERBY-2986.  That
+     * regression may not be noticeable in the scope of the full regression
+     * suite, but if this test is run standalone then this fixture could
+     * still be useful.
+     */
+    public void testMultipleWhens() throws SQLException
+    {
+        Statement s = createStatement();
+        JDBC.assertFullResultSet(
+            s.executeQuery(
+                "values CASE WHEN 10 = 1 THEN 'a' " +
+                "WHEN 10 = 2 THEN 'b' " +
+                "WHEN 10 = 3 THEN 'c' " +
+                "WHEN 10 = 4 THEN 'd' " +
+                "WHEN 10 = 5 THEN 'e' " +
+                "WHEN 10 = 6 THEN 'f' " +
+                "WHEN 10 = 7 THEN 'g' " +
+                "WHEN 10 = 8 THEN 'h' " +
+                "WHEN 10 = 11 THEN 'i' " +
+                "WHEN 10 = 12 THEN 'j' " +
+                "WHEN 10 = 15 THEN 'k' " +
+                "WHEN 10 = 16 THEN 'l' " +
+                "WHEN 10 = 23 THEN 'm' " +
+                "WHEN 10 = 24 THEN 'n' " +
+                "WHEN 10 = 27 THEN 'o' " +
+                "WHEN 10 = 31 THEN 'p' " +
+                "WHEN 10 = 41 THEN 'q' " +
+                "WHEN 10 = 42 THEN 'r' " +
+                "WHEN 10 = 50 THEN 's' " +
+                "ELSE '*' END"),
+            new String[][] {{"*"}});
 
         s.close();
     }
