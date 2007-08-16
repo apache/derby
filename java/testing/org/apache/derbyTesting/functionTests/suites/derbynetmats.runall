@@ -15,7 +15,6 @@ jdbcapi/metadataMultiConn.java
 jdbcapi/odbc_metadata.java
 lang/optimizerOverrides.sql
 lang/big.sql
-lang/bug5054.java
 lang/holdCursorIJ.sql
 lang/wisconsin.java
 lang/ShutdownDatabase.java

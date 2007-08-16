@@ -18,7 +18,6 @@
 #  jdbcapi/odbc_metadata.java
 #  lang/optimizerOverrides.sql
 #  lang/big.sql
-#  lang/bug5054.sql
 #  lang/wisconsin.java
 #  jdbcapi/derbyStress.java
 #  jdbcapi/maxfieldsize.java
@@ -37,7 +36,6 @@ stress/stress.multi
 jdbcapi/odbc_metadata.java
 lang/optimizerOverrides.sql
 lang/big.sql
-lang/bug5054.sql
 lang/wisconsin.java
 jdbcapi/derbyStress.java
 jdbcapi/maxfieldsize.java
