@@ -68,6 +68,12 @@ import org.apache.derby.iapi.types.TypeId;
 
 class CreateIndexConstantAction extends IndexConstantAction
 {
+    /**
+     * Is this for a CREATE TABLE, i.e. it is
+     * for a constraint declared in a CREATE TABLE
+     * statement that requires a backing index.
+     */
+    private final boolean forCreateTable;
 
 	private boolean			unique;
 	private String			indexType;
@@ -84,6 +90,7 @@ class CreateIndexConstantAction extends IndexConstantAction
 	/**
 	 *	Make the ConstantAction to create an index.
 	 *
+     *  @param forCreateTable Being executed within a CREATE TABLE statement
 	 *  @param unique		True means it will be a unique index
 	 *  @param indexType	The type of index (BTREE, for example)
 	 *  @param schemaName	the schema that table (and index) lives in.
@@ -97,6 +104,7 @@ class CreateIndexConstantAction extends IndexConstantAction
 	 *  @param properties	The optional properties list associated with the index.
 	 */
 	CreateIndexConstantAction(
+            boolean forCreateTable,
 								boolean			unique,
 								String			indexType,
 								String			schemaName,
@@ -110,6 +118,7 @@ class CreateIndexConstantAction extends IndexConstantAction
 								Properties		properties)
 	{
 		super(tableId, indexName, tableName, schemaName);
+        this.forCreateTable = forCreateTable;
 		this.unique = unique;
 		this.indexType = indexType;
 		this.columnNames = columnNames;
@@ -155,7 +164,6 @@ class CreateIndexConstantAction extends IndexConstantAction
 	public void	executeConstantAction( Activation activation )
 						throws StandardException
 	{
-		boolean						forCreateTable;
 		TableDescriptor 			td;
 		UUID 						toid;
 		ColumnDescriptor			columnDescriptor;
@@ -173,9 +181,6 @@ class CreateIndexConstantAction extends IndexConstantAction
 		DataDictionary dd = lcc.getDataDictionary();
 		DependencyManager dm = dd.getDependencyManager();
 		TransactionController tc = lcc.getTransactionExecute();
-
-		/* Remember whether or not we are doing a create table */
-		forCreateTable = activation.getForCreateTable();
 
 		/*
 		** Inform the data dictionary that we are about to write to it.

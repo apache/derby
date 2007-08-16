@@ -288,7 +288,9 @@ public class CreateIndexNode extends DDLStatementNode
         }
 
 
-		return	getGenericConstantActionFactory().getCreateIndexConstantAction(unique,
+		return	getGenericConstantActionFactory().getCreateIndexConstantAction(               
+                false, // not for CREATE TABLE
+                unique,
 											  indexType,
 											  sd.getSchemaName(),
 											  indexName.getTableName(),

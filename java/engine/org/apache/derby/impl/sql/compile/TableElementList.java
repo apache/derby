@@ -673,7 +673,9 @@ public class TableElementList extends QueryTreeNodeVector
 			 */
 			if (constraintDN.requiresBackingIndex())
 			{
-				indexAction = genIndexAction(constraintDN.requiresUniqueIndex(),
+				indexAction = genIndexAction(
+                        forCreateTable,
+                        constraintDN.requiresUniqueIndex(),
 											 null, constraintDN, 
 											 columnNames, true, tableSd, tableName,
 											 constraintType, dd);
@@ -772,6 +774,7 @@ public class TableElementList extends QueryTreeNodeVector
 	}
 
 	private IndexConstantAction genIndexAction(
+            boolean forCreateTable,
 										boolean	isUnique,
 										String indexName,
 										ConstraintDefinitionNode cdn,
@@ -787,6 +790,11 @@ public class TableElementList extends QueryTreeNodeVector
 
 		if (constraintType == DataDictionary.DROP_CONSTRAINT)
 		{
+            if (SanityManager.DEBUG)
+            {
+                if (forCreateTable)
+                    SanityManager.THROWASSERT("DROP INDEX with forCreateTable true");
+            }
 			return	getGenericConstantActionFactory().getDropIndexConstantAction(
 									  null,
 									  indexName,
@@ -801,6 +809,7 @@ public class TableElementList extends QueryTreeNodeVector
 			for (int i = 0; i < isAscending.length; i++)
 				isAscending[i] = true;
 			return	getGenericConstantActionFactory().getCreateIndexConstantAction(
+                    forCreateTable,
 									isUnique,
 									"BTREE", // indexType
 									sd.getSchemaName(),
