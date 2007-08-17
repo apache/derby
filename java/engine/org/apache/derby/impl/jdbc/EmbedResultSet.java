@@ -129,9 +129,10 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 for a single execution Activation. Ie.
 	 a ResultSet from a Statement.executeQuery().
 	 In this case the closing of this ResultSet will close
-	 the activation or the finalization of the ResultSet
+	 the activation or the finalization of the parent EmbedStatement
 	 without it being closed will mark the Activation as unused.
-	 c.f. EmbedPreparedStatement.finalize().
+	 @see EmbedStatement#finalize()
+	 @see EmbedPreparedStatement#finalize()
     */
 	Activation singleUseActivation;
 
@@ -291,21 +292,6 @@ public abstract class EmbedResultSet extends ConnectionChild
 			maxFieldSize = 0;
 
 		order = conn.getResultSetOrderId();
-	}
-
-	/**
-		JDBC states that a ResultSet is closed when garbage collected.
-		We simply mark the activation as unused. Some later use
-		of the connection will clean everything up.
-
-		@exception Throwable Allows any exception to be thrown during finalize
-	*/
-	protected void finalize() throws Throwable {
-		super.finalize();
-
-		if (singleUseActivation != null) {
-			singleUseActivation.markUnused();
-		}		
 	}
 
 	private void checkNotOnInsertRow() throws SQLException {
