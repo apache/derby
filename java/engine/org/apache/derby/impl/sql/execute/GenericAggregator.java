@@ -21,43 +21,25 @@
 
 package org.apache.derby.impl.sql.execute;
 
-import org.apache.derby.iapi.types.NumberDataValue;
-import org.apache.derby.iapi.types.UserDataValue;
-
-import org.apache.derby.iapi.reference.SQLState;
-
-import org.apache.derby.iapi.sql.execute.ExecRow;
-import org.apache.derby.iapi.store.access.TransactionController;
-import org.apache.derby.iapi.services.io.Storable;
-
-import org.apache.derby.iapi.types.DataValueDescriptor;
-import org.apache.derby.iapi.types.DataValueDescriptor;
-import org.apache.derby.iapi.sql.ResultDescription;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.services.loader.ClassFactory;
-
-import org.apache.derby.iapi.sql.execute.ExecAggregator;
-import org.apache.derby.iapi.sql.execute.NoPutResultSet;
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.jdbc.ConnectionContext;
-import java.sql.Statement;
+import org.apache.derby.iapi.services.io.Storable;
+import org.apache.derby.iapi.services.loader.ClassFactory;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.execute.ExecAggregator;
+import org.apache.derby.iapi.sql.execute.ExecRow;
+import org.apache.derby.iapi.types.DataValueDescriptor;
+import org.apache.derby.iapi.types.UserDataValue;
 /**
  * Adaptor that sits between execution layer and aggregates.
  *
  */
 class GenericAggregator 
 {
-	AggregatorInfo			aggInfo;
+	private final AggregatorInfo			aggInfo;
 	int						aggregatorColumnId;
 	private int						inputColumnId;
 	private int						resultColumnId;
-	private ResultDescription		inputColumnResultDescription;
 
-	private	ExecRow[]			rowArray;
-	private	TemporaryRowHolderResultSet execResultSet;
 	private final ClassFactory		cf;
 
 	/*
@@ -82,8 +64,6 @@ class GenericAggregator
 		aggregatorColumnId = aggInfo.getAggregatorColNum();
 		inputColumnId = aggInfo.getInputColNum();
 		resultColumnId = aggInfo.getOutputColNum();
-		int[] colArray = new int[1];
-		inputColumnResultDescription = aggInfo.getResultDescription();
 		this.cf = cf;
 	}
 

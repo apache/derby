@@ -570,15 +570,13 @@ class SortResultSet extends NoPutResultSetImpl
 		throws StandardException
 	{
 		ExecRow				sourceRow;
-		ExecRow			inputRow = null;	
 
 		if ((sourceRow = source.getNextRowCore()) != null)
 		{
 			rowsInput++;
-			inputRow = sourceRow;
 		}
 
-		return inputRow;
+		return sourceRow;
 	}
 
 

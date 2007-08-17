@@ -21,39 +21,15 @@
 
 package org.apache.derby.impl.sql.execute;
 
-import org.apache.derby.iapi.services.monitor.Monitor;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
-import org.apache.derby.iapi.services.stream.InfoStreams;
-
-import org.apache.derby.iapi.services.io.Formatable;
-
-import org.apache.derby.iapi.sql.execute.CursorResultSet;
-import org.apache.derby.iapi.sql.ResultSet;
-import org.apache.derby.iapi.sql.execute.ExecRow;
-import org.apache.derby.iapi.sql.execute.ExecIndexRow;
-import org.apache.derby.iapi.sql.execute.NoPutResultSet;
-
-import org.apache.derby.iapi.sql.Activation;
-
-import org.apache.derby.iapi.store.access.ColumnOrdering;
-import org.apache.derby.iapi.store.access.TransactionController;
-
-import org.apache.derby.iapi.services.loader.GeneratedMethod;
-
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-
 import org.apache.derby.iapi.error.StandardException;
-
+import org.apache.derby.iapi.services.loader.GeneratedMethod;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.Activation;
+import org.apache.derby.iapi.sql.execute.CursorResultSet;
+import org.apache.derby.iapi.sql.execute.ExecIndexRow;
+import org.apache.derby.iapi.sql.execute.ExecRow;
+import org.apache.derby.iapi.sql.execute.NoPutResultSet;
 import org.apache.derby.iapi.types.RowLocation;
-
-import org.apache.derby.iapi.services.io.FormatableArrayHolder;
-
-import java.util.Properties;
-import java.util.Vector;
-import java.util.Enumeration;
 
 /**
  * This ResultSet evaluates scalar, non distinct aggregates.
@@ -186,13 +162,11 @@ class ScalarAggregateResultSet extends GenericAggregateResultSet
 			return null;
 		}
 
-	    ExecIndexRow sortResult = null;
-	    ExecRow result = null;
 	    ExecIndexRow execIndexRow = null;
 	    ExecIndexRow aggResult = null;
 		//only care if it is a minAgg if we have a singleInputRow, then we know
 		//we are only looking at one aggregate
-		boolean minAgg = (singleInputRow && aggregates[0].aggInfo.aggregateName.equals("MIN"));
+		boolean minAgg = (singleInputRow && aggregates[0].getAggregatorInfo().aggregateName.equals("MIN"));
 		beginTime = getCurrentTimeMillis();
 	    if (isOpen)
 	    {
