@@ -102,7 +102,7 @@ public abstract class EmbedPreparedStatement
         
         private BrokeredConnectionControl bcc=null;
 
-	/*
+	/**
 		Constructor assumes caller will setup context stack
 		and restore it.
 	 */
@@ -1630,9 +1630,6 @@ public abstract class EmbedPreparedStatement
 		return super.toString();
 	}
 
-	/*
-	**
-	*/
 	public void transferParameters(EmbedPreparedStatement newStatement) throws SQLException {
 
 		try {
@@ -1658,7 +1655,7 @@ public abstract class EmbedPreparedStatement
 			sourceType);
 		return se;
 	}
-        /*
+        /**
          * This method is used to initialize the BrokeredConnectionControl 
          * variable with its implementation. This method will be called in the  
          * BrokeredConnectionControl class 
@@ -1673,7 +1670,7 @@ public abstract class EmbedPreparedStatement
             bcc = control;
         }
         
-        /*
+        /**
          * Method calls onStatementError occurred on the 
          * BrokeredConnectionControl class after checking the 
          * SQLState of the SQLException thrown.
