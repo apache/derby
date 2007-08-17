@@ -21,16 +21,35 @@
 
 package org.apache.derbyTesting.functionTests.tests.jdbc4;
 
-import javax.xml.transform.Result;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.CallableStatement;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.sql.Blob;
+import java.sql.Clob;
+import java.sql.SQLFeatureNotSupportedException;
+import java.sql.SQLException;
+import java.sql.NClob;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.io.StringReader;
+import java.io.Reader;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import org.apache.derbyTesting.functionTests.util.SQLStateConstants;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 import junit.extensions.TestSetup;
-import junit.framework.*;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.BaseJDBCTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
-import java.io.*;
-import java.sql.*;
 
 /**
  * Tests of JDBC4 features in ResultSet.
@@ -1445,6 +1464,266 @@ public class ResultSetTest
         rs1.close();
     }
 
+    /**
+     * Tests that <code>ResultSet.getHoldability()</code> has the
+     * correct behaviour.
+     * 
+     * @throws SQLException	Thrown if some unexpected error happens
+     * @throws Exception	Thrown if some unexpected error happens
+     */
+    public void testGetHoldability() throws SQLException, Exception {
+        
+        Connection conn = getConnection();
+        
+        conn.setAutoCommit(false);
+        
+        // test default holdability
+        Statement stmt = createStatement();
+        ResultSet rs = stmt.executeQuery("values(1)");
+        assertEquals("default holdability is HOLD_CURSORS_OVER_COMMIT", ResultSet.HOLD_CURSORS_OVER_COMMIT, rs.getHoldability());
+        rs.close();
+        try {
+            rs.getHoldability();
+            fail("getHoldability() should fail when closed");
+        } catch (SQLException sqle) {
+            assertSQLState("XCL16", sqle);
+        }
+        
+        // test explicitly set holdability
+        final int[] holdabilities = {
+            ResultSet.HOLD_CURSORS_OVER_COMMIT,
+            ResultSet.CLOSE_CURSORS_AT_COMMIT,
+        };
+        for (int h=0; h < holdabilities.length; h++) {
+            Statement s =
+                    createStatement(ResultSet.TYPE_FORWARD_ONLY,
+                    ResultSet.CONCUR_READ_ONLY, holdabilities[h]);
+            rs = s.executeQuery("values(1)");
+            assertEquals("holdability " + holdabilityString(holdabilities[h]), holdabilities[h], rs.getHoldability());
+            rs.close();
+            s.close();
+        }
+        
+        // test holdability of result set returned from a stored
+        // procedure (DERBY-1101)
+        stmt.execute("create procedure getresultsetwithhold(in hold int) " +
+                "parameter style java language java external name " +
+                "'org.apache.derbyTesting.functionTests.tests." +
+                "jdbc4.ResultSetTest." +
+                "getResultSetWithHoldability' " +
+                "dynamic result sets 1 reads sql data");
+        for (int statementHoldability=0; statementHoldability<holdabilities.length; statementHoldability++) {
+            for (int procHoldability=0; procHoldability < holdabilities.length; procHoldability++) {
+                CallableStatement cs =
+                        prepareCall("call getresultsetwithhold(?)",
+                        ResultSet.TYPE_FORWARD_ONLY,
+                        ResultSet.CONCUR_READ_ONLY,
+                        holdabilities[statementHoldability]);
+                cs.setInt(1, holdabilities[procHoldability]);
+                cs.execute();
+                rs = cs.getResultSet();
+                int holdability = rs.getHoldability();
+                assertEquals("holdability of ResultSet from stored proc: " + holdabilityString(holdability), holdabilities[procHoldability], holdability);
+                commit();
+                
+                try {
+                    rs.next();
+                    assertEquals("non-holdable result set not closed on commit", ResultSet.HOLD_CURSORS_OVER_COMMIT, holdability);
+                } catch (SQLException sqle) {
+                    assertSQLState("XCL16",sqle);
+                    assertEquals("holdable result set closed on commit", ResultSet.CLOSE_CURSORS_AT_COMMIT, holdability);   
+                }
+                rs.close();
+                cs.close();
+            }
+        }
+        stmt.execute("drop procedure getresultsetwithhold");
+        stmt.close();
+        commit();
+    }
+    
+    
+    /**
+     * Tests that <code>ResultSet.isClosed()</code> returns the
+     * correct value in different situations.
+     *
+     * @throws SQLException	Thrown if some unexpected error happens
+     */
+    public void testIsClosed() throws SQLException{
+        
+        Statement stmt = createStatement();
+        
+        // simple open/read/close test
+        ResultSet rs = stmt.executeQuery("values(1)");
+        assertFalse("rs should be open", rs.isClosed());
+        while (rs.next());
+        assertFalse("rs should be open", rs.isClosed());
+        rs.close();
+        assertTrue("rs should be closed", rs.isClosed());
+        
+        // execute and re-execute statement
+        rs = stmt.executeQuery("values(1)");
+        assertFalse("rs should be open", rs.isClosed());
+        ResultSet rs2 = stmt.executeQuery("values(1)");
+        assertTrue("rs should be closed", rs.isClosed());
+        assertFalse("rs2 should be open", rs2.isClosed());
+        
+        // re-execute another statement on the same connection
+        Statement stmt2 = createStatement();
+        rs = stmt2.executeQuery("values(1)");
+        assertFalse("rs2 should be open" ,rs2.isClosed());
+        assertFalse("rs should be open", rs.isClosed());
+        
+        // retrieve multiple result sets
+        stmt.execute("create procedure retrieve_result_sets() " +
+                "parameter style java language java external name " +
+                "'org.apache.derbyTesting.functionTests.tests." +
+                "jdbc4.ResultSetTest.threeResultSets' " +
+                "dynamic result sets 3 reads sql data");
+        stmt.execute("call retrieve_result_sets()");
+        ResultSet[] rss = new ResultSet[3];
+        int count = 0;
+        do {
+            rss[count] = stmt.getResultSet();
+            assertFalse("rss[" + count + "] should be open", rss[count].isClosed());
+            
+            if (count > 0) {
+                assertTrue("rss[" + (count-1) + "] should be closed", rss[count-1].isClosed());
+            }
+            ++count;
+        } while (stmt.getMoreResults());
+        assertEquals("expected three result sets", 3, count);
+        stmt.execute("drop procedure retrieve_result_sets");
+        
+        // close statement
+        rs = stmt2.executeQuery("values(1)");
+        stmt2.close();
+        assertTrue("rs should be closed", rs.isClosed());
+        
+        // close connection
+        Connection conn2 = openDefaultConnection();
+        stmt2 = conn2.createStatement();
+        rs = stmt2.executeQuery("values(1)");
+        conn2.close();
+        assertTrue("rs should be closed", rs.isClosed());
+        
+        stmt.close();
+        stmt2.close();
+    }
+    /**
+     * Test that an exception is thrown when methods are called
+     * on a closed result set (DERBY-1060).
+     *
+     * @throws SQLException	Thrown if some unexpected error happens
+     */
+    public void testExceptionWhenClosed() 
+	throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, SQLException {
+        
+            // create a result set and close it
+            Statement stmt = createStatement();
+            ResultSet rs = stmt.executeQuery("values(1)");
+            rs.close();
+
+            // maps method name to parameter list
+            HashMap<String, Class[]> params = new HashMap<String, Class[]>();
+            // maps method name to argument list
+            HashMap<String, Object[]> args = new HashMap<String, Object[]>();
+
+            // methods with no parameters
+            String[] zeroArgMethods = {
+                "getWarnings", "clearWarnings", "getStatement",
+                "getMetaData", "getConcurrency", "getHoldability",
+                "getRow", "getType", "rowDeleted", "rowInserted",
+                "rowUpdated", "getFetchDirection", "getFetchSize",
+            };
+            for (String name : zeroArgMethods) {
+                params.put(name, null);
+                args.put(name, null);
+            }
+
+            // methods with a single int parameter
+            for (String name : new String[] { "setFetchDirection",
+                                              "setFetchSize" }) {
+                params.put(name, new Class[] { Integer.TYPE });
+                args.put(name, new Integer[] { 0 });
+            }
+
+            // invoke the methods
+            for (String name : params.keySet()) {
+                    Method method =
+                        rs.getClass().getMethod(name, params.get(name));
+                    try {
+                        method.invoke(rs, args.get(name));
+			fail("Unexpected Failure: method.invoke(rs, " + 
+					args.get(name) + ") should have failed.");
+                    } catch (InvocationTargetException ite) {
+                        Throwable cause = ite.getCause();
+                        if (cause instanceof SQLException) {
+                            SQLException sqle = (SQLException) cause;
+                            String state = sqle.getSQLState();
+                            // Should get SQL state XCL16 when the
+                            // result set is closed
+                            assertSQLState("XCL16", sqle);
+                            continue;
+                        }
+                        throw ite;
+                    }
+                    fail("no exception thrown for " + name +
+                                       "() when ResultSet is closed");
+            }
+            stmt.close();
+        
+    }
+    /**
+     * Tests the wrapper methods isWrapperFor and unwrap. There are two cases
+     * to be tested
+     * Case 1: isWrapperFor returns true and we call unwrap
+     * Case 2: isWrapperFor returns false and we call unwrap
+     *
+     * @param rs The ResultSet object on which the wrapper 
+     *           methods are tested
+     *
+     * @throws SQLException	Thrown if some unexpected error happens
+     */
+    public void testWrapper() throws SQLException {
+        PreparedStatement ps = prepareStatement("select count(*) from sys.systables");
+        ResultSet rs = ps.executeQuery();
+        Class<ResultSet> wrap_class = ResultSet.class;
+        
+        //The if succeeds and we call the unwrap method on the conn object        
+        if(rs.isWrapperFor(wrap_class)) {
+        	ResultSet rs1 = 
+                	(ResultSet)rs.unwrap(wrap_class);
+        }
+        else {
+        	assertFalse("isWrapperFor wrongly returns false", rs.isWrapperFor(wrap_class));
+        } 
+        //Being Test for Case2
+        //test for the case when isWrapper returns false
+        //using some class that will return false when 
+        //passed to isWrapperFor
+        Class<PreparedStatement> wrap_class1 = PreparedStatement.class;
+        
+        try {
+            //returning false is the correct behaviour in this case
+            //Generate a message if it returns true
+            if(rs.isWrapperFor(wrap_class1)) {
+                assertTrue("isWrapperFor wrongly returns true", rs.isWrapperFor(wrap_class1));
+            }
+            else {
+                PreparedStatement ps1 = (PreparedStatement)
+                                           rs.unwrap(wrap_class1);
+                fail("unwrap does not throw the expected exception"); 
+            }
+        }
+        catch (SQLException sqle) {
+            //Calling unwrap in this case throws an 
+            //SQLException ensure that this SQLException 
+            //has the correct SQLState
+            assertSQLState(SQLStateConstants.UNABLE_TO_UNWRAP, sqle);
+        }
+    }
+    
     /************************************************************************
      **                        T E S T  S E T U P                           *
      ************************************************************************/
@@ -1540,4 +1819,65 @@ public class ResultSetTest
         return stmt.executeQuery("select " + colName +
                 " from UpdateTestTableResultSet where sno = " + key);
     }
+    
+    /**
+     * Convert holdability from an integer to a readable string.
+     *
+     * @param holdability an <code>int</code> value representing a holdability
+     * @return a <code>String</code> value representing the same holdability
+     *
+     */
+    private static String holdabilityString(int holdability) {
+        switch (holdability) {
+        case ResultSet.HOLD_CURSORS_OVER_COMMIT:
+            return "HOLD_CURSORS_OVER_COMMIT";
+        case ResultSet.CLOSE_CURSORS_AT_COMMIT:
+            return "CLOSE_CURSORS_AT_COMMIT";
+        default:
+            return "UNKNOWN HOLDABILITY";
+        }
+    }
+    /**
+     * Method that is invoked by <code>testIsClosed()</code> (as a
+     * stored procedure) to retrieve three result sets.
+     *
+     * @param rs1 first result set
+     * @param rs2 second result set
+     * @param rs3 third result set
+     * @exception SQLException if a database error occurs
+     */
+    public static void threeResultSets(ResultSet[] rs1,
+                                       ResultSet[] rs2,
+                                       ResultSet[] rs3)
+        throws SQLException
+    {
+        Connection c = DriverManager.getConnection("jdbc:default:connection");
+        Statement stmt1 = c.createStatement();
+        rs1[0] = stmt1.executeQuery("values(1)");
+        Statement stmt2 = c.createStatement();
+        rs2[0] = stmt2.executeQuery("values(1)");
+        Statement stmt3 = c.createStatement();
+        rs3[0] = stmt3.executeQuery("values(1)");
+        c.close();
+    }
+    /**
+     * Method invoked by <code>testGetHoldability()</code> (as a stored
+     * procedure) to retrieve a result set with a given holdability.
+     *
+     * @param holdability requested holdability
+     * @param rs result set returned from stored procedure
+     * @exception SQLException if a database error occurs
+     */
+    public static void getResultSetWithHoldability(int holdability,
+                                                   ResultSet[] rs)
+        throws SQLException
+    {
+        Connection c = DriverManager.getConnection("jdbc:default:connection");
+        Statement s = c.createStatement(ResultSet.TYPE_FORWARD_ONLY,
+                                        ResultSet.CONCUR_READ_ONLY,
+                                        holdability);
+        rs[0] = s.executeQuery("values (1), (2), (3)");
+        c.close();
+    }
 }
+

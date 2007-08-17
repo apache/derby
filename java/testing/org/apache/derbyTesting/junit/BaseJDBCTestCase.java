@@ -164,6 +164,21 @@ public abstract class BaseJDBCTestCase
         addStatement(s);
         return s;
     }
+
+    /**
+     * Utility method to create a Statement using the connection
+     * returned by getConnection.
+     * @return Statement object from
+     * getConnection.createStatement(resultSetType, resultSetConcurrency, resultSetHoldability)
+     * @throws SQLException
+     */
+    public Statement createStatement(int resultSetType,
+            			int resultSetConcurrency,
+	    			int resultSetHoldability) throws SQLException
+    {
+        return getConnection().createStatement(resultSetType, resultSetConcurrency, resultSetHoldability);
+    }
+
     /**
      * Utility method to create a PreparedStatement using the connection
      * returned by getConnection.
@@ -260,6 +275,35 @@ public abstract class BaseJDBCTestCase
         addStatement(cs);
         return cs;
  
+    }
+
+    /**
+     * Utility method to create a CallableStatement using the connection
+     * returned by getConnection.
+     * @return Statement object from
+     * getConnection().prepareCall(sql, resultSetType, resultSetConcurrency)
+     * @throws SQLException
+     */
+    public CallableStatement prepareCall(String sql,
+					int resultSetType, 
+					int resultSetConcurrency) throws SQLException
+    {
+        return getConnection().prepareCall(sql, resultSetType, resultSetConcurrency);
+    }
+
+    /**
+     * Utility method to create a CallableStatement using the connection
+     * returned by getConnection.
+     * @return Statement object from
+     * getConnection().prepareCall(sql, resultSetType, resultSetConcurrency, resultSetHoldability)
+     * @throws SQLException
+     */
+    public CallableStatement prepareCall(String sql,
+                                        int resultSetType,
+                                        int resultSetConcurrency,
+					 int resultSetHoldability) throws SQLException
+    {
+        return getConnection().prepareCall(sql, resultSetType, resultSetConcurrency, resultSetHoldability);
     }
     
     /**
