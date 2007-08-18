@@ -54,6 +54,16 @@ public class IndexColumnOrder implements ColumnOrdering, Formatable
 
 	int colNum;
 	boolean ascending;
+        /**
+         * indicate whether NULL values should sort low.
+         *
+         * nullsOrderedLow is usually false, because generally Derby defaults
+         * to have NULL values compare higher than non-null values, but if
+         * the user specifies an ORDER BY clause with a <null ordering>
+         * specification that indicates that NULL values should be ordered
+         * lower than non-NULL values, thien nullsOrderedLow is set to true.
+         */
+        boolean nullsOrderedLow;
 
 	/*
 	 * class interface
@@ -69,11 +79,34 @@ public class IndexColumnOrder implements ColumnOrdering, Formatable
 	public IndexColumnOrder(int colNum) {
 		 this.colNum = colNum;
 		 this.ascending = true;
+                 this.nullsOrderedLow = false;
 	}
 
 	public IndexColumnOrder(int colNum, boolean ascending) {
 		 this.colNum = colNum;
 		 this.ascending = ascending;
+                 this.nullsOrderedLow = false;
+	}
+
+        /**
+         * constructor used by the ORDER BY clause.
+         *
+         * This version of the constructor is used by the compiler when
+         * it processes an ORDER BY clause in a SQL statement. For such
+         * statements, the user gets to control whether NULL values are
+         * ordered as lower than all non-NULL values, or higher than all
+         * non-NULL values.
+         *
+         * @param colNum number of this column
+         * @param ascending whether the ORDER BY is ascendeing or descending
+         * @param nullsLow whether nulls should be ordered low
+         */
+	public IndexColumnOrder(int colNum, boolean ascending,
+                boolean nullsLow)
+        {
+		 this.colNum = colNum;
+		 this.ascending = ascending;
+                 this.nullsOrderedLow = nullsLow;
 	}
 
 	/*
@@ -85,6 +118,19 @@ public class IndexColumnOrder implements ColumnOrdering, Formatable
 
 	public boolean getIsAscending() {
 		return ascending;
+	}
+
+        /**
+         * Indicate whether NULL values should be ordered below non-NULL.
+         *
+         * This function returns TRUE if the user has specified, via the
+         * <null ordering> clause in the ORDER BY clause, that NULL values
+         * of this column should sort lower than non-NULL values.
+         *
+         * @return whether nulls should sort low
+         */
+	public boolean getIsNullsOrderedLow() {
+		return nullsOrderedLow;
 	}
 
 	//////////////////////////////////////////////

@@ -59,5 +59,13 @@ public class T_ColumnOrderingImpl implements ColumnOrdering
 	{
 		return this.isAscending;
 	}
+
+	/**
+	@see ColumnOrdering#getIsNullsOrderedLow
+	**/
+	public boolean getIsNullsOrderedLow()
+	{
+		return false;
+	}
 }
 

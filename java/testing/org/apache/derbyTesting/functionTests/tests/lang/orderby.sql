@@ -683,4 +683,54 @@ SELECT DISTINCT name FROM person ORDER BY name desc;
 drop table person;
 
 
+create table d2887_types(
+   id             int,
+   c1_smallint    smallint,
+   c2_int         integer,
+   c3_bigint      bigint,
+   c4_real        real,
+   c5_float       float,
+   c6_numeric     numeric(10,2),
+   c7_char        char(10),
+   c8_date        date,
+   c9_time        time,
+   c10_timestamp  timestamp,
+   c11_varchar    varchar(50)
+);
+
+-- Tests to demonstrate proper operation of <null ordering> (DERBY-2887)
+
+insert into d2887_types values
+  (1, 1, 1, 1, 1.0, 1.0, 1.0, 'one', 
+   '1991-01-01', '11:01:01', '1991-01-01 11:01:01',
+   'one'),
+  (2, 2, 2, 2, 2.0, 2.0, 2.0, 'two', 
+   '1992-02-02', '12:02:02', '1992-02-02 12:02:02',
+   'two'),
+  (3, 3, 3, 3, 3.0, 3.0, 3.0, 'three',
+   '1993-03-03', '03:03:03', '1993-03-03 03:03:03',
+   'three'),
+  (4, null, null, null, null, null, null, null,
+   null, null, null,
+   null);
+
+
+-- Demonstrate various combinations of NULLS FIRST, NULLS LAST, and default,
+-- with various combinations of ASC, DESC, and default, with various
+-- data types. These should all succeed, should all produce output with the
+-- non-null values in the proper order, and should all produce output with
+-- the null values ordered as specified. If null ordering was not specified,
+-- the default Derby behavior is nulls are last if asc, first if desc.
+
+select id, c1_smallint from d2887_types order by c1_smallint nulls first;
+select id, c2_int from d2887_types order by c2_int nulls last;
+select id, c3_bigint from d2887_types order by c3_bigint asc;
+select id, c4_real from d2887_types order by c4_real desc;
+select id, c5_float from d2887_types order by c5_float asc nulls last;
+select id, c6_numeric from d2887_types order by c6_numeric desc nulls last;
+select id, c7_char from d2887_types order by c7_char asc nulls first;
+select id, c8_date from d2887_types order by c8_date desc nulls first;
+
+drop table d2887_types;
+
 

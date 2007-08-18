@@ -846,6 +846,105 @@ public abstract class DataType
 	}
 
 	/**
+	 * Compare this Orderable with another, with configurable null ordering.
+	 * The caller gets to determine how nulls
+	 * should be treated - they can either be ordered values or unknown
+	 * values. The caller also gets to decide, if they are ordered,
+         * whether they should be lower than non-NULL values, or higher
+	 *
+	 * @param op	Orderable.ORDER_OP_EQUALS means do an = comparison.
+	 *				Orderable.ORDER_OP_LESSTHAN means compare this < other.
+	 *				Orderable.ORDER_OP_LESSOREQUALS means compare this <= other.
+	 * @param other	The DataValueDescriptor to compare this one to.
+	 * @param orderedNulls	True means to treat nulls as ordered values,
+	 *						that is, treat SQL null as equal to null, and either greater or less
+	 *						than all other values.
+	 *						False means to treat nulls as unknown values,
+	 *						that is, the result of any comparison with a null
+	 *						is the UNKNOWN truth value.
+         * @param nullsOrderedLow       True means NULL less than non-NULL,
+         *                              false means NULL greater than non-NULL.
+         *                              Only relevant if orderedNulls is true.
+	 * @param unknownRV		The return value to use if the result of the
+	 *						comparison is the UNKNOWN truth value.  In other
+	 *						words, if orderedNulls is false, and a null is
+	 *						involved in the comparison, return unknownRV.
+	 *						This parameter is not used orderedNulls is true.
+	 *
+	 * @return	true if the comparison is true (duh!)
+	 *
+	 * @exception StandardException		Thrown on error
+	 */
+	public boolean compare(int op,
+						   DataValueDescriptor other,
+						   boolean orderedNulls,
+						   boolean nullsOrderedLow,
+						   boolean unknownRV)
+		throws StandardException
+	{
+		/* Use compare method from dominant type, flipping the operator
+		 * to reflect flipping of sides.
+		 */
+		if (typePrecedence() < other.typePrecedence())
+		{
+			return other.compare(flip(op), this, orderedNulls,
+                                nullsOrderedLow, unknownRV);
+		}
+
+		int result = compare(other, nullsOrderedLow);
+
+		switch(op)
+		{
+		case ORDER_OP_LESSTHAN:
+			return (result < 0);   // this <  other
+		case ORDER_OP_EQUALS:
+			return (result == 0);  // this == other
+		case ORDER_OP_LESSOREQUALS:
+			return (result <= 0);  // this <= other
+		// flipped operators
+		case ORDER_OP_GREATERTHAN:
+			return (result > 0);   // this > other
+		case ORDER_OP_GREATEROREQUALS:
+			return (result >= 0);  // this >= other
+		default:
+			if (SanityManager.DEBUG)
+				SanityManager.THROWASSERT("Invalid Operator");
+			return false;
+		}
+	}
+
+	/**
+	 * Compare this Orderable with another, with configurable null ordering.
+	 * This method treats nulls as ordered values, but allows the caller
+         * to specify whether they should be lower than all non-NULL values,
+         * or higher than all non-NULL values.
+	 *
+	 * @param other		The Orderable to compare this one to.
+         % @param nullsOrderedLow True if null should be lower than non-NULL
+	 *
+	 * @return  <0 - this Orderable is less than other.
+	 * 			 0 - this Orderable equals other.
+	 *			>0 - this Orderable is greater than other.
+     *
+     *			The code should not explicitly look for -1, or 1.
+	 *
+	 * @exception StandardException		Thrown on error
+	 */
+	public int compare(DataValueDescriptor other, boolean nullsOrderedLow)
+            throws StandardException
+        {
+            if (this.isNull() || other.isNull())
+            {
+                if (!isNull())
+                    return nullsOrderedLow ? 1 : -1;
+                if (!other.isNull())
+                    return nullsOrderedLow ? -1 : 1;
+                return 0; // both null
+            }
+            return compare(other);
+        } 
+
+	/**
 	 * Wrapper method for the "compare(DataValueDescriptor)" method of
 	 * this class.  Allows sorting of an array of DataValueDescriptors
 	 * using the JVMs own sorting algorithm.  Currently used for

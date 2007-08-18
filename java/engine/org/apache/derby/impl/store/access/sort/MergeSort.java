@@ -123,6 +123,11 @@ final class MergeSort implements Sort
 	private boolean columnOrderingAscendingMap[];
 
 	/**
+    A lookup table to speed up lookup of nulls-low ordering of a column, 
+	**/
+	private boolean columnOrderingNullsLowMap[];
+
+	/**
 	The sort observer.  May be null.  Used as a callback.
 	**/
 	SortObserver sortObserver;
@@ -488,10 +493,11 @@ final class MergeSort implements Sort
         {
 			// Get columns to compare.
             int colid = this.columnOrderingMap[i];
+            boolean nullsLow = this.columnOrderingNullsLowMap[i];
 
 			// If the columns don't compare equal, we're done.
 			// Return the sense of the comparison.
-			if ((r = r1[colid].compare(r2[colid])) 
+			if ((r = r1[colid].compare(r2[colid], nullsLow)) 
                     != 0)
 			{
 				if (this.columnOrderingAscendingMap[i])
@@ -540,10 +546,12 @@ final class MergeSort implements Sort
         // to change throughout a sort.
         columnOrderingMap          = new int[columnOrdering.length];
         columnOrderingAscendingMap = new boolean[columnOrdering.length];
+        columnOrderingNullsLowMap  = new boolean[columnOrdering.length];
         for (int i = 0; i < columnOrdering.length; i++)
         {
             columnOrderingMap[i] = columnOrdering[i].getColumnId();
             columnOrderingAscendingMap[i] = columnOrdering[i].getIsAscending();
+            columnOrderingNullsLowMap[i] = columnOrdering[i].getIsNullsOrderedLow();
         }
 
 		// No inserter or scan yet.

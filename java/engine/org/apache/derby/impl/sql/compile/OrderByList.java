@@ -469,6 +469,14 @@ public class OrderByList extends OrderedColumnList
 		{
 			OrderByColumn obc = getOrderByColumn(loc);
 
+            // If the user specified NULLS FIRST or NULLS LAST in such a way
+            // as to require NULL values to be re-sorted to be lower than
+            // non-NULL values, then a sort is required, as the index holds
+            // NULL values unconditionally higher than non-NULL values
+            //
+            if (obc.isNullsOrderedLow())
+				return RequiredRowOrdering.SORT_REQUIRED;
+
 			// ResultColumn rc = obc.getResultColumn();
 
 			/*

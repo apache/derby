@@ -69,7 +69,8 @@ public abstract class OrderedColumnList extends QueryTreeNodeVector
 			if (! hashColumns.containsKey(posInt))
 			{
 				ordering[i] = new IndexColumnOrder(position,
-												oc.isAscending());
+												oc.isAscending(),
+												oc.isNullsOrderedLow());
 				actualCols++;
 				hashColumns.put(posInt, posInt);
 			}

@@ -1081,7 +1081,8 @@ public class GenericResultSetFactory implements ResultSetFactory
                                              int opType,
                                              boolean all,
                                             int intermediateOrderByColumnsSavedObject,
-                                             int intermediateOrderByDirectionSavedObject)
+                                             int intermediateOrderByDirectionSavedObject,
+                                             int intermediateOrderByNullsLowSavedObject)
         throws StandardException
     {
         return new SetOpResultSet( leftSource,
@@ -1093,7 +1094,8 @@ public class GenericResultSetFactory implements ResultSetFactory
                                    opType,
                                    all,
                                    intermediateOrderByColumnsSavedObject,
-                                   intermediateOrderByDirectionSavedObject);
+                                   intermediateOrderByDirectionSavedObject,
+                                   intermediateOrderByNullsLowSavedObject);
     }
 
 	/**

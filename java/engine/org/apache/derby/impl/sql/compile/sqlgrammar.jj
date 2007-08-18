@@ -2165,6 +2165,7 @@ TOKEN [IGNORE_CASE] :
 |	<NAME: "name">
 |	<NCLOB: "nclob">
 |	<NULLABLE: "nullable">
+|	<NULLS: "nulls">
 |	<NUMBER: "number">
 |	<OBJECT: "object">
 |	<PASCAL: "pascal">
@@ -7848,7 +7849,7 @@ void
 sortSpecification(OrderByList orderCols) throws StandardException :
 {	OrderByColumn orderCol; }
 {
-	orderCol = sortKey() /* [ collateClause() ] */ [ orderingSpecification(orderCol) ]
+	orderCol = sortKey() /* [ collateClause() ] */ [ orderingSpecification(orderCol) ] [ nullOrdering(orderCol) ]
 	{
 		orderCols.addOrderByColumn(orderCol);
 	} 
@@ -7881,6 +7882,38 @@ orderingSpecification(OrderByColumn orderCol) :
 	{
 		orderCol.setDescending();
 	}
+}
+
+/*
+ * The data type comparison functions need to know whether NULL values
+ * should sort higher than non-NULL values, or lower. The answer to this
+ * depends on whether the user specified ASCending or DESCending, and on
+ * whether the user specified NULLS FIRST, or NULLS LAST, as follows:
+ *
+ * +===============+========+========+
+ * | ORDER BY says | ASC    | DESC   |
+ * +===============+========+========+
+ * | NULLS FIRST   | less   | greater|
+ * +===============+========+========+
+ * | NULLS LAST    | greater| less   |
+ * +===============+========+========+
+ */
+void
+nullOrdering(OrderByColumn orderCol) :
+{}
+{
+        LOOKAHEAD( { getToken(2).kind == LAST } )
+        <NULLS> <LAST>
+        {
+            if (! orderCol.isAscending())
+                orderCol.setNullsOrderedLow();
+        }
+|
+        <NULLS> <FIRST>
+        {
+            if (orderCol.isAscending())
+                orderCol.setNullsOrderedLow();
+        }
 }
 
 /*
@@ -13123,6 +13156,7 @@ nonReservedKeyword()  :
 	|	tok = <NEW>
 	|   tok = <NEW_TABLE>
 	|	tok = <NULLABLE>
+	|	tok = <NULLS>
 	|	tok = <NUMBER>
 	|	tok = <OBJECT>
 	|	tok = <OFF>

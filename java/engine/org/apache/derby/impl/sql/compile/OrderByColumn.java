@@ -45,6 +45,7 @@ public class OrderByColumn extends OrderedColumn {
 
 	private ResultColumn	resultCol;
 	private boolean			ascending = true;
+	private boolean			nullsOrderedLow = false;
 	private ValueNode expression;
 	private OrderByList     list;
     /**
@@ -94,6 +95,23 @@ public class OrderByColumn extends OrderedColumn {
 	 */
 	public boolean isAscending() {
 		return ascending;
+	}
+
+	/**
+	 * Mark the column as ordered NULL values lower than non-NULL values.
+	 */
+	public void setNullsOrderedLow() {
+		nullsOrderedLow = true;
+	}
+
+	/**
+	 * Get the column NULL ordering. Overrides
+	 * OrderedColumn.getIsNullsOrderedLow.
+	 *
+	 * @return true if NULLs ordered low, false if NULLs ordered high
+	 */
+	public boolean isNullsOrderedLow() {
+		return nullsOrderedLow;
 	}
 
 	/**

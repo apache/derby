@@ -86,6 +86,7 @@ public class IntersectOrExceptNode extends SetOperatorNode
 
     private int[] intermediateOrderByColumns; // The input result sets will be ordered on these columns. 0 indexed
     private int[] intermediateOrderByDirection; // ascending = 1, descending = -1
+    private boolean[] intermediateOrderByNullsLow; // TRUE means NULL values should be ordered lower than non-NULL values
 
 	/**
 	 * Initializer for a SetOperatorNode.
@@ -144,6 +145,7 @@ public class IntersectOrExceptNode extends SetOperatorNode
 
         intermediateOrderByColumns = new int[ getResultColumns().size()];
         intermediateOrderByDirection = new int[ intermediateOrderByColumns.length];
+        intermediateOrderByNullsLow = new boolean[ intermediateOrderByColumns.length];
         /* If there is an order by on the result of the intersect then use that because we know that doing so
          * will avoid a sort.  If the output of the intersect/except is small relative to its inputs then in some
          * cases it would be better to sort the inputs on a different sequence of columns, but it is hard to analyze
@@ -160,6 +162,7 @@ public class IntersectOrExceptNode extends SetOperatorNode
                     continue;
                 OrderByColumn orderByColumn = orderByList.getOrderByColumn(i);
                 intermediateOrderByDirection[intermediateOrderByIdx] = orderByColumn.isAscending() ? 1 : -1;
+                intermediateOrderByNullsLow[intermediateOrderByIdx] = orderByColumn.isNullsOrderedLow();
                 int columnIdx = orderByColumn.getResultColumn().getColumnPosition() - 1;
                 intermediateOrderByColumns[intermediateOrderByIdx] = columnIdx;
                 colsOrdered.set( columnIdx);
@@ -170,6 +173,7 @@ public class IntersectOrExceptNode extends SetOperatorNode
                 if( ! colsOrdered.get(i))
                 {
                     intermediateOrderByDirection[intermediateOrderByIdx] = 1;
+                    intermediateOrderByNullsLow[intermediateOrderByIdx] = false;
                     intermediateOrderByColumns[intermediateOrderByIdx] = i;
                     intermediateOrderByIdx++;
                 }
@@ -183,6 +187,7 @@ public class IntersectOrExceptNode extends SetOperatorNode
             for( int i = 0; i < intermediateOrderByColumns.length; i++)
             {
                 intermediateOrderByDirection[i] = 1;
+                intermediateOrderByNullsLow[i] = false;
                 intermediateOrderByColumns[i] = i;
             }
         }
@@ -208,6 +213,8 @@ public class IntersectOrExceptNode extends SetOperatorNode
                           cm);
             if( intermediateOrderByDirection[i] < 0)
                 orderByColumn.setDescending();
+            if( intermediateOrderByNullsLow[i])
+                orderByColumn.setNullsOrderedLow();
             orderByList.addOrderByColumn( orderByColumn);
         }
         orderByList.bindOrderByColumns( rsn);
@@ -344,9 +351,9 @@ public class IntersectOrExceptNode extends SetOperatorNode
          *  6) estimated cost
          *  7) opType
          *  8) all
-         *  9) close method
-         *  10) intermediateOrderByColumns saved object index
-         *  11) intermediateOrderByDirection saved object index
+         *  9) intermediateOrderByColumns saved object index
+         *  10) intermediateOrderByDirection saved object index
+         *  11) intermediateOrderByNullsLow saved object index
          */
 
 		acb.pushGetResultSetFactoryExpression(mb); // instance for getSetOpResultSet
@@ -362,11 +369,12 @@ public class IntersectOrExceptNode extends SetOperatorNode
         mb.push( all);
         mb.push( getCompilerContext().addSavedObject( intermediateOrderByColumns));
         mb.push( getCompilerContext().addSavedObject( intermediateOrderByDirection));
+        mb.push( getCompilerContext().addSavedObject( intermediateOrderByNullsLow));
 
 		mb.callMethod(VMOpcode.INVOKEINTERFACE,
                       (String) null,
                       "getSetOpResultSet",
-                      ClassName.NoPutResultSet, 10);
+                      ClassName.NoPutResultSet, 11);
 	} // end of generate
 
 	/**

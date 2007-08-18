@@ -63,6 +63,7 @@ class SetOpResultSet extends NoPutResultSetImpl
 
     private final int[] intermediateOrderByColumns;
     private final int[] intermediateOrderByDirection;
+    private final boolean[] intermediateOrderByNullsLow;
 
     /* Run time statistics variables */
     private int rowsSeenLeft;
@@ -78,7 +79,8 @@ class SetOpResultSet extends NoPutResultSetImpl
                     int opType,
                     boolean all,
                     int intermediateOrderByColumnsSavedObject,
-                    int intermediateOrderByDirectionSavedObject)
+                    int intermediateOrderByDirectionSavedObject,
+                    int intermediateOrderByNullsLowSavedObject)
     {
 		super(activation, resultSetNumber, 
 			  optimizerEstimatedRowCount, optimizerEstimatedCost);
@@ -92,6 +94,7 @@ class SetOpResultSet extends NoPutResultSetImpl
         ExecPreparedStatement eps = activation.getPreparedStatement();
         intermediateOrderByColumns = (int[]) eps.getSavedObject(intermediateOrderByColumnsSavedObject);
         intermediateOrderByDirection = (int[]) eps.getSavedObject(intermediateOrderByDirectionSavedObject);
+        intermediateOrderByNullsLow = (boolean[]) eps.getSavedObject(intermediateOrderByNullsLowSavedObject);
         recordConstructorTime();
     }
 
@@ -214,12 +217,14 @@ class SetOpResultSet extends NoPutResultSetImpl
             int colIdx = intermediateOrderByColumns[i];
             if( leftCols[colIdx].compare( Orderable.ORDER_OP_LESSTHAN,
                                           rightCols[colIdx],
-                                          true, // nulls sort high
+                                          true, // nulls should be ordered
+                                          intermediateOrderByNullsLow[i],
                                           false))
                 return -1 * intermediateOrderByDirection[i];
             if( ! leftCols[colIdx].compare( Orderable.ORDER_OP_EQUALS,
                                             rightCols[colIdx],
-                                            true, // nulls sort high
+                                            true, // nulls should be ordered
+                                            intermediateOrderByNullsLow[i],
                                             false))
                 return intermediateOrderByDirection[i];
         }

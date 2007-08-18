@@ -49,6 +49,20 @@ public abstract class OrderedColumn extends QueryTreeNode
 	}
 
 	/**
+	 * Indicate whether this column should be ordered NULLS low.
+	 * By default we assume that all ordered columns are ordered
+	 * with NULLS higher than non-null values. If this class is inherited
+	 * by someone that can be specified to have NULLs ordered lower than
+         * non-null values, they are expected to override this method.
+	 *
+	 * @return false
+	 */
+	public boolean isNullsOrderedLow()
+	{
+		return false;
+	}
+
+	/**
 	 * Convert this object to a String.  See comments in QueryTreeNode.java
 	 * for how this should be done for tree printing.
 	 *

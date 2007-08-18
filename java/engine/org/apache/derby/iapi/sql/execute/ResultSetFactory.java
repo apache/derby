@@ -1415,7 +1415,8 @@ public interface ResultSetFactory {
                                       int opType,
                                       boolean all,
                                       int intermediateOrderByColumnsSavedObject,
-                                      int intermediateOrderByDirectionSavedObject)
+                                      int intermediateOrderByDirectionSavedObject,
+                                      int intermediateOrderByNullsLowSavedObject)
         throws StandardException;
                                                      
                                                      

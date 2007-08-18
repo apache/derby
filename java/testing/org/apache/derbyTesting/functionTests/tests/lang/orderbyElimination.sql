@@ -80,6 +80,17 @@ values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
 select c3, c4 from t1 union select c2, c1 as c4 from t1 order by c4;
 values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
 
+-- DERBY-2887: investigate affect of NULLS FIRST/LAST on sorting
+
+insert into t1 values (1, null, 14, null);
+
+-- should NOT do a sort:
+select c1,c2,c3 from t1 where c1 = 1 order by c1,c2;
+values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+-- Needs to do a sort to get the NULLS FIRST:
+select c1,c2,c3 from t1 where c1 = 1 order by c1,c2 nulls first;
+values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+
 -- test recognition of single row tables
 -- even when scanning heap
 create table u1(c1 int, c2 int);

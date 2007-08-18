@@ -720,7 +720,7 @@ public interface DataValueDescriptor extends Storable, Orderable
 	/**
 	 * Compare this Orderable with a given Orderable for the purpose of
 	 * index positioning.  This method treats nulls as ordered values -
-	 * that is, it treats SQL null as equal to null and less than all
+	 * that is, it treats SQL null as equal to null and greater than all
 	 * other values.
 	 *
 	 * @param other		The Orderable to compare this one to.
@@ -734,6 +734,26 @@ public interface DataValueDescriptor extends Storable, Orderable
 	 * @exception StandardException		Thrown on error
 	 */
 	int compare(DataValueDescriptor other) throws StandardException;
+
+	/**
+	 * Compare this Orderable with another, with configurable null ordering.
+	 * This method treats nulls as ordered values, but allows the caller
+         * to specify whether they should be lower than all non-NULL values,
+         * or higher than all non-NULL values.
+	 *
+	 * @param other		The Orderable to compare this one to.
+         % @param nullsOrderedLow True if null should be lower than non-NULL
+	 *
+	 * @return  <0 - this Orderable is less than other.
+	 * 			 0 - this Orderable equals other.
+	 *			>0 - this Orderable is greater than other.
+     *
+     *			The code should not explicitly look for -1, or 1.
+	 *
+	 * @exception StandardException		Thrown on error
+	 */
+	int compare(DataValueDescriptor other, boolean nullsOrderedLow)
+            throws StandardException;
 
 	/**
 	 * Compare this Orderable with a given Orderable for the purpose of
@@ -765,6 +785,44 @@ public interface DataValueDescriptor extends Storable, Orderable
     int         op, 
     DataValueDescriptor   other,
     boolean     orderedNulls, 
+    boolean     unknownRV)
+				throws StandardException;
+
+	/**
+	 * Compare this Orderable with another, with configurable null ordering.
+	 * The caller gets to determine how nulls
+	 * should be treated - they can either be ordered values or unknown
+	 * values. The caller also gets to decide, if they are ordered,
+         * whether they should be lower than non-NULL values, or higher
+	 *
+	 * @param op	Orderable.ORDER_OP_EQUALS means do an = comparison.
+	 *				Orderable.ORDER_OP_LESSTHAN means compare this < other.
+	 *				Orderable.ORDER_OP_LESSOREQUALS means compare this <= other.
+	 * @param other	The DataValueDescriptor to compare this one to.
+	 * @param orderedNulls	True means to treat nulls as ordered values,
+	 *						that is, treat SQL null as equal to null, and either greater or less
+	 *						than all other values.
+	 *						False means to treat nulls as unknown values,
+	 *						that is, the result of any comparison with a null
+	 *						is the UNKNOWN truth value.
+         * @param nullsOrderedLow       True means NULL less than non-NULL,
+         *                              false means NULL greater than non-NULL.
+         *                              Only relevant if orderedNulls is true.
+	 * @param unknownRV		The return value to use if the result of the
+	 *						comparison is the UNKNOWN truth value.  In other
+	 *						words, if orderedNulls is false, and a null is
+	 *						involved in the comparison, return unknownRV.
+	 *						This parameter is not used orderedNulls is true.
+	 *
+	 * @return	true if the comparison is true (duh!)
+	 *
+	 * @exception StandardException		Thrown on error
+	 */
+	boolean compare(
+    int         op, 
+    DataValueDescriptor   other,
+    boolean     orderedNulls, 
+    boolean     nullsOrderedLow,
     boolean     unknownRV)
 				throws StandardException;
 
