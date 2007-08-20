@@ -31,6 +31,7 @@ import org.apache.derby.iapi.services.io.Storable;
 import org.apache.derby.iapi.services.io.TypedFormat;
 import org.apache.derby.iapi.services.loader.ClassInspector;
 import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.conn.ConnectionUtil;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.StringDataValue;
@@ -41,6 +42,7 @@ import org.apache.derby.iapi.reference.SQLState;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.text.RuleBasedCollator;
 
 import java.io.InputStream;
 import java.io.IOException;
@@ -674,7 +676,8 @@ public class XML
      * @exception StandardException    Thrown on error
      */
     public StringDataValue XMLSerialize(StringDataValue result,
-        int targetType, int targetWidth) throws StandardException
+        int targetType, int targetWidth, int targetCollationType) 
+    throws StandardException
     {
         if (result == null) {
             switch (targetType)
@@ -694,6 +697,30 @@ public class XML
                     }
                     return null;
             }
+            // If the collation type is territory based, then we should use
+            // CollatorSQLxxx rather than SQLxxx types for StringDataValue. 
+            // eg
+            // CREATE TABLE T_MAIN1 (ID INT  GENERATED ALWAYS AS IDENTITY 
+            //       PRIMARY KEY, V XML);
+            // INSERT INTO T_MAIN1(V) VALUES NULL;
+            // SELECT ID, XMLSERIALIZE(V AS CLOB), XMLSERIALIZE(V AS CLOB) 
+            //       FROM T_MAIN1 ORDER BY 1;
+            // Following code is for (V AS CLOB) inside XMLSERIALIZE. The
+            // StringDataValue returned for (V AS CLOB) should consider the 
+            // passed collation type in determining whether we should
+            // generate SQLChar vs CollatorSQLChar for instance. Keep in mind
+            // that collation applies only to character string types.
+    		if (result instanceof StringDataValue) {
+    			try {
+    				RuleBasedCollator rbs = ConnectionUtil.getCurrentLCC().getDataValueFactory().
+    				getCharacterCollator(targetCollationType);
+    				result = ((StringDataValue)result).getValue(rbs);
+    			}
+    			catch( java.sql.SQLException sqle)
+    			{
+    				throw StandardException.plainWrapException( sqle);
+    			}
+    		}
         }
 
         // Else we're reusing a StringDataValue.  We only reuse

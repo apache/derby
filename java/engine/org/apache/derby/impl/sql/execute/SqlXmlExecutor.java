@@ -126,10 +126,11 @@ public class SqlXmlExecutor {
     private Activation activation;
     private int sqlXUtilId;
 
-    // Target type and target width that were specified
-    // for an XMLSERIALIZE operator.
+    // Target type, target width and target collation type that 
+    // were specified for an XMLSERIALIZE operator.
     private int targetTypeId;
     private int targetMaxWidth;
+    private int targetCollationType;
 
     // Whether or not to preserve whitespace for XMLPARSE
     // operator.
@@ -153,11 +154,14 @@ public class SqlXmlExecutor {
      * Constructor 2: Used for XMLSERIALIZE op.
      * @param targetTypeId The string type to which we want to serialize.
      * @param targetMaxWidth The max width of the target type.
+     * @param targetCollationType The collation type of the target type.
      */
-    public SqlXmlExecutor(int targetTypeId, int targetMaxWidth)
+    public SqlXmlExecutor(int targetTypeId, int targetMaxWidth, 
+    		int targetCollationType)
     {
         this.targetTypeId = targetTypeId;
         this.targetMaxWidth = targetMaxWidth;
+        this.targetCollationType = targetCollationType;
     }
 
     /**
@@ -213,7 +217,8 @@ public class SqlXmlExecutor {
     public StringDataValue XMLSerialize(XMLDataValue xmlVal,
         StringDataValue result) throws StandardException
     {
-        return xmlVal.XMLSerialize(result, targetTypeId, targetMaxWidth);
+        return xmlVal.XMLSerialize(result, targetTypeId, targetMaxWidth, 
+        		targetCollationType);
     }
 
     /**
