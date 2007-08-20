@@ -56,12 +56,14 @@ public interface XMLDataValue extends DataValueDescriptor
      *  null if not called yet.
      * @param targetType The string type to which we want to serialize.
      * @param targetWidth The width of the target type.
+     * @param targetCollationType The collation type of the target type.
      * @return A serialized (to string) version of this XML object,
      *  in the form of a StringDataValue object.
      * @exception StandardException Thrown on error
      */
     public StringDataValue XMLSerialize(StringDataValue result,
-        int targetType, int targetWidth) throws StandardException;
+        int targetType, int targetWidth, int targetCollationType) 
+    throws StandardException;
 
     /**
      * The SQL/XML XMLExists operator.

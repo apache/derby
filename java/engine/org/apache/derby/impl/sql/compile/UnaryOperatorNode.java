@@ -791,11 +791,17 @@ public class UnaryOperatorNode extends ValueNode
         // the serialized version of the XML value, which we
         // already found when the XML value was created (ex.
         // as part of the XMLPARSE work).
+        // We also need to pass the collation type of the current
+        // compilation schema. If the JDBC type id is of type
+        // StringDataValue, then we should use the collation to
+        // decide whether we need to generate collation sensitive
+        // StringDataValue.
             DataTypeDescriptor targetType =
                 (DataTypeDescriptor)additionalArgs[0];
             mb.push(targetType.getJDBCTypeId());
             mb.push(targetType.getMaximumWidth());
-            return 2;
+            mb.push(getSchemaDescriptor(null, false).getCollationType());
+            return 3;
         }
 
         /* Else we're here for XMLPARSE. */

@@ -577,7 +577,7 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     //The query below will work for the same reason. 
     checkLangBasedQuery(s, "SELECT count(*) FROM SYS.SYSTABLES WHERE CASE " +
     		" WHEN 1=1 THEN TABLENAME ELSE TABLEID END = TABLENAME",
-    		new String[][] {{"21"} });   
+    		new String[][] {{"22"} });   
 
     //Do some testing using CONCATENATION
     //following will fail because result string of concatenation has 
@@ -1045,6 +1045,18 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     s.execute("CREATE INDEX DERBY_2973_I1 ON DERBY_2973 (V)");
     s.execute("ALTER TABLE DERBY_2973 ALTER V SET DATA TYPE VARCHAR(4096)");
     s.execute("INSERT INTO DERBY_2973 VALUES('hello')");
+    
+    //DERBY-2961
+    //Should generate collation sensitive data type when working with something
+    //like V AS CLOB insdie XMLSERIALIZE as shown below 
+    //SELECT ID, XMLSERIALIZE(V AS CLOB), XMLSERIALIZE(V AS CLOB) FROM 
+    //    DERBY_2961 ORDER BY 1
+    s.executeUpdate("set schema APP");
+    if (XML.classpathMeetsXMLReqs()) {
+        checkLangBasedQuery(s, "SELECT ID, XMLSERIALIZE(V AS CLOB) " +
+        		" FROM DERBY_2961 ORDER BY 1",
+        		null);
+    }
     s.close();
  
 }
@@ -1066,6 +1078,10 @@ private void setUpTable(Statement s) throws SQLException {
 
     s.execute("create table xmlTable (x xml)");
     s.executeUpdate("insert into xmlTable values(null)");
+
+    s.execute("create table DERBY_2961 (ID INT  GENERATED ALWAYS AS " +
+    		" IDENTITY PRIMARY KEY, V XML)");
+    s.executeUpdate("insert into DERBY_2961(V) values(null)");
     
     conn.commit();
     ps.close();
