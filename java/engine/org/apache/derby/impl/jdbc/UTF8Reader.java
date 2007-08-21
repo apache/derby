@@ -37,6 +37,7 @@ import org.apache.derby.iapi.types.Resetable;
 */
 public final class UTF8Reader extends Reader
 {
+    private static final String READER_CLOSED = "Reader closed";
 
     private InputStream in;
     /** Stream store that can reposition itself on request. */
@@ -46,7 +47,7 @@ public final class UTF8Reader extends Reader
     private final long utfLen;          // bytes
     private long       utfCount;        // bytes
     private long       readerCharCount; // characters
-    private long       maxFieldSize;    // characeters
+    private final long maxFieldSize;    // characters
 
     private char[]         buffer = new char[8 * 1024];
     private int            charactersInBuffer; // within buffer
@@ -149,7 +150,7 @@ public final class UTF8Reader extends Reader
 
             // check if closed..
             if (noMoreReads)
-                throw new IOException();
+                throw new IOException(READER_CLOSED);
 
             if (readPositionInBuffer >= charactersInBuffer) {
                 if (fillBuffer()) {
@@ -167,7 +168,7 @@ public final class UTF8Reader extends Reader
         synchronized (lock) {
             // check if closed..
             if (noMoreReads)
-                throw new IOException();
+                throw new IOException(READER_CLOSED);
 
             if (readPositionInBuffer >= charactersInBuffer) {
                 if (fillBuffer()) {
@@ -196,7 +197,7 @@ public final class UTF8Reader extends Reader
         synchronized (lock) {
             // check if closed..
             if (noMoreReads)
-                throw new IOException();
+                throw new IOException(READER_CLOSED);
 
             if (readPositionInBuffer >= charactersInBuffer) {
                 // do somthing
@@ -306,12 +307,6 @@ public final class UTF8Reader extends Reader
         return new UTFDataFormatException(s);
     }
 
-    private IOException utfFormatException() {
-        noMoreReads = true;
-        closeIn();
-        return new UTFDataFormatException();
-    }
-
     /**
         Fill the buffer, return true if eof has been reached.
     */
@@ -348,7 +343,8 @@ readChars:
                     closeIn();
                     break readChars;
                 }
-                throw utfFormatException();
+                throw utfFormatException("Reached EOF prematurely, " +
+                    "read " + utfCount + " out of " + utfLen + " bytes");
             }
 
             int finalChar;
@@ -365,10 +361,16 @@ readChars:
                     utfCount += 2;
                     int char2 = in.read();
                     if (char2 == -1)
-                        throw utfFormatException();
+                        throw utfFormatException("Reached EOF when reading " +
+                            "second byte in a two byte character encoding; " +
+                            "byte/char position " + utfCount + "/" +
+                            readerCharCount);
 
                     if ((char2 & 0xC0) != 0x80)
-                        throw utfFormatException();
+                        throw utfFormatException("Second byte in a two byte" +
+                            "character encoding invalid: (int)" + char2 +
+                            ", byte/char pos " + utfCount + "/" +
+                            readerCharCount);
                     finalChar = (((c & 0x1F) << 6) | (char2 & 0x3F));
                     break;
                     }
@@ -380,7 +382,10 @@ readChars:
                     int char2 = in.read();
                     int char3 = in.read();
                     if (char2 == -1 || char3 == -1)
-                        throw utfFormatException();
+                        throw utfFormatException("Reached EOF when reading " +
+                            "second/third byte in a three byte character " +
+                            "encoding; byte/char position " + utfCount + "/" +
+                            readerCharCount);
 
                     if ((c == 0xE0) && (char2 == 0) && (char3 == 0))
                     {
@@ -391,11 +396,15 @@ readChars:
                             closeIn();
                             break readChars;
                         }
-                        throw utfFormatException();
+                        throw utfFormatException("Internal error: Derby-" +
+                            "specific EOF marker read");
                     }
 
                     if (((char2 & 0xC0) != 0x80) || ((char3 & 0xC0) != 0x80))
-                        throw utfFormatException();
+                        throw utfFormatException("Second/third byte in a " +
+                            "three byte character encoding invalid: (int)" +
+                            char2 + "/" + char3 + ", byte/char pos " +
+                            utfCount + "/" + readerCharCount);
 
                     finalChar = (((c & 0x0F) << 12) |
                                ((char2 & 0x3F) << 6) |
@@ -405,14 +414,17 @@ readChars:
 
                 default:
                     // 10xx xxxx,  1111 xxxx
-                    throw utfFormatException();
+                    throw utfFormatException("Invalid UTF encoding at " +
+                        "byte/char position " + utfCount + "/" +
+                        readerCharCount + ": (int)" + c);
             }
 
             buffer[charactersInBuffer++] = (char) finalChar;
             readerCharCount++;
         }
         if (utfLen != 0 && utfCount > utfLen)
-            throw utfFormatException("utfCount " + utfCount + " utfLen " + utfLen);
+            throw utfFormatException("Incorrect encoded length in stream, " +
+                "expected " + utfLen + ", have " + utfCount + " bytes");
 
         if (charactersInBuffer != 0) {
             if (this.positionedIn != null) {
@@ -441,7 +453,8 @@ readChars:
         int ch1 = in.read();
         int ch2 = in.read();
         if ((ch1 | ch2) < 0)
-            throw new EOFException();
+            throw new EOFException("Reached EOF when reading" +
+                                   "encoded length bytes");
 
         return (ch1 << 8) + (ch2 << 0);
     }
