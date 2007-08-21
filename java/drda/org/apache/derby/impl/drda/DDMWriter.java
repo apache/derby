@@ -25,6 +25,7 @@ import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.CharsetEncoder;
@@ -217,7 +218,8 @@ class DDMWriter
 		// continuation bit defaults to '1' for lobs, so
 		// we only have to switch it if we're not writing
 		// lobs.
-			bytes[dssLengthLocation] |= 0x80;
+			byte b = (byte) (buffer.get(dssLengthLocation) | 0x80);
+			buffer.put(dssLengthLocation, b);
 		}
 
 		// We need to set the chaining state, but ONLY
@@ -248,11 +250,24 @@ class DDMWriter
 		endDss(true);
 
 		// Now override default chain state.
-		bytes[dssLengthLocation + 3] &= 0x0F;	// Zero out default
-		bytes[dssLengthLocation + 3] |= chainByte;
+		overrideChainByte(dssLengthLocation + 3, chainByte);
 		previousChainByte = chainByte;
 
 	}
+
+    /**
+     * Override the default chaining byte with the chaining byte that is passed
+     * in.
+     *
+     * @param pos the position on which the chaining byte is located
+     * @param chainByte the chaining byte that overrides the default
+     */
+    private void overrideChainByte(int pos, byte chainByte) {
+        byte b = buffer.get(pos);
+        b &= 0x0F;              // Zero out default
+        b |= chainByte;
+        buffer.put(pos, b);
+    }
 
 	/**
 	 * End DSS header by writing the length in the length location
@@ -322,7 +337,8 @@ class DDMWriter
 		start = start + dssLengthLocation;
 		int length = buffer.position() - start;
 		byte [] temp = new byte[length];
-		System.arraycopy(bytes,start,temp,0,length);
+		buffer.position(start);
+		buffer.get(temp);
 		return temp;
 	}
 
@@ -402,13 +418,12 @@ class DDMWriter
 					              extendedLengthLocation + extendedLengthByteCount,
 					              extendedLength);
 
-			// write the extended length
-			int shiftSize = (extendedLengthByteCount -1) * 8;
-			for (int i = 0; i < extendedLengthByteCount; i++)
-			{
-				bytes[extendedLengthLocation++] =
-					(byte) ((extendedLength >>> shiftSize ) & 0xff);
-				shiftSize -= 8;
+			// write the extended length (a variable number of bytes in
+			// big-endian order)
+			for (int pos = extendedLengthLocation + extendedLengthByteCount - 1;
+				 pos >= extendedLengthLocation; pos--) {
+				buffer.put(pos, (byte) extendedLength);
+				extendedLength >>= 8;
 			}
 
 			// adjust the offset to account for the shift and insert
@@ -423,9 +438,7 @@ class DDMWriter
 		}
 
 		// write the 2 byte length field (2 bytes before codepoint).
-		bytes[lengthLocation] = (byte) ((length >>> 8) & 0xff);
-		bytes[lengthLocation+1] = (byte) (length & 0xff);
-
+		buffer.putShort(lengthLocation, (short) length);
 	}
 
     /**
@@ -727,8 +740,7 @@ class DDMWriter
 
 		// always turn on continuation flags... this is helpful for lobs...
 		// these bytes will get rest if dss lengths are finalized.
-  		bytes[dssLengthLocation] = (byte) 0xFF;
-  		bytes[dssLengthLocation + 1] = (byte) 0xFF;
+		buffer.putShort(dssLengthLocation, (short) 0xFFFF);
 
 		// Set whether or not this DSS should be chained to
 		// the next one.  If it's chained, it has to be chained
@@ -737,7 +749,7 @@ class DDMWriter
 			dssType |= DssConstants.GDSCHAIN_SAME_ID;
 		}
 
-		bytes[dssLengthLocation + 3] = (byte) (dssType & 0xff);
+		buffer.put(dssLengthLocation + 3, (byte) dssType);
 	}
 
 
@@ -880,8 +892,7 @@ class DDMWriter
 		ensureLength ((stringLength * 2)  + 4);
 		buffer.putShort((short) (stringLength + 4));
 		buffer.putShort((short) codePoint);
-		buffer.position(
-			ccsidManager.convertFromUCS2(string, bytes, buffer.position()));
+		ccsidManager.convertFromUCS2(string, buffer);
 	}
 
 	/**
@@ -899,11 +910,8 @@ class DDMWriter
 		ensureLength (paddedLength + 4);
 		buffer.putShort((short) (paddedLength + 4));
 		buffer.putShort((short) codePoint);
-		final int offset =
-			ccsidManager.convertFromUCS2(string, bytes, buffer.position());
-		final int end = offset + fillLength;
-		Arrays.fill(bytes, offset, end, ccsidManager.space);
-		buffer.position(end);
+		ccsidManager.convertFromUCS2(string, buffer);
+		padBytes(ccsidManager.space, fillLength);
 	}
 
 	/**
@@ -919,11 +927,8 @@ class DDMWriter
 
 		int fillLength = paddedLength -stringLength;
 		ensureLength (paddedLength);
-		final int offset =
-			ccsidManager.convertFromUCS2(string, bytes, buffer.position());
-		final int end = offset + fillLength;
-		Arrays.fill(bytes, offset, end, ccsidManager.space);
-		buffer.position(end);
+		ccsidManager.convertFromUCS2(string, buffer);
+		padBytes(ccsidManager.space, fillLength);
 	}
 
 	/**
@@ -939,10 +944,7 @@ class DDMWriter
 		int fillLength = paddedLength - stringLength;
 		ensureLength(paddedLength);
 		buffer.put(drdaString.getBytes(), 0, stringLength);
-		final int offset = buffer.position();
-		final int end = offset + fillLength;
-		Arrays.fill(bytes, offset, end, ccsidManager.space);
-		buffer.position(end);
+		padBytes(ccsidManager.space, fillLength);
 	}
 
 	/**
@@ -959,10 +961,7 @@ class DDMWriter
 		buffer.putShort((short) (paddedLength + 4));
 		buffer.putShort((short) codePoint);
 		buffer.put(buf);
-		final int offset = buffer.position();
-		final int end = offset + (paddedLength - buf.length);
-		Arrays.fill(bytes, offset, end, padByte);
-		buffer.position(end);
+		padBytes(padByte, paddedLength - buf.length);
 	}
 
 	/**
@@ -976,10 +975,7 @@ class DDMWriter
 	{
 		ensureLength (paddedLength);
 		buffer.put(buf);
-		final int offset = buffer.position();
-		final int end = offset + (paddedLength - buf.length);
-		Arrays.fill(bytes, offset, end, padByte);
-		buffer.position(end);
+		padBytes(padByte, paddedLength - buf.length);
 	}
 
 	/**
@@ -1082,23 +1078,6 @@ class DDMWriter
 	protected void writeDouble (double v)
 	{
 		writeLong (Double.doubleToLongBits (v));
-	}
-
-	/**
-	 * Write big decimal to buffer
-	 *
-	 * @param v value to write
-	 * @param precision Precison of decimal or numeric type
-	 * @param scale declared scale
-	 * @exception SQLException thrown if number of digits > 31
-	 */
-	protected void writeBigDecimal (java.math.BigDecimal v, int precision, int scale)
-		throws SQLException
-	{
-		int length = precision / 2 + 1;
-		ensureLength(length);
-		bigDecimalToPackedDecimalBytes (v,precision, scale);
-		buffer.position(buffer.position() + length);
 	}
 
 	/**
@@ -1210,7 +1189,7 @@ class DDMWriter
 	{
 		final int offset = buffer.position();
 		final int end = offset + length;
-		Arrays.fill(bytes, offset, end, val);
+		Arrays.fill(buffer.array(), offset, end, val);
 		buffer.position(end);
 	}
 
@@ -1235,6 +1214,7 @@ class DDMWriter
 	protected void flush(OutputStream socketOutputStream)
 		throws java.io.IOException
 	{
+		final byte[] bytes = buffer.array();
 		final int length = buffer.position();
 		try {
 			socketOutputStream.write (bytes, 0, length);
@@ -1354,6 +1334,10 @@ class DDMWriter
 			int dataByte = offset - 1;
 			int shiftSize = contDssHeaderCount * 2;
 			ensureLength (shiftSize);
+
+			// We're going to access the buffer with absolute positions, so
+			// just move the current position pointer right away to where it's
+			// supposed to be after we have finished the shifting.
 			buffer.position(offset + shiftSize);
 
 			// Notes on the behavior of the Layer B segmenting loop below:
@@ -1413,6 +1397,8 @@ class DDMWriter
 				if (dataToShift == 0)
 					dataToShift = 32765;
 				int startOfCopyData = dataByte - dataToShift + 1;
+				// perform the shift directly on the backing array
+				final byte[] bytes = buffer.array();
 				System.arraycopy(bytes,startOfCopyData, bytes, 
 								 startOfCopyData + shiftSize, dataToShift);
 				dataByte -= dataToShift;
@@ -1434,10 +1420,8 @@ class DDMWriter
 				}
 
 				// insert the header's length bytes
-				bytes[dataByte + shiftSize - 1] = (byte)
-					((twoByteContDssHeader >>> 8) & 0xff);
-				bytes[dataByte + shiftSize] = (byte)
-					(twoByteContDssHeader & 0xff);
+				buffer.putShort(dataByte + shiftSize - 1,
+								(short) twoByteContDssHeader);
 
 				// adjust the bytesRequiringContDssHeader and the amount to shift for
 				// data in upstream headers.
@@ -1525,14 +1509,22 @@ class DDMWriter
 	 *
 	 * @param b BigDecimal to write
 	 * @param precision Precision of decimal or numeric type
-	 * @return length written.
+	 * @param scale declared scale
 	 *
 	 * @exception SQLException Thrown if # digits > 31
 	 */
-	private int bigDecimalToPackedDecimalBytes (java.math.BigDecimal b,
-												int precision, int scale)
+	void writeBigDecimal(BigDecimal b, int precision, int scale)
 	throws SQLException
 	{
+        final int encodedLength = precision / 2 + 1;
+        ensureLength(encodedLength);
+
+        // The bytes are processed from right to left. Therefore, save starting
+        // offset and use absolute positioning.
+        final int offset = buffer.position();
+        // Move current position to the end of the encoded decimal.
+        buffer.position(offset + encodedLength);
+
 		int declaredPrecision = precision;
 		int declaredScale = scale;
 
@@ -1585,7 +1577,7 @@ class DDMWriter
         // start index in source big decimal.
         int bigIndex;
 
-        final int offset = buffer.position();
+        byte signByte = (byte) ((b.signum() >= 0) ? 12 : 13);
 
         if (bigScale >= declaredScale) {
           // If target scale is less than source scale,
@@ -1594,17 +1586,11 @@ class DDMWriter
           // set start index in source big decimal to ignore excessive fraction.
           bigIndex = bigPrecision-1-(bigScale-declaredScale);
 
-          if (bigIndex < 0) {
-            // all digits are discarded, so only process the sign nybble.
-            bytes[offset+(packedIndex+1)/2] =
-              (byte) ( (b.signum()>=0)?12:13 ); // sign nybble
+          if (bigIndex >= 0) {
+              // process the last nybble together with the sign nybble.
+              signByte |= (unscaledStr.charAt(bigIndex) - zeroBase) << 4;
           }
-          else {
-            // process the last nybble together with the sign nybble.
-            bytes[offset+(packedIndex+1)/2] =
-              (byte) ( ( (unscaledStr.charAt(bigIndex)-zeroBase) << 4 ) + // last nybble
-                     ( (b.signum()>=0)?12:13 ) ); // sign nybble
-          }
+          buffer.put(offset + (packedIndex+1)/2, signByte);
           packedIndex-=2;
           bigIndex-=2;
         }
@@ -1616,16 +1602,15 @@ class DDMWriter
           bigIndex = declaredScale-bigScale-1;
 
           // process the sign nybble.
-          bytes[offset+(packedIndex+1)/2] =
-            (byte) ( (b.signum()>=0)?12:13 ); // sign nybble
+          buffer.put(offset + (packedIndex+1)/2, signByte);
 
           for (packedIndex-=2, bigIndex-=2; bigIndex>=0; packedIndex-=2, bigIndex-=2)
-            bytes[offset+(packedIndex+1)/2] = (byte) 0;
+              buffer.put(offset + (packedIndex+1)/2, (byte) 0);
 
           if (bigIndex == -1) {
-            bytes[offset+(packedIndex+1)/2] =
-              (byte) ( (unscaledStr.charAt(bigPrecision-1)-zeroBase) << 4 ); // high nybble
-
+            byte bt = (byte)
+                ((unscaledStr.charAt(bigPrecision - 1) - zeroBase) << 4);
+            buffer.put(offset + (packedIndex+1)/2, bt);
             packedIndex-=2;
             bigIndex = bigPrecision-3;
           }
@@ -1636,24 +1621,23 @@ class DDMWriter
 
         // process the rest.
         for (; bigIndex>=0; packedIndex-=2, bigIndex-=2) {
-          bytes[offset+(packedIndex+1)/2] =
-            (byte) ( ( (unscaledStr.charAt(bigIndex)-zeroBase) << 4 ) + // high nybble
-                   ( unscaledStr.charAt(bigIndex+1)-zeroBase ) ); // low nybble
+            byte bt = (byte)
+                (((unscaledStr.charAt(bigIndex)-zeroBase) << 4) | // high nybble
+                  (unscaledStr.charAt(bigIndex+1)-zeroBase));     // low nybble
+            buffer.put(offset + (packedIndex+1)/2, bt);
         }
 
         // process the first nybble when there is one left.
         if (bigIndex == -1) {
-          bytes[offset+(packedIndex+1)/2] =
-            (byte) (unscaledStr.charAt(0) - zeroBase);
+            buffer.put(offset + (packedIndex+1)/2,
+                       (byte) (unscaledStr.charAt(0) - zeroBase));
 
-          packedIndex-=2;
+            packedIndex-=2;
         }
 
         // pad zero in front of the big decimal if necessary.
         for (; packedIndex>=-1; packedIndex-=2)
-          bytes[offset+(packedIndex+1)/2] = (byte) 0;
-
-        return declaredPrecision/2 + 1;
+            buffer.put(offset + (packedIndex+1)/2, (byte) 0);
 	}
 
 
@@ -1704,9 +1688,10 @@ class DDMWriter
       throws java.io.IOException
   {
 	resetChainState();
-	final int offset = buffer.position();
+	final byte[] bytes = buffer.array();
+	final int length = buffer.position();
     try {
-      socketOutputStream.write (bytes, 0, offset);
+      socketOutputStream.write(bytes, 0, length);
       if(flashStream)
 	  socketOutputStream.flush();
     }
@@ -1714,7 +1699,7 @@ class DDMWriter
 		if ((dssTrace != null) && dssTrace.isComBufferTraceOn()) {
 			dssTrace.writeComBufferData (bytes,
 			                               0,
-			                               offset,
+			                               length,
 			                               DssTrace.TYPE_TRACE_SEND,
 			                               "Reply",
 			                               "flush",
@@ -1727,10 +1712,8 @@ class DDMWriter
 	protected String toDebugString(String indent)
 	{
 		String s = indent + "***** DDMWriter toDebugString ******\n";
-		int byteslen = 0;
-		if ( bytes != null)
-			byteslen = bytes.length;
-		s += indent + "byte array length  = " + bytes.length + "\n";
+		int len = (buffer != null) ? buffer.capacity() : 0;
+		s += indent + "byte buffer length  = " + len + "\n";
 		return s;
 	}
 
@@ -1796,8 +1779,7 @@ class DDMWriter
 		// and we had to send it (which means we were probably
 		// writing EXTDTA).  In such cases, proper chaining
 		// should already have been handled @ time of send.
-			bytes[prevHdrLocation + 3] &= 0x0F;	// Zero out old chain value.
-			bytes[prevHdrLocation + 3] |= currChainByte;
+			overrideChainByte(prevHdrLocation + 3, currChainByte);
 		}
 
 		// previousChainByte needs to match what we just did.
@@ -1872,9 +1854,8 @@ class DDMWriter
 		// last remaining DSS had chaining, so we set "nextCorrelationID"
 		// to be 1 greater than whatever the last remaining DSS had as
 		// its correlation id.
- 			nextCorrelationID = 1 + (int)
-				(((bytes[lastDSSBeforeMark + 4] & 0xff) << 8) +
-				(bytes[lastDSSBeforeMark + 5] & 0xff));
+ 			nextCorrelationID =
+				(buffer.getShort(lastDSSBeforeMark + 4) & 0xFFFF) + 1;
 		}
 
 	}

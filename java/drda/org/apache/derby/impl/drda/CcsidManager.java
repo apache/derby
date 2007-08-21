@@ -20,6 +20,8 @@
  */
 package org.apache.derby.impl.drda;
 
+import java.nio.ByteBuffer;
+
 // Peforms character conversions.
 abstract class CcsidManager
 {
@@ -45,16 +47,14 @@ abstract class CcsidManager
   abstract byte[] convertFromUCS2 (String sourceString);
 
 
-  // Convert a Java String into bytes for a particular ccsid.
-  // The String is converted into a buffer provided by the caller.
-  //
-  // @param sourceString  A Java String to convert.
-  // @param buffer        The buffer to convert the String into.
-  // @param offset        Offset in buffer to start putting output.
-  // @return An int containing the buffer offset after conversion.
-  abstract int convertFromUCS2 (String sourceString,
-                                byte[] buffer,
-                                int offset);
+    /**
+     * Convert a Java String into bytes for a particular ccsid.
+     * The String is converted into a buffer provided by the caller.
+     *
+     * @param sourceString  A Java String to convert.
+     * @param buffer        The buffer to convert the String into.
+     */
+    abstract void convertFromUCS2(String sourceString, ByteBuffer buffer);
 
   // Convert a byte array representing characters in a particular ccsid into a Java String.
   //

@@ -953,9 +953,7 @@ public class TestProto {
 	 */
 	private byte[] getEBCDIC(String str)
 	{
-		byte [] buf = new byte[str.length()];
-		ccsidManager.convertFromUCS2(str, buf, 0);
-		return buf;
+		return ccsidManager.convertFromUCS2(str);
 	}
 	/**
 	 * Write an encoded string

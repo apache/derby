@@ -21,6 +21,8 @@
 
 package org.apache.derby.impl.drda;
 
+import java.nio.ByteBuffer;
+
 /**
  * A concrete implementation of a CcsidMgr used to convert
  * between Java UCS2 and Ebcdic as needed to handle character
@@ -124,24 +126,20 @@ class EbcdicCcsidManager extends CcsidManager
 
 	byte[] convertFromUCS2 (String sourceString)
 	{
-		byte[] bytes = new byte[sourceString.length()];
-		convertFromUCS2 (sourceString, bytes, 0);
-		return bytes;
+		ByteBuffer buf = ByteBuffer.allocate(sourceString.length());
+		convertFromUCS2(sourceString, buf);
+		return buf.array();
 	}
 
-	int convertFromUCS2 (String sourceString,
-		       byte[] buffer,
-		       int offset)
+	void convertFromUCS2 (String sourceString, ByteBuffer buffer)
 	{
 		for (int i=0; i < sourceString.length(); i++) {
 			char c = sourceString.charAt (i);
 			if (c > 0xff)
-				buffer[offset++] = (byte) 63; // what's this ???
+				buffer.put((byte) 63); // what's this ???
 			else
-				buffer[offset++] = (byte) (conversionArrayToEbcdic [c]); ;
+				buffer.put((byte) conversionArrayToEbcdic[c]);
 		}
-
-		return offset;
 	}
 
 	String convertToUCS2 (byte[] sourceBytes)
