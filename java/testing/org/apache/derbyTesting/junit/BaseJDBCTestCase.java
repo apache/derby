@@ -373,7 +373,7 @@ public abstract class BaseJDBCTestCase
      * specified user name and password.
      * <BR>
      * This connection is not
-     * automaticaly closed on tearDown, the text fixture must
+     * automaticaly closed on tearDown, the test fixture must
      * ensure the connection is closed.
      * 
      * The connection will be initialized by calling initializeConnection.
@@ -404,7 +404,7 @@ public abstract class BaseJDBCTestCase
      * 
      * <BR>
      * This connection is not
-     * automaticaly closed on tearDown, the text fixture must
+     * automaticaly closed on tearDown, the test fixture must
      * ensure the connection is closed.
      * <BR>
      * The connection will be initialized by calling initializeConnection.
