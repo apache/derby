@@ -223,18 +223,16 @@ public class ReplicationLogBuffer {
                     LogBufferElement current =
                         (LogBufferElement)dirtyBuffers.removeFirst();
 
-                    if (outBufferData.length < current.size()) {
-                        // resize outBufferData if it has too few bytes
-                        outBufferData = new byte[current.size()];
-                    } else if(outBufferData.length != defaultBufferSize) {
-                        // the buffer should be resized to default if it has
-                        // previously been increased
-                        int newSize = defaultBufferSize;
-                        if (current.size() > newSize) {
-                            // can not be smaller than current LogBufferElement
-                            newSize = current.size();
-                        }
-                        outBufferData = new byte[newSize];
+                    // The outBufferData byte[] should have the
+                    // default size or the size of the current
+                    // LogBufferElement if that is bigger than the
+                    // default size.
+                    int requiredOutBufferSize = Math.max(defaultBufferSize,
+                                                         current.size());
+                    if (outBufferData.length != requiredOutBufferSize) {
+                        // The current buffer has a different size
+                        // than what we need it to be, so we resize.
+                        outBufferData = new byte[requiredOutBufferSize];
                     }
 
                     // set the outBuffer data
