@@ -57,14 +57,6 @@ class DDMWriter
 
 	/**
 	 * Output buffer.
-	 * @see #bytes
-	 */
-	private byte[] bytes;
-	/**
-	 * Wrapper around the output buffer (<code>bytes</code>) which enables the
-	 * use of utility methods for easy encoding of primitive values and
-	 * strings. Changes to the output buffer are visible in the wrapper, and
-	 * vice versa.
 	 */
 	private ByteBuffer buffer;
 
@@ -97,7 +89,7 @@ class DDMWriter
 	// trace object of the associated session
 	private DssTrace dssTrace;
 
-	// Location within the "bytes" array of the start of the header
+	// Location of the start of the header
 	// of the DSS most recently written to the buffer.
 	private int prevHdrLocation;
 
@@ -112,7 +104,7 @@ class DDMWriter
 
 	// In situations where we want to "mark" a buffer location so that
 	// we can "back-out" of a write to handle errors, this holds the
-	// location within the "bytes" array of the start of the header
+	// location within the buffer of the start of the header
 	// that immediately precedes the mark.
 	private int lastDSSBeforeMark;
 
@@ -121,8 +113,7 @@ class DDMWriter
 
 	DDMWriter (CcsidManager ccsidManager, DRDAConnThread agent, DssTrace dssTrace)
 	{
-		this.bytes = new byte[DEFAULT_BUFFER_SIZE];
-		this.buffer = ByteBuffer.wrap(bytes);
+		this.buffer = ByteBuffer.allocate(DEFAULT_BUFFER_SIZE);
 		this.ccsidManager = ccsidManager;
 		this.agent = agent;
 		this.prevHdrLocation = -1;
@@ -393,8 +384,7 @@ class DDMWriter
 		// remove the top length location offset from the mark stack
 		// calculate the length based on the marked location and end of data.
 		int lengthLocation = markStack[--top];
-		final int offset = buffer.position();
-		int length = offset - lengthLocation;
+		int length = buffer.position() - lengthLocation;
 
 		// determine if any extended length bytes are needed.	the value returned
 		// from calculateExtendedLengthByteCount is the number of extended length
@@ -409,14 +399,14 @@ class DDMWriter
 			// this length does not include the 4 byte llcp.
 			int extendedLength = length - 4;
 
+			// the extended length should be written right after the length and
+			// the codepoint (2+2 bytes)
+			final int extendedLengthLocation = lengthLocation + 4;
+
 			// shift the data to the right by the number of extended
 			// length bytes needed.
-			int extendedLengthLocation = lengthLocation + 4;
-			System.arraycopy (bytes,
-					              extendedLengthLocation,
-					              bytes,
-					              extendedLengthLocation + extendedLengthByteCount,
-					              extendedLength);
+			buffer.position(extendedLengthLocation + extendedLengthByteCount);
+			buffer.put(buffer.array(), extendedLengthLocation, extendedLength);
 
 			// write the extended length (a variable number of bytes in
 			// big-endian order)
@@ -425,9 +415,6 @@ class DDMWriter
 				buffer.put(pos, (byte) extendedLength);
 				extendedLength >>= 8;
 			}
-
-			// adjust the offset to account for the shift and insert
-			buffer.position(offset + extendedLengthByteCount);
 
 			// the two byte length field before the codepoint contains the length
 			// of itself, the length of the codepoint, and the number of bytes used
@@ -673,9 +660,6 @@ class DDMWriter
 											writeNullByte);
 	    
 		// write the data
-		int bytesRead = 0;
-		int totalBytesRead = 0;
-
 				try {
 				    
 		OutputStream out = 
@@ -685,24 +669,22 @@ class DDMWriter
 		
 		while( !isLastSegment ){
 		    
-		    int spareBufferLength = buffer.remaining();
-		    
 		    if( SanityManager.DEBUG ){
 		
 			if( PropertyUtil.getSystemBoolean("derby.debug.suicideOfLayerBStreaming") )
 			    throw new IOException();
 				}
 
+			// read as many bytes as possible directly into the backing array
 			final int offset = buffer.position();
-		    bytesRead = in.read(bytes,
-					offset,
-					Math.min(spareDssLength,
-						 spareBufferLength));
-		    
-			totalBytesRead += bytesRead;
+			final int bytesRead =
+				in.read(buffer.array(), offset,
+						Math.min(spareDssLength, buffer.remaining()));
+
+			// update the buffer position
 			buffer.position(offset + bytesRead);
+
 		    spareDssLength -= bytesRead;
-		    spareBufferLength -= bytesRead;
 
 		    isLastSegment = peekStream(in) < 0;
 		    
@@ -1498,8 +1480,6 @@ class DDMWriter
 			// copy the old buffer into a new one
 			buffer.flip();
 			buffer = ByteBuffer.allocate(newLength).put(buffer);
-			// update the reference to the new backing array
-			bytes = buffer.array();
 		}
 	}
 
