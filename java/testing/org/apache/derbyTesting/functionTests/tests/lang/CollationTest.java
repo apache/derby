@@ -1055,7 +1055,7 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     if (XML.classpathMeetsXMLReqs()) {
         checkLangBasedQuery(s, "SELECT ID, XMLSERIALIZE(V AS CLOB) " +
         		" FROM DERBY_2961 ORDER BY 1",
-        		null);
+        		new String[][] {{"1",null}});
     }
     s.close();
  
