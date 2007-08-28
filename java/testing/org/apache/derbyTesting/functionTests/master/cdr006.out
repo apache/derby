@@ -44,7 +44,7 @@ ij> INSERT INTO STAFF8
 ij> UPDATE STAFF8
         SET EMPNAME = NULL
         WHERE EMPNUM = 'E1';
-ERROR 23513: The check constraint 'STAFF8_EMPNAME' was violated while performing an INSERT or UPDATE on table 'SUN.STAFF8'.
+ERROR 23513: The check constraint 'STAFF8_EMPNAME' was violated while performing an INSERT or UPDATE on table '"SUN"."STAFF8"'.
 ij> -- PASS:0316 If ERROR, check constraint, 0 rows updated?
 
   SELECT COUNT(*) FROM STAFF8
@@ -71,7 +71,7 @@ ij> INSERT INTO STAFF13
 ij> UPDATE STAFF13
         SET EMPNAME = NULL
         WHERE EMPNUM = 'E1';
-ERROR 23513: The check constraint 'STAFF13_EMPNAME' was violated while performing an INSERT or UPDATE on table 'SUN.STAFF13'.
+ERROR 23513: The check constraint 'STAFF13_EMPNAME' was violated while performing an INSERT or UPDATE on table '"SUN"."STAFF13"'.
 ij> -- PASS:0317 If ERROR, check constraint, 0 rows updated?
 
   SELECT COUNT(*)
@@ -100,7 +100,7 @@ ij> INSERT INTO STAFF9
 ij> UPDATE STAFF9
         SET EMPNAME = 'Thomas'
         WHERE EMPNUM = 'E3';
-ERROR 23513: The check constraint 'STAFF9_EMPNAME' was violated while performing an INSERT or UPDATE on table 'SUN.STAFF9'.
+ERROR 23513: The check constraint 'STAFF9_EMPNAME' was violated while performing an INSERT or UPDATE on table '"SUN"."STAFF9"'.
 ij> -- PASS:0318 If ERROR, check constraint, 0 rows updated?
 
   SELECT COUNT(*)

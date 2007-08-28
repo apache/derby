@@ -1775,7 +1775,7 @@ COLUMNNAME                                                                      
 C11                                                                                                                             |4                   |2                   |2                   
 ij(CONN2)> -- try RESTART WITH on a non-autoincrement column. It should fail
 alter table t1 alter column c12 RESTART WITH 2;
-ERROR 42837: ALTER TABLE 'APP.T1' specified attributes for column 'C12' that are not compatible with the existing column.
+ERROR 42837: ALTER TABLE '"APP"."T1"' specified attributes for column 'C12' that are not compatible with the existing column.
 ij(CONN2)> -- try RESTART WITH with a non-integer column
 alter table t1 alter column c11 RESTART WITH 2.20;
 ERROR 42X49: Value '2.20' is not a valid integer literal.

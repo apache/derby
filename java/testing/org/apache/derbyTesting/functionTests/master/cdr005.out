@@ -44,7 +44,7 @@ ij> INSERT INTO STAFF5
 1 row inserted/updated/deleted
 ij> UPDATE STAFF5
         SET GRADE = 20;
-ERROR 23513: The check constraint 'STAFF5_GRADE' was violated while performing an INSERT or UPDATE on table 'SUN.STAFF5'.
+ERROR 23513: The check constraint 'STAFF5_GRADE' was violated while performing an INSERT or UPDATE on table '"SUN"."STAFF5"'.
 ij> -- PASS:0313 If ERROR, check constraint, 0 rows updated?
 
   SELECT COUNT(*) FROM STAFF5
@@ -71,7 +71,7 @@ ij> INSERT INTO STAFF6
 1 row inserted/updated/deleted
 ij> UPDATE STAFF6
         SET GRADE = 20;
-ERROR 23513: The check constraint 'STAFF6_GRADE' was violated while performing an INSERT or UPDATE on table 'SUN.STAFF6'.
+ERROR 23513: The check constraint 'STAFF6_GRADE' was violated while performing an INSERT or UPDATE on table '"SUN"."STAFF6"'.
 ij> -- PASS:0314 If ERROR, check constraint, 0 rows updated?
 
   SELECT COUNT(*) FROM STAFF6
@@ -97,7 +97,7 @@ ij> INSERT INTO STAFF7
 1 row inserted/updated/deleted
 ij> UPDATE STAFF7
         SET GRADE = 21;
-ERROR 23513: The check constraint 'STAFF7_GRADE' was violated while performing an INSERT or UPDATE on table 'SUN.STAFF7'.
+ERROR 23513: The check constraint 'STAFF7_GRADE' was violated while performing an INSERT or UPDATE on table '"SUN"."STAFF7"'.
 ij> -- PASS:0315 If ERROR, check constraint, 0 rows updated?
 
   SELECT COUNT(*) FROM STAFF7

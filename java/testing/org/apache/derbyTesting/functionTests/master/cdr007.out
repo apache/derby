@@ -45,7 +45,7 @@ ij> INSERT INTO STAFF10
 ij> UPDATE STAFF10
         SET GRADE = 5
         WHERE EMPNUM = 'E3';
-ERROR 23513: The check constraint 'STAFF10_GRADE' was violated while performing an INSERT or UPDATE on table 'SUN.STAFF10'.
+ERROR 23513: The check constraint 'STAFF10_GRADE' was violated while performing an INSERT or UPDATE on table '"SUN"."STAFF10"'.
 ij> -- PASS:0319 If ERROR, check constraint, 0 rows updated?
 
   SELECT COUNT(*) FROM STAFF10
@@ -72,13 +72,13 @@ ij> INSERT INTO STAFF11
 ij> UPDATE STAFF11
         SET GRADE = 5
         WHERE EMPNUM = 'E3';
-ERROR 23513: The check constraint 'STAFF11_GRADE_EMPNAME' was violated while performing an INSERT or UPDATE on table 'SUN.STAFF11'.
+ERROR 23513: The check constraint 'STAFF11_GRADE_EMPNAME' was violated while performing an INSERT or UPDATE on table '"SUN"."STAFF11"'.
 ij> -- PASS:0320 If ERROR, check constraint, 0 rows updated?
 
   UPDATE STAFF11
         SET EMPNAME = 'Tom'
         WHERE EMPNUM = 'E3';
-ERROR 23513: The check constraint 'STAFF11_GRADE_EMPNAME' was violated while performing an INSERT or UPDATE on table 'SUN.STAFF11'.
+ERROR 23513: The check constraint 'STAFF11_GRADE_EMPNAME' was violated while performing an INSERT or UPDATE on table '"SUN"."STAFF11"'.
 ij> -- PASS:0320 If ERROR, check constraint, 0 rows updated?
 
   SELECT COUNT(*) FROM STAFF11
@@ -104,7 +104,7 @@ ij> INSERT INTO STAFF12
 ij> UPDATE STAFF12
         SET GRADE = 5
         WHERE EMPNUM = 'E3';
-ERROR 23513: The check constraint 'STAFF12_GRADE_EMPNAME' was violated while performing an INSERT or UPDATE on table 'SUN.STAFF12'.
+ERROR 23513: The check constraint 'STAFF12_GRADE_EMPNAME' was violated while performing an INSERT or UPDATE on table '"SUN"."STAFF12"'.
 ij> -- PASS:0321 If ERROR, check constraint, 0 rows updated?
 
   SELECT COUNT(*) FROM STAFF12

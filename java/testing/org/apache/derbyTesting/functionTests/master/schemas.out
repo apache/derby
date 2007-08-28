@@ -410,7 +410,7 @@ set schema test;
 ij> create table sampletab (c1 int constraint st_c1 check (c1 > 1), c2 char(20));
 0 rows inserted/updated/deleted
 ij> insert into sampletab values (1,'in schema: TEST');
-ERROR 23513: The check constraint 'ST_C1' was violated while performing an INSERT or UPDATE on table 'TEST.SAMPLETAB'.
+ERROR 23513: The check constraint 'ST_C1' was violated while performing an INSERT or UPDATE on table '"TEST"."SAMPLETAB"'.
 ij> insert into sampletab values (2,'in schema: TEST');
 1 row inserted/updated/deleted
 ij> -- verify it

@@ -70,17 +70,17 @@ alter table notexists add column c1 int;
 ERROR 42Y55: 'ALTER TABLE' cannot be performed on 'NOTEXISTS' because it does not exist.
 ij> -- add a column that already exists
 alter table t0 add column c1 int;
-ERROR X0Y32: Column 'C1' already exists in Table/View 'APP.T0'.
+ERROR X0Y32: Column 'C1' already exists in Table/View '"APP"."T0"'.
 ij> -- alter a system table
 alter table sys.systables add column c1 int;
 ERROR 42X62: 'ALTER TABLE' is not allowed in the 'SYS' schema.
 ij> -- alter table on a view
 alter table v2 add column c2 int;
-ERROR 42Y62: 'ALTER TABLE' is not allowed on 'APP.V2' because it is a view.
+ERROR 42Y62: 'ALTER TABLE' is not allowed on '"APP"."V2"' because it is a view.
 ij> -- add a primary key column to a table which already has one
 -- this will produce an error
 alter table t0 add column c2 int not null default 0 primary key;
-ERROR X0Y58: Attempt to add a primary key constraint to table 'APP.T0' failed because the table already has a constraint of that type.  A table can only have a single primary key constraint.
+ERROR X0Y58: Attempt to add a primary key constraint to table '"APP"."T0"' failed because the table already has a constraint of that type.  A table can only have a single primary key constraint.
 ij> -- add a unique column constraint to a table with > 1 row
 alter table t3 add column c2 int not null default 0 unique;
 ERROR 23505: The statement was aborted because it would have caused a duplicate key value in a unique or primary key constraint or unique index identified by 'xxxxGENERATED-IDxxxx' defined on 'T3'.
@@ -452,7 +452,7 @@ alter table t0_1 add column c2 int check(c2 != 3);
 ij> insert into t0_1 values (1, 1);
 1 row inserted/updated/deleted
 ij> insert into t0_1 values (1, 3);
-ERROR 23513: The check constraint 'xxxxGENERATED-IDxxxx' was violated while performing an INSERT or UPDATE on table 'APP.T0_1'.
+ERROR 23513: The check constraint 'xxxxGENERATED-IDxxxx' was violated while performing an INSERT or UPDATE on table '"APP"."T0_1"'.
 ij> insert into t0_1 values (1, 1);
 1 row inserted/updated/deleted
 ij> select * from t0_1;
@@ -477,7 +477,7 @@ C1         |C2
 2          |2          
 ij> -- verify constraint has been added, the following should fail
 insert into t0_1 values (1, 3);
-ERROR 23513: The check constraint 'CK1' was violated while performing an INSERT or UPDATE on table 'APP.T0_1'.
+ERROR 23513: The check constraint 'CK1' was violated while performing an INSERT or UPDATE on table '"APP"."T0_1"'.
 ij> rollback;
 ij> -- add check constraint to table with rows w/ 3 failures
 alter table t0_1 add column c2 int;
@@ -501,7 +501,7 @@ ij> insert into t0_1 values (666, 3);
 ij> insert into t0_1 values (3, 3);
 1 row inserted/updated/deleted
 ij> alter table t0_1 add constraint ck1 check(c2 = c1);
-ERROR X0Y59: Attempt to add or enable constraint(s) on table 'APP.T0_1' failed because the table contains 3 row(s) that violate the following check constraint(s): CK1.
+ERROR X0Y59: Attempt to add or enable constraint(s) on table '"APP"."T0_1"' failed because the table contains 3 row(s) that violate the following check constraint(s): CK1.
 ij> -- verify constraint has NOT been added, the following should succeed
 insert into t0_1 values (1, 3);
 1 row inserted/updated/deleted
@@ -527,11 +527,11 @@ ij> alter table t0_1 add check(c2 = c1);
 ij> insert into t0_1 values (1, 1);
 1 row inserted/updated/deleted
 ij> insert into t0_1 values (1, 2);
-ERROR 23513: The check constraint 'xxxxGENERATED-IDxxxx' was violated while performing an INSERT or UPDATE on table 'APP.T0_1'.
+ERROR 23513: The check constraint 'xxxxGENERATED-IDxxxx' was violated while performing an INSERT or UPDATE on table '"APP"."T0_1"'.
 ij> insert into t0_1 values (1, 1);
 ERROR 23505: The statement was aborted because it would have caused a duplicate key value in a unique or primary key constraint or unique index identified by 'P2' defined on 'T0_1'.
 ij> insert into t0_1 values (2, 1);
-ERROR 23513: The check constraint 'xxxxGENERATED-IDxxxx' was violated while performing an INSERT or UPDATE on table 'APP.T0_1'.
+ERROR 23513: The check constraint 'xxxxGENERATED-IDxxxx' was violated while performing an INSERT or UPDATE on table '"APP"."T0_1"'.
 ij> insert into t0_1 values (2, 2);
 1 row inserted/updated/deleted
 ij> select * from t0_1;
@@ -603,15 +603,15 @@ ij> -- drop constraint
 -- negative tests
 -- drop non-existent constraint
 alter table t0 drop constraint notexists;
-ERROR 42X86: ALTER TABLE failed. There is no constraint 'APP.NOTEXISTS' on table 'APP.T0'. 
+ERROR 42X86: ALTER TABLE failed. There is no constraint 'APP.NOTEXISTS' on table '"APP"."T0"'. 
 ij> -- constraint/table mismatch
 alter table t1 drop constraint p1;
-ERROR 42X86: ALTER TABLE failed. There is no constraint 'APP.P1' on table 'APP.T1'. 
+ERROR 42X86: ALTER TABLE failed. There is no constraint 'APP.P1' on table '"APP"."T1"'. 
 ij> -- In DB2 compatibility mode, we cann't add a nullable primary key
 alter table t0_1 add constraint p2 primary key(c1);
 ERROR 42831: 'C1' cannot be a column of a primary key or unique key because it can contain null values.
 ij> alter table t0_1 drop constraint p2;
-ERROR 42X86: ALTER TABLE failed. There is no constraint 'APP.P2' on table 'APP.T0_1'. 
+ERROR 42X86: ALTER TABLE failed. There is no constraint 'APP.P2' on table '"APP"."T0_1"'. 
 ij> -- positive tests
 -- verify that we can add/drop/add/drop/... constraints
 alter table t0_1 add column c2 int not null constraint p2 primary key default 0;
@@ -778,7 +778,7 @@ alter table x drop constraint badschema.newcons;
 ERROR 42Y07: Schema 'BADSCHEMA' does not exist
 ij> -- fail
 alter table x drop constraint newschema.newcons;
-ERROR 42X86: ALTER TABLE failed. There is no constraint 'NEWSCHEMA.NEWCONS' on table 'APP.X'. 
+ERROR 42X86: ALTER TABLE failed. There is no constraint 'NEWSCHEMA.NEWCONS' on table '"APP"."X"'. 
 ij> -- ok
 alter table x drop constraint app.newcons;
 0 rows inserted/updated/deleted
@@ -804,7 +804,7 @@ ij> set schema emptyschema;
 0 rows inserted/updated/deleted
 ij> -- fail, cannot find emptyschema.conn
 alter table app.x drop constraint emptyschema.con;
-ERROR 42X86: ALTER TABLE failed. There is no constraint 'EMPTYSCHEMA.CON' on table 'APP.X'. 
+ERROR 42X86: ALTER TABLE failed. There is no constraint 'EMPTYSCHEMA.CON' on table '"APP"."X"'. 
 ij> select schemaname, constraintname from sys.sysconstraints c, sys.sysschemas s where s.schemaid = c.schemaid order by 1;
 SCHEMANAME                                                                                                                      |CONSTRAINTNAME                                                                                                                  
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -856,9 +856,9 @@ C1         |C2
 1          |1          
 1          |1          
 ij> alter table t1 drop primary key;
-ERROR 42X86: ALTER TABLE failed. There is no constraint 'PRIMARY KEY' on table 'APP.T1'. 
+ERROR 42X86: ALTER TABLE failed. There is no constraint 'PRIMARY KEY' on table '"APP"."T1"'. 
 ij> alter table t1 drop constraint emptyschema.C1;
-ERROR 42X86: ALTER TABLE failed. There is no constraint 'EMPTYSCHEMA.C1' on table 'APP.T1'. 
+ERROR 42X86: ALTER TABLE failed. There is no constraint 'EMPTYSCHEMA.C1' on table '"APP"."T1"'. 
 ij> alter table t1 drop constraint nosuchschema.C2;
 ERROR 42Y07: Schema 'NOSUCHSCHEMA' does not exist
 ij> alter table t1 add constraint emptyschema.C1_PLUS_C2 check ((c1 + c2) < 100);
@@ -869,7 +869,7 @@ ij> prepare alplus as 'alter table t1 drop constraint C1_PLUS_C2';
 ij> alter table APP.t1 drop constraint APP.C1_PLUS_C2;
 0 rows inserted/updated/deleted
 ij> execute alplus;
-ERROR 42X86: ALTER TABLE failed. There is no constraint 'APP.C1_PLUS_C2' on table 'APP.T1'. 
+ERROR 42X86: ALTER TABLE failed. There is no constraint 'APP.C1_PLUS_C2' on table '"APP"."T1"'. 
 ij> remove alplus;
 ij> drop table t1;
 0 rows inserted/updated/deleted
@@ -920,7 +920,7 @@ A          |B
 1          |NULL       
 ij> -- Now that B has a null value, trying to modify it to NOT NULL should fail
 alter table atmcn_1 alter column b not null;
-ERROR X0Y80: ALTER table 'APP.ATMCN_1' failed. Null data found in column 'B'.
+ERROR X0Y80: ALTER table '"APP"."ATMCN_1"' failed. Null data found in column 'B'.
 ij> -- show that a column which is part of the PRIMARY KEY cannot be modified NULL
 create table atmcn_2 (a integer not null primary key, b integer not null);
 0 rows inserted/updated/deleted
@@ -1002,7 +1002,7 @@ ij> -- attempt to rename a column in a view, should fail:
 create view renc_vw_1 (v1, v2) as select b, d from renc_1;
 0 rows inserted/updated/deleted
 ij> rename column renc_vw_1.v2 to v3;
-ERROR 42Y62: 'RENAME COLUMN' is not allowed on 'APP.RENC_VW_1' because it is a view.
+ERROR 42Y62: 'RENAME COLUMN' is not allowed on '"APP"."RENC_VW_1"' because it is a view.
 ij> describe renc_vw_1;
 COLUMN_NAME         |TYPE_NAME|DEC&|NUM&|COLUM&|COLUMN_DEF|CHAR_OCTE&|IS_NULL&
 ------------------------------------------------------------------------------
@@ -1423,7 +1423,7 @@ ij> create index atdc_3_idx_1 on atdc_3 (a);
 0 rows inserted/updated/deleted
 ij> -- This fails because a is the only column in the table.
 alter table atdc_3 drop column a restrict;
-ERROR X0Y25: Operation 'DROP COLUMN' cannot be performed on object 'THE *LAST* COLUMN A' because TABLE 'RENC_SCHEMA_1.ATDC_3' is dependent on that object.
+ERROR X0Y25: Operation 'DROP COLUMN' cannot be performed on object 'THE *LAST* COLUMN A' because TABLE '"RENC_SCHEMA_1"."ATDC_3"' is dependent on that object.
 ij> drop index atdc_3_idx_1;
 0 rows inserted/updated/deleted
 ij> -- cascade/restrict processing doesn't currently consider indexes.

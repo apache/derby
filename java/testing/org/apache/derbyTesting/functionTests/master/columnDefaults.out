@@ -69,7 +69,7 @@ ij> -- too many values in values clause
 create table neg(c1 int default 10);
 0 rows inserted/updated/deleted
 ij> insert into neg values (1, default);
-ERROR 42X06: Too many result columns specified for table 'APP.NEG'.
+ERROR 42X06: Too many result columns specified for table '"APP"."NEG"'.
 ij> insert into neg values (default, 1);
 ERROR 42802: The number of values assigned is not the same as the number of specified or implied columns.
 ij> drop table neg;

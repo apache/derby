@@ -59,7 +59,7 @@ rename table sys.systables to fake;
 ERROR 42X62: 'RENAME TABLE' is not allowed in the 'SYS' schema.
 ij> -- rename a view
 rename table v1 to fake;
-ERROR 42Y62: 'RENAME TABLE' is not allowed on 'APP.V1' because it is a view.
+ERROR 42Y62: 'RENAME TABLE' is not allowed on '"APP"."V1"' because it is a view.
 ij> -- cannot rename a table when there is an open cursor on it
 get cursor c1 as 'select * from t2';
 ij> rename table t2 to fake;

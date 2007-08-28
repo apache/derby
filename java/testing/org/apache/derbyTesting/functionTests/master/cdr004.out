@@ -41,12 +41,12 @@ ij> -- RERUN if USER value does not match preceding AUTHORIZATION comment
 WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> INSERT INTO STAFF11
         VALUES('E1','Thomas',0,'Deale');
-ERROR 23513: The check constraint 'STAFF11_GRADE_EMPNAME' was violated while performing an INSERT or UPDATE on table 'SUN.STAFF11'.
+ERROR 23513: The check constraint 'STAFF11_GRADE_EMPNAME' was violated while performing an INSERT or UPDATE on table '"SUN"."STAFF11"'.
 ij> -- PASS:0309 If ERROR, check constraint, 0 rows inserted?
 
   INSERT INTO STAFF11
         VALUES('E2','Tom',22,'Newyork');
-ERROR 23513: The check constraint 'STAFF11_GRADE_EMPNAME' was violated while performing an INSERT or UPDATE on table 'SUN.STAFF11'.
+ERROR 23513: The check constraint 'STAFF11_GRADE_EMPNAME' was violated while performing an INSERT or UPDATE on table '"SUN"."STAFF11"'.
 ij> -- PASS:0309 If ERROR, check constraint, 0 rows inserted?
 
   INSERT INTO STAFF11
@@ -72,12 +72,12 @@ ij> -- PASS:0309 If count = 1?
 WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> INSERT INTO STAFF12
         VALUES('E1','Thomas',0,'Deale');
-ERROR 23513: The check constraint 'STAFF12_GRADE_EMPNAME' was violated while performing an INSERT or UPDATE on table 'SUN.STAFF12'.
+ERROR 23513: The check constraint 'STAFF12_GRADE_EMPNAME' was violated while performing an INSERT or UPDATE on table '"SUN"."STAFF12"'.
 ij> -- PASS:0310 If ERROR, check constraint, 0 rows inserted?
 
   INSERT INTO STAFF12
         VALUES('E2','Tom',22,'Newyork');
-ERROR 23513: The check constraint 'STAFF12_GRADE_EMPNAME' was violated while performing an INSERT or UPDATE on table 'SUN.STAFF12'.
+ERROR 23513: The check constraint 'STAFF12_GRADE_EMPNAME' was violated while performing an INSERT or UPDATE on table '"SUN"."STAFF12"'.
 ij> -- PASS:0310 If ERROR, check constraint, 0 rows inserted?
 
   INSERT INTO STAFF12

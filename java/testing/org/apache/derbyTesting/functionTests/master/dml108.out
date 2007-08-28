@@ -204,7 +204,7 @@ ij> -- PASS:0617 If 1 row selected and values are 1994, 1118?
    ROLLBACK WORK;
 ij> --0   DROP TABLE TEMPS CASCADE;
    DROP TABLE SUBQ1 ;
-ERROR 42Y62: 'DROP TABLE' is not allowed on 'FLATER.SUBQ1' because it is a view.
+ERROR 42Y62: 'DROP TABLE' is not allowed on '"FLATER"."SUBQ1"' because it is a view.
 ij> DROP TABLE TEMPS ;
 ERROR X0Y23: Operation 'DROP TABLE' cannot be performed on object 'TEMPS' because VIEW 'SUBQ1' is dependent on that object.
 ij> -- PASS:0617 If table and view are dropped?

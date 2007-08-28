@@ -80,7 +80,7 @@ drop view t1;
 ERROR X0Y16: 'T1' is not a view.  If it is a table, then use DROP TABLE instead.
 ij> -- drop table on view
 drop table sv1;
-ERROR 42Y62: 'DROP TABLE' is not allowed on 'APP.SV1' because it is a view.
+ERROR 42Y62: 'DROP TABLE' is not allowed on '"APP"."SV1"' because it is a view.
 ij> -- views and tables share same name space
 create view sv1(i) as values 1;
 ERROR X0Y32: Table/View 'SV1' already exists in Schema 'APP'.
@@ -148,7 +148,7 @@ ij> get cursor c2 as 'select * from sv1 for update of s_was_i';
 ERROR 42Y90: FOR UPDATE is not permitted in this type of statement.  
 ij> -- create index on a view
 create index i1 on sv2(i);
-ERROR 42Y62: 'CREATE INDEX' is not allowed on 'APP.SV2' because it is a view.
+ERROR 42Y62: 'CREATE INDEX' is not allowed on '"APP"."SV2"' because it is a view.
 ij> -- positive tests
 select * from sv1;
 S_WAS_I    |DP_WA&|I_WAS_F               |F_WAS_DP              

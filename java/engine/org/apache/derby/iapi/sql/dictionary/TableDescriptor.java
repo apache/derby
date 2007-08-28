@@ -231,31 +231,34 @@ public class TableDescriptor extends TupleDescriptor
 	 */
 	public String	getQualifiedName()
 	{
-		//quoteStringIfNecessary is for bug 3476. If the schemaName and/or tableName has
-		//double quotes in it, this method will put them in quotes and replace every
-		//double quote with 2 double quotes.
-		return quoteStringIfNecessary(getSchemaName()) + "." +
-			quoteStringIfNecessary(getName());
+		//quoteProtectName is for bug 3476. 
+		return quoteProtectName(getSchemaName()) + "." +
+			quoteProtectName(getName());
 	}
 
 	/**
 	 * If the name has double quotes in it, put two double quotes for every single
 	 * double quote.
+	 * Finally put double quotes around string to protect against
+	 * names with blanks, reserved words being used as identifiers etc.
 	 * For eg, if table name is m"n, return it as "m""n". For now, this is used
 	 * by DMLModStatementNode.parseCheckConstraint().
+	 *
+	 * Possible improvement: We could possibly analyze string to
+	 * avoid double quotes in normal cases.
 	 *
 	 * @param name	The String with or without double quotes
 	 *
 	 * @return	The quoted String
 	 */
 
-	private String quoteStringIfNecessary(String name)
+	private String quoteProtectName(String name)
 	{
 		String quotedString = name;
 		int quotePos = name.indexOf("\"");
 
 		if (quotePos == -1)
-			return name;
+			return "\"" + name + "\"";
 
 		//string does have quotes in it.
 		while(quotePos != -1) {

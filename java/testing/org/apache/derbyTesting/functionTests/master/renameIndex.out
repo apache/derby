@@ -42,7 +42,7 @@ set schema sys;
 0 rows inserted/updated/deleted
 ij> -- will fail because it is a system table
 rename index syscolumns_index1 to newName;
-ERROR X0Y56: 'RENAME INDEX' is not allowed on the System table 'SYS.SYSCOLUMNS'.
+ERROR X0Y56: 'RENAME INDEX' is not allowed on the System table '"SYS"."SYSCOLUMNS"'.
 ij> set schema app;
 0 rows inserted/updated/deleted
 ij> --
