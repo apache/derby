@@ -142,7 +142,7 @@ public class ValueNodeList extends QueryTreeNodeVector
 	/**
 	 * Get the dominant DataTypeServices from the elements in the list. This
 	 * method will also set the correct collation information on the dominant
-	 * DataTypeService.
+	 * DataTypeService if we are dealing with character string datatypes.
 	 *  
 	 * Algorithm for determining collation information
 	 * This method will check if it is dealing with character string datatypes.
@@ -153,51 +153,23 @@ public class ValueNodeList extends QueryTreeNodeVector
 	 * have the same collation derivation and collation type as all the 
 	 * character string datatypes.
 	 * 
-	 * eg consider we are dealing with a database with territory based 
-	 * collation. Now consider following example first
-	 * sysCharColumn1 || userCharColumn
-	 * The result of this concatenation will have collation derivation of NONE
-	 * because the first operand has collation derivation of IMPLICIT and 
-	 * collation type of UCS_BASIC whereas the 2nd opernad has collation 
-	 * derivation of IMPLICIT and collation type of territory based. Since the
-	 * 2 operands don't have matching collaiton information, the result of this
-	 * concatenation will have collation derivation of NONE.
-	 * 
-	 * Now consider following example
-	 * sysCharColumn1 || sysCharColumn2
-	 * Since in this example, both the operands have the same collation
-	 * derivation of IMPLICIT and same collation type of UCS_BASIC, the 
-	 * resultant type will have collation derivation of IMPLICIT and collation 
-	 * type of UCS_BASIC
-	 * 
 	 * Note that this method calls DTD.getDominantType and that method returns
-	 * the dominant type of the 2 DTDs involved in this method. The method also
+	 * the dominant type of the 2 DTDs involved in this method. That method 
 	 * sets the collation info on the dominant type following the algorithm
 	 * mentioned in the comments of 
 	 * @see DataTypeDescriptor#getDominantType(DataTypeDescriptor, ClassFactory)
-	 * But when there are more than 2 DTDs involved in this ValueNodeList, we
-	 * can't determine the collation info using only 2 DTDs at a time which is
-	 * what TD.getDominantType does. Consider following eg
-	 * sysCharColumn1 || userCharColumn || sysCharColumn2
-	 * If we let the DataTypeDescriptor.getDominantType determine the collation
-	 * of the eg above, then DataTypeDescriptor.getDominantType will first set 
-	 * collation derivation of NONE for the following. This intermediate DTD is 
-	 * tracked by dominantDTS 
-	 * sysCharColumn1 || userCharColumn
-	 * Next, DataTypeDescriptor.getDominantType gets called for the intermediate
-	 * DTD (dominantDTS) and sysCharColumn2
-	 * dominantDTS || sysCharColumn2
-	 * For these two DTDs, DataTypeDescriptor.getDominantType will set 
-	 * collation type of UCS_BASIC and collation derivation of IMPLICIT. So, the
-	 * result string of the sysCharColumn1 || userCharColumn || sysCharColumn2
-	 * will have collation type of UCS_BASIC and collation derivation of 
-	 * IMPLICIT, but that is not correct. The reason for this is 
-	 * DataTypeDescriptor.getDominantType deals with only 2 DTDs at a time. To
-	 * fix this problem, we basically ignore the collation type and derivation 
-	 * picked by DataTypeDescriptor.getDominantType. Instead we let 
+	 * With that algorithm, if one DTD has collation derivation of NONE and the
+	 * other DTD has collation derivation of IMPLICIT, then the return DTD from
+	 * DTD.getDominantType will have collation derivation of IMPLICIT. That is 
+	 * not the correct algorithm for aggregate operators. SQL standards says
+	 * that if EVERY type has implicit derivation AND is of the same type, then 
+	 * the collation of the resultant will be of that type with derivation 
+	 * IMPLICIT. To provide this behavior for aggregate operator, we basically 
+	 * ignore the collation type and derivation picked by 
+	 * DataTypeDescriptor.getDominantType. Instead we let 
 	 * getDominantTypeServices use the simple algorithm listed at the top of
-	 * this method's comments to determine the collation type and derivation for 
-	 * this ValueNodeList object.
+	 * this method's comments to determine the collation type and derivation 
+	 * for this ValueNodeList object.
 	 * 
 	 * @return DataTypeServices		The dominant DataTypeServices.
 	 *
