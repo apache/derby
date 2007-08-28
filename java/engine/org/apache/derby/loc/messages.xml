@@ -4667,6 +4667,16 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
 
 
         <family>
+            <title>Class XRE: Replication Exceptions</title>
+
+            <msg>
+                <name>XRE01</name>
+                <text>The log received from the master is corrupted.</text>
+            </msg>
+
+        </family>
+
+        <family>
             <title>Class XSAI: Store - access.protocol.interface</title>
 
             <msg>

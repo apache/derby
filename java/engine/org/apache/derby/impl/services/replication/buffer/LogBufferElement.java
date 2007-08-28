@@ -27,6 +27,18 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
  * ReplicationLogBuffer consists of n LogBufferElements, each of which
  * can store m log records in a single byte[].
  *
+ * <p>
+ * The format of each log record in the LogBufferElement is:
+ * <br>
+ * (long)   instant <br>
+ * (int)    dataLength <br>
+ * (int)    dataOffset <br>
+ * (int)    optionalDataLength <br>
+ * (int)    optionalDataOffset <br>
+ * (byte[]) data (with length dataLength) <br>
+ * (byte[]) optionalData (with length optionalDataLength) <br>
+ * <br>
+ * </p>
  * In addition to adding the log record information to the byte[], the
  * greatestInstant variable is updated for every append so that
  * getLastInstant can be used to get the highest log instant in this

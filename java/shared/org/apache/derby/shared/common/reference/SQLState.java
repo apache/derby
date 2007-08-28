@@ -142,6 +142,11 @@ package org.apache.derby.shared.common.reference;
 	  <LI> XK...
 	  </UL>
 
+    <LI>Replication
+      <UL>
+      <LI> XRExx
+      </UL>
+
     <LI>Reserved for IBM Use: XQC00 - XQCZZ
 	</UL>
 */
@@ -1741,5 +1746,11 @@ public interface SQLState {
     ** Security XK...
     */
     String POLICY_NOT_RELOADED                                     ="XK000.S";
+
+    /*
+    ** Replication XRExx
+    */
+    String REPLICATION_LOG_CORRUPTED                               = "XRE01";
+
 }
 
