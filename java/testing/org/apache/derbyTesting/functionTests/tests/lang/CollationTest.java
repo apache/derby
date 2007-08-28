@@ -1057,8 +1057,23 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
         		" FROM DERBY_2961 ORDER BY 1",
         		new String[][] {{"1",null}});
     }
+    
+    //DERBY-2910 
+    // Test proper collation is set for  implicit cast with 
+    // UPPER(CURRENT_DATE) and concatonation.
+    
+    s.executeUpdate("create table a (vc varchar(30))");
+    s.executeUpdate("insert into a values(CURRENT_DATE)");
+    rs = s.executeQuery("select vc from a where vc = CURRENT_DATE");
+    assertEquals(1,JDBC.assertDrainResults(rs));
+    rs = s.executeQuery("select vc from a where vc = UPPER(CURRENT_DATE)");
+    JDBC.assertDrainResults(rs,1);
+    rs = s.executeQuery("select vc from a where vc =  '' || CURRENT_DATE");
+    JDBC.assertDrainResults(rs,1);
+    rs = s.executeQuery("select vc from a where '' || CURRENT_DATE = vc");
+    assertEquals(1,JDBC.assertDrainResults(rs));
+    assertStatementError("42818",s,"select TABLENAME FROM SYS.SYSTABLES WHERE UPPER(CURRENT_DATE) = TABLENAME");
     s.close();
- 
 }
 
 private void setUpTable(Statement s) throws SQLException {

@@ -199,26 +199,37 @@ public class ConcatenationOperatorNode extends BinaryOperatorNode {
 		TypeCompiler tc = leftOperand.getTypeCompiler();
 		if (!(leftOperand.getTypeId().isStringTypeId() || leftOperand
 				.getTypeId().isBitTypeId())) {
+			DataTypeDescriptor dtd = DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+					Types.VARCHAR, true, tc
+					.getCastToCharWidth(leftOperand							.getTypeServices()));	
+			// DERBY-2910 - Match current schema collation for implicit cast as we do for
+			// explicit casts per SQL Spec 6.12 (10)									
+			dtd.setCollationType(getSchemaDescriptor(null).getCollationType());
+			dtd.setCollationDerivation(StringDataValue.COLLATION_DERIVATION_IMPLICIT);
+
 			leftOperand = (ValueNode) getNodeFactory().getNode(
 					C_NodeTypes.CAST_NODE,
 					leftOperand,
-					DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-							Types.VARCHAR, true, tc
-									.getCastToCharWidth(leftOperand
-											.getTypeServices())),
+					dtd,
 					getContextManager());
 			((CastNode) leftOperand).bindCastNodeOnly();
 		}
 		tc = rightOperand.getTypeCompiler();
 		if (!(rightOperand.getTypeId().isStringTypeId() || rightOperand
 				.getTypeId().isBitTypeId())) {
+			DataTypeDescriptor dtd = DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+					Types.VARCHAR, true, tc
+							.getCastToCharWidth(rightOperand
+									.getTypeServices()));
+			// DERBY-2910 - Match current schema collation for implicit cast as we do for
+			// explicit casts per SQL Spec 6.12 (10)					
+			dtd.setCollationType(getSchemaDescriptor(null).getCollationType());
+			dtd.setCollationDerivation(StringDataValue.COLLATION_DERIVATION_IMPLICIT);
+
 			rightOperand = (ValueNode) getNodeFactory().getNode(
 					C_NodeTypes.CAST_NODE,
 					rightOperand,
-					DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-							Types.VARCHAR, true, tc
-									.getCastToCharWidth(rightOperand
-											.getTypeServices())),
+					dtd,
 					getContextManager());
 			((CastNode) rightOperand).bindCastNodeOnly();
 		}

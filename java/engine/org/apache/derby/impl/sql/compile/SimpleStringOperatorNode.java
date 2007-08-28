@@ -102,16 +102,22 @@ public class SimpleStringOperatorNode extends UnaryOperatorNode
 				}
 
 				default:
+					DataTypeDescriptor dtd = DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, true, 
+							  operand.getTypeCompiler().
+								getCastToCharWidth(
+									operand.getTypeServices()));
+				// DERBY-2910 - Match current schema collation for implicit cast as we do for
+				// explicit casts per SQL Spec 6.12 (10)					
+				dtd.setCollationType(getSchemaDescriptor(null).getCollationType());
+				dtd.setCollationDerivation(StringDataValue.COLLATION_DERIVATION_IMPLICIT);
+			
 					operand =  (ValueNode)
 						getNodeFactory().getNode(
 							C_NodeTypes.CAST_NODE,
 							operand,
-							DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, true, 
-										  operand.getTypeCompiler().
-											getCastToCharWidth(
-												operand.getTypeServices())),
+							dtd,
 							getContextManager());
-					((CastNode) operand).bindCastNodeOnly();
+				((CastNode) operand).bindCastNodeOnly();
 					operandType = operand.getTypeId();
 		}
 
