@@ -734,13 +734,18 @@ public class TernaryOperatorNode extends ValueNode
 		TypeCompiler vnTC = vn.getTypeCompiler();
 		if (! vn.getTypeId().isStringTypeId())
 		{
+			DataTypeDescriptor dtd = DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, true,
+	                vnTC.getCastToCharWidth(
+		                    vn.getTypeServices()));
+			// DERBY-2910 - Match current schema collation for implicit cast as we do for
+			// explicit casts per SQL Spec 6.12 (10)							                    
+			dtd.setCollationType(getSchemaDescriptor(null).getCollationType());
+			dtd.setCollationDerivation(StringDataValue.COLLATION_DERIVATION_IMPLICIT);
 			ValueNode newNode = (ValueNode)
 						getNodeFactory().getNode(
 							C_NodeTypes.CAST_NODE,
 							vn,
-							DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, true,
-							                vnTC.getCastToCharWidth(
-							                    vn.getTypeServices())),
+							dtd,
 							getContextManager());
 			((CastNode) newNode).bindCastNodeOnly();
 			return newNode;

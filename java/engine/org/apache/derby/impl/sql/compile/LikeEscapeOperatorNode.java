@@ -454,25 +454,7 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
         return this;
     }
 
-    private ValueNode castArgToNationalString(
-    ValueNode       vn, 
-    TypeCompiler    vnTC, 
-    TypeId          vnTypeId)
-        throws StandardException
-    {
-        ValueNode newNode =  (ValueNode)
-            getNodeFactory().getNode(
-                C_NodeTypes.CAST_NODE,
-                vn, 
-                new DataTypeDescriptor(vnTypeId, 
-                true,
-                vnTC.getCastToCharWidth(vn.getTypeServices())), 
-                getContextManager());
-
-        ((CastNode) newNode).bindCastNodeOnly();
-
-        return newNode;
-    }
+  
 
     private void finishBindExpr()
     throws StandardException
