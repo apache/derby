@@ -235,3 +235,10 @@ select c.constraintname, c.type from sys.sysconstraints c, sys.systables t where
 drop table t4;
 create table t4(c11 int not null, c12 int not null, primary key (c11, c12));
 select c.constraintname, c.type from sys.sysconstraints c, sys.systables t where c.tableid = t.tableid and tablename='T4';
+
+-- DERBY-2989
+CREATE TABLE "indicator" (c CHAR(1) DEFAULT 'N');
+ALTER TABLE  "indicator" ADD CONSTRAINT my_constraint CHECK ((c IN ('Y','N')));
+INSERT INTO  "indicator" VALUES ('N');
+ALTER TABLE  "indicator" DROP CONSTRAINT my_constraint;
+DROP TABLE   "indicator";

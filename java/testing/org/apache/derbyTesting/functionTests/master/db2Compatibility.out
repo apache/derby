@@ -732,7 +732,7 @@ insert into testconst1( col1, col2) values( 'a', 2);
 ij> insert into testconst1( col1, col2) values( 'a', 2);
 ERROR 23505: The statement was aborted because it would have caused a duplicate key value in a unique or primary key constraint or unique index identified by 'xxxxGENERATED-IDxxxx' defined on 'TESTCONST1'.
 ij> insert into testconst1( col1, col2) values( 'b', 0);
-ERROR 23513: The check constraint 'CC' was violated while performing an INSERT or UPDATE on table 'APP.TESTCONST1'.
+ERROR 23513: The check constraint 'CC' was violated while performing an INSERT or UPDATE on table '"APP"."TESTCONST1"'.
 ij> insert into testconst2( col1, col2, col3) values( 'a', 'a', 1);
 1 row inserted/updated/deleted
 ij> insert into testconst2( col1, col2, col3) values( 'z', 'b', 1);
@@ -769,13 +769,13 @@ ij> insert into testconst2( col1, col2, col3) values( 'z', 'b', 1);
 ij> insert into testconst2( col1, col2, col3) values( 'a', 'a', 1);
 1 row inserted/updated/deleted
 ij> ALTER TABLE testconst2 DROP FOREIGN KEY noSuchConstraint;
-ERROR 42X86: ALTER TABLE failed. There is no constraint 'APP.NOSUCHCONSTRAINT' on table 'APP.TESTCONST2'. 
+ERROR 42X86: ALTER TABLE failed. There is no constraint 'APP.NOSUCHCONSTRAINT' on table '"APP"."TESTCONST2"'. 
 ij> ALTER TABLE testconst2 DROP CHECK noSuchConstraint;
-ERROR 42X86: ALTER TABLE failed. There is no constraint 'APP.NOSUCHCONSTRAINT' on table 'APP.TESTCONST2'. 
+ERROR 42X86: ALTER TABLE failed. There is no constraint 'APP.NOSUCHCONSTRAINT' on table '"APP"."TESTCONST2"'. 
 ij> ALTER TABLE testconst2 DROP UNIQUE noSuchConstraint;
-ERROR 42X86: ALTER TABLE failed. There is no constraint 'APP.NOSUCHCONSTRAINT' on table 'APP.TESTCONST2'. 
+ERROR 42X86: ALTER TABLE failed. There is no constraint 'APP.NOSUCHCONSTRAINT' on table '"APP"."TESTCONST2"'. 
 ij> ALTER TABLE testconst1 DROP PRIMARY KEY;
-ERROR 42X86: ALTER TABLE failed. There is no constraint 'PRIMARY KEY' on table 'APP.TESTCONST1'. 
+ERROR 42X86: ALTER TABLE failed. There is no constraint 'PRIMARY KEY' on table '"APP"."TESTCONST1"'. 
 ij> -- clean up
 DROP TABLE testconst1;
 0 rows inserted/updated/deleted

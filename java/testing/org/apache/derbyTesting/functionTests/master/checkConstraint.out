@@ -60,13 +60,13 @@ create table pos1(c1 int check(c1 > 0), constraint asdf check(c1 < 10));
 0 rows inserted/updated/deleted
 ij> -- verify both constraints are enforced
 insert into pos1 values 0;
-ERROR 23513: The check constraint 'xxxxGENERATED-IDxxxx' was violated while performing an INSERT or UPDATE on table 'APP.POS1'.
+ERROR 23513: The check constraint 'xxxxGENERATED-IDxxxx' was violated while performing an INSERT or UPDATE on table '"APP"."POS1"'.
 ij> insert into pos1 values 1;
 1 row inserted/updated/deleted
 ij> insert into pos1 values 9;
 1 row inserted/updated/deleted
 ij> insert into pos1 values 10;
-ERROR 23513: The check constraint 'ASDF' was violated while performing an INSERT or UPDATE on table 'APP.POS1'.
+ERROR 23513: The check constraint 'ASDF' was violated while performing an INSERT or UPDATE on table '"APP"."POS1"'.
 ij> select * from pos1;
 C1         
 -----------
@@ -74,14 +74,14 @@ C1
 9          
 ij> -- verify constraint violation rolls back entire statement
 update pos1 set c1 = c1 + 1;
-ERROR 23513: The check constraint 'ASDF' was violated while performing an INSERT or UPDATE on table 'APP.POS1'.
+ERROR 23513: The check constraint 'ASDF' was violated while performing an INSERT or UPDATE on table '"APP"."POS1"'.
 ij> select * from pos1;
 C1         
 -----------
 1          
 9          
 ij> update pos1 set c1 = c1 - 1;
-ERROR 23513: The check constraint 'xxxxGENERATED-IDxxxx' was violated while performing an INSERT or UPDATE on table 'APP.POS1'.
+ERROR 23513: The check constraint 'xxxxGENERATED-IDxxxx' was violated while performing an INSERT or UPDATE on table '"APP"."POS1"'.
 ij> select * from pos1;
 C1         
 -----------
@@ -93,13 +93,13 @@ create table negcks(c1 int constraint ck1st check(c1 > 4), c2 int constraint ck2
 0 rows inserted/updated/deleted
 ij> -- constraint ck1st fails
 insert into negcks values (1, 3, 3);
-ERROR 23513: The check constraint 'CK1ST' was violated while performing an INSERT or UPDATE on table 'APP.NEGCKS'.
+ERROR 23513: The check constraint 'CK1ST' was violated while performing an INSERT or UPDATE on table '"APP"."NEGCKS"'.
 ij> -- constraint ckLast fails (ck2nd fails too)
 insert into negcks values (5, 1, 3);
-ERROR 23513: The check constraint 'CKLAST' was violated while performing an INSERT or UPDATE on table 'APP.NEGCKS'.
+ERROR 23513: The check constraint 'CKLAST' was violated while performing an INSERT or UPDATE on table '"APP"."NEGCKS"'.
 ij> -- constraint ck1st fails (ckLast fails too)
 insert into negcks values (2, 3, 3);
-ERROR 23513: The check constraint 'CK1ST' was violated while performing an INSERT or UPDATE on table 'APP.NEGCKS'.
+ERROR 23513: The check constraint 'CK1ST' was violated while performing an INSERT or UPDATE on table '"APP"."NEGCKS"'.
 ij> rollback;
 ij> -- same source and target tables
 create table pos1(c1 int, c2 int, constraint ck1 check (c1 < c2));
@@ -129,14 +129,14 @@ C1         |C2
 ij> rollback;
 ij> -- these should fail
 insert into pos1 select c2, c1 from pos1;
-ERROR 23513: The check constraint 'CK1' was violated while performing an INSERT or UPDATE on table 'APP.POS1'.
+ERROR 23513: The check constraint 'CK1' was violated while performing an INSERT or UPDATE on table '"APP"."POS1"'.
 ij> select count(*) from pos1;
 1          
 -----------
 3          
 ij> update pos1 set c2 = (select min(c1) from pos1),
 				c1 = (select max(c2) from pos1);
-ERROR 23513: The check constraint 'CK1' was violated while performing an INSERT or UPDATE on table 'APP.POS1'.
+ERROR 23513: The check constraint 'CK1' was violated while performing an INSERT or UPDATE on table '"APP"."POS1"'.
 ij> select * from pos1;
 C1         |C2         
 -----------------------
@@ -150,7 +150,7 @@ ij> -- union under insert
 create table t1(c1 int, c2 int, constraint ck1 check(c1 = c2));
 0 rows inserted/updated/deleted
 ij> insert into t1 values (1, 1), (2, 1);
-ERROR 23513: The check constraint 'CK1' was violated while performing an INSERT or UPDATE on table 'APP.T1'.
+ERROR 23513: The check constraint 'CK1' was violated while performing an INSERT or UPDATE on table '"APP"."T1"'.
 ij> select * from t1;
 C1         |C2         
 -----------------------
@@ -158,7 +158,7 @@ ij> -- normalize result set under insert/update
 insert into t1 values (1.0, 1);
 1 row inserted/updated/deleted
 ij> insert into t1 values (2.0, 1);
-ERROR 23513: The check constraint 'CK1' was violated while performing an INSERT or UPDATE on table 'APP.T1'.
+ERROR 23513: The check constraint 'CK1' was violated while performing an INSERT or UPDATE on table '"APP"."T1"'.
 ij> select * from t1;
 C1         |C2         
 -----------------------
@@ -166,7 +166,7 @@ C1         |C2
 ij> update t1 set c2 = 1.0;
 1 row inserted/updated/deleted
 ij> update t1 set c2 = 2.0;
-ERROR 23513: The check constraint 'CK1' was violated while performing an INSERT or UPDATE on table 'APP.T1'.
+ERROR 23513: The check constraint 'CK1' was violated while performing an INSERT or UPDATE on table '"APP"."T1"'.
 ij> select * from t1;
 C1         |C2         
 -----------------------
@@ -195,7 +195,7 @@ update t1 set c1 = c1 where current of c1;
 1 row inserted/updated/deleted
 ij> -- this update should fail
 update t1 set c1 = c1 + 1 where current of c1;
-ERROR 23513: The check constraint 'CK2' was violated while performing an INSERT or UPDATE on table 'APP.T1'.
+ERROR 23513: The check constraint 'CK2' was violated while performing an INSERT or UPDATE on table '"APP"."T1"'.
 ij> close c1;
 ij> get cursor c2 as 'select * from t1 where c1 = 2 for update of c2';
 ij> next c2;
@@ -207,7 +207,7 @@ update t1 set c2 = c2 where current of c2;
 1 row inserted/updated/deleted
 ij> -- this update should fail
 update t1 set c2 = c2 + 1 where current of c2;
-ERROR 23513: The check constraint 'CK2' was violated while performing an INSERT or UPDATE on table 'APP.T1'.
+ERROR 23513: The check constraint 'CK2' was violated while performing an INSERT or UPDATE on table '"APP"."T1"'.
 ij> close c2;
 ij> get cursor c3 as 'select * from t1 where c1 = 2 for update of c1, c2';
 ij> next c3;
@@ -219,7 +219,7 @@ update t1 set c2 = c1, c1 = c2 where current of c3;
 1 row inserted/updated/deleted
 ij> -- this update should fail
 update t1 set c2 = c2 + 1, c1 = c1 + 3 where current of c3;
-ERROR 23513: The check constraint 'CK2' was violated while performing an INSERT or UPDATE on table 'APP.T1'.
+ERROR 23513: The check constraint 'CK2' was violated while performing an INSERT or UPDATE on table '"APP"."T1"'.
 ij> -- this update should succeed
 update t1 set c2 = c1 + 3, c1 = c2 + 3 where current of c3;
 1 row inserted/updated/deleted
@@ -248,7 +248,7 @@ ij> update t1 set c1 = 1 where c1 = 2;
 2 rows inserted/updated/deleted
 ij> -- this update should fail
 update t1 set c1 = c2;
-ERROR 23513: The check constraint 'xxxxGENERATED-IDxxxx' was violated while performing an INSERT or UPDATE on table 'APP.T1'.
+ERROR 23513: The check constraint 'xxxxGENERATED-IDxxxx' was violated while performing an INSERT or UPDATE on table '"APP"."T1"'.
 ij> select * from t1;
 C1         |C2         
 -----------------------
@@ -270,14 +270,14 @@ ij> insert into intTab values 1;
 1 row inserted/updated/deleted
 ij> -- this insert should fail, does not satisfy check constraint
 insert into intTab values 2;
-ERROR 23513: The check constraint 'xxxxGENERATED-IDxxxx' was violated while performing an INSERT or UPDATE on table 'APP.INTTAB'.
+ERROR 23513: The check constraint 'xxxxGENERATED-IDxxxx' was violated while performing an INSERT or UPDATE on table '"APP"."INTTAB"'.
 ij> create table maxIntTab (c1 int check(INT(2147483647) > c1));
 0 rows inserted/updated/deleted
 ij> insert into maxIntTab values 1;
 1 row inserted/updated/deleted
 ij> -- this insert should fail, does not satisfy check constraint
 insert into maxIntTab values 2147483647;
-ERROR 23513: The check constraint 'xxxxGENERATED-IDxxxx' was violated while performing an INSERT or UPDATE on table 'APP.MAXINTTAB'.
+ERROR 23513: The check constraint 'xxxxGENERATED-IDxxxx' was violated while performing an INSERT or UPDATE on table '"APP"."MAXINTTAB"'.
 ij> rollback;
 ij> -- verify that inserts, updates and statements with forced constraints are
 -- indeed dependent on the constraints
@@ -391,4 +391,15 @@ ij> select c.constraintname, c.type from sys.sysconstraints c, sys.systables t w
 CONSTRAINTNAME                                                                                                                  |&
 ----------------------------------------------------------------------------------------------------------------------------------
 xxxxGENERATED-IDxxxx                                                                                                              |P
+ij> -- DERBY-2989
+CREATE TABLE "indicator" (c CHAR(1) DEFAULT 'N');
+0 rows inserted/updated/deleted
+ij> ALTER TABLE  "indicator" ADD CONSTRAINT my_constraint CHECK ((c IN ('Y','N')));
+0 rows inserted/updated/deleted
+ij> INSERT INTO  "indicator" VALUES ('N');
+1 row inserted/updated/deleted
+ij> ALTER TABLE  "indicator" DROP CONSTRAINT my_constraint;
+0 rows inserted/updated/deleted
+ij> DROP TABLE   "indicator";
+0 rows inserted/updated/deleted
 ij> 

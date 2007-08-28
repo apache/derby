@@ -50,7 +50,7 @@ ij> -- PASS:0306 If count = 1?
 
   INSERT INTO STAFF13
         VALUES('E2',NULL,36,'Newyork');
-ERROR 23513: The check constraint 'STAFF13_EMPNAME' was violated while performing an INSERT or UPDATE on table 'SUN.STAFF13'.
+ERROR 23513: The check constraint 'STAFF13_EMPNAME' was violated while performing an INSERT or UPDATE on table '"SUN"."STAFF13"'.
 ij> -- PASS:0306 If ERROR, check constraint, 0 rows inserted?
 
   SELECT COUNT(*) FROM STAFF13;
@@ -72,12 +72,12 @@ ij> -- PASS:0306 If count = 1?
 WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> INSERT INTO STAFF9
         VALUES('E1','Thomas',0,'Deale');
-ERROR 23513: The check constraint 'STAFF9_EMPNAME' was violated while performing an INSERT or UPDATE on table 'SUN.STAFF9'.
+ERROR 23513: The check constraint 'STAFF9_EMPNAME' was violated while performing an INSERT or UPDATE on table '"SUN"."STAFF9"'.
 ij> -- PASS:0307 If ERROR, check constraint, 0 rows inserted?
 
   INSERT INTO STAFF9
         VALUES('E2','Tom',22,'Newyork');
-ERROR 23513: The check constraint 'STAFF9_EMPNAME' was violated while performing an INSERT or UPDATE on table 'SUN.STAFF9'.
+ERROR 23513: The check constraint 'STAFF9_EMPNAME' was violated while performing an INSERT or UPDATE on table '"SUN"."STAFF9"'.
 ij> -- PASS:0307 If ERROR, check constraint, 0 rows inserted?
 
   INSERT INTO STAFF9
@@ -103,12 +103,12 @@ ij> -- PASS:0307 If count = 1?
 WARNING 02000: No row was found for FETCH, UPDATE or DELETE; or the result of a query is an empty table.
 ij> INSERT INTO STAFF10
         VALUES('E1','Thomas',5,'Deale');
-ERROR 23513: The check constraint 'STAFF10_GRADE' was violated while performing an INSERT or UPDATE on table 'SUN.STAFF10'.
+ERROR 23513: The check constraint 'STAFF10_GRADE' was violated while performing an INSERT or UPDATE on table '"SUN"."STAFF10"'.
 ij> -- PASS:0308 If ERROR, check constraint, 0 rows inserted?
 
   INSERT INTO STAFF10
         VALUES('E2','Tom',22,'Newyork');
-ERROR 23513: The check constraint 'STAFF10_GRADE' was violated while performing an INSERT or UPDATE on table 'SUN.STAFF10'.
+ERROR 23513: The check constraint 'STAFF10_GRADE' was violated while performing an INSERT or UPDATE on table '"SUN"."STAFF10"'.
 ij> -- PASS:0308 If ERROR, check constraint, 0 rows inserted?
 
   INSERT INTO STAFF10
@@ -149,7 +149,7 @@ ij> -- PASS:0374 If count = 1?
   UPDATE STAFF5
          SET GRADE = 10 * 10 / 5 + 1
          WHERE EMPNUM = 'R9';
-ERROR 23513: The check constraint 'STAFF5_GRADE' was violated while performing an INSERT or UPDATE on table 'SUN.STAFF5'.
+ERROR 23513: The check constraint 'STAFF5_GRADE' was violated while performing an INSERT or UPDATE on table '"SUN"."STAFF5"'.
 ij> -- PASS:0374 If ERROR, check constraint, 0 rows updated?
 
   SELECT COUNT(*) FROM STAFF5

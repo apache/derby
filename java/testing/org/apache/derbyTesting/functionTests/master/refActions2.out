@@ -804,7 +804,7 @@ ij> alter table t2 drop constraint c1;
 ij> alter table t3 drop constraint c2;
 0 rows inserted/updated/deleted
 ij> alter table t3 drop constraint c3;
-ERROR 42X86: ALTER TABLE failed. There is no constraint 'APP.C3' on table 'APP.T3'. 
+ERROR 42X86: ALTER TABLE failed. There is no constraint 'APP.C3' on table '"APP"."T3"'. 
 ij> -- c3 fails; sql0632N - 3 
 alter table t2 add constraint c1 foreign key (x) 
                              references t1(a) on delete CASCADE;
@@ -820,7 +820,7 @@ ij> alter table t2 drop constraint c1;
 ij> alter table t3 drop constraint c2;
 0 rows inserted/updated/deleted
 ij> alter table t3 drop constraint c3;
-ERROR 42X86: ALTER TABLE failed. There is no constraint 'APP.C3' on table 'APP.T3'. 
+ERROR 42X86: ALTER TABLE failed. There is no constraint 'APP.C3' on table '"APP"."T3"'. 
 ij> -- passes
 alter table t2 add constraint c1 foreign key (x) 
                              references t1(a) on delete set null;
@@ -900,7 +900,7 @@ ij> alter table t2 drop constraint c1;
 ij> alter table t3 drop constraint c2;
 0 rows inserted/updated/deleted
 ij> alter table t3 drop constraint c3;
-ERROR 42X86: ALTER TABLE failed. There is no constraint 'APP.C3' on table 'APP.T3'. 
+ERROR 42X86: ALTER TABLE failed. There is no constraint 'APP.C3' on table '"APP"."T3"'. 
 ij> drop table t1;
 0 rows inserted/updated/deleted
 ij> drop table t2;
@@ -932,7 +932,7 @@ ERROR 42915: Foreign  Key 'C2' is invalid because 'The delete rule of foreign ke
 ij> alter table t1 drop constraint c1;
 0 rows inserted/updated/deleted
 ij> alter table t2 drop constraint c2;
-ERROR 42X86: ALTER TABLE failed. There is no constraint 'APP.C2' on table 'APP.T2'. 
+ERROR 42X86: ALTER TABLE failed. There is no constraint 'APP.C2' on table '"APP"."T2"'. 
 ij> --c2 fails - sql0632N - reason code 2
 alter table t1 add constraint c1 foreign key (b)
                              references t2(x) on delete cascade;
@@ -943,7 +943,7 @@ ERROR 42915: Foreign  Key 'C2' is invalid because 'The table cannot be defined a
 ij> alter table t1 drop constraint c1;
 0 rows inserted/updated/deleted
 ij> alter table t2 drop constraint c2;
-ERROR 42X86: ALTER TABLE failed. There is no constraint 'APP.C2' on table 'APP.T2'. 
+ERROR 42X86: ALTER TABLE failed. There is no constraint 'APP.C2' on table '"APP"."T2"'. 
 ij> --c1 fails - sql0634N - reason code 2
 alter table t2 add constraint c2 foreign key (y)
                               references t1(b) on delete set null;
@@ -952,7 +952,7 @@ ij> alter table t1 add constraint c1 foreign key (b)
                              references t2(x) on delete cascade;
 ERROR 42915: Foreign  Key 'C1' is invalid because 'The delete rule of foreign key cannot be CASCADE. (The relationship would form a cycle that would cause a table to be delete-connected to itself. One of the existing delete rules in the cycle is not CASCADE, so this relationship may be definable if the delete rule is not CASCADE.) '. 
 ij> alter table t1 drop constraint c1;
-ERROR 42X86: ALTER TABLE failed. There is no constraint 'APP.C1' on table 'APP.T1'. 
+ERROR 42X86: ALTER TABLE failed. There is no constraint 'APP.C1' on table '"APP"."T1"'. 
 ij> alter table t2 drop constraint c2;
 0 rows inserted/updated/deleted
 ij> -- c1 fails : column b can not contain null values
@@ -1045,7 +1045,7 @@ ij> alter table t1 drop constraint c1;
 ij> alter table t2 drop constraint c2;
 0 rows inserted/updated/deleted
 ij> alter table t3 drop constraint c3;
-ERROR 42X86: ALTER TABLE failed. There is no constraint 'APP.C3' on table 'APP.T3'. 
+ERROR 42X86: ALTER TABLE failed. There is no constraint 'APP.C3' on table '"APP"."T3"'. 
 ij> --c3 should fail SQL0634N - 2 -- PROBLEMATIC CASE
 -- DELETE CONNECTED CYCLE
 alter table t1 add constraint c1 foreign key (b)
@@ -1062,7 +1062,7 @@ ij> alter table t1 drop constraint c1;
 ij> alter table t2 drop constraint c2;
 0 rows inserted/updated/deleted
 ij> alter table t3 drop constraint c3;
-ERROR 42X86: ALTER TABLE failed. There is no constraint 'APP.C3' on table 'APP.T3'. 
+ERROR 42X86: ALTER TABLE failed. There is no constraint 'APP.C3' on table '"APP"."T3"'. 
 ij> --c3 should fail - SQL0634N - 2
 --DELETE CONNECTED CYCLE
 alter table t1 add constraint c1 foreign key (b)
@@ -1079,7 +1079,7 @@ ij> alter table t1 drop constraint c1;
 ij> alter table t2 drop constraint c2;
 0 rows inserted/updated/deleted
 ij> alter table t3 drop constraint c3;
-ERROR 42X86: ALTER TABLE failed. There is no constraint 'APP.C3' on table 'APP.T3'. 
+ERROR 42X86: ALTER TABLE failed. There is no constraint 'APP.C3' on table '"APP"."T3"'. 
 ij> -- passes
 alter table t1 add constraint c1 foreign key (b)
                               references t3(m) on delete set null;

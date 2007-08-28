@@ -76,7 +76,7 @@ ij> -- PASS:7052 If table altered successfully?
 
    COMMIT WORK;
 ij> INSERT INTO TAB752a VALUES(1000,'KILLER','PAROS');
-ERROR 23513: The check constraint 'COL3_CHECK' was violated while performing an INSERT or UPDATE on table 'CTS1.TAB752A'.
+ERROR 23513: The check constraint 'COL3_CHECK' was violated while performing an INSERT or UPDATE on table '"CTS1"."TAB752A"'.
 ij> -- PASS:7052 If ERROR - integrity constraint violation?
 
    ROLLBACK WORK;

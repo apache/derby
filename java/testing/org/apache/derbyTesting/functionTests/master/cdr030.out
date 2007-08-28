@@ -113,7 +113,7 @@ ij> -- PASS:0516 If 1 row inserted?
    UPDATE STAFF11
          SET GRADE = 5
          WHERE EMPNUM = 'E3';
-ERROR 23513: The check constraint 'STAFF11_GRADE_EMPNAME' was violated while performing an INSERT or UPDATE on table 'SUN.STAFF11'.
+ERROR 23513: The check constraint 'STAFF11_GRADE_EMPNAME' was violated while performing an INSERT or UPDATE on table '"SUN"."STAFF11"'.
 ij> -- PASS:0516 If ERROR, integrity constraint violation, 0 rows updated?
 -- PASS:0516 OR ERROR, check constraint, 0 rows updated?
 -- PASS:0516 OR SQLSTATE = 23502 OR SQLCODE < 0?
@@ -122,7 +122,7 @@ ij> -- PASS:0516 If ERROR, integrity constraint violation, 0 rows updated?
    UPDATE STAFF11
          SET EMPNAME = 'Tom'
          WHERE EMPNUM = 'E3';
-ERROR 23513: The check constraint 'STAFF11_GRADE_EMPNAME' was violated while performing an INSERT or UPDATE on table 'SUN.STAFF11'.
+ERROR 23513: The check constraint 'STAFF11_GRADE_EMPNAME' was violated while performing an INSERT or UPDATE on table '"SUN"."STAFF11"'.
 ij> -- PASS:0516 If ERROR, integrity constraint violation, 0 rows updated?
 -- PASS:0516 OR ERROR, check constraint, 0 rows updated?
 -- PASS:0516 OR SQLSTATE = 23502 OR SQLCODE < 0?

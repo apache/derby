@@ -168,7 +168,7 @@ ij> -- END TEST >>> 0448 <<< END TEST
 1 row inserted/updated/deleted
 ij> INSERT INTO STAFF9(EMPNUM,EMPNAME)
        VALUES('Z1','Tina');
-ERROR 23513: The check constraint 'STAFF9_EMPNAME' was violated while performing an INSERT or UPDATE on table 'SUN.STAFF9'.
+ERROR 23513: The check constraint 'STAFF9_EMPNAME' was violated while performing an INSERT or UPDATE on table '"SUN"."STAFF9"'.
 ij> -- PASS:0449 If ERROR, check constraint, 0 rows inserted?
 
    INSERT INTO STAFF9(EMPNUM,EMPNAME)

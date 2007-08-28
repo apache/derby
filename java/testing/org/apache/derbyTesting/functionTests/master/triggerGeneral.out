@@ -64,7 +64,7 @@ create trigger sys.tr NO CASCADE before insert on x for each row values 1;
 ERROR 42X62: 'CREATE TRIGGER' is not allowed in the 'SYS' schema.
 ij> -- not on table in sys schema
 create trigger tr NO CASCADE before insert on sys.systables for each row values 1;
-ERROR X0Y56: 'CREATE TRIGGER' is not allowed on the System table 'SYS.SYSTABLES'.
+ERROR X0Y56: 'CREATE TRIGGER' is not allowed on the System table '"SYS"."SYSTABLES"'.
 ij> -- duplicate columns, not allowed
 create trigger tr NO CASCADE before update of x, x on x for each row values 1;
 ERROR 42Y40: 'X' appears multiple times in the UPDATE OF column list for trigger 'TR'.
@@ -76,7 +76,7 @@ create trigger tr NO CASCADE before update of doesnotexist on x for each row val
 ERROR 42X14: 'DOESNOTEXIST' is not a column in table or VTI 'X'.
 ij> -- not on view
 create trigger tr NO CASCADE before insert on v for each row values 1;
-ERROR 42Y62: 'CREATE TRIGGER' is not allowed on 'APP.V' because it is a view.
+ERROR 42Y62: 'CREATE TRIGGER' is not allowed on '"APP"."V"' because it is a view.
 ij> -- error to use table qualifier
 create trigger tr NO CASCADE before update of x.x on x for each row values 1;
 ERROR 42X01: Syntax error: Encountered "." at line 2, column 48.

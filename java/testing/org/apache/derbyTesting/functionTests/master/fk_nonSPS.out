@@ -192,13 +192,13 @@ create table f (x int, constraint fk foreign key (x) references notthere);
 ERROR X0Y46: Constraint 'FK' is invalid: referenced table NOTTHERE does not exist.
 ij> -- negative: fk table, bad column
 create table f (x int, constraint fk foreign key (x) references p1(notthere));
-ERROR X0Y44: Constraint 'FK' is invalid: there is no unique or primary key constraint on table 'APP.P1' that matches the number and types of the columns in the foreign key.
+ERROR X0Y44: Constraint 'FK' is invalid: there is no unique or primary key constraint on table '"APP"."P1"' that matches the number and types of the columns in the foreign key.
 ij> -- negative: fk table, no constraint
 create table f (x int, constraint fk foreign key (x) references p2(y));
-ERROR X0Y44: Constraint 'FK' is invalid: there is no unique or primary key constraint on table 'APP.P2' that matches the number and types of the columns in the foreign key.
+ERROR X0Y44: Constraint 'FK' is invalid: there is no unique or primary key constraint on table '"APP"."P2"' that matches the number and types of the columns in the foreign key.
 ij> -- negative: fk table, wrong type
 create table f (x smallint, constraint fk foreign key (x) references p1(x));
-ERROR X0Y44: Constraint 'FK' is invalid: there is no unique or primary key constraint on table 'APP.P1' that matches the number and types of the columns in the foreign key.
+ERROR X0Y44: Constraint 'FK' is invalid: there is no unique or primary key constraint on table '"APP"."P1"' that matches the number and types of the columns in the foreign key.
 ij> -- negative: cannot reference a system table
 create table f (x char(36), constraint fk foreign key (x) references sys.sysforeignkeys(constraintid));
 ERROR 42Y08: Foreign key constraints are not allowed on system tables.
@@ -210,9 +210,9 @@ create table f (x dec(5,2), y int, constraint fk foreign key (x,z) references p2
 ERROR 42X93: Table 'F' contains a constraint definition with column 'Z' which is not in the table.
 ij> -- negative: wrong number of columns
 create table f (x dec(5,2), y int, constraint fk foreign key (x) references p2(x,y));
-ERROR X0Y44: Constraint 'FK' is invalid: there is no unique or primary key constraint on table 'APP.P2' that matches the number and types of the columns in the foreign key.
+ERROR X0Y44: Constraint 'FK' is invalid: there is no unique or primary key constraint on table '"APP"."P2"' that matches the number and types of the columns in the foreign key.
 ij> create table f (x dec(5,2), y int, constraint fk foreign key (x,y) references p2(x));
-ERROR X0Y44: Constraint 'FK' is invalid: there is no unique or primary key constraint on table 'APP.P2' that matches the number and types of the columns in the foreign key.
+ERROR X0Y44: Constraint 'FK' is invalid: there is no unique or primary key constraint on table '"APP"."P2"' that matches the number and types of the columns in the foreign key.
 ij> -- 
 -- Negative test cases for foreign key COLUMN
 -- constraints
@@ -222,13 +222,13 @@ create table f (x int references notthere);
 ERROR X0Y46: Constraint 'xxxxGENERATED-IDxxxx' is invalid: referenced table NOTTHERE does not exist.
 ij> -- negative: fk column, bad column
 create table f (x int references p1(notthere));
-ERROR X0Y44: Constraint 'xxxxGENERATED-IDxxxx' is invalid: there is no unique or primary key constraint on table 'APP.P1' that matches the number and types of the columns in the foreign key.
+ERROR X0Y44: Constraint 'xxxxGENERATED-IDxxxx' is invalid: there is no unique or primary key constraint on table '"APP"."P1"' that matches the number and types of the columns in the foreign key.
 ij> -- negative: fk column, no constraint
 create table f (x int references p2(y));
-ERROR X0Y44: Constraint 'xxxxGENERATED-IDxxxx' is invalid: there is no unique or primary key constraint on table 'APP.P2' that matches the number and types of the columns in the foreign key.
+ERROR X0Y44: Constraint 'xxxxGENERATED-IDxxxx' is invalid: there is no unique or primary key constraint on table '"APP"."P2"' that matches the number and types of the columns in the foreign key.
 ij> -- negative: fk column, wrong type
 create table f (x smallint references p1(x));
-ERROR X0Y44: Constraint 'xxxxGENERATED-IDxxxx' is invalid: there is no unique or primary key constraint on table 'APP.P1' that matches the number and types of the columns in the foreign key.
+ERROR X0Y44: Constraint 'xxxxGENERATED-IDxxxx' is invalid: there is no unique or primary key constraint on table '"APP"."P1"' that matches the number and types of the columns in the foreign key.
 ij> -- negative: cannot reference a system table
 create table f (x char(36) references sys.sysforeignkeys(constraintid));
 ERROR 42Y08: Foreign key constraints are not allowed on system tables.
@@ -271,20 +271,20 @@ ij> CALL WAIT_FOR_POST_COMMIT();
 0 rows inserted/updated/deleted
 ij> -- type mismatch
 create table f (i int, d dec(5,1), constraint fk foreign key (i,d) references p2(x,y));
-ERROR X0Y44: Constraint 'FK' is invalid: there is no unique or primary key constraint on table 'APP.P2' that matches the number and types of the columns in the foreign key.
+ERROR X0Y44: Constraint 'FK' is invalid: there is no unique or primary key constraint on table '"APP"."P2"' that matches the number and types of the columns in the foreign key.
 ij> create table f (i int, d dec(4,2), constraint fk foreign key (i,d) references p2(x,y));
-ERROR X0Y44: Constraint 'FK' is invalid: there is no unique or primary key constraint on table 'APP.P2' that matches the number and types of the columns in the foreign key.
+ERROR X0Y44: Constraint 'FK' is invalid: there is no unique or primary key constraint on table '"APP"."P2"' that matches the number and types of the columns in the foreign key.
 ij> create table f (i int, d dec(4,2), constraint fk foreign key (i,d) references p2(x,y));
-ERROR X0Y44: Constraint 'FK' is invalid: there is no unique or primary key constraint on table 'APP.P2' that matches the number and types of the columns in the foreign key.
+ERROR X0Y44: Constraint 'FK' is invalid: there is no unique or primary key constraint on table '"APP"."P2"' that matches the number and types of the columns in the foreign key.
 ij> create table f (i int, d numeric(5,2), constraint fk foreign key (i,d) references p2(x,y));
-ERROR X0Y44: Constraint 'FK' is invalid: there is no unique or primary key constraint on table 'APP.P2' that matches the number and types of the columns in the foreign key.
+ERROR X0Y44: Constraint 'FK' is invalid: there is no unique or primary key constraint on table '"APP"."P2"' that matches the number and types of the columns in the foreign key.
 ij> create table f (c char(11) references p3(x));
-ERROR X0Y44: Constraint 'xxxxGENERATED-IDxxxx' is invalid: there is no unique or primary key constraint on table 'APP.P3' that matches the number and types of the columns in the foreign key.
+ERROR X0Y44: Constraint 'xxxxGENERATED-IDxxxx' is invalid: there is no unique or primary key constraint on table '"APP"."P3"' that matches the number and types of the columns in the foreign key.
 ij> create table f (c varchar(10) references p3(x));
-ERROR X0Y44: Constraint 'xxxxGENERATED-IDxxxx' is invalid: there is no unique or primary key constraint on table 'APP.P3' that matches the number and types of the columns in the foreign key.
+ERROR X0Y44: Constraint 'xxxxGENERATED-IDxxxx' is invalid: there is no unique or primary key constraint on table '"APP"."P3"' that matches the number and types of the columns in the foreign key.
 ij> -- wrong order
 create table f (d dec(5,2), i int, constraint fk foreign key (d,i) references p2(x,y));
-ERROR X0Y44: Constraint 'FK' is invalid: there is no unique or primary key constraint on table 'APP.P2' that matches the number and types of the columns in the foreign key.
+ERROR X0Y44: Constraint 'FK' is invalid: there is no unique or primary key constraint on table '"APP"."P2"' that matches the number and types of the columns in the foreign key.
 ij> -- check system tables 
 create table f (x int, constraint fk foreign key (x) references p1);
 0 rows inserted/updated/deleted
@@ -355,7 +355,7 @@ ij> CALL WAIT_FOR_POST_COMMIT();
 0 rows inserted/updated/deleted
 ij> -- we shouldn't be able to add an fk on p1 now
 alter table f add constraint fk foreign key (x) references p1;
-ERROR X0Y41: Constraint 'FK' is invalid because the referenced table APP.P1 has no primary key.  Either add a primary key to APP.P1 or explicitly specify the columns of a unique constraint that this foreign key references. 
+ERROR X0Y41: Constraint 'FK' is invalid because the referenced table "APP"."P1" has no primary key.  Either add a primary key to "APP"."P1" or explicitly specify the columns of a unique constraint that this foreign key references. 
 ij> -- add the constraint and try again
 alter table p1 add constraint pk1 primary key (x);
 0 rows inserted/updated/deleted
