@@ -237,6 +237,15 @@ public interface Attribute {
      */
     String DRDA_SECTKN_IN = "drdaSecTokenIn";
     String DRDA_SECTKN_OUT = "drdaSecTokenOut";
+    /**
+     * Internal attribute which holds the value of the securityMechanism
+     * attribute specified by the client. Used for passing information about
+     * which security mechanism to use from the network server to the embedded
+     * driver. Use another name than "securityMechanism" in order to prevent
+     * confusion if an attempt is made to establish an embedded connection with
+     * securityMechanism specified (see DERBY-3025).
+     */
+    String DRDA_SECMEC = "drdaSecMec";
 
 	/**
 	 * Internal attribute. Used to always allow soft upgrade for
