@@ -1012,6 +1012,11 @@
 
     <echo level="info" message="Beginning derby.jar ${sanity.name} build"/>
 
+    <!-- purge lists directory to avoid unnecessary content from other jars -->
+    <delete>
+      <fileset dir="${derby.jar.dir}/lists" includes="**/*"/>
+    </delete>
+         
     <concat destfile="${derby.jar.dir}/lists/otherDerbyClasses.properties">
       <fileset dir="${basedir}/tools/jar" includes="*DBMS*.properties"/>
     </concat>
@@ -1187,6 +1192,11 @@
 
     <echo level="info" message="Beginning derbytools.jar ${sanity.name} build"/>
 
+    <!-- purge lists directory to avoid unnecessary content from other jars -->
+    <delete>
+      <fileset dir="${derby.jar.dir}/lists" includes="**/*"/>
+    </delete>
+
     <echo level="info" message=" creating tools.list "/>
     <java classname="org.apache.derbyBuild.classlister" fork="yes">
       <jvmarg value="-Ddb2jtools=true"/>
@@ -1235,6 +1245,11 @@
   <target name="derbynetjar" depends="setsanityname">
 
     <echo level="info" message="Beginning derbynet.jar ${sanity.name} build"/>
+
+    <!-- purge lists directory to avoid unnecessary content from other jars -->
+    <delete>
+      <fileset dir="${derby.jar.dir}/lists" includes="**/*"/>
+    </delete>
 
     <echo level="info" message=" creating net.list"/> 
     <java classname="org.apache.derbyBuild.classlister" fork="yes">
@@ -1304,6 +1319,11 @@
 
     <echo level="info" message="Beginning derbyclient.jar ${sanity.name} build"/>
 
+    <!-- purge lists directory to avoid unnecessary content from other jars -->
+    <delete>
+      <fileset dir="${derby.jar.dir}/lists" includes="**/*"/>
+    </delete>
+
     <copy file="${basedir}/tools/jar/dnc.properties"
           tofile="${derby.jar.dir}/lists/dnc.properties"/>
 
@@ -1366,6 +1386,11 @@
 
     <echo level="info" message="Beginning derbyrun.jar build"/>
 
+    <!-- purge lists directory to avoid unnecessary content from other jars -->
+    <delete>
+      <fileset dir="${derby.jar.dir}/lists" includes="**/*"/>
+    </delete>
+
     <mkdir dir="${derby.jar.dir}/lists/META-INF"/>
     <copy todir="${derby.jar.dir}/lists/META-INF">
       <fileset dir="${basedir}" includes="LICENSE*,NOTICE*"/>
@@ -1401,6 +1426,11 @@
 
   <target name="derbylocalejars" depends="initjars">
  
+    <!-- purge lists directory to avoid unnecessary content from other jars -->
+    <delete>
+      <fileset dir="${derby.jar.dir}/lists" includes="**/*"/>
+    </delete>
+
     <!-- copy boilerplate common to derby jar files -->
     <antcall target="meta-inf-common"/>
 
