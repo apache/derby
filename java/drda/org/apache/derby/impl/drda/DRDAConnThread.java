@@ -1231,7 +1231,7 @@ class DRDAConnThread extends Thread {
         if ((database.securityMechanism == CodePoint.SECMEC_USRSSBPWD) &&
             (database.dbName.indexOf(Attribute.PASSWORD_ATTR) == -1))
         {
-            p.put(Attribute.CLIENT_SECURITY_MECHANISM,
+            p.put(Attribute.DRDA_SECMEC,
                   String.valueOf(database.securityMechanism));
             p.put(Attribute.DRDA_SECTKN_IN,
                   DecryptionManager.toHexString(database.secTokenIn, 0,

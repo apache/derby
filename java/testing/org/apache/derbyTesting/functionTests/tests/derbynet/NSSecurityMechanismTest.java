@@ -41,6 +41,7 @@ import javax.sql.PooledConnection;
 import org.apache.derby.drda.NetworkServerControl;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.J2EEDataSource;
 import org.apache.derbyTesting.junit.JDBCDataSource;
 import org.apache.derbyTesting.junit.NetworkServerTestSetup;
@@ -173,9 +174,20 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
     public static Test suite() 
     {
         TestSuite suite = new TestSuite("NSSecurityMechanismTest");
-        suite.addTest(new NSSecurityMechanismTest(
+
+        TestSuite clientSuite =
+            new TestSuite("NSSecurityMechanismTest - client");
+        clientSuite.addTest(new NSSecurityMechanismTest(
             "testNetworkServerSecurityMechanism"));
-        return TestConfiguration.clientServerDecorator((suite));
+        suite.addTest(TestConfiguration.clientServerDecorator(clientSuite));
+
+        // Test case for embedded mode. Enable builtin authentication.
+        suite.addTest(
+            DatabasePropertyTestSetup.builtinAuthentication(
+                new NSSecurityMechanismTest("testSecurityMechanismOnEmbedded"),
+                new String[] { "calvin" }, "pw"));
+
+        return suite;
     }
     
     public void tearDown() throws Exception {
@@ -368,7 +380,22 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
             }
         }
     }
-    
+
+    /**
+     * Test that securityMechanism=8 is ignored by the embedded driver
+     * (DERBY-3025).
+     */
+    public void testSecurityMechanismOnEmbedded() throws SQLException {
+        DataSource ds = JDBCDataSource.getDataSource();
+        JDBCDataSource.setBeanProperty(
+            ds, "connectionAttributes", "securityMechanism=8");
+
+        // DERBY-3025: NullPointerException or AssertFailure was thrown here
+        Connection c = ds.getConnection("calvin", "calvinpw");
+
+        c.close();
+    }
+
     // returns a boolean true if the security mechanism is not supported
     // so the loop in which this is called can be continued without
     // causing unnecessary/impossible tests to be run

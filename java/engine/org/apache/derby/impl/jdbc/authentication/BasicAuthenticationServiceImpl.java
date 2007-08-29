@@ -176,7 +176,7 @@ public final class BasicAuthenticationServiceImpl
         // assess the substitute password to be legitimate for Derby's
         // BUILTIN authentication scheme/provider.
         if ((clientSecurityMechanism =
-                info.getProperty(Attribute.CLIENT_SECURITY_MECHANISM)) != null)
+                info.getProperty(Attribute.DRDA_SECMEC)) != null)
         {
             secMec = Integer.parseInt(clientSecurityMechanism);
         }
