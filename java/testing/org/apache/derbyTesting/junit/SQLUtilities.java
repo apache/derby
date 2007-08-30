@@ -22,7 +22,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import org.apache.derbyTesting.functionTests.tests.lang.CastingTest;
 
 public class SQLUtilities {
 
@@ -87,25 +86,27 @@ public class SQLUtilities {
 
         StringBuffer createSQL = new StringBuffer(
                 "create table AllDataTypesTable (");
-        for (int type = 0; type < CastingTest.SQLTypes.length - 1; type++) {
-            createSQL.append(allDataTypesColumnNames[type] + " " + CastingTest.SQLTypes[type]
+        for (int type = 0; type < SQLUtilities.SQLTypes.length - 1; type++) {
+            createSQL.append(allDataTypesColumnNames[type] + " " + SQLUtilities.SQLTypes[type]
                     + ",");
         }
-        createSQL.append(allDataTypesColumnNames[CastingTest.SQLTypes.length - 1] + " "
-                + CastingTest.SQLTypes[CastingTest.SQLTypes.length - 1] + ")");
+        createSQL.append(allDataTypesColumnNames[SQLUtilities.SQLTypes.length - 1] + " "
+                + SQLUtilities.SQLTypes[SQLUtilities.SQLTypes.length - 1] + ")");
         s.executeUpdate(createSQL.toString());
 
         for (int row = 0; row < allDataTypesSQLData[0].length; row++) {
             createSQL = new StringBuffer(
                     "insert into AllDataTypesTable values(");
-            for (int type = 0; type < CastingTest.SQLTypes.length - 1; type++) {
+            for (int type = 0; type < SQLUtilities.SQLTypes.length - 1; type++) {
                 createSQL.append(allDataTypesSQLData[type][row] + ",");
             }
-            createSQL.append(allDataTypesSQLData[CastingTest.SQLTypes.length - 1][row] + ")");
+            createSQL.append(allDataTypesSQLData[SQLUtilities.SQLTypes.length - 1][row] + ")");
             
             s.executeUpdate(createSQL.toString());
         }
     }
+
+    
     
     /**
      * 
@@ -140,5 +141,27 @@ public class SQLUtilities {
         s2.close();
         return parser;
     }
+
+	// Note: This array is accessed in lang.NullIfTest
+	public static String[] SQLTypes =
+	{
+	        "SMALLINT",
+	        "INTEGER",
+	        "BIGINT",
+	        "DECIMAL(10,5)",
+	        "REAL",
+	        "DOUBLE",
+	        "CHAR(60)",
+	        "VARCHAR(60)",
+	        "LONG VARCHAR",
+	        "CHAR(60) FOR BIT DATA",
+	        "VARCHAR(60) FOR BIT DATA",
+	        "LONG VARCHAR FOR BIT DATA",
+	        "CLOB(1k)",
+	        "DATE",
+	        "TIME",
+	        "TIMESTAMP",
+	        "BLOB(1k)",
+	};
     
 }

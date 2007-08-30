@@ -35,7 +35,6 @@ import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.SQLUtilities;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
-import org.apache.derbyTesting.functionTests.tests.lang.CastingTest;
 
 public class CaseExpressionTest extends BaseJDBCTestCase {
 
@@ -79,6 +78,8 @@ public class CaseExpressionTest extends BaseJDBCTestCase {
                 "2000-01-01 15:30:20.0"},
             /*BLOB(1k)*/ {null,null,null,null},
         };
+        
+       
 
         // Results if the Case Expression evaluates to a NULL value :
         //
@@ -241,6 +242,7 @@ public class CaseExpressionTest extends BaseJDBCTestCase {
              */
             protected void decorateSQL(Statement s) throws SQLException {
                 SQLUtilities.createAndPopulateAllDataTypesTable(s);
+                
             }
         };
     }
@@ -258,7 +260,7 @@ public class CaseExpressionTest extends BaseJDBCTestCase {
         int row;
 
         for (colType = 0;
-            colType < CastingTest.SQLTypes.length;
+            colType < SQLUtilities.SQLTypes.length;
             colType++)
         {
             rs = st.executeQuery(
@@ -267,6 +269,7 @@ public class CaseExpressionTest extends BaseJDBCTestCase {
                 caseExprEnd);
 
             row = 0;
+            
             while (rs.next()) {
                 String val = rs.getString(1);
                 assertEquals(expRS[colType][row], val);
@@ -274,5 +277,9 @@ public class CaseExpressionTest extends BaseJDBCTestCase {
             }
             rs.close();
         }
+     
     }
+    
+  
+    
 }

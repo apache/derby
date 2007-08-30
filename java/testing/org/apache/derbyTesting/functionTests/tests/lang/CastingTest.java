@@ -30,6 +30,7 @@ import junit.framework.Test;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.SQLUtilities;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
@@ -70,28 +71,6 @@ public class CastingTest extends BaseJDBCTestCase {
     public static int TIME_OFFSET = 14;
     public static int TIMESTAMP_OFFSET = 15;
     public static int BLOB_OFFSET = 16;
-
-    // Note: This array is accessed in lang.NullIfTest
-    public static String[] SQLTypes =
-    {
-            "SMALLINT",
-            "INTEGER",
-            "BIGINT",
-            "DECIMAL(10,5)",
-            "REAL",
-            "DOUBLE",
-            "CHAR(60)",
-            "VARCHAR(60)",
-            "LONG VARCHAR",
-            "CHAR(60) FOR BIT DATA",
-            "VARCHAR(60) FOR BIT DATA",
-            "LONG VARCHAR FOR BIT DATA",
-            "CLOB(1k)",
-            "DATE",
-            "TIME",
-            "TIMESTAMP",
-            "BLOB(1k)",
-    };
 
     public static int[] jdbcTypes = {
         java.sql.Types.SMALLINT,
@@ -294,8 +273,8 @@ public static String[][]SQLData =
     protected void setUp() throws SQLException {
         Statement scb = createStatement();
 
-        for (int type = 0; type < SQLTypes.length; type++) {
-            String typeName = SQLTypes[type];
+        for (int type = 0; type < SQLUtilities.SQLTypes.length; type++) {
+            String typeName = SQLUtilities.SQLTypes[type];
             String tableName = getTableName(type);
 
             String createSQL = "create table " + tableName + " (c " + typeName
@@ -307,7 +286,7 @@ public static String[][]SQLData =
         // * testing literal inserts
 
         for (int dataOffset = 0; dataOffset < SQLData[0].length; dataOffset++)
-            for (int type = 0; type < SQLTypes.length; type++) {
+            for (int type = 0; type < SQLUtilities.SQLTypes.length; type++) {
                 try {
                     String tableName = getTableName(type);
 
@@ -331,9 +310,9 @@ public static String[][]SQLData =
 
         // Try to insert each sourceType into the targetType table
         for (int dataOffset = 0; dataOffset < SQLData[0].length; dataOffset++)
-            for (int sourceType = 0; sourceType < SQLTypes.length; sourceType++) {
-                String sourceTypeName = SQLTypes[sourceType];
-                for (int targetType = 0; targetType < SQLTypes.length; targetType++) {
+            for (int sourceType = 0; sourceType < SQLUtilities.SQLTypes.length; sourceType++) {
+                String sourceTypeName = SQLUtilities.SQLTypes[sourceType];
+                for (int targetType = 0; targetType < SQLUtilities.SQLTypes.length; targetType++) {
                     try {
                         String targetTableName = getTableName(targetType);
 
@@ -369,14 +348,14 @@ public static String[][]SQLData =
         Statement s = createStatement();
 
         // Try Casts from each type to the
-        for (int sourceType = 0; sourceType < SQLTypes.length; sourceType++) {
+        for (int sourceType = 0; sourceType < SQLUtilities.SQLTypes.length; sourceType++) {
 
-            String sourceTypeName = SQLTypes[sourceType];
+            String sourceTypeName = SQLUtilities.SQLTypes[sourceType];
             //System.out.print("/*" + sourceTypeName + "*/ {");
             for (int dataOffset = 0; dataOffset < SQLData[0].length; dataOffset++)
-                for (int targetType = 0; targetType < SQLTypes.length; targetType++) {
+                for (int targetType = 0; targetType < SQLUtilities.SQLTypes.length; targetType++) {
                     try {
-                        String targetTypeName = SQLTypes[targetType];
+                        String targetTypeName = SQLUtilities.SQLTypes[targetType];
                         // For casts from Character types use strings that can
                         // be converted to the targetType.
 
@@ -385,8 +364,8 @@ public static String[][]SQLData =
 
                         String query =
                             "VALUES CAST (CAST (" + convertString + " AS "
-                                + SQLTypes[sourceType] + ") AS "
-                                + SQLTypes[targetType] + " )";
+                                + SQLUtilities.SQLTypes[sourceType] + ") AS "
+                                + SQLUtilities.SQLTypes[targetType] + " )";
                         ResultSet rs = s.executeQuery(query);
                         rs.next();
                         String val = rs.getString(1);
@@ -433,7 +412,7 @@ public static String[][]SQLData =
 
         // Comparison's using literals
 
-        for (int type = 0; type < SQLTypes.length; type++) {
+        for (int type = 0; type < SQLUtilities.SQLTypes.length; type++) {
             try {
                 int dataOffset = 1; // don't use null values
                 String tableName = getTableName(type);
@@ -454,9 +433,9 @@ public static String[][]SQLData =
 
         // Try to compare each sourceType with the targetType
         for (int dataOffset = 0; dataOffset < SQLData[0].length; dataOffset++)
-            for (int sourceType = 0; sourceType < SQLTypes.length; sourceType++) {
-                String sourceTypeName = SQLTypes[sourceType];
-                for (int targetType = 0; targetType < SQLTypes.length; targetType++) {
+            for (int sourceType = 0; sourceType < SQLUtilities.SQLTypes.length; sourceType++) {
+                String sourceTypeName = SQLUtilities.SQLTypes[sourceType];
+                for (int targetType = 0; targetType < SQLUtilities.SQLTypes.length; targetType++) {
                     try {
                         String targetTableName = getTableName(targetType);
 
@@ -500,8 +479,8 @@ public static String[][]SQLData =
     protected void tearDown() throws SQLException, Exception {
         Statement scb = createStatement();
 
-        for (int type = 0; type < SQLTypes.length; type++) {
-            String typeName = SQLTypes[type];
+        for (int type = 0; type < SQLUtilities.SQLTypes.length; type++) {
+            String typeName = SQLUtilities.SQLTypes[type];
             String tableName = getTableName(type);
 
             String dropSQL = "drop table " + tableName;
@@ -536,7 +515,7 @@ public static String[][]SQLData =
      */
 
     private static String getShortTypeName(int type) {
-        String typeName = SQLTypes[type];
+        String typeName = SQLUtilities.SQLTypes[type];
         String shortName = typeName;
         int parenIndex = typeName.indexOf('(');
         if (parenIndex >= 0) {
@@ -607,16 +586,16 @@ public static String[][]SQLData =
     }
 
     private static void checkSupportedCast(int sourceType, int targetType) {
-        String description = " Cast from " + SQLTypes[sourceType] + " to "
-                + SQLTypes[targetType];
+        String description = " Cast from " + SQLUtilities.SQLTypes[sourceType] + " to "
+                + SQLUtilities.SQLTypes[targetType];
 
         if (!isSupportedCast(sourceType, targetType))
             fail(description + "should not succeed");
     }
 
     private static void checkSupportedAssignment(int sourceType, int targetType) {
-        String description = " Assignment from " + SQLTypes[sourceType]
-                + " to " + SQLTypes[targetType];
+        String description = " Assignment from " + SQLUtilities.SQLTypes[sourceType]
+                + " to " + SQLUtilities.SQLTypes[targetType];
 
         if (!isSupportedAssignment(sourceType, targetType))
             fail(description + "should not succeed");
@@ -624,8 +603,8 @@ public static String[][]SQLData =
     }
 
     private static void checkSupportedComparison(int sourceType, int targetType) {
-        String description = " Comparison of " + SQLTypes[sourceType] + " to "
-                + SQLTypes[targetType];
+        String description = " Comparison of " + SQLUtilities.SQLTypes[sourceType] + " to "
+                + SQLUtilities.SQLTypes[targetType];
 
         if (!isSupportedComparison(sourceType, targetType))
             fail("FAIL: unsupported comparison:" + description);

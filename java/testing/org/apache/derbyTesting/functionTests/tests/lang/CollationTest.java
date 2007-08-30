@@ -47,31 +47,6 @@ import org.apache.derbyTesting.junit.TestConfiguration;
 
 public class CollationTest extends BaseJDBCTestCase {
 
-	/*
-	 * ToDo test cases
-	 * 1)Use a parameter as cast operand and cast that to character type. The
-	 * resultant type should get it's collation from the compilation schema
-	 * 2)Test conditional if (NULLIF and CASE) with different datatypes to see
-	 * how casting works. The compile node for this SQL construct seems to be
-	 * dealing with lot of casting code (ConditionalNode)
-	 * 3)When doing concatenation testing, check what happens if concatantion
-	 * is between non-char types. This is because ConcatenationOperatorNode
-	 * in compile package has following comment "If either the left or right 
-	 * operands are non-string, non-bit types, then we generate an implicit 
-	 * cast to VARCHAR."
-	 * 4)Do testing with upper and lower
-	 * 5)It looks like node for LIKE ESCAPE which is LikeEscapeOperatorNode
-	 * also uses quite a bit of casting. Should include test for LIKE ESCAPE
-	 * which will trigger the casting.
-	 * 6)Binary arithmetic operators do casting if one of the operands is
-	 * string and other is numeric. Test that combination
-	 * 7)Looks like import utility does casting (in ColumnInfo class). See
-	 * if any testing is required for that.
-	 * 8)Do testing with UNION and use the results of UNION in collation
-	 * comparison (if there is something like that possible. I didn't put too
-	 * much thought into it but wanted to list here so we can do the required
-	 * testing if needed).
-	 */
     public CollationTest(String name) {
         super(name);
     }
@@ -1065,15 +1040,58 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     s.executeUpdate("create table a (vc varchar(30))");
     s.executeUpdate("insert into a values(CURRENT_DATE)");
     rs = s.executeQuery("select vc from a where vc = CURRENT_DATE");
+    
     assertEquals(1,JDBC.assertDrainResults(rs));
     rs = s.executeQuery("select vc from a where vc = UPPER(CURRENT_DATE)");
+    
     JDBC.assertDrainResults(rs,1);
+    rs = s.executeQuery("select vc from a where vc = LOWER(CURRENT_DATE)");
+    
+    JDBC.assertDrainResults(rs,1);    
     rs = s.executeQuery("select vc from a where vc =  '' || CURRENT_DATE");
+    
     JDBC.assertDrainResults(rs,1);
     rs = s.executeQuery("select vc from a where '' || CURRENT_DATE = vc");
-    assertEquals(1,JDBC.assertDrainResults(rs));
+    JDBC.assertDrainResults(rs,1);
+    
     assertStatementError("42818",s,"select TABLENAME FROM SYS.SYSTABLES WHERE UPPER(CURRENT_DATE) = TABLENAME");
-    s.close();
+    
+    
+   //Use a parameter as cast operand and cast that to character type. The
+   // * resultant type should get it's collation from the compilation schema
+   ps = prepareStatement("select vc from a where  CAST (? AS VARCHAR(30)) = vc");
+   ps.setString(1,"hello");
+   rs = ps.executeQuery();
+   JDBC.assertEmpty(rs);
+	
+   //Binary arithmetic operators do casting if one of the operands is
+   //string and other is numeric. Test that combination
+   rs = s.executeQuery("select vc from a where '1.2' + 1.2 = 2.4");
+   JDBC.assertDrainResults(rs,1);
+   
+   //Do testing with UNION and use the results of UNION in collation
+   //comparison 
+   s.executeUpdate("create table t1 (vc varchar(30))");
+   s.executeUpdate("create table t2 (vc varchar(30))");
+   s.executeUpdate("insert into t2 values('hello2')");
+   rs = s.executeQuery("select vc from t2 where vc = (select vc from t2 union select vc from t)");
+   JDBC.assertFullResultSet(rs, new String[][] {{"hello2"}});
+   s.executeUpdate("drop table t1");
+   s.executeUpdate("drop table t2");
+   
+   // Cast in escape in like
+   // Get Current date for use in query
+   rs = s.executeQuery("VALUES CURRENT_DATE");
+   rs.next();
+   java.sql.Date d = rs.getDate(1);
+   s.executeUpdate("create table t1 (vc varchar(30))");
+   s.executeUpdate("insert into t1 values(CURRENT_DATE)");
+   ps = prepareStatement("select vc from t1 where vc like ? escape '%'");
+   ps.setDate(1,d);
+   rs = ps.executeQuery();
+   JDBC.assertDrainResults(rs);
+   s.executeUpdate("drop table t1");
+   s.close();
 }
 
 private void setUpTable(Statement s) throws SQLException {
@@ -1181,7 +1199,6 @@ private void checkLangBasedQuery(Statement s, String query, String[][] expectedR
       suite.addTest(BatchUpdateTest.embeddedSuite());
       suite.addTest(GroupByExpressionTest.suite());
       suite.addTest(UpdatableResultSetTest.suite());
-      
       return Decorator.territoryCollatedDatabase(suite, locale);
   }
 

@@ -135,11 +135,11 @@ public class NullIfTest extends BaseJDBCTestCase {
      */
     public void testAllDatatypesCombinations() throws SQLException {
         Statement s = createStatement();
-        for (int firstColumnType = 0; firstColumnType < CastingTest.SQLTypes.length; firstColumnType++) {
+        for (int firstColumnType = 0; firstColumnType < SQLUtilities.SQLTypes.length; firstColumnType++) {
 
             StringBuffer nullIfString = new StringBuffer("SELECT NULLIF("
                     + SQLUtilities.allDataTypesColumnNames[firstColumnType]);
-            for (int secondColumnType = 0; secondColumnType < CastingTest.SQLTypes.length; secondColumnType++) {
+            for (int secondColumnType = 0; secondColumnType < SQLUtilities.SQLTypes.length; secondColumnType++) {
 
                 int row = 0;
                 try {
@@ -192,7 +192,7 @@ public class NullIfTest extends BaseJDBCTestCase {
      * @throws SQLException
      */
     public void testParameterForFirstOperandToNullIf() throws SQLException {
-        for (int secondColumnType = 0; secondColumnType < CastingTest.SQLTypes.length; secondColumnType++) {
+        for (int secondColumnType = 0; secondColumnType < SQLUtilities.SQLTypes.length; secondColumnType++) {
 
             String nullIfString = new String("SELECT NULLIF(?,"
                     + SQLUtilities.allDataTypesColumnNames[secondColumnType]
