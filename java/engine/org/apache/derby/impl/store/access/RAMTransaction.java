@@ -432,13 +432,6 @@ public class RAMTransaction
 		context = rtc;
 	}
 
-	/**
-		Get cache statistics for the specified cache
-	*/
-	public long[] getCacheStats(String cacheName) {
-		return getRawStoreXact().getCacheStats(cacheName);
-	}
-
     private ConglomerateController openConglomerate(
     Conglomerate                    conglom,
     boolean                         hold,
@@ -552,15 +545,6 @@ public class RAMTransaction
 		scanControllers.add(sm);
 
 		return(sm);
-	}
-
-
-
-	/**
-		Reset the cache statistics for the specified cache
-	*/
-	public void resetCacheStats(String cacheName) {
-		getRawStoreXact().resetCacheStats(cacheName);
 	}
 
     /**

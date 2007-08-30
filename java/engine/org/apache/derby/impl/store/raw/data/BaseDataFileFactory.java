@@ -1357,46 +1357,6 @@ public class BaseDataFileFactory
 		return pageCache;
 	}
 
-	public long[] getCacheStats(String cacheName) 
-    {
-
-		if (cacheName == null) 
-        {
-			// cache name is not specified, return the default.
-			return getPageCache().getCacheStats();
-		}
-
-		if (cacheName.equals("pageCache")) 
-        {
-			return getPageCache().getCacheStats();
-		} 
-        else
-        {
-			// return default set of cache.
-			return getPageCache().getCacheStats();
-        }
-	}
-
-	public void resetCacheStats(String cacheName) 
-    {
-		if (cacheName == null) 
-        {
-			// cache name is not specified, return the default.
-			getPageCache().resetCacheStats();
-			return;
-		}
-
-		if (cacheName.equals("pageCache")) 
-        {
-			getPageCache().resetCacheStats();
-		} 
-        else
-        {
-			// default
-			getPageCache().resetCacheStats();
-        }
-	}
-
 	/**
 		Ask the log factory to flush up to this log instant.
 

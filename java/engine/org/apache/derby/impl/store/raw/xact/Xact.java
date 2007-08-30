@@ -329,20 +329,6 @@ public class Xact extends RawTransaction implements Limit  {
 	}
 
 	/**
-		Get cache statistics for the specified cache
-	*/
-	public long[] getCacheStats(String cacheName) {
-		return getDataFactory().getCacheStats(cacheName);
-	}
-
-	/**
-		Reset the cache statistics for the specified cache
-	*/
-	public void resetCacheStats(String cacheName)  {
-		getDataFactory().resetCacheStats(cacheName);
-	}
-
-	/**
 		Return true if any transaction is currently blocked, even if not by
 		this transaction.
 

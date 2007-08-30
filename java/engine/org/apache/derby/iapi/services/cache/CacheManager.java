@@ -31,21 +31,6 @@ import java.util.Collection;
 
 public interface CacheManager {
 
-    /**
-     * @return the current maximum size of the cache.
-     */
-	public long getMaximumSize();
-
-    /**
-     * Change the maximum size of the cache. If the size is decreased then cache entries
-     * will be thrown out.
-     *
-     * @param newSize the new maximum cache size
-     *
-     * @exception StandardException Standard Derby error policy
-     */
-	public void resize( long newSize) throws StandardException;
-
 	/**
         Find an object in the cache.
         <p>
@@ -112,24 +97,6 @@ public interface CacheManager {
 	*/
 	public Cacheable findCached(Object key) throws StandardException;
 
-    /**
-     * Determine whether a key is in the cache.
-     *
-     * <b>WARNING:</b> This method does not keep a lock on the entry or the cache, so
-     * the return value could be made incorrect by the time that this method returns.
-     * Therefore this method should only be used for statistical purposes.
-     */
-    public boolean containsKey( Object key);
-    
-    /**
-     * Mark a set of entries as having been used. Normally this is done as a side effect
-     * of find() or findCached. If the entry has been replaced then this method
-     * does nothing.
-     *
-     * @param keys the key of the used entry.
-     */
-    public void setUsed( Object[] keys);
-    
 	/**
 		Create an object in the cache. The resulting object will match the key provided using the equals()
 		method, i.e. the return Cacheable will have getIdentifier.equals(key) true.
@@ -280,31 +247,6 @@ public interface CacheManager {
 		were not gotten rid of because it was kept.
 	*/
 	public boolean discard(Matchable partialKey);
-
-	/**
-		Report the number of items in use (with Identity) in this cache.
-	 */
-	public int getNumberInUse();
-
-	/**
-		Return statistics about cache that may be implemented.
-	**/
-	public long[] getCacheStats();
-
-	/**
-		reset the cache statistics to 0.
-	**/
-	public void resetCacheStats();
-
-    /**
-     * Perform an operation on (approximately) all entries that matches the filter,
-     * or all entries if the filter is null.  Entries that are added while the
-     * cache is being scanned might or might not be missed.
-     *
-     * @param filter
-     * @param operator
-     */
-    public void scan( Matchable filter, Operator operator);
 
 	/**
 	 * Return a Collection of the Cacheables currently in the

@@ -91,16 +91,6 @@ public abstract class RawTransaction extends Observable implements Transaction {
 	public abstract LogFactory getLogFactory();
 
 	/**
-		Get cache statistics for the specified cache
-	*/
-	public abstract long[] getCacheStats(String cacheName);
-
-	/**
-		Reset the cache statistics for the specified cache
-	*/
-	public abstract void resetCacheStats(String cacheName);
-
-	/**
 		Get the log buffer to be used during this transaction.
 	*/
 	public abstract DynamicByteArrayOutputStream getLogBuffer();

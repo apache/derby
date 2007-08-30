@@ -512,16 +512,6 @@ public interface Transaction {
 	public FileResource getFileHandler();
 
 	/**
-		Get cache statistics for the specified cache
-	*/
-	public abstract long[] getCacheStats(String cacheName);
-
-	/**
-		Reset the cache statistics for the specified cache
-	*/
-	public abstract void resetCacheStats(String cacheName);
-
-	/**
 		Return true if any transaction is blocked, even if not by this one.
 	 */
 	public  boolean anyoneBlocked();

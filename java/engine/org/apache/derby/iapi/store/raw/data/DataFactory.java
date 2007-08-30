@@ -240,16 +240,6 @@ public interface DataFactory extends Corruptable {
 	public void removeStubsOK();
 
 	/**
-		Get cache statistics for the specified cache
-	*/
-	public long[] getCacheStats(String cacheName);
-
-	/**
-		Reset the cache statistics for the specified cache
-	*/
-	public void resetCacheStats(String cacheName);
-
-	/**
 		Reclaim space used by this factory.  Called by post commit daemon.
 		@exception StandardException  Standard Derby exception policy
 	*/

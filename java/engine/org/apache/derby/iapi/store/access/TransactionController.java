@@ -1527,22 +1527,6 @@ public interface TransactionController
 		throws StandardException;
 
     /**************************************************************************
-     * Interfaces previously defined in TcCacheStatIface:
-     **************************************************************************
-     */
-
-	/**
-		Get cache statistics for the specified cache
-	*/
-	public long[] getCacheStats(String cacheName);
-
-	/**
-		Reset the cache statistics for the specified cache
-	*/
-	public void resetCacheStats(String cacheName);
-
-
-    /**************************************************************************
      * Interfaces previously defined in TcLogIface:
      **************************************************************************
      */
