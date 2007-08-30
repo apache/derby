@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://www.netbeans.org/ns/project/1">
+    <type>org.netbeans.modules.ant.freeform</type>
+    <configuration>
+        <general-data xmlns="http://www.netbeans.org/ns/freeform-project/1">
+            <!-- Do not use Project Properties customizer when editing this file manually. -->
+            <name>derby</name>
+            <properties>
+                <property name="project.dir">../../../..</property>
+                <property name="ant.script">${project.dir}/build.xml</property>
+            </properties>
+            <folders>
+                <source-folder>
+                    <label>java/build</label>
+                    <type>java</type>
+                    <location>${project.dir}/java/build</location>
+                </source-folder>
+                <source-folder>
+                    <label>java/client</label>
+                    <type>java</type>
+                    <location>${project.dir}/java/client</location>
+                </source-folder>
+                <source-folder>
+                    <label>java/demo</label>
+                    <type>java</type>
+                    <location>${project.dir}/java/demo</location>
+                </source-folder>
+                <source-folder>
+                    <label>java/drda</label>
+                    <type>java</type>
+                    <location>${project.dir}/java/drda</location>
+                </source-folder>
+                <source-folder>
+                    <label>java/engine</label>
+                    <type>java</type>
+                    <location>${project.dir}/java/engine</location>
+                </source-folder>
+                <source-folder>
+                    <label>java/shared</label>
+                    <type>java</type>
+                    <location>${project.dir}/java/shared</location>
+                </source-folder>
+                <source-folder>
+                    <label>java/storeless</label>
+                    <type>java</type>
+                    <location>${project.dir}/java/storeless</location>
+                </source-folder>
+                <source-folder>
+                    <label>java/testing</label>
+                    <type>java</type>
+                    <location>${project.dir}/java/testing</location>
+                </source-folder>
+                <source-folder>
+                    <label>java/tools</label>
+                    <type>java</type>
+                    <location>${project.dir}/java/tools</location>
+                </source-folder>
+                <source-folder>
+                    <label>trunk</label>
+                    <location>${project.dir}</location>
+                </source-folder>
+            </folders>
+            <ide-actions>
+                <action name="build">
+                    <script>${ant.script}</script>
+                    <target>all</target>
+                </action>
+                <action name="clean">
+                    <script>${ant.script}</script>
+                    <target>clobber</target>
+                </action>
+                <action name="javadoc">
+                    <script>${ant.script}</script>
+                    <target>javadoc</target>
+                </action>
+                <action name="test">
+                    <script>${ant.script}</script>
+                    <target>junit-core</target>
+                </action>
+                <action name="rebuild">
+                    <script>${ant.script}</script>
+                    <target>clobber</target>
+                    <target>all</target>
+                </action>
+            </ide-actions>
+            <view>
+                <items>
+                    <source-folder style="packages">
+                        <label>java/build</label>
+                        <location>${project.dir}/java/build</location>
+                    </source-folder>
+                    <source-folder style="packages">
+                        <label>java/client</label>
+                        <location>${project.dir}/java/client</location>
+                    </source-folder>
+                    <source-folder style="packages">
+                        <label>java/demo</label>
+                        <location>${project.dir}/java/demo</location>
+                    </source-folder>
+                    <source-folder style="packages">
+                        <label>java/drda</label>
+                        <location>${project.dir}/java/drda</location>
+                    </source-folder>
+                    <source-folder style="packages">
+                        <label>java/engine</label>
+                        <location>${project.dir}/java/engine</location>
+                    </source-folder>
+                    <source-folder style="packages">
+                        <label>java/shared</label>
+                        <location>${project.dir}/java/shared</location>
+                    </source-folder>
+                    <source-folder style="packages">
+                        <label>java/storeless</label>
+                        <location>${project.dir}/java/storeless</location>
+                    </source-folder>
+                    <source-folder style="packages">
+                        <label>java/testing</label>
+                        <location>${project.dir}/java/testing</location>
+                    </source-folder>
+                    <source-folder style="packages">
+                        <label>java/tools</label>
+                        <location>${project.dir}/java/tools</location>
+                    </source-folder>
+                    <source-file>
+                        <location>${ant.script}</location>
+                    </source-file>
+                </items>
+                <context-menu>
+                    <ide-action name="build"/>
+                    <ide-action name="clean"/>
+                    <ide-action name="javadoc"/>
+                    <ide-action name="test"/>
+                    <ide-action name="rebuild"/>
+                </context-menu>
+            </view>
+        </general-data>
+        <java-data xmlns="http://www.netbeans.org/ns/freeform-project-java/1">
+            <compilation-unit>
+                <package-root>${project.dir}/java/build</package-root>
+                <package-root>${project.dir}/java/client</package-root>
+                <package-root>${project.dir}/java/demo</package-root>
+                <package-root>${project.dir}/java/drda</package-root>
+                <package-root>${project.dir}/java/engine</package-root>
+                <package-root>${project.dir}/java/shared</package-root>
+                <package-root>${project.dir}/java/storeless</package-root>
+                <package-root>${project.dir}/java/testing</package-root>
+                <package-root>${project.dir}/java/tools</package-root>
+                <classpath mode="compile">${project.dir}/classes:${project.dir}/tools/java/geronimo-spec-servlet-2.4-rc4.jar:${project.dir}/tools/java/jakarta-oro-2.0.8.jar:${project.dir}/tools/java/javacc.jar:${project.dir}/tools/java/junit.jar:${project.dir}/tools/java/xercesImpl.jar:${project.dir}/tools/java/xml-apis.jar</classpath>
+                <source-level>1.4</source-level>
+            </compilation-unit>
+        </java-data>
+    </configuration>
+</project>
