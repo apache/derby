@@ -1234,16 +1234,16 @@ public interface StoredFormatIds {
             (MIN_ID_2 + 227);
 
     /**
-            class org.apache.derby.Database.Language.Execution.ValueRow
-     */
-    static public final int VALUE_ROW_V01_ID =
-            (MIN_ID_2 + 237);
+     * 237 - unused
+      */
+    //static public final int VALUE_ROW_V01_ID =
+    //        (MIN_ID_2 + 237);
 
     /**
-            class org.apache.derby.Database.Language.Execution.IndexRow
+      238 unused
      */
-    static public final int INDEX_ROW_V01_ID =
-            (MIN_ID_2 + 238);
+    //static public final int INDEX_ROW_V01_ID =
+    //       (MIN_ID_2 + 238);
 
     /**
       class org.apache.derby.impl.sql.execute.AddJarConstantAction;
