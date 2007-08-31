@@ -32,6 +32,7 @@ import org.apache.derby.catalog.types.BaseTypeIdImpl;
 import org.apache.derby.catalog.types.RowMultiSetImpl;
 import org.apache.derby.catalog.types.TypeDescriptorImpl;
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.io.Formatable;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
@@ -42,6 +43,12 @@ import org.apache.derby.iapi.sql.conn.ConnectionUtil;
 
 /** 
  * DataTypeDescriptor describes a runtime SQL type.
+ * It consists of a catalog type (TypeDescriptor)
+ * and runtime attributes. The list of runtime
+ * attributes is:
+ * <UL>
+ * <LI> Collation Derivation
+ * </UL>
  */
 
 public final class DataTypeDescriptor implements TypeDescriptor, Formatable
@@ -311,6 +318,10 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 
 	private TypeDescriptorImpl	typeDescriptor;
 	private TypeId			typeId;
+    
+    /** @see TypeDescriptor#getCollationDerivation() */
+    private int collationDerivation = StringDataValue.COLLATION_DERIVATION_IMPLICIT;
+
 
 	/**
 	 * Public niladic constructor. Needed for Formatable interface to work.
@@ -368,8 +379,8 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 												scale,
 												isNullable,
 												maximumWidth,
-												collationType,
-												collationDerivation);
+												collationType);
+        this.collationDerivation = collationDerivation;
 	}
 
 	/**
@@ -413,8 +424,9 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 												source.getScale(),
 												isNullable,
 												source.getMaximumWidth(),
-												source.getCollationType(),
-												source.getCollationDerivation());
+												source.getCollationType()
+												);
+        this.collationDerivation = source.getCollationDerivation();
 	}
 
 	/**
@@ -441,8 +453,9 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 												scale,
 												isNullable,
 												maximumWidth,
-												source.getCollationType(),
-												source.getCollationDerivation());
+												source.getCollationType()
+												);
+        this.collationDerivation = source.getCollationDerivation();
 	}
 
 	/**
@@ -462,8 +475,9 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 				source.getScale(),
 				isNullable,
 				maximumWidth,
-				source.getCollationType(),
-				source.getCollationDerivation());
+				source.getCollationType()
+				);
+        this.collationDerivation = source.getCollationDerivation();
 
 	}
 
@@ -959,10 +973,26 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 	 *
 	 *  @return	the name of the collation being used in this type.
 	 */
-	public String getCollationName()
-	{
-        return(typeDescriptor.getCollationName());
-	}
+    /**
+     * Gets the name of the collation type in this descriptor if the collation
+     * derivation is not NONE. If the collation derivation is NONE, then this
+     * method will return "NONE".
+     * <p>
+     * This method is used for generating error messages which will use correct
+     * string describing collation type/derivation.
+     * 
+     *
+     *  @return the name of the collation being used in this type.
+     */
+    public String getCollationName()
+    {
+        return(
+                getCollationDerivation() == StringDataValue.COLLATION_DERIVATION_NONE ?
+                        Property.COLLATION_NONE :
+                getCollationType() == StringDataValue.COLLATION_TYPE_UCS_BASIC ?
+                        Property.UCS_BASIC_COLLATION :
+                        Property.TERRITORY_BASED_COLLATION);
+    }
 
     /**
      * Set the collation type of this TypeDescriptor
@@ -977,10 +1007,45 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 		typeDescriptor.setCollationType(collationTypeValue);
 	}
 
-	/** @see TypeDescriptor#getCollationDerivation() */
+    /**
+     * Get the collation derivation for this type. This applies only for
+     * character string types. For the other types, this api should be
+     * ignored.
+     * 
+     * SQL spec talks about character string types having collation type and 
+     * collation derivation associated with them (SQL spec Section 4.2.2 
+     * Comparison of character strings). If collation derivation says explicit 
+     * or implicit, then it means that there is a valid collation type 
+     * associated with the charcter string type. If the collation derivation is 
+     * none, then it means that collation type can't be established for the 
+     * character string type.
+     * 
+     * 1)Collation derivation will be explicit if SQL COLLATE clause has been  
+     * used for character string type (this is not a possibility for Derby 10.3 
+     * because we are not planning to support SQL COLLATE clause in the 10.3
+     * release). 
+     * 
+     * 2)Collation derivation will be implicit if the collation can be 
+     * determined w/o the COLLATE clause eg CREATE TABLE t1(c11 char(4)) then 
+     * c11 will have collation of USER character set. Another eg, TRIM(c11) 
+     * then the result character string of TRIM operation will have collation 
+     * of the operand, c11.
+     * 
+     * 3)Collation derivation will be none if the aggregate methods are dealing 
+     * with character strings with different collations (Section 9.3 Data types 
+     * of results of aggregations Syntax Rule 3aii).
+     *  
+     * Collation derivation will be initialized to COLLATION_DERIVATION_NONE.
+     *  
+     * @return Should be COLLATION_DERIVATION_NONE or COLLATION_DERIVATION_IMPLICIT
+     * 
+     * @see StringDataValue#COLLATION_DERIVATION_NONE
+     * @see StringDataValue#COLLATION_DERIVATION_IMPLICIT
+     * @see StringDataValue#COLLATION_DERIVATION_EXPLICIT
+     */
 	public int	getCollationDerivation()
 	{
-		return typeDescriptor.getCollationDerivation();
+		return collationDerivation;
 	}
 
 	/**
@@ -1004,7 +1069,7 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
      */
 	public void	setCollationDerivation(int collationDerivationValue)
 	{
-		typeDescriptor.setCollationDerivation(collationDerivationValue);
+        collationDerivation = collationDerivationValue;
 	}
 
 	/**
@@ -1046,12 +1111,17 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
     }
 
 	/**
-	  Compare if two TypeDescriptors are exactly the same
-	  @param aTypeDescriptor the typeDescriptor to compare to.
+	  Compare if two DataTypeDescriptors are exactly the same
+	  @param other the type to compare to.
 	  */
-	public boolean equals(Object aTypeDescriptor)
+	public boolean equals(Object other)
 	{
-		return typeDescriptor.equals(aTypeDescriptor);
+        if (!(other instanceof DataTypeDescriptor))
+            return false;
+        
+        DataTypeDescriptor odtd = (DataTypeDescriptor) other;
+        return typeDescriptor.equals(odtd.typeDescriptor)
+          && collationDerivation == odtd.collationDerivation;
 	}
 
 	/**

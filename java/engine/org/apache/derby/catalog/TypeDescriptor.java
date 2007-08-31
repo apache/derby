@@ -180,54 +180,6 @@ public interface TypeDescriptor
 	public int getCollationType();
 
 	/**
-	 * Get the collation derivation for this type. This applies only for
-	 * character string types. For the other types, this api should be
-	 * ignored.
-	 * 
-	 * SQL spec talks about character string types having collation type and 
-	 * collation derivation associated with them (SQL spec Section 4.2.2 
-	 * Comparison of character strings). If collation derivation says explicit 
-	 * or implicit, then it means that there is a valid collation type 
-	 * associated with the charcter string type. If the collation derivation is 
-	 * none, then it means that collation type can't be established for the 
-	 * character string type.
-	 * 
-	 * 1)Collation derivation will be explicit if SQL COLLATE clause has been  
-	 * used for character string type (this is not a possibility for Derby 10.3 
-	 * because we are not planning to support SQL COLLATE clause in the 10.3
-	 * release). 
-	 * 
-	 * 2)Collation derivation will be implicit if the collation can be 
-	 * determined w/o the COLLATE clause eg CREATE TABLE t1(c11 char(4)) then 
-	 * c11 will have collation of USER character set. Another eg, TRIM(c11) 
-	 * then the result character string of TRIM operation will have collation 
-	 * of the operand, c11.
-	 * 
-	 * 3)Collation derivation will be none if the aggregate methods are dealing 
-	 * with character strings with different collations (Section 9.3 Data types 
-	 * of results of aggregations Syntax Rule 3aii).
-	 *  
-	 * Collation derivation will be initialized to COLLATION_DERIVATION_NONE.
-	 *  
-	 * @return Should be COLLATION_DERIVATION_NONE or COLLATION_DERIVATION_IMPLICIT
-     * 
-     * @see StringDataValue#COLLATION_DERIVATION_NONE
-     * @see StringDataValue#COLLATION_DERIVATION_IMPLICIT
-     * @see StringDataValue#COLLATION_DERIVATION_EXPLICIT
-	 */
-	public int getCollationDerivation();
-
-	/**
-	 * Gets the name of the collation type in this descriptor.
-     * <p>
-     * Used to generate strings decribing collation type for error messages.
-	 * 
-	 *
-	 *  @return	the name of the collation being used in this type.
-	 */
-	public String getCollationName();
-
-	/**
 	 * Return true if this is a Row Multiset type
 	  */
 	public	boolean isRowMultiSet();

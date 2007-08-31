@@ -58,8 +58,6 @@ public class TypeDescriptorImpl implements TypeDescriptor, Formatable
 	private int						maximumWidth;
 	/** @see TypeDescriptor#getCollationType() */
 	private int	collationType = StringDataValue.COLLATION_TYPE_UCS_BASIC;
-	/** @see TypeDescriptor#getCollationDerivation() */
-	private int	collationDerivation = StringDataValue.COLLATION_DERIVATION_IMPLICIT;
 
 	/**
 	 * Public niladic constructor. Needed for Formatable interface to work.
@@ -116,8 +114,7 @@ public class TypeDescriptorImpl implements TypeDescriptor, Formatable
 		int scale,
 		boolean isNullable,
 		int maximumWidth,
-		int collationType,
-		int collationDerivation)
+		int collationType)
 	{
 		this.typeId = typeId;
 		this.precision = precision;
@@ -125,7 +122,6 @@ public class TypeDescriptorImpl implements TypeDescriptor, Formatable
 		this.isNullable = isNullable;
 		this.maximumWidth = maximumWidth;
 		this.collationType = collationType;
-		this.collationDerivation = collationDerivation;
 	}
 
 	/**
@@ -178,8 +174,7 @@ public class TypeDescriptorImpl implements TypeDescriptor, Formatable
 			int scale,
 			boolean isNullable,
 			int maximumWidth,
-			int collationType,
-			int collationDerivation)
+			int collationType)
 		{
 			this.typeId = source.typeId;
 			this.precision = precision;
@@ -187,7 +182,6 @@ public class TypeDescriptorImpl implements TypeDescriptor, Formatable
 			this.isNullable = isNullable;
 			this.maximumWidth = maximumWidth;
 			this.collationType = collationType;
-			this.collationDerivation = collationDerivation;
 		}
 	
 	
@@ -411,39 +405,6 @@ public class TypeDescriptorImpl implements TypeDescriptor, Formatable
 		collationType = collationTypeValue;
 	}
 
-	/** @see TypeDescriptor#getCollationDerivation() */
-	public int	getCollationDerivation()
-	{
-		return collationDerivation;
-	}
-
-	/** @see DataTypeDescriptor#setCollationDerivation(int) */
-	public void	setCollationDerivation(int collationDerivationValue)
-	{
-		collationDerivation = collationDerivationValue;
-	}
-
-	/**
-	 * Gets the name of the collation type in this descriptor if the collation
-	 * derivation is not NONE. If the collation derivation is NONE, then this
-	 * method will return "NONE".
-     * <p>
-     * This method is used for generating error messages which will use correct
-     * string describing collation type/derivation.
-	 * 
-	 *
-	 *  @return	the name of the collation being used in this type.
-	 */
-	public String getCollationName()
-    {
-        return(
-        		collationDerivation == StringDataValue.COLLATION_DERIVATION_NONE ?
-        				Property.COLLATION_NONE :
-        		collationType == StringDataValue.COLLATION_TYPE_UCS_BASIC ?
-        				Property.UCS_BASIC_COLLATION :
-        				Property.TERRITORY_BASED_COLLATION);
-    }
-
 	/**
 	 * Converts this data type descriptor (including length/precision)
 	 * to a string. E.g.
@@ -501,8 +462,7 @@ public class TypeDescriptorImpl implements TypeDescriptor, Formatable
 			case Types.CLOB:
 				//if we are dealing with character types, then we should 
 				//also compare the collation information on them.
-				if(this.collationDerivation != typeDescriptor.getCollationDerivation() ||
-						this.collationType != typeDescriptor.getCollationType())
+				if(this.collationType != typeDescriptor.getCollationType())
 					return false;
 				else
 					return true;
@@ -547,17 +507,10 @@ public class TypeDescriptorImpl implements TypeDescriptor, Formatable
 		case Types.CLOB:
 			scale = 0;
 			collationType = in.readInt();
-			//I am assuming that the readExternal gets called only on 
-			//persistent columns. Since all persistent character string type
-			//columns always have the collation derivation of implicit, I will 
-			//simply use that value for collation derivation here for character 
-			//string type columns.
-			collationDerivation = StringDataValue.COLLATION_DERIVATION_IMPLICIT;
 			break;
 		default:
 			scale = in.readInt();
 			collationType = 0;
-			collationDerivation = StringDataValue.COLLATION_DERIVATION_IMPLICIT;
 			break;
 		}
 		
