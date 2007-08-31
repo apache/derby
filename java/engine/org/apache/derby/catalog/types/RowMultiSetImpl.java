@@ -20,9 +20,9 @@
  */
 
 package org.apache.derby.catalog.types;
+import org.apache.derby.catalog.TypeDescriptor;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
-import org.apache.derby.iapi.types.DataTypeDescriptor;
 import java.io.ObjectOutput;
 import java.io.ObjectInput;
 import java.io.IOException;
@@ -63,7 +63,7 @@ public class RowMultiSetImpl extends BaseTypeIdImpl
     ///////////////////////////////////////////////////////////////////////////////////
 
     private String[]                            _columnNames;
-    private DataTypeDescriptor[]    _types;
+    private TypeDescriptor[]    _types;
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -84,7 +84,7 @@ public class RowMultiSetImpl extends BaseTypeIdImpl
      * Construct from column names and their types.
      * </p>
      */
-    public RowMultiSetImpl( String[] columnNames, DataTypeDescriptor[] types )
+    public RowMultiSetImpl( String[] columnNames, TypeDescriptor[] types )
     {
         _columnNames = columnNames;
         _types = types;
@@ -110,7 +110,7 @@ public class RowMultiSetImpl extends BaseTypeIdImpl
     public  String[]    getColumnNames()    { return _columnNames; }
     
     /** Get the types of the columns in this row set */
-    public  DataTypeDescriptor[]    getTypes() { return _types; }
+    public  TypeDescriptor[]    getTypes() { return _types; }
     
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -195,10 +195,10 @@ public class RowMultiSetImpl extends BaseTypeIdImpl
         int     count = in.readInt();
 
         _columnNames = new String[ count ];
-        _types = new DataTypeDescriptor[ count ];
+        _types = new TypeDescriptor[ count ];
 
         for ( int i = 0; i < count; i++ ) { _columnNames[ i ] = in.readUTF(); }
-        for ( int i = 0; i < count; i++ ) { _types[ i ] = (DataTypeDescriptor) in.readObject(); }
+        for ( int i = 0; i < count; i++ ) { _types[ i ] = (TypeDescriptor) in.readObject(); }
     }
 
     /**

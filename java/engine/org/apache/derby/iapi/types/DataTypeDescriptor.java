@@ -110,7 +110,15 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 		** be wrapped in.
 		*/
         TypeId wrapperTypeId = new TypeId(typeId.wrapperTypeFormatId(), typeId);
-		return new DataTypeDescriptor(typeDescriptor, wrapperTypeId);
+		DataTypeDescriptor dtd =
+            new DataTypeDescriptor(typeDescriptor, wrapperTypeId);
+        
+        // By definition, any catalog type (column in a table,
+        // procedure etc.) is derivation implicit.
+        dtd.setCollationDerivation(
+                StringDataValue.COLLATION_DERIVATION_IMPLICIT);
+        
+        return dtd;
 	}
     
     /**
@@ -306,7 +314,11 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 		DataTypeDescriptor[]	types
 	)
 	{
-		RowMultiSetImpl       rms = new RowMultiSetImpl( columnNames, types );
+        TypeDescriptor[] catalogTypes =
+            new TypeDescriptor[types.length];
+        for (int i = 0; i < types.length; i++)
+            catalogTypes[i] = types[i].getCatalogType();
+		RowMultiSetImpl rms = new RowMultiSetImpl(columnNames, catalogTypes);
 		TypeId              typeID = new TypeId( StoredFormatIds.ROW_MULTISET_CATALOG_ID, rms );
 
 		return new DataTypeDescriptor( typeID, true);
@@ -319,7 +331,10 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 	private TypeDescriptorImpl	typeDescriptor;
 	private TypeId			typeId;
     
-    /** @see TypeDescriptor#getCollationDerivation() */
+    /**
+     * Derivation of this type. All catalog types are
+     * by definition implicit.
+     */
     private int collationDerivation = StringDataValue.COLLATION_DERIVATION_IMPLICIT;
 
 

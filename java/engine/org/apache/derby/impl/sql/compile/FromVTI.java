@@ -1589,12 +1589,13 @@ public class FromVTI extends FromTable implements VTIEnvironment
         DataTypeDescriptor      returnType = (DataTypeDescriptor) td;
         RowMultiSetImpl         rmsi = (RowMultiSetImpl) returnType.getTypeId().getBaseTypeId();
         String[]                        columnNames = rmsi.getColumnNames();
-        DataTypeDescriptor[]    types = rmsi.getTypes();
+        TypeDescriptor[]    types = rmsi.getTypes();
         int                                     count = columnNames.length;
         
         for ( int i = 0; i < count; i++ )
         {
-            resultColumns.addColumn( exposedName, columnNames[ i ], types[ i ] );
+            resultColumns.addColumn( exposedName, columnNames[ i ],
+                    DataTypeDescriptor.getType(types[i]));
         }
 
     }
