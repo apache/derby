@@ -21,15 +21,7 @@
 
 package org.apache.derby.impl.sql.execute;
 
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
-
-import org.apache.derby.iapi.services.io.ArrayUtil;
-import org.apache.derby.iapi.services.io.Formatable;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
-import org.apache.derby.iapi.services.io.Storable;
-import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.sql.execute.ExecRow;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.RowLocation;
@@ -38,22 +30,8 @@ import org.apache.derby.iapi.types.RowLocation;
 	Basic implementation of ExecRow.
 
  */
-public class ValueRow implements ExecRow, Formatable
+public class ValueRow implements ExecRow
 {
-	/********************************************************
-	**
-	**	This class implements Formatable. That means that it
-	**	can write itself to and from a formatted stream. If
-	**	you add more fields to this class, make sure that you
-	**	also write/read them with the writeExternal()/readExternal()
-	**	methods.
-	**
-	**	If, inbetween releases, you add more fields to this class,
-	**	then you should bump the version number emitted by the getTypeFormatId()
-	**	method.
-	**
-	********************************************************/
-
 	///////////////////////////////////////////////////////////////////////
 	//
 	//	STATE
@@ -69,11 +47,6 @@ public class ValueRow implements ExecRow, Formatable
 	//
 	///////////////////////////////////////////////////////////////////////
 
-	/**
-	 * Public niladic constructor. Needed for Formatable interface to work.
-	 *
-	 */
-    public	ValueRow() {}
 
 	/**
 	  *	Make a value row with a designated number of column slots.
@@ -110,7 +83,7 @@ public class ValueRow implements ExecRow, Formatable
 	// position is 1-based
 	public DataValueDescriptor	getColumn (int position) {
 		if (position <= column.length)
-			return (DataValueDescriptor) (column[position-1]);
+			return column[position-1];
 		else
 			return (DataValueDescriptor)null;
 	}
@@ -283,48 +256,4 @@ public class ValueRow implements ExecRow, Formatable
 		System.arraycopy(column, 0, newcol, 0, column.length);
 		column = newcol;
 	}
-
-	///////////////////////////////////////////////////////////////////////
-	//
-	//	FORMATABLE INTERFACE
-	//
-	///////////////////////////////////////////////////////////////////////
-
-	/**
-	 * Read this object from a stream of stored objects.
-	 *
-	 * @param in read this.
-	 *
-	 * @exception IOException					thrown on error
-	 * @exception ClassNotFoundException		thrown on error
-	 */
-	public void readExternal( ObjectInput in )
-		 throws IOException, ClassNotFoundException
-	{
-		column = new DataValueDescriptor[ArrayUtil.readArrayLength(in)];
-		ArrayUtil.readArrayItems(in, column);
-		ncols = column.length;
-	}
-
-	/**
-	 * Write this object to a stream of stored objects.
-	 *
-	 * @param out write bytes here.
-	 *
-	 * @exception IOException		thrown on error
-	 */
-	public void writeExternal( ObjectOutput out )
-		 throws IOException
-	{
-		ArrayUtil.writeArrayLength(out, column);
-		ArrayUtil.writeArrayItems(out, column);
-	}
-
-	/**
-	 * Get the formatID which corresponds to this class.
-	 *
-	 *	@return	the formatID of this class
-	 */
-	public	int getTypeFormatId()	{ return StoredFormatIds.VALUE_ROW_V01_ID; }
-
 }

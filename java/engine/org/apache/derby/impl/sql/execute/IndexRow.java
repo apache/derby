@@ -37,20 +37,6 @@ import org.apache.derby.iapi.sql.execute.ExecRow;
  */
 public class IndexRow extends ValueRow implements ExecIndexRow
 {
-	/********************************************************
-	**
-	**	This class implements Formatable. That means that it
-	**	can write itself to and from a formatted stream. If
-	**	you add more fields to this class, make sure that you
-	**	also write/read them with the writeExternal()/readExternal()
-	**	methods.
-	**
-	**	If, inbetween releases, you add more fields to this class,
-	**	then you should bump the version number emitted by the getTypeFormatId()
-	**	method.
-	**
-	********************************************************/
-
 	///////////////////////////////////////////////////////////////////////
 	//
 	//	STATE
@@ -65,12 +51,6 @@ public class IndexRow extends ValueRow implements ExecIndexRow
 	//	CONSTRUCTORS
 	//
 	///////////////////////////////////////////////////////////////////////
-
-	/**
-	 * Public niladic constructor. Needed for Formatable interface to work.
-	 *
-	 */
-    public	IndexRow() {}
 
 	IndexRow(int ncols) {
 		 super(ncols);
@@ -103,54 +83,6 @@ public class IndexRow extends ValueRow implements ExecIndexRow
 				"execRowToExecIndexRow() not expected to be called for IndexRow");
 		}
 	}
-
-	///////////////////////////////////////////////////////////////////////
-	//
-	//	FORMATABLE INTERFACE
-	//
-	///////////////////////////////////////////////////////////////////////
-
-	/**
-	 * Read this object from a stream of stored objects.
-	 *
-	 * @param in read this.
-	 *
-	 * @exception IOException					thrown on error
-	 * @exception ClassNotFoundException		thrown on error
-	 */
-	public void readExternal( ObjectInput in )
-		 throws IOException, ClassNotFoundException
-	{
-		super.readExternal( in );
-
-		int colCount = nColumns();
-
-		orderedNulls = new boolean[ colCount ];
-		for ( int ictr = 0; ictr < colCount; ictr++ ) { orderedNulls[ ictr ] = in.readBoolean(); }
-	}
-
-	/**
-	 * Write this object to a stream of stored objects.
-	 *
-	 * @param out write bytes here.
-	 *
-	 * @exception IOException		thrown on error
-	 */
-	public void writeExternal( ObjectOutput out )
-		 throws IOException
-	{
-		super.writeExternal( out );
-		int colCount = nColumns();
-
-		for ( int ictr = 0; ictr < colCount; ictr++ ) { out.writeBoolean( orderedNulls[ ictr ] ); }
-	}
-
-	/**
-	 * Get the formatID which corresponds to this class.
-	 *
-	 *	@return	the formatID of this class
-	 */
-	public	int	getTypeFormatId()	{ return StoredFormatIds.INDEX_ROW_V01_ID; }
 
 	ExecRow cloneMe() {
 		return new IndexRow(nColumns());
