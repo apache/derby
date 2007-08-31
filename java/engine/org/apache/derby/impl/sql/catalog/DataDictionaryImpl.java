@@ -469,7 +469,7 @@ public final class	DataDictionaryImpl
 	public void boot(boolean create, Properties startParams) 
 			throws StandardException
 	{
-		softwareVersion = new DD_Version(this, DataDictionary.DD_VERSION_DERBY_10_3);
+		softwareVersion = new DD_Version(this, DataDictionary.DD_VERSION_DERBY_10_4);
 
 		/* There is a bootstrapping problem here. We would like to use
          * a language connection context to find the name of the system and default
