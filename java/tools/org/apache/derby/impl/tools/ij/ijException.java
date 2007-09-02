@@ -59,7 +59,6 @@ public class ijException extends RuntimeException {
 	private final static String ResultSetGetWarningsFailed = "IJ_UnabToGetWar_19";
     private final static String ResourceNotFound = "IJ_ResoNotFoun";
 	private final static String ScrollCursorsNotSupported = "IJ_ScroCursAre1";
-	private final static String HoldCursorsNotSupported = "IJ_HoldCursAre4";
 	private final static String StatementGetWarningsFailed = "IJ_UnabToGetWar_22";
 	private final static String WaitInterrupted = "IJ_WaitForStatI";
 	private final static String ZeroInvalidForAbsolute = "IJ_0IsAnInvaVal";
@@ -140,11 +139,6 @@ public class ijException extends RuntimeException {
 	}
 	static ijException scrollCursorsNotSupported() {
 		return new ijException(LocalizedResource.getMessage(ScrollCursorsNotSupported));
-	}
-	//IJImpl20.utilMain can't throw exception for holdable cursors if
-	//following not declared public
-	public static ijException holdCursorsNotSupported() {
-		return new ijException(LocalizedResource.getMessage(HoldCursorsNotSupported));
 	}
 	static ijException statementGetWarningsFailed() {
 		return new ijException(LocalizedResource.getMessage(StatementGetWarningsFailed));

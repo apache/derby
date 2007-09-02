@@ -21,7 +21,6 @@
 
 package org.apache.derby.tools;
 
-import org.apache.derby.iapi.services.info.JVMInfo;
 import org.apache.derby.iapi.tools.i18n.LocalizedInput;
 import org.apache.derby.iapi.tools.i18n.LocalizedOutput;
 import org.apache.derby.iapi.tools.i18n.LocalizedResource;
@@ -57,19 +56,7 @@ public class ij {
   	@exception IOException thrown if cannot access input or output files.
    */
   static public void main(String[] args) throws IOException {
-
-	  /* We decide which verion of ij (2.0 or 4.0) to
-	   * load based on the same criteria that the JDBC driver
-	   * uses.
-	   */
-	  if (JVMInfo.JDK_ID == JVMInfo.J2SE_13)
-	  {
-		  Main.main(args);
-	  }
-	  else
-	  {
-		  org.apache.derby.impl.tools.ij.Main14.main(args);
-	  }
+      Main.main(args);
   }
   
   /**
@@ -101,20 +88,7 @@ public class ij {
 		          LocalizedResource.getInstance().
                     getNewEncodedOutput(sqlOut, outputEncoding);
 
-	  Main ijE;
-	  if (JVMInfo.JDK_ID == JVMInfo.J2SE_13)
-	  {
-		  ijE = new Main(false);
-	  }
-	  else
-	  {
-		  // temp - allow ij to continue to work under jdk131
-		  // will resolve as part of DEBRY-1609
-		  // jdk13 gets error loading Main14 due to the
-		  // class now being built with the jdk14 target flag.
-		  // ijE = new org.apache.derby.impl.tools.ij.Main14(false);
-		  ijE = new Main(false);
-	  }	  
+	  Main ijE = new Main(false);
 	  
 	  LocalizedInput li = LocalizedResource.getInstance().
 	            getNewEncodedInput(sqlIn, inputEncoding);

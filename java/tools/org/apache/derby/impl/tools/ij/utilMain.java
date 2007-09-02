@@ -57,6 +57,9 @@ import java.sql.PreparedStatement;
  */
 public class utilMain implements java.security.PrivilegedAction {
 
+    private static final String JDBC_NOTSUPPORTED =
+        "JDBC 3 method called - not yet supported";
+
 	private StatementFinder[] commandGrabber;
 	UCode_CharStream charStream;
 	ijTokenManager ijTokMgr;
@@ -656,50 +659,6 @@ public class utilMain implements java.security.PrivilegedAction {
 		mtUse = b;
 	}
 
-	// JDBC 2.0 support
-
-
-	/**
-	 * Connections by default create ResultSet objects with holdability true. This method can be used
-	 * to change the holdability of the connection by passing one of ResultSet.HOLD_CURSORS_OVER_COMMIT
-	 * or ResultSet.CLOSE_CURSORS_AT_COMMIT.
-	 *
-	 * @param conn			The connection.
-	 * @param holdType	The new holdability for the Connection object.
-	 *
-	 * @return	The connection object with holdability set to passed value.
-	 */
-	Connection setHoldability(Connection conn, int holdType)
-		throws SQLException
-	{
-    //Prior to db2 compatibility work, the default holdability for connections was close cursors over commit and all the tests
-    //were written based on that assumption
-    //Later, as part of db2 compatibility, we changed the default holdability for connection to hold cursors over commit.
-    //But in order for the existing tests to work fine, the tests needed a way to set the holdability to close cursors for connections
-        conn.setHoldability(ResultSet.CLOSE_CURSORS_AT_COMMIT);
-        return conn;
-	}
-
-	/**
-	 * Retrieves the current holdability of ResultSet objects created using this
-	 * Connection object.
-	 *
-	 * @return  The holdability, one of ResultSet.HOLD_CURSORS_OVER_COMMIT
-	 * or ResultSet.CLOSE_CURSORS_AT_COMMIT
-	 *
-	 */
-	int getHoldability(Connection conn)
-		throws SQLException
-	{
-    //this method is used to make sure we are not trying to create a statement with holdability different than the connection holdability
-    //This is because jdk13 and lower does not have support for that.
-    //The holdability of connection and statement can differ if connection holdability is set to close cursor on commit using reflection
-    //and statement is getting created with holdability true
-    //Another instance of holdability of connection and statement not being same is when connection holdability is hold cursor
-    //over commit and statement is being created with holdability false
-        return conn.getHoldability();
-	}
-
 	/**
 	 * Create the right kind of statement (scrolling or not)
 	 * off of the specified connection.
@@ -712,27 +671,28 @@ public class utilMain implements java.security.PrivilegedAction {
 	Statement createStatement(Connection conn, int scrollType, int holdType)
 		throws SQLException
 	{
-    	//following if is used to make sure we are not trying to create a statement with holdability different that the connection
-    	//holdability. This is because jdk13 and lower does not have support for that.
-    	//The holdability of connection and statement can differ if connection holdability is set to close cursor on commit using reflection
-    	//and statement is getting created with holdability true
-    	//Another instance of holdability of connection and statement not being same is when connection holdability is hold cursor
-    	//over commit and statement is being created with holdability false
-    	if (holdType != getHoldability(conn))
-    	{
-        	throw ijException.holdCursorsNotSupported();
-    	}
-      
-    	Statement stmt;
         try {
-        	stmt = conn.createStatement(scrollType, JDBC20Translation.CONCUR_READ_ONLY);
+            return conn.createStatement(
+                scrollType, ResultSet.CONCUR_READ_ONLY, holdType);
+        } catch(SQLException se) {
+            // since jcc doesn't yet support JDBC3.0 we have to go back to
+            // JDBC2.0
+            if (isJCC && se.getMessage().equals(JDBC_NOTSUPPORTED)) {
+                return conn.createStatement(scrollType,
+                                            ResultSet.CONCUR_READ_ONLY);
+            }
+            throw se;
         } catch(AbstractMethodError ame) {
-        //because weblogic 4.5 doesn't yet implement jdbc 2.0 interfaces, need to go back
-        //to jdbc 1.x functionality
-        	stmt = conn.createStatement();
+            // because weblogic 4.5 doesn't yet implement jdbc 2.0 interfaces,
+            // we need to go back to jdbc 1.x functionality
+            // The jcc obfuscated jar gets this error
+            if (isJCC) {
+                return conn.createStatement(scrollType,
+                                            ResultSet.CONCUR_READ_ONLY);
+            }
+            return conn.createStatement();
         }
-		return stmt;
-	}
+    }
 
 	/**
 	 * Position on the specified row of the specified ResultSet.

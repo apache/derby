@@ -33,7 +33,7 @@
   <property file="${properties.dir}/compilepath.properties"/>
 
 <!-- Targets -->
-  <target name="compile" depends="compile_tools_impl_jdk14"/>
+  <target name="compile" depends="compile_tools_impl"/>
 
   <target name="parser">
     <ant antfile="${src.dir}/build.xml" target="genParser">
@@ -73,34 +73,7 @@
         <pathelement path="${compile.classpath}"/>
       </classpath>
       <include name="${derby.dir}/impl/tools/**"/>
-      <exclude name="${derby.dir}/impl/tools/ij/mtGrammar.java"/>
-      <exclude name="${derby.dir}/impl/tools/ij/Main14.java"/>
-      <exclude name="${derby.dir}/impl/tools/ij/utilMain14.java"/>
     </javac>
-   </target>
-
-  <target name="compile_tools_impl_jdk14" depends="compile_tools_impl">
-    <javac
-      source="1.4"
-      target="1.4"
-      bootclasspath="${empty}"
-      nowarn="on"
-      debug="${debug}"
-      depend="${depend}"
-      deprecation="${deprecation}"
-      optimize="${optimize}"
-      proceed="${proceed}"
-      verbose="${verbose}"
-      srcdir="${derby.tools.src.dir}"
-      destdir="${out.dir}">
-      <classpath>
-        <pathelement path="${java14compile.classpath}"/>
-      </classpath>
-      <include name="${derby.dir}/impl/tools/ij/mtGrammar.java"/>
-      <include name="${derby.dir}/impl/tools/ij/Main14.java"/>
-      <include name="${derby.dir}/impl/tools/ij/utilMain14.java"/>
-    </javac>
-	
    </target>
 
 </project>

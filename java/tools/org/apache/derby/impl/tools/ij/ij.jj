@@ -1928,7 +1928,7 @@ throws SQLException
 	Token s;
 	Token scrolling = null;
 	Token withtoken = null;
-	int holdType = utilInstance.getHoldability(theConnection);
+	int holdType = theConnection.getHoldability();
 	String c;
 	Statement st = null;
 	String sVal;
@@ -2597,8 +2597,7 @@ throws SQLException
 	<NOHOLDFORCONNECTION> 
 	{
 		haveConnection();
-		theConnection = utilInstance.setHoldability(theConnection, JDBC30Translation.CLOSE_CURSORS_AT_COMMIT);
-
+		theConnection.setHoldability(ResultSet.CLOSE_CURSORS_AT_COMMIT);
 		return null;
 	}
 }
