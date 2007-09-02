@@ -2241,27 +2241,17 @@ public final class NetworkServerControlImpl {
 										if (hostAddress == null)
 											hostAddress = InetAddress.getByName(hostArg);
 
-										// JDK131 can't connect with a client
-										// socket with 0.0.0.0 (all addresses) so we will
-										// getLocalHost() which will suffice.
-										InetAddress connectAddress;
-										if (JVMInfo.JDK_ID <= JVMInfo.J2SE_13 &&
-											hostAddress.getHostAddress().equals("0.0.0.0"))
-											connectAddress = InetAddress.getLocalHost();
-										else
-											connectAddress = hostAddress;
-
 										switch(getSSLMode()) {
 										case SSL_BASIC:
 											SSLSocket s1 = (SSLSocket)NaiveTrustManager.getSocketFactory().
-												createSocket(connectAddress, portNumber);
+												createSocket(hostAddress, portNumber);
 											// Need to handshake now to get proper error reporting.
 											s1.startHandshake();
 											return s1;
 
 										case SSL_PEER_AUTHENTICATION:
 											SSLSocket s2 = (SSLSocket)SSLSocketFactory.getDefault().
-												createSocket(connectAddress, portNumber);
+												createSocket(hostAddress, portNumber);
 											// Need to handshake now to get proper error reporting.
 											s2.startHandshake();
 											return s2;
@@ -2269,7 +2259,7 @@ public final class NetworkServerControlImpl {
 										case SSL_OFF:
 										default:
 											return SocketFactory.getDefault().
-												createSocket(connectAddress, portNumber);
+												createSocket(hostAddress, portNumber);
 										}
 									}
 								}
