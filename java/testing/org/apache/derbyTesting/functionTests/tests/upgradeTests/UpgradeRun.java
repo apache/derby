@@ -192,6 +192,8 @@ class UpgradeRun {
                    //run. 
                    suite.addTest(Changes10_3.suite(phase));
                  }
+                if (oldMinor < 4)
+                	suite.addTest(Changes10_4.suite(phase));
             }
             
             // Add DatabaseMetaData tests. Since metadata
