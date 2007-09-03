@@ -106,7 +106,6 @@ public class TypeDescriptorImpl implements TypeDescriptor, Formatable
 	 *			it definitely cannot contain NULL.
 	 * @param maximumWidth	The maximum number of bytes for this datatype
 	 * @param collationType The collation type of a string data type
-	 * @param collationDerivation Collation Derivation of a string data type
 	 */
 	public TypeDescriptorImpl(
 		BaseTypeIdImpl typeId,
