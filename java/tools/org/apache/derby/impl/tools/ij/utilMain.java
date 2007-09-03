@@ -21,8 +21,6 @@
 
 package org.apache.derby.impl.tools.ij;
                 
-import org.apache.derby.iapi.reference.JDBC20Translation;
-
 import org.apache.derby.tools.JDBCDisplayUtil;
 import org.apache.derby.iapi.tools.i18n.*;
 
@@ -39,8 +37,6 @@ import java.io.FileInputStream;
 import java.io.BufferedInputStream;
 import java.io.FileNotFoundException;
 import java.io.StringReader;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.sql.DriverManager;
 import java.sql.Driver;
 import java.sql.Connection;
@@ -56,9 +52,6 @@ import java.sql.PreparedStatement;
 
  */
 public class utilMain implements java.security.PrivilegedAction {
-
-    private static final String JDBC_NOTSUPPORTED =
-        "JDBC 3 method called - not yet supported";
 
 	private StatementFinder[] commandGrabber;
 	UCode_CharStream charStream;
@@ -84,8 +77,6 @@ public class utilMain implements java.security.PrivilegedAction {
      * Value of the system property ij.execptionTrace
      */
     private final String ijExceptionTrace;
-
-	protected boolean isJCC;	//The driver being used is JCC
 
 	/*
 		In the goodness of time, this could be an ij property
@@ -125,14 +116,6 @@ public class utilMain implements java.security.PrivilegedAction {
 	public utilMain(int numConnections, LocalizedOutput out, Hashtable ignoreErrors)
 		throws ijFatalException
 	{
-		String framework_property = util.getSystemProperty("framework");
-		
-		if (framework_property != null)
-		{
-			if (framework_property.equals("DB2jNet") 
-					|| framework_property.equals("DB2jcc"))
-				isJCC = true;
-		}
 		/* init the parser; give it no input to start with.
 		 * (1 parser for entire test.)
 		 */
@@ -659,38 +642,18 @@ public class utilMain implements java.security.PrivilegedAction {
 		mtUse = b;
 	}
 
-	/**
-	 * Create the right kind of statement (scrolling or not)
-	 * off of the specified connection.
-	 *
-	 * @param conn			The connection.
-	 * @param scrollType	The scroll type of the cursor.
-	 *
-	 * @return	The statement.
-	 */
-	Statement createStatement(Connection conn, int scrollType, int holdType)
-		throws SQLException
-	{
-        try {
-            return conn.createStatement(
-                scrollType, ResultSet.CONCUR_READ_ONLY, holdType);
-        } catch(SQLException se) {
-            // since jcc doesn't yet support JDBC3.0 we have to go back to
-            // JDBC2.0
-            if (isJCC && se.getMessage().equals(JDBC_NOTSUPPORTED)) {
-                return conn.createStatement(scrollType,
-                                            ResultSet.CONCUR_READ_ONLY);
-            }
-            throw se;
-        } catch(AbstractMethodError ame) {
-            // because weblogic 4.5 doesn't yet implement jdbc 2.0 interfaces,
-            // we need to go back to jdbc 1.x functionality
-            // The jcc obfuscated jar gets this error
-            if (isJCC) {
-                return conn.createStatement(scrollType,
-                                            ResultSet.CONCUR_READ_ONLY);
-            }
-            return conn.createStatement();
+    /**
+     * Check that the cursor is scrollable.
+     *
+     * @param rs the ResultSet to check
+     * @param operation which operation this is checked for
+     * @exception ijException if the cursor isn't scrollable
+     * @exception SQLException if a database error occurs
+     */
+    private void checkScrollableCursor(ResultSet rs, String operation)
+            throws ijException, SQLException {
+        if (rs.getType() == ResultSet.TYPE_FORWARD_ONLY) {
+            throw ijException.forwardOnlyCursor(operation);
         }
     }
 
@@ -709,13 +672,7 @@ public class utilMain implements java.security.PrivilegedAction {
 	ijResult absolute(ResultSet rs, int row)
 		throws SQLException
 	{
-        boolean forwardOnly = (rs.getStatement().getResultSetType() == JDBC20Translation.TYPE_FORWARD_ONLY);
-
-        if (forwardOnly)
-		{
-			throw ijException.forwardOnlyCursor("ABSOLUTE");
-		}
-
+        checkScrollableCursor(rs, "ABSOLUTE");
 		// 0 is an *VALID* value for row
 		return new ijRowResult(rs, rs.absolute(row));
 	}
@@ -735,14 +692,7 @@ public class utilMain implements java.security.PrivilegedAction {
 	ijResult relative(ResultSet rs, int row)
 		throws SQLException
 	{
-    	boolean forwardOnly = (rs.getStatement().getResultSetType() == JDBC20Translation.TYPE_FORWARD_ONLY);
-
-    	// relative is only allowed on scroll cursors
-		if (forwardOnly)
-		{
-			throw ijException.forwardOnlyCursor("RELATIVE");
-		}
-
+        checkScrollableCursor(rs, "RELATIVE");
 		return new ijRowResult(rs, rs.relative(row));
 	}
 
@@ -760,14 +710,7 @@ public class utilMain implements java.security.PrivilegedAction {
 	ijResult beforeFirst(ResultSet rs)
 		throws SQLException
 	{
-    	boolean forwardOnly = (rs.getStatement().getResultSetType() == JDBC20Translation.TYPE_FORWARD_ONLY);
-
-    	// before first is only allowed on scroll cursors
-		if (forwardOnly)
-		{
-			throw ijException.forwardOnlyCursor("BEFORE FIRST");
-		}
-
+        checkScrollableCursor(rs, "BEFORE FIRST");
 		rs.beforeFirst();
 		return new ijRowResult(rs, false);
 	}
@@ -786,14 +729,7 @@ public class utilMain implements java.security.PrivilegedAction {
 	ijResult first(ResultSet rs)
 		throws SQLException
 	{
-    	boolean forwardOnly = (rs.getStatement().getResultSetType() == JDBC20Translation.TYPE_FORWARD_ONLY);
-
-    	// first is only allowed on scroll cursors
-		if (forwardOnly)
-		{
-			throw ijException.forwardOnlyCursor("FIRST");
-		}
-
+        checkScrollableCursor(rs, "FIRST");
 		return new ijRowResult(rs, rs.first());
 	}
 
@@ -811,20 +747,7 @@ public class utilMain implements java.security.PrivilegedAction {
 	ijResult afterLast(ResultSet rs)
 		throws SQLException
 	{
-    	boolean forwardOnly;
-        try {
-        	forwardOnly = (rs.getStatement().getResultSetType() == JDBC20Translation.TYPE_FORWARD_ONLY);
-        } catch (AbstractMethodError ame) {
-        //because weblogic 4.5 doesn't yet implement jdbc 2.0 interfaces, need to go back
-        //to jdbc 1.x functionality
-            forwardOnly = true;
-        }
-		// after last is only allowed on scroll cursors
-		if (forwardOnly)
-		{
-			throw ijException.forwardOnlyCursor("AFTER LAST");
-		}
-
+        checkScrollableCursor(rs, "AFTER LAST");
 		rs.afterLast();
 		return new ijRowResult(rs, false);
 	}
@@ -843,14 +766,7 @@ public class utilMain implements java.security.PrivilegedAction {
 	ijResult last(ResultSet rs)
 		throws SQLException
 	{
-    	boolean forwardOnly = (rs.getStatement().getResultSetType() == JDBC20Translation.TYPE_FORWARD_ONLY);
-
-		// last is only allowed on scroll cursors
-		if (forwardOnly)
-		{
-			throw ijException.forwardOnlyCursor("LAST");
-		}
-
+        checkScrollableCursor(rs, "LAST");
 		return new ijRowResult(rs, rs.last());
 	}
 
@@ -868,14 +784,7 @@ public class utilMain implements java.security.PrivilegedAction {
 	ijResult previous(ResultSet rs)
 		throws SQLException
 	{
-    	boolean forwardOnly = (rs.getStatement().getResultSetType() == JDBC20Translation.TYPE_FORWARD_ONLY);
- 
-    	// first is only allowed on scroll cursors
-		if (forwardOnly)
-		{
-			throw ijException.forwardOnlyCursor("PREVIOUS");
-		}
-
+        checkScrollableCursor(rs, "PREVIOUS");
 		return new ijRowResult(rs, rs.previous());
 	}
 
@@ -892,15 +801,7 @@ public class utilMain implements java.security.PrivilegedAction {
 	int getCurrentRowNumber(ResultSet rs)
 		throws SQLException
 	{
-
-		boolean forwardOnly = (rs.getStatement().getResultSetType() == JDBC20Translation.TYPE_FORWARD_ONLY);
-
-		// getCurrentRow is only allowed on scroll cursors
-		if (forwardOnly)
-		{
-			throw ijException.forwardOnlyCursor("GETCURRENTROWNUMBER");
-		}
-
+        checkScrollableCursor(rs, "GETCURRENTROWNUMBER");
 		return rs.getRow();
 	}
 

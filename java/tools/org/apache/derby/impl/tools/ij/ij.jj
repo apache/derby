@@ -1941,7 +1941,8 @@ throws SQLException
 	{
 		sVal = stringValue(s.image);
 		try {
-			st = utilInstance.createStatement(theConnection, scrollType, holdType);
+			st = theConnection.createStatement(
+				scrollType, ResultSet.CONCUR_READ_ONLY, holdType);
 			JDBCDisplayUtil.checkNotNull(st,"cursor");
 			st.setCursorName(c);
 			rs = st.executeQuery(sVal);
