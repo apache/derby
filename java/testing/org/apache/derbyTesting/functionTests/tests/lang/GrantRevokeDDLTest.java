@@ -5493,7 +5493,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         JDBC.assertEmpty(rs);
         
-        // DERBY-1608: Recognize new SYSFUC routines as system 
+        // DERBY-1608: Recognize new SYSFUN routines as system 
         // builtin routines Builtin functions don't need any 
         // permission checking. They are executable by all
         

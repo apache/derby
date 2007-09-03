@@ -969,7 +969,7 @@ public class SQLParser
        
     /**
        Convert a JDBC escaped function name to a function
-       name in the SYSFUC schema. Returns null if no such
+       name in the SYSFUN schema. Returns null if no such
        function exists.
     */  
 	private String getEscapedSYSFUN(String name)
