@@ -282,16 +282,22 @@ public class ConditionalNode extends ValueNode
 	 *
 	 * @param thenElseList    The thenElseList to update.
 	 * @param castType        The type to cast SQL parsed NULL's too.
+	 * @param fromList        FromList to pass on to bindExpression if recast is performed
+	 * @param subqueryList    SubqueryList to pass on to bindExpression if recast is performed
+	 * @param aggregateVector AggregateVector to pass on to bindExpression if recast is performed
 	 *
 	 * @exception             StandardException Thrown on error.
 	 */
 	private void recastNullNodes(ValueNodeList thenElseList,
-	                           DataTypeDescriptor castType)
+	                           DataTypeDescriptor castType, FromList fromList,
+	                           SubqueryList subqueryList, Vector aggregateVector)
 	 throws StandardException {
 
 		// Don't do anything if we couldn't find a castType.
 		if (castType == null) return;
-
+		
+		// need to have nullNodes nullable
+		castType.setNullability(true);
 		ValueNode thenNode = (ValueNode)thenElseList.elementAt(0);
 		ValueNode elseNode = (ValueNode)thenElseList.elementAt(1);
 
@@ -299,22 +305,29 @@ public class ConditionalNode extends ValueNode
 		if (isNullNode(thenNode) &&
 		    shouldCast(castType, thenNode.getTypeServices()))
 		{
+			// recast and rebind. findTypes would have bound as SQL CHAR.
+			// need to rebind here. (DERBY-3032)
 			thenElseList.setElementAt(recastNullNode(thenNode, castType), 0);
+			((ValueNode) thenElseList.elementAt(0)).bindExpression(fromList, subqueryList, aggregateVector);
+			
 		// otherwise recurse on thenNode, but only if it's a conditional
 		} else if (isConditionalNode(thenNode)) {
 			recastNullNodes(((ConditionalNode)thenNode).thenElseList,
-			                castType);
+			                castType,fromList, subqueryList, aggregateVector);
 		}
 
 		// lastly, check if the "else" node is NULL
 		if (isNullNode(elseNode) &&
 		    shouldCast(castType, elseNode.getTypeServices()))
 		{
+			// recast and rebind. findTypes would have bound as SQL CHAR.
+			// need to rebind here. (DERBY-3032)
 			thenElseList.setElementAt(recastNullNode(elseNode, castType), 1);
+			((ValueNode) thenElseList.elementAt(1)).bindExpression(fromList, subqueryList, aggregateVector);
 		// otherwise recurse on elseNode, but only if it's a conditional
 		} else if (isConditionalNode(elseNode)) {
 			recastNullNodes(((ConditionalNode)elseNode).thenElseList,
-			                castType);
+			                castType,fromList,subqueryList,aggregateVector);
 		}
 	}
 
@@ -396,16 +409,21 @@ public class ConditionalNode extends ValueNode
 				aggregateVector);
 
 		} else {
-			/* Following call to "findType()" will indirectly bind the
+			/* Following call to "findType()"  and "recastNullNodes" will indirectly bind the
 			 * expressions in the thenElseList, so no need to call
 			 * "thenElseList.bindExpression(...)" after we do this.
 			 * DERBY-2986.
 			 */
 			recastNullNodes(thenElseList,
-				findType(thenElseList, fromList, subqueryList, aggregateVector));
+				findType(thenElseList, fromList, subqueryList, aggregateVector),fromList,
+					subqueryList,
+					aggregateVector);
+			
  		}
-
+		
+		
 		// Can't get the then and else expressions until after they've been bound
+		// expressions have been bound by findType and rebound by recastNullNodes if needed.
 		ValueNode thenExpression = (ValueNode) thenElseList.elementAt(0);
 		ValueNode elseExpression = (ValueNode) thenElseList.elementAt(1);
 

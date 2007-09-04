@@ -22,6 +22,7 @@
 package org.apache.derbyTesting.functionTests.tests.lang;
 
 import java.sql.Connection;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.ResultSet;
@@ -275,4 +276,37 @@ public class CaseExpressionTest extends BaseJDBCTestCase {
             rs.close();
         }
     }
+
+    
+    /**
+     * Test fix for DERBY-3032. Fix ClassCastException if SQL NULL is returned from conditional.
+     * 
+     * @throws SQLException
+     */
+    public void testDerby3032() throws SQLException 
+    {
+        Statement s = createStatement();
+        
+
+        s.executeUpdate("create table t (d date, vc varchar(30))");
+        s.executeUpdate("insert into t values(CURRENT_DATE, 'hello')");
+        ResultSet rs = s.executeQuery("SELECT d from t where d = (SELECT CASE WHEN 1 = 1 THEN CURRENT_DATE ELSE NULL END from t)");
+        JDBC.assertDrainResults(rs,1);
+        
+        // Make sure null gets cast properly to date type to avoid cast exception. DERBY-3032
+        rs = s.executeQuery("SELECT d from t where d = (SELECT CASE WHEN 1 = 1 THEN NULL  ELSE CURRENT_DATE  END from t)");
+        JDBC.assertEmpty(rs);
+        
+        rs = s.executeQuery("SELECT d from t where d = (SELECT CASE WHEN 1 = 0 THEN CURRENT_DATE  ELSE NULL END from t)");
+        JDBC.assertEmpty(rs);
+        
+        // Make sure metadata has correct type
+        rs = s.executeQuery("SELECT CASE WHEN 1 = 1 THEN NULL  ELSE CURRENT_DATE  END from t");
+        ResultSetMetaData rsmd = rs.getMetaData();
+        assertEquals(java.sql.Types.DATE, rsmd.getColumnType(1));
+        // should be nullable since it returns NULL #:)
+        assertTrue(rsmd.isNullable(1) == ResultSetMetaData.columnNullable);
+        JDBC.assertSingleValueResultSet(rs, null);        
+    }
+    
 }
