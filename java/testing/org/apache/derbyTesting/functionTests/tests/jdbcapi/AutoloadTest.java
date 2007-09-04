@@ -112,6 +112,17 @@ public class AutoloadTest extends BaseJDBCTestCase
                 suite.addTest(
                   TestConfiguration.clientServerDecorator(
                           baseAutoLoadSuite("client")));
+            
+            if (jdbc4Autoload || embeddedAutoLoad)
+            {
+                // DERBY-2905 related testing.
+                // Ensure that after a shutdown no Derby code is
+                // left registered in the driver manager
+                // and that after a shutdown, an explicit load
+                // can restart the engine.
+                suite.addTest(new AutoloadTest("testShutdownDeRegister"));
+                suite.addTest(new AutoloadTest("testExplicitReload"));
+            }
                 
             return suite;
         }
@@ -175,6 +186,43 @@ public class AutoloadTest extends BaseJDBCTestCase
         Driver driver = DriverManager.getDriver(protocol);
         assertNotNull("Expected registered driver", driver);
     }
+    
+    /**
+     * Test that after a shutdown that no Derby embedded driver
+     * is left registered in the DriverManager. See DERBY-2905.
+     * @throws SQLException failure
+     */
+    public void testShutdownDeRegister() throws SQLException
+    {
+        assertTrue(isEmbeddedDriverRegistered());
+        TestConfiguration.getCurrent().shutdownEngine();
+        
+        // DERBY-2905 - Autoload driver is left around.
+        // assertFalse(isEmbeddedDriverRegistered());   
+    }
+    
+    /**
+     * Return true if there appears to be a Derby embedded
+     * driver registered with the DriverManager.
+     * @return
+     */
+    private boolean isEmbeddedDriverRegistered()
+    {
+        for (Enumeration e = DriverManager.getDrivers();
+                e.hasMoreElements(); )
+        {
+            Driver d = (Driver) e.nextElement();
+            String driverClass = d.getClass().getName();
+            if (!driverClass.startsWith("org.apache.derby."))
+                continue;
+            if (driverClass.equals("org.apache.derby.jdbc.ClientDriver"))
+                continue;
+            
+            // Some form of Derby embedded driver seems to be registered.
+            return true;
+        }
+        return false;
+    }
 
 	/**
      * Test we can connect successfully to a database.
@@ -213,19 +261,41 @@ public class AutoloadTest extends BaseJDBCTestCase
     }
     
     /**
-     * Test an explict load of the driver works as well.
+     * Test an explict load of the driver works as well
+     * even though the drivers were loaded automatically.
      * @throws Exception 
      *
      */
     public void testExplicitLoad() throws Exception
     {
+        explicitLoad(false);
+    }
+    
+    /**
+     * Test that an explicit reload of the driver works,
+     * typically after a shutdown. Note that just loading
+     * the driver class here cannot reload the driver
+     * as the driver class is already loaded and thus
+     * its static initializer will not be re-executed.
+     * @throws Exception
+     */
+    public void testExplicitReload() throws Exception
+    {
+        explicitLoad(true);
+    }
+    
+    private void explicitLoad(boolean instanceOnly) throws Exception
+    {
         String driverClass =
             getTestConfiguration().getJDBCClient().getJDBCDriverName();
         
+        
         // With and without a new instance
-        Class.forName(driverClass);
-        testSuccessfulConnect();
-        testUnsuccessfulConnect();
+        if (!instanceOnly) {
+            Class.forName(driverClass);
+            testSuccessfulConnect();
+            testUnsuccessfulConnect();
+        }
         
         Class.forName(driverClass).newInstance();
         testSuccessfulConnect();
