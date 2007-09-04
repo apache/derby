@@ -93,8 +93,7 @@ extends BasicNoPutResultSetImpl
 						double optimizerEstimatedRowCount,
 						double optimizerEstimatedCost)
 	{
-		super(null,
-				activation,
+		super(activation,
 				optimizerEstimatedRowCount,
 				optimizerEstimatedCost);
 
@@ -110,7 +109,7 @@ extends BasicNoPutResultSetImpl
 	/**
      * Returns the description of the table's rows
 	 */
-	public ResultDescription getResultDescription() {
+	public final ResultDescription getResultDescription() {
 	    return activation.getResultDescription();
 	}
 

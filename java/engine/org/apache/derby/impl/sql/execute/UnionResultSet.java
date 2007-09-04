@@ -90,15 +90,6 @@ class UnionResultSet extends NoPutResultSetImpl
 	//
 
 	/**
-     * Returns the description of the first source.
-     * Assumes the compiler ensured both sources
-     * had the same description.
-	 */
-	public ResultDescription getResultDescription() {
-	    return source1.getResultDescription();
-	}
-
-	/**
      * open the first source.
  	 *	@exception StandardException thrown on failure
      */
