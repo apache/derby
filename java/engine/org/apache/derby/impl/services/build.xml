@@ -54,6 +54,8 @@
       <include name="${derby.dir}/impl/services/**"/>
       <exclude name="${derby.dir}/impl/services/jce/**"/>
       <exclude name="${derby.dir}/impl/services/locks/Concurrent*.java"/>
+      <exclude name="${derby.dir}/impl/services/cache/Concurrent*.java"/>
+      <exclude name="${derby.dir}/impl/services/cache/CacheEntry.java"/>
     </javac>
  </target>
  
@@ -79,6 +81,8 @@
        <pathelement path="${java16compile.classpath}"/>
      </classpath>
      <include name="${derby.dir}/impl/services/locks/Concurrent*.java"/>
+     <include name="${derby.dir}/impl/services/cache/Concurrent*.java"/>
+     <include name="${derby.dir}/impl/services/cache/CacheEntry.java"/>
    </javac>
  </target>
 
