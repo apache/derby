@@ -21,6 +21,7 @@
 
 package org.apache.derby.impl.services.cache;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.derby.iapi.error.StandardException;
@@ -401,8 +402,28 @@ final class ConcurrentCache implements CacheManager {
         return allRemoved;
     }
 
-    public Collection values() {
-        // TODO
-        return null;
+    /**
+     * Return a collection view of all the <code>Cacheable</code>s in the
+     * cache. There is no guarantee that the objects in the collection can be
+     * accessed in a thread-safe manner once this method has returned, so it
+     * should only be used for diagnostic purposes. (Currently, it is only used
+     * by the <code>StatementCache</code> VTI.)
+     *
+     * @return a collection view of the objects in the cache
+     */
+    public Collection<Cacheable> values() {
+        ArrayList<Cacheable> values = new ArrayList<Cacheable>();
+        for (CacheEntry entry : cache.values()) {
+            entry.lock();
+            try {
+                Cacheable c = entry.getCacheable();
+                if (c != null) {
+                    values.add(c);
+                }
+            } finally {
+                entry.unlock();
+            }
+        }
+        return values;
     }
 }
