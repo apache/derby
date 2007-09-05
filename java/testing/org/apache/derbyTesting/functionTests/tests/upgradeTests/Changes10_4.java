@@ -42,6 +42,26 @@ import junit.framework.TestSuite;
  * <BR>
     10.4 Upgrade issues
 
+    <UL>
+    <LI> testMetaDataQueryRunInSYScompilationSchema - DERBY-2946 
+    Make sure that metadata queries get run with SYS schema as the current 
+    compilation schema rather than a user schema as the current compilation 
+    schema. This is because if the user is inside a user schema in a collated 
+    database and if the meta data query gets run inside the user schema, then 
+    we will run into collation mismatch errors for a subclause like following 
+    in the WHERE clause.
+    P.SELECTPRIV = 'Y' 
+    The reason for error is that the left hand side of the = operation will 
+    have collation type of UCS_BASIC because that column belongs to a table 
+    from system schema. But the collation type of the right hand will be 
+    territory based if the current compilation schema is user schema. But if 
+    the current compilation schema is set to SYS schema, then right hand side 
+    will also have collation of UCS_BASIC and hence there won't be any 
+    collation mismatch. 
+    Background info : character string constants pick up the collation of the
+    current compilation schema. 
+    </UL>
+
  */
 public class Changes10_4 extends UpgradeChange {
 
@@ -63,11 +83,51 @@ public class Changes10_4 extends UpgradeChange {
     }
     
     /**
-     * Just a place holder until we add actual tests.
+     * Check that even though we have set schema to a user schema, the 
+     * metadata queries get run with compilation schema as SYS.
+     * DERBY-2946
+     * Test added for 10.4.
      * @throws SQLException 
      *
      */
-    public void testRemoveMeAfterRealTestIsAdded() throws SQLException
+    public void testMetaDataQueryRunInSYScompilationSchema() throws SQLException
     {
+    	//This test is for databases with territory based collation. That
+    	//feature was added in 10.3 codeline and hence there is no point in
+    	//doing any testing with pre-10.3 databases.
+        if (!oldAtLeast(10, 3))
+        	return;
+
+        DataSource ds = JDBCDataSource.getDataSourceLogical("COLLATED_DB_10_3");
+        
+        switch (getPhase())
+        {
+        case PH_CREATE:
+            // create the database if it was not already created. Note the
+        	// JDBC url attributes.
+            JDBCDataSource.setBeanProperty(
+                    ds, "ConnectionAttributes", "create=true;territory=no;collation=TERRITORY_BASED");
+            ds.getConnection().close();
+            break;
+            
+        case PH_SOFT_UPGRADE:
+        case PH_POST_SOFT_UPGRADE:
+        case PH_HARD_UPGRADE:
+        case PH_POST_HARD_UPGRADE:
+            Connection con = ds.getConnection();
+        	//First make the current schema as a user schema. And then run a 
+        	//metadata query to make sure that it runs fine. If it does (which
+        	//is the expected behavior), then it will mean that the metadata
+        	//query is getting run with SYS as the compilation schema rather
+        	//than the current schema which is APP.
+            Statement s = con.createStatement();
+            s.execute("SET SCHEMA APP");
+
+            DatabaseMetaData dmd = con.getMetaData();
+            ResultSet rs = dmd.getTables(null,"APP",null,null);
+            JDBC.assertDrainResults(rs);
+            s.close();
+            break;
+        }
     }
 }

@@ -67,6 +67,7 @@ class UpgradeRun {
      * The databases are shutdown at the end of each phase.
      */
     static final String[] ADDITIONAL_DBS = {
+        "COLLATED_DB_10_3",//db with territory based collation 
         "NO_ENCRYPT_10_2",
         "ENCRYPT_10_2"
     };

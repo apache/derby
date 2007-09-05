@@ -750,6 +750,15 @@ public class GenericLanguageConnectionContext
         public PreparedStatement prepareInternalStatement(SchemaDescriptor compilationSchema, String sqlText, boolean isForReadOnly, boolean forMetaData) 
 	    throws StandardException 
         {
+        	if (forMetaData) {
+        		//DERBY-2946
+        		//Make sure that metadata queries always run with SYS as 
+        		//compilation schema. This will make sure that the collation
+        		//type of character string constants will be UCS_BASIC which
+        		//is also the collation of character string columns belonging
+        		//to system tables. 
+        		compilationSchema = getDataDictionary().getSystemSchemaDescriptor(); 
+        	}
 	    return connFactory.getStatement(compilationSchema, sqlText, isForReadOnly).prepare(this, forMetaData);
     	}
 
