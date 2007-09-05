@@ -83,13 +83,25 @@ import org.apache.derby.impl.jdbc.EmbedSQLException;
 
 */
 public final class NetworkServerControlImpl {
-	private final static int NO_USAGE_MSGS= 12;
+	private final static int NO_USAGE_MSGS= 16;
+
+	//The COMMANDS array stores the list of commands that the
+	//NetworkServerControl class understands. Each index in 
+	//this array contains a particular command.
+
+	//Index 10 in this array is a command that is not present in the 
+	//COMMAND array. It refers to COMMAND_PROPERTIES which refers to 
+	//the command the network server receives from the client.
+
+	//Hence index 10 is replaced by an empty string and the replication
+	//related commands start from index 11.
 	private final static String [] COMMANDS = 
 	{"start","shutdown","trace","tracedirectory","ping", 
-	 "logconnections", "sysinfo", "runtimeinfo",  "maxthreads", "timeslice"};
+	 "logconnections", "sysinfo", "runtimeinfo",  "maxthreads", "timeslice",
+	"", "startreplication", "startslave", "failover", "stopreplication"};
 	// number of required arguments for each command
 	private final static int [] COMMAND_ARGS =
-	{0, 0, 1, 1, 0, 1, 0, 0, 1, 1};
+	{0, 0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 1, 1, 1, 1};
 	public final static int COMMAND_START = 0;
 	public final static int COMMAND_SHUTDOWN = 1;
 	public final static int COMMAND_TRACE = 2;
@@ -101,9 +113,14 @@ public final class NetworkServerControlImpl {
 	public final static int COMMAND_MAXTHREADS = 8;
 	public final static int COMMAND_TIMESLICE = 9;
 	public final static int COMMAND_PROPERTIES = 10;
+	public final static int COMMAND_START_MASTER = 11;
+	public final static int COMMAND_START_SLAVE = 12;
+	public final static int COMMAND_START_FAILOVER = 13;
+	public final static int COMMAND_STOP_REPLICATION = 14;
 	public final static int COMMAND_UNKNOWN = -1;
 	public final static String [] DASHARGS =
-	{"p","d","u","ld","ea","ep", "b", "h", "s", "noSecurityManager", "ssl"};
+	{"p","d","u","ld","ea","ep", "b", "h", "s", "noSecurityManager", "ssl", 
+	"slavehost", "slaveport"};
 	public final static int DASHARG_PORT = 0;
 	public final static int DASHARG_DATABASE = 1;
 	public final static int DASHARG_USER = 2;
@@ -115,6 +132,8 @@ public final class NetworkServerControlImpl {
 	public final static int DASHARG_SESSION = 8;
 	public final static int DASHARG_UNSECURE = 9;
 	private final static int DASHARG_SSL = 10;
+	private final static int DASHARG_SLAVEHOST = 11;
+	private final static int DASHARG_SLAVEPORT = 12;
 
 	// command protocol version - you need to increase this number each time
 	// the command protocol changes 
@@ -215,6 +234,8 @@ public final class NetworkServerControlImpl {
 	private InetAddress hostAddress;
 	private int sessionArg;
 	private boolean unsecureArg;
+	private String slavehost;
+	private int slaveport;
 
 	// Used to debug memory in SanityManager.DEBUG mode
 	private memCheck mc;
@@ -256,6 +277,8 @@ public final class NetworkServerControlImpl {
 	protected boolean debugOutput = false;
 	private boolean cleanupOnStart = false;	// Should we clean up when starting the server?
 	private boolean restartFlag = false;
+
+	private String replicationdb; //The name of the database that is replicated.
 
     protected final static int INVALID_OR_NOTSET_SECURITYMECHANISM = -1; 
     // variable to store value set to derby.drda.securityMechanism
@@ -1990,6 +2013,26 @@ public final class NetworkServerControlImpl {
 				netSetTimeSlice(timeslice);
 				
 				break;
+			case COMMAND_START_MASTER: {
+				setReplicationDB((String) commandArgs.elementAt(0));
+				consolePropertyMessage("DRDA_ReplicationImplementation.I");
+				break;
+			}
+			case COMMAND_START_SLAVE: {
+				setReplicationDB((String) commandArgs.elementAt(0));
+				consolePropertyMessage("DRDA_ReplicationImplementation.I");
+				break;
+			}
+			case COMMAND_START_FAILOVER:  {
+				setReplicationDB((String) commandArgs.elementAt(0));
+				consolePropertyMessage("DRDA_ReplicationImplementation.I");
+				break;
+			}
+			case COMMAND_STOP_REPLICATION: {
+				setReplicationDB((String) commandArgs.elementAt(0));
+				consolePropertyMessage("DRDA_ReplicationImplementation.I");
+				break;
+			}
 			default:
 				//shouldn't get here
 				if (SanityManager.DEBUG)
@@ -2045,8 +2088,10 @@ public final class NetworkServerControlImpl {
 			{
 				for (i = 0; i < COMMANDS.length; i++)
 				{
-					if (StringUtil.SQLEqualsIgnoreCase(COMMANDS[i], 
-													   (String)commandArgs.firstElement()))
+					if (COMMANDS[i].length () > 0 && 
+					    StringUtil.SQLEqualsIgnoreCase(
+					    COMMANDS[i],
+					    (String) commandArgs.firstElement())) 
 					{
 						commandArgs.removeElementAt(0);
 						return i;
@@ -2174,6 +2219,37 @@ public final class NetworkServerControlImpl {
 					setSSLMode(SSL_OFF);
 				}
 				break;
+
+			case DASHARG_SLAVEHOST:
+				if (pos < args.length) {
+					slavehost = args[pos];
+				}
+				else {
+					consolePropertyMessage("DRDA_MissingValue.U",
+					"DRDA_Slavehost.I");
+				}
+			break;
+
+			case DASHARG_SLAVEPORT:
+				if (pos < args.length) {
+					try {
+					slaveport = Integer.parseInt(args[pos]);
+					}
+					catch(NumberFormatException nfe) {
+						//An invalid value has been assigned
+						//to the slaveport.
+						consolePropertyMessage
+						("DRDA_InvalidValue.U", 
+						new String [] {args[pos], 
+						"DRDA_Slaveport.I"});
+					}
+				}
+				else {
+					consolePropertyMessage
+					("DRDA_MissingValue.U",
+					"DRDA_Slaveport.I");
+				}
+			break;
 
 			default:
 				//shouldn't get here
@@ -3221,6 +3297,16 @@ public final class NetworkServerControlImpl {
 				thread.setLogConnections(value);
 			}
 		}
+	}
+
+	/**
+	* Set the current value for the Replication Database.
+	*
+	* @param db a String representing the name of the database being 
+	*           replicated.
+	*/
+	private void setReplicationDB(String db) {
+		replicationdb = db;
 	}
 
 	/**
