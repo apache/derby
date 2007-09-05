@@ -28,9 +28,6 @@ package org.apache.derbyTesting.system.oe.client;
  * implementation would have a reference to its own JDBC connection and prepared
  * statements.
  * <P>
- * Setup methods are provided for each operation to allow testing with a single
- * transaction or mixing of Operations implementations from a single client.
- * <P>
  * Implementations of the execution methods must perform the following:
  * <OL>
  * <LI>Execute business transaction
@@ -45,58 +42,6 @@ package org.apache.derbyTesting.system.oe.client;
  */
 
 public interface Operations {
-
-    /**
-     * Perform any setup required to call stockLevel().
-     * 
-     * @throws Exception
-     *             Error performing the setup.
-     * @see #stockLevel(Display, Object, short, short, int)
-     */
-    public void setupStockLevel() throws Exception;
-
-    /**
-     * Perform any setup required to call either orderStatus().
-     * 
-     * @throws Exception
-     *             Error performing the setup.
-     * @see #orderStatus
-     */
-    public void setupOrderStatus() throws Exception;
-
-    /**
-     * Perform any setup required to call either payment().
-     * 
-     * @throws Exception
-     *             Error performing the setup.
-     * @see #payment
-     */
-    public void setupPayment() throws Exception;
-
-    /**
-     * Perform any setup required to call newOrder().
-     * 
-     * @throws Exception
-     *             Error performing the setup.
-     * @see #newOrder(Display, Object, short, short, int, int[], short[], short[])
-     */
-    public void setupNewOrder() throws Exception;
-
-    /**
-     * Perform any setup required to call scheduleDelivery().
-     * 
-     * @throws Exception
-     *             Error performing the setup.
-     */
-    public void setupScheduleDelivery() throws Exception;
-
-    /**
-     * Perform any setup required to call delivery().
-     * 
-     * @throws Exception
-     *             Error performing the setup.
-     */
-    public void setupDelivery() throws Exception;
 
     /**
      * Execute stock level. Stock level is described in clause 2.8.

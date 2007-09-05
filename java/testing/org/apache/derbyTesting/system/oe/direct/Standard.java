@@ -19,7 +19,6 @@
  */
 package org.apache.derbyTesting.system.oe.direct;
 
-import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -71,17 +70,6 @@ public class Standard implements Operations {
     }
     
     /**
-     * Prepare all statements as forward-only, read-only, close at commit.
-     */
-    PreparedStatement prepare(String sql) throws SQLException
-    {
-        return conn.prepareStatement(sql,
-                ResultSet.TYPE_FORWARD_ONLY,
-                ResultSet.CONCUR_READ_ONLY,
-                ResultSet.CLOSE_CURSORS_AT_COMMIT);
-    }
-    
-    /**
      * Map of SQL text to its PreparedStatement.
      * This allows the SQL text to be in-line with
      * code that sets the parameters and looks at 
@@ -90,10 +78,6 @@ public class Standard implements Operations {
      * (and hence interned). Assumption is that this
      * will provide for a quicker lookup than by text
      * since the statements can be many characters.
-     * Only the new order transaction uses this map
-     * now, the others should be converted as need arises
-     * to have a simple, single model. Then the setup methods
-     * can be removed.
      * 
      * May also allow easier sharing with other implementations
      * such as a Java procedure which could have a different
@@ -111,31 +95,20 @@ public class Standard implements Operations {
         if (ps != null)
             return ps;
         
-        ps = prepare(sql);
+        // Prepare all statements as forward-only, read-only, close at commit.
+        ps = conn.prepareStatement(sql,
+                ResultSet.TYPE_FORWARD_ONLY,
+                ResultSet.CONCUR_READ_ONLY,
+                ResultSet.CLOSE_CURSORS_AT_COMMIT);
         statements.put(sql, ps);
         return ps;
     }
     
-    /*
+    /**
      *  Stock Level transaction.
      *  Described in section 2.8.2.
      *  SQL based upon sample prgram in appendix A.5.
      */
-    
-    private PreparedStatement sl1;
-    private PreparedStatement sl2;
-    
-    public void setupStockLevel() throws Exception {
-        sl1 = prepare(
-            "SELECT D_NEXT_O_ID FROM DISTRICT WHERE D_W_ID = ? AND D_ID = ?");
-        
-        sl2 = prepare(
-            "SELECT COUNT(DISTINCT(S_I_ID)) AS LOW_STOCK FROM ORDERLINE, STOCK " +
-            "WHERE OL_W_ID = ? AND OL_D_ID = ? " +
-            "AND OL_O_ID < ? AND OL_O_ID >= ? " +
-            "AND S_W_ID = ? AND S_I_ID = OL_I_ID AND S_QUANTITY < ?");
-    }
-    
     public void stockLevel(Display display, Object displayData, short w,
             short d, int threshold) throws Exception {
         
@@ -147,6 +120,15 @@ public class Standard implements Operations {
             try {
 
                 conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+                
+                PreparedStatement sl1 = prepareStatement(
+                        "SELECT D_NEXT_O_ID FROM DISTRICT WHERE D_W_ID = ? AND D_ID = ?");
+
+                PreparedStatement sl2 = prepareStatement(
+                        "SELECT COUNT(DISTINCT(S_I_ID)) AS LOW_STOCK FROM ORDERLINE, STOCK " +
+                        "WHERE OL_W_ID = ? AND OL_D_ID = ? " +
+                        "AND OL_O_ID < ? AND OL_O_ID >= ? " +
+                        "AND S_W_ID = ? AND S_I_ID = OL_I_ID AND S_QUANTITY < ?");
                          
                 sl1.setShort(1, w);
                 sl1.setShort(2, d);
@@ -179,52 +161,25 @@ public class Standard implements Operations {
         } catch (SQLException sqle) {
 
             conn.rollback();
+            conn.setTransactionIsolation(isolation);
             throw sqle;
         }
 
         if (display != null)
             display.displayStockLevel(displayData, w, d, threshold, lowStock);
     }
-    
-    /*
-     * Order Status transaction.
-     */
-    
-    private PreparedStatement osCustomerById;
-    private PreparedStatement osLastOrderNumber;
-    private PreparedStatement osOrderDetails;
-    private PreparedStatement osOrderLineItems;
-    
-    private PreparedStatement osCustomerByName;
-
-    public void setupOrderStatus() throws Exception {
-        osCustomerById = prepare(
-                "SELECT C_BALANCE, C_FIRST, C_MIDDLE, C_LAST " +
-                "FROM CUSTOMER WHERE C_W_ID = ? AND C_D_ID = ? AND C_ID = ?");
-        osLastOrderNumber = prepare(
-                "SELECT MAX(O_ID) AS LAST_ORDER FROM ORDERS " +
-                "WHERE O_W_ID = ? AND O_D_ID = ? AND O_C_ID = ?");
-        osOrderDetails = prepare(
-                "SELECT O_ENTRY_D, O_CARRIER_ID, O_OL_CNT " +
-                "FROM ORDERS WHERE O_W_ID = ? AND O_D_ID = ? AND O_ID = ?");
-        osOrderLineItems = prepare(
-                "SELECT OL_I_ID, OL_SUPPLY_W_ID, OL_QUANTITY, OL_AMOUNT, " +
-                "OL_DELIVERY_D FROM ORDERLINE " +
-                "WHERE OL_W_ID = ? AND OL_D_ID = ? AND OL_O_ID = ?");
-
-        osCustomerByName = prepare(
-                "SELECT C_ID, C_BALANCE, C_FIRST, C_MIDDLE " +
-                "FROM CUSTOMER WHERE C_W_ID = ? AND C_D_ID = ? AND C_LAST = ? " +
-                "ORDER BY C_FIRST");
-
-    }
-    
+       
     /**
      * Order status by customer last name.
      * Based up the example SQL queries in appendix A.3
      */
     public void orderStatus(Display display, Object displayData, short w,
             short d, String customerLast) throws Exception {
+        
+        PreparedStatement osCustomerByName = prepareStatement(
+                "SELECT C_ID, C_BALANCE, C_FIRST, C_MIDDLE " +
+                "FROM CUSTOMER WHERE C_W_ID = ? AND C_D_ID = ? AND C_LAST = ? " +
+                "ORDER BY C_FIRST");
         
        
         try {
@@ -276,6 +231,10 @@ public class Standard implements Operations {
     public void orderStatus(Display display, Object displayData, short w,
             short d, int c) throws Exception {
         
+        PreparedStatement osCustomerById = prepareStatement(
+                "SELECT C_BALANCE, C_FIRST, C_MIDDLE, C_LAST " +
+                "FROM CUSTOMER WHERE C_W_ID = ? AND C_D_ID = ? AND C_ID = ?");
+        
         Customer customer = new Customer();
         customer.setWarehouse(w);
         customer.setDistrict(d);
@@ -308,6 +267,17 @@ public class Standard implements Operations {
     private void getOrderStatusForCustomer(Display display, Object displayData,
             boolean byName, Customer customer) throws Exception
     {
+        PreparedStatement osLastOrderNumber = prepareStatement(
+                "SELECT MAX(O_ID) AS LAST_ORDER FROM ORDERS " +
+                "WHERE O_W_ID = ? AND O_D_ID = ? AND O_C_ID = ?");
+        PreparedStatement osOrderDetails = prepareStatement(
+                "SELECT O_ENTRY_D, O_CARRIER_ID, O_OL_CNT " +
+                "FROM ORDERS WHERE O_W_ID = ? AND O_D_ID = ? AND O_ID = ?");
+        PreparedStatement osOrderLineItems = prepareStatement(
+                "SELECT OL_I_ID, OL_SUPPLY_W_ID, OL_QUANTITY, OL_AMOUNT, " +
+                "OL_DELIVERY_D FROM ORDERLINE " +
+                "WHERE OL_W_ID = ? AND OL_D_ID = ? AND OL_O_ID = ?");
+        
         Order order = new Order();
         order.setWarehouse(customer.getWarehouse());
         order.setDistrict(customer.getDistrict());
@@ -358,59 +328,6 @@ public class Standard implements Operations {
                     byName, customer, order, lineItems);
     }
     
-    private PreparedStatement pyCustomerPayment;
-    private PreparedStatement pyCustomerInfoId;
-    private PreparedStatement pyCustomerByName;
-    private PreparedStatement pyCustomerUpdateBadCredit;
-    private PreparedStatement pyCustomerGetData;
-    private PreparedStatement pyDistrictUpdate;
-    private PreparedStatement pyDistrictInfo;
-    private PreparedStatement pyWarehouseUpdate;
-    private PreparedStatement pyWarehouseInfo;
-    private PreparedStatement pyHistory;
-
-    public void setupPayment() throws Exception {
-        pyCustomerPayment = prepare(
-            "UPDATE CUSTOMER SET C_BALANCE = C_BALANCE - ?, " +
-            "C_YTD_PAYMENT = C_YTD_PAYMENT + ?, " +
-            "C_PAYMENT_CNT = C_PAYMENT_CNT + 1 " +
-            "WHERE C_W_ID = ? AND C_D_ID = ? AND C_ID = ?");
-        
-        pyCustomerInfoId = prepare(
-            "SELECT C_FIRST, C_MIDDLE, C_LAST, C_BALANCE, " +
-            "C_STREET_1, C_STREET_2, C_CITY, C_STATE, C_ZIP, " +
-            "C_PHONE, C_SINCE, C_CREDIT, C_CREDIT_LIM, C_DISCOUNT " +
-            "FROM CUSTOMER WHERE C_W_ID = ? AND C_D_ID = ? AND C_ID = ?");
-        
-        pyCustomerByName = prepare(
-                "SELECT C_ID " +
-                "FROM CUSTOMER WHERE C_W_ID = ? AND C_D_ID = ? AND C_LAST = ? " +
-                "ORDER BY C_FIRST");
-        
-        pyCustomerUpdateBadCredit = prepare(
-            "UPDATE CUSTOMER SET C_DATA = " +
-            " BAD_CREDIT_DATA(C_DATA, ?, ?, C_W_ID, C_W_ID, C_ID, ?) " +
-            "WHERE C_W_ID = ? AND C_D_ID = ? AND C_ID = ?");
-        pyCustomerGetData = prepare(
-            "SELECT SUBSTR(C_DATA, 1, 200) AS C_DATA_200 " +
-            "FROM CUSTOMER WHERE C_W_ID = ? AND C_D_ID = ? AND C_ID = ?");
-        
-        pyDistrictUpdate = prepare(
-            "UPDATE DISTRICT SET D_YTD = D_YTD + ? WHERE D_W_ID = ? AND D_ID = ?");
-        pyDistrictInfo = prepare(
-            "SELECT D_NAME, D_STREET_1, D_STREET_2, D_CITY, D_STATE, D_ZIP FROM DISTRICT WHERE D_W_ID = ? AND D_ID = ? ");
-        pyWarehouseUpdate = prepare(
-            "UPDATE WAREHOUSE SET W_YTD = W_YTD + ? WHERE W_ID = ?");
-        pyWarehouseInfo = prepare(
-                "SELECT W_NAME, W_STREET_1, W_STREET_2, W_CITY, W_STATE, W_ZIP " +
-                "FROM WAREHOUSE WHERE W_ID = ?");
-        
-        pyHistory = prepare(
-            "INSERT INTO HISTORY(H_C_ID, H_C_D_ID, H_C_W_ID, H_D_ID, H_W_ID, " +
-            "H_DATE, H_AMOUNT, H_DATA) " +
-            "VALUES (?, ?, ?, ?, ?, CURRENT TIMESTAMP, ?, ?)");
-     }
-
     /**
      * Payment by customer last name.
      * Section 2.5.2
@@ -422,6 +339,11 @@ public class Standard implements Operations {
     public void payment(Display display, Object displayData, short w, short d,
             short cw, short cd, String customerLast, String amount)
             throws Exception {
+            
+        PreparedStatement pyCustomerByName = prepareStatement(
+                    "SELECT C_ID " +
+                    "FROM CUSTOMER WHERE C_W_ID = ? AND C_D_ID = ? AND C_LAST = ? " +
+                    "ORDER BY C_FIRST");
         
         // Since so much data is needed for the payment transaction
         // from the customer we don't fill it in as we select the
@@ -482,7 +404,41 @@ public class Standard implements Operations {
     
     private void paymentById(Display display, Object displayData, short w, short d,
             short cw, short cd, int c, final String amount) throws Exception {
-  
+
+        PreparedStatement pyCustomerPayment = prepareStatement(
+                "UPDATE CUSTOMER SET C_BALANCE = C_BALANCE - ?, " +
+                "C_YTD_PAYMENT = C_YTD_PAYMENT + ?, " +
+                "C_PAYMENT_CNT = C_PAYMENT_CNT + 1 " +
+                "WHERE C_W_ID = ? AND C_D_ID = ? AND C_ID = ?");
+            
+        PreparedStatement pyCustomerInfoId = prepareStatement(
+                "SELECT C_FIRST, C_MIDDLE, C_LAST, C_BALANCE, " +
+                "C_STREET_1, C_STREET_2, C_CITY, C_STATE, C_ZIP, " +
+                "C_PHONE, C_SINCE, C_CREDIT, C_CREDIT_LIM, C_DISCOUNT " +
+                "FROM CUSTOMER WHERE C_W_ID = ? AND C_D_ID = ? AND C_ID = ?");
+        
+        PreparedStatement pyCustomerUpdateBadCredit = prepareStatement(
+                "UPDATE CUSTOMER SET C_DATA = " +
+                " BAD_CREDIT_DATA(C_DATA, ?, ?, C_W_ID, C_W_ID, C_ID, ?) " +
+                "WHERE C_W_ID = ? AND C_D_ID = ? AND C_ID = ?");
+        PreparedStatement pyCustomerGetData = prepareStatement(
+                "SELECT SUBSTR(C_DATA, 1, 200) AS C_DATA_200 " +
+                "FROM CUSTOMER WHERE C_W_ID = ? AND C_D_ID = ? AND C_ID = ?");
+            
+        PreparedStatement pyDistrictUpdate = prepareStatement(
+                "UPDATE DISTRICT SET D_YTD = D_YTD + ? WHERE D_W_ID = ? AND D_ID = ?");
+        PreparedStatement pyDistrictInfo = prepareStatement(
+                "SELECT D_NAME, D_STREET_1, D_STREET_2, D_CITY, D_STATE, D_ZIP FROM DISTRICT WHERE D_W_ID = ? AND D_ID = ? ");
+        PreparedStatement pyWarehouseUpdate = prepareStatement(
+                "UPDATE WAREHOUSE SET W_YTD = W_YTD + ? WHERE W_ID = ?");
+        PreparedStatement pyWarehouseInfo = prepareStatement(
+                    "SELECT W_NAME, W_STREET_1, W_STREET_2, W_CITY, W_STATE, W_ZIP " +
+                    "FROM WAREHOUSE WHERE W_ID = ?");
+            
+        PreparedStatement pyHistory = prepareStatement(
+                "INSERT INTO HISTORY(H_C_ID, H_C_D_ID, H_C_W_ID, H_D_ID, H_W_ID, " +
+                "H_DATE, H_AMOUNT, H_DATA) " +
+                "VALUES (?, ?, ?, ?, ?, CURRENT TIMESTAMP, ?, ?)");
         
         Customer customer = new Customer();
         customer.setWarehouse(cw);
@@ -598,10 +554,6 @@ public class Standard implements Operations {
   
     }
     
-    public void setupNewOrder() throws Exception {
-        
-
-    }
     private static final String[] STOCK_INFO = {
     "SELECT S_QUANTITY, S_DIST_01, S_DATA FROM STOCK WHERE S_I_ID = ? AND S_W_ID = ?",
     "SELECT S_QUANTITY, S_DIST_02, S_DATA FROM STOCK WHERE S_I_ID = ? AND S_W_ID = ?",
@@ -794,14 +746,6 @@ public class Standard implements Operations {
         }
     }
     
-    private PreparedStatement sdSchedule;
-    
-    public void setupScheduleDelivery() throws Exception {
-        sdSchedule = prepare(
-           "INSERT INTO DELIVERY_REQUEST(DR_W_ID, DR_CARRIER_ID, DR_STATE) " +
-           "VALUES(?, ?, 'Q')");
-    }
-    
     /**
      * Schedule a delivery using the database as the queuing
      * mechanism and the results file.
@@ -809,6 +753,11 @@ public class Standard implements Operations {
      */
     public void scheduleDelivery(Display display, Object displayData, short w,
             short carrier) throws Exception {
+        
+        PreparedStatement sdSchedule = prepareStatement(
+                "INSERT INTO DELIVERY_REQUEST(DR_W_ID, DR_CARRIER_ID, DR_STATE) " +
+                "VALUES(?, ?, 'Q')");
+        
         int isolation = conn.getTransactionIsolation(); 
         try {
 
@@ -827,64 +776,49 @@ public class Standard implements Operations {
             display.displayScheduleDelivery(displayData, w, carrier);
     }
     
-    private PreparedStatement dlFindOldestRequest;
-    private PreparedStatement dlSetRequestState;
-    private PreparedStatement dlFindOrderToDeliver;
-    private PreparedStatement dlDeleteNewOrder;
-    private PreparedStatement dlSetOrderCarrier;
-    private PreparedStatement dlSetOrderlineDate;
-    private PreparedStatement dlUpdateCustomer;
-    private PreparedStatement dlRecordDelivery;
-    private PreparedStatement dlCompleteDelivery;
-    
-    
-    public void setupDelivery() throws Exception {
-
-        dlFindOldestRequest = prepare(
-            "SELECT DR_ID, DR_W_ID, DR_CARRIER_ID FROM DELIVERY_REQUEST " +
-            "WHERE DR_STATE = 'Q' ORDER BY DR_QUEUED");
-        dlFindOldestRequest.setMaxRows(1);
-        
-        dlSetRequestState = prepare(
-            "UPDATE DELIVERY_REQUEST SET DR_STATE = ? " +
-            "WHERE DR_ID = ?");
-        dlCompleteDelivery = prepare(
-            "UPDATE DELIVERY_REQUEST SET DR_STATE = 'C', DR_COMPLETED = CURRENT TIMESTAMP " +
-            "WHERE DR_ID = ?");
-        
-        dlFindOrderToDeliver = prepare(
-            "SELECT MIN(NO_O_ID) AS ORDER_TO_DELIVER FROM NEWORDERS " +
-            "WHERE NO_W_ID = ? AND NO_D_ID = ?");
-        
-        dlDeleteNewOrder = prepare(
-            "DELETE FROM NEWORDERS WHERE NO_W_ID = ? AND NO_D_ID = ? AND NO_O_ID = ?");
-        
-        dlSetOrderCarrier = prepare(
-            "UPDATE ORDERS SET O_CARRIER_ID = ? " +
-            "WHERE O_W_ID = ? AND O_D_ID = ? AND O_ID = ?");
-        
-        dlSetOrderlineDate = prepare(
-            "UPDATE ORDERLINE SET OL_DELIVERY_D = CURRENT TIMESTAMP " +
-            "WHERE OL_W_ID = ? AND OL_D_ID = ? AND OL_O_ID = ?");
-        
-        
-        dlUpdateCustomer = prepare(
-            "UPDATE CUSTOMER SET " +
-            "C_BALANCE = (SELECT SUM(OL_AMOUNT) FROM ORDERLINE " +
-                          "WHERE OL_W_ID = ? AND OL_D_ID = ? AND OL_O_ID = ?), " +
-            "C_DELIVERY_CNT = C_DELIVERY_CNT + 1 " +
-            "WHERE C_W_ID = ? AND C_D_ID = ? AND " +
-            "C_ID = (SELECT O_C_ID FROM ORDERS " +
-                    "WHERE O_W_ID = ? AND O_D_ID = ? AND O_ID = ?)");
-        
-        dlRecordDelivery = prepare(
-            "INSERT INTO DELIVERY_ORDERS(DO_DR_ID, DO_D_ID, DO_O_ID) " +
-            "VALUES (?, ?, ?)");
-
-    }
-    
-
     public void delivery() throws Exception {
+        
+        PreparedStatement dlFindOldestRequest = prepareStatement(
+                "SELECT DR_ID, DR_W_ID, DR_CARRIER_ID FROM DELIVERY_REQUEST " +
+                "WHERE DR_STATE = 'Q' ORDER BY DR_QUEUED");
+            dlFindOldestRequest.setMaxRows(1);
+            
+            PreparedStatement dlSetRequestState = prepareStatement(
+                "UPDATE DELIVERY_REQUEST SET DR_STATE = ? " +
+                "WHERE DR_ID = ?");
+            PreparedStatement dlCompleteDelivery = prepareStatement(
+                "UPDATE DELIVERY_REQUEST SET DR_STATE = 'C', DR_COMPLETED = CURRENT TIMESTAMP " +
+                "WHERE DR_ID = ?");
+            
+            PreparedStatement dlFindOrderToDeliver = prepareStatement(
+                "SELECT MIN(NO_O_ID) AS ORDER_TO_DELIVER FROM NEWORDERS " +
+                "WHERE NO_W_ID = ? AND NO_D_ID = ?");
+            
+            PreparedStatement dlDeleteNewOrder = prepareStatement(
+                "DELETE FROM NEWORDERS WHERE NO_W_ID = ? AND NO_D_ID = ? AND NO_O_ID = ?");
+            
+            PreparedStatement dlSetOrderCarrier = prepareStatement(
+                "UPDATE ORDERS SET O_CARRIER_ID = ? " +
+                "WHERE O_W_ID = ? AND O_D_ID = ? AND O_ID = ?");
+            
+            PreparedStatement dlSetOrderlineDate = prepareStatement(
+                "UPDATE ORDERLINE SET OL_DELIVERY_D = CURRENT TIMESTAMP " +
+                "WHERE OL_W_ID = ? AND OL_D_ID = ? AND OL_O_ID = ?");
+            
+            
+            PreparedStatement dlUpdateCustomer = prepareStatement(
+                "UPDATE CUSTOMER SET " +
+                "C_BALANCE = (SELECT SUM(OL_AMOUNT) FROM ORDERLINE " +
+                              "WHERE OL_W_ID = ? AND OL_D_ID = ? AND OL_O_ID = ?), " +
+                "C_DELIVERY_CNT = C_DELIVERY_CNT + 1 " +
+                "WHERE C_W_ID = ? AND C_D_ID = ? AND " +
+                "C_ID = (SELECT O_C_ID FROM ORDERS " +
+                        "WHERE O_W_ID = ? AND O_D_ID = ? AND O_ID = ?)");
+            
+            PreparedStatement dlRecordDelivery = prepareStatement(
+                "INSERT INTO DELIVERY_ORDERS(DO_DR_ID, DO_D_ID, DO_O_ID) " +
+                "VALUES (?, ?, ?)");
+
         
         // Find the most oldest queued order (FIFO)
         ResultSet rs = dlFindOldestRequest.executeQuery();
@@ -976,18 +910,7 @@ public class Standard implements Operations {
     }
 
     public void close() throws Exception {
-        
-        // Close any instance field that is a PreparedStatement
-        Field[] fields = getClass().getDeclaredFields();
-        for (int i = 0; i < fields.length; i++) {
-            Field f = fields[i];
-                       
-            if (PreparedStatement.class.isAssignableFrom(f.getType()))
-            {
-                close((PreparedStatement) f.get(this));
-            }
-        }
-        
+              
         for (Iterator i = statements.keySet().iterator(); i.hasNext(); )
         {
             String sql = (String) i.next();

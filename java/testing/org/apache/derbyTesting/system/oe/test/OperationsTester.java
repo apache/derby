@@ -61,9 +61,7 @@ public class OperationsTester extends BaseJDBCTestCase implements Display {
     }
     
     public void testStockLevel() throws Exception
-    {
-        ops.setupStockLevel();
-        
+    {     
         // Check a null display is handled
         ops.stockLevel(null, null,
                 w, rand.district(), rand.threshold());
@@ -89,9 +87,7 @@ public class OperationsTester extends BaseJDBCTestCase implements Display {
      * @throws Exception
      */
     public void testOrderStatus() throws Exception
-    {
-        ops.setupOrderStatus();
-        
+    {     
         // By identifier
         ops.orderStatus(null, null,
                 w, rand.district(), rand.NURand1023());
@@ -124,9 +120,7 @@ public class OperationsTester extends BaseJDBCTestCase implements Display {
         }
     }
     public void testPayment() throws Exception
-    {
-        ops.setupPayment();
-        
+    {       
         //  With no display
         ops.payment(null, null, w, rand.district(),
                 w, rand.district(), rand.randomCLast(), rand.payment().toString());
@@ -148,7 +142,6 @@ public class OperationsTester extends BaseJDBCTestCase implements Display {
     }
     public void testNewOrder() throws Exception
     {
-        ops.setupNewOrder();
         for (int x = 0; x < 50; x++)
         {
             int itemCount = rand.randomInt(5, 15);
@@ -176,13 +169,11 @@ public class OperationsTester extends BaseJDBCTestCase implements Display {
     }
     public void testScheduleDelivery() throws Exception
     {
-        ops.setupScheduleDelivery();
         for (int i = 0; i < 50; i++)
             ops.scheduleDelivery(this, null, w, rand.carrier());
     }
     public void testDelivery() throws Exception
     {
-        ops.setupDelivery();
         // Ensure there are some schedule deliveries
         testScheduleDelivery();
         for (int i = 0; i < 50; i++)
