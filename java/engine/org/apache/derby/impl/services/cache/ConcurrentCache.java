@@ -59,6 +59,15 @@ final class ConcurrentCache implements CacheManager {
     private final String name;
 
     /**
+     * Flag that indicates whether this cache instance has been shut down. When
+     * it has been stopped, <code>find()</code>, <code>findCached()</code> and
+     * <code>create()</code> will return <code>null</code>. The flag is
+     * declared <code>volatile</code> so that no synchronization is needed when
+     * it is accessed by concurrent threads.
+     */
+    private volatile boolean stopped;
+
+    /**
      * Creates a new cache manager.
      *
      * @param holderFactory factory which creates <code>Cacheable</code>s
@@ -154,6 +163,11 @@ final class ConcurrentCache implements CacheManager {
      * @return the cached object, or <code>null</code> if it cannot be found
      */
     public Cacheable find(Object key) throws StandardException {
+
+        if (stopped) {
+            return null;
+        }
+
         CacheEntry entry = getEntry(key);
         try {
             Cacheable item = entry.getCacheable();
@@ -192,6 +206,11 @@ final class ConcurrentCache implements CacheManager {
      * @return the cached object, or <code>null</code> if it's not in the cache
      */
     public Cacheable findCached(Object key) throws StandardException {
+
+        if (stopped) {
+            return null;
+        }
+
         // We don't want to insert it if it's not there, so there's no need to
         // use getEntry().
         CacheEntry entry = cache.get(key);
@@ -228,6 +247,11 @@ final class ConcurrentCache implements CacheManager {
      */
     public Cacheable create(Object key, Object createParameter)
             throws StandardException {
+
+        if (stopped) {
+            return null;
+        }
+
         CacheEntry entry = getEntry(key);
         try {
             if (entry.isValid()) {
@@ -358,8 +382,14 @@ final class ConcurrentCache implements CacheManager {
         }
     }
 
+    /**
+     * Shut down the cache.
+     */
     public void shutdown() throws StandardException {
-        // TODO
+        // TODO - unsubscribe background writer
+        stopped = true;
+        cleanAll();
+        ageOut();
     }
 
     public void useDaemonService(DaemonService daemon) {
