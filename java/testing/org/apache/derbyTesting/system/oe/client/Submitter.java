@@ -1,0 +1,323 @@
+/*
+ *
+ * Derby - Class org.apache.derbyTesting.system.oe.client.Submitter
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, 
+ * software distributed under the License is distributed on an 
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, 
+ * either express or implied. See the License for the specific 
+ * language governing permissions and limitations under the License.
+ */
+package org.apache.derbyTesting.system.oe.client;
+
+import java.io.PrintStream;
+import java.math.BigDecimal;
+
+import org.apache.derbyTesting.system.oe.util.OERandom;
+
+/**
+ * Class that submits Order Entry transactions
+ * to a database through an instance of an Operations class.
+ * This class is responsible for the mix of transactions
+ * and the generation of the random input values.
+ * 
+ * Sub-classes can override the mix.
+ */
+public class Submitter {
+    
+    /**
+     * Offset of Stock Level transaction in returned
+     * arrays with run information.
+     */
+    public static final int STOCK_LEVEL = 0;
+    /**
+     * Offset of Order Status by Name transaction in returned
+     * arrays with run information.
+     */    
+    public static final int ORDER_STATUS_BY_NAME = 1;
+    /**
+     * Offset of Order Status by Id transaction in returned
+     * arrays with run information.
+     */
+    public static final int ORDER_STATUS_BY_ID = 2;
+    
+     /**
+      * Offset of Payment by Name transaction in returned
+      * arrays with run information.
+      */
+    public static final int PAYMENT_BY_NAME = 3;
+    
+    /**
+     * Offset of Payement by ID transaction in returned
+     * arrays with run information.
+     */
+    public static final int PAYMENT_BY_ID = 4;
+    
+    /**
+     * Offset of Delivery transaction in returned
+     * arrays with run information.
+     */
+    public static final int DELIVERY_SCHEDULE = 5;
+    
+    /**
+     * Offset of New Order transaction in returned
+     * arrays with run information.
+     */
+    public static final int NEW_ORDER = 6;
+    
+    /**
+     * Offset of New Order transaction that rolled back in returned
+     * arrays with run information.
+     */
+    public static final int NEW_ORDER_ROLLBACK = 7;
+    
+    /**
+     * Display to write the output to.
+     */
+    private final Display display;
+    
+    /**
+     * How the business transactions are implemented.
+     */
+    private final Operations ops;
+    
+    /**
+     * My own random number generator.
+     */
+    private final OERandom rand;
+    
+    /**
+     * Scale of the database.
+     */
+    private final short maxW;
+    
+    /**
+     * Record of how many transactions are implemented.
+     */
+    private final int[] transactionCount;
+
+    public Submitter(Display display, Operations ops, OERandom rand,
+            short maxW)
+        throws Exception
+    {
+        this.display = display;
+        this.ops = ops;
+        this.rand = rand;
+        this.maxW = maxW;
+        
+        transactionCount = new int[NEW_ORDER_ROLLBACK+1];
+    }
+    
+    /**
+     * Run an order entry transaction picking the specific
+     * transaction at random with a hard-coded mix.
+     * @param displayData Passed onto Display calls
+     * @throws Exception Error executing the transaction
+     */
+    public void runTransaction(Object displayData) throws Exception
+    {       
+        int chooseType = rand.randomInt(1, 100);
+        
+        int type = mixType(chooseType);
+        
+        switch (type)
+        {
+        case Submitter.DELIVERY_SCHEDULE:
+            runScheduleDelivery(displayData);
+            break;
+        case Submitter.NEW_ORDER:
+            runNewOrder(displayData, false);
+            break;
+        case Submitter.NEW_ORDER_ROLLBACK:
+            runNewOrder(displayData, true);
+            break;
+        case Submitter.ORDER_STATUS_BY_ID:
+            runOrderStatus(displayData, false);
+            break;
+        case Submitter.ORDER_STATUS_BY_NAME:
+            runOrderStatus(displayData, true);
+            break;
+        case Submitter.PAYMENT_BY_ID:
+            runPayment(displayData, false);
+            break;
+        case Submitter.PAYMENT_BY_NAME:
+            runPayment(displayData, true);
+            break;
+        case Submitter.STOCK_LEVEL:
+            runStockLevel(displayData);
+            break;
+        }
+        
+        transactionCount[type]++;
+    }
+    
+    /**
+     * Return one of transaction constants to run that transaction.
+     * This mix in not correct for TPC-C specification.
+     * With the official spec the final mix of transactions
+     * must match a certain profile. With this setup the
+     * mix is fixed upon input following the TPC-C final ratios.
+     * This will give approximately correct results, but the final
+     * mix will not be in line with TPC-C rules. This is because
+     * different transactions have different execution times.
+     * @param chooseType Random number between 1 and 100 inclusive.
+     * @return A transaction constant from this class.
+     */
+    protected int mixType(int chooseType)
+    {
+        if (chooseType <= 43)
+        {
+            boolean byName = rand.randomInt(1, 100) <= 60;
+            return byName ?
+                Submitter.PAYMENT_BY_NAME : Submitter.PAYMENT_BY_ID;       
+        }
+        else if (chooseType <= (43 + 4))
+        {
+            boolean byName = rand.randomInt(1, 100) <= 60;
+            return byName ?
+                Submitter.ORDER_STATUS_BY_NAME : Submitter.ORDER_STATUS_BY_ID;
+        }
+        else if (chooseType <= (43 + 4 + 4))
+            return Submitter.DELIVERY_SCHEDULE;
+        else if (chooseType <= (43 + 4 + 4 + 4))
+            return Submitter.STOCK_LEVEL;
+        else
+        {
+            // 1% rollback
+            boolean rollback = rand.randomInt(1, 100) == 1;
+            return rollback ?
+               Submitter.NEW_ORDER_ROLLBACK : Submitter.NEW_ORDER;
+        }
+    }
+    
+    protected void runNewOrder(Object displayData, boolean forRollback) {
+        // TODO Auto-generated method stub
+    }
+
+    protected void runScheduleDelivery(Object displayData) {
+        // TODO Auto-generated method stub
+    }
+
+    /**
+     * Run a payment transaction with random input values.
+     */
+    protected void runPayment(Object displayData,
+            boolean byName) throws Exception {
+        
+        if (byName)
+        {
+            ops.payment(display, displayData,
+                    warehouse(), rand.district(),
+                    warehouse(), rand.district(),
+                    rand.randomCLast(), rand.payment().toString());
+        }
+        else
+        {
+            ops.payment(display, displayData,
+                warehouse(), rand.district(),
+                warehouse(), rand.district(),
+                rand.NURand1023(), rand.payment().toString());
+        }
+     }
+
+    /**
+     * Return a random warehouse
+     * @return
+     */
+    private final short warehouse() {
+        return (short) rand.randomInt(1, maxW);
+    }
+
+    /**
+     * Run a stock level transaction with random input values.
+     */
+    protected void runStockLevel(Object displayData) throws Exception
+    {
+        ops.stockLevel(display, displayData,
+                warehouse(), rand.district(), rand.threshold());
+    }
+    
+    /**
+     * Run an order status transaction with random input values.
+     */
+    protected void runOrderStatus(Object displayData, boolean byName) throws Exception {
+
+        if (byName)
+        {
+            ops.orderStatus(display, displayData,
+                    warehouse(), rand.district(), rand.randomCLast());
+        }
+        else
+        {
+            ops.orderStatus(display, displayData,
+                warehouse(), rand.district(), rand.NURand1023());
+        }
+
+    }
+    
+    /**
+     * Print a simple report of the activity.
+     * @param out
+     */
+    public void printReport(PrintStream out) {
+             
+        int total = 0;
+        for (int i = 0; i < transactionCount.length; i++)
+            total += transactionCount[i];
+        
+        out.println("Total Transactions: " + total);
+        
+        int noTotal = transactionCount[NEW_ORDER] +
+            transactionCount[NEW_ORDER_ROLLBACK];       
+        int pyCount = transactionCount[PAYMENT_BY_NAME] +
+            transactionCount[PAYMENT_BY_ID];
+        int osCount = transactionCount[ORDER_STATUS_BY_NAME] +
+            transactionCount[ORDER_STATUS_BY_ID];
+
+        out.println(transactionCount("New Order         ", noTotal, total));        
+        out.println(transactionCount("Payment           ",  pyCount, total));
+        out.println(transactionCount("Order Status      ",  osCount, total));
+        out.println(transactionCount("    By Name       ",  transactionCount[ORDER_STATUS_BY_NAME], total));
+        out.println(transactionCount("    By Identifier ",  transactionCount[ORDER_STATUS_BY_ID], total));
+        
+        out.println(transactionCount("Stock Level       ", 
+                transactionCount[STOCK_LEVEL], total));
+        out.println(transactionCount("Schedule Delivery ", 
+                transactionCount[DELIVERY_SCHEDULE], total));
+    }
+    
+    private String transactionCount(String name, int count, int total) 
+    {
+        return name + " : " + percent(count, total) +
+           "(" + count + ")" ;
+        
+    }
+    
+    private String percent(int count, int total)
+    {
+        BigDecimal c = new BigDecimal((long) count * 100L);
+        BigDecimal t = new BigDecimal((long) total);
+        
+        BigDecimal p = c.divide(t, 2, BigDecimal.ROUND_DOWN);
+        
+        return p.toString().concat("%");
+    }
+
+    /**
+     * Get the executed transaction counts.
+     * 
+     * @return
+     */
+    public int[] getTransactionCount() {
+        return transactionCount;
+    }   
+}

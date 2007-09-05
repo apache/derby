@@ -24,6 +24,7 @@ import java.util.HashMap;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.system.oe.client.Display;
 import org.apache.derbyTesting.system.oe.client.Operations;
+import org.apache.derbyTesting.system.oe.client.Submitter;
 import org.apache.derbyTesting.system.oe.direct.Standard;
 import org.apache.derbyTesting.system.oe.model.Customer;
 import org.apache.derbyTesting.system.oe.model.District;
@@ -77,6 +78,9 @@ public class OperationsTester extends BaseJDBCTestCase implements Display {
             
             ops.stockLevel(this, inputData,
                     w, d, threshold);
+            
+            // Ensures the Display object read it.
+            assertTrue(inputData.isEmpty());
         }
     }
     
@@ -101,6 +105,8 @@ public class OperationsTester extends BaseJDBCTestCase implements Display {
             inputData.put("c", new Integer(c));
 
             ops.orderStatus(this, inputData, w, d, c);
+            // Ensures the Display object read it.
+            assertTrue(inputData.isEmpty());
         }
         
         // By name 
@@ -116,6 +122,8 @@ public class OperationsTester extends BaseJDBCTestCase implements Display {
             inputData.put("customerLast", customerLast);
 
             ops.orderStatus(this, inputData, w, d, customerLast);
+            // Ensures the Display object read it.
+            assertTrue(inputData.isEmpty());
             
         }
     }
@@ -181,14 +189,27 @@ public class OperationsTester extends BaseJDBCTestCase implements Display {
     }
 
     public void displayStockLevel(Object displayData, short w, short d, int threshold, int lowStock) throws Exception {
+        
+        // Submitter does not fill this in.
+        if (displayData == null)
+            return;
+        
         HashMap inputData = (HashMap) displayData;
         assertEquals("sl:w", this.w, w);
         assertEquals("sl:d", ((Short) inputData.get("d")).shortValue(), d);
         assertEquals("sl:threshold", ((Integer) inputData.get("threshold")).intValue(), threshold);
-        assertTrue("sl:low stock", lowStock >= 0); 
+        assertTrue("sl:low stock", lowStock >= 0);
+        
+        // Clear it to inform the caller that it was read.
+        inputData.clear();
     }
 
     public void displayOrderStatus(Object displayData, boolean byName, Customer customer, Order order, OrderLine[] lineItems) throws Exception {
+        
+        // Submitter does not fill this in.
+        if (displayData == null)
+            return;
+        
         HashMap inputData = (HashMap) displayData;
         assertEquals("os:w", this.w, customer.getWarehouse());
         assertEquals("os:d", ((Short) inputData.get("d")).shortValue(), customer.getDistrict());
@@ -201,6 +222,9 @@ public class OperationsTester extends BaseJDBCTestCase implements Display {
         {
             assertNull(inputData.get("customerLast"));
         }
+        
+        // Clear it to inform the caller that it was read.
+        inputData.clear();
     }
 
     public void displayPayment(Object displayData, String amount, boolean byName, Warehouse warehouse, District district, Customer customer) throws Exception {
@@ -215,6 +239,28 @@ public class OperationsTester extends BaseJDBCTestCase implements Display {
 
     public void displayScheduleDelivery(Object displayData, short w, short carrier) throws Exception {
         // TODO Auto-generated method stub
+        
+    }
+    
+    public void testSubmitter() throws Exception
+    {
+        Submitter submitter = new Submitter(this, this.ops, this.rand,
+                (short) 1);
+        
+        int tranCount = 37;
+        
+        for (int i = 0; i < tranCount; i++)
+        {
+            submitter.runTransaction(null);
+        }
+        
+        int[] executeCounts = submitter.getTransactionCount();
+        int totalTran = 0;
+        for (int i = 0; i < executeCounts.length; i++)
+            totalTran += executeCounts[i];
+        
+        assertEquals("Mismatch on Submitter transaction count",
+                tranCount, totalTran);
         
     }
 }
