@@ -1680,8 +1680,6 @@ public class ResultSetTest
      * Case 1: isWrapperFor returns true and we call unwrap
      * Case 2: isWrapperFor returns false and we call unwrap
      *
-     * @param rs The ResultSet object on which the wrapper 
-     *           methods are tested
      *
      * @throws SQLException	Thrown if some unexpected error happens
      */

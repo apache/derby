@@ -204,7 +204,7 @@ public class AutoloadTest extends BaseJDBCTestCase
     /**
      * Return true if there appears to be a Derby embedded
      * driver registered with the DriverManager.
-     * @return
+     * @return true if there appears to be a Derby embedded driver registered
      */
     private boolean isEmbeddedDriverRegistered()
     {

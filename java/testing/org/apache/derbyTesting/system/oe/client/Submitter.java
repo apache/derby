@@ -231,7 +231,7 @@ public class Submitter {
 
     /**
      * Return a random warehouse
-     * @return
+     * @return a random warehouse
      */
     private final short warehouse() {
         return (short) rand.randomInt(1, maxW);
@@ -315,7 +315,7 @@ public class Submitter {
     /**
      * Get the executed transaction counts.
      * 
-     * @return
+     * @return transactionCount
      */
     public int[] getTransactionCount() {
         return transactionCount;

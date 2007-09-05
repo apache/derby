@@ -58,7 +58,6 @@ public interface Operations {
      *            District for transaction
      * @param threshold
      *            Threshold for transaction.
-     * @see #setupStockLevel()
      * @see Display#displayStockLevel(Object, short, short, int, int)
      */
     public void stockLevel(Display display, Object displayData, short w,
