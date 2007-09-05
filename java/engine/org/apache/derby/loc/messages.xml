@@ -4670,6 +4670,10 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
             <title>Class XRE: Replication Exceptions</title>
 
             <msg>
+                <name>XRE00</name>
+                <text>Cannot start replication for a read-only database.</text>
+            </msg>
+            <msg>
                 <name>XRE01</name>
                 <text>The log received from the master is corrupted.</text>
             </msg>

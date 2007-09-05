@@ -349,6 +349,25 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 		return this.authenticationService;
 	}
 
+    /**
+     * Start the replication master role for this database
+     * @param host The hostname for the slave
+     * @param port The port the slave is listening on
+     * @param replicationMode The type of replication contract.
+     * Currently only asynchronous replication is supported, but
+     * 1-safe/2-safe/very-safe modes may be added later.
+     * @exception SQLException Thrown on error
+     */
+    public void startReplicationMaster(String host, int port,
+                                       String replicationMode)
+        throws SQLException {
+        try {
+            af.startReplicationMaster(host, port, replicationMode);
+        } catch (StandardException se) {
+            throw PublicAPI.wrapStandardException(se);
+        }
+    }
+
 	public void freeze() throws SQLException
 	{
 		try {

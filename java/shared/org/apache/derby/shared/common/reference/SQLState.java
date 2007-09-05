@@ -1750,6 +1750,7 @@ public interface SQLState {
     /*
     ** Replication XRExx
     */
+    String CANNOT_REPLICATE_READONLY_DATABASE                      = "XRE00";
     String REPLICATION_LOG_CORRUPTED                               = "XRE01";
 
 }

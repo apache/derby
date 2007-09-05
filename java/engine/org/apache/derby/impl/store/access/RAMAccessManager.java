@@ -912,6 +912,22 @@ public abstract class RAMAccessManager
 		return rawstore.getTransactionInfo();
 	}
 
+    /**
+     * Start the replication master role for this database. 
+     * @param host The hostname for the slave
+     * @param port The port the slave is listening on
+     * @param replicationMode The type of replication contract.
+     * Currently only asynchronous replication is supported, but
+     * 1-safe/2-safe/very-safe modes may be added later.
+     * @exception StandardException Standard Derby exception policy,
+     * thrown on error.
+     */
+    public void startReplicationMaster(String host, int port,
+                                       String replicationMode)
+        throws StandardException {
+        rawstore.startReplicationMaster(host, port, replicationMode);
+    }
+
 	public void freeze() throws StandardException
 	{
 		rawstore.freeze();

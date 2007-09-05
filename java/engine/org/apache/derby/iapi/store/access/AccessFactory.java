@@ -214,6 +214,20 @@ public interface AccessFactory
      **************************************************************************
      */
 
+    /**
+     * Start the replication master role for this database
+     * @param host The hostname for the slave
+     * @param port The port the slave is listening on
+     * @param replicationMode The type of replication contract.
+     * Currently only asynchronous replication is supported, but
+     * 1-safe/2-safe/very-safe modes may be added later.
+     * @exception StandardException Standard Derby exception policy,
+     * thrown on error.
+     */
+    public void startReplicationMaster(String host, int port,
+                                       String replicationMode)
+        throws StandardException;
+
 	/**
 	  * Freeze the database temporarily so a backup can be taken.
 	  * <P>Please see Derby on line documentation on backup and restore.

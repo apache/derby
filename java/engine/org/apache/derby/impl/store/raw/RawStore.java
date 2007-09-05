@@ -88,6 +88,7 @@ import java.net.URL;
 import java.security.PrivilegedExceptionAction;
 import java.lang.SecurityException;
 
+import org.apache.derby.iapi.services.replication.master.MasterFactory;
 
 /**
 	A Raw store that implements the RawStoreFactory module by delegating all the
@@ -439,6 +440,40 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 	{
 		logFactory.checkpoint(this, dataFactory, xactFactory, false);
 	}
+
+    /**
+     * Start the replication master role for this database
+     * @param host The hostname for the slave
+     * @param port The port the slave is listening on
+     * @param replicationMode The type of replication contract.
+     * Currently only asynchronous replication is supported, but
+     * 1-safe/2-safe/very-safe modes may be added later.
+     * @exception StandardException Standard Derby exception policy,
+     * thrown on error.
+     */
+    public void startReplicationMaster(String host, int port,
+                                       String replicationMode)
+        throws StandardException {
+
+        if (isReadOnly()) {
+            throw StandardException.newException(
+                      SQLState.CANNOT_REPLICATE_READONLY_DATABASE);
+        }
+
+        Properties replicationProps = new Properties();
+        replicationProps.setProperty(MasterFactory.SLAVE_HOST, host);
+        replicationProps.setProperty(MasterFactory.SLAVE_PORT,
+                                     new Integer(port).toString());
+
+        replicationProps.setProperty(MasterFactory.REPLICATION_MODE,
+                                     replicationMode);
+
+        MasterFactory masterFactory = (MasterFactory)
+            Monitor.bootServiceModule(true, this, getMasterFactoryModule(),
+                                      replicationProps);
+        masterFactory.startMaster(this, dataFactory, logFactory);
+
+    }
 
 	public void freeze() throws StandardException
 	{
@@ -1988,6 +2023,11 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 	{
 		return TransactionFactory.MODULE;
 	}
+
+    public String getMasterFactoryModule()
+    {
+        return MasterFactory.MODULE;
+    }
 
 	public String getDataFactoryModule()
 	{
