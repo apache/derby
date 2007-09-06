@@ -141,9 +141,12 @@ public interface CacheManager {
 	public Cacheable create(Object key, Object createParameter) throws StandardException;
 
 	/**
-		Release a Cacheable object previously found with find() or findCached().
+		Release a <code>Cacheable</code> object previously found with
+		<code>find()</code> or <code>findCached()</code>, or created with
+		<code>create()</code>, and which is still kept by the caller.
 		After this call the caller must throw away the reference to item.
 
+		@param entry the cached object to release
 	*/
 	public void release(Cacheable entry);
 
@@ -152,7 +155,9 @@ public interface CacheManager {
 		to provide synchronization of some form that ensures that only one caller
 		executes remove() on a cached object.
 		<BR>
-		The object must have previously been found with find() or findCached().
+		The object must previously have been found with <code>find()</code> or
+		<code>findCached()</code>, or created with <code>create()</code>, and
+		it must still be kept by the caller.
 		The item will be placed into the NoIdentity
 		state through clean(true) (if required) and clearIdentity(). The removal of the
 		object will be delayed until it is not kept by anyone. Objects that are in the
@@ -161,6 +166,8 @@ public interface CacheManager {
 		has been removed.
 		<BR>
 		After this call the caller must throw away the reference to item.
+
+		@param entry the object to remove from the cache
 
 		@exception StandardException Standard Derby error policy.
 	*/
@@ -212,7 +219,8 @@ public interface CacheManager {
 
 	/**
 		Shutdown the cache. This call stops the cache returning
-		any more valid references on a find() or findCached() call,
+		any more valid references on a <code>find()</code>,
+		<code>findCached()</code> or <code>create()</code> call,
 		and then cleanAll() and ageOut() are called. The cache remains
 		in existence until the last kept object has been unkept.
 
@@ -252,6 +260,9 @@ public interface CacheManager {
 	 * Return a Collection of the Cacheables currently in the
 	 * cache. The Collection should be a copy so that external
 	 * synchronization isn't required.
+	 *
+	 * <p>
+	 * This method should only be used for diagnostic purposes.
 	 *
 	 * @return a Collection of all the elements in the cache
 	 */
