@@ -19,19 +19,17 @@
  */
 package org.apache.derbyTesting.system.oe.run;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.security.PrivilegedActionException;
 import java.sql.SQLException;
+
+import javax.sql.DataSource;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.apache.derbyTesting.junit.JDBCDataSource;
 import org.apache.derbyTesting.junit.JDBCPerfTestCase;
 import org.apache.derbyTesting.system.oe.client.Load;
-import org.apache.derbyTesting.system.oe.load.SimpleInsert;
-import org.apache.derbyTesting.system.oe.run.Checks;
-import org.apache.derbyTesting.system.oe.run.Schema;
+import org.apache.derbyTesting.system.oe.load.ThreadInsert;
 
 /**
  * Driver to do the load phase for the Order Entry benchmark.
@@ -43,6 +41,7 @@ import org.apache.derbyTesting.system.oe.run.Schema;
  * <LI>-scale warehouse scaling factor. Takes a short value. If not specified defaults to 1
  * <LI>-createConstraintsBeforeLoad create constraints before initial load of data, takes a boolean value. If not specified, defaults to true
  * <LI>-doChecks check consistency of data, takes a boolean value. If not specified, defaults to true
+ * <LI>-loaderThreads Number of threads to populate tables, defaults to number of cores
  * <LI>-help prints usage
  * </OL>
  * 
@@ -66,6 +65,11 @@ public class Populate extends JDBCPerfTestCase {
      * Warehouse scale factor
      */
     static short scale = 1;
+    
+    /**
+     * Number of threads to load the data.
+     */
+    static int loaderThreads;
 
     /**
      * flag to indicate if we should create constraints before loading data
@@ -77,11 +81,6 @@ public class Populate extends JDBCPerfTestCase {
      * after the load
      */
     private static boolean doChecks = true;
-    
-    /**
-     * Load implementation used to populate the database
-     */
-    Load loader;
 
     /**
      * Create a test case with the given name.
@@ -93,20 +92,6 @@ public class Populate extends JDBCPerfTestCase {
         super(name);
     }
 
-
-    /**
-     * Do the initial setup required Initialize the appropriate implementation
-     * for the Load phase.
-     */
-    protected void setUp() throws Exception {
-        // Use simple insert statements to insert data.
-        // currently only this form of load is present, once we have 
-        // different implementations, the loading mechanism will need
-        // to be configurable taking an option from the command line
-        // arguments.
-       loader = new SimpleInsert();
-       loader.setupLoad(getConnection(), scale);
-    }
 
     /**
      * Run OE load
@@ -135,6 +120,8 @@ public class Populate extends JDBCPerfTestCase {
                 createConstraintsBeforeLoad = (args[++i].equals("false")? false:true);
             } else if (arg.equals("-doChecks")) {
                 doChecks = (args[++i].equals("false")? false:true);
+            } else if (arg.equals("-loaderThreads")) {
+                loaderThreads = Integer.parseInt(args[++i]);
             } else if (arg.equals("-help")) {
                 printUsage();
                 System.exit(0);
@@ -153,6 +140,7 @@ public class Populate extends JDBCPerfTestCase {
         System.out.println("  -scale warehouse scaling factor. Takes a short value. If not specified defaults to 1");
         System.out.println("  -createConstraintsBeforeLoad create constraints before initial load of data, takes a boolean value. If not specified, defaults to true)");
         System.out.println("  -doChecks check consistency of data, takes a boolean value. If not specified, defaults to true)");
+        System.out.println("  -loaderThreads number of threads used to populate database, defaults to number of cpu cores)");
         System.out.println("  -help prints usage");
         System.out.println();
     }
@@ -163,11 +151,10 @@ public class Populate extends JDBCPerfTestCase {
      * @return the tests to run
      */
     public static Test suite() {
-        return loaderSuite(Populate.class);
-    }
-    
-    static Test loaderSuite(Class loader) {
+
         TestSuite suite = new TestSuite("Order Entry");
+        
+        suite.addTest(new Populate("testCreateDB"));
 
         // Create Schema
         Schema.addBaseSchema(suite);
@@ -175,7 +162,7 @@ public class Populate extends JDBCPerfTestCase {
             Schema.addConstraints(suite);
         
         // this will populate db
-        suite.addTestSuite(loader);
+        suite.addTest(new Populate("testLoad"));
 
         if (!createConstraintsBeforeLoad)
             Schema.addConstraints(suite);
@@ -192,6 +179,16 @@ public class Populate extends JDBCPerfTestCase {
         return suite;
     }
 
+    public void testCreateDB() throws SQLException
+    {
+        DataSource ds = JDBCDataSource.getDataSource();
+        
+        JDBCDataSource.setBeanProperty(ds,
+                "createDatabase", "create");
+ 
+        ds.getConnection().close();
+
+    }
 
     /**
      * test the initial database load
@@ -199,6 +196,19 @@ public class Populate extends JDBCPerfTestCase {
      * @throws Exception
      */
     public void testLoad() throws Exception {
+        
+        // Use simple insert statements to insert data.
+        // currently only this form of load is present, once we have 
+        // different implementations, the loading mechanism will need
+        // to be configurable taking an option from the command line
+        // arguments.
+        DataSource ds = JDBCDataSource.getDataSource();
+       
+        Load loader = new ThreadInsert(ds);
+        loader.setupLoad(getConnection(), scale);
+        if (loaderThreads > 0)
+            loader.setThreadCount(loaderThreads);
+        
         loader.populateAllTables();
 
         // Way to populate data is extensible. Any other implementation

@@ -21,6 +21,9 @@ package org.apache.derbyTesting.system.oe.client;
 
 import java.io.PrintStream;
 import java.math.BigDecimal;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 import org.apache.derbyTesting.system.oe.util.OERandom;
 
@@ -104,6 +107,40 @@ public class Submitter {
      * Record of how many transactions are implemented.
      */
     private final int[] transactionCount;
+    
+    /**
+     * Generate a new random number generator
+     * that follows the rules according to 2.1.6.1
+     * @param conn
+     * @return
+     * @throws SQLException
+     */
+    public static OERandom getRuntimeRandom(Connection conn)
+        throws SQLException
+    {
+        OERandom rand = new OERandom(-1);
+        
+        ResultSet rs = conn.createStatement().executeQuery(
+                "SELECT CLOAD FROM C");
+        rs.next();
+        int cload = rs.getInt(1);
+        rs.close();
+        
+        for (;;)
+        {
+            int c = rand.randomInt(0, 255);
+            int delta = Math.abs(cload - c);
+            if (delta == 96 || delta == 112)
+                continue;
+            if (delta < 65 || delta > 119)
+                continue;
+            
+            rand = new OERandom(c);
+            break;
+        }
+        
+        return rand;
+    }
 
     public Submitter(Display display, Operations ops, OERandom rand,
             short maxW)
@@ -118,12 +155,31 @@ public class Submitter {
     }
     
     /**
+     * Run a fixed number of transactions returning the
+     * time in milli-seconds required to execute all of them.
+     * @param displayData Passed onto Display calls
+     * @param count Number of transactions to run
+     * @return Elapsed time in ms to run count transactions
+     * @throws Exception
+     */
+    public long runTransactions(final Object displayData, final int count)
+    throws Exception
+    {
+        long startms = System.currentTimeMillis();
+        for (int i = 0; i < count; i++)
+            runTransaction(displayData);
+        long endms = System.currentTimeMillis();
+        
+        return endms - startms;
+    }
+    
+    /**
      * Run an order entry transaction picking the specific
      * transaction at random with a hard-coded mix.
      * @param displayData Passed onto Display calls
      * @throws Exception Error executing the transaction
      */
-    public void runTransaction(Object displayData) throws Exception
+    public void runTransaction(final Object displayData) throws Exception
     {       
         int chooseType = rand.randomInt(1, 100);
         
@@ -172,7 +228,7 @@ public class Submitter {
      * @param chooseType Random number between 1 and 100 inclusive.
      * @return A transaction constant from this class.
      */
-    protected int mixType(int chooseType)
+    protected int mixType(final int chooseType)
     {
         if (chooseType <= 43)
         {

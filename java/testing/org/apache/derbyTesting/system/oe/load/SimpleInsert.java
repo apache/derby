@@ -71,14 +71,14 @@ public class SimpleInsert implements Load {
             // ignore
         }
         conn.commit();
-        s.execute("CREATE TABLE C(CLOAD INT, CLAST INT, CID INT, CITEM INT)");
+        s.execute("CREATE TABLE C(CLOAD INT)");
         conn.commit();
 
-        random = new OERandom(-1, -1, -1, seed);
+        random = new OERandom(-1, seed);
 
         // Section 2.1.6.1 of TPC-C spec
         int loadRandomFactor = random.randomInt(0, 255);
-        s.execute("INSERT INTO C VALUES(" + loadRandomFactor + ", -1, -1, -1)");
+        s.execute("INSERT INTO C VALUES(" + loadRandomFactor + ")");
         s.close();
         conn.commit();  
         
@@ -108,7 +108,7 @@ public class SimpleInsert implements Load {
         rs.next();
         int loadRandomFactor = rs.getInt(1);
         rs.close();
-        random = new OERandom(loadRandomFactor, -1, -1, seed);
+        random = new OERandom(loadRandomFactor, seed);
         s.close();
         conn.commit();
     }

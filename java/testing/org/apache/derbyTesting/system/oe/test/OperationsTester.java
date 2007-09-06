@@ -42,17 +42,18 @@ import org.apache.derbyTesting.system.oe.util.OERandom;
 public class OperationsTester extends BaseJDBCTestCase implements Display {
 
     private Operations ops;
-    private final OERandom rand;
+    private OERandom rand;
     private final short w = 1;
     
     public OperationsTester(String name) {
         super(name);
-        this.rand = new OERandom(-1, -1, -1);
+        
     }
     
     protected void setUp() throws Exception 
     {
         ops = new Standard(getConnection());
+        rand = Submitter.getRuntimeRandom(getConnection());
     }
     
     protected void tearDown() throws Exception
@@ -242,17 +243,24 @@ public class OperationsTester extends BaseJDBCTestCase implements Display {
         
     }
     
+    /**
+     * Test submitting transactions through Submitter,
+     * as individual transactions and as a block.
+     * @throws Exception
+     */
     public void testSubmitter() throws Exception
     {
         Submitter submitter = new Submitter(this, this.ops, this.rand,
                 (short) 1);
         
         int tranCount = 37;
-        
         for (int i = 0; i < tranCount; i++)
         {
             submitter.runTransaction(null);
         }
+        
+        int tranCount2 = 47;
+        submitter.runTransactions(null, tranCount2);
         
         int[] executeCounts = submitter.getTransactionCount();
         int totalTran = 0;
@@ -260,7 +268,7 @@ public class OperationsTester extends BaseJDBCTestCase implements Display {
             totalTran += executeCounts[i];
         
         assertEquals("Mismatch on Submitter transaction count",
-                tranCount, totalTran);
+                tranCount + tranCount2, totalTran);
         
     }
 }

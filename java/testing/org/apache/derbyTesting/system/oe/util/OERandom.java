@@ -39,18 +39,32 @@ public class OERandom {
     protected final int Cid;
 
     protected final int Citem;
+    
+    /**
+     * Create a matching OERandom, for use in multi-threaded
+     * runs where all the submitters need to share the same
+     * Clast, Cid and Citem values.
+     * @param oer
+     */
+    public OERandom(OERandom oer) {
+        rand = new Random(System.currentTimeMillis());
+        Clast = oer.Clast;
+        Cid = oer.Cid;
+        Citem = oer.Citem;
+    }
 
-    public OERandom(int last, int id, int item, long seed) {
+    public OERandom(int last, long seed) {
 
-        Clast = last;
-        Cid = id;
-        Citem = item;
         rand = new Random(seed);
+        Clast = last;
+        Cid = this.randomInt(0, 255);
+        Citem = this.randomInt(0, 255);
+        
         initAStrings();
     }
 
-    public OERandom(int last, int id, int item) {
-        this(last, id, item, System.currentTimeMillis());
+    public OERandom(int last) {
+        this(last, System.currentTimeMillis());
     }
 
     private static int[] RESCALE = { 0, 10, 100, 1000, 10000, 100000, 1000000 };
