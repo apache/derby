@@ -112,7 +112,7 @@ public class Submitter {
      * Generate a new random number generator
      * that follows the rules according to 2.1.6.1
      * @param conn
-     * @return
+     * @return random number generator
      * @throws SQLException
      */
     public static OERandom getRuntimeRandom(Connection conn)
