@@ -1170,11 +1170,19 @@ public class SQLToJUnit
         	}
         	int linetype;
         	
+            // Skip entirely blank lines:
+            while (nextline != null)
+            {
+                nextline = nextline.trim();
+                if (nextline.length() == 0)
+                    nextline = ijScript.readLine();	
+                else
+                    break;
+            }
         	if (nextline == null) {
         		c = -1;
         		break;
         	} else {
-        		nextline = nextline.trim();
         		linetype = getLineType(nextline);
         		// multiple lines of SQL comments will be condensed in convert().
         		// If we are inside a result set, allow the first line of a command
