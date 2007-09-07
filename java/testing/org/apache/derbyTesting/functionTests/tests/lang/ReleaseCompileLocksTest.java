@@ -103,9 +103,19 @@ public class ReleaseCompileLocksTest extends BaseJDBCTestCase {
             
             Statement stmt = createStatement();
 
-        	JDBC.assertFullResultSet(stmt.executeQuery(
-        		"select (dmlstatic()) from sys.systables where " +
-        		"CAST(tablename AS VARCHAR(128))= 'SYSCONGLOMERATES'"), new String[][] {{"1"}});
+    		// Calling the method dmlstatic with jsr169 will not work because
+    		// the procedures use DriverManager to get the default connection.
+    		// Of course, this makes this test not fully useful with jsr169,
+    		// but at least performing the call to locktable is performed.
+            if (JDBC.vmSupportsJDBC3()) 
+            	JDBC.assertFullResultSet(stmt.executeQuery(
+            		"select (dmlstatic()) from sys.systables where " +
+        			"CAST(tablename AS VARCHAR(128))= 'SYSCONGLOMERATES'"), new String[][] {{"1"}});
+    		else
+    			JDBC.assertFullResultSet(stmt.executeQuery(
+            		"select count(*) from sys.systables where " +
+            		"CAST(tablename AS VARCHAR(128)) = 'SYSCONGLOMERATES'"), new String[][] {{"1"}});
+    			
 
                 JDBC.assertEmpty(stmt.executeQuery("select TYPE, MODE, TABLENAME, LOCKNAME, STATE from syscs_diag.lock_table order by 1"));
 		commit();
@@ -114,10 +124,19 @@ public class ReleaseCompileLocksTest extends BaseJDBCTestCase {
 		stmt.execute("create table t1 (s int)");
 		commit();
 
-		JDBC.assertFullResultSet(stmt.executeQuery(
+		// Calling the method insertstatic with jsr169 will not work because
+		// the procedures use DriverManager to get the default connection.
+		// Of course, this makes this test not fully useful with jsr169,
+		// but at least performing the call to locktable is performed.
+		if (JDBC.vmSupportsJDBC3())
+			JDBC.assertFullResultSet(stmt.executeQuery(
         		"select (insertstatic()) from sys.systables where " +
         		"CAST(tablename AS VARCHAR(128)) = 'SYSCONGLOMERATES'"), new String[][] {{"1"}});
-
+		else
+			JDBC.assertFullResultSet(stmt.executeQuery(
+        		"select count(*) from sys.systables where " +
+        		"CAST(tablename AS VARCHAR(128)) = 'SYSCONGLOMERATES'"), new String[][] {{"1"}});
+			
                 JDBC.assertEmpty(stmt.executeQuery("select TYPE, MODE, TABLENAME, LOCKNAME, STATE from syscs_diag.lock_table order by 1"));
 
 		JDBC.assertEmpty(stmt.executeQuery("select * from t1"));
