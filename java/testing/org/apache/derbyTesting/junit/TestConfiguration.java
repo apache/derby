@@ -20,6 +20,10 @@
 package org.apache.derbyTesting.junit;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.net.InetAddress;
 import java.lang.reflect.Method;
 import java.security.*;
 import java.sql.Connection;
@@ -30,6 +34,8 @@ import java.util.Properties;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Hashtable;
+
+import org.apache.derby.drda.NetworkServerControl;
 
 import junit.extensions.TestSetup;
 import junit.framework.Assert;
@@ -72,6 +78,15 @@ public class TestConfiguration {
     public final static String DEFAULT_SSL = "off";
 
     public  final   static  String  TEST_DBO = "TEST_DBO";
+
+    private FileOutputStream serverOutput;
+		
+    /** Sleep for 500 ms before pinging the network server (again) */
+    private static final int SLEEP_TIME = 1000;
+
+    /* Network Server Control */
+    private NetworkServerControl networkServerController;
+    private NetworkServerControl networkServer;
             
     /**
      * Keys to use to look up values in properties files.
@@ -1079,6 +1094,82 @@ public class TestConfiguration {
              BaseJDBCTestCase.assertSQLState("Engine shutdown", "XJ015", e);
         }
     }    
+
+   /**
+     * stops the Network server for this configuration.
+     *
+     */
+    public void stopNetworkServer() {
+        try {
+            NetworkServerControl networkServer = new NetworkServerControl();
+            networkServer.shutdown();
+            if (serverOutput != null) {
+                serverOutput.close();
+            }
+        } catch(Exception e) {
+            SQLException se = new SQLException("Error shutting down server");
+            se.initCause(e);
+        }
+    }
+
+   /**
+     * starts the Networs server for this configuration.
+     *
+     */
+    public void startNetworkServer() throws SQLException
+    {
+        Exception failException = null;
+        try {
+
+	    NetworkServerControl networkServer =
+                     new NetworkServerControl(InetAddress.getByName("localhost"), port);
+	    serverOutput = (FileOutputStream)
+            AccessController.doPrivileged(new PrivilegedAction() {
+                public Object run() {
+                    File logs = new File("logs");
+                    logs.mkdir();
+                    File console = new File(logs, "serverConsoleOutput.log");
+                    FileOutputStream fos = null;
+                    try {
+                        fos = new FileOutputStream(console.getPath(), true);
+                    } catch (FileNotFoundException ex) {
+                        ex.printStackTrace();
+                    }
+                    return fos;
+                }
+            });
+
+            networkServer.start(new PrintWriter(serverOutput));
+
+            // Wait for the network server to start
+            boolean started = false;
+            int retries = 10;         // Max retries = max seconds to wait
+
+            while (!started && retries > 0) {
+                try {
+                    // Sleep 1 second and then ping the network server
+                    Thread.sleep(SLEEP_TIME);
+                    networkServer.ping();
+
+                    // If ping does not throw an exception the server has started
+                    started = true;
+                } catch(Exception e) {		   
+                    retries--;
+                    failException = e;
+                 }
+                
+             }
+
+            // Check if we got a reply on ping
+            if (!started) {
+                 throw failException;
+            }
+        } catch (Exception e) {
+            SQLException se = new SQLException("Error starting network  server");
+            se.initCause(failException);
+            throw se;
+      }
+    }
     /**
      * Set the verbosity, i.e., whether debug statements print.
      */

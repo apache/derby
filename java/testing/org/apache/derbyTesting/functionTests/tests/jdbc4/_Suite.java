@@ -67,6 +67,7 @@ public class _Suite extends BaseTestCase  {
 		suite.addTest(TestJDBC40Exception.suite());
 		suite.addTest(UnsupportedVetter.suite());
 		suite.addTest(XA40Test.suite());
+		suite.addTest(ConnectionMethodsTest.suite());
         suite.addTest(VerifySignatures.suite());
         suite.addTest (LobStreamTest.suite());
         suite.addTest (BlobSetMethodsTest.suite());

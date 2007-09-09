@@ -51,6 +51,10 @@
       <fileset dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/testData/ResultSetStream"
         includes="*.asc,*.del,*.txt,*.utf,*.gif"/>
     </copy>
+    <copy todir="${out.dir}/${derby.testing.functest.dir}/testData/ConnectionMethods">
+      <fileset dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/testData/ConnectionMethods"
+        includes="*.txt"/>
+    </copy>
   </target>
 
 </project>
