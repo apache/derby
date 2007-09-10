@@ -22,6 +22,7 @@ limitations under the License.
 package org.apache.derbyTesting.functionTests.tests.lang;
 
 import java.lang.reflect.*;
+import java.io.*;
 import java.sql.*;
 import java.util.ArrayList;
 
@@ -53,6 +54,10 @@ public class TableFunctionTest extends BaseJDBCTestCase
         "invert",
         "returnsACoupleRows",
         "returnsAllLegalDatatypes",
+        "missingConstructor",
+        "zeroArgConstructorNotPublic",
+        "constructorException",
+        "goodVTICosting",
     };
     
     private static  final   String[][]  SIMPLE_ROWS =
@@ -702,6 +707,9 @@ public class TableFunctionTest extends BaseJDBCTestCase
         },
     };
 
+    private static  final   String  ESTIMATED_ROW_COUNT = "optimizer estimated row count:";
+    private static  final   String  ESTIMATED_COST = "optimizer estimated cost:";
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // INNER CLASSES
@@ -784,6 +792,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
         notTableFunction();
         simpleVTIResults();
         allLegalDatatypesVTIResults();
+        vtiCosting();
     }
     
     /**
@@ -863,7 +872,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
     private void simpleDDL()
         throws Exception
     {
-        goodDDL
+        goodStatement
             (
              "create function simpleFunctionTable()\n" +
              "returns TABLE\n" +
@@ -894,7 +903,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
     private void notTableFunction()
         throws Exception
     {
-        goodDDL
+        goodStatement
             (
              "create function invert( intValue int )\n" +
              "returns int\n" +
@@ -921,7 +930,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
     private void  simpleVTIResults()
         throws Exception
     {
-        goodDDL
+        goodStatement
             (
              "create function returnsACoupleRows()\n" +
              "returns TABLE\n" +
@@ -950,7 +959,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
     private void  allLegalDatatypesVTIResults()
         throws Exception
     {
-        goodDDL
+        goodStatement
             (
              "create function returnsAllLegalDatatypes( intArgument int, varcharArgument varchar( 10 ) )\n" +
              "returns TABLE\n" +
@@ -1015,6 +1024,103 @@ public class TableFunctionTest extends BaseJDBCTestCase
              );
         
         assertFunctionDBMD( "RETURNSALLLEGALDATATYPES", GF_RADT , GFC_RADT );
+    }
+    
+    /**
+     * Verify the VTICosting optimizer api.
+     */
+    private void vtiCosting()
+        throws Exception
+    {
+        //
+        // Doesn't have a public no-arg constructor.
+        //
+        goodStatement
+            (
+             "create function missingConstructor()\n" +
+             "returns TABLE\n" +
+             "  (\n" +
+             "     varcharCol varchar( 10 )\n" +
+             "  )\n" +
+             "language java\n" +
+             "parameter style DERBY_JDBC_RESULT_SET\n" +
+             "no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.StringArrayVTI$MissingConstructor.dummyVTI'\n"
+             );
+        expectError
+            (
+             "42ZB5",
+             "select s.*\n" +
+             "    from TABLE( missingConstructor() ) s\n"
+             );
+
+        //
+        // Has a no-arg constructor but it isn't public.
+        //
+        goodStatement
+            (
+             "create function zeroArgConstructorNotPublic()\n" +
+             "returns TABLE\n" +
+             "  (\n" +
+             "     varcharCol varchar( 10 )\n" +
+             "  )\n" +
+             "language java\n" +
+             "parameter style DERBY_JDBC_RESULT_SET\n" +
+             "no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.StringArrayVTI$ZeroArgConstructorNotPublic.dummyVTI'\n"
+             );
+        expectError
+            (
+             "42ZB5",
+             "select s.*\n" +
+             "    from TABLE( missingConstructor() ) s\n"
+             );
+
+        //
+        // Has a public, no-arg constructor but it raises an exception.
+        //
+        goodStatement
+            (
+             "create function constructorException()\n" +
+             "returns TABLE\n" +
+             "  (\n" +
+             "     varcharCol varchar( 10 )\n" +
+             "  )\n" +
+             "language java\n" +
+             "parameter style DERBY_JDBC_RESULT_SET\n" +
+             "no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.StringArrayVTI$ConstructorException.dummyVTI'\n"
+             );
+        expectError
+            (
+             "38000",
+             "select s.*\n" +
+             "    from TABLE( constructorException() ) s\n"
+             );
+
+        //
+        // Good implementation of VTICosting. Verify that the optimizer costs
+        // are overridden.
+        //
+        goodStatement
+            (
+             "create function goodVTICosting()\n" +
+             "returns TABLE\n" +
+             "  (\n" +
+             "     varcharCol varchar( 10 )\n" +
+             "  )\n" +
+             "language java\n" +
+             "parameter style DERBY_JDBC_RESULT_SET\n" +
+             "no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.StringArrayVTI$GoodVTICosting.dummyVTI'\n"
+             );
+        String      optimizerStats = getOptimizerStats
+            (
+             "select s.*\n" +
+             "    from TABLE( goodVTICosting() ) s\n"
+             );
+        assertEquals( StringArrayVTI.FAKE_ROW_COUNT, readDoubleTag( optimizerStats, ESTIMATED_ROW_COUNT ), 0.0 );
+        assertEquals( StringArrayVTI.FAKE_INSTANTIATION_COST, readDoubleTag( optimizerStats, ESTIMATED_COST ), 0.0 );
     }
     
     ///////////////////////////////////////////////////////////////////////////////////
@@ -1091,9 +1197,9 @@ public class TableFunctionTest extends BaseJDBCTestCase
     /**
      * Run good DDL.
      */
-    private void    goodDDL( String ddl )
+    private void    goodStatement( String ddl )
     {
-        println( "Running good DDL:\n\t" + ddl );
+        println( "Running good statement:\n\t" + ddl );
         
         try {
             PreparedStatement    ps = prepareStatement( ddl );
@@ -1479,4 +1585,71 @@ public class TableFunctionTest extends BaseJDBCTestCase
         org.apache.derby.tools.JDBCDisplayUtil.DisplayResults
             ( System.out, rs, conn );
     }
+
+    //////////////////
+    //
+    // OPTIMIZER STATS
+    //
+    //////////////////
+
+    /**
+     * <p>
+     * Get the optimizer stats for a query.
+     * </p>
+     */
+    private String  getOptimizerStats( String query )
+        throws Exception
+    {
+        goodStatement( "CALL SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1)" );
+        goodStatement( "CALL SYSCS_UTIL.SYSCS_SET_STATISTICS_TIMING(1)" );
+        goodStatement( query );
+
+        PreparedStatement   ps = prepareStatement( "values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS()" );
+        ResultSet           rs = ps.executeQuery();
+
+        rs.next();
+
+        String  retval = rs.getString( 1 );
+
+        rs.close();
+        ps.close();
+
+        goodStatement( "CALL SYSCS_UTIL.SYSCS_SET_STATISTICS_TIMING(0)" );
+        goodStatement( "CALL SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(0)" );
+
+        return retval;
+    }
+
+    
+    /**
+     * <p>
+     * Read the value of a tag in some optimizer output.
+     * </p>
+     */
+    private	double  readDoubleTag( String optimizerOutput, String tag )
+        throws Exception
+    {
+        StringReader        stringReader = new StringReader( optimizerOutput );
+        LineNumberReader    lineNumberReader = new LineNumberReader( stringReader );
+
+        while ( true )
+        {
+            String  line = lineNumberReader.readLine();
+            if ( line == null ) { break; }
+
+            int     idx = line.indexOf( tag );
+
+            if ( idx < 0 ) { continue; }
+
+            String  remnant = line.substring( idx + tag.length() );
+            double  result = Double.parseDouble( remnant );
+            
+            println( "Read " + result + " from optimizer output." );
+            return result;
+        }
+
+        return 0.0;
+    }
+
+
 }

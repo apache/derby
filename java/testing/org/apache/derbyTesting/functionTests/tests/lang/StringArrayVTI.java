@@ -23,6 +23,9 @@ package org.apache.derbyTesting.functionTests.tests.lang;
 
 import  java.sql.*;
 
+import org.apache.derby.vti.VTICosting;
+import org.apache.derby.vti.VTIEnvironment;
+
 /**
  * <p>
  * This is a concrete VTI which is prepopulated with rows which are just
@@ -37,12 +40,70 @@ public    class   StringArrayVTI  extends StringColumnVTI
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
+    public  static  final   double  FAKE_ROW_COUNT = 13.0;
+    public  static  final   double  FAKE_INSTANTIATION_COST = 3149.0;
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // INNER CLASSES
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
+    //
+    // Inner classes for testing VTICosting api.
+    //
+    public  static  class   MissingConstructor  extends StringArrayVTI  implements VTICosting
+    {
+        private  MissingConstructor( String[] columnNames, String[][] rows ) { super( columnNames, rows ); }
+
+        public  static  ResultSet   dummyVTI()
+        {
+            return new StringArrayVTI( new String[] { "foo" }, new String[][] { { "bar" } } );
+        }
+        
+        public  double  getEstimatedRowCount( VTIEnvironment env ) throws SQLException
+        {
+            return FAKE_ROW_COUNT;
+        }
+        
+        public  double  getEstimatedCostPerInstantiation( VTIEnvironment env ) throws SQLException
+        {
+            return FAKE_INSTANTIATION_COST;
+        }
+        
+        public  boolean supportsMultipleInstantiations( VTIEnvironment env ) throws SQLException
+        {
+            return false;
+        }        
+    }
+    
+    public  static  class   ZeroArgConstructorNotPublic    extends MissingConstructor
+    {
+        ZeroArgConstructorNotPublic()
+        { super( new String[] { "foo" }, new String[][] { { "bar" } } ); }
+    }
+    
+    public  static  class   ConstructorException    extends ZeroArgConstructorNotPublic
+    {
+        public  ConstructorException()
+        {
+            super();
+
+            Object      shameOnYou = null;
+
+            // trip over a null pointer exception
+            shameOnYou.hashCode();
+        }
+    }
+    
+    public  static  class   GoodVTICosting    extends ZeroArgConstructorNotPublic
+    {
+        public  GoodVTICosting()
+        {
+            super();
+        }
+    }
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // STATE

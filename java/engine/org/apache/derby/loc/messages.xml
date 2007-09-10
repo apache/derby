@@ -2517,6 +2517,12 @@ Guide.
                 <arg>functionName</arg>
             </msg>
 
+            <msg>
+                <name>42ZB5</name>
+                <text>Class '{0}' implements VTICosting but does not provide a public, no-arg constructor.</text>
+                <arg>className</arg>
+            </msg>
+
         </family>
 
 

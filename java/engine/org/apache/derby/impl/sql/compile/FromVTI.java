@@ -78,6 +78,7 @@ import org.apache.derby.iapi.sql.execute.ExecutionContext;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -231,7 +232,7 @@ public class FromVTI extends FromTable implements VTIEnvironment
 		{
 			try
 			{
-				VTICosting vtic = (version2) ? (VTICosting) ps : (VTICosting) rs;
+				VTICosting vtic = getVTICosting();
 				estimatedCost = vtic.getEstimatedCostPerInstantiation(this);
 				estimatedRowCount = vtic.getEstimatedRowCount(this);
 				supportsMultipleInstantiations = vtic.supportsMultipleInstantiations(this);
@@ -543,6 +544,19 @@ public class FromVTI extends FromTable implements VTIEnvironment
 									 subqueryList,
 									 aggregateVector);
 
+		// Is the parameter list to the constructor valid for a VTI?
+		methodParms = methodCall.getMethodParms();
+
+        RoutineAliasInfo    routineInfo = methodCall.getRoutineInfo();
+
+        if (
+            (routineInfo !=null) &&
+            routineInfo.getReturnType().isRowMultiSet() &&
+            (routineInfo.getParameterStyle() == RoutineAliasInfo.PS_DERBY_JDBC_RESULT_SET)
+            )			{
+            isDerbyStyleTableFunction = true;
+        }
+        
 		/* If we have a valid constructor, does class implement the correct interface? 
 		 * If version2 is true, then it must implement PreparedStatement, otherwise
 		 * it can implement either PreparedStatement or ResultSet.  (We check for
@@ -583,10 +597,11 @@ public class FromVTI extends FromTable implements VTIEnvironment
 		    implementsVTICosting = constructor.assignableTo(ClassName.VTICosting);
 		}
 
-
-
-		// Is the parameter list to the constructor valid for a VTI?
-		methodParms = methodCall.getMethodParms();
+        if ( isDerbyStyleTableFunction )
+        {
+            implementsVTICosting = implementsDerbyStyleVTICosting( methodCall.getJavaClassName() );
+        }
+            
 
 		/* Build the RCL for this VTI.  We instantiate an object in order
 		 * to get the ResultSetMetaData.
@@ -615,14 +630,8 @@ public class FromVTI extends FromTable implements VTIEnvironment
 
 			// if this is a Derby-style Table Function, then build the result
 			// column list from the RowMultiSetImpl return datatype
-			RoutineAliasInfo    routineInfo = methodCall.getRoutineInfo();
 
-			if (
-			     (routineInfo !=null) &&
-			     routineInfo.getReturnType().isRowMultiSet() &&
-			     (routineInfo.getParameterStyle() == RoutineAliasInfo.PS_DERBY_JDBC_RESULT_SET)
-			    )			{
-			    isDerbyStyleTableFunction = true;
+			if ( isDerbyStyleTableFunction ) {
 			    createResultColumnsForTableFunction( routineInfo.getReturnType() );
 			}
 			else
@@ -1599,4 +1608,69 @@ public class FromVTI extends FromTable implements VTIEnvironment
         }
 
     }
+
+    /**
+     * Return true if this Derby Style Table Function implements the VTICosting
+     * interface. The class must satisfy the following conditions:
+     *
+     * <ul>
+     * <li>Implements VTICosting</li>
+     * <li>Has a public, no-arg constructor</li>
+     * </ul>
+     */
+    private boolean implementsDerbyStyleVTICosting( String className )
+        throws StandardException
+    {
+        Constructor     constructor = null;
+        Class           vtiClass = null;
+        
+        try {
+            vtiClass = Class.forName( className );
+
+            if ( !VTICosting.class.isAssignableFrom( vtiClass ) ) { return false; }
+        }
+        catch (Throwable t)
+        {
+            throw StandardException.unexpectedUserException( t );
+        }
+
+        try {
+            constructor = vtiClass.getConstructor( new Class[] {} );
+        }
+        catch (Throwable t)
+        {
+            throw StandardException.newException
+                ( SQLState.LANG_NO_COSTING_CONSTRUCTOR, t, className );
+        }
+        
+        if ( Modifier.isPublic( constructor.getModifiers() ) ) { return true; }
+
+        // Bad class. It thinks it implements VTICosting, but it doesn't
+        // have a public no-arg constructor
+        throw StandardException.newException
+            ( SQLState.LANG_NO_COSTING_CONSTRUCTOR, className );
+    }
+
+    /**
+     * Get the VTICosting implementation for this optimizable VTI.
+     */
+    private VTICosting  getVTICosting()
+        throws StandardException
+    {
+        if ( !isDerbyStyleTableFunction ) { return (version2) ? (VTICosting) ps : (VTICosting) rs; }
+        
+        try {
+            String              className = methodCall.getJavaClassName();
+            Class               vtiClass = Class.forName( className );
+            Constructor         constructor = vtiClass.getConstructor( new Class[] {} );
+            VTICosting          result = (VTICosting) constructor.newInstance( null );
+
+            return result;
+        }
+        catch (Throwable t)
+        {
+            throw StandardException.unexpectedUserException( t );
+        }
+    }
+
 }
