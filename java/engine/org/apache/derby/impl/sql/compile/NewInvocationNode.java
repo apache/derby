@@ -37,6 +37,8 @@ import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.StringDataValue;
 
 import org.apache.derby.iapi.reference.SQLState;
 
@@ -45,6 +47,7 @@ import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
 import org.apache.derby.iapi.util.JBitSet;
 
 import org.apache.derby.catalog.AliasInfo;
+import org.apache.derby.catalog.TypeDescriptor;
 
 import java.lang.reflect.Member;
 import java.lang.reflect.Modifier;
@@ -309,8 +312,15 @@ public class NewInvocationNode extends MethodCallNode
 				" actual is " + classInspector.getType(method));
 		}
 	 	setJavaTypeName( javaClassName );
-
-		return this;
+	 	if (routineInfo != null)
+                {
+                    TypeDescriptor returnType = routineInfo.getReturnType();
+                    if (returnType != null)
+                    {
+                        setCollationType(returnType.getCollationType());
+                    }
+                }
+	 	return this;
 	}
 
 	/**

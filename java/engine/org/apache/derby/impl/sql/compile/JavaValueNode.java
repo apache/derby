@@ -74,6 +74,9 @@ abstract class JavaValueNode extends QueryTreeNode
 	/* Name of field holding receiver value, if any */
 	private LocalField receiverField;
 
+        // * Collation type of schema where method is defined. 
+	private int collationType;
+
 	public boolean isPrimitiveType() throws StandardException
 	{
 		JSQLType	myType = getJSQLType();
@@ -444,4 +447,25 @@ abstract class JavaValueNode extends QueryTreeNode
                 SQLState.LANG_JAVA_METHOD_CALL_OR_FIELD_REF
                 );
 	}
+
+    /**
+     * @return collationType as set by setCollationType
+     */
+    public int getCollationType() {
+        return collationType;
+    }
+    
+    /**
+     * Set the collation type.
+     * This will be used to determine the collation type for 
+     * the SQLToJavaValueNode.
+     * 
+     * @param type one of <code>StringDataValue.COLLATION_TYPE_UCS_BASIC </code> or
+     *                    <code>StringDataValue.COLLATION_TYPE_TERRITORY_BASED </code>  
+     */
+    public void setCollationType(int type) {
+        collationType = type;
+    }
+    
+    
 }

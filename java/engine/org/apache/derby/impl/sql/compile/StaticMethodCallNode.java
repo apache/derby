@@ -278,8 +278,9 @@ public class StaticMethodCallNode extends MethodCallNode
 								returnType.isNullable(),
 								returnType.getMaximumWidth()
 							);
-
-
+					// DERBY-2972  Match the collation of the RoutineAliasInfo		
+					returnValueDtd.setCollationType(returnType.getCollationType());
+                                        returnValueDtd.setCollationDerivation(StringDataValue.COLLATION_DERIVATION_IMPLICIT);
 					ValueNode returnValueToSQL = (ValueNode) getNodeFactory().getNode(
 								C_NodeTypes.JAVA_TO_SQL_VALUE_NODE,
 								this, 
@@ -296,7 +297,7 @@ public class StaticMethodCallNode extends MethodCallNode
 										C_NodeTypes.SQL_TO_JAVA_VALUE_NODE,
 										returnValueCastNode, 
 										getContextManager());
-
+					returnValueToJava.setCollationType(returnType.getCollationType());
 					return returnValueToJava.bindExpression(fromList, subqueryList, aggregateVector);
 				}
 
