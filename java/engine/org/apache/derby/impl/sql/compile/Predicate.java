@@ -306,7 +306,16 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 		boolean thisIsEquals = false, otherIsEquals = false;
 		boolean thisIsNotEquals = true, otherIsNotEquals = true;
 
-		if (this.isRelationalOpPredicate()) // this is not "in"
+		/* The call to "isRelationalOpPredicate()" will return false
+		 * for a "probe predicate" because a probe predicate is really
+		 * a disguised IN list. But when it comes to sorting, the probe
+		 * predicate (which is of the form "<col> = ?") should be treated
+		 * as an equality--i.e. it should have precedence over any non-
+		 * equals predicate, per the comment at the start of this
+		 * method.  So that's what we're checking here.
+		 */
+		if (this.isRelationalOpPredicate() || // this is not "in" or
+			this.isInListProbePredicate())    // this is a probe predicate
 		{
 			int thisOperator = ((RelationalOperator)andNode.getLeftOperand()).getOperator();
 			thisIsEquals = (thisOperator == RelationalOperator.EQUALS_RELOP ||
@@ -314,7 +323,9 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 			thisIsNotEquals = (thisOperator == RelationalOperator.NOT_EQUALS_RELOP ||
 								   thisOperator == RelationalOperator.IS_NOT_NULL_RELOP);
 		}
-		if (otherPred.isRelationalOpPredicate()) // other is not "in"
+
+		if (otherPred.isRelationalOpPredicate() || // other is not "in" or
+			otherPred.isInListProbePredicate())    // other is a probe predicate
 		{
 			int	otherOperator = ((RelationalOperator)(otherPred.getAndNode().getLeftOperand())).getOperator();
 			otherIsEquals = (otherOperator == RelationalOperator.EQUALS_RELOP ||

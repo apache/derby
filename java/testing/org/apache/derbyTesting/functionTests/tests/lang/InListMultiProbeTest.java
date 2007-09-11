@@ -264,7 +264,7 @@ public class InListMultiProbeTest extends BaseJDBCTestCase {
      * to do index multi-probing *and* there are multiple start/stop preds.
      * That is to say, there are predicates other than the probe predicate
      * that can be used as start and/or stop keys on the index, as well.
-     * DERBY-2470.
+     * DERBY-2470, DERBY-3061.
      */
     public void testMultipleStartStopPreds() throws Exception
     {
@@ -408,10 +408,80 @@ public class InListMultiProbeTest extends BaseJDBCTestCase {
                 {"91","91   ","212398    "}
             }, st);
 
+        st.execute("drop table ct");
+
+        /* DERBY-3061: Slightly different scenario in which the
+         * less-than predicate was being chosen as the stop key
+         * while the probe predicate was being chosen as the start
+         * key.  That was leading to incorrect results.
+         */
+
+        st.execute("create table mytable (id int primary key)");
+        st.execute("insert into mytable (id) values " +
+            "0, 1, 2, 3, 4, 5, 6, 7, 8, 9");
+
+        st.execute("insert into mytable select id + 10 from mytable");
+        st.execute("insert into mytable select id + 20 from mytable");
+        st.execute("insert into mytable select id + 40 from mytable");
+        st.execute("insert into mytable select id + 100 from mytable");
+
+        // Sanity check: single less than predicate. Expect 80 rows.
+        JDBC.assertDrainResults(st.executeQuery(
+            "select mytable.id from mytable where mytable.id < 100"),
+            80);
+
+        // Sanity check: single IN predicate.
+        JDBC.assertUnorderedResultSet(st.executeQuery(
+            "select mytable.id from mytable where " +
+            "mytable.id in ( 2, 15, 19, 20, 21, 48, 49 )"),
+            new String [][] {
+                {"2"}, {"15"}, {"19"}, {"20"}, {"21"}, {"48"}, {"49"}
+            });
+
+        /* Now both predicates combined; check to make sure we're
+         * getting the correct results.
+         */
+        JDBC.assertUnorderedResultSet(st.executeQuery(
+            "select mytable.id from mytable where mytable.id < 100 " +
+            "and mytable.id in ( 2, 15, 19, 20, 21, 48, 49 )"),
+            new String [][] {
+                {"2"}, {"15"}, {"19"}, {"20"}, {"21"}, {"48"}, {"49"}
+            });
+
+        /* Same as previous query, but put the probe predicate first; this
+         * can affect sorting so we need to make sure things work in this
+         * case as well.
+         */
+        JDBC.assertUnorderedResultSet(st.executeQuery(
+            "select mytable.id from mytable where " +
+            "mytable.id in ( 2, 15, 19, 20, 21, 48, 49 ) " +
+            "and mytable.id < 100"),
+            new String [][] {
+                {"2"}, {"15"}, {"19"}, {"20"}, {"21"}, {"48"}, {"49"}
+            });
+
+        /* Similar to previous query but make the "other" predicate an
+         * equality predicate, as well.  In this case we end up choosing
+         * the "other" predicate for start/stop key instead of the probe
+         * predicate.  Make sure that we still get the correct results
+         * in that case...
+         */
+
+        JDBC.assertEmpty(st.executeQuery(
+            "select mytable.id from mytable where " +
+            "mytable.id in ( 2, 15, 19, 20, 21, 48, 49 ) " +
+            "and mytable.id = 100"));
+
+        JDBC.assertUnorderedResultSet(st.executeQuery(
+            "select mytable.id from mytable where " +
+            "mytable.id in ( 2, 15, 19, 20, 21, 48, 49 ) " +
+            "and mytable.id = 21"),
+            new String [][] {{"21"}});
+
         // Cleanup.
 
         st.execute(RUNTIME_STATS_OFF_QUERY);
-        st.execute("drop table ct");
+        st.execute("drop table mytable");
 
         ps.close();
         st.close();
