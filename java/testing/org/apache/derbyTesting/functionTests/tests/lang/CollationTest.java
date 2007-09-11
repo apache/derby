@@ -109,6 +109,13 @@ public void testDefaultCollation() throws SQLException {
       		new String[][] {{"4","Acorn"},{"0","Smith"},{"1","Zebra"},
       		{"6","aacorn"}, {"2","\u0104corn"},{"5","\u015Amith"},{"3","\u017Bebra"} });   
 
+      // Order by expresssion
+      s.executeUpdate("CREATE FUNCTION mimic(val VARCHAR(32000)) RETURNS VARCHAR(32000) EXTERNAL NAME 'org.apache.derbyTesting.functionTests.tests.lang.CollationTest.mimic' LANGUAGE JAVA PARAMETER STYLE JAVA");
+      checkLangBasedQuery(s, "SELECT ID, NAME FROM CUSTOMER ORDER BY MIMIC(NAME)",
+                new String[][] {{"4","Acorn"},{"0","Smith"},{"1","Zebra"},
+                {"6","aacorn"}, {"2","\u0104corn"},{"5","\u015Amith"},{"3","\u017Bebra"} });   
+
+      s.executeUpdate("DROP FUNCTION mimic");
       //COMPARISONS INVOLVING CONSTANTS
       //In default JVM territory, 'aacorn' is != 'Acorn'
       checkLangBasedQuery(s, "SELECT ID, NAME FROM CUSTOMER where 'aacorn' = 'Acorn' ",
@@ -289,6 +296,14 @@ public void testPolishCollation() throws SQLException {
       		new String[][] {{"6","aacorn"}, {"4","Acorn"}, {"2","\u0104corn"},
       		{"0","Smith"},{"5","\u015Amith"}, {"1","Zebra"},{"3","\u017Bebra"} });
       
+      // Order by expresssion
+      s.executeUpdate("CREATE FUNCTION mimic(val VARCHAR(32000)) RETURNS VARCHAR(32000) EXTERNAL NAME 'org.apache.derbyTesting.functionTests.tests.lang.CollationTest.mimic' LANGUAGE JAVA PARAMETER STYLE JAVA");
+      checkLangBasedQuery(s, "SELECT ID, NAME FROM CUSTOMER ORDER BY MIMIC(NAME)",
+              new String[][] {{"6","aacorn"}, {"4","Acorn"}, {"2","\u0104corn"},
+                {"0","Smith"},{"5","\u015Amith"}, {"1","Zebra"},{"3","\u017Bebra"} });
+                
+      s.executeUpdate("DROP FUNCTION mimic");
+      
       //COMPARISONS INVOLVING CONSTANTS
       //In Polish, 'aacorn' is != 'Acorn'
       checkLangBasedQuery(s, "SELECT ID, NAME FROM CUSTOMER where 'aacorn' = 'Acorn' ",
@@ -354,6 +369,14 @@ public void testNorwayCollation() throws SQLException {
       		new String[][] {{"4","Acorn"}, {"2","\u0104corn"},{"0","Smith"},
       		{"5","\u015Amith"}, {"1","Zebra"},{"3","\u017Bebra"}, {"6","aacorn"} });
       
+      // Order by expresssion
+      s.executeUpdate("CREATE FUNCTION mimic(val VARCHAR(32000)) RETURNS VARCHAR(32000) EXTERNAL NAME 'org.apache.derbyTesting.functionTests.tests.lang.CollationTest.mimic' LANGUAGE JAVA PARAMETER STYLE JAVA");
+      checkLangBasedQuery(s, "SELECT ID, NAME FROM CUSTOMER ORDER BY MIMIC(NAME)",
+                new String[][] {{"4","Acorn"}, {"2","\u0104corn"},{"0","Smith"},
+                {"5","\u015Amith"}, {"1","Zebra"},{"3","\u017Bebra"}, {"6","aacorn"} });
+              
+      s.executeUpdate("DROP FUNCTION mimic");
+  
       //COMPARISONS INVOLVING CONSTANTS
       //In Norway, 'aacorn' is != 'Acorn'
       checkLangBasedQuery(s, "SELECT ID, NAME FROM CUSTOMER where 'aacorn' = 'Acorn' ",
@@ -1005,6 +1028,34 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
         		new String[][] {{"1",null}});
     }
     
+    // Test Collation for functions DERBY-2972
+    s.executeUpdate("CREATE FUNCTION HELLO () RETURNS VARCHAR(32000) EXTERNAL NAME 'org.apache.derbyTesting.functionTests.tests.lang.CollationTest.hello' LANGUAGE JAVA PARAMETER STYLE JAVA");
+    s.executeUpdate("create table testing (a varchar(2024))");
+    s.executeUpdate("insert into testing values('hello')");
+    rs = s.executeQuery("select * from testing where a = HELLO()");
+    JDBC.assertSingleValueResultSet(rs, "hello");
+    s.executeUpdate("DROP FUNCTION hello");
+    s.executeUpdate("DROP TABLE  testing");
+    
+    // Test system functions. Should have UCS_BASIC collation
+    // so a statement like this won't work, we need to cast the function.
+    assertStatementError("42818",s,"VALUES case WHEN SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY('derby.stream.error.logSeverityLevel') = '50000'  THEN 'LOGSHUTDOWN  ERRORS' ELSE 'DONT KNOW' END");
+    // cast function output and we it will match the compilation schema and run
+    rs = s.executeQuery("VALUES case WHEN CAST(SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY('derby.stream.error.logSeverityLevel') AS VARCHAR(30000))   = '50000'  THEN 'LOGSHUTDOWN  ERRORS' ELSE 'DONT KNOW' END");
+    JDBC.assertSingleValueResultSet(rs,"DONT KNOW");
+    
+    // Test system table function.  Should have UCS_BASIC collation
+    s.executeUpdate("create table lockfunctesttable (i int)");
+    conn.setAutoCommit(false);
+    s.executeUpdate("insert into lockfunctesttable values(1)");
+    // This statement should error because of collation mismatch
+    assertStatementError("42818",s,"select * from SYSCS_DIAG.LOCK_TABLE where tablename = 'LOCKFUNCTESTTABLE'");
+    // we have to cast for it to work.
+    rs = s.executeQuery("select * from SYSCS_DIAG.LOCK_TABLE where CAST(tablename as VARCHAR(128))= 'LOCKFUNCTESTTABLE'");
+    JDBC.assertDrainResults(rs,2);
+    s.executeUpdate("drop table lockfunctesttable");
+    
+    
     //DERBY-2910 
     // Test proper collation is set for  implicit cast with 
     // UPPER(CURRENT_DATE) and concatonation.
@@ -1021,7 +1072,29 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     assertEquals(1,JDBC.assertDrainResults(rs));
     assertStatementError("42818",s,"select TABLENAME FROM SYS.SYSTABLES WHERE UPPER(CURRENT_DATE) = TABLENAME");
     s.close();
+
 }
+
+// methods used for function testing.
+
+/**
+ * Name says it all
+ * @return hello
+ */
+public static String hello() {
+        return "hello";
+}
+
+/**
+ * Just return the value as passed in.  Used to make sure 
+ * order by works properly with collation with order by expression
+ * @param val value to return
+ * @return
+ */
+public static String mimic(String val) {
+    return val;
+}
+
 
 private void setUpTable(Statement s) throws SQLException {
 

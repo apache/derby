@@ -735,9 +735,13 @@ abstract class MethodCallNode extends JavaValueNode
 			// type we need to promote to an object so we can return null.
 			if (promoteName != null)
 				typeName = promoteName;
-		}
+			//propogate collation type from RoutineAliasInfo to
+			// MethodCallNode DERBY-2972
+                        if (routineInfo.getReturnType() != null)
+                            setCollationType(routineInfo.getReturnType().getCollationType());     
+                }
 	 	setJavaTypeName( typeName );
-
+                
 		methodParameterTypes = classInspector.getParameterTypes(method);
 
 		for (int i = 0; i < methodParameterTypes.length; i++)

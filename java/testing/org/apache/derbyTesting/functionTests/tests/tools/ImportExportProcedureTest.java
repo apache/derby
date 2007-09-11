@@ -2140,6 +2140,7 @@ public final class ImportExportProcedureTest extends BaseJDBCTestCase {
             + "'extinout/t1.dat' , ';', ';', null, 1) ");
         assertStatementError("38000", cSt);
         
+        SupportFilesSetup.deleteFile("extinout/t1.dat");
         Connection conn = getConnection();
         conn.setAutoCommit(false);
         

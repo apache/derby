@@ -23,6 +23,7 @@ package	org.apache.derby.impl.sql.compile;
 
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.StringDataValue;
 import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.sql.compile.TypeCompiler;
 import org.apache.derby.iapi.reference.SQLState;
@@ -250,9 +251,15 @@ public class JavaToSQLValueNode extends ValueNode
 			throw StandardException.newException(SQLState.LANG_NO_CORRESPONDING_S_Q_L_TYPE, 
 				javaNode.getJavaTypeName());
 		}
-
+                // For functions returning string types we should set the collation to match the 
+                // java method's schema DERBY-2972. This is propogated from 
+                // RoutineAliasInfo to javaNode.
+                       if (dts.getTypeId().isStringTypeId()){                           
+                           dts.setCollationType(javaNode.getCollationType());
+                           dts.setCollationDerivation(StringDataValue.COLLATION_DERIVATION_IMPLICIT);
+                       }
 		setType(dts);
-
+         
 		return this;
 	}
 
