@@ -1078,9 +1078,12 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     s.executeUpdate("insert into lockfunctesttable values(1)");
     // This statement should error because of collation mismatch
     assertStatementError("42818",s,"select * from SYSCS_DIAG.LOCK_TABLE where tablename = 'LOCKFUNCTESTTABLE'");
-    // we have to cast for it to work.
-    rs = s.executeQuery("select * from SYSCS_DIAG.LOCK_TABLE where CAST(tablename as VARCHAR(128))= 'LOCKFUNCTESTTABLE'");
+    // we have to use parameter markers for it to work.
+    ps = prepareStatement("select * from SYSCS_DIAG.LOCK_TABLE where tablename = ?");
+    ps.setString(1,"LOCKFUNCTESTTABLE");
+    rs = ps.executeQuery();
     JDBC.assertDrainResults(rs,2);
+    
     s.executeUpdate("drop table lockfunctesttable");
     
     
