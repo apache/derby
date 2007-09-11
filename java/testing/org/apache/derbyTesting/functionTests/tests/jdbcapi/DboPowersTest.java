@@ -22,6 +22,7 @@
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
 import java.sql.SQLException;
+import java.sql.Connection;
 import javax.sql.DataSource;
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -445,14 +446,21 @@ public class DboPowersTest extends BaseJDBCTestCase
         JDBCDataSource.setBeanProperty(ds, "user", user);
         JDBCDataSource.setBeanProperty(ds, "password", password);
 
+        Connection con = null;
         try {
-            ds.getConnection();
+            con = ds.getConnection();
             vetEncryptionAttempt(user, null);
         } catch (SQLException e) {
             vetEncryptionAttempt(user, e);
             bringDbDown();
             return;
         }
+
+        try {
+            derby3038(con);
+        } catch (SQLException e) {
+            fail("derby3038 regression: " + e);
+        } 
 
         // we managed to encrypt: bring db down and up again to verify
         bringDbDown();
@@ -752,5 +760,36 @@ public class DboPowersTest extends BaseJDBCTestCase
             fail("test error: invalid authLevel: " + _authLevel);
             break;
         }
+    }
+
+
+    /**
+     * Make and call a stored procedure which opens a nested
+     * connection to expose DERBY-3038.
+     */
+    private void derby3038(Connection con) throws SQLException {
+
+        java.sql.Statement s = con.createStatement();
+
+        try {
+            s.executeUpdate
+                ("CREATE PROCEDURE DERBY3038PROC () " + 
+                 "LANGUAGE JAVA PARAMETER STYLE JAVA EXTERNAL NAME '" +
+                 DboPowersTest.class.getName() + ".derby3038Proc' " + 
+                 "READS SQL DATA");
+            s.executeUpdate("CALL DERBY3038PROC()");
+        } finally {
+            s.close();
+        }
+    }
+
+
+    public static void derby3038Proc() 
+        throws SQLException {
+
+        // Before fixing DERNY-3038 this connect would fail.
+        Connection con = java.sql.DriverManager.
+            getConnection("jdbc:default:connection");
+        con.close();
     }
 }
