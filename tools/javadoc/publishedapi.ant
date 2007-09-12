@@ -35,3 +35,9 @@ org/apache/derby/jdbc/EmbeddedDriver.java
 org/apache/derby/tools/ij.java
 org/apache/derby/tools/sysinfo.java
 org/apache/derby/tools/dblook.java
+
+# package: org.apache.derby.vti
+
+org/apache/derby/vti/VTICosting.java
+org/apache/derby/vti/VTIEnvironment.java
+

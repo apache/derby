@@ -24,39 +24,76 @@ package org.apache.derby.vti;
 import java.sql.SQLException;
 
 /**
-  *	VTICosting is the interface that the query optimizer uses
-  * to cost VTIs.
-  * 
-  The methods on the interface provide the optimizer
-  * with the following information:
-  <UL> 
-  <LI> the estimated number of rows returned by the VTI in a single instantiation.
-  <LI> the estimated cost to instantiate and iterate through the VTI.
-  <LI> whether or not the VTI can be instantiated multiple times within a single query execution
-  </UL>
   * <P>
-  * This class can only be used within an SQL-J statement.  Using the methods
-  * in application-side Java code results in Exceptions being thrown.
+  *	VTICosting is the interface that the query optimizer uses
+  * to cost Table Functions. The methods on this interface provide the optimizer
+  * with the following information:
+  * </P>
+  *
+  * <UL> 
+  * <LI> The estimated number of rows returned by the Table Function in a single instantiation.
+  * <LI> The estimated cost to instantiate and iterate through the Table Function.
+  * <LI> Whether or not the Table Function can be instantiated multiple times within a single query execution.
+  * </UL>
+  *
+  * <P>
+  * The optimizer places a Table Function in the join order after making some
+  * assumptions:
+  * </P>
+  *
+  * <UL>
+  * <LI><B>Cost</B> - The optimizer hard-codes a guess about how expensive
+  * it is to materialize a Table Function.
+  * </LI>
+  * <LI><B>Count</B> - The optimizer also hard-codes a guess about how
+  * many rows a Table Function returns.
+  * </LI>
+  * <LI><B>Repeatability</B> - The optimizer assumes that the same results
+  * come back each time you invoke a Table Function.
+  * </LI>
+  * </Ul>
+  *
+  * <P>
+  * The class which contains your Table Function can override these assumptions
+  * and improve the join order as follows:
+  * </P>
+  *
+  * <UL>
+  * <LI><B>Implement</B> - The class must implement <a href="./VTICosting.html">VTICosting</a>.
+  * </LI>
+  * <LI><B>Construct</B> - The class must contain a public, no-arg constructor.
+  * </LI>
+  * </Ul>
+  *
+  * <P>
+  * The methods in this interface take a <a href="./VTIEnvironment.html">VTIEnvironment</a>
+  * argument. This is a state variable created by the optimizer. The methods in
+  * this interface can use this state variable to pass information to one
+  * another and learn other details of the operating environment.
+  * </P>
+  *
   *
   * @see org.apache.derby.vti.VTIEnvironment
  */
 public interface VTICosting
 {
 	/**
-	 * A useful constant: the default estimated number of rows returned by a VTI.
+	 * A useful constant: the default estimated number of rows returned by a
+	 * Table Function.
 	 */
 	public static final double defaultEstimatedRowCount		= 10000d;
 	/**
-	   A useful constant: The default estimated cost of instantiating and iterating throught a VTI.
+	   A useful constant: The default estimated cost of instantiating and
+	   iterating throught a Table Function.
 	 */
 	public static final double defaultEstimatedCost			= 100000d;
 
 	/**
-	 *  Get the estimated row count for a single scan of a VTI.
+	 *  Get the estimated row count for a single scan of a Table Function.
 	 *
-	 *  @param vtiEnvironment The VTIEnvironment.
+	 *  @param vtiEnvironment The state variable for optimizing the Table Function.
 	 *
-	 *  @return	The estimated row count for a single scan of a VTI.
+	 *  @return	The estimated row count for a single scan of the Table Function.
 	 *
 	 *  @exception SQLException thrown if the costing fails.
 	 */
@@ -64,11 +101,11 @@ public interface VTICosting
 		throws SQLException;
 
 	/**
-	 *  Get the estimated cost for a single instantiation of a VTI.
+	 *  Get the estimated cost for a single instantiation of a Table Function.
 	 *
-	 *  @param vtiEnvironment The VTIEnvironment.
+	 *  @param vtiEnvironment The state variable for optimizing the Table Function.
 	 *
-	 *  @return	The estimated cost for a single instantiation of a VTI.
+	 *  @return	The estimated cost for a single instantiation of the Table Function.
 	 *
 	 *  @exception SQLException thrown if the costing fails.
 	 */
@@ -76,9 +113,9 @@ public interface VTICosting
 		throws SQLException;
 
 	/**
-		 Find out if the ResultSet of the VTI can be instantiated multiple times.
+		 Find out if the ResultSet of the Table Function can be instantiated multiple times.
 
-		 @param vtiEnvironment The VTIEnvironment.
+		 @param vtiEnvironment The state variable for optimizing the Table Function.
 
 		 @return	True if the ResultSet can be instantiated multiple times, false if
 		 can only be instantiated once.

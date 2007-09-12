@@ -1,0 +1,105 @@
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<BODY>
+<h2> Support for Table Functions. </h2>
+
+<P>
+Derby lets you declare functions which return
+<a href="http://java.sun.com/javase/6/docs/api/java/sql/ResultSet.html">ResultSet</a>s.
+You can then use these function results as tables in your queries.
+This, in turn, lets you do the following:
+</P>
+
+<UL>
+<LI><B>Migrate</B> - Bulk-load data from an external
+        database. The external data source could be any vendor's
+        database.
+</LI>
+<LI><B>Integrate</B> - Transform live data from an existing
+legacy server and load the data into Derby. This lets users
+ build new Derby-powered apps against subsets of legacy data,
+keep the data current, but limit the burden which the new apps
+place on the legacy server.
+</LI>
+<LI><B>Snapshot</B> - Copy a subset of server data to a laptop before travelling.
+</LI>
+<LI><B>Federate</B> - Join data from multiple external data
+sources. The external sources could be other relational databases
+or they could be non-relational data feeds.
+</LI>
+</Ul>
+
+<P>
+Here is an example of how to declare and invoke a Table Function:
+</P>
+
+<BLOCKQUOTE><PRE><FONT color="blue" size="+1"><B>
+CREATE FUNCTION externalEmployees
+()
+RETURNS TABLE
+(
+  employeeId    INT,
+  lastName       VARCHAR( 50 ),
+  firstName      VARCHAR( 50 ),
+  birthday         DATE
+)
+LANGUAGE JAVA
+PARAMETER STYLE DERBY_JDBC_RESULT_SET
+NO SQL
+EXTERNAL NAME 'com.acme.hrSchema.EmployeesTable.read'
+;
+
+INSERT INTO employees
+  SELECT s.*
+    FROM TABLE (externalEmployees() ) s;
+</B></FONT></PRE></BLOCKQUOTE>
+
+<P>
+The Derby optimizer makes some assumptions about these Table Functions:
+</P>
+
+<UL>
+<LI><B>Cost</B> - The optimizer hard-codes a guess about how expensive
+  it is to materialize a Table Function.
+</LI>
+<LI><B>Count</B> - The optimizer also hard-codes a guess about how
+many rows a Table Function returns.
+</LI>
+<LI><B>Repeatability</B> - The optimizer assumes that the same results
+come back each time you invoke a Table Function.
+</LI>
+</Ul>
+
+<P>
+Based on these assumptions, the optimizer decides where to place the
+Table Function in the join order. Using the interfaces in this package,
+you may override the optimizer's guesses and force the optimizer to
+choose a better join order.
+</P>
+
+<UL>
+  <LI><a href="./VTICosting.html">VTICosting</a> - This interface
+  exposes methods which let you override the optimizer's guesses.</LI>
+  <LI><a href="./VTIEnvironment.html">VTIEnvironment</a> - This is a
+  state variable, created by the optimizer and passed to the methods
+  in <a href="./VTICosting.html">VTICosting</a>.
+  <a href="./VTICosting.html">VTICosting</a> methods use this state
+  variable to communicate with one another and learn more about the
+  operating environment.</LI>
+</UL>
+
+</BODY>
