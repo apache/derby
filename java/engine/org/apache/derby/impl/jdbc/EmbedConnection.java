@@ -326,6 +326,7 @@ public abstract class EmbedConnection implements EngineConnection
 				tr = new TransactionResourceImpl(driver, url, info);
 				active = true;
 				setupContextStack();
+				context = pushConnectionContext(tr.getContextManager());
 
 				if (!bootDatabase(info, false))
 				{
