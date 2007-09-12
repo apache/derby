@@ -585,7 +585,8 @@ public abstract class EmbedConnection implements EngineConnection
 											   userInfo
 											   )) {
 
-			throw newSQLException(SQLState.LOGIN_FAILED, MessageService.getTextMessage(MessageId.AUTH_INVALID));
+			throw newSQLException(SQLState.NET_CONNECT_AUTH_FAILED,
+                     MessageService.getTextMessage(MessageId.AUTH_INVALID));
 
 		}
 

@@ -197,7 +197,9 @@ public abstract class InternalDriver implements ModuleControl {
 
 						// not a valid user
 						throw Util.generateCsSQLException(
-                                  SQLState.LOGIN_FAILED, MessageService.getTextMessage(MessageId.AUTH_INVALID));
+                                    SQLState.NET_CONNECT_AUTH_FAILED,
+                                    MessageService.
+                                    getTextMessage(MessageId.AUTH_INVALID));
 					}
 
 					Monitor.getMonitor().shutdown();

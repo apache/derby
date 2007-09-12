@@ -1192,17 +1192,86 @@ class DRDAConnThread extends Thread {
 	private int getRdbAccessErrorCodePoint()
 	{
 		String sqlState = databaseAccessException.getSQLState();
-		if (sqlState.regionMatches(0,SQLState.DATABASE_NOT_FOUND,0,5) |
-			sqlState.regionMatches(0,SQLState.NO_SUCH_DATABASE,0,5))
+		// These tests are ok since DATABASE_NOT_FOUND,
+		// NO_SUCH_DATABASE and AUTH_INVALID_USER_NAME are not
+		// ambigious error codes (on the first five characters) in
+		// SQLState. If they were, we would have to perform a similar
+		// check as done in method isAuthenticationException
+		if (sqlState.regionMatches(0,SQLState.DATABASE_NOT_FOUND,0,5) ||
+			sqlState.regionMatches(0,SQLState.NO_SUCH_DATABASE,0,5)) {
+			// RDB not found codepoint
 			return CodePoint.RDBNFNRM;
-		else
-			if (sqlState.regionMatches(0,SQLState.LOGIN_FAILED,0,5) ||
-				sqlState.regionMatches(0,SQLState.AUTH_INVALID_USER_NAME,0,5))
+		} else {
+			if (isAuthenticationException(databaseAccessException) ||
+				sqlState.regionMatches(0,SQLState.AUTH_INVALID_USER_NAME,0,5)) {
+				// Not Authorized To RDB reply message codepoint
 				return CodePoint.RDBATHRM;
-		else
+			} else {
+				// RDB Access Failed Reply Message codepoint
 				return CodePoint.RDBAFLRM;
+            }
+        }
 	}
 
+    /**
+     * There are multiple reasons for not getting a connection, and
+     * all these should throw SQLExceptions with SQL state 08004
+     * according to the SQL standard. Since only one of these SQL
+     * states indicate that an authentication error has occurred, it
+     * is not enough to check that the SQL state is 08004 and conclude
+     * that authentication caused the exception to be thrown.
+     *
+     * This method tries to cast the exception to an EmbedSQLException
+     * and use getMessageId on that object to check for authentication
+     * error instead of the SQL state we get from
+     * SQLExceptions#getSQLState. getMessageId returns the entire id
+     * as defined in SQLState (e.g. 08004.C.1), while getSQLState only
+     * return the 5 first characters (i.e. 08004 instead of 08004.C.1)
+     *
+     * If the cast to EmbedSQLException is not successful, the
+     * assumption that SQL State 08004 is caused by an authentication
+     * failure is followed even though this is not correct. This was
+     * the pre DERBY-3060 way of solving the issue.
+     *
+     * @param sqlException The exception that is checked to see if
+     * this is really caused by an authentication failure
+     * @return true if sqlException is (or has to be assumed to be)
+     * caused by an authentication failure, false otherwise.
+     * @see SQLState
+     */
+    private boolean isAuthenticationException (SQLException sqlException) {
+        boolean authFail = false;
+
+        // get exception which carries Derby messageID and args
+        SQLException se = Util.getExceptionFactory().
+            getArgumentFerry(sqlException);
+
+        if (se instanceof EmbedSQLException) {
+            // DERBY-3060: if this is an EmbedSQLException, we can
+            // check the messageId to find out what caused the
+            // exception.
+
+            String msgId = ((EmbedSQLException)se).getMessageId();
+
+            // Of the 08004.C.x messages, only
+            // SQLState.NET_CONNECT_AUTH_FAILED is an authentication
+            // exception
+            if (msgId.equals(SQLState.NET_CONNECT_AUTH_FAILED)) {
+                authFail = true;
+            }
+        } else {
+            String sqlState = se.getSQLState();
+            if (sqlState.regionMatches(0,SQLState.LOGIN_FAILED,0,5)) {
+                // Unchanged by DERBY-3060: This is not an
+                // EmbedSQLException, so we cannot check the
+                // messageId. As before DERBY-3060, we assume that all
+                // 08004 error codes are due to an authentication
+                // failure, even though this ambigious
+                authFail = true;
+            }
+        }
+        return authFail;
+    }
 
 	/**
 	 * Verify userId and password
@@ -1275,9 +1344,7 @@ class DRDAConnThread extends Thread {
 			database.makeConnection(p);
 	  	} catch (SQLException se) {
 			String sqlState = se.getSQLState();
-			// need to set the security check code based on the reason the connection     
-			// was denied, Derby doesn't say whether the userid or password caused
-			// the problem, so we will just return userid invalid
+
 			databaseAccessException = se;
 			for (; se != null; se = se.getNextException())
 			{
@@ -1286,10 +1353,15 @@ class DRDAConnThread extends Thread {
 	 			println2Log(database.dbName, session.drdaID, se.getMessage());
 			}
 
-			if (sqlState.regionMatches(0,SQLState.LOGIN_FAILED,0,5))
+			if (isAuthenticationException(databaseAccessException)) {
+				// need to set the security check code based on the
+				// reason the connection was denied, Derby doesn't say
+				// whether the userid or password caused the problem,
+				// so we will just return userid invalid
 				return CodePoint.SECCHKCD_USERIDINVALID;
-
-			return 0;
+			} else {
+				return 0;
+			}
 		}
 		catch (Exception e)
 		{
