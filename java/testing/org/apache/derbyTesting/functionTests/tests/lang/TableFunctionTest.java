@@ -47,6 +47,8 @@ public class TableFunctionTest extends BaseJDBCTestCase
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
+    private static  final   String  UTF8 = "UTF8";
+    
     // functions to drop at teardown time
     private static  final   String[]    FUNCTION_NAMES =
     {
@@ -1526,7 +1528,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
         {
             Blob    blob = (Blob) obj;
 
-            return new String( blob.getBytes( (long) 0, (int) blob.length() ) );
+            return new String( blob.getBytes( (long) 0, (int) blob.length() ), UTF8 );
         }
         else if ( obj instanceof Clob )
         {
@@ -1538,7 +1540,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
         {
             byte[]  bytes = (byte[]) obj;
 
-            return new String( bytes );
+            return new String( bytes, UTF8 );
         }
         else { return obj.toString(); }
     }
