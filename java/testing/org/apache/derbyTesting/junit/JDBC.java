@@ -46,8 +46,34 @@ public class JDBC {
      */
     public static class GeneratedId {
         public boolean equals(Object o) {
-            return o instanceof String &&
+            // unless JSR169, use String.matches...
+            if (JDBC.vmSupportsJDBC3()) 
+            {
+                return o instanceof String &&
                 ((String) o).matches("SQL[0-9]{15}");
+            }
+            else
+            {
+                String tmpstr = (String)o;
+                boolean b = true;
+                if (!(o instanceof String))
+                    b = false;
+                if (!(tmpstr.startsWith("SQL")))
+                    b = false;
+                if (tmpstr.length() != 18)
+                    b = false;
+                for (int i=3 ; i<18 ; i++)
+                {
+                    if (Character.isDigit(tmpstr.charAt(i)))
+                        continue;
+                    else
+                    {
+                        b = false;
+                        break;
+                    }
+                }
+            return b;
+            }
         }
         public String toString() {
             return "xxxxGENERATED-IDxxxx";

@@ -36,7 +36,7 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 
 /**
  * SQL DECIMAL using raw data. Provides the basis for the
- * CDCDecimal implementation.
+ * BigIntegerDecimal implementation.
  * <P>
  * The on-disk format must match the SQLDecimal format so that
  * databases are portable across J2ME and J2SE environments.
@@ -372,7 +372,7 @@ abstract class BinaryDecimal extends NumberDataType
 	 * @param result	The result of a previous call to this method, null
 	 *					if not called yet
 	 *
-	 * @return	A SQLDecimal containing the result of the addition
+	 * @return	A BinaryDecimal containing the result of the addition
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -686,9 +686,9 @@ return divide(dividend, divisor, result, -1);
 	 * @see org.apache.derby.iapi.types.DataValueDescriptor#setValueFromResultSet(java.sql.ResultSet, int, boolean)
 	 */
 	public void setValueFromResultSet(ResultSet resultSet, int colNumber, boolean isNullable) throws StandardException, SQLException {
-		// TODO Auto-generated method stub
-		throw StandardException.newException(SQLState.NOT_IMPLEMENTED);
-		
+		// using DataType.setValue(String), which should be implemented
+		// by the implementing class.
+		setValue(resultSet.getString(colNumber));
 	}
 
 	/* (non-Javadoc)

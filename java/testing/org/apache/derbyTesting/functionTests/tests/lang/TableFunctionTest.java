@@ -1404,10 +1404,17 @@ public class TableFunctionTest extends BaseJDBCTestCase
 
                 case Types.DECIMAL:
                 case Types.NUMERIC:
-                    actualValue = squeezeString(  rs.getBigDecimal( column ) );
-                    actualValueByName = squeezeString(  rs.getBigDecimal( columnName ) );
-                    break;
-
+                    // with JSR169, we cannot execute resultSet.getBigDecimal...
+                    if (JDBC.vmSupportsJDBC3()) {
+                        actualValue = squeezeString(  rs.getBigDecimal( column ) );
+                        actualValueByName = squeezeString(  rs.getBigDecimal( columnName ) );
+                        break;
+                    }
+                    else {
+                        actualValue = squeezeString(  rs.getString( column ) );
+                        actualValueByName = squeezeString(  rs.getString( columnName ) );
+                        break;
+                    }
                 case Types.DATE:
                     actualValue = squeezeString(  rs.getDate( column ) );
                     actualValueByName = squeezeString(  rs.getDate( columnName ) );
