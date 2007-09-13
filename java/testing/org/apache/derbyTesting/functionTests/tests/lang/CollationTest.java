@@ -1089,7 +1089,7 @@ public static String hello() {
  * Just return the value as passed in.  Used to make sure 
  * order by works properly with collation with order by expression
  * @param val value to return
- * @return
+ * @return string passed in
  */
 public static String mimic(String val) {
     return val;
