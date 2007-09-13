@@ -70,6 +70,25 @@ public class Standard implements Operations {
     }
     
     /**
+     * Return an Operations implementation based upon
+     * Standard with a single difference. In this implementation
+     * the reset() executed after each PreparedStatement execute
+     * does nothing. Sees if there is any performance impact
+     * of explicitly closing each ResultSet and clearing the
+     * parameters.
+     * <P>
+     * Each ResultSet will be closed implicitly either at commit
+     * time or at the next execution of the same PreparedStatement object.
+     */
+    public static Operations noReset(final Connection conn)
+        throws SQLException
+    {
+        return new Standard(conn) {
+            protected void reset(PreparedStatement ps) {}
+        };
+    }
+    
+    /**
      * Map of SQL text to its PreparedStatement.
      * This allows the SQL text to be in-line with
      * code that sets the parameters and looks at 
@@ -579,7 +598,6 @@ public class Standard implements Operations {
         // provide a different implementation of this class with
         // the sort method a no-op.
         sortOrderItems(items, quantities, supplyW);
-
         
         try {
             // Get the warehouse tax
@@ -587,6 +605,7 @@ public class Standard implements Operations {
                 "SELECT W_TAX FROM WAREHOUSE WHERE W_ID = ?");
             psWarehouseTax.setShort(1, w);
             ResultSet rs = psWarehouseTax.executeQuery();
+            rs.next();
             BigDecimal warehouseTax = (BigDecimal) rs.getObject(1);
             reset(psWarehouseTax);
             
@@ -929,22 +948,12 @@ public class Standard implements Operations {
      * It is assumed the prepared statement was just executed.
      * @throws SQLException 
      */
-    private static void reset(PreparedStatement ps) throws SQLException
+    protected void reset(PreparedStatement ps) throws SQLException
     {
         ResultSet rs = ps.getResultSet();
         if (rs != null)
             rs.close();
         ps.clearParameters();
-    }
-    
-    /**
-     * Close a PreparedStatement if it was opened.
-     */
-    private static void close(PreparedStatement ps)
-       throws SQLException
-    {
-        if (ps != null)
-            ps.close();
     }
     
     private Address getAddress(ResultSet rs, String firstColumnName) throws SQLException
