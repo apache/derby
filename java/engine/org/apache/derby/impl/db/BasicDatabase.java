@@ -73,6 +73,8 @@ import org.apache.derby.impl.sql.execute.JarUtil;
 import org.apache.derby.io.StorageFile;
 import org.apache.derby.catalog.UUID;
 
+import org.apache.derby.iapi.services.replication.slave.SlaveFactory;
+
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
@@ -133,6 +135,7 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 	private DateFormat timestampFormat;
 	private UUID		myUUID;
     private boolean normalizeToUpper = true;
+    private boolean inReplicationSlaveMode = false;
 
 	protected boolean lastToBoot; // is this class last to boot
 
@@ -147,6 +150,14 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 	public void boot(boolean create, Properties startParams)
 		throws StandardException
 	{
+
+        // Database is booted in replication slave mode. Make sure
+        // other clients are not able to connect
+        String slave = startParams.getProperty(SlaveFactory.REPLICATION_MODE);
+        if (slave != null && slave.equals(SlaveFactory.SLAVE_MODE)) {
+            inReplicationSlaveMode = true;
+        }
+
 		ModuleFactory monitor = Monitor.getMonitor();
 		if (create)
 		{
@@ -285,6 +296,13 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 
 	public LanguageConnectionContext setupConnection(ContextManager cm, String user, String drdaID, String dbname)
 		throws StandardException {
+
+        if (inReplicationSlaveMode) {
+            // do not allow connections to a database that is
+            // currently in replication slave move
+            throw StandardException.newException(
+                        SQLState.CANNOT_CONNECT_TO_DB_IN_SLAVE_MODE, dbname);
+        }
 
 		TransactionController tc = getConnectionTransaction(cm);
 

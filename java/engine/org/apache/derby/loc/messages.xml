@@ -365,6 +365,12 @@ Guide.
             </msg>
 
             <msg>
+                <name>08004.C.7</name>
+                <text>Connection refused to database '{0}' because it is in replication slave mode.</text>
+                <arg>databaseName</arg>
+            </msg>
+
+            <msg>
                 <name>08006.C.1</name>
                 <text>An error occurred during connect reset and the connection has been terminated.  See chained exceptions for details.</text>
             </msg>

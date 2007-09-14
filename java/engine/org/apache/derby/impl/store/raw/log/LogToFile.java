@@ -38,6 +38,8 @@ import org.apache.derby.iapi.reference.MessageId;
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.SQLState;
 
+import org.apache.derby.iapi.services.replication.slave.SlaveFactory;
+
 import org.apache.derby.iapi.services.daemon.DaemonService;
 import org.apache.derby.iapi.services.daemon.Serviceable;
 import org.apache.derby.iapi.services.context.ContextManager;
@@ -473,6 +475,8 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
     // this variable needs to visible to checkpoint thread. 
     private volatile boolean backupInProgress = false; 
    
+
+    private boolean inSlaveMode = false;
 
 	/**
 		MT- not needed for constructor
@@ -2843,6 +2847,13 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 	*/
 	public void	boot(boolean create, Properties startParams) throws StandardException
 	{
+        // Is the database booted in replication slave mode?
+        String mode = startParams.getProperty(SlaveFactory.REPLICATION_MODE);
+        if (mode != null && mode.equals(SlaveFactory.SLAVE_MODE)) {
+            inSlaveMode = true; 
+            // will be used when slave functionality is added to this class
+        }
+
 		dataDirectory = startParams.getProperty(PersistentService.ROOT);
         
 		logDevice = startParams.getProperty(Attribute.LOG_DEVICE);

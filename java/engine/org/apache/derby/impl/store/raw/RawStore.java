@@ -89,6 +89,7 @@ import java.security.PrivilegedExceptionAction;
 import java.lang.SecurityException;
 
 import org.apache.derby.iapi.services.replication.master.MasterFactory;
+import org.apache.derby.iapi.services.replication.slave.SlaveFactory;
 
 /**
 	A Raw store that implements the RawStoreFactory module by delegating all the
@@ -108,6 +109,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 	protected TransactionFactory	xactFactory;
 	protected DataFactory			dataFactory;
 	protected LogFactory			logFactory;
+    private SlaveFactory slaveFactory;
     private StorageFactory storageFactory;
 
 	private SecureRandom random;
@@ -173,6 +175,14 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 	public void	boot(boolean create, Properties properties)
 		throws StandardException
 	{
+
+        boolean inReplicationSlaveMode = false;
+
+        String slave = properties.getProperty(SlaveFactory.REPLICATION_MODE);
+        if (slave != null && slave.equals(SlaveFactory.SLAVE_MODE)) {
+            inReplicationSlaveMode = true;
+        }
+
 		dataDirectory = properties.getProperty(PersistentService.ROOT);
 		DaemonFactory daemonFactory =
 			(DaemonFactory)Monitor.startSystemModule(org.apache.derby.iapi.reference.Module.DaemonFactory);
@@ -315,6 +325,18 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
             configureDatabaseForEncryption(properties, 
                                            newCipherFactory);
         }
+
+        if (inReplicationSlaveMode) {
+            // The LogFactory has already been booted in slave mode.
+            // Can now start slave replication by booting the
+            // SlaveFactory service
+            slaveFactory = (SlaveFactory) 
+                Monitor.bootServiceModule(create, this,
+                                          getSlaveFactoryModule(),
+                                          properties);
+            slaveFactory.startSlave(this, logFactory);
+        }
+
 	}
 
 	public void	stop() {
@@ -2023,6 +2045,10 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 	{
 		return TransactionFactory.MODULE;
 	}
+
+    public String getSlaveFactoryModule() {
+        return SlaveFactory.MODULE;
+    }
 
     public String getMasterFactoryModule()
     {

@@ -1582,6 +1582,7 @@ public interface SQLState {
     String AUTH_ENCRYPT_NOT_DB_OWNER                        = "08004.C.5";
     String AUTH_HARD_UPGRADE_NOT_DB_OWNER                   = "08004.C.6";
     //DERBY-1828: AUTH_x_NOT_DB_OWNER used to be "2850H/I/J.C";
+    String CANNOT_CONNECT_TO_DB_IN_SLAVE_MODE               = "08004.C.7";
 
     // There can be multiple causes for 08003, which according
     // to SQL2003 spec means "connection does not exist"
