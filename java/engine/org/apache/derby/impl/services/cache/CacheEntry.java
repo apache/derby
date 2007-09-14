@@ -29,9 +29,49 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 /**
  * Class representing an entry in the cache. It is used by
  * <code>ConcurrentCache</code>. When a thread invokes any of the methods in
- * this class, except <code>lock()</code>, it must have called
- * <code>lock()</code> to ensure exclusive access to the entry. No thread
- * should ever lock more than one entry in order to prevent deadlocks.
+ * this class, except <code>lock()</code>, it must first have called
+ * <code>lock()</code> to ensure exclusive access to the entry.
+ *
+ * <p>
+ *
+ * When no thread holds the lock on the entry, it must be in one of the
+ * following states:
+ *
+ * <dl>
+ *
+ * <dt>Uninitialized</dt> <dd>The entry object has just been constructed. In
+ * this state, <code>isValid()</code> and <code>isKept()</code> return
+ * <code>false</code>, and <code>getCacheable()</code> returns
+ * <code>null</code>. As long as the entry is in this state, the reference to
+ * the object should not be made available to other threads than the one that
+ * created it, since there is no way for other threads to see the difference
+ * between an uninitialized entry and a removed entry.</dd>
+ *
+ * <dt>Unkept</dt> <dd>In this state, the entry object contains a reference to
+ * a <code>Cacheable</code> and the keep count is zero. <code>isValid()</code>
+ * returns <code>true</code> and <code>isKept()</code> returns
+ * <code>false</code> in this state. <code>getCacheable()</code> returns a
+ * non-null value.<dd>
+ *
+ * <dt>Kept</dt> <dd>Same as the unkept state, except that the keep count is
+ * positive and <code>isKept()</code> returns <code>true</code>.</dd>
+ *
+ * <dt>Removed</dt> <dd>The entry has been removed from the cache. In this
+ * state, <code>isValid()</code> and <code>isKept()</code> return
+ * <code>false</code>, and <code>getCacheable()</code> returns
+ * <code>null</code>. When an entry has entered the removed state, it cannot be
+ * transitioned back to any of the other states.</dd>
+ *
+ * </dl>
+ *
+ * <p>
+ *
+ * To prevent deadlocks, each thread should normally lock only one entry at a
+ * time. In some cases it is legitimate to hold the lock on two entries, for
+ * instance if an entry must be evicted to make room for a new entry. If this
+ * is the case, exactly one of the two entries must be in the uninitialized
+ * state, and the uninitialized entry must be locked before the lock on the
+ * other entry can be requested.
  */
 final class CacheEntry {
     /** Mutex which guards the internal state of the entry. */
