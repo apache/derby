@@ -120,7 +120,8 @@ public class RowMultiSetImpl extends BaseTypeIdImpl
 
     /**
      * <p>
-     * Get the SQL name of this multi set.
+     * Get the SQL name of this multi set. This is the name suitable for
+     * replaying the DDL to create a Table Function.
      * </p>
      */
     public  String  getSQLTypeName()
@@ -128,18 +129,20 @@ public class RowMultiSetImpl extends BaseTypeIdImpl
         StringBuffer    buffer = new StringBuffer();
         int                     count = _columnNames.length;
 
-        buffer.append( "ROW ( " );
+        buffer.append( "TABLE ( " );
 
         for ( int i = 0; i < count; i++ )
         {
             if ( i > 0 ) { buffer.append( ", " ); }
 
+            buffer.append( '\"' );
             buffer.append( _columnNames[ i ] );
+            buffer.append( '\"' );
             buffer.append( ' ' );
             buffer.append( _types[ i ].getSQLstring() );
         }
 
-        buffer.append( " ) MULTISET" );
+        buffer.append( " )" );
 
         return buffer.toString();
     }
