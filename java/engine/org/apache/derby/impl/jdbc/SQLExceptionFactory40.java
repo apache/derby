@@ -25,9 +25,9 @@ import java.sql.SQLDataException;
 import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.sql.SQLInvalidAuthorizationSpecException;
+import java.sql.SQLNonTransientConnectionException;
 import java.sql.SQLSyntaxErrorException;
 import java.sql.SQLTransactionRollbackException;
-import java.sql.SQLTransientConnectionException;
 import java.sql.SQLFeatureNotSupportedException;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.shared.common.reference.SQLState;
@@ -43,7 +43,7 @@ public class SQLExceptionFactory40 extends SQLExceptionFactory {
      * overwrites super class method to create JDBC4 exceptions      
      * SQLSTATE CLASS (prefix)     Exception
      * 0A                          java.sql.SQLFeatureNotSupportedException
-     * 08                          java.sql.SQLTransientConnectionException
+     * 08                          java.sql.SQLNonTransientConnectionException
      * 22                          java.sql.SQLDataException
      * 28                          java.sql.SQLInvalidAuthorizationSpecException
      * 40                          java.sql.SQLTransactionRollbackException
@@ -72,8 +72,8 @@ public class SQLExceptionFactory40 extends SQLExceptionFactory {
         final SQLException ex;
         if (sqlState.startsWith(SQLState.CONNECTIVITY_PREFIX)) {
             //none of the sqlstate supported by derby belongs to
-            //NonTransientConnectionException
-            ex = new SQLTransientConnectionException(message, sqlState,
+            //TransientConnectionException DERBY-3074
+            ex = new SQLNonTransientConnectionException(message, sqlState,
                     severity, t);
         } else if (sqlState.startsWith(SQLState.SQL_DATA_PREFIX)) {
             ex = new SQLDataException(message, sqlState, severity, t);

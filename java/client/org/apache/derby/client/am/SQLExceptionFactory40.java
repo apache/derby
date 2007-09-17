@@ -28,9 +28,10 @@ import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.sql.SQLInvalidAuthorizationSpecException;
+import java.sql.SQLNonTransientConnectionException;
 import java.sql.SQLSyntaxErrorException;
 import java.sql.SQLTransactionRollbackException;
-import java.sql.SQLTransientConnectionException;
+
 
 /**
  * SQLException factory class to create jdbc 40 exception classes
@@ -65,8 +66,8 @@ public class SQLExceptionFactory40 extends SQLExceptionFactory {
         } else if (sqlState.startsWith(SQLState.CONNECTIVITY_PREFIX) ||
             errCode >= ExceptionSeverity.SESSION_SEVERITY) {
             //none of the sqlstate supported by derby belongs to
-            //NonTransientConnectionException
-            ex = new SQLTransientConnectionException(message, sqlState, errCode);
+            //TransientConnectionException. DERBY-3075
+            ex = new SQLNonTransientConnectionException(message, sqlState, errCode);
         } else if (sqlState.startsWith(SQLState.SQL_DATA_PREFIX)) {
             ex = new SQLDataException(message, sqlState, errCode);
         } else if (sqlState.startsWith(SQLState.INTEGRITY_VIOLATION_PREFIX)) {

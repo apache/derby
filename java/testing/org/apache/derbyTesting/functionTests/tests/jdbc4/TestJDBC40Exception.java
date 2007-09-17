@@ -23,16 +23,21 @@
 package org.apache.derbyTesting.functionTests.tests.jdbc4;
 
 import java.sql.Connection;
+import java.sql.SQLNonTransientConnectionException;
 import java.sql.Statement;
 import java.sql.SQLDataException;
 import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.sql.SQLSyntaxErrorException;
-import java.sql.SQLTransientConnectionException;
 import java.sql.SQLTransactionRollbackException;
+
+import javax.sql.DataSource;
+
 import junit.framework.Test;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
+import org.apache.derbyTesting.junit.J2EEDataSource;
+import org.apache.derbyTesting.junit.JDBCDataSource;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 public class TestJDBC40Exception extends BaseJDBCTestCase {
@@ -93,10 +98,38 @@ public class TestJDBC40Exception extends BaseJDBCTestCase {
         try {
             stmt.execute("select * from exception1");
             fail("Statement didn't fail.");
-        } catch (SQLTransientConnectionException cone) {
+        } catch (SQLNonTransientConnectionException cone) {
             assertTrue("Unexpected SQL State: " + cone.getSQLState(),
                        cone.getSQLState().startsWith("08"));
         }
+        
+        if (usingEmbedded())
+        {
+        	// test exception after database shutdown
+        	// DERBY-3074
+        	stmt = createStatement();
+        	TestConfiguration.getCurrent().shutdownDatabase();
+        	try {
+        		stmt.execute("select * from exception1");
+        		fail("Statement didn't fail.");
+        	} catch (SQLNonTransientConnectionException cone) {
+        		assertTrue("Unexpected SQL State: " + cone.getSQLState(),
+        				cone.getSQLState().startsWith("08"));        	  
+        	}
+        }
+        // test connection to server which is not up.
+        // DERBY-3075
+        if (usingDerbyNetClient()) {
+        	DataSource ds = JDBCDataSource.getDataSource();
+        	JDBCDataSource.setBeanProperty(ds, "portNumber", new Integer(0));
+        	try {
+        		ds.getConnection();
+        	} catch (SQLNonTransientConnectionException cone) {
+        		assertTrue("Unexpected SQL State: " + cone.getSQLState(),
+        				cone.getSQLState().startsWith("08"));   
+        	}
+        }
+
     }
     
     public void testSyntaxErrorException() throws SQLException {
