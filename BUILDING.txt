@@ -31,7 +31,7 @@ Contents
 2.2.3 section removed - no longer applies
 2.2.4 section removed - no longer applies
 2.2.5 Download and install JUnit 3.8.*
-2.2.6 Download Java Development Kit release 1.6.x (Optional)
+2.2.6 Download Java 6 Development Kit (Optional)
 2.2.7 Download OSGi Service Platform release 3 (osgi.jar) (Optional)
 2.2.8 Download J2ME/CDC/Foundation 1.0 and JSR169 jars (Optional)
 
@@ -178,22 +178,21 @@ installed on your system.
     ${derby.source}/tools/java.
 
 
-2.2.6 Optional - Download and install Java Development Kit (JDK) 
-  release 1.6.x
+2.2.6 Optional - Download and install Java 6 Development Kit (JDK) 
 
-Skip steps 1-2 of this section if you already have JDK 1.6.x 
+
+Skip steps 1-2 of this section if you already have the Java 6 JDK
 installed on your system.
 
-(1) Download JDK 1.6 (aka "Mustang")
-    This is currently under development, and is available as a
-    release candidate at http://download.java.net/jdk6/binaries/
+(1) Download the Java 6 JDK
+    This is available at http://java.sun.com/javase/6/
   
 
-(2) Install JDK 1.6 according to the instructions in any directory. 
+(2) Install Java 6 JDK according to the instructions in any directory. 
 
     Verify that bin/javac(.exe) exists under the JDK install directory.
 
-(3) The directory where you have installed JDK 1.6 will be 
+(3) The directory where you have installed the Java 6 JDK will be 
     referred to as ${jdk16.dir} in the rest of this document.
 
 
@@ -349,9 +348,9 @@ to specify your environment and options:
 
     - Optional - jdk16
 
-      This specifies the location of your JDK 1.6 install directory.
-      This is only needed if you want to build the JDK 1.6-specific
-      code (e.g. JDBC 4 classes)
+      This specifies the location of your Java 6 JDK install directory.
+      This is only needed if you want to build the code specific to
+      Java 6 (e.g. JDBC 4 classes)
 
 
     - java14compile.classpath - IBM JVMs only
@@ -472,9 +471,9 @@ to specify your environment and options:
 
     >ant testing
 
-    NOTE ABOUT building JDBC4/JDK1.6 : The JDBC4 class files have
-    dependencies on JDK 1.6.  However, to build for JDBC4, do NOT
-    set your JAVA_HOME to the JDK 1.6 location.  Instead, set it
+    NOTE ABOUT building JDBC4: The JDBC4 class files have
+    dependencies on the Java 6 JDK.  However, to build for JDBC4, do NOT
+    set your JAVA_HOME to the Java 6 JDK.  Instead, set it
     to your standard JDK 1.4 or JDK 1.3 location.  In your ant.properties,
     make sure you set jdk16 as described in section
     2.2.4, and that is all you need to do.
