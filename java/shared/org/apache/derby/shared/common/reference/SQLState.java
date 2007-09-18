@@ -1595,8 +1595,18 @@ public interface SQLState {
 
     
     // 08006 means connection exception - connection failure
+    String DRDA_CONNECTION_TERMINATED                           = "08006.C";
     String CONNECTION_FAILED_ON_RESET                           = "08006.C.1";
-
+   
+    // Use this version of SOCKET_EXCEPTION any time *except* when trying to
+    // establish a connection, as the SQLState is different.  When trying
+    // to establish a connection, use CONNECT_SOCKET_EXCEPTION.
+    String SOCKET_EXCEPTION                                     = "08006.C.2";
+    String COMMUNICATION_ERROR                                  = "08006.C.3";
+    String CONNECTION_FAILED_ON_DEFERRED_RESET                  = "08006.C.4";
+    String NET_INSUFFICIENT_DATA                                = "08006.C.5";
+    String NET_LOB_DATA_TOO_LARGE_FOR_JVM                       = "08006.C.6";
+  
     
     // 08001 is specifically about the SQL client not being able to establish
     // a connection with the server.  Should only be used for errors that
@@ -1661,24 +1671,23 @@ public interface SQLState {
     String DRDA_INVALID_XA_STATE_ON_COMMIT_OR_ROLLBACK              = "2D521.S.2"; 
     String DRDA_CURSOR_NOT_OPEN                                     = "24501.S";
 
-    // 58009 means connection is terminated.  This can be caused by any number
-    // of reasons, so this SQL State has a lot of instances.
+    // 58009 means connection is terminated by a DRDA-protocol error.  This can be caused by any number
+    // of reasons, so this SQL State has a lot of instances. Exceptions that are 
+    // not protocol related, e.g. SocketException, IOException etc should use 
+    // SQLState 8006. DERBY-3077.  The exceptions that have been moved have been
+    // marked with an XX_MOVED_TO_8006 prefix.  Since only english has been 
+    // changed, these should not be reused, to avoid conflicts with localized
+    // messages.
     // 
-    // NOTE: if the disconnection is not caused by DRDA-level error, you should
-    // use SQL State 08006.  The way I determined this is if the error occurs
-    // in the 'client.net' package, use 58009.  If it occurs in the 'client.am'
-    // or any other client package, use 08006.  It's really not at all clear
-    // from the specs when you should use one SQL state or the other, but that's
-    // the approach I chose (David Van Couvering).
-    String DRDA_CONNECTION_TERMINATED                               = "58009.C";
+    String XX_MOVED_TO_8006_DRDA_CONNECTION_TERMINATED                               = "58009.C";
     // Use this version of SOCKET_EXCEPTION any time *except* when trying to
     // establish a connection, as the SQLState is different.  When trying
     // to establish a connection, use CONNECT_SOCKET_EXCEPTION.
-    String SOCKET_EXCEPTION                                         = "58009.C.2";
-    String COMMUNICATION_ERROR                                      = "58009.C.3";
-    String CONNECTION_FAILED_ON_DEFERRED_RESET                      = "58009.C.4";
-    String NET_INSUFFICIENT_DATA                                    = "58009.C.5";
-    String NET_LOB_DATA_TOO_LARGE_FOR_JVM                           = "58009.C.6";
+    String XX_MOVED_TO_8006_SOCKET_EXCEPTION                                         = "58009.C.2";
+    String XX_MOVED_TO_8006_COMMUNICATION_ERROR                                      = "58009.C.3";
+    String XX_MOVED_TO_8006_CONNECTION_FAILED_ON_DEFERRED_RESET                      = "58009.C.4";
+    String XX_MOVED_TO_8006_NET_INSUFFICIENT_DATA                                    = "58009.C.5";
+    String XX_MOVED_TO_8006_NET_LOB_DATA_TOO_LARGE_FOR_JVM                           = "58009.C.6";
     String NET_SQLCDTA_INVALID_FOR_RDBCOLID                         = "58009.C.7";
     String NET_SQLCDTA_INVALID_FOR_PKGID                            = "58009.C.8";
     String NET_PGNAMCSN_INVALID_AT_SQLAM                            = "58009.C.9";

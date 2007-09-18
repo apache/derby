@@ -193,7 +193,7 @@ public class SSLTest extends BaseJDBCTestCase
             c2.close();
             fail();
         } catch (SQLException e) {
-            assertSQLState("58009", e);
+            assertSQLState("8006", e);
         }
     }
 }
