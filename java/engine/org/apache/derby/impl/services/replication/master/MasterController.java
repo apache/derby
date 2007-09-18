@@ -161,9 +161,12 @@ public class MasterController implements MasterFactory, ModuleControl,
      * @param rawStore The RawStoreFactory for the database
      * @param dataFac The DataFactory for this database
      * @param logFac The LogFactory ensuring recoverability for this database
+     * @exception StandardException Standard Derby exception policy,
+     * thrown on replication startup error. 
      */
     public void startMaster(RawStoreFactory rawStore,
-                            DataFactory dataFac, LogFactory logFac) {
+                            DataFactory dataFac, LogFactory logFac)
+        throws StandardException{
         // Added when Network Service has been committed to trunk:
         // connection.connect(); // sets up a network connection to the slave
 
@@ -172,6 +175,8 @@ public class MasterController implements MasterFactory, ModuleControl,
         logFactory = logFac;
         logBuffer = new ReplicationLogBuffer(DEFAULT_LOG_BUFFER_SIZE);
         //  logFactory.setReplicationMaster(this); //added later
+
+        logFactory.startReplicationMasterRole(this);
 
         if (replicationMode.equals(MasterFactory.ASYNCHRONOUS_MODE)) {
             System.out.println("MasterController would now " +
@@ -208,22 +213,22 @@ public class MasterController implements MasterFactory, ModuleControl,
     /**
      * Append a single log record to the replication log buffer.
      *
-     * @param instant               the log address of this log record.
      * @param dataLength            number of bytes in data[]
-     * @param dataOffset            offset in data[] to start copying from.
-     * @param optionalDataLength    number of bytes in optionalData[]
-     * @param optionalDataOffset    offset in optionalData[] to start copy from
+     * @param instant               the log address of this log record.
      * @param data                  "from" array to copy "data" portion of rec
+     * @param dataOffset            offset in data[] to start copying from.
      * @param optionalData          "from" array to copy "optional data" from
+     * @param optionalDataOffset    offset in optionalData[] to start copy from
+     * @param optionalDataLength    number of bytes in optionalData[]
      *
      **/
-    public void appendLogRecord(long instant,
-                                int dataLength,
-                                int dataOffset,
-                                int optionalDataLength,
-                                int optionalDataOffset,
+    public void appendLogRecord(int dataLength,
+                                long instant,
                                 byte[] data,
-                                byte[] optionalData) {
+                                int dataOffset,
+                                byte[] optionalData, 
+                                int optionalDataOffset,
+                                int optionalDataLength) {
         try {
             logBuffer.appendLogRecord(instant, dataLength, dataOffset,
                                       optionalDataLength, optionalDataOffset,

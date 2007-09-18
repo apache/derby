@@ -37,6 +37,7 @@ import org.apache.derby.iapi.store.raw.log.LogFactory;
 import org.apache.derby.iapi.store.raw.log.LogInstant;
 import org.apache.derby.iapi.store.raw.log.Logger;
 import org.apache.derby.iapi.store.raw.log.LogScan;
+import org.apache.derby.iapi.services.replication.master.MasterFactory;
 
 import org.apache.derby.iapi.store.raw.data.DataFactory;
 import org.apache.derby.iapi.store.raw.xact.TransactionFactory;
@@ -445,4 +446,19 @@ public class ReadOnly implements LogFactory, ModuleSupportable {
         throw StandardException.newException(
                   SQLState.STORE_FEATURE_NOT_IMPLEMENTED);
     }
+
+    /** Replication not applicable on readonly databases 
+     * @exception StandardException always thrown, indicating that
+     * ReadOnly databases can not be replicated
+     */
+    public void startReplicationMasterRole(MasterFactory masterFactory)
+        throws StandardException {
+        throw StandardException.newException(
+                  SQLState.CANNOT_REPLICATE_READONLY_DATABASE);
+    }
+
+    /** Replication not applicable on readonly databases */
+    public void stopReplicationMasterRole() {
+    }
+
 }

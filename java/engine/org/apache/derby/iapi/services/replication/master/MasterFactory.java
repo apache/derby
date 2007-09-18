@@ -104,9 +104,12 @@ public interface MasterFactory {
      * @param rawStore The RawStoreFactory for the database
      * @param dataFac The DataFactory for this database
      * @param logFac The LogFactory ensuring recoverability for this database
+     * @exception StandardException Standard Derby exception policy,
+     * thrown on replication startup error. 
      */
     public void startMaster(RawStoreFactory rawStore,
-                            DataFactory dataFac, LogFactory logFac);
+                            DataFactory dataFac, LogFactory logFac)
+        throws StandardException;
 
     /**
      * Will perform all work that is needed to shut down replication
@@ -116,18 +119,22 @@ public interface MasterFactory {
     /**
      * Append a single log record to the replication log buffer.
      *
-     * @param instant               the log address of this log record.
      * @param dataLength            number of bytes in data[]
-     * @param dataOffset            offset in data[] to start copying from.
-     * @param optionalDataLength    number of bytes in optionalData[]
-     * @param optionalDataOffset    offset in optionalData[] to start copy from
+     * @param instant               the log address of this log record.
      * @param data                  "from" array to copy "data" portion of rec
+     * @param dataOffset            offset in data[] to start copying from.
      * @param optionalData          "from" array to copy "optional data" from
+     * @param optionalDataOffset    offset in optionalData[] to start copy from
+     * @param optionalDataLength    number of bytes in optionalData[]
+     *
      **/
-    public void appendLogRecord(long instant, int dataLength,
-                                int dataOffset, int optionalDataLength,
+    public void appendLogRecord(int dataLength,
+                                long instant,
+                                byte[] data,
+                                int dataOffset,
+                                byte[] optionalData, 
                                 int optionalDataOffset,
-                                byte[] data, byte[] optionalData);
+                                int optionalDataLength);
 
     /**
      * Used by the LogFactory to notify the replication master

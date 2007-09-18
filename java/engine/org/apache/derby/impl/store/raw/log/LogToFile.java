@@ -38,8 +38,6 @@ import org.apache.derby.iapi.reference.MessageId;
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.SQLState;
 
-import org.apache.derby.iapi.services.replication.slave.SlaveFactory;
-
 import org.apache.derby.iapi.services.daemon.DaemonService;
 import org.apache.derby.iapi.services.daemon.Serviceable;
 import org.apache.derby.iapi.services.context.ContextManager;
@@ -74,6 +72,8 @@ import org.apache.derby.iapi.store.raw.xact.RawTransaction;
 import org.apache.derby.iapi.store.raw.xact.TransactionFactory;
 import org.apache.derby.iapi.store.raw.data.DataFactory;
 import org.apache.derby.iapi.services.property.PersistentSet;
+import org.apache.derby.iapi.services.replication.master.MasterFactory;
+import org.apache.derby.iapi.services.replication.slave.SlaveFactory;
 
 import org.apache.derby.iapi.store.access.DatabaseInstant;
 import org.apache.derby.catalog.UUID;
@@ -373,6 +373,12 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 	protected boolean	ReadOnlyDB;	// true if this db is read only, i.e, cannot
 								// append log records
 
+    // REPLICATION 
+    // initialized if this Derby has the master role for this database
+    private MasterFactory masterFactory; 
+    private boolean inReplicationMasterMode = false;
+    // initialized if this Derby has the slave role for this database
+    private boolean inReplicationSlaveMode = false;
 
 	// DEBUG DEBUG - do not truncate log files
 	private boolean keepAllLogs;
@@ -475,8 +481,6 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
     // this variable needs to visible to checkpoint thread. 
     private volatile boolean backupInProgress = false; 
    
-
-    private boolean inSlaveMode = false;
 
 	/**
 		MT- not needed for constructor
@@ -2850,7 +2854,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
         // Is the database booted in replication slave mode?
         String mode = startParams.getProperty(SlaveFactory.REPLICATION_MODE);
         if (mode != null && mode.equals(SlaveFactory.SLAVE_MODE)) {
-            inSlaveMode = true; 
+            inReplicationSlaveMode = true; 
             // will be used when slave functionality is added to this class
         }
 
@@ -3560,6 +3564,22 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
                     length, instant, data, offset, 
                     optionalData, optionalDataOffset, optionalDataLength);
 
+                if (inReplicationMasterMode) {
+                    // Append this log record to the replication log
+                    // buffer so that it can be shipped to the slave.
+                    // Note that the length field is not the same as
+                    // used by writeLogRecord which uses the length of
+                    // data+optionalData - masterFactory needs the
+                    // length of data alone.
+                    masterFactory.appendLogRecord(length - optionalDataLength,
+                                                  instant,
+                                                  data, 
+                                                  offset,
+                                                  optionalData,
+                                                  optionalDataOffset,
+                                                  optionalDataLength);
+                }
+
 				if (optionalDataLength != 0) 
                 {
 					if (SanityManager.DEBUG)
@@ -3761,7 +3781,21 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 						// once logBeingFlushed is set, need to release
 						// the logBeingFlushed flag in finally block.
 						logBeingFlushed = true;	
-					}
+
+                        // If in Replication Master mode - Notify the
+                        // MasterFactory that log has been flushed to
+                        // disk. At this point, we know that this is a
+                        // "real" flush, not just a call to check
+                        // whether the database is frozen/corrupted
+                        // (i.e., wherePosition ==
+                        // LogCounter.INVALID_LOG_INSTANT has already
+                        // been checked)
+                        if (inReplicationMasterMode) {
+                            masterFactory.flushedTo(LogCounter.
+                                       makeLogInstantAsLong(fileNumber,
+                                                            wherePosition));
+                        }
+                    }
 
 				} while (waited) ;
 				// if I have waited, go down do loop again - hopefully,
@@ -4845,6 +4879,32 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 		
 	}
 
+    /**
+     * Make this LogFactory pass log records to the MasterFactory
+     * every time a log record is appended to the log on disk, and
+     * notify the MasterFactory when a log disk flush has taken place.
+     * @param masterFactory The MasterFactory service responsible for
+     * controlling the master side replication behaviour.
+     * @exception StandardException Standard Derby exception policy,
+     * thrown on replication startup error. Will only be thrown if
+     * replication is attempted started on a readonly database, i.e,
+     * never thrown here.
+     */
+    public void startReplicationMasterRole(MasterFactory masterFactory) 
+        throws StandardException {
+        this.masterFactory = masterFactory;
+        inReplicationMasterMode = true;
+    }
+
+    /**
+     * Stop this LogFactory from passing log records to the
+     * MasterFactory and from notifying the MasterFactory when a log
+     * disk flush has taken place.
+     */
+    public void stopReplicationMasterRole() {
+        inReplicationMasterMode = false;
+        masterFactory = null;
+    }
 
 	/**
 	 *

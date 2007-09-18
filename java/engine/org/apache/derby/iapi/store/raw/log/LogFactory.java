@@ -23,6 +23,7 @@ package org.apache.derby.iapi.store.raw.log;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.property.PersistentSet;
+import org.apache.derby.iapi.services.replication.master.MasterFactory;
 import org.apache.derby.iapi.store.raw.data.DataFactory;
 import org.apache.derby.iapi.store.raw.Corruptable;
 import org.apache.derby.iapi.store.raw.RawStoreFactory;
@@ -349,6 +350,27 @@ public interface LogFactory extends Corruptable {
                                 int requiredMinorVersion, 
                                 String feature) 
         throws StandardException;
+
+    /**
+     * Make this LogFactory pass log records to the MasterFactory
+     * every time a log record is appended to the log on disk, and
+     * notify the MasterFactory when a log disk flush has taken place.
+     * Not implemented by ReadOnly.
+     * @param masterFactory The MasterFactory service responsible for
+     * controlling the master side replication behaviour.
+     * @exception StandardException Standard Derby exception policy,
+     * thrown on replication startup error. Will only be thrown if
+     * replication is attempted started on a readonly database.
+     */
+    public void startReplicationMasterRole(MasterFactory masterFactory)
+        throws StandardException;
+
+    /**
+     * Stop this LogFactory from passing log records to the
+     * MasterFactory and from notifying the MasterFactory when a log
+     * disk flush has taken place. Not implemented by ReadOnly.
+     */
+    public void stopReplicationMasterRole();
 
 }
 
