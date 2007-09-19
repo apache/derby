@@ -22,7 +22,6 @@
 package org.apache.derby.impl.jdbc;
 
 import java.sql.Blob;
-import java.sql.Connection;
 import java.sql.Clob;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -39,7 +38,7 @@ public class LOBStoredProcedure {
      * Creates a new empty Clob and registers it in the HashMap in the
      * Connection and returns the locator value corresponding to this Clob.
      * @return an integer that maps to the Clob value created.
-     * @throws a SQLException.
+     * @throws SQLException
      */
     public static int CLOBCREATELOCATOR() throws SQLException {
         Clob clob = getEmbedConnection().createClob();
@@ -50,7 +49,7 @@ public class LOBStoredProcedure {
      * Removes the supplied LOCATOR entry from the hash map.
      * @param LOCATOR an integer that represents the locator that needs to be
      *                removed from the hash map.
-     * @throws SQLException.
+     * @throws SQLException
      */
     public static void CLOBRELEASELOCATOR(int LOCATOR) throws SQLException {
         Clob clob = (Clob)getEmbedConnection().getLOBMapping(LOCATOR);
@@ -80,7 +79,7 @@ public class LOBStoredProcedure {
      *         first occurrence of the sub-string from the given starting
      *         position.
      *
-     * @throws an SQLException
+     * @throws SQLException
      */
     public static long CLOBGETPOSITIONFROMSTRING(int LOCATOR, String searchLiteral,
         long fromPosition) throws SQLException {
@@ -106,7 +105,7 @@ public class LOBStoredProcedure {
      *         first occurrence of the sub-string from the given starting
      *         position.
      *
-     * @throws an SQLException
+     * @throws SQLException
      */
     public static long CLOBGETPOSITIONFROMLOCATOR(int LOCATOR, int searchLocator,
         long fromPosition) throws SQLException {
@@ -120,6 +119,7 @@ public class LOBStoredProcedure {
      * @param LOCATOR an integer that represents the locator of the Clob whose
      *        length needs to be obtained.
      * @return an integer that represents the length of the Clob.
+     * @throws java.sql.SQLException 
      *
      */
     public static long CLOBGETLENGTH(int LOCATOR) throws SQLException {
@@ -136,7 +136,7 @@ public class LOBStoredProcedure {
      * @param len an integer that represents the length of the substring.
      * @return the substring conforming to the indexes we requested for from
      *         inside the LOB.
-     * @throws a SQLException
+     * @throws SQLException
      */
     public static String CLOBGETSUBSTRING(int LOCATOR,
         long pos, int len) throws SQLException {
@@ -157,7 +157,7 @@ public class LOBStoredProcedure {
      *
      * @param str the string from which the repalcement characters are built.
      *
-     * @throws an SQLException.
+     * @throws SQLException
      */
     public static void CLOBSETSTRING(int LOCATOR, long pos, int length,
         String str) throws SQLException {
@@ -172,7 +172,7 @@ public class LOBStoredProcedure {
      *                instance of the LOB.
      * @param length an integer that represents the length to which the Clob
      *               must be truncated to.
-     * @throws a SQLException.
+     * @throws SQLException
      */
     public static void CLOBTRUNCATE(int LOCATOR, long length) throws SQLException {
         getClobObjectCorrespondingtoLOCATOR(LOCATOR).truncate(length);
@@ -198,7 +198,7 @@ public class LOBStoredProcedure {
      * Creates a new empty Blob and registers it in the HashMap in the
      * Connection and returns the locator value corresponding to this Blob.
      * @return an integer that maps to the Blob value created.
-     * @throws a SQLException.
+     * @throws SQLException
      */
     public static int BLOBCREATELOCATOR() throws SQLException {
         Blob blob = getEmbedConnection().createBlob();
@@ -209,7 +209,7 @@ public class LOBStoredProcedure {
      * Removes the supplied LOCATOR entry from the hash map.
      * @param LOCATOR an integer that represents the locator that needs to be
      *                removed from the hash map.
-     * @throws SQLException.
+     * @throws SQLException
      */
     public static void BLOBRELEASELOCATOR(int LOCATOR) throws SQLException {
         Blob blob = (Blob)getEmbedConnection().getLOBMapping(LOCATOR);
@@ -232,7 +232,7 @@ public class LOBStoredProcedure {
      * @param pos the position from which the seaching needs to be done.
      * @return the position at which the first occurrence of the Blob is
      *         found.
-     * @throws a SQLException.
+     * @throws SQLException
      *
      */
     public static long BLOBGETPOSITIONFROMLOCATOR(int LOCATOR,
@@ -251,7 +251,7 @@ public class LOBStoredProcedure {
      * @param pos the position from which the seaching needs to be done.
      * @return the position at which the first occurrence of the Byte array is
      *         found.
-     * @throws a SQLException.
+     * @throws SQLException
      *
      */
     public static long BLOBGETPOSITIONFROMBYTES(int LOCATOR,
@@ -266,7 +266,7 @@ public class LOBStoredProcedure {
      * @param LOCATOR the locator value of the Blob whose length needs to
      *                be found.
      * @return the length of the Blob object mapped to the locator .
-     * @throws a SQLException.
+     * @throws SQLException
      *
      */
     public static long BLOBGETLENGTH(int LOCATOR) throws SQLException {
@@ -279,13 +279,13 @@ public class LOBStoredProcedure {
      *
      * @param LOCATOR the locator value of the Blob from which the byte array
      *                needs to be retrieved.
-     * @param len the length of te byte array that needs to be retrieved from
+     * @param len the length of the byte array that needs to be retrieved from
      *            pos
      * @param pos the position from which the bytes from the Blob need to be
      *            retrieved.
      * @return a byte array containing the bytes stating from pos and
      *         of length len.
-     * @throws a SQLException.
+     * @throws SQLException
      *
      */
     public static byte[] BLOBGETBYTES(int LOCATOR, long pos, int len)
@@ -304,7 +304,7 @@ public class LOBStoredProcedure {
      * @param len the number of bytes that need to be used in replacement.
      * @param replaceBytes the byte array that contains the bytes that needs to
      *                     be used for replacement.
-     * @throws a SQLException.
+     * @throws SQLException
      *
      */
     public static void BLOBSETBYTES(int LOCATOR, long pos, int len,
@@ -321,7 +321,7 @@ public class LOBStoredProcedure {
      *                instance of the LOB.
      * @param length an integer that represents the length to which the Blob
      *               must be truncated to.
-     * @throws a SQLException.
+     * @throws SQLException
      */
     public static void BLOBTRUNCATE(int LOCATOR, long length) throws SQLException {
         getBlobObjectCorrespondingtoLOCATOR(LOCATOR).truncate(length);
@@ -332,7 +332,7 @@ public class LOBStoredProcedure {
      * @param LOCATOR an integer that represents the locator corresponding
      *                to the Blob object requested.
      * @return a Blob object that is mapped to the LOCATOR object passed in.
-     * @throws a SQLException.
+     * @throws SQLException
      */
     private static Blob getBlobObjectCorrespondingtoLOCATOR(int LOCATOR)
     throws SQLException {
