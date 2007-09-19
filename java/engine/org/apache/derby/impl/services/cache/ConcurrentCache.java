@@ -125,15 +125,16 @@ final class ConcurrentCache implements CacheManager {
     }
 
     /**
-     * Find a free cacheable. If a free one cannot be found, allocate a new
-     * one.
+     * Find a free cacheable and give the specified entry a pointer to it. If
+     * a free cacheable cannot be found, allocate a new one. The entry must be
+     * locked by the current thread.
      *
-     * @return a cacheable with no identity
+     * @param entry the entry for which a <code>Cacheable</code> is needed
      */
-    private Cacheable findFreeCacheable() {
+    private void findFreeCacheable(CacheEntry entry) {
         // TODO - When the replacement algorithm has been implemented, we
         // should reuse a cacheable if possible.
-        return holderFactory.newCacheable(this);
+        entry.setCacheable(holderFactory.newCacheable(this));
     }
 
     /**
@@ -141,13 +142,12 @@ final class ConcurrentCache implements CacheManager {
      * and made available for other entries. This method should only be called
      * if the entry is locked by the current thread.
      *
-     * @param entry the entry to remove from the cache
+     * @param key the identity of the entry to remove
      */
-    private void removeEntry(CacheEntry entry) {
-        Cacheable c = entry.getCacheable();
-        cache.remove(c.getIdentity());
+    private void removeEntry(Object key) {
+        CacheEntry entry = cache.remove(key);
+        entry.getCacheable().clearIdentity();
         entry.setCacheable(null);
-        c.clearIdentity();
         // TODO - When replacement policy is implemented, return the
         // cacheable to the free list
     }
@@ -173,17 +173,12 @@ final class ConcurrentCache implements CacheManager {
             Cacheable item = entry.getCacheable();
             if (item == null) {
                 // not currently in the cache
-                Cacheable free = findFreeCacheable();
-                item = free.setIdentity(key);
+                findFreeCacheable(entry);
+                item = entry.getCacheable().setIdentity(key);
                 if (item == null) {
                     // Could not find an object with that identity. Remove its
                     // entry from the cache and return null.
-                    cache.remove(key);
-
-                    // TODO - When the replacement algorithm has been
-                    // implemented, the cacheable (free) should be returned to
-                    // the free list.
-
+                    removeEntry(key);
                     return null;
                 }
                 entry.setCacheable(item);
@@ -258,14 +253,16 @@ final class ConcurrentCache implements CacheManager {
                 throw StandardException.newException(
                     SQLState.OBJECT_EXISTS_IN_CACHE, name, key);
             }
-            Cacheable free = findFreeCacheable();
-            Cacheable c = free.createIdentity(key, createParameter);
+            findFreeCacheable(entry);
+            Cacheable c =
+                    entry.getCacheable().createIdentity(key, createParameter);
             if (c != null) {
                 entry.setCacheable(c);
                 entry.keep();
             } else {
-                // TODO - When replacement policy is implemented, return the
-                // cacheable (free) to the free list
+                // Could not create an object with that identity. Remove the
+                // entry from the cache.
+                removeEntry(key);
             }
             return c;
         } finally {
@@ -305,7 +302,8 @@ final class ConcurrentCache implements CacheManager {
      */
     public void remove(Cacheable item) throws StandardException {
         // The entry must be present, so we don't need to call getEntry().
-        CacheEntry entry = cache.get(item.getIdentity());
+        Object key = item.getIdentity();
+        CacheEntry entry = cache.get(key);
         entry.lock();
         try {
             if (SanityManager.DEBUG) {
@@ -313,7 +311,7 @@ final class ConcurrentCache implements CacheManager {
             }
             entry.unkeepForRemove();
             item.clean(true);
-            removeEntry(entry);
+            removeEntry(key);
         } finally {
             entry.unlock();
         }
@@ -373,7 +371,7 @@ final class ConcurrentCache implements CacheManager {
                     // If c is null, it's not in the cache and there's no need
                     // to remove it. If c is dirty, we can't remove it yet.
                     if (c != null && !c.isDirty()) {
-                        removeEntry(entry);
+                        removeEntry(c.getIdentity());
                     }
                 }
             } finally {
@@ -424,7 +422,7 @@ final class ConcurrentCache implements CacheManager {
                     allRemoved = false;
                     continue;
                 }
-                removeEntry(entry);
+                removeEntry(c.getIdentity());
             } finally {
                 entry.unlock();
             }
