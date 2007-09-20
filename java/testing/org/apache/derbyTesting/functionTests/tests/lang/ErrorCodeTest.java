@@ -97,7 +97,7 @@ public final class ErrorCodeTest extends BaseJDBCTestCase {
         // new ones can be added.
         rs = s.executeQuery("select * from SYSCS_DIAG.Error_messages where SEVERITY >= 40000 order by SQL_STATE");
         //Utilities.showResultSet(rs);
-        String [][] expectedRows = 
+        String [][] expectedRows =
         {{"08000","Connection closed by unknown interrupt.","40000"},
         		{"08001","A connection could not be established because the security token is larger than the maximum allowed by the network protocol.","40000"},
         		{"08001","A connection could not be established because the user id has a length of zero or is larger than the maximum allowed by the network protocol.","40000"},
@@ -145,15 +145,9 @@ public final class ErrorCodeTest extends BaseJDBCTestCase {
         		{"58009","Network protocol exception: SECTKN was not returned.  The connection has been terminated.","40000"},
         		{"58009","Network protocol exception: only one of NVCM, NVCS can be non-null.  The connection has been terminated.","40000"},
         		{"58009","Network protocol exception: SCLDTA length, {0}, is invalid for RDBNAM.  The connection has been terminated.","40000"},
-        		{"58009","SocketException: '{0}'","40000"},
-        		{"58009","A communications error has been detected: {0}.","40000"},
-        		{"58009","An error occurred during a deferred connect reset and the connection has been terminated.  See chained exceptions for details.","40000"},
-        		{"58009","Insufficient data while reading from the network - expected a minimum of {0} bytes and received only {1} bytes.  The connection has been terminated.","40000"},
-        		{"58009","Attempt to fully materialize lob data that is too large for the JVM.  The connection has been terminated.","40000"},
         		{"58009","Network protocol exception: SCLDTA length, {0}, is invalid for RDBCOLID.  The connection has been terminated.","40000"},
         		{"58009","Network protocol exception: SCLDTA length, {0}, is invalid for PKGID.  The connection has been terminated.","40000"},
         		{"58009","Network protocol exception: PKGNAMCSN length, {0}, is invalid at SQLAM {1}.  The connection has been terminated.","40000"},
-        		{"58009","A network protocol error was encountered and the connection has been terminated: {0}","40000"},
         		{"58010","A network protocol error was encountered.  A connection could not be established because the manager {0} at level {1} is not supported by the server. ","40000"},
         		{"58014","The DDM command 0x{0} is not supported.  The connection has been terminated.","40000"},
         		{"58015","The DDM object 0x{0} is not supported.  The connection has been terminated.","40000"},
@@ -246,6 +240,7 @@ public final class ErrorCodeTest extends BaseJDBCTestCase {
         		{"XSTB6","Cannot substitute a transaction table with another while one is already in use.","50000"},
         		{"XXXXX","Normal database session close.","40000"}};
 
+        		
 
         JDBC.assertUnorderedResultSet(rs, expectedRows);
         s.executeUpdate("drop table t");
