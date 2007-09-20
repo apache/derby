@@ -1662,20 +1662,8 @@ public interface SQLState {
     // 58009 means connection is terminated by a DRDA-protocol error.  This can be caused by any number
     // of reasons, so this SQL State has a lot of instances. Exceptions that are 
     // not protocol related, e.g. SocketException, IOException etc should use 
-    // SQLState 8006. DERBY-3077.  The exceptions that have been moved have been
-    // marked with an XX_MOVED_TO_8006 prefix.  Since only english has been 
-    // changed, these should not be reused, to avoid conflicts with localized
-    // messages.
+    // SQLState 8006. DERBY-3077. 
     // 
-    String XX_MOVED_TO_8006_DRDA_CONNECTION_TERMINATED                               = "58009.C";
-    // Use this version of SOCKET_EXCEPTION any time *except* when trying to
-    // establish a connection, as the SQLState is different.  When trying
-    // to establish a connection, use CONNECT_SOCKET_EXCEPTION.
-    String XX_MOVED_TO_8006_SOCKET_EXCEPTION                                         = "58009.C.2";
-    String XX_MOVED_TO_8006_COMMUNICATION_ERROR                                      = "58009.C.3";
-    String XX_MOVED_TO_8006_CONNECTION_FAILED_ON_DEFERRED_RESET                      = "58009.C.4";
-    String XX_MOVED_TO_8006_NET_INSUFFICIENT_DATA                                    = "58009.C.5";
-    String XX_MOVED_TO_8006_NET_LOB_DATA_TOO_LARGE_FOR_JVM                           = "58009.C.6";
     String NET_SQLCDTA_INVALID_FOR_RDBCOLID                         = "58009.C.7";
     String NET_SQLCDTA_INVALID_FOR_PKGID                            = "58009.C.8";
     String NET_PGNAMCSN_INVALID_AT_SQLAM                            = "58009.C.9";

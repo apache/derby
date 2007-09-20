@@ -97,16 +97,16 @@ public final class ErrorCodeTest extends BaseJDBCTestCase {
         // new ones can be added.
         rs = s.executeQuery("select * from SYSCS_DIAG.Error_messages where SEVERITY >= 40000 order by SQL_STATE");
         //Utilities.showResultSet(rs);
-        String [][] expectedRows = 
+        String [][] expectedRows =
         {{"08000","Connection closed by unknown interrupt.","40000"},
-                {"08001","A connection could not be established because the security token is larger than the maximum allowed by the network protocol.","40000"},
-                {"08001","A connection could not be established because the user id has a length of zero or is larger than the maximum allowed by the network protocol.","40000"},
-                {"08001","A connection could not be established because the password has a length of zero or is larger than the maximum allowed by the network protocol.","40000"},
                 {"08001","Required Derby DataSource property {0} not set.","40000"},
                 {"08001","{0} : Error connecting to server {1} on port {2} with message {3}.","40000"},
                 {"08001","SocketException: '{0}'","40000"},
                 {"08001","Unable to open stream on socket: '{0}'.","40000"},
                 {"08001","User id length ({0}) is outside the range of 1 to {1}.","40000"},
+                {"08001","A connection could not be established because the security token is larger than the maximum allowed by the network protocol.","40000"},
+                {"08001","A connection could not be established because the user id has a length of zero or is larger than the maximum allowed by the network protocol.","40000"},
+                {"08001","A connection could not be established because the password has a length of zero or is larger than the maximum allowed by the network protocol.","40000"},
                 {"08001","Password length ({0}) is outside the range of 1 to {1}.","40000"},
                 {"08001","User id can not be null.","40000"},
                 {"08001","Password can not be null.","40000"},
@@ -123,16 +123,23 @@ public final class ErrorCodeTest extends BaseJDBCTestCase {
                 {"08004","User '{0}' cannot (re)encrypt database '{1}'. Only the database owner can perform this operation.","40000"},
                 {"08004","User '{0}' cannot hard upgrade database '{1}'. Only the database owner can perform this operation.","40000"},
                 {"08004","Connection refused to database '{0}' because it is in replication slave mode.","40000"},
+                {"08006","A network protocol error was encountered and the connection has been terminated: {0}","40000"},
+                {"08006","Database '{0}' shutdown.","45000"},
                 {"08006","An error occurred during connect reset and the connection has been terminated.  See chained exceptions for details.","40000"},
                 {"08006","SocketException: '{0}'","40000"},
                 {"08006","A communications error has been detected: {0}.","40000"},
                 {"08006","An error occurred during a deferred connect reset and the connection has been terminated.  See chained exceptions for details.","40000"},
                 {"08006","Insufficient data while reading from the network - expected a minimum of {0} bytes and received only {1} bytes.  The connection has been terminated.","40000"},
                 {"08006","Attempt to fully materialize lob data that is too large for the JVM.  The connection has been terminated.","40000"},
-                {"08006","A network protocol error was encountered and the connection has been terminated: {0}","40000"},
-                {"08006","Database '{0}' shutdown.","45000"},
                 {"0A000","The DRDA command {0} is not currently implemented.  The connection has been terminated.","40000"},
                 {"57017","There is no available conversion for the source code page, {0}, to the target code page, {1}.  The connection has been terminated.","40000"},
+                {"58009","Network protocol exception: invalid FDOCA LID.  The connection has been terminated.","40000"},
+                {"58009","Network protocol exception: SECTKN was not returned.  The connection has been terminated.","40000"},
+                {"58009","Network protocol exception: only one of NVCM, NVCS can be non-null.  The connection has been terminated.","40000"},
+                {"58009","Network protocol exception: SCLDTA length, {0}, is invalid for RDBNAM.  The connection has been terminated.","40000"},
+                {"58009","Network protocol exception: SCLDTA length, {0}, is invalid for RDBCOLID.  The connection has been terminated.","40000"},
+                {"58009","Network protocol exception: SCLDTA length, {0}, is invalid for PKGID.  The connection has been terminated.","40000"},
+                {"58009","Network protocol exception: PKGNAMCSN length, {0}, is invalid at SQLAM {1}.  The connection has been terminated.","40000"},
                 {"58009","Network protocol exception: only one of the VCM, VCS length can be greater than 0.  The connection has been terminated.","40000"},
                 {"58009","The connection was terminated because the encoding is not supported.","40000"},
                 {"58009","Network protocol exception: actual code point, {0}, does not match expected code point, {1}.  The connection has been terminated.","40000"},
@@ -141,19 +148,6 @@ public final class ErrorCodeTest extends BaseJDBCTestCase {
                 {"58009","Network protocol exception: DSS length not 0 at end of same id chain parse.  The connection has been terminated.","40000"},
                 {"58009","Network protocol exception: DSS chained with same id at end of same id chain parse.  The connection has been terminated.","40000"},
                 {"58009","Network protocol exception: end of stream prematurely reached while reading InputStream, parameter #{0}.  The connection has been terminated.","40000"},
-                {"58009","Network protocol exception: invalid FDOCA LID.  The connection has been terminated.","40000"},
-                {"58009","Network protocol exception: SECTKN was not returned.  The connection has been terminated.","40000"},
-                {"58009","Network protocol exception: only one of NVCM, NVCS can be non-null.  The connection has been terminated.","40000"},
-                {"58009","Network protocol exception: SCLDTA length, {0}, is invalid for RDBNAM.  The connection has been terminated.","40000"},
-                {"58009","SocketException: '{0}'","40000"},
-                {"58009","A communications error has been detected: {0}.","40000"},
-                {"58009","An error occurred during a deferred connect reset and the connection has been terminated.  See chained exceptions for details.","40000"},
-                {"58009","Insufficient data while reading from the network - expected a minimum of {0} bytes and received only {1} bytes.  The connection has been terminated.","40000"},
-                {"58009","Attempt to fully materialize lob data that is too large for the JVM.  The connection has been terminated.","40000"},
-                {"58009","Network protocol exception: SCLDTA length, {0}, is invalid for RDBCOLID.  The connection has been terminated.","40000"},
-                {"58009","Network protocol exception: SCLDTA length, {0}, is invalid for PKGID.  The connection has been terminated.","40000"},
-                {"58009","Network protocol exception: PKGNAMCSN length, {0}, is invalid at SQLAM {1}.  The connection has been terminated.","40000"},
-                {"58009","A network protocol error was encountered and the connection has been terminated: {0}","40000"},
                 {"58010","A network protocol error was encountered.  A connection could not be established because the manager {0} at level {1} is not supported by the server. ","40000"},
                 {"58014","The DDM command 0x{0} is not supported.  The connection has been terminated.","40000"},
                 {"58015","The DDM object 0x{0} is not supported.  The connection has been terminated.","40000"},
@@ -247,7 +241,6 @@ public final class ErrorCodeTest extends BaseJDBCTestCase {
                 {"XXXXX","Normal database session close.","40000"}};
 
                 
-
         JDBC.assertUnorderedResultSet(rs, expectedRows);
         s.executeUpdate("drop table t");
         commit();        

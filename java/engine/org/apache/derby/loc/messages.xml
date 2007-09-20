@@ -2614,36 +2614,6 @@ Guide.
                 <text>Network protocol exception: SCLDTA length, {0}, is invalid for RDBNAM.  The connection has been terminated.</text>
                 <arg>length</arg>
             </msg>
-
-            <msg>
-                <name>58009.C.2</name>
-                <text> SocketException: '{0}'</text>
-                <arg>error</arg>
-            </msg>
-
-            <msg>
-                <name>58009.C.3</name>
-                <text>A communications error has been detected: {0}.</text>
-                <arg>error</arg>
-            </msg>
-
-            <msg>
-                <name>58009.C.4</name>
-                <text>An error occurred during a deferred connect reset and the connection has been terminated.  See chained exceptions for details.</text>
-            </msg>
-
-            <msg>
-                <name>58009.C.5</name>
-                <text>Insufficient data while reading from the network - expected a minimum of {0} bytes and received only {1} bytes.  The connection has been terminated.</text>
-                <arg>number</arg>
-                <arg>number</arg>
-            </msg>
-
-            <msg>
-                <name>58009.C.6</name>
-                <text>Attempt to fully materialize lob data that is too large for the JVM.  The connection has been terminated.</text>
-            </msg>
-
             <msg>
                 <name>58009.C.7</name>
                 <text>Network protocol exception: SCLDTA length, {0}, is invalid for RDBCOLID.  The connection has been terminated.</text>
@@ -2662,13 +2632,6 @@ Guide.
                 <arg>length</arg>
                 <arg>value</arg>
             </msg>
-
-            <msg>
-                <name>58009.C</name>
-                <text>A network protocol error was encountered and the connection has been terminated: {0}</text>
-                <arg>error</arg>
-            </msg>
-
             <msg>
                 <name>58010.C</name>
                 <text>A network protocol error was encountered.  A connection could not be established because the manager {0} at level {1} is not supported by the server. </text>
