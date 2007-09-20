@@ -4720,6 +4720,14 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
                 <name>XRE01</name>
                 <text>The log received from the master is corrupted.</text>
             </msg>
+            <msg>
+                <name>XRE02</name>
+                <text>Master and Slave at different versions. Unable to proceed with Replication.</text>
+            </msg>
+            <msg>
+                <name>XRE03</name>
+                <text>Unexpected error during replication network communication initiation.</text>
+            </msg>
 
         </family>
 

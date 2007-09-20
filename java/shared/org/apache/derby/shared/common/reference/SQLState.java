@@ -1763,6 +1763,7 @@ public interface SQLState {
     */
     String CANNOT_REPLICATE_READONLY_DATABASE                      = "XRE00";
     String REPLICATION_LOG_CORRUPTED                               = "XRE01";
-
+    String REPLICATION_MASTER_SLAVE_VERSION_MISMATCH               = "XRE02";
+    String REPLICATION_UNEXPECTED_EXCEPTION                        = "XRE03";
 }
 
