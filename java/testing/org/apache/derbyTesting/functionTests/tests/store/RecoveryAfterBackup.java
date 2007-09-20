@@ -32,7 +32,7 @@ import javax.sql.DataSource;
 import org.apache.derby.tools.ij;
 import org.apache.derbyTesting.functionTests.util.TestUtil;
 
-/*
+/**
  * This test contains a recovery for a database that did recovery just
  * before it went down. After recovery more records are inserted into
  * the database before the database is shutdown.  Then, roll-forward
