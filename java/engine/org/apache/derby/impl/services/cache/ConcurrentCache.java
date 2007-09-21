@@ -146,10 +146,65 @@ final class ConcurrentCache implements CacheManager {
      */
     private void removeEntry(Object key) {
         CacheEntry entry = cache.remove(key);
-        entry.getCacheable().clearIdentity();
+        Cacheable c = entry.getCacheable();
+        if (c != null && c.getIdentity() != null) {
+            // The cacheable should not have an identity when it has been
+            // removed.
+            entry.getCacheable().clearIdentity();
+        }
         entry.setCacheable(null);
         // TODO - When replacement policy is implemented, return the
         // cacheable to the free list
+    }
+
+    /**
+     * Initialize an entry by finding a free <code>Cacheable</code> and setting
+     * its identity. If the identity is successfully set, the entry is kept and
+     * the <code>Cacheable</code> is inserted into the entry and returned.
+     * Otherwise, the entry is removed from the cache and <code>null</code>
+     * is returned.
+     *
+     * @param entry the entry to initialize
+     * @param key the identity to set
+     * @param createParameter parameter to <code>createIdentity()</code>
+     * (ignored if <code>create</code> is <code>false</code>)
+     * @param create if <code>true</code>, create new identity with
+     * <code>Cacheable.createIdentity()</code>; otherwise, set identity with
+     * <code>Cacheable.setIdentity()</code>
+     * @return a <code>Cacheable</code> if the identity could be set,
+     * <code>null</code> otherwise
+     * @exception StandardException if an error occured while searching for a
+     * free <code>Cacheable</code> or while setting the identity
+     * @see Cacheable#setIdentity(Object)
+     * @see Cacheable#createIdentity(Object,Object)
+     */
+    private Cacheable initIdentity(CacheEntry entry,
+            Object key, Object createParameter, boolean create)
+            throws StandardException {
+        Cacheable c = null;
+        try {
+            findFreeCacheable(entry);
+            if (create) {
+                c = entry.getCacheable().createIdentity(key, createParameter);
+            } else {
+                c = entry.getCacheable().setIdentity(key);
+            }
+        } finally {
+            if (c == null) {
+                // Either an exception was thrown, or setIdentity() or
+                // createIdentity() returned null. In either case, the entry is
+                // invalid and must be removed.
+                removeEntry(key);
+            }
+        }
+
+        // If we successfully set the identity, insert the cacheable and mark
+        // the entry as kept.
+        if (c != null) {
+            entry.setCacheable(c);
+            entry.keep();
+        }
+        return c;
     }
 
     // Implementation of the CacheManager interface
@@ -171,22 +226,12 @@ final class ConcurrentCache implements CacheManager {
         CacheEntry entry = getEntry(key);
         try {
             Cacheable item = entry.getCacheable();
-            if (item == null) {
-                // not currently in the cache
-                findFreeCacheable(entry);
-                item = entry.getCacheable().setIdentity(key);
-                if (item == null) {
-                    // Could not find an object with that identity. Remove its
-                    // entry from the cache and return null.
-                    removeEntry(key);
-                    return null;
-                }
-                entry.setCacheable(item);
+            if (item != null) {
+                entry.keep();
+                return item;
             }
-            // increase keep count to prevent others from removing the entry
-            // while it's not locked
-            entry.keep();
-            return item;
+            // not currently in the cache
+            return initIdentity(entry, key, null, false);
         } finally {
             entry.unlock();
         }
@@ -253,18 +298,7 @@ final class ConcurrentCache implements CacheManager {
                 throw StandardException.newException(
                     SQLState.OBJECT_EXISTS_IN_CACHE, name, key);
             }
-            findFreeCacheable(entry);
-            Cacheable c =
-                    entry.getCacheable().createIdentity(key, createParameter);
-            if (c != null) {
-                entry.setCacheable(c);
-                entry.keep();
-            } else {
-                // Could not create an object with that identity. Remove the
-                // entry from the cache.
-                removeEntry(key);
-            }
-            return c;
+            return initIdentity(entry, key, createParameter, true);
         } finally {
             entry.unlock();
         }
