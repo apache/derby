@@ -42,12 +42,12 @@ import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.junit.JDBC;
 
 /**
- * This Junit test class tests the JDBC PreparedStatement.  This test is a
- * Junit of the old prepStmt.java test.  This test tested prepared statements
- * in client/server context, and many of the test cases is specifically
- * testing corner cases in client/server communication.  However, this Junit
- * test is set up to run as part of both the embedded and client/server test
- * suites.
+ * This Junit test class tests the JDBC PreparedStatement.  This test
+ * is a Junit version of the old prepStmt.java test.  That test tested
+ * prepared statements in client/server context, and many of the test
+ * cases is specifically testing corner cases in client/server
+ * communication.  However, this Junit test is set up to run as part
+ * of both the embedded and client/server test suites.
  */
 
 public class PrepareStatementTest extends BaseJDBCTestCase
@@ -380,7 +380,7 @@ public class PrepareStatementTest extends BaseJDBCTestCase
         for (int i = 1; i <= numCols; ++i)
         {
             insertSql.append(" c");
-            insertSql.append(i);;
+            insertSql.append(i);
             insertSql.append((i != numCols) ? ", " : ")");
         }
         insertSql.append("  values (");
