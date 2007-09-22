@@ -130,4 +130,54 @@ public class Changes10_4 extends UpgradeChange {
             break;
         }
     }
+
+
+    /**
+     * Check that you must be hard-upgraded to 10.4 or later in order to declare
+     * table functions.
+     * @throws SQLException 
+     *
+     */
+    public void testTableFunctionDeclaration() throws SQLException
+    {
+        Statement       s = createStatement();
+        String          createTableFunctionText =
+            "create function svnLogReader( logFileName varchar( 32672 ) )\n" +
+            "returns TABLE\n" +
+            "  (\n" +
+            "     XID varchar( 15 ),\n" +
+            "     committer    varchar( 20 ),\n" +
+            "     commit_time  timestamp,\n" +
+            "     line_count   varchar( 10 ),\n" +
+            "     description  varchar( 32672 )\n" +
+            "  )\n" +
+            "language java\n" +
+            "parameter style DERBY_JDBC_RESULT_SET\n" +
+            "no sql\n" +
+            "external name 'org.apache.derbyDemo.vtis.example.SubversionLogVTI.subversionLogVTI'\n"
+            ;
+
+        switch (getPhase())
+        {
+        case PH_CREATE:
+            assertStatementError("42X01", s, createTableFunctionText );
+            break;
+            
+        case PH_SOFT_UPGRADE:
+            assertStatementError("XCL47", s, createTableFunctionText );
+            break;
+            
+        case PH_POST_SOFT_UPGRADE:
+            assertStatementError("42X01", s, createTableFunctionText );
+            break;
+            
+        case PH_HARD_UPGRADE:
+        case PH_POST_HARD_UPGRADE:
+            s.execute( createTableFunctionText );
+            break;
+        }
+
+        s.close();
+    }
+
 }
