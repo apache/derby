@@ -10136,7 +10136,7 @@ functionTableType() throws StandardException :
 	    ( <COMMA> functionTableReturnColumn( names, types ) ) *
 	<RIGHT_PAREN>
 	{
-        checkVersion( DataDictionary.DD_VERSION_DERBY_10_4, "table functions");
+        checkVersion( DataDictionary.DD_VERSION_DERBY_10_4, "CREATE FUNCTION...RETURNS TABLE");
 
 		columnCount = names.size();
 		nameArray = new String[ columnCount ];
