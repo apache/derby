@@ -14,6 +14,10 @@
             </properties>
             <folders>
                 <source-folder>
+                    <label>trunk</label>
+                    <location>${project.dir}</location>
+                </source-folder>
+                <source-folder>
                     <label>java/build</label>
                     <type>java</type>
                     <location>${project.dir}/java/build</location>
@@ -66,10 +70,6 @@
                     <type>java</type>
                     <location>${project.dir}/java/tools</location>
                     <encoding>UTF-8</encoding>
-                </source-folder>
-                <source-folder>
-                    <label>trunk</label>
-                    <location>${project.dir}</location>
                 </source-folder>
             </folders>
             <ide-actions>
@@ -145,6 +145,7 @@
                     <ide-action name="test"/>
                 </context-menu>
             </view>
+            <subprojects/>
         </general-data>
         <java-data xmlns="http://www.netbeans.org/ns/freeform-project-java/1">
             <compilation-unit>
@@ -157,7 +158,7 @@
                 <package-root>${project.dir}/java/storeless</package-root>
                 <package-root>${project.dir}/java/testing</package-root>
                 <package-root>${project.dir}/java/tools</package-root>
-                <classpath mode="compile">${project.dir}/classes:${project.dir}/tools/java/geronimo-spec-servlet-2.4-rc4.jar:${project.dir}/tools/java/jakarta-oro-2.0.8.jar:${project.dir}/tools/java/javacc.jar:${project.dir}/tools/java/junit.jar:${project.dir}/tools/java/xercesImpl.jar:${project.dir}/tools/java/xml-apis.jar</classpath>
+                <classpath mode="compile">${project.dir}/classes:${project.dir}/tools/java/geronimo-spec-servlet-2.4-rc4.jar:${project.dir}/tools/java/jakarta-oro-2.0.8.jar:${project.dir}/tools/java/javacc.jar:${project.dir}/tools/java/junit.jar:${project.dir}/tools/java/xercesImpl.jar:${project.dir}/tools/java/xml-apis.jar:${project.dir}/tools/java/ant.jar</classpath>
                 <source-level>1.4</source-level>
             </compilation-unit>
         </java-data>
