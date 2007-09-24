@@ -91,7 +91,7 @@ public class DataSourceTest extends BaseJDBCTestCase {
      *  (DATABASE=<dbname>), (DRDAID = <drdaid>)"
      */
     private static final String CONNSTRING_FORMAT = 
-        "\\S+@[0-9]+.* \\(XID = .*\\), \\(SESSIONID = [0-9]+\\), " +
+        "\\S+@\\-?[0-9]+.* \\(XID = .*\\), \\(SESSIONID = [0-9]+\\), " +
         "\\(DATABASE = [A-Za-z]+\\), \\(DRDAID = .*\\) "; 
     
     
