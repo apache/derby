@@ -68,12 +68,9 @@ import org.apache.derby.iapi.store.raw.RawStoreFactory;
 	when buffers is switched. Checksum log record is written into the reserved
 	space in the beginning buffer. 
 
-    In case of a large log record that does not fit into a bufffer, it needs to 
-    be written directly to the disk instead of going through the log buffers. 
-    In this case the log record write gets broken into three parts:
-        1) Write checksum log record and LOG RECORD HEADER (length + instant) 
-        2) Write the log record. 
-        3) Write the trailing length of the log record. 
+    In case of a large log record that does not fit into a buffer, the
+    checksum is written to the byte[] allocated for the big log
+    record. 
 
 	Checksum log records helps in identifying the incomplete log disk writes during 
     recovery. This is done by recalculating the checksum value for the data on
@@ -114,7 +111,6 @@ public class LogAccessFile
 	//streams used to generated check sume log record ; see if there is any simpler way
 	private ArrayOutputStream logOutputBuffer;
 	private FormatIdOutputStream logicalOut;
-	private boolean directWrite = false; //true when log is written directly to file.
 	private long checksumInstant = -1;
 	private int checksumLength;
 	private int checksumLogRecordSize;      //checksumLength + LOG_RECORD_FIXED_OVERHEAD_SIZE
@@ -197,7 +193,7 @@ public class LogAccessFile
 
 			/** initialize the buffer with space reserved for checksum log record in
 			 * the beginning of the log buffer; checksum record is written into
-			 * this space when buffer is switched or while doing direct write to the log file.
+			 * this space when buffer is switched
 			 */
 		}else
 		{
@@ -207,9 +203,6 @@ public class LogAccessFile
 		
 		currentBuffer.init(checksumLogRecordSize);
 	}
-
-
-	private byte[] db = new byte[LOG_RECORD_TRAILER_SIZE]; 
 
 
     /**
@@ -258,114 +251,131 @@ public class LogAccessFile
     {
         int total_log_record_length = length + LOG_RECORD_FIXED_OVERHEAD_SIZE;
 
-		if (total_log_record_length <= currentBuffer.bytes_free)
-        {
-            byte[] b    = currentBuffer.buffer;
-            int    p    = currentBuffer.position;
-
-            // writeInt(length)
-			p = writeInt(length, b, p);
-            
-            // writeLong(instant)
-			p = writeLong(instant, b , p);
-
-            // write(data, data_offset, length - optional_data_length)
-            int transfer_length = (length - optional_data_length);
-			System.arraycopy(data, data_offset, b, p, transfer_length);
-
-            p += transfer_length;
-
-            if (optional_data_length != 0)
-            {
-                // write(
-                //   optional_data, optional_data_offset, optional_data_length);
-
-                System.arraycopy(
-                    optional_data, optional_data_offset, 
-                    b,             p, 
-                    optional_data_length);
-
-                p += optional_data_length;
-            }
-
-            // writeInt(length)
-			p = writeInt(length, b, p);
-            
-			currentBuffer.position   = p;
+        if (total_log_record_length <= currentBuffer.bytes_free) {
+            int newpos = appendLogRecordToBuffer(currentBuffer.buffer,
+                                                 currentBuffer.position,
+                                                 length, 
+                                                 instant, 
+                                                 data, 
+                                                 data_offset,
+                                                 optional_data,
+                                                 optional_data_offset,
+                                                 optional_data_length);
+            currentBuffer.position = newpos;
             currentBuffer.bytes_free -= total_log_record_length;
-		}
-        else
-        {
-			
-			/** Because current log record will never fit in a single buffer
-			 * a direct write to the log file is required instead of 
-			 * writing the log record through  the log bufffers. 
-			 */
-			directWrite = true;
-
-			byte[] b    = currentBuffer.buffer;
-            int    p    = currentBuffer.position;
-
-            // writeInt(length)
-			p = writeInt(length , b, p);
-            
-            // writeLong(instant)
-			p = writeLong(instant, b, p);
-
-			currentBuffer.position   = p;
-			currentBuffer.bytes_free -= LOG_RECORD_HEADER_SIZE;
-
-			/** using a seperate small buffer to write the traling length
-			 * instead of the log buffer because data portion will be 
-			 * written directly to log file after the log buffer is 
-			 * flushed and the trailing length should be written after that. 
-			 */
-
-			// writeInt(length)
-			writeInt(length , db, 0);
-
-			if(writeChecksum)
-			{
-				checksumLogOperation.reset();
-				checksumLogOperation.update(b, checksumLogRecordSize, p - checksumLogRecordSize);
-				checksumLogOperation.update(data, data_offset, length - optional_data_length);
-				if (optional_data_length != 0)
-				{
-					checksumLogOperation.update(optional_data, optional_data_offset, optional_data_length);	
-				}
-
-				// update the checksum to include the trailing length.
-				checksumLogOperation.update(db, 0, LOG_RECORD_TRAILER_SIZE);
-			
-				// write checksum log record to the log buffer 
-				writeChecksumLogRecord();
-			}
-			
-			
-			// now do the  writes directly to the log file. 
-
-			// flush all buffers before wrting directly to the log file. 
-			flushLogAccessFile();
-
-			// Note:No Special Synchronization required here , 
-			// There will be nothing to write by flushDirtyBuffers that can run
-			// in parallel to the threads that is executing this code. Above
-			// flush call should have written all the buffers and NO new log will 
-			// get added until the following direct log to file call finishes. 
-
-
-			// write the rest of the log directltly to the log file. 
-            writeToLog(data, data_offset, length - optional_data_length);
-            if (optional_data_length != 0)
-            {
-                writeToLog(
-                    optional_data, optional_data_offset, optional_data_length);
+            if (SanityManager.DEBUG) {
+                int normalizedPosition = currentBuffer.position;
+                if (writeChecksum) {
+                    normalizedPosition -= checksumLogRecordSize;
+                }
+                SanityManager.ASSERT(
+                    currentBuffer.bytes_free + normalizedPosition ==
+                    currentBuffer.length,
+                    "free_bytes and position do not add up to the total " +
+                    "length of the buffer");
             }
 
-			// write the trailing length 
-			writeToLog(db,0, 4);
-			directWrite = false;
-		}
+        } else {
+            /* The current log record will never fit in a single
+             * buffer. The reason is that reserveSpaceForChecksum is
+             * always called before writeLogRecord (see
+             * LogToFile#appendLogRecord). When we reach this point,
+             * reserveSpaceForChecksum has already found out that the
+             * previous buffer did not have enough free bytes to store
+             * this log record, and therefore switched to a fresh
+             * buffer. Hence, currentBuffer is empty now, and
+             * switching to the next free buffer will not help. Since
+             * there is no way for this log record to fit into a
+             * buffer, it is written to a new, big enough, byte[] and
+             * then written to log file instead of writing it to
+             * buffer.
+             */
+
+            // allocate a byte[] that is big enough to contain the
+            // giant log record:
+            int bigBufferLength =
+                checksumLogRecordSize + total_log_record_length;
+            byte[] bigbuffer = new byte[bigBufferLength];
+            appendLogRecordToBuffer(bigbuffer, checksumLogRecordSize,
+                                    length, 
+                                    instant, 
+                                    data, 
+                                    data_offset,
+                                    optional_data,
+                                    optional_data_offset,
+                                    optional_data_length);
+
+            // write checksum to bigbuffer
+            if(writeChecksum) {
+                checksumLogOperation.reset();
+                checksumLogOperation.update(bigbuffer, checksumLogRecordSize,
+                                            total_log_record_length);
+
+                writeChecksumLogRecord(bigbuffer);
+            }
+
+            // flush all buffers before writing the bigbuffer to the
+            // log file.
+            flushLogAccessFile();
+
+            // Note:No Special Synchronization required here , There
+            // will be nothing to write by flushDirtyBuffers that can
+            // run in parallel to the threads that is executing this
+            // code. Above flush call should have written all the
+            // buffers and NO new log will get added until the
+            // following direct log to file call finishes.
+
+			// write the log record directly to the log file.
+            writeToLog(bigbuffer, 0, bigBufferLength);
+        }
+    }
+
+    /**
+     * Append a log record to a byte[]. Typically, the byte[] will be
+     * currentBuffer, but if a log record that is too big to fit in a
+     * buffer is added, buff will be a newly allocated byte[].
+     *
+     * @param buff The byte[] the log record is appended to
+     * @param pos The position in buff where the method will start to
+     * append to
+     * @param length (data + optional_data) length bytes to write
+     * @param instant the log address of this log record.
+     * @param data "from" array to copy "data" portion of rec
+     * @param data_offset offset in "data" to start copying from.
+     * @param optional_data "from" array to copy "optional data" from
+     * @param optional_data_offset offset in "optional_data" to start copy from
+     * @param optional_data_length length of optional data to copy.
+     *
+     * @see writeLogRecord
+     */
+    private int appendLogRecordToBuffer(byte[] buff, int pos,
+                                        int length,
+                                        long instant,
+                                        byte[] data,
+                                        int data_offset,
+                                        byte[] optional_data,
+                                        int optional_data_offset,
+                                        int optional_data_length) {
+
+        pos = writeInt(length, buff, pos);
+        pos = writeLong(instant, buff, pos);
+
+        int data_length = length - optional_data_length;
+        System.arraycopy(data, data_offset,
+                         buff, pos,
+                         data_length);
+        pos += data_length;
+
+        if (optional_data_length != 0) {
+            System.arraycopy(optional_data, optional_data_offset, 
+                             buff, pos, 
+                             optional_data_length);
+            pos += optional_data_length;
+        }
+
+        pos = writeInt(length, buff, pos);
+
+        return pos;
     }
 
 
@@ -571,11 +581,11 @@ public class LogAccessFile
 			// calculate the checksum for the current log buffer 
 			// and write the record to the space reserverd in 
 			// the beginning of the buffer. 
-			if(writeChecksum && !directWrite)
+			if(writeChecksum)
 			{
 				checksumLogOperation.reset();
 				checksumLogOperation.update(currentBuffer.buffer, checksumLogRecordSize, currentBuffer.position - checksumLogRecordSize);
-				writeChecksumLogRecord();
+				writeChecksumLogRecord(currentBuffer.buffer);
 			}
 
 			//add the current buffer to the flush buffer list
@@ -803,23 +813,26 @@ public class LogAccessFile
 	}
 
 
-	/*
-	 * generate the checkum log record and write it into the log buffer.
+	/**
+	 * Generate the checkum log record and write it into the log
+	 * buffer. The checksum applies to all bytes from this checksum
+	 * log record to the next one. 
+     * @param buffer The byte[] the checksum is written to. The
+     * checksum is always written at the beginning of buffer.
 	 */
-	private void writeChecksumLogRecord() throws IOException, StandardException
-	{
+	private void writeChecksumLogRecord(byte[] buffer)
+		throws IOException, StandardException{
 		
-		byte[] b    = currentBuffer.buffer;
 		int    p    = 0; //checksum is written in the beginning of the buffer
 
 		// writeInt(length)
-		p = writeInt(checksumLength, b , p);
+		p = writeInt(checksumLength, buffer, p);
             
 		// writeLong(instant)
-		p = writeLong(checksumInstant, b , p);
+		p = writeLong(checksumInstant, buffer, p);
 
 		//write the checksum log operation  
-		logOutputBuffer.setData(b);
+		logOutputBuffer.setData(buffer);
 		logOutputBuffer.setPosition(p);
 		logicalOut.writeObject(checksumLogRecord);
 
@@ -827,8 +840,8 @@ public class LogAccessFile
 		{
 			//encrypt the checksum log operation part.
 			int len = 
-				logFactory.encrypt(b, LOG_RECORD_HEADER_SIZE, checksumLength, 
-								   b, LOG_RECORD_HEADER_SIZE);
+				logFactory.encrypt(buffer, LOG_RECORD_HEADER_SIZE, checksumLength, 
+								   buffer, LOG_RECORD_HEADER_SIZE);
 			
 		   
 			if (SanityManager.DEBUG)
@@ -839,7 +852,7 @@ public class LogAccessFile
 		p = LOG_RECORD_HEADER_SIZE + checksumLength ;
 
 		// writeInt(length) trailing
-		p = writeInt(checksumLength, b, p );
+		p = writeInt(checksumLength, buffer, p );
 		
 		if (SanityManager.DEBUG)
 		{
