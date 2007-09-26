@@ -23,6 +23,7 @@ package	org.apache.derby.impl.sql.compile;
 
 import org.apache.derby.iapi.services.loader.ClassInspector;
 
+import org.apache.derby.iapi.services.compiler.LocalField;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
@@ -57,6 +58,8 @@ import org.apache.derby.catalog.types.RoutineAliasInfo;
 
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Member;
+
+import java.sql.ResultSet;
 
 import java.util.Enumeration;
 import java.util.StringTokenizer;
@@ -528,23 +531,49 @@ abstract class MethodCallNode extends JavaValueNode
 	{
 		int				param;
 
-		String[] expectedTypes = methodParameterTypes;
+		String[]    expectedTypes = methodParameterTypes;
+        String      varargsType = getVarargsType();
+        int         numPushedArgs = methodParms.length;
+        int         firstVararg = -1;
+        LocalField  varargsArrayField = null;
 
-		ClassInspector classInspector = getClassFactory().getClassInspector();
+        if ( varargsType != null )
+        {
+            numPushedArgs = expectedTypes.length;
+            firstVararg = numPushedArgs - 1;
+            varargsArrayField = acb.newFieldDeclaration(Modifier.PRIVATE, varargsType + "[]" );
+
+            mb.pushNewArray( varargsType, methodParms.length - firstVararg );
+            mb.setField( varargsArrayField );  
+        }
+
+        ClassInspector classInspector = getClassFactory().getClassInspector();
 
 		/* Generate the code for each user parameter, generating the appropriate
 		 * cast when the passed type needs to get widened to the expected type.
 		 */
+
 		for (param = 0; param < methodParms.length; param++)
 		{
+            boolean     isVararg = (varargsType != null) && (param >= firstVararg);
+            
+            // if this is a varargs method/constructor, then the trailing
+            // arguments must be stuffed into a single array argument
+            if ( isVararg ) { mb.getField( varargsArrayField ); }
+            
 			generateOneParameter( acb, mb, param );
 
 			// type from the SQL-J expression
 			String argumentType = getParameterTypeName( methodParms[param] );
 
-			// type of the method
-			String parameterType = expectedTypes[param];
+			// type of the method. check if it is a varargs method/constrctor
+			// and if we have moved on to the varargs.
+			String parameterType;
 
+            if ( isVararg )
+            { parameterType = varargsType; }
+            else { parameterType = expectedTypes[param]; }
+            
 			if (!parameterType.equals(argumentType))
 			{
 				// since we reached here through method resolution
@@ -574,9 +603,12 @@ abstract class MethodCallNode extends JavaValueNode
 				}
 			}
 
+            if ( isVararg ) { mb.setArrayElement( param - firstVararg ); }
 		}
 
-		return methodParms.length;
+        if ( varargsType != null ) { mb.getField( varargsArrayField ); }
+
+		return numPushedArgs;
 	}
 
 	static	public	String	getParameterTypeName( JavaValueNode param )
@@ -1276,4 +1308,35 @@ abstract class MethodCallNode extends JavaValueNode
 
 		return returnNode;
 	}
+
+	/**
+	 * Get the type name of the method/constructor's final varargs argument if
+	 * the method/constructor has a varargs signature. Returns null if the
+	 * method/constructor does not have a varargs signature.
+	 *
+	 * @exception StandardException on error
+	 */
+	private String  getVarargsType() 
+    {
+        Class   varargsTypeClass = ClassInspector.getVarargsType( method );
+
+        if ( varargsTypeClass == null ) { return null; }
+        else { return varargsTypeClass.getName(); }
+    }
+
+	/**
+	 * Get the number of compiled ResultSets added to the end of the method
+	 * signature.
+	 */
+	protected int getCompiledResultSetCount()
+	{
+        Class   varargsType = ClassInspector.getVarargsType( method );
+
+        if ( (varargsType != null) && !ResultSet.class.equals( varargsType ) ) { return 0; }
+        
+        return methodParameterTypes.length - methodParms.length;		
+	}
+
 }
+
+

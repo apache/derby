@@ -892,7 +892,7 @@ public class StaticMethodCallNode extends MethodCallNode
 		// add in the ResultSet arrays.
 		if (routineInfo != null) {
 
-			int compiledResultSets = methodParameterTypes.length - methodParms.length;
+			int compiledResultSets = getCompiledResultSetCount();
 
 			if (compiledResultSets != 0) {
 
@@ -939,7 +939,7 @@ public class StaticMethodCallNode extends MethodCallNode
 				// complete the method that returns the ResultSet[][] to the 
 				gdr.methodReturn();
 				gdr.complete();
-
+                
 				nargs += compiledResultSets;
 			}
 
@@ -949,7 +949,6 @@ public class StaticMethodCallNode extends MethodCallNode
 
 		MethodBuilder mbnc = null;
 		MethodBuilder mbcm = mb;
-
 
 		// If any of the parameters are null then
 		// do not call the method, just return null.
@@ -1125,4 +1124,5 @@ public class StaticMethodCallNode extends MethodCallNode
 	{
 		return Authorizer.EXECUTE_PRIV;
 	}
+
 }
