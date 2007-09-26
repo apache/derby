@@ -290,7 +290,7 @@ public class TernaryOperatorNode extends ValueNode
 		{
 			mb.push(trimType);
 			leftOperand.generateExpression(acb, mb);
-			mb.upCast(leftInterfaceType);
+			mb.cast(leftInterfaceType);
 
 			mb.getField(field);
 			nargs = 3;
