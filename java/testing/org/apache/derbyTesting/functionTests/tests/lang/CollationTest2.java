@@ -2028,7 +2028,10 @@ public class CollationTest2 extends BaseJDBCTestCase
 
         runAlterTableCompress(conn, db_index);
 
-        runBulkInsert(conn, db_index);
+        // because of jvm issue described in DERBY-3055, do not
+        // test this with J2ME/JSR169.
+        if (JDBC.vmSupportsJDBC3())
+            runBulkInsert(conn, db_index);
 
         runLikeTests(conn, db_index);
 
