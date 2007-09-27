@@ -2911,7 +2911,8 @@ public class DataSourceTest extends BaseJDBCTestCase {
     {
         assertStringPrefix(conn);
         String str = conn.toString(); 
-        assertTrue(str.matches(CONNSTRING_FORMAT));
+        assertTrue("\nexpected format:\n " + CONNSTRING_FORMAT + "\nactual value:\n " + str,
+            str.matches(CONNSTRING_FORMAT));
     }
 
     /**
