@@ -76,19 +76,28 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 final class CacheEntry {
     /** Mutex which guards the internal state of the entry. */
     private final ReentrantLock mutex = new ReentrantLock();
+
     /**
      * The cached object. If it is null, it means that the entry is invalid
      * (either uninitialized or removed).
      */
     private Cacheable cacheable;
+
     /** How many threads are currently keeping this entry. */
     private int keepCount;
+
     /**
      * Condition variable used to notify a thread that it is allowed to remove
      * the entry from the cache. If it is null, there is no thread waiting for
      * the entry to be unkept.
      */
     private Condition forRemove;
+
+    /**
+     * Callback object used to notify the replacement algorithm about events on
+     * the cached objects (like accesses and requests for removal).
+     */
+    private ReplacementPolicy.Callback callback;
 
     /**
      * Block until the current thread is granted exclusive access to the entry.
@@ -116,6 +125,7 @@ final class CacheEntry {
             SanityManager.ASSERT(mutex.isHeldByCurrentThread());
         }
         keepCount++;
+        callback.access();
     }
 
     /**
@@ -203,5 +213,34 @@ final class CacheEntry {
      */
     boolean isValid() {
         return getCacheable() != null;
+    }
+
+    /**
+     * Set the callback object used to notify the replacement algorithm about
+     * actions performed on the cached object.
+     *
+     * @param cb the callback object
+     */
+    void setCallback(ReplacementPolicy.Callback cb) {
+        if (SanityManager.DEBUG) {
+            SanityManager.ASSERT(mutex.isHeldByCurrentThread());
+        }
+        callback = cb;
+    }
+
+    /**
+     * Clear this entry and notify the replacement algorithm that the
+     * <code>Cacheable</code> can be reused.
+     */
+    void free() {
+        if (SanityManager.DEBUG) {
+            SanityManager.ASSERT(mutex.isHeldByCurrentThread());
+        }
+        if (callback != null) {
+            // The entry was inserted into the ReplacementPolicy before
+            // removal. Now we need to mark it as free.
+            callback.free();
+        }
+        cacheable = null;
     }
 }

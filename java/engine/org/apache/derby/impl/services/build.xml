@@ -56,6 +56,7 @@
       <exclude name="${derby.dir}/impl/services/locks/Concurrent*.java"/>
       <exclude name="${derby.dir}/impl/services/cache/Concurrent*.java"/>
       <exclude name="${derby.dir}/impl/services/cache/CacheEntry.java"/>
+      <exclude name="${derby.dir}/impl/services/cache/*Policy.java"/>
     </javac>
  </target>
  
@@ -83,6 +84,7 @@
      <include name="${derby.dir}/impl/services/locks/Concurrent*.java"/>
      <include name="${derby.dir}/impl/services/cache/Concurrent*.java"/>
      <include name="${derby.dir}/impl/services/cache/CacheEntry.java"/>
+     <include name="${derby.dir}/impl/services/cache/*Policy.java"/>
    </javac>
  </target>
 

@@ -57,6 +57,8 @@ final class ConcurrentCache implements CacheManager {
     private final CacheableFactory holderFactory;
     /** Name of this cache. */
     private final String name;
+    /** Replacement policy to be used for this cache. */
+    private final ReplacementPolicy replacementPolicy;
 
     /**
      * Flag that indicates whether this cache instance has been shut down. When
@@ -72,9 +74,11 @@ final class ConcurrentCache implements CacheManager {
      *
      * @param holderFactory factory which creates <code>Cacheable</code>s
      * @param name the name of the cache
+     * @param maxSize maximum number of elements in the cache
      */
-    ConcurrentCache(CacheableFactory holderFactory, String name) {
+    ConcurrentCache(CacheableFactory holderFactory, String name, int maxSize) {
         cache = new ConcurrentHashMap<Object, CacheEntry>();
+        replacementPolicy = new ClockPolicy(this, maxSize);
         this.holderFactory = holderFactory;
         this.name = name;
     }
@@ -130,17 +134,20 @@ final class ConcurrentCache implements CacheManager {
      * locked by the current thread.
      *
      * @param entry the entry for which a <code>Cacheable</code> is needed
+     * @exception StandardException if an error occurs during the search for
+     * a free cacheable
      */
-    private void findFreeCacheable(CacheEntry entry) {
-        // TODO - When the replacement algorithm has been implemented, we
-        // should reuse a cacheable if possible.
-        entry.setCacheable(holderFactory.newCacheable(this));
+    private void findFreeCacheable(CacheEntry entry) throws StandardException {
+        replacementPolicy.insertEntry(entry);
+        if (!entry.isValid()) {
+            entry.setCacheable(holderFactory.newCacheable(this));
+        }
     }
 
     /**
      * Remove an entry from the cache. Its <code>Cacheable</code> is cleared
      * and made available for other entries. This method should only be called
-     * if the entry is locked by the current thread.
+     * if the entry is present in the cache and locked by the current thread.
      *
      * @param key the identity of the entry to remove
      */
@@ -150,11 +157,24 @@ final class ConcurrentCache implements CacheManager {
         if (c != null && c.getIdentity() != null) {
             // The cacheable should not have an identity when it has been
             // removed.
-            entry.getCacheable().clearIdentity();
+            c.clearIdentity();
         }
+        entry.free();
+    }
+
+    /**
+     * Remove an entry from the cache. Clear the identity of its
+     * <code>Cacheable</code> and set it to null. This method is called when
+     * the replacement algorithm needs to evict an entry from the cache in
+     * order to make room for a new entry. The caller must have locked the
+     * entry that is about to be evicted.
+     *
+     * @param key identity of the entry to remove
+     */
+    void evictEntry(Object key) {
+        CacheEntry entry = cache.remove(key);
+        entry.getCacheable().clearIdentity();
         entry.setCacheable(null);
-        // TODO - When replacement policy is implemented, return the
-        // cacheable to the free list
     }
 
     /**
