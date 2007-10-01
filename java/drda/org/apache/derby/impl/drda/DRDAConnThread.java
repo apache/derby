@@ -4527,6 +4527,10 @@ class DRDAConnThread extends Thread {
 		for (int i = 0; i < numExt; i++)
 					{
 						int paramPos = stmt.getExtPosition(i);
+						// Only the last EXTDTA is streamed.  This is because all of 
+						// the parameters have to be set before execution and are 
+						// consecutive in the network server stream, so only the last
+						// one can be streamed.
 						final boolean doStreamLOB = (streamLOB && i == numExt -1);
 						readAndSetExtParam(paramPos,
 										   stmt,
@@ -4580,12 +4584,13 @@ class DRDAConnThread extends Thread {
 							paramBytes = null;
 							final EXTDTAReaderInputStream stream = 
 								reader.getEXTDTAReaderInputStream(checkNullability);
-                            
+                            // Save the streamed parameter so we can drain it if it does not get used
+                            // by embedded when the statement is executed. DERBY-3085
+                            stmt.setStreamedParameter(stream);
                             if( stream instanceof StandardEXTDTAReaderInputStream ){
                                 
                                 final StandardEXTDTAReaderInputStream stdeis = 
                                     (StandardEXTDTAReaderInputStream) stream ;
-
                                 ps.setBinaryStream( i + 1, 
                                                     stdeis, 
                                                     (int) stdeis.getLength() );
@@ -4643,7 +4648,7 @@ class DRDAConnThread extends Thread {
 					case DRDAConstants.DRDA_TYPE_LOBCSBCS:
 					case DRDAConstants.DRDA_TYPE_NLOBCSBCS:
                         
-                        setAsCharacterStream(ps,
+                        setAsCharacterStream(stmt,
                                              i,
                                              checkNullability,
                                              reader,
@@ -4654,7 +4659,7 @@ class DRDAConnThread extends Thread {
 					case DRDAConstants.DRDA_TYPE_LOBCDBCS:
 					case DRDAConstants.DRDA_TYPE_NLOBCDBCS:
                         
-                        setAsCharacterStream(ps,
+                        setAsCharacterStream(stmt,
                                              i,
                                              checkNullability,
                                              reader,
@@ -4665,7 +4670,7 @@ class DRDAConnThread extends Thread {
 					case DRDAConstants.DRDA_TYPE_LOBCMIXED:
 					case DRDAConstants.DRDA_TYPE_NLOBCMIXED:
 
-                        setAsCharacterStream(ps,
+                        setAsCharacterStream(stmt,
                                              i,
                                              checkNullability,
                                              reader,
@@ -8259,7 +8264,7 @@ class DRDAConnThread extends Thread {
         
     }
     
-    private static void setAsCharacterStream(PreparedStatement ps,
+    private static void setAsCharacterStream(DRDAStatement stmt,
                                              int i,
                                              boolean checkNullability,
                                              DDMReader reader,
@@ -8268,12 +8273,16 @@ class DRDAConnThread extends Thread {
         throws DRDAProtocolException ,
                SQLException ,
                IOException {
-        
+        PreparedStatement ps = stmt.getPreparedStatement();
         EnginePreparedStatement engnps = 
             ( EnginePreparedStatement ) ps;
         
         final EXTDTAReaderInputStream extdtastream = 
             reader.getEXTDTAReaderInputStream(checkNullability);
+        // DERBY-3085. Save the stream so it can be drained later
+        // if not  used.
+        if (streamLOB)
+            stmt.setStreamedParameter(extdtastream);
         
         final InputStream is = 
             streamLOB ?

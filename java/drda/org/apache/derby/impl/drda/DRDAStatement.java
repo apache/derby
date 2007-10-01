@@ -21,6 +21,7 @@
 
 package org.apache.derby.impl.drda;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -108,6 +109,12 @@ class DRDAStatement
 	 * of Integer/Byte in order to re-use the same storage each time
 	 * the statement is executed. */
 	private static class DrdaParamState {
+		// The last parameter may be streamed. 
+		// We need to keep a record of it so we can drain it if it is not 
+		// used.
+		// Only the last parameter with an EXTDTA will be streamed. 
+		//(See DRDAConnThread.readAndSetAllExtParams()). 
+		private EXTDTAReaderInputStream streamedParameter = null;
 		private int typeLstEnd_ = 0;
 		private byte[] typeLst_ = new byte[10];
 		private int[]  lenLst_ = new int[10];
@@ -132,6 +139,7 @@ class DRDAStatement
 		 * @param trim - if true; release excess storage
 		 */
 		protected void clear(boolean trim) {
+			streamedParameter = null;
 			typeLstEnd_ = 0;
 			extLstEnd_ = 0;
 			if (trim && typeLst_.length > 10) {
@@ -223,6 +231,33 @@ class DRDAStatement
 		 * of the ith external parameter (zero-based)
 		 */
 		protected int getExtPos(int i) { return extLst_[i]; }
+        
+		/**
+		 * Read the rest of the streamed parameter if not consumed
+		 * by the executing statement.  DERBY-3085
+		 * @throws IOException
+		 */
+		protected void drainStreamedParameter() throws IOException
+		{
+			if (streamedParameter != null)
+			{   
+				// we drain the buffer 1000 bytes at a time.
+				// 1000 is just a random selection that doesn't take
+				// too much memory. Perhaps something else would be 
+				// more efficient?
+				byte[] buffer = new byte[1000];
+				int i;
+				do {
+					i= streamedParameter.read(buffer,0,1000);
+				}  while (i != -1);
+			}
+		}
+            
+
+		public void setStreamedParameter(EXTDTAReaderInputStream eis) {
+			streamedParameter = eis;    
+		}
+		
 	}
 	private DrdaParamState drdaParamState_ = new DrdaParamState();
 
@@ -664,7 +699,16 @@ class DRDAStatement
 	protected boolean execute() throws SQLException
 	{
 		boolean hasResultSet = ps.execute();
-
+		// DERBY-3085 - We need to make sure we drain the streamed parameter
+		// if not used by the server, for example if an update statement does not 
+		// update any rows, the parameter won't be used.  Network Server will
+		// stream only the last parameter with an EXTDTA. This is stored when the
+		// parameter is set and drained now after statement execution if needed.
+		try {
+			drdaParamState_.drainStreamedParameter();
+		} catch (IOException e) { 
+			Util.javaException(e);
+		}
 		// java.sql.Statement says any result sets that are opened
 		// when the statement is re-executed must be closed; this
 		// is handled by the call to "ps.execute()" above--but we
@@ -1260,6 +1304,11 @@ class DRDAStatement
 		drdaParamState_.addDrdaParam(t, l);
 	}
 
+    protected void setStreamedParameter(EXTDTAReaderInputStream eis)
+    {
+        drdaParamState_.setStreamedParameter(eis);
+    }
+    
 	/**
 	 * get parameter DRDAType
 	 *
