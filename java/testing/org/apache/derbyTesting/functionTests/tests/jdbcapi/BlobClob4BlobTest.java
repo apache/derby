@@ -20,6 +20,7 @@
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
 import java.io.ByteArrayInputStream;
+import java.io.CharArrayReader;
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
@@ -85,6 +86,101 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
     }
 
     /***                TESTS               ***/
+
+    /**
+     * DERBY-3085.  Test update where streamed parameter is not 
+     * consumed by the server. Network Server needs to clean-up 
+     * after execution.
+     * 
+     */
+    public void testUnconsumedParameter() throws SQLException
+    {
+        Connection conn = getConnection();
+        conn.setAutoCommit(false);
+        Statement s = conn.createStatement();
+        // Test table with no rows.
+        s.executeUpdate("create table testing(num int, addr varchar(40), contents blob(16M))");
+        // no rows inserted so there is no match.
+        byte[] data = new byte[ 38000];
+        for (int i = 0; i < data.length; i++)
+            data[i] = 'a';
+        ByteArrayInputStream is = new ByteArrayInputStream( data);           
+        String sql = "UPDATE testing SET Contents=? WHERE num=1";
+        
+        PreparedStatement ps = prepareStatement( sql);
+        ps.setBinaryStream( 1, is,data.length);
+        ps.executeUpdate();          
+        // Make sure things still work ok when we have a parameter that does get consumed.
+        // insert a matching row.
+        s.executeUpdate("insert into testing values (1,null,null)");
+        is = new ByteArrayInputStream(data);
+        ps.setBinaryStream( 1, is,data.length);
+        ps.executeUpdate();
+        // Check update occurred
+        ResultSet rs = s.executeQuery("select length(contents) from testing where num = 1");
+        JDBC.assertSingleValueResultSet(rs, "38000");
+        ps.close();
+        conn.commit();
+        // Check the case where there are rows inserted but there is no match.
+        is = new ByteArrayInputStream( data);           
+        sql = "UPDATE testing SET Contents=? WHERE num=2";
+        ps = prepareStatement( sql);
+        ps.setBinaryStream( 1, is,data.length);
+        ps.executeUpdate();
+        ps.close();
+        s.executeUpdate("drop table testing");
+        conn.commit();
+        
+        // Test with multiple parameters
+        s.executeUpdate("create table testing(num int, addr varchar(40), contents blob(16M),contents2 blob(16M))");
+        
+        is = new ByteArrayInputStream( data);
+        ByteArrayInputStream is2 = new ByteArrayInputStream(data);
+        sql = "UPDATE testing SET Contents=?, contents2=?  WHERE num=1";
+
+        ps = prepareStatement( sql);
+        ps.setBinaryStream( 1, is,data.length);
+        ps.setBinaryStream(2, is2,data.length);
+        ps.executeUpdate();
+        
+        
+        // multiple parameters and matching row
+        s.executeUpdate("insert into testing values (1,'addr',NULL,NULL)");
+        is = new ByteArrayInputStream( data);
+        is2 = new ByteArrayInputStream(data);
+        ps.setBinaryStream( 1, is,data.length);
+        ps.setBinaryStream(2, is2,data.length);
+        ps.executeUpdate();
+        rs = s.executeQuery("select length(contents), length(contents2) from testing where num = 1");
+        JDBC.assertFullResultSet(rs, new String[][] {{"38000","38000"}});
+        rs.close();
+        s.executeUpdate("drop table testing");
+        
+        // With Clob
+        s.executeUpdate("create table testing(num int, addr varchar(40), contents Clob(16M))");
+        char[] charData = new char[ 38000];
+        for (int i = 0; i < data.length; i++)
+       data[i] = 'a';
+        CharArrayReader reader = new CharArrayReader( charData);            
+        sql = "UPDATE testing SET Contents=? WHERE num=1";
+
+       ps = prepareStatement( sql);
+       ps.setCharacterStream( 1, reader,charData.length);
+       ps.executeUpdate();
+       // with a matching row
+       s.executeUpdate("insert into testing values (1,null,null)");
+       reader = new CharArrayReader(charData);
+       ps.setCharacterStream( 1, reader,data.length);
+       ps.executeUpdate();
+       // Check update occurred
+       rs = s.executeQuery("select length(contents) from testing where num = 1");
+       JDBC.assertSingleValueResultSet(rs, "38000");
+       s.executeUpdate("drop table testing");
+       ps.close();
+       
+       conn.commit();
+        
+    }
 
     /**
      * Tests PreparedStatement.setCharacterStream
@@ -3189,6 +3285,7 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         s.execute("drop table blobCheck");
     }
 
+     
     private void checkException(String SQLState, SQLException se)
             throws Exception
     {
