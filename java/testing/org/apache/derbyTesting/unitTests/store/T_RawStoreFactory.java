@@ -5062,7 +5062,6 @@ public class T_RawStoreFactory extends T_MultiThreadedIterations {
 
 		ContainerHandle c = t_util.t_openContainer(t, segment, cid, true);
 		Page page = t_util.t_getPage(c, ContainerHandle.FIRST_PAGE_NUMBER);
-		int insertFlag = Page.INSERT_INITIAL | Page.INSERT_OVERFLOW;
 
 		try
 		{
@@ -5190,7 +5189,7 @@ public class T_RawStoreFactory extends T_MultiThreadedIterations {
 		}
 		finally	
 		{
-			if (page != null)
+			if (page != null && page.isLatched())
 				page.unlatch();
 			t_util.t_commit(t);
 			t.close();
