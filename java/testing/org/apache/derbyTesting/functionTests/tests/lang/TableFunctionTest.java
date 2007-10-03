@@ -24,6 +24,7 @@ package org.apache.derbyTesting.functionTests.tests.lang;
 import java.lang.reflect.*;
 import java.io.*;
 import java.sql.*;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 
 import org.apache.derby.shared.common.reference.JDBC40Translation;
@@ -1650,11 +1651,14 @@ public class TableFunctionTest extends BaseJDBCTestCase
 
             if ( idx < 0 ) { continue; }
 
-            String  remnant = line.substring( idx + tag.length() );
-            double  result = Double.parseDouble( remnant );
+            String remnant = line.substring(idx + tag.length()).trim();
+
+            // Use NumberFormat.parse() instead of Double.parseDouble() to
+            // avoid localization issues (DERBY-3100)
+            Number result = NumberFormat.getInstance().parse(remnant);
             
             println( "Read " + result + " from optimizer output." );
-            return result;
+            return result.doubleValue();
         }
 
         return 0.0;
