@@ -271,5 +271,14 @@ public class MasterController implements MasterFactory, ModuleControl,
     public void flushedTo(long instant) {
         // logShipper.flushedTo(instant); 
     }
-
+    
+    /**
+     * Used by the log shipper to inform the master controller about the 
+     * exception condition that caused it to terminate unexpectedly.
+     *
+     * @param exception the exception which caused the log shipper to terminate
+     *                  in an unexcepted manner.
+     */
+    void handleExceptions(Exception exception) {
+    }
 }
