@@ -1026,7 +1026,7 @@
     </antcall>
 
     <mkdir dir="${derby.jar.dir}/lists/org/apache/derby"/>
-    <java classname="org.apache.derbyBuild.propertyconfig">
+    <java classname="org.apache.derbyBuild.propertyconfig" fork="yes">
       <arg value="${out.dir}/org/apache/derby/modules.properties"/>
       <arg value="derby"/>
       <arg value="${derby.jar.dir}/lists/org/apache/derby/modules.properties"/>
