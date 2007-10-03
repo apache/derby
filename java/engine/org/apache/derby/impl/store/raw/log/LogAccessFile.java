@@ -346,7 +346,7 @@ public class LogAccessFile
      * @param optional_data_offset offset in "optional_data" to start copy from
      * @param optional_data_length length of optional data to copy.
      *
-     * @see writeLogRecord
+     * @see #writeLogRecord
      */
     private int appendLogRecordToBuffer(byte[] buff, int pos,
                                         int length,
