@@ -1,6 +1,6 @@
 /*
  
-   Derby - Class org.apache.derbyTesting.functionTests.tests.lang.ExistsWithSetOpsTest
+   Derby - Class org.apache.derbyTesting.functionTests.tests.lang.ExistsWithSubqueriesTest
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -31,9 +31,12 @@ import org.apache.derbyTesting.junit.TestConfiguration;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.PreparedStatement;
 
 /**
- * This test ensures that an EXISTS predicate which wraps a set operation--
+ * This test contains a variety of cases of EXISTS predicates with subqueries.
+ *
+ * Several tests ensure that an EXISTS predicate which wraps a set operation--
  * meaning a UNION, INTERSECT, or EXCEPT node--returns the correct results.
  * For example:
  *
@@ -41,8 +44,14 @@ import java.sql.Statement;
  *     where exists ((values 1) intersect (values 2))
  *
  * should return zero rows. Prompted by DERBY-2370.
+ *
+ * A somewhat unrelated test verifies the DERBY-3033 behavior, which
+ * involves flattening of subqueries with NOT EXISTS predicates. The
+ * issue here is that a flattened NOT EXISTS subquery cannot be used
+ * to perform equi-join transitive closure, because the implied predicate
+ * that results from the flattening is a NOT EQUALS condition.
  */
-public class ExistsWithSetOpsTest extends BaseJDBCTestCase {
+public class ExistsWithSubqueriesTest extends BaseJDBCTestCase {
     
     private static final String EXISTS_PREFIX_1 =
         "select * from ( values 'GOT_A_ROW' ) as T where exists (";
@@ -55,7 +64,7 @@ public class ExistsWithSetOpsTest extends BaseJDBCTestCase {
      * @param name name of the test.
      *
      */
-    public ExistsWithSetOpsTest(String name)
+    public ExistsWithSubqueriesTest(String name)
     {
         super(name);
     }
@@ -72,7 +81,7 @@ public class ExistsWithSetOpsTest extends BaseJDBCTestCase {
          * to run the test against one or the other; we choose embedded.
          */
         suite.addTest(
-            TestConfiguration.embeddedSuite(ExistsWithSetOpsTest.class));
+            TestConfiguration.embeddedSuite(ExistsWithSubqueriesTest.class));
 
         /* Wrap the suite in a CleanDatabaseTestSetup that will create
          * and populate the test tables.
@@ -382,4 +391,153 @@ public class ExistsWithSetOpsTest extends BaseJDBCTestCase {
             JDBC.assertFullResultSet(rs, expRS);
         rs.close();
     }
+
+    /**
+     * Regression test for Derby-3033.
+     *
+     * This method constructs a query with the property that it:
+     * - contains a NOT EXISTS condition against a correlated subquery
+     * - such that if that subquery is flattened, the result is 3 tables
+     *   which all have join predicates on the same key.
+     * The point of the test is that it is *not* correct to construct
+     * a new equijoin predicate between table d3033_a and d3033_c via
+     * transitive closure, because the join condition between d3033_b and
+     * d3033_c is NOT EXISTS.
+     *
+     * In the original bug, the compiler/optimizer erroneously generated
+     * the extra equijoin predicate, which caused NPE exceptions at
+     * runtime due to attempts to reference the non-existent (NOT EXISTS) row.
+     *
+     * So this test succeeds if it gets the right results and no NPE.
+     */
+    public void testDerby3033()
+        throws Exception
+    {
+        setupDerby3033();
+
+        PreparedStatement pstmt = prepareStatement(
+            "select c1, c2_b " +
+            "from (select distinct st.c1,st.c2_b,dsr.c3_a,st.c3_b " +
+            "      from " +
+            "             d3033_a dsr, " +  // Table order matters here!
+            "             d3033_b st " +
+            "      where dsr.c4_a is null " +
+            "      and   dsr.c2 = ? " +
+            "      and   dsr.c1 = st.c1 " +
+            "      and   not exists ( " +
+            "              select 1 " +
+            "              from d3033_c " +
+            "              where d3033_c.c1 = st.c1 " +
+            "              and   d3033_c.c2 = ? " +
+            "              and   d3033_c.c3_c = ? " +
+            "              ) " +
+            ") temp "
+        );
+ 
+        pstmt.setInt(1, 4);
+        pstmt.setInt(2, 4);
+        pstmt.setInt(3, 100);
+ 
+        String [][]expected = {
+            { "1", "100" },
+            { "2", "200" },
+            { "3", "300" },
+        };
+        ResultSet rs = pstmt.executeQuery();
+        JDBC.assertFullResultSet(rs, expected);
+        pstmt.close();
+    }
+
+    /**
+     * Ensure that the #rows statistics are updated
+     */
+    private void updateStats(Statement st, String tName)
+        throws Exception
+    {
+        ResultSet rs = st.executeQuery("select * from " + tName);
+        int numRows = 0;
+        while (rs.next())
+            numRows ++;
+        rs.close();
+    }
+
+    private void setupDerby3033()
+        throws Exception
+    {
+        // The pattern of inserting the data is fairly important, as we
+        // are going to do a combination of joins between the three tables
+        // and we want both matching data and non-matching data. We load:
+        //
+        // d3033_a      d3033_b       d3033_c
+        // --------     --------      --------
+        //    1            1             1
+        //    2            2             3
+        //    3            3
+        //                 4
+        //
+        // We also load a whole pile of irrelevant data into tables a and c
+        // so that the index becomes relevant in the optimizer's analysis,
+        // then we create some constraints and indexes and delete the rows
+        // from table d3033_c (the NOT EXISTS table).
+        //
+        Statement s = createStatement();
+
+        s.executeUpdate("create table d3033_a "+
+                        "(c1 int, c2 int, c3_a int, c4_a date)");
+        s.executeUpdate("create table d3033_b "+
+                        "(c1 int primary key not null, c2_b int, c3_b date)");
+        s.executeUpdate("create table d3033_c (c1 int, c2 int, c3_c int)");
+        s.executeUpdate("insert into d3033_a (c1,c2,c3_a) values(1, 4, 10)");
+        s.executeUpdate("insert into d3033_a (c1,c2,c3_a) values(2, 4, 20)");
+        s.executeUpdate("insert into d3033_a (c1,c2,c3_a) values(3, 4, 30)");
+        s.executeUpdate("insert into d3033_b values(1, 100, CURRENT_DATE)");
+        s.executeUpdate("insert into d3033_b values(2, 200, CURRENT_DATE)");
+        s.executeUpdate("insert into d3033_b values(3, 300, CURRENT_DATE)");
+        s.executeUpdate("insert into d3033_b values(4, 400, CURRENT_DATE)");
+        s.executeUpdate("insert into d3033_c values(1, 4, 100)");
+        s.executeUpdate("insert into d3033_c values(3, 4, 100)");
+            
+        PreparedStatement pstmt2 = prepareStatement(
+                "insert into d3033_a (c1, c2, c3_a) values (?,?,?)");
+
+        PreparedStatement pstmt = prepareStatement(
+                "insert into d3033_b (c1, c2_b, c3_b) values (?,?,?)");
+
+        java.util.Date now = new java.util.Date();
+        java.sql.Timestamp nowTS = new java.sql.Timestamp(now.getTime());
+        for (int i = 0; i < 15; i++)
+        {
+            pstmt.setInt(1, 100+i);
+            pstmt.setInt(2, 100+i);
+            pstmt.setTimestamp(3, nowTS);
+            pstmt.executeUpdate();
+
+            for (int j = 0; j < 200; j++)
+            {
+                pstmt2.setInt(1, 1000+j);
+                pstmt2.setInt(2, 100+i); // note "i" here (FK)
+                pstmt2.setInt(3, 1000 + (j+1)*10);
+                pstmt2.executeUpdate();
+            }
+        }
+
+
+        s.executeUpdate("alter table d3033_a add constraint " +
+                "d3033_a_fk foreign key (c2) references d3033_b(c1) " +
+                "on delete cascade on update no action");
+
+        s.executeUpdate("alter table d3033_c add constraint " +
+                "d3033_c_fk foreign key (c1) references d3033_b(c1) " +
+                "on delete cascade on update no action");
+
+        s.executeUpdate("delete from d3033_c");
+
+        // Update the statistics on the 3 tables:
+        updateStats(s, "d3033_a");
+        updateStats(s, "d3033_b");
+        updateStats(s, "d3033_c");
+
+        s.close();
+    }
+
 }

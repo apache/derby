@@ -1549,6 +1549,42 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 	}
 
 	/**
+	 * determine whether this table is NOT EXISTS.
+	 *
+	 * This routine searches for the indicated table number in the fromlist
+	 * and returns TRUE if the table is present in the from list and is 
+	 * marked NOT EXISTS, false otherwise.
+	 *
+	 * A table may be present in the from list for NOT EXISTS if it is used
+	 * as a correlated NOT EXISTS subquery. In such a situation, when the
+	 * subquery is flattened, it is important that we remember that this is
+	 * a NOT EXISTS subquery, because the join semantics are different 
+	 * (we're looking for rows that do NOT match, rather than rows
+	 * that do). And since the join semantics are different, we cannot
+	 * include this table into a transitive closure of equijoins
+	 * (See DERBY-3033 for a situation where this occurs).
+	 *
+	 * @param tableNumber	which table to check
+	 * @return true if this table is in the from list as NOT EXISTS
+	 */
+	boolean tableNumberIsNotExists(int tableNumber)
+		throws StandardException
+	{
+		int size = size();
+		for (int index = 0; index < size; index++)
+		{
+			ProjectRestrictNode prn = (ProjectRestrictNode) elementAt(index);
+			if (! (prn.getChildResult() instanceof FromTable))
+			{
+				continue;
+			}
+			FromTable ft = (FromTable) prn.getChildResult();
+			if (ft.getTableNumber() == tableNumber)
+				return ft.isNotExists();
+		}
+		return false;
+	}
+	/**
 	 * Get the lock mode for the target of an update statement
 	 * (a delete or update).  The update mode will always be row for
 	 * CurrentOfNodes.  It will be table if there is no where clause.
