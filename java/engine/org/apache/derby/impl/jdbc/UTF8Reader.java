@@ -34,31 +34,89 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.types.Resetable;
 
 /**
-*/
+ * Class for reading characters from streams encoded in the modified UTF-8
+ * format.
+ * <p>
+ * Note that we often operate on a special Derby stream.
+ * A Derby stream is possibly different from a "normal" stream in two ways;
+ * an encoded length is inserted at the head of the stream, and if the encoded
+ * length is <code>0</code> a Derby-specific end of stream marker is appended
+ * to the data.
+ * <p>
+ * If the underlying stream is capable of repositioning itself on request,
+ * this class supports multiple readers on the same source stream in such a way
+ * that the various readers do not interfere with each other (except for
+ * serializing access). Each reader instance will have its own pointer into the
+ * stream, and request that the stream repositions itself before calling
+ * read/skip on the stream.
+ *
+ * @see PositionedStoreStream
+ */
 public final class UTF8Reader extends Reader
 {
     private static final String READER_CLOSED = "Reader closed";
 
+    /** The underlying data stream. */
     private InputStream in;
-    /** Stream store that can reposition itself on request. */
+    /** Store stream that can reposition itself on request. */
     private final PositionedStoreStream positionedIn;
     /** Store last visited position in the store stream. */
     private long rawStreamPos = 0L;
+    /**
+     * The expected number of bytes in the stream, if known.
+     * <p>
+     * A value of <code>0<code> means the length is unknown, and that the end
+     * of the stream is marked with a Derby-specific end of stream marker.
+     */
     private final long utfLen;          // bytes
+    /** Number of bytes read from the stream. */
     private long       utfCount;        // bytes
+    /** Number of characters read from the stream. */
     private long       readerCharCount; // characters
+    /** 
+     * The maximum number of characters allowed for the column
+     * represented by the passed stream.
+     * <p>
+     * A value of <code>0</code> means there is no associated maximum length.
+     */
     private final long maxFieldSize;    // characters
 
-    private char[]         buffer = new char[8 * 1024];
+    /** Internal character buffer storing characters read from the stream. */
+    private final char[]   buffer = new char[8 * 1024];
+    /** The number of characters in the internal buffer. */
     private int            charactersInBuffer; // within buffer
+    /** The position of the next character to read in the internal buffer. */
     private int            readPositionInBuffer;
 
+    /** Tells if this reader has been closed. */
     private boolean noMoreReads;
 
-    // maintain a reference to the parent object so that it can't get
-    // garbage collected until we are done with the stream.
+    /** 
+     * A reference to the parent object of the stream.
+     * <p>
+     * The reference is kept so that the parent object can't get
+     * garbage collected until we are done with the stream.
+     */
     private ConnectionChild parent;
 
+    /**
+     * Constructs a reader and consumes the encoded length bytes from the
+     * stream.
+     * <p>
+     * The encoded length bytes either state the number of bytes in the stream,
+     * or it is <code>0</code> which informs us the length is unknown or could
+     * not be represented and that we have to look for the Derby-specific
+     * end of stream marker.
+     * 
+     * @param in the underlying stream
+     * @param maxFieldSize the maximum allowed column length in characters
+     * @param parent the parent object / connection child
+     * @param synchronization synchronization object used when accessing the
+     *      underlying data stream
+     * 
+     * @throws IOException if reading from the underlying stream fails
+     * @throws SQLException if setting up or restoring the context stack fails
+     */
     public UTF8Reader(
         InputStream in,
         long maxFieldSize,
@@ -96,7 +154,7 @@ public final class UTF8Reader extends Reader
                 this.utfLen = readUnsignedShort();
                 // Even if we are reading the encoded length, the stream may
                 // not be a positioned stream. This is currently true when a
-                // stream is passed in after a ResetSet.getXXXStream method.
+                // stream is passed in after a ResultSet.getXXXStream method.
                 if (this.positionedIn != null) {
                     this.rawStreamPos = this.positionedIn.getPosition();
                 }
@@ -123,8 +181,7 @@ public final class UTF8Reader extends Reader
             long maxFieldSize,
             long streamSize,
             ConnectionChild parent,
-            Object synchronization)
-                throws IOException {
+            Object synchronization) {
         super(synchronization);
         this.maxFieldSize = maxFieldSize;
         this.parent = parent;
@@ -142,8 +199,16 @@ public final class UTF8Reader extends Reader
     }
 
     /*
-    ** Reader implemention.
-    */
+     * Reader implemention.
+     */
+
+    /**
+     * Reads a single character from the stream.
+     * 
+     * @return A character or <code>-1</code> if end of stream has been reached.
+     * @throws IOException if the stream has been closed, or an exception is
+     *      raised while reading from the underlying stream
+     */
     public int read() throws IOException
     {
         synchronized (lock) {
@@ -163,6 +228,12 @@ public final class UTF8Reader extends Reader
         }
     }
 
+    /**
+     * Reads characters into an array.
+     * 
+     * @return The number of characters read, or <code>-1</code> if the end of
+     *      the stream has been reached.
+     */ 
     public int read(char[] cbuf, int off, int len) throws IOException
     {
         synchronized (lock) {
@@ -189,6 +260,15 @@ public final class UTF8Reader extends Reader
         }
     }
 
+    /**
+     * Skips characters.
+     * 
+     * @param len the numbers of characters to skip
+     * @return The number of characters actually skipped.
+     * @throws IllegalArgumentException if the number of characters to skip is
+     *      negative
+     * @throws IOException if accessing the underlying stream fails
+     */
     public long skip(long len) throws IOException {
         if (len < 0) {
             throw new IllegalArgumentException(
@@ -219,18 +299,35 @@ public final class UTF8Reader extends Reader
 
     }
 
+    /**
+     * Close the reader, disallowing further reads.
+     */
     public void close()
     {
         synchronized (lock) {
             closeIn();
-            parent  = null;
+            parent = null;
             noMoreReads = true;
         }
     }
 
     /*
-    ** Methods just for Derby's JDBC driver
-    */
+     * Methods just for Derby's JDBC driver
+     */
+
+    /**
+     * Reads characters from the stream.
+     * <p>
+     * Due to internal buffering a smaller number of characters than what is
+     * requested might be returned. To ensure that the request is fulfilled,
+     * call this method in a loop until the requested number of characters is
+     * read or <code>-1</code> is returned.
+     * 
+     * @param sb the destination buffer
+     * @param len maximum number of characters to read
+     * @return The number of characters read, or <code>-1</code> if the end of
+     *      the stream is reached.
+     */
     public int readInto(StringBuffer sb, int len) throws IOException {
 
         synchronized (lock) {
@@ -253,6 +350,23 @@ public final class UTF8Reader extends Reader
         }
     }
 
+    /**
+     * Reads characters into an array as ASCII characters.
+     * <p>
+     * Due to internal buffering a smaller number of characters than what is
+     * requested might be returned. To ensure that the request is fulfilled,
+     * call this method in a loop until the requested number of characters is
+     * read or <code>-1</code> is returned.
+     * <p>
+     * Characters outside the ASCII range are replaced with an out of range
+     * marker.
+     * 
+     * @param abuf the buffer to read into
+     * @param off the offset into the destination buffer
+     * @param len maximum number of characters to read
+     * @return The number of characters read, or <code>-1</code> if the end of
+     *      the stream is reached.
+     */
     int readAsciiInto(byte[] abuf, int off, int len) throws IOException {
 
         synchronized (lock) {
@@ -287,20 +401,29 @@ public final class UTF8Reader extends Reader
     }
 
     /*
-    ** internal implementation
-    */
+     * internal implementation
+     */
 
+    /**
+     * Close the underlying stream if it is open.
+     */
     private void closeIn() {
         if (in != null) {
             try {
                 in.close();
             } catch (IOException ioe) {
+                // Ignore exceptions thrown on close.
+                // [TODO] Maybe we should log these?
             } finally {
                 in = null;
             }
         }
     }
 
+    /**
+     * Convenience method generating an {@link UTFDataFormatException} and
+     * cleaning up the reader state.
+     */
     private IOException utfFormatException(String s) {
         noMoreReads = true;
         closeIn();
@@ -308,8 +431,11 @@ public final class UTF8Reader extends Reader
     }
 
     /**
-        Fill the buffer, return true if eof has been reached.
-    */
+     * Fills the internal character buffer by decoding bytes from the stream.
+     * 
+     * @return <code>true</code> if the end of the stream is reached,
+     *      <code>false</code> if there is apparently more data to be read.
+     */
     //@GuardedBy("lock")
     private boolean fillBuffer() throws IOException
     {
@@ -448,7 +574,15 @@ readChars:
         }
     }
 
-    // this method came from java.io.DataInputStream
+    /**
+     * Decode the length encoded in the stream.
+     * 
+     * This method came from {@link java.io.DataInputStream}
+     * 
+     * @return The number of bytes in the stream, or <code>0</code> if the
+     *      length is unknown and the end of stream must be marked by the
+     *      Derby-specific end of stream marker.
+     */
     private final int readUnsignedShort() throws IOException {
         int ch1 = in.read();
         int ch2 = in.read();
