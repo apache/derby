@@ -21,9 +21,12 @@
 
 package org.apache.derby.ui.popup.actions;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.derby.ui.common.CommonNames;
 import org.apache.derby.ui.common.Messages;
-import org.apache.derby.ui.util.DerbyUtils;
+import org.apache.derby.ui.container.DerbyClasspathContainer;
 import org.apache.derby.ui.util.Logger;
 import org.apache.derby.ui.util.SelectionUtil;
 import org.eclipse.core.resources.IProject;
@@ -113,9 +116,16 @@ public class AddDerbyNature implements IObjectActionDelegate
             IClasspathEntry[] rawClasspath = currentJavaProject
                     .getRawClasspath();
 
-            currentJavaProject.setRawClasspath(DerbyUtils
-                    .addDerbyJars(rawClasspath), null);
-
+            List<IClasspathEntry> newEntries = new ArrayList<IClasspathEntry>(rawClasspath.length+1);            
+            for(IClasspathEntry e: rawClasspath) {
+            	newEntries.add(e);
+            }            
+            newEntries.add(JavaCore.newContainerEntry(DerbyClasspathContainer.CONTAINER_ID));
+            
+            IClasspathEntry[] newEntriesArray = new IClasspathEntry[newEntries.size()];
+            newEntriesArray = (IClasspathEntry[])newEntries.toArray(newEntriesArray);
+            currentJavaProject.setRawClasspath(newEntriesArray, null);
+                    
             // refresh project so user sees new files, libraries, etc
             currentJavaProject.getProject().refreshLocal(
                     IResource.DEPTH_INFINITE, null);

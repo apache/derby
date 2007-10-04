@@ -45,4 +45,6 @@ public class Messages {
 	
 	public static String NO_ACTION="Unable to execute the action";
 	public static String SERVER_RUNNING="The Network Server is already running.\nStop the server prior to changing the settings.";
+	
+	public static String DERBY_CONTAINER_DESC = "Derby Libraries";
 }

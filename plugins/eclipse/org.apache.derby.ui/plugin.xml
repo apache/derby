@@ -421,4 +421,9 @@
             configTypeID="org.apache.derby.ui.sysinfoDerbyLaunchConfigurationType"
             id="org.apache.derby.ui.sysinfoDerbyLaunchConfigurationTypeImage"/>
    </extension>
+   <extension point="org.eclipse.jdt.core.classpathContainerInitializer">
+      <classpathContainerInitializer
+            id="DERBY_CONTAINER"
+            class="org.apache.derby.ui.container.DerbyClasspathContainerInitializer"/>
+   </extension>
 </plugin>

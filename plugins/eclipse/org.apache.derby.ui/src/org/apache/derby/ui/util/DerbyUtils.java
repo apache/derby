@@ -21,7 +21,6 @@
 
 package org.apache.derby.ui.util;
 
-import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +31,6 @@ import org.apache.derby.ui.properties.DerbyProperties;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
@@ -44,8 +42,6 @@ import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.model.IProcess;
-import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.IRuntimeClasspathEntry;
 import org.eclipse.jdt.launching.JavaRuntime;
@@ -57,119 +53,10 @@ import org.osgi.framework.Constants;
 
 
 public class DerbyUtils {
-	private final static String PLUGIN_ROOT = "ECLIPSE_HOME/plugins/";
 	
 	private static ManifestElement[] getElements(String bundleName) throws BundleException {
 		String requires = (String)Platform.getBundle(bundleName).getHeaders().get(Constants.BUNDLE_CLASSPATH);
 		return ManifestElement.parseHeader(Constants.BUNDLE_CLASSPATH, requires);
-	}
-	public static IClasspathEntry[] addDerbyJars(IClasspathEntry[] rawCP) throws Exception{
-		
-		IClasspathEntry[] newRawCP= null;
-		try{
-			//New OSGI way
-			ManifestElement[] elements_core, elements_ui;
-			elements_core = getElements(CommonNames.CORE_PATH);
-			elements_ui=getElements(CommonNames.UI_PATH);
-			
-			Bundle bundle=Platform.getBundle(CommonNames.CORE_PATH);
-			URL pluginURL = FileLocator.resolve(FileLocator.find(bundle, new Path("/"), null));
-			String pluginName = new File(pluginURL.getPath()).getName();
-
-			newRawCP=new IClasspathEntry[rawCP.length + (elements_core.length) + (elements_ui.length-1)];
-			System.arraycopy(rawCP, 0, newRawCP, 0, rawCP.length);
-			
-			//Add the CORE jars
-			int oldLength=rawCP.length;
-			for(int i=0;i<elements_core.length;i++){
-				// add JAR as var type entry relative to the eclipse plugins dir, so the entry is portable 
-				newRawCP[oldLength+i]=JavaCore.newVariableEntry(new Path(PLUGIN_ROOT+pluginName+"/"+elements_core[i].getValue()), null, null);				
-				
-			}
-			 // Add the UI jars
-			bundle=Platform.getBundle(CommonNames.UI_PATH);
-			pluginURL = FileLocator.resolve(FileLocator.find(bundle, new Path("/"), null));
-			pluginName = new File(pluginURL.getPath()).getName();
-			oldLength=oldLength+elements_core.length -1; 
-			for(int i=0;i<elements_ui.length;i++){
-				if(!(elements_ui[i].getValue().toLowerCase().equals("ui.jar"))){
-					// add JAR as var type entry relative to the eclipse plugins dir, so the entry is portable
-					newRawCP[oldLength+i]=JavaCore.newVariableEntry(new Path(PLUGIN_ROOT+pluginName+"/"+elements_ui[i].getValue()), null, null);
-				}
-			}					
-			return newRawCP;
-		}catch(Exception e){
-			throw e;
-		}
-		
-	}
-	public static IClasspathEntry[] removeDerbyJars(IClasspathEntry[] rawCP) throws Exception{
-		ArrayList arrL=new ArrayList();
-		for (int i=0;i<rawCP.length;i++){
-			arrL.add(rawCP[i]);
-		}
-		IClasspathEntry[] newRawCP= null;
-		try{
-			ManifestElement[] elements_core, elements_ui;
-			elements_core = getElements(CommonNames.CORE_PATH);
-			elements_ui=getElements(CommonNames.UI_PATH);
-			
-			Bundle bundle;
-			URL pluginURL,jarURL,localURL;
-
-			boolean add;
-			IClasspathEntry icp=null;
-			for (int j=0;j<arrL.size();j++){
-				bundle=Platform.getBundle(CommonNames.CORE_PATH);
-				pluginURL = bundle.getEntry("/");
-				add=true;
-				icp=(IClasspathEntry)arrL.get(j);
-				//remove 'core' jars
-				for (int i=0;i<elements_core.length;i++){
-					jarURL= new URL(pluginURL,elements_core[i].getValue());
-					localURL=Platform.asLocalURL(jarURL);
-					if(((icp).equals(JavaCore.newLibraryEntry(new Path(localURL.getPath()), null, null)))||
-							icp.getPath().toString().toLowerCase().endsWith("derby.jar")||
-							icp.getPath().toString().toLowerCase().endsWith("derbynet.jar")||
-							icp.getPath().toString().toLowerCase().endsWith("derbyclient.jar")||
-							icp.getPath().toString().toLowerCase().endsWith("derbytools.jar")){
-						add=false;
-					}
-				}
-				if(!add){
-					arrL.remove(j);
-					j=j-1;
-				}
-				//REMOVE 'ui' jars
-				bundle=Platform.getBundle(CommonNames.UI_PATH);
-				pluginURL = bundle.getEntry("/");
-				add=true;
-				
-				for (int i=0;i<elements_ui.length;i++){
-					if(!(elements_ui[i].getValue().toLowerCase().equals("ui.jar"))){
-						jarURL= new URL(pluginURL,elements_ui[i].getValue());
-						localURL=Platform.asLocalURL(jarURL);					
-						if((icp).equals(JavaCore.newLibraryEntry(new Path(localURL.getPath()), null, null))){
-							add=false;
-						}
-					}
-				}
-				if(!add){
-					arrL.remove(j);
-					j=j-1;
-				}
-			}
-			newRawCP=new IClasspathEntry[arrL.size()];
-			for (int i=0;i<arrL.size();i++){
-				newRawCP[i]=(IClasspathEntry)arrL.get(i);
-			}
-			return newRawCP;
-		}catch(Exception e){
-			e.printStackTrace();
-			//return rawCP;
-			throw e;
-		}
-		
 	}
 	protected static ILaunch launch(IProject proj, String name, String mainClass, String args, String vmargs, String app) throws CoreException {	
 		ILaunchManager manager = DebugPlugin.getDefault().getLaunchManager();

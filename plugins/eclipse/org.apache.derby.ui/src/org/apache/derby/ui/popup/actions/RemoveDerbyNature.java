@@ -21,11 +21,12 @@
 package org.apache.derby.ui.popup.actions;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.derby.ui.common.CommonNames;
 import org.apache.derby.ui.common.Messages;
+import org.apache.derby.ui.container.DerbyClasspathContainer;
 import org.apache.derby.ui.util.DerbyServerUtils;
-import org.apache.derby.ui.util.DerbyUtils;
 import org.apache.derby.ui.util.Logger;
 import org.apache.derby.ui.util.SelectionUtil;
 import org.eclipse.core.resources.IProject;
@@ -86,7 +87,19 @@ public class RemoveDerbyNature implements IObjectActionDelegate {
 				DerbyServerUtils.getDefault().stopDerbyServer(currentJavaProject.getProject());
 			}
 			IClasspathEntry[] rawClasspath = currentJavaProject.getRawClasspath();
-			currentJavaProject.setRawClasspath(DerbyUtils.removeDerbyJars(rawClasspath), null);
+			
+			List<IClasspathEntry> newEntries = new ArrayList<IClasspathEntry>();
+			for(IClasspathEntry e: rawClasspath) {
+				if(e.getEntryKind()!=IClasspathEntry.CPE_CONTAINER) {
+					newEntries.add(e);
+				} else if(!e.getPath().equals(DerbyClasspathContainer.CONTAINER_ID)) {
+					newEntries.add(e);
+				}
+			}
+			
+			IClasspathEntry[] newEntriesArray = new IClasspathEntry[newEntries.size()];
+			newEntriesArray = (IClasspathEntry[])newEntries.toArray(newEntriesArray);			
+			currentJavaProject.setRawClasspath(newEntriesArray, null);
 			
 			IProjectDescription description = currentJavaProject.getProject().getDescription();
 			String[] natures = description.getNatureIds();
