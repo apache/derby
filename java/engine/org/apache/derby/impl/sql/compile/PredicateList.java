@@ -1818,6 +1818,14 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
      * between outer and inner.  If so, then we simply assign it to the same 
      * equivalence class.  If not, then we add the new equijoin clause.
 	 *
+	 * Note that an equijoin predicate between two tables CANNOT be
+	 * used for transitive closure, if either of the tables is in the
+	 * fromlist for NOT EXISTS. In that case, the join predicate
+	 * actually specifies that the rows from the indicated table must
+	 * NOT exist, and therefore those non-existent rows cannot be
+	 * transitively joined to the other matching tables. See DERBY-3033
+	 * for a description of a situation in which this actually arises.
+	 *
 	 * @param numTables	The number of tables in the query
 	 * @param fromList	The FromList in question.
 	 * @param cc		The CompilerContext to use
@@ -1867,7 +1875,9 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 				ColumnReference leftCR = (ColumnReference) left;
 				ColumnReference rightCR = (ColumnReference) right;
 				if (leftCR.getSourceLevel() == rightCR.getSourceLevel() &&
-					leftCR.getTableNumber() != rightCR.getTableNumber())
+					leftCR.getTableNumber() != rightCR.getTableNumber() &&
+					!fromList.tableNumberIsNotExists(leftCR.getTableNumber()) &&
+					!fromList.tableNumberIsNotExists(rightCR.getTableNumber()))
 				{
 					// Add the equijoin clause to each of the lists
 					joinClauses[leftCR.getTableNumber()].addElement(predicate);
