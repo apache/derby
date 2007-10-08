@@ -47,19 +47,24 @@ RESOLVED ISSUES SINCE LAST STATUS
 
 New committers:
 
-Dag Wanvik
+Øystein Grøvlen
+Dyre Tjeldvoll
 
 
 RECENT VOTES
 =================================
 
-Dag Wanvik elected as a committer
-   March 20, 2007
-   See http://mail-archives.apache.org/mod_mbox/db-derby-dev/200703.mbox/%3c45FFD9CA.4080304@sun.com%3e
+Require Java 5 (or later) compiler to build Derby
+   October 3, 2007
+   See http://www.nabble.com/-VOTE--Require-Java-5-%28or-later%29-compiler-to-build-Derby-tf4522491.html#a13030783
 
-Accepted NetworkServer system tests contributed by IBM
-   February 26, 2007
-   See http://www.nabble.com/-VOTE--Accept-NetworkServer-system-tests-contributed-by-IBM-tf3256175.html#a9174275
+Dyre Tjeldvoll elected as a committer
+   September 17, 2007
+   See http://mail-archives.apache.org/mod_mbox/db-derby-dev/200709.mbox/%3c46F01512.5030705@sun.com%3e
+
+Øystein Grøvlen elected as a committer
+   August 28, 2007
+   See http://mail-archives.apache.org/mod_mbox/db-derby-dev/200708.mbox/%3c46D578A1.4020801@sun.com%3e
 
 
 
