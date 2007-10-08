@@ -71,16 +71,18 @@ public class statementJdbc20 {
            //Error  testing  : set wrong values ..
            try{
               stmt.setFetchSize(-1000);
+              System.out.println("setFetchSize(-1000) expected to fail");
            } 
            catch(SQLException e){
-              dumpExpectedSQLExceptions(e);
+               BaseJDBCTestCase.assertSQLState("XJ065", e);
            }
 
            try{
               stmt.setFetchDirection(-1000);
+              System.out.println("setFetchDirection(-1000) expected to fail");
            } 
            catch(SQLException e){
-              dumpExpectedSQLExceptions(e);
+               BaseJDBCTestCase.assertSQLState("XJ064", e);
            }
             
 
@@ -122,9 +124,10 @@ public class statementJdbc20 {
            //Error  testing  : set wrong values ..
            try{
               rs.setFetchSize(-2000);
+              System.out.println("setFetchSize(-2000) expected to fail");
            } 
            catch(SQLException e){
-              dumpExpectedSQLExceptions(e);
+               BaseJDBCTestCase.assertSQLState("XJ062", e);
            }
 
            try{
