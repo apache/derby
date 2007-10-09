@@ -38,9 +38,9 @@
 
 
   <!-- Files to be included with and excluded from the source distribution -->
-  <property name="src.top.includes" value="BUILDING.txt,README,CHANGES.html,COPYRIGHT,KEYS,LICENSE,NOTICE,RELEASE-NOTES.html,STATUS,build.xml,frameworks.DEPRECATED.txt,index.html,published_api_overview.html"/>
+  <property name="src.top.includes" value="BUILDING.txt,README,CHANGES.html,COPYRIGHT,KEYS,LICENSE,NOTICE,RELEASE-NOTES.html,STATUS,build.xml,index.html,published_api_overview.html"/>
   <property name="src.tools.includes" value="tools/ant/**,tools/j2ee/**,tools/jar/**,tools/java/**,tools/javadoc/**,tools/jdbc4/**,tools/testing/**,tools/release/build.xml"/>
-  <property name="src.dirs.includes" value="frameworks/**,java/**,plugins/**,bin/**,maven/**"/>
+  <property name="src.dirs.includes" value="java/**,plugins/**,bin/**,maven/**"/>
   <property name="src.includes" value="${src.top.includes},${src.tools.includes},${src.dirs.includes}"/>
 
   <property name="src.excludes" value="tools/**/db2jcc*,tools/**/osgi.jar,tools/**/junit.jar,tools/**/jdbc2_0*,tools/java/jce*,tools/**/packaging.properties,java/demo/toursdb/toursdb/**,java/demo/toursdb/toursdb.out,java/demo/toursdb/toursdb.jar,tools/testing/derby/**,**/derby.log"/>
@@ -98,9 +98,9 @@
     <mkdir dir="${crlf.dir}"/>
     <mkdir dir="${lf.dir}"/>
     <fixcrlf srcdir="${basedir}" destdir="${crlf.dir}" eol="crlf"
-             includes="CHANGES.html,COPYRIGHT,LICENSE,KEYS,NOTICE,RELEASE-NOTES.html,frameworks.DEPRECATED.txt"/>
+             includes="CHANGES.html,COPYRIGHT,LICENSE,KEYS,NOTICE,RELEASE-NOTES.html"/>
     <fixcrlf srcdir="${basedir}" destdir="${lf.dir}" eol="lf"
-             includes="CHANGES.html,COPYRIGHT,LICENSE,KEYS,NOTICE,RELEASE-NOTES.html,frameworks.DEPRECATED.txt"/>
+             includes="CHANGES.html,COPYRIGHT,LICENSE,KEYS,NOTICE,RELEASE-NOTES.html"/>
 
   </target>
 
@@ -150,7 +150,7 @@
     <zip destfile="${release.dir}/${derby.bin}.zip"
          compress="true">
       <!-- top-level -->
-      <zipfileset dir="${crlf.dir}" includes="CHANGES.html,COPYRIGHT,LICENSE,KEYS,NOTICE,RELEASE-NOTES.html,frameworks.DEPRECATED.txt"
+      <zipfileset dir="${crlf.dir}" includes="CHANGES.html,COPYRIGHT,LICENSE,KEYS,NOTICE,RELEASE-NOTES.html"
                   prefix="${derby.bin}/"/>
       <zipfileset dir="${basedir}" includes="index.html" prefix="${derby.bin}/"/>
       <!-- bin -->
@@ -181,9 +181,6 @@
                   prefix="${derby.bin}/docs/html"/>
       <zipfileset dir="${docs.out}" includes="**/*.pdf"
                   prefix="${derby.bin}/docs/pdf"/>
-      <!-- frameworks -->
-      <zipfileset dir="${basedir}/frameworks" prefix="${derby.bin}/frameworks" includes="**/*.html"/> 
-      <zipfileset dir="${basedir}/frameworks" prefix="${derby.bin}/frameworks" includes="**/bin/*" filemode="755"/> 
       <!-- javadoc -->
       <zipfileset dir="${basedir}/javadoc/publishedapi" prefix="${derby.bin}/javadoc" includes="**"/>   
       <!-- lib -->
@@ -202,7 +199,7 @@
     <tar destfile="${release.dir}/${derby.bin}.tar.gz"
          compression="gzip" longfile="gnu">
       <!-- top-level -->
-      <tarfileset dir="${lf.dir}" includes="CHANGES.html,COPYRIGHT,LICENSE,KEYS,NOTICE,RELEASE-NOTES.html,frameworks.DEPRECATED.txt"
+      <tarfileset dir="${lf.dir}" includes="CHANGES.html,COPYRIGHT,LICENSE,KEYS,NOTICE,RELEASE-NOTES.html"
                   prefix="${derby.bin}/"/>
       <tarfileset dir="${basedir}" includes="index.html" prefix="${derby.bin}/"/>
       <!-- bin -->
@@ -232,9 +229,6 @@
 		          prefix="${derby.bin}/docs/html"/>
       <tarfileset dir="${docs.out}" includes="**/*.pdf"
 	              prefix="${derby.bin}/docs/pdf"/>
-      <!-- frameworks -->
-      <tarfileset dir="${basedir}/frameworks" prefix="${derby.bin}/frameworks" includes="**/*.html"/> 
-      <tarfileset dir="${basedir}/frameworks" prefix="${derby.bin}/frameworks" includes="**/bin/*" mode="755"/> 
       <!-- javadoc -->
       <tarfileset dir="${basedir}/javadoc/publishedapi" prefix="${derby.bin}/javadoc" includes="**"/>   
       <!-- lib -->
