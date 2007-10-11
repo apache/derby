@@ -739,12 +739,12 @@ public class Blob extends Lob implements java.sql.Blob {
         return true;
     }
     
-    /*
+    /**
      * Checks is isValid is true. If it is not true throws 
      * a SQLException stating that a method has been called on
      * an invalid LOB object
      *
-     * throws SQLException if isvalid is not true.
+     * @throws SQLException if isValid is not true
      */
     private void checkValidity() throws SQLException{
         if(!isValid)
