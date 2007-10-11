@@ -46,8 +46,6 @@ public class Clob extends Lob implements java.sql.Clob {
     // Therefore, we always convert a String to UTF-8 before we flow it for input
     protected byte[] utf8String_;
 
-    private PreparedStatement internalLengthStmt_ = null;
-
     protected String encoding_ = "UNICODE";
     
     //This boolean variable indicates whether the Clob object has
@@ -211,13 +209,6 @@ public class Clob extends Lob implements java.sql.Clob {
                  boolean willBeLayerBStreamed) {
         super(agent,
               willBeLayerBStreamed);
-    }
-
-    protected void finalize() throws java.lang.Throwable {
-        super.finalize();
-        if (internalLengthStmt_ != null) {
-            internalLengthStmt_.closeX();
-        }
     }
 
     // ---------------------------jdbc 2------------------------------------------
@@ -857,15 +848,6 @@ public class Clob extends Lob implements java.sql.Clob {
             }
             catch(IOException ioe) {
                 throw new SqlException(null, new ClientMessageId(SQLState.IO_ERROR_UPON_LOB_FREE)).getSQLException();
-            }
-        }
-        
-        if (internalLengthStmt_ != null) {
-            try {
-                internalLengthStmt_.closeX();
-            }
-            catch(SqlException sqle) {
-                throw sqle.getSQLException();
             }
         }
     }
