@@ -369,10 +369,9 @@ public class StoredPage extends CachedPage
      * This is used as the threshold for a long column.
      * 
      * maxFieldSize = 
-     *      totalSpace * (1 - spareSpace/100) - 
-     *      slotEntrySize * - 16 - OVERFLOW_POINTER_SIZE;
+     *      totalSpace - slotEntrySize - 16 - OVERFLOW_POINTER_SIZE;
      **/
-	protected int maxFieldSize;
+    private int maxFieldSize;
 
 
     /**
@@ -696,14 +695,14 @@ public class StoredPage extends CachedPage
 		if (rawDataIn != null)
 			rawDataIn.setData(pageData);
 
-        initSpace();
+        // Note that the slotFieldSize and slotEntrySize need to be
+        // calculated BEFORE initSpace() is called, because the
+        // maxFieldSize computation in initSpace() includes these
+        // values in its calculations. (DERBY-3099)
+        slotFieldSize = calculateSlotFieldSize(pageSize);
+        slotEntrySize = 3 * slotFieldSize;
 
-		if (pageSize >= 65536)
-			slotFieldSize = LARGE_SLOT_SIZE;
-		else
-			slotFieldSize = SMALL_SLOT_SIZE;
-		
-		slotEntrySize = 3 * slotFieldSize;
+        initSpace();
 
         // offset of slot table entry[0]
         slotTableOffsetToFirstEntry = 
@@ -721,6 +720,21 @@ public class StoredPage extends CachedPage
 			rawDataOut.setData(pageData);
 	}
 
+    /**
+     * Calculate the slot field size from the page size.
+     *
+     * @param pageSize page size in bytes
+     * @return slot field size in bytes
+     */
+    private int calculateSlotFieldSize(int pageSize) {
+        if (pageSize < 65536) {
+            // slots are 2 bytes (unsigned short data type) for pages <64KB
+            return SMALL_SLOT_SIZE;
+        } else {
+            // slots are 4 bytes (int data type) for pages >=64KB
+            return LARGE_SLOT_SIZE;
+        }
+    }
 
     /**
      * Create a new StoredPage.
@@ -3338,8 +3352,16 @@ public class StoredPage extends CachedPage
 
 		maxFieldSize = totalSpace - slotEntrySize - 16 - OVERFLOW_POINTER_SIZE;
 
-        if (SanityManager.DEBUG)
+        if (SanityManager.DEBUG) {
             SanityManager.ASSERT(maxFieldSize >= 0);
+            // DERBY-3099: maxFieldSize was calculated before slotFieldSize and
+            // slotEntrySize had been initialized.
+            int expectedFieldSize = calculateSlotFieldSize(pageData.length);
+            SanityManager.ASSERT(slotFieldSize == expectedFieldSize,
+                                 "slotFieldSize uninitialized");
+            SanityManager.ASSERT(slotEntrySize == 3 * expectedFieldSize,
+                                 "slotEntrySize uninitialized");
+        }
 	}
 
     /**
