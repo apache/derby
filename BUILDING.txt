@@ -114,18 +114,23 @@ build environment.
 
 Notes:
 ----- 
-(1) Derby build environment requires you to install one level of 
-    Java Development Kit (JDK) - 1.4.x as Derby is designed 
+(1) The Derby build environment requires you to install two levels of 
+    the Java Development Kit (JDK) - Java 5 and JDK 1.4.x.
+    Java 5 is needed to compile language features introduced by Java 5.
+    JDK 1.4.x  is needed because Derby is designed 
     to work in JDK 1.4.x (JDBC 3.0) environments (or higher).
-    The Derby build is set up such that that most of 
-    the code is compiled against JDK 1.4.x libraries so that no 
-    dependencies on higher levels of JDKs exist, except for
-    that code designed to run on Java SE 6.
+    The Derby build is set up such that most of 
+    the code is compiled against JDK 1.4.x libraries. This ensures that
+    no run-time dependencies on higher levels of the JDK exist. Optional
+    run-time code can take advantage of Java 5 language features.
+    If the Java 6 JDK is present, the build will also compile optional
+    support for JDBC 4.
 
-(2) The Derby build environment is tested with 
-    JDK 142(Sun) and Ant 161. The Derby build environment should
-    work with other versions and other sources of 
-    JDK 14 (1.4.x), and other versions of Ant 1.6 (1.6.x).
+(2) The Derby build environment is tested with Sun's Java 5 compiler,
+    with Sun's JDK 1.4.2 libraries, and with Ant 1.6.1.
+    The Derby build environment
+    should work with other versions and other sources of 
+    Java 5 and  JDK 1.4 (1.4.x) and with other versions of Ant 1.6 (1.6.x).
 
 
 
@@ -139,7 +144,7 @@ Notes:
     directory in the rest of this document. 
 
 
-2.2.2 Download and install Java Development Kit (JDK) release 1.4.x
+2.2.2 Download and install Java Development Kits
 
 Skip steps 1-2 of this section if you already have JDK 1.4.x 
 installed on your system.  
@@ -157,7 +162,23 @@ installed on your system.
 (3) The directory where you have installed JDK 1.4.x will be 
     referred to as ${jdk14.dir} in the rest of this document.
 
+You must also install the Java 5 (or later) JDK and this must be the version of
+Java used by the ant process in which you run the Derby build. You
+may skip steps 4-5 of this section if you have already installed
+Java 5 or a later version of the JDK.
 
+(4) Download the Java 5 or later JDK.
+    The reference implementation is available at:
+       http://java.sun.com/javase
+
+    For MacOS X, get the latest download from:
+       http://developer.apple.com/java/download
+
+(5) Install the Java 5 JDK according to the instructions included 
+    with the release in any directory. 
+
+(6) The directory where you have installed the Java 5 JDK will be 
+    referred to as ${java5.dir} in the rest of this document.
 
 2.2.3 section removed - no longer applies
 
@@ -269,11 +290,12 @@ ${derby.source}/tools/java/xml-apis.jar
     actually perform the build. 
 
 (3) Create environment variable JAVA_HOME  to point to the 
-    directory where you have installed JDK 1.4.x. For example:
+    directory where you have installed the Java 5 (or later)
+    JDK. For example:
 
-     setenv JAVA_HOME ${jdk14.dir} -- On unix(csh).
-     export JAVA_HOME=${jdk14.dir} -- On unix(ksh)
-     set JAVA_HOME=${jdk14.dir}    -- On Windows
+     setenv JAVA_HOME ${java5.dir} -- On unix(csh).
+     export JAVA_HOME=${java5.dir} -- On unix(ksh)
+     set JAVA_HOME=${java5.dir}    -- On Windows
 
 
 3.2   Create property file
