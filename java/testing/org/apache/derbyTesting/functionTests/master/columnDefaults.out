@@ -202,7 +202,32 @@ ij> select * from t_331;
 A          |B          
 -----------------------
 4          |0          
-ij> -- clean up
+ij> -- begin DERBY-3013
+create table tabWithUserAndSchemaDefaults(
+             cUser           CHAR(8) default user,
+             cCurrent_user   CHAR(8) default current_user,
+             cSession_user   CHAR(8) default session_user,
+             cCurrent_schema CHAR(128) default current schema);
+0 rows inserted/updated/deleted
+ij> -- Should work
+insert into tabWithUserAndSchemaDefaults values (default, default, default, default);
+1 row inserted/updated/deleted
+ij> select * from tabWithUserAndSchemaDefaults;
+CUSER   |CCURREN&|CSESSIO&|CCURRENT_SCHEMA                                                                                                                 
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+APP     |APP     |APP     |APP                                                                                                                             
+ij> -- Should fail:
+create table tabWithUserDefaultTooNarrowColumn(
+       c1 CHAR(7) default user);
+ERROR 42894: DEFAULT value or IDENTITY attribute value is not valid for column 'C1'.
+ij> -- Should fail:
+create table tabWithSchemaDefaultTooNarrowColumn(
+       c1 CHAR(127) default current sqlid);
+ERROR 42894: DEFAULT value or IDENTITY attribute value is not valid for column 'C1'.
+ij> drop table tabWithUserAndSchemaDefaults;
+0 rows inserted/updated/deleted
+ij> -- end DERBY-3013
+-- clean up
 drop function asdf;
 0 rows inserted/updated/deleted
 ij> drop table t1;

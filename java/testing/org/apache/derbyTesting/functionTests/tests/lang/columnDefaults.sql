@@ -125,6 +125,28 @@ insert into t_331 values (4, default);
 insert into t_331 values (4, default);
 select * from t_331;
 
+-- begin DERBY-3013
+create table tabWithUserAndSchemaDefaults(
+             cUser           CHAR(8) default user,
+             cCurrent_user   CHAR(8) default current_user,
+             cSession_user   CHAR(8) default session_user,
+             cCurrent_schema CHAR(128) default current schema);                 
+             
+-- Should work
+insert into tabWithUserAndSchemaDefaults values (default, default, default, default);
+select * from tabWithUserAndSchemaDefaults;
+
+-- Should fail:
+create table tabWithUserDefaultTooNarrowColumn(
+       c1 CHAR(7) default user);
+
+-- Should fail:
+create table tabWithSchemaDefaultTooNarrowColumn(
+       c1 CHAR(127) default current sqlid);
+
+drop table tabWithUserAndSchemaDefaults;
+-- end DERBY-3013
+
 -- clean up
 drop function asdf;
 drop table t1;

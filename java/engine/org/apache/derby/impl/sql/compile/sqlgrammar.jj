@@ -10590,11 +10590,12 @@ DB2DefaultOption(String columnName) throws StandardException :
 						getContextManager());
 	}
 |
-	<USER>
+	/* Revert DB2 restriction: DERBY-3013. Accept standard SQL CURRENT_USER,
+	 * SESSION_USER in addition to USER.
+	 */
+	value = userNode()
 	{
-		return (ValueNode) nodeFactory.getNode(
-								C_NodeTypes.USER_NODE,
-								getContextManager());
+		return value;
 	}
 |
 	LOOKAHEAD({
