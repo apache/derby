@@ -73,6 +73,7 @@ import org.apache.derby.iapi.services.io.LimitObjectInput;
 import org.apache.derby.iapi.services.io.ErrorObjectInput;
 
 
+import java.util.Arrays;
 import java.util.zip.CRC32;
 
 import java.io.IOException;
@@ -1830,14 +1831,13 @@ public class StoredPage extends CachedPage
 
     /**
      * Zero out a portion of the page.
-     * <p>
+     *
+     * @param offset position of first byte to clear
+     * @param length how many bytes to clear
      **/
 	protected final void clearSection(int offset, int length)
 	{
-		int endOffset = offset + length;
-
-		while (offset < endOffset) 
-			pageData[offset++] = 0;
+        Arrays.fill(pageData, offset, offset + length, (byte) 0);
 	}
 
     /**
