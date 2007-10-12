@@ -1355,9 +1355,6 @@ public class GenericLanguageConnectionContext
 									  "), " + LanguageConnectionContext.dbnameStr +
 										  dbname +
 										  "), " +
-										  LanguageConnectionContext.dbnameStr +
-										  dbname +
-										  "), " +
 										  LanguageConnectionContext.drdaStr +
 										  drdaID +
 									  "), Rolling back");
