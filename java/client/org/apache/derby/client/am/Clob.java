@@ -831,6 +831,20 @@ public class Clob extends Lob implements java.sql.Clob {
         //valid
         isValid = false;
         
+        try {
+            synchronized (agent_.connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry(this, "free");
+                }
+                if (isLocator()) {
+                    agent_.connection_.locatorProcedureCall()
+                        .clobReleaseLocator(locator_);
+                }
+            }
+        } catch (SqlException se) {
+            throw se.getSQLException();
+        }
+
         if(isString()) {
             string_ = null;
             utf8String_ = null;
