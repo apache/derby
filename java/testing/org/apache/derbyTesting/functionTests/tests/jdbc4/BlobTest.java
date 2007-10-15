@@ -23,7 +23,9 @@ package org.apache.derbyTesting.functionTests.tests.jdbc4;
 
 import junit.framework.*;
 
+import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetStream;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 import java.sql.*;
@@ -159,19 +161,13 @@ public class BlobTest
         // Life span of Blob objects are limited by the transaction.  Need
         // autocommit off so Blob objects survive closing of result set.
         getConnection().setAutoCommit(false);
-
-        blob = BlobClobTestSetup.getSampleBlob(getConnection());
-        
-        //call the buildHashSetMethod to initialize the 
-        //HashSet with the method signatures that are exempted 
-        //from throwing a SQLException after free has been called
-        //on the Clob object.
-        buildHashSet();
     }
 
     protected void tearDown() throws Exception {
-        blob.free();
-        blob = null;
+        if (blob != null) {
+            blob.free();
+            blob = null;
+        }
         excludedMethodSet = null;
         super.tearDown();
     }
@@ -204,6 +200,15 @@ public class BlobTest
      */
     public void testFreeandMethodsAfterCallingFree()
         throws SQLException {
+        
+        blob = BlobClobTestSetup.getSampleBlob(getConnection());
+        
+        //call the buildHashSetMethod to initialize the
+        //HashSet with the method signatures that are exempted 
+        //from throwing a SQLException after free has been called
+        //on the Clob object.
+        buildHashSet();
+
         blob.free();
         //testing the idempotence of the free() method
         //the method can be called multiple times on
@@ -603,16 +608,151 @@ public class BlobTest
          //match
          assertEquals(is_BeforeWrite, is_AfterWrite);
      }
+     
+    /**
+     * Test that a lock held on the corresponding row is released when free() is
+     * called on the Blob object.
+     * @throws java.sql.SQLException 
+     */
+    public void testLockingAfterFree() throws SQLException
+    {
+        int id = initializeLongBlob();  // Opens blob object
+        executeParallelUpdate(id, true); // Test that timeout occurs
+        
+        // Test that update goes through after the blob is closed
+        blob.free();
+        executeParallelUpdate(id, false);
+        
+        commit();
+    }
     
+    
+    /**
+     * Test that a lock held on the corresponding row is NOT released when
+     * free() is called on the Blob object if the isolation level is
+     * Repeatable Read
+     * @throws java.sql.SQLException
+     */
+    public void testLockingAfterFreeWithRR() throws SQLException
+    {
+        getConnection().
+                setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
+        int id = initializeLongBlob(); // Opens blob object
+        executeParallelUpdate(id, true); // Test that timeout occurs
+        
+        // Test that update still times out after the blob is closed
+        blob.free();
+        executeParallelUpdate(id, true);
+        
+        // Test that the update goes through after the transaction has committed
+        commit();
+        executeParallelUpdate(id, false);
+    }
 
+    
+     /**
+     * Test that a lock held on the corresponding row is released when
+     * free() is called on the Blob object if the isolation level is
+     * Read Uncommitted
+     * @throws java.sql.SQLException
+     */
+    public void testLockingAfterFreeWithDirtyReads() throws SQLException
+    {
+        getConnection().
+                setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+        int id = initializeLongBlob(); // Opens blob object
+        executeParallelUpdate(id, true); // Test that timeout occurs
+        
+       // Test that update goes through after the blob is closed
+        blob.free();
+        executeParallelUpdate(id, false);
+        
+        commit();
+    }
+
+
+    /**
+     * Insert a row with a large blob into the test table.  Read the row from 
+     * the database and assign the blob value to <code>blob</code>.
+     * @return The id of the row that was inserted
+     * @throws java.sql.SQLException 
+     */
+    private int initializeLongBlob() throws SQLException
+    {
+        // Blob needs to be larger than one page for locking to occur
+        final int lobLength = 40000;
+
+        // Insert a long Blob
+        PreparedStatement ps =
+                prepareStatement("insert into BLOBCLOB(ID, BLOBDATA) values(?,?)");
+        int id =BlobClobTestSetup.getID();
+        ps.setInt(1, id);
+        ps.setBinaryStream(2,
+                           new LoopingAlphabetStream(lobLength), lobLength);
+        ps.execute();
+        ps.close();
+        commit();
+
+        // Fetch the Blob object from the database
+        Statement st = createStatement();
+        ResultSet rs =
+                st.executeQuery("select BLOBDATA from BLOBCLOB where ID=" + id);
+        rs.next();
+        blob = rs.getBlob(1);
+        rs.close();
+        st.close();
+
+        return id;
+    }
+     
+
+    /**
+     * Try to update the row with the given error.  Flag a failure if a 
+     * timeout occurs when not expected, and vice versa.
+     * @param id The id of the row to be updated
+     * @param timeoutExpected true if it is expected that the update times out
+     * @throws java.sql.SQLException 
+     */
+    private void executeParallelUpdate(int id, boolean timeoutExpected) 
+            throws SQLException
+    {
+        Connection conn2 = openDefaultConnection();
+        Statement stmt2 = conn2.createStatement();
+
+        try {
+            stmt2.executeUpdate("update BLOBCLOB set CLOBDATA = 'New' where id=" 
+                    + id);
+            stmt2.close();
+            conn2.commit();
+            conn2.close();
+            if (timeoutExpected) {
+                fail("FAIL - should have gotten lock timeout");
+            }
+         } catch (SQLException se) {
+            stmt2.close();
+            conn2.rollback();
+            conn2.close();
+            if (timeoutExpected) {
+                assertSQLState(LOCK_TIMEOUT, se);
+            } else {               
+                throw se;
+            }
+        }
+    }
+
+    
     /**
      * Create test suite for this test.
      */
-    public static Test suite() {
-        return  new BlobClobTestSetup(
-                TestConfiguration.defaultSuite(
-                BlobTest.class,
-                false));
+    public static Test suite()
+    {
+        return new BlobClobTestSetup(
+                // Reduce lock timeouts so lock test case does not take too long
+                DatabasePropertyTestSetup.setLockTimeouts(
+                        TestConfiguration.defaultSuite(BlobTest.class, false),
+                        2, 
+                        4));
     }
 
+   private static final String LOCK_TIMEOUT = "40XL1";
 } // End class BlobTest

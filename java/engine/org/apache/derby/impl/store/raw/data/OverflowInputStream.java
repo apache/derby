@@ -30,7 +30,6 @@ import org.apache.derby.iapi.types.Resetable;
 import org.apache.derby.iapi.store.raw.LockingPolicy;
 import org.apache.derby.iapi.store.access.TransactionController;
 
-import java.io.InputStream;
 import java.io.IOException;
 
 /**
@@ -49,6 +48,9 @@ implements Resetable
 	protected int firstOverflowId;
     // the row to lock for Blobs/Clobs
     protected RecordHandle recordToLock;
+    
+    // Make sure record is only locked once.
+    private boolean initialized = false;
 
 	public OverflowInputStream(ByteHolder bh, BaseContainerHandle owner,
 		    long overflowPage, int overflowId, RecordHandle recordToLock)
@@ -133,41 +135,37 @@ implements Resetable
 		fillByteHolder();
     }
 
-    /*
-      Initialize.  Reopen the container. This will have the effect of
-      getting an intent shared lock on the table, which will stay around until
-      the end of the transaction (or until the enclosing blob/clob object is
-      closed). Also get a read lock on the appropriate row.
-    */
+    /**
+     * Initialize.  Reopen the container. This will have the effect of
+     * getting an intent shared lock on the table, which will stay around until
+     * the enclosing blob/clob object is closed, or until the end of the 
+     * transaction. Also get a read lock on the appropriate row.
+     * 
+     * @throws org.apache.derby.iapi.error.StandardException
+     */
     public void initStream() throws StandardException
     {
-        // it is possible that the transaction in which the stream was 
+        if (initialized) return;
+        
+        // it is possible that the transaction in which the stream was
         // created is committed and no longer valid
         // dont want to get NPE but instead throw error that
         // container was not opened
         if (owner.getTransaction() == null)
             throw StandardException.newException(SQLState.DATA_CONTAINER_CLOSED);
+                
         /*
-        We might want to use the mode and isolation level of the container.
-        This would have the advantage that, if the isolation level
-        is READ_COMMITTED, resources would be freed if blobs/clob finalizers are
-        called (e.g. they are garbage collected) before the end of transaction.
-        If the mode was MODE_CONTAINER, openContainer would get an S lock on the
-        table instead of an IS lock, and lockRecordForRead would have no effect.
-
-        To do this, need to consider:
-        Sometimes the container's locking policy may NOT reflect the correct
-        locking policy. For example, if the container is a table (not an index)
-        and Access handles the locking of the table via an index, the container's
-        locking policy would be set to do no locking.
-        Moreover, if the container is an index, the locking policy would
-        always be set to do no locking.
+        We use isolation level READ_COMMITTED and reopen the container to 
+        get a new container handle to use for locking.  This way, the lock will
+        be freed when we the container handle is closed. This will happen in
+        closeStream() or when the transaction commits. 
+        Hence, locks will be released before the end of transaction if 
+        blobs/clobs are explicitly released.
         */
-
         LockingPolicy lp = 
             owner.getTransaction().newLockingPolicy(
                 LockingPolicy.MODE_RECORD, 
-                TransactionController.ISOLATION_REPEATABLE_READ, true);
+                TransactionController.ISOLATION_READ_COMMITTED, true);
 
         // reopen the container
         owner = (BaseContainerHandle) owner.getTransaction().openContainer(
@@ -178,17 +176,19 @@ implements Resetable
         // thrown
         owner.getLockingPolicy().lockRecordForRead(
             owner.getTransaction(), owner, recordToLock, true, false);
+        
+        initialized = true;
     }
 
 
     /*
-      Close the container associated with this stream. (In the future if we use
-      a read committed isolation mode, this will also free the associated IS
-      table lock and the associated S row lock.)
+      Close the container associated with this stream. (This will also free the 
+      associated IS table lock and the associated S row lock.)
     */
     public void closeStream()
     {
         owner.close();
+        initialized = false;
     }
 
 }
