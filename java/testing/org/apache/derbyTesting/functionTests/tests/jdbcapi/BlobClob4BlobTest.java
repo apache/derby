@@ -1255,6 +1255,11 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
             checkException(LOCK_TIMEOUT, se);
         }
         assertEquals("FAIL: clob length changed", 10000, clob.length());
+        
+        // Test that update goes through after the transaction is committed
+        commit();
+        stmt2.executeUpdate("update testClob set b = b + 1 where b = 10000");
+        
         stmt2.close();
         conn2.rollback();
         conn2.close();
@@ -1307,12 +1312,17 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
             stmt2.executeUpdate(
                     "update testClob set el = 'smurfball' where b = 1");
             stmt2.close(); // Cleanup on fail
-            conn2.commit();
+            conn2.rollback();
             conn2.close();
             fail("FAIL - statement should timeout");
         } catch (SQLException se) {
             checkException(LOCK_TIMEOUT, se);
         }
+                
+        // Test that update goes through after the transaction is committed
+        commit();
+        stmt2.executeUpdate("update testClob set el = 'smurfball' where b = 1");
+        
         stmt2.close();
         conn2.commit();
         conn2.close();
@@ -2266,14 +2276,19 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
                     "update testBlob set b = b + 1 where b = 10000");
             stmt.close();
             stmt2.close();
+            conn2.rollback();
             conn2.close();
             fail("FAIL - should have gotten lock timeout");
         } catch (SQLException se) {
             checkException(LOCK_TIMEOUT, se);
         }
+        
+        // Test that update goes through after the transaction is committed
+        commit();
+        stmt2.executeUpdate("update testBlob set b = b + 1 where b = 10000");
+        
         stmt.close();
         stmt2.close();
-        commit();
         conn2.commit();
         conn2.close();
     }
@@ -2325,11 +2340,16 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
             stmt2.executeUpdate("update testBlob set el = null where b = 1");
             stmt2.close();
             stmt.close();
+            conn2.rollback();
             conn2.close();
             fail("FAIL - statement should timeout");
         } catch (SQLException se) {
             checkException(LOCK_TIMEOUT, se);
         }
+        // Test that update goes through after the transaction is committed
+        commit();
+        stmt2.executeUpdate("update testBlob set el = null where b = 1");
+        
         stmt2.close();
         conn2.commit();
         stmt.close();

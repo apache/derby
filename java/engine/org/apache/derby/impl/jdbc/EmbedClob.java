@@ -144,7 +144,7 @@ final class EmbedClob extends ConnectionChild implements Clob
                 SanityManager.ASSERT(storeStream instanceof Resetable);
 
             try {
-                ((Resetable) storeStream).initStream();
+                this.clob = new StoreStreamClob(storeStream, this);
             } catch (StandardException se) {
                 if (se.getMessageId().equals(SQLState.DATA_CONTAINER_CLOSED)) {
                     throw StandardException
@@ -152,7 +152,6 @@ final class EmbedClob extends ConnectionChild implements Clob
                 }
                 throw se;
             }
-            this.clob = new StoreStreamClob(storeStream, this);
         }
         con.addLOBMapping (this);
     }
