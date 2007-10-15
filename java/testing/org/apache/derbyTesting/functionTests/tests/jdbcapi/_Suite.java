@@ -108,6 +108,7 @@ public class _Suite extends BaseTestCase  {
             suite.addTest(DriverMgrAuthenticationTest.suite());
             // Tests uses JDBC 3.0 datasources
             suite.addTest(PoolDSAuthenticationTest.suite());
+            suite.addTest(PoolXADSCreateShutdownDBTest.suite());
             suite.addTest(XADSAuthenticationTest.suite());
             suite.addTest(XATransactionTest.suite());
 
