@@ -220,8 +220,7 @@ public final class ArrayInputStream extends InputStream implements LimitObjectIn
 
     public final int skipBytes(int n) throws IOException {
 		if ((position + n) > end) {
-
-			throw new EOFException();
+            n = end - position;
 		}
 		position += n;
 		return n;
