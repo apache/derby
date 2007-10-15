@@ -61,7 +61,7 @@ import org.apache.derby.iapi.services.io.ArrayInputStream;
 	present in the page data array.  It is accessed directly by the
 	FileContainer.  Any change made to the borrowed space is not managed or
 	seen by the allocation page.
-	<P
+	<P>
 	The reason for having this borrowed space is so that the container header
 	does not need to have a page of its own.
 
