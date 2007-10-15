@@ -322,7 +322,7 @@ public class SQLParser
 		Utility method for checking that the underlying database uses SQL standard
 		permission checking (GRANT/REVOKE).
 
-		@param command "GRANT" or "REVOKE"
+		@param command "GRANT", "REVOKE", "CREATE/DROP/SET ROLE" or CURRENT_ROLE
     */
 	private void checkSqlStandardAccess( String command) throws StandardException
 	{
@@ -1675,6 +1675,16 @@ public class SQLParser
 		    }
 		}
     }
+
+	boolean isPrivilegeKeywordExceptTrigger(int tokenKind) {
+		return (tokenKind == SELECT ||
+				tokenKind == DELETE ||
+				tokenKind == INSERT ||
+				tokenKind == UPDATE ||
+				tokenKind == REFERENCES ||
+				tokenKind == EXECUTE ||
+				tokenKind == ALL);
+	}
 }
 
 PARSER_END(SQLParser)
@@ -2222,6 +2232,7 @@ TOKEN [IGNORE_CASE] :
 	<BOOLEAN: "boolean">
 |	<CALL: "call">
 |	<CURDATE: "curdate">
+|	<CURRENT_ROLE: "current_role">
 |	<CURTIME: "curtime">
 |   <DATABASE: "database">
 |	<GET_CURRENT_CONNECTION: "getCurrentConnection">
@@ -2229,6 +2240,8 @@ TOKEN [IGNORE_CASE] :
 |	<LONGINT: "bigint">
 |	<LONG: "long">
 |	<LTRIM: "ltrim">
+|	<NONE: "none">
+|	<ROLE: "role">
 |	<RTRIM: "rtrim">
 |	<SUBSTR:	"substr">
 |	<XML:	"xml">
@@ -2767,7 +2780,8 @@ createStatements() throws StandardException :
             statementNode = schemaDefinition() |
             statementNode = viewDefinition(beginToken) |
             statementNode = triggerDefinition() |
-            statementNode = synonymDefinition()
+            statementNode = synonymDefinition() |
+            statementNode = roleDefinition()
         )
         {
         }
@@ -2803,7 +2817,8 @@ dropStatements() throws StandardException :
             statementNode = dropIndexStatement() |
             statementNode = dropAliasStatement() |
             statementNode = dropViewStatement() |
-            statementNode = dropTriggerStatement() 
+            statementNode = dropTriggerStatement() |
+            statementNode = dropRoleStatement()
         )
 	{
 		return statementNode;
@@ -2842,7 +2857,8 @@ spsSetStatement() throws StandardException :
         (
                 statementNode = setIsolationStatement() |
 	        statementNode = setSchemaStatement() |
-		statementNode = setMessageLocaleStatement()
+            statementNode = setMessageLocaleStatement() |
+            statementNode = setRoleStatement()
         )
 	{
 		return statementNode;
@@ -7344,6 +7360,11 @@ generalValueSpecification() throws StandardException :
 	{
 		return parm;
 	}
+|
+	parm = currentRoleNode()
+	{
+		return parm;
+	}
 }
 
 ValueNode
@@ -7374,6 +7395,23 @@ userNode() throws StandardException :
 }
 
 
+/*
+ * <A NAME="currentRoleNode">currentRoleNode</A>
+ */
+ValueNode
+currentRoleNode() throws StandardException :
+{
+}
+{
+	<CURRENT_ROLE>
+	{
+		checkSqlStandardAccess("CURRENT_ROLE");
+		checkVersion( DataDictionary.DD_VERSION_DERBY_10_4, "ROLES");
+		return (ValueNode) nodeFactory.getNode(
+			C_NodeTypes.CURRENT_ROLE_NODE,
+			getContextManager());
+	}
+}
 
 
 /*
@@ -9581,6 +9619,34 @@ schemaDefinition() throws StandardException :
 	)
 }
 
+
+/*
+ * <A NAME="roleDefinition">roleDefinition</A>
+ */
+StatementNode
+roleDefinition() throws StandardException :
+{
+	String	roleName = null;
+}
+{
+	/*
+	 * CREATE ROLE
+	 *
+	 * Not currently supported: [ WITH ADMIN <grantor>]
+	 */
+	<ROLE> roleName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
+	{
+		checkSqlStandardAccess("CREATE ROLE");
+		checkVersion( DataDictionary.DD_VERSION_DERBY_10_4, "ROLES");
+
+		return (StatementNode) nodeFactory.getNode(
+			C_NodeTypes.CREATE_ROLE_NODE,
+			roleName,
+			getContextManager());
+	}
+}
+
+
 /*
  * <A NAME="tableDefinition">tableDefinition</A>
  */
@@ -10598,6 +10664,11 @@ DB2DefaultOption(String columnName) throws StandardException :
 		return value;
 	}
 |
+	value = currentRoleNode()
+	{
+		return value;
+	}
+|
 	LOOKAHEAD({
 				getToken(1).kind == DATE ||
                 getToken(1).kind == TIME ||
@@ -11322,6 +11393,78 @@ simpleValueSpecification() throws StandardException :
 }
 
 
+/*
+ * <A NAME="setRoleStatement">setRoleStatement</A>
+ */
+StatementNode
+setRoleStatement() throws StandardException :
+{
+	StatementNode role;
+}
+{
+	/*
+	 * SET ROLE { <rolename> | NONE | ? }
+	 *
+	 * Can also be prepared with ? argument, cf. SET SCHEMA.
+	 */
+	<ROLE> role = setRoleSpecification()
+	{
+		if (parameterList != null && parameterList.size() > 0)
+		{
+			setUpAndLinkParameters();
+			// set the type of parameter node, it should be a varchar
+			// max Limits.MAX_IDENTIFIER_LENGTH - non nullable
+			ParameterNode p = (ParameterNode)parameterList.elementAt(0);
+			p.setType(new DataTypeDescriptor
+					  (TypeId.getBuiltInTypeId(Types.VARCHAR),
+					   false,
+					   Limits.MAX_IDENTIFIER_LENGTH));
+		}
+		return role;
+	}
+}
+
+
+/*
+ * <A NAME="setRoleSpecification">setRoleSpecification</A>
+ */
+StatementNode
+setRoleSpecification() throws StandardException :
+{
+	String roleName = null;
+        checkSqlStandardAccess("SET ROLE");
+        checkVersion( DataDictionary.DD_VERSION_DERBY_10_4, "ROLES");
+}
+{
+	<NONE>
+	{
+		return (StatementNode) nodeFactory.getNode
+			(C_NodeTypes.SET_ROLE_NODE,
+			 roleName,
+			 null,
+			 getContextManager());
+	}
+|
+	roleName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
+	{
+		return (StatementNode) nodeFactory.getNode
+			(C_NodeTypes.SET_ROLE_NODE,
+			 roleName,
+			 null,
+			 getContextManager());
+	}
+|
+	dynamicParameterSpecification()
+	{
+		return (StatementNode) nodeFactory.getNode
+			(C_NodeTypes.SET_ROLE_NODE,
+			 null,
+			 ReuseFactory.getInteger(StatementType.SET_ROLE_DYNAMIC),
+			 getContextManager());
+	}
+}
+
+
 StatementNode
 setSchemaStatement() throws StandardException :
 {
@@ -11923,6 +12066,32 @@ columnConstraint(TableName constraintName,
 	}
 }
 
+
+/*
+ * <A NAME="dropRoleStatement">dropRoleStatement</A>
+ */
+StatementNode
+dropRoleStatement() throws StandardException :
+{
+	String roleName;
+}
+{
+	/*
+	 * DROP ROLE <rolename>
+	 */
+	<ROLE> roleName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
+	{
+		checkSqlStandardAccess("DROP ROLE");
+		checkVersion( DataDictionary.DD_VERSION_DERBY_10_4, "ROLES");
+
+		return (StatementNode) nodeFactory.getNode(
+			C_NodeTypes.DROP_ROLE_NODE,
+			roleName,
+			getContextManager());
+	}
+}
+
+
 StatementNode
 dropSchemaStatement() throws StandardException :
 {
@@ -12454,9 +12623,33 @@ truncateTableStatement() throws StandardException :
 StatementNode
 grantStatement() throws StandardException :
 {
-    StatementNode node;
+	StatementNode node;
 }
 {
+	/* TRIGGER is a non-reserved word, so it is allowed as role
+	 * identifier.	This gives a parser problem in determining if
+	 * a grant statement is a grant role or grant privilege
+	 * statement. In a grant privilege statement, all the other
+	 * grantable privileges are reserved keywords, except
+	 * TRIGGER. So, if we encounter GRANT TRIGGER, we need to look
+	 * one or two more tokens ahead to determine what kind of
+	 * grant statement we are seeing:
+	 *
+	 * privilege grant:
+	 *	  grant trigger , <any of rest of privilege keywords>
+	 *	  grant trigger on ..
+	 *	  grant <any of rest of privilege keywords>
+	 * role grant:
+	 *	  grant trigger to ..
+	 *	  grant trigger, <NOT any of  rest of privilege keywords>
+	 *	  grant <NOT any of rest of privilege keywords>
+	 */
+	LOOKAHEAD( { getToken(1).kind == GRANT &&
+				((getToken(2).kind == TRIGGER &&
+				  ((getToken(3).kind == COMMA &&
+					isPrivilegeKeywordExceptTrigger(getToken(4).kind)) ||
+				   getToken(3).kind == ON)) ||
+				 isPrivilegeKeywordExceptTrigger(getToken(2).kind)) } )
 	<GRANT>
 	{
 		checkVersion( DataDictionary.DD_VERSION_DERBY_10_2, "GRANT");
@@ -12464,6 +12657,24 @@ grantStatement() throws StandardException :
 	}
 	( node = tableGrantStatement() | node = routineGrantStatement() )
 	{
+		return node;
+	}
+|
+	LOOKAHEAD( { getToken(1).kind == GRANT &&
+				((getToken(2).kind == TRIGGER &&
+				  ((getToken(3).kind == COMMA &&
+					!isPrivilegeKeywordExceptTrigger(getToken(4).kind)) ||
+				   getToken(3).kind == TO)) ||
+				 !isPrivilegeKeywordExceptTrigger(getToken(2).kind)) } )
+	<GRANT>
+	{
+		checkSqlStandardAccess("GRANT <role>");
+		checkVersion( DataDictionary.DD_VERSION_DERBY_10_4, "ROLES");
+	}
+	( node = roleGrantStatement() )
+	{
+		checkVersion( DataDictionary.DD_VERSION_DERBY_10_2, "GRANT");
+		checkSqlStandardAccess( "GRANT");
 		return node;
 	}
 }
@@ -12684,6 +12895,67 @@ grantee( List list)  throws StandardException :
     }
 }
 
+
+/*
+ * <A NAME="roleGrantStatement">roleGrantStatement</A>
+ */
+StatementNode
+roleGrantStatement() throws StandardException :
+{
+	List rolesGranted;
+	List grantees;
+}
+{
+	/*
+	 * GRANT <rolename> {, <rolename>}* TO <authentication identifier>
+	 *									{, <authentication identifier>}*
+	 *
+	 * not implemented: WITH ADMIN OPTION, GRANTED BY clauses
+	 */
+	rolesGranted = roleList()
+	<TO>
+	grantees = granteeList()
+	{
+		return (StatementNode) nodeFactory.getNode
+			(C_NodeTypes.GRANT_ROLE_NODE,
+			 rolesGranted,
+			 grantees,
+			 getContextManager());
+	}
+}
+
+
+/*
+ * <A NAME="roleList">roleList</A>
+ */
+List roleList() throws StandardException :
+{
+    ArrayList list = new ArrayList();
+}
+{
+    roleElement(list) ( <COMMA> roleElement(list) ) *
+    {
+        return list;
+    }
+}
+
+
+/*
+ * <A NAME="roleElement">roleElement</A>
+ */
+void
+roleElement( List list)  throws StandardException :
+{
+    String str;
+}
+{
+    str = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
+    {
+        list.add(str);
+    }
+}
+
+
 /*
  * <A NAME="revokeStatement">revokeStatement</A>
  */
@@ -12693,15 +12965,48 @@ revokeStatement() throws StandardException :
     StatementNode node;
 }
 {
-    <REVOKE>
-      {
-          checkVersion( DataDictionary.DD_VERSION_DERBY_10_2, "REVOKE");
-          checkSqlStandardAccess( "REVOKE");
-      }
-    ( node = tableRevokeStatement() | node = routineRevokeStatement() )
-    {
-        return node;
-    }
+	/* See look-ahead explanation in grantStatement.
+	 *
+	 * privilege revoke:
+	 *	  revoke trigger , <any of rest of privilege keywords>
+	 *	  revoke trigger on ..
+	 *	  revoke <any of rest of privilege keywords>
+	 * role revoke:
+	 *	  revoke trigger from ..
+	 *	  revoke trigger, <NOT any of  rest of privilege keywords>
+	 *	  revoke <NOT any of rest of privilege keywords>
+	 */
+	LOOKAHEAD( { getToken(1).kind == REVOKE &&
+				((getToken(2).kind == TRIGGER &&
+				  ((getToken(3).kind == COMMA &&
+					isPrivilegeKeywordExceptTrigger(getToken(4).kind)) ||
+				   getToken(3).kind == ON)) ||
+				 isPrivilegeKeywordExceptTrigger(getToken(2).kind)) } )
+	<REVOKE>
+	{
+		checkVersion( DataDictionary.DD_VERSION_DERBY_10_2, "REVOKE");
+		checkSqlStandardAccess( "REVOKE");
+	}
+	( node = tableRevokeStatement() | node = routineRevokeStatement() )
+	{
+		return node;
+	}
+|
+	LOOKAHEAD( { getToken(1).kind == REVOKE &&
+				((getToken(2).kind == TRIGGER &&
+				  ((getToken(3).kind == COMMA &&
+					!isPrivilegeKeywordExceptTrigger(getToken(4).kind)) ||
+				   getToken(3).kind == FROM)) ||
+				 !isPrivilegeKeywordExceptTrigger(getToken(2).kind)) } )
+	<REVOKE>
+	{
+		checkSqlStandardAccess("REVOKE <role>");
+		checkVersion( DataDictionary.DD_VERSION_DERBY_10_4, "ROLES");
+	}
+	( node = roleRevokeStatement() )
+	{
+		return node;
+	}
 }
 
 /*
@@ -12746,6 +13051,29 @@ routineRevokeStatement() throws StandardException :
                                     getContextManager());
     }
 }// end of routineRevokeStatement
+
+
+/*
+ * <A NAME="roleRevokeStatement">roleRevokeStatement</A>
+ */
+StatementNode
+roleRevokeStatement() throws StandardException :
+{
+	List rolesRevokeed;
+	List grantees;
+}
+{
+	rolesRevokeed = roleList()
+	<FROM>
+	grantees = granteeList()
+	{
+		return (StatementNode) nodeFactory.getNode
+			(C_NodeTypes.REVOKE_ROLE_NODE,
+			 rolesRevokeed,
+			 grantees,
+			 getContextManager());
+	}
+}
 
 /*
  * <A NAME="identifier">identifier</A>
@@ -12970,6 +13298,7 @@ reservedKeyword() :
 |	tok = <NVARCHAR> 
 |	tok = <NEXT>
 |	tok = <NO>
+|   tok = <NONE>
 |	tok = <NOT>
 |	tok = <NULL>
 |	tok = <NULLIF>
@@ -13049,6 +13378,7 @@ reservedKeyword() :
 	/* Additional JSQL reserved keywords -- non-SQL92 reserved Keywords */
 |	tok = <BOOLEAN>
 |	tok = <CALL>
+|   tok = <CURRENT_ROLE>
 |	tok = <EXPLAIN>
 |	tok = <LONGINT>
 |	tok = <LTRIM>
@@ -13184,6 +13514,7 @@ nonReservedKeyword()  :
 	|	tok = <RETAIN>
 	|	tok = <RETURNING>
 	|	tok = <RETURNS>
+	|	tok = <ROLE>
 	|	tok = <ROW>
 //	|	tok = <ROW_COUNT>
 	|   tok = <RR>

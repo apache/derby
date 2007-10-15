@@ -51,7 +51,8 @@ public interface StatementType
 	
 	public static final int SET_SCHEMA_USER = 1;
 	public static final int SET_SCHEMA_DYNAMIC = 2;
-	
+
+    public static final int SET_ROLE_DYNAMIC = 1;	
 }
 
 

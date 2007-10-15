@@ -217,6 +217,18 @@ public interface C_NodeTypes
     static final int XML_EXISTS_OPERATOR_NODE = 202;
     static final int XML_QUERY_OPERATOR_NODE = 203;
 
+    // Roles
+    static final int CURRENT_ROLE_NODE = 210;
+    static final int CREATE_ROLE_NODE = 211;
+    static final int SET_ROLE_NODE = 212;
+    static final int SET_ROLE_DYNAMIC = 213;
+    static final int DROP_ROLE_NODE = 214;
+    static final int GRANT_ROLE_NODE = 215;
+    static final int REVOKE_ROLE_NODE = 216;
+
+    // Final value in set, keep up to date!
+    static final int FINAL_VALUE = REVOKE_ROLE_NODE;
+
     /**
      * Extensions to this interface can use nodetypes > MAX_NODE_TYPE with out fear of collision
      * with C_NodeTypes
