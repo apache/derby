@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.sql.Blob;
 import java.sql.CallableStatement;
 import java.sql.Clob;
@@ -45,6 +46,7 @@ import org.apache.derbyTesting.junit.BigDecimalHandler;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
+import org.apache.derbyTesting.junit.Utilities;
 
 /**
  * 
@@ -358,7 +360,103 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         conn.commit();
 
     }
-
+    /**
+     * Test setBigDecimal does not lose fractional digits
+     * @throws Exception
+     */
+    public void testDerby2073() throws Exception
+    {
+        // Cannot use setBigDecimal with J2ME
+        if (!JDBC.vmSupportsJDBC2())
+            return;
+        
+        
+        Statement s = createStatement();
+        s.executeUpdate("CREATE TABLE DERBY_2073_TAB (dc DECIMAL(10,2), db double, r real, i int)");
+        PreparedStatement ps = prepareStatement("INSERT INTO DERBY_2073_TAB VALUES(?,?,?,?)");
+        BigDecimal value = new BigDecimal("123.45");
+        ps.setBigDecimal(1, value);
+        ps.setBigDecimal(2, value);
+        ps.setBigDecimal(3, value);
+        ps.setBigDecimal(4, value);
+        ps.executeUpdate();
+        // Test with null values as the change sets precision/scale for null values differently
+        ps.setBigDecimal(1, null);
+        ps.setBigDecimal(2, null);
+        ps.setBigDecimal(3, null);
+        ps.setBigDecimal(4, null);
+        ps.executeUpdate();
+        
+        // Test with negative scale.
+        value = new BigDecimal(new BigInteger("2"), -3);
+        ps.setBigDecimal(1,value);
+        ps.setBigDecimal(2,value);
+        ps.setBigDecimal(3,value);
+        ps.setBigDecimal(4,value);
+        ps.executeUpdate();
+        
+        value = new BigDecimal("123.45");
+        // Test with setObject and scale of 2
+        ps.setObject(1, value,java.sql.Types.DECIMAL,2);
+        ps.setObject(2, value,java.sql.Types.DECIMAL,2);
+        ps.setObject(3, value,java.sql.Types.DECIMAL,2);
+        ps.setObject(4, value,java.sql.Types.DECIMAL,2);
+        ps.executeUpdate();
+        
+        // Test with setObject and scale of 0
+        ps.setObject(1, value,java.sql.Types.DECIMAL,0);
+        ps.setObject(2, value,java.sql.Types.DECIMAL,0);
+        ps.setObject(3, value,java.sql.Types.DECIMAL,0);
+        ps.setObject(4, value,java.sql.Types.DECIMAL,0);
+        ps.executeUpdate();
+        
+        
+        // Test with setObject and type with no scale.
+        // should default to scale 0
+        ps.setObject(1, value,java.sql.Types.DECIMAL);
+        ps.setObject(2, value,java.sql.Types.DECIMAL);
+        ps.setObject(3, value,java.sql.Types.DECIMAL);
+        ps.setObject(4, value,java.sql.Types.DECIMAL);
+        ps.executeUpdate();
+        
+        // Test with setObject and no type and no scale.
+        // Keeps the fractional digits.
+        ps.setObject(1, value);
+        ps.setObject(2, value);
+        ps.setObject(3, value);
+        ps.setObject(4, value);
+        ps.executeUpdate();
+        
+        // Test with setObject and negative scale.
+        value = new BigDecimal(new BigInteger("2"), -3);
+        ps.setObject(1,value);
+        ps.setObject(2,value);
+        ps.setObject(3,value);
+        ps.setObject(4,value);
+        ps.executeUpdate();
+        ResultSet rs = s.executeQuery("SELECT * FROM DERBY_2073_TAB");
+        String [][] expectedResults = new String [][]
+               {{"123.45","123.45","123.45","123"},
+                {null,null,null,null},
+                {"2000.00","2000.0","2000.0","2000"},
+                {"123.45","123.45","123.45","123"},
+                {"123.00","123.0","123.0","123"},
+                {"123.00","123.0","123.0","123"},
+                {"123.45","123.45","123.45","123"},
+                {"2000.00","2000.0","2000.0","2000"}};
+                                      
+                                                    
+       // Cannot run for embedded for now because embedded
+       // does not adjust the scale if the  column is 
+        // not BigDecimal (e.g. double or real or varchar.) (DERBY-3128)
+        if (usingDerbyNetClient())
+            JDBC.assertFullResultSet(rs, expectedResults);
+           
+        
+        s.executeUpdate("DROP TABLE DERBY_2073_TAB");
+        
+    }
+    
     public void testParameterMapping() throws Exception {
         Connection conn = getConnection();
 

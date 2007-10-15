@@ -30,6 +30,7 @@ import org.apache.derby.client.am.Section;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.Types;
 import org.apache.derby.client.am.ClientMessageId;
+import org.apache.derby.client.am.Utils;
 import org.apache.derby.shared.common.reference.SQLState;
 
 // For performance, should we worry about the ordering of our DDM command parameters
@@ -1097,6 +1098,8 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
     // Consider refacctor so that this does not even have to look
     // at the actual object data, and only uses tags from the meta data
     // only have to call this once, rather than calling this for every input row
+    // Comment: I don't think that it is possible to send decimal values without looking at the data for 
+    // precision and scale (Kathey Marsden 10/11)
     // backburner: after refactoring this, later on, think about replacing case statements with table lookups
     private java.util.Hashtable computeProtocolTypesAndLengths(Object[] inputRow,
                                                                ColumnMetaData parameterMetaData,
@@ -1208,32 +1211,35 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                 case java.sql.Types.DECIMAL:
                     // lid: PROTOCOL_TYPE_NDECIMAL
                     // dataFormat: java.math.BigDecimal
-                    // input only:
-                    //   if null and describe input - use describe input precision and scale
-                    //   if not null and describe input - calculate precision and actual scale from data
-                    //   if null and no describe input - guess with precision 1 scale 0
-                    //   if not null and no describe input - calculate precision and actual scale from data
-                    // output only:
-                    //   use largest precision/scale based on registered scale from registerOutParameter
-                    // inout:
-                    //   if null - use largest precision/scale based on scale from registerOutParameter
-                    //   if not null - write bigDecimal () pass registered scale so it can pad, you don't even
-                    //      have to look at the actual scale at this level.
-                    /*
-                    if (parameterMetaData.isGuessed) {
-                      java.math.BigDecimal bigDecimal = (java.math.BigDecimal) inputRow[i];
-                      int precision = Utils.computeBigDecimalPrecision (bigDecimal);
-                      lidAndLengths[i][1] = (precision << 8) + // use precision above
-                                          (bigDecimal.scale() << 0);
+                    // if null - guess with precision 1, scale 0
+                    // if not null - get scale from data and calculate maximum precision.
+                    // DERBY-2073. Get scale and precision from data so we don't lose fractional digits.
+                    java.math.BigDecimal bigDecimal = (java.math.BigDecimal) inputRow[i];
+                    int scale;
+                    int precision;
+                    
+                    if (bigDecimal == null)
+                    {
+                        scale = 0;
+                        precision = 1;
                     }
-                    */
-                    // Split this entire method into two parts, the first method is called only once and the inputRow is not passed,!!
-                    // the second method is called for every inputRow and overrides inputDA lengths/scales based upon the acutal data!
-                    // for decimal and blob columns only
-                    int precision = parameterMetaData.sqlPrecision_[i];
-                    int scale = parameterMetaData.sqlScale_[i];
+                    else
+                    {
+                        // adjust scale if it is negative. Packed Decimal cannot handle 
+                        // negative scale. We don't want to change the original 
+                        // object so make a new one.
+                        if (bigDecimal.scale() < 0) 
+                        {
+                            bigDecimal =  bigDecimal.setScale(0);
+                            inputRow[i] = bigDecimal;
+                        }                        
+                        scale = bigDecimal.scale();
+                        precision = Utils.computeBigDecimalPrecision(bigDecimal);
+                    }                    
                     lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NDECIMAL;
-                    lidAndLengths[i][1] = (precision << 8) + (scale << 0);
+                    lidAndLengths[i][1] = (precision << 8) + // use precision above
+                        (scale << 0);
+                    
                     break;
                 case java.sql.Types.DATE:
                     // for input, output, and inout parameters
