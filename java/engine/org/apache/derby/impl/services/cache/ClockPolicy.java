@@ -22,6 +22,7 @@
 package org.apache.derby.impl.services.cache;
 
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.cache.Cacheable;
 import org.apache.derby.iapi.services.sanity.SanityManager;
@@ -88,6 +89,13 @@ final class ClockPolicy implements ReplacementPolicy {
     private int hand;
 
     /**
+     * The number of free entries. This is the number of objects that have been
+     * removed from the cache and whose entries are free to be reused without
+     * eviction.
+     */
+    private final AtomicInteger freeEntries = new AtomicInteger();
+
+    /**
      * Create a new <code>ClockPolicy</code> instance.
      *
      * @param cacheManager the cache manager that requests this policy
@@ -108,16 +116,27 @@ final class ClockPolicy implements ReplacementPolicy {
      * @exception StandardException if an error occurs when inserting the entry
      */
     public Callback insertEntry(CacheEntry entry) throws StandardException {
+
+        final boolean isFull;
         synchronized (clock) {
             if (clock.size() < maxSize) {
-                // TODO - check whether there are free entries that could be
-                // used instead of growing
-                return grow(entry);
+                if (freeEntries.get() == 0) {
+                    // We have not reached the maximum size yet, and there's no
+                    // free entry to reuse. Make room by growing.
+                    return grow(entry);
+                }
+                // The cache is not full, but there are free entries that can
+                // be reused.
+                isFull = false;
+            } else {
+                // The cache is full, so we'll need to rotate the clock hand
+                // and evict an object.
+                isFull = true;
             }
         }
 
         // rotate clock hand (look at up to 20% of the cache)
-        Holder h = rotateClock(entry, (float) 0.2);
+        Holder h = rotateClock(entry, (float) 0.2, isFull);
         if (h != null) {
             return h;
         }
@@ -135,7 +154,7 @@ final class ClockPolicy implements ReplacementPolicy {
      * <code>ConcurrentCache</code> can notify the clock policy about events
      * relevant to the clock algorithm.
      */
-    private static class Holder implements Callback {
+    private class Holder implements Callback {
         /**
          * Flag indicating whether or not this entry has been accessed
          * recently. Should only be accessed/modified when the current thread
@@ -183,6 +202,13 @@ final class ClockPolicy implements ReplacementPolicy {
             freedCacheable = entry.getCacheable();
             entry = null;
             recentlyUsed = false;
+            // let others know that a free entry is available
+            int free = freeEntries.incrementAndGet();
+            if (SanityManager.DEBUG) {
+                SanityManager.ASSERT(
+                    free > 0,
+                    "freeEntries should be greater than 0, but is " + free);
+            }
         }
 
         /**
@@ -197,6 +223,11 @@ final class ClockPolicy implements ReplacementPolicy {
         synchronized boolean takeIfFree(CacheEntry e) {
             if (entry == null) {
                 // the holder is free - take it!
+                int free = freeEntries.decrementAndGet();
+                if (SanityManager.DEBUG) {
+                    SanityManager.ASSERT(
+                        free >= 0, "freeEntries is negative: " + free);
+                }
                 e.setCacheable(freedCacheable);
                 e.setCallback(this);
                 entry = e;
@@ -260,34 +291,52 @@ final class ClockPolicy implements ReplacementPolicy {
     }
 
     /**
-     * Rotate the clock in order to find a free space for a new entry, or a
-     * <em>not recently used</em> entry that we can evict to make free
-     * space. Entries that we move past are marked as recently used.
+     * Rotate the clock in order to find a free space for a new entry. If
+     * <code>allowEvictions</code> is <code>true</code>, an not recently used
+     * object might be evicted to make room for the new entry. Otherwise, only
+     * unused entries are searched for. When evictions are allowed, entries are
+     * marked as not recently used when the clock hand sweeps over them. The
+     * search stops when a reusable entry is found, or when as many entries as
+     * specified by <code>partOfClock</code> have been checked. If there are
+     * free (unused) entries, the search will continue until a reusable entry
+     * is found, regardless of how many entries that need to be checked.
      *
      * @param entry the entry to insert
      * @param partOfClock how large part of the clock to look at before we give
      * up
+     * @param allowEvictions tells whether evictions are allowed (normally
+     * <code>true</code> if the cache is full and <code>false</code> otherwise)
      * @return a holder that we can reuse, or <code>null</code> if we didn't
      * find one
      */
-    private Holder rotateClock(CacheEntry entry, float partOfClock)
+    private Holder rotateClock(CacheEntry entry, float partOfClock,
+                               boolean allowEvictions)
             throws StandardException {
 
         // calculate how many items to check
         int itemsToCheck;
-        synchronized (clock) {
-            itemsToCheck = clock.size();
-            if (itemsToCheck < 20) {
+        if (allowEvictions) {
+            final int size;
+            synchronized (clock) {
+                size = clock.size();
+            }
+            if (size < 20) {
                 // if we have a very small cache, allow two rounds before
                 // giving up
-                itemsToCheck *= 2;
+                itemsToCheck = size * 2;
             } else {
                 // otherwise, just check a fraction of the clock
-                itemsToCheck *= partOfClock;
+                itemsToCheck = (int) (size * partOfClock);
             }
+        } else {
+            // we don't allow evictions, so we shouldn't check any items unless
+            // there are unused ones
+            itemsToCheck = 0;
         }
 
-        while (itemsToCheck-- > 0) {
+        // Check up to itemsToCheck entries before giving up, but don't give up
+        // if we know there are unused entries.
+        while (itemsToCheck-- > 0 || freeEntries.get() > 0) {
 
             final Holder h = moveHand();
             final CacheEntry e = h.getEntry();
@@ -298,6 +347,11 @@ final class ClockPolicy implements ReplacementPolicy {
                 }
                 // Someone else grabbed this entry between the calls to
                 // getEntry() and takeIfFree(). Just move on to the next entry.
+                continue;
+            }
+
+            if (!allowEvictions) {
+                // Evictions are not allowed, so we can't reuse this entry.
                 continue;
             }
 
