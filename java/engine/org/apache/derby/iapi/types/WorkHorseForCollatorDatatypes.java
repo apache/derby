@@ -125,15 +125,15 @@ final class WorkHorseForCollatorDatatypes
 			SanityManager.ASSERT(
 				pattern instanceof CollationElementsInterface,
 				"Both the operands must be instances of CollationElementsInterface");
-		CollationElementsInterface patternToCheck = (CollationElementsInterface) pattern;
-		likeResult = Like.like(
-				getCollationElementsForString(),
-				getCountOfCollationElements(),
-				patternToCheck.getCollationElementsForString(),
-				patternToCheck.getCountOfCollationElements(),
+		likeResult = Like.like(stringData.getCharArray(), 
+				stringData.getLength(), 
+				((SQLChar)pattern).getCharArray(), 
+				pattern.getLength(), 
+				null, 
+				0,
 				collatorForCharacterDatatypes);
 
-		return SQLBoolean.truthValue(stringData,
+		return SQLBoolean.truthValue(stringData ,
 									 pattern,
 									 likeResult);
 	}
@@ -169,7 +169,6 @@ final class WorkHorseForCollatorDatatypes
 			throw StandardException.newException(SQLState.LANG_ESCAPE_IS_NULL);
 		}
 
-		CollationElementsInterface patternToCheck = (CollationElementsInterface) pattern;
 		CollationElementsInterface escapeCharacter = (CollationElementsInterface) escape;
 
 		if (escapeCharacter.getCollationElementsForString() != null && 
@@ -178,13 +177,12 @@ final class WorkHorseForCollatorDatatypes
 			throw StandardException.newException(SQLState.LANG_INVALID_ESCAPE_CHARACTER,
 					new String(escapeCharacter.toString()));
 		}
-		likeResult = Like.like(
-				getCollationElementsForString(),
-				getCountOfCollationElements(),
-				patternToCheck.getCollationElementsForString(),
-				patternToCheck.getCountOfCollationElements(),
-				escapeCharacter.getCollationElementsForString(),
-				escapeCharacter.getCountOfCollationElements(),
+		likeResult = Like.like(stringData.getCharArray(), 
+				stringData.getLength(), 
+				((SQLChar)pattern).getCharArray(), 
+				pattern.getLength(), 
+				((SQLChar)escape).getCharArray(), 
+				escape.getLength(),
 				collatorForCharacterDatatypes);
 
 		return SQLBoolean.truthValue(stringData,

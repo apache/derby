@@ -321,11 +321,11 @@ public class CollationTest2 extends BaseJDBCTestCase
     private static final int[] NORWAY_LIKE_RESULT =
     {
         0,
-        0,
+        -1,
         9,
-        9,
+        -1,
         8,
-        8,
+        -1,
         8,
         10
     };
@@ -1797,6 +1797,7 @@ public class CollationTest2 extends BaseJDBCTestCase
           {"\u00ADa"}, 
           {"ekstra\u00ADarbeid"}, 
           {"ekstrabetaling"}, 
+          {"ekstraarbeid"}, 
           {"Wanvik"}, 
           {"W\u00E5gan"},
           {"Waagan"}, 

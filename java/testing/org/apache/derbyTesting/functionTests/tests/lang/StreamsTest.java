@@ -156,16 +156,16 @@ public class StreamsTest extends BaseJDBCTestCase {
         s.executeUpdate("insert into t4 values (1, 'ccccc')");
         ps = prepareStatement("insert into t4 values(?, ?)");
         insertLongString(ps, 6, false);
-        s.executeUpdate("insert into t4 values (3, 'aaaaabbbbbb')");
+        s.executeUpdate("insert into t4 values (3, 'abbb')");
         s.executeUpdate("insert into t4 values (4, 'bbbbbb')");
         insertLongString(ps, 5, false);
         ps.close();
         ResultSet rs = s
         .executeQuery("select id, cast(longcol as varchar(8192)) lcol from t4 order by lcol");
         
-        assertTrue(rs.next()); // 3, aaaaabbbbbb
+        assertTrue(rs.next()); // 3, abbb
         assertEquals(3, rs.getInt(1));
-        assertEquals("aaaaabbbbbb", rs.getString(2));
+        assertEquals("abbb", rs.getString(2));
         
         assertTrue(rs.next()); // 4, bbbbbb
         assertEquals(4, rs.getInt(1));

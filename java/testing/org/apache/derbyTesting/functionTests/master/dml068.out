@@ -51,7 +51,7 @@ ij> INSERT INTO AA VALUES(')rpr');
 1 row inserted/updated/deleted
 ij> INSERT INTO AA VALUES('*ast');
 1 row inserted/updated/deleted
-ij> INSERT INTO AA VALUES('aaaa');
+ij> INSERT INTO AA VALUES('bbbb');
 1 row inserted/updated/deleted
 ij> INSERT INTO AA VALUES(':col');
 1 row inserted/updated/deleted
@@ -93,7 +93,7 @@ ij> INSERT INTO AA VALUES('?que');
 1 row inserted/updated/deleted
 ij> INSERT INTO AA VALUES('_und');
 1 row inserted/updated/deleted
-ij> INSERT INTO AA VALUES('AAAA');
+ij> INSERT INTO AA VALUES('BBBB');
 1 row inserted/updated/deleted
 ij> INSERT INTO AA VALUES('0000');
 1 row inserted/updated/deleted
@@ -134,7 +134,7 @@ $dol
 > gt                
 ?que                
 @ at                
-AAAA                
+BBBB                
 ZZZZ                
 [lbk                
 \bsl                
@@ -142,7 +142,7 @@ ZZZZ
 ^hat                
 _und                
 `-qt                
-aaaa                
+bbbb                
 zzzz                
 {lbc                
 |dvt                
@@ -171,7 +171,7 @@ $dol
 (lpr                
 )rpr                
 *ast                
-aaaa                
+bbbb                
 :col                
 +plu                
 ;sem                
@@ -192,7 +192,7 @@ aaaa
 / sl                
 ?que                
 _und                
-AAAA                
+BBBB                
 0000                
 9999                
 zzzz                
