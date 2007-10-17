@@ -31,6 +31,7 @@ import org.apache.derby.shared.common.reference.JDBC40Translation;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
+import org.apache.derbyTesting.junit.Decorator;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 import junit.framework.Test;
@@ -56,11 +57,19 @@ public class TableFunctionTest extends BaseJDBCTestCase
         "SIMPLEFUNCTIONTABLE",
         "invert",
         "returnsACoupleRows",
+        "getXXXrecord",
         "returnsAllLegalDatatypes",
         "missingConstructor",
         "zeroArgConstructorNotPublic",
         "constructorException",
         "goodVTICosting",
+        "allStringTypesFunction",
+    };
+    
+    // tables to drop at teardown time
+    private static  final   String[]    TABLE_NAMES =
+    {
+        "allStringTypesTable",
     };
     
     private static  final   String[][]  SIMPLE_ROWS =
@@ -95,6 +104,55 @@ public class TableFunctionTest extends BaseJDBCTestCase
             null,   // TIMESTAMP
             null,   // VARCHAR
             null,   // VARCHAR FOR BIT DATA
+        },
+    };
+
+    private static  final   String  EXPECTED_GET_XXX_CALLS =
+        "getLong " +            // BIGINT
+        "getBlob " +            // BLOB
+        "getString " +          // CHAR
+        "getBytes " +           // CHAR FOR BIT DATA
+        "getString " +          // CLOB
+        "getDate " +            // DATE
+        "getBigDecimal " +      // DECIMAL
+        "getDouble " +          // DOUBLE
+        "getDouble " +          // DOUBLE PRECISION
+        "getFloat " +           // FLOAT( 23 )
+        "getDouble " +          // FLOAT( 24 )
+        "getInt " +             // INTEGER
+        "getString " +          // LONG VARCHAR
+        "getBytes " +           // LONG VARCHAR FOR BIT DATA
+        "getBigDecimal " +      // NUMERIC
+        "getFloat " +           // REAL
+        "getShort " +           // SMALLINT
+        "getTime " +            // TIME
+        "getTimestamp " +       // TIMESTAMP
+        "getString " +          // VARCHAR
+        "getBytes ";            // VARCHAR FOR BIT DATA
+
+    private static  final   String[]  STRING_TYPES =
+    {
+        "CHAR( 20 )",
+        //"CLOB", long string types are not comparable
+        //"LONG VARCHAR", long string types are not comparable
+        "VARCHAR( 20 )",
+    };
+    
+    private static  final   int[]  STRING_JDBC_TYPES =
+    {
+        Types.CHAR,
+        //Types.CLOB, long string types are not comparable
+        //Types.LONGVARCHAR, long string types are not comparable
+        Types.VARCHAR,
+    };
+    
+    private static  final   String[][]  ALL_STRING_TYPES_ROWS =
+    {
+        {
+            "char col",   // CHAR
+            //"clob col", long string types are not comparable
+            //"long varchar col",   // LONG VARCHAR long string types are not comparable
+            "varchar col",   // VARCHAR
         },
     };
 
@@ -725,7 +783,8 @@ public class TableFunctionTest extends BaseJDBCTestCase
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
-    private DatabaseMetaData _databaseMetaData;
+    private boolean             _usingLocaleSpecificCollation;
+    private DatabaseMetaData    _databaseMetaData;
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -754,11 +813,28 @@ public class TableFunctionTest extends BaseJDBCTestCase
     {
         TestSuite       suite = new TestSuite( "TableFunctionTest" );
 
-        suite.addTest( new TableFunctionTest( "testTableFunctions" ) );
+        suite.addTest( new TableFunctionTest( "noSpecialCollation" ) );
+        suite.addTest( collatedSuite( "en", "specialCollation" ) );
 
         return suite;
     }
     
+    /**
+     * Return a suite that uses a single use database with
+     * a primary fixture from this test plus potentially other
+     * fixtures.
+     * @param locale Locale to use for the database
+     * @param baseFixture Base fixture from this test.
+     * @return suite of tests to run for the given locale
+     */
+    private static Test collatedSuite(String locale, String baseFixture)
+    {
+        TestSuite suite = new TestSuite( "TableFunctionTest:territory=" + locale );
+        suite.addTest( new TableFunctionTest( baseFixture ) );
+
+        return Decorator.territoryCollatedDatabase( suite, locale );
+    }
+
     protected void    setUp()
         throws Exception
     {
@@ -784,9 +860,29 @@ public class TableFunctionTest extends BaseJDBCTestCase
     ///////////////////////////////////////////////////////////////////////////////////
     
     /**
+     * Verify table functions in a vanilla database without locale-specific collations.
+     */
+    public void noSpecialCollation()
+        throws Exception
+    {
+        _usingLocaleSpecificCollation = false;
+        tableFunctionTest();
+    }
+    
+    /**
+     * Verify table functions in a database with a special collation.
+     */
+    public void specialCollation()
+        throws Exception
+    {
+        _usingLocaleSpecificCollation = true;
+        tableFunctionTest();
+    }
+    
+    /**
      * Verify table functions.
      */
-    public void testTableFunctions()
+    public void tableFunctionTest()
         throws Exception
     {
         badDDL();
@@ -796,6 +892,8 @@ public class TableFunctionTest extends BaseJDBCTestCase
         simpleVTIResults();
         allLegalDatatypesVTIResults();
         vtiCosting();
+        
+        collationTest();
     }
     
     /**
@@ -964,6 +1062,16 @@ public class TableFunctionTest extends BaseJDBCTestCase
     {
         goodStatement
             (
+             "create function getXXXrecord()\n" +
+             "returns varchar( 1000 )\n" +
+             "language java\n" +
+             "parameter style java\n" +
+             "no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.StringArrayVTI.getXXXrecord'\n"
+             );
+
+        goodStatement
+            (
              "create function returnsAllLegalDatatypes( intArgument int, varcharArgument varchar( 10 ) )\n" +
              "returns TABLE\n" +
              "  (\n" +
@@ -1027,6 +1135,74 @@ public class TableFunctionTest extends BaseJDBCTestCase
              );
         
         assertFunctionDBMD( "RETURNSALLLEGALDATATYPES", GF_RADT , GFC_RADT );
+
+        checkGetXXXCalls();
+    }
+    
+    /**
+     * Verify that the correct getXXX() methods are called by Derby. If Derby
+     * changes so that different getXXX() methods are called for these
+     * datatypes, then the user documentation will have to be adjusted. These
+     * are the methods which we tell users they must implement.
+     */
+    private void  checkGetXXXCalls()
+        throws Exception
+    {
+        int             datatypeCount = ALL_TYPES_ROWS[ 0 ].length;
+        StringBuffer    buffer = new StringBuffer();
+
+        buffer.append( "select s.*\n" );
+        buffer.append( "    from TABLE( returnsAllLegalDatatypes( 1, 'one' ) ) s\n" );
+        buffer.append( "    where\n" );
+        for ( int i = 0; i < datatypeCount; i++ )
+        {
+            String  rc = "s.column" + i;
+            if ( i > 0 ) { buffer.append( "   and " ); }
+            buffer.append( "( " + rc + " is null )\n" );
+        }
+
+        assertResults
+            (
+             buffer.toString(),
+             ALL_TYPES_ROWS,
+             new int[]
+                {
+                    Types.BIGINT,
+                    Types.BLOB,
+                    Types.CHAR,
+                    Types.BINARY,
+                    Types.CLOB,
+                    Types.DATE,
+                    Types.DECIMAL,
+                    Types.DOUBLE,
+                    Types.DOUBLE,
+                    Types.REAL,
+                    Types.DOUBLE,
+                    Types.INTEGER,
+                    Types.LONGVARCHAR,
+                    Types.LONGVARBINARY,
+                    Types.NUMERIC,
+                    Types.REAL,
+                    Types.SMALLINT,
+                    Types.TIME,
+                    Types.TIMESTAMP,
+                    Types.VARCHAR,
+                    Types.VARBINARY,
+                }
+             );
+
+        PreparedStatement   ps = prepareStatement( "values getXXXrecord()" );
+        ResultSet           rs = ps.executeQuery();
+
+        rs.next();
+
+        String  actualGetXXXCalls = rs.getString( 1 );
+
+        rs.close();
+        ps.close();
+        
+        println( StringArrayVTI.getXXXrecord() );
+        assertEquals( EXPECTED_GET_XXX_CALLS, actualGetXXXCalls );
     }
     
     /**
@@ -1126,6 +1302,132 @@ public class TableFunctionTest extends BaseJDBCTestCase
         assertEquals( StringArrayVTI.FAKE_INSTANTIATION_COST, readDoubleTag( optimizerStats, ESTIMATED_COST ), 0.0 );
     }
     
+    /**
+     * Verify that Derby uses the same collation logic on columns in real Tables
+     * and in Table Functions.
+     */
+    private void  collationTest()
+        throws Exception
+    {
+        assertEquals( STRING_TYPES.length, ALL_STRING_TYPES_ROWS[ 0 ].length );
+        
+        StringBuffer    rowSet = new StringBuffer();
+        int             stringTypeCount = STRING_TYPES.length;
+
+        rowSet.append( "(\n" );
+        for ( int i = 0; i < stringTypeCount; i++ )
+        {
+            rowSet.append( '\t' );
+            if ( i > 0 ) { rowSet.append( ", " ); }
+            rowSet.append( "column" + i + " " + STRING_TYPES[ i ] + "\n" );
+        }
+        rowSet.append( ")\n" );
+        
+        goodStatement
+            (
+             "create table allStringTypesTable\n" +
+             rowSet.toString()
+             );
+
+        goodStatement
+            (
+             "create function allStringTypesFunction()\n" +
+             "returns TABLE\n" +
+             rowSet.toString() +
+             "language java\n" +
+             "parameter style DERBY_JDBC_RESULT_SET\n" +
+             "no sql\n" +
+             "external name '" + getClass().getName() + ".allStringTypesFunction'\n"
+             );
+
+        // populate table
+        StringBuffer    insertSql = new StringBuffer();
+        insertSql.append( "insert into allStringTypesTable values\n" );
+        insertSql.append( "(\n" );
+        for ( int i = 0; i < stringTypeCount; i++ )
+        {
+            if ( i > 0 ) { insertSql.append( ", " ); }
+            insertSql.append( "?" );
+        }
+        insertSql.append( ")\n" );
+
+        PreparedStatement   ps = chattyPrepare( insertSql.toString() );
+        int                 rowCount = ALL_STRING_TYPES_ROWS.length;
+        for ( int i = 0; i < rowCount; i++ )
+        {
+            for ( int j = 0; j < stringTypeCount; j++ )
+            {
+                ps.setString( j + 1, ALL_STRING_TYPES_ROWS[ i ][ j ] );
+            }
+            ps.execute();
+        }
+        ps.close();
+
+        // now verify that the string columns in the table are comparable to the
+        // string columns returned by the function. they would not be comparable
+        // if they had different collations.
+        StringBuffer    compareRows = new StringBuffer();
+        compareRows.append
+            (
+             "select f.*\n" +
+             "    from TABLE( allStringTypesFunction() ) f,\n" +
+             "    allStringTypesTable t\n" +
+             "where\n" );
+        for ( int i = 0; i < stringTypeCount; i++ )
+        {
+            String  fcol = "f.column" + i;
+            String  tcol = "t.column" + i;
+
+            if ( i > 0 ) { compareRows.append( " and " ); }
+            compareRows.append( fcol + " = " + tcol );
+        }
+        
+        assertResults
+            (
+             compareRows.toString(),
+             ALL_STRING_TYPES_ROWS,
+             STRING_JDBC_TYPES
+             );
+
+        // now verify that with default collation, we can compare the function
+        // columns to system identifiers. however, with locale-specific
+        // collations, these comparisons should fail.
+        compareRows = new StringBuffer();
+        compareRows.append
+            (
+             "select f.*\n" +
+             "    from TABLE( allStringTypesFunction() ) f,\n" +
+             "    sys.systables t\n" +
+             "where\n" );
+        for ( int i = 0; i < stringTypeCount; i++ )
+        {
+            String  fcol = "f.column" + i;
+            String  tcol = "t.tablename";
+
+            if ( i > 0 ) { compareRows.append( " and " ); }
+            compareRows.append( fcol + " = " + tcol );
+        }
+
+        if ( _usingLocaleSpecificCollation )
+        {
+            expectError
+                (
+                 "42818",
+                 compareRows.toString()
+                 );
+
+        }
+        else
+        {
+            assertResults
+                (
+                 compareRows.toString(),
+                 new  String[][] {},
+                 STRING_JDBC_TYPES
+                 );
+        }
+    }
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // Derby FUNCTIONS
@@ -1156,6 +1458,14 @@ public class TableFunctionTest extends BaseJDBCTestCase
         return makeVTI( ALL_TYPES_ROWS );
     }
 
+    /**
+     * A VTI which returns rows having columns of all string datatypes.
+     */
+    public  static  ResultSet allStringTypesFunction()
+    {
+        return makeVTI( ALL_STRING_TYPES_ROWS );
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // MINIONS
@@ -1170,7 +1480,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
     {
         println( "\nExpecting good results from " + sql );
 
-        String[]    columnNames = makeColumnNames( rows[ 0 ].length, "COLUMN" );
+        String[]    columnNames = makeColumnNames( expectedJdbcTypes.length, "COLUMN" );
 
         try {
             PreparedStatement    ps = prepareStatement( sql );
@@ -1205,7 +1515,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
         println( "Running good statement:\n\t" + ddl );
         
         try {
-            PreparedStatement    ps = prepareStatement( ddl );
+            PreparedStatement    ps = chattyPrepare( ddl );
 
             ps.execute();
             ps.close();
@@ -1214,6 +1524,17 @@ public class TableFunctionTest extends BaseJDBCTestCase
         {
             unexpectedThrowable( e );
         }
+    }
+    
+    /**
+     * Prepare a statement and report its sql text.
+     */
+    private PreparedStatement   chattyPrepare( String text )
+        throws SQLException
+    {
+        println( "Preparing statement:\n\t" + text );
+        
+        return prepareStatement( text );
     }
     
     /**
@@ -1313,9 +1634,11 @@ public class TableFunctionTest extends BaseJDBCTestCase
     private void    dropSchema()
         throws Exception
     {
-        int count = FUNCTION_NAMES.length;
+        int functionCount = FUNCTION_NAMES.length;
+        for ( int i = 0; i < functionCount; i++ ) { dropFunction( FUNCTION_NAMES[ i ] ); }
 
-        for ( int i = 0; i < count; i++ ) { dropFunction( FUNCTION_NAMES[ i ] ); }
+        int tableCount = TABLE_NAMES.length;
+        for ( int i = 0; i < tableCount; i++ ) { dropTable( TABLE_NAMES[ i ] ); }
     }
     
     /**
@@ -1327,6 +1650,22 @@ public class TableFunctionTest extends BaseJDBCTestCase
         // swallow the "object doesn't exist" diagnostic
         try {
             PreparedStatement   ps = prepareStatement( "drop function " + functionName );
+
+            ps.execute();
+            ps.close();
+        }
+        catch( SQLException se) {}
+    }
+
+    /**
+     * Drop a table so that we can recreate it.
+     */
+    private void    dropTable( String tableName )
+        throws Exception
+    {
+        // swallow the "object doesn't exist" diagnostic
+        try {
+            PreparedStatement   ps = prepareStatement( "drop table " + tableName );
 
             ps.execute();
             ps.close();

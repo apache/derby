@@ -21,6 +21,8 @@
 
 package org.apache.derby.catalog.types;
 
+import org.apache.derby.shared.common.reference.JDBC40Translation;
+
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.io.Formatable;
 
@@ -312,6 +314,28 @@ public class TypeDescriptorImpl implements TypeDescriptor, Formatable
 
 		}
 
+	}
+
+	/**
+	 * Report whether this type is a string type.
+	 */
+	public boolean  isStringType()
+	{
+		switch (typeId.getJDBCTypeId())
+        {
+			case Types.CHAR:
+			case Types.VARCHAR:
+			case Types.LONGVARCHAR:
+			case Types.CLOB:
+			case JDBC40Translation.NCHAR:
+			case JDBC40Translation.NVARCHAR:
+			case JDBC40Translation.LONGNVARCHAR:
+			case JDBC40Translation.NCLOB:
+                return true;
+                
+			default:
+				return false;
+		}
 	}
 
 	/**

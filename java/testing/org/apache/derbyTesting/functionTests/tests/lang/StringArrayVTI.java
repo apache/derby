@@ -111,7 +111,9 @@ public    class   StringArrayVTI  extends StringColumnVTI
     ///////////////////////////////////////////////////////////////////////////////////
 
     private int             _rowIdx = -1;
-    private String[][]  _rows;
+    private String[][]      _rows;
+
+    private static  StringBuffer    _callers;
     
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -128,14 +130,57 @@ public    class   StringArrayVTI  extends StringColumnVTI
     
     ///////////////////////////////////////////////////////////////////////////////////
     //
+    // FUNCTIONS
+    //
+    ///////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * <p>
+     * This SQL function returns the list of getXXX() calls made to the last
+     * StringArrayVTI.
+     * </p>
+     */
+    public  static  String  getXXXrecord()
+    {
+        if ( _callers == null ) { return null; }
+        else { return _callers.toString(); }
+    }
+    
+    ///////////////////////////////////////////////////////////////////////////////////
+    //
     // ABSTRACT StringColumn BEHAVIOR
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
     protected String  getRawColumn( int columnNumber ) throws SQLException
     {
+        String                  callersCallerMethod = deduceGetXXXCaller();
+
+        _callers.append( callersCallerMethod );
+        _callers.append( ' ' );
+
+        return  _rows[ _rowIdx ][ columnNumber - 1 ];
+    }
+
+    // The stack looks like this:
+    //
+    // getXXX()
+    // getString()
+    // getRawColumn()
+    // deduceGetXXXCaller()
+    //
+    // Except if the actual getXXX() method is getString()
+    //
+    private String  deduceGetXXXCaller() throws SQLException
+    {
         try {
-            return  _rows[ _rowIdx ][ columnNumber - 1 ];
+            StackTraceElement[]     stack = (new Throwable()).getStackTrace();
+            StackTraceElement       callersCaller = stack[ 3 ];
+            String                  callersCallerMethod = callersCaller.getMethodName();
+
+            if ( !callersCallerMethod.startsWith( "get" ) ) { callersCallerMethod = "getString"; }
+
+            return  callersCallerMethod;
         } catch (Throwable t) { throw new SQLException( t.getMessage() ); }
     }
 
@@ -148,7 +193,11 @@ public    class   StringArrayVTI  extends StringColumnVTI
     public  boolean next() throws SQLException
     {
         if ( (++_rowIdx) >= _rows.length ) { return false; }
-        else { return true; }
+        else
+        {
+            _callers = new StringBuffer();
+            return true;
+        }
     }
 
     public  void close() throws SQLException

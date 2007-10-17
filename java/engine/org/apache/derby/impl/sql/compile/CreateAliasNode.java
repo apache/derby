@@ -40,6 +40,7 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.catalog.AliasInfo;
 import org.apache.derby.catalog.TypeDescriptor;
 import org.apache.derby.catalog.types.RoutineAliasInfo;
+import org.apache.derby.catalog.types.RowMultiSetImpl;
 import org.apache.derby.catalog.types.SynonymAliasInfo;
 import org.apache.derby.catalog.types.TypeDescriptorImpl;
 
@@ -304,6 +305,32 @@ public class CreateAliasNode extends DDLStatementNode
 		return changeTD;
 	}
 	
+	/**
+	 * Set the collation of the columns in a Table Function's returned row set.
+	 */
+	private void    setTableFunctionCollations()
+        throws StandardException
+    {
+		if ( aliasInfo.isTableFunction() )
+        {
+            RoutineAliasInfo    info = (RoutineAliasInfo) aliasInfo;
+            RowMultiSetImpl     tableFunctionReturnType = (RowMultiSetImpl) ((DataTypeDescriptor) info.getReturnType()).getTypeId().getBaseTypeId();
+            TypeDescriptor[]    types = tableFunctionReturnType.getTypes();
+            int                 returnedTableColumnCount = types.length;
+            SchemaDescriptor    sd = getSchemaDescriptor();
+
+            for ( int i = 0; i < returnedTableColumnCount; i++ )
+            {
+                TypeDescriptorImpl  tdi = (TypeDescriptorImpl) types[ i ];
+                if ( tdi.isStringType() )
+                {
+                    tdi.setCollationType( sd.getCollationType() );
+                }
+            }
+        }
+
+    }
+    
 	// We inherit the generate() method from DDLStatementNode.
 
 	/**
@@ -350,7 +377,12 @@ public class CreateAliasNode extends DDLStatementNode
 						oldAliasInfo.getSQLAllowed(),
 						oldAliasInfo.calledOnNullInput(), 
 						typeDescriptorWithCorrectCollation(oldAliasInfo.getReturnType()));
-			}
+
+            }
+            
+            // if this is a table function, then force its string columns to
+            // have the correct collation.
+            setTableFunctionCollations();
 		}
 		// Procedures and functions do not check class or method validity until
 		// runtime execution. Synonyms do need some validity checks.
