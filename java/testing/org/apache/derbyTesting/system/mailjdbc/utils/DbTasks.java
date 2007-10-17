@@ -193,7 +193,11 @@ public class DbTasks extends Thread {
 			}
 		}
 		try {
-			int attach_id = Rn.nextInt(count - 1);
+			int attach_id = 0;
+			if((count - 1) <= 0)
+				attach_id = 0;
+			else
+				 attach_id = Rn.nextInt(count - 1);
 			ResultSet rs = stmt
 					.executeQuery("select attachment from REFRESH.attach where id  = "
 							+ attach_id);
@@ -261,6 +265,8 @@ public class DbTasks extends Thread {
 		// Delete done by the user. Thre user will mark the mails to be deleted
 		// and then
 		int id_count = 0;
+		int id = 0;
+		int for_id = 0;
 		try {
 			saveAutoCommit = conn.getAutoCommit();
 			conn.setAutoCommit(false);
@@ -272,12 +278,18 @@ public class DbTasks extends Thread {
 			if (rs.next())
 				id_count = rs.getInt(1);
 			short to_delete = 1;
-			int id = Rn.nextInt(id_count - 1);
+			if((id_count -1) <= 0 )
+				id = id_count;
+			else
+				id = Rn.nextInt(id_count - 1);
 			long s_update = System.currentTimeMillis();
 			int delete_count = 0;
 			for (int i = 0; i < id; i++) {
 				updateUser.setShort(1, to_delete);
-				int for_id = Rn.nextInt(id_count - 1);
+				if((id_count -1) <= 0 )
+					for_id = id_count;
+				else
+					for_id = Rn.nextInt(id_count - 1);
 				updateUser.setInt(2, for_id);
 				int del = updateUser.executeUpdate();
 				delete_count = delete_count + del;
@@ -375,9 +387,13 @@ public class DbTasks extends Thread {
 				MailJdbc.logAct.logMsg(LogFile.INFO + thread_name + " : "
 						+ "no message in the REFRESH.INBOX to move");
 			else {
+				int message_id = 0;
 				int count = rs.getInt(1);
 				int folder_id = Rn.nextInt(5 - 1);
-				int message_id = Rn.nextInt(count - 1);
+				if (count == 0)
+					message_id = 0;
+				else
+				    message_id = Rn.nextInt(count - 1);
 				moveToFolder.setInt(1, folder_id);
 				moveToFolder.setInt(2, message_id);
 				long s_folder = System.currentTimeMillis();
@@ -423,7 +439,6 @@ public class DbTasks extends Thread {
 		// and for those rows inserting blobs in the attach table
 		Statement stmt = conn.createStatement();
 		int num = Rn.nextInt(10 - 1);
-		System.out.println("num: " + num);
 		InputStream streamIn = null;
 		Reader streamReader = null;
 		try {
