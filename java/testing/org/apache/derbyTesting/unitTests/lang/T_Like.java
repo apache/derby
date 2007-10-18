@@ -107,15 +107,15 @@ public class T_Like extends T_Generic
 
 		REPORT("testing null combinations...");
 		try {
-		expect("null like null escape null", Like.like(caNull, 0, caNull, 0, caNull, 0), null);
-		expect("null like 'hello' escape null", Like.like(caNull, 0, caHello, caHello.length, caNull, 0), null);
-		expect("'hello' like null escape null", Like.like(caHello, caHello.length, caNull, 0, caNull, 0), null);
-		expect("null like null escape '\\'", Like.like(caNull, 0, caNull, 0, "\\".toCharArray(), "\\".toCharArray().length), null);
+		expect("null like null escape null", Like.like(caNull, 0, caNull, 0, caNull, 0, null), null);
+		expect("null like 'hello' escape null", Like.like(caNull, 0, caHello, caHello.length, caNull, 0, null), null);
+		expect("'hello' like null escape null", Like.like(caHello, caHello.length, caNull, 0, caNull, 0, null), null);
+		expect("null like null escape '\\'", Like.like(caNull, 0, caNull, 0, "\\".toCharArray(), "\\".toCharArray().length, null), null);
 
 		// gets back a null before it evaluates the escape
-		expect("null like null escape 'hello'", Like.like(caNull, 0, caNull, 0, caHello, caHello.length), null);
+		expect("null like null escape 'hello'", Like.like(caNull, 0, caNull, 0, caHello, caHello.length, null), null);
 		// gets back a null before it evaluates the pattern
-		expect("null like 'hello\\' escape '\\'", Like.like(caNull, 0, "hello\\".toCharArray(), "hello\\".toCharArray().length, "\\".toCharArray(), "\\".toCharArray().length), null);
+		expect("null like 'hello\\' escape '\\'", Like.like(caNull, 0, "hello\\".toCharArray(), "hello\\".toCharArray().length, "\\".toCharArray(), "\\".toCharArray().length, null), null);
 
 		} catch(StandardException leOuter1) {
 			leOuter1.printStackTrace();
@@ -124,21 +124,21 @@ public class T_Like extends T_Generic
 
 		REPORT("testing valid match cases...");
 		try {
-		expect("'hello' like 'hello' escape null", Like.like(caHello, caHello.length, caHello, caHello.length, caNull, 0), Boolean.TRUE);
-		expect("'hello' like 'h_llo' escape null", Like.like(caHello, caHello.length, "h_llo".toCharArray(), "h_llo".toCharArray().length, caNull, 0), Boolean.TRUE);
-		expect("'hello' like '_ello' escape null", Like.like(caHello, caHello.length, "_ello".toCharArray(), "_ello".toCharArray().length, caNull, 0), Boolean.TRUE);
-		expect("'hello' like 'hell_' escape null", Like.like(caHello, caHello.length, "hell_".toCharArray(), "hell_".toCharArray().length, caNull, 0), Boolean.TRUE);
-		expect("'hello' like '_____' escape null", Like.like(caHello, caHello.length, "_____".toCharArray(), "_____".toCharArray().length, caNull, 0), Boolean.TRUE);
-		expect("'hello' like 'h___e' escape null", Like.like(caHello, caHello.length, "h___o".toCharArray(), "h___o".toCharArray().length, caNull, 0), Boolean.TRUE);
-		expect("'h' like 'h' escape null", Like.like("h".toCharArray(), "h".toCharArray().length, "h".toCharArray(), "h".toCharArray().length, caNull, 0), Boolean.TRUE);
-		expect("'h' like '_' escape null", Like.like("h".toCharArray(), "h".toCharArray().length, "_".toCharArray(), "_".toCharArray().length, caNull, 0), Boolean.TRUE);
-		expect("'h' like '%' escape null", Like.like("h".toCharArray(), "h".toCharArray().length, "%".toCharArray(), "%".toCharArray().length, caNull, 0), Boolean.TRUE);
-		expect("'h' like '_%' escape null", Like.like("h".toCharArray(), "h".toCharArray().length, "_%".toCharArray(), "_%".toCharArray().length, caNull, 0), Boolean.TRUE);
-		expect("'h' like '%_' escape null", Like.like("h".toCharArray(), "h".toCharArray().length, "%_".toCharArray(), "%_".toCharArray().length, caNull, 0), Boolean.TRUE);
-		expect("'h' like '%' escape null", Like.like("h".toCharArray(), "h".toCharArray().length, "%".toCharArray(), "%".toCharArray().length, caNull, 0), Boolean.TRUE);
-		expect("'' like '%' escape null", Like.like("".toCharArray(), "".toCharArray().length, "%".toCharArray(), "%".toCharArray().length, caNull, 0), Boolean.TRUE);
-		expect("'' like '%%' escape null", Like.like("".toCharArray(), "".toCharArray().length, "%%".toCharArray(), "%%".toCharArray().length, caNull, 0), Boolean.TRUE);
-		expect("'' like '%%%' escape null", Like.like("".toCharArray(), "".toCharArray().length, "%%%".toCharArray(), "%%%".toCharArray().length, caNull, 0), Boolean.TRUE);
+		expect("'hello' like 'hello' escape null", Like.like(caHello, caHello.length, caHello, caHello.length, caNull, 0, null), Boolean.TRUE);
+		expect("'hello' like 'h_llo' escape null", Like.like(caHello, caHello.length, "h_llo".toCharArray(), "h_llo".toCharArray().length, caNull, 0, null), Boolean.TRUE);
+		expect("'hello' like '_ello' escape null", Like.like(caHello, caHello.length, "_ello".toCharArray(), "_ello".toCharArray().length, caNull, 0, null), Boolean.TRUE);
+		expect("'hello' like 'hell_' escape null", Like.like(caHello, caHello.length, "hell_".toCharArray(), "hell_".toCharArray().length, caNull, 0, null), Boolean.TRUE);
+		expect("'hello' like '_____' escape null", Like.like(caHello, caHello.length, "_____".toCharArray(), "_____".toCharArray().length, caNull, 0, null), Boolean.TRUE);
+		expect("'hello' like 'h___e' escape null", Like.like(caHello, caHello.length, "h___o".toCharArray(), "h___o".toCharArray().length, caNull, 0, null), Boolean.TRUE);
+		expect("'h' like 'h' escape null", Like.like("h".toCharArray(), "h".toCharArray().length, "h".toCharArray(), "h".toCharArray().length, caNull, 0, null), Boolean.TRUE);
+		expect("'h' like '_' escape null", Like.like("h".toCharArray(), "h".toCharArray().length, "_".toCharArray(), "_".toCharArray().length, caNull, 0, null), Boolean.TRUE);
+		expect("'h' like '%' escape null", Like.like("h".toCharArray(), "h".toCharArray().length, "%".toCharArray(), "%".toCharArray().length, caNull, 0, null), Boolean.TRUE);
+		expect("'h' like '_%' escape null", Like.like("h".toCharArray(), "h".toCharArray().length, "_%".toCharArray(), "_%".toCharArray().length, caNull, 0, null), Boolean.TRUE);
+		expect("'h' like '%_' escape null", Like.like("h".toCharArray(), "h".toCharArray().length, "%_".toCharArray(), "%_".toCharArray().length, caNull, 0, null), Boolean.TRUE);
+		expect("'h' like '%' escape null", Like.like("h".toCharArray(), "h".toCharArray().length, "%".toCharArray(), "%".toCharArray().length, caNull, 0, null), Boolean.TRUE);
+		expect("'' like '%' escape null", Like.like("".toCharArray(), "".toCharArray().length, "%".toCharArray(), "%".toCharArray().length, caNull, 0, null), Boolean.TRUE);
+		expect("'' like '%%' escape null", Like.like("".toCharArray(), "".toCharArray().length, "%%".toCharArray(), "%%".toCharArray().length, caNull, 0, null), Boolean.TRUE);
+		expect("'' like '%%%' escape null", Like.like("".toCharArray(), "".toCharArray().length, "%%%".toCharArray(), "%%%".toCharArray().length, caNull, 0, null), Boolean.TRUE);
 		} catch(StandardException leOuter2) {
 			leOuter2.printStackTrace();
 			FAIL("unexpected exception");
@@ -146,15 +146,15 @@ public class T_Like extends T_Generic
 
 		REPORT("testing valid nonmatch cases...");
 		try {
-		expect("'hello' like 'hello ' escape null", Like.like(caHello, caHello.length, "hello ".toCharArray(), "hello ".toCharArray().length, caNull, 0), Boolean.FALSE);
-		expect("'hello ' like 'hello' escape null", Like.like("hello ".toCharArray(), "hello ".toCharArray().length, caHello, caHello.length, caNull, 0), Boolean.FALSE);
-		expect("'hello' like 'hellox' escape null", Like.like(caHello, caHello.length, "hellox".toCharArray(), "hellox".toCharArray().length, caNull, 0), Boolean.FALSE);
-		expect("'hellox' like 'hello' escape null", Like.like("hellox".toCharArray(), "hellox".toCharArray().length, caHello, caHello.length, caNull, 0), Boolean.FALSE);
-		expect("'xhellox' like 'hello' escape null", Like.like("xhellox".toCharArray(), "xhellox".toCharArray().length, caHello, caHello.length, caNull, 0), Boolean.FALSE);
-		expect("'hello' like 'xhellox' escape null", Like.like(caHello, caHello.length, "xhellox".toCharArray(), "xhellox".toCharArray().length, null, 0), Boolean.FALSE);
-		expect("'hello' like 'h___' escape null", Like.like(caHello, caHello.length, "h___".toCharArray(), "h___".toCharArray().length, caNull, 0), Boolean.FALSE);
-		expect("'h' like '_%_' escape null", Like.like("h".toCharArray(), "h".toCharArray().length, "_%_".toCharArray(), "_%_".toCharArray().length, caNull, 0), Boolean.FALSE);
-		expect("'' like '_' escape null", Like.like("".toCharArray(), "".toCharArray().length, "_".toCharArray(), "_".toCharArray().length, caNull, 0), Boolean.FALSE);
+		expect("'hello' like 'hello ' escape null", Like.like(caHello, caHello.length, "hello ".toCharArray(), "hello ".toCharArray().length, caNull, 0, null), Boolean.FALSE);
+		expect("'hello ' like 'hello' escape null", Like.like("hello ".toCharArray(), "hello ".toCharArray().length, caHello, caHello.length, caNull, 0, null), Boolean.FALSE);
+		expect("'hello' like 'hellox' escape null", Like.like(caHello, caHello.length, "hellox".toCharArray(), "hellox".toCharArray().length, caNull, 0, null), Boolean.FALSE);
+		expect("'hellox' like 'hello' escape null", Like.like("hellox".toCharArray(), "hellox".toCharArray().length, caHello, caHello.length, caNull, 0, null), Boolean.FALSE);
+		expect("'xhellox' like 'hello' escape null", Like.like("xhellox".toCharArray(), "xhellox".toCharArray().length, caHello, caHello.length, caNull, 0, null), Boolean.FALSE);
+		expect("'hello' like 'xhellox' escape null", Like.like(caHello, caHello.length, "xhellox".toCharArray(), "xhellox".toCharArray().length, null, 0, null), Boolean.FALSE);
+		expect("'hello' like 'h___' escape null", Like.like(caHello, caHello.length, "h___".toCharArray(), "h___".toCharArray().length, caNull, 0, null), Boolean.FALSE);
+		expect("'h' like '_%_' escape null", Like.like("h".toCharArray(), "h".toCharArray().length, "_%_".toCharArray(), "_%_".toCharArray().length, caNull, 0, null), Boolean.FALSE);
+		expect("'' like '_' escape null", Like.like("".toCharArray(), "".toCharArray().length, "_".toCharArray(), "_".toCharArray().length, caNull, 0, null), Boolean.FALSE);
 		} catch(StandardException leOuter3) {
 			leOuter3.printStackTrace();
 			FAIL("unexpected exception");
@@ -166,7 +166,7 @@ public class T_Like extends T_Generic
 			msg = null;
 			gotLE=false;
 			desc="null like null escape 'hello'";
-			t=Like.like(caHello, caHello.length, caHello, caHello.length, caHello, caHello.length);
+			t=Like.like(caHello, caHello.length, caHello, caHello.length, caHello, caHello.length, null);
 		} catch (StandardException le) {
 			gotLE=true;
 			msg = le.getMessage();
@@ -181,7 +181,7 @@ public class T_Like extends T_Generic
 			msg = null;
 			gotLE=false;
 			desc="'hello' like 'hhh' escape 'h'";
-			t=Like.like(caHello, caHello.length, "hhh".toCharArray(), "hhh".toCharArray().length, "h".toCharArray(), "h".toCharArray().length);
+			t=Like.like(caHello, caHello.length, "hhh".toCharArray(), "hhh".toCharArray().length, "h".toCharArray(), "h".toCharArray().length, null);
 		} catch (StandardException le) {
 			gotLE=true;
 			msg = le.getMessage();
@@ -196,7 +196,7 @@ public class T_Like extends T_Generic
 			msg = null;
 			gotLE=false;
 			desc="'hello' like 'he%' escape 'h'";
-			t=Like.like(caHello, caHello.length, "he%".toCharArray(), "he%".toCharArray().length, "h".toCharArray(), "h".toCharArray().length);
+			t=Like.like(caHello, caHello.length, "he%".toCharArray(), "he%".toCharArray().length, "h".toCharArray(), "h".toCharArray().length, null);
 		} catch (StandardException le) {
 			gotLE=true;
 			msg = le.getMessage();

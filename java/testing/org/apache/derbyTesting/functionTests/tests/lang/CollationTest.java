@@ -93,7 +93,9 @@ public class CollationTest extends BaseJDBCTestCase {
    */
 public void testDefaultCollation() throws SQLException {
 
-      getConnection().setAutoCommit(false);
+
+    Connection conn = getConnection();
+      conn.setAutoCommit(false);
       Statement s = createStatement();
       PreparedStatement ps;
       ResultSet rs;
@@ -274,13 +276,64 @@ public void testDefaultCollation() throws SQLException {
       //End of parameter testing
       
       s.close();
+      compareAgrave(conn,1,1);
       }
       
-  /**
+
+public void testFrenchCollation() throws SQLException {
+    Connection conn = getConnection();
+    compareAgrave(conn,2,1);    
+}
+
+
+
+   /**
+   * For a TERRITORY_BASED collation french database, differences between pre-composed accents such 
+   * as "\u00C0" (A-grave) and combining accents such as "A\u0300" (A, combining-grave) should match
+   * for = and like. But they do not match for UCS_BASIC. We insert both into a table and search
+   * based on equal and like. 
+   *  
+   * @param conn
+   * @param expectedMatchCount  number of rows we expect back. 2 for french, 1 for English 
+   * @throws SQLException
+   */
+   private void compareAgrave(Connection conn, int expectedMatchCountForEqual,
+		int expectedMatchCountForLike) throws SQLException {
+      
+      String agrave = "\u00C0";
+      String agraveCombined ="A\u0300";
+      Statement s = conn.createStatement();
+      
+      try {
+          s.executeUpdate("DROP TABLE T");
+      }catch (SQLException se) {}
+      s.executeUpdate("CREATE TABLE T (vc varchar(30))");
+      PreparedStatement ps = conn.prepareStatement("INSERT INTO T VALUES (?)");
+      ps.setString(1,agrave);
+      ps.executeUpdate();
+      ps.setString(1,agraveCombined);
+      ps.executeUpdate();
+      ps.close();
+        
+      ps = conn.prepareStatement("SELECT COUNT(*) FROM T WHERE VC = ?");
+      ps.setString(1, agrave);
+      ResultSet rs = ps.executeQuery();
+      JDBC.assertSingleValueResultSet(rs, Integer.toString(expectedMatchCountForEqual));
+      ps = conn.prepareStatement("SELECT COUNT(*) FROM T WHERE VC LIKE ?");
+      ps.setString(1, agrave);
+      rs = ps.executeQuery();
+      JDBC.assertSingleValueResultSet(rs, Integer.toString(expectedMatchCountForLike));
+      rs.close();
+      ps.close();
+      s.close();
+  }
+
+
+   /**
    * Test order by with polish collation
    * @throws SQLException
    */
-public void testPolishCollation() throws SQLException {
+   public void testPolishCollation() throws SQLException {
 
       getConnection().setAutoCommit(false);
       Statement s = createStatement();
@@ -1016,6 +1069,19 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     s.execute("ALTER TABLE DERBY_2973 ALTER V SET DATA TYPE VARCHAR(4096)");
     s.execute("INSERT INTO DERBY_2973 VALUES('hello')");
     
+    //DERBY-2967
+    //The special character _ should match one character and not just advance
+    //by number of collation elements that special character _ represents
+    s.executeUpdate("create table DERBY_2967(c11 int)"); 
+    s.executeUpdate("insert into DERBY_2967 values 1"); 
+    ps = conn.prepareStatement("select 1 from DERBY_2967 where '\uFA2D' like ?");
+    String[] match = { "%", "_", "\uFA2D" }; 
+    for (int i = 0; i < match.length; i++) { 
+        ps.setString(1, match[i]); 
+        rs = ps.executeQuery(); 
+        JDBC.assertFullResultSet(rs,new String[][] {{"1"}});
+    }
+
     //DERBY-2961
     //Should generate collation sensitive data type when working with something
     //like V AS CLOB insdie XMLSERIALIZE as shown below 

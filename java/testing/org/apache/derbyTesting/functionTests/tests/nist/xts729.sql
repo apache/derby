@@ -69,7 +69,7 @@ CoLuMnOfNUMERIC123456789012_1 NUMERIC(5));
 
 --O   INSERT INTO CTS1.TESTB6439
    INSERT INTO TESTB6439
-         VALUES('AA','BB',1,2);
+         VALUES('AB','BB',1,2);
 -- PASS:7029 If 1 row inserted successfully?
 
 --O   INSERT INTO CTS1.TESTB6439
@@ -97,7 +97,7 @@ CoLuMnOfNUMERIC123456789012_1 NUMERIC(5));
           ORDER BY cOlUmNoFNUMERIC123456789012_0;
 -- PASS:7029 If 5 rows selected in the following order?
 --                    ===  ===  === ===
--- PASS:7029   If      AA   BB   1   2?
+-- PASS:7029   If      AB   BB   1   2?
 -- PASS:7029   If      CC   DD   3   4?
 -- PASS:7029   If      EE   FF   5   6?
 -- PASS:7029   If      GG   HH   7   8?
@@ -170,7 +170,7 @@ CHAR(3));
 
 --O   INSERT INTO CTS1.TESTC6439
    INSERT INTO TESTC6439
-         VALUES('aaa','bbb');
+         VALUES('aba','bbb');
 -- PASS:7029 If 1 row inserted successfully?
 
 --O   INSERT INTO CTS1.TESTC6439
@@ -188,7 +188,7 @@ CHAR(3));
          ORDER BY COLUMNOFCHARACTERSA;
 -- PASS:7029 If 3 rows selected in the following order?
 --                 ===    ===
--- PASS:7029 If    aaa    bbb?
+-- PASS:7029 If    aba    bbb?
 -- PASS:7029 If    ccc    ddd?
 -- PASS:7029 If    eee    fff? 
 

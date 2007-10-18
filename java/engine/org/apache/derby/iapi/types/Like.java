@@ -53,6 +53,11 @@ public class Like {
 	}
 
 	/**
+	  
+	 This method gets called for UCS_BASIC and territory based character
+	 string types to look for a pattern in a value string. It also deals
+	 with escape character if user has provided one.
+	  
 		@param val value to compare. if null, result is null.
 		@param valLength length of val
 		@param pat pattern to compare. if null, result is null.
@@ -60,6 +65,10 @@ public class Like {
 		@param escape escape character. Must be 1 char long.
 			if null, no escape character is used.
 		@param escapeLength length of escape
+		@param collator null if we are dealing with UCS_BASIC 
+		    character string types. If not null, then we use it to 
+		    get collation elements for characters in val and 
+		    non-metacharacters in pat to do the comparison.
 
 		@return null if val or pat null, otherwise true if match
 		and false if not.
@@ -72,10 +81,12 @@ public class Like {
 		char[] 	pat, 
 		int 	patLength, 
 		char[] 	escape,
-		int 	escapeLength
+		int 	escapeLength,
+		RuleBasedCollator collator
 	) throws StandardException 
 	{
-		return like(val, 0, valLength, pat, 0, patLength, escape, escapeLength);
+		return like(val, 0, valLength, pat, 0, patLength, escape, 
+				escapeLength, collator);
 	}
 
 	/**
@@ -107,7 +118,8 @@ public class Like {
 		return like(val, 0, valLength, pat, 0, patLength, escape, escapeLength, collator);
 	}
 
-	/* non-national chars */
+	/* For character string types with UCS_BASIC and territory based
+	 * collation. There is a different method for non-national chars */
 	private static Boolean like
 	(
 		char[] 	val, 
@@ -117,7 +129,8 @@ public class Like {
 		int 	pLoc, 	// start at pat[pLoc]
 		int 	pEnd, 	// end at pat[pEnd]
 		char[] 	escape,
-		int 	escapeLength
+		int 	escapeLength,
+		RuleBasedCollator collator
 	) throws StandardException 
 	{
 		char escChar = ' ';
@@ -147,18 +160,14 @@ public class Like {
 			// go until we get a special char in the pattern or hit EOS
 			while (pat[pLoc] != anyChar && pat[pLoc] != anyString &&
 					((! haveEsc) || pat[pLoc] != escChar)) {
-				if (val[vLoc] == pat[pLoc]) 
-				{
+				if (checkEquality(val, vLoc, pat, pLoc, collator)) {
 					vLoc++; pLoc++;
-	
+					
 					result = checkLengths(vLoc, vEnd, pLoc, pat, pEnd);
 					if (result != null) 
 						return result;
-				}
-				else 
-				{
+				} else
 					return Boolean.FALSE;
-				}
 			}
 
 			// deal with escChar first, as it can be escaping a special char
@@ -174,7 +183,7 @@ public class Like {
 					throw StandardException.newException(SQLState.LANG_INVALID_ESCAPE_SEQUENCE);
 				}
 				// regardless of the char in pat, it must match exactly:
-				if (val[vLoc] == pat[pLoc]) {
+				if (checkEquality(val, vLoc, pat, pLoc, collator)) {
 					vLoc++; pLoc++;
 	
 					result = checkLengths(vLoc, vEnd, pLoc, pat, pEnd);
@@ -233,7 +242,8 @@ public class Like {
 				int minLen = getMinLen(pat, pLoc+1, pEnd, haveEsc, escChar);
 				for (int i=vRem; i>=minLen; i--) 
 				{
-					Boolean restResult = Like.like(val,vLoc+n,vLoc+n+i,pat,pLoc+1,pEnd,escape,escapeLength);
+					Boolean restResult = Like.like(val, vLoc+n, vLoc+n+i, pat,
+							pLoc+1, pEnd, escape, escapeLength, collator);
 					if (SanityManager.DEBUG)
 					{
 						if (restResult == null)
@@ -252,6 +262,60 @@ public class Like {
 				return Boolean.FALSE;
 			}
 		}
+	}
+
+	/**
+	 * Make sure that the character in val matches the character in pat.
+	 * If we are dealing with UCS_BASIC character string (ie collator is null)
+	 * then we can just do simple character equality check. But if we are
+	 * dealing with territory based character string type, then we need to 
+	 * convert the character in val and pat into it's collation element(s)
+	 * and then do collation element equality comparison.
+	 * 
+	 * @param val value to compare.
+	 * @param vLoc character position in val.
+	 * @param pat pattern to look for in val.
+	 * @param pLoc character position in pat.
+	 * @param collator null if we are dealing with UCS_BASIC character string
+	 * types. If not null, then we use it to get collation elements for 
+	 * character in val and pat to do the equality comparison.
+	 * @return
+	 */
+	private static boolean checkEquality(char[] val, int vLoc,
+			char[] pat, int pLoc, RuleBasedCollator collator) {
+		CollationElementIterator patternIterator;
+		int curCollationElementInPattern;
+		CollationElementIterator valueIterator;
+		int curCollationElementInValue;
+
+		if (collator == null) {//dealing with UCS_BASIC character string
+			if (val[vLoc] == pat[pLoc]) 
+				return true;
+			else 
+				return false;
+		} else {//dealing with territory based character string
+			patternIterator = collator.getCollationElementIterator(
+					new String(pat, pLoc, 1));
+			valueIterator = collator.getCollationElementIterator(
+					new String(val, vLoc, 1));
+			curCollationElementInPattern = patternIterator.next(); 
+			curCollationElementInValue = valueIterator.next();
+			while (curCollationElementInPattern == curCollationElementInValue)
+			{
+				if (curCollationElementInPattern == CollationElementIterator.NULLORDER)
+					break;
+				curCollationElementInPattern = patternIterator.next(); 
+				curCollationElementInValue = valueIterator.next(); 
+			}
+			//If the current collation element for the character in pattern 
+			//and value do not match, then we have found a mismatach and it
+			//is time to return FALSE from this method.
+			if (curCollationElementInPattern != curCollationElementInValue)
+				return false;
+			else
+				return true;
+		}
+		
 	}
 
 	/* national chars */
@@ -644,13 +708,17 @@ public class Like {
 		return true;
 	}
 
-
 	/*
-		Most typical interface for non-national chars
+		Most typical interface for character string types with UCS_BASIC and 
+		territory based collation. There is a different method for non-national 
+		chars.
 	 */
-	public static Boolean like(char[] value, int valueLength, char[] pattern, int patternLength) throws StandardException { 
+	public static Boolean like(char[] value, int valueLength, char[] pattern, 
+			int patternLength, RuleBasedCollator collator) 
+	throws StandardException { 
 		if (value == null || pattern == null) return null;
-		return like(value, valueLength, pattern, patternLength, null, 0);
+		return like(value, valueLength, pattern, patternLength, null, 0, 
+				collator);
 	}
 
 	/*

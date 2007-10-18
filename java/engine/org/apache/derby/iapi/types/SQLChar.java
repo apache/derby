@@ -1691,16 +1691,17 @@ readingLoop:
 			likeResult = Like.like(evalCharArray, 
 								   getLength(),
  		    					   patternCharArray,
-								   pattern.getLength());
+								   pattern.getLength(),
+								   null);
 		}
 		else
 		{
 			SQLChar patternSQLChar = (SQLChar) pattern;
 			likeResult = Like.like(getIntArray(), 
-								   getIntLength(),
- 		    					   patternSQLChar.getIntArray(),
-								   patternSQLChar.getIntLength(),
-								   getLocaleFinder().getCollator());
+					getIntLength(), 
+					patternSQLChar.getIntArray(),
+					patternSQLChar.getIntLength(),
+					getLocaleFinder().getCollator());
 		}
 
 		return SQLBoolean.truthValue(this,
@@ -1774,7 +1775,8 @@ readingLoop:
  		    					   patternCharArray,
 								   pattern.getLength(),
 								   escapeCharArray,
-								   escapeLength);
+								   escapeLength,
+								   null);
 		}
 		else
 		{
@@ -1788,13 +1790,13 @@ readingLoop:
 				throw StandardException.newException(SQLState.LANG_INVALID_ESCAPE_CHARACTER,
 						new String(escapeSQLChar.getCharArray()));
 			}
-			likeResult = Like.like(getIntArray(), 
-								   getIntLength(),
- 		    					   patternSQLChar.getIntArray(),
-								   patternSQLChar.getIntLength(),
-								   escapeIntArray,
-								   escapeLength,
-								   getLocaleFinder().getCollator());
+			likeResult = Like.like(getIntArray(),
+					getIntLength(), 
+					patternSQLChar.getIntArray(),
+					patternSQLChar.getIntLength(),
+					escapeIntArray,
+					escapeLength,
+					getLocaleFinder().getCollator());
 		}
 
 		return SQLBoolean.truthValue(this,
@@ -2618,7 +2620,7 @@ readingLoop:
 			return 0;
 		return tmpCKey.hashCode();
 	}
-
+	
 	private int[] getIntArray()
 		throws StandardException
 	{
