@@ -277,9 +277,11 @@ public class Like {
 	 * @param pat pattern to look for in val.
 	 * @param pLoc character position in pat.
 	 * @param collator null if we are dealing with UCS_BASIC character string
-	 * types. If not null, then we use it to get collation elements for 
-	 * character in val and pat to do the equality comparison.
-	 * @return
+	 *   types. If not null, then we use it to get collation elements for 
+	 *   character in val and pat to do the equality comparison.
+	 * @return TRUE if the character in val and vLoc match based on straight
+	 *   equality or collation element based equality. Otherwise we will 
+	 *   return FALSE.
 	 */
 	private static boolean checkEquality(char[] val, int vLoc,
 			char[] pat, int pLoc, RuleBasedCollator collator) {

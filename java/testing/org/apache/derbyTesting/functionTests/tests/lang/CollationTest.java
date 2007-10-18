@@ -270,7 +270,10 @@ public void testFrenchCollation() throws SQLException {
  * based on equal and like. 
  *  
  * @param conn
- * @param expectedMatchCount  number of rows we expect back. 2 for french, 1 for English 
+ * @param expectedMatchCountForEqual  number of rows we expect back for =. 
+ * 	2 for French, 1 for English 
+ * @param expectedMatchCountForLike  number of rows we expect back for LIKE. 
+ * 	1 for French and English 
  * @throws SQLException
  */
 private void compareAgrave(Connection conn, int expectedMatchCountForEqual,
