@@ -386,14 +386,22 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         ps.setBigDecimal(3, null);
         ps.setBigDecimal(4, null);
         ps.executeUpdate();
-        
-        // Test with negative scale.
-        value = new BigDecimal(new BigInteger("2"), -3);
+
+        // Can't use negative scale on jdk1.4.2
+        if (JDBC.vmSupportsJDBC4())
+        {
+            // Test with negative scale.
+            value = new BigDecimal(new BigInteger("2"), -3);
+        }
+        else
+        {
+            value = new BigDecimal("2000");
+        }
         ps.setBigDecimal(1,value);
         ps.setBigDecimal(2,value);
         ps.setBigDecimal(3,value);
         ps.setBigDecimal(4,value);
-        ps.executeUpdate();
+        ps.executeUpdate();        
         
         value = new BigDecimal("123.45");
         // Test with setObject and scale of 2
@@ -427,8 +435,15 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         ps.setObject(4, value);
         ps.executeUpdate();
         
-        // Test with setObject and negative scale.
-        value = new BigDecimal(new BigInteger("2"), -3);
+        // Can't use negative scale on jdk1.4.2
+        if (JDBC.vmSupportsJDBC4())
+        {
+            // Test with setObject and negative scale.
+            value = new BigDecimal(new BigInteger("2"), -3);
+        } else
+        {
+            value = new BigDecimal("2000");
+        }
         ps.setObject(1,value);
         ps.setObject(2,value);
         ps.setObject(3,value);
