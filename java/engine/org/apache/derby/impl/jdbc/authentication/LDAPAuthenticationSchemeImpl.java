@@ -37,6 +37,11 @@ import javax.naming.directory.*;
 
 
 import java.util.Properties;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.sql.SQLException;
 
 /**
@@ -170,7 +175,10 @@ extends JNDIAuthenticationSchemeBase
 			// Connect & authenticate (bind) to the LDAP server now
 
 			// it is happening right here
-			DirContext ctx = new InitialDirContext(env);
+
+            DirContext ctx =   privInitialDirContext(env);
+          
+            
 
 			// if the above was successfull, then username and
 			// password must be correct
@@ -189,7 +197,33 @@ extends JNDIAuthenticationSchemeBase
 		throw getLoginSQLException(e);
 	}
 
-	/**
+	
+
+    /**
+     * Call new InitialDirContext in a privilege block
+     * @param env environment used to create the initial DirContext. Null indicates an empty environment.
+     * @return an initial DirContext using the supplied environment. 
+     */
+    private DirContext privInitialDirContext(final Properties env) throws NamingException {
+        try {
+            return ((InitialDirContext)AccessController.doPrivileged(
+                    new PrivilegedExceptionAction() {
+                        public Object run() throws SecurityException, NamingException {
+                            return new InitialDirContext(env);
+                    }
+                }));
+    } catch (PrivilegedActionException pae) {
+            Exception e = pae.getException();
+       
+            if (e instanceof NamingException)
+                    throw (NamingException)e;
+            else
+                throw (SecurityException)e;
+        }   
+   
+    }   
+
+    /**
 	 * This method basically tests and sets default/expected JNDI properties
 	 * for the JNDI provider scheme (here it is LDAP).
 	 *
@@ -353,13 +387,49 @@ extends JNDIAuthenticationSchemeBase
 		{
 			if (SanityManager.DEBUG_ON(
 						AuthenticationServiceBase.AuthenticationTrace)) {
-				try {
-					initDirContextEnv.put("com.sun.naming.ldap.trace.ber",
-								new java.io.FileOutputStream("CloudLDAP.out"));
-				} catch (java.io.IOException ie) {}
+                             
+                                // This tracing needs some investigation and cleanup.
+                                // 1) It creates the file in user.dir instead of derby.system.home
+                                // 2) It doesn't seem to work. The file is empty after successful
+                                //    and unsuccessful ldap connects.  Perhaps the fileOutputStream
+                                // is never flushed and closed.
+                                // I (Kathey Marsden) wrapped this in a priv block and kept the previous
+                                // behaviour that it will not stop processing if file 
+                                // creation fails. Perhaps that should be investigated as well.
+                                FileOutputStream fos = null;
+                                try {
+                                    fos = privNewFileOutputStream("DerbyLDAP.out");
+                                } catch (Exception e) {
+                                    // If file creation fails do not stop execution.
+                                }
+                                if (fos != null)
+                                    initDirContextEnv.put("com.sun.naming.ldap.trace.ber",fos);
+
+				
 			}
 		}
 	}
+
+	/**
+     * Construct a new FileOutputStream in a privilege block.
+     * 
+	 * @param fileName Filename to create
+	 * @return 
+	 * @throws IOException
+	 */
+	private FileOutputStream privNewFileOutputStream(final String fileName) throws IOException{
+	    try {
+            return ((FileOutputStream)AccessController.doPrivileged(
+                        new PrivilegedExceptionAction() {
+                            public Object run() throws SecurityException, java.io.IOException {
+                                return new  FileOutputStream(fileName);
+                            }
+                        }));
+        } catch (PrivilegedActionException pae) {
+            throw (SecurityException)pae.getException();
+        }
+    }
+	
 
 	/**
 	 * Search for the full user's DN in the LDAP server.
@@ -389,7 +459,7 @@ extends JNDIAuthenticationSchemeBase
 		else
 			env = initDirContextEnv;
 
-		DirContext ctx = new InitialDirContext(env);
+		DirContext ctx = privInitialDirContext(env);
 
 		// Construct Search Filter
 		SearchControls ctls = new SearchControls();
