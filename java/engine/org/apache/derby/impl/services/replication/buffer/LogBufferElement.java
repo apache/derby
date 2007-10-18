@@ -25,21 +25,18 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 
 /**
  * ReplicationLogBuffer consists of n LogBufferElements, each of which
- * can store m log records in a single byte[].
- *
+ * can store a number of log records in a single byte[].
  * <p>
- * The format of each log record in the LogBufferElement is:
- * <br>
- * (long)   instant <br>
- * (int)    dataLength <br>
- * (int)    dataOffset <br>
- * (int)    optionalDataLength <br>
- * (int)    optionalDataOffset <br>
- * (byte[]) data (with length dataLength) <br>
- * (byte[]) optionalData (with length optionalDataLength) <br>
- * <br>
+ * The format of each log record in the LogBufferElement is the same
+ * as is written to log file in LogAccessFile:<br>
+ *
+ * (int)    total_length (data[].length + optionaldata[].length)<br>
+ * (long)   instant<br>
+ * (byte[]) data+optionaldata<br>
+ * (int)    total_length<br>
+ *
  * </p>
- * In addition to adding the log record information to the byte[], the
+ * In addition to adding a chunk of log records to the byte[], the
  * greatestInstant variable is updated for every append so that
  * getLastInstant can be used to get the highest log instant in this
  * LogBufferElement.
@@ -69,47 +66,26 @@ class LogBufferElement {
     }
 
     /**
-     * Append a single log record to this LogBufferElement.
+     * Append a chunk of log records to this LogBufferElement.
      *
-     * @param instant               the log address of this log record.
-     * @param dataLength            number of bytes in data[]
-     * @param dataOffset            offset in data[] to start copying from.
-     * @param optionalDataLength    number of bytes in optionalData[]
-     * @param optionalDataOffset    offset in optionalData[] to start copy from
-     * @param data                  "from" array to copy "data" portion of rec
-     * @param optionalData          "from" array to copy "optional data" from
+     * @param greatestInstant   the instant of the log record that was
+     *                          added last to this chunk of log
+     * @param log               the chunk of log records
+     * @param logOffset         offset in log to start copy from
+     * @param logLength         number of bytes to copy, starting
+     *                          from logOffset
      **/
-    protected void appendLogRecord(long instant,
-                                int dataLength,
-                                int dataOffset,
-                                int optionalDataLength,
-                                int optionalDataOffset,
-                                byte[] data,
-                                byte[] optionalData){
+    protected void appendLog(long greatestInstant,
+                             byte[] log, int logOffset, int logLength) {
 
         if (SanityManager.DEBUG){
-            int totalSize = dataLength + optionalDataLength +
-                ReplicationLogBuffer.LOG_RECORD_FIXED_OVERHEAD_SIZE;
-            SanityManager.ASSERT(freeSize() >= totalSize,
-                                 "Log record does not fit into"+
+            SanityManager.ASSERT(freeSize() >= logLength,
+                                 "Log chunk does not fit into"+
                                  " this LogBufferElement");
         }
 
-        position = appendLong(instant, position);
-        position = appendInt(dataLength, position);
-        position = appendInt(dataOffset, position);
-        position = appendInt(optionalDataLength, position);
-        position = appendInt(optionalDataOffset, position);
-
-        if (dataLength > 0){
-            position = appendBytes(data, position, dataLength);
-        }
-
-        if (optionalDataLength > 0) {
-            position = appendBytes(optionalData, position, optionalDataLength);
-        }
-
-        this.greatestInstant = instant;
+        this.greatestInstant = greatestInstant;
+        position = appendBytes(log, logOffset, position, logLength);
     }
 
     /**
@@ -161,45 +137,23 @@ class LogBufferElement {
 
     /**
      * Append a byte[] to this LogBufferElement.
+     *
+     * @param b       where the bytes are copied from
+     * @param offset  offset in b to start copying from
+     * @param pos     the position in this LogBufferElement to start copying to
+     * @param length  number of bytes to copy from b, starting from offset
+     *
      * @return new position
      */
-    private int appendBytes(byte b[], int pos, int length) {
+    private int appendBytes(byte b[], int offset, int pos, int length) {
         if (SanityManager.DEBUG){
-            SanityManager.ASSERT(freeSize() >= (pos+length),
+            SanityManager.ASSERT(freeSize() >= length,
                                  "byte[] is to big to fit"+
                                  " into this buffer");
             SanityManager.ASSERT(b != null, "Cannot append null to buffer");
         }
-        System.arraycopy(b, 0, bufferdata, pos, length);
+        System.arraycopy(b, offset, bufferdata, pos, length);
         return pos + length;
-    }
-
-    /**
-     * Append an int to this LogBufferElement.
-     * @return new position
-     */
-    private int appendInt(int i, int p) {
-        bufferdata[p++] = (byte) (i >> 24);
-        bufferdata[p++] = (byte) (i >> 16);
-        bufferdata[p++] = (byte) (i >> 8);
-        bufferdata[p++] = (byte) i;
-        return p;
-    }
-
-    /**
-     * Append a long to this LogBufferElement.
-     * @return new position
-     */
-    private int appendLong(long l, int p) {
-        bufferdata[p++] = (byte) (l >> 56);
-        bufferdata[p++] = (byte) (l >> 48);
-        bufferdata[p++] = (byte) (l >> 40);
-        bufferdata[p++] = (byte) (l >> 32);
-        bufferdata[p++] = (byte) (l >> 24);
-        bufferdata[p++] = (byte) (l >> 16);
-        bufferdata[p++] = (byte) (l >> 8);
-        bufferdata[p++] = (byte) l;
-        return p;
     }
 
 }

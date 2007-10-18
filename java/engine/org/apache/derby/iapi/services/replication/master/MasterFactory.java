@@ -117,24 +117,17 @@ public interface MasterFactory {
     public void stopMaster();
 
     /**
-     * Append a single log record to the replication log buffer.
+     * Append a chunk of log records to the log buffer.
      *
-     * @param dataLength            number of bytes in data[]
-     * @param instant               the log address of this log record.
-     * @param data                  "from" array to copy "data" portion of rec
-     * @param dataOffset            offset in data[] to start copying from.
-     * @param optionalData          "from" array to copy "optional data" from
-     * @param optionalDataOffset    offset in optionalData[] to start copy from
-     * @param optionalDataLength    number of bytes in optionalData[]
-     *
+     * @param greatestInstant   the instant of the log record that was
+     *                          added last to this chunk of log
+     * @param log               the chunk of log records
+     * @param logOffset         offset in log to start copy from
+     * @param logLength         number of bytes to copy, starting
+     *                          from logOffset
      **/
-    public void appendLogRecord(int dataLength,
-                                long instant,
-                                byte[] data,
-                                int dataOffset,
-                                byte[] optionalData, 
-                                int optionalDataOffset,
-                                int optionalDataLength);
+    public void appendLog(long greatestInstant,
+                          byte[] log, int logOffset, int logLength);
 
     /**
      * Used by the LogFactory to notify the replication master

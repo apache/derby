@@ -36,6 +36,7 @@ import java.util.LinkedList;
 
 import org.apache.derby.iapi.services.io.FormatIdOutputStream;
 import org.apache.derby.iapi.services.io.ArrayOutputStream;
+import org.apache.derby.iapi.services.replication.master.MasterFactory;
 import org.apache.derby.iapi.store.raw.RawStoreFactory;
 
 
@@ -107,6 +108,9 @@ public class LogAccessFile
 	static int                      mon_numWritesToLog;
 	static int                      mon_numBytesToLog;
 
+    // the MasterFactory that will accept log when in replication master mode
+    MasterFactory masterFac; 
+    boolean inReplicationMasterMode = false;
 
 	//streams used to generated check sume log record ; see if there is any simpler way
 	private ArrayOutputStream logOutputBuffer;
@@ -202,6 +206,7 @@ public class LogAccessFile
 		}
 		
 		currentBuffer.init(checksumLogRecordSize);
+		logFactory.checkForReplication(this);
 	}
 
 
@@ -263,6 +268,7 @@ public class LogAccessFile
                                                  optional_data_length);
             currentBuffer.position = newpos;
             currentBuffer.bytes_free -= total_log_record_length;
+            currentBuffer.greatest_instant = instant;
             if (SanityManager.DEBUG) {
                 int normalizedPosition = currentBuffer.position;
                 if (writeChecksum) {
@@ -326,7 +332,7 @@ public class LogAccessFile
             // following direct log to file call finishes.
 
 			// write the log record directly to the log file.
-            writeToLog(bigbuffer, 0, bigBufferLength);
+            writeToLog(bigbuffer, 0, bigBufferLength, instant);
         }
     }
 
@@ -346,7 +352,7 @@ public class LogAccessFile
      * @param optional_data_offset offset in "optional_data" to start copy from
      * @param optional_data_length length of optional data to copy.
      *
-     * @see #writeLogRecord
+     * @see LogAccessFile#writeLogRecord
      */
     private int appendLogRecordToBuffer(byte[] buff, int pos,
                                         int length,
@@ -517,8 +523,9 @@ public class LogAccessFile
 			
 			while(nFlushed < noOfBuffers)
 			{
-				if (buf.position != 0)
-					writeToLog(buf.buffer, 0, buf.position);
+				if (buf.position != 0) {
+					writeToLog(buf.buffer, 0, buf.position, buf.greatest_instant);
+				}
 
 				nFlushed++;
 				synchronized(this)
@@ -704,9 +711,29 @@ public class LogAccessFile
 		}
 	}
 
+    /**
+     * Make this LogAccessFile pass chunks of log records (byte[]) to
+     * the MasterFactory when the chunks are written to disk.
+     * @param masterFac The MasterFactory service responsible for
+     * controlling the master side replication behaviour.
+     */
+    protected void setReplicationMasterRole(MasterFactory masterFac) {
+        this.masterFac = masterFac;
+        inReplicationMasterMode = true;
+    }
+
+    /**
+     * Stop this LogAccessFile from passing chunks of log records to
+     * the MasterFactory.
+     */
+    protected void stopReplicationMasterRole() {
+        inReplicationMasterMode = false;
+        masterFac = null;
+    }
 
 	/* write to the log file */
-	private void writeToLog(byte b[], int off, int len) throws IOException
+	private void writeToLog(byte b[], int off, int len, long highestInstant)
+		throws IOException
 	{
 		synchronized(logFileSemaphore)
 		{
@@ -724,6 +751,10 @@ public class LogAccessFile
                     try 
                     {
                         log.write(b, off, len);
+                        if (inReplicationMasterMode) {
+                            masterFac.appendLog(highestInstant,
+                                                b, off, len);
+                        }
                         break;
                     }
                     catch (IOException ioe)
@@ -880,7 +911,7 @@ public class LogAccessFile
 		int    p    = 0; //end is written in the beginning of the buffer, no
 						 //need to checksum a int write.
 		p = writeInt(marker , b , p);
-		writeToLog(b, 0, p);
+		writeToLog(b, 0, p, -1); //end marker has no instant
 	}
 
 	

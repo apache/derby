@@ -41,8 +41,11 @@ import java.util.NoSuchElementException;
  * is initialized by calling init(...). Every time next() is called
  * after that, ReplicationLogScan reads a new log record from
  * logToScan. If next() returns true, the next log record was
- * successfully read. The information in this last read log record can
- * be retrieved by using the get-methods.
+ * successfully read. The information in this last read log record
+ * either indicates that a log file switch has taken place on the
+ * master (isLogSwitch() = true) or it is a normal log record which
+ * information can be retrieved by using the get-methods (if
+ * isLogRecord() = true).
  * </p>
  * <p>
  * Threads: The class does not provide thread synchronization since it
@@ -53,13 +56,9 @@ import java.util.NoSuchElementException;
  * </p>
  * <p>
  * The format of the log chunk byte[] is defined in 
- * org.apache.derby.impl.services.replication.buffer.LogBufferElement
+ * org.apache.derby.impl.store.raw.log.LogAccessFile
  * </p>
- * <p>
- * @see
- * org.apache.derby.impl.services.replication.buffer.LogBufferElement
- * org.apache.derby.impl.services.replication.buffer.LogBufferElement
- * </p>
+ * @see org.apache.derby.impl.store.raw.log.LogAccessFile
  */
 
 class ReplicationLogScan {
@@ -71,13 +70,23 @@ class ReplicationLogScan {
     // get-methods to retrieve these
     private long currentInstant;
     private int currentDataOffset;
-    private int currentOptDataOffset;
     private byte[] currentData;
-    private byte[] currentOptData;
-    // validLogRecord = true when the above variables contain
-    // meaningful data. false before next() is called for the first
-    // time and after next() has reached the end of logToScan
-    private boolean validLogRecord;
+
+    /** hasInfo = true when the scan will return meaningful
+     * information, either in the form of a log record (in which case
+     * the above variables will be set), or when it has found a log
+     * record indicating that a log file switch has taken place on the
+     * master (isLogSwitch = true). hasInfo = false before next() is
+     * called for the first time, after next() has reached the end of
+     * logToScan and if an error occured when parsing logToScan (i.e.
+     * when next() has thrown a StandardException)
+     */
+    private boolean hasInfo;
+
+    /** true if the last read log record indicates a log switch, false
+     * if it is a normal log record private boolean isLogSwitch;
+     */
+    private boolean isLogSwitch;
 
     protected ReplicationLogScan() { }
 
@@ -92,11 +101,9 @@ class ReplicationLogScan {
 
         currentPosition = 0;
         currentInstant = -1;
-        currentDataOffset = -1;
-        currentOptDataOffset = -1;
         currentData = null;
-        currentOptData = null;
-        validLogRecord = false;
+        isLogSwitch = false;
+        hasInfo = false;
     }
 
     /**
@@ -107,32 +114,38 @@ class ReplicationLogScan {
      * <p>
      * Side effects: <br>
      * <br>
-     * On a successful read (return true): setting currentInstant,
-     * currentDataOffset, currentOptDataOffset, currentData,
-     * currentOptData, validLogRecord = true. Also updates
-     * currentPosition to point to the byte immediatly following the
-     * log record.
+     * On a successful read (return true): either...<br>
+     *<br>
+     * ... the scan read a log record indicating that a log file
+     * switch has taken place on the master, in which case
+     * isLogFileSwitch() returns true. In this case, getXXX will not
+     * contain valid data. Asserts handle calls to these methods when
+     * in sane mode. currentPosition is updated to point to the byte
+     * immediately following this log file switch log record.<br>
+     *<br>
+     * ... or the scan read a normal log record, in which case
+     * isLogRecord() returns true. Also sets currentInstant and
+     * currentData, and updates currentPosition to point to the byte
+     * immediatly following the log record. In this case, getXXX will
+     * return meaningful information about the log record.
      * </p>
      * <p>
      * If there are no more log records in logToScan (returns false) or
      * a problem occurs (throws StandardException): setting
-     * validLogRecord = false
+     * hasInfo = false
      * </p>
      * @return true if a log record was successfully read, false if end
      * of logToScan has been reached.
-     * @throws StandardException if logToScan is found to be corrupt.
+     * @throws StandardException if logToScan is found to be corrupted.
      */
     protected boolean next() throws StandardException {
 
         /* format of received log:
          *
+         * (int)    total_length (data[].length + optionaldata[].length)
          * (long)   instant
-         * (int)    dataLength
-         * (int)    dataOffset
-         * (int)    optionalDataLength
-         * (int)    optionalDataOffset
-         * (byte[]) data
-         * (byte[]) optionalData
+         * (byte[]) data+optionaldata
+         * (int)    total_length
          */
 
         if (SanityManager.DEBUG){
@@ -149,181 +162,180 @@ class ReplicationLogScan {
             // not be possible for currentPosition to be greater than
             // logToScan.length if not an exception was thrown by the
             // previous next() call
-            validLogRecord = false;
-            return validLogRecord;
+            hasInfo = false;
+            return hasInfo;
         }
 
         try {
-            currentInstant = retrieveLong();       // (long) instant
-            int currentDataLength = retrieveInt(); // (int)  dataLength
-            currentDataOffset = retrieveInt();     // (int)  dataOffset
-                                                   // (int)  optionalDataLength
-            int currentOptDataLength = retrieveInt();
-            currentOptDataOffset = retrieveInt();  // (int)  optionalDataOffset
+            int currentLength = retrieveInt();   // (int)  dataLength
 
-            // (byte[]) data
-            currentData = new byte[currentDataLength];
-            retrieveBytes(currentData, currentDataLength);
+            if (currentLength == 0) { 
+                // int value 0 is written to log to mark EOF. A length
+                // of 0 therefore means that a log file switch has
+                // taken place on the master
+                isLogSwitch = true;
+                hasInfo = true;
+            } else {
 
-            // (byte[]) optionalData
-            currentOptData = new byte[currentOptDataLength];
-            retrieveBytes(currentOptData, currentOptDataLength);
+                currentInstant = retrieveLong(); // (long) instant
 
-            validLogRecord = true;
+                // (byte[]) data
+                currentData = new byte[currentLength];
+                retrieveBytes(currentData, currentLength);
+
+                retrieveInt();                   // (int) trailing length
+
+                isLogSwitch = false;
+                hasInfo = true;
+            }
         } catch(StandardException se){
             // Means that we have tried to read higher byte addresses
             // than the size of logToScan. That should not happen as
-            // long as logToScan is not currupt. E.g., this could mean
-            // that one of the data or optional data lengths were
+            // long as logToScan is not corrupted. E.g., this could mean
+            // that the data length was
             // wrong. No matter what caused us to be outside the
             // logToScan size, we will not be able to read more log
             // from this logToScan, and should probably abort the
-            // whole replication due to corrupt data. That decision is
+            // whole replication due to corrupted data. That decision is
             // not made here, however.
-            validLogRecord = false;
+            hasInfo = false;
             throw se;
         }
 
-        return validLogRecord;
+        return hasInfo;
     }
 
     /**
      * @return The instant of the log record read by the last call to
-     * next().
+     * next(). Only returns meaningful information if isLogRecord()
+     * returns true.
      * @throws NoSuchElementException if next() has not been called or
      * if there are no more log records in this chunk of log. Should
      * never be thrown unless ReplicationLogScan is used in a wrong
      * way.
      */
     protected long getInstant() throws NoSuchElementException{
-        if (validLogRecord) {
-            return currentInstant;
-        } else {
+        if (!hasInfo) {
             throw new NoSuchElementException();
         }
+
+        if (isLogSwitch) {
+            if (SanityManager.DEBUG){
+                SanityManager.THROWASSERT("Log switch log records " +
+                                          "have no instant");
+            }
+            return -1;
+        }
+
+        return currentInstant;
     }
 
     /**
      * @return The number of bytes in the byte[] returned by getData()
-     * for the log record read by the last call to next().
+     * for the log record read by the last call to next(). Only
+     * returns meaningful information if isLogRecord() returns true.
      * @throws NoSuchElementException if next() has not been called or
      * if there are no more log records in this chunk of log. Should
      * never be thrown unless ReplicationLogScan is used in a wrong
      * way.
      */
     protected int getDataLength() throws NoSuchElementException{
-        if (validLogRecord) {
-            return currentData.length;
-        } else {
+        if (!hasInfo) {
             throw new NoSuchElementException();
         }
+
+        if (isLogSwitch) {
+            if (SanityManager.DEBUG){
+                SanityManager.THROWASSERT("Log switch log records " +
+                                          "have no length");
+            }
+            return -1;
+        }
+
+        return currentData.length;
     }
 
     /**
-     * @return The offset in the byte[] returned by getData() for the
-     * log record read by the last call to next().
-     * @throws NoSuchElementException if next() has not been called or
-     * if there are no more log records in this chunk of log. Should
-     * never be thrown unless ReplicationLogScan is used in a wrong
-     * way.
-     */
-    protected int getDataOffset() throws NoSuchElementException{
-        if (validLogRecord) {
-            return currentDataOffset;
-        } else {
-            throw new NoSuchElementException();
-        }
-    }
-
-    /**
-     * @return The number of bytes in the byte[] returned by
-     * getOptData() for the log record read by the last call to next().
-     * @throws NoSuchElementException if next() has not been called or
-     * if there are no more log records in this chunk of log. Should
-     * never be thrown unless ReplicationLogScan is used in a wrong
-     * way.
-     */
-    protected int getOptDataLength() throws NoSuchElementException{
-        if (validLogRecord) {
-            return currentOptData.length;
-        } else {
-            throw new NoSuchElementException();
-        }
-    }
-
-    /**
-     * @return The offset in the byte[] returned by getOptData() for
-     * the log record read by the last call to next().
-     * @throws NoSuchElementException if next() has not been called or
-     * if there are no more log records in this chunk of log. Should
-     * never be thrown unless ReplicationLogScan is used in a wrong
-     * way.
-     */
-    protected int getOptDataOffset() throws NoSuchElementException{
-        if (validLogRecord) {
-            return currentOptDataOffset;
-        } else {
-            throw new NoSuchElementException();
-        }
-    }
-
-    /**
-     * @return The data byte[] of the log record read by the last call
-     * to next().
+     * Method to get the data byte[] read by the last call to next().
+     * Note that this byte[] contains both byte[] data and byte[]
+     * optional_data from LogAccessFile. To split this byte[] into
+     * data and optional_data, we would need to create a Loggable
+     * object from it because the log does not provide information on
+     * where to split. There is no need to split since this byte[]
+     * will only be written to the slave log anyway. If it was split,
+     * LogAccessFile would simply merge them when writing to file.
+     *
+     * @return The byte[] containing data+optional_data of the log
+     * record read by the last call to next(). Only returns meaningful
+     * information if isLogRecord() returns true.
      * @throws NoSuchElementException if next() has not been called or
      * if there are no more log records in this chunk of log. Should
      * never be thrown unless ReplicationLogScan is used in a wrong
      * way.
      */
     protected byte[] getData() throws NoSuchElementException{
-        if (validLogRecord) {
-            return currentData;
-        } else {
+        if (!hasInfo) {
             throw new NoSuchElementException();
         }
+
+        if (isLogSwitch) {
+            if (SanityManager.DEBUG){
+                SanityManager.THROWASSERT("Log switch log records " +
+                                          "have no data");
+            }
+            return null;
+        }
+
+        return currentData;
     }
 
     /**
-     * @return The optionalData byte[] of the log record read by the
-     * last call to next().
-     * @throws NoSuchElementException if next() has not been called or
-     * if there are no more log records in this chunk of log. Should
-     * never be thrown unless ReplicationLogScan is used in a wrong
-     * way.
-     */
-    protected byte[] getOptData() throws NoSuchElementException{
-        if (validLogRecord) {
-            return currentOptData;
-        } else {
-            throw new NoSuchElementException();
-        }
-    }
-
-    /**
-     * @return Length of byte[] data + byte[] optionalData of the log
-     * record read by the last call to next(). This is the same number
-     * as is stored in the normal Derby transaction log as "lenght" in
-     * the head and tail of each log record.
-     * @throws NoSuchElementException if next() has not been called or
-     * if there are no more log records in this chunk of log. Should
-     * never be thrown unless ReplicationLogScan is used in a wrong
-     * way.
-     */
-    protected int getTotalDataLength() throws NoSuchElementException{
-        if (validLogRecord) {
-            return currentData.length + currentOptData.length;
-        } else {
-            throw new NoSuchElementException();
-        }
-    }
-
-    /**
+     * Used to determine whether or not the last call to next() was
+     * successful.
      * @return true if next() has been called and the end of the log
      * chunk has not yet been reached. Returns the same answer as the
-     * last call to next() did.
+     * last call to next() did. Use isLogFileSwitch() and
+     * isLogRecord() to find out if the current log record indicates a
+     * log file switch or is a normal log record.
      */
-    protected boolean hasValidLogRecord() {
-        return validLogRecord;
+    protected boolean hasValidInformation() {
+        return hasInfo;
+    }
+
+    /**
+     * Used to determine whether the last call to next() read a log
+     * record
+     * @return true if the last call to next() found a normal log
+     * record.
+     * @throws NoSuchElementException if next() has not been called or
+     * if there are no more log records in this chunk of log. Should
+     * never be thrown unless ReplicationLogScan is used in a wrong
+     * way.
+     */
+    protected boolean isLogRecord()  throws NoSuchElementException{
+        if (!hasInfo) {
+            throw new NoSuchElementException();
+        }
+
+        return !isLogSwitch;
+    }
+
+    /**
+     * Used to determine whether the last call to next() found a log
+     * file switch
+     * @return true if the last call to next() found a log record
+     * indicating a log file switch has taken place on the master.
+     * @throws NoSuchElementException if next() has not been called or
+     * if there are no more log records in this chunk of log. Should
+     * never be thrown unless ReplicationLogScan is used in a wrong
+     * way.
+     */
+    protected boolean isLogFileSwitch() throws NoSuchElementException{
+        if (!hasInfo) {
+            throw new NoSuchElementException();
+        }
+
+        return isLogSwitch;
     }
 
     /*

@@ -37,12 +37,12 @@ import java.util.LinkedList;
  *
  * ReplicationLogBuffer consists of a number of LogBufferElements.
  * Elements that are not in use are in the freeBuffers list, while
- * elements that contains dirty log are in dirtyBuffers. Log records
+ * elements that contains dirty log are in dirtyBuffers. Chunks of log records
  * are appended to the buffer element in currentDirtyBuffer. Hence,
  * the life cycle of buffer elements is:
  * freeBuffers -> currentDirtyBuffer -> dirtyBuffers -> freeBuffers
  *
- * To append log records to the buffer, use appendLogRecord(...)
+ * To append chunks of log records to the buffer, use appendLog(...)
  *
  * To consume chunks of log records, use next() followed by getData(),
  * getLastInstant() and getSize(). These get-methods throw
@@ -58,17 +58,10 @@ public class ReplicationLogBuffer {
 
     private static final int DEFAULT_NUMBER_LOG_BUFFERS = 10;
 
-    protected static final int LOG_RECORD_FIXED_OVERHEAD_SIZE = 24;
-    // long instant           - 8
-    // int dataLength         - 4
-    // int dataOffset         - 4
-    // int optionalDataLength - 4
-    // int optionalDataOffset - 4
-
     private final LinkedList dirtyBuffers;// LogBufferElements with unsent log
     private final LinkedList freeBuffers; // currently unused LogBufferElements
 
-    // the buffer we currently APPEND log records to
+    // the buffer we currently APPEND chunks of log records to
     private LogBufferElement currentDirtyBuffer;
 
     // used to GET data from this buffer. next() sets these
@@ -79,10 +72,10 @@ public class ReplicationLogBuffer {
 
     // Two objects to synchronize on so that the logger (LogToFile)
     // and the log consumer (LogShipping service) can use the buffer
-    // concurrently (although appendLogRecord may conflict with next).
+    // concurrently (although appendLog may conflict with next).
     // In cases where both latches are needed at the same time,
     // listLatch is always set first to avoid deadlock. listLatch is
-    // used by appendLogRecord and next to synchronize operations on
+    // used by appendLog and next to synchronize operations on
     // the free and dirty buffer lists and on currentDirtyBuffer.
     // outputLatch is used by next and getXXX to synchronize on the
     // output data variables
@@ -110,41 +103,21 @@ public class ReplicationLogBuffer {
     }
 
     /**
-     * Append a single log record to the log buffer.
+     * Append a chunk of log records to the log buffer.
      *
-     * @param instant               the log address of this log record.
-     * @param dataLength            number of bytes in data[]
-     * @param dataOffset            offset in data[] to start copying from.
-     * @param optionalDataLength    number of bytes in optionalData[]
-     * @param optionalDataOffset    offset in optionalData[] to start copy from
-     * @param data                  "from" array to copy "data" portion of rec
-     * @param optionalData          "from" array to copy "optional data" from
+     * @param greatestInstant   the instant of the log record that was
+     *                          added last to this chunk of log
+     * @param log               the chunk of log records
+     * @param logOffset         offset in log to start copy from
+     * @param logLength         number of bytes to copy, starting
+     *                          from logOffset
      *
      * @throws LogBufferFullException - thrown if there is not enough
-     * free space in the buffer to store the log record.
+     * free space in the buffer to store the chunk of log.
      **/
-    public void appendLogRecord(long instant,
-                                int dataLength,
-                                int dataOffset,
-                                int optionalDataLength,
-                                int optionalDataOffset,
-                                byte[] data,
-                                byte[] optionalData)
+    public void appendLog(long greatestInstant,
+                          byte[] log, int logOffset, int logLength)
         throws LogBufferFullException{
-
-        /* format of log to write:
-         *
-         * (long)   instant
-         * (int)    dataLength
-         * (int)    dataOffset
-         * (int)    optionalDataLength
-         * (int)    optionalDataOffset
-         * (byte[]) data
-         * (byte[]) optionalData
-         */
-
-        int totalLength = dataLength + optionalDataLength +
-                          LOG_RECORD_FIXED_OVERHEAD_SIZE;
 
         synchronized (listLatch) {
             if (currentDirtyBuffer == null) {
@@ -155,31 +128,20 @@ public class ReplicationLogBuffer {
 
             // switch buffer if current buffer does not have enough space
             // for the incoming data
-            if (totalLength > currentDirtyBuffer.freeSize()) {
+            if (logLength > currentDirtyBuffer.freeSize()) {
                 switchDirtyBuffer();
             }
 
-            if (totalLength <= currentDirtyBuffer.freeSize()) {
-                currentDirtyBuffer.appendLogRecord(instant,
-                                                   dataLength,
-                                                   dataOffset,
-                                                   optionalDataLength,
-                                                   optionalDataOffset,
-                                                   data,
-                                                   optionalData);
+            if (logLength <= currentDirtyBuffer.freeSize()) {
+                currentDirtyBuffer.appendLog(greatestInstant,
+                                             log, logOffset, logLength);
             } else {
-                // The log record requires more space than one
+                // The chunk of log records requires more space than one
                 // LogBufferElement with default size. Create a new big
                 // enough LogBufferElement
-                LogBufferElement current = new LogBufferElement(totalLength);
+                LogBufferElement current = new LogBufferElement(logLength);
                 current.setRecyclable(false);
-                current.appendLogRecord(instant,
-                                        dataLength,
-                                        dataOffset,
-                                        optionalDataLength,
-                                        optionalDataOffset,
-                                        data,
-                                        optionalData);
+                current.appendLog(greatestInstant, log, logOffset, logLength);
                 dirtyBuffers.addLast(current);
                 // currentDirtyBuffer has already been handed over to
                 // the dirtyBuffers list, and an empty one is in
@@ -242,7 +204,7 @@ public class ReplicationLogBuffer {
                     outBufferLastInstant = current.getLastInstant();
 
                     // recycle = false if the LogBufferElement has been
-                    // used to store a single very big log record
+                    // used to store a very big chunk of log records
                     if (current.isRecyclable()) {
                         freeBuffers.addLast(current);
                     }
@@ -280,7 +242,7 @@ public class ReplicationLogBuffer {
     }
 
     /**
-     * Method to determine whether or not the buffer had log record
+     * Method to determine whether or not the buffer had any log records
      * the last time next() was called.
      *
      * @return true if the buffer contained log records the last time

@@ -32,6 +32,7 @@ import org.apache.derby.iapi.store.raw.log.LogFactory;
 import org.apache.derby.iapi.store.raw.data.DataFactory;
 
 import org.apache.derby.iapi.services.replication.master.MasterFactory;
+import org.apache.derby.impl.services.replication.net.ReplicationMessageTransmit;
 import org.apache.derby.impl.services.replication.buffer.ReplicationLogBuffer;
 import org.apache.derby.impl.services.replication.buffer.LogBufferFullException;
 
@@ -62,7 +63,7 @@ public class MasterController implements MasterFactory, ModuleControl,
     private ReplicationLogBuffer logBuffer;
     // waiting for code to go into trunk:
     //    private LogShipper logShipper; 
-    //    private NetworkTransmit connection; 
+    private ReplicationMessageTransmit transmitter; 
 
     private String replicationMode;
     private String slavehost;
@@ -106,10 +107,19 @@ public class MasterController implements MasterFactory, ModuleControl,
             slaveport = new Integer(port).intValue();
         }
 
-        // Added when Network Service has been committed to trunk
-        // connection = new NetworkTransmit();
-
         System.out.println("MasterController booted");
+    }
+
+    private boolean setupConnection(){
+        try {
+            transmitter = new ReplicationMessageTransmit(slavehost, slaveport);
+            transmitter.initConnection();
+            return true;
+        } catch (Exception e) {
+            // printline used for debugging - will be removed
+            System.out.println("(MC) Got an exception during setupConnection:");
+            return false;
+        }
     }
 
     /**
@@ -174,8 +184,9 @@ public class MasterController implements MasterFactory, ModuleControl,
         dataFactory = dataFac;
         logFactory = logFac;
         logBuffer = new ReplicationLogBuffer(DEFAULT_LOG_BUFFER_SIZE);
-        //  logFactory.setReplicationMaster(this); //added later
 
+        // May want to move this below connectblock later when
+        // database is not filesystem copied to slave. 
         logFactory.startReplicationMasterRole(this);
 
         if (replicationMode.equals(MasterFactory.ASYNCHRONOUS_MODE)) {
@@ -211,28 +222,20 @@ public class MasterController implements MasterFactory, ModuleControl,
     }
 
     /**
-     * Append a single log record to the replication log buffer.
+     * Append a chunk of log records to the log buffer.
      *
-     * @param dataLength            number of bytes in data[]
-     * @param instant               the log address of this log record.
-     * @param data                  "from" array to copy "data" portion of rec
-     * @param dataOffset            offset in data[] to start copying from.
-     * @param optionalData          "from" array to copy "optional data" from
-     * @param optionalDataOffset    offset in optionalData[] to start copy from
-     * @param optionalDataLength    number of bytes in optionalData[]
-     *
+     * @param greatestInstant   the instant of the log record that was
+     *                          added last to this chunk of log
+     * @param log               the chunk of log records
+     * @param logOffset         offset in log to start copy from
+     * @param logLength         number of bytes to copy, starting
+     *                          from logOffset
      **/
-    public void appendLogRecord(int dataLength,
-                                long instant,
-                                byte[] data,
-                                int dataOffset,
-                                byte[] optionalData, 
-                                int optionalDataOffset,
-                                int optionalDataLength) {
+    public void appendLog(long greatestInstant,
+                          byte[] log, int logOffset, int logLength){
+
         try {
-            logBuffer.appendLogRecord(instant, dataLength, dataOffset,
-                                      optionalDataLength, optionalDataOffset,
-                                      data, optionalData);
+            logBuffer.appendLog(greatestInstant, log, logOffset, logLength);
         } catch (LogBufferFullException lbfe) {
             // Waiting for log shipper to implement this
             // We have multiple alternatives: 

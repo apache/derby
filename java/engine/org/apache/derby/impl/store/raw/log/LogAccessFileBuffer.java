@@ -40,6 +40,7 @@ final class LogAccessFileBuffer
     protected int       bytes_free;
     protected int       position;
 	protected int       length;
+    protected long      greatest_instant;
 
     LogAccessFileBuffer next;
     LogAccessFileBuffer prev;
@@ -67,6 +68,7 @@ final class LogAccessFileBuffer
 		length =  buffer.length - reserve;
         bytes_free  = length;
         position    = reserve;
+        greatest_instant = -1;
     }
 
     /**************************************************************************

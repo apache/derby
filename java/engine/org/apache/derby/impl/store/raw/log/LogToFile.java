@@ -3564,22 +3564,6 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
                     length, instant, data, offset, 
                     optionalData, optionalDataOffset, optionalDataLength);
 
-                if (inReplicationMasterMode) {
-                    // Append this log record to the replication log
-                    // buffer so that it can be shipped to the slave.
-                    // Note that the length field is not the same as
-                    // used by writeLogRecord which uses the length of
-                    // data+optionalData - masterFactory needs the
-                    // length of data alone.
-                    masterFactory.appendLogRecord(length - optionalDataLength,
-                                                  instant,
-                                                  data, 
-                                                  offset,
-                                                  optionalData,
-                                                  optionalDataOffset,
-                                                  optionalDataLength);
-                }
-
 				if (optionalDataLength != 0) 
                 {
 					if (SanityManager.DEBUG)
@@ -4893,7 +4877,21 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
     public void startReplicationMasterRole(MasterFactory masterFactory) 
         throws StandardException {
         this.masterFactory = masterFactory;
-        inReplicationMasterMode = true;
+        synchronized(this) {
+            // checkpoint followed by flushAll ensures that all data
+            // and log are written on disk. After this, the database
+            // can be safely copied to the slave location provided
+            // that no clients perform operations on the database
+            // before a connection has been established with the
+            // slave. Note: this is a hack that will be removed once
+            // the repliation functionality is able to send the
+            // database from master to slave using the network
+            // connection.
+            rawStoreFactory.checkpoint();
+            flushAll();
+            inReplicationMasterMode = true;
+            logOut.setReplicationMasterRole(masterFactory);
+        }
     }
 
     /**
@@ -4904,6 +4902,20 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
     public void stopReplicationMasterRole() {
         inReplicationMasterMode = false;
         masterFactory = null;
+        logOut.stopReplicationMasterRole();
+    }
+
+    /**
+     * Used by LogAccessFile to check if it should take the
+     * replication master role, and thereby send log records to the
+     * MasterFactory.
+     * @param log The LogAccessFile that will take the replication
+     * master role iff this database is master.
+     */
+    protected void checkForReplication(LogAccessFile log) {
+        if (inReplicationMasterMode) {
+            log.setReplicationMasterRole(masterFactory);
+        }
     }
 
 	/**
