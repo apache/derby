@@ -130,6 +130,29 @@ public class TableFunctionTest extends BaseJDBCTestCase
         "getString " +          // VARCHAR
         "getBytes ";            // VARCHAR FOR BIT DATA
 
+    private static  final   String  EXPECTED_GET_XXX_CALLS_JSR169 =
+        "getLong " +            // BIGINT
+        "getBlob " +            // BLOB
+        "getString " +          // CHAR
+        "getBytes " +           // CHAR FOR BIT DATA
+        "getString " +          // CLOB
+        "getDate " +            // DATE
+        "getString " +      // DECIMAL
+        "getDouble " +          // DOUBLE
+        "getDouble " +          // DOUBLE PRECISION
+        "getFloat " +           // FLOAT( 23 )
+        "getDouble " +          // FLOAT( 24 )
+        "getInt " +             // INTEGER
+        "getString " +          // LONG VARCHAR
+        "getBytes " +           // LONG VARCHAR FOR BIT DATA
+        "getString " +      // NUMERIC
+        "getFloat " +           // REAL
+        "getShort " +           // SMALLINT
+        "getTime " +            // TIME
+        "getTimestamp " +       // TIMESTAMP
+        "getString " +          // VARCHAR
+        "getBytes ";            // VARCHAR FOR BIT DATA
+
     private static  final   String[]  STRING_TYPES =
     {
         "CHAR( 20 )",
@@ -1201,8 +1224,13 @@ public class TableFunctionTest extends BaseJDBCTestCase
         rs.close();
         ps.close();
         
-        println( StringArrayVTI.getXXXrecord() );
-        assertEquals( EXPECTED_GET_XXX_CALLS, actualGetXXXCalls );
+        println( actualGetXXXCalls );
+
+        String  expectedGetXXXCalls;
+        if ( JDBC.vmSupportsJSR169() )
+        { expectedGetXXXCalls = EXPECTED_GET_XXX_CALLS_JSR169; }
+        else { expectedGetXXXCalls = EXPECTED_GET_XXX_CALLS; }
+        assertEquals( expectedGetXXXCalls, actualGetXXXCalls );
     }
     
     /**
