@@ -2410,10 +2410,16 @@ public class PreparedStatement extends Statement
 
     void checkForValidParameterIndex(int parameterIndex) throws SqlException {
         if (parameterMetaData_ == null || parameterIndex < 1 || parameterIndex > parameterMetaData_.columns_) {
+        	int totalParameters = 0;
+            if (parameterMetaData_ != null)
+            	//Load totalParmeters with correct number of parameters if 
+            	//ParameterMetaData_ is not null. We will need that in the error
+            	//message.
+            	totalParameters = parameterMetaData_.columns_;
             throw new SqlException(agent_.logWriter_, 
                 new ClientMessageId(SQLState.LANG_INVALID_PARAM_POSITION),
                 new Integer(parameterIndex), 
-                new Integer(parameterMetaData_.columns_));
+                new Integer(totalParameters));
         }
     }
 
