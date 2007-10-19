@@ -20,12 +20,14 @@
 
 package org.apache.derby.impl.store.access;
 
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Properties;
 import java.util.Vector;
 
 import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.util.ReuseFactory;
 
 import org.apache.derby.iapi.services.context.ContextManager;
 
@@ -119,6 +121,11 @@ public class RAMTransaction
 	private Vector sorts;
 	private Vector sortControllers;
 
+    /** List of sort identifiers (represented as <code>Integer</code> objects)
+     * which can be reused. Since sort identifiers are used as array indexes,
+     * we need to reuse them to avoid leaking memory (DERBY-912). */
+    private ArrayList freeSortIds;
+
 	/**
 	Where to look for temporary conglomerates.
 	**/
@@ -162,6 +169,7 @@ public class RAMTransaction
 		conglomerateControllers = new Vector();
 
 		sorts                   = null; // allocated on demand.
+		freeSortIds             = null; // allocated on demand.
 		sortControllers         = null; // allocated on demand
 
         if (parent_tran != null)
@@ -313,6 +321,7 @@ public class RAMTransaction
                         sort.drop(this);
                 }
                 sorts.removeAllElements();
+                freeSortIds.clear();
             }
 		}
 	}
@@ -1716,10 +1725,22 @@ public class RAMTransaction
                         estimatedRowSize);
 
 		// Add the sort to the sorts vector
-		if (sorts == null)
+		if (sorts == null) {
 			sorts = new Vector();
-		long sortid = sorts.size();
-		sorts.addElement(sort);
+            freeSortIds = new ArrayList();
+        }
+
+        int sortid;
+        if (freeSortIds.isEmpty()) {
+            // no free identifiers, add sort at the end
+            sortid = sorts.size();
+            sorts.addElement(sort);
+        } else {
+            // reuse a sort identifier
+            sortid = ((Integer) freeSortIds.remove(freeSortIds.size() - 1))
+                .intValue();
+            sorts.setElementAt(sort, sortid);
+        }
 
 		return sortid;
 	}
@@ -1747,6 +1768,7 @@ public class RAMTransaction
         {
             sort.drop(this);
             sorts.setElementAt(null, (int) sortid);
+            freeSortIds.add(ReuseFactory.getInteger((int) sortid));
         }
     }
 

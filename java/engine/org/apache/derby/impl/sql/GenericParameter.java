@@ -352,11 +352,11 @@ final class GenericParameter
 		{
 			try
 			{
-				return value.getString();
+				return value.getTraceString();
 			}
 			catch (StandardException se)
 			{
-				return "unexpected exception from getString() - " + se;
+				return "unexpected exception from getTraceString() - " + se;
 			}
 		}
 	}
