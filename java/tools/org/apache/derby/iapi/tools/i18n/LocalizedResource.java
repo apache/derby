@@ -340,8 +340,7 @@ public final class LocalizedResource  implements java.security.PrivilegedAction 
 				return getNumberAsString(rs.getDouble(columnNumber));
 			}
 			else if (SUPPORTS_BIG_DECIMAL_CALLS && (type == Types.NUMERIC || type == Types.DECIMAL)) {
-				return	getNumberAsString(rs.getBigDecimal(columnNumber,
-											rsm.getScale(columnNumber)));
+				return getNumberAsString(rs.getBigDecimal(columnNumber));
 			}
 			else if (type == Types.TIME ) {
 				return getTimeAsString(rs.getTime(columnNumber));

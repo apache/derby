@@ -1201,7 +1201,15 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
      */
     private static String formatURL(URL loc)
     {
-        String filename = URLDecoder.decode(loc.toString());
+        String filename;
+        try {
+            // Should use UTF-8 according to
+            // http://www.w3.org/TR/html40/appendix/notes.html#non-ascii-chars
+            filename = URLDecoder.decode(loc.toString(), "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            // All JVMs are required to support UTF-8.
+            return null;
+        }
 
         if (filename.startsWith("jar:")) { filename = filename.substring(4); }
         if (filename.startsWith("file:")) { filename = filename.substring(5); }

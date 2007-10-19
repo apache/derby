@@ -173,7 +173,7 @@ public class splitmessages {
 				new FileOutputStream(new File(dir, "m"+i+locale+".properties")), 16 * 1024);
 
             
-			c[i].save(fos, (String) null);
+			c[i].store(fos, (String) null);
 			fos.flush();
 			fos.close();
             
@@ -181,7 +181,7 @@ public class splitmessages {
 				// add duplicate english file as the base
 				fos = new BufferedOutputStream(
 					new FileOutputStream(new File(dir, "m"+i+".properties")), 16 * 1024);
-				c[i].save(fos, (String) null);
+				c[i].store(fos, (String) null);
 				fos.flush();
 				fos.close();
 			}
@@ -198,7 +198,7 @@ public class splitmessages {
             new FileOutputStream(new File(dir, clientPropsFileName)), 
             16 * 1024);
 
-        clientProps.save(clientOutStream, (String)null);
+        clientProps.store(clientOutStream, (String)null);
         clientOutStream.flush();
         clientOutStream.close();
         
@@ -209,7 +209,7 @@ public class splitmessages {
                 new FileOutputStream(new File(dir, "clientmessages.properties")), 
                 16 * 1024);
 
-            clientProps.save(clientOutStream, (String)null);
+            clientProps.store(clientOutStream, (String)null);
             clientOutStream.flush();
             clientOutStream.close();            
         }
