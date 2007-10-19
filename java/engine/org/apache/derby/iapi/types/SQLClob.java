@@ -193,6 +193,26 @@ public class SQLClob
 	{
 		throw dataTypeConversion("java.sql.Timestamp");
 	}
+    
+    /**
+     * Gets a trace representation of the CLOB for debugging.
+     *
+     * @return a trace representation of the CLOB.
+     */
+    public final String getTraceString() throws StandardException {
+        // Check if the value is SQL NULL.
+        if (isNull()) {
+            return "NULL";
+        }
+
+        // Check if we have a stream.
+        if (getStream() != null) {
+            return ("CLOB(" + getStream().toString() + ")");
+        }
+
+        return ("CLOB(" + getLength() + ")");
+    }
+
 
 	public void setValue(Time theValue, Calendar cal) throws StandardException
 	{

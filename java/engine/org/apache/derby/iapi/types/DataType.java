@@ -230,6 +230,19 @@ public abstract class DataType
 			MessageService.getTextMessage(SQLState.LANG_STREAM));
 	}
 
+    /**
+     * Gets the value in the data stream descriptor as a trace string.
+     * This default implementation simply forwards the call to
+     * <code>getString</code>.
+     *
+     * @return The data value in a representation suitable for tracing.
+     * @throws StandardException if getting the data value fails.
+     * @see DataValueDescriptor#getString
+     */
+    public String getTraceString() throws StandardException {
+        return getString();  
+    }
+
 	/*
 	 * Column interface
 	 */
