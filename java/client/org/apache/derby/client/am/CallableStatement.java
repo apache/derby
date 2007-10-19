@@ -406,6 +406,7 @@ public class CallableStatement extends PreparedStatement
         }
     }
 
+    /** @deprecated */
     public java.math.BigDecimal getBigDecimal(int parameterIndex, int scale) throws SQLException, ArithmeticException {
         try
         {

@@ -1058,6 +1058,7 @@ public abstract class EmbedCallableStatement20
     /**
 	 * @see CallableStatement#getBigDecimal
      * @exception SQLException NoOutputParameters thrown.
+     * @deprecated
      */
     public final BigDecimal getBigDecimal(int parameterIndex, int scale) throws SQLException
 	{

@@ -783,6 +783,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     }
 
     // Live life on the edge and run unsynchronized
+    /** @deprecated */
     public java.math.BigDecimal getBigDecimal(int column, int scale) throws SQLException {
         try
         {
@@ -1168,6 +1169,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
      *
      * @param column the column to retrieve as a Unicode stream
      * @exception SQLException throws feature not implemented
+     * @deprecated
      */
     public java.io.InputStream getUnicodeStream(int column) throws SQLException {
         if (agent_.loggingEnabled()) {
@@ -1527,6 +1529,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
         }
     }
 
+    /** @deprecated */
     public final java.math.BigDecimal getBigDecimal(String columnName, int scale) throws SQLException {
         try
         {
@@ -1695,6 +1698,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
         }
     }
 
+    /** @deprecated */
     public final java.io.InputStream getUnicodeStream(String columnName) throws SQLException {
         try
         {

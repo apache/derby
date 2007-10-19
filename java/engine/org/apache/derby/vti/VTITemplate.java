@@ -151,6 +151,7 @@ public abstract class VTITemplate implements ResultSet {
 	 * @see java.sql.ResultSet
 	 *
  	 * @exception SQLException on unexpected JDBC error
+     * @deprecated
 	 */
     public BigDecimal getBigDecimal(int columnIndex, int scale) throws SQLException {
         throw new SQLException("getBigDecimal");
@@ -205,6 +206,7 @@ public abstract class VTITemplate implements ResultSet {
 	 * @see java.sql.ResultSet
 	 *
  	 * @exception SQLException on unexpected JDBC error
+     * @deprecated
 	 */
     public java.io.InputStream getUnicodeStream(int columnIndex) throws SQLException {
         throw new SQLException("getUnicodeStream");
@@ -296,6 +298,7 @@ public abstract class VTITemplate implements ResultSet {
 	 * @see java.sql.ResultSet
 	 *
  	 * @exception SQLException on unexpected JDBC error
+     * @deprecated
 	 */
     public BigDecimal getBigDecimal(String columnName, int scale) throws SQLException {
         return getBigDecimal(findColumn(columnName), scale);
@@ -350,6 +353,7 @@ public abstract class VTITemplate implements ResultSet {
 	 * @see java.sql.ResultSet
 	 *
  	 * @exception SQLException on unexpected JDBC error
+     * @deprecated
 	 */
     public java.io.InputStream getUnicodeStream(String columnName) throws SQLException {
         throw new SQLException("getUnicodeStream");

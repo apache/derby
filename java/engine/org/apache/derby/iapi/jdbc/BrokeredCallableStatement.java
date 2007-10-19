@@ -108,6 +108,7 @@ public abstract class BrokeredCallableStatement extends BrokeredPreparedStatemen
         return getCallableStatement().getDouble( parameterIndex);
     }
 
+    /** @deprecated */
     public final BigDecimal getBigDecimal(int parameterIndex,
                                               int scale)
         throws SQLException

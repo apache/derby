@@ -93,6 +93,7 @@ public class EmbedResultSet20
 		 * @param scale the number of digits to the right of the decimal
 		 * @return the column value; if the value is SQL NULL, the result is null
 		 * @exception SQLException thrown on failure.
+         * @deprecated
 		 */
 		public final BigDecimal getBigDecimal(int columnIndex, int scale)
 			throws SQLException {
@@ -128,6 +129,7 @@ public class EmbedResultSet20
 		 * @param scale the number of digits to the right of the decimal
 		 * @return the column value; if the value is SQL NULL, the result is null
 		 * @exception SQLException thrown on failure.
+         * @deprecated
 		 */
 		public final BigDecimal getBigDecimal(String columnName, int scale)
 			throws SQLException {
@@ -141,6 +143,7 @@ public class EmbedResultSet20
      *
 		Deprecated in JDBC 2.0, not supported by JCC.
 	 * @exception SQLException thrown on failure.
+     * @deprecated
      */
     public final java.io.InputStream getUnicodeStream(int columnIndex) throws SQLException {
 		throw Util.notImplemented("getUnicodeStream");
@@ -148,6 +151,7 @@ public class EmbedResultSet20
     /**
 		Deprecated in JDBC 2.0, not supported by JCC.
 	 * @exception SQLException thrown on failure.
+     * @deprecated
      */
     public final java.io.InputStream getUnicodeStream(String columnName) throws SQLException {
 		throw Util.notImplemented("getUnicodeStream");

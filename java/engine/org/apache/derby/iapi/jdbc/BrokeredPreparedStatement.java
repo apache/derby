@@ -303,6 +303,7 @@ public abstract class BrokeredPreparedStatement extends BrokeredStatement
      * UNICODE parameter value 
      * @param length the number of bytes in the stream 
 	 * @exception SQLException thrown on failure.
+     * @deprecated
      */
     public final void setUnicodeStream(int parameterIndex, InputStream x, int length) throws SQLException
     {

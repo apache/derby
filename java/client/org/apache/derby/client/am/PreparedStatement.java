@@ -1191,6 +1191,7 @@ public class PreparedStatement extends Statement
      * value
      * @param length the number of bytes in the stream
      * @exception SQLException throws feature not implemented.
+     * @deprecated
      */
     public void setUnicodeStream(int parameterIndex,
                                  java.io.InputStream x,
