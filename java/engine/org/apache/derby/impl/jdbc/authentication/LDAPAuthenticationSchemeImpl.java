@@ -398,9 +398,14 @@ extends JNDIAuthenticationSchemeBase
                                 // creation fails. Perhaps that should be investigated as well.
                                 FileOutputStream fos = null;
                                 try {
-                                    fos = privNewFileOutputStream("DerbyLDAP.out");
-                                } catch (Exception e) {
-                                    // If file creation fails do not stop execution.
+                                    fos =  ((FileOutputStream)AccessController.doPrivileged(
+                                                new PrivilegedExceptionAction() {
+                                                    public Object run() throws SecurityException, java.io.IOException {
+                                                        return new  FileOutputStream("DerbyLDAP.out");
+                                                    }
+                                                }));
+                                } catch (PrivilegedActionException pae) {
+                                    // If trace file creation fails do not stop execution.                                    
                                 }
                                 if (fos != null)
                                     initDirContextEnv.put("com.sun.naming.ldap.trace.ber",fos);
@@ -410,25 +415,8 @@ extends JNDIAuthenticationSchemeBase
 		}
 	}
 
-	/**
-     * Construct a new FileOutputStream in a privilege block.
-     * 
-	 * @param fileName Filename to create
-	 * @return 
-	 * @throws IOException
-	 */
-	private FileOutputStream privNewFileOutputStream(final String fileName) throws IOException{
-	    try {
-            return ((FileOutputStream)AccessController.doPrivileged(
-                        new PrivilegedExceptionAction() {
-                            public Object run() throws SecurityException, java.io.IOException {
-                                return new  FileOutputStream(fileName);
-                            }
-                        }));
-        } catch (PrivilegedActionException pae) {
-            throw (SecurityException)pae.getException();
-        }
-    }
+	
+	
 	
 
 	/**
