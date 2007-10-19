@@ -1104,6 +1104,57 @@ public class PrepareStatementTest extends BaseJDBCTestCase
         st.close();
     }
 
+    /**
+     * A test case for DERBY-3046
+     * We were running into null pointer exception if the parameter count
+     * for PreparedStatement was 0 and the user tried doing setObject
+     * 
+     * @throws Exception
+     */
+    public void testVariationOfSetObject() throws Exception
+    {
+        Statement stmt = createStatement();
+        String createString = "CREATE TABLE WISH_LIST  "
+        	+  "(WISH_ID INT NOT NULL GENERATED ALWAYS AS IDENTITY " 
+        	+  "   CONSTRAINT WISH_PK PRIMARY KEY, " 
+        	+  " ENTRY_DATE TIMESTAMP DEFAULT CURRENT_TIMESTAMP, "
+        	+  " WISH_ITEM VARCHAR(32) NOT NULL) " ;
+        
+        stmt.executeUpdate(createString);
+        PreparedStatement ps = prepareStatement("insert into WISH_LIST(WISH_ITEM) values (?)");
+        //this won't raise any errors because there is one parameter in ps
+        ps.setString(1, "aaa");
+        ps.executeUpdate();
+        
+        //Negative test case. There are no parameter in the following ps
+        ps = prepareStatement("insert into WISH_LIST(WISH_ITEM) values ('bb')");
+        //Try setString when no parameters in ps
+        try {
+        	ps.setString(1, "aaa");
+            fail("Exception expected above!");
+        } catch (SQLException e)  {  
+        	if (usingDerbyNetClient())
+        		//note that SQLState is XCL14. For setObject below, the 
+        		//SQLState is XCL13. I have entered DERBY-3139 for this
+        		//difference in SQLState.
+        		assertSQLState("XCL14", e);
+        	else
+        		assertSQLState("07009", e);
+        }
+        //Try setObject when no parameters in ps
+        try {
+        	ps.setObject(1,"cc",java.sql.Types.VARCHAR); 
+            fail("Exception expected above!");
+        } catch (SQLException e)  {   
+        	if (usingDerbyNetClient())
+        		//note that SQLState is XCL13. For setString above, the 
+        		//SQLState is XCL14. I have entered DERBY-3139 for this
+        		//difference in SQLState.
+        		assertSQLState("XCL13", e);
+        	else
+        		assertSQLState("07009", e);
+        }
+    }
 
     /**
      * Test two different bugs regarding the handling of large
