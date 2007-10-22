@@ -1174,7 +1174,7 @@ public abstract class EmbedConnection implements EngineConnection
 				(rootConnection == this) && 
 				(!autoCommit && !transactionIsIdle())) {
 			throw newSQLException(
-				SQLState.LANG_INVALID_TRANSACTION_STATE);
+				SQLState.CANNOT_CLOSE_ACTIVE_CONNECTION);
 		}
 		
 		close(exceptionClose);

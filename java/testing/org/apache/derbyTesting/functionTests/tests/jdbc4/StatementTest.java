@@ -165,11 +165,8 @@ public class StatementTest
         } catch (SQLException sqle) {
             // The SQL State is incorrect in the embedded client, see
             // JIRA id DERBY-1168
-            String expectedState;
-            if ( this.usingDerbyNetClient() )
-                expectedState = SQLStateConstants.INVALID_TRANSACTION_STATE_ACTIVE_SQL_TRANSACTION;
-            else
-                expectedState = SQLStateConstants.INVALID_TRANSACTION_STATE_NO_SUBCLASS;
+            String expectedState =
+                SQLStateConstants.INVALID_TRANSACTION_STATE_ACTIVE_SQL_TRANSACTION;
             
             if ( ! expectedState.equals(sqle.getSQLState()) )
             {
