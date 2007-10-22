@@ -230,7 +230,7 @@ abstract class MethodCallNode extends JavaValueNode
 		throws StandardException
 	{
 		CollectNodesVisitor getCRs = new CollectNodesVisitor(ColumnReference.class);
-		super.accept(getCRs);
+		accept(getCRs);
 		Vector colRefs = getCRs.getList();
 		for (Enumeration e = colRefs.elements(); e.hasMoreElements(); )
 		{

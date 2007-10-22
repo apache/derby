@@ -649,6 +649,35 @@ public final class SysDiagVTIMappingTest extends BaseJDBCTestCase {
         st.close();
     }
 
+    /**
+     * Test that diagnostic VTIs will work correctly when they
+     * are invoked in a subquery with correlated references to
+     * outer query blocks.  DERBY-3138.
+     */
+    public void testCorrelatedReferences() throws SQLException
+    {
+        Statement   st = createStatement();
+        String      [][] expRS = new String [][] {};
+
+        ResultSet rs = st.executeQuery
+            (
+             "select s.schemaname, t.tableName\n" +
+             "from sys.sysschemas s, sys.systables t\n" +
+             "where t.schemaid=s.schemaid\n" +
+             "and exists\n" +
+             "(\n" +
+             "  select vti.*\n" +
+             "  from table( syscs_diag.space_table( s.schemaname, t.tableName ) ) as vti\n" +
+             "  where vti.numfreepages < -1\n" +
+             ")\n"
+             );
+        
+        JDBC.assertFullResultSet(rs, expRS);
+
+        rs.close();
+        st.close();
+    }
+
     /* All statements in this method should fail because a VTI table-
      * mapping that takes arguments can only be used as part of the TABLE 
      * constructor.  Any other uses of, or attempts to modify, such a
