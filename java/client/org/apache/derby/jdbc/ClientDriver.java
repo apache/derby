@@ -169,7 +169,8 @@ public class ClientDriver implements java.sql.Driver {
 	private String appendDatabaseAttributes(String database, Properties augmentedProperties) {
 	
 		StringBuffer longDatabase = new StringBuffer(database);
-		for (Enumeration keys = augmentedProperties.keys(); keys.hasMoreElements() ;)
+		for (Enumeration keys = augmentedProperties.propertyNames();
+			 keys.hasMoreElements() ;)
 		{
 			String key = (String) keys.nextElement();
 			if (key.equals(Attribute.USERNAME_ATTR) || 

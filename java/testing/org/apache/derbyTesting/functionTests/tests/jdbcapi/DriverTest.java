@@ -67,6 +67,7 @@ public class DriverTest extends BaseJDBCTestCase {
         DB_NAME_WITH_SPACES,
         "testcreatedb1", 
         "testcreatedb2",
+        "testcreatedb3",
         "'wombat'"
     };
     
@@ -386,6 +387,15 @@ public class DriverTest extends BaseJDBCTestCase {
         assertConnect(false, url, info);
         assertTraceFilesExist();
         shutdownDB(url + ";shutdown=true", null);
+
+        // Derby-974: test that connection sees default properties as well
+        info.setProperty("create","true");
+        Properties infoWithDefaults = new Properties(info);
+
+        url = TestConfiguration.getCurrent().getJDBCUrl("testcreatedb3");
+        assertConnect(false, url, infoWithDefaults);
+
+        shutdownDB(url+";shutdown=true", null);
 
     }
 
