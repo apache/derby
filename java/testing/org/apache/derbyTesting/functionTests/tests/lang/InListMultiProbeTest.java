@@ -141,7 +141,18 @@ public class InListMultiProbeTest extends BaseJDBCTestCase {
     {
         super(name);
     }
-
+    
+    /* 
+     * Null out foreignIdToRowsMap so it doesn't hang around after test
+     * completes
+     * @see org.apache.derbyTesting.junit.BaseJDBCTestCase#tearDown()
+     */
+    protected void tearDown() throws Exception 
+    {
+        foreignIdToRowsMap = null;
+        super.tearDown();
+    }
+    
     /**
      * Return a suite that runs the relevant multi-probing tests.
      */
