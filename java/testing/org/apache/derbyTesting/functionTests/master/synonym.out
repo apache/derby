@@ -372,26 +372,6 @@ ij> drop synonym mySynonym;
 ij> -- Previously compiled cached statement should get invalidated
 select * from mySynonym;
 ERROR 42X05: Table/View 'MYSYNONYM' does not exist.
-ij> create synonym mySyn for table1;
-0 rows inserted/updated/deleted
-ij> create view v1 as select * from mySyn;
-0 rows inserted/updated/deleted
-ij> create view v2 as select * from v1;
-0 rows inserted/updated/deleted
-ij> -- Drop synonym should fail since it is used in two views.
-drop synonym mySyn;
-ERROR X0Y23: Operation 'DROP SYNONYM' cannot be performed on object 'MYSYN' because VIEW 'V1' is dependent on that object.
-ERROR X0Y23: Operation 'DROP SYNONYM' cannot be performed on object 'MYSYN' because VIEW 'V2' is dependent on that object.
-ij> drop view v2;
-0 rows inserted/updated/deleted
-ij> -- fail still
-drop synonym mySyn;
-ERROR X0Y23: Operation 'DROP SYNONYM' cannot be performed on object 'MYSYN' because VIEW 'V1' is dependent on that object.
-ij> drop view v1;
-0 rows inserted/updated/deleted
-ij> -- should pass
-drop synonym mySyn;
-0 rows inserted/updated/deleted
 ij> -- drop and recreate schema test
 create schema testSchema;
 0 rows inserted/updated/deleted
