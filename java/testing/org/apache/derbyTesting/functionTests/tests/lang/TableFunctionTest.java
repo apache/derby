@@ -70,6 +70,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
     private static  final   String[]    TABLE_NAMES =
     {
         "allStringTypesTable",
+        "fooTestTable",
     };
     
     private static  final   String[][]  SIMPLE_ROWS =
@@ -917,6 +918,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
         vtiCosting();
         
         collationTest();
+        subqueryTest();
     }
     
     /**
@@ -1456,6 +1458,62 @@ public class TableFunctionTest extends BaseJDBCTestCase
         }
     }
     
+    /**
+     * Verify that table functions work correctly when invoked in
+     * a subuery with correlated references to outer query blocks.
+     */
+    private void  subqueryTest()
+        throws Exception
+    {
+        goodStatement
+            (
+             "create table fooTestTable\n" +
+             "(\n" +
+             "    inputCol    varchar( 20 ),\n" +
+             "    outputCol   varchar( 30 )\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             "insert into fooTestTable\n" +
+             "values\n" +
+             "( 'succeed1', 'succeed1 foo' ),\n" +
+             "( 'fail1', 'ladeedah' ),\n" +
+             "( 'succeed2', 'succeed2 bar' ),\n" +
+             "( 'fail2', 'hoopla' )\n"
+             );
+        goodStatement
+            (
+             "create function appendFooAndBar( inputArg varchar( 20 ) )\n" +
+             "returns TABLE\n" +
+             "  (\n" +
+             "     inputText varchar( 20 ),\n" +
+             "     outputText varchar( 30 )\n" +
+             "  )\n" +
+             "language java\n" +
+             "parameter style DERBY_JDBC_RESULT_SET\n" +
+             "no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.TableFunctionTest.appendFooAndBar'\n"
+             );
+
+        assertResults
+            (
+             "select * from fooTestTable\n" +
+             "where outputCol in\n" +
+             "(\n" +
+             "    select f.outputText\n" +
+             "    from TABLE( appendFooAndBar( inputCol ) ) as f\n" +
+             ")\n",
+             new String[] { "INPUTCOL", "OUTPUTCOL" },
+             new String[][]
+             {
+                 { "succeed1", "succeed1 foo" },
+                 { "succeed2", "succeed2 bar" },
+             },
+             new int[] { Types.VARCHAR, Types.VARCHAR }
+             );
+    }
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // Derby FUNCTIONS
@@ -1494,6 +1552,20 @@ public class TableFunctionTest extends BaseJDBCTestCase
         return makeVTI( ALL_STRING_TYPES_ROWS );
     }
 
+    /**
+     * A VTI which returns rows based on a passed-in parameter
+     */
+    public  static  ResultSet appendFooAndBar( String text )
+    {
+        String[][]  kernel = new String[][]
+        {
+            { text, text + " foo" },
+            { text, text + " bar" },
+        };
+
+        return makeVTI( kernel );
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // MINIONS
@@ -1506,9 +1578,18 @@ public class TableFunctionTest extends BaseJDBCTestCase
     public void assertResults( String sql, String[][] rows, int[] expectedJdbcTypes )
         throws Exception
     {
-        println( "\nExpecting good results from " + sql );
-
         String[]    columnNames = makeColumnNames( expectedJdbcTypes.length, "COLUMN" );
+
+        assertResults( sql, columnNames, rows, expectedJdbcTypes );
+    }
+
+    /**
+     * Assert that the ResultSet returns the desired rows.
+     */
+    public void assertResults( String sql, String[] columnNames, String[][] rows, int[] expectedJdbcTypes )
+        throws Exception
+    {
+        println( "\nExpecting good results from " + sql );
 
         try {
             PreparedStatement    ps = prepareStatement( sql );
@@ -1540,8 +1621,6 @@ public class TableFunctionTest extends BaseJDBCTestCase
      */
     private void    goodStatement( String ddl )
     {
-        println( "Running good statement:\n\t" + ddl );
-        
         try {
             PreparedStatement    ps = chattyPrepare( ddl );
 
