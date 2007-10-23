@@ -1,0 +1,50 @@
+This branch of the Demo subtree contains sample table functions. The
+code is built by the top-level Derby compile target and the javadoc is
+built by the top-level Derby javadoc target. That is, from the root
+directory of your subversion client or source distribution, invoke
+"ant all". This will build all of Derby and will also build all of the
+classes in this demo. The demo classes will be compiled into
+classes/org/apache/derbyDemo/vtis... Similarly, if you invoke
+"ant buildjavadoc" then all of the Derby javadoc will be built and,
+in addition, javadoc for this demo will be built into the demo
+subdirectory of the javadoc output.
+
+Two sql scripts are provided to test-drive these table functions.
+Use Derby's ij tool to run these scripts:
+
+1)  sql/demoFileVtis.sql
+2)  sql/demoForeignDbmsVtis.sql
+
+1) The first script needs to be customized as explained in the
+script's header.
+
+This first script exercises the following table functions:
+
+a) PropertyFileVTI - a table function for presenting a property file
+as a table.
+
+b) XmlVTI - a table function for presenting an arbitrary XML file as
+a table.
+
+c) ApacheServerLogVTI - an example of an XmlVTI which makes a table
+out of an Apache web server log.
+
+d) DerbyJiraReportVTI - an example of an XmlVTI which makes a table
+out of a JIRA report.
+
+e) SubversionLogVTI - a table function for making a table from the
+output of the "svn log" command.
+
+
+2) The second script runs table functions against the sample MySQL
+database called "world". To run this script, you must be running a
+MySQL server which manages the world database. You will also need
+to customize this script as its header explains. The second script
+exercises the following machinery:
+
+a) A table function which queries the CountryLanguage table in the
+MySQL database.
+
+b) A parameterized subscription from several tables in the MySQL
+database. This subscription is defined by an annotated class called
+WorldDBSnapshot.

@@ -110,6 +110,19 @@
         <pathelement path="${java14compile.classpath};${jcc};"/>
       </classpath>
     </javac>
+    <javac
+      source="1.5"
+      target="1.5"
+      nowarn="on"
+      debug="${debug}"
+      depend="${depend}"
+      deprecation="${deprecation}"
+      optimize="${optimize}"
+      proceed="${proceed}"
+      verbose="${verbose}"
+      srcdir="${derby.demo.src.dir}/vtis/java"
+      destdir="${out.dir}">
+    </javac>
     <ant target="compile" dir="toursdb"/>
   </target>
 

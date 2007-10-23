@@ -637,7 +637,7 @@
   <property name="javadoc.tool.jdk16" value="${jdk16}/bin/javadoc"/>
 
   <target name="javadoc"
-    depends="init-javadoc-tool,init,initjars,publishedapi,derbydocs,toolsdocs,grammardocs,testingdocs"/>
+    depends="init-javadoc-tool,init,initjars,publishedapi,derbydocs,toolsdocs,grammardocs,demodocs,testingdocs"/>
 
   <target name="init-javadoc-tool" depends="init-javadoc-not-jdk16,init-javadoc-jdk16"/>
 
@@ -882,6 +882,29 @@
       <param name="jjtodoc" value="${derby.tools.dir}/impl/tools/ij/ij.jj"/>
       <param name="jjdoctarget" value="${out.javadoc.dir}/tools/ij.html"/>
     </antcall>
+
+  </target>
+
+  <target name="demodocs" depends="init-javadoc-tool,init">
+
+    <delete dir="${out.javadoc.dir}/demo"/>
+    <mkdir dir="${out.javadoc.dir}/demo"/>
+
+    <javadoc
+        executable="${javadoc.tool}"
+        additionalparam="-J-mx320M"
+        packagenames="org.apache.derbyDemo.vtis.*"
+        access="private"
+        breakiterator="yes"
+        useexternalfile="yes"
+        classpath="${out.dir}"
+        destdir="${out.javadoc.dir}/demo"
+        windowtitle="Apache Derby Demos"
+        doctitle="Apache Derby Demos"
+    >
+     <fileset dir="${derby.demo.src.dir}/vtis/java"/>
+    </javadoc>
+
 
   </target>
 
