@@ -15,6 +15,8 @@
 --   limitations under the License.
 --
 -- tests for synonym support
+-- When we decide to convert this test to junit test, the converted tests can 
+-- go in existing SynonymTest.java
 
 set schema APP;
 -- negative tests
@@ -228,23 +230,6 @@ drop synonym mySynonym;
 
 -- Previously compiled cached statement should get invalidated
 select * from mySynonym;
-
-create synonym mySyn for table1;
-create view v1 as select * from mySyn;
-create view v2 as select * from v1;
-
--- Drop synonym should fail since it is used in two views.
-drop synonym mySyn;
-
-drop view v2;
-
--- fail still
-drop synonym mySyn;
-
-drop view v1;
-
--- should pass
-drop synonym mySyn;
 
 -- drop and recreate schema test
 create schema testSchema;
