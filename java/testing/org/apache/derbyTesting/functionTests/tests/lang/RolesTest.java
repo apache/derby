@@ -304,6 +304,8 @@ public class RolesTest extends BaseJDBCTestCase
         // set
         doStmt("set role foo",
                sqlAuthorizationRequired, notImplemented, notImplemented);
+        doStmt("set role 'FOO'",
+               sqlAuthorizationRequired, notImplemented, notImplemented);
         doStmt("set role none",
                sqlAuthorizationRequired, notImplemented, notImplemented);
         doDynamicSetRole(_conn);

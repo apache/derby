@@ -9638,6 +9638,7 @@ roleDefinition() throws StandardException :
 	{
 		checkSqlStandardAccess("CREATE ROLE");
 		checkVersion( DataDictionary.DD_VERSION_DERBY_10_4, "ROLES");
+		checkAuthorizationLength(roleName);
 
 		return (StatementNode) nodeFactory.getNode(
 			C_NodeTypes.CREATE_ROLE_NODE,
@@ -11461,6 +11462,16 @@ setRoleSpecification() throws StandardException :
 			 null,
 			 ReuseFactory.getInteger(StatementType.SET_ROLE_DYNAMIC),
 			 getContextManager());
+	}
+|
+	roleName = string()
+	{
+		checkIdentifierLengthLimit(roleName, Limits.MAX_IDENTIFIER_LENGTH);
+		return (StatementNode) nodeFactory.getNode(
+			C_NodeTypes.SET_ROLE_NODE,
+			roleName,
+			null,
+			getContextManager());
 	}
 }
 
