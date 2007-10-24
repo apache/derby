@@ -15,6 +15,8 @@ ij> --
 --   limitations under the License.
 --
 -- tests for synonym support
+-- When we decide to convert this test to junit test, the converted tests can 
+-- go in existing SynonymTest.java
 set schema APP;
 0 rows inserted/updated/deleted
 ij> -- negative tests
