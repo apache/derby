@@ -408,18 +408,6 @@
   <target name="regex.masters">
     <property file="${basedir}/tools/release/maintversion.properties"/>
     <antcall target="regex.version"> 
-      <param name="regex.file" value="java/testing/org/apache/derbyTesting/functionTests/master/DerbyNetClient/metadata.out"/>
-    </antcall>
-    <antcall target="regex.version"> 
-      <param name="regex.file" value="java/testing/org/apache/derbyTesting/functionTests/master/DerbyNetClient/odbc_metadata.out"/>
-    </antcall>
-    <antcall target="regex.version"> 
-      <param name="regex.file" value="java/testing/org/apache/derbyTesting/functionTests/master/metadata.out"/>
-    </antcall>
-    <antcall target="regex.version"> 
-      <param name="regex.file" value="java/testing/org/apache/derbyTesting/functionTests/master/odbc_metadata.out"/>
-    </antcall>
-    <antcall target="regex.version"> 
       <param name="regex.file" value="java/testing/org/apache/derbyTesting/functionTests/master/NSinSameJVM.out"/>
     </antcall>
     <antcall target="regex.version"> 
