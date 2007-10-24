@@ -1,13 +1,8 @@
-This branch of the Demo subtree contains sample table functions. The
-code is built by the top-level Derby compile target and the javadoc is
-built by the top-level Derby javadoc target. That is, from the root
-directory of your subversion client or source distribution, invoke
-"ant all". This will build all of Derby and will also build all of the
-classes in this demo. The demo classes will be compiled into
-classes/org/apache/derbyDemo/vtis... Similarly, if you invoke
-"ant buildjavadoc" then all of the Derby javadoc will be built and,
-in addition, javadoc for this demo will be built into the demo
-subdirectory of the javadoc output.
+This branch of the Demo subtree contains sample table functions.
+
+To build the code, invoke the vti-demo build target in the
+top level build script. To build the javadoc, invoke the demodocs
+target in the top level build script.
 
 Two sql scripts are provided to test-drive these table functions.
 Use Derby's ij tool to run these scripts:

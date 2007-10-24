@@ -390,6 +390,10 @@
     <ant dir="${derby.demo.src.dir}"/>
   </target>
 
+  <target name="vti-demo" depends="buildsource">
+    <ant dir="${derby.demo.src.dir}" target="compile-vtidemo"/>
+  </target>
+
   <target name="testing" depends="demo">
     <ant dir="${derby.testing.src.dir}"/>
   </target>
@@ -637,7 +641,7 @@
   <property name="javadoc.tool.jdk16" value="${jdk16}/bin/javadoc"/>
 
   <target name="javadoc"
-    depends="init-javadoc-tool,init,initjars,publishedapi,derbydocs,toolsdocs,grammardocs,demodocs,testingdocs"/>
+    depends="init-javadoc-tool,init,initjars,publishedapi,derbydocs,toolsdocs,grammardocs,testingdocs"/>
 
   <target name="init-javadoc-tool" depends="init-javadoc-not-jdk16,init-javadoc-jdk16"/>
 
