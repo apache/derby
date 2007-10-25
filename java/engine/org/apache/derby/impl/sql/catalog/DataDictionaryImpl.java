@@ -265,9 +265,6 @@ public final class	DataDictionaryImpl
 	private SchemaDescriptor sysIBMSchemaDesc;
 	private SchemaDescriptor declaredGlobalTemporaryTablesSchemaDesc;
 	private SchemaDescriptor systemUtilSchemaDesc;
-
-    protected boolean convertIdToLower;
-    // Convert identifiers to lower case (as in Foundation) or not.
     
 	// This array of non-core table names *MUST* be in the same order
 	// as the non-core table numbers, above.
@@ -470,16 +467,6 @@ public final class	DataDictionaryImpl
 			throws StandardException
 	{
 		softwareVersion = new DD_Version(this, DataDictionary.DD_VERSION_DERBY_10_4);
-
-		/* There is a bootstrapping problem here. We would like to use
-         * a language connection context to find the name of the system and default
-         * schemas. However a language connection context is not available when a
-         * database is being created, as it is when this method is called. So,
-         * this method must look at the params properties to discover the identifier
-         * casing and convert the standard names as necessary, essentially duplicating
-         * logic found in GenericLanguageConnectionContext.
-         */
-        convertIdToLower = false;
 
 		startupParameters = startParams;
 
@@ -6364,8 +6351,6 @@ public final class	DataDictionaryImpl
 		*/
 		systemSchemaDesc =
           newSystemSchemaDesc(
-              convertIdToLower ? 
-			      StringUtil.SQLToLowerCase(SchemaDescriptor.STD_SYSTEM_SCHEMA_NAME) : 
                   SchemaDescriptor.STD_SYSTEM_SCHEMA_NAME, 
                   SchemaDescriptor.SYSTEM_SCHEMA_UUID);
 
@@ -6580,7 +6565,7 @@ public final class	DataDictionaryImpl
 		SchemaDescriptor schema_desc = 
             new SchemaDescriptor(
                 this, 
-                convertIdToLower ? schema_name.toLowerCase() : schema_name, 
+                schema_name, 
                 authorizationDatabaseOwner,
                 uuidFactory.recreateUUID(schema_uuid),
                 true);
@@ -7480,13 +7465,13 @@ public final class	DataDictionaryImpl
 		UUIDFactory luuidFactory = uuidFactory;
 
 		lcoreInfo[SYSTABLES_CORE_NUM] = 
-			new TabInfoImpl(new SYSTABLESRowFactory(luuidFactory, exFactory, dvf, convertIdToLower));
+			new TabInfoImpl(new SYSTABLESRowFactory(luuidFactory, exFactory, dvf));
 		lcoreInfo[SYSCOLUMNS_CORE_NUM] = 
-			new TabInfoImpl(new SYSCOLUMNSRowFactory(luuidFactory, exFactory, dvf, convertIdToLower));
+			new TabInfoImpl(new SYSCOLUMNSRowFactory(luuidFactory, exFactory, dvf));
 		lcoreInfo[SYSCONGLOMERATES_CORE_NUM] = 
-			new TabInfoImpl(new SYSCONGLOMERATESRowFactory(luuidFactory, exFactory, dvf, convertIdToLower));
+			new TabInfoImpl(new SYSCONGLOMERATESRowFactory(luuidFactory, exFactory, dvf));
 		lcoreInfo[SYSSCHEMAS_CORE_NUM] = 
-			new TabInfoImpl(new SYSSCHEMASRowFactory(luuidFactory, exFactory, dvf, convertIdToLower));
+			new TabInfoImpl(new SYSSCHEMASRowFactory(luuidFactory, exFactory, dvf));
 	}
 
 	/**
@@ -7895,77 +7880,77 @@ public final class	DataDictionaryImpl
 			{
 			  case SYSCONSTRAINTS_CATALOG_NUM:
 				retval = new TabInfoImpl(new SYSCONSTRAINTSRowFactory(
-												luuidFactory, exFactory, dvf, convertIdToLower));
+												luuidFactory, exFactory, dvf));
 				break;
 
 			  case SYSKEYS_CATALOG_NUM:
 				retval = new TabInfoImpl(new SYSKEYSRowFactory(
-												luuidFactory, exFactory, dvf, convertIdToLower));
+												luuidFactory, exFactory, dvf));
 				break;
 
 			  case SYSDEPENDS_CATALOG_NUM:
 				retval = new TabInfoImpl(new SYSDEPENDSRowFactory(
-												luuidFactory, exFactory, dvf, convertIdToLower));
+												luuidFactory, exFactory, dvf));
 				break;
 
 			  case SYSVIEWS_CATALOG_NUM:
 				retval = new TabInfoImpl(new SYSVIEWSRowFactory(
-												luuidFactory, exFactory, dvf, convertIdToLower));
+												luuidFactory, exFactory, dvf));
 				break;
 
 			  case SYSCHECKS_CATALOG_NUM:
 				retval = new TabInfoImpl(new SYSCHECKSRowFactory(
-												luuidFactory, exFactory, dvf, convertIdToLower));
+												luuidFactory, exFactory, dvf));
 				break;
 
 			  case SYSFOREIGNKEYS_CATALOG_NUM:
 				retval = new TabInfoImpl(new SYSFOREIGNKEYSRowFactory(
-												luuidFactory, exFactory, dvf, convertIdToLower));
+												luuidFactory, exFactory, dvf));
 				break;
 
 			  case SYSSTATEMENTS_CATALOG_NUM:
 				retval = new TabInfoImpl(new SYSSTATEMENTSRowFactory(
-												luuidFactory, exFactory, dvf, convertIdToLower));
+												luuidFactory, exFactory, dvf));
 				break;
 
 			  case SYSFILES_CATALOG_NUM:
 				retval = new TabInfoImpl(new SYSFILESRowFactory(
-												luuidFactory, exFactory, dvf, convertIdToLower));
+												luuidFactory, exFactory, dvf));
 				break;
 
 			  case SYSALIASES_CATALOG_NUM:
 				retval = new TabInfoImpl(new SYSALIASESRowFactory(
-												luuidFactory, exFactory, dvf, convertIdToLower));
+												luuidFactory, exFactory, dvf));
 				break;
 
 			  case SYSTRIGGERS_CATALOG_NUM:
 				retval = new TabInfoImpl(new SYSTRIGGERSRowFactory(
-												luuidFactory, exFactory, dvf, convertIdToLower));
+												luuidFactory, exFactory, dvf));
 				break;
 
 			  case SYSSTATISTICS_CATALOG_NUM:
 				retval = new TabInfoImpl(new SYSSTATISTICSRowFactory(
-												 luuidFactory, exFactory, dvf, convertIdToLower));					 
+												 luuidFactory, exFactory, dvf));					 
 				break;
 
 			  case SYSDUMMY1_CATALOG_NUM:
 				retval = new TabInfoImpl(new SYSDUMMY1RowFactory(
-												 luuidFactory, exFactory, dvf, convertIdToLower));					 
+												 luuidFactory, exFactory, dvf));					 
 				break;
 
 			  case SYSTABLEPERMS_CATALOG_NUM:
 				retval = new TabInfoImpl(new SYSTABLEPERMSRowFactory(
-												 luuidFactory, exFactory, dvf, convertIdToLower));					 
+												 luuidFactory, exFactory, dvf));					 
 				break;
 
 			  case SYSCOLPERMS_CATALOG_NUM:
 				retval = new TabInfoImpl(new SYSCOLPERMSRowFactory(
-												 luuidFactory, exFactory, dvf, convertIdToLower));					 
+												 luuidFactory, exFactory, dvf));					 
 				break;
 
 			  case SYSROUTINEPERMS_CATALOG_NUM:
 				retval = new TabInfoImpl(new SYSROUTINEPERMSRowFactory(
-												 luuidFactory, exFactory, dvf, convertIdToLower));					 
+												 luuidFactory, exFactory, dvf));					 
 				break;
 			}
 

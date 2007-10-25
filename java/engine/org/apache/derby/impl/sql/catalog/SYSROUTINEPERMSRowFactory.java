@@ -81,10 +81,9 @@ public class SYSROUTINEPERMSRowFactory extends PermissionsCatalogRowFactory
 		,"08264012-010c-bc85-060d-000000109ab8" // index3
     };
 
-    public SYSROUTINEPERMSRowFactory(UUIDFactory uuidf, ExecutionFactory ef, DataValueFactory dvf,
-                                     boolean convertIdToLower)
+    SYSROUTINEPERMSRowFactory(UUIDFactory uuidf, ExecutionFactory ef, DataValueFactory dvf)
 	{
-		super(uuidf,ef,dvf,convertIdToLower);
+		super(uuidf,ef,dvf);
 		initInfo( COLUMN_COUNT, TABLENAME_STRING, indexColumnPositions, indexUniqueness, uuids);
 	}
 
