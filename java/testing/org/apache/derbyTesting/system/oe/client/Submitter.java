@@ -24,6 +24,7 @@ import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
 
 import org.apache.derbyTesting.system.oe.util.OERandom;
 
@@ -253,6 +254,14 @@ public class Submitter {
         this.maxW = maxW;
         
         transactionCount = new int[NEW_ORDER_ROLLBACK+1];
+    }
+    
+    /**
+     * Reset the transaction counts to zero.
+     */
+    public void clearTransactionCount()
+    {
+        Arrays.fill(transactionCount, 0);
     }
     
     /**
@@ -488,17 +497,27 @@ public class Submitter {
         int osCount = transactionCount[ORDER_STATUS_BY_NAME] +
             transactionCount[ORDER_STATUS_BY_ID];
 
-        out.println(transactionCount("New Order         ", noTotal, total));        
-        out.println(transactionCount("Payment           ",  pyCount, total));
-        out.println(transactionCount("    By Name       ",  transactionCount[PAYMENT_BY_NAME], total));
-        out.println(transactionCount("    By Identifier ",  transactionCount[PAYMENT_BY_ID], total));
-        out.println(transactionCount("Order Status      ",  osCount, total));
-        out.println(transactionCount("    By Name       ",  transactionCount[ORDER_STATUS_BY_NAME], total));
-        out.println(transactionCount("    By Identifier ",  transactionCount[ORDER_STATUS_BY_ID], total));
+        if (noTotal != 0)
+            out.println(transactionCount("New Order         ", noTotal, total));
         
-        out.println(transactionCount("Stock Level       ", 
+        if (pyCount != 0) {
+            out.println(transactionCount("Payment           ",  pyCount, total));
+            out.println(transactionCount("    By Name       ",  transactionCount[PAYMENT_BY_NAME], total));
+            out.println(transactionCount("    By Identifier ",  transactionCount[PAYMENT_BY_ID], total));
+        }
+        
+        if (osCount != 0) {
+            out.println(transactionCount("Order Status      ",  osCount, total));
+            out.println(transactionCount("    By Name       ",  transactionCount[ORDER_STATUS_BY_NAME], total));
+            out.println(transactionCount("    By Identifier ",  transactionCount[ORDER_STATUS_BY_ID], total));
+        }
+        
+        if (transactionCount[STOCK_LEVEL] != 0)
+            out.println(transactionCount("Stock Level       ", 
                 transactionCount[STOCK_LEVEL], total));
-        out.println(transactionCount("Schedule Delivery ", 
+        
+        if (transactionCount[DELIVERY_SCHEDULE] != 0)
+            out.println(transactionCount("Schedule Delivery ", 
                 transactionCount[DELIVERY_SCHEDULE], total));
     }
     

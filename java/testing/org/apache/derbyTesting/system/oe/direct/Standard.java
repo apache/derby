@@ -206,7 +206,7 @@ public class Standard implements Operations {
             osCustomerByName.setShort(2, d);
             osCustomerByName.setString(3, customerLast);
             ResultSet rs = osCustomerByName.executeQuery();
-            int n = 0;
+
             List list = new ArrayList();
             while (rs.next())
             {
@@ -228,8 +228,8 @@ public class Standard implements Operations {
                         + customerLast);
             
             // Customer to use is midpoint (with round up) (see 2.6.2.2)
-            int mid = n/2;
-            if (n%2 == 1)
+            int mid = list.size()/2;
+            if (list.size()%2 == 1)
                 mid++;
 
 
@@ -373,7 +373,7 @@ public class Standard implements Operations {
             pyCustomerByName.setShort(2, cd);
             pyCustomerByName.setString(3, customerLast);
             ResultSet rs = pyCustomerByName.executeQuery();
-            int n = 0;
+
             List list = new ArrayList();
             while (rs.next())
             {           
@@ -385,8 +385,8 @@ public class Standard implements Operations {
                         + customerLast);
             
             // Customer to use is midpoint (with round up) (see 2.5.2.2)
-            int mid = n/2;
-            if (n%2 == 1)
+            int mid = list.size()/2;
+            if (list.size()%2 == 1)
                 mid++;
             
             int c = ((Integer) list.get(mid)).intValue();
