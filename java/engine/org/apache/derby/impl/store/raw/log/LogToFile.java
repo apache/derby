@@ -72,8 +72,11 @@ import org.apache.derby.iapi.store.raw.xact.RawTransaction;
 import org.apache.derby.iapi.store.raw.xact.TransactionFactory;
 import org.apache.derby.iapi.store.raw.data.DataFactory;
 import org.apache.derby.iapi.services.property.PersistentSet;
+
+//for replication
 import org.apache.derby.iapi.services.replication.master.MasterFactory;
 import org.apache.derby.iapi.services.replication.slave.SlaveFactory;
+import org.apache.derby.iapi.services.io.ArrayInputStream;
 
 import org.apache.derby.iapi.store.access.DatabaseInstant;
 import org.apache.derby.catalog.UUID;
@@ -319,8 +322,45 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 	long					 lastFlush = 0;	// the position in the current log
 											// file that has been flushed to disk
 
+    // logFileNumber and bootTimeLogFileNumber:
+    // ----------------------------------------
+    // There are three usages of the log file number in this class:
+    //
+    //  1 Recover uses the log file number determined at boot-time to
+    //    find which log file the redo pass should start to read.
+    //  2 If the database is booted in slave replication mode, a slave
+    //    thread will apply log records to the tail of the log.
+    //    switchLogFile() allocates new log files when the current log
+    //    file is full. logFileNumber needs to point to the log file
+    //    with the highest number for switchLogFile() to work
+    //    correctly.
+    //  3 After the database has been fully booted, i.e. after boot()
+    //    and recover(), and users are allowed to connect to the
+    //    database, logFileNumber is used by switchLogFile() to
+    //    allocate new log files when the current is full.
+    //
+    // Usage 2 and 3 are very similar. The only difference is that 1
+    // and 2 are performed concurrently, whereas 3 is performed afterwards.
+    // Because usage 1 and 2 are required in concurrent threads (when
+    // booted in slave replication mode) that must not interfere, two
+    // versions of the log file number are required:
+    //
+    // bootTimeLogFileNumber: Set to point to the log file with the
+    //   latest checkpoint during boot(). This is done before the
+    //   slave replication thread has started to apply log records
+    //   received from the master. Used by recover() during the time
+    //   interval in which slave replication mode may be active, i.e.
+    //   during the redo pass. After the redo pass has completed,
+    //   recover starts using logFileNumber (which will point to the
+    //   highest log file when recovery has completed). 
+    // logFileNumber: Used by recovery after the redo pass, and by
+    //   switchLogFile (both in slave replication mode and after the
+    //   database has been fully booted) when a new log file is
+    //   allocated.
 	long					 logFileNumber = -1; // current log file number
 								// other than during boot and recovery time,
+								// and by initializeSlaveReplication if in
+								// slave replication mode,
 								// logFileNumber is only changed by
 								// switchLogFile, which is synchronized.
 								// 
@@ -328,6 +368,10 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 								// synchronized on this if the current log file
 								// must not be changed. If not synchronized,
 								// the log file may have been switched.
+
+    // Initially set to point to the log file with the latest
+    // checkpoint (in boot()). Only used by recovery() after that
+    long                     bootTimeLogFileNumber = -1;
 
 	long					 firstLogFileNumber = -1;
 								// first log file that makes up the active
@@ -373,12 +417,25 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 	protected boolean	ReadOnlyDB;	// true if this db is read only, i.e, cannot
 								// append log records
 
-    // REPLICATION 
-    // initialized if this Derby has the master role for this database
+    // <START USED BY REPLICATION>
+    // initialized if this Derby has the MASTER role for this database
     private MasterFactory masterFactory; 
     private boolean inReplicationMasterMode = false;
-    // initialized if this Derby has the slave role for this database
+
+    // initialized if this Derby has the SLAVE role for this database
     private boolean inReplicationSlaveMode = false;
+
+    private Object slaveRecoveryMonitor; // for synchronization in slave mode
+
+    // The highest log file number the recovery thread is allowed to
+    // read while in slave replication mode. Remains -1 until the
+    // first time switchLogFile is called. This call will only happen 
+    // when the slave replication thread has applied log records
+    // received from the master, which happens after slave replication
+    // has been initialized. From that point on, it will have a value
+    // of one less than logFileNumber.
+    private long allowedToReadFileNumber = -1;
+    // <STOP USED BY REPLICATION>
 
 	// DEBUG DEBUG - do not truncate log files
 	private boolean keepAllLogs;
@@ -622,6 +679,32 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 		if (firstLog != null) 
 			logOut = new LogAccessFile(this, firstLog, logBufferSize);
 
+        // If booted in slave mode, the recovery thread is not allowed
+        // to do any recovery work until the SlaveFactory tells the
+        // thread it may do so. Effectively, the recovery thread is blocked 
+        // here until allowedToReadFileNumber != -1. We cannot rely on the
+        // inReplicationSlaveMode block in getLogFileAtBeginning
+        // because that method is used to open consecutive log files,
+        // but not the first one. While the recovery thread waits
+        // here, the slave replication thread can perform necessary
+        // initialization without causing serialization conflicts.
+        if (inReplicationSlaveMode) {
+            synchronized (slaveRecoveryMonitor) {
+                // Recheck inReplicationSlaveMode==true every time
+                // because slave replication may have been stopped
+                // while this thread waited on the monitor
+                while (inReplicationSlaveMode &&
+                       (allowedToReadFileNumber<bootTimeLogFileNumber)) {
+                    // Wait until the first log file can be read.
+                    try {
+                        slaveRecoveryMonitor.wait();
+                    } catch (InterruptedException ie) {
+                        // do nothing
+                    }
+                }
+            }
+        }
+
 		// we don't want to set ReadOnlyDB before recovery has a chance to look
 		// at the latest checkpoint and determine that the database is shutdown
 		// cleanly.  If the medium is read only but there are logs that need
@@ -635,8 +718,9 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 				/////////////////////////////////////////////////////////////
 				//
 				// During boot time, the log control file is accessed and
-				// logFileNumber is determined.  LogOut is not set up.
-				// LogFileNumber is the log file the latest checkpoint lives in,
+				// bootTimeLogFileNumber is determined.  LogOut is not set up.
+				// bootTimeLogFileNumber is the log file the latest checkpoint
+				// lives in,
 				// or 1.  It may not be the latest log file (the system may have
 				// crashed between the time a new log was generated and the
 				// checkpoint log written), that can only be determined at the
@@ -674,12 +758,12 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 
 						if (beginLogFileNumber != null)
                         {
-							logFileNumber = 
+							bootTimeLogFileNumber = 
                                 Long.valueOf(beginLogFileNumber).longValue();
                         }
 						else
                         {
-							logFileNumber = 1;
+							bootTimeLogFileNumber = 1;
                         }
 					}
 				}
@@ -780,11 +864,11 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 
 					long start = 
 						LogCounter.makeLogInstantAsLong(
-                            logFileNumber, LOG_FILE_HEADER_SIZE);
+                            bootTimeLogFileNumber, LOG_FILE_HEADER_SIZE);
 
 					// no checkpoint, start redo from the beginning of the 
                     // file - assume this is the first log file
-					firstLogFileNumber = logFileNumber;
+					firstLogFileNumber = bootTimeLogFileNumber;
 
 					redoScan = (StreamLogScan) 
                         openForwardsScan(start, (LogInstant)null);
@@ -829,6 +913,15 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 				inRedo = false;
 				
 
+                // Replication slave: When recovery has completed the
+                // redo pass, the database is no longer in replication
+                // slave mode and only the recover thread will access
+                // this object until recover has complete. We
+                // therefore do not need two versions of the log file
+                // number anymore. From this point on, logFileNumber
+                // is used for all references to the current log file
+                // number; bootTimeLogFileNumber is no longer used.
+                logFileNumber = bootTimeLogFileNumber;
 				
 				// if we are only interested in dumping the log, don't alter
 				// the database and prevent anyone from using the log
@@ -2018,6 +2111,14 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 				}
 			}
 			
+            // Replication slave: Recovery thread should be allowed to
+            // read the previous log file
+            if (inReplicationSlaveMode) {
+                allowedToReadFileNumber = logFileNumber-1;
+                synchronized (slaveRecoveryMonitor) {
+                    slaveRecoveryMonitor.notify();
+                }
+            }
 			inLogSwitch = false;
 		}
 		// unfreezes the log
@@ -2733,7 +2834,13 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 		Open a log file and position the file at the beginning.
 		Used by scan to switch to the next log file
 
-		<P> MT- read only
+		<P> MT- read only </p>
+
+		<p> When the database is in slave replication mode only:
+		Assumes that only recover() will call this method after
+		initializeSlaveReplication() has been called, and until slave
+		replication has ended. If this changes, the current
+		implementation will fail.</p>
 
 		@exception StandardException Standard Derby error policy
 		@exception IOException cannot access the log at the new position.
@@ -2741,6 +2848,42 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 	protected StorageRandomAccessFile getLogFileAtBeginning(long filenumber)
 		 throws IOException, StandardException
 	{
+
+        // <SLAVE REPLICATION CODE> When in slave replication mode,
+        // the recovery processing will not start until after the
+        // first call to switchLogRecord, at which time
+        // allowedToReadFileNumber will be set to one less than the
+        // current log file number. Before recovery is allowed to
+        // start, log scans will be allowed unrestricted access to the
+        // log files through this method. This is needed because
+        // boot() and initializeSlaveReplication() use this method to
+        // find the log end. When the recovery thread is allowed to
+        // start (i.e., allowedToReadFileNumber != -1), it will use
+        // this method to read log files. Every time it tries to read
+        // a new log file, a check is performed to see if the thread
+        // is allowed to read it. If not, it has to wait either until
+        // this database is no longer in slave replication mode or
+        // until it is allowed to read that file. Currently, only
+        // recover() uses this method (through openForwardsScan) up to
+        // the point where the database has been fully recovered. If
+        // this changes (i.e. another thread also needs access to the
+        // log files while in slave mode), this code will not work.
+        if (inReplicationSlaveMode && (allowedToReadFileNumber != -1)) {
+            synchronized (slaveRecoveryMonitor) {
+                // Recheck inReplicationSlaveMode == true because it
+                // may have changed while the thread was waiting.
+                while (inReplicationSlaveMode &&
+                       (filenumber > allowedToReadFileNumber)) {
+                    try {
+                        slaveRecoveryMonitor.wait();
+                    } catch (InterruptedException ie) {
+                        // do nothing
+                    }
+                }
+            }
+        }
+        // </SLAVE REPLICATION CODE>
+
 		long instant = LogCounter.makeLogInstantAsLong(filenumber,
 													   LOG_FILE_HEADER_SIZE);
 		return getLogFileAtPosition(instant);
@@ -2855,7 +2998,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
         String mode = startParams.getProperty(SlaveFactory.REPLICATION_MODE);
         if (mode != null && mode.equals(SlaveFactory.SLAVE_MODE)) {
             inReplicationSlaveMode = true; 
-            // will be used when slave functionality is added to this class
+            slaveRecoveryMonitor = new Object();
         }
 
 		dataDirectory = startParams.getProperty(PersistentService.ROOT);
@@ -3181,6 +3324,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 						  RawStoreFactory.DERBY_STORE_MINOR_VERSION_1))
 			maxLogFileNumber = LogCounter.DERBY_10_0_MAX_LOGFILE_NUMBER;
 
+		bootTimeLogFileNumber = logFileNumber;
 	} // end of boot
 
     private void getLogStorageFactory() throws StandardException
@@ -3699,10 +3843,14 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 						return;
 					}
 
-					// if we are not corrupt and we are in the middle of redo, 
-                    // we know the log record has already been flushed since we haven't written any log 
-                    // yet.
-					if (recoveryNeeded && inRedo) 
+					// In non-replicated databases, if we are not
+					// corrupt and we are in the middle of redo, we
+					// know the log record has already been flushed
+					// since we haven't written any log yet. If in
+					// slave replication mode, however, log records
+					// received from the master may have been
+					// written to the log.
+					if (recoveryNeeded && inRedo && !inReplicationSlaveMode) 
 					{
 						return;
 					}
@@ -4916,6 +5064,91 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
         if (inReplicationMasterMode) {
             log.setReplicationMasterRole(masterFactory);
         }
+    }
+
+    /**
+     * Normally, logOut (the file log records are appended to) is set
+     * up as part of the recovery process. When the database is booted
+     * in replication slave mode, however, recovery will not get to
+     * the point where logOut is initialized until this database is no
+     * longer in slave mode. Since logOut is needed to append log
+     * records received from the master, logOut needs to be set up for
+     * replication slave mode.
+     *
+     * This method finds the last log record in the log file with the
+     * highest number. logOut is set up so that log records will be
+     * appended to the end of that file, and the endPosition and
+     * lastFlush variables are set to point to the end of the same
+     * file. All this is normally done as part of recovery.
+     *
+     * After the first log file switch resulting from applying log
+     * received from the master, recovery will be allowed to read up
+     * to, but not including, the current log file which is the file
+     * numbered logFileNumber.
+     *
+     * Note that this method must not be called until LogToFile#boot()
+     * has completed. Currently, this is ensured because RawStore#boot
+     * starts the SlaveFactory (in turn calling this method) after
+     * LogFactory.boot() has completed. Race conditions for
+     * logFileNumber may occur if this is changed.
+     *
+     * @exception StandardException Standard Derby error policy
+     * @exception IOException If a log file cannot be opened
+     */
+    public void initializeSlaveReplication()
+        throws StandardException, IOException{
+
+        if (!inReplicationSlaveMode) {
+            return;
+        }
+
+        /*
+         * Find the end of the log, i.e the highest log file and the
+         * end position in that file
+         */
+
+        // Find the log file with the highest file number on disk
+        while (getLogFileAtBeginning(logFileNumber+1) != null) {
+            logFileNumber++;
+        }
+
+        // Scan the highest log file to find it's end.
+        long startInstant =
+            LogCounter.makeLogInstantAsLong(logFileNumber,
+                                            LOG_FILE_HEADER_SIZE);
+        long logEndInstant = LOG_FILE_HEADER_SIZE;
+
+        StreamLogScan scanOfHighestLogFile =
+            (StreamLogScan) openForwardsScan(startInstant, (LogInstant)null);
+        ArrayInputStream scanInputStream = new ArrayInputStream();
+        while(scanOfHighestLogFile.getNextRecord(scanInputStream, null, 0)
+              != null){
+            logEndInstant = scanOfHighestLogFile.getLogRecordEnd();
+        }
+
+        endPosition = LogCounter.getLogFilePosition(logEndInstant);
+
+        // endPosition and logFileNumber now point to the end of the
+        // highest log file. This is where a new log record should be
+        // appended.
+
+        /*
+         * Open the highest log file and make sure log records are
+         * appended at the end of it
+         */
+
+        StorageRandomAccessFile logFile = null;
+        if(isWriteSynced) {
+            logFile = openLogFileInWriteMode(getLogFileName(logFileNumber));
+        } else {
+            logFile = privRandomAccessFile(getLogFileName(logFileNumber),
+                                           "rw");
+        }
+        logOut = new LogAccessFile(this, logFile, logBufferSize);
+
+        lastFlush = endPosition;
+        logFile.seek(endPosition); // append log records at the end of
+                                   // the file
     }
 
 	/**
