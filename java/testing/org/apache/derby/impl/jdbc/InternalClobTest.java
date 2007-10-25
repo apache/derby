@@ -45,6 +45,7 @@ import java.io.Writer;
 import java.sql.SQLException;
 
 import junit.framework.Test;
+import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 /**
@@ -87,11 +88,11 @@ public abstract class InternalClobTest
         super.tearDown();
     }
 
-    protected static Test addModifyingTests(Class theClass)
+    protected static Test addModifyingTests(Class<? extends TestCase> theClass)
             throws Exception {
         TestSuite suite = new TestSuite("Modifying InternalClob test suite");
         Method[] methods = theClass.getMethods();
-        List testMethods = new ArrayList();
+        List<String> testMethods = new ArrayList<String>();
         for (int i=0; i < methods.length; i++) {
             Method m = methods[i];
             if (m.getReturnType().equals(Void.TYPE) &&
@@ -100,10 +101,10 @@ public abstract class InternalClobTest
                 testMethods.add(m.getName());
             }
         }
-        Constructor ctor = theClass.getConstructor(new Class[] {String.class});
+        Constructor<? extends Test> ctor = theClass.getConstructor(new Class[] {String.class});
         for (int i=0; i < testMethods.size(); i++) {
-            suite.addTest((Test)ctor.newInstance(
-                new Object[] {(String)testMethods.get(i)}));
+            suite.addTest(ctor.newInstance(
+                new Object[] {testMethods.get(i)}));
         }
         return suite;
     }

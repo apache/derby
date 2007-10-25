@@ -26,6 +26,7 @@ import org.apache.derbyTesting.functionTests.util.streams.CharAlphabet;
 import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetReader;
 
 import junit.framework.Test;
+import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 /**
@@ -71,7 +72,7 @@ public class SmallTemporaryClobTest
 
     public static Test suite()
             throws Exception {
-        Class theClass = SmallTemporaryClobTest.class;
+        Class<? extends TestCase> theClass = SmallTemporaryClobTest.class;
         TestSuite suite = new TestSuite(theClass, "SmallTemporaryClobTest suite");
         suite.addTest(addModifyingTests(theClass));
         return suite;
