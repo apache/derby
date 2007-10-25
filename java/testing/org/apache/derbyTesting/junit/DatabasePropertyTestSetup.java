@@ -76,8 +76,25 @@ public class DatabasePropertyTestSetup extends BaseJDBCTestSetup {
     /**
      * Decorate a test so that the database has authentication enabled
      * using the BUILTIN provider and the set of users passed in.
-     * The password for each user is set to the user's name with 
-     * the value of passwordToken appended.
+     * The password for each user is set to the user's name as set
+     * in the users array with the value of passwordToken appended.
+     * <BR>
+     * The user names in the users array are treated as SQL identifiers
+     * since that is the defined behaviour for derby.user.username.
+     * This means that the quoted identifiers can be passed, examples
+     * are (users[i] is shown as the contents of the Java string) with
+     * a password suffix of T63:
+     * <UL>
+     * <LI>users[i]=fred - normal user name FRED, password fredT63
+     * <LI>users[i]=FRED - normal user name FRED, passeword FREDT63
+     * <LI>users[i]="FRED" - normal user name FRED, passeword "FREDT63"
+     * <LI>users[i]="fred" - normal user name fred, passeword "fredT63"
+     * </UL>
+     * Thus with a quoted identifier the password will include the quotes.
+     * Note bug DERBY-3150 exists which means that the normalized user name
+     * to password mapping does not exist, thus a connection request must be
+     * made with the values passed in the users array, not any other form of the
+     * name.
      * <BR>
      * The decorated test can use BaseJDBCTestCase.openUserConnection(String user)
      * method to simplify using authentication.
