@@ -32,8 +32,7 @@ Contents
 2.2.4 section removed - no longer applies
 2.2.5 Download and install JUnit 3.8.*
 2.2.6 Download Java 6 Development Kit (Optional)
-2.2.7 Download OSGi Service Platform release 3 (osgi.jar) (Optional)
-2.2.8 Download J2ME/CDC/Foundation 1.0 and JSR169 jars (Optional)
+2.2.7 Download J2ME/CDC/Foundation 1.0 and JSR169 jars (Optional)
 
 3     Build instructions
 3.1   Set required environmental variables
@@ -217,29 +216,7 @@ installed on your system.
     referred to as ${jdk16.dir} in the rest of this document.
 
 
-
-2.2.7 Download OSGi Service Platform release 3 (osgi.jar) (Optional)
-
-This is an optional section.
-The reason is that osgi.jar is required to only build the 
-class org.apache.derby.osgi.EmbeddedActivator. This class 
-and jar file manifest entries created in derby.jar allow 
-that jar file to be an OSGi bundle. If osgi.jar is not 
-present EmbeddedActivator will not be build and derby.jar 
-will not contain the manifest entries to be an OSGi bundle.
-
-OSGi Service Platform release 3 (osgi.jar) can be downloaded from: 
-   http://osgi.org
-
-Note: You will need to register to download OSGi Service Platform 
-      release 3.
-
-The downloaded file should be copied to directory
-   ${derby.source}/tools/java 
-
-
-
-2.2.8 Download J2ME/CDC/Foundation and JSR 169 jars
+2.2.7 Download J2ME/CDC/Foundation and JSR 169 jars
 
 This is an optional section.
 
@@ -259,7 +236,7 @@ on J2ME, or J2SE, write once run anywhere.
 
 
 
-Note: After following the steps in sections 2.2.4-2.2.8 of this
+Note: After following the steps in sections 2.2.4-2.2.7 of this
 document, you should have the following:
 
 ${derby.source}/tools/java/empty.jar
@@ -267,7 +244,7 @@ ${derby.source}/tools/java/geronimo-spec-servlet-2.4-rc4.jar
 ${derby.source}/tools/java/jakarta-oro-2.0.8.jar
 ${derby.source}/tools/java/javacc.jar
 ${derby.source}/tools/java/junit.jar
-${derby.source}/tools/java/osgi.jar
+${derby.source}/tools/java/felix.jar
 ${derby.source}/tools/java/xercesImpl.jar
 ${derby.source}/tools/java/xml-apis.jar
 
