@@ -45,6 +45,11 @@ public class _Suite extends BaseTestCase {
 
         TestSuite suite = new TestSuite("tools");
 
+        // warning: SysinfoCPCheckTest reassigns System.out, and if
+        // one places this test after a test that runs 'runSQLCommands'
+        // (e.g. IJRunScriptTest, or ImportExportTest), the System.out
+        // never gets the redirected info.
+        suite.addTest(SysinfoCPCheckTest.suite());
         suite.addTest(IJRunScriptTest.suite());
         suite.addTest(ImportExportTest.suite());
         suite.addTest(ImportExportBinaryDataTest.suite());
