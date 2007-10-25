@@ -29,6 +29,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Locale;
 import java.util.Properties;
 
 import javax.sql.DataSource;
@@ -51,7 +52,8 @@ public class AuthenticationTest extends BaseJDBCTestCase {
 
     private static final String PASSWORD_SUFFIX = "suf2ix";
     private static final String USERS[] = 
-        {"APP","dan","kreg","jeff","ames","jerry","francois","jamie","howardR"};
+        {"APP","dan","kreg","jeff","ames","jerry","francois","jamie","howardR",
+        "\"eVe\""};
 
     private static final String zeus = "\u0396\u0395\u03A5\u03A3";
     private static final String apollo = "\u0391\u09A0\u039F\u039B\u039B\u039A\u0390";
@@ -81,6 +83,9 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         
         Test test = new AuthenticationTest(
             "testConnectShutdownAuthentication");
+        setBaseProps(suite, test);
+        
+        test = new AuthenticationTest("testUserCasing");
         setBaseProps(suite, test);
         
         test = new AuthenticationTest("testUserFunctions");
@@ -145,6 +150,123 @@ public class AuthenticationTest extends BaseJDBCTestCase {
             fail("failed to unset properties");
         }
         super.tearDown();
+    }
+    
+    /**
+     * Test how user names behave with casing.
+     * @throws SQLException
+     */
+    public void testUserCasing() throws SQLException
+    {
+        for (int i = 0; i < USERS.length; i++)
+        {          
+            String jdbcUserName = USERS[i];
+            boolean delimited = jdbcUserName.charAt(0) == '"';
+            String normalUserName;
+            if (delimited)
+            {
+                normalUserName = jdbcUserName.substring(1,
+                        jdbcUserName.length() - 1);          
+            }
+            else
+            {
+                normalUserName = jdbcUserName.toUpperCase(Locale.ENGLISH);
+            }
+             
+            String password = USERS[i] + PASSWORD_SUFFIX;
+            
+            userCasingTest(jdbcUserName, normalUserName, password);
+            
+            if (!delimited)
+            {
+
+                if (!normalUserName.equals(jdbcUserName))
+                {
+                    // Test connecting via the normalized name
+                    // but only if it wasn't already tested.
+                    // E.g. connect as "DAN" for user DAN as opposed
+                    // to the user being defined as dan (regular identifier).
+                    
+                    // DERBY-3150 disable this test until bug is fixed.
+                    //userCasingTest(normalUserName, normalUserName, password);
+                }
+                
+                // Test with the normalized name quoted as a delimited identifer.
+                // E.g. connect as "DAN" for user DAN
+                
+                // DERBY-3150 disable this test until bug is fixed.
+                // userCasingTest("\"" + normalUserName + "\"",
+                //        normalUserName, password);
+            }
+            
+        }
+    }
+    
+    /**
+     * Test the user casing obtaining connections a variety of ways.
+     * @param jdbcUserName User name to be used to obtain the connection via JDBC
+     * @param normalUserName Normalized form of the user connection.
+     * @param password Password for the user.
+     * @throws SQLException
+     */
+    private void userCasingTest(String jdbcUserName, String normalUserName,
+            String password) throws SQLException
+    {
+        // Default test mechanism to get a connection.
+        userCasingTest(jdbcUserName, normalUserName,
+                openDefaultConnection(jdbcUserName, password));
+        
+        
+        DataSource ds = JDBCDataSource.getDataSource();
+        
+        // DataSource using explict user
+        userCasingTest(jdbcUserName, normalUserName,
+                ds.getConnection(jdbcUserName, password));
+        
+        JDBCDataSource.setBeanProperty(ds, "user", jdbcUserName);
+        JDBCDataSource.setBeanProperty(ds, "password", password);
+        userCasingTest(jdbcUserName, normalUserName,
+                ds.getConnection());        
+    }
+    
+    /**
+     * 
+     * @param jdbcUserName User name as passed into the JDBC connection request.
+     * @param normalUserName Normalized user name.
+     * @param connUser Connection for the user, closed by this method.
+     * @throws SQLException 
+     */
+    private void userCasingTest(String jdbcUserName, String normalUserName,
+            Connection connUser) throws SQLException
+    {
+        assertNormalUserName(normalUserName, connUser);
+        
+        JDBC.cleanup(connUser);
+    }
+    
+    /**
+     * Assert that the user name returned by various mechanisms
+     * matches the normal user name.
+     * @param normalUserName
+     * @param conn
+     * @throws SQLException
+     */
+    private void assertNormalUserName(String normalUserName, Connection connUser)
+        throws SQLException
+    {
+        //assertEquals("DatabaseMetaData.getUserName",
+        //        normalUserName, connUser.getMetaData().getUserName());
+        
+        Statement s = connUser.createStatement();
+        
+        JDBC.assertSingleValueResultSet(s.executeQuery("VALUES CURRENT_USER"),
+                normalUserName);
+        JDBC.assertSingleValueResultSet(s.executeQuery("VALUES SESSION_USER"),
+                normalUserName);
+        JDBC.assertSingleValueResultSet(s.executeQuery("VALUES {fn user()}"),
+                normalUserName);
+        s.close();
+        
     }
 
     
