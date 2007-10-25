@@ -265,59 +265,45 @@ public class Like {
 	}
 
 	/**
-	 * Make sure that the character in val matches the character in pat.
-	 * If we are dealing with UCS_BASIC character string (ie collator is null)
-	 * then we can just do simple character equality check. But if we are
-	 * dealing with territory based character string type, then we need to 
-	 * convert the character in val and pat into it's collation element(s)
-	 * and then do collation element equality comparison.
+	 * If the character in val matches the character in pat, then it does not
+	 * matter if the database is UCS_BASIC or territory based, we simply return 
+	 * TRUE from the method. 
+	 * If the characters do not match and we are running with UCS_BASIC 
+	 * collation, then we will return FALSE. 
+	 * But if the database is territory based, then we want to use the Collator 
+	 * for the territory to determine if the Collator treats the 2 characters 
+	 * as equal (ie if their collation elements match, then the 2 characters 
+	 * are equal even if they  are not the same character).
 	 * 
 	 * @param val value to compare.
 	 * @param vLoc character position in val.
 	 * @param pat pattern to look for in val.
 	 * @param pLoc character position in pat.
 	 * @param collator null if we are dealing with UCS_BASIC character string
-	 *   types. If not null, then we use it to get collation elements for 
-	 *   character in val and pat to do the equality comparison.
+	 *   types. If not null, then we use it to determine the equality of the
+	 *   2 characters in pat and val if they are not same.
 	 * @return TRUE if the character in val and vLoc match based on straight
 	 *   equality or collation element based equality. Otherwise we will 
 	 *   return FALSE.
 	 */
 	private static boolean checkEquality(char[] val, int vLoc,
 			char[] pat, int pLoc, RuleBasedCollator collator) {
-		CollationElementIterator patternIterator;
-		int curCollationElementInPattern;
-		CollationElementIterator valueIterator;
-		int curCollationElementInValue;
 
-		if (collator == null) {//dealing with UCS_BASIC character string
-			if (val[vLoc] == pat[pLoc]) 
-				return true;
-			else 
-				return false;
-		} else {//dealing with territory based character string
-			patternIterator = collator.getCollationElementIterator(
-					new String(pat, pLoc, 1));
-			valueIterator = collator.getCollationElementIterator(
-					new String(val, vLoc, 1));
-			curCollationElementInPattern = patternIterator.next(); 
-			curCollationElementInValue = valueIterator.next();
-			while (curCollationElementInPattern == curCollationElementInValue)
-			{
-				if (curCollationElementInPattern == CollationElementIterator.NULLORDER)
-					break;
-				curCollationElementInPattern = patternIterator.next(); 
-				curCollationElementInValue = valueIterator.next(); 
-			}
-			//If the current collation element for the character in pattern 
-			//and value do not match, then we have found a mismatach and it
-			//is time to return FALSE from this method.
-			if (curCollationElementInPattern != curCollationElementInValue)
-				return false;
-			else
-				return true;
-		}
-		
+		if (val[vLoc] == pat[pLoc]) { 
+	        // same character, so two strings consisting of this 
+	        // single character must be equal regardless of territory 
+	        return true; 
+	    } else if (collator == null) { 
+	        // not same character, must be unequal in UCS_BASIC 
+	        return false; 
+	    } 
+
+		//Check if the Collator for this database's territory considers these
+		//2 characters as equal based on their collation elements
+	    String s1 = new String(val, vLoc, 1); 
+	    String s2 = new String(pat, pLoc, 1); 
+
+	    return collator.compare(s1, s2) == 0; 
 	}
 
 	/* national chars */
