@@ -1770,6 +1770,11 @@
         <isset property="derby.junit.classpath"/>
       </not>
     </condition>
+    <condition property="derbyTesting.oldReleasePath" value="">
+      <not>
+        <isset property="derbyTesting.oldReleasePath"/>
+      </not>
+    </condition>
          <!--
          Specifying max heap size (maxmemory) for JVMs spawned by this
          target, since the default max heap size on most systems is
@@ -1782,6 +1787,7 @@
            dir="junit_${derby.junit.timestamp}"
   	 	   errorproperty="tests.failed"
   	       failureproperty="tests.failed">
+      <sysproperty key="derbyTesting.oldReleasePath" value="${derbyTesting.oldReleasePath}"/>
       <formatter type="xml"/>
   	 	
 <test name="org.apache.derbyTesting.functionTests.tests.jdbcapi.AutoloadTest"
