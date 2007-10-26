@@ -158,7 +158,7 @@
                 <package-root>${project.dir}/java/storeless</package-root>
                 <package-root>${project.dir}/java/testing</package-root>
                 <package-root>${project.dir}/java/tools</package-root>
-                <classpath mode="compile">${project.dir}/classes:${project.dir}/tools/java/geronimo-spec-servlet-2.4-rc4.jar:${project.dir}/tools/java/jakarta-oro-2.0.8.jar:${project.dir}/tools/java/javacc.jar:${project.dir}/tools/java/junit.jar:${project.dir}/tools/java/xercesImpl.jar:${project.dir}/tools/java/xml-apis.jar:${project.dir}/tools/java/ant.jar</classpath>
+                <classpath mode="compile">${project.dir}/classes:${project.dir}/tools/java/geronimo-spec-servlet-2.4-rc4.jar:${project.dir}/tools/java/jakarta-oro-2.0.8.jar:${project.dir}/tools/java/javacc.jar:${project.dir}/tools/java/junit.jar:${project.dir}/tools/java/xercesImpl.jar:${project.dir}/tools/java/xml-apis.jar:${project.dir}/tools/java/ant.jar:${project.dir}/tools/java/feilx.jar</classpath>
                 <source-level>1.4</source-level>
             </compilation-unit>
         </java-data>
