@@ -34,7 +34,6 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import java.util.StringTokenizer;
-import java.util.Properties;
 
 import junit.framework.Assert;
 
@@ -324,13 +323,35 @@ public class XML {
              */
             if (boolObj.booleanValue())
             {
-                // Load the properties gathered from checkEnvironment().
-                Properties props = new Properties();
-                props.load(new ByteArrayInputStream(bos.toByteArray()));
+                /* We wrote the byte array using the platform's default
+                 * encodinging (that's what we get with the call to
+                 * "new PrintWriter(bos)" above), so read it in using
+                 * the default encoding, as well (i.e. don't pass an
+                 * encoding into toString()).
+                 */
+                String checkEnvOutput = bos.toString();
                 bos.close();
 
+                /* The property we're looking for is on a single line
+                 * of the output, and that line starts with the name
+                 * of the property.  So extract that line out now. If
+                 * we can't find it, just return "false" to say that
+                 * we could not find the minimum version. Note: it's
+                 * possible (though admittedly unlikely) that the
+                 * string "version.xalan2_2" appears in the user's
+                 * classpath.  Adding an equals sign ("=") at the end
+                 * of our search pattern reduces the chance of the
+                 * search string appearing in the classpath, but does
+                 * not eliminate it...
+                 */
+                int pos = checkEnvOutput.indexOf("version.xalan2_2=");
+                if (pos < 0)
+                    return false;
+
+                String ver = checkEnvOutput.substring(
+                    pos, checkEnvOutput.indexOf("\n", pos));
+
                 // Now pull out the one we need.
-                String ver = props.getProperty("version.xalan2_2");
                 haveMinXalanVersion = (ver != null);
                 if (haveMinXalanVersion)
                 {
