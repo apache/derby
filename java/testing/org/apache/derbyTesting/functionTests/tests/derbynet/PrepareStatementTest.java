@@ -1146,13 +1146,7 @@ public class PrepareStatementTest extends BaseJDBCTestCase
         	ps.setObject(1,"cc",java.sql.Types.VARCHAR); 
             fail("Exception expected above!");
         } catch (SQLException e)  {   
-        	if (usingDerbyNetClient())
-        		//note that SQLState is XCL13. For setString above, the 
-        		//SQLState is XCL14. I have entered DERBY-3139 for this
-        		//difference in SQLState.
-        		assertSQLState("XCL13", e);
-        	else
-        		assertSQLState("07009", e);
+    		assertSQLState("07009", e);
         }
     }
 
