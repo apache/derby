@@ -13090,7 +13090,7 @@ roleRevokeStatement() throws StandardException :
  * <A NAME="identifier">identifier</A>
  */
 String
-internalIdentifier( int id_length_limit, boolean useANSICasing, boolean checkLength) throws StandardException :
+internalIdentifier( int id_length_limit, boolean checkLength) throws StandardException :
 {
 	String	str;
 	Token 	tok;
@@ -13098,11 +13098,9 @@ internalIdentifier( int id_length_limit, boolean useANSICasing, boolean checkLen
 {
 	tok = <IDENTIFIER>
 	{
-        if( useANSICasing)
-            str = StringUtil.SQLToUpperCase(tok.image);
-        else
-            str = getLanguageConnectionContext().convertIdentifierCase( tok.image);
-		if (checkLength) {//if checkLength false, then calling method would do the length limit checks
+        str = StringUtil.SQLToUpperCase(tok.image);
+ 
+ 		if (checkLength) {//if checkLength false, then calling method would do the length limit checks
 			//limit the identifier to the id length limit passed to this method
 			checkIdentifierLengthLimit(str, id_length_limit);
 		}
@@ -13125,7 +13123,7 @@ internalIdentifier( int id_length_limit, boolean useANSICasing, boolean checkLen
 |
 	str = nonReservedKeyword()
 	{
-		return getLanguageConnectionContext().convertIdentifierCase( str);
+		return StringUtil.SQLToUpperCase(str);
 	}
 }
 
@@ -13135,7 +13133,7 @@ identifier(int id_length_limit, boolean checkLength) throws StandardException :
 	String	id;
 }
 {
-    id = internalIdentifier( id_length_limit, false, checkLength)
+    id = internalIdentifier( id_length_limit, checkLength)
     {
         return id;
     }
@@ -13622,7 +13620,7 @@ caseInsensitiveIdentifierPlusReservedWords() throws StandardException :
 |
 	str = reservedKeyword()
 	{
-		return getLanguageConnectionContext().convertIdentifierCase( str);
+		return StringUtil.SQLToUpperCase(str);
 	}
 }
 

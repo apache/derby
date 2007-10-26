@@ -904,27 +904,6 @@ public interface LanguageConnectionContext extends Context {
 	  */
 	public	boolean	isTransactionPristine();
 
-	/**
-	  *	Get casing for delimited identifiers. This feature is here to
-	  *	support the Plugin.
-	  *
-	  *	@return	ANSI_CASING or ANTI_ANSI_CASING.
-	  *
-	  * @exception StandardException thrown if something goes wrong
-	  */
-    public	int	getIdentifierCasing() throws StandardException;
-
-    /**
-     * Convert an identifier to the proper case for this connection. This method
-     * is here to support the Plugin.
-     *
-     * @param id an identifier string
-     * @return  the string converted to upper or lower case, as appropriate
-     *
-     * @exception StandardException thrown if something goes wrong
-     */
-    public	String convertIdentifierCase( String id) throws StandardException;
-
 
 	/**
 	 * Returns the last autoincrement value inserted by this connection.

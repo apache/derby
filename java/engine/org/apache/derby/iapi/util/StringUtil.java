@@ -372,7 +372,7 @@ public class StringUtil
 		if (s2 == null)
 			return  false;
 		else
-			return s1.toUpperCase(Locale.ENGLISH).equals(s2.toUpperCase(Locale.ENGLISH));
+			return SQLToUpperCase(s1).equals(SQLToUpperCase(s2));
 
 	}
 
