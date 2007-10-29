@@ -197,6 +197,7 @@ public interface SQLState {
 	String GENERATED_CLASS_LINKAGE_ERROR	= "XBCM1.S";
 	String GENERATED_CLASS_INSTANCE_ERROR	= "XBCM2.S";
 	String GENERATED_CLASS_NO_SUCH_METHOD	= "XBCM3.S";
+	String GENERATED_CLASS_LIMIT_EXCEEDED	= "XBCM4.S";
 
 	/*
 	** Cryptography
@@ -983,6 +984,7 @@ public interface SQLState {
     String LANG_EXPLICIT_NULLS_IN_DB2_MODE                              = "42Z9C";
 	String LANG_UNSUPPORTED_TRIGGER_STMT		   					   = "42Z9D";
     String LANG_DROP_CONSTRAINT_TYPE                                   = "42Z9E";
+    String LANG_QUERY_TOO_COMPLEX                                      = "42ZA0";
 
 	//following 3 matches the DB2 sql states
 	String LANG_DECLARED_GLOBAL_TEMP_TABLE_ONLY_IN_SESSION_SCHEMA = "428EK";

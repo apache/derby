@@ -262,10 +262,24 @@ public abstract class StatementNode extends QueryTreeNode
 		// wrap up the constructor by putting a return at the end of it
 		generatingClass.finishConstructor();
 
-		// cook the completed class into a real class
-		// and stuff it into activationClass
-		GeneratedClass activationClass = generatingClass.getGeneratedClass(byteCode);
+		try {
+			// cook the completed class into a real class
+			// and stuff it into activationClass
+			GeneratedClass activationClass = generatingClass.getGeneratedClass(byteCode);
 
-		return activationClass;
+			return activationClass;
+		} catch (StandardException e) {
+			
+			String msgId = e.getMessageId();
+
+			if (SQLState.GENERATED_CLASS_LIMIT_EXCEEDED.equals(msgId)
+					|| SQLState.GENERATED_CLASS_LINKAGE_ERROR.equals(msgId))
+			{
+				throw StandardException.newException(
+						SQLState.LANG_QUERY_TOO_COMPLEX, e);
+			}
+	
+			throw e;
+		}
 	 }
 }

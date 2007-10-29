@@ -205,7 +205,7 @@ class BCMethod implements MethodBuilder {
 		
 		// get the code attribute to put itself into the class
 		// provide the final header information needed
-		myCode.complete(modClass, myEntry, maxStack, currentVarNum);
+		myCode.complete(this, modClass, myEntry, maxStack, currentVarNum);
 	}
 
 	/*
@@ -895,7 +895,7 @@ class BCMethod implements MethodBuilder {
 	public void startElseCode() {
 		
 		// start the else code
-		Type[] entryStack = condition.startElse(myCode, copyStack());
+		Type[] entryStack = condition.startElse(this, myCode, copyStack());
 		
 		for (int i = stackDepth = 0; i  < entryStack.length; i++)
 		{
@@ -905,7 +905,7 @@ class BCMethod implements MethodBuilder {
 
 	}
 	public void completeConditional() {
-		condition = condition.end(myCode, stackTypes, stackTypeOffset);
+		condition = condition.end(this, myCode, stackTypes, stackTypeOffset);
 	}
 	
 	public void pop() {

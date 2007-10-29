@@ -350,25 +350,36 @@ class CodeChunk {
 	/**
 	 * now that we have codeBytes, fix the lengths fields in it
 	 * to reflect what was stored.
+	 * Limits checked here are from these sections of the JVM spec.
+	 * <UL>
+	 * <LI> 4.7.3 The Code Attribute
+	 * <LI> 4.10 Limitations of the Java Virtual Machine 
+	 * </UL>
 	 */
-	void fixLengths(int maxStack, int maxLocals, int codeLength) {
+	private void fixLengths(BCMethod mb, int maxStack, int maxLocals, int codeLength) {
 
 		byte[] codeBytes = cout.getData();
 
 		// max_stack is in bytes 0-1
+		if (mb != null && maxStack > 65535)
+			mb.cb.addLimitExceeded(mb, "max_stack", 65535, maxStack);
+			
 		codeBytes[0] = (byte)(maxStack >> 8 );
 		codeBytes[1] = (byte)(maxStack );
 
 		// max_locals is in bytes 2-3
+		if (mb != null && maxLocals > 65535)
+			mb.cb.addLimitExceeded(mb, "max_locals", 65535, maxLocals);
 		codeBytes[2] = (byte)(maxLocals >> 8 );
 		codeBytes[3] = (byte)(maxLocals );
 
 		// code_length is in bytes 4-7
+		if (mb != null && codeLength > 65536)
+			mb.cb.addLimitExceeded(mb, "code_length", 65536, codeLength);
 		codeBytes[4] = (byte)(codeLength >> 24 );
 		codeBytes[5] = (byte)(codeLength >> 16 );
 		codeBytes[6] = (byte)(codeLength >> 8 );
 		codeBytes[7] = (byte)(codeLength );
-
 	}
 
 	/**
@@ -376,7 +387,8 @@ class CodeChunk {
 	 * now that it holds all of the instructions and
 	 * the exception table.
 	 */
-	void complete(ClassHolder ch, ClassMember method, int maxStack, int maxLocals) {
+	void complete(BCMethod mb, ClassHolder ch,
+			ClassMember method, int maxStack, int maxLocals) {
 
 		int codeLength = getRelativePC();
 
@@ -412,7 +424,7 @@ class CodeChunk {
 		} catch (IOException ioe) {
 		}
 
-		fixLengths(maxStack, maxLocals, codeLength);
+		fixLengths(mb, maxStack, maxLocals, codeLength);
 		method.addAttribute("Code", out);
 	}
 
