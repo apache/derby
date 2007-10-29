@@ -63,7 +63,7 @@ import java.io.IOException;
  * Method Builder implementation for generating bytecode.
  *
  */
-public class BCMethod implements MethodBuilder {
+class BCMethod implements MethodBuilder {
 
 	final BCClass		cb;
 	protected final ClassHolder modClass; // the class it is in (modifiable fmt)
@@ -270,12 +270,32 @@ public class BCMethod implements MethodBuilder {
 	** New push compiler api.
 	*/
 
+	/**
+	 * Array of the current types of the values on the stack.
+	 * A type that types up two words on the stack, e.g. double
+	 * will only occupy one element in this array.
+	 * This array is dynamically re-sized as needed.
+	 */
 	private Type[]	stackTypes = new Type[8];
+	
+	/**
+	 * Points to the next array offset in stackTypes
+	 * to be used. Really it's the number of valid entries
+	 * in stackTypes.
+	 */
 	private int     stackTypeOffset;
 
+	/**
+	 * Maximum stack depth seen in this method, measured in words.
+	 * Corresponds to max_stack in the Code attribute of section 4.7.3
+	 * of the vm spec.
+	 */
 	private int maxStack;
+	
+	/**
+	 * Current stack depth in this method, measured in words.
+	 */
 	private int stackDepth;
-	// public Stack stackTypes = new Stack();
 
 	private void growStack(int size, Type type) {
 		stackDepth += size;
@@ -313,6 +333,13 @@ public class BCMethod implements MethodBuilder {
 		stackDepth -= topType.width();
 		return topType;
 
+	}
+	
+	private Type[] copyStack()
+	{
+		Type[] stack = new Type[stackTypeOffset];
+		System.arraycopy(stackTypes, 0, stack, 0, stackTypeOffset);
+		return stack;
 	}
 
 	public void pushThis() {
@@ -857,27 +884,28 @@ public class BCMethod implements MethodBuilder {
 
 	private void conditionalIf(short opcode) {
 		popStack();
+		
+		// Save the stack upon entry to the 'then' block of the
+		// 'if' so that we can set up the 'else' block with the
+		// correct stack on entry.
 
-
-		int clearTo = stackTypeOffset;
-
-		condition = new Conditional(condition, myCode, opcode, clearTo);
+		condition = new Conditional(condition, myCode, opcode, copyStack());
 	}
 
 	public void startElseCode() {
-		int clearTo = condition.startElse(myCode, stackTypeOffset);
-
-		if (SanityManager.DEBUG) {
-			if ((stackTypeOffset - 1) != clearTo)
-				SanityManager.THROWASSERT(stackTypeOffset + " is not one more than " + clearTo);
+		
+		// start the else code
+		Type[] entryStack = condition.startElse(myCode, copyStack());
+		
+		for (int i = stackDepth = 0; i  < entryStack.length; i++)
+		{
+			stackDepth += (stackTypes[i] = entryStack[i]).width();
 		}
+		this.stackTypeOffset = entryStack.length;
 
-		while (stackTypeOffset > clearTo) {
-			popStack();
-		}
 	}
 	public void completeConditional() {
-		condition = condition.end(myCode, stackTypeOffset);
+		condition = condition.end(myCode, stackTypes, stackTypeOffset);
 	}
 	
 	public void pop() {

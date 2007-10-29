@@ -360,7 +360,7 @@ public interface MethodBuilder {
 	public void methodReturn();
 
 	/**
-		Initiate a sequence that corresponds to the Java language 'ref == null ? ... : ...'.
+		Initiate a conditional sequence.
 		The top value on the stack (a reference) is popped and compared to 'null'.
 		If the value is null then the code following this call until the startElseCode()
 		will be executed at runtime, otherwise the code following startElseCode() until
@@ -380,6 +380,9 @@ public interface MethodBuilder {
 
 		Each path through the ?: statement must leave the stack at the same depth
 		as the other.
+		<BR>
+		If the if or else code pops values from the stack that were before the conditional
+		value, then they must use the same number of values from the stack.
 
 		<PRE>
 		Stack ...,ref =>
@@ -389,12 +392,14 @@ public interface MethodBuilder {
 	*/
 
 	public void conditionalIfNull();
+	
 	/**
-		Initiate a sequence that corresponds to the Java language ' value ? ... : ...'.
+		Initiate a conditional sequence.
 		The top value on the stack must be a boolean and will be popped. If it
 		is true then the code following this call until the startElseCode()
 		will be executed at runtime, otherwise the code following startElseCode() until
-		the completeConditional() is called. See conditionalIfNull() for example.
+		the completeConditional() is called. See conditionalIfNull() for example
+		and restrictions.
 
 		<PRE>
 		Stack ...,boolean_value =>
@@ -404,12 +409,12 @@ public interface MethodBuilder {
 	public void conditionalIf();
 
 	/**
-		Complete the true code path of a ?: operator.
+		Complete the true code path of a conditional.
 	*/
 	public void startElseCode();
 
 	/**
-		Complete the a ?: operator which completes the false code path.
+		Complete a conditional which completes the false code path.
 	*/
 	public void completeConditional();
 

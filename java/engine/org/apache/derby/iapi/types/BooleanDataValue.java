@@ -127,4 +127,10 @@ public interface BooleanDataValue extends DataValueDescriptor
 	 * @return	true if the BooleanDataValue contains the given value.
 	 */
 	public boolean equals(boolean value);
+	
+	/**
+	 * Return an immutable BooleanDataValue with the same value as this.
+	 * @return An immutable BooleanDataValue with the same value as this.
+	 */
+	public BooleanDataValue getImmutable();
 }

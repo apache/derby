@@ -43,7 +43,7 @@ import org.apache.derby.iapi.services.classfile.VMOpcode;
 
 import java.util.Vector;
 
-public abstract class BinaryLogicalOperatorNode extends BinaryOperatorNode
+abstract class BinaryLogicalOperatorNode extends BinaryOperatorNode
 {
 	boolean	shortCircuitValue;
 
@@ -62,13 +62,11 @@ public abstract class BinaryLogicalOperatorNode extends BinaryOperatorNode
 	public void init(
 				Object	leftOperand,
 				Object	rightOperand,
-				Object		shortCircuitValue,
 				Object		methodName)
 	{
 		/* For logical operators, the operator and method names are the same */
 		super.init(leftOperand, rightOperand, methodName, methodName,
 				ClassName.BooleanDataValue, ClassName.BooleanDataValue);
-		this.shortCircuitValue = ((Boolean) shortCircuitValue).booleanValue();
 	}
 
 	/**
@@ -121,6 +119,8 @@ public abstract class BinaryLogicalOperatorNode extends BinaryOperatorNode
 
 	/**
 	 * Do code generation for this logical binary operator.
+	 * This is used for AND and OR. the IsNode extends this class but
+	 * overrides generateExpression.
 	 *
 	 * @param acb	The ExpressionClassBuilder for the class we're generating
 	 * @param mb	The method the code to place the code
@@ -132,19 +132,21 @@ public abstract class BinaryLogicalOperatorNode extends BinaryOperatorNode
 	public void generateExpression(ExpressionClassBuilder acb,
 											MethodBuilder mb)
 		throws StandardException
-	{
+	{		
 		/*
 		** This generates the following code:
 		**
-		** (<fieldx> = <leftOperand>).equals(shortCircuitValue) ?
-		**	 <fieldy> = <shortCircuitValue, nullability> :
-		**   fieldx.<and/or>(<rightOperand>, nullability)
+		** (<leftOperand>.equals(shortCircuitValue) ?
+		**	 <leftOperand> :
+		**   <leftOperand>.<and/or>(<rightOperand>)
 		**
 		** The ?: operator accomplishes the short-circuiting.  We save the
-		** value of the left operand in a field so we don't have to evaluate
-		** it twice.  We save the return value of the getBoolean() call so
-		** we can re-use that object rather than allocate a new one every
-		** time this method is called.
+		** value of the left operand on the stack so we don't have to evaluate
+		** it twice.
+		**
+		** The BooleanDataValue.{and,or} methods return an immutable BooleanDataValue
+		** and an immutable BooleanDataValue is returned by this generated code in
+		** the short circuit case.
 		*/
 
 		/*
@@ -172,28 +174,28 @@ public abstract class BinaryLogicalOperatorNode extends BinaryOperatorNode
 		** Generated code is:
 		**
 		**		<test for short circuiting> ?
-		**			<call to getBooleanDataValue> : <call to operator method>
+		**			<call to BooleanDataValue.getImmutable> : <call to operator method>
+		**
+		** For AND short circuiting shortcircuit value will be false, so that
+		** if left is false, no need to evaluate the right and the result will be false.
+		**
+		** For OR short circuiting shortcircuit value will be true, so that
+		** if left is true, no need to to evaluate the right and the result will be true.
+		**
+		** In both cases the result is the same as the left operand.
+		**
+		** TODO: Could short circuit when the left value is NULL as well. Then
+		** the result would be NULL in either case and still equal to the left value.
+		** This would require a different check on the conditional.
 		*/
 
 		mb.conditionalIf();
 		
 		// stack: left
+		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getImmutable",
+				ClassName.BooleanDataValue, 0);
 		
-		/*
-		** Generate the return value if the left operand equals the short-
-		** circuit value.  Generated code calls a static method in the
-		** boolean datatype implementation that allocates a new object
-		** if necessary, and re-uses the object if it already exists.
-		*/
-		LocalField reusableBoolean = acb.newFieldDeclaration(Modifier.PRIVATE,
-												ClassName.BooleanDataValue);
-
-
-		mb.push(shortCircuitValue);
-		// stack: left, shortcircuit
-		acb.generateDataValue(mb, getTypeCompiler(), reusableBoolean);
-		// stack: left, dvf
-
+		// stack: result (matching left)
 
 		mb.startElseCode();
 
@@ -207,33 +209,18 @@ public abstract class BinaryLogicalOperatorNode extends BinaryOperatorNode
 		*/
 
 		// stack: left
-		
-		// we duplicate left here rather than just pop'ing left
-		// in the 'then' clause. pop'ing in the then clause
-		// breaks the current conditional implementation
-		// which is modeling a simple ? : operator.
-		// note that this will leave through either path
-		// an extra left on the stack after the conditional
-		mb.dup();
-		// stack left, left
 
 		rightOperand.generateExpression(acb, mb);
-		// stack: left, left, right
+
+		// stack: left, right
 		mb.upCast(ClassName.BooleanDataValue);
 
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, methodName, ClassName.BooleanDataValue, 1);
-		// stack: left, result(left op right)
+		// stack: result(left op right)
 
 		mb.completeConditional();
-		//	 stack: left, result
-		
-		// remove the extra left on the stack, see the
-		// comments in the else clause.
-		mb.swap();
-		// stack: result, left
-		mb.pop();
-		
-		// stack: result
+		//	 stack: result
+
 	}
 
 	DataTypeDescriptor resolveLogicalBinaryOperator(

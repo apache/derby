@@ -41,7 +41,7 @@ import java.util.Vector;
 
 public class IsNode extends BinaryLogicalOperatorNode
 {
-	boolean		notMe;	// set to true if we're to negate the sense of this node
+	private boolean		notMe;	// set to true if we're to negate the sense of this node
 
 	/**
 	 * Initializer for an IsNode
@@ -56,7 +56,8 @@ public class IsNode extends BinaryLogicalOperatorNode
 							Object rightOperand,
 							Object notMe )
 	{
-		super.init(leftOperand, rightOperand, Boolean.FALSE, "is" );
+		// the false for shortCir
+		super.init(leftOperand, rightOperand, "is" );
 		this.notMe = ((Boolean) notMe).booleanValue();
 	}
 
