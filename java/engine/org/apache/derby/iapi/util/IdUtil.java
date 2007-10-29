@@ -61,7 +61,7 @@ public abstract class IdUtil
 	  Delimit the identifier provided.
 	  @return the delimited identifier.
 	  */
-	public static String delimitId(String id)
+	private static String delimitId(String id)
 	{
 		StringBuffer quotedBuffer = new StringBuffer();
 		quotedBuffer.append('\"');
@@ -109,40 +109,43 @@ public abstract class IdUtil
 	}
 
 	/**
-	  Scan a qualified name from the String provided. Raise an excepion
-	  if the string does not contain a qualified name.
+	  Parse a multi-part (dot separated) SQL identifier form the
+      String provided. Raise an excepion
+	  if the string does not contain valid SQL indentifiers.
+      The returned String array contains the normalized form of the
+      identifiers.
       
       @param s The string to be parsed
-      @param normalizeToUpper If true then undelimited names are converted to upper case (the ANSI standard). If false then undelimited names are converted to lower case (used when the source database is Informix Foundation).
       @return An array of strings made by breaking the input string at its dots, '.'.
 	  @exception StandardException Oops
 	  */
-	public static String[] parseQualifiedName(String s, boolean normalizeToUpper)
+	public static String[] parseMultiPartSQLIdentifier(String s)
 		 throws StandardException
 	{
 		StringReader r = new StringReader(s);
-		String[] qName = parseQualifiedName(r, normalizeToUpper);
+		String[] qName = parseMultiPartSQLIdentifier(r);
 		verifyEmpty(r);
 		return qName;
 	}
 
-	/**
-	  Scan a qualified name from a StringReader. Return an array
-	  of Strings with 1 entry per name scanned. Raise an exception
-	  if the StringReader does not contain a valid qualified name.
-
-      @param r A StringReader for the string to be parsed
-      @param normalizeToUpper If true then undelimited names are converted to upper case (the ANSI standard). If false then undelimited names are converted to lower case (used when the source database is Informix Foundation).
-      @return An array of strings made by breaking the input string at its dots, '.'.
-	  @exception StandardException Oops
-	  */
-	public static String[] parseQualifiedName(StringReader r, boolean normalizeToUpper)
+    /**
+      Parse a multi-part (dot separated) SQL identifier form the
+      StringReader provided. Raise an excepion
+      if the string does not contain valid SQL indentifiers.
+      The returned String array contains the normalized form of the
+      identifiers.
+    
+    @param s The string to be parsed
+    @return An array of strings made by breaking the input string at its dots, '.'.
+      @exception StandardException Oops
+      */
+	private static String[] parseMultiPartSQLIdentifier(StringReader r)
 		 throws StandardException
 	{
 		Vector v = new Vector();
 		while (true)
 		{
-			String thisId = parseId(r,true, normalizeToUpper);
+			String thisId = parseId(r,true);
 			v.addElement(thisId);
 			int dot;
 
@@ -179,7 +182,7 @@ public abstract class IdUtil
 		 throws StandardException
 	{
 		StringReader r = new StringReader(s);
-		String id = parseId(r,true, true);
+		String id = parseId(r,true);
 		verifyEmpty(r);
 		return id;
 	}
@@ -197,7 +200,7 @@ public abstract class IdUtil
 
 	  @exception StandardException Ooops.
 	  */
-	private static String parseId(StringReader r, boolean normalize, boolean normalizeToUpper)
+	private static String parseId(StringReader r, boolean normalize)
 		 throws StandardException
 	{
 		try {
@@ -209,7 +212,7 @@ public abstract class IdUtil
 			if (c == '"')
 				return parseQId(r,normalize);
 			else
-				return parseUnQId(r,normalize, normalizeToUpper);
+				return parseUnQId(r,normalize, true);
 		}
 
 		catch (IOException ioe){
@@ -346,7 +349,7 @@ public abstract class IdUtil
 
 	  @exception StandardException Oops
 	  */
-	public static String[][] parseDbClassPath(String input, boolean normalizeToUpper)
+	public static String[][] parseDbClassPath(String input)
 		 throws StandardException
 	{
 		//As a special case we accept a zero length dbclasspath.
@@ -359,7 +362,7 @@ public abstract class IdUtil
 		while (true)
 		{
 			try {
-				String[] thisQName = IdUtil.parseQualifiedName(r, normalizeToUpper);
+				String[] thisQName = IdUtil.parseMultiPartSQLIdentifier(r);
 				if (thisQName.length != 2)
 					throw StandardException.newException(SQLState.DB_CLASS_PATH_PARSE_ERROR,input);
 
@@ -430,7 +433,7 @@ public abstract class IdUtil
 		{
 			int delim;
 			try {
-				String thisId = IdUtil.parseId(r,normalize, true);
+				String thisId = IdUtil.parseId(r,normalize);
 				v.addElement(thisId);
 				r.mark(0);
 				delim = r.read();
@@ -510,9 +513,11 @@ public abstract class IdUtil
 	}
 
 	/**
-	 * Get user name from URL properties. Handles the case of "" user.
-	 * 
-	 * @exception StandardException on error
+	 * Get user name from URL properties (key user) without any transformation.
+     * If the user property does not exist or is set to the empty string
+     * then Property.DEFAULT_USER_NAME is returned.
+     * 
+     * @see Property#DEFAULT_USER_NAME
 	 */
 	public static String getUserNameFromURLProps(Properties params)
 	{
