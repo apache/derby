@@ -553,6 +553,66 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         // use valid user/pwd to set the full accessusers.
         Connection conn1 = openDefaultConnection(
             "dan", ("dan" + PASSWORD_SUFFIX));
+        
+        // Test duplicates on the list of users
+        try {
+            setDatabaseProperty("derby.database.fullAccessUsers", 
+                    "dan,jamie,dan", conn1);
+            fail("Duplicate allowed on derby.database.fullAccessUsers");
+        } catch (SQLException e) {
+            assertSQLState("4250D", e);
+        }
+        try {
+            setDatabaseProperty("derby.database.fullAccessUsers", 
+                    "dan,jamie,DaN", conn1);
+            fail("Duplicate allowed on derby.database.fullAccessUsers");
+        } catch (SQLException e) {
+            assertSQLState("4250D", e);
+        }
+        try {
+            setDatabaseProperty("derby.database.fullAccessUsers", 
+                    "dan,jamie,\"DAN\"", conn1);
+            fail("Duplicate allowed on derby.database.fullAccessUsers");
+        } catch (SQLException e) {
+            assertSQLState("4250D", e);
+        }
+        try {
+            setDatabaseProperty("derby.database.fullAccessUsers", 
+                    "\"dan\",jamie,\"dan\"", conn1);
+            fail("Duplicate allowed on derby.database.fullAccessUsers");
+        } catch (SQLException e) {
+            assertSQLState("4250D", e);
+        }
+        
+        try {
+            setDatabaseProperty("derby.database.readOnlyAccessUsers", 
+                    "dan,jamie,dan", conn1);
+            fail("Duplicate allowed on derby.database.readOnlyAccessUsers");
+        } catch (SQLException e) {
+            assertSQLState("4250D", e);
+        }
+        try {
+            setDatabaseProperty("derby.database.readOnlyAccessUsers", 
+                    "dan,jamie,DaN", conn1);
+            fail("Duplicate allowed on derby.database.readOnlyAccessUsers");
+        } catch (SQLException e) {
+            assertSQLState("4250D", e);
+        }
+        try {
+            setDatabaseProperty("derby.database.readOnlyAccessUsers", 
+                    "dan,jamie,\"DAN\"", conn1);
+            fail("Duplicate allowed on derby.database.readOnlyAccessUsers");
+        } catch (SQLException e) {
+            assertSQLState("4250D", e);
+        }
+        try {
+            setDatabaseProperty("derby.database.readOnlyAccessUsers", 
+                    "\"dan\",jamie,\"dan\"", conn1);
+            fail("Duplicate allowed on derby.database.readOnlyAccessUsers");
+        } catch (SQLException e) {
+            assertSQLState("4250D", e);
+        }
+        
         setDatabaseProperty("derby.database.fullAccessUsers", 
             "dan,jamie,system", conn1);
         // cannot set a user to both full and readonly access...
