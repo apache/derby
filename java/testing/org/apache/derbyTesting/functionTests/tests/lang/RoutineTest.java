@@ -55,6 +55,119 @@ public class RoutineTest extends BaseJDBCTestCase {
         return new CleanDatabaseTestSetup(suite);
     }
     
+    
+    /**
+     * Test that function result data types are resolved correctly for numeric
+     * types that Derby supports that are simply mappable or object mappable.
+     */
+    public void testFunctionResultDataTypeValidation() throws SQLException
+    {
+        Statement s = createStatement();
+
+        // SMALLINT -> short
+        s.executeUpdate(
+        "CREATE FUNCTION SMALLINT_P_SHORT(VARCHAR(10)) RETURNS SMALLINT " +
+           "EXTERNAL NAME 'java.lang.Short.parseShort' " +
+           "LANGUAGE JAVA PARAMETER STYLE JAVA");
+
+        PreparedStatement ps = prepareStatement("VALUES SMALLINT_P_SHORT(?)");
+        ps.setString(1, "123");
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), "123");  
+
+        // SMALLINT -> Integer
+        s.executeUpdate(
+        "CREATE FUNCTION SMALLINT_O_INTEGER(VARCHAR(10)) RETURNS SMALLINT " +
+           "EXTERNAL NAME 'java.lang.Integer.valueOf' " +
+           "LANGUAGE JAVA PARAMETER STYLE JAVA");
+
+        ps = prepareStatement("VALUES SMALLINT_O_INTEGER(?)");
+        ps.setString(1, "123");
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), "123");  
+
+        // INTEGER -> int
+        s.executeUpdate(
+        "CREATE FUNCTION INTEGER_P_INT(VARCHAR(10)) RETURNS INTEGER " +
+           "EXTERNAL NAME 'java.lang.Integer.parseInt' " +
+           "LANGUAGE JAVA PARAMETER STYLE JAVA");
+
+        ps = prepareStatement("VALUES INTEGER_P_INT(?)");
+        ps.setString(1, "123");
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), "123");  
+
+        // INTEGER -> Integer
+        s.executeUpdate(
+        "CREATE FUNCTION INTEGER_O_INTEGER(VARCHAR(10)) RETURNS INTEGER " +
+           "EXTERNAL NAME 'java.lang.Integer.valueOf' " +
+           "LANGUAGE JAVA PARAMETER STYLE JAVA");
+
+        ps = prepareStatement("VALUES INTEGER_O_INTEGER(?)");
+        ps.setString(1, "123");
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), "123");  
+
+        // BIGINT -> long
+        s.executeUpdate(
+        "CREATE FUNCTION BIGINT_P_LONG(VARCHAR(10)) RETURNS BIGINT " +
+           "EXTERNAL NAME 'java.lang.Long.parseLong' " +
+           "LANGUAGE JAVA PARAMETER STYLE JAVA");
+
+        ps = prepareStatement("VALUES BIGINT_P_LONG(?)");
+        ps.setString(1, "123");
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), "123");  
+
+        // BIGINT -> Long
+        s.executeUpdate(
+        "CREATE FUNCTION BIGINT_O_LONG(VARCHAR(10)) RETURNS BIGINT " +
+           "EXTERNAL NAME 'java.lang.Long.valueOf' " +
+           "LANGUAGE JAVA PARAMETER STYLE JAVA");
+
+        ps = prepareStatement("VALUES BIGINT_O_LONG(?)");
+        ps.setString(1, "123");
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), "123");  
+
+        // REAL -> float
+        s.executeUpdate(
+        "CREATE FUNCTION REAL_P_FLOAT(VARCHAR(10)) RETURNS REAL " +
+           "EXTERNAL NAME 'java.lang.Float.parseFloat' " +
+           "LANGUAGE JAVA PARAMETER STYLE JAVA");
+
+        ps = prepareStatement("VALUES REAL_P_FLOAT(?)");
+        ps.setString(1, "123.0");
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), "123.0");  
+
+        // REAL -> Float
+        s.executeUpdate(
+        "CREATE FUNCTION REAL_O_FLOAT(VARCHAR(10)) RETURNS REAL " +
+           "EXTERNAL NAME 'java.lang.Float.valueOf' " +
+           "LANGUAGE JAVA PARAMETER STYLE JAVA");
+
+        ps = prepareStatement("VALUES REAL_O_FLOAT(?)");
+        ps.setString(1, "123.0");
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), "123.0");  
+
+        // DOUBLE -> double
+        s.executeUpdate(
+        "CREATE FUNCTION DOUBLE_P_DOUBLE(VARCHAR(10)) RETURNS DOUBLE " +
+           "EXTERNAL NAME 'java.lang.Double.parseDouble' " +
+           "LANGUAGE JAVA PARAMETER STYLE JAVA");
+
+        ps = prepareStatement("VALUES DOUBLE_P_DOUBLE(?)");
+        ps.setString(1, "123.0");
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), "123.0");  
+
+        // DOBULE -> Double
+        s.executeUpdate(
+        "CREATE FUNCTION DOUBLE_O_DOUBLE(VARCHAR(10)) RETURNS DOUBLE " +
+           "EXTERNAL NAME 'java.lang.Double.valueOf' " +
+           "LANGUAGE JAVA PARAMETER STYLE JAVA");
+
+        ps = prepareStatement("VALUES DOUBLE_O_DOUBLE(?)");
+        ps.setString(1, "123.0");
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), "123.0");
+        
+        ps.close();
+        s.close();
+    }
+    
     /**
      * Test that functions handle being called or not called
      * when it is passed a NULL argument correctly.
