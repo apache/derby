@@ -240,13 +240,21 @@ public class AuthenticationTest extends BaseJDBCTestCase {
      */
     private void userCasingTest(String jdbcUserName, String normalUserName,
             Connection connUser) throws SQLException
-    {
+    {        
         assertNormalUserName(normalUserName, connUser);
         
         // DatabaseMetaData.getUserName() returns the user name used
         // to make the request via JDBC.
         assertEquals("DatabaseMetaData.getUserName()",
-                jdbcUserName, connUser.getMetaData().getUserName());       
+                jdbcUserName, connUser.getMetaData().getUserName());
+        
+        
+        Statement s = connUser.createStatement();
+          
+        s.executeUpdate("CALL SYSCS_UTIL.SYSCS_SET_USER_ACCESS(" +
+                "CURRENT_USER, 'FULLACCESS')");
+        
+        s.close();
         
         JDBC.cleanup(connUser);
     }
@@ -817,9 +825,6 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         csSetAccess.setString(2, "FULLACCESS");
         assertStatementError("28502", csSetAccess);
         
-        csSetAccess.setString(1, "123"); // not an identifier.
-        csSetAccess.setString(2, "FULLACCESS");
-        assertStatementError("28502", csSetAccess);
 
         // Random user will now have only READONLYACCESS
         setDatabaseProperty(

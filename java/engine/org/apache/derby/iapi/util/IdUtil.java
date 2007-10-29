@@ -58,17 +58,16 @@ import java.util.Properties;
 public abstract class IdUtil
 {
 	/**
-	  Delimit the identifier provided.
+     * Produce a delimited form of a normal value.
 	  @return the delimited identifier.
 	  */
-	private static String delimitId(String id)
+	public static String normalToDelimited(String id)
 	{
 		StringBuffer quotedBuffer = new StringBuffer();
 		quotedBuffer.append('\"');
-	    char[] charArray = id.toCharArray();
-
-		for (int ix = 0; ix < charArray.length; ix++){
-			char currentChar = charArray[ix];
+        
+		for (int ix = 0; ix < id.length(); ix++){
+			char currentChar = id.charAt(ix);
 			quotedBuffer.append(currentChar);
 			if (currentChar == '\"')
 				quotedBuffer.append('\"');
@@ -87,11 +86,11 @@ public abstract class IdUtil
 										 String id2)
 	{
         if( null == id1)
-            return delimitId(id2);
+            return normalToDelimited(id2);
 		return
-			delimitId(id1) +
+        normalToDelimited(id1) +
 			"." +
-			delimitId(id2);
+            normalToDelimited(id2);
 	}
 
 	/**
@@ -103,7 +102,7 @@ public abstract class IdUtil
 		for (int ix=0; ix < ids.length; ix++)
 		{
 			if (ix!=0) sb.append(".");
-			sb.append(delimitId(ids[ix]));
+			sb.append(normalToDelimited(ids[ix]));
 		}
 		return sb.toString();
 	}
@@ -303,7 +302,7 @@ c
 		if (normalize)
 			return b.toString();
 		else
-			return delimitId(b.toString()); //Put the quotes back.
+			return normalToDelimited(b.toString()); //Put the quotes back.
 	}
 
 	private static void verifyEmpty(java.io.Reader r)
@@ -581,7 +580,7 @@ c
 		for (int ix=0;ix<ids.length; ix++)
 		{
 			if (ix != 0) sb.append(",");
-			sb.append(IdUtil.delimitId(ids[ix]));
+			sb.append(IdUtil.normalToDelimited(ids[ix]));
 		}
 		return sb.toString();
 	}
@@ -672,16 +671,21 @@ c
 
 
 	/**
-	  Append an id in external form.
-	  @return the list with the id appended. 
+     * Append an identifier to a comma separated list
+     * of identifiers. The passed in identifier is its
+     * normal form, the list contains a list of SQL identifiers,
+     * either regular or delimited. This routine takes the easy
+     * way out and always appends a delimited identifier.
+	  @return the list with the id appended in its delimited form. 
 	  @exception StandardException oops
 	  */
-	public static String appendId(String id, String list)
+	public static String appendNormalToList(String id, String list)
 		 throws StandardException
 	{
+        String delimitedId = normalToDelimited(id);
 		if (list==null)
-			return id;
+			return delimitedId;
 		else
-			return list+","+id;
+			return list+","+delimitedId;
 	}
 }
