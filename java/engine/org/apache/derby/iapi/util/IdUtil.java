@@ -129,11 +129,7 @@ public abstract class IdUtil
 	}
 
     /**
-      Parse a multi-part (dot separated) SQL identifier form the
-      StringReader provided. Raise an excepion
-      if the string does not contain valid SQL indentifiers.
-      The returned String array contains the normalized form of the
-      identifiers.
+c
     
     @param s The string to be parsed
     @return An array of strings made by breaking the input string at its dots, '.'.
@@ -169,16 +165,14 @@ public abstract class IdUtil
 	}
 	
 	/**
-	  Convert the String provided to an ID. Throw an exception
-	  iff the string does not contain only a valid external form
-	  for an id. This is a convenience routine that simply
-	  uses getId(StringReader) to do the work.
-	  
-	  <P> See the header for getId below for restrictions.
-	  
+      Parse a SQL identifier from the String provided. Raise an excepion
+      if the string does not contain a valid SQL indentifier.
+      The returned String  contains the normalized form of the
+      identifier.
+        
 	  @exception StandardException Oops
 	  */
-	public static String parseId(String s)
+	public static String parseSQLIdentifier(String s)
 		 throws StandardException
 	{
 		StringReader r = new StringReader(s);
@@ -400,8 +394,10 @@ public abstract class IdUtil
 
 
 	/**
-	  Scan a list of ids from the string provided. This returns
-	  an array with id per entry. This raises an an exception if
+	  Scan a list of comma separated SQL identifiers from the string provided.
+      This returns an array with containing the normalized forms of the identifiers.
+      
+      This raises an an exception if
 	  the string does not contain a valid list of names.
 
 	  @exception StandardException Oops
@@ -418,7 +414,8 @@ public abstract class IdUtil
 	
 	
 	/**
-	  Parse an idList. 
+	  Parse a list of comma separated SQL identifiers returning
+      them a as elements in an array.
 
 	  @param normalize true means return ids in nomral form, false means
 	        return them as they were entered.
@@ -497,7 +494,7 @@ public abstract class IdUtil
 	}
 
 	/**
-	 * Map userName to authorizationId
+	 * Map userName to authorizationId in its normal form.
 	 * 
 	 * @exception StandardException on error or userName is null
 	 */
@@ -505,7 +502,7 @@ public abstract class IdUtil
 	{
 		try {
             if (userName != null)
-			    return parseId(userName);
+			    return parseSQLIdentifier(userName);
 		}
 		catch (StandardException se) {
 		}
@@ -619,7 +616,8 @@ public abstract class IdUtil
 	}
 
 	/**
-	  Return true if the id provided is on the list provided.
+	  Return true if the normalized value of an indentifier is on the list 
+      of SQL identifiers provided.
 	  @param id an id in normal form
 	  @param	list a list of ids in external form.
 	  @exception StandardException oops.
@@ -635,13 +633,18 @@ public abstract class IdUtil
 	}
 
 	/**
-	  Delete an id from a list of ids.
+	  Delete an normal value from a list of SQL identifiers.
+      The returned list maintains its remaining identifiers in the
+      format they were upon entry to the call.
+      
+      
 	  @param id an id in normal form (quotes removed, upshifted if regular)
 	  @param list a comma separated list of ids in external
 	         form (possibly delmited or not upshifted).
 	  @return the list with the id deleted or null if the
 	    resulting list has no ids. If 'id' is not on 'list'
-		this returns list unchanged.
+		this returns list unchanged. If list becomes empty after the removal
+        null is returned.
 				 
 	  @exception StandardException oops.
 	  */
@@ -652,13 +655,14 @@ public abstract class IdUtil
 		Vector v = new Vector();
 		StringReader r = new StringReader(list);
 		String[] enteredList_a = parseIdList(r,false);
+        
 		//
 		//Loop through enteredList element by element
 		//removing elements that match id. Before we
-		//compare we parse each id in list to convert
+		//compare we parse each SQL indentifier in list to convert
 		//to normal form.
 		for (int ix=0; ix < enteredList_a.length; ix++)
-			if (!id.equals(IdUtil.parseId(enteredList_a[ix])))
+			if (!id.equals(IdUtil.parseSQLIdentifier(enteredList_a[ix])))
 				v.addElement(enteredList_a[ix]);
 		if (v.size() == 0)
 			return null;

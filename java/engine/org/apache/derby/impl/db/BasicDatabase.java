@@ -318,7 +318,7 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 		//Initialize our language connection context. Note: This is
 		//a bit of a hack. Unfortunately, we can't initialize this
 		//when we push it. We first must push a few more contexts. 
-		lctx.initialize(true);		
+		lctx.initialize();		
 
 		// Need to commit this to release locks gotten in initialize.  
 		// Commit it but make sure transaction not have any updates. 

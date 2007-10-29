@@ -94,11 +94,10 @@ public interface LanguageConnectionContext extends Context {
 	/**
 	 * Initialize. For use after pushing the contexts that initialization needs.
 	 *
-	 * @param sqlConnection	Whether or not this is called from a sql connection.
 	 *
 	 * @exception StandardException thrown if something goes wrong
 	 */
-	void initialize(boolean sqlConnection) throws StandardException;
+	void initialize() throws StandardException;
 
 	/**
 	 * Get value of logStatementText.

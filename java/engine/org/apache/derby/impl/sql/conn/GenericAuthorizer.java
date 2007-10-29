@@ -64,17 +64,13 @@ implements Authorizer
 	private final String authorizationId; //the userName after parsing by IdUtil 
 	
 	GenericAuthorizer(String authorizationId, 
-						     LanguageConnectionContext lcc,
-					         boolean sqlConnection)
+						     LanguageConnectionContext lcc)
 		 throws StandardException
 	{
 		this.lcc = lcc;
 		this.authorizationId = authorizationId;
 
-		//we check the access level only if this is coming from a sql
-		//connection, not internal logSniffer or StageTrunc db connection
-		if(sqlConnection)
-			refresh();
+		refresh();
 	}
 
 	/*

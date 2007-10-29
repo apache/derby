@@ -307,16 +307,11 @@ public class GenericLanguageConnectionContext
 		triggerTables = new ArrayList();
 	}
 
-	public void initialize(boolean sqlConnection) throws StandardException
+	public void initialize() throws StandardException
 	{
 		//
 		//Creating the authorizer authorizes the connection.
-		authorizer = new GenericAuthorizer(IdUtil.getUserAuthorizationId(userName),this, sqlConnection);
-
-		//we can ignore the following if this is a database connection
-		//associated with internal thread such as logSniffer and StageTrunc
-		if(!sqlConnection)
-			return;
+		authorizer = new GenericAuthorizer(IdUtil.getUserAuthorizationId(userName),this);
 
 		/*
 		** Set the authorization id.  User shouldn't
