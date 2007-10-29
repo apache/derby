@@ -197,7 +197,7 @@ public abstract class IdUtil
 
 	  @exception StandardException Ooops.
 	  */
-	public static String parseId(StringReader r, boolean normalize, boolean normalizeToUpper)
+	private static String parseId(StringReader r, boolean normalize, boolean normalizeToUpper)
 		 throws StandardException
 	{
 		try {
@@ -217,6 +217,19 @@ public abstract class IdUtil
 		}
 	}
 
+    /**
+     * Parse a regular identifier (unquoted) returning returning either
+     * the value of the identifier or a delimited identifier. Ensures
+     * that all characters in the identifer are valid for a regular identifier.
+     * 
+     * @param r Regular identifier to parse.
+     * @param normalize If true return the identifer converted to a single case, otherwise return the identifier as entered.
+     * @param normalizeToUpper
+     * @return the value of the identifer or a delimited identifier
+     * @throws IOException Error accessing value
+     * @throws StandardException Error parsing identifier.
+ 
+     */
 	private static String parseUnQId(StringReader r, boolean normalize, boolean normalizeToUpper)
 		 throws IOException,StandardException
 	{
@@ -252,6 +265,16 @@ public abstract class IdUtil
 			return true;
 		return false;
 	}
+    
+    /**
+     * Parse a delimited (quoted) identifier returning either
+     * the value of the identifier or a delimited identifier.
+     * @param r Quoted identifier to parse.
+     * @param normalize If true return a delimited identifer, otherwise return the identifier's value.
+     * @return the value of the identifer or a delimited identifier
+     * @throws IOException Error accessing value
+     * @throws StandardException Error parsing identifier.
+     */
 	private static String parseQId(StringReader r,boolean normalize)
 		 throws IOException,StandardException
 	{
@@ -608,7 +631,7 @@ public abstract class IdUtil
 
 	/**
 	  Delete an id from a list of ids.
-	  @param id an id in normal form (quotes removed, upshifted)
+	  @param id an id in normal form (quotes removed, upshifted if regular)
 	  @param list a comma separated list of ids in external
 	         form (possibly delmited or not upshifted).
 	  @return the list with the id deleted or null if the
