@@ -422,24 +422,6 @@ public abstract class DMLStatementNode extends StatementNode
 				( acb, numberOfParameters, parameterList);
 	}
 
-	/*
-	** When all other generation is done for the statement,
-	** we need to ensure all of the parameters have been touched.
-	*
-	*	@param	acb				ActivationClassBuilder
-	*
-	*/
-	void generateParameterHolders(ActivationClassBuilder acb) 
-		throws StandardException
-	{
-		Vector pList = getCompilerContext().getParameterList();
-		if (pList.size() <= 0)
-			return;
-
-		ParameterNode.generateParameterHolders( acb,  pList);
-			
-	}
-
 	/**
 	 * A read statement is atomic (DMLMod overrides us) if there
 	 * are no work units, and no SELECT nodes, or if its SELECT nodes 

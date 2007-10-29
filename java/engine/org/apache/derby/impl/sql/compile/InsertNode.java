@@ -792,11 +792,6 @@ public final class InsertNode extends DMLModStatementNode
 
 			mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getInsertVTIResultSet", ClassName.ResultSet, 3);
 		}
-
-		/*
-		** ensure all parameters have been generated
-		*/
-		generateParameterHolders(acb);
 	}
 
 	/**

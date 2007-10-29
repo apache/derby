@@ -558,11 +558,6 @@ public class CursorNode extends ReadCursorNode
 			acb.rememberCursor(mb);
 			acb.addCursorPositionCode();
 		}
-
-		/*
-		** ensure all parameters have been generated
-		*/
-		generateParameterHolders(acb);
 	}
 
 	// class interface

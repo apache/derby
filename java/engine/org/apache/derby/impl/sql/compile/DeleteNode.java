@@ -652,12 +652,6 @@ public class DeleteNode extends DMLModStatementNode
 				constructor.endStatement();
 			}
 		}
-
-		/*
-		** ensure all parameters have been generated
-		*/
-		if(!isDependentTable)
-			generateParameterHolders(acb);
 	}
 
 

@@ -656,10 +656,33 @@ class BCMethod implements MethodBuilder {
 	}
 
 	public void cast(String className) {
-		Type ct = cb.factory.type(className);
-		Type tbc = popStack();
-
+		
+		// Perform a simple optimization to not
+		// insert a checkcast when the classname
+		// of the cast exactly matches the type name
+		// currently on the stack.
+		// This can reduce the amount of generated code.
+		// This compiler/class generator does not load
+		// classes to check relationships or any other
+		// information. Thus other optimizations where a cast
+		// is not required are not implemented.
+		Type tbc = stackTypes[stackTypeOffset - 1];
+		
 		short sourceType = tbc.vmType();
+		
+		if (sourceType == BCExpr.vm_reference)
+		{
+			// Simple optimize step
+			if (className.equals(tbc.javaName()))
+			{
+				// do nothing, exact matching type
+				return;
+			}
+		}
+		
+		Type ct = cb.factory.type(className);
+		popStack();
+		
 		short targetType = ct.vmType();
 
 		if (SanityManager.DEBUG) {

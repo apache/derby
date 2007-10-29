@@ -70,16 +70,7 @@ public class ParameterNode extends ValueNode
 	/*
 	** The parameter number for this parameter.  The numbers start at 0.
 	*/
-	int	parameterNumber;
-
-	/*
-	** We want to know if this node was generated or not.
-	** It will be skipped if it was in a predicate that
-	** was optimized out of the query.  Skipped parameters
-	** need to do some minimal generation so that we can
-	** make users pass in parameter values for us to ignore.
-	*/
-	private boolean generated;
+	private int	parameterNumber;
 
 	/*
 	** Pointer to the array in the DMLStatementNode that holds the
@@ -89,7 +80,7 @@ public class ParameterNode extends ValueNode
 	** are not filled in until their corresponding parameters are bound.
 	*/
 
-	DataTypeDescriptor[]	typeServices;
+	private DataTypeDescriptor[]	typeServices;
 
 	/*
 	** The default value for this parameter.  Currently, the only
@@ -97,14 +88,14 @@ public class ParameterNode extends ValueNode
 	** stored prepared statement, where they are supplied for
 	** optimization.
 	*/
-	DataValueDescriptor		defaultValue;
+	private DataValueDescriptor		defaultValue;
 
 	/**
 	  *	This ParameterNode may turn up as an argument to a replicated Work Unit.
 	  *	If so, the remote system will have figured out the type of this node.
 	  *	That's what this variable is for.
 	  */
-	protected	JSQLType			jsqlType;
+	private	JSQLType			jsqlType;
 
 	private int orderableVariantType = Qualifier.QUERY_INVARIANT;
 
@@ -143,7 +134,7 @@ public class ParameterNode extends ValueNode
 	 * @return	The parameter number
 	 */
 
-	public	int getParameterNumber()
+	int getParameterNumber()
 	{
 		return parameterNumber;
 	}
@@ -157,7 +148,7 @@ public class ParameterNode extends ValueNode
 	 * @return	Nothing
 	 */
 
-	public void setDescriptors(DataTypeDescriptor[] descriptors)
+	void setDescriptors(DataTypeDescriptor[] descriptors)
 	{
 
         // The following is commented out for #3546, for create publication 
@@ -397,12 +388,7 @@ public class ParameterNode extends ValueNode
 		//if (genRetval != null)
 		//	return genRetval;
 
-        /*
-        ** First, generate the holder in the constructor.
-        */
-        generateHolder(acb);
-
-        /* now do the return value */
+        /* Generate the return value */
 
         /* First, get the field that holds the ParameterValueSet */
         acb.pushPVSReference(mb);
@@ -434,38 +420,6 @@ public class ParameterNode extends ValueNode
         /* Cast the result to its specific interface */
         mb.cast(getTypeCompiler().interfaceName());
 	} // End of generateExpression
-
-	/*
-	** parameters might never be used, but still need
-	** to have space allocated for them and be assigned
-	** to, for the query to operate.
-	**
-	** This generates the minimum code needed to make
-	** the parameter exist.
-	*/
-	void generateHolder(ExpressionClassBuilder acb) throws StandardException {
-
-		MethodBuilder	constructor = acb.getConstructor();
-
-		if (generated) return;
-		generated = true;
-
-		/*
-		** First, build the statement in the constructor.
-		*/
-		acb.pushPVSReference(constructor);
-
-		acb.generateNull(constructor, getTypeCompiler()); constructor.upCast(ClassName.DataValueDescriptor);
-
-		constructor.push(parameterNumber); // second arg
-		TypeId myId = getTypeId();
-		constructor.push(myId.getJDBCTypeId()); // third arg
-		constructor.push(myId.getCorrespondingJavaTypeName()); // fouth arg
-
-		constructor.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "setStorableDataValue", "void", 4);
-
-		/* The constructor portion is done */
-	}
 
 	public TypeId getTypeId()
 	{
@@ -559,28 +513,6 @@ public class ParameterNode extends ValueNode
 
 			executeMethod.pushThis();
 			executeMethod.callMethod(VMOpcode.INVOKEVIRTUAL, ClassName.BaseActivation, "throwIfMissingParms", "void", 0);
-		}
-	}
-
-	/*
-	** When all other generation is done for the statement,
-	** we need to ensure all of the parameters have been touched.
-	*
-	*	@param	acb				ExpressionClassBuilder
-	*	@param	parameterList	list of parameter
-	*
-	* @exception StandardException		Thrown on error
-	*/
-	static	public	void generateParameterHolders
-	( ExpressionClassBuilder acb, Vector parameterList ) 
-		throws StandardException
-	{
-		if (parameterList == null) return;
-
-		for (Enumeration paramEnum = parameterList.elements(); 
-			 paramEnum.hasMoreElements(); )
-		{
-			((ParameterNode)paramEnum.nextElement()).generateHolder(acb);
 		}
 	}
 

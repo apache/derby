@@ -26,6 +26,7 @@ import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 
 import org.apache.derby.iapi.sql.ParameterValueSet;
 
+import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataValueFactory;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 
@@ -98,6 +99,21 @@ final class GenericParameterValueSet implements ParameterValueSet
 	/*
 	** ParameterValueSet interface methods
 	*/
+	
+	/**
+	 * Initialize the set by allocating a holder DataValueDescriptor object
+	 * for each parameter.
+	 */
+	public void initialize(DataTypeDescriptor[] types)
+	{
+		for (int i = 0; i < parms.length; i++)
+		{
+			DataTypeDescriptor dtd = types[i];
+			
+			parms[i].initialize(dtd.getNull(),
+					dtd.getJDBCTypeId(), dtd.getTypeId().getCorrespondingJavaTypeName());
+		}
+	}
 
 	public void setParameterMode(int position, int mode) {
 		parms[position].parameterMode = (short) mode;
@@ -296,7 +312,7 @@ final class GenericParameterValueSet implements ParameterValueSet
 			}
 		}
 
-		parms[position].setStorableDataValue(sdv, jdbcTypeId, className);
+		parms[position].initialize(sdv, jdbcTypeId, className);
 
 		/* NOTE: We do not deal with associated parameters here.
 		 * This method is only called from the generated code

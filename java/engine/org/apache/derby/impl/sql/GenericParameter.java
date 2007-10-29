@@ -145,22 +145,17 @@ final class GenericParameter
 	public GenericParameter getClone(GenericParameterValueSet pvs)
 	{
 		GenericParameter gpClone = new GenericParameter(pvs, isReturnOutputParameter);
-		gpClone.setStorableDataValue(this.getValue().getClone(), jdbcTypeId, declaredClassName);
+		gpClone.initialize(this.getValue().getClone(), jdbcTypeId, declaredClassName);
 		gpClone.isSet = true;
 
 		return gpClone;
 	}
 
 	/**
-	 * Set the DataValueDescriptor for this parameter.  If makrAsSet
-	 * is set, then we consider this parameter both initialized and
-	 * set.  Otherwise, it is just initialized but not yet set.
+	 * Set the DataValueDescriptor and type information for this parameter
 	 *
-	 * @param std the storable data value
-	 * @param markAsSet whether we should mark as being set or not.
-	 * 		The isSet() method will return this value.
 	 */
-	void setStorableDataValue(DataValueDescriptor value, int jdbcTypeId, String className)
+	void initialize(DataValueDescriptor value, int jdbcTypeId, String className)
 	{
 		this.value = value;
 		this.jdbcTypeId = jdbcTypeId;

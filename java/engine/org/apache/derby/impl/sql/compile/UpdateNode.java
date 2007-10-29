@@ -811,12 +811,6 @@ public final class UpdateNode extends DMLModStatementNode
                               ClassName.ResultSet, 3);
             }
         }
-		/*
-		** ensure all parameters have been generated
-		*/
-		if(!isDependentTable)
-			generateParameterHolders(acb);
-
 	}
 
 	/**

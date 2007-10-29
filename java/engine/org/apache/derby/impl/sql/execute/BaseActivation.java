@@ -274,11 +274,17 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 	*/
 	public final void setupActivation(ExecPreparedStatement ps, boolean scrollable) {
 		preStmt = ps;
-
+				
 		if (ps != null) {
 			// get the result set description
    			resultDescription = ps.getResultDescription();
 			this.scrollable = scrollable;
+			
+			// Initialize the parameter set to have allocated
+			// DataValueDescriptor objects for each parameter.
+			if (pvs != null && pvs.getParameterCount() != 0)
+				pvs.initialize(ps.getParameterTypes());
+
 		} else {
 			resultDescription = null;
 			this.scrollable = false;
@@ -1215,7 +1221,7 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 		pvs = lcc.getLanguageFactory().newParameterValueSet(
 			lcc.getLanguageConnectionFactory().getClassFactory().getClassInspector(),
 			paramCount, hasReturnParam);
-	}
+		}
 
 	/**
 	 return the parameters.
