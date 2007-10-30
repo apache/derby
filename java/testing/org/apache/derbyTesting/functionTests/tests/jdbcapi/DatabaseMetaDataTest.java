@@ -674,8 +674,9 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * Test methods that describe attributes of SQL Objects
      * that are not supported by derby. In each case the
      * metadata should return an empty ResultSet of the
-     * correct shape.
-     * TODO: types and column names of the ResultSets
+     * correct shape, and with correct names, datatypes and 
+     * nullability for the columns in the ResultSet. 
+     * 
      */
     public void testUnimplementedSQLObjectAttributes() throws SQLException
     {
@@ -684,7 +685,34 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         ResultSet rs;
         
         rs = dmd.getAttributes(null,null,null,null);
-        assertMetaDataResultSet(rs, null, null, null);
+        
+        String [] columnNames = {
+                "TYPE_CAT", "TYPE_SCHEM", "TYPE_NAME", "ATTR_NAME", "DATA_TYPE",
+                "ATTR_TYPE_NAME", "ATTR_SIZE", "DECIMAL_DIGITS", "NUM_PREC_RADIX",
+                "NULLABLE", "REMARKS", "ATTR_DEF", "SQL_DATA_TYPE", 
+                "SQL_DATETIME_SUB", "CHAR_OCTET_LENGTH", "ORDINAL_POSITION", 
+                "IS_NULLABLE", "SCOPE_CATALOG", "SCOPE_SCHEMA", "SCOPE_TABLE",
+                "SOURCE_DATA_TYPE"
+        };
+        int [] columnTypes = { 
+                Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, 
+                Types.INTEGER, Types.VARCHAR, Types.INTEGER, Types.INTEGER, Types.INTEGER,
+                Types.INTEGER, Types.VARCHAR, Types.VARCHAR, Types.INTEGER,
+                Types.INTEGER, Types.INTEGER, Types.INTEGER,
+                Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.SMALLINT            
+        };
+        // interestingly, we get a different value back for nullability for
+        // the a number of the columns with networkserver/client vs. embedded 
+        boolean nullval = true;
+        if (usingDerbyNetClient())
+            nullval = false;
+        boolean [] nullability = {
+                true, true, true, true, nullval, true, nullval,
+                nullval, nullval, nullval, true, true, nullval, nullval,
+                nullval, nullval, true, true, true, true, true
+        };
+            
+        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
         JDBC.assertEmpty(rs);
         
         rs = dmd.getCatalogs();
@@ -692,14 +720,35 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         JDBC.assertEmpty(rs);
         
         rs = dmd.getSuperTables(null,null,null);
-        assertMetaDataResultSet(rs, null, null, null);
+        columnNames = new String[] {
+                "TABLE_CAT", "TABLE_SCHEM", "TABLE_NAME", "SUPERTABLE_NAME"};
+        columnTypes = new int[] {
+                Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
+        nullability = new boolean[] {
+                true, true, true, true};
+        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
         JDBC.assertEmpty(rs);
 
         rs = dmd.getSuperTypes(null,null,null);
-        assertMetaDataResultSet(rs, null, null, null);
+        columnNames = new String[] {
+                "TYPE_CAT", "TYPE_SCHEM", "TYPE_NAME", "SUPERTYPE_CAT",
+                "SUPERTYPE_SCHEM", "SUPERTYPE_NAME"};
+        columnTypes = new int[] {
+                Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR,
+                Types.VARCHAR, Types.VARCHAR};
+        nullability = new boolean[] {
+                true, true, true, true, true, true};
+        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
         JDBC.assertEmpty(rs);
 
         rs = dmd.getUDTs(null,null,null,null);
+        columnNames = new String[] {
+                "TYPE_CAT", "TYPE_SCHEM", "TYPE_NAME", "CLASS_NAME",
+                "DATA_TYPE", "REMARKS", "BASE_TYPE"};
+        columnTypes = new int[] {
+                Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
+        nullability = new boolean[] {
+                true, true, true, true};
         assertMetaDataResultSet(rs, null, null, null);
         JDBC.assertEmpty(rs);
         
