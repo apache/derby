@@ -132,6 +132,11 @@ implements NoPutResultSet
 		this.optimizerEstimatedRowCount = optimizerEstimatedRowCount;
 		this.optimizerEstimatedCost = optimizerEstimatedCost;
 	}
+	
+	public final Activation getActivation()
+	{
+		return activation;
+	}
 
 	// NoPutResultSet interface
 

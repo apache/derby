@@ -36,6 +36,7 @@ import org.apache.derby.iapi.sql.execute.NoPutResultSet;
 import org.apache.derby.iapi.sql.execute.ExecutionFactory;
 import org.apache.derby.iapi.sql.execute.TargetResultSet;
 
+import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.ResultDescription;
 import org.apache.derby.iapi.sql.ResultSet;
 import org.apache.derby.iapi.sql.Row;
@@ -1143,6 +1144,12 @@ public class TemporaryRowHolderResultSet implements CursorResultSet, NoPutResult
 		return clo;
 	}
 	public java.sql.SQLWarning getWarnings() {
+		return null;
+	}
+
+	public Activation getActivation() {
+		if (SanityManager.DEBUG)
+			SanityManager.THROWASSERT("getActivation() called for " + getClass());
 		return null;
 	}
 }

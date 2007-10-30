@@ -797,18 +797,16 @@ public final class UpdateNode extends DMLModStatementNode
             // generate code to evaluate CHECK CONSTRAINTS
             generateCheckConstraints( checkConstraints, acb, mb ); // arg 2
 
-            acb.pushThisAsActivation(mb);
-
             if(isDependentTable)
             {
                 mb.push(acb.addItem(makeConstantAction()));
                 mb.push(acb.addItem(makeResultDescription()));
                 mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getDeleteCascadeUpdateResultSet",
-                              ClassName.ResultSet, 5);
+                              ClassName.ResultSet, 4);
             }else
             {
                 mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getUpdateResultSet",
-                              ClassName.ResultSet, 3);
+                              ClassName.ResultSet, 2);
             }
         }
 	}

@@ -349,7 +349,7 @@ public class IntersectOrExceptNode extends SetOperatorNode
          *  11) intermediateOrderByDirection saved object index
          */
 
-		acb.pushGetResultSetFactoryExpression(mb); // instance for getUnionResultSet
+		acb.pushGetResultSetFactoryExpression(mb); // instance for getSetOpResultSet
 
 		getLeftResultSet().generate( acb, mb);
 		getRightResultSet().generate( acb, mb);

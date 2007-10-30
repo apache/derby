@@ -541,30 +541,27 @@ public class DeleteNode extends DMLModStatementNode
 			if(cascadeDelete || isDependentTable)
 			{
 				resultSetGetter = "getDeleteCascadeResultSet";
+				argCount = 4;
 			}		
 			else
 			{
 				resultSetGetter = "getDeleteResultSet";
+				argCount = 1;
 			}
-			argCount = 2;
+			
 		} else {
-			argCount = 2;
+			argCount = 1;
 			resultSetGetter = "getDeleteVTIResultSet";
 		}
 
-
-		acb.pushThisAsActivation(mb);
-
 		if(isDependentTable)
 		{
-			argCount = 3;
 			mb.push(acb.addItem(makeConstantAction()));
 		
 		}else
 		{
 			if(cascadeDelete)
 			{
-				argCount = 3;
 				mb.push(-1); //root table.
 			}
 		}		
@@ -579,8 +576,6 @@ public class DeleteNode extends DMLModStatementNode
 				acb.newFieldDeclaration(Modifier.PRIVATE, resultSetArrayType);
 			mb.pushNewArray(ClassName.ResultSet, dependentNodes.length);  // new ResultSet[size]
 			mb.setField(arrayField);
-
-			argCount = 4;
 			for(int index=0 ; index <  dependentNodes.length ; index++)
 			{
 
@@ -620,7 +615,6 @@ public class DeleteNode extends DMLModStatementNode
 		{
 			if(isDependentTable)
 			{
-				argCount =4;
 				mb.pushNull(resultSetArrayType); //No dependent tables for this table
 			}
 		}
@@ -630,7 +624,6 @@ public class DeleteNode extends DMLModStatementNode
 		{
 			parentResultSetId = targetTableDescriptor.getSchemaName() +
 			                       "." + targetTableDescriptor.getName();
-			argCount = 5;
 			mb.push(parentResultSetId);
 
 		}

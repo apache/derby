@@ -1543,7 +1543,6 @@ public abstract class ResultSetNode extends QueryTreeNode
 
 		// instance and first arg are pushed by caller
 
-		acb.pushThisAsActivation(mb);
 		mb.push(resultSetNumber);
 		mb.push(erdNumber);
 		mb.push(getCostEstimate().rowCount());
@@ -1552,7 +1551,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 		closeMethodArgument(acb, mb);
 
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getNormalizeResultSet",
-					ClassName.NoPutResultSet, 8);
+					ClassName.NoPutResultSet, 7);
 	}
 
 	/**
