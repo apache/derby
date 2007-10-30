@@ -235,8 +235,6 @@ public class SQLStateConstants
         = "26000";
     public static final String INVALID_TRANSFORM_GROUP_NAME_SPECIFICATION_NO_SUBCLASS 
         = "0S000";
-    public static final String INVALID_TRANSACTION_STATE_NO_SUBCLASS 
-        = "25000";
     public static final String INVALID_TRANSACTION_STATE_ACTIVE_SQL_TRANSACTION 
         = "25001";
     public static final String INVALID_TRANSACTION_STATE_BRANCH_TRANSACTION_ALREADY_ACTIVE 

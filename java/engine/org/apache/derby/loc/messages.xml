@@ -740,11 +740,6 @@ Guide.
             <title>Class 25: Invalid Transaction State</title>
 
             <msg>
-                <name>25000</name>
-                <text>Invalid transaction state.</text>
-            </msg>
-
-            <msg>
                 <name>25001</name>
                 <text>Cannot close a connection while a transaction is still active.</text>
             </msg>
