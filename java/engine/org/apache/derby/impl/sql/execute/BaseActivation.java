@@ -1222,7 +1222,18 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 			lcc.getLanguageConnectionFactory().getClassFactory().getClassInspector(),
 			paramCount, hasReturnParam);
 		}
-
+	
+	/**
+	 * This method can help reduce the amount of generated code by changing
+	 * instances of this.pvs.getParameter(position) to this.getParameter(position) 
+	 * @param position
+	 * @return
+	 * @throws StandardException
+	 */
+	protected final DataValueDescriptor getParameter(int position) throws StandardException { 
+		return pvs.getParameter(position); 
+		} 
+	
 	/**
 	 return the parameters.
 	 */

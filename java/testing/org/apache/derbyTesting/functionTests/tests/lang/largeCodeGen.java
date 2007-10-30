@@ -36,7 +36,7 @@ import org.apache.derby.tools.ij;
 
 public class largeCodeGen
 {
-
+	private static boolean TEST_QUERY_EXECUTION = true;
 	
     public static void main(String argv[]) 
        throws Exception
@@ -45,7 +45,7 @@ public class largeCodeGen
         Connection con = ij.startJBMS();
         con.setAutoCommit(false);
         createTestTable(con);
-        testParamsInWhereClause(con);
+        testLogicalOperators(con);
         testInClause(con);
         testUnions(con);
         con.commit();
@@ -71,19 +71,62 @@ public class largeCodeGen
 		stmt.executeUpdate("insert into t0 values(2,3,4,5.3,5.3,5.3,31.13,123456.123, 'one','one','one')");
     }
     
-    /**
+    
+	/**
+	 * Prepares and executes query against table t0 with n parameters
+	 * The assumption is that the query will always return our one row
+	 * of data inserted into the t0 table.
+	 * 
+	 * @param con
+	 * @param testName
+	 * @param sqlBuffer  - StringBuffer with SQL Text
+	 * @param numParams  - Number of parameters
+	 * @param paramValue - Parameter value
+	 * @return true if the check fails
+	 */
+	private static boolean checkT0Query(Connection con, String testName, 
+				StringBuffer sqlBuffer, int numParams, int paramValue) {
+		PreparedStatement ps;
+		try {
+			ps = con.prepareStatement(sqlBuffer.toString());
+			
+			if (TEST_QUERY_EXECUTION)
+			{
+				for (int i = 1; i <= numParams; i++)
+				{	
+					ps.setInt(i, paramValue);
+				}
+				ResultSet rs = ps.executeQuery();
+				rs.next();
+				checkRowData(rs);
+				rs.close();
+			}
+			ps.close();
+			System.out.println("PASS: " + testName);
+			return false;
+		}catch (Exception e)
+		{
+			reportFailure(testName, e);
+			return true;
+			
+		}
+	}
+
+	/**
      * Test many parameters in the where clause
      * e.g. 
 	 * @param con  
 	 */
-	private static void testParamsInWhereClause(Connection con)  throws SQLException {
+	private static void testLogicalOperators(Connection con)  throws SQLException {
 		 
 		 for (int count = 200; count <= 10000 ; count += 100)
 		 {
-			 // keep testing until it fails.
-			 if (testWhereParams(con, count))
+			 // keep testing until it fails with linkage error
+			 if (testLogicalOperators(con, count))
 				 break;
 		 }
+		 // 10,000 causes Stack overflow and database corruption
+		 //testLogicalOperators(con, 10000);
 	}
 
 	
@@ -91,74 +134,63 @@ public class largeCodeGen
 	 * Tests numParam parameter markers in a where clause
 	 * 
 	 * @param con          
-	 * @param  numparams  
+	 * @param  numOperands 
 	 */
-	private static boolean testWhereParams(Connection con, int numParams) throws SQLException {
-		String pred = "(si = ? AND i = ? )";
-		String testName = "WHERE clause with " + numParams + " parameters";
-		StringBuffer sqlBuffer = new StringBuffer((numParams * 20) + 512);
-		sqlBuffer.append("DELETE FROM T0 WHERE " + pred );
-		for (int i = 2; i < numParams; i+=2)
+	private static boolean testLogicalOperators(Connection con, 
+				int numOperands) throws SQLException {
+		
+		// First with parameters
+		String pred =  "(si = ? AND si = ? )";
+		String testName = "Logical operators with " + numOperands + " parameters";
+		StringBuffer sqlBuffer = new StringBuffer((numOperands * 20) + 512);
+		sqlBuffer.append("SELECT * FROM T0 WHERE " + pred );
+		for (int i = 2; i < numOperands; i+=2)
 		{
-			sqlBuffer.append(" OR (si = ? AND i = ? ) ");
+			sqlBuffer.append(" OR " + pred);
 		}
-		try {
-			PreparedStatement ps = con.prepareStatement(sqlBuffer.toString());
-			System.out.println("PASS: " + testName);
-			ps.close();
-			return false;
-		 
-		}catch (Exception e)
-		{
-			reportFailure(testName, e);
-			return true;
-			
-		}
+		return checkT0Query(con, testName, sqlBuffer, numOperands, 2);
+		
+		
+		
+		
 	}
+	
 	private static void testInClause(Connection con)  throws SQLException {
-		 for (int count = 2500; count <= 10000 ; count += 100)
+	  
+		// DERBY-739 raised number of parameters from 2700 to 3400
+		 for (int count = 3300; count <= 10000 ; count += 100)
 		 {
 			 // keep testing until it fails.
 			 if (testInClause(con, count))
-				 break;
+			 	break;
 		 }
 	}	
+	
+	/**
+	 * Test in clause with many parameters
+	 *
+	 * @param con
+	 * @param numParams - Number of parameters to test
+	 * @return true if the test fails
+	 * @throws SQLException
+	 */
 	private static boolean testInClause(Connection con, int numParams) throws SQLException {
 		String testName = "IN clause with " + numParams + " parameters";
 		StringBuffer sqlBuffer = new StringBuffer((numParams * 20) + 512);
-		sqlBuffer.append("SELECT * FROM T0 WHERE I IN ("  );
+		sqlBuffer.append("SELECT * FROM T0 WHERE SI IN ("  );
 		for (int i = 1; i < numParams; i++)
 		{
 			sqlBuffer.append("?, ");
 		}
 		sqlBuffer.append("?)");
-		try {
-			PreparedStatement ps = con.prepareStatement(sqlBuffer.toString());
-			System.out.println("PASS: " + testName);
-			ps.close();
-			return false;
-		 
-		}catch (Exception e)
-		{
-			reportFailure(testName, e);
-			return true;
-			
-		}
+		return checkT0Query(con, testName, sqlBuffer, numParams, 2); 	
 	}
+	
 	private static void testUnions(Connection con) throws Exception
 	{
 		Statement stmt = null;
         PreparedStatement pstmt = null; 
         createTestTable(con);
-		//int numUnions = 4000;
-		//int numUnions = 2000;
-		/*
-		  We still have problems with large queries. 
-		  Passes at 4000.
-		  With size 5000 it gets "java.lang.VerifyError: 
-		  (class: db2j/exe/ac601a400fx0102xc673xe3e9x000000163ac04, method: 
-		  execute signature: ()Lcom/ibm/db2j/protocol/Database/Language/Interface/ResultSet;) Illegal target of jump or branch". My fix affects generated method "fillResultSet". With size 10000 largeCodeGen gets Java exception: 'java.io.IOException: constant_pool(70796 > 65535)'.
-		*/
 		
 		String viewName = "v0";		
 		stmt = con.createStatement();
@@ -182,8 +214,6 @@ public class largeCodeGen
 		//System.out.println(createViewString);
 		stmt.executeUpdate(createView.toString());
 		
-		// 2000 unions caused method too big error in verifier
-		// 10000 unions overflows the number of constant pool entries
 		
 		for (int count = 800; count <= 10000; count += 100)
 		{
@@ -191,6 +221,8 @@ public class largeCodeGen
 			if (largeUnionSelect(con, viewName, count))
 				break;
 		}
+		// 10000 gives a different constant pool error
+		largeUnionSelect(con, viewName, 10000);
     }
     
     private static boolean largeUnionSelect(Connection con, String viewName,
