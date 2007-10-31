@@ -39,7 +39,7 @@ import java.io.IOException;
   Class Reference Constant Pool Entry - page 93 - Section 4.4.1 - One index
 
 */
-final class CONSTANT_Index_info extends ConstantPoolEntry {
+public final class CONSTANT_Index_info extends ConstantPoolEntry {
 
 	private int i1;
 	private int i2;

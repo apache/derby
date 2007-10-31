@@ -239,4 +239,23 @@ public interface VMOpcode {
      * See section 4.10 of JVM spec version 1.
      */
     int MAX_CODE_LENGTH = 65535;
+    
+    /**
+     * Instruction length for IF (IFNULL, IFEQ) etc.
+     * Used in conditional handling.
+     */
+    int IF_INS_LENGTH = 3;
+    
+    /**
+     * Instruction length for GOTO etc.
+     * Used in conditional handling.
+     */
+    int GOTO_INS_LENGTH = 3;
+
+    /**
+     * Instruction length for GOTO_W.
+     * Used in conditional handling.
+    */
+    int GOTO_W_INS_LENGTH = 5;
+   
 }
