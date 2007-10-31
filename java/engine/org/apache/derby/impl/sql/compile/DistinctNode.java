@@ -319,12 +319,11 @@ public class DistinctNode extends SingleChildResultSetNode
 		 *  arg2: distinct - true, of course
 		 *  arg3: isInSortedOrder - is the source result set in sorted order
 		 *  arg4: orderItem - entry in saved objects for the ordering
-		 *  arg5: Activation
-		 *  arg6: rowAllocator - method to construct rows for fetching
+		 *  arg5: rowAllocator - method to construct rows for fetching
 		 *			from the sort
-		 *  arg7: row size
-		 *  arg8: resultSetNumber
-		 *  arg9: closeCleanup
+		 *  arg6: row size
+		 *  arg7: resultSetNumber
+		 *  arg8: closeCleanup
 		 */
 
 		acb.pushGetResultSetFactoryExpression(mb);
@@ -333,7 +332,6 @@ public class DistinctNode extends SingleChildResultSetNode
 		mb.push(true);
 		mb.push(inSortedOrder);
 		mb.push(orderItem);
-		acb.pushThisAsActivation(mb);
 		resultColumns.generateHolder(acb, mb);
 		mb.push(resultColumns.getTotalColumnSize());
 		mb.push(resultSetNumber);
@@ -341,6 +339,6 @@ public class DistinctNode extends SingleChildResultSetNode
 		mb.push(costEstimate.getEstimatedCost());
 		closeMethodArgument(acb, mb);
 
-		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getSortResultSet", ClassName.NoPutResultSet, 11);
+		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getSortResultSet", ClassName.NoPutResultSet, 10);
 	}
 }

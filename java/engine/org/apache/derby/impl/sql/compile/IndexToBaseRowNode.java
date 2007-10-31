@@ -212,7 +212,6 @@ public class IndexToBaseRowNode extends FromTable
 
 		mb.push(heapConglomNumber);
 		mb.push(acb.addItem(scoci));
-		acb.pushThisAsActivation(mb);
 		source.generate(acb, mb);
 		
 		mb.upCast(ClassName.NoPutResultSet);
@@ -267,7 +266,7 @@ public class IndexToBaseRowNode extends FromTable
 		closeMethodArgument(acb, mb);
 
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getIndexRowToBaseRowResultSet",
-						ClassName.NoPutResultSet, 15);
+						ClassName.NoPutResultSet, 14);
 
 		/* The IndexRowToBaseRowResultSet generator is what we return */
 

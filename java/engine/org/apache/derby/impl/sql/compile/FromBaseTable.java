@@ -3207,10 +3207,10 @@ public class FromBaseTable extends FromTable
 
 		acb.pushGetResultSetFactoryExpression(mb);
 
+     	acb.pushThisAsActivation(mb);
 		mb.push(conglomNumber);
 		mb.push(acb.addItem(scoci));
-      	acb.pushThisAsActivation(mb);
-		resultColumns.generateHolder(acb, mb, referencedCols, (FormatableBitSet) null);
+ 		resultColumns.generateHolder(acb, mb, referencedCols, (FormatableBitSet) null);
 		mb.push(getResultSetNumber());
 		mb.push(hashKeyItem);
 		mb.push(tableDescriptor.getName());

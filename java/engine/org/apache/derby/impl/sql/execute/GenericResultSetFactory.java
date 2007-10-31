@@ -181,10 +181,10 @@ public class GenericResultSetFactory implements ResultSetFactory
 		@see ResultSetFactory#getUpdateVTIResultSet
 		@exception StandardException thrown on error
 	 */
-	public ResultSet getUpdateVTIResultSet(NoPutResultSet source,
-                                           Activation activation)
+	public ResultSet getUpdateVTIResultSet(NoPutResultSet source)
 			throws StandardException
 	{
+		Activation activation = source.getActivation();
 		getAuthorizer(activation).authorize(Authorizer.SQL_WRITE_OP);
 		return new UpdateVTIResultSet(source, activation);
 	}
@@ -251,7 +251,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 		@exception StandardException thrown on error
 	 */
 	public NoPutResultSet getHashTableResultSet(NoPutResultSet source,
-		Activation activation, GeneratedMethod singleTableRestriction, 
+		GeneratedMethod singleTableRestriction, 
 		Qualifier[][] equijoinQualifiers,
 		GeneratedMethod projection, int resultSetNumber,
 		int mapRefItem,
@@ -266,7 +266,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 		GeneratedMethod closeCleanup)
 			throws StandardException
 	{
-		return new HashTableResultSet(source, activation, 
+		return new HashTableResultSet(source, source.getActivation(), 
 			singleTableRestriction, 
             equijoinQualifiers,
 			projection, resultSetNumber, 
@@ -290,7 +290,6 @@ public class GenericResultSetFactory implements ResultSetFactory
 		boolean distinct, 
 		boolean isInSortedOrder,
 		int orderItem,
-		Activation activation, 
 		GeneratedMethod rowAllocator, 
 		int maxRowSize,
 		int resultSetNumber, 
@@ -303,7 +302,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 			distinct, 
 			isInSortedOrder,
 			orderItem,
-			activation, 
+			source.getActivation(), 
 			rowAllocator, 
 			maxRowSize,
 			resultSetNumber, 
@@ -320,7 +319,6 @@ public class GenericResultSetFactory implements ResultSetFactory
 		boolean isInSortedOrder,
 		int aggregateItem,
 		int orderItem,
-		Activation activation, 
 		GeneratedMethod rowAllocator, 
 		int maxRowSize,
 		int resultSetNumber, 
@@ -331,7 +329,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 			throws StandardException
 	{
 		return new ScalarAggregateResultSet(
-						source, isInSortedOrder, aggregateItem, activation,
+						source, isInSortedOrder, aggregateItem, source.getActivation(),
 						rowAllocator, resultSetNumber, singleInputRow,
 						optimizerEstimatedRowCount,
 						optimizerEstimatedCost, closeCleanup);
@@ -345,7 +343,6 @@ public class GenericResultSetFactory implements ResultSetFactory
 		boolean isInSortedOrder,
 		int aggregateItem,
 		int orderItem,
-		Activation activation, 
 		GeneratedMethod rowAllocator, 
 		int maxRowSize,
 		int resultSetNumber, 
@@ -356,7 +353,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 			throws StandardException
 	{
 		return new DistinctScalarAggregateResultSet(
-						source, isInSortedOrder, aggregateItem, orderItem, activation,
+						source, isInSortedOrder, aggregateItem, orderItem, source.getActivation(),
 						rowAllocator, maxRowSize, resultSetNumber, singleInputRow,
 						optimizerEstimatedRowCount,
 						optimizerEstimatedCost, closeCleanup);
@@ -370,7 +367,6 @@ public class GenericResultSetFactory implements ResultSetFactory
 		boolean isInSortedOrder,
 		int aggregateItem,
 		int orderItem,
-		Activation activation, 
 		GeneratedMethod rowAllocator, 
 		int maxRowSize,
 		int resultSetNumber, 
@@ -380,7 +376,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 			throws StandardException
 	{
 		return new GroupedAggregateResultSet(
-						source, isInSortedOrder, aggregateItem, orderItem, activation,
+						source, isInSortedOrder, aggregateItem, orderItem, source.getActivation(),
 						rowAllocator, maxRowSize, resultSetNumber, optimizerEstimatedRowCount,
 						optimizerEstimatedCost, closeCleanup);
 	}
@@ -393,7 +389,6 @@ public class GenericResultSetFactory implements ResultSetFactory
 		boolean isInSortedOrder,
 		int aggregateItem,
 		int orderItem,
-		Activation activation, 
 		GeneratedMethod rowAllocator, 
 		int maxRowSize,
 		int resultSetNumber, 
@@ -403,7 +398,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 			throws StandardException
 	{
 		return new DistinctGroupedAggregateResultSet(
-						source, isInSortedOrder, aggregateItem, orderItem, activation,
+						source, isInSortedOrder, aggregateItem, orderItem, source.getActivation(),
 						rowAllocator, maxRowSize, resultSetNumber, optimizerEstimatedRowCount,
 						optimizerEstimatedCost, closeCleanup);
 	}
@@ -503,9 +498,9 @@ public class GenericResultSetFactory implements ResultSetFactory
 		@exception StandardException thrown on error
 	 */
 	public NoPutResultSet getHashScanResultSet(
+                        			Activation activation,
 									long conglomId,
 									int scociItem,
-									Activation activation,
 									GeneratedMethod resultRowAllocator,
 									int resultSetNumber,
 									GeneratedMethod startKeyGetter,
@@ -573,9 +568,9 @@ public class GenericResultSetFactory implements ResultSetFactory
 		@exception StandardException thrown on error
 	 */
 	public NoPutResultSet getDistinctScanResultSet(
+                         			Activation activation,
 									long conglomId,
 									int scociItem,
-									Activation activation,
 									GeneratedMethod resultRowAllocator,
 									int resultSetNumber,
 									int hashKeyColumn,
@@ -618,9 +613,9 @@ public class GenericResultSetFactory implements ResultSetFactory
 		@exception StandardException thrown on error
 	 */
 	public NoPutResultSet getTableScanResultSet(
+                        			Activation activation,
 									long conglomId,
 									int scociItem,
-									Activation activation,
 									GeneratedMethod resultRowAllocator,
 									int resultSetNumber,
 									GeneratedMethod startKeyGetter,
@@ -680,9 +675,9 @@ public class GenericResultSetFactory implements ResultSetFactory
 		@exception StandardException thrown on error
 	 */
 	public NoPutResultSet getBulkTableScanResultSet(
+                       			    Activation activation,
 									long conglomId,
 									int scociItem,
-									Activation activation,
 									GeneratedMethod resultRowAllocator,
 									int resultSetNumber,
 									GeneratedMethod startKeyGetter,
@@ -751,7 +746,6 @@ public class GenericResultSetFactory implements ResultSetFactory
 	public NoPutResultSet getIndexRowToBaseRowResultSet(
 								long conglomId,
 								int scociItem,
-								Activation a,
 								NoPutResultSet source,
 								GeneratedMethod resultRowAllocator,
 								int resultSetNumber,
@@ -769,7 +763,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 		return new IndexRowToBaseRowResultSet(
 								conglomId,
 								scociItem,
-								a,
+								source.getActivation(),
 								source,
 								resultRowAllocator,
 								resultSetNumber,
@@ -793,7 +787,6 @@ public class GenericResultSetFactory implements ResultSetFactory
 								   int leftNumCols,
 								   NoPutResultSet rightResultSet,
 								   int rightNumCols,
-								   Activation activation,
 								   GeneratedMethod joinClause,
 								   int resultSetNumber,
 								   boolean oneRowRightSide,
@@ -805,7 +798,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 	{
 		return new NestedLoopJoinResultSet(leftResultSet, leftNumCols,
 										   rightResultSet, rightNumCols,
-										   activation, joinClause,
+										   leftResultSet.getActivation(), joinClause,
 										   resultSetNumber, 
 										   oneRowRightSide, 
 										   notExistsRightSide, 
@@ -823,7 +816,6 @@ public class GenericResultSetFactory implements ResultSetFactory
 								   int leftNumCols,
 								   NoPutResultSet rightResultSet,
 								   int rightNumCols,
-								   Activation activation,
 								   GeneratedMethod joinClause,
 								   int resultSetNumber,
 								   boolean oneRowRightSide,
@@ -835,7 +827,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 	{
 		return new HashJoinResultSet(leftResultSet, leftNumCols,
 										   rightResultSet, rightNumCols,
-										   activation, joinClause,
+										   leftResultSet.getActivation(), joinClause,
 										   resultSetNumber, 
 										   oneRowRightSide, 
 										   notExistsRightSide, 
@@ -853,7 +845,6 @@ public class GenericResultSetFactory implements ResultSetFactory
 								   int leftNumCols,
 								   NoPutResultSet rightResultSet,
 								   int rightNumCols,
-								   Activation activation,
 								   GeneratedMethod joinClause,
 								   int resultSetNumber,
 								   GeneratedMethod emptyRowFun,
@@ -867,7 +858,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 	{
 		return new NestedLoopLeftOuterJoinResultSet(leftResultSet, leftNumCols,
 										   rightResultSet, rightNumCols,
-										   activation, joinClause,
+										   leftResultSet.getActivation(), joinClause,
 										   resultSetNumber, 
 										   emptyRowFun, 
 										   wasRightOuterJoin,
@@ -887,7 +878,6 @@ public class GenericResultSetFactory implements ResultSetFactory
 								   int leftNumCols,
 								   NoPutResultSet rightResultSet,
 								   int rightNumCols,
-								   Activation activation,
 								   GeneratedMethod joinClause,
 								   int resultSetNumber,
 								   GeneratedMethod emptyRowFun,
@@ -901,7 +891,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 	{
 		return new HashLeftOuterJoinResultSet(leftResultSet, leftNumCols,
 										   rightResultSet, rightNumCols,
-										   activation, joinClause,
+										   leftResultSet.getActivation(), joinClause,
 										   resultSetNumber, 
 										   emptyRowFun, 
 										   wasRightOuterJoin,
@@ -1145,9 +1135,9 @@ public class GenericResultSetFactory implements ResultSetFactory
 	 *	@exception StandardException thrown on error
 	 */
 	public NoPutResultSet getRaDependentTableScanResultSet(
+			                        Activation activation,
 									long conglomId,
 									int scociItem,
-									Activation activation,
 									GeneratedMethod resultRowAllocator,
 									int resultSetNumber,
 									GeneratedMethod startKeyGetter,

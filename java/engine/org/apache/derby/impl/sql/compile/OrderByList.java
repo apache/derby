@@ -366,14 +366,13 @@ public class OrderByList extends OrderedColumnList
 		 *				for distincts
 		 *  arg3: isInSortedOrder - is the source result set in sorted order
 		 *  arg4: orderItem - entry in saved objects for the ordering
-		 *  arg5: Activation
-		 *  arg6: rowAllocator - method to construct rows for fetching
+		 *  arg5: rowAllocator - method to construct rows for fetching
 		 *			from the sort
-		 *  arg7: row size
-		 *  arg8: resultSetNumber
-		 *  arg9: estimated row count
-		 *  arg10: estimated cost
-		 *  arg11: closeCleanup
+		 *  arg6: row size
+		 *  arg7: resultSetNumber
+		 *  arg8: estimated row count
+		 *  arg9: estimated cost
+		 *  arg10: closeCleanup
 		 */
 
 		acb.pushGetResultSetFactoryExpression(mb);
@@ -389,8 +388,6 @@ public class OrderByList extends OrderedColumnList
 		mb.push(false);
 
 		mb.push(orderItem);
-
-		acb.pushThisAsActivation(mb);
 
 		// row allocator
 		child.getResultColumns().generateHolder(acb, mb);
@@ -415,7 +412,7 @@ public class OrderByList extends OrderedColumnList
 		acb.pushResultSetClosedMethodFieldAccess(mb);
 
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getSortResultSet",
-							ClassName.NoPutResultSet, 11);
+							ClassName.NoPutResultSet, 10);
 
 	}
 

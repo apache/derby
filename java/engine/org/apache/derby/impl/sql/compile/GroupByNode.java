@@ -849,7 +849,6 @@ public class GroupByNode extends SingleChildResultSetNode
 		mb.push(isInSortedOrder);
 		mb.push(aggInfoItem);
 		mb.push(orderingItem);
-		acb.pushThisAsActivation(mb);
 
 		resultColumns.generateHolder(acb, mb);
 
@@ -896,7 +895,7 @@ public class GroupByNode extends SingleChildResultSetNode
 
 		closeMethodArgument(acb, mb);
 
-		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, resultSet, ClassName.NoPutResultSet, 12);
+		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, resultSet, ClassName.NoPutResultSet, 11);
 	}
 
 	/**
@@ -926,7 +925,7 @@ public class GroupByNode extends SingleChildResultSetNode
 
 		closeMethodArgument(acb, mb);
 
-		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, resultSet, ClassName.NoPutResultSet, 11);
+		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, resultSet, ClassName.NoPutResultSet, 10);
 
 	}
 

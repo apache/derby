@@ -47,8 +47,8 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.reference.ClassName;
 
-abstract public class BaseJoinStrategy implements JoinStrategy {
-	public BaseJoinStrategy() {
+abstract class BaseJoinStrategy implements JoinStrategy {
+	BaseJoinStrategy() {
 	}
 
 	/** @see JoinStrategy#bulkFetchOK */
@@ -61,7 +61,25 @@ abstract public class BaseJoinStrategy implements JoinStrategy {
 		return false;
 	}
 
-	protected void fillInScanArgs1(
+	/**
+	 * Push the first set of common arguments for obtaining a scan ResultSet from
+	 * ResultSetFactory.
+	 * The first 11 arguments are common for these ResultSet getters
+	 * <UL>
+	 * <LI> ResultSetFactory.getBulkTableScanResultSet
+	 * <LI> ResultSetFactory.getHashScanResultSet
+	 * <LI> ResultSetFactory.getTableScanResultSet
+	 * <LI> ResultSetFactory.getRaDependentTableScanResultSet
+	 * </UL>
+	 * @param tc
+	 * @param mb
+	 * @param innerTable
+	 * @param predList
+	 * @param acbi
+	 * @param resultRowAllocator
+	 * @throws StandardException
+	 */
+	void fillInScanArgs1(
 								TransactionController tc,
 								MethodBuilder mb,
 								Optimizable innerTable,
@@ -78,9 +96,9 @@ abstract public class BaseJoinStrategy implements JoinStrategy {
 										getConglomerateNumber();
 		StaticCompiledOpenConglomInfo scoci = tc.getStaticCompiledConglomInfo(conglomNumber);
 		
+		acb.pushThisAsActivation(mb);
 		mb.push(conglomNumber);
 		mb.push(acb.addItem(scoci));
-		acb.pushThisAsActivation(mb);
 
 		acb.pushMethodReference(mb, resultRowAllocator);
 		mb.push(innerTable.getResultSetNumber());
@@ -101,7 +119,7 @@ abstract public class BaseJoinStrategy implements JoinStrategy {
 		mb.upCast(ClassName.Qualifier + "[][]");
 	}
 
-	protected void fillInScanArgs2(MethodBuilder mb,
+	final void fillInScanArgs2(MethodBuilder mb,
 								Optimizable innerTable,
 								int bulkFetch,
 								int colRefItem,
