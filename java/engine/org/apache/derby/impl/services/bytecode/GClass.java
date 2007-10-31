@@ -93,13 +93,15 @@ public abstract class GClass implements ClassBuilder {
 		}
 	}
 
-	public final void validateType(String typeName1)
+	final void validateType(String typeName1)
 	{
 	    if (SanityManager.DEBUG)
 	    {
             SanityManager.ASSERT(typeName1 != null);
 
             String typeName = typeName1.trim();
+
+            if ("void".equals(typeName)) return;
 
 	        // first remove all array-ness
 	        while (typeName.endsWith("[]")) typeName = typeName.substring(0,typeName.length()-2);
@@ -115,7 +117,6 @@ public abstract class GClass implements ClassBuilder {
 	        if ("int".equals(typeName)) return;
 	        if ("long".equals(typeName)) return;
 	        if ("short".equals(typeName)) return;
-	        if ("void".equals(typeName)) return;
 
 	        // then see if it can be found
 	        // REVISIT: this will fail if ASSERT is on and the
