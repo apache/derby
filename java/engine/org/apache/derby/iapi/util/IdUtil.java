@@ -205,7 +205,7 @@ c
 			if (c == '"')
 				return parseQId(r,normalize);
 			else
-				return parseUnQId(r,normalize, true);
+				return parseUnQId(r,normalize);
 		}
 
 		catch (IOException ioe){
@@ -220,13 +220,12 @@ c
      * 
      * @param r Regular identifier to parse.
      * @param normalize If true return the identifer converted to a single case, otherwise return the identifier as entered.
-     * @param normalizeToUpper
      * @return the value of the identifer or a delimited identifier
      * @throws IOException Error accessing value
      * @throws StandardException Error parsing identifier.
  
      */
-	private static String parseUnQId(StringReader r, boolean normalize, boolean normalizeToUpper)
+	private static String parseUnQId(StringReader r, boolean normalize)
 		 throws IOException,StandardException
 	{
 		StringBuffer b = new StringBuffer();
@@ -242,11 +241,13 @@ c
 				break;
 		}
 		if (c != -1) r.reset();
+        
+        String id = b.toString();
 
 		if (normalize)
-			return normalizeToUpper ? StringUtil.SQLToUpperCase(b.toString()) : StringUtil.SQLToLowerCase(b.toString());
+			return StringUtil.SQLToUpperCase(id);
 		else
-			return b.toString();
+			return id;
 	}
 
 
@@ -305,6 +306,11 @@ c
 			return normalToDelimited(b.toString()); //Put the quotes back.
 	}
 
+    /**
+     * Verify the read is empty (no more characters in its stream).
+     * @param r
+     * @throws StandardException
+     */
 	private static void verifyEmpty(java.io.Reader r)
 		 throws StandardException
 	{
@@ -407,7 +413,7 @@ c
 		if (p==null) return null;
 		StringReader r = new StringReader(p);
 		String[] result = parseIdList(r, true);
-		verifyListEmpty(r);
+		verifyEmpty(r);
 		return result;
 	}
 	
@@ -597,21 +603,6 @@ c
 			sb.append(externalIds[ix]);
 		}
 		return sb.toString();
-	}
-
-	private static void verifyListEmpty(StringReader r)
-		 throws StandardException
-	{
-		try {
-			if (r.read() != -1)
-				throw StandardException.newException(SQLState.ID_LIST_PARSE_ERROR);
-		}
-
-		catch (IOException ioe){
-			throw StandardException.newException(SQLState.ID_LIST_PARSE_ERROR,ioe);
-		}
-		
-
 	}
 
 	/**
