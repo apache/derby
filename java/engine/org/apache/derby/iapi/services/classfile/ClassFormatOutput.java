@@ -27,7 +27,7 @@ import java.io.OutputStream;
 
 
 /** A wrapper around DataOutputStream to provide input functions in terms
-    of the types defined on pages 83.
+    of the types defined on pages 83 of the Java Virtual Machine spec.
 
 	For this types use these methods of DataOutputStream
 	<UL>
@@ -46,9 +46,11 @@ public final class ClassFormatOutput extends DataOutputStream {
 	}
 
 	public ClassFormatOutput(int size) {
-		super(new AccessibleByteArrayOutputStream(size));
+		this(new AccessibleByteArrayOutputStream(size));
 	}
-
+	public ClassFormatOutput(java.io.OutputStream stream) {
+		super(stream);
+	}
 	public void putU1(int i) throws IOException {
 		// ensure the format of the class file is not
 		// corrupted by writing an incorrect, truncated value.

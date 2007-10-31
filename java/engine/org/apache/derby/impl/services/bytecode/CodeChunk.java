@@ -2,7 +2,7 @@
 
    Derby - Class org.apache.derby.impl.services.bytecode.CodeChunk
 
-   Copyright 1998, 2004 The Apache Software Foundation or its licensors, as applicable.
+   Copyright 1998, 2006 The Apache Software Foundation or its licensors, as applicable.
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -26,8 +26,10 @@ import org.apache.derby.iapi.services.classfile.ClassMember;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
+import org.apache.derby.iapi.services.io.ArrayOutputStream;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 /**
  * This class represents a chunk of code in a CodeAttribute.
@@ -38,7 +40,13 @@ import java.io.IOException;
  * the need to generate a jump around each catch block, which
  * would be a forward reference.
  */
-class CodeChunk {
+final class CodeChunk {
+	
+	/**
+	 * Starting point of the byte code stream in the underlying stream/array.
+	 */
+	private static final int CODE_OFFSET = 8;
+		
 	// The use of ILOAD for the non-integer types is correct.
 	// We have to assume that the appropriate checks/conversions
 	// are defined on math operation results to ensure that
@@ -241,7 +249,13 @@ class CodeChunk {
 		} catch (IOException ioe) {
 		}
 	}
-
+	void addInstrU4(short opcode, int operand) {
+		try {
+		cout.putU1(opcode);
+		cout.putU4(operand);
+		} catch (IOException ioe) {
+		}
+	}
 	void addInstrU1(short opcode, int operand) {
 		try {
 		cout.putU1(opcode);
@@ -309,41 +323,54 @@ class CodeChunk {
 		}
 	}
 
-	/** Add an arbitrary array of bytes */
-	void addChunk(CodeChunk other) {
-		
+	/** Get the current program counter */
+	public int getPC() {
+		return cout.size() + pcDelta;
+	}
+	
+	/**
+	 * The delta between cout.size() and the pc.
+	 * For an initial code chunk this is -8 (CODE_OFFSET)
+	 * since 8 bytes are written.
+	 * For a nested CodeChunk return by insertCodeSpace the delta
+	 * corresponds to the original starting pc.
+	 * @see insetCodeSpace
+	 */
+	private final int pcDelta;
+
+	CodeChunk() {
+        cout = new ClassFormatOutput();
 		try {
-			other.getCout().writeTo(cout);
+			cout.putU2(0); // max_stack, placeholder for now
+			cout.putU2(0); // max_locals, placeholder for now
+			cout.putU4(0); // code_length, placeholder 4 now
 		} catch (IOException ioe) {
 		}
+		pcDelta = - CodeChunk.CODE_OFFSET;
 	}
-
-	/** Get the ClassFormatOutput */
-	ClassFormatOutput getCout() {
-		return cout;
-	}
-
-	/** Get the current PC */
-	public int getRelativePC() {
-		return cout.size() - codeOffset;
-	}
-
-	CodeChunk(boolean main) {
-        cout = new ClassFormatOutput();
-		if (main) {
-			try {
-				cout.putU2(0); // max_stack, placeholder for now
-				cout.putU2(0); // max_locals, placeholder for now
-				cout.putU4(0); // code_length, placeholder 4 now
-			} catch (IOException ioe) {
-			}
-			
-			codeOffset = 8; // just wrote eight bytes
+	
+	/**
+	 * Return a CodeChunk that has limited visibility into
+	 * this CodeChunk. Used when a caller needs to insert instructions
+	 * into an existing stream.
+	 * @param pc
+	 * @param byteCount
+	 * @throws IOException 
+	 */
+	private CodeChunk(CodeChunk main, int pc, int byteCount)
+	{
+		ArrayOutputStream aos =
+			new ArrayOutputStream(main.cout.getData());
+		
+		try {
+			aos.setPosition(CODE_OFFSET + pc);
+			aos.setLimit(byteCount);
+		} catch (IOException e) {
 		}
+		
+		cout = new ClassFormatOutput(aos);
+		pcDelta = pc;
 	}
-
-	/* This is the PC relative to the beginning of this code chunk */
-	private int codeOffset;
 
 	private final ClassFormatOutput cout;
 
@@ -374,8 +401,9 @@ class CodeChunk {
 		codeBytes[3] = (byte)(maxLocals );
 
 		// code_length is in bytes 4-7
-		if (mb != null && codeLength > 65536)
-			mb.cb.addLimitExceeded(mb, "code_length", 65536, codeLength);
+		if (mb != null && codeLength > VMOpcode.MAX_CODE_LENGTH)
+			mb.cb.addLimitExceeded(mb, "code_length",
+					VMOpcode.MAX_CODE_LENGTH, codeLength);
 		codeBytes[4] = (byte)(codeLength >> 24 );
 		codeBytes[5] = (byte)(codeLength >> 16 );
 		codeBytes[6] = (byte)(codeLength >> 8 );
@@ -390,7 +418,7 @@ class CodeChunk {
 	void complete(BCMethod mb, ClassHolder ch,
 			ClassMember method, int maxStack, int maxLocals) {
 
-		int codeLength = getRelativePC();
+		int codeLength = getPC();
 
 		ClassFormatOutput out = cout;
 
@@ -427,5 +455,94 @@ class CodeChunk {
 		fixLengths(mb, maxStack, maxLocals, codeLength);
 		method.addAttribute("Code", out);
 	}
+	
+	/**
+	 * Return the opcode at the given pc.
+	 */
+	short getOpcode(int pc)
+	{
+		return (short) (cout.getData()[CODE_OFFSET + pc] & 0xff);
+	}
+	
+	/**
+	 * Insert room for byteCount bytes after the instruction at pc
+	 * and prepare to replace the instruction at pc. The instruction
+	 * at pc is not modified by this call, space is allocated after it.
+	 * The newly inserted space will be filled with NOP instructions.
+	 * 
+	 * Returns a CodeChunk positioned at pc and available to write
+	 * instructions upto (byteCode + length(existing instruction at pc) bytes.
+	 * 
+	 * This chunk is left correctly positioned at the end of the code
+	 * stream, ready to accept more code. Its pc will have increased by
+	 * additionalBytes.
+	 * 
+	 * It is the responsibility of the caller to patch up any
+	 * branches or gotos.
+	 * 
+	 * @param pc
+	 * @param additionalBytes
+	 * @return
+	 */
+	CodeChunk insertCodeSpace(int pc, int additionalBytes)
+	{
+		short existingOpcode = getOpcode(pc);
+		int lengthOfExistingInstruction;
+		if (existingOpcode == VMOpcode.GOTO_W)
+			lengthOfExistingInstruction = 5;
+		else
+			lengthOfExistingInstruction = 3;
+		
+		
+		if (additionalBytes > 0)
+		{
+			// Size of the current code after this pc.
+			int sizeToMove = (getPC() - pc) - lengthOfExistingInstruction;
 
+			// Increase the code by the number of bytes to be
+			// inserted. These NOPs will be overwritten by the
+			// moved code by the System.arraycopy below.
+			// It's assumed that the number of inserted bytes
+			// is small, one or two instructions worth, so it
+			// won't be a performance issue.
+			for (int i = 0; i < additionalBytes; i++)
+				addInstr(VMOpcode.NOP);
+		
+			// Must get codeBytes here as the array might have re-sized.
+			byte[] codeBytes = cout.getData();
+			
+			int byteOffset = CODE_OFFSET + pc + lengthOfExistingInstruction;
+					
+			
+			// Shift the existing code stream down
+			// pc + 3
+			// Pc + 3 + 5
+			System.arraycopy(
+					codeBytes, byteOffset,
+					codeBytes, byteOffset + additionalBytes,
+					sizeToMove);
+			
+			// Place NOPs in the space just freed by the move.
+			// This is not required, it ias assumed the caller
+			// will overwrite all the bytes they requested, but
+			// to be safe fill in with NOPs rather than leaving code
+			// that could break the verifier.
+			Arrays.fill(codeBytes, byteOffset, byteOffset + additionalBytes,
+					(byte) VMOpcode.NOP);
+		}
+		
+		// The caller must overwrite the original instruction
+		// at pc, thus increase the range of the limit stream
+		// created to include those bytes.
+		additionalBytes += lengthOfExistingInstruction;
+		
+		// Now the caller needs to fill in the instructions
+		// that make up the modified byteCount bytes of bytecode stream.
+		// Return a CodeChunk that can be used for this and
+		// is limited to only those bytes.
+		// The pc of the original code chunk is left unchanged.
+		
+		return new CodeChunk(this, pc, additionalBytes);
+						
+	}
 }
