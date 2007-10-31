@@ -265,19 +265,15 @@ class Conditional {
 		
 		if (branchOpcode == VMOpcode.GOTO)
 		{
-			// Ensure the pc we are jumping to (the current pc)
-			// is within bounds of a valid method *after*
-			// we have added the extra bytes.
-			if ((target_pc + 2) >= VMOpcode.MAX_CODE_LENGTH)
-			{
-				mb.cb.addLimitExceeded(mb, "goto_target",
-						VMOpcode.MAX_CODE_LENGTH, target_pc + 2);
-				
-				// even if we fail continue to generate the correct code
-				// so that the assumptions in the patch up code are not broken.
-			}
-			
-		
+	
+            // The goto could be beyond the code length
+            // supported by the virtual machine: VMOpcode.MAX_CODE_LENGTH
+            // We allow this because later splits may bring the goto
+            // offset to within the required limits. If the goto
+            // still points outside the limits of the JVM then
+            // building the class will fail anyway since the code
+            // size will be too large. So no need to flag an error here.
+            	
 			// Change the GOTO to a GOTO_W, which means
 			// inserting 2 bytes into the stream.
 			CodeChunk mod = chunk.insertCodeSpace(branch_pc, 2);

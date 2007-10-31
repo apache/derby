@@ -32,6 +32,7 @@ import org.apache.derby.iapi.services.classfile.VMOpcode;
 import org.apache.derby.iapi.services.io.ArrayOutputStream;
 
 import java.io.IOException;
+import java.lang.reflect.Modifier;
 import java.util.Arrays;
 
 /**
@@ -733,7 +734,7 @@ final class CodeChunk {
 	void complete(BCMethod mb, ClassHolder ch,
 			ClassMember method, int maxStack, int maxLocals) {
 
-		int codeLength = getPC();
+        int codeLength =  getPC();
 
 		ClassFormatOutput out = cout;
 		
@@ -920,13 +921,14 @@ final class CodeChunk {
         for (; pc < endPc;) {
 
             short opcode = getOpcode(pc);
-
+            
+ 
             int stackDelta = stackWordDelta(ch, pc, opcode);
 
             stack += stackDelta;
             if (stack > maxStack)
                 maxStack = stack;
-
+ 
             int[] cond_pcs = findConditionalPCs(pc, opcode);
             if (cond_pcs != null) {
                 // an else block exists.
@@ -994,8 +996,7 @@ final class CodeChunk {
      * type.
      */
     private static int getDescriptorWordCount(String vmDescriptor) {
-        // System.out.println("vmDescriptor" + vmDescriptor);
-
+ 
         int width;
         if (VMDescriptor.DOUBLE.equals(vmDescriptor))
             width = 2;
@@ -1228,5 +1229,286 @@ final class CodeChunk {
         ret[5] = end_pc;
 
         return ret;
+    }
+    
+    /**
+     * Attempt to split the current method by pushing a chunk of
+     * its code into a sub-method. The starting point of the split
+     * (split_pc) must correspond to a stack depth of zero. It is the
+     * reponsibility of the caller to ensure this.
+     * Split is only made if there exists a chunk of code starting at
+     * pc=split_pc, whose stack depth upon termination is zero.
+     * The method will try to split a code section greater than
+     * optimalMinLength but may split earlier if no such block exists.
+     * <P>
+     * The method is aimed at splitting methods that contain
+     * many independent statements.
+     * <P>
+     * If a split is possible this method will perform the split and
+     * create a void sub method, and move the code into the sub-method
+     * and setup this method to call the sub-method before continuing.
+     * This method's max stack and current pc will be correctly set
+     * as though the method had just been created.
+     * 
+     * @param mb Method for this chunk.
+     * @param ch Class definition
+     * @param codeLength codeLength to check
+     * @param optimalMinLength minimum length required for split
+     */
+    final int splitZeroStack(BCMethod mb, ClassHolder ch, final int split_pc,
+            final int codeLength, final int optimalMinLength) {
+        int stack = 0;
+
+        // maximum possible split seen that is less than
+        // the minimum.
+        int possibleSplitLength = -1;
+
+        // do not split until at least this point (inclusive)
+        // used to ensure no split occurs in the middle of
+        // a conditional.
+        int outerConditionalEnd_pc = -1;
+
+        int end_pc = split_pc + codeLength;
+        for (int pc = split_pc; pc < end_pc;) {
+
+            short opcode = getOpcode(pc);
+
+            int stackDelta = stackWordDelta(ch, pc, opcode);
+
+            stack += stackDelta;
+
+            // Cannot split a conditional but need to calculate
+            // the stack depth at the end of the conditional.
+            // Each path through the conditional will have the
+            // same stack depth.
+            int[] cond_pcs = findConditionalPCs(pc, opcode);
+            if (cond_pcs != null) {
+                // an else block exists, skip the then block.
+                if (cond_pcs[3] != -1) {
+                    pc = cond_pcs[3];
+                    continue;
+                }
+
+                if (SanityManager.DEBUG) {
+                    if (outerConditionalEnd_pc != -1) {
+                        if (cond_pcs[5] >= outerConditionalEnd_pc)
+                            SanityManager.THROWASSERT("NESTED CONDITIONALS!");
+                    }
+                }
+
+                if (outerConditionalEnd_pc == -1) {
+                    outerConditionalEnd_pc = cond_pcs[5];
+                }
+            }
+
+            pc += instructionLength(opcode);
+
+            // Don't split in the middle of a conditional
+            if (outerConditionalEnd_pc != -1) {
+                if (pc > outerConditionalEnd_pc) {
+                    // passed the outermost conditional
+                    outerConditionalEnd_pc = -1;
+                }
+                continue;
+            }
+
+            if (stack != 0)
+                continue;
+
+            int splitLength = pc - split_pc;
+
+            if (splitLength < optimalMinLength) {
+                // record we do have a possible split.
+                possibleSplitLength = splitLength;
+                continue;
+            }
+
+            // no point splitting to a method bigger
+            // than the VM can handle. Save one for
+            // return instruction.
+            if (splitLength > BCMethod.CODE_SPLIT_LENGTH - 1) {
+                if (possibleSplitLength == -1)
+                    return -1;
+
+                // Decide if the earlier possible split is
+                // worth it. 100 is an arbitary number,
+                // a real low limit would be the number of
+                // bytes of instructions required to call
+                // the sub-method, four I think.
+                if (possibleSplitLength < 100)
+                    return -1;
+
+                // OK go with the earlier split
+                splitLength = possibleSplitLength;
+
+            }
+
+            // Yes, we can split this big method into a smaller method!!
+
+            BCMethod subMethod = startSubMethod(mb, "void", split_pc,
+                    splitLength);
+
+            CodeChunk subChunk = subMethod.myCode;
+
+            byte[] codeBytes = cout.getData();
+
+            // the code to be moved into the sub method
+            // as a block. This will correctly increase the
+            // program counter.
+            try {
+                subChunk.cout.write(codeBytes, CODE_OFFSET + split_pc,
+                        splitLength);
+            } catch (IOException ioe) {
+                // writing to a byte array
+            }
+
+            // Just cause the sub-method to return,
+            // fix up its maxStack and then complete it.
+            subChunk.addInstr(VMOpcode.RETURN);
+            subMethod.maxStack = subChunk.findMaxStack(ch, 0, subChunk.getPC());
+            subMethod.complete();
+
+            return removePushedCode(mb, ch, subMethod, split_pc, splitLength,
+                    codeLength);
+        }
+        return -1;
+    }
+
+    /**
+     * Start a sub method that we will split the portion of our current code to,
+     * starting from start_pc and including codeLength bytes of code.
+     * 
+     * Return a BCMethod obtained from BCMethod.getNewSubMethod with the passed
+     * in return type and same parameters as mb if the code block to be moved
+     * uses parameters.
+     */
+    private BCMethod startSubMethod(BCMethod mb, String returnType,
+            int split_pc, int codeLength) {
+
+        boolean needParameters = usesParameters(mb, split_pc, codeLength);
+
+        return mb.getNewSubMethod(returnType, needParameters);
+    }
+
+    /**
+     * Does a section of code use parameters.
+     * Any load, exception ALOAD_0 in an instance method, is
+     * seen as using parameters, as this complete byte code
+     * implementation does not use local variables.
+     * 
+     */
+    private boolean usesParameters(BCMethod mb, int pc, int codeLength) {
+
+        // does the method even have parameters?
+        if (mb.parameters == null)
+            return false;
+
+        boolean isStatic = (mb.myEntry.getModifier() & Modifier.STATIC) != 0;
+
+        int endPc = pc + codeLength;
+
+        for (; pc < endPc;) {
+            short opcode = getOpcode(pc);
+            switch (opcode) {
+            case VMOpcode.ILOAD_0:
+            case VMOpcode.LLOAD_0:
+            case VMOpcode.FLOAD_0:
+            case VMOpcode.DLOAD_0:
+                return true;
+
+            case VMOpcode.ALOAD_0:
+                if (isStatic)
+                    return true;
+                break;
+
+            case VMOpcode.ILOAD_1:
+            case VMOpcode.LLOAD_1:
+            case VMOpcode.FLOAD_1:
+            case VMOpcode.DLOAD_1:
+            case VMOpcode.ALOAD_1:
+                return true;
+
+            case VMOpcode.ILOAD_2:
+            case VMOpcode.LLOAD_2:
+            case VMOpcode.FLOAD_2:
+            case VMOpcode.DLOAD_2:
+            case VMOpcode.ALOAD_2:
+                return true;
+
+            case VMOpcode.ILOAD_3:
+            case VMOpcode.LLOAD_3:
+            case VMOpcode.FLOAD_3:
+            case VMOpcode.DLOAD_3:
+            case VMOpcode.ALOAD_3:
+                return true;
+
+            case VMOpcode.ILOAD:
+            case VMOpcode.LLOAD:
+            case VMOpcode.FLOAD:
+            case VMOpcode.DLOAD:
+            case VMOpcode.ALOAD:
+                return true;
+            default:
+                break;
+
+            }
+            pc += instructionLength(opcode);
+        }
+        return false;
+    }
+
+    /**
+     * Remove a block of code from this method that was
+     * pushed into a sub-method and call the sub-method.
+     * 
+     * Returns the pc of this method just after the call
+     * to the sub-method.
+     
+     * @param mb My method
+     * @param ch My class
+     * @param subMethod Sub-method code was pushed into
+     * @param split_pc Program counter the split started at
+     * @param splitLength Length of code split
+     * @param codeLength Length of code before split
+     */
+    private int removePushedCode(BCMethod mb, ClassHolder ch,
+            BCMethod subMethod, int split_pc, int splitLength, int codeLength) {
+        // now need to fix up this method, create
+        // a new CodeChunk just to be clearer than
+        // trying to modify this chunk directly.
+        CodeChunk replaceChunk = new CodeChunk();
+        mb.myCode = replaceChunk;
+        mb.maxStack = 0;
+
+        byte[] codeBytes = cout.getData();
+
+        // write any existing code before the split point
+        // into the replacement chunk.
+        if (split_pc != 0) {
+            try {
+                replaceChunk.cout.write(codeBytes, CODE_OFFSET, split_pc);
+            } catch (IOException ioe) {
+                // writing to a byte array
+            }
+        }
+
+        // Call the sub method, will write into replaceChunk.
+        mb.callSubMethod(subMethod);
+
+        int postSplit_pc = replaceChunk.getPC();
+
+        // Write the code remaining in this method into the replacement chunk
+
+        int remainingCodeLength = codeLength - splitLength;
+        try {
+            replaceChunk.cout.write(codeBytes, CODE_OFFSET + split_pc
+                    + splitLength, remainingCodeLength);
+        } catch (IOException ioe) {
+            // writing to a byte array
+        }
+
+        mb.maxStack = replaceChunk.findMaxStack(ch, 0, replaceChunk.getPC());
+
+        return postSplit_pc;
     }
 }
