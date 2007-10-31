@@ -1626,21 +1626,27 @@ public class SystemProcedures  {
     /**
      * Get the connection level authorization for
      * a specific user - SYSCS_UTIL.SYSCS_GET_USER_ACCESS.
+     * 
+     * @param userName name of the user in its normal form (not a SQL identifier).
+
      */
     public static String SYSCS_GET_USER_ACCESS(String userName)
         throws SQLException
     {
         try {
-            String sqlUser = IdUtil.getUserAuthorizationId(userName);
             
+            if (userName == null)
+                throw StandardException.newException(SQLState.AUTH_INVALID_USER_NAME,
+                        userName);
+           
             String fullUserList =
                 SYSCS_GET_DATABASE_PROPERTY(Property.FULL_ACCESS_USERS_PROPERTY);
-            if (IdUtil.idOnList(sqlUser, fullUserList))
+            if (IdUtil.idOnList(userName, fullUserList))
                 return Property.FULL_ACCESS;
             
             String readOnlyUserList =
                 SYSCS_GET_DATABASE_PROPERTY(Property.READ_ONLY_ACCESS_USERS_PROPERTY);
-            if (IdUtil.idOnList(sqlUser, readOnlyUserList))
+            if (IdUtil.idOnList(userName, readOnlyUserList))
                 return Property.READ_ONLY_ACCESS;
             
             String defaultAccess = 

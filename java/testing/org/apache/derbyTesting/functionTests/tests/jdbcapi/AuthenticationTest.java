@@ -223,6 +223,7 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         for (int i = 1; i < USERS.length; i++)
         {          
             String jdbcUserName = USERS[i];
+            
             boolean delimited = jdbcUserName.charAt(0) == '"';
             String normalUserName;
             if (delimited)
@@ -254,8 +255,8 @@ public class AuthenticationTest extends BaseJDBCTestCase {
             connUser.close();
             
             psGetAccess.setString(1, normalUserName);
-            //JDBC.assertSingleValueResultSet(psGetAccess.executeQuery(),
-            //        "READONLYACCESS");
+            JDBC.assertSingleValueResultSet(psGetAccess.executeQuery(),
+                    "READONLYACCESS");
             commit();
             
             // clear the property.
@@ -269,8 +270,8 @@ public class AuthenticationTest extends BaseJDBCTestCase {
             connUser.close(); 
             
             psGetAccess.setString(1, normalUserName);
-            //JDBC.assertSingleValueResultSet(psGetAccess.executeQuery(),
-            //        "FULLACCESS");
+            JDBC.assertSingleValueResultSet(psGetAccess.executeQuery(),
+                    "FULLACCESS");
             commit();
             
             
@@ -290,8 +291,8 @@ public class AuthenticationTest extends BaseJDBCTestCase {
             connUser.close();
             
             psGetAccess.setString(1, normalUserName);
-            //JDBC.assertSingleValueResultSet(psGetAccess.executeQuery(),
-            //        "READONLYACCESS");
+            JDBC.assertSingleValueResultSet(psGetAccess.executeQuery(),
+                    "READONLYACCESS");
             commit();           
 
         }
@@ -732,19 +733,19 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         
         PreparedStatement psGetAccess = conn1.prepareStatement(
                 "VALUES SYSCS_UTIL.SYSCS_GET_USER_ACCESS(?)");
-        psGetAccess.setString(1, "jamie");
+        psGetAccess.setString(1, "JAMIE");
         JDBC.assertSingleValueResultSet(psGetAccess.executeQuery(), "FULLACCESS");
         
         psGetAccess.setString(1, "DAN");
         JDBC.assertSingleValueResultSet(psGetAccess.executeQuery(), "FULLACCESS");
         
-        psGetAccess.setString(1, "system");
+        psGetAccess.setString(1, "SYSTEM");
         JDBC.assertSingleValueResultSet(psGetAccess.executeQuery(), "FULLACCESS");
         
         psGetAccess.setString(1, "AMES");
         JDBC.assertSingleValueResultSet(psGetAccess.executeQuery(), "READONLYACCESS");
         
-        psGetAccess.setString(1, "mickEy");
+        psGetAccess.setString(1, "MICKEY");
         JDBC.assertSingleValueResultSet(psGetAccess.executeQuery(), "READONLYACCESS");
 
         // unknown user
@@ -765,13 +766,13 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         psGetAccess.setString(1, "AMES");
         JDBC.assertSingleValueResultSet(psGetAccess.executeQuery(), "FULLACCESS");
         
-        psGetAccess.setString(1, "miCKEY");
+        psGetAccess.setString(1, "MICKEY");
         JDBC.assertSingleValueResultSet(psGetAccess.executeQuery(), "READONLYACCESS");
-        psGetAccess.setString(1, "jamie");
+        psGetAccess.setString(1, "JAMIE");
         JDBC.assertSingleValueResultSet(psGetAccess.executeQuery(), "FULLACCESS");       
         psGetAccess.setString(1, "DAN");
         JDBC.assertSingleValueResultSet(psGetAccess.executeQuery(), "FULLACCESS");        
-        psGetAccess.setString(1, "system");
+        psGetAccess.setString(1, "SYSTEM");
         JDBC.assertSingleValueResultSet(psGetAccess.executeQuery(), "FULLACCESS");
 
         // and change AMES back again
@@ -782,13 +783,13 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         psGetAccess.setString(1, "AMES");
         JDBC.assertSingleValueResultSet(psGetAccess.executeQuery(), "READONLYACCESS");
         
-        psGetAccess.setString(1, "miCKEY");
+        psGetAccess.setString(1, "MICKEY");
         JDBC.assertSingleValueResultSet(psGetAccess.executeQuery(), "READONLYACCESS");
-        psGetAccess.setString(1, "jamie");
+        psGetAccess.setString(1, "JAMIE");
         JDBC.assertSingleValueResultSet(psGetAccess.executeQuery(), "FULLACCESS");       
         psGetAccess.setString(1, "DAN");
         JDBC.assertSingleValueResultSet(psGetAccess.executeQuery(), "FULLACCESS");        
-        psGetAccess.setString(1, "system");
+        psGetAccess.setString(1, "SYSTEM");
         JDBC.assertSingleValueResultSet(psGetAccess.executeQuery(), "FULLACCESS");
 
         // add a new users in
@@ -903,13 +904,7 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         CallableStatement csSetAccess = conn1.prepareCall(
             "CALL SYSCS_UTIL.SYSCS_SET_USER_ACCESS(?, ?)"); 
         
-        // Clear out the properties to ensure we start afresh
-        setDatabaseProperty("derby.database.fullAccessUsers", 
-                null, conn1);
-        setDatabaseProperty("derby.database.readOnlyAccessUsers", 
-                null, conn1);
-        
-        csSetAccess.setString(1, "dan");
+        csSetAccess.setString(1, "DAN");
         csSetAccess.setString(2, "FULLACCESS");
         csSetAccess.execute();
 
