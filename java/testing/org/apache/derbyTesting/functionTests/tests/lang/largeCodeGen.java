@@ -48,9 +48,14 @@ public class largeCodeGen
         createTestTable(con);
         testLogicalOperators(con);
         testInClause(con);
-        testUnions(con);
-        con.commit();
-        con.close();
+	con.rollback();
+	con.close();
+	// need to make a new connetion for unions as 
+	// 99000 parameters in the in clause causes loss of connection.
+	Connection con2 = ij.startJBMS();
+        testUnions(con2);
+        con2.rollback();
+        con2.close();
     }
     
     private static void createTestTable(Connection con) throws SQLException
@@ -162,11 +167,12 @@ public class largeCodeGen
 	  
 		// DERBY-739 raised number of parameters from 2700 to 3400
         // svn 372388 trunk - passed @ 3400
-        // fixes for DERBY-766 to split methods with individual statements
-        // bumps the limit to 98,000 parameters.
-        testInClause(con, 3400);
-		 for (int count = 97000; count <= 200000 ; count += 1000)
+	    testInClause(con,3400);
+		 for (int count = 98000; count <= 100000 ; count += 1000)
 		 {
+		     // In 10.1 when the query fails at 99000 parameter we see 
+		     // a ClassCastException in the derby.log and lose 
+		     //the connection. This is different than trunk.
 			 // keep testing until it fails.
 			 if (testInClause(con, count))
 			 	break;
@@ -217,6 +223,7 @@ public class largeCodeGen
 		{
 			createView.append(" UNION ALL (SELECT * FROM t0 )");
 		}
+		String createViewString = createView.toString();
 		//System.out.println(createViewString);
 		stmt.executeUpdate(createView.toString());
 		
