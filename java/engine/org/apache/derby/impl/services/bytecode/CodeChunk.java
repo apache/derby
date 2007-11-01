@@ -497,6 +497,15 @@ final class CodeChunk {
 	
 	};
 	
+    /**
+     * Assume an IOException means some limit of the class file
+     * format was hit
+     * 
+     */
+    private void limitHit(IOException ioe)
+    {
+        cb.addLimitExceeded(ioe.toString());
+    }
 	
 	
 	/**
@@ -507,6 +516,7 @@ final class CodeChunk {
 		try {
 		cout.putU1(opcode);
 		} catch (IOException ioe) {
+            limitHit(ioe);
 		}
 
 		if (SanityManager.DEBUG) {			
@@ -520,10 +530,12 @@ final class CodeChunk {
 	 * Add an instruction that has a 16 bit operand.
 	 */
 	void addInstrU2(short opcode, int operand) {
+        
 		try {
 		cout.putU1(opcode);
 		cout.putU2(operand);
 		} catch (IOException ioe) {
+            limitHit(ioe);
 		}
 
 		if (SanityManager.DEBUG) {			
@@ -541,6 +553,7 @@ final class CodeChunk {
 		cout.putU1(opcode);
 		cout.putU4(operand);
 		} catch (IOException ioe) {
+            limitHit(ioe);
 		}
 		if (SanityManager.DEBUG) {			
 			if (OPCODE_ACTION[opcode][1] != 5)
@@ -558,6 +571,7 @@ final class CodeChunk {
 		cout.putU1(opcode);
 		cout.putU1(operand);
 		} catch (IOException ioe) {
+            limitHit(ioe);
 		}
 
 		// Only debug code from here.
@@ -613,6 +627,7 @@ final class CodeChunk {
 		cout.putU1(operand2);
 		cout.putU1(operand3);
 		} catch (IOException ioe) {
+            limitHit(ioe);
 		}
 		if (SanityManager.DEBUG) {			
 			if (OPCODE_ACTION[opcode][1] != 5)
@@ -653,14 +668,22 @@ final class CodeChunk {
 	 * @see insetCodeSpace
 	 */
 	private final int pcDelta;
+    
+    /**
+     * The class we are generating code for, used to indicate that
+     * some limit was hit during code generation.
+     */
+    final BCClass       cb;
 
-	CodeChunk() {
+	CodeChunk(BCClass cb) {
+        this.cb = cb;
         cout = new ClassFormatOutput();
 		try {
 			cout.putU2(0); // max_stack, placeholder for now
 			cout.putU2(0); // max_locals, placeholder for now
 			cout.putU4(0); // code_length, placeholder 4 now
 		} catch (IOException ioe) {
+            limitHit(ioe);
 		}
 		pcDelta = - CodeChunk.CODE_OFFSET;
 	}
@@ -671,10 +694,10 @@ final class CodeChunk {
 	 * into an existing stream.
 	 * @param pc
 	 * @param byteCount
-	 * @throws IOException 
 	 */
 	private CodeChunk(CodeChunk main, int pc, int byteCount)
 	{
+        this.cb = main.cb;
 		ArrayOutputStream aos =
 			new ArrayOutputStream(main.cout.getData());
 		
@@ -682,6 +705,7 @@ final class CodeChunk {
 			aos.setPosition(CODE_OFFSET + pc);
 			aos.setLimit(byteCount);
 		} catch (IOException e) {
+            limitHit(e);
 		}
 		
 		cout = new ClassFormatOutput(aos);
@@ -705,20 +729,20 @@ final class CodeChunk {
 
 		// max_stack is in bytes 0-1
 		if (mb != null && maxStack > 65535)
-			mb.cb.addLimitExceeded(mb, "max_stack", 65535, maxStack);
+			cb.addLimitExceeded(mb, "max_stack", 65535, maxStack);
 			
 		codeBytes[0] = (byte)(maxStack >> 8 );
 		codeBytes[1] = (byte)(maxStack );
 
 		// max_locals is in bytes 2-3
 		if (mb != null && maxLocals > 65535)
-			mb.cb.addLimitExceeded(mb, "max_locals", 65535, maxLocals);
+			cb.addLimitExceeded(mb, "max_locals", 65535, maxLocals);
 		codeBytes[2] = (byte)(maxLocals >> 8 );
 		codeBytes[3] = (byte)(maxLocals );
 
 		// code_length is in bytes 4-7
 		if (mb != null && codeLength > VMOpcode.MAX_CODE_LENGTH)
-			mb.cb.addLimitExceeded(mb, "code_length",
+			cb.addLimitExceeded(mb, "code_length",
 					VMOpcode.MAX_CODE_LENGTH, codeLength);
 		codeBytes[4] = (byte)(codeLength >> 24 );
 		codeBytes[5] = (byte)(codeLength >> 16 );
@@ -766,6 +790,7 @@ final class CodeChunk {
 				// attributes is empty, a 0-element array.
 			}
 		} catch (IOException ioe) {
+            limitHit(ioe);
 		}
 
 		fixLengths(mb, maxStack, maxLocals, codeLength);
@@ -1375,7 +1400,7 @@ final class CodeChunk {
                 subChunk.cout.write(codeBytes, CODE_OFFSET + split_pc,
                         splitLength);
             } catch (IOException ioe) {
-                // writing to a byte array
+                limitHit(ioe);
             }
 
             // Just cause the sub-method to return,
@@ -1492,7 +1517,7 @@ final class CodeChunk {
         // now need to fix up this method, create
         // a new CodeChunk just to be clearer than
         // trying to modify this chunk directly.
-        CodeChunk replaceChunk = new CodeChunk();
+        CodeChunk replaceChunk = new CodeChunk(mb.cb);
         mb.myCode = replaceChunk;
         mb.maxStack = 0;
 
@@ -1504,7 +1529,7 @@ final class CodeChunk {
             try {
                 replaceChunk.cout.write(codeBytes, CODE_OFFSET, split_pc);
             } catch (IOException ioe) {
-                // writing to a byte array
+                limitHit(ioe);
             }
         }
 
@@ -1520,12 +1545,338 @@ final class CodeChunk {
             replaceChunk.cout.write(codeBytes, CODE_OFFSET + split_pc
                     + splitLength, remainingCodeLength);
         } catch (IOException ioe) {
-            // writing to a byte array
+            limitHit(ioe);
         }
 
+        // Finding the max stack requires the class format to
+        // still be valid. If we have blown the number of constant
+        // pool entries then we can no longer guarantee that indexes
+        // into the constant pool in the code stream are valid.
+        if (cb.limitMsg != null)
+            return -1;
+                
         mb.maxStack = replaceChunk.findMaxStack(ch, 0, replaceChunk.getPC());
 
         return postSplit_pc;
+    }
+    
+    /**
+     * Split an expression out of a large method into its own
+     * sub-method.
+     * <P>
+     * Method call expressions are of the form:
+     * <UL>
+     * <LI> expr.method(args) -- instance method call
+     * <LI> method(args) -- static method call
+     * </UL>
+     * Two special cases of instance method calls will be handled
+     * by the first incarnation of splitExpressionOut. 
+     * three categories:
+     * <UL>
+     * <LI>this.method(args)
+     * <LI>this.getter().method(args)
+     * </UL>
+     * These calls are choosen as they are easier sub-cases
+     * and map to the code generated for SQL statements.
+     * Future coders can expand the method to cover more cases.
+     * <P>
+     * This method will split out such expressions in sub-methods
+     * and replace the original code with a call to that submethod.
+     * <UL>
+     * <LI>this.method(args) ->> this.sub1([parameters])
+     * <LI>this.getter().method(args) ->> this.sub1([parameters])
+     * </UL>
+     * The assumption is of course that the call to the sub-method
+     * is much smaller than the code it replaces.
+     * <P>
+     * Looking at the byte code for such calls they would look like
+     * (for an example three argument method):
+     * <code>
+     * this arg1 arg2 arg3 INVOKE // this.method(args)
+     * this INVOKE arg1 arg2 arg3 INVOKE // this.getter().metod(args)
+     * </code>
+     * The bytecode for the arguments can be arbitary long and
+     * consist of expressions, typical Derby code for generated
+     * queries is deeply nested method calls.
+     * <BR>
+     * If none of the arguments requred the parameters passed into
+     * the method, then in both cases the replacement bytecode
+     * would look like:
+     * <code>
+     * this.sub1();
+     * </code>
+     * Parameter handling is just as in the method splitZeroStack().
+     * <P>
+     * Because the VM is a stack machine the original byte code
+     * sequences are self contained. The stack at the start of
+     * is sequence is N and at the end (after the method call) will
+     * be:
+     * <UL>
+     * <LI> N - void method
+     * <LI> N + 1 - method returning a single word
+     * <LI> N + 2 - method returning a double word (java long or double)
+     * </UL>
+     * This code will handle the N+1 and  N+2 cases, the typical
+     * ones for generated code.
+     * <BR>
+     * The code is self contained because in general the byte code
+     * for the arguments will push and pop values but never drop
+     * below the stack value at the start of the byte code sequence.
+     * E.g. in the examples the stack before the first arg will be
+     * N+1 (the objectref for the method call) and at the end of the
+     * byte code for arg1 will be N+2 or N+3 depending on if arg1 is
+     * a single or double word argument. During the execution of
+     * the byte code the stack may have had many arguments pushed
+     * and popped, but will never have dropped below N+1. Thus the
+     * code for arg1 is independent of the stack's previous values
+     * and is self contained. This self-containment then extends to
+     * all the arguements, the method call itself and pushing the
+     * objectref for the method call, thus the complete
+     * sequence is self-contained.
+     * <BR>
+     * The self-containment breaks in a few cases, take the simple
+     * method call this.method(3), the byte code for this could be:
+     * <code>
+     * push3 this swap invoke
+     * </code>
+     * In this case the byte code for arg1 (swap) is not self-contained
+     * and relies on earlier stack values. The set of instructions
+     * that break the self-containment are limited and thus can be
+     * checked for easily.
+     * <P>
+     * How to identify "self-contained blocks of code".
+     * <BR>
+     * We walk through the byte code and maintain a history of
+     * the program counter when the stack changed. If a word
+     * was pushed by an opcode that does not depend on previous
+     * stack values the current program counter is recorded
+     * otherwise -1 is set to indicate stack value may depend
+     * on previous stack values.
+     * <code>
+     * pcDepth[N] = 45
+     * pcDepth[N+1] = -1
+     * pcDepth[N+2] = 52
+     * </code>
+     * <BR>
+     * The pcDepth represents a program counter that caused
+     * the stack to reach that depth and is independent of
+     * previous stack entries. Initially a very limited
+     * number of opcodes are supported as independent.
+     * <BR>
+     * If the instruction that caused the stack decrease
+     * is an invoke byte code that matches what we are looking for
+     * then a determination begins as to if its calling sequence
+     * is self-contained and should it be split out into a sub-method.
+     * The information with the instruction allows us to find
+     * the stack-depth corresponding to the instance for the call.
+     * The depth, from the pcDepth array allows us to find the
+     * pc and instruction that pushed the instance. It can then be
+     * determined the code to generate the instance is this
+     * or this.getter(). 
+     * <BR>
+     * If the block is self-contained then it can be split, following
+     * similar logic to splitZeroStack().
+     *  
+     *  <P>
+     *  WORK IN PROGRESS - Incremental development
+     *  <BR>
+     *  Currently just walks the method maintaining the
+     *  pcByDepth array and identifies potential blocks
+     *  to splt. Does not perform any split.
+     *  Not called by submitted code. Tested with local
+     *  changes from calls in BCMethod.
+     *  
+      */
+    final int splitExpressionOut(BCMethod mb, ClassHolder ch,
+            final int codeLength, final int optimalMinLength,
+            int maxStack)
+    {
+        // program counter for the instruction that
+        // made the stack reach the given stack depth.
+        int[] pcByDepth = new int[maxStack+1];
+        Arrays.fill(pcByDepth, -1);
+        pcByDepth[0] = 0;
+        
+        int stack = 0;
+               
+        //TODO: this conditional handling is copied from
+        //the splitZeroStack code, need to check to see
+        // how it fits with the expression logic.
+        // do not split until at least this point (inclusive)
+        // used to ensure no split occurs in the middle of
+        // a conditional.
+        int outerConditionalEnd_pc = -1;  
+
+        int end_pc = 0 + codeLength;
+        for (int pc = 0; pc < end_pc;) {
+
+            short opcode = getOpcode(pc);
+
+            int stackDelta = stackWordDelta(ch, pc, opcode);
+            
+            stack += stackDelta;
+            
+            // Cannot split a conditional but need to calculate
+            // the stack depth at the end of the conditional.
+            // Each path through the conditional will have the
+            // same stack depth.
+            int[] cond_pcs = findConditionalPCs(pc, opcode);
+            if (cond_pcs != null) {
+                // an else block exists, skip the then block.
+                if (cond_pcs[3] != -1) {
+                    pc = cond_pcs[3];
+                    continue;
+                }
+                
+                if (SanityManager.DEBUG)
+                {
+                    if (outerConditionalEnd_pc != -1)
+                    {
+                        if (cond_pcs[5] >= outerConditionalEnd_pc)
+                            SanityManager.THROWASSERT("NESTED CONDITIONALS!");
+                    }
+                }
+
+                if (outerConditionalEnd_pc == -1)
+                {
+                    outerConditionalEnd_pc = cond_pcs[5];
+                }
+            }
+                       
+            pc += instructionLength(opcode);
+            
+            // Don't split in the middle of a conditional
+            if (outerConditionalEnd_pc != -1) {
+                if (pc > outerConditionalEnd_pc) {
+                    // passed the outermost conditional
+                    outerConditionalEnd_pc = -1;
+                }
+                continue;
+            }
+
+            // Set up independent points.
+            // 
+            // Code in this switch either
+            // 1) 'break's out not changing anything
+            // to indicate the instruction left the
+            // stack in such that its independence
+            // at the current stack level is left unchanged.
+            //
+            // 2) Marks the opcode_pc as the independent
+            // start point for the current stack depth.
+            //
+            // 3) marks the current stack depth as not
+            // having an independent start point. In some cases
+            // that may be a false assertion as it's a fail safe
+            // system. Only a small defined set of instructions
+            // are handled as valid starting points. More development
+            // and thought can be put into handling more cases as required.
+            // The 'this' ALOAD_0 instruction will cover most cases.
+            
+            int opcode_pc = pc - instructionLength(opcode);
+            switch (opcode)
+            {
+            // Independent instructions that do not modify the stack
+            case VMOpcode.NOP: 
+            	break;
+            	
+            // Independent instructions that push one value
+            case VMOpcode.ALOAD_0: // push 'this'
+            	pcByDepth[stack] = opcode_pc;
+            	break;
+
+            case VMOpcode.INVOKEINTERFACE:
+            case VMOpcode.INVOKEVIRTUAL:
+            {
+            	//   ...,objectref[,word]*
+            	//   
+            	// => ...
+            	// => ...,word
+            	// => ...,word1,word2
+            	
+                // Width of the value returned by the method call.
+                String vmDescriptor = getTypeDescriptor(ch, opcode_pc);
+                int width = CodeChunk.getDescriptorWordCount(vmDescriptor);
+     
+                // Need to determine the pc of the
+            	// instruction that pushed the objectref
+            	// for the method call. Three cases depending
+            	// on the return type:
+            	// 1) void method
+            	//     pcDepth[stack + 1]
+            	// 2) returns single word
+            	//     pcDepth[stack]
+            	// 3) returns double word
+            	//     pcDepth[stack - 1]
+                
+                // Special case of zero arguments
+                // and returning an single word value.
+                // In this case most likely the code
+                // block to the objectref is not
+                // worth splitting, but it also
+                // does not affect the independence
+                // of the current stack depth.
+                // If the objectref was independent
+                // then the current stack value will
+                // be. This is looking
+                // for the case of this.getXXXFactory().
+                //
+                // 
+                // objectref is popped and single word
+                // value pushed by method call, so
+                // stackDelta must be zero.
+                if (stackDelta == 0 && width == 1)
+                {
+                	break;
+                }
+                
+                int stackDepthForObjectref = stack + (1 - width);
+                
+                // Look for an starting point that is independent
+                // starting at the objectref and working backwards
+                // in the code by looking for program counters
+                // that pushed an independent value.
+                int selfContainedBlockStart = -1;
+                for (int sd = stackDepthForObjectref; sd >= 0; sd--)
+                {
+                	int pcStart = pcByDepth[sd];
+                	
+                	// not a independent value
+                	if (pcStart == -1)
+                		continue;
+                	
+                	// found a suitable block if
+                	if ((pc - pcStart) >= optimalMinLength)
+                	{
+                		selfContainedBlockStart = pcStart;
+                		break;
+                	}
+                }
+            	
+            	// Did we find an independent starting pc
+            	if (selfContainedBlockStart != -1)
+            	{     
+            		// TODO: actual extract & split
+             	    return -1;
+            	}
+            	pcByDepth[stack] = -1;
+            	if (width == 2)
+            		pcByDepth[stack - 1] = -1;
+            	break;
+              }
+               //TODO: work on splits.
+              default:
+            	// assume the instruction is not independent
+            	// (fail-safe)
+            	pcByDepth[stack] = -1;
+                // account for opcodes pushing longs/doubles.
+                if (stackDelta == 2)
+                	pcByDepth[stack - 1] = -1;
+                break;
+            }   	
+       }
+            
+        return -1;
     }
     
     /**
@@ -1548,4 +1899,150 @@ final class CodeChunk {
             return false;
         }        
     }
+    
+    /*
+    final int splitNonZeroStack(BCMethod mb, ClassHolder ch,
+            final int codeLength, final int optimalMinLength,
+            int maxStack) {
+        
+        // program counter for the instruction that
+        // made the stack reach the given stack depth.
+        int[] stack_pcs = new int[maxStack+1];
+        Arrays.fill(stack_pcs, -1);
+        
+        int stack = 0;
+        
+        // maximum possible split seen that is less than
+        // the minimum.
+        int possibleSplitLength = -1;
+        
+        System.out.println("NZ SPLIT + " + mb.getName());
+
+        // do not split until at least this point (inclusive)
+        // used to ensure no split occurs in the middle of
+        // a conditional.
+        int outerConditionalEnd_pc = -1;
+
+        int end_pc = 0 + codeLength;
+        for (int pc = 0; pc < end_pc;) {
+
+            short opcode = getOpcode(pc);
+
+            int stackDelta = stackWordDelta(ch, pc, opcode);
+            
+            stack += stackDelta;
+            
+            // Cannot split a conditional but need to calculate
+            // the stack depth at the end of the conditional.
+            // Each path through the conditional will have the
+            // same stack depth.
+            int[] cond_pcs = findConditionalPCs(pc, opcode);
+            if (cond_pcs != null) {
+                // an else block exists, skip the then block.
+                if (cond_pcs[3] != -1) {
+                    pc = cond_pcs[3];
+                    continue;
+                }
+                
+                if (SanityManager.DEBUG)
+                {
+                    if (outerConditionalEnd_pc != -1)
+                    {
+                        if (cond_pcs[5] >= outerConditionalEnd_pc)
+                            SanityManager.THROWASSERT("NESTED CONDITIONALS!");
+                    }
+                }
+
+                if (outerConditionalEnd_pc == -1)
+                {
+                    outerConditionalEnd_pc = cond_pcs[5];
+                }
+            }
+                       
+            pc += instructionLength(opcode);
+            
+            // Don't split in the middle of a conditional
+            if (outerConditionalEnd_pc != -1) {
+                if (pc > outerConditionalEnd_pc) {
+                    // passed the outermost conditional
+                    outerConditionalEnd_pc = -1;
+                }
+                continue;
+            }
+            
+            if (stackDelta == 0)
+                continue;
+
+            // Only split when the stack is having items popped
+            if (stackDelta > 0)
+            {
+                // pushing double word, clear out a
+                if (stackDelta == 2)
+                    stack_pcs[stack - 1] = pc;
+                stack_pcs[stack] = pc;
+                continue;
+            }
+            
+            int opcode_pc = pc - instructionLength(opcode);
+            
+            // Look for specific opcodes that have the capability
+            // of having a significant amount of code in a self
+            // contained block.
+            switch (opcode)
+            {
+            // this.method(A) construct
+            //  ...         -- stack N
+            //  push this -- stack N+1
+            //  push args -- stack N+1+A
+            //  call method -- stack N+R (R=0,1,2)
+            //
+            //  stackDelta = (N+R) - (N+1+A) = R-(1+A)
+            //  stack = N+R
+            //  Need to determine N+1
+            //  
+            //  
+            //
+            //  this.a(<i2>, <i2>, <i3>)
+            //  returning int
+            //
+            //  stackDelta = -3 (this & 3 args popped, ret pushed)
+            //  initial depth N = 10
+            //  pc        - stack
+            //  100 ...       - stack 10
+            //  101 push this - stack 11
+            //  109 push i1   - stack 12
+            //  125 push i2   - stack 13
+            //  156 push i3   - stack 14
+            //  157 call      - stack 11
+            //  
+            //  need stack_pcs[11] = stack_pcs[11 + -3]
+            //
+            // ref.method(args).method(args) ... method(args)
+            // 
+            case VMOpcode.INVOKEINTERFACE:
+            case VMOpcode.INVOKESPECIAL:
+            case VMOpcode.INVOKEVIRTUAL:
+            {
+                String vmDescriptor = getTypeDescriptor(ch, opcode_pc);
+                int r = CodeChunk.getDescriptorWordCount(vmDescriptor);
+             
+                // PC of the opcode that pushed the reference for
+                // this method call.
+                int ref_pc = stack_pcs[stack - r + 1];
+               if (getOpcode(ref_pc) == VMOpcode.ALOAD_0) {
+                    System.out.println("POSS SPLIT " + (pc - ref_pc) + " @ " + ref_pc);
+                }
+               break;
+            }
+            case VMOpcode.INVOKESTATIC:
+                String vmDescriptor = getTypeDescriptor(ch, opcode_pc);
+                int r = CodeChunk.getDescriptorWordCount(vmDescriptor);
+                int p1_pc = stack_pcs[stack - r + 1];
+                System.out.println("POSS STATIC SPLIT " + (pc - p1_pc) + " @ " + p1_pc);
+                
+            }
+            stack_pcs[stack] = opcode_pc;
+        }
+        return -1;
+    }*/
 }
