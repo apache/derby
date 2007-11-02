@@ -128,9 +128,7 @@ public abstract class IdUtil
 	}
 
     /**
-c
-    
-    @param s The string to be parsed
+    @param r The multi-part identifier to be parsed
     @return An array of strings made by breaking the input string at its dots, '.'.
       @exception StandardException Oops
       */
