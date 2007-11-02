@@ -357,7 +357,7 @@ public class AuthenticationTest extends BaseJDBCTestCase {
      * Assert that the user name returned by various mechanisms
      * matches the normal user name.
      * @param normalUserName
-     * @param conn
+     * @param connUser
      * @throws SQLException
      */
     private void assertNormalUserName(String normalUserName, Connection connUser)
