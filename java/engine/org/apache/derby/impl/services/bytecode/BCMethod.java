@@ -76,7 +76,7 @@ class BCMethod implements MethodBuilder {
 
 	final BCClass		cb;
 	protected final ClassHolder modClass; // the class it is in (modifiable fmt)
-	private final String myReturnType;
+	final String myReturnType;
 	
 	/**
 	 * The original name of the method, this
@@ -259,6 +259,7 @@ class BCMethod implements MethodBuilder {
     private void splitMethod() {
         
         int split_pc = 0;
+        boolean splittingZeroStack = true;
         for (int codeLength = myCode.getPC();
                (cb.limitMsg == null) &&
                (codeLength > CODE_SPLIT_LENGTH);
@@ -279,19 +280,36 @@ class BCMethod implements MethodBuilder {
             if (optimalMinLength > lengthToCheck)
                 optimalMinLength = lengthToCheck;
 
-            split_pc = myCode.splitZeroStack(this, modClass, split_pc,
-                    lengthToCheck, optimalMinLength);
+            if (splittingZeroStack)
+            {
+                split_pc = myCode.splitZeroStack(this, modClass, split_pc,
+                    optimalMinLength);
+            }
+            else
+            {
+                //TODO: re-start split at point left off
+                //split_pc = myCode.splitExpressionOut(this, modClass,
+                //        optimalMinLength, maxStack);
+                
+                // DERBY-766 temp - don't call the split method yet.
+                split_pc = -1;
+            }
 
             // Negative split point returned means that no split
             // was possible. Give up on this approach and goto
-            // the next approach (none-yet).
+            // the next approach.
             if (split_pc < 0) {
-                break;
+                if (!splittingZeroStack)
+                   break;
+                splittingZeroStack = false;
+                split_pc = 0;
             }
 
             // success, continue on splitting after the call to the
             // sub-method if the method still execeeds the maximum length.
         }
+        
+ 
     }
 
 	/*
