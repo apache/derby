@@ -28,11 +28,9 @@ Contents
 2.2   Download required software
 2.2.1 Download and install Apache Ant 1.6.3 or higher
 2.2.2 Download and install Java Development Kit release 1.4.x
-2.2.3 section removed - no longer applies
-2.2.4 section removed - no longer applies
-2.2.5 Download and install JUnit 3.8.*
-2.2.6 Download Java 6 Development Kit (Optional)
-2.2.7 Download J2ME/CDC/Foundation 1.0 and JSR169 jars (Optional)
+2.2.3 Download and install JUnit 3.8.*
+2.2.4 Download Java 6 Development Kit (Optional)
+2.2.5 Download J2ME/CDC/Foundation 1.0 and JSR169 jars (Optional)
 
 3     Build instructions
 3.1   Set required environmental variables
@@ -101,9 +99,11 @@ After downloading source code to directory ${derby.source},
 there should be the following files and directories:
 
 ${derby.source}/build.xml 
+${derby.source}/bin
 ${debry.source}/java 
+${derby.source}/maven
+${derby.source}/plugins
 ${derby.source}/tools 
-
 
 
 2.2   Download required software
@@ -135,10 +135,10 @@ Notes:
 
 2.2.1 Download and install Apache Ant 1.6.3 or higher
 
-(1) Download a binary distribution of Ant 1.6.x from:
+(1) Download a binary distribution of Ant from:
          http://ant.apache.org/bindownload.cgi
 
-(2) Install Ant 1.6.x in any directory. This 
+(2) Install Ant in any directory. This 
     directory will be referred to as ${ant.dir} 
     directory in the rest of this document. 
 
@@ -150,7 +150,7 @@ installed on your system.
 
 (1) Download JDK 1.4.x. 
     The reference implementation is available at:
-       http://java.sun.com/j2se
+       http://java.sun.com/j2se/1.4.2/download.html
 
     For MacOS X, get the latest download from:
        http://developer.apple.com/java/download
@@ -168,7 +168,7 @@ Java 5 or a later version of the JDK.
 
 (4) Download the Java 5 or later JDK.
     The reference implementation is available at:
-       http://java.sun.com/javase
+       http://java.sun.com/javase/downloads/index_jdk5.jsp
 
     For MacOS X, get the latest download from:
        http://developer.apple.com/java/download
@@ -179,11 +179,7 @@ Java 5 or a later version of the JDK.
 (6) The directory where you have installed the Java 5 JDK will be 
     referred to as ${java5.dir} in the rest of this document.
 
-2.2.3 section removed - no longer applies
-
-2.2.4 section removed - no longer applies
-
-2.2.5 Download and install JUnit 3.8.*
+2.2.3 Download and install JUnit 3.8.*
 
 (1) JUnit is needed for some of Derby's tests. Download a JUnit 3.8.1
     from
@@ -198,7 +194,7 @@ Java 5 or a later version of the JDK.
     ${derby.source}/tools/java.
 
 
-2.2.6 Optional - Download and install Java 6 Development Kit (JDK) 
+2.2.4 Optional - Download and install Java 6 Development Kit (JDK) 
 
 
 Skip steps 1-2 of this section if you already have the Java 6 JDK
@@ -216,9 +212,7 @@ installed on your system.
     referred to as ${jdk16.dir} in the rest of this document.
 
 
-2.2.7 Download J2ME/CDC/Foundation and JSR 169 jars
-
-This is an optional section.
+2.2.5 Optional - Download J2ME/CDC/Foundation and JSR 169 jars
 
 Derby's embeded engine supports J2ME/CDC/Foundation 1.0 using the JDBC
 sub-set defined in JSR 169. In order to build Derby to
@@ -236,7 +230,7 @@ on J2ME, or J2SE, write once run anywhere.
 
 
 
-Note: After following the steps in sections 2.2.4-2.2.7 of this
+Note: After following the steps in sections 2.2.3-2.2.5 of this
 document, you should have the following:
 
 ${derby.source}/tools/java/empty.jar
@@ -402,7 +396,7 @@ to specify your environment and options:
 
     - Optional - jsr169compile.classpath
 
-      If you downloaded the J2ME jar files (section 2.2.7) then
+      If you downloaded the J2ME jar files (section 2.2.5) then
       setting this property will enable the optional JSR169 targets
       for the top-level default, engine or all targets.
       The compile classpath needs to include the Foundation 1.0
@@ -475,7 +469,7 @@ to specify your environment and options:
     set your JAVA_HOME to the Java 6 JDK.  Instead, set it
     to your standard JDK 1.4 or JDK 1.3 location.  In your ant.properties,
     make sure you set jdk16 as described in section
-    2.2.4, and that is all you need to do.
+    3.2 (2), and that is all you need to do.
 
 
 (3) Run the following command to build all jars:
@@ -486,7 +480,7 @@ to specify your environment and options:
     - derby.jar (database engine), 
     - derbytools.jar (utilities: sysinfo, dblook, ij) 
     - derbynet.jar (network server).
-    - derbyLocale_*.jar (9 jar files with locale support).
+    - derbyLocale_*.jar (13 jar files with locale support).
     - derbyclient.jar (derby network client)
     If the tests were built, the following jar file will also be built:
     - derbyTesting.jar (the test framework and related files)
