@@ -22,5 +22,21 @@ PASS: PREPARE: SELECT with 800 unions
 PASS: EXECUTE SELECT with 800 unions Row data check ok
 PASS: PREPARE: SELECT with 900 unions
 PASS: EXECUTE SELECT with 900 unions Row data check ok
-FAILED QUERY: SELECT with 1000 unions.
+PASS: PREPARE: SELECT with 1000 unions
+PASS: EXECUTE SELECT with 1000 unions Row data check ok
+PASS: PREPARE: SELECT with 1100 unions
+PASS: EXECUTE SELECT with 1100 unions Row data check ok
+PASS: PREPARE: SELECT with 1200 unions
+PASS: EXECUTE SELECT with 1200 unions Row data check ok
+PASS: PREPARE: SELECT with 1300 unions
+PASS: EXECUTE SELECT with 1300 unions Row data check ok
+PASS: PREPARE: SELECT with 1400 unions
+PASS: EXECUTE SELECT with 1400 unions Row data check ok
+PASS: PREPARE: SELECT with 1500 unions
+PASS: EXECUTE SELECT with 1500 unions Row data check ok
+PASS: PREPARE: SELECT with 1600 unions
+PASS: EXECUTE SELECT with 1600 unions Row data check ok
+PASS: PREPARE: SELECT with 1700 unions
+PASS: EXECUTE SELECT with 1700 unions Row data check ok
+FAILED QUERY: SELECT with 1800 unions.
 FAILED QUERY: SELECT with 10000 unions.

@@ -1282,6 +1282,9 @@ final class CodeChunk {
      */
     final int splitZeroStack(BCMethod mb, ClassHolder ch, final int split_pc,
             final int optimalMinLength) {
+        
+        int splitMinLength = splitMinLength(mb);
+        
         int stack = 0;
 
         // maximum possible split seen that is less than
@@ -1371,11 +1374,8 @@ final class CodeChunk {
                     return -1;
  
                 // Decide if the earlier possible split is
-                // worth it. 100 is an arbitary number,
-                // a real low limit would be the number of
-                // bytes of instructions required to call
-                // the sub-method, four I think.
-                if (possibleSplitLength < 100)
+                // worth it.
+                if (possibleSplitLength <= splitMinLength)
                     return -1;
 
                 // OK go with the earlier split
@@ -1715,14 +1715,16 @@ final class CodeChunk {
      *  
       */
 
-    final int splitExpressionOut(BCMethod mb, ClassHolder ch,
+    final int splitExpressionOut(final BCMethod mb, final ClassHolder ch,
             final int optimalMinLength,
-            int maxStack)
+            final int maxStack)
     {
         // Save the best block we have seen for splitting out.
         int bestSplitPC = -1;
         int bestSplitBlockLength = -1;
-        String bestSplitRT = null;      
+        String bestSplitRT = null;  
+        
+        int splitMinLength = splitMinLength(mb);
         
         // Program counter of the earliest instruction
         // that the word in the current active stack
@@ -1778,6 +1780,15 @@ final class CodeChunk {
             // same stack depth.
             int[] cond_pcs = findConditionalPCs(pc, opcode);
             if (cond_pcs != null) {
+                
+                // TODO: This conditional handling was copied
+                // from splitZeroStack, haven't looked in detail
+                // to see how a conditional should be handled
+                // with an expression split. So for the time
+                // being just bail.
+                if (true)
+                    return -1;
+
                 // an else block exists, skip the then block.
                 if (cond_pcs[3] != -1) {
                     pc = cond_pcs[3];
@@ -1917,8 +1928,10 @@ final class CodeChunk {
                 if (width == 0)
                 {
                     // objectref was at one more than the current depth
-                    selfContainedBlockStart =
-                        earliestIndepPC[stack + 1];
+                    // no plan to split here though, as we are only
+                    // splitting methods that return a reference.
+                    selfContainedBlockStart = -1;
+                        // earliestIndepPC[stack + 1];
                 }
                 else if (width == 1)
                 {     
@@ -1930,47 +1943,62 @@ final class CodeChunk {
                 {
                     // width == 2, objectref was one below the
                     // current stack depth.
-                    selfContainedBlockStart = earliestIndepPC[stack] =
+                    // no plan to split here though, as we are only
+                    // splitting methods that return a reference.
+                    selfContainedBlockStart = -1;
+                        
+                    // top two words depend on the objectref
+                    // which was at the same depth of the first word
+                    // of the 64 bit value.
+                    earliestIndepPC[stack] =
                         earliestIndepPC[stack - 1];
                  }
                 
                 if (selfContainedBlockStart != -1)
                 {
                     int blockLength = pc - selfContainedBlockStart;
-
-                    // Only split for a method that returns
-                    // an class reference.
-                    int me = vmDescriptor.lastIndexOf(')');
                     
-                    if (vmDescriptor.charAt(me+1) == 'L')
+                    if (blockLength <= splitMinLength)
                     {
-                        String rt = vmDescriptor.substring(me + 2,
-                                vmDescriptor.length() - 1);
-                        
-                        if (blockLength > (VMOpcode.MAX_CODE_LENGTH - 1))
+                        // No point splitting, too small
+                    }
+                    else if (blockLength > (VMOpcode.MAX_CODE_LENGTH - 1))
+                    {
+                        // too big to split into a single method
+                        // (one for the return opcode)
+                    }
+                    else
+                    {
+                        // Only split for a method that returns
+                        // an class reference.
+                        int me = vmDescriptor.lastIndexOf(')');
+                    
+                        if (vmDescriptor.charAt(me+1) == 'L')
                         {
-                            // too big to split into a single method
-                            // (one for the return opcode)
-                        }                       
-                        else if (blockLength >= optimalMinLength)
-                        {
-                            // Split now!
-                            System.out.println("NOW " + blockLength
-                                    + " @ " + selfContainedBlockStart);
-                            BCMethod subMethod = startSubMethod(mb,
-                                    rt, selfContainedBlockStart,
-                                    blockLength);
-
-                            return splitCodeIntoSubMethod(mb, ch, subMethod,
-                                    selfContainedBlockStart, blockLength);                             
-                        }                       
-                        else if (blockLength > bestSplitBlockLength)
-                        {
-                            // Save it, may split at this point
-                            // if nothing better seen.                          
-                            bestSplitPC = selfContainedBlockStart;
-                            bestSplitBlockLength = blockLength;
-                            bestSplitRT = rt;
+                            String rt = vmDescriptor.substring(me + 2,
+                                    vmDescriptor.length() - 1);
+                            
+                            // convert to external format.
+                            rt = rt.replace('/', '.');
+                            
+                            if (blockLength >= optimalMinLength)
+                            {
+                                // Split now!
+                                BCMethod subMethod = startSubMethod(mb,
+                                        rt, selfContainedBlockStart,
+                                        blockLength);
+    
+                                return splitCodeIntoSubMethod(mb, ch, subMethod,
+                                        selfContainedBlockStart, blockLength);                             
+                            }                       
+                            else if (blockLength > bestSplitBlockLength)
+                            {
+                                // Save it, may split at this point
+                                // if nothing better seen.
+                                bestSplitPC = selfContainedBlockStart;
+                                bestSplitBlockLength = blockLength;
+                                bestSplitRT = rt;
+                            }
                         }
                     }
                 }
@@ -1980,19 +2008,16 @@ final class CodeChunk {
             
        }
         
-        if (bestSplitBlockLength > 100)
-        {
-            System.out.println("BEST " + bestSplitBlockLength
-                    + " @ " + bestSplitPC);
+
+        if (bestSplitBlockLength != -1) {
             BCMethod subMethod = startSubMethod(mb,
                     bestSplitRT, bestSplitPC,
                     bestSplitBlockLength);
-
+    
             return splitCodeIntoSubMethod(mb, ch, subMethod,
-                    bestSplitBlockLength, bestSplitBlockLength); 
-            
+                    bestSplitPC, bestSplitBlockLength);  
         }
-                       
+               
         return -1;
     }
     
@@ -2017,6 +2042,38 @@ final class CodeChunk {
         }        
     }
     
+    /**
+     * Minimum split length for a sub-method. If the number of
+     * instructions to call the sub-method exceeds the length
+     * of the sub-method, then there's no point splitting.
+     * The number of bytes in the code stream to call
+     * a generated sub-method can take is based upon the number of method args.
+     * A method can have maximum of 255 words of arguments (section 4.10 JVM spec)
+     * which in the worst case would be 254 (one-word) parameters
+     * and this. For a sub-method the arguments will come from the
+     * parameters to the method, i.e. ALOAD, ILOAD etc.
+     * <BR>
+     * This leads to this number of instructions.
+     * <UL>
+     * <LI> 4 - 'this' and first 3 parameters have single byte instructions
+     * <LI> (N-4)*2 - Remaining parameters have two byte instructions
+     * <LI> 3 for the invoke instruction.
+     * </UL>
+     */
+    private static int splitMinLength(BCMethod mb) {
+        int min = 1 + 3; // For ALOAD_0 (this) and invoke instruction
+        
+        if (mb.parameters != null) {
+            int paramCount = mb.parameters.length;
+            
+            min += paramCount;
+            
+            if (paramCount > 3)
+                min += (paramCount - 3);
+        }
+        
+        return min;
+    }
     /*
     final int splitNonZeroStack(BCMethod mb, ClassHolder ch,
             final int codeLength, final int optimalMinLength,
