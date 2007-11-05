@@ -123,31 +123,35 @@ class Session
 	 * initialize a server trace for the DRDA protocol
 	 * 
 	 * @param traceDirectory - directory for trace file
+	 * @throws IOException 
 	 */
-	protected void initTrace(String traceDirectory)
+	protected void initTrace(String traceDirectory) throws IOException 
 	{
 		if (traceDirectory != null)
 			traceFileName = traceDirectory + "/" + TRACENAME_PREFIX+
 				connNum+ TRACENAME_SUFFIX;
 		else
 			traceFileName = TRACENAME_PREFIX +connNum+ TRACENAME_SUFFIX;
-		traceOn = true;
+		
 		if (dssTrace == null)
 			dssTrace = new DssTrace();
 		dssTrace.startComBufferTrace (traceFileName);
+		traceOn = true;
 	}
 
 	/**
 	 * Set tracing on
 	 * 
 	 * @param traceDirectory 	directory for trace files
+	 * @throws IOException 
 	 */
-	protected void setTraceOn(String traceDirectory)
+	protected void setTraceOn(String traceDirectory) throws IOException
 	{
 		if (traceOn)
 			return;
-		initTrace(traceDirectory);
+		initTrace(traceDirectory);    
 	}
+
 	/**
 	 * Get whether tracing is on 
 	 *

@@ -45,7 +45,8 @@ public class _Suite extends BaseTestCase  {
     public static Test suite() {
 
         TestSuite suite = new TestSuite("derbynet");
-             
+        
+        suite.addTest(NetworkServerControlApiTest.suite());     
         suite.addTest(PrepareStatementTest.suite());
         suite.addTest(ShutDownDBWhenNSShutsDownTest.suite());
         suite.addTest(DRDAProtocolTest.suite());
@@ -55,6 +56,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(SecureServerTest.suite());
         suite.addTest(SSLTest.suite());
         suite.addTest(NetIjTest.suite());
+        
         
         // Disabled due to "java.sql.SQLSyntaxErrorException: The class
         // 'org.apache.derbyTesting.functionTests.tests.derbynet.checkSecMgr'
