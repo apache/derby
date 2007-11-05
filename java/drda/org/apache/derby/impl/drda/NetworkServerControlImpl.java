@@ -1425,10 +1425,14 @@ public final class NetworkServerControlImpl {
 					}
 					else
 					{
-						sendMessage(writer, ERROR,  
-							localizeMessage("DRDA_SessionNotFound.U", 
-							(session.langUtil == null) ? langUtil : session.langUtil,
-							new String [] {new Integer(sessionArg).toString()}));
+					    if (sessionArg != 0)
+							sendMessage(writer, ERROR,  
+							    localizeMessage("DRDA_SessionNotFound.U", 
+									    (session.langUtil == null) ? langUtil : session.langUtil,
+									    new String [] {new Integer(sessionArg).toString()}));
+					    else
+							sendMessage(writer, ERROR,  
+										localizeMessage("DRDA_ErrorStartingTracing.S",null));          
 					}
 					break;
 				case COMMAND_TRACEDIRECTORY:
@@ -3355,18 +3359,27 @@ public final class NetworkServerControlImpl {
 	 */
 	private boolean setTrace(boolean on)
 	{
+        boolean setTraceSuccessful = true;
 		if (sessionArg == 0)
 		{
-			setTraceAll(on);
 			synchronized(sessionTable) {
 				for (Enumeration e = sessionTable.elements(); e.hasMoreElements(); )
-				{	
-					Session session = (Session) e.nextElement();
+				{
+                   
+				    Session session = (Session) e.nextElement();
 					if (on)
-						session.setTraceOn(traceDirectory);
+						try {
+							session.setTraceOn(traceDirectory);
+						} catch (Exception te ) {
+							consoleExceptionPrintTrace(te);
+							setTraceSuccessful = false;
+							session.setTraceOff();
+						}
 					else
 						session.setTraceOff();
 				}
+				if (setTraceSuccessful)
+					setTraceAll(on);
 			}
 		}
 		else
@@ -3375,14 +3388,20 @@ public final class NetworkServerControlImpl {
 			if (session != null)
 			{	
 				if (on)
-					session.setTraceOn(traceDirectory);
+					try {                         
+						session.setTraceOn(traceDirectory);
+					}catch (Exception te) {
+						consoleExceptionPrintTrace(te);
+						setTraceSuccessful = false;
+						session.setTraceOff();
+					}
 				else
 					session.setTraceOff();
 			}
 			else
 				return false;
 		}
-		return true;
+		return setTraceSuccessful;
 	}
 
 

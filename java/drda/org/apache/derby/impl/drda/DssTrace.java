@@ -20,6 +20,13 @@
  */
 package org.apache.derby.impl.drda;
 
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
+
+
 // Generic process and error tracing encapsulation.
 // This class also traces a DRDA communications buffer.
 // The value of the hex bytes are traced along with
@@ -97,7 +104,7 @@ public class DssTrace
 
 
   // An array of characters representing hex numbers.
-  private static final char hexDigit [] = {
+ private static final char hexDigit [] = {
     '0','1','2','3','4','5','6','7',
     '8','9','A','B','C','D','E','F'
   };
@@ -160,14 +167,28 @@ public class DssTrace
   // Start the communications buffer trace.
   // The name of the file to place the trace is passed to this method.
   // After calling this method, calls to isComBufferTraceOn() will return true.
-  protected void startComBufferTrace (String fileName)
+  protected void startComBufferTrace (final String fileName) throws IOException 
   {
     synchronized (comBufferSync) {
-      try {
         // Only start the trace if it is off.
         if (comBufferTraceOn == false) {
           // The writer will be buffered for effeciency.
-          comBufferWriter = new java.io.PrintWriter (new java.io.BufferedWriter (new java.io.FileWriter (fileName), 4096));
+            try {
+                
+                comBufferWriter =  ((PrintWriter)AccessController.doPrivileged(
+                            new PrivilegedExceptionAction() {
+                                public Object run() throws SecurityException, IOException {
+                                    return new  PrintWriter (new java.io.BufferedWriter (new java.io.FileWriter (fileName), 4096));
+                                }
+                            }));
+            } catch (PrivilegedActionException pae) {
+               Exception e = pae.getException();
+               if (e instanceof SecurityException)
+                   throw (SecurityException)pae.getException();
+               else
+                   throw (IOException) pae.getException();
+            }
+          
           // Turn on the trace flag.
           comBufferTraceOn = true;
           // initialize the codepoint name table if it is null.
@@ -181,11 +202,8 @@ public class DssTrace
           }
         }
       }
-      catch (java.io.IOException e) {
-        // The IOException is currently ignored.  Handling should be added.
-      }
     }
-  }
+  
 
   // Stop the communications buffer trace.
   // The trace file is flushed and closed.  After calling this method,
@@ -198,8 +216,11 @@ public class DssTrace
         // Turn of the trace flag.
         comBufferTraceOn = false;
         // Flush and close the writer used for tracing.
-        comBufferWriter.flush();
-        comBufferWriter.close();
+        if (comBufferWriter != null)
+        {
+            comBufferWriter.flush();
+            comBufferWriter.close();
+        }
       }
     }
   }
