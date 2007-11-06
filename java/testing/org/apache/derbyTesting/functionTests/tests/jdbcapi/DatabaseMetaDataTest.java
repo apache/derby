@@ -21,8 +21,8 @@
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
 import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
+//import java.lang.reflect.Constructor;
+//import java.lang.reflect.Method;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -34,11 +34,11 @@ import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
+//import java.util.HashMap;
+//import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
+//import java.util.Map;
 import java.util.Random;
 import java.util.StringTokenizer;
 
@@ -46,11 +46,11 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
+//import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
-import org.apache.derby.shared.common.reference.JDBC40Translation;
+//import org.apache.derby.shared.common.reference.JDBC40Translation;
 
 /**
  * Test the DatabaseMetaData api.
@@ -68,9 +68,8 @@ import org.apache.derby.shared.common.reference.JDBC40Translation;
  * <BR>
  * The modify versions test
  * Work in progress.
- * Methods left to test from JDBC 3
+ * TODO: Methods left to test from JDBC 3
  * 
- *  getBestRowIdentifier
  *  getColumnPrivileges
  *  getCrossReference
  *  getExportedKeys
@@ -701,8 +700,8 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                 Types.INTEGER, Types.INTEGER, Types.INTEGER,
                 Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.SMALLINT            
         };
-        // interestingly, we get a different value back for nullability for
-        // the a number of the columns with networkserver/client vs. embedded 
+        // DERBY-3171; we get a different value back for nullability for
+        // a number of the columns with networkserver/client vs. embedded 
         boolean nullval = true;
         if (usingDerbyNetClient())
             nullval = false;
@@ -758,7 +757,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     }
     
     /**
-     * Six cominations of valid identifiers with mixed
+     * Six combinations of valid identifiers with mixed
      * case, to see how the various pattern matching
      * and returned values handle them.
      * This test only creates objects in these schemas.
@@ -1013,7 +1012,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         int rowPosition = 0;
         while (rs.next())
         {
-            boolean ourTable;
+            //boolean ourTable;
             assertEquals("TABLE_CAT", "", rs.getString("TABLE_CAT"));
             
             String schema = rs.getString("TABLE_SCHEM");
@@ -2762,4 +2761,357 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         );        
     }
     
+    /**
+     * Test getBestRowIdentifier
+     * @throws SQLException 
+     */
+    public void testGetBestRowIdentifier() throws SQLException
+    {
+        Statement st = createStatement();
+
+        // Create 5 tables which have only one best row identifier
+        st.execute("create table brit1 (i int not null primary key, j int)");
+        st.execute("create table brit2 (i int not null unique, j int)");
+        // adding not null unique to j - otherwise brit2 & brit3 would be same.
+        st.execute("create table brit3 (i int not null unique, " +
+                "j int not null unique)");
+        st.execute("create table brit4 (i int, j int)");
+        st.execute("create unique index brit4i on brit4(i)");
+        st.execute("create table brit5 (i int, j int)");
+        // following have more than one best row identifier
+        st.execute("create table brit6 (i int not null unique, " +
+                "j int not null primary key)");
+        // PK preferred to unique index
+        st.execute("create table brit7 (i int not null, " +
+                "j int not null primary key)");
+        st.execute("create unique index brit7i on brit7(i)");
+        // unique con preferred to unique index
+        st.execute("create table brit8 (i int not null, " +
+                "j int not null unique)");
+        st.execute("create unique index brit8i on brit8(i)");
+        // non-unique index just ignored
+        st.execute("create table brit9 (i int, j int)");
+        st.execute("create index brit9i on brit9(i)");
+        // fewer cols unique con still ignored over primary key
+        st.execute("create table brit10 " +
+                "(i int unique not null , j int not null, primary key (i,j))");
+        // fewer cols unique index still ignored over primary key
+        st.execute("create table brit11 (i int not null, j int not null, "
+                + "primary key (i,j))");
+        st.execute("create unique index brit11i on brit11(i)");
+        // fewer cols unique index still ignored over unique con
+        st.execute("create table brit12 (i int not null, j int not null, "
+                + "unique (i,j))");
+        st.execute("create unique index brit12i on brit12(i)");
+        st.execute("create table brit13 (i int not null, j int not null, k "
+                + "int, unique (i,j))");
+        // fewest cols unique con is the one picked of several
+        st.execute("create table brit14 (i int not null unique, j int not "
+                + "null, k int, unique (i,j))");
+        // fewest cols unique index is the one picked of several
+        st.execute("create table brit15 (i int not null, j int not null, k int)");
+        st.execute("create unique index brit15ij on brit15(i,j)");
+        st.execute("create unique index brit15i on brit15(i)");
+        st.execute("create table brit16 (i int not null primary key, j int)");
+        // from old metadata test
+        // if this one gets activated here, running the entire test suite
+        // twice runs into into trouble.
+/*        st.execute("create table brit17 (i int not null default 10, " +
+                "s smallint not null, c30 char(30) not null, " +
+                "vc10 varchar(10) not null default 'asdf', " +
+                "constraint PRIMKEY primary key(vc10, i), " +
+                "constraint UNIQUEKEY unique(c30, s), ai bigint " +
+                "generated always as identity " +
+                "(start with -10, increment by 2001))");
+        // Create another unique index on brit17
+        st.execute("create unique index brit17i on brit17(s, i)");
+        // Create a non-unique index on brit17
+        st.execute("create index brit17ij on brit17(s)");
+*/
+        getConnection().setAutoCommit(false);
+        
+        String[] columnNames = {
+                "SCOPE", "COLUMN_NAME", "DATA_TYPE", "TYPE_NAME", 
+                "COLUMN_SIZE", "BUFFER_LENGTH", "DECIMAL_DIGITS", 
+                "PSEUDO_COLUMN"};
+        int[] columnTypes = {
+                Types.SMALLINT, Types.VARCHAR, Types.INTEGER, Types.VARCHAR,
+                Types.INTEGER, Types.INTEGER, Types.SMALLINT, Types.SMALLINT};
+        boolean [] nullability = {
+                true, false, true, true, true, true, true, true};
+        
+        DatabaseMetaData dmd = getConnection().getMetaData();
+
+        // result: column i
+        ResultSet rs = dmd.getBestRowIdentifier(null,"APP","BRIT1",0,true);
+        String[][] expRS = new String [][] {
+                {"2", "I", "4", "INTEGER", "4", null, "10", "1"}};
+        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
+        JDBC.assertFullResultSet(rs, expRS, true);
+
+        // result: column i
+        rs = dmd.getBestRowIdentifier(null,"APP","BRIT2",0,true);
+        expRS = new String [][] {
+                {"2", "I", "4", "INTEGER", "4", null, "10", "1"}};
+        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
+        JDBC.assertFullResultSet(rs, expRS, true);
+
+        // result: column i
+        rs = dmd.getBestRowIdentifier(null,"APP","BRIT3",0,true);
+        expRS = new String [][] {
+                {"2", "J", "4", "INTEGER", "4", null, "10", "1"}};
+        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
+        JDBC.assertFullResultSet(rs, expRS, true);
+        
+        // result: column i
+        rs = dmd.getBestRowIdentifier(null,"APP","BRIT4",0,true);
+        expRS = new String [][] {
+                {"2", "I", "4", "INTEGER", "4", null, "10", "1"}};
+        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
+        JDBC.assertFullResultSet(rs, expRS, true);
+        
+        // result: columns i and j
+        rs = dmd.getBestRowIdentifier(null,"APP","BRIT5",0,true);
+        expRS = new String [][] {
+                {"2", "I", "4", "INTEGER", "4", null, "10", "1"},
+                {"2", "J", "4", "INTEGER", "4", null, "10", "1"}
+        };
+        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
+        JDBC.assertFullResultSet(rs, expRS, true);
+
+        // result: column j
+        rs = dmd.getBestRowIdentifier(null,"APP","BRIT6",0,true);
+        expRS = new String [][] {
+                {"2", "J", "4", "INTEGER", "4", null, "10", "1"}};
+        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
+        JDBC.assertFullResultSet(rs, expRS, true);
+
+        // result: column j
+        rs = dmd.getBestRowIdentifier(null,"APP","BRIT7",0,true);
+        expRS = new String [][] {
+                {"2", "J", "4", "INTEGER", "4", null, "10", "1"}};
+        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
+        JDBC.assertFullResultSet(rs, expRS, true);
+        
+        // result: column j
+        rs = dmd.getBestRowIdentifier(null,"APP","BRIT8",0,true);
+        expRS = new String [][] {
+                {"2", "J", "4", "INTEGER", "4", null, "10", "1"}};
+        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
+        JDBC.assertFullResultSet(rs, expRS, true);
+        
+        // result: columns i,j
+        rs = dmd.getBestRowIdentifier(null,"APP","BRIT9",0,true);
+        expRS = new String [][] {
+                {"2", "I", "4", "INTEGER", "4", null, "10", "1"},
+                {"2", "J", "4", "INTEGER", "4", null, "10", "1"}
+        };
+        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
+        JDBC.assertFullResultSet(rs, expRS, true);
+        
+        // result: columns i,j
+        rs = dmd.getBestRowIdentifier(null,"APP","BRIT10",0,true);
+        expRS = new String [][] {
+                {"2", "I", "4", "INTEGER", "4", null, "10", "1"},
+                {"2", "J", "4", "INTEGER", "4", null, "10", "1"}
+        };
+        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
+        JDBC.assertFullResultSet(rs, expRS, true);
+        
+        // result: columns i,j
+        rs = dmd.getBestRowIdentifier(null,"APP","BRIT11",0,true);
+        expRS = new String [][] {
+                {"2", "I", "4", "INTEGER", "4", null, "10", "1"},
+                {"2", "J", "4", "INTEGER", "4", null, "10", "1"}
+        };
+        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
+        JDBC.assertFullResultSet(rs, expRS, true);
+        
+        // result: columns i,j
+        rs = dmd.getBestRowIdentifier(null,"APP","BRIT12",0,true);
+        expRS = new String [][] {
+                {"2", "I", "4", "INTEGER", "4", null, "10", "1"},
+                {"2", "J", "4", "INTEGER", "4", null, "10", "1"}
+        };
+        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
+        JDBC.assertFullResultSet(rs, expRS, true);
+        
+        // TODO: from bestrowidentifier.sql  - 
+        // find or create JIRA & update with bug #
+        
+        // REMIND: we aren't handling nullOk flag correctly we 
+        // just drop nullable cols, we should skip an answer that 
+        // has nullable cols in it instead and look for another one.
+
+        // result: columns i, j (WRONG) the correct answer is k: 
+        // the non-null columns of the table
+        rs = dmd.getBestRowIdentifier(null,"APP","BRIT13",0,true);
+        expRS = new String [][] {
+                {"2", "I", "4", "INTEGER", "4", null, "10", "1"},
+                {"2", "J", "4", "INTEGER", "4", null, "10", "1"}
+        };
+        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
+        JDBC.assertFullResultSet(rs, expRS, true);
+        
+        // result: columns i
+        rs = dmd.getBestRowIdentifier(null,"APP","BRIT14",0,true);
+        expRS = new String [][] {
+                {"2", "I", "4", "INTEGER", "4", null, "10", "1"}
+        };
+        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
+        JDBC.assertFullResultSet(rs, expRS, true);
+        
+        // result: columns i
+        rs = dmd.getBestRowIdentifier(null,"APP","BRIT15",0,true);
+        expRS = new String [][] {
+                {"2", "I", "4", "INTEGER", "4", null, "10", "1"}
+        };
+        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
+        JDBC.assertFullResultSet(rs, expRS, true);
+        
+        // we don't do anything with SCOPE except detect bad values
+        // result: columns i
+        rs = dmd.getBestRowIdentifier(null,"APP","BRIT16",1,true);
+        expRS = new String [][] {
+                {"2", "I", "4", "INTEGER", "4", null, "10", "1"}
+        };
+        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
+        JDBC.assertFullResultSet(rs, expRS, true);
+        // result: columns i
+        rs = dmd.getBestRowIdentifier(null,"APP","BRIT16",2,true);
+        expRS = new String [][] {
+                {"2", "I", "4", "INTEGER", "4", null, "10", "1"}
+        };
+        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
+        JDBC.assertFullResultSet(rs, expRS, true);
+        // result: no rows
+        rs = dmd.getBestRowIdentifier(null,"APP","BRIT16",-1,true);
+        expRS = new String [][] {
+                {"2", "I", "4", "INTEGER", "4", null, "10", "1"}
+        };
+        // odd, column nullability is opposite...?
+        // TODO: log?
+        nullability = new boolean [] {
+                false, true, false, true, false, false, false, false};
+        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
+        JDBC.assertDrainResults(rs, 0);
+        // result: no rows
+        rs = dmd.getBestRowIdentifier(null,"APP","BRIT16",3,true);
+        expRS = new String [][] {
+                {"2", "I", "4", "INTEGER", "4", null, "10", "1"}
+        };
+        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
+        JDBC.assertDrainResults(rs, 0);
+
+        // set back nullability
+        nullability = new boolean[] {
+                true, false, true, true, true, true, true, true};
+        
+/*        rs = dmd.getBestRowIdentifier(null, "APP","BRIT17",0,true);
+        expRS = new String [][] {
+                {"2", "I", "4", "INTEGER", "4", null, "10", "1"},
+                {"2", "VC10", "12", "VARCHAR", "10", null, null, "1"}
+        };
+        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
+        JDBC.assertFullResultSet(rs, expRS, true);
+*/        
+        // test DERBY-2610 for fun; can't pass in null table name
+        try {
+            rs = dmd.getBestRowIdentifier(null,"APP",null,3,true);
+        } catch (SQLException sqle) {
+            assertSQLState( "XJ103", sqle);
+        }
+        
+        // check on systables
+        rs = dmd.getBestRowIdentifier(null,"SYS","SYSTABLES",0,true);
+        expRS = new String [][] {
+                {"2", "TABLEID", "1", "CHAR", "36", null, null, "1"}
+        };
+        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
+        JDBC.assertFullResultSet(rs, expRS, true);
+        
+        getConnection().setAutoCommit(true);
+        
+        st.execute("drop table brit1");
+        st.execute("drop table brit2");
+        st.execute("drop table brit3");
+        st.execute("drop index brit4i");
+        st.execute("drop table brit4");
+        st.execute("drop table brit5");
+        st.execute("drop table brit6");
+        st.execute("drop index brit7i");
+        st.execute("drop table brit7");
+        st.execute("drop index brit8i");
+        st.execute("drop table brit8");
+        st.execute("drop index brit9i");
+        st.execute("drop table brit9");
+        st.execute("drop table brit10");
+        st.execute("drop index brit11i");
+        st.execute("drop table brit11");
+        st.execute("drop index brit12i");
+        st.execute("drop table brit12");
+        st.execute("drop table brit13");
+        st.execute("drop table brit14");
+        st.execute("drop index brit15i");
+        st.execute("drop index brit15ij");
+        st.execute("drop table brit15");
+        st.execute("drop table brit16");
+/*        st.execute("drop index brit17i");
+        st.execute("drop index brit17ij");
+        st.execute("drop table brit17");
+*/
+        st.close();
+        
+    }
+    
+    /**
+     * Test getBestRowIdentifier
+     * Tests one select, which would give an error second time around
+     *  when run within testGetBestRowIdentifier
+     * @throws SQLException 
+     */
+    public void testGetBestRowIdentifier2() throws SQLException
+    {
+        Statement st = createStatement();
+        // from old metadata test
+        // if this one gets activated in testGetBestRowIdentifier(), 
+        // running the entire test suite twice runs into into trouble, 
+        // complaining with error XSDA3 after attempting online compress...
+        st.execute("create table brit17 (i int not null default 10, " +
+                "s smallint not null, c30 char(30) not null, " +
+                "vc10 varchar(10) not null default 'asdf', " +
+                "constraint PRIMKEY primary key(vc10, i), " +
+                "constraint UNIQUEKEY unique(c30, s), ai bigint " +
+                "generated always as identity " +
+                "(start with -10, increment by 2001))");
+        // Create another unique index on brit17
+        st.execute("create unique index brit17i on brit17(s, i)");
+        // Create a non-unique index on brit17
+        st.execute("create index brit17ij on brit17(s)");
+        getConnection().setAutoCommit(false);
+        
+        String[] columnNames = {
+                "SCOPE", "COLUMN_NAME", "DATA_TYPE", "TYPE_NAME", 
+                "COLUMN_SIZE", "BUFFER_LENGTH", "DECIMAL_DIGITS", 
+                "PSEUDO_COLUMN"};
+        int[] columnTypes = {
+                Types.SMALLINT, Types.VARCHAR, Types.INTEGER, Types.VARCHAR,
+                Types.INTEGER, Types.INTEGER, Types.SMALLINT, Types.SMALLINT};
+        boolean [] nullability = {
+                true, false, true, true, true, true, true, true};
+        
+        DatabaseMetaData dmd = getConnection().getMetaData();
+
+        ResultSet rs = dmd.getBestRowIdentifier(null, "APP","BRIT17",0,true);
+        String [][] expRS = new String [][] {
+                {"2", "I", "4", "INTEGER", "4", null, "10", "1"},
+                {"2", "VC10", "12", "VARCHAR", "10", null, null, "1"}
+        };
+        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
+        JDBC.assertFullResultSet(rs, expRS, true);
+        getConnection().setAutoCommit(true);
+        st.execute("drop index brit17i");
+        st.execute("drop index brit17ij");
+        st.execute("drop table brit17");
+    } 
 }
