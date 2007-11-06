@@ -261,15 +261,24 @@ public class DataSourceTest extends BaseJDBCTestCase {
             SecurityCheck.assertSourceSecurity(
                 pc, "javax.sql.PooledConnection");
         }
-        pc.addConnectionEventListener(new AssertEventCatcher(1));
+        AssertEventCatcher aes1 = new AssertEventCatcher(1);
+        pc.addConnectionEventListener(aes1);
 
         // DERBY-2531
         // with Network Server / DerbyNetClient, the assertConnectionOK check
         // returns a different connection object...
         assertConnectionOK(
             expectedValues, "ConnectionPoolDataSource", pc.getConnection());
+        //Check if got connection closed event but not connection error event
+        assertTrue(aes1.didConnectionClosedEventHappen());
+        assertFalse(aes1.didConnectionErrorEventHappen());
+        aes1.resetState();
         assertConnectionOK(
             expectedValues, "ConnectionPoolDataSource", pc.getConnection());
+        //Check if got connection closed event but not connection error event
+        assertTrue(aes1.didConnectionClosedEventHappen());
+        assertFalse(aes1.didConnectionErrorEventHappen());
+        aes1.resetState();
 
         XADataSource dsx = J2EEDataSource.getXADataSource();
         JDBCDataSource.setBeanProperty(dsx, "DatabaseName", dbName);
@@ -302,27 +311,47 @@ public class DataSourceTest extends BaseJDBCTestCase {
         {
             SecurityCheck.assertSourceSecurity(xac, "javax.sql.XAConnection");
         }
-        xac.addConnectionEventListener(new AssertEventCatcher(3));
+        AssertEventCatcher aes3 = new AssertEventCatcher(3);
+        xac.addConnectionEventListener(aes3);
         assertConnectionOK(
             expectedValues, "XADataSource", xac.getConnection());
-
+        //Check if got connection closed event but not connection error event
+        assertTrue(aes3.didConnectionClosedEventHappen());
+        assertFalse(aes3.didConnectionErrorEventHappen());
+        aes3.resetState();
+                       
         pc = dsp.getPooledConnection();
-        pc.addConnectionEventListener(new AssertEventCatcher(2));
+        AssertEventCatcher aes2 = new AssertEventCatcher(2);
+        pc.addConnectionEventListener(aes2);
         assertConnectionOK(
             expectedValues, "ConnectionPoolDataSource", pc.getConnection());
+        //Check if got connection closed event but not connection error event
+        assertTrue(aes2.didConnectionClosedEventHappen());
+        assertFalse(aes2.didConnectionErrorEventHappen());
+        aes2.resetState();
 
         // test "local" XAConnections
         xac = dsx.getXAConnection();
-        xac.addConnectionEventListener(new AssertEventCatcher(4));
+        AssertEventCatcher aes4 = new AssertEventCatcher(4);
+        xac.addConnectionEventListener(aes4);
         assertConnectionOK(
             expectedValues, "XADataSource", xac.getConnection());
+        //Check if got connection closed event but not connection error event
+        assertTrue(aes4.didConnectionClosedEventHappen());
+        assertFalse(aes4.didConnectionErrorEventHappen());
+        aes4.resetState();
         assertConnectionOK(
             expectedValues, "XADataSource", xac.getConnection());
+        //Check if got connection closed event but not connection error event
+        assertTrue(aes4.didConnectionClosedEventHappen());
+        assertFalse(aes4.didConnectionErrorEventHappen());
+        aes4.resetState();
         xac.close();
 
         // test "global" XAConnections
         xac = dsx.getXAConnection();
-        xac.addConnectionEventListener(new AssertEventCatcher(5));
+        AssertEventCatcher aes5 = new AssertEventCatcher(5);
+        xac.addConnectionEventListener(aes5);
         XAResource xar = xac.getXAResource();
         // checks currently only implemented for embedded 
         if (usingEmbedded())
@@ -340,8 +369,16 @@ public class DataSourceTest extends BaseJDBCTestCase {
         expectedValues[3] = new Boolean(false);
         assertConnectionOK(
             expectedValues, "Global XADataSource", xac.getConnection());
+        //Check if got connection closed event but not connection error event
+        assertTrue(aes5.didConnectionClosedEventHappen());
+        assertFalse(aes5.didConnectionErrorEventHappen());
+        aes5.resetState();
         assertConnectionOK(
             expectedValues, "Global XADataSource", xac.getConnection());
+        //Check if got connection closed event but not connection error event
+        assertTrue(aes5.didConnectionClosedEventHappen());
+        assertFalse(aes5.didConnectionErrorEventHappen());
+        aes5.resetState();
 
         xar.end(xid, XAResource.TMSUCCESS);
 
@@ -349,8 +386,16 @@ public class DataSourceTest extends BaseJDBCTestCase {
         expectedValues[3] = new Boolean(true);
         assertConnectionOK(expectedValues, 
             "Switch to local XADataSource", xac.getConnection());
+        //Check if got connection closed event but not connection error event
+        assertTrue(aes5.didConnectionClosedEventHappen());
+        assertFalse(aes5.didConnectionErrorEventHappen());
+        aes5.resetState();
         assertConnectionOK(expectedValues, 
             "Switch to local XADataSource", xac.getConnection());
+        //Check if got connection closed event but not connection error event
+        assertTrue(aes5.didConnectionClosedEventHappen());
+        assertFalse(aes5.didConnectionErrorEventHappen());
+        aes5.resetState();
 
         Connection backtoGlobal = xac.getConnection();
 
@@ -359,8 +404,16 @@ public class DataSourceTest extends BaseJDBCTestCase {
         expectedValues[3] = new Boolean(false);
         assertConnectionOK(expectedValues, 
             "Switch to global XADataSource", backtoGlobal);
+        //Check if got connection closed event but not connection error event
+        assertTrue(aes5.didConnectionClosedEventHappen());
+        assertFalse(aes5.didConnectionErrorEventHappen());
+        aes5.resetState();
         assertConnectionOK(expectedValues, 
             "Switch to global XADataSource", xac.getConnection());
+        //Check if got connection closed event but not connection error event
+        assertTrue(aes5.didConnectionClosedEventHappen());
+        assertFalse(aes5.didConnectionErrorEventHappen());
+        aes5.resetState();
         xar.end(xid, XAResource.TMSUCCESS);
         xar.commit(xid, true);
 
@@ -456,7 +509,8 @@ public class DataSourceTest extends BaseJDBCTestCase {
         XADataSource dsx = J2EEDataSource.getXADataSource();
         JDBCDataSource.setBeanProperty(dsx, "DatabaseName", dbName);
         XAConnection xac = dsx.getXAConnection();
-        xac.addConnectionEventListener(new AssertEventCatcher(6));
+        AssertEventCatcher aes6 = new AssertEventCatcher(6);
+        xac.addConnectionEventListener(aes6);
         XAResource xar = xac.getXAResource();
         Xid xid = new cdsXid(1, (byte) 93, (byte) 103);
 
@@ -555,7 +609,15 @@ public class DataSourceTest extends BaseJDBCTestCase {
         cs1.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
         cs1.setReadOnly(true);
         setHoldability(cs1, true); // hold
+        //Confirm - no connection closed event & connection error event
+        assertFalse(aes6.didConnectionClosedEventHappen());
+        assertFalse(aes6.didConnectionErrorEventHappen());
+        aes6.resetState();
         cs1.close();
+        //Check if got connection closed event but not connection error event
+        assertTrue(aes6.didConnectionClosedEventHappen());
+        assertFalse(aes6.didConnectionErrorEventHappen());
+        aes6.resetState();
         
         cs1 = xac.getConnection();
         // new handle - local
@@ -564,6 +626,10 @@ public class DataSourceTest extends BaseJDBCTestCase {
             Connection.TRANSACTION_READ_COMMITTED,
             true, false, cs1);
         cs1.close();
+        //Check if got connection closed event but not connection error event
+        assertTrue(aes6.didConnectionClosedEventHappen());
+        assertFalse(aes6.didConnectionErrorEventHappen());
+        aes6.resetState();
         
         xar.start(xid, XAResource.TMJOIN);
         cs1 = xac.getConnection();
@@ -574,6 +640,10 @@ public class DataSourceTest extends BaseJDBCTestCase {
             false, ReadOnly, cs1);
         cs1.close();
         xar.end(xid, XAResource.TMSUCCESS);
+        //Check if got connection closed event but not connection error event
+        assertTrue(aes6.didConnectionClosedEventHappen());
+        assertFalse(aes6.didConnectionErrorEventHappen());
+        aes6.resetState();
 
         // now get a connection (attached to a local)
         // attach to the global and commit it.
@@ -603,7 +673,15 @@ public class DataSourceTest extends BaseJDBCTestCase {
             ResultSet.HOLD_CURSORS_OVER_COMMIT, 
             Connection.TRANSACTION_REPEATABLE_READ,
             true, false, cs1);
+        //Confirm - no connection closed event & connection error event
+        assertFalse(aes6.didConnectionClosedEventHappen());
+        assertFalse(aes6.didConnectionErrorEventHappen());
+        aes6.resetState();
         cs1.close();
+        //Check if got connection closed event but not connection error event
+        assertTrue(aes6.didConnectionClosedEventHappen());
+        assertFalse(aes6.didConnectionErrorEventHappen());
+        aes6.resetState();
     }
     
     // really part of testGlobalLocalInterLeaf:
@@ -619,7 +697,8 @@ public class DataSourceTest extends BaseJDBCTestCase {
         XADataSource dsx = J2EEDataSource.getXADataSource();
         JDBCDataSource.setBeanProperty(dsx, "DatabaseName", dbName);
         XAConnection xac = dsx.getXAConnection();
-        xac.addConnectionEventListener(new AssertEventCatcher(6));
+        AssertEventCatcher aes6 = new AssertEventCatcher(6);
+        xac.addConnectionEventListener(aes6);
         XAResource xar = xac.getXAResource();
         Connection conn = xac.getConnection();
         Statement s = conn.createStatement();
@@ -732,6 +811,10 @@ public class DataSourceTest extends BaseJDBCTestCase {
         assertConnectionState(ResultSet.HOLD_CURSORS_OVER_COMMIT, 
             Connection.TRANSACTION_READ_UNCOMMITTED,
             true, false, conn);
+        //Confirm - no connection closed event & connection error event
+        assertFalse(aes6.didConnectionClosedEventHappen());
+        assertFalse(aes6.didConnectionErrorEventHappen());
+        aes6.resetState();
     }
 
     // This test includes some short-hand descriptions of the test cases
@@ -767,7 +850,8 @@ public class DataSourceTest extends BaseJDBCTestCase {
         XADataSource dsx = J2EEDataSource.getXADataSource();
         JDBCDataSource.setBeanProperty(dsx, "DatabaseName", dbName);
         XAConnection xac = dsx.getXAConnection();
-        xac.addConnectionEventListener(new AssertEventCatcher(6));
+        AssertEventCatcher aes6 = new AssertEventCatcher(6);
+        xac.addConnectionEventListener(aes6);
         XAResource xar = xac.getXAResource();
         Xid xid = new cdsXid(1, (byte) 103, (byte) 119);
 
@@ -855,10 +939,15 @@ public class DataSourceTest extends BaseJDBCTestCase {
         resultSetQuery("params", three, psParams.executeQuery());
         assertLocks(new int[] {14,14}, cs1);
         cs1.commit();
+        //Confirm - no connection closed event & connection error event
+        assertFalse(aes6.didConnectionClosedEventHappen());
+        assertFalse(aes6.didConnectionErrorEventHappen());
+        aes6.resetState();
 
         // attach the XA transaction to another connection and see what happens
         XAConnection xac2 = dsx.getXAConnection();
-        xac2.addConnectionEventListener(new AssertEventCatcher(5));
+        AssertEventCatcher aes5 = new AssertEventCatcher(5);
+        xac2.addConnectionEventListener(aes5);
         XAResource xar2 = xac2.getXAResource();
 
         xar2.start(xid, XAResource.TMJOIN);
@@ -891,6 +980,10 @@ public class DataSourceTest extends BaseJDBCTestCase {
             "sruBatch", new int[] {1,2,3,4,5,6,7,8}, cs1, sruBatch);
 
         xar2.end(xid, XAResource.TMSUCCESS);
+        //Confirm - no connection closed event & connection error event
+        assertFalse(aes5.didConnectionClosedEventHappen());
+        assertFalse(aes5.didConnectionErrorEventHappen());
+        aes5.resetState();
         xac2.close();
 
         // allow close on already closed XAConnection
@@ -3171,6 +3264,10 @@ class cdsXid implements Xid, Serializable
 class AssertEventCatcher implements ConnectionEventListener
 {
     private final int catcher;
+    //The following flags will indicate what kind of event was
+    //received by this listener
+    private boolean gotConnectionClosed = false;
+    private boolean gotConnectionErrorOccured = false;
 
     AssertEventCatcher(int which) {
         catcher=which;
@@ -3179,19 +3276,46 @@ class AssertEventCatcher implements ConnectionEventListener
     // ConnectionEventListener methods
     public void connectionClosed(ConnectionEvent event)
     {
-        // System.out.print("EVENT("+catcher+"):connectionClosed");
         SQLException sqle = event.getSQLException();
         if (sqle != null)
             System.out.print("DataSourceTest-" + catcher + "; SQLSTATE="
                 + sqle.getSQLState());
+        gotConnectionClosed = true;
     }
 
     public void connectionErrorOccurred(ConnectionEvent event)
     {
-        // System.out.print("EVENT("+catcher+"):connectionErrorOccurred");
         SQLException sqle = event.getSQLException();
         if (sqle != null)
             System.out.print("DataSourceTest-" + catcher + "; SQLSTATE=" +
                 sqle.getSQLState());
+        gotConnectionErrorOccured = true;
+    }
+
+    /**
+     * Tell the caller if we received Connection closed event
+     * @return true if received Connection closed event
+     */
+    public boolean didConnectionClosedEventHappen() 
+    {
+    	return gotConnectionClosed;
+    }
+    
+    /**
+     * Tell the caller if we received Connection error event
+     * @return true if received Connection error event
+     */
+    public boolean didConnectionErrorEventHappen() 
+    {
+    	return gotConnectionErrorOccured;
+    }
+    
+    /**
+     * Clear the event received flags for this listener.
+     */
+    public void resetState() 
+    {
+    	gotConnectionClosed = false;
+    	gotConnectionErrorOccured = false;
     }
 }
