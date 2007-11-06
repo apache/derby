@@ -21,6 +21,9 @@
 
 package org.apache.derby.impl.tools.ij;
 
+import org.apache.derby.iapi.tools.i18n.LocalizedOutput;
+import org.apache.derby.iapi.tools.i18n.LocalizedInput;
+
 import java.io.IOException;
 import java.io.Reader;
 
@@ -54,6 +57,9 @@ public class StatementFinder {
 	private boolean peekEOF = false;
 	private char peekChar;
 	private boolean peeked = false;
+	private LocalizedOutput promptwriter;
+	private boolean doPrompt;
+	private boolean continuedStatement;
 
 	// state variables
 	private static final int IN_STATEMENT = 0;
@@ -77,19 +83,36 @@ public class StatementFinder {
 		The constructor does not assume the stream is data input
 		or buffered, so it will wrap it appropriately.
 
+		If the StatementFinder's input stream is connected to
+		System.in, a LocalizedOutput stream may be given to print
+		line continuation prompts when StatementFinder reads a newline.
+
 		@param s the input stream for reading statements from.
+		@param promptDest LocalizedOutput stream to write line
+						continuation prompts ("> ") to. If null,
+						no such prompts will be written.
 	 */
-	public StatementFinder(Reader s) { 
+	public StatementFinder(LocalizedInput s, LocalizedOutput promptDest) {
 		source = s;
+		if(promptDest != null && s.isStandardInput()) {
+			promptwriter = promptDest;
+			doPrompt = true;
+		} else {
+			doPrompt = false;
+		}
 	}
 
 	/**
 		Reinit is used to redirect the finder to another stream.
 		The previous stream should not have been in a PEEK state.
 
+		If an output stream was given when constructing this 
+		StatementFinder and the input is standard input, 
+		continuation prompting will be enabled.
+
 		@param s the input stream for reading statements from.
 	 */
-	public void ReInit(Reader s) { 
+	public void ReInit(LocalizedInput s) {
 	    try {
 			source.close();
 		} catch (IOException ioe) {
@@ -100,6 +123,11 @@ public class StatementFinder {
 		atEOF = false;
 		peekEOF = false;
 		peeked = false;
+		if(s.isStandardInput() && promptwriter != null) {
+			doPrompt = true;
+		} else {
+			doPrompt = false;
+		}
 	}
 
 	public void close() throws IOException {
@@ -145,6 +173,9 @@ public class StatementFinder {
 				state = END_OF_INPUT;
 				break;
 			}
+			
+			if (!(nextChar == MINUS))
+				continuedStatement=true;
 
 			switch(nextChar) {
 				case MINUS:
@@ -157,7 +188,19 @@ public class StatementFinder {
 				case SEMICOLON:
 					haveSemi = true;
 					state = END_OF_STATEMENT;
+					continuedStatement=false;
 					break;
+				case NEWLINE:
+				case RETURN:
+					if(doPrompt) {
+						utilMain.doPrompt(false, promptwriter, "");
+						/* If the next character is a newline as well,
+						   we swallow it to avoid double prompting on
+						   Windows. */
+						if(nextChar == RETURN && peekChar() == NEWLINE) {
+							readChar();
+						}
+					}
 				default:
 					// keep going, just a normal character
 					break;
@@ -204,7 +247,11 @@ public class StatementFinder {
 
 		// if nextChar is not a minus, it was just a normal minus,
 		// nothing special to do
-		if (nextChar != commentChar) return;
+		if (nextChar != commentChar)
+		{
+			continuedStatement=true;
+			return;
+		}
 
 		// we are really in a comment
 		readChar(); // grab the minus for real.
@@ -222,7 +269,23 @@ public class StatementFinder {
 				case RETURN:
 					readChar(); // okay to process the character
 					state = IN_STATEMENT;
-					return;
+					if (doPrompt){
+						// If we had previously already started a statement,
+						// add the prompt.
+						// Otherwise, consider this a single line comment,
+						// and the next line should not get a prompt
+						if (continuedStatement)
+							utilMain.doPrompt(false, promptwriter, "");
+                        else
+                            utilMain.doPrompt(true, promptwriter, "");
+					    
+						/* If the next character is a NEWLINE, we process
+						 *  it as well to account for Windows CRLFs. */
+						if(nextChar == RETURN && peekChar() == NEWLINE) {
+							readChar();
+						}
+					}
+				return;
 				default:
 					readChar(); // process the character, still in comment
 					break;

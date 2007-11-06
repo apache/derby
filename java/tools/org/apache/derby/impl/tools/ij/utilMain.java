@@ -140,7 +140,7 @@ public class utilMain implements java.security.PrivilegedAction {
 
 		for (int ictr = 0; ictr < numConnections; ictr++)
 		{
-		    commandGrabber[ictr] = new StatementFinder(langUtil.getNewInput(System.in));
+		    commandGrabber[ictr] = new StatementFinder(langUtil.getNewInput(System.in), out);
 			connEnv[ictr] = new ConnectionEnv(ictr, (numConnections > 1), (numConnections == 1));
 		}
 
@@ -609,7 +609,7 @@ public class utilMain implements java.security.PrivilegedAction {
 		// if the file was opened, move to use it for input.
 		oldGrabbers.push(commandGrabber[currCE]);
 	    commandGrabber[currCE] = 
-                new StatementFinder(langUtil.getNewInput(new BufferedInputStream(newFile, BUFFEREDFILESIZE)));
+                new StatementFinder(langUtil.getNewInput(new BufferedInputStream(newFile, BUFFEREDFILESIZE)), null);
 		fileInput = true;
 	}
 
@@ -618,7 +618,7 @@ public class utilMain implements java.security.PrivilegedAction {
 		if (is==null) throw ijException.resourceNotFound();
 		oldGrabbers.push(commandGrabber[currCE]);
 	    commandGrabber[currCE] = 
-                new StatementFinder(langUtil.getNewEncodedInput(new BufferedInputStream(is, BUFFEREDFILESIZE), "UTF8"));
+                new StatementFinder(langUtil.getNewEncodedInput(new BufferedInputStream(is, BUFFEREDFILESIZE), "UTF8"), null);
 		fileInput = true;
 	}
 
