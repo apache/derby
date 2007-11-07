@@ -3,9 +3,6 @@
 # 
 # jdbcapi/HoldabilityTest.junit - causes subsequent tests to fail because of missing
 #     File permissions
-# jdbcapi/bestrowidentifier.sql - test fails when db2jcc is in classpath, complaining about
-#     java.lang.ExceptionInInitializerError 
-#     and access denied (java.lang.RuntimePermission loadLibrary.db2jcct2). (????!)
 # derbynet/NSinSameJVM.java - diff between thread and main. kind of ok, but fails.
 # derbynet/DerbyNetAutoStart.java - exits suite...
 # derbynet/getCurrentProperties.java - fails with different sessions
@@ -21,7 +18,6 @@
 #
 jdbcapi/maxfieldsize.java
 jdbcapi/HoldabilityTest.junit
-jdbcapi/bestrowidentifier.sql
 derbynet/NSinSameJVM.java
 derbynet/DerbyNetAutoStart.java
 derbynet/getCurrentProperties.java

@@ -2,9 +2,6 @@
 # identifies tests that fail when run in a suite with useprocess=false with embedded 
 # 
 # jdbcapi/HoldabilityTest.junit - causes subsequent tests to fail
-# jdbcapi/bestrowidentifier.sql - test fails when db2jcc is in classpath, complaining about
-#     java.lang.ExceptionInInitializerError 
-#     and access denied (java.lang.RuntimePermission loadLibrary.db2jcct2). (????!)
 # jdbcapi/getCurConnJdbc20.sql ditto.
 # jdbcapi/SURQueryMixTest.junit - fails with severe errors.
 # jdbcapi/SURTest.junit - fails with severe errors.
@@ -12,7 +9,6 @@
 # jdbcapi/rsgetXXXcolumnNames.java - fails with an error indicating wombat already exists
 # 
 jdbcapi/HoldabilityTest.junit
-jdbcapi/bestrowidentifier.sql
 jdbcapi/getCurConnJdbc20.sql
 jdbcapi/SURQueryMixTest.junit
 jdbcapi/SURTest.junit
