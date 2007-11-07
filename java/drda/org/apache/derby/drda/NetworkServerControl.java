@@ -586,6 +586,14 @@ public class NetworkServerControl{
         { System.setProperty( Property.SYSTEM_HOME_PROPERTY, PropertyUtil.getSystemProperty( "user.dir" ) ); }
 
         //
+        // Make sure the following property is set so that it can be substituted into the
+        // policy file. That will let us grant write permission on the server's
+        // trace file.
+        //
+        if ( PropertyUtil.getSystemProperty( Property.DRDA_PROP_TRACEDIRECTORY ) == null )
+        { System.setProperty( Property.DRDA_PROP_TRACEDIRECTORY, PropertyUtil.getSystemProperty( Property.SYSTEM_HOME_PROPERTY ) ); }
+
+        //
         // Forcibly set the following property so that it will be correctly
         // substituted into the default policy file. This is the hostname for
         // SocketPermissions. This is an internal property which customers
