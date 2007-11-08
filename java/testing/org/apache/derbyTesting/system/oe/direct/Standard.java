@@ -229,8 +229,10 @@ public class Standard implements Operations {
             
             // Customer to use is midpoint (with round up) (see 2.6.2.2)
             int mid = list.size()/2;
-            if (list.size()%2 == 1)
-                mid++;
+            if (mid != 0) {
+                if (list.size()%2 == 1)
+                    mid++;
+            }
 
 
             Customer customer = (Customer) list.get(mid);
@@ -386,8 +388,10 @@ public class Standard implements Operations {
             
             // Customer to use is midpoint (with round up) (see 2.5.2.2)
             int mid = list.size()/2;
-            if (list.size()%2 == 1)
-                mid++;
+            if (mid != 0) {
+                if (list.size()%2 == 1)
+                    mid++;
+            }
             
             int c = ((Integer) list.get(mid)).intValue();
 
