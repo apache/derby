@@ -45,8 +45,8 @@ public class _Suite extends BaseTestCase  {
     public static Test suite() {
 
         TestSuite suite = new TestSuite("derbynet");
-        
-        suite.addTest(NetworkServerControlApiTest.suite());     
+        // Remove NetworkServerControlApiTest until DERBY-3174 is resolved.
+        //suite.addTest(NetworkServerControlApiTest.suite());     
         suite.addTest(PrepareStatementTest.suite());
         suite.addTest(ShutDownDBWhenNSShutsDownTest.suite());
         suite.addTest(DRDAProtocolTest.suite());
