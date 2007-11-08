@@ -33,6 +33,9 @@ public class MultiThreadSubmitter {
      * transactions will be executed. The time returned
      * will be the time to execute all the transactions.
      * 
+     * Each submitter will have its clearTransactionCount called
+     * before the run.
+     * 
      * @param submitters Submitters to use.
      * @param displays Displays for each submitter.
      * If null then null will be passed into each transaction
@@ -47,6 +50,7 @@ public class MultiThreadSubmitter {
 
         Thread[] threads = new Thread[submitters.length];
         for (int i = 0; i < submitters.length; i++) {
+            submitters[i].clearTransactionCount();
             Object displayData = displays == null ? null : displays[i];
             threads[i] = newThread(i, submitters[i], displayData, count);
         }
