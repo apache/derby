@@ -43,10 +43,6 @@ public class SysinfoCPCheckTest extends BaseJDBCTestCase {
         super(name); 
     }
 
-    final String outputEncoding = "US-ASCII";
-
-    private ByteArrayOutputStream rawBytes;
-
     private static boolean isClient = true;
     private static boolean isServer = true;
     
@@ -116,9 +112,11 @@ public class SysinfoCPCheckTest extends BaseJDBCTestCase {
         int tst=0;
         for (tst=0; tst<tstargs.length ; tst++)
         {
+            ByteArrayOutputStream rawBytes = getOutputStream();
+
             // First obtain the output for the sysinfo command
             try {
-                PrintStream testOut = new PrintStream(getOutputStream(),
+                PrintStream testOut = new PrintStream(rawBytes,
                     false, outputEncoding);
                 setSystemOut(testOut);
             } catch (UnsupportedEncodingException uee) {
@@ -241,12 +239,7 @@ public class SysinfoCPCheckTest extends BaseJDBCTestCase {
         );       
     }
 
-    OutputStream getOutputStream() {
-        return rawBytes = new ByteArrayOutputStream(20 * 1024);
-    }
-
-    protected void tearDown() throws Exception {
-        rawBytes = null;
-        super.tearDown();
+    ByteArrayOutputStream getOutputStream() {
+        return new ByteArrayOutputStream(20 * 1024);
     }
 }
