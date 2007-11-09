@@ -32,8 +32,10 @@ import org.apache.derbyTesting.junit.TestConfiguration;
 
 import java.io.File;
 import java.security.AccessController;
+import java.security.Policy;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
+import java.util.Enumeration;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -62,6 +64,7 @@ public class NetworkServerControlApiTest extends BaseJDBCTestCase {
         NetworkServerControl nsctrl = new NetworkServerControl();
         String derbySystemHome = getSystemProperty("derby.system.home");
         nsctrl.setTraceDirectory(derbySystemHome);
+       
         nsctrl.trace(true);
         nsctrl.ping();
         assertTrue(fileExists(derbySystemHome+"/Server3.trace"));

@@ -177,9 +177,10 @@ public final class SecurityManagerSetup extends TestSetup {
 
                 public Object run() {
                     SecurityManager sm = new SecurityManager();
-				System.setSecurityManager(sm);
- 				return null;
-			}
+                    System.setSecurityManager(sm);
+                    Policy.getPolicy().refresh();
+                    return null;
+                }
 		});
 
 	}

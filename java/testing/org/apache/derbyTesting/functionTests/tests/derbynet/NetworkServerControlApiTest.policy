@@ -94,7 +94,7 @@ grant codeBase "${derbyTesting.codejar}derbynet.jar" {
   permission java.net.SocketPermission "${derbyTesting.serverhost}", "accept,connect";
     //tracing testing. NetworkServerControlApiTest
     permission java.io.FilePermission "${derby.system.home}", "write"; 
-    permission java.io.FilePermission "${derby.system.home}/-", "write"; 
+    permission java.io.FilePermission "${derby.system.home}${/}-", "write"; 
 };
 
 //
@@ -158,6 +158,7 @@ grant codeBase "${derbyTesting.testjar}derbyTesting.jar" {
   // the security manager and allow setIO to change the system err and out
   // streams. Currently the nist suite runs with useprocess=false.
   permission java.lang.RuntimePermission "setSecurityManager";
+  permission java.security.SecurityPermission "getPolicy";
   permission java.lang.RuntimePermission "setIO"; 
 };
 
