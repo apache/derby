@@ -1936,18 +1936,6 @@ nextModule:
 
 	private void dumpTempWriter(boolean bothPlaces) {
 
-                // DERBY-1272: Print sysinfo to log if derby.stream.error.logSeverityLevel=0
-                int logSeverityLevel = PropertyUtil.getSystemInt(Property.LOG_SEVERITY_LEVEL,
-                        SanityManager.DEBUG ? 0 : ExceptionSeverity.SESSION_SEVERITY);
-                if (logSeverityLevel == 0) {
-                    if (systemStreams != null) {
-                       systemStreams.stream().printlnWithHeader("");
-                       org.apache.derby.tools.sysinfo.getInfo(systemStreams.stream().getPrintWriter());
-                    } else {
-                       org.apache.derby.tools.sysinfo.getInfo(getTempWriter());
-                    }
-                }
-
 		if (tmpWriter == null)
 			return;
 
