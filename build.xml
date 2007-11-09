@@ -38,7 +38,7 @@
 <!-- Targets -->
 
   <target name="buildsource" depends="checkCompilerLevel,init,engine,storeless,tools,drda,client,build,versioninfo,localeinfo"/>
-  <target name="all" depends="buildsource,demo,testing"/>
+  <target name="all" depends="buildsource,demo,testing,pptesting"/>
 
 <!-- ==================================================================== -->
 <!--                       Initialize targets                             -->
@@ -392,10 +392,14 @@
     <ant dir="${derby.demo.src.dir}" target="compile-vtidemo"/>
   </target>
 
-  <target name="testing" depends="demo">
+  <target name="testing" depends="buildsource,demo">
     <ant dir="${derby.testing.src.dir}"/>
   </target>
 	
+  <!-- Build the package private tests -->
+  <target name="pptesting" if="jdk16" depends="testing">
+    <ant dir="${derby.pptesting.src.dir}"/>
+  </target>
 
 
 <!-- ==================================================================== -->
@@ -453,6 +457,7 @@
   <target name="clean">
     <delete dir="${out.dir}"/>
   	<delete dir="${out.storeless.dir}"/>
+  	<delete dir="${out.pptesting.dir}"/>
   </target>
 
 <!-- ==================================================================== -->
@@ -1839,6 +1844,26 @@
        	    <pathelement path="${derby.junit.classpath}"/>
         </classpath>
       </junit>	
+  </target>
+
+  <!-- Run the package private tests against the classes directories. -->
+  <target name="junit-pptesting" depends="junit-init">
+    <junit  printsummary="on"
+            fork="yes" forkmode="once"
+            showoutput="yes"
+            dir="junit_${derby.junit.timestamp}"
+            errorproperty="tests.failed"
+            failureproperty="tests.failed">
+        <formatter type="xml"/>
+
+        <test name="org.apache.derby.PackagePrivateTestSuite"
+                todir="junit_${derby.junit.timestamp}"/>
+
+        <classpath>
+            <pathelement location="${out.pptesting.dir}"/>
+            <pathelement location="${out.dir}"/>
+        </classpath>
+    </junit>
   </target>
 
   <target name="junit-all" depends="junit-core,junit-jdbc4">
