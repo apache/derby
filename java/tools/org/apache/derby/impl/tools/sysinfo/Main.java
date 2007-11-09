@@ -93,7 +93,7 @@ public final class Main {
   */
   public static void main(String args[]) {
         // adjust the application in accordance with derby.ui.locale and derby.ui.codeset
-        LocalizedResource.getInstance();
+        LocalizedResource.getInstance().init();
 
 		LocalizedOutput out;
 

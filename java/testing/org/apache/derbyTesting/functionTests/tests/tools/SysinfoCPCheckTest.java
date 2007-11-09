@@ -91,87 +91,77 @@ public class SysinfoCPCheckTest extends BaseJDBCTestCase {
         final String[][] tstargs = {
                 // empty string; should check all; what to check? Just check top
                 // to ensure it recognizes it needs to check all.
-                {null, "0", "Testing for presence of all Derby-related librari" +
-                    "es; typically, only some are needed.", null, "0"},
-                    // incorrect syntax, or 'args' - should return usage
-                    {"a", "0", "USAGE: java org.apache.derby.tools.sysinfo -cp [" +
-                        " [ embedded ][ server ][ client] [ db2driver ] [ tools ]" +
-                        " [  anyClass.class ] ]", null, "1"},
-                        {"embedded", "6", Success, "derby.jar", "2"}, 
-                        {"server", "10", Success, "derbynet.jar", "3"},
-                        {"tools", "6", Success, "derbytools.jar", "4"},
-                        {"client", "6", Success, "derbyclient.jar", "5"},
-                        // let's not test the following valid value, it's likely to fail:
-                        // {"db2driver", "6", Success, "db2jcc.jar"},
-                        {thisclass, "6", Success, "SysinfoCPCheckTest", "6"},
-                        // neg tst, hope this doesn't exist
-                        {"nonexist.class", "6", "    (nonexist not found.)", null, "7"}
+                {null, "0", "Testing for presence of all Derby-related " +
+                    "libraries; typically, only some are needed.", null},
+                // incorrect syntax, or 'args' - should return usage
+                {"a", "0", "USAGE: java org.apache.derby.tools.sysinfo -cp [" +
+                    " [ embedded ][ server ][ client] [ db2driver ] [ tools ]" +
+                    " [  anyClass.class ] ]", null},
+                {"embedded", "6", Success, "derby.jar"}, 
+                {"server", "10", Success, "derbynet.jar"},
+                {"tools", "6", Success, "derbytools.jar"},
+                {"client", "6", Success, "derbyclient.jar"},
+                // let's not test the following valid value, it will 
+                // fail if db2jcc.jar is not on CLASSPATH
+                //{"db2driver", "6", Success, "db2jcc.jar"},
+                {thisclass, "6", Success, "SysinfoCPCheckTest"},
+                // neg tst, hope this doesn't exist
+                {"nonexist.class", "6", "    (nonexist not found.)", null}
         };
-
-        // First obtain the output of all sysinfo commands we want to test
-        // we print a number for each of the commands to test for unraveling
-        // them later.
 
         final String outputEncoding = "US-ASCII";
 
         PrintStream out = System.out;
-        try {
-            PrintStream testOut = new PrintStream(getOutputStream(),
-                    false, outputEncoding);
-            setSystemOut(testOut);
-        } catch (UnsupportedEncodingException uee) {
-            uee.printStackTrace();
-        }
 
-        for (int tst=0; tst<tstargs.length ; tst++)
+        int tst=0;
+        for (tst=0; tst<tstargs.length ; tst++)
         {
+            // First obtain the output for the sysinfo command
+            try {
+                PrintStream testOut = new PrintStream(getOutputStream(),
+                    false, outputEncoding);
+                setSystemOut(testOut);
+            } catch (UnsupportedEncodingException uee) {
+                uee.printStackTrace();
+            }
+
             if (!checkClientOrServer(tstargs[tst][0]))
                 continue;
 
-            // print out a number to unravel the fulloutput later
-            System.out.println(tstargs[tst][4]);
-
-            // The first command has only 1 arg
+            // First command has only 1 arg, prevent NPE with if/else block 
             if (tstargs[tst][0] == null)
-                org.apache.derby.tools.sysinfo.main(
-                    new String[] {"-cp"} );
+                org.apache.derby.tools.sysinfo.main(new String[] {"-cp"} );
             else
                 org.apache.derby.tools.sysinfo.main(
                     new String[] {"-cp", tstargs[tst][0]} );
-        }
 
-        setSystemOut(out);
+            setSystemOut(out);
 
-        rawBytes.flush();
-        rawBytes.close();
+            rawBytes.flush();
+            rawBytes.close();
 
-        byte[] testRawBytes = rawBytes.toByteArray();
+            byte[] testRawBytes = rawBytes.toByteArray();
 
-        String s = null;
+            //System.out.println("cp command: -cp " + tstargs[tst][0]);
 
-        try {
+            String s = null;
 
-            BufferedReader sysinfoOutput = new BufferedReader(
-                new InputStreamReader(
-                    new ByteArrayInputStream(testRawBytes),
-                        outputEncoding));
+            try {
+                BufferedReader sysinfoOutput = new BufferedReader(
+                    new InputStreamReader(
+                        new ByteArrayInputStream(testRawBytes),
+                            outputEncoding));
 
-            s = sysinfoOutput.readLine();
-
-            // evaluate the output
-            for (int tst=0; tst<tstargs.length ; tst++)
-            {
-                //System.out.println("cp command: -cp " + tstargs[tst][0]);
-
+                // evaluate the output
                 // compare the sentence picked
 
                 // first one is a bit different - is classpath dependent, so
                 // we're not going to look through all lines.
-                if (tstargs[tst][4].equals("0"))
+                if (tstargs[tst][0]==null)
                 {
                     s=sysinfoOutput.readLine();
                     assertEquals(tstargs[tst][2], s);
-                    while (!s.equals(tstargs[tst+1][4]))
+                    while (s != null)
                     {
                         s=sysinfoOutput.readLine();
                     }
@@ -180,9 +170,6 @@ public class SysinfoCPCheckTest extends BaseJDBCTestCase {
 
                 if (!checkClientOrServer(tstargs[tst][0]))
                     continue;
-
-                if (!s.equals(tstargs[tst][4]))
-                    fail("out of sync with expected lines, indicates a problem");
 
                 // get the appropriate line for the full line comparison
                 int linenumber = Integer.parseInt(tstargs[tst][1]);
@@ -201,7 +188,7 @@ public class SysinfoCPCheckTest extends BaseJDBCTestCase {
                 }
                 if (tstargs[tst][3] != null && !found)
                     fail ("did not find the string searched for: " + 
-                            tstargs[tst][3] + " for command -cp: " + tstargs[tst][0]);
+                         tstargs[tst][3] + " for command -cp: " + tstargs[tst][0]);
 
                 // read the line to be compared
                 s = sysinfoOutput.readLine();
@@ -215,11 +202,11 @@ public class SysinfoCPCheckTest extends BaseJDBCTestCase {
 
                 // read one more line - should be the next command's sequence number
                 s = sysinfoOutput.readLine();
-            }
 
-            sysinfoOutput.close();
-        } catch (Exception e) {
-            e.printStackTrace();
+                sysinfoOutput.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
