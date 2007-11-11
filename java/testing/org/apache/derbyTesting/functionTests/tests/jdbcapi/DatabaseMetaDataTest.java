@@ -2804,8 +2804,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         st.execute("create table brit12 (i int not null, j int not null, "
                 + "unique (i,j))");
         st.execute("create unique index brit12i on brit12(i)");
-        st.execute("create table brit13 (i int not null, j int not null, k "
-                + "int, unique (i,j))");
+        st.execute("create table brit13 (i int not null, j int)");
         // fewest cols unique con is the one picked of several
         st.execute("create table brit14 (i int not null unique, j int not "
                 + "null, k int, unique (i,j))");
@@ -2841,9 +2840,6 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         String [][] expRSIJ = {
                 {"2", "I", "4", "INTEGER", "4", null, "10", "1"},
                 {"2", "J", "4", "INTEGER", "4", null, "10", "1"}};
-        // not used unless DERBY-3182 is fixed
-        // String [][] expRSK =
-        //    {"2", "K", "4", "INTEGER", "4", null, "10", "1"},
 
         boolean [] nullability = {
                 true, false, true, true, true, true, true, true};
@@ -2898,13 +2894,12 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         rs = dmd.getBestRowIdentifier(null,"APP","BRIT12",0,true);
         verifyBRIResults(rs, expRSIJ, nullability);
         
-        // DERBY-3182: we aren't handling nullOk flag correctly we 
-        // just drop nullable cols, we should skip an answer that 
-        // has nullable cols in it instead and look for another one.
-
-        // result: columns i, j (WRONG) the correct answer is k: 
-        // the non-null columns of the table
+        // Verify nullOK flas makes a difference. See also DERBY-3182
+        // result: column i, should've ignored null column
         rs = dmd.getBestRowIdentifier(null,"APP","BRIT13",0,false);
+        verifyBRIResults(rs, expRSI, nullability);
+        // result: columns i, j
+        rs = dmd.getBestRowIdentifier(null,"APP","BRIT13",0,true);
         verifyBRIResults(rs, expRSIJ, nullability);
         
         // result: columns i
