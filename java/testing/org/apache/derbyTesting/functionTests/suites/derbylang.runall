@@ -21,7 +21,6 @@ lang/declareGlobalTempTableJavaJDBC30.java
 lang/desc_index.sql
 lang/dropTable.sql
 lang/emptyStatistics.sql
-lang/errorStream.java
 lang/fk_nonSPS.sql
 lang/holdCursorIJ.sql
 lang/inbetween.sql
@@ -30,7 +29,6 @@ lang/isolationLevels.sql
 lang/joinDeadlock.sql
 lang/langUnitTests.sql
 lang/lockTable.sql
-lang/logStream.java
 lang/lojreorder.sql
 lang/maxMemPerTab.java
 lang/nestedCommit.sql

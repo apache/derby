@@ -1811,6 +1811,8 @@
 	todir="junit_${derby.junit.timestamp}"/>
 <test name="org.apache.derbyTesting.functionTests.tests.store._Suite"
 	todir="junit_${derby.junit.timestamp}"/>
+<test name="org.apache.derbyTesting.functionTests.tests.engine._Suite"
+	todir="junit_${derby.junit.timestamp}"/>
 <test name="org.apache.derbyTesting.functionTests.tests.upgradeTests._Suite"
   	todir="junit_${derby.junit.timestamp}"/>
 <test name="org.apache.derbyTesting.functionTests.suites.EncryptionSuite"
