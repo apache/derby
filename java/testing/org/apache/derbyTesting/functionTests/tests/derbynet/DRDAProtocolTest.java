@@ -24,26 +24,26 @@ package org.apache.derbyTesting.functionTests.tests.derbynet;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
-import javax.sql.DataSource;
 
-import junit.extensions.TestSetup;
 import junit.framework.Test;
-import junit.framework.TestSuite;
 
-import org.apache.derbyTesting.junit.JDBCDataSource;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.BaseJDBCTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
-import org.apache.derbyTesting.junit.SupportFilesSetup;
 
-/** The test of the properties of the DRDA network protocol implementation.
-  */
+/**
+ * Tests of the properties of the DRDA network protocol implementation.
+ */
 public class DRDAProtocolTest extends BaseJDBCTestCase {
     
-    /** Test whether the multiple connections to different databases
-      * on a same derby instance are working without exceptions. */
-    public void testMultipleConnections() throws Exception {
+    /** 
+     * Tests whether multiple connections to different databases
+     * on the same Derby instance are working without exceptions.
+     * 
+     * @throws SQLException if database interaction fails
+     */
+    public void testMultipleConnections() throws SQLException {
         Connection conn1 = openConnection("FIRSTDB1");
         conn1.setAutoCommit(false);
 
@@ -87,5 +87,4 @@ public class DRDAProtocolTest extends BaseJDBCTestCase {
         test = TestConfiguration.additionalDatabaseDecorator(test, "SECONDDB2");
         return test;
     }
-    
 }
