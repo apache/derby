@@ -697,6 +697,7 @@ public class ColumnDefinitionNode extends TableElementNode
 				{
 				case C_NodeTypes.USER_NODE:
 				case C_NodeTypes.CURRENT_USER_NODE:
+				case C_NodeTypes.CURRENT_ROLE_NODE:
 				case C_NodeTypes.SESSION_USER_NODE:
 				case C_NodeTypes.SYSTEM_USER_NODE:
 				// DB2 enforces min length of 8.

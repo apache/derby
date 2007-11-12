@@ -34,6 +34,7 @@ SYS                 |SYSDEPENDS                    |
 SYS                 |SYSFILES                      |                    
 SYS                 |SYSFOREIGNKEYS                |                    
 SYS                 |SYSKEYS                       |                    
+SYS                 |SYSROLES                      |                    
 SYS                 |SYSROUTINEPERMS               |                    
 SYS                 |SYSSCHEMAS                    |                    
 SYS                 |SYSSTATEMENTS                 |                    
@@ -77,6 +78,7 @@ SYS                 |SYSDEPENDS                    |
 SYS                 |SYSFILES                      |                    
 SYS                 |SYSFOREIGNKEYS                |                    
 SYS                 |SYSKEYS                       |                    
+SYS                 |SYSROLES                      |                    
 SYS                 |SYSROUTINEPERMS               |                    
 SYS                 |SYSSCHEMAS                    |                    
 SYS                 |SYSSTATEMENTS                 |                    

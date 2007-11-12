@@ -672,6 +672,7 @@ SYSSTATISTICS                                                                   
 SYSTABLEPERMS                                                                                                                   |1          
 SYSCOLPERMS                                                                                                                     |1          
 SYSROUTINEPERMS                                                                                                                 |1          
+SYSROLES                                                                                                                        |1          
 ij> -- verify the consistency of the indexes on the user tables
 select tablename, SYSCS_UTIL.SYSCS_CHECK_TABLE('APP', tablename)
 from sys.systables where tabletype = 'T';

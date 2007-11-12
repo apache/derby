@@ -41,6 +41,7 @@ import org.apache.derby.iapi.sql.dictionary.StatementTablePermission;
 import org.apache.derby.iapi.sql.dictionary.StatementSchemaPermission;
 import org.apache.derby.iapi.sql.dictionary.StatementColumnPermission;
 import org.apache.derby.iapi.sql.dictionary.StatementRoutinePermission;
+import org.apache.derby.iapi.sql.dictionary.StatementRolePermission;
 
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 
@@ -693,6 +694,7 @@ public class CompilerContextImpl extends ContextImpl
 		requiredTablePrivileges = null;
 		requiredSchemaPrivileges = null;
 		requiredRoutinePrivileges = null;
+		requiredRolePrivileges = null;
 		LanguageConnectionContext lcc = (LanguageConnectionContext)
 		getContextManager().getContext(LanguageConnectionContext.CONTEXT_ID);
 		if( lcc.usesSqlAuthorization())
@@ -701,6 +703,7 @@ public class CompilerContextImpl extends ContextImpl
 			requiredTablePrivileges = new HashMap();
 			requiredSchemaPrivileges = new HashMap();
 			requiredRoutinePrivileges = new HashMap();
+			requiredRolePrivileges = new HashMap();
 		}
 	} // end of initRequiredPriv
 
@@ -818,6 +821,24 @@ public class CompilerContextImpl extends ContextImpl
 		requiredSchemaPrivileges.put(key, key);
 	}
 
+
+	/**
+	 * Add a required role privilege to the list privileges.
+	 *
+	 * @see CompilerContext#addRequiredRolePriv
+	 */
+	public void addRequiredRolePriv(String roleName, int privType)
+	{
+		if( requiredRolePrivileges == null)
+			return;
+
+		StatementRolePermission key = new
+			StatementRolePermission(roleName, privType);
+
+		requiredRolePrivileges.put(key, key);
+	}
+
+
 	/**
 	 * @return The list of required privileges.
 	 */
@@ -832,6 +853,8 @@ public class CompilerContextImpl extends ContextImpl
 			size += requiredSchemaPrivileges.size();
 		if( requiredColumnPrivileges != null)
 			size += requiredColumnPrivileges.size();
+		if( requiredRolePrivileges != null)
+			size += requiredRolePrivileges.size();
 		
 		ArrayList list = new ArrayList( size);
 		if( requiredRoutinePrivileges != null)
@@ -860,6 +883,14 @@ public class CompilerContextImpl extends ContextImpl
 		if( requiredColumnPrivileges != null)
 		{
 			for( Iterator itr = requiredColumnPrivileges.values().iterator(); itr.hasNext();)
+			{
+				list.add( itr.next());
+			}
+		}
+		if( requiredRolePrivileges != null)
+		{
+			for( Iterator itr = requiredRolePrivileges.values().iterator();
+				 itr.hasNext();)
 			{
 				list.add( itr.next());
 			}
@@ -914,4 +945,5 @@ public class CompilerContextImpl extends ContextImpl
 	private HashMap requiredTablePrivileges;
 	private HashMap requiredSchemaPrivileges;
 	private HashMap requiredRoutinePrivileges;
+	private HashMap requiredRolePrivileges;
 } // end of class CompilerContextImpl

@@ -27,6 +27,7 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
+import org.apache.derby.iapi.sql.dictionary.RoleDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.compile.OptimizerFactory;
 import org.apache.derby.iapi.types.DataValueFactory;
@@ -421,7 +422,23 @@ public interface LanguageConnectionContext extends Context {
 	 * @return String	the authorization id
 	 */
 	public String getAuthorizationId();
-  
+
+	/**
+	 *	Get the current role authorization identifier
+	 *
+	 * @return String	the role id
+	 */
+	public String getCurrentRoleId();
+
+
+    /**
+	 * Set the current role
+	 *
+	 * @param rd	the descriptor of the role to be set to current
+	 */
+    public void setCurrentRole(RoleDescriptor rd);
+
+
 	/**
 	 *	Get the current default schema for the connection.
 	 *

@@ -63,7 +63,11 @@ public interface Authorizer
 	public static final int CREATE_SCHEMA_PRIV = 16;
 	public static final int MODIFY_SCHEMA_PRIV = 17;
 	public static final int DROP_SCHEMA_PRIV = 18;
-	
+
+    /* Check who can create and drop roles */
+	public static final int CREATE_ROLE_PRIV = 19;
+	public static final int DROP_ROLE_PRIV = 20;
+
 	/**
 	 * The system authorization ID is defined by the SQL2003 spec as the grantor
 	 * of privileges to object owners.

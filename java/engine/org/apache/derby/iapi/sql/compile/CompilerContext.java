@@ -551,6 +551,13 @@ public interface CompilerContext extends Context
 	public void addRequiredRoutinePriv( AliasDescriptor routine);
 
 	/**
+	 * Add a required role privilege to the list of privileges.
+	 *
+	 * @see CompilerContext#addRequiredRolePriv
+	 */
+	public void addRequiredRolePriv(String roleName, int privType);
+
+	/**
 	 * @return The list of required privileges.
 	 */
 	public List getRequiredPermissionsList();

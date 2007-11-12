@@ -79,6 +79,20 @@ Guide.
             </msg>
 
             <msg>
+                <name>01007</name>
+                <text>Role {0} not revoked from authentication id {1}.</text>
+                <arg>authorizationID</arg>
+                <arg>authorizationID</arg>
+            </msg>
+
+            <msg>
+                <name>01008</name>
+                <text>WITH ADMIN OPTION of role {0} not revoked from authentication id {1}.</text>
+                <arg>authorizationID</arg>
+                <arg>authorizationID</arg>
+            </msg>
+
+            <msg>
                 <name>0100E</name>
                 <text>XX Attempt to return too many result sets. </text>
             </msg>
@@ -468,6 +482,24 @@ Guide.
 
 
         <family>
+            <title>Class 0P: Invalid role specification</title>
+
+            <msg>
+                <name>0P000</name>
+                <text>Invalid role specification, role does not exist: '{0}'.</text>
+                <arg>roleName</arg>
+            </msg>
+
+            <msg>
+                <name>0P000.S.1</name>
+                <text>Invalid role specification, role not granted to current user or PUBLIC: '{0}'.</text>
+                <arg>roleName</arg>
+            </msg>
+
+        </family>
+
+
+        <family>
             <title>Class 21: Cardinality Violation</title>
 
             <msg>
@@ -742,6 +774,11 @@ Guide.
             <msg>
                 <name>25001</name>
                 <text>Cannot close a connection while a transaction is still active.</text>
+            </msg>
+
+            <msg>
+                <name>25001.S.1</name>
+                <text>Invalid transaction state: active SQL transaction.</text>
             </msg>
 
             <msg>
@@ -1068,6 +1105,12 @@ Guide.
                 <name>4250E</name>
                 <text>Internal Error: invalid {0} id in statement permission list.</text>
                 <arg>authorizationID</arg>
+            </msg>
+
+            <msg>
+                <name>4251A</name>
+                <text>Statement {0} can only be issued by database owner.</text>
+                <arg>value</arg>
             </msg>
 
             <msg>

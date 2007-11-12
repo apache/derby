@@ -53,6 +53,7 @@ import org.apache.derby.iapi.sql.dictionary.ColPermsDescriptor;
 import org.apache.derby.iapi.sql.dictionary.RoutinePermsDescriptor;
 import org.apache.derby.iapi.sql.dictionary.PermissionsDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ReferencedKeyConstraintDescriptor;
+import org.apache.derby.iapi.sql.dictionary.RoleDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SPSDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.CheckConstraintDescriptor;
@@ -283,7 +284,8 @@ public final class	DataDictionaryImpl
 									"SYSDUMMY1",
                                     "SYSTABLEPERMS",
                                     "SYSCOLPERMS",
-                                    "SYSROUTINEPERMS"
+                                    "SYSROUTINEPERMS",
+									"SYSROLES"
 									};
 
 	private	static final int		NUM_NONCORE = nonCoreNames.length;
@@ -1710,6 +1712,45 @@ public final class	DataDictionaryImpl
 		}
 	}
 
+
+	/**
+	 * Drop the descriptor for a role
+	 *
+	 * @param roleName	The name of the role to drop
+	 * @param grantee	The grantee of the descriptor
+	 * @param grantor	The grantor of the descriptor
+	 * @param tc		TransactionController for the transaction
+	 *
+	 * @exception StandardException Thrown on error
+	 */
+	public void dropRoleDescriptor(String roleName,
+								   String grantee,
+								   String grantor,
+								   TransactionController tc)
+		throws StandardException
+	{
+		DataValueDescriptor roleNameOrderable;
+		DataValueDescriptor granteeOrderable;
+		DataValueDescriptor grantorOrderable;
+
+		TabInfoImpl ti = getNonCoreTI(SYSROLES_CATALOG_NUM);
+
+		roleNameOrderable = new SQLVarchar(roleName);
+		granteeOrderable = new SQLVarchar(grantee);
+		grantorOrderable = new SQLVarchar(grantor);
+
+		ExecIndexRow keyRow = null;
+
+		/* Set up the start/stop position for the scan */
+		keyRow = exFactory.getIndexableRow(3);
+		keyRow.setColumn(1, roleNameOrderable);
+		keyRow.setColumn(2, granteeOrderable);
+		keyRow.setColumn(3, grantorOrderable);
+
+		ti.deleteRow(tc, keyRow, SYSROLESRowFactory.SYSROLES_INDEX1_ID );
+	}
+
+
 	/**
 	 * Drop the descriptor for a schema, given the schema's name
 	 *
@@ -1950,8 +1991,7 @@ public final class	DataDictionaryImpl
 		TableDescriptor			  td;
 		TabInfoImpl					  ti = coreInfo[SYSTABLES_CORE_NUM];
 
-		/* Use tableNameOrderable and schemaIdOrderable in both start 
-		 * and stop position for scan. 
+		/* Use tableIDOrderable in both start and stop position for scan.
 		 */
 		tableIDOrderable = new SQLChar(tableUUID);
 
@@ -2636,6 +2676,259 @@ public final class	DataDictionaryImpl
 			ti.deleteRow(tc, uuidKey, rf.ROUTINEPERMSID_INDEX_NUM);
 		}
 	}
+
+
+	/**
+	 * Drop all role descriptors corresponding to a grant of (any)
+	 * role to a named authentication identifier
+	 *
+	 * @param grantee The grantee of the descriptor
+	 * @param tc      Transaction Controller
+	 *
+	 * @exception StandardException Thrown on failure
+	 */
+	public void dropRoleGrantsByGrantee(String grantee,
+										TransactionController tc)
+			throws StandardException
+	{
+		TabInfoImpl ti = getNonCoreTI(SYSROLES_CATALOG_NUM);
+		SYSROLESRowFactory rf = (SYSROLESRowFactory)ti.getCatalogRowFactory();
+
+		dropRoleGrants(ti,
+					   rf,
+					   rf.SYSROLES_GRANTEE_IN_INDEX1,
+					   grantee,
+					   tc);
+	}
+
+
+	/**
+	 * Drop all role descriptors corresponding to a grant of the
+	 * named role to any authentication identifier
+	 *
+	 * @param roleName The role name granted
+	 * @param tc       Transaction Controller
+	 *
+	 * @exception StandardException Thrown on failure
+	 */
+	public void dropRoleGrantsByName(String roleName,
+									 TransactionController tc)
+		throws StandardException
+	{
+		TabInfoImpl ti = getNonCoreTI(SYSROLES_CATALOG_NUM);
+		SYSROLESRowFactory rf = (SYSROLESRowFactory)ti.getCatalogRowFactory();
+
+		dropRoleGrants(ti,
+					   rf,
+					   rf.SYSROLES_ROLEID_IN_INDEX1,
+					   roleName,
+					   tc);
+	}
+
+	/*
+	 * There is no index on roleid/grantee column only on SYSROLES, so
+	 * we use the index which contains roleid/grantee and scan that,
+	 * setting up a scan qualifier to match the roleid/grantee, then
+	 * delete the catalog entry.
+	 *
+	 * If this proves too slow, we should add an index on
+	 * roleid/grantee only.
+	 */
+	private void dropRoleGrants(TabInfoImpl ti,
+								SYSROLESRowFactory rf,
+								int columnInIndex1,
+								String authId,
+								TransactionController tc)
+		throws StandardException
+	{
+		ConglomerateController heapCC = tc.openConglomerate(
+			ti.getHeapConglomerate(), false, 0,
+			TransactionController.MODE_RECORD,
+			TransactionController.ISOLATION_REPEATABLE_READ);
+
+		DataValueDescriptor authIdOrderable = new SQLVarchar(authId);
+		ScanQualifier[][] scanQualifier = exFactory.getScanQualifier(1);
+
+		scanQualifier[0][0].setQualifier(
+			columnInIndex1 - 1,	/* to zero-based */
+			authIdOrderable,
+			Orderable.ORDER_OP_EQUALS,
+			false,
+			false,
+			false);
+
+		ScanController sc = tc.openScan(
+			ti.getIndexConglomerate(rf.SYSROLES_INDEX1_ID),
+			false,   // don't hold open across commit
+			0,       // for update
+			TransactionController.MODE_RECORD,
+			TransactionController.ISOLATION_REPEATABLE_READ,
+			(FormatableBitSet) null,      // all fields as objects
+			(DataValueDescriptor[]) null, // start position -
+			0,                            // startSearchOperation - none
+			scanQualifier,                //
+			(DataValueDescriptor[]) null, // stop position -through last row
+			0);                           // stopSearchOperation - none
+
+		try {
+			ExecRow outRow = rf.makeEmptyRow();
+			ExecIndexRow indexRow = getIndexRowFromHeapRow(
+				ti.getIndexRowGenerator(rf.SYSROLES_INDEX1_ID),
+				heapCC.newRowLocationTemplate(),
+				outRow);
+
+			while (sc.fetchNext(indexRow.getRowArray())) {
+				ti.deleteRow(tc, indexRow,
+							 rf.SYSROLES_INDEX1_ID);
+			}
+		} finally {
+			if (sc != null) {
+				sc.close();
+			}
+
+			if (heapCC != null) {
+				heapCC.close();
+			}
+		}
+	}
+
+
+	/**
+	 * Drop all permission descriptors corresponding to a grant to
+	 * the named authentication identifier
+	 *
+	 * @param authId  The authentication identifier
+	 * @param tc      Transaction Controller
+	 *
+	 * @exception StandardException Thrown on failure
+	 */
+	public void dropAllPermsByGrantee(String authId,
+									  TransactionController tc)
+		throws StandardException
+	{
+		dropPermsByGrantee(
+			authId,
+			tc,
+			SYSTABLEPERMS_CATALOG_NUM,
+			SYSTABLEPERMSRowFactory.GRANTEE_TABLE_GRANTOR_INDEX_NUM,
+			SYSTABLEPERMSRowFactory.
+				GRANTEE_COL_NUM_IN_GRANTEE_TABLE_GRANTOR_INDEX);
+
+		dropPermsByGrantee(
+			authId,
+			tc,
+			SYSCOLPERMS_CATALOG_NUM,
+			SYSCOLPERMSRowFactory.GRANTEE_TABLE_TYPE_GRANTOR_INDEX_NUM,
+			SYSCOLPERMSRowFactory.
+				GRANTEE_COL_NUM_IN_GRANTEE_TABLE_TYPE_GRANTOR_INDEX);
+
+		dropPermsByGrantee(
+			authId,
+			tc,
+			SYSROUTINEPERMS_CATALOG_NUM,
+			SYSROUTINEPERMSRowFactory.GRANTEE_ALIAS_GRANTOR_INDEX_NUM,
+			SYSROUTINEPERMSRowFactory.
+				GRANTEE_COL_NUM_IN_GRANTEE_ALIAS_GRANTOR_INDEX);
+	}
+
+
+	/*
+	 * Presently only used when dropping roles - user dropping is not
+	 * under Derby control (well, built-in users are), any permissions
+	 * granted to users remain in place even if the user is no more.
+	 *
+	 * There is no index on grantee column only on on any of the
+	 * permissions tables, so we use the index which contain grantee
+	 * and scan that, setting up a scan qualifier to match the
+	 * grantee, then fetch the case row to set up the permission
+	 * descriptor, then remove any cached entry, then finally delete
+	 * the catalog entry.
+	 *
+	 * If this proves too slow, we should add an index on grantee
+	 * only.
+	 */
+	private void dropPermsByGrantee(String authId,
+									TransactionController tc,
+									int catalog,
+									int indexNo,
+									int granteeColnoInIndex)
+		throws StandardException
+	{
+		TabInfoImpl ti = getNonCoreTI(catalog);
+		PermissionsCatalogRowFactory rf =
+			(PermissionsCatalogRowFactory)ti.getCatalogRowFactory();
+
+		ConglomerateController heapCC = tc.openConglomerate(
+			ti.getHeapConglomerate(), false, 0,
+			TransactionController.MODE_RECORD,
+			TransactionController.ISOLATION_REPEATABLE_READ);
+
+		DataValueDescriptor authIdOrderable = new SQLVarchar(authId);
+		ScanQualifier[][] scanQualifier = exFactory.getScanQualifier(1);
+
+		scanQualifier[0][0].setQualifier(
+			granteeColnoInIndex - 1,	/* to zero-based */
+			authIdOrderable,
+			Orderable.ORDER_OP_EQUALS,
+			false,
+			false,
+			false);
+
+		ScanController sc = tc.openScan(
+			ti.getIndexConglomerate(indexNo),
+			false,                        // don't hold open across commit
+			0,                            // for update
+			TransactionController.MODE_RECORD,
+			TransactionController.ISOLATION_REPEATABLE_READ,
+			(FormatableBitSet) null,      // all fields as objects
+			(DataValueDescriptor[]) null, // start position -
+			0,                            // startSearchOperation - none
+			scanQualifier,                //
+			(DataValueDescriptor[]) null, // stop position -through last row
+			0);                           // stopSearchOperation - none
+
+		try {
+			ExecRow outRow = rf.makeEmptyRow();
+			ExecIndexRow indexRow = getIndexRowFromHeapRow(
+				ti.getIndexRowGenerator(indexNo),
+				heapCC.newRowLocationTemplate(),
+				outRow);
+
+			while (sc.fetchNext(indexRow.getRowArray())) {
+				RowLocation baseRowLocation = (RowLocation)indexRow.getColumn(
+					indexRow.nColumns());
+
+				boolean base_row_exists =
+					heapCC.fetch(
+						baseRowLocation, outRow.getRowArray(),
+						(FormatableBitSet)null);
+
+				if (SanityManager.DEBUG) {
+					// it can not be possible for heap row to
+					// disappear while holding scan cursor on index at
+					// ISOLATION_REPEATABLE_READ.
+					SanityManager.ASSERT(base_row_exists,
+										 "base row doesn't exist");
+				}
+
+				PermissionsDescriptor perm = (PermissionsDescriptor)rf.
+					buildDescriptor(outRow,
+									(TupleDescriptor) null,
+									this);
+				removePermEntryInCache(perm);
+				ti.deleteRow(tc, indexRow, indexNo);
+			}
+		} finally {
+			if (sc != null) {
+				sc.close();
+			}
+
+			if (heapCC != null) {
+				heapCC.close();
+			}
+		}
+	}
+
 
 	/**
 	 * Delete the appropriate rows from syscolumns when
@@ -7952,6 +8245,12 @@ public final class	DataDictionaryImpl
 				retval = new TabInfoImpl(new SYSROUTINEPERMSRowFactory(
 												 luuidFactory, exFactory, dvf));					 
 				break;
+
+			  case SYSROLES_CATALOG_NUM:
+				retval = new TabInfoImpl(new SYSROLESRowFactory(
+											 luuidFactory, exFactory, dvf));
+
+				break;
 			}
 
 			initSystemIndexVariables(retval);
@@ -11187,5 +11486,135 @@ public final class	DataDictionaryImpl
 		}
 		
 		return null;
+	}
+
+
+	/**
+	 * Get the descriptor for the named role.
+	 *
+	 * @param roleName	The role name
+	 *
+	 * @return The descriptor for the role. Can be null if not found.
+	 *
+	 * @exception StandardException  Thrown on error
+	 */
+	public RoleDescriptor getRoleDefinitionDescriptor(String roleName)
+		throws StandardException
+	{
+		RoleDescriptor rd = locateRoleDefinitionRow(roleName);
+
+		return rd;
+	}
+
+
+	/**
+	 * Get a role descriptor for a role grant
+	 *
+	 * @param roleName The name of the role whose definition we seek
+	 * @param grantee  The grantee
+	 * @param grantor  The grantor
+	 *
+	 * @throws StandardException error
+	 */
+	public RoleDescriptor getRoleGrantDescriptor(String roleName,
+												 String grantee,
+												 String grantor)
+		throws StandardException
+	{
+		RoleDescriptor rd = locateRoleGrantRow(roleName, grantee, grantor);
+
+		return rd;
+	}
+
+
+	/**
+	 * Get the target role definition by searching for a matching row
+	 * in SYSROLES by rolename where isDef==true.  Read only scan.
+	 * Uses index on (rolename, isDef) columns.
+	 *
+	 * @param roleName The name of the role we're interested in.
+	 *
+	 * @return The descriptor (row) for the role
+	 *
+	 * @exception StandardException Thrown on error
+	 */
+	private RoleDescriptor locateRoleDefinitionRow(String roleName)
+			throws StandardException
+	{
+		DataValueDescriptor roleNameOrderable;
+		DataValueDescriptor isDefOrderable;
+
+		TabInfoImpl ti = getNonCoreTI(SYSROLES_CATALOG_NUM);
+
+		/* Use aliasNameOrderable , isDefOrderable in both start
+		 * and stop position for scan.
+		 */
+		roleNameOrderable = new SQLVarchar(roleName);
+		isDefOrderable = new SQLVarchar("Y");
+
+		/* Set up the start/stop position for the scan */
+		ExecIndexRow keyRow = exFactory.getIndexableRow(2);
+		keyRow.setColumn(1, roleNameOrderable);
+		keyRow.setColumn(2, isDefOrderable);
+
+		return (RoleDescriptor)
+					getDescriptorViaIndex(
+						SYSROLESRowFactory.SYSROLES_INDEX2_ID,
+						keyRow,
+						(ScanQualifier [][]) null,
+						ti,
+						(TupleDescriptor) null,
+						(List) null,
+						false);
+	}
+
+
+	/**
+	 * Get the target role by searching for a matching row
+	 * in SYSROLES by rolename, grantee and grantor.  Read only scan.
+     * Uses index on roleid, grantee and grantor columns.
+	 *
+	 * @param roleName	    The name of the role we're interested in.
+	 * @param grantee       The grantee
+	 * @param grantor       The grantor
+	 *
+	 * @return	            The descriptor (row) for the role grant
+	 *
+	 * @exception StandardException  Thrown on error
+	 */
+	private RoleDescriptor locateRoleGrantRow(String roleName,
+											  String grantee,
+											  String grantor)
+		throws StandardException
+	{
+		DataValueDescriptor roleNameOrderable;
+		DataValueDescriptor granteeOrderable;
+		DataValueDescriptor grantorOrderable;
+
+
+		TabInfoImpl ti = getNonCoreTI(SYSROLES_CATALOG_NUM);
+
+		/* Use aliasNameOrderable, granteeOrderable and
+		 * grantorOrderable in both start and stop position for scan.
+		 */
+		roleNameOrderable = new SQLVarchar(roleName);
+		granteeOrderable = new SQLVarchar(grantee);
+		grantorOrderable = new SQLVarchar(grantor);
+
+		/* Set up the start/stop position for the scan */
+		ExecIndexRow keyRow = exFactory.getIndexableRow(3);
+		keyRow.setColumn(1, roleNameOrderable);
+		keyRow.setColumn(2, granteeOrderable);
+		keyRow.setColumn(3, grantorOrderable);
+
+		return (RoleDescriptor)
+			getDescriptorViaIndex(
+								  SYSROLESRowFactory.SYSROLES_INDEX1_ID,
+								  keyRow,
+								  (ScanQualifier [][]) null,
+								  ti,
+								  (TupleDescriptor) null,
+								  (List) null,
+								  false);
 	}
 }

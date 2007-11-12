@@ -653,11 +653,17 @@ public interface SQLState {
 	String LANG_SYNONYM_UNDEFINED                                      = "01522";
 	String LANG_NULL_ELIMINATED_IN_SET_FUNCTION						   = "01003";
 	String LANG_PRIVILEGE_NOT_REVOKED						   		   = "01006";
-	
+	String LANG_ROLE_NOT_REVOKED                                       = "01007";
+	String LANG_WITH_ADMIN_OPTION_NOT_REVOKED                          = "01008";
+
 	String LANG_NO_ROW_FOUND									   	   = "02000";
 
 	String LANG_TOO_MANY_DYNAMIC_RESULTS_RETURNED					   = "0100E";
-    
+
+
+	// Invalid role specification: standard says class 0P, no subclass.
+	String ROLE_INVALID_SPECIFICATION                                  = "0P000";
+	String ROLE_INVALID_SPECIFICATION_NOT_GRANTED                      = "0P000.S.1";
 
 	// TRANSACTION severity language errors. These are in the range:
 	// 40XC0 - 40XCZ
@@ -724,6 +730,7 @@ public interface SQLState {
 	String LANG_XQUERY_SERIALIZATION_ERROR                             = "2200W";
 
     String CANNOT_CLOSE_ACTIVE_CONNECTION                              = "25001";
+    String INVALID_TRANSACTION_STATE_ACTIVE_CONNECTION                 = "25001.S.1";
 
 
 	String LANG_UNEXPECTED_USER_EXCEPTION                              = "38000";
@@ -750,6 +757,7 @@ public interface SQLState {
 	String AUTH_USER_IN_READ_AND_WRITE_LISTS                           = "4250C";
 	String AUTH_DUPLICATE_USERS                                        = "4250D";
 	String AUTH_INTERNAL_BAD_UUID                                      = "4250E";
+    String AUTH_ROLE_DBO_ONLY                                          = "4251A";
 
 	String LANG_DB2_NOT_NULL_COLUMN_INVALID_DEFAULT                    = "42601";
 	String LANG_DB2_INVALID_HEXADECIMAL_CONSTANT                    = "42606";

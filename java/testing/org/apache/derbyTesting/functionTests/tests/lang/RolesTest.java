@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derbyTesting.functionTests.tests.jdbcapi.RolesTest
+   Derby - Class org.apache.derbyTesting.functionTests.tests.lang.RolesTest
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -22,16 +22,15 @@
 package org.apache.derbyTesting.functionTests.tests.lang;
 
 import java.sql.SQLException;
+import java.sql.SQLWarning;
 import java.sql.Connection;
 import java.sql.Statement;
 import java.sql.PreparedStatement;
-import javax.sql.DataSource;
+import java.sql.ResultSet;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
-import org.apache.derbyTesting.junit.JDBC;
-import org.apache.derbyTesting.junit.JDBCDataSource;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
@@ -63,8 +62,11 @@ public class RolesTest extends BaseJDBCTestCase
     /* SQL states */
     private final static String sqlAuthorizationRequired = "42Z60";
     private final static String syntaxError = "42X01";
-    // temporary until feature fully implemented:
-    private final static String notImplemented = "0A000";
+    private final static String roleDboOnly = "4251A";
+    private final static String invalidRole = "0P000";
+    private final static String tooLongId   = "42622";
+    private final static String revokeWarn  = "01007";
+    private final static String notIdle     = "25001";
 
     /**
      * Users used by all suites when when authLevel == SQLAUTHORIZATION.
@@ -73,8 +75,11 @@ public class RolesTest extends BaseJDBCTestCase
      * 'dbsqlauth', not 'wombat'.
      */
     private final static String[] users = {"TEST_DBO", "DonaldDuck"};
+    private final static int dboIndex        = 0;
+    private final static int nonDboIndex = 1;
 
-    private boolean isDbo() {
+    private boolean isDbo()
+    {
         return users[0].equals(this._user);
     }
 
@@ -112,17 +117,24 @@ public class RolesTest extends BaseJDBCTestCase
         /* Negative syntax tests */
         suite.addTest(negativeSyntaxSuite("suite: negative syntax, embedded"));
 
-        // suite.addTest(
-        //     TestConfiguration.clientServerDecorator(
-        //         negativeSyntaxSuite("suite: negative syntax, client")));
+        suite.addTest(
+            TestConfiguration.clientServerDecorator(
+                negativeSyntaxSuite("suite: negative syntax, client")));
+
+        /* Positive syntax tests */
+        suite.addTest(positiveSyntaxSuite("suite: positive syntax, embedded"));
+
+        suite.addTest(
+            TestConfiguration.clientServerDecorator(
+                positiveSyntaxSuite("suite: positive syntax, client")));
 
         /* Positive tests */
         suite.addTest(
             positiveSuite("suite: positive, embedded"));
 
-        // suite.addTest(
-        //     TestConfiguration.clientServerDecorator(
-        //         positiveSuite("suite: positive, client")));
+        suite.addTest(
+            TestConfiguration.clientServerDecorator(
+                positiveSuite("suite: positive, client")));
 
         return suite;
     }
@@ -140,7 +152,7 @@ public class RolesTest extends BaseJDBCTestCase
      */
     private static Test negativeSyntaxSuite(String framework)
     {
-        Test tests[] = new Test[SQLAUTHORIZATION+1]; // one per authLevel
+        TestSuite suite = new TestSuite("roles:"+framework);
 
         /* Tests running without sql authorization set.
          */
@@ -150,29 +162,39 @@ public class RolesTest extends BaseJDBCTestCase
                                           NO_SQLAUTHORIZATION,
                                           null,
                                           null));
-        tests[NO_SQLAUTHORIZATION] = noauthSuite;
+        suite.addTest(noauthSuite);
 
-        /* Tests running with sql authorization set.
-         * First decorate with users, then with authentication +
-         * sqlAuthorization.
-         */
-        tests[SQLAUTHORIZATION] = wrapTest("testNegativeSyntax");
-
-
-        TestSuite suite = new TestSuite("roles:"+framework);
-        suite.addTest(tests[NO_SQLAUTHORIZATION]);
-        suite.addTest(tests[SQLAUTHORIZATION]);
+        // Tests running with sql authorization set.
+        suite.addTest(wrapInAuthorization("testNegativeSyntax"));
 
         return suite;
     }
 
 
-
     /**
-     * Wraps the negative syntax fixture in decorators to run with
-     * data base owner and one other valid user in sqlAuthorization
-     * mode.
+     *
+     * Construct suite of tests for positive syntax (edge cases)
+     *
+     * @param framework Derby framework indication
+     * @return A suite containing the test cases for  syntax
+     * edge cases. Incarnated only for sqlAuthorization, dbo.
      */
+    private static Test positiveSyntaxSuite(String framework)
+    {
+        String dbo = users[dboIndex];
+        String dbopw = dbo.concat(pwSuffix);
+
+        Test t = (TestConfiguration.changeUserDecorator
+                  (new RolesTest("testPositiveSyntax",
+                                 SQLAUTHORIZATION,
+                                 dbo, dbopw),
+                   dbo, dbopw));
+
+        return TestConfiguration.sqlAuthorizationDecorator(
+            DatabasePropertyTestSetup.builtinAuthentication(
+                t, users, pwSuffix));
+    }
+
 
     /**
      * Test negative syntax for roles.
@@ -191,6 +213,54 @@ public class RolesTest extends BaseJDBCTestCase
                syntaxError, syntaxError, syntaxError);
         doStmt("create role current_role", // current_role is reserved word
                syntaxError, syntaxError, syntaxError);
+        String nameWithMoreThan30Chars = ("r123456789" +
+                                          "0123456789" +
+                                          "01234567890"); // 31 long
+        doStmt("create role " + nameWithMoreThan30Chars,
+               sqlAuthorizationRequired, tooLongId, tooLongId);
+
+        _stm.close();
+    }
+
+
+    /**
+     * Test syntax edge cases (positive)
+     *
+     * @throws SQLException
+     */
+    public void testPositiveSyntax() throws SQLException
+    {
+        println("testPositiveSyntax");
+        String n_a     = null; // auth level not used for this test
+        int    n_a_cnt = -1;   //
+
+        // sanity check:
+        if (!isDbo()) { throw new SQLException("test error"); }
+
+
+        _conn = getConnection();
+        _stm  = _conn.createStatement();
+
+        // "trigger" is not reserved word, but required tweaking of grammar
+        // so we add a regression test for it.
+        doStmt("create role trigger", n_a, null, n_a);
+
+        // "role" is not a reserved word, either:
+        doStmt("create role role", n_a, null, n_a);
+
+        assertSysRolesRowCount(n_a_cnt, 2, n_a_cnt);
+
+        doStmt("grant trigger to foo", n_a, null, n_a);
+        doStmt("grant role to foo", n_a, null, n_a);
+        doStmt("revoke trigger from foo", n_a, null, n_a);
+        doStmt("revoke role from foo", n_a, null, n_a);
+
+        doStmt("drop role trigger", n_a, null, n_a);
+        doStmt("drop role role", n_a, null, n_a);
+
+        assertSysRolesRowCount(n_a_cnt, 0, n_a_cnt);
+
+        _stm.close();
     }
 
     /**
@@ -207,8 +277,9 @@ public class RolesTest extends BaseJDBCTestCase
      */
     private static Test positiveSuite(String framework)
     {
-        Test tests[] = new Test[SQLAUTHORIZATION+1]; // one per authLevel
-        /* Tests running without sql authorization set.
+        /*
+         * Tests running without sql authorization set.  The purpose
+         * of this is just to make sure the proper errors are given.
          */
         TestSuite noauthSuite = new TestSuite(
             "suite: security level=noSqlAuthorization");
@@ -216,27 +287,26 @@ public class RolesTest extends BaseJDBCTestCase
                                           NO_SQLAUTHORIZATION,
                                           null,
                                           null));
-        tests[NO_SQLAUTHORIZATION] = noauthSuite;
+
         /* Tests running with sql authorization set.
          * First decorate with users, then with authentication +
          * sqlAuthorization.
          */
         TestSuite suite = new TestSuite("roles:"+framework);
-        tests[SQLAUTHORIZATION] = wrapTest("testPositive");
 
-        suite.addTest(tests[NO_SQLAUTHORIZATION]);
-        suite.addTest(tests[SQLAUTHORIZATION]);
+        suite.addTest(noauthSuite);
+        suite.addTest(wrapInAuthorization("testPositive"));
 
         return suite;
     }
 
     /**
-     * Wraps in decorators to run with data base owner and one other
+     * Wrap in decorators to run with data base owner and one other
      * valid user in sqlAuthorization mode.
      *
      * @param testName test to wrap
      */
-    private static Test wrapTest(String testName)
+    private static Test wrapInAuthorization(String testName)
     {
         // add decorator for different users authenticated
         TestSuite usersSuite =
@@ -262,6 +332,8 @@ public class RolesTest extends BaseJDBCTestCase
 
     /**
      * Positive tests for roles (well, positive for dbo at least!)
+     * Side effect from the dbo run are needed for the nonDbo run
+     * which follows (since only dbo can create and grant roles).
      *
      * @throws SQLException
      */
@@ -273,134 +345,376 @@ public class RolesTest extends BaseJDBCTestCase
         _conn = getConnection();
         _stm  = _conn.createStatement();
 
-        // create
+
+        /*
+         * CREATE ROLE
+         */
         doStmt("create role foo",
-               sqlAuthorizationRequired, notImplemented, notImplemented);
+               sqlAuthorizationRequired, null , roleDboOnly);
         doStmt("create role bar",
-               sqlAuthorizationRequired, notImplemented, notImplemented);
+               sqlAuthorizationRequired, null , roleDboOnly);
         doStmt("create role role", // role is not reserved word
-               sqlAuthorizationRequired, notImplemented, notImplemented);
-        doStmt("create role trigger",
-               sqlAuthorizationRequired, notImplemented, notImplemented);
+               sqlAuthorizationRequired, null , roleDboOnly);
+        doStmt("create role admin",
+                sqlAuthorizationRequired, null , roleDboOnly);
         doStmt("create role \"NONE\"", // quoted role id should work
-               sqlAuthorizationRequired, notImplemented, notImplemented);
+                sqlAuthorizationRequired, null , roleDboOnly);
 
-        // grant
+
+        /*
+         * GRANT <role>
+         */
         doStmt("grant foo to authid", // authid: user or role
-               sqlAuthorizationRequired, notImplemented, notImplemented);
-        doStmt("grant foo, role, bar to authid1, authid2, authid3",
-               sqlAuthorizationRequired, notImplemented, notImplemented);
+               sqlAuthorizationRequired, null , roleDboOnly);
 
-        // grant: parser look-ahead tests to discern grant role from
-        // grant privilege
-        doStmt("grant trigger to authid",
-               sqlAuthorizationRequired, notImplemented, notImplemented);
-        doStmt("grant trigger, foo to authid",
-               sqlAuthorizationRequired, notImplemented, notImplemented);
-        doStmt("grant trigger, foo to public",
-               sqlAuthorizationRequired, notImplemented, notImplemented);
+        // this grant also grant role bar to the non-dbo user
+        // so we can set it when running as non-dbo.
+        doStmt("grant foo, role, bar to authid1, authid2, " +
+               users[nonDboIndex],
+               sqlAuthorizationRequired, null , roleDboOnly);
+
+        doStmt("grant admin to authid",
+               sqlAuthorizationRequired, null , invalidRole);
+        doStmt("grant admin, foo to authid",
+               sqlAuthorizationRequired, null , invalidRole);
+        doStmt("grant admin, foo to public",
+               sqlAuthorizationRequired, null , invalidRole);
+
+        // These grants will no be explicitly revoked, count on drop
+        // role to void them!
+        doStmt("grant admin to a,b,c",
+               sqlAuthorizationRequired, null , invalidRole);
+        doStmt("grant foo,bar to admin",
+               sqlAuthorizationRequired, null , roleDboOnly);
+
+        assertSysRolesRowCount(0, 23,
+                               // nonDbo run: foo, bar still in
+                               // place, used for testing SET ROLE for
+                               // non-dbo user. foo granted to public,
+                               // bar granted to nonDbo, so 4!
+                               4);
 
 
-        // set
+        /*
+         * SET ROLE
+         */
         doStmt("set role foo",
-               sqlAuthorizationRequired, notImplemented, notImplemented);
+               sqlAuthorizationRequired, null , null /* through public */);
         doStmt("set role 'FOO'",
-               sqlAuthorizationRequired, notImplemented, notImplemented);
+               sqlAuthorizationRequired, null, null);
         doStmt("set role none",
-               sqlAuthorizationRequired, notImplemented, notImplemented);
+               sqlAuthorizationRequired, null , null);
         doDynamicSetRole(_conn);
+        doStmt("set role bar",
+               sqlAuthorizationRequired, null , null /* direct grant */);
+        doStmt("set role role",
+               sqlAuthorizationRequired, null , invalidRole);
 
-        // revoke
+        /* Test that we cannot set role while in non-idle state */
+        _conn.setAutoCommit(false);
+        doStmt("select * from SYS.SYSROLES", null, null, null);
+        doStmt("set role role",
+               sqlAuthorizationRequired, notIdle , notIdle);
+        _conn.commit();
+        _conn.setAutoCommit(true);
 
+        /*
+         * CURRENT_ROLE
+         */
+        ResultSet rs = doQuery("values current_role",
+                               sqlAuthorizationRequired, null , null);
+        assertCurrentRole(rs, "ROLE", "BAR");
+
+        /*
+         * REVOKE role
+         */
         doStmt("revoke foo from authid", // authid: user or role
-               sqlAuthorizationRequired, notImplemented, notImplemented);
-        doStmt("revoke foo, role, bar from authid1, authid2, authid3",
-               sqlAuthorizationRequired, notImplemented, notImplemented);
+               sqlAuthorizationRequired, null , roleDboOnly);
+        doStmt("revoke foo, role, bar from authid1, authid2",
+               sqlAuthorizationRequired, null , roleDboOnly);
+        // revoke everything from nonDbo also, except bar
+        doStmt("revoke foo, role from " + users[nonDboIndex],
+               sqlAuthorizationRequired, null , roleDboOnly);
 
-        // revoke: parser look-ahead tests to discern revoke role from
-        // revoke privilege
-        doStmt("revoke trigger from authid",
-               sqlAuthorizationRequired, notImplemented, notImplemented);
-        doStmt("revoke trigger, foo from authid",
-               sqlAuthorizationRequired, notImplemented, notImplemented);
-        doStmt("revoke trigger, foo from public",
-               sqlAuthorizationRequired, notImplemented, notImplemented);
 
-        // drop
-        doStmt("drop role foo",
-               sqlAuthorizationRequired, notImplemented, notImplemented);
-        doStmt("drop role role",
-               sqlAuthorizationRequired, notImplemented, notImplemented);
-        doStmt("drop role trigger",
-               sqlAuthorizationRequired, notImplemented, notImplemented);
-        doStmt("drop role \"NONE\"",
-               sqlAuthorizationRequired, notImplemented, notImplemented);
+        doStmt("revoke admin from authid",
+               sqlAuthorizationRequired, null , invalidRole);
+        doStmtWithWarnings("revoke admin from authid",
+                           new String[]{sqlAuthorizationRequired, null},
+                           new String[]{null, revokeWarn},
+                           new String[]{invalidRole, null},
+                           false);
+        doStmt("revoke admin, foo from authid",
+               sqlAuthorizationRequired, null , invalidRole);
+        // leave foo granted to public
+        doStmt("revoke admin from public",
+               sqlAuthorizationRequired, null , invalidRole);
 
-        // current_role
-        doStmt("values current_role",
-               sqlAuthorizationRequired, notImplemented, notImplemented);
 
-        // column default current_role
+
+        /*
+         * DEFAULT CURRENT_ROLE
+         */
         doStmt("create table foo(str varchar(128) default current_role)",
-               sqlAuthorizationRequired, notImplemented, notImplemented);
+               sqlAuthorizationRequired, null , null );
+
+        /*
+         * GRANT TABLE PERMISSION to role
+         * Should get auto-dropped when role is dropped
+         */
+        doStmt("grant select, insert on foo to admin",
+               sqlAuthorizationRequired, null , null );
+        /*
+         * GRANT COLUMN PERMISSION to role
+         * Should get auto-dropped when role is dropped
+         */
+        doStmt("grant select (str), update (str) on foo to admin",
+               sqlAuthorizationRequired, null , null );
+        /*
+         * GRANT ROUTINE PERMISSION to role
+         * Should get auto-dropped when role is dropped
+         */
+        doStmt("create function f1() returns int" +
+               "  language java parameter style java" +
+               "  external name 'org.apache.derbyTesting." +
+               "functionTests.tests.lang.RolesTest.t1'" +
+               "  no sql called on null input",
+               null, null, null);
+        doStmt("grant execute on function f1 to admin",
+               sqlAuthorizationRequired, null , null );
+
+        assertSysTablePermsRowCount(0,
+                                    // role admin not dropped yet:
+                                    1,
+                                    // role admin has been dropped, so
+                                    // this run's grant to admin is de
+                                    // facto to a user named admin:
+                                    1);
+
+        assertSysColPermsRowCount(0, 2, 2);
+
+        assertSysRoutinePermsRowCount(5, // 5 pre-existing grants to PUBLIC
+                                      6,
+                                      6);
+
+        /*
+         * DROP ROLE
+         */
+
+        // Dbo run: don't drop foo and bar, so they survive to next run,
+        // a non-dbo can set them, otherwise drop all roles and
+        // premissions.
+        doStmt("drop role role",
+               sqlAuthorizationRequired, null , roleDboOnly);
+
+        doStmt("drop role admin",
+               sqlAuthorizationRequired, null , roleDboOnly);
+        assertSysTablePermsRowCount(0, 0,
+                                    // nonDbo run: role admin has
+                                    // been dropped, so this run's
+                                    // grant to admin is de facto to a
+                                    // user named admin:
+                                    1);
+        assertSysColPermsRowCount(0, 0,
+                                  // nonDbo run: role admin has
+                                  // been dropped, so this run's grant
+                                  // to admin is de facto to a user
+                                  // named admin:
+                                  2);
+        assertSysRoutinePermsRowCount(5, 5,
+                                      //  nonDbo run: role admin
+                                      // has been dropped, so this
+                                      // run's grant to admin is de
+                                      // facto to a user named admin:
+                                      6);
+
+        doStmt("drop role \"NONE\"",
+               sqlAuthorizationRequired, null , roleDboOnly);
+
+
+        /*
+         * REVOKE permissions for nonDbo run
+         */
+        doStmt("revoke select, insert on foo from admin",
+               sqlAuthorizationRequired, null , null );
+        doStmt("revoke select (str), update (str) on foo from admin",
+               sqlAuthorizationRequired, null , null );
+        doStmt("revoke execute on function f1 from admin restrict",
+               sqlAuthorizationRequired, null , null );
+
+        // assert blank slate
+        assertSysTablePermsRowCount(0,0,0);
+        assertSysColPermsRowCount(0,0,0);
+        assertSysRoutinePermsRowCount(5,5,5);
+
+        // roles foo and bar survive to nonDbo run and beyond:
+        assertSysRolesRowCount(0, 4, 4);
+
+        _stm.close();
+    }
+
+
+    protected void setUp() throws Exception
+    {
+        super.setUp();
+
+        _stm = createStatement();
+
+        if (_authLevel == SQLAUTHORIZATION && isDbo()) {
+
+            // We need to clean away roles when we run the dbo run the
+            // second time around (client/server). The reason is that
+            // the dbo run has a side-effect: it leaves roles for the
+            // non-dbo run to play with, and that run can't remove the
+            // roles (since non-dbo can't drop roles).
+            try {
+                _stm.executeUpdate("drop role foo");
+                _stm.executeUpdate("drop role bar");
+            } catch (SQLException se) {
+            }
+        }
+
+        try {
+            _stm.executeUpdate("drop function f1");
+            _stm.executeUpdate("drop table foo");
+        } catch (SQLException se) {
+        }
+
+        _stm.close();
+    }
+
+
+    protected void tearDown() throws Exception
+    {
+        if (_stm != null) {
+            _stm.close();
+            _stm = null;
+        }
+
+        if (_conn != null) {
+            _conn = null;
+        }
+
+        super.tearDown();
+    }
+
+
+    private void doStmt(String stmt,
+                             String noAuthState,
+                             String authDboState,
+                             String authNotDboState)
+    {
+        doStmt(stmt, noAuthState, authDboState, authNotDboState, false);
+    }
+
+
+    private ResultSet doQuery(String stmt,
+                              String noAuthState,
+                              String authDboState,
+                              String authNotDboState)
+    {
+        return doStmt(stmt, noAuthState, authDboState, authNotDboState, true);
+    }
+
+
+    private ResultSet doStmt(String stmt,
+                             String noAuthState,
+                             String authDboState,
+                             String authNotDboState,
+                             boolean query)
+    {
+        return doStmtWithWarnings(stmt,
+                                  new String[]{noAuthState,null},
+                                  new String[]{authDboState, null},
+                                  new String[]{authNotDboState, null},
+                                  query);
     }
 
     // Minion to analyze outcome. If state string is empty, we expect success
     // for that combination of authentication level and user (dbo or not).
-    private void doStmt(String stmt,
-                        String noAuthState,
-                        String authDboState,
-                        String authNotDboState) {
+    // State arrays: element 0: expected error, element 1: expected warning
+    private ResultSet doStmtWithWarnings(String stmt,
+                                         String[] noAuthState,
+                                         String[] authDboState,
+                                         String[] authNotDboState,
+                                         boolean query)
+    {
+        ResultSet result = null;
+
         try {
-            _stm.execute(stmt);
+            if (query) {
+                result = _stm.executeQuery(stmt);
+            } else {
+                _stm.execute(stmt);
+            }
+
             if (_authLevel == NO_SQLAUTHORIZATION) {
-                if (noAuthState != null) {
-                    fail("exception " + noAuthState + " expected: (" + stmt);
+                if (noAuthState[0] != null) {
+                    fail("exception " + noAuthState[0] + " expected: (" + stmt);
                 }
+                if (noAuthState[1] != null) {
+                    SQLWarning w = _stm.getWarnings();
+                    assertNotNull("Expected warning but found none", w);
+                    assertSQLState(noAuthState[1], w);
+                }
+
             } else { // SQLAUTHORIZATION
                 if (isDbo()) {
-                    if (authDboState != null) {
-                        fail("exception " + noAuthState + " expected: (" +
+                    if (authDboState[0] != null) {
+                        fail("exception " + noAuthState[0] + " expected: (" +
                              stmt);
                     }
+                    if (authDboState[1] != null) {
+                        SQLWarning w = _stm.getWarnings();
+                        assertNotNull("Expected warning but found none", w);
+                        assertSQLState(authDboState[1], w);
+                    }
                 } else {
-                    if (authNotDboState != null) {
-                        fail("exception " + noAuthState + " expected: (" +
+                    if (authNotDboState[0] != null) {
+                        fail("exception " + noAuthState[0] + " expected: (" +
                              stmt);
+                    }
+                    if (authNotDboState[1] != null) {
+                        SQLWarning w = _stm.getWarnings();
+                        assertNotNull("Expected warning but found none", w);
+                        assertSQLState(authNotDboState[1], w);
                     }
                 }
             }
         } catch (SQLException e) {
             if (_authLevel == NO_SQLAUTHORIZATION) {
-                if (noAuthState == null) {
+                if (noAuthState[0] == null) {
                     fail("stmt " + stmt + " failed with exception " +
                          e.getSQLState());
                 } else {
-                    assertSQLState("Stmt " + stmt, noAuthState, e);
+                    assertSQLState("Stmt " + stmt, noAuthState[0], e);
                 }
 
             } else { // SQLAUTHORIZATION
                 if (isDbo()) {
-                    if (authDboState == null) {
+                    if (authDboState[0] == null) {
                         fail("stmt " + stmt + " failed with exception " +
                              e.getSQLState());
                     } else {
-                        assertSQLState("Stmt " + stmt, authDboState, e);
+                        assertSQLState("Stmt " + stmt, authDboState[0], e);
                     }
                 } else {
-                    if (authNotDboState == null) {
+                    if (authNotDboState[0] == null) {
                         fail("stmt " + stmt + " failed with exception " +
                              e.getSQLState());
                     } else {
-                        assertSQLState("Stmt " + stmt, authNotDboState, e);
+                        assertSQLState("Stmt " + stmt, authNotDboState[0], e);
                     }
                 }
             }
         }
+
+        return result;
     }
 
 
-    private void doDynamicSetRole(Connection conn) {
+    private void doDynamicSetRole(Connection conn)
+    {
         PreparedStatement pstmt = null;
 
         try {
@@ -414,34 +728,249 @@ public class RolesTest extends BaseJDBCTestCase
                  assertSQLState(sqlAuthorizationRequired, e);
                  return;
              } else {
-                 // fail("prepare of set role ? failed:" + e);
-                 assertSQLState(notImplemented, e);
-                 return;
+                 fail("prepare of set role ? failed:" + e);
              }
         }
 
         try {
-            pstmt.setString(1, "foo");
+            pstmt.setString(1, "BAR");
             int rowcnt = pstmt.executeUpdate();
             assertEquals(rowcnt, 0, "rowcount from set role ? not 0");
         } catch (SQLException e) {
-            assertSQLState(notImplemented, e);
+            fail("execute of set role ? failed: [foo]" + e);
         }
 
 
         try {
-            pstmt.setString(1, "\"NONE\"");
+            pstmt.setString(1, null);
             int rowcnt = pstmt.executeUpdate();
             assertEquals(rowcnt, 0, "rowcount from set role ? not 0");
         } catch (SQLException e) {
-            assertSQLState(notImplemented, e);
+            fail("execute of set role ? failed: [NONE] " + e);
+        }
+
+        if (isDbo()) {
+            // not granted to non-dbo, so don't try..
+            String n_a     = null; // auth level not used for this test
+
+            try {
+                pstmt.setString(1, "NONE");
+                int rowcnt = pstmt.executeUpdate();
+                assertEquals(rowcnt, 0, "rowcount from set role ? not 0");
+                ResultSet rs = doQuery("values current_role", n_a, null , n_a );
+                assertCurrentRole(rs, "NONE", n_a);
+                rs.close();
+            } catch (SQLException e) {
+                fail("execute of set role ? failed: [NONE] " + e);
+            }
+        }
+
+        if (pstmt != null) {
+            try {
+                pstmt.close();
+            } catch (SQLException e) {
+            }
         }
     }
 
 
-    private void assertEquals(int a, int b, String txt) {
+    private void assertSystableRowCount(String table,
+                                        int rcNoAuth,
+                                        int rcDbo,
+                                        int rcMereMortal)
+        throws SQLException
+    {
+        ResultSet rs = _stm.executeQuery(
+                "SELECT COUNT(*) FROM " + table);
+        rs.next();
+        assertEquals(table + " row count:",
+                     _authLevel == NO_SQLAUTHORIZATION ? rcNoAuth :
+                     (isDbo() ? rcDbo : rcMereMortal),
+                     rs.getInt(1));
+        rs.close();
+    }
+
+
+    private void assertSysRolesRowCount(int rcNoAuth,
+                                        int rcDbo,
+                                        int rcMereMortal)
+        throws SQLException
+    {
+
+        if (TestConfiguration.getCurrent().isVerbose()) {
+            dumpSysRoles();
+        }
+
+        assertSystableRowCount("SYS.SYSROLES",
+                               rcNoAuth, rcDbo, rcMereMortal);
+    }
+
+
+    private void assertSysTablePermsRowCount(int rcNoAuth,
+                                             int rcDbo,
+                                             int rcMereMortal)
+        throws SQLException
+    {
+
+        if (TestConfiguration.getCurrent().isVerbose()) {
+            dumpSysTablePerms();
+        }
+
+        assertSystableRowCount("SYS.SYSTABLEPERMS",
+                               rcNoAuth, rcDbo, rcMereMortal);
+    }
+
+
+    private void assertSysColPermsRowCount(int rcNoAuth,
+                                           int rcDbo,
+                                           int rcMereMortal)
+        throws SQLException
+    {
+
+        if (TestConfiguration.getCurrent().isVerbose()) {
+            dumpSysColPerms();
+        }
+
+        assertSystableRowCount("SYS.SYSCOLPERMS",
+                               rcNoAuth, rcDbo, rcMereMortal);
+    }
+
+
+    private void assertSysRoutinePermsRowCount(int rcNoAuth,
+                                               int rcDbo,
+                                               int rcMereMortal)
+        throws SQLException
+    {
+
+        if (TestConfiguration.getCurrent().isVerbose()) {
+            dumpSysRoutinePerms();
+        }
+
+        assertSystableRowCount("SYS.SYSROUTINEPERMS",
+                               rcNoAuth, rcDbo, rcMereMortal);
+    }
+
+
+    private void dumpSysRoles() throws SQLException
+    {
+
+        ResultSet rs = _stm.executeQuery
+            ("SELECT * FROM SYS.SYSROLES ORDER BY ROLEID");
+
+        println("SYS.SYSROLES:");
+
+        while (rs.next()) {
+            println("r=" + rs.getString(1) + " -ee:" + rs.getString(2) +
+                    " -or:" + rs.getString(3) + " a:" + rs.getString(4) +
+                    " d:" + rs.getString(5));
+        }
+
+        rs.close();
+    }
+
+
+    private void dumpSysTablePerms() throws SQLException
+    {
+        ResultSet rs = _stm.executeQuery
+            ("SELECT * FROM SYS.SYSTABLEPERMS");
+
+        println("SYS.SYSTABLEPERMS:");
+
+        while (rs.next()) {
+            println("id: " + rs.getString(1) +
+                    " -ee:" + rs.getString(2) +
+                    " -or:" + rs.getString(3) +
+                    " tableid:" + rs.getString(4) +
+                    " S:" + rs.getString(5) +
+                    " D:" + rs.getString(6) +
+                    " I:" + rs.getString(7) +
+                    " U:" + rs.getString(8) +
+                    " R:" + rs.getString(9) +
+                    " T:" + rs.getString(10));
+        }
+
+        rs.close();
+    }
+
+
+    private void dumpSysColPerms() throws SQLException
+    {
+
+        ResultSet rs = _stm.executeQuery
+            ("SELECT * FROM SYS.SYSCOLPERMS");
+
+        println("SYS.SYSCOLPERMS:");
+
+        while (rs.next()) {
+            println("id: " + rs.getString(1) +
+                    " -ee:" + rs.getString(2) +
+                    " -or:" + rs.getString(3) +
+                    " tableid:" + rs.getString(4) +
+                    " type:" + rs.getString(5) +
+                    " col#:" + rs.getString(6));
+        }
+
+        rs.close();
+    }
+
+
+    private void dumpSysRoutinePerms() throws SQLException
+    {
+
+        ResultSet rs = _stm.executeQuery
+            ("SELECT * FROM SYS.SYSROUTINEPERMS");
+
+        println("SYS.SYSROUTINEPERMS:");
+
+        while (rs.next()) {
+            println("id: " + rs.getString(1) +
+                    " -ee:" + rs.getString(2) +
+                    " -or:" + rs.getString(3) +
+                    " alias:" + rs.getString(4) +
+                    " grantopt:" + rs.getString(5));
+        }
+
+        rs.close();
+    }
+
+
+    private void assertCurrentRole(ResultSet rs,
+                                   String dboRole,
+                                   String notDboRole)
+        throws SQLException
+    {
+
+        if (_authLevel == NO_SQLAUTHORIZATION) {
+            assertNull(rs);
+        } else {
+            assertTrue("result set empty", rs.next());
+
+            if (isDbo()) {
+                assertTrue(dboRole.equals(rs.getString(1)));
+            } else {
+                assertTrue(notDboRole.equals(rs.getString(1)));
+            }
+
+            // cardinality should be 1
+            assertFalse("result set not empty", rs.next());
+            rs.close();
+        }
+    }
+
+    private void assertEquals(int a, int b, String txt)
+    {
         if (a!=b) {
             fail(txt);
         }
+    }
+
+    /**
+     * Utility function used to test auto-drop of grant routine
+     * permission to a role
+     * @return 1
+     */
+    public static int f1()
+    {
+        return 1;
     }
 }

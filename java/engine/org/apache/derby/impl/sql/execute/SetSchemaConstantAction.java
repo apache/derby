@@ -88,7 +88,7 @@ class SetSchemaConstantAction implements ConstantAction
 
 
 	/**
-	 *	This is the guts of the Execution-time logic for CREATE SCHEMA.
+	 *	This is the guts of the Execution-time logic for SET SCHEMA.
 	 *
 	 *	@see ConstantAction#executeConstantAction
 	 *

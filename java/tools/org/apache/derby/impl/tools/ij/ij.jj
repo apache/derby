@@ -827,6 +827,38 @@ class ij {
 	}
 
 	/**
+	   Return a resultset of roles. No database metadata
+	   available, so select from SYS.SYSROLES directly. This has
+	   the side effect of starting a transaction if one is not
+	   already active, so we should perhaps give warning when not
+	   in autocommit mode.
+	*/
+	public ijResult showRoles() throws SQLException {
+		ResultSet rs = null;
+		try {
+			haveConnection();
+
+			rs = theConnection.createStatement().executeQuery
+				("SELECT ROLEID FROM SYS.SYSROLES WHERE ISDEF='Y' " +
+				 "ORDER BY ROLEID ASC");
+
+			int[] displayColumns = new int[] {
+				rs.findColumn("ROLEID")
+			};
+			int[] columnWidths = new int[] {
+				30
+			};
+
+			return new ijResultSetResult(rs, displayColumns, columnWidths);
+		} catch (SQLException e) {
+			if(rs!=null)
+				rs.close();
+			throw e;
+		}
+	}
+
+
+	/**
 	   Outputs the names of all fields of given table. Outputs field
 	   names and data type.
 	 */
@@ -978,6 +1010,7 @@ TOKEN [IGNORE_CASE] :
 |	<RELATIVE: "relative">
 |	<REMOVE: "remove">
 |	<RESOURCE: "resource">
+|       <ROLES: "roles">
 |	<ROLLBACK: "rollback">
 |	<RUN: "run">
 |	<TO: "to">
@@ -1776,6 +1809,10 @@ throws SQLException
 	{
 		return showSchemas();
 	}
+|       <SHOW> <ROLES>
+        {
+            return showRoles();
+        }
 }
 
 /**

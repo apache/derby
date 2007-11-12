@@ -264,6 +264,32 @@ public class GenericConstantActionFactory
 		return new CreateSchemaConstantAction(schemaName, aid);
 	}
 
+
+    /**
+	 * Make the ConstantAction for a CREATE ROLE statement.
+	 *
+	 * @param roleName	Name of role.
+	 */
+	public	ConstantAction	getCreateRoleConstantAction(String roleName)
+	{
+		return new CreateRoleConstantAction(roleName);
+	}
+
+
+	/**
+	 * Make the ConstantAction for a SET ROLE statement.
+	 *
+	 * @param roleName  Name of role
+	 * @param type      Literal (== 0)
+	 *                  or ?    (== StatementType.SET_ROLE_DYNAMIC)
+	 */
+	public ConstantAction getSetRoleConstantAction(String roleName,
+												   int type)
+	{
+		return new SetRoleConstantAction(roleName, type);
+	}
+
+
 	/**
 	 *	Make the ConstantAction for a CREATE TABLE statement.
 	 *
@@ -505,7 +531,19 @@ public class GenericConstantActionFactory
 	}
 
 	/**
-	 *	Make the ConstantAction for a DROP TABLE statement.
+	 *	Make the ConstantAction for a DROP ROLE statement.
+	 *
+	 *	@param	roleName			role name to be dropped
+	 *
+	 */
+	public ConstantAction getDropRoleConstantAction(String roleName)
+	{
+		return new DropRoleConstantAction(roleName);
+	}
+
+
+	/**
+	 *	Make the ConstantAction for a DROP SCHEMA statement.
 	 *
 	 *	@param	schemaName			Table name.
 	 *
@@ -955,6 +993,21 @@ public class GenericConstantActionFactory
 		return new GrantRevokeConstantAction( true, privileges, grantees);
 	}
 
+
+    /**
+	 * Make the ConstantAction for a GRANT role statement.
+	 *
+	 * @param roleNames list of roles to be granted
+	 * @param grantees  list of authentication ids (user or roles) to
+	 *                  which roles(s) are to be granted
+	 */
+	public ConstantAction getGrantRoleConstantAction(List roleNames,
+													 List grantees)
+	{
+		return new GrantRoleConstantAction(roleNames, grantees);
+	}
+
+
 	/**
 	 * Make the constant action for a Revoke statement
 	 * 
@@ -965,5 +1018,19 @@ public class GenericConstantActionFactory
 								List grantees)
 	{
 		return new GrantRevokeConstantAction( false, privileges, grantees);
+	}
+
+
+    /**
+	 * Make the ConstantAction for a REVOKE role statement.
+	 *
+	 * @param roleNames list of roles to be revoked
+	 * @param grantees  list of authentication ids (user or roles) for whom
+	 *                  roles are to be revoked
+	 */
+	public ConstantAction getRevokeRoleConstantAction(List roleNames,
+													  List grantees)
+	{
+		return new RevokeRoleConstantAction(roleNames, grantees);
 	}
 }

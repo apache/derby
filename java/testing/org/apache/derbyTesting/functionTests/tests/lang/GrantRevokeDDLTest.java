@@ -7695,6 +7695,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             {"SYSTABLEPERMS"},
             {"SYSCOLPERMS"},
             {"SYSROUTINEPERMS"},
+            {"SYSROLES"},
             {"T1"},
             {"T2"},
             {"T2"},

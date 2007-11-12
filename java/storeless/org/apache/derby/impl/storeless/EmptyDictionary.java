@@ -48,6 +48,7 @@ import org.apache.derby.iapi.sql.dictionary.PermissionsDescriptor;
 import org.apache.derby.iapi.sql.dictionary.RoutinePermsDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SPSDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
+import org.apache.derby.iapi.sql.dictionary.RoleDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SubKeyConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TablePermsDescriptor;
@@ -157,6 +158,32 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
 		return false;
 	}
 
+	public void	dropRoleDescriptor(String roleName,
+                                   String grantee,
+                                   String grantor,
+								   TransactionController tc)
+			throws StandardException {
+		// TODO Auto-generated method stub
+	}
+
+	public void	dropRoleGrantsByGrantee(String grantee,
+										TransactionController tc)
+			throws StandardException {
+		// TODO Auto-generated method stub
+	}
+
+	public void	dropRoleGrantsByName(String roleName,
+									 TransactionController tc)
+			throws StandardException {
+		// TODO Auto-generated method stub
+	}
+
+	public void	dropAllPermsByGrantee(String authid,
+									  TransactionController tc)
+			throws StandardException {
+		// TODO Auto-generated method stub
+	}
+
 	public void dropSchemaDescriptor(String schemaName, TransactionController tc)
 			throws StandardException {
 		// TODO Auto-generated method stub
@@ -166,6 +193,20 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
 	public boolean isSchemaEmpty(SchemaDescriptor sd) throws StandardException {
 		// TODO Auto-generated method stub
 		return false;
+	}
+
+	public RoleDescriptor getRoleDefinitionDescriptor(String roleName)
+			throws StandardException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public RoleDescriptor getRoleGrantDescriptor(String roleName,
+												 String grantee,
+												 String grantor)
+		throws StandardException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	public TableDescriptor getTableDescriptor(String tableName,

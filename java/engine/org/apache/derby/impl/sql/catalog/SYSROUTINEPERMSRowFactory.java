@@ -70,6 +70,8 @@ public class SYSROUTINEPERMSRowFactory extends PermissionsCatalogRowFactory
 		{ ALIASID_COL_NUM }
 	};
 
+    public static final int GRANTEE_COL_NUM_IN_GRANTEE_ALIAS_GRANTOR_INDEX = 1;
+
     private static final boolean[] indexUniqueness = { true, true, false };
 
     private	static final String[] uuids =

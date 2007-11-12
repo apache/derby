@@ -78,7 +78,7 @@ public class DMDBugsTest extends BaseJDBCTestCase {
 	                  {{"","APP","TSYN","SYNONYM","",null,null,null,null,null}});
 
 		rs = dmd.getTables( "%", "%", "%", new String[] {"SYSTEM TABLE"});
-		assertEquals(19, JDBC.assertDrainResults(rs));
+		assertEquals(20, JDBC.assertDrainResults(rs));
 		s.executeUpdate("DROP VIEW APP.V");
 		s.executeUpdate("DROP TABLE APP.TAB");
 		s.executeUpdate("DROP SYNONYM APP.TSYN");

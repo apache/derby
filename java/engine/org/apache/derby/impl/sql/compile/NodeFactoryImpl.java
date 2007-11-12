@@ -361,6 +361,9 @@ public class NodeFactoryImpl extends NodeFactory implements ModuleControl, Modul
 		  case C_NodeTypes.RESULT_COLUMN:
 		  	return C_NodeNames.RESULT_COLUMN_NAME;
 
+		  case C_NodeTypes.SET_ROLE_NODE:
+		  	return C_NodeNames.SET_ROLE_NODE_NAME;
+
 		  case C_NodeTypes.SET_SCHEMA_NODE:
 		  	return C_NodeNames.SET_SCHEMA_NODE_NAME;
 
@@ -381,6 +384,9 @@ public class NodeFactoryImpl extends NodeFactory implements ModuleControl, Modul
 
 		  case C_NodeTypes.DROP_SCHEMA_NODE:
 		  	return C_NodeNames.DROP_SCHEMA_NODE_NAME;
+
+		  case C_NodeTypes.DROP_ROLE_NODE:
+		  	return C_NodeNames.DROP_ROLE_NODE_NAME;
 
 		  case C_NodeTypes.DROP_TABLE_NODE:
 		  	return C_NodeNames.DROP_TABLE_NODE_NAME;
@@ -438,6 +444,7 @@ public class NodeFactoryImpl extends NodeFactory implements ModuleControl, Modul
 		  case C_NodeTypes.CURRENT_ISOLATION_NODE:
 		  case C_NodeTypes.IDENTITY_VAL_NODE:
 		  case C_NodeTypes.CURRENT_SCHEMA_NODE:
+          case C_NodeTypes.CURRENT_ROLE_NODE:
 		  	return C_NodeNames.SPECIAL_FUNCTION_NODE_NAME;
 
 		  case C_NodeTypes.IS_NODE:
@@ -497,6 +504,9 @@ public class NodeFactoryImpl extends NodeFactory implements ModuleControl, Modul
 
 		  case C_NodeTypes.NEW_INVOCATION_NODE:
 		  	return C_NodeNames.NEW_INVOCATION_NODE_NAME;
+
+		  case C_NodeTypes.CREATE_ROLE_NODE:
+		  	return C_NodeNames.CREATE_ROLE_NODE_NAME;
 
 		  case C_NodeTypes.CREATE_SCHEMA_NODE:
 		  	return C_NodeNames.CREATE_SCHEMA_NODE_NAME;
@@ -591,6 +601,12 @@ public class NodeFactoryImpl extends NodeFactory implements ModuleControl, Modul
             return C_NodeNames.GRANT_NODE_NAME;
           case C_NodeTypes.REVOKE_NODE:
             return C_NodeNames.REVOKE_NODE_NAME;
+
+          case C_NodeTypes.GRANT_ROLE_NODE:
+            return C_NodeNames.GRANT_ROLE_NODE_NAME;
+
+          case C_NodeTypes.REVOKE_ROLE_NODE:
+			return C_NodeNames.REVOKE_ROLE_NODE_NAME;
 
           case C_NodeTypes.PRIVILEGE_NODE:
             return C_NodeNames.PRIVILEGE_NAME;

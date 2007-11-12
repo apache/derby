@@ -231,7 +231,8 @@ public class PrimaryKeyTest extends BaseJDBCTestCase
                         {"SYSSTATISTICS","1"},
                         {"SYSTABLEPERMS","1"},
                         {"SYSCOLPERMS","1"},
-                        {"SYSROUTINEPERMS","1"}};
+                        {"SYSROUTINEPERMS","1"},
+						{"SYSROLES", "1"}};
                 JDBC.assertFullResultSet(rs,expectedCheckTables); 
 		//-- drop tables
 		assertUpdateCount(s , 0 , "drop table pos1");

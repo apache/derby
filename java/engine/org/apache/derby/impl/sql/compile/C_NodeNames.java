@@ -84,6 +84,9 @@ public interface C_NodeNames
 
 	static final String CREATE_ALIAS_NODE_NAME = "org.apache.derby.impl.sql.compile.CreateAliasNode";
 
+	static final String CREATE_ROLE_NODE_NAME =
+		"org.apache.derby.impl.sql.compile.CreateRoleNode";
+
 	static final String CREATE_INDEX_NODE_NAME = "org.apache.derby.impl.sql.compile.CreateIndexNode";
 
 	static final String CREATE_SCHEMA_NODE_NAME = "org.apache.derby.impl.sql.compile.CreateSchemaNode";
@@ -118,6 +121,9 @@ public interface C_NodeNames
 
 	static final String DROP_INDEX_NODE_NAME = "org.apache.derby.impl.sql.compile.DropIndexNode";
 
+	static final String DROP_ROLE_NODE_NAME =
+		"org.apache.derby.impl.sql.compile.DropRoleNode";
+
 	static final String DROP_SCHEMA_NODE_NAME = "org.apache.derby.impl.sql.compile.DropSchemaNode";
 
 	static final String DROP_TABLE_NODE_NAME = "org.apache.derby.impl.sql.compile.DropTableNode";
@@ -143,6 +149,9 @@ public interface C_NodeNames
 	static final String GET_CURRENT_CONNECTION_NODE_NAME = "org.apache.derby.impl.sql.compile.GetCurrentConnectionNode";
 
 	static final String GRANT_NODE_NAME = "org.apache.derby.impl.sql.compile.GrantNode";
+
+    static final String GRANT_ROLE_NODE_NAME =
+		"org.apache.derby.impl.sql.compile.GrantRoleNode";
     
 	static final String GROUP_BY_COLUMN_NAME = "org.apache.derby.impl.sql.compile.GroupByColumn";
 
@@ -215,7 +224,10 @@ public interface C_NodeNames
 	static final String RESULT_COLUMN_LIST_NAME = "org.apache.derby.impl.sql.compile.ResultColumnList";
 
 	static final String REVOKE_NODE_NAME = "org.apache.derby.impl.sql.compile.RevokeNode";
-    
+
+	static final String REVOKE_ROLE_NODE_NAME =
+		"org.apache.derby.impl.sql.compile.RevokeRoleNode";
+
 	static final String ROW_RESULT_SET_NODE_NAME = "org.apache.derby.impl.sql.compile.RowResultSetNode";
 
 	static final String SQL_BOOLEAN_CONSTANT_NODE_NAME = "org.apache.derby.impl.sql.compile.SQLBooleanConstantNode";
@@ -225,6 +237,9 @@ public interface C_NodeNames
 	static final String SCROLL_INSENSITIVE_RESULT_SET_NODE_NAME = "org.apache.derby.impl.sql.compile.ScrollInsensitiveResultSetNode";
 
 	static final String SELECT_NODE_NAME = "org.apache.derby.impl.sql.compile.SelectNode";
+
+	static final String SET_ROLE_NODE_NAME =
+		"org.apache.derby.impl.sql.compile.SetRoleNode";
 
 	static final String SET_SCHEMA_NODE_NAME = "org.apache.derby.impl.sql.compile.SetSchemaNode";
 

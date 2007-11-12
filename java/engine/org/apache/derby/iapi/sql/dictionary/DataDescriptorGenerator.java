@@ -500,4 +500,32 @@ public class DataDescriptorGenerator
                                            grantor,
                                            ad.getUUID());
     }
+
+
+    /**
+     * Create a new role descriptor
+     *
+     * @param roleName the name of the role for which a new descriptor
+     *                 is created
+     * @param grantee authorization identifier of grantee
+     * @param grantor authorization identifier of grantor
+	 * @param withadminoption if true, WITH ADMIN OPTION is set for
+	 *        this descriptor
+     * @param isDef if true, this descriptor represents a role
+     *              definition, otherwise it represents a grant.
+     */
+    public RoleDescriptor newRoleDescriptor(String roleName,
+											String grantee,
+											String grantor,
+                                            boolean withadminoption,
+											boolean isDef)
+        throws StandardException
+    {
+        return new RoleDescriptor(dataDictionary,
+                                  roleName,
+                                  grantee,
+                                  grantor,
+								  withadminoption,
+                                  isDef);
+    }
 }

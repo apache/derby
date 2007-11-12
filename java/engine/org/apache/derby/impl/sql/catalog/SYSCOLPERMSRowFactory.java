@@ -79,6 +79,9 @@ class SYSCOLPERMSRowFactory extends PermissionsCatalogRowFactory
 		{ TABLEID_COL_NUM }
 	};
 
+    public static final int
+        GRANTEE_COL_NUM_IN_GRANTEE_TABLE_TYPE_GRANTOR_INDEX = 1;
+
     private static final boolean[] indexUniqueness = { true, true, false};
 
     private	static final String[] uuids =

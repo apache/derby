@@ -59,6 +59,7 @@ import java.util.Vector;
 	 <UL>
 	 <LI> USER
 	 <LI> CURRENT_USER
+	 <LI> CURRENT_ROLE
 	 <LI> SESSION_USER
 	 <LI> SYSTEM_USER
 	 <LI> CURRENT SCHEMA
@@ -153,6 +154,22 @@ public class SpecialFunctionNode extends ValueNode
 			//ie there collation type will be UCS_BASIC. The collation 
 			//derivation will be implicit. 
 			dtd.setCollationDerivation(StringDataValue.COLLATION_DERIVATION_IMPLICIT);
+			dtd.setCollationType(StringDataValue.COLLATION_TYPE_UCS_BASIC);
+			break;
+
+		case C_NodeTypes.CURRENT_ROLE_NODE:
+			sqlName = "CURRENT_ROLE";
+			methodName = "getCurrentRoleId";
+			methodType = "java.lang.String";
+			dtd = DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+				Types.VARCHAR, false, 128);
+			//SQL spec Section 6.4 Syntax Rule 4 says that the collation type
+			//of these functions will be the collation of character set
+			//SQL_IDENTIFIER. In Derby's case, that will mean, the collation of
+			//these functions will be UCS_BASIC. The collation derivation will
+			//be implicit.
+			dtd.setCollationDerivation(
+				StringDataValue.COLLATION_DERIVATION_IMPLICIT);
 			dtd.setCollationType(StringDataValue.COLLATION_TYPE_UCS_BASIC);
 			break;
 

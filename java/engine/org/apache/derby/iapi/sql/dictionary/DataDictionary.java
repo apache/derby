@@ -163,6 +163,7 @@ public interface DataDictionary
 	public static final int SYSTABLEPERMS_CATALOG_NUM = 16;
 	public static final int SYSCOLPERMS_CATALOG_NUM = 17;
 	public static final int SYSROUTINEPERMS_CATALOG_NUM = 18;
+    public static final int SYSROLES_CATALOG_NUM = 19;
 
 	/* static finals for constraints 
 	 * (Here because they are needed by parser, compilation and execution.)
@@ -382,6 +383,66 @@ public interface DataDictionary
     public boolean isSystemSchemaName( String name)
         throws StandardException;
     
+
+	/**
+	 * Drop the descriptor for a role
+	 *
+	 * @param roleName	The name of the role to drop
+     * @param grantee   The grantee of the descriptor
+     * @param grantor   The grantor of the descriptor
+	 * @param tc        Transaction Controller
+	 *
+	 * @exception StandardException		Thrown on failure
+	 */
+	public void	dropRoleDescriptor(String roleName,
+                                   String grantee,
+                                   String grantor,
+								   TransactionController tc)
+			throws StandardException;
+
+
+	/**
+	 * Drop all role descriptors corresponding to a grant of (any)
+	 * role to a named authentication identifier
+	 *
+     * @param grantee   The grantee of the descriptor
+	 * @param tc        Transaction Controller
+	 *
+	 * @exception StandardException		Thrown on failure
+	 */
+	public void	dropRoleGrantsByGrantee(String grantee,
+										TransactionController tc)
+			throws StandardException;
+
+
+	/**
+	 * Drop all role descriptors corresponding to a grant of the
+	 * named role to any authentication identifier
+	 *
+     * @param roleName  The role name granted
+	 * @param tc        Transaction Controller
+	 *
+	 * @exception StandardException		Thrown on failure
+	 */
+	public void	dropRoleGrantsByName(String roleName,
+									 TransactionController tc)
+			throws StandardException;
+
+
+	/**
+	 * Drop all permission descriptors corresponding to a grant to
+	 * the named authentication identifier
+	 *
+     * @param authid    The authentication identifier
+	 * @param tc        Transaction Controller
+	 *
+	 * @exception StandardException		Thrown on failure
+	 */
+	public void	dropAllPermsByGrantee(String authid,
+									  TransactionController tc)
+			throws StandardException;
+
+
 	/**
 	 * Drop the descriptor for a schema, given the schema's name
 	 *
@@ -1769,6 +1830,32 @@ public interface DataDictionary
 	 */
 	public String getBuiltinVTIClass(TableDescriptor td, boolean asTableFunction)
 		throws StandardException;
+
+
+	/**
+	 * Get a role descriptor for a role definition.
+	 *
+	 * @param roleName The name of the role whose definition we seek
+	 *
+	 * @throws StandardException error
+	 */
+	public RoleDescriptor getRoleDefinitionDescriptor(String roleName)
+			throws StandardException;
+
+	/**
+	 * Get a role descriptor for a role grant
+	 *
+	 * @param roleName The name of the role whose definition we seek
+	 * @param grantee  The grantee
+	 * @param grantor  The grantor
+	 *
+	 * @throws StandardException error
+	 */
+	public RoleDescriptor getRoleGrantDescriptor(String roleName,
+												 String grantee,
+												 String grantor)
+		throws StandardException;
+
 
 	/**
 	 * Adds a descriptor to a system catalog identified by the catalogNumber. 

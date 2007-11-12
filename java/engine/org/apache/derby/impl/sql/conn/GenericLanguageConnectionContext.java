@@ -50,6 +50,7 @@ import org.apache.derby.iapi.sql.conn.StatementContext;
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptorList;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
+import org.apache.derby.iapi.sql.dictionary.RoleDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.types.DataValueFactory;
@@ -184,7 +185,7 @@ public class GenericLanguageConnectionContext
     protected Authorizer authorizer;
 	protected String userName = null; //The name the user connects with.
 	                                  //May still be quoted.
-	
+	protected RoleDescriptor currentRole;
 	protected SchemaDescriptor	sd;
 
 	// RESOLVE - How do we want to set the default.
@@ -1758,7 +1759,7 @@ public class GenericLanguageConnectionContext
 	}
 
 	/**
-	 *	Get the Authorization Id
+	 *	Get the Authorization Id (user)
 	 *
 	 * @return String	the authorization id
 	 */
@@ -1766,6 +1767,28 @@ public class GenericLanguageConnectionContext
 	{ 
 		return authorizer.getAuthorizationId();
 	}
+
+
+	/**
+	 * Get the current role authorization identifier
+	 *
+	 * @return String	the role id
+	 */
+	public String getCurrentRoleId() {
+		return currentRole != null ?
+			currentRole.getRoleName() : null;
+	}
+
+
+	/**
+	 * Set the current role
+	 *
+	 * @param rd	the descriptor of the role to be set to current
+	 */
+	public void setCurrentRole(RoleDescriptor rd) {
+		this.currentRole = rd;
+	}
+
 
 	/**
 	 *	Get the default schema
