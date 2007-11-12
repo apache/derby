@@ -23,7 +23,8 @@ package org.apache.derby.iapi.services.info;
 
 
 /**
-	What's the current JDK runtime environment.
+	This class is used to determine which Java specification Derby will run at.
+    For a useful discussion of how this class is used, please see DERBY-3176.
  */
 public abstract class JVMInfo
 {
@@ -31,15 +32,15 @@ public abstract class JVMInfo
 		The JVM's runtime environment.
 		<UL>
 		<LI> 1 - not used was JDK 1.1
-		<LI> 2 - J2SE_13- JDK 1.2, 1.3
+		<LI> 2 - not used, was for JDK 1.2 and 1.3
 		<LI> 4 - J2SE_14 - JDK 1.4.0 or 1.4.1
 		<LI> 5 - J2SE_142 - JDK 1.4.2
 		<LI> 6 - J2SE_15 - JDK 1.5
+		<LI> 7 - J2SE_16 - JDK 1.6
 		</UL>
 	*/
 	public static final int JDK_ID;
 
-	public static final int J2SE_13 = 2;
 	public static final int J2SE_14 = 4;
 	public static final int J2SE_142 = 5;
 	public static final int J2SE_15 = 6; // aka J2SE 5.0
@@ -80,23 +81,25 @@ public abstract class JVMInfo
 		}
 
 		try {
-			javaVersion = System.getProperty("java.specification.version", "1.3");
+			javaVersion = System.getProperty("java.specification.version", "1.4");
 
 		} catch (SecurityException se) {
 			// some vms do not know about this property so they
 			// throw a security exception when access is restricted.
-			javaVersion = "1.3";
+			javaVersion = "1.4";
 		}
 
-		if (javaSpec != null && javaSpec.startsWith("J2ME"))
+		if (javaSpec != null &&
+            (
+             javaSpec.startsWith("J2ME") || // recognize IBM WCTME
+             (
+              (javaSpec.indexOf( "Profile" ) > -1) && // recognize phoneME
+              (javaSpec.indexOf( "Specification" ) > -1)
+             )
+            )
+            )
 		{
-			// IBM's WCTME 5.7 returns these values for CDC 1.0 profiles.
-			// "J2ME Foundation Specification"
-			//
-
-			// Foundation 1.0 and Personal Profile 1.0 based
-			// upon CDC 1.0 which is JDK 1.3 based
-			id = J2SE_13;
+			id = J2SE_14;
 			isJ2ME = true;
 		}
 		else
@@ -104,11 +107,7 @@ public abstract class JVMInfo
 			// J2SE/J2EE
 			isJ2ME = false;
 
-			if (javaVersion.equals("1.2") || javaVersion.equals("1.3"))
-			{	
-				id = J2SE_13; //jdk1.3 is still Java2 platform with the same API
-			}
-			else if (javaVersion.equals("1.4"))
+			if (javaVersion.equals("1.4"))
 			{
 				String vmVersion = System.getProperty("java.version", "1.4.0");
 
@@ -129,7 +128,7 @@ public abstract class JVMInfo
 			{
 				// aussme our lowest support unless the java spec
 				// is greater than our highest level.
-				id = J2SE_13;
+				id = J2SE_14;
 
 				try {
 
@@ -162,12 +161,12 @@ public abstract class JVMInfo
 	{
 		switch (JDK_ID)
 		{
-		case J2SE_13: return J2ME ? "J2ME - JDBC for CDC/FP 1.0" : "J2SE 1.3 - JDBC 2.1";
-		case J2SE_14: return "J2SE 1.4 - JDBC 3.0";
+		case J2SE_14: return J2ME ? "J2ME - JDBC for CDC/FP 1.1" : "J2SE 1.4 - JDBC 3.0";
 		case J2SE_142: return "J2SE 1.4.2 - JDBC 3.0";
 		case J2SE_15: return "J2SE 5.0 - JDBC 3.0";
 		case J2SE_16: return "Java SE 6 - JDBC 4.0";
 		default: return "?-?";
 		}
 	}
+
 }

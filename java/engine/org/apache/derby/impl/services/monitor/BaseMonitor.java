@@ -1663,7 +1663,7 @@ nextModule:
     private static final HashMap storageFactories = new HashMap();
     static {
 		String dirStorageFactoryClass;
-		if( JVMInfo.JDK_ID >= JVMInfo.J2SE_14)
+		if( !JVMInfo.J2ME && (JVMInfo.JDK_ID >= JVMInfo.J2SE_14) )
             dirStorageFactoryClass = "org.apache.derby.impl.io.DirStorageFactory4";
         else
             dirStorageFactoryClass = "org.apache.derby.impl.io.DirStorageFactory";
