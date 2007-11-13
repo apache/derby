@@ -176,6 +176,9 @@ public class SecurityPolicyReloadingTest extends BaseJDBCTestCase {
              new String[] { undecoratedTest.makeTargetPolicyStub() }
              );
 
+        // No need to run with default testing policy file because we install our 
+        // own initial policy file.
+        test = SecurityManagerSetup.noSecurityManager(test);
         return test;
     }
 
