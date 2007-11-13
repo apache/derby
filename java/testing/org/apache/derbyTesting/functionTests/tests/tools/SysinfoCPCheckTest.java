@@ -211,14 +211,15 @@ public class SysinfoCPCheckTest extends BaseJDBCTestCase {
 
     public boolean checkClientOrServer(String kind)
     {
-        // JSR169 / J2ME does not support client or server
-        if (JDBC.vmSupportsJSR169())
-            return false;
-
         if (kind == null)
             return true;
         // if there is no derbynet.jar, the syntax should still
         // work, but the comparisons will fail. So never mind.
+        // JSR169 / J2ME does not support client or server
+        if ((kind.equals("server") || kind.equals("client")) 
+                && JDBC.vmSupportsJSR169())
+            return false;
+
         if (kind.equals("server")) 
             return isServer;
         // same for derbyclient.jar
