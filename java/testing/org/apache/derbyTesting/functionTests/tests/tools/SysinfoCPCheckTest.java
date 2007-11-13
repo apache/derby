@@ -36,6 +36,7 @@ import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.Derby;
+import org.apache.derbyTesting.junit.JDBC;
 
 public class SysinfoCPCheckTest extends BaseJDBCTestCase {
 
@@ -210,6 +211,10 @@ public class SysinfoCPCheckTest extends BaseJDBCTestCase {
 
     public boolean checkClientOrServer(String kind)
     {
+        // JSR169 / J2ME does not support client or server
+        if (JDBC.vmSupportsJSR169())
+            return false;
+
         if (kind == null)
             return true;
         // if there is no derbynet.jar, the syntax should still
