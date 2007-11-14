@@ -154,6 +154,7 @@ public class SYSCOLUMNSRowFactory extends CatalogRowFactory
 		Object					defaultSerializable = null;
 		long					autoincStart = 0;
 		long					autoincInc = 0;
+		long					autoincValue = 0;
 		//The SYSCOLUMNS table's autoinc related columns change with different
 		//values depending on what happened to the autoinc column, ie is the 
 		//user adding an autoincrement column, or is user changing the existing 
@@ -174,6 +175,7 @@ public class SYSCOLUMNSRowFactory extends CatalogRowFactory
 			colID = new Integer(column.getPosition() );
 			autoincStart = column.getAutoincStart();
 			autoincInc   = column.getAutoincInc();
+			autoincValue   = column.getAutoincValue();
 			autoinc_create_or_modify_Start_Increment = column.getAutoinc_create_or_modify_Start_Increment();
 			if (column.getDefaultInfo() != null)
 			{
@@ -222,8 +224,15 @@ public class SYSCOLUMNSRowFactory extends CatalogRowFactory
 		if (autoinc_create_or_modify_Start_Increment == ColumnDefinitionNode.CREATE_AUTOINCREMENT ||
 				autoinc_create_or_modify_Start_Increment == ColumnDefinitionNode.MODIFY_AUTOINCREMENT_INC_VALUE)
 		{//user is adding an autoinc column or is changing the increment value of autoinc column
+			// This code also gets run when ALTER TABLE DROP COLUMN
+			// is used to drop a column other than the autoinc
+			// column, and the autoinc column gets removed from
+			// SYSCOLUMNS and immediately re-added with a different
+			// column position (to account for the dropped column).
+			// In this case, the autoincValue may have a
+			// different value than the autoincStart.
 			row.setColumn(SYSCOLUMNS_AUTOINCREMENTVALUE, 
-						  new SQLLongint(autoincStart));
+						  new SQLLongint(autoincValue));
 			row.setColumn(SYSCOLUMNS_AUTOINCREMENTSTART, 
 						  new SQLLongint(autoincStart));
 			row.setColumn(SYSCOLUMNS_AUTOINCREMENTINC, 
@@ -320,7 +329,7 @@ public class SYSCOLUMNSRowFactory extends CatalogRowFactory
 		UUID				defaultUUID = null;
 		UUID				uuid = null;
 		UUIDFactory			uuidFactory = getUUIDFactory();
-		long autoincStart, autoincInc;
+		long autoincStart, autoincInc, autoincValue;
 
 		DataDescriptorGenerator	ddg = dd.getDataDescriptorGenerator();
 
@@ -393,7 +402,8 @@ public class SYSCOLUMNSRowFactory extends CatalogRowFactory
 		DataTypeDescriptor dataTypeServices = 
 			DataTypeDescriptor.getType(catalogType);
 
-		/* 7th column is AUTOINCREMENTVALUE, not cached in descriptor (long) */
+		/* 7th column is AUTOINCREMENTVALUE (long) */
+		autoincValue = row.getColumn(SYSCOLUMNS_AUTOINCREMENTVALUE).getLong();
 
 		/* 8th column is AUTOINCREMENTSTART (long) */
 		autoincStart = row.getColumn(SYSCOLUMNS_AUTOINCREMENTSTART).getLong();
@@ -409,7 +419,8 @@ public class SYSCOLUMNSRowFactory extends CatalogRowFactory
 
 		colDesc = new ColumnDescriptor(columnName, columnNumber,
 							dataTypeServices, defaultValue, defaultInfo, uuid, 
-							defaultUUID, autoincStart, autoincInc);
+							defaultUUID, autoincStart, autoincInc,
+                            autoincValue);
 		return colDesc;
 	}
 

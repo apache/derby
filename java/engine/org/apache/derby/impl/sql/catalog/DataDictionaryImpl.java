@@ -3678,7 +3678,7 @@ public final class	DataDictionaryImpl
                         (DataValueDescriptor)parameterDefaults[index],
                     (DefaultInfo) null,
                     uuid,
-                    (UUID) null, 0, 0);
+                    (UUID) null, 0, 0, 0);
 										
 			addDescriptor(cd, null, SYSCOLUMNS_CATALOG_NUM, 
 						  false, // no chance of duplicates here
@@ -3862,7 +3862,7 @@ public final class	DataDictionaryImpl
 										  (DefaultInfo) null,
 										  uuid,
 										  (UUID) null,
-										  0, 0);
+										  0, 0, 0);
 										
 				updateColumnDescriptor(cd,
 									   cd.getReferencingUUID(), 
