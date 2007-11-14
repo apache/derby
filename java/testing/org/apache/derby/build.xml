@@ -17,10 +17,14 @@
 -->
 <project default="pptesting-build" basedir="../../../../../">
 
+    <!-- User settings -->
+    <property file="${user.home}/ant.properties"/>
+
     <!-- Compile-time classpath properties files -->
     <property file="${properties.dir}/extrapath.properties"/>
     <property file="${properties.dir}/compilepath.properties"/>
 
+    <!-- Compile package private tests. -->
     <target name="compile">
         <mkdir dir="${out.pptesting.dir}"/>
 
@@ -30,13 +34,13 @@
             fork="yes"
             bootclasspath="${empty}"
             nowarn="on"
-            debug="${debug}"
+            debug="true"
             depend="${depend}"
             deprecation="${deprecation}"
             optimize="${optimize}"
             proceed="${proceed}"
             verbose="${verbose}"
-            srcdir="${derby.pptesting.src.dir}"
+            srcdir="${derby.testing.src.dir}"
             destdir="${out.pptesting.dir}">
             <classpath>
                 <!-- Fix this to use the Java SE 5 classpath -->
@@ -44,13 +48,15 @@
                 <pathelement path="${junit}"/>
                 <pathelement path="${out.dir}"/>
             </classpath>
-            <include name="**/*Test.java"/>
-            <include name="**/_Suite.java"/>
-            <include name="**/PackagePrivateTestSuite.java"/>
+            <!-- Can't rely on just compiling PackagePrivateTestSuite, as ant
+                 won't check the timestamp on the other Java files to determine
+                 if they have been changed since last compile then. -->
+            <include name="org/apache/derby/**/*java"/>
         </javac>
     </target>
 
+    <!-- Build package private tests. Currently this only involve compilation,
+         but might be extended with packaging and more later on. -->
     <target name="pptesting-build" depends="compile">
-       <echo message="Package private tests build completed."/>
     </target>
 </project>

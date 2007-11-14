@@ -398,7 +398,7 @@
 	
   <!-- Build the package private tests -->
   <target name="pptesting" if="jdk16" depends="testing">
-    <ant dir="${derby.pptesting.src.dir}"/>
+    <ant dir="${derby.testing.src.dir}/org/apache/derby"/>
   </target>
 
 
