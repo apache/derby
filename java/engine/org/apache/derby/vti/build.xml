@@ -62,7 +62,7 @@
       target="1.4"
       bootclasspath="${empty}"
       nowarn="on"
-      debug="true"
+      debug="${debug}"
       depend="${depend}"
       deprecation="${deprecation}"
       optimize="${optimize}"
