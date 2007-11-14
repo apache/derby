@@ -34,8 +34,6 @@ import java.security.PrivilegedExceptionAction;
 import java.sql.SQLException;
 import junit.framework.Test;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.NetworkServerTestSetup;
-import org.apache.derbyTesting.junit.SecurityManagerSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 
@@ -126,18 +124,18 @@ public class ErrorStreamTest extends BaseJDBCTestCase {
         assertNotDirectory(derbyLog);
         assertNotEmpty(derbyLog);
 
-        boolean deleted = deleteFile(derbyLog);
-        assertTrue("File " + derbyLog + " could not be deleted", deleted);
-
         println("Shutdown engine");
         getTestConfiguration().shutdownEngine();
+
+        boolean deleted = deleteFile(derbyLog);
+        assertTrue("File " + derbyLog + " could not be deleted", deleted);
     }
 
     /**
      * Test the derby.stream.error.file property.
      */
     public void testFile() throws IOException, SQLException {
-        setSystemProperty(FILE_PROP, fileStreamFile.getCanonicalPath());
+        setSystemProperty(FILE_PROP, getCanonicalPath(fileStreamFile));
 
         bootDerby();
         getTestConfiguration().shutdownEngine();
@@ -154,9 +152,9 @@ public class ErrorStreamTest extends BaseJDBCTestCase {
      * Test the derby.stream.error.file property with wrong input.
      */
     public void testWrongFile() throws IOException, SQLException {
-        setSystemProperty(FILE_PROP,
-              new File(new File(getSystemProperty("derby.system.home"), "foo"),
-              makeStreamFilename("file")).getCanonicalPath()); // erroneous path
+        setSystemProperty(FILE_PROP, getCanonicalPath(new File(
+              new File(getSystemProperty("derby.system.home"), "foo"),
+              makeStreamFilename("file")))); // erroneous path
 
         bootDerby();
         getTestConfiguration().shutdownEngine();
@@ -250,7 +248,7 @@ public class ErrorStreamTest extends BaseJDBCTestCase {
      * derby.stream.error.method property.
      */
     public void testFileOverMethod() throws IOException, SQLException {
-        setSystemProperty(FILE_PROP, fileStreamFile.getCanonicalPath());
+        setSystemProperty(FILE_PROP, getCanonicalPath(fileStreamFile));
         setSystemProperty(METHOD_PROP,
               "org.apache.derbyTesting.functionTests.tests.engine."+
               "ErrorStreamTest.getStream");
@@ -271,7 +269,7 @@ public class ErrorStreamTest extends BaseJDBCTestCase {
      * derby.stream.error.field property.
      */
     public void testFileOverField() throws IOException, SQLException {
-        setSystemProperty(FILE_PROP, fileStreamFile.getCanonicalPath());
+        setSystemProperty(FILE_PROP, getCanonicalPath(fileStreamFile));
         setSystemProperty(FIELD_PROP,
               "org.apache.derbyTesting.functionTests.tests.engine."+
               "ErrorStreamTest.fieldStream");
@@ -292,7 +290,7 @@ public class ErrorStreamTest extends BaseJDBCTestCase {
      * derby.stream.error.method and the derby.stream.error.field property.
      */
     public void testFileOverMethodAndField() throws IOException, SQLException {
-        setSystemProperty(FILE_PROP, fileStreamFile.getCanonicalPath());
+        setSystemProperty(FILE_PROP, getCanonicalPath(fileStreamFile));
         setSystemProperty(METHOD_PROP,
               "org.apache.derbyTesting.functionTests.tests.engine."+
               "ErrorStreamTest.getStream");
@@ -485,6 +483,22 @@ public class ErrorStreamTest extends BaseJDBCTestCase {
         return deleted.booleanValue();
     }
 
+    private static String getCanonicalPath(final File f) throws IOException {
+        String path = null;
+        try {
+            path = (String) AccessController.doPrivileged(
+                  new PrivilegedExceptionAction() {
+                public Object run() throws IOException {
+                    return f.getCanonicalPath();
+                }
+            });
+        } catch (PrivilegedActionException e) {
+            // e.getException() should be an instance of IOException.
+            throw (IOException) e.getException();
+        }
+        return path;
+    }
+
     private static void makeDirIfNotExisting(final String filename) {
         AccessController.doPrivileged(new PrivilegedAction() {
             public Object run() {
@@ -517,7 +531,7 @@ public class ErrorStreamTest extends BaseJDBCTestCase {
                 }
             });
             } catch (PrivilegedActionException e) {
-                // e.getException() should be an instance of IOException.
+                // e.getException() should be a FileNotFoundException.
                 throw (FileNotFoundException) e.getException();
             }
         return outStream;
