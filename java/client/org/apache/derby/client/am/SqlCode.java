@@ -50,7 +50,7 @@ public class SqlCode {
 
     public final static SqlCode queuedXAError = new SqlCode(-4203);
 
-    public final static SqlCode disconnectError = new SqlCode(-4499);
+    public final static SqlCode disconnectError = new SqlCode(40000);
 
     public final static SqlCode undefinedError = new SqlCode(-99999);
     

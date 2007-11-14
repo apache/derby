@@ -310,7 +310,7 @@ public class NsTest extends Thread {
 
 			System.out.println("\n\n " + sqe + sqe.getErrorCode() + " "
 					+ sqe.getSQLState());
-			if ((sqe.getErrorCode() == -4499)
+			if ((sqe.getErrorCode() == 40000)
 					|| sqe.getSQLState().equalsIgnoreCase("08001")) {
 				System.out
 				.println("\n Unable to connect, test cannot proceed. Please verify if the Network Server is started on port 1900.");
