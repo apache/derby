@@ -47,6 +47,18 @@ public class Warehouse {
     private Address address;
     private String tax;
     private String ytd;
+    
+    /**
+     * Clear all information to allow object re-use.
+     */
+    public void clear()
+    {
+        id = 0;
+        name = null;
+        address = null;
+        tax = null;
+        ytd = null;
+    }
 
     public Address getAddress() {
         return address;

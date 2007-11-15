@@ -69,6 +69,24 @@ public class Customer {
     private int payment_cnt;
     private int delivery_cnt;
     private String data;
+    
+    /**
+     * Clear all information to allow object re-use.
+     */
+    public void clear()
+    {
+        warehouse = district = 0;
+        id = 0;     
+        first = middle = last = null;
+        address = null;     
+        phone = null;       
+        since = null;       
+        credit = credit_lim = discount = null;      
+        ytd_payment = null;     
+        payment_cnt = delivery_cnt = 0; 
+        data = null;
+    }
+    
     public Address getAddress() {
         return address;
     }

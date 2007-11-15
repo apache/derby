@@ -52,10 +52,31 @@ import org.apache.derbyTesting.system.oe.model.Warehouse;
  * <P>
  * More specific direct (client side) implementations
  * could extend this class overriding methods as needed.
+ * <P>
+ * Object is single threaded so it re-uses objects
+ * where possible to avoid the garbage collection
+ * due to the application affecting the results
+ * too much since the purpose of the framework
+ * is to test Derby's performance.
  */
 public class Standard implements Operations {
     
     private final Connection conn;
+    
+    /*
+     * Objects for re-use within the transactions
+     */
+    
+    private final Customer customer = new Customer();
+    
+    private final Warehouse warehouse = new Warehouse();
+    
+    private final District district = new District();
+    
+    private final Order order = new Order();
+    
+    private final List nameList = new ArrayList();
+
 
     /**
      * Create an instance of this implementation.
@@ -207,7 +228,7 @@ public class Standard implements Operations {
             osCustomerByName.setString(3, customerLast);
             ResultSet rs = osCustomerByName.executeQuery();
 
-            List list = new ArrayList();
+            nameList.clear();
             while (rs.next())
             {
                 Customer customer = new Customer();
@@ -220,23 +241,23 @@ public class Standard implements Operations {
                 customer.setFirst(rs.getString("C_FIRST"));
                 customer.setMiddle(rs.getString("C_MIDDLE"));
                 
-                list.add(customer);
+                nameList.add(customer);
             }
             reset(osCustomerByName);
-            if (list.isEmpty())
+            if (nameList.isEmpty())
                 throw new SQLException("Order Status by name - no matching customer "
                         + customerLast);
             
             // Customer to use is midpoint (with round up) (see 2.6.2.2)
-            int mid = list.size()/2;
+            int mid = nameList.size()/2;
             if (mid != 0) {
-                if (list.size()%2 == 1)
+                if (nameList.size()%2 == 1)
                     mid++;
             }
 
 
-            Customer customer = (Customer) list.get(mid);
-            list = null;
+            Customer customer = (Customer) nameList.get(mid);
+            nameList.clear();
             
             getOrderStatusForCustomer(display, displayData, true, customer);
         } catch (SQLException e) {
@@ -256,7 +277,7 @@ public class Standard implements Operations {
                 "SELECT C_BALANCE, C_FIRST, C_MIDDLE, C_LAST " +
                 "FROM CUSTOMER WHERE C_W_ID = ? AND C_D_ID = ? AND C_ID = ?");
         
-        Customer customer = new Customer();
+        customer.clear();
         customer.setWarehouse(w);
         customer.setDistrict(d);
         customer.setId(c);
@@ -299,7 +320,7 @@ public class Standard implements Operations {
                 "OL_DELIVERY_D FROM ORDERLINE " +
                 "WHERE OL_W_ID = ? AND OL_D_ID = ? AND OL_O_ID = ?");
         
-        Order order = new Order();
+        order.clear();
         order.setWarehouse(customer.getWarehouse());
         order.setDistrict(customer.getDistrict());
         
@@ -376,24 +397,24 @@ public class Standard implements Operations {
             pyCustomerByName.setString(3, customerLast);
             ResultSet rs = pyCustomerByName.executeQuery();
 
-            List list = new ArrayList();
+            nameList.clear();
             while (rs.next())
             {           
-                list.add(rs.getObject("C_ID"));            
+                nameList.add(rs.getObject("C_ID"));            
             }
             reset(pyCustomerByName);
-            if (list.isEmpty())
+            if (nameList.isEmpty())
                 throw new SQLException("Payment by name - no matching customer "
                         + customerLast);
             
             // Customer to use is midpoint (with round up) (see 2.5.2.2)
-            int mid = list.size()/2;
+            int mid = nameList.size()/2;
             if (mid != 0) {
-                if (list.size()%2 == 1)
+                if (nameList.size()%2 == 1)
                     mid++;
             }
             
-            int c = ((Integer) list.get(mid)).intValue();
+            int c = ((Integer) nameList.get(mid)).intValue();
 
             paymentById(display, displayData, w, d, cw, cd, c, amount);
         } catch (SQLException e) {
@@ -521,7 +542,7 @@ public class Standard implements Operations {
             reset(pyCustomerGetData);
         }
 
-        District district = new District();
+        district.clear();
         district.setWarehouse(w);
         district.setId(d);
 
@@ -541,7 +562,7 @@ public class Standard implements Operations {
         district.setAddress(getAddress(rs, "D_STREET_1"));
         reset(pyDistrictInfo);        
         
-        Warehouse warehouse = new Warehouse();
+        warehouse.clear();
         warehouse.setId(w);
         
         // Update WAREHOUSE

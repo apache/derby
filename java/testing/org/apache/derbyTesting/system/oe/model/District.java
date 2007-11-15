@@ -49,6 +49,16 @@ package org.apache.derbyTesting.system.oe.model;
  */
 public class District extends Warehouse {
     private short warehouse;
+    
+    /**
+     * Clear all information to allow object re-use.
+     */
+    public void clear()
+    {
+        super.clear();
+        warehouse = 0;
+    }
+
 
     public short getWarehouse() {
         return warehouse;

@@ -36,6 +36,9 @@ import org.apache.derbyTesting.system.oe.model.Warehouse;
  * Objects passed in from the data model (Customer etc.) may not
  * be fully populated, but they will contain all the information
  * required for that specific operation.
+ * <BR>
+ * Any display method must not retain references to any objects
+ * it is passed, the caller may be re-using the objects across transactions.
  * <P>
  * DECIMAL values are represented as String objects to allow
  * Order Entry to be run on J2ME/CDC/Foundation which does

@@ -54,6 +54,20 @@ public class Order {
     private Integer carrier_id; // JDBC maps SMALLINT to java.lang.Integer
     private int ol_cnt;
     private boolean all_local;
+    
+    /**
+     * Clear all information to allow object re-use.
+     */
+    public void clear()
+    {
+        id = 0;
+        district = warehouse = 0;
+        customer = 0;
+        entry_d = null;
+        carrier_id = null;
+        ol_cnt = 0;
+        all_local = false;
+    }
 
     public boolean isAll_local() {
         return all_local;
