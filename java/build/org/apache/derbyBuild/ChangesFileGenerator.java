@@ -1107,63 +1107,7 @@ public class ChangesFileGenerator extends Task
         //
         title = title.substring( title.indexOf( ']' ) + 2, title.length() );        
 
-        //return new JiraIssue( key, title, releaseNoteAttachmentID );
-        String type=squeezeText(getFirstChild(itemElement, "type"));
-
-        try {
-        	String resolution=squeezeText(getOptionalChild(itemElement, "resolution"));
-        	if (resolution != null)
-        	{   
-        		if (!resolution.equals("Fixed"))
-        			return null;
-        	}
-        } catch (Exception e) {
-        	return null;
-        }
-
-        String fixVersion=null;
-        try {
-        	fixVersion=squeezeText(getOptionalChild(itemElement, JIRA_FIXIN));
-        } catch (Exception e) {
-        	return null;
-        }
-
-        while (fixVersion != null)
-        {
-
-        	NodeList        subItemList = itemElement.getElementsByTagName( JIRA_FIXIN );
-        	int             fixcount = subItemList.getLength();
-        	for (int i=0; i<fixcount; i++)
-        	{
-        		// if we encounter the previous release's ID, we can do away with entire issue
-        		if (_previousReleaseID.equals(fixVersion))
-        		{
-        			return null;
-        		}
-        		// hardcode excluding 10.2.1.6; we want to exclude those also
-        		if (fixVersion.equals("10.2.1.6"))
-        		{
-        			return null;
-        		}
-        		// if the first fixVersion does not match the current release, or the beta,
-        		// check the next one
-        		if ( (!_releaseID.equals(fixVersion)) &&
-        				(!"10.3.0.0".equals(fixVersion)) &&
-        				(!"10.3.1.1".equals(fixVersion)) &&
-        				(!"10.3.1.2".equals(fixVersion)) &&
-        				(!"10.3.1.3".equals(fixVersion))) {
-        			try {
-        				fixVersion = squeezeText(getNextChild( itemElement, JIRA_FIXIN, i+1));
-        				continue;
-        			} catch (Exception e) {
-        				fixVersion=null;
-        				return null;
-        			}
-        		}
-        	}
-        	return new JiraIssue( key, title );
-        }
-        return null;
+        return new JiraIssue( key, title);
     }
     
     ////////////////////////////////////////////////////////

@@ -111,7 +111,7 @@ public class ReleaseNotesGenerator extends Task
     // major sections
     private static  final   String  OVERVIEW_SECTION = "Overview";
     private static  final   String  NEW_FEATURES_SECTION = "New Features";
-    private static  final   String  BUG_FIXES_SECTION = "CHANGES";
+    private static  final   String  BUG_FIXES_SECTION = "Bug Fixes";
     private static  final   String  ISSUES_SECTION = "Issues";
     private static  final   String  BUILD_ENVIRONMENT_SECTION = "Build Environment";
 
@@ -165,7 +165,6 @@ public class ReleaseNotesGenerator extends Task
     private static  final   String  JIRA_KEY = "key";
     private static  final   String  JIRA_NAME = "name";
     private static  final   String  JIRA_TITLE = "title";
-    private static  final   String  JIRA_FIXIN = "fixVersion";
 
     // managing releaseNote.html
     private static  final   String  RN_SUMMARY_OF_CHANGE = "Summary of Change";
@@ -589,12 +588,7 @@ public class ReleaseNotesGenerator extends Task
         String          previousReleaseID = getPreviousReleaseID( gs );
         String          deltaStatement =
             "The following issues are addressed by Derby release " + releaseID +
-            ". These issues are not addressed in the preceding " + 
-              previousReleaseID + " release." +
-            "Note that some of these issues were discovered during development" +
-            " of the release and may not affect earlier releases. " +
-            "This list includes bugs, improvements and new features, including sub-tasks," +
-            " but not issues with only test or web content changes.";
+            ". These issues are not addressed in the preceding " + previousReleaseID + " release.";
 
         addParagraph( bugListSection, deltaStatement );
 
@@ -603,8 +597,6 @@ public class ReleaseNotesGenerator extends Task
 
         for ( int i = 0; i < count; i++ )
         {
-        	if (bugs[i] == null)
-        		continue;
             JiraIssue   issue = bugs[ i ];
             Element     row = insertRow( table );
             Element     linkColumn = insertColumn( row );
@@ -639,8 +631,6 @@ public class ReleaseNotesGenerator extends Task
         int                 count = bugs.length;
         String          releaseID = getReleaseID( gs );
         String          previousReleaseID = getPreviousReleaseID( gs );
-        String          greleaseID = releaseID;
-        String          gpreviousReleaseID = previousReleaseID;
         String          deltaStatement =
             "Compared with the previous release (" + previousReleaseID +
             "), Derby release " + releaseID + " introduces the following new features " +
@@ -652,9 +642,7 @@ public class ReleaseNotesGenerator extends Task
 
         for ( int i = 0; i < count; i++ )
         {
-        	if (bugs[ i ] == null)
-        		continue;
-        	JiraIssue       issue = bugs[ i ];
+            JiraIssue       issue = bugs[ i ];
             
             Document    releaseNote = null;
 
@@ -1294,19 +1282,6 @@ public class ReleaseNotesGenerator extends Task
         return retval;
     }
 
-    private Element getNextChild( Element node, String childName, int index )
-    throws Exception
-    {
-    	Element retval = (Element) node.getElementsByTagName( childName ).item( index );
-
-    	if ( retval == null )
-    	{
-    		throw new BuildException( "Could not find child element '" + childName + "' in parent element '" + node.getNodeName() + "'." );
-    	}
-
-    	return retval;
-    }
-    
     private Element getOptionalChild( Element node, String childName )
         throws Exception
     {
@@ -1405,17 +1380,7 @@ public class ReleaseNotesGenerator extends Task
         int                 count = itemList.getLength();
         JiraIssue[]     issues = new JiraIssue[ count ];
 
-        
-        
-        //for ( int i = 0; i < count; i++ ) { issues[ i ] = makeJiraIssue( (Element) itemList.item( i ) ); }
-        for ( int i = 0; i < count; i++ ) 
-        { 
-        	JiraIssue ji =  makeJiraIssue( (Element) itemList.item( i ) ); 
-        	if (ji != null)
-        	{
-        		issues[ i ] = ji; 
-        	}
-        }             
+        for ( int i = 0; i < count; i++ ) { issues[ i ] = makeJiraIssue( (Element) itemList.item( i ) ); }
 
         return issues;
     }
@@ -1442,82 +1407,7 @@ public class ReleaseNotesGenerator extends Task
         //
         title = title.substring( title.indexOf( ']' ) + 2, title.length() );        
 
-        //return new JiraIssue( key, title, releaseNoteAttachmentID );
-        String type=squeezeText(getFirstChild(itemElement, "type"));
-        if (!(type.equals("Bug") || type.equals("New Feature") || type.equals("Improvement") || type.equals("Sub-task")))
-        	return null;
-
-        try {
-        	String component=squeezeText(getOptionalChild(itemElement, "component"));
-        	if (component != null)
-        	{   
-        		NodeList        subItemList = itemElement.getElementsByTagName( "component" );
-        		int             compcount = subItemList.getLength();
-        		for (int i=0; i<compcount; i++)
-        		{
-        			if (component.equals("Test") || component.equals("Web content"))
-        				return null;
-        			try {
-        				component = squeezeText(getNextChild(itemElement, "component", i+1));
-        			} catch (Exception e) {
-        				// nothing...
-        			}
-        		}
-        	}
-        } catch (NullPointerException e) {
-        	// do nothing, now...
-        }
-
-        try {
-        	String resolution=squeezeText(getOptionalChild(itemElement, "resolution"));
-        	if (resolution != null)
-        	{   
-        		if (!resolution.equals("Fixed"))
-        			return null;
-        	}
-        } catch (Exception e) {
-        	return null;
-        }
-
-        String fixVersion=null;
-        try {
-        	fixVersion=squeezeText(getOptionalChild(itemElement, JIRA_FIXIN));
-        } catch (Exception e) {
-        	return null;
-        }
-
-        while (fixVersion != null)
-        {
-
-        	NodeList        subItemList = itemElement.getElementsByTagName( JIRA_FIXIN );
-        	int             fixcount = subItemList.getLength();
-        	for (int i=0; i<fixcount; i++)
-        	{
-        		// if we encounter the previous release's ID, we can do away with entire issue
-        		if (_previousReleaseID.equals(fixVersion))
-        		{
-        			return null;
-        		}
-        		// hardcode excluding 10.2.1.6; we want to exclude those also
-        		if (fixVersion.equals("10.2.1.6"))
-        		{
-        			return null;
-        		}
-        		// if the first fixVersion does not match the current release, or the beta,
-        		// check the next one
-        		if ( (!_releaseID.equals(fixVersion)) && (!"10.3.0.0".equals(fixVersion)) && (!"10.3.1.1".equals(fixVersion)) && (!"10.3.1.2".equals(fixVersion)) && (!"10.3.1.3".equals(fixVersion))) {
-        			try {
-        				fixVersion = squeezeText(getNextChild( itemElement, JIRA_FIXIN, i+1));
-        				continue;
-        			} catch (Exception e) {
-        				fixVersion=null;
-        				return null;
-        			}
-        		}
-        	}
-        	return new JiraIssue( key, title, releaseNoteAttachmentID );
-        }
-        return null;
+        return new JiraIssue( key, title, releaseNoteAttachmentID );
     }
 
     /**
