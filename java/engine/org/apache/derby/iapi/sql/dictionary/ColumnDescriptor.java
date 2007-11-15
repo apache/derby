@@ -69,6 +69,7 @@ public final class ColumnDescriptor extends TupleDescriptor
 	private UUID				defaultUUID;
 	private long				autoincStart;
 	private long				autoincInc;
+	private long				autoincValue;
 	//Following variable is used to see if the user is adding an autoincrement 
 	//column, or if user is altering the existing autoincrement column to change 
 	//the increment value or to change the start value. If none of the above,
@@ -154,6 +155,7 @@ public final class ColumnDescriptor extends TupleDescriptor
 			      columnDefaultInfo);
 
 		this.autoincStart = autoincStart;
+		this.autoincValue = autoincStart;
 		this.autoincInc = autoincInc;
 
 	}
@@ -176,13 +178,14 @@ public final class ColumnDescriptor extends TupleDescriptor
 	 * @param defaultUUID			The UUID for the default, if any.
 	 * @param autoincStart	Start value for an autoincrement column.
 	 * @param autoincInc	Increment for autoincrement column
+	 * @param autoincValue	Current value of the autoincrement column
 	 */
 	public ColumnDescriptor(String columnName, int columnPosition,
 		DataTypeDescriptor columnType, DataValueDescriptor columnDefault,
 		DefaultInfo columnDefaultInfo,
 		UUID uuid,
 		UUID defaultUUID,
-        long autoincStart, long autoincInc)
+        long autoincStart, long autoincInc, long autoincValue)
 
 	{
 		this.columnName = columnName;
@@ -198,6 +201,7 @@ public final class ColumnDescriptor extends TupleDescriptor
 			      columnDefaultInfo);
 		
 		this.autoincStart = autoincStart;
+		this.autoincValue = autoincValue;
 		this.autoincInc = autoincInc;
 	}
 
@@ -380,9 +384,32 @@ public final class ColumnDescriptor extends TupleDescriptor
 		return autoincInc;
 	}
 
+	/**
+	 * Get the current value for an autoincrement column.
+	 *
+	 * One case in which this is used involves dropping a column
+	 * from a table. When ALTER TABLE DROP COLUMN runs, it drops
+	 * the column from SYSCOLUMNS, and then must adjust the
+	 * column positions of the other subsequent columns in the table
+	 * to account for the removal of the dropped columns. This
+	 * involves deleting and re-adding the column descriptors to
+	 * SYSCOLUMNS, but during that process we must be careful to
+	 * preserve the current value of any autoincrement column.
+	 *
+	 * @return the current value for an autoincrement column
+	 */
+	public long getAutoincValue()
+	{
+		return autoincValue;
+	}
+
 	public long getAutoinc_create_or_modify_Start_Increment()
 	{
 		return autoinc_create_or_modify_Start_Increment;
+	}
+	public void setAutoinc_create_or_modify_Start_Increment(int c_or_m)
+	{
+		autoinc_create_or_modify_Start_Increment = c_or_m;
 	}
 
 	/**

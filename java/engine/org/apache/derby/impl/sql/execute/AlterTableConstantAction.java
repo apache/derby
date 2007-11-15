@@ -79,6 +79,7 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.RowLocation;
 import org.apache.derby.iapi.types.StringDataValue;
 import org.apache.derby.impl.sql.catalog.DDColumnDependableFinder;
+import org.apache.derby.impl.sql.compile.ColumnDefinitionNode;
 
 /**
  *	This class  describes actions that are ALWAYS performed for an
@@ -931,11 +932,22 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		ColumnDescriptor[] cdlArray = 
             new ColumnDescriptor[size - columnDescriptor.getPosition()];
 
+		// For each column in this table with a higher column position,
+		// drop the entry from SYSCOLUMNS, but hold on to the column
+		// descriptor and reset its position to adjust for the dropped
+		// column. Then, re-add all those adjusted column descriptors
+		// back to SYSCOLUMNS
+		//
 		for (int i = columnDescriptor.getPosition(), j = 0; i < size; i++, j++)
 		{
 			ColumnDescriptor cd = (ColumnDescriptor) tab_cdl.elementAt(i);
 			dd.dropColumnDescriptor(td.getUUID(), cd.getColumnName(), tc);
 			cd.setPosition(i);
+			if (cd.isAutoincrement())
+			{
+				cd.setAutoinc_create_or_modify_Start_Increment(
+						ColumnDefinitionNode.CREATE_AUTOINCREMENT);
+			}
 			cdlArray[j] = cd;
 		}
 		dd.addDescriptorArray(cdlArray, td,
