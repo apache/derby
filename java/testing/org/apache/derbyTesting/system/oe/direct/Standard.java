@@ -26,14 +26,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
-import java.util.IdentityHashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.derbyTesting.system.oe.client.Display;
 import org.apache.derbyTesting.system.oe.client.Operations;
-import org.apache.derbyTesting.system.oe.model.Address;
 import org.apache.derbyTesting.system.oe.model.Customer;
 import org.apache.derbyTesting.system.oe.model.District;
 import org.apache.derbyTesting.system.oe.model.Order;
@@ -59,14 +55,11 @@ import org.apache.derbyTesting.system.oe.model.Warehouse;
  * too much since the purpose of the framework
  * is to test Derby's performance.
  */
-public class Standard implements Operations {
-    
-    private final Connection conn;
+public class Standard extends StatementHelper implements Operations {
     
     /*
      * Objects for re-use within the transactions
      */
-    
     private final Customer customer = new Customer();
     
     private final Warehouse warehouse = new Warehouse();
@@ -85,9 +78,7 @@ public class Standard implements Operations {
      */
     public Standard(Connection conn) throws SQLException
     {
-        this.conn = conn;
-        conn.setAutoCommit(false);
-        conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+        super(conn, false, Connection.TRANSACTION_SERIALIZABLE);
     }
     
     /**
@@ -107,41 +98,6 @@ public class Standard implements Operations {
         return new Standard(conn) {
             protected void reset(PreparedStatement ps) {}
         };
-    }
-    
-    /**
-     * Map of SQL text to its PreparedStatement.
-     * This allows the SQL text to be in-line with
-     * code that sets the parameters and looks at 
-     * the results. Map is on the identity of the SQL
-     * string which assumes they are all constants
-     * (and hence interned). Assumption is that this
-     * will provide for a quicker lookup than by text
-     * since the statements can be many characters.
-     * 
-     * May also allow easier sharing with other implementations
-     * such as a Java procedure which could have a different
-     * prepareStatement method.
-     */
-    private Map statements = new IdentityHashMap();
-    
-    /**
-     * Prepare a statement, looking in the map first.
-     * If the statement does not exist in the map then
-     * it is prepared and put into the map for future use.
-     */
-    PreparedStatement prepareStatement(String sql) throws SQLException {
-        PreparedStatement ps = (PreparedStatement) statements.get(sql);
-        if (ps != null)
-            return ps;
-        
-        // Prepare all statements as forward-only, read-only, close at commit.
-        ps = conn.prepareStatement(sql,
-                ResultSet.TYPE_FORWARD_ONLY,
-                ResultSet.CONCUR_READ_ONLY,
-                ResultSet.CLOSE_CURSORS_AT_COMMIT);
-        statements.put(sql, ps);
-        return ps;
     }
     
     /**
@@ -953,49 +909,6 @@ public class Standard implements Operations {
         
     }
 
-    public void close() throws Exception {
-              
-        for (Iterator i = statements.keySet().iterator(); i.hasNext(); )
-        {
-            String sql = (String) i.next();
-            PreparedStatement ps = (PreparedStatement) statements.get(sql);
-            ps.close();
-        }
-    }
-    
-    /**
-     * Reset a PreparedStatement. Closes its open ResultSet
-     * and clears the parameters. While clearing the parameters
-     * is not required since any future execution will override
-     * them, it is done here to reduce the chance of errors.
-     * E.g. using the wrong prepared statement for a operation
-     * or not setting all the parameters.
-     * It is assumed the prepared statement was just executed.
-     * @throws SQLException 
-     */
-    protected void reset(PreparedStatement ps) throws SQLException
-    {
-        ResultSet rs = ps.getResultSet();
-        if (rs != null)
-            rs.close();
-        ps.clearParameters();
-    }
-    
-    private Address getAddress(ResultSet rs, String firstColumnName) throws SQLException
-    {
-        Address address = new Address();
-        
-        int col = rs.findColumn(firstColumnName);
-        address.setStreet1(rs.getString(col++));
-        address.setStreet2(rs.getString(col++));
-        address.setCity(rs.getString(col++));
-        address.setState(rs.getString(col++));
-        address.setZip(rs.getString(col));
-        
-        return address;
-    }
-    
-    
     public void sortOrderItems(int[] items, short[] quantities, short[] supplyW) {
 
         OrderItem4Sort[] list = new OrderItem4Sort[items.length];

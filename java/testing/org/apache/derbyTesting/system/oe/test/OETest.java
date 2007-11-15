@@ -25,9 +25,13 @@ import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
+import org.apache.derbyTesting.system.oe.direct.SimpleNonStandardOperations;
 import org.apache.derbyTesting.system.oe.run.Checks;
 import org.apache.derbyTesting.system.oe.run.Populate;
 import org.apache.derbyTesting.system.oe.run.Schema;
+
+import java.sql.Connection;
+import java.sql.SQLException;
 
 /**
  * Test the basic functionality of the Order Entry test
@@ -53,7 +57,40 @@ public class OETest extends BaseJDBCTestCase {
         suite.addTest(Checks.suite());
 
         suite.addTestSuite(OperationsTester.class);
+        suite.addTestSuite(OETest.class);
                 
         return new CleanDatabaseTestSetup(suite);
+    }
+    
+    private SimpleNonStandardOperations getNSOps() throws SQLException
+    {
+        return new SimpleNonStandardOperations(
+                getConnection(), Connection.TRANSACTION_SERIALIZABLE);
+    }
+    
+    /**
+     * Test the non-standard customer inquiry transaction
+     */
+    public void testCustomerInquiry() throws SQLException
+    {
+        SimpleNonStandardOperations nsops = getNSOps();
+                   
+        for (int i = 0; i < 20; i++)
+            nsops.customerInquiry(1);
+        
+        nsops.close();
+    }
+    
+    /**
+     * Test the non-standard customer address change transaction
+     */
+    public void testCustomerAddressChange() throws SQLException
+    {
+        SimpleNonStandardOperations nsops = getNSOps();
+                   
+        for (int i = 0; i < 20; i++)
+            nsops.customerAddressChange(1);
+        
+        nsops.close();
     }
 }
