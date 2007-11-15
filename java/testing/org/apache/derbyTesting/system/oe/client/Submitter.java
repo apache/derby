@@ -405,7 +405,7 @@ public class Submitter {
     	// Section 2.4.1.4
     	if (forRollback)
     	{
-    		items[orderItemCount] = 2334432;
+    		items[orderItemCount - 1] = 2334432;
     	}
     	
         ops.newOrder(display, displayData,
