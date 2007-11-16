@@ -123,6 +123,7 @@ public final class ErrorCodeTest extends BaseJDBCTestCase {
         		{"08004","User '{0}' cannot (re)encrypt database '{1}'. Only the database owner can perform this operation.","40000"},
         		{"08004","User '{0}' cannot hard upgrade database '{1}'. Only the database owner can perform this operation.","40000"},
         		{"08004","Connection refused to database '{0}' because it is in replication slave mode.","40000"},
+        		{"08004","User '{0}' cannot issue a replication operation on database '{1}'. Only the database owner can perform this operation.","40000"},
         		{"08006","An error occurred during connect reset and the connection has been terminated.  See chained exceptions for details.","40000"},
         		{"08006","SocketException: '{0}'","40000"},
         		{"08006","A communications error has been detected: {0}.","40000"},

@@ -383,6 +383,14 @@ Guide.
                 <text>Connection refused to database '{0}' because it is in replication slave mode.</text>
                 <arg>databaseName</arg>
             </msg>
+
+            <msg>
+                <name>08004.C.8</name>
+                <text>User '{0}' cannot issue a replication operation on database '{1}'. Only the database owner can perform this operation.</text>
+                <arg>authorizationID</arg>
+                <arg>databaseName</arg>
+            </msg>
+
             <msg>
                 <name>08006.C</name>
                 <text>A network protocol error was encountered and the connection has been terminated: {0}</text>

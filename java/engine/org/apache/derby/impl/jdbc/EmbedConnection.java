@@ -304,6 +304,14 @@ public abstract class EmbedConnection implements EngineConnection
 			// the rest.
 			tr.startTransaction();
 
+			if (isStartReplicationMasterBoot(info) && !shutdown) {
+				handleStartReplicationMaster(tr, info);
+			} else if (isStopReplicationMasterBoot(info)) {
+				// Stopping replication master can be done
+				// simultaneously with a database shutdown operation
+				handleStopReplicationMaster(tr, info);
+			}
+
 			if (isTwoPhaseEncryptionBoot || isTwoPhaseUpgradeBoot) {
 
 				// DERBY-2264: shutdown and boot again with encryption or
@@ -474,6 +482,86 @@ public abstract class EmbedConnection implements EngineConnection
 			p.getProperty(Attribute.UPGRADE_ATTR)).booleanValue();
 	}
 
+    private boolean isStartReplicationMasterBoot(Properties p) {
+        return ((Boolean.valueOf(
+                 p.getProperty(Attribute.REPLICATION_START_MASTER)).
+                 booleanValue()));
+    }
+
+    private boolean isStopReplicationMasterBoot(Properties p) {
+        return ((Boolean.valueOf(
+                 p.getProperty(Attribute.REPLICATION_STOP_MASTER)).
+                 booleanValue()));
+    }
+
+    private void handleStartReplicationMaster(TransactionResourceImpl tr,
+                                              Properties p)
+        throws SQLException {
+
+        // If authorization is turned on, we need to check if this
+        // user is database owner.
+        if (!usingNoneAuth &&
+            getLanguageConnection().usesSqlAuthorization()) {
+            checkIsDBOwner(OP_REPLICATION);
+        }
+        // TODO: If system privileges is turned on, we need to check
+        // that the user has the replication privilege. Waiting for
+        // Derby-2109
+
+        // At this point, the user is properly authenticated,
+        // authorized and has the correct system privilege to start
+        // replication - depending on the security mechanisms
+        // Derby is running under.
+
+        String slavehost =
+            p.getProperty(Attribute.REPLICATION_SLAVE_HOST);
+
+        if (slavehost == null) {
+            // slavehost is required attribute.
+            SQLException wrappedExc =
+                newSQLException(SQLState.PROPERTY_MISSING,
+                                Attribute.REPLICATION_SLAVE_HOST);
+            throw newSQLException(SQLState.LOGIN_FAILED, wrappedExc);
+        }
+
+        String portString =
+            p.getProperty(Attribute.REPLICATION_SLAVE_PORT);
+        int slaveport = -1; // slaveport < 0 will use the default port
+        if (portString != null) {
+            slaveport = Integer.valueOf(portString).intValue();
+        }
+
+        tr.getDatabase().startReplicationMaster(slavehost,
+                                                slaveport,
+                                                org.apache.derby.iapi.
+                                                services.replication.
+                                                master.MasterFactory.
+                                                ASYNCHRONOUS_MODE);
+    }
+
+    private void handleStopReplicationMaster(TransactionResourceImpl tr,
+                                             Properties p)
+        throws SQLException {
+
+        // If authorization is turned on, we need to check if this
+        // user is database owner.
+        if (!usingNoneAuth &&
+            getLanguageConnection().usesSqlAuthorization()) {
+            checkIsDBOwner(OP_REPLICATION);
+        }
+        // TODO: If system privileges is turned on, we need to check
+        // that the user has the replication privilege. Waiting for
+        // Derby-2109
+
+        // At this point, the user is properly authenticated,
+        // authorized and has the correct system privilege to start
+        // replication - depending on the security mechanisms
+        // Derby is running under.
+
+        // Waiting for Derby-2954:
+        // tr.getDatabase().stopReplicationMaster();
+    }
+
 	/**
 	 * Remove any encryption or upgarde properties from the given properties
 	 *
@@ -601,6 +689,7 @@ public abstract class EmbedConnection implements EngineConnection
 	private static final int OP_ENCRYPT = 0;
 	private static final int OP_SHUTDOWN = 1;
 	private static final int OP_HARD_UPGRADE = 2;
+	private static final int OP_REPLICATION = 3;
 	/**
 	 * Check if actual authenticationId is equal to the database owner's.
 	 *
@@ -624,6 +713,9 @@ public abstract class EmbedConnection implements EngineConnection
 									  actualId, tr.getDBName());
 			case OP_HARD_UPGRADE:
 				throw newSQLException(SQLState.AUTH_HARD_UPGRADE_NOT_DB_OWNER,
+									  actualId, tr.getDBName());
+			case OP_REPLICATION:
+				throw newSQLException(SQLState.AUTH_REPLICATION_NOT_DB_OWNER,
 									  actualId, tr.getDBName());
 			default:
 				if (SanityManager.DEBUG) {

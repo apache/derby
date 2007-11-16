@@ -101,7 +101,30 @@ public interface Attribute {
 
 	String NEW_BOOT_PASSWORD = "newBootPassword";
 
+    /**
+     * Attribute name to start replication master mode for a database.
+     * If used, REPLICATION_SLAVE_HOST is a required attribute.
+     */
+    String REPLICATION_START_MASTER = "startMaster";
 
+    /**
+     * Attribute name to stop replication master mode for a database.
+     */
+    String REPLICATION_STOP_MASTER = "stopMaster";
+
+    /**
+     * If startMaster is true, this attribute is used to specify the
+     * host name the master should connect to. This is a required
+     * attribute.
+     */
+    String REPLICATION_SLAVE_HOST = "slaveHost";
+
+    /**
+     * If startMaster is true, this attribute is used to specify the
+     * port the master should connect to. This is an optional
+     * attribute
+     */
+    String REPLICATION_SLAVE_PORT = "slavePort";
 
 	/**
 		The attribute that is used for the database name, from
