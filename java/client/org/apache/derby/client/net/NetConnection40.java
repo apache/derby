@@ -244,8 +244,9 @@ public class  NetConnection40 extends org.apache.derby.client.net.NetConnection 
 	try { checkForClosedConnection(); }
 	catch (SqlException se) {
             throw new SQLClientInfoException
-                (se.getMessage(), se.getSQLState(), 
-                 new FailedProperties40(p).getProperties());
+                (se.getMessage(), se.getSQLState(),
+                		se.getErrorCode(),
+                		new FailedProperties40(p).getProperties());
         }
 
         if (name == null && value == null) {
@@ -274,7 +275,8 @@ public class  NetConnection40 extends org.apache.derby.client.net.NetConnection 
 	try { checkForClosedConnection(); } 
 	catch (SqlException se) {
 	    throw new SQLClientInfoException(se.getMessage(), se.getSQLState(),
-					  fp.getProperties());
+	    		se.getErrorCode(),
+	    		fp.getProperties());
 	}
 	
 	if (properties == null || properties.isEmpty()) {
@@ -287,7 +289,9 @@ public class  NetConnection40 extends org.apache.derby.client.net.NetConnection 
 			     (SQLState.PROPERTY_UNSUPPORTED_CHANGE), 
 			     fp.getFirstKey(), fp.getFirstValue());
         throw new SQLClientInfoException(se.getMessage(),
-                                         se.getSQLState(), fp.getProperties());
+        		se.getSQLState(), 
+	    		se.getErrorCode(),
+	    		fp.getProperties());
     }
 
     /**

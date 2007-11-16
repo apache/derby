@@ -120,6 +120,7 @@ public class EmbedConnection40 extends EmbedConnection30 {
             FailedProperties40 fp = new FailedProperties40(p);
             throw new SQLClientInfoException(se.getMessage(), 
                                              se.getSQLState(), 
+                                             se.getErrorCode(),
                                              fp.getProperties());
         }
         // Allow null to simplify compliance testing through
@@ -152,7 +153,7 @@ public class EmbedConnection40 extends EmbedConnection30 {
         try { checkIfClosed(); }
         catch (SQLException se) {
             throw new SQLClientInfoException(se.getMessage(), se.getSQLState(),
-                                             fp.getProperties());
+            		se.getErrorCode(), fp.getProperties());
         }
 
         // Allow null to simplify compliance testing through
@@ -169,7 +170,9 @@ public class EmbedConnection40 extends EmbedConnection30 {
              fp.getFirstKey(), 
              fp.getFirstValue());
         throw new SQLClientInfoException(se.getMessage(),
-                                         se.getSQLState(), fp.getProperties());
+        		se.getSQLState(), 
+        		se.getErrorCode(),
+        		fp.getProperties());
     }
     
     /**
