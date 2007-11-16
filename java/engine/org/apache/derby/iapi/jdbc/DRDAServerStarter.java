@@ -34,6 +34,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
 import java.net.InetAddress;
 import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 
@@ -231,7 +232,13 @@ public final class DRDAServerStarter implements ModuleControl, Runnable
 			{
 				serverShutdownMethod.invoke( server,
 											 null);
-				serverThread.interrupt();
+				AccessController.doPrivileged(
+							      new PrivilegedAction() {
+								  public Object run() {
+								      serverThread.interrupt();
+								      return null;
+								  }
+							      });				
 				serverThread = null;
 			}
 		   
