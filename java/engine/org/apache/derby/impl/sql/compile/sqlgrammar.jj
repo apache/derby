@@ -1696,6 +1696,8 @@ TOKEN_MGR_DECLS :
 		t.beginOffset = input_stream.getBeginOffset();
 		t.endOffset = input_stream.getEndOffset();
 	}
+	
+	int commentNestingDepth = 0;
 }
 
 SKIP :
@@ -1708,7 +1710,24 @@ SKIP :
 
 SKIP :
 {	/* comments */
-	"--" : IN_COMMENT
+	  "--" : IN_COMMENT
+	| "/*" { commentNestingDepth = 1; } : IN_BRACKETED_COMMENT
+}
+
+<IN_BRACKETED_COMMENT> SKIP :
+{
+	"/*" { commentNestingDepth++; }
+}
+
+<IN_BRACKETED_COMMENT> SKIP :
+{
+	"*/"
+	{ commentNestingDepth--; SwitchTo(commentNestingDepth == 0 ? DEFAULT : IN_BRACKETED_COMMENT); }
+}
+
+<IN_BRACKETED_COMMENT> SKIP :
+{
+	< ~[] >
 }
 
 <IN_COMMENT> SKIP :
