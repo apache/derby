@@ -170,5 +170,14 @@ public interface MessageId {
      */
     String SERVICE_PROPERTIES_DONT_EDIT = "M001"; // Tell user not to edit service.properties
 
+    /*
+     * Replication
+     */
+    String REPLICATION_ERROR_BEGIN                       = "R001";
+    String REPLICATION_ERROR_END                         = "R002";
+    String REPLICATION_SLAVE_STARTED                     = "R003";
+    String REPLICATION_SLAVE_STOPPED                     = "R004";
+    String REPLICATION_FATAL_ERROR                       = "R005";
+    String REPLICATION_SLAVE_LOST_CONN                   = "R006";
 
 }

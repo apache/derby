@@ -23,15 +23,23 @@
 package org.apache.derby.impl.services.replication.slave;
 
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.MessageId;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.monitor.ModuleControl;
 import org.apache.derby.iapi.services.monitor.ModuleSupportable;
+import org.apache.derby.iapi.services.monitor.Monitor;
 
 import org.apache.derby.iapi.store.raw.RawStoreFactory;
 import org.apache.derby.iapi.store.raw.log.LogFactory;
+import org.apache.derby.impl.store.raw.log.LogToFile;
 
+import org.apache.derby.impl.services.replication.ReplicationLogger;
+import org.apache.derby.impl.services.replication.net.ReplicationMessage;
+import org.apache.derby.impl.services.replication.net.ReplicationMessageReceive;
 import org.apache.derby.iapi.services.replication.slave.SlaveFactory;
 
+import java.io.EOFException;
+import java.net.SocketTimeoutException;
 import java.util.Properties;
 
 /**
@@ -48,15 +56,39 @@ import java.util.Properties;
  *
  * @see SlaveFactory
  */
-public class SlaveController implements SlaveFactory, ModuleControl,
-                                        ModuleSupportable {
+public class SlaveController extends ReplicationLogger
+    implements SlaveFactory, ModuleControl, ModuleSupportable {
+
+
+    // How long to wait for a connection to be established with the
+    // master before timing out. Note that this is done so that we can
+    // detect if replication slave mode has been stopped. If
+    // replication mode has not been stopped, a new attempt is made to
+    // set up the connection. 
+    // TODO: make this configurable through a property
+    private static final int DEFAULT_SOCKET_TIMEOUT = 1000; // 1 second
 
     private RawStoreFactory rawStoreFactory;
-    private LogFactory logFactory;
-    // waiting for code to go into trunk:
-    //    private NetworkReceive connection; 
+    private LogToFile logToFile;
+    private ReplicationMessageReceive receiver;
 
+    private String slavehost;
     private int slaveport;
+    private String dbname; // The name of the replicated database
+
+    // Whether or not replication slave mode is still on. Will be set
+    // to false when slave replication is shut down. The value of this
+    // variable is checked after every timeout when trying to set up a
+    // connection to the master, and by the thread that applies log
+    // chunks received from the master.
+    private volatile boolean inReplicationSlaveMode = true;
+
+    // Used to parse chunks of log records received from the master.
+    private ReplicationLogScan logScan;
+
+    // Thread that listens for log chunk messages from the master, and
+    // applies these to the local log
+    private SlaveLogReceiverThread logReceiverThread;
 
     /**
      * Empty constructor required by Monitor.bootServiceModule
@@ -71,8 +103,6 @@ public class SlaveController implements SlaveFactory, ModuleControl,
      * Used by Monitor.bootServiceModule to start the service. It will
      * set up basic variables 
      *
-     * Not implemented yet
-     *
      * @param create Currently ignored
      * @param properties Properties used to start the service in the
      * correct mode
@@ -82,15 +112,14 @@ public class SlaveController implements SlaveFactory, ModuleControl,
     public void boot(boolean create, Properties properties)
         throws StandardException {
 
+        slavehost = properties.getProperty(SlaveFactory.SLAVE_HOST);
+
         String port = properties.getProperty(SlaveFactory.SLAVE_PORT);
         if (port != null) {
             slaveport = new Integer(port).intValue();
         }
 
-        // Added when Network Service has been committed to trunk
-        // connection = new NetworkReceive();
-
-        System.out.println("SlaveController booted");
+        dbname = properties.getProperty(SlaveFactory.SLAVE_DB);
     }
 
     /**
@@ -137,28 +166,54 @@ public class SlaveController implements SlaveFactory, ModuleControl,
     /**
      * Start slave replication. This method establishes a network
      * connection with the associated replication master and starts a
-     * daemon that applies operations received from the master (in the
+     * thread that applies operations received from the master (in the
      * form of log records) to the local slave database.
      *
-     * Not implemented yet
-     *
      * @param rawStore The RawStoreFactory for the database
-     * @param logFac The LogFactory ensuring recoverability for this database
+     * @param logFac The LogFactory ensuring recoverability for this
+     * database
+     *
+     * @exception StandardException Thrown if the slave could not be
+     * started.
      */
-    public void startSlave(RawStoreFactory rawStore, LogFactory logFac) {
-        // Added when Network Service has been committed to trunk:
-        // connection.connect(); // sets up a network connection to the slave
+    public void startSlave(RawStoreFactory rawStore, LogFactory logFac)
+        throws StandardException {
+
+        // Retry to setup a connection with the master until a
+        // connection has been established or until we are no longer
+        // in replication slave mode
+        receiver = new ReplicationMessageReceive(slavehost, slaveport);
+        while (!setupConnection()) {
+            if (!inReplicationSlaveMode) {
+                // If we get here, another thread has called
+                // stopSlave() while we waited for a connection with
+                // the master. The thread shutting the slave down will
+                // clean up anything we did during setupConnection, so
+                // simply return.
+                return;
+            }
+        }
+
+        // Setup the log scan used to parse chunks of log received
+        // from the master
+        logScan = new ReplicationLogScan();
 
         rawStoreFactory = rawStore;
-        logFactory = logFac;
 
-        // Add code that initializes replication by setting up a
-        // network connection with the master, receiving the database
-        // from the master, make a DaemonService for applying log
-        // records etc. Repliation should be up and running when this
-        // method returns.
+        try {
+            logToFile = (LogToFile)logFac;
+        } catch (ClassCastException cce) {
+            // Since there are only two implementing classes of
+            // LogFactory, the class type has to be ReadOnly if it is
+            // not LogToFile.
+            throw StandardException.newException(
+                SQLState.CANNOT_REPLICATE_READONLY_DATABASE);
+        }
 
-        System.out.println("SlaveController started");
+        logToFile.initializeReplicationSlaveRole();
+        startLogReceiverThread();
+
+        Monitor.logTextMessage(MessageId.REPLICATION_SLAVE_STARTED, dbname);
     }
 
     /**
@@ -167,7 +222,10 @@ public class SlaveController implements SlaveFactory, ModuleControl,
      * Not implemented yet
      */
     public void stopSlave() {
-        System.out.println("SlaveController stopped");
+        inReplicationSlaveMode = false;
+
+        // todo: shutdown slave
+        Monitor.logTextMessage(MessageId.REPLICATION_SLAVE_STOPPED, dbname);
     }
 
     /**
@@ -200,7 +258,7 @@ public class SlaveController implements SlaveFactory, ModuleControl,
         // this database. The database can be connected to after this.
 
         // // complete recovery of the database 
-        // logFactory.setReplicationMode(false); 
+        // logToFile.setReplicationMode(false);
 
         // Added when Network Service has been committed to trunk:
         // connection.shutdown();
@@ -208,5 +266,216 @@ public class SlaveController implements SlaveFactory, ModuleControl,
         System.out.println("SlaveController failover");
     }
 
+    ////////////////////////////////////////////////////////////
+    // Private Methods                                        //
+    ////////////////////////////////////////////////////////////
+
+    /**
+     * Establish a connection with the replication master. Listens for
+     * a connection on the slavehost/port for DEFAULT_SOCKET_TIMEOUT
+     * milliseconds. 
+     *
+     * @return true if a connection has been set up with the master,
+     * false if the connection attempt timed out.
+     *
+     * @exception StandardException if an unexpected exception occured
+     * that prevented a connection with the master.
+     */
+    private boolean setupConnection() throws StandardException {
+
+        try {
+            // timeout to check if still in replication slave mode
+            receiver.initConnection(DEFAULT_SOCKET_TIMEOUT);
+            return true; // will not reach this if timeout
+        } catch (StandardException se) {
+            throw se;
+        } catch (Exception e) {
+            // SocketTimeoutException is wrapped in
+            // PrivilegedActionException.
+            Throwable cause = e.getCause();
+            if (cause instanceof SocketTimeoutException) {
+                // Timeout! 
+                return false;
+            } else {
+                throw StandardException.newException
+                    (SQLState.REPLICATION_CONNECTION_EXCEPTION, e, dbname);
+            }
+        }
+    }
+
+    /**
+     * Write the reason for the lost connection to the log (derby.log)
+     * and reconnect with the master. Once the network is up and
+     * running, a new LogReceiverThread is started. The method returns
+     * without doing anything if inReplicationSlaveMode=false, which
+     * means that stopSlave() has been called by another thread.
+     *
+     * @param eofe The reason the connection to the master was lost
+     */
+
+    private void handleDisconnect(EOFException eofe) {
+        if (!inReplicationSlaveMode) {
+            return;
+        }
+
+        logError(MessageId.REPLICATION_SLAVE_LOST_CONN, eofe, dbname);
+
+        try {
+            while (!setupConnection()) {
+                if (!inReplicationSlaveMode) {
+                    // stopSlave may have been called, turning
+                    // replication slave mode off. Simply return if
+                    // that is the case. The thread that called
+                    // stopSlave will clean up everything.
+                    return;
+                }
+            }
+
+            startLogReceiverThread();
+        } catch (StandardException se) {
+            handleFatalException(se);
+        }
+    }
+
+    /**
+     * Starts the LogReceiverThread that will listen for chunks of log
+     * records from the master and apply the log records to the local
+     * log file.
+     */
+    private void startLogReceiverThread() {
+        logReceiverThread = new SlaveLogReceiverThread();
+        logReceiverThread.start();
+    }
+
+    /**
+     * Handles fatal errors for slave replication functionality. These
+     * are errors that requires us to stop replication. Calling this
+     * method has the following effects:
+     *
+     * 1) Debug messages are written to the log file (usually
+     *    derby.log) if ReplicationLogger#LOG_REPLICATION_MESSAGES is
+     *    true.
+     *
+     * 2) If the network connection is up, the master is notified of
+     *    the problem.
+     *
+     * 3) All slave replication functionality is stopped, and the
+     *    database is then shut down without being booted.
+     *
+     * The method will return without doing anything if
+     * inReplicationSlaveMode=false, meaning that stopSlave has been
+     * called.
+     *
+     * @param e The fatal exception that is the reason for calling
+     * this method
+     */
+    private void handleFatalException(Exception e) {
+        // If inReplicationSlaveMode is false, the stopSlave method in
+        // this controller has already been called. If so, we ignore
+        // this fatal error.
+        if (!inReplicationSlaveMode) {
+            return;
+        }
+
+        logError(MessageId.REPLICATION_FATAL_ERROR, e, dbname);
+
+        // todo: notify master of the problem
+        // todo: rawStoreFactory.stopReplicationSlave();
+    }
+
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Inner Class - Thread used to apply chunks of log received from master //
+    ///////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Thread that listens for incoming messages from the master and
+     * applies chunks of log records to the local log files.
+     */
+    private class SlaveLogReceiverThread extends Thread {
+        public void run() {
+            // Debug only - println will be removed
+            System.out.println("Started log receiver thread");
+            try {
+                ReplicationMessage message;
+                while (inReplicationSlaveMode) {
+                    message = receiver.readMessage();
+
+                    switch (message.getType()){
+                    case ReplicationMessage.TYPE_LOG:
+                        byte[] logChunk = (byte[])message.getMessage();
+                        handleLogChunk(logChunk);
+                        break;
+                    default:
+                        // debug; will be removed
+                        System.out.println("Not handling non-log messages yet "
+                                           +"- got a type "+message.getType());
+                        break;
+                    }
+                }
+
+            } catch (EOFException eofe) {
+                // Network connection with master has been lost.
+                handleDisconnect(eofe);
+            } catch (StandardException se) {
+                handleFatalException(se);
+            } catch (Exception e) {
+                // Exceptions not caused by disconnect are unexpected,
+                // and therefore fatal
+                StandardException se = 
+                    StandardException.newException
+                    (SQLState.REPLICATION_UNEXPECTED_EXCEPTION, e);
+                handleFatalException(se);
+            }
+        }
+
+        /**
+         * Parses a chunk of log received from the master, and applies
+         * the individual log records to the local log file.
+         *
+         * @param logChunk A chunk of log records received from the
+         * master
+         * @exception StandardException If the chunk of log records
+         * could not be parsed or the local log file is out of synch
+         * with the master log file.
+         */
+        private void handleLogChunk(byte[] logChunk)
+            throws StandardException{
+            logScan.init(logChunk);
+
+            while (logScan.next()){
+                if (logScan.isLogFileSwitch()) {
+                    logToFile.switchLogFile();
+                } else {
+
+                    long localInstant = logToFile.
+                        appendLogRecord(logScan.getData(), 
+                                        0, 
+                                        logScan.getDataLength(), 
+                                        null, 
+                                        0, 
+                                        0);
+
+                    // If the log instant of the received log does not
+                    // match with the local log instant, the log
+                    // records are not written to the same physical
+                    // location in the log files. This is fatal since
+                    // log records are identified by their physical
+                    // location in the log files.
+                    if (logScan.getInstant() != localInstant) {
+                        throw StandardException.newException
+                            (SQLState.REPLICATION_LOG_OUT_OF_SYNCH,
+                             dbname,
+                             new Long(logScan.getInstant()),
+                             new Long(localInstant));
+
+                    }
+                }
+            }
+        }
+    }
+    ///////////////////////////////////////////////////////////
+    // END Inner Class                                       //
+    ///////////////////////////////////////////////////////////
 
 }

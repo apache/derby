@@ -357,9 +357,9 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
     //   switchLogFile (both in slave replication mode and after the
     //   database has been fully booted) when a new log file is
     //   allocated.
-	long					 logFileNumber = -1; // current log file number
-								// other than during boot and recovery time,
-								// and by initializeSlaveReplication if in
+	long					 logFileNumber = -1; // current log file number.
+								// Other than during boot and recovery time,
+								// and during initializeReplicationSlaveRole if in
 								// slave replication mode,
 								// logFileNumber is only changed by
 								// switchLogFile, which is synchronized.
@@ -1904,7 +1904,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 		<P>MT - log factory is single threaded thru a log file switch, the log
 		is frozen for the duration of the switch
 	*/
-	private void switchLogFile() throws StandardException
+	public void switchLogFile() throws StandardException
 	{
 		boolean switchedOver = false;
 
@@ -2838,7 +2838,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 
 		<p> When the database is in slave replication mode only:
 		Assumes that only recover() will call this method after
-		initializeSlaveReplication() has been called, and until slave
+		initializeReplicationSlaveRole() has been called, and until slave
 		replication has ended. If this changes, the current
 		implementation will fail.</p>
 
@@ -2849,25 +2849,35 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 		 throws IOException, StandardException
 	{
 
-        // <SLAVE REPLICATION CODE> When in slave replication mode,
-        // the recovery processing will not start until after the
-        // first call to switchLogRecord, at which time
-        // allowedToReadFileNumber will be set to one less than the
-        // current log file number. Before recovery is allowed to
-        // start, log scans will be allowed unrestricted access to the
-        // log files through this method. This is needed because
-        // boot() and initializeSlaveReplication() use this method to
-        // find the log end. When the recovery thread is allowed to
-        // start (i.e., allowedToReadFileNumber != -1), it will use
-        // this method to read log files. Every time it tries to read
-        // a new log file, a check is performed to see if the thread
-        // is allowed to read it. If not, it has to wait either until
-        // this database is no longer in slave replication mode or
-        // until it is allowed to read that file. Currently, only
-        // recover() uses this method (through openForwardsScan) up to
-        // the point where the database has been fully recovered. If
-        // this changes (i.e. another thread also needs access to the
-        // log files while in slave mode), this code will not work.
+        // <SLAVE REPLICATION CODE>
+        //
+        // When in slave replication mode, the recovery processing
+        // will not start until after the first call to
+        // switchLogRecord, at which time allowedToReadFileNumber will
+        // be set to one less than the current log file number. The
+        // call to switchLogRecord comes as a result of the
+        // SlaveController appending log records received from the
+        // master. This implies that the initialization steps (boot
+        // and initializeReplicationSlaveRole) have completed.
+        // 
+        // Before recovery processing is started, log scans will be
+        // allowed unrestricted access to the log files through this
+        // method. This is needed because boot() and
+        // initializeReplicationSlaveRole() use this method to find
+        // the log end. Once the recovery thread is allowed to start
+        // processing (i.e., allowedToReadFileNumber != -1), it will
+        // use this method to read log files. From this point on, this
+        // method will not return until allowedToReadFileNumber =>
+        // filenumber. In other words, while in replication slave
+        // mode, the method is blocking until allowedToReadFileNumber
+        // is high enough to read the requested log file.
+        //
+        // Currently, only recover() uses this method (through
+        // openForwardsScan) up to the point where the database has
+        // been fully recovered. The database cannot fully recover
+        // until it is no longer in slave mode. If this changes (i.e.
+        // another thread also needs access to the log files while in
+        // slave mode), this code will not work.
         if (inReplicationSlaveMode && (allowedToReadFileNumber != -1)) {
             synchronized (slaveRecoveryMonitor) {
                 // Recheck inReplicationSlaveMode == true because it
@@ -3604,7 +3614,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 		@exception StandardException Log Full.
 
 	*/
-	protected long appendLogRecord(byte[] data, int offset, int length,
+	public long appendLogRecord(byte[] data, int offset, int length,
 			byte[] optionalData, int optionalDataOffset, int optionalDataLength) 
 		 throws StandardException
 	{
@@ -5093,13 +5103,14 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
      * logFileNumber may occur if this is changed.
      *
      * @exception StandardException Standard Derby error policy
-     * @exception IOException If a log file cannot be opened
      */
-    public void initializeSlaveReplication()
-        throws StandardException, IOException{
+    public void initializeReplicationSlaveRole()
+        throws StandardException{
 
-        if (!inReplicationSlaveMode) {
-            return;
+        if (SanityManager.DEBUG) {
+            SanityManager.ASSERT(!inReplicationSlaveMode, 
+                                 "This method should only be used when"
+                                 + " in slave replication mode");
         }
 
         /*
@@ -5107,48 +5118,56 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
          * end position in that file
          */
 
-        // Find the log file with the highest file number on disk
-        while (getLogFileAtBeginning(logFileNumber+1) != null) {
-            logFileNumber++;
+        try {
+            // Find the log file with the highest file number on disk
+            while (getLogFileAtBeginning(logFileNumber+1) != null) {
+                logFileNumber++;
+            }
+
+            // Scan the highest log file to find it's end.
+            long startInstant =
+                LogCounter.makeLogInstantAsLong(logFileNumber,
+                                                LOG_FILE_HEADER_SIZE);
+            long logEndInstant = LOG_FILE_HEADER_SIZE;
+
+            StreamLogScan scanOfHighestLogFile =
+                (StreamLogScan) openForwardsScan(startInstant,
+                                                 (LogInstant)null);
+            ArrayInputStream scanInputStream = new ArrayInputStream();
+            while(scanOfHighestLogFile.getNextRecord(scanInputStream, null, 0)
+                  != null){
+                logEndInstant = scanOfHighestLogFile.getLogRecordEnd();
+            }
+
+            endPosition = LogCounter.getLogFilePosition(logEndInstant);
+
+            // endPosition and logFileNumber now point to the end of the
+            // highest log file. This is where a new log record should be
+            // appended.
+
+            /*
+             * Open the highest log file and make sure log records are
+             * appended at the end of it
+             */
+
+            StorageRandomAccessFile logFile = null;
+            if(isWriteSynced) {
+                logFile = openLogFileInWriteMode(
+                              getLogFileName(logFileNumber));
+            } else {
+                logFile = privRandomAccessFile(getLogFileName(logFileNumber),
+                                               "rw");
+            }
+            logOut = new LogAccessFile(this, logFile, logBufferSize);
+
+            lastFlush = endPosition;
+            logFile.seek(endPosition); // append log records at the end of
+            // the file
+
+        } catch (IOException ioe) {
+            throw StandardException.newException
+                (SQLState.REPLICATION_UNEXPECTED_EXCEPTION, ioe);
         }
-
-        // Scan the highest log file to find it's end.
-        long startInstant =
-            LogCounter.makeLogInstantAsLong(logFileNumber,
-                                            LOG_FILE_HEADER_SIZE);
-        long logEndInstant = LOG_FILE_HEADER_SIZE;
-
-        StreamLogScan scanOfHighestLogFile =
-            (StreamLogScan) openForwardsScan(startInstant, (LogInstant)null);
-        ArrayInputStream scanInputStream = new ArrayInputStream();
-        while(scanOfHighestLogFile.getNextRecord(scanInputStream, null, 0)
-              != null){
-            logEndInstant = scanOfHighestLogFile.getLogRecordEnd();
-        }
-
-        endPosition = LogCounter.getLogFilePosition(logEndInstant);
-
-        // endPosition and logFileNumber now point to the end of the
-        // highest log file. This is where a new log record should be
-        // appended.
-
-        /*
-         * Open the highest log file and make sure log records are
-         * appended at the end of it
-         */
-
-        StorageRandomAccessFile logFile = null;
-        if(isWriteSynced) {
-            logFile = openLogFileInWriteMode(getLogFileName(logFileNumber));
-        } else {
-            logFile = privRandomAccessFile(getLogFileName(logFileNumber),
-                                           "rw");
-        }
-        logOut = new LogAccessFile(this, logFile, logBufferSize);
-
-        lastFlush = endPosition;
-        logFile.seek(endPosition); // append log records at the end of
-                                   // the file
     }
 
 	/**

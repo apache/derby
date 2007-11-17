@@ -60,18 +60,29 @@ public class ReplicationMessageReceive {
      * @param portNumber an integer that contains the port number of the
      *                   slave to replicate to.
      *
-     * @throws UnknownHostException If an exception occurs while trying to
-     *                              resolve the host name.
+     * @throws StandardException If an exception occurs while trying to
+     *                           resolve the host name.
      */
     public ReplicationMessageReceive(String hostName, int portNumber)
-    throws UnknownHostException {
-        slaveAddress = new SlaveAddress(hostName, portNumber);
+        throws StandardException {
+        try {
+            slaveAddress = new SlaveAddress(hostName, portNumber);
+        } catch (UnknownHostException uhe) {
+            throw StandardException.newException
+                (SQLState.REPLICATION_CONNECTION_EXCEPTION, uhe);
+        }
     }
     
     /**
      * Used to create the server socket, listen on the socket
      * for connections from the master and verify compatibility
      * with the database version of the master.
+     *
+     * @param timeout The amount of time, in milliseconds, this method
+     * will wait for a connection to be established. If no connection
+     * has been established before the timeout, a
+     * PrivilegedExceptionAction is raised with cause
+     * java.net.SocketTimeoutException
      *
      * @throws PrivilegedActionException if an exception occurs while trying
      *                                   to open a connection.
@@ -84,7 +95,7 @@ public class ReplicationMessageReceive {
      * @throws StandardException if an incompatible database version is found.
      *
      */
-    public void initConnection() throws
+    public void initConnection(int timeout) throws
         PrivilegedActionException,
         IOException,
         StandardException,
@@ -93,6 +104,7 @@ public class ReplicationMessageReceive {
         //Contains the <code>ServerSocket</code> used to listen for
         //connections from the replication master.
         final ServerSocket serverSocket = createServerSocket();
+        serverSocket.setSoTimeout(timeout);
         
         //Start listening on the socket and accepting the connection
         Socket client =

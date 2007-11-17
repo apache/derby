@@ -4738,6 +4738,21 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
                 <text>Unexpected error during replication network communication initiation.</text>
             </msg>
 
+            <msg>
+                <name>XRE04</name>
+                <text>Could not establish a connection to the master of the replicated database '{0}'.</text>
+                <arg>dbname</arg>
+            </msg>
+
+            <msg>
+                <name>XRE05</name>
+                <text>The log received from the master is not in synch with the local log for replicated database '{0}'. The received log instant is {1}, whereas the local instant is {2}. This is FATAL for replication - replication will be stopped.</text>
+                <arg>dbname</arg>
+                <arg>masterinstant</arg>
+                <arg>slaveinstant</arg>
+            </msg>
+
+
         </family>
 
         <family>
@@ -7518,6 +7533,45 @@ Shutting down instance {0}</text>
             </msg>
 
         </family>
+
+
+        <family>
+            <title>Undocumented Replication Messages from MessageId.java</title>
+            <msg>
+                <name>R001</name>
+                <text>--------  BEGIN REPLICATION ERROR MESSAGE ---------</text>
+            </msg>
+
+            <msg>
+                <name>R002</name>
+                <text>---------  END REPLICATION ERROR MESSAGE ----------</text>
+            </msg>
+
+            <msg>
+                <name>R003</name>
+                <text>Replication slave role started for database '{0}'.</text>
+                <arg>dbname</arg>
+            </msg>
+
+            <msg>
+                <name>R004</name>
+                <text>Replication slave role was stopped for database '{0}'.</text>
+                <arg>dbname</arg>
+            </msg>
+
+            <msg>
+                <name>R005</name>
+                <text>Replication slave got a fatal error for database '{0}'. Replication will be stopped.</text>
+                <arg>dbname</arg>
+            </msg>
+
+            <msg>
+                <name>R006</name>
+                <text>Lost connection with the replication master of database '{0}'.</text>
+                <arg>dbname</arg>
+            </msg>
+        </family>
+
 
 
         <family>

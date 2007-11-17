@@ -27,7 +27,6 @@ import org.apache.derby.iapi.reference.Property;
 
 import org.apache.derby.iapi.store.raw.RawStoreFactory;
 import org.apache.derby.iapi.store.raw.log.LogFactory;
-import org.apache.derby.iapi.store.raw.data.DataFactory;
 
 /**
  * <p> 
@@ -50,9 +49,17 @@ public interface SlaveFactory {
 
     /* Strings used as keys in the Properties objects*/
 
+    /** Property key to specify which host to listen to */
+    public static final String SLAVE_HOST =
+        Property.PROPERTY_RUNTIME_PREFIX + "replication.slave.slavehost";
+
     /** Property key to specify which port to listen to */
     public static final String SLAVE_PORT =
         Property.PROPERTY_RUNTIME_PREFIX + "replication.slave.slaveport";
+
+    /** Property key to specify the name of the database */
+    public static final String SLAVE_DB =
+        Property.PROPERTY_RUNTIME_PREFIX + "replication.slave.dbname";
 
     /** Property key to specify replication mode */
     public static final String REPLICATION_MODE =
@@ -78,8 +85,12 @@ public interface SlaveFactory {
      *
      * @param rawStore The RawStoreFactory for the database
      * @param logFac The LogFactory ensuring recoverability for this database
+     *
+     * @exception StandardException Thrown if the slave could not be
+     * started.
      */
-    public void startSlave(RawStoreFactory rawStore, LogFactory logFac);
+    public void startSlave(RawStoreFactory rawStore, LogFactory logFac)
+        throws StandardException;
 
     /**
      * Will perform all work that is needed to stop replication
