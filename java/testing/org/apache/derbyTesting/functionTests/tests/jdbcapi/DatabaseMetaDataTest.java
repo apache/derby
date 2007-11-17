@@ -55,7 +55,7 @@ import org.apache.derbyTesting.junit.TestConfiguration;
 /**
  * Test the DatabaseMetaData api.
  * <P>
- * For the methods that return a ResultSet to determine the
+ * For a number of methods that return a ResultSet to determine the
  * attributes of SQL objects (e.g. getTables) two methods
  * are provided. A non-modify and a modify one.
  * 
@@ -66,13 +66,12 @@ import org.apache.derbyTesting.junit.TestConfiguration;
  * The non-modify means that the test method does not change the database
  * in order to test the return of the getXXX method is correct.
  * <BR>
- * The modify versions test
  * Work in progress.
  * TODO: Methods left to test from JDBC 3
  * 
  *  getColumnPrivileges
  *  getCrossReference
- *  getExportedKeys
+ *  getExportedKeys (note; when done, adjust comment in ODBCgetExportedKeys)
  *  getImportedKeys
  *  getIndexInfo
  *  getPrimaryKeys
@@ -82,6 +81,14 @@ import org.apache.derbyTesting.junit.TestConfiguration;
  *  <P>
  *  This test is also called from the upgrade tests to test that
  *  metadata continues to work at various points in the upgrade.
+ *  
+ *  // TODO: 
+ *  convert from metadata.java test;
+ *  - implement edge case with nested connection, verified using isReadOnly()
+ *  - implement getColumns edge case (marked 'beetle 4620') with large column  
+ *    (if char or varchar size is > max integer /2 = 2147483647)
+ *  - tests for own/others Inserts/Updates/Deletes AreVisible
+ *  - insertsAreDetected, updatesAreDetected, (see deletesAreDetected)
  */
 public class DatabaseMetaDataTest extends BaseJDBCTestCase {
   
@@ -3012,4 +3019,98 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                 Types.INTEGER, Types.INTEGER, Types.SMALLINT, Types.SMALLINT};
         assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
     } 
+    
+    /**
+     * Test getGetColumnPrivileges; does not modify database
+     * For further testing see test lang.grantRevokeTest
+     * @throws SQLException 
+     */
+    public void testGetColumnPrivileges() throws SQLException
+    {
+        
+        String [] columnNames = {"TABLE_CAT","TABLE_SCHEM","TABLE_NAME",
+            "COLUMN_NAME","GRANTOR","GRANTEE","PRIVILEGE","IS_GRANTABLE"};
+        int [] columnTypes = {
+            Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,
+            Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR};
+        // Note: the API docs seem to suggest that TABLE_SCHEM (col2) may be 
+        // null, however, that is not what we get back.
+        // For Grantee (col6), and privilege it's not so clear, as the api 
+        // doesn't specify, which means it may not be null.
+        // Modified here so test will pass.
+        // See DERBY-3212.
+        boolean [] nullability = {true,false,false,false,true,true,true,true};
+        
+        DatabaseMetaData dmd = getDMD();
+        
+        // unlike for instance getTables() and getUDTs trying to call
+        // getColumnPrivileges with all nulls gets stopped because 
+        // the spec indicates it takes a table name, not just a pattern
+        try {
+            dmd.getColumnPrivileges(null,null,null,null);
+            fail ("expected error XJ103");
+        } catch (SQLException sqle) {
+            assertSQLState("XJ103", sqle);
+        }
+        
+        ResultSet rs = dmd.getColumnPrivileges(null,null,"",null);
+        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
+        JDBC.assertEmpty(rs);
+        
+        rs = dmd.getColumnPrivileges("","","","");
+        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
+        JDBC.assertEmpty(rs);
+        
+        rs = dmd.getColumnPrivileges("%","%","%","%");
+        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
+        JDBC.assertEmpty(rs);
+
+        // we didn't (can't) grant any privileges to the systabels, so no row
+        rs = dmd.getColumnPrivileges(null,"SYS","SYSTABLES","TABLEID");
+        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
+        JDBC.assertEmpty(rs);
+        rs.close();
+    }
+
+    /**
+     * Test getGetTablePrivileges; does not modify database
+     * For further testing see test lang.grantRevokeTest
+     * @throws SQLException 
+     */
+    public void testGetTablePrivileges() throws SQLException
+    {
+        
+        String [] columnNames = {"TABLE_CAT","TABLE_SCHEM","TABLE_NAME",
+            "GRANTOR","GRANTEE","PRIVILEGE","IS_GRANTABLE"};
+        int [] columnTypes = {
+            Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,
+            Types.VARCHAR,Types.VARCHAR,Types.VARCHAR};
+        // Note: the API docs seem to suggest that TABLE_SCHEM (col2) may be 
+        // null, however, that is not what we get back.
+        // For Grantee (col5), and privilege it's not so clear, as the api 
+        // doesn't specify, which means it may not be null.
+        // Modified here so test will pass.
+        // See DERBY-3212.
+        boolean [] nullability = {true,false,false,true,true,true,true};
+        
+        DatabaseMetaData dmd = getDMD();
+        
+        ResultSet rs = dmd.getTablePrivileges(null,null,null);
+        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
+        JDBC.assertEmpty(rs);
+        
+        rs = dmd.getTablePrivileges("","","");
+        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
+        JDBC.assertEmpty(rs);
+        
+        rs = dmd.getTablePrivileges("%","%","%");
+        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
+        JDBC.assertEmpty(rs);
+
+        // we didn't (can't) grant any privileges to the systabels, so no row
+        rs = dmd.getTablePrivileges(null,"SYS","SYSTABLES");
+        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
+        JDBC.assertEmpty(rs);
+        rs.close();
+    }
 }

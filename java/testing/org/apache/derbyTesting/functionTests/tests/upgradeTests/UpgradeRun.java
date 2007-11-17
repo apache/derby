@@ -377,7 +377,11 @@ class UpgradeRun {
             String name = m.getName();
             if (name.startsWith("test"))
             {
-                if (!(name.equals("testGetTablesModify") && oldMinor < 1))
+                if ((!(name.equals("testGetTablesModify") && oldMinor < 1)) &&
+                   // these two tests will fail with versions before 10.2.1.6
+                   // because of missing support for grant/revoke/privileges
+                   (!(name.equals("testGetTablePrivileges") && oldMinor <2)) &&
+                   (!(name.equals("testGetColumnPrivileges") && oldMinor <2)))
                     suite.addTest(new DatabaseMetaDataTest(name));
             }
         }

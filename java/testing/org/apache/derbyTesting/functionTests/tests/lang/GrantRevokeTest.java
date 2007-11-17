@@ -564,13 +564,6 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
     }
     */
     
-    /*
-     * TODO - write more extensive tests for DatabaseMetaData.getColumnPrivileges()
-     *        and DatabaseMetaData.getTablePrivileges(). Specifically,
-     *        would be nice to have some test cases which verify grantor
-     *         and is_grantable are valid.
-     */
-    
     /* Begin standard error cases */
     
     public void testInvalidGrantAction() throws Exception {
@@ -1338,6 +1331,12 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
     	if (columns == null) {
         	while (rs.next())
         	{
+        	// also verify that grantor and is_grantable can be obtained
+        	// Derby doesn't currently support the for grant option, the
+        	// grantor is always the object owner - in this test, TEST_DBO,
+        	// and is_grantable is always 'NO'
+          	    assertEquals(rs.getString(4),"TEST_DBO");
+          	    assertEquals(rs.getString(7),"NO");
           	    if (rs.getString(6).equals(type)) {
         	    	String privUser = rs.getString(5);
         	    	if (privUser.equals(user) || privUser.equals("PUBLIC")) {
@@ -1393,6 +1392,13 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
     			cp = dm.getColumnPrivileges(null, schema.toUpperCase(), table.toUpperCase(), columns[i].toUpperCase());
     			found = false;
     			while (cp.next()) {
+    			// also verify that grantor and is_grantable are valid
+    			// Derby doesn't currently support for grant, so
+    			// grantor is always the object owner - in this test, 
+    			// TEST_DBO, and getColumnPrivileges casts 'NO' for 
+    			// is_grantable for supported column-related privileges
+					assertEquals("TEST_DBO", cp.getString(5));
+					assertEquals("NO", cp.getString(8));
 					if (cp.getString(7).equals(type)) {
 						String privUser = cp.getString(6);
 						if (privUser.equals(user) || privUser.equals("PUBLIC")) {
