@@ -69,15 +69,12 @@ import org.apache.derbyTesting.junit.TestConfiguration;
  * Work in progress.
  * TODO: Methods left to test from JDBC 3
  * 
- *  getColumnPrivileges
  *  getCrossReference
  *  getExportedKeys (note; when done, adjust comment in ODBCgetExportedKeys)
  *  getImportedKeys
- *  getIndexInfo
  *  getPrimaryKeys
  *  getProcedureColumns
  *  getProcedures
- *  getTablePrivileges
  *  <P>
  *  This test is also called from the upgrade tests to test that
  *  metadata continues to work at various points in the upgrade.
@@ -2338,7 +2335,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     /**
      * Return a list of all valid supported datatypes as Strings
      * suitable for use in any SQL statement where a SQL type is
-     * expected. For variable sixzed types the string will
+     * expected. For variable sized types the string will
      * have random valid length information. E.g. CHAR(37).
      */
     public static List getSQLTypes(Connection conn) throws SQLException
@@ -2901,7 +2898,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         rs = dmd.getBestRowIdentifier(null,"APP","BRIT12",0,true);
         verifyBRIResults(rs, expRSIJ, nullability);
         
-        // Verify nullOK flas makes a difference. See also DERBY-3182
+        // Verify nullOK flags makes a difference. See also DERBY-3182
         // result: column i, should've ignored null column
         rs = dmd.getBestRowIdentifier(null,"APP","BRIT13",0,false);
         verifyBRIResults(rs, expRSI, nullability);
@@ -2998,7 +2995,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * @param rs - Resultset from dmd.getBestRowIdentifier
      * @param expRS - bidimensional String array with expected result row(s)
      * @param nullability - boolean array holding expected nullability
-     *   values. This needs to be a paramter because of DERBY-3081
+     *   values. This needs to be a parameter because of DERBY-3081
      * @throws SQLException 
      */
     public void verifyBRIResults(ResultSet rs, String[][] expRS,
@@ -3033,12 +3030,6 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         int [] columnTypes = {
             Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,
             Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR};
-        // Note: the API docs seem to suggest that TABLE_SCHEM (col2) may be 
-        // null, however, that is not what we get back.
-        // For Grantee (col6), and privilege it's not so clear, as the api 
-        // doesn't specify, which means it may not be null.
-        // Modified here so test will pass.
-        // See DERBY-3212.
         boolean [] nullability = {true,false,false,false,true,true,true,true};
         
         DatabaseMetaData dmd = getDMD();
@@ -3112,5 +3103,116 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
         JDBC.assertEmpty(rs);
         rs.close();
+    }
+    
+    /**
+     * Test getIndexInfo; does not modify database
+     * @throws SQLException 
+     */
+    public void testGetIndexInfo() throws SQLException
+    {
+        String [] columnNames = {"TABLE_CAT","TABLE_SCHEM","TABLE_NAME",
+            "NON_UNIQUE","INDEX_QUALIFIER","INDEX_NAME","TYPE",
+            "ORDINAL_POSITION","COLUMN_NAME","ASC_OR_DESC","CARDINALITY",
+            "PAGES","FILTER_CONDITION"};
+        int [] columnTypes = {
+                Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,
+                Types.BOOLEAN,Types.VARCHAR,Types.VARCHAR,Types.SMALLINT,
+                // ASC_OR_DESC is Types.CHAR rather than VARCHAR...
+                Types.SMALLINT,Types.VARCHAR,Types.CHAR,Types.INTEGER,
+                Types.INTEGER,Types.VARCHAR};
+        if (usingDerbyNetClient())
+            columnTypes = new int[] {
+                Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,
+                // types.boolean is not supported with networkserver
+                Types.SMALLINT,Types.VARCHAR,Types.VARCHAR,Types.SMALLINT,
+                // ASC_OR_DESC is Types.CHAR rather than VARCHAR...
+                Types.SMALLINT,Types.VARCHAR,Types.CHAR,Types.INTEGER,
+                Types.INTEGER,Types.VARCHAR};
+        boolean [] nullability = {true,false,false,
+            true,true,true,true,true,false,true,true,true,true};
+        
+        DatabaseMetaData dmd = getDMD();
+        
+        // unlike for instance getTables() and getUDTs trying to call
+        // getIndexInfo with all nulls gets stopped because 
+        // the spec indicates it takes a table name, not just a pattern
+        try {
+            dmd.getIndexInfo(null,null,null,true,true);
+            fail ("expected error XJ103");
+        } catch (SQLException sqle) {
+            assertSQLState("XJ103", sqle);
+        }
+        
+        // do a call which selects unique indexes only
+        ResultSet rs = dmd.getIndexInfo("","SYS","SYSCOLUMNS",true,false);
+        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
+        String[][] expRS = {
+            {"","SYS","SYSCOLUMNS","false","","SYSCOLUMNS_INDEX1","3","1",
+                "REFERENCEID","A",null,null,null},
+            {"","SYS","SYSCOLUMNS","false","","SYSCOLUMNS_INDEX1","3","2",
+                "COLUMNNAME","A",null,null,null}};
+        JDBC.assertFullResultSet(rs, expRS, true);
+        
+        // same table, but select all indexes (unique=false)
+        // note, that true for approximate does nothing in Derby
+        rs = dmd.getIndexInfo("","SYS","SYSCOLUMNS",false,false);
+        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
+        expRS = new String[][] {
+            {"","SYS","SYSCOLUMNS","false","","SYSCOLUMNS_INDEX1","3","1",
+                "REFERENCEID","A",null,null,null},
+            {"","SYS","SYSCOLUMNS","false","","SYSCOLUMNS_INDEX1","3","2",
+                "COLUMNNAME","A",null,null,null},
+            {"","SYS","SYSCOLUMNS","true","","SYSCOLUMNS_INDEX2","3","1",
+                 "COLUMNDEFAULTID","A",null,null,null}};
+        JDBC.assertFullResultSet(rs, expRS, true);
+        
+        rs = dmd.getIndexInfo("","SYS","SYSTABLES",true,false);
+        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
+        expRS = new String[][] {
+            {"","SYS","SYSTABLES","false","","SYSTABLES_INDEX1","3","1",
+                "TABLENAME","A",null,null,null},
+            {"","SYS","SYSTABLES","false","","SYSTABLES_INDEX1","3","2",
+                "SCHEMAID","A",null,null,null},
+            {"","SYS","SYSTABLES","false","","SYSTABLES_INDEX2","3","1",
+                "TABLEID","A",null,null,null}};
+        
+        // should return no rows
+        rs = dmd.getIndexInfo("","SYS","SYSSTABLES",true,false);
+        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
+        JDBC.assertEmpty(rs);
+        rs.close();
+    }
+    
+    /**
+     * Test getIndexInfo further; does modify database
+     * @throws SQLException 
+     */
+    public void testMoreGetIndexInfo() throws SQLException
+    {
+        // test to see that we are correctly returning D for ASC_OR_DESC.
+        // As Derby only supports tableIndexHashed Type, and 
+        // CARDINALITY, PAGES, nor FILTER_CONDITION get set, no further
+        // tests seem necessary.
+        Statement st = createStatement();
+
+        // First, create the test tables and indexes/keys
+        // Create 5 tables which have only one best row identifier
+        st.execute("create table iit (i int not null, j int)");
+        st.execute("create unique index iii on iit(i asc, j desc)");
+        DatabaseMetaData dmd = getDMD();
+        ResultSet rs = dmd.getIndexInfo("","APP","IIT",false,false);
+        
+        rs.next();
+        if (rs != null)
+            assertEquals(rs.getString(10),"A");
+        rs.next();    
+        if (rs != null)
+            assertEquals(rs.getString(10),"D");
+
+        st.execute("drop index iii");
+        st.execute("drop table iit");
+
+        st.close();
     }
 }
