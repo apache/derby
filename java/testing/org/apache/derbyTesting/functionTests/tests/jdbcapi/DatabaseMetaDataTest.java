@@ -84,8 +84,6 @@ import org.apache.derbyTesting.junit.TestConfiguration;
  *  - implement edge case with nested connection, verified using isReadOnly()
  *  - implement getColumns edge case (marked 'beetle 4620') with large column  
  *    (if char or varchar size is > max integer /2 = 2147483647)
- *  - tests for own/others Inserts/Updates/Deletes AreVisible
- *  - insertsAreDetected, updatesAreDetected, (see deletesAreDetected)
  */
 public class DatabaseMetaDataTest extends BaseJDBCTestCase {
   
@@ -468,7 +466,33 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         assertFalse(dmd.deletesAreDetected(ResultSet.TYPE_FORWARD_ONLY));
         assertTrue(dmd.deletesAreDetected(ResultSet.TYPE_SCROLL_INSENSITIVE));
         assertFalse(dmd.deletesAreDetected(ResultSet.TYPE_SCROLL_SENSITIVE));
+        assertFalse(dmd.insertsAreDetected(ResultSet.TYPE_FORWARD_ONLY));
+        assertFalse(dmd.insertsAreDetected(ResultSet.TYPE_SCROLL_INSENSITIVE));
+        assertFalse(dmd.insertsAreDetected(ResultSet.TYPE_SCROLL_SENSITIVE));
+        assertFalse(dmd.updatesAreDetected(ResultSet.TYPE_FORWARD_ONLY));
+        assertTrue(dmd.updatesAreDetected(ResultSet.TYPE_SCROLL_INSENSITIVE));
+        assertFalse(dmd.updatesAreDetected(ResultSet.TYPE_SCROLL_SENSITIVE));
         
+        assertTrue(dmd.othersDeletesAreVisible(ResultSet.TYPE_FORWARD_ONLY));
+        assertFalse(dmd.othersDeletesAreVisible(ResultSet.TYPE_SCROLL_INSENSITIVE));
+        assertFalse(dmd.othersDeletesAreVisible(ResultSet.TYPE_SCROLL_SENSITIVE));
+        assertTrue(dmd.othersInsertsAreVisible(ResultSet.TYPE_FORWARD_ONLY));
+        assertFalse(dmd.othersInsertsAreVisible(ResultSet.TYPE_SCROLL_INSENSITIVE));
+        assertFalse(dmd.othersInsertsAreVisible(ResultSet.TYPE_SCROLL_SENSITIVE));
+        assertTrue(dmd.othersUpdatesAreVisible(ResultSet.TYPE_FORWARD_ONLY));
+        assertFalse(dmd.othersUpdatesAreVisible(ResultSet.TYPE_SCROLL_INSENSITIVE));
+        assertFalse(dmd.othersUpdatesAreVisible(ResultSet.TYPE_SCROLL_SENSITIVE));
+        
+        assertFalse(dmd.ownDeletesAreVisible(ResultSet.TYPE_FORWARD_ONLY));
+        assertTrue(dmd.ownDeletesAreVisible(ResultSet.TYPE_SCROLL_INSENSITIVE));
+        assertFalse(dmd.ownDeletesAreVisible(ResultSet.TYPE_SCROLL_SENSITIVE));
+        assertFalse(dmd.ownInsertsAreVisible(ResultSet.TYPE_FORWARD_ONLY));
+        assertFalse(dmd.ownInsertsAreVisible(ResultSet.TYPE_SCROLL_INSENSITIVE));
+        assertFalse(dmd.ownInsertsAreVisible(ResultSet.TYPE_SCROLL_SENSITIVE));
+        assertFalse(dmd.ownUpdatesAreVisible(ResultSet.TYPE_FORWARD_ONLY));
+        assertTrue(dmd.ownUpdatesAreVisible(ResultSet.TYPE_SCROLL_INSENSITIVE));
+        assertFalse(dmd.ownUpdatesAreVisible(ResultSet.TYPE_SCROLL_SENSITIVE));
+                
         assertTrue(dmd.doesMaxRowSizeIncludeBlobs());
         
         // Catalogs not supported, so empty string returned for separator.
@@ -3205,10 +3229,10 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         
         rs.next();
         if (rs != null)
-            assertEquals(rs.getString(10),"A");
+            assertEquals("A",rs.getString(10));
         rs.next();    
         if (rs != null)
-            assertEquals(rs.getString(10),"D");
+            assertEquals("D",rs.getString(10));
 
         st.execute("drop index iii");
         st.execute("drop table iit");
