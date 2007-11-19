@@ -84,6 +84,17 @@ import org.apache.derbyTesting.junit.TestConfiguration;
  *  - implement edge case with nested connection, verified using isReadOnly()
  *  - implement getColumns edge case (marked 'beetle 4620') with large column  
  *    (if char or varchar size is > max integer /2 = 2147483647)
+ *  - test for DERBY-655/DERBY-1343
+ *    
+ *  convert from odbc_metadata.java test:
+ *  - checks for SQLPROCEDURES, SQLPROCEDURECOLS, 
+ *  - checks for SQLCOLUMNS
+ *  - checks for SQLCOLPRIVILEGES, SQLTABLEPRIVILEGES (????)
+ *  - checks for SQLSPECIALCOLUMNS
+ *  - checks for SQLPRIMARYKEYS 
+ *  - checks for SQLSTATISTICS
+ *  - checks for GETBESTROWIDENTIFIER (not in any test?)
+ *  - checks for GETINDEXINFO (not in any test?)
  */
 public class DatabaseMetaDataTest extends BaseJDBCTestCase {
   
@@ -2663,7 +2674,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
          * This effectively means that the SQLFOREIGNKEYS function
          * will always be mapped to getCrossReference() internally.
          * Since that worked fine prior to 10.3, we need to preserve
-         * that behavior if we want to maintina backward compatibility.
+         * that behavior if we want to maintain backward compatibility.
          */
         CallableStatement cs = prepareCall(
             "CALL SYSIBM.SQLFOREIGNKEYS(?, ?, ?, ?, ?, ?, " +
@@ -3113,12 +3124,6 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         int [] columnTypes = {
             Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,
             Types.VARCHAR,Types.VARCHAR,Types.VARCHAR};
-        // Note: the API docs seem to suggest that TABLE_SCHEM (col2) may be 
-        // null, however, that is not what we get back.
-        // For Grantee (col5), and privilege it's not so clear, as the api 
-        // doesn't specify, which means it may not be null.
-        // Modified here so test will pass.
-        // See DERBY-3212.
         boolean [] nullability = {true,false,false,true,true,true,true};
         
         DatabaseMetaData dmd = getDMD();
@@ -3233,8 +3238,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         // tests seem necessary.
         Statement st = createStatement();
 
-        // First, create the test tables and indexes/keys
-        // Create 5 tables which have only one best row identifier
+        // First, create the test table and indexes/keys
         st.execute("create table iit (i int not null, j int)");
         st.execute("create unique index iii on iit(i asc, j desc)");
         DatabaseMetaData dmd = getDMD();
@@ -3252,4 +3256,8 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
 
         st.close();
     }
+    
+    
+    
+    
 }
