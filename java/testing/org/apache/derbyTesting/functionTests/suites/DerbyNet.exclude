@@ -8,7 +8,6 @@
 # excluding largedata/LobLimits.java to run with the network server because currently lobs are materialized and this test tests for 2G lobs.
 # 			see DERBY-326 and DERBY-550 issues
 jdbcapi/resultsetStream.java
-lang/errorStream.java
 jdbcapi/statementJdbc20.java
 jdbcapi/testRelative.java
 jdbcapi/rsgetXXXcolumnNames.java
