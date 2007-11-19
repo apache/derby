@@ -34,7 +34,7 @@
       source="1.5"
       target="1.5"
       nowarn="on"
-      debug="${debug}"
+      debug="true"
       depend="${depend}"
       deprecation="${deprecation}"
       optimize="${optimize}"

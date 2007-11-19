@@ -202,8 +202,8 @@ public class PropertySetter extends Task
             String  j14lib = getProperty( J14LIB );
             String  j15lib = getProperty( J15LIB );
 
-            if ( j14lib != null ) { setClasspathFromLib( J14LIB, j14lib ); }
-            if ( j15lib != null ) { setClasspathFromLib( J15LIB, j15lib ); }
+            if ( j14lib != null ) { setClasspathFromLib(J14CLASSPATH, j14lib ); }
+            if ( j15lib != null ) { setClasspathFromLib(J15CLASSPATH, j15lib ); }
 
             //
             // If the library properties were not set, the following
