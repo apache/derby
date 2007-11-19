@@ -25,8 +25,10 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Hashtable;
+import java.util.List;
 
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
@@ -303,20 +305,62 @@ public class PropertySetter extends Task
     private void    setForMostJDKs( String seed14, String seed15)
         throws Exception
     {
-        File        jdkParentDirectory = getJdkParentDirectory();
+        List<File> jdkParents = getJdkSearchPath();
         
         String  default_j14lib = getProperty( J14LIB );
         String  default_j15lib = getProperty( J15LIB );
         
         if ( default_j14lib == null )
-        { default_j14lib = getJreLib( jdkParentDirectory, seed14 ); }
+        { default_j14lib = searchForJreLib(jdkParents, seed14); }
 
         if ( default_j15lib == null )
-        { default_j15lib = getJreLib( jdkParentDirectory, seed15 ); }
+        { default_j15lib = searchForJreLib(jdkParents, seed15); }
 
         defaultSetter( default_j14lib, default_j15lib );
     }
-    
+
+    /**
+     * Search for a library directory in some likely locations.
+     *
+     * @param parents list of potential JDK parent directories
+     * @param seed search string which identifies a given JDK version
+     * @return a library directory, or <code>null</code> if not found
+     */
+    private String searchForJreLib(List<File> parents, String seed) {
+        for (File parent : parents) {
+            String jreLib = getJreLib(parent, seed);
+            if (jreLib != null) {
+                return jreLib;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Get a list of potential JDK parent directories. These include the parent
+     * directory of JAVA_HOME, and possibly some system dependent directories.
+     *
+     * @return a list of potential JDK parent directories
+     */
+    private List<File> getJdkSearchPath() throws Exception {
+        ArrayList<File> searchPath = new ArrayList<File>();
+
+        // Add parent of JAVA_HOME
+        searchPath.add(getJdkParentDirectory());
+
+        String osName = System.getProperty("os.name");
+
+        if ("SunOS".equals(osName)) {
+            // On Solaris, JDK 1.4.2 is installed under /usr/jdk, whereas JDK
+            // 5.0 and later are placed under /usr/jdk/instances. If we don't
+            // find JDK 1.4.2 in the parent of JAVA_HOME, it's worth taking a
+            // look at /usr/jdk before giving up.
+            searchPath.add(new File("/usr/jdk"));
+        }
+
+        return searchPath;
+    }
+
     /**
      * <p>
      * Get the parent directory of JAVA_HOME
