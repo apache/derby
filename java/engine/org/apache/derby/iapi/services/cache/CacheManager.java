@@ -231,7 +231,9 @@ public interface CacheManager {
 
 	/**
 		This cache can use this DaemonService if it needs some work to be done
-		int he background 
+		in the background. The caller must ensure that it has exclusive access
+        to the cache when this method is called. No synchronization is required
+        in the implementations of this method.
 	*/
 	public void useDaemonService(DaemonService daemon);
 

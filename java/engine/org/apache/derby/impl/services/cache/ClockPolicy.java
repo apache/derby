@@ -355,6 +355,10 @@ final class ClockPolicy implements ReplacementPolicy {
                 continue;
             }
 
+            // This variable will hold a dirty cacheable that should be cleaned
+            // after the try/finally block.
+            final Cacheable dirty;
+
             e.lock();
             try {
                 if (h.getEntry() != e) {
@@ -381,21 +385,38 @@ final class ClockPolicy implements ReplacementPolicy {
                     continue;
                 }
 
-                // OK, we can use this Holder
+                // The entry is not in use, and has not been used for at least
+                // one round on the clock. See if it needs to be cleaned.
                 Cacheable c = e.getCacheable();
-                if (c.isDirty()) {
-                    c.clean(false);
+                if (!c.isDirty()) {
+                    // Not in use and not dirty. Take over the holder.
+                    h.switchEntry(entry);
+                    cacheManager.evictEntry(c.getIdentity());
+                    return h;
                 }
 
-                h.switchEntry(entry);
+                // Ask the background cleaner to clean the entry.
+                BackgroundCleaner cleaner = cacheManager.getBackgroundCleaner();
+                if (cleaner != null && cleaner.scheduleWork(e)) {
+                    // Successfully scheduled the clean operation. Move on to
+                    // the next entry.
+                    continue;
+                }
 
-                cacheManager.evictEntry(c.getIdentity());
-
-                return h;
+                // There is no background cleaner, or the background cleaner
+                // has no free capacity. Let's clean the object ourselves.
+                // First, mark the entry as kept to prevent eviction until
+                // we have cleaned it, but don't mark it as accessed (recently
+                // used).
+                e.keep(false);
+                dirty = c;
 
             } finally {
                 e.unlock();
             }
+
+            // Clean the entry and unkeep it.
+            cacheManager.cleanAndUnkeepEntry(e, dirty);
         }
 
         return null;

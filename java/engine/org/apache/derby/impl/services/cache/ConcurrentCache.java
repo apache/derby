@@ -57,6 +57,8 @@ final class ConcurrentCache implements CacheManager {
     private final CacheableFactory holderFactory;
     /** Name of this cache. */
     private final String name;
+    /** The maximum size (number of elements) for this cache. */
+    private final int maxSize;
     /** Replacement policy to be used for this cache. */
     private final ReplacementPolicy replacementPolicy;
 
@@ -70,6 +72,12 @@ final class ConcurrentCache implements CacheManager {
     private volatile boolean stopped;
 
     /**
+     * Background cleaner which can be used to clean cached objects in a
+     * separate thread to avoid blocking the user threads.
+     */
+    private BackgroundCleaner cleaner;
+
+    /**
      * Creates a new cache manager.
      *
      * @param holderFactory factory which creates <code>Cacheable</code>s
@@ -81,6 +89,7 @@ final class ConcurrentCache implements CacheManager {
         replacementPolicy = new ClockPolicy(this, maxSize);
         this.holderFactory = holderFactory;
         this.name = name;
+        this.maxSize = maxSize;
     }
 
     /**
@@ -222,7 +231,7 @@ final class ConcurrentCache implements CacheManager {
         // the entry as kept.
         if (c != null) {
             entry.setCacheable(c);
-            entry.keep();
+            entry.keep(true);
         }
         return c;
     }
@@ -247,7 +256,7 @@ final class ConcurrentCache implements CacheManager {
         try {
             Cacheable item = entry.getCacheable();
             if (item != null) {
-                entry.keep();
+                entry.keep(true);
                 return item;
             }
             // not currently in the cache
@@ -284,7 +293,7 @@ final class ConcurrentCache implements CacheManager {
             // locked it, getCacheable() returns null and so should we do.
             Cacheable item = entry.getCacheable();
             if (item != null) {
-                entry.keep();
+                entry.keep(true);
             }
             return item;
         } finally {
@@ -398,14 +407,89 @@ final class ConcurrentCache implements CacheManager {
      */
     private void cleanCache(Matchable partialKey) throws StandardException {
         for (CacheEntry entry : cache.values()) {
+            final Cacheable dirtyObject;
             entry.lock();
             try {
-                Cacheable c = entry.getCacheable();
-                if (c != null && c.isDirty() &&
-                        (partialKey == null ||
-                             partialKey.match(c.getIdentity()))) {
-                    c.clean(false);
+                if (!entry.isValid()) {
+                    // no need to clean an invalid entry
+                    continue;
                 }
+                Cacheable c = entry.getCacheable();
+                if (partialKey != null && !partialKey.match(c.getIdentity())) {
+                    // don't clean objects that don't match the partial key
+                    continue;
+                }
+                if (!c.isDirty()) {
+                    // already clean
+                    continue;
+                }
+
+                // Increment the keep count for this entry to prevent others
+                // from removing it. Then release the lock on the entry to
+                // avoid blocking others when the object is cleaned.
+                entry.keep(false);
+                dirtyObject = c;
+
+            } finally {
+                entry.unlock();
+            }
+
+            // Clean the object and decrement the keep count.
+            cleanAndUnkeepEntry(entry, dirtyObject);
+        }
+    }
+
+    /**
+     * Clean an entry in the cache.
+     *
+     * @param entry the entry to clean
+     * @exception StandardException if an error occurs while cleaning
+     */
+    void cleanEntry(CacheEntry entry) throws StandardException {
+        // Fetch the cacheable while having exclusive access to the entry.
+        // Release the lock before cleaning to avoid blocking others.
+        Cacheable item;
+        entry.lock();
+        try {
+            item = entry.getCacheable();
+            if (item == null) {
+                // nothing to do
+                return;
+            }
+            entry.keep(false);
+        } finally {
+            entry.unlock();
+        }
+        cleanAndUnkeepEntry(entry, item);
+    }
+
+    /**
+     * Clean an entry in the cache and decrement its keep count. The entry must
+     * be kept before this method is called, and it must contain the specified
+     * <code>Cacheable</code>.
+     *
+     * @param entry the entry to clean
+     * @param item the cached object contained in the entry
+     * @exception StandardException if an error occurs while cleaning
+     */
+    void cleanAndUnkeepEntry(CacheEntry entry, Cacheable item)
+            throws StandardException {
+        try {
+            // Clean the cacheable while we're not holding
+            // the lock on its entry.
+            item.clean(false);
+        } finally {
+            // Re-obtain the lock on the entry, and reduce the keep count
+            // since the entry should not be kept by the cleaner any longer.
+            entry.lock();
+            try {
+                if (SanityManager.DEBUG) {
+                    // Since the entry is kept, the Cacheable shouldn't
+                    // have changed.
+                    SanityManager.ASSERT(entry.getCacheable() == item,
+                            "CacheEntry didn't contain the expected Cacheable");
+                }
+                entry.unkeep();
             } finally {
                 entry.unlock();
             }
@@ -438,14 +522,32 @@ final class ConcurrentCache implements CacheManager {
      * Shut down the cache.
      */
     public void shutdown() throws StandardException {
-        // TODO - unsubscribe background writer
         stopped = true;
         cleanAll();
         ageOut();
+        if (cleaner != null) {
+            cleaner.unsubscribe();
+        }
     }
 
+    /**
+     * Specify a daemon service that can be used to perform operations in
+     * the background. Callers must provide enough synchronization so that
+     * they have exclusive access to the cache when this method is called.
+     *
+     * @param daemon the daemon service to use
+     */
     public void useDaemonService(DaemonService daemon) {
-        // TODO
+        if (cleaner != null) {
+            cleaner.unsubscribe();
+        }
+        // Create a background cleaner that can queue up 1/10 of the elements
+        // in the cache.
+        cleaner = new BackgroundCleaner(this, daemon, Math.max(maxSize/10, 1));
+    }
+
+    BackgroundCleaner getBackgroundCleaner() {
+        return cleaner;
     }
 
     /**

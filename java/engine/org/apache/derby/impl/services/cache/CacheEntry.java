@@ -119,13 +119,19 @@ final class CacheEntry {
     /**
      * Increase the keep count for this entry. An entry which is kept cannot be
      * removed from the cache.
+     *
+     * @param accessed if <code>true</code>, notify the entry's callback object
+     * that it has been accessed (normally because of calls to create, find or
+     * findCached); otherwise, don't notify the callback object
      */
-    void keep() {
+    void keep(boolean accessed) {
         if (SanityManager.DEBUG) {
             SanityManager.ASSERT(mutex.isHeldByCurrentThread());
         }
         keepCount++;
-        callback.access();
+        if (accessed) {
+            callback.access();
+        }
     }
 
     /**
