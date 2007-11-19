@@ -27,24 +27,17 @@
   <property file="${properties.dir}/dirs.properties"/>
   <!-- Compiler settings -->
   <property file="${properties.dir}/sane${sanity}.properties"/>
-  <property file="${properties.dir}/defaultcompiler.properties"/>
-  <property file="${properties.dir}/${build.compiler}.properties"/>
-  <!-- Compile-time classpath`< properties files -->
-  <property file="${properties.dir}/extrapath.properties"/>
-  <property file="${properties.dir}/compilepath.properties"/>
-  <!-- Release and version info -->
-  <property file="${properties.dir}/release.properties"/>
 
 <!-- Targets -->
 
-  <target name="buildsource" depends="checkCompilerLevel,init,engine,storeless,tools,drda,client,build,versioninfo,localeinfo"/>
+  <target name="buildsource" depends="checkCompilerLevel,init,prebuild,setCompilerProperties,engine,storeless,tools,drda,client,build,versioninfo,localeinfo"/>
   <target name="all" depends="buildsource,demo,testing,pptesting"/>
 
 <!-- ==================================================================== -->
 <!--                       Initialize targets                             -->
 <!-- ==================================================================== -->
 
-  <target name="init" unless="init.done">
+  <target name="init" unless="init.done" depends="setInitialProperties">
 
     <tstamp/>
     <mkdir dir="${out.dir}"/>
@@ -172,6 +165,55 @@
     <delete file="${out.dir}/org/apache/derby/info/tools.properties"/>
     <delete file="${out.dir}/org/apache/derby/info/net.properties"/>
     <delete file="${out.dir}/org/apache/derby/info/dnc.properties"/>
+  </target>
+
+  <target name="setCompilerProperties" if="autosetProps"
+          description="Set the ant variables which identify the compiler classpaths. Remove the autosetProps logic when this target becomes mandatory."
+          depends="prebuild">
+
+<!--     <antcall target="printCompilerProperties"> <param name="checkEvent" value="Before"/> </antcall> -->
+
+    <taskdef
+      name="setJdkProperties"
+      classname="org.apache.derbyPreBuild.PropertySetter"
+      classpath="${out.dir}"
+    />
+
+    <setJdkProperties/>
+
+<!--     <antcall target="printCompilerProperties"> <param name="checkEvent" value="After"/> </antcall> -->
+
+    <property file="${properties.dir}/defaultcompiler.properties"/>
+    <property file="${properties.dir}/${build.compiler}.properties"/>
+    <!-- Compile-time classpath`< properties files -->
+    <property file="${properties.dir}/extrapath.properties"/>
+    <property file="${properties.dir}/compilepath.properties"/>
+    <!-- Release and version info -->
+    <property file="${properties.dir}/release.properties"/>
+
+  </target>
+
+  <target name="setInitialProperties" unless="autosetProps"
+          description="Set the initial properties for this build script. This duplicates the property setting block in setCompilerProperties. Once we make setCompilerProperties mandatory, this target should be removed."
+          >
+
+    <property file="${properties.dir}/defaultcompiler.properties"/>
+    <property file="${properties.dir}/${build.compiler}.properties"/>
+    <!-- Compile-time classpath`< properties files -->
+    <property file="${properties.dir}/extrapath.properties"/>
+    <property file="${properties.dir}/compilepath.properties"/>
+    <!-- Release and version info -->
+    <property file="${properties.dir}/release.properties"/>
+
+  </target>
+
+  <target name="printCompilerProperties">
+
+    <echo message="${checkEvent} j14lib = ${j14lib}"/>
+    <echo message="${checkEvent} java14compile.classpath = ${java14compile.classpath}"/>
+    <echo message="${checkEvent} j15lib = ${j15lib}"/>
+    <echo message="${checkEvent} java15compile.classpath = ${java15compile.classpath}"/>
+
   </target>
 
 <!-- ==================================================================== -->
@@ -378,6 +420,10 @@
 
   <target name="client" depends="engine,shared">
     <ant dir="${derby.client.src.dir}"/>
+  </target>
+
+  <target name="prebuild">
+    <ant dir="${derby.build.src.dir}/org/apache/derbyPreBuild"/>
   </target>
 
   <target name="build">
@@ -1027,7 +1073,7 @@
   <target name="buildjarsclean" depends="cleanjars,initjars,derbyjar,derbytoolsjar,derbynetjar,derbyclientjar,derbyrunjar,derbywar,derbylocalejars,derbytestingjar"/>
   <target name="buildjars" depends="initjars,derbyjar,derbytoolsjar,derbynetjar,derbyclientjar,derbyrunjar,derbywar,derbylocalejars,derbytestingjar"/>
 
-  <target name="initjars" depends="setsanityname,getsvnversion">
+  <target name="initjars" depends="setsanityname,getsvnversion,setCompilerProperties">
     <property name="derby.jar.dir" value="${basedir}/jars/${sanity.name}"/>
     <property name="derby.jar.topdir" value="${basedir}/jars"/>
     <mkdir dir="${derby.jar.dir}"/>
