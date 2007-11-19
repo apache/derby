@@ -87,12 +87,19 @@ public interface DaemonService
 	public void unsubscribe(int clientNumber);
 
 
-	/**
-	    Service this subscription ASAP.  Does not guarantee that the daemon
-		will actually do anything about it.
-
-		@param clientNumber the number that uniquely identify the client
-	 */
+    /**
+     * Service this subscription ASAP. When this method is called, the
+     * subscriber's <code>performWork()</code> method is guaranteed to be
+     * invoked at some point in the future. However, there is no guarantee that
+     * a subscriber's <code>performWork()</code> is called the same number of
+     * times as the subscriber calls this method. More precisely, if a
+     * subscriber is waiting for this daemon service to invoke its
+     * <code>performWork()</code> method, the daemon service may, but is not
+     * required to, ignore requests from that subscriber until the
+     * <code>performWork()</code> method has been invoked.
+     *
+     * @param clientNumber the number that uniquely identifies the client
+     */
 	public void serviceNow(int clientNumber);
 
 
