@@ -25,6 +25,8 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.URL;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.ArrayList;
@@ -355,6 +357,12 @@ public class SecureServerTest extends BaseJDBCTestCase
         // wildcarded (DERBY-2811)
         //
         if ( _authenticationRequired && ( _wildCardHost != null ) ) { connectToServer(); }
+
+        //
+        // make sure that we can run sysinfo and turn on tracing (DERBY-3086)
+        //
+        runsysinfo();
+        enableTracing();
     }
 
     private void    connectToServer()
@@ -376,6 +384,26 @@ public class SecureServerTest extends BaseJDBCTestCase
         conn.close();
     }
 
+    private void    runsysinfo()
+        throws Exception
+    {
+        String          sysinfoOutput = runServerCommand( "sysinfo" );
+
+        if ( sysinfoOutput.indexOf( "Security Exception:" ) > -1 )
+        { fail( "Security exceptions in sysinfo output:\n\n:" + sysinfoOutput ); }
+    }
+
+    private void    enableTracing()
+        throws Exception
+    {
+        String          traceOnOutput = runServerCommand( "trace on" );
+
+        println( "Output for trace on command:\n\n" + traceOnOutput );
+
+        if ( traceOnOutput.indexOf( "Trace turned on for all sessions." ) < 0 )
+        { fail( "Security exceptions in output of trace enabling command:\n\n:" + traceOnOutput ); }
+    }
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // Object OVERLOADS
@@ -402,12 +430,59 @@ public class SecureServerTest extends BaseJDBCTestCase
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
+    /**
+     * <p>
+     * Run a NetworkServerControl command.
+     * </p>
+     */
+    private String    runServerCommand( String commandSpecifics )
+        throws Exception
+    {
+        String          portNumber = Integer.toString( getTestConfiguration().getPort() );
+        StringBuffer    buffer = new StringBuffer();
+        String          classpath = getSystemProperty( "java.class.path" );
+
+        buffer.append( "java -classpath " );
+        buffer.append( classpath );
+        buffer.append( " org.apache.derby.drda.NetworkServerControl -p " + portNumber + " " + commandSpecifics );
+
+        final   String  command = buffer.toString();
+
+        println( "Server command is " + command );
+
+        Process     serverProcess = (Process) AccessController.doPrivileged
+            (
+             new PrivilegedAction()
+             {
+                 public Object run()
+                 {
+                     Process    result = null;
+                     try {
+                        result = Runtime.getRuntime().exec( command );
+                     } catch (Exception ex) {
+                         ex.printStackTrace();
+                     }
+                     
+                     return result;
+                 }
+             }
+            );
+
+        InputStream is = serverProcess.getInputStream();
+        
+        return getProcessOutput( is, 10000 );
+    }
+
     private String  getServerOutput()
         throws Exception
     {
-        byte[]          inputBuffer = new byte[ 1000 ];
+        return getProcessOutput( _inputStreamHolder[ 0 ], 1000 );
+    }
 
-        InputStream is = _inputStreamHolder[ 0 ];
+    private String  getProcessOutput( InputStream is, int bufferLength )
+        throws Exception
+    {
+        byte[]          inputBuffer = new byte[ bufferLength ];
 
         int             bytesRead = is.read( inputBuffer );
 

@@ -199,10 +199,17 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
 
 	  localAW.println("JRE - JDBC: " + org.apache.derby.iapi.services.info.JVMInfo.derbyVMLevel());
 
-	  String classpath;
+	  String classpath = null;
 
-	  try {
-		  classpath = System.getProperty("java.class.path");
+      try {
+          classpath = (String) AccessController.doPrivileged( new PrivilegedAction()
+              {
+                  public Object run()
+                  {
+                      return System.getProperty("java.class.path");
+                  }
+              }
+              );
 	  }
 	  catch (SecurityException se) {
           localAW.println(
@@ -210,7 +217,7 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
 		  classpath = null;
 	  }
 
-    ZipInfoProperties zip[]= Main.getAllInfo (classpath);
+      ZipInfoProperties zip[]= Main.getAllInfo (classpath);
 
     if (zip != null) {
 
@@ -289,15 +296,20 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
     security exception.
    */
 
-  private static String getJavaProperty (String whichProperty) {
+  private static String getJavaProperty (final String whichProperty) {
 
-    String property;
-    String unavailable = Main.getTextMessage ("SIF01.H");
+    final   String unavailable = Main.getTextMessage ("SIF01.H");
 
     try {
-
-      property = System.getProperty (whichProperty, unavailable);
-      return property;
+        String  property = (String) AccessController.doPrivileged( new PrivilegedAction()
+            {
+                public  Object  run()
+                {
+                    return System.getProperty (whichProperty, unavailable);
+                }
+            }
+            );
+        return property;
     }
     catch (SecurityException se) {
 
@@ -889,26 +901,34 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
      *  @param cpEntry the classpath element
      *  @return a ZipInfoProperties if an info properties file is found.
      */
-    private static ZipInfoProperties checkForInfo(String cpEntry)
+    private static ZipInfoProperties checkForInfo(final String cpEntry)
     {
-        File f = new File(cpEntry);
-        if ( ! f.exists())
-        {
-            return null;
-        }
+        return (ZipInfoProperties) AccessController.doPrivileged( new PrivilegedAction()
+            {
+                public Object run()
+                {
+                    File f = new File(cpEntry);
+                    if ( ! f.exists())
+                    {
+                        return null;
+                    }
 
-        if (f.isDirectory())
-        {
-            ZipInfoProperties zip = checkDirectory(cpEntry);
-            return zip;
-        }
+                    if (f.isDirectory())
+                    {
+                        ZipInfoProperties zip = checkDirectory(cpEntry);
+                        return zip;
+                    }
 
-        if (f.isFile())
-        {
-            ZipInfoProperties zip = checkFile(cpEntry);
-            return zip;
-        }
-        return null;
+                    if (f.isFile())
+                    {
+                        ZipInfoProperties zip = checkFile(cpEntry);
+                        return zip;
+                    }
+                    return null;
+                }
+            }
+            );
+        
     }
 
     /**
