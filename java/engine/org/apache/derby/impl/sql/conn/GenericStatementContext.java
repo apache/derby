@@ -105,14 +105,13 @@ final class GenericStatementContext
 		super(lcc.getContextManager(), org.apache.derby.iapi.reference.ContextId.LANG_STATEMENT);
 		this.lcc = lcc;
 
-		internalSavePointName = "ISSP" + hashCode();
-
 		if (SanityManager.DEBUG)
 		{
 			SanityManager.ASSERT((lcc != null),
 					"Failed to get language connection context");
 		}
 
+        internalSavePointName = lcc.getUniqueSavepointName();
 	}
 
     /**
