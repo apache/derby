@@ -84,8 +84,6 @@ public class SYSTABLEPERMSRowFactory extends PermissionsCatalogRowFactory
 		,"f81e0010-010c-bc85-060d-000000109ab8"	// index3
     };
 
-    private SystemColumn[] columnList;
-
     public SYSTABLEPERMSRowFactory(UUIDFactory uuidf, ExecutionFactory ef, DataValueFactory dvf,
                                    boolean convertIdToLower)
 	{
@@ -198,103 +196,19 @@ public class SYSTABLEPERMSRowFactory extends PermissionsCatalogRowFactory
 	/** builds a column list for the catalog */
 	public SystemColumn[] buildColumnList()
     {
-		if (columnList == null)
-        {
-            columnList = new SystemColumn[ COLUMN_COUNT];
-
-            columnList[ TABLEPERMSID_COL_NUM - 1] =
-                new SystemColumnImpl( convertIdCase( "TABLEPERMSID"),
-                                      TABLEPERMSID_COL_NUM,
-                                      0, // precision
-                                      0, // scale
-                                      false, // nullability
-                                      "CHAR",
-                                      true,
-                                      36);
-            columnList[ GRANTEE_COL_NUM - 1] =
-              new SystemColumnImpl( convertIdCase( "GRANTEE"),
-                                    GRANTEE_COL_NUM,
-                                    0, // precision
-                                    0, // scale
-                                    false, // nullability
-                                    AUTHORIZATION_ID_TYPE,
-                                    AUTHORIZATION_ID_IS_BUILTIN_TYPE,
-                                    AUTHORIZATION_ID_LENGTH);
-            columnList[ GRANTOR_COL_NUM - 1] =
-              new SystemColumnImpl( convertIdCase( "GRANTOR"),
-                                    GRANTOR_COL_NUM,
-                                    0, // precision
-                                    0, // scale
-                                    false, // nullability
-                                    AUTHORIZATION_ID_TYPE,
-                                    AUTHORIZATION_ID_IS_BUILTIN_TYPE,
-                                    AUTHORIZATION_ID_LENGTH);
-            columnList[ TABLEID_COL_NUM - 1] =
-              new SystemColumnImpl( convertIdCase( "TABLEID"),
-                                    TABLEID_COL_NUM,
-                                    0, // precision
-                                    0, // scale
-                                    false, // nullability
-                                    "CHAR", // dataType
-                                    true, // built-in type
-                                    36);
-            columnList[ SELECTPRIV_COL_NUM - 1] =
-              new SystemColumnImpl( convertIdCase( "SELECTPRIV"),
-                                    SELECTPRIV_COL_NUM,
-                                    0, // precision
-                                    0, // scale
-                                    false, // nullability
-                                    "CHAR", // dataType
-                                    true, // built-in type
-                                    1);
-            columnList[ DELETEPRIV_COL_NUM - 1] =
-              new SystemColumnImpl( convertIdCase( "DELETEPRIV"),
-                                    DELETEPRIV_COL_NUM,
-                                    0, // precision
-                                    0, // scale
-                                    false, // nullability
-                                    "CHAR", // dataType
-                                    true, // built-in type
-                                    1);
-            columnList[ INSERTPRIV_COL_NUM - 1] =
-              new SystemColumnImpl( convertIdCase( "INSERTPRIV"),
-                                    INSERTPRIV_COL_NUM,
-                                    0, // precision
-                                    0, // scale
-                                    false, // nullability
-                                    "CHAR", // dataType
-                                    true, // built-in type
-                                    1);
-            columnList[ UPDATEPRIV_COL_NUM - 1] =
-              new SystemColumnImpl( convertIdCase( "UPDATEPRIV"),
-                                    UPDATEPRIV_COL_NUM,
-                                    0, // precision
-                                    0, // scale
-                                    false, // nullability
-                                    "CHAR", // dataType
-                                    true, // built-in type
-                                    1);
-            columnList[ REFERENCESPRIV_COL_NUM - 1] =
-              new SystemColumnImpl( convertIdCase( "REFERENCESPRIV"),
-                                    REFERENCESPRIV_COL_NUM,
-                                    0, // precision
-                                    0, // scale
-                                    false, // nullability
-                                    "CHAR", // dataType
-                                    true, // built-in type
-                                    1);
-            columnList[ TRIGGERPRIV_COL_NUM - 1] =
-              new SystemColumnImpl( convertIdCase( "TRIGGERPRIV"),
-                                    TRIGGERPRIV_COL_NUM,
-                                    0, // precision
-                                    0, // scale
-                                    false, // nullability
-                                    "CHAR", // dataType
-                                    true, // built-in type
-                                    1);
-        }
-		return columnList;
-    } // end of buildColumnList
+        return new SystemColumn[] {
+            SystemColumnImpl.getUUIDColumn("TABLEPERMSID", false),
+            SystemColumnImpl.getIdentifierColumn("GRANTEE", false),
+            SystemColumnImpl.getIdentifierColumn("GRANTOR", false),
+            SystemColumnImpl.getUUIDColumn("TABLEID", false),
+            SystemColumnImpl.getIndicatorColumn("SELECTPRIV"),
+            SystemColumnImpl.getIndicatorColumn("DELETEPRIV"),
+            SystemColumnImpl.getIndicatorColumn("INSERTPRIV"),
+            SystemColumnImpl.getIndicatorColumn("UPDATEPRIV"),
+            SystemColumnImpl.getIndicatorColumn("REFERENCESPRIV"),
+            SystemColumnImpl.getIndicatorColumn("TRIGGERPRIV"),
+        };
+    }
 
 	/**
 	 * builds a key row given for a given index number.

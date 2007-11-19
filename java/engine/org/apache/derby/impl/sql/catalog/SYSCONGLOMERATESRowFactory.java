@@ -55,6 +55,7 @@ import org.apache.derby.catalog.UUID;
 
 import org.apache.derby.catalog.IndexDescriptor;
 
+import java.sql.Types;
 import java.util.Properties;
 
 /**
@@ -425,106 +426,19 @@ public class SYSCONGLOMERATESRowFactory extends CatalogRowFactory
 	 *
 	 * @return array of SystemColumn suitable for making this catalog.
 	 */
+    	        
 	public SystemColumn[]	buildColumnList()
 	{
-		int						index = 0;
-		SystemColumn[]			columnList = new SystemColumn[SYSCONGLOMERATES_COLUMN_COUNT];
-
-		// describe columns
-
-
-		columnList[index++] = 
-					new SystemColumnImpl(	
-							convertIdCase( "SCHEMAID"),			// column name
-							SYSCONGLOMERATES_SCHEMAID,	// column number
-							0,					// precision
-							0,					// scale
-							false,				// nullability
-							"CHAR",				// dataType
-							true,				// built-in type
-							36					// maxLength
-			               );
-
-		columnList[index++] = 
-					new SystemColumnImpl(	
-							convertIdCase( "TABLEID"),			// column name
-							SYSCONGLOMERATES_TABLEID,	// column number
-							0,					// precision
-							0,					// scale
-							false,				// nullability
-							"CHAR",				// dataType
-							true,				// built-in type
-							36					// maxLength
-			               );
-		columnList[index++] = 
-					new SystemColumnImpl(	
-							convertIdCase( "CONGLOMERATENUMBER"),		// column name
-							SYSCONGLOMERATES_CONGLOMERATENUMBER,	// column number
-							0,					// precision
-							0,					// scale
-							false,				// nullability
-							"BIGINT",				// dataType
-							true,				// built-in type
-							TypeId.LONGINT_MAXWIDTH	// maxLength
-			               );
-
-		columnList[index++] =
-					new SystemColumnImpl(		// SQL IDENTIFIER
-							convertIdCase( "CONGLOMERATENAME"),				// column name
-							SYSCONGLOMERATES_CONGLOMERATENAME,
-							true				// nullability
-							);
-
-		columnList[index++] = 
-					new SystemColumnImpl(	
-							convertIdCase( "ISINDEX"),			// column name
-							SYSCONGLOMERATES_ISINDEX,	// column number
-							0,					// precision
-							0,					// scale
-							false,				// nullability
-							"BOOLEAN",				// dataType
-							true,				// built-in type
-							1					// maxLength
-			               );
-
-		columnList[index++] =
-					new SystemColumnImpl(
-							convertIdCase( "DESCRIPTOR"),				// column name
-							SYSCONGLOMERATES_DESCRIPTOR,
-							0,					// precision
-							0,					// scale
-							true,				// nullability
-							"org.apache.derby.catalog.IndexDescriptor",	// datatype
-							false,				// built-in type
-							TypeDescriptor.MAXIMUM_WIDTH_UNKNOWN
-												// maxLength
-							);
-
-		columnList[index++] =
-					new SystemColumnImpl(
-							convertIdCase( "ISCONSTRAINT"),				// column name
-							SYSCONGLOMERATES_ISCONSTRAINT,
-							0,					// precision
-							0,					// scale
-							true,				// nullability
-							"BOOLEAN",	// datatype
-							true,				// built-in type
-							1					// maxLength
-							);
-
-		columnList[index++] =
-					new SystemColumnImpl(
-							convertIdCase( "CONGLOMERATEID"),	// column name
-							SYSCONGLOMERATES_CONGLOMERATEID,
-							0,					// precision
-							0,					// scale
-							false,				// nullability
-							"CHAR",				// datatype
-							true,				// built-in type
-							36					// maxLength
-							);
-
-		return	columnList;
-
+            return new SystemColumn[] {
+               SystemColumnImpl.getUUIDColumn("SCHEMAID", false),
+               SystemColumnImpl.getUUIDColumn("TABLEID", false),
+               SystemColumnImpl.getColumn("CONGLOMERATENUMBER", Types.BIGINT, false),
+               SystemColumnImpl.getIdentifierColumn("CONGLOMERATENAME", true),
+               SystemColumnImpl.getColumn("ISINDEX", Types.BOOLEAN, false),
+               SystemColumnImpl.getJavaColumn("DESCRIPTOR",
+                       "org.apache.derby.catalog.IndexDescriptor", true),
+               SystemColumnImpl.getColumn("ISCONSTRAINT", Types.BOOLEAN, true),
+               SystemColumnImpl.getUUIDColumn("CONGLOMERATEID", false)
+           };
 	}
 }

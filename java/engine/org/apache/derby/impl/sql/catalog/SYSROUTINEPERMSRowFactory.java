@@ -21,6 +21,7 @@
 
 package org.apache.derby.impl.sql.catalog;
 
+import org.apache.derby.iapi.reference.JDBC30Translation;
 import org.apache.derby.iapi.sql.dictionary.SystemColumn;
 import org.apache.derby.iapi.sql.dictionary.TupleDescriptor;
 import org.apache.derby.iapi.sql.dictionary.RoutinePermsDescriptor;
@@ -79,8 +80,6 @@ public class SYSROUTINEPERMSRowFactory extends PermissionsCatalogRowFactory
 		,"40f70088-010c-4c2f-c8de-0000000f43a0" // index2
 		,"08264012-010c-bc85-060d-000000109ab8" // index3
     };
-
-    private SystemColumn[] columnList;
 
     public SYSROUTINEPERMSRowFactory(UUIDFactory uuidf, ExecutionFactory ef, DataValueFactory dvf,
                                      boolean convertIdToLower)
@@ -153,58 +152,14 @@ public class SYSROUTINEPERMSRowFactory extends PermissionsCatalogRowFactory
 	/** builds a column list for the catalog */
 	public SystemColumn[] buildColumnList()
     {
-		if (columnList == null)
-        {
-            columnList = new SystemColumn[ COLUMN_COUNT];
-
-            columnList[ ROUTINEPERMSID_COL_NUM - 1] =
-                new SystemColumnImpl( convertIdCase( "ROUTINEPERMSID"),
-                                      ROUTINEPERMSID_COL_NUM,
-                                      0, // precision
-                                      0, // scale
-                                      false, // nullability
-                                      "CHAR",
-                                      true,
-                                      36);
-            columnList[ GRANTEE_COL_NUM - 1] =
-              new SystemColumnImpl( convertIdCase( "GRANTEE"),
-                                    GRANTEE_COL_NUM,
-                                    0, // precision
-                                    0, // scale
-                                    false, // nullability
-                                    AUTHORIZATION_ID_TYPE,
-                                    AUTHORIZATION_ID_IS_BUILTIN_TYPE,
-                                    AUTHORIZATION_ID_LENGTH);
-            columnList[ GRANTOR_COL_NUM - 1] =
-              new SystemColumnImpl( convertIdCase( "GRANTOR"),
-                                    GRANTOR_COL_NUM,
-                                    0, // precision
-                                    0, // scale
-                                    false, // nullability
-                                    AUTHORIZATION_ID_TYPE,
-                                    AUTHORIZATION_ID_IS_BUILTIN_TYPE,
-                                    AUTHORIZATION_ID_LENGTH);
-            columnList[ ALIASID_COL_NUM - 1] =
-              new SystemColumnImpl( convertIdCase( "ALIASID"),
-                                    ALIASID_COL_NUM,
-                                    0, // precision
-                                    0, // scale
-                                    false, // nullability
-                                    "CHAR", // dataType
-                                    true, // built-in type
-                                    36);
-            columnList[ GRANTOPTION_COL_NUM - 1] =
-              new SystemColumnImpl( convertIdCase( "GRANTOPTION"),
-                                    GRANTOPTION_COL_NUM,
-                                    0, // precision
-                                    0, // scale
-                                    false, // nullability
-                                    "CHAR", // dataType
-                                    true, // built-in type
-                                    1);
-        }
-		return columnList;
-    } // end of buildColumnList
+         return new SystemColumn[] {
+             SystemColumnImpl.getUUIDColumn("ROUTINEPERMSID", false),
+             SystemColumnImpl.getIdentifierColumn("GRANTEE", false),
+             SystemColumnImpl.getIdentifierColumn("GRANTOR", false),
+             SystemColumnImpl.getUUIDColumn("ALIASID", false),
+             SystemColumnImpl.getIndicatorColumn("GRANTOPTION")
+         };
+    }
 
 	/**
 	 * builds an index key row given for a given index number.

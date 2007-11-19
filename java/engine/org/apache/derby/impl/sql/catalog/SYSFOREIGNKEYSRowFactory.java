@@ -21,6 +21,8 @@
 
 package org.apache.derby.impl.sql.catalog;
 
+import java.sql.Types;
+
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.sanity.SanityManager;
@@ -246,64 +248,14 @@ public class SYSFOREIGNKEYSRowFactory extends CatalogRowFactory
 	 */
 	public SystemColumn[]	buildColumnList()
 	{
-		int						index = 0;
-		SystemColumn[]			columnList = new SystemColumn[SYSFOREIGNKEYS_COLUMN_COUNT];
-
-		// describe columns
-
-		columnList[index++] = new SystemColumnImpl(	
-							convertIdCase( "CONSTRAINTID"),			// name 
-							SYSFOREIGNKEYS_CONSTRAINTID,	// column number
-							0,					// precision
-							0,					// scale
-							false,				// nullability
-							"CHAR",				// dataType
-							true,				// built-in type
-							36					// maxLength
-			                );
-		columnList[index++] = new SystemColumnImpl(	
-							convertIdCase( "CONGLOMERATEID"),			// name 
-							SYSFOREIGNKEYS_CONGLOMERATEID,	// column number
-							0,					// precision
-							0,					// scale
-							false,				// nullability
-							"CHAR",				// dataType
-							true,				// built-in type
-							36					// maxLength
-			                );
-		columnList[index++] = new SystemColumnImpl(	
-							convertIdCase( "KEYCONSTRAINTID"),			// name 
-							SYSFOREIGNKEYS_KEYCONSTRAINTID,	// column number
-							0,					// precision
-							0,					// scale
-							false,				// nullability
-							"CHAR",				// dataType
-							true,				// built-in type
-							36					// maxLength
-			                );
-
-		columnList[index++] = new SystemColumnImpl(	
-							convertIdCase( "DELETERULE"),			// name 
-							SYSFOREIGNKEYS_DELETERULE,	// column number
-							0,					// precision
-							0,					// scale
-							false,				// nullability
-							"CHAR",				// dataType
-							true,				// built-in type
-							1					// maxLength
-			                );
-
-		columnList[index++] = new SystemColumnImpl(	
-							convertIdCase( "UPDATERULE"),			// name 
-							SYSFOREIGNKEYS_UPDATERULE,	// column number
-							0,					// precision
-							0,					// scale
-							false,				// nullability
-							"CHAR",				// dataType
-							true,				// built-in type
-							1					// maxLength
-			                );
-		return	columnList;
+            return new SystemColumn[] {
+                 SystemColumnImpl.getUUIDColumn("CONSTRAINTID", false),
+                 SystemColumnImpl.getUUIDColumn("CONGLOMERATEID", false),
+                 SystemColumnImpl.getUUIDColumn("KEYCONSTRAINTID", false),
+                 SystemColumnImpl.getIndicatorColumn("DELETERULE"),
+                 SystemColumnImpl.getIndicatorColumn("UPDATERULE"),
+           
+            };
 	}
 
 

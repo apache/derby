@@ -23,11 +23,8 @@ package org.apache.derby.impl.sql.catalog;
 
 import java.sql.Types;
 
-import	org.apache.derby.iapi.sql.dictionary.SystemColumn;
-import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.sql.dictionary.SystemColumn;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.types.DataValueDescriptor;
-import org.apache.derby.iapi.types.DataValueFactory;
 import org.apache.derby.iapi.types.TypeId;
 
 /**
@@ -147,76 +144,6 @@ class SystemColumnImpl implements SystemColumn
         this.name = name;
         this.type = type;
     }
-
-	/**
-     * Constructor to create a description of a column in a system table.
-     * 
-     * @param name
-     *            of column.
-     * @param id
-     *            of column.
-     * @param nullability
-     *            Whether or not column accepts nulls.
-     * @param dataType
-     *            Datatype of column.
-     * @param maxLength
-     *            Maximum length of data in column.
-     */
-	SystemColumnImpl(	String	name,
-								int		id,
-								boolean	nullability,
-								String	dataType,
-								boolean	builtInType,
-								int		maxLength )
-	{
-		this.name			= name;
-        
-        TypeId  typeId;
-
-        if (builtInType)
-        {
-            typeId = TypeId.getBuiltInTypeId(dataType);
-        }
-        else
-        {
-
-            typeId = TypeId.getUserDefinedTypeId(dataType, false);
-        }
-
-        this.type = new DataTypeDescriptor(
-                               typeId,
-                               0,
-                               0,
-                               nullability,
-                               maxLength
-                               );
-	}
-    SystemColumnImpl(   String  name,
-            int     id,
-            int ignoreP,
-            int ignoreS,
-            boolean nullability,
-            String  dataType,
-            boolean builtInType,
-            int     maxLength )
-{
-        this(name, id, nullability, dataType, builtInType, maxLength);
-}
-
-	/**
-	 * Constructor to create a description of a column in a system table.
-	 * This constructor is used for SQL Identifiers (varchar 128).
-	 *
-	 *	@param	name of column.
-	 *	@param	id of column.
-	 *	@param	nullability Whether or not column accepts nulls.
-	 */
-	SystemColumnImpl(	String	name,
-								int		id,
-								boolean	nullability)
-	{
-        this(name, id, nullability, "VARCHAR", true, 128);
-	}
 
 	/**
 	 * Gets the name of this column.

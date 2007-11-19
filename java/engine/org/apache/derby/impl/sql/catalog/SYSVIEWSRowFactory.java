@@ -21,6 +21,8 @@
 
 package org.apache.derby.impl.sql.catalog;
 
+import java.sql.Types;
+
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.sanity.SanityManager;
@@ -261,53 +263,13 @@ public class SYSVIEWSRowFactory extends CatalogRowFactory
 	 */
 	public SystemColumn[]	buildColumnList()
 	{
-		SystemColumn[]			columnList = new SystemColumn[SYSVIEWS_COLUMN_COUNT];
-
-		columnList[0] = new SystemColumnImpl(	
-							convertIdCase( "TABLEID"),			// name 
-							SYSVIEWS_TABLEID,	// column number
-							0,					// precision
-							0,					// scale
-							false,				// nullability
-							"CHAR",				// dataType
-							true,				// built-in type
-							36					// maxLength
-			                );
-		// describe columns
-
-		columnList[1] = 
-					new SystemColumnImpl(	
-							convertIdCase( "VIEWDEFINITION"),		// column name
-							SYSVIEWS_VIEWDEFINITION,	// column number
-							0,					// precision
-							0,					// scale
-							false,				// nullability
-							"LONG VARCHAR",	    // dataType
-							true,				// built-in type
-							TypeId.LONGVARCHAR_MAXWIDTH // maxLength
-			               );
-		columnList[2] = 
-					new SystemColumnImpl(	
-							convertIdCase( "CHECKOPTION"),		// column name
-							SYSVIEWS_CHECKOPTION,// column number
-							0,					// precision
-							0,					// scale
-							false,				// nullability
-							"CHAR",				// dataType
-							true,				// built-in type
-							1					// maxLength
-		                   );
-
-		columnList[3] = new SystemColumnImpl(	
-							convertIdCase( "COMPILATIONSCHEMAID"),	// name 
-							SYSVIEWS_COMPILATION_SCHEMAID,	// column number
-							0,					// precision
-							0,					// scale
-							true,				// nullability
-							"CHAR",				// dataType
-							true,				// built-in type
-							36					// maxLength
-			                );
-		return	columnList;
+            return new SystemColumn[] {
+                SystemColumnImpl.getUUIDColumn("TABLEID", false),
+                SystemColumnImpl.getColumn("VIEWDEFINITION", Types.LONGVARCHAR,
+                        false, TypeId.LONGVARCHAR_MAXWIDTH),
+                SystemColumnImpl.getIndicatorColumn("CHECKOPTION"),
+                SystemColumnImpl.getUUIDColumn("COMPILATIONSCHEMAID", true),
+                        
+            };
 	}
 }

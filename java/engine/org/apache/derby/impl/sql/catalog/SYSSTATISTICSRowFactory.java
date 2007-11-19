@@ -44,6 +44,7 @@ import org.apache.derby.catalog.Statistics;
 import org.apache.derby.iapi.types.*;
 
 import java.sql.Timestamp;
+import java.sql.Types;
 
 /**
  * Factory for creating a SYSSTATISTICS row.
@@ -110,7 +111,6 @@ public class SYSSTATISTICSRowFactory extends CatalogRowFactory
 	/*
 	 * STATE
 	 */
-	private	SystemColumn[]		columnList;
 
 	/*
 	 *	CONSTRUCTORS
@@ -239,108 +239,16 @@ public class SYSSTATISTICSRowFactory extends CatalogRowFactory
 	 */
 	public SystemColumn[] buildColumnList()
 	{
-		if (columnList != null)
-			return columnList;
-
-		columnList = new SystemColumn[SYSSTATISTICS_COLUMN_COUNT];
-		
-		columnList[0] = new SystemColumnImpl(
-						   convertIdCase( "STATID"),			// column name
-						   SYSSTATISTICS_ID,    // column number
-						   0,					// precision
-						   0,					// scale
-						   false,				// nullability
-						   "CHAR",				// dataType
-						   true,				// built-in type
-						   36					// maxLength
-						   );
-		
-		columnList[1] = new SystemColumnImpl(
-						   convertIdCase( "REFERENCEID"),			  // column name
-						   SYSSTATISTICS_REFERENCEID, // column number
-						   0,						  // precision
-						   0,						  // scale
-						   false,					  // nullability
-						   "CHAR",					  // dataType
-						   true,					  // built-in type
-						   36						  // maxLength
-						   );
-
-		columnList[2] = new SystemColumnImpl(
-						   convertIdCase( "TABLEID"),			      // column name
-						   SYSSTATISTICS_TABLEID,    // column number
-						   0,						  // precision
-						   0,						  // scale
-						   false,					  // nullability
-						   "CHAR",					  // dataType
-						   true,					  // built-in type
-						   36						  // maxLength
-						   );
-
-		columnList[3] = 
-					new SystemColumnImpl(		
-							convertIdCase( "CREATIONTIMESTAMP"),	  // name 
-							SYSSTATISTICS_TIMESTAMP,  // column number
-							0,						  // precision
-							0,						  // scale
-							false,					  // nullability
-							"TIMESTAMP",			  // dataType
-							true,					  // built-in type
-							TypeId.TIMESTAMP_MAXWIDTH // maxLength
-			                );
-
-		columnList[4] = 
-					new SystemColumnImpl(		
-							convertIdCase( "TYPE"),	  			  	  // name 
-							SYSSTATISTICS_TYPE,  	  // column number
-							0,						  // precision
-							0,						  // scale
-							false,					  // nullability
-							"CHAR",					  // dataType
-							true,					  // built-in type
-							1						  // maxLength
-			                );
-
-		columnList[5] = 
-					new SystemColumnImpl(		
-							convertIdCase( "VALID"),	  			  	  // name 
-							SYSSTATISTICS_VALID,  	  // column number
-							0,						  // precision
-							0,						  // scale
-							false,					  // nullability
-							"BOOLEAN",					  // dataType
-							true,					  // built-in type
-							1						  // maxLength
-			                );
-
-
-		columnList[6] = 
-			       new SystemColumnImpl(
-							convertIdCase( "COLCOUNT"), 				// name
-							SYSSTATISTICS_COLCOUNT,    // column number
-							0,							// precision
-							0,							// scale
-							false,						// nullability
-							"INTEGER",					// data type
-							true,						// built in type
-							4							//maxlength
-							 );
-		columnList[7] = 
-					new SystemColumnImpl(		
-							convertIdCase( "STATISTICS"),	  		  // name 
-							SYSSTATISTICS_STAT,  	  // column number
-							0,						  // precision
-							0,						  // scale
-							false,					  // nullability
-							"org.apache.derby.catalog.Statistics",  // dataType
-							false,					  // built-in type
-							12						  // maxLength
-			                );
-
-
-
-		return columnList;
-	}
-
-
+            return new SystemColumn[] {
+                SystemColumnImpl.getUUIDColumn("STATID", false),
+                SystemColumnImpl.getUUIDColumn("REFERENCEID", false),
+                SystemColumnImpl.getUUIDColumn("TABLEID", false),
+                SystemColumnImpl.getColumn("CREATIONTIMESTAMP", Types.TIMESTAMP, false),
+                SystemColumnImpl.getIndicatorColumn("TYPE"),
+                SystemColumnImpl.getColumn("VALID", Types.BOOLEAN, false),
+                SystemColumnImpl.getColumn("COLCOUNT", Types.INTEGER, false),
+                SystemColumnImpl.getJavaColumn("STATISTICS",
+                        "org.apache.derby.catalog.Statistics", false)
+            };
+        }
 }	

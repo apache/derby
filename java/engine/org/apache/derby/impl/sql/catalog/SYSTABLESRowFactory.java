@@ -382,61 +382,13 @@ class SYSTABLESRowFactory extends CatalogRowFactory
 	 */
 	public SystemColumn[]	buildColumnList()
 	{
-		SystemColumn[]			columnList = new SystemColumn[SYSTABLES_COLUMN_COUNT];
-
-		// describe columns
-
-		columnList[0] = new SystemColumnImpl(	
-								convertIdCase( "TABLEID"),			// column name
-								SYSTABLES_TABLEID,	// column number
-								0,					// precision
-								0,					// scale
-								false,				// nullability
-								"CHAR",				// dataType
-								true,				// built-in type
-								36					// maxLength
-			                   );
-
-		columnList[1] = new SystemColumnImpl(		// SQLIDENTIFIER
-								convertIdCase( "TABLENAME"),		// column name
-								SYSTABLES_TABLENAME, 	// column number
-								false				// nullability
-			                   );
-
-		columnList[2] = new SystemColumnImpl(	
-								convertIdCase( "TABLETYPE"),		// column name
-								SYSTABLES_TABLETYPE,// column number
-								0,					// precision
-								0,					// scale
-								false,				// nullability
-								"CHAR",				// dataType
-								true,				// built-in type
-								1					// maxLength
-			                   );
-
-		columnList[3] = new SystemColumnImpl(	
-								convertIdCase( "SCHEMAID"),			// column name
-								SYSTABLES_SCHEMAID,	// schema number
-								0,					// precision
-								0,					// scale
-								false,				// nullability
-								"CHAR",				// dataType
-								true,				// built-in type
-								36					// maxLength
-			                   );
-
-		columnList[4] = new SystemColumnImpl(	
-								convertIdCase( "LOCKGRANULARITY"),		// column name
-								SYSTABLES_LOCKGRANULARITY,// column number
-								0,					// precision
-								0,					// scale
-								false,				// nullability
-								"CHAR",				// dataType
-								true,				// built-in type
-								1					// maxLength
-			                   );
-
-		return	columnList;
+        return new SystemColumn[] {
+            SystemColumnImpl.getUUIDColumn("TABLEID", false),
+            SystemColumnImpl.getIdentifierColumn("TABLENAME", false),
+            SystemColumnImpl.getIndicatorColumn("TABLETYPE"),
+            SystemColumnImpl.getUUIDColumn("SCHEMAID", false),
+            SystemColumnImpl.getIndicatorColumn("LOCKGRANULARITY"),
+        };
 	}
 
 }
