@@ -303,39 +303,75 @@ public class PropertySetter extends Task
     private void    setForMostJDKs( String seed14, String seed15)
         throws Exception
     {
-        String  javaHome = getProperty( JAVA_HOME );
-        
-        // slice off the jdk1.5.0_u13/jre. ant seems to tack the "/jre" onto
-        // the end of what the shell thinks $JAVA_HOME is:
-        String  sunJavaRoot = javaHome + File.separator + ".." + File.separator + "..";
+        File        jdkParentDirectory = getJdkParentDirectory();
         
         String  default_j14lib = getProperty( J14LIB );
         String  default_j15lib = getProperty( J15LIB );
         
         if ( default_j14lib == null )
-        { default_j14lib = getJreLib( sunJavaRoot, seed14 ); }
+        { default_j14lib = getJreLib( jdkParentDirectory, seed14 ); }
 
         if ( default_j15lib == null )
-        { default_j15lib = getJreLib( sunJavaRoot, seed15 ); }
+        { default_j15lib = getJreLib( jdkParentDirectory, seed15 ); }
 
         defaultSetter( default_j14lib, default_j15lib );
     }
     
     /**
      * <p>
+     * Get the parent directory of JAVA_HOME
+     * </p>
+     */
+    private File    getJdkParentDirectory()
+        throws Exception
+    {
+        String  javaHome = getProperty( JAVA_HOME );
+        
+        // slice off the jdk1.5.0_u13/jre. ant seems to tack the "/jre" onto
+        // the end of what the shell thinks $JAVA_HOME is:
+        
+        File    javaHomeDir = new File( javaHome );
+        File    ancestor = getParent( getParent( javaHomeDir ) );
+
+        if ( ancestor == null )
+        {
+            echo( "JAVA_HOME directory '" + javaHome + "' does not have a grandparent directory sitting above all of the JDKs." );
+        }
+        
+        return ancestor;
+    }
+    
+    /**
+     * <p>
+     * Get a file's parent directory. Return null if there is no parent directory.
+     * </p>
+     */
+    private File    getParent( File file )
+        throws Exception
+    {
+        if ( file == null ) { return null; }
+        if ( !file.exists() ) { return null; }
+        
+        return file.getParentFile();
+    }
+
+
+    /**
+     * <p>
      * Get the path name of the library directory in the latest version of this jre
      * </p>
      */
-    private String    getJreLib( String jdkParent, String jdkName )
+    private String    getJreLib( File jdkParentDirectory, String jdkName )
         throws BuildException
     {
-        File        jdkParentDirectory = new File( jdkParent );
+        if ( jdkParentDirectory == null ) { return null; }
+        
         File[]      versions = jdkParentDirectory.listFiles( new DirContainsStringFilter( jdkName ) );
         int         count = versions.length;
 
         if ( count <= 0 )
         {
-            echo( "Directory '" + jdkParent + "' does not have any child directories containing the string '" + jdkName + "'." );
+            echo( "Directory '" + jdkParentDirectory.getAbsolutePath() + "' does not have any child directories containing the string '" + jdkName + "'." );
             return null;
         }
 
