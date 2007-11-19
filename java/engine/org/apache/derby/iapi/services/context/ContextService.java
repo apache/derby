@@ -25,6 +25,8 @@ import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.Hashtable;
 import java.util.Enumeration;
 
@@ -556,8 +558,17 @@ public final class ContextService //OLD extends Hashtable
 				if (active == null)
 					continue;
 
+                final Thread fActive = active;
 				if (cm.setInterrupted(c))
-					active.interrupt();
+                {
+                    AccessController.doPrivileged(
+                            new PrivilegedAction() {
+                                public Object run()  {
+                                    fActive.interrupt();
+                                    return null;
+                                }
+                            });
+                }
 			}
 		}
 	}

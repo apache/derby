@@ -41,6 +41,7 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.SSLServerSocketFactory;
 import java.net.UnknownHostException;
 import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.sql.Connection;
@@ -704,7 +705,7 @@ public final class NetworkServerControlImpl {
 		
 		// We accept clients on a separate thread so we don't run into a problem
 		// blocking on the accept when trying to process a shutdown
-		ClientThread clientThread =	 
+		final ClientThread clientThread =	 
 			(ClientThread) AccessController.doPrivileged(
 								new PrivilegedExceptionAction() {
 									public Object run() throws Exception
@@ -727,13 +728,21 @@ public final class NetworkServerControlImpl {
             }
         }
 
-		// Need to interrupt the memcheck thread if it is sleeping.
-		if (mc != null)
-			mc.interrupt();
+        
+        AccessController.doPrivileged(
+                new PrivilegedAction() {
+                    public Object run()  {
+                    // Need to interrupt the memcheck thread if it is sleeping.
+                        if (mc != null)
+                            mc.interrupt();
 
-		//interrupt client thread
-		clientThread.interrupt();
+                        //interrupt client thread
+                        clientThread.interrupt();
 
+                        return null;
+                    }
+                });
+		
  		// Close out the sessions
  		synchronized(sessionTable) {
  			for (Enumeration e = sessionTable.elements(); e.hasMoreElements(); )
@@ -748,8 +757,16 @@ public final class NetworkServerControlImpl {
  			//interupt any connection threads still active
  			for (int i = 0; i < threadList.size(); i++)
  			{
- 				((DRDAConnThread)threadList.get(i)).close();
- 				((DRDAConnThread)threadList.get(i)).interrupt();
+				final DRDAConnThread threadi = (DRDAConnThread)threadList.get(i);
+                
+ 				threadi.close();
+				AccessController.doPrivileged(
+							new PrivilegedAction() {
+								public Object run() {
+									threadi.interrupt();
+									return null;
+								}
+							});
  			}
  			threadList.clear();
 		}
