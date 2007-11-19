@@ -463,6 +463,13 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         assertFalse(dmd.dataDefinitionCausesTransactionCommit());
         assertFalse(dmd.dataDefinitionIgnoredInTransactions());
         
+        // Derby does not yet implement scroll sensitive resultsets, so can't
+        //   see changes for those; all *AreDetected and *AreVisible methods
+        //   return false.
+        // For Forward Only ResultSets, also see lang.UpdatableResultSetTest
+        
+        // *AreDetected; expect true for updates and deletes of 
+        //   TYPE_SCROLL_INSENSITIVE, all others should be false
         assertFalse(dmd.deletesAreDetected(ResultSet.TYPE_FORWARD_ONLY));
         assertTrue(dmd.deletesAreDetected(ResultSet.TYPE_SCROLL_INSENSITIVE));
         assertFalse(dmd.deletesAreDetected(ResultSet.TYPE_SCROLL_SENSITIVE));
@@ -473,6 +480,11 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         assertTrue(dmd.updatesAreDetected(ResultSet.TYPE_SCROLL_INSENSITIVE));
         assertFalse(dmd.updatesAreDetected(ResultSet.TYPE_SCROLL_SENSITIVE));
         
+        // others*AreVisible
+        // Since Derby materializes a forward only ResultSet incrementally, 
+        //   it is possible to see changes for FORWARD_ONLY
+        // Scroll insensitive ResultSet by their definition do not see changes
+        //   made by others
         assertTrue(dmd.othersDeletesAreVisible(ResultSet.TYPE_FORWARD_ONLY));
         assertFalse(dmd.othersDeletesAreVisible(ResultSet.TYPE_SCROLL_INSENSITIVE));
         assertFalse(dmd.othersDeletesAreVisible(ResultSet.TYPE_SCROLL_SENSITIVE));
@@ -483,6 +495,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         assertFalse(dmd.othersUpdatesAreVisible(ResultSet.TYPE_SCROLL_INSENSITIVE));
         assertFalse(dmd.othersUpdatesAreVisible(ResultSet.TYPE_SCROLL_SENSITIVE));
         
+        // Scroll insensitive ResultSets see updates, deletes, but not inserts
         assertFalse(dmd.ownDeletesAreVisible(ResultSet.TYPE_FORWARD_ONLY));
         assertTrue(dmd.ownDeletesAreVisible(ResultSet.TYPE_SCROLL_INSENSITIVE));
         assertFalse(dmd.ownDeletesAreVisible(ResultSet.TYPE_SCROLL_SENSITIVE));
