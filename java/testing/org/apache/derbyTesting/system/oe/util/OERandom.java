@@ -47,7 +47,10 @@ public class OERandom {
      * @param oer
      */
     public OERandom(OERandom oer) {
-        rand = new Random(System.currentTimeMillis());
+        // Since these objects may be created at the same time,
+        // within the resolution of currentTimeMillis(), then
+        // ensure they have different seeds.
+        rand = new Random(System.currentTimeMillis() + oer.rand.nextLong());
         Clast = oer.Clast;
         Cid = oer.Cid;
         Citem = oer.Citem;
