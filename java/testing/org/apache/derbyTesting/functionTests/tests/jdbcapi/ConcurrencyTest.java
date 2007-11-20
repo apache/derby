@@ -58,14 +58,10 @@ public class ConcurrencyTest extends SURBaseTest {
     
     public void tearDown() throws Exception 
     {
-        try {
-            rollback();
-            Statement dropStatement = createStatement();
-            dropStatement.execute("drop table t1");
-            dropStatement.close();
-        } catch (SQLException e) {
-            printStackTrace(e); // Want to propagate the real exception.
-        }
+        rollback();
+        dropTable("T1");
+        commit();
+
         super.tearDown();
     }
     

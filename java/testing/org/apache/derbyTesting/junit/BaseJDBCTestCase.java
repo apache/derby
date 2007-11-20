@@ -818,6 +818,42 @@ public abstract class BaseJDBCTestCase
     }
 
     /**
+     * Execute a DROP TABLE command using the passed in tableName as-is
+     * and the default connection.
+     * If the DROP TABLE fails because the table does not exist then
+     * the exception is ignored.
+     * @param tableName Table to be dropped.
+     * @throws SQLException
+     */
+    public final void dropTable(String tableName) throws SQLException
+    {
+       dropTable(getConnection(), tableName);
+    }
+    
+    /**
+     * Execute a DROP TABLE command using the passed in tableName as-is.
+     * If the DROP TABLE fails because the table does not exist then
+     * the exception is ignored.
+     * @param conn Connection to execute the DROP TABLE
+     * @param tableName Table to be dropped.
+     * @throws SQLException
+     */
+    public static void dropTable(Connection conn, String tableName) throws SQLException
+    {
+        Statement statement = conn.createStatement();
+        String dropSQL = "DROP TABLE " + tableName;
+        try { 
+            
+            statement.executeUpdate(dropSQL); 
+        } catch (SQLException e) {
+            assertSQLState("42Y55", e);
+        }
+        finally {
+            statement.close();
+        }
+    }
+
+    /**
      * Assert that the query fails (either in compilation,
      * execution, or retrieval of results--doesn't matter)
      * and throws a SQLException with the expected state.

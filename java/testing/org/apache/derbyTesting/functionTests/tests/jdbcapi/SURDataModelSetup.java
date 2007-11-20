@@ -62,27 +62,10 @@ public class SURDataModelSetup extends BaseJDBCTestSetup
                                        int records) 
         throws SQLException
     {
-        Statement statement = con.createStatement();
         
-        try { 
-            statement.execute("drop table t1"); 
-        } catch (SQLException e) {
-            assertEquals("'drop table t1' failed with unexpected SQL State",
-                         TABLE_EXISTS_SQL_STATE, e.getSQLState());
-            
-            // The net framework does not give any valuable error code
-            if (!TestConfiguration.getCurrent().getJDBCClient().isEmbedded()) {
-                
-                assertEquals("'drop table t1' failed with unexpected error code",
-                             NET_ERROR, e.getErrorCode());
-            } else {
-                assertEquals("'drop table t1' failed with unexpected error code",
-                             TABLE_EXISTS_ERRORCODE, e.getErrorCode());
-            }
-            
-        };
+        BaseJDBCTestCase.dropTable(con, "T1");
         
-        
+        Statement statement = con.createStatement();     
         
         /** Create the table */
         statement.execute(model.getCreateTableStatement());
@@ -253,11 +236,4 @@ public class SURDataModelSetup extends BaseJDBCTestSetup
     static void printStackTrace(Throwable t) {
         BaseJDBCTestCase.printStackTrace(t);
     }
-    
-    /**
-     * Error codes and SQL state
-     */
-    private final static String TABLE_EXISTS_SQL_STATE = "42Y55";
-    private final static int TABLE_EXISTS_ERRORCODE = 20000;
-    private final static int NET_ERROR = -1; 
 }

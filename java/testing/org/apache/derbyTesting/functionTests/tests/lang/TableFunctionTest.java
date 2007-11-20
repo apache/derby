@@ -1764,21 +1764,6 @@ public class TableFunctionTest extends BaseJDBCTestCase
         catch( SQLException se) {}
     }
 
-    /**
-     * Drop a table so that we can recreate it.
-     */
-    private void    dropTable( String tableName )
-        throws Exception
-    {
-        // swallow the "object doesn't exist" diagnostic
-        try {
-            PreparedStatement   ps = prepareStatement( "drop table " + tableName );
-
-            ps.execute();
-            ps.close();
-        }
-        catch( SQLException se) {}
-    }
 
     /**
      * Assert that the ResultSet returns the desired rows.
