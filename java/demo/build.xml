@@ -74,6 +74,7 @@
         <pathelement location="${jcc}"/>
       </classpath>
     </javac>
+    <!-- "simple" demos under java/demo/ (SimpleApp, SimpleMobileApp) -->
     <javac
       source="1.4"
       target="1.4"
@@ -85,8 +86,9 @@
       optimize="${optimize}"
       proceed="${proceed}"
       verbose="${verbose}"
-      srcdir="${derby.demo.src.dir}/simple"
-      destdir="${out.dir}">
+      srcdir="${derby.demo.src.dir}"
+      destdir="${out.dir}"
+      includes="simple/**,simplemobile/**">
       <classpath>
         <pathelement location="${javasrc.dir};${jcc}"/>
         <pathelement path="${java14compile.classpath};${jcc}"/>

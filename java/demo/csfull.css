@@ -329,6 +329,11 @@ OL {
 	background-color : transparent;
 }
 
+OL.decimal {
+        background-color : transparent;
+        list-style-type : decimal;
+}
+
 P {
 	text-align : left;
 	font-style : normal;
