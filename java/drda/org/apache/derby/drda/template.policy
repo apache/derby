@@ -76,7 +76,6 @@ grant codeBase "${derby.install.url}derbynet.jar"
 //    derby.jar
 //    derbyclient.jar
 //    derbytools.jar
-//    derbytesting.jar
 //
   permission java.util.PropertyPermission "user.*", "read";
   permission java.util.PropertyPermission "java.home", "read";
