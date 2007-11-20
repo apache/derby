@@ -69,10 +69,6 @@ import org.apache.derbyTesting.junit.TestConfiguration;
  * Work in progress.
  * TODO: Methods left to test from JDBC 3
  * 
- *  getCrossReference
- *  getExportedKeys (note; when done, adjust comment in ODBCgetExportedKeys)
- *  getImportedKeys
- *  getPrimaryKeys
  *  getProcedureColumns
  *  getProcedures
  *  <P>
@@ -89,12 +85,11 @@ import org.apache.derbyTesting.junit.TestConfiguration;
  *  convert from odbc_metadata.java test:
  *  - checks for SQLPROCEDURES, SQLPROCEDURECOLS, 
  *  - checks for SQLCOLUMNS
- *  - checks for SQLCOLPRIVILEGES, SQLTABLEPRIVILEGES (????)
- *  - checks for SQLSPECIALCOLUMNS
+ *  - checks for SQLCOLPRIVILEGES, SQLTABLEPRIVILEGES 
+ *  - checks for SQLSPECIALCOLUMNS (getBestRowIdentifier, getVersionColumns)
  *  - checks for SQLPRIMARYKEYS 
- *  - checks for SQLSTATISTICS
- *  - checks for GETBESTROWIDENTIFIER (not in any test?)
- *  - checks for GETINDEXINFO (not in any test?)
+ *  - checks for SQLSTATISTICS (getIndexInfo)
+ *  - odbc 3.0 compliance
  */
 public class DatabaseMetaDataTest extends BaseJDBCTestCase {
   
@@ -2580,7 +2575,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * to ODBC clients.  Note that for "correctness" we just compare the results
      * to those of the equivalent JDBC calls; this fixture assumes that the
      * the JDBC calls return correct results (testing of the JDBC results occurs
-     * elsewhere, esp. jdbcapi/metadata_test.java).
+     * elsewhere, see fixtures testGetXXportedKeys()
      */
     public void testGetXXportedKeysODBC() throws SQLException, IOException
     {
@@ -3218,6 +3213,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                 "SCHEMAID","A",null,null,null},
             {"","SYS","SYSTABLES","false","","SYSTABLES_INDEX2","3","1",
                 "TABLEID","A",null,null,null}};
+        JDBC.assertFullResultSet(rs, expRS, true);
         
         // should return no rows
         rs = dmd.getIndexInfo("","SYS","SYSSTABLES",true,false);
@@ -3243,7 +3239,6 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         st.execute("create unique index iii on iit(i asc, j desc)");
         DatabaseMetaData dmd = getDMD();
         ResultSet rs = dmd.getIndexInfo("","APP","IIT",false,false);
-        
         rs.next();
         if (rs != null)
             assertEquals("A",rs.getString(10));
@@ -3257,7 +3252,429 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         st.close();
     }
     
+    /**
+     * Create the tables for get*Keys tests
+     * @throws SQLException 
+     */
+    private void createObjectsForKeysTests() throws SQLException
+    {
+        getConnection().setAutoCommit(false);
+        Statement s = createStatement();
+        s.execute("create table kt1 (" +
+                "i int not null default 10, " +
+                "s smallint not null, " +
+                "c30 char(30) not null, " +
+                "vc10 varchar(10) not null default 'asdf', " +
+                "constraint PRIMKEY primary key(vc10, i), " +
+                "constraint UNIQUEKEY unique(c30, s), " + 
+                "ai bigint generated always as identity " +
+                    "(start with -10, increment by 2001))");
+
+        // Create another unique index on kt1
+        s.execute("create unique index u1 on kt1(s, i)");
+        // Create a non-unique index on kt1
+        s.execute("create index u2 on kt1(s)");
+        // Create a view on key table 1
+        s.execute("create view kv as select * from kt1");
+
+        // Create a foreign key
+        s.execute("create table reftab (vc10 varchar(10), i int, " +
+                  "s smallint, c30 char(30), " +
+                  "s2 smallint, c302 char(30), " +
+                  "dprim decimal(5,1) not null, dfor decimal(5,1) not null, "+
+                  "constraint PKEY_REFTAB primary key (dprim), " + 
+                  "constraint FKEYSELF " +
+                      "foreign key (dfor) references reftab, "+
+                  "constraint FKEY1 " +
+                      "foreign key(vc10, i) references kt1, " + 
+                  "constraint FKEY2 " +
+                      "foreign key(c30, s2) references kt1 (c30, s), "+
+                  "constraint FKEY3 " +
+                      "foreign key(c30, s) references kt1 (c30, s))");
+
+        s.execute("create table reftab2 (t2_vc10 varchar(10), t2_i int, " +
+                  "constraint T2_FKEY1 " +
+                      "foreign key(t2_vc10, t2_i) references kt1)");
+        commit();
+        getConnection().setAutoCommit(true);
+    }
     
+    /**
+     * Drop the database objects for get*Keys tests
+     * @throws SQLException 
+     */
+    private void dropObjectsForKeysTests() throws SQLException
+    {
+        getConnection().setAutoCommit(false);
+        Statement s = createStatement();
+        s.execute("drop table reftab2");
+        s.execute("drop table reftab");
+        commit();
+        s.execute("drop view kv");
+        s.execute("drop index u2");
+        s.execute("drop index u1");
+        s.execute("drop table kt1");
+        commit();
+        getConnection().setAutoCommit(true);        
+    }
+
+    /**
+     * Test getPrimaryKeys; does modify database
+     * @throws SQLException 
+     */
+    public void testGetPrimaryKeys() throws SQLException
+    {
+        String [] columnNames = {"TABLE_CAT","TABLE_SCHEM","TABLE_NAME",
+                "COLUMN_NAME","KEY_SEQ","PK_NAME"};
+        int [] columnTypes = {
+                Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,
+                Types.VARCHAR,Types.SMALLINT,Types.VARCHAR};
+        boolean [] nullability = {true,false,false,false,true,false};
+
+        String[][] expRS = new String[][] {
+                {"","APP","KT1","I","2","PRIMKEY"},
+                {"","APP","KT1","VC10","1","PRIMKEY"}};
+                       
+        createObjectsForKeysTests();
+        
+        DatabaseMetaData dmd = getDMD();
+        
+        // try with valid search criteria
+        // although, % may not actually be appropriate?
+        ResultSet rs = dmd.getPrimaryKeys("", "%", "KT1");
+        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
+        JDBC.assertFullResultSet(rs, expRS, true);
+        
+        rs = dmd.getPrimaryKeys(null, "APP", "KT1");
+        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
+        JDBC.assertFullResultSet(rs, expRS, true);
+
+        rs = dmd.getPrimaryKeys(null, null, "KT1");
+        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
+        JDBC.assertFullResultSet(rs, expRS, true);
+
+        rs = dmd.getPrimaryKeys(null, "", "KT1");
+        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
+        JDBC.assertEmpty(rs);
+
+        // tablename may not be null
+        try {
+            rs = dmd.getPrimaryKeys(null, null, null);
+            fail ("table name may not be null, should've given error");
+        } catch (SQLException sqle) {
+            assertSQLState("XJ103", sqle);
+        }
+        
+        // DERBY-2610, tablename must be given as stored - % means no rows
+        rs = dmd.getPrimaryKeys(null, null, "%");
+        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
+        JDBC.assertEmpty(rs);
+        
+        dropObjectsForKeysTests();
+    }
+
+    /**
+     * Test getImportedKeys, getExportedKeys, getCrossReference; modifies db
+     * @throws SQLException 
+     */
+    public void testGetXXportedKeys() throws SQLException
+    {
+        // getExportedKeys
+        String [] columnNames = {
+            "PKTABLE_CAT","PKTABLE_SCHEM","PKTABLE_NAME","PKCOLUMN_NAME",
+            "FKTABLE_CAT","FKTABLE_SCHEM","FKTABLE_NAME","FKCOLUMN_NAME",
+            "KEY_SEQ","UPDATE_RULE","DELETE_RULE",
+            "FK_NAME","PK_NAME","DEFERRABILITY"};
+        int [] columnTypes = {
+            Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,
+            Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,
+            Types.SMALLINT,Types.SMALLINT,Types.SMALLINT,
+            Types.VARCHAR,Types.VARCHAR,Types.SMALLINT};
+        boolean [] nullability = {true,false,false,false,
+            true,false,false,false,true,true,true,false,false,true};
+
+        String[][] expRS1 = new String[][] {
+            {"","APP","KT1","VC10","","APP","REFTAB","VC10","1","3","3","FKEY1","PRIMKEY","7"},
+            {"","APP","KT1","I","","APP","REFTAB","I","2","3","3","FKEY1","PRIMKEY","7"},
+            {"","APP","KT1","C30","","APP","REFTAB","C30","1","3","3","FKEY3","UNIQUEKEY","7"},
+            {"","APP","KT1","C30","","APP","REFTAB","C30","1","3","3","FKEY2","UNIQUEKEY","7"},
+            {"","APP","KT1","S","","APP","REFTAB","S","2","3","3","FKEY3","UNIQUEKEY","7"},
+            {"","APP","KT1","S","","APP","REFTAB","S2","2","3","3","FKEY2","UNIQUEKEY","7"},
+            {"","APP","REFTAB","DPRIM","","APP","REFTAB","DFOR","1","3","3","FKEYSELF","PKEY_REFTAB","7"}};
+        String[][] expRS2 = new String[][] {
+            {"","APP","KT1","VC10","","APP","REFTAB2","T2_VC10","1","3","3","T2_FKEY1","PRIMKEY","7"},
+            {"","APP","KT1","I","","APP","REFTAB2","T2_I","2","3","3","T2_FKEY1","PRIMKEY","7"}};               
+
+        createObjectsForKeysTests();
+        
+        DatabaseMetaData dmd = getDMD();
+        
+        // try with valid search criteria
+        // although, % may not actually be appropriate?
+        ResultSet rs = dmd.getImportedKeys("", "%", "REFTAB");
+        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
+        JDBC.assertFullResultSet(rs, expRS1, true);
+        rs = dmd.getImportedKeys("", "%", "REFTAB2");
+        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
+        JDBC.assertFullResultSet(rs, expRS2, true);
+        
+        rs = dmd.getImportedKeys(null, "APP", "REFTAB");
+        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
+        JDBC.assertFullResultSet(rs, expRS1, true);
+        rs = dmd.getImportedKeys(null, "APP", "REFTAB2");
+        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
+        JDBC.assertFullResultSet(rs, expRS2, true);
+
+        rs = dmd.getImportedKeys(null, null, "REFTAB");
+        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
+        JDBC.assertFullResultSet(rs, expRS1, true);
+
+        rs = dmd.getImportedKeys(null, "", "REFTAB");
+        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
+        JDBC.assertEmpty(rs);
+
+        // tablename may not be null
+        try {
+            rs = dmd.getImportedKeys(null, null, null);
+            fail ("table name may not be null, should've given error");
+        } catch (SQLException sqle) {
+            assertSQLState("XJ103", sqle);
+        }
+        
+        // DERBY-2610, tablename must be given as stored - % means no rows
+        rs = dmd.getImportedKeys(null, null, "%");
+        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
+        JDBC.assertEmpty(rs);
+
+        // getExportedKeys
+        expRS1 = new String[][] {
+                {"","APP","KT1","VC10","","APP","REFTAB","VC10","1","3","3","FKEY1","PRIMKEY","7"},
+                {"","APP","KT1","I","","APP","REFTAB","I","2","3","3","FKEY1","PRIMKEY","7"},
+                {"","APP","KT1","C30","","APP","REFTAB","C30","1","3","3","FKEY2","UNIQUEKEY","7"},
+                {"","APP","KT1","S","","APP","REFTAB","S2","2","3","3","FKEY2","UNIQUEKEY","7"},
+                {"","APP","KT1","C30","","APP","REFTAB","C30","1","3","3","FKEY3","UNIQUEKEY","7"},
+                {"","APP","KT1","S","","APP","REFTAB","S","2","3","3","FKEY3","UNIQUEKEY","7"},
+                {"","APP","KT1","VC10","","APP","REFTAB2","T2_VC10","1","3","3","T2_FKEY1","PRIMKEY","7"},
+                {"","APP","KT1","I","","APP","REFTAB2","T2_I","2","3","3","T2_FKEY1","PRIMKEY","7"}};
+        expRS2 = new String[][] {
+                {"","APP","REFTAB","DPRIM","","APP","REFTAB","DFOR","1","3","3","FKEYSELF","PKEY_REFTAB","7"}};
+
+        rs = dmd.getExportedKeys("", "%", "KT1");
+        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
+        JDBC.assertFullResultSet(rs, expRS1, true);
+        rs = dmd.getExportedKeys("", "%", "REFTAB");
+        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
+        JDBC.assertFullResultSet(rs, expRS2, true);
+        
+        rs = dmd.getExportedKeys(null, "APP", "KT1");
+        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
+        JDBC.assertFullResultSet(rs, expRS1, true);
+        rs = dmd.getExportedKeys(null, "APP", "REFTAB");
+        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
+        JDBC.assertFullResultSet(rs, expRS2, true);
+
+        rs = dmd.getExportedKeys(null, null, "KT1");
+        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
+        JDBC.assertFullResultSet(rs, expRS1, true);
+
+        rs = dmd.getExportedKeys(null, "", "KT1");
+        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
+        JDBC.assertEmpty(rs);
+
+        // tablename may not be null
+        try {
+            rs = dmd.getExportedKeys(null, null, null);
+            fail ("table name may not be null, should've given error");
+        } catch (SQLException sqle) {
+            assertSQLState("XJ103", sqle);
+        }
+        
+        // DERBY-2610, tablename must be given as stored - % means no rows
+        rs = dmd.getExportedKeys(null, null, "%");
+        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
+        JDBC.assertEmpty(rs);
+        
+        // getCrossReference
+        expRS1 = new String[][] {
+                {"","APP","KT1","VC10","","APP","REFTAB","VC10","1","3","3","FKEY1","PRIMKEY","7"},
+                {"","APP","KT1","I","","APP","REFTAB","I","2","3","3","FKEY1","PRIMKEY","7"},
+                {"","APP","KT1","C30","","APP","REFTAB","C30","1","3","3","FKEY2","UNIQUEKEY","7"},
+                {"","APP","KT1","S","","APP","REFTAB","S2","2","3","3","FKEY2","UNIQUEKEY","7"},
+                {"","APP","KT1","C30","","APP","REFTAB","C30","1","3","3","FKEY3","UNIQUEKEY","7"},
+                {"","APP","KT1","S","","APP","REFTAB","S","2","3","3","FKEY3","UNIQUEKEY","7"}};
+        expRS2 = new String[][] {
+                {"","APP","REFTAB","DPRIM","","APP","REFTAB","DFOR","1","3","3","FKEYSELF","PKEY_REFTAB","7"}};
+
+        // try with valid search criteria
+        rs = dmd.getCrossReference("", null, "KT1", "", null, "REFTAB");
+        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
+        JDBC.assertFullResultSet(rs, expRS1, true);
+        
+        rs = dmd.getCrossReference("", "APP", "REFTAB", "", null, "REFTAB");
+        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
+        JDBC.assertFullResultSet(rs, expRS2, true);
+
+        rs = dmd.getCrossReference("", null, "KT1", "", "APP", "REFTAB");
+        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
+        JDBC.assertFullResultSet(rs, expRS1, true);
+
+        rs = dmd.getCrossReference("", null, "REFTAB", "", "APP", "REFTAB");
+        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
+        JDBC.assertFullResultSet(rs, expRS2, true);
+
+        rs = dmd.getCrossReference(null, "APP", "KT1", null, null, "REFTAB");
+        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
+        JDBC.assertFullResultSet(rs, expRS1, true);
+
+        rs = dmd.getCrossReference(null, "APP", "REFTAB", null, null, "REFTAB");
+        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
+        JDBC.assertFullResultSet(rs, expRS2, true);
+
+        // DERBY-2758; query should return a different value for odbc vs. jdbc
+        // only experiment jdbc here, odbc is handled elsewhere.
+        rs = dmd.getCrossReference(null, "APP", "%", null, null, "%");
+        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
+        JDBC.assertEmpty(rs);
+        
+        // tablename may not be null
+        try {
+            rs = dmd.getCrossReference(null, null, null, null, null, null);
+            fail ("table name may not be null, should've given error");
+        } catch (SQLException sqle) {
+            if (usingDerbyNetClient())
+                assertSQLState("XJ110", sqle);
+            else
+                assertSQLState("XJ103", sqle);
+        }
+        // tablename may not be null
+        try {
+            rs = dmd.getCrossReference(null, null, "", null, null, null);
+            fail ("table name may not be null, should've given error");
+        } catch (SQLException sqle) {
+            if (usingDerbyNetClient())
+                assertSQLState("XJ111", sqle);
+            else
+                assertSQLState("XJ103", sqle);
+        }
+        
+        // DERBY-2610, tablename must be given as stored - % means no rows
+        rs = dmd.getCrossReference(null, null, "%", null, null, "%");
+        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
+        JDBC.assertEmpty(rs);
+        
+        rs.close();
+        
+        dropObjectsForKeysTests();
+    }
     
-    
+    /**
+     * Test referential action values; modifies database
+     * @throws SQLException 
+     */
+    public void testReferentialAction() throws SQLException
+    {
+        Statement s = createStatement();
+        DatabaseMetaData dmd = getDMD();
+
+        getConnection().setAutoCommit(false);        
+        // First, create the test table and indexes/keys
+        // note: apparently we have no test for setdefault.
+        s.execute("create table refaction1(a int not null primary key)");
+        s.execute("create table refactnone(a int references refaction1(a))");
+        s.execute("create table refactrestrict(a int references refaction1(a) on delete restrict)");
+        s.execute("create table refactnoaction(a int references refaction1(a) on delete no action)");
+        s.execute("create table refactcascade(a int references refaction1(a) on delete cascade)");
+        s.execute("create table refactsetnull(a int references refaction1(a) on delete set null)");
+        s.execute("create table refactupdrestrict(a int references refaction1(a) on update restrict)");
+        s.execute("create table refactupdnoaction(a int references refaction1(a) on update no action)");
+        
+        short restrict = DatabaseMetaData.importedKeyRestrict;
+        short no_action = DatabaseMetaData.importedKeyNoAction;
+        short cascade = DatabaseMetaData.importedKeyCascade;
+        short setnull = DatabaseMetaData.importedKeySetNull;
+        short setdefault = DatabaseMetaData.importedKeySetDefault;
+        
+        ResultSet rs = dmd.getCrossReference("","APP","REFACTION1","","APP","REFACTNONE");
+        rs.next();
+        assertEquals(no_action, rs.getShort(10));
+        assertEquals(no_action, rs.getShort(11));
+        rs = dmd.getCrossReference("","APP","REFACTION1","","APP","REFACTRESTRICT");
+        rs.next();
+        assertEquals(no_action, rs.getShort(10));
+        assertEquals(restrict, rs.getShort(11));
+        rs = dmd.getCrossReference("","APP","REFACTION1","","APP","REFACTNOACTION");
+        rs.next();
+        assertEquals(no_action, rs.getShort(10));
+        assertEquals(no_action, rs.getShort(11));
+        rs = dmd.getCrossReference("","APP","REFACTION1","","APP","REFACTCASCADE");
+        rs.next();
+        assertEquals(no_action, rs.getShort(10));
+        assertEquals(cascade, rs.getShort(11));
+        rs = dmd.getCrossReference("","APP","REFACTION1","","APP","REFACTSETNULL");
+        rs.next();
+        assertEquals(no_action, rs.getShort(10));
+        assertEquals(setnull, rs.getShort(11));
+        rs = dmd.getCrossReference("","APP","REFACTION1","","APP","REFACTUPDRESTRICT");
+        rs.next();
+        assertEquals(restrict, rs.getShort(10));
+        assertEquals(no_action, rs.getShort(11));
+        rs = dmd.getCrossReference("","APP","REFACTION1","","APP","REFACTUPDNOACTION");
+        rs.next();
+        assertEquals(no_action, rs.getShort(10));
+        assertEquals(no_action, rs.getShort(11));
+
+        rs = dmd.getImportedKeys(null, "APP", "REFACTNONE");
+        rs.next();
+        assertEquals(no_action, rs.getShort(10));
+        assertEquals(no_action, rs.getShort(11));
+        rs = dmd.getImportedKeys(null, "APP", "REFACTRESTRICT");
+        rs.next();
+        assertEquals(restrict, rs.getShort(11));
+        rs = dmd.getImportedKeys(null, "APP", "REFACTNOACTION");
+        rs.next();
+        assertEquals(no_action, rs.getShort(11));
+        rs = dmd.getImportedKeys(null, "APP", "REFACTCASCADE");
+        rs.next();
+        assertEquals(cascade, rs.getShort(11));
+        rs = dmd.getImportedKeys(null, "APP", "REFACTSETNULL");
+        rs.next();
+        assertEquals(setnull, rs.getShort(11));
+        rs = dmd.getImportedKeys(null, "APP", "REFACTUPDRESTRICT");
+        rs.next();
+        assertEquals(no_action, rs.getShort(11));
+        rs = dmd.getImportedKeys(null, "APP", "REFACTUPDNOACTION");
+        rs.next();
+        assertEquals(no_action, rs.getShort(11));
+
+        rs = dmd.getExportedKeys(null, "APP", "REFACTION1");
+        short [][] expkeyresults = {
+                {no_action, cascade},
+                {no_action, no_action},
+                {no_action, no_action},
+                {no_action, restrict},
+                {no_action, setnull},
+                {no_action, no_action},
+                {restrict, no_action}};
+        for (int i = 0 ; i < 6 ; i++)
+        {
+            rs.next();
+            assertEquals(expkeyresults[i][0], rs.getShort(10));
+            assertEquals(expkeyresults[i][1], rs.getShort(11));
+        }
+
+        s.execute("drop table refactnone");
+        s.execute("drop table refactupdrestrict");
+        s.execute("drop table refactupdnoaction");
+        s.execute("drop table refactrestrict");
+        s.execute("drop table refactnoaction");
+        s.execute("drop table refactcascade");
+        s.execute("drop table refactsetnull");
+        s.execute("drop table refaction1");
+        commit();
+        
+        rs.clearWarnings();
+        s.close();
+        
+        getConnection().setAutoCommit(true);        
+    }    
 }
