@@ -816,7 +816,7 @@ public abstract class CachedPage extends BasePage implements Cacheable
 				// page cannot be written
 				throw StandardException.newException(
                     SQLState.FILE_WRITE_PAGE_EXCEPTION, 
-                    ioe, identity, new Integer(myContainer.getPageSize()));
+                    ioe, identity);
 			}
 			finally
 			{
@@ -833,7 +833,7 @@ public abstract class CachedPage extends BasePage implements Cacheable
 			throw dataFactory.markCorrupt(
                 StandardException.newException(
                     SQLState.FILE_WRITE_PAGE_EXCEPTION, nested, 
-                    identity, new Integer(myContainer.getPageSize())));
+                    identity));
 		}
 
 		synchronized (this) 
