@@ -90,10 +90,9 @@ class SYSCOLPERMSRowFactory extends PermissionsCatalogRowFactory
 		,"80220011-010c-bc85-060d-000000109ab8" //index3
     };
 
-    SYSCOLPERMSRowFactory(UUIDFactory uuidf, ExecutionFactory ef, DataValueFactory dvf,
-                                 boolean convertIdToLower)
+    SYSCOLPERMSRowFactory(UUIDFactory uuidf, ExecutionFactory ef, DataValueFactory dvf)
 	{
-		super(uuidf,ef,dvf,convertIdToLower);
+		super(uuidf,ef,dvf);
 		initInfo(COLUMN_COUNT, TABLENAME_STRING, indexColumnPositions, indexUniqueness, uuids);
 	}
 

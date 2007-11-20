@@ -90,10 +90,9 @@ public class SYSFOREIGNKEYSRowFactory extends CatalogRowFactory
 	//
 	/////////////////////////////////////////////////////////////////////////////
 
-    public	SYSFOREIGNKEYSRowFactory(UUIDFactory uuidf, ExecutionFactory ef, DataValueFactory dvf,
-                                 boolean convertIdToLower)
+    SYSFOREIGNKEYSRowFactory(UUIDFactory uuidf, ExecutionFactory ef, DataValueFactory dvf)
 	{
-		super(uuidf,ef,dvf,convertIdToLower);
+		super(uuidf,ef,dvf);
 		initInfo(SYSFOREIGNKEYS_COLUMN_COUNT, TABLENAME_STRING, 
 				 indexColumnPositions, uniqueness, uuids );
 	}

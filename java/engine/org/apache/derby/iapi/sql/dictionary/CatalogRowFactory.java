@@ -62,7 +62,6 @@ public abstract	class CatalogRowFactory
 	private     final ExecutionFactory    ef;
 	private		UUIDFactory			uuidf;
 
-    private     boolean convertIdToLower;
     private     int indexCount;
 	private     int columnCount;
 	private     String catalogName;
@@ -75,14 +74,12 @@ public abstract	class CatalogRowFactory
 
     public CatalogRowFactory(UUIDFactory uuidf,
 							 ExecutionFactory ef,
-							 DataValueFactory dvf,
-							 boolean convertIdToLower)
+							 DataValueFactory dvf)
 								 
 	{
 		this.uuidf = uuidf;
 		this.dvf = dvf;
 		this.ef = ef;
-        this.convertIdToLower = convertIdToLower;
 	}
 
 	/**
@@ -152,7 +149,7 @@ public abstract	class CatalogRowFactory
 	 *
 	 * @return String	The name for the heap conglomerate.
 	 */
-	public String getCanonicalHeapName() { return catalogName + convertIdCase( "_HEAP"); }
+	public String getCanonicalHeapName() { return catalogName + "_HEAP"; }
 
 	/**
 	 * Get the name for the specified index number.
@@ -195,7 +192,7 @@ public abstract	class CatalogRowFactory
 	public	String	generateIndexName( int indexNumber )
 	{
 		indexNumber++;
-		return	catalogName + convertIdCase( "_INDEX") + indexNumber;
+		return	catalogName + "_INDEX" + indexNumber;
 	}
 
 	/** get the number of indexes on this catalog */
@@ -226,7 +223,7 @@ public abstract	class CatalogRowFactory
 		indexCount = (indexColumnPositions != null) ? 
 			                 indexColumnPositions.length : 0;
 
-		this.catalogName = convertIdCase(catalogName);
+		this.catalogName = catalogName;
 		this.columnCount = columnCount;
 
 		UUIDFactory	uf = getUUIDFactory();
@@ -300,15 +297,6 @@ public abstract	class CatalogRowFactory
 	{
 		return columnCount;
 	}
-
-    protected String convertIdCase( String id)
-    {
-        if( convertIdToLower)
-            return StringUtil.SQLToLowerCase(id);
-        else
-            return id;
-    }
-    
 
 	/** 
 	 * Return an empty row for this conglomerate. 

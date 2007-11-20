@@ -115,12 +115,11 @@ public class SYSSTATISTICSRowFactory extends CatalogRowFactory
 	/*
 	 *	CONSTRUCTORS
 	 */
-    public	SYSSTATISTICSRowFactory(UUIDFactory uuidf, 
+    SYSSTATISTICSRowFactory(UUIDFactory uuidf, 
 									ExecutionFactory ef, 
-									DataValueFactory dvf,
-                                    boolean convertIdToLower)
+									DataValueFactory dvf)
 	{
-		super(uuidf,ef,dvf,convertIdToLower);
+		super(uuidf,ef,dvf);
 		
 		initInfo(SYSSTATISTICS_COLUMN_COUNT, TABLENAME_STRING, 
 				 indexColumnPositions, uniqueness, uuids);

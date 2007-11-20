@@ -181,8 +181,7 @@ public class JarUtil
 		String dbcp_s = PropertyUtil.getServiceProperty(lcc.getTransactionExecute(),Property.DATABASE_CLASSPATH);
 		if (dbcp_s != null)
 		{
-			String[][]dbcp= IdUtil.parseDbClassPath(dbcp_s,
-                                                            lcc.getIdentifierCasing() != lcc.ANTI_ANSI_CASING );
+			String[][]dbcp= IdUtil.parseDbClassPath(dbcp_s);
 			boolean found = false;
 			//
 			//Look for the jar we are dropping on our database classpath.

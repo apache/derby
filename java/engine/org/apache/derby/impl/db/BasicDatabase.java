@@ -126,13 +126,10 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 	protected Object resourceAdapter;
 	private Locale databaseLocale;
 	private RuleBasedCollator ruleBasedCollator;
-	private int			spaceInt;
-	private boolean		spaceIntSet;
 	private DateFormat dateFormat;
 	private DateFormat timeFormat;
 	private DateFormat timestampFormat;
 	private UUID		myUUID;
-    private boolean normalizeToUpper = true;
 
 	protected boolean lastToBoot; // is this class last to boot
 
@@ -165,10 +162,7 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 		} else {
 			databaseLocale = monitor.getLocale(this);
 		}
-		setLocale(databaseLocale);
-
-        normalizeToUpper = true;
-        
+		setLocale(databaseLocale);      
 
 		// boot the validation needed to do property validation, now property
 		// validation is separated from AccessFactory, therefore from store
@@ -306,7 +300,7 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 		//Initialize our language connection context. Note: This is
 		//a bit of a hack. Unfortunately, we can't initialize this
 		//when we push it. We first must push a few more contexts. 
-		lctx.initialize(true);		
+		lctx.initialize();		
 
 		// Need to commit this to release locks gotten in initialize.  
 		// Commit it but make sure transaction not have any updates. 
@@ -650,7 +644,7 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 		if (newClasspath != null) {
 			// parse it when it is set to ensure only valid values
 			// are written to the actual conglomerate.
-			dbcp = IdUtil.parseDbClassPath(newClasspath, normalizeToUpper);
+			dbcp = IdUtil.parseDbClassPath(newClasspath);
 		}
 
 		//
@@ -730,9 +724,7 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 			String classpath = getClasspath(startParams);
 
 			// parse the class path and allow 2 part names.
-            boolean normalizeToUpper = true;
-			String[][] elements =
-				IdUtil.parseDbClassPath(classpath, normalizeToUpper);
+			IdUtil.parseDbClassPath(classpath);
 
 			startParams.put(Property.BOOT_DB_CLASSPATH, classpath);
 			cfDB = (ClassFactory) Monitor.bootServiceModule(create, this,

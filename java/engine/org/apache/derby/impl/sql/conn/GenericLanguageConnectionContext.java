@@ -135,8 +135,6 @@ public class GenericLanguageConnectionContext
 	private final int instanceNumber;
 	private String drdaID;
 	private String dbname;
-
-    private int identifierCasing = UNKNOWN_CASING;
     
 	/**
 	The transaction to use within this language connection context.  It may
@@ -309,16 +307,11 @@ public class GenericLanguageConnectionContext
 		triggerTables = new ArrayList();
 	}
 
-	public void initialize(boolean sqlConnection) throws StandardException
+	public void initialize() throws StandardException
 	{
 		//
 		//Creating the authorizer authorizes the connection.
-		authorizer = new GenericAuthorizer(IdUtil.getUserAuthorizationId(userName),this, sqlConnection);
-
-		//we can ignore the following if this is a database connection
-		//associated with internal thread such as logSniffer and StageTrunc
-		if(!sqlConnection)
-			return;
+		authorizer = new GenericAuthorizer(IdUtil.getUserAuthorizationId(userName),this);
 
 		/*
 		** Set the authorization id.  User shouldn't
@@ -2597,39 +2590,6 @@ public class GenericLanguageConnectionContext
 		return getTransactionExecute().isPristine();
 	}
 
-    /**
-     * Convert an identifier to the proper case for this connection. This method
-     * is here to support the Plugin.
-     *
-     * @param id an identifier string
-     * @return  the string converted to upper or lower case, as appropriate
-     *
-     * @exception StandardException thrown if something goes wrong
-     */
-    public	String convertIdentifierCase( String id) throws StandardException
-    {
-        if( ANTI_ANSI_CASING == getIdentifierCasing())
-            return StringUtil.SQLToLowerCase(id);
-        else
-            return StringUtil.SQLToUpperCase(id);
-    }
-    
-	/**
-	  *	Get casing for delimited identifiers. This feature is here to
-	  *	support the Plugin.
-	  *
-	  *	@return	ANSI_CASING or ANTI_ANSI_CASING.
-	  *
-	  * @exception StandardException thrown if something goes wrong
-	  */
-    public	int	getIdentifierCasing() throws StandardException
-	{
-        if( UNKNOWN_CASING == identifierCasing)
-        {
-            identifierCasing = ANSI_CASING;
-        }
-        return identifierCasing;
-    }
 
 	//
 	// Context interface

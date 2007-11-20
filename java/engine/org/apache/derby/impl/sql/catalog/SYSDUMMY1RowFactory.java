@@ -64,10 +64,9 @@ class SYSDUMMY1RowFactory extends CatalogRowFactory
 	 */
     SYSDUMMY1RowFactory(UUIDFactory uuidf, 
 									ExecutionFactory ef, 
-									DataValueFactory dvf,
-                                    boolean convertIdToLower)
+									DataValueFactory dvf)
 	{
-		super(uuidf,ef,dvf,convertIdToLower);
+		super(uuidf,ef,dvf);
 		
 		initInfo(SYSDUMMY1_COLUMN_COUNT, "SYSDUMMY1", 
 				 null, null, uuids);

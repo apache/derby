@@ -116,7 +116,7 @@ final class UpdateLoader {
 
 	private void initializeFromClassPath(String classpath) throws StandardException {
 
-		final String[][] elements = IdUtil.parseDbClassPath(classpath, normalizeToUpper);
+		final String[][] elements = IdUtil.parseDbClassPath(classpath);
 		
 		final int jarCount = elements.length;
 		jarList = new JarLoader[jarCount];

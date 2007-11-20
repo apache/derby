@@ -459,9 +459,10 @@ public class PropertyUtil {
 			return defaultValue;
 
 		String vS = ((String) v).trim();
-		if (StringUtil.SQLToLowerCase(vS).equals("true"))
+
+		if ("TRUE".equals(StringUtil.SQLToUpperCase(vS)))
 			return true;
-		if (StringUtil.SQLToLowerCase(vS).equals("false"))
+        if ("FALSE".equals(StringUtil.SQLToUpperCase(vS)))
 			return false;
 
 		throw StandardException.newException(SQLState.PROPERTY_INVALID_VALUE, p,vS);

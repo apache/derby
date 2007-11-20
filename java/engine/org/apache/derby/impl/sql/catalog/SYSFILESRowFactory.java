@@ -103,10 +103,9 @@ class SYSFILESRowFactory extends CatalogRowFactory
 	//
 	/////////////////////////////////////////////////////////////////////////////
 
-    SYSFILESRowFactory(UUIDFactory uuidf, ExecutionFactory ef, DataValueFactory dvf,
-                                 boolean convertIdToLower) 
+    SYSFILESRowFactory(UUIDFactory uuidf, ExecutionFactory ef, DataValueFactory dvf) 
 	{
-		super(uuidf,ef,dvf,convertIdToLower);
+		super(uuidf,ef,dvf);
 		initInfo(SYSFILES_COLUMN_COUNT, TABLENAME_STRING, 
 				 indexColumnPositions, uniqueness, uuids );
 	}

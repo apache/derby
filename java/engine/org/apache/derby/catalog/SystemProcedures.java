@@ -983,7 +983,7 @@ public class SystemProcedures  {
             
             LanguageConnectionContext lcc = ConnectionUtil.getCurrentLCC();
 
-			String[] st = IdUtil.parseQualifiedName(jar.trim(), true);
+			String[] st = IdUtil.parseMultiPartSQLIdentifier(jar.trim());
 
 			String schemaName;
 			String sqlName;
@@ -1025,7 +1025,7 @@ public class SystemProcedures  {
             
             LanguageConnectionContext lcc = ConnectionUtil.getCurrentLCC();
 
-			String[] st = IdUtil.parseQualifiedName(jar.trim(), true);
+			String[] st = IdUtil.parseMultiPartSQLIdentifier(jar.trim());
 
             String schemaName;
             String sqlName;
@@ -1065,7 +1065,7 @@ public class SystemProcedures  {
             
             LanguageConnectionContext lcc = ConnectionUtil.getCurrentLCC();
 
-			String[] st = IdUtil.parseQualifiedName(jar.trim(), true);
+			String[] st = IdUtil.parseMultiPartSQLIdentifier(jar.trim());
 
             String schemaName;
             String sqlName;

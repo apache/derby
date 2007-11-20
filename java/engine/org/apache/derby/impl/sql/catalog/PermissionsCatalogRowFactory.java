@@ -37,10 +37,9 @@ import org.apache.derby.iapi.types.StringDataValue;
 
 abstract class PermissionsCatalogRowFactory extends CatalogRowFactory
 {
-    PermissionsCatalogRowFactory(UUIDFactory uuidf, ExecutionFactory ef, DataValueFactory dvf,
-                                        boolean convertIdToLower)
+    PermissionsCatalogRowFactory(UUIDFactory uuidf, ExecutionFactory ef, DataValueFactory dvf)
     {
-        super(uuidf,ef,dvf,convertIdToLower);
+        super(uuidf,ef,dvf);
     }
 
     DataValueDescriptor getAuthorizationID( String value)

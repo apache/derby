@@ -103,10 +103,9 @@ public class SYSCONGLOMERATESRowFactory extends CatalogRowFactory
 		,"80000016-00d0-fd77-3ed8-000a0a0b1900"	// SYSCONGLOMERATES_INDEX3
 	};
 
-	SYSCONGLOMERATESRowFactory(UUIDFactory uuidf, ExecutionFactory ef, DataValueFactory dvf,
-                                 boolean convertIdToLower)
+	SYSCONGLOMERATESRowFactory(UUIDFactory uuidf, ExecutionFactory ef, DataValueFactory dvf)
 	{
-		super(uuidf,ef,dvf,convertIdToLower);
+		super(uuidf,ef,dvf);
 		initInfo(SYSCONGLOMERATES_COLUMN_COUNT, 
 				 TABLENAME_STRING, indexColumnPositions, 
 				 uniqueness, uuids );

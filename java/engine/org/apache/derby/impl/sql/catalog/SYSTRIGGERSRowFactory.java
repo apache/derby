@@ -119,10 +119,9 @@ public class SYSTRIGGERSRowFactory extends CatalogRowFactory
 	//	CONSTRUCTORS
 	//
 	/////////////////////////////////////////////////////////////////////////////
-	public	SYSTRIGGERSRowFactory(UUIDFactory uuidf, ExecutionFactory ef, DataValueFactory dvf,
-                                  boolean convertIdToLower)
+	SYSTRIGGERSRowFactory(UUIDFactory uuidf, ExecutionFactory ef, DataValueFactory dvf)
 	{
-		super(uuidf,ef,dvf,convertIdToLower);
+		super(uuidf,ef,dvf);
 		initInfo(SYSTRIGGERS_COLUMN_COUNT, TABLENAME_STRING, 
 				 indexColumnPositions,  uniqueness, uuids);
 	}
