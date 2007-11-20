@@ -167,6 +167,8 @@
                   fullpath="${derby.bin}/demo/templates/server.policy"/>
       <zipfileset dir="${basedir}/classes" includes="SimpleApp.class"
                   prefix="${derby.bin}/demo/programs/simple"/>
+      <zipfileset dir="${basedir}/classes" includes="SimpleMobileApp.class"
+                  prefix="${derby.bin}/demo/programs/simplemobile"/>            
       <zipfileset dir="${basedir}/classes" includes="SimpleNetwork*.class"
                   prefix="${derby.bin}/demo/programs/nserverdemo"/>
       <zipfileset dir="${basedir}/classes/nserverdemo" includes="*.class"
@@ -216,6 +218,8 @@
                   fullpath="${derby.bin}/demo/templates/server.policy"/>
       <tarfileset dir="${basedir}/classes" includes="SimpleApp.class"
                   prefix="${derby.bin}/demo/programs/simple"/>
+      <tarfileset dir="${basedir}/classes" includes="SimpleMobileApp.class"
+                  prefix="${derby.bin}/demo/programs/simplemobile"/>
       <tarfileset dir="${basedir}/classes" includes="SimpleNetwork*.class"
                   prefix="${derby.bin}/demo/programs/nserverdemo"/>
       <tarfileset dir="${basedir}/classes/nserverdemo" includes="*.class"

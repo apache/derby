@@ -1,0 +1,330 @@
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <meta name="LASTUPDATED" content="2007-11-09 16:00:00 CET">
+    <link rel="StyleSheet" href="../csfull.css" type="text/css" media="screen">
+    <title>Simple Java ME Database Application</title>
+  </head>
+  <body>
+    <h1 class="Title">Simple Java ME Database Application</h1>
+    <p class="Body">
+      More Derby demos and sample programs are available from <a href="../readme.html" target="_top">../readme.html</a>   
+    </p>
+    <ul class="ChapterTOC">
+        <li class="ChapterTOC"><a href="#overview">Overview</a></li>
+        <li class="ChapterTOC"><a href="#requirements">Requirements</a></li>
+        <li class="ChapterTOC"><a href="#included">What's Included?</a></li>
+        <li class="ChapterTOC"><a href="#run">How to run this sample application</a></li>
+        <li class="ChapterTOC"><a href="#results">Results</a></li>
+        <li class="ChapterTOC"><a href="#modify">How to modify this sample application</a></li>
+    </ul>
+    
+    <!-- ###############  OVERVIEW  ############### -->
+    <h2 class="Heading2"><a name="overview">Overview</a></h2>
+    <p class="Body">
+      This document describes <em class="fileName">SimpleMobileApp</em>, an 
+      example of a small Java application using JDBC to create and
+      work with a Derby database. The demo is designed to run on small devices such
+      as advanced cell phones or smart phones. Such devices must include support
+      for the Java Platform, Micro Edition (Java ME, previously known as J2ME) 
+      CDC/Foundation Profile; see 
+      <a href="#requirements">specific requirements below</a>. This program:
+    </p>
+    <ul class="Normal">  
+      <li class="Normal">runs on Java ME or SE Virtual Machines</li>
+      <li class="Normal">runs Derby in embedded mode (the database engine runs in the same JVM as the program)</li>
+      <li class="Normal">creates an appropriate data source for connecting to Derby</li>
+      <li class="Normal">creates a new database</li>
+      <li class="Normal">creates a table in the database</li>
+      <li class="Normal">inserts some data</li>
+      <li class="Normal">updates some data</li>
+      <li class="Normal">selects data, then verifies some of it</li>
+      <li class="Normal">drops the table</li>
+      <li class="Normal">disconnects</li>
+      <li class="Normal">shuts down the database</li>
+    </ul>
+    <p class="Body">
+      Inspect the source code (<em class="fileName">SimpleMobileApp.java</em>) to
+      see how this demo application actually works.
+    </p>
+    
+    
+    <!-- ###############  REQUIREMENTS  ############### -->
+    <h2 class="Heading2"><a name="requirements">Requirements</a></h2>
+    <p class="Body">
+      In order to run this demo, you need a Java Runtime Environment with access
+      to the compiled class (<em class="fileName">SimpleMobileApp.class</em>)
+      and the Derby embedded driver jar file (<em class="fileName">derby.jar</em>).
+    </p>
+    <p>
+      This demo is designed to demonstrate database access from a mobile Java environment.
+      If you are using a Java ME (J2ME) Virtual Machine, and Derby version 10.3 or newer,
+      the following minimum requirements must be met:
+    </p>
+    <ul>
+      <li>Connected Device Configuration (CDC) 1.1 (JSR-218)</li>
+      <li>Foundation Profile 1.1 (JSR-219)</li>
+      <li>JDBC Optional package (JSR-169) for Java ME platforms</li>
+    </ul>
+    <p>
+      If you are using a Java SE Virtual Machine and the pre-compiled version
+      of this demo, and/or Derby 10.3 or newer, your JVM must support Java version
+      1.4.2 or newer.
+    </p>
+    
+    <!-- ###############  CONVENTIONS  ############### -->
+    <h2 class="Heading2"><a name="conventions">Conventions</a></h2>
+    <p class="Body">
+      Conventions used in this document:
+    </p>
+    <ul>
+      <li>
+        <p class="BodyRelative">
+          <strong>File paths</strong> use forward slash (/) as the file separator, 
+          as used in UNIX-like operating systems. You will have to substitute this 
+          for the file separator used by your operating system if this is different
+          from the forward slash.
+        </p>
+        <p class="BodyRelative">
+          For example, if the path to a file is described as <em class="fileName">derby/lib/derby.jar</em>,
+          this would correspond to <em class="fileName">derby\lib\derby.jar</em>
+          on a Microsoft Windows operating system.
+        </p>
+      </li>
+      <li>
+        <p class="BodyRelative">
+          The notation used for <strong>environment variables</strong> is the UNIX standard
+          notation in most shells, that is $VARIABLE for the variable named VARIABLE. 
+          On Microsoft Windows operating systems, $VARIABLE must be replaced with %VARIABLE%. 
+          For example, replace <em class="fileName">$DERBY_HOME/lib/derby.jar</em> with
+            <em class="fileName">%DERBY_HOME%\lib\derby.jar</em> on Windows XP.
+        </p>
+        <p class="BodyRelative">
+          To check the value of a given environment variable, use the echo command in
+          a command window, for example:
+        </p>
+        <p class="CommandLine">
+          echo $DERBY_HOME
+        </p>
+        <p class="BodyRelative">or</p>
+        <p class="CommandLine">
+          echo %DERBY_HOME%
+        </p>
+      </li>
+    </ul>
+    
+    <!-- ###############  WHAT'S INCLUDED  ############### -->
+    <h2 class="Heading2"><a name="included">What's Included?</a></h2>
+    <p class="Body">
+      Before running this demo, you should see the following files and directories
+      in the <em class="fileName">$DERBY_HOME/demo/programs/simplemobile/</em> directory:
+    </p>
+    <ul class="Normal">
+      <li class="Normal"><em class="fileName">readme.html</em>
+        <p class="BodyRelative">
+          This file.
+        </p>
+      </li>
+      <li class="Normal"><em class="fileName"><a href="SimpleMobileApp.java" target="_top">SimpleMobileApp.java</a></em>
+        <p class="BodyRelative">
+          Source code for this sample program. Examine this
+          file to see how the application works.
+        </p>
+      </li>
+      <li class="Normal"><em class="fileName">SimpleMobileApp.class</em>
+        <p class="BodyRelative">
+          The compiled class file, runnable in a supported Java Virtual Machine.
+        </p>
+      </li>
+    </ul>
+
+    <!-- ###############  HOW TO RUN  ############### -->
+    <h2 class="Heading2"><a name="run">How to run this sample application</a></h2>
+    <p>
+      Unless noted otherwise, the example commands shown are (UNIX) bash shell commands. 
+      See <a href="#conventions">conventions used in this document</a> for details on
+      how to adapt the example commands to other systems.
+    </p>
+    <ol class="decimal">
+      <li class="Normal"><strong>Open a new terminal/shell/console/command window.</strong></li>
+      <li class="Normal">
+        <p class="BodyRelative"><strong>If you haven't set it already on a system-wide basis, set the DERBY_HOME 
+        environment variable to the location of the directory where you installed Derby.</strong></p>
+        <p class="BodyRelative">Example - UNIX, bash:</p>
+        <p class="CommandLine">
+          export DERBY_HOME=/home/user/derby/derby-bin-install
+        </p>
+        <p class="BodyRelative">Example - Windows XP:</p>
+        <p class="CommandLine">
+          set DERBY_HOME=c:\derby\derby-bin-install
+        </p>
+      </li>
+      <li class="Normal"><strong>Change directories to the <em class="fileName">$DERBY_HOME/demo/programs/simplemobile</em> directory.</strong>
+        <p class="CommandLine">
+          cd $DERBY_HOME/demo/programs/simplemobile/
+        </p>
+      </li>
+      <li class="Normal"><strong>In the command window, set the CLASSPATH to include 
+        the current directory (containing <em class="fileName">SimpleMobileApp.class</em>)
+        and derby.jar.</strong>
+        <p class="BodyRelative">Example - UNIX, bash:</p>
+        <p class="CommandLine">
+          export CLASSPATH=.:$DERBY_HOME/lib/derby.jar
+        </p>
+        <p class="BodyRelative">Example - Windows XP:</p>
+        <p class="CommandLine">
+          set CLASSPATH=.;%DERBY_HOME%\lib\derby.jar
+        </p>
+        <p class="BodyRelative">
+          Note that some JVMs do not read the value of the CLASSPATH environment
+          variable. If that is the case with your JVM, you must specify the 
+          classpath as part of the JVM launch command used in the next step. 
+          Refer to your JVM's documentation for details.          
+        </p>
+      </li>
+      <li class="Normal"><strong>Execute the application.</strong>
+        <p class="CommandLine">
+          &lt;vmExecutable&gt; SimpleMobileApp
+        </p>
+        <p class="BodyRelative">
+          Replace &lt;vmExecutable&gt; with the appropriate launch command (including
+          any necessary options) for your JVM. Here is an example showing how to
+          execute the demo with a phoneME Advanced JVM without built-in support
+          for JDBC/JSR-169, in a linux environment:
+        </p>
+        <p class="CommandLine">
+          cvm -Xbootclasspath/a:$JDBC_JARS/jsr169.jar -cp $CLASSPATH SimpleMobileApp
+        </p>
+      </li>
+    </ol>
+    
+    <!-- ###############  RESULTS  ############### -->
+    <h2 class="Heading2"><a name="results">Results</a></h2>
+    <h3 class="heading4">Console output:</h3>
+    <blockquote class="Output">
+        SimpleMobileApp started<br>
+        Connected to and created database simpleMobileDB<br>
+        Created table streetaddr<br>
+        Inserted 1956 Webster<br>
+        Inserted 1910 Union<br>
+        Updated 1956 Webster to 180 Grand<br>
+        Updated 180 Grand to 300 Lakeshore<br>
+        Verified the rows<br>
+        Dropped table streetaddr<br>
+        simpleMobileDB shut down successfully<br>
+        SimpleMobileApp finished<br>
+    </blockquote>
+    <p class="Body">
+        If any of the <a href="#requirements">requirements</a> are not fulfilled, the application
+        may fail with an error message. If you are unable to resolve this error, ask for
+        help on the derby-user <a href="http://db.apache.org/derby/derby_mail.html" target="_new">mailing list</a>.
+    </p>
+    
+    <h3 class="heading4">New files:</h3>
+    <p class="Body">
+      After running the demo, you will see some new files and directories in 
+      <em class="fileName">$DERBY_HOME/demo/programs/simplemobile/</em>:
+    </p>
+    <ul class="Normal">
+      <li class="Normal"><em class="fileName">simpleMobileDB</em> (directory)
+        <p class="BodyRelative">
+          The directory that makes up the <em class="fileName">simpleMobileDB</em> database. 
+          If you intend to use this database again, you must not modify anything in 
+          this directory, or you will corrupt the database. 
+          The directory was created when the application connected with Derby, 
+          having set the DataSource property for creating a database. The database name, 
+          <em class="Emphasis">simpleMobileDB</em>, was also set as the value of a 
+          DataSource property. 
+        </p>
+        <ul class="Normal">
+          <li class="Normal"><em class="fileName">simpleMobileDB/log</em> (directory)
+            <p class="BodyRelative">
+              The directory that holds the database transaction logs for the 
+              <em class="fileName">simeplMobileDB</em> database. 
+            </p>
+          </li>
+          <li class="Normal"><em class="fileName">simpleMobileDB/seg0</em> (directory)
+            <p class="BodyRelative">
+              The directory that holds the data for the <em class="fileName">simpleMobileDB</em> database.
+            </p>
+          </li>
+          <li class="Normal"><em class="fileName">simpleMobileDB/service.properties</em>
+            <p class="BodyRelative">
+              An internal file that holds boot-time configuration parameters for the 
+              <em class="fileName">simpleMobileDB</em> database; do not edit.
+            </p>
+          </li>
+        </ul>
+      </li>
+      <li class="Normal"><em class="fileName">derby.log</em>
+        <p class="BodyRelative">
+          The log file with Derby progress and error messages.
+        </p>
+      </li>
+    </ul>
+    <p class="Body">
+      Note that since the application normally drops (deletes) the table
+      it created when done processing the data, the database will be empty when
+      the application has finsished running. To view or modify the contents of the
+      database yourself, <a href="#modify">modify the application</a> accordingly.
+    </p>
+
+    <h3 class="heading4">Cleaning up:</h3>
+    <p class="Body">
+      To delete the files created by running the demo application, simply delete
+      the database directory (<em class="fileName">simpleMobileDB</em>) and the
+      Derby log file (<em class="fileName">derby.log</em>). These files should be 
+      located in the directory from which you executed the demo program, normally
+      <em class="fileName">$DERBY_HOME/demo/programs/simpledemo/</em>.
+    </p>
+  
+  <!-- ###############  HOW TO MODIFY  ############### -->
+  <h2 class="Heading2"><a name="modify">How to modify this sample application</a></h2>
+  <p class="Body">
+    To change the behavior of this demo, for example if you want the program not
+    to delete the table when data processing has finished, you may do the following:
+  </p>
+  <ol class="decimal">
+    <li class="Normal"><strong>Open the source file (<em class="fileName">SimpleMobileApp.java</em>)
+      in your favorite Java source editor.</strong>
+      <p class ="BodyRelative">(You may want to create a backup copy of the source file before continuing.)</p>
+    </li>
+    <li class="Normal">
+      <p class="BodyRelative"><strong>Modify the Java source according to your desires, 
+        then save the file.</strong></p>
+    <li class="Normal"><strong>Compile the modified source.</strong> 
+      Make sure that the generated class file is supported by your runtime environment 
+      (for example, CDC 1.1 is based on J2SE 1.4). You also need to include
+      <em class="fileName">derby.jar</em> in the compiler's classpath.
+      <p class="BodyRelative">Example - UNIX, bash - JDK 6:</p>
+      <p class="CommandLine">
+        javac -source 1.4 -target 1.4 -classpath $DERBY_HOME/lib/derby.jar SimpleMobileApp.java
+      </p>
+    </li>
+  </ol>
+  <p class="Body">A new version of the demo, <em class="fileName">SimpleMobileApp.class</em>,
+  is now ready for use.</p>
+  
+  <hr>
+  <!-- ###############  VERSION INFO  ############### -->
+  <p class=NavBarVersion>Last updated for Apache Derby Version 10.3.2</p>
+
+</body>
+</html>
