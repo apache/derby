@@ -53,7 +53,7 @@ public class AuthenticationTest extends BaseJDBCTestCase {
     private static final String PASSWORD_SUFFIX = "suf2ix";
     private static final String USERS[] = 
         {"APP","dan","kreg","jeff","ames","jerry","francois","jamie","howardR",
-        "\"eVe\""};
+        "\"eVe\"","\"fred@derby.com\"", "\"123\"" };
 
     private static final String zeus = "\u0396\u0395\u03A5\u03A3";
     private static final String apollo = "\u0391\u09A0\u039F\u039B\u039B\u039A\u0390";
@@ -135,20 +135,22 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         suite.addTest(new SystemPropertyTestSetup (test, sysprops));
     }
     
-    public void tearDown() throws Exception {
-        try {
-            AccessController.doPrivileged
-            (new java.security.PrivilegedAction(){
-                public Object run(){
-                    System.getProperties().remove(
-                        "derby.connection.requireAuthentication");
-                    return 
-                        System.getProperties().remove("derby.user." +apollo);
-                }
-            });
-        } catch (Exception e) {
-            fail("failed to unset properties");
-        }
+    protected void setUp() throws Exception {
+        
+        setDatabaseProperty("derby.database.defaultConnectionMode",
+                null, getConnection());
+        setDatabaseProperty("derby.database.readOnlyAccessUsers",
+                null, getConnection());
+        setDatabaseProperty("derby.database.fullAccessUsers",
+                null, getConnection());
+        
+        commit();
+        
+    }
+    
+    protected void tearDown() throws Exception {
+        removeSystemProperty("derby.connection.requireAuthentication");
+        removeSystemProperty("derby.user." +apollo);
         super.tearDown();
     }
     
@@ -244,7 +246,7 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         // DatabaseMetaData.getUserName() returns the user name used
         // to make the request via JDBC.
         assertEquals("DatabaseMetaData.getUserName()",
-                jdbcUserName, connUser.getMetaData().getUserName());
+                jdbcUserName, connUser.getMetaData().getUserName());       
         
         JDBC.cleanup(connUser);
     }
