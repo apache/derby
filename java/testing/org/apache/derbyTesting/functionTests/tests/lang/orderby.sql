@@ -733,4 +733,23 @@ select id, c8_date from d2887_types order by c8_date desc nulls first;
 
 drop table d2887_types;
 
+-- DERBY-2352 involved a mismatch between the return type of the SUBSTR
+-- method and the expected type of the result column. During compilation,
+-- bind processing was computing that the SUBSTR would return a CHAR, but
+-- at execution time it actually returned a VARCHAR, resulting in a type
+-- mismatch detected by the sorter. Since the TRIM functions are very
+-- closely related to the SUBSTR function, we include a few tests of
+-- those functions in the test case.
+
+create table d2352 (c int);
+insert into d2352 values (1), (2), (3);
+select substr('abc', 1) from d2352 order by substr('abc', 1);
+select substr('abc', 1) from d2352 group by substr('abc', 1);
+select ltrim('abc') from d2352 order by ltrim('abc');
+select ltrim('abc') from d2352 group by ltrim('abc');
+select trim(trailing ' ' from 'abc') from d2352
+       order by trim(trailing ' ' from 'abc');
+select trim(trailing ' ' from 'abc') from d2352
+       group by trim(trailing ' ' from 'abc');
+drop table d2352;
 

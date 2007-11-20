@@ -28,22 +28,17 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.Visitable;
 import org.apache.derby.iapi.sql.compile.Visitor;
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.store.access.Qualifier;
 import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.sql.compile.TypeCompiler;
-import org.apache.derby.iapi.types.NumberDataValue;
 import org.apache.derby.iapi.types.StringDataValue;
 import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 
-import org.apache.derby.iapi.store.access.Qualifier;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 
-import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
 import org.apache.derby.iapi.util.JBitSet;
 import org.apache.derby.iapi.util.ReuseFactory;
 
@@ -765,7 +760,7 @@ public class TernaryOperatorNode extends ValueNode
 			throws StandardException
 	{
 		TypeId	receiverType;
-		TypeId	resultType;
+		TypeId	resultType = TypeId.getBuiltInTypeId(Types.VARCHAR);
 
 		// handle parameters here
 
@@ -813,7 +808,7 @@ public class TernaryOperatorNode extends ValueNode
 		** Check the type of the receiver - this function is allowed only on
 		** string value types.  
 		*/
-		resultType = receiverType = receiver.getTypeId();
+		receiverType = receiver.getTypeId();
 		switch (receiverType.getJDBCTypeId())
 		{
 			case Types.CHAR:
@@ -825,6 +820,15 @@ public class TernaryOperatorNode extends ValueNode
 			{
 				throwBadType("SUBSTR", receiverType.getSQLTypeName());
 			}
+		}
+		if ((receiverType.getTypeFormatId() == StoredFormatIds.CLOB_TYPE_ID) ||
+		   (receiverType.getTypeFormatId() == StoredFormatIds.NCLOB_TYPE_ID)) {
+		// special case for CLOBs: if we start with a CLOB, we have to get
+		// a CLOB as a result (as opposed to a VARCHAR), because we can have a 
+		// CLOB that is beyond the max length of VARCHAR (ex. "clob(100k)").
+		// This is okay because CLOBs, like VARCHARs, allow variable-length
+		// values (which is a must for the substr to actually work).
+			resultType = receiverType;
 		}
 
 		// Determine the maximum length of the result
