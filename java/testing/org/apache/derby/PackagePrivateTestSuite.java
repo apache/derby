@@ -29,7 +29,7 @@ public class PackagePrivateTestSuite
     extends BaseTestCase {
 
     /**
-     * Use the {@link suite}  method instead.
+     * Use the {@link #suite} method instead.
      */
     private PackagePrivateTestSuite(String name) {
         super(name);
