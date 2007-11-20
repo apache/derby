@@ -343,19 +343,6 @@ public class StringUtil
 			return s.toUpperCase(Locale.ENGLISH);
 	}
 
-
-	/** Convert string to lowercase
-	 *  Return java.util.Locale.ENGLISH lowercasing
-	 * @param s string to lowercase
-	 * @return lowercased string
-	 */
-	public static String SQLToLowerCase(String s)
-	{
-		return s.toLowerCase(Locale.ENGLISH);
-
-	}
-
-
 	/** Compares two strings 
 	 * Strings will be uppercased in english and compared
 	 * equivalent to s1.equalsIgnoreCase(s2)

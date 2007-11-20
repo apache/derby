@@ -202,6 +202,99 @@ public class AuthenticationTest extends BaseJDBCTestCase {
             }
             
         }
+        
+        // Now test that setting the user connection authorizaton
+        // with the various names works correctly. Use the first user
+        // to set the access on others to avoid setting a user to read-only
+        // and then not being able to reset it.
+        
+        PreparedStatement psGetAccess = prepareStatement(
+            "VALUES SYSCS_UTIL.SYSCS_GET_USER_ACCESS(?)");
+        CallableStatement csSetAccess = prepareCall(
+            "CALL SYSCS_UTIL.SYSCS_SET_USER_ACCESS(?, ?)"); 
+        
+        setDatabaseProperty("derby.database.fullAccessUsers",
+                USERS[0], getConnection());
+        setDatabaseProperty("derby.database.readOnlyAccessUsers",
+                null, getConnection());
+        commit();
+        
+        // Yes - skip the first user, see above.
+        for (int i = 1; i < USERS.length; i++)
+        {          
+            String jdbcUserName = USERS[i];
+            boolean delimited = jdbcUserName.charAt(0) == '"';
+            String normalUserName;
+            if (delimited)
+            {
+                normalUserName = jdbcUserName.substring(1,
+                        jdbcUserName.length() - 1);          
+            }
+            else
+            {
+                normalUserName = jdbcUserName.toUpperCase(Locale.ENGLISH);
+            }
+             
+            String password = USERS[i] + PASSWORD_SUFFIX;
+            
+            // Set the access with the database property
+            setDatabaseProperty("derby.database.readOnlyAccessUsers",
+                    jdbcUserName, getConnection());
+            commit();
+            
+            
+            Connection connUser = openDefaultConnection(jdbcUserName, password);
+            
+            // DERBY-2738 (network client always returns false for isReadOnly)
+            if (usingEmbedded())
+                assertTrue(jdbcUserName + ":isReadOnly()",
+                    connUser.isReadOnly());
+            
+            
+            connUser.close();
+            
+            psGetAccess.setString(1, normalUserName);
+            //JDBC.assertSingleValueResultSet(psGetAccess.executeQuery(),
+            //        "READONLYACCESS");
+            commit();
+            
+            // clear the property.
+            setDatabaseProperty("derby.database.readOnlyAccessUsers",
+                    null, getConnection());
+            commit();
+            
+            // Test it was reset back
+            connUser = openDefaultConnection(jdbcUserName, password);
+            assertFalse(connUser.isReadOnly());
+            connUser.close(); 
+            
+            psGetAccess.setString(1, normalUserName);
+            //JDBC.assertSingleValueResultSet(psGetAccess.executeQuery(),
+            //        "FULLACCESS");
+            commit();
+            
+            
+            // Set to be read-only via the procedure which uses
+            // the normal user name.
+            csSetAccess.setString(1, normalUserName);
+            csSetAccess.setString(2, "READONLYACCESS");
+            csSetAccess.executeUpdate();
+            commit();
+            
+            connUser = openDefaultConnection(jdbcUserName, password);
+            // DERBY-2738 (network client always returns false for isReadOnly)
+            if (usingEmbedded())
+                assertTrue(jdbcUserName + ":isReadOnly()",
+                    connUser.isReadOnly());
+
+            connUser.close();
+            
+            psGetAccess.setString(1, normalUserName);
+            //JDBC.assertSingleValueResultSet(psGetAccess.executeQuery(),
+            //        "READONLYACCESS");
+            commit();           
+
+        }
     }
     
     /**
