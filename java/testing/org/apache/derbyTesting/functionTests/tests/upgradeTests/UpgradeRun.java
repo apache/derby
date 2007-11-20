@@ -236,14 +236,15 @@ class UpgradeRun {
     
     /**
      * Get the location of jars of old release. The location is specified 
-     * in the property derbyTesting.oldReleasePath.
+     * in the property derbyTesting.oldReleasePath. If derbyTesting.oldReleasePath
+     * is set to the empty string it is ignored.
      *  
      * @return location of jars of old release
      */
     private static String getOldJarLocation(int[] oldVersion) {
         String jarPath = System.getProperty(_Suite.OLD_RELEASE_PATH_PROPERTY);
       
-        if (jarPath == null)
+        if (jarPath == null || jarPath.length() == 0)
             return null;
         
         String version = getTextVersion(oldVersion);
