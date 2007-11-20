@@ -1553,48 +1553,52 @@ public class SystemProcedures  {
     /**
      * Set the connection level authorization for
      * a specific user - SYSCS_UTIL.SYSCS_SET_USER_ACCESS.
+     * 
+     * @param userName name of the user in its normal form (not a SQL identifier).
+     * @param connectionPermission
      * @throws SQLException Error setting the permission
      */
     public static void SYSCS_SET_USER_ACCESS(String userName,
             String connectionPermission)
         throws SQLException
     {
-        try {
-            // Validate the name, however the name stored in 
-            // the properties is in the external format, as a
-            // quoted identifier if required. The external form
-            // is what the user passes into this method so that
-            // gets used in modifying the lists.
-            IdUtil.getUserAuthorizationId(userName);
+         try {
+            
+            if (userName == null)
+                 throw StandardException.newException(SQLState.AUTH_INVALID_USER_NAME,
+                         userName);
             
             String addListProperty;
             if (Property.FULL_ACCESS.equals(connectionPermission))
             {
-                removeFromAccessList(Property.READ_ONLY_ACCESS_USERS_PROPERTY,
-                        userName);
                 addListProperty = Property.FULL_ACCESS_USERS_PROPERTY;
             }
             else if (Property.READ_ONLY_ACCESS.equals(connectionPermission))
-            {
-                removeFromAccessList(Property.FULL_ACCESS_USERS_PROPERTY,
-                        userName);                
+            {               
                 addListProperty = Property.READ_ONLY_ACCESS_USERS_PROPERTY;
             }
             else if (connectionPermission == null)
             {
-                removeFromAccessList(Property.FULL_ACCESS_USERS_PROPERTY,
-                        userName);
-                removeFromAccessList(Property.READ_ONLY_ACCESS_USERS_PROPERTY,
-                        userName);
-                return;
+                // Remove from the lists but don't add back into any.
+                addListProperty = null;
             }
             else
                 throw StandardException.newException(SQLState.UU_UNKNOWN_PERMISSION,
                         connectionPermission);
+
+            // Always remove from both lists to avoid any repeated
+            // user on list errors.
+            removeFromAccessList(Property.FULL_ACCESS_USERS_PROPERTY,
+                    userName);
+            removeFromAccessList(Property.READ_ONLY_ACCESS_USERS_PROPERTY,
+                    userName);
             
-            String addList = SYSCS_GET_DATABASE_PROPERTY(addListProperty);
-            SYSCS_SET_DATABASE_PROPERTY(addListProperty,
-                IdUtil.appendId(userName, addList));
+            
+            if (addListProperty != null) {
+                String addList = SYSCS_GET_DATABASE_PROPERTY(addListProperty);
+                SYSCS_SET_DATABASE_PROPERTY(addListProperty,
+                    IdUtil.appendNormalToList(userName, addList));
+            }
             
         } catch (StandardException se) {
             throw PublicAPI.wrapStandardException(se);
