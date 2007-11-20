@@ -241,6 +241,11 @@ public class AuthenticationTest extends BaseJDBCTestCase {
     {
         assertNormalUserName(normalUserName, connUser);
         
+        // DatabaseMetaData.getUserName() returns the user name used
+        // to make the request via JDBC.
+        assertEquals("DatabaseMetaData.getUserName()",
+                jdbcUserName, connUser.getMetaData().getUserName());
+        
         JDBC.cleanup(connUser);
     }
     
@@ -253,10 +258,7 @@ public class AuthenticationTest extends BaseJDBCTestCase {
      */
     private void assertNormalUserName(String normalUserName, Connection connUser)
         throws SQLException
-    {
-        //assertEquals("DatabaseMetaData.getUserName",
-        //        normalUserName, connUser.getMetaData().getUserName());
-        
+    {      
         Statement s = connUser.createStatement();
         
         JDBC.assertSingleValueResultSet(s.executeQuery("VALUES CURRENT_USER"),
