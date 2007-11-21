@@ -23,22 +23,17 @@ package org.apache.derby.impl.store.raw.data;
 
 import org.apache.derby.iapi.reference.SQLState;
 
-import org.apache.derby.impl.store.raw.data.BasePage;
-
 import org.apache.derby.iapi.store.raw.log.LogInstant;
-import org.apache.derby.iapi.store.raw.ContainerHandle;
 import org.apache.derby.iapi.store.raw.PageKey;
 
 import org.apache.derby.iapi.services.cache.Cacheable;
 import org.apache.derby.iapi.services.cache.CacheManager;
-import org.apache.derby.iapi.services.context.ContextService;
 
 import org.apache.derby.iapi.services.monitor.Monitor;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.services.io.FormatIdUtil;
-import org.apache.derby.iapi.services.io.StoredFormatIds;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.error.ExceptionSeverity;
@@ -768,72 +763,70 @@ public abstract class CachedPage extends BasePage implements Cacheable
 		FileContainer myContainer = 
             (FileContainer) containerCache.find(identity.getContainerId());
 
-		if (myContainer != null) 
-        {
-			try 
-            {
-				myContainer.writePage(
-                    identity.getPageNumber(), pageData, syncMe);
-
-				//
-				// Do some in memory unlogged bookkeeping tasks while we have
-				// the container. 
-				//
-
-				if (!isOverflowPage() && isDirty())
-				{
-
-					// let the container knows whether this page is a not 
-                    // filled, non-overflow page
-					myContainer.trackUnfilledPage(
-                        identity.getPageNumber(), unfilled());
-
-					// if this is not an overflow page, see if the page's row
-					// count has changed since it come into the cache.
-					//
-					// if the page is not invalid, row count is 0.  Otherwise,
-					// count non-deleted records on page.
-					//
-					// Cannot call nonDeletedRecordCount because the page is
-					// unlatched now even though nobody is changing it
-					int currentRowCount = internalNonDeletedRecordCount();
-
-					if (currentRowCount != initialRowCount)
-					{
-						myContainer.updateEstimatedRowCount(
-                            currentRowCount - initialRowCount);
-
-						setContainerRowCount(
-                            myContainer.getEstimatedRowCount(0));
-
-						initialRowCount = currentRowCount;
-					}
-				}
-
-			} 
-            catch (IOException ioe) 
-            {
-				// page cannot be written
-				throw StandardException.newException(
-                    SQLState.FILE_WRITE_PAGE_EXCEPTION, 
-                    ioe, identity);
-			}
-			finally
-			{
-				containerCache.release(myContainer);
-				myContainer = null;
-			}
-		} 
-		else
+		if (myContainer == null)
 		{
-			StandardException nested = 
-                StandardException.newException(
-                    SQLState.DATA_CONTAINER_VANISHED, 
-                    identity.getContainerId());
+			StandardException nested =
+				StandardException.newException(
+					SQLState.DATA_CONTAINER_VANISHED,
+					identity.getContainerId());
 			throw dataFactory.markCorrupt(
-                StandardException.newException(
-                    SQLState.FILE_WRITE_PAGE_EXCEPTION, nested, 
-                    identity));
+				StandardException.newException(
+					SQLState.FILE_WRITE_PAGE_EXCEPTION, nested,
+					identity));
+		}
+
+		try
+		{
+			myContainer.writePage(
+				identity.getPageNumber(), pageData, syncMe);
+
+			//
+			// Do some in memory unlogged bookkeeping tasks while we have
+			// the container.
+			//
+
+			if (!isOverflowPage() && isDirty())
+			{
+
+				// let the container knows whether this page is a not
+				// filled, non-overflow page
+				myContainer.trackUnfilledPage(
+					identity.getPageNumber(), unfilled());
+
+				// if this is not an overflow page, see if the page's row
+				// count has changed since it come into the cache.
+				//
+				// if the page is not invalid, row count is 0.	Otherwise,
+				// count non-deleted records on page.
+				//
+				// Cannot call nonDeletedRecordCount because the page is
+				// unlatched now even though nobody is changing it
+				int currentRowCount = internalNonDeletedRecordCount();
+
+				if (currentRowCount != initialRowCount)
+				{
+					myContainer.updateEstimatedRowCount(
+						currentRowCount - initialRowCount);
+
+					setContainerRowCount(
+						myContainer.getEstimatedRowCount(0));
+
+					initialRowCount = currentRowCount;
+				}
+			}
+
+		}
+		catch (IOException ioe)
+		{
+			// page cannot be written
+			throw StandardException.newException(
+				SQLState.FILE_WRITE_PAGE_EXCEPTION,
+				ioe, identity);
+		}
+		finally
+		{
+			containerCache.release(myContainer);
+			myContainer = null;
 		}
 
 		synchronized (this) 
