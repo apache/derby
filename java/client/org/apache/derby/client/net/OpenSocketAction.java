@@ -41,7 +41,12 @@ public class OpenSocketAction implements java.security.PrivilegedExceptionAction
         throws java.net.UnknownHostException, 
                java.io.IOException,
                java.security.NoSuchAlgorithmException,
-               java.security.KeyManagementException {
+               java.security.KeyManagementException,
+               java.security.NoSuchProviderException,
+               java.security.KeyStoreException,
+               java.security.UnrecoverableKeyException,
+               java.security.cert.CertificateException
+    {
         
         SocketFactory sf;
         switch (clientSSLMode_) {
