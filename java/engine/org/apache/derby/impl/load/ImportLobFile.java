@@ -48,9 +48,9 @@ class ImportLobFile
     private String dataCodeset; 
     
 
-    /*
+    /**
      * Create a ImportLobFile object.
-     * @param lobFile  the file which has the LOB Data.
+     * @param lobFile the file which has the LOB Data.
      * @param dataCodeset the code set to use char data in the file.
      */
     ImportLobFile(File lobFile, String dataCodeset) throws Exception {
@@ -59,10 +59,10 @@ class ImportLobFile
     }
 
 
-    /* 
+    /**
      * Open the lob file and setup the stream required to read the data.
      * @param lobFile the file that contains lob data.
-     * @exception  Exception  if an error occurs.     
+     * @exception Exception if an error occurs.     
      */
     private void openLobFile(final File lobFile) 
         throws Exception 
@@ -88,11 +88,11 @@ class ImportLobFile
                       lobFile.getPath()));
         } 
         
-        // set up stream to read from input file, starting from 
+        // Set up stream to read from input file, starting from 
         // any offset in the file. Users can specify columns in 
         // any order or skip some during import. So it is 
-        // is required  for this stream have ability to read from 
-        // any offset in the file. 
+        // required for this stream to have the ability to read
+        // from any offset in the file. 
 
         lobInputStream = new ImportFileInputStream(lobRaf);
 
@@ -105,10 +105,10 @@ class ImportLobFile
     }
 
 
-    /*
+    /**
      * Returns a stream that points to the lob data from file at the 
-     * given <code> offset </code>.
-     * at the specified offset. 
+     * given <code>offset</code>.
+     *
      * @param offset  byte offset of the column data in the file. 
      * @param length  length of the the data.
      * @exception  IOException  if any I/O error occurs.     
@@ -122,8 +122,8 @@ class ImportLobFile
     }
 
 
-    /* 
-     * Returns the clob data at the given location as String. 
+    /**
+     * Returns the clob data at the given location as <code>String</code>. 
      * @param offset  byte offset of the column data in the file. 
      * @param length  length of the the data.
      * @exception  IOException  on any I/O error.     
@@ -152,9 +152,9 @@ class ImportLobFile
     }
 
 
-    /* 
+    /** 
      * Returns a stream that points to the clob data from file at the 
-     * given <code> offset </code>.
+     * given <code>offset</code>.
      * @param offset  byte offset of the column data in the file. 
      * @param length  length of the the data in bytes.
      * @exception  IOException  on any I/O error.     
@@ -176,7 +176,7 @@ class ImportLobFile
         return lobReader;
     }
 
-    /*
+    /**
      * Returns the clob data length in characters at the give location. 
      * @param offset  byte offset of the column data in the file. 
      * @param length  length of the the data in bytes.
@@ -206,8 +206,8 @@ class ImportLobFile
         return lengthInChars;
     }
 
-    /* 
-     * close all the resources realate to the lob file.
+    /**
+     * Close all the resources realated to the lob file.
      */
     public void close() throws IOException {
 
@@ -235,9 +235,8 @@ class ImportLobFile
  * any offset in the file. This stream operates on top of a 
  * RandomAccessFile object. This class overrides InputStream methods to 
  * read from the given RandomAccessFile and provides an addtional method
- * <code> seek(..) </code> to postion the stream at offset in the file. 
+ * <code>seek(..)</code> to position the stream at offset in the file. 
  */
-
 class ImportFileInputStream extends InputStream 
 {
 
@@ -246,8 +245,8 @@ class ImportFileInputStream extends InputStream
     private long fileLength = 0;
 
     /**
-     * Create a <code> ImportFileInputStreamm object  </code> for 
-     * the given  file.  
+     * Create a <code>ImportFileInputStream</code> object for 
+     * the given file.  
      * @param raf  file the stream reads from. 
      * @exception  IOException  if any I/O error occurs.
      */
@@ -258,8 +257,8 @@ class ImportFileInputStream extends InputStream
         this.fileLength = raf.length();
     }
 
-    /*
-     * sets the file offset at which the next read will occur. 
+    /**
+     * Sets the file offset at which the next read will occur. 
      * @param offset byte offset in the file.
      * @exception  IOException  if an I/O error occurs.     
      */
@@ -269,8 +268,8 @@ class ImportFileInputStream extends InputStream
     }
 
 
-    /** overide following input stream methods to read data from the 
-     *  from the current postion of the file. 
+    /* Override the following InputStream-methods to
+     * read data from the current postion of the file.
      */
     
 
