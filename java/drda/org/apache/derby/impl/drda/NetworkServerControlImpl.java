@@ -2251,7 +2251,11 @@ public final class NetworkServerControlImpl {
 										throws UnknownHostException,
 											   IOException, 
 											   java.security.NoSuchAlgorithmException,
-											   java.security.KeyManagementException
+											   java.security.KeyManagementException,
+                                               java.security.NoSuchProviderException,
+                                               java.security.KeyStoreException,
+                                               java.security.UnrecoverableKeyException,
+                                               java.security.cert.CertificateException
 									{
 										if (hostAddress == null)
 											hostAddress = InetAddress.getByName(hostArg);

@@ -21,12 +21,16 @@
 
 package org.apache.derby.client.net;
 
+import java.io.FileInputStream;
 import javax.net.SocketFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
+import javax.net.ssl.KeyManagerFactory;
+import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 import java.security.cert.CertificateException;
+
 
 /**
  * This is a naive trust manager we use when we don't want server
@@ -52,18 +56,53 @@ public class NaiveTrustManager
      **/
     public static SocketFactory getSocketFactory()
         throws java.security.NoSuchAlgorithmException,
-               java.security.KeyManagementException
+               java.security.KeyManagementException,
+               java.security.NoSuchProviderException,
+               java.security.KeyStoreException,
+               java.security.UnrecoverableKeyException,
+               java.security.cert.CertificateException,
+               java.io.IOException
     {
         if (thisManager == null) {
             thisManager = new TrustManager [] {new NaiveTrustManager()};
         }
-        
+
         SSLContext ctx = SSLContext.getInstance("SSL");
-        ctx.init(null, // Use default key manager
-                 thisManager,
-                 null); // Use default random source
+        
+        if (ctx.getProvider().getName().equals("SunJSSE") &&
+            (System.getProperty("javax.net.ssl.keyStore") != null) &&
+            (System.getProperty("javax.net.ssl.keyStorePassword") != null)) {
+            
+            // SunJSSE does not give you a working default keystore
+            // when using your own trust manager. Since a keystore is
+            // needed on the client when the server does
+            // peerAuthentication, we have to provide one working the
+            // same way as the default one.
+
+            String keyStore = 
+                System.getProperty("javax.net.ssl.keyStore");
+            String keyStorePassword =
+                System.getProperty("javax.net.ssl.keyStorePassword");
+            
+            KeyStore ks = KeyStore.getInstance("JKS");
+            ks.load(new FileInputStream(keyStore),
+                    keyStorePassword.toCharArray());
+            
+            KeyManagerFactory kmf = 
+                KeyManagerFactory.getInstance("SunX509", "SunJSSE");
+            kmf.init(ks, keyStorePassword.toCharArray());
+
+            ctx.init(kmf.getKeyManagers(),
+                     thisManager,
+                     null); // Use default random source
+        } else {
+            ctx.init(null, // Use default key manager
+                     thisManager,
+                     null); // Use default random source
+        }
+
         return ctx.getSocketFactory();
-    }
+     }
     
     /** 
      * Checks wether the we trust the client. Since this trust manager
@@ -76,7 +115,7 @@ public class NaiveTrustManager
                                    String authType)
         throws CertificateException
     {
-        // Reject all attemtpts to truts a client. We should never end
+        // Reject all attemtpts to trust a client. We should never end
         // up here.
         throw new CertificateException();
     }
