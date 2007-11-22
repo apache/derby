@@ -54,9 +54,9 @@ import org.apache.derby.jdbc.EmbeddedSimpleDataSource;  // from derby.jar
  * Derby databases: <code>org.apache.derby.jdbc.EmbeddedSimpleDataSource</code>.
  * This is demonstrated in this simple demo application.
  * </p>
- * <p>To compile this application on your own, make sure you include both
- * derby.jar and the location (directory) of the compiled version of this source
- * file in the compiler's classpath.
+ * <p>To compile this application on your own, make sure you include derby.jar 
+ * in the compiler's classpath; see <a href="readme.html">readme.html</a> for 
+ * details.
  * </p>
  */
 public class SimpleMobileApp {
