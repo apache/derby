@@ -64,14 +64,22 @@ class UpgradeRun {
      * They are only created if a test opens a
      * connection against them. In hard upgrade the test
      * must explictly upgrade the database.
-     * The databases are shutdown at the end of each phase.
+     * The databases are shutdown at the end of each phase, unless
+     * "NoShutDown" is specified. The latter is used by databases
+     * which need sqlAuthorization (specified by test). This thwarts
+     * normal shutdown since credentials are required so shutdown is
+     * done in test, not by the tearDown methods. See
+     * Changes10_4#testSQLRoles for example.
      */
-    static final String[] ADDITIONAL_DBS = {
-        "COLLATED_DB_10_3",//db with territory based collation 
-        "NO_ENCRYPT_10_2",
-        "ENCRYPT_10_2"
+
+    static final AdditionalDb[] ADDITIONAL_DBS = {
+        new AdditionalDb("COLLATED_DB_10_3", true), // db with territory
+                                                    // based collation
+        new AdditionalDb("NO_ENCRYPT_10_2", true),
+        new AdditionalDb("ENCRYPT_10_2",  true),
+        new AdditionalDb("ROLES_10_4", false)
     };
-    
+
     private static String getTextVersion(int[] iv)
     {
         String version = iv[0] + "." + iv[1] +
@@ -80,7 +88,6 @@ class UpgradeRun {
     }
 
     public final static Test suite(final int[] version) {
-        
         
         ClassLoader oldLoader = (ClassLoader )AccessController.doPrivileged
         (new java.security.PrivilegedAction(){
@@ -135,8 +142,13 @@ class UpgradeRun {
         
         for (int i = 0; i < ADDITIONAL_DBS.length; i++)
         {
-            setup = TestConfiguration.additionalDatabaseDecorator(setup,
-                    ADDITIONAL_DBS[i]);
+            if (ADDITIONAL_DBS[i].shutDown) {
+                setup = TestConfiguration.additionalDatabaseDecorator(
+                    setup, ADDITIONAL_DBS[i].logicalName);
+            } else {
+                setup = TestConfiguration.additionalDatabaseDecoratorNoShutdown(
+                    setup, ADDITIONAL_DBS[i].logicalName);
+            }
         }
         
         Properties preReleaseUpgrade = new Properties();
@@ -385,5 +397,17 @@ class UpgradeRun {
                     suite.addTest(new DatabaseMetaDataTest(name));
             }
         }
+    }
+
+}
+
+class AdditionalDb
+{
+    final String logicalName;
+    final boolean shutDown;
+    public AdditionalDb(String logicalName, boolean shutDown)
+    {
+        this.logicalName = logicalName;
+        this.shutDown  = shutDown;
     }
 }

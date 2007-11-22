@@ -109,21 +109,25 @@ final class PhaseChanger extends BaseTestSetup {
             for (int i = 0; i < UpgradeRun.ADDITIONAL_DBS.length; i++)
             {
                 ds = JDBCDataSource.getDataSourceLogical(
-                        UpgradeRun.ADDITIONAL_DBS[i]);
-                
-                boolean shutdown = true;
-                try {
-                    ds.getConnection().close();
-                } catch (SQLException e) {
-                    // if the database was never created
-                    // don't bother shutting it down
-                    String sqlState = e.getSQLState();
-                    if ("XJ004".equals(sqlState) || "XJ040".equals(sqlState))
-                        shutdown = false;
-                }
-                
-                if (shutdown)
-                    JDBCDataSource.shutdownDatabase(ds);
+                    UpgradeRun.ADDITIONAL_DBS[i].logicalName);
+
+                if (UpgradeRun.ADDITIONAL_DBS[i].shutDown) {
+                    boolean shutdown = true;
+                    try {
+                        ds.getConnection().close();
+                    } catch (SQLException e) {
+                        // if the database was never created
+                        // don't bother shutting it down
+                        String sqlState = e.getSQLState();
+                        if ("XJ004".equals(sqlState) ||
+                                "XJ040".equals(sqlState)) {
+                            shutdown = false;
+                        }
+                    }
+
+                    if (shutdown)
+                        JDBCDataSource.shutdownDatabase(ds);
+                } // else done by test
             }
         }
         

@@ -29,6 +29,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.CallableStatement;
 
 import javax.sql.DataSource;
 
@@ -180,4 +181,170 @@ public class Changes10_4 extends UpgradeChange {
         s.close();
     }
 
+    /**
+     * Check that you must be hard-upgraded to 10.4 or later in order to use
+     * SQL roles
+     * @throws SQLException
+     *
+     */
+    public void testSQLRolesBasic() throws SQLException
+    {
+        // The standard upgrade database doesn't have sqlAuthorization
+        // set, so we can only check if the system tables for roles is
+        // present.
+
+        Statement s = createStatement();
+        String createRoleText = "create role foo";
+
+        switch (getPhase())
+            {
+            case PH_CREATE:
+                assertStatementError("42X01", s, createRoleText );
+                break;
+
+            case PH_SOFT_UPGRADE:
+                // needs hard upgrade
+                assertStatementError("XCL47", s, createRoleText );
+                break;
+
+            case PH_POST_SOFT_UPGRADE:
+                assertStatementError("42X01", s, createRoleText );
+                break;
+
+            case PH_HARD_UPGRADE:
+            case PH_POST_HARD_UPGRADE:
+                // not supported because SQL authorization not set
+                assertStatementError("42Z60", s, createRoleText );
+                break;
+            }
+
+        s.close();
+    }
+
+    /**
+     * Check that when hard-upgraded to 10.4 or later SQL roles can be
+     * declared if DB has sqlAuthorization.
+     * @throws SQLException
+     *
+     */
+    public void testSQLRoles() throws SQLException
+    {
+        // Do rudimentary sanity checking: that we can create and drop roles
+        // when we are database owner. If so, we can presume SYS.SYSROLES
+        // has been upgraded correctly.
+
+        DataSource ds = JDBCDataSource.getDataSourceLogical("ROLES_10_4");
+        String createRoleText = "create role foo";
+        String dropRoleText   = "drop role foo";
+        Connection conn = null;
+        Statement s = null;
+        boolean supportSqlAuthorization = oldAtLeast(10, 2);
+
+        JDBCDataSource.setBeanProperty(ds, "user", "garfield");
+        JDBCDataSource.setBeanProperty(ds, "password", "theCat");
+
+        switch (getPhase()) {
+        case PH_CREATE:
+            // create the database if it was not already created.
+            JDBCDataSource.setBeanProperty(ds, "createDatabase", "create");
+            conn = ds.getConnection();
+
+            // Make the database have std security, and define
+            // a database user for the database owner).
+            CallableStatement cs = conn.prepareCall(
+                "call syscs_util.syscs_set_database_property(?,?)");
+
+            cs.setString(1, "derby.connection.requireAuthentication");
+            cs.setString(2, "true");
+            cs.execute();
+
+            cs.setString(1, "derby.authentication.provider");
+            cs.setString(2, "BUILTIN");
+            cs.execute();
+
+            cs.setString(1, "derby.database.sqlAuthorization");
+            cs.setString(2, "true");
+            cs.execute();
+
+            cs.setString(1, "derby.database.propertiesOnly");
+            cs.setString(2, "true");
+            cs.execute();
+
+            cs.setString(1, "derby.user.garfield");
+            cs.setString(2, "theCat");
+            cs.execute();
+
+            conn.close();
+
+            JDBCDataSource.shutdownDatabase(ds);
+            break;
+
+        case PH_SOFT_UPGRADE:
+            /* We can't always do soft upgrade, because when
+             * sqlAuthorization is set and we are coming from a
+             * pre-10.2 database, connecting will fail with a message
+             * to hard upgrade before setting sqlAuthorization, so we
+             * skip this step.
+             */
+            if (oldAtLeast(10,2)) {
+                // needs hard upgrade
+                conn = ds.getConnection();
+                s = conn.createStatement();
+
+                assertStatementError("XCL47", s, createRoleText );
+                conn.close();
+
+                JDBCDataSource.shutdownDatabase(ds);
+            }
+            break;
+
+        case PH_POST_SOFT_UPGRADE:
+            conn = ds.getConnection();
+            s = conn.createStatement();
+
+            // syntax error
+            assertStatementError("42X01", s, createRoleText );
+            conn.close();
+
+            JDBCDataSource.shutdownDatabase(ds);
+            break;
+
+        case PH_HARD_UPGRADE:
+            JDBCDataSource.setBeanProperty(
+                ds, "connectionAttributes", "upgrade=true");
+            conn = ds.getConnection();
+            s = conn.createStatement();
+
+            // should work now
+            try {
+                s.execute(createRoleText);
+            } catch (SQLException e) {
+                fail("can't create role on hard upgrade");
+            }
+
+            s.execute(dropRoleText);
+            conn.close();
+
+            JDBCDataSource.clearStringBeanProperty(ds, "connectionAttributes");
+            JDBCDataSource.shutdownDatabase(ds);
+            break;
+
+        case PH_POST_HARD_UPGRADE:
+            conn = ds.getConnection();
+            s = conn.createStatement();
+
+            // should work now
+            try {
+                s.execute(createRoleText);
+            } catch (SQLException e) {
+                fail("can't create role post hard upgrade");
+            }
+
+            s.execute(dropRoleText);
+            conn.close();
+
+            JDBCDataSource.shutdownDatabase(ds);
+            break;
+        }
+    }
 }

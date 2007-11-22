@@ -363,6 +363,13 @@ public	class DD_Version implements	Formatable
 		
 		*/
 
+		if (fromMajorVersionNumber <= DataDictionary.DD_VERSION_DERBY_10_3)
+		{
+			// Add new system catalogs created for roles
+			bootingDictionary.upgradeMakeCatalog(
+				tc, DataDictionary.SYSROLES_CATALOG_NUM);
+		}
+
         if (fromMajorVersionNumber <= DataDictionary.DD_VERSION_DERBY_10_1)
         {
             // add catalogs 1st, subsequent procedure adding may depend on

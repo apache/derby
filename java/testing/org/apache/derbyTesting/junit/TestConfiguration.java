@@ -435,6 +435,35 @@ public class TestConfiguration {
     }
     
     /**
+     * Similar to additionalDatabaseDecorator except the database will
+     * not be shutdown, only deleted. It is the responsibility of the
+     * test to shut it down.
+     *
+     * @param test Test to be decorated
+     * @param logicalDbName The logical database name. This name is
+     *                      used to identify the database in
+     *                      openConnection(String logicalDatabaseName)
+     *                      method calls.
+     * @return decorated test.
+     */
+    public static TestSetup additionalDatabaseDecoratorNoShutdown(
+        Test test,
+        String logicalDbName)
+    {
+        return new DatabaseChangeSetup(
+            new DropDatabaseSetup(test, logicalDbName)
+            {
+                protected void tearDown() throws Exception {
+                    // the test is responsible for shutdown
+                    removeDatabase();
+                }
+            },
+            logicalDbName,
+            generateUniqueDatabaseName(),
+            false);
+    }
+
+    /**
      * Decorate a test changing the default user name and password.
      * Typically used along with DatabasePropertyTestSetup.builtinAuthentication.
      * The tearDown method resets the default user and password value to
