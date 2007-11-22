@@ -3204,8 +3204,8 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
 
     /**
      * helper method for test testGetBestRowIdentifier
-     * @param rs - Resultset array from getBestRowIdentifier;
-     *     rs[0] will have the JDBC result, rs[1] the ODBC result
+     * @param rss - ResultSet array from getBestRowIdentifier;
+     *     rss[0] will have the JDBC result, rss[1] the ODBC result
      * @param expRS - bidimensional String array with expected result row(s)
      * @param nullability - boolean array holding expected nullability
      *   values. This needs to be a parameter because of DERBY-3081
