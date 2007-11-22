@@ -21,16 +21,21 @@
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 //import java.lang.reflect.Constructor;
 //import java.lang.reflect.Method;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.Date;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -66,30 +71,9 @@ import org.apache.derbyTesting.junit.TestConfiguration;
  * The non-modify means that the test method does not change the database
  * in order to test the return of the getXXX method is correct.
  * <BR>
- * Work in progress.
- * TODO: Methods left to test from JDBC 3
- * 
- *  getProcedureColumns
- *  getProcedures
  *  <P>
  *  This test is also called from the upgrade tests to test that
  *  metadata continues to work at various points in the upgrade.
- *  
- *  // TODO: 
- *  convert from metadata.java test;
- *  - implement edge case with nested connection, verified using isReadOnly()
- *  - implement getColumns edge case (marked 'beetle 4620') with large column  
- *    (if char or varchar size is > max integer /2 = 2147483647)
- *  - test for DERBY-655/DERBY-1343
- *    
- *  convert from odbc_metadata.java test:
- *  - checks for SQLPROCEDURES, SQLPROCEDURECOLS, 
- *  - checks for SQLCOLUMNS
- *  - checks for SQLCOLPRIVILEGES, SQLTABLEPRIVILEGES 
- *  - checks for SQLSPECIALCOLUMNS (getBestRowIdentifier, getVersionColumns)
- *  - checks for SQLPRIMARYKEYS 
- *  - checks for SQLSTATISTICS (getIndexInfo)
- *  - odbc 3.0 compliance
  */
 public class DatabaseMetaDataTest extends BaseJDBCTestCase {
   
@@ -208,6 +192,8 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      */
     public static Test suite() {
         TestSuite suite = new TestSuite("DatabaseMetaDataTest");
+        suite.addTest(new DatabaseMetaDataTest("testGetProceduresGetProcColumns"));
+        suite.addTest(new DatabaseMetaDataTest("testBugFixes"));
         suite.addTest(
             TestConfiguration.defaultSuite(DatabaseMetaDataTest.class));
         // Test for DERBY-2584 needs a fresh database to ensure that the
@@ -798,11 +784,50 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         assertMetaDataResultSet(rs, null, null, null);
         JDBC.assertEmpty(rs);
         
-        rs = dmd.getVersionColumns(null,null, "No_such_table");
-        checkVersionColumnsShape(rs);
-        JDBC.assertEmpty(rs);
+        ResultSet rss[] = getVersionColumns(null,null, "No_such_table");
+        checkVersionColumnsShape(rss);
+        JDBC.assertEmpty(rss[0]);
+        JDBC.assertEmpty(rss[1]);
+        
+        rs.close();
+        rss[0].close();
+        rss[1].close();
     }
     
+    /**
+     *  Implement ODBC equivalent for getVersionColumns - SYSIBM.SQLCOLUMNS
+     */
+    public ResultSet getVersionColumnsODBC(
+            String catalog, String schema, String table)
+        throws SQLException 
+    {
+        CallableStatement cs = prepareCall("CALL SYSIBM.SQLSPECIALCOLUMNS " +
+            "(2, ?, ?, ?, 1, 1, 'DATATYPE=''ODBC''')");
+
+        cs.setString(1, catalog);
+        cs.setString(2, schema);
+        cs.setString(3, table);
+        cs.execute();
+        return cs.getResultSet();
+    }
+    
+    /**
+     * Helper method for testing getVersionColumns - calls 
+     * dmd.getVersionColumns for the JDBC call, and getVersionColumnsODBC for
+     * the ODBC procedure
+     * @throws SQLException 
+     */
+    private ResultSet[] getVersionColumns(
+            String catalog, String schema, String table)
+        throws SQLException 
+    {
+        ResultSet[] rss = new ResultSet[2]; 
+        DatabaseMetaData dmd = getDMD();
+        rss[0]= dmd.getVersionColumns(catalog, schema, table);
+        rss[1]= getVersionColumnsODBC(catalog, schema, table);
+        return rss;        
+    }
+
     /**
      * Six combinations of valid identifiers with mixed
      * case, to see how the various pattern matching
@@ -1272,11 +1297,11 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      */
     public void testGetColumnsReadOnly() throws SQLException
     {
-        DatabaseMetaData dmd = getDMD();
-        ResultSet rs = dmd.getColumns(null, null, null, null);
-        checkColumnsShape(rs);
-        crossCheckGetColumnsAndResultSetMetaData(rs, false);
-        
+        ResultSet[] rs = getColumns(null, null, null, null);
+        for ( int j =0 ; j<2 ; j++) {
+            checkColumnsShape(rs[j], j);
+            crossCheckGetColumnsAndResultSetMetaData(rs[j], false, j);
+        }
     }
     
     /**
@@ -1297,10 +1322,6 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         Random rand = new Random();
         String[] dbIDS = getSortedIdentifiers();
             
-        
-        DatabaseMetaData dmd = this.getDMD();
-        
-        
         for (int i = 1; i < 20; i++) {
             int seenColumnCount = 0;
             // These are the pattern matching parameters
@@ -1308,56 +1329,59 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
             String tableNamePattern = getPattern(rand, dbIDS);
             String columnNamePattern = getPattern(rand, dbIDS);
         
-            ResultSet rs = dmd.getColumns(null,
+            ResultSet[] rs = getColumns(null,
                 schemaPattern, tableNamePattern, columnNamePattern);
             
-            
-            checkColumnsShape(rs);
-            
-            while (rs.next())
-            {
-                String schema = rs.getString("TABLE_SCHEM");
-                String table = rs.getString("TABLE_NAME");
-                String column = rs.getString("COLUMN_NAME");
-                
-                assertMatchesPattern(schemaPattern, schema);
-                assertMatchesPattern(tableNamePattern, table);
-                assertMatchesPattern(columnNamePattern, column);
-                
-                
-                seenColumnCount++;
+            for (int j=0  ; j<2 ; j++) {
+                checkColumnsShape(rs[j], j);
+
+                while (rs[j].next())
+                {
+                    String schema = rs[j].getString("TABLE_SCHEM");
+                    String table = rs[j].getString("TABLE_NAME");
+                    String column = rs[j].getString("COLUMN_NAME");
+
+                    assertMatchesPattern(schemaPattern, schema);
+                    assertMatchesPattern(tableNamePattern, table);
+                    assertMatchesPattern(columnNamePattern, column);
+
+                    seenColumnCount++;
+                }
+                rs[j].close();
             }
-            rs.close();
             
             // Re-run to check the correct data is returned
             // when filtering is enabled
-            rs = dmd.getColumns(null,
+            rs = getColumns(null,
                     schemaPattern, tableNamePattern, columnNamePattern);
-            crossCheckGetColumnsAndResultSetMetaData(rs, true);
+            for (int j=0  ; j<2 ; j++) {
+                crossCheckGetColumnsAndResultSetMetaData(rs[j], true, j);
+            }
             
             // Now re-execute fetching all schemas, columns etc.
             // and see we can the same result when we "filter"
             // in the application
+            rs = getColumns(null,null, null, null);
+            
             int appColumnCount = 0;
-            rs = dmd.getColumns(null,null, null, null);
-            
-            while (rs.next())
-            {
-                String schema = rs.getString("TABLE_SCHEM");
-                String table = rs.getString("TABLE_NAME");
-                String column = rs.getString("COLUMN_NAME");
-                
-                if (!doesMatch(schemaPattern, 0, schema, 0))
-                    continue;               
-                if (!doesMatch(tableNamePattern, 0, table, 0))
-                    continue;
-                if (!doesMatch(columnNamePattern, 0, column, 0))
-                    continue;
-                
-                appColumnCount++;
+            for (int j=0  ; j<2 ; j++) {
+                while (rs[j].next())
+                {
+                    String schema = rs[j].getString("TABLE_SCHEM");
+                    String table = rs[j].getString("TABLE_NAME");
+                    String column = rs[j].getString("COLUMN_NAME");
+
+                    if (!doesMatch(schemaPattern, 0, schema, 0))
+                        continue;               
+                    if (!doesMatch(tableNamePattern, 0, table, 0))
+                        continue;
+                    if (!doesMatch(columnNamePattern, 0, column, 0))
+                        continue;
+
+                    appColumnCount++;
+                }
+                rs[j].close();
             }
-            rs.close();
-            
             assertEquals("Mismatched column count on getColumns() filtering",
                     seenColumnCount, appColumnCount);    
         }       
@@ -1536,11 +1560,14 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * the ResultSet.
      * The first action is to call rs.next().
      * The ResultSet will be closed by this method.
-     * @param rs
+     * @param rs resultset to crossCheck
+     * @param partial used to indicate if ordinal position should get checked
+     * @param odbc - flag to indicate if this was a resultset obtained
+     *    from a JDBC (0) or ODBC (1) call.
      * @throws SQLException
      */
     private void crossCheckGetColumnsAndResultSetMetaData(ResultSet rs,
-            boolean partial)
+            boolean partial, int odbc)
     throws SQLException
     {
         Statement s = createStatement();
@@ -1571,7 +1598,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                 assertEquals("TABLE_NAME",
                         table, rs.getString("TABLE_NAME"));
                 
-                crossCheckGetColumnRowAndResultSetMetaData(rs, rsmdt);
+                crossCheckGetColumnRowAndResultSetMetaData(rs, rsmdt, odbc);
                 if (partial)
                     break;
                 
@@ -1589,10 +1616,12 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * for a SELECT * from the same table.
      * @param rs ResultSet from getColumns already positioned on the row.
      * @param rsmdt ResultSetMetaData for the SELECT *
+     * @param odbc 0 for JDBC call, 1 for ODBC. Needed to allow for difference
+     *    in using BUFFER_LENGTH (ODBC) or no(JDBC).
      * @throws SQLException
      */
     public static void crossCheckGetColumnRowAndResultSetMetaData(
-            ResultSet rs, ResultSetMetaData rsmdt)
+            ResultSet rs, ResultSetMetaData rsmdt, int odbc)
         throws SQLException
     {
         int col = rs.getInt("ORDINAL_POSITION");
@@ -1670,9 +1699,19 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         }
         */
         
-        // not used by JDBC spec
-        assertEquals("BUFFER_LENGTH", 0, rs.getInt("BUFFER_LENGTH"));
-        assertTrue("BUFFER_LENGTH", rs.wasNull());
+        // not used by JDBC spec, but by ODBC
+        if (odbc == 0)
+        {
+            assertEquals("BUFFER_LENGTH", 0, rs.getInt("BUFFER_LENGTH"));
+            assertTrue("BUFFER_LENGTH", rs.wasNull());
+        }
+        else
+        {
+            if (col == 0)
+                assertEquals("BUFFER_LENGTH", 0, rs.getInt("BUFFER_LENGTH"));
+            else
+                assertTrue(rs.getInt("BUFFER_LENGTH") != 0);
+        }
         
         /*
         assertEquals("DECIMAL_DIGITS",
@@ -1692,11 +1731,37 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         
         // COLUMN_DEF ??
        
-        // both unused by JDBC spec
-        assertEquals("SQL_DATA_TYPE", 0, rs.getInt("SQL_DATA_TYPE"));
-        assertTrue(rs.wasNull());
-        assertEquals("SQL_DATETIME_SUB", 0, rs.getInt("SQL_DATETIME_SUB"));
-        assertTrue(rs.wasNull());
+        if (odbc == 0)
+        {
+            // both unused by JDBC spec
+            assertEquals("SQL_DATA_TYPE", 0, rs.getInt("SQL_DATA_TYPE"));
+            assertTrue(rs.wasNull());
+            assertEquals("SQL_DATETIME_SUB", 0, rs.getInt("SQL_DATETIME_SUB"));
+            assertTrue(rs.wasNull());
+        }
+        else {
+            // ODBC uses formula:
+            // DATA_TYPE = 10 * SQL_DATA_TYPE + SQL_DATETIME_SUB,
+            // e.g SQL_TIME_STAMP = 10 * SQL_DATETIME + SQL_CODE_TIMESTAMP
+            //                 93 = 10 * 9            + 3
+            if (dmdColumnType == 91)
+            {
+                assertTrue(rs.getInt("SQL_DATA_TYPE")== 9);
+                assertTrue(rs.getInt("SQL_DATETIME_SUB")== 1);
+            }
+            else if (dmdColumnType == 92)
+            {
+                assertTrue(rs.getInt("SQL_DATA_TYPE")== 9);
+                assertTrue(rs.getInt("SQL_DATETIME_SUB")== 2);
+            }
+            else if (dmdColumnType == 93)
+            {
+                assertTrue(rs.getInt("SQL_DATA_TYPE")== 9);
+                assertTrue(rs.getInt("SQL_DATETIME_SUB")== 3);
+            }
+            else
+                assertTrue(rs.getInt("SQL_DATA_TYPE") == dmdColumnType);
+        }
         
         // IS_NULLABLE
         switch (rsmdt.isNullable(col))
@@ -1730,6 +1795,43 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
        assertFalse(rs.wasNull());        
     }
     
+    /**
+     *  Implement ODBC equivalent for getColumns - SYSIBM.SQLCOLUMNS
+     */
+    public ResultSet getColumnsODBC(
+            String catalog, String schemaPattern, String tableNamePattern,
+            String columnNamePattern)
+        throws SQLException 
+    {
+        CallableStatement cs = prepareCall("CALL SYSIBM.SQLCOLUMNS(" +
+                "?, ?, ?, ?, 'DATATYPE=''ODBC''')");
+
+        cs.setString(1, catalog);
+        cs.setString(2, schemaPattern);
+        cs.setString(3, tableNamePattern);
+        cs.setString(4, columnNamePattern);
+        cs.execute();
+        return cs.getResultSet();
+    }
+    
+    /**
+     * Helper method for testing getColumns - calls dmd.getColumns for
+     * the JDBC call, and getColumnsODBC for the ODBC procedure
+     * @throws SQLException 
+     */
+    private ResultSet[] getColumns(
+            String catalog, String schemaPattern, String tableNamePattern,
+            String columnNamePattern)
+        throws SQLException 
+    {
+        ResultSet[] rss = new ResultSet[2]; 
+        DatabaseMetaData dmd = getDMD();
+        rss[0]= dmd.getColumns(catalog, schemaPattern, tableNamePattern,
+            columnNamePattern);
+        rss[1]= getColumnsODBC(catalog, schemaPattern, tableNamePattern,
+                columnNamePattern);
+        return rss;        
+    }
     
     /**
      * Test getTableTypes()
@@ -2148,8 +2250,25 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     /*
      * Check the shape of the ResultSet from any getColumns call.
      */
-    private void checkColumnsShape(ResultSet rs) throws SQLException
+    private void checkColumnsShape(ResultSet rs, int odbc) throws SQLException
     {
+        int[] columnTypes = new int[] {
+                Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR,
+                Types.INTEGER, Types.VARCHAR, Types.INTEGER, Types.INTEGER,
+                Types.INTEGER, Types.INTEGER, Types.INTEGER, Types.VARCHAR,
+                Types.VARCHAR, Types.INTEGER, Types.INTEGER, Types.INTEGER,
+                Types.INTEGER, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR,
+                Types.VARCHAR, Types.SMALLINT, Types.VARCHAR
+                };
+        if (odbc == 1)
+        {
+            columnTypes[4] = Types.SMALLINT;
+            columnTypes[8] = Types.SMALLINT;
+            columnTypes[9] = Types.SMALLINT;
+            columnTypes[10] = Types.SMALLINT;
+            columnTypes[13] = Types.SMALLINT;
+            columnTypes[14] = Types.SMALLINT;
+        }
         assertMetaDataResultSet(rs,
                 new String[] {
                 "TABLE_CAT", "TABLE_SCHEM", "TABLE_NAME", "COLUMN_NAME",
@@ -2158,15 +2277,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                 "COLUMN_DEF", "SQL_DATA_TYPE", "SQL_DATETIME_SUB", "CHAR_OCTET_LENGTH",
                 "ORDINAL_POSITION", "IS_NULLABLE", "SCOPE_CATLOG", "SCOPE_SCHEMA",
                 "SCOPE_TABLE", "SOURCE_DATA_TYPE", "IS_AUTOINCREMENT"
-               },
-               new int[] {
-               Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR,
-               Types.INTEGER, Types.VARCHAR, Types.INTEGER, Types.INTEGER,
-               Types.INTEGER, Types.INTEGER, Types.INTEGER, Types.VARCHAR,
-               Types.VARCHAR, Types.INTEGER, Types.INTEGER, Types.INTEGER,
-               Types.INTEGER, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR,
-               Types.VARCHAR, Types.SMALLINT, Types.VARCHAR
-               }
+               }, columnTypes
         , null
               );          
     }
@@ -2215,19 +2326,18 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * Check the shape of the ResultSet from any
      * getVersionColumns call.
      */
-    private static void checkVersionColumnsShape(ResultSet rs) throws SQLException
+    private static void checkVersionColumnsShape(ResultSet[] rs) throws SQLException
     {
-        assertMetaDataResultSet(rs,
-          new String[] {
-          "SCOPE", "COLUMN_NAME", "DATA_TYPE", "TYPE_NAME",
-          "COLUMN_SIZE", "BUFFER_LENGTH", "DECIMAL_DIGITS", "PSEUDO_COLUMN"
-         },
-         new int[] {
-          Types.SMALLINT, Types.VARCHAR, Types.INTEGER, Types.VARCHAR,
-          Types.INTEGER, Types.INTEGER, Types.SMALLINT, Types.SMALLINT
-         }
-        , null
-        );        
+        String [] columnNames = new String[] {
+                "SCOPE", "COLUMN_NAME", "DATA_TYPE", "TYPE_NAME",
+                "COLUMN_SIZE", "BUFFER_LENGTH", "DECIMAL_DIGITS", "PSEUDO_COLUMN"
+               };
+        int[] columnTypes = new int[] {
+                Types.SMALLINT, Types.VARCHAR, Types.INTEGER, Types.VARCHAR,
+                Types.INTEGER, Types.INTEGER, Types.SMALLINT, Types.SMALLINT};
+        assertMetaDataResultSet(rs[0], columnNames, columnTypes, null);
+        columnTypes[2] = Types.SMALLINT;
+        assertMetaDataResultSet(rs[1], columnNames, columnTypes, null);        
     }
     
     public static void assertMetaDataResultSet(ResultSet rs,
@@ -2891,114 +3001,137 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         boolean [] nullability = {
                 true, false, true, true, true, true, true, true};
         
-        DatabaseMetaData dmd = getConnection().getMetaData();
-
         // result: column i
-        ResultSet rs = dmd.getBestRowIdentifier(null,"APP","BRIT1",0,true);
+        ResultSet[] rs = getBestRowIdentifier(null,"APP","BRIT1",0,true);
         verifyBRIResults(rs, expRSI, nullability);
 
         // result: column i
-        rs = dmd.getBestRowIdentifier(null,"APP","BRIT2",0,true);
+        rs = getBestRowIdentifier(null,"APP","BRIT2",0,true);
         verifyBRIResults(rs, expRSI, nullability);
 
         // result: column j
-        rs = dmd.getBestRowIdentifier(null,"APP","BRIT3",0,true);
+        rs = getBestRowIdentifier(null,"APP","BRIT3",0,true);
         verifyBRIResults(rs, expRSJ, nullability);
         
         // result: column i
-        rs = dmd.getBestRowIdentifier(null,"APP","BRIT4",0,true);
+        rs = getBestRowIdentifier(null,"APP","BRIT4",0,true);
         verifyBRIResults(rs, expRSI, nullability);
         
         // result: columns i and j
-        rs = dmd.getBestRowIdentifier(null,"APP","BRIT5",0,true);
+        rs = getBestRowIdentifier(null,"APP","BRIT5",0,true);
         verifyBRIResults(rs, expRSIJ, nullability);
 
         // result: column j
-        rs = dmd.getBestRowIdentifier(null,"APP","BRIT6",0,true);
+        rs = getBestRowIdentifier(null,"APP","BRIT6",0,true);
         verifyBRIResults(rs, expRSJ, nullability);
 
         // result: column j
-        rs = dmd.getBestRowIdentifier(null,"APP","BRIT7",0,true);
+        rs = getBestRowIdentifier(null,"APP","BRIT7",0,true);
         verifyBRIResults(rs, expRSJ, nullability);
         
         // result: column j
-        rs = dmd.getBestRowIdentifier(null,"APP","BRIT8",0,true);
+        rs = getBestRowIdentifier(null,"APP","BRIT8",0,true);
         verifyBRIResults(rs, expRSJ, nullability);
         
         // result: columns i,j
-        rs = dmd.getBestRowIdentifier(null,"APP","BRIT9",0,true);
+        rs = getBestRowIdentifier(null,"APP","BRIT9",0,true);
         verifyBRIResults(rs, expRSIJ, nullability);
         
         // result: columns i,j
-        rs = dmd.getBestRowIdentifier(null,"APP","BRIT10",0,true);
+        rs = getBestRowIdentifier(null,"APP","BRIT10",0,true);
         verifyBRIResults(rs, expRSIJ, nullability);
         
         // result: columns i,j
-        rs = dmd.getBestRowIdentifier(null,"APP","BRIT11",0,true);
+        rs = getBestRowIdentifier(null,"APP","BRIT11",0,true);
         verifyBRIResults(rs, expRSIJ, nullability);
         
         // result: columns i,j
-        rs = dmd.getBestRowIdentifier(null,"APP","BRIT12",0,true);
+        rs = getBestRowIdentifier(null,"APP","BRIT12",0,true);
         verifyBRIResults(rs, expRSIJ, nullability);
         
         // Verify nullOK flags makes a difference. See also DERBY-3182
         // result: column i, should've ignored null column
-        rs = dmd.getBestRowIdentifier(null,"APP","BRIT13",0,false);
+        rs = getBestRowIdentifier(null,"APP","BRIT13",0,false);
         verifyBRIResults(rs, expRSI, nullability);
         // result: columns i, j
-        rs = dmd.getBestRowIdentifier(null,"APP","BRIT13",0,true);
+        rs = getBestRowIdentifier(null,"APP","BRIT13",0,true);
         verifyBRIResults(rs, expRSIJ, nullability);
         
         // result: columns i
-        rs = dmd.getBestRowIdentifier(null,"APP","BRIT14",0,true);
+        rs = getBestRowIdentifier(null,"APP","BRIT14",0,true);
         verifyBRIResults(rs, expRSI, nullability);
         
         // result: columns i
-        rs = dmd.getBestRowIdentifier(null,"APP","BRIT15",0,true);
+        rs = getBestRowIdentifier(null,"APP","BRIT15",0,true);
         verifyBRIResults(rs, expRSI, nullability);
         
         // we don't do anything with SCOPE except detect bad values
         // result: columns i
-        rs = dmd.getBestRowIdentifier(null,"APP","BRIT16",1,true);
+        rs = getBestRowIdentifier(null,"APP","BRIT16",1,true);
         verifyBRIResults(rs, expRSI, nullability);
         // result: columns i
-        rs = dmd.getBestRowIdentifier(null,"APP","BRIT16",2,true);
+        rs = getBestRowIdentifier(null,"APP","BRIT16",2,true);
         verifyBRIResults(rs, expRSI, nullability);
         // result: no rows
-        rs = dmd.getBestRowIdentifier(null,"APP","BRIT16",-1,true);
+        rs = getBestRowIdentifier(null,"APP","BRIT16",-1,true);
         // column nullability is opposite to with scope=1 or 2...DERBY-3181
         nullability = new boolean [] {
                 false, true, false, true, false, false, false, false};
-        assertBestRowIdentifierMetaDataResultSet(rs, nullability);
-        JDBC.assertDrainResults(rs, 0);
+        // When running the ODBC version, the datatype returned for
+        // column 3 is SMALLINT, vs. INTEGER when scope=1 or 2...
+        // So, in this case, the columnTypes are the same for ODBC and JDBC,
+        // but with calls with a valid scope, they are different.
+        //assertBestRowIdentifierMetaDataResultSet(rs, nullability);
+        String[] tmpcolNames = {
+                "SCOPE", "COLUMN_NAME", "DATA_TYPE", "TYPE_NAME", 
+                "COLUMN_SIZE", "BUFFER_LENGTH", "DECIMAL_DIGITS", 
+                "PSEUDO_COLUMN"};
+        int[] tmpcolTypes = {
+                Types.SMALLINT, Types.VARCHAR, Types.INTEGER, Types.VARCHAR,
+                Types.INTEGER, Types.INTEGER, Types.SMALLINT, Types.SMALLINT};
+        assertMetaDataResultSet(rs[0], tmpcolNames, tmpcolTypes, nullability);
+        assertMetaDataResultSet(rs[1], tmpcolNames, tmpcolTypes, nullability);
+        JDBC.assertDrainResults(rs[0], 0);
+        JDBC.assertDrainResults(rs[1], 0);
         // result: no rows
-        rs = dmd.getBestRowIdentifier(null,"APP","BRIT16",3,true);
-        assertBestRowIdentifierMetaDataResultSet(rs, nullability);
-        JDBC.assertDrainResults(rs, 0);
+        rs = getBestRowIdentifier(null,"APP","BRIT16",3,true);
+        //assertBestRowIdentifierMetaDataResultSet(rs, nullability);
+        assertMetaDataResultSet(rs[0], tmpcolNames, tmpcolTypes, nullability);
+        assertMetaDataResultSet(rs[1], tmpcolNames, tmpcolTypes, nullability);
+        JDBC.assertDrainResults(rs[0], 0);
+        JDBC.assertDrainResults(rs[1], 0);
         // set back nullability
         nullability = new boolean[] {
                 true, false, true, true, true, true, true, true};
         
-        rs = dmd.getBestRowIdentifier(null, "APP","BRIT17",0,true);
+        rs = getBestRowIdentifier(null, "APP","BRIT17",0,true);
         String [][] expRS = new String [][] {
                 {"2", "I", "4", "INTEGER", "4", null, "10", "1"},
                 {"2", "VC10", "12", "VARCHAR", "10", null, null, "1"}
         };
-        verifyBRIResults(rs, expRS, nullability);
-      
-        // test DERBY-2610 for fun; can't pass in null table name
+        JDBC.assertFullResultSet(rs[0], expRS, true);
+        // set buffer_length expected for ODBC; for most of the simple 
+        // tables/rows in our test it's "4" so set in verifyBRIResults
+        expRS[0][5] = "4";
+        expRS[1][5] = "20";
+        JDBC.assertFullResultSet(rs[1], expRS, true);
+        
+        // test DERBY-2610 for fun; can't pass in null table name      
         try {
-            rs = dmd.getBestRowIdentifier(null,"APP",null,3,true);
+            rs = getBestRowIdentifier(null,"APP",null,3,true);
         } catch (SQLException sqle) {
             assertSQLState( "XJ103", sqle);
         }
         
         // check on systables
-        rs = dmd.getBestRowIdentifier(null,"SYS","SYSTABLES",0,true);
+        rs = getBestRowIdentifier(null,"SYS","SYSTABLES",0,true);
         expRS = new String [][] {
                 {"2", "TABLEID", "1", "CHAR", "36", null, null, "1"}
         };
-        verifyBRIResults(rs, expRS, nullability);
+        JDBC.assertFullResultSet(rs[0], expRS, true);
+        // set buffer_length expected for ODBC
+        expRS[0][5] = "72";
+        JDBC.assertFullResultSet(rs[1], expRS, true);
         
         getConnection().setAutoCommit(true);
         
@@ -3034,22 +3167,70 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     }
     
     /**
+     * Helper method for testing getBestRowIdentifier - calls the ODBC procedure
+     * @throws SQLException 
+     */
+    public ResultSet getBestRowIdentifierODBC(String catalog, String schema, 
+        String table, int scope, boolean nullable) throws SQLException 
+    {
+        CallableStatement cs = prepareCall(
+            "CALL SYSIBM.SQLSPECIALCOLUMNS(1, ?, ?, ?, ?, ?, " +
+        "'DATATYPE=''ODBC''')");
+        cs.setString(1, catalog);
+        cs.setString(2, schema);
+        cs.setString(3, table);
+        cs.setInt(4, scope);
+        cs.setBoolean(5, nullable);
+
+        cs.execute();
+        return cs.getResultSet();
+    }
+    
+    /**
+     * Helper method for testing getBestRowIdentifier - calls 
+     * dmd.getBestRowIdentifier for the JDBC call, and getBestRowIdentifierODBC
+     * for the ODBC procedure
+     * @throws SQLException 
+     */
+    private ResultSet[] getBestRowIdentifier(String catalog, String schema, String table,
+        int scope, boolean nullable) throws SQLException 
+    {
+        ResultSet[] rss = new ResultSet[2]; 
+        DatabaseMetaData dmd = getDMD();
+        rss[0]= dmd.getBestRowIdentifier(catalog, schema, table, scope, nullable);
+        rss[1]= getBestRowIdentifierODBC(catalog, schema, table, scope, nullable);
+        return rss;        
+    }
+
+    /**
      * helper method for test testGetBestRowIdentifier
-     * @param rs - Resultset from dmd.getBestRowIdentifier
+     * @param rs - Resultset array from getBestRowIdentifier;
+     *     rs[0] will have the JDBC result, rs[1] the ODBC result
      * @param expRS - bidimensional String array with expected result row(s)
      * @param nullability - boolean array holding expected nullability
      *   values. This needs to be a parameter because of DERBY-3081
      * @throws SQLException 
      */
-    public void verifyBRIResults(ResultSet rs, String[][] expRS,
-            boolean[] nullability) throws SQLException {
-        assertBestRowIdentifierMetaDataResultSet(rs, nullability);
-        JDBC.assertFullResultSet(rs, expRS, true);
+    public void verifyBRIResults(ResultSet[] rss, String[][] expRS,
+            boolean[] nullability) throws SQLException {      
+        assertBestRowIdentifierMetaDataResultSet(rss, nullability);
+        JDBC.assertFullResultSet(rss[0], expRS, true);
+        // JDBC does not use BUFFER_LENGTH column (6th), with ODBC
+        // in our queries the value is mostly 4
+        for (int  i = 0 ; i < expRS.length; i++) {
+            expRS[i][5] = "4";
+        }
+        JDBC.assertFullResultSet(rss[1], expRS, true);
+        for (int  i = 0 ; i < expRS.length; i++) {
+            expRS[i][5] = null;
+        }
     }
     
-    // helper method for testGetBestRowIdentifier
+    // helper method for testGetBestRowIdentifier - checks the 
+    // metadata resultsets for the JDBC and ODBC calls for correct
+    // shape.
     public void assertBestRowIdentifierMetaDataResultSet(
-            ResultSet rs, boolean[] nullability) throws SQLException {
+            ResultSet[] rss, boolean[] nullability) throws SQLException {
         String[] columnNames = {
                 "SCOPE", "COLUMN_NAME", "DATA_TYPE", "TYPE_NAME", 
                 "COLUMN_SIZE", "BUFFER_LENGTH", "DECIMAL_DIGITS", 
@@ -3057,7 +3238,11 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         int[] columnTypes = {
                 Types.SMALLINT, Types.VARCHAR, Types.INTEGER, Types.VARCHAR,
                 Types.INTEGER, Types.INTEGER, Types.SMALLINT, Types.SMALLINT};
-        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
+        int[] odbcColumnTypes = {
+                Types.SMALLINT, Types.VARCHAR, Types.SMALLINT, Types.VARCHAR,
+                Types.INTEGER, Types.INTEGER, Types.SMALLINT, Types.SMALLINT};
+        assertMetaDataResultSet(rss[0], columnNames, columnTypes, nullability);
+        assertMetaDataResultSet(rss[1], columnNames, odbcColumnTypes, nullability);
     } 
     
     /**
@@ -3075,37 +3260,78 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
             Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR};
         boolean [] nullability = {true,false,false,false,true,true,true,true};
         
-        DatabaseMetaData dmd = getDMD();
-        
         // unlike for instance getTables() and getUDTs trying to call
         // getColumnPrivileges with all nulls gets stopped because 
         // the spec indicates it takes a table name, not just a pattern
         try {
-            dmd.getColumnPrivileges(null,null,null,null);
+            getColumnPrivileges(null,null,null,null);
             fail ("expected error XJ103");
         } catch (SQLException sqle) {
             assertSQLState("XJ103", sqle);
         }
         
-        ResultSet rs = dmd.getColumnPrivileges(null,null,"",null);
-        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
-        JDBC.assertEmpty(rs);
+        ResultSet[] rs = getColumnPrivileges(null,null,"",null);
+        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
+        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
+        JDBC.assertEmpty(rs[0]);
+        JDBC.assertEmpty(rs[1]);
         
-        rs = dmd.getColumnPrivileges("","","","");
-        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
-        JDBC.assertEmpty(rs);
+        rs = getColumnPrivileges("","","","");
+        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
+        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
+        JDBC.assertEmpty(rs[0]);
+        JDBC.assertEmpty(rs[1]);
         
-        rs = dmd.getColumnPrivileges("%","%","%","%");
-        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
-        JDBC.assertEmpty(rs);
+        rs = getColumnPrivileges("%","%","%","%");
+        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
+        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
+        JDBC.assertEmpty(rs[0]);
+        JDBC.assertEmpty(rs[1]);
 
         // we didn't (can't) grant any privileges to the systabels, so no row
-        rs = dmd.getColumnPrivileges(null,"SYS","SYSTABLES","TABLEID");
-        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
-        JDBC.assertEmpty(rs);
-        rs.close();
+        rs = getColumnPrivileges(null,"SYS","SYSTABLES","TABLEID");
+        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
+        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
+        JDBC.assertEmpty(rs[0]);
+        JDBC.assertEmpty(rs[1]);
+        rs[0].close();
+        rs[1].close();
     }
 
+    /**
+     * Helper method for testing getColumnPrivileges - calls the ODBC procedure
+     * @throws SQLException 
+     */
+    public ResultSet getColumnPrivilegesODBC(String catalog, String schema, 
+        String table, String columnNamePattern) throws SQLException 
+    {
+        CallableStatement cs = prepareCall(
+            "CALL SYSIBM.SQLCOLPRIVILEGES(?, ?, ?, ?, 'DATATYPE=''ODBC''')");
+        
+        cs.setString(1, catalog);
+        cs.setString(2, schema);
+        cs.setString(3, table);
+        cs.setString(4, columnNamePattern);
+
+        cs.execute();
+        return cs.getResultSet();
+    }
+    
+    /**
+     * Helper method for testing getColumnPrivileges - calls dmd.getIndexInfo for the 
+     * JDBC call, and getColumnPrivilegesODBC for the ODBC procedure
+     * @throws SQLException 
+     */
+    private ResultSet[] getColumnPrivileges(String catalog, String schema, String table,
+        String columnNamePattern) throws SQLException 
+    {
+        ResultSet[] rss = new ResultSet[2]; 
+        DatabaseMetaData dmd = getDMD();
+        rss[0]= dmd.getColumnPrivileges(catalog, schema, table, columnNamePattern);
+        rss[1]= getColumnPrivilegesODBC(catalog, schema, table, columnNamePattern);
+        return rss;        
+    }
+    
     /**
      * Test getGetTablePrivileges; does not modify database
      * For further testing see test lang.grantRevokeTest
@@ -3121,27 +3347,67 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
             Types.VARCHAR,Types.VARCHAR,Types.VARCHAR};
         boolean [] nullability = {true,false,false,true,true,true,true};
         
-        DatabaseMetaData dmd = getDMD();
+        ResultSet rs[] = getTablePrivileges(null,null,null);
+        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
+        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
+        JDBC.assertEmpty(rs[0]);
+        JDBC.assertEmpty(rs[1]);
         
-        ResultSet rs = dmd.getTablePrivileges(null,null,null);
-        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
-        JDBC.assertEmpty(rs);
+        rs = getTablePrivileges("","","");
+        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
+        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
+        JDBC.assertEmpty(rs[0]);
+        JDBC.assertEmpty(rs[1]);
         
-        rs = dmd.getTablePrivileges("","","");
-        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
-        JDBC.assertEmpty(rs);
-        
-        rs = dmd.getTablePrivileges("%","%","%");
-        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
-        JDBC.assertEmpty(rs);
+        rs = getTablePrivileges("%","%","%");
+        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
+        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
+        JDBC.assertEmpty(rs[0]);
+        JDBC.assertEmpty(rs[1]);
 
         // we didn't (can't) grant any privileges to the systabels, so no row
-        rs = dmd.getTablePrivileges(null,"SYS","SYSTABLES");
-        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
-        JDBC.assertEmpty(rs);
-        rs.close();
+        rs = getTablePrivileges(null,"SYS","SYSTABLES");
+        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
+        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
+        JDBC.assertEmpty(rs[0]);
+        JDBC.assertEmpty(rs[1]);
+        rs[0].close();
+        rs[1].close();
     }
     
+    /**
+     * Helper method for testing getTablePrivileges - calls the ODBC procedure
+     * @throws SQLException 
+     */
+    public ResultSet getTablePrivilegesODBC(String catalog, String schema, 
+        String tableNamePattern) throws SQLException 
+    {
+        CallableStatement cs = prepareCall(
+            "CALL SYSIBM.SQLTABLEPRIVILEGES(?, ?, ?, 'DATATYPE=''ODBC''')");
+        
+        cs.setString(1, catalog);
+        cs.setString(2, schema);
+        cs.setString(3, tableNamePattern);
+        cs.execute();
+        return cs.getResultSet();
+    }
+    
+    /**
+     * Helper method for testing getTablePrivileges - calls dmd.getIndexInfo for the 
+     * JDBC call, and getTablePrivilegesODBC for the ODBC procedure
+     * @throws SQLException 
+     */
+    private ResultSet[] getTablePrivileges(
+        String catalog, String schema, String tableNamePattern) 
+    throws SQLException 
+    {
+        ResultSet[] rss = new ResultSet[2]; 
+        DatabaseMetaData dmd = getDMD();
+        rss[0]= dmd.getTablePrivileges(catalog, schema, tableNamePattern);
+        rss[1]= getTablePrivilegesODBC(catalog, schema, tableNamePattern);
+        return rss;        
+    }
+
     /**
      * Test getIndexInfo; does not modify database
      * @throws SQLException 
@@ -3166,35 +3432,42 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                 // ASC_OR_DESC is Types.CHAR rather than VARCHAR...
                 Types.SMALLINT,Types.VARCHAR,Types.CHAR,Types.INTEGER,
                 Types.INTEGER,Types.VARCHAR};
+        int[] odbcColumnTypes = new int[] {
+                Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,
+                // types.boolean is not supported with ODBC
+                Types.SMALLINT,Types.VARCHAR,Types.VARCHAR,Types.SMALLINT,
+                // ASC_OR_DESC is Types.CHAR rather than VARCHAR...
+                Types.SMALLINT,Types.VARCHAR,Types.CHAR,Types.INTEGER,
+                Types.INTEGER,Types.VARCHAR};
         boolean [] nullability = {true,false,false,
             true,true,true,true,true,false,true,true,true,true};
-        
-        DatabaseMetaData dmd = getDMD();
         
         // unlike for instance getTables() and getUDTs trying to call
         // getIndexInfo with all nulls gets stopped because 
         // the spec indicates it takes a table name, not just a pattern
         try {
-            dmd.getIndexInfo(null,null,null,true,true);
+            getIndexInfo(null,null,null,true,true);
             fail ("expected error XJ103");
         } catch (SQLException sqle) {
             assertSQLState("XJ103", sqle);
         }
         
         // do a call which selects unique indexes only
-        ResultSet rs = dmd.getIndexInfo("","SYS","SYSCOLUMNS",true,false);
-        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
+        ResultSet rss[] = getIndexInfo("","SYS","SYSCOLUMNS",true,false);
+        assertMetaDataResultSet(rss[0], columnNames, columnTypes, nullability);
+        assertMetaDataResultSet(rss[1], columnNames, odbcColumnTypes, nullability);
         String[][] expRS = {
             {"","SYS","SYSCOLUMNS","false","","SYSCOLUMNS_INDEX1","3","1",
                 "REFERENCEID","A",null,null,null},
             {"","SYS","SYSCOLUMNS","false","","SYSCOLUMNS_INDEX1","3","2",
                 "COLUMNNAME","A",null,null,null}};
-        JDBC.assertFullResultSet(rs, expRS, true);
+        assertFullResultSet(rss, expRS, true);
         
         // same table, but select all indexes (unique=false)
         // note, that true for approximate does nothing in Derby
-        rs = dmd.getIndexInfo("","SYS","SYSCOLUMNS",false,false);
-        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
+        rss = getIndexInfo("","SYS","SYSCOLUMNS",false,false);
+        assertMetaDataResultSet(rss[0], columnNames, columnTypes, nullability);
+        assertMetaDataResultSet(rss[1], columnNames, odbcColumnTypes, nullability);
         expRS = new String[][] {
             {"","SYS","SYSCOLUMNS","false","","SYSCOLUMNS_INDEX1","3","1",
                 "REFERENCEID","A",null,null,null},
@@ -3202,10 +3475,11 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                 "COLUMNNAME","A",null,null,null},
             {"","SYS","SYSCOLUMNS","true","","SYSCOLUMNS_INDEX2","3","1",
                  "COLUMNDEFAULTID","A",null,null,null}};
-        JDBC.assertFullResultSet(rs, expRS, true);
+        assertFullResultSet(rss, expRS, true);
         
-        rs = dmd.getIndexInfo("","SYS","SYSTABLES",true,false);
-        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
+        rss = getIndexInfo("","SYS","SYSTABLES",true,false);
+        assertMetaDataResultSet(rss[0], columnNames, columnTypes, nullability);
+        assertMetaDataResultSet(rss[1], columnNames, odbcColumnTypes, nullability);
         expRS = new String[][] {
             {"","SYS","SYSTABLES","false","","SYSTABLES_INDEX1","3","1",
                 "TABLENAME","A",null,null,null},
@@ -3213,13 +3487,16 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                 "SCHEMAID","A",null,null,null},
             {"","SYS","SYSTABLES","false","","SYSTABLES_INDEX2","3","1",
                 "TABLEID","A",null,null,null}};
-        JDBC.assertFullResultSet(rs, expRS, true);
+        assertFullResultSet(rss, expRS, true);
         
         // should return no rows
-        rs = dmd.getIndexInfo("","SYS","SYSSTABLES",true,false);
-        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
-        JDBC.assertEmpty(rs);
-        rs.close();
+        rss = getIndexInfo("","SYS","SYSSTABLES",true,false);
+        assertMetaDataResultSet(rss[0], columnNames, columnTypes, nullability);
+        assertMetaDataResultSet(rss[1], columnNames, odbcColumnTypes, nullability);
+        JDBC.assertEmpty(rss[0]);
+        JDBC.assertEmpty(rss[1]);
+        rss[0].close();
+        rss[1].close();
     }
     
     /**
@@ -3246,12 +3523,71 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         if (rs != null)
             assertEquals("D",rs.getString(10));
 
+        rs = getIndexInfoODBC("","APP","IIT",false,false);
+        rs.next();
+        if (rs != null)
+            assertEquals("A",rs.getString(10));
+        rs.next();    
+        if (rs != null)
+            assertEquals("D",rs.getString(10));
+
         st.execute("drop index iii");
         st.execute("drop table iit");
 
         st.close();
     }
+
+    /**
+     * Helper method for testing getIndexInfo - calls the ODBC procedure
+     * @throws SQLException 
+     */
+    public ResultSet getIndexInfoODBC(String catalog, String schema, 
+        String table, boolean unique, boolean approximate) throws SQLException 
+    {
+        CallableStatement cs = prepareCall(
+                "CALL SYSIBM.SQLSTATISTICS(?, ?, ?, ?, ?, " +
+                "'DATATYPE=''ODBC''')");
+
+        cs.setString(1, catalog);
+        cs.setString(2, schema);
+        cs.setString(3, table);
+        // the unique parameter needs to be flopped...See the call
+        // in SystemProcedures.
+        cs.setBoolean(4, unique? false : true);
+        cs.setBoolean(5, approximate);
+
+        cs.execute();
+        return cs.getResultSet();
+    }
     
+    /**
+     * Helper method for testing getIndexInfo - calls dmd.getIndexInfo for the 
+     * JDBC call, and getIndexInfoODBC for the ODBC procedure
+     * @throws SQLException 
+     */
+    private ResultSet[] getIndexInfo(String catalog, String schema, String table,
+        boolean unique, boolean approximate) throws SQLException 
+    {
+        ResultSet[] rss = new ResultSet[2]; 
+        DatabaseMetaData dmd = getDMD();
+        rss[0]= dmd.getIndexInfo(catalog, schema, table, unique, approximate);
+        rss[1]= getIndexInfoODBC(catalog, schema, table, unique, approximate);
+        return rss;        
+    }
+    
+    /**
+     * Helper method - unravles a ResultSet array created e.g. 
+     * with this.getIndexInfo, i.e. Resultset[0] has the JDBC resultset
+     * and ResultSet[1] the ODBC resultset
+     * @throws SQLException 
+     */
+    private void assertFullResultSet(
+        ResultSet rs[], String[][] expRS, boolean trim) throws SQLException
+    {
+        JDBC.assertFullResultSet(rs[0], expRS, trim);
+        JDBC.assertFullResultSet(rs[1], expRS, trim);
+    }
+
     /**
      * Create the tables for get*Keys tests
      * @throws SQLException 
@@ -3337,40 +3673,83 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                        
         createObjectsForKeysTests();
         
-        DatabaseMetaData dmd = getDMD();
-        
         // try with valid search criteria
         // although, % may not actually be appropriate?
-        ResultSet rs = dmd.getPrimaryKeys("", "%", "KT1");
-        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
-        JDBC.assertFullResultSet(rs, expRS, true);
+        ResultSet rs[] = getPrimaryKeys("", "%", "KT1");
+        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
+        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
+        assertFullResultSet(rs, expRS, true);
         
-        rs = dmd.getPrimaryKeys(null, "APP", "KT1");
-        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
-        JDBC.assertFullResultSet(rs, expRS, true);
+        rs = getPrimaryKeys(null, "APP", "KT1");
+        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
+        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
+        assertFullResultSet(rs, expRS, true);
 
-        rs = dmd.getPrimaryKeys(null, null, "KT1");
-        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
-        JDBC.assertFullResultSet(rs, expRS, true);
+        rs = getPrimaryKeys(null, null, "KT1");
+        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
+        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
+        assertFullResultSet(rs, expRS, true);
 
-        rs = dmd.getPrimaryKeys(null, "", "KT1");
-        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
-        JDBC.assertEmpty(rs);
+        rs = getPrimaryKeys(null, "", "KT1");
+        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
+        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
+        JDBC.assertEmpty(rs[0]);
+        JDBC.assertEmpty(rs[1]);
 
         // tablename may not be null
+        DatabaseMetaData dmd = getDMD();
         try {
-            rs = dmd.getPrimaryKeys(null, null, null);
+            rs[0] = dmd.getPrimaryKeys(null, null, null);
+            fail ("table name may not be null, should've given error");
+        } catch (SQLException sqle) {
+            assertSQLState("XJ103", sqle);
+        }
+        try {
+            rs[1] = getPrimaryKeysODBC(null, null, null);
             fail ("table name may not be null, should've given error");
         } catch (SQLException sqle) {
             assertSQLState("XJ103", sqle);
         }
         
         // DERBY-2610, tablename must be given as stored - % means no rows
-        rs = dmd.getPrimaryKeys(null, null, "%");
-        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
-        JDBC.assertEmpty(rs);
+        rs = getPrimaryKeys(null, null, "%");
+        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
+        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
+        JDBC.assertEmpty(rs[0]);
+        JDBC.assertEmpty(rs[1]);
         
         dropObjectsForKeysTests();
+    }
+
+    /**
+     * Helper method for testing getPrimaryKeys - calls the ODBC procedure
+     * @throws SQLException 
+     */
+    public ResultSet getPrimaryKeysODBC(
+            String catalog, String schema, String table) throws SQLException 
+    {
+        CallableStatement cs = prepareCall(
+                "CALL SYSIBM.SQLPRIMARYKEYS(?, ?, ?, 'DATATYPE=''ODBC''')");
+        cs.setString(1, catalog);
+        cs.setString(2, schema);
+        cs.setString(3, table);
+        cs.execute();
+        return cs.getResultSet();
+    }
+    
+    /**
+     * Helper method for testing getPrimaryKeys - calls dmd.getPrimaryKeys for
+     * the JDBC call, and getPrimaryKeysODBC for the ODBC procedure
+     * @throws SQLException 
+     */
+    private ResultSet[] getPrimaryKeys(
+            String catalog, String schema, String table) throws SQLException 
+    {
+        ResultSet[] rss = new ResultSet[2]; 
+        DatabaseMetaData dmd = getDMD();
+        rss[0]= dmd.getPrimaryKeys(catalog, schema, table);
+        rss[1]= getPrimaryKeysODBC(catalog, schema, table);
+        return rss;        
     }
 
     /**
@@ -3407,44 +3786,58 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
 
         createObjectsForKeysTests();
         
-        DatabaseMetaData dmd = getDMD();
-        
         // try with valid search criteria
         // although, % may not actually be appropriate?
-        ResultSet rs = dmd.getImportedKeys("", "%", "REFTAB");
-        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
-        JDBC.assertFullResultSet(rs, expRS1, true);
-        rs = dmd.getImportedKeys("", "%", "REFTAB2");
-        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
-        JDBC.assertFullResultSet(rs, expRS2, true);
+        ResultSet rs[] = getImportedKeys("", "%", "REFTAB");
+        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
+        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
+        assertFullResultSet(rs, expRS1, true);
+        rs = getImportedKeys("", "%", "REFTAB2");
+        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
+        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
+        assertFullResultSet(rs, expRS2, true);
         
-        rs = dmd.getImportedKeys(null, "APP", "REFTAB");
-        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
-        JDBC.assertFullResultSet(rs, expRS1, true);
-        rs = dmd.getImportedKeys(null, "APP", "REFTAB2");
-        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
-        JDBC.assertFullResultSet(rs, expRS2, true);
+        rs = getImportedKeys(null, "APP", "REFTAB");
+        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
+        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
+        assertFullResultSet(rs, expRS1, true);
+        rs = getImportedKeys(null, "APP", "REFTAB2");
+        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
+        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
+        assertFullResultSet(rs, expRS2, true);
 
-        rs = dmd.getImportedKeys(null, null, "REFTAB");
-        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
-        JDBC.assertFullResultSet(rs, expRS1, true);
+        rs = getImportedKeys(null, null, "REFTAB");
+        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
+        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
+        assertFullResultSet(rs, expRS1, true);
 
-        rs = dmd.getImportedKeys(null, "", "REFTAB");
-        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
-        JDBC.assertEmpty(rs);
+        rs = getImportedKeys(null, "", "REFTAB");
+        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
+        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
+        JDBC.assertEmpty(rs[0]);
+        JDBC.assertEmpty(rs[1]);
 
         // tablename may not be null
+        DatabaseMetaData dmd = getDMD();
         try {
-            rs = dmd.getImportedKeys(null, null, null);
+            rs[0] = dmd.getImportedKeys(null, null, null);
+            fail ("table name may not be null, should've given error");
+        } catch (SQLException sqle) {
+            assertSQLState("XJ103", sqle);
+        }
+        try {
+            rs[1] = getImportedKeysODBC(null, null, null);
             fail ("table name may not be null, should've given error");
         } catch (SQLException sqle) {
             assertSQLState("XJ103", sqle);
         }
         
         // DERBY-2610, tablename must be given as stored - % means no rows
-        rs = dmd.getImportedKeys(null, null, "%");
-        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
-        JDBC.assertEmpty(rs);
+        rs = getImportedKeys(null, null, "%");
+        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
+        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
+        JDBC.assertEmpty(rs[0]);
+        JDBC.assertEmpty(rs[1]);
 
         // getExportedKeys
         expRS1 = new String[][] {
@@ -3459,40 +3852,55 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         expRS2 = new String[][] {
                 {"","APP","REFTAB","DPRIM","","APP","REFTAB","DFOR","1","3","3","FKEYSELF","PKEY_REFTAB","7"}};
 
-        rs = dmd.getExportedKeys("", "%", "KT1");
-        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
-        JDBC.assertFullResultSet(rs, expRS1, true);
-        rs = dmd.getExportedKeys("", "%", "REFTAB");
-        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
-        JDBC.assertFullResultSet(rs, expRS2, true);
+        rs = getExportedKeys("", "%", "KT1");
+        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
+        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
+        assertFullResultSet(rs, expRS1, true);
+        rs = getExportedKeys("", "%", "REFTAB");
+        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
+        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
+        assertFullResultSet(rs, expRS2, true);
         
-        rs = dmd.getExportedKeys(null, "APP", "KT1");
-        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
-        JDBC.assertFullResultSet(rs, expRS1, true);
-        rs = dmd.getExportedKeys(null, "APP", "REFTAB");
-        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
-        JDBC.assertFullResultSet(rs, expRS2, true);
+        rs = getExportedKeys(null, "APP", "KT1");
+        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
+        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
+        assertFullResultSet(rs, expRS1, true);
+        rs = getExportedKeys(null, "APP", "REFTAB");
+        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
+        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
+        assertFullResultSet(rs, expRS2, true);
 
-        rs = dmd.getExportedKeys(null, null, "KT1");
-        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
-        JDBC.assertFullResultSet(rs, expRS1, true);
+        rs = getExportedKeys(null, null, "KT1");
+        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
+        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
+        assertFullResultSet(rs, expRS1, true);
 
-        rs = dmd.getExportedKeys(null, "", "KT1");
-        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
-        JDBC.assertEmpty(rs);
+        rs = getExportedKeys(null, "", "KT1");
+        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
+        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
+        JDBC.assertEmpty(rs[0]);
+        JDBC.assertEmpty(rs[1]);
 
         // tablename may not be null
         try {
-            rs = dmd.getExportedKeys(null, null, null);
+            rs[0] = dmd.getExportedKeys(null, null, null);
+            fail ("table name may not be null, should've given error");
+        } catch (SQLException sqle) {
+            assertSQLState("XJ103", sqle);
+        }
+        try {
+            rs[1] = getExportedKeysODBC(null, null, null);
             fail ("table name may not be null, should've given error");
         } catch (SQLException sqle) {
             assertSQLState("XJ103", sqle);
         }
         
         // DERBY-2610, tablename must be given as stored - % means no rows
-        rs = dmd.getExportedKeys(null, null, "%");
-        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
-        JDBC.assertEmpty(rs);
+        rs = getExportedKeys(null, null, "%");
+        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
+        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
+        JDBC.assertEmpty(rs[0]);
+        JDBC.assertEmpty(rs[1]);
         
         // getCrossReference
         expRS1 = new String[][] {
@@ -3506,40 +3914,69 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                 {"","APP","REFTAB","DPRIM","","APP","REFTAB","DFOR","1","3","3","FKEYSELF","PKEY_REFTAB","7"}};
 
         // try with valid search criteria
-        rs = dmd.getCrossReference("", null, "KT1", "", null, "REFTAB");
-        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
-        JDBC.assertFullResultSet(rs, expRS1, true);
+        rs = getCrossReference("", null, "KT1", "", null, "REFTAB");
+        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
+        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
+        assertFullResultSet(rs, expRS1, true);
         
-        rs = dmd.getCrossReference("", "APP", "REFTAB", "", null, "REFTAB");
-        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
-        JDBC.assertFullResultSet(rs, expRS2, true);
+        rs = getCrossReference("", "APP", "REFTAB", "", null, "REFTAB");
+        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
+        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
+        assertFullResultSet(rs, expRS2, true);
 
-        rs = dmd.getCrossReference("", null, "KT1", "", "APP", "REFTAB");
-        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
-        JDBC.assertFullResultSet(rs, expRS1, true);
+        rs = getCrossReference("", null, "KT1", "", "APP", "REFTAB");
+        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
+        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
+        assertFullResultSet(rs, expRS1, true);
 
-        rs = dmd.getCrossReference("", null, "REFTAB", "", "APP", "REFTAB");
-        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
-        JDBC.assertFullResultSet(rs, expRS2, true);
+        rs = getCrossReference("", null, "REFTAB", "", "APP", "REFTAB");
+        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
+        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
+        assertFullResultSet(rs, expRS2, true);
 
-        rs = dmd.getCrossReference(null, "APP", "KT1", null, null, "REFTAB");
-        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
-        JDBC.assertFullResultSet(rs, expRS1, true);
+        rs = getCrossReference(null, "APP", "KT1", null, null, "REFTAB");
+        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
+        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
+        assertFullResultSet(rs, expRS1, true);
 
-        rs = dmd.getCrossReference(null, "APP", "REFTAB", null, null, "REFTAB");
-        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
-        JDBC.assertFullResultSet(rs, expRS2, true);
+        rs = getCrossReference(null, "APP", "REFTAB", null, null, "REFTAB");
+        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
+        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
+        assertFullResultSet(rs, expRS2, true);
 
         // DERBY-2758; query should return a different value for odbc vs. jdbc
         // only experiment jdbc here, odbc is handled elsewhere.
-        rs = dmd.getCrossReference(null, "APP", "%", null, null, "%");
-        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
-        JDBC.assertEmpty(rs);
+        rs = getCrossReference(null, "APP", "%", null, null, "%");
+        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
+        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
+        JDBC.assertEmpty(rs[0]);
+        String[][] expRS = new String[][] {
+                {"","APP","KT1","VC10","","APP","REFTAB","VC10","1","3","3","FKEY1","PRIMKEY","7"},
+                {"","APP","KT1","I","","APP","REFTAB","I","2","3","3","FKEY1","PRIMKEY","7"},
+                {"","APP","KT1","C30","","APP","REFTAB","C30","1","3","3","FKEY2","UNIQUEKEY","7"},
+                {"","APP","KT1","S","","APP","REFTAB","S2","2","3","3","FKEY2","UNIQUEKEY","7"},
+                {"","APP","KT1","C30","","APP","REFTAB","C30","1","3","3","FKEY3","UNIQUEKEY","7"},
+                {"","APP","KT1","S","","APP","REFTAB","S","2","3","3","FKEY3","UNIQUEKEY","7"},
+                {"","APP","REFTAB","DPRIM","","APP","REFTAB","DFOR","1","3","3","FKEYSELF","PKEY_REFTAB","7"},
+                {"","APP","KT1","VC10","","APP","REFTAB2","T2_VC10","1","3","3","T2_FKEY1","PRIMKEY","7"},
+                {"","APP","KT1","I","","APP","REFTAB2","T2_I","2","3","3","T2_FKEY1","PRIMKEY","7"}};
+        JDBC.assertFullResultSet(rs[1], expRS, true);
         
         // tablename may not be null
         try {
-            rs = dmd.getCrossReference(null, null, null, null, null, null);
+            rs[0] = dmd.getCrossReference(null, null, null, null, null, null);
             fail ("table name may not be null, should've given error");
+        } catch (SQLException sqle) {
+            if (usingDerbyNetClient())
+                assertSQLState("XJ110", sqle);
+            else
+                assertSQLState("XJ103", sqle);
+        }
+        // Note: With ODBC, this does *not* give an error. 
+        // If that changes, uncomment the fail.
+        try {
+            rs[1] = getCrossReferenceODBC(null, null, null, null, null, null);
+        //    fail ("table name may not be null, should've given error");
         } catch (SQLException sqle) {
             if (usingDerbyNetClient())
                 assertSQLState("XJ110", sqle);
@@ -3548,7 +3985,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         }
         // tablename may not be null
         try {
-            rs = dmd.getCrossReference(null, null, "", null, null, null);
+            rs[0] = dmd.getCrossReference(null, null, "", null, null, null);
             fail ("table name may not be null, should've given error");
         } catch (SQLException sqle) {
             if (usingDerbyNetClient())
@@ -3556,15 +3993,131 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
             else
                 assertSQLState("XJ103", sqle);
         }
+        try {
+            rs[1] = getCrossReferenceODBC(null, null, "", null, null, null);
+            //fail ("table name may not be null, should've given error");
+        } catch (SQLException sqle) {
+            if (usingDerbyNetClient())
+                assertSQLState("XJ111", sqle);
+            else
+                assertSQLState("XJ103", sqle);
+        }        
         
         // DERBY-2610, tablename must be given as stored - % means no rows
-        rs = dmd.getCrossReference(null, null, "%", null, null, "%");
-        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
-        JDBC.assertEmpty(rs);
+        rs = getCrossReference(null, null, "%", null, null, "%");
+        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
+        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
+        JDBC.assertEmpty(rs[0]);
+        // But it *is* allowed with ODBC, see DERBY-2758
+        JDBC.assertFullResultSet(rs[1], expRS, true);
         
-        rs.close();
+        rs[0].close();
+        rs[1].close();
         
         dropObjectsForKeysTests();
+    }
+    
+    /**
+     * Helper method for testing getImportedKeys - calls the ODBC procedure
+     * @throws SQLException 
+     */
+    public ResultSet getImportedKeysODBC(
+            String catalog, String schema, String table) throws SQLException 
+    {
+        CallableStatement cs = prepareCall("CALL SYSIBM.SQLFOREIGNKEYS(" +
+            "null, null, null, ?, ?, ?, 'IMPORTEDKEY=1;DATATYPE=''ODBC''')");
+        cs.setString(1, catalog);
+        cs.setString(2, schema);
+        cs.setString(3, table);
+        cs.execute();
+        return cs.getResultSet();
+    }
+    
+    /**
+     * Helper method for testing getImportedKeys - calls dmd.getImportedKeys for
+     * the JDBC call, and getImportedKeysODBC for the ODBC procedure
+     * @throws SQLException 
+     */
+    private ResultSet[] getImportedKeys(
+            String catalog, String schema, String table) throws SQLException 
+    {
+        ResultSet[] rss = new ResultSet[2]; 
+        DatabaseMetaData dmd = getDMD();
+        rss[0]= dmd.getImportedKeys(catalog, schema, table);
+        rss[1]= getImportedKeysODBC(catalog, schema, table);
+        return rss;        
+    }
+
+    /**
+     * Helper method for testing getExportedKeys - calls the ODBC procedure
+     * @throws SQLException 
+     */
+    public ResultSet getExportedKeysODBC(
+            String catalog, String schema, String table) throws SQLException 
+    {
+        CallableStatement cs = prepareCall("CALL SYSIBM.SQLFOREIGNKEYS(" +
+            "?, ?, ?, null, null, null, 'EXPORTEDKEY=1;DATATYPE=''ODBC''')");
+        cs.setString(1, catalog);
+        cs.setString(2, schema);
+        cs.setString(3, table);
+        cs.execute();
+        return cs.getResultSet();
+    }
+    
+    /**
+     * Helper method for testing getExportedKeys - calls dmd.getExportedKeys for
+     * the JDBC call, and getExportedKeysODBC for the ODBC procedure
+     * @throws SQLException 
+     */
+    private ResultSet[] getExportedKeys(
+            String catalog, String schema, String table) throws SQLException 
+    {
+        ResultSet[] rss = new ResultSet[2]; 
+        DatabaseMetaData dmd = getDMD();
+        rss[0]= dmd.getExportedKeys(catalog, schema, table);
+        rss[1]= getExportedKeysODBC(catalog, schema, table);
+        return rss;        
+    }
+
+    /**
+     * Helper method for testing getCrossReference - calls the ODBC procedure
+     * @throws SQLException 
+     */
+    public ResultSet getCrossReferenceODBC(
+            String parentcatalog, String parentschema, String parenttable,
+            String foreigncatalog, String foreignschema, String foreigntable)
+        throws SQLException 
+    {
+        CallableStatement cs = prepareCall("CALL SYSIBM.SQLFOREIGNKEYS(" +
+                "?, ?, ?, ?, ?, ?, 'DATATYPE=''ODBC''')");
+
+        cs.setString(1, parentcatalog);
+        cs.setString(2, parentschema);
+        cs.setString(3, parenttable);
+        cs.setString(4, foreigncatalog);
+        cs.setString(5, foreignschema);
+        cs.setString(6, foreigntable);
+        cs.execute();
+        return cs.getResultSet();
+    }
+    
+    /**
+     * Helper method for testing getCrossReference - calls dmd.getCrossReference for
+     * the JDBC call, and getCrossReferenceODBC for the ODBC procedure
+     * @throws SQLException 
+     */
+    private ResultSet[] getCrossReference(
+            String parentcatalog, String parentschema, String parenttable,
+            String foreigncatalog, String foreignschema, String foreigntable)
+        throws SQLException 
+    {
+        ResultSet[] rss = new ResultSet[2]; 
+        DatabaseMetaData dmd = getDMD();
+        rss[0]= dmd.getCrossReference(parentcatalog, parentschema, parenttable,
+            foreigncatalog, foreignschema, foreigntable);
+        rss[1]= getCrossReferenceODBC(parentcatalog, parentschema, parenttable,
+            foreigncatalog, foreignschema, foreigntable);
+        return rss;        
     }
     
     /**
@@ -3574,7 +4127,6 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     public void testReferentialAction() throws SQLException
     {
         Statement s = createStatement();
-        DatabaseMetaData dmd = getDMD();
 
         getConnection().setAutoCommit(false);        
         // First, create the test table and indexes/keys
@@ -3594,59 +4146,37 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         short setnull = DatabaseMetaData.importedKeySetNull;
         short setdefault = DatabaseMetaData.importedKeySetDefault;
         
-        ResultSet rs = dmd.getCrossReference("","APP","REFACTION1","","APP","REFACTNONE");
-        rs.next();
-        assertEquals(no_action, rs.getShort(10));
-        assertEquals(no_action, rs.getShort(11));
-        rs = dmd.getCrossReference("","APP","REFACTION1","","APP","REFACTRESTRICT");
-        rs.next();
-        assertEquals(no_action, rs.getShort(10));
-        assertEquals(restrict, rs.getShort(11));
-        rs = dmd.getCrossReference("","APP","REFACTION1","","APP","REFACTNOACTION");
-        rs.next();
-        assertEquals(no_action, rs.getShort(10));
-        assertEquals(no_action, rs.getShort(11));
-        rs = dmd.getCrossReference("","APP","REFACTION1","","APP","REFACTCASCADE");
-        rs.next();
-        assertEquals(no_action, rs.getShort(10));
-        assertEquals(cascade, rs.getShort(11));
-        rs = dmd.getCrossReference("","APP","REFACTION1","","APP","REFACTSETNULL");
-        rs.next();
-        assertEquals(no_action, rs.getShort(10));
-        assertEquals(setnull, rs.getShort(11));
-        rs = dmd.getCrossReference("","APP","REFACTION1","","APP","REFACTUPDRESTRICT");
-        rs.next();
-        assertEquals(restrict, rs.getShort(10));
-        assertEquals(no_action, rs.getShort(11));
-        rs = dmd.getCrossReference("","APP","REFACTION1","","APP","REFACTUPDNOACTION");
-        rs.next();
-        assertEquals(no_action, rs.getShort(10));
-        assertEquals(no_action, rs.getShort(11));
+        ResultSet rs[] = getCrossReference("","APP","REFACTION1","","APP","REFACTNONE");
+        verifyReferentialAction(rs, new short[] {no_action, no_action});
+        rs = getCrossReference("","APP","REFACTION1","","APP","REFACTRESTRICT");
+        verifyReferentialAction(rs, new short[] {no_action, restrict});
+        rs = getCrossReference("","APP","REFACTION1","","APP","REFACTNOACTION");
+        verifyReferentialAction(rs, new short[] {no_action, no_action});
+        rs = getCrossReference("","APP","REFACTION1","","APP","REFACTCASCADE");
+        verifyReferentialAction(rs, new short[] {no_action, cascade});
+        rs = getCrossReference("","APP","REFACTION1","","APP","REFACTSETNULL");
+        verifyReferentialAction(rs, new short[] {no_action, setnull});
+        rs = getCrossReference("","APP","REFACTION1","","APP","REFACTUPDRESTRICT");
+        verifyReferentialAction(rs, new short[] {restrict, no_action});
+        rs = getCrossReference("","APP","REFACTION1","","APP","REFACTUPDNOACTION");
+        verifyReferentialAction(rs, new short[] {no_action, no_action});
 
-        rs = dmd.getImportedKeys(null, "APP", "REFACTNONE");
-        rs.next();
-        assertEquals(no_action, rs.getShort(10));
-        assertEquals(no_action, rs.getShort(11));
-        rs = dmd.getImportedKeys(null, "APP", "REFACTRESTRICT");
-        rs.next();
-        assertEquals(restrict, rs.getShort(11));
-        rs = dmd.getImportedKeys(null, "APP", "REFACTNOACTION");
-        rs.next();
-        assertEquals(no_action, rs.getShort(11));
-        rs = dmd.getImportedKeys(null, "APP", "REFACTCASCADE");
-        rs.next();
-        assertEquals(cascade, rs.getShort(11));
-        rs = dmd.getImportedKeys(null, "APP", "REFACTSETNULL");
-        rs.next();
-        assertEquals(setnull, rs.getShort(11));
-        rs = dmd.getImportedKeys(null, "APP", "REFACTUPDRESTRICT");
-        rs.next();
-        assertEquals(no_action, rs.getShort(11));
-        rs = dmd.getImportedKeys(null, "APP", "REFACTUPDNOACTION");
-        rs.next();
-        assertEquals(no_action, rs.getShort(11));
+        rs = getImportedKeys(null, "APP", "REFACTNONE");
+        verifyReferentialAction(rs, new short[] {no_action, no_action});
+        rs = getImportedKeys(null, "APP", "REFACTRESTRICT");
+        verifyReferentialAction(rs, new short[] {restrict, restrict}); 
+        rs = getImportedKeys(null, "APP", "REFACTNOACTION");
+        verifyReferentialAction(rs, new short[] {no_action, no_action});
+        rs = getImportedKeys(null, "APP", "REFACTCASCADE");
+        verifyReferentialAction(rs, new short[] {no_action, cascade});
+        rs = getImportedKeys(null, "APP", "REFACTSETNULL");
+        verifyReferentialAction(rs, new short[] {no_action, setnull});
+        rs = getImportedKeys(null, "APP", "REFACTUPDRESTRICT");
+        verifyReferentialAction(rs, new short[] {no_action, no_action});
+        rs = getImportedKeys(null, "APP", "REFACTUPDNOACTION");
+        verifyReferentialAction(rs, new short[] {no_action, no_action});
 
-        rs = dmd.getExportedKeys(null, "APP", "REFACTION1");
+        rs = getExportedKeys(null, "APP", "REFACTION1");
         short [][] expkeyresults = {
                 {no_action, cascade},
                 {no_action, no_action},
@@ -3657,9 +4187,15 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                 {restrict, no_action}};
         for (int i = 0 ; i < 6 ; i++)
         {
-            rs.next();
-            assertEquals(expkeyresults[i][0], rs.getShort(10));
-            assertEquals(expkeyresults[i][1], rs.getShort(11));
+            rs[0].next();
+            assertEquals(expkeyresults[i][0], rs[0].getShort(10));
+            assertEquals(expkeyresults[i][1], rs[0].getShort(11));
+        }
+        for (int i = 0 ; i < 6 ; i++)
+        {
+            rs[1].next();
+            assertEquals(expkeyresults[i][0], rs[1].getShort(10));
+            assertEquals(expkeyresults[i][1], rs[1].getShort(11));
         }
 
         s.execute("drop table refactnone");
@@ -3672,9 +4208,393 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         s.execute("drop table refaction1");
         commit();
         
-        rs.clearWarnings();
+        rs[0].close();
+        rs[1].close();
         s.close();
         
         getConnection().setAutoCommit(true);        
     }    
+    
+    // helper method for Referential Action test; verifies result
+    // of various calls.
+    // rs[0] is for JDBC calls, rs[1] for ODBC
+    public void verifyReferentialAction(ResultSet[] rs, short[] expRes) 
+        throws SQLException {
+        rs[0].next();
+        assertEquals(expRes[0], rs[0].getShort(10));
+        assertEquals(expRes[1], rs[0].getShort(11));
+        rs[1].next();
+        assertEquals(expRes[0], rs[1].getShort(10));
+        assertEquals(expRes[1], rs[1].getShort(11));
+    }
+    
+    
+    /**
+     * Test DatabaseMetaData.getProcedures and .getProcedureColumns,
+     * Both for JDBC and ODBC.
+     * Further testing of these methods is done in lang/LangProcedureTest
+     *
+     * 
+     * @throws SQLexception
+     */
+    // Possible TODO: 
+    //   rewrite data portion of this test to compare results from 
+    //   metadata with sys.sys* query results (leave shape check in place)
+    public void testGetProceduresGetProcColumns() throws SQLException {
+        
+        Statement s = createStatement();
+        getConnection().setAutoCommit(false);
+        
+        s.execute("create procedure GETPCTEST1 (" +
+                // for creating, the procedure's params do not need to exactly match the method's
+                "out outb VARCHAR(3), a VARCHAR(3), b NUMERIC, c SMALLINT, " +
+                "e SMALLINT, f INTEGER, g BIGINT, h FLOAT, i DOUBLE PRECISION, " +
+                "k DATE, l TIME, T TIMESTAMP )"+
+                "language java external name " +
+                "'org.apache.derbyTesting.functionTests.tests.jdbcapi.metadata.getpc'" +
+        " parameter style java"); 
+        s.execute("create procedure GETPCTEST2 (pa INTEGER, pb BIGINT)"+
+                "language java external name " +
+                "'org.apache.derbyTesting.functionTests.tests.jdbcapi.metadata.getpc'" +
+        " parameter style java"); 
+        s.execute("create procedure GETPCTEST3A (STRING1 VARCHAR(5), out STRING2 VARCHAR(5))"+
+                "language java external name " +
+                "'org.apache.derbyTesting.functionTests.tests.jdbcapi.metadata.getpc'" +
+        " parameter style java"); 
+        s.execute("create procedure GETPCTEST3B (in STRING3 VARCHAR(5), inout STRING4 VARCHAR(5))"+
+                "language java external name " +
+                "'org.apache.derbyTesting.functionTests.tests.jdbcapi.metadata.getpc'" +
+        " parameter style java"); 
+        s.execute("create procedure GETPCTEST4A()  "+
+                "language java external name " +
+                "'org.apache.derbyTesting.functionTests.tests.jdbcapi.metadata.getpc4a'"+
+        " parameter style java"); 
+        s.execute("create procedure GETPCTEST4B() "+
+                "language java external name " +
+                "'org.apache.derbyTesting.functionTests.tests.jdbcapi.metadata.getpc4b'" +
+        " parameter style java"); 
+        s.execute("create procedure GETPCTEST4Bx(out retparam INTEGER) "+
+                "language java external name " +
+                "'org.apache.derbyTesting.functionTests.tests.jdbcapi.metadata.getpc4b'" +
+        " parameter style java"); 
+        
+        ResultSet rs[] = getProcedures(null, "%", "GETPCTEST%");
+        String[] columnNames = new String[] {
+                "PROCEDURE_CAT","PROCEDURE_SCHEM","PROCEDURE_NAME",
+                "RESERVED1","RESERVED2","RESERVED3",
+                "REMARKS","PROCEDURE_TYPE","SPECIFIC_NAME"};
+        String[] odbcColumnNames = new String[] {
+                "PROCEDURE_CAT","PROCEDURE_SCHEM","PROCEDURE_NAME",
+                "NUM_INPUT_PARAMS","NUM_OUTPUT_PARAMS","NUM_RESULT_SETS",
+                "REMARKS","PROCEDURE_TYPE"};
+        int[] columnTypes = new int[] {
+                Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.INTEGER,
+                Types.INTEGER, Types.INTEGER, Types.VARCHAR, Types.SMALLINT,
+                Types.VARCHAR};
+        int[] odbcColumnTypes = new int[] {
+                Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.INTEGER,
+                Types.INTEGER, Types.INTEGER, Types.VARCHAR, Types.SMALLINT};
+        boolean[] nullability = new boolean[] {
+                true, false, false, true, true, true, true, true, false};
+        boolean[] odbcNullability = new boolean[] {
+                true, false, false, true, true, true, true, true};
+        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
+        assertMetaDataResultSet(
+                rs[1], odbcColumnNames, odbcColumnTypes, odbcNullability);
+        String[][] expRS = new String[][] {
+                {"","APP","GETPCTEST1","null","null","null","getpc","1"},
+                {"","APP","GETPCTEST2","null","null","null","getpc","1"},
+                {"","APP","GETPCTEST3A","null","null","null","getpc","1"},
+                {"","APP","GETPCTEST3B","null","null","null","getpc","1"},
+                {"","APP","GETPCTEST4A","null","null","null","getpc4a","1"},
+                {"","APP","GETPCTEST4B","null","null","null","getpc4b","1"},
+                {"","APP","GETPCTEST4BX","null","null","null","getpc4b","1"},
+        };
+        for (int j=0 ; j<2 ; j++)
+        {
+            int rowcount = 0;
+            while (rowcount < 7){
+                rs[j].next();
+                assertEquals(expRS[rowcount][0], rs[j].getString(1));
+                assertEquals(expRS[rowcount][1], rs[j].getString(2));
+                assertEquals(expRS[rowcount][2], rs[j].getString(3));
+                assertNull(rs[j].getString(4));
+                assertNull(rs[j].getString(5));
+                assertNull(rs[j].getString(6));
+                assertTrue(rs[j].getString(7).indexOf(expRS[rowcount][6])>0);
+                assertEquals(expRS[rowcount][7], rs[j].getString(8));
+                if (j == 0)
+                    assertNotNull(rs[j].getString(9));
+                rowcount++;
+            }
+        }
+        rs = getProcedureColumns(null, "%", "GETPCTEST%", "%");
+        columnNames = new String[] {
+                "PROCEDURE_CAT","PROCEDURE_SCHEM","PROCEDURE_NAME",
+                "COLUMN_NAME", "COLUMN_TYPE", "DATA_TYPE", "TYPE_NAME",
+                "PRECISION", "LENGTH", "SCALE",
+                "RADIX", "NULLABLE", "REMARKS", "COLUMN_DEF",
+                "SQL_DATA_TYPE", "SQL_DATETIME_SUB", "CHAR_OCTET_LENGTH",
+                "ORDINAL_POSITION", "IS_NULLABLE", "SPECIFIC_NAME" //};
+                // interesting, we seem to have two extra columns vs the API
+                ,"METHOD_ID", "PARAMETER_ID"};
+        odbcColumnNames = new String[] {
+                "PROCEDURE_CAT","PROCEDURE_SCHEM","PROCEDURE_NAME",
+                "COLUMN_NAME", "COLUMN_TYPE", "DATA_TYPE", "TYPE_NAME",
+                "COLUMN_SIZE", "BUFFER_LENGTH", "DECIMAL_DIGITS",
+                "NUM_PREC_RADIX", "NULLABLE", "REMARKS", "COLUMN_DEF",
+                "SQL_DATA_TYPE", "SQL_DATETIME_SUB", "CHAR_OCTET_LENGTH",
+                "ORDINAL_POSITION", "IS_NULLABLE"//};
+                ,"METHOD_ID", "PARAMETER_ID"};
+        columnTypes = new int[] {
+                Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR,
+                Types.SMALLINT, Types.INTEGER, Types.VARCHAR, Types.INTEGER,
+                Types.INTEGER, Types.SMALLINT, Types.SMALLINT, Types.SMALLINT,
+                Types.VARCHAR, Types.VARCHAR, Types.INTEGER, Types.INTEGER,
+                Types.INTEGER, Types.INTEGER, Types.VARCHAR, Types.VARCHAR //};
+                , Types.SMALLINT, Types.SMALLINT};
+        odbcColumnTypes = new int[] {
+                Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR,
+                Types.SMALLINT, Types.SMALLINT, Types.VARCHAR, Types.INTEGER,
+                Types.INTEGER, Types.SMALLINT, Types.SMALLINT, Types.SMALLINT,
+                Types.VARCHAR, Types.VARCHAR, Types.SMALLINT, Types.SMALLINT,
+                Types.INTEGER, Types.INTEGER, Types.VARCHAR//};
+                , Types.SMALLINT, Types.SMALLINT};
+        nullability = new boolean[] {
+                true, false, false, false, false, false, false, false, true, true,
+                true, false, true, true, true, true, true, true, true, false//};
+                , false, false};
+        odbcNullability = new boolean[] {
+                true, false, false, false, false, true, false, false, true, true,
+                true, false, true, true, true, true, true, true, true//};
+                , false, false};
+        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
+        assertMetaDataResultSet(
+            rs[1], odbcColumnNames, odbcColumnTypes, odbcNullability);
+        expRS = new String[][] {
+                {null,"APP","GETPCTEST1","OUTB","4","12","VARCHAR","3","6",null,null,"1",null,null,"12",null,"6","1","YES","genid","12","0"},
+                {null,"APP","GETPCTEST1","A","1","12","VARCHAR","3","6",null,null,"1",null,null,"12",null,"6","2","YES","genid","12","1"},
+                {null,"APP","GETPCTEST1","B","1","2","NUMERIC","5","14","0","10","1",null,null,"2",null,null,"3","YES","genid","12","2"},
+                {null,"APP","GETPCTEST1","C","1","5","SMALLINT","5","2","0","10","1",null,null,"5",null,null,"4","YES","genid","12","3"},
+                {null,"APP","GETPCTEST1","E","1","5","SMALLINT","5","2","0","10","1",null,null,"5",null,null,"5","YES","genid","12","4"},
+                {null,"APP","GETPCTEST1","F","1","4","INTEGER","10","4","0","10","1",null,null,"4",null,null,"6","YES","genid","12","5"},                
+                {null,"APP","GETPCTEST1","G","1","-5","BIGINT","19","40","0","10","1",null,null,"-5",null,null,"7","YES","genid","12","6"},                
+                {null,"APP","GETPCTEST1","H","1","8","DOUBLE","52","8",null,"2","1",null,null,"8",null,null,"8","YES","genid","12","7"},                
+                {null,"APP","GETPCTEST1","I","1","8","DOUBLE","52","8",null,"2","1",null,null,"8",null,null,"9","YES","genid","12","8"},                
+                {null,"APP","GETPCTEST1","K","1","91","DATE","10","6","0","10","1",null,null,"9","1",null,"10","YES","genid","12","9"},                
+                {null,"APP","GETPCTEST1","L","1","92","TIME","8","6","0","10","1",null,null,"9","2",null,"11","YES","genid","12","10"},                
+                {null,"APP","GETPCTEST1","T","1","93","TIMESTAMP","26","16","6","10","1",null,null,"9","3",null,"12","YES","genid","12","11"},                
+                {null,"APP","GETPCTEST2","PA","1","4","INTEGER","10","4","0","10","1",null,null,"4",null,null,"1","YES","genid","2","0"},
+                {null,"APP","GETPCTEST2","PB","1","-5","BIGINT","19","40","0","10","1",null,null,"-5",null,null,"2","YES","genid","2","1"},
+                {null,"APP","GETPCTEST3A","STRING1","1","12","VARCHAR","5","10",null,null,"1",null,null,"12",null,"10","1","YES","genid","2","0"}, 
+                {null,"APP","GETPCTEST3A","STRING2","4","12","VARCHAR","5","10",null,null,"1",null,null,"12",null,"10","2","YES","genid","2","1"},
+                {null,"APP","GETPCTEST3B","STRING3","1","12","VARCHAR","5","10",null,null,"1",null,null,"12",null,"10","1","YES","genid","2","0"},
+                {null,"APP","GETPCTEST3B","STRING4","2","12","VARCHAR","5","10",null,null,"1",null,null,"12",null,"10","2","YES","genid","2","1"},
+                {null,"APP","GETPCTEST4BX","RETPARAM","4","4","INTEGER","10","4","0","10","1",null,null,"4",null,null,"1","YES","genid","1","0"}
+        };
+        for (int j=0 ; j<2 ; j++)
+        {
+            int rowcount = 0;
+            while (rowcount < 19){
+                rs[j].next();
+                for (int k=0 ; k<19 ; k++){
+                    if (j == 0 && (k == 14 || k == 15))
+                        assertNull(rs[j].getString(k+1));
+                    else
+                    {
+                        // the datetime rows are a little different with odbc.
+                        if (j==1 && k==9 && rowcount==9)
+                            assertNull(rs[j].getString(k+1));
+                        else if (j==1 && k==10 && 
+                                (rowcount==9 || rowcount==10 || rowcount==11))
+                            assertEquals("2",rs[j].getString(k+1));
+                        else
+                            assertEquals(expRS[rowcount][k], rs[j].getString(k+1));
+                    }
+                }
+                if (j == 0)
+                {
+                    // one column more for jdbc...
+                    assertNotNull(rs[j].getString(20));
+                    assertEquals(expRS[rowcount][20], rs[j].getString(21));
+                    assertEquals(expRS[rowcount][21], rs[j].getString(22));
+                }
+                else
+                {
+                    assertEquals(expRS[rowcount][20], rs[j].getString(20));
+                    assertEquals(expRS[rowcount][21], rs[j].getString(21));
+                }                
+                rowcount++;
+            }
+        }
+        
+        s.execute("drop procedure GETPCTEST4Bx");
+        s.execute("drop procedure GETPCTEST4B");
+        s.execute("drop procedure GETPCTEST4A");
+        s.execute("drop procedure GETPCTEST3B");
+        s.execute("drop procedure GETPCTEST3A");
+        s.execute("drop procedure GETPCTEST2");
+        s.execute("drop procedure GETPCTEST1");
+        commit();
+    }
+
+    /**
+     * Helper method for testing getProcedures - calls the ODBC procedure
+     * @throws SQLException 
+     */
+    public ResultSet getProceduresODBC(
+            String catalog, String schemaPattern, String procedureNamePattern)
+        throws SQLException 
+    {
+        CallableStatement cs = prepareCall("CALL SYSIBM.SQLPROCEDURES(" +
+                "?, ?, ?, 'DATATYPE=''ODBC''')");
+            cs.setString(1, catalog);
+            cs.setString(2, schemaPattern);
+            cs.setString(3, procedureNamePattern);
+            cs.execute();
+            return cs.getResultSet();
+    }
+    
+    /**
+     * Helper method for testing getProcedures - calls dmd.getProcedures for
+     * the JDBC call, and getProceduresODBC for the ODBC procedure
+     * @throws SQLException 
+     */
+    private ResultSet[] getProcedures(
+            String catalog, String schemaPattern, String procedureNamePattern)
+        throws SQLException 
+    {
+        ResultSet[] rs = new ResultSet[2]; 
+        DatabaseMetaData dmd = getDMD();
+        rs[0]= dmd.getProcedures(catalog, schemaPattern, procedureNamePattern);
+        rs[1]= getProceduresODBC(catalog, schemaPattern, procedureNamePattern);
+        return rs;        
+    }
+
+    /**
+     * Helper method for testing getProcedureColumns - calls the ODBC procedure
+     * @throws SQLException 
+     */
+    public ResultSet getProcedureColumnsODBC(String catalog, 
+            String schemaPattern, String procedureNamePattern,
+            String columnNamePattern) throws SQLException 
+    {
+        CallableStatement cs = prepareCall("CALL SYSIBM.SQLPROCEDURECOLS(" +
+                "?, ?, ?, ?, 'DATATYPE=''ODBC''')");
+
+        cs.setString(1, catalog);
+        cs.setString(2, schemaPattern);
+        cs.setString(3, procedureNamePattern);
+        cs.setString(4, columnNamePattern);
+        cs.execute();
+        return cs.getResultSet();
+    }
+    
+    /**
+     * Helper method for testing getProcedureColumns - calls 
+     * dmd.getProcedureColumns for the JDBC call, and 
+     * getProcedureColumnssODBC for the ODBC procedure
+     * @throws SQLException 
+     */
+    private ResultSet[] getProcedureColumns(String catalog, 
+            String schemaPattern, String procedureNamePattern,
+            String columnNamePattern) throws SQLException 
+    {
+        ResultSet[] rss = new ResultSet[2]; 
+        DatabaseMetaData dmd = getDMD();
+        rss[0]= dmd.getProcedureColumns(catalog, schemaPattern, 
+                procedureNamePattern, columnNamePattern);
+        rss[1]= getProcedureColumnsODBC(catalog, schemaPattern,
+                procedureNamePattern, columnNamePattern);
+        return rss;        
+    }
+
+    public void testBugFixes() throws SQLException {
+        
+        Statement s = createStatement();
+        getConnection().setAutoCommit(false);        
+        DatabaseMetaData dmd = getDMD();
+
+        // test DERBY-655, DERBY-1343
+        // If a table has duplicate backing index, then it will share the 
+        // physical conglomerate with the existing index, but the duplicate
+        // indexes should have their own unique logical congomerates 
+        // associated with them. That way, it will be possible to 
+        // distinguish the 2 indexes in SYSCONGLOMERATES from each other.
+        s.execute("CREATE TABLE Derby655t1(c11_ID BIGINT NOT NULL)");
+        s.execute("CREATE TABLE Derby655t2 (c21_ID BIGINT NOT NULL primary key)");
+        s.execute("ALTER TABLE Derby655t1 ADD CONSTRAINT F_12 Foreign Key (c11_ID) REFERENCES Derby655t2 (c21_ID) ON DELETE CASCADE ON UPDATE NO ACTION");
+        s.execute("CREATE TABLE Derby655t3(c31_ID BIGINT NOT NULL primary key)");
+        s.execute("ALTER TABLE Derby655t2 ADD CONSTRAINT F_443 Foreign Key (c21_ID) REFERENCES Derby655t3(c31_ID) ON DELETE CASCADE ON UPDATE NO ACTION");
+
+        ResultSet rs = dmd.getImportedKeys("", "APP", "DERBY655T1");
+        JDBC.assertDrainResults(rs, 1);
+        
+        s.execute("drop table Derby655t1");
+        s.execute("drop table Derby655t2");
+        s.execute("drop table Derby655t3");
+
+        // This checks for a bug where you get incorrect behavior on a nested connection.
+        // if you do not get an error, the bug does not occur.          
+        if(JDBC.vmSupportsJDBC3()){
+            s.execute("create procedure isReadO() language java external name " +
+                    "'org.apache.derbyTesting.functionTests.tests.jdbcapi.metadata.isro'" +
+            " parameter style java"); 
+            s.execute("call isReadO()");
+        }
+    }
+    /**
+     * method used in testBugFixes, for testing nexted connection metadata
+     * @throws SQLException
+     */
+    public static void isro() throws SQLException {
+        DriverManager.getConnection(
+        "jdbc:default:connection").getMetaData().isReadOnly();
+    }
+    
+    /**
+     *  dummy method to test getProcedureColumns
+     */
+    public static byte[] getpc(String a, BigDecimal b, short c, byte d, short e, int f, long g, float h, double i, byte[] j, Date k, Time l, Timestamp T)
+    {
+        return j;
+    }
+
+    /**
+     *  overload getpc to further test getProcedureColumns
+     */
+    public static void getpc(int a, long[] b)
+    {
+    }
+
+    /**
+     *  overload getpc to further test getProcedureColumns
+     *  private method shouldn't be returned with alias, ok with procedure
+     */
+    private static void getpc(int a, long b)
+    {
+    }
+
+    /** 
+     * instance method for getProcedureColumns testing
+     * with method alias, this should not be returned by getProcedureColumns
+     * but DB2 returns this with a java procedure
+     */ 
+    public void getpc(String a, String b) {
+    }
+
+    /**
+     * this method should notbe seen by getProcedureColumns as
+     * it has no parameters and no return value.
+     */
+    public static void getpc4a() {
+    }
+
+    /**
+     * check a method with no paramters and a return value works
+     * for getProcedureColumns
+     */
+    public static int getpc4b() {
+        return 4;
+    }
 }
