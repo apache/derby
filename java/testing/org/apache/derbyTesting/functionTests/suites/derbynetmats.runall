@@ -10,9 +10,7 @@ derbynet/testProtocol.java
 derbynet/testProperties.java
 derbynet/testconnection.java
 derbynet/timeslice.java
-jdbcapi/metadata.java
 jdbcapi/metadataMultiConn.java
-jdbcapi/odbc_metadata.java
 lang/optimizerOverrides.sql
 lang/big.sql
 lang/holdCursorIJ.sql

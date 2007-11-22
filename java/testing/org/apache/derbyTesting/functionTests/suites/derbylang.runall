@@ -1,6 +1,4 @@
-jdbcapi/metadata.java
 jdbcapi/metadataMultiConn.java
-jdbcapi/odbc_metadata.java
 lang/DB2IsolationLevels.sql
 lang/LOBDB2compatibility.sql
 lang/aggregateOptimization.sql

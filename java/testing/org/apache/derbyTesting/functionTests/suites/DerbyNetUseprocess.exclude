@@ -10,7 +10,6 @@
 # derbynet/runtimeinfo.java - fails with already existing threads (maybe intermittent)
 # derbynet/sysinfo.java - fails because not access to java.class.path
 # derbynet/sysinfo_withproperties.java - fails because not access to java.class.path
-# jdbcapi/odbc_metadata.java - fails...
 # lang/optimizerOverrides.sql - fails...
 # lang/big.sql - checks depend on dir structure
 # lang/wisconsin.java - checks depend on dir structure
@@ -25,7 +24,6 @@ derbynet/dblook_test_net.java
 derbynet/runtimeinfo.java
 derbynet/sysinfo.java
 derbynet/sysinfo_withproperties.java
-jdbcapi/odbc_metadata.java
 lang/optimizerOverrides.sql
 lang/big.sql
 lang/wisconsin.java

@@ -4251,31 +4251,31 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                 "e SMALLINT, f INTEGER, g BIGINT, h FLOAT, i DOUBLE PRECISION, " +
                 "k DATE, l TIME, T TIMESTAMP )"+
                 "language java external name " +
-                "'org.apache.derbyTesting.functionTests.tests.jdbcapi.metadata.getpc'" +
+                "'org.apache.derbyTesting.functionTests.tests.jdbcapi.DatabaseMetaDataTest.getpc'" +
         " parameter style java"); 
         s.execute("create procedure GETPCTEST2 (pa INTEGER, pb BIGINT)"+
                 "language java external name " +
-                "'org.apache.derbyTesting.functionTests.tests.jdbcapi.metadata.getpc'" +
+                "'org.apache.derbyTesting.functionTests.tests.jdbcapi.DatabaseMetaDataTest.getpc'" +
         " parameter style java"); 
         s.execute("create procedure GETPCTEST3A (STRING1 VARCHAR(5), out STRING2 VARCHAR(5))"+
                 "language java external name " +
-                "'org.apache.derbyTesting.functionTests.tests.jdbcapi.metadata.getpc'" +
+                "'org.apache.derbyTesting.functionTests.tests.jdbcapi.DatabaseMetaDataTest.getpc'" +
         " parameter style java"); 
         s.execute("create procedure GETPCTEST3B (in STRING3 VARCHAR(5), inout STRING4 VARCHAR(5))"+
                 "language java external name " +
-                "'org.apache.derbyTesting.functionTests.tests.jdbcapi.metadata.getpc'" +
+                "'org.apache.derbyTesting.functionTests.tests.jdbcapi.DatabaseMetaDataTest.getpc'" +
         " parameter style java"); 
         s.execute("create procedure GETPCTEST4A()  "+
                 "language java external name " +
-                "'org.apache.derbyTesting.functionTests.tests.jdbcapi.metadata.getpc4a'"+
+                "'org.apache.derbyTesting.functionTests.tests.jdbcapi.DatabaseMetaDataTest.getpc4a'"+
         " parameter style java"); 
         s.execute("create procedure GETPCTEST4B() "+
                 "language java external name " +
-                "'org.apache.derbyTesting.functionTests.tests.jdbcapi.metadata.getpc4b'" +
+                "'org.apache.derbyTesting.functionTests.tests.jdbcapi.DatabaseMetaDataTest.getpc4b'" +
         " parameter style java"); 
         s.execute("create procedure GETPCTEST4Bx(out retparam INTEGER) "+
                 "language java external name " +
-                "'org.apache.derbyTesting.functionTests.tests.jdbcapi.metadata.getpc4b'" +
+                "'org.apache.derbyTesting.functionTests.tests.jdbcapi.DatabaseMetaDataTest.getpc4b'" +
         " parameter style java"); 
         
         ResultSet rs[] = getProcedures(null, "%", "GETPCTEST%");
@@ -4538,7 +4538,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         // if you do not get an error, the bug does not occur.          
         if(JDBC.vmSupportsJDBC3()){
             s.execute("create procedure isReadO() language java external name " +
-                    "'org.apache.derbyTesting.functionTests.tests.jdbcapi.metadata.isro'" +
+                    "'org.apache.derbyTesting.functionTests.tests.jdbcapi.DatabaseMetaDataTest.isro'" +
             " parameter style java"); 
             s.execute("call isReadO()");
         }

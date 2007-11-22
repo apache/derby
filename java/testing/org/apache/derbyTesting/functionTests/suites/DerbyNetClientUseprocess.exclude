@@ -12,7 +12,6 @@
 # derbynet/sysinfo.java - needs other properties
 # derbynet/sysinfo_withproperties.java - needs other properties
 # following fail for various reasons, many related to not being able to connect:
-#  jdbcapi/odbc_metadata.java
 #  lang/optimizerOverrides.sql
 #  lang/big.sql
 #  lang/wisconsin.java
@@ -29,7 +28,6 @@ derbynet/runtimeinfo.java
 derbynet/sysinfo.java
 derbynet/sysinfo_withproperties.java
 stress/stress.multi
-jdbcapi/odbc_metadata.java
 lang/optimizerOverrides.sql
 lang/big.sql
 lang/wisconsin.java

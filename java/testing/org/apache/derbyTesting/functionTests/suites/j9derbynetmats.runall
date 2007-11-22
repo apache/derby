@@ -6,9 +6,7 @@ derbynet/runtimeinfo.java
 derbynet/testProperties.java
 derbynet/testconnection.java
 derbynet/timeslice.java
-jdbcapi/metadata.java
 jdbcapi/metadataMultiConn.java
-jdbcapi/odbc_metadata.java
 lang/big.sql
 lang/holdCursorIJ.sql
 store/holdCursorExternalSortJDBC30.sql
