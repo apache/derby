@@ -105,7 +105,12 @@ public class CoalesceFunctionNode extends ValueNode
 {
 	String	functionName; //Are we here because of COALESCE function or VALUE function
 	ValueNodeList	argumentsList; //this is the list of arguments to the function. We are interested in the first not-null argument
-	ValueNode firstNonParameterNode;//The generated method will generate code to call coalesce on this non-parameter argument
+
+	/**
+	 * The generated method will generate code to call coalesce on
+	 * this non-parameter argument.
+	 */
+	private int firstNonParameterNodeIdx = -1;
 
 	/**
 	 * Initializer for a CalesceFunctionNode
@@ -152,7 +157,7 @@ public class CoalesceFunctionNode extends ValueNode
 		{
 			if (!(((ValueNode) argumentsList.elementAt(index)).requiresTypeFromContext()))
 			{
-				firstNonParameterNode = (ValueNode) argumentsList.elementAt(index);
+				firstNonParameterNodeIdx = index;
 				break;
 			}
 		}
@@ -279,7 +284,10 @@ public class CoalesceFunctionNode extends ValueNode
 		**	Next, if we are dealing with result type that is variable length, then generate a call to setWidth.
 		*/
 
-		firstNonParameterNode.generateExpression(acb, mb); //coalesce will be called on this non-parameter argument
+		// coalesce will be called on this non-parameter argument
+		((ValueNode) argumentsList.elementAt(firstNonParameterNodeIdx)).
+			generateExpression(acb, mb);
+
 		mb.upCast(ClassName.DataValueDescriptor);
 
 		mb.getField(arrayField); // first arg to the coalesce function
@@ -411,7 +419,8 @@ public class CoalesceFunctionNode extends ValueNode
 		if (SanityManager.DEBUG)
 		{
 			super.printSubNodes(depth);
-			printLabel(depth, "argumentsList: ");
+			printLabel(depth, "argumentsList: [firstNonParameterNodeIdx=" +
+					   firstNonParameterNodeIdx + "]" );
 			int argumentsListSize = argumentsList.size();
 			for (int i=0; i < argumentsListSize; i++) {
 			    ((ValueNode)argumentsList.elementAt(i)).treePrint(depth+1);

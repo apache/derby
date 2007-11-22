@@ -170,6 +170,7 @@ public class CoalesceTest extends BaseJDBCTestCase
         "create table tD (c1 int, c2 char(254))",
         "create table tB (c1 char(254), c2 char(40), vc1 varchar(253), vc2 varchar(2000), lvc1 long varchar, lvc2 long varchar, clob1 CLOB(200), clob2 CLOB(33K))",
         "create table tC (cbd1 char(254) for bit data, cbd2 char(40) for bit data, vcbd1 varchar(253) for bit data, vcbd2 varchar(2000) for bit data, lvcbd1 long varchar for bit data, lvcbd2 long varchar for bit data, blob1 BLOB(200), blob2 BLOB(33K))",	
+        "create table tAggr (i int)"
     };
 
     /* Public constructor required for running test as standalone JUnit. */    
@@ -1131,7 +1132,43 @@ public class CoalesceTest extends BaseJDBCTestCase
 
         dumpRS(s.executeQuery("select coalesce(blob1,blob2) from tC"), expectedValues[index++]);
         dumpRS(s.executeQuery("select value(blob1,blob2) from tC"), expectedValues[index++]);	
-    }    
+    }
+
+
+    public void testAggregateDerby2016() throws SQLException
+    {
+        String[] expectedValues = {
+            "COL1(datatype : INTEGER, precision : 10, scale : 0) 2 ",
+            "COL1(datatype : INTEGER, precision : 10, scale : 0) 55 ",
+            "COL1(datatype : INTEGER, precision : 10, scale : 0) 1 ",
+        };
+
+        int index = 0;
+
+        // let aggregate max return a non-null: should give 2
+        ps = prepareStatement("insert into tAggr values ?");
+        for (int i=0; i<3; i++) {
+            ps.setInt(1, i);
+            ps.executeUpdate();
+        }
+
+        dumpRS(s.executeQuery("select coalesce(max(i), 55) from tAggr"),
+               expectedValues[index++]);
+
+        s.executeUpdate("delete from tAggr");
+
+        // let aggregate max return a null
+        ps.setNull(1, Types.INTEGER);
+        ps.executeUpdate();
+
+        dumpRS(s.executeQuery("select coalesce(max(i), 55) from tAggr"),
+               expectedValues[index++]);
+
+        // two aggregates
+        dumpRS(s.executeQuery(
+                   "select coalesce(max(i), count(*), 55) from tAggr"),
+               expectedValues[index++]);
+    }
 
 
     /**************supporting methods *******************/
