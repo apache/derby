@@ -291,10 +291,11 @@ public abstract class metadata_test {
 						
 			met = con.getMetaData();
 
-			System.out.println("JDBC Driver '" + met.getDriverName() +
-							   "', version " + met.getDriverMajorVersion() +
-							   "." + met.getDriverMinorVersion() +
-							   " (" + met.getDriverVersion() + ")");
+            // driver version tested in junit test DatabaseMetaData.java
+			//System.out.println("JDBC Driver '" + met.getDriverName() +
+			//				   "', version " + met.getDriverMajorVersion() +
+			//				   "." + met.getDriverMinorVersion() +
+			//				   " (" + met.getDriverVersion() + ")");
 
 
 			System.out.println("getProcedures():");
