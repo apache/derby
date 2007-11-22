@@ -9,7 +9,6 @@
 #     the server machine
 # derbynet/getCurrentProperties for it exercises NetworkServerControl statements
 #     that are only supported on localhost
-# derbynet/NSinSameJVM - tries to start the server
 # derbynet/maxthreads - tries to use NetworkServerControl statements
 # derbynet/runtimeinfo - tries to use NetworkServerControl statements
 # derbynet/sysinfo - tries to use NetworkServerControl statements
@@ -25,7 +24,6 @@
 store/bootLock.java
 derbynet/dblook_test_net.java
 derbynet/getCurrentProperties.java
-derbynet/NSinSameJVM.java
 derbynet/maxthreads.java
 derbynet/runtimeinfo.java
 derbynet/sysinfo.java

@@ -3,7 +3,6 @@
 # 
 # jdbcapi/HoldabilityTest.junit - causes subsequent tests to fail because of missing
 #     File permissions
-# derbynet/NSinSameJVM.java - diff between thread and main. kind of ok, but fails.
 # derbynet/DerbyNetAutoStart.java - exits suite...
 # derbynet/getCurrentProperties.java - fails with different sessions
 # derbynet/dblook_test_net.java - fails, test misses properties
@@ -17,7 +16,6 @@
 #
 jdbcapi/maxfieldsize.java
 jdbcapi/HoldabilityTest.junit
-derbynet/NSinSameJVM.java
 derbynet/DerbyNetAutoStart.java
 derbynet/getCurrentProperties.java
 derbynet/dblook_test_net.java
