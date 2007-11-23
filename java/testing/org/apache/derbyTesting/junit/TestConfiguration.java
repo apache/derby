@@ -290,6 +290,18 @@ public class TestConfiguration {
                 suiteName(testClass)+":client");
         return clientServerDecorator(suite);
     }
+    /**
+     * Create a suite for the passed test class that includes
+     * all the default fixtures from the class, wrapped in
+     * a derbyClientServerDecorator with a given port.
+     * 
+     */
+    public static Test clientServerSuite(Class testClass, int port)
+    {           
+        TestSuite suite = new TestSuite(testClass,
+                suiteName(testClass)+":client");
+        return clientServerDecorator(suite,port);
+    }
 
     /**
      * Return a decorator for the passed in tests that sets the
@@ -308,6 +320,15 @@ public class TestConfiguration {
         Test test = new NetworkServerTestSetup(suite, false);
             
         return defaultServerDecorator(test);
+    }
+    /**
+     * Wrapper ot use the given port number.
+     */
+    public static Test clientServerDecorator(Test suite,int port)
+    {
+        Test test = new NetworkServerTestSetup(suite, false);
+            
+        return defaultServerDecorator(test,port);
     }
    
     /**
@@ -328,7 +349,24 @@ public class TestConfiguration {
         //
         return new ServerSetup(test, DEFAULT_HOSTNAME, DEFAULT_PORT);
     }
-   
+    /**
+     * Decorate a test to use suite's default host and given port.
+     */
+    public static Test defaultServerDecorator(Test test, int port)
+    {
+        // Need to have network server and client and not
+        // running in J2ME (JSR169).
+        if (!(Derby.hasClient() && Derby.hasServer())
+                || JDBC.vmSupportsJSR169())
+            return new TestSuite("empty: no network server support");
+
+        //
+        // This looks bogus to me. Shouldn't this get the hostname and port
+        // which are specific to this test run (perhaps overridden on the
+        // command line)?
+        //
+        return new ServerSetup(test, DEFAULT_HOSTNAME, port);
+    }
 
     /**
      * Generate the unique database name for single use.

@@ -7,7 +7,6 @@
 #     and access denied (java.lang.RuntimePermission loadLibrary.db2jcct2). (????!)
 # junitTests/derbyNet/CompatibilityTest.java - exits the suite
 # derbynet/DerbyNetAutoStart.java - exits the suite...
-# derbynet/NSinSameJVM.java - fails with different thread names. probably ok...
 # derbynet/dblook_test_net.java - expects different dir structure
 # stress/stress.multi - exits suite
 # derbynet/getCurrentProperties.java - fails, different sessions
@@ -27,7 +26,6 @@ jdbcapi/HoldabilityTest.junit
 jdbcapi/bestrowidentifier.sql
 junitTests/derbyNet/CompatibilityTest.java
 derbynet/DerbyNetAutoStart.java
-derbynet/NSinSameJVM.java
 derbynet/dblook_test_net.java
 derbynet/getCurrentProperties.java
 derbynet/runtimeinfo.java
