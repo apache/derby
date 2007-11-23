@@ -157,8 +157,10 @@
       <zipfileset dir="${basedir}/bin" prefix="${derby.bin}/bin" 
                   filemode="755" includes="*"/>
       <!-- demo -->
+      <zipfileset file="${derby.demo.src.dir}/README.txt"
+                  fullpath="${derby.bin}/demo/README.txt"/>
       <zipfileset dir="${derby.demo.src.dir}" prefix="${derby.bin}/demo/programs" 
-                  excludes="**/build.xml,toursdb/toursdb**,toursdb/derby.log"/>
+                  excludes="**/build.xml,toursdb/toursdb**,toursdb/derby.log,README.txt"/>
       <zipfileset file="${derby.demo.src.dir}/toursdb/toursdb.xml"
                   fullpath="${derby.bin}/demo/programs/toursdb/build.xml"/>
       <zipfileset file="${derby.demo.src.dir}/toursdb/toursdb_readme.html"
@@ -208,8 +210,10 @@
       <tarfileset dir="${basedir}/bin" prefix="${derby.bin}/bin" 
                   mode="755" includes="*"/>
       <!-- demo -->
+      <tarfileset file="${derby.demo.src.dir}/README.txt"
+                  fullpath="${derby.bin}/demo/README.txt"/>
       <tarfileset dir="${derby.demo.src.dir}" prefix="${derby.bin}/demo/programs" 
-                  excludes="**/build.xml,toursdb/toursdb**,toursdb/derby.log"/>
+                  excludes="**/build.xml,toursdb/toursdb**,toursdb/derby.log,README.txt"/>
       <tarfileset file="${derby.demo.src.dir}/toursdb/toursdb.xml"
                   fullpath="${derby.bin}/demo/programs/toursdb/build.xml"/>
       <tarfileset file="${derby.demo.src.dir}/toursdb/toursdb_readme.html"
