@@ -484,7 +484,7 @@ public class TriggerTest extends BaseJDBCTestCase {
         
         s.executeUpdate("CREATE TRIGGER AIS " +
                 "AFTER INSERT ON T_MAIN " +
-                "REFERENCING NEW_TABLE AS N " +
+                "REFERENCING NEW TABLE AS N " +
                 "FOR EACH STATEMENT " +      
                 "INSERT INTO T_ACTION_STATEMENT(A, V1, ID, V2) " +
                 "SELECT 'I', V, ID, V FROM N");
@@ -499,7 +499,7 @@ public class TriggerTest extends BaseJDBCTestCase {
         
         s.executeUpdate("CREATE TRIGGER AUS " +
                 "AFTER UPDATE OF V ON T_MAIN " +
-                "REFERENCING NEW_TABLE AS N OLD_TABLE AS O " +
+                "REFERENCING NEW TABLE AS N OLD TABLE AS O " +
                 "FOR EACH STATEMENT " +      
                 "INSERT INTO T_ACTION_STATEMENT(A, V1, ID, V2) " +
                 "SELECT 'U', N.V, N.ID, O.V FROM N,O WHERE O.ID = N.ID");
@@ -514,7 +514,7 @@ public class TriggerTest extends BaseJDBCTestCase {
         
         s.executeUpdate("CREATE TRIGGER ADS " +
                 "AFTER DELETE ON T_MAIN " +
-                "REFERENCING OLD_TABLE AS O " +
+                "REFERENCING OLD TABLE AS O " +
                 "FOR EACH STATEMENT " +      
                 "INSERT INTO T_ACTION_STATEMENT(A, V1, ID, V2) " +
                 "SELECT 'D', O.V, O.ID, O.V FROM O");        

@@ -755,7 +755,7 @@ public class CreateTriggerNode extends DDLStatementNode
 			** 4) Additional restriction on BEFORE triggers
 			*/
 			if (this.isBefore && !trn.isRow) {
-			// OLD_TABLE and NEW_TABLE not allowed for BEFORE triggers.
+			// OLD TABLE and NEW TABLE not allowed for BEFORE triggers.
 				throw StandardException.newException(SQLState.LANG_TRIGGER_BAD_REF_MISMATCH, "BEFORE", "row");
 			}
 

@@ -369,12 +369,12 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         stmt.executeUpdate(
                 "create trigger T13A after update on testClob " +
                 "referencing new as n old as o " +
-                "for each row mode db2sql "+
+                "for each row "+
                 "insert into testClobTriggerA(a, b) values (n.a, n.b)");
         stmt.executeUpdate(
                 "create trigger T13B after INSERT on testClobTriggerA " +
-                "referencing new_table as n " +
-                "for each statement mode db2sql "+
+                "referencing new table as n " +
+                "for each statement "+
                 "insert into testClobTriggerB(a, b) select n.a, n.b from n");
 
         commit();
@@ -1904,13 +1904,13 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         stmt.executeUpdate(
                 "create trigger T8A after update on testBlob " +
                 "referencing new as n old as o " +
-                "for each row mode db2sql "+
+                "for each row "+
                 "insert into blobTest8TriggerA(a, b, crc32) " +
                 "values (n.a, n.b, n.crc32)");
         stmt.executeUpdate(
                 "create trigger T8B after INSERT on blobTest8TriggerA " +
-                "referencing new_table as n " +
-                "for each statement mode db2sql "+
+                "referencing new table as n " +
+                "for each statement "+
                 "insert into blobTest8TriggerB(a, b, crc32) " +
                 "select n.a, n.b, n.crc32 from n");
 

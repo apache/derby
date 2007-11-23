@@ -10491,9 +10491,9 @@ triggerReferencingExpression(Vector vector) throws StandardException :
 }
 {
 	(
-	  <NEW> 
+	  <NEW> [ <ROW> | <TABLE> { isRow = false;} ]
 	  |
-	  <OLD> {isNew = false;}
+	  <OLD> {isNew = false;} [ <ROW> | <TABLE> { isRow = false;} ]
 	  |
 	  <NEW_TABLE> { isRow = false;}
 	  |
