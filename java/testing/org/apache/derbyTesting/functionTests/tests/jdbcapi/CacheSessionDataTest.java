@@ -35,6 +35,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
+import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
@@ -104,14 +105,20 @@ public class CacheSessionDataTest extends BaseJDBCTestCase {
 
     /**
      * Adds both the embedded and client-server versions of the baseSuite to
-     * the Test
+     * the Test. An empty TestSuite is returned unless we have JDBC3 support, because
+     * all test cases call verifyCachedIsolation() which in turn 
+     * makes use of getTransactionIsolationJDBC()
+     * (GET_TRANSACTION_ISOLATION_JDBC) which uses DriverManager to access the 
+     * default connection.
      * @return the resulting Test object
      */
     public static Test suite() {
         TestSuite suite = new TestSuite("CacheSessionDataTest");
-        suite.addTest(baseSuite("CacheSessionDataTest:embedded"));
-        suite.addTest(TestConfiguration.clientServerDecorator(
-            baseSuite("CacheSessionDataTest:client")));
+        if (JDBC.vmSupportsJDBC3()) {
+            suite.addTest(baseSuite("CacheSessionDataTest:embedded"));
+            suite.addTest(TestConfiguration.clientServerDecorator(
+                    baseSuite("CacheSessionDataTest:client")));
+        }
         return suite;
     }
     
@@ -174,9 +181,9 @@ public class CacheSessionDataTest extends BaseJDBCTestCase {
                 for (int i = 0; i < 10; ++i) {
                     cs.execute();
                 }
-//                ResultSet x = s.executeQuery("SELECT COUNT(*) FROM BIG");
-//                x.next();
-//                System.out.println("BIG has "+x.getInt(1)+" rows");
+                ResultSet x = s.executeQuery("SELECT COUNT(*) FROM BIG");
+                x.next();
+                println("BIG has "+x.getInt(1)+" rows");
                 
                 // Create procedures
                 s.execute("CREATE PROCEDURE SET_ISOLATION_JDBC" +
@@ -222,10 +229,9 @@ public class CacheSessionDataTest extends BaseJDBCTestCase {
     public void setUp() throws SQLException {
         Connection c = getConnection();
         c.setAutoCommit(false);
-        assertEquals(c.getTransactionIsolation(),
-                Connection.TRANSACTION_READ_COMMITTED);
+        assertEquals(Connection.TRANSACTION_READ_COMMITTED, c.getTransactionIsolation());
         if (isoLevels == null) {
-            Statement s = c.createStatement();
+            Statement s = createStatement();
             ResultSet rs = s.executeQuery(
                     "SELECT * FROM ISOLATION_NAMES WHERE ISOLEVEL > 0 " +
                     "ORDER BY ISOLEVEL");
@@ -233,7 +239,7 @@ public class CacheSessionDataTest extends BaseJDBCTestCase {
             
             for (int i = 0; i < 4; ++i) {
                 isoLevels[i] = new IsoLevel(rs);
-                System.out.println(isoLevels[i]); 
+                println(isoLevels[i].toString()); 
             }
             assertFalse(rs.next());
             rs.close();
@@ -312,7 +318,7 @@ public class CacheSessionDataTest extends BaseJDBCTestCase {
             throws SQLException {
         Connection c = DriverManager.getConnection("jdbc:default:connection");
         c.setTransactionIsolation(cycleIsolation().getIsoLevel());
-        System.out.println("getCycleIsolationJDBC() -> "+c.getTransactionIsolation());
+        println("getCycleIsolationJDBC() -> "+c.getTransactionIsolation());
         return c.getTransactionIsolation();
     }
     /**
@@ -331,7 +337,7 @@ public class CacheSessionDataTest extends BaseJDBCTestCase {
         String sqlName = rs.getString(1);
         rs.close();
         s.close();
-        System.out.println("getCycleIsolationSQL() -> "+sqlName);
+        println("getCycleIsolationSQL() -> "+sqlName);
         return sqlName;
     }
 
@@ -358,10 +364,10 @@ public class CacheSessionDataTest extends BaseJDBCTestCase {
      * @param c Connection to check
      * @throws java.sql.SQLException
      */
-    private static void verifyCachedIsolation(Connection c) throws SQLException {
+    private void verifyCachedIsolation(Connection c) throws SQLException {
         final int clientInt = c.getTransactionIsolation();
         
-        Statement s = c.createStatement();
+        Statement s = createStatement();
         final IsoLevel serverSql = new IsoLevel(s.executeQuery(
                 "SELECT * FROM ISOLATION_NAMES " +
                 "WHERE SQLNAME = (VALUES CURRENT ISOLATION)"));
@@ -374,15 +380,15 @@ public class CacheSessionDataTest extends BaseJDBCTestCase {
                 "ISOLATION_NAMES WHERE ISOLEVEL = "+clientInt));
         s.getResultSet().close();
         s.close();
-        assertEquals(client, serverSql);
-        assertEquals(client, serverJdbc);
+        assertEquals(serverSql, client);
+        assertEquals(serverJdbc, client);
     }
     
     // Test cases (fixtures) 
     // Change the isolation level using SQL
     public void testChangeIsoLevelStatementSQL() throws SQLException {
         Connection c = getConnection();
-        Statement s = c.createStatement();
+        Statement s = createStatement();
         for (int i = 0; i < 4; ++i) {
             s.execute("SET ISOLATION "+isoLevels[i].getSqlName());
             verifyCachedIsolation(c);
@@ -392,7 +398,7 @@ public class CacheSessionDataTest extends BaseJDBCTestCase {
     public void testChangeIsoLevelPreparedStatementSQL() throws SQLException {
         Connection c = getConnection();
         for (int i = 0; i < 4; ++i) {
-            PreparedStatement ps = c.prepareStatement("SET ISOLATION " + 
+            PreparedStatement ps = prepareStatement("SET ISOLATION " + 
                     isoLevels[i].getSqlName());
             ps.execute();
             verifyCachedIsolation(c);
@@ -404,7 +410,7 @@ public class CacheSessionDataTest extends BaseJDBCTestCase {
     public void testChangeIsoLevelFunctionJDBC() throws SQLException {
         Connection c = getConnection();
         c.setAutoCommit(true);
-        Statement s = c.createStatement();
+        Statement s = createStatement();
         s.execute("CREATE TABLE T1(ISOLEVEL INT)");
         for (int i = 0; i < 4; ++i) {
             s.execute("INSERT INTO T1 VALUES GET_CYCLE_ISOLATION_JDBC()");
@@ -415,7 +421,7 @@ public class CacheSessionDataTest extends BaseJDBCTestCase {
     public void testChangeIsoLevelFunctionSQL() throws SQLException {
         Connection c = getConnection();
         c.setAutoCommit(true);
-        Statement s = c.createStatement();
+        Statement s = createStatement();
         s.execute("CREATE TABLE T1(SQLNAME VARCHAR(2))");
         for (int i = 0; i < 4; ++i) {
             s.executeUpdate("INSERT INTO T1 VALUES GET_CYCLE_ISOLATION_SQL()");
@@ -428,7 +434,7 @@ public class CacheSessionDataTest extends BaseJDBCTestCase {
         c.setAutoCommit(true);
         Statement s = createStatement();
         s.execute("CREATE TABLE T1(ISOLEVEL INT)");
-        PreparedStatement ps = c.prepareStatement("INSERT INTO T1 VALUES " +
+        PreparedStatement ps = prepareStatement("INSERT INTO T1 VALUES " +
                 "GET_CYCLE_ISOLATION_JDBC()");
         for (int i = 0; i < 4; ++i) {
             ps.executeUpdate();
@@ -441,7 +447,7 @@ public class CacheSessionDataTest extends BaseJDBCTestCase {
         c.setAutoCommit(true);
         Statement s = createStatement();
         s.execute("CREATE TABLE T1(SQLNAME VARCHAR(2))");
-        PreparedStatement ps = c.prepareStatement("INSERT INTO T1 VALUES " +
+        PreparedStatement ps = prepareStatement("INSERT INTO T1 VALUES " +
                 "GET_CYCLE_ISOLATION_SQL()");
         for (int i = 0; i < 4; ++i) {
             ps.executeUpdate();
@@ -453,7 +459,7 @@ public class CacheSessionDataTest extends BaseJDBCTestCase {
     // Change isolation level from a stored procedure
     public void testChangeIsoLevelProcedureJDBC() throws SQLException {
         Connection c = getConnection();
-        Statement s = c.createStatement();
+        Statement s = createStatement();
         for (int i = 0; i < 4; ++i) {
             s.execute("CALL SET_ISOLATION_JDBC(" + isoLevels[i].getIsoLevel() + ")");
             verifyCachedIsolation(c);
@@ -462,7 +468,7 @@ public class CacheSessionDataTest extends BaseJDBCTestCase {
     }
     public void testChangeIsoLevelProcedureSQL() throws SQLException {
         Connection c = getConnection();
-        Statement s = c.createStatement();
+        Statement s = createStatement();
         for (int i = 0; i < 4; ++i) {
             s.execute("CALL SET_ISOLATION_SQL('" + isoLevels[i].getSqlName() + "')");
             verifyCachedIsolation(c);
@@ -474,7 +480,7 @@ public class CacheSessionDataTest extends BaseJDBCTestCase {
     // callable statement
     public void testChangeIsoLevelCallableStatementJDBC() throws SQLException {
         Connection c = getConnection();
-        CallableStatement cs = c.prepareCall("CALL SET_ISOLATION_JDBC(?)");
+        CallableStatement cs = prepareCall("CALL SET_ISOLATION_JDBC(?)");
         for (int i = 0; i < 4; ++i) {
             cs.setInt(1, isoLevels[i].getIsoLevel());
             cs.execute();
@@ -484,7 +490,7 @@ public class CacheSessionDataTest extends BaseJDBCTestCase {
     }
     public void testChangeIsoLevelCallableStatementSQL() throws SQLException {
         Connection c = getConnection();
-        CallableStatement cs = c.prepareCall("CALL SET_ISOLATION_SQL(?)");
+        CallableStatement cs = prepareCall("CALL SET_ISOLATION_SQL(?)");
         for (int i = 0; i < 4; ++i) {
             cs.setString(1, isoLevels[i].getSqlName());
             cs.execute();
@@ -603,7 +609,7 @@ public class CacheSessionDataTest extends BaseJDBCTestCase {
     private void cursorTest(String table, int type, int concur) 
             throws SQLException {
         Connection c = getConnection();
-        Statement s = c.createStatement(type, concur);
+        Statement s = createStatement(type, concur);
         ResultSet rs = s.executeQuery("SELECT * FROM "+table);
         verifyCachedIsolation(c);
         while (rs.next()) {

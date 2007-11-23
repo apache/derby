@@ -83,7 +83,6 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(AIjdbcTest.suite());
         suite.addTest(LargeDataLocksTest.suite());
         suite.addTest(DMDBugsTest.suite());
-        suite.addTest(CacheSessionDataTest.suite());
 
         // Old harness .java tests that run using the HarnessJavaTest
         // adapter and continue to use a single master file.
@@ -128,6 +127,7 @@ public class _Suite extends BaseTestCase  {
 
 	    //JSR169 does not support ParameterMetaData
 	    suite.addTest(ParameterMetaDataJdbc30Test.suite());
+            suite.addTest(CacheSessionDataTest.suite());
         }
 		
         return suite;
