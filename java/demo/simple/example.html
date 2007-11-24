@@ -18,533 +18,599 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<meta name="LASTUPDATED" content="2007-11-08 09:18:20 UTC">
+<meta name="LASTUPDATED" content="2007-11-20 13:04:00 UTC">
 <link rel="StyleSheet" href="../csfull.css" type="text/css" media="screen">
 <title>Simple JDBC Application</title>
-
-<script language="JavaScript">
-<!--
-var isNav, isIE, inFrame;
-
-if (parseInt(navigator.appVersion) >= 4) {
-    if (navigator.appName == "Netscape") {
-	isNav = true
-	} else {
-	isIE = true
-	}
-}
-if (parent.frames.length > 0)
-    inFrame = true;
-else
-	inFrame = false;
-
-
-
-
-//-->
-</script>
-
-
-
 </head>
 <body>
-
-
-
-
-
 <h1 class="Title">
-  <a name="811209"> </a>Simple JDBC Application
+  Simple JDBC Application
 </h1>
  
-
-<ul class="ChapterTOC">  <li class="ChapterTOC"><a name="820053"> </a>  <a href="#820067">Overview</a>
-  <li class="ChapterTOC">  <a href="#816689">What's Included?</a>
-  <li class="ChapterTOC">  <a href="#816722">How to run this sample application in an embedded environment</a>
-<li class="ChapterTOC">  <a href="#816723">How to run this sample application in a server environment</a>
+<!-- ##########  TABLE OF CONTENTS  ########## -->
+<ul class="ChapterTOC">
+  <li class="ChapterTOC"><a href="#overview">Overview</a>
+  <li class="ChapterTOC"><a href="#included">What's Included?</a>
+  <li class="ChapterTOC"><a href="#runembedded">How to run this sample application in an embedded environment</a>
+  <li class="ChapterTOC"><a href="#runclientserver">How to run this sample application in a client/server environment</a>
+  <ul class="SubList">
+    <li class="ChapterToc"><a href="#server">Starting the Network Server</a>
+    <li class="ChapterToc"><a href="#derbyclient">Using the Derby client driver</a>
+    <li class="ChapterToc"><a href="#jcc">Using the IBM DB2 Universal JDBC driver</a>
+  </ul>
 </ul>
-<h2 class="Heading2"><a name="820067"> </a>Overview
+
+<!-- ##########  OVERVIEW  ########## -->
+<h2 class="Heading2"><a id="overview" name="overview">Overview</a>
 </h2>
- <p class="Body">
-  <a name="820012"> </a>This example program is a very minimal JDBC application. JDBC is the primary API for interacting with Apache Derby. This program:
-</p><ul class="Normal">  
-  <li class="Normal">runs in either embedded mode (the default) or as a client in a server environment, depending on the arguments passed to the program.
-  <li class="Normal"><a name="817266"> </a>starts up the Derby engine, if running in embedded mode
-  <li class="Normal"><a name="817266"> </a>connects to the Derby Network Server, if running in client mode
-  <li class="Normal"><a name="817275"> </a>creates and connects to a database
-  <li class="Normal"><a name="817276"> </a>creates a table
-  <li class="Normal"><a name="817277"> </a>inserts data
-  <li class="Normal"><a name="817278"> </a>updates data
-  <li class="Normal"><a name="817279"> </a>selects data
-  <li class="Normal"><a name="817280"> </a>drops a table
-  <li class="Normal"><a name="817281"> </a>disconnects
-  <li class="Normal"><a name="817282"> </a>shuts down Derby, if running in embedded mode
+<p>
+  This example program is a minimal JDBC application written in Java. JDBC is
+  the primary API for interacting with Apache Derby using Java. This program:
+</p>
+<ul class="Normal">
+  <li class="Normal">runs in either embedded mode (the default) or as a client in a client/server environment, depending on the arguments passed to the program
+  <li class="Normal">starts up the Derby engine, if running in embedded mode
+  <li class="Normal">connects to the Derby Network Server, if running in client mode
+  <li class="Normal">creates and connects to a database
+  <li class="Normal">creates a table
+  <li class="Normal">inserts data
+  <li class="Normal">updates data
+  <li class="Normal">selects data
+  <li class="Normal">drops a table
+  <li class="Normal">disconnects
+  <li class="Normal">shuts down the database, if running in embedded mode
 </ul>
-<p class="Body">
-  <a name="817267"> </a>In embedded mode, the application starts up an instance of Derby within the current Java Virtual Machine and shuts down the instance before it completes. No network access is involved. Only one application can access a database at a time. 
+<p>
+  This program is intended to run in Virtual Machines for the Java Platform
+  supporting J2SE 1.4.2 or newer.
 </p>
-<p>In a server environment, the application demonstrates the use of the Derby network client or the IBM DB2 JDBC Universal Driver by connecting to the Network Server and running the demo. Note that the client drivers allow multiple instances of the application to run at the same time.  However, the SQL operations performed by this demo will cause failures when multiple simultaneous instances of the application are run. Use of a client driver to connect to the Network Server in this application is intended only to demonstrate this type of connection. The SimpleApp demo is not suited for simultaneous executions because it creates and drops the table on which it operates.
+<p>
+  In embedded mode, the application starts up an instance of Derby within the
+  current Java Virtual Machine (JVM) and shuts down the instance before it
+  completes. No network access is involved. Only one JVM can access a database
+  at a time.
 </p>
-<h2 class="Heading2"><a name="816689"> </a>What's Included?
-</h2>
- <p class="Body">
-  <a name="816691"> </a>Before running this demo, you should see the following files and directories in the <em class="fileName">/demo/programs/simple</em> directory:
-</p><ul class="Normal">  <li class="Normal"><a name="816694"> </a><em class="fileName">example.html</em>
-
- 
-
-<p class="BodyRelative">
-  <a name="816695"> </a>This file.
+<p>In a client/server environment, the application demonstrates the
+use of the Derby network client driver or the IBM DB2 JDBC Universal Driver by
+connecting to the Network Server and running the demo. Note that the client
+drivers allow multiple instances of the application to run at the same time.
+However, the SQL operations performed by this demo will cause failures when
+multiple simultaneous instances of the application are run. Use of a client
+driver to connect to the Network Server in this application is intended only to
+demonstrate this type of connection. The SimpleApp demo is not suited for
+simultaneous executions because it creates and drops the table on which it
+operates.
 </p>
-  <li class="Normal"><a name="816696"> </a><em class="fileName">
-<a href="SimpleApp.java" target="_top">SimpleApp.java</a></em>
-
- 
-
-<p class="BodyRelative">
-  <a name="816697"> </a>Source code for the example program that starts up Derby, creates a database, performs some inserts and updates, and then shuts down Derby. <em class="Emphasis">Examine this file to see how the application behaves in the various environments</em>.
+<p>
+  <em>Note that in this document, file paths and environment variables are
+  referenced using UNIX notation unless noted otherwise. This means that if, for
+  example, you are using a Windows platform, you must substitute file separators,
+  path separators and environment variable references to the Windows-specific
+  notation, for example:</em>
 </p>
-  <li class="Normal"><a name="816699"> </a><em class="fileName">
-<a href="derby.properties" target="_top">derby.properties</a></em>
-
- 
-
-<p class="BodyRelative">
-  <a name="816700"> </a>Properties file for the Derby system.
-</p>
-  <li class="Normal"><a name="816701"> </a><em class="fileName">SimpleApp.class</em>
-
- 
-
-<p class="BodyRelative">
-  <a name="816702"> </a>The compiled class file.
-</p>
-</ul>
-<p class="Body">
-  <a name="816704"> </a>After running the demo, you will see some new files and directories:
-</p><ul class="Normal">  <li class="Normal"><a name="816706"> </a><em class="fileName">derbyDB</em> (directory)
-
- 
-
-<p class="BodyRelative">
-  <a name="816707"> </a>The directory that makes up the <em class="fileName">derbyDB</em> database. You must not modify anything in this directory, or you will corrupt the database. The directory was created when the application connected with Derby, using the attribute <em class="Emphasis">create=true</em> in the database connection URL. The database name, <em class="Emphasis">derbyDB</em>, was also set in the database connection URL. 
-</p>
-  <li class="Normal"><a name="816712"> </a><em class="fileName">derbyDB\log</em> (directory)
-
- 
-
-<p class="BodyRelative">
-  <a name="816713"> </a>The directory that holds the database transaction logs for the <em class="fileName">derbyDB</em> database. 
-</p>
-  <li class="Normal"><a name="816714"> </a><em class="fileName">derbyDB\seg0</em> (directory)
-
- 
-
-<p class="BodyRelative">
-  <a name="816715"> </a>The directory that holds the data for the <em class="fileName">derbyDB</em> database.
-</p>
-  <li class="Normal"><a name="816716"> </a><em class="fileName">derbyDB\service.properties</em>
-
- 
-
-<p class="BodyRelative">
-  <a name="816717"> </a>An internal file that holds boot-time configuration parameters for the <em class="fileName">derbyDB</em> database; do not edit.
-</p>
-  <li class="Normal"><a name="816719"> </a><em class="fileName">derby.LOG</em>
-
- 
-
-<p class="BodyRelative">
-  <a name="816720"> </a>The log file with Derby progress and error messages.
-</p>
-</ul>
-<h2 class="Heading2"><a name="816722"> </a>How to run this sample application in an embedded environment
-</h2>
- <ol type="1">  <li class="Normal"><a name="816724"> </a>Open a command window.
-  <li class="Normal"><a name="816726"> </a>If you haven't set it already on a system-wide basis, set the DERBY_INSTALL environment variable to the location of the directory where you installed the Derby software in the current command window.
-  <li class="Normal">and change directories to the <em class="fileName">%DERBY_INSTALL%\demo\programs\simple</em> directory.
-  <li class="Normal"><a name="819207"> </a>In the command window, set the CLASSPATH as follows:
-<p>WINDOWS: set CLASSPATH=.;%DERBY_INSTALL%\lib\derby.jar<br>
-UNIX (ksh): export CLASSPATH=.:${DERBY_INSTALL}/lib/derby.jar
-</p>
-<p><table border="4" cellspacing="0" cellpadding="5" bgcolor="#FAF0E6">
-  <caption class="TableTitle"></caption>
-  <tr valign="bottom">
-    <th><a name="819182"> </a><p class="CellHeading">Library or Directory</p></th>
-    <th><a name="819184"> </a><p class="CellHeading">Path to Library or Directory</p></th>
+<table class="simple">
+  <tr>
+    <td class="heading">Element</td>
+    <td class="heading">Example, UNIX</td>
+    <td class="heading">Example, Windows</td>
   </tr>
-  <tr valign="top">
-    <td class="DefaultTable"><a name="821049"> </a><p class="CellBody">main Derby library:</p>
-<a name="819190"> </a><p class="CellBody"><em class="fileName">derby.jar</em></p>
-</td>
-    <td class="DefaultTable"><a name="819195"> </a><p class="CellBody"><em class="fileName">%DERBY_INSTALL%\lib\derby.jar</em></p>
-</td>
+  <tr>
+    <td class="listItem">File separator</td>
+    <td class="listItem"><em class="fileName">/home/path/file</em></td>
+    <td class="listItem"><em class="fileName">c:\path\file</em></td>
   </tr>
-  <tr valign="top">
-    <td class="DefaultTable"><a name="819204"> </a><p class="CellBody">current directory<br>SimpleApp.class</p>
-</td>
-    <td class="DefaultTable"><a name="819206"> </a><p class="CellBody">.\</p>
-</td>
+  <tr>
+    <td class="listItem">(CLASS)PATH separator</td>
+    <td class="listItem"><var class="envVar">derby.jar:derbytools.jar</var></td>
+    <td class="listItem"><var class="envVar">derby.jar;derbytools.jar</var></td>
+  </tr>
+  <tr>
+    <td class="listItem">Environment Variable reference</td>
+    <td class="listItem"><var class="envVar">$DERBY_HOME</var></td>
+    <td class="listItem"><var class="envVar">%DERBY_HOME%</var></td>
   </tr>
 </table>
-
-
+<p>
+  <em>Also note that this document refers to the JVM launch command as
+    <var class="command">java</var>, and that it is being assumed that the JVM
+    installation's launcher is available via the system's
+    <em class="envVar">PATH</em>. Refer to the documentation of your JVM /
+    runtime environment for details on how to run a Java program using that JVM.
+    </em>
+</p>
+<h3>Modifying the application code</h3>
+<p>
+  If you decide to modify the demo application code, or use it as a model for
+  your own JDBC application, be aware that any change may affect the behavior
+  of the program and the results from running it.
+  For example, the data verification code is very specific to the data this
+  demo inserts into the database, and will not work without modification with
+  other databases.
+</p>
+<p>
+  For more information about how to use Derby, refer to the included
+  documentation and the
+  <a href="http://db.apache.org/derby" target="_new">Apache Derby web site</a>.
+</p>
+<p>
+  If you are relatively new to databases or JDBC,
+  <a href="http://java.sun.com/docs/books/tutorial/jdbc/basics/index.html" target="_new">Sun's
+  JDBC basics tutorial</a> may be a good starting point.
 </p>
 
 
- 
+<!-- ##########  WHAT'S INCLUDED  ########## -->
+<h2 class="Heading2"><a id="included" name="included">What's Included?</a>
+</h2>
+<p>
+  Before running this demo, you should see the following files and directories
+  in the <em class="fileName">demo/programs/simple/</em> directory:
+</p>
+<ul class="Normal">
+  <li class="Normal"><em class="fileName">example.html</em>
+    <p class="BodyRelative">
+      This file.
+    </p>
+  <li class="Normal"><em class="fileName">
+    <a href="SimpleApp.java" target="_top">SimpleApp.java</a></em>
+    <p class="BodyRelative">
+      Source code for the example program.
+      <em class="Emphasis">Examine this file to see how the application behaves
+      in the various environments</em>.
+    </p>
+  <li class="Normal"><em class="fileName">
+    <a href="derby.properties" target="_top">derby.properties</a></em>
+    <p class="BodyRelative">
+      Properties file for the Derby system. This demo program runs with default
+      settings, but you can use this file to tune Derby if you want to.
+    </p>
+  <li class="Normal"><em class="fileName">SimpleApp.class</em>
+    <p class="BodyRelative">
+      The compiled class file, runnable by Java SE JVMs.
+    </p>
+</ul>
 
-<p class="BodyRelative">
-  <a name="819218"> </a><p><table border="0" cellpadding="3" cellspacing="2" bgcolor="Silver">
-  <tr valign="top">
-    <td class="BoxTable"><h3 class="BoxHead">
-  <a name="819210"> </a>A note on setting the classpath for an embedded environment
-</h3>
-<a name="819214"> </a><p class="CellBody">Derby provides a script to help you get started with setting the classpath in <br> <em class="fileName">%DERBY_INSTALL%\frameworks\embedded\bin</em>. This script is called<em class="fileName"> setEmbeddedCP </em>and comes in two flavors: one for Windows environment (this file ends with <em class="fileName">.bat</em>) and one for UNIX environments (this file ends with <em class="fileName">.ksh</em>). For users working in those environments, copying the commands in this file will help you get started setting the classpath. </p>
-</td>
+<p>
+  After running the demo, you will see some new files and directories. These
+  will be located in the directory that the system property
+  <var class="property">derby.system.home</var>
+  points to, or the current directory (<var class="property">user.dir</var>) if
+  <var class="property">derby.system.home</var> is not set for the embedded or
+  Network Server JVM. If you are following the instructions on this page, you
+  will find the new files in the directory
+  <em class="fileName">demo/programs/simple/</em>, relative to this Derby
+  installation. New files are:
+</p>
+<ul class="Normal">
+  <li class="Normal"><em class="fileName">derbyDB</em> (directory)
+    <p class="BodyRelative">
+      The directory that makes up the <em class="fileName">derbyDB</em> database.
+      You must not modify anything in this directory, or you will corrupt the
+      database. The directory was created when the application connected with
+      Derby, using the attribute <em class="Emphasis">create=true</em> in the
+      database connection URL. The database name, <em class="Emphasis">derbyDB</em>,
+      was also set in the database connection URL.
+    </p>
+    <ul class="Normal">
+      <li class="Normal"><em class="fileName">derbyDB/log</em> (directory)
+        <p class="BodyRelative">
+          The directory that holds the database transaction logs for the
+          <em class="fileName">derbyDB</em> database.
+        </p>
+      <li class="Normal"><em class="fileName">derbyDB/seg0</em> (directory)
+        <p class="BodyRelative">
+          The directory that holds the data for the <em class="fileName">derbyDB</em>
+          database.
+        </p>
+      <li class="Normal"><em class="fileName">derbyDB/service.properties</em>
+        <p class="BodyRelative">
+          An internal file that holds boot-time configuration parameters for the
+          <em class="fileName">derbyDB</em> database; do not edit.
+        </p>
+    </ul>
+   <li class="Normal"><em class="fileName">derby.log</em>
+    <p class="BodyRelative">
+      The log file with Derby progress and error messages.
+    </p>
+</ul>
+<p>
+  To remove the effects of running the demo program, simply delete the database
+  directory (<em class="fileName">derbyDB</em>) and
+  <em class="fileName">derby.log</em>. Note that if you are running the demo in
+  a client/server environment you most likely need to shut down the Derby
+  Network Server before being able to delete the database directory.
+
+<!-- ##########  HOW TO RUN - EMBEDDED  ########## -->
+<h2 class="Heading2"><a id="runembedded" name="runembedded">How to run this sample application in an embedded environment</a>
+</h2>
+<p>
+  The Derby embedded driver is a JDBC driver included in binary distributions of
+  Apache Derby, in the directory <em class="fileName">$DERBY_HOME/lib/</em>.
+  The embedded driver should be used when you want to run Derby in the same
+  JVM as your application, for example when no direct network access to the
+  database system is needed.
+</p>
+<table class="listing">
+  <tr>
+    <td class="listItem">Class name:</td>
+    <td class="listItem"><em class="javaObject">org.apache.derby.jdbc.EmbeddedDriver</em></td>
+  </tr>
+  <tr>
+    <td class="listItem">Library:</td>
+    <td class="listItem"><em class="fileName">derby.jar</em></td>
   </tr>
 </table>
-</p>
+<p>&nbsp;</p>
+<ol class="decimal">
+  <li class="Normal">Open a command window.
+  <li class="Normal">If you haven't set it already on a system-wide basis, set
+  the <var class="envVar">DERBY_HOME</var> environment variable to the location
+  of this Derby installation. This is not strictly required to run the demo, but
+  this environment variable will be used later on this page to refer to the
+  required Derby resources, files, etc. Examples:
+    <p class="BodyRelative">UNIX (ksh/bash)</p>
+    <p class="commandLine">export DERBY_HOME=/home/user/derby/db-derby-10.x.y.z-bin</p>
+    <p class="BodyRelative">Windows:</p>
+    <p class="commandLine">set DERBY_HOME=c:\programs\derby\db-derby-10.x.y.z-bin</p>
+  <li class="Normal">Change directories to the <em class="fileName">$DERBY_HOME/demo/programs/simple</em> directory.
+  <li class="Normal">In the command window, set the CLASSPATH to include the
+  current directory (the location of <em class="fileName">SimpleApp.class</em>)
+  and Derby's embedded driver library (<em class="fileName">derby.jar</em>).
+  (You may skip this step and provide the classpath as an option to the JVM
+  launch command instead, refer to your JVM's documentation for details).
+    <p class="BodyRelative">This may be done as follows:</p>
+    <p class="BodyRelative">UNIX (ksh/bash):</p>
+    <p class="commandLine">export CLASSPATH=.:${DERBY_HOME}/lib/derby.jar</p>
+    <p class="BodyRelative">WINDOWS:</p>
+    <p class="commandLine">set CLASSPATH=.;%DERBY_HOME%\lib\derby.jar</p>
+  <li class="Normal">(Optional) Run Derby's Sysinfo utility for testing the
+    classpath for an embedded environment. You should provide the arguments
+    <em class="Emphasis">embedded</em> (to indicate an embedded environment) and
+    <em class="Emphasis">SimpleApp.class</em> to test for the presence of the
+    <em class="javaObject">SimpleApp</em> class.
+    <p class="BodyRelative">
+      You run the utility like this:
+    </p>
+    <p class="CommandLine">
+      java org.apache.derby.tools.sysinfo -cp <em class="Emphasis">arguments</em>
+    </p>
+    <p class="BodyRelative">
+      So for the arguments you need here, run it like this (all on one line):
+    </p>
+    <p class="CommandLine">
+      java org.apache.derby.tools.sysinfo -cp embedded SimpleApp.class
+    </p>
+    <p class="BodyRelative">
+      If your environment is set up correctly, the utility shows output indicating
+      success. It looks like this:
+    </p>
+    <pre class="Output">
+FOUND IN CLASS PATH:
+   Derby embedded engine library (derby.jar)
+   /home/user/derby/db-derby-10.x.y.z-bin/lib/derby.jar
 
-</p>
-  <li class="Normal"><a name="819222"> </a>Run Derby's Sysinfo utility for testing the classpath for an embedded environment. You will provide the arguments <em class="Emphasis">embedded</em> to indicate an embedded environment and <em class="Emphasis">SimpleApp.class</em> to test for the presence of the <em class="javaObject">SimpleApp</em> class.
 
- 
-
-<p class="BodyRelative">
-  <a name="818908"> </a>You run the utility like this:
-</p>
-<p class="CommandLine"><a name="818909">java org.apache.derby.tools.sysinfo -cp <em class="Emphasis">arguments</em></a></p>
- 
-
-<p class="BodyRelative">
-  <a name="818907"> </a>So for the arguments you need here, run it like this (all on one line):
-</p>
-<p class="CommandLine"><a name="818910">java org.apache.derby.tools.sysinfo -cp embedded SimpleApp.class</a></p>
- 
-
-<p class="BodyRelative">
-  <a name="820871"> </a>If your environment is set up correctly, the utility shows output indicating success. It looks like this:
-</p>
-<p class="OutputRelative"><a name="820884"> </a>FOUND IN classpath:</p>
-<p class="OutputRelative"><a name="820886"> </a>  Derby embedded engine library (derby.jar)</p>
-<p class="OutputRelative"><a name="820887"> </a></p>
-<p class="OutputRelative"><a name="820893"> </a>   user-specified class (SimpleApp)</p>
-<p class="OutputRelative"><a name="820896"> </a>SUCCESS: All Derby-Related classes for embedded environment found in classpath.</p>
-
- 
-
-<p class="BodyRelative">
-  <a name="820878"> </a>If something is missing from your classpath environment, the utility indicates what is missing. For example, if you neglected to add the directory containing the SimpleApp class to your classpath, the utility would indicate as such:
-</p>
-<p class="OutputRelative"><a name="820925"> </a>Testing for presence of Derby-related libraries for embedded environment.</p>
-<p class="OutputRelative"><a name="820927"> </a>FOUND IN classpath:</p>
-<p class="OutputRelative"><a name="820956"> </a></p>
-<p class="OutputRelative"><a name="820929"> </a>   Derby embedded engine library (derby.jar)</p>
-<p class="OutputRelative"><a name="820934"> </a></p>
-<p class="OutputRelative"><a name="820937"> </a>NOT FOUND IN classpath:</p>
-<p class="OutputRelative"><a name="820958"> </a>   user-specified class (SimpleApp)</p>
-<p class="OutputRelative"><a name="820940"> </a>    (SimpleApp not found.)</p>
-  <li class="Normal"><a name="818903"> </a>Once you have your environment set up correctly, execute the application in embedded mode from the same directory (<em class="fileName">/demo/programs/simple</em>): 
-<p class="CommandLine"><a name="816737">java SimpleApp</a></p></ol>
+   user-specified class (SimpleApp)
+   /home/user/derby/db-derby-10.x.y.z-bin/demo/programs/simple
 
 
-<BLOCKQUOTE><A name=820970></A>SimpleApp starting in embedded mode. <BR>
-<A 
-name=820971></A>Loaded the appropriate driver. <BR>
-<A name=820972></A>Connected 
-to and created database derbyDB <BR>
-<A name=820973></A>Created table derbyDB 
-<BR>
-<A name=820974></A>Inserted 1956 Webster <BR>
-<A name=820975></A>Inserted 
-1910 Union <BR>
-<A name=820976></A>Updated 1956 Webster to 180 Grand <BR>
-<A 
-name=820977></A>Updated 180 Grand to 300 Lakeshore <BR>
-<A 
-name=820978></A>Verified the rows <BR>
-<A name=820979></A>Dropped table derbyDB 
-<BR>
-<A name=820980></A>Closed result set and statement <BR>
-<A 
-name=820981></A>Committed transaction and closed connection <BR>
-<A 
-name=820982></A>Database shut down normally <BR>
-<A name=818289></A>SimpleApp 
-finished</BLOCKQUOTE>
+SUCCESS: All Derby related classes found in class path.
+    </pre>
+    <p class="BodyRelative">
+      If something is missing from your classpath environment, the utility
+      indicates what is missing. For example, if you neglected to add the
+      directory containing the SimpleApp class to your classpath, the utility
+      would indicate as such:
+    </p>
+    <pre class="Output">
+FOUND IN CLASS PATH:
+
+   Derby embedded engine library (derby.jar)
+   /home/user/derby/db-derby-10.x.y.z-bin/lib/derby.jar
 
 
 
+NOT FOUND IN CLASS PATH:
 
-<h2 class="Heading2"><a name="816723"> </a>How to run this sample application in a server environment
+   user-specified class (SimpleApp)
+    (SimpleApp not found.)
+    </pre>
+  <li class="Normal">Once you have your environment set up correctly, execute
+    the application from the same directory (<em class="fileName">demo/programs/simple</em>):
+    <p class="CommandLine">java SimpleApp</p>
+    The demo program's default framework is embedded, so there is no need to
+    specify this explicitly.
+    <p class="BodyRelative">A successful run produces the following output:</p>
+    <pre class="Output">
+SimpleApp starting in embedded mode
+Loaded the appropriate driver
+Connected to and created database derbyDB
+Created table location
+Inserted 1956 Webster
+Inserted 1910 Union
+Updated 1956 Webster to 180 Grand
+Updated 180 Grand to 300 Lakeshore
+Verified the rows
+Dropped table location
+Committed the transaction
+Derby shut down normally
+SimpleApp finished
+    </pre>
+    <p class="BodyRelative">
+      If any error messages appear, and you are unable to resolve the error(s),
+      ask for help on the derby-user
+      <a href="http://db.apache.org/derby/derby_mail.html" target="_new">mailing list</a>.
+    </p>
+</ol>
+
+<!-- ##########  HOW TO RUN - CLIENT/SERVER  ########## -->
+<h2 class="Heading2"><a id="runclientserver" name="runclientserver">How to run this sample application in a client/server environment</a>
 </h2>
-<p>You will need to set up both the client process and the server process to run the demo application as a client connecting to the Network server.</p>
-<P><A name="Server"><B>First start the Network Server:</B></A></P>
+<p>You will need to set up both the client process and the server
+process to run the demo application as a client connecting to the Network server.
+The Network Server needs to be running before you can connect using a client
+driver. This demo includes support for both the Derby client driver and the IBM
+DB2 Universal JDBC driver.
+</p>
+<p>You must start the Network Server before trying to run the
+demo application in one of the client modes.
 
- <ol type="1">  <li class="Normal"><a name="816724"> </a>Open a command window for the server.
-  <li class="Normal"><a name="816726"> </a>If you haven't set it already on a system-wide basis, set the DERBY_INSTALL environment variable to the location of the directory where you installed the Derby software in the current command window.
-<li class="Normal">Change directories to the <em class="fileName">\demo\programs\simple</em> directory.
-  <li class="Normal"><a name="819207"> </a>In the command window for the server, set the CLASSPATH as follows:<p>
+<!-- ##########  HOW TO RUN - SERVER  ########## -->
+<h3><a id="server" name="server">Starting the Network Server</a></h3>
+<ol class="decimal">
+  <li class="Normal">Open a command window for the server.
+  <li class="Normal">If you haven't set it already on a system-wide basis, set
+  the <var class="envVar">DERBY_HOME</var> environment variable to the location of this Derby installation.
+  This is not strictly required to run the demo, but this environment variable
+  will be used later on this page to refer to the required Derby resources,
+  files, etc.
+    <p class="BodyRelative">Examples:</p>
+    <p class="BodyRelative">UNIX (ksh/bash):</p>
+    <p class="commandLine">export DERBY_HOME=/home/user/derby/db-derby-10.x.y.z-bin</p>
+    <p class="BodyRelative">Windows:</p>
+    <p class="commandLine">set DERBY_HOME=c:\programs\derby\db-derby-10.x.y.z-bin</p>
+  <li class="Normal">Change directories to the <em class="fileName">$DERBY_HOME/demo/programs/simple</em> directory.
+  <li class="Normal">In the command window for the server, start the Network Server
+  by running the executable jar file <em class="fileName">derbyrun.jar</em>.
+    <p class="BodyRelative">Examples:</p>
+    <p class="BodyRelative">UNIX (ksh/bash):
+    <p class="commandLine">java -jar $DERBY_HOME/lib/derbyrun.jar server start</p>
+    <p class="BodyRelative">Windows:</p>
+    <p class="commandLine">java -jar %DERBY_HOME%\lib\derbyrun.jar server start</p>
+    <p class="BodyRelative">When the server starts, the server console output will
+      resemble something like this:
+    </p>
+    <pre class="Output">
+Security manager installed using the Basic server security policy.
+Apache Derby Network Server - &lt;version&gt; - (&lt;svnrevision&gt;) started and ready to accept connections on port 1527 at &lt;timestamp&gt;
+    </pre>
+    <p class="BodyRelative">(When you are done with the demo, you may shut down the network server for example by
+      passing the arguments <var class="command">server shutdown</var> to
+      <em class="fileName">derbyrun.jar</em> in a new command window.)
+    </p>
+  <table cellSpacing=2 cellPadding=3 bgColor=silver border=0>
+    <tbody>
+      <tr vAlign=top>
+        <td class=BoxTable>
+        <h3 class=BoxHead>A note on running the Network Server</h3>
+        <p class=CellBodySmall>You may start the server in a number of other ways,
+        including:</p>
+        <ul class="boxed">
+          <li>Invoking the Network Server's main class from the command line.
+            <p class="CommandLine">java -cp $DERBY_HOME/lib/derbynet.jar org.apache.derby.drda.NetworkServerControl start</p>
+            <li>Accessing the <em class="java">NetworkServerControl</em> API from a Java program.
+          <li>Running a so-called "embedded server" by setting the property
+            <var class="property">derby.drda.startNetworkServer=true</var> before loading the
+            embedded driver (with <em class="fileName">derbynet.jar</em> in the classpath).
+          <li>Running the script <em class=fileName>$DERBY_HOME/bin/startNetworkServer</em>
+            (<em class=fileName>%DERBY_HOME%\bin\startNetworkServer.bat</em> on Windows).
+        </ul>
+        <p class="CellBody">
+        Note that unless you set the system property
+        <var class="property">derby.system.home</var>, Derby's default database
+        location is the working directory of the Network Server JVM.
+        </p>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</ol>
 
-<BLOCKQUOTE>WINDOWS: set CLASSPATH=.;%DERBY_INSTALL%\lib\derby.jar;%DERBY_INSTALL%\lib\derbynet.jar<BR>
-UNIX (ksh): export CLASSPATH=.:${DERBY_INSTALL}/lib/derby.jar:${DERBY_INSTALL}/lib/derbynet.jar</BLOCKQUOTE>
-<BLOCKQUOTE>
-<br>
+<!-- ##########  HOW TO RUN - DERBY CLIENT  ########## -->
+<h3><a id="derbyclient" name="derbyclient">Using the Derby client driver (<var class="command">derbyclient</var>)</a></h3>
+<p>
+  The Derby client driver is a JDBC driver included in binary distributions of
+  Apache Derby, in the directory <em class="fileName">$DERBY_HOME/lib/</em>.
+  It is recommended that you use this driver to connect to the
+  Derby Network Server, as this client driver is developed and maintained by
+  the Apache Derby development community.
+</p>
+<table class="listing">
+  <tr><td class="listItem">Class name:</td><td class="listItem"><em class="javaObject">org.apache.derby.jdbc.ClientDriver</em></td></tr>
+  <tr><td class="listItem">Library:</td><td class="listItem"><em class="fileName">derbyclient.jar</em></td></tr>
+</table>
+<p>&nbsp;</p>
+<ol class="decimal">
+  <li class="Normal">Open a command window
+  <li class="Normal">If you haven't set it already on a system-wide basis, set
+  the <var class="envVar">DERBY_HOME</var> environment variable to the location
+  of this Derby installation. This is not strictly required to run the demo, but
+  this environment variable will be used later on this page to refer to the
+  required Derby resources, files, etc. Examples:
+    <p class="BodyRelative">UNIX (ksh/bash):</p>
+    <p class="commandLine">export DERBY_HOME=/home/user/derby/db-derby-10.x.y.z-bin</p>
+    <p class="BodyRelative">Windows:</p>
+    <p class="commandLine">set DERBY_HOME=c:\programs\derby\db-derby-10.x.y.z-bin</p>
+  <li class="Normal">Change directories to the <em class="fileName">$DERBY_HOME/demo/programs/simple</em> directory.
+  <li class="Normal">In the client command window, set the CLASSPATH to include the
+  current directory (the location of <em class="fileName">SimpleApp.class</em>)
+  and Derby's client driver library (<em class="fileName">derbyclient.jar</em>).
+  (You may skip this step and provide the classpath as an option to the JVM
+  launch command instead, refer to your JVM's documentation for details).
+    <p class="BodyRelative">This may be done as follows:</p>
+    <p class="BodyRelative">UNIX (ksh/bash):</p>
+    <p class="commandLine">export CLASSPATH=.:${DERBY_HOME}/lib/derbyclient.jar</p>
+    <p class="BodyRelative">WINDOWS:</p>
+    <p class="commandLine">set CLASSPATH=.;%DERBY_HOME%\lib\derbyclient.jar</p>
+  <li class="Normal">(Optional) Run Derby's Sysinfo utility for testing the
+    classpath in your environment. You should provide the arguments
+    <em class="Emphasis">client</em> (to indicate a client environment) and
+    <em class="Emphasis">SimpleApp.class</em> to test for the presence of the
+    <em class="javaObject">SimpleApp</em> class.
+    <p class="BodyRelative">
+      You run the utility like this:
+    </p>
+    <p class="CommandLine">
+      java org.apache.derby.tools.sysinfo -cp <em class="Emphasis">arguments</em>
+    </p>
+    <p class="BodyRelative">
+      So for the arguments you need here, run it like this (all on one line):
+    </p>
+    <p class="CommandLine">
+      java org.apache.derby.tools.sysinfo -cp client SimpleApp.class
+    </p>
+    <p class="BodyRelative">
+      If your environment is set up correctly, the utility shows output indicating
+      success. It looks like this:
+    </p>
+    <pre class="Output">
+FOUND IN CLASS PATH:
 
-<TABLE cellspacing="0" cellpadding="5" bgcolor="#faf0e6" border="4">
-  <CAPTION class=TableTitle>Classpath for the process starting the Network Server </CAPTION>
-  <TBODY>
-    <TR vAlign=bottom>
-      <TH><A name=819182></A>
-      <P class=CellHeading>Library or Directory</P>
-      </TH>
-      <TH><A name=819184></A>
-      <P class=CellHeading>Path to Library or Directory</P>
-      </TH>
-    </TR>
-    <TR vAlign=top>
-      <TD class=DefaultTable><A name=821049></A>
-      <P class=CellBody>main Derby library:</P>
-      <A name=819190></A>
-      <P class=CellBody><EM class=fileName>derby.jar</EM></P>
-      </TD>
-      <TD class=DefaultTable><A name=819195></A>
-      <P class=CellBody><EM 
-        class=fileName>%DERBY_INSTALL%\lib\derby.jar</EM></P>
-      </TD>
-    </TR>
-    <TR vAlign=top>
-      <TD class=DefaultTable><A name=821050></A>
-      <P class=CellBody>Derby Network Server:</P>
-      <A name=819200></A>
-      <P class=CellBody><EM class=fileName>derbynet.jar</EM></P>
-      </TD>
-      <TD class=DefaultTable><A name=819205></A>
-      <P class=CellBody><EM 
-        class=fileName>%DERBY_INSTALL%\lib\derbynet.jar</EM></P>
-      </TD>
-    </TR>
-  </TBODY>
-</TABLE>
-  <BR>
-  <TABLE cellSpacing=2 cellPadding=3 bgColor=silver border=0>
-    <TBODY>
-      <TR vAlign=top>
-        <TD class=BoxTable>
-        <H3 class=BoxHead><A name=819210></A>A note on setting the classpath for 
-        a server environment</H3>
-        <A name=819214></A>
-        <P class=CellBody>Derby provides a script to help you get started with 
-        setting the classpath in <BR>
-        <EM 
-        class=fileName>%DERBY_INSTALL%\frameworks\NetworkServer\bin</EM>. This 
-        script is called <EM class=fileName>setNetworkServerCP</EM> and comes in 
-        two flavors: one for Windows environment (this file ends with <EM 
-        class=fileName>.bat</EM>) and one for UNIX environments (this file ends 
-        with <EM class=fileName>.ksh</EM>). For users working in those environments using the Derby Network Server,
-      copying the commands in this file will help you get started setting the
-      classpath on the server process. </P>
-        </TD>
-      </TR>
-    </TBODY>
-  </TABLE>
-</BLOCKQUOTE>
-  <LI class="Normal">Run Derby's Sysinfo utility for testing the classpath for a server environment.
-  You will provide the arguments <EM 
-  class=Emphasis>server</EM> to indicate a server environment and <EM 
-  class=Emphasis>SimpleApp.class</EM> to test for the presence of the <EM 
-  class=javaObject>SimpleApp</EM> class.
-  <BR>
-  If your environment is set up correctly, the utility shows output indicating success. It looks like this:<BR>
-  <BR>
-  java org.apache.derby.tools.sysinfo -cp server SimpleApp.class<BR><br>
-FOUND IN CLASS PATH:<BR>
-<BR>
-   <BLOCKQUOTE>
-Derby Network Server library (derbynet.jar)<BR>
-<BR>
-<BR>
-  user-specified class (SimpleApp)</BLOCKQUOTE>
-<BR>
-<BR>
-  SUCCESS: All Derby related classes found in class path.<BR>
-  <LI class="Normal"><A name=816724></A>Now start the Network Server:<BR>
-  <A name=818909>java org.apache.derby.drda.NetworkServerControl start</A><BR>
-  <BLOCKQUOTE>A sucessful start produces the following output:</BLOCKQUOTE>
-<BLOCKQUOTE>
-<BLOCKQUOTE><CODE>Server is ready to accept connections on port 1527.</CODE></BLOCKQUOTE>
-</BLOCKQUOTE>
+   Derby Client libraries (derbyclient.jar)
+   /home/user/derby/db-derby-10.x.y.z-bin/lib/derbyclient.jar
 
-</OL>
-<P <A name="derbyClient"><B>Next run the SimpleApp demo in Derby client mode:</B></P>
-<OL type=1>
-  <LI class=Normal value=1><A name=816724></A>Open a command window to run the application in client mode
-  <LI class="Normal"><A name=816724></A>If you haven't set it already on a system-wide basis, set the DERBY_INSTALL
-  environment variable for the current command window to the location of
-  the directory where you installed the Derby software 
-  <LI class="Normal"><A name=816724></A>Change directories to the %DERBY_INSTALL%<EM class=fileName>\demo\programs\simple</EM> directory.
-  <LI class="Normal"><A name=816724></A>In the command window for the client, set the CLASSPATH as follows:
-<BLOCKQUOTE>WINDOWS: set CLASSPATH=.;%DERBY_INSTALL%\lib\derbyclient.jar<BR>
-UNIX (ksh): export CLASSPATH=.:${DERBY_INSTALL}/lib/derbyclient.jar</BLOCKQUOTE>
-<BLOCKQUOTE>
-<TABLE cellSpacing=0 cellPadding=5 bgColor=#faf0e6 border=4>
-  <CAPTION class=TableTitle>Classpath for the client process when using the Derby network client</CAPTION>
-  <TBODY>
-    <TR vAlign=top>
-      <TD class=DefaultTable><A name=821950></A>
-      <P class=CellBody>Derby network client:</P>
-      <A name=819200></A>
-      <P class=CellBody><EM class=fileName>derbyclient.jar</EM></P>
-      </TD>
-      <TD class=DefaultTable><A name=819305></A>
-      <P class=CellBody><EM 
-        class=fileName>%DERBY_INSTALL%\lib\derbyclient.jar</EM></P>
-      </TD>
-    </TR>
-    <TR vAlign=top>
-      <TD class=DefaultTable><A name=819204></A>
-      <P class=CellBody>current directory<BR>SimpleApp.class</P>
-      </TD>
-      <TD class=DefaultTable><A name=819206></A>
-      <P class=CellBody>.\</P>
-      </TD>
-    </TR>
-  </TBODY>
-</TABLE>
-</BLOCKQUOTE>
-  <LI class="Normal">Run Derby's Sysinfo utility for testing the classpath for a client environment.
-  You will provide the arguments <EM 
-  class=Emphasis>client</EM> to indicate a client environment and <EM 
-  class=Emphasis>SimpleApp.class</EM> to test for the presence of the <EM 
-  class=javaObject>SimpleApp</EM> class. Note that the following assumes you have not downloaded the IBM
-  DB2 JDBC Universal Driver (see the next section for details) so the db2jcc.jar
-  is listed as NOT FOUND - this is not a problem.<BR>
-  If your environment is set up correctly, the utility shows output indicating success. It looks like this:<BR>
-  <BR>
-  java org.apache.derby.tools.sysinfo -cp client SimpleApp.class<BR>
-FOUND IN CLASS PATH:<BR>
-<BR><BLOCKQUOTE>
-   Derby Client libraries (derbyclient.jar)<BR>
-<BR>
-<BR>
-  user-specified class (SimpleApp)</BLOCKQUOTE>
-  <BR>
-NOT FOUND IN CLASS PATH:<BR>
-<BR><BLOCKQUOTE>
-   Derby Client libraries (db2jcc.jar)<BR>
-  (com.ibm.db2.jcc.DB2Driver not found.)</BLOCKQUOTE>
-<BR>
-  <LI class="Normal"><A name=816724></A>Now start the SimpleApp in Derby client mode:<BR>
-  <br><A name=818909>java SimpleApp derbyclient</A><BR>
-  <BR>
-  <A name=818687></A>A successful run produces the following output:
-  <P><A name=820970></A>SimpleApp starting in derbyclient mode.<BR>
-  Loaded the appropriate driver.<BR>
-  Connected to and created database derbyDB<BR>
-  Created table derbyDB<BR>
-  Inserted 1956 Webster<BR>
-  Inserted 1910 Union<BR>
-  Updated 1956 Webster to 180 Grand<BR>
-  Updated 180 Grand to 300 Lakeshore<BR>
-  Verified the rows<BR>
-  Dropped table derbyDB<BR>
-  Closed result set and statement<BR>
-  Committed transaction and closed connection<BR>
-  SimpleApp finished</P>
-</OL>
-<P><B>Running the SimpleApp demo using the IBM DB2 JDBC Universal Driver:</B></P>
-<P>In version 10.0 of Derby, the IBM DB2 JDBC Universal Driver was the only client driver
-that could communicate with the Derby Network Server. This driver is not licensed under the <a href="http://www.apache.org/licenses/">Apache License, Version 2.0</a> used by Apache Derby, but can be downloaded from the IBM developerWorks
-website (see: <A href="http://www-106.ibm.com/developerworks/db2/downloads/jcc/">IBM 
-      DB2 JDBC Universal Driver, for Apache Derby Network Server</A> for more information). Beginning with version 10.1, the Derby network client driver is bundled with the Derby distribution and this is the recommended client driver for most applications. The DB2 Universal Driver is still supported and can be utilized with the SimpleApp demo as follows (these instructions assume you have unzipped the Universal Driver into the <EM>lib</EM> directory of <EM>DERBY_INSTALL</EM>):</P>
-<OL type="1">
-  <LI class=Normal value=1><A name=JccSteps></A>Open a command window to run the application in client mode using the DB2
-  Universal Driver
-  <LI class="Normal"><A name=JccSteps></A>If you haven't set it already on a system-wide basis, set the DERBY_INSTALL
-  environment variable for the current command window to the location of
-  the directory where you installed the Derby software. It is assumed that you
-  installed the IBM DB2 JDBC Universal Driver jar in the lib subdirectory
-  at this location.
-  <LI class="Normal"><A name=JccSteps></A>Change directories to the %DERBY_INSTALL%<EM class=fileName>\demo\programs\simple</EM> directory.
-  <li class="Normal"><a href="#Server">Set the Network Server classpath</a> as you would if using the Derby network client.
-  <LI class="Normal"><A name=JccSteps></A>In the command window for the client, set the classpath as follows:
-<BLOCKQUOTE>WINDOWS: set CLASSPATH=.;%DERBY_INSTALL%\lib\db2jcc.jar;%DERBY_INSTALL%\lib\db2jcc_license_c.jar<BR>
-UNIX (ksh): export CLASSPATH=.:${DERBY_INSTALL}/lib/db2jcc.jar:${DERBY_INSTALL}/lib/db2jcc_license_c.jar</BLOCKQUOTE>
-<BLOCKQUOTE>
-<TABLE cellSpacing=0 cellPadding=5 bgColor=#faf0e6 border=4>
-  <CAPTION class=TableTitle>Classpath for the client process when using the IBM DB2 JCC Client Driver</CAPTION>
-  <TBODY>
-    <TR vAlign=top>
-      <TD class=DefaultTable><A name=821950></A>
-      <P class=CellBody>IBM DB2 JCC Client Driver jar files:</P>
-      <A 
-        name=819200></A>
-      <P class=CellBody><EM class=fileName>db2jcc.jar</EM> and <EM 
-        class=fileName>db2jcc_license_c.jar</EM></P>
-      </TD>
-      <TD class=DefaultTable><A name=819305></A>
-      <P class=CellBody><EM 
-        class=fileName>%DERBY_INSTALL%\lib\db2jcc_license_c.jar</EM><BR>
-      <EM 
-        class=fileName>%DERBY_INSTALL%\lib\db2jcc.jar</EM></P>
-      </TD>
-    </TR>
-    <TR vAlign=top>
-      <TD class=DefaultTable><A name=819204></A>
-      <P class=CellBody>current directory<BR>
-      SimpleApp.class</P>
-      </TD>
-      <TD class=DefaultTable><A name=819206></A>
-      <P class=CellBody>.\</P>
-      </TD>
-    </TR>
-  </TBODY>
-</TABLE>
-</BLOCKQUOTE>
-  <LI class="Normal"><A name=JccSteps></A>Now start the SimpleApp demo in Derby client mode:<BR><br>
-  <A name=818909>java SimpleApp jccjdbcclient</A>
- </OL>
-<BLOCKQUOTE><A name=818687></A></BLOCKQUOTE>
-<BLOCKQUOTE>A successful run produces the following output:<BR>
-</BLOCKQUOTE>
-<BLOCKQUOTE>SimpleApp starting in jccjdbc mode.<BR>
-Loaded the appropriate driver.<BR>
-Connected to and created database derbyDB<BR>
-Created table derbyDB<BR>
-Inserted 1956 Webster<BR>
-Inserted 1910 Union<BR>
-Updated 1956 Webster to 180 Grand<BR>
-Updated 180 Grand to 300 Lakeshore<BR>
-Verified the rows<BR>
-Dropped table derbyDB<BR>
-Closed result set and statement<BR>
-Committed transaction and closed connection<BR>
-SimpleApp finished</BLOCKQUOTE>
-<BR>
-<TABLE cellSpacing=2 cellPadding=3 bgColor=silver border=0>
-    <TBODY>
-      <TR vAlign=top>
-        <TD class=BoxTable>
-        <H3 class=BoxHead><A name=819210></A>A note on setting the classpath for a client environment (JCC)</H3>
-        <A name=819214></A>
-        <P class=CellBody>Derby provides a script to help you get started with setting the IBM DB2
-      JDBC Universal Driver client classpath: <BR>
-        <EM 
-        class=fileName>%DERBY_INSTALL%\frameworks\NetworkServer\bin</EM>. This 
-        script is called <EM class=fileName>setNetworkClientCP</EM> and comes in 
-        two flavors: one for Windows environment (this file ends with <EM 
-        class=fileName>.bat</EM>) and one for UNIX environments (this file ends 
-        with <EM class=fileName>.ksh</EM>). For users working in those environments using the IBM DB2 JCC Client
-      Driver Client, copying the commands in this file will help you get started
-      setting the classpath on the client process. Note to use these scripts
-      copy the jar files into the <EM 
-        class=fileName>%DERBY_INSTALL%\lib </EM>directory.</P>
-        </TD>
-      </TR>
-    </TBODY>
-  </TABLE>
-  <P class=NavBarVersion>Apache Derby Version 10.1</P>
+
+   user-specified class (SimpleApp)
+   /home/user/derby/db-derby-10.x.y.z-bin/demo/programs/simple
+
+
+SUCCESS: All Derby related classes found in class path.
+    </pre>
+  <li class="Normal">Start the Derby Network Server in a different command
+    window, as described <a href="#server">here</a>
+  <li class="Normal">Start SimpleApp in Derby client mode:
+    <p class="commandLine">java SimpleApp derbyclient</p>
+    <p class="BodyRelative">The <var class="command">derbyclient</var> argument
+      tells the program to use the Derby client driver instead of its default
+      driver (the embedded driver).
+    </p>
+    <p class="BodyRelative">A successful run produces the following output:</p>
+    <pre class="Output">
+SimpleApp starting in derbyclient mode
+Loaded the appropriate driver
+Connected to and created database derbyDB
+Created table location
+Inserted 1956 Webster
+Inserted 1910 Union
+Updated 1956 Webster to 180 Grand
+Updated 180 Grand to 300 Lakeshore
+Verified the rows
+Dropped table location
+Committed the transaction
+SimpleApp finished
+    </pre>
+    <p class="BodyRelative">
+      If any error messages appear, and you are unable to resolve the error(s),
+      ask for help on the derby-user
+      <a href="http://db.apache.org/derby/derby_mail.html" target="_new">mailing list</a>.
+    </p>
+</ol>
+
+<!-- ##########  HOW TO RUN - DB2 UNIVERSAL (JCC) DRIVER  ########## -->
+<h3><a id="jcc" name="jcc">Using the IBM DB2 JDBC Universal Driver (<var class="command">jccjdbcclient</var>)</a></h3>
+<p>
+  In version 10.0 of Derby, the IBM DB2 JDBC Universal Driver (also known as
+  JCC) was the only client driver that could communicate with the Derby Network
+  Server. This driver is not licensed under the
+  <a href="http://www.apache.org/licenses/">Apache License, Version 2.0</a> used
+  by Apache Derby, but can be downloaded from the IBM developerWorks website
+  (see: <a href="http://www-106.ibm.com/developerworks/db2/downloads/jcc/" target="_new">IBM
+  DB2 JDBC Universal Driver for Apache Derby Network Server</a> for more
+  information).
+</p>
+<table class="listing">
+  <tr>
+    <td class="listItem">Class name:</td>
+    <td class="listItem"><em class="javaObject">com.ibm.db2.jcc.DB2Driver</em></td>
+  </tr>
+  <tr>
+    <td class="listItem">Libraries:</td>
+    <td class="listItem"><em class="fileName">db2jcc.jar</em></td>
+  <tr>
+    <td class="listItem"></td>
+    <td class="listItem"><em class="fileName">db2jcc_license_c.jar</em></td>
+  </tr>
+</table>
+<p>
+  Newer versions of Derby include <a href="#derbyclient">Derby's own network
+  client driver</a>, which is the recommended client driver for most applications.
+  The DB2 Universal Driver is still supported and can be utilized with the
+  SimpleApp demo as follows (these instructions assume you have unzipped the
+  Universal Driver libraries into the <em class="fileName">lib</em> directory of
+  <var class="envVar">DERBY_HOME</var>):
+</p>
+<ol class="decimal">
+  <li class="Normal">Open a command window
+  <li class="Normal">If you haven't set it already on a system-wide basis, set
+  the <var class="envVar">DERBY_HOME</var> environment variable to the location
+  of this Derby installation. This is not strictly required to run the demo, but
+  this environment variable will be used later on this page to refer to the
+  required Derby resources, files, etc. Examples:
+    <p class="BodyRelative">UNIX (ksh/bash):</p>
+    <p class="commandLine">export DERBY_HOME=/home/user/derby/db-derby-10.x.y.z-bin</p>
+    <p class="BodyRelative">Windows:</p>
+    <p class="commandLine">set DERBY_HOME=c:\programs\derby\db-derby-10.x.y.z-bin</p>
+  <li class="Normal">Change directories to the <em class="fileName">$DERBY_HOME/demo/programs/simple</em> directory.
+  <li class="Normal">In the jcc client command window, set the CLASSPATH to include the
+  current directory (the location of <em class="fileName">SimpleApp.class</em>)
+  and the JCC libraries (<em class="fileName">db2jcc.jar</em> and
+  <em class="fileName">db2jcc_license_c.jar</em>).
+  (You may skip this step and provide the classpath as an option to the JVM
+  launch command instead, refer to your JVM's documentation for details).
+    <p class="BodyRelative">This may be done as follows:</p>
+    <p class="BodyRelative">UNIX (ksh/bash):</p>
+    <p class="commandLine">
+      export CLASSPATH=.:${DERBY_HOME}/lib/db2jcc.jar:${DERBY_HOME}/lib/db2jcc_license_c.jar
+    </p>
+    <p class="BodyRelative">WINDOWS:</p>
+    <p class="commandLine">
+      set CLASSPATH=.;%DERBY_HOME%\lib\db2jcc.jar;%DERBY_HOME%\lib\db2jcc_license_c.jar
+    </p>
+    <p class="BodyRelative">
+      It is assumed that you installed the IBM DB2 JDBC Universal Driver jars in
+      the <em class="fileName">lib</em> subdirectory of this Derby installation
+      (<var class="envVar">DERBY_HOME</var>).
+    </p>
+  <li class="Normal">Start the Derby Network Server in a different command
+    window, as described <a href="#server">here</a>
+  <li class="Normal">Start the SimpleApp demo in JCC client mode:
+    <p class="commandLine">
+      java SimpleApp jccjdbcclient
+    </p>
+    <p class="BodyRelative">The <var class="command">jccjdbcclient</var> argument
+      tells the program to use the IBM DB2 JDBC Universal driver (JCC) instead
+      of its default driver (the embedded driver).
+    </p>
+    <p class="BodyRelative">A successful run produces the following output:</p>
+    <pre class="Output">
+SimpleApp starting in jccjdbc mode
+Loaded the appropriate driver
+Connected to and created database derbyDB
+Created table location
+Inserted 1956 Webster
+Inserted 1910 Union
+Updated 1956 Webster to 180 Grand
+Updated 180 Grand to 300 Lakeshore
+Verified the rows
+Dropped table location
+Committed the transaction
+SimpleApp finished
+    </pre>
+ </ol>
+
+<!-- ##########  FOOTER (VERSION INFO)  ########## -->
+<hr>
+<p class=NavBarVersion>Last updated for Apache Derby Version 10.3.2</p>
 
 </body>
 </html>

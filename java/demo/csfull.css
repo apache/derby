@@ -15,8 +15,8 @@
 * limitations under the License.
 */
 BODY {
-	font-size : 12pt;
-	font-family : "Times New Roman";
+	font-size : 10pt;
+	font-family : sans-serif;
 	background-color : White;
 }
 
@@ -25,15 +25,14 @@ A:LINK {
 	background-color : transparent;
 }
 
-A:HOVER {
-	color : Fuchsia;
-	text-decoration : underline;
+A:VISITED {
+	color : #330099;
 	background-color : transparent;
 }
 
-	
-A:VISITED {
-	color : #330099;
+A:HOVER {
+	color : Teal;
+	text-decoration : underline;
 	background-color : transparent;
 }
 
@@ -49,16 +48,15 @@ A.TOC:LINK {
 	background-color : transparent;
 }
 
-A.TOC:HOVER {
-	color : Fuchsia;
-	font-weight : bold;
-	background-color : transparent;
-}
-
-	
 A.TOC:VISITED {
 	color : #330099;
 	text-decoration : none;
+	background-color : transparent;
+}
+
+A.TOC:HOVER {
+	color : Fuchsia;
+	font-weight : bold;
 	background-color : transparent;
 }
 
@@ -66,6 +64,18 @@ A.TOC:ACTIVE {
 	color : Purple;
 	text-decoration : none;
 	background-color : transparent;
+}
+
+a[id] {
+	/* All anchors with an id attribute get this style.
+	   Used to make sure internal links (links to a different section
+	   on the same page, i.e. named anchors) don't change appearance when
+	   hovering in CSS2-enabled browsers.
+	   Hence, links to other pages should not have the id attribute set,
+	   unless this particular solution is consciously abandoned.
+        */
+	color : #3300ff ! important;
+	text-decoration : none ! important;
 }
 
 .BadFormatting{
@@ -82,6 +92,10 @@ A.TOC:ACTIVE {
 	font-size : 9pt;
 }
 
+.java {
+	background-color : transparent;
+	font-family: monospace;
+}
 
 .Output {
 	color : Gray;
@@ -122,6 +136,12 @@ Caption.TableTitle {
 	font-style : normal;
 	text-align : center;
 	font-weight : bold;
+}
+
+div.navMenu {
+	border-style: dashed;
+	border-width: thin;
+	border-color: #6699cc;
 }
 
 DL.Index {
@@ -211,6 +231,7 @@ H3 {
 }
 
 H3.BoxHead {
+	font-size : 90%;
 	margin-top : 1px;
 	margin-bottom : 6px;
 	color : Black;
@@ -303,7 +324,9 @@ H5.SyntaxSubhead {
 	margin-left : 2em;
 }
 
-
+IMG {
+	border : none;
+}
 
 LI{
 	margin-top : 12px;
@@ -465,10 +488,10 @@ P.NavBar {
 	font-size : 9pt;
 	margin-top:6px;
 	margin-bottom :6px;
-	padding-top : 2px;
+	padding-top : 2em;
 	padding-right : 2px;
 	padding-left : 2px;
-	padding-bottom : 2px;
+	padding-bottom : 2em;
 	background-color : transparent;
 }
 
@@ -646,13 +669,48 @@ PRE.ECIJ {
 
 }
 
+PRE.Output {
+	background-color : transparent;
+	font-size : 10pt;
+	font-family : monospace;
+	color: gray;
+}
+
+TABLE.listing {
+	font-size : 100%;
+	background-color : #faf0e6;
+	border-style: solid;
+	border-color: silver;
+	border-width : 1px;
+}
+
 TABLE.Sample {
 	background-color : #FAF0E6;
+}
+
+TABLE.simple {
+	font-size : 100%;
+	border-style: solid;
+	border-width: 1px;
+	border-color: #6699cc;
 }
 
 TD.BoxTable {
 	background-color : Silver;
 	padding : 10px;
+}
+
+TD.listItem {
+	padding-top: 0.2em;
+	padding-bottom: 0.2em;
+	padding-left: 0.2em;
+	padding-right: 0.5em;
+}
+
+TD.heading {
+	font-weight : bold;
+	background-color : #6699cc;
+	color: #e7efff;
 }
 
 UL {
@@ -662,6 +720,11 @@ UL.Normal {
 	background-color : transparent;
 }
 
+UL.boxed {
+	background-color : transparent;
+	font-size : 9pt;
+	padding-bottom : 1em;
+}
 
 UL.CellBodyBulleted {
 	font-size : 10pt;
@@ -770,3 +833,18 @@ STRONG.PartNum {
 	background-color : transparent;
 }
 
+var {
+	background-color : transparent;
+	color : Black;
+	font-weight : bold;
+	font-family : monospace;
+	font-size : 90%;
+}
+
+var.envVar {
+	font-style : normal;
+}
+
+var.property {
+	font-weight : normal;
+}
