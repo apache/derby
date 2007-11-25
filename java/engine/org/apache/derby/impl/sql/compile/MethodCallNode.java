@@ -696,34 +696,27 @@ abstract class MethodCallNode extends JavaValueNode
 			}
 			else
 			{
-
-
-				// DB2 LUW does not support Java object types for SMALLINT, INTEGER, BIGINT, REAL, DOUBLE
-				// and these are the only types that can map to a primitive or an object type according
-				// to SQL part 13. So always map to the primitive type. We can not use the getPrimitiveSignature()
-				// as it (incorrectly but historically always has) maps a DECIMAL to a double. 
-
-				
 				TypeId returnTypeId = TypeId.getBuiltInTypeId(returnType.getJDBCTypeId());
-				switch (returnType.getJDBCTypeId()) {
-				case java.sql.Types.SMALLINT:
-				case java.sql.Types.INTEGER:
-				case java.sql.Types.BIGINT:
-				case java.sql.Types.REAL:
-				case java.sql.Types.DOUBLE:
-					TypeCompiler tc = getTypeCompiler(returnTypeId);
-					requiredType = tc.getCorrespondingPrimitiveTypeName();
-					if (!routineInfo.calledOnNullInput() && routineInfo.getParameterCount() != 0)
-					{
-						promoteName = returnTypeId.getCorrespondingJavaTypeName();
+
+				requiredType = returnTypeId.getCorrespondingJavaTypeName();
+
+				if (!requiredType.equals(typeName)) {
+					switch (returnType.getJDBCTypeId()) {
+					case java.sql.Types.SMALLINT:
+					case java.sql.Types.INTEGER:
+					case java.sql.Types.BIGINT:
+					case java.sql.Types.REAL:
+					case java.sql.Types.DOUBLE:
+						TypeCompiler tc = getTypeCompiler(returnTypeId);
+						requiredType = tc.getCorrespondingPrimitiveTypeName();
+						if (!routineInfo.calledOnNullInput() && 
+								routineInfo.getParameterCount() != 0) {
+							promoteName = returnTypeId.getCorrespondingJavaTypeName();
+						}
+						
+						break;
 					}
-
-					break;
-				default:
-					requiredType = returnTypeId.getCorrespondingJavaTypeName();
-					break;
 				}
-
 			}
 
 			if (!requiredType.equals(typeName))
