@@ -519,9 +519,6 @@ class BTreePostCommit implements Serviceable
         {
             if (controlRow != null)
                 controlRow.release();
-
-            return;
         }
     }
-
 }
