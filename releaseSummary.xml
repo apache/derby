@@ -31,7 +31,7 @@ with real information.
 
     E.g.: 10.3.0.4
 -->
-<releaseID>10.3.1.4</releaseID>
+<releaseID>10.3.2.0</releaseID>
 
 <!--
     Identifier of previous release. The release notes describe the
@@ -40,7 +40,7 @@ with real information.
     E.g.: 10.2.1.7
 
 -->
-<previousReleaseID>10.2.2.0</previousReleaseID>
+<previousReleaseID>10.3.1.4</previousReleaseID>
 
 <buildInfo>
 
@@ -51,13 +51,13 @@ with real information.
   <machine>Cygwin on Microsoft Windows XP Professional Version 2002 Service Pack 2.</machine>
 
   <!-- Ant version. E.g.:  Apache Ant version 1.6.5 compiled on June 2 2005. -->
-  <antVersion>Apache Ant version 1.6.5 compiled on June 2 2005.</antVersion>
+  <antVersion>Apache Ant version 1.7.0  compiled on December 13 2006.</antVersion>
 
   <!-- Output of "java -version" run from your jdk1.4 installation. E.g.:  Java(TM) 2 Runtime Environment, Standard Edition (build 1.4.2_12-b03). -->
-  <jdk1.4>Java(TM) 2 Runtime Environment, Standard Edition (build 1.4.2_12-b03).</jdk1.4>
+  <jdk1.4>Java(TM) 2 Runtime Environment, Standard Edition (build 1.4.2_07-b05)</jdk1.4>
 
   <!-- Output of "java -version" run from your Java 6 installation. E.g.:  Java(TM) 2 Runtime Environment, Standard Edition (build 1.6.0-b105). -->
-  <java6> Java(TM) 2 Runtime Environment, Standard Edition (build 1.6.0-b105).</java6>
+  <java6> Java(TM) SE Runtime Environment (build 1.6.0_01-b06).</java6>
 
   <!--
          Say here whether you used osgi.jar to build org.apache.derby.osgi.EmbeddedActivator.
@@ -72,15 +72,15 @@ with real information.
            The 1.4.2_12-b03 javac was used to compile all classes
            except for the JDBC4 drivers. The JDBC4 driver classes were compiled using the 1.6.0-b105 javac.
   -->
-  <compilers>The 1.4.2_12-b03 javac was used to compile all classes
-           except for the JDBC4 drivers. The JDBC4 driver classes were compiled using the 1.6.0-b105 javac.</compilers>
+  <compilers>The 1.4.2_07-b05 javac was used to compile all classes
+           except for the JDBC4 drivers. The JDBC4 driver classes were compiled using the 1.6.0_01-b06 javac.</compilers>
 
   <!--
          Say here whether you built the J2ME support and, if so, which
          tookit you used.
          E.g.: J2ME support was built using java.sun.com/j2me (j2me_cdc_fp-1_0_2).
   -->
-  <jsr169>J2ME support was built using java.sun.com/j2me (j2me_cdc_fp-1_0_2).</jsr169>
+  <jsr169>J2ME support was built using IBM J9 - VM for the Java(TM) platform, Version 2.3 </jsr169>
 
 </buildInfo>
 
@@ -107,7 +107,7 @@ Derby functionality includes:
 <newFeatures>
 
 <p>
-This is a minor release. The following new features were added:
+This is a maintenance release. No new features have been added.
 </p>
 
 </newFeatures>
