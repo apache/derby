@@ -1356,7 +1356,8 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
                 }
             }
 
-            if (SanityManager.DEBUG) {
+            if (SanityManager.DEBUG) 
+            {
                 // DERBY-2197: Assume no row locking here. If locking policy
                 // requires row locking, we would need to obtain a row lock at
                 // this point.
@@ -1367,9 +1368,12 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
             }
 
             if (scan_position.current_leaf.page.isDeletedAtSlot(
-                    scan_position.current_slot)) {
+                    scan_position.current_slot)) 
+            {
                 ret_val = false;
-            } else {
+            } 
+            else 
+            {
                 scan_position.current_leaf.page.deleteAtSlot(
                     scan_position.current_slot, true, this.btree_undo);
                 ret_val = true;
@@ -1377,16 +1381,18 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
 
             // See if we just deleted the last row on the page, in a btree a
             // page with all rows still has 1 left - the control row.
-  	    // Beetle 5750: we do not reclaim the root page of the btree if 
-            // there are no children since we were
-    	    // doing too many post commit actions in a benchmark which does an
-    	    // insert/commit/delete/commit operations in a single user system. now ,
-    	    // with this change the work will move to the user
-       	    // thread which does the insert 
+  	        // Do not reclaim the root page of the btree if there are no 
+            // children since we were doing too many post commit actions in a 
+            // benchmark which does an insert/commit/delete/commit operations 
+            // in a single user system.  Now with this change the work will 
+            // move to the user thread which does the insert and finds no space
+            // on the root page.  In that case it will try a split, which 
+            // automatically first checks if there is committed deleted space
+            // that can be reclaimed.
 
             if (scan_position.current_leaf.page.nonDeletedRecordCount() == 1 &&
-		!(scan_position.current_leaf.getIsRoot() && 
-		  scan_position.current_leaf.getLevel() == 0 )) 
+                !(scan_position.current_leaf.getIsRoot() && 
+                 scan_position.current_leaf.getLevel() == 0)) 
             {
                 this.getXactMgr().addPostCommitWork(new BTreePostCommit(
                     this.getXactMgr().getAccessManager(),

@@ -30,7 +30,9 @@ import org.apache.derby.iapi.store.access.AccessFactory;
 import org.apache.derby.iapi.store.access.AccessFactoryGlobals;
 import org.apache.derby.iapi.store.access.ConglomerateController;
 import org.apache.derby.iapi.store.access.DynamicCompiledOpenConglomInfo;
+import org.apache.derby.iapi.store.access.RowUtil;
 import org.apache.derby.iapi.store.access.TransactionController;
+
 import org.apache.derby.iapi.store.access.conglomerate.LogicalUndo;
 import org.apache.derby.iapi.store.access.conglomerate.TransactionManager;
 
@@ -132,6 +134,54 @@ class BTreePostCommit implements Serviceable
     }
 
     /**
+     * Open index for either table level or row level update.
+     * <p>
+     * @param lock_level For table level use TransactionManager.MODE_TABLE,
+     *                   for row   level use TransactionManager.MODE_RECORD
+     * @param lock_mode  For table level use LockingPolicy.MODE_CONTAINER,
+     *                   for row   level use LockingPolicy.MODE_RECORD
+     *
+     * @exception  StandardException  Standard exception policy.
+     **/
+    private final OpenBTree openIndex(
+    TransactionManager internal_xact,
+    int                lock_level,
+    int                lock_mode)
+        throws StandardException
+    {
+        OpenBTree open_btree = new OpenBTree();
+
+        ConglomerateController base_cc = 
+            btree.lockTable(
+                internal_xact, 
+                (ContainerHandle.MODE_FORUPDATE |
+                 ContainerHandle.MODE_LOCK_NOWAIT), 
+                lock_level,
+                TransactionController.ISOLATION_REPEATABLE_READ);
+
+        open_btree.init(
+            (TransactionManager) null, 
+            internal_xact, 
+            (ContainerHandle) null,           // open the container 
+            internal_xact.getRawStoreXact(),
+            false,
+            (ContainerHandle.MODE_FORUPDATE | ContainerHandle.MODE_LOCK_NOWAIT),
+            lock_level,
+            btree.getBtreeLockingPolicy(
+                internal_xact.getRawStoreXact(),
+                lock_level,
+                lock_mode,
+                TransactionController.ISOLATION_REPEATABLE_READ, 
+                base_cc,
+                open_btree),
+            btree, 
+            (LogicalUndo) null,              // No logical undo necessry.
+            (DynamicCompiledOpenConglomInfo) null);
+
+        return(open_btree);
+    }
+
+    /**
      * perform the work described in the postcommit work.
      * <p>
      * In this implementation the only work that can be executed by this
@@ -165,51 +215,31 @@ class BTreePostCommit implements Serviceable
                 System.out.println("starting internal xact\n");
         }
 
-        OpenBTree open_btree = new OpenBTree();
+        OpenBTree open_btree = null;
 
         try
         {
             // Get lock on base table.
             
-            // The current space reclamation algorithm requires a table level
-            // lock on the btree - this is mostly because the shrink algorithm
-            // is not multi-user.  This lock is requested NOWAIT as it does
-            // not want to impedede normal operation on the table.  If the lock
-            // were to wait then the current lock manager livelock algorithm 
-            // would block all subsequent lock requests on this btree even if
-            // they are compatible with the current holder of the lock.
-            // 
-            // There are currently 3 outstanding enhancement requests:
-            // track 4237 - retry the work intelligently
-            // track 4238 - if can't get table lock, at least reclaim the rows
-            // track 4239 - do row level lock shrink - very hard to do.
+            // First attempt to get a table lock on the btree.  This lock is
+            // requested NOWAIT to not impede normal operation on the table.
+            // If the lock were to wait then the current lock manager livelock 
+            // algorithm would block all subsequent lock requests on this 
+            // btree even if they are compatible with the current holder of 
+            // the lock.
             //
-            ConglomerateController base_cc = 
-                btree.lockTable(
+            // If this lock is granted then:
+            // 1) deleted rows on the page can automatically be purged as
+            //    they must be committed, otherwise lock would not have been
+            //    granted.
+            // 2) if all rows from page are reclaimed then a structure shrink
+            //    which requires table level lock can be executed.
+            //
+            open_btree = 
+                openIndex(
                     internal_xact, 
-                    (ContainerHandle.MODE_FORUPDATE |
-                     ContainerHandle.MODE_LOCK_NOWAIT), 
-                    TransactionController.MODE_TABLE,
-                    TransactionController.ISOLATION_REPEATABLE_READ);
-
-            open_btree.init(
-                (TransactionManager) null, 
-                internal_xact, 
-                (ContainerHandle) null,           // open the container 
-                internal_xact.getRawStoreXact(),
-                false,
-                ContainerHandle.MODE_FORUPDATE,
-                TransactionController.MODE_TABLE,
-                btree.getBtreeLockingPolicy(
-                    internal_xact.getRawStoreXact(),
-                    TransactionController.MODE_TABLE,
-                    LockingPolicy.MODE_CONTAINER,
-                    TransactionController.ISOLATION_REPEATABLE_READ, 
-                    base_cc,
-                    open_btree),
-                btree, 
-                (LogicalUndo) null,              // No logical undo necessry.
-                (DynamicCompiledOpenConglomInfo) null);
+                    TransactionController.MODE_TABLE, 
+                    LockingPolicy.MODE_CONTAINER);
 
             DataValueDescriptor[] shrink_key = 
                 purgeCommittedDeletes(open_btree, this.page_number);
@@ -222,29 +252,46 @@ class BTreePostCommit implements Serviceable
         }
         catch (StandardException se)
         {
-
-			
-            //2 kinds of errors here expected here.  Either container not found or dead lock. 
+            // 2 kinds of errors here expected here.  Either container not 
+            // found or could not obtain lock (LOCK_TIMEOUT or DEADLOCK).
+            //
             // It is possible by the time this post commit work gets scheduled 
             // that the container has been dropped and that the open container 
             // call will return null - in this case just return assuming no 
             // work to be done.
 
-			//If it is a locking error, work is requeued. (4237)
-		   
 			if (se.getMessageId().equals(SQLState.LOCK_TIMEOUT) ||
 				se.getMessageId().equals(SQLState.DEADLOCK))
 			{
-				requeue_work = true;
-			}
+                // Could not get exclusive table lock, so try row level
+                // reclaim of just the rows on this page.  No merge is 
+                // attempted.
 
-			//RESSOLVE-mike (4238) If you can't get a table level lock for btree space recovery in 
-			//the post commit thread, maybe you should at least reclaim the 
-			//rows on the page while you are at it.  Use the same algorithm 
-			//as exists in BTreeController.java.  row level shrink is still a 
-			//big problem and a separate track exists for it.
-			
+                try
+                {
+                    open_btree = 
+                        openIndex(
+                            internal_xact, 
+                            TransactionController.MODE_RECORD, 
+                            LockingPolicy.MODE_RECORD);
 
+                    purgeRowLevelCommittedDeletes(open_btree);
+
+                    open_btree.close();
+
+                }
+                catch (StandardException se2)
+                {
+                    if (se2.getMessageId().equals(SQLState.LOCK_TIMEOUT) ||
+                        se2.getMessageId().equals(SQLState.DEADLOCK))
+                    {
+                        // Could not get intended exclusive table lock, so 
+                        // requeue and hope other user gives up table level
+                        // lock soon.  This should not be normal case.
+                        requeue_work = true;
+                    }
+                }
+            }
         }
         finally
         {
@@ -385,4 +432,93 @@ class BTreePostCommit implements Serviceable
         return(shrink_key);
     }
 
+    /**
+     * Attempt to reclaim committed deleted rows from the page with row locking.
+     * <p>
+     * Get exclusive latch on page, and then loop backward through
+     * page searching for deleted rows which are committed.  
+     * This routine is called only from post commit processing so it will never
+     * see rows deleted by the current transaction.
+     * For each deleted row on the page
+     * it attempts to get an exclusive lock on the deleted row, NOWAIT.
+     * If it succeeds, and since this transaction did not delete the row then 
+     * the row must have been deleted by a transaction which has committed, so
+     * it is safe to purge the row.  It then purges the row from the page.
+     *
+     * @param open_btree The already open btree, which has been locked with IX
+     *                   table lock, to use to get latch on page.
+     *
+	 * @exception  StandardException  Standard exception policy.
+     **/
+    private final void purgeRowLevelCommittedDeletes(
+    OpenBTree           open_btree)
+        throws StandardException
+    {
+        ControlRow  controlRow              = null; 
+
+        try
+        {
+
+            if ((controlRow = ControlRow.get(open_btree, page_number)) == null)
+                return;
+
+            LeafControlRow leaf = (LeafControlRow) controlRow;
+
+            BTreeLockingPolicy  btree_locking_policy = 
+                open_btree.getLockingPolicy();
+
+            // The number records that can be reclaimed is:
+            // total recs - control row - recs_not_deleted
+            int num_possible_commit_delete = 
+                leaf.page.recordCount() - 1 - leaf.page.nonDeletedRecordCount();
+
+            if ((num_possible_commit_delete > 0) &&
+                (btree_locking_policy.lockScanForReclaimSpace(leaf)))
+            {
+                DataValueDescriptor[] scratch_template = 
+                    open_btree.getRuntimeMem().get_template(
+                        open_btree.getRawTran());
+
+                // Need to get an exclusive scan lock on the page before we can
+                // do any sort of purges, otherwise other concurrent scans would
+                // not work.  If we can't get the lock NOWAIT, just give up on
+                // purging rows. 
+                Page page   = leaf.page;
+
+
+                // RowLocation column is in last column of template.
+                FetchDescriptor lock_fetch_desc = 
+                    RowUtil.getFetchDescriptorConstant(
+                        scratch_template.length - 1);
+
+                // loop backward so that purges which affect the slot table 
+                // don't affect the loop (ie. they only move records we 
+                // have already looked at).
+                for (int slot_no = page.recordCount() - 1; 
+                     slot_no > 0; 
+                     slot_no--) 
+                {
+                    if (page.isDeletedAtSlot(slot_no))
+                    {
+                        // try to get an exclusive lock on the row, if we can 
+                        // then the row is a committed deleted row and it is 
+                        // safe to purge it.
+                        if (btree_locking_policy.lockScanCommittedDeletedRow(
+                                open_btree, leaf, scratch_template, 
+                                lock_fetch_desc, slot_no))
+                        {
+                            // the row is a committed deleted row, purge it.
+                            page.purgeAtSlot(slot_no, 1, true);
+                        }
+                    }
+                }
+
+            }
+        }
+        finally
+        {
+            if (controlRow != null)
+                controlRow.release();
+        }
+    }
 }
