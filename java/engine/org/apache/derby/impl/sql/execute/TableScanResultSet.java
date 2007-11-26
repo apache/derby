@@ -614,7 +614,7 @@ class TableScanResultSet extends ScanResultSet
 		if (currentRow == null || scanRepositioned)
 		{
 			currentRow =
-				getCompactRow(candidate, accessedCols, (FormatableBitSet) null, isKeyed);
+				getCompactRow(candidate, accessedCols, isKeyed);
 		}
 
 		beginTime = getCurrentTimeMillis();
@@ -965,7 +965,7 @@ class TableScanResultSet extends ScanResultSet
 
 		result = (ExecRow) resultRowAllocator.invoke(activation);
 		currentRow = 
-            getCompactRow(result, accessedCols, (FormatableBitSet) null, isKeyed);
+            getCompactRow(result, accessedCols, isKeyed);
 
         try
         {

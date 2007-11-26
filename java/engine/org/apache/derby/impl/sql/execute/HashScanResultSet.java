@@ -204,7 +204,7 @@ public class HashScanResultSet extends ScanResultSet
             getLanguageConnectionContext().getRunTimeStatisticsMode();
 
 		compactRow =
-				getCompactRow(candidate, accessedCols, (FormatableBitSet) null, false);
+				getCompactRow(candidate, accessedCols, false);
 		recordConstructorTime();
     }
 

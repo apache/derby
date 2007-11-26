@@ -881,21 +881,12 @@ implements NoPutResultSet
 	 * @param candidate		The row to get the columns from
 	 * @param accessedCols	A bit map of the columns that are accessed in
 	 *						the candidate row
-	 * @param otherCols		An bit map of other column ids - this is used
-	 *						in case columns from an index row will be
-	 *						copied into a heap row - in this case, we
-	 *						need to be sure there are enough columns in
-	 *						the compact row. This parameter is null if
-	 *						columns will not be copied from an index row
-	 *						to a compact heap row. The column numbers in
-	 *						the bit map are zero-based.
 	 * @param isKeyed		Tells whether to return a ValueRow or an IndexRow
 	 *
 	 * @return		A compact row.
 	 */
 	protected ExecRow getCompactRow(ExecRow candidate,
 									FormatableBitSet accessedCols,
-									FormatableBitSet otherCols,
 									boolean isKeyed)
 									throws StandardException
 	{
@@ -910,19 +901,7 @@ implements NoPutResultSet
 		}
 		else
 		{
-			FormatableBitSet allCols;
-
-			if (otherCols == null)
-			{
-				allCols = accessedCols;
-			}
-			else
-			{
-				allCols = new FormatableBitSet(accessedCols);
-				allCols.or(otherCols);
-			}
-
-			int numCols = allCols.getNumBitsSet();
+			int numCols = accessedCols.getNumBitsSet();
 			baseColumnMap = new int[numCols];
 
 			if (compactRow == null)
@@ -940,9 +919,9 @@ implements NoPutResultSet
 			}
 
 			int position = 0;
-			for (int i = allCols.anySetBit();
+			for (int i = accessedCols.anySetBit();
 					i != -1;
-					i = allCols.anySetBit(i))
+					i = accessedCols.anySetBit(i))
 			{
 				// Stop looking if there are columns beyond the columns
 				// in the candidate row. This can happen due to the
@@ -998,9 +977,9 @@ implements NoPutResultSet
 	}
 
 
-	protected final void setCompatRow(ExecRow compactRow, Object[] sourceRow) {
+	protected final void setCompatRow(ExecRow compactRow, DataValueDescriptor[] sourceRow) {
 
-		Object[] destRow = compactRow.getRowArray();
+		DataValueDescriptor[] destRow = compactRow.getRowArray();
 		int[] lbcm = baseColumnMap;
 
 		for (int i = 0; i < lbcm.length; i++)

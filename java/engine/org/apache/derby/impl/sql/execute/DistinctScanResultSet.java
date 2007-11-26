@@ -31,6 +31,7 @@ import org.apache.derby.iapi.sql.Activation;
 
 import org.apache.derby.iapi.store.access.Qualifier;
 import org.apache.derby.iapi.store.access.StaticCompiledOpenConglomInfo;
+import org.apache.derby.iapi.types.DataValueDescriptor;
 
 import java.util.Enumeration;
 
@@ -96,7 +97,6 @@ class DistinctScanResultSet extends HashScanResultSet
 	public ExecRow getNextRowCore() throws StandardException
 	{
 	    ExecRow result = null;
-		Object[] columns = null;
 
 		beginTime = getCurrentTimeMillis();
 	    if ( isOpen )
@@ -109,7 +109,7 @@ class DistinctScanResultSet extends HashScanResultSet
 
 			if (element.hasMoreElements())
 			{
-				columns = (Object[]) element.nextElement();
+                DataValueDescriptor[] columns = (DataValueDescriptor[]) element.nextElement();
 
 				setCompatRow(compactRow, columns);
 

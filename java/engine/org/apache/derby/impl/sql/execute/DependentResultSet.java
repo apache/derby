@@ -334,7 +334,7 @@ class DependentResultSet extends ScanResultSet implements CursorResultSet
 		if (currentRow == null)
 		{
 			currentRow =
-				getCompactRow(candidate, accessedCols, (FormatableBitSet) null, isKeyed);
+				getCompactRow(candidate, accessedCols, isKeyed);
 		} 
 
 		baseRowLocation = (RowLocation) indexRow.getColumn(indexRow.getRowArray().length);

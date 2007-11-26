@@ -163,8 +163,7 @@ class IndexRowToBaseRowResultSet extends NoPutResultSetImpl
 		// variable compactRow which can be accessed through
 		// inheritance. Hence we need not collect the return value
 		// of the method.
-		getCompactRow(resultRow, accessedAllCols, 
-					  (FormatableBitSet)null, false);
+		getCompactRow(resultRow, accessedAllCols, false);
 
 		/* If there's no partial row bit map, then we want the entire
 		 * row, otherwise we need to diddle with the row array so that

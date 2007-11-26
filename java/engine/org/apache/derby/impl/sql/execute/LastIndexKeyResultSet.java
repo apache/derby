@@ -201,7 +201,7 @@ class LastIndexKeyResultSet extends ScanResultSet
 					candidateCopy.getRowArray()))
 		{
 			currentRow =
-			  getCompactRow(candidateCopy, accessedCols, (FormatableBitSet) null, true);
+			  getCompactRow(candidateCopy, accessedCols, true);
 			setCurrentRow(currentRow);
 		}
 		else

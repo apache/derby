@@ -272,7 +272,6 @@ class BulkTableScanResultSet extends TableScanResultSet
 				currentRow =
 					getCompactRow(candidate,
 									accessedCols,
-									(FormatableBitSet) null,
 									isKeyed);
 			}
 
