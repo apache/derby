@@ -86,6 +86,27 @@ import org.apache.derby.iapi.tools.i18n.*;
 
 public final class Main {
 
+    /**
+     * Name of file which contains messages for sysinfo.
+     */
+    private final static String MESSAGE_FILE =
+        "org.apache.derby.loc.sysinfoMessages";
+
+    /**
+     * Resource for localizing the sysinfo messages.
+     *
+     * The default LocalizedResource reads messages from the toolsmessages
+     * bundle. Create this instance to read messages from sysinfoMessages. Use
+     * the locale and codeset specified by derby.ui.locale and derby.ui.codeset
+     * if they are set.
+     *
+     * Note that this variable must be initialized when the class is loaded in
+     * order to work correctly for the API methods that don't call
+     * <code>main()</code>.
+     */
+    private final static LocalizedResource LOCALIZED_RESOURCE =
+        new LocalizedResource(null, null, MESSAGE_FILE);
+
   /**
     Application entry point for SysInfo.   This will print out
     the Derby product information as well as a snapshot of
@@ -1086,16 +1107,9 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
 	/*
 	** Message handling
 	*/
-	private static ResourceBundle getBundle() {
-		try {
-			return ResourceBundle.getBundle("org.apache.derby.loc.sysinfoMessages");
-		} catch (MissingResourceException mre) {
-		}
-		return null;
-	}
 
 	public static String getTextMessage(String msgId) {
-		return getCompleteMessage(msgId, (Object[]) null);
+		return getCompleteMessage(msgId, new Object[0]);
 	}
 	public static String getTextMessage(String msgId, Object a1) {
 
@@ -1114,9 +1128,7 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
 	/**
 	 */
 	public static String getCompleteMessage(String msgId, Object[] arguments) {
-
-		// we have a base file (sysinfoMessages.properties) so don't give us a last chance.
-		return org.apache.derby.iapi.services.i18n.MessageService.formatMessage(getBundle(), msgId, arguments, false);
+        return LOCALIZED_RESOURCE.getTextMessage(msgId, arguments);
 	}
 
     /**

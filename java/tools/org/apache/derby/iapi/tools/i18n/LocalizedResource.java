@@ -166,7 +166,7 @@ public final class LocalizedResource  implements java.security.PrivilegedAction 
 			return;
 		}
 		if ( locale == null || locale.toString().equals("none") ){
-			res = ResourceBundle.getBundle(MESSAGE_FILE);
+			res = ResourceBundle.getBundle(messageFileName);
 		}
 		else
 		try {
