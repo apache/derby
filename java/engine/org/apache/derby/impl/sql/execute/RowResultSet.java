@@ -139,21 +139,18 @@ class RowResultSet extends NoPutResultSetImpl
 			if (!next) 
 			{
 	            next = true;
-				if (currentRow == null)
-				{
-					if (cachedRow != null)
-					{
-						currentRow = cachedRow;
-					}
-					else if (row != null)
-					{
-						currentRow = (ExecRow) row.invoke(activation);
-						if (canCacheRow)
-						{
-							cachedRow = currentRow;
-						}
-					}
-				}
+				if (cachedRow != null)
+                {
+                    currentRow = cachedRow;
+                }
+                else if (row != null)
+                {
+                    currentRow = (ExecRow) row.invoke(activation);
+                    if (canCacheRow)
+                    {
+                        cachedRow = currentRow;
+                    }
+                }
 				rowsReturned++;
 			}
 			setCurrentRow(currentRow);
