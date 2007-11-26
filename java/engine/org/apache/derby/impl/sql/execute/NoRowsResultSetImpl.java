@@ -66,11 +66,6 @@ abstract class NoRowsResultSetImpl implements ResultSet
 	/** True if the result set has been opened, and not yet closed. */
 	private boolean isOpen;
 
-	/* fields used for formating run time statistics output */
-	protected String indent;
-	protected String subIndent;
-	protected int sourceDepth;
-
 	/* Run time statistics variables */
 	final LanguageConnectionContext lcc;
 	protected long beginTime;

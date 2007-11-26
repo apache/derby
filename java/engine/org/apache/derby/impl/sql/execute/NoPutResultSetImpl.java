@@ -61,16 +61,9 @@ extends BasicNoPutResultSetImpl
 	/* Set in constructor and not modified */
 	public final int				resultSetNumber;
 
-	/* fields used for formating run time statistics output */
-	protected String indent;
-	protected String subIndent;
-	protected int sourceDepth;
-
 	// fields used when being called as a RowSource
 	private boolean needsRowLocation;
 	protected ExecRow clonedExecRow;
-	GeneratedMethod	checkGM;
-	long			heapConglomerate;
 	protected TargetResultSet	targetResultSet;
 
 	/* beetle 4464. compact flags into array of key column positions that we do check/skip nulls,
@@ -285,31 +278,6 @@ extends BasicNoPutResultSetImpl
 				}
 			}
 		}
-	}
-
-	/* Support methods for RowSource interface.
-	 * These methods are used for enabling check constraint enforcement and
-	 * replication logging for published tables when we are a RowSource.
-	 */
-
-	/**
-	 * Set the GeneratedMethod for enforcing check constraints
-	 * 
-	 * @param checkGM	The GeneratedMethod for enforcing any check constraints.
-	 */
-	protected void setCheckConstraints(GeneratedMethod checkGM)
-	{
-		this.checkGM = checkGM;
-	}
-
-	/**
-	 * Set the heap conglomerate number (used in enforcing check constraints)
-	 * 
-	 * @param heapConglomerate	The heap conglomerate number.
-	 */
-	protected void setHeapConglomerate(long heapConglomerate)
-	{
-		this.heapConglomerate = heapConglomerate;
 	}
 
 	/**
