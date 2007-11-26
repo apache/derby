@@ -661,7 +661,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
 	}
 
 
-	/*
+	/**
 		Write the header of a random access file and sync it
 		@param create if true, the container is being created
 				if false, the container already exist
