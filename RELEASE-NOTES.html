@@ -82,6 +82,9 @@ This is a maintenance release. No new features have been added.
 <td><a href="http://issues.apache.org/jira/browse/DERBY-3187">DERBY-3187</a></td><td>SimpleApp (demo) does not work in a client setting</td>
 </tr>
 <tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3176">DERBY-3176</a></td><td>J2ME support for phoneME platform disabled in 10.3</td>
+</tr>
+<tr>
 <td><a href="http://issues.apache.org/jira/browse/DERBY-3175">DERBY-3175</a></td><td>NullPointerException on INSERT after ALTER TABLE ... DROP COLUMN</td>
 </tr>
 <tr>
@@ -136,6 +139,9 @@ This is a maintenance release. No new features have been added.
 <td><a href="http://issues.apache.org/jira/browse/DERBY-3093">DERBY-3093</a></td><td>Intermittent transaction failure caused by internal duplicate savepoint name for triggers</td>
 </tr>
 <tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3086">DERBY-3086</a></td><td>The server policy needs to grant derbynet.jar more permissions so that sysinfo and drda tracing will work</td>
+</tr>
+<tr>
 <td><a href="http://issues.apache.org/jira/browse/DERBY-3085">DERBY-3085</a></td><td>Fails to handle BLOB fields with a PreparedStatement with size &gt;32750 bytes</td>
 </tr>
 <tr>
@@ -185,6 +191,9 @@ This is a maintenance release. No new features have been added.
 </tr>
 <tr>
 <td><a href="http://issues.apache.org/jira/browse/DERBY-2972">DERBY-2972</a></td><td>Update or select with function in the where clause causes with TERRITORY_BASED collation fails with ERROR 42818: Comparisons between 'VARCHAR' and 'VARCHAR' are not supported.</td>
+</tr>
+<tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-2967">DERBY-2967</a></td><td>Single character does not match high value unicode character with collation TERRITORY_BASED</td>
 </tr>
 <tr>
 <td><a href="http://issues.apache.org/jira/browse/DERBY-2961">DERBY-2961</a></td><td>TriggerTest.testTypesINActionStatement fails with 'ASSERT FAILED col1.getClass() (class org.apache.derby.iapi.types.SQLClob) expected to be the same as col2.getClass() (class org.apache.derby.iapi.types.CollatorSQLClob)</td>
@@ -239,8 +248,33 @@ This is a maintenance release. No new features have been added.
 <h2>
 <a name="Issues"></a>Issues</h2>
 <blockquote>
-<p>Compared with the previous release (10.3.1.4), Derby release 10.3.2.0 introduces there are no issue specific release notes.</p>
-<ul></ul>
+<p>Compared with the previous release (10.3.1.4), Derby release 10.3.2.0 introduces the following new features and incompatibilities. These merit your special attention.</p>
+<hr>
+<ul>
+<h3 class="boxed">DERBY-2967</h3>
+
+<h4>Summary of Change</h4>
+<p>
+  Databases with territory based collation might see the behavior of LIKE predicate in WHERE clause has changed. 
+</p>
+
+<h4>Symptoms Seen by Applications Affected by Change</h4>
+<p>
+In territory based databases, the LIKE predicate will now comply with SQL specification(Derby already follows SQL specification for UCS_BASIC databases). SQL specification for LIKE predicate requires that database should do one character comparison at a time. Prior to the fix that went in as part of DERBY-2967, Derby did string comparison rather than character comparison for LIKE. This causes a problem with territory based database because the collation element(s) for a string of characters may not be same as the collation element(s) for inidivdual characters that make up that string. 
+In addition, the metacharacter _ in the pattern in a LIKE predicate will now consume exactly one character rather than working on number of collation elements.
+To show the impact on application, consider following eg. Say we are working with a territory where character 'z' has same collation elements as 'xy'. For such a territory consider following LIKE predicate 
+'zcb' LIKE 'xy_b' 
+Prior to DERBY-2967, Derby will return TRUE because collation elements for 'z' matched 'xy' and 'c' was consumed by '_' and 'b' matched 'b'. But this does not follow SQL specification. SQL specification requires one character comparison at a time in LIKE. With the fix for DERBY-2967, the LIKE predicate in this example will return FALSE because the collation element(s) for 'z' does not match collation element(s) for 'x'. 
+In addition, the metacharacter _ in pattern for LIKE will consume *one* character in the string value. So for an eg clause 'xycb' LIKE '_cb' will return FALSE because metacharacter _ will consume 'x' and since 'c' does not match 'y', Derby will return FALSE.
+</p>
+
+
+<h4>Rationale for Change</h4>
+<p>
+The previous behavior violated the SQL specification. The new behavior is correct.
+</p>
+
+</ul>
 </blockquote>
 <h2>
 <a name="Build Environment"></a>Build Environment</h2>
