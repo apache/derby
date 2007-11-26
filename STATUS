@@ -27,8 +27,8 @@ Project info
   * The Derby sub-project's modules will be available as distinct and discrete downloads.
 
 Releases from trunk:
-
- * 10.3.0.0 : In development 
+ * 10.4.0.0 : In development
+ * 10.3.1.4 : Released 08/01/2007
  * 10.2.2.0 : Released 10/19/2006
  * 10.2.1.6 : Released 10/05/2006
  * 10.1.3.1 : Released 06/30/2006
@@ -45,20 +45,17 @@ RESOLVED ISSUES SINCE LAST STATUS
 =================================
 
 New committers:
+Dyre Tjeldvoll 
 
-Dag Wanvik
 
 
 RECENT VOTES
 =================================
 
-Dag Wanvik elected as a committer
-   March 20, 2007
-   See http://mail-archives.apache.org/mod_mbox/db-derby-dev/200703.mbox/%3c45FFD9CA.4080304@sun.com%3e
+Dyre Tjeldvoll  elected as a committer
+ September 18,2007
+ http://www.nabble.com/-RESULT---VOTE--Dyre-Tjeldvoll-as-a-committer-p12762894.html
 
-Accepted NetworkServer system tests contributed by IBM
-   February 26, 2007
-   See http://www.nabble.com/-VOTE--Accept-NetworkServer-system-tests-contributed-by-IBM-tf3256175.html#a9174275
 
 
 
@@ -70,7 +67,8 @@ OTHER NEWS
 RELEASE STATUS
 ==============
 
-Derby 10.3.0.0 is open for development.
+Derby 10.4.0.0 is open for development.
+Derby 10.3.2.0 is preparing for release
 
 No currently outstanding issues.
 
@@ -109,3 +107,4 @@ Committers      mamta                Mamta Satoor (CLA on file)
 Committers      scotsmatrix        Laura Stewart (CLA on file)
 Committers      kristwaa             Kristian Waagan (CLA on file)
 Committers      dag                  Dag H. Wanvik (CLA on file)
+Committers 	dyre		     Dyre Tjeldvoll (CLA on file)
