@@ -120,7 +120,8 @@ public class BlobLocatorInputStream extends java.io.InputStream
         if (bytes.length == 0) { // EOF
             return -1;
         } else {
-            return bytes[0];
+            // convert byte in range [-128,127] to int in range [0,255]
+            return bytes[0] & 0xff;
         }
     }
     
