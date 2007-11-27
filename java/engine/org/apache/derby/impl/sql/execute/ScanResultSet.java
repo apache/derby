@@ -30,7 +30,29 @@ import org.apache.derby.shared.common.sanity.SanityManager;
 
 /**
  * Abstract <code>ResultSet</code> class for <code>NoPutResultSet</code>s which
- * contain a scan.
+ * contain a scan. Returns rows that may be a column sub-set of the
+ * rows in the underlying object to be scanned. If accessedCols is
+ * not null then a sub-set of columns will be fetched from the underlying
+ * object (usually into the candidate row object), then the returned
+ * rows will be a compacted form of that row, with the not-fetched columns
+ * moved out. If accessedCols is null then the full row will be returned.
+ * <BR>
+ * Example: if accessedCols indicates that we want to retrieve columns
+ * 1 and 4, then candidate row will have space for 5
+ * columns (because that's the size of the rows in the underlying object),
+ * but only cols "1" and "4" will have values:
+ * <BR>
+ * <pre>
+ *     0    1    2    3    4
+ *  [  - , COL1,  - ,  - , COL4 ]
+ *  </pre>
+ *  <BR>
+ * Rows returned by this ScanResultSet will have the values:
+ * <BR>
+ * <pre>
+ *     0     1
+ *  [ COL1, COL4 ]
+ * </pre>
  */
 abstract class ScanResultSet extends NoPutResultSetImpl {
 
@@ -49,7 +71,9 @@ abstract class ScanResultSet extends NoPutResultSetImpl {
     /** The scan isolation level. */
     int isolationLevel;
 
-    /** The candidate row. */
+    /** The candidate row, matches the shape of the rows in
+     * the underlying object to be scanned.
+     */
     final ExecRow candidate;
     
     /**
@@ -68,6 +92,8 @@ abstract class ScanResultSet extends NoPutResultSetImpl {
      * @param lockMode lock mode (record or table)
      * @param tableLocked true if marked as table locked in SYS.SYSTABLES
      * @param isolationLevel language isolation level for the result set
+     * @param colRefItem Identifier of saved object for accessedCols,
+     * -1 if need to fetch all columns.
      * @param optimizerEstimatedRowCount estimated row count
      * @param optimizerEstimatedCost estimated cost
      */
