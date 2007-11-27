@@ -22,6 +22,7 @@
 package org.apache.derbyTesting.functionTests.tests.engine;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -95,6 +96,9 @@ public class ErrorStreamTest extends BaseJDBCTestCase {
     }
 
     public void setUp() throws Exception {
+        bootDerby();
+        // Shutdown engine so we can change properties for error stream
+        getTestConfiguration().shutdownEngine();
         openStreams();
     }
 
@@ -431,8 +435,13 @@ public class ErrorStreamTest extends BaseJDBCTestCase {
         try {
             AccessController.doPrivileged (new PrivilegedExceptionAction() {
                 public Object run() throws IOException {
-                    assertTrue("assertNotEmpty failed:" + f.getCanonicalPath(),
-                          f.exists() && (f.length() != 0));
+                    assertTrue("assertNotEmpty failed: " + f.getCanonicalPath()
+                          + " does not exist.", f.exists());
+                    FileInputStream fis = new FileInputStream(f);
+                    int result = fis.read();
+                    fis.close();
+                    assertTrue("assertNotEmpty failed: " + f.getCanonicalPath()
+                          + " is empty.", -1 != result);
                     return null;
                 }
             });
