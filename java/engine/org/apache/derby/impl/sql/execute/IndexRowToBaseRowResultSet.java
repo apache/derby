@@ -21,41 +21,23 @@
 
 package org.apache.derby.impl.sql.execute;
 
-import org.apache.derby.iapi.services.monitor.Monitor;
-
+import org.apache.derby.catalog.types.ReferencedColumnsDescriptorImpl;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.io.FormatableBitSet;
+import org.apache.derby.iapi.services.loader.GeneratedMethod;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
-import org.apache.derby.iapi.services.stream.InfoStreams;
-
+import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.execute.CursorResultSet;
 import org.apache.derby.iapi.sql.execute.ExecRow;
 import org.apache.derby.iapi.sql.execute.NoPutResultSet;
-
-import org.apache.derby.iapi.types.DataValueDescriptor;
-
-import org.apache.derby.iapi.sql.Activation;
-import org.apache.derby.iapi.sql.ResultSet;
-import org.apache.derby.impl.sql.GenericPreparedStatement;
-
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-import org.apache.derby.iapi.sql.conn.StatementContext;
-
 import org.apache.derby.iapi.store.access.ConglomerateController;
 import org.apache.derby.iapi.store.access.DynamicCompiledOpenConglomInfo;
 import org.apache.derby.iapi.store.access.StaticCompiledOpenConglomInfo;
 import org.apache.derby.iapi.store.access.TransactionController;
-
-import org.apache.derby.iapi.services.loader.GeneratedMethod;
-
-import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.error.StandardException;
-
+import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.RowLocation;
-
-import org.apache.derby.iapi.services.io.FormatableBitSet;
-
-import org.apache.derby.catalog.types.ReferencedColumnsDescriptorImpl;
+import org.apache.derby.impl.sql.GenericPreparedStatement;
 
 /**
  * Takes a result set with a RowLocation as the last column, and uses the
@@ -69,11 +51,8 @@ class IndexRowToBaseRowResultSet extends NoPutResultSetImpl
 
     // set in constructor and not altered during
     // life of object.
-	private long conglomId;
     public NoPutResultSet source;
-	private GeneratedMethod resultRowAllocator;
 	private GeneratedMethod restriction;
-    private long baseConglomId;
 	public FormatableBitSet accessedHeapCols;
 	//caching accessed columns (heap+index) beetle 3865
 	private FormatableBitSet accessedAllCols;
@@ -133,7 +112,6 @@ class IndexRowToBaseRowResultSet extends NoPutResultSetImpl
 		TransactionController tc = activation.getTransactionController();
 		dcoci = tc.getDynamicCompiledConglomInfo(conglomId);
         this.source = source;
-		this.resultRowAllocator = resultRowAllocator;
 		this.indexName = indexName;
 		this.forUpdate = forUpdate;
 		this.restriction = restriction;
@@ -295,7 +273,6 @@ class IndexRowToBaseRowResultSet extends NoPutResultSetImpl
 	 * @exception StandardException thrown if cursor finished.
 	 */
 	public void	reopenCore() throws StandardException {
-		TransactionController		tc;
 
 		if (SanityManager.DEBUG)
 		{
