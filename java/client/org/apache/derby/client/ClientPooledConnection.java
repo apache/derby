@@ -23,8 +23,8 @@ package org.apache.derby.client;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import org.apache.derby.client.net.NetXAConnection;
+import org.apache.derby.iapi.error.ExceptionSeverity;
 import org.apache.derby.jdbc.ClientBaseDataSource;
-import org.apache.derby.jdbc.ClientDataSource;
 import org.apache.derby.jdbc.ClientDriver;
 import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.client.am.SqlException;
@@ -263,6 +263,10 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
 
     // Not public, but needs to be visible to am.LogicalConnection
     public void trashConnection(SqlException exception) {
+		// only report fatal error  
+		if (exception.getErrorCode() < ExceptionSeverity.SESSION_SEVERITY)
+			return;
+
         for (java.util.Enumeration e = listeners_.elements(); e.hasMoreElements();) {
             javax.sql.ConnectionEventListener listener = (javax.sql.ConnectionEventListener) e.nextElement();
             java.sql.SQLException sqle = exception.getSQLException();

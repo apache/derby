@@ -67,9 +67,6 @@ public class BrokeredConnection40 extends BrokeredConnection30 {
      *
      */
     public Blob createBlob() throws SQLException {
-        if (isClosed()) {
-            throw Util.noCurrentConnection();
-        }
         // Forward the createBlob call to the physical connection
         try {
             return getRealConnection().createBlob();
@@ -93,9 +90,6 @@ public class BrokeredConnection40 extends BrokeredConnection30 {
      *
      */
     public Clob createClob() throws SQLException{
-        if (isClosed()) {
-            throw Util.noCurrentConnection();
-        }
         // Forward the createClob call to the physical connection
         try {
             return getRealConnection().createClob();
@@ -182,8 +176,10 @@ public class BrokeredConnection40 extends BrokeredConnection30 {
             throw se;
         }
         catch (SQLException se) {
+            notifyException(se);
             throw new SQLClientInfoException
                 (se.getMessage(), se.getSQLState(), 
+                		se.getErrorCode(),
   		 (new FailedProperties40
 		  (FailedProperties40.makeProperties(name,value))).
 		 getProperties());
@@ -210,8 +206,10 @@ public class BrokeredConnection40 extends BrokeredConnection30 {
             throw cie;
         }
         catch (SQLException se) {
+            notifyException(se);
             throw new SQLClientInfoException
-                (se.getMessage(), se.getSQLState(), 
+                (se.getMessage(), se.getSQLState(),
+                		se.getErrorCode(),
   		 (new FailedProperties40(properties)).getProperties());
         }
     }
@@ -311,8 +309,14 @@ public class BrokeredConnection40 extends BrokeredConnection30 {
      *                                with the given interface.
      */
     public final boolean isWrapperFor(Class<?> interfaces) throws SQLException {
-        checkIfClosed();
-        return interfaces.isInstance(this);
+        try {
+            if (getRealConnection().isClosed())
+                throw Util.noCurrentConnection();
+            return interfaces.isInstance(this);
+        } catch (SQLException sqle) {
+            notifyException(sqle);
+            throw sqle;
+        }
     }
     
     /**
@@ -325,14 +329,20 @@ public class BrokeredConnection40 extends BrokeredConnection30 {
      */
     public final <T> T unwrap(java.lang.Class<T> interfaces) 
                             throws SQLException{
-        checkIfClosed();
-        //Derby does not implement non-standard methods on 
-        //JDBC objects
         try {
-            return interfaces.cast(this);
-        } catch (ClassCastException cce) {
-            throw Util.generateCsSQLException(SQLState.UNABLE_TO_UNWRAP,
-                    interfaces);
+            if (getRealConnection().isClosed())
+                throw Util.noCurrentConnection();
+            //Derby does not implement non-standard methods on 
+            //JDBC objects
+            try {
+                return interfaces.cast(this);
+            } catch (ClassCastException cce) {
+                throw Util.generateCsSQLException(SQLState.UNABLE_TO_UNWRAP,
+                        interfaces);
+            }
+        } catch (SQLException sqle) {
+            notifyException(sqle);
+            throw sqle;
         }
     }    
 }

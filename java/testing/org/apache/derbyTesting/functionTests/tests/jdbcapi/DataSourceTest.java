@@ -22,7 +22,10 @@
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.PrintWriter;
 import java.io.Serializable;
+import java.net.InetAddress;
 import java.security.AccessController;
 import java.sql.CallableStatement;
 import java.sql.Connection;
@@ -32,11 +35,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Savepoint;
 import java.util.Hashtable;
 import java.util.Iterator;
 
-import javax.sql.ConnectionEvent;
-import javax.sql.ConnectionEventListener;
+import org.apache.derbyTesting.functionTests.tests.jdbcapi.AssertEventCatcher;
 import javax.sql.ConnectionPoolDataSource;
 import javax.sql.DataSource;
 import javax.sql.PooledConnection;
@@ -49,6 +52,7 @@ import javax.transaction.xa.Xid;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.apache.derby.drda.NetworkServerControl;
 import org.apache.derby.jdbc.ClientConnectionPoolDataSource;
 import org.apache.derby.jdbc.ClientDataSource;
 import org.apache.derby.jdbc.ClientXADataSource;
@@ -57,6 +61,7 @@ import org.apache.derby.jdbc.EmbeddedDataSource;
 import org.apache.derby.jdbc.EmbeddedSimpleDataSource;
 import org.apache.derby.jdbc.EmbeddedXADataSource;
 import org.apache.derbyTesting.functionTests.util.SecurityCheck;
+import org.apache.derbyTesting.functionTests.util.TestUtil;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.J2EEDataSource;
 import org.apache.derbyTesting.junit.JDBC;
@@ -191,6 +196,419 @@ public class DataSourceTest extends BaseJDBCTestCase {
         SecurityCheck.report();
     }
      */
+    
+    /**
+     * Test case for DERBY-3172
+     * When the Derby engine is shutdown or Network Server is brought down, any
+     * api on JDBC Connection object should generate a Connection error event.
+     */
+    public void testConnectionErrorEvent() throws SQLException, Exception
+    {
+    	Connection conn;
+    	ConnectionPoolDataSource ds;
+    	PooledConnection pc;
+    	Statement st;
+        AssertEventCatcher aes12 = new AssertEventCatcher(12);
+        //Get the correct ConnectionPoolDataSource object
+        if (usingEmbedded())
+        {
+        	ds = new EmbeddedConnectionPoolDataSource();
+            ((EmbeddedConnectionPoolDataSource)ds).setDatabaseName(dbName);
+        } else
+        {
+            ds = new ClientConnectionPoolDataSource();
+            ((ClientConnectionPoolDataSource)ds).setDatabaseName(dbName);
+        }
+        pc = ds.getPooledConnection();
+        //Add a connection event listener to ConnectionPoolDataSource
+        pc.addConnectionEventListener(aes12);
+        conn = pc.getConnection();
+        st = conn.createStatement();
+        //TAB1 does not exist and hence catch the expected exception
+        try {
+            st.executeUpdate("drop table TAB1");
+        } catch (SQLException sqle) {
+            assertSQLState("42Y55", sqle);
+        }
+        //No event should have been generated at this point
+        assertFalse(aes12.didConnectionClosedEventHappen());
+        assertFalse(aes12.didConnectionErrorEventHappen());
+        aes12.resetState();
+        //Shutdown the Derby engine or Network Server depending on what 
+        //mode we are running in.
+        if (usingEmbedded())
+        {
+        	getTestConfiguration().shutdownDatabase();
+        } else
+        {
+        	stopNetworkServer();
+        }
+        //Now try to use various apis on the JDBC Connection object created 
+        //before shutdown and they all should generate connection error event.
+        try {
+            conn.prepareStatement("CREATE TABLE TAB1(COL1 INT NOT NULL)");
+        } catch (SQLException e) {
+            //The first call on JDBC Connection object after Network Server
+            //shutdown will generate a communication error and that's why we
+            //are checking for SQL State 08006 rather than No current connection
+            //SQL State 08003. In embedded mode, we will get SQL State 08003
+        	//meaning No current connection
+            if (usingEmbedded())
+                assertSQLState("08003", e);
+            else
+                assertSQLState("08006", e);
+        }
+        assertFalse(aes12.didConnectionClosedEventHappen());
+        assertTrue(aes12.didConnectionErrorEventHappen());
+        aes12.resetState();
+        try {
+            conn.prepareStatement("CREATE TABLE TAB1(COL1 INT NOT NULL)", 1);
+        } catch (SQLException e) {
+            assertSQLState("08003", e);
+        }
+        assertFalse(aes12.didConnectionClosedEventHappen());
+        assertTrue(aes12.didConnectionErrorEventHappen());
+        aes12.resetState();
+        try {
+        	int[] columnIndexes = {1};
+            conn.prepareStatement("CREATE TABLE TAB1(COL1 INT NOT NULL)", 
+            		columnIndexes);
+        } catch (SQLException e) {
+            assertSQLState("08003", e);
+        }
+        assertFalse(aes12.didConnectionClosedEventHappen());
+        assertTrue(aes12.didConnectionErrorEventHappen());
+        aes12.resetState();
+        try {
+        	String[] columnNames = {"col1"};
+            conn.prepareStatement("CREATE TABLE TAB1(COL1 INT NOT NULL)", 
+            		columnNames);
+        } catch (SQLException e) {
+            assertSQLState("08003", e);
+        }
+        assertFalse(aes12.didConnectionClosedEventHappen());
+        assertTrue(aes12.didConnectionErrorEventHappen());
+        aes12.resetState();
+        try {
+            conn.prepareStatement("CREATE TABLE TAB1(COL1 INT NOT NULL)",
+            		ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+        } catch (SQLException e) {
+                assertSQLState("08003", e);
+        }
+        assertFalse(aes12.didConnectionClosedEventHappen());
+        assertTrue(aes12.didConnectionErrorEventHappen());
+        aes12.resetState();
+        try {
+            conn.prepareStatement("CREATE TABLE TAB1(COL1 INT NOT NULL)",
+            		ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY,
+            		ResultSet.CLOSE_CURSORS_AT_COMMIT);
+        } catch (SQLException e) {
+                assertSQLState("08003", e);
+        }
+        assertFalse(aes12.didConnectionClosedEventHappen());
+        assertTrue(aes12.didConnectionErrorEventHappen());
+        aes12.resetState();
+        try {
+            conn.createStatement();
+        } catch (SQLException e) {
+            assertSQLState("08003", e);
+        }
+        assertFalse(aes12.didConnectionClosedEventHappen());
+        assertTrue(aes12.didConnectionErrorEventHappen());
+        aes12.resetState();
+        try {
+            conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, 
+            		ResultSet.CONCUR_READ_ONLY,
+            		ResultSet.CLOSE_CURSORS_AT_COMMIT);
+        } catch (SQLException e) {
+                assertSQLState("08003", e);
+        }
+        assertFalse(aes12.didConnectionClosedEventHappen());
+        assertTrue(aes12.didConnectionErrorEventHappen());
+        aes12.resetState();
+        try {
+            conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, 
+            ResultSet.CONCUR_READ_ONLY);
+        } catch (SQLException e) {
+            assertSQLState("08003", e);
+        }
+        assertFalse(aes12.didConnectionClosedEventHappen());
+        assertTrue(aes12.didConnectionErrorEventHappen());
+        aes12.resetState();
+        try {
+            conn.prepareCall("CREATE TABLE TAB1(COL1 INT NOT NULL)",
+            		ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+        } catch (SQLException e) {
+                assertSQLState("08003", e);
+        }
+        assertFalse(aes12.didConnectionClosedEventHappen());
+        assertTrue(aes12.didConnectionErrorEventHappen());
+        aes12.resetState();
+        try {
+            conn.prepareCall("CREATE TABLE TAB1(COL1 INT NOT NULL)");
+        } catch (SQLException e) {
+                assertSQLState("08003", e);
+        }
+        assertFalse(aes12.didConnectionClosedEventHappen());
+        assertTrue(aes12.didConnectionErrorEventHappen());
+        aes12.resetState();
+        try {
+            conn.prepareCall("CREATE TABLE TAB1(COL1 INT NOT NULL)",
+            		ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY,
+            		ResultSet.CLOSE_CURSORS_AT_COMMIT);
+        } catch (SQLException e) {
+                assertSQLState("08003", e);
+        }
+        assertFalse(aes12.didConnectionClosedEventHappen());
+        assertTrue(aes12.didConnectionErrorEventHappen());
+        aes12.resetState();
+        try {
+            conn.nativeSQL("CREATE TABLE TAB1(COL1 INT NOT NULL)");
+        } catch (SQLException e) {
+                assertSQLState("08003", e);
+        }
+        assertFalse(aes12.didConnectionClosedEventHappen());
+        assertTrue(aes12.didConnectionErrorEventHappen());
+        aes12.resetState();
+        try {
+            conn.getAutoCommit();
+        } catch (SQLException e) {
+                assertSQLState("08003", e);
+        }
+        assertFalse(aes12.didConnectionClosedEventHappen());
+        assertTrue(aes12.didConnectionErrorEventHappen());
+        aes12.resetState();
+        try {
+            conn.setAutoCommit(false);
+        } catch (SQLException e) {
+                assertSQLState("08003", e);
+        }
+        assertFalse(aes12.didConnectionClosedEventHappen());
+        assertTrue(aes12.didConnectionErrorEventHappen());
+        aes12.resetState();
+        try {
+            conn.getHoldability();
+        } catch (SQLException e) {
+                assertSQLState("08003", e);
+        }
+        assertFalse(aes12.didConnectionClosedEventHappen());
+        assertTrue(aes12.didConnectionErrorEventHappen());
+        aes12.resetState();
+        try {
+            conn.setHoldability(1);
+        } catch (SQLException e) {
+                assertSQLState("08003", e);
+        }
+        assertFalse(aes12.didConnectionClosedEventHappen());
+        assertTrue(aes12.didConnectionErrorEventHappen());
+        aes12.resetState();
+        try {
+            conn.commit();
+        } catch (SQLException e) {
+                assertSQLState("08003", e);
+        }
+        assertFalse(aes12.didConnectionClosedEventHappen());
+        assertTrue(aes12.didConnectionErrorEventHappen());
+        aes12.resetState();
+        try {
+            conn.rollback();
+        } catch (SQLException e) {
+                assertSQLState("08003", e);
+        }
+        assertFalse(aes12.didConnectionClosedEventHappen());
+        assertTrue(aes12.didConnectionErrorEventHappen());
+        aes12.resetState();
+        try {
+            conn.setSavepoint();
+        } catch (SQLException e) {
+                assertSQLState("08003", e);
+        }
+        assertFalse(aes12.didConnectionClosedEventHappen());
+        assertTrue(aes12.didConnectionErrorEventHappen());
+        aes12.resetState();
+        try {
+            conn.setSavepoint("savept1");
+        } catch (SQLException e) {
+                assertSQLState("08003", e);
+        }
+        assertFalse(aes12.didConnectionClosedEventHappen());
+        assertTrue(aes12.didConnectionErrorEventHappen());
+        aes12.resetState();
+        try {
+            conn.rollback((Savepoint)null);
+        } catch (SQLException e) {
+                assertSQLState("08003", e);
+        }
+        assertFalse(aes12.didConnectionClosedEventHappen());
+        assertTrue(aes12.didConnectionErrorEventHappen());
+        aes12.resetState();
+        try {
+            conn.releaseSavepoint((Savepoint)null);
+        } catch (SQLException e) {
+                assertSQLState("08003", e);
+        }
+        assertFalse(aes12.didConnectionClosedEventHappen());
+        assertTrue(aes12.didConnectionErrorEventHappen());
+        aes12.resetState();
+        try {
+            conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+        } catch (SQLException e) {
+                assertSQLState("08003", e);
+        }
+        assertFalse(aes12.didConnectionClosedEventHappen());
+        assertTrue(aes12.didConnectionErrorEventHappen());
+        aes12.resetState();
+        try {
+            conn.getTransactionIsolation();
+        } catch (SQLException e) {
+                assertSQLState("08003", e);
+        }
+        assertFalse(aes12.didConnectionClosedEventHappen());
+        assertTrue(aes12.didConnectionErrorEventHappen());
+        aes12.resetState();
+        try {
+            conn.getWarnings();
+        } catch (SQLException e) {
+                assertSQLState("08003", e);
+        }
+        assertFalse(aes12.didConnectionClosedEventHappen());
+        assertTrue(aes12.didConnectionErrorEventHappen());
+        aes12.resetState();
+        try {
+            conn.clearWarnings();
+        } catch (SQLException e) {
+                assertSQLState("08003", e);
+        }
+        assertFalse(aes12.didConnectionClosedEventHappen());
+        assertTrue(aes12.didConnectionErrorEventHappen());
+        aes12.resetState();
+        try {
+            conn.getMetaData();
+        } catch (SQLException e) {
+                assertSQLState("08003", e);
+        }
+        assertFalse(aes12.didConnectionClosedEventHappen());
+        assertTrue(aes12.didConnectionErrorEventHappen());
+        aes12.resetState();
+        try {
+            conn.isReadOnly();
+        } catch (SQLException e) {
+                assertSQLState("08003", e);
+        }
+        assertFalse(aes12.didConnectionClosedEventHappen());
+        assertTrue(aes12.didConnectionErrorEventHappen());
+        aes12.resetState();
+        try {
+            conn.setReadOnly(true);
+        } catch (SQLException e) {
+                assertSQLState("08003", e);
+        }
+        assertFalse(aes12.didConnectionClosedEventHappen());
+        assertTrue(aes12.didConnectionErrorEventHappen());
+        aes12.resetState();
+        try {
+            conn.setCatalog(null);
+        } catch (SQLException e) {
+                assertSQLState("08003", e);
+        }
+        assertFalse(aes12.didConnectionClosedEventHappen());
+        assertTrue(aes12.didConnectionErrorEventHappen());
+        aes12.resetState();
+        try {
+            conn.getCatalog();
+        } catch (SQLException e) {
+                assertSQLState("08003", e);
+        }
+        assertFalse(aes12.didConnectionClosedEventHappen());
+        assertTrue(aes12.didConnectionErrorEventHappen());
+        aes12.resetState();
+        try {
+            conn.getTypeMap();
+        } catch (SQLException e) {
+                assertSQLState("08003", e);
+        }
+        assertFalse(aes12.didConnectionClosedEventHappen());
+        assertTrue(aes12.didConnectionErrorEventHappen());
+        aes12.resetState();
+        try {
+            conn.setTypeMap(null);
+        } catch (SQLException e) {
+                assertSQLState("08003", e);
+        }
+        assertFalse(aes12.didConnectionClosedEventHappen());
+        assertTrue(aes12.didConnectionErrorEventHappen());
+        aes12.resetState();
+        if (usingEmbedded())
+        {
+            Class.forName("org.apache.derby.jdbc.EmbeddedDriver").newInstance();
+        }else
+        {
+        	startNetworkServer();
+        }
+
+        // Get a new connection to the database
+        conn = getConnection();
+        conn.close();
+    }
+    /**
+     * Stop the network server
+     */
+    private void stopNetworkServer() {
+        try {
+            NetworkServerControl networkServer = new NetworkServerControl();
+            networkServer.shutdown();
+        } catch(Exception e) {
+            System.out.println("INFO: Network server shutdown returned: " + e);
+        }
+    }
+
+    /**
+     * Start the network server
+     */
+    private void startNetworkServer() {
+        int serverPort;
+
+        // Determines which host and port to run the network server on
+        // This is based how it is done in the test testSecMec.java
+        String serverName = TestUtil.getHostName();
+        if (serverName.equals("localhost")) {
+            serverPort = 1527;
+        }
+        else {
+            serverPort = 20000;
+        }
+
+        try {
+            NetworkServerControl networkServer = 
+                     new NetworkServerControl(InetAddress.getByName(serverName), 
+                                              serverPort);
+            networkServer.start(null);
+
+            // Wait for the network server to start
+            boolean started = false;
+            int retries = 10;         // Max retries = max seconds to wait
+            while (!started && retries > 0) {
+                try {
+                    // Sleep 1 second and then ping the network server
+		      Thread.sleep(1000);
+                    networkServer.ping();
+
+                    // If ping does not throw an exception the server has started
+                    started = true;
+                } catch(Exception e) {
+                    System.out.println("INFO: ping returned: " + e);
+                    retries--;
+	         }
+	     }
+
+            // Check if we got a reply on ping
+            if (!started) {
+                System.out.println("FAIL: Failed to start network server");
+            }
+        } catch (Exception e) {
+            System.out.println("FAIL: startNetworkServer got exception: " + e);
+        }
+    }
     
     public void testAllDataSources() throws SQLException, Exception
     {
@@ -3258,64 +3676,5 @@ class cdsXid implements Xid, Serializable
     public byte[] getBranchQualifier()
     {
         return(branch_id);
-    }
-}
-
-class AssertEventCatcher implements ConnectionEventListener
-{
-    private final int catcher;
-    //The following flags will indicate what kind of event was
-    //received by this listener
-    private boolean gotConnectionClosed = false;
-    private boolean gotConnectionErrorOccured = false;
-
-    AssertEventCatcher(int which) {
-        catcher=which;
-    }
-
-    // ConnectionEventListener methods
-    public void connectionClosed(ConnectionEvent event)
-    {
-        SQLException sqle = event.getSQLException();
-        if (sqle != null)
-            System.out.print("DataSourceTest-" + catcher + "; SQLSTATE="
-                + sqle.getSQLState());
-        gotConnectionClosed = true;
-    }
-
-    public void connectionErrorOccurred(ConnectionEvent event)
-    {
-        SQLException sqle = event.getSQLException();
-        if (sqle != null)
-            System.out.print("DataSourceTest-" + catcher + "; SQLSTATE=" +
-                sqle.getSQLState());
-        gotConnectionErrorOccured = true;
-    }
-
-    /**
-     * Tell the caller if we received Connection closed event
-     * @return true if received Connection closed event
-     */
-    public boolean didConnectionClosedEventHappen() 
-    {
-    	return gotConnectionClosed;
-    }
-    
-    /**
-     * Tell the caller if we received Connection error event
-     * @return true if received Connection error event
-     */
-    public boolean didConnectionErrorEventHappen() 
-    {
-    	return gotConnectionErrorOccured;
-    }
-    
-    /**
-     * Clear the event received flags for this listener.
-     */
-    public void resetState() 
-    {
-    	gotConnectionClosed = false;
-    	gotConnectionErrorOccured = false;
     }
 }

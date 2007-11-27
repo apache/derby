@@ -65,7 +65,7 @@ public class BadConnectionTest extends BaseJDBCTestCase
 					"jdbc:derby://" + host + ":" + port + "/testbase");
 		} catch (SQLException e) {
 			assertSQLState("08004", e);
-			assertEquals(-4499, e.getErrorCode());
+			assertEquals(40000, e.getErrorCode());
 		}
 	}
 	
@@ -84,7 +84,7 @@ public class BadConnectionTest extends BaseJDBCTestCase
 		} catch (SQLException e)
 		{
 			assertSQLState("08004", e);
-			assertEquals(-4499, e.getErrorCode());
+			assertEquals(40000, e.getErrorCode());
 		}
 	}
 	

@@ -54,38 +54,74 @@ public class LogicalConnection40
 
     public Array createArrayOf(String typeName, Object[] elements)
         throws SQLException {
-		checkForNullPhysicalConnection();
-        return physicalConnection_.createArrayOf( typeName, elements );
+        try
+        {
+    		checkForNullPhysicalConnection();
+            return physicalConnection_.createArrayOf( typeName, elements );
+		} catch (SQLException sqle) {
+			notifyException(sqle);
+			throw sqle;
+		}
     }
     
     public Blob createBlob()
         throws SQLException {
-		checkForNullPhysicalConnection();
-        return physicalConnection_.createBlob();
+        try
+        {
+    		checkForNullPhysicalConnection();
+            return physicalConnection_.createBlob();
+		} catch (SQLException sqle) {
+			notifyException(sqle);
+			throw sqle;
+		}
     }
 
     public Clob createClob()
         throws SQLException {
-		checkForNullPhysicalConnection();
-        return physicalConnection_.createClob();
+        try
+        {
+    		checkForNullPhysicalConnection();
+            return physicalConnection_.createClob();
+		} catch (SQLException sqle) {
+			notifyException(sqle);
+			throw sqle;
+		}
     }
     
     public NClob createNClob()
         throws SQLException {
-		checkForNullPhysicalConnection();
-        return physicalConnection_.createNClob();
+        try
+        {
+    		checkForNullPhysicalConnection();
+            return physicalConnection_.createNClob();
+		} catch (SQLException sqle) {
+			notifyException(sqle);
+			throw sqle;
+		}
     }
 
     public SQLXML createSQLXML()
         throws SQLException {
-		checkForNullPhysicalConnection();
-        return physicalConnection_.createSQLXML();
+        try
+        {
+    		checkForNullPhysicalConnection();
+            return physicalConnection_.createSQLXML();
+		} catch (SQLException sqle) {
+			notifyException(sqle);
+			throw sqle;
+		}
     }
 
     public Struct createStruct(String typeName, Object[] attributes)
         throws SQLException {
-		checkForNullPhysicalConnection();
-        return physicalConnection_.createStruct( typeName, attributes );
+        try
+        {
+    		checkForNullPhysicalConnection();
+            return physicalConnection_.createStruct( typeName, attributes );
+		} catch (SQLException sqle) {
+			notifyException(sqle);
+			throw sqle;
+		}
     }
 
     /**
@@ -100,8 +136,14 @@ public class LogicalConnection40
      */
     public Properties getClientInfo()
         throws SQLException {
-	checkForNullPhysicalConnection();
-	return physicalConnection_.getClientInfo();
+        try
+        {
+        	checkForNullPhysicalConnection();
+        	return physicalConnection_.getClientInfo();
+		} catch (SQLException sqle) {
+			notifyException(sqle);
+			throw sqle;
+		}
     }
     
     /**
@@ -116,8 +158,14 @@ public class LogicalConnection40
      */
     public String getClientInfo(String name)
         throws SQLException {
-	checkForNullPhysicalConnection();
-	return physicalConnection_.getClientInfo(name);
+        try
+        {
+        	checkForNullPhysicalConnection();
+        	return physicalConnection_.getClientInfo(name);
+		} catch (SQLException sqle) {
+			notifyException(sqle);
+			throw sqle;
+		}
     }
 
     /**
@@ -127,8 +175,14 @@ public class LogicalConnection40
      * @exception SQLException if a database access error occurs
      */
     public Map<String, Class<?>> getTypeMap() throws SQLException {
-        checkForNullPhysicalConnection();
-        return ((java.sql.Connection) physicalConnection_).getTypeMap();
+        try
+        {
+            checkForNullPhysicalConnection();
+            return ((java.sql.Connection) physicalConnection_).getTypeMap();
+		} catch (SQLException sqle) {
+			notifyException(sqle);
+			throw sqle;
+		}
     }
 
     /**
@@ -146,18 +200,30 @@ public class LogicalConnection40
      * exception.
      */
     synchronized public boolean isValid(int timeout) throws SQLException {
-        // Check if we have a underlying physical connection
-        if (physicalConnection_ == null) {
-            return false;
-        }
-        return physicalConnection_.isValid(timeout);
+        try
+        {
+            // Check if we have a underlying physical connection
+            if (physicalConnection_ == null) {
+                return false;
+            }
+            return physicalConnection_.isValid(timeout);
+		} catch (SQLException sqle) {
+			notifyException(sqle);
+			throw sqle;
+		}
     }
    
 
     public boolean isWrapperFor(Class<?> interfaces)
         throws SQLException {
-        checkForNullPhysicalConnection();
-        return interfaces.isInstance(this);
+        try
+        {
+            checkForNullPhysicalConnection();
+            return interfaces.isInstance(this);
+		} catch (SQLException sqle) {
+			notifyException(sqle);
+			throw sqle;
+		}
     }
 
     /**
@@ -170,13 +236,20 @@ public class LogicalConnection40
      */
     public void setClientInfo(Properties properties)
         throws SQLClientInfoException {
-	try { checkForNullPhysicalConnection(); }
-	catch (SQLException se) { 
-	    throw new SQLClientInfoException
-		(se.getMessage(), se.getSQLState(), 
-		 (new FailedProperties40(properties)).getProperties());
-	}
-	physicalConnection_.setClientInfo(properties);
+        try
+        {
+    		checkForNullPhysicalConnection(); 
+        	physicalConnection_.setClientInfo(properties);
+        } catch (SQLClientInfoException cie) {
+            notifyException(cie);
+            throw cie;
+    	} catch (SQLException sqle) {
+    		notifyException(sqle);
+    	    throw new SQLClientInfoException
+    		(sqle.getMessage(), sqle.getSQLState(), 
+    				sqle.getErrorCode(),
+    				(new FailedProperties40(properties)).getProperties());
+    	}
     }
     
     /**
@@ -189,28 +262,41 @@ public class LogicalConnection40
      */
     public void setClientInfo(String name, String value)
         throws SQLClientInfoException {
-	try { checkForNullPhysicalConnection(); }
-        catch (SQLException se) {
+        try
+        {
+    		checkForNullPhysicalConnection(); 
+        	physicalConnection_.setClientInfo(name, value);
+        } catch (SQLClientInfoException cie) {
+            notifyException(cie);
+            throw cie;
+    	} catch (SQLException sqle) {
+    		notifyException(sqle);
             throw new SQLClientInfoException
-                (se.getMessage(), se.getSQLState(),
-                 new FailedProperties40
-                 (FailedProperties40.makeProperties
-                  (name,value)).getProperties());
-        }
-	physicalConnection_.setClientInfo(name, value);
+            (sqle.getMessage(), sqle.getSQLState(),
+            		sqle.getErrorCode(),
+             new FailedProperties40
+             (FailedProperties40.makeProperties
+              (name,value)).getProperties());
+    	}
     }
     
     public <T>T unwrap(Class<T> interfaces)
         throws SQLException {
-        checkForNullPhysicalConnection();
-        // Derby does not implement non-standard methods on JDBC objects
-        try {
-            return interfaces.cast(this);
-        } catch (ClassCastException cce) {
-            throw new SqlException(null,
-                                   new ClientMessageId(SQLState.UNABLE_TO_UNWRAP),
-                                   interfaces).getSQLException();
-        }
+        try
+        {
+            checkForNullPhysicalConnection();
+            // Derby does not implement non-standard methods on JDBC objects
+            try {
+                return interfaces.cast(this);
+            } catch (ClassCastException cce) {
+                throw new SqlException(null,
+                                       new ClientMessageId(SQLState.UNABLE_TO_UNWRAP),
+                                       interfaces).getSQLException();
+            }
+    	} catch (SQLException sqle) {
+    		notifyException(sqle);
+    		throw sqle;
+    	}
     }
     
 } // End class LogicalConnection40
