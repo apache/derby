@@ -33,7 +33,7 @@ import org.apache.derby.iapi.sql.Activation;
  * a row trigger.  It is instantiated at execution time.
  * There is one per row trigger.
  */
-public class RowTriggerExecutor extends GenericTriggerExecutor
+class RowTriggerExecutor extends GenericTriggerExecutor
 {
 	/**
 	 * Constructor

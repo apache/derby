@@ -390,12 +390,10 @@ class UpdateResultSet extends DMLWriteResultSet
 			rowChanger.getHeapConglomerateController().getInternalTablePropertySet(properties);
 			if(beforeUpdateCopyRequired){
 				deletedRowHolder =
-					new TemporaryRowHolderImpl(activation, properties,
-											   triggerResultDescription);
+					new TemporaryRowHolderImpl(activation, properties);
 			}
 			insertedRowHolder =
-				new TemporaryRowHolderImpl(activation, properties,
-										   triggerResultDescription);
+				new TemporaryRowHolderImpl(activation, properties);
 
 			rowChanger.setRowHolder(insertedRowHolder);
 		}
@@ -742,7 +740,7 @@ class UpdateResultSet extends DMLWriteResultSet
 						// in-memory heap grows), hopefully we never spill temp table to disk.
 
 						tableScan.futureForUpdateRows = new TemporaryRowHolderImpl
-							(activation, null, null, 100, false, true);
+							(activation, null, 100, false, true);
 					}
 
 					rlRow.setColumn(1, rowLoc);

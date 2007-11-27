@@ -98,8 +98,7 @@ class UpdateVTIResultSet extends DMLVTIResultSet
 			** If deferred we save a copy of the entire row.
 			*/
 			rowHolder =
-				new TemporaryRowHolderImpl(activation, properties,
-										   resultDescription);
+				new TemporaryRowHolderImpl(activation, properties);
 		}
 
         try

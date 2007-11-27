@@ -102,8 +102,7 @@ class DeleteVTIResultSet extends DMLVTIResultSet
 			activation.clearIndexScanInfo();
             if( null == rowHolder)
                 rowHolder =
-                    new TemporaryRowHolderImpl(activation, new Properties(),
-                                               (ResultDescription) null);
+                    new TemporaryRowHolderImpl(activation, new Properties());
 		}
 
         try

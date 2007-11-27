@@ -53,7 +53,7 @@ import java.util.Enumeration;
  * it should be done based on whether the resultset has dependent resultsets or not.
  *
  */
-public class DeleteCascadeResultSet extends DeleteResultSet
+class DeleteCascadeResultSet extends DeleteResultSet
 {
 
 
@@ -71,7 +71,7 @@ public class DeleteCascadeResultSet extends DeleteResultSet
      * class interface
 	 * @exception StandardException		Thrown on error
      */
-    public DeleteCascadeResultSet
+    DeleteCascadeResultSet
 	(
 		NoPutResultSet		source,
 		Activation			activation,

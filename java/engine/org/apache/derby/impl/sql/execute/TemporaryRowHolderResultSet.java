@@ -57,7 +57,6 @@ class TemporaryRowHolderResultSet implements CursorResultSet, NoPutResultSet, Cl
 	private boolean 				isOpen;
 	private boolean 				finished;
 	private ExecRow					currentRow;
-	private ResultDescription		resultDescription;
 	private boolean                 isAppendable = false;
 	private long                    positionIndexConglomId;
 	private boolean 				isVirtualMemHeap;
@@ -73,19 +72,17 @@ class TemporaryRowHolderResultSet implements CursorResultSet, NoPutResultSet, Cl
 	 *
 	 * @param tc the xact controller
 	 * @param rowArray the row array
-	 * @param resultDescription value returned by getResultDescription()
 	 */
-	public TemporaryRowHolderResultSet
+	TemporaryRowHolderResultSet
 	(
 		TransactionController		tc,
 		ExecRow[]					rowArray,
-		ResultDescription			resultDescription,
 		boolean						isVirtualMemHeap,
 		TemporaryRowHolderImpl		holder
    	)
 	{
 
-		this(tc, rowArray, resultDescription, isVirtualMemHeap, false, 0, holder);
+		this(tc, rowArray, isVirtualMemHeap, false, 0, holder);
 
 
 	}
@@ -95,16 +92,14 @@ class TemporaryRowHolderResultSet implements CursorResultSet, NoPutResultSet, Cl
 	 *
 	 * @param tc the xact controller
 	 * @param rowArray the row array
-	 * @param resultDescription value returned by getResultDescription()
 	 * @param isAppendable true,if we can insert rows after this result is created
 	 * @param positionIndexConglomId conglomId of the index which has order rows
 	 *                               are inserted and their row location 
 	 */
-	public TemporaryRowHolderResultSet
+	TemporaryRowHolderResultSet
 	(
 		TransactionController		tc,
 		ExecRow[]					rowArray,
-		ResultDescription			resultDescription,
 		boolean						isVirtualMemHeap,
 		boolean                     isAppendable,
 		long                        positionIndexConglomId,
@@ -113,7 +108,6 @@ class TemporaryRowHolderResultSet implements CursorResultSet, NoPutResultSet, Cl
 	{
 		this.tc = tc;
 		this.rowArray = rowArray;
-		this.resultDescription = resultDescription;
 		this.numRowsOut = 0;
 		isOpen = false;
 		finished = false;
@@ -178,15 +172,14 @@ class TemporaryRowHolderResultSet implements CursorResultSet, NoPutResultSet, Cl
 	 *
 	 * @exception StandardException on error
 	 */
-	public static TemporaryRowHolderResultSet getNewRSOnCurrentRow
+	static TemporaryRowHolderResultSet getNewRSOnCurrentRow
 	(
 		Activation				activation,
 		CursorResultSet 		rs
 	) throws StandardException
 	{
 		TemporaryRowHolderImpl singleRow =
-			new TemporaryRowHolderImpl(activation, null,
-									   rs.getResultDescription());
+			new TemporaryRowHolderImpl(activation, null);
 		singleRow.insert(rs.getCurrentRow());
 		return (TemporaryRowHolderResultSet) singleRow.getResultSet();
 	}
@@ -605,7 +598,7 @@ class TemporaryRowHolderResultSet implements CursorResultSet, NoPutResultSet, Cl
 	 */
 	public ResultDescription	getResultDescription()
 	{
-		return resultDescription;
+		return null;
 	}
 
 	/**

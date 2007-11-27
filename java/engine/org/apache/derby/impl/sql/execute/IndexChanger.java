@@ -408,8 +408,7 @@ public class IndexChanger
 			** row holder (the description is needed when the row
 			** holder is going to be handed to users for triggers).
 			*/
-			rowHolder = new TemporaryRowHolderImpl(activation, properties,
-												   (ResultDescription) null);
+			rowHolder = new TemporaryRowHolderImpl(activation, properties);
 		}
 
 		/*

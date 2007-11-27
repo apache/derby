@@ -129,21 +129,6 @@ public final class TriggerInfo implements Formatable
 		}
 	}
 
-	/*
-	 * private constructor for TriggerInfo
-	 */
-	private TriggerInfo
-	(
-		TriggerDescriptor[]		triggers,
-		int[]					changedColsIds,
-		String[]				changedColsNames
-	) 
-	{
-		this.columnIds = changedColsIds;
-		this.columnNames = changedColsNames;
-		this.triggerArray = triggers;
-	}
-
 	/**
 	 * Do we have a trigger or triggers that meet
 	 * the criteria

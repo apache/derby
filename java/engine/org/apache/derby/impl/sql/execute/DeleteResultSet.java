@@ -306,18 +306,13 @@ class DeleteResultSet extends DMLWriteResultSet
 			if(cascadeDelete)
 			{
 				rowHolder = new TemporaryRowHolderImpl(activation, properties, 
-						(resultDescription != null) ?
-							resultDescription.truncateColumns(rlColumnNumber) :
-							null, false);
+						 false);
 
 
 			}else
 			{
 
-				rowHolder = new TemporaryRowHolderImpl(activation, properties, 
-						(resultDescription != null) ?
-							resultDescription.truncateColumns(rlColumnNumber) :
-							null);
+				rowHolder = new TemporaryRowHolderImpl(activation, properties);
 
 			}
 
