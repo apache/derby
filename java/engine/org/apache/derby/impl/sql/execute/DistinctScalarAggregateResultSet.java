@@ -212,7 +212,6 @@ class DistinctScalarAggregateResultSet extends ScalarAggregateResultSet
 			if (countOfRows == 0)
 			{
 				aggResult = finishAggregation(aggResult);
-				currentRow = aggResult;
 				setCurrentRow(aggResult);
 				countOfRows++;
 			}

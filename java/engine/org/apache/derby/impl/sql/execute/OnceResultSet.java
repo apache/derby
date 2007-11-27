@@ -239,7 +239,6 @@ public class OnceResultSet extends NoPutResultSetImpl
 			}
 	    }
 
-		currentRow = result;
 		setCurrentRow(result);
 		rowsSeen++;
 

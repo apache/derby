@@ -497,7 +497,6 @@ public class HashScanResultSet extends ScanResultSet
 
 		}
 
-		currentRow = result;
 		setCurrentRow(result);
 
 		nextTime += getElapsedMillis(beginTime);

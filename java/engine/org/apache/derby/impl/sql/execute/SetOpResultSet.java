@@ -186,8 +186,8 @@ class SetOpResultSet extends NoPutResultSetImpl
                 }
             }
         }
-        currentRow = leftInputRow;
-        setCurrentRow( currentRow );
+
+        setCurrentRow(leftInputRow);
 
         if (currentRow != null) {
            rowsReturned++;

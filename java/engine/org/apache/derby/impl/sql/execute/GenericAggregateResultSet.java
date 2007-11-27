@@ -164,7 +164,6 @@ abstract class GenericAggregateResultSet extends NoPutResultSetImpl
 		}
 
 		setCurrentRow(row);
-		currentRow = row;
 
 		boolean eliminatedNulls = false;
 		for (int i = 0; i < size; i++)

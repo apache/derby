@@ -281,7 +281,7 @@ outer:		for (;;)
 				{
 					if (reloadArray() == OUT_OF_ROWS)
 					{
-						setCurrentRow(null);
+						clearCurrentRow();
 						setRowCountIfPossible(rowsThisScan);
 						return null;
 					}

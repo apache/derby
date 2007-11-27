@@ -536,8 +536,7 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 			afterLast = false;
 		}
 
-		currentRow = result;
-		setCurrentRow(currentRow);
+		setCurrentRow(result);
 		beforeFirst = false;
 
 		nextTime += getElapsedMillis(beginTime);

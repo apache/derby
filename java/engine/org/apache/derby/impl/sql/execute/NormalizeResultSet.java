@@ -190,7 +190,6 @@ class NormalizeResultSet extends NoPutResultSetImpl
 			rowsSeen++;
 		}
 
-		currentRow = result;
 		setCurrentRow(result);
 
 		nextTime += getElapsedMillis(beginTime);

@@ -148,7 +148,6 @@ class UnionResultSet extends NoPutResultSetImpl
 	        }
 	    }
 
-		currentRow = result;
 		setCurrentRow(result);
 		if (result != null)
 		{
@@ -294,8 +293,6 @@ class UnionResultSet extends NoPutResultSetImpl
 	            break;
         }
 
-
-		currentRow = result;
 		setCurrentRow(result);
 	    return result;
 	}

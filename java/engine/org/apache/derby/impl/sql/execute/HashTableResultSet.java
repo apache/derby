@@ -445,7 +445,6 @@ class HashTableResultSet extends NoPutResultSetImpl
 			while (result == null && numFetchedOnNext < entryVectorSize);
 		}
 
-		currentRow = result;
 		setCurrentRow(result);
 
 		nextTime += getElapsedMillis(beginTime);

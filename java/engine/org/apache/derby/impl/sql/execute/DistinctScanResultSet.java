@@ -120,7 +120,6 @@ class DistinctScanResultSet extends HashScanResultSet
 			// else done
 		}
 
-		currentRow = result;
 		setCurrentRow(result);
 
 		nextTime += getElapsedMillis(beginTime);

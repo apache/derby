@@ -184,7 +184,6 @@ public class AnyResultSet extends NoPutResultSetImpl
 			}
 	    }
 
-		currentRow = result;
 		setCurrentRow(result);
 		rowsSeen++;
 

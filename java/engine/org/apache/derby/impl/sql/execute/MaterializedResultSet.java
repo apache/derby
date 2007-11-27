@@ -197,8 +197,7 @@ class MaterializedResultSet extends NoPutResultSetImpl
 			rowsSeen++;
 		}
 
-		currentRow = result;
-		setCurrentRow(currentRow);
+		setCurrentRow(result);
 
 		nextTime += getElapsedMillis(beginTime);
 
