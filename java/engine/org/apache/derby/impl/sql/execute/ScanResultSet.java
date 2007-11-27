@@ -20,6 +20,7 @@
 package org.apache.derby.impl.sql.execute;
 
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.loader.GeneratedMethod;
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.execute.ExecRow;
@@ -50,6 +51,13 @@ abstract class ScanResultSet extends NoPutResultSetImpl {
 
     /** The candidate row. */
     final ExecRow candidate;
+    
+    /**
+     * If not null indicates the subset of columns that
+     * need to be pulled from the underlying object to be scanned.
+     * Set from the PreparedStatement's saved objects, if it exists.
+     */
+    protected final FormatableBitSet accessedCols;
 
     /**
      * Construct a <code>ScanResultSet</code>.
@@ -66,6 +74,7 @@ abstract class ScanResultSet extends NoPutResultSetImpl {
     ScanResultSet(Activation activation, int resultSetNumber,
                   GeneratedMethod resultRowAllocator,
                   int lockMode, boolean tableLocked, int isolationLevel,
+                  int colRefItem,
                   double optimizerEstimatedRowCount,
                   double optimizerEstimatedCost) throws StandardException {
         super(activation, resultSetNumber,
@@ -88,6 +97,10 @@ abstract class ScanResultSet extends NoPutResultSetImpl {
 
         /* Only call row allocators once */
         candidate = (ExecRow) resultRowAllocator.invoke(activation);
+        
+        this.accessedCols = colRefItem != -1 ?
+            (FormatableBitSet)(activation.getPreparedStatement().
+                getSavedObject(colRefItem)) : null;      
     }
 
     /**

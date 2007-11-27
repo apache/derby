@@ -79,7 +79,6 @@ class TableScanResultSet extends ScanResultSet
 	public String userSuppliedOptimizerOverrides;
 	public String indexName;
 	protected boolean runTimeStatisticsOn;
-	protected FormatableBitSet accessedCols;
     protected int[] indexCols;		//index keys base column position array
 	public int rowsPerRead;
 	public boolean forUpdate;
@@ -163,6 +162,7 @@ class TableScanResultSet extends ScanResultSet
 				resultSetNumber,
 				resultRowAllocator,
 				lockMode, tableLocked, isolationLevel,
+                colRefItem,
 				optimizerEstimatedRowCount,
 				optimizerEstimatedCost);
 
@@ -201,14 +201,6 @@ class TableScanResultSet extends ScanResultSet
 		this.rowsPerRead = rowsPerRead;
 		this.oneRowScan = oneRowScan;
 
-		// retrieve the valid column list from
-		// the saved objects, if it exists
-		this.accessedCols = null;
-		if (colRefItem != -1)
-		{
-			this.accessedCols = (FormatableBitSet)(activation.getPreparedStatement().
-						getSavedObject(colRefItem));
-		}
 		if (indexColItem != -1)
 		{
 			this.indexCols = (int[])(activation.getPreparedStatement().

@@ -90,7 +90,6 @@ public class HashScanResultSet extends ScanResultSet
 	public String indexName;
 	public boolean forUpdate;
 	private boolean runTimeStatisticsOn;
-	private FormatableBitSet accessedCols;
 	public int[] keyColumns;
 	private boolean sameStartStopPosition;
 	private boolean skipNullKeyColumns;
@@ -145,6 +144,7 @@ public class HashScanResultSet extends ScanResultSet
 				resultSetNumber,
 				resultRowAllocator,
 				lockMode, tableLocked, isolationLevel,
+                colRefItem,
 				optimizerEstimatedRowCount,
 				optimizerEstimatedCost);
         this.scoci = scoci;
@@ -189,15 +189,6 @@ public class HashScanResultSet extends ScanResultSet
 		for (int index = 0; index < fihArray.length; index++)
 		{
 			keyColumns[index] = fihArray[index].getInt();
-		}
-
-		// retrieve the valid column list from
-		// the saved objects, if it exists
-		this.accessedCols = null;
-		if (colRefItem != -1)
-		{
-			this.accessedCols = (FormatableBitSet)(activation.getPreparedStatement().
-										  getSavedObject(colRefItem));
 		}
 
 		runTimeStatisticsOn = 

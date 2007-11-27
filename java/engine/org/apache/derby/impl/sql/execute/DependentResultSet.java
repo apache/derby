@@ -101,7 +101,6 @@ class DependentResultSet extends ScanResultSet implements CursorResultSet
 	public String userSuppliedOptimizerOverrides;
 	public String indexName;
 	protected boolean runTimeStatisticsOn;
-	protected FormatableBitSet accessedCols;
 	public int rowsPerRead;
 	public boolean forUpdate;
 	private boolean sameStartStopPosition;
@@ -154,6 +153,7 @@ class DependentResultSet extends ScanResultSet implements CursorResultSet
 			  //REPEATABLE READ irrespective what the user level isolation
 			  //level is.
 			  TransactionController.ISOLATION_REPEATABLE_READ,
+              colRefItem,
 			  optimizerEstimatedRowCount, optimizerEstimatedCost);
 
 		this.conglomId = conglomId;
@@ -191,15 +191,6 @@ class DependentResultSet extends ScanResultSet implements CursorResultSet
 		this.forUpdate = forUpdate;
 		this.rowsPerRead = rowsPerRead;
 		this.oneRowScan = oneRowScan;
-
-		// retrieve the valid column list from
-		// the saved objects, if it exists
-		this.accessedCols = null;
-		if (colRefItem != -1)
-		{
-			this.accessedCols = (FormatableBitSet)(activation.getPreparedStatement().
-						getSavedObject(colRefItem));
-		}
 		
 		runTimeStatisticsOn = (activation != null &&
 							   activation.getLanguageConnectionContext().getRunTimeStatisticsMode());

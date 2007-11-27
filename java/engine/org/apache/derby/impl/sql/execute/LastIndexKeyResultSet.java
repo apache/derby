@@ -22,7 +22,6 @@
 package org.apache.derby.impl.sql.execute;
 
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.loader.GeneratedMethod;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.Activation;
@@ -52,7 +51,6 @@ class LastIndexKeyResultSet extends ScanResultSet
 	public String userSuppliedOptimizerOverrides;
 	public String indexName;
 	protected boolean runTimeStatisticsOn;
-	protected FormatableBitSet accessedCols;
 
 	// Run time statistics
 	public String stopPositionString;
@@ -110,6 +108,7 @@ class LastIndexKeyResultSet extends ScanResultSet
 				resultSetNumber,
 				resultRowAllocator,
 				lockMode, tableLocked, isolationLevel,
+                colRefItem,
 				optimizerEstimatedRowCount,
 				optimizerEstimatedCost);
 
@@ -125,11 +124,6 @@ class LastIndexKeyResultSet extends ScanResultSet
 		this.tableName = tableName;
 		this.userSuppliedOptimizerOverrides = userSuppliedOptimizerOverrides;
 		this.indexName = indexName;
-		if (colRefItem != -1)
-		{
-			this.accessedCols = (FormatableBitSet)(activation.getPreparedStatement().
-						getSavedObject(colRefItem));
-		}
 
 		runTimeStatisticsOn = getLanguageConnectionContext().getRunTimeStatisticsMode();
 
