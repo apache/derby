@@ -545,7 +545,6 @@ public class NetworkServerControl{
      * <li>The command must be "start".</li>
      * <li>The customer didn't specify the -noSecurityManager flag on the startup command
      * line.</li>
-     * <li>Classes live in the jar files which we expect..</li>
      * </ul>
      */
     private static  boolean needsSecurityManager( NetworkServerControlImpl server, int command )
@@ -555,28 +554,10 @@ public class NetworkServerControl{
             (
              (System.getSecurityManager() == null) &&
              (command == NetworkServerControlImpl.COMMAND_START) &&
-             (!server.runningUnsecure()) &&
-             (packagingLooksGood())
+             (!server.runningUnsecure())
              );
    }
     
-    /**
-     * Return true if the server lives in the expected jar file. This
-     * is meant to address DERBY-3083. We expect that the URL of
-     * the jar which contains NetworkServerControl will end with the
-     * string "derbynet.jar". If this is true, then getCodeSourcePrefix()
-     * will return a prefix which can be substituted into the default
-     * server policy file and so end up granting permissions to the server jar file.
-     */
-    private static  boolean packagingLooksGood()
-        throws Exception
-    {
-        String      derbyNetURL = NetworkServerControl.class.getProtectionDomain().getCodeSource().getLocation().toExternalForm();
-
-        return derbyNetURL.endsWith( DERBYNET_JAR );
-    }
-
-
     /**
      * Verify that all prerequisites are met before bringing up a security
      * manager. See DERBY-2196. If prerequisites aren't met, raise an
