@@ -31,7 +31,7 @@ with real information.
 
     E.g.: 10.3.0.4
 -->
-<releaseID>10.3.2.0</releaseID>
+<releaseID>10.3.2.1</releaseID>
 
 <!--
     Identifier of previous release. The release notes describe the
@@ -80,7 +80,7 @@ with real information.
          tookit you used.
          E.g.: J2ME support was built using java.sun.com/j2me (j2me_cdc_fp-1_0_2).
   -->
-  <jsr169>J2ME support was built using IBM J9 - VM for the Java(TM) platform, Version 2.3 </jsr169>
+  <jsr169>Java ME support was built using Java ME CDC/Foundation Specification 1.1 libraries from IBM WebSphere Everyplace Micro Environment 6.1  </jsr169>
 
 </buildInfo>
 
