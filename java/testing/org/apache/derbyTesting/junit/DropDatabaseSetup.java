@@ -98,6 +98,10 @@ class DropDatabaseSetup extends BaseTestSetup {
     static void removeDirectory(String path)
     {
         final File dir = new File(path);
+        removeDirectory(dir);
+    }
+    
+    static void removeDirectory(final File dir) {
         AccessController.doPrivileged(new java.security.PrivilegedAction() {
 
             public Object run() {

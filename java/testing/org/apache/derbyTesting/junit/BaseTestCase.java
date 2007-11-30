@@ -394,4 +394,21 @@ public abstract class BaseTestCase
         	}
         });
 	}
+    
+    /**
+     * Remove the directory and its contents.
+     * @param path Path of the directory
+     */
+    public static void removeDirectory(String path)
+    {
+        DropDatabaseSetup.removeDirectory(path);
+    }
+    /**
+     * Remove the directory and its contents.
+     * @param fir File of the directory
+     */
+    public static void removeDirectory(File dir)
+    {
+        DropDatabaseSetup.removeDirectory(dir);
+    }
 } // End class BaseTestCase
