@@ -92,6 +92,8 @@ public class executeUpdate
 				System.out.println("PASS - drop table");
 			stmt.close();
 			System.out.println("executeUpdate Test ends");
+            
+            conn.close();
 
         }
         catch (java.sql.SQLException e) {
