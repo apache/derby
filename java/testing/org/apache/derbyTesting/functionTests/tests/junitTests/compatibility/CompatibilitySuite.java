@@ -134,7 +134,11 @@ public	class	CompatibilitySuite	extends	DerbyJUnitTest
 			   findServer()
 		   )
 		{		
-			TestResult	result = junit.textui.TestRunner.run( suite() );
+			Test t = suite(); 
+			println("CompatibilitySuite.main() will run suite with  " 
+				+ t.countTestCases() + " testcases.");
+
+			TestResult	result = junit.textui.TestRunner.run( t );
 			
 			exitStatus = result.errorCount() + result.failureCount();
 		}
@@ -216,7 +220,7 @@ public	class	CompatibilitySuite	extends	DerbyJUnitTest
 	// We allow for the special case when we're running the embedded client
 	// off the current compiled class tree rather than off product jars.
 	//
-	private	static	boolean	findClient()
+	static	boolean	findClient()
 		throws Exception
 	{
 		//
@@ -275,7 +279,7 @@ public	class	CompatibilitySuite	extends	DerbyJUnitTest
 	// Initialize server settings. Assumes that you have called
 	// findClient().
 	//
-	private	static	boolean	findServer()
+	static	boolean	findServer()
 		throws Exception
 	{
 		try {
@@ -299,7 +303,7 @@ public	class	CompatibilitySuite	extends	DerbyJUnitTest
 		return true;
 	}
 
-	private	static	boolean	parseVMLevel()
+	static	boolean	parseVMLevel()
 		throws Exception
 	{
 		String				vmVersion = getVMVersion();
@@ -317,7 +321,7 @@ public	class	CompatibilitySuite	extends	DerbyJUnitTest
 		return true;
 	}
 
-	private	static	boolean	parseArgs( String args[] )
+	static	boolean	parseArgs( String args[] )
 		throws Exception
 	{
 		if ( ( args == null ) || (args.length == 0 ) )
@@ -356,7 +360,7 @@ public	class	CompatibilitySuite	extends	DerbyJUnitTest
 	 * Get the vm level of the server.
 	 * </p>
 	 */
-	private	static	void	parseServerVMVersion( Connection conn )
+	static	void	parseServerVMVersion( Connection conn )
 		throws SQLException
 	{
 		dropFunction( conn, SERVER_VERSION_FUNCTION );

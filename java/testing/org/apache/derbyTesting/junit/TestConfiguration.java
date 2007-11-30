@@ -245,6 +245,30 @@ public class TestConfiguration {
 
         return (suite);
     }
+    /**
+     * Equivalent to "defaultSuite" as defined above, but assumes a server
+     * has already been started. 
+     * Does NOT decorate for running in embedded mode.
+     */
+    public static Test defaultExistingServerSuite(Class testClass)
+    {
+        return defaultExistingServerSuite(testClass, true);
+    }
+    public static Test defaultExistingServerSuite(Class testClass, boolean cleanDB)
+    {
+         final TestSuite suite = new TestSuite(suiteName(testClass));
+         
+        if (cleanDB)
+        {
+            suite.addTest(new CleanDatabaseTestSetup(clientExistingServerSuite(testClass)));
+        }
+        else
+        {
+            suite.addTest(clientExistingServerSuite(testClass));
+        }
+
+        return (suite);
+    }
 
     /**
      * Return a Test suite that contains all the test fixtures
@@ -320,6 +344,18 @@ public class TestConfiguration {
     }
 
     /**
+     * Equivalent to 'clientServerSuite' above, but assumes server is
+     * already running.
+     *
+     */
+    public static Test clientExistingServerSuite(Class testClass)
+    {
+        TestSuite suite = new TestSuite(testClass,
+                suiteName(testClass)+":client");
+        return defaultExistingServerDecorator(suite); // Will not start server and does not stop it when done!.
+    }
+
+    /**
      * Return a decorator for the passed in tests that sets the
      * configuration for the client to be Derby's JDBC client
      * and to start the network server at setUp.
@@ -345,6 +381,28 @@ public class TestConfiguration {
         Test test = new NetworkServerTestSetup(suite, false);
             
         return defaultServerDecorator(test,port);
+    }
+    /**
+     * Decorate a test to use suite's default host and port, 
+     * but assuming the server is already running.
+     */
+    public static Test defaultExistingServerDecorator(Test test)
+    {
+        // As defaultServerDecorator but assuming 
+        // server is already started.
+        // Need to have client 
+        // and not running in J2ME (JSR169).
+        if (!(Derby.hasClient())
+                || JDBC.vmSupportsJSR169())
+        {
+            return new TestSuite("empty: no network server support in JSR169 (or derbyclient.jar missing).");
+        }
+        
+        Test r =
+                new ServerSetup(test, DEFAULT_HOSTNAME, DEFAULT_PORT);
+        ((ServerSetup)r).setJDBCClient(JDBCClient.DERBYNETCLIENT); 
+        
+        return r;
     }
    
     /**
