@@ -1131,13 +1131,13 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     
     s.executeUpdate("create table a (vc varchar(30))");
     s.executeUpdate("insert into a values(CURRENT_DATE)");
-    rs = s.executeQuery("select vc from a where vc = CURRENT_DATE");
+    rs = s.executeQuery("select vc from a where vc <= CURRENT_DATE");
     assertEquals(1,JDBC.assertDrainResults(rs));
-    rs = s.executeQuery("select vc from a where vc = UPPER(CURRENT_DATE)");
+    rs = s.executeQuery("select vc from a where vc <= UPPER(CURRENT_DATE)");
     JDBC.assertDrainResults(rs,1);
-    rs = s.executeQuery("select vc from a where vc =  '' || CURRENT_DATE");
+    rs = s.executeQuery("select vc from a where vc <=  '' || CURRENT_DATE");
     JDBC.assertDrainResults(rs,1);
-    rs = s.executeQuery("select vc from a where '' || CURRENT_DATE = vc");
+    rs = s.executeQuery("select vc from a where '' || CURRENT_DATE >= vc");
     assertEquals(1,JDBC.assertDrainResults(rs));
     assertStatementError("42818",s,"select TABLENAME FROM SYS.SYSTABLES WHERE UPPER(CURRENT_DATE) = TABLENAME");
     s.close();
