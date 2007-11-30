@@ -38,20 +38,10 @@ import org.apache.derbyTesting.junit.TestConfiguration;
 
 public class BadConnectionTest extends BaseJDBCTestCase
 {
-	private static String host;
-	private static int port;
-
 	public void setUp() throws SQLException
 	{
 		// get the default connection so the driver is loaded.
-		//
-		// host and port are set here, if set at the time the
-		// class is instantiated, they will get the default 
-		// embedded 'port' of -1.
-		Connection c = getConnection();
-		host = TestConfiguration.getCurrent().getHostName();
-		port = TestConfiguration.getCurrent().getPort();
-		c.close();
+		getConnection().close();
 	}
 	
 	/**
@@ -62,7 +52,9 @@ public class BadConnectionTest extends BaseJDBCTestCase
 	{
 		try {
 			Connection c = DriverManager.getConnection(
-					"jdbc:derby://" + host + ":" + port + "/testbase");
+					"jdbc:derby://" + getTestConfiguration().getHostName()
+                    + ":" + getTestConfiguration().getPort() + "/testbase");
+            fail("Connection with no user or password succeeded");
 		} catch (SQLException e) {
 			assertSQLState("08004", e);
 			assertEquals(40000, e.getErrorCode());
@@ -80,7 +72,9 @@ public class BadConnectionTest extends BaseJDBCTestCase
 			p.put("user", "admin");
 			p.put("password", "admin");
 			Connection c = DriverManager.getConnection(
-					"jdbc:derby://" + host + ":" + port + "/testbase", p);
+					"jdbc:derby://" + getTestConfiguration().getHostName()
+                    + ":" + getTestConfiguration().getPort() + "/testbase", p);
+            fail("Connection with no database succeeded");
 		} catch (SQLException e)
 		{
 			assertSQLState("08004", e);
@@ -99,7 +93,9 @@ public class BadConnectionTest extends BaseJDBCTestCase
 	{
 		try {
 			Connection c = DriverManager.getConnection(
-					"jdbc:derby://" + host + ":" + port + "/badAttribute;upgrade=notValidValue");
+					"jdbc:derby://" + getTestConfiguration().getHostName()
+                    + ":" + getTestConfiguration().getPort() + "/badAttribute;upgrade=notValidValue");
+            fail("Connection with bad atttributes succeeded");
 		} catch (SQLException e)
 		{
 			assertSQLState("XJ05B", e);
@@ -114,7 +110,6 @@ public class BadConnectionTest extends BaseJDBCTestCase
 	
 	public static Test suite()
 	{
-		return TestConfiguration.clientServerDecorator(
-			new TestSuite(BadConnectionTest.class, "BadConnection"));
+		return TestConfiguration.clientServerSuite(BadConnectionTest.class);
 	}
 }
