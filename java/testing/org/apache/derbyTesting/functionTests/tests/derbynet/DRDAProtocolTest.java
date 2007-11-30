@@ -30,6 +30,7 @@ import java.sql.Statement;
 import junit.framework.Test;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
@@ -56,6 +57,8 @@ public class DRDAProtocolTest extends BaseJDBCTestCase {
         ResultSet rs1 = pSt1.executeQuery();
         rs1.next();
         rs1.close();
+        pSt1.close();
+        st.close();
         
         Connection conn2 = openConnection("SECONDDB2");
         conn2.setAutoCommit(false);
@@ -68,11 +71,11 @@ public class DRDAProtocolTest extends BaseJDBCTestCase {
         rs1 = pSt2.executeQuery();
         rs1.next();
         rs1.close();
+        pSt2.close();
+        st2.close();
         
-        conn1.rollback();
-        conn1.close();
-        conn2.rollback();
-        conn2.close();
+        JDBC.cleanup(conn1);
+        JDBC.cleanup(conn2);
     }
     
     /* ------------------- end helper methods  -------------------------- */
