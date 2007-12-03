@@ -467,12 +467,12 @@ public final class util implements java.security.PrivilegedAction {
         driverName = util.getSystemProperty("driver");
         if (driverName == null) driverName = util.getSystemProperty("ij.driver");
 	if (driverName == null || driverName.length()==0) driverName = defaultDriver;
-        if (driverName != null) {
+        if (driverName != null && IS_AT_LEAST_JDBC2) {
 	    util.loadDriver(driverName);
 	}
 
 	String jdbcProtocol = util.getSystemProperty("ij.protocol");
-	if (jdbcProtocol != null)
+	if (jdbcProtocol != null && IS_AT_LEAST_JDBC2)
 	    util.loadDriverIfKnown(jdbcProtocol);
 	
     String user = util.getSystemProperty("ij.user");
@@ -482,7 +482,7 @@ public final class util implements java.security.PrivilegedAction {
 	databaseURL = util.getSystemProperty("database");
 	if (databaseURL == null) databaseURL = util.getSystemProperty("ij.database");
 	if (databaseURL == null || databaseURL.length()==0) databaseURL = defaultURL;
-	if (databaseURL != null) {
+	if (databaseURL != null && IS_AT_LEAST_JDBC2) {
 	    // add protocol if might help find driver.
 		// if have full URL, load driver for it
 		if (databaseURL.startsWith("jdbc:"))
