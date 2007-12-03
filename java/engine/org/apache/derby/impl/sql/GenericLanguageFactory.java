@@ -100,25 +100,6 @@ public class GenericLanguageFactory implements LanguageFactory, ModuleControl
 	}
 
 	/**
-	 * Get a new result description from the input result
-	 * description.  Picks only the columns in the column
-	 * array from the inputResultDescription.
-	 *
- 	 * @param inputResultDescription  the input rd
-	 * @param theCols array of ints, non null
-	 *
-	 * @return ResultDescription the rd
-	 */
-	public ResultDescription getResultDescription
-	(
-		ResultDescription	inputResultDescription,
-		int[]				theCols
-	)
-	{
-		return new GenericResultDescription(inputResultDescription, theCols);
-	} 
-
-	/**
 	 * Get a new result description
 	 *
  	 * @param cols an array of col descriptors

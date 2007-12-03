@@ -66,22 +66,6 @@ public interface ResultDescription
 	 *			column in the ResultSet.
 	 */
 	ResultColumnDescriptor	getColumnDescriptor(int position);
-
-	/**
-	 * Get a new result description that has been truncated
-	 * from input column number.   If the input column is
-	 * 5, then columns 5 to getColumnCount() are removed.
-	 * The new ResultDescription points to the same
-	 * ColumnDescriptors (this method performs a shallow
-	 * copy. The saved JDBC ResultSetMetaData will
-     * not be copied.
-	 *
-	 * @param truncateFrom the starting column to remove,
-	 * 1-based.
-	 *
-	 * @return a new ResultDescription
-	 */
-	public ResultDescription truncateColumns(int truncateFrom);
     
     /**
      * Set the JDBC ResultSetMetaData for this ResultDescription.

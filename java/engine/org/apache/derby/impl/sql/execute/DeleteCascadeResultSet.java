@@ -59,9 +59,6 @@ class DeleteCascadeResultSet extends DeleteResultSet
 
 	public ResultSet[] dependentResultSets;
 	private int noDependents =0;
-	private CursorResultSet parentSource;
-	private FKInfo parentFKInfo;
-	private long fkIndexConglomNumber;
 	private String resultSetId;
 	private boolean mainNodeForTable = true;
 	private boolean affectedRows = false;
@@ -87,13 +84,8 @@ class DeleteCascadeResultSet extends DeleteResultSet
 			  (ConstantAction)activation.getPreparedStatement().getSavedObject(constantActionItem)),
 			  activation);
 
-		ConstantAction passedInConstantAction;
-		if(constantActionItem == -1)
-			passedInConstantAction = activation.getConstantAction(); //root table
-		else
+		if(constantActionItem != -1)
 		{
-			passedInConstantAction = 
-				(ConstantAction) activation.getPreparedStatement().getSavedObject(constantActionItem);
 			resultDescription = constants.resultDescription;
 		}
 		cascadeDelete = true;

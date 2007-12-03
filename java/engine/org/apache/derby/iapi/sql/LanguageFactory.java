@@ -55,22 +55,6 @@ public interface LanguageFactory
 	ParameterValueSet newParameterValueSet(ClassInspector ci, int numParms, boolean hasReturnParam);
 
 	/**
-	 * Get a new result description from the input result
-	 * description.  Picks only the columns in the column
-	 * array from the inputResultDescription.
-	 *
- 	 * @param inputResultDescription the input rd
-	 * @param theCols non null array of ints
-	 *
-	 * @return ResultDescription the rd
-	 */
-	public ResultDescription getResultDescription
-	(
-		ResultDescription	inputResultDescription,
-		int[]				theCols
-	);
-
-	/**
 	 * Get a new result description
 	 *
  	 * @param cols an array of col descriptors

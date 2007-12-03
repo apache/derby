@@ -63,12 +63,14 @@ abstract	class WriteCursorConstantAction implements ConstantAction, Formatable
 	**
 	**	This class implements Formatable. But it is NOT used
  	**	across either major or minor releases.  It is only
-	** 	written persistently in stored prepared statements, 
-	**	not in the replication stage.  SO, IT IS OK TO CHANGE
-	**	ITS read/writeExternal.
+	** 	written persistently in stored prepared statements.
+    *   SO, IT IS OK TO CHANGE ITS read/writeExternal.
 	**
 	********************************************************/
 
+    /**
+     * Heap conglomerate identifier.
+     */
 	long						conglomId;
 	StaticCompiledOpenConglomInfo heapSCOCI;
 	IndexRowGenerator[] 		irgs;

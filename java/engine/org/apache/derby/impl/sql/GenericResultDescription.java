@@ -79,7 +79,7 @@ public final class GenericResultDescription
      * A map which maps a column name to a column number.
      * Entries only added when accessing columns with the name.
      */
-    private Map columnNameMap;
+    private transient Map columnNameMap;
 	
 	/**
 	 * Niladic constructor for Formatable
@@ -99,31 +99,6 @@ public final class GenericResultDescription
 	{
 		this.columns = columns;
 		this.statementType = statementType;
-	}
-
-	/**
-	 * Build a GenericResultDescription 
-	 *
-	 * @param rd the result description
-	 * @param theCols the columns to take from the input rd
-	 */
-	public GenericResultDescription
-	(
-		ResultDescription	rd, 
-		int[]				theCols
-	) 
-	{
-		if (SanityManager.DEBUG)
-		{
-			SanityManager.ASSERT(theCols != null, "theCols argument to GenericResultDescription is null");
-		}
-
-		this.columns = new ResultColumnDescriptor[theCols.length];
-		for (int i = 0; i < theCols.length; i++)
-		{
-			columns[i] = rd.getColumnDescriptor(theCols[i]);
-		}
-		this.statementType = rd.getStatementType();
 	}
 
 	//
@@ -154,36 +129,6 @@ public final class GenericResultDescription
 	 */
 	public ResultColumnDescriptor getColumnDescriptor(int position) {
 		return columns[position-1];
-	}
-
-	/**
-	 * Get a new result description that has been truncated
-	 * from input column number.   If the input column is
-	 * 5, then columns 5 to getColumnCount() are removed.
-	 * The new ResultDescription points to the same
-	 * ColumnDescriptors (this method performs a shallow
-	 * copy.
-	 *
-	 * @param truncateFrom the starting column to remove
-	 *
-	 * @return a new ResultDescription
-	 */
-	public ResultDescription truncateColumns(int truncateFrom)	
-	{
-		if (SanityManager.DEBUG) 
-		{
-			if (!(truncateFrom > 0 && columns != null))
-			{
-				SanityManager.THROWASSERT("bad truncate value: "+truncateFrom+" is too low");
-			}
-			if (truncateFrom > columns.length)
-			{
-				SanityManager.THROWASSERT("bad truncate value: "+truncateFrom+" is too high");
-			}
-		}
-		ResultColumnDescriptor[] newColumns = new ResultColumnDescriptor[truncateFrom-1];
-		System.arraycopy(columns, 0, newColumns, 0, newColumns.length);
-		return new GenericResultDescription(newColumns, statementType);
 	}
 
 

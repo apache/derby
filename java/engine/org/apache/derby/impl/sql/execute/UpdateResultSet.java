@@ -34,7 +34,6 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.ResultDescription;
 import org.apache.derby.iapi.sql.ResultSet;
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
 import org.apache.derby.iapi.sql.execute.CursorResultSet;
 import org.apache.derby.iapi.sql.execute.ExecRow;
@@ -93,7 +92,6 @@ class UpdateResultSet extends DMLWriteResultSet
 	private ExecRow					deferredTempRow;
 	private ExecRow					deferredBaseRow;
 	private ExecRow					oldDeletedRow;
-	private ResultDescription		triggerResultDescription;
 
 	int lockMode;
 	boolean deferred;
@@ -379,9 +377,6 @@ class UpdateResultSet extends DMLWriteResultSet
 			{
 				deferredTempRow = RowUtil.getEmptyValueRow(numberOfBaseColumns+1, lcc);
 				oldDeletedRow = RowUtil.getEmptyValueRow(numberOfBaseColumns, lcc);
-				triggerResultDescription = (resultDescription != null) ?
-									resultDescription.truncateColumns(numberOfBaseColumns+1) :
-									null;
 			}
 
 			Properties properties = new Properties();
