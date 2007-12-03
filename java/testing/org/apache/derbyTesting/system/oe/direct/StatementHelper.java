@@ -109,16 +109,30 @@ class StatementHelper {
     }
 
     protected Address getAddress(ResultSet rs, String firstColumnName) throws SQLException {
-        Address address = new Address();
+        return getAddress(new Address(), rs, firstColumnName);
+    }
+    
+    /**
+     * Get the address from a query against an order entry WAREHOUSE, DISTRICT
+     * or CUSTOMER table.
+     * 
+     * @param address Object to fill in
+     * @param rs ResultSet already positioned on the current row.
+     * @param firstColumnName First column that makes up the address.
+     * @throws SQLException
+     */
+    protected Address getAddress(Address address,
+            ResultSet rs, String firstColumnName) throws SQLException {
         
+        address.clear();
+    
         int col = rs.findColumn(firstColumnName);
         address.setStreet1(rs.getString(col++));
         address.setStreet2(rs.getString(col++));
         address.setCity(rs.getString(col++));
         address.setState(rs.getString(col++));
         address.setZip(rs.getString(col));
-        
+
         return address;
     }
-
 }

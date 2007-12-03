@@ -26,6 +26,7 @@ import java.sql.SQLException;
 
 import org.apache.derbyTesting.system.oe.client.Operations;
 import org.apache.derbyTesting.system.oe.client.Submitter;
+import org.apache.derbyTesting.system.oe.model.Address;
 import org.apache.derbyTesting.system.oe.model.Customer;
 import org.apache.derbyTesting.system.oe.util.OERandom;
 
@@ -47,6 +48,8 @@ public class SimpleNonStandardOperations extends StatementHelper {
      * Reusable objects
      */
     private final Customer customer = new Customer();
+    
+    private final Address address = new Address();
     
     private final OERandom rand;
 
@@ -126,7 +129,7 @@ public class SimpleNonStandardOperations extends StatementHelper {
             customer.setMiddle(rs.getString("C_MIDDLE"));
             customer.setLast(rs.getString("C_LAST"));
             
-            customer.setAddress(getAddress(rs, "C_STREET_1"));
+            customer.setAddress(getAddress(address, rs, "C_STREET_1"));
             
             customer.setPhone(rs.getString("C_PHONE"));
             

@@ -36,6 +36,15 @@ public class Address {
     private String city;
     private String state;
     private String zip;
+    
+    /**
+     * Reset the fields to allow object re-use.
+     *
+     */
+    public void clear()
+    {
+        street1 = street2 = city = state = zip = null;
+    }
 
     public String getCity() {
         return city;
