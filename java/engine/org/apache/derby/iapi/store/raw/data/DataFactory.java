@@ -23,6 +23,7 @@ package org.apache.derby.iapi.store.raw.data;
 
 import org.apache.derby.iapi.store.raw.ContainerKey;
 
+import org.apache.derby.iapi.services.daemon.DaemonService;
 import org.apache.derby.iapi.services.daemon.Serviceable;
 import org.apache.derby.iapi.services.context.ContextManager;
 
@@ -252,6 +253,14 @@ public interface DataFactory extends Corruptable {
 		@exception StandardException Standard Derby Error Policy
 	*/
 	public void postRecovery() throws StandardException;
+
+    /**
+     * Set up the data factory's caches to use the specified daemon service for
+     * background cleaning.
+     *
+     * @param daemon daemon service to use for background cleaning
+     */
+    public void setupCacheCleaner(DaemonService daemon);
 
 	/**
 		Encrypt cleartext into ciphertext.

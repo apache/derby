@@ -2222,15 +2222,11 @@ public class BaseDataFileFactory
 	public void postRecovery() throws StandardException 
     {
 
-		// hook up the cache cleaner daemon after recovery is finished
 		DaemonService daemon = rawStoreFactory.getDaemon();
 
 		if (daemon == null)
 			return;
 
-		containerCache.useDaemonService(daemon);
-
-		pageCache.useDaemonService(daemon);
 		if (postRecoveryRemovedFiles != null) 
         {
             synchronized( this)
@@ -2248,6 +2244,14 @@ public class BaseDataFileFactory
 			postRecoveryRemovedFiles = null;
 		}
 	}
+
+    /**
+     * Set up the cache cleaner for the container cache and the page cache.
+     */
+    public void setupCacheCleaner(DaemonService daemon) {
+        containerCache.useDaemonService(daemon);
+        pageCache.useDaemonService(daemon);
+    }
 
 	public void freezePersistentStore() throws StandardException
 	{

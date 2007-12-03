@@ -1340,13 +1340,16 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
         // done with recovery        
         
 		/////////////////////////////////////////////////////////////
-		// setup checktpoint daemon
+		// setup checkpoint daemon and cache cleaner
 		/////////////////////////////////////////////////////////////
 		checkpointDaemon = rawStoreFactory.getDaemon();
 		if (checkpointDaemon != null)
         {
 			myClientNumber =
                 checkpointDaemon.subscribe(this, true /*onDemandOnly */);
+
+            // use the same daemon for the cache cleaner
+            dataFactory.setupCacheCleaner(checkpointDaemon);
         }
 	}
 
