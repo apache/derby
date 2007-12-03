@@ -606,7 +606,7 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
         try
         {
             TestConfiguration.getCurrent();
-            DriverManager.getConnection(dbUrl);
+            DriverManager.getConnection(dbUrl).close();
             // Please note: EUSRIDPWD security mechanism in DRDA uses 
             // Diffie-Helman for generation of shared keys. 
             // The spec specifies the prime to use for DH which is 32 bytes and
