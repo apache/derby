@@ -29,7 +29,9 @@ import junit.framework.Assert;
 
 /**
  * Utility methods related to JDBC DataSource objects.
- *
+ * J2EEDataSource exists to return XA and connection pooling data sources.
+ * 
+ * @see J2EEDataSource
  */
 public class JDBCDataSource {
     
@@ -41,33 +43,6 @@ public class JDBCDataSource {
     public static javax.sql.DataSource getDataSource()
     {
         return getDataSource(TestConfiguration.getCurrent(), (HashMap) null);
-    }
-    
-    /**
-     * Return a ConnectionPoolDataSource corresponding to the current
-     * configuration.  This method returns a generic Object (as opposed
-     * to a ConnectionPoolDataSource) because this class has to work
-     * with JSR169 JVMs, as well, and those JVMs do not include the
-     * javax.sql.ConnectionPoolDataSource class.
-     */
-    public static Object getConnectionPoolDataSource()
-    {
-        TestConfiguration config = TestConfiguration.getCurrent();
-        return getDataSource(config, (HashMap) null,
-			config.getJDBCClient().getConnectionPoolDataSourceClassName());
-    }
-    
-    /*
-     * Return an XADataSource corresponding to the current configuration.
-     * This method returns a generic Object (as opposed to an XADataSource)
-     * because this class has to work with JSR169 JVMs, as well, and those
-     * JVMs do not include the javax.sql.XADataSource class.
-     */
-    public static Object getXADataSource()
-    {
-        TestConfiguration config = TestConfiguration.getCurrent();
-        return getDataSource(config, (HashMap) null,
-            config.getJDBCClient().getXADataSourceClassName());
     }
     
     /**

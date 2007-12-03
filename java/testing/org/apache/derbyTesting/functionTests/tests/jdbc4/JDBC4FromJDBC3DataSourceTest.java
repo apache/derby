@@ -24,6 +24,7 @@ package org.apache.derbyTesting.functionTests.tests.jdbc4;
 import junit.framework.*;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.J2EEDataSource;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.JDBCClient;
 import org.apache.derbyTesting.junit.JDBCDataSource;
@@ -78,8 +79,7 @@ public class JDBC4FromJDBC3DataSourceTest extends BaseJDBCTestCase {
      */
     public void testPooledConnection() throws Exception
     {
-        ConnectionPoolDataSource ds = (ConnectionPoolDataSource)
-            JDBCDataSource.getConnectionPoolDataSource();
+        ConnectionPoolDataSource ds = J2EEDataSource.getConnectionPoolDataSource();
 
         assertNonJDBC4DataSource((DataSource)ds);
         checkJDBC4Interface(ds.getPooledConnection());
@@ -91,8 +91,7 @@ public class JDBC4FromJDBC3DataSourceTest extends BaseJDBCTestCase {
      */
     public void testXAConnection() throws Exception
     {
-        XADataSource ds = 
-            (XADataSource) JDBCDataSource.getXADataSource();
+        XADataSource ds = J2EEDataSource.getXADataSource();
 
         assertNonJDBC4DataSource((DataSource)ds);
         checkJDBC4Interface(ds.getXAConnection());
