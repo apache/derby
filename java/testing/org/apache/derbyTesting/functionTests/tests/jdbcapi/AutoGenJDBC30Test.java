@@ -395,6 +395,18 @@ public class AutoGenJDBC30Test extends BaseJDBCTestCase {
         assertEquals("Key value after ps.executeUpdate()", 4, keyval);
 
         ps.close();
+        
+        /*
+        DERBY-3249 - Returned generated key result sets have the wrong
+        concurrency. Test should be expanded to handle all concurrencies/types.
+        
+        // Test the type of the Statement object does not affect the
+        // type of the generated key ResultSet (checked in getKeyValue)
+        s = this.createStatement(ResultSet.CONCUR_UPDATABLE, ResultSet.TYPE_SCROLL_INSENSITIVE);
+        s.execute(sql, Statement.RETURN_GENERATED_KEYS);
+        keyval = getKeyValue(s.getGeneratedKeys());
+        assertEquals("Key value after s.execute()", 5, keyval);
+        */
     }
 
 
@@ -1438,7 +1450,8 @@ public class AutoGenJDBC30Test extends BaseJDBCTestCase {
     public void verifyNullKey (String description, ResultSet r) 
         throws SQLException
     {
-        assertNotNull(description, r);
+        JDBC.assertGeneratedKeyResultSet(description, r);
+
         int i = 0;
         while(r.next())
         {
@@ -1456,7 +1469,8 @@ public class AutoGenJDBC30Test extends BaseJDBCTestCase {
      */
     public int getKeyValue (ResultSet r) throws SQLException
     {
-        assertNotNull("ResultSet is NULL", r);
+        JDBC.assertGeneratedKeyResultSet("AutoGenJDBC30Test.getKeyValue", r);
+        
         int i = 0;
         int retval = 0;
         while(r.next())

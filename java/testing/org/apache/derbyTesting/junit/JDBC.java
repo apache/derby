@@ -510,6 +510,40 @@ public class JDBC {
         
     }
     
+    /**
+     * Assert that a ResultSet representing generated keys is non-null
+     * and of the correct type. This method leaves the ResultSet
+     * open and does not fetch any date from it.
+     * 
+     * @param description For assert messages
+     * @param keys ResultSet returned from getGeneratedKeys().
+     * @throws SQLException
+     */
+    public static void assertGeneratedKeyResultSet(
+            String description, ResultSet keys) throws SQLException
+    {
+        
+        Assert.assertNotNull(description, keys);
+        
+        // Requirements from section 13.6 JDBC 4 specification
+        Assert.assertEquals(
+                description + 
+                " - Required CONCUR_READ_ONLY for generated key result sets",
+                ResultSet.CONCUR_READ_ONLY, keys.getConcurrency());
+        
+        int type = keys.getType();
+        if ( (type != ResultSet.TYPE_FORWARD_ONLY) &&
+             (type != ResultSet.TYPE_SCROLL_INSENSITIVE))
+        {
+            Assert.fail(description +
+                    " - Invalid type for generated key result set" + type);
+        }
+        
+        
+
+    }
+    
+    
 	/**
 	 * Drain a single ResultSet by reading all of its
 	 * rows and columns. Each column is accessed using
