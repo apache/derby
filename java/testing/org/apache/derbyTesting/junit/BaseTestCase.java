@@ -405,7 +405,7 @@ public abstract class BaseTestCase
     }
     /**
      * Remove the directory and its contents.
-     * @param fir File of the directory
+     * @param dir File of the directory
      */
     public static void removeDirectory(File dir)
     {
