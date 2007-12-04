@@ -20,6 +20,8 @@
  */
 package org.apache.derbyTesting.functionTests.tests.lang;
 
+import java.io.ByteArrayInputStream;
+import java.io.CharArrayReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
@@ -397,6 +399,210 @@ public class TriggerTest extends BaseJDBCTestCase {
     {
         ((List) TRIGGER_INFO.get()).add(info);  
     }
+    
+    /** 
+     * Test for DERBY-3238 trigger fails with IOException if triggering table has large lob.
+     * 
+     * @throws SQLException
+     * @throws IOException
+     */
+    public void testClobInTriggerTable() throws SQLException, IOException
+    {
+    	testClobInTriggerTable(1024);
+        testClobInTriggerTable(16384);
+         
+        testClobInTriggerTable(1024 *32 -1);
+        testClobInTriggerTable(1024 *32);
+        testClobInTriggerTable(1024 *32+1);
+        testClobInTriggerTable(1024 *64 -1);
+        testClobInTriggerTable(1024 *64);
+        testClobInTriggerTable(1024 *64+1);
+        
+    }
+   
+    /**
+     * Create a table with after update trigger on non-lob column.
+     * Insert clob of size clobSize into table and perform update
+     * on str1 column to fire trigger. Helper method called from 
+     * testClobInTriggerTable
+     * @param clobSize size of clob to test
+     * @throws SQLException
+     * @throws IOException
+     */
+    private void testClobInTriggerTable(int clobSize) throws SQLException, IOException {
+    	Connection conn = getConnection();
+    	// --- add a clob
+    	String trig = " create trigger t_lob1 after update of str1 on lob1 ";
+        trig = trig + " REFERENCING OLD AS old NEW AS new FOR EACH ROW MODE DB2SQL ";
+        trig = trig + " insert into t_lob1_log(oldvalue, newvalue) values (old.str1, new.str1)";
+
+        Statement s = createStatement();
+        
+        s.executeUpdate("create table LOB1 (str1 Varchar(80), c_lob CLOB(50M))");
+        s.executeUpdate("create table t_lob1_log(oldvalue varchar(80), newvalue varchar(80), chng_time timestamp default current_timestamp)");
+        s.executeUpdate(trig);
+        conn.commit();      
+
+        PreparedStatement ps = prepareStatement("INSERT INTO LOB1 VALUES (?, ?)");
+        
+        ps.setString(1, clobSize +"");
+
+
+        char[] arr = new char[clobSize];
+        for (int i = 0; i < arr.length; i++)
+            arr[i] = 'a';
+
+        // - set the value of the input parameter to the input stream
+        ps.setCharacterStream(2, new CharArrayReader(arr) , clobSize);
+        ps.execute();
+        conn.commit();
+
+        // Now executing update to fire trigger
+        s.executeUpdate("update LOB1 set str1 = str1 || ' '");
+        s.executeUpdate("drop table lob1");
+        s.executeUpdate("drop table t_lob1_log");
+    }
+    
+    
+    
+    /** 
+     * Test for DERBY-3238 trigger fails with IOException if triggering table has large lob.
+     * 
+     * @throws SQLException
+     * @throws IOException
+     */
+    public void testBlobInTriggerTable() throws SQLException, IOException
+    {        
+    	testBlobInTriggerTable(1024);
+        testBlobInTriggerTable(16384);
+         
+        testBlobInTriggerTable(1024 *32 -1);
+        testBlobInTriggerTable(1024 *32);
+        testBlobInTriggerTable(1024 *32+1);
+        testBlobInTriggerTable(1024 *64 -1);
+        testBlobInTriggerTable(1024 *64);
+        testBlobInTriggerTable(1024 *64+1);
+        testBlobInTriggerTable(1024 *1024* 7);
+    }
+    
+    
+    /**
+     * Create a table with after update trigger on non-lob column.
+     * Insert two blobs of size blobSize into table and perform update
+     * on str1 column to fire trigger. Helper method called from 
+     * testBlobInTriggerTable
+     * 
+     * @param blobSize  size of blob to test.
+     * @throws SQLException
+     * @throws IOException
+     */
+    private  void testBlobInTriggerTable(int blobSize) throws SQLException, IOException {
+    	Connection conn = getConnection();
+
+        String trig = " create trigger t_lob1 after update of str1 on lob1 ";
+        trig = trig + " REFERENCING OLD AS old NEW AS new FOR EACH ROW MODE DB2SQL ";
+        trig = trig + " insert into t_lob1_log(oldvalue, newvalue) values (old.str1, new.str1)";
+
+        Statement s = createStatement();
+        
+        s.executeUpdate("create table LOB1 (str1 Varchar(80), b_lob BLOB(50M), b_lob2 BLOB(50M))");
+        s.executeUpdate("create table t_lob1_log(oldvalue varchar(80), newvalue varchar(80), chng_time timestamp default current_timestamp)");
+        s.executeUpdate(trig);
+        conn.commit();      
+
+    	// --- add a blob
+        PreparedStatement ps = prepareStatement("INSERT INTO LOB1 VALUES (?, ?, ?)");
+        
+        ps.setString(1, blobSize +"");
+
+
+        byte[] arr = new byte[blobSize];
+        for (int i = 0; i < arr.length; i++)
+            arr[i] = (byte)8;
+
+        // - set the value of the input parameter to the input stream
+        // use a couple blobs so we are sure it works with multiple lobs
+        ps.setBinaryStream(2, new ByteArrayInputStream(arr) , blobSize);
+        ps.setBinaryStream(3, new ByteArrayInputStream(arr) , blobSize);
+        ps.execute();
+        
+        conn.commit();
+        // Now executing update to fire trigger
+        s.executeUpdate("update LOB1 set str1 = str1 || ' '");
+        s.executeUpdate("drop table lob1");
+        s.executeUpdate("drop table t_lob1_log");
+   
+    }
+    
+    /* 
+     * Test an update trigger on a Clob column
+     * 
+     */
+    public void testUpdateTriggerOnClobColumn() throws SQLException, IOException
+    {
+    	Connection conn = getConnection();
+    	Statement s = createStatement();
+    	String trig = " create trigger t_lob1 after update of str1 on lob1 ";
+    	trig = trig + " REFERENCING OLD AS old NEW AS new FOR EACH ROW MODE DB2SQL ";
+    	trig = trig + " insert into t_lob1_log(oldvalue, newvalue) values (old.str1, new.str1)";
+    	s.executeUpdate("create table LOB1 (str1 Varchar(80), C_lob CLOB(50M))");
+        s.executeUpdate("create table t_lob1_log(oldvalue varchar(80), newvalue varchar(80), chng_time timestamp default current_timestamp)");
+        s.executeUpdate(trig);
+        conn.commit();
+        PreparedStatement ps = prepareStatement("INSERT INTO LOB1 VALUES (?, ?)");
+        int clobSize = 1024*64+1;
+        ps.setString(1, clobSize +"");
+
+
+        // - set the value of the input parameter to the input stream
+        ps.setCharacterStream(2, makeCharArrayReader('a', clobSize), clobSize);
+        ps.execute();
+        conn.commit();
+
+
+        PreparedStatement ps2 = prepareStatement("update LOB1 set c_lob = ? where str1 = '" + clobSize + "'");
+        ps2.setCharacterStream(1,makeCharArrayReader('b',clobSize), clobSize);
+        ps2.executeUpdate();
+        conn.commit();
+        // 	--- reading the clob make sure it was updated
+        ResultSet rs = s.executeQuery("SELECT * FROM LOB1 where str1 = '" + clobSize + "'");
+        rs.next();
+     
+        Reader r = rs.getCharacterStream(2);
+        int count = 0;
+        int c;
+        do {
+        	c = r.read();        	 
+        	if (c!= -1)
+        	{
+        		count++;
+        		assertEquals('b',c);
+        	}	
+        } while (c != -1);
+          
+        assertEquals(clobSize,count);
+        rs.close();
+        s.executeUpdate("drop table lob1");
+        s.executeUpdate("drop table t_lob1_log");
+        
+	  
+    }
+    
+    /**
+     * Make a CharArrayReader
+     * @param c character to repeat	 
+     * @param size size of array
+     * @return CharArrayReader of specified character  repeating the specified character   
+     */
+    private  CharArrayReader  makeCharArrayReader(char c, int size)
+    {
+   char[] arr = new char[size];
+   for (int i = 0; i < arr.length; i++)
+        	arr[i] = c;
+    return new CharArrayReader(arr);
+    }
+    
+    
     
     /**
      * Test that the action statement of a trigger
