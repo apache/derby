@@ -1,10 +1,7 @@
 # excluding TestErrorStreamTarget.java since it's not relevant for clients
-# excluding statementJdbc20.java because this tests fetch_reverse throughout the test
-#           regardless of framework
 # excluding largedata/LobLimits.java to run with the network server because currently lobs are materialized and this test tests for 2G lobs.
 # 			see DERBY-326 and DERBY-550 issues
 #
-jdbcapi/statementJdbc20.java
 largedata/LobLimits.java
 #
 # This test brings the network server up and down by itself

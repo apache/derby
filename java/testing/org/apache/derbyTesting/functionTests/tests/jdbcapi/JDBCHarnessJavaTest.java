@@ -47,7 +47,6 @@ public class JDBCHarnessJavaTest extends HarnessJavaTest {
     {
             // from old jdbc20.runall
             "connectionJdbc20",
-            // "statementJdbc20", runs in embedded only
             "resultsetJdbc20",           
             
             // from old jdbcapi.runall
@@ -71,9 +70,6 @@ public class JDBCHarnessJavaTest extends HarnessJavaTest {
      */
     private static final String[] JDBCAPI_TESTS_EMEBDDED=
     {
-        // excluded from derby client in old harness
-        "statementJdbc20",
-        
         // Tests that run ok in embedded but have a different client master file.
         "savepointJdbc30_JSR169",
         

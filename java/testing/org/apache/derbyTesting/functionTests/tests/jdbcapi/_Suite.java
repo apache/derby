@@ -78,6 +78,7 @@ public class _Suite extends BaseTestCase  {
 		suite.addTest(NullSQLTextTest.suite());
 		suite.addTest(PrepStmtNullTest.suite());
 		suite.addTest(StatementJdbc30Test.suite());
+		suite.addTest(StatementJdbc20Test.suite());
         suite.addTest(ClobTest.suite());
         suite.addTest(BlobUpdatableStreamTest.suite());
         suite.addTest(AIjdbcTest.suite());
