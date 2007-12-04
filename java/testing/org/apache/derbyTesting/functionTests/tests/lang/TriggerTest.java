@@ -430,7 +430,7 @@ public class TriggerTest extends BaseJDBCTestCase {
      * @throws IOException
      */
     private void testClobInTriggerTable(int clobSize) throws SQLException, IOException {
-    	Connection conn = getConnection();
+    	
     	// --- add a clob
     	String trig = " create trigger t_lob1 after update of str1 on lob1 ";
         trig = trig + " REFERENCING OLD AS old NEW AS new FOR EACH ROW MODE DB2SQL ";
@@ -441,7 +441,7 @@ public class TriggerTest extends BaseJDBCTestCase {
         s.executeUpdate("create table LOB1 (str1 Varchar(80), c_lob CLOB(50M))");
         s.executeUpdate("create table t_lob1_log(oldvalue varchar(80), newvalue varchar(80), chng_time timestamp default current_timestamp)");
         s.executeUpdate(trig);
-        conn.commit();      
+        commit();      
 
         PreparedStatement ps = prepareStatement("INSERT INTO LOB1 VALUES (?, ?)");
         
@@ -455,7 +455,7 @@ public class TriggerTest extends BaseJDBCTestCase {
         // - set the value of the input parameter to the input stream
         ps.setCharacterStream(2, new CharArrayReader(arr) , clobSize);
         ps.execute();
-        conn.commit();
+        commit();
 
         // Now executing update to fire trigger
         s.executeUpdate("update LOB1 set str1 = str1 || ' '");
@@ -497,7 +497,7 @@ public class TriggerTest extends BaseJDBCTestCase {
      * @throws IOException
      */
     private  void testBlobInTriggerTable(int blobSize) throws SQLException, IOException {
-    	Connection conn = getConnection();
+    	
 
         String trig = " create trigger t_lob1 after update of str1 on lob1 ";
         trig = trig + " REFERENCING OLD AS old NEW AS new FOR EACH ROW MODE DB2SQL ";
@@ -508,7 +508,7 @@ public class TriggerTest extends BaseJDBCTestCase {
         s.executeUpdate("create table LOB1 (str1 Varchar(80), b_lob BLOB(50M), b_lob2 BLOB(50M))");
         s.executeUpdate("create table t_lob1_log(oldvalue varchar(80), newvalue varchar(80), chng_time timestamp default current_timestamp)");
         s.executeUpdate(trig);
-        conn.commit();      
+        commit();      
 
     	// --- add a blob
         PreparedStatement ps = prepareStatement("INSERT INTO LOB1 VALUES (?, ?, ?)");
@@ -526,7 +526,7 @@ public class TriggerTest extends BaseJDBCTestCase {
         ps.setBinaryStream(3, new ByteArrayInputStream(arr) , blobSize);
         ps.execute();
         
-        conn.commit();
+        commit();
         // Now executing update to fire trigger
         s.executeUpdate("update LOB1 set str1 = str1 || ' '");
         s.executeUpdate("drop table lob1");
