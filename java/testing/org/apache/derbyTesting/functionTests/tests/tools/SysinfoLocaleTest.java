@@ -53,6 +53,9 @@ public class SysinfoLocaleTest extends BaseTestCase {
      */
     private final boolean localizedToGerman;
 
+    /** Name of the test. */
+    private final String name;
+
     /** The default locale before this test started. */
     private Locale savedLocale;
 
@@ -61,11 +64,24 @@ public class SysinfoLocaleTest extends BaseTestCase {
      *
      * @param defaultLocale the default locale for this test
      * @param german true if output is expected to be localized to German
+     * @param info extra information to append to the test name (for debugging)
      */
-    private SysinfoLocaleTest(Locale defaultLocale, boolean german) {
+    private SysinfoLocaleTest(Locale defaultLocale, boolean german,
+                              String info) {
         super("testSysinfoLocale");
         this.defaultLocale = defaultLocale;
         this.localizedToGerman = german;
+        this.name = super.getName() + ":" + info;
+    }
+
+    /**
+     * Returns the name of the test, which includes the default locale and
+     * derby.ui.locale to aid debugging.
+     *
+     * @return name of the test
+     */
+    public String getName() {
+        return name;
     }
 
     /**
@@ -130,7 +146,8 @@ public class SysinfoLocaleTest extends BaseTestCase {
         // always set the encoding so that we can reliably read the output
         prop.setProperty("derby.ui.codeset", ENCODING);
 
-        Test test = new SysinfoLocaleTest(loc, german);
+        String info = "defaultLocale=" + loc + ",uiLocale=" + ui;
+        Test test = new SysinfoLocaleTest(loc, german, info);
         return new SystemPropertyTestSetup(test, prop);
     }
 
@@ -194,20 +211,29 @@ public class SysinfoLocaleTest extends BaseTestCase {
     };
 
     /**
+     * Checks that all the expected substrings are part of the output from
+     * sysinfo. Fails if one or more of the substrings are not found.
+     *
+     * @param expectedSubstrings substrings in the expected locale
+     * @param output the output from sysinfo
+     */
+    private void assertContains(String[] expectedSubstrings, String output) {
+        for (int i = 0; i < expectedSubstrings.length; i++) {
+            String s = expectedSubstrings[i];
+            if (output.indexOf(s) == -1) {
+                fail("Substring '" + s + "' not found in output: " + output);
+            }
+        }
+    }
+
+    /**
      * Test method which checks that the output from sysinfo is correctly
      * localized.
      */
     public void testSysinfoLocale() throws Exception {
         String output = getSysinfoOutput();
-
-        for (int i = 0; i < GERMAN_STRINGS.length; i++) {
-            assertEquals(localizedToGerman,
-                         output.indexOf(GERMAN_STRINGS[i]) != -1);
-        }
-
-        for (int i = 0; i < ITALIAN_STRINGS.length; i++) {
-            assertEquals(localizedToGerman,
-                         output.indexOf(ITALIAN_STRINGS[i]) == -1);
-        }
+        String[] expectedSubstrings =
+                localizedToGerman ? GERMAN_STRINGS : ITALIAN_STRINGS;
+        assertContains(expectedSubstrings, output);
     }
 }
