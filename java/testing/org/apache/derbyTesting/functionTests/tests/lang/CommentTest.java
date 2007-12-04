@@ -119,6 +119,12 @@ public final class CommentTest extends BaseJDBCTestCase {
         JDBC.assertFullResultSet(
             stmt.executeQuery("VALUES '/* a comment \n-- */'"),
             new String [][] {{"/* a comment \n-- */"}});
+
+        // unterminated comments
+        assertCallError("42X03", getConnection(), "VALUES 1 /*");
+        assertCallError("42X03", getConnection(), "VALUES 1 /* comment");
+        assertCallError("42X03", getConnection(), "VALUES 1 /* comment /*");
+        assertCallError("42X03", getConnection(), "VALUES 1 /* comment /* nested */");
     }
     
     /**
