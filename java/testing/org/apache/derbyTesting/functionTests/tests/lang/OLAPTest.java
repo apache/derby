@@ -21,7 +21,6 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -29,7 +28,6 @@ import java.sql.Statement;
 import junit.framework.Test;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
@@ -52,8 +50,7 @@ public class OLAPTest extends BaseJDBCTestCase {
 	public void testBasicOperations() 
 		throws SQLException 
 	{   
-		Connection conn = getConnection();
-		Statement s = conn.createStatement();
+		Statement s = createStatement();
 
 		s.executeUpdate("create table t1 (a int, b int)");
 		s.executeUpdate("create table t2 (x int)");
@@ -114,10 +111,11 @@ public class OLAPTest extends BaseJDBCTestCase {
 		s.executeUpdate("drop table t1");        
 		s.executeUpdate("drop table t2");
 		s.executeUpdate("drop table t3");
+
+		s.close();
 	}
 
 	public static Test suite() {
-		Test suite = TestConfiguration.defaultSuite(OLAPTest.class);
-		return DatabasePropertyTestSetup.setLockTimeouts(suite,3,3);
+		return TestConfiguration.defaultSuite(OLAPTest.class);
 	}
 }
