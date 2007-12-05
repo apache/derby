@@ -21,7 +21,6 @@ package org.apache.derbyTesting.junit;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStreamReader;
 
