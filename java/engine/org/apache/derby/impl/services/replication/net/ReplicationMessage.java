@@ -98,6 +98,18 @@ public class ReplicationMessage implements Externalizable {
     public static final int TYPE_INITIATE = 3;
     
     /**
+     * Used to send a stop replication signal to the slave. Since this
+     * is a control signal the object this message contains will be null.
+     */
+    public static final int TYPE_STOP = 4;
+    
+    /**
+     * Used to signal the slave that it must failover. The object associated
+     * with this message will be null.
+     */
+    public static final int TYPE_FAILOVER = 5;
+    
+    /**
      * public No args constructor required with Externalizable.
      */
     public ReplicationMessage() {}
