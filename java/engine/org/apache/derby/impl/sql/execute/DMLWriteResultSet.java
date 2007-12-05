@@ -21,6 +21,8 @@
 
 package org.apache.derby.impl.sql.execute;
 
+import java.io.InputStream;
+
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.sql.execute.NoPutResultSet;
 import org.apache.derby.iapi.services.io.StreamStorable;
@@ -148,10 +150,29 @@ abstract class DMLWriteResultSet extends NoRowsResultSetImpl
 					heapIx :
 					baseRowReadMap[heapIx];
 
+                
 				DataValueDescriptor col = row.getColumn(readIx+1);
+				InputStream stream = ((StreamStorable)col).returnStream();
 				((StreamStorable)col).loadStream();
+				// DERBY-3238 
+				// fix up any duplicate streams, for instance in the case of an update with a trigger,
+				// all the columns are read as update columns even if they are not updated, so 
+				// the update column will still have a reference to the original stream.
+				// If we knew from this context that this was an update and we knew the number
+				// of columns in the base table we would be able to calculate exactly the offset to 
+				// check, but we don't have that information from this context.
+				// If DERBY-1482 is fixed, perhaps this code can be removed.
+				
+				if (stream != null)
+					for (int i = 1; i <= row.nColumns(); i++)
+					{
+						DataValueDescriptor c = row.getColumn(i);
+						if (c instanceof StreamStorable)
+							if (((StreamStorable)c).returnStream() == stream)
+								row.setColumn(i, col.getClone());
+					}
+				}
 			}
-		}
 	}
 
 	/**
