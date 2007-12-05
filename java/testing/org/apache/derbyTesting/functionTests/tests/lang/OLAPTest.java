@@ -32,7 +32,7 @@ import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
- * OLAP functionallity test.
+ * OLAP functionality test.
  * 
  * Please refer to DERBY-581 for more details.
  */ 
