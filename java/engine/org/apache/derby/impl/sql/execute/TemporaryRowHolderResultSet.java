@@ -588,20 +588,6 @@ class TemporaryRowHolderResultSet implements CursorResultSet, NoPutResultSet, Cl
 	public int modifiedRowCount() { return 0;};
 
 	/**
-	 * Returns a ResultDescription object, which describes the results
-	 * of the statement this ResultSet is in. This will *not* be a
-	 * description of this particular ResultSet, if this is not the
-	 * outermost ResultSet.
-	 *
-	 * @return	A ResultDescription describing the results of the
-	 *		statement.
-	 */
-	public ResultDescription	getResultDescription()
-	{
-		return null;
-	}
-
-	/**
 	 * Tells the system that there will be calls to getNextRow().
 	 *
 	 * @exception StandardException		Thrown on failure

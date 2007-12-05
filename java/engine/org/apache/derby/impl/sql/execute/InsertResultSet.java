@@ -97,7 +97,6 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 
 	// divined at run time
 
-    private	ResultDescription 		resultDescription;
 	private RowChanger 				rowChanger;
 
 	private	TransactionController 	tc;
@@ -166,15 +165,6 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 	private long					identityVal;  //support of IDENTITY_LOCAL_VAL function
 	private boolean					setIdentity;
 	
-
-	/**
-     * Returns the description of the inserted rows.
-     * REVISIT: Do we want this to return NULL instead?
-	 */
-	public ResultDescription getResultDescription()
-	{
-	    return resultDescription;
-	}
 
 	// TargetResultSet interface
 
@@ -336,7 +326,7 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 				triggerInfo.hasTrigger(true, true) :
 				false;
 
-        resultDescription = sourceResultSet.getResultDescription();
+        ResultDescription resultDescription = activation.getResultDescription();
 
 		// Is this a bulkInsert or regular insert?
 		String insertMode = constants.getProperty("insertMode");

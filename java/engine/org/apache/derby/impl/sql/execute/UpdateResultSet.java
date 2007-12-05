@@ -61,7 +61,6 @@ class UpdateResultSet extends DMLWriteResultSet
 	private ExecRow 					deferredSparseRow;
 	UpdateConstantAction		constants;
 	
-    private ResultDescription 		resultDescription;
 	private NoPutResultSet			source;
 	NoPutResultSet			savedSource;
 	private RowChanger				rowChanger;
@@ -97,14 +96,6 @@ class UpdateResultSet extends DMLWriteResultSet
 	boolean deferred;
 	boolean beforeUpdateCopyRequired = false;
 
-	/**
-     * Returns the description of the updated rows.
-     * REVISIT: Do we want this to return NULL instead?
-	 */
-	public ResultDescription getResultDescription()
-	{
-	    return resultDescription;
-	}
 
     /*
      * class interface
@@ -181,8 +172,9 @@ class UpdateResultSet extends DMLWriteResultSet
 		heapConglom = constants.conglomId;
 
 		baseRowReadList = constants.getBaseRowReadList();
+        ResultDescription resultDescription;
 		if(passedInRsd ==null)
-			resultDescription = source.getResultDescription();
+			resultDescription = activation.getResultDescription();
 		else
 			resultDescription = passedInRsd;
 		/*

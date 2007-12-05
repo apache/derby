@@ -100,13 +100,6 @@ extends BasicNoPutResultSetImpl
 	// NoPutResultSet interface
 
 	/**
-     * Returns the description of the table's rows
-	 */
-	public final ResultDescription getResultDescription() {
-	    return activation.getResultDescription();
-	}
-
-	/**
 		Return my cursor name for JDBC. Can be null.
 	*/
 	public String getCursorName() {

@@ -84,17 +84,6 @@ public interface ResultSet
 	 * @return	The number of rows affect by the statement, so far.
 	 */
 	int	modifiedRowCount();
-
-	/**
-	 * Returns a ResultDescription object, which describes the results
-	 * of the statement this ResultSet is in. This will *not* be a
-	 * description of this particular ResultSet, if this is not the
-	 * outermost ResultSet.
-	 *
-	 * @return	A ResultDescription describing the results of the
-	 *		statement.
-	 */
-	ResultDescription	getResultDescription();
 	
 	Activation getActivation();
 
