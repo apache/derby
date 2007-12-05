@@ -127,7 +127,9 @@ public class DataSourceConnector implements Connector {
     }
 
     public void shutEngine() throws SQLException {
-        Assert.fail("shutdown engine not implemened");
+        DataSource tmpDs = singleUseDS("shutdownDatabase", "shutdown");
+        JDBCDataSource.setBeanProperty(tmpDs, "databaseName", "");
+        tmpDs.getConnection();
     }
     
     /**
