@@ -326,6 +326,12 @@ public class EmbedStatement extends ConnectionChild
      * well, even though prepared statements reuse activations, since
      * <code>getGeneratedKeys()</code> uses a single-use activation regardless
      * of statement type.
+     * <BR>
+     * Dynamic result sets (those in dynamicResults array) need not
+     * be handled here as they will be handled by the statement object
+     * that created them. In some cases results will point to a
+     * ResultSet in dynamicResults but all that will happen is that
+     * the activation will get marked as unused twice.
      */
     protected void finalize() throws Throwable {
         super.finalize();
