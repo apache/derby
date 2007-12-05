@@ -20,7 +20,6 @@
 package org.apache.derbyTesting.junit;
 
 import java.net.URL;
-import junit.framework.Assert;
 
 /* The following import is of a JAXP API class.  The JAXP API classes
  * are included within JVMs that are 1.4 and later.  However, 1.3 and

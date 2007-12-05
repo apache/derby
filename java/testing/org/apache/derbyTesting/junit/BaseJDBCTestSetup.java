@@ -21,8 +21,6 @@ package org.apache.derbyTesting.junit;
 
 import java.sql.*;
 
-
-import junit.extensions.TestSetup;
 import junit.framework.Test;
 
 /**

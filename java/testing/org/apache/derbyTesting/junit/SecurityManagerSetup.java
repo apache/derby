@@ -23,7 +23,6 @@ import java.io.File;
 import java.net.URL;
 import java.security.AccessController;
 import java.security.Policy;
-import java.security.PrivilegedActionException;
 import java.util.Enumeration;
 import java.util.Properties;
 

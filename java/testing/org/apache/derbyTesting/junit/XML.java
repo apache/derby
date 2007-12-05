@@ -26,7 +26,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStreamReader;
 
 import java.lang.reflect.Method;
-import java.net.URL;
 import java.security.PrivilegedActionException;
 
 import java.sql.Connection;

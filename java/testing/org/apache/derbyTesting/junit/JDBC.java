@@ -24,11 +24,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.List;
 import java.util.ListIterator;
-
-import org.apache.derby.iapi.reference.JDBC30Translation;
-import org.apache.derbyTesting.functionTests.tests.lang.CastingTest;
 
 import junit.framework.Assert;
 
