@@ -30,8 +30,6 @@ import java.sql.Statement;
 import javax.transaction.xa.XAException;
 import javax.transaction.xa.Xid;
 
-import org.apache.derby.tools.JDBCDisplayUtil;
-
 public class XATestUtil {
     
     /**

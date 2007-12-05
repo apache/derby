@@ -25,7 +25,6 @@ import java.util.Random;
 
 import javax.sql.DataSource;
 
-import junit.extensions.TestSetup;
 import junit.framework.Test;
 
 /**

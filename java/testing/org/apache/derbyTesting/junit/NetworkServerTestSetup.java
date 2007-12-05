@@ -21,7 +21,6 @@ package org.apache.derbyTesting.junit;
 
 import java.io.FileNotFoundException;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -29,7 +28,6 @@ import java.io.PrintWriter;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
-import junit.extensions.TestSetup;
 import junit.framework.Test;
 import org.apache.derby.drda.NetworkServerControl;
 
