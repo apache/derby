@@ -28,11 +28,8 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
-import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
 import org.apache.derby.iapi.sql.Activation;
-import org.apache.derby.iapi.sql.ResultDescription;
 import org.apache.derby.iapi.sql.ResultSet;
 import org.apache.derby.iapi.sql.Row;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
@@ -602,36 +599,6 @@ implements NoPutResultSet
 	{
 
 		if (!finished) {
-			/*
-			** If run time statistics tracing is turned on, then now is the
-			** time to dump out the information.
-			*/
-			if (isTopResultSet) {
-
-				LanguageConnectionContext lcc = getLanguageConnectionContext();
-				if (lcc.getRunTimeStatisticsMode())
-				{
-					endExecutionTime = getCurrentTimeMillis();
-
-					lcc.setRunTimeStatisticsObject(
-						lcc.getExecutionContext().getResultSetStatisticsFactory().getRunTimeStatistics(activation, this, subqueryTrackingArray));
-
-					HeaderPrintWriter istream = lcc.getLogQueryPlan() ? Monitor.getStream() : null;
-					if (istream != null)
-					{
-						istream.printlnWithHeader(LanguageConnectionContext.xidStr + 
-												  lcc.getTransactionExecute().getTransactionIdString() +
-												  "), " +
-												  LanguageConnectionContext.lccStr +
-												  lcc.getInstanceNumber() +
-												  "), " +
-												  lcc.getRunTimeStatisticsObject().getStatementText() + " ******* " +
-												  lcc.getRunTimeStatisticsObject().getStatementExecutionPlanText());
-					}
-				}
-
-			}
-
 			if (!isClosed())
 				close();
 
