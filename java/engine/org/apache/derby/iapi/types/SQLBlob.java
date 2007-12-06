@@ -110,6 +110,16 @@ public class SQLBlob extends SQLBinary
 		setWidth(desiredType.getMaximumWidth(), 0, true);
 	}
 
+           /**
+             * Tell if this blob is length less.
+             *
+             * @return <code>true</code> if the length of the blob is not known,
+             *      <code>false</code> otherwise
+             */
+            private final boolean isLengthLess() {
+                return (stream != null && streamLength < 0);
+            }
+            
     // The method setWidth is only(?) used to adopt the value
     // to the casted domain/size. BLOBs behave different
     // from the BIT types in that a (CAST (X'01' TO BLOB(1024)))
@@ -127,8 +137,10 @@ public class SQLBlob extends SQLBinary
 
 		if (isNull())
 			return this;
+		if (isLengthLess())
+                    return this;
 
-		int sourceWidth = getLength();
+                int sourceWidth = getLength();
 
         // need to truncate?
         if (sourceWidth > desiredWidth) {

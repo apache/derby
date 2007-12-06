@@ -19,6 +19,7 @@ lang/bit2.sql
 lang/bug4356.java
 lang/bug5052rts.java
 lang/bug5054.java
+lang/bug3238.java
 lang/case.sql
 lang/cast.sql
 lang/casting.java
