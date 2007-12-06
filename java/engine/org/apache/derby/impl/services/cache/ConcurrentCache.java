@@ -93,6 +93,15 @@ final class ConcurrentCache implements CacheManager {
     }
 
     /**
+     * Return the <code>ReplacementPolicy</code> instance for this cache.
+     *
+     * @return replacement policy
+     */
+    ReplacementPolicy getReplacementPolicy() {
+        return replacementPolicy;
+    }
+
+    /**
      * Get the entry associated with the specified key from the cache. If the
      * entry does not exist, insert an empty one and return it. The returned
      * entry is always locked for exclusive access by the current thread, but
@@ -500,6 +509,7 @@ final class ConcurrentCache implements CacheManager {
      * Remove all objects that are not kept and not dirty.
      */
     public void ageOut() {
+        boolean shrunk = false;
         for (CacheEntry entry : cache.values()) {
             entry.lock();
             try {
@@ -510,11 +520,15 @@ final class ConcurrentCache implements CacheManager {
                     // to remove it. If c is dirty, we can't remove it yet.
                     if (c != null && !c.isDirty()) {
                         removeEntry(c.getIdentity());
+                        shrunk = true;
                     }
                 }
             } finally {
                 entry.unlock();
             }
+        }
+        if (shrunk) {
+            replacementPolicy.trimToSize();
         }
     }
 
@@ -561,6 +575,7 @@ final class ConcurrentCache implements CacheManager {
      */
     public boolean discard(Matchable partialKey) {
         boolean allRemoved = true;
+        boolean shrunk = false;
         for (CacheEntry entry : cache.values()) {
             entry.lock();
             try {
@@ -579,9 +594,13 @@ final class ConcurrentCache implements CacheManager {
                     continue;
                 }
                 removeEntry(c.getIdentity());
+                shrunk = true;
             } finally {
                 entry.unlock();
             }
+        }
+        if (shrunk) {
+            replacementPolicy.trimToSize();
         }
         return allRemoved;
     }

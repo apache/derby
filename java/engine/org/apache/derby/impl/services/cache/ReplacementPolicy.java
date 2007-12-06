@@ -47,6 +47,21 @@ interface ReplacementPolicy {
     Callback insertEntry(CacheEntry entry) throws StandardException;
 
     /**
+     * Try to shrink the cache if it has exceeded its maximum size. It is not
+     * guaranteed that the cache will actually shrink.
+     */
+    void doShrink();
+
+    /**
+     * Try to reduce the size of the cache as much as possible by removing
+     * invalid entries. Depending on the underlying data structure, this might
+     * be a very expensive operation. The implementations are therefore allowed
+     * to ignore calls to this method when they think the cost outweighs the
+     * benefit.
+     */
+    void trimToSize();
+
+    /**
      * The interface for the callback objects that <code>ConcurrentCache</code>
      * uses to notify the replacement algorithm about events such as look-ups
      * and removals. Each <code>Callback</code> object is associated with a

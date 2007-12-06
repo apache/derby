@@ -22,6 +22,7 @@
 package org.apache.derby.impl.services.cache;
 
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.cache.Cacheable;
@@ -96,6 +97,13 @@ final class ClockPolicy implements ReplacementPolicy {
     private final AtomicInteger freeEntries = new AtomicInteger();
 
     /**
+     * Tells whether there currently is a thread in the <code>doShrink()</code>
+     * or <code>trimToSize()</code> methods. If this variable is
+     * <code>true</code> a call to any one of those methods will be a no-op.
+     */
+    private final AtomicBoolean isShrinking = new AtomicBoolean();
+
+    /**
      * Create a new <code>ClockPolicy</code> instance.
      *
      * @param cacheManager the cache manager that requests this policy
@@ -117,26 +125,35 @@ final class ClockPolicy implements ReplacementPolicy {
      */
     public Callback insertEntry(CacheEntry entry) throws StandardException {
 
-        final boolean isFull;
+        final int size;
         synchronized (clock) {
-            if (clock.size() < maxSize) {
+            size = clock.size();
+            if (size < maxSize) {
                 if (freeEntries.get() == 0) {
                     // We have not reached the maximum size yet, and there's no
                     // free entry to reuse. Make room by growing.
                     return grow(entry);
                 }
-                // The cache is not full, but there are free entries that can
-                // be reused.
-                isFull = false;
-            } else {
-                // The cache is full, so we'll need to rotate the clock hand
-                // and evict an object.
-                isFull = true;
             }
         }
 
-        // rotate clock hand (look at up to 20% of the cache)
-        Holder h = rotateClock(entry, (float) 0.2, isFull);
+        if (size > maxSize) {
+            // Maximum size is exceeded. Shrink the clock in the background
+            // cleaner, if we have one; otherwise, shrink it in the current
+            // thread.
+            BackgroundCleaner cleaner = cacheManager.getBackgroundCleaner();
+            if (cleaner != null) {
+                cleaner.scheduleShrink();
+            } else {
+                doShrink();
+            }
+        }
+
+        // Rotate the clock hand (look at up to 20% of the cache) and try to
+        // find free space for the entry. Only allow evictions if the cache
+        // has reached its maximum size. Otherwise, we only look for invalid
+        // entries and rather grow the cache than evict valid entries.
+        Holder h = rotateClock(entry, (float) 0.2, size >= maxSize);
         if (h != null) {
             return h;
         }
@@ -181,6 +198,14 @@ final class ClockPolicy implements ReplacementPolicy {
          */
         private Cacheable freedCacheable;
 
+        /**
+         * Flag which tells whether this holder has been evicted from the
+         * clock. If it has been evicted, it can't be reused when a new entry
+         * is inserted. Only the owner of this holder's monitor is allowed to
+         * access this variable.
+         */
+        private boolean evicted;
+
         Holder(CacheEntry e) {
             entry = e;
             e.setCallback(this);
@@ -218,10 +243,11 @@ final class ClockPolicy implements ReplacementPolicy {
          * @param e the entry to associate the holder with (it must be locked
          * by the current thread)
          * @return <code>true</code> if the holder has been associated with the
-         * specified entry, <code>false</code> if someone else has taken it
+         * specified entry, <code>false</code> if someone else has taken it or
+         * the holder has been evicted from the clock
          */
         synchronized boolean takeIfFree(CacheEntry e) {
-            if (entry == null) {
+            if (entry == null && !evicted) {
                 // the holder is free - take it!
                 int free = freeEntries.decrementAndGet();
                 if (SanityManager.DEBUG) {
@@ -259,6 +285,49 @@ final class ClockPolicy implements ReplacementPolicy {
             e.setCallback(this);
             e.setCacheable(entry.getCacheable());
             entry = e;
+        }
+
+        /**
+         * Evict this holder from the clock if it is not associated with an
+         * entry.
+         *
+         * @return <code>true</code> if the holder was successfully evicted,
+         * <code>false</code> otherwise
+         */
+        synchronized boolean evictIfFree() {
+            if (entry == null && !evicted) {
+                int free = freeEntries.decrementAndGet();
+                if (SanityManager.DEBUG) {
+                    SanityManager.ASSERT(
+                        free >= 0, "freeEntries is negative: " + free);
+                }
+                evicted = true;
+                return true;
+            }
+            return false;
+        }
+
+        /**
+         * Mark this holder as evicted from the clock, effectively preventing
+         * reuse of the holder. Calling thread must have locked the holder's
+         * entry.
+         */
+        synchronized void setEvicted() {
+            if (SanityManager.DEBUG) {
+                SanityManager.ASSERT(!evicted, "Already evicted");
+            }
+            evicted = true;
+            entry = null;
+        }
+
+        /**
+         * Check whether this holder has been evicted from the clock.
+         *
+         * @return <code>true</code> if it has been evicted, <code>false</code>
+         * otherwise
+         */
+        synchronized boolean isEvicted() {
+            return evicted;
         }
     }
 
@@ -370,7 +439,10 @@ final class ClockPolicy implements ReplacementPolicy {
                 if (SanityManager.DEBUG) {
                     // At this point the entry must be valid. Otherwise, it
                     // would have been removed from the Holder.
-                    SanityManager.ASSERT(e.isValid());
+                    SanityManager.ASSERT(e.isValid(),
+                            "Holder contains invalid entry");
+                    SanityManager.ASSERT(!h.isEvicted(),
+                            "Trying to reuse an evicted holder");
                 }
 
                 if (e.isKept()) {
@@ -397,7 +469,7 @@ final class ClockPolicy implements ReplacementPolicy {
 
                 // Ask the background cleaner to clean the entry.
                 BackgroundCleaner cleaner = cacheManager.getBackgroundCleaner();
-                if (cleaner != null && cleaner.scheduleWork(e)) {
+                if (cleaner != null && cleaner.scheduleClean(e)) {
                     // Successfully scheduled the clean operation. Move on to
                     // the next entry.
                     continue;
@@ -420,5 +492,249 @@ final class ClockPolicy implements ReplacementPolicy {
         }
 
         return null;
+    }
+
+    /**
+     * Remove the holder at the given clock position.
+     *
+     * @param pos position of the holder
+     * @param h the holder to remove
+     */
+    private void removeHolder(int pos, Holder h) {
+        synchronized (clock) {
+            Holder removed = clock.remove(pos);
+            if (SanityManager.DEBUG) {
+                SanityManager.ASSERT(removed == h, "Wrong Holder removed");
+            }
+        }
+    }
+
+    /**
+     * Try to shrink the clock if it's larger than its maximum size.
+     */
+    public void doShrink() {
+        // If we're already performing a shrink, ignore this request. We'll get
+        // a new call later by someone else if the current shrink operation is
+        // not enough.
+        if (isShrinking.compareAndSet(false, true)) {
+            try {
+                if (shrinkMe()) {
+                    // the clock shrunk, try to trim it too
+                    trimMe();
+                }
+            } finally {
+                isShrinking.set(false);
+            }
+        }
+    }
+
+    /**
+     * Try to reduce the size of the clock as much as possible by removing
+     * invalid entries. In most cases, this method will do nothing.
+     *
+     * @see #trimMe()
+     */
+    public void trimToSize() {
+        // ignore this request if we're already performing trim or shrink
+        if (isShrinking.compareAndSet(false, true)) {
+            try {
+                trimMe();
+            } finally {
+                isShrinking.set(false);
+            }
+        }
+    }
+
+    /**
+     * Perform the shrinking of the clock. This method should only be called
+     * by a single thread at a time, and should not be called concurrently
+     * with <code>trimMe()</code>.
+     *
+     * @return <code>true</code> if the
+     */
+    private boolean shrinkMe() {
+
+        if (SanityManager.DEBUG) {
+            SanityManager.ASSERT(isShrinking.get(),
+                    "Called shrinkMe() without ensuring exclusive access");
+        }
+
+        // Look at 10% of the cache to find candidates for shrinking
+        int maxLooks = Math.max(1, maxSize / 10);
+
+        // Since we don't scan the entire cache, start at the clock hand so
+        // that we don't always scan the first 10% of the cache.
+        int pos;
+        synchronized (clock) {
+            pos = hand;
+        }
+
+        boolean shrunk = false;
+
+        while (maxLooks-- > 0) {
+
+            final Holder h;
+            final int size;
+
+            // The index of the holder we're looking at. Since no one else than
+            // us can remove elements from the clock while we're in this
+            // method, and new elements will be added at the end of the list,
+            // the index for a holder does not change until we remove it.
+            final int index;
+
+            synchronized (clock) {
+                size = clock.size();
+                if (pos >= size) {
+                    pos = 0;
+                }
+                index = pos++;
+                h = clock.get(index);
+            }
+
+            // No need to shrink if the size isn't greater than maxSize.
+            if (size <= maxSize) {
+                break;
+            }
+
+            final CacheEntry e = h.getEntry();
+
+            if (e == null) {
+                // The holder does not hold an entry. Try to remove it.
+                if (h.evictIfFree()) {
+                    removeHolder(index, h);
+                    shrunk = true;
+                    // move position back because of the removal so that we
+                    // don't skip one clock element
+                    pos = index;
+                }
+                // Either the holder was evicted, or someone else took it
+                // before we could evict it. In either case, we should move on
+                // to the next holder.
+                continue;
+            }
+
+            e.lock();
+            try {
+                if (h.getEntry() != e) {
+                    // Entry got evicted before we got the lock. Move on.
+                    continue;
+                }
+
+                if (SanityManager.DEBUG) {
+                    // At this point the entry must be valid. Otherwise, it
+                    // would have been removed from the Holder.
+                    SanityManager.ASSERT(e.isValid(),
+                            "Holder contains invalid entry");
+                    SanityManager.ASSERT(!h.isEvicted(),
+                            "Trying to evict already evicted holder");
+                }
+
+                if (e.isKept() || h.recentlyUsed) {
+                    // Don't evict entries currently in use or recently used.
+                    continue;
+                }
+
+                final Cacheable c = e.getCacheable();
+                if (c.isDirty()) {
+                    // Don't evict dirty entries.
+                    continue;
+                }
+
+                // mark as evicted to prevent reuse
+                h.setEvicted();
+
+                // remove from cache manager
+                cacheManager.evictEntry(c.getIdentity());
+
+                // remove from clock
+                removeHolder(index, h);
+
+                // move position back because of the removal so that we don't
+                // skip one clock element
+                pos = index;
+
+                shrunk = true;
+
+            } finally {
+                e.unlock();
+            }
+        }
+
+        return shrunk;
+    }
+
+    /**
+     * The number of times <code>trimMe()</code> has been called since the last
+     * time <code>trimMe()</code> tried to do some real work. This variable is
+     * used by <code>trimMe()</code> to decide whether it's about time to
+     * actually do something.
+     */
+    private int trimRequests;
+
+    /**
+     * Perform the trimming of the clock. This method should only be called by
+     * a single thread at a time, and should not be called concurrently with
+     * <code>shrinkMe()</code>.
+     *
+     * This method will not do anything unless it has been called a substantial
+     * number of times. Also, it won't do anything if less than 25% of the
+     * clock entries are unused.
+     */
+    private void trimMe() {
+
+        if (SanityManager.DEBUG) {
+            SanityManager.ASSERT(isShrinking.get(),
+                    "Called trimMe() without ensuring exclusive access");
+        }
+
+        // Only trim the clock occasionally, as it's an expensive operation.
+        if (++trimRequests < maxSize / 8) {
+            return;
+        }
+        trimRequests = 0;
+
+        // Get the current size of the clock.
+        final int size;
+        synchronized (clock) {
+            size = clock.size();
+        }
+
+        // no need to trim a small clock
+        if (size < 32) {
+            return;
+        }
+
+        final int unused = freeEntries.get();
+
+        if (unused < size / 4) {
+            // don't trim unless more than 25% of the entries are unused
+            return;
+        }
+
+        // We still want 10% unused entries as a pool for new objects.
+        final int minUnused = (size - unused) / 10;
+
+        // Search for unused entries from the end since it's cheaper to remove
+        // elements near the end of an ArrayList. Since no one else can shrink
+        // the cache while we are in this method, we know that the size of the
+        // clock still must be the same as or greater than the size variable,
+        // so it's OK to search from position (size-1).
+        for (int i = size - 1; i >= 0 && freeEntries.get() > minUnused; i--) {
+            final Holder h;
+            synchronized (clock) {
+                h = clock.get(i);
+            }
+            // Index will be stable since no one else is allowed to remove
+            // elements from the list, and new elements will be appended at the
+            // end of the list.
+            if (h.evictIfFree()) {
+                removeHolder(i, h);
+            }
+        }
+
+        // Finally, trim the underlying array.
+        synchronized (clock) {
+            clock.trimToSize();
+        }
     }
 }

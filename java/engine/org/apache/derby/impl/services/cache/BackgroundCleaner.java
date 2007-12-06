@@ -54,6 +54,12 @@ final class BackgroundCleaner implements Serviceable {
     /** A queue of cache entries that need to be cleaned. */
     private final ArrayBlockingQueue<CacheEntry> queue;
 
+    /**
+     * Flag which tells whether the cleaner should try to shrink the cache
+     * the next time it wakes up.
+     */
+    private volatile boolean shrink;
+
     /** The cache manager owning this cleaner. */
     private final ConcurrentCache cacheManager;
 
@@ -83,12 +89,21 @@ final class BackgroundCleaner implements Serviceable {
      * <code>false</code> if the background cleaner can't clean the entry (its
      * queue is full)
      */
-    boolean scheduleWork(CacheEntry entry) {
+    boolean scheduleClean(CacheEntry entry) {
         final boolean queued = queue.offer(entry);
         if (queued) {
             requestService();
         }
         return queued;
+    }
+
+    /**
+     * Request that the cleaner tries to shrink the cache the next time it
+     * wakes up.
+     */
+    void scheduleShrink() {
+        shrink = true;
+        requestService();
     }
 
     /**
@@ -126,12 +141,20 @@ final class BackgroundCleaner implements Serviceable {
     public int performWork(ContextManager context) throws StandardException {
         // allow others to schedule more work
         scheduled.set(false);
+
+        // First, try to shrink the cache if requested.
+        if (shrink) {
+            shrink = false;
+            cacheManager.getReplacementPolicy().doShrink();
+        }
+
+        // See if there are objects waiting to be cleaned.
         CacheEntry e = queue.poll();
         if (e != null) {
             try {
                 cacheManager.cleanEntry(e);
             } finally {
-                if (!queue.isEmpty()) {
+                if (!queue.isEmpty() || shrink) {
                     // We have more work in the queue. Request service again.
                     requestService();
                 }
