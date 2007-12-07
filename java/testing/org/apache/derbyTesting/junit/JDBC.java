@@ -539,6 +539,17 @@ public class JDBC {
 
     }
     
+    /**
+     * Drain a ResultSet and assert it has at least one row.
+     *
+     * The ResultSet is closed by this method.
+     */
+    public static void assertDrainResultsHasData(ResultSet rs)
+    throws SQLException
+    {
+        int rowCount = assertDrainResults(rs, -1);
+        Assert.assertTrue("ResultSet expected to have data", rowCount > 0);
+    }    
     
 	/**
 	 * Drain a single ResultSet by reading all of its
