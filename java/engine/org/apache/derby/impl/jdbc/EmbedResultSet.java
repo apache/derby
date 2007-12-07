@@ -592,7 +592,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 
 			try	{
 				try	{
-					theResults.finish(); // release the result set, don't just close it
+					theResults.close(); 
 				    
 				    if (this.singleUseActivation != null)
 				    {
