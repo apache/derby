@@ -330,16 +330,17 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
             // This is a hack. A NetworkServerControl constructor with
             // the needed interface to control sslMode (and possibly
             // more) would be better.
-            String oldValue = 
-                System.setProperty("derby.drda.sslMode", config.getSsl());
+            String oldValue = BaseTestCase.getSystemProperty("derby.drda.sslMode");
+            BaseTestCase.setSystemProperty("derby.drda.sslMode", config.getSsl());
             NetworkServerControl control = new NetworkServerControl
                 (InetAddress.getByName(config.getHostName()), 
                  config.getPort());
+               
             if (oldValue == null) {
-                // JDK 1.4 does not have clearProperty....
-                System.getProperties().remove("derby.drda.sslMode");
+
+                BaseTestCase.removeSystemProperty("derby.drda.sslMode");
             } else {
-                System.setProperty("derby.drda.sslMode", oldValue);
+                BaseTestCase.setSystemProperty("derby.drda.sslMode", oldValue);
             }
             return control;
         }
