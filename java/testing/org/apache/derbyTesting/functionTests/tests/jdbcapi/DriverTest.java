@@ -89,7 +89,7 @@ public class DriverTest extends BaseJDBCTestCase {
         return suite;
     }
     
-    public static Test baseSuite(String name) {
+    private static Test baseSuite(String name) {
         
         TestSuite suite = new TestSuite("DriverTest");
         setBaseProps(suite, new DriverTest("testDriverCompliantVersion"));
@@ -114,8 +114,6 @@ public class DriverTest extends BaseJDBCTestCase {
         dbprops.setProperty("derby.debug.true", "AuthenticationTrace");
         dbprops.setProperty("derby.user.APP", "xxxx");
         dbprops.setProperty("derby.user.testuser", "testpass");
-        String dbName = TestConfiguration.getCurrent().getDefaultDatabaseName();
-        dbprops.setProperty("derby.database.users." + dbName, "testuser,APP");
         test = new DatabasePropertyTestSetup (test, dbprops, true);
         suite.addTest(test);
     }
@@ -197,7 +195,7 @@ public class DriverTest extends BaseJDBCTestCase {
      * driver.get*Version
      * @throws Exception
      */
-    public static void testDriverCompliantVersion() throws Exception 
+    public void testDriverCompliantVersion() throws Exception 
     {   
         String dbName = TestConfiguration.getCurrent().getDefaultDatabaseName();
         String url = TestConfiguration.getCurrent().getJDBCUrl(dbName);
@@ -228,7 +226,7 @@ public class DriverTest extends BaseJDBCTestCase {
      * 
      * @throws SQLException, Exception
      */
-    public static void testAcceptsURL() throws SQLException, Exception {
+    public void testAcceptsURL() throws SQLException, Exception {
         String dbName = TestConfiguration.getCurrent().getDefaultDatabaseName();
         String orgurl = TestConfiguration.getCurrent().getJDBCUrl(dbName);
 
@@ -287,7 +285,7 @@ public class DriverTest extends BaseJDBCTestCase {
      * argument to connect
      * DERBY-530. Only valid for embedded driver and client. 
      */
-    public static void testEmbeddedAttributes() throws SQLException
+    public void testEmbeddedAttributes() throws SQLException
     {
         // JCC can't take embedded attributes in info or as normal url 
         // attributes, so not tested here.
@@ -367,7 +365,7 @@ public class DriverTest extends BaseJDBCTestCase {
      * as info argument to connect.
      * DERBY-530. 
      */
-    public static void testClientAttributes() throws SQLException
+    public void testClientAttributes() throws SQLException
     {
         if (!usingDerbyNetClient())
             return;
@@ -423,7 +421,7 @@ public class DriverTest extends BaseJDBCTestCase {
     /**
      * Tests client URLs to see connection is successful or the correct exception is thrown.
      */
-    public static void testClientURL() throws SQLException {
+    public void testClientURL() throws SQLException {
         if (!usingDerbyNetClient())
             return;
         
@@ -503,7 +501,7 @@ public class DriverTest extends BaseJDBCTestCase {
      * 
      * @throws SQLException
      */
-    public static void testDbNameWithSpaces() throws SQLException {
+    public void testDbNameWithSpaces() throws SQLException {
         
         Properties info = null;
         String url = null;
