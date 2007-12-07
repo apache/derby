@@ -21,28 +21,18 @@
 
 package org.apache.derbyTesting.functionTests.tests.derbynet;
 
-import org.apache.derby.drda.NetworkServerControl;
-
-import org.apache.derbyTesting.functionTests.harness.jvm;
-import org.apache.derbyTesting.junit.TestConfiguration;
-
-import org.apache.derby.tools.ij;
-
+import java.io.ByteArrayOutputStream;
+import java.io.PrintWriter;
+import java.net.InetAddress;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.Properties;
 
-import java.io.ByteArrayOutputStream;
-import java.io.OutputStream;
-import java.io.PrintWriter;
-
-import java.net.InetAddress;
-
-import java.sql.DriverManager;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import org.apache.derby.drda.NetworkServerControl;
+import org.apache.derby.tools.ij;
 import org.apache.derbyTesting.functionTests.util.TestUtil;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * Test NetworkServerControl.start(PrintWriter) writes to the print Writer
@@ -54,7 +44,7 @@ import org.apache.derbyTesting.functionTests.util.TestUtil;
  *</ul>
  */
 
-public class DerbyNetNewServer extends Thread
+public class DerbyNetNewServer
 {
 
     private static final String DATABASE_NAME = "wombat";
@@ -66,8 +56,6 @@ public class DerbyNetNewServer extends Thread
         authenticationProperties.put ("user", "admin");
         authenticationProperties.put ("password", "admin");
     }
-
-    private NetworkServerControl server;
     
     public static void main( String[] args)
     {
@@ -183,10 +171,4 @@ public class DerbyNetNewServer extends Thread
             }
         }
     } // end of testServer
-
-    private DerbyNetNewServer( NetworkServerControl server)
-    {
-        this.server = server;
-    }
-
 }
