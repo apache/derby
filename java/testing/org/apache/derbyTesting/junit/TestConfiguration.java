@@ -79,10 +79,6 @@ public class TestConfiguration {
 		
     /** Sleep for 500 ms before pinging the network server (again) */
     private static final int SLEEP_TIME = 1000;
-
-    /* Network Server Control */
-    private NetworkServerControl networkServerController;
-    private NetworkServerControl networkServer;
             
     /**
      * Keys to use to look up values in properties files.
@@ -182,6 +178,11 @@ public class TestConfiguration {
     /**
      * Get this Thread's current configuraiton for running
      * the tests.
+     * Note this call must only be used while a test is
+     * running, they make no sense when setting up a suite.
+     * A suite itself sets up which test configurations
+     * the fixtures will run in.
+
      * @return TestConfiguration to use.
      */
     public static TestConfiguration getCurrent() {
@@ -1222,7 +1223,9 @@ public class TestConfiguration {
      */
     public void stopNetworkServer() {
         try {
-            NetworkServerControl networkServer = new NetworkServerControl();
+            NetworkServerControl networkServer =
+                NetworkServerTestSetup.getNetworkServerControl();
+
             networkServer.shutdown();
             if (serverOutput != null) {
                 serverOutput.close();
@@ -1241,10 +1244,11 @@ public class TestConfiguration {
     {
         Exception failException = null;
         try {
-
-	    NetworkServerControl networkServer =
-                     new NetworkServerControl(InetAddress.getByName("localhost"), port);
-	    serverOutput = (FileOutputStream)
+            
+            NetworkServerControl networkServer =
+                NetworkServerTestSetup.getNetworkServerControl();
+	    
+ 	    serverOutput = (FileOutputStream)
             AccessController.doPrivileged(new PrivilegedAction() {
                 public Object run() {
                     File logs = new File("logs");
