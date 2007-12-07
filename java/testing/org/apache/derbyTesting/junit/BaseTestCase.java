@@ -74,7 +74,8 @@ public abstract class BaseTestCase
      * setUp, tearDown methods and decorators.
      */
     public void runBare() throws Throwable {
-        boolean trace = TestConfiguration.getCurrent().doTrace();
+        TestConfiguration config = getTestConfiguration();
+        boolean trace = config.doTrace();
         long startTime = 0;
         if ( trace )
         {
@@ -85,7 +86,7 @@ public abstract class BaseTestCase
         // installed
         if ( System.getSecurityManager() == null )
         {
-            if (getTestConfiguration().defaultSecurityManagerSetup())
+            if (config.defaultSecurityManagerSetup())
             {
     		assertSecurityManager();
             }
