@@ -56,8 +56,6 @@ public class SSLTest extends BaseJDBCTestCase
 {
     // helper state for intercepting server error messages
     private InputStream[]  _inputStreamHolder;
-    /** Reference to the enclosing NetworkServerTestSetup. */
-    private NetworkServerTestSetup nsTestSetup;
 
     // Constructors
 
@@ -125,8 +123,6 @@ public class SSLTest extends BaseJDBCTestCase
                                        true,
                                        true, 
                                        sslTest._inputStreamHolder);
-        
-        sslTest.nsTestSetup = networkServerTestSetup;
         
         Test testSetup =
             SecurityManagerSetup.noSecurityManager(networkServerTestSetup);
