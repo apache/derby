@@ -181,8 +181,8 @@ public class CallableTest extends BaseJDBCTestCase {
         // Add tests that every JVM should be able to run.
         suite.addTestSuite(CallableTest.class);
 
-        // Add tests that require JDBC 2 
-        if (JDBC.vmSupportsJDBC2()) {
+        // Add tests that require JDBC 3 
+        if (JDBC.vmSupportsJDBC3()) {
 
             // Tests that require DriverManager.
             suite.addTest
@@ -203,13 +203,11 @@ public class CallableTest extends BaseJDBCTestCase {
             // Test that both requires DriverManager and BigDecimal
             suite.addTest
                 (new CallableTest("xtestNumericBoundariesProc"));
-        }
-
-        // Tests that can't run under DB2 client jdbc driver.
-        if (!usingDerbyNet()) {
+            
             suite.addTest
                 (new CallableTest("xtestRegUserDefOutParameterError"));
         }
+
 
         return new CleanDatabaseTestSetup(suite) 
         {
@@ -255,14 +253,14 @@ public class CallableTest extends BaseJDBCTestCase {
      */
     public void testTwoInOneOutProc() throws SQLException
     {
-        CallableStatement cs = getConnection().prepareCall
+        CallableStatement cs = prepareCall
             ("call TWO_IN_ONE_OUT_PROC (?, ?, ?)");
         cs.setInt(1, 6);
         cs.setInt(2, 9);
         cs.registerOutParameter (3, java.sql.Types.INTEGER);
         cs.execute();
         assertEquals("Sum of 6 and 9", 15, cs.getInt(3));
-        cs.close();
+
     }
 
     /**
@@ -271,13 +269,12 @@ public class CallableTest extends BaseJDBCTestCase {
      */
     public void testOneInOneOutFunc() throws SQLException
     {
-        CallableStatement cs = getConnection().prepareCall
+        CallableStatement cs = prepareCall
             ("? = call ONE_IN_ONE_OUT_FUNC (?)");
         cs.registerOutParameter (1, java.sql.Types.INTEGER);
         cs.setInt(2, 6);
         cs.execute();
         assertEquals("Square of 6 then plus 6", 42, cs.getInt(1));
-        cs.close();
     }
 
     /**
@@ -287,12 +284,12 @@ public class CallableTest extends BaseJDBCTestCase {
      */
     public void testNoInOneOutFunc() throws SQLException
     {
-        CallableStatement cs = getConnection().prepareCall
+        CallableStatement cs = prepareCall
             ("? = call NO_IN_ONE_OUT_FUNC()");
         cs.registerOutParameter (1, java.sql.Types.INTEGER);
         cs.execute();
         assertEquals("NO_IN_ONE_OUT_FUNC output value", 55, cs.getInt(1));
-        cs.close();
+
     }
 
     /**
@@ -317,7 +314,7 @@ public class CallableTest extends BaseJDBCTestCase {
      */
     public void xtestNumericTypesInAndOutProc() throws SQLException
     {
-        CallableStatement cs = getConnection().prepareCall
+        CallableStatement cs = prepareCall
             ("call NUMERIC_TYPES_IN_AND_OUT_PROC(?,?,?,?,?,?,?,?,?,?,?,?)");
 
         cs.setShort(1, (short) 3);
@@ -342,8 +339,6 @@ public class CallableTest extends BaseJDBCTestCase {
         assertEquals("OUT float" , (float) 6.0, cs.getFloat(10), .0001);
         assertEquals("OUT double" , 7.0, cs.getDouble(11), .0001);
         assertDecimalSameValue("OUT decimal", "88.88", cs.getBigDecimal(12));
-
-        cs.close();
     }
 
     /**
@@ -352,7 +347,7 @@ public class CallableTest extends BaseJDBCTestCase {
      */
     public void testNonNumericTypesInAndOutProc() throws SQLException
     {
-        CallableStatement cs = getConnection().prepareCall
+        CallableStatement cs = prepareCall
             ("call NON_NUMERIC_TYPES_IN_AND_OUT_PROC(?,?,?,?,?,?,?,?)");
 
         cs.setDate(1, Date.valueOf("2002-05-12"));
@@ -376,8 +371,6 @@ public class CallableTest extends BaseJDBCTestCase {
             Timestamp.valueOf("2002-05-12 10:05:02.000000000"), 
             cs.getTimestamp(7));
         assertTrue(Arrays.equals(ba, cs.getBytes(8)));
-
-        cs.close();
     }
 
     /**
@@ -386,7 +379,7 @@ public class CallableTest extends BaseJDBCTestCase {
      */
     public void testManyTypesInoutProc() throws SQLException
     {
-        CallableStatement cs = getConnection().prepareCall
+        CallableStatement cs = prepareCall
             ("call MANY_TYPES_INOUT_PROC(?,?,?,?,?,?,?,?,?,?,?,?)");
 
         cs.registerOutParameter (2, java.sql.Types.SMALLINT);
@@ -421,7 +414,6 @@ public class CallableTest extends BaseJDBCTestCase {
         assertEquals("Time: changed to", Time.valueOf("11:06:03"), 
             cs.getTime(12));
 
-        cs.close();
     }
 
     /**
@@ -434,7 +426,7 @@ public class CallableTest extends BaseJDBCTestCase {
      */
     public void xtestRegUserDefOutParameterError() throws SQLException
     {
-        CallableStatement cs = getConnection().prepareCall
+        CallableStatement cs = prepareCall
             ("? = call NO_IN_ONE_OUT_FUNC()");
 
         try {
@@ -443,8 +435,6 @@ public class CallableTest extends BaseJDBCTestCase {
         } catch (SQLException se) {
             assertSQLState(NOT_IMPLEMENTED, se);
         }
-
-        cs.close();
     }
 
     /**
@@ -485,9 +475,6 @@ public class CallableTest extends BaseJDBCTestCase {
             byte[] retvalue = (byte[]) rs.getObject(1);
             assertTrue(Arrays.equals(bytearr, retvalue));
         }
-        rs.close();
-        stmt.close();
-        cstmt.close();
     }
 
     /**
@@ -546,10 +533,6 @@ public class CallableTest extends BaseJDBCTestCase {
         {
             assertEquals(rs.getString(2), rs.getInt(1)*10, rs.getInt(3));
         }
-
-        rs.close();
-        stmt.close();
-        cstmt.close();
     }
 
 
@@ -654,10 +637,6 @@ public class CallableTest extends BaseJDBCTestCase {
                     break;
             }
         }
-
-        rs.close();
-        stmt.close();
-        cstmt.close();
     }
 
     /**
@@ -694,8 +673,6 @@ public class CallableTest extends BaseJDBCTestCase {
             cstmt.getBigDecimal(2));
         assertNull("Expected OUT 3 to be null", cstmt.getBigDecimal(3));
 
-        stmt.close();
-        cstmt.close();
     }
 
     /**
@@ -705,7 +682,7 @@ public class CallableTest extends BaseJDBCTestCase {
      */
     public void xtestBigDecimalInAndOutProc() throws SQLException
     {
-        CallableStatement cs = getConnection().prepareCall
+        CallableStatement cs = prepareCall
             ("CALL BIGDECIMAL_IN_AND_OUT_PROC (?, ?, ?, ?, ?, ?, ?, ?, ?)");
         cs.setBigDecimal(1, new BigDecimal("33.333"));
         cs.registerOutParameter (2, java.sql.Types.DECIMAL);
@@ -725,8 +702,6 @@ public class CallableTest extends BaseJDBCTestCase {
         assertDecimalSameValue("OUT 7", "0.0000",         cs.getBigDecimal(7));
         assertDecimalSameValue("OUT 8", "99999999.0000",  cs.getBigDecimal(8));
         assertDecimalSameValue("OUT 9", "-99999999.0000", cs.getBigDecimal(9));
-
-        cs.close();
     }
 
     /**
