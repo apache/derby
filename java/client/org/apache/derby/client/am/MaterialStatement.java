@@ -61,7 +61,7 @@ public interface MaterialStatement {
 
     public abstract void markClosedOnServer_();
 
-    public abstract void writeSetSpecialRegister_(java.util.ArrayList sqlsttList) throws SqlException;
+    public abstract void writeSetSpecialRegister_(Section section, java.util.ArrayList sqlsttList) throws SqlException;
 
     public abstract void readSetSpecialRegister_() throws SqlException;
 

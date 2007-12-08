@@ -1762,10 +1762,7 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
         return CodePoint.RSLSETFLG_EXTENDED_SQLDA;
     }
 
-    public void writeSetSpecialRegister(java.util.ArrayList sqlsttList) throws SqlException {
-        Section section =
-                netAgent_.sectionManager_.getDynamicSection(java.sql.ResultSet.HOLD_CURSORS_OVER_COMMIT);
-
+    public void writeSetSpecialRegister(Section section, java.util.ArrayList sqlsttList) throws SqlException {
         buildEXCSQLSET(section);
 
         // SQLSTT:

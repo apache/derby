@@ -39,6 +39,8 @@ import org.apache.derbyTesting.junit.TestConfiguration;
  */
 
 public class StatementJdbc30Test extends BaseJDBCTestCase {
+    private static final String CLIENT_SUITE_NAME = 
+        "StatementJdbc30Test:client";
 
     /**
      * Create a test with the given name.
@@ -61,7 +63,7 @@ public class StatementJdbc30Test extends BaseJDBCTestCase {
         suite.addTest(baseSuite("StatementJdbc30Test:embedded"));
         suite
                 .addTest(TestConfiguration
-                        .clientServerDecorator(baseSuite("StatementJdbc30Test:client")));
+                        .clientServerDecorator(baseSuite(CLIENT_SUITE_NAME)));
 
         return suite;
     }
@@ -70,6 +72,16 @@ public class StatementJdbc30Test extends BaseJDBCTestCase {
         TestSuite suite = new TestSuite(name);
 
         suite.addTestSuite(StatementJdbc30Test.class);
+
+        if  (name.equals(CLIENT_SUITE_NAME)) {
+            // These test CAN be run in embedded mode as well, but
+            // they're only meaningful in c/s mode and also take quite
+            // a bit of time to run.
+            suite.addTest(new StatementJdbc30Test
+                          ("xtestMultiExecWithQueryTimeout"));
+            suite.addTest(new StatementJdbc30Test
+                          ("xtestMaxOpenStatementsWithQueryTimeout"));
+        }
 
         return new CleanDatabaseTestSetup(suite) {
             /**
@@ -276,6 +288,40 @@ public class StatementJdbc30Test extends BaseJDBCTestCase {
             }
         
     }
+
+    /**
+     * DERBY-3198: Verify that a statement can be executed
+     * more than 32000 times, even when query timeout is enabled.
+     */
+    public void xtestMultiExecWithQueryTimeout() throws SQLException {
+        Statement stmt = createStatement();
+        stmt.setQueryTimeout(10);
+        for (int i = 0; i < 33000; ++i) {
+            ResultSet rs = stmt.executeQuery("VALUES(1)");
+            rs.close();
+        }
+    }
+
+    /**
+     * DERBY-3198: Verify that we can have at least 16383 open Statements with
+     * query timeout. With query timeout, each Statement holds on to 2
+     * Section objects until it is closed.
+     */
+    public void xtestMaxOpenStatementsWithQueryTimeout() throws SQLException {
+        Statement[] stmts = new Statement[16500];
+        int i = 0;
+        try {
+            for (; i < 16500; ++i) {
+                stmts[i] = createStatement();
+                stmts[i].setQueryTimeout(10);
+                stmts[i].executeQuery("VALUES(1)");
+            }
+        } catch (SQLException e) {
+            assertSQLState("XJ200",e);
+            assertTrue("16383 >= (i="+ i +")", 16383 >= i);
+        }  
+    }
+
 
     /**
      * Testing stmt.getResultSetHoldability()
