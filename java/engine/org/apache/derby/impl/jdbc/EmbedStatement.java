@@ -1619,8 +1619,6 @@ public class EmbedStatement extends ConnectionChild
      * </UL>
      * Any invalid ResultSet is ignored.
      * 
-     * <P>
-     * if b
      * 
      * @param conn Connection ResultSet needs to belong to
      * @param resultSet ResultSet to be tested
