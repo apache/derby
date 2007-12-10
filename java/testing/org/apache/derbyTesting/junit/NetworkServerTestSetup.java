@@ -35,10 +35,6 @@ import org.apache.derby.drda.NetworkServerControl;
  * Test decorator that starts the network server on startup
  * and stops it on teardown.
  * 
- *
- * Currently it will start the network server in the same VM
- * and it does not support starting it from a remote 
- * machine.
  */
 final public class NetworkServerTestSetup extends BaseTestSetup {
 
@@ -66,12 +62,31 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
     private final boolean useSeparateProcess;
     private final boolean serverShouldComeUp;
     private final InputStream[] inputStreamHolder;
+    
+    /**
+     * System properties to set on the command line (using -D)
+     * only when starting the server in a separate virtual machine.
+     */
     private final String[]    systemProperties;
+    
+    /**
+     * Startup arguments for the command line
+     * only when starting the server in a separate virtual machine.
+     */
     private final String[]    startupArgs;
     private Process serverProcess;
     
     /**
-     * Decorator this test with the NetworkServerTestSetup
+     * Decorator this test with the NetworkServerTestSetup.
+     * 
+     * Runs the server using the current configuration (at the time
+     * of setup).
+     * 
+     * @param asCommand True to start using NetworkServerControl.main()
+     * within the same virtual machine, false to use NetworkServerControl.start.
+     * 
+     * @see NetworkServerControl#main(String[])
+     * @see NetworkServerControl#start(PrintWriter)
      */
     public NetworkServerTestSetup(Test test, boolean asCommand) {
         super(test);
@@ -85,14 +100,15 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
 }
 
      /**
-     * Decorator for starting up with specific command args.
+     * Decorator for starting up with specific command args
+     * and system properties. Server is always started up
+     * in a separate process with a separate virtual machine.
      */
     public NetworkServerTestSetup
         (
          Test test,
          String[] systemProperties,
          String[] startupArgs,
-         boolean useSeparateProcess,
          boolean serverShouldComeUp,
          InputStream[] inputStreamHolder
         )

@@ -248,7 +248,6 @@ public class SecureServerTest extends BaseJDBCTestCase
              secureServerTest,
              startupProperties,
              startupArgs,
-             true,
              secureServerTest._outcome.serverShouldComeUp(),
              secureServerTest._inputStreamHolder
              );

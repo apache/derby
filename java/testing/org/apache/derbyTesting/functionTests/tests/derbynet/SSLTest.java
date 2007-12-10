@@ -120,7 +120,6 @@ public class SSLTest extends BaseJDBCTestCase
             new NetworkServerTestSetup(sslTest,
                                        startupProperties,
                                        startupArgs,
-                                       true,
                                        true, 
                                        sslTest._inputStreamHolder);
         
