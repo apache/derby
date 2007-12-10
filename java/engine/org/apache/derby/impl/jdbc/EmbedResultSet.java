@@ -565,7 +565,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 				// just give up and return
 				return;
 			}
-
+            
 			try	{
 				try	{
 					theResults.close(); 
@@ -4389,15 +4389,25 @@ public abstract class EmbedResultSet extends ConnectionChild
 	}
 
 	/**
-		A dynamic result set was created in a procedure by a nested connection.
+		A dynamic result was created in a procedure by a nested connection.
 		Once the procedure returns, there is a good chance that connection is closed,
 		so we re-attach the result set to the connection of the statement the called
 		the procedure, which will be still open.
+        <BR>
+        In the case where the dynamic result will not be accessible
+        then owningStmt will be null, the ResultSet will be linked to
+        the root connection to allow its close method to work. It
+        will remain attached to its original statement.
 	*/
 	void setDynamicResultSet(EmbedStatement owningStmt) {
 
-		this.owningStmt = owningStmt;
-		this.localConn = owningStmt.getEmbedConnection();
+        
+        if (owningStmt != null) {
+		    this.owningStmt = owningStmt;
+            this.localConn = owningStmt.getEmbedConnection();
+        }
+        else
+            this.localConn = this.localConn.rootConnection;
         
         // The activation that created these results now becomes
         // a single use activation so it will be closed when this

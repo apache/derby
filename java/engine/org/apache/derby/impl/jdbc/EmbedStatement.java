@@ -1272,8 +1272,6 @@ public class EmbedStatement extends ConnectionChild
 					}
 
 					updateCount = resultsToWrap.modifiedRowCount();
-
-					resultsToWrap.finish();	// Don't need the result set any more
 					results = null; // note that we have none.
 
                     int dynamicResultCount = 0;
@@ -1282,6 +1280,8 @@ public class EmbedStatement extends ConnectionChild
                             processDynamicResults(a.getDynamicResults(),
                                                   a.getMaxDynamicResults());
 					}
+                    
+                    resultsToWrap.finish(); // Don't need the result set any more
 
                     // executeQuery() is not allowed if the statement
                     // doesn't return exactly one ResultSet.
@@ -1553,26 +1553,25 @@ public class EmbedStatement extends ConnectionChild
 
 			java.sql.ResultSet[] param = holder[i];
 
-			if (param[0] == null)
-				continue;
-
 			java.sql.ResultSet rs = param[0];
+
+            // Clear the JDBC dynamic ResultSet from the language
+            // ResultSet for the CALL statement. This stops the
+            // CALL statement closing the ResultSet when its language
+            // ResultSet is closed, which will happen just after the
+            // call to the processDynamicResults() method.
 			param[0] = null;
+            
+            // ignore non-Derby result sets or results sets from another connection
+            // and closed result sets.
+            EmbedResultSet lrs = EmbedStatement.processDynamicResult(
+                    getEmbedConnection(), rs, this);
+            
+            if (lrs == null)
+            {
+                continue;
+            }
 
-			// ignore non-Derby result sets or results sets from another connection
-			if (!(rs instanceof EmbedResultSet))
-				continue;
-
-			EmbedResultSet lrs = (EmbedResultSet) rs;
-
-			if (lrs.getEmbedConnection().rootConnection != getEmbedConnection().rootConnection)
-				continue;
-
-			// ignore closed result sets.
-			if (lrs.isClosed)
-				continue;
-
-			lrs.setDynamicResultSet(this);
 			sorted[actualCount++] = lrs;
 		}
 
@@ -1608,6 +1607,51 @@ public class EmbedStatement extends ConnectionChild
 
 		return actualCount;
 	}
+    
+    /**
+     * Process a ResultSet created in a Java procedure as a dynamic result.
+     * To be a valid dynamic result the ResultSet must be:
+     * <UL>
+     * <LI> From a Derby system
+     * <LI> From a nested connection of connection passed in
+     * or from the connection itself.
+     * <LI> Open
+     * </UL>
+     * Any invalid ResultSet is ignored.
+     * 
+     * <P>
+     * if b
+     * 
+     * @param conn Connection ResultSet needs to belong to
+     * @param resultSet ResultSet to be tested
+     * @param callStatement Statement that executed the CALL, null if 
+     * @return The result set cast down to EmbedResultSet, null if not a valid
+     * dynamic result.
+     */
+    static EmbedResultSet processDynamicResult(EmbedConnection conn,
+            java.sql.ResultSet resultSet,
+            EmbedStatement callStatement)
+    {
+        if (resultSet == null)
+            return null;
+
+        // ignore non-Derby result sets or results sets from another connection
+        if (!(resultSet instanceof EmbedResultSet))
+            return null;
+
+        EmbedResultSet lrs = (EmbedResultSet) resultSet;
+
+        if (lrs.getEmbedConnection().rootConnection != conn.rootConnection)
+            return null;
+
+        // ignore closed result sets.
+        if (lrs.isClosed)
+            return null;
+        
+        lrs.setDynamicResultSet(callStatement);
+
+        return lrs;
+    }
 
 	/**
 		Callback on the statement when one of its result sets is closed.

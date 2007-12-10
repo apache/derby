@@ -21,7 +21,6 @@
 
 package org.apache.derby.iapi.jdbc;
 
-import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.ResultSet;
 
 import java.sql.Connection;
@@ -57,4 +56,27 @@ public interface ConnectionContext
 	(
 		ResultSet 				executionResultSet
 	) throws java.sql.SQLException;
+    
+    /**
+     * Process the resultSet as a dynamic result for closure.
+     * The result set will have been created in a Java procedure.
+     * If the ResultSet is a valid dynamic ResultSet for
+     * this connection, then it is set up as a dynamic result
+     * which includes:
+     * <UL>
+     * <LI> breaking its link with the JDBC connection
+     * that created it, since there is a good chance that connection
+     * was closed explicitly by the Java procedure.
+     * <LI> marking its activation as single use to ensure the
+     * close of the ResultSet will close the activation.
+     * </UL>
+     * <P>
+     * If the result set a valid dynamic result then false will
+     * be returned and no action made against it.
+     * 
+     * @param resultSet ResultSet to process.
+     * @return True if this ResultSet was created by this connection
+     * and the result set is open. False otherwise.
+     */
+    public boolean processInaccessibleDynamicResult(java.sql.ResultSet resultSet);
 }
