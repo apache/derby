@@ -81,6 +81,10 @@ public interface MasterFactory {
     /** Property key to specify which slave port to connect to */
     public static final String SLAVE_PORT =
         Property.PROPERTY_RUNTIME_PREFIX + "replication.master.slaveport";
+    
+    /** Property key to specify the name of the database */
+    public static final String MASTER_DB =
+        Property.PROPERTY_RUNTIME_PREFIX + "replication.master.dbname";
 
     /** Property key to specify replication mode */
     public static final String REPLICATION_MODE =

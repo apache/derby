@@ -87,6 +87,12 @@ public class AsynchronousLogShipper extends Thread implements
     private MasterController masterController = null;
     
     /**
+     * Store the log chunk that failed during a previous shipping attempt
+     * so that it can be re-shipped to the slave.
+     */
+    private ReplicationMessage failedChunk = null;
+    
+    /**
      * Constructor initializes the log buffer, the replication message
      * transmitter, the shipping interval and the master controller.
      *
@@ -108,6 +114,7 @@ public class AsynchronousLogShipper extends Thread implements
         this.transmitter = transmitter;
         this.shippingInterval = shippingInterval;
         this.masterController = masterController;
+        this.stopShipping = false;
     }
     
     /**
@@ -126,8 +133,8 @@ public class AsynchronousLogShipper extends Thread implements
                     wait(shippingInterval);
                 }
             } catch (InterruptedException ie) {
-                //Ignore the Interrupted exception to enable stopping
-                //the shipping thread in a controlled way.
+                //Interrupt the log shipping thread.
+                return;
             } catch (IOException ioe) {
                 masterController.handleExceptions(ioe);
             } catch (StandardException se) {
@@ -149,11 +156,22 @@ public class AsynchronousLogShipper extends Thread implements
     private synchronized void shipALogChunk()
     throws IOException, StandardException {
         byte [] logRecords = null;
+        ReplicationMessage mesg = null;
         try {
+            //Check to see if a previous log record exists that needs
+            //to be re-transmitted. If there is then transmit that
+            //log record and then transmit the next log record in the
+            //log buffer.
+            if (failedChunk != null) {
+                transmitter.sendMessage(failedChunk);
+                failedChunk = null;
+            }
+            //transmit the log record that is at the head of
+            //the log buffer.
             if (logBuffer.next()) {
                 logRecords = logBuffer.getData();
                 
-                ReplicationMessage mesg = new ReplicationMessage(
+                mesg = new ReplicationMessage(
                     ReplicationMessage.TYPE_LOG, logRecords);
                 
                 transmitter.sendMessage(mesg);
@@ -164,6 +182,11 @@ public class AsynchronousLogShipper extends Thread implements
             //buffer.
             masterController.handleExceptions(StandardException.newException
                 (SQLState.REPLICATION_UNEXPECTED_EXCEPTION, nse));
+        } catch (IOException ioe) {
+            //An exception occurred while transmitting the log record.
+            //Store the previous log record so that it can be re-transmitted
+            failedChunk = (mesg==null) ? failedChunk : mesg;
+            throw ioe;
         }
     }
     
@@ -179,7 +202,9 @@ public class AsynchronousLogShipper extends Thread implements
      *                           log records from the log buffer.
      */
     public void forceFlush() throws IOException, StandardException {
-        shipALogChunk();
+        if (!stopShipping) {
+            shipALogChunk();
+        }
         
         synchronized(this) {
             //There will still be more log to send after the forceFlush

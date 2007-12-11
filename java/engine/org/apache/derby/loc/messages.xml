@@ -4751,6 +4751,12 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
                 <arg>masterinstant</arg>
                 <arg>slaveinstant</arg>
             </msg>
+            
+            <msg>
+                <name>XRE06</name>
+                <text>The connection attempts to the replication slave for the database {0} exceeded the specified timeout period.</text>
+                <arg>dbname</arg>
+            </msg>
 
 
         </family>
@@ -7568,6 +7574,29 @@ Shutting down instance {0}</text>
             <msg>
                 <name>R006</name>
                 <text>Lost connection with the replication master of database '{0}'.</text>
+                <arg>dbname</arg>
+            </msg>
+            
+            <msg>
+                <name>R007</name>
+                <text>Replication master role started for database '{0}'.</text>
+                <arg>dbname</arg>
+            </msg>
+            
+            <msg>
+                <name>R008</name>
+                <text>Replication master role stopped for database '{0}'.</text>
+                <arg>dbname</arg>
+            </msg>
+            
+            <msg>
+                <name>R009</name>
+                <text>Exception occurred during log shipping.</text>
+            </msg>
+            
+            <msg>
+                <name>R010</name>
+                <text>Replication master trying to reconnect to slave for database '{0}'.</text>
                 <arg>dbname</arg>
             </msg>
         </family>

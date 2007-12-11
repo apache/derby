@@ -22,16 +22,22 @@
 
 package org.apache.derby.impl.services.replication.master;
 
+import java.io.IOException;
+import java.net.SocketTimeoutException;
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.MessageId;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.monitor.ModuleControl;
 import org.apache.derby.iapi.services.monitor.ModuleSupportable;
+import org.apache.derby.iapi.services.monitor.Monitor;
 
 import org.apache.derby.iapi.store.raw.RawStoreFactory;
 import org.apache.derby.iapi.store.raw.log.LogFactory;
 import org.apache.derby.iapi.store.raw.data.DataFactory;
 
 import org.apache.derby.iapi.services.replication.master.MasterFactory;
+
+import org.apache.derby.impl.services.replication.ReplicationLogger;
 import org.apache.derby.impl.services.replication.net.ReplicationMessageTransmit;
 import org.apache.derby.impl.services.replication.buffer.ReplicationLogBuffer;
 import org.apache.derby.impl.services.replication.buffer.LogBufferFullException;
@@ -52,8 +58,8 @@ import java.util.Properties;
  *
  * @see MasterFactory
  */
-public class MasterController implements MasterFactory, ModuleControl,
-                                         ModuleSupportable {
+public class MasterController extends ReplicationLogger 
+        implements MasterFactory, ModuleControl, ModuleSupportable {
 
     private static final int DEFAULT_LOG_BUFFER_SIZE = 32768; //32K
 
@@ -61,14 +67,21 @@ public class MasterController implements MasterFactory, ModuleControl,
     private DataFactory dataFactory;
     private LogFactory logFactory;
     private ReplicationLogBuffer logBuffer;
-    // waiting for code to go into trunk:
-    //    private LogShipper logShipper; 
+    private AsynchronousLogShipper logShipper;
     private ReplicationMessageTransmit transmitter; 
 
     private String replicationMode;
     private String slavehost;
     private int slaveport;
+    private String dbname;
+    
+    //Set to true when stopMaster is called
+    private boolean stopMasterController = false;
 
+    //How long to wait before reporting the failure to
+    //establish a connection with the slave.
+    // TODO: make this configurable through a property
+    private static final int SLAVE_CONNECTION_ATTEMPT_TIMEOUT = 5000;
 
 
     /**
@@ -107,27 +120,8 @@ public class MasterController implements MasterFactory, ModuleControl,
             slaveport = new Integer(port).intValue();
         }
 
-        System.out.println("MasterController booted");
+        dbname = properties.getProperty(MasterFactory.MASTER_DB);
     }
-
-    private boolean setupConnection(){
-        try {
-            transmitter = new ReplicationMessageTransmit(slavehost, slaveport);
-            transmitter.initConnection();
-            return true;
-        } catch (Exception e) {
-            // printline used for debugging - will be removed
-            System.out.println("(MC) Got an exception during setupConnection:");
-            return false;
-        }
-    }
-
-    /**
-     * Will stop the replication master service
-     *
-     * Not implemented yet
-     */
-    public void stop() { }
 
     ////////////////////////////////////////////////////////////////
     // Implementation of methods from interface ModuleSupportable //
@@ -158,15 +152,20 @@ public class MasterController implements MasterFactory, ModuleControl,
             return false;
         }
     }
+    
+    /**
+     * Will stop the replication master service
+     *
+     * Not implemented yet
+     */
+    public void stop() { }
 
     ////////////////////////////////////////////////////////////
     // Implementation of methods from interface MasterFactory //
     ////////////////////////////////////////////////////////////
 
     /**
-     * Will perform all the work that is needed to set up replication
-     *
-     * Not implemented yet
+     * Will perform all the work that is needed to set up replication.
      *
      * @param rawStore The RawStoreFactory for the database
      * @param dataFac The DataFactory for this database
@@ -175,25 +174,24 @@ public class MasterController implements MasterFactory, ModuleControl,
      * thrown on replication startup error. 
      */
     public void startMaster(RawStoreFactory rawStore,
-                            DataFactory dataFac, LogFactory logFac)
-        throws StandardException{
-        // Added when Network Service has been committed to trunk:
-        // connection.connect(); // sets up a network connection to the slave
-
+                            DataFactory dataFac, LogFactory logFac) 
+                            throws StandardException {
+        stopMasterController = false;
         rawStoreFactory = rawStore;
         dataFactory = dataFac;
         logFactory = logFac;
         logBuffer = new ReplicationLogBuffer(DEFAULT_LOG_BUFFER_SIZE);
 
-        // May want to move this below connectblock later when
-        // database is not filesystem copied to slave. 
         logFactory.startReplicationMasterRole(this);
 
+        setupConnection();
+
         if (replicationMode.equals(MasterFactory.ASYNCHRONOUS_MODE)) {
-            System.out.println("MasterController would now " +
-                               "start asynchronous log shipping");
-            // Added when Master Log Shipping code has been committed to trunk:
-            // logShipper = new AsynchronousLogShipper(connection);
+            logShipper = new AsynchronousLogShipper(logBuffer,
+                                                    transmitter,
+                                                    1000,
+                                                    this);
+            ((Thread)logShipper).start();
         }
 
         // Add code that initializes replication by sending the
@@ -201,24 +199,19 @@ public class MasterController implements MasterFactory, ModuleControl,
         // the buffer etc. Repliation should be up and running when
         // this method returns.
 
-        System.out.println("MasterController started");
+        Monitor.logTextMessage(MessageId.REPLICATION_MASTER_STARTED, dbname);
     }
 
     /**
      * Will perform all work that is needed to shut down replication
-     *
-     * Not implemented yet
      */
     public void stopMaster() {
-        // logFactory.stopReplicationLogging(); // added later
-
-        // Added when Network Service has been committed to trunk:
-        // if (connection.isUp()) {
-        //     logShipper.flushAllLog();
-        // }
-
-        // logBuffer.stop();
-        System.out.println("MasterController stopped");
+        stopMasterController = true;
+        //interrupt the periodic shipper first
+        logShipper.interrupt();
+        //This would ensure that any further call to forceFlush fails.
+        logShipper.stopLogShipment();
+        Monitor.logTextMessage(MessageId.REPLICATION_MASTER_STOPPED, dbname);
     }
 
     /**
@@ -237,13 +230,13 @@ public class MasterController implements MasterFactory, ModuleControl,
         try {
             logBuffer.appendLog(greatestInstant, log, logOffset, logLength);
         } catch (LogBufferFullException lbfe) {
-            // Waiting for log shipper to implement this
-            // We have multiple alternatives: 
-            //  1) Try to force-send some log to the slave:
-            //     logShipper.forceFlush()
-            //  2) Increase the size of the buffer
-            // Stop replication if both these are unsuccessful or not
-            // an alternative. 
+            try {
+                logShipper.forceFlush();
+            } catch (IOException ioe) {
+                printStackAndStopMaster(ioe);
+            } catch (StandardException se) {
+                printStackAndStopMaster(se);
+            }
         }
     }
 
@@ -272,16 +265,72 @@ public class MasterController implements MasterFactory, ModuleControl,
      * @see LogFactory#flush
      */
     public void flushedTo(long instant) {
-        // logShipper.flushedTo(instant); 
+        logShipper.flushedInstance(instant); 
     }
     
     /**
-     * Used by the log shipper to inform the master controller about the 
-     * exception condition that caused it to terminate unexpectedly.
+     * Connects to the slave being replicated to.
+     *
+     * @throws StandardException If a failure occurs while trying to open
+     *                           the connection to the slave.
+     */
+    private void setupConnection() throws StandardException {
+        try {
+            transmitter = new ReplicationMessageTransmit(slavehost, slaveport);
+            transmitter.initConnection(SLAVE_CONNECTION_ATTEMPT_TIMEOUT);
+        } catch (SocketTimeoutException ste) {
+            throw StandardException.newException
+                    (SQLState.REPLICATION_MASTER_TIMED_OUT, dbname);
+        } catch (IOException ioe) {
+            throw StandardException.newException
+                    (SQLState.REPLICATION_CONNECTION_EXCEPTION, ioe, dbname);
+        } catch (Exception e) {
+            throw StandardException.newException
+                    (SQLState.REPLICATION_CONNECTION_EXCEPTION, e, dbname);
+        }
+    }
+    
+    /**
+     * Used to handle the exceptions (IOException and StandardException) from 
+     * the log shipper.
      *
      * @param exception the exception which caused the log shipper to terminate
      *                  in an unexcepted manner.
      */
     void handleExceptions(Exception exception) {
+        if (exception instanceof IOException) {
+            logError(MessageId.REPLICATION_LOGSHIPPER_EXCEPTION, 
+                    exception, dbname);
+            Monitor.logTextMessage(MessageId.REPLICATION_MASTER_RECONN, dbname);
+            
+            while (!stopMasterController) {
+                try {
+                    transmitter = new ReplicationMessageTransmit
+                            (slavehost, slaveport);
+                    transmitter.initConnection
+                            (SLAVE_CONNECTION_ATTEMPT_TIMEOUT);
+                    break;
+                } catch (SocketTimeoutException ste) {
+                    continue;
+                } catch (IOException ioe) {
+                    continue;
+                } catch (Exception e) {
+                    printStackAndStopMaster(e);
+                }
+            }
+        } else if (exception instanceof StandardException) {
+            printStackAndStopMaster(exception);
+        }
+    }
+    
+    /**
+     * used to print the error stack for the given exception and
+     * stop the master.
+     *
+     * @param t the throwable that needs to be handled.
+     */
+    private void printStackAndStopMaster(Throwable t) {
+        logError(MessageId.REPLICATION_LOGSHIPPER_EXCEPTION, t, dbname);
+        stopMaster();
     }
 }

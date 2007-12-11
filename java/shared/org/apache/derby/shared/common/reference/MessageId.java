@@ -179,5 +179,9 @@ public interface MessageId {
     String REPLICATION_SLAVE_STOPPED                     = "R004";
     String REPLICATION_FATAL_ERROR                       = "R005";
     String REPLICATION_SLAVE_LOST_CONN                   = "R006";
+    String REPLICATION_MASTER_STARTED                    = "R007";
+    String REPLICATION_MASTER_STOPPED                    = "R008";
+    String REPLICATION_LOGSHIPPER_EXCEPTION              = "R009";
+    String REPLICATION_MASTER_RECONN                     = "R010";
 
 }

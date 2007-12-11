@@ -21,6 +21,7 @@
 package org.apache.derby.impl.services.replication.net;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.security.AccessController;
@@ -72,6 +73,9 @@ public class ReplicationMessageTransmit {
      * comparing the UID's of the <code>ReplicationMessage</code> classes
      * of the master and the slave.
      *
+     * @param timeout the amount of time for which the connection should
+     *                block before being established.
+     *
      * @throws PrivilegedActionException if an exception occurs while trying
      *                                   to open a connection.
      *
@@ -85,7 +89,7 @@ public class ReplicationMessageTransmit {
      * @throws ClassNotFoundException Class of a serialized object cannot
      *         be found.
      */
-    public void initConnection() throws
+    public void initConnection(int timeout) throws
         PrivilegedActionException,
         IOException,
         StandardException,
@@ -93,13 +97,19 @@ public class ReplicationMessageTransmit {
         
         Socket s = null;
         
+        final int timeout_ = timeout;
+        
         //create a connection to the slave.
         s = (Socket)
         AccessController.doPrivileged(new PrivilegedExceptionAction() {
             public Object run() throws IOException {
                 SocketFactory sf = SocketFactory.getDefault();
-                return sf.createSocket(slaveAddress.getHostAddress(),
-                    slaveAddress.getPortNumber());
+                InetSocketAddress sockAddr = new InetSocketAddress(
+                        slaveAddress.getHostAddress(), 
+                        slaveAddress.getPortNumber());
+                Socket s_temp = sf.createSocket();
+                s_temp.connect(sockAddr, timeout_);
+                return s_temp;
             }
         });
         

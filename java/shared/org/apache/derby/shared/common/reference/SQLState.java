@@ -1763,5 +1763,6 @@ public interface SQLState {
     String REPLICATION_UNEXPECTED_EXCEPTION                        = "XRE03";
     String REPLICATION_CONNECTION_EXCEPTION                        = "XRE04";
     String REPLICATION_LOG_OUT_OF_SYNCH                            = "XRE05";
+    String REPLICATION_MASTER_TIMED_OUT                            = "XRE06";
 }
 
