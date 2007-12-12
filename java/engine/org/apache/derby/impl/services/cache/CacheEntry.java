@@ -39,13 +39,13 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
  *
  * <dl>
  *
- * <dt>Uninitialized</dt> <dd>The entry object has just been constructed. In
- * this state, <code>isValid()</code> and <code>isKept()</code> return
- * <code>false</code>, and <code>getCacheable()</code> returns
- * <code>null</code>. As long as the entry is in this state, the reference to
- * the object should not be made available to other threads than the one that
- * created it, since there is no way for other threads to see the difference
- * between an uninitialized entry and a removed entry.</dd>
+ * <dt>Uninitialized</dt> <dd>The entry object has just been constructed, but
+ * has not yet been initialized. In this state, <code>isValid()</code> returns
+ * <code>false</code>, whereas <code>isKept()</code> returns <code>true</code>
+ * in order to prevent removal of the entry until it has been initialized.
+ * When the entry is in this state, calls to
+ * <code>lockWhenIdentityIsSet()</code> will block until
+ * <code>settingIdentityComplete()</code> has been called.</dd>
  *
  * <dt>Unkept</dt> <dd>In this state, the entry object contains a reference to
  * a <code>Cacheable</code> and the keep count is zero. <code>isValid()</code>
@@ -94,6 +94,14 @@ final class CacheEntry {
     private Condition forRemove;
 
     /**
+     * Condition variable used to notify a thread that the setting of this
+     * entry's identity is complete. This variable is non-null when the object
+     * is created, and will be set to null when the identity has been set.
+     * @see #settingIdentityComplete()
+     */
+    private Condition settingIdentity = mutex.newCondition();
+
+    /**
      * Callback object used to notify the replacement algorithm about events on
      * the cached objects (like accesses and requests for removal).
      */
@@ -110,10 +118,36 @@ final class CacheEntry {
     }
 
     /**
+     * Block until this entry's cacheable has been initialized (that is, until
+     * <code>settingIdentityComplete()</code> has been called on this object)
+     * and the current thread is granted exclusive access to the entry.
+     */
+    void lockWhenIdentityIsSet() {
+        lock();
+        while (settingIdentity != null) {
+            settingIdentity.awaitUninterruptibly();
+        }
+    }
+
+    /**
      * Give up exclusive access.
      */
     void unlock() {
         mutex.unlock();
+    }
+
+    /**
+     * Notify this entry that the initialization of its cacheable has been
+     * completed. This method should be called after
+     * <code>Cacheable.setIdentity()</code> or
+     * <code>Cacheable.createIdentity()</code> has been called.
+     */
+    void settingIdentityComplete() {
+        if (SanityManager.DEBUG) {
+            SanityManager.ASSERT(mutex.isHeldByCurrentThread());
+        }
+        settingIdentity.signalAll();
+        settingIdentity = null;
     }
 
     /**
@@ -213,12 +247,17 @@ final class CacheEntry {
     }
 
     /**
-     * Check whether this entry holds a valid object.
+     * Check whether this entry holds a valid object. That is, it must hold
+     * a non-null <code>Cacheable</code> and have completed setting its
+     * identity.
      *
      * @return <code>true</code> if the entry holds a valid object
      */
     boolean isValid() {
-        return getCacheable() != null;
+        if (SanityManager.DEBUG) {
+            SanityManager.ASSERT(mutex.isHeldByCurrentThread());
+        }
+        return (settingIdentity == null) && (cacheable != null);
     }
 
     /**

@@ -436,18 +436,20 @@ final class ClockPolicy implements ReplacementPolicy {
                     continue;
                 }
 
+                if (e.isKept()) {
+                    // The entry is in use. Move on to the next entry.
+                    continue;
+                }
+
                 if (SanityManager.DEBUG) {
-                    // At this point the entry must be valid. Otherwise, it
-                    // would have been removed from the Holder.
+                    // At this point the entry must be valid. If it's not, it's
+                    // either removed (in which case we shouldn't get here), or
+                    // it is setting it's identity (in which case it is kept,
+                    // and we shouldn't get here).
                     SanityManager.ASSERT(e.isValid(),
                             "Holder contains invalid entry");
                     SanityManager.ASSERT(!h.isEvicted(),
                             "Trying to reuse an evicted holder");
-                }
-
-                if (e.isKept()) {
-                    // The entry is in use. Move on to the next entry.
-                    continue;
                 }
 
                 if (h.recentlyUsed) {
@@ -620,17 +622,24 @@ final class ClockPolicy implements ReplacementPolicy {
                     continue;
                 }
 
+                if (e.isKept()) {
+                    // Don't evict entries currently in use.
+                    continue;
+                }
+
                 if (SanityManager.DEBUG) {
-                    // At this point the entry must be valid. Otherwise, it
-                    // would have been removed from the Holder.
+                    // At this point the entry must be valid. If it's not, it's
+                    // either removed (in which case we shouldn't get here), or
+                    // it is setting it's identity (in which case it is kept,
+                    // and we shouldn't get here).
                     SanityManager.ASSERT(e.isValid(),
                             "Holder contains invalid entry");
                     SanityManager.ASSERT(!h.isEvicted(),
                             "Trying to evict already evicted holder");
                 }
 
-                if (e.isKept() || h.recentlyUsed) {
-                    // Don't evict entries currently in use or recently used.
+                if (h.recentlyUsed) {
+                    // Don't evict recently used entries.
                     continue;
                 }
 
