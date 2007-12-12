@@ -857,10 +857,26 @@ public class OptimizerImpl implements Optimizer
 
 					/*
 					** It's possible for newCost to go negative here due to
-					** loss of precision.
+					** loss of precision--but that should ONLY happen if the
+					** optimizable we just pulled was at position 0.  If we
+					** have a newCost that is <= 0 at any other time, then
+					** it's the result of a different kind of precision loss--
+					** namely, the estimated cost of pullMe was so large that
+					** we lost the precision of the accumulated cost as it
+					** existed prior to pullMe. Then when we subtracted
+					** pullMe's cost out, we ended up setting newCost to zero.
+					** That's an unfortunate side effect of optimizer cost
+					** estimates that grow too large. If that's what happened
+					** here,try to make some sense of things by adding up costs
+					** as they existed prior to pullMe...
 					*/
-					if (newCost < 0.0)
-						newCost = 0.0;
+					if (newCost <= 0.0)
+					{
+						if (joinPosition == 0)
+							newCost = 0.0;
+						else
+							newCost = recoverCostFromProposedJoinOrder();
+					}
 				}
 
 				/* If we are choosing a new outer table, then
@@ -932,6 +948,18 @@ public class OptimizerImpl implements Optimizer
 							prevSingleScanRowCount = localCE.singleScanRowCount();
 							prevEstimatedCost = currentSortAvoidanceCost.getEstimatedCost() -
 													ap.getCostEstimate().getEstimatedCost();
+						}
+
+						// See discussion above for "newCost"; same applies here.
+						if (prevEstimatedCost <= 0.0)
+						{
+							if (joinPosition == 0)
+								prevEstimatedCost = 0.0;
+							else
+							{
+								prevEstimatedCost =
+									recoverCostFromProposedJoinOrder();
+							}
 						}
 
 						currentSortAvoidanceCost.setCost(
@@ -1230,6 +1258,34 @@ public class OptimizerImpl implements Optimizer
 			optimizableList.getOptimizable(i).
 				updateBestPlanMap(FromTable.REMOVE_PLAN, this);
 		}
+	}
+
+	/**
+	 * Iterate through all optimizables in the current proposedJoinOrder
+	 * and find the accumulated sum of their estimated costs.  This method
+	 * is used to 'recover' cost estimate sums that have been lost due to
+	 * the addition/subtraction of the cost estimate for the Optimizable
+	 * at position "joinPosition".  Ex. If the total cost for Optimizables
+	 * at positions < joinPosition is 1500, and then the Optimizable at
+	 * joinPosition has an estimated cost of 3.14E40, adding those two
+	 * numbers effectively "loses" the 1500. When we later subtract 3.14E40
+	 * from the total cost estimate (as part of "pull" processing), we'll
+	 * end up with 0 as the result--which is wrong. This method allows us
+	 * to recover the "1500" that we lost in the process of adding and
+	 * subtracting 3.14E40.
+	 */
+	private double recoverCostFromProposedJoinOrder()
+		throws StandardException
+	{
+		double recoveredCost = 0.0d;
+		for (int i = 0; i < joinPosition; i++)
+		{
+			recoveredCost +=
+				optimizableList.getOptimizable(proposedJoinOrder[i])
+					.getBestAccessPath().getCostEstimate().getEstimatedCost();
+		}
+
+		return recoveredCost;
 	}
 
 	/*
