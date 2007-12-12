@@ -293,8 +293,10 @@ public interface BTreeLockingPolicy
      * then it will release all latches that it has acquired up to that point
      * including the latched current_leaf passed into the routine, and request 
      * the lock WAIT.  Once the lock has been granted the routine will return
-     * and it is up to the caller to research the tree to find where the 
-     * row may have ended up.
+     * and it is up to the caller to research the tree to find where the
+     * current position may have ended up.  For instance in the case of insert
+     * once the current latch is released, the correct page to do the insert
+     * may no longer be where the original scan found it.
      * <p>
      * If routine returns true, lock was granted NOWAIT, current leaf
      * remains latched, and was never unlatched.  If routine returns false,

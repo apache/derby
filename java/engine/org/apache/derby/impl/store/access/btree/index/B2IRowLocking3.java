@@ -341,6 +341,41 @@ class B2IRowLocking3 implements BTreeLockingPolicy
         return(ret_status);
     }
 
+    /**
+     * move left in btree and lock previous key.
+     * <p>
+     * Enter routine with "current_leaf" latched.  This routine implements
+     * the left travel ladder locking protocol to search the leaf pages from
+     * right to left for the previous key to 1st key on current_leaf.
+     *
+     * There are 2 cases:
+     * 1) the previous page has keys, in which case the last key on that
+     *    page is locked, other wise search continues on the next page to
+     *    the left.
+     * 2) there are no keys on the current page and there is no page to the
+     *    left.  In this case the special "leftmost key" lock is gotten by
+     *    calling lockPreviousToFirstKey().
+     *
+     * Left laddar locking is used if all latches can be obtained immediately
+     * with NOWAIT.  This means that current latch is held while asking for
+     * left latch NOWAIT, and if left latch is granted then subsequently 
+     * current latch can be released.  If this protocol is followed and 
+     * all latches are granted then caller is guaranteed that the correct
+     * previous key has been locked and current_page latch remains.  The
+     * NOWAIT protocol is used to avoid latch/latch deadlocks.  The overall
+     * protocol is that one never holds a latch while waiting on another unless
+     * the direction of travel is down and to the right.
+     * <p>
+     * If along the search a latch has to be waited on then latches are
+     * released and a wait is performed, and "false" status is returned to
+     * caller.  In this case the routine can no longer be sure of it's current
+     * position and may have to retry the whole operation.
+     *
+     * @return true if previous key found without ever waiting on a latch, 
+     *         false if latch released in order to wait for other latch.
+     *
+     * @exception  StandardException  Standard exception policy.
+     **/
     private boolean searchLeftAndLockPreviousKey(
     B2I                     b2i,
     LeafControlRow          current_leaf,
@@ -364,18 +399,18 @@ class B2IRowLocking3 implements BTreeLockingPolicy
 
             prev_leaf = 
                 (LeafControlRow) current_leaf.getLeftSibling(open_btree);
-
         }
         catch (WaitError e)
         {
+            // initial latch request on leaf left of current could not be
+            // granted NOWAIT.
+
             long previous_pageno = current_leaf.getleftSiblingPageNumber();
 
-            // error going from mainpage to first left page.  Release 
-            // current page latch and continue the search.
             current_leaf.release();
             current_leaf = null;
 
-            // wait on the left page, which we could not get before. 
+            // wait on the left leaf, which we could not be granted NOWAIT.
             prev_leaf = (LeafControlRow) 
                 ControlRow.get(open_btree, previous_pageno);
 
@@ -391,6 +426,7 @@ class B2IRowLocking3 implements BTreeLockingPolicy
 
                 if (prev_leaf.getPage().recordCount() > 1)
                 {
+
                     // lock the last row on the page, which is the previous 
                     // record to the first row on the next page.
                     
@@ -409,6 +445,9 @@ class B2IRowLocking3 implements BTreeLockingPolicy
 
                     if (!ret_status)
                     {
+                        // needed to wait on a row lock, so both prev_leaf and
+                        // current_leaf latches have been released by 
+                        // lockRowOnPage()
                         prev_leaf        = null;
                         current_leaf     = null;
                         latches_released = true;
@@ -427,6 +466,10 @@ class B2IRowLocking3 implements BTreeLockingPolicy
 
                     if (!ret_status)
                     {
+                        // needed to wait on a row lock, so both prev_leaf and
+                        // current_leaf latches have been released by 
+                        // lockPreviousToFirstKey()
+
                         prev_leaf        = null;
                         current_leaf     = null;
                         latches_released = true;
@@ -440,14 +483,14 @@ class B2IRowLocking3 implements BTreeLockingPolicy
                 // Release latches on pages between "current_leaf" and 
                 // where the search leads, so that at most 3 latched pages
                 // (current_leaf, prev_leaf, prev_prev_leaf) are held during 
-                // the search.  Do left ladder locking as you walk left, 
-                // but be ready to release l
+                // the search.  Do left ladder locking as you walk left.
 
                 prev_prev_leaf = 
                     (LeafControlRow) prev_leaf.getLeftSibling(open_btree);
                 prev_leaf.release();
                 prev_leaf = prev_prev_leaf;
                 prev_prev_leaf = null;
+
             }
             catch (WaitError e)
             {
@@ -455,8 +498,17 @@ class B2IRowLocking3 implements BTreeLockingPolicy
 
                 // error going left.  Release current page latch and 
                 // original page latch continue the search.
-                current_leaf.release();
-                current_leaf = null;
+                if (current_leaf != null)
+                {
+                    // current_leaf may have already been released as part of
+                    // previous calls, need to check null status.
+                    current_leaf.release();
+                    current_leaf = null;
+                }
+
+                // can only get here by above getLeftSibling() call so prev_leaf
+                // should always be valid and latched at this point.  No null
+                // check necessary.
                 prev_leaf.release();
                 prev_leaf = null;
 
@@ -467,11 +519,11 @@ class B2IRowLocking3 implements BTreeLockingPolicy
                 latches_released = true;
             }
         }
+
         if (prev_leaf != null)
             prev_leaf.release();
 
         return(!latches_released);
-
     }
 
     /**************************************************************************
@@ -897,7 +949,7 @@ class B2IRowLocking3 implements BTreeLockingPolicy
     /**
      * Lock the row previous to the input row.
      * <p>
-     * See BTree.lockPreviousRow() for more info.
+     * See BTreeLockingPolicy.lockNonScanPreviousRow
      *
 	 * @exception  StandardException  Standard exception policy.
      **/
