@@ -56,68 +56,17 @@ public class SystemCatalogTest extends BaseJDBCTestCase {
 	public void testNoUserDDLOnSystemTables() throws SQLException {
 	    Statement s = createStatement();
 	    
-	    try{
-	    	s.executeUpdate("drop table sys.systables");
-	    } catch (SQLException e)
-	    {
-	    	assertSQLState("X0Y56", e);
-	    }
+	    assertStatementError("X0Y56", s, "drop table sys.systables");
+	    assertStatementError("42X62", s, "drop index sys.sysaliases_index2");
+	    assertStatementError("42X62", s, "create index trash on sys.systables(tableid)");
+	    assertStatementError("42X62", s, "create table sys.usertable(c1 int)");
+	    assertStatementError("42X62", s, "create view sys.userview as select * from sys.systables");
+	    assertStatementError("42X62", s, "alter table sys.systables drop column tablename");
+	    assertStatementError("42X62", s, "alter table sys.systables add column foo int");
+	    assertStatementError("42X62", s, "alter table sys.systables alter column tablename null");
+	    assertStatementError("42X62", s, "alter table sys.systables drop primary key");
 	    
-	    try{
-	    	s.executeUpdate("drop index sys.sysaliases_index2");
-	    } catch (SQLException e)
-	    {
-	    	assertSQLState("42X62", e);
-	    }
-		
-	    try{
-	    	s.executeUpdate("create index trash on sys.systables(tableid)");
-	    } catch (SQLException e)
-	    {
-	    	assertSQLState("42X62", e);
-	    }
-	    
-	    try{
-	    	s.executeUpdate("create table sys.usertable(c1 int)");
-	    } catch (SQLException e)
-	    {
-	    	assertSQLState("42X62", e);
-	    }
-	    
-	    try{
-	    	s.executeUpdate("create view sys.userview as select * from sys.systables");
-	    } catch (SQLException e)
-	    {
-	    	assertSQLState("42X62", e);
-	    }
-	    
-	    try{
-	    	s.executeUpdate("alter table sys.systables drop column tablename");
-	    } catch (SQLException e)
-	    {
-	    	assertSQLState("42X62", e);
-	    }
-	    
-	    try{
-	    	s.executeUpdate("alter table sys.systables add column foo int");
-	    } catch (SQLException e)
-	    {
-	    	assertSQLState("42X62", e);
-	    }
-	    
-	    try{
-	    	s.executeUpdate("alter table sys.systables alter column tablename null");
-	    } catch (SQLException e)
-	    {
-	    	assertSQLState("42X62", e);
-	    }
-	    
-	    try{
-	    	s.executeUpdate("alter table sys.systables drop primary key");
-	    } catch (SQLException e)
-	    {
-	    	assertSQLState("42X62", e);
-	    }
+	    s.close();
 	}
 	
 	/**
