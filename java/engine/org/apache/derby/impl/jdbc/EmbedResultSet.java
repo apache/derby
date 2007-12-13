@@ -3642,8 +3642,6 @@ public abstract class EmbedResultSet extends ConnectionChild
                 //execute the insert
                 org.apache.derby.iapi.sql.ResultSet rs = 
                         ps.execute(act, true, 0L); 
-                rs.close();
-                rs.finish();
                 act.close();
 
                 lcc.popStatementContext(statementContext, null);
@@ -3721,8 +3719,6 @@ public abstract class EmbedResultSet extends ConnectionChild
             if (w != null) {
                 addWarning(w);
             }
-            rs.close();
-            rs.finish();
             act.close();
             //For forward only resultsets, after a update, the ResultSet will be positioned right before the next row.
             if (getType() == TYPE_FORWARD_ONLY) {
@@ -3785,8 +3781,6 @@ public abstract class EmbedResultSet extends ConnectionChild
                 if (w != null) {
                     addWarning(w);
                 }
-                rs.close();
-                rs.finish();
                 act.close();
                 //After a delete, the ResultSet will be positioned right before 
                 //the next row.

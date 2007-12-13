@@ -198,7 +198,6 @@ abstract class JoinResultSet extends NoPutResultSetImpl
 	 */
 	public void	close() throws StandardException
 	{
-		clearScanState();
 
 		if ( isOpen )
 	    {
@@ -214,6 +213,7 @@ abstract class JoinResultSet extends NoPutResultSetImpl
 			if (SanityManager.DEBUG)
 				SanityManager.DEBUG("CloseRepeatInfo","Close of JoinResultSet repeated");
 
+		clearScanState();
 	}
 
 	public void finish() throws StandardException {
