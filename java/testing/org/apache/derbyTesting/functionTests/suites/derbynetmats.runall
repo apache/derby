@@ -7,7 +7,6 @@ derbynet/sysinfo.java
 derbynet/sysinfo_withproperties.java
 derbynet/testProtocol.java
 derbynet/testProperties.java
-derbynet/testconnection.java
 derbynet/timeslice.java
 jdbcapi/metadataMultiConn.java
 lang/optimizerOverrides.sql

@@ -3,7 +3,6 @@ derbynet/getCurrentProperties.java
 derbynet/maxthreads.java
 derbynet/runtimeinfo.java
 derbynet/testProperties.java
-derbynet/testconnection.java
 derbynet/timeslice.java
 jdbcapi/metadataMultiConn.java
 lang/big.sql
