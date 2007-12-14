@@ -19,10 +19,18 @@
  */
 package org.apache.derbyTesting.junit;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+
+import junit.framework.Assert;
 
 /**
  * General non-JDBC related utilities relocated from TestUtil
@@ -141,6 +149,54 @@ public class Utilities {
                 else
                     System.out.println("};\n");
             }
+        }
+        /**
+         * Execute a java command and check for the appropriate exit code.
+         * return an InputStream 
+         * @param args
+         * @param expectedExitCode
+         * 
+         * @throws InterruptedException
+         */
+        public static InputStream execJavaCmd(String[] args, int expectedExitCode) throws IOException, InterruptedException {
+            InputStream is = null;
+            
+            int totalSize = 3 + args.length;
+            String[] cmd = new String[totalSize];
+            cmd[0] = "java";
+            cmd[1] = "-classpath";
+            cmd[2] = BaseTestCase.getSystemProperty("java.class.path");
+                    
+            System.arraycopy(args, 0, cmd, 3, args.length);
+            
+            final String[] command = cmd;
+            Process pr = null;
+            try {
+                pr = (Process) AccessController
+                    .doPrivileged(new PrivilegedExceptionAction() {
+                        public Object run() throws IOException {
+                            Process result = null;
+        
+                                result = Runtime.getRuntime().exec(command);
+        
+                            return result;
+                        }
+                    });
+            } catch (PrivilegedActionException pe) {
+                Exception e = pe.getException();
+                if (e instanceof IOException)
+                    throw (IOException) e;
+                else
+                    throw (SecurityException) e;
+            }
+            is = pr.getInputStream();
+        
+            // wait until the process exits
+            pr.waitFor();
+        
+            Assert.assertEquals(expectedExitCode,pr.exitValue());
+            
+            return is;
         }       
 
 }

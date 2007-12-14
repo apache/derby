@@ -26,11 +26,15 @@ import org.apache.derbyTesting.functionTests.tests.lang.SecurityPolicyReloadingT
 import org.apache.derbyTesting.functionTests.tests.lang.SimpleTest;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.Derby;
+import org.apache.derbyTesting.junit.NetworkServerTestSetup;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.security.AccessController;
 import java.security.Policy;
 import java.security.PrivilegedActionException;
@@ -61,7 +65,7 @@ public class NetworkServerControlApiTest extends BaseJDBCTestCase {
      */
     public void testTraceCommands() throws Exception
     {
-        NetworkServerControl nsctrl = new NetworkServerControl();
+        NetworkServerControl nsctrl = NetworkServerTestSetup.getNetworkServerControl();
         String derbySystemHome = getSystemProperty("derby.system.home");
         nsctrl.setTraceDirectory(derbySystemHome);
        
@@ -88,6 +92,60 @@ public class NetworkServerControlApiTest extends BaseJDBCTestCase {
                         
     }
 
+    /**
+     * Test NetworkServerControl ping command.
+     * @throws Exception
+     */
+    public void testPing() throws Exception
+    {
+        String currentHost = TestConfiguration.getCurrent().getHostName();
+        
+        NetworkServerControl nsctrl = NetworkServerTestSetup.getNetworkServerControl();
+        nsctrl.ping();
+        
+        // Note:Cannot test ping with unknown host because it fails in
+        // InetAddress.getByName()
+        
+        nsctrl = new NetworkServerControl(privInetAddressGetByName(currentHost), 9393);
+        try {        
+        	nsctrl.ping();
+        	fail("Should not have been able to ping on port 9393");
+        }catch (Exception e){
+        	// expected exception
+        }
+    }
+    
+        /**
+         * Wraps InitAddress.getByName in privilege block.
+         * 
+         * @param host  host to resolve
+         * @return InetAddress of host
+         * @throws UnknownHostException
+         */
+        private InetAddress privInetAddressGetByName(final String host) throws UnknownHostException
+        {
+            InetAddress inetAddr = null;
+            try {
+                inetAddr = (InetAddress) AccessController
+                    .doPrivileged(new PrivilegedExceptionAction() {
+                        public Object run() throws UnknownHostException {
+                            return InetAddress.getByName(host);
+                        }
+                    });
+            } catch (PrivilegedActionException pe) {
+                Exception e = pe.getException();
+                if (e instanceof UnknownHostException)
+                    throw (UnknownHostException) e;
+                else
+                    throw (SecurityException) e;
+            }
+        return inetAddr;
+            
+        }
+        
+        
+    
+    
     private boolean fileExists(String filename) {
         final File file = new File(filename);
         try {
