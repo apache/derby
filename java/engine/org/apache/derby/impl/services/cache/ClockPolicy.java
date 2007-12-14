@@ -84,7 +84,7 @@ final class ClockPolicy implements ReplacementPolicy {
      * cache. Accesses to <code>clock</code> and <code>hand</code> must be
      * synchronized on <code>clock</code>.
      */
-    private final ArrayList<Holder> clock = new ArrayList<Holder>();
+    private final ArrayList<Holder> clock;
 
     /** The current position of the clock hand. */
     private int hand;
@@ -107,11 +107,13 @@ final class ClockPolicy implements ReplacementPolicy {
      * Create a new <code>ClockPolicy</code> instance.
      *
      * @param cacheManager the cache manager that requests this policy
+     * @param initialSize the initial capacity of the cache
      * @param maxSize the maximum size of the cache
      */
-    ClockPolicy(ConcurrentCache cacheManager, int maxSize) {
+    ClockPolicy(ConcurrentCache cacheManager, int initialSize, int maxSize) {
         this.cacheManager = cacheManager;
         this.maxSize = maxSize;
+        clock = new ArrayList<Holder>(initialSize);
     }
 
     /**

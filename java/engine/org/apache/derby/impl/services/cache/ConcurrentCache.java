@@ -82,11 +82,13 @@ final class ConcurrentCache implements CacheManager {
      *
      * @param holderFactory factory which creates <code>Cacheable</code>s
      * @param name the name of the cache
+     * @param initialSize the initial capacity of the cache
      * @param maxSize maximum number of elements in the cache
      */
-    ConcurrentCache(CacheableFactory holderFactory, String name, int maxSize) {
-        cache = new ConcurrentHashMap<Object, CacheEntry>();
-        replacementPolicy = new ClockPolicy(this, maxSize);
+    ConcurrentCache(CacheableFactory holderFactory, String name,
+                    int initialSize, int maxSize) {
+        cache = new ConcurrentHashMap<Object, CacheEntry>(initialSize);
+        replacementPolicy = new ClockPolicy(this, initialSize, maxSize);
         this.holderFactory = holderFactory;
         this.name = name;
         this.maxSize = maxSize;

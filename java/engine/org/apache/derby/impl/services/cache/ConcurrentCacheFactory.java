@@ -35,14 +35,14 @@ public class ConcurrentCacheFactory implements CacheFactory {
      *
      * @param holderFactory factory which creates <code>Cacheable</code>s
      * @param name name of the cache
-     * @param initialSize initial size of the cache (number of objects)
+     * @param initialSize initial capacity of the cache (number of objects)
      * @param maximumSize maximum size of the cache (number of objects)
      * @return a <code>ConcurrentCache</code> instance
      */
     public CacheManager newCacheManager(CacheableFactory holderFactory,
                                         String name,
                                         int initialSize, int maximumSize) {
-        // TODO - use the initial size
-        return new ConcurrentCache(holderFactory, name, maximumSize);
+        return new ConcurrentCache(holderFactory, name,
+                                   initialSize, maximumSize);
     }
 }
