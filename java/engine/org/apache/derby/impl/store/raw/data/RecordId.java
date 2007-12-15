@@ -157,7 +157,7 @@ public final class RecordId implements RecordHandle {
 
 	/**
 		Determine if this request can be granted.
-        <p)
+        <p>
         Implements the grant/wait lock logic for row locks.  See the
         table in RowLock for more information.
 
