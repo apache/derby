@@ -875,7 +875,7 @@ public class OptimizerImpl implements Optimizer
 						if (joinPosition == 0)
 							newCost = 0.0;
 						else
-							newCost = recoverCostFromProposedJoinOrder();
+							newCost = recoverCostFromProposedJoinOrder(false);
 					}
 				}
 
@@ -958,7 +958,7 @@ public class OptimizerImpl implements Optimizer
 							else
 							{
 								prevEstimatedCost =
-									recoverCostFromProposedJoinOrder();
+									recoverCostFromProposedJoinOrder(true);
 							}
 						}
 
@@ -1274,15 +1274,26 @@ public class OptimizerImpl implements Optimizer
 	 * to recover the "1500" that we lost in the process of adding and
 	 * subtracting 3.14E40.
 	 */
-	private double recoverCostFromProposedJoinOrder()
+	private double recoverCostFromProposedJoinOrder(boolean sortAvoidance)
 		throws StandardException
 	{
 		double recoveredCost = 0.0d;
 		for (int i = 0; i < joinPosition; i++)
 		{
-			recoveredCost +=
-				optimizableList.getOptimizable(proposedJoinOrder[i])
-					.getBestAccessPath().getCostEstimate().getEstimatedCost();
+			if (sortAvoidance)
+			{
+				recoveredCost +=
+					optimizableList.getOptimizable(proposedJoinOrder[i])
+						.getBestSortAvoidancePath().getCostEstimate()
+							.getEstimatedCost();
+			}
+			else
+			{
+				recoveredCost +=
+					optimizableList.getOptimizable(proposedJoinOrder[i])
+						.getBestAccessPath().getCostEstimate()
+							.getEstimatedCost();
+			}
 		}
 
 		return recoveredCost;
