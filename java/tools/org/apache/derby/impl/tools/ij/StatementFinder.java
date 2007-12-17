@@ -36,8 +36,9 @@ import java.io.Reader;
 	are not considered to be statement terminators but to be
 	part of those tokens.
 	<p>
-	The only comment form currently recognized is the SQL comment,
-	which begins with "--" and ends at the next EOL.
+    Comments currently recognized include the SQL comment,
+    which begins with "--" and ends at the next EOL, and nested
+    bracketed comments.
 	<p>
 	Strings and delimited identifiers are permitted to contain
 	newlines; the actual IJ or JSQL parsers will report errors when
@@ -78,6 +79,8 @@ public class StatementFinder {
 	private static final char SPACE = ' ';
 	private static final char TAB = '\t';
 	private static final char FORMFEED = '\f';
+	private static final char SLASH = '/';
+	private static final char ASTERISK = '*';
 
 	/**
 		The constructor does not assume the stream is data input
@@ -181,6 +184,9 @@ public class StatementFinder {
 				case MINUS:
 					readSingleLineComment(nextChar);
 					break;
+				case SLASH:
+				    readBracketedComment();
+				    break;
 				case SINGLEQUOTE:
 				case DOUBLEQUOTE:
 					readString(nextChar);
@@ -224,6 +230,64 @@ public class StatementFinder {
 		    	c == RETURN ||
 		    	c == NEWLINE ||
 		    	c == FORMFEED);
+	}
+
+	/**
+	 	* Advance the source stream to the end of a comment
+		* if it is on one, assuming the first character of
+		* a potential bracketed comment has been found.
+		* If it is not a comment, do not advance the stream.
+	 */
+	private void readBracketedComment() {
+		char nextChar = peekChar();
+
+		// if next char is EOF, we are done.
+		if (peekEOF()) return;
+
+		// if nextChar is not an asterisk, then not a comment.
+		if (nextChar != ASTERISK)
+		{
+			continuedStatement = true;
+			return;
+		}
+
+		// we are really in a comment
+		readChar(); // grab the asterisk for real.
+
+		int nestingLevel = 1;
+
+		while (true) {
+			nextChar = readChar();
+
+			if (atEOF()) {
+				// let the caller process the EOF, don't read it
+				state = IN_STATEMENT;
+				return;
+			}
+
+			char peek = peekChar();
+
+			if (nextChar == SLASH && peek == ASTERISK) {
+				readChar();
+				nestingLevel++;
+			} else if (nextChar == ASTERISK && peek == SLASH) {
+				readChar();
+				nestingLevel--;
+				if (nestingLevel == 0) {
+					state = IN_STATEMENT;
+					return;
+				}
+			} else if (nextChar == NEWLINE || nextChar == RETURN) {
+				if (doPrompt) {
+					utilMain.doPrompt(false, promptwriter, "");
+					// If the next character is a NEWLINE, we process
+					// it as well to account for Windows CRLFs.
+					if (nextChar == RETURN && peek == NEWLINE) {
+						readChar();
+					}
+				}
+			}
+		}
 	}
 
 	/**

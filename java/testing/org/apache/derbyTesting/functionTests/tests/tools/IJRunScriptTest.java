@@ -82,6 +82,19 @@ public class IJRunScriptTest extends BaseJDBCTestCase {
     }
 
     /**
+     * Test support for nested bracketed comments.
+     * @throws SQLException
+     * @throws UnsupportedEncodingException
+     */
+    public void testBracketedComment()
+        throws SQLException, UnsupportedEncodingException
+    {
+        runTestingScript("VALUES /* comment /* nested comment */ 5; */ 1;", 0);
+        runTestingScript("/* just a comment */", 0);
+        runTestingScript("/* a /* nested */ comment */", 0);
+    }
+
+    /**
      * Test execution an empty script.
      * @throws SQLException
      * @throws UnsupportedEncodingException 

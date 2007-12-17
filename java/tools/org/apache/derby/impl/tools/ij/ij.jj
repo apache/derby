@@ -927,6 +927,11 @@ class ij {
 
 PARSER_END(ij)
 
+TOKEN_MGR_DECLS :
+{
+	int commentNestingDepth = 0;
+}
+
 /* WHITE SPACE */
 
 SKIP :
@@ -939,13 +944,44 @@ SKIP :
 | "\f"
 }
 
-// sqlgrammar only recognizes --, so that's all we will recognize as well.
 SPECIAL_TOKEN : /* COMMENTS */
 {
   <SINGLE_LINE_SQLCOMMENT: "--" (~["\n","\r"])* ("\n"|"\r"|"\r\n")>
 //| <SINGLE_LINE_COMMENT: "//" (~["\n","\r"])* ("\n"|"\r"|"\r\n")>
 //| <FORMAL_COMMENT: "/**" (~["*"])* "*" ("*" | (~["*","/"] (~["*"])* "*"))* "/">
 //| <MULTI_LINE_COMMENT: "/*" (~["*"])* "*" ("*" | (~["*","/"] (~["*"])* "*"))* "/">
+}
+
+
+MORE :
+{
+	"/*" : IN_BRACKETED_COMMENT
+}
+
+<IN_BRACKETED_COMMENT> MORE :
+{
+	"/*" { commentNestingDepth = 1; } : IN_NESTED_BRACKETED_COMMENT
+}
+
+<IN_BRACKETED_COMMENT> SKIP :
+{
+	"*/" : DEFAULT
+}
+
+<IN_NESTED_BRACKETED_COMMENT> MORE :
+{
+	"/*" { commentNestingDepth++; }
+}
+
+<IN_NESTED_BRACKETED_COMMENT> MORE :
+{
+	"*/"
+	{ commentNestingDepth--; SwitchTo(commentNestingDepth == 0 ? IN_BRACKETED_COMMENT : IN_NESTED_BRACKETED_COMMENT); }
+}
+
+<IN_BRACKETED_COMMENT,IN_NESTED_BRACKETED_COMMENT> MORE :
+{
+	< ~[] >
 }
 
 TOKEN [IGNORE_CASE] :

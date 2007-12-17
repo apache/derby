@@ -120,11 +120,15 @@ public final class CommentTest extends BaseJDBCTestCase {
             stmt.executeQuery("VALUES '/* a comment \n-- */'"),
             new String [][] {{"/* a comment \n-- */"}});
 
-        // unterminated comments
+        // unterminated comments generate lexical errors
         assertCallError("42X03", getConnection(), "VALUES 1 /*");
         assertCallError("42X03", getConnection(), "VALUES 1 /* comment");
         assertCallError("42X03", getConnection(), "VALUES 1 /* comment /*");
         assertCallError("42X03", getConnection(), "VALUES 1 /* comment /* nested */");
+
+        // just comments generates syntax error
+        assertCompileError("42X01", "/* this is a comment */");
+        assertCompileError("42X01", "-- this is a comment \n");
     }
     
     /**
