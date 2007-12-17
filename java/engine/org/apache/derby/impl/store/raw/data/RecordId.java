@@ -248,8 +248,10 @@ public final class RecordId implements RecordHandle {
 		MT - thread safe
 	*/
 	public int hashCode() {
-
-		return (int) recordId ^ pageId.hashCode();
+        int hash = 7;
+        hash = 89 * hash + pageId.hashCode();
+        hash = 89 * hash + recordId;
+        return hash;
 	}
 
     public String toString()

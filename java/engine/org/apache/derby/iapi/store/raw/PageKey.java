@@ -92,8 +92,10 @@ public final class PageKey
 
 
 	public int hashCode() {
-
-		return (int) (pageNumber ^ container.hashCode());
+        int hash = 7;
+        hash = 79 * hash + container.hashCode();
+        hash = 79 * hash + (int) (pageNumber ^ (pageNumber >>> 32));
+        return hash;
 	}
 
 	public String toString() {
