@@ -1281,7 +1281,7 @@ public class EmbedStatement extends ConnectionChild
                                                   a.getMaxDynamicResults());
 					}
                     
-                    resultsToWrap.finish(); // Don't need the result set any more
+                    resultsToWrap.close(); // Don't need the result set any more
 
                     // executeQuery() is not allowed if the statement
                     // doesn't return exactly one ResultSet.
