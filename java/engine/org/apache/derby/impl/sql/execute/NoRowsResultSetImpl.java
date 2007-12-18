@@ -347,32 +347,12 @@ abstract class NoRowsResultSetImpl implements ResultSet
 	}
 
 	/**
-     * No rows to return, does nothing
+     * Dump the stat if not already done so. Close all of the open subqueries.
 	 *
 	 * @exception StandardException thrown on error
 	 */
 	public void	close() throws StandardException
 	{ 
-		isOpen = false;
-	}
-
-	/**
-	 * Find out if the <code>ResultSet</code> is closed.
-	 *
-	 * @return <code>true</code> if closed, <code>false</code> otherwise
-	 */
-	public boolean isClosed() {
-		return !isOpen;
-	}
-
-	/**
-	 *	doesn't need to do anything, as no calls
-	 *	are made that need to be restricted once
-	 *	the result set is 'finished'.
-	 *
-	 * @exception StandardException on error
-	 */
-	public void finish() throws StandardException {
 		if (! dumpedStats)
 		{
 			/*
@@ -429,6 +409,20 @@ abstract class NoRowsResultSetImpl implements ResultSet
 			}
 			subqueryTrackingArray[index].close();
 		}
+		isOpen = false;
+	}
+
+	/**
+	 * Find out if the <code>ResultSet</code> is closed.
+	 *
+	 * @return <code>true</code> if closed, <code>false</code> otherwise
+	 */
+	public boolean isClosed() {
+		return !isOpen;
+	}
+
+	public void	finish() throws StandardException
+	{
 	}
 
 	/**

@@ -1242,7 +1242,7 @@ public class EmbedStatement extends ConnectionChild
 
 					updateCount = resultsToWrap.modifiedRowCount();
 
-					resultsToWrap.finish();	// Don't need the result set any more
+					resultsToWrap.close();	// Don't need the result set any more
 					results = null; // note that we have none.
 
                     int dynamicResultCount = 0;
