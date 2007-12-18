@@ -167,7 +167,7 @@
     <delete file="${out.dir}/org/apache/derby/info/dnc.properties"/>
   </target>
 
-  <target name="setCompilerProperties" if="autosetProps"
+  <target name="setCompilerProperties" unless="dontAutosetProps"
           description="Set the ant variables which identify the compiler classpaths. Remove the autosetProps logic when this target becomes mandatory."
           depends="prebuild">
 
@@ -193,7 +193,7 @@
 
   </target>
 
-  <target name="setInitialProperties" unless="autosetProps"
+  <target name="setInitialProperties" if="dontAutosetProps"
           description="Set the initial properties for this build script. This duplicates the property setting block in setCompilerProperties. Once we make setCompilerProperties mandatory, this target should be removed."
           >
 
