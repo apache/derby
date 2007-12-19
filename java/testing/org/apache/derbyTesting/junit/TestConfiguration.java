@@ -330,14 +330,14 @@ public class TestConfiguration {
     /**
      * Create a suite for the passed test class that includes
      * all the default fixtures from the class, wrapped in
-     * a derbyClientServerDecorator with a given port.
+     * a derbyClientServerDecorator with alternative port.
      * 
      */
-    public static Test clientServerSuite(Class testClass, int port)
-    {           
-        TestSuite suite = new TestSuite(testClass,
-                suiteName(testClass)+":client");
-        return clientServerDecorator(suite,port);
+
+    public static Test clientServerSuiteWithAlternativePort(Class testClass) {
+        TestSuite suite = new TestSuite(testClass, suiteName(testClass)
+                + ":client");
+        return clientServerDecoratorWithAlternativePort(suite);
     }
 
     /**
@@ -371,13 +371,12 @@ public class TestConfiguration {
         return defaultServerDecorator(test);
     }
     /**
-     * Wrapper ot use the given port number.
+     * Wrapper to use the alternative port number.
      */
-    public static Test clientServerDecorator(Test suite,int port)
-    {
+    public static Test clientServerDecoratorWithAlternativePort(Test suite) {
         Test test = new NetworkServerTestSetup(suite, false);
-            
-        return defaultServerDecorator(test,port);
+
+        return defaultServerDecoratorWithAlternativePort(test);
     }
     /**
      * Decorate a test to use suite's default host and port, 
@@ -421,15 +420,15 @@ public class TestConfiguration {
         return new ServerSetup(test, DEFAULT_HOSTNAME, DEFAULT_PORT);
     }
     /**
-     * Decorate a test to use suite's default host and given port.
+     * Decorate a test to use suite's default host and Alternative port.
      */
-    public static Test defaultServerDecorator(Test test, int port)
-    {
+    public static Test defaultServerDecoratorWithAlternativePort(Test test) {
         // Need to have network server and client and not
         // running in J2ME (JSR169).
         if (!(Derby.hasClient() && Derby.hasServer())
                 || JDBC.vmSupportsJSR169())
             return new TestSuite("empty: no network server support");
+        int port = getCurrent().getAlternativePort();
 
         //
         // This looks bogus to me. Shouldn't this get the hostname and port
@@ -1128,6 +1127,20 @@ public class TestConfiguration {
      */
     public int getPort() {
         return port;
+    }
+    /**
+     * Get an alternative port number for network server.
+     *
+     * @return port number.
+     */
+
+    public int getAlternativePort() {
+        int possiblePort = getPort();
+        if (!(possiblePort > 0))
+            possiblePort = 1528;
+        else
+            possiblePort = getPort() + 1;
+        return possiblePort;
     }
 
     /**

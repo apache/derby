@@ -1,6 +1,6 @@
 /*
 
- Derby - Class org.apache.derbyTesting.functionTests.tests.derbynet.DRDAProtocolTest
+ Derby - Class org.apache.derbyTesting.functionTests.tests.derbynet.NSinSameJVMTest
 
  Licensed to the Apache Software Foundation (ASF) under one or more
  contributor license agreements.  See the NOTICE file distributed with
@@ -20,7 +20,6 @@
  */
 package org.apache.derbyTesting.functionTests.tests.derbynet;
 
-import java.net.InetAddress;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
@@ -29,44 +28,40 @@ import org.apache.derby.drda.NetworkServerControl;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.TestConfiguration;
+import org.apache.derbyTesting.junit.NetworkServerTestSetup;
 
 public class NSinSameJVMTest extends BaseJDBCTestCase {
-	public NSinSameJVMTest(String name) {
-		super(name);
-	}
+    public NSinSameJVMTest(String name) {
+        super(name);
+    }
 
-	protected void tearDown() throws Exception {
-		super.tearDown();
-	}
-	/** Test NetworkServer start and shutdown on a different port 
-	 * other than 1527 in the same jvm
-	 * @throws Exception
-	 **/
-	public void testShutdown() throws Exception {
-		final int NETWORKSERVER_PORT = 20000; //port to start the server
-		NetworkServerControl serverControl = null;
-		try {
-			serverControl = new NetworkServerControl(InetAddress
-					.getByName("localhost"), NETWORKSERVER_PORT);//initialized for the shutdown.
-			Connection connection = null;
-			// Just connect, do something and close the connection
-			connection = getConnection();
-			Statement stmt = connection.createStatement();
-			ResultSet rs = stmt.executeQuery("Select  tablename   from  sys.systables");	
-			JDBC.assertDrainResults(rs);
-			serverControl.shutdown();
-			Thread.sleep(5000);
-		} catch (Exception e) {
-			System.out.print("FAIL: Unexpected exception" + e.getMessage());
-			e.printStackTrace();
-		}
-	}
-	 /**
-     * Construct the name of the server policy file.
+    protected void tearDown() throws Exception {
+        super.tearDown();
+    }
+
+    /**
+     * Test NetworkServer start and shutdown on a different port other than 1527
+     * in the same jvm
+     *
+     * @throws Exception
      */
-	public static Test suite() {
+    public void testShutdown() throws Exception {
+        NetworkServerControl serverControl= NetworkServerTestSetup.getNetworkServerControl();
+        Connection connection = null;
+        // Just connect, do something
+        connection = getConnection();
+        Statement stmt = connection.createStatement();
+        ResultSet rs = stmt
+        .executeQuery("Select  tablename   from  sys.systables");
+        JDBC.assertDrainResults(rs);
+        // Leave the connection open before shutdown
+        serverControl.shutdown();
+    }
+
+    public static Test suite() {
         Test test;
-        test = TestConfiguration.clientServerSuite(NSinSameJVMTest.class,20000);
+        test = TestConfiguration
+        .clientServerSuiteWithAlternativePort(NSinSameJVMTest.class);
         return test;
     }
 }
