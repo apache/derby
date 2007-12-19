@@ -117,6 +117,9 @@ public interface MasterFactory {
 
     /**
      * Will perform all work that is needed to shut down replication
+     *
+     * @throws StandardException Standard Derby exception policy,
+     *                           thrown on replication stop failure.
      */
     public void stopMaster();
 

@@ -37,6 +37,7 @@ import org.apache.derby.iapi.store.raw.data.DataFactory;
 
 import org.apache.derby.iapi.services.replication.master.MasterFactory;
 
+import org.apache.derby.impl.services.replication.net.ReplicationMessage;
 import org.apache.derby.impl.services.replication.ReplicationLogger;
 import org.apache.derby.impl.services.replication.net.ReplicationMessageTransmit;
 import org.apache.derby.impl.services.replication.buffer.ReplicationLogBuffer;
@@ -207,10 +208,19 @@ public class MasterController extends ReplicationLogger
      */
     public void stopMaster() {
         stopMasterController = true;
-        //interrupt the periodic shipper first
-        logShipper.interrupt();
-        //This would ensure that any further call to forceFlush fails.
-        logShipper.stopLogShipment();
+        logFactory.stopReplicationMasterRole();
+        try {
+            logShipper.flushBuffer();
+
+            ReplicationMessage mesg = new ReplicationMessage(
+                        ReplicationMessage.TYPE_STOP, null);
+
+            transmitter.sendMessage(mesg);
+        } catch (IOException ioe) {
+            logError(MessageId.REPLICATION_LOGSHIPPER_EXCEPTION, ioe, dbname);
+        } catch(StandardException se) {
+            logError(MessageId.REPLICATION_LOGSHIPPER_EXCEPTION, se, dbname);
+        }
         Monitor.logTextMessage(MessageId.REPLICATION_MASTER_STOPPED, dbname);
     }
 

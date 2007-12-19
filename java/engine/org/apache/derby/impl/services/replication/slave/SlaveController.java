@@ -406,6 +406,9 @@ public class SlaveController extends ReplicationLogger
                         byte[] logChunk = (byte[])message.getMessage();
                         handleLogChunk(logChunk);
                         break;
+                    case ReplicationMessage.TYPE_STOP:
+                        stopSlave();
+                        break;
                     default:
                         // debug; will be removed
                         System.out.println("Not handling non-log messages yet "

@@ -57,4 +57,17 @@ interface LogShipper {
      *                           log records from the log buffer.
      */
     public void forceFlush() throws IOException, StandardException;
+    
+    /**
+     *
+     * Transmits all the log records in the log buffer to the slave.
+     *
+     * @throws IOException If an exception occurs while trying to ship the
+     *                     replication message (containing the log records)
+     *                     across the network.
+     * @throws StandardException If an exception occurs while trying to read
+     *                           log records from the log buffer.
+     *
+     */
+    public void flushBuffer() throws IOException, StandardException;
 }

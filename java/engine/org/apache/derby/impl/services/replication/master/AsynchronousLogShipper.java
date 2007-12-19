@@ -152,8 +152,11 @@ public class AsynchronousLogShipper extends Thread implements
      *                     across the network.
      * @throws StandardException If an exception occurs while trying to read
      *                           log records from the log buffer.
+     * 
+     * @return true if a chunk of log records was shipped.
+     *         false if no log records were shipped because log buffer is empty.
      */
-    private synchronized void shipALogChunk()
+    private synchronized boolean shipALogChunk()
     throws IOException, StandardException {
         byte [] logRecords = null;
         ReplicationMessage mesg = null;
@@ -175,7 +178,8 @@ public class AsynchronousLogShipper extends Thread implements
                     ReplicationMessage.TYPE_LOG, logRecords);
                 
                 transmitter.sendMessage(mesg);
-            }
+                return true;
+            } 
         } catch (NoSuchElementException nse) {
             //Although next() returns true a request for data on the buffer
             //fails implying that there has been a fatal exception in the
@@ -188,6 +192,21 @@ public class AsynchronousLogShipper extends Thread implements
             failedChunk = (mesg==null) ? failedChunk : mesg;
             throw ioe;
         }
+        return false;
+    }
+    
+    /**
+     *
+     * Transmits all the log records in the log buffer to the slave.
+     *
+     * @throws IOException If an exception occurs while trying to ship the
+     *                     replication message (containing the log records)
+     *                     across the network.
+     * @throws StandardException If an exception occurs while trying to read
+     *                           log records from the log buffer.
+     */
+    public void flushBuffer() throws IOException, StandardException {
+        while (shipALogChunk());
     }
     
     /**
