@@ -212,11 +212,10 @@ public class InListMultiProbeTest extends BaseJDBCTestCase {
     }
 
     /**
-     * The one test fixture for this test.  Executes three different types
-     * of queries ("strategies") repeatedly with an increasing number of
-     * values in the IN list.  Underneath we will check the query plan
-     * for each query to make sure that Derby is doing multi-probing as
-     * expected.
+     * Executes three different types of queries ("strategies") repeatedly
+     * with an increasing number of values in the IN list.  Underneath we
+     * will check the query plan for each query to make sure that Derby is
+     * doing multi-probing as expected.
      */
     public void testMultiProbing() throws Exception
     {
@@ -495,6 +494,54 @@ public class InListMultiProbeTest extends BaseJDBCTestCase {
         st.execute("drop table mytable");
 
         ps.close();
+        st.close();
+    }
+
+    /**
+     * Test the scenario in which Derby creates an IN-list probe
+     * predicate, remaps its left operand to point to a nested
+     * SELECT query, and then decides to *not* use the probe
+     * predicate in the final plan.  The remapping of the left
+     * operand will cause the probe predicate's left operand to
+     * be set to a different ColumnReference object--one that
+     * points to the target table in the subselect.  Then when
+     * the optimizer decides to *not* use the probe predicate
+     * in the final query, we'll revert back to the original IN
+     * list (InListOperatorNode) and generate that for the query.
+     * When we do so, the left operand of the InListOperatorNode
+     * must reflect the fact that the IN operation's left operand
+     * has changed (it now points to the table from the subselect).
+     * Otherwise the InListOperatorNode will generate an invalid
+     * ColumnReference.  DERBY-3253.
+     */
+    public void testProbePredPushedIntoSelectThenReverted()
+        throws Exception
+    {
+        Statement st = createStatement();
+
+        st.execute("create table d3253 (i int, vc varchar(10))");
+        st.execute("insert into d3253 values " +
+            "(1, 'one'), (2, 'two'), (3, 'three'), (1, 'un')");
+
+        /* Before DERBY-3253 was fixed, this query would have thrown
+         * an execution time NPE due to the fact the generated column
+         * reference was pointing to the wrong place.
+         */
+        JDBC.assertUnorderedResultSet(st.executeQuery(
+            "select x.* from d3253, (select * from d3253) x " +
+            "where d3253.i = x.i and x.vc in ('un', 'trois')"),
+            new String [][] {{"1","un"},{"1","un"}});
+
+        JDBC.assertUnorderedResultSet(st.executeQuery(
+            "select x.* from d3253, (select * from d3253) x " +
+            "where d3253.i = x.i and x.i in (2, 3)"),
+            new String [][] {{"2","two"},{"3","three"}});
+
+        JDBC.assertEmpty(st.executeQuery(
+            "select x.* from d3253, (select * from d3253) x " +
+            "where d3253.i = x.i and x.vc in ('uno', 'tres')"));
+
+        st.execute("drop table d3253");
         st.close();
     }
 

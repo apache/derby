@@ -80,9 +80,12 @@ public class BinaryRelationalOperatorNode
 	 * this BinRelOp is for an IN-list probe predicate; 2) if the
 	 * optimizer chooses a plan for which the probe predicate is
 	 * not usable as a start/stop key then we'll "revert" the pred
-	 * back to the InListOperatorNode referenced here.
+	 * back to the InListOperatorNode referenced here.  NOTE: Once
+	 * set, this variable should *only* ever be accessed via the
+	 * isInListProbeNode() or getInListOp() methods--see comments
+	 * in the latter method for more.
 	 */
-	InListOperatorNode inListProbeSource = null;
+	private InListOperatorNode inListProbeSource = null;
 
 	public void init(Object leftOperand, Object rightOperand)
 	{
@@ -153,10 +156,46 @@ public class BinaryRelationalOperatorNode
 	 * If this rel op was created for an IN-list probe predicate then return
 	 * the underlying InListOperatorNode.  Will return null if this rel
 	 * op is a "legitimate" relational operator (as opposed to a disguised
-	 * IN-list).
+	 * IN-list).  With the exception of nullability checking via the
+	 * isInListProbeNode() method, all access to this.inListProbeSource
+	 * MUST come through this method, as this method ensures that the
+	 * left operand of the inListProbeSource is set correctly before
+	 * returning it.
 	 */
 	protected InListOperatorNode getInListOp()
 	{
+		if (inListProbeSource != null)
+		{
+			/* Depending on where this probe predicate currently sits
+			 * in the query tree, this.leftOperand *may* have been
+			 * transformed, replaced, or remapped one or more times
+			 * since inListProbeSource was last referenced. Since the
+			 * leftOperand of the IN list should be the same regardless
+			 * of which "version" of the operation we're looking at
+			 * (i.e. the "probe predicate" version (this node) vs the
+			 * original version (inListProbeSource)), we have to make
+			 * sure that all of the changes made to this.leftOperand
+			 * are reflected in inListProbeSource's leftOperand, as
+			 * well.  In doing so we ensure the caller of this method
+			 * will see an up-to-date version of the InListOperatorNode--
+			 * and thus, if the caller references the InListOperatorNode's
+			 * leftOperand, it will see the correct information. One
+			 * notable example of this is at code generation time, where
+			 * if this probe predicate is deemed "not useful", we'll
+			 * generate the underlying InListOperatorNode instead of
+			 * "this".  For that to work correctly, the InListOperatorNode
+			 * must have the correct leftOperand. DERBY-3253.
+			 *
+			 * That said, since this.leftOperand will always be "up-to-
+			 * date" w.r.t. the current query tree (because this probe
+			 * predicate sits in the query tree and so all relevant
+			 * transformations will be applied here), the simplest way
+			 * to ensure the underlying InListOperatorNode also has an
+			 * up-to-date leftOperand is to set it to this.leftOperand.
+			 */
+			inListProbeSource.setLeftOperand(this.leftOperand);
+		}
+
 		return inListProbeSource;
 	}
 
@@ -777,7 +816,7 @@ public class BinaryRelationalOperatorNode
 		 * the IN-list).  That would lead to wrong results (missing rows)
 		 * because that restriction is incorrect.
 		 */
-		if (inListProbeSource != null)
+		if (isInListProbeNode())
 			return false;
 
 		FromTable	ft;
@@ -1215,7 +1254,7 @@ public class BinaryRelationalOperatorNode
 		 * it a "relational operator"; it's actually a disguised IN-list
 		 * operator.
 		 */
-		return (inListProbeSource == null);
+		return !isInListProbeNode();
 	}
 	
 	/** @see ValueNode#isBinaryEqualsOperatorNode */
@@ -1225,11 +1264,18 @@ public class BinaryRelationalOperatorNode
 		 * it as an "equals operator"; it's actually a disguised IN-list
 		 * operator.
 		 */
-		return (inListProbeSource == null) &&
+		return !isInListProbeNode() &&
 			(operatorType == RelationalOperator.EQUALS_RELOP);
 	}
 
-	/** @see ValueNode#isInListProbeNode */
+	/**
+	 * @see ValueNode#isInListProbeNode
+	 *
+	 * It's okay for this method to reference inListProbeSource directly
+	 * because it does not rely on the contents of inListProbeSource's
+	 * leftOperand, and a caller of this method cannot gain access to
+	 * inListProbeSource's leftOperand through this method.
+	 */
 	public boolean isInListProbeNode()
 	{
 		return (inListProbeSource != null);
@@ -1247,7 +1293,7 @@ public class BinaryRelationalOperatorNode
 		/* If this rel op is for a probe predicate then we do not treat
 		 * it as an equality node; it's actually a disguised IN-list node.
 		 */
-		if (inListProbeSource != null)
+		if (isInListProbeNode())
 			return false;
 
 		ColumnReference cr = getColumnOperand(optTable,
