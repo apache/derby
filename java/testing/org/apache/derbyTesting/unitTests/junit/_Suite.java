@@ -48,6 +48,7 @@ public class _Suite extends BaseTestCase  {
 
         suite.addTest(FormatableBitSetTest.suite());
         //suite.addTest(SystemPrivilegesPermissionTest.suite());
+        suite.addTest(UTF8UtilTest.suite());
 
         return suite;
     }

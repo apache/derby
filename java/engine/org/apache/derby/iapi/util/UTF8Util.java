@@ -40,11 +40,6 @@ import java.io.UTFDataFormatException;
 //@ThreadSafe
 public final class UTF8Util {
 
-    /** Constant used to look up character count in an array. */
-    private static final int CHAR_COUNT = 0;
-    /** Constant used to look up byte count in an array. */
-    private static final int BYTE_COUNT = 1;
-
     /** This class cannot be instantiated. */
     private UTF8Util() {}
 
@@ -61,7 +56,7 @@ public final class UTF8Util {
         // No need to do the skip in a loop, as Reader.read() returning -1
         // means EOF has been reached.
         // Note that a loop should be used if skip is used instead of read.
-        return internalSkip(in, Long.MAX_VALUE)[CHAR_COUNT];
+        return internalSkip(in, Long.MAX_VALUE).charsSkipped();
     }
 
     /**
@@ -77,13 +72,13 @@ public final class UTF8Util {
      */
     public static final long skipFully(InputStream in, long charsToSkip)
             throws EOFException, IOException {
-        long[] counts = internalSkip(in, charsToSkip);
-        if (counts[CHAR_COUNT] != charsToSkip) {
+        SkipCount skipped = internalSkip(in, charsToSkip);
+        if (skipped.charsSkipped() != charsToSkip) {
             throw new EOFException("Reached end-of-stream prematurely at " +
-                "character/byte position " + counts[CHAR_COUNT] + "/" +
-                counts[BYTE_COUNT] + ", trying to skip " + charsToSkip);
+                "character/byte position " + skipped.charsSkipped() + "/" +
+                skipped.bytesSkipped() + ", trying to skip " + charsToSkip);
         }
-        return counts[BYTE_COUNT];
+        return skipped.bytesSkipped();
     }
 
     /**
@@ -105,8 +100,8 @@ public final class UTF8Util {
      * @throws IOException if reading from the stream fails
      * @throws UTFDataFormatException if an invalid UTF-8 encoding is detected
      */
-    private static final long[] internalSkip(final InputStream in,
-                                             final long charsToSkip)
+    private static final SkipCount internalSkip(final InputStream in,
+                                                final long charsToSkip)
             throws IOException {
         long charsSkipped = 0;
         long bytesSkipped = 0;
@@ -166,7 +161,7 @@ public final class UTF8Util {
         }
         // We don't close the stream, since it might be reused. One example of
         // this is use of Resetable streams.
-        return new long[] {charsSkipped, bytesSkipped};
+        return new SkipCount(charsSkipped, bytesSkipped);
     }
 
     /**
@@ -198,5 +193,46 @@ public final class UTF8Util {
             skipped += skippedNow;
         }
         return skipped;
+    }
+
+    /**
+     * Helper class to hold skip counts; one for chars and one for bytes.
+     */
+    // @Immutable
+    private static final class SkipCount {
+        /** Number of bytes skipped. */
+        private final long byteCount;
+        /** Number of characters skipped. */
+        private final long charCount; 
+
+        /**
+         * Creates a holder for the specified skip counts.
+         * 
+         * @param byteCount number of bytes
+         * @param charCount number of characters
+         */
+        SkipCount(long charCount, long byteCount) {
+            if (byteCount < 0 || charCount < 0) {
+                // Don't allow negative counts.
+                throw new IllegalArgumentException("charCount/byteCount " +
+                        "cannot be negative: " + charCount + "/" + byteCount);
+            }
+            if (byteCount < charCount) {
+                // A char must always be represented by at least one byte.
+                throw new IllegalArgumentException("Number of bytes cannot be" +
+                        "less than number of chars: " + byteCount + " < " +
+                        charCount);
+            }
+            this.byteCount = byteCount;
+            this.charCount = charCount;
+        }
+
+        long charsSkipped() {
+            return this.charCount;
+        }
+
+        long bytesSkipped() {
+            return this.byteCount;
+        }
     }
 } // End class UTF8Util
