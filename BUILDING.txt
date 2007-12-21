@@ -43,8 +43,6 @@ Contents
 4.2   Derby source code upgrade
 4.3   Derby build flow
 
-5     MacOS X Requirements
-
 ---------------------------------------------------------------
 1     About this document
 
@@ -271,7 +269,43 @@ ${derby.source}/tools/java/xml-apis.jar
 
 3.2   Create property file
 
-You will need to create a property file to specify
+On many platforms, you can skip this section if you are happy with the
+defaults which the Derby build provides. However, please consult this
+section if the Derby build fails on your platform or if you want to
+override the build defaults. By editting the ant environment file
+(called ant.properties and located in your home directory), you can
+override the following defaults:
+
+- The location of the compiler libraries for jdk 1.4 and Java 5.
+   Some effort has been put into figuring out where these libraries
+   live, based on the platform you are using and the vendor who
+   supplied your VM. The following combinations of VMs and
+   operating systems should work out-of-the-box:
+
+   * Apple JDKs on Mac OS X
+   * Sun and IBM JDKs on  Linux
+   * Sun and IBM JDKs on Windows/Cygwin
+   * Sun JDKs on Solaris
+
+- The location of the Java 6 environment needed to build the
+   optional JDBC4 support.
+
+- The compiler to be used.
+
+- Whether the build should continue after stumbling over an error.
+
+- Whether to omit debug information from compiled classes.
+
+- The location of the small device libraries needed to build the
+  optional JSR169 support.
+
+- The location of old versions of Derby needed to run the upgrade
+   tests.
+
+If you are happy with the defaults, you can skip this section and
+proceed to section 3.3.
+
+Otherwise, you will need to create a property file to specify
 your environment and some of your options. Do the following
 to specify your environment and options:
 
@@ -309,8 +343,6 @@ to specify your environment and options:
     directory and define the following variables in 
     "ant.properties".
 
-    NOTE TO MAC OS X USERS: See section 5.
- 
     NOTE TO CYGWIN USERS: Put this in your *Windows* home directory,
     not your Cygwin home directory.
 
@@ -677,41 +709,3 @@ message files are copied into the output directory and the
 version information properties files are generated.
 
 
----------------------------------------------------------------
-5   Mac OS X Requirements
-
-With Mac OS X, Java is now distributed as core technology, so no 
-downloads are needed except to upgrade to the latest release. Starting
-with Mac OS X 10.4 both JDK 1.5 and JDK 1.4 are included. Derby can
-be compiled with Ant using either the JDK 1.5 or JDK 1.4 included with 
-Mac OS X.
-
-
-5.1   Mac OS X ant.properties
-
-For MacOS X, ant.properties is different from other environments,
-and should contain the following. Note that for readability, multiple
-jar files are shown as part of the classpath values, but they need
-to be entered on a single line in the properties file.
-
-j14lib=/System/Library/Frameworks/JavaVM.framework/Versions/1.4.2/Classes
-javatools.dir=${basedir}/tools/java
-
-java14compile.classpath=
-${j14lib}/classes.jar:
-${j14lib}/ui.jar:
-${j14lib}/laf.jar:
-${j14lib}/sunrsasign.jar:
-${j14lib}/jsse.jar:
-${j14lib}/jce.jar:
-${j14lib}/charsets.jar
-
-compile.classpath=${java14compile.classpath}
-javadoc.tool.jdk14=${java.home}/bin/javadoc
-
-<NOTE> If you get an error saying "unable to find java.lang
-in classpath or bootclasspath", you might want to try this alternate
-setting for java14compile.classpath:
-
-java14compile.classpath=${j14lib}/classes.jar;${j14lib}/ui.jar;${j14lib}/laf.jar;${j14lib}/sunrsasign.jar;${j14lib}/jsse.jar;${j14lib}/jce.jar;${j14lib}/charsets.jar
-</NOTE>
