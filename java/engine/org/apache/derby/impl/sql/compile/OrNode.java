@@ -152,7 +152,7 @@ public class OrNode extends BinaryLogicalOperatorNode
 						if (left instanceof BinaryRelationalOperatorNode)
 						{
  							bron = (BinaryRelationalOperatorNode)left;
-							if (bron.getInListOp() == null)
+							if (!bron.isInListProbeNode())
 							{
 								SanityManager.THROWASSERT(
 								"isRelationalOperator() unexpectedly returned "
@@ -223,7 +223,7 @@ public class OrNode extends BinaryLogicalOperatorNode
 					OrNode on = (OrNode) vn;
 					BinaryRelationalOperatorNode bron =
 						(BinaryRelationalOperatorNode) on.getLeftOperand();
-					if (bron.getInListOp() != null)
+					if (bron.isInListProbeNode())
 					{
 						/* If we have an OR between multiple IN-lists on the same
 						 * column then just combine them into a single IN-list.
