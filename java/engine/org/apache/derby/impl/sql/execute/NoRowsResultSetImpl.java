@@ -330,6 +330,9 @@ abstract class NoRowsResultSetImpl implements ResultSet
 	 */
 	public void	close() throws StandardException
 	{ 
+		if (!isOpen)
+			return;
+
 		if (! dumpedStats)
 		{
 			/*
@@ -386,7 +389,11 @@ abstract class NoRowsResultSetImpl implements ResultSet
 			}
 			subqueryTrackingArray[index].close();
 		}
+
 		isOpen = false;
+
+		if (activation.isSingleExecution())
+			activation.close();
 	}
 
 	/**

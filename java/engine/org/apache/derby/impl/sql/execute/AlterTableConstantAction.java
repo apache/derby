@@ -2239,7 +2239,6 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
         // timeout to its parent statement's timeout settings.
 		ResultSet rs = ps.execute(lcc, true, 0L);
 		rs.close();
-		rs.finish();
 	}
 
 	/**
