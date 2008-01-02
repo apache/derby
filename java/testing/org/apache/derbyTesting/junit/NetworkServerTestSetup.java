@@ -184,22 +184,21 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
 
     private Process startSeparateProcess() throws Exception
     {
-        StringBuffer    buffer = new StringBuffer();
+        ArrayList       al = new ArrayList();
         String              classpath = BaseTestCase.getSystemProperty( "java.class.path" );
         boolean         skipHostName = false;
 
-        buffer.append( "java -classpath " );
-        buffer.append( classpath );
-        buffer.append( " " );
+        al.add( "java" );
+        al.add( "-classpath" );
+        al.add( classpath );
 
         int         count = systemProperties.length;
         for ( int i = 0; i < count; i++ )
         {
-            buffer.append( " -D" );
-            buffer.append( systemProperties[ i ] );
+            al.add( "-D" + systemProperties[ i ] );
         }
 
-        buffer.append( " org.apache.derby.drda.NetworkServerControl " );
+        al.add( "org.apache.derby.drda.NetworkServerControl" );
 
         count = startupArgs.length;
         for ( int i = 0; i < count; i++ )
@@ -214,20 +213,24 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
         count = defaultArgs.length;
         for ( int i = 0; i < count; i++ )
         {
-            buffer.append( " " );
-            buffer.append( defaultArgs[ i ] );
+            al.add( defaultArgs[ i ] );
         }
 
         count = startupArgs.length;
         for ( int i = 0; i < count; i++ )
         {
-            buffer.append( " " );
-            buffer.append( startupArgs[ i ] );
+            al.add( startupArgs[ i ] );
         }
 
-        final   String  command = buffer.toString();
+        final   String[]  command = new String[ al.size() ];
+        al.toArray(command);
 
-        //System.out.println( "XXX server startup command = " + command );
+        /* System.out.println( "XXX server startup command = ");
+        for (int i = 0 ; i < command.length ; i++) {
+            System.out.print( command[i] + " " );
+        }
+        System.out.println();
+        */
 
         Process     serverProcess = (Process) AccessController.doPrivileged
             (
