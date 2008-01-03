@@ -762,17 +762,17 @@ public	class DD_Version implements	Formatable
 		{
 			// SYSSTATEMENTS table ==> SYSSTATEMENTS_COMPILATION_SCHEMAID needs 
 			// to be modified.
-			bootingDictionary.upgrade_setNullability(rowFactory,
+			bootingDictionary.upgradeFixSystemColumnDefinition(rowFactory,
 				SYSSTATEMENTSRowFactory.SYSSTATEMENTS_COMPILATION_SCHEMAID, 
-				true, tc);
+				tc);
 		}
 		else if (catalogNum == DataDictionaryImpl.SYSVIEWS_CATALOG_NUM)
 		{
 			// SYSVIEWS table ==> SYSVIEWS_COMPILATION_SCHEMAID needs 
 			// to be modified.
-			bootingDictionary.upgrade_setNullability(rowFactory,
+			bootingDictionary.upgradeFixSystemColumnDefinition(rowFactory,
 				SYSVIEWSRowFactory.SYSVIEWS_COMPILATION_SCHEMAID, 
-				true, tc);
+				tc);
 		}
 		
 		/* OLD Cloudscape 5.1 upgrade code. See applySafeChanges(). 

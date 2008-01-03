@@ -6922,31 +6922,31 @@ public final class	DataDictionaryImpl
 		addSystemTableToDictionary(ti, sd, tc, ddg);
 	}							 
 	/**
-	  *	Upgrade an existing catalog by  setting the nullability
+	  *	Upgrade an existing system catalog column's definition
+      * by setting it to the value it would have in a newly
+      * created database. This is only used to for a couple
+      * of columns that had incorrectly nullability. Other
+      * uses (e.g. changing column type) might require more work.
 	  *
 	  *	@param	columnNumber			The column to change
-	  *	@param	nullability				true if nullable 
 	  *	@param	tc						Transaction controller
 	  *
 	  *	@exception StandardException Standard Derby error policy
 	  */
-	public void upgrade_setNullability(CatalogRowFactory rowFactory,
+	public void upgradeFixSystemColumnDefinition(CatalogRowFactory rowFactory,
 									   int columnNumber,
-									   boolean nullability,
 									   TransactionController tc)
 		throws StandardException
 	{
 		SystemColumn		theColumn;
 		SystemColumn[]		columns = rowFactory.buildColumnList();
 		SchemaDescriptor	sd = getSystemSchemaDescriptor();
-		String columnName;
 
 		TableDescriptor td = getTableDescriptor(rowFactory.getCatalogName(), sd, tc);
 
 		theColumn = columns[columnNumber - 1];	// from 1 to 0 based
 		ColumnDescriptor cd = makeColumnDescriptor(theColumn, columnNumber, td );
-		columnName = cd.getColumnName();
-		cd.getType().setNullability(nullability);
+		String columnName = cd.getColumnName();
 		int[] columnNameColArray = new int[1];
 		columnNameColArray[0] = SYSCOLUMNSRowFactory.SYSCOLUMNS_COLUMNDATATYPE ;
 		updateColumnDescriptor(cd,
