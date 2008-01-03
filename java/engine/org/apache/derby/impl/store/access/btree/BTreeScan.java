@@ -483,7 +483,6 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
         this.scan_state         = SCAN_INPROGRESS;
         pos.current_scan_protectionHandle =
             pos.current_leaf.page.getProtectionRecordHandle();
-		pos.current_slot        = pos.current_slot;
 
         if (SanityManager.DEBUG)
             SanityManager.ASSERT(pos.current_leaf != null);

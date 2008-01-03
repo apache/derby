@@ -76,8 +76,6 @@ public final class TemplateRow
     int[]               collation_ids)
 		throws StandardException
     {
-        int         dest_pos = 0;
-
         DataValueDescriptor[] ret_row = 
             new DataValueDescriptor[num_cols_to_allocate];
         int         num_cols = 
