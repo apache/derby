@@ -57,6 +57,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(NetIjTest.suite());
         suite.addTest(NSinSameJVMTest.suite());
         suite.addTest(NetworkServerControlClientCommandTest.suite());
+        suite.addTest(ServerPropertiesTest.suite());
         
         
         // Disabled due to "java.sql.SQLSyntaxErrorException: The class
