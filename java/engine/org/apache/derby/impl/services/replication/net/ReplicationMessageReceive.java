@@ -45,6 +45,11 @@ public class ReplicationMessageReceive {
     private final SlaveAddress slaveAddress;
     
     /**
+     * Contains the <code>ServerSocket</code> used to listen for
+     * connections from the replication master. */
+    private ServerSocket serverSocket;
+
+    /**
      * Contains the methods used to read and write to the Object streams
      * obtained from a <code>Socket</code> connection.
      */
@@ -101,9 +106,12 @@ public class ReplicationMessageReceive {
         StandardException,
         ClassNotFoundException {
         
-        //Contains the <code>ServerSocket</code> used to listen for
-        //connections from the replication master.
-        final ServerSocket serverSocket = createServerSocket();
+        // Create the ServerSocket object if this is the first
+        // initConnection attempt. Otherwise, we reuse the existing
+        // server socket
+        if (serverSocket == null) {
+            serverSocket = createServerSocket();
+        }
         serverSocket.setSoTimeout(timeout);
         
         //Start listening on the socket and accepting the connection

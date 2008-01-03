@@ -4740,7 +4740,7 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
 
             <msg>
                 <name>XRE04</name>
-                <text>Could not establish a connection to the master of the replicated database '{0}'.</text>
+                <text>Could not establish a connection to the peer of the replicated database '{0}'.</text>
                 <arg>dbname</arg>
             </msg>
 

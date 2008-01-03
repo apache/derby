@@ -5076,6 +5076,8 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
     protected void checkForReplication(LogAccessFile log) {
         if (inReplicationMasterMode) {
             log.setReplicationMasterRole(masterFactory);
+        } else if (inReplicationSlaveMode) {
+            log.setReplicationSlaveRole();
         }
     }
 

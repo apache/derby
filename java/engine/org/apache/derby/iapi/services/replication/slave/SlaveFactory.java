@@ -49,14 +49,6 @@ public interface SlaveFactory {
 
     /* Strings used as keys in the Properties objects*/
 
-    /** Property key to specify which host to listen to */
-    public static final String SLAVE_HOST =
-        Property.PROPERTY_RUNTIME_PREFIX + "replication.slave.slavehost";
-
-    /** Property key to specify which port to listen to */
-    public static final String SLAVE_PORT =
-        Property.PROPERTY_RUNTIME_PREFIX + "replication.slave.slaveport";
-
     /** Property key to specify the name of the database */
     public static final String SLAVE_DB =
         Property.PROPERTY_RUNTIME_PREFIX + "replication.slave.dbname";

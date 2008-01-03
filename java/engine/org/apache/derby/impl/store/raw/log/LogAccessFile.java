@@ -111,6 +111,7 @@ public class LogAccessFile
     // the MasterFactory that will accept log when in replication master mode
     MasterFactory masterFac; 
     boolean inReplicationMasterMode = false;
+    boolean inReplicationSlaveMode = false;
 
 	//streams used to generated check sume log record ; see if there is any simpler way
 	private ArrayOutputStream logOutputBuffer;
@@ -134,6 +135,10 @@ public class LogAccessFile
 				bufferSize = 10;	// make it very tiny
 		}
 		
+		// Puts this LogAccessFile object in replication slave or
+		// master mode if the database has such a role
+		logFactory.checkForReplication(this);
+
 		this.log            = log;
 		logFileSemaphore    = log;
 		this.logFactory     = logFactory;
@@ -162,6 +167,9 @@ public class LogAccessFile
 		// soft upgrade mode. 
 		writeChecksum = logFactory.checkVersion(RawStoreFactory.DERBY_STORE_MAJOR_VERSION_10, 
 												RawStoreFactory.DERBY_STORE_MINOR_VERSION_1);
+
+		// Checksums are received from the master if in slave replication mode
+		if (inReplicationSlaveMode) writeChecksum = false;
 		if(writeChecksum)
 		{
 			/**
@@ -206,7 +214,6 @@ public class LogAccessFile
 		}
 		
 		currentBuffer.init(checksumLogRecordSize);
-		logFactory.checkForReplication(this);
 	}
 
 
@@ -729,6 +736,31 @@ public class LogAccessFile
     protected void stopReplicationMasterRole() {
         inReplicationMasterMode = false;
         masterFac = null;
+    }
+
+    /**
+     * Method to put this LogAccessFile object in replication slave
+     * mode, effectively disabling checksum writes.
+     *
+     * Because checksums are received from the replication master, the
+     * slave can not be allowed to add it's own checksums - that would
+     * invalidate the checksums and would stop the database from
+     * recovering. Replication slave mode must therefore be set before
+     * LogAccessFile decides whether to write it's own checksums, and
+     * this method is therefore indirectly called from the constructor
+     * of this class by calling LogFactory.checkForReplication
+     *
+     * If replication slave mode for the database is stopped after
+     * this object has been created, checksums cannot be reenabled
+     * without creating a new instance of this class. That is
+     * conveniently handled as LogToFile.recover completes (which
+     * automatically happens once replication slave mode is no longer
+     * active)
+     *
+     * @see LogToFile#checkForReplication
+     */
+    protected void setReplicationSlaveRole() {
+        inReplicationSlaveMode = true;
     }
 
 	/* write to the log file */

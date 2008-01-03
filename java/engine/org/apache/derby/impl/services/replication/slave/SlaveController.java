@@ -23,6 +23,7 @@
 package org.apache.derby.impl.services.replication.slave;
 
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.Attribute;
 import org.apache.derby.iapi.reference.MessageId;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.monitor.ModuleControl;
@@ -112,9 +113,9 @@ public class SlaveController extends ReplicationLogger
     public void boot(boolean create, Properties properties)
         throws StandardException {
 
-        slavehost = properties.getProperty(SlaveFactory.SLAVE_HOST);
+        slavehost = properties.getProperty(Attribute.REPLICATION_SLAVE_HOST);
 
-        String port = properties.getProperty(SlaveFactory.SLAVE_PORT);
+        String port = properties.getProperty(Attribute.REPLICATION_SLAVE_PORT);
         if (port != null) {
             slaveport = new Integer(port).intValue();
         }

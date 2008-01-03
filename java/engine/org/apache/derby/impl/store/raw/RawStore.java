@@ -314,6 +314,20 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
             dataFactory.setDatabaseEncrypted();
         }
 
+        // If SlaveFactory is to be booted, the boot has to happen
+        // before logFactory.recover since that method will be blocked
+        // when in replication slave mode.
+        if (inReplicationSlaveMode) {
+            // The LogFactory has already been booted in slave mode.
+            // Can now start slave replication by booting the
+            // SlaveFactory service
+            slaveFactory = (SlaveFactory) 
+                Monitor.bootServiceModule(create, this,
+                                          getSlaveFactoryModule(),
+                                          properties);
+            slaveFactory.startSlave(this, logFactory);
+        }
+
 		// no need to tell log factory which raw store factory it belongs to
 		// since this is passed into the log factory for recovery
 		// after the factories are loaded, recover the database
@@ -324,17 +338,6 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
         if (encryptDatabase) {
             configureDatabaseForEncryption(properties, 
                                            newCipherFactory);
-        }
-
-        if (inReplicationSlaveMode) {
-            // The LogFactory has already been booted in slave mode.
-            // Can now start slave replication by booting the
-            // SlaveFactory service
-            slaveFactory = (SlaveFactory) 
-                Monitor.bootServiceModule(create, this,
-                                          getSlaveFactoryModule(),
-                                          properties);
-            slaveFactory.startSlave(this, logFactory);
         }
 
 	}
