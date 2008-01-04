@@ -40,7 +40,6 @@ import org.apache.derbyTesting.junit.TestConfiguration;
  * Test for comments.
  */
 public final class CommentTest extends BaseJDBCTestCase {
-    private Statement stmt;
 
     /**
      * Public constructor required for running test as standalone JUnit.
@@ -63,6 +62,8 @@ public final class CommentTest extends BaseJDBCTestCase {
      */
     public void testBracketedComments() throws Exception
     {
+        Statement stmt = createStatement();
+        
         JDBC.assertFullResultSet(
             stmt.executeQuery("/* a comment */ VALUES 1"), 
             new String [][] {{"1"}});
@@ -121,10 +122,10 @@ public final class CommentTest extends BaseJDBCTestCase {
             new String [][] {{"/* a comment \n-- */"}});
 
         // unterminated comments generate lexical errors
-        assertCallError("42X03", getConnection(), "VALUES 1 /*");
-        assertCallError("42X03", getConnection(), "VALUES 1 /* comment");
-        assertCallError("42X03", getConnection(), "VALUES 1 /* comment /*");
-        assertCallError("42X03", getConnection(), "VALUES 1 /* comment /* nested */");
+        assertCompileError("42X02", "VALUES 1 /*");
+        assertCompileError("42X02", "VALUES 1 /* comment");
+        assertCompileError("42X02", "VALUES 1 /* comment /*");
+        assertCompileError("42X02", "VALUES 1 /* comment /* nested */");
 
         // just comments generates syntax error
         assertCompileError("42X01", "/* this is a comment */");
@@ -132,20 +133,10 @@ public final class CommentTest extends BaseJDBCTestCase {
     }
     
     /**
-     * Set the fixture up.
+     * Default connections to auto-commit false.
      */
-    protected void setUp() throws SQLException
+    protected void initializeConnection(Connection conn) throws SQLException
     {    
-        getConnection().setAutoCommit(false);
-        stmt = createStatement();
-    }
-    
-    /**
-     * Tear-down the fixture.
-     */
-    protected void tearDown() throws Exception
-    {
-        stmt.close();
-        super.tearDown();
+        conn.setAutoCommit(false);
     }
 }
