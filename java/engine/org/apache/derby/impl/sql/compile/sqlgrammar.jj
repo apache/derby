@@ -11797,8 +11797,8 @@ uniqueConstraintDefinition(TableName constraintName) throws StandardException :
 	ResultColumnList uniqueColumnList;
 }
 {
-	//for table level constraint, second parameter will be null
-	constraintType = uniqueSpecification((DataTypeDescriptor) null, null) 
+	//for table level constraint, parameter will be null
+	constraintType = uniqueSpecification(null) 
 		<LEFT_PAREN> uniqueColumnList = uniqueColumnList() <RIGHT_PAREN>
 	{
 		//go through the unique columns list and if any of the columns in the
@@ -11836,8 +11836,7 @@ uniqueConstraintDefinition(TableName constraintName) throws StandardException :
 //the second parameter to the following method will always be null for a table level
 //constraint but not for a column level constraint
 int
-uniqueSpecification(DataTypeDescriptor dataTypeDescriptor,
-String columnName) throws StandardException :
+uniqueSpecification(String columnName) throws StandardException :
 {
 }
 {
@@ -12050,7 +12049,7 @@ columnConstraint(TableName constraintName,
 	//pass the columnname as the second parameter. It will be used to throw an
 	//exception if null constraint is defined for this column-level primary 
 	//key constraint
-	constraintType = uniqueSpecification(dataTypeDescriptor,columnName)
+	constraintType = uniqueSpecification(columnName)
 		[ properties = propertyList(false) <CHECK_PROPERTIES>]
 	{
 		ResultColumnList uniqueColumnList =
