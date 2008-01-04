@@ -268,7 +268,6 @@ public void testFrenchCollation() throws SQLException {
  * for = and like. But they do not match for UCS_BASIC. We insert both into a table and search
  * based on equal and like. 
  *  
- * @param conn
  * @param expectedMatchCountForEqual  number of rows we expect back for =. 
  * 	2 for French, 1 for English 
  * @param expectedMatchCountForLike  number of rows we expect back for LIKE. 
