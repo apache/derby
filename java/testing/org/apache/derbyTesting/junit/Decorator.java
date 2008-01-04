@@ -137,12 +137,17 @@ public class Decorator {
      * Decorate a set of tests to use an single
      * use database with TERRITORY_BASED collation
      * set to the passed in locale. Database is created
-     * on by the setUp method of the decorator.
+     * by the setUp method of the decorator.
+     * @param locale Locale used to set territory JDBC attribute. If null
+     * then only collation=TERRITORY_BASED will be set.
      */
     public static Test territoryCollatedDatabase(Test test, final String locale)
     {
         
-        String attributes = "collation=TERRITORY_BASED;territory=" + locale;
+        String attributes = "collation=TERRITORY_BASED";
+        
+        if (locale != null)
+            attributes = attributes.concat(";territory=" + locale);
         
         return attributesDatabase(attributes, test);
     }
