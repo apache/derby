@@ -936,8 +936,8 @@ public class TableElementList extends QueryTreeNodeVector
 		for (int index = 0; index < rclSize; index++)
 		{
 			String colName = ((ResultColumn) rcl.elementAt(index)).getName();
-            DataTypeDescriptor dtd = getColumnDataTypeDescriptor(colName);
-            dtd.setNullability(false);
+            
+            findColumnDefinition(colName).setNullability(false);
         }
 	}
 
@@ -968,21 +968,10 @@ public class TableElementList extends QueryTreeNodeVector
 
     private DataTypeDescriptor getColumnDataTypeDescriptor(String colName)
     {
-        int size = size();
+        ColumnDefinitionNode col = findColumnDefinition(colName);
+        if (col != null)
+            return col.getType();
 
-        for (int index = 0; index < size; index++)
-        {
-            TableElementNode tableElement = (TableElementNode) elementAt(index);
-
-            if (tableElement instanceof ColumnDefinitionNode)
-            {
-                ColumnDefinitionNode cdn = (ColumnDefinitionNode) tableElement;
-                if (colName.equals(cdn.getColumnName()))
-                {
-                    return cdn.getType();
-                }
-            }
-        }
         return null;
     }
 
@@ -997,31 +986,42 @@ public class TableElementList extends QueryTreeNodeVector
         // check for new columns
         return getColumnDataTypeDescriptor(colName);
     }
+    
+    /**
+     * Find the column definition node in this list that matches
+     * the passed in column name.
+     * @param colName
+     * @return Reference to column definition node or null if the column is
+     * not in the list.
+     */
+    private ColumnDefinitionNode findColumnDefinition(String colName) {
+        int size = size();
+        for (int index = 0; index < size; index++) {
+            TableElementNode tableElement = (TableElementNode) elementAt(index);
+
+            if (tableElement instanceof ColumnDefinitionNode) {
+                ColumnDefinitionNode cdn = (ColumnDefinitionNode) tableElement;
+                if (colName.equals(cdn.getName())) {
+                    return cdn;
+                }
+            }
+        }
+        return null;
+    }
+    
 
 	/**
-	 * Determine whether or not the parameter matches a column name in this list.
-	 *
-	 * @param colName	The column name to search for.
-	 *
-	 * @return boolean  Whether or not a match is found.
-	 */
+     * Determine whether or not the parameter matches a column name in this
+     * list.
+     * 
+     * @param colName
+     *            The column name to search for.
+     * 
+     * @return boolean Whether or not a match is found.
+     */
 	public boolean containsColumnName(String colName)
 	{
-		int size = size();
-		for (int index = 0; index < size; index++)
-		{
-			TableElementNode tableElement = (TableElementNode) elementAt(index);
-
-			if (tableElement instanceof ColumnDefinitionNode)
-			{
-				if (colName.equals(((ColumnDefinitionNode) tableElement).getName()))
-				{
-					return true;
-				}
-			}
-		}
-
-		return false;
+        return findColumnDefinition(colName) != null;
 	}
 }
 
