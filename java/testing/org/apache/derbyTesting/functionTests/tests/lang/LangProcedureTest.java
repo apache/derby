@@ -271,7 +271,6 @@ public class LangProcedureTest extends BaseJDBCTestCase {
      * @throws SQLException
      */
     public void testDelayedClassChecking() throws SQLException {
-        Connection conn = getConnection();
         Statement s = createStatement();
 
         s.execute("create procedure noclass() language java "
@@ -285,10 +284,10 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         s
                 .execute("create procedure notvoid() language java "
                         + "external name 'java.lang.Runtime.getRuntime' parameter style java");
-        assertCallError("42X51", conn, "call noclass()");
-        assertCallError("42X50", conn, "call nomethod()");
-        assertCallError("42X50", conn, "call notstatic()");
-        assertCallError("42X50", conn, "call notvoid()");
+        assertCallError("42X51", "call noclass()");
+        assertCallError("42X50", "call nomethod()");
+        assertCallError("42X50", "call notstatic()");
+        assertCallError("42X50", "call notvoid()");
 
         // Comment from old test: CHECK SYSALIAS
         s.execute("drop procedure noclass");
@@ -352,20 +351,19 @@ public class LangProcedureTest extends BaseJDBCTestCase {
     }
 
     public void testAmbigiousMethods() throws SQLException {
-        Connection conn = getConnection();
 
         Statement s = createStatement();
 
         // ambiguous resolution - with result sets
         s
                 .execute("create procedure ambiguous01(p1 INTEGER, p2 CHAR(20)) dynamic result sets 1 language java parameter style java external name 'org.apache.derbyTesting.functionTests.tests.lang.LangProcedureTest.ambiguous1'");
-        assertCallError("42X73", conn, "call AMBIGUOUS01(?, ?)");
+        assertCallError("42X73", "call AMBIGUOUS01(?, ?)");
         s.execute("drop procedure AMBIGUOUS01");
 
         // ambiguous in defined parameters
         s
                 .execute("create procedure ambiguous02(p1 INTEGER, p2 INTEGER) dynamic result sets 1 language java parameter style java external name 'org.apache.derbyTesting.functionTests.tests.lang.LangProcedureTest.ambiguous2'");
-        assertCallError("42X50", conn, "call AMBIGUOUS02(?, ?)");
+        assertCallError("42X50", "call AMBIGUOUS02(?, ?)");
         s.execute("drop procedure AMBIGUOUS02");
 
         // verify we can find it with a Java signature
@@ -500,9 +498,9 @@ public class LangProcedureTest extends BaseJDBCTestCase {
                 "procedureColumnIn P2 CHAR" };
         checkMatchingProcedures(conn, "IR2", sysaliasDefinition,
                 dbMetadataDefinition, columnDefinition);
-        assertCallError("42Y03", conn, "CALL IR()");
+        assertCallError("42Y03", "CALL IR()");
 
-        CallableStatement ir1 = conn.prepareCall("CALL IR(?)");
+        CallableStatement ir1 = prepareCall("CALL IR(?)");
 
         ir1.setInt(1, 1);
         ir1.execute();
@@ -554,9 +552,9 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         if (!conn.getAutoCommit())
             conn.commit();
 
-        assertCallError("38000", conn, "CALL IR2(2, 'no way')");
-        assertCallError("07000", conn, "CALL IR2(?, 'no way')");
-        assertCallError("07000", conn, "CALL IR2(2, ?)");
+        assertCallError("38000", "CALL IR2(2, 'no way')");
+        assertCallError("07000", "CALL IR2(?, 'no way')");
+        assertCallError("07000", "CALL IR2(2, ?)");
 
         s.execute("drop procedure IR");
         s.execute("drop procedure IR2");
@@ -588,10 +586,10 @@ public class LangProcedureTest extends BaseJDBCTestCase {
 
         checkMatchingProcedures(conn, "DRS", sysaliasDefinition,
                 dbMetadataDefinition, columnDefinition);
-        assertCallError("42Y03", conn, "CALL DRS()");
-        assertCallError("42Y03", conn, "CALL DRS(?,?)");
+        assertCallError("42Y03", "CALL DRS()");
+        assertCallError("42Y03","CALL DRS(?,?)");
 
-        CallableStatement drs1 = conn.prepareCall("CALL DRS(?)");
+        CallableStatement drs1 = prepareCall("CALL DRS(?)");
 
         drs1.setInt(1, 3);
         drs1.execute();
@@ -697,14 +695,14 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         // method with no ResultSet argument.
         s
                 .execute("create procedure irdrs(p1 int) dynamic result sets 1 language java external name 'org.apache.derbyTesting.functionTests.tests.lang.LangProcedureTest.missingDynamicParameter' parameter style JAVA");
-        assertCallError("42X50", conn, "CALL IRDRS(?)");
+        assertCallError("42X50", "CALL IRDRS(?)");
         s.execute("drop procedure irdrs");
 
         // check that a procedure with dynamic result sets can not resolve to a
         // method with an argument that is a ResultSet impl,
         s
                 .execute("create procedure rsi(p1 int) dynamic result sets 1 language java external name 'org.apache.derbyTesting.functionTests.util.ProcedureTest.badDynamicParameter' parameter style JAVA");
-        assertCallError("42X50", conn, "CALL rsi(?)");
+        assertCallError("42X50", "CALL rsi(?)");
         s.execute("drop procedure rsi");
 
         // simple check for a no-arg method that has dynamic result sets but
@@ -1294,7 +1292,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         // an output parameter using a PreparedStatement
         if (usingEmbedded())
             try {
-                PreparedStatement ps = conn.prepareStatement("CALL OP1(?, ?)");
+                prepareStatement("CALL OP1(?, ?)");
                 fail("FAIL prepare succeeded on OUT param with PreparedStatement");
             } catch (SQLException sqle) {
                 String expectedSQLState = "XJ009";
@@ -1337,7 +1335,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
             // check execute via a PreparedStatement fails for use of INOUT
             // parameter
             try {
-                PreparedStatement ps = conn.prepareStatement("CALL OP2(?, ?)");
+                prepareStatement("CALL OP2(?, ?)");
                 fail("FAIL prepare succeeded on INOUT param with PreparedStatement");
             } catch (SQLException sqle) {
                 String expectedSQLState = "XJ009";
@@ -1956,7 +1954,9 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         }
         // Make sure we throw proper error with network server
         // if params are not registered
-        testBug5280(conn);
+        assertCallError(
+                usingEmbedded() ? "07004" : "07000",
+                "CALL SQLCONTROL3_0 (?, ?, ?, ?, ?, ?, ?)");
 
         s.execute("DROP TABLE SQLC.SQLCONTROL_DML");
 
@@ -1970,16 +1970,6 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         s.execute("DROP SCHEMA SQLC RESTRICT");
 
         s.close();
-    }
-
-    public static void testBug5280(Connection conn) throws SQLException {
-        String csString = "CALL SQLCONTROL3_0 (?, ?, ?, ?, ?, ?, ?)";
-        // Bug 5280 If we don't register the outparams
-        // we don't get an error with network server.
-        // for (int p = 1; p <= 7; p++) {
-        // cs.registerOutParameter(p,Types.VARCHAR);
-        // }
-        assertCallError("07000", conn, csString);
     }
 
     public static void pSMALLINT(short in, short[] inout, short[] out)
@@ -2138,8 +2128,6 @@ public class LangProcedureTest extends BaseJDBCTestCase {
 
         Connection conn = DriverManager
                 .getConnection("jdbc:default:connection");
-
-        Statement s = conn.createStatement();
 
         String sql = "CALL SQLC.SQLCONTROL2_" + sqlc
                 + " (?, ?, ?, ?, ?, ?, ?) ";
