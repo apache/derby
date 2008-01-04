@@ -146,9 +146,9 @@ extends BasicNoPutResultSetImpl
 			if (lcc.getRunTimeStatisticsMode())
 			{
 				endExecutionTime = getCurrentTimeMillis();
-
+                
 				lcc.setRunTimeStatisticsObject(
-					lcc.getExecutionContext().getResultSetStatisticsFactory().getRunTimeStatistics(activation, this, subqueryTrackingArray));
+					lcc.getLanguageConnectionFactory().getExecutionFactory().getResultSetStatisticsFactory().getRunTimeStatistics(activation, this, subqueryTrackingArray));
 
 				HeaderPrintWriter istream = lcc.getLogQueryPlan() ? Monitor.getStream() : null;
 				if (istream != null)

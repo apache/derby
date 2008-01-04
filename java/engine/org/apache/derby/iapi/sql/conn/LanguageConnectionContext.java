@@ -817,11 +817,6 @@ public interface LanguageConnectionContext extends Context {
 	public Authorizer getAuthorizer(); 
 
 	/**
-	 *	Get the current ExecutionContext.
-	 */
-	ExecutionContext getExecutionContext();
-
-	/**
 	 *	Get the current StatementContext.
 	 */
 	StatementContext getStatementContext();

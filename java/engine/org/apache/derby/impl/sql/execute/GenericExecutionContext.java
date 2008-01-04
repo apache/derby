@@ -21,16 +21,12 @@
 
 package org.apache.derby.impl.sql.execute;
 
-import java.util.Properties;
-
 import org.apache.derby.iapi.error.ExceptionSeverity;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.context.ContextImpl;
 import org.apache.derby.iapi.services.context.ContextManager;
-import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.sql.execute.ExecutionContext;
 import org.apache.derby.iapi.sql.execute.ExecutionFactory;
-import org.apache.derby.iapi.sql.execute.ResultSetStatisticsFactory;
 /**
  * ExecutionContext stores the result set factory to be used by
  * the current connection, and manages execution-level connection
@@ -47,34 +43,11 @@ class GenericExecutionContext
 	//
 	// class implementation
 	//
-	private ResultSetStatisticsFactory rssFactory;
 	private ExecutionFactory execFactory;
 
 	//
 	// ExecutionContext interface
 	//
-
-	/**
-	 * Get the ResultSetStatisticsFactory from this ExecutionContext.
-	 *
-	 * @return	The result set statistics factory associated with this
-	 *		ExecutionContext
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
-	public ResultSetStatisticsFactory getResultSetStatisticsFactory()
-					throws StandardException {
-		if (rssFactory == null) {
-			rssFactory = (ResultSetStatisticsFactory)
-				Monitor.bootServiceModule(
-									false,
-									execFactory,
-									ResultSetStatisticsFactory.MODULE,
-									(Properties) null);
-		}
-
-		return rssFactory;
-	}
 
 	public ExecutionFactory getExecutionFactory() {
 		return execFactory;

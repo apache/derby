@@ -77,6 +77,17 @@ public interface ExecutionFactory {
 		@return the result set factory for this database.
 	 */
 	ResultSetFactory getResultSetFactory();
+    
+    /**
+     * Get the ResultSetStatisticsFactory from this ExecutionFactory.
+     *
+     * @return  The result set statistics factory associated with this
+     *      ExecutionFactory
+     *
+     * @exception StandardException     Thrown on error
+     */
+    public ResultSetStatisticsFactory getResultSetStatisticsFactory()
+        throws StandardException;
 
 	/**
 		We want an execution context so that we can push it onto

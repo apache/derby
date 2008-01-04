@@ -40,7 +40,6 @@ import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.execute.ExecRow;
-import org.apache.derby.iapi.sql.execute.ExecutionContext;
 import org.apache.derby.iapi.sql.execute.NoPutResultSet;
 import org.apache.derby.iapi.sql.execute.ResultSetStatisticsFactory;
 import org.apache.derby.iapi.types.DataValueDescriptor;
@@ -348,9 +347,9 @@ abstract class NoRowsResultSetImpl implements ResultSet
 			{
 				endExecutionTime = getCurrentTimeMillis();
 
-				ExecutionContext ec = lcc.getExecutionContext();
-				ResultSetStatisticsFactory rssf;
-				rssf = ec.getResultSetStatisticsFactory();
+				ResultSetStatisticsFactory rssf =
+                    lcc.getLanguageConnectionFactory().
+                         getExecutionFactory().getResultSetStatisticsFactory();
 
 				lcc.setRunTimeStatisticsObject(
 					rssf.getRunTimeStatistics(activation, this, subqueryTrackingArray));

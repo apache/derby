@@ -75,6 +75,11 @@ import java.util.Vector;
  */
 public class GenericExecutionFactory
 	implements ModuleControl, ModuleSupportable, ExecutionFactory {
+    
+    /**
+     * Statistics factory for this factory.
+     */
+    private ResultSetStatisticsFactory rssFactory;
 
 	//
 	// ModuleControl interface
@@ -143,6 +148,28 @@ public class GenericExecutionFactory
 		}
 		return genericConstantActionFactory; 
 	}
+    
+    /**
+     * Get the ResultSetStatisticsFactory from this ExecutionFactory.
+     *
+     * @return  The result set statistics factory associated with this
+     *      ExecutionFactory
+     *
+     * @exception StandardException     Thrown on error
+     */
+    public ResultSetStatisticsFactory getResultSetStatisticsFactory()
+                    throws StandardException {
+        if (rssFactory == null) {
+            rssFactory = (ResultSetStatisticsFactory)
+                Monitor.bootServiceModule(
+                                    false,
+                                    this,
+                                    ResultSetStatisticsFactory.MODULE,
+                                    (Properties) null);
+        }
+
+        return rssFactory;
+    }
 
 	/**
 		We want a dependency context so that we can push it onto

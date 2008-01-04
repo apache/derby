@@ -2514,14 +2514,6 @@ public class GenericLanguageConnectionContext
 	}
 
 	/**
-	 * @see LanguageConnectionContext#getExecutionContext
-	 */
-	public ExecutionContext getExecutionContext()
-	{
-		return (ExecutionContext) getContextManager().getContext(ExecutionContext.CONTEXT_ID);
-	}
-
-	/**
 	 * @see LanguageConnectionContext#getStatementContext
 	 */
 	public StatementContext getStatementContext()

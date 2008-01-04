@@ -23,10 +23,6 @@ package org.apache.derby.iapi.sql.execute;
 
 import org.apache.derby.iapi.services.context.Context;
 
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.sql.ResultSet;
-
 /**
  * ExecutionContext stores the factories that are to be used by
  * the current connection. It also provides execution services
@@ -49,6 +45,10 @@ public interface ExecutionContext extends Context {
 	public static final int REPEATABLE_READ_ISOLATION_LEVEL = 3;
 	public static final int SERIALIZABLE_ISOLATION_LEVEL = 4;
 
+    /**
+     * Map from Derby transaction isolation constants to
+     * JDBC constants.
+     */
 	public static final int[] CS_TO_JDBC_ISOLATION_LEVEL_MAP = {
 		java.sql.Connection.TRANSACTION_NONE,				// UNSPECIFIED_ISOLATION_LEVEL
 		java.sql.Connection.TRANSACTION_READ_UNCOMMITTED,	// READ_UNCOMMITTED_ISOLATION_LEVEL
@@ -57,6 +57,13 @@ public interface ExecutionContext extends Context {
 		java.sql.Connection.TRANSACTION_SERIALIZABLE		// SERIALIZABLE_ISOLATION_LEVEL
 	};
 
+    /**
+     * Map from Derby transaction isolation constants to
+     * text values used in SQL. Note that the text
+     * "REPEATABLE READ" or "RR" maps to SERIALIZABLE_ISOLATION_LEVEL
+     * as a hang over from DB2 compatibility and now to preserve
+     * backwards compatability.
+     */
 	public static final String[][] CS_TO_SQL_ISOLATION_MAP = {
 		{ "  "},					// UNSPECIFIED_ISOLATION_LEVEL
 		{ "UR", "DIRTY READ", "READ UNCOMMITTED"},
@@ -64,17 +71,6 @@ public interface ExecutionContext extends Context {
 		{ "RS"},		// read stability	
 		{ "RR", "REPEATABLE READ", "SERIALIZABLE"}
 	};
-
-	/**
-	 * Get the ResultSetStatisticsFactory from this ExecutionContext.
-	 *
-	 * @return	The result set statistics factory associated with this
-	 *		ExecutionContext
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
-	ResultSetStatisticsFactory getResultSetStatisticsFactory()
-								throws StandardException;
 
 	/**
 	 * Get the ExecutionFactory from this ExecutionContext.
