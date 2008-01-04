@@ -252,13 +252,12 @@ public void testDefaultCollation() throws SQLException {
       //End of parameter testing
       
       s.close();
-      compareAgrave(conn,1,1);
+      compareAgrave(1,1);
       }
       
 
 public void testFrenchCollation() throws SQLException {
-    Connection conn = getConnection();
-    compareAgrave(conn,2,1);    
+    compareAgrave(2,1);    
 }
 
 
@@ -276,35 +275,33 @@ public void testFrenchCollation() throws SQLException {
  * 	1 for French and English 
  * @throws SQLException
  */
-private void compareAgrave(Connection conn, int expectedMatchCountForEqual,
+private void compareAgrave(int expectedMatchCountForEqual,
 		int expectedMatchCountForLike) throws SQLException {
       
       String agrave = "\u00C0";
       String agraveCombined ="A\u0300";
-      Statement s = conn.createStatement();
+      Statement s = createStatement();
       
       try {
           s.executeUpdate("DROP TABLE T");
       }catch (SQLException se) {}
       s.executeUpdate("CREATE TABLE T (vc varchar(30))");
-      PreparedStatement ps = conn.prepareStatement("INSERT INTO T VALUES (?)");
+      PreparedStatement ps = prepareStatement("INSERT INTO T VALUES (?)");
       ps.setString(1,agrave);
       ps.executeUpdate();
       ps.setString(1,agraveCombined);
       ps.executeUpdate();
-      ps.close();
         
-      ps = conn.prepareStatement("SELECT COUNT(*) FROM T WHERE VC = ?");
+      ps = prepareStatement("SELECT COUNT(*) FROM T WHERE VC = ?");
       ps.setString(1, agrave);
       ResultSet rs = ps.executeQuery();
       JDBC.assertSingleValueResultSet(rs, Integer.toString(expectedMatchCountForEqual));
-      ps = conn.prepareStatement("SELECT COUNT(*) FROM T WHERE VC LIKE ?");
+      ps = prepareStatement("SELECT COUNT(*) FROM T WHERE VC LIKE ?");
       ps.setString(1, agrave);
       rs = ps.executeQuery();
       JDBC.assertSingleValueResultSet(rs, Integer.toString(expectedMatchCountForLike));
-      rs.close();
-      ps.close();
-      s.close();
+
+
   }
 
 
@@ -518,8 +515,9 @@ public void testEnglishCollation() throws SQLException {
 
 private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
 	PreparedStatement ps;
-	ResultSet rs;
-    Connection conn = s.getConnection();		
+	ResultSet rs;	
+    
+    Connection conn = s.getConnection();
 
     s.executeUpdate("set schema APP");
     //Following sql will fail because the compilation schema is user schema
@@ -724,12 +722,12 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
         		null);
         //Do some parameter testing for XMLSERIALIZE. ? is not supported inside
         //the XMLSERIALIZE function and hence following will result in errors.
-        checkPreparedStatementError(conn, "SELECT XMLSERIALIZE(x as CHAR(10)) " +
+        assertCompileError("42Z70", "SELECT XMLSERIALIZE(x as CHAR(10)) " +
         		" FROM xmlTable, SYS.SYSTABLES WHERE " +
-				" XMLSERIALIZE(? as CHAR(10)) = TABLENAME", "42Z70");
-        checkPreparedStatementError(conn, "SELECT XMLSERIALIZE(x as CHAR(10)) FROM " +
+				" XMLSERIALIZE(? as CHAR(10)) = TABLENAME");
+        assertCompileError("42Z70", "SELECT XMLSERIALIZE(x as CHAR(10)) FROM " +
         		" xmlTable, SYS.SYSTABLES WHERE XMLSERIALIZE(? as CHAR(10)) = " + 
-    			" CAST(TABLENAME AS CHAR(10))", "42Z70");
+    			" CAST(TABLENAME AS CHAR(10))");
     }
     
     //Start of user defined function testing
@@ -755,7 +753,7 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     //from the context which in this case is from TABLENAME and TABLENAME
     //has collation type of UCS_BASIC
     s.executeUpdate("set schema APP");
-    ps = conn.prepareStatement("SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
+    ps = prepareStatement("SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
     		" ? = TABLENAME");
     ps.setString(1, "SYSCOLUMNS");
     rs = ps.executeQuery();
@@ -769,13 +767,13 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     //territory based since the result of SUBSTR always picks up the 
     //collation of it's first operand. So the comparison between left hand
     //side with terriotry based and right hand side with UCS_BASIC will fail.
-    checkPreparedStatementError(conn, "SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
-    		" SUBSTR(?,2) = TABLENAME", "42818");
+    assertCompileError("42818", "SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
+    		" SUBSTR(?,2) = TABLENAME");
     //To fix the problem above, we need to CAST TABLENAME so that the result 
     //of CAST will pick up the collation of the current schema and this will
     //cause both the operands of SUBSTR(?,2) = CAST(TABLENAME AS CHAR(10)) 
     //to have same collation
-    ps = conn.prepareStatement("SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
+    ps = prepareStatement("SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
 		" SUBSTR(?,2) = CAST(TABLENAME AS CHAR(10))");
     ps.setString(1, "aSYSCOLUMNS");
     rs = ps.executeQuery();
@@ -789,16 +787,16 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     //take collation from context which here will be TABLENAME and hence the
     //result of concatenation will have collation type of it's 2 operands,
     //namely UCS_BASIC
-    checkPreparedStatementError(conn, "SELECT TABLENAME FROM SYS.SYSTABLES " +
-    		" WHERE TABLENAME || ? LIKE 'SYSCOLUMNS '", "42ZA2");   
+    assertCompileError("42ZA2", "SELECT TABLENAME FROM SYS.SYSTABLES " +
+    		" WHERE TABLENAME || ? LIKE 'SYSCOLUMNS '");   
     //The query above can be made to work if we are in SYS schema or if we use
     //CAST while we are trying to run the query is user schema
     //Let's try CAST first
-    ps = conn.prepareStatement("SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
+    ps = prepareStatement("SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
     		" CAST((TABLENAME || ?) AS CHAR(20)) LIKE 'SYSCOLUMNS'");   
     //try switching to SYS schema and then run the original query without CAST
     s.executeUpdate("set schema SYS");
-    ps = conn.prepareStatement("SELECT TABLENAME FROM SYS.SYSTABLES " +
+    ps = prepareStatement("SELECT TABLENAME FROM SYS.SYSTABLES " +
     		" WHERE TABLENAME || ? LIKE 'SYSCOLUMNS'");   
     s.executeUpdate("set schema APP");
     //The following will fail because the left hand side of LIKE has collation
@@ -816,13 +814,13 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     //Do parameter testing for IS NULL
     //Following query will pass because it doesn't matter what the collation of
     //? is when doing a NULL check
-    ps = conn.prepareStatement("SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
+    ps = prepareStatement("SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
     		" ? IS NULL");   
     ps.setString(1, " ");
     rs = ps.executeQuery();
 	JDBC.assertEmpty(rs);
 	//Now do the testing for IS NOT NULL
-    ps = conn.prepareStatement("SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
+    ps = prepareStatement("SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
     		" ? IS NOT NULL");
     ps.setNull(1, java.sql.Types.VARCHAR);
     rs = ps.executeQuery();
@@ -832,28 +830,28 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     //Following query will fail because LENGTH operator is not allowed to take
     //a parameter. I just wanted to have a test case out for the changes that
     //are going into engine code (ie LengthOperatorNode)
-    checkPreparedStatementError(conn, "SELECT COUNT(*) FROM CUSTOMER WHERE " +
-    		" LENGTH(?) != 0", "42X36");   
+    assertCompileError("42X36", "SELECT COUNT(*) FROM CUSTOMER WHERE " +
+    		" LENGTH(?) != 0");   
 
     //Do parameter testing for BETWEEN
     //Following should pass for ? will take the collation from the context and
     //hence, it will be UCS_BASIC
-    ps = conn.prepareStatement("SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
+    ps = prepareStatement("SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
 	" TABLENAME NOT BETWEEN ? AND TABLENAME");   
     ps.setString(1, " ");
     rs = ps.executeQuery();
 	JDBC.assertEmpty(rs);
 	//Following will fail because ? will take collation of territory based but
 	//the left hand side has collation of UCS_BASIC
-    checkPreparedStatementError(conn, "SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
-    		" TABLENAME NOT BETWEEN ? AND 'SYSCOLUMNS'", "42818");   
+    assertCompileError("42818", "SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
+    		" TABLENAME NOT BETWEEN ? AND 'SYSCOLUMNS'");   
     
     //Do parameter testing with COALESCE
     //following will pass because the ? inside the COALESCE will take the 
     //collation type of the other operand which is TABLENAME. The result of
     //COALESCE will have collation type of UCS_BASIC and that is the same
     //collation that the ? on rhs of = will get.
-    ps = conn.prepareStatement("SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
+    ps = prepareStatement("SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
 	" COALESCE(TABLENAME, ?) = ?");   
     ps.setString(1, " ");
     ps.setString(2, "SYSCOLUMNS ");
@@ -868,22 +866,22 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     //territory based since the result of LTRIM always picks up the 
     //collation of it's operand. So the comparison between left hand
     //side with terriotry based and right hand side with UCS_BASIC will fail.
-    checkPreparedStatementError(conn, "SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
-    		" LTRIM(?) = TABLENAME", "42818");
+    assertCompileError("42818", "SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
+    		" LTRIM(?) = TABLENAME");
     //To fix the problem above, we need to CAST TABLENAME so that the result 
     //of CAST will pick up the collation of the current schema and this will
     //cause both the operands of LTRIM(?) = CAST(TABLENAME AS CHAR(10)) 
     //to have same collation
-    ps = conn.prepareStatement("SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
+    ps = prepareStatement("SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
 		" LTRIM(?) = CAST(TABLENAME AS CHAR(10))");
     ps.setString(1, " SYSCOLUMNS");
     rs = ps.executeQuery();
     JDBC.assertFullResultSet(rs,new String[][] {{"SYSCOLUMNS"}});
 
     //Similar testing for RTRIM
-    checkPreparedStatementError(conn, "SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
-    		" RTRIM(?) = TABLENAME", "42818");
-    ps = conn.prepareStatement("SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
+    assertCompileError("42818", "SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
+    		" RTRIM(?) = TABLENAME");
+    ps = prepareStatement("SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
 		" RTRIM(?) = CAST(TABLENAME AS CHAR(10))");
     ps.setString(1, "SYSCOLUMNS  ");
     rs = ps.executeQuery();
@@ -895,12 +893,12 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     //And the ? in TRIM will pick up it's collation from 'a' and hence the
     //comparison between territory based character string returned from TRIM
     //function will fail against UCS_BASIC based TABLENAME on the right
-    checkPreparedStatementError(conn, "SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
-    		" TRIM('a' FROM ?) = TABLENAME", "42818");
+    assertCompileError("42818", "SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
+    		" TRIM('a' FROM ?) = TABLENAME");
     //The problem can be fixed by using CAST on TABLENAME so the resultant of
     //CAST string will compare fine with the output of TRIM. Note CAST always
     //picks up the collation of the compilation schema.
-    ps = conn.prepareStatement("SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
+    ps = prepareStatement("SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
     		" TRIM('a' FROM ?) = CAST(TABLENAME AS CHAR(10))");
     ps.setString(1, "aSYSCOLUMNS");
     rs = ps.executeQuery();
@@ -910,7 +908,7 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     //from it's first parameter which is a SUBSTR on TABLENAME and hence the 
     //result of TRIM will have UCS_BASIC collation which matches the collation
     //on the right.
-    ps = conn.prepareStatement("SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
+    ps = prepareStatement("SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
     		" TRIM(LEADING SUBSTR(TABLENAME, LENGTH(TABLENAME)) FROM ?) = TABLENAME");
     ps.setString(1, "SYSCOLUMNS");
     rs = ps.executeQuery();
@@ -921,13 +919,13 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     //Following will fail because 'LOOKFORME' has collation of territory based
     //but TABLENAME has collation of UCS_BASIC and hence LOCATE will fail 
     //because the collation types of it's two operands do not match
-    ps = conn.prepareStatement("SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
+    ps = prepareStatement("SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
     		" LOCATE(?, TABLENAME) != 0");
     ps.setString(1, "ABC");
     rs = ps.executeQuery();
     JDBC.assertEmpty(rs);
     //Just switch the parameter position and try the sql again
-    ps = conn.prepareStatement("SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
+    ps = prepareStatement("SELECT TABLENAME FROM SYS.SYSTABLES WHERE " +
     		" LOCATE(TABLENAME, ?) != 0");
     ps.setString(1, "ABC");
     rs = ps.executeQuery();
@@ -937,7 +935,7 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     //Following will work just fine because ? will take it's collation from the
     //context which in this case will be collation of TABLENAME which has 
     //collation type of UCS_BASIC. 
-    ps = conn.prepareStatement("SELECT COUNT(*) FROM CUSTOMER WHERE ? IN " +
+    ps = prepareStatement("SELECT COUNT(*) FROM CUSTOMER WHERE ? IN " +
     		" (SELECT TABLENAME FROM SYS.SYSTABLES)");
     ps.setString(1, "SYSCOLUMNS");
     rs = ps.executeQuery();
@@ -949,14 +947,14 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     //current schema which is the user schema and hence it's collation type
     //will be territory based. But that collation does not match the left hand
     //side on IN clause and hence it results in compliation error.
-    checkPreparedStatementError(conn, "SELECT TABLENAME FROM SYS.SYSTABLES " +
+    assertCompileError("42818", "SELECT TABLENAME FROM SYS.SYSTABLES " +
     		" WHERE TABLENAME NOT IN (?, ' SYSCOLUMNS ') AND " +
-			" CAST(TABLENAME AS CHAR(10)) = 'SYSCOLUMNS' ", "42818");
+			" CAST(TABLENAME AS CHAR(10)) = 'SYSCOLUMNS' ");
     //We can make the query work in 2 ways
     //1)Be in the SYS schema and then ? will take the collation of UCS_BASIC
     //because that is what the character string literal ' SYSCOLUMNS ' has.
     s.executeUpdate("set schema SYS");
-    ps = conn.prepareStatement("SELECT TABLENAME FROM SYS.SYSTABLES " +
+    ps = prepareStatement("SELECT TABLENAME FROM SYS.SYSTABLES " +
     		" WHERE TABLENAME NOT IN (?, ' SYSCOLUMNS ') AND " +
 			" CAST(TABLENAME AS CHAR(10)) = 'SYSCOLUMNS' ");
     ps.setString(1, "aSYSCOLUMNS");
@@ -965,7 +963,7 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     //2)The other way to fix the query would be to do a CAST on TABLENAME so
     //it will have the collation of current schema which is APP 
     s.executeUpdate("set schema APP");
-    ps = conn.prepareStatement("SELECT TABLENAME FROM SYS.SYSTABLES WHERE " + 
+    ps = prepareStatement("SELECT TABLENAME FROM SYS.SYSTABLES WHERE " + 
 	" CAST(TABLENAME AS CHAR(10)) NOT IN (?, ' SYSCOLUMNS ') AND " +
 	" CAST(TABLENAME AS CHAR(10)) = 'SYSCOLUMNS' ");
     ps.setString(1, "aSYSCOLUMNS");
@@ -975,7 +973,7 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     //Following will not fail because collation of ? here does not matter 
     //since we are not doing a collation related method 
     s.executeUpdate("set schema SYS");
-    ps = conn.prepareStatement("INSERT INTO APP.CUSTOMER(NAME) VALUES(?)");
+    ps = prepareStatement("INSERT INTO APP.CUSTOMER(NAME) VALUES(?)");
     ps.setString(1, "SYSCOLUMNS");
     ps.executeUpdate();
     ps.close();
@@ -1012,7 +1010,7 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     s.execute("create table assoc (x char(10) not null primary key, "+
     		" y char(100))");
     s.execute("create table assocout(x char(10))");
-    ps = conn.prepareStatement("insert into assoc values (?, 'hello')");
+    ps = prepareStatement("insert into assoc values (?, 'hello')");
     ps.setString(1, new Integer(10).toString());
     ps.executeUpdate();     
     
@@ -1053,7 +1051,7 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     //by number of collation elements that special character _ represents
     s.executeUpdate("create table DERBY_2967(c11 int)"); 
     s.executeUpdate("insert into DERBY_2967 values 1"); 
-    ps = conn.prepareStatement("select 1 from DERBY_2967 where '\uFA2D' like ?");
+    ps = prepareStatement("select 1 from DERBY_2967 where '\uFA2D' like ?");
     String[] match = { "%", "_", "\uFA2D" }; 
     for (int i = 0; i < match.length; i++) { 
         ps.setString(1, match[i]); 
@@ -1219,24 +1217,6 @@ private void dropTable(Statement s) throws SQLException {
     s.getConnection().commit();
 }
 
-/**
- * Make sure that attempt to prepare the statement will give the passed error
- * 
- * @param con Connection on which query should be prepared
- * @param query Query to be prepared
- * @param error Prepared statement will give this error for the passed query
- */
-private void checkPreparedStatementError(Connection con, String query, 
-		String error)
-{
-	try{
-	    con.prepareStatement(query);
-        fail("Expected error '" + error  + "' but no error was thrown.");
-	} catch (SQLException sqle) {
-        assertSQLState(error, sqle);		
-	}
-	
-}
 /**
  * Execute the passed statement and compare the results against the
  * expectedResult 
