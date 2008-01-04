@@ -206,6 +206,40 @@ public abstract class ValueNode extends QueryTreeNode
     {
         setType(getTypeServices().getNullabilityType(nullability));
     }
+    
+    /**
+     * Set the collation type and derivation of this node based upon
+     * the collation information in the passed in type. Note that the
+     * base type of this node is not changed (e.g. INTEGER), only its
+     * collation settings. This may result in a different object being
+     * returned from getTypeServices().
+     * 
+     * @param collationInfoType Type to take collation type and derivation from.
+     * @throws StandardException Error setting type.
+     */
+    public void setCollationInfo(DataTypeDescriptor collationInfoType)
+    throws StandardException
+    {
+        setCollationInfo(collationInfoType.getCollationType(),
+                collationInfoType.getCollationDerivation());
+    }
+
+    /**
+     * Set the collation type and derivation of this node based upon
+     * the collation information passed in.
+     * This may result in a different object being
+     * returned from getTypeServices().
+     * 
+     * @param collationType Collation type
+     * @param collationDerivation Collation derivation
+     * @throws StandardException Error setting type
+     */
+    public void setCollationInfo(int collationType, int collationDerivation)
+        throws StandardException
+    {
+        setType(getTypeServices().getCollatedType(
+                collationType, collationDerivation));
+    }
 
 	/**
 	 * Get the TypeId from this ValueNode.
@@ -271,9 +305,9 @@ public abstract class ValueNode extends QueryTreeNode
 	 */
 	protected void setCollationUsingCompilationSchema(int collationDerivation)
 	throws StandardException {
-        getTypeServices().setCollationType(
-	    	     getSchemaDescriptor(null, false).getCollationType());
-        getTypeServices().setCollationDerivation(collationDerivation);
+        setCollationInfo(
+                getSchemaDescriptor(null, false).getCollationType(),
+                collationDerivation);
 	}
 
 

@@ -126,10 +126,7 @@ public class ConcatenationOperatorNode extends BinaryOperatorNode {
 			leftOperand.setType(new DataTypeDescriptor(leftType, true));
 			if (rightOperand.getTypeId().isStringTypeId()) {
 				//collation of ? operand should be picked from the context
-				leftOperand.getTypeServices().setCollationDerivation(
-						rightOperand.getTypeServices().getCollationDerivation());
-				leftOperand.getTypeServices().setCollationType(
-						rightOperand.getTypeServices().getCollationType());
+                leftOperand.setCollationInfo(rightOperand.getTypeServices());
 			}
 		}
 
@@ -169,10 +166,7 @@ public class ConcatenationOperatorNode extends BinaryOperatorNode {
 			rightOperand.setType(new DataTypeDescriptor(rightType, true));
 			if (leftOperand.getTypeId().isStringTypeId()) {
 				//collation of ? operand should be picked from the context
-				rightOperand.getTypeServices().setCollationDerivation(
-						leftOperand.getTypeServices().getCollationDerivation());
-				rightOperand.getTypeServices().setCollationType(
-						leftOperand.getTypeServices().getCollationType());
+                rightOperand.setCollationInfo(leftOperand.getTypeServices());
 			}
 		}
 

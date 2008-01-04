@@ -133,10 +133,7 @@ public class SimpleStringOperatorNode extends UnaryOperatorNode
 				);
 		//Result of upper()/lower() will have the same collation as the   
 		//argument to upper()/lower(). 
-		getTypeServices().setCollationDerivation(
-				operand.getTypeServices().getCollationDerivation());
-		getTypeServices().setCollationType(
-				operand.getTypeServices().getCollationType());
+        setCollationInfo(operand.getTypeServices());
 
 		return this;
 	}

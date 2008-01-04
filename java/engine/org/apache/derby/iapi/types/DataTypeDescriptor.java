@@ -115,8 +115,7 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
         
         // By definition, any catalog type (column in a table,
         // procedure etc.) is derivation implicit.
-        dtd.setCollationDerivation(
-                StringDataValue.COLLATION_DERIVATION_IMPLICIT);
+        dtd.collationDerivation = StringDataValue.COLLATION_DERIVATION_IMPLICIT;
         
         return dtd;
 	}
@@ -425,7 +424,7 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 												isNullable,
 												typeId.getMaximumMaximumWidth());
 	}
-	public DataTypeDescriptor(DataTypeDescriptor source, boolean isNullable)
+	private DataTypeDescriptor(DataTypeDescriptor source, boolean isNullable)
 	{
 		//There might be other places, but one place this method gets called
 		//from is ResultColumn.init. When the ResultColumn(RC) is for a 
@@ -443,6 +442,27 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 												);
         this.collationDerivation = source.getCollationDerivation();
 	}
+    
+    private DataTypeDescriptor(DataTypeDescriptor source,
+            int collationType,
+            int collationDerivation)
+    {
+        //There might be other places, but one place this method gets called
+        //from is ResultColumn.init. When the ResultColumn(RC) is for a 
+        //ColumnDescriptor(CD), the RC's TypeDescriptorImpl(TDI) should get 
+        //all the attributes of CD's TDI. So, if the CD is for a user table's
+        //character type column, then this call by RC.init should have CD's 
+        //collation attributes copied into RC along with other attributes. 
+        this.typeId = source.typeId;
+        typeDescriptor = new TypeDescriptorImpl(source.typeDescriptor,
+                                                source.getPrecision(),
+                                                source.getScale(),
+                                                source.isNullable(),
+                                                source.getMaximumWidth(),
+                                                collationType
+                                                );
+        this.collationDerivation = collationDerivation;
+    }
 
 	/**
 	 * Constructor for internal uses only.  
@@ -1123,6 +1143,24 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
             return this;
         
         return new DataTypeDescriptor(this, isNullable);
+    }
+    
+    /**
+     * Return a type description identical to this type
+     * with the exception that its collation information is
+     * taken from the passed in information.
+    * @return This if collation would be unchanged otherwise a new type.
+     */   
+    public DataTypeDescriptor getCollatedType(int collationType,
+            int collationDerivation)
+    {
+        if ((getCollationType() == collationType) &&
+            (getCollationDerivation() == collationDerivation))
+            return this;
+                
+        return new DataTypeDescriptor(this,
+                collationType,
+                collationDerivation);
     }
 
 	/**

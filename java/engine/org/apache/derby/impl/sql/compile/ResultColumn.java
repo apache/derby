@@ -1043,10 +1043,8 @@ public class ResultColumn extends ValueNode
 				//depending on the collation type.
 				if (newValue instanceof StringDataValue)
 				{
-					constant.getTypeServices().setCollationDerivation(
-							resultColumnType.getCollationDerivation());
-					constant.getTypeServices().setCollationType(
-							resultColumnType.getCollationType());
+                    constant.setCollationInfo(resultColumnType);
+                    
 					DataValueFactory dvf = getDataValueFactory();
 					newValue = ((StringDataValue)newValue).getValue(dvf.getCharacterCollator(
 							constant.getTypeServices().getCollationType()));

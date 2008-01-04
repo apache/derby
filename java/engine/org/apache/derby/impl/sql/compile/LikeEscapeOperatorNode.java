@@ -193,15 +193,10 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
             //or escape clauses in that order. If not, then it will take it's
             //collation from the compilation schema.
             if (!leftOperand.requiresTypeFromContext()) {
-            	receiver.getTypeServices().setCollationDerivation(
-            			leftOperand.getTypeServices().getCollationDerivation());
-            	receiver.getTypeServices().setCollationType(
-            			leftOperand.getTypeServices().getCollationType());
+                receiver.setCollationInfo(leftOperand.getTypeServices());
+
             } else if (rightOperand != null && !rightOperand.requiresTypeFromContext()) {
-            	receiver.getTypeServices().setCollationDerivation(
-            			rightOperand.getTypeServices().getCollationDerivation());
-            	receiver.getTypeServices().setCollationType(
-            			rightOperand.getTypeServices().getCollationType());            	
+                receiver.setCollationInfo(rightOperand.getTypeServices());          	
             } else {
     			receiver.setCollationUsingCompilationSchema(
     					StringDataValue.COLLATION_DERIVATION_IMPLICIT);            	
@@ -235,10 +230,7 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
             //By the time we come here, receiver will have correct collation
             //set on it and hence we can rely on it to get correct collation
             //for the other ? in LIKE clause
-			leftOperand.getTypeServices().setCollationDerivation(
-					receiver.getTypeServices().getCollationDerivation());
-			leftOperand.getTypeServices().setCollationType(
-        			receiver.getTypeServices().getCollationType());            	
+            leftOperand.setCollationInfo(receiver.getTypeServices());          	
         }
 
         /* 
@@ -267,10 +259,7 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
             //By the time we come here, receiver will have correct collation
             //set on it and hence we can rely on it to get correct collation
             //for the other ? in LIKE clause
-			rightOperand.getTypeServices().setCollationDerivation(
-					receiver.getTypeServices().getCollationDerivation());
-			rightOperand.getTypeServices().setCollationType(
-        			receiver.getTypeServices().getCollationType());            	
+            rightOperand.setCollationInfo(receiver.getTypeServices());    	
         }
 
         bindToBuiltIn();

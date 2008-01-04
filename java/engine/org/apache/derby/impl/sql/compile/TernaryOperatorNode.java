@@ -532,10 +532,7 @@ public class TernaryOperatorNode extends ValueNode
 			//character to be trimmed is also a parameter), then it will take 
 			//it's collation from the compilation schema.
             if (!leftOperand.requiresTypeFromContext()) {
-            	receiver.getTypeServices().setCollationDerivation(
-            			leftOperand.getTypeServices().getCollationDerivation());
-            	receiver.getTypeServices().setCollationType(
-            			leftOperand.getTypeServices().getCollationType());
+                receiver.setCollationInfo(leftOperand.getTypeServices());
             } else {
     			receiver.setCollationUsingCompilationSchema(
     					StringDataValue.COLLATION_DERIVATION_IMPLICIT);            	
@@ -551,10 +548,7 @@ public class TernaryOperatorNode extends ValueNode
             //By the time we come here, receiver will have correct collation
             //set on it and hence we can rely on it to get correct collation
             //for the ? for the character that needs to be used for trimming.
-			leftOperand.getTypeServices().setCollationDerivation(
-					receiver.getTypeServices().getCollationDerivation());
-			leftOperand.getTypeServices().setCollationType(
-        			receiver.getTypeServices().getCollationType());            	
+            leftOperand.setCollationInfo(receiver.getTypeServices());           	
 		}
 
 		bindToBuiltIn();
@@ -597,10 +591,7 @@ public class TernaryOperatorNode extends ValueNode
 		//Result of TRIM should pick up the collation of the character string
 		//that is getting trimmed (which is variable receiver) because it has
 		//correct collation set on it.
-		getTypeServices().setCollationDerivation(
-				receiver.getTypeServices().getCollationDerivation());
-		getTypeServices().setCollationType(
-				receiver.getTypeServices().getCollationType());
+        setCollationInfo(receiver.getTypeServices());
 
 		return this;
 	}
@@ -681,10 +672,7 @@ public class TernaryOperatorNode extends ValueNode
             //By the time we come here, receiver will have correct collation
             //set on it and hence we can rely on it to get correct collation
             //for this ? 
-			leftOperand.getTypeServices().setCollationDerivation(
-					receiver.getTypeServices().getCollationDerivation());
-			leftOperand.getTypeServices().setCollationType(
-        			receiver.getTypeServices().getCollationType());            	
+            leftOperand.setCollationInfo(receiver.getTypeServices());          	
 		}
 
 		/*
@@ -851,10 +839,7 @@ public class TernaryOperatorNode extends ValueNode
 		//Result of SUSBSTR should pick up the collation of the 1st argument
 		//to SUBSTR. The 1st argument to SUBSTR is represented by the variable
 		//receiver in this class.
-		getTypeServices().setCollationDerivation(
-				receiver.getTypeServices().getCollationDerivation());
-		getTypeServices().setCollationType(
-				receiver.getTypeServices().getCollationType());
+        setCollationInfo(receiver.getTypeServices());
 		return this;
 	}
 
