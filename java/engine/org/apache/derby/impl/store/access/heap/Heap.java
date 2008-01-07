@@ -575,12 +575,9 @@ public class Heap
      *
 	 * @return The dynamic information.
      *
-     * @param conglomId The identifier of the conglomerate to open.
-     *
 	 * @exception  StandardException  Standard exception policy.
      **/
-    public DynamicCompiledOpenConglomInfo getDynamicCompiledConglomInfo(
-    long        conglomId)
+    public DynamicCompiledOpenConglomInfo getDynamicCompiledConglomInfo()
 		throws StandardException
     {
         return(new OpenConglomerateScratchSpace(format_ids, collation_ids));

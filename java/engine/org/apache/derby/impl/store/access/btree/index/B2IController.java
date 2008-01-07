@@ -100,8 +100,7 @@ public class B2IController extends BTreeController
                     static_info.base_table_static_info, 
                     /* TODO - maintain a dynamic info for this */
                     ((Conglomerate) static_info.getConglom()).
-                        getDynamicCompiledConglomInfo(
-                            conglomerate.baseConglomerateId));
+                        getDynamicCompiledConglomInfo());
         }
         else
         {

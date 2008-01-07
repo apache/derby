@@ -694,7 +694,7 @@ public class RAMTransaction
     {
         return(
             findExistingConglomerate(
-                conglomId).getDynamicCompiledConglomInfo(conglomId));
+                conglomId).getDynamicCompiledConglomInfo());
     }
 
 

@@ -221,12 +221,9 @@ public interface Conglomerate extends Storable, DataValueDescriptor
      *
 	 * @return The dynamic information.
      *
-     * @param conglomId The identifier of the conglomerate to open.
-     *
 	 * @exception  StandardException  Standard exception policy.
      **/
-    public DynamicCompiledOpenConglomInfo getDynamicCompiledConglomInfo(
-    long        conglomId)
+    public DynamicCompiledOpenConglomInfo getDynamicCompiledConglomInfo()
 		throws StandardException;
 
     /**
