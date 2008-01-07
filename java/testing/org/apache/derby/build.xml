@@ -32,6 +32,7 @@
             source="1.5"
             target="1.5"
             fork="yes"
+            executable="${jdk16}/bin/javac"
             bootclasspath="${empty}"
             nowarn="on"
             debug="true"
