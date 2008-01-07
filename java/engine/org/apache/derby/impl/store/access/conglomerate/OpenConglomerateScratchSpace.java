@@ -31,7 +31,6 @@ import org.apache.derby.iapi.store.raw.Transaction;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 
 import org.apache.derby.iapi.services.io.FormatableBitSet;
-import org.apache.derby.iapi.services.loader.InstanceGetter;
 
 /**
 
@@ -56,7 +55,6 @@ public class OpenConglomerateScratchSpace
      * create new rows for export from this class.  This variable is for
      * use by get_row_for_export().
      **/
-    private FormatableBitSet        row_for_export_column_list;
     private DataValueDescriptor[]   row_for_export_template;
 
     /**
@@ -80,12 +78,24 @@ public class OpenConglomerateScratchSpace
     private int[]                   collation_ids;
 
 
-    /* scratch space used by ConglomerateController.delete and replace */
+    /**
+     * Scratch space used by <code>ConglomerateController</code>.
+     * 
+     * @see org.apache.derby.iapi.store.access.ConglomerateController#delete
+     * @see org.apache.derby.iapi.store.access.ConglomerateController#replace
+     */
     private RowPosition             scratch_row_position;
 
     /**************************************************************************
      * Constructors for This class:
      **************************************************************************
+     */
+
+    /**
+     * Creates a new scratch space.
+     *
+     * @param format_ids format identifiers for columns in the row
+     * @param collation_ids collation identifiers for the columns in the row
      */
     public OpenConglomerateScratchSpace(
     int[]   format_ids,
@@ -127,7 +137,7 @@ public class OpenConglomerateScratchSpace
             row_for_export_template = 
                 RowUtil.newTemplate(
                     rawtran.getDataValueFactory(), 
-                    row_for_export_column_list, format_ids, collation_ids);
+                    null, format_ids, collation_ids);
         }
 
         // Allocate a new row based on the class template.
@@ -209,17 +219,5 @@ public class OpenConglomerateScratchSpace
         }
 
         return(scratch_row_position);
-    }
-
-    /**
-     * Initialize scratch space for reuse by possibly different template.
-     * <p>
-     * Some data is only valid per statement.
-     **/
-    public void init(
-    FormatableBitSet export_column_list)
-    {
-        row_for_export_template       = null;
-        row_for_export_column_list    = null;
     }
 }
