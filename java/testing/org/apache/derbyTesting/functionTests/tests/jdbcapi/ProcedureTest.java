@@ -729,7 +729,12 @@ public class ProcedureTest extends BaseJDBCTestCase {
           "CREATE PROCEDURE PROC_WITH_SIDE_EFFECTS(ret INT) LANGUAGE JAVA " +
           "PARAMETER STYLE JAVA EXTERNAL NAME '" +
           ProcedureTest.class.getName() + ".procWithSideEffects' " +
-          "DYNAMIC RESULT SETS 2"
+          "DYNAMIC RESULT SETS 2",
+          
+          "CREATE PROCEDURE NESTED_RESULT_SETS(proctext VARCHAR(128)) LANGUAGE JAVA " +
+          "PARAMETER STYLE JAVA EXTERNAL NAME '" +
+          ProcedureTest.class.getName() + ".nestedDynamicResultSets' " +
+          "DYNAMIC RESULT SETS 6"
 
     };
 
@@ -842,6 +847,43 @@ public class ProcedureTest extends BaseJDBCTestCase {
         }
         c.close();
     }
+    
+    /**
+     * Method for a Java procedure that calls another procedure
+     * and just passes on the dynamic results from that call.
+     */
+    public static void nestedDynamicResultSets(String procedureText,
+            ResultSet[] rs1, ResultSet[] rs2, ResultSet[] rs3, ResultSet[] rs4,
+            ResultSet[] rs5, ResultSet[] rs6)
+    throws SQLException
+    {
+        Connection c = DriverManager.getConnection("jdbc:default:connection");
+        
+        CallableStatement cs = c.prepareCall("CALL " + procedureText);
+        
+        cs.execute();
+        
+        // Mix up the order of the result sets in the returned
+        // parameters, ensures order is defined by creation
+        // and not parameter order.
+        rs6[0] = cs.getResultSet();
+        if (!cs.getMoreResults(Statement.KEEP_CURRENT_RESULT))
+            return;
+        rs3[0] = cs.getResultSet();
+        if (!cs.getMoreResults(Statement.KEEP_CURRENT_RESULT))
+            return;
+        rs4[0] = cs.getResultSet();
+        if (!cs.getMoreResults(Statement.KEEP_CURRENT_RESULT))
+            return;
+        rs2[0] = cs.getResultSet();
+        if (!cs.getMoreResults(Statement.KEEP_CURRENT_RESULT))
+            return;
+        rs1[0] = cs.getResultSet();
+        if (!cs.getMoreResults(Statement.KEEP_CURRENT_RESULT))
+            return;
+        rs5[0] = cs.getResultSet();
+    
+    }
 
     
         /**
@@ -881,6 +923,14 @@ public class ProcedureTest extends BaseJDBCTestCase {
                 java.util.Arrays.fill(allRS, null);
                 checkCSCloseClosesResults(cs,allRS);
                 java.util.Arrays.fill(allRS, null);
+                
+                // a procedure that calls another procedure that returns
+                // dynamic result sets, see if the result sets are handled
+                // correctly through the nesting.
+                CallableStatement nestedCs = prepareCall(
+                        "CALL NESTED_RESULT_SETS('MRS.FIVEJP()')");
+                defaultGetMoreResults(nestedCs, allRS);
+                
         }
 
         
