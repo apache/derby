@@ -107,8 +107,8 @@ public class ProcedureTest extends BaseJDBCTestCase {
         throws SQLException
     {
         Statement stmt = createStatement();
-        int count = stmt.executeUpdate("CALL RETRIEVE_DYNAMIC_RESULTS(0)");
-        assertEquals("Wrong update count.", 0, count);
+        assertUpdateCount(stmt, 0, "CALL RETRIEVE_DYNAMIC_RESULTS(0)");
+        JDBC.assertNoMoreResults(stmt);
     }
 
     /**
@@ -196,8 +196,8 @@ public class ProcedureTest extends BaseJDBCTestCase {
         PreparedStatement ps =
             prepareStatement("CALL RETRIEVE_DYNAMIC_RESULTS(?)");
         ps.setInt(1, 0);
-        int count = ps.executeUpdate();
-        assertEquals("Wrong update count.", 0, count);
+        assertUpdateCount(ps, 0);
+        JDBC.assertNoMoreResults(ps);
     }
 
     /**
@@ -294,9 +294,8 @@ public class ProcedureTest extends BaseJDBCTestCase {
         CallableStatement cs =
             prepareCall("CALL RETRIEVE_DYNAMIC_RESULTS(?)");
         cs.setInt(1, 0);
-        int count = cs.executeUpdate();
-        assertEquals("Wrong update count.", 0, count);
-
+        assertUpdateCount(cs, 0);
+        JDBC.assertNoMoreResults(cs);
     }
 
     /**
@@ -330,11 +329,10 @@ public class ProcedureTest extends BaseJDBCTestCase {
         ResultSet rs = stmt.executeQuery("CALL PROC_WITH_SIDE_EFFECTS(1)");
         rs.close();
         rollback();
-        ResultSet tableRs = stmt.executeQuery("SELECT * FROM SIMPLE_TABLE");
-        // table should be empty after rollback
-        assertFalse("Side effects from stored procedure not rolled back.",
-                    tableRs.next());
-
+        
+        // Expect Side effects from stored procedure to be rolled back.
+        JDBC.assertEmpty(stmt.executeQuery("SELECT * FROM SIMPLE_TABLE"));
+ 
     }
 
     /**
@@ -347,10 +345,10 @@ public class ProcedureTest extends BaseJDBCTestCase {
         Statement stmt = createStatement();
         stmt.executeUpdate("CALL PROC_WITH_SIDE_EFFECTS(0)");
         rollback();
-        ResultSet rs = stmt.executeQuery("SELECT * FROM SIMPLE_TABLE");
-        // table should be empty after rollback
-        assertFalse("Side effects from stored procedure not rolled back.",
-                    rs.next());
+        
+        // Expect Side effects from stored procedure to be rolled back.
+        JDBC.assertEmpty(stmt.executeQuery("SELECT * FROM SIMPLE_TABLE"));
+ 
     }
 
     /**
@@ -374,9 +372,9 @@ public class ProcedureTest extends BaseJDBCTestCase {
         } catch (SQLException sqle) {
             assertNoResultSetFromExecuteQuery(sqle);
         }
-        ResultSet rs = stmt.executeQuery("SELECT * FROM SIMPLE_TABLE");
-        assertFalse("Side effects from stored procedure not rolled back.",
-                    rs.next());
+
+        // Expect Side effects from stored procedure to be rolled back.
+        JDBC.assertEmpty(stmt.executeQuery("SELECT * FROM SIMPLE_TABLE"));
     }
 
     /**
@@ -401,9 +399,9 @@ public class ProcedureTest extends BaseJDBCTestCase {
         } catch (SQLException sqle) {
             assertMultipleResultsFromExecuteQuery(sqle);
         }
-        ResultSet rs = stmt.executeQuery("SELECT * FROM SIMPLE_TABLE");
-        assertFalse("Side effects from stored procedure not rolled back.",
-                    rs.next());
+        // Expect Side effects from stored procedure to be rolled back.
+        JDBC.assertEmpty(stmt.executeQuery("SELECT * FROM SIMPLE_TABLE"));
+ 
     }
 
     /**
@@ -427,9 +425,9 @@ public class ProcedureTest extends BaseJDBCTestCase {
         } catch (SQLException sqle) {
             assertResultsFromExecuteUpdate(sqle);
         }
-        ResultSet rs = stmt.executeQuery("SELECT * FROM SIMPLE_TABLE");
-        assertFalse("Side effects from stored procedure not rolled back.",
-                    rs.next());
+        // Expect Side effects from stored procedure to be rolled back.
+        JDBC.assertEmpty(stmt.executeQuery("SELECT * FROM SIMPLE_TABLE"));
+ 
     }
 
     /**
@@ -456,9 +454,9 @@ public class ProcedureTest extends BaseJDBCTestCase {
             assertNoResultSetFromExecuteQuery(sqle);
         }
         Statement stmt = createStatement();
-        ResultSet rs = stmt.executeQuery("SELECT * FROM SIMPLE_TABLE");
-        assertFalse("Side effects from stored procedure not rolled back.",
-                    rs.next());
+        // Expect Side effects from stored procedure to be rolled back.
+        JDBC.assertEmpty(stmt.executeQuery("SELECT * FROM SIMPLE_TABLE"));
+ 
     }
 
     /**
@@ -486,10 +484,9 @@ public class ProcedureTest extends BaseJDBCTestCase {
             assertMultipleResultsFromExecuteQuery(sqle);
         }
         Statement stmt = createStatement();
-        ResultSet rs = stmt.executeQuery("SELECT * FROM SIMPLE_TABLE");
-        assertFalse("Side effects from stored procedure not rolled back.",
-                    rs.next());
-    }
+        // Expect Side effects from stored procedure to be rolled back.
+        JDBC.assertEmpty(stmt.executeQuery("SELECT * FROM SIMPLE_TABLE"));
+     }
 
     /**
      * Tests that the effects of executing a stored procedure with
@@ -516,9 +513,9 @@ public class ProcedureTest extends BaseJDBCTestCase {
             assertResultsFromExecuteUpdate(sqle);
         }
         Statement stmt = createStatement();
-        ResultSet rs = stmt.executeQuery("SELECT * FROM SIMPLE_TABLE");
-        assertFalse("Side effects from stored procedure not rolled back.",
-                    rs.next());
+        // Expect Side effects from stored procedure to be rolled back.
+        JDBC.assertEmpty(stmt.executeQuery("SELECT * FROM SIMPLE_TABLE"));
+ 
     }
 
     /**
@@ -548,6 +545,7 @@ public class ProcedureTest extends BaseJDBCTestCase {
     {
         Statement stmt = createStatement();
         stmt.executeUpdate("CALL RETRIEVE_CLOSED_RESULT()");
+        JDBC.assertNoMoreResults(stmt);
     }
 
     /**
@@ -588,6 +586,8 @@ public class ProcedureTest extends BaseJDBCTestCase {
         ps.setString(3, getTestConfiguration().getUserPassword());
         
         ps.executeUpdate();
+        
+        JDBC.assertNoMoreResults(ps);
     }
 
     // UTILITY METHODS
@@ -1013,34 +1013,18 @@ public class ProcedureTest extends BaseJDBCTestCase {
          */
         private void keepCurrentGetMoreResults(CallableStatement cs, ResultSet[] allRS) throws SQLException {
             cs.execute();
-            allRS[0] = cs.getResultSet();
-            allRS[0].next();
-            assertEquals(2,allRS[0].getInt(1));
-            cs.getMoreResults(Statement.KEEP_CURRENT_RESULT);
             
-            allRS[1] = cs.getResultSet();
-            allRS[1].next();
-            assertEquals(3,allRS[1].getInt(1));
-            cs.getMoreResults(Statement.KEEP_CURRENT_RESULT);
-          
-            allRS[2] = cs.getResultSet();
-            allRS[2].next();
-            assertEquals(4,allRS[2].getInt(1));
-            cs.getMoreResults(Statement.KEEP_CURRENT_RESULT);
-         
-            
-            allRS[3] = cs.getResultSet();
-            allRS[3].next();
-            assertEquals(5,allRS[3].getInt(1));
-            cs.getMoreResults(Statement.KEEP_CURRENT_RESULT);
-            
-
-            
-            allRS[4] = cs.getResultSet();
-            allRS[4].next();
-            assertEquals(6,allRS[4].getInt(1));
-            cs.getMoreResults(Statement.KEEP_CURRENT_RESULT);
-            
+            for (int i = 0; i < 5; i++)
+            {
+                allRS[i] = cs.getResultSet();
+                allRS[i].next();
+                assertEquals(2+i, allRS[i].getInt(1));
+                
+                if (i < 4)
+                    assertTrue(cs.getMoreResults(Statement.KEEP_CURRENT_RESULT));
+                else
+                    assertFalse(cs.getMoreResults(Statement.KEEP_CURRENT_RESULT));
+            }            
             
             // resultSets should still be open
             for (int i = 0; i < 5; i++)
@@ -1049,31 +1033,18 @@ public class ProcedureTest extends BaseJDBCTestCase {
 
         private void closeCurrentGetMoreResults(CallableStatement cs, ResultSet[] allRS) throws SQLException {
             cs.execute();
-            allRS[0] = cs.getResultSet();
-            allRS[0].next();
-            assertEquals(2,allRS[0].getInt(1));
-            cs.getMoreResults(Statement.CLOSE_CURRENT_RESULT);
             
-            allRS[1] = cs.getResultSet();
-            allRS[1].next();
-            assertEquals(3,allRS[1].getInt(1));
-            cs.getMoreResults(Statement.CLOSE_CURRENT_RESULT);
-          
-            allRS[2] = cs.getResultSet();
-            allRS[2].next();
-            assertEquals(4,allRS[2].getInt(1));
-            cs.getMoreResults(Statement.CLOSE_CURRENT_RESULT);
-            
-            allRS[3] = cs.getResultSet();
-            allRS[3].next();
-            assertEquals(5,allRS[3].getInt(1));
-            cs.getMoreResults(Statement.CLOSE_CURRENT_RESULT);
-
-            
-            allRS[4] = cs.getResultSet();
-            allRS[4].next();
-            assertEquals(6,allRS[4].getInt(1));
-            cs.getMoreResults(Statement.CLOSE_CURRENT_RESULT);
+            for (int i = 0; i < 5; i++)
+            {
+                allRS[i] = cs.getResultSet();
+                allRS[i].next();
+                assertEquals(2+i, allRS[i].getInt(1));
+                
+                if (i < 4)
+                    assertTrue(cs.getMoreResults(Statement.CLOSE_CURRENT_RESULT));
+                else
+                    assertFalse(cs.getMoreResults(Statement.CLOSE_CURRENT_RESULT));
+            }
             
             // verify resultSets are closed
             for (int i = 0; i < 5; i++)
@@ -1091,31 +1062,19 @@ public class ProcedureTest extends BaseJDBCTestCase {
             // options of getMoreResults().
 
             cs.execute();
-            allRS[0] = cs.getResultSet();
-            allRS[0].next();
-            assertEquals(2,allRS[0].getInt(1));
-            cs.getMoreResults();
             
-            allRS[1] = cs.getResultSet();
-            allRS[1].next();
-            assertEquals(3,allRS[1].getInt(1));
-            cs.getMoreResults();
-            
-            allRS[2] = cs.getResultSet();
-            allRS[2].next();
-            assertEquals(4,allRS[2].getInt(1));
-            cs.getMoreResults();
-            
-            allRS[3] = cs.getResultSet();
-            allRS[3].next();
-            assertEquals(5,allRS[3].getInt(1));
-            cs.getMoreResults();
-            
-            allRS[4] = cs.getResultSet();
-            allRS[4].next();
-            assertEquals(6,allRS[4].getInt(1));
-            cs.getMoreResults();
-            
+            for (int i = 0; i < 5; i++)
+            {
+                allRS[i] = cs.getResultSet();
+                allRS[i].next();
+                assertEquals(2+i, allRS[i].getInt(1));
+                
+                if (i < 4)
+                    assertTrue(cs.getMoreResults());
+                else
+                    assertFalse(cs.getMoreResults());
+            } 
+                        
             // verify resultSets are closed
             for (int i = 0; i < 5; i++)
                 JDBC.assertClosed(allRS[i]);

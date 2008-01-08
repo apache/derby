@@ -507,6 +507,18 @@ public class JDBC {
     }
     
     /**
+     * Assert that the statement has no more results. Logic taken
+     * from javadoc for java.sql.Statement.getMoreResults.
+     * @param s Statement holding no results.
+     * @throws SQLException Exception checking results.
+     */
+    public static void assertNoMoreResults(Statement s) throws SQLException
+    {
+        Assert.assertTrue((s.getMoreResults() == false)
+                && (s.getUpdateCount() == -1));
+    }
+    
+    /**
      * Assert that a ResultSet representing generated keys is non-null
      * and of the correct type. This method leaves the ResultSet
      * open and does not fetch any date from it.
