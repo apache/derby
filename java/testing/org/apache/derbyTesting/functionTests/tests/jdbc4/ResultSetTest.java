@@ -1877,5 +1877,77 @@ public class ResultSetTest
         rs[0] = s.executeQuery("values (1), (2), (3)");
         c.close();
     }
+    
+    /**
+     * EOFException when reading from blob's binary stream
+     * and calling length() twice
+     * 
+     * Test with and without lengthless insert.
+     * 
+     * @throws SQLException
+     * @throws IOException
+     */
+    public void testDerby1368() throws SQLException, IOException
+    {
+        testDerby1368(true);
+        testDerby1368(false);
+    }
+    
+    /**
+     * EOFException when reading from blob's binary stream
+     * and calling length() twice
+     * 
+     * @param lengthless Insert data with lengthless method.
+     * @throws SQLException
+     * @throws IOException 
+     */
+    public void testDerby1368 (boolean lengthless) throws SQLException, IOException 
+    {
+        Statement stmt = createStatement();
+        stmt.execute("create table T1368 (ID char(32) PRIMARY KEY, DATA blob(2G) not null)");
+
+        // add row  
+        int length = 1024 * 1024;
+        byte[] data = new byte[length]; 
+        data[0] = 1; 
+        data[1] = 2; 
+        ByteArrayInputStream bais = new ByteArrayInputStream(data);
+
+        PreparedStatement ps = prepareStatement("insert into T1368 (ID, DATA) values (?, ?)"); 
+        
+        ps.setString(1, "id"); 
+        if (lengthless)
+            ps.setBinaryStream(2, bais);
+        else
+            ps.setBinaryStream(2, bais,length);
+        ps.execute(); 
+        ps.close(); 
+
+        // read row 
+         
+        ps = prepareStatement("select DATA from T1368 where ID = ?"); 
+        ps.setString(1, "id"); 
+        ResultSet rs = ps.executeQuery();          
+        rs.next(); 
+        Blob b = rs.getBlob(1); 
+
+        
+        // test output  
+        assertEquals(length,b.length());
+        InputStream in = b.getBinaryStream();
+        assertEquals(1, in.read());
+        //drain the stream
+        while (in.read() != -1 );
+        in.close(); 
+
+        in = b.getBinaryStream(); 
+        assertEquals(length,b.length());
+        assertEquals(1, in.read());
+ 
+        in.close(); 
+
+        rs.close(); 
+        stmt.executeUpdate("DROP TABLE T1368");
+    }
 }
 
