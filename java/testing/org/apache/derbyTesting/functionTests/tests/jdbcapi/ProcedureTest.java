@@ -75,6 +75,7 @@ public class ProcedureTest extends BaseJDBCTestCase {
         Statement stmt = createStatement();
         ResultSet rs = stmt.executeQuery("CALL RETRIEVE_DYNAMIC_RESULTS(1)");
         assertNotNull("executeQuery() returned null.", rs);
+        assertSame(stmt, rs.getStatement());
         JDBC.assertDrainResultsHasData(rs);
     }
 
@@ -159,6 +160,7 @@ public class ProcedureTest extends BaseJDBCTestCase {
         ps.setInt(1, 1);
         ResultSet rs = ps.executeQuery();
         assertNotNull("executeQuery() returned null.", rs);
+        assertSame(ps, rs.getStatement());
         JDBC.assertDrainResultsHasData(rs);
 
     }
@@ -258,6 +260,7 @@ public class ProcedureTest extends BaseJDBCTestCase {
         cs.setInt(1, 1);
         ResultSet rs = cs.executeQuery();
         assertNotNull("executeQuery() returned null.", rs);
+        assertSame(cs, rs.getStatement());
         JDBC.assertDrainResultsHasData(rs);
     }
 
@@ -946,7 +949,8 @@ public class ProcedureTest extends BaseJDBCTestCase {
             int pass = 0;
             do {
 
-                    allRS[pass++] = cs.getResultSet();                
+                    allRS[pass++] = cs.getResultSet();      
+                    assertSame(cs, allRS[pass-1].getStatement());
                     // expect everything to stay open.                        
 
             } while (cs.getMoreResults(Statement.KEEP_CURRENT_RESULT));
@@ -972,7 +976,8 @@ public class ProcedureTest extends BaseJDBCTestCase {
             int pass = 0;
             do {
 
-                    allRS[pass++] = cs.getResultSet();                
+                    allRS[pass++] = cs.getResultSet();         
+                    assertSame(cs, allRS[pass-1].getStatement());
                     // expect everything to stay open.                        
 
             } while (cs.getMoreResults(Statement.KEEP_CURRENT_RESULT));
@@ -993,10 +998,12 @@ public class ProcedureTest extends BaseJDBCTestCase {
 
             //first two with KEEP_CURRENT_RESULT"
             allRS[0] = cs.getResultSet();
+            assertSame(cs, allRS[0].getStatement());
             boolean moreRS = cs.getMoreResults(Statement.KEEP_CURRENT_RESULT);
             if (!moreRS)
                     fail("FAIL - no second result set");
-            allRS[1] = cs.getResultSet();                
+            allRS[1] = cs.getResultSet();   
+            assertSame(cs, allRS[1].getStatement());
             // two open
             allRS[0].next();
             assertEquals(2,allRS[0].getInt(1));
@@ -1009,6 +1016,7 @@ public class ProcedureTest extends BaseJDBCTestCase {
                     fail("FAIL - no third result set");
             // first and third open
             allRS[2] = cs.getResultSet();
+            assertSame(cs, allRS[2].getStatement());
             assertEquals(2,allRS[0].getInt(1));
             JDBC.assertClosed(allRS[1]);
             allRS[2].next();
@@ -1020,6 +1028,7 @@ public class ProcedureTest extends BaseJDBCTestCase {
             if (!moreRS)
                     fail("FAIL - no fourth result set");
             allRS[3] = cs.getResultSet();
+            assertSame(cs, allRS[3].getStatement());
             allRS[3].next();
             // first, third and fourth open, second closed
             assertEquals(2,allRS[0].getInt(1));
@@ -1032,6 +1041,7 @@ public class ProcedureTest extends BaseJDBCTestCase {
             if (!moreRS)
                    fail("FAIL - no fifth result set");
             allRS[4] = cs.getResultSet();
+            assertSame(cs, allRS[4].getStatement());
             allRS[4].next();
             // only fifth open
             JDBC.assertClosed(allRS[0]);
@@ -1067,6 +1077,7 @@ public class ProcedureTest extends BaseJDBCTestCase {
             for (int i = 0; i < 5; i++)
             {
                 allRS[i] = cs.getResultSet();
+                assertSame(cs, allRS[i].getStatement());
                 allRS[i].next();
                 assertEquals(2+i, allRS[i].getInt(1));
                 
@@ -1087,6 +1098,7 @@ public class ProcedureTest extends BaseJDBCTestCase {
             for (int i = 0; i < 5; i++)
             {
                 allRS[i] = cs.getResultSet();
+                assertSame(cs, allRS[i].getStatement());
                 allRS[i].next();
                 assertEquals(2+i, allRS[i].getInt(1));
                 
@@ -1116,6 +1128,7 @@ public class ProcedureTest extends BaseJDBCTestCase {
             for (int i = 0; i < 5; i++)
             {
                 allRS[i] = cs.getResultSet();
+                assertSame(cs, allRS[i].getStatement());
                 allRS[i].next();
                 assertEquals(2+i, allRS[i].getInt(1));
                 

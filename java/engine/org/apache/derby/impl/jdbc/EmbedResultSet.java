@@ -4398,6 +4398,7 @@ public abstract class EmbedResultSet extends ConnectionChild
         
         if (owningStmt != null) {
 		    this.owningStmt = owningStmt;
+            this.applicationStmt = owningStmt.applicationStatement;
             this.localConn = owningStmt.getEmbedConnection();
         }
         else
