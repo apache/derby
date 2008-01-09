@@ -1522,6 +1522,7 @@ public class ResultSetTest
                 cs.setInt(1, holdabilities[procHoldability]);
                 cs.execute();
                 rs = cs.getResultSet();
+                assertSame(cs, rs.getStatement());
                 int holdability = rs.getHoldability();
                 assertEquals("holdability of ResultSet from stored proc: " + holdabilityString(holdability), holdabilities[procHoldability], holdability);
                 commit();
