@@ -32,7 +32,6 @@
             source="1.5"
             target="1.5"
             fork="yes"
-            executable="${jdk16}/bin/javac"
             bootclasspath="${empty}"
             nowarn="on"
             debug="true"
@@ -44,8 +43,7 @@
             srcdir="${derby.testing.src.dir}"
             destdir="${out.pptesting.dir}">
             <classpath>
-                <!-- Fix this to use the Java SE 5 classpath -->
-                <pathelement path="${java16compile.classpath}"/>
+                <pathelement path="${java15compile.classpath}"/>
                 <pathelement path="${junit}"/>
                 <pathelement path="${out.dir}"/>
             </classpath>

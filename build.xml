@@ -443,7 +443,7 @@
   </target>
 	
   <!-- Build the package private tests -->
-  <target name="pptesting" if="jdk16" depends="testing">
+  <target name="pptesting" depends="testing">
     <ant dir="${derby.testing.src.dir}/org/apache/derby"/>
   </target>
 
