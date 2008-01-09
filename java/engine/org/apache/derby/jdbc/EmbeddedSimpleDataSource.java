@@ -119,6 +119,7 @@ public final class EmbeddedSimpleDataSource implements DataSource {
 	 * No-arg constructor.
 	 */
 	public EmbeddedSimpleDataSource() {
+        update();
 	}
 
 	/*
