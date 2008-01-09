@@ -27,7 +27,7 @@ Contents
 2.1   Download source code
 2.2   Download required software
 2.2.1 Download and install Apache Ant 1.6.3 or higher
-2.2.2 Download and install Java Development Kit release 1.4.x
+2.2.2 Download and install Java Development Kits
 2.2.3 Download and install JUnit 3.8.*
 2.2.4 Download Java 6 Development Kit (Optional)
 2.2.5 Download J2ME/CDC/Foundation 1.0 and JSR169 jars (Optional)
@@ -370,6 +370,16 @@ to specify your environment and options:
       
       where ${jdk14.dir} is the directory name where you have 
       installed JDK 1.4.x. Check out section 2.2.2 of this document. 
+
+    - j15lib
+
+      This is a required variable which defines the location of
+      JDK 1.5.0. Define the variable as follows:
+
+          j15lib=${jdk15.dir}/jre/lib
+      
+      where ${jdk15.dir} is the directory name where you have 
+      installed JDK 1.5.0. Check out section 2.2.2 of this document. 
 
     - Optional - jdk16
 
