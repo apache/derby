@@ -538,6 +538,26 @@ public abstract class BaseJDBCTestCase
     public static boolean usingDerbyNet() {
         return TestConfiguration.getCurrent().getJDBCClient().isDB2Client();
     }
+    
+    /**
+     * Get the value of a database property using the default connection 
+     * @param propertyName Property key
+     * @return null if the property is not set at the database level,
+     * otherwise the value of the property.
+     * @throws SQLException
+     */
+    public String getDatabaseProperty(String propertyName) throws SQLException
+    {
+        PreparedStatement ps =  prepareStatement(
+             "VALUES SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY(?)");
+        
+        ps.setString(1, propertyName);
+        ResultSet rs = ps.executeQuery();
+        
+        rs.next();
+        
+        return rs.getString(1);
+    }
 
     /**
      * Assert equality between two <code>Blob</code> objects.

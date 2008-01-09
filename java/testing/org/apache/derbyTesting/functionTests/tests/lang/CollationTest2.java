@@ -311,43 +311,12 @@ public class CollationTest2 extends BaseJDBCTestCase
      * Private/Protected setup/utility methods of This class:
      **************************************************************************
      */
-
-    /**
-     * Assert that the query does not compile and throws
-     * a SQLException with the expected state.
-     * 
-     * @param conn      Connection to correct datatabase.
-     * @param sqlState  expected sql state.
-     * @param query     the query to compile.
-     */
-    private void assertCompileError(
-    Connection  conn,
-    String      sqlState, 
-    String      query) 
+    
+    protected void initializeConnection(Connection conn) throws SQLException
     {
-        try 
-        {
-            PreparedStatement pSt = conn.prepareStatement(query);
-
-            if (usingDerbyNet())
-            {
-                /* For JCC the prepares are deferred until execution,
-                 * so we have to actually execute in order to see the
-                 * expected error.  Note that we don't need to worry
-                 * about binding the parameters (if any); the compile
-                 * error should occur before the execution-time error
-                 * about unbound parameters.
-                 */
-                pSt.execute();
-            }
-            fail("expected compile error: " + sqlState);
-            pSt.close();
-        } 
-        catch (SQLException se) 
-        {
-            assertSQLState(sqlState, se);
-        }
+        conn.setAutoCommit(false);
     }
+
 
     /**
      * RESOLVE - unfinished LIKE test with dataset of all unicode characters
@@ -497,13 +466,12 @@ public class CollationTest2 extends BaseJDBCTestCase
     }
 
     private void checkLangBasedQuery(
-    Connection  conn,
     String      query, 
     String[][]  expectedResult,
     boolean     ordered) 
         throws SQLException 
     {
-        Statement s  = conn.createStatement();
+        Statement s  = createStatement();
         ResultSet rs = s.executeQuery(query);
 
         if (verbose_debug)
@@ -538,13 +506,9 @@ public class CollationTest2 extends BaseJDBCTestCase
                 JDBC.assertUnorderedResultSet(rs, expectedResult);
             }
         }
-
-        rs.close();
-        s.close();
     }
 
     private void checkParamQuery(
-    Connection  conn,
     String      query, 
     String[]      param,
     int    paramNumber,
@@ -552,7 +516,7 @@ public class CollationTest2 extends BaseJDBCTestCase
     boolean     ordered) 
         throws SQLException 
     {
-        PreparedStatement   ps = conn.prepareStatement(query);
+        PreparedStatement   ps = prepareStatement(query);
         for (int i=0; i < paramNumber;i++)
         {
         	ps.setString(i+1, param[i]);
@@ -590,17 +554,13 @@ public class CollationTest2 extends BaseJDBCTestCase
             else
                 JDBC.assertUnorderedResultSet(rs, expectedResult);
         }
-
-        rs.close();
-        ps.close();
-        conn.commit();
+        commit();
     }
 
     /**
      * Perform export using SYSCS_UTIL.SYSCS_EXPORT_TABLE procedure.
      */
     protected void doExportTable(
-    Connection  conn,
     String      schemaName, 
     String      tableName, 
     String      fileName, 
@@ -613,7 +573,7 @@ public class CollationTest2 extends BaseJDBCTestCase
         SupportFilesSetup.deleteFile(fileName);
 
         CallableStatement ps = 
-            conn.prepareCall(
+            prepareCall(
                 "call SYSCS_UTIL.SYSCS_EXPORT_TABLE (? , ? , ? , ?, ? , ?)");
         ps.setString(1, schemaName);
         ps.setString(2, tableName);
@@ -629,7 +589,6 @@ public class CollationTest2 extends BaseJDBCTestCase
      * Perform import using SYSCS_UTIL.SYSCS_IMPORT_TABLE procedure.
      */
     protected void doImportTable(
-    Connection  conn,
     String      schemaName, 
     String      tableName, 
     String      fileName, 
@@ -640,7 +599,7 @@ public class CollationTest2 extends BaseJDBCTestCase
         throws SQLException 
     {
         CallableStatement ps = 
-            conn.prepareCall(
+            prepareCall(
                 "call SYSCS_UTIL.SYSCS_IMPORT_TABLE (?, ?, ?, ?, ?, ?, ?)");
         ps.setString(1, schemaName);
         ps.setString(2, tableName);
@@ -743,26 +702,10 @@ public class CollationTest2 extends BaseJDBCTestCase
         return(ret_order);
     }
 
-    private boolean isDatabaseBasicCollation(Connection conn)
+    private boolean isDatabaseBasicCollation()
         throws SQLException
-    {
-        PreparedStatement ps = 
-            conn.prepareStatement(
-                "VALUES SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY" + 
-                    "('derby.database.collation')");
-
-        ResultSet rs = ps.executeQuery();
-
-        Assert.assertTrue(rs.next());
-
-        String collation = rs.getString(1);
-
-        Assert.assertFalse(rs.next());
-
-        rs.close();
-        ps.close();
-
-        return(collation.equals("UCS_BASIC"));
+    {       
+        return "UCS_BASIC".equals(getDatabaseProperty("derby.database.collation"));
     }
 
 
@@ -771,17 +714,16 @@ public class CollationTest2 extends BaseJDBCTestCase
      **************************************************************************
      */
 
-    private void setUpTable(Connection conn) throws SQLException 
+    private void setUpTable() throws SQLException 
     {
-        Statement s = conn.createStatement();
+        Statement s = createStatement();
         s.execute(
             "CREATE TABLE CUSTOMER(" +
                 "D1 CHAR(200), D2 CHAR(200), D3 CHAR(200), D4 INT, " + 
                 "ID INT, NAME VARCHAR(40), NAME2 VARCHAR(40))");
 
-        conn.setAutoCommit(false);
         PreparedStatement ps = 
-            conn.prepareStatement("INSERT INTO CUSTOMER VALUES(?,?,?,?,?,?,?)");
+            prepareStatement("INSERT INTO CUSTOMER VALUES(?,?,?,?,?,?,?)");
 
         for (int i = 0; i < NAMES.length; i++)
         {
@@ -795,16 +737,12 @@ public class CollationTest2 extends BaseJDBCTestCase
             ps.executeUpdate();
         }
 
-        conn.commit();
-        ps.close();
-        s.close();
+        commit();
     }
 
-    private void setUpLikeTable(Connection conn) throws SQLException 
+    private void setUpLikeTable() throws SQLException 
     {
-        conn.setAutoCommit(false);
-
-        Statement s = conn.createStatement();
+        Statement s = createStatement();
         s.execute(
             "CREATE TABLE CUSTOMER ("              +
                 "NAME_CHAR          CHAR(10), "    +
@@ -814,7 +752,7 @@ public class CollationTest2 extends BaseJDBCTestCase
                 "ID                 INT)");
 
         PreparedStatement ps = 
-            conn.prepareStatement("INSERT INTO CUSTOMER VALUES(?,?,?,?,?)");
+            prepareStatement("INSERT INTO CUSTOMER VALUES(?,?,?,?,?)");
 
         for (int i = 0; i < LIKE_NAMES.length; i++)
         {
@@ -828,6 +766,7 @@ public class CollationTest2 extends BaseJDBCTestCase
 
         ps.close();
         s.close();
+        commit();
     }
 
     
@@ -931,17 +870,6 @@ public class CollationTest2 extends BaseJDBCTestCase
         s.close();
     }
 
-
-    private void dropLikeTable(Connection conn) 
-        throws SQLException 
-    {
-        Statement s = conn.createStatement();
-	
-        s.execute("DROP TABLE CUSTOMER");     
-        s.close();
-
-    }
-
     /**************************************************************************
      * run*() tests, called from the actual test*() tests.
      **************************************************************************
@@ -955,31 +883,19 @@ public class CollationTest2 extends BaseJDBCTestCase
      * the IMPORT and EXPORT system procedures depend on. 
      * Currently on ibm and sun 1.4.2 jvm's this test fails.
      **/
-    private void runDERBY_2703(Connection conn, int db_index)
+    private void runDERBY_2703(int db_index)
         throws SQLException
     {
-        setUpTable(conn);
+        setUpTable();
 
         ResultSet rs = 
-            conn.getMetaData().getColumns(null, "APP", "CUSTOMER", "%");
+            getConnection().getMetaData().getColumns(null, "APP", "CUSTOMER", "%");
+        
+        int rowCount = JDBC.assertDrainResults(rs);
 
-        Assert.assertTrue("catch bug where no rows are returned.", rs.next());
+        Assert.assertTrue("catch bug where no rows are returned.", rowCount > 0);
 
-        if (verbose_debug)
-            System.out.println("column =" + rs.getString(4));
-
-        while (rs.next())
-        {
-            if (verbose_debug)
-                System.out.println("column =" + rs.getString(4));
-        }
-
-        // TODO should verify all columns are returned.
-
-        rs.close();
-
-        dropTable(conn);
-
+        dropTable();
     }
 
     /**************************************************************************
@@ -997,7 +913,6 @@ public class CollationTest2 extends BaseJDBCTestCase
      * @throws SQLException
      **/
     private void checkSimpleCompare(
-    Connection  conn,
     int[]       expected_order)
         throws SQLException
     {
@@ -1008,7 +923,6 @@ public class CollationTest2 extends BaseJDBCTestCase
         {
             // '<' test
             checkLangBasedQuery(
-                conn, 
                 "SELECT ID, NAME FROM CUSTOMER where NAME < '" + 
                     NAMES[expected_order[i]] + "' ORDER BY NAME",
                 full_row_set(
@@ -1020,7 +934,6 @@ public class CollationTest2 extends BaseJDBCTestCase
 
             // '<=' test
             checkLangBasedQuery(
-                conn, 
                 "SELECT ID, NAME FROM CUSTOMER where NAME <= '" + 
                     NAMES[expected_order[i]] + "' ORDER BY NAME",
                 full_row_set(
@@ -1032,7 +945,6 @@ public class CollationTest2 extends BaseJDBCTestCase
 
             // '=' test
             checkLangBasedQuery(
-                conn, 
                 "SELECT ID, NAME FROM CUSTOMER where NAME = '" + 
                     NAMES[expected_order[i]] + "' ORDER BY NAME",
                 full_row_set(
@@ -1044,7 +956,6 @@ public class CollationTest2 extends BaseJDBCTestCase
 
             // '>=' test
             checkLangBasedQuery(
-                conn, 
                 "SELECT ID, NAME FROM CUSTOMER where NAME >= '" + 
                     NAMES[expected_order[i]] + "' ORDER BY NAME",
                 full_row_set(
@@ -1056,8 +967,7 @@ public class CollationTest2 extends BaseJDBCTestCase
 
 
             // '>' test
-            checkLangBasedQuery(
-                conn, 
+            checkLangBasedQuery( 
                 "SELECT ID, NAME FROM CUSTOMER where NAME > '" + 
                     NAMES[expected_order[i]] + "' ORDER BY NAME",
                 full_row_set(
@@ -1071,7 +981,6 @@ public class CollationTest2 extends BaseJDBCTestCase
 
             // '<' test
             checkParamQuery(
-                conn, 
                 "SELECT ID, NAME FROM CUSTOMER where NAME < ? ORDER BY NAME",
                 new String[] {NAMES[expected_order[i]]},
                 1,
@@ -1084,7 +993,6 @@ public class CollationTest2 extends BaseJDBCTestCase
 
             // '<=' test
             checkParamQuery(
-                conn, 
                 "SELECT ID, NAME FROM CUSTOMER where NAME <= ? ORDER BY NAME",
                 new String[] {NAMES[expected_order[i]]},
                 1,
@@ -1097,7 +1005,6 @@ public class CollationTest2 extends BaseJDBCTestCase
 
             // '=' test
             checkParamQuery(
-                conn, 
                 "SELECT ID, NAME FROM CUSTOMER where NAME = ? ORDER BY NAME",
                 new String[] {NAMES[expected_order[i]]},
                 1,
@@ -1110,7 +1017,6 @@ public class CollationTest2 extends BaseJDBCTestCase
 
             // '>=' test
             checkParamQuery(
-                conn, 
                 "SELECT ID, NAME FROM CUSTOMER where NAME >= ? ORDER BY NAME",
                 new String[] {NAMES[expected_order[i]]},
                 1,
@@ -1123,7 +1029,6 @@ public class CollationTest2 extends BaseJDBCTestCase
 
             // '>' test
             checkParamQuery(
-                conn, 
                 "SELECT ID, NAME FROM CUSTOMER where NAME > ? ORDER BY NAME",
                 new String[] {NAMES[expected_order[i]]},
                 1,
@@ -1146,13 +1051,12 @@ public class CollationTest2 extends BaseJDBCTestCase
      * @throws SQLException
      **/
     private void checkTwoPersistentCompare(
-    Connection  conn,
     int[]       expected_order)
         throws SQLException
     {
-        Statement s  = conn.createStatement();
+        Statement s  = createStatement();
 
-        conn.commit();
+        commit();
         s.execute(
             "ALTER TABLE CUSTOMER ADD COLUMN TWO_CHECK_CHAR CHAR(40)");
         s.execute(
@@ -1160,13 +1064,13 @@ public class CollationTest2 extends BaseJDBCTestCase
 
         // Set CHAR field to be third item im expected order array
         PreparedStatement   ps = 
-            conn.prepareStatement("UPDATE CUSTOMER SET TWO_CHECK_CHAR = ?"); 
+            prepareStatement("UPDATE CUSTOMER SET TWO_CHECK_CHAR = ?"); 
         ps.setString(1, NAMES[expected_order[3]]);
         ps.executeUpdate();
 
         // Set VARCHAR field to be third item im expected order array
         ps = 
-            conn.prepareStatement("UPDATE CUSTOMER SET TWO_CHECK_VARCHAR = ?"); 
+            prepareStatement("UPDATE CUSTOMER SET TWO_CHECK_VARCHAR = ?"); 
 
         ps.setString(1, NAMES[expected_order[3]]);
         ps.executeUpdate();
@@ -1174,7 +1078,6 @@ public class CollationTest2 extends BaseJDBCTestCase
         // check persistent compared to persistent - VARCHAR TO CHAR, 
         // should return rows bigger than 3rd in expected order.
         checkLangBasedQuery(
-            conn, 
             "SELECT ID, NAME FROM CUSTOMER WHERE NAME > TWO_CHECK_CHAR ORDER BY NAME",
             full_row_set(
                 expected_order,
@@ -1186,7 +1089,6 @@ public class CollationTest2 extends BaseJDBCTestCase
         // check persistent compared to persistent - CHAR TO VARCHAR, 
         // should return rows bigger than 3rd in expected order.
         checkLangBasedQuery(
-            conn, 
             "SELECT ID, NAME FROM CUSTOMER WHERE TWO_CHECK_CHAR < NAME ORDER BY NAME",
             full_row_set(
                 expected_order,
@@ -1198,7 +1100,6 @@ public class CollationTest2 extends BaseJDBCTestCase
         // check persistent compared to persistent - VARCHAR TO VARCHAR, 
         // should return rows bigger than 3rd in expected order.
         checkLangBasedQuery(
-            conn, 
             "SELECT ID, NAME FROM CUSTOMER WHERE NAME > TWO_CHECK_VARCHAR ORDER BY NAME",
             full_row_set(
                 expected_order,
@@ -1209,8 +1110,7 @@ public class CollationTest2 extends BaseJDBCTestCase
 
         // check persistent compared to persistent - CHAR TO CHAR, 
         // should return rows bigger than 3rd in expected order.
-        checkLangBasedQuery(
-            conn, 
+        checkLangBasedQuery( 
             "SELECT ID, NAME FROM CUSTOMER WHERE D3 > TWO_CHECK_CHAR ORDER BY NAME",
             full_row_set(
                 expected_order,
@@ -1220,37 +1120,32 @@ public class CollationTest2 extends BaseJDBCTestCase
             true);
 
         // put back data the way it was on entry to test.
-        conn.rollback();
+        rollback();
     }
 
 
 
-    private void dropTable(Connection conn) throws SQLException 
+    private void dropTable() throws SQLException 
     {
-        Statement s = conn.createStatement();
-	
-        s.execute("DROP TABLE CUSTOMER");     
-        s.close();
+        dropTable("CUSTOMER");
     }
 
     private void runQueries(
-    Connection  conn,
     int         db_index,
     String      create_idx_qry,
     String      idx_name)
         throws SQLException 
     {
-        Statement s = conn.createStatement();
+        Statement s = createStatement();
 
         if (create_idx_qry != null)
         {
             s.execute(create_idx_qry);
-            conn.commit();
+            commit();
         }
 
         // Simple check of getting all rows back in order
         checkLangBasedQuery(
-            conn, 
             "SELECT ID, NAME FROM CUSTOMER ORDER BY NAME",
             full_row_set(
                 EXPECTED_NAME_ORDER[db_index], 
@@ -1261,7 +1156,6 @@ public class CollationTest2 extends BaseJDBCTestCase
 
         // Simple check of getting all rows back in order
         checkLangBasedQuery(
-            conn, 
             "SELECT ID, NAME FROM CUSTOMER ORDER BY NAME, ID",
             full_row_set(
                 EXPECTED_NAME_ORDER[db_index], 
@@ -1272,7 +1166,6 @@ public class CollationTest2 extends BaseJDBCTestCase
 
         // Simple check of getting all rows back in opposite order
         checkLangBasedQuery(
-            conn, 
             "SELECT ID, NAME FROM CUSTOMER ORDER BY NAME DESC",
             full_row_set(
                 EXPECTED_NAME_ORDER[db_index], 
@@ -1282,15 +1175,15 @@ public class CollationTest2 extends BaseJDBCTestCase
             true);
 
         // Check <, <=, =, >=, > operators on constant vs. column
-        checkSimpleCompare(conn, EXPECTED_NAME_ORDER[db_index]);
+        checkSimpleCompare(EXPECTED_NAME_ORDER[db_index]);
 
         // Check compare of 2 persistent values, using join
-        checkTwoPersistentCompare(conn, EXPECTED_NAME_ORDER[db_index]);
+        checkTwoPersistentCompare(EXPECTED_NAME_ORDER[db_index]);
 
         if (create_idx_qry != null)
             s.execute("DROP INDEX " + idx_name);
 
-        conn.commit();
+        commit();
     }
 
     /**
@@ -1300,11 +1193,10 @@ public class CollationTest2 extends BaseJDBCTestCase
      * @throws SQLException
      **/
     private void runLikeTests(
-    Connection  conn,
     int         db_index)
         throws SQLException
     {
-        setUpLikeTable(conn);
+        setUpLikeTable();
 
         for (int i = 0; i < LIKE_TEST_CASES.length; i++)
         {
@@ -1316,7 +1208,6 @@ public class CollationTest2 extends BaseJDBCTestCase
 
             // varchar column - constant pattern
             checkLangBasedQuery(
-                conn,
                 "SELECT ID, NAME_VARCHAR FROM CUSTOMER " + 
                     "WHERE NAME_VARCHAR LIKE '" + LIKE_TEST_CASES[i] + "'",
                 full_row_single_value(
@@ -1326,7 +1217,6 @@ public class CollationTest2 extends BaseJDBCTestCase
 
             // varchar column - parameter pattern
             checkParamQuery(
-                conn,
                 "SELECT ID, NAME_VARCHAR FROM CUSTOMER " + 
                     "WHERE NAME_VARCHAR LIKE ?",
                 new String[] {LIKE_TEST_CASES[i]},
@@ -1338,7 +1228,6 @@ public class CollationTest2 extends BaseJDBCTestCase
 
             // long varchar column - constant
             checkLangBasedQuery(
-                conn,
                 "SELECT ID, NAME_LONGVARCHAR FROM CUSTOMER " + 
                     "WHERE NAME_LONGVARCHAR LIKE '" + LIKE_TEST_CASES[i] + "'",
                 full_row_single_value(
@@ -1348,7 +1237,6 @@ public class CollationTest2 extends BaseJDBCTestCase
 
             // long varchar column - parameter
             checkParamQuery(
-                conn,
                 "SELECT ID, NAME_LONGVARCHAR FROM CUSTOMER " + 
                     "WHERE NAME_LONGVARCHAR LIKE ?",
                 new String[] {LIKE_TEST_CASES[i]},
@@ -1360,7 +1248,6 @@ public class CollationTest2 extends BaseJDBCTestCase
 
             // clob column - constant
             checkLangBasedQuery(
-                conn,
                 "SELECT ID, NAME_CLOB FROM CUSTOMER WHERE NAME_CLOB LIKE " +
                     "'" + LIKE_TEST_CASES[i] + "'",
                 full_row_single_value(
@@ -1370,7 +1257,6 @@ public class CollationTest2 extends BaseJDBCTestCase
 
             // clob column - parameter
             checkParamQuery(
-                conn,
                 "SELECT ID, NAME_CLOB FROM CUSTOMER WHERE NAME_CLOB LIKE ?",
                 new String[] {LIKE_TEST_CASES[i]},
                 1,
@@ -1382,7 +1268,6 @@ public class CollationTest2 extends BaseJDBCTestCase
             // char column, char includes blank padding so alter all these
             // tests cases to match for blanks at end also.
             checkLangBasedQuery(
-                conn,
                 "SELECT ID, NAME_CHAR FROM CUSTOMER WHERE NAME_CHAR LIKE " + 
                     "'" + LIKE_CHAR_TEST_CASES[i] + "%'",
                 full_row_single_value(
@@ -1393,7 +1278,6 @@ public class CollationTest2 extends BaseJDBCTestCase
             // char column, char includes blank padding so alter all these
             // tests cases to match for blanks at end also.
             checkParamQuery(
-                conn,
                 "SELECT ID, NAME_CHAR FROM CUSTOMER WHERE NAME_CHAR LIKE ?",
                 new String[] {LIKE_CHAR_TEST_CASES[i] + "%"},
                 1,
@@ -1415,46 +1299,46 @@ public class CollationTest2 extends BaseJDBCTestCase
         String zero_row_syscat_query_param3 = 
             "SELECT count(*) from SYS.SYSCOLUMNS where ? like ?";
 
-        if (!isDatabaseBasicCollation(conn))
+        if (!isDatabaseBasicCollation())
         {
             // collation of 'fred' picked up from current schema which is
             // territory based collation, but system column will have basic
             // collation.
 
-            assertCompileError(conn, "42ZA2", zero_row_syscat_query1);
-            assertCompileError(conn, "42ZA2", zero_row_syscat_query2);
+            assertCompileError("42ZA2", zero_row_syscat_query1);
+            assertCompileError("42ZA2", zero_row_syscat_query2);
             //The following 2 queries will work because ? in the query will
             //take it's collation from the context, which in this case would
             //mean from COLUMNNAME column in SYS.SYSCOLUMNS
             //
             checkParamQuery(
-                    conn, zero_row_syscat_query_param1, 
+                    zero_row_syscat_query_param1, 
                     new String[] {"nonmatchiing"}, 1, null, true);
             checkParamQuery(
-                    conn, zero_row_syscat_query_param2, 
+                    zero_row_syscat_query_param2, 
                     new String[] {"nonmatchiing"}, 1, null, true);
             checkParamQuery(
-                    conn, zero_row_syscat_query_param3, 
+                    zero_row_syscat_query_param3, 
                     new String[] {"nonmatching", "matching"}, 2, 
                     new String[][] {{"0"}}, true);
         }
         else
         {
-            checkLangBasedQuery(conn, zero_row_syscat_query1, null, true);
-            checkLangBasedQuery(conn, zero_row_syscat_query2, null, true);
+            checkLangBasedQuery(zero_row_syscat_query1, null, true);
+            checkLangBasedQuery(zero_row_syscat_query2, null, true);
             checkParamQuery(
-                    conn, zero_row_syscat_query_param1, 
+                    zero_row_syscat_query_param1, 
                     new String[] {"nonmatchiing"}, 1, null, true);
             checkParamQuery(
-                    conn, zero_row_syscat_query_param2, 
+                    zero_row_syscat_query_param2, 
                     new String[] {"nonmatchiing"}, 1, null, true);
             checkParamQuery(
-                    conn, zero_row_syscat_query_param3, 
+                    zero_row_syscat_query_param3, 
                     new String[] {"nonmatching", "123"}, 2, 
                     new String[][] {{"0"}}, true);
         }
 
-        dropLikeTable(conn);
+        dropTable();
     }
 
 
@@ -1465,14 +1349,12 @@ public class CollationTest2 extends BaseJDBCTestCase
      * T10: alter table compress with indexes
      **/
     private void runAlterTableCompress(
-    Connection  conn,
     int         db_index)
         throws SQLException 
     {
-        Statement s = conn.createStatement();
+        Statement s = createStatement();
 
-        setUpTable(conn);
-        conn.commit();
+        setUpTable();
 
         s.execute("CREATE INDEX IDX1 ON CUSTOMER (NAME)");
         s.execute("CREATE INDEX IDX2 ON CUSTOMER (NAME, ID)");
@@ -1480,18 +1362,18 @@ public class CollationTest2 extends BaseJDBCTestCase
         s.execute("CREATE INDEX IDX4 ON CUSTOMER (ID)");
         s.execute("CREATE INDEX IDX5 ON CUSTOMER (ID, NAME, D1, D2, D3)");
 
-        conn.commit();
+        commit();
 
         // execute alter table compress which will build all new indexes and
         // base conglomerates, verify collation info correctly gets into new
         // entities.
-        CallableStatement call_stmt = conn.prepareCall(
+        CallableStatement call_stmt = prepareCall(
             " call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('APP', 'CUSTOMER', 1)");
         assertUpdateCount(call_stmt, 0);
  
-        conn.commit();
+        commit();
 
-        runQueries(conn, db_index, null, null);
+        runQueries(db_index, null, null);
 
         s.execute("DROP INDEX IDX1 ");
         s.execute("DROP INDEX IDX2 ");
@@ -1500,12 +1382,12 @@ public class CollationTest2 extends BaseJDBCTestCase
         s.execute("DROP INDEX IDX5 ");
 
         // let's test abort get's back to right collation also.
-        conn.rollback();
+        rollback();
 
-        runQueries(conn, db_index, null, null);
+        runQueries(db_index, null, null);
 
-        dropTable(conn);
-        conn.commit();
+        dropTable();
+        commit();
     }
 
     /**
@@ -1525,19 +1407,18 @@ public class CollationTest2 extends BaseJDBCTestCase
     {
         Statement s = conn.createStatement();
 
-        setUpTable(conn);
-        conn.commit();
+        setUpTable();
 
         s.execute("ALTER TABLE CUSTOMER DROP COLUMN D1");
-        runQueries(conn, db_index, null, null);
+        runQueries(db_index, null, null);
 
         s.execute("CREATE INDEX IDX1 ON CUSTOMER (NAME)");
         s.execute("ALTER TABLE CUSTOMER DROP COLUMN D2");
-        runQueries(conn, db_index, null, null);
+        runQueries(db_index, null, null);
         conn.rollback();
 
-        dropTable(conn);
-        conn.commit();
+        dropTable();
+        commit();
     }
 
     /**
@@ -1551,27 +1432,24 @@ public class CollationTest2 extends BaseJDBCTestCase
      * T12: alter table add column with index
      **/
     private void runAlterTableAddColumn(
-    Connection  conn,
     int         db_index)
         throws SQLException 
     {
-        Statement s = conn.createStatement();
+        Statement s = createStatement();
 
-        setUpTable(conn);
-
-        conn.commit();
+        setUpTable();
 
         s.execute("ALTER TABLE CUSTOMER DROP COLUMN NAME");
         s.execute("ALTER TABLE CUSTOMER ADD COLUMN NAME CHAR(40)");
         s.execute("UPDATE CUSTOMER SET NAME = D1");
-        runQueries(conn, db_index, null, null);
+        runQueries(db_index, null, null);
 
         s.execute("CREATE INDEX IDX1 ON CUSTOMER (NAME)");
-        runQueries(conn, db_index, null, null);
+        runQueries(db_index, null, null);
 
-        dropTable(conn);
+        dropTable();
 
-        conn.commit();
+        commit();
     }
 
     /**
@@ -1588,33 +1466,32 @@ public class CollationTest2 extends BaseJDBCTestCase
      * T14: (DONE) bulk insert replace, with and without indexes
      **/
     private void runBulkInsert(
-    Connection  conn,
     int         db_index)
         throws SQLException 
     {
-        Statement s = conn.createStatement();
+        Statement s = createStatement();
 
-        setUpTable(conn);
+        setUpTable();
 
         // export CUSTOMER date to names.dat
         String fileName =
             (SupportFilesSetup.getReadWrite("names.dat")).getPath();
 
-        doExportTable(conn, "APP", "CUSTOMER", fileName, null, null, "UTF-16");
+        doExportTable("APP", "CUSTOMER", fileName, null, null, "UTF-16");
 
-        conn.commit();
+        commit();
 
 
         // bulk insert to empty table, no indexes without replace 
         // (last arg 0 = no replace).
         s.execute("DELETE FROM CUSTOMER");
-        conn.commit();
+        commit();
 
         // checkGetColumn(conn);
 
         doImportTable(
-            conn, "APP", "CUSTOMER", fileName, null, null, "UTF-16", 0);
-        runQueries(conn, db_index, null, null);
+            "APP", "CUSTOMER", fileName, null, null, "UTF-16", 0);
+        runQueries(db_index, null, null);
 
         // bulk insert to empty table, with indexes without replace 
         // (last arg 0 = no replace).
@@ -1625,8 +1502,8 @@ public class CollationTest2 extends BaseJDBCTestCase
         s.execute("CREATE INDEX IDX4 ON CUSTOMER (ID)");
         s.execute("CREATE INDEX IDX5 ON CUSTOMER (ID, NAME, D1, D2, D3)");
         doImportTable(
-            conn, "APP", "CUSTOMER", fileName, null, null, "UTF-16", 0);
-        runQueries(conn, db_index, null, null);
+            "APP", "CUSTOMER", fileName, null, null, "UTF-16", 0);
+        runQueries(db_index, null, null);
         s.execute("DROP INDEX IDX1 ");
         s.execute("DROP INDEX IDX2 ");
         s.execute("DROP INDEX IDX3 ");
@@ -1637,10 +1514,10 @@ public class CollationTest2 extends BaseJDBCTestCase
         // import first to double the rows in the table.
         // (last arg to Import 1 = replace).
         doImportTable(
-            conn, "APP", "CUSTOMER", fileName, null, null, "UTF-16", 0);
+            "APP", "CUSTOMER", fileName, null, null, "UTF-16", 0);
         doImportTable(
-            conn, "APP", "CUSTOMER", fileName, null, null, "UTF-16", 1);
-        runQueries(conn, db_index, null, null);
+            "APP", "CUSTOMER", fileName, null, null, "UTF-16", 1);
+        runQueries(db_index, null, null);
 
         // bulk insert to non-empty table, indexes with replace, call 
         // import first to double the rows in the table.
@@ -1651,19 +1528,19 @@ public class CollationTest2 extends BaseJDBCTestCase
         s.execute("CREATE INDEX IDX4 ON CUSTOMER (ID)");
         s.execute("CREATE INDEX IDX5 ON CUSTOMER (ID, NAME, D1, D2, D3)");
         doImportTable(
-            conn, "APP", "CUSTOMER", fileName, null, null, "UTF-16", 0);
+            "APP", "CUSTOMER", fileName, null, null, "UTF-16", 0);
         doImportTable(
-            conn, "APP", "CUSTOMER", fileName, null, null, "UTF-16", 1);
-        runQueries(conn, db_index, null, null);
+            "APP", "CUSTOMER", fileName, null, null, "UTF-16", 1);
+        runQueries(db_index, null, null);
         s.execute("DROP INDEX IDX1 ");
         s.execute("DROP INDEX IDX2 ");
         s.execute("DROP INDEX IDX3 ");
         s.execute("DROP INDEX IDX4 ");
         s.execute("DROP INDEX IDX5 ");
 
-        dropTable(conn);
+        dropTable();
 
-        conn.commit();
+        commit();
     }
 
 
@@ -1761,11 +1638,10 @@ public class CollationTest2 extends BaseJDBCTestCase
      * to do with bad like optimization which can not be applied to collation
      * based like.
      **/
-    private void runDerby2670(
-    Connection conn)
+    private void runDerby2670()
         throws SQLException
     {
-        Statement s = conn.createStatement();
+        Statement s = createStatement();
 
         String[] rows = 
             { "Waagan", "W\u00E5han", "Wanvik", "W\u00E5gan", "ekstrabetaling",
@@ -1775,22 +1651,22 @@ public class CollationTest2 extends BaseJDBCTestCase
 
 
         s.executeUpdate("create table t (x varchar(20))");
-        PreparedStatement ps = conn.prepareStatement("insert into t values ?");
+        PreparedStatement ps = prepareStatement("insert into t values ?");
         for (int i = 0; i < rows.length; i++) {
             ps.setString(1, rows[i]);
             ps.executeUpdate();
         }
         ps.close();
 
-        Assert.assertTrue(
+        Assert.assertEquals(
             "source and result arrays do not match for derby2670",
-            derby2670_pattern_result.length == derby2670_pattern.length);
+            derby2670_pattern_result.length, derby2670_pattern.length);
 
         String like_qry = "select * from t where x like ";
         PreparedStatement ps_like = 
-            conn.prepareStatement("select * from t where x like ?");
+            prepareStatement("select * from t where x like ?");
         PreparedStatement ps_like_orderby = 
-            conn.prepareStatement("select * from t where x like ? order by x");
+            prepareStatement("select * from t where x like ? order by x");
 
         for (int i = 0; i < derby2670_pattern.length; i++)
         {
@@ -1798,13 +1674,13 @@ public class CollationTest2 extends BaseJDBCTestCase
             String qry = like_qry + "'" + derby2670_pattern[i] + "'";
 
             checkLangBasedQuery(
-                conn, qry, derby2670_pattern_result[i], false);
+                qry, derby2670_pattern_result[i], false);
 
             // add an order by 
             qry += " order by x";
 
             checkLangBasedQuery(
-                conn, qry, derby2670_pattern_result[i], false);
+                qry, derby2670_pattern_result[i], false);
 
             // try parameter for pattern
             ps_like.setString(1, derby2670_pattern[i]);
@@ -1841,13 +1717,13 @@ public class CollationTest2 extends BaseJDBCTestCase
             String qry = like_qry + "'" + derby2670_pattern[i] + "'";
 
             checkLangBasedQuery(
-                conn, qry, derby2670_pattern_result[i], false);
+                qry, derby2670_pattern_result[i], false);
 
             // add an order by 
             qry += " order by x";
 
             checkLangBasedQuery(
-                conn, qry, derby2670_pattern_result[i], false);
+                qry, derby2670_pattern_result[i], false);
 
             // try parameter for pattern
             ps_like.setString(1, derby2670_pattern[i]);
@@ -1879,7 +1755,7 @@ public class CollationTest2 extends BaseJDBCTestCase
 
         s.executeUpdate("drop table t");
 
-        conn.commit();
+        commit();
         
         // cleanup
         ps_like_orderby.close();
@@ -1899,61 +1775,60 @@ public class CollationTest2 extends BaseJDBCTestCase
      * @exception  SQLException
      **/
     private void runTestIter(
-    Connection  conn, 
     int         db_index) 
         throws SQLException 
     {
-        setUpTable(conn);
+        setUpTable();
 
         // run tests against base table no index, exercise heap path
         // Tests the following:
         // T0: Heap based compare using predicate pushing
         // T3: order by on heap using in memory sorter
-        runQueries(conn, db_index, null, null);
+        runQueries(db_index, null, null);
 
         // run tests against base table with non unique index
         // Tests the following:
         // T1: (DONE) Index based compare start/stop predicates on index
         runQueries(
-            conn, db_index, 
+            db_index, 
             "CREATE INDEX NAME_IDX ON CUSTOMER (NAME)", "NAME_IDX");
 
         // run tests against base table with only unique index
         runQueries(
-            conn, db_index, 
+            db_index, 
             "CREATE UNIQUE INDEX IDX ON CUSTOMER (NAME)", "IDX");
 
         // run tests against base table with non unique descending index
         runQueries(
-            conn, db_index, 
+            db_index, 
             "CREATE INDEX NAME_IDX ON CUSTOMER (NAME DESC)", "NAME_IDX");
 
         // run tests against base table with unique descending index
         runQueries(
-            conn, db_index, 
+            db_index, 
             "CREATE UNIQUE INDEX IDX ON CUSTOMER (NAME DESC)", "IDX");
 
         // run tests against base table with unique composite key
         runQueries(
-            conn, db_index, 
+            db_index, 
             "CREATE UNIQUE INDEX IDX ON CUSTOMER (NAME, ID)", "IDX");
 
-        dropTable(conn);
+        dropTable();
 
         // the following tests mess with column values and ddl, so they
         // are going to drop and recreate the small test data table.
-        runDERBY_2703(conn, db_index);
+        runDERBY_2703(db_index);
 
-        runAlterTableAddColumn(conn, db_index);
+        runAlterTableAddColumn(db_index);
 
-        runAlterTableCompress(conn, db_index);
+        runAlterTableCompress(db_index);
 
         // because of jvm issue described in DERBY-3055, do not
         // test this with J2ME/JSR169.
         if (JDBC.vmSupportsJDBC3())
-            runBulkInsert(conn, db_index);
+            runBulkInsert(db_index);
 
-        runLikeTests(conn, db_index);
+        runLikeTests(db_index);
 
 
         /*
@@ -1961,7 +1836,7 @@ public class CollationTest2 extends BaseJDBCTestCase
         runAlterTableDropColumn(conn, db_index);
         */
 
-        conn.commit();
+        commit();
     }
 
     /**************************************************************************
@@ -1971,29 +1846,25 @@ public class CollationTest2 extends BaseJDBCTestCase
 
     public void testDefaultCollation() throws SQLException
     {
-        Connection conn = getConnection();
-        assertTrue(isDatabaseBasicCollation(conn));
-        runTestIter(conn, TEST_DEFAULT);
+        assertTrue(isDatabaseBasicCollation());
+        runTestIter(TEST_DEFAULT);
     }
     public void testEnglishCollation() throws SQLException
     {
-        Connection conn = getConnection();
-        assertFalse(isDatabaseBasicCollation(conn));
-        runTestIter(conn, TEST_ENGLISH);
+        assertFalse(isDatabaseBasicCollation());
+        runTestIter(TEST_ENGLISH);
     }
 
     public void testPolishCollation() throws SQLException
     {
-        Connection conn = getConnection();
-        assertFalse(isDatabaseBasicCollation(conn));
-        runTestIter(conn, TEST_POLISH);
+        assertFalse(isDatabaseBasicCollation());
+        runTestIter(TEST_POLISH);
     }
     public void testNorwayCollation() throws SQLException
     {
-        Connection conn = getConnection();
-        assertFalse(isDatabaseBasicCollation(conn));
-        runDerby2670(conn);
-        runTestIter(conn, TEST_NORWAY);
+        assertFalse(isDatabaseBasicCollation());
+        runDerby2670();
+        runTestIter(TEST_NORWAY);
     }
     /**
      * Test creating a TERRITORY_BASED collated database by only setting
@@ -2007,32 +1878,19 @@ public class CollationTest2 extends BaseJDBCTestCase
      **/
     public void testDefaultJVMTerritoryCollation() throws SQLException
     {
-        boolean run_test = false;
-        int     db_index = -1;
-
         Locale locale = Locale.getDefault();
 
         if (locale.getLanguage().equals("en"))
         {
-            run_test = true;
-            db_index = TEST_ENGLISH;
+            testEnglishCollation();
         }
         else if (locale.getLanguage().equals("no"))
         {
-            run_test = true;
-            db_index = TEST_NORWAY;
+            testNorwayCollation();
         }
         else if (locale.getLanguage().equals("po"))
         {
-            run_test = true;
-            db_index = TEST_POLISH;
-        }
-
-        if (run_test)
-        {
-            Connection conn = getConnection();
-            assertFalse(isDatabaseBasicCollation(conn));
-            runTestIter(conn, db_index);
+            testPolishCollation();
         }
     }
     
