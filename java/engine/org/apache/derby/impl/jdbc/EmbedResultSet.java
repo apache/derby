@@ -133,7 +133,8 @@ public abstract class EmbedResultSet extends ConnectionChild
 	/**
 	 This activation is set by EmbedStatement
 	 for a single execution Activation. Ie.
-	 a ResultSet from a Statement.executeQuery().
+	 a ResultSet from a Statement.executeQuery() or
+     a ResultSet that is now a dynamic result set.
 	 In this case the closing of this ResultSet will close
 	 the activation or the finalization of the ResultSet
 	 without it being closed will mark the Activation as unused.
@@ -4419,6 +4420,16 @@ public abstract class EmbedResultSet extends ConnectionChild
 
 		this.owningStmt = owningStmt;
 		this.localConn = owningStmt.getEmbedConnection();
+        
+        // The activation that created these results now becomes
+        // a single use activation so it will be closed when this
+        // object is closed. Otherwise the activation would
+        // only be closed on garbage collection for any
+        // dynamic result set created by a PreparedStatement
+        // or CallableStatement. Dynamic result sets created
+        // by Statement objects will already be marked as
+        // single use.
+        this.singleUseActivation = theResults.getActivation();
 	}
 
 	/*
