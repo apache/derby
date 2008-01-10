@@ -23,17 +23,10 @@ package org.apache.derby.client;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.Enumeration;
 import java.util.Vector;
-import javax.sql.ConnectionEventListener;
 import javax.sql.StatementEventListener;
 import javax.sql.StatementEvent;
-import org.apache.derby.client.am.SqlException;
-import org.apache.derby.client.net.NetXAConnection;
 import org.apache.derby.jdbc.ClientBaseDataSource;
-import org.apache.derby.jdbc.ClientDataSource;
-import org.apache.derby.client.am.SqlException;
-import org.apache.derby.client.net.NetLogWriter;
 
 /**
  *
