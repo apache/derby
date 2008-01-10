@@ -75,6 +75,18 @@ class CollatorSQLClob extends SQLClob implements CollationElementsInterface
 		holderForCollationSensitiveInfo = 
 			new WorkHorseForCollatorDatatypes(collatorForCharacterDatatypes, this);
 	}
+
+	/**
+	 * Get the RuleBasedCollator for this instance of CollatorSQLClob. It 
+	 * will be used to do the collation.
+	 * 
+	 * @return	The Collator object which should be used for collation 
+	 * operation on this object
+	 */
+	protected RuleBasedCollator getCollatorForCollation() throws StandardException
+	{
+		return holderForCollationSensitiveInfo.getCollatorForCollation();
+	}
 	
 	/** @see CollationElementsInterface#getCollationElementsForString */
 	public int[] getCollationElementsForString() throws StandardException 
