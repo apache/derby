@@ -4121,13 +4121,8 @@ class DRDAConnThread extends Thread {
      * @throws SQLException
 	 */
 	private void writeSQLCINRD(DRDAStatement stmt) throws DRDAProtocolException,SQLException
-	{
-		ResultSet rs = null;
-        // todo ps is never used or closed - could this be a memory leak?
-        PreparedStatement ps = stmt.getPreparedStatement();
-		
-		if (!stmt.needsToSendParamData)
-			rs = stmt.getResultSet();
+	{		
+		ResultSet rs = stmt.getResultSet();
 
 		writer.createDssObject();
 		writer.startDdm(CodePoint.SQLCINRD);
