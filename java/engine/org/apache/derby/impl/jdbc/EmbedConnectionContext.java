@@ -133,4 +133,25 @@ class EmbedConnectionContext extends ContextImpl
 							false, (EmbedStatement) null, true);
 		return rs;
 	}
+
+    /**
+     * Process a ResultSet from a procedure to be a dynamic result,
+     * but one that will be closed due to it being inaccessible. We cannot simply
+     * close the ResultSet as it the nested connection that created
+     * it might be closed, leading to its close method being a no-op.
+     * This performs all the conversion (linking the ResultSet
+     * to a valid connection) required but does not close
+     * the ResultSet.
+     * 
+     *   @see EmbedStatement#processDynamicResult(EmbedConnection, java.sql.ResultSet, EmbedStatement)
+     */
+    public boolean processInaccessibleDynamicResult(java.sql.ResultSet resultSet) {
+        EmbedConnection conn = (EmbedConnection) connRef.get();
+        if (conn == null)
+            return false;
+        
+        // Pass in null as the Statement to own the ResultSet since
+        // we don't have one since the dynamic result will be inaccessible.
+        return EmbedStatement.processDynamicResult(conn, resultSet, null) != null;
+    }
 }
