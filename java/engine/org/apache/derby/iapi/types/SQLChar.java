@@ -2492,6 +2492,16 @@ readingLoop:
 		return ckey1.compareTo(ckey2);
 	}
 		
+	/**
+	 * This method gets called for the collation sensitive char classes ie
+	 * CollatorSQLChar, CollatorSQLVarchar, CollatorSQLLongvarchar,
+	 * CollatorSQLClob. These collation sensitive chars need to have the 
+	 * collation key in order to do string comparison. And the collation key
+	 * is obtained using the Collator object that these classes already have.
+	 * 
+	 * @return CollationKey obtained using Collator on the string
+	 * @throws StandardException
+	 */
 	protected CollationKey getCollationKey() throws StandardException
 	{
 		char tmpCharArray[];
@@ -2513,7 +2523,7 @@ readingLoop:
 			   rawData[lastNonspaceChar - 1] == '\u0020')
 			lastNonspaceChar--;			// count off the trailing spaces.
 
-		RuleBasedCollator rbc = getLocaleFinder().getCollator();		
+		RuleBasedCollator rbc = getCollatorForCollation();		
 		cKey = rbc.getCollationKey(new String(rawData, 0, lastNonspaceChar));
 
 		return cKey;
@@ -2746,6 +2756,11 @@ readingLoop:
 	private Locale getLocale() throws StandardException
 	{
 		return getLocaleFinder().getCurrentLocale();
+	}
+
+	protected RuleBasedCollator getCollatorForCollation() throws StandardException
+	{
+		return getLocaleFinder().getCollator();
 	}
 
 	protected LocaleFinder getLocaleFinder()
