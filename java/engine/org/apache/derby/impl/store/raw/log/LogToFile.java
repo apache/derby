@@ -425,6 +425,11 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
     // initialized if this Derby has the SLAVE role for this database
     private boolean inReplicationSlaveMode = false;
 
+    /** True if the database has been booted in replication slave pre
+     * mode, effectively turning off writes to the log file.
+     * @see SlaveFactory */
+    private boolean inReplicationSlavePreMode = false;
+
     private Object slaveRecoveryMonitor; // for synchronization in slave mode
 
     // The highest log file number the recovery thread is allowed to
@@ -3012,6 +3017,8 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
         if (mode != null && mode.equals(SlaveFactory.SLAVE_MODE)) {
             inReplicationSlaveMode = true; 
             slaveRecoveryMonitor = new Object();
+        } else if (mode != null && mode.equals(SlaveFactory.SLAVE_PRE_MODE)) {
+            inReplicationSlavePreMode = true;
         }
 
 		dataDirectory = startParams.getProperty(PersistentService.ROOT);
@@ -3621,6 +3628,13 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 			byte[] optionalData, int optionalDataOffset, int optionalDataLength) 
 		 throws StandardException
 	{
+        if (inReplicationSlavePreMode) {
+            // Return the *current* end of log without adding the log
+            // record to the log file. Effectively, this call to
+            // appendLogRecord does not do anything
+            return LogCounter.makeLogInstantAsLong(logFileNumber, endPosition);
+        }
+
 		long instant;
 		boolean testIncompleteLogWrite = false;
 
@@ -5039,17 +5053,6 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
         throws StandardException {
         this.masterFactory = masterFactory;
         synchronized(this) {
-            // checkpoint followed by flushAll ensures that all data
-            // and log are written on disk. After this, the database
-            // can be safely copied to the slave location provided
-            // that no clients perform operations on the database
-            // before a connection has been established with the
-            // slave. Note: this is a hack that will be removed once
-            // the repliation functionality is able to send the
-            // database from master to slave using the network
-            // connection.
-            rawStoreFactory.checkpoint();
-            flushAll();
             inReplicationMasterMode = true;
             logOut.setReplicationMasterRole(masterFactory);
         }
@@ -5082,6 +5085,9 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
     }
 
     /**
+     * Initializes logOut so that log received from the replication
+     * master can be appended to the log file.
+     *
      * Normally, logOut (the file log records are appended to) is set
      * up as part of the recovery process. When the database is booted
      * in replication slave mode, however, recovery will not get to
@@ -5113,7 +5119,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
         throws StandardException{
 
         if (SanityManager.DEBUG) {
-            SanityManager.ASSERT(!inReplicationSlaveMode, 
+            SanityManager.ASSERT(inReplicationSlaveMode, 
                                  "This method should only be used when"
                                  + " in slave replication mode");
         }

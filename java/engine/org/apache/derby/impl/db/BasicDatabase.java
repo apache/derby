@@ -111,7 +111,7 @@ import java.text.DateFormat;
 
 public class BasicDatabase implements ModuleControl, ModuleSupportable, PropertySetCallback, Database, JarReader
 {
-	private boolean		active;
+	protected boolean	active;
 	private AuthenticationService authenticationService;
 	protected AccessFactory af;
 	protected PropertyFactory pf;
@@ -132,7 +132,6 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 	private DateFormat timeFormat;
 	private DateFormat timestampFormat;
 	private UUID		myUUID;
-    private boolean inReplicationSlaveMode = false;
 
 	protected boolean lastToBoot; // is this class last to boot
 
@@ -141,19 +140,24 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 	 */
 
 	public boolean canSupport(Properties startParams) {
-        return Monitor.isDesiredCreateType(startParams, getEngineType());
+        boolean supported =
+            Monitor.isDesiredCreateType(startParams, getEngineType());
+
+        if (supported) {
+            String repliMode =
+                startParams.getProperty(SlaveFactory.REPLICATION_MODE);
+            if (repliMode != null &&
+                !repliMode.equals(SlaveFactory.SLAVE_PRE_MODE)) {
+                supported = false;
+            }
+        }
+
+        return supported;
 	}
 
 	public void boot(boolean create, Properties startParams)
 		throws StandardException
 	{
-
-        // Database is booted in replication slave mode. Make sure
-        // other clients are not able to connect
-        String slave = startParams.getProperty(SlaveFactory.REPLICATION_MODE);
-        if (slave != null && slave.equals(SlaveFactory.SLAVE_MODE)) {
-            inReplicationSlaveMode = true;
-        }
 
 		ModuleFactory monitor = Monitor.getMonitor();
 		if (create)
@@ -291,13 +295,6 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 	public LanguageConnectionContext setupConnection(ContextManager cm, String user, String drdaID, String dbname)
 		throws StandardException {
 
-        if (inReplicationSlaveMode) {
-            // do not allow connections to a database that is
-            // currently in replication slave move
-            throw StandardException.newException(
-                        SQLState.CANNOT_CONNECT_TO_DB_IN_SLAVE_MODE, dbname);
-        }
-
 		TransactionController tc = getConnectionTransaction(cm);
 
 		cm.setLocaleFinder(this);
@@ -346,7 +343,7 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 		DatabaseContext dc = new DatabaseContextImpl(cm, this);
 	}
 
-	public final AuthenticationService getAuthenticationService() {
+	public AuthenticationService getAuthenticationService() {
 
 		// Expected to find one - Sanity check being done at
 		// DB boot-up.

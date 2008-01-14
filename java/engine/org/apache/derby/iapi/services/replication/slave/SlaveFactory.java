@@ -23,7 +23,6 @@
 package org.apache.derby.iapi.services.replication.slave;
 
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.reference.Property;
 
 import org.apache.derby.iapi.store.raw.RawStoreFactory;
 import org.apache.derby.iapi.store.raw.log.LogFactory;
@@ -51,11 +50,11 @@ public interface SlaveFactory {
 
     /** Property key to specify the name of the database */
     public static final String SLAVE_DB =
-        Property.PROPERTY_RUNTIME_PREFIX + "replication.slave.dbname";
+        "replication.slave.dbname";
 
     /** Property key to specify replication mode */
     public static final String REPLICATION_MODE =
-        Property.PROPERTY_RUNTIME_PREFIX + "replication.slave.mode";
+        "replication.slave.mode";
 
     /* Strings used as values in the Properties objects */
 
@@ -64,8 +63,21 @@ public interface SlaveFactory {
      * booted in asynchronous replication mode.
      */
     public static final String SLAVE_MODE =
-        Property.PROPERTY_RUNTIME_PREFIX + "slavemode";
+        "slavemode";
 
+    /**
+     * Property value used to indicate that the service should be
+     * booted in slave replication pre mode. The reason for having a
+     * slave pre mode is that when slave replication is started, we
+     * need to boot the database twice: Once to check authentication
+     * and authorization, and a second time to put the database in
+     * slave mode. It is imperative that the disk image of log files
+     * remain unmodified by the first boot since the master and slave
+     * log files have to be identical when slave mode starts. Booting
+     * in SLAVE_PRE_MODE ensures that the log files remain unmodified.
+     */
+    public static final String SLAVE_PRE_MODE =
+        "slavepremode";
 
     /* Required methods */
 

@@ -38,7 +38,7 @@ public class UpdateServiceProperties extends Properties {
 
 	private PersistentService serviceType;
 	private String serviceName;
-    private WritableStorageFactory storageFactory;
+    private volatile WritableStorageFactory storageFactory;
     
 	/*
 	Fix for bug 3668: Following would allow user to change properties while in the session
