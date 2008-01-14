@@ -116,29 +116,6 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
         }
     }
 
-    public ClientPooledConnection(ClientBaseDataSource ds,
-                                  org.apache.derby.client.am.LogWriter logWriter) throws SQLException {
-        logWriter_ = logWriter;
-        ds_ = ds;
-        listeners_ = new java.util.Vector();
-	try {
-            netPhysicalConnection_ = (org.apache.derby.client.net.NetConnection)
-            ClientDriver.getFactory().newNetConnection(
-                    (NetLogWriter) logWriter_,
-                    null,
-                    null,
-                    ds,
-                    -1,
-                    false);
-
-            physicalConnection_ = netPhysicalConnection_;
-        }
-        catch (SqlException se)
-        {
-            throw se.getSQLException();
-        }
-    }
-
     protected void finalize() throws java.lang.Throwable {
         if (logWriter_ != null) {
             logWriter_.traceEntry(this, "finalize");
