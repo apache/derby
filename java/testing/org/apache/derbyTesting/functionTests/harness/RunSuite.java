@@ -497,7 +497,7 @@ public class RunSuite
                     suiteProperties.put("derbyTesting.jar.path", upgradejarpath);
 		String testout = sp.getProperty("testoutname");
 		if (testout != null)
-		    suiteProperties.put("testoutname", testout); // toursDemo
+		    suiteProperties.put("testoutname", testout);
 		String mtdir = sp.getProperty("mtestdir"); // used by multi tests
 		if (mtdir != null)
 		    suiteProperties.put("mtestdir", mtdir);

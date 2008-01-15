@@ -82,6 +82,7 @@
       <classpath>
         <!--pathelement location="${oro}"/-->
         <pathelement path="${compile.classpath}"/>
+        <pathelement path="${junit}"/>
       </classpath>
       <include name="${this.dir}/*.java"/>
       <!--exclude name=""/-->

@@ -830,10 +830,7 @@ public class RunTest
         // this is probably always going to be testBase
         if ( testOutName == null )
         {
-            if (testType.equals("demo"))
-                testOutName = testBase.substring(testBase.indexOf(".")+1);
-            else
-                testOutName = testBase;
+            testOutName = testBase;
         }
 
         // Create a .tmp file for doing sed later to create testBase.out
@@ -2263,7 +2260,7 @@ clp.list(System.out);
             jvm.setClasspath(classpath);
 
 		Vector jvmProps = new Vector();
-		if ( testType.equals("java") || testType.equals("demo") )
+		if ( testType.equals("java"))
 		    addStandardTestJvmProps(jvmProps,systemHome,
 			    outDir.getCanonicalPath(),null);		    
         else if ( (runDir != null) && (runDir.exists()) )
