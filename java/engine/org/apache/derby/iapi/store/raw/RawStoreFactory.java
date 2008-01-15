@@ -694,6 +694,14 @@ public interface RawStoreFactory extends Corruptable {
     public void startReplicationMaster(String host, int port,
                                        String replicationMode)
         throws StandardException;
+    
+    /**
+     * Stop the replication master role for this database.
+     * 
+     * @exception StandardException Standard Derby exception policy,
+     * thrown on error.
+     */
+    public void stopReplicationMaster() throws StandardException;
 
 	/**
 	  * Freeze the database temporarily so a backup can be taken.

@@ -376,6 +376,19 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
             throw PublicAPI.wrapStandardException(se);
         }
     }
+    
+    /**
+     * Stop the replication master role for this database.
+     * 
+     * @exception SQLException Thrown on error
+     */
+    public void stopReplicationMaster()  throws SQLException {
+        try {
+            af.stopReplicationMaster();
+        } catch (StandardException se) {
+            throw PublicAPI.wrapStandardException(se);
+        }
+    }
 
 	public void freeze() throws SQLException
 	{

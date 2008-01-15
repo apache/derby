@@ -228,6 +228,14 @@ public interface AccessFactory
                                        String replicationMode)
         throws StandardException;
 
+    /**
+     * Stop the replication master role for this database.
+     * 
+     * @exception StandardException Standard Derby exception policy,
+     * thrown on error.
+     */
+    public void stopReplicationMaster() throws StandardException;
+
 	/**
 	  * Freeze the database temporarily so a backup can be taken.
 	  * <P>Please see Derby on line documentation on backup and restore.

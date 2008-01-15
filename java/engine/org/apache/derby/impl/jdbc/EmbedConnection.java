@@ -558,8 +558,7 @@ public abstract class EmbedConnection implements EngineConnection
         // replication - depending on the security mechanisms
         // Derby is running under.
 
-        // Waiting for Derby-2954:
-        // tr.getDatabase().stopReplicationMaster();
+        tr.getDatabase().stopReplicationMaster();
     }
 
 	/**

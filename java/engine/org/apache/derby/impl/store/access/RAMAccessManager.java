@@ -928,6 +928,16 @@ public abstract class RAMAccessManager
         rawstore.startReplicationMaster(host, port, replicationMode);
     }
 
+    /**
+     * Stop the replication master role for this database.
+     * 
+     * @exception StandardException Standard Derby exception policy,
+     * thrown on error.
+     */
+    public void stopReplicationMaster() throws StandardException {
+        rawstore.stopReplicationMaster();
+    }
+
 	public void freeze() throws StandardException
 	{
 		rawstore.freeze();

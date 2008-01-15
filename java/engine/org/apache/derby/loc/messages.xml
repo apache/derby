@@ -4757,6 +4757,11 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
                 <text>The connection attempts to the replication slave for the database {0} exceeded the specified timeout period.</text>
                 <arg>dbname</arg>
             </msg>
+            
+            <msg>
+                <name>XRE07</name>
+                <text>Could not stop replication because the database is not in replication master mode.</text>
+            </msg>
 
 
         </family>

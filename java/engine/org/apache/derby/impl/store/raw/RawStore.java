@@ -499,6 +499,32 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
         masterFactory.startMaster(this, dataFactory, logFactory);
 
     }
+    
+    /**
+     * Stop the replication master role for this database.
+     * 
+     * @exception StandardException Standard Derby exception policy,
+     * thrown on error.
+     */
+    public void stopReplicationMaster() throws StandardException {
+        
+        MasterFactory masterFactory = null;
+        
+        if (isReadOnly()) {
+            throw StandardException.newException(
+                      SQLState.CANNOT_REPLICATE_READONLY_DATABASE);
+        }
+
+        try {
+            masterFactory = (MasterFactory) 
+                Monitor.findServiceModule(this, getMasterFactoryModule());
+        }
+        catch (StandardException se) {
+            throw StandardException.newException(
+                      SQLState.REPLICATION_UNABLE_TO_STOP_MASTER);
+        }
+        masterFactory.stopMaster();
+    }
 
 	public void freeze() throws StandardException
 	{

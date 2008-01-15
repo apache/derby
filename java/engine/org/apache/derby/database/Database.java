@@ -128,6 +128,13 @@ public interface Database
     public void startReplicationMaster(String host, int port, 
                                        String replicationMode)
         throws SQLException;
+    
+    /**
+     * Stop the replication master role for the given database.
+     * 
+     * @exception SQLException Thrown on error
+     */
+    public void stopReplicationMaster() throws SQLException;
 
 	/**
 	  * Freeze the database temporarily so a backup can be taken.
