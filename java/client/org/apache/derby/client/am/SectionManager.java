@@ -21,6 +21,8 @@
 
 package org.apache.derby.client.am;
 
+import java.lang.ref.WeakReference;
+
 import org.apache.derby.shared.common.reference.JDBC30Translation;
 
 import org.apache.derby.shared.common.reference.SQLState;
@@ -184,11 +186,12 @@ public class SectionManager {
     }
 
     void mapCursorNameToResultSet(String cursorName, ResultSet resultSet) {
-        positionedUpdateCursorNameToResultSet_.put(cursorName, resultSet);
+        // DERBY-3316. Needs WeakReference so that ResultSet can be garbage collected
+        positionedUpdateCursorNameToResultSet_.put(cursorName, new WeakReference(resultSet));
     }
 
     ResultSet getPositionedUpdateResultSet(String cursorName) throws SqlException {
-        ResultSet rs = (ResultSet) positionedUpdateCursorNameToResultSet_.get(cursorName);
+        ResultSet rs = (ResultSet) ((WeakReference) (positionedUpdateCursorNameToResultSet_.get(cursorName))).get();
         if (rs == null) {
             throw new SqlException(agent_.logWriter_, 
                 new ClientMessageId(SQLState.CLIENT_RESULT_SET_NOT_OPEN));

@@ -54,7 +54,7 @@ public class derbyStress {
 			}
 
 			reExecuteStatementTest();
-
+			testDerby3316();
 			System.out.println("Test derbyStress finished.");
 		} catch (SQLException se) {
 			TestUtil.dumpSQLExceptions(se);
@@ -133,4 +133,37 @@ public class derbyStress {
 		conn.close();
 		System.out.println("PASSED");
 	}
+        
+    /**
+     * Test fix for leak if ResultSets are not closed.
+     * @throws Exception
+     */
+    public static void testDerby3316() throws Exception {
+          System.out.println("DERBY-3316: Multiple statement executions ");
+          Connection conn = ij.startJBMS();
+                
+          Statement s = conn.createStatement();
+          s.executeUpdate("CREATE TABLE TAB (col1 varchar(32672))");
+          PreparedStatement ps = conn.prepareStatement("INSERT INTO TAB VALUES(?)");
+          ps.setString(1,"hello");
+          ps.executeUpdate();
+          ps.setString(1,"hello");
+          ps.executeUpdate();
+          ps.close();
+          for (int i = 0; i < 2000; i++)
+          {
+                  s = conn.createStatement();
+                  ResultSet rs = s.executeQuery("SELECT * from tab");
+                  // drain the resultset
+                  while (rs.next());
+                  // With DERBY-3316, If I don't explicitly close the resultset or 
+                  // statement, we get a leak.
+                  //rs.close();
+                  //s.close();
+          }    
+          s = conn.createStatement();
+          s.executeUpdate("DROP TABLE TAB");
+          s.close();
+       }
+      
 }
