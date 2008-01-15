@@ -2,4 +2,5 @@ Test derbyStress starting
 Testing with 2000 prepared statements
 PASS -- Prepared statement test
 DERBY-557: reExecuteStatementTest() PASSED
+DERBY-3316: Multiple statement executions 
 Test derbyStress finished.
