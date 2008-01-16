@@ -3,8 +3,3 @@
 # 			see DERBY-326 and DERBY-550 issues
 #
 largedata/LobLimits.java
-#
-# This test brings the network server up and down by itself
-# and so should not be run with a competing server.
-#
-jdbc4/AutoloadBooting.java
