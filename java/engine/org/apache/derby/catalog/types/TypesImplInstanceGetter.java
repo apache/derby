@@ -40,9 +40,6 @@ public class TypesImplInstanceGetter extends FormatableInstanceGetter {
                   case StoredFormatIds.CHAR_TYPE_ID_IMPL:
                   case StoredFormatIds.VARCHAR_TYPE_ID_IMPL:
                   case StoredFormatIds.LONGVARCHAR_TYPE_ID_IMPL:
-                  case StoredFormatIds.NATIONAL_CHAR_TYPE_ID_IMPL:
-                  case StoredFormatIds.NATIONAL_VARCHAR_TYPE_ID_IMPL:
-                  case StoredFormatIds.NATIONAL_LONGVARCHAR_TYPE_ID_IMPL:
                   case StoredFormatIds.BIT_TYPE_ID_IMPL:
                   case StoredFormatIds.VARBIT_TYPE_ID_IMPL:
                   case StoredFormatIds.LONGVARBIT_TYPE_ID_IMPL:
@@ -51,7 +48,6 @@ public class TypesImplInstanceGetter extends FormatableInstanceGetter {
                   case StoredFormatIds.TIMESTAMP_TYPE_ID_IMPL:
                   case StoredFormatIds.BLOB_TYPE_ID_IMPL:
                   case StoredFormatIds.CLOB_TYPE_ID_IMPL:
-                  case StoredFormatIds.NCLOB_TYPE_ID_IMPL:
                   case StoredFormatIds.XML_TYPE_ID_IMPL:
                           return new BaseTypeIdImpl(fmtId);
                   case StoredFormatIds.DECIMAL_TYPE_ID_IMPL:

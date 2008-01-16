@@ -551,66 +551,6 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
             return previous;
         }
 
-        //
-        public StringDataValue getNationalCharDataValue(String value)
-        {
-                return new SQLNationalChar(value, getLocaleFinder());
-        }
-
-        public StringDataValue getNationalCharDataValue(String value,
-                                                                                        StringDataValue previous)
-                                                                                                        throws StandardException
-        {
-                if (previous == null)
-                        return new SQLNationalChar(value, getLocaleFinder());
-                previous.setValue(value);
-                return previous;
-        }
-
-        public StringDataValue getNationalVarcharDataValue(String value)
-        {
-                return new SQLNationalVarchar(value, getLocaleFinder());
-        }
-
-        public StringDataValue getNationalVarcharDataValue(String value,
-                                                                                                StringDataValue previous)
-                                                                                                        throws StandardException
-        {
-                if (previous == null)
-                        return new SQLNationalVarchar(value, getLocaleFinder());
-                previous.setValue(value);
-                return previous;
-        }
-
-        public StringDataValue getNationalLongvarcharDataValue(String value)
-        {
-                return new SQLNationalLongvarchar(value, getLocaleFinder());
-        }
-
-        public StringDataValue getNationalLongvarcharDataValue(String value,
-                                                                                                        StringDataValue previous)
-                                                                                                        throws StandardException
-        {
-                if (previous == null)
-                        return new SQLNationalLongvarchar(value, getLocaleFinder());
-                previous.setValue(value);
-                return previous;
-        }
-
-        public StringDataValue getNClobDataValue(String value)
-        {
-                return new SQLNClob(value, getLocaleFinder());
-        }
-
-        public StringDataValue getNClobDataValue(String value, StringDataValue previous)
-            throws StandardException
-        {
-                if (previous == null)
-                        return new SQLNClob(value, getLocaleFinder());
-                previous.setValue(value);
-                return previous;
-        }
-
         public DateTimeDataValue getDataValue(Date value) throws StandardException
         {
                 return new SQLDate(value);
@@ -977,58 +917,6 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
             return previous;
         }
 
-        public StringDataValue          getNullNationalChar(StringDataValue dataValue)
-        {
-                if (dataValue == null)
-                {
-                        return getNationalCharDataValue((String) null);
-                }
-                else
-                {
-                        dataValue.setToNull();
-                        return dataValue;
-                }
-        }
-
-        public StringDataValue          getNullNationalVarchar(StringDataValue dataValue)
-        {
-                if (dataValue == null)
-                {
-                        return getNationalVarcharDataValue((String) null);
-                }
-                else
-                {
-                        dataValue.setToNull();
-                        return dataValue;
-                }
-        }
-
-        public StringDataValue          getNullNationalLongvarchar(StringDataValue dataValue)
-        {
-                if (dataValue == null)
-                {
-                        return getNationalLongvarcharDataValue((String) null);
-                }
-                else
-                {
-                        dataValue.setToNull();
-                        return dataValue;
-                }
-        }
-
-        public StringDataValue          getNullNClob(StringDataValue dataValue)
-        {
-                if (dataValue == null)
-                {
-                        return getNClobDataValue((String) null);
-                }
-                else
-                {
-                        dataValue.setToNull();
-                        return dataValue;
-                }
-        }
-
         public UserDataValue            getNullObject(UserDataValue dataValue)
         {
                 if (dataValue == null)
@@ -1257,9 +1145,6 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
         case StoredFormatIds.SQL_DOUBLE_ID: return new SQLDouble();
         case StoredFormatIds.SQL_INTEGER_ID: return new SQLInteger();
         case StoredFormatIds.SQL_LONGINT_ID: return new SQLLongint();
-        case StoredFormatIds.SQL_NATIONAL_CHAR_ID: return new SQLNationalChar();
-        case StoredFormatIds.SQL_NATIONAL_LONGVARCHAR_ID: return new SQLNationalLongvarchar();
-        case StoredFormatIds.SQL_NATIONAL_VARCHAR_ID: return new SQLNationalVarchar();
         case StoredFormatIds.SQL_REAL_ID: return new SQLReal();
         case StoredFormatIds.SQL_REF_ID: return new SQLRef();
         case StoredFormatIds.SQL_SMALLINT_ID: return new SQLSmallint();
@@ -1273,7 +1158,6 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
         case StoredFormatIds.SQL_USERTYPE_ID_V3: return new UserType();
         case StoredFormatIds.SQL_BLOB_ID: return new SQLBlob();
         case StoredFormatIds.SQL_CLOB_ID: return new SQLClob();
-        case StoredFormatIds.SQL_NCLOB_ID: return new SQLNClob();
         case StoredFormatIds.XML_ID: return new XML();
         case StoredFormatIds.ACCESS_HEAP_ROW_LOCATION_V1_ID: 
         // This is an specific implementation of RowLocation, known to be

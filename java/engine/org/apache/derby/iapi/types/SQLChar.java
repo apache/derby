@@ -346,9 +346,6 @@ public class SQLChar
 					// free up this char[] array to reduce memory usage
 					rawData = null;
 					rawLength = -1;
-					// clear out the int array as well, so it will stay current
-					intArray = null;
-					intLength = 0;
 					cKey = null;
 				}
 
@@ -412,9 +409,6 @@ public class SQLChar
 			getString();
 			rawData = value.toCharArray();
 			rawLength = rawData.length;
-			// clear out the int array as well, so it will stay current
-			intArray = null;
-			intLength = 0;
 			cKey = null;
 			return rawData;
 		}
@@ -436,9 +430,6 @@ public class SQLChar
 		this.value = null;
 		this.rawLength = -1;
 		this.stream = newStream;
-		// clear out the int array as well, so it will stay current
-		intArray = null;
-		intLength = 0;
 		cKey = null;
 	}
 
@@ -635,9 +626,6 @@ public class SQLChar
         value  = null;
         stream = null;
 
-        // clear out the int array, so it will stay current
-        intArray = null;
-        intLength = 0;
         cKey = null;
     }
     char[][] arg_passer = new char[1][];
@@ -825,9 +813,6 @@ readingLoop:
         rawData = str;
         rawLength = strlen;
                         
-        // clear out the int array, so it will stay current
-        intArray = null;
-        intLength = 0;
         cKey = null;
     }
 
@@ -852,9 +837,6 @@ readingLoop:
 		value = null;
 		stream = null;
 		rawLength = -1;
-		// clear out the int array as well, so it will stay current
-		intArray = null;
-		intLength = 0;
 		cKey = null;
 	}
 
@@ -1008,9 +990,6 @@ readingLoop:
 	{
 		stream = null;
 		rawLength = -1;
-		// clear out the int array as well, so it will stay current
-		intArray = null;
-		intLength = 0;
 		cKey = null;
 
 		value = theValue;
@@ -1680,29 +1659,17 @@ readingLoop:
 	{
 		Boolean likeResult;
 
-		if (! isNationalString())
-		{
-			// note that we call getLength() because the length
-			// of the char array may be different than the
-			// length we should be using (i.e. getLength()).
-			// see getCharArray() for more info
-			char[] evalCharArray = getCharArray();
-			char[] patternCharArray = ((SQLChar)pattern).getCharArray();
-			likeResult = Like.like(evalCharArray, 
-								   getLength(),
- 		    					   patternCharArray,
-								   pattern.getLength(),
-								   null);
-		}
-		else
-		{
-			SQLChar patternSQLChar = (SQLChar) pattern;
-			likeResult = Like.like(getIntArray(), 
-					getIntLength(), 
-					patternSQLChar.getIntArray(),
-					patternSQLChar.getIntLength(),
-					getLocaleFinder().getCollator());
-		}
+		// note that we call getLength() because the length
+		// of the char array may be different than the
+		// length we should be using (i.e. getLength()).
+		// see getCharArray() for more info
+		char[] evalCharArray = getCharArray();
+		char[] patternCharArray = ((SQLChar)pattern).getCharArray();
+		likeResult = Like.like(evalCharArray, 
+							   getLength(),
+		    					   patternCharArray,
+							   pattern.getLength(),
+							   null);
 
 		return SQLBoolean.truthValue(this,
 									 pattern,
@@ -1743,61 +1710,27 @@ readingLoop:
 			throw StandardException.newException(SQLState.LANG_ESCAPE_IS_NULL);
 		}
 
-		if (! isNationalString())
-		{
-			// note that we call getLength() because the length
-			// of the char array may be different than the
-			// length we should be using (i.e. getLength()).
-			// see getCharArray() for more info
-			char[] evalCharArray = getCharArray();
-			char[] patternCharArray = ((SQLChar)pattern).getCharArray();
-			char[] escapeCharArray = (((SQLChar) escape).getCharArray());
-			int escapeLength = escape.getLength();
+		// note that we call getLength() because the length
+		// of the char array may be different than the
+		// length we should be using (i.e. getLength()).
+		// see getCharArray() for more info
+		char[] evalCharArray = getCharArray();
+		char[] patternCharArray = ((SQLChar)pattern).getCharArray();
+		char[] escapeCharArray = (((SQLChar) escape).getCharArray());
+		int escapeLength = escape.getLength();
 
-			if (escapeCharArray != null && escapeLength != 1 )
-			{
-				throw StandardException.newException(SQLState.LANG_INVALID_ESCAPE_CHARACTER,
-						new String(escapeCharArray));
-			}
-			else 
-			{
-			  // Make sure we fail for both varchar an nvarchar
-			  // for multiple collation characters.
-			  SQLChar escapeSQLChar = (SQLChar) escape;
-			  int[] escapeIntArray = escapeSQLChar.getIntArray();
-			  if (escapeIntArray != null && (escapeIntArray.length != 1))
-			  {
-				throw StandardException.newException(SQLState.LANG_INVALID_ESCAPE_CHARACTER,new String(escapeSQLChar.getCharArray()));
-			  }
-			}
-			likeResult = Like.like(evalCharArray, 
-								   getLength(),
- 		    					   patternCharArray,
-								   pattern.getLength(),
-								   escapeCharArray,
-								   escapeLength,
-								   null);
-		}
-		else
+		if (escapeCharArray != null && escapeLength != 1 )
 		{
-			SQLChar patternSQLChar = (SQLChar) pattern;
-			SQLChar escapeSQLChar = (SQLChar) escape;
-			int[] escapeIntArray = escapeSQLChar.getIntArray();
-			int escapeLength = escapeSQLChar.getIntLength();
-
-			if (escapeIntArray != null && (escapeIntArray.length != 1))
-			{
-				throw StandardException.newException(SQLState.LANG_INVALID_ESCAPE_CHARACTER,
-						new String(escapeSQLChar.getCharArray()));
-			}
-			likeResult = Like.like(getIntArray(),
-					getIntLength(), 
-					patternSQLChar.getIntArray(),
-					patternSQLChar.getIntLength(),
-					escapeIntArray,
-					escapeLength,
-					getLocaleFinder().getCollator());
+			throw StandardException.newException(SQLState.LANG_INVALID_ESCAPE_CHARACTER,
+					new String(escapeCharArray));
 		}
+		likeResult = Like.like(evalCharArray, 
+							   getLength(),
+		    					   patternCharArray,
+							   pattern.getLength(),
+							   escapeCharArray,
+							   escapeLength,
+							   null);
 
 		return SQLBoolean.truthValue(this,
 									 pattern,
@@ -2336,9 +2269,7 @@ readingLoop:
 	}
 
 	/** 
-	 * Compare two SQLChars.  This method will be overriden in the
-	 * National char wrappers so that the appropriate comparison
-	 * is done.
+	 * Compare two SQLChars.  
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -2459,38 +2390,6 @@ readingLoop:
 		*/
 		return 0;
 	}
-
-
-	/**
-	 * Compare a localized string with this one.
-	 *
-	 * @param str2              The other string
-	 *
-	 * @return  -1 - this <  str2
-	 * 			 0 - this == str2
-	 *			 1 - this > str2
-	 */
-	protected int stringCollatorCompare(SQLChar str2) 
-		throws StandardException
-	{	
-		CollationKey ckey1 = this.getCollationKey();
-		CollationKey ckey2 = str2.getCollationKey();
-
-		
-		/*
-		** By convention, nulls sort High, and null == null
-		*/
-		if (ckey1 == null || ckey2 == null)
-		{
-			if (ckey1 != null)	// str2 == null
-				return -1;
-			if (ckey2 != null)	// this == null
-				return 1;
-			return 0;			// both == null
-		}
-
-		return ckey1.compareTo(ckey2);
-	}
 		
 	/**
 	 * This method gets called for the collation sensitive char classes ie
@@ -2607,144 +2506,15 @@ readingLoop:
 	}
 
 	/**
-	 * Implementation of hashCode() for the national character types,
-	 * put here to make it accessible to all the national types.
-	 */
-	protected int nationalHashCode()
-	{
-		CollationKey tmpCKey = null;
-
-		try
-		{
-			tmpCKey = getCollationKey();
-		}
-		catch (StandardException se)
-		{
-			if (SanityManager.DEBUG)
-			{
-				SanityManager.THROWASSERT("Unexpected exception", se);
-			}
-		}
-
-		if (tmpCKey == null)
-			return 0;
-		return tmpCKey.hashCode();
-	}
-	
-	private int[] getIntArray()
-		throws StandardException
-	{
-		if (isNull())
-		{
-			return (int[]) null;
-		}
-
-		if (intArray != null)
-		{
-			return intArray;
-		}
-
-		// intLength should always be 0 when intArray is null
-		if (SanityManager.DEBUG)
-		{
-			if (intLength != 0)
-			{
-				SanityManager.THROWASSERT(
-					"intLength expected to be 0, not " + intLength);
-			}
-		}
-
-		intArray = new int[getLength()];
-
-		RuleBasedCollator rbc = getLocaleFinder().getCollator();
-		CollationElementIterator cei = rbc.getCollationElementIterator(getString());
-		int nextInt;
-		while ((nextInt = cei.next()) != CollationElementIterator.NULLORDER)
-		{
-			/* Believe it or not, a String might have more
-			 * collation elements than characters.
-			 * So, we handle that case by increasing the int array
-			 * by 5 and copying array elements.
-			 */
-			if (intLength == intArray.length)
-			{
-				int[] tempArray = intArray;
-				intArray = new int[intLength + 5];
-				for (int index = 0; index < tempArray.length; index++)
-				{
-					intArray[index] = tempArray[index];
-				}
-			}
-			intArray[intLength++] = nextInt;
-		}
-
-		return intArray;
-	}
-
-	private int getIntLength()
-	{
-		return intLength;
-	}
-
-	/**
 	 * Get a SQLVarchar for a built-in string function.  
-	 * (Could be either a SQLVarchar or SQLNationalVarchar.)
 	 *
-	 * @return a SQLVarchar or SQLNationalVarchar.
+	 * @return a SQLVarchar.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	protected StringDataValue getNewVarchar() throws StandardException
 	{
 		return new SQLVarchar();
-	}
-
-	/** 
-	 * Return whether or not this is a national character datatype.
-	 */
-	protected boolean isNationalString()
-	{
-		return false;
-	}
-
-	/**
-	 * This implements getDate() for the national types. It lives
-	 * here so it can be shared between all the national types.
-	 *
-	 * @exception StandardException thrown on failure to convert
-	 */
-	protected Date	nationalGetDate( Calendar cal) throws StandardException
-	{
-		if (isNull())
-            return null;
-        SQLDate internalDate = new SQLDate( getString(), false, getLocaleFinder(), cal);
-        return internalDate.getDate( cal);
-	}
-
-	/**
-	 * This implements getTime() for the national types. It lives
-	 * here so it can be shared between all the national types.
-	 *
-	 * @exception StandardException thrown on failure to convert
-	 */
-	protected Time nationalGetTime( Calendar cal) throws StandardException
-	{
-		if (isNull())
-            return null;
-        SQLTime internalTime = new SQLTime( getString(), false, getLocaleFinder(), cal);
-        return internalTime.getTime( cal);
-	}
-
-	/**
-	 * This implements getTimestamp() for the national types. It lives
-	 * here so it can be shared between all the national types.
-	 *
-	 * @exception StandardException thrown on failure to convert
-	 */
-	protected Timestamp	nationalGetTimestamp( Calendar cal) throws StandardException
-	{
-        // DB2 does not support internationalized timestamps
-        return getTimestamp( cal, getString(), getLocaleFinder());
 	}
 
 	protected void setLocaleFinder(LocaleFinder localeFinder)
@@ -2835,10 +2605,6 @@ readingLoop:
 	 * The value as a stream in the on-disk format.
 	 */
 	InputStream stream;
-	
-	/* Comparison info for National subclasses) */
-	private int[]	intArray;
-	private int		intLength;
 
 	/* Locale info (for International support) */
 	private LocaleFinder localeFinder;
@@ -2851,8 +2617,6 @@ readingLoop:
         if( null != rawData)
             sz += 2*rawData.length;
         // Assume that cKey, stream, and localFinder are shared, so do not count their memory usage
-        if( null != intArray)
-            sz += intArray.length*ClassSize.getIntSize();
         return sz;
     } // end of estimateMemoryUsage
 
@@ -2863,8 +2627,6 @@ readingLoop:
 		this.rawLength = other.rawLength;
 		this.cKey = other.cKey;
 		this.stream = other.stream;
-		this.intArray = intArray;
-		this.intLength = intLength;
 		this.localeFinder = localeFinder;
 	}
 

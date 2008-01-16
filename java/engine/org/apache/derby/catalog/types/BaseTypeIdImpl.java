@@ -159,11 +159,8 @@ public class BaseTypeIdImpl implements Formatable
 
           case StoredFormatIds.CHAR_TYPE_ID_IMPL:
           case StoredFormatIds.VARCHAR_TYPE_ID_IMPL:
-          case StoredFormatIds.NATIONAL_CHAR_TYPE_ID_IMPL:
-          case StoredFormatIds.NATIONAL_VARCHAR_TYPE_ID_IMPL:
           case StoredFormatIds.BLOB_TYPE_ID_IMPL:
           case StoredFormatIds.CLOB_TYPE_ID_IMPL:
-          case StoredFormatIds.NCLOB_TYPE_ID_IMPL:
                 retval += "(" + td.getMaximumWidth() + ")";
                 break;
 
@@ -343,30 +340,6 @@ public class BaseTypeIdImpl implements Formatable
                 SQLTypeName = TypeId.CLOB_NAME;
                 JDBCTypeId = JDBC20Translation.SQL_TYPES_CLOB;
                 wrapperTypeFormatId = StoredFormatIds.CLOB_TYPE_ID;
-                break;
-
-          case StoredFormatIds.NATIONAL_CHAR_TYPE_ID_IMPL:
-                SQLTypeName = TypeId.NATIONAL_CHAR_NAME;
-                JDBCTypeId = Types.CHAR;
-                wrapperTypeFormatId = StoredFormatIds.NATIONAL_CHAR_TYPE_ID;
-                break;
-
-          case StoredFormatIds.NATIONAL_VARCHAR_TYPE_ID_IMPL:
-                SQLTypeName = TypeId.NATIONAL_VARCHAR_NAME;
-                JDBCTypeId = Types.VARCHAR;
-                wrapperTypeFormatId = StoredFormatIds.NATIONAL_VARCHAR_TYPE_ID;
-                break;
-
-          case StoredFormatIds.NATIONAL_LONGVARCHAR_TYPE_ID_IMPL:
-                SQLTypeName = TypeId.NATIONAL_LONGVARCHAR_NAME;
-                JDBCTypeId = Types.LONGVARCHAR;
-                wrapperTypeFormatId = StoredFormatIds.NATIONAL_LONGVARCHAR_TYPE_ID;
-                break;
-
-         case StoredFormatIds.NCLOB_TYPE_ID_IMPL:
-                SQLTypeName = TypeId.NCLOB_NAME;
-                JDBCTypeId = JDBC20Translation.SQL_TYPES_CLOB;
-                wrapperTypeFormatId = StoredFormatIds.NCLOB_TYPE_ID;
                 break;
 
           case StoredFormatIds.BIT_TYPE_ID_IMPL:

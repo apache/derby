@@ -95,17 +95,11 @@ public class CLOBTypeCompiler extends BaseTypeCompiler
             int formatId = getStoredFormatIdFromTypeId();
             switch (formatId) {
                 case StoredFormatIds.CLOB_TYPE_ID:  return "java.sql.Clob";
-                case StoredFormatIds.NCLOB_TYPE_ID: return "java.sql.Clob";
                 default:
                     if (SanityManager.DEBUG)
                         SanityManager.THROWASSERT("unexpected formatId in getCorrespondingPrimitiveTypeName() - " + formatId);
                     return null;
             }
-        }
-
-        public String getMatchingNationalCharTypeName()
-        {
-            return TypeId.NCLOB_NAME;
         }
 
         /**
@@ -120,7 +114,6 @@ public class CLOBTypeCompiler extends BaseTypeCompiler
             int formatId = getStoredFormatIdFromTypeId();
             switch (formatId) {
                 case StoredFormatIds.CLOB_TYPE_ID:  return "getNullClob";
-                case StoredFormatIds.NCLOB_TYPE_ID: return "getNullNClob";
                 default:
                     if (SanityManager.DEBUG)
                         SanityManager.THROWASSERT("unexpected formatId in nullMethodName() - " + formatId);
@@ -133,7 +126,6 @@ public class CLOBTypeCompiler extends BaseTypeCompiler
             int formatId = getStoredFormatIdFromTypeId();
             switch (formatId) {
                 case StoredFormatIds.CLOB_TYPE_ID:  return "getClobDataValue";
-                case StoredFormatIds.NCLOB_TYPE_ID: return "getNClobDataValue";
                 default:
                     if (SanityManager.DEBUG)
                         SanityManager.THROWASSERT("unexpected formatId in dataValueMethodName() - " + formatId);

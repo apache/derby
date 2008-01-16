@@ -239,35 +239,6 @@ public interface DataValueFactory
          */
         StringDataValue getClobDataValue(String value, StringDataValue previous,
                 int collationType) throws StandardException;
-        
-        /**
-         * Get a SQL national varchar with the given value.  A null argument means get
-         * a SQL null value.  The second form uses the previous value (if non-null)
-         * to hold the return value.
-         */
-        StringDataValue         getNationalVarcharDataValue(String value);
-        StringDataValue         getNationalVarcharDataValue(String value,
-                                                                                        StringDataValue previous)
-                                                                                                        throws StandardException;
-
-        /**
-         * Get a SQL national long varchar with the given value.  A null argument means
-         * get a SQL null value.  The second form uses the previous value
-         * (if non-null) to hold the return value.
-         */
-        StringDataValue         getNationalLongvarcharDataValue(String value);
-        StringDataValue         getNationalLongvarcharDataValue(String value,
-                                                                                                StringDataValue previous)
-                                                                                                        throws StandardException;
-
-        /**
-         * Get a SQL national blob with the given value.  A null argument means
-         * get a SQL null value.  The second form uses the previous value
-         * (if non-null) to hold the return value.
-         */
-        StringDataValue         getNClobDataValue(String value);
-        StringDataValue         getNClobDataValue(String value, StringDataValue previous) 
-            throws StandardException;
 
         /**
          * Get a User-defined data value with the given value and type name.
@@ -425,15 +396,6 @@ public interface DataValueFactory
          */
         StringDataValue getCharDataValue(String value, StringDataValue previous,
                 int collationType) throws StandardException;
-
-        /**
-         * Get a SQL national char with the given value.  A null argument means get
-         * a SQL null value.  The second form re-uses the previous value,
-         * if non-null, as the data holder to return.
-         */
-        StringDataValue         getNationalCharDataValue(String value);
-        StringDataValue         getNationalCharDataValue(String value, StringDataValue previous)
-                                                        throws StandardException;
 
         /**
          * Get a SQL date with the given value.  A null argument means get
@@ -694,37 +656,6 @@ public interface DataValueFactory
          */
         StringDataValue         getNullClob(StringDataValue dataValue,
                 int collationType);
-
-        /**
-         * Get a SQL national char with a SQL null value. If the supplied value
-         * is null then get a new value, otherwise set it to null and return 
-         * that value.
-         */
-        StringDataValue         getNullNationalChar(StringDataValue dataValue);
-
-        /**
-         * Get a SQL national varchar with a SQL null value. If the supplied value
-         * is null then get a new value, otherwise set it to null and return 
-         * that value.
-         *
-         */
-        StringDataValue         getNullNationalVarchar(StringDataValue dataValue);
-
-        /**
-         * Get a SQL national long varchar with a SQL null value. If the supplied value
-         * is null then get a new value, otherwise set it to null and return 
-         * that value.
-         *
-         */
-        StringDataValue         getNullNationalLongvarchar(StringDataValue dataValue);
-
-        /**
-         * Get a SQL NCLOB with a SQL null value. If the supplied value
-         * is null then get a new value, otherwise set it to null and return 
-         * that value.
-         *
-         */
-        StringDataValue         getNullNClob(StringDataValue dataValue);
 
         /**
          * Get a User-defined data value with a SQL null value. If the supplied value

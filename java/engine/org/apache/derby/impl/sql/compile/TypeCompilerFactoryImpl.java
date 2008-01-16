@@ -52,9 +52,6 @@ public class TypeCompilerFactoryImpl implements TypeCompilerFactory
         static TypeCompiler longintTypeCompiler ;
         static TypeCompiler longvarbitTypeCompiler ;
         static TypeCompiler longvarcharTypeCompiler ;
-        static TypeCompiler nationalCharTypeCompiler ;
-        static TypeCompiler nationalLongvarcharTypeCompiler ;
-        static TypeCompiler nationalVarcharTypeCompiler ;
         static TypeCompiler realTypeCompiler ;
         static TypeCompiler smallintTypeCompiler ;
         static TypeCompiler tinyintTypeCompiler ;
@@ -66,7 +63,6 @@ public class TypeCompilerFactoryImpl implements TypeCompilerFactory
         static TypeCompiler refTypeCompiler ;
         static TypeCompiler blobTypeCompiler ;
         static TypeCompiler clobTypeCompiler ;
-        static TypeCompiler nclobTypeCompiler ;
         static TypeCompiler xmlTypeCompiler ;
 
         /**
@@ -103,20 +99,10 @@ public class TypeCompilerFactoryImpl implements TypeCompilerFactory
 
                   case Types.CHAR:
                           sqlTypeName = typeId.getSQLTypeName();
-                          if (sqlTypeName.equals(TypeId.CHAR_NAME))
-                          {
-                                return charTypeCompiler =
-                                        getAnInstance(PACKAGE_NAME + "CharTypeCompiler",
-                                                                charTypeCompiler,
-                                                                typeId);
-                          }
-                          else
-                          {
-                                return nationalCharTypeCompiler =
-                                        getAnInstance(PACKAGE_NAME + "CharTypeCompiler",
-                                                                nationalCharTypeCompiler,
-                                                                typeId);
-                          }
+                          return charTypeCompiler =
+                              getAnInstance(PACKAGE_NAME + "CharTypeCompiler",
+                                                      charTypeCompiler,
+                                                      typeId);
 
                   case Types.NUMERIC:
                   case Types.DECIMAL:
@@ -157,33 +143,16 @@ public class TypeCompilerFactoryImpl implements TypeCompilerFactory
 
                   case JDBC20Translation.SQL_TYPES_CLOB:
                       sqlTypeName = typeId.getSQLTypeName();
-                      if (sqlTypeName.equals(TypeId.CLOB_NAME)) {
-                          return clobTypeCompiler =
-                              getAnInstance(PACKAGE_NAME + "CLOBTypeCompiler",
-                                            clobTypeCompiler,
-                                            typeId);
-                      } else {
-                          return nclobTypeCompiler =
-                              getAnInstance(PACKAGE_NAME + "CLOBTypeCompiler",
-                                            nclobTypeCompiler,
-                                            typeId);
-                      }
+                      return clobTypeCompiler =
+                          getAnInstance(PACKAGE_NAME + "CLOBTypeCompiler",
+                                        clobTypeCompiler,
+                                        typeId);
                   case Types.LONGVARCHAR:
                           sqlTypeName = typeId.getSQLTypeName();
-                          if (sqlTypeName.equals(TypeId.LONGVARCHAR_NAME))
-                          {
-                                return longvarcharTypeCompiler =
-                                        getAnInstance(PACKAGE_NAME + "CharTypeCompiler",
-                                                                longvarcharTypeCompiler,
-                                                                typeId);
-                          }
-                          else
-                          {
-                                return nationalLongvarcharTypeCompiler =
-                                        getAnInstance(PACKAGE_NAME + "CharTypeCompiler",
-                                                                nationalLongvarcharTypeCompiler,
-                                                                typeId);
-                          }
+                          return longvarcharTypeCompiler =
+                              getAnInstance(PACKAGE_NAME + "CharTypeCompiler",
+                                                      longvarcharTypeCompiler,
+                                                      typeId);
 
                   case Types.REAL:
                         return realTypeCompiler =
@@ -227,20 +196,10 @@ public class TypeCompilerFactoryImpl implements TypeCompilerFactory
 
                   case Types.VARCHAR:
                           sqlTypeName = typeId.getSQLTypeName();
-                          if (sqlTypeName.equals(TypeId.VARCHAR_NAME))
-                          {
-                                return varcharTypeCompiler =
-                                        getAnInstance(PACKAGE_NAME + "CharTypeCompiler",
-                                                                varcharTypeCompiler,
-                                                                typeId);
-                          }
-                          else
-                          {
-                                return nationalVarcharTypeCompiler =
-                                        getAnInstance(PACKAGE_NAME + "CharTypeCompiler",
-                                                                nationalVarcharTypeCompiler,
-                                                                typeId);
-                          }
+                          return varcharTypeCompiler =
+                              getAnInstance(PACKAGE_NAME + "CharTypeCompiler",
+                                                      varcharTypeCompiler,
+                                                      typeId);
 
                   case org.apache.derby.iapi.reference.JDBC20Translation.SQL_TYPES_JAVA_OBJECT:
                   case Types.OTHER:

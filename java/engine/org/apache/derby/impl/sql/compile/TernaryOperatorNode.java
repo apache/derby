@@ -569,8 +569,7 @@ public class TernaryOperatorNode extends ValueNode
 
 		receiver = castArgToString(receiver);
 
-		if ((receiverType.getTypeFormatId() == StoredFormatIds.CLOB_TYPE_ID) ||
-		   (receiverType.getTypeFormatId() == StoredFormatIds.NCLOB_TYPE_ID)) {
+		if (receiverType.getTypeFormatId() == StoredFormatIds.CLOB_TYPE_ID) {
 		// special case for CLOBs: if we start with a CLOB, we have to get
 		// a CLOB as a result (as opposed to a VARCHAR), because we can have a 
 		// CLOB that is beyond the max length of VARCHAR (ex. "clob(100k)").
@@ -821,8 +820,7 @@ public class TernaryOperatorNode extends ValueNode
 				throwBadType("SUBSTR", receiverType.getSQLTypeName());
 			}
 		}
-		if ((receiverType.getTypeFormatId() == StoredFormatIds.CLOB_TYPE_ID) ||
-		   (receiverType.getTypeFormatId() == StoredFormatIds.NCLOB_TYPE_ID)) {
+		if (receiverType.getTypeFormatId() == StoredFormatIds.CLOB_TYPE_ID) {
 		// special case for CLOBs: if we start with a CLOB, we have to get
 		// a CLOB as a result (as opposed to a VARCHAR), because we can have a 
 		// CLOB that is beyond the max length of VARCHAR (ex. "clob(100k)").

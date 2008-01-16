@@ -206,7 +206,7 @@ public interface C_NodeTypes
     // LOB
     static final int BLOB_CONSTANT_NODE = 195;
     static final int CLOB_CONSTANT_NODE = 196;
-    static final int NCLOB_CONSTANT_NODE = 197;
+    //static final int NCLOB_CONSTANT_NODE = 197;
     // for SAVEPOINT sql
     static final int SAVEPOINT_NODE = 198;
 

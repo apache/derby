@@ -795,7 +795,7 @@ public class ColumnDefinitionNode extends TableElementNode
 
 			default:
 			// All other default type checks either 
-			// (TINYINT, NATIONAL_CHAR, etc), or 2) require a DB2 cast-
+			// (TINYINT, etc), or 2) require a DB2 cast-
 			// function (ex. blob(...), which Derby doesn't
 			// support yet--see Beetle 5281), and so they are not
 			// valid for Derby running in DB2 compatibility mode.

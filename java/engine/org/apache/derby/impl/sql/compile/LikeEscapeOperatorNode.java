@@ -328,8 +328,8 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
             rightConstant = true;
         }
 
-        /* If we are comparing a char with a national char then
-         * we generate a cast above the receiver to force preprocess to
+        /* If we are comparing a UCS_BASIC char with a terriotry based char 
+         * then we generate a cast above the receiver to force preprocess to
          * not attempt any of the > <= optimizations since there is no
          * way to determine the 'next' character for the <= operand.
          *
@@ -578,7 +578,7 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
         if (!(receiver instanceof ColumnReference))
         {
             // We also do an early return here if in bindExpression we found 
-            // we had a National Char and put a CAST above the receiver.
+            // we had a territory based Char and put a CAST above the receiver.
             //
             return this;
         }
@@ -596,7 +596,7 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
          *   given collation could sort: ab, a'\u0000'.  Is there any guarantee
          *   about the sort of the unicode '\u0000'.
          *
-         * o National char's don't try to produce a < than, is there a way
+         * o National char's didn't try to produce a < than, is there a way
          *   in collation?
          */
         if (receiver.getTypeServices().getCollationType() != 
@@ -628,16 +628,10 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
             greaterEqualString = 
                 Like.greaterEqualString(pattern, escape, maxWidth);
 
-            /* We do not generate the < and we cannot drop the LIKE
-             * when doing LIKE on a national char column.
-             */
-            if (!receiver.getTypeId().isNationalStringTypeId())
-            {
-                lessThanString          = 
-                    Like.lessThanString(pattern, escape, maxWidth);
-                eliminateLikeComparison = 
-                    !Like.isLikeComparisonNeeded(pattern);
-            }
+            lessThanString          = 
+                Like.lessThanString(pattern, escape, maxWidth);
+            eliminateLikeComparison = 
+                !Like.isLikeComparisonNeeded(pattern);
         }
 
         /* For some unknown reason we need to clone the receiver if it is
@@ -670,14 +664,10 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
                             getContextManager());
 
         /* Create the AND <, if lessThanString is non-null or 
-         * (leftOperand is a parameter and not a national string).
-         *
-         * Currently for a national string we do not add a < than operator 
-         * since we don't know (?) how to calculate such a string.
+         * leftOperand is a parameter.
          */
         if (lessThanString != null || 
-            (leftOperand.requiresTypeFromContext() && 
-             !receiver.getTypeId().isNationalStringTypeId()))
+            leftOperand.requiresTypeFromContext())
         {
             QueryTreeNode likeLTopt;
             if (leftOperand.requiresTypeFromContext())

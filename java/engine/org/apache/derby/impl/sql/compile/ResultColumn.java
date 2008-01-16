@@ -1638,8 +1638,6 @@ public class ResultColumn extends ValueNode
 				return constantValue;
 
 			case StoredFormatIds.VARCHAR_TYPE_ID:
-			case StoredFormatIds.NATIONAL_CHAR_TYPE_ID:
-			case StoredFormatIds.NATIONAL_VARCHAR_TYPE_ID:
 				String sourceValue = constantValue.getString();
 				int sourceWidth = sourceValue.length();
 				int posn;
@@ -1652,32 +1650,8 @@ public class ResultColumn extends ValueNode
 
 				if (sourceWidth <= maxWidth)
 				{
-					switch (formatId)
-					{
-						// For NCHAR we must pad the result, saves on normilization later if all
-						// constants are of the correct size
-						case StoredFormatIds.NATIONAL_CHAR_TYPE_ID:
-
-							if (sourceWidth < maxWidth)
-							{
-								StringBuffer stringBuffer = new StringBuffer(sourceValue);
-
-								int needed = maxWidth - sourceWidth;
-								char blankArray[] = new char[needed];
-								for (int i = 0; i < needed; i++)
-									blankArray[i] = ' ';
-								stringBuffer.append(blankArray, 0,
-												maxWidth - sourceWidth);
-								sourceValue = stringBuffer.toString();
-							}
-							return dvf.getNationalCharDataValue(sourceValue);
-
-						case StoredFormatIds.NATIONAL_VARCHAR_TYPE_ID:
-							return dvf.getNationalVarcharDataValue(sourceValue);
-
-						case StoredFormatIds.VARCHAR_TYPE_ID:
-							return dvf.getVarcharDataValue(sourceValue);
-					}
+					if(formatId == StoredFormatIds.VARCHAR_TYPE_ID)
+						return dvf.getVarcharDataValue(sourceValue);
 				}
 
 				/*
@@ -1688,20 +1662,8 @@ public class ResultColumn extends ValueNode
 					if (sourceValue.charAt(posn) != ' ')
 					{
 						String typeName = null;
-						switch (formatId)
-						{
-							case StoredFormatIds.NATIONAL_CHAR_TYPE_ID:
-								typeName = TypeId.NATIONAL_CHAR_NAME;
-								break;
-
-							case StoredFormatIds.NATIONAL_VARCHAR_TYPE_ID:
-								typeName = TypeId.NATIONAL_VARCHAR_NAME;
-								break;
-
-							case StoredFormatIds.VARCHAR_TYPE_ID:
+						if (formatId == StoredFormatIds.VARCHAR_TYPE_ID)
 								typeName = TypeId.VARCHAR_NAME;
-								break;
-						}
 						throw StandardException.newException(SQLState.LANG_STRING_TRUNCATION, 
 													 typeName,
 													 StringUtil.formatForPrint(sourceValue), 
@@ -1709,25 +1671,12 @@ public class ResultColumn extends ValueNode
 					}
 				}
 
-				switch (formatId)
-				{
-					case StoredFormatIds.NATIONAL_CHAR_TYPE_ID:
-						return dvf.getNationalCharDataValue(sourceValue.substring(0, maxWidth));
-
-					case StoredFormatIds.NATIONAL_VARCHAR_TYPE_ID:
-						return dvf.getNationalVarcharDataValue(sourceValue.substring(0, maxWidth));
-
-					case StoredFormatIds.VARCHAR_TYPE_ID:
-						return dvf.getVarcharDataValue(sourceValue.substring(0, maxWidth));
-				}
+				if (formatId == StoredFormatIds.VARCHAR_TYPE_ID)
+					return dvf.getVarcharDataValue(sourceValue.substring(0, maxWidth));
 
 			case StoredFormatIds.LONGVARCHAR_TYPE_ID:
 				//No need to check widths here (unlike varchar), since no max width
 				return dvf.getLongvarcharDataValue(constantValue.getString());
-
-			case StoredFormatIds.NATIONAL_LONGVARCHAR_TYPE_ID:
-				//No need to check widths here (unlike varchar), since no max width
-				return dvf.getNationalLongvarcharDataValue(constantValue.getString());
 
 		}
 	}
