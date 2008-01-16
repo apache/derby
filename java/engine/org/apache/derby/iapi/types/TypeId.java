@@ -107,9 +107,6 @@ public final class TypeId implements Formatable
         public static final int CHAR_MAXWIDTH           = Limits.DB2_CHAR_MAXWIDTH;
         public static final int VARCHAR_MAXWIDTH        = Limits.DB2_VARCHAR_MAXWIDTH;
         public static final int LONGVARCHAR_MAXWIDTH = Limits.DB2_LONGVARCHAR_MAXWIDTH;
-        public static final int NATIONAL_CHAR_MAXWIDTH  = Integer.MAX_VALUE;
-        public static final int NATIONAL_VARCHAR_MAXWIDTH       = Integer.MAX_VALUE;
-        public static final int NATIONAL_LONGVARCHAR_MAXWIDTH = Limits.DB2_LONGVARCHAR_MAXWIDTH;
         public static final int BIT_MAXWIDTH            = Limits.DB2_CHAR_MAXWIDTH;
         public static final int VARBIT_MAXWIDTH         = Limits.DB2_VARCHAR_MAXWIDTH;
         public static final int LONGVARBIT_MAXWIDTH = Limits.DB2_LONGVARCHAR_MAXWIDTH;
@@ -117,7 +114,6 @@ public final class TypeId implements Formatable
         // not supposed to be limited! 4096G should be ok(?), if Derby can handle...
         public static final int BLOB_MAXWIDTH = Integer.MAX_VALUE; // to change long
         public static final int CLOB_MAXWIDTH = Integer.MAX_VALUE; // to change long
-        public static final int NCLOB_MAXWIDTH = Integer.MAX_VALUE; // to change long
         public static final int XML_MAXWIDTH = Integer.MAX_VALUE;
 
         // Max width for datetime values is the length of the
@@ -214,11 +210,7 @@ public final class TypeId implements Formatable
         public static final int SMALLINT_PRECEDENCE = 40;
         public static final int TINYINT_PRECEDENCE       = 30;
         public static final int REF_PRECEDENCE           = 25;
-        public static final int NATIONAL_LONGVARCHAR_PRECEDENCE = 18;
-        public static final int NATIONAL_VARCHAR_PRECEDENCE  = 17;
-        public static final int NATIONAL_CHAR_PRECEDENCE         = 16;
         public static final int CLOB_PRECEDENCE = 14;
-        public static final int NCLOB_PRECEDENCE = 13; 
         public static final int LONGVARCHAR_PRECEDENCE = 12;
         public static final int VARCHAR_PRECEDENCE  = 10;
         public static final int CHAR_PRECEDENCE  = 0;
@@ -236,7 +228,7 @@ public final class TypeId implements Formatable
         /*
         ** Others are created on demand by the getBuiltInTypeId(int),
         ** if they are built-in (i.e.? Part of JDBC .Types),
-        ** or by getBuiltInTypeId(string) if they are NATIONAL types or REF_NAME type.
+        ** or by getBuiltInTypeId(string) if they are REF_NAME type.
         */
 
         private static TypeId                   TINYINT_ID;
@@ -247,9 +239,6 @@ public final class TypeId implements Formatable
         private static TypeId                   DECIMAL_ID;
         private static TypeId                   NUMERIC_ID;
         private static TypeId                   VARCHAR_ID;
-        private static TypeId                   NATIONAL_CHAR_ID;
-        private static TypeId                   NATIONAL_LONGVARCHAR_ID;
-        private static TypeId                   NATIONAL_VARCHAR_ID;
         private static TypeId                   DATE_ID;
         private static TypeId                   TIME_ID;
         private static TypeId                   TIMESTAMP_ID;
@@ -261,7 +250,6 @@ public final class TypeId implements Formatable
 
         private static TypeId                   BLOB_ID;
         private static TypeId                   CLOB_ID;
-        private static TypeId                   NCLOB_ID;
         private static TypeId                   XML_ID;
 
         /**
@@ -614,30 +602,7 @@ public final class TypeId implements Formatable
                 TypeId ret = null;
 
                 // Types defined below here are SQL types and non-JDBC types that are supported by Derby
-                if (SQLTypeName.equals(TypeId.NCLOB_NAME)) {
-                        ret = NCLOB_ID;
-                        if (ret == null)
-                                ret = NCLOB_ID = new TypeId(StoredFormatIds.NCLOB_TYPE_ID,
-                                                            new BaseTypeIdImpl(StoredFormatIds.NCLOB_TYPE_ID_IMPL));
-                } else if (SQLTypeName.equals(TypeId.NATIONAL_CHAR_NAME)) {
-                        ret = NATIONAL_CHAR_ID;
-                        if (ret == null)
-                                ret = NATIONAL_CHAR_ID = new TypeId(StoredFormatIds.NATIONAL_CHAR_TYPE_ID,
-                                                                    new BaseTypeIdImpl(StoredFormatIds.NATIONAL_CHAR_TYPE_ID_IMPL));
-
-                } else if (SQLTypeName.equals(TypeId.NATIONAL_LONGVARCHAR_NAME)) {
-                        ret = NATIONAL_LONGVARCHAR_ID;
-                        if (ret == null)
-                                ret = NATIONAL_LONGVARCHAR_ID = new TypeId(StoredFormatIds.NATIONAL_LONGVARCHAR_TYPE_ID,
-                                                                        new BaseTypeIdImpl(StoredFormatIds.NATIONAL_LONGVARCHAR_TYPE_ID_IMPL));
-
-                } else if (SQLTypeName.equals(TypeId.NATIONAL_VARCHAR_NAME)) {
-                        ret = NATIONAL_VARCHAR_ID;
-                        if (ret == null)
-                                ret = NATIONAL_VARCHAR_ID = new TypeId(StoredFormatIds.NATIONAL_VARCHAR_TYPE_ID,
-                                                                        new BaseTypeIdImpl(StoredFormatIds.NATIONAL_VARCHAR_TYPE_ID_IMPL));
-
-                } else if (SQLTypeName.equals(TypeId.REF_NAME)) {
+                if (SQLTypeName.equals(TypeId.REF_NAME)) {
                         ret = REF_ID;
                         if (ret == null)
                                 ret = REF_ID = new TypeId(StoredFormatIds.REF_TYPE_ID,
@@ -826,31 +791,6 @@ public final class TypeId implements Formatable
                                 isLongConcatableTypeId = true;
                                 break;
 
-                        case StoredFormatIds.NATIONAL_CHAR_TYPE_ID:
-                                typePrecedence = NATIONAL_CHAR_PRECEDENCE;
-                                javaTypeName = "java.lang.String";
-                                maxMaxWidth = TypeId.NATIONAL_CHAR_MAXWIDTH;
-                                isStringTypeId = true;
-                                isConcatableTypeId = true;
-                                break;
-
-                        case StoredFormatIds.NATIONAL_LONGVARCHAR_TYPE_ID:
-                                typePrecedence = NATIONAL_LONGVARCHAR_PRECEDENCE;
-                                javaTypeName = "java.lang.String";
-                                maxMaxWidth = TypeId.NATIONAL_LONGVARCHAR_MAXWIDTH;
-                                isStringTypeId = true;
-                                isConcatableTypeId = true;
-                                isLongConcatableTypeId = true;
-                                break;
-
-                        case StoredFormatIds.NATIONAL_VARCHAR_TYPE_ID:
-                                typePrecedence = NATIONAL_VARCHAR_PRECEDENCE;
-                                javaTypeName = "java.lang.String";
-                                maxMaxWidth = TypeId.NATIONAL_VARCHAR_MAXWIDTH;
-                                isStringTypeId = true;
-                                isConcatableTypeId = true;
-                                break;
-
                         case StoredFormatIds.REAL_TYPE_ID:
                                 maxPrecision = TypeId.REAL_PRECISION;
                                 maxScale = TypeId.REAL_SCALE;
@@ -946,16 +886,6 @@ public final class TypeId implements Formatable
                               typePrecedence = CLOB_PRECEDENCE;
                               javaTypeName = "java.sql.Clob";
                               maxMaxWidth = TypeId.CLOB_MAXWIDTH;
-                              isStringTypeId = true;
-                              isConcatableTypeId = true;
-                              isLongConcatableTypeId = true; // ??
-                              isLOBTypeId = true;
-                              break;
-
-                      case StoredFormatIds.NCLOB_TYPE_ID:
-                              typePrecedence = NCLOB_PRECEDENCE;
-                              javaTypeName = "java.sql.Clob";
-                              maxMaxWidth = TypeId.NCLOB_MAXWIDTH;
                               isStringTypeId = true;
                               isConcatableTypeId = true;
                               isLongConcatableTypeId = true; // ??
@@ -1124,22 +1054,20 @@ public final class TypeId implements Formatable
 	
 		/**
 		 * Is this a fixed string type?
-		 * @return true if this is CHAR or NCHAR
+		 * @return true if this is CHAR
 		 */
 		public boolean isFixedStringTypeId()
 		{
-				return ((formatId == StoredFormatIds.CHAR_TYPE_ID)||
-						(formatId == StoredFormatIds.NATIONAL_CHAR_TYPE_ID));
+				return (formatId == StoredFormatIds.CHAR_TYPE_ID);
 		}
 
 		/** 
 		 *Is this a Clob?
-		 * @return true if this is CLOB or NCLOB
+		 * @return true if this is CLOB
 		 */
 		public boolean isClobTypeId()
 		{
-			   return ((formatId == StoredFormatIds.CLOB_TYPE_ID)||
-					   (formatId == StoredFormatIds.NCLOB_TYPE_ID));
+			   return (formatId == StoredFormatIds.CLOB_TYPE_ID);
 		}
 
 		/** 
@@ -1158,8 +1086,7 @@ public final class TypeId implements Formatable
 		 */
 		public boolean isLongVarcharTypeId()
 		{
-				return ((formatId == StoredFormatIds.LONGVARCHAR_TYPE_ID) ||
-						(formatId == StoredFormatIds.NATIONAL_LONGVARCHAR_TYPE_ID));
+				return (formatId == StoredFormatIds.LONGVARCHAR_TYPE_ID);
 		}
 
 
@@ -1174,26 +1101,6 @@ public final class TypeId implements Formatable
 						(formatId == StoredFormatIds.TIME_TYPE_ID) ||
 						(formatId == StoredFormatIds.TIMESTAMP_TYPE_ID));
 		}
-
-        /**
-                Does this type id represent a national character string.
-                If this returns true then isStringTypeId will also return true.
-        */
-        public boolean isNationalStringTypeId()
-        {
-                switch (formatId)
-                {
-                        default:
-                                return false;
-
-                        case StoredFormatIds.NATIONAL_CHAR_TYPE_ID:
-                        case StoredFormatIds.NATIONAL_LONGVARCHAR_TYPE_ID:
-                        case StoredFormatIds.NATIONAL_VARCHAR_TYPE_ID:
-                        case StoredFormatIds.NCLOB_TYPE_ID:
-                                return true;
-
-                }
-        }
 
         /** 
          *Is this an XML doc?
@@ -1231,8 +1138,6 @@ public final class TypeId implements Formatable
                         // cmp not allowed, indexing not allowed
                         case StoredFormatIds.BLOB_TYPE_ID:
                         case StoredFormatIds.CLOB_TYPE_ID:
-                        case StoredFormatIds.NCLOB_TYPE_ID:
-                        case StoredFormatIds.NATIONAL_LONGVARCHAR_TYPE_ID:
                         case StoredFormatIds.LONGVARCHAR_TYPE_ID:
                         case StoredFormatIds.XML_TYPE_ID:
                         case StoredFormatIds.LONGVARBIT_TYPE_ID:
@@ -1332,8 +1237,6 @@ public final class TypeId implements Formatable
             if ((BLOB_ID != null) && BLOB_ID.equals(this))
                 return "java.sql.Blob";
             if ((CLOB_ID != null) && CLOB_ID.equals(this))
-                return "java.sql.Clob";
-            if ((NCLOB_ID != null) && NCLOB_ID.equals(this))
                 return "java.sql.Clob";
             return getCorrespondingJavaTypeName();
         }
@@ -1549,20 +1452,8 @@ public final class TypeId implements Formatable
                         case StoredFormatIds.CLOB_TYPE_ID:
                                 return new SQLClob();
 
-                        case StoredFormatIds.NCLOB_TYPE_ID:
-                                return new SQLNClob();
-
                         case StoredFormatIds.LONGVARCHAR_TYPE_ID:
                                 return new SQLLongvarchar();
-
-                        case StoredFormatIds.NATIONAL_CHAR_TYPE_ID:
-                                return new SQLNationalChar();
-
-                        case StoredFormatIds.NATIONAL_VARCHAR_TYPE_ID:
-                                return new SQLNationalVarchar();
-
-                        case StoredFormatIds.NATIONAL_LONGVARCHAR_TYPE_ID:
-                                return new SQLNationalLongvarchar();
 
                         case StoredFormatIds.REAL_TYPE_ID:
                                 return new SQLReal();
@@ -1639,7 +1530,6 @@ public final class TypeId implements Formatable
                                 return (int)(Math.ceil(dts.getMaximumWidth()/8d));
 
                         case StoredFormatIds.CHAR_TYPE_ID:
-                        case StoredFormatIds.NATIONAL_CHAR_TYPE_ID:
                                 return (2 * dts.getMaximumWidth()) + 2;
 
                         case StoredFormatIds.DECIMAL_TYPE_ID:
@@ -1656,7 +1546,6 @@ public final class TypeId implements Formatable
                         case StoredFormatIds.LONGVARBIT_TYPE_ID:
                         case StoredFormatIds.BLOB_TYPE_ID:
                         case StoredFormatIds.CLOB_TYPE_ID:
-                        case StoredFormatIds.NCLOB_TYPE_ID:
                         // RESOLVE: Should XML be here?  What's this value mean, anyway?
                         case StoredFormatIds.XML_TYPE_ID:
                                 return 10240;
@@ -1681,10 +1570,8 @@ public final class TypeId implements Formatable
                                         return (int)(Math.ceil(dts.getMaximumWidth()/8d));
                                 }
 
-                        case StoredFormatIds.NATIONAL_VARCHAR_TYPE_ID:
                         case StoredFormatIds.VARCHAR_TYPE_ID:
                         case StoredFormatIds.LONGVARCHAR_TYPE_ID:
-                        case StoredFormatIds.NATIONAL_LONGVARCHAR_TYPE_ID:
                                 // Return 200 if maximum width is max int
                                 if (dts.getMaximumWidth() == Integer.MAX_VALUE)
                                 {
@@ -1799,8 +1686,6 @@ public final class TypeId implements Formatable
                         case StoredFormatIds.DECIMAL_TYPE_ID:
                         case StoredFormatIds.CHAR_TYPE_ID:
                         case StoredFormatIds.VARCHAR_TYPE_ID:
-                        case StoredFormatIds.NATIONAL_CHAR_TYPE_ID:
-                        case StoredFormatIds.NATIONAL_VARCHAR_TYPE_ID:
                         case StoredFormatIds.BLOB_TYPE_ID:
                         case StoredFormatIds.CLOB_TYPE_ID:
                                  return true;

@@ -107,10 +107,6 @@ public class Types {
             // Types we don't support:
             case java.sql.Types.ARRAY: return "ARRAY";
             case java.sql.Types.DATALINK: return "DATALINK";
-            case JDBC40Translation.NCHAR: return "NATIONAL CHAR";
-            case JDBC40Translation.NCLOB: return "NCLOB";
-            case JDBC40Translation.NVARCHAR: return "NATIONAL CHAR VARYING";
-            case JDBC40Translation.LONGNVARCHAR: return "LONG NVARCHAR";
             case java.sql.Types.REF: return "REF";
             case JDBC40Translation.ROWID: return "ROWID";
             case JDBC40Translation.SQLXML: return "SQLXML";

@@ -48,9 +48,6 @@ public class DTSClassInfo extends FormatableInstanceGetter {
                 case StoredFormatIds.LONGINT_TYPE_ID: 
                 case StoredFormatIds.LONGVARBIT_TYPE_ID: 
                 case StoredFormatIds.LONGVARCHAR_TYPE_ID: 
-                case StoredFormatIds.NATIONAL_CHAR_TYPE_ID: 
-                case StoredFormatIds.NATIONAL_LONGVARCHAR_TYPE_ID: 
-                case StoredFormatIds.NATIONAL_VARCHAR_TYPE_ID: 
                 case StoredFormatIds.REAL_TYPE_ID: 
                 case StoredFormatIds.REF_TYPE_ID: 
                 case StoredFormatIds.SMALLINT_TYPE_ID: 
@@ -62,7 +59,6 @@ public class DTSClassInfo extends FormatableInstanceGetter {
                 case StoredFormatIds.VARCHAR_TYPE_ID: 
                 case StoredFormatIds.BLOB_TYPE_ID:
                 case StoredFormatIds.CLOB_TYPE_ID:
-                case StoredFormatIds.NCLOB_TYPE_ID:
                 case StoredFormatIds.XML_TYPE_ID:
                 case StoredFormatIds.ROW_MULTISET_CATALOG_ID:
                         return new TypeId(fmtId);

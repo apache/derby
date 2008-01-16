@@ -113,10 +113,9 @@ public class ModifyColumnNode extends ColumnDefinitionNode
 					 SQLState.LANG_MODIFY_COLUMN_CHANGE_TYPE, name);
 		}			
 		
-		// can only alter the length of varchar, nvarchar, bitvarying columns
+		// can only alter the length of varchar, bitvarying columns
 		String typeName = getType().getTypeName();
-		if (!(typeName.equals(TypeId.NATIONAL_VARCHAR_NAME)) &&
-			!(typeName.equals(TypeId.VARCHAR_NAME)) &&
+		if (!(typeName.equals(TypeId.VARCHAR_NAME)) &&
 			!(typeName.equals(TypeId.VARBIT_NAME)))
 		{
 			throw StandardException.newException(

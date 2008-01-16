@@ -69,13 +69,6 @@ abstract class BaseTypeCompiler implements TypeCompiler
 		return null;
 	}
 
-	/** @see TypeCompiler#getMatchingNationalCharTypeName */
-	public String getMatchingNationalCharTypeName()
-	{
-		return TypeId.NATIONAL_CHAR_NAME;
-	}
-
-
 	/**
 	 * @see TypeCompiler#resolveArithmeticOperation
 	 *

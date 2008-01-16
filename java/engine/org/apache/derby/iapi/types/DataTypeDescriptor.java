@@ -1381,12 +1381,9 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 
 			case StoredFormatIds.CHAR_TYPE_ID:
 			case StoredFormatIds.VARCHAR_TYPE_ID:
-			case StoredFormatIds.NATIONAL_CHAR_TYPE_ID:
-			case StoredFormatIds.NATIONAL_VARCHAR_TYPE_ID:
 				return (double) (2.0 * getMaximumWidth());
 
 			case StoredFormatIds.LONGVARCHAR_TYPE_ID:
-			case StoredFormatIds.NATIONAL_LONGVARCHAR_TYPE_ID:
 				/* Who knows? Let's just use some big number */
 				return 10000.0;
 

@@ -316,16 +316,9 @@ public abstract class Util  {
 			case Types.DECIMAL	:  return TypeId.DECIMAL_NAME;
 
 			case Types.CHAR		:  return TypeId.CHAR_NAME;
-			case JDBC40Translation.NCHAR:
-				return TypeId.NATIONAL_CHAR_NAME;
 			case Types.VARCHAR 	:  return TypeId.VARCHAR_NAME;
-			case JDBC40Translation.NVARCHAR:
-				return TypeId.NATIONAL_VARCHAR_NAME;
 			case Types.LONGVARCHAR 	:  return "LONGVARCHAR";
-			case JDBC40Translation.LONGNVARCHAR:
-				return TypeId.NATIONAL_LONGVARCHAR_NAME;
             case Types.CLOB     :  return TypeId.CLOB_NAME;
-			case JDBC40Translation.NCLOB: return TypeId.NCLOB_NAME;
 
 			case Types.DATE 		:  return TypeId.DATE_NAME;
 			case Types.TIME 		:  return TypeId.TIME_NAME;

@@ -132,7 +132,6 @@ public abstract class BinaryComparisonOperatorNode extends BinaryOperatorNode
 	{
 		super.bindExpression(fromList, subqueryList, aggregateVector);
 
-//RESOLVELOCALIZE - convert constants to national constants
 		TypeCompiler leftTC = leftOperand.getTypeCompiler();
 		TypeCompiler rightTC = rightOperand.getTypeCompiler();
 		TypeId leftTypeId = leftOperand.getTypeId();
@@ -177,36 +176,6 @@ public abstract class BinaryComparisonOperatorNode extends BinaryOperatorNode
 							leftTypeServices.getMaximumWidth()),
 					getContextManager());
 			((CastNode) leftOperand).bindCastNodeOnly();
-		}
-		/* If we are comparing a char with a national char then
-		 * we need to generate a cast to the appropriate national
-		 * char above the char operand.
-		 */
-		else if (! leftTypeId.isNationalStringTypeId() &&
-			rightTypeId.isNationalStringTypeId())
-		{
-			leftOperand =  (ValueNode)
-				getNodeFactory().getNode(
-					C_NodeTypes.CAST_NODE,
-					leftOperand, 
-					DataTypeDescriptor.getBuiltInDataTypeDescriptor(leftTC.getMatchingNationalCharTypeName(),
-										leftTC.getCastToCharWidth(
-											leftOperand.getTypeServices())),
-					getContextManager());
-			((CastNode) leftOperand).bindCastNodeOnly();
-		}
-		else if (! rightTypeId.isNationalStringTypeId() &&
-				leftTypeId.isNationalStringTypeId())
-		{
-			rightOperand =  (ValueNode)
-				getNodeFactory().getNode(
-					C_NodeTypes.CAST_NODE,
-					rightOperand, 
-					DataTypeDescriptor.getBuiltInDataTypeDescriptor(rightTC.getMatchingNationalCharTypeName(), 
-										rightTC.getCastToCharWidth(
-											rightOperand.getTypeServices())),
-					getContextManager());
-			((CastNode) rightOperand).bindCastNodeOnly();
 		}
 
 		/* Test type compatability and set type info for this node */

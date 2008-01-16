@@ -327,10 +327,6 @@ public class TypeDescriptorImpl implements TypeDescriptor, Formatable
 			case Types.VARCHAR:
 			case Types.LONGVARCHAR:
 			case Types.CLOB:
-			case JDBC40Translation.NCHAR:
-			case JDBC40Translation.NVARCHAR:
-			case JDBC40Translation.LONGNVARCHAR:
-			case JDBC40Translation.NCLOB:
                 return true;
                 
 			default:

@@ -559,26 +559,26 @@ public interface StoredFormatIds {
     /**
         class org.apache.derby.iapi.types.NationalCharTypeId
      */
-    static public final int NATIONAL_CHAR_TYPE_ID =
-            (MIN_ID_2 + 370);
+    //static public final int NATIONAL_CHAR_TYPE_ID =
+            //(MIN_ID_2 + 370);
     
     /**
         class org.apache.derby.iapi.types.NationalLongvarcharTypeId
      */
-    static public final int NATIONAL_LONGVARCHAR_TYPE_ID =
-            (MIN_ID_2 + 362);
+    //static public final int NATIONAL_LONGVARCHAR_TYPE_ID =
+            //(MIN_ID_2 + 362);
     
     /**
         class org.apache.derby.iapi.types.NationalLongvarcharTypeId
      */
-    static public final int NCLOB_TYPE_ID = 
-            (MIN_ID_2 + 448);
+    //static public final int NCLOB_TYPE_ID = 
+            //(MIN_ID_2 + 448);
     
     /**
         class org.apache.derby.iapi.types.NationalVarcharTypeId
      */
-    static public final int NATIONAL_VARCHAR_TYPE_ID =
-            (MIN_ID_2 + 369);
+    //static public final int NATIONAL_VARCHAR_TYPE_ID =
+            //(MIN_ID_2 + 369);
 
     /**
     class org.apache.derby.impl.sql.catalog.SchemaDescriptorFinder
@@ -851,26 +851,26 @@ public interface StoredFormatIds {
     /**
         class org.apache.derby.catalog.types.NationalCharTypeIdImpl
      */
-    static public final int NATIONAL_CHAR_TYPE_ID_IMPL =
-            (MIN_ID_2 + 366);
+    //static public final int NATIONAL_CHAR_TYPE_ID_IMPL =
+            //(MIN_ID_2 + 366);
 
     /**
         class org.apache.derby.catalog.types.NationalVarcharTypeIdImpl
      */
-    static public final int NATIONAL_VARCHAR_TYPE_ID_IMPL =
-            (MIN_ID_2 + 367);
+    //static public final int NATIONAL_VARCHAR_TYPE_ID_IMPL =
+            //(MIN_ID_2 + 367);
 
     /**
         class org.apache.derby.catalog.types.NationalLongVarcharTypeIdImpl
      */
-    static public final int NATIONAL_LONGVARCHAR_TYPE_ID_IMPL =
-            (MIN_ID_2 + 368);
+    //static public final int NATIONAL_LONGVARCHAR_TYPE_ID_IMPL =
+            //(MIN_ID_2 + 368);
     
     /**
         class org.apache.derby.catalog.types.NationalLongVarcharTypeIdImpl
      */
-    static public final int NCLOB_TYPE_ID_IMPL =
-            (MIN_ID_2 + 449);
+    //static public final int NCLOB_TYPE_ID_IMPL =
+            //(MIN_ID_2 + 449);
     
     /**
         class org.apache.derby.iapi.types.XML (implementation of
@@ -1539,17 +1539,17 @@ public interface StoredFormatIds {
     public static final int SQL_BLOB_ID =
             (MIN_ID_2 + 443);
 
-    public static final int SQL_NATIONAL_CHAR_ID = 
-            (MIN_ID_2 + 363);
+    //public static final int SQL_NATIONAL_CHAR_ID = 
+            //(MIN_ID_2 + 363);
 
-    public static final int SQL_NATIONAL_VARCHAR_ID = 
-            (MIN_ID_2 + 364);
+    //public static final int SQL_NATIONAL_VARCHAR_ID = 
+            //(MIN_ID_2 + 364);
 
-    public static final int SQL_NATIONAL_LONGVARCHAR_ID = 
-            (MIN_ID_2 + 365);
+    //public static final int SQL_NATIONAL_LONGVARCHAR_ID = 
+            //(MIN_ID_2 + 365);
 
-    public static final int SQL_NCLOB_ID = 
-            (MIN_ID_2 + 450);
+    //public static final int SQL_NCLOB_ID = 
+            //(MIN_ID_2 + 450);
 
     // Interface: org.apache.derby.iapi.types.XMLDataValue
     public static final int XML_ID = 

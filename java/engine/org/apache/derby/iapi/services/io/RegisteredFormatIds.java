@@ -414,15 +414,15 @@ String[] TwoByte = {
         /* 359 */       "org.apache.derby.impl.sql.depend.DepClassInfo",
         /* 360 */       "org.apache.derby.impl.store.access.btree.index.B2IStaticCompiledInfo",
         /* 361 */       null, // SQLData marker
-        /* 362 */       "org.apache.derby.iapi.types.DTSClassInfo", //InstanceGetter
-        /* 363 */       "org.apache.derby.iapi.types.DTSClassInfo", //InstanceGetter,
-        /* 364 */       "org.apache.derby.iapi.types.DTSClassInfo", //InstanceGetter,
-        /* 365 */       "org.apache.derby.iapi.types.DTSClassInfo", //InstanceGetter,
-        /* 366 */       "org.apache.derby.catalog.types.TypesImplInstanceGetter",
-        /* 367 */       "org.apache.derby.catalog.types.TypesImplInstanceGetter",
-        /* 368 */       "org.apache.derby.catalog.types.TypesImplInstanceGetter",
-        /* 369 */       "org.apache.derby.iapi.types.DTSClassInfo", //InstanceGetter
-        /* 370 */       "org.apache.derby.iapi.types.DTSClassInfo", //InstanceGetter
+        /* 362 */       null,
+        /* 363 */       null,
+        /* 364 */       null,
+        /* 365 */       null,
+        /* 366 */       null,
+        /* 367 */       null,
+        /* 368 */       null,
+        /* 369 */       null,
+        /* 370 */       null,
         /* 371 */       "org.apache.derby.impl.sql.catalog.CoreDDFinderClassInfo",             // InstanceGetter
         /* 372 */       null,
         /* 373 */       null,
@@ -508,9 +508,9 @@ String[] TwoByte = {
 
     /// --- NLOB is copying NATIONAL LONGVARCHAR in implementation
         
-        /* 448 */   "org.apache.derby.iapi.types.DTSClassInfo", //InstanceGetter
-        /* 449 */       "org.apache.derby.catalog.types.TypesImplInstanceGetter",
-        /* 450 */       "org.apache.derby.iapi.types.DTSClassInfo", //InstanceGetter,
+        /* 448 */   null,
+        /* 449 */   null,
+        /* 450 */   null,
 
         /* 451 */   "org.apache.derby.catalog.types.RoutineAliasInfo",
 		/* 452 */   null,

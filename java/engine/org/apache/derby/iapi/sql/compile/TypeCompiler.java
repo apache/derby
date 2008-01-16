@@ -165,14 +165,6 @@ public interface TypeCompiler
 	 */
 	String getPrimitiveMethodName();
 
-
-	/**
-	 * Get the name of the matching national char type.
-	 *
-	 * @return The name of the matching national char type.
-	 */
-	String getMatchingNationalCharTypeName();
-
 	/**
 	 * Generate the code necessary to produce a SQL null of the appropriate
 	 * type. The stack must contain a DataValueFactory and a null or a value

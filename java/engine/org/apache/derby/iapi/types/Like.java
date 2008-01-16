@@ -89,37 +89,8 @@ public class Like {
 				escapeLength, collator);
 	}
 
-	/**
-		For national chars.
-		@param val value to compare. if null, result is null.
-		@param valLength length of val
-		@param pat pattern to compare. if null, result is null.
-		@param patLength length of pat
-		@param escape escape character. Must be 1 char long.
-			if null, no escape character is used.
-		@param escapeLength length of escape
-		@param collator	The collator to use.
-
-		@return null if val or pat null, otherwise true if match
-		and false if not.
-		@exception StandardException thrown if data invalid
-	 */
-	public static Boolean like
-	(
-		int[] 	val, 
-		int 	valLength, 
-		int[] 	pat, 
-		int 	patLength, 
-		int[] 	escape,
-		int 	escapeLength,
-		RuleBasedCollator collator
-	) throws StandardException 
-	{
-		return like(val, 0, valLength, pat, 0, patLength, escape, escapeLength, collator);
-	}
-
 	/* For character string types with UCS_BASIC and territory based
-	 * collation. There is a different method for non-national chars */
+	 * collation. */
 	private static Boolean like
 	(
 		char[] 	val, 
@@ -306,236 +277,8 @@ public class Like {
 	    return collator.compare(s1, s2) == 0; 
 	}
 
-	/* national chars */
-	private static Boolean like
-	(
-		int[] 	val, 
-		int 	vLoc, 	// start at val[vLoc]
-		int 	vEnd, 	// end at val[vEnd]
-		int[] 	pat, 
-		int 	pLoc, 	// start at pat[pLoc]
-		int 	pEnd, 	// end at pat[pEnd]
-		int[] 	escape,
-		int 	escapeLength,
-		RuleBasedCollator	collator
-	) throws StandardException 
-	{
-		int[] escCharInts = null;
-		boolean haveEsc = true;
-		int[] anyCharInts = new int[1];	// assume only 1 int
-		int[] anyStringInts = new int[1];	// assume only 1 int
-		
-		if (val == null) return null;
-		if (pat == null) return null;
-
-		if (escape == null)
-		{
-			haveEsc = false;
-		}
-		else
-		{
-			escCharInts = escape;
-		}
-
-		Boolean result;
-
-		// get the collation integer representing "_"
-		CollationElementIterator cei =
-									collator.getCollationElementIterator("_");
-		anyCharInts[0] = cei.next();
-		{
-			int nextInt;
-
-			// There may be multiple ints representing this character
-			while ((nextInt = cei.next()) != CollationElementIterator.NULLORDER)
-			{
-				int[] temp = new int[anyCharInts.length + 1];
-				for (int index = 0; index < anyCharInts.length; index++)
-				{
-					temp[index] = anyCharInts[index];
-				}
-				temp[anyCharInts.length] = nextInt;
-				anyCharInts = temp;
-			}
-		}
-		// get the collation integer representing "%"
-		cei = collator.getCollationElementIterator("%");
-		anyStringInts[0] = cei.next();
-		{
-			int nextInt;
-
-			// There may be multiple ints representing this character
-			while ((nextInt = cei.next()) != CollationElementIterator.NULLORDER)
-			{
-				int[] temp = new int[anyStringInts.length + 1];
-				for (int index = 0; index < anyStringInts.length; index++)
-				{
-					temp[index] = anyStringInts[index];
-				}
-				temp[anyStringInts.length] = nextInt;
-				anyStringInts = temp;
-			}
-		}
-
-		while (true) 
-		{
-			// returns null if more work to do, otherwise match Boolean
-			result = checkLengths(vLoc, vEnd, pLoc, pat, pEnd, anyStringInts);
-			if (result != null) 
-				return result;
-
-			// go until we get a special char in the pattern or hit EOS
-			while ( (! matchSpecial(pat, pLoc, pEnd, anyCharInts)) &&
-					(! matchSpecial(pat, pLoc, pEnd, anyStringInts)) &&
-					((! haveEsc)
-						|| (! matchSpecial(pat, pLoc, pEnd, escCharInts))))
-			{
-				if (val[vLoc] == pat[pLoc]) 
-				{
-					vLoc++; pLoc++;
-	
-					result = checkLengths(vLoc, vEnd, pLoc,
-								pat, pEnd, anyStringInts);
-					if (result != null) 
-					{
-						return result;
-					}
-				}
-				else 
-				{
-					return Boolean.FALSE;
-				}
-			}
-
-			// deal with escCharInt first, as it can be escaping a special char
-			// and can be a special char itself.
-			if (haveEsc && matchSpecial(pat, pLoc, pEnd, escCharInts))
-			{
-				pLoc += escCharInts.length;
-				if (pLoc == pEnd) 
-				{
-					throw StandardException.newException(
-						SQLState.LANG_INVALID_ESCAPE_SEQUENCE);
-				}
-
-				int[] specialInts = null;
-				if (matchSpecial(pat, pLoc, pEnd, escCharInts))
-				{
-					specialInts = escCharInts;
-				}
-				if (matchSpecial(pat, pLoc, pEnd, anyCharInts))
-				{
-					specialInts = anyCharInts;
-				}
-				if (matchSpecial(pat, pLoc, pEnd, anyStringInts))
-				{
-					specialInts = anyStringInts;
-				}
-				if (specialInts == null)
-				{
-					throw StandardException.newException(SQLState.LANG_INVALID_ESCAPE_SEQUENCE);
-				}
-				// regardless of the char in pat, it must match exactly:
-				for (int index = 0; index < specialInts.length; index++)
-				{
-					if (val[vLoc + index] != pat[pLoc + index])
-					{
-						return Boolean.FALSE;
-					}
-				}
-
-				vLoc += specialInts.length; 
-				pLoc += specialInts.length; 
-	
-				// returns null if more work to do, otherwise match Boolean
-				result = checkLengths(vLoc, vEnd,
-						pLoc, pat, pEnd, anyStringInts);
-
-				if (result != null) 
-					return result;
-			}
-			else if (matchSpecial(pat, pLoc, pEnd, anyCharInts))
-			{
-				// regardless of the char, it matches
-				vLoc += anyCharInts.length; 
-				pLoc += anyCharInts.length; 
-	
-				result = checkLengths(vLoc, vEnd, pLoc, pat, pEnd, anyStringInts);
-				if (result != null) 
-					return result;
-			}
-			else if (matchSpecial(pat, pLoc, pEnd, anyStringInts))
-			{
-				// catch the simple cases -- end of the pattern or of the string
-				if (pLoc+1 == pEnd)
-					return Boolean.TRUE;
-
-				// would return true, but caught in checkLengths above
-				if (SanityManager.DEBUG)
-					SanityManager.ASSERT(vLoc!=vEnd, 
-						"Should have been found already");
-
-				if (vLoc == vEnd)
-					return Boolean.TRUE;
-
-				// check if remainder of pattern is anyString's
-				// if escChar == anyString, we couldn't be here
-				// If there is an escape in the pattern we break
-				boolean allPercentChars = true;
-				for (int i=pLoc+1;i<pEnd;i++)
-				{
-					if (! matchSpecial(pat, i, pEnd, anyStringInts))
-					{
-						allPercentChars=false;
-						break;
-					}
-				}
-				if (allPercentChars)
-					return Boolean.TRUE;
-
-				// pattern can match 0 or more chars in value.
-				// to test that, we take the remainder of pattern and
-				// apply it to ever-shorter  remainders of value until
-				// we hit a match.
-
-				// the loop never continues from this point -- we will
-				// always generate an answer here.
-
-				// REMIND: there are smarter ways to pick the remainders
-				// and do this matching.
-
-				// num chars left in value includes current char
-				int vRem = vEnd - vLoc;
-
-				int n=0;
-
-				// num chars left in pattern excludes the anyString
-				int minLen = getMinLen(pat, pLoc+1, pEnd, haveEsc, escCharInts, anyStringInts);
-				for (int i=vRem; i>=minLen; i--) 
-				{
-					Boolean restResult = Like.like(val,vLoc+n,vLoc+n+i,pat,pLoc+1,pEnd,escape,escapeLength, collator);
-					if (SanityManager.DEBUG)
-					{
-						if (restResult == null)
-						{
-							SanityManager.THROWASSERT("null result on like(vLoc+n = "+(vLoc+n)+", i = "+i+
-													  ", pLoc+1 = " + (pLoc+1) + ", pEnd-(pLoc+1) = " + 
-													  (pEnd-(pLoc+1)) + ")");
-						}
-					}
-					if (restResult.booleanValue())
-						return restResult;
-
-					n++;
-				}
-				// none of the possibilities worked 
-				return Boolean.FALSE;
-			}
-		}
-	}
-
 	/**
-		Calculate the shortest length string that could match this pattern for non-national chars
+		Calculate the shortest length string that could match this pattern
 	 */
 	static int getMinLen(char[] pattern, int pStart, int pEnd, boolean haveEsc, char escChar) 
 	{
@@ -557,33 +300,7 @@ public class Like {
 	}
 
 	/**
-		Calculate the shortest length string that could match this pattern for national chars
-	 */
-	static int getMinLen(int[] pattern, int pStart, int pEnd, boolean haveEsc, 
-						 int[] escCharInts, int[] anyStringInts) 
-	{
-		int m=0;
-		for (int l = pStart; l<pEnd; ) 
-		{
-			if (haveEsc && matchSpecial(pattern, l, pEnd, escCharInts))
-			{ 
-				l += escCharInts.length + 1;
-				m += escCharInts.length;
-			}
-			else if (matchSpecial(pattern, l, pEnd, anyStringInts)) 
-			{
-				l += anyStringInts.length; // anyString, nothing needed
-			}
-			else 
-			{ // anyChar or other chars, need one char
-				l++; m++;
-			}
-		}
-		return m;
-	}
-
-	/**
-	 * checkLengths -- non-national chars 
+	 * checkLengths  
 	 *
 	 * Returns null if we are not done.
 	 * Returns true if we are at the end of our value and pattern
@@ -626,49 +343,6 @@ public class Like {
 	}
 
 	/**
-	 * checkLengths -- national chars 
-	 *
-	 * Returns null if we are not done.
-	 * Returns true if we are at the end of our value and pattern
-	 * Returns false if there is more pattern left but out of input value
-	 *
-	 * @param vLoc current index into int[] val
-	 * @param vEnd end index or our value
-	 * @param pLoc current index into our int[] pattern
-	 * @param pat  pattern int []
-	 * @param pEnd end index of our pattern []
-	 */
-
-	static Boolean checkLengths(int vLoc, int vEnd,
-			int pLoc, int[] pat, int pEnd, int[] anyStringInts) 
-	{
-		if (vLoc == vEnd) 
-		{
-			if (pLoc == pEnd) 
-			{
-				return Boolean.TRUE;
-			}
-			else 
-			{
-				// if remainder of pattern is anyString chars, ok
-				for (int i=pLoc; i<pEnd; i += anyStringInts.length) 
-				{
-					if (! matchSpecial(pat, i, pEnd, anyStringInts))
-					{
-						return Boolean.FALSE;
-					}
-				}
-				return Boolean.TRUE;
-			}
-		}
-		else if (pLoc == pEnd)
-		{
-			return Boolean.FALSE; // ran out of pattern
-		}
-		else return null; // still have strings to match, not done
-	}
-
-	/**
 	 * matchSpecial
 	 *
 	 *	check the pattern against the various special character arrays.
@@ -698,8 +372,7 @@ public class Like {
 
 	/*
 		Most typical interface for character string types with UCS_BASIC and 
-		territory based collation. There is a different method for non-national 
-		chars.
+		territory based collation.
 	 */
 	public static Boolean like(char[] value, int valueLength, char[] pattern, 
 			int patternLength, RuleBasedCollator collator) 
@@ -707,16 +380,6 @@ public class Like {
 		if (value == null || pattern == null) return null;
 		return like(value, valueLength, pattern, patternLength, null, 0, 
 				collator);
-	}
-
-	/*
-		Most typical interface for national chars
-	 */
-	public static Boolean like(int[] value, int valueLength, int[] pattern, int patternLength, RuleBasedCollator collator) 
-		throws StandardException 
-	{ 
-		if (value == null || pattern == null) return null;
-		return like(value, valueLength, pattern, patternLength, null, 0, collator);
 	}
 
 	// Methods for LIKE transformation at preprocess time:

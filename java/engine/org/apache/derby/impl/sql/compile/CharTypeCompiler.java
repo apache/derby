@@ -131,35 +131,6 @@ public final class CharTypeCompiler extends BaseTypeCompiler
                 return dts.getMaximumWidth();
         }
 
-        /** @see TypeCompiler#getMatchingNationalCharTypeName */
-        public String getMatchingNationalCharTypeName()
-        {
-                int formatId = getStoredFormatIdFromTypeId();
-                switch (formatId)
-                {
-                        case StoredFormatIds.CHAR_TYPE_ID:
-                        case StoredFormatIds.NATIONAL_CHAR_TYPE_ID:
-                                return TypeId.NATIONAL_CHAR_NAME;
-
-                        case StoredFormatIds.LONGVARCHAR_TYPE_ID:
-                        case StoredFormatIds.NATIONAL_LONGVARCHAR_TYPE_ID:
-                                return TypeId.NATIONAL_LONGVARCHAR_NAME;
-
-                        case StoredFormatIds.VARCHAR_TYPE_ID:
-                        case StoredFormatIds.NATIONAL_VARCHAR_TYPE_ID:
-                                return TypeId.NATIONAL_VARCHAR_NAME;
-
-                        default:
-                                if (SanityManager.DEBUG)
-                                {
-                                        SanityManager.THROWASSERT(
-                                                "unexpected formatId in getMatchingNationalCharTypeName() - " + formatId);
-                                }
-                                return null;
-                }
-        }
-
-
         String nullMethodName()
         {
                 int formatId = getStoredFormatIdFromTypeId();
@@ -170,15 +141,6 @@ public final class CharTypeCompiler extends BaseTypeCompiler
 
                         case StoredFormatIds.LONGVARCHAR_TYPE_ID:
                                 return "getNullLongvarchar";
-
-                        case StoredFormatIds.NATIONAL_CHAR_TYPE_ID:
-                                return "getNullNationalChar";
-
-                        case StoredFormatIds.NATIONAL_LONGVARCHAR_TYPE_ID:
-                                return "getNullNationalLongvarchar";
-
-                        case StoredFormatIds.NATIONAL_VARCHAR_TYPE_ID:
-                                return "getNullNationalVarchar";
 
                         case StoredFormatIds.VARCHAR_TYPE_ID:
                                 return "getNullVarchar";
@@ -214,15 +176,6 @@ public final class CharTypeCompiler extends BaseTypeCompiler
 
                         case StoredFormatIds.LONGVARCHAR_TYPE_ID:
                                 return "getLongvarcharDataValue";
-
-                        case StoredFormatIds.NATIONAL_CHAR_TYPE_ID:
-                                return "getNationalCharDataValue";
-
-                        case StoredFormatIds.NATIONAL_LONGVARCHAR_TYPE_ID:
-                                return "getNationalLongvarcharDataValue";
-
-                        case StoredFormatIds.NATIONAL_VARCHAR_TYPE_ID:
-                                return "getNationalVarcharDataValue";
 
                         case StoredFormatIds.VARCHAR_TYPE_ID:
                                 return "getVarcharDataValue";
