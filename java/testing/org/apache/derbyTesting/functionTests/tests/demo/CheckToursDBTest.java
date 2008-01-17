@@ -159,9 +159,9 @@ public class CheckToursDBTest extends BaseJDBCTestCase {
         JDBC.assertSingleValueResultSet(ps.executeQuery(), "B747");
         ps = prepareStatement("select REGION from MAPS where MAP_NAME = 'North Ocean'");
         JDBC.assertSingleValueResultSet(ps.executeQuery(), "Cup Island");
-        stmt.execute("update MAPS set REGION='Northern Ocean' where MAP_NAME = 'North Ocean'");
+        stmt.execute("update MAPS set REGION='Coffee Cup Island' where MAP_NAME = 'North Ocean'");
         JDBC.assertSingleValueResultSet(ps.executeQuery(),
-                "Northern Ocean");
+                "Coffee Cup Island");
         // Flight_history is now has 1 row, because of TRIG1
         ps = prepareStatement("select STATUS from FLIGHTS_HISTORY where FLIGHT_ID = 'AA1134'");
         JDBC.assertSingleValueResultSet(ps.executeQuery(),
