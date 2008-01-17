@@ -146,7 +146,12 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
         }
 
         NetSqlca[] netSqlca = this.parseSQLCARD(qrydscTypdef_);
-
+        // If we don't have at least one byte in the buffer for the DA null indicator,
+        // then we need to send a CNTQRY request to fetch the next block of data.
+        // Read the DA null indicator. Do this before we close mark the statement
+        // closed on the server. DERBY-3230
+        daNullIndicator = readFdocaOneByte();
+        
         if (netSqlca != null) {
             for (int i=0;i<netSqlca.length; i++) {
                 int sqlcode = netSqlca[i].getSqlCode();
@@ -183,10 +188,7 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
         setIsUpdataDeleteHole(rowIndex, receivedDeleteHoleWarning);
         setIsRowUpdated(receivedRowUpdatedWarning);
         
-        // If we don't have at least one byte in the buffer for the DA null indicator,
-        // then we need to send a CNTQRY request to fetch the next block of data.
-        // Read the DA null indicator.
-        daNullIndicator = readFdocaOneByte();
+        
 
         // In the case for held cursors, the +100 comes back as part of the QRYDTA, and as
         // we are parsing through the row that contains the SQLCA with +100, we mark the

@@ -1249,6 +1249,41 @@ public class PrepareStatementTest extends BaseJDBCTestCase
     }
 
     /**
+     * Test fix for protocol error if splitQRYDTA occurs during DRDAConnThread.doneData()
+     * DERBY-3230
+     * @throws SQLException
+     */
+    public void testDerby3230() throws SQLException {
+        Statement s = createStatement();
+        s.executeUpdate("CREATE TABLE TAB (col1 varchar(32672) NOT NULL)");
+        PreparedStatement ps = prepareStatement("INSERT INTO TAB VALUES(?)");
+        ps.setString(1,makeString(15000));
+        ps.executeUpdate();
+        ps.setString(1,makeString(7500));
+        ps.executeUpdate();
+        ps.setString(1,makeString(5000));
+        ps.executeUpdate();
+        ps.setString(1,makeString(2000));
+        ps.executeUpdate();
+        ps.setString(1,makeString(1600));
+        ps.executeUpdate();
+        ps.setString(1,makeString(800));
+        ps.executeUpdate();
+        ps.setString(1,makeString(400));
+        ps.executeUpdate();
+        ps.setString(1,makeString(200));
+        ps.executeUpdate();
+        ps.setString(1,makeString(100));
+        ps.executeUpdate();
+        ps.setString(1,makeString(56));
+        ps.executeUpdate();
+            
+        ResultSet rs = s.executeQuery("SELECT * from tab");
+        // drain the resultset
+        JDBC.assertDrainResults(rs);
+                   
+    }
+    /**
      * Return a string of the given length.  The string will contain just 'X'
      * characters.
      *
