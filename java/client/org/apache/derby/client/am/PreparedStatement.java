@@ -2455,9 +2455,9 @@ public class PreparedStatement extends Statement
         //
         // Throws: (...) SQLFeatureNotSupportedException - if
         // targetSqlType is a ARRAY, BLOB, CLOB, DATALINK,
-        // JAVA_OBJECT, LONGNVARCHAR, REF, ROWID, SQLXML or 
-    	// STRUCT data type and the JDBC driver does not
-        // support this data type
+        // JAVA_OBJECT, NCHAR, NCLOB, NVARCHAR, LONGNVARCHAR, REF,
+        // ROWID, SQLXML or STRUCT data type and the JDBC driver does
+        // not support this data type
         //
         // Of these types, we only support BLOB, CLOB and
         // (sort of) JAVA_OBJECT.
@@ -2465,6 +2465,9 @@ public class PreparedStatement extends Statement
         switch (dataType) {
         case java.sql.Types.ARRAY:
         case java.sql.Types.DATALINK:
+        case JDBC40Translation.NCHAR:
+        case JDBC40Translation.NCLOB:
+        case JDBC40Translation.NVARCHAR:
         case JDBC40Translation.LONGNVARCHAR:
         case java.sql.Types.REF:
         case JDBC40Translation.ROWID:
