@@ -2828,7 +2828,7 @@ COUNTRY is first: United States, COUNTRY is then: United States of America
 COUNTRY is first: United States, COUNTRY is then: United States of America
 ECONOMY_SEATS_TAKEN is first: 2, ECONOMY_SEATS_TAKEN is then: 20
 AIRCRAFT is first: B747, AIRCRAFT is then: B747
-REGION is first: Bay Area, REGION is then: San Francisco Bay Area
+REGION is first: Cup Island, REGION is then: Coffee Cup Island
 STATUS is first: INSERTED FROM TRIG1, STATUS is then: over
 deleted all from table AIRLINES
 deleted all from table CITIES

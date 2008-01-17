@@ -54,29 +54,29 @@ public class insertMaps {
 			ps = connCS.prepareStatement
 			("insert into maps (map_name, region, area, photo_format, picture) values (?,?,?,?,?)");
 	
-			ps.setString(1,"BART");
-			ps.setString(2,"Bay Area");
+			ps.setString(1,"North Ocean");
+			ps.setString(2,"Cup Island");
 			ps.setBigDecimal(3, new BigDecimal("1776.11"));
 			ps.setString(4,"gif");
-			File file = new File ("BART.gif");
+			File file = new File ("cupisle.gif");
 			InputStream fileIn = new FileInputStream(file);
 			ps.setBinaryStream(5, fileIn, (int)file.length());
 			int numrows = ps.executeUpdate();
 
-			ps.setString(1,"Caltrain");
-			ps.setString(2,"West Bay");
+			ps.setString(1,"Middle Ocean");
+			ps.setString(2,"Small Island");
 			ps.setBigDecimal(3, new BigDecimal("1166.77"));
 			ps.setString(4,"gif");
-			file = new File ("Caltrain.gif");
+			file = new File ("smallisle.gif");
 			fileIn = new FileInputStream(file);
 			ps.setBinaryStream(5, fileIn, (int)file.length());
 			numrows = numrows + ps.executeUpdate();
 
-			ps.setString(1,"Light Rail");
-			ps.setString(2,"Santa Clara Valley");
+			ps.setString(1,"South Ocean");
+			ps.setString(2,"Witch Island");
 			ps.setBigDecimal(3, new BigDecimal("9117.90"));
 			ps.setString(4,"gif");
-			file = new File ("BART.gif");
+			file = new File ("witchisle.gif");
 			fileIn = new FileInputStream(file);
 			ps.setBinaryStream(5, fileIn, (int)file.length());
 			numrows = numrows + ps.executeUpdate();

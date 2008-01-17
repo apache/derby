@@ -125,12 +125,12 @@ public class checkToursDB {
 			if (rs.next())
 				System.out.println(", AIRCRAFT is then: " + rs.getString(1));
 		
-			ps = connCS.prepareStatement ("select REGION from MAPS where MAP_NAME = 'BART'" );
+			ps = connCS.prepareStatement ("select REGION from MAPS where MAP_NAME = 'North Ocean'" );
 			rs = ps.executeQuery();
 			if (rs.next())
 				System.out.print("REGION is first: " + rs.getString(1));
 			stmt  = connCS.createStatement();
-			stmt.execute("update MAPS set REGION='San Francisco Bay Area' where MAP_NAME = 'BART'");
+			stmt.execute("update MAPS set REGION='Coffee Cup Island' where MAP_NAME = 'North Ocean'");
 			rs = ps.executeQuery();
 			if (rs.next())
 				System.out.println(", REGION is then: " + rs.getString(1));
