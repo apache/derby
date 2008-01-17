@@ -225,12 +225,12 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
         final   String[]  command = new String[ al.size() ];
         al.toArray(command);
 
-         System.out.println( "XXX server startup command = ");
+        /* System.out.println( "XXX server startup command = ");
         for (int i = 0 ; i < command.length ; i++) {
             System.out.print( command[i] + " " );
         }
         System.out.println();
-        
+        */
 
         Process     serverProcess = (Process) AccessController.doPrivileged
             (
