@@ -116,7 +116,7 @@
   <target name="copyfiles">
     <copy todir="${out.dir}/${derby.testing.functest.dir}/tests/demo">
       <fileset dir="${derby.demo.src.dir}/toursdb"
-               includes="*.sql,BART.gif,Caltrain.gif,LightRail.gif"/>
+               includes="*.sql,*.gif"/>
     </copy>
   </target>
 

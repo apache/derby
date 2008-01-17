@@ -52,8 +52,9 @@ public class CheckToursDBTest extends BaseJDBCTestCase {
    public static Test basesuite(String name) {
         TestSuite suite = new TestSuite(CheckToursDBTest.class, name);
         Test test = new SupportFilesSetup(suite, new String[] {
-                "functionTests/tests/demo/BART.gif",
-                "functionTests/tests/demo/Caltrain.gif" });
+                "functionTests/tests/demo/cupisle.gif",
+                "functionTests/tests/demo/smallisle.gif",
+                "functionTests/tests/demo/witchisle.gif" });
         return test;
     }
 
@@ -156,11 +157,11 @@ public class CheckToursDBTest extends BaseJDBCTestCase {
         JDBC.assertSingleValueResultSet(ps.executeQuery(), "B747");
         stmt.execute("update FLIGHTS set AIRCRAFT='B777' where FLIGHT_ID = 'AA1134'");
         JDBC.assertSingleValueResultSet(ps.executeQuery(), "B747");
-        ps = prepareStatement("select REGION from MAPS where MAP_NAME = 'BART'");
-        JDBC.assertSingleValueResultSet(ps.executeQuery(), "Bay Area");
-        stmt.execute("update MAPS set REGION='San Francisco Bay Area' where MAP_NAME = 'BART'");
+        ps = prepareStatement("select REGION from MAPS where MAP_NAME = 'North Ocean'");
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), "Cup Island");
+        stmt.execute("update MAPS set REGION='Northern Ocean' where MAP_NAME = 'North Ocean'");
         JDBC.assertSingleValueResultSet(ps.executeQuery(),
-                "San Francisco Bay Area");
+                "Northern Ocean");
         // Flight_history is now has 1 row, because of TRIG1
         ps = prepareStatement("select STATUS from FLIGHTS_HISTORY where FLIGHT_ID = 'AA1134'");
         JDBC.assertSingleValueResultSet(ps.executeQuery(),
