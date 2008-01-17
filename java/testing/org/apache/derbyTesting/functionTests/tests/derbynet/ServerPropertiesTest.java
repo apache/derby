@@ -24,32 +24,26 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.security.PrivilegedActionException;
-import java.security.PrivilegedExceptionAction;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Locale;
 import java.util.Properties;
 
-import junit.framework.Assert;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.apache.derby.drda.NetworkServerControl;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.BaseTestCase;
 import org.apache.derbyTesting.junit.Derby;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.NetworkServerTestSetup;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
-import org.apache.derbyTesting.junit.Utilities;
 
 /** 
  * This test tests the derby.properties, system properties and command line
@@ -98,33 +92,30 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
     public static Test suite()
     {
         TestSuite suite = new TestSuite("ServerPropertiesTest");
-
-        // Server booting requires that we run from the jar files
-        // Need derbynet.jar in the classpath!
-        // TODO: check - can this be modified to use noSecurityManager
-        //    for classes?
-        // if (!TestConfiguration.loadingFromJars()) { return suite; }
           
         if (!Derby.hasServer()) return suite;
         // don't run with JSR169 for 1. this is network server and
         // 2. the java executable may be named differently
         if (JDBC.vmSupportsJSR169()) return suite;
         
-        // this test doesn't use a client/server setup, instead does the 
+        // this fixture doesn't use a client/server setup, instead does the 
         // relevant starting/stopping inside the test
         // Add security manager policy that allows executing java commands
         Test setPortPriority = new ServerPropertiesTest("ttestSetPortPriority");
         setPortPriority = decorateWithPolicy(setPortPriority);
         suite.addTest(setPortPriority);
         
-        // unfinished properties settings. decorateTest add policy file and sets
-        // up properties
-        suite.addTest(decorateTest("ttestDefaultProperties", getStartupProperties(),
-            new String[] {}));
+        // test unfinished properties settings. 
+        // decorateTest adds policy file and sets up properties
+        // fixture hits error DRDA_MissingNetworkJar (Cannot find derbynet.jar) so,
+        // only run with jars
+        if (TestConfiguration.loadingFromJars())
+            suite.addTest(decorateTest("ttestDefaultProperties", 
+                getStartupProperties(), new String[] {}));
         
-        // The other tests, testToggleTrace (trace on/off), 
+        // The other fixtures, testToggleTrace (trace on/off), 
         // testToggleLogConnections (logconnections on/off) , and
-        // testWrongCommands can all use the default setup - with policy
+        // testWrongCommands can all use the default setup with adjusted policy
         
         // need english locale so we can compare command output for those tests 
         if (!Locale.getDefault().getLanguage().equals("en"))
@@ -458,96 +449,8 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
     * @throws IOException
     */
    private void  assertSuccessfulCmd(String expectedString, String[] Cmd) throws InterruptedException, IOException {
-       InputStream is = Utilities.execJavaCmd(Cmd, 0);
-       byte[] b = new byte[80];
-       is.read(b, 0, 80);
-       String output = new String(b);
-       //System.out.println("output: " + output);
-       assertTrue(output.startsWith(expectedString));
+       assertExecJavaCmdAsExpected(new String[] {expectedString}, Cmd, 0);
    }
-
-   /**
-    * Execute command and verify that it completes with
-    * an error
-    * This method does *not* use Utilities.execJavaCmd, because
-    * that one will hang on waitFor() when the usage message needs
-    * to get extracted. This is probably DERBY-3251.
-    * Note: this method may possibly be extracted 
-    *     be placed in either Utilities or one of the Configuration
-    *     or Setup classes, but as there is an intermittent problem
-    *     with it, holding off on that
-    * @param expectedString String to compare the resulting output with
-    * @param cmd array of java arguments for command
-    * @param expectedExitValue expected return value from the command
-    * @throws InterruptedException
-    * @throws IOException
-    */
-   private void  assertUsageMessage(
-           String[] expectedString, String[] cmd, int expectedExitValue)
-   throws InterruptedException, IOException {
-       
-       int totalSize = 3 + cmd.length;
-       String[] tcmd = new String[totalSize];
-       tcmd[0] = "java";
-       tcmd[1] = "-classpath";
-       tcmd[2] = BaseTestCase.getSystemProperty("java.class.path");
-               
-       System.arraycopy(cmd, 0, tcmd, 3, cmd.length);
-       
-       final String[] command = tcmd;
-       Process pr = null;
-       try {
-           pr = (Process) AccessController
-               .doPrivileged(new PrivilegedExceptionAction() {
-                   public Object run() throws IOException {
-                       Process result = null;
-                           result = Runtime.getRuntime().exec(command);
-                       return result;
-                   }
-               });
-       } catch (PrivilegedActionException pe) {
-           Exception e = pe.getException();
-           if (e instanceof IOException)
-               throw (IOException) e;
-           else
-               throw (SecurityException) e;
-       }
-       InputStream is = pr.getInputStream();
-       if ( is == null )
-       {
-           fail("Unexpectedly receiving no text from the java command");
-       }
-       
-       String output = "";
-       try
-       {
-           char[] ca = new char[1024];
-           // Create an InputStreamReader with UTF-8 encoding
-           // use default encoding; we're hoping this to be en.
-           // if not, it's not going to match the expected string.
-           InputStreamReader inStream;
-               //inStream = new InputStreamReader(is, "UTF-8");
-               inStream = new InputStreamReader(is);
-           // keep reading from the stream until all done
-           while ((inStream.read(ca, 0, ca.length)) != -1)
-           {
-               output = output + new String(ca).trim();
-           }
-       } catch (Exception e) {
-           fail("Exception accessing inputstream from javacommand");
-       }
-       
-       // wait until the process exits
-       pr.waitFor();
-       
-       Assert.assertEquals(expectedExitValue, pr.exitValue());
-       for (int i=0 ; i<expectedString.length ; i++)
-       {
-           assertFalse(output.indexOf(expectedString[i]) < 0);
-       }
-   }
-   
-   
 
     /**
      *  Test port setting priority
@@ -845,15 +748,15 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
         // we'll assume that we get the full message if we get 'Usage'
         // because sometimes, the message gets returned with carriage return,
         // and sometimes it doesn't, checking for two different parts...
-        assertUsageMessage(new String[] 
+        assertExecJavaCmdAsExpected(new String[] 
             {"No arguments given.", "Usage: "}, cmd, 1);
         //Unknown command
         cmd = new String[] {nsc, "unknowncmd"};
-        assertUsageMessage(new String[] 
+        assertExecJavaCmdAsExpected(new String[] 
             {"Command unknowncmd is unknown.", "Usage: "}, cmd, 0);
         // wrong number of arguments
         cmd = new String[] {nsc, "ping", "arg1"};
-        assertUsageMessage(new String[] 
+        assertExecJavaCmdAsExpected(new String[] 
             {"Invalid number of arguments for command ping.",
              "Usage: "}, cmd, 1);
     }

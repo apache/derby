@@ -61,12 +61,13 @@ public class NetworkServerControlClientCommandTest extends BaseJDBCTestCase {
      */
     private void  assertSuccessfulPing(String[] pingCmd) throws InterruptedException, IOException {
         
-        InputStream is = Utilities.execJavaCmd(pingCmd, 0);
+/*        InputStream is = Utilities.execJavaCmd(pingCmd, 0);
         byte[] b = new byte[80];
         is.read(b, 0, 80);
         String output = new String(b);
         assertTrue(output.startsWith("Connection obtained"));
-        
+*/
+        assertExecJavaCmdAsExpected(new String[] {"Connection obtained"}, pingCmd, 0);
     }
     /**
      * Execute ping command and verify that it fails with the expected message
@@ -78,12 +79,12 @@ public class NetworkServerControlClientCommandTest extends BaseJDBCTestCase {
      */
     private void assertFailedPing(String[] pingCmd,String expectedMessage) throws InterruptedException, IOException {
         
-        InputStream is = Utilities.execJavaCmd(pingCmd, 1);
+        /*InputStream is = Utilities.execJavaCmd(pingCmd, 1);
         byte[] b = new byte[80];
         is.read(b, 0, 80);
         String output = new String(b);
-        assertTrue(output.startsWith(expectedMessage));
-        
+        assertTrue(output.startsWith(expectedMessage));*/
+        assertExecJavaCmdAsExpected(new String[] {expectedMessage}, pingCmd, 1);
     }
     
 

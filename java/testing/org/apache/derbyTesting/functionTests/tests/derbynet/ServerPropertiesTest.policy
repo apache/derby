@@ -172,6 +172,12 @@ grant codeBase "${derbyTesting.testjar}derbyTesting.jar" {
 // super-set of the jar permissions for running out of the classes directory
 //
 grant codeBase "${derbyTesting.codeclasses}" {
+
+  // just add the complete gross policy change for ServerPropertiesTest
+  // execute permission is for 'java', but this can be at a variety of locations.
+  permission java.io.FilePermission "<<ALL FILES>>", "execute";
+  permission java.security.SecurityPermission "getPolicy";
+
   // Access all properties using System.getProperties
   permission java.util.PropertyPermission "*", "read, write";
   
