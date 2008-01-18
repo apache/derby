@@ -4763,6 +4763,23 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
                 <text>Could not stop replication because the database is not in replication master mode.</text>
             </msg>
 
+            <msg>
+                <name>XRE08</name>
+                <text>Replication slave mode started successfully for database '{0}'. Connection refused because the database is in replication slave mode. </text>
+                <arg>dbname</arg>
+            </msg>
+
+            <msg>
+                <name>XRE09</name>
+                <text>Cannot start replication slave mode for database '{0}'. The database has already been booted. </text>
+                <arg>dbname</arg>
+            </msg>
+
+            <msg>
+                <name>XRE10</name>
+                <text>Conflicting attributes specified. See reference manual for attributes allowed in combination with replication attribute '{0}'.</text>
+                <arg>attribute</arg>
+            </msg>
 
         </family>
 

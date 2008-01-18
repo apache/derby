@@ -48,6 +48,9 @@ import org.apache.derby.iapi.sql.execute.ExecutionContext;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.store.access.XATransactionController;
 
+import org.apache.derby.iapi.services.replication.master.MasterFactory;
+import org.apache.derby.iapi.services.replication.slave.SlaveFactory;
+
 /* can't import due to name overlap:
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -229,10 +232,37 @@ public abstract class EmbedConnection implements EngineConnection
 												isEncryptionBoot(info));
 			boolean isTwoPhaseUpgradeBoot = (!createBoot &&
 											 isHardUpgradeBoot(info));
+			boolean isStartSlaveBoot = isStartReplicationSlaveBoot(info);
 
 			// Save original properties if we modified them for
 			// two phase encryption or upgrade boot.
 			Properties savedInfo = null;
+
+            if (isStartSlaveBoot) {
+                if (database != null) {
+                    throw StandardException.newException(
+                        SQLState.CANNOT_START_SLAVE_ALREADY_BOOTED,
+                        getTR().getDBName());
+                } else if (createBoot ||
+                           shutdown ||
+                           isTwoPhaseEncryptionBoot ||
+                           isTwoPhaseUpgradeBoot) {
+                    throw StandardException.newException(
+                        SQLState.REPLICATION_CONFLICTING_ATTRIBUTES,
+                        Attribute.REPLICATION_START_SLAVE);
+                }
+
+                // We need to boot the slave database two times. The
+                // first boot will check authentication and
+                // authorization. The second boot will put the
+                // database in replication slave mode. SLAVE_PRE_MODE
+                // ensures that log records are not written to disk
+                // during the first boot. This is necessary because
+                // the second boot needs a log that is exactly equal
+                // to the log at the master.
+                info.setProperty(SlaveFactory.REPLICATION_MODE,
+                                 SlaveFactory.SLAVE_PRE_MODE);
+            }
 
 			if (database != null)
 			{
@@ -312,23 +342,56 @@ public abstract class EmbedConnection implements EngineConnection
 				handleStopReplicationMaster(tr, info);
 			}
 
-			if (isTwoPhaseEncryptionBoot || isTwoPhaseUpgradeBoot) {
+			if (isTwoPhaseEncryptionBoot ||
+				isTwoPhaseUpgradeBoot ||
+				isStartSlaveBoot) {
 
-				// DERBY-2264: shutdown and boot again with encryption or
-				// upgrade attributes active. This is restricted to the
-				// database owner if authentication and sqlAuthorization is on.
+				// shutdown and boot again with encryption, upgrade or
+				// start replication slave attributes active. This is
+				// restricted to the database owner if authentication
+				// and sqlAuthorization is on.
 				if (!usingNoneAuth &&
 						getLanguageConnection().usesSqlAuthorization()) {
-					// a failure here leaves database booted, but no
-					// (re)encryption has taken place and the connection is
-					// rejected.
-					checkIsDBOwner(isTwoPhaseEncryptionBoot? OP_ENCRYPT :
-								   OP_HARD_UPGRADE);
+					int operation;
+					if (isTwoPhaseEncryptionBoot) {
+						operation = OP_ENCRYPT;
+					} else if (isTwoPhaseUpgradeBoot) {
+						operation = OP_HARD_UPGRADE;
+					} else {
+						operation = OP_REPLICATION;
+					}
+					try {
+						// a failure here leaves database booted, but no
+						// (re)encryption has taken place and the connection is
+						// rejected.
+						checkIsDBOwner(operation);
+					} catch (SQLException sqle) {
+						if (isStartSlaveBoot) {
+							// If authorization fails for the start
+							// slave command, we want to shutdown the
+							// database which is currently in the
+							// SLAVE_PRE_MODE.
+							handleException(tr.shutdownDatabaseException());
+						}
+						throw sqle;
+					}
 				}
 
-				// shutdown and reboot using saved properties which
-				// include the (re)encyption or upgrade attribute(s)
-				info = savedInfo;
+				if (isStartSlaveBoot) {
+					// Let the next boot of the database be
+					// replication slave mode
+					info.setProperty(SlaveFactory.REPLICATION_MODE,
+									 SlaveFactory.SLAVE_MODE);
+					info.setProperty(SlaveFactory.SLAVE_DB,
+									 getTR().getDBName());
+				} else {
+					// reboot using saved properties which
+					// include the (re)encyption or upgrade attribute(s)
+					info = savedInfo;
+				}
+
+                // Authentication and authorization done - shutdown
+                // the database
 				handleException(tr.shutdownDatabaseException());
 				restoreContextStack();
 				tr = new TransactionResourceImpl(driver, url, info);
@@ -336,6 +399,8 @@ public abstract class EmbedConnection implements EngineConnection
 				setupContextStack();
 				context = pushConnectionContext(tr.getContextManager());
 
+                // Reboot the database in the correct
+                // encrypt/upgrade/slave replication mode
 				if (!bootDatabase(info, false))
 				{
 					if (SanityManager.DEBUG) {
@@ -347,9 +412,20 @@ public abstract class EmbedConnection implements EngineConnection
 					setInactive();
 					return;
 				}
-				// don't need to check user credentials again, did
-				// that on first plain boot, so just start
-				tr.startTransaction();
+
+				if (isStartSlaveBoot) {
+					// We don't return a connection to the client who
+					// called startSlave. Rather, we throw an
+					// exception stating that replication slave mode
+					// has been successfully started for the database
+					throw StandardException.newException(
+						SQLState.REPLICATION_SLAVE_STARTED_OK,
+						getTR().getDBName());
+				} else {
+					// don't need to check user credentials again, did
+					// that on first plain boot, so just start
+					tr.startTransaction();
+				}
 			}
 
 			// now we have the database connection, we can shut down
@@ -482,6 +558,12 @@ public abstract class EmbedConnection implements EngineConnection
 			p.getProperty(Attribute.UPGRADE_ATTR)).booleanValue();
 	}
 
+    private boolean isStartReplicationSlaveBoot(Properties p) {
+        return ((Boolean.valueOf(
+                 p.getProperty(Attribute.REPLICATION_START_SLAVE)).
+                 booleanValue()));
+    }
+
     private boolean isStartReplicationMasterBoot(Properties p) {
         return ((Boolean.valueOf(
                  p.getProperty(Attribute.REPLICATION_START_MASTER)).
@@ -533,9 +615,7 @@ public abstract class EmbedConnection implements EngineConnection
 
         tr.getDatabase().startReplicationMaster(slavehost,
                                                 slaveport,
-                                                org.apache.derby.iapi.
-                                                services.replication.
-                                                master.MasterFactory.
+                                                MasterFactory.
                                                 ASYNCHRONOUS_MODE);
     }
 

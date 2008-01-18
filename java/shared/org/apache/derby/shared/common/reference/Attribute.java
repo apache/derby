@@ -103,6 +103,16 @@ public interface Attribute {
     String REPLICATION_STOP_MASTER = "stopMaster";
 
     /**
+     * Attribute name to start replication slave mode for a database.
+     */
+    String REPLICATION_START_SLAVE = "startSlave";
+
+    /**
+     * Attribute name to stop replication slave mode for a database.
+     */
+    String REPLICATION_STOP_SLAVE = "stopSlave";
+
+    /**
      * If startMaster is true, this attribute is used to specify the
      * host name the master should connect to. This is a required
      * attribute.
