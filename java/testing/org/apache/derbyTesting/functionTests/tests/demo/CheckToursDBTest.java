@@ -59,6 +59,11 @@ public class CheckToursDBTest extends BaseJDBCTestCase {
     }
 
     public static Test suite() {
+        if ( JDBC.vmSupportsJSR169())
+            // Test executes PreparedStatement.setBigDecimal, which
+            // is not supported with JSR169
+            return new TestSuite("empty CheckToursDBTest - *.setBigDecimal not supported with JSR169");
+        
         TestSuite suite = new TestSuite("CheckToursDBTest");
         suite.addTest(basesuite("CheckToursDBTest:embedded"));
         suite.addTest(TestConfiguration
