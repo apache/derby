@@ -150,10 +150,11 @@ public class derbyStress {
           ps.setString(1,"hello");
           ps.executeUpdate();
           ps.close();
+          ResultSet rs = null;
           for (int i = 0; i < 2000; i++)
           {
                   s = conn.createStatement();
-                  ResultSet rs = s.executeQuery("SELECT * from tab");
+                  rs = s.executeQuery("SELECT * from tab");
                   // drain the resultset
                   while (rs.next());
                   // With DERBY-3316, If I don't explicitly close the resultset or 
@@ -161,6 +162,11 @@ public class derbyStress {
                   //rs.close();
                   //s.close();
           }    
+          // close the final ResultSet and gc() so we won't have a 
+          // ResultSet reference when we try to drop the table.
+          rs.close();
+          rs = null;
+          System.gc();
           s = conn.createStatement();
           s.executeUpdate("DROP TABLE TAB");
           s.close();
