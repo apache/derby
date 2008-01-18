@@ -67,7 +67,7 @@ class TemporaryRowHolderImpl implements TemporaryRowHolder
 	private int			numRowsIn;
 	protected int		state = STATE_UNINIT;
 
-	protected	long				CID;
+	private	long				    CID;
 	private boolean					conglomCreated;
 	private ConglomerateController	cc;
 	private Properties				properties;
@@ -238,8 +238,9 @@ class TemporaryRowHolderImpl implements TemporaryRowHolder
 			//In case of unique stream we push every thing into the
 			// conglomerates for time being, we keep one row in the array for
 			// the template.
-			if(!isUniqueStream)
+            if (!isUniqueStream) {
 				return;  
+            }
 		}
 			
 		if (!conglomCreated)
@@ -490,32 +491,32 @@ class TemporaryRowHolderImpl implements TemporaryRowHolder
 	public void truncate() throws StandardException
 	{
 		close();
-
+        if (SanityManager.DEBUG) {
+            SanityManager.ASSERT(lastArraySlot == -1);
+            SanityManager.ASSERT(state == STATE_UNINIT);
+            SanityManager.ASSERT(!conglomCreated);
+            SanityManager.ASSERT(CID == 0);
+        }
 		for (int i = 0; i < rowArray.length; i++)
 		{
 			rowArray[i] = null;
 		}
-		lastArraySlot = -1;
-		numRowsIn = 0;
-		state = STATE_UNINIT;
 
-		/*
-		** We are not expecting this to be called
-		** when we have a temporary conglomerate
-		** but just to be on the safe side, drop
-		** it.  We'd like do something cheaper,
-		** but there is no truncate on congloms.
-		*/
-		if (conglomCreated)
-		{
-			TransactionController tc = activation.getTransactionController();
-			tc.dropConglomerate(CID);
-			conglomCreated = false;
-		}
+		numRowsIn = 0;
 	}
 
+    /**
+     * Accessor to get the id of the temporary conglomerate. Temporary 
+     * conglomerates have negative ids. An id equal to zero means that no 
+     * temporary conglomerate has been created.
+     * @return Conglomerate ID of temporary conglomerate
+     */
 	public long getTemporaryConglomId()
 	{
+        if (SanityManager.DEBUG) {
+            SanityManager.ASSERT(CID == 0 && !conglomCreated || 
+                    CID < 0 && conglomCreated);
+        }
 		return CID;
 	}
 
@@ -593,8 +594,14 @@ class TemporaryRowHolderImpl implements TemporaryRowHolder
 		{
 			tc.dropConglomerate(CID);
 			conglomCreated = false;
-		}
-
+            CID = 0;
+		} 
+        else 
+        {
+            if (SanityManager.DEBUG) {
+                SanityManager.ASSERT(CID == 0, "CID(" + CID + ")==0");
+            }
+        }
 		state = STATE_UNINIT;
 		lastArraySlot = -1;
 	}
