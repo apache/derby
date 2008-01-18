@@ -43,6 +43,7 @@ import org.apache.derby.iapi.jdbc.BrokeredConnection;
 import org.apache.derby.iapi.jdbc.BrokeredPreparedStatement;
 import org.apache.derby.iapi.jdbc.EngineConnection;
 import org.apache.derby.iapi.jdbc.EnginePreparedStatement;
+import org.apache.derby.iapi.jdbc.EngineResultSet;
 import org.apache.derby.iapi.reference.JDBC30Translation;
 import org.apache.derby.iapi.sql.execute.ExecutionContext;
 import org.apache.derby.iapi.util.StringUtil;
@@ -408,38 +409,6 @@ class DRDAStatement
 		currentDrdaRs.clearExtDtaObjects();
 	}
 
-	/**
-	 *
-	 *  get resultSetHoldability.
-	 * 
-	 * @return the resultSet holdability for the prepared statement
-	 *
-	 */
-	protected int getResultSetHoldability() throws SQLException
-	{
-		return getResultSetHoldability(getResultSet());
-	}
-	
-	/**
-	 *
-	 *  get resultSetHoldability.
-	 * 
-	 * @param rs ResultSet 
-	 * @return the resultSet holdability for the prepared statement
-	 *
-	 */
-	int getResultSetHoldability(ResultSet rs) throws SQLException
-	{
-		Statement rsstmt;
-
-		if (rs  != null)
-			rsstmt = rs.getStatement();
-		else
-			rsstmt = getPreparedStatement();
-        
-        return rsstmt.getResultSetHoldability();
-	}	
-
 	/*
 	 * Is lob object nullable
 	 * @param index - offset starting with 0
@@ -727,7 +696,7 @@ class DRDAStatement
 			{
 				//For callable statement, get holdability of statement generating the result set
 				if(isCallable)
-					addResultSet(rs,getResultSetHoldability(rs));
+					addResultSet(rs, ((EngineResultSet) rs).getHoldability());
 				else
 					addResultSet(rs,withHoldCursor);
 				hasResultSet = true;

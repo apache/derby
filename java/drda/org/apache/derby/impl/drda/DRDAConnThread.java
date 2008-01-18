@@ -61,6 +61,7 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
 import org.apache.derby.iapi.tools.i18n.LocalizedResource;
 import org.apache.derby.iapi.jdbc.AuthenticationService;
+import org.apache.derby.iapi.jdbc.EngineResultSet;
 import org.apache.derby.impl.jdbc.EmbedSQLException;
 import org.apache.derby.impl.jdbc.Util;
 import org.apache.derby.jdbc.InternalDriver;
@@ -4127,7 +4128,7 @@ class DRDAConnThread extends Thread {
 		writer.createDssObject();
 		writer.startDdm(CodePoint.SQLCINRD);
 		if (sqlamLevel >= MGRLVL_7)
-			writeSQLDHROW (stmt);
+			writeSQLDHROW(((EngineResultSet) rs).getHoldability());
 
 		ResultSetMetaData rsmeta = rs.getMetaData();
 		int ncols = rsmeta.getColumnCount();
@@ -6250,7 +6251,7 @@ class DRDAConnThread extends Thread {
 		writeSQLCAGRP(e, getSqlCode(getExceptionSeverity(e)), 0, 0);
 
 		if (sqlamLevel >= MGRLVL_7)
-			writeSQLDHROW (stmt);
+			writeSQLDHROW(ps.getResultSetHoldability());
 
 		//SQLNUMROW
 		if (SanityManager.DEBUG) 
@@ -6460,9 +6461,15 @@ class DRDAConnThread extends Thread {
 
 
 
-	//pass PreparedStatement here so we can send correct holdability on the wire for jdk1.3 and higher
-	//For jdk1.3, we provide hold cursor support through reflection.
-	private void writeSQLDHROW (DRDAStatement stmt) throws DRDAProtocolException,SQLException
+
+    /**
+     * Holdability passed in as it can represent the holdability of
+     * the statement or a specific result set.
+     * @param holdability HOLD_CURSORS_OVER_COMMIT or CLOSE_CURSORS_AT_COMMIT
+     * @throws DRDAProtocolException
+     * @throws SQLException
+     */
+	private void writeSQLDHROW(int holdability) throws DRDAProtocolException,SQLException
 	{		
 		if (JVMInfo.JDK_ID < 2) //write null indicator for SQLDHROW because there is no holdability support prior to jdk1.3
 		{
@@ -6473,7 +6480,7 @@ class DRDAConnThread extends Thread {
 		writer.writeByte(0);		// SQLDHROW INDICATOR
 
 		//SQLDHOLD
-		writer.writeShort(stmt.getResultSetHoldability());
+		writer.writeShort(holdability);
 		
 		//SQLDRETURN
 		writer.writeShort(0);

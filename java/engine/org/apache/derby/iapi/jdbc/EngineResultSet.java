@@ -57,4 +57,12 @@ public interface EngineResultSet extends ResultSet {
      */
     public int getLength(int columnIndex) throws SQLException;
     
+    /**
+     * Fetch the holdability of this ResultSet which may be different
+     * from the holdability of its Statement.
+     * @return HOLD_CURSORS_OVER_COMMIT or CLOSE_CURSORS_AT_COMMIT
+     * @throws SQLException Error.
+     */
+    public int getHoldability() throws SQLException;
+    
 }
