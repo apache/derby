@@ -120,6 +120,12 @@ public class SubqueryNode extends ValueNode
 	ValueNode		leftOperand;
 	boolean			pushedNewPredicate;
 
+    /**
+     * is this subquery part of a having clause.  We need to know this so 
+     * we can avoid flattening.
+     */
+    boolean havingSubquery = false;
+    
 	/* Expression subqueries on the right side of a BinaryComparisonOperatorNode
 	 * will get passed a pointer to that node prior to preprocess().  This
 	 * allows us to replace the entire comparison, if we want to, when
@@ -605,11 +611,12 @@ public class SubqueryNode extends ValueNode
 
 		/* Values subquery is flattenable if:
 		 *  o It is not under an OR.
+         *  o It is not a subquery in a having clause (DERBY-3257)
 		 *  o It is an expression subquery on the right side
 		 *	  of a BinaryComparisonOperatorNode.
 		 */
 		flattenable = (resultSet instanceof RowResultSetNode) &&
-					  underTopAndNode &&
+					  underTopAndNode && !havingSubquery &&
 					  parentComparisonOperator instanceof BinaryComparisonOperatorNode;
 		if (flattenable)
 		{
@@ -666,6 +673,7 @@ public class SubqueryNode extends ValueNode
 		 *  o There is a uniqueness condition that ensures
 		 *	  that the flattening of the subquery will not
 		 *	  introduce duplicates into the result set.
+         *  o The subquery is not part of a having clause (DERBY-3257)
 		 *
 		 *	OR,
 		 *  o The subquery is NOT EXISTS, NOT IN, ALL (beetle 5173).
@@ -673,7 +681,7 @@ public class SubqueryNode extends ValueNode
 		boolean flattenableNotExists = (isNOT_EXISTS() || canAllBeFlattened());
 
 		flattenable = (resultSet instanceof SelectNode) &&
-					  underTopAndNode &&
+					  underTopAndNode && !havingSubquery &&
 					  (isIN() || isANY() || isEXISTS() || flattenableNotExists ||
                        parentComparisonOperator != null);
 
@@ -2284,5 +2292,22 @@ public class SubqueryNode extends ValueNode
     protected boolean isEquivalent(ValueNode o)
     {
     	return false;
+    }
+
+    /**
+     * Is this subquery part of a having clause?
+     * 
+     * @return true if it is part of a having clause, otherwise false
+     */
+    public boolean isHavingSubquery() {
+        return havingSubquery;
+    }
+
+    /**
+     * Mark this subquery as being part of a having clause.
+     * @param havingSubquery
+     */
+    public void setHavingSubquery(boolean havingSubquery) {
+        this.havingSubquery = havingSubquery;
     }
 }

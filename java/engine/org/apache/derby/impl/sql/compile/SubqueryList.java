@@ -237,5 +237,23 @@ public class SubqueryList extends QueryTreeNodeVector
 			((SubqueryNode) elementAt(index)).getResultSet().decrementLevel(decrement);
 		}
 	}
+
+	/**
+     * Mark all of the subqueries in this 
+     * list as being part of a having clause,
+     * so we can avoid flattenning later.
+	 * 
+	 */
+	public void markHavingSubqueries() {
+	    int size = size();
+	    
+	    for (int index = 0; index < size; index++)
+	    {
+	        SubqueryNode    subqueryNode;
+
+	        subqueryNode = (SubqueryNode) elementAt(index);
+	        subqueryNode.setHavingSubquery(true);
+	    }
+	}
 }
 

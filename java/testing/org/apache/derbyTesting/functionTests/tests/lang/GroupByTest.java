@@ -168,5 +168,26 @@ public class GroupByTest extends BaseJDBCTestCase {
 
 		s.executeUpdate("drop table yy");
 	}
+    
+    
+    /**
+     * DERBY-3257 check for correct number of rows returned with
+     * or in having clause.
+     *  
+     * @throws SQLException
+     */
+    public void testOrNodeInHavingClause() throws SQLException
+    {
+        Statement s = createStatement();
+        s.executeUpdate("CREATE TABLE TAB ( ID VARCHAR(20), INFO VARCHAR(20))");
+        s.executeUpdate("insert into TAB values  ('1', 'A')");
+        s.executeUpdate("insert into TAB values  ('2', 'A')");
+        s.executeUpdate("insert into TAB values  ('3', 'B')");
+        s.executeUpdate("insert into TAB values  ('4', 'B')");
+        ResultSet rs = s.executeQuery("SELECT t0.INFO, COUNT(t0.ID) FROM TAB t0 GROUP BY t0.INFO HAVING (t0.INFO = 'A' OR t0.INFO = 'B') AND t0.INFO IS NOT NULL");
+        String [][] expectedRows = {{"A","2"},{"B","2"}};
+        JDBC.assertFullResultSet(rs, expectedRows);
+        s.executeUpdate("DROP TABLE TAB");
+    }
 }
 
