@@ -255,9 +255,20 @@ final class GenericActivationHolder implements Activation
 			if (gc != ps.getActivationClass())
 			{
 
+                GeneratedClass newGC;
+
 				// ensure the statement is valid by rePreparing it.
-				ps.rePrepare(getLanguageConnectionContext());
-				
+                // DERBY-3260: If someone else reprepares the statement at the
+                // same time as we do, there's a window between the calls to
+                // rePrepare() and getActivationClass() when the activation
+                // class can be set to null, leading to NullPointerException
+                // being thrown later. Therefore, synchronize on ps to close
+                // the window.
+                synchronized (ps) {
+                    ps.rePrepare(getLanguageConnectionContext());
+                    newGC = ps.getActivationClass();
+                }
+
 				/*
 				** If we get here, it means the PreparedStatement has been
 				** recompiled.  Get a new Activation and check whether the
@@ -265,8 +276,6 @@ final class GenericActivationHolder implements Activation
 				** from the old Activation to the new one, and make that the
 				** current Activation.  If not, throw an exception.
 				*/
-				GeneratedClass		newGC = ps.getActivationClass();
-
 				BaseActivation		newAC = (BaseActivation) newGC.newInstance(lcc);
 
 				DataTypeDescriptor[]	newParamTypes = ps.getParameterTypes();
