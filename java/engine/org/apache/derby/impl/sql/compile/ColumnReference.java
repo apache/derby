@@ -855,7 +855,13 @@ public class ColumnReference extends ValueNode
 						"RCL for '" + ft.getTableName() + "'.");
 				}
 
-				columnNumber = ftRC.getColumnPosition();
+				/* Use the virtual column id if the ResultColumn's expression
+				 * is a virtual column (DERBY-3023).
+				 */
+				columnNumber =
+					(ftRC.getExpression() instanceof VirtualColumnNode)
+						? ftRC.getVirtualColumnId()
+						: ftRC.getColumnPosition();
 			}
 			else
 			{

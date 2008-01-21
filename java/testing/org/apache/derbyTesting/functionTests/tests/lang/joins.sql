@@ -222,6 +222,84 @@ drop table b1;
 drop table b2;
 drop table xx;
 
+-- DERBY-3023: join node flattening leads to incorrect search transitive
+-- closure, which in turn leads to incorrect results.
+
+CREATE TABLE d3023_t1 (A INTEGER, B INTEGER);
+insert into d3023_t1 values (1, 1), (-2, 2), (3, 3);
+
+CREATE TABLE d3023_t2 (C INTEGER, D INTEGER);
+insert into d3023_t2 values (1, -1), (2, -2), (3, -3);
+
+CREATE TABLE d3023_t3 (I INTEGER, J INTEGER);
+insert into d3023_t3 values (-2, 1), (-3, -2);
+
+CREATE TABLE d3023_t4 (X INTEGER, Y INTEGER);
+insert into d3023_t4 values (1, 1), (2, 2), (3, 3);
+
+-- Incremental queries building up to the query in question...
+
+select distinct * from
+  d3023_t1 left outer join d3023_t2 on d3023_t1.a = d3023_t2.d;
+
+select distinct * from
+  d3023_t1 left outer join d3023_t2 on d3023_t1.a = d3023_t2.d
+ where d3023_t1.a = -2;
+
+select distinct * from
+  d3023_t1 left outer join d3023_t2 on d3023_t1.a = d3023_t2.d
+  inner join d3023_t3 on d3023_t1.a = d3023_t3.j;
+
+select distinct * from
+  d3023_t1 left outer join d3023_t2 on d3023_t1.a = d3023_t2.d
+  inner join d3023_t3 on d3023_t1.a = d3023_t3.j
+ where d3023_t1.a = -2;
+
+-- This query only returns a single row, even without the
+-- explicit search predicate.
+select distinct * from
+  d3023_t1 left outer join d3023_t2 on d3023_t1.a = d3023_t2.d
+  inner join d3023_t3 on d3023_t1.a = d3023_t3.j
+  inner join d3023_t4 on d3023_t2.c = d3023_t4.x;
+
+-- Slight variation of the same query.  Add a search predicate
+-- enforcing "d3023_t1.a = -2" to the join condition.  Since the
+-- row we saw in the previous query satisifies that predicate,
+-- we should see the same row again.
+select distinct * from
+  d3023_t1 left outer join d3023_t2
+    on d3023_t1.a = d3023_t2.d AND d3023_t1.a = -2
+  inner join d3023_t3 on d3023_t1.a = d3023_t3.j
+  inner join d3023_t4 on d3023_t2.c = d3023_t4.x;
+
+-- Same query as above, but with the predicate "d3023_t1.a = -2"
+-- sitting at the top-most (outer) SELECT.  That makes the predicate
+-- available for inclusion in the "search transitive closure" logic
+-- for the outer SELECT. That said, prior to the fix for DERBY-3023,
+-- search transitive closure was incorrectly adding a new predicate,
+-- d3023_t4.x = -2, to the query.  This was because two different
+-- column references were incorrectly mapped to the same column
+-- position w.r.t. the outer join: i.e. "d3023_t1.a" in the search
+-- predicate "d3023_t1.a = -2" AND "d3023_t2.c" in the join predicate
+-- "d3023_t2.c = d3023_t4.x" were BOTH referencing the first column
+-- in the HalfOuterJoinNode.  As a result, the search transitive
+-- closure logic thought that there was transitive equality between
+-- the two predicates, which was incorrect.  That in turn caused the
+-- query to return incorrect results (no rows).  With the fix for
+-- DERBY-3023, this query should now return a single row.
+
+select distinct * from
+  d3023_t1 left outer join d3023_t2 on d3023_t1.a = d3023_t2.d
+  inner join d3023_t3 on d3023_t1.a = d3023_t3.j
+  inner join d3023_t4 on d3023_t2.c = d3023_t4.x
+ where d3023_t1.a = -2;
+
+-- Cleanup.
+drop table d3023_t1;
+drop table d3023_t2;
+drop table d3023_t3;
+drop table d3023_t4;
+
 -- Beetle task 5000. Bug found by Websphere. Should not return any rows.
 select t1_c1, t1_c2, t2_c1, t2_c2
   from t1, t2
