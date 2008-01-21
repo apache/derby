@@ -211,6 +211,8 @@ public class MasterController extends ReplicationLogger
         logFactory.stopReplicationMasterRole();
         try {
             logShipper.flushBuffer();
+            
+            logShipper.stopLogShipment();
 
             ReplicationMessage mesg = new ReplicationMessage(
                         ReplicationMessage.TYPE_STOP, null);
