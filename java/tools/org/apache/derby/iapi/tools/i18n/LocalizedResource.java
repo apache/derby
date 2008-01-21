@@ -400,8 +400,9 @@ public final class LocalizedResource  implements java.security.PrivilegedAction 
 		if (!enableLocalized){
 			return t.toString();
 		}
-		return formatTime.format(t,	new StringBuffer(),
-									new java.text.FieldPosition(0)).toString();
+		return formatTimestamp.format
+			(t, new StringBuffer(),
+			 new java.text.FieldPosition(0)).toString();
 	}
 	public int getColumnDisplaySize(ResultSetMetaData rsm,
 										int columnNumber) throws SQLException{
