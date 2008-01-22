@@ -260,7 +260,35 @@ public class LangProcedureTest extends BaseJDBCTestCase {
                 "CALL APP.SIGNATURE_BUG_DERBY_258_I(4)");
         s.execute("DROP PROCEDURE SIGNATURE_BUG_DERBY_258_I");
 
+        s.execute("CREATE PROCEDURE DERBY_3304() "
+                + " DYNAMIC RESULT SETS 1 LANGUAGE JAVA PARAMETER STYLE JAVA " 
+                + " EXTERNAL NAME 'org.apache.derbyTesting.functionTests.tests.lang.LangProcedureTest.DERBY_3304'"
+                + " MODIFIES SQL DATA");               
+        String[][] t1Results = { { "APP"} };
+        ResultSet rs = s.executeQuery("CALL APP.DERBY_3304()");
+        JDBC.assertFullResultSet(rs, t1Results);
+        s.execute("DROP PROCEDURE DERBY_3304");
+
         s.close();
+    }
+
+    /**
+     * This procedure does an explicit commit and then creates a resultset
+     * to be passed back to the caller. As part of commit, we should not
+     * close the resultset that will be returned by this procedure.
+     * 
+     * @param rs1
+     * @throws SQLException
+     */
+    public static void DERBY_3304(ResultSet[] rs1) throws SQLException 
+    {
+        Connection conn = null;
+        Statement stm = null;
+        conn = DriverManager.getConnection("jdbc:default:connection");
+        stm = conn.createStatement();
+        conn.commit();
+        ResultSet rs = stm.executeQuery("values current_user");
+        rs1[0] = rs;
     }
 
     /**
