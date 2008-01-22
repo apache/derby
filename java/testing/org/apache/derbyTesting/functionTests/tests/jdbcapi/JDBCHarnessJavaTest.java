@@ -51,7 +51,7 @@ public class JDBCHarnessJavaTest extends HarnessJavaTest {
             "resultsetJdbc20",           
             
             // from old jdbcapi.runall
-            "derbyStress",
+            // "derbyStress",       TODO: Need a way to control heap size from Junit tests
             // "nullSQLText",  TODO: investigate failure/convert
             // "prepStmtMetaData",  TODO: convert - different canon for client
             // "resultsetStream", TODO: investigate failure/convert needs ext files
