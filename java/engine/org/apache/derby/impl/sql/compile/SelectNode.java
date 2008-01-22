@@ -816,8 +816,11 @@ public class SelectNode extends ResultSetNode
 		 * because the subquery transformations assume that any subquery operator 
 		 * negation has already occurred.
 		 */
-		normExpressions();
-
+		whereClause = normExpressions(whereClause);
+		// DERBY-3257. We need to normalize the having clause as well, because 
+		// preProcess expects CNF.
+		havingClause = normExpressions(havingClause);
+		
 		/**
 		 * This method determines if (1) the query is a LOJ, and (2) if the LOJ is a candidate for
 		 * reordering (i.e., linearization).  The condition for LOJ linearization is:
@@ -880,7 +883,19 @@ public class SelectNode extends ResultSetNode
 		}
 		
 		if (havingClause != null) {
-			havingClause = havingClause.preprocess(
+		    // DERBY-3257 
+		    // Mark  subqueries that are part of the having clause as 
+		    // such so we can avoid flattenning later. Having subqueries
+		    // cannot be flattened because we cannot currently handle
+		    // column references at the same source level.
+		    // DERBY-3257 required we normalize the having clause which
+		    // triggered flattening because SubqueryNode.underTopAndNode
+		    // became true after normalization.  We needed another way to
+		    // turn flattening off. Perhaps the long term solution is
+		    // to avoid this restriction all together but that was beyond
+		    // the scope of this bugfix.
+		    havingSubquerys.markHavingSubqueries();
+		    havingClause = havingClause.preprocess(
 					numTables, fromList, havingSubquerys, wherePredicates);
 		}
 		
@@ -1068,9 +1083,11 @@ public class SelectNode extends ResultSetNode
 
 	/** Put the expression trees in conjunctive normal form 
 	 *
+     * @param boolClause clause to normalize
+     * 
 	 * @exception StandardException		Thrown on error
 	 */
-	private void normExpressions()
+	private ValueNode normExpressions(ValueNode boolClause)
 				throws StandardException
 	{
 		/* For each expression tree:
@@ -1079,41 +1096,43 @@ public class SelectNode extends ResultSetNode
 		 *	  top level expression. (putAndsOnTop())
 		 *	o Finish the job (changeToCNF())
 		 */
-		if (whereClause != null)
+		if (boolClause != null)
 		{
-			whereClause = whereClause.eliminateNots(false);
+			boolClause = boolClause.eliminateNots(false);
 			if (SanityManager.DEBUG)
 			{
-				if (!(whereClause.verifyEliminateNots()) )
+				if (!(boolClause.verifyEliminateNots()) )
 				{
-					whereClause.treePrint();
+					boolClause.treePrint();
 					SanityManager.THROWASSERT(
-						"whereClause in invalid form: " + whereClause); 
+						"boolClause in invalid form: " + boolClause); 
 				}
 			}
-			whereClause = whereClause.putAndsOnTop();
+			boolClause = boolClause.putAndsOnTop();
 			if (SanityManager.DEBUG)
 			{
-				if (! ((whereClause instanceof AndNode) &&
-					   (whereClause.verifyPutAndsOnTop())) )
+				if (! ((boolClause instanceof AndNode) &&
+					   (boolClause.verifyPutAndsOnTop())) )
 				{
-					whereClause.treePrint();
+					boolClause.treePrint();
 					SanityManager.THROWASSERT(
-						"whereClause in invalid form: " + whereClause); 
+						"boolClause in invalid form: " + boolClause); 
 				}
 			}
-			whereClause = whereClause.changeToCNF(true);
+			boolClause = boolClause.changeToCNF(true);
 			if (SanityManager.DEBUG)
 			{
-				if (! ((whereClause instanceof AndNode) &&
-					   (whereClause.verifyChangeToCNF())) )
+				if (! ((boolClause instanceof AndNode) &&
+					   (boolClause.verifyChangeToCNF())) )
 				{
-					whereClause.treePrint();
+					boolClause.treePrint();
 					SanityManager.THROWASSERT(
-						"whereClause in invalid form: " + whereClause); 
+						"boolClause in invalid form: " + boolClause); 
 				}
 			}
 		}
+
+		return boolClause;
 	}
 
 	/**
