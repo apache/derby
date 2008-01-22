@@ -240,6 +240,8 @@ public class GenericPreparedStatement
 		// deadlock.
 		lcc.closeUnusedActivations();
 
+		ac.setCallActivation(lcc.getCaller());
+
 		return ac;
 	}
 

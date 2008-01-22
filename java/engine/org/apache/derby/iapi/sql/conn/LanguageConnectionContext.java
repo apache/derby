@@ -424,22 +424,6 @@ public interface LanguageConnectionContext extends Context {
 	public String getAuthorizationId();
 
 	/**
-	 *	Get the current role authorization identifier
-	 *
-	 * @return String	the role id
-	 */
-	public String getCurrentRoleId();
-
-
-    /**
-	 * Set the current role
-	 *
-	 * @param rd	the descriptor of the role to be set to current
-	 */
-    public void setCurrentRole(RoleDescriptor rd);
-
-
-	/**
 	 *	Get the current default schema for the connection.
 	 *
 	 * @return SchemaDescriptor	the current schema
@@ -1048,4 +1032,38 @@ public interface LanguageConnectionContext extends Context {
 	 * Close any unused activations in this connection context.
 	 */
 	public void closeUnusedActivations() throws StandardException;
+
+	/**
+	 * Remember most recent (call stack top) caller's activation when
+	 * invoking a method, see CallStatementResultSet#open.
+	 */
+	public void pushCaller(Activation a);
+
+	/**
+	 * Companion of pushCaller. See usage in CallStatementResultSet#open.
+	 */
+	public void popCaller();
+
+	/**
+	 * Get most recent (call stack top) caller's activation
+	 */
+	public Activation getCaller();
+
+    /**
+	 * Set the current role
+	 *
+	 * @param activation activation of set role statement
+	 * @param role  the id of the role to be set to current
+	 */
+    public void setCurrentRole(Activation a, String role);
+
+	/**
+	 * Get the current role authorization identifier of the dynamic
+	 * call context associated with this activation.
+	 *
+	 * @param activation activation of statement needing current role
+	 * @return String	the role id
+	 */
+	public String getCurrentRoleId(Activation a);
+
 }

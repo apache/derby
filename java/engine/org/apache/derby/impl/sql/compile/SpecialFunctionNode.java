@@ -236,8 +236,15 @@ public class SpecialFunctionNode extends ValueNode
 		mb.pushThis();
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, ClassName.Activation, "getLanguageConnectionContext",
 											 ClassName.LanguageConnectionContext, 0);
+		int argCount = 0;
 
-		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, methodName, methodType, 0);
+		if (methodName.equals("getCurrentRoleId")) {
+			acb.pushThisAsActivation(mb);
+			argCount++;
+		}
+
+		mb.callMethod(VMOpcode.INVOKEINTERFACE,
+					  (String) null, methodName, methodType, argCount);
 
 		String fieldType = getTypeCompiler().interfaceName();
 		LocalField field = acb.newFieldDeclaration(Modifier.PRIVATE, fieldType);

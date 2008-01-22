@@ -27,6 +27,7 @@ import java.sql.Connection;
 import java.sql.Statement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.DriverManager;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
@@ -402,9 +403,14 @@ public class RolesTest extends BaseJDBCTestCase
                sqlAuthorizationRequired, null , null /* through public */);
         doStmt("set role 'FOO'",
                sqlAuthorizationRequired, null, null);
+
+        doSetRoleInsideStoredProcedures("FOO");
+
         doStmt("set role none",
                sqlAuthorizationRequired, null , null);
+
         doDynamicSetRole(_conn);
+
         doStmt("set role bar",
                sqlAuthorizationRequired, null , null /* direct grant */);
         doStmt("set role role",
@@ -418,12 +424,14 @@ public class RolesTest extends BaseJDBCTestCase
         _conn.commit();
         _conn.setAutoCommit(true);
 
+
+
         /*
          * CURRENT_ROLE
          */
         ResultSet rs = doQuery("values current_role",
                                sqlAuthorizationRequired, null , null);
-        assertCurrentRole(rs, "ROLE", "BAR");
+        assertRoleInRs(rs, "ROLE", "BAR");
 
         /*
          * REVOKE role
@@ -477,7 +485,7 @@ public class RolesTest extends BaseJDBCTestCase
         doStmt("create function f1() returns int" +
                "  language java parameter style java" +
                "  external name 'org.apache.derbyTesting." +
-               "functionTests.tests.lang.RolesTest.t1'" +
+               "functionTests.tests.lang.RolesTest.f1'" +
                "  no sql called on null input",
                null, null, null);
         doStmt("grant execute on function f1 to admin",
@@ -758,7 +766,7 @@ public class RolesTest extends BaseJDBCTestCase
                 int rowcnt = pstmt.executeUpdate();
                 assertEquals(rowcnt, 0, "rowcount from set role ? not 0");
                 ResultSet rs = doQuery("values current_role", n_a, null , n_a );
-                assertCurrentRole(rs, "NONE", n_a);
+                assertRoleInRs(rs, "NONE", n_a);
                 rs.close();
             } catch (SQLException e) {
                 fail("execute of set role ? failed: [NONE] " + e);
@@ -773,6 +781,60 @@ public class RolesTest extends BaseJDBCTestCase
         }
     }
 
+
+    /* Test that current role is handled correctly when inside a
+     * stored procedure.  The SQL standard requires we have an
+     * "authorization stack", see section 4.34.1.1. This implies that
+     * current role is popped at end of stored procedure.
+     * We test two levels deep.
+     */
+    private void doSetRoleInsideStoredProcedures(String currRole)
+            throws SQLException
+    {
+        if (_authLevel != NO_SQLAUTHORIZATION) {
+            String n_a = null; // auth level not used for this test
+
+            doStmt("create procedure p2(role varchar(255))" +
+                   "  dynamic result sets 1 language java parameter style java"+
+                   "  external name 'org.apache.derbyTesting." +
+                   "functionTests.tests.lang.RolesTest.p2'" +
+                   "  modifies sql data",
+                   n_a, null, null);
+            doStmt("create function f2(role varchar(255))" +
+                   "  returns int language java parameter style java" +
+                   "  external name 'org.apache.derbyTesting." +
+                   "functionTests.tests.lang.RolesTest.f2'" +
+                   "  reads sql data",
+                   n_a, null, null);
+            doStmt("call p2('" + currRole + "')",
+                   n_a , null , null );
+
+            // Dynamic result set: At what time should CURRENT_ROLE be
+            // evaluated?  Logically at the inside, so it should be
+            // "BAR" also when accessed on outside. I think. Anyway,
+            // that's what's implemented: the activation of the call
+            // is still live and holds the current role as it was
+            // inside the nested scope even when the procedure call
+            // has returned.
+            ResultSet prs = _stm.getResultSet();
+            assertRoleInRs(prs, "BAR", "BAR");
+            prs.close();
+
+            // check that role didn't get impacted by change inside p2
+            // too 'BAR':
+            ResultSet rs = doQuery("values current_role",
+                                   n_a , null , null );
+            assertRoleInRs(rs, currRole, currRole);
+            rs.close();
+
+            rs = doQuery("values f2('" + currRole + "')",
+                         n_a , null , null );
+            rs.close();
+
+            doStmt("drop procedure p2", n_a, null, null);
+            doStmt("drop function  f2", n_a, null, null);
+        }
+    }
 
     private void assertSystableRowCount(String table,
                                         int rcNoAuth,
@@ -934,9 +996,9 @@ public class RolesTest extends BaseJDBCTestCase
     }
 
 
-    private void assertCurrentRole(ResultSet rs,
-                                   String dboRole,
-                                   String notDboRole)
+    private void assertRoleInRs(ResultSet rs,
+                                String dboRole,
+                                String notDboRole)
         throws SQLException
     {
 
@@ -944,16 +1006,18 @@ public class RolesTest extends BaseJDBCTestCase
             assertNull(rs);
         } else {
             assertTrue("result set empty", rs.next());
+            String actualRole = rs.getString(1);
 
             if (isDbo()) {
-                assertTrue(dboRole.equals(rs.getString(1)));
+                assertTrue("role is " + actualRole + ", expected " + dboRole,
+                           dboRole.equals(actualRole));
             } else {
-                assertTrue(notDboRole.equals(rs.getString(1)));
+                assertTrue("role is " + actualRole + ", expected " + notDboRole,
+                           notDboRole.equals(actualRole));
             }
 
             // cardinality should be 1
             assertFalse("result set not empty", rs.next());
-            rs.close();
         }
     }
 
@@ -964,6 +1028,22 @@ public class RolesTest extends BaseJDBCTestCase
         }
     }
 
+    private static void assertRsSingleStringValue(ResultSet rs,
+                                                  String expectedValue)
+            throws SQLException
+    {
+
+        assertTrue("result set empty", rs.next());
+        String actualValue = rs.getString(1);
+
+        assertTrue("string is " + actualValue + ", expected " + expectedValue,
+                   actualValue.equals(expectedValue));
+
+        // cardinality should be 1
+        assertFalse("result set not empty", rs.next());
+    }
+
+
     /**
      * Utility function used to test auto-drop of grant routine
      * permission to a role
@@ -971,6 +1051,160 @@ public class RolesTest extends BaseJDBCTestCase
      */
     public static int f1()
     {
+        return 1;
+    }
+
+
+    /**
+     * Utility procedure used to test that current role
+     * is stacked correctly according to dynamic scope.
+     */
+    public static void p2(String roleOutside, ResultSet[] rs1)
+            throws SQLException
+    {
+        Connection conn1 = null;
+        Connection conn2 = null;
+
+        try {
+            conn1 = DriverManager.getConnection("jdbc:default:connection");
+            PreparedStatement ps =
+                conn1.prepareStatement("values current_role");
+
+            // check that we inherit role correctly
+            ResultSet rs = ps.executeQuery();
+            assertRsSingleStringValue(rs, roleOutside);
+            rs.close();
+
+            // set the role to something else
+            Statement stm = conn1.createStatement();
+            stm.execute("set role bar");
+            rs = ps.executeQuery();
+
+            // check that role got set
+            assertRsSingleStringValue(rs, "BAR");
+
+            // another nesting level to test authorization stack even more
+            stm.execute(
+                "create procedure calledNestedFromP2(role varchar(255))" +
+                "  language java parameter style java" +
+                "  external name 'org.apache.derbyTesting." +
+                "functionTests.tests.lang.RolesTest.calledNestedFromP2'" +
+                "  modifies sql data");
+            conn1.commit(); // need to be idle
+            stm.execute("call calledNestedFromP2('BAR')");
+
+            rs = ps.executeQuery();
+
+            // check that role didn't get impacted by change inside
+            // calledNestedFromP2 too 'FOO':
+            assertRsSingleStringValue(rs, "BAR");
+            stm.execute("drop procedure calledNestedFromP2");
+
+            // Test that the role is shared by another nested
+            // connection also.
+            conn2 = DriverManager.getConnection("jdbc:default:connection");
+            PreparedStatement ps2 =
+                conn2.prepareStatement("values current_role");
+            ResultSet rs2 = ps2.executeQuery();
+            assertRsSingleStringValue(rs2, "BAR");
+
+            // Pass out CURRENT_ROLE in a dynamic result set.
+            rs = ps.executeQuery();
+            rs1[0] = rs;
+
+        } finally {
+
+            if (conn1 != null) {
+                try {
+                    conn1.close();
+                } catch (Exception e) {
+                }
+            }
+
+            if (conn2 != null) {
+                try {
+                    conn2.close();
+                } catch (Exception e) {
+                }
+            }
+        }
+
+    }
+
+    /**
+     * Called from p2 so we get to test with a call stack 3 levels
+     * deep.
+     */
+    public static void calledNestedFromP2(String roleOutside)
+            throws SQLException
+    {
+        Connection conn1 = null;
+
+        try {
+            conn1 = DriverManager.getConnection("jdbc:default:connection");
+            PreparedStatement ps =
+                conn1.prepareStatement("values current_role");
+
+            // check that we inherit role correctly
+            ResultSet rs = ps.executeQuery();
+            assertRsSingleStringValue(rs, roleOutside);
+            rs.close();
+
+            // set the role to something else
+            Statement stm = conn1.createStatement();
+            stm.execute("set role foo");
+            rs = ps.executeQuery();
+
+            // check that role got set
+            assertRsSingleStringValue(rs, "FOO");
+
+        } finally {
+            if (conn1 != null) {
+                try {
+                    conn1.close();
+                } catch (Exception e) {
+                }
+            }
+        }
+    }
+
+
+    /**
+     * Utility function used to test that current role
+     * is stacked correctly according to scope.
+     */
+    public static int f2(String roleOutside) throws SQLException
+    {
+        Connection conn1 = null;
+
+        try {
+            conn1 = DriverManager.getConnection("jdbc:default:connection");
+            PreparedStatement ps =
+                conn1.prepareStatement("values current_role");
+
+            // check that we inherit role correctly
+            ResultSet rs = ps.executeQuery();
+            assertRsSingleStringValue(rs, roleOutside);
+            rs.close();
+
+            // set the role to something else
+            Statement stm = conn1.createStatement();
+            stm.execute("set role bar");
+            rs = ps.executeQuery();
+
+            // check that role got set
+            assertRsSingleStringValue(rs, "BAR");
+
+        } finally {
+
+            if (conn1 != null) {
+                try {
+                    conn1.close();
+                } catch (Exception e) {
+                }
+            }
+
+        }
         return 1;
     }
 }

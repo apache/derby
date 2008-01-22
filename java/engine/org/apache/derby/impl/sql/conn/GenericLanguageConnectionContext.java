@@ -163,6 +163,18 @@ public class GenericLanguageConnectionContext
 	 */
 	private int queryNestingDepth;
 
+	/**
+	 * 'callers' keeps track of which, if any, stored procedure
+	 * activations are active. This helps implement the "authorization
+	 * stack" of SQL 2003, vol 2, section 4.34.1.1 and 4.27.3.
+	 *
+	 * For the top level, the current role is kept here,
+	 * cf. 'currentRole'.  For dynamic call contexts, the current role
+	 * is kept in the activation of the calling statement,
+	 * cf. 'getCurrentRoleId'.
+	 */
+	private ArrayList callers = new ArrayList(); // used as a stack only
+
 	protected DataValueFactory dataFactory;
 	protected LanguageFactory langFactory;
 	protected TypeCompilerFactory tcf;
@@ -185,7 +197,7 @@ public class GenericLanguageConnectionContext
     protected Authorizer authorizer;
 	protected String userName = null; //The name the user connects with.
 	                                  //May still be quoted.
-	protected RoleDescriptor currentRole;
+	protected String currentRole;
 	protected SchemaDescriptor	sd;
 
 	// RESOLVE - How do we want to set the default.
@@ -1770,27 +1782,6 @@ public class GenericLanguageConnectionContext
 
 
 	/**
-	 * Get the current role authorization identifier
-	 *
-	 * @return String	the role id
-	 */
-	public String getCurrentRoleId() {
-		return currentRole != null ?
-			currentRole.getRoleName() : null;
-	}
-
-
-	/**
-	 * Set the current role
-	 *
-	 * @param rd	the descriptor of the role to be set to current
-	 */
-	public void setCurrentRole(RoleDescriptor rd) {
-		this.currentRole = rd;
-	}
-
-
-	/**
 	 *	Get the default schema
 	 *
 	 * @return SchemaDescriptor	the default schema
@@ -3082,5 +3073,76 @@ public class GenericLanguageConnectionContext
 		sb.append("), ");
 
 		return sb;
+	}
+
+	/**
+	 * Remember most recent (call stack top) caller's activation when
+	 * invoking a method, see CallStatementResultSet#open.
+	 */
+	public void pushCaller(Activation a) {
+		callers.add(a);
+	}
+
+	/**
+	 * Companion of pushCaller. See usage in CallStatementResultSet#open.
+	 */
+	public void popCaller() {
+		callers.remove(callers.size() - 1);
+	}
+
+
+	/**
+	 * Get most recent (call stack top) caller's activation
+	 * or null, if not in a call context.
+	 */
+	public Activation getCaller() {
+		if (callers.isEmpty()) {
+			return null;
+		} else {
+			return (Activation)callers.get(callers.size() - 1);
+		}
+	}
+
+
+	/**
+	 * Set the current role
+	 *
+	 * @param activation activation of set role statement
+	 * @param role	the id of the role to be set to current
+	 */
+	public void setCurrentRole(Activation a, String role) {
+		Activation caller = a.getCallActivation();
+
+		if (caller != null ) {
+			//inside a stored procedure context
+			caller.setNestedCurrentRole(role);
+		} else {
+			// top level
+			this.currentRole = role;
+		}
+	}
+
+
+	/**
+	 * Get the current role authorization identifier of the dynamic
+	 * call context associated with this activation.
+	 *
+	 * @param activation activation  of statement needing current role
+	 * @return String	the role id
+	 */
+	public String getCurrentRoleId(Activation a) {
+		Activation caller = a.getCallActivation();
+
+		if (caller != null ) {
+			// Want current role of stored procedure context
+			// Note that it may have returned at this point, but the
+			// activation still keeps track on what the current role
+			// was when we returned.
+			return caller.getNestedCurrentRole();
+		} else {
+			// Top level current role, no stored procedure call
+			// context.
+			return currentRole;
+		}
 	}
 }

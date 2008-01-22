@@ -585,4 +585,39 @@ public interface Activation
 		this with a real implementation.
 	*/
 	public int getMaxDynamicResults();
+
+	/**
+	 * Set the current role name of the dynamic call context stemming
+	 * from this activation (which must be a stored
+	 * procedure/function) call.
+	 *
+	 * @arg role The name of the current role
+	 */
+	public void setNestedCurrentRole(String role);
+
+	/**
+	 * Get the current role name of the dynamic call context stemming
+	 * from this activation (which must be a stored
+	 * procedure/function) call.
+	 *
+	 * @return The name of the current role
+	 */
+    public String getNestedCurrentRole();
+
+	/**
+	 * This activation is created in a dynamic call context, remember
+	 * its caller's activation.
+	 *
+	 * @arg a The caller's activation
+	 */
+	public void setCallActivation(Activation a);
+
+	/**
+	 * This activation is created in a dynamic call context, get its
+	 * caller's activation.
+	 *
+	 * @return The caller's activation
+	 */
+	public Activation getCallActivation();
+
 }

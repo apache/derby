@@ -564,6 +564,23 @@ final class GenericActivationHolder implements Activation
 		return ac.getTargetVTI();
 	}
 
+	public void setNestedCurrentRole(String role) {
+		ac.setNestedCurrentRole(role);
+    }
+
+    public String getNestedCurrentRole() {
+		return ac.getNestedCurrentRole();
+    }
+
+	public void setCallActivation(Activation a) {
+		ac.setCallActivation(a);
+	}
+
+	public Activation getCallActivation() {
+		return ac.getCallActivation();
+	}
+
+
 	/* Class implementation */
 
 
@@ -667,5 +684,4 @@ final class GenericActivationHolder implements Activation
 	public int getMaxDynamicResults() {
 		return ac.getMaxDynamicResults();
 	}
-
 }

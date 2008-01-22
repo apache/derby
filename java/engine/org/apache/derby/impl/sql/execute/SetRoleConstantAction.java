@@ -135,15 +135,19 @@ class SetRoleConstantAction implements ConstantAction
                     rd = dd.getRoleGrantDescriptor(thisRoleName,
                                                    currentAuthId,
                                                    dbo);
-                    if (rd == null &&
-                        (dd.getRoleGrantDescriptor
-                         (thisRoleName,
-                          Authorizer.PUBLIC_AUTHORIZATION_ID,
-                          dbo) == null)) {
+                    if (rd == null) {
+                        // or if not, via PUBLIC?
+                        rd = dd.getRoleGrantDescriptor
+                            (thisRoleName,
+                             Authorizer.PUBLIC_AUTHORIZATION_ID,
+                             dbo);
 
-                        throw StandardException.newException
-                            (SQLState.ROLE_INVALID_SPECIFICATION_NOT_GRANTED,
-                             thisRoleName);
+                        // Nope, we can't set this role, so throw.
+                        if (rd == null) {
+                            throw StandardException.newException
+                              (SQLState. ROLE_INVALID_SPECIFICATION_NOT_GRANTED,
+                               thisRoleName);
+                        }
                     }
                 }
             } finally {
@@ -152,6 +156,6 @@ class SetRoleConstantAction implements ConstantAction
             }
         }
 
-        lcc.setCurrentRole(rd);
+        lcc.setCurrentRole(activation, rd != null ? thisRoleName : null);
     }
 }

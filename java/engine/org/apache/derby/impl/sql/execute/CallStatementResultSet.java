@@ -28,6 +28,7 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.jdbc.ConnectionContext;
 import org.apache.derby.iapi.services.loader.GeneratedMethod;
 import org.apache.derby.iapi.sql.Activation;
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 
 /**
  * Call a Java procedure. This calls a generated method in the
@@ -71,9 +72,28 @@ class CallStatementResultSet extends NoRowsResultSetImpl
 	public void open() throws StandardException
 	{
 		setup();
-		methodCall.invoke(activation);
+
+        LanguageConnectionContext lcc =
+            activation.getLanguageConnectionContext();
+
+        // Push the "authorization stack" of SQL 2003, vol 2, section
+        // 4.34.1.1 and 4.27.3.
+        lcc.pushCaller(activation);
+
+        // Copy the current role into top cell of stack. Activations
+        // inside nested connections look to this activation for
+        // keeping its current role rather than rely on what's in lcc
+        // (top level only).
+        activation.setNestedCurrentRole(lcc.getCurrentRoleId(activation));
+
+        try {
+            methodCall.invoke(activation);
+        }
+        finally {
+            activation.getLanguageConnectionContext().popCaller();
+        }
     }
-    
+
     /**
      * Need to explicitly close any dynamic result sets.
      * <BR>
