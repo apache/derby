@@ -97,11 +97,13 @@ class CreateRoleConstantAction extends DDLConstantAction {
         // can't guarantee against collision if users are externally
         // defined or added later).
 
-        rd = ddg.newRoleDescriptor(roleName,
-                                   currentAuthId,// grantee
-                                   Authorizer.SYSTEM_AUTHORIZATION_ID,// grantor
-                                   true,         // with admin option
-                                   true);        // is definition
+        rd = ddg.newRoleDescriptor(
+            dd.getUUIDFactory().createUUID(),
+            roleName,
+            currentAuthId,// grantee
+            Authorizer.SYSTEM_AUTHORIZATION_ID,// grantor
+            true,         // with admin option
+            true);        // is definition
 
         dd.startWriting(lcc);
         dd.addDescriptor(rd,

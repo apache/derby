@@ -21,16 +21,23 @@
 
 package org.apache.derby.iapi.sql.dictionary;
 
+import org.apache.derby.catalog.UUID;
+import org.apache.derby.catalog.DependableFinder;
+import org.apache.derby.catalog.Dependable;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
+import org.apache.derby.iapi.sql.depend.Provider;
 import org.apache.derby.iapi.store.access.TransactionController;
+import org.apache.derby.impl.sql.catalog.DDdependableFinder;
 
 /**
  * This class is used by rows in the SYS.SYSROLES system table.
  */
 public class RoleDescriptor extends TupleDescriptor
 {
+    private final UUID uuid;
     private final String roleName;
     private final String grantee;
     private final String grantor;
@@ -42,6 +49,8 @@ public class RoleDescriptor extends TupleDescriptor
      * Constructor
      *
      * @param dd data dictionary
+     * @param uuid  unique identification in time and space of this role
+     *              descriptor
      * @param roleName
      * @param grantee
      * @param grantor
@@ -50,17 +59,23 @@ public class RoleDescriptor extends TupleDescriptor
      *
      */
     RoleDescriptor(DataDictionary dd,
+                   UUID uuid,
                    String roleName,
                    String grantee,
                    String grantor,
                    boolean withAdminOption,
                    boolean isDef) {
         super(dd);
+        this.uuid = uuid;
         this.roleName = roleName;
         this.grantee = grantee;
         this.grantor = grantor;
         this.withAdminOption = withAdminOption;
         this.isDef = isDef;
+    }
+
+    public UUID getUUID() {
+        return uuid;
     }
 
     public String getGrantee() {
@@ -89,7 +104,8 @@ public class RoleDescriptor extends TupleDescriptor
 
     public String toString() {
         if (SanityManager.DEBUG) {
-            return "roleName: " + roleName + "\n" +
+            return "uuid: " + uuid + "\n" +
+                "roleName: " + roleName + "\n" +
                 "grantor: " + grantor + "\n" +
                 "grantee: " + grantee + "\n" +
                 "withadminoption: " + withAdminOption + "\n" +

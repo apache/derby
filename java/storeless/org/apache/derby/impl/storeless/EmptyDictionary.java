@@ -201,6 +201,14 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
 		return null;
 	}
 
+
+	public RoleDescriptor getRoleDescriptor(UUID uuid)
+			throws StandardException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
 	public RoleDescriptor getRoleGrantDescriptor(String roleName,
 												 String grantee,
 												 String grantor)

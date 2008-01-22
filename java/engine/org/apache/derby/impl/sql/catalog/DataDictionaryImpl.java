@@ -1747,7 +1747,8 @@ public final class	DataDictionaryImpl
 		keyRow.setColumn(2, granteeOrderable);
 		keyRow.setColumn(3, grantorOrderable);
 
-		ti.deleteRow(tc, keyRow, SYSROLESRowFactory.SYSROLES_INDEX1_ID );
+		ti.deleteRow(tc, keyRow,
+					 SYSROLESRowFactory.SYSROLES_INDEX_ID_EE_OR_IDX);
 	}
 
 
@@ -2696,7 +2697,7 @@ public final class	DataDictionaryImpl
 
 		dropRoleGrants(ti,
 					   rf,
-					   rf.SYSROLES_GRANTEE_IN_INDEX1,
+					   rf.SYSROLES_GRANTEE_COLPOS_IN_INDEX_ID_EE_OR,
 					   grantee,
 					   tc);
 	}
@@ -2720,7 +2721,7 @@ public final class	DataDictionaryImpl
 
 		dropRoleGrants(ti,
 					   rf,
-					   rf.SYSROLES_ROLEID_IN_INDEX1,
+					   rf.SYSROLES_ROLEID_COLPOS_IN_INDEX_ID_EE_OR,
 					   roleName,
 					   tc);
 	}
@@ -2758,7 +2759,7 @@ public final class	DataDictionaryImpl
 			false);
 
 		ScanController sc = tc.openScan(
-			ti.getIndexConglomerate(rf.SYSROLES_INDEX1_ID),
+			ti.getIndexConglomerate(rf.SYSROLES_INDEX_ID_EE_OR_IDX),
 			false,   // don't hold open across commit
 			0,       // for update
 			TransactionController.MODE_RECORD,
@@ -2773,13 +2774,13 @@ public final class	DataDictionaryImpl
 		try {
 			ExecRow outRow = rf.makeEmptyRow();
 			ExecIndexRow indexRow = getIndexRowFromHeapRow(
-				ti.getIndexRowGenerator(rf.SYSROLES_INDEX1_ID),
+				ti.getIndexRowGenerator(rf.SYSROLES_INDEX_ID_EE_OR_IDX),
 				heapCC.newRowLocationTemplate(),
 				outRow);
 
 			while (sc.fetchNext(indexRow.getRowArray())) {
 				ti.deleteRow(tc, indexRow,
-							 rf.SYSROLES_INDEX1_ID);
+							 rf.SYSROLES_INDEX_ID_EE_OR_IDX);
 			}
 		} finally {
 			if (sc != null) {
@@ -11506,6 +11507,43 @@ public final class	DataDictionaryImpl
 		return rd;
 	}
 
+	
+	/**
+	 * Get the descriptor corresponding to the uuid
+	 *
+	 * @param uuid
+	 *
+	 * @return The descriptor for the role (definition or grant descriptor)
+	 *
+	 * @exception StandardException  Thrown on error
+	 */
+	public RoleDescriptor getRoleDescriptor(UUID uuid)
+		throws StandardException
+	{
+		DataValueDescriptor UUIDStringOrderable;
+
+		TabInfoImpl ti = getNonCoreTI(SYSROLES_CATALOG_NUM);
+
+		/* Use UUIDStringOrderable in both start and stop position for
+		 * scan.
+		 */
+		UUIDStringOrderable = getIDValueAsCHAR(uuid);
+
+		/* Set up the start/stop position for the scan */
+		ExecIndexRow keyRow = exFactory.getIndexableRow(2);
+		keyRow.setColumn(1, UUIDStringOrderable);
+
+		return (RoleDescriptor)
+					getDescriptorViaIndex(
+						SYSROLESRowFactory.SYSROLES_INDEX_UUID_IDX,
+						keyRow,
+						(ScanQualifier [][]) null,
+						ti,
+						(TupleDescriptor) null,
+						(List) null,
+						false);
+	}
+
 
 	/**
 	 * Get a role descriptor for a role grant
@@ -11559,7 +11597,7 @@ public final class	DataDictionaryImpl
 
 		return (RoleDescriptor)
 					getDescriptorViaIndex(
-						SYSROLESRowFactory.SYSROLES_INDEX2_ID,
+						SYSROLESRowFactory.SYSROLES_INDEX_ID_DEF_IDX,
 						keyRow,
 						(ScanQualifier [][]) null,
 						ti,
@@ -11609,12 +11647,12 @@ public final class	DataDictionaryImpl
 
 		return (RoleDescriptor)
 			getDescriptorViaIndex(
-								  SYSROLESRowFactory.SYSROLES_INDEX1_ID,
-								  keyRow,
-								  (ScanQualifier [][]) null,
-								  ti,
-								  (TupleDescriptor) null,
-								  (List) null,
-								  false);
+				SYSROLESRowFactory.SYSROLES_INDEX_ID_EE_OR_IDX,
+				keyRow,
+				(ScanQualifier [][]) null,
+				ti,
+				(TupleDescriptor) null,
+				(List) null,
+				false);
 	}
 }

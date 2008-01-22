@@ -21,6 +21,7 @@
 
 package org.apache.derby.impl.sql.catalog;
 
+import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.types.SQLChar;
 import org.apache.derby.iapi.types.SQLVarchar;
 import org.apache.derby.iapi.types.DataValueDescriptor;
@@ -45,34 +46,44 @@ public class SYSROLESRowFactory extends CatalogRowFactory
 {
     private static final String TABLENAME_STRING = "SYSROLES";
 
-    private static final int SYSROLES_COLUMN_COUNT = 5;
+    private static final int SYSROLES_COLUMN_COUNT = 6;
     /* Column #s for sysinfo (1 based) */
-    private static final int SYSROLES_ROLEID = 1;
-    private static final int SYSROLES_GRANTEE = 2;
-    private static final int SYSROLES_GRANTOR = 3;
-    private static final int SYSROLES_WITHADMINOPTION = 4;
-    private static final int SYSROLES_ISDEF = 5;
-
-    static final int SYSROLES_INDEX1_ID = 0;
-    static final int SYSROLES_INDEX2_ID = 1;
-
+    private static final int SYSROLES_ROLE_UUID = 1;
+    private static final int SYSROLES_ROLEID = 2;
+    private static final int SYSROLES_GRANTEE = 3;
+    private static final int SYSROLES_GRANTOR = 4;
+    private static final int SYSROLES_WITHADMINOPTION = 5;
+    private static final int SYSROLES_ISDEF = 6;
 
     private static final int[][] indexColumnPositions =
     {
         {SYSROLES_ROLEID, SYSROLES_GRANTEE, SYSROLES_GRANTOR},
-        {SYSROLES_ROLEID, SYSROLES_ISDEF}
+        {SYSROLES_ROLEID, SYSROLES_ISDEF},
+        {SYSROLES_ROLE_UUID}
     };
 
-    static final int SYSROLES_ROLEID_IN_INDEX1 = 1;
-    static final int SYSROLES_GRANTEE_IN_INDEX1 = 2;
+    // (role)ID_(grant)EE_(grant)OR
+    static final int SYSROLES_INDEX_ID_EE_OR_IDX = 0;
+    // (role)ID_(is)DEF
+    static final int SYSROLES_INDEX_ID_DEF_IDX = 1;
+    // UUID
+    static final int SYSROLES_INDEX_UUID_IDX = 2;
 
-    private static  final   boolean[]   uniqueness = {true,false};
+
+    static final int SYSROLES_ROLEID_COLPOS_IN_INDEX_ID_EE_OR = 1;
+    static final int SYSROLES_GRANTEE_COLPOS_IN_INDEX_ID_EE_OR = 2;
+
+    private static  final   boolean[]   uniqueness = {
+        true,
+        false, // many rows have same roleid and is not a definition
+        true};
 
     private static final String[] uuids = {
         "e03f4017-0115-382c-08df-ffffe275b270", // catalog UUID
         "c851401a-0115-382c-08df-ffffe275b270", // heap UUID
-        "c065801d-0115-382c-08df-ffffe275b270", // SYSROLES_INDEX1
-        "787c0020-0115-382c-08df-ffffe275b270"  // SYSROLES_INDEX2
+        "c065801d-0115-382c-08df-ffffe275b270", // SYSROLES_INDEX_ID_EE_OR
+        "787c0020-0115-382c-08df-ffffe275b270", // SYSROLES_INDEX_ID_DEF
+        "629f8094-0116-d8f9-5f97-ffffe275b270"  // SYSROLES_INDEX_UUID
     };
 
     /**
@@ -106,6 +117,7 @@ public class SYSROLESRowFactory extends CatalogRowFactory
         throws StandardException
     {
         ExecRow                 row;
+        String                  oid_string = null;
         String                  roleid = null;
         String                  grantee = null;
         String                  grantor = null;
@@ -121,25 +133,30 @@ public class SYSROLESRowFactory extends CatalogRowFactory
             grantor = roleDescriptor.getGrantor();
             wao = roleDescriptor.isWithAdminOption();
             isdef = roleDescriptor.isDef();
+            UUID oid = roleDescriptor.getUUID();
+            oid_string = oid.toString();
         }
 
         /* Build the row to insert */
         row = getExecutionFactory().getValueRow(SYSROLES_COLUMN_COUNT);
 
-        /* 1st column is ROLEID */
-        row.setColumn(1, new SQLVarchar(roleid));
+        /* 1st column is UUID */
+        row.setColumn(1, new SQLChar(oid_string));
 
-        /* 2nd column is GRANTEE */
-        row.setColumn(2, new SQLVarchar(grantee));
+        /* 2nd column is ROLEID */
+        row.setColumn(2, new SQLVarchar(roleid));
 
-        /* 3rd column is GRANTOR */
-        row.setColumn(3, new SQLVarchar(grantor));
+        /* 3rd column is GRANTEE */
+        row.setColumn(3, new SQLVarchar(grantee));
 
-        /* 4th column is WITHADMINOPTION */
-        row.setColumn(4, new SQLChar(wao ? "Y" : "N"));
+        /* 4th column is GRANTOR */
+        row.setColumn(4, new SQLVarchar(grantor));
 
-        /* 4th column is ISDEF */
-        row.setColumn(5, new SQLChar(isdef ? "Y" : "N"));
+        /* 5th column is WITHADMINOPTION */
+        row.setColumn(5, new SQLChar(wao ? "Y" : "N"));
+
+        /* 6th column is ISDEF */
+        row.setColumn(6, new SQLChar(isdef ? "Y" : "N"));
 
         return row;
     }
@@ -170,6 +187,7 @@ public class SYSROLESRowFactory extends CatalogRowFactory
 
         DataValueDescriptor         col;
         RoleDescriptor              descriptor;
+        String                      oid_string;
         String                      roleid;
         String                      grantee;
         String                      grantor;
@@ -183,31 +201,37 @@ public class SYSROLESRowFactory extends CatalogRowFactory
                                  "Wrong number of columns for a SYSROLES row");
         }
 
-        // first column is roleid (varchar(128))
+        // first column is uuid of this role descriptor (char(36))
         col = row.getColumn(1);
+        oid_string = col.getString();
+
+        // second column is roleid (varchar(128))
+        col = row.getColumn(2);
         roleid = col.getString();
 
-        // second column is grantee (varchar(128))
-        col = row.getColumn(2);
+        // third column is grantee (varchar(128))
+        col = row.getColumn(3);
         grantee = col.getString();
 
-        // third column is grantor (varchar(128))
-        col = row.getColumn(3);
+        // fourth column is grantor (varchar(128))
+        col = row.getColumn(4);
         grantor = col.getString();
 
-        // fourth column is withadminoption (char(1))
-        col = row.getColumn(4);
+        // fifth column is withadminoption (char(1))
+        col = row.getColumn(5);
         wao = col.getString();
 
-        // fifth column is isdef (char(1))
-        col = row.getColumn(5);
+        // sixth column is isdef (char(1))
+        col = row.getColumn(6);
         isdef = col.getString();
 
-        descriptor = ddg.newRoleDescriptor(roleid,
-                                           grantee,
-                                           grantor,
-                                           wao.equals("Y") ? true: false,
-                                           isdef.equals("Y") ? true: false);
+        descriptor = ddg.newRoleDescriptor
+            (getUUIDFactory().recreateUUID(oid_string),
+             roleid,
+             grantee,
+             grantor,
+             wao.equals("Y") ? true: false,
+             isdef.equals("Y") ? true: false);
 
         return descriptor;
     }
@@ -221,6 +245,7 @@ public class SYSROLESRowFactory extends CatalogRowFactory
     public SystemColumn[]   buildColumnList()
     {
         return new SystemColumn[] {
+            SystemColumnImpl.getUUIDColumn("UUID", false),
             SystemColumnImpl.getIdentifierColumn("ROLEID", false),
             SystemColumnImpl.getIdentifierColumn("GRANTEE", false),
             SystemColumnImpl.getIdentifierColumn("GRANTOR", false),

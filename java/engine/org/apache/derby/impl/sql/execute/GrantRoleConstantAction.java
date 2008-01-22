@@ -150,16 +150,19 @@ class GrantRoleConstantAction extends DDLConstantAction {
                         // FIXME: Grantee is role, need to check for circularity
                     }
 
-                    rd = ddg.newRoleDescriptor(role,
-                                               grantee,
-                                               grantor, // dbo for now
-                                               withAdminOption,
-                                               false);  // not definition
-                    dd.addDescriptor(rd,
-                                     null,  // parent
-                                     DataDictionary.SYSROLES_CATALOG_NUM,
-                                     false, // no duplicatesAllowed
-                                     tc);
+                    rd = ddg.newRoleDescriptor(
+                        dd.getUUIDFactory().createUUID(),
+                        role,
+                        grantee,
+                        grantor, // dbo for now
+                        withAdminOption,
+                        false);  // not definition
+                    dd.addDescriptor(
+                        rd,
+                        null,  // parent
+                        DataDictionary.SYSROLES_CATALOG_NUM,
+                        false, // no duplicatesAllowed
+                        tc);
                 } // else exists already, no need to add
             }
         }

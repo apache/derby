@@ -1843,6 +1843,18 @@ public interface DataDictionary
 			throws StandardException;
 
 	/**
+	 * Get the descriptor corresponding to the uuid
+	 *
+	 * @param uuid
+	 *
+	 * @return The descriptor for the role (definition or grant descriptor)
+	 *
+	 * @exception StandardException  Thrown on error
+	 */
+	public RoleDescriptor getRoleDescriptor(UUID uuid)
+			throws StandardException;
+
+	/**
 	 * Get a role descriptor for a role grant
 	 *
 	 * @param roleName The name of the role whose definition we seek

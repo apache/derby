@@ -488,6 +488,7 @@ public class DataDescriptorGenerator
     /**
      * Create a new role descriptor
      *
+	 * @param uuid unique identifier for this role descriptor in time and space
      * @param roleName the name of the role for which a new descriptor
      *                 is created
      * @param grantee authorization identifier of grantee
@@ -497,7 +498,8 @@ public class DataDescriptorGenerator
      * @param isDef if true, this descriptor represents a role
      *              definition, otherwise it represents a grant.
      */
-    public RoleDescriptor newRoleDescriptor(String roleName,
+    public RoleDescriptor newRoleDescriptor(UUID uuid,
+											String roleName,
 											String grantee,
 											String grantor,
                                             boolean withadminoption,
@@ -505,6 +507,7 @@ public class DataDescriptorGenerator
         throws StandardException
     {
         return new RoleDescriptor(dataDictionary,
+								  uuid,
                                   roleName,
                                   grantee,
                                   grantor,
