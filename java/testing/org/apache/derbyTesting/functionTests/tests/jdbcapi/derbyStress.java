@@ -161,9 +161,14 @@ public class derbyStress {
                   //rs.close();
                   //s.close();
           }    
+          // close the connection to free up all the result sets that our sloppy 
+          // user didn't close.
+          conn.close();
+          conn = ij.startJBMS();
           s = conn.createStatement();
           s.executeUpdate("DROP TABLE TAB");
           s.close();
+          conn.close();
        }
       
 }
