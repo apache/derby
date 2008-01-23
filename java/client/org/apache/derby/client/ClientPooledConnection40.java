@@ -23,7 +23,7 @@ package org.apache.derby.client;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.Vector;
+import java.util.ArrayList;
 import javax.sql.StatementEventListener;
 import javax.sql.StatementEvent;
 import org.apache.derby.jdbc.ClientBaseDataSource;
@@ -37,9 +37,11 @@ import org.apache.derby.jdbc.ClientBaseDataSource;
  */
 
 public class ClientPooledConnection40 extends ClientPooledConnection {
-    //using generics to avoid casting problems
-     protected final Vector<StatementEventListener> statementEventListeners = 
-             new Vector<StatementEventListener>();
+    
+    /** List of statement event listeners. */
+    //@GuardedBy("this")
+    private final ArrayList<StatementEventListener> statementEventListeners = 
+             new ArrayList<StatementEventListener>();
 
     public ClientPooledConnection40(ClientBaseDataSource ds,
         org.apache.derby.client.am.LogWriter logWriter,
@@ -71,11 +73,11 @@ public class ClientPooledConnection40 extends ClientPooledConnection {
      *                  interface and wants to be notified of Statement closed or 
      *                  or Statement error occurred events
      */
-    public void addStatementEventListener(StatementEventListener listener){
+    public synchronized void addStatementEventListener(StatementEventListener listener){
         if (logWriter_ != null) {
             logWriter_.traceEntry(this, "addStatementEventListener", listener);
         }
-        statementEventListeners.addElement(listener);
+        statementEventListeners.add(listener);
     }
     
     /**
@@ -87,11 +89,11 @@ public class ClientPooledConnection40 extends ClientPooledConnection {
      * @param listener The previously registered event listener that needs to be
      *                 removed from the list of components
      */
-    public void removeStatementEventListener(StatementEventListener listener){
+    public synchronized void removeStatementEventListener(StatementEventListener listener){
         if (logWriter_ != null) {
             logWriter_.traceEntry(this, "removeConnectionEventListener", listener);
         }
-        statementEventListeners.removeElement(listener);
+        statementEventListeners.remove(listener);
     }
     
     /**
@@ -102,15 +104,11 @@ public class ClientPooledConnection40 extends ClientPooledConnection {
      * @param statement The PreparedStatement that was closed
      *
      */
-    public void onStatementClose(PreparedStatement statement) {
+    public synchronized void onStatementClose(PreparedStatement statement) {
         if (!statementEventListeners.isEmpty()) {
             StatementEvent event = new StatementEvent(this,statement);
-            //synchronized block on statementEventListeners to make it thread
-            //safe
-            synchronized(statementEventListeners) {
-                for (StatementEventListener l : statementEventListeners) {
-                    l.statementClosed(event);
-                }
+            for (StatementEventListener l : statementEventListeners) {
+                l.statementClosed(event);
             }
         }
     }
@@ -125,16 +123,13 @@ public class ClientPooledConnection40 extends ClientPooledConnection {
      *                  caused the invalidation of the PreparedStatements
      *
      */
-    public void onStatementErrorOccurred(PreparedStatement statement,
-                    SQLException sqle) {
+    public synchronized void onStatementErrorOccurred(
+                                                    PreparedStatement statement,
+                                                    SQLException sqle) {
         if (!statementEventListeners.isEmpty()) {
             StatementEvent event = new StatementEvent(this,statement,sqle);
-            //synchronized block on statementEventListeners to make it thread
-            //safe
-            synchronized(statementEventListeners) {
-                for (StatementEventListener l : statementEventListeners) {
-                    l.statementErrorOccurred(event);
-                }
+            for (StatementEventListener l : statementEventListeners) {
+                l.statementErrorOccurred(event);
             }
         }
     }   
