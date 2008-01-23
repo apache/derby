@@ -75,7 +75,6 @@ public final class LangScripts extends ScriptTestCase {
         "ejbql",
         "floattypes",
         "functions",
-        "groupBy",
         "identifier",
         "implicitConversions",
         "innerjoin",

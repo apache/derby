@@ -24,13 +24,19 @@ package org.apache.derbyTesting.functionTests.tests.lang;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.PreparedStatement;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 
+/**
+ * Many of these test cases were converted from the old groupBy.sql
+ * using the DERBY-2151 SQLToJUnit conversion utility.
+ */
 public class GroupByTest extends BaseJDBCTestCase {
 
 	public GroupByTest(String name) {
@@ -38,8 +44,1317 @@ public class GroupByTest extends BaseJDBCTestCase {
 	}
 	
 	public static Test suite() {
-		return new TestSuite(GroupByTest.class);
+		return new CleanDatabaseTestSetup(
+				new TestSuite(GroupByTest.class, "GroupByTest")) {
+			protected void decorateSQL(Statement s)
+				throws SQLException
+			{
+				createSchemaObjects(s);
+			}
+		};
 	}
+
+	String [][] expRS;
+	String [] expColNames;
+
+	/**
+	 * Creates a variety of tables used by the various GroupBy tests
+	 * @throws SQLException
+	 */
+	private static void createSchemaObjects(Statement st)
+		throws SQLException
+	{
+		st.executeUpdate("create table bug280 (a int, b int)");
+		st.executeUpdate("insert into bug280 (a, b) " +
+						"values (1,1), (1,2), (1,3), (2,1), (2,2)");
+        st.executeUpdate("CREATE TABLE A2937 (C CHAR(10) NOT NULL, " +
+                "D DATE NOT NULL, DC DECIMAL(6,2))");
+        st.executeUpdate("INSERT INTO A2937 VALUES ('aaa', " +
+                "DATE('2007-07-10'), 500.00)");
+		st.executeUpdate("create table yy (a double, b double)");
+		st.executeUpdate("insert into yy values (2,4), (2, 4), " +
+			"(5,7), (2,3), (2,3), (2,3), (2,3), (9,7)");
+        
+        st.executeUpdate("create table t1 (a int, b int, c int)");
+        st.executeUpdate("create table t2 (a int, b int, c int)");
+        st.executeUpdate("insert into t2 values (1,1,1), (2,2,2)");
+        
+        st.executeUpdate("create table unmapped(c1 long varchar)");
+        st.executeUpdate("create table t_twoints(c1 int, c2 int)");
+        st.executeUpdate("create table t5920(c int, d int)");
+        st.executeUpdate("insert into t5920(c,d) values "
+            + "(1,10),(2,20),(2,20),(3,30),(3,30),(3,30)");
+        st.executeUpdate("create table t5653 (c1 float)");
+        st.executeUpdate("insert into t5653 values 0.0, 90.0");
+
+        // create an all types tables
+        
+        st.executeUpdate(
+            "create table t (i int, s smallint, l bigint, c "
+            + "char(10), v varchar(50), lvc long varchar, d double "
+            + "precision, r real, dt date, t time, ts timestamp, b "
+            + "char(2) for bit data, bv varchar(2) for bit data, "
+            + "lbv long varchar for bit data)");
+        
+        st.executeUpdate(
+            " create table tab1 ( i integer, s smallint, l "
+            + "bigint, c char(30), v varchar(30), lvc long "
+            + "varchar, d double precision, r real, dt date, t "
+            + "time, ts timestamp)");
+        
+        // populate tables
+        
+        st.executeUpdate("insert into t (i) values (null)");
+        st.executeUpdate("insert into t (i) values (null)");
+        
+        st.executeUpdate(
+            " insert into t values (0, 100, 1000000, 'hello', "
+            + "'everyone is here', 'what the heck do we care?', "
+            + "200.0e0, 200.0e0, date('1992-01-01'), "
+            + "time('12:30:30'), timestamp('1992-01-01 12:30:30'), "
+            + "X'12af', X'0f0f', X'ABCD')");
+        
+        st.executeUpdate(
+            " insert into t values (0, 100, 1000000, 'hello', "
+            + "'everyone is here', 'what the heck do we care?', "
+            + "200.0e0, 200.0e0, date('1992-01-01'), "
+            + "time('12:30:30'), timestamp('1992-01-01 12:30:30'), "
+            + "X'12af', X'0f0f', X'ABCD')");
+        
+        st.executeUpdate(
+            " insert into t values (1, 100, 1000000, 'hello', "
+            + "'everyone is here', 'what the heck do we care?', "
+            + "200.0e0, 200.0e0, date('1992-01-01'), "
+            + "time('12:30:30'), timestamp('1992-01-01 12:30:30'), "
+            + "X'12af', X'0f0f', X'ABCD')");
+        
+        st.executeUpdate(
+            " insert into t values (0, 200, 1000000, 'hello', "
+            + "'everyone is here', 'what the heck do we care?', "
+            + "200.0e0, 200.0e0, date('1992-01-01'), "
+            + "time('12:30:30'), timestamp('1992-01-01 12:30:30'), "
+            + "X'12af', X'0f0f', X'ABCD')");
+        
+        st.executeUpdate(
+            " insert into t values (0, 100, 2000000, 'hello', "
+            + "'everyone is here', 'what the heck do we care?', "
+            + "200.0e0, 200.0e0, date('1992-01-01'), "
+            + "time('12:30:30'), timestamp('1992-01-01 12:30:30'), "
+            + "X'12af', X'0f0f', X'ABCD')");
+        
+        st.executeUpdate(
+            " insert into t values (0, 100, 1000000, 'goodbye', "
+            + "'everyone is here', 'adios, muchachos', 200.0e0, "
+            + "200.0e0, date('1992-01-01'), time('12:30:30'), "
+            + "timestamp('1992-01-01 12:30:30'), X'12af', X'0f0f', X'ABCD')");
+        
+        st.executeUpdate(
+            " insert into t values (0, 100, 1000000, 'hello', "
+            + "'noone is here', 'what the heck do we care?', "
+            + "200.0e0, 200.0e0, date('1992-01-01'), "
+            + "time('12:30:30'), timestamp('1992-01-01 12:30:30'), "
+            + "X'12af', X'0f0f', X'ABCD')");
+        
+        st.executeUpdate(
+            " insert into t values (0, 100, 1000000, 'hello', "
+            + "'everyone is here', 'what the heck do we care?', "
+            + "200.0e0, 200.0e0, date('1992-01-01'), "
+            + "time('12:30:30'), timestamp('1992-01-01 12:30:30'), "
+            + "X'12af', X'0f0f', X'ABCD')");
+        
+        st.executeUpdate(
+            " insert into t values (0, 100, 1000000, 'hello', "
+            + "'everyone is here', 'what the heck do we care?', "
+            + "100.0e0, 200.0e0, date('1992-01-01'), "
+            + "time('12:30:30'), timestamp('1992-01-01 12:30:30'), "
+            + "X'12af', X'0f0f', X'ABCD')");
+        
+        st.executeUpdate(
+            " insert into t values (0, 100, 1000000, 'hello', "
+            + "'everyone is here', 'what the heck do we care?', "
+            + "200.0e0, 100.0e0, date('1992-01-01'), "
+            + "time('12:30:30'), timestamp('1992-01-01 12:30:30'), "
+            + "X'12af', X'0f0f', X'ABCD')");
+        
+        st.executeUpdate(
+            " insert into t values (0, 100, 1000000, 'hello', "
+            + "'everyone is here', 'what the heck do we care?', "
+            + "200.0e0, 200.0e0, date('1992-09-09'), "
+            + "time('12:30:30'), timestamp('1992-01-01 12:30:30'), "
+            + "X'12af', X'0f0f', X'ABCD')");
+        
+        st.executeUpdate(
+            " insert into t values (0, 100, 1000000, 'hello', "
+            + "'everyone is here', 'what the heck do we care?', "
+            + "200.0e0, 200.0e0, date('1992-01-01'), "
+            + "time('12:55:55'), timestamp('1992-01-01 12:30:30'), "
+            + "X'12af', X'0f0f', X'ABCD')");
+        
+        st.executeUpdate(
+            " insert into t values (0, 100, 1000000, 'hello', "
+            + "'everyone is here', 'what the heck do we care?', "
+            + "200.0e0, 200.0e0, date('1992-01-01'), "
+            + "time('12:30:30'), timestamp('1992-01-01 12:55:55'), "
+            + "X'12af', X'0f0f', X'ABCD')");
+        
+        st.executeUpdate(
+            " insert into t values (0, 100, 1000000, 'hello', "
+            + "'everyone is here', 'what the heck do we care?', "
+            + "200.0e0, 200.0e0, date('1992-01-01'), "
+            + "time('12:30:30'), timestamp('1992-01-01 12:30:30'), "
+            + "X'ffff', X'0f0f', X'1234')");
+        
+        st.executeUpdate(
+            " insert into t values (0, 100, 1000000, 'hello', "
+            + "'everyone is here', 'what the heck do we care?', "
+            + "200.0e0, 200.0e0, date('1992-01-01'), "
+            + "time('12:30:30'), timestamp('1992-01-01 12:30:30'), "
+            + "X'12af', X'ffff', X'ABCD')");
+        
+        // bit maps to Byte[], so can't test for now
+        
+        st.executeUpdate(
+            "insert into tab1 select i, s, l, c, v, lvc, d, r, "
+            + "dt, t, ts from t");
+	}
+
+	/**
+	 * Test various invalid GROUP BY statements.
+	 * @throws Exception
+	 */
+    public void testGroupByErrors()
+		throws Exception
+    {
+		Statement st = createStatement();
+
+        // group by constant. should compile but fail because it 
+        // is not a valid grouping expression.
+        
+        assertStatementError("42Y30", st,
+            "select * from t1 group by 1");
+        
+        // column in group by list not in from list
+        
+        assertStatementError("42X04", st,
+            "select a as d from t1 group by d");
+        
+        // column in group by list not in select list
+        
+        assertStatementError("42Y30", st,
+            "select a as b from t1 group by b");
+        
+        assertStatementError("42Y30", st,
+            " select a from t1 group by b");
+        
+        assertStatementError("42Y30", st,
+            " select a, char(b) from t1 group by a");
+        
+        // cursor with group by is not updatable
+        
+        assertCompileError("42Y90",
+                "select a from t1 group by a for update");
+        
+        // noncorrelated subquery that returns too many rows
+        
+        assertStatementError("21000", st,
+            "select a, (select a from t2) from t1 group by a");
+        
+        // correlation on outer table
+        
+        assertStatementError("42Y30", st,
+            "select t2.a, (select b from t1 where t1.b = t2.b) "
+            + "from t1 t2 group by t2.a");
+        
+        // having clause cannot contain column references which 
+        // are not grouping columns
+        
+        assertStatementError("42X24", st,
+            "select a from t1 group by a having c = 1");
+        
+        assertStatementError("42X04", st,
+            " select a from t1 o group by a having a = (select a "
+            + "from t1 where b = b.o)");
+        
+        // ?s in group by
+        
+        assertStatementError("42X01", st,
+            "select a from t1 group by ?");
+
+        // group by on long varchar type
+        
+        assertStatementError("X0X67", st,
+            " select c1, max(1) from unmapped group by c1");
+		st.close();
+	}
+
+	/**
+	 * Verify the correct behavior of GROUP BY with various datatypes.
+	 * @throws Exception
+	 */
+	public void testGroupByWithVariousDatatypes()
+		throws Exception
+	{
+		Statement st = createStatement();
+		ResultSet rs = null;
+
+        // Test group by and having clauses with no aggregates 
+        
+        // simple grouping
+        
+        rs = st.executeQuery(
+            "select i from t group by i order by i");
+        
+        expColNames = new String [] {"I"};
+        JDBC.assertColumnNames(rs, expColNames);
+        
+        expRS = new String [][]
+        {
+            {"0"},
+            {"1"},
+            {null}
+        };
+        
+        JDBC.assertFullResultSet(rs, expRS, true);
+        
+        rs = st.executeQuery(
+            " select s from t group by s order by s");
+        
+        expColNames = new String [] {"S"};
+        JDBC.assertColumnNames(rs, expColNames);
+        
+        expRS = new String [][]
+        {
+            {"100"},
+            {"200"},
+            {null}
+        };
+        
+        JDBC.assertFullResultSet(rs, expRS, true);
+        
+        rs = st.executeQuery(
+            " select l from t group by l order by l");
+        
+        expColNames = new String [] {"L"};
+        JDBC.assertColumnNames(rs, expColNames);
+        
+        expRS = new String [][]
+        {
+            {"1000000"},
+            {"2000000"},
+            {null}
+        };
+        
+        JDBC.assertFullResultSet(rs, expRS, true);
+        
+        rs = st.executeQuery(
+            " select c from t group by c order by c");
+        
+        expColNames = new String [] {"C"};
+        JDBC.assertColumnNames(rs, expColNames);
+        
+        expRS = new String [][]
+        {
+            {"goodbye"},
+            {"hello"},
+            {null}
+        };
+        
+        JDBC.assertFullResultSet(rs, expRS, true);
+        
+        rs = st.executeQuery(
+            " select v from t group by v order by v");
+        
+        expColNames = new String [] {"V"};
+        JDBC.assertColumnNames(rs, expColNames);
+        
+        expRS = new String [][]
+        {
+            {"everyone is here"},
+            {"noone is here"},
+            {null}
+        };
+        
+        JDBC.assertFullResultSet(rs, expRS, true);
+        
+        rs = st.executeQuery(
+            " select d from t group by d order by d");
+        
+        expColNames = new String [] {"D"};
+        JDBC.assertColumnNames(rs, expColNames);
+        
+        expRS = new String [][]
+        {
+            {"100.0"},
+            {"200.0"},
+            {null}
+        };
+        
+        JDBC.assertFullResultSet(rs, expRS, true);
+        
+        rs = st.executeQuery(
+            " select r from t group by r order by r");
+        
+        expColNames = new String [] {"R"};
+        JDBC.assertColumnNames(rs, expColNames);
+        
+        expRS = new String [][]
+        {
+            {"100.0"},
+            {"200.0"},
+            {null}
+        };
+        
+        JDBC.assertFullResultSet(rs, expRS, true);
+        
+        rs = st.executeQuery(
+            " select dt from t group by dt order by dt");
+        
+        expColNames = new String [] {"DT"};
+        JDBC.assertColumnNames(rs, expColNames);
+        
+        expRS = new String [][]
+        {
+            {"1992-01-01"},
+            {"1992-09-09"},
+            {null}
+        };
+        
+        JDBC.assertFullResultSet(rs, expRS, true);
+        
+        rs = st.executeQuery(
+            " select t from t group by t order by t");
+        
+        expColNames = new String [] {"T"};
+        JDBC.assertColumnNames(rs, expColNames);
+        
+        expRS = new String [][]
+        {
+            {"12:30:30"},
+            {"12:55:55"},
+            {null}
+        };
+        
+        JDBC.assertFullResultSet(rs, expRS, true);
+        
+        rs = st.executeQuery(
+            " select ts from t group by ts order by ts");
+        
+        expColNames = new String [] {"TS"};
+        JDBC.assertColumnNames(rs, expColNames);
+        
+        expRS = new String [][]
+        {
+            {"1992-01-01 12:30:30.0"},
+            {"1992-01-01 12:55:55.0"},
+            {null}
+        };
+        
+        JDBC.assertFullResultSet(rs, expRS, true);
+        
+        rs = st.executeQuery(
+            " select b from t group by b order by b");
+        
+        expColNames = new String [] {"B"};
+        JDBC.assertColumnNames(rs, expColNames);
+        
+        expRS = new String [][]
+        {
+            {"12af"},
+            {"ffff"},
+            {null}
+        };
+        
+        JDBC.assertFullResultSet(rs, expRS, true);
+        
+        rs = st.executeQuery(
+            " select bv from t group by bv order by bv");
+        
+        expColNames = new String [] {"BV"};
+        JDBC.assertColumnNames(rs, expColNames);
+        
+        expRS = new String [][]
+        {
+            {"0f0f"},
+            {"ffff"},
+            {null}
+        };
+        
+        JDBC.assertFullResultSet(rs, expRS, true);
+        
+        // grouping by long varchar [for bit data] cols should 
+        // fail in db2 mode
+        
+        assertStatementError("X0X67", st,
+            "select lbv from t group by lbv order by lbv");
+		st.close();
+	}
+
+	/**
+	 * Test multicolumn grouping.
+	 * @throws Exception
+	 */
+    public void testMulticolumnGrouping()
+		throws Exception
+	{
+		Statement st = createStatement();
+		ResultSet rs = null;
+
+        rs = st.executeQuery(
+            "select i, dt, b from t where 1=1 group by i, dt, b "
+            + "order by i,dt,b");
+        
+        expColNames = new String [] {"I", "DT", "B"};
+        JDBC.assertColumnNames(rs, expColNames);
+        
+        expRS = new String [][]
+        {
+            {"0", "1992-01-01", "12af"},
+            {"0", "1992-01-01", "ffff"},
+            {"0", "1992-09-09", "12af"},
+            {"1", "1992-01-01", "12af"},
+            {null, null, null}
+        };
+        
+        JDBC.assertFullResultSet(rs, expRS, true);
+        
+        rs = st.executeQuery(
+            " select i, dt, b from t group by i, dt, b order by i,dt,b");
+        
+        expColNames = new String [] {"I", "DT", "B"};
+        JDBC.assertColumnNames(rs, expColNames);
+        
+        expRS = new String [][]
+        {
+            {"0", "1992-01-01", "12af"},
+            {"0", "1992-01-01", "ffff"},
+            {"0", "1992-09-09", "12af"},
+            {"1", "1992-01-01", "12af"},
+            {null, null, null}
+        };
+        
+        JDBC.assertFullResultSet(rs, expRS, true);
+        
+        rs = st.executeQuery(
+            " select i, dt, b from t group by b, i, dt order by i,dt,b");
+        
+        expColNames = new String [] {"I", "DT", "B"};
+        JDBC.assertColumnNames(rs, expColNames);
+        
+        expRS = new String [][]
+        {
+            {"0", "1992-01-01", "12af"},
+            {"0", "1992-01-01", "ffff"},
+            {"0", "1992-09-09", "12af"},
+            {"1", "1992-01-01", "12af"},
+            {null, null, null}
+        };
+        
+        JDBC.assertFullResultSet(rs, expRS, true);
+        
+        rs = st.executeQuery(
+            " select i, dt, b from t group by dt, i, b order by i,dt,b");
+        
+        expColNames = new String [] {"I", "DT", "B"};
+        JDBC.assertColumnNames(rs, expColNames);
+        
+        expRS = new String [][]
+        {
+            {"0", "1992-01-01", "12af"},
+            {"0", "1992-01-01", "ffff"},
+            {"0", "1992-09-09", "12af"},
+            {"1", "1992-01-01", "12af"},
+            {null, null, null}
+        };
+        
+        JDBC.assertFullResultSet(rs, expRS, true);
+		st.close();
+	}
+
+	/**
+	 * Test the use of a subquery to group by an expression.
+	 * @throws Exception
+	 */
+	public void testGroupByExpression()
+		throws Exception
+	{
+		Statement st = createStatement();
+		ResultSet rs = null;
+
+        rs = st.executeQuery(
+            "select expr1, expr2 from (select i * s, c || v from "
+            + "t) t (expr1, expr2) group by expr2, expr1 order by "
+            + "expr2,expr1");
+        
+        expColNames = new String [] {"EXPR1", "EXPR2"};
+        JDBC.assertColumnNames(rs, expColNames);
+        
+        expRS = new String [][]
+        {
+            {"0", "goodbye   everyone is here"},
+            {"0", "hello     everyone is here"},
+            {"100", "hello     everyone is here"},
+            {"0", "hello     noone is here"},
+            {null, null}
+        };
+        
+        JDBC.assertFullResultSet(rs, expRS, true);
+		st.close();
+	}
+
+	/**
+	 * Test using GROUP BY in a correlated subquery.
+	 * @throws Exception
+	 */
+	public void testGroupByCorrelatedSubquery()
+		throws Exception
+	{
+		Statement st = createStatement();
+		ResultSet rs = null;
+
+        rs = st.executeQuery(
+            "select i, expr1 from (select i, (select distinct i "
+            + "from t m where m.i = t.i) from t) t (i, expr1) "
+            + "group by i, expr1 order by i,expr1");
+        
+        expColNames = new String [] {"I", "EXPR1"};
+        JDBC.assertColumnNames(rs, expColNames);
+        
+        expRS = new String [][]
+        {
+            {"0", "0"},
+            {"1", "1"},
+            {null, null}
+        };
+        
+        JDBC.assertFullResultSet(rs, expRS, true);
+		st.close();
+	}
+
+	/**
+	 * Test GROUP BY and DISTINCT.
+	 * @throws Exception
+	 */
+	public void testGroupByDistinct()
+		throws Exception
+	{
+		Statement st = createStatement();
+		ResultSet rs = null;
+
+        rs = st.executeQuery(
+            "select distinct i, dt, b from t group by i, dt, b "
+            + "order by i,dt,b");
+        
+        expColNames = new String [] {"I", "DT", "B"};
+        JDBC.assertColumnNames(rs, expColNames);
+        
+        expRS = new String [][]
+        {
+            {"0", "1992-01-01", "12af"},
+            {"0", "1992-01-01", "ffff"},
+            {"0", "1992-09-09", "12af"},
+            {"1", "1992-01-01", "12af"},
+            {null, null, null}
+        };
+        
+        JDBC.assertFullResultSet(rs, expRS, true);
+		st.close();
+	}
+
+	/**
+	 * Test combinations of GROUP BY and ORDER BY.
+	 * @throws Exception
+	 */
+	public void testGroupByOrderBy()
+		throws Exception
+	{
+		Statement st = createStatement();
+		ResultSet rs = null;
+
+        // order by and group by same order
+        
+        rs = st.executeQuery(
+            "select i, dt, b from t group by i, dt, b order by i, dt, b");
+        
+        expColNames = new String [] {"I", "DT", "B"};
+        JDBC.assertColumnNames(rs, expColNames);
+        
+        expRS = new String [][]
+        {
+            {"0", "1992-01-01", "12af"},
+            {"0", "1992-01-01", "ffff"},
+            {"0", "1992-09-09", "12af"},
+            {"1", "1992-01-01", "12af"},
+            {null, null, null}
+        };
+        
+        JDBC.assertFullResultSet(rs, expRS, true);
+        
+        // subset in same order
+        
+        rs = st.executeQuery(
+            "select i, dt, b from t group by i, dt, b order by i, dt");
+        
+        expColNames = new String [] {"I", "DT", "B"};
+        JDBC.assertColumnNames(rs, expColNames);
+        
+        expRS = new String [][]
+        {
+            {"0", "1992-01-01", "12af"},
+            {"0", "1992-01-01", "ffff"},
+            {"0", "1992-09-09", "12af"},
+            {"1", "1992-01-01", "12af"},
+            {null, null, null}
+        };
+        
+        JDBC.assertFullResultSet(rs, expRS, true);
+        
+        // different order
+        
+        rs = st.executeQuery(
+            "select i, dt, b from t group by i, dt, b order by b, dt, i");
+        
+        expColNames = new String [] {"I", "DT", "B"};
+        JDBC.assertColumnNames(rs, expColNames);
+        
+        expRS = new String [][]
+        {
+            {"0", "1992-01-01", "12af"},
+            {"1", "1992-01-01", "12af"},
+            {"0", "1992-09-09", "12af"},
+            {"0", "1992-01-01", "ffff"},
+            {null, null, null}
+        };
+        
+        JDBC.assertFullResultSet(rs, expRS, true);
+        
+        // subset in different order
+        
+        rs = st.executeQuery(
+            "select i, dt, b from t group by i, dt, b order by b, dt");
+        
+        expColNames = new String [] {"I", "DT", "B"};
+        JDBC.assertColumnNames(rs, expColNames);
+        
+        expRS = new String [][]
+        {
+            {"0", "1992-01-01", "12af"},
+            {"1", "1992-01-01", "12af"},
+            {"0", "1992-09-09", "12af"},
+            {"0", "1992-01-01", "ffff"},
+            {null, null, null}
+        };
+        
+        JDBC.assertFullResultSet(rs, expRS, true);
+		st.close();
+	}
+
+	/**
+	 * group by without having in from subquery.
+	 * @throws Exception
+	 */
+	public void testGroupByInSubquery()
+		throws Exception
+	{
+		Statement st = createStatement();
+		ResultSet rs = null;
+
+        
+        rs = st.executeQuery(
+            "select * from (select i, dt from t group by i, dt) "
+            + "t (t_i, t_dt), (select i, dt from t group by i, dt) "
+            + "m (m_i, m_dt) where t_i = m_i and t_dt = m_dt order "
+            + "by t_i,t_dt,m_i,m_dt");
+        
+        expColNames = new String [] {"T_I", "T_DT", "M_I", "M_DT"};
+        JDBC.assertColumnNames(rs, expColNames);
+        
+        expRS = new String [][]
+        {
+            {"0", "1992-01-01", "0", "1992-01-01"},
+            {"0", "1992-09-09", "0", "1992-09-09"},
+            {"1", "1992-01-01", "1", "1992-01-01"}
+        };
+        
+        JDBC.assertFullResultSet(rs, expRS, true);
+        
+        rs = st.executeQuery(
+            " select * from (select i, dt from t group by i, dt) "
+            + "t (t_i, t_dt), (select i, dt from t group by i, dt) "
+            + "m (m_i, m_dt) group by t_i, t_dt, m_i, m_dt order "
+            + "by t_i,t_dt,m_i,m_dt");
+        
+        expColNames = new String [] {"T_I", "T_DT", "M_I", "M_DT"};
+        JDBC.assertColumnNames(rs, expColNames);
+        
+        expRS = new String [][]
+        {
+            {"0", "1992-01-01", "0", "1992-01-01"},
+            {"0", "1992-01-01", "0", "1992-09-09"},
+            {"0", "1992-01-01", "1", "1992-01-01"},
+            {"0", "1992-01-01", null, null},
+            {"0", "1992-09-09", "0", "1992-01-01"},
+            {"0", "1992-09-09", "0", "1992-09-09"},
+            {"0", "1992-09-09", "1", "1992-01-01"},
+            {"0", "1992-09-09", null, null},
+            {"1", "1992-01-01", "0", "1992-01-01"},
+            {"1", "1992-01-01", "0", "1992-09-09"},
+            {"1", "1992-01-01", "1", "1992-01-01"},
+            {"1", "1992-01-01", null, null},
+            {null, null, "0", "1992-01-01"},
+            {null, null, "0", "1992-09-09"},
+            {null, null, "1", "1992-01-01"},
+            {null, null, null, null}
+        };
+        
+        JDBC.assertFullResultSet(rs, expRS, true);
+        
+        rs = st.executeQuery(
+            " select * from (select i, dt from t group by i, dt) "
+            + "t (t_i, t_dt), (select i, dt from t group by i, dt) "
+            + "m (m_i, m_dt) where t_i = m_i and t_dt = m_dt group "
+            + "by t_i, t_dt, m_i, m_dt order by t_i,t_dt,m_i,m_dt");
+        
+        expColNames = new String [] {"T_I", "T_DT", "M_I", "M_DT"};
+        JDBC.assertColumnNames(rs, expColNames);
+        
+        expRS = new String [][]
+        {
+            {"0", "1992-01-01", "0", "1992-01-01"},
+            {"0", "1992-09-09", "0", "1992-09-09"},
+            {"1", "1992-01-01", "1", "1992-01-01"}
+        };
+        
+        JDBC.assertFullResultSet(rs, expRS, true);
+        
+        rs = st.executeQuery(
+            " select t.*, m.* from (select i, dt from t group by "
+            + "i, dt) t (t_i, t_dt), (select i, dt from t group by "
+            + "i, dt) m (t_i, t_dt) where t.t_i = m.t_i and t.t_dt "
+            + "= m.t_dt group by t.t_i, t.t_dt, m.t_i, m.t_dt "
+            + "order by t.t_i,t.t_dt,m.t_i,m.t_dt");
+        
+        expColNames = new String [] {"T_I", "T_DT", "T_I", "T_DT"};
+        JDBC.assertColumnNames(rs, expColNames);
+        
+        expRS = new String [][]
+        {
+            {"0", "1992-01-01", "0", "1992-01-01"},
+            {"0", "1992-09-09", "0", "1992-09-09"},
+            {"1", "1992-01-01", "1", "1992-01-01"}
+        };
+        
+        JDBC.assertFullResultSet(rs, expRS, true);
+        
+        rs = st.executeQuery(
+            " select t.t_i, t.t_dt, m.* from (select i, dt from "
+            + "t group by i, dt) t (t_i, t_dt), (select i, dt from "
+            + "t group by i, dt) m (t_i, t_dt) where t.t_i = m.t_i "
+            + "and t.t_dt = m.t_dt group by t.t_i, t.t_dt, m.t_i, "
+            + "m.t_dt order by t.t_i,t.t_dt,m.t_i,m.t_dt");
+        
+        expColNames = new String [] {"T_I", "T_DT", "T_I", "T_DT"};
+        JDBC.assertColumnNames(rs, expColNames);
+        
+        expRS = new String [][]
+        {
+            {"0", "1992-01-01", "0", "1992-01-01"},
+            {"0", "1992-09-09", "0", "1992-09-09"},
+            {"1", "1992-01-01", "1", "1992-01-01"}
+        };
+        
+        JDBC.assertFullResultSet(rs, expRS, true);
+		st.close();
+	}
+
+	/**
+	 * additional columns in group by list not in select list.
+	 * @throws Exception
+	 */
+	public void testGroupByWithAdditionalColumns()
+		throws Exception
+	{
+		Statement st = createStatement();
+		ResultSet rs = null;
+
+        rs = st.executeQuery(
+            "select i, dt, b from t group by i, dt, b order by i,dt,b");
+        
+        expColNames = new String [] {"I", "DT", "B"};
+        JDBC.assertColumnNames(rs, expColNames);
+        
+        expRS = new String [][]
+        {
+            {"0", "1992-01-01", "12af"},
+            {"0", "1992-01-01", "ffff"},
+            {"0", "1992-09-09", "12af"},
+            {"1", "1992-01-01", "12af"},
+            {null, null, null}
+        };
+        
+        JDBC.assertFullResultSet(rs, expRS, true);
+        
+        rs = st.executeQuery(
+            " select t.i from t group by i, dt, b order by i");
+        
+        expColNames = new String [] {"I"};
+        JDBC.assertColumnNames(rs, expColNames);
+        
+        expRS = new String [][]
+        {
+            {"0"},
+            {"0"},
+            {"0"},
+            {"1"},
+            {null}
+        };
+        
+        JDBC.assertFullResultSet(rs, expRS, true);
+        
+        rs = st.executeQuery(
+            " select t.dt from t group by i, dt, b order by dt");
+        
+        expColNames = new String [] {"DT"};
+        JDBC.assertColumnNames(rs, expColNames);
+        
+        expRS = new String [][]
+        {
+            {"1992-01-01"},
+            {"1992-01-01"},
+            {"1992-01-01"},
+            {"1992-09-09"},
+            {null}
+        };
+        
+        JDBC.assertFullResultSet(rs, expRS, true);
+        
+        rs = st.executeQuery(
+            " select t.b from t group by i, dt, b order by b");
+        
+        expColNames = new String [] {"B"};
+        JDBC.assertColumnNames(rs, expColNames);
+        
+        expRS = new String [][]
+        {
+            {"12af"},
+            {"12af"},
+            {"12af"},
+            {"ffff"},
+            {null}
+        };
+        
+        JDBC.assertFullResultSet(rs, expRS, true);
+        
+        rs = st.executeQuery(
+            " select t.t_i, m.t_i from (select i, dt from t "
+            + "group by i, dt) t (t_i, t_dt), (select i, dt from t "
+            + "group by i, dt) m (t_i, t_dt) where t.t_i = m.t_i "
+            + "and t.t_dt = m.t_dt group by t.t_i, t.t_dt, m.t_i, "
+            + "m.t_dt order by t.t_i,m.t_i");
+        
+        expColNames = new String [] {"T_I", "T_I"};
+        JDBC.assertColumnNames(rs, expColNames);
+        
+        expRS = new String [][]
+        {
+            {"0", "0"},
+            {"0", "0"},
+            {"1", "1"}
+        };
+        
+        JDBC.assertFullResultSet(rs, expRS, true);
+		st.close();
+	}
+
+	/**
+	 * Test parameter markers in the having clause.
+	 * @throws Exception
+	 */
+	public void testParameterMarkersInHavingClause()
+		throws Exception
+	{
+		ResultSet rs = null;
+
+		PreparedStatement pSt = prepareStatement(
+            "select i, dt, b from t group by i, dt, b having i = "
+            + "? order by i,dt,b");
+        
+		pSt.setInt(1, 0);
+        
+        rs = pSt.executeQuery();
+        expColNames = new String [] {"I", "DT", "B"};
+        JDBC.assertColumnNames(rs, expColNames);
+        
+        expRS = new String [][]
+        {
+            {"0", "1992-01-01", "12af"},
+            {"0", "1992-01-01", "ffff"},
+            {"0", "1992-09-09", "12af"}
+        };
+        
+        JDBC.assertFullResultSet(rs, expRS, true);
+		pSt.close();
+	}
+
+	/**
+	 * group by with having in from subquery.
+	 * @throws Exception
+	 */
+	public void testHavingClauseInSubquery()
+		throws Exception
+	{
+		Statement st = createStatement();
+		ResultSet rs = null;
+
+        rs = st.executeQuery(
+            "select * from (select i, dt from t group by i, dt "
+            + "having 1=1) t (t_i, t_dt), (select i, dt from t "
+            + "group by i, dt having i = 0) m (m_i, m_dt) where "
+            + "t_i = m_i and t_dt = m_dt order by t_i,t_dt,m_i,m_dt");
+        
+        expColNames = new String [] {"T_I", "T_DT", "M_I", "M_DT"};
+        JDBC.assertColumnNames(rs, expColNames);
+        
+        expRS = new String [][]
+        {
+            {"0", "1992-01-01", "0", "1992-01-01"},
+            {"0", "1992-09-09", "0", "1992-09-09"}
+        };
+        
+        JDBC.assertFullResultSet(rs, expRS, true);
+        
+        rs = st.executeQuery(
+            " select * from (select i, dt from t group by i, dt "
+            + "having 1=1) t (t_i, t_dt), (select i, dt from t "
+            + "group by i, dt having i = 0) m (m_i, m_dt) group by "
+            + "t_i, t_dt, m_i, m_dt order by t_i,t_dt,m_i,m_dt");
+        
+        expColNames = new String [] {"T_I", "T_DT", "M_I", "M_DT"};
+        JDBC.assertColumnNames(rs, expColNames);
+        
+        expRS = new String [][]
+        {
+            {"0", "1992-01-01", "0", "1992-01-01"},
+            {"0", "1992-01-01", "0", "1992-09-09"},
+            {"0", "1992-09-09", "0", "1992-01-01"},
+            {"0", "1992-09-09", "0", "1992-09-09"},
+            {"1", "1992-01-01", "0", "1992-01-01"},
+            {"1", "1992-01-01", "0", "1992-09-09"},
+            {null, null, "0", "1992-01-01"},
+            {null, null, "0", "1992-09-09"}
+        };
+        
+        JDBC.assertFullResultSet(rs, expRS, true);
+        
+        rs = st.executeQuery(
+            " select * from (select i, dt from t group by i, dt "
+            + "having 1=1) t (t_i, t_dt), (select i, dt from t "
+            + "group by i, dt having i = 0) m (m_i, m_dt) where "
+            + "t_i = m_i and t_dt = m_dt group by t_i, t_dt, m_i, "
+            + "m_dt having t_i * m_i = m_i * t_i order by t_i,t_dt,m_i,m_dt");
+        
+        expColNames = new String [] {"T_I", "T_DT", "M_I", "M_DT"};
+        JDBC.assertColumnNames(rs, expColNames);
+        
+        expRS = new String [][]
+        {
+            {"0", "1992-01-01", "0", "1992-01-01"},
+            {"0", "1992-09-09", "0", "1992-09-09"}
+        };
+        
+        JDBC.assertFullResultSet(rs, expRS, true);
+		st.close();
+	}
+
+	/**
+	 * correlated subquery in having clause.
+	 * @throws Exception
+	 */
+	public void testCorrelatedSubqueryInHavingClause()
+		throws Exception
+	{
+		Statement st = createStatement();
+		ResultSet rs = null;
+
+        rs = st.executeQuery(
+            "select i, dt from t group by i, dt having i = "
+            + "(select distinct i from tab1 where t.i = tab1.i) "
+            + "order by i,dt");
+        
+        expColNames = new String [] {"I", "DT"};
+        JDBC.assertColumnNames(rs, expColNames);
+        
+        expRS = new String [][]
+        {
+            {"0", "1992-01-01"},
+            {"0", "1992-09-09"},
+            {"1", "1992-01-01"}
+        };
+        
+        JDBC.assertFullResultSet(rs, expRS, true);
+        
+        rs = st.executeQuery(
+            " select i, dt from t group by i, dt having i = "
+            + "(select i from t m group by i having t.i = m.i) "
+            + "order by i,dt");
+        
+        expColNames = new String [] {"I", "DT"};
+        JDBC.assertColumnNames(rs, expColNames);
+        
+        expRS = new String [][]
+        {
+            {"0", "1992-01-01"},
+            {"0", "1992-09-09"},
+            {"1", "1992-01-01"}
+        };
+        
+        JDBC.assertFullResultSet(rs, expRS, true);
+		st.close();
+	}
+
+	/**
+	 * column references in having clause match columns in group by list.
+	 * @throws Exception
+	 */
+	public void testHavingClauseColumnRef()
+		throws Exception
+	{
+		Statement st = createStatement();
+		ResultSet rs = null;
+
+        rs = st.executeQuery(
+            "select i as outer_i, dt from t group by i, dt "
+            + "having i = (select i from t m group by i having t.i "
+            + "= m.i) order by outer_i,dt");
+        
+        expColNames = new String [] {"OUTER_I", "DT"};
+        JDBC.assertColumnNames(rs, expColNames);
+        
+        expRS = new String [][]
+        {
+            {"0", "1992-01-01"},
+            {"0", "1992-09-09"},
+            {"1", "1992-01-01"}
+        };
+        
+        JDBC.assertFullResultSet(rs, expRS, true);
+        
+		st.close();
+	}
+
+	/**
+	 * additional columns in group by list not in select list.
+	 * @throws Exception
+	 */
+	public void testGroupByColumnsNotInSelectList()
+		throws Exception
+	{
+		Statement st = createStatement();
+		ResultSet rs = null;
+
+        rs = st.executeQuery(
+            "select i, dt from t group by i, dt order by i,dt");
+        
+        expColNames = new String [] {"I", "DT"};
+        JDBC.assertColumnNames(rs, expColNames);
+        
+        expRS = new String [][]
+        {
+            {"0", "1992-01-01"},
+            {"0", "1992-09-09"},
+            {"1", "1992-01-01"},
+            {null, null}
+        };
+        
+        JDBC.assertFullResultSet(rs, expRS, true);
+        
+        rs = st.executeQuery(
+            " select t.dt from t group by i, dt having i = 0 "
+            + "order by t.dt");
+        
+        expColNames = new String [] {"DT"};
+        JDBC.assertColumnNames(rs, expColNames);
+        
+        expRS = new String [][]
+        {
+            {"1992-01-01"},
+            {"1992-09-09"}
+        };
+        
+        JDBC.assertFullResultSet(rs, expRS, true);
+        
+        rs = st.executeQuery(
+            " select t.dt from t group by i, dt having i <> 0 "
+            + "order by t.dt");
+        
+        expColNames = new String [] {"DT"};
+        JDBC.assertColumnNames(rs, expColNames);
+        
+        expRS = new String [][]
+        {
+            {"1992-01-01"}
+        };
+        
+        JDBC.assertFullResultSet(rs, expRS, true);
+        
+        rs = st.executeQuery(
+            " select t.dt from t group by i, dt having i != 0 "
+            + "order by t.dt");
+        
+        expColNames = new String [] {"DT"};
+        JDBC.assertColumnNames(rs, expColNames);
+        
+        expRS = new String [][]
+        {
+            {"1992-01-01"}
+        };
+        
+        JDBC.assertFullResultSet(rs, expRS, true);
+		st.close();
+	}
+        
+	/**
+	 * negative tests for selects with a having clause without a group by.
+	 * @throws Exception
+	 */
+	public void testInvalidHavingClauses()
+		throws Exception
+	{
+		Statement st = createStatement();
+
+        // binding of having clause
+        
+        assertStatementError("42X19", st,
+            "select 1 from t_twoints having 1");
+        
+        // column references in having clause not allowed if no 
+        // group by
+        
+        assertStatementError("42Y35", st,
+            "select * from t_twoints having c1 = 1");
+        
+        assertStatementError("42X24", st,
+            " select 1 from t_twoints having c1 = 1");
+        
+        // correlated subquery in having clause
+        
+        assertStatementError("42Y35", st,
+            "select * from t_twoints t1_outer having 1 = (select 1 from "
+            + "t_twoints where c1 = t1_outer.c1)");
+		st.close();
+	}
+
+	/**
+	 * Tests for Bug 5653 restrictions.
+	 * @throws Exception
+	 */
+	public void testHavingClauseRestrictions5653()
+		throws Exception
+	{
+		Statement st = createStatement();
+		ResultSet rs = null;
+
+        // bug 5653 test (almost useful) restrictions on a having 
+        // clause without a group by clause create the table
+        
+        // this is the only query that should not fail filter out 
+        // all rows
+        
+        rs = st.executeQuery(
+            "select 1 from t5653 having 1=0");
+        
+        expColNames = new String [] {"1"};
+        JDBC.assertColumnNames(rs, expColNames);
+        JDBC.assertDrainResults(rs, 0);
+        
+        // all 6 queries below should fail after bug 5653 is fixed 
+        // select *
+        
+        assertStatementError("42Y35", st,
+            "select * from t5653 having 1=1");
+        
+        // select column
+        
+        assertStatementError("42Y35", st,
+            "select c1 from t5653 having 1=1");
+        
+        // select with a built-in function sqrt
+        
+        assertStatementError("42Y35", st,
+            "select sqrt(c1) from t5653 having 1=1");
+        
+        // non-correlated subquery in having clause
+        
+        assertStatementError("42Y35", st,
+            "select * from t5653 having 1 = (select 1 from t5653 where "
+            + "c1 = 0.0)");
+        
+        // expression in select list
+        
+        assertStatementError("42Y35", st,
+            "select (c1 * c1) / c1 from t5653 where c1 <> 0 having 1=1");
+        
+        // between
+        
+        assertStatementError("42Y35", st,
+            "select * from t5653 having 1 between 1 and 2");
+		st.close();
+	}
+
+	/**
+	 * bug 5920 test that HAVING without GROUPBY makes one group.
+	 * @throws Exception
+	 */
+	public void testHavingWithoutGroupBy5920()
+		throws Exception
+	{
+		Statement st = createStatement();
+		ResultSet rs = null;
+
+        rs = st.executeQuery(
+            " select avg(c) from t5920 having 1 < 2");
+        
+        expColNames = new String [] {"1"};
+        JDBC.assertColumnNames(rs, expColNames);
+        
+        expRS = new String [][]
+        {
+            {"2"}
+        };
+        
+        JDBC.assertFullResultSet(rs, expRS, true);
+        
+        // used to give several rows, now gives only one
+        
+        rs = st.executeQuery(
+            "select 10 from t5920 having 1 < 2");
+        
+        expColNames = new String [] {"1"};
+        JDBC.assertColumnNames(rs, expColNames);
+        
+        expRS = new String [][]
+        {
+            {"10"}
+        };
+        
+        JDBC.assertFullResultSet(rs, expRS, true);
+        
+        // ok, gives one row
+        
+        rs = st.executeQuery(
+            "select 10,avg(c) from t5920 having 1 < 2");
+        
+        expColNames = new String [] {"1", "2"};
+        JDBC.assertColumnNames(rs, expColNames);
+        
+        expRS = new String [][]
+        {
+            {"10", "2"}
+        };
+        
+        JDBC.assertFullResultSet(rs, expRS, true);
+		st.close();
+    }
+
 	/**
 	 * DERBY-578: select with group by on a temp table caused NPE
 	 * @throws SQLException
@@ -55,13 +1370,8 @@ public class GroupByTest extends BaseJDBCTestCase {
 	 * in group by
 	 */
 	public void testGroupByWithAliasToSameName() throws SQLException {
-		// disable auto-commit so that no tear-down code is needed
-		getConnection().setAutoCommit(false);
 
 		Statement s = createStatement();
-		s.executeUpdate("create table bug280 (a int, b int)");
-		s.executeUpdate("insert into bug280 (a, b) " +
-						"values (1,1), (1,2), (1,3), (2,1), (2,2)");
 
 		String[][] expected1 = {{"1", "3"}, {"2", "2"}};
 		JDBC.assertUnorderedResultSet(
@@ -109,7 +1419,6 @@ public class GroupByTest extends BaseJDBCTestCase {
 			expected4);
 
 		s.close();
-		rollback();
 	}
     
     /**
@@ -121,26 +1430,16 @@ public class GroupByTest extends BaseJDBCTestCase {
     public void testDERBY2937() throws SQLException {
         Statement s = createStatement();
         
-        s.executeUpdate("CREATE TABLE A2937 (C CHAR(10) NOT NULL, " +
-                "D DATE NOT NULL, DC DECIMAL(6,2))");
-        s.executeUpdate("INSERT INTO A2937 VALUES ('aaa', " +
-                "DATE('2007-07-10'), 500.00)");
-        
         ResultSet rs = s.executeQuery("SELECT A.C, SUBSTR (MAX(CAST(A.D AS CHAR(10)) || " +
                 "CAST(A.DC AS CHAR(8))), 11, 8) AS BUG " +
                 "FROM A2937 A GROUP BY A.C");
         JDBC.assertFullResultSet(rs,
                 new String[][] {{"aaa","500.00"}});
-        s.executeUpdate("DROP TABLE A2937");
-        
     }
 
 	public void testDerbyOrderByOnAggregate() throws SQLException
 	{
 		Statement s = createStatement();
-		s.executeUpdate("create table yy (a double, b double)");
-		s.executeUpdate("insert into yy values (2,4), (2, 4), " +
-			"(5,7), (2,3), (2,3), (2,3), (2,3), (9,7)");
 
 		ResultSet rs = s.executeQuery(
 			"select b, count(*) from yy where a=5 or a=2 " +
@@ -165,8 +1464,6 @@ public class GroupByTest extends BaseJDBCTestCase {
 						{new Double(4), new Integer(2)},
 						{new Double(3), new Integer(4)}},
 				false);
-
-		s.executeUpdate("drop table yy");
 	}
     
     
