@@ -94,6 +94,10 @@
                     <target>clobber</target>
                     <target>all</target>
                 </action>
+                <action name="debug">
+                    <script>nbproject/ide-file-targets.xml</script>
+                    <target>debug-nb</target>
+                </action>
             </ide-actions>
             <view>
                 <items>
@@ -143,6 +147,7 @@
                     <ide-action name="clean"/>
                     <ide-action name="javadoc"/>
                     <ide-action name="test"/>
+                    <ide-action name="debug"/>
                 </context-menu>
             </view>
             <subprojects/>
