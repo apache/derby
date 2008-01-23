@@ -1768,5 +1768,7 @@ public interface SQLState {
     String REPLICATION_SLAVE_STARTED_OK                            = "XRE08";
     String CANNOT_START_SLAVE_ALREADY_BOOTED                       = "XRE09";
     String REPLICATION_CONFLICTING_ATTRIBUTES                      = "XRE10";
+    String REPLICATION_FAILOVER_SUCCESSFUL                         = "XRE20.D";
+    String REPLICATION_FAILOVER_UNSUCCESSFUL                       = "XRE21";
 }
 

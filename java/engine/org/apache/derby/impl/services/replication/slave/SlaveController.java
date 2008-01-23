@@ -255,16 +255,10 @@ public class SlaveController extends ReplicationLogger
      * @see org.apache.derby.impl.services.replication.master.MasterController#flushedTo
      */
     public void failover() {
-        // Apply all received log records, thus completing the boot of
-        // this database. The database can be connected to after this.
-
-        // // complete recovery of the database 
-        // logToFile.setReplicationMode(false);
-
-        // Added when Network Service has been committed to trunk:
-        // connection.shutdown();
-
-        System.out.println("SlaveController failover");
+        inReplicationSlaveMode = false;
+        logToFile.stopReplicationSlaveRole();
+        Monitor.logTextMessage
+                (MessageId.REPLICATION_FAILOVER_SUCCESSFUL, dbname);
     }
 
     ////////////////////////////////////////////////////////////
@@ -406,6 +400,12 @@ public class SlaveController extends ReplicationLogger
                     case ReplicationMessage.TYPE_LOG:
                         byte[] logChunk = (byte[])message.getMessage();
                         handleLogChunk(logChunk);
+                        break;
+                    case ReplicationMessage.TYPE_FAILOVER:
+                        failover();
+                        ReplicationMessage ack = new ReplicationMessage
+                            (ReplicationMessage.TYPE_ACK, "failover succeeded");
+                        receiver.sendMessage(ack);
                         break;
                     case ReplicationMessage.TYPE_STOP:
                         stopSlave();

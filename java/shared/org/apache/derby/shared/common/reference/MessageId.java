@@ -183,5 +183,6 @@ public interface MessageId {
     String REPLICATION_MASTER_STOPPED                    = "R008";
     String REPLICATION_LOGSHIPPER_EXCEPTION              = "R009";
     String REPLICATION_MASTER_RECONN                     = "R010";
+    String REPLICATION_FAILOVER_SUCCESSFUL               = "R020";
 
 }

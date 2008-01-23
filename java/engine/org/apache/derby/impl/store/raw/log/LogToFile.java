@@ -5180,6 +5180,14 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
                 (SQLState.REPLICATION_UNEXPECTED_EXCEPTION, ioe);
         }
     }
+    
+    /**
+     * Used to make the slave stop appending log records, complete recovery 
+     * and boot the database.
+     */
+    public void stopReplicationSlaveRole() {
+        inReplicationSlaveMode = false;
+    }
 
 	/**
 	 *

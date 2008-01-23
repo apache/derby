@@ -227,6 +227,84 @@ public class MasterController extends ReplicationLogger
     }
 
     /**
+     * Will perform all work needed to failover.
+     *
+     * @throws StandardException 1) If the failover succeeds
+     *                           2) If a failure occurs during network 
+     *                              communication with slave.
+     */
+    public void startFailover() throws StandardException {
+        //acknowledgment returned from the slave containing
+        //the status of the failover performed.
+        ReplicationMessage ack = null;
+        
+        stopMasterController = true;
+        
+        //freeze the database to stop clients when this command is received
+        rawStoreFactory.freeze();
+        
+        try {
+            //Flush the log buffer of any remaining log records.
+            logShipper.flushBuffer();
+            
+            //Send the failover message to the slave and wait for 
+            //acknowledgement.
+            ReplicationMessage mesg = new ReplicationMessage(
+                        ReplicationMessage.TYPE_FAILOVER, null);
+            transmitter.sendMessage(mesg);
+            ack = transmitter.readMessage();
+        } catch (IOException ioe) {
+            handleFailoverFailure(ioe);
+        } catch (StandardException se) {
+            handleFailoverFailure(se);
+        } catch (ClassNotFoundException cnfe) {
+            handleFailoverFailure(cnfe);
+        }
+        
+        //check the contents of the acknowledgement received from the slave
+        //and perform appropriate actions.
+        if (ack == null) {
+            //ack can be null if the wait on the socket stream timed out
+            handleFailoverFailure(null);
+        } else if (ack.getType() == ReplicationMessage.TYPE_ACK) {
+            //An exception is thrown to indicate the successful completion 
+            //of failover. Also the AsynchronousLogShipper thread is terminated.
+            //The exception thrown is of Database Severity, this shuts
+            //down the master database.
+            logShipper.stopLogShipment();
+            throw StandardException.newException
+                    (SQLState.REPLICATION_FAILOVER_SUCCESSFUL, dbname);  
+        } else {
+            //TYPE_ACK is the only type that is returned. ack can
+            //ideally not contain any other type. The program should
+            //ideally not come here.
+           handleFailoverFailure(null);
+        }
+    }
+    
+    /**
+     * used to handle the case when an attempt to failover the database
+     * fails.
+     *
+     * @param t        The throwable which resulted in the aborted failover
+     *                 attempt.
+     * 
+     * @throws StandardException Indicating the reason for the aborted
+     *                          failover attempt. 
+     */
+    private void handleFailoverFailure(Throwable t) 
+    throws StandardException {
+        rawStoreFactory.unfreeze();
+        if (t != null) {
+            throw StandardException.newException
+                        (SQLState.REPLICATION_FAILOVER_UNSUCCESSFUL, t, dbname);
+        } else {
+            throw StandardException.newException
+                        (SQLState.REPLICATION_FAILOVER_UNSUCCESSFUL, dbname);
+        }
+    }
+    
+    /**
      * Append a chunk of log records to the log buffer.
      *
      * @param greatestInstant   the instant of the log record that was

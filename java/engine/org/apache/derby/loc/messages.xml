@@ -4780,6 +4780,18 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
                 <text>Conflicting attributes specified. See reference manual for attributes allowed in combination with replication attribute '{0}'.</text>
                 <arg>attribute</arg>
             </msg>
+            
+            <msg>
+                <name>XRE20.D</name>
+                <text>Failover performed successfully for database '{0}', the database has been shutdown.</text>
+                <arg>dbname</arg>
+            </msg>
+            
+            <msg>
+                <name>XRE21</name>
+                <text>Error occurred while performing failover for database '{0}', Failover attempt was aborted.</text>
+                <arg>dbname</arg>
+            </msg>
 
         </family>
 
@@ -7619,6 +7631,12 @@ Shutting down instance {0}</text>
             <msg>
                 <name>R010</name>
                 <text>Replication master trying to reconnect to slave for database '{0}'.</text>
+                <arg>dbname</arg>
+            </msg>
+            
+            <msg>
+                <name>R020</name>
+                <text>Failover perfomed successfully for database '{0}'.</text>
                 <arg>dbname</arg>
             </msg>
         </family>

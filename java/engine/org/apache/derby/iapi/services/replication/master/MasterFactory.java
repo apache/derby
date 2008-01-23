@@ -119,6 +119,14 @@ public interface MasterFactory {
      * Will perform all work that is needed to shut down replication
      */
     public void stopMaster();
+    
+    /**
+     * Will perform all work needed to failover
+     * @throws StandardException 1) If the failover succeeds
+     *                           2) If a failure occurs during network 
+     *                              communication with slave.
+     */
+    public void startFailover() throws StandardException;
 
     /**
      * Append a chunk of log records to the log buffer.

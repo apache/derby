@@ -187,6 +187,7 @@ public final class ErrorCodeTest extends BaseJDBCTestCase {
         		{"XJ05B","JDBC attribute '{0}' has an invalid value '{1}', valid values are '{2}'.","40000"},
         		{"XJ081","Conflicting create/restore/recovery attributes specified.","40000"},
         		{"XJ213","The traceLevel connection property does not have a valid format for a number.","40000"},
+        		{"XRE20","Failover performed successfully for database '{0}', the database has been shutdown.","45000"},
         		{"XSDB0","Unexpected exception on in-memory page {0}","45000"},
         		{"XSDB1","Unknown page format at page {0}","45000"},
         		{"XSDB2","Unknown container format at container {0} : {1}","45000"},
