@@ -102,8 +102,10 @@ public interface Database extends org.apache.derby.database.Database, LocaleFind
 	 * and at the system level.
 	 *
 	 * @return	The authentication service handle for the database
+	 * @exception Standard Derby exception policy
 	 */
-	public AuthenticationService getAuthenticationService();
+	public AuthenticationService getAuthenticationService()
+		throws StandardException;
 
 	/**
 	 * Get a Resource Adapter - only used by XA system.  There is one and only

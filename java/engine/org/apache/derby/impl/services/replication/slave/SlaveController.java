@@ -57,7 +57,7 @@ import java.util.Properties;
  *
  * @see SlaveFactory
  */
-public class SlaveController extends ReplicationLogger
+public class SlaveController
     implements SlaveFactory, ModuleControl, ModuleSupportable {
 
 
@@ -313,7 +313,8 @@ public class SlaveController extends ReplicationLogger
             return;
         }
 
-        logError(MessageId.REPLICATION_SLAVE_LOST_CONN, eofe, dbname);
+        ReplicationLogger.
+            logError(MessageId.REPLICATION_SLAVE_LOST_CONN, eofe, dbname);
 
         try {
             while (!setupConnection()) {
@@ -372,7 +373,8 @@ public class SlaveController extends ReplicationLogger
             return;
         }
 
-        logError(MessageId.REPLICATION_FATAL_ERROR, e, dbname);
+        ReplicationLogger.
+            logError(MessageId.REPLICATION_FATAL_ERROR, e, dbname);
 
         // todo: notify master of the problem
         // todo: rawStoreFactory.stopReplicationSlave();

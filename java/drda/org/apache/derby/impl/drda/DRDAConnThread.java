@@ -49,6 +49,7 @@ import java.util.Properties;
 import java.util.Vector;
 
 import org.apache.derby.catalog.SystemProcedures;
+import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.error.ExceptionSeverity;
 import org.apache.derby.iapi.reference.Attribute;
 import org.apache.derby.iapi.reference.DRDAConstants;
@@ -8267,9 +8268,16 @@ class DRDAConnThread extends Thread {
             // does not exist - we just return security mechanism not
             // supported down below as we could not verify we can handle
             // it.
-            if (databaseObj != null)
-                authenticationService =
+            try {
+                if (databaseObj != null)
+                    authenticationService =
                         databaseObj.getAuthenticationService();
+            } catch (StandardException se) {
+                println2Log(null, session.drdaID, se.getMessage());
+                // Local security service non-retryable error.
+                return CodePoint.SECCHKCD_0A;
+            }
+
         }
 
         // Now we check if the authentication provider is NONE or BUILTIN

@@ -343,7 +343,8 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 		DatabaseContext dc = new DatabaseContextImpl(cm, this);
 	}
 
-	public AuthenticationService getAuthenticationService() {
+	public AuthenticationService getAuthenticationService()
+		throws StandardException{
 
 		// Expected to find one - Sanity check being done at
 		// DB boot-up.

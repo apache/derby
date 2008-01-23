@@ -26,7 +26,7 @@ import org.apache.derby.iapi.reference.MessageId;
 import org.apache.derby.iapi.services.context.ErrorStringBuilder;
 import org.apache.derby.iapi.services.monitor.Monitor;
 
-public abstract class ReplicationLogger {
+public class ReplicationLogger {
 
     /** Whether or not to print log messages to derby.log. Defaults to
      * true, but can be set to false with derby property
@@ -47,7 +47,7 @@ public abstract class ReplicationLogger {
      * @param t Error trace starts from this error
      * @param dbname The name of the replicated database
      */
-    protected void logError(String msgId, Throwable t, String dbname) {
+    public static void logError(String msgId, Throwable t, String dbname) {
 
         if (LOG_REPLICATION_MESSAGES) {
 

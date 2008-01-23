@@ -59,7 +59,7 @@ import java.util.Properties;
  *
  * @see MasterFactory
  */
-public class MasterController extends ReplicationLogger 
+public class MasterController 
         implements MasterFactory, ModuleControl, ModuleSupportable {
 
     private static final int DEFAULT_LOG_BUFFER_SIZE = 32768; //32K
@@ -219,9 +219,13 @@ public class MasterController extends ReplicationLogger
 
             transmitter.sendMessage(mesg);
         } catch (IOException ioe) {
-            logError(MessageId.REPLICATION_LOGSHIPPER_EXCEPTION, ioe, dbname);
+            ReplicationLogger.
+                logError(MessageId.REPLICATION_LOGSHIPPER_EXCEPTION,
+                         ioe, dbname);
         } catch(StandardException se) {
-            logError(MessageId.REPLICATION_LOGSHIPPER_EXCEPTION, se, dbname);
+            ReplicationLogger.
+                logError(MessageId.REPLICATION_LOGSHIPPER_EXCEPTION, 
+                         se, dbname);
         }
         Monitor.logTextMessage(MessageId.REPLICATION_MASTER_STOPPED, dbname);
     }
@@ -389,8 +393,9 @@ public class MasterController extends ReplicationLogger
      */
     void handleExceptions(Exception exception) {
         if (exception instanceof IOException) {
-            logError(MessageId.REPLICATION_LOGSHIPPER_EXCEPTION, 
-                    exception, dbname);
+            ReplicationLogger.
+                logError(MessageId.REPLICATION_LOGSHIPPER_EXCEPTION, 
+                         exception, dbname);
             Monitor.logTextMessage(MessageId.REPLICATION_MASTER_RECONN, dbname);
             
             while (!stopMasterController) {
@@ -420,7 +425,8 @@ public class MasterController extends ReplicationLogger
      * @param t the throwable that needs to be handled.
      */
     private void printStackAndStopMaster(Throwable t) {
-        logError(MessageId.REPLICATION_LOGSHIPPER_EXCEPTION, t, dbname);
+        ReplicationLogger.
+            logError(MessageId.REPLICATION_LOGSHIPPER_EXCEPTION, t, dbname);
         stopMaster();
     }
 }

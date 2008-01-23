@@ -21,12 +21,14 @@
 
 package org.apache.derby.impl.db;
 
+import org.apache.derby.iapi.reference.MessageId;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.jdbc.AuthenticationService;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.services.monitor.Monitor;
+import org.apache.derby.impl.services.replication.ReplicationLogger;
 import org.apache.derby.iapi.services.replication.slave.SlaveFactory;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.impl.services.monitor.UpdateServiceProperties;
@@ -68,6 +70,7 @@ public class SlaveDatabase extends BasicDatabase {
      * database. Does not happen until the failover command has been
      * executed for this database */
     private volatile boolean inReplicationSlaveMode;
+    private String dbname; // The name of the replicated database
 
     /////////////////////////////
     // ModuleControl interface //
@@ -101,6 +104,7 @@ public class SlaveDatabase extends BasicDatabase {
         throws StandardException {
 
         inReplicationSlaveMode = true;
+        dbname = startParams.getProperty(SlaveFactory.SLAVE_DB);
 
         // SlaveDatabaseBootThread is an internal class
         SlaveDatabaseBootThread dbBootThread =
@@ -154,11 +158,13 @@ public class SlaveDatabase extends BasicDatabase {
         return super.setupConnection(cm, user, drdaID, dbname);
     }
 
-    public AuthenticationService getAuthenticationService() {
+    public AuthenticationService getAuthenticationService()
+        throws StandardException{
         if (inReplicationSlaveMode) {
             // Cannot get authentication service for a database that
             // is currently in replication slave move
-            // Todo: throw exception
+            throw StandardException.newException(
+                SQLState.CANNOT_CONNECT_TO_DB_IN_SLAVE_MODE, dbname);
         }
         return super.getAuthenticationService();
     }
@@ -185,7 +191,7 @@ public class SlaveDatabase extends BasicDatabase {
 
             // The thread needs a ContextManager since two threads
             // cannot share a context
-            ContextManager bootThreadCm;
+            ContextManager bootThreadCm = null;
             try {
 
                 bootThreadCm = ContextService.getFactory().newContextManager();
@@ -195,10 +201,16 @@ public class SlaveDatabase extends BasicDatabase {
                 bootBasicDatabase(create, params); // will be blocked
 
             } catch (StandardException se) {
-                //todo - report exception
+                ReplicationLogger.logError(MessageId.REPLICATION_FATAL_ERROR,
+                                           se, dbname);
+                // todo: shutdown this database
             } finally {
                 inReplicationSlaveMode = false;
-                //todo: tear down context
+                if (bootThreadCm != null) {
+                    ContextService.getFactory().
+                        resetCurrentContextManager(bootThreadCm);
+                    bootThreadCm = null;
+                }
             }
         }
     }

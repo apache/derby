@@ -729,11 +729,18 @@ public abstract class EmbedConnection implements EngineConnection
 		//
 		AuthenticationService authenticationService = null;
 
-		// Retrieve appropriate authentication service handle
-		if (dbname == null)
-			authenticationService = getLocalDriver().getAuthenticationService();
-		else
-			authenticationService = getTR().getDatabase().getAuthenticationService();
+        try {
+            // Retrieve appropriate authentication service handle
+            if (dbname == null)
+                authenticationService =
+                    getLocalDriver().getAuthenticationService();
+            else
+                authenticationService =
+                    getTR().getDatabase().getAuthenticationService();
+
+        } catch (StandardException se) {
+            throw Util.generateCsSQLException(se);
+        }
 
 		// check that we do have a authentication service
 		// it is _always_ expected.

@@ -4735,7 +4735,7 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
             </msg>
             <msg>
                 <name>XRE03</name>
-                <text>Unexpected error during replication network communication initiation.</text>
+                <text>Unexpected replication error. See derby.log for details.</text>
             </msg>
 
             <msg>
