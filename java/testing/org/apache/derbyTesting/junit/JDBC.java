@@ -610,6 +610,8 @@ public class JDBC {
 			{
 				String s = rs.getString(col);
 				Assert.assertEquals(s == null, rs.wasNull());
+                if (rs.wasNull())
+                    assertResultColumnNullable(rsmd, col);
 			}
 			rows++;
 		}
@@ -620,6 +622,22 @@ public class JDBC {
         
         return rows;
 	}
+    
+    /**
+     * Assert that a column is nullable in its ResultSetMetaData.
+     * Used when a utility method checking the contents of a
+     * ResultSet sees a NULL value. If the value is NULL then
+     * the column's definition in ResultSetMetaData must allow NULLs
+     * (or not disallow NULLS).
+     * @param rsmd Metadata of the ResultSet
+     * @param col Position of column just fetched that was NULL.
+     * @throws SQLException Error accessing meta data
+     */
+    private static void assertResultColumnNullable(ResultSetMetaData rsmd, int col)
+    throws SQLException
+    {
+        Assert.assertFalse(rsmd.isNullable(col) == ResultSetMetaData.columnNoNulls); 
+    }
 	
     /**
      * Takes a result set and an array of expected colum names (as
@@ -967,6 +985,10 @@ public class JDBC {
                     ":\n    Expected: >" + expected +
                     "<\n    Found:    >" + found + "<");
             }
+            
+            if (rs.wasNull())
+                assertResultColumnNullable(rsmd, i+1);
+
         }
     }
     
@@ -1086,6 +1108,8 @@ public class JDBC {
                 } else {
                     row.add(rs.getObject(i));
                 }
+                if (rs.wasNull())
+                    assertResultColumnNullable(rsmd, i);
             }
             actual.add(row);
         }
