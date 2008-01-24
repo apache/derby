@@ -192,8 +192,6 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      */
     public static Test suite() {
         TestSuite suite = new TestSuite("DatabaseMetaDataTest");
-        suite.addTest(new DatabaseMetaDataTest("testGetProceduresGetProcColumns"));
-        suite.addTest(new DatabaseMetaDataTest("testBugFixes"));
         suite.addTest(
             TestConfiguration.defaultSuite(DatabaseMetaDataTest.class));
         // Test for DERBY-2584 needs a fresh database to ensure that the
@@ -1798,7 +1796,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     /**
      *  Implement ODBC equivalent for getColumns - SYSIBM.SQLCOLUMNS
      */
-    public ResultSet getColumnsODBC(
+    private ResultSet getColumnsODBC(
             String catalog, String schemaPattern, String tableNamePattern,
             String columnNamePattern)
         throws SQLException 
@@ -2997,114 +2995,108 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         String [][] expRSIJ = {
                 {"2", "I", "4", "INTEGER", "4", null, "10", "1"},
                 {"2", "J", "4", "INTEGER", "4", null, "10", "1"}};
-
-        boolean [] nullability = {
-                true, false, true, true, true, true, true, true};
         
         // result: column i
-        ResultSet[] rs = getBestRowIdentifier(null,"APP","BRIT1",0,true);
-        verifyBRIResults(rs, expRSI, nullability);
+        ResultSet[] rs = getBestRowIdentifier(null,"APP","BRIT1",
+        		DatabaseMetaData.bestRowTemporary, true);
+        verifyBRIResults(rs, expRSI);
 
         // result: column i
-        rs = getBestRowIdentifier(null,"APP","BRIT2",0,true);
-        verifyBRIResults(rs, expRSI, nullability);
+        rs = getBestRowIdentifier(null,"APP","BRIT2",
+        		DatabaseMetaData.bestRowTemporary, true);
+        verifyBRIResults(rs, expRSI);
 
         // result: column j
-        rs = getBestRowIdentifier(null,"APP","BRIT3",0,true);
-        verifyBRIResults(rs, expRSJ, nullability);
+        rs = getBestRowIdentifier(null,"APP","BRIT3",
+        		DatabaseMetaData.bestRowTemporary,true);
+        verifyBRIResults(rs, expRSJ);
         
         // result: column i
-        rs = getBestRowIdentifier(null,"APP","BRIT4",0,true);
-        verifyBRIResults(rs, expRSI, nullability);
+        rs = getBestRowIdentifier(null,"APP","BRIT4",
+        		DatabaseMetaData.bestRowTemporary,true);
+        verifyBRIResults(rs, expRSI);
         
         // result: columns i and j
-        rs = getBestRowIdentifier(null,"APP","BRIT5",0,true);
-        verifyBRIResults(rs, expRSIJ, nullability);
+        rs = getBestRowIdentifier(null,"APP","BRIT5",
+        		DatabaseMetaData.bestRowTemporary,true);
+        verifyBRIResults(rs, expRSIJ);
 
         // result: column j
-        rs = getBestRowIdentifier(null,"APP","BRIT6",0,true);
-        verifyBRIResults(rs, expRSJ, nullability);
+        rs = getBestRowIdentifier(null,"APP","BRIT6",
+        		DatabaseMetaData.bestRowTemporary,true);
+        verifyBRIResults(rs, expRSJ);
 
         // result: column j
-        rs = getBestRowIdentifier(null,"APP","BRIT7",0,true);
-        verifyBRIResults(rs, expRSJ, nullability);
+        rs = getBestRowIdentifier(null,"APP","BRIT7",
+        		DatabaseMetaData.bestRowTemporary,true);
+        verifyBRIResults(rs, expRSJ);
         
         // result: column j
-        rs = getBestRowIdentifier(null,"APP","BRIT8",0,true);
-        verifyBRIResults(rs, expRSJ, nullability);
+        rs = getBestRowIdentifier(null,"APP","BRIT8",
+        		DatabaseMetaData.bestRowTemporary,true);
+        verifyBRIResults(rs, expRSJ);
         
         // result: columns i,j
-        rs = getBestRowIdentifier(null,"APP","BRIT9",0,true);
-        verifyBRIResults(rs, expRSIJ, nullability);
+        rs = getBestRowIdentifier(null,"APP","BRIT9",
+        		DatabaseMetaData.bestRowTemporary,true);
+        verifyBRIResults(rs, expRSIJ);
         
         // result: columns i,j
-        rs = getBestRowIdentifier(null,"APP","BRIT10",0,true);
-        verifyBRIResults(rs, expRSIJ, nullability);
+        rs = getBestRowIdentifier(null,"APP","BRIT10",
+        		DatabaseMetaData.bestRowTemporary,true);
+        verifyBRIResults(rs, expRSIJ);
         
         // result: columns i,j
-        rs = getBestRowIdentifier(null,"APP","BRIT11",0,true);
-        verifyBRIResults(rs, expRSIJ, nullability);
+        rs = getBestRowIdentifier(null,"APP","BRIT11",
+        		DatabaseMetaData.bestRowTemporary,true);
+        verifyBRIResults(rs, expRSIJ);
         
         // result: columns i,j
-        rs = getBestRowIdentifier(null,"APP","BRIT12",0,true);
-        verifyBRIResults(rs, expRSIJ, nullability);
+        rs = getBestRowIdentifier(null,"APP","BRIT12",
+        		DatabaseMetaData.bestRowTemporary,true);
+        verifyBRIResults(rs, expRSIJ);
         
         // Verify nullOK flags makes a difference. See also DERBY-3182
         // result: column i, should've ignored null column
-        rs = getBestRowIdentifier(null,"APP","BRIT13",0,false);
-        verifyBRIResults(rs, expRSI, nullability);
+        rs = getBestRowIdentifier(null,"APP","BRIT13",
+        		DatabaseMetaData.bestRowTemporary,false);
+        verifyBRIResults(rs, expRSI);
         // result: columns i, j
-        rs = getBestRowIdentifier(null,"APP","BRIT13",0,true);
-        verifyBRIResults(rs, expRSIJ, nullability);
+        rs = getBestRowIdentifier(null,"APP","BRIT13",
+        		DatabaseMetaData.bestRowTemporary,true);
+        verifyBRIResults(rs, expRSIJ);
         
         // result: columns i
-        rs = getBestRowIdentifier(null,"APP","BRIT14",0,true);
-        verifyBRIResults(rs, expRSI, nullability);
+        rs = getBestRowIdentifier(null,"APP","BRIT14",
+        		DatabaseMetaData.bestRowTemporary,true);
+        verifyBRIResults(rs, expRSI);
         
         // result: columns i
-        rs = getBestRowIdentifier(null,"APP","BRIT15",0,true);
-        verifyBRIResults(rs, expRSI, nullability);
+        rs = getBestRowIdentifier(null,"APP","BRIT15",
+        		DatabaseMetaData.bestRowTemporary,true);
+        verifyBRIResults(rs, expRSI);
         
         // we don't do anything with SCOPE except detect bad values
         // result: columns i
-        rs = getBestRowIdentifier(null,"APP","BRIT16",1,true);
-        verifyBRIResults(rs, expRSI, nullability);
+        rs = getBestRowIdentifier(null,"APP","BRIT16",
+        		DatabaseMetaData.bestRowTransaction,true);
+        verifyBRIResults(rs, expRSI);
         // result: columns i
-        rs = getBestRowIdentifier(null,"APP","BRIT16",2,true);
-        verifyBRIResults(rs, expRSI, nullability);
-        // result: no rows
+        rs = getBestRowIdentifier(null,"APP","BRIT16",
+        		DatabaseMetaData.bestRowSession,true);
+        verifyBRIResults(rs, expRSI);
+        // result: no rows (invalid scope -1)
         rs = getBestRowIdentifier(null,"APP","BRIT16",-1,true);
-        // column nullability is opposite to with scope=1 or 2...DERBY-3181
-        nullability = new boolean [] {
-                false, true, false, true, false, false, false, false};
-        // When running the ODBC version, the datatype returned for
-        // column 3 is SMALLINT, vs. INTEGER when scope=1 or 2...
-        // So, in this case, the columnTypes are the same for ODBC and JDBC,
-        // but with calls with a valid scope, they are different.
-        //assertBestRowIdentifierMetaDataResultSet(rs, nullability);
-        String[] tmpcolNames = {
-                "SCOPE", "COLUMN_NAME", "DATA_TYPE", "TYPE_NAME", 
-                "COLUMN_SIZE", "BUFFER_LENGTH", "DECIMAL_DIGITS", 
-                "PSEUDO_COLUMN"};
-        int[] tmpcolTypes = {
-                Types.SMALLINT, Types.VARCHAR, Types.INTEGER, Types.VARCHAR,
-                Types.INTEGER, Types.INTEGER, Types.SMALLINT, Types.SMALLINT};
-        assertMetaDataResultSet(rs[0], tmpcolNames, tmpcolTypes, nullability);
-        assertMetaDataResultSet(rs[1], tmpcolNames, tmpcolTypes, nullability);
-        JDBC.assertDrainResults(rs[0], 0);
-        JDBC.assertDrainResults(rs[1], 0);
-        // result: no rows
-        rs = getBestRowIdentifier(null,"APP","BRIT16",3,true);
-        //assertBestRowIdentifierMetaDataResultSet(rs, nullability);
-        assertMetaDataResultSet(rs[0], tmpcolNames, tmpcolTypes, nullability);
-        assertMetaDataResultSet(rs[1], tmpcolNames, tmpcolTypes, nullability);
-        JDBC.assertDrainResults(rs[0], 0);
-        JDBC.assertDrainResults(rs[1], 0);
-        // set back nullability
-        nullability = new boolean[] {
-                true, false, true, true, true, true, true, true};
+        JDBC.assertEmpty(rs[0]);
+        JDBC.assertEmpty(rs[1]);
         
-        rs = getBestRowIdentifier(null, "APP","BRIT17",0,true);
+        // result: no rows (invalid scope 3)
+        rs = getBestRowIdentifier(null,"APP","BRIT16",3,true);
+        JDBC.assertEmpty(rs[0]);
+        JDBC.assertEmpty(rs[1]);
+        
+        rs = getBestRowIdentifier(null, "APP","BRIT17",
+        		DatabaseMetaData.bestRowTemporary,true);
         String [][] expRS = new String [][] {
                 {"2", "I", "4", "INTEGER", "4", null, "10", "1"},
                 {"2", "VC10", "12", "VARCHAR", "10", null, null, "1"}
@@ -3118,13 +3110,15 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         
         // test DERBY-2610 for fun; can't pass in null table name      
         try {
-            rs = getBestRowIdentifier(null,"APP",null,3,true);
+            rs = getBestRowIdentifier(null,"APP",null,
+            		DatabaseMetaData.bestRowTemporary,true);
         } catch (SQLException sqle) {
             assertSQLState( "XJ103", sqle);
         }
         
         // check on systables
-        rs = getBestRowIdentifier(null,"SYS","SYSTABLES",0,true);
+        rs = getBestRowIdentifier(null,"SYS","SYSTABLES",
+        		DatabaseMetaData.bestRowTemporary,true);
         expRS = new String [][] {
                 {"2", "TABLEID", "1", "CHAR", "36", null, null, "1"}
         };
@@ -3170,7 +3164,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * Helper method for testing getBestRowIdentifier - calls the ODBC procedure
      * @throws SQLException 
      */
-    public ResultSet getBestRowIdentifierODBC(String catalog, String schema, 
+    private ResultSet getBestRowIdentifierODBC(String catalog, String schema, 
         String table, int scope, boolean nullable) throws SQLException 
     {
         CallableStatement cs = prepareCall(
@@ -3199,6 +3193,39 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         DatabaseMetaData dmd = getDMD();
         rss[0]= dmd.getBestRowIdentifier(catalog, schema, table, scope, nullable);
         rss[1]= getBestRowIdentifierODBC(catalog, schema, table, scope, nullable);
+        
+        String[] columnNames = {
+                "SCOPE", "COLUMN_NAME", "DATA_TYPE", "TYPE_NAME", 
+                "COLUMN_SIZE", "BUFFER_LENGTH", "DECIMAL_DIGITS", 
+                "PSEUDO_COLUMN"};
+        int[] columnTypes = {
+                Types.SMALLINT, Types.VARCHAR, Types.INTEGER, Types.VARCHAR,
+                Types.INTEGER, Types.INTEGER, Types.SMALLINT, Types.SMALLINT};
+        int[] odbcColumnTypes = {
+                Types.SMALLINT, Types.VARCHAR, Types.SMALLINT, Types.VARCHAR,
+                Types.INTEGER, Types.INTEGER, Types.SMALLINT, Types.SMALLINT};
+        boolean [] nullability = {
+                true, false, true, true, true, true, true, true};
+        
+        // column nullability is opposite to with scope=1 or 2...DERBY-3181
+        // When running the ODBC version, the datatype returned for
+        // column 3 is SMALLINT, vs. INTEGER when scope=1 or 2...
+        // So, in this case, the columnTypes are the same for ODBC and JDBC,
+        // but with calls with a valid scope, they are different.
+
+        if (scope != DatabaseMetaData.bestRowTemporary &&
+        		scope != DatabaseMetaData.bestRowTransaction &&
+        		scope != DatabaseMetaData.bestRowSession)
+        {
+        	nullability = new boolean [] {
+                    false, true, false, true, false, false, false, false};
+        	
+        	odbcColumnTypes = columnTypes;
+        }
+       
+        assertMetaDataResultSet(rss[0], columnNames, columnTypes, nullability);
+        assertMetaDataResultSet(rss[1], columnNames, odbcColumnTypes, nullability);
+              
         return rss;        
     }
 
@@ -3207,13 +3234,9 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * @param rss - ResultSet array from getBestRowIdentifier;
      *     rss[0] will have the JDBC result, rss[1] the ODBC result
      * @param expRS - bidimensional String array with expected result row(s)
-     * @param nullability - boolean array holding expected nullability
-     *   values. This needs to be a parameter because of DERBY-3081
      * @throws SQLException 
      */
-    public void verifyBRIResults(ResultSet[] rss, String[][] expRS,
-            boolean[] nullability) throws SQLException {      
-        assertBestRowIdentifierMetaDataResultSet(rss, nullability);
+    public void verifyBRIResults(ResultSet[] rss, String[][] expRS) throws SQLException {      
         JDBC.assertFullResultSet(rss[0], expRS, true);
         // JDBC does not use BUFFER_LENGTH column (6th), with ODBC
         // in our queries the value is mostly 4
@@ -3226,40 +3249,13 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         }
     }
     
-    // helper method for testGetBestRowIdentifier - checks the 
-    // metadata resultsets for the JDBC and ODBC calls for correct
-    // shape.
-    public void assertBestRowIdentifierMetaDataResultSet(
-            ResultSet[] rss, boolean[] nullability) throws SQLException {
-        String[] columnNames = {
-                "SCOPE", "COLUMN_NAME", "DATA_TYPE", "TYPE_NAME", 
-                "COLUMN_SIZE", "BUFFER_LENGTH", "DECIMAL_DIGITS", 
-                "PSEUDO_COLUMN"};
-        int[] columnTypes = {
-                Types.SMALLINT, Types.VARCHAR, Types.INTEGER, Types.VARCHAR,
-                Types.INTEGER, Types.INTEGER, Types.SMALLINT, Types.SMALLINT};
-        int[] odbcColumnTypes = {
-                Types.SMALLINT, Types.VARCHAR, Types.SMALLINT, Types.VARCHAR,
-                Types.INTEGER, Types.INTEGER, Types.SMALLINT, Types.SMALLINT};
-        assertMetaDataResultSet(rss[0], columnNames, columnTypes, nullability);
-        assertMetaDataResultSet(rss[1], columnNames, odbcColumnTypes, nullability);
-    } 
-    
     /**
      * Test getGetColumnPrivileges; does not modify database
      * For further testing see test lang.grantRevokeTest
      * @throws SQLException 
      */
     public void testGetColumnPrivileges() throws SQLException
-    {
-        
-        String [] columnNames = {"TABLE_CAT","TABLE_SCHEM","TABLE_NAME",
-            "COLUMN_NAME","GRANTOR","GRANTEE","PRIVILEGE","IS_GRANTABLE"};
-        int [] columnTypes = {
-            Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,
-            Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR};
-        boolean [] nullability = {true,false,false,false,true,true,true,true};
-        
+    {       
         // unlike for instance getTables() and getUDTs trying to call
         // getColumnPrivileges with all nulls gets stopped because 
         // the spec indicates it takes a table name, not just a pattern
@@ -3271,38 +3267,29 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         }
         
         ResultSet[] rs = getColumnPrivileges(null,null,"",null);
-        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
-        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
         JDBC.assertEmpty(rs[0]);
         JDBC.assertEmpty(rs[1]);
         
         rs = getColumnPrivileges("","","","");
-        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
-        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
         JDBC.assertEmpty(rs[0]);
         JDBC.assertEmpty(rs[1]);
         
         rs = getColumnPrivileges("%","%","%","%");
-        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
-        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
         JDBC.assertEmpty(rs[0]);
         JDBC.assertEmpty(rs[1]);
 
         // we didn't (can't) grant any privileges to the systabels, so no row
         rs = getColumnPrivileges(null,"SYS","SYSTABLES","TABLEID");
-        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
-        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
         JDBC.assertEmpty(rs[0]);
         JDBC.assertEmpty(rs[1]);
-        rs[0].close();
-        rs[1].close();
+
     }
 
     /**
      * Helper method for testing getColumnPrivileges - calls the ODBC procedure
      * @throws SQLException 
      */
-    public ResultSet getColumnPrivilegesODBC(String catalog, String schema, 
+    private ResultSet getColumnPrivilegesODBC(String catalog, String schema, 
         String table, String columnNamePattern) throws SQLException 
     {
         CallableStatement cs = prepareCall(
@@ -3329,6 +3316,17 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         DatabaseMetaData dmd = getDMD();
         rss[0]= dmd.getColumnPrivileges(catalog, schema, table, columnNamePattern);
         rss[1]= getColumnPrivilegesODBC(catalog, schema, table, columnNamePattern);
+        
+        String [] columnNames = {"TABLE_CAT","TABLE_SCHEM","TABLE_NAME",
+                "COLUMN_NAME","GRANTOR","GRANTEE","PRIVILEGE","IS_GRANTABLE"};
+        int [] columnTypes = {
+                Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,
+                Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR};
+        boolean [] nullability = {true,false,false,false,true,true,true,true};
+
+        assertMetaDataResultSet(rss[0], columnNames, columnTypes, nullability);
+        assertMetaDataResultSet(rss[1], columnNames, columnTypes, nullability);
+                       
         return rss;        
     }
     
@@ -3339,47 +3337,29 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      */
     public void testGetTablePrivileges() throws SQLException
     {
-        
-        String [] columnNames = {"TABLE_CAT","TABLE_SCHEM","TABLE_NAME",
-            "GRANTOR","GRANTEE","PRIVILEGE","IS_GRANTABLE"};
-        int [] columnTypes = {
-            Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,
-            Types.VARCHAR,Types.VARCHAR,Types.VARCHAR};
-        boolean [] nullability = {true,false,false,true,true,true,true};
-        
         ResultSet rs[] = getTablePrivileges(null,null,null);
-        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
-        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
         JDBC.assertEmpty(rs[0]);
         JDBC.assertEmpty(rs[1]);
         
         rs = getTablePrivileges("","","");
-        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
-        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
-        JDBC.assertEmpty(rs[0]);
+       JDBC.assertEmpty(rs[0]);
         JDBC.assertEmpty(rs[1]);
         
         rs = getTablePrivileges("%","%","%");
-        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
-        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
-        JDBC.assertEmpty(rs[0]);
+         JDBC.assertEmpty(rs[0]);
         JDBC.assertEmpty(rs[1]);
 
         // we didn't (can't) grant any privileges to the systabels, so no row
         rs = getTablePrivileges(null,"SYS","SYSTABLES");
-        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
-        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
         JDBC.assertEmpty(rs[0]);
         JDBC.assertEmpty(rs[1]);
-        rs[0].close();
-        rs[1].close();
     }
     
     /**
      * Helper method for testing getTablePrivileges - calls the ODBC procedure
      * @throws SQLException 
      */
-    public ResultSet getTablePrivilegesODBC(String catalog, String schema, 
+    private ResultSet getTablePrivilegesODBC(String catalog, String schema, 
         String tableNamePattern) throws SQLException 
     {
         CallableStatement cs = prepareCall(
@@ -3405,6 +3385,17 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         DatabaseMetaData dmd = getDMD();
         rss[0]= dmd.getTablePrivileges(catalog, schema, tableNamePattern);
         rss[1]= getTablePrivilegesODBC(catalog, schema, tableNamePattern);
+        
+        String [] columnNames = {"TABLE_CAT","TABLE_SCHEM","TABLE_NAME",
+                "GRANTOR","GRANTEE","PRIVILEGE","IS_GRANTABLE"};
+        int [] columnTypes = {
+                Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,
+                Types.VARCHAR,Types.VARCHAR,Types.VARCHAR};
+        boolean [] nullability = {true,false,false,true,true,true,true};
+        
+        assertMetaDataResultSet(rss[0], columnNames, columnTypes, nullability);
+        assertMetaDataResultSet(rss[1], columnNames, columnTypes, nullability);
+            
         return rss;        
     }
 
@@ -3414,33 +3405,6 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      */
     public void testGetIndexInfo() throws SQLException
     {
-        String [] columnNames = {"TABLE_CAT","TABLE_SCHEM","TABLE_NAME",
-            "NON_UNIQUE","INDEX_QUALIFIER","INDEX_NAME","TYPE",
-            "ORDINAL_POSITION","COLUMN_NAME","ASC_OR_DESC","CARDINALITY",
-            "PAGES","FILTER_CONDITION"};
-        int [] columnTypes = {
-                Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,
-                Types.BOOLEAN,Types.VARCHAR,Types.VARCHAR,Types.SMALLINT,
-                // ASC_OR_DESC is Types.CHAR rather than VARCHAR...
-                Types.SMALLINT,Types.VARCHAR,Types.CHAR,Types.INTEGER,
-                Types.INTEGER,Types.VARCHAR};
-        if (usingDerbyNetClient())
-            columnTypes = new int[] {
-                Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,
-                // types.boolean is not supported with networkserver
-                Types.SMALLINT,Types.VARCHAR,Types.VARCHAR,Types.SMALLINT,
-                // ASC_OR_DESC is Types.CHAR rather than VARCHAR...
-                Types.SMALLINT,Types.VARCHAR,Types.CHAR,Types.INTEGER,
-                Types.INTEGER,Types.VARCHAR};
-        int[] odbcColumnTypes = new int[] {
-                Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,
-                // types.boolean is not supported with ODBC
-                Types.SMALLINT,Types.VARCHAR,Types.VARCHAR,Types.SMALLINT,
-                // ASC_OR_DESC is Types.CHAR rather than VARCHAR...
-                Types.SMALLINT,Types.VARCHAR,Types.CHAR,Types.INTEGER,
-                Types.INTEGER,Types.VARCHAR};
-        boolean [] nullability = {true,false,false,
-            true,true,true,true,true,false,true,true,true,true};
         
         // unlike for instance getTables() and getUDTs trying to call
         // getIndexInfo with all nulls gets stopped because 
@@ -3454,8 +3418,6 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         
         // do a call which selects unique indexes only
         ResultSet rss[] = getIndexInfo("","SYS","SYSCOLUMNS",true,false);
-        assertMetaDataResultSet(rss[0], columnNames, columnTypes, nullability);
-        assertMetaDataResultSet(rss[1], columnNames, odbcColumnTypes, nullability);
         String[][] expRS = {
             {"","SYS","SYSCOLUMNS","false","","SYSCOLUMNS_INDEX1","3","1",
                 "REFERENCEID","A",null,null,null},
@@ -3466,8 +3428,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         // same table, but select all indexes (unique=false)
         // note, that true for approximate does nothing in Derby
         rss = getIndexInfo("","SYS","SYSCOLUMNS",false,false);
-        assertMetaDataResultSet(rss[0], columnNames, columnTypes, nullability);
-        assertMetaDataResultSet(rss[1], columnNames, odbcColumnTypes, nullability);
+
         expRS = new String[][] {
             {"","SYS","SYSCOLUMNS","false","","SYSCOLUMNS_INDEX1","3","1",
                 "REFERENCEID","A",null,null,null},
@@ -3478,8 +3439,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         assertFullResultSet(rss, expRS, true);
         
         rss = getIndexInfo("","SYS","SYSTABLES",true,false);
-        assertMetaDataResultSet(rss[0], columnNames, columnTypes, nullability);
-        assertMetaDataResultSet(rss[1], columnNames, odbcColumnTypes, nullability);
+
         expRS = new String[][] {
             {"","SYS","SYSTABLES","false","","SYSTABLES_INDEX1","3","1",
                 "TABLENAME","A",null,null,null},
@@ -3491,12 +3451,10 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         
         // should return no rows
         rss = getIndexInfo("","SYS","SYSSTABLES",true,false);
-        assertMetaDataResultSet(rss[0], columnNames, columnTypes, nullability);
-        assertMetaDataResultSet(rss[1], columnNames, odbcColumnTypes, nullability);
+
         JDBC.assertEmpty(rss[0]);
         JDBC.assertEmpty(rss[1]);
-        rss[0].close();
-        rss[1].close();
+
     }
     
     /**
@@ -3541,7 +3499,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * Helper method for testing getIndexInfo - calls the ODBC procedure
      * @throws SQLException 
      */
-    public ResultSet getIndexInfoODBC(String catalog, String schema, 
+    private ResultSet getIndexInfoODBC(String catalog, String schema, 
         String table, boolean unique, boolean approximate) throws SQLException 
     {
         CallableStatement cs = prepareCall(
@@ -3572,6 +3530,38 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         DatabaseMetaData dmd = getDMD();
         rss[0]= dmd.getIndexInfo(catalog, schema, table, unique, approximate);
         rss[1]= getIndexInfoODBC(catalog, schema, table, unique, approximate);
+        
+        String [] columnNames = {"TABLE_CAT","TABLE_SCHEM","TABLE_NAME",
+                "NON_UNIQUE","INDEX_QUALIFIER","INDEX_NAME","TYPE",
+                "ORDINAL_POSITION","COLUMN_NAME","ASC_OR_DESC","CARDINALITY",
+                "PAGES","FILTER_CONDITION"};
+        int [] columnTypes = {
+                Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,
+                Types.BOOLEAN,Types.VARCHAR,Types.VARCHAR,Types.SMALLINT,
+                // ASC_OR_DESC is Types.CHAR rather than VARCHAR...
+                Types.SMALLINT,Types.VARCHAR,Types.CHAR,Types.INTEGER,
+                Types.INTEGER,Types.VARCHAR};
+        if (usingDerbyNetClient())
+            columnTypes = new int[] {
+                Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,
+                // types.boolean is not supported with networkserver
+                Types.SMALLINT,Types.VARCHAR,Types.VARCHAR,Types.SMALLINT,
+                // ASC_OR_DESC is Types.CHAR rather than VARCHAR...
+                Types.SMALLINT,Types.VARCHAR,Types.CHAR,Types.INTEGER,
+                Types.INTEGER,Types.VARCHAR};
+        int[] odbcColumnTypes = new int[] {
+                Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,
+                // types.boolean is not supported with ODBC
+                Types.SMALLINT,Types.VARCHAR,Types.VARCHAR,Types.SMALLINT,
+                // ASC_OR_DESC is Types.CHAR rather than VARCHAR...
+                Types.SMALLINT,Types.VARCHAR,Types.CHAR,Types.INTEGER,
+                Types.INTEGER,Types.VARCHAR};
+        boolean [] nullability = {true,false,false,
+            true,true,true,true,true,false,true,true,true,true};
+        
+        assertMetaDataResultSet(rss[0], columnNames, columnTypes, nullability);
+        assertMetaDataResultSet(rss[1], columnNames, odbcColumnTypes, nullability);
+       
         return rss;        
     }
     
@@ -3660,13 +3650,6 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      */
     public void testGetPrimaryKeys() throws SQLException
     {
-        String [] columnNames = {"TABLE_CAT","TABLE_SCHEM","TABLE_NAME",
-                "COLUMN_NAME","KEY_SEQ","PK_NAME"};
-        int [] columnTypes = {
-                Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,
-                Types.VARCHAR,Types.SMALLINT,Types.VARCHAR};
-        boolean [] nullability = {true,false,false,false,true,false};
-
         String[][] expRS = new String[][] {
                 {"","APP","KT1","I","2","PRIMKEY"},
                 {"","APP","KT1","VC10","1","PRIMKEY"}};
@@ -3676,23 +3659,15 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         // try with valid search criteria
         // although, % may not actually be appropriate?
         ResultSet rs[] = getPrimaryKeys("", "%", "KT1");
-        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
-        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
         assertFullResultSet(rs, expRS, true);
         
         rs = getPrimaryKeys(null, "APP", "KT1");
-        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
-        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
         assertFullResultSet(rs, expRS, true);
 
         rs = getPrimaryKeys(null, null, "KT1");
-        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
-        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
         assertFullResultSet(rs, expRS, true);
 
         rs = getPrimaryKeys(null, "", "KT1");
-        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
-        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
         JDBC.assertEmpty(rs[0]);
         JDBC.assertEmpty(rs[1]);
 
@@ -3713,8 +3688,6 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         
         // DERBY-2610, tablename must be given as stored - % means no rows
         rs = getPrimaryKeys(null, null, "%");
-        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
-        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
         JDBC.assertEmpty(rs[0]);
         JDBC.assertEmpty(rs[1]);
         
@@ -3725,7 +3698,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * Helper method for testing getPrimaryKeys - calls the ODBC procedure
      * @throws SQLException 
      */
-    public ResultSet getPrimaryKeysODBC(
+    private ResultSet getPrimaryKeysODBC(
             String catalog, String schema, String table) throws SQLException 
     {
         CallableStatement cs = prepareCall(
@@ -3749,6 +3722,16 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         DatabaseMetaData dmd = getDMD();
         rss[0]= dmd.getPrimaryKeys(catalog, schema, table);
         rss[1]= getPrimaryKeysODBC(catalog, schema, table);
+        
+        String [] columnNames = {"TABLE_CAT","TABLE_SCHEM","TABLE_NAME",
+                "COLUMN_NAME","KEY_SEQ","PK_NAME"};
+        int [] columnTypes = {
+                Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,
+                Types.VARCHAR,Types.SMALLINT,Types.VARCHAR};
+        boolean [] nullability = {true,false,false,false,true,false};
+        assertMetaDataResultSet(rss[0], columnNames, columnTypes, nullability);
+        assertMetaDataResultSet(rss[1], columnNames, columnTypes, nullability);
+           
         return rss;        
     }
 
@@ -3759,18 +3742,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     public void testGetXXportedKeys() throws SQLException
     {
         // getExportedKeys
-        String [] columnNames = {
-            "PKTABLE_CAT","PKTABLE_SCHEM","PKTABLE_NAME","PKCOLUMN_NAME",
-            "FKTABLE_CAT","FKTABLE_SCHEM","FKTABLE_NAME","FKCOLUMN_NAME",
-            "KEY_SEQ","UPDATE_RULE","DELETE_RULE",
-            "FK_NAME","PK_NAME","DEFERRABILITY"};
-        int [] columnTypes = {
-            Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,
-            Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,
-            Types.SMALLINT,Types.SMALLINT,Types.SMALLINT,
-            Types.VARCHAR,Types.VARCHAR,Types.SMALLINT};
-        boolean [] nullability = {true,false,false,false,
-            true,false,false,false,true,true,true,false,false,true};
+
 
         String[][] expRS1 = new String[][] {
             {"","APP","KT1","VC10","","APP","REFTAB","VC10","1","3","3","FKEY1","PRIMKEY","7"},
@@ -3789,31 +3761,19 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         // try with valid search criteria
         // although, % may not actually be appropriate?
         ResultSet rs[] = getImportedKeys("", "%", "REFTAB");
-        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
-        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
         assertFullResultSet(rs, expRS1, true);
         rs = getImportedKeys("", "%", "REFTAB2");
-        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
-        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
         assertFullResultSet(rs, expRS2, true);
         
         rs = getImportedKeys(null, "APP", "REFTAB");
-        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
-        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
         assertFullResultSet(rs, expRS1, true);
         rs = getImportedKeys(null, "APP", "REFTAB2");
-        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
-        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
         assertFullResultSet(rs, expRS2, true);
 
         rs = getImportedKeys(null, null, "REFTAB");
-        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
-        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
         assertFullResultSet(rs, expRS1, true);
 
         rs = getImportedKeys(null, "", "REFTAB");
-        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
-        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
         JDBC.assertEmpty(rs[0]);
         JDBC.assertEmpty(rs[1]);
 
@@ -3834,8 +3794,6 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         
         // DERBY-2610, tablename must be given as stored - % means no rows
         rs = getImportedKeys(null, null, "%");
-        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
-        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
         JDBC.assertEmpty(rs[0]);
         JDBC.assertEmpty(rs[1]);
 
@@ -3853,31 +3811,19 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                 {"","APP","REFTAB","DPRIM","","APP","REFTAB","DFOR","1","3","3","FKEYSELF","PKEY_REFTAB","7"}};
 
         rs = getExportedKeys("", "%", "KT1");
-        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
-        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
         assertFullResultSet(rs, expRS1, true);
         rs = getExportedKeys("", "%", "REFTAB");
-        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
-        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
         assertFullResultSet(rs, expRS2, true);
         
         rs = getExportedKeys(null, "APP", "KT1");
-        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
-        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
         assertFullResultSet(rs, expRS1, true);
         rs = getExportedKeys(null, "APP", "REFTAB");
-        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
-        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
-        assertFullResultSet(rs, expRS2, true);
+       assertFullResultSet(rs, expRS2, true);
 
         rs = getExportedKeys(null, null, "KT1");
-        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
-        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
         assertFullResultSet(rs, expRS1, true);
 
         rs = getExportedKeys(null, "", "KT1");
-        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
-        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
         JDBC.assertEmpty(rs[0]);
         JDBC.assertEmpty(rs[1]);
 
@@ -3897,8 +3843,6 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         
         // DERBY-2610, tablename must be given as stored - % means no rows
         rs = getExportedKeys(null, null, "%");
-        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
-        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
         JDBC.assertEmpty(rs[0]);
         JDBC.assertEmpty(rs[1]);
         
@@ -3915,40 +3859,26 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
 
         // try with valid search criteria
         rs = getCrossReference("", null, "KT1", "", null, "REFTAB");
-        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
-        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
         assertFullResultSet(rs, expRS1, true);
         
         rs = getCrossReference("", "APP", "REFTAB", "", null, "REFTAB");
-        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
-        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
         assertFullResultSet(rs, expRS2, true);
 
         rs = getCrossReference("", null, "KT1", "", "APP", "REFTAB");
-        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
-        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
         assertFullResultSet(rs, expRS1, true);
 
         rs = getCrossReference("", null, "REFTAB", "", "APP", "REFTAB");
-        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
-        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
         assertFullResultSet(rs, expRS2, true);
 
         rs = getCrossReference(null, "APP", "KT1", null, null, "REFTAB");
-        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
-        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
         assertFullResultSet(rs, expRS1, true);
 
         rs = getCrossReference(null, "APP", "REFTAB", null, null, "REFTAB");
-        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
-        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
         assertFullResultSet(rs, expRS2, true);
 
         // DERBY-2758; query should return a different value for odbc vs. jdbc
         // only experiment jdbc here, odbc is handled elsewhere.
         rs = getCrossReference(null, "APP", "%", null, null, "%");
-        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
-        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
         JDBC.assertEmpty(rs[0]);
         String[][] expRS = new String[][] {
                 {"","APP","KT1","VC10","","APP","REFTAB","VC10","1","3","3","FKEY1","PRIMKEY","7"},
@@ -4005,8 +3935,6 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         
         // DERBY-2610, tablename must be given as stored - % means no rows
         rs = getCrossReference(null, null, "%", null, null, "%");
-        assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
-        assertMetaDataResultSet(rs[1], columnNames, columnTypes, nullability);
         JDBC.assertEmpty(rs[0]);
         // But it *is* allowed with ODBC, see DERBY-2758
         JDBC.assertFullResultSet(rs[1], expRS, true);
@@ -4021,7 +3949,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * Helper method for testing getImportedKeys - calls the ODBC procedure
      * @throws SQLException 
      */
-    public ResultSet getImportedKeysODBC(
+    private ResultSet getImportedKeysODBC(
             String catalog, String schema, String table) throws SQLException 
     {
         CallableStatement cs = prepareCall("CALL SYSIBM.SQLFOREIGNKEYS(" +
@@ -4045,14 +3973,42 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         DatabaseMetaData dmd = getDMD();
         rss[0]= dmd.getImportedKeys(catalog, schema, table);
         rss[1]= getImportedKeysODBC(catalog, schema, table);
+        
+        assertGetImportedAndExportedKeysShape(rss);
         return rss;        
+    }
+    
+    /**
+     * Assert the shape of the ResultSets for getImportedKeys,
+     * getExportedKeys and getCrossReference.
+     * @param rss ResultSets from JDBC and ODBC calls.
+     * @throws SQLException
+     */
+    private void assertGetImportedAndExportedKeysShape(ResultSet[] rss)
+        throws SQLException
+    {
+        String [] columnNames = {
+                "PKTABLE_CAT","PKTABLE_SCHEM","PKTABLE_NAME","PKCOLUMN_NAME",
+                "FKTABLE_CAT","FKTABLE_SCHEM","FKTABLE_NAME","FKCOLUMN_NAME",
+                "KEY_SEQ","UPDATE_RULE","DELETE_RULE",
+                "FK_NAME","PK_NAME","DEFERRABILITY"};
+            int [] columnTypes = {
+                Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,
+                Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,
+                Types.SMALLINT,Types.SMALLINT,Types.SMALLINT,
+                Types.VARCHAR,Types.VARCHAR,Types.SMALLINT};
+            boolean [] nullability = {true,false,false,false,
+                true,false,false,false,true,true,true,false,false,true};
+            
+         assertMetaDataResultSet(rss[0], columnNames, columnTypes, nullability);
+         assertMetaDataResultSet(rss[1], columnNames, columnTypes, nullability);   
     }
 
     /**
      * Helper method for testing getExportedKeys - calls the ODBC procedure
      * @throws SQLException 
      */
-    public ResultSet getExportedKeysODBC(
+    private ResultSet getExportedKeysODBC(
             String catalog, String schema, String table) throws SQLException 
     {
         CallableStatement cs = prepareCall("CALL SYSIBM.SQLFOREIGNKEYS(" +
@@ -4076,6 +4032,9 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         DatabaseMetaData dmd = getDMD();
         rss[0]= dmd.getExportedKeys(catalog, schema, table);
         rss[1]= getExportedKeysODBC(catalog, schema, table);
+        
+        assertGetImportedAndExportedKeysShape(rss);
+        
         return rss;        
     }
 
@@ -4083,7 +4042,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * Helper method for testing getCrossReference - calls the ODBC procedure
      * @throws SQLException 
      */
-    public ResultSet getCrossReferenceODBC(
+    private ResultSet getCrossReferenceODBC(
             String parentcatalog, String parentschema, String parenttable,
             String foreigncatalog, String foreignschema, String foreigntable)
         throws SQLException 
@@ -4117,6 +4076,8 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
             foreigncatalog, foreignschema, foreigntable);
         rss[1]= getCrossReferenceODBC(parentcatalog, parentschema, parenttable,
             foreigncatalog, foreignschema, foreigntable);
+        
+        assertGetImportedAndExportedKeysShape(rss);
         return rss;        
     }
     
@@ -4442,7 +4403,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * Helper method for testing getProcedures - calls the ODBC procedure
      * @throws SQLException 
      */
-    public ResultSet getProceduresODBC(
+    private ResultSet getProceduresODBC(
             String catalog, String schemaPattern, String procedureNamePattern)
         throws SQLException 
     {
@@ -4475,7 +4436,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * Helper method for testing getProcedureColumns - calls the ODBC procedure
      * @throws SQLException 
      */
-    public ResultSet getProcedureColumnsODBC(String catalog, 
+    private ResultSet getProcedureColumnsODBC(String catalog, 
             String schemaPattern, String procedureNamePattern,
             String columnNamePattern) throws SQLException 
     {
