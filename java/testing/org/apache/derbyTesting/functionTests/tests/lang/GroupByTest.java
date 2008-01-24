@@ -132,5 +132,39 @@ public class GroupByTest extends BaseJDBCTestCase {
         JDBC.assertFullResultSet(rs, expectedRows);
         s.executeUpdate("DROP TABLE TAB");
     }
+
+	public void testDerbyOrderByOnAggregate() throws SQLException
+	{
+		Statement s = createStatement();
+		s.executeUpdate("create table yy (a double, b double)");
+		s.executeUpdate("insert into yy values (2,4), (2, 4), " +
+			"(5,7), (2,3), (2,3), (2,3), (2,3), (9,7)");
+
+		ResultSet rs = s.executeQuery(
+			"select b, count(*) from yy where a=5 or a=2 " +
+			"group by b order by count(*) desc");
+
+		JDBC.assertFullResultSet(
+				rs,
+				new Object[][]{
+						{new Double(3), new Integer(4)},
+						{new Double(4), new Integer(2)},
+						{new Double(7), new Integer(1)}},
+				false);
+
+		rs = s.executeQuery(
+			"select b, count(*) from yy where a=5 or a=2 " +
+			"group by b order by count(*) asc");
+
+		JDBC.assertFullResultSet(
+				rs,
+				new Object[][]{
+						{new Double(7), new Integer(1)},
+						{new Double(4), new Integer(2)},
+						{new Double(3), new Integer(4)}},
+				false);
+
+		s.executeUpdate("drop table yy");
+	}
 }
 

@@ -620,4 +620,14 @@ public class AggregateNode extends UnaryOperatorNode
 			return "";
 		}
 	}
+
+	public boolean isConstant()
+	{
+		return false;
+	}
+	
+	public boolean constantExpression(PredicateList where)
+	{
+		return false;
+	}
 }
