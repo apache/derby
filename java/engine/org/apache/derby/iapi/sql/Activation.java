@@ -591,7 +591,7 @@ public interface Activation
 	 * from this activation (which must be a stored
 	 * procedure/function) call.
 	 *
-	 * @arg role The name of the current role
+	 * @param role The name of the current role
 	 */
 	public void setNestedCurrentRole(String role);
 
@@ -608,7 +608,7 @@ public interface Activation
 	 * This activation is created in a dynamic call context, remember
 	 * its caller's activation.
 	 *
-	 * @arg a The caller's activation
+	 * @param a The caller's activation
 	 */
 	public void setCallActivation(Activation a);
 

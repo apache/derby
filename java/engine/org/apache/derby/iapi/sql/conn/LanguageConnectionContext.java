@@ -1052,7 +1052,7 @@ public interface LanguageConnectionContext extends Context {
     /**
 	 * Set the current role
 	 *
-	 * @param activation activation of set role statement
+	 * @param a activation of set role statement
 	 * @param role  the id of the role to be set to current
 	 */
     public void setCurrentRole(Activation a, String role);
@@ -1061,7 +1061,7 @@ public interface LanguageConnectionContext extends Context {
 	 * Get the current role authorization identifier of the dynamic
 	 * call context associated with this activation.
 	 *
-	 * @param activation activation of statement needing current role
+	 * @param a activation of statement needing current role
 	 * @return String	the role id
 	 */
 	public String getCurrentRoleId(Activation a);
