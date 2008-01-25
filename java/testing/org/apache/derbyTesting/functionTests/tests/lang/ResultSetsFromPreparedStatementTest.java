@@ -21,9 +21,6 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
-import java.util.HashMap;
-import java.util.Iterator;
-
 import java.sql.Connection;
 import java.sql.Statement;
 import java.sql.PreparedStatement;
@@ -2049,5 +2046,54 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
             assertResultSet("R?="+i+" ?="+(i+1), empty, rs);
         }
         tst.close();
+    }
+
+
+    // Regression tests for DERBY-3343 (regression from the fix for DERBY-827)
+    /**
+     * Private helper method. Runs the same test for different
+     * generated identity columns.
+     * @param dataType SMALLINT, INT, or BIGINT
+     * @param generatedType BY DEFAULT or ALWAYS
+     * @throws Exception all errors passed on to JUnit
+     */
+    private void testGeneratedIdentity(String dataType, String generateType) 
+        throws Exception {
+        Statement s = createStatement();
+        s.execute("CREATE TABLE T(GI "+dataType+" PRIMARY KEY GENERATED "+
+                  generateType+
+                  " AS IDENTITY (START WITH 5, INCREMENT BY 10), "+
+                  "L VARCHAR(8))");
+        PreparedStatement implicit = 
+            prepareStatement("INSERT INTO T(L) VALUES('implicit')"); 
+        implicit.executeUpdate();
+        implicit.executeUpdate();
+        implicit.executeUpdate();
+        
+        PreparedStatement explicit = 
+            prepareStatement("INSERT INTO T(GI, L) "+
+                             "VALUES(DEFAULT, 'explicit')"); 
+        explicit.executeUpdate();
+        explicit.executeUpdate();
+        explicit.executeUpdate();
+    } 
+    public void testIntGeneratedByDefaultAsIdentity() throws Exception {
+        testGeneratedIdentity("INT","BY DEFAULT");
+    }
+    public void testSmallintGeneratedByDefaultAsIdentity() throws Exception {
+        testGeneratedIdentity("SMALLINT","BY DEFAULT");
+    }
+    public void testBigintGeneratedByDefaultAsIdentity() throws Exception {
+        testGeneratedIdentity("BIGINT","BY DEFAULT");
+    }
+
+    public void testIntGeneratedAlwaysAsIdentity() throws Exception {
+        testGeneratedIdentity("INT","ALWAYS");
+    }
+    public void testSmallintGeneratedAlwaysAsIdentity() throws Exception {
+        testGeneratedIdentity("SMALLINT","ALWAYS");
+    }
+    public void testBigintGeneratedAlwaysAsIdentity() throws Exception {
+        testGeneratedIdentity("BIGINT","ALWAYS");
     }
 }

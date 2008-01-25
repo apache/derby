@@ -1435,14 +1435,16 @@ public class ResultColumn extends ValueNode
 		** return VARIANT.  Otherwise, we return
 		** CONSTANT. For result columns that are 
 		** generating autoincrement values, the result
-		** is variant-- note that there is no expression
-		** associated with an autoincrement column in 
-		** an insert statement.
+		** is variant.
 		*/
-		int expType = ((expression != null) ?
-					   expression.getOrderableVariantType() : 
-					   ((isAutoincrementGenerated()) ? 
-						Qualifier.VARIANT : Qualifier.CONSTANT));
+        int expType;
+        if (isAutoincrementGenerated()) {
+            expType = Qualifier.VARIANT;
+        } else if (expression != null) {
+            expType = expression.getOrderableVariantType();
+        } else {
+            expType = Qualifier.CONSTANT;
+        }
 
 		switch (expType)
 		{
