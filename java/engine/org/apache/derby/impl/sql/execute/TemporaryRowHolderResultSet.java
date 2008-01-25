@@ -159,7 +159,12 @@ class TemporaryRowHolderResultSet implements CursorResultSet, NoPutResultSet, Cl
 	{
 		if(isAppendable)
 		{
-			holder.CID = currentConglomId;
+            if (SanityManager.DEBUG) {
+                SanityManager.ASSERT(currentConglomId == holder.getTemporaryConglomId(),
+                        "currentConglomId(" + currentConglomId + 
+                        ") == holder.getTemporaryConglomeateId (" + 
+                        holder.getTemporaryConglomId() + ")");
+            }
 			positionIndexConglomId = pconglomId;
 			setupPositionBasedScan(numRowsOut);
 		}else
@@ -282,7 +287,7 @@ class TemporaryRowHolderResultSet implements CursorResultSet, NoPutResultSet, Cl
 			return currentRow;
 		}
 
-		if (holder.CID == 0)
+		if (holder.getTemporaryConglomId() == 0)
 		{
 			return (ExecRow)null;
 		}
@@ -294,7 +299,7 @@ class TemporaryRowHolderResultSet implements CursorResultSet, NoPutResultSet, Cl
 		{
 			scan = 
                 tc.openScan(
-                    holder.CID,
+                    holder.getTemporaryConglomId(),
                     false,					// hold
                     0, 		// open read only
                     TransactionController.MODE_TABLE,
@@ -347,7 +352,7 @@ class TemporaryRowHolderResultSet implements CursorResultSet, NoPutResultSet, Cl
 			scan.fetchLocation(baseRowLocation);
 			if(heapCC == null)
 			{
-				heapCC = tc.openConglomerate( holder.CID,
+                heapCC = tc.openConglomerate(holder.getTemporaryConglomId(),
 											  false,
 											  TransactionController.OPENMODE_FORUPDATE,
 											  TransactionController.MODE_TABLE,
@@ -367,11 +372,11 @@ class TemporaryRowHolderResultSet implements CursorResultSet, NoPutResultSet, Cl
 	{
 
 		//incase nothing is inserted yet into the temporary row holder
-		if(holder.CID ==0)
+        if (holder.getTemporaryConglomId() == 0)
 			return;
 		if(heapCC == null)
 		{
-			heapCC = tc.openConglomerate( holder.CID,
+			heapCC = tc.openConglomerate( holder.getTemporaryConglomId(),
 										  false,
 										  0,
 										  TransactionController.MODE_TABLE,
