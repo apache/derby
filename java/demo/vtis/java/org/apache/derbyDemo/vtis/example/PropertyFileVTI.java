@@ -124,8 +124,16 @@ public    class   PropertyFileVTI  extends FlatFileVTI
         int         equalsIdx = nextLine.indexOf( '=' );
 
         try {
-            newRow[ PROPERTY_KEY ] = nextLine.substring( 0, equalsIdx );
-            newRow[ PROPERTY_VALUE ] = nextLine.substring( equalsIdx, nextLine.length() );
+            if ( equalsIdx >= 0 )
+            {
+                newRow[ PROPERTY_KEY ] = nextLine.substring( 0, equalsIdx );
+                newRow[ PROPERTY_VALUE ] = nextLine.substring( equalsIdx, nextLine.length() );
+            }
+            else
+            {
+                newRow[ PROPERTY_KEY ] = nextLine;
+                newRow[ PROPERTY_VALUE ] = "";
+            }
         }
         catch (Throwable t)
         {
