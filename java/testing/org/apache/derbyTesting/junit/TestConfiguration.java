@@ -688,6 +688,26 @@ public class TestConfiguration {
     
     /**
      * Return a decorator that changes the configuration to obtain
+     * connections from a ConnectionPoolDataSource using
+     * <code>getPooledConnection().getConnection()</code>
+     * <p>
+     * Note that statement pooling is enabled in the data source and in all the
+     * connections created from it.
+     * <p>
+     * The tearDown reverts the configuration to the previous
+     * configuration.
+     * 
+     * @param test the test/suite to decorate
+     * @return A test setup with the requested decorator.
+     */
+    public static TestSetup connectionCPDecorator(Test test)
+    {
+        return new ConnectorSetup(test,
+             "org.apache.derbyTesting.junit.ConnectionPoolDataSourceConnector");
+    }
+
+    /**
+     * Return a decorator that changes the configuration to obtain
      * connections from an XADataSource using
      * <code>
      * getXAConnection().getConnection()
