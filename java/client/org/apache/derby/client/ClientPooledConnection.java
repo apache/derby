@@ -31,7 +31,13 @@ import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.net.NetLogWriter;
 import org.apache.derby.shared.common.reference.SQLState;
 
+/**
+ * A physical connection to a data source, to be used for creating logical
+ * connections to the same data source.
+ */
 public class ClientPooledConnection implements javax.sql.PooledConnection {
+
+    /** Tells if this pooled connection is newly created. */
     private boolean newPC_ = true;
 
     private java.util.Vector listeners_ = null;
@@ -39,10 +45,13 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
     org.apache.derby.client.net.NetConnection netPhysicalConnection_ = null;
     org.apache.derby.client.net.NetXAConnection netXAPhysicalConnection_ = null;
 
+    /** The logical connection using the physical connection. */
+    //@GuardedBy("this")
     org.apache.derby.client.am.LogicalConnection logicalConnection_ = null;
 
     protected org.apache.derby.client.am.LogWriter logWriter_ = null;
 
+    /** Resource manager identificator. */
     protected int rmId_ = 0;
 
     // Cached stuff from constructor
@@ -50,9 +59,19 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
     private String user_;
     private String password_;
 
-    // Constructor for Non-XA pooled connections.
-    // Using standard Java APIs, a CPDS is passed in.
-    // user/password overrides anything on the ds.
+    /**
+     * Constructor for non-XA pooled connections.
+     * <p>
+     * Using standard Java APIs, a CPDS is passed in. Arguments for
+     * user/password overrides anything on the data source.
+     * 
+     * @param ds data source creating this pooled connection
+     * @param logWriter destination for log messages
+     * @param user user name
+     * @param password user password
+     * @throws SQLException if creating the pooled connection fails due problems
+     *      in the database, or problems communicating with the database
+     */
     public ClientPooledConnection(ClientBaseDataSource ds,
                                   org.apache.derby.client.am.LogWriter logWriter,
                                   String user,
@@ -90,9 +109,20 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
         }
     }
 
-    // Constructor for XA pooled connections only.
-    // Using standard Java APIs, a CPDS is passed in.
-    // user/password overrides anything on the ds.
+    /**
+     * Constructor for XA pooled connections only.
+     * <p>
+     * Using standard Java APIs, a CPDS is passed in. Arguments for
+     * user/password overrides anything on the data source.
+     * 
+     * @param ds data source creating this pooled connection
+     * @param logWriter destination for log messages
+     * @param user user name
+     * @param password user password
+     * @param rmId resource manager id
+     * @throws SQLException if creating the pooled connection fails due problems
+     *      in the database, or problems communicating with the database
+     */
     public ClientPooledConnection(ClientBaseDataSource ds,
                                   org.apache.derby.client.am.LogWriter logWriter,
                                   String user,
@@ -123,6 +153,14 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
         close();
     }
 
+    /**
+     * Closes the physical connection to the data source and frees all
+     * assoicated resources.
+     * 
+     * @throws SQLException if closing the connection causes an error. Note that
+     *      this connection can still be considered closed even if an error
+     *      occurs.
+     */
     public synchronized void close() throws SQLException {
         try
         {
@@ -149,8 +187,15 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
         }
     }
 
-    // This is the standard API for getting a logical connection handle for a pooled connection.
-    // No "resettable" properties are passed, so user, password, and all other properties may not change.
+    /**
+     * Creates a logical connection.
+     * <p>
+     * This is the standard API for getting a logical connection handle for a
+     * pooled connection. No "resettable" properties are passed, so user,
+     * password, and all other properties may not change.
+     * 
+     * @throws SQLException if creating a new logical connection fails
+     */
     public synchronized java.sql.Connection getConnection() throws SQLException {
         try
         {
@@ -183,6 +228,16 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
         }
     }
 
+    /**
+     * Creates a new logical connection by performing all the required steps to
+     * be able to reuse the physical connection.
+     * <p>
+     * 
+     * @throws SqlException if there is no physical connection, or if any error
+     *      occurs when recycling the physical connection or closing/craeting
+     *      the logical connection
+     */
+    //@GuardedBy("this")
     private void createLogicalConnection() throws SqlException {
         if (physicalConnection_ == null) {
             throw new SqlException(logWriter_,
@@ -201,8 +256,10 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
             throw new SqlException(sqle);
         }
         
-        // Not the usual case, but if we have an existing logical connection, then we must close it by spec.
-        // We close the logical connection without notifying the pool manager that this pooled connection is availabe for reuse.
+        // Not the usual case, but if we have an existing logical connection,
+        // then we must close it by spec. We close the logical connection
+        // without notifying the pool manager that this pooled connection is
+        // availabe for reuse.
         if (logicalConnection_ != null) {
             logicalConnection_.closeWithoutRecyclingToPool();
         }
@@ -225,7 +282,12 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
         listeners_.removeElement(listener);
     }
 
-    // Not public, but needs to be visible to am.LogicalConnection
+    /**
+     * Inform listeners that the logical connection has been closed and that the
+     * physical connection is ready for reuse.
+     * <p>
+     * Not public, but needs to be visible to am.LogicalConnection
+     */
     public void recycleConnection() {
         if (physicalConnection_.agent_.loggingEnabled()) {
             physicalConnection_.agent_.logWriter_.traceEntry(this, "recycleConnection");
@@ -238,7 +300,14 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
         }
     }
 
-    // Not public, but needs to be visible to am.LogicalConnection
+    /**
+     * Inform listeners that an error has occured on the connection, if the
+     * error severity is high enough.
+     * <p>
+     * Not public, but needs to be visible to am.LogicalConnection
+     * 
+     * @param exception the exception that occurred on the connection
+     */
     public void trashConnection(SqlException exception) {
 		// only report fatal error  
 		if (exception.getErrorCode() < ExceptionSeverity.SESSION_SEVERITY)
@@ -252,7 +321,10 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
         }
     }
 
-    // Used by LogicalConnection close when it disassociates itself from the ClientPooledConnection
+    /**
+     * Used by <code>LogicalConnection.close</code> when it disassociates itself
+     * from the pooled connection.
+     */
     public synchronized void nullLogicalConnection() {
         logicalConnection_ = null;
     }
