@@ -21,6 +21,7 @@
 
 package org.apache.derby.impl.load;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.ResultSetMetaData;
@@ -123,7 +124,7 @@ abstract class ImportAbstract extends VTITemplate {
       lineNumber++;
       return (importReadData.readNextRow(nextRow));
     } catch (Exception ex) {
-		throw LoadError.unexpectedError(ex);
+		throw importError(ex);
 	}
   }
 
@@ -312,4 +313,24 @@ abstract class ImportAbstract extends VTITemplate {
 			return false;
 
 	}
+        
+        /**
+         * Close the stream and wrap exception in a SQLException
+         * 
+         * @param ex  Exception causing the import error
+         * @throws SQLException
+         */
+        public  SQLException importError(Exception ex) {
+            Exception closeException = null;
+            if (importReadData != null)
+                try {
+                    importReadData.closeStream(); 
+                } catch (Exception e) {
+                    closeException = e;
+                }
+                SQLException le = LoadError.unexpectedError(ex);
+                if (closeException != null)
+                    le.setNextException(LoadError.unexpectedError(closeException));
+                return le;
+        }
 }

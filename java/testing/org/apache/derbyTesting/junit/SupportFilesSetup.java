@@ -30,6 +30,7 @@ import java.security.AccessController;
 import java.security.PrivilegedActionException;
 
 import junit.extensions.TestSetup;
+import junit.framework.Assert;
 import junit.framework.Test;
 
 /**
@@ -268,17 +269,20 @@ public class SupportFilesSetup extends TestSetup {
     }
 
 
-    public static boolean deleteFile(final String fileName) 
+    public static void deleteFile(final String fileName) 
     {
-        Boolean ret = (Boolean) AccessController.doPrivileged
+        AccessController.doPrivileged
             (new java.security.PrivilegedAction() {
                         
                     public Object run() {
-                        return Boolean.valueOf((new File(fileName)).delete());
+                        File delFile = new File(fileName);
+                        if (!delFile.exists())
+                                return null;
+                         Assert.assertTrue(delFile.delete());
+                         return null;
                     }
                 }
              );
             
-        return ret.booleanValue();
     }
 }

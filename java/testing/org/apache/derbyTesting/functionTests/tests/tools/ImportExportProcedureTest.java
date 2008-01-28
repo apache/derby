@@ -1922,8 +1922,6 @@ public final class ImportExportProcedureTest extends BaseJDBCTestCase {
             + "'extout/nodir/t1.dat' , null, null, null) ");
         assertStatementError("XIE0I", cSt);
 	
-	//DERBY-2925: need to delete existing files first.
-        SupportFilesSetup.deleteFile("extinout/t1.dat");
 
         //export table not found
         
@@ -1943,7 +1941,7 @@ public final class ImportExportProcedureTest extends BaseJDBCTestCase {
         assertStatementError("38000", cSt);
        
 	//DERBY-2925: need to delete existing files first.
-        SupportFilesSetup.deleteFile("extout/t1.dat");
+        SupportFilesSetup.deleteFile("extinout/t1.dat");
  
         //export query is invalid (syntax error)
         
@@ -2048,7 +2046,7 @@ public final class ImportExportProcedureTest extends BaseJDBCTestCase {
             "call SYSCS_UTIL.SYSCS_EXPORT_TABLE ('IEP', 'T1' , "
             + "'extinout/t1.dat' , '\\a', '\\', null) ");
         assertStatementError("XIE0J", cSt);
-        
+                
         //DO A VALID EXPORT AND  IMPORT
         
         st.executeUpdate(
@@ -2070,6 +2068,8 @@ public final class ImportExportProcedureTest extends BaseJDBCTestCase {
             + "'extinout/t1.dat' , null, null, 'utf-8', 0) ");
         assertUpdateCount(cSt, 0);
         
+        //  DERBY-2925: need to delete existing files 
+        SupportFilesSetup.deleteFile("extinout/t1.dat");
         rs = st.executeQuery(
             " select * from t1");
         

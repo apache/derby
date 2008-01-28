@@ -84,7 +84,7 @@ public class Import extends ImportAbstract{
 
 		}catch(Exception e)
 		{
-			throw LoadError.unexpectedError(e);
+			throw importError(e);
 		}
 	}
 
