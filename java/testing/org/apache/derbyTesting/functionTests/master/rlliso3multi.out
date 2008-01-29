@@ -592,13 +592,13 @@ ij(T6SCANNER)> --
 get cursor update_cursor3 as
     'select b from test_6 where a=8 for update of b';
 ij(T6SCANNER)> select type, cnt, mode, tabname, lockname, state from lock_table2 order by tabname, type desc, mode, cnt, lockname;
-TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE
-------------------------------------------------
-TABLE   |1   |IX  |TEST_6      |Tablelock |GRANT
-TABLE   |1   |IX  |TEST_6      |Tablelock |GRANT
-ROW     |1   |S   |TEST_6      |(1,1)     |GRANT
-ROW     |1   |U   |TEST_6      |(1,3)     |GRANT
-ROW     |1   |U   |TEST_6      |(1,7)     |GRANT
+TYPE    |CNT|MODE|TABNAME     |LOCKNAME  |STATE
+-----------------------------------------------
+TABLE   |1  |IX  |TEST_6      |Tablelock |GRANT
+TABLE   |1  |IX  |TEST_6      |Tablelock |GRANT
+ROW     |1  |S   |TEST_6      |(1,1)     |GRANT
+ROW     |1  |U   |TEST_6      |(1,3)     |GRANT
+ROW     |1  |U   |TEST_6      |(1,7)     |GRANT
 ij(T6SCANNER)> next update_cursor3;
 B          
 -----------

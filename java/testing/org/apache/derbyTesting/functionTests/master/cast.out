@@ -30,18 +30,18 @@ ij> --
 
 -- shrink
 values (cast ('hell' as char(2)));
-1   
-----
-he  
+1 
+--
+he
 ij> values (cast ('hell' as varchar(2)));
-1   
-----
-he  
+1 
+--
+he
 ij> -- shrink, whitespace only
 values (cast ('he  ' as char(2)));
-1   
-----
-he  
+1 
+--
+he
 ij> -- expand, check lengths
 values (cast ('hell' as char(20)));
 1                   
@@ -64,14 +64,14 @@ ij> ----------------
 ----------------
 -- shrink
 values (cast (X'1111' as char(1) for bit data));
-1   
-----
-11  
+1 
+--
+11
 ij> -- shrink, zero only
 values (cast (X'1100' as char(1) for bit data));
-1   
-----
-11  
+1 
+--
+11
 ij> -- expand
 values (cast (X'1111' as char(2) for bit data));
 1   
@@ -84,149 +84,149 @@ values (cast ('1234' as char(2) for bit data));
 ERROR 42846: Cannot convert types 'CHAR' to 'CHAR () FOR BIT DATA'.
 ij> -- extra tests for shrinking parts of bits
 values cast (X'11111111' as char(1) for bit data);
-1   
-----
-11  
+1 
+--
+11
 ij> values cast (X'01111111' as char(1) for bit data);
-1   
-----
-01  
+1 
+--
+01
 ij> values cast (X'11111111' as char(1) for bit data);
-1   
-----
-11  
+1 
+--
+11
 ij> values cast (X'01111111' as char(1) for bit data);
-1   
-----
-01  
+1 
+--
+01
 ij> values cast (X'00111111' as char(1) for bit data);
-1   
-----
-00  
+1 
+--
+00
 ij> values cast (X'11111111' as char(1) for bit data);
-1   
-----
-11  
+1 
+--
+11
 ij> values cast (X'01111111' as char(1) for bit data);
-1   
-----
-01  
+1 
+--
+01
 ij> values cast (X'00111111' as char(1) for bit data);
-1   
-----
-00  
+1 
+--
+00
 ij> values cast (X'00011111' as char(1) for bit data);
-1   
-----
-00  
+1 
+--
+00
 ij> values cast (X'11111111' as char(1) for bit data);
-1   
-----
-11  
+1 
+--
+11
 ij> values cast (X'01111111' as char(1) for bit data);
-1   
-----
-01  
+1 
+--
+01
 ij> values cast (X'00111111' as char(1) for bit data);
-1   
-----
-00  
+1 
+--
+00
 ij> values cast (X'00011111' as char(1) for bit data);
-1   
-----
-00  
+1 
+--
+00
 ij> values cast (X'00001111' as char(1) for bit data);
-1   
-----
-00  
+1 
+--
+00
 ij> values cast (X'11111111' as char(1) for bit data);
-1   
-----
-11  
+1 
+--
+11
 ij> values cast (X'01111111' as char(1) for bit data);
-1   
-----
-01  
+1 
+--
+01
 ij> values cast (X'00111111' as char(1) for bit data);
-1   
-----
-00  
+1 
+--
+00
 ij> values cast (X'00011111' as char(1) for bit data);
-1   
-----
-00  
+1 
+--
+00
 ij> values cast (X'00001111' as char(1) for bit data);
-1   
-----
-00  
+1 
+--
+00
 ij> values cast (X'00000111' as char(1) for bit data);
-1   
-----
-00  
+1 
+--
+00
 ij> values cast (X'11111111' as char(1) for bit data);
-1   
-----
-11  
+1 
+--
+11
 ij> values cast (X'01111111' as char(1) for bit data);
-1   
-----
-01  
+1 
+--
+01
 ij> values cast (X'00111111' as char(1) for bit data);
-1   
-----
-00  
+1 
+--
+00
 ij> values cast (X'00011111' as char(1) for bit data);
-1   
-----
-00  
+1 
+--
+00
 ij> values cast (X'00001111' as char(1) for bit data);
-1   
-----
-00  
+1 
+--
+00
 ij> values cast (X'00000111' as char(1) for bit data);
-1   
-----
-00  
+1 
+--
+00
 ij> values cast (X'00000011' as char(1) for bit data);
-1   
-----
-00  
+1 
+--
+00
 ij> values cast (X'11111111' as char(1) for bit data);
-1   
-----
-11  
+1 
+--
+11
 ij> values cast (X'01111111' as char(1) for bit data);
-1   
-----
-01  
+1 
+--
+01
 ij> values cast (X'00111111' as char(1) for bit data);
-1   
-----
-00  
+1 
+--
+00
 ij> values cast (X'00011111' as char(1) for bit data);
-1   
-----
-00  
+1 
+--
+00
 ij> values cast (X'00001111' as char(1) for bit data);
-1   
-----
-00  
+1 
+--
+00
 ij> values cast (X'00000111' as char(1) for bit data);
-1   
-----
-00  
+1 
+--
+00
 ij> values cast (X'00000011' as char(1) for bit data);
-1   
-----
-00  
+1 
+--
+00
 ij> values cast (X'00000001' as char(1) for bit data);
-1   
-----
-00  
+1 
+--
+00
 ij> values cast (X'0011111111111111' as char(1) for bit data);
-1   
-----
-00  
+1 
+--
+00
 ij> values cast (X'1111111100111111' as char(2) for bit data);
 1   
 ----
@@ -259,13 +259,13 @@ ij> values (cast (1.1 as decimal(2,1)));
 ----
 1.1 
 ij> values (cast (1.1 as numeric(2,0)));
-1   
-----
-1   
+1  
+---
+1  
 ij> values (cast (1.1 as decimal(2,0)));
-1   
-----
-1   
+1  
+---
+1  
 ij> values (cast (1.1 as float));
 1                     
 ----------------------
@@ -299,13 +299,13 @@ ij> values (cast (1.9 as decimal(2,1)));
 ----
 1.9 
 ij> values (cast (1.9 as numeric(2,0)));
-1   
-----
-1   
+1  
+---
+1  
 ij> values (cast (1.9 as decimal(2,0)));
-1   
-----
-1   
+1  
+---
+1  
 ij> values (cast (1.9 as float));
 1                     
 ----------------------

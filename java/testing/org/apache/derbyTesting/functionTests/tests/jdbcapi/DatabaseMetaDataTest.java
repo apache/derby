@@ -193,7 +193,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     public static Test suite() {
         TestSuite suite = new TestSuite("DatabaseMetaDataTest");
         suite.addTest(
-            TestConfiguration.defaultSuite(DatabaseMetaDataTest.class));
+            TestConfiguration.embeddedSuite(DatabaseMetaDataTest.class));
         // Test for DERBY-2584 needs a fresh database to ensure that the
         // meta-data queries haven't already been compiled. No need to run the
         // test in client/server mode since it only tests the compilation of
@@ -737,7 +737,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         if (usingDerbyNetClient())
             nullval = false;
         boolean [] nullability = {
-                true, true, true, true, nullval, true, nullval,
+                true, true, false, true, nullval, true, nullval,
                 nullval, nullval, nullval, true, true, nullval, nullval,
                 nullval, nullval, true, true, true, true, true
         };
@@ -755,7 +755,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         columnTypes = new int[] {
                 Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
         nullability = new boolean[] {
-                true, true, true, true};
+                true, true, false, false};
         assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
         JDBC.assertEmpty(rs);
 
@@ -767,7 +767,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                 Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR,
                 Types.VARCHAR, Types.VARCHAR};
         nullability = new boolean[] {
-                true, true, true, true, true, true};
+                true, true, false, true, true, false};
         assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
         JDBC.assertEmpty(rs);
 
@@ -1903,15 +1903,15 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                 true 
         };
         
-        // DERBY-2307 Nullablity is wrong for columns 1,7,9 (1-based)
+        // DERBY-2307 Nullablity is wrong for column 1 (1-based)
         // Make a modified copy of JDBC_COLUMN_NULLABILITY
         // here to allow the test to pass. Left JDBC_COLUMN_NULLABILITY
         // as the expected versions as it is also used for the ODBC
         // checks below and has the correct values.
         boolean[] JDBC_COLUMN_NULLABILITY_DERBY_2307 = {
                 true, false, true, true,
-                true, true, true, false,
-                true, true, false,
+                true, true, false, false,
+                false, true, false,
                 true, true,
                 true, true,
                 true, true,
@@ -2282,6 +2282,10 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
 
     /**
      * Check the shape of the ResultSet from any getTables call.
+     * Note nullability of TABLE_CAT is not nullable for Derby
+     * even though it doesn't support catalogs because the
+     * SQL query returns a constant (empty string) for
+     * a table's catalog.
      */
     private void checkTablesShape(ResultSet rs) throws SQLException
     {
@@ -2297,8 +2301,8 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
           Types.VARCHAR, Types.VARCHAR
          }
         , new boolean[] {
-          true, false, false, true, // TABLE_SCHEM cannot be NULL in Derby
-          true, true, true, true,
+          false, false, false, true, // TABLE_SCHEM cannot be NULL in Derby
+          false, true, true, true,
           true, true
         }
         );        
@@ -2899,8 +2903,8 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
 
             // incorrect
             new boolean[] {
-                true, false, false, false,
-                true, false, false, false,
+                false, false, false, false,
+                false, false, false, false,
                 true, true, true, false,
                 false, true
             }
@@ -3218,7 +3222,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         		scope != DatabaseMetaData.bestRowSession)
         {
         	nullability = new boolean [] {
-                    false, true, false, true, false, false, false, false};
+                    false, false, false, false, false, false, false, false};
         	
         	odbcColumnTypes = columnTypes;
         }
@@ -3322,7 +3326,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         int [] columnTypes = {
                 Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,
                 Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR};
-        boolean [] nullability = {true,false,false,false,true,true,true,true};
+        boolean [] nullability = {false,false,false,false,false,false,true,true};
 
         assertMetaDataResultSet(rss[0], columnNames, columnTypes, nullability);
         assertMetaDataResultSet(rss[1], columnNames, columnTypes, nullability);
@@ -3391,7 +3395,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         int [] columnTypes = {
                 Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,
                 Types.VARCHAR,Types.VARCHAR,Types.VARCHAR};
-        boolean [] nullability = {true,false,false,true,true,true,true};
+        boolean [] nullability = {false,false,false,false,false,false,false};
         
         assertMetaDataResultSet(rss[0], columnNames, columnTypes, nullability);
         assertMetaDataResultSet(rss[1], columnNames, columnTypes, nullability);
@@ -3556,8 +3560,8 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                 // ASC_OR_DESC is Types.CHAR rather than VARCHAR...
                 Types.SMALLINT,Types.VARCHAR,Types.CHAR,Types.INTEGER,
                 Types.INTEGER,Types.VARCHAR};
-        boolean [] nullability = {true,false,false,
-            true,true,true,true,true,false,true,true,true,true};
+        boolean [] nullability = {false,false,false,
+            true,false,true,true,true,false,true,true,true,true};
         
         assertMetaDataResultSet(rss[0], columnNames, columnTypes, nullability);
         assertMetaDataResultSet(rss[1], columnNames, odbcColumnTypes, nullability);
@@ -3728,7 +3732,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         int [] columnTypes = {
                 Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,
                 Types.VARCHAR,Types.SMALLINT,Types.VARCHAR};
-        boolean [] nullability = {true,false,false,false,true,false};
+        boolean [] nullability = {false,false,false,false,true,false};
         assertMetaDataResultSet(rss[0], columnNames, columnTypes, nullability);
         assertMetaDataResultSet(rss[1], columnNames, columnTypes, nullability);
            
@@ -3997,8 +4001,8 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                 Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,
                 Types.SMALLINT,Types.SMALLINT,Types.SMALLINT,
                 Types.VARCHAR,Types.VARCHAR,Types.SMALLINT};
-            boolean [] nullability = {true,false,false,false,
-                true,false,false,false,true,true,true,false,false,true};
+            boolean [] nullability = {false,false,false,false,
+                false,false,false,false,true,true,true,false,false,true};
             
          assertMetaDataResultSet(rss[0], columnNames, columnTypes, nullability);
          assertMetaDataResultSet(rss[1], columnNames, columnTypes, nullability);   
@@ -4256,9 +4260,9 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                 Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.INTEGER,
                 Types.INTEGER, Types.INTEGER, Types.VARCHAR, Types.SMALLINT};
         boolean[] nullability = new boolean[] {
-                true, false, false, true, true, true, true, true, false};
+                false, false, false, true, true, true, true, true, false};
         boolean[] odbcNullability = new boolean[] {
-                true, false, false, true, true, true, true, true};
+                false, false, false, true, true, true, true, true};
         assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
         assertMetaDataResultSet(
                 rs[1], odbcColumnNames, odbcColumnTypes, odbcNullability);
@@ -4323,11 +4327,11 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                 , Types.SMALLINT, Types.SMALLINT};
         nullability = new boolean[] {
                 true, false, false, false, false, false, false, false, true, true,
-                true, false, true, true, true, true, true, true, true, false//};
+                true, false, true, true, true, true, true, false, true, false//};
                 , false, false};
         odbcNullability = new boolean[] {
-                true, false, false, false, false, true, false, false, true, true,
-                true, false, true, true, true, true, true, true, true//};
+                true, false, false, false, false, false, false, false, true, true,
+                true, false, true, true, true, true, true, false, true//};
                 , false, false};
         assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
         assertMetaDataResultSet(

@@ -417,7 +417,11 @@ public class CastNode extends ValueNode
 						sourceCTI.getSQLTypeName(),
                         getTypeId().getSQLTypeName());
 			}
-		}		
+		}	
+		
+		// Preserve the nullability of the operand since a CAST
+		// of a non-NULL value is also non-NULL.
+		setNullability(castOperand.getTypeServices().isNullable());
 	}
 
 	/**

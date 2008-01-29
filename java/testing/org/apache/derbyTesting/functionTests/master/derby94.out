@@ -54,41 +54,41 @@ C1
 -----------
 0          
 ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname ;
-TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE
-------------------------------------------------
-TABLE   |2   |IX  |DERBY94_T1  |Tablelock |GRANT
-ROW     |1   |U   |DERBY94_T1  |(1,8)     |GRANT
-ROW     |1   |X   |DERBY94_T1  |(1,7)     |GRANT
-TABLE   |1   |IX  |DERBY94_T2  |Tablelock |GRANT
-ROW     |1   |U   |DERBY94_T2  |(1,7)     |GRANT
+TYPE    |CNT|MODE|TABNAME     |LOCKNAME  |STATE
+-----------------------------------------------
+TABLE   |2  |IX  |DERBY94_T1  |Tablelock |GRANT
+ROW     |1  |U   |DERBY94_T1  |(1,8)     |GRANT
+ROW     |1  |X   |DERBY94_T1  |(1,7)     |GRANT
+TABLE   |1  |IX  |DERBY94_T2  |Tablelock |GRANT
+ROW     |1  |U   |DERBY94_T2  |(1,7)     |GRANT
 ij> --following insert should get X lock on derby94_t2 because of escalation , but should leave U lock on derby94_t1 as it is
 insert into derby94_t2 select c1 from derby94_t1 ;
 160 rows inserted/updated/deleted
 ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname ;
-TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE
-------------------------------------------------
-TABLE   |3   |IX  |DERBY94_T1  |Tablelock |GRANT
-ROW     |1   |U   |DERBY94_T1  |(1,8)     |GRANT
-ROW     |1   |X   |DERBY94_T1  |(1,7)     |GRANT
-TABLE   |4   |IX  |DERBY94_T2  |Tablelock |GRANT
-TABLE   |1   |X   |DERBY94_T2  |Tablelock |GRANT
+TYPE    |CNT|MODE|TABNAME     |LOCKNAME  |STATE
+-----------------------------------------------
+TABLE   |3  |IX  |DERBY94_T1  |Tablelock |GRANT
+ROW     |1  |U   |DERBY94_T1  |(1,8)     |GRANT
+ROW     |1  |X   |DERBY94_T1  |(1,7)     |GRANT
+TABLE   |4  |IX  |DERBY94_T2  |Tablelock |GRANT
+TABLE   |1  |X   |DERBY94_T2  |Tablelock |GRANT
 ij> --following update statement should escalate the locks on derby94_t1 to table level X lock
 update derby94_t1 set c1=c1+999 ;
 160 rows inserted/updated/deleted
 ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname ;
-TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE
-------------------------------------------------
-TABLE   |8   |IX  |DERBY94_T1  |Tablelock |GRANT
-TABLE   |1   |X   |DERBY94_T1  |Tablelock |GRANT
-TABLE   |4   |IX  |DERBY94_T2  |Tablelock |GRANT
-TABLE   |1   |X   |DERBY94_T2  |Tablelock |GRANT
+TYPE    |CNT|MODE|TABNAME     |LOCKNAME  |STATE
+-----------------------------------------------
+TABLE   |8  |IX  |DERBY94_T1  |Tablelock |GRANT
+TABLE   |1  |X   |DERBY94_T1  |Tablelock |GRANT
+TABLE   |4  |IX  |DERBY94_T2  |Tablelock |GRANT
+TABLE   |1  |X   |DERBY94_T2  |Tablelock |GRANT
 ij> close c1 ;
 ij> close c2 ;
 ij> commit ;
 ij> --following lock table dump should not show any  locks, above commit should have release them
 select * from lock_table order by tabname, type desc, mode, cnt, lockname;
-TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE
-------------------------------------------------
+TYPE    |CNT|MODE|TABNAME     |LOCKNAME  |STATE
+-----------------------------------------------
 ij> drop table derby94_t1;
 0 rows inserted/updated/deleted
 ij> drop table derby94_t2;
