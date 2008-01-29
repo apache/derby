@@ -1904,23 +1904,12 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         };
         
         // DERBY-2307 Nullablity is wrong for column 1 (1-based)
-        // Make a modified copy of JDBC_COLUMN_NULLABILITY
-        // here to allow the test to pass. Left JDBC_COLUMN_NULLABILITY
-        // as the expected versions as it is also used for the ODBC
-        // checks below and has the correct values.
-        boolean[] JDBC_COLUMN_NULLABILITY_DERBY_2307 = {
-                true, false, true, true,
-                true, true, false, false,
-                false, true, false,
-                true, true,
-                true, true,
-                true, true,
-                true 
-        };
-        
+        // Modify JDBC_COLUMN_NULLABILITY to reflect current reality
+        JDBC_COLUMN_NULLABILITY[1 - 1] = true;
+      
         ResultSet rs = getDMD().getTypeInfo();
         assertMetaDataResultSet(rs, JDBC_COLUMN_NAMES, JDBC_COLUMN_TYPES
-        , JDBC_COLUMN_NULLABILITY_DERBY_2307
+        , JDBC_COLUMN_NULLABILITY
         );
 
 	/*
@@ -2228,8 +2217,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         System.arraycopy(JDBC_COLUMN_NULLABILITY, 0, ODBC_COLUMN_NULLABILITY, 0,
                 JDBC_COLUMN_NULLABILITY.length);
         
-        ODBC_COLUMN_NULLABILITY[15] = false; // // SQL_DATETIME_SUB (JDBC unused)
-        ODBC_COLUMN_NULLABILITY[18] = true; // INTERVAL_PRECISION
+        ODBC_COLUMN_NULLABILITY[19 - 1] = true; // INTERVAL_PRECISION (extra column comapred to JDBC)
                 
         CallableStatement cs = prepareCall(
                 "CALL SYSIBM.SQLGETTYPEINFO (0, 'DATATYPE=''ODBC''')");
@@ -2238,7 +2226,8 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         ResultSet odbcrs = cs.getResultSet();
         assertNotNull(odbcrs);
         
-        assertMetaDataResultSet(odbcrs, ODBC_COLUMN_NAMES, ODBC_COLUMN_TYPES, null);
+        assertMetaDataResultSet(odbcrs, ODBC_COLUMN_NAMES, ODBC_COLUMN_TYPES,
+        		ODBC_COLUMN_NULLABILITY);
         
         odbcrs.close();
         cs.close();
@@ -3545,26 +3534,22 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                 // ASC_OR_DESC is Types.CHAR rather than VARCHAR...
                 Types.SMALLINT,Types.VARCHAR,Types.CHAR,Types.INTEGER,
                 Types.INTEGER,Types.VARCHAR};
+        
+        // types.boolean is not supported with networkserver
         if (usingDerbyNetClient())
-            columnTypes = new int[] {
-                Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,
-                // types.boolean is not supported with networkserver
-                Types.SMALLINT,Types.VARCHAR,Types.VARCHAR,Types.SMALLINT,
-                // ASC_OR_DESC is Types.CHAR rather than VARCHAR...
-                Types.SMALLINT,Types.VARCHAR,Types.CHAR,Types.INTEGER,
-                Types.INTEGER,Types.VARCHAR};
-        int[] odbcColumnTypes = new int[] {
-                Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,
-                // types.boolean is not supported with ODBC
-                Types.SMALLINT,Types.VARCHAR,Types.VARCHAR,Types.SMALLINT,
-                // ASC_OR_DESC is Types.CHAR rather than VARCHAR...
-                Types.SMALLINT,Types.VARCHAR,Types.CHAR,Types.INTEGER,
-                Types.INTEGER,Types.VARCHAR};
+        	columnTypes[4 - 1] = Types.SMALLINT;
+        
         boolean [] nullability = {false,false,false,
             true,false,true,true,true,false,true,true,true,true};
         
+        // JDBC result set
         assertMetaDataResultSet(rss[0], columnNames, columnTypes, nullability);
-        assertMetaDataResultSet(rss[1], columnNames, odbcColumnTypes, nullability);
+        
+        // Change shape for ODBC.
+        columnTypes[4 - 1] = Types.SMALLINT; // types.boolean is not supported with ODBC
+
+        // ODBC result set
+        assertMetaDataResultSet(rss[1], columnNames, columnTypes, nullability);
        
         return rss;        
     }
