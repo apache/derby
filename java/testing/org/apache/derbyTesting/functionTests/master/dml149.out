@@ -65,8 +65,8 @@ ij> -- PASS:0846 If table is created?
 ij> -- NOTE:0846 CAST (100 AS NUMERIC (2)) loses the leading significant digit
    SELECT CAST (100 AS NUMERIC (2))
   FROM HU.ECCO;
-1   
-----
+1  
+---
 ERROR 22003: The resulting value is outside the range for the data type DECIMAL/NUMERIC(2,0).
 ij> -- PASS:0846 If ERROR, numeric value out of range, 0 rows selected?
 
