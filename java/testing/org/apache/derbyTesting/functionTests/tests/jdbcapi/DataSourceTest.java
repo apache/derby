@@ -535,6 +535,82 @@ public class DataSourceTest extends BaseJDBCTestCase {
         conn.close();
     }
     
+    /**
+     * Test that a PooledConnection can be reused during the close
+     * event raised by the closing of its logical connection.
+     * DERBY-2142.
+     * @throws SQLException 
+     *
+     */
+    public void testPooledReuseOnClose() throws SQLException
+    {
+    	// TEMP - seems to fail on network client
+    	if (!usingEmbedded())
+    		return;
+    	
+    	// PooledConnection from a ConnectionPoolDataSource
+    	ConnectionPoolDataSource cpds =
+    		J2EEDataSource.getConnectionPoolDataSource();
+    	subtestPooledReuseOnClose(cpds.getPooledConnection());
+
+    	// PooledConnection from an XDataSource
+    	XADataSource xads = J2EEDataSource.getXADataSource();
+    	subtestPooledReuseOnClose(xads.getXAConnection());
+    }
+    
+    /**
+     * Tests that a pooled connection can successfully be reused
+     * (a new connection obtained from it) during the processing
+     * of its close event by its listener.
+     * Sections 11.2 & 12.5 of JDBC 4 specification indicate that the
+     * connection can be returned to the pool when the
+     * ConnectionEventListener.connectionClosed() is called.
+     */
+    private void subtestPooledReuseOnClose(final PooledConnection pc) throws SQLException
+    {
+    	final Connection[] newConn = new Connection[1];
+    	pc.addConnectionEventListener(new ConnectionEventListener() {
+
+    		/**
+    		 * Mimic a pool handler that returns the PooledConnection
+    		 * to the pool and then reallocates it to a new logical connection.
+    		 */
+			public void connectionClosed(ConnectionEvent event) {
+				PooledConnection pce = (PooledConnection) event.getSource();
+				assertSame(pc, pce);
+				try {
+					// open a new logical connection and pass
+					// back to the fixture.
+					newConn[0] = pce.getConnection();
+				} catch (SQLException e) {
+					// Need to catch the exception here because
+					// we cannot throw an exception through
+					// the api method.
+					fail(e.getMessage());
+				}
+			}
+
+			public void connectionErrorOccurred(ConnectionEvent event) {
+			}
+    		
+    	});
+    	
+    	// Open a connection then close it to trigger the
+    	// fetching of a new connection in the callback.
+    	Connection c1 = pc.getConnection();
+    	c1.close();
+    	
+    	// Fetch the connection created in the close callback
+    	Connection c2 = newConn[0];
+    	assertNotNull(c2);
+    	
+    	// Ensure the connection is useable, this hit a NPE before DERBY-2142
+    	// was fixed (for embedded).
+    	c2.createStatement().close();
+    	
+    	pc.close();
+    }
+    
     public void testAllDataSources() throws SQLException, Exception
     {
         Connection dmc = getConnection();
