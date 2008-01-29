@@ -321,4 +321,12 @@ public interface OptimizablePredicateList
 	 */	
 	public double selectivity(Optimizable optTable) throws StandardException;
 	
+	/**
+	 * Walk through the predicates in this list and make any adjustments
+	 * that are required to allow for proper handling of an ORDER BY
+	 * clause.
+	 */
+	public void adjustForSortElimination(RequiredRowOrdering ordering)
+		throws StandardException;
+
 }

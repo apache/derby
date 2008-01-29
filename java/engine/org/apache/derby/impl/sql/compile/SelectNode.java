@@ -1422,7 +1422,7 @@ public class SelectNode extends ResultSetNode
 		 */
 		if (eliminateSort)
 		{
-			prnRSN.adjustForSortElimination();
+			prnRSN.adjustForSortElimination(orderByList);
 		}
 
 		/* Set the cost of this node in the generated node */

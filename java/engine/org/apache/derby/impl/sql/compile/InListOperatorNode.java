@@ -52,6 +52,7 @@ import java.lang.reflect.Modifier;
 public final class InListOperatorNode extends BinaryListOperatorNode
 {
 	private boolean isOrdered;
+	private boolean sortDescending;
 
 	/**
 	 * Initializer for a InListOperatorNode
@@ -102,6 +103,9 @@ public final class InListOperatorNode extends BinaryListOperatorNode
 		ilon.copyFields(this);
 		if (isOrdered)
 			ilon.markAsOrdered();
+
+		if (sortDescending)
+			ilon.markSortDescending();
 
 		return ilon;
 	}
@@ -739,6 +743,19 @@ public final class InListOperatorNode extends BinaryListOperatorNode
 	}
 
 	/**
+	 * Indicate that the IN-list values for this node must be sorted
+	 * in DESCENDING order.  This only applies to in-list "multi-probing",
+	 * where the rows are processed in the order of the IN list elements
+	 * themselves.  In that case, any requirement to sort the rows in
+	 * descending order means that the values in the IN list have to
+	 * be sorted in descending order, as well.
+	 */
+	protected void markSortDescending()
+	{
+		sortDescending = true;
+	}
+
+	/**
 	 * Return whether or not the IN-list values for this node are ordered.
 	 * This is used for determining whether or not we need to do an execution-
 	 * time sort.
@@ -746,5 +763,14 @@ public final class InListOperatorNode extends BinaryListOperatorNode
 	protected boolean isOrdered()
 	{
 		return isOrdered;
+	} 
+
+	/**
+	 * Return whether or not the IN-list values for this node must be
+	 * sorted in DESCENDING order.
+	 */
+	protected boolean sortDescending()
+	{
+		return sortDescending;
 	} 
 }

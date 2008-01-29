@@ -546,6 +546,175 @@ public class InListMultiProbeTest extends BaseJDBCTestCase {
     }
 
     /**
+     * When IN list multi-probing occurs, the rows from the underlying
+     * table are returned in the order of the values in the *IN list*,
+     * instead of in the order of the rows as they are returned from
+     * the index scan.  So if the index is defined as "DESC" and we
+     * eliminate an ORDER BY ... DESC sort during optimization, we
+     * have to sort the IN list values in descending order to make up
+     * for the eliminated sort.  DERBY-3279.
+     */
+    public void testInListProbingWithOrderBy() throws SQLException
+    {
+        Statement st = createStatement();
+
+        st.execute("create table CHEESE (CHEESE_CODE VARCHAR(5), " +
+            "CHEESE_NAME VARCHAR(20), CHEESE_COST DECIMAL(7,4))");
+
+        st.execute("create index cheese_index on CHEESE " +
+            "(CHEESE_CODE DESC, CHEESE_NAME DESC, CHEESE_COST DESC)");
+
+        st.execute(
+            "INSERT INTO CHEESE (CHEESE_CODE, CHEESE_NAME, CHEESE_COST) " +
+            "VALUES ('00000', 'GOUDA', 001.1234), ('00000', 'EDAM', " +
+            "002.1111), ('54321', 'EDAM', 008.5646), ('12345', " +
+            "'GORGONZOLA', 888.2309), ('AAAAA', 'EDAM', 999.8888), " +
+            "('54321', 'MUENSTER', 077.9545)");
+
+        /* ORDER BY is DESC, so we'll eliminate the ORDER BY sort for
+         * this query.  Results should still come back in descending
+         * order, though.
+         */
+
+        String [][] expRS1 =
+            new String [][] {
+                {"AAAAA", "EDAM", "999.8888"},
+                {"54321", "EDAM", "8.5646"},
+                {"00000", "EDAM", "2.1111"}
+            };
+
+        JDBC.assertFullResultSet(st.executeQuery(
+            "SELECT * FROM CHEESE " +
+            "WHERE (CHEESE_CODE='54321' OR CHEESE_CODE='00000' " +
+            "OR CHEESE_CODE='AAAAA') AND CHEESE_NAME='EDAM' " +
+            "ORDER BY CHEESE_CODE DESC, CHEESE_NAME DESC, CHEESE_COST DESC"),
+            expRS1);
+
+        /* ORDER BY is ASC so we will not eliminate the sort; make
+         * sure the rows are still correctly ordered.
+         */
+
+        String [][] expRS2 =
+            new String [][] {
+                {"00000", "EDAM", "2.1111"},
+                {"54321", "EDAM", "8.5646"},
+                {"AAAAA", "EDAM", "999.8888"}
+            };
+
+        JDBC.assertFullResultSet(st.executeQuery(
+            "SELECT * FROM CHEESE " +
+            "WHERE (CHEESE_CODE='54321' OR CHEESE_CODE='00000' " +
+            "OR CHEESE_CODE='AAAAA') AND CHEESE_NAME='EDAM' " +
+            "ORDER BY CHEESE_CODE ASC, CHEESE_NAME DESC, CHEESE_COST DESC"),
+            expRS2);
+
+        /* Simple join where the ORDER BY is based on position in
+         * the RCL and the probe predicate is w.r.t. the second
+         * table in the FROM list.  In this case the ORDER BY's
+         * immediate column position is "4" while the probe pred's
+         * immediate column position is "1"; but underneath we
+         * should still be able to figure out that they are pointing
+         * to the same column and thus do the correct sorting.
+         */
+
+        String [][] expRS3 =
+            new String [][] {
+                {"AAAAA", "EDAM", "999.8888", "54321", "EDAM", "8.5646"},
+                {"54321", "EDAM", "8.5646", "54321", "EDAM", "8.5646"},
+                {"00000", "EDAM", "2.1111", "54321", "EDAM", "8.5646"},
+                {"AAAAA", "EDAM", "999.8888", "00000", "EDAM", "2.1111"},
+                {"54321", "EDAM", "8.5646", "00000", "EDAM", "2.1111"},
+                {"00000", "EDAM", "2.1111", "00000", "EDAM", "2.1111"}
+            };
+
+        JDBC.assertFullResultSet(st.executeQuery(
+            "SELECT * FROM CHEESE C1, CHEESE C2 " +
+            "WHERE C1.CHEESE_NAME = C2.CHEESE_NAME AND " +
+            "(C2.CHEESE_CODE='00000' OR C2.CHEESE_CODE='54321') " +
+            "AND C1.CHEESE_NAME='EDAM' ORDER BY 4 DESC, 5 DESC, 6 DESC"),
+            expRS3);
+
+        // Same as previous query but with ASC in the ORDER BY.
+
+        String [][] expRS4 =
+            new String [][] {
+                {"00000", "EDAM", "2.1111", "00000", "EDAM", "2.1111"},
+                {"54321", "EDAM", "8.5646", "00000", "EDAM", "2.1111"},
+                {"AAAAA", "EDAM", "999.8888", "00000", "EDAM", "2.1111"},
+                {"00000", "EDAM", "2.1111", "54321", "EDAM", "8.5646"},
+                {"54321", "EDAM", "8.5646", "54321", "EDAM", "8.5646"},
+                {"AAAAA", "EDAM", "999.8888", "54321", "EDAM", "8.5646"}
+            };
+
+        JDBC.assertFullResultSet(st.executeQuery(
+            "SELECT * FROM CHEESE C1, CHEESE C2 " +
+            "WHERE C1.CHEESE_NAME = C2.CHEESE_NAME AND " +
+            "(C2.CHEESE_CODE='00000' OR C2.CHEESE_CODE='54321') " +
+            "AND C1.CHEESE_NAME='EDAM' ORDER BY 4 ASC, 5 DESC, 6 DESC"),
+            expRS4);
+
+        /* Repeat the tests with parameter markers instead of literals,
+         * and explicit IN lists instead of an OR clause that would
+         * get transformed into an IN list.
+         */
+
+        /* ORDER BY is DESC, so we'll eliminate the ORDER BY sort for
+         * this query.  Results should still come back in descending
+         * order, though.
+         */
+        PreparedStatement ps = prepareStatement("SELECT * FROM CHEESE " +
+            "WHERE CHEESE_CODE IN (?,?,?) AND CHEESE_NAME='EDAM' " +
+            "ORDER BY CHEESE_CODE DESC, CHEESE_NAME DESC, CHEESE_COST DESC");
+
+        ps.setString(1, "00000");
+        ps.setString(2, "AAAAA");
+        ps.setString(3, "54321");
+        JDBC.assertFullResultSet(ps.executeQuery(), expRS1);
+
+        /* ORDER BY is ASC so we will not eliminate the sort; make
+         * sure the rows are still correctly ordered.
+         */
+
+        ps = prepareStatement("SELECT * FROM CHEESE " +
+            "WHERE CHEESE_CODE IN (?,?,?) AND CHEESE_NAME='EDAM' " +
+            "ORDER BY CHEESE_CODE ASC, CHEESE_NAME DESC, CHEESE_COST DESC");
+
+        ps.setString(1, "00000");
+        ps.setString(2, "AAAAA");
+        ps.setString(3, "54321");
+        JDBC.assertFullResultSet(ps.executeQuery(), expRS2);
+
+        /* Simple join where the ORDER BY is based on position in
+         * the RCL and the probe predicate is w.r.t. to the second
+         * table in the FROM list.
+         */
+
+        ps = prepareStatement("SELECT * FROM CHEESE C1, CHEESE C2 " +
+            "WHERE C1.CHEESE_NAME = C2.CHEESE_NAME AND " +
+            "C2.CHEESE_CODE IN (?,?) AND C1.CHEESE_NAME='EDAM' " +
+            "ORDER BY 4 DESC, 5 DESC, 6 DESC");
+
+        ps.setString(1, "00000");
+        ps.setString(2, "54321");
+        JDBC.assertFullResultSet(ps.executeQuery(), expRS3);
+
+        // Same as previous query but with ASC in the ORDER BY.
+
+        ps = prepareStatement("SELECT * FROM CHEESE C1, CHEESE C2 " +
+            "WHERE C1.CHEESE_NAME = C2.CHEESE_NAME AND " +
+            "C2.CHEESE_CODE IN (?,?) AND C1.CHEESE_NAME='EDAM' " +
+            "ORDER BY 4 ASC, 5 ASC, 6 ASC");
+
+        ps.setString(1, "00000");
+        ps.setString(2, "54321");
+        JDBC.assertFullResultSet(ps.executeQuery(), expRS4);
+
+        ps.close();
+        st.execute("drop table cheese");
+        st.close();
+    }
+
+    /**
      * Insert the received number of rows into DATA_TABLE via
      * batch processing.
      */

@@ -577,6 +577,15 @@ abstract class SingleChildResultSetNode extends FromTable
 	}
 
 	/**
+	 * @see ResultSetNode#adjustForSortElimination
+	 */
+	void adjustForSortElimination(RequiredRowOrdering rowOrdering)
+		throws StandardException
+	{
+		childResult.adjustForSortElimination(rowOrdering);
+	}
+
+	/**
 	 * Get the final CostEstimate for this node.
 	 *
 	 * @return	The final CostEstimate for this node, which is

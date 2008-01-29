@@ -36,6 +36,8 @@ import org.apache.derby.iapi.sql.compile.ExpressionClassBuilderInterface;
 import org.apache.derby.iapi.sql.compile.OptimizablePredicate;
 import org.apache.derby.iapi.sql.compile.OptimizablePredicateList;
 import org.apache.derby.iapi.sql.compile.Optimizable;
+import org.apache.derby.iapi.sql.compile.RequiredRowOrdering;
+import org.apache.derby.iapi.sql.compile.RowOrdering;
 import org.apache.derby.iapi.sql.compile.AccessPath;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
@@ -2919,7 +2921,28 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 
 			InListOperatorNode ilon = pred.getSourceInList();
 			mb.getField(ilon.generateListAsArray(acb, mb));
-			mb.push(ilon.isOrdered());
+
+			if (ilon.sortDescending())
+				mb.push(RowOrdering.DESCENDING);
+			else if (!ilon.isOrdered())
+			{
+				/* If there is no requirement to sort descending and the
+				 * IN list values have not already been sorted, then we
+				 * sort them in ascending order at execution time.
+				 */
+				mb.push(RowOrdering.ASCENDING);
+			}
+			else
+			{
+				/* DONTCARE here means we don't have to sort the IN
+				 * values at execution time because we already did
+				 * it as part of compilation (esp. preprocessing).
+				 * This can only be the case if all values in the IN
+				 * list are literals (as opposed to parameters).
+				 */
+				mb.push(RowOrdering.DONTCARE);
+			}
+
 			return;
 		}
 
@@ -3626,6 +3649,48 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 		return retval;
 	}
 	
+	/**
+	 * @see OptimizablePredicateList#adjustForSortElimination
+	 *
+	 * Currently this method only accounts for IN list multi-probing
+	 * predicates (DERBY-3279).
+	 */
+	public void adjustForSortElimination(
+		RequiredRowOrdering ordering) throws StandardException
+	{
+		// Nothing to do if there's no required ordering. 
+		if (ordering == null)
+			return;
+
+		/* Walk through the predicate list and search for any
+		 * multi-probing predicates.  If we find any which
+		 * operate on a column that is part of the received
+		 * ORDER BY, then check to see if the ORDER BY requires
+		 * a DESCENDING sort.  If so, then we must take note
+		 * of this requirement so that the IN list values for
+		 * the probe predicate are sorted in DESCENDING order
+		 * at execution time.
+		 */
+		int size = size();
+		OrderByList orderBy = (OrderByList)ordering;
+		for (int index = 0; index < size; index++)
+		{
+			Predicate pred = (Predicate) elementAt(index);
+			if (!pred.isInListProbePredicate())
+				continue;
+
+			BinaryRelationalOperatorNode bron =
+				(BinaryRelationalOperatorNode)pred.getRelop();
+
+			if (orderBy.requiresDescending(
+				(ColumnReference)bron.getLeftOperand(),
+				pred.getReferencedSet().size()))
+			{
+				pred.getSourceInList(true).markSortDescending();
+			}
+		}
+	}
+		
 	/** 
 	 * @see OptimizablePredicateList#selectivity
 	 */

@@ -41,6 +41,15 @@ public class BaseTableNumbersVisitor implements Visitor
 	// JBitSet to hold the table numbers that we find.
 	private JBitSet tableMap;
 
+	/* Column number of the ColumnReference or ResultColumn
+	 * for which we most recently found a base table number. 
+	 * In cases where this visitor is only expected to find
+	 * a single base table number, this field is useful for
+	 * determining what the column position w.r.t. the found
+	 * base table was.
+	 */
+	private int columnNumber;
+
 	/**
 	 * Constructor: takes a JBitSet to use as the holder for any base table
 	 * numbers found while walking the subtree.
@@ -50,6 +59,7 @@ public class BaseTableNumbersVisitor implements Visitor
 	public BaseTableNumbersVisitor(JBitSet tableMap)
 	{
 		this.tableMap = tableMap;
+		columnNumber = -1;
 	}
 
 	/**
@@ -61,6 +71,25 @@ public class BaseTableNumbersVisitor implements Visitor
 	protected void setTableMap(JBitSet tableMap)
 	{
 		this.tableMap = tableMap;
+	}
+
+	/**
+	 * Reset the state of this visitor.
+	 */
+	protected void reset()
+	{
+		tableMap.clearAll();
+		columnNumber = -1;
+	}
+
+	/**
+	 * Retrieve the the position of the ColumnReference or
+	 * ResultColumn for which we most recently found a base
+	 * table number.
+	 */
+	protected int getColumnNumber()
+	{
+		return columnNumber;
 	}
 
 	////////////////////////////////////////////////
@@ -96,7 +125,7 @@ public class BaseTableNumbersVisitor implements Visitor
 			}
 		}
 		else if (node instanceof ResultColumn)
-			rc = (ResultColumn)rc;
+			rc = (ResultColumn)node;
 		else if (node instanceof SelectNode)
 		{
 			// If the node is a SelectNode we just need to look at its
@@ -143,13 +172,16 @@ public class BaseTableNumbersVisitor implements Visitor
 				// have pulled it from a VirtualColumnNode's source
 				// table); so just set the number.
 					tableMap.set(baseTableNumber);
+					columnNumber = rc.getColumnPosition();
 				}
 			}
 			else if (node instanceof ColumnReference) {
 			// we couldn't find any other table numbers beneath the
 			// ColumnReference, so just use the table number for
 			// that reference.
-				((ColumnReference)node).getTablesReferenced(tableMap);
+				ColumnReference cr = (ColumnReference)node;
+				cr.getTablesReferenced(tableMap);
+				columnNumber = cr.getColumnNumber();
 			}
 		}
 

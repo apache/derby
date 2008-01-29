@@ -31,6 +31,7 @@ import org.apache.derby.iapi.store.access.StaticCompiledOpenConglomInfo;
 import org.apache.derby.iapi.store.access.TransactionController;
 
 import org.apache.derby.iapi.sql.Activation;
+import org.apache.derby.iapi.sql.compile.RowOrdering;
 import org.apache.derby.iapi.sql.execute.CursorResultSet;
 import org.apache.derby.iapi.sql.execute.ExecRow;
 
@@ -81,11 +82,11 @@ class MultiProbeTableScanResultSet extends TableScanResultSet
     protected int probeValIndex;
 
     /**
-     * Whether or not we need to sort the values.  If all values were
-     * specified as literals (as opposed to parameters) then we did the
-     * sort at compile time and so we do not need to do it here.
+     * Indicator as to which type of sort we need: ASCENDING, DESCENDING,
+     * or NONE (NONE is represented by "RowOrdering.DONTCARE" and is used
+     * for cases where all necessary sorting occurred at compilation time).
      */
-    private boolean needSort;
+    private int sortRequired;
 
     /**
      * Constructor.  Just save off the relevant probing state and pass
@@ -103,7 +104,7 @@ class MultiProbeTableScanResultSet extends TableScanResultSet
         boolean sameStartStopPosition,
         Qualifier[][] qualifiers,
         DataValueDescriptor [] probingVals,
-        boolean probeValsAreSorted,
+        int sortRequired,
         String tableName,
         String userSuppliedOptimizerOverrides,
         String indexName,
@@ -157,7 +158,7 @@ class MultiProbeTableScanResultSet extends TableScanResultSet
         }
 
         this.origProbeValues = probingVals;
-        this.needSort = !probeValsAreSorted;
+        this.sortRequired = sortRequired;
     }
 
     /**
@@ -175,7 +176,14 @@ class MultiProbeTableScanResultSet extends TableScanResultSet
          * have to do the sort here, at execution time, because this is the
          * only point at which we know what values the parameters have.
          */
-        if (needSort)
+        if (sortRequired == RowOrdering.DONTCARE)
+        {
+            /* DONTCARE really means that the values are already sorted
+             * in ascending order, and that's good enough.
+             */
+            probeValues = origProbeValues;
+        }
+        else
         {
             /* RESOLVE: For some reason sorting the probeValues array
              * directly leads to incorrect parameter value assignment when
@@ -190,11 +198,17 @@ class MultiProbeTableScanResultSet extends TableScanResultSet
             for (int i = 0; i < pVals.length; i++)
                 pVals[i] = origProbeValues[i].getClone();
 
-            java.util.Arrays.sort(pVals);
+            if (sortRequired == RowOrdering.ASCENDING)
+                java.util.Arrays.sort(pVals);
+            else
+            {
+                // Sort the values in DESCENDING order.
+                java.util.Arrays.sort(
+                    pVals, java.util.Collections.reverseOrder());
+            }
+
             probeValues = pVals;
         }
-        else
-            probeValues = origProbeValues;
 
         probeValIndex = 0;
         super.openCore();
@@ -369,9 +383,10 @@ class MultiProbeTableScanResultSet extends TableScanResultSet
 
     /**
      * Return the next non-duplicate value from the probe list.
-     * Assumption is that the list is sorted in ascending order
-     * and that probeValIndex is the index of the next value.
-     * If we've exhausted the probe list then just return null.
+     * Assumption is that the list is sorted so that duplicates
+     * appear next to each other, and that probeValIndex is the
+     * index of the next value. If we've exhausted the probe list
+     * then just return null.
      */
     private DataValueDescriptor getNextProbeValue()
         throws StandardException
