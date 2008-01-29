@@ -193,7 +193,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     public static Test suite() {
         TestSuite suite = new TestSuite("DatabaseMetaDataTest");
         suite.addTest(
-            TestConfiguration.embeddedSuite(DatabaseMetaDataTest.class));
+            TestConfiguration.defaultSuite(DatabaseMetaDataTest.class));
         // Test for DERBY-2584 needs a fresh database to ensure that the
         // meta-data queries haven't already been compiled. No need to run the
         // test in client/server mode since it only tests the compilation of
@@ -737,9 +737,9 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         if (usingDerbyNetClient())
             nullval = false;
         boolean [] nullability = {
-                true, true, false, true, nullval, true, nullval,
+                true, true, false, nullval, nullval, nullval, nullval,
                 nullval, nullval, nullval, true, true, nullval, nullval,
-                nullval, nullval, true, true, true, true, true
+                nullval, nullval, nullval, true, true, true, true
         };
             
         assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
