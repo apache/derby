@@ -337,23 +337,8 @@ class EmbedPooledConnection implements javax.sql.PooledConnection, BrokeredConne
 		}
 	}
 
-	// my conneciton handle is being closed
-	public synchronized void notifyClose()
-	{
-		// tell my listeners I am closed 
-		if (eventListener != null && eventListener.size() > 0)
-		{
-			ConnectionEvent closeEvent = new ConnectionEvent(this);
 
-			for (Enumeration e = eventListener.elements();
-				 e.hasMoreElements(); )
-			{
-				ConnectionEventListener l =
-					(ConnectionEventListener)e.nextElement();
-				l.connectionClosed(closeEvent);
-			}
-		}
-	}
+       
 
 	final void checkActive() throws SQLException {
 		if (!isActive)
@@ -431,13 +416,28 @@ class EmbedPooledConnection implements javax.sql.PooledConnection, BrokeredConne
 	/**
 		Close called on BrokeredConnection. If this call
 		returns true then getRealConnection().close() will be called.
-
+		
+		Notify listners that connection is closed.
 		Don't close the underlying real connection as
 		it is pooled.
 	*/
-	public boolean closingConnection() throws SQLException {
-		notifyClose();
+	public synchronized boolean closingConnection() throws SQLException {	    
+		//DERBY-2142 - Null out the connection handle BEFORE notifying listeners.
 		currentConnectionHandle = null;
+		// tell my listeners I am closed 
+		if (eventListener != null && eventListener.size() > 0)
+		{
+			ConnectionEvent closeEvent = new ConnectionEvent(this);
+
+			for (Enumeration e = eventListener.elements();
+				 e.hasMoreElements(); )
+			{
+				ConnectionEventListener l =
+					(ConnectionEventListener)e.nextElement();
+				l.connectionClosed(closeEvent);
+			}
+		}
+
 		return false;
 	}
 
