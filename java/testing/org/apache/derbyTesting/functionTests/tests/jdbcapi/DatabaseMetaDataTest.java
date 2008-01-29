@@ -4375,22 +4375,33 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                 "PROCEDURE_CAT","PROCEDURE_SCHEM","PROCEDURE_NAME",
                 "RESERVED1","RESERVED2","RESERVED3",
                 "REMARKS","PROCEDURE_TYPE","SPECIFIC_NAME"};
-        String[] odbcColumnNames = new String[] {
-                "PROCEDURE_CAT","PROCEDURE_SCHEM","PROCEDURE_NAME",
-                "NUM_INPUT_PARAMS","NUM_OUTPUT_PARAMS","NUM_RESULT_SETS",
-                "REMARKS","PROCEDURE_TYPE"};
+
         int[] columnTypes = new int[] {
                 Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.INTEGER,
                 Types.INTEGER, Types.INTEGER, Types.VARCHAR, Types.SMALLINT,
                 Types.VARCHAR};
-        int[] odbcColumnTypes = new int[] {
-                Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.INTEGER,
-                Types.INTEGER, Types.INTEGER, Types.VARCHAR, Types.SMALLINT};
+
         boolean[] nullability = new boolean[] {
                 false, false, false, true, true, true, true, true, false};
-        boolean[] odbcNullability = new boolean[] {
-                false, false, false, true, true, true, true, true};
+        
+        // JDBC result set
         assertMetaDataResultSet(rs[0], columnNames, columnTypes, nullability);
+        
+        // change the shape for ODBC - one less column, no SPECIFIC_NAME (9)
+        
+        String[] odbcColumnNames = new String[columnNames.length - 1];
+        System.arraycopy(columnNames, 0, odbcColumnNames, 0, odbcColumnNames.length);
+        int[] odbcColumnTypes = new int[columnTypes.length - 1];
+        System.arraycopy(columnTypes, 0, odbcColumnTypes, 0, odbcColumnTypes.length);
+        boolean[] odbcNullability = new boolean[nullability.length - 1];
+        System.arraycopy(nullability, 0, odbcNullability, 0, odbcNullability.length);
+        
+        // Change column names
+        odbcColumnNames[4 - 1] = "NUM_INPUT_PARAMS";
+        odbcColumnNames[5 - 1] = "NUM_OUTPUT_PARAMS";
+        odbcColumnNames[6 - 1] = "NUM_RESULT_SETS";
+              
+        // ODBC result set.
         assertMetaDataResultSet(
                 rs[1], odbcColumnNames, odbcColumnTypes, odbcNullability);
 
@@ -4442,14 +4453,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                 "ORDINAL_POSITION", "IS_NULLABLE", "SPECIFIC_NAME" //};
                 // interesting, we seem to have two extra columns vs the API
                 ,"METHOD_ID", "PARAMETER_ID"};
-        String[] odbcColumnNames = new String[] {
-                "PROCEDURE_CAT","PROCEDURE_SCHEM","PROCEDURE_NAME",
-                "COLUMN_NAME", "COLUMN_TYPE", "DATA_TYPE", "TYPE_NAME",
-                "COLUMN_SIZE", "BUFFER_LENGTH", "DECIMAL_DIGITS",
-                "NUM_PREC_RADIX", "NULLABLE", "REMARKS", "COLUMN_DEF",
-                "SQL_DATA_TYPE", "SQL_DATETIME_SUB", "CHAR_OCTET_LENGTH",
-                "ORDINAL_POSITION", "IS_NULLABLE"//};
-                ,"METHOD_ID", "PARAMETER_ID"};
+
         int[] columnTypes = new int[] {
                 Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR,
                 Types.SMALLINT, Types.INTEGER, Types.VARCHAR, Types.INTEGER,
@@ -4457,22 +4461,44 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                 Types.VARCHAR, Types.VARCHAR, Types.INTEGER, Types.INTEGER,
                 Types.INTEGER, Types.INTEGER, Types.VARCHAR, Types.VARCHAR //};
                 , Types.SMALLINT, Types.SMALLINT};
-        int[] odbcColumnTypes = new int[] {
-                Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR,
-                Types.SMALLINT, Types.SMALLINT, Types.VARCHAR, Types.INTEGER,
-                Types.INTEGER, Types.SMALLINT, Types.SMALLINT, Types.SMALLINT,
-                Types.VARCHAR, Types.VARCHAR, Types.SMALLINT, Types.SMALLINT,
-                Types.INTEGER, Types.INTEGER, Types.VARCHAR//};
-                , Types.SMALLINT, Types.SMALLINT};
+
         boolean[] nullability = new boolean[] {
                 true, false, false, false, false, false, false, false, true, true,
                 true, false, true, true, true, true, true, false, true, false//};
                 , false, false};
-        boolean[] odbcNullability = new boolean[] {
-                true, false, false, false, false, false, false, false, true, true,
-                true, false, true, true, true, true, true, false, true//};
-                , false, false};
+
+        
+        // JDBC result set
         assertMetaDataResultSet(rss[0], columnNames, columnTypes, nullability);
+        
+        // Change expected shape for ODBC
+        
+        // One less column for ODBC, (20) SPECIFIC_NAME is missing.
+        
+        String[] odbcColumnNames = new String[columnNames.length - 1];
+        System.arraycopy(columnNames, 0, odbcColumnNames, 0, 19);
+        System.arraycopy(columnNames, 21 - 1, odbcColumnNames, 20 - 1, 2);
+        
+        int[] odbcColumnTypes = new int[columnTypes.length - 1];
+        System.arraycopy(columnTypes, 0, odbcColumnTypes, 0, 19);
+        System.arraycopy(columnTypes, 21 - 1, odbcColumnTypes, 20 - 1, 2);
+        
+        boolean[] odbcNullability = new boolean[nullability.length - 1];
+        System.arraycopy(nullability, 0, odbcNullability, 0, 19);
+        System.arraycopy(nullability, 21 - 1, odbcNullability, 20 - 1, 2);
+        
+        // And change some column names.
+        odbcColumnNames[8 - 1] = "COLUMN_SIZE";
+        odbcColumnNames[9 - 1] = "BUFFER_LENGTH";
+        odbcColumnNames[10 - 1] = "DECIMAL_DIGITS";
+        odbcColumnNames[11 - 1] = "NUM_PREC_RADIX";
+        
+        // And some column types.
+        odbcColumnTypes[6 - 1] = Types.SMALLINT;
+        odbcColumnTypes[15 - 1] = Types.SMALLINT;
+        odbcColumnTypes[16 - 1] = Types.SMALLINT;
+             
+        // odbc result set
         assertMetaDataResultSet(
             rss[1], odbcColumnNames, odbcColumnTypes, odbcNullability);
         
