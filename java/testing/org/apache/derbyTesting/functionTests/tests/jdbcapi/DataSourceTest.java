@@ -199,32 +199,18 @@ public class DataSourceTest extends BaseJDBCTestCase {
      */
     public void testConnectionErrorEvent() throws SQLException, Exception
     {
-    	Connection conn;
-    	ConnectionPoolDataSource ds;
-    	PooledConnection pc;
-    	Statement st;
         AssertEventCatcher aes12 = new AssertEventCatcher(12);
-        //Get the correct ConnectionPoolDataSource object
-        if (usingEmbedded())
-        {
-        	ds = new EmbeddedConnectionPoolDataSource();
-            ((EmbeddedConnectionPoolDataSource)ds).setDatabaseName(dbName);
-        } else
-        {
-            ds = new ClientConnectionPoolDataSource();
-            ((ClientConnectionPoolDataSource)ds).setDatabaseName(dbName);
-        }
-        pc = ds.getPooledConnection();
+        
+        ConnectionPoolDataSource ds = J2EEDataSource.getConnectionPoolDataSource();
+
+        PooledConnection pc = ds.getPooledConnection();
         //Add a connection event listener to ConnectionPoolDataSource
         pc.addConnectionEventListener(aes12);
-        conn = pc.getConnection();
-        st = conn.createStatement();
-        //TAB1 does not exist and hence catch the expected exception
-        try {
-            st.executeUpdate("drop table TAB1");
-        } catch (SQLException sqle) {
-            assertSQLState("42Y55", sqle);
-        }
+        Connection conn = pc.getConnection();
+        Statement st = conn.createStatement();
+        
+        dropTable(conn, "TAB1");
+
         //No event should have been generated at this point
         assertFalse(aes12.didConnectionClosedEventHappen());
         assertFalse(aes12.didConnectionErrorEventHappen());
@@ -602,8 +588,7 @@ public class DataSourceTest extends BaseJDBCTestCase {
         }
             
         ConnectionPoolDataSource dsp = 
-            J2EEDataSource.getConnectionPoolDataSource();
-        JDBCDataSource.setBeanProperty(dsp, "DatabaseName", dbName);        
+            J2EEDataSource.getConnectionPoolDataSource();      
         
         if (usingEmbedded()) 
             assertToString(dsp);
@@ -778,8 +763,7 @@ public class DataSourceTest extends BaseJDBCTestCase {
         // verify that outstanding updates from a closed connection, obtained
         // from a ConnectionPoolDataSource, are not committed, but rolled back.
         ConnectionPoolDataSource dsp = 
-            J2EEDataSource.getConnectionPoolDataSource();
-        JDBCDataSource.setBeanProperty(dsp, "DatabaseName", dbName);        
+            J2EEDataSource.getConnectionPoolDataSource();       
         PooledConnection pc = dsp.getPooledConnection();
         Connection c1 = pc.getConnection();
         Statement s = c1.createStatement();
@@ -828,7 +812,6 @@ public class DataSourceTest extends BaseJDBCTestCase {
         // verify that outstanding updates from a closed connection, obtained
         // from an XADataSource, are not committed, but rolled back.
         XADataSource dsx = J2EEDataSource.getXADataSource();
-        JDBCDataSource.setBeanProperty(dsx, "DatabaseName", dbName);
         XAConnection xac = dsx.getXAConnection();
         Connection c1 = xac.getConnection();
         Statement s = c1.createStatement();
@@ -1541,7 +1524,6 @@ public class DataSourceTest extends BaseJDBCTestCase {
         // 3)start another global transaction 
 
         XADataSource dsx = J2EEDataSource.getXADataSource();
-        JDBCDataSource.setBeanProperty(dsx, "DatabaseName", dbName);
         XAConnection xac5 = dsx.getXAConnection();
         Xid xid5a = new cdsXid(5, (byte) 119, (byte) 129);
         Connection conn5 = xac5.getConnection();
@@ -1673,7 +1655,6 @@ public class DataSourceTest extends BaseJDBCTestCase {
         
         // DataSource - bad connattr syntax
         DataSource ds = JDBCDataSource.getDataSource();
-        JDBCDataSource.setBeanProperty(ds, "databaseName", dbName);
         JDBCDataSource.setBeanProperty(ds, "ConnectionAttributes", "bad");
         try {
             ds.getConnection();
@@ -1684,11 +1665,9 @@ public class DataSourceTest extends BaseJDBCTestCase {
             else if (usingDerbyNetClient())
                 assertSQLState("XJ212", e);
         } 
-        JDBCDataSource.clearStringBeanProperty(ds, "ConnectionAttributes");
 
         // ConnectionPoolDataSource - bad connatr syntax
         ConnectionPoolDataSource cpds = J2EEDataSource.getConnectionPoolDataSource();
-        JDBCDataSource.setBeanProperty(cpds, "databaseName", dbName);
         JDBCDataSource.setBeanProperty(cpds, "ConnectionAttributes", "bad");
         try {
             cpds.getPooledConnection();
@@ -1696,11 +1675,9 @@ public class DataSourceTest extends BaseJDBCTestCase {
         } catch (SQLException e) {
             assertSQLState("XJ028", e);
         } 
-        JDBCDataSource.clearStringBeanProperty(cpds, "ConnectionAttributes");
 
         // XADataSource - bad connattr syntax");
         XADataSource xads = J2EEDataSource.getXADataSource();
-        JDBCDataSource.setBeanProperty(xads, "databaseName", dbName);
         JDBCDataSource.setBeanProperty(xads, "ConnectionAttributes", "bad");
         try {
             xads.getXAConnection();
@@ -1708,7 +1685,6 @@ public class DataSourceTest extends BaseJDBCTestCase {
         } catch (SQLException e) {
             assertSQLState("XJ028", e);
         } 
-        JDBCDataSource.clearStringBeanProperty(xads, "ConnectionAttributes");
     } // End testBadConnectionAttributeSyntax
         
     /**
@@ -2236,7 +2212,6 @@ public class DataSourceTest extends BaseJDBCTestCase {
             return;
         // START XA HOLDABILITY TEST
         XADataSource dscsx = J2EEDataSource.getXADataSource();
-        JDBCDataSource.setBeanProperty(dscsx, "databaseName", dbName);
 
         XAConnection xac = dscsx.getXAConnection();
         XAResource xr = xac.getXAResource();
@@ -2589,7 +2564,6 @@ public class DataSourceTest extends BaseJDBCTestCase {
         // Test holdability   
         ConnectionPoolDataSource ds = 
             J2EEDataSource.getConnectionPoolDataSource();
-        JDBCDataSource.setBeanProperty(ds, "databaseName", dbName);
         pc1 = ds.getPooledConnection();
         assertPooledConnHoldability("PooledConnection", pc1);
         pc1.close();
@@ -2608,7 +2582,6 @@ public class DataSourceTest extends BaseJDBCTestCase {
     public void testDerby1144XADS() throws SQLException {
        
         XADataSource xds = J2EEDataSource.getXADataSource();
-        JDBCDataSource.setBeanProperty(xds, "databaseName", dbName);
         // Test xa connection isolation
         XAConnection xpc1 = xds.getXAConnection();        
         assertPooledConnIso("XAConnection", xpc1);                 
@@ -2799,15 +2772,12 @@ public class DataSourceTest extends BaseJDBCTestCase {
     throws SQLException
     {
         DataSource ds = JDBCDataSource.getDataSource();
-        JDBCDataSource.setBeanProperty(ds, "databaseName", dbName);
         Connection cadmin = ds.getConnection();
         CallableStatement cs = cadmin.prepareCall(
             "CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(?, ?)");
         cs.setString(1, property);
         cs.setString(2, value);
         cs.execute();
-
-        JDBCDataSource.setBeanProperty(ds, "databaseName", dbName);
         
         cs.close();
         cadmin.close();

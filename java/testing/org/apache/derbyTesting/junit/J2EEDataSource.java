@@ -33,7 +33,7 @@ import javax.sql.XADataSource;
 public class J2EEDataSource {
     
     /**
-     * Return a DataSource corresponding to the current
+     * Return a new DataSource corresponding to the current
      * configuration. The getPooledConnection() method is configured
      * to use the user name and password from the configuration.
      */
@@ -60,7 +60,7 @@ public class J2EEDataSource {
     }
     
     /**
-     * Return an XA DataSource corresponding to the current
+     * Return a new XA DataSource corresponding to the current
      * configuration. The getXAConnection() method is configured
      * to use the user name and password from the configuration.
      */

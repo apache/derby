@@ -27,6 +27,7 @@ import org.apache.derby.jdbc.ClientConnectionPoolDataSource;
 import org.apache.derby.jdbc.EmbeddedConnectionPoolDataSource;
 import org.apache.derbyTesting.functionTests.tests.jdbcapi.AssertEventCatcher;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.J2EEDataSource;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.JDBCDataSource;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -43,8 +44,6 @@ public class DataSourceTest extends BaseJDBCTestCase {
     
     //Default DataSource that will be used by the tests
     private DataSource ds = null;
-    protected static String dbName = 
-        TestConfiguration.getCurrent().getDefaultDatabaseName();
     
     /**
      *
@@ -130,32 +129,17 @@ public class DataSourceTest extends BaseJDBCTestCase {
      */
     public void testConnectionErrorEvent() throws SQLException, Exception
     {
-    	Connection conn;
-    	ConnectionPoolDataSource ds;
-    	PooledConnection pc;
-    	Statement st;
         AssertEventCatcher aes12 = new AssertEventCatcher(12);
         //Get the correct ConnectionPoolDataSource object
-        if (usingEmbedded())
-        {
-        	ds = new EmbeddedConnectionPoolDataSource();
-            ((EmbeddedConnectionPoolDataSource)ds).setDatabaseName(dbName);
-        } else
-        {
-            ds = new ClientConnectionPoolDataSource();
-            ((ClientConnectionPoolDataSource)ds).setDatabaseName(dbName);
-        }
-        pc = ds.getPooledConnection();
+        ConnectionPoolDataSource ds = J2EEDataSource.getConnectionPoolDataSource();
+
+        PooledConnection pc = ds.getPooledConnection();
         //Add a connection event listener to ConnectionPoolDataSource
         pc.addConnectionEventListener(aes12);
-        conn = pc.getConnection();
-        st = conn.createStatement();
-        //TAB1 does not exist and hence catch the expected exception
-        try {
-            st.executeUpdate("drop table TAB1");
-        } catch (SQLException sqle) {
-            assertSQLState("42Y55", sqle);
-        }
+        Connection conn = pc.getConnection();
+        
+        dropTable(conn, "TAB1");
+
         //No event should have been generated at this point
         assertFalse(aes12.didConnectionClosedEventHappen());
         assertFalse(aes12.didConnectionErrorEventHappen());

@@ -36,7 +36,7 @@ import junit.framework.Assert;
 public class JDBCDataSource {
     
     /**
-     * Return a DataSource corresponding to the current
+     * Return a new DataSource corresponding to the current
      * configuration. The getConnection() method will return
      * a connection identical to TestConfiguration.openDefaultConnection().
      */
@@ -46,7 +46,7 @@ public class JDBCDataSource {
     }
     
     /**
-     * Return a DataSource corresponding to the current
+     * Return a new DataSource corresponding to the current
      * configuration except that the databse name is different.
      */
     public static javax.sql.DataSource getDataSource(String dbName)
