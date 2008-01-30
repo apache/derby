@@ -1118,17 +1118,6 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 	{
 		return typeDescriptor.isNullable();
 	}
-
-	/**
-	 * Set the nullability of the datatype described by this descriptor
-	 *
-	 * @param nullable	TRUE means set nullability to TRUE, FALSE
-	 *			means set it to FALSE
-	 */
-	public void	setNullability(boolean nullable)
-	{
-		typeDescriptor.setNullability(nullable);
-	}
     
     /**
      * Return a type descriptor identical to the this type

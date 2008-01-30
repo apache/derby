@@ -394,17 +394,6 @@ public class TypeDescriptorImpl implements TypeDescriptor, Formatable
 	}
 
 	/**
-	 * Set the nullability of the datatype described by this descriptor
-	 *
-	 * @param nullable	TRUE means set nullability to TRUE, FALSE
-	 *					means set it to FALSE
-	 */
-	public void setNullability(boolean nullable)
-	{
-		isNullable = nullable;
-	}
-
-	/**
 	* @see TypeDescriptor#isRowMultiSet
 	 */
 	public	boolean isRowMultiSet()
