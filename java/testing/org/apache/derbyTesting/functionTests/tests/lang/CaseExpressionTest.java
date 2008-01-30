@@ -304,13 +304,45 @@ public class CaseExpressionTest extends BaseJDBCTestCase {
         rs = s.executeQuery("SELECT d from t where d = (SELECT CASE WHEN 1 = 0 THEN CURRENT_DATE  ELSE NULL END from t)");
         JDBC.assertEmpty(rs);
         
-        // Make sure metadata has correct type
+        // Make sure metadata has correct type for various null handling
         rs = s.executeQuery("SELECT CASE WHEN 1 = 1 THEN NULL  ELSE CURRENT_DATE  END from t");
         ResultSetMetaData rsmd = rs.getMetaData();
         assertEquals(java.sql.Types.DATE, rsmd.getColumnType(1));
         // should be nullable since it returns NULL #:)
-        assertTrue(rsmd.isNullable(1) == ResultSetMetaData.columnNullable);
-        JDBC.assertSingleValueResultSet(rs, null);        
+        assertEquals(ResultSetMetaData.columnNullable, rsmd.isNullable(1));
+        JDBC.assertSingleValueResultSet(rs, null);    
+        
+        rs = s.executeQuery("SELECT CASE WHEN 1 = 0 THEN CURRENT_DATE ELSE NULL END from t");
+        rsmd = rs.getMetaData();
+        assertEquals(java.sql.Types.DATE, rsmd.getColumnType(1));
+        // should be nullable since it returns NULL #:)
+        assertEquals(ResultSetMetaData.columnNullable, rsmd.isNullable(1));
+        JDBC.assertSingleValueResultSet(rs, null);  
+        
+        // and with an implicit NULL return.
+        rs = s.executeQuery("SELECT CASE WHEN 1 = 0 THEN CURRENT_DATE END from t");
+        rsmd = rs.getMetaData();
+        assertEquals(java.sql.Types.DATE, rsmd.getColumnType(1));
+        // should be nullable since it returns NULL #:)
+        assertEquals(ResultSetMetaData.columnNullable, rsmd.isNullable(1));
+        JDBC.assertSingleValueResultSet(rs, null);  
+        
+        // and no possible NULL return.
+        
+        rs = s.executeQuery("SELECT CASE WHEN 1 = 0 THEN 6 ELSE 4 END from t");
+        rsmd = rs.getMetaData();
+        assertEquals(java.sql.Types.INTEGER, rsmd.getColumnType(1));
+        // should be nullable since it returns NULL #:)
+        assertEquals(ResultSetMetaData.columnNoNulls, rsmd.isNullable(1));
+        JDBC.assertSingleValueResultSet(rs, "4"); 
+        
+        rs = s.executeQuery("SELECT CASE WHEN 1 = 1 THEN 6 ELSE 4 END from t");
+        rsmd = rs.getMetaData();
+        assertEquals(java.sql.Types.INTEGER, rsmd.getColumnType(1));
+        // should be nullable since it returns NULL #:)
+        assertEquals(ResultSetMetaData.columnNoNulls, rsmd.isNullable(1));
+        JDBC.assertSingleValueResultSet(rs, "6");
+        
     }
     
 }
