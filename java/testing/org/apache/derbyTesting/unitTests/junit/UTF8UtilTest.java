@@ -25,11 +25,13 @@ package org.apache.derbyTesting.unitTests.junit;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
-
 import java.io.UTFDataFormatException;
+
 import org.apache.derby.iapi.types.ReaderToUTF8Stream;
 import org.apache.derby.iapi.util.UTF8Util;
 
@@ -197,6 +199,104 @@ public class UTF8UtilTest
             fail("Should have failed because the stream has been drained.");
         } catch (EOFException eofe) {
             // As expected, do nothing
+        }
+    }
+
+    /**
+     * Tries to skip characters where the data is incomplete.
+     * <p>
+     * In this test, the encoding states there is a character represented by
+     * two bytes present. However, only one byte is provided.
+     */
+    public void testMissingSecondByteOfTwo()
+            throws IOException {
+        byte[] data = {'a', (byte)0xdf};
+        InputStream is = new ByteArrayInputStream(data);
+        try {
+            UTF8Util.skipFully(is, 2);
+            fail("Reading invalid UTF-8 should fail");
+        } catch (UTFDataFormatException udfe) {
+            // As expected
+        }
+    }
+
+    /**
+     * Tries to skip characters where the data is incomplete.
+     * <p>
+     * In this test, the encoding states there is a character represented by
+     * three bytes present. However, only one byte is provided.
+     */
+    public void testMissingSecondByteOfThree()
+            throws IOException {
+        byte[] data = {'a', (byte)0xef};
+        InputStream is = new ByteArrayInputStream(data);
+        try {
+            UTF8Util.skipFully(is, 2);
+            fail("Reading invalid UTF-8 should fail");
+        } catch (UTFDataFormatException udfe) {
+            // As expected
+        }
+    }
+
+    /**
+     * Tries to skip characters where the data is incomplete.
+     * <p>
+     * In this test, the encoding states there is a character represented by
+     * three bytes present. However, only two bytes are provided.
+     */
+    public void testMissingThirdByteOfThree()
+            throws IOException {
+        byte[] data = {'a', (byte)0xef, (byte)0xb8};
+        InputStream is = new ByteArrayInputStream(data);
+        try {
+            UTF8Util.skipFully(is, 2);
+            fail("Reading invalid UTF-8 should fail");
+        } catch (UTFDataFormatException udfe) {
+            // As expected
+        }
+    }
+
+    /**
+     * Tries to read a stream of data where there is an invalid UTF-8 encoded
+     * byte.
+     */
+    public void testInvalidUTF8Encoding()
+            throws IOException {
+        // 0xf8 = 11111000 <-- invalid UTF-8 encoding
+        byte[] data = {'a', 'b', 'c', (byte)0xf8, 'e', 'f'};
+        InputStream is = new ByteArrayInputStream(data);
+        try {
+            UTF8Util.skipFully(is, 6);
+            fail("Reading invalid UTF-8 should fail");
+        } catch (UTFDataFormatException udfe) {
+            // As expected when reading invalid data
+        }
+    }
+
+    /**
+     * Demonstrates that skipping incorrectly encoded character sequences
+     * works because the stream is not checked for well-formedness.
+     */
+    public void testSkippingInvalidEncodingWorks()
+            throws IOException {
+        // The array contains three valid characters and one invalid three-byte
+        // representation that only has two bytes present.
+        // When skipping, this sequence is (incorrectly) taken as a sequence of
+        // three characters ('a' - some three byte character - 'a').
+        byte[] data = {'a', (byte)0xef, (byte)0xb8, 'a', 'a'};
+        byte[] dataWithLength =
+            {0x0, 0x5, 'a', (byte)0xef, (byte)0xb8, 'a', 'a'};
+        InputStream is = new ByteArrayInputStream(data);
+        // This is actually incorrect, but does work currently.
+        UTF8Util.skipFully(is, 3);
+        // Verify that decoding this actually fails.
+        DataInputStream dis = new DataInputStream(
+                                    new ByteArrayInputStream(dataWithLength));
+        try {
+            dis.readUTF();
+            fail("UTF-8 expected to be invalid, read should fail");
+        } catch (UTFDataFormatException udfe) {
+            // This is expected, since the UTF-8 encoding is invalid
         }
     }
 
