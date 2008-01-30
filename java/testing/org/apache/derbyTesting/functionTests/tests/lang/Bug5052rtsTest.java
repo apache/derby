@@ -94,7 +94,7 @@ public class Bug5052rtsTest extends BaseJDBCTestCase {
         }
 
         // set the runtime statistics on now.
-        cs = getConnection().prepareCall(
+        cs = prepareCall(
                 "CALL SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(?)");
         cs.setInt(1, 1);
         cs.execute();
@@ -102,7 +102,7 @@ public class Bug5052rtsTest extends BaseJDBCTestCase {
 
         rs.close();
 
-        cs = getConnection().prepareCall(
+        cs = prepareCall(
                 "CALL SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(?)");
         cs.setInt(1, 0);
         cs.execute();
@@ -115,7 +115,7 @@ public class Bug5052rtsTest extends BaseJDBCTestCase {
             // System.out.println(rs.getString(1));
         }
         // set the runtime statistics on now.
-        cs = getConnection().prepareCall(
+        cs = prepareCall(
                 "CALL SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(?)");
         cs.setInt(1, 1);
         cs.execute();

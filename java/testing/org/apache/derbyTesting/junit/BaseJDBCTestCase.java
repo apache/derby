@@ -192,7 +192,43 @@ public abstract class BaseJDBCTestCase
         PreparedStatement ps = getConnection().prepareStatement(sql);
         addStatement(ps);
         return ps;
-    }    
+    }
+    
+    /**
+     * Utility method to create a PreparedStatement using the connection
+     * returned by getConnection with result set type and concurrency.
+     * The returned statement object will be closed automatically
+     * at tearDown() but may be closed earlier by the test if required.
+     * @return Statement object from
+     * getConnection.prepareStatement(sql)
+     * @throws SQLException
+     */
+    public PreparedStatement prepareStatement(String sql,
+            int resultSetType, int resultSetConcurrency) throws SQLException
+    {
+        PreparedStatement ps = getConnection().prepareStatement(sql,
+                resultSetType, resultSetConcurrency);
+        addStatement(ps);
+        return ps;
+    }
+    /**
+     * Utility method to create a PreparedStatement using the connection
+     * returned by getConnection with result set type and concurrency.
+     * The returned statement object will be closed automatically
+     * at tearDown() but may be closed earlier by the test if required.
+     * @return Statement object from
+     * getConnection.prepareStatement(sql)
+     * @throws SQLException
+     */
+    public PreparedStatement prepareStatement(String sql,
+            int resultSetType, int resultSetConcurrency,
+            int resultSetHoldability) throws SQLException
+    {
+        PreparedStatement ps = getConnection().prepareStatement(sql,
+                resultSetType, resultSetConcurrency, resultSetHoldability);
+        addStatement(ps);
+        return ps;
+    }
     /**
      * Utility method to create a PreparedStatement using the connection
      * returned by getConnection and a flag that signals the driver whether
@@ -279,6 +315,8 @@ public abstract class BaseJDBCTestCase
     /**
      * Utility method to create a CallableStatement using the connection
      * returned by getConnection.
+     * The returned statement object will be closed automatically
+     * at tearDown() but may be closed earlier by the test if required.
      * @return Statement object from
      * getConnection().prepareCall(sql, resultSetType, resultSetConcurrency)
      * @throws SQLException
@@ -287,12 +325,17 @@ public abstract class BaseJDBCTestCase
 					int resultSetType, 
 					int resultSetConcurrency) throws SQLException
     {
-        return getConnection().prepareCall(sql, resultSetType, resultSetConcurrency);
+        CallableStatement cs = getConnection().prepareCall(sql, resultSetType,
+                resultSetConcurrency);
+        addStatement(cs);
+        return cs;
     }
 
     /**
      * Utility method to create a CallableStatement using the connection
      * returned by getConnection.
+     * The returned statement object will be closed automatically
+     * at tearDown() but may be closed earlier by the test if required.
      * @return Statement object from
      * getConnection().prepareCall(sql, resultSetType, resultSetConcurrency, resultSetHoldability)
      * @throws SQLException
@@ -302,7 +345,10 @@ public abstract class BaseJDBCTestCase
                                         int resultSetConcurrency,
 					 int resultSetHoldability) throws SQLException
     {
-        return getConnection().prepareCall(sql, resultSetType, resultSetConcurrency, resultSetHoldability);
+        CallableStatement cs = getConnection().prepareCall(sql,
+                resultSetType, resultSetConcurrency, resultSetHoldability);
+        addStatement(cs);
+        return cs;
     }
     
     /**

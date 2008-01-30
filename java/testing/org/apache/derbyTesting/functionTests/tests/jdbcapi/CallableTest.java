@@ -301,7 +301,7 @@ public class CallableTest extends BaseJDBCTestCase {
      */
     public void norun_testSystemOutPrintlnProc() throws SQLException
     {
-        CallableStatement cs = getConnection().prepareCall
+        CallableStatement cs = prepareCall
             ("call SYSTEM_OUT_PRINTLN_PROC()");
         cs.execute();
         cs.close();

@@ -331,7 +331,7 @@ final public class BLOBTest extends BaseJDBCTestCase
                                                     final int newSize) 
         throws SQLException, IOException
     {
-        final PreparedStatement preparedStatement = getConnection().prepareStatement
+        final PreparedStatement preparedStatement = prepareStatement
             ("UPDATE " + BLOBDataModelSetup.getBlobTableName() +
              " SET val=?, length = ?, data = ? WHERE CURRENT OF " +
              rs.getCursorName());

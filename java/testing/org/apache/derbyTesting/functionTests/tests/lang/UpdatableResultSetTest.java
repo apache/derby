@@ -1127,7 +1127,7 @@ public class UpdatableResultSetTest  extends BaseJDBCTestCase {
      */
     public void testDeleteRowWithPreparedStatement() throws SQLException {
         createTableT1();
-        PreparedStatement pStmt = getConnection().prepareStatement(
+        PreparedStatement pStmt = prepareStatement(
                 "select * from t1 where c1 > ?",
                 ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
         assertEquals("FAIL - wrong result set type",
@@ -1185,7 +1185,7 @@ public class UpdatableResultSetTest  extends BaseJDBCTestCase {
      */
     public void testUpdateXXXWithPreparedStatement() throws SQLException {
         createTableT1();
-        PreparedStatement pStmt = getConnection().prepareStatement(
+        PreparedStatement pStmt = prepareStatement(
                 "select * from t1 where c1>? for update",
                 ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
         assertEquals("FAIL - wrong result set type",
@@ -1265,7 +1265,7 @@ public class UpdatableResultSetTest  extends BaseJDBCTestCase {
             throws SQLException 
     {
         createTableT1();
-        CallableStatement callStmt = getConnection().prepareCall(
+        CallableStatement callStmt = prepareCall(
                 "select * from t1",
                 ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
         ResultSet rs = callStmt.executeQuery();
@@ -2480,7 +2480,7 @@ public class UpdatableResultSetTest  extends BaseJDBCTestCase {
     {
         createAllDatatypesTable();
         commit();
-        PreparedStatement pstmt = getConnection().prepareStatement(
+        PreparedStatement pstmt = prepareStatement(
                 "SELECT * FROM AllDataTypesForTestingTable FOR UPDATE", 
                 ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
         PreparedStatement pstmt1 = prepareStatement(
@@ -2765,7 +2765,7 @@ public class UpdatableResultSetTest  extends BaseJDBCTestCase {
     {
         createAllDatatypesTable();
         commit();
-        PreparedStatement pstmt = getConnection().prepareStatement(
+        PreparedStatement pstmt = prepareStatement(
                 "SELECT * FROM AllDataTypesForTestingTable FOR UPDATE", 
                 ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
         PreparedStatement pstmt1 = prepareStatement(
@@ -4019,7 +4019,7 @@ public class UpdatableResultSetTest  extends BaseJDBCTestCase {
         Statement stmt = createStatement();
         stmt.executeUpdate("DELETE FROM AllDataTypesForTestingTable");
         
-        PreparedStatement pstmti = getConnection().prepareStatement(
+        PreparedStatement pstmti = prepareStatement(
                 "SELECT * FROM AllDataTypesForTestingTable FOR UPDATE", 
                 ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
         PreparedStatement pstmt1i = prepareStatement(
