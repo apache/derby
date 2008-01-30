@@ -210,6 +210,7 @@ public class UTF8UtilTest
      */
     public void testMissingSecondByteOfTwo()
             throws IOException {
+        // 0xdf = 11011111
         byte[] data = {'a', (byte)0xdf};
         InputStream is = new ByteArrayInputStream(data);
         try {
@@ -228,6 +229,7 @@ public class UTF8UtilTest
      */
     public void testMissingSecondByteOfThree()
             throws IOException {
+        // 0xef = 11101111
         byte[] data = {'a', (byte)0xef};
         InputStream is = new ByteArrayInputStream(data);
         try {
@@ -246,6 +248,7 @@ public class UTF8UtilTest
      */
     public void testMissingThirdByteOfThree()
             throws IOException {
+        // 0xef = 11101111, 0xb8 = 10111000
         byte[] data = {'a', (byte)0xef, (byte)0xb8};
         InputStream is = new ByteArrayInputStream(data);
         try {
@@ -283,6 +286,7 @@ public class UTF8UtilTest
         // representation that only has two bytes present.
         // When skipping, this sequence is (incorrectly) taken as a sequence of
         // three characters ('a' - some three byte character - 'a').
+        // 0xef = 11101111, 0xb8 = 10111000
         byte[] data = {'a', (byte)0xef, (byte)0xb8, 'a', 'a'};
         byte[] dataWithLength =
             {0x0, 0x5, 'a', (byte)0xef, (byte)0xb8, 'a', 'a'};
