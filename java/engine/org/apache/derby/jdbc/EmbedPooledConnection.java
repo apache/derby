@@ -417,12 +417,21 @@ class EmbedPooledConnection implements javax.sql.PooledConnection, BrokeredConne
 		Close called on BrokeredConnection. If this call
 		returns true then getRealConnection().close() will be called.
 		
-		Notify listners that connection is closed.
+	
+	Notify listners that connection is closed.
 		Don't close the underlying real connection as
 		it is pooled.
 	*/
 	public synchronized boolean closingConnection() throws SQLException {	    
-		//DERBY-2142 - Null out the connection handle BEFORE notifying listeners.
+		//DERBY-2142-Null out the connection handle BEFORE notifying listeners.
+		//At time of the callback the PooledConnection must be 
+		//disassociated from its previous logical connection.
+		//If not there is a risk that the Pooled
+		//Connection could be returned to the pool, ready for pickup by a 
+		//new thread. This new thread then might obtain a java.sql.Connection 
+		//whose reference might get assigned to the currentConnectionHandle 
+		//field, meanwhile the previous thread completes the close making 
+		//the newly assigned currentConnectionHandle null, resulting in an NPE.
 		currentConnectionHandle = null;
 		// tell my listeners I am closed 
 		if (eventListener != null && eventListener.size() > 0)
