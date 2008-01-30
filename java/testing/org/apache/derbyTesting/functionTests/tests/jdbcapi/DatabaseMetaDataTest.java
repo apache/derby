@@ -2216,7 +2216,8 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         boolean[] ODBC_COLUMN_NULLABILITY = new boolean[ODBC_COLUMN_NAMES.length];
         System.arraycopy(JDBC_COLUMN_NULLABILITY, 0, ODBC_COLUMN_NULLABILITY, 0,
                 JDBC_COLUMN_NULLABILITY.length);
-        
+        //SQL_DATA_TYPE is NULL in JDBC but a valid non-null value in ODBC
+        ODBC_COLUMN_NULLABILITY[16 - 1] = false; 
         ODBC_COLUMN_NULLABILITY[19 - 1] = true; // INTERVAL_PRECISION (extra column comapred to JDBC)
                 
         CallableStatement cs = prepareCall(
@@ -3315,7 +3316,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         int [] columnTypes = {
                 Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,
                 Types.VARCHAR,Types.VARCHAR,Types.VARCHAR,Types.VARCHAR};
-        boolean [] nullability = {false,false,false,false,false,false,true,true};
+        boolean [] nullability = {false,false,false,false,false,false,false,false};
 
         assertMetaDataResultSet(rss[0], columnNames, columnTypes, nullability);
         assertMetaDataResultSet(rss[1], columnNames, columnTypes, nullability);
@@ -3540,7 +3541,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         	columnTypes[4 - 1] = Types.SMALLINT;
         
         boolean [] nullability = {false,false,false,
-            true,false,true,true,true,false,true,true,true,true};
+            false,false,true,true,true,false,false,true,true,true};
         
         // JDBC result set
         assertMetaDataResultSet(rss[0], columnNames, columnTypes, nullability);
@@ -4448,8 +4449,8 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                 , Types.SMALLINT, Types.SMALLINT};
 
         boolean[] nullability = new boolean[] {
-                true, false, false, false, false, false, false, false, true, true,
-                true, false, true, true, true, true, true, false, true, false//};
+                true, false, false, false, false, false, false, false, false, true,
+                true, false, true, true, true, true, true, false, false, false//};
                 , false, false};
 
         
@@ -4482,6 +4483,8 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         odbcColumnTypes[6 - 1] = Types.SMALLINT;
         odbcColumnTypes[15 - 1] = Types.SMALLINT;
         odbcColumnTypes[16 - 1] = Types.SMALLINT;
+        
+        odbcNullability[15 - 1] = false; // SQL_DATA_TYPE NULL in JDBC, valid type in ODBC
              
         // odbc result set
         assertMetaDataResultSet(

@@ -297,7 +297,7 @@ public class ConditionalNode extends ValueNode
 		if (castType == null) return;
 		
 		// need to have nullNodes nullable
-		castType.setNullability(true);
+		castType = castType.getNullabilityType(true);
 		ValueNode thenNode = (ValueNode)thenElseList.elementAt(0);
 		ValueNode elseNode = (ValueNode)thenElseList.elementAt(1);
 
