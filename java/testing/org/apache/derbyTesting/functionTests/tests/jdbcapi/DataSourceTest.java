@@ -40,6 +40,9 @@ import java.util.Hashtable;
 import java.util.Iterator;
 
 import org.apache.derbyTesting.functionTests.tests.jdbcapi.AssertEventCatcher;
+
+import javax.sql.ConnectionEvent;
+import javax.sql.ConnectionEventListener;
 import javax.sql.ConnectionPoolDataSource;
 import javax.sql.DataSource;
 import javax.sql.PooledConnection;
@@ -80,7 +83,7 @@ import org.apache.derbyTesting.junit.TestConfiguration;
  */
 public class DataSourceTest extends BaseJDBCTestCase {
 
-    protected static String dbName = 
+    private static final String dbName = 
         TestConfiguration.getCurrent().getDefaultDatabaseName();
     
     /**
@@ -610,6 +613,82 @@ public class DataSourceTest extends BaseJDBCTestCase {
         }
     }
     
+    /**
+     * Test that a PooledConnection can be reused during the close
+     * event raised by the closing of its logical connection.
+     * DERBY-2142.
+     * @throws SQLException 
+     *
+     */
+    public void testPooledReuseOnClose() throws SQLException
+    {
+    	// TEMP - seems to fail on network client
+    	if (!usingEmbedded())
+    		return;
+    	
+    	// PooledConnection from a ConnectionPoolDataSource
+    	ConnectionPoolDataSource cpds =
+    		J2EEDataSource.getConnectionPoolDataSource();
+    	subtestPooledReuseOnClose(cpds.getPooledConnection());
+
+    	// PooledConnection from an XDataSource
+    	XADataSource xads = J2EEDataSource.getXADataSource();
+    	subtestPooledReuseOnClose(xads.getXAConnection());
+    }
+    
+    /**
+     * Tests that a pooled connection can successfully be reused
+     * (a new connection obtained from it) during the processing
+     * of its close event by its listener.
+     * Sections 11.2 & 12.5 of JDBC 4 specification indicate that the
+     * connection can be returned to the pool when the
+     * ConnectionEventListener.connectionClosed() is called.
+     */
+    private void subtestPooledReuseOnClose(final PooledConnection pc) throws SQLException
+    {
+    	final Connection[] newConn = new Connection[1];
+    	pc.addConnectionEventListener(new ConnectionEventListener() {
+
+    		/**
+    		 * Mimic a pool handler that returns the PooledConnection
+    		 * to the pool and then reallocates it to a new logical connection.
+    		 */
+			public void connectionClosed(ConnectionEvent event) {
+				PooledConnection pce = (PooledConnection) event.getSource();
+				assertSame(pc, pce);
+				try {
+					// open a new logical connection and pass
+					// back to the fixture.
+					newConn[0] = pce.getConnection();
+				} catch (SQLException e) {
+					// Need to catch the exception here because
+					// we cannot throw an exception through
+					// the api method.
+					fail(e.getMessage());
+				}
+			}
+
+			public void connectionErrorOccurred(ConnectionEvent event) {
+			}
+    		
+    	});
+    	
+    	// Open a connection then close it to trigger the
+    	// fetching of a new connection in the callback.
+    	Connection c1 = pc.getConnection();
+    	c1.close();
+    	
+    	// Fetch the connection created in the close callback
+    	Connection c2 = newConn[0];
+    	assertNotNull(c2);
+    	
+    	// Ensure the connection is useable, this hit a NPE before DERBY-2142
+    	// was fixed (for embedded).
+    	c2.createStatement().close();
+    	
+    	pc.close();
+    }
+    
     public void testAllDataSources() throws SQLException, Exception
     {
         Connection dmc = getConnection();
@@ -645,7 +724,7 @@ public class DataSourceTest extends BaseJDBCTestCase {
         if (usingEmbedded())
             assertTenConnectionsUnique();
 
-        DataSource dscs = JDBCDataSource.getDataSource(dbName);
+        DataSource dscs = JDBCDataSource.getDataSource();
         if (usingEmbedded()) 
                 assertToString(dscs);
 
@@ -699,7 +778,6 @@ public class DataSourceTest extends BaseJDBCTestCase {
         aes1.resetState();
 
         XADataSource dsx = J2EEDataSource.getXADataSource();
-        JDBCDataSource.setBeanProperty(dsx, "DatabaseName", dbName);
         if (usingEmbedded())
             assertToString(dsx);
 
@@ -925,7 +1003,6 @@ public class DataSourceTest extends BaseJDBCTestCase {
         // some of this may be tested elsewhere too.
 
         XADataSource dsx = J2EEDataSource.getXADataSource();
-        JDBCDataSource.setBeanProperty(dsx, "DatabaseName", dbName);
         XAConnection xac = dsx.getXAConnection();
         AssertEventCatcher aes6 = new AssertEventCatcher(6);
         xac.addConnectionEventListener(aes6);
@@ -1113,7 +1190,6 @@ public class DataSourceTest extends BaseJDBCTestCase {
         // handled correctly 
         // Some more isolation testing using SQL and JDBC api
         XADataSource dsx = J2EEDataSource.getXADataSource();
-        JDBCDataSource.setBeanProperty(dsx, "DatabaseName", dbName);
         XAConnection xac = dsx.getXAConnection();
         AssertEventCatcher aes6 = new AssertEventCatcher(6);
         xac.addConnectionEventListener(aes6);
@@ -1266,7 +1342,6 @@ public class DataSourceTest extends BaseJDBCTestCase {
             ResultSet.HOLD_CURSORS_OVER_COMMIT};
 
         XADataSource dsx = J2EEDataSource.getXADataSource();
-        JDBCDataSource.setBeanProperty(dsx, "DatabaseName", dbName);
         XAConnection xac = dsx.getXAConnection();
         AssertEventCatcher aes6 = new AssertEventCatcher(6);
         xac.addConnectionEventListener(aes6);
@@ -1874,7 +1949,7 @@ public class DataSourceTest extends BaseJDBCTestCase {
     // for embedded datasources.
     // This subtest does not run for network server, the database shutdown
     // is done using setDatabaseShutdown.
-    public static void testDSRequestAuthentication() throws SQLException {
+    public void testDSRequestAuthentication() throws SQLException {
 
         if (usingDerbyNetClient())
             return;
@@ -2057,55 +2132,53 @@ public class DataSourceTest extends BaseJDBCTestCase {
         String traceFile;
 
         // DataSource
-        ClientDataSource ds = new ClientDataSource();
-        ds.setDatabaseName(dbName);
+        DataSource ds = JDBCDataSource.getDataSource();
 
         // DataSource - setTransationAttributes
         traceFile = "trace1.out";
-        ds.setConnectionAttributes("traceFile="+traceFile);
+        JDBCDataSource.setBeanProperty(ds, "connectionAttributes",
+        		"traceFile="+traceFile);
+
         // In this scenario, we *only* get a tracefile, if we first get a 
         // successful connection, followed by an unsuccessful connection. 
         // So, we cannot just use ds.getConnection()
         dsGetBadConnection(ds);
-        ds.setConnectionAttributes(null);
+        JDBCDataSource.clearStringBeanProperty(ds, "connectionAttributes");
+
         // DataSource - setTraceFile
         traceFile = "trace2.out";
-        ds.setTraceFile(traceFile);
+        JDBCDataSource.setBeanProperty(ds, "traceFile", traceFile);
         ds.getConnection();
-        ds.setTraceFile(null);
-        ds.setDatabaseName(null);
+        ds = null;
 
         // now with ConnectionPoolDataSource
-        ClientConnectionPoolDataSource cpds = new ClientConnectionPoolDataSource();
-        cpds.setDatabaseName(dbName);
+        ConnectionPoolDataSource cpds = J2EEDataSource.getConnectionPoolDataSource();
 
         traceFile = "trace3.out";
-        cpds.setConnectionAttributes("traceFile="+traceFile);
+        JDBCDataSource.setBeanProperty(cpds, "connectionAttributes",
+        		"traceFile="+traceFile);
         // DERBY-2468 - trace3.out does not get created
-        cpds.getConnection();
-        cpds.setConnectionAttributes(null);
+        ((ClientConnectionPoolDataSource) cpds).getConnection();
+        JDBCDataSource.clearStringBeanProperty(cpds, "connectionAttributes");
 
         traceFile = "trace4.out";
-        cpds.setTraceFile(traceFile);
-        cpds.getConnection();
-        cpds.setTraceFile(null);
-        cpds.setDatabaseName(null);
+        JDBCDataSource.setBeanProperty(cpds, "traceFile", traceFile);
+        ((ClientConnectionPoolDataSource) cpds).getConnection();
+        cpds = null;
 
         // now with XADataSource
-        ClientXADataSource xads = new ClientXADataSource();
-        xads.setDatabaseName(dbName);
+        XADataSource xads = J2EEDataSource.getXADataSource();
 
         traceFile = "trace5.out";
-        xads.setConnectionAttributes("traceFile="+traceFile);
-        xads.getConnection();
+        JDBCDataSource.setBeanProperty(xads, "connectionAttributes",
+        		"traceFile="+traceFile);
+        ((ClientXADataSource) xads).getConnection();
         // DERBY-2468 - trace5.out does not get created
-        xads.setConnectionAttributes(null);
+        JDBCDataSource.clearStringBeanProperty(xads, "connectionAttributes");
 
         traceFile = "trace6.out";
-        xads.setTraceFile(traceFile);
-        xads.getConnection();
-        xads.setTraceFile(null);
-        xads.setDatabaseName(null);
+        JDBCDataSource.setBeanProperty(xads, "traceFile", traceFile);
+        ((ClientXADataSource) xads).getConnection();
 
         assertTraceFilesExist();
     }
@@ -2249,44 +2322,36 @@ public class DataSourceTest extends BaseJDBCTestCase {
      *  
      * @throws SQLException
      */
-    public void testClientDescriptionConnectionAttribute() 
+    public void testDescriptionProperty() 
     throws SQLException, Exception {
-
-        if (usingEmbedded())
-            return;
         
-        // DataSource
-        String setDescription = 
-            "Everything you ever wanted to know about this datasource";
-        String getDescription;
-
         // DataSource - setDescription
-        ClientDataSource ds = new ClientDataSource();
-        ds.setDatabaseName(dbName);
-        ds.setDescription(setDescription);
-        ds.getConnection();
-        getDescription = ds.getDescription();
-        assertEquals(setDescription, getDescription);
-        ds.setDescription(null);
+        subTestDataSourceDescription(JDBCDataSource.getDataSource());
 
         // ConnectionPoolDataSource - setDescription
-        ClientConnectionPoolDataSource cpds = 
-            new ClientConnectionPoolDataSource();
-        cpds.setDatabaseName(dbName);
-        cpds.setDescription(setDescription);
-        cpds.getConnection();
-        getDescription = cpds.getDescription();
-        assertEquals(setDescription, getDescription);
-        cpds.setDescription(null);
+        subTestDataSourceDescription(
+        		(DataSource) J2EEDataSource.getConnectionPoolDataSource());
 
         // XADataSource - setDescription
-        ClientXADataSource xads = new ClientXADataSource();
-        xads.setDatabaseName(dbName);
-        xads.setDescription(setDescription);
-        xads.getConnection();
-        getDescription = xads.getDescription();
-        assertEquals(setDescription, getDescription);
-        xads.setDescription(null);
+        subTestDataSourceDescription(
+        		(DataSource) J2EEDataSource.getXADataSource());
+
+    }
+    
+    /**
+     * Utility method for testing setting and fetching the description
+     * property on a data source.
+     */
+    private void subTestDataSourceDescription(DataSource ds) throws Exception
+    {
+        String setDescription = 
+            "Everything you ever wanted to know about this datasource";
+        
+        JDBCDataSource.setBeanProperty(ds, "description", setDescription);
+        ds.getConnection();
+        assertEquals(setDescription, JDBCDataSource.getBeanProperty(ds, "description"));
+        JDBCDataSource.clearStringBeanProperty(ds, "description");
+        assertNull(JDBCDataSource.getBeanProperty(ds, "description"));    	
     }
 
     /* ------------------ JDBC30 (and up) Fixtures ------------------ */

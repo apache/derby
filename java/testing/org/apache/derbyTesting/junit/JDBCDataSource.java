@@ -231,6 +231,22 @@ public class JDBCDataSource {
     }
     
     /**
+     * Get a bean property for a data source. This code can be used
+     * on any data source type.
+     * @param ds DataSource to fetch property from
+     * @param property name of property.
+     */
+    public static Object getBeanProperty(Object ds, String property)
+        throws Exception
+    {
+        String getterName = getGetterName(property);
+
+        Method getter = ds.getClass().getMethod(getterName,
+                    new Class[0]);
+        return getter.invoke(ds, new Object[0]);
+    }
+    
+    /**
      * Clear a String Java bean property by setting it to null.
      * @param ds ds DataSource to have property cleared
      * @param property name of property.
@@ -249,6 +265,10 @@ public class JDBCDataSource {
     
     private static String getSetterName(String attribute) {
         return "set" + Character.toUpperCase(attribute.charAt(0))
+                + attribute.substring(1);
+    }
+    private static String getGetterName(String attribute) {
+        return "get" + Character.toUpperCase(attribute.charAt(0))
                 + attribute.substring(1);
     }
     
