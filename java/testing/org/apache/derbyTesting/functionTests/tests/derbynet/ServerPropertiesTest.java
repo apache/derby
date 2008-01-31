@@ -26,9 +26,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
 import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Locale;
 import java.util.Properties;
@@ -44,6 +42,7 @@ import org.apache.derbyTesting.junit.NetworkServerTestSetup;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
+import org.apache.derbyTesting.junit.Utilities;
 
 /** 
  * This test tests the derby.properties, system properties and command line
@@ -69,20 +68,7 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
     private static String POLICY_FILE_NAME = 
         "functionTests/tests/derbynet/ServerPropertiesTest.policy";
     private static String TARGET_POLICY_FILE_NAME = "server.policy";
-    
-    private static String[] serverProperties = {
-                "derby.drda.logConnections",
-                "derby.drda.traceAll",
-                "derby.drda.traceDirectory",
-                "derby.drda.keepAlive",
-                "derby.drda.timeSlice",
-                "derby.drda.host",
-                "derby.drda.portNumber",
-                "derby.drda.minThreads",
-                "derby.drda.maxThreads",
-                "derby.drda.startNetworkServer",
-                "derby.drda.debug"
-                };
+    private int[] portsSoFar;
     
     public ServerPropertiesTest(String name) {
         super(name);
@@ -101,17 +87,30 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
         // this fixture doesn't use a client/server setup, instead does the 
         // relevant starting/stopping inside the test
         // Add security manager policy that allows executing java commands
-        Test setPortPriority = new ServerPropertiesTest("ttestSetPortPriority");
-        setPortPriority = decorateWithPolicy(setPortPriority);
-        suite.addTest(setPortPriority);
+        suite.addTest(decorateTest("ttestSetPortPriority", 
+                new String[] {}, new String[] {}, false));
         
         // test unfinished properties settings. 
         // decorateTest adds policy file and sets up properties
+        // the properties settings are incorrect i.e. they have no value
+        String[] badServerProperties = {
+                "derby.drda.logConnections=",
+                "derby.drda.traceAll=",
+                "derby.drda.traceDirectory=",
+                "derby.drda.keepAlive=",
+                "derby.drda.timeSlice=",
+                "derby.drda.host=",
+                "derby.drda.portNumber=",
+                "derby.drda.minThreads=",
+                "derby.drda.maxThreads=",
+                "derby.drda.startNetworkServer=",
+                "derby.drda.debug="
+                };
         // fixture hits error DRDA_MissingNetworkJar (Cannot find derbynet.jar) so,
         // only run with jars
         if (TestConfiguration.loadingFromJars())
             suite.addTest(decorateTest("ttestDefaultProperties", 
-                getStartupProperties(), new String[] {}));
+                badServerProperties, new String[] {}, true));
         
         // The other fixtures, testToggleTrace (trace on/off), 
         // testToggleLogConnections (logconnections on/off) , and
@@ -132,10 +131,21 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
     
     public void tearDown() throws Exception {
         super.tearDown();
-        serverProperties = null;
         POLICY_FILE_NAME = null;
         TARGET_POLICY_FILE_NAME = null;
         _inputStreamHolder = null;
+        if (portsSoFar != null)
+        {
+            for (int i = 0 ; i < portsSoFar.length ; i++)
+            {
+                try {
+                    shutdownServer(portsSoFar[i], true);
+                } catch (SQLException e) {
+                    fail("could not shutdown server at port " + portsSoFar[i]);
+                }
+            }
+            portsSoFar=null;
+        }
     }
     
     /**
@@ -145,7 +155,8 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
      * </p>
      */
     private static Test decorateTest(String testName, 
-            String[] startupProperties, String[] startupArgs)
+            String[] startupProperties, String[] startupArgs,
+            boolean startServer)
     {
         ServerPropertiesTest spt = new ServerPropertiesTest(testName);
         String [] startupProps;
@@ -155,34 +166,23 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
             startupProps = startupProperties;
         if (startupArgs == null)
             startupArgs = new String[]{};
-        // start networkServer as a process
-        NetworkServerTestSetup networkServerTestSetup =
-            new NetworkServerTestSetup(spt,
-                startupProps, startupArgs, true, 
-                spt._inputStreamHolder);
+        NetworkServerTestSetup networkServerTestSetup;
+        if (startServer)
+        {
+            // start networkServer as a process
+            networkServerTestSetup = new NetworkServerTestSetup(
+                spt, startupProps, startupArgs, true, spt._inputStreamHolder);
+        }
+        else
+        {
+            // get networkserver setup but don't start anything
+            networkServerTestSetup = new NetworkServerTestSetup(
+                spt, true, false);
+        }
         Test test = decorateWithPolicy(networkServerTestSetup);
         test = TestConfiguration.defaultServerDecorator(test);
         return test;
     }   
-    
-    /**
-     * <p>
-     * Return a set of startup properties for testing
-     * </p>
-     */
-    private static  String[]  getStartupProperties()
-    {
-
-        ArrayList list = new ArrayList();
-        for (int i = 0 ; i<serverProperties.length ; i++)
-        {
-            //System.out.println(serverProperties[i]);
-            list.add(serverProperties[i] + "=");
-        }
-        String[] result = new String[ list.size()];
-        list.toArray(result);
-        return result;
-    }
     
     /**
      * Construct the name of the server policy file.
@@ -225,8 +225,7 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
     private static void verifyProperties(String[] expectedValues) { 
         Properties p;
         try {
-        NetworkServerControl derbyServer = NetworkServerTestSetup.getNetworkServerControl(); 
-            p = derbyServer.getCurrentProperties();
+            p = NetworkServerTestSetup.getNetworkServerControl().getCurrentProperties();
         } catch (Exception e) {
             p = null; // should be ok to set to null (to satisfy compiler)
             // as fail will exit without further checks.
@@ -297,55 +296,22 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
     }
     
     /**
-     *  Ping for the server started on the specified port
+     *  Ping for the server to be up - or down.
+     *  @param port port number to be used in the ping
+     *  @param expectServerUp indicator whether the server is expected to be up
      */
-    public boolean canPingServer(int port, int SLEEP_TIME, int retries) 
+    private boolean canPingServer(int port, boolean expectServerUp) 
     throws SQLException {
-    
-        // Wait for the network server to respond
-        boolean started = false;
-        if (retries > 10)
-            retries = 10;         // Max retries = max seconds to wait
-
-        while (!started && retries > 0) {
-            try {
-                NetworkServerControl nsctrl = new NetworkServerControl(
-                        InetAddress.getByName(
-                                TestConfiguration.getCurrent().getHostName()),
-                                port);
-                // Sleep x second and then ping the network server
-                Thread.sleep(SLEEP_TIME);
-                nsctrl.ping();
-
-                // If ping does not throw an exception the server has started
-                started = true;
-            } catch(Exception e) {         
-                retries--;
-            }
-        }
-        return (started);
-    }
         
-    private Process runProcess(String[] command) {
-        final String[] finalCommand = command;
-        Process serverProcess = (Process) AccessController.doPrivileged
-        (
-         new PrivilegedAction()
-         {
-             public Object run()
-             {
-                 Process result = null;
-                 try {
-                    result = Runtime.getRuntime().exec(finalCommand);
-                 } catch (Exception ex) {
-                     ex.printStackTrace();
-                     println("failure starting process");
-                 }
-                 return result;
-             }
-         }
-        );
-        return serverProcess;
+        boolean serverUp = false;
+        try {
+            serverUp = NetworkServerTestSetup.pingForServerUp(
+                NetworkServerTestSetup.getNetworkServerControl(port), null,
+                expectServerUp);
+        } catch (Exception e) {
+            fail("unexpected Exception while pinging");
+        }
+        return serverUp;
     }
     
     // obtain & shutdown the network server;
@@ -355,20 +321,20 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
         try {
             if (specifyPort)
             {
-                NetworkServerControl nsctrl = new NetworkServerControl(
-                    InetAddress.getByName(
-                        TestConfiguration.getCurrent().getHostName()), port);
+                NetworkServerControl nsctrl = 
+                    NetworkServerTestSetup.getNetworkServerControl(port);
                 nsctrl.shutdown();
             }
             else
             {
-                NetworkServerControl nsctrl = new NetworkServerControl();
+                NetworkServerControl nsctrl = 
+                    NetworkServerTestSetup.getNetworkServerControlDefault();
                 nsctrl.shutdown();
             }
         } catch (Exception e) {
             return "failed to shutdown server with API parameter";
         }
-        if (canPingServer(port,0,1)) {
+        if (canPingServer(port,false)) {
             return "Can still ping server";
         }
         return null;
@@ -382,10 +348,8 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
         try {
             if (specifyPort)
             {
-                NetworkServerControl nsctrl = new NetworkServerControl(
-                        InetAddress.getByName(
-                            TestConfiguration.getCurrent().getHostName()),
-                            port);
+                NetworkServerControl nsctrl = 
+                    NetworkServerTestSetup.getNetworkServerControl(port);
                 // For debugging, to make output come to console uncomment:
                 //nsctrl.start(new PrintWriter(System.out, true));
                 // and comment out:
@@ -394,7 +358,8 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
             }
             else
             {
-            NetworkServerControl nsctrl = new NetworkServerControl();
+                NetworkServerControl nsctrl = 
+                    NetworkServerTestSetup.getNetworkServerControlDefault();
                 // For debugging, to make output come to console uncomment:
                 //nsctrl.start(new PrintWriter(System.out, true));
                 // and comment out:
@@ -405,40 +370,18 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
             return "failed to start server with port " + port;
         }
         // check that we have this server up now
-        if (!canPingServer(port, 1, 10)) {
+        if (!canPingServer(port, true)) {
             return "Cannot ping server started with port set to " + port;
         }
         return null;
     }
     
-    /**
-     *  Shutdown the server on the specified port - for cleanup
-     */
-    public void shutdownServer(int port) throws SQLException {
-        try {
-        NetworkServerControl nsctrl = new NetworkServerControl(
-            InetAddress.getByName(
-                TestConfiguration.getCurrent().getHostName()), port);
-        nsctrl.shutdown();
-        } catch (Exception e) {
-            // ignore errors for this one.
-        }
-    }
-    
-   public void checkWhetherNeedToShutdown(int[] portsSoFar, String failReason) {
+   public void checkWhetherNeedToShutdown(int[] ports, String failReason) {
        
+       portsSoFar = ports;
        if (!(failReason == null))
        {
-           if (portsSoFar != null && portsSoFar[0] != 0);
-           for (int i = 0 ; i < portsSoFar.length ; i++)
-           {
-               try {
-                   shutdownServer(portsSoFar[i]);
-               } catch (SQLException e) {
-                   fail("could not shutdown server at port " + portsSoFar[i]);
-               }
-           }
-       fail(failReason);
+           fail(failReason);
        }
    }
    
@@ -455,7 +398,8 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
     /**
      *  Test port setting priority
      */
-    public void ttestSetPortPriority() throws SQLException {
+    public void ttestSetPortPriority() 
+    throws SQLException, InterruptedException, IOException {
         // default is 1527. The test harness configuration would
         // use the API and add the port number. We want to test all
         // 4 mechanisms for specifying the port.
@@ -468,10 +412,15 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
         // Note: if the harness gets modified to accomodate splitting
         //    over different networkservers, there maybe something more
         //    appropriate than shutting down the default server.
-        if (canPingServer(1527, 0, 1)) {
+        // we really expect the server to be down, let's
+        // not do any waiting around
+        NetworkServerTestSetup.setWaitTime(0);
+        if (canPingServer(1527, false)) {
             // for now, shutdown
             shutdownServer(1527, false);
         }
+        NetworkServerTestSetup.setDefaultWaitTime();
+
         // start the default, which at this point should be localhost and 1527
         String actionResult = startServer(1527, false);
         checkWhetherNeedToShutdown(new int[] {1527}, actionResult);
@@ -482,24 +431,7 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
         derbyProperties.put("derby.drda.portNumber", 
                 new Integer(firstAlternatePort).toString());
 
-        String tmpDerbyHome = "";
-        try {
-            final String derbyHome = (String)
-            AccessController.doPrivileged
-            (new java.security.PrivilegedAction(){
-                public Object run(){
-                    String x = System.getProperty(
-                        "derby.system.home");
-                    println("derbyhome: " + x);
-                        return x;
-                }
-            });
-            tmpDerbyHome = derbyHome;
-        } catch (Exception e) {
-            checkWhetherNeedToShutdown(new int[] {1527}, "failed to get derby.system.home for test");
-        }
-        
-        final String derbyHome = tmpDerbyHome;
+        final String derbyHome = getSystemProperty("derby.system.home");
         Boolean b = (Boolean)AccessController.doPrivileged
         (new java.security.PrivilegedAction(){
             public Object run(){
@@ -516,7 +448,7 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
             }
         });
         if (b.booleanValue())
-       {
+        {
             checkWhetherNeedToShutdown(new int[] {1527}, "failed to write derby.properties");
         }
         // have to shutdown engine to force read of derby.properties
@@ -543,51 +475,31 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
 
         // now with -p. 
         int fourthAlternatePort = getAlternativePort();
-        String classpath = getSystemProperty("java.class.path");
-        String[] commandArray = {"java", "-classpath", classpath, 
-            "-Dderby.system.home=" + derbyHome,
+        String[] commandArray = {"-Dderby.system.home=" + derbyHome,
             "org.apache.derby.drda.NetworkServerControl", "-p",
             String.valueOf(fourthAlternatePort).toString(), 
             "-noSecurityManager", "start"};
-        Process p = runProcess(commandArray);
+        Utilities.execJavaCmd(commandArray);
         
-        if (!canPingServer(fourthAlternatePort,1,10)) {
+        if (!canPingServer(fourthAlternatePort, true)) {
             actionResult = "Can not ping server specified with -p";
         }
         checkWhetherNeedToShutdown(new int[] {1527, firstAlternatePort, secondAlternatePort,
             thirdAlternatePort, fourthAlternatePort}, actionResult);
-            
+                        
         // shutdown with -p
-        commandArray = new String[] {"java", "-classpath", classpath, 
-                "-Dderby.system.home=" + derbyHome,
+        commandArray = new String[] {"-Dderby.system.home=" + derbyHome,
                 "org.apache.derby.drda.NetworkServerControl", "-p",
                 String.valueOf(fourthAlternatePort).toString(), 
                 "-noSecurityManager", "shutdown"};
-        Process p2 = runProcess(commandArray);
+        Utilities.execJavaCmd(commandArray);
 
-        if (canPingServer(fourthAlternatePort,1000,10)) {
+        if (canPingServer(fourthAlternatePort, false)) {
             actionResult = "Can still ping server specified with -p";
         }
         checkWhetherNeedToShutdown(new int[] {1527, firstAlternatePort, secondAlternatePort,
             thirdAlternatePort, fourthAlternatePort}, actionResult);
             
-        // clean up
-        InputStream istr = p.getInputStream();
-        InputStream istr2 = p2.getInputStream();
-        try {
-            istr.close();
-            istr2.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail("cannot close spawned process' inputstream");
-        }
-        istr=null;
-        istr2=null;
-        p.destroy();
-        p=null;
-        p2.destroy();
-        p2=null;
-        
         // shutdown with port specified in constructor
         actionResult = shutdownServer(thirdAlternatePort, true);
         checkWhetherNeedToShutdown( new int[] {1527, firstAlternatePort, secondAlternatePort,

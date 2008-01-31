@@ -59,6 +59,7 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
     private FileOutputStream serverOutput;
     private final boolean asCommand;
 
+    private final boolean startServerAtSetup;
     private final boolean useSeparateProcess;
     private final boolean serverShouldComeUp;
     private final InputStream[] inputStreamHolder;
@@ -97,8 +98,35 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
         this.useSeparateProcess = false;
         this.serverShouldComeUp = true;
         this.inputStreamHolder = null;
+        this.startServerAtSetup = true;
 }
 
+    /**
+     * Decorator this test with the NetworkServerTestSetup.
+     * 
+     * Sets up the server using the current configuration, but does not start.
+     * 
+     * @param test the Test for which this setup is used
+     * @param asCommand True to start using NetworkServerControl.main()
+     * within the same virtual machine, false to use NetworkServerControl.start.
+     * @param startServerAtSetup False to start using NetworkServerControl.main()
+     * 
+     * @see NetworkServerControl#main(String[])
+     * @see NetworkServerControl#start(PrintWriter)
+     */
+    public NetworkServerTestSetup(Test test, boolean asCommand, boolean startServerAtSetup) {
+        super(test);
+        this.asCommand = asCommand;
+
+        this.systemProperties = null;
+        this.startupArgs = null;
+        this.useSeparateProcess = false;
+        this.serverShouldComeUp = true;
+        this.inputStreamHolder = null;
+
+        this.startServerAtSetup = startServerAtSetup;
+    }
+    
      /**
      * Decorator for starting up with specific command args
      * and system properties. Server is always started up
@@ -122,6 +150,7 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
         this.useSeparateProcess = true;
         this.serverShouldComeUp = serverShouldComeUp;
         this.inputStreamHolder = inputStreamHolder;
+        this.startServerAtSetup = true;
     }
 
     /**
@@ -132,14 +161,17 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
         
         networkServerController = getNetworkServerControl();
 
-        if (useSeparateProcess)
-        { serverProcess = startSeparateProcess(); }
-        else if (asCommand)
-        { startWithCommand(); }
-        else
-        { startWithAPI(); }
-        
-        if ( serverShouldComeUp ) { waitForServerStart(networkServerController); }
+        if (startServerAtSetup)
+        {
+            if (useSeparateProcess)
+            { serverProcess = startSeparateProcess(); }
+            else if (asCommand)
+            { startWithCommand(); }
+            else
+            { startWithAPI(); }
+
+            if ( serverShouldComeUp ) { waitForServerStart(networkServerController); }
+        }
     }
 
     private void startWithAPI() throws Exception
@@ -366,6 +398,34 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
     }
     
     /**
+     * Return a new NetworkServerControl for the current configuration.
+     * Use the port number specified.
+     * This method is not for general use - in most cases, the port
+     * should not be specified in the test, instead, the test framework
+     * will decide what is the best port number to use.
+     */
+    public static NetworkServerControl getNetworkServerControl(int port)
+        throws Exception
+    {
+        TestConfiguration config = TestConfiguration.getCurrent();
+            return new NetworkServerControl
+            (InetAddress.getByName(config.getHostName()), 
+             port);
+    }
+    
+    /**
+     * Return a new NetworkServerControl for the current configuration.
+     * Use default values, i.e. port number and host are dependent on 
+     * whatever settings are set in the environment (properties)
+     */
+    public static NetworkServerControl getNetworkServerControlDefault()
+        throws Exception
+    {
+        TestConfiguration config = TestConfiguration.getCurrent();
+            return new NetworkServerControl();
+    }
+    
+    /**
      * Ping the server until it has started. Asserts a failure
      * if the server has not started within sixty seconds.
      */
@@ -387,6 +447,16 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
     }
     
     /**
+     * Set the number of milliseconds to wait before declaring server startup
+     * a failure back to the default value specified in this class.
+     * 
+     */
+    public static void setDefaultWaitTime()
+    {
+        waitTime = WAIT_TIME;
+    }
+    
+    /**
      * Ping server for upto sixty seconds. If the server responds
      * in that time then return true, otherwise return false.
      * 
@@ -395,16 +465,30 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
      * (could be <code>null</code>)
      * @return true if server responds in time, false otherwise
      */
-    public static boolean pingForServerStart(
-        NetworkServerControl networkServerController, Process serverProcess)
+    public static boolean pingForServerUp(
+        NetworkServerControl networkServerController, Process serverProcess,
+        boolean expectServerUp)
         throws InterruptedException
     {
+        // If we expect the server to be or come up, then
+        // it makes sense to sleep (if ping unsuccessful), then ping 
+        // and repeat this for the duration of wait-time, but stop
+        // when the ping is successful.
+        // But if we are pinging to see if the server is - or
+        // has come - down, we should do the opposite, stop if ping 
+        // is unsuccessful, and repeat until wait-time if it is
         final long startTime = System.currentTimeMillis();
         while (true) {
-            Thread.sleep(SLEEP_TIME);
             try {
                 networkServerController.ping();
-                return true;
+                if (expectServerUp)
+                    return true;
+                else
+                {
+                    if (System.currentTimeMillis() - startTime > waitTime) {
+                        return true;
+                    }
+                }
             } catch (Throwable e) {
                 if ( !vetPing( e ) )
                 {
@@ -416,9 +500,13 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
 
                     return false;
                 }
-                if (System.currentTimeMillis() - startTime > waitTime) {
-                    return false;
+                if (expectServerUp){
+                    if (System.currentTimeMillis() - startTime > waitTime) 
+                        return false;
                 }
+                // else, we got what we expected, done.
+                else
+                    return false;
             }
             if (serverProcess != null) {
                 // if the server runs in a separate process, check whether the
@@ -438,6 +526,7 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
                     return false;
                 }
             }
+            Thread.sleep(SLEEP_TIME);
         }
     }
 
@@ -460,6 +549,6 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
     public static boolean pingForServerStart(NetworkServerControl control)
         throws InterruptedException
     {
-        return pingForServerStart(control, null);
+        return pingForServerUp(control, null, true);
     }
 }

@@ -57,8 +57,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(NetIjTest.suite());
         suite.addTest(NSinSameJVMTest.suite());
         suite.addTest(NetworkServerControlClientCommandTest.suite());
-        // Disabled until further cleanup is complete - See DERBY-3088
-        // suite.addTest(ServerPropertiesTest.suite());
+        suite.addTest(ServerPropertiesTest.suite());
         
         
         // Disabled due to "java.sql.SQLSyntaxErrorException: The class

@@ -496,9 +496,9 @@ public class SecureServerTest extends BaseJDBCTestCase
     private boolean serverCameUp()
         throws Exception
     {
-        return NetworkServerTestSetup.pingForServerStart(
+        return NetworkServerTestSetup.pingForServerUp(
             NetworkServerTestSetup.getNetworkServerControl(),
-            nsTestSetup.getServerProcess());
+            nsTestSetup.getServerProcess(), true);
     }
 
 }

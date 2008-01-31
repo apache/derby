@@ -151,15 +151,18 @@ public class Utilities {
             }
         }
         /**
-         * Execute a java command and check for the appropriate exit code.
-         * return an InputStream 
-         * @param args
-         * @param expectedExitCode
+         * Execute a java command and return the process.
+         * The caller should decide what to do with the process, if anything,
+         * typical activities would be to do a pr.waitFor, or to
+         * get a getInputStream or getErrorStream
+         * Note, that for verifying the output of a Java process, there is
+         * BaseTestCase.assertExecJavaCmdAsExpected
          * 
+         * @param args
+         * @return the Process 
          * @throws InterruptedException
          */
-        public static InputStream execJavaCmd(String[] args, int expectedExitCode) throws IOException, InterruptedException {
-            InputStream is = null;
+        public static Process execJavaCmd(String[] args) throws IOException, InterruptedException {
             
             int totalSize = 3 + args.length;
             String[] cmd = new String[totalSize];
@@ -189,14 +192,8 @@ public class Utilities {
                 else
                     throw (SecurityException) e;
             }
-            is = pr.getInputStream();
-        
-            // wait until the process exits
-            pr.waitFor();
-        
-            Assert.assertEquals(expectedExitCode,pr.exitValue());
             
-            return is;
+            return pr;
         }       
 
 }
