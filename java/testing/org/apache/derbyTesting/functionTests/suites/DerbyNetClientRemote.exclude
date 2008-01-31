@@ -15,7 +15,6 @@
 # derbynet/sysinfo_withproperties - tries to use NetworkServerControl statements and for the test, server needs to be
 # started with specific property set - DERBY928 for reference 
 # thus not suitable for remote server testing in its current form. - DERBY-928
-# derbynet/testProperties - tries to use NetworkServerControl statements
 # derbynet/timeslice - tries to use NetworkServerControl statements
 # derbynet/DerbyNetAutoStart - tries to start networkserver
 # lang/wisconsin - optimization is quite different when running remote server.
@@ -29,7 +28,6 @@ derbynet/maxthreads.java
 derbynet/runtimeinfo.java
 derbynet/sysinfo.java
 derbynet/sysinfo_withproperties.java
-derbynet/testProperties.java
 derbynet/timeslice.java
 derbynet/DerbyNetAutoStart.java
 lang/wisconsin.java

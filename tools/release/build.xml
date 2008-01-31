@@ -416,13 +416,7 @@
   <target name="regex.masters">
     <property file="${basedir}/tools/release/maintversion.properties"/>
     <antcall target="regex.version"> 
-      <param name="regex.file" value="java/testing/org/apache/derbyTesting/functionTests/master/checkToursDB.out"/>
-    </antcall>
-    <antcall target="regex.version"> 
       <param name="regex.file" value="java/testing/org/apache/derbyTesting/functionTests/master/testclientij.out"/>
-    </antcall>
-    <antcall target="regex.version"> 
-      <param name="regex.file" value="java/testing/org/apache/derbyTesting/functionTests/master/testProperties.out"/>
     </antcall>
   </target>
 
