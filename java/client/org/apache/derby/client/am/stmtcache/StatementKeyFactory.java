@@ -27,12 +27,12 @@ import java.sql.Statement;
 /**
  * A factory for creating JDBC statement keys for use with the JDBC statement
  * cache.
- * 
+ *
  * @see JDBCStatementCache
  */
 //@ThreadSafe
 public final class StatementKeyFactory {
-    
+
     private static final boolean CALLABLE = true;
     private static final boolean PREPARED = false;
 
@@ -46,7 +46,7 @@ public final class StatementKeyFactory {
      * <code>ResultSet.TYPE_FORWARD_ONLY</code>, concurrency will be
      * <code>ResultSet.CONCUR_READ_ONLY</code> and the statement will not
      * return auto-generated keys.
-     * 
+     *
      * @param sql SQL query string
      * @param schema current compilation schema
      * @param holdability result set holdability
@@ -67,7 +67,7 @@ public final class StatementKeyFactory {
      * Unspecified settings will be according to the JDBC standard; result set
      * type will be <code>ResultSet.TYPE_FORWARD_ONLY</code>, concurrency will
      * be <code>ResultSet.CONCUR_READ_ONLY</code>.
-     * 
+     *
      * @param sql SQL query string
      * @param schema current compilation schema
      * @param holdability result set holdability
@@ -87,7 +87,7 @@ public final class StatementKeyFactory {
      * Creates a key for a query specifying result set type and concurrency.
      * <p>
      * The returned key is for a statement not returning auto-generated keys.
-     * 
+     *
      * @param sql SQL query string
      * @param schema current compilation schema
      * @param holdability result set holdability
@@ -107,7 +107,7 @@ public final class StatementKeyFactory {
      * Unspecified settings will be according to the JDBC standard; result set
      * type will be <code>ResultSet.TYPE_FORWARD_ONLY</code>, concurrency will
      * be <code>ResultSet.CONCUR_READ_ONLY</code>.
-     * 
+     *
      * @param sql SQL query string
      * @param schema current compilation schema
      * @param holdability result set holdability
@@ -124,7 +124,7 @@ public final class StatementKeyFactory {
      * concurrency.
      * <p>
      * The returned key is for a statement not returning auto-generated keys.
-     * 
+     *
      * @param sql SQL query string
      * @param schema current compilation schema
      * @param holdability result set holdability

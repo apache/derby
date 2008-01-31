@@ -1,22 +1,22 @@
 /*
- 
+
    Derby - Class org.apache.derby.client.am.stmtcache.JDBCStatementCache
- 
+
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
    The ASF licenses this file to You under the Apache License, Version 2.0
    (the "License"); you may not use this file except in compliance with
    the License.  You may obtain a copy of the License at
- 
+
       http://www.apache.org/licenses/LICENSE-2.0
- 
+
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
- 
+
  */
 
 package org.apache.derby.client.am.stmtcache;
@@ -57,9 +57,9 @@ public final class JDBCStatementCache {
 
     /**
      * Creates a new, empty JDBC statement cache.
-     * 
+     *
      * @param maxSize maximum number of statements in the cache
-     * 
+     *
      * @throws IllegalArgumentException if <code>maxSize</code> is less than one
      */
     public JDBCStatementCache(int maxSize) {
@@ -72,7 +72,7 @@ public final class JDBCStatementCache {
 
     /**
      * Retrieves a cached prepared statement if one exists.
-     * 
+     *
      * @param statementKey key for the prepared statement to look up
      * @return A cached statement if one exists, <code>null</code> otherwise.
      */
@@ -88,7 +88,7 @@ public final class JDBCStatementCache {
 
     /**
      * Cache the prepared statement if it does not already exist.
-     * 
+     *
      * @param statementKey key to insert prepared statement with
      * @param ps prepared statement to cache
      * @return <code>true</code> if added to the cache, <code>false</code> if
@@ -127,7 +127,7 @@ public final class JDBCStatementCache {
          * size.
          * <p>
          * Iteration is by insertion-order.
-         * 
+         *
          * @param maxCapacity maximum size of the map
          */
         public BoundedLinkedHashMap(int maxCapacity) {
@@ -141,7 +141,7 @@ public final class JDBCStatementCache {
          * If the cache has exceeded its maximum size, the oldest element will
          * be marked for removal. The oldest element will be removed after the
          * new element has been inserted.
-         * 
+         *
          * @param eldest the element picked out for removal
          * @return <code>true</code> if the element is to be removed,
          *      <code>false</code> if not.
