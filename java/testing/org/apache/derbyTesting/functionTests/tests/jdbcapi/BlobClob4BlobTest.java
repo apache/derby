@@ -1522,6 +1522,32 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
     }
 
     /**
+     * Make sure we get an error attempting to access the 
+     * lob after commit.
+     */
+    public void testClobAfterCommitWithSecondClob() throws SQLException
+    {
+        getConnection().setAutoCommit(false);
+        Statement s1 = createStatement();
+        ResultSet rs1 = s1.executeQuery("values cast('first' as clob)");
+        rs1.next();
+        Clob first = rs1.getClob(1);
+        rs1.close(); 
+        commit();
+        Statement s2 = createStatement();
+        ResultSet rs2 = s2.executeQuery("values cast('second' as clob)");
+        rs2.next();
+        Clob second = rs2.getClob(1);
+        try {
+            first.getSubString(1,100);
+            fail("first.getSubString should have failed because after the commit");
+        } catch (SQLException se){
+            assertSQLState(INVALID_LOB,se);
+        }
+        assertEquals("second",second.getSubString(1, 100));        
+        rs2.close(); 
+    }
+    /**
      * Test fix for derby-1382.
      *
      * Test that the getClob() returns the correct value for the clob before and

@@ -24,13 +24,11 @@ package org.apache.derby.impl.jdbc;
 
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.jdbc.EngineBlob;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.Resetable;
-import org.apache.derby.impl.jdbc.ConnectionChild;
-import org.apache.derby.impl.jdbc.EmbedConnection;
-import org.apache.derby.impl.jdbc.Util;
 import org.apache.derby.iapi.services.io.NewByteArrayInputStream;
 import org.apache.derby.iapi.services.io.InputStreamUtil;
 import org.apache.derby.iapi.services.io.ArrayInputStream;
@@ -70,11 +68,14 @@ import java.io.IOException;
 
  */
 
-final class EmbedBlob extends ConnectionChild implements Blob
+final class EmbedBlob extends ConnectionChild implements Blob, EngineBlob
 {
     // blob is either materialized or still in stream
     private boolean         materialized;
     private InputStream     myStream;
+    
+    // locator key for lob. used by Network Server.
+    private final int             locator;
     
     /*
      * Length of the BLOB if known. Set to -1 if
@@ -116,7 +117,7 @@ final class EmbedBlob extends ConnectionChild implements Blob
              materialized = true;
              //add entry in connection so it can be cleared 
              //when transaction is not valid
-             con.addLOBMapping (this);
+             locator = con.addLOBMapping (this);
          }
          catch (IOException e) {
              throw Util.setStreamFailure (e);
@@ -192,7 +193,7 @@ final class EmbedBlob extends ConnectionChild implements Blob
         pos = 0;
         //add entry in connection so it can be cleared 
         //when transaction is not valid
-        con.addLOBMapping (this);
+        this.locator = con.addLOBMapping (this);
     }
 
 
@@ -991,5 +992,14 @@ final class EmbedBlob extends ConnectionChild implements Blob
      */
     boolean isMaterialized () {
         return materialized;
+    }
+
+    /**
+     * Return locator for this lob.
+     * 
+     * @return
+     */
+    public int getLocator() {
+        return locator;
     }
 }
