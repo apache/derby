@@ -93,7 +93,6 @@ public class Changes10_3 extends UpgradeChange {
         {
             case PH_CREATE:
             case PH_POST_SOFT_UPGRADE:
-            case PH_POST_HARD_UPGRADE:
                 // 10.0-10.2 inclusive had the system schema incorrect.
                 if (!oldAtLeast(10, 3))
                     return;
@@ -323,7 +322,6 @@ public class Changes10_3 extends UpgradeChange {
                 break;
                 
             case PH_HARD_UPGRADE:
-            case PH_POST_HARD_UPGRADE:
                 assertPolicyReloaderExists();
                 break;
             
@@ -474,14 +472,6 @@ public class Changes10_3 extends UpgradeChange {
                 break;
             }
             case PH_HARD_UPGRADE:
-            {
-                checkNewHeap("testNewHeap1", "create");
-                checkNewHeap("testNewHeap2", "soft");
-                checkNewHeap("testNewHeap3", "hard");
-                break;
-            }
-
-            case PH_POST_HARD_UPGRADE:
             {
                 checkNewHeap("testNewHeap1", "create");
                 checkNewHeap("testNewHeap2", "soft");

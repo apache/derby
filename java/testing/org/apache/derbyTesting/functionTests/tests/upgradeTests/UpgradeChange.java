@@ -74,7 +74,9 @@ abstract class UpgradeChange extends BaseJDBCTestCase {
     
     static final int PH_HARD_UPGRADE = 3;
     /**
-     * Boot the database with old release after hard upgrade
+     * Boot the database with old release after hard upgrade.
+     * Expected to fail to connect, so no tests need to have
+     * cases for this condition.
      */
     static final int PH_POST_HARD_UPGRADE = 4;
     

@@ -114,7 +114,6 @@ public class Changes10_4 extends UpgradeChange {
         case PH_SOFT_UPGRADE:
         case PH_POST_SOFT_UPGRADE:
         case PH_HARD_UPGRADE:
-        case PH_POST_HARD_UPGRADE:
             Connection con = ds.getConnection();
         	//First make the current schema as a user schema. And then run a 
         	//metadata query to make sure that it runs fine. If it does (which
@@ -173,7 +172,6 @@ public class Changes10_4 extends UpgradeChange {
             break;
             
         case PH_HARD_UPGRADE:
-        case PH_POST_HARD_UPGRADE:
             s.execute( createTableFunctionText );
             break;
         }
@@ -212,7 +210,6 @@ public class Changes10_4 extends UpgradeChange {
                 break;
 
             case PH_HARD_UPGRADE:
-            case PH_POST_HARD_UPGRADE:
                 // not supported because SQL authorization not set
                 assertStatementError("42Z60", s, createRoleText );
                 break;
@@ -326,23 +323,6 @@ public class Changes10_4 extends UpgradeChange {
             conn.close();
 
             JDBCDataSource.clearStringBeanProperty(ds, "connectionAttributes");
-            JDBCDataSource.shutdownDatabase(ds);
-            break;
-
-        case PH_POST_HARD_UPGRADE:
-            conn = ds.getConnection();
-            s = conn.createStatement();
-
-            // should work now
-            try {
-                s.execute(createRoleText);
-            } catch (SQLException e) {
-                fail("can't create role post hard upgrade");
-            }
-
-            s.execute(dropRoleText);
-            conn.close();
-
             JDBCDataSource.shutdownDatabase(ds);
             break;
         }
