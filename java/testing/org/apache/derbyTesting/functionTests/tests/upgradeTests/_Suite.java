@@ -124,7 +124,8 @@ public class _Suite extends BaseTestCase {
     
     public static Test suite() {
         
-        TestSuite suite = new TestSuite("Upgrade Suite");       
+        TestSuite suite = new TestSuite("Upgrade Suite: "
+                + OLD_RELEASE_PATH_PROPERTY + "=" + UpgradeRun.jarPath);       
 
         for (int i = 0; i < OLD_VERSIONS.length; i++) {
             // JSR169 support was only added with 10.1, so don't
@@ -133,7 +134,7 @@ public class _Suite extends BaseTestCase {
                 (OLD_VERSIONS[i][0]==10) && (OLD_VERSIONS[i][1]==0)))
                 suite.addTest(UpgradeRun.suite(OLD_VERSIONS[i]));
         }
-        
+
         return suite;
     }
     

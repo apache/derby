@@ -79,6 +79,21 @@ class UpgradeRun {
         new AdditionalDb("ENCRYPT_10_2",  true),
         new AdditionalDb("ROLES_10_4", false)
     };
+    
+    static final String jarPath;
+    
+    static {
+        jarPath = (String ) AccessController.doPrivileged
+        (new java.security.PrivilegedAction(){
+
+            public Object run(){
+            return System.getProperty(_Suite.OLD_RELEASE_PATH_PROPERTY);
+
+            }
+
+        }
+         );
+    }
 
     private static String getTextVersion(int[] iv)
     {
@@ -257,7 +272,6 @@ class UpgradeRun {
      * @return location of jars of old release
      */
     private static String getOldJarLocation(int[] oldVersion) {
-        String jarPath = System.getProperty(_Suite.OLD_RELEASE_PATH_PROPERTY);
       
         if (jarPath == null || jarPath.length() == 0)
             return null;
