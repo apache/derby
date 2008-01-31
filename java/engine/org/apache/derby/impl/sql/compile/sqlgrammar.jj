@@ -10135,14 +10135,14 @@ StatementNode
 functionDefinition() throws StandardException :
 {
 	TableName functionName;
-	DataTypeDescriptor  returnType;
+	TypeDescriptor  returnType;
 	Object[] functionElements = new Object[9];
 }
 {
 		<FUNCTION> functionName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
 		functionElements[0] = functionParameterList()
 		<RETURNS> returnType = functionReturnDataType() 
-		( routineElement(false, returnType.getTypeId().isRowMultiSetTypeId(), functionElements) ) +
+		( routineElement(false, returnType.isRowMultiSet(), functionElements) ) +
 		{
 		    functionElements[8] = returnType;
 		    checkRequiredRoutineClause(JAVA_ROUTINE_CLAUSES, functionElements);
@@ -10200,10 +10200,10 @@ functionParameterDefinition(Vector[] list) throws StandardException :
 /*
  * <A NAME="functionReturnDataType">functionReturnDataType</A>
  */
-DataTypeDescriptor
+TypeDescriptor
 functionReturnDataType() throws StandardException :
 {
-    DataTypeDescriptor	typeDescriptor;
+    TypeDescriptor	typeDescriptor;
 }
 {
     (
@@ -10219,10 +10219,9 @@ functionReturnDataType() throws StandardException :
 /*
  * <A NAME="functionTableType">functionTableType</A>
  */
-DataTypeDescriptor
+TypeDescriptor
 functionTableType() throws StandardException :
 {
-	DataTypeDescriptor      typeDescriptor;
 	ArrayList                       names = new ArrayList();
 	ArrayList                         types = new ArrayList();
 	String[]                          nameArray;
@@ -10255,9 +10254,7 @@ functionTableType() throws StandardException :
 		    { throw StandardException.newException( SQLState.LANG_XML_NOT_ALLOWED_DJRS ); }
 		}
 
-		typeDescriptor = DataTypeDescriptor.getRowMultiSet( nameArray, typeArray );
-
-		return typeDescriptor;
+		return DataTypeDescriptor.getRowMultiSet( nameArray, typeArray );
 	}
 }
 

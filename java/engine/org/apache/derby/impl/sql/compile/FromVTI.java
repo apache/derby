@@ -62,7 +62,6 @@ import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.catalog.TypeDescriptor;
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.catalog.types.RoutineAliasInfo;
-import org.apache.derby.catalog.types.RowMultiSetImpl;
 
 import org.apache.derby.vti.DeferModification;
 import org.apache.derby.vti.VTICosting;
@@ -1595,13 +1594,9 @@ public class FromVTI extends FromTable implements VTIEnvironment
         (TypeDescriptor td)
         throws StandardException
     {
-        DataTypeDescriptor      returnType = (DataTypeDescriptor) td;
-        RowMultiSetImpl         rmsi = (RowMultiSetImpl) returnType.getTypeId().getBaseTypeId();
-        String[]                        columnNames = rmsi.getColumnNames();
-        TypeDescriptor[]    types = rmsi.getTypes();
-        int                                     count = columnNames.length;
-        
-        for ( int i = 0; i < count; i++ )
+        String[] columnNames = td.getRowColumnNames();
+        TypeDescriptor[] types = td.getRowTypes();
+        for ( int i = 0; i < columnNames.length; i++ )
         {
             resultColumns.addColumn( exposedName, columnNames[ i ],
                     DataTypeDescriptor.getType(types[i]));

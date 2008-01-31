@@ -40,7 +40,6 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.catalog.AliasInfo;
 import org.apache.derby.catalog.TypeDescriptor;
 import org.apache.derby.catalog.types.RoutineAliasInfo;
-import org.apache.derby.catalog.types.RowMultiSetImpl;
 import org.apache.derby.catalog.types.SynonymAliasInfo;
 import org.apache.derby.catalog.types.TypeDescriptorImpl;
 
@@ -315,12 +314,11 @@ public class CreateAliasNode extends DDLStatementNode
 		if ( aliasInfo.isTableFunction() )
         {
             RoutineAliasInfo    info = (RoutineAliasInfo) aliasInfo;
-            RowMultiSetImpl     tableFunctionReturnType = (RowMultiSetImpl) ((DataTypeDescriptor) info.getReturnType()).getTypeId().getBaseTypeId();
-            TypeDescriptor[]    types = tableFunctionReturnType.getTypes();
-            int                 returnedTableColumnCount = types.length;
+            TypeDescriptor[]    types = info.getReturnType().getRowTypes();
+
             SchemaDescriptor    sd = getSchemaDescriptor();
 
-            for ( int i = 0; i < returnedTableColumnCount; i++ )
+            for ( int i = 0; i < types.length; i++ )
             {
                 TypeDescriptorImpl  tdi = (TypeDescriptorImpl) types[ i ];
                 if ( tdi.isStringType() )

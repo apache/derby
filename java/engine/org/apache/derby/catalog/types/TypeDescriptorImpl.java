@@ -398,7 +398,7 @@ public class TypeDescriptorImpl implements TypeDescriptor, Formatable
 	 */
 	public	boolean isRowMultiSet()
 	{
-		return false;
+		return typeId instanceof RowMultiSetImpl;
 	}
 
 	/** @see TypeDescriptor#getCollationType() */
@@ -573,4 +573,18 @@ public class TypeDescriptorImpl implements TypeDescriptor, Formatable
 	 *	@return	the formatID of this class
 	 */
 	public	int	getTypeFormatId()	{ return StoredFormatIds.DATA_TYPE_IMPL_DESCRIPTOR_V01_ID; }
+
+    public String[] getRowColumnNames() {
+        if (!isRowMultiSet())
+            return null;
+
+        return ((RowMultiSetImpl) typeId).getColumnNames();
+    }
+
+    public TypeDescriptor[] getRowTypes() {
+        if (!isRowMultiSet())
+            return null;
+
+        return ((RowMultiSetImpl) typeId).getTypes();
+    }
 }

@@ -323,14 +323,14 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 	}
     
 	/**
-	 * Get a DataTypeServices that corresponds to a SQL Row Multiset
+	 * Get a catalog type that corresponds to a SQL Row Multiset
 	 *
 	 * @param columnNames   Names of the columns in the Row Muliset
 	 * @param types                 Types of the columns in the Row Muliset
 	 *
 	 * @return	A new DataTypeDescriptor describing the SQL Row Multiset
 	 */
-	public static DataTypeDescriptor getRowMultiSet
+	public static TypeDescriptor getRowMultiSet
 	(
 		String[]	                        columnNames,
 		DataTypeDescriptor[]	types
@@ -343,7 +343,7 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 		RowMultiSetImpl rms = new RowMultiSetImpl(columnNames, catalogTypes);
 		TypeId              typeID = new TypeId( StoredFormatIds.ROW_MULTISET_CATALOG_ID, rms );
 
-		return new DataTypeDescriptor( typeID, true);
+		return new DataTypeDescriptor( typeID, true).getCatalogType();
 	}
 
 	/*
@@ -1749,6 +1749,20 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
             name = name + " (" + getCollationName() + ")";
         }
         return name;    
+    }
+
+    // TEMP: DERBY-2917 - refactoring type system
+    public String[] getRowColumnNames() {
+        if (SanityManager.DEBUG)
+            SanityManager.THROWASSERT("Row type must always be a catalog type");
+        return null;
+    }
+
+    // TEMP: DERBY-2917 - refactoring type system
+    public TypeDescriptor[] getRowTypes() {
+        if (SanityManager.DEBUG)
+            SanityManager.THROWASSERT("Row type must always be a catalog type");
+        return null;
     }
 }
 

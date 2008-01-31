@@ -175,5 +175,23 @@ public interface TypeDescriptor
 	 * Return true if this is a Row Multiset type
 	  */
 	public	boolean isRowMultiSet();
+    
+    /**
+     * If this catalog type is a row multi-set type
+     * then return its array of catalog types.
+     * 
+     * @return Catalog ypes comprising the row,
+     * null if this is not a row type.
+     */
+    public TypeDescriptor[] getRowTypes();
+
+    /**
+     * If this catalog type is a row multi-set type
+     * then return its array of column names.
+     * 
+     * @return Column names comprising the row,
+     * null if this is not a row type.
+     */
+    public String[] getRowColumnNames();
 }
 
