@@ -115,8 +115,8 @@ public final class StatementKeyFactory {
      */
     public static StatementKey newCallable(
             String sql, String schema, int holdability) {
-        return newCallable(sql, schema, holdability,
-                ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+        return newCallable(sql, schema, ResultSet.TYPE_FORWARD_ONLY,
+                ResultSet.CONCUR_READ_ONLY, holdability);
     }
 
     /**
