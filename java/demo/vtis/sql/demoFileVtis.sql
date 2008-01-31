@@ -107,8 +107,8 @@ group by committer
 --
 ----------------------------------------------------------------------------------------
 
--- find the messages whihc have not been translated into french
-select m_english.messageID
+-- find the messages which have not been translated into french
+select *
 from table( propertyFileVTI( '/opt/DerbyTrunk/java/engine/org/apache/derby/loc/messages_en.properties' ) ) m_english
 where m_english.messageID not in
 (

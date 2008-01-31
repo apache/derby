@@ -105,20 +105,40 @@ public    class   PropertyFileVTI  extends FlatFileVTI
     {
         String[]    newRow = new String[ COLUMN_NAMES.length ];
         String      nextLine = null;
+        String      oldLine = "";
 
         while( true )
         {
+            boolean     isContinuationLine = ( oldLine.length() != 0 );
+            
             nextLine = readLine();
 
             // if at EOF, get out of here
-            if ( nextLine == null ) { return null; }
+            if ( nextLine == null )
+            {
+                if ( !isContinuationLine ) { return null; }
+                else { nextLine = oldLine; }
+            }
 
             nextLine = nextLine.trim();
 
             // skip blank lines and lines which start with the comment character
             if ( nextLine.startsWith( "#" ) ) { continue; }
-            else if ( nextLine.length() == 0 ) { continue; }
-            else { break; }
+            else if ( nextLine.length() == 0 )
+            {
+                if ( !isContinuationLine ) { continue; }
+            }
+
+            // handle continuation lines
+            nextLine = oldLine + nextLine;
+
+            if ( nextLine.endsWith( "\\" ) )
+            {
+                oldLine = nextLine.substring( 0, nextLine.length() - 1 );
+                continue;
+            }
+
+            break;
         }
 
         int         equalsIdx = nextLine.indexOf( '=' );
@@ -127,7 +147,7 @@ public    class   PropertyFileVTI  extends FlatFileVTI
             if ( equalsIdx >= 0 )
             {
                 newRow[ PROPERTY_KEY ] = nextLine.substring( 0, equalsIdx );
-                newRow[ PROPERTY_VALUE ] = nextLine.substring( equalsIdx, nextLine.length() );
+                newRow[ PROPERTY_VALUE ] = nextLine.substring( equalsIdx + 1, nextLine.length() );
             }
             else
             {
