@@ -90,14 +90,14 @@ public final class StatementKeyFactory {
      *
      * @param sql SQL query string
      * @param schema current compilation schema
-     * @param holdability result set holdability
      * @param rst result set type
      * @param rsc result set concurrency level
+     * @param rsh result set holdability
      * @return A statement key.
      */
     public static StatementKey newPrepared(
-            String sql, String schema, int holdability, int rst, int rsc) {
-        return new StatementKey(PREPARED, sql, schema, rst, rsc, holdability,
+            String sql, String schema, int rst, int rsc, int rsh) {
+        return new StatementKey(PREPARED, sql, schema, rst, rsc, rsh,
                                 Statement.NO_GENERATED_KEYS);
     }
 
@@ -127,14 +127,14 @@ public final class StatementKeyFactory {
      *
      * @param sql SQL query string
      * @param schema current compilation schema
-     * @param holdability result set holdability
      * @param rst result set type
      * @param rsc result set concurrency level
+     * @param rsh result set holdability
      * @return A statement key.
      */
     public static StatementKey newCallable(
-            String sql, String schema, int holdability, int rst, int rsc) {
-        return new StatementKey(CALLABLE, sql, schema, rst, rsc, holdability,
+            String sql, String schema, int rst, int rsc, int rsh) {
+        return new StatementKey(CALLABLE, sql, schema, rst, rsc, rsh,
                                 Statement.NO_GENERATED_KEYS);
     }
 }

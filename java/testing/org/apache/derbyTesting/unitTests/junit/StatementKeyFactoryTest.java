@@ -128,9 +128,9 @@ public class StatementKeyFactoryTest
         StatementKey[] keys = new StatementKey[] {
             StatementKeyFactory.newPrepared(sql, schema, rsh),
             StatementKeyFactory.newPrepared(sql, schema, rsh, auto),
-            StatementKeyFactory.newPrepared(sql, schema, rsh, rst, rsc),
+            StatementKeyFactory.newPrepared(sql, schema, rst, rsc, rsh),
             StatementKeyFactory.newCallable(sql, schema, rsh),
-            StatementKeyFactory.newCallable(sql, schema, rsh, rst, rsc)};
+            StatementKeyFactory.newCallable(sql, schema, rst, rsc, rsh)};
         for (int outer=0; outer < keys.length; outer++) {
             StatementKey current = keys[outer];
             for (int inner=0; inner < keys.length; inner++) {
