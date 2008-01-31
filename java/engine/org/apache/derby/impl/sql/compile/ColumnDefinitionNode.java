@@ -37,6 +37,7 @@ import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataValueDescriptor;
+import org.apache.derby.iapi.types.StringDataValue;
 import org.apache.derby.iapi.types.TypeId;
 
 import org.apache.derby.iapi.sql.depend.DependencyManager;
@@ -217,6 +218,16 @@ public class ColumnDefinitionNode extends TableElementNode
     void setNullability(boolean nullable)
     {
         type = getType().getNullabilityType(nullable);
+    }
+    
+    /**
+     * Set the collation type, note derivation is always
+     * implicit for any catalog item.
+     */
+    void setCollationType(int collationType)
+    {
+        type = getType().getCollatedType(collationType,
+                StringDataValue.COLLATION_DERIVATION_IMPLICIT);
     }
 
 	/**

@@ -36,6 +36,7 @@ import org.apache.derby.iapi.sql.compile.TypeCompiler;
 import org.apache.derby.iapi.store.access.Qualifier;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataValueFactory;
+import org.apache.derby.iapi.types.StringDataValue;
 import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.util.JBitSet;
 
@@ -289,6 +290,18 @@ public abstract class ValueNode extends QueryTreeNode
 	}
 	
 	/**
+	 * Set the collation based upon the current schema with derivation
+	 * type implicit.
+	 * 
+	 * @throws StandardException
+	 */
+	protected final void setCollationUsingCompilationSchema()
+	throws StandardException {
+		setCollationUsingCompilationSchema(
+				StringDataValue.COLLATION_DERIVATION_IMPLICIT);
+	}	
+	
+	/**
 	 * There are many subclasses of ValueNode where we want the 
 	 * DataTypeDescriptor of the node to have the same collation type as the 
 	 * compilation schema's collation type. For that purpose, this method in 
@@ -303,7 +316,7 @@ public abstract class ValueNode extends QueryTreeNode
 	 * 
 	 * @throws StandardException
 	 */
-	protected void setCollationUsingCompilationSchema(int collationDerivation)
+	protected final void setCollationUsingCompilationSchema(int collationDerivation)
 	throws StandardException {
         setCollationInfo(
                 getSchemaDescriptor(null, false).getCollationType(),

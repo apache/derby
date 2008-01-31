@@ -32,6 +32,7 @@ import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.NumberDataValue;
 import org.apache.derby.iapi.types.DataValueFactory;
 import org.apache.derby.iapi.types.DataValueDescriptor;
+import org.apache.derby.iapi.types.StringDataValue;
 import org.apache.derby.iapi.sql.compile.CostEstimate;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.execute.ExecutionFactory;
@@ -39,9 +40,11 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.types.RowLocation;
 
+import org.apache.derby.catalog.TypeDescriptor;
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.services.uuid.UUIDFactory;
 
+import java.sql.Types;
 import java.util.List;
 import java.util.Hashtable;
 import java.util.Properties;
@@ -133,6 +136,21 @@ public interface DataDictionary
 	 */
 	public  static  final   String  SOFT_DATA_DICTIONARY_VERSION = "derby.softDataDictionaryVersion";
     public  static  final   String  PROPERTY_CONGLOMERATE_VERSION = "PropertyConglomerateVersion";
+    
+    /**
+     * An immutable runtime type that describes the type VARCHAR(128) NOT NULL
+     * with collation type UCS_BASIC and derivation IMPLICIT.
+     */
+    public static final DataTypeDescriptor TYPE_SYSTEM_IDENTIFIER =
+        DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                Types.VARCHAR, false, 128);
+      
+    /**
+     * An immutable catalog type that describes the type VARCHAR(128) NOT NULL
+     * with collation type UCS_BASIC.
+     */
+    public static final TypeDescriptor CATALOG_TYPE_SYSTEM_IDENTIFIER =
+        TYPE_SYSTEM_IDENTIFIER.getCatalogType();
 
 	/*
 	** CORE TABLES

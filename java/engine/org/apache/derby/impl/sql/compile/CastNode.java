@@ -374,8 +374,7 @@ public class CastNode extends ValueNode
 		if (externallyGeneratedCastNode && getTypeId().isStringTypeId()) {
 			//set the collation type to be same as the compilation schema's 
 			//collation type. Collation derivation will be set to "IMPLICIT".
-			setCollationUsingCompilationSchema(
-					StringDataValue.COLLATION_DERIVATION_IMPLICIT);
+			setCollationUsingCompilationSchema();
 		}
 		/* 
 		** If it is a java cast, do some work to make sure

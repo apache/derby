@@ -41,6 +41,7 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 
 import java.sql.Types;
 
@@ -134,27 +135,25 @@ public class SpecialFunctionNode extends ValueNode
 			}
 			methodName = "getAuthorizationId";
 			methodType = "java.lang.String";
-			dtd = DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, false, 128);
+            
 			//SQL spec Section 6.4 Syntax Rule 4 says that the collation type 
 			//of these functions will be the collation of character set 
 			//SQL_IDENTIFIER. In Derby's case, that will mean, the collation of
 			//these functions will be UCS_BASIC. The collation derivation will 
 			//be implicit. 
-			dtd.setCollationDerivation(StringDataValue.COLLATION_DERIVATION_IMPLICIT);
-			dtd.setCollationType(StringDataValue.COLLATION_TYPE_UCS_BASIC);
+            dtd = DataDictionary.TYPE_SYSTEM_IDENTIFIER;
 			break;
 
 		case C_NodeTypes.CURRENT_SCHEMA_NODE:
 			sqlName = "CURRENT SCHEMA";
 			methodName = "getCurrentSchemaName";
 			methodType = "java.lang.String";
-			dtd = DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, false, 128);
-			//This is a Derby specific function but it's collation type will
+			
+			//This is a Derby specific function but its collation type will
 			//be based on the same rules as for SESSION_USER/CURRENT_USER etc. 
 			//ie there collation type will be UCS_BASIC. The collation 
 			//derivation will be implicit. 
-			dtd.setCollationDerivation(StringDataValue.COLLATION_DERIVATION_IMPLICIT);
-			dtd.setCollationType(StringDataValue.COLLATION_TYPE_UCS_BASIC);
+            dtd = DataDictionary.TYPE_SYSTEM_IDENTIFIER;
 			break;
 
 		case C_NodeTypes.CURRENT_ROLE_NODE:
@@ -167,10 +166,7 @@ public class SpecialFunctionNode extends ValueNode
 			//of these functions will be the collation of character set
 			//SQL_IDENTIFIER. In Derby's case, that will mean, the collation of
 			//these functions will be UCS_BASIC. The collation derivation will
-			//be implicit.
-			dtd.setCollationDerivation(
-				StringDataValue.COLLATION_DERIVATION_IMPLICIT);
-			dtd.setCollationType(StringDataValue.COLLATION_TYPE_UCS_BASIC);
+			//be implicit. (set by default)
 			break;
 
 		case C_NodeTypes.IDENTITY_VAL_NODE:
@@ -188,9 +184,7 @@ public class SpecialFunctionNode extends ValueNode
 			//This is a Derby specific function but it's collation type will
 			//be based on the same rules as for SESSION_USER/CURRENT_USER etc. 
 			//ie there collation type will be UCS_BASIC. The collation 
-			//derivation will be implicit. 
-			dtd.setCollationDerivation(StringDataValue.COLLATION_DERIVATION_IMPLICIT);
-			dtd.setCollationType(StringDataValue.COLLATION_TYPE_UCS_BASIC);
+			//derivation will be implicit. (set by default).
 			break;
 		default:
 			if (SanityManager.DEBUG)

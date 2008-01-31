@@ -215,7 +215,7 @@ public class ModifyColumnNode extends ColumnDefinitionNode
 
 	/**
 	 * If the column being modified is of character string type, then it should
-	 * get it's collation from the corresponding column in the TableDescriptor.
+	 * get its collation from the corresponding column in the TableDescriptor.
 	 * This will ensure that at alter table time, the existing character string
 	 * type columns do not loose their collation type. If the alter table is 
 	 * doing a drop column, then we do not need to worry about collation info.
@@ -238,9 +238,7 @@ public class ModifyColumnNode extends ColumnDefinitionNode
 		//no need to worry about collation info
 		if (getType() != null) {
 			if (getType().getTypeId().isStringTypeId()) {
-				this.getType().setCollationType(cd.getType().getCollationType());
-				this.getType().setCollationDerivation(StringDataValue.COLLATION_DERIVATION_IMPLICIT);
-			
+				setCollationType(cd.getType().getCollationType());			
 			}
 		}
     }

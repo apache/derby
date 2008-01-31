@@ -245,8 +245,7 @@ public class AlterTableNode extends DDLStatementNode
 							//collation type of this column to be the same as
 							//schema descriptor's collation. Set the collation
 							//derivation as implicit
-							cdn.getType().setCollationType(schemaDescriptor.getCollationType());
-							cdn.getType().setCollationDerivation(StringDataValue.COLLATION_DERIVATION_IMPLICIT);
+							cdn.setCollationType(schemaDescriptor.getCollationType());
 			        	}						
 					}
 				}

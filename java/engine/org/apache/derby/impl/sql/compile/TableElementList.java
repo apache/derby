@@ -124,8 +124,7 @@ public class TableElementList extends QueryTreeNodeVector
 			{
 				ColumnDefinitionNode cdn = (ColumnDefinitionNode) elementAt(index);
 				if (cdn.getType().getTypeId().isStringTypeId()) {
-					cdn.getType().setCollationType(collationType);
-					cdn.getType().setCollationDerivation(StringDataValue.COLLATION_DERIVATION_IMPLICIT);
+					cdn.setCollationType(collationType);
 				}
 			}
 		}

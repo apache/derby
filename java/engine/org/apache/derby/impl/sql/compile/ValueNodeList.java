@@ -236,7 +236,10 @@ public class ValueNodeList extends QueryTreeNodeVector
 				//do not have matching collation information on them. Hence the
 				//resultant dominant DTD should have collation derivation of 
 				//NONE.
-				dominantDTS.setCollationDerivation(StringDataValue.COLLATION_DERIVATION_NONE);
+				dominantDTS =
+                    dominantDTS.getCollatedType(
+                            dominantDTS.getCollationType(),
+                            StringDataValue.COLLATION_DERIVATION_NONE);
 			}			
 			//if we didn't find any collation mismatch, then resultant dominant
 			//DTD already has the correct collation information on it and hence

@@ -9039,7 +9039,7 @@ public final class	DataDictionaryImpl
 
             // procedure argument types
             TypeDescriptor[] arg_types = {
-                    TypeDescriptor.VARCHAR128,
+                    CATALOG_TYPE_SYSTEM_IDENTIFIER,
                 DataTypeDescriptor.getCatalogType(
                     Types.VARCHAR, Limits.DB2_VARCHAR_MAXWIDTH)
             };
@@ -9064,8 +9064,8 @@ public final class	DataDictionaryImpl
 
             // procedure argument types
             TypeDescriptor[] arg_types = {
-                    TypeDescriptor.VARCHAR128,
-                    TypeDescriptor.VARCHAR128,
+                    CATALOG_TYPE_SYSTEM_IDENTIFIER,
+                    CATALOG_TYPE_SYSTEM_IDENTIFIER,
                     TypeDescriptor.SMALLINT
 
             };
@@ -9253,7 +9253,7 @@ public final class	DataDictionaryImpl
             String[] arg_names = {"KEY"};
 
             // procedure argument types
-            TypeDescriptor[] arg_types = {TypeDescriptor.VARCHAR128};
+            TypeDescriptor[] arg_types = {CATALOG_TYPE_SYSTEM_IDENTIFIER};
 
             createSystemProcedureOrFunction(
                 "SYSCS_GET_DATABASE_PROPERTY",
@@ -9275,8 +9275,8 @@ public final class	DataDictionaryImpl
 
             // procedure argument types
             TypeDescriptor[] arg_types = {
-                    TypeDescriptor.VARCHAR128,
-                    TypeDescriptor.VARCHAR128
+                    CATALOG_TYPE_SYSTEM_IDENTIFIER,
+                    CATALOG_TYPE_SYSTEM_IDENTIFIER
             };
 
             createSystemProcedureOrFunction(
@@ -9332,7 +9332,7 @@ public final class	DataDictionaryImpl
             TypeDescriptor[] arg_types = {
 				DataTypeDescriptor.getCatalogType(
                     Types.VARCHAR, 256),
-                    TypeDescriptor.VARCHAR128,
+                    CATALOG_TYPE_SYSTEM_IDENTIFIER,
                     TypeDescriptor.INTEGER
             };
 
@@ -9355,7 +9355,7 @@ public final class	DataDictionaryImpl
             TypeDescriptor[] arg_types = {
 				DataTypeDescriptor.getCatalogType(
                     Types.VARCHAR, 256),
-                    TypeDescriptor.VARCHAR128
+                    CATALOG_TYPE_SYSTEM_IDENTIFIER
             };
 
             createSystemProcedureOrFunction(
@@ -9375,7 +9375,7 @@ public final class	DataDictionaryImpl
             String[] arg_names = {"JAR", "UNDEPLOY"};
 
             TypeDescriptor[] arg_types = {
-                    TypeDescriptor.VARCHAR128,
+                    CATALOG_TYPE_SYSTEM_IDENTIFIER,
                     TypeDescriptor.INTEGER
             };
 
@@ -9406,14 +9406,14 @@ public final class	DataDictionaryImpl
 
             // procedure argument types
             TypeDescriptor[] arg_types = {
-                    TypeDescriptor.VARCHAR128, 
-                    TypeDescriptor.VARCHAR128,
+                    CATALOG_TYPE_SYSTEM_IDENTIFIER, 
+                    CATALOG_TYPE_SYSTEM_IDENTIFIER,
                     varchar32672Type,
 				DataTypeDescriptor.getCatalogType(
 				Types.CHAR, 1),
 				DataTypeDescriptor.getCatalogType(
 				Types.CHAR, 1),
-                TypeDescriptor.VARCHAR128
+                CATALOG_TYPE_SYSTEM_IDENTIFIER
             };
 
             createSystemProcedureOrFunction(
@@ -9448,7 +9448,7 @@ public final class	DataDictionaryImpl
 				Types.CHAR, 1),
 				DataTypeDescriptor.getCatalogType(
 				Types.CHAR, 1),
-                TypeDescriptor.VARCHAR128
+                CATALOG_TYPE_SYSTEM_IDENTIFIER
             };
 
             createSystemProcedureOrFunction(
@@ -9479,14 +9479,14 @@ public final class	DataDictionaryImpl
 			
             // procedure argument types
             TypeDescriptor[] arg_types = {
-                    TypeDescriptor.VARCHAR128, 
-                    TypeDescriptor.VARCHAR128,
+                    CATALOG_TYPE_SYSTEM_IDENTIFIER, 
+                    CATALOG_TYPE_SYSTEM_IDENTIFIER,
                     varchar32672Type,
 				DataTypeDescriptor.getCatalogType(
 				Types.CHAR, 1),
 				DataTypeDescriptor.getCatalogType(
 				Types.CHAR, 1),
-                TypeDescriptor.VARCHAR128,
+                CATALOG_TYPE_SYSTEM_IDENTIFIER,
                 TypeDescriptor.SMALLINT,
             };
 
@@ -9520,8 +9520,8 @@ public final class	DataDictionaryImpl
 			
             // procedure argument types
             TypeDescriptor[] arg_types = {
-                    TypeDescriptor.VARCHAR128, 
-                    TypeDescriptor.VARCHAR128,
+                    CATALOG_TYPE_SYSTEM_IDENTIFIER, 
+                    CATALOG_TYPE_SYSTEM_IDENTIFIER,
                     varchar32672Type,
                     varchar32672Type,
                     varchar32672Type,
@@ -9529,7 +9529,7 @@ public final class	DataDictionaryImpl
 				Types.CHAR, 1),
 				DataTypeDescriptor.getCatalogType(
 				Types.CHAR, 1),
-                TypeDescriptor.VARCHAR128,
+                CATALOG_TYPE_SYSTEM_IDENTIFIER,
                 TypeDescriptor.SMALLINT,
             };
 
@@ -9561,8 +9561,8 @@ public final class	DataDictionaryImpl
 			
             // procedure argument types
             TypeDescriptor[] arg_types = {
-                    TypeDescriptor.VARCHAR128, 
-                    TypeDescriptor.VARCHAR128,
+                    CATALOG_TYPE_SYSTEM_IDENTIFIER, 
+                    CATALOG_TYPE_SYSTEM_IDENTIFIER,
                     varchar32672Type,
                     varchar32672Type,
             };
@@ -9680,9 +9680,9 @@ public final class	DataDictionaryImpl
 
             // procedure argument types
             TypeDescriptor[] arg_types = {
-                    TypeDescriptor.VARCHAR128,
-                    TypeDescriptor.VARCHAR128,
-                    TypeDescriptor.VARCHAR128,
+                    CATALOG_TYPE_SYSTEM_IDENTIFIER,
+                    CATALOG_TYPE_SYSTEM_IDENTIFIER,
+                    CATALOG_TYPE_SYSTEM_IDENTIFIER,
 				DataTypeDescriptor.getCatalogType(Types.VARCHAR, 4000)};
 
             createSystemProcedureOrFunction(
@@ -9709,9 +9709,9 @@ public final class	DataDictionaryImpl
 
             // procedure argument types
             TypeDescriptor[] arg_types = {
-                    TypeDescriptor.VARCHAR128,
-                    TypeDescriptor.VARCHAR128,
-                    TypeDescriptor.VARCHAR128,
+                    CATALOG_TYPE_SYSTEM_IDENTIFIER,
+                    CATALOG_TYPE_SYSTEM_IDENTIFIER,
+                    CATALOG_TYPE_SYSTEM_IDENTIFIER,
 				DataTypeDescriptor.getCatalogType(Types.VARCHAR, 4000)};
 
             createSystemProcedureOrFunction(
@@ -9738,9 +9738,9 @@ public final class	DataDictionaryImpl
 
             // procedure argument types
             TypeDescriptor[] arg_types = {
-                    TypeDescriptor.VARCHAR128,
-                    TypeDescriptor.VARCHAR128,
-                    TypeDescriptor.VARCHAR128,
+                    CATALOG_TYPE_SYSTEM_IDENTIFIER,
+                    CATALOG_TYPE_SYSTEM_IDENTIFIER,
+                    CATALOG_TYPE_SYSTEM_IDENTIFIER,
 				DataTypeDescriptor.getCatalogType(Types.VARCHAR, 4000)};
 
             createSystemProcedureOrFunction(
@@ -9768,9 +9768,9 @@ public final class	DataDictionaryImpl
 
             // procedure argument types
             TypeDescriptor[] arg_types = {
-                    TypeDescriptor.VARCHAR128,
-                    TypeDescriptor.VARCHAR128,
-                    TypeDescriptor.VARCHAR128,
+                    CATALOG_TYPE_SYSTEM_IDENTIFIER,
+                    CATALOG_TYPE_SYSTEM_IDENTIFIER,
+                    CATALOG_TYPE_SYSTEM_IDENTIFIER,
 				DataTypeDescriptor.getCatalogType(Types.VARCHAR, 4000),
 				DataTypeDescriptor.getCatalogType(Types.VARCHAR, 4000)};
 
@@ -9800,10 +9800,10 @@ public final class	DataDictionaryImpl
 
             // procedure argument types
             TypeDescriptor[] arg_types = {
-				TypeDescriptor.VARCHAR128,
-				TypeDescriptor.VARCHAR128,
-				TypeDescriptor.VARCHAR128,
-				TypeDescriptor.VARCHAR128,
+				CATALOG_TYPE_SYSTEM_IDENTIFIER,
+				CATALOG_TYPE_SYSTEM_IDENTIFIER,
+				CATALOG_TYPE_SYSTEM_IDENTIFIER,
+				CATALOG_TYPE_SYSTEM_IDENTIFIER,
 				DataTypeDescriptor.getCatalogType(Types.VARCHAR, 4000)};
 
             createSystemProcedureOrFunction(
@@ -9831,10 +9831,10 @@ public final class	DataDictionaryImpl
 
             // procedure argument types
             TypeDescriptor[] arg_types = {
-				TypeDescriptor.VARCHAR128,
-				TypeDescriptor.VARCHAR128,
-				TypeDescriptor.VARCHAR128,
-				TypeDescriptor.VARCHAR128,
+				CATALOG_TYPE_SYSTEM_IDENTIFIER,
+				CATALOG_TYPE_SYSTEM_IDENTIFIER,
+				CATALOG_TYPE_SYSTEM_IDENTIFIER,
+				CATALOG_TYPE_SYSTEM_IDENTIFIER,
 				DataTypeDescriptor.getCatalogType(Types.VARCHAR, 4000)};
 
             createSystemProcedureOrFunction(
@@ -9862,10 +9862,10 @@ public final class	DataDictionaryImpl
 
             // procedure argument types
             TypeDescriptor[] arg_types = {
-				TypeDescriptor.VARCHAR128,
-				TypeDescriptor.VARCHAR128,
-				TypeDescriptor.VARCHAR128,
-				TypeDescriptor.VARCHAR128,
+				CATALOG_TYPE_SYSTEM_IDENTIFIER,
+				CATALOG_TYPE_SYSTEM_IDENTIFIER,
+				CATALOG_TYPE_SYSTEM_IDENTIFIER,
+				CATALOG_TYPE_SYSTEM_IDENTIFIER,
 				DataTypeDescriptor.getCatalogType(Types.VARCHAR, 4000)};
 
             createSystemProcedureOrFunction(
@@ -9893,10 +9893,10 @@ public final class	DataDictionaryImpl
 
             // procedure argument types
             TypeDescriptor[] arg_types = {
-				TypeDescriptor.VARCHAR128,
-				TypeDescriptor.VARCHAR128,
-				TypeDescriptor.VARCHAR128,
-				TypeDescriptor.VARCHAR128,
+				CATALOG_TYPE_SYSTEM_IDENTIFIER,
+				CATALOG_TYPE_SYSTEM_IDENTIFIER,
+				CATALOG_TYPE_SYSTEM_IDENTIFIER,
+				CATALOG_TYPE_SYSTEM_IDENTIFIER,
 				DataTypeDescriptor.getCatalogType(Types.VARCHAR, 4000)};
 
             createSystemProcedureOrFunction(
@@ -9927,12 +9927,12 @@ public final class	DataDictionaryImpl
 
             // procedure argument types
             TypeDescriptor[] arg_types = {
-				TypeDescriptor.VARCHAR128,
-				TypeDescriptor.VARCHAR128,
-				TypeDescriptor.VARCHAR128,
-				TypeDescriptor.VARCHAR128,
-				TypeDescriptor.VARCHAR128,
-				TypeDescriptor.VARCHAR128,
+				CATALOG_TYPE_SYSTEM_IDENTIFIER,
+				CATALOG_TYPE_SYSTEM_IDENTIFIER,
+				CATALOG_TYPE_SYSTEM_IDENTIFIER,
+				CATALOG_TYPE_SYSTEM_IDENTIFIER,
+				CATALOG_TYPE_SYSTEM_IDENTIFIER,
+				CATALOG_TYPE_SYSTEM_IDENTIFIER,
 				DataTypeDescriptor.getCatalogType(Types.VARCHAR, 4000)};
 
             createSystemProcedureOrFunction(
@@ -9964,9 +9964,9 @@ public final class	DataDictionaryImpl
             // procedure argument types
             TypeDescriptor[] arg_types = {
                     TypeDescriptor.SMALLINT,
-				TypeDescriptor.VARCHAR128,
-				TypeDescriptor.VARCHAR128,
-				TypeDescriptor.VARCHAR128,
+				CATALOG_TYPE_SYSTEM_IDENTIFIER,
+				CATALOG_TYPE_SYSTEM_IDENTIFIER,
+				CATALOG_TYPE_SYSTEM_IDENTIFIER,
                 TypeDescriptor.SMALLINT,
                 TypeDescriptor.SMALLINT,
 				DataTypeDescriptor.getCatalogType(Types.VARCHAR, 4000)};
@@ -10023,9 +10023,9 @@ public final class	DataDictionaryImpl
 
             // procedure argument types
             TypeDescriptor[] arg_types = {
-				TypeDescriptor.VARCHAR128,
-				TypeDescriptor.VARCHAR128,
-				TypeDescriptor.VARCHAR128,
+				CATALOG_TYPE_SYSTEM_IDENTIFIER,
+				CATALOG_TYPE_SYSTEM_IDENTIFIER,
+				CATALOG_TYPE_SYSTEM_IDENTIFIER,
                 TypeDescriptor.SMALLINT,
                 TypeDescriptor.SMALLINT,
 				DataTypeDescriptor.getCatalogType(Types.VARCHAR, 4000)};
@@ -10198,8 +10198,8 @@ public final class	DataDictionaryImpl
 
             // procedure argument types
             TypeDescriptor[] arg_types = {
-                TypeDescriptor.VARCHAR128,
-                TypeDescriptor.VARCHAR128,
+                CATALOG_TYPE_SYSTEM_IDENTIFIER,
+                CATALOG_TYPE_SYSTEM_IDENTIFIER,
                 TypeDescriptor.SMALLINT,
                 TypeDescriptor.SMALLINT,
                 TypeDescriptor.SMALLINT
@@ -10306,9 +10306,9 @@ public final class	DataDictionaryImpl
 
             // procedure argument types
             TypeDescriptor[] arg_types = {
-                    TypeDescriptor.VARCHAR128,
-                    TypeDescriptor.VARCHAR128,
-                    TypeDescriptor.VARCHAR128,
+                    CATALOG_TYPE_SYSTEM_IDENTIFIER,
+                    CATALOG_TYPE_SYSTEM_IDENTIFIER,
+                    CATALOG_TYPE_SYSTEM_IDENTIFIER,
 				DataTypeDescriptor.getCatalogType(Types.VARCHAR, 4000)};
 
             createSystemProcedureOrFunction(
@@ -10337,10 +10337,10 @@ public final class	DataDictionaryImpl
 
             // procedure argument types
             TypeDescriptor[] arg_types = {
-                    TypeDescriptor.VARCHAR128,
-                    TypeDescriptor.VARCHAR128,
-                    TypeDescriptor.VARCHAR128,
-                    TypeDescriptor.VARCHAR128,
+                    CATALOG_TYPE_SYSTEM_IDENTIFIER,
+                    CATALOG_TYPE_SYSTEM_IDENTIFIER,
+                    CATALOG_TYPE_SYSTEM_IDENTIFIER,
+                    CATALOG_TYPE_SYSTEM_IDENTIFIER,
 				DataTypeDescriptor.getCatalogType(Types.VARCHAR, 4000)};
 
             createSystemProcedureOrFunction(
@@ -10771,15 +10771,15 @@ public final class	DataDictionaryImpl
 
             // procedure argument types
             TypeDescriptor[] arg_types = {
-                    TypeDescriptor.VARCHAR128, 
-                    TypeDescriptor.VARCHAR128,
+                    CATALOG_TYPE_SYSTEM_IDENTIFIER, 
+                    CATALOG_TYPE_SYSTEM_IDENTIFIER,
                 DataTypeDescriptor.getCatalogType(
                 Types.VARCHAR, 32672),
                 DataTypeDescriptor.getCatalogType(
                 Types.CHAR, 1),
                 DataTypeDescriptor.getCatalogType(
                 Types.CHAR, 1),
-                TypeDescriptor.VARCHAR128,
+                CATALOG_TYPE_SYSTEM_IDENTIFIER,
                 DataTypeDescriptor.getCatalogType(
                 Types.VARCHAR, 32672)
             };
@@ -10819,7 +10819,7 @@ public final class	DataDictionaryImpl
                 Types.CHAR, 1),
                 DataTypeDescriptor.getCatalogType(
                 Types.CHAR, 1),
-                TypeDescriptor.VARCHAR128,
+                CATALOG_TYPE_SYSTEM_IDENTIFIER,
                 DataTypeDescriptor.getCatalogType(
                 Types.VARCHAR, 32672)
             };
@@ -10850,15 +10850,15 @@ public final class	DataDictionaryImpl
 
             // procedure argument types
             TypeDescriptor[] arg_types = {
-                    TypeDescriptor.VARCHAR128, 
-                    TypeDescriptor.VARCHAR128,
+                    CATALOG_TYPE_SYSTEM_IDENTIFIER, 
+                    CATALOG_TYPE_SYSTEM_IDENTIFIER,
                 DataTypeDescriptor.getCatalogType(
                 Types.VARCHAR, 32672),
                 DataTypeDescriptor.getCatalogType(
                 Types.CHAR, 1),
                 DataTypeDescriptor.getCatalogType(
                 Types.CHAR, 1),
-                TypeDescriptor.VARCHAR128,
+                CATALOG_TYPE_SYSTEM_IDENTIFIER,
                 TypeDescriptor.SMALLINT,
             };
 
@@ -10890,8 +10890,8 @@ public final class	DataDictionaryImpl
 
             // procedure argument types
             TypeDescriptor[] arg_types = {
-                    TypeDescriptor.VARCHAR128, 
-                    TypeDescriptor.VARCHAR128,
+                    CATALOG_TYPE_SYSTEM_IDENTIFIER, 
+                    CATALOG_TYPE_SYSTEM_IDENTIFIER,
                 DataTypeDescriptor.getCatalogType(
                 Types.VARCHAR, 32672),
                 DataTypeDescriptor.getCatalogType(
@@ -10902,7 +10902,7 @@ public final class	DataDictionaryImpl
                 Types.CHAR, 1),
                 DataTypeDescriptor.getCatalogType(
                 Types.CHAR, 1),
-                TypeDescriptor.VARCHAR128,
+                CATALOG_TYPE_SYSTEM_IDENTIFIER,
                 TypeDescriptor.SMALLINT,
             };
 
@@ -10937,7 +10937,7 @@ public final class	DataDictionaryImpl
         // void SYSCS_UTIL.SYSCS_SET_USER_ACCESS(USER_NAME VARCHAR(128),
         // CONNECTION_PERMISSION VARCHAR(128))
         {
-            TypeDescriptor[] arg_types = {TypeDescriptor.VARCHAR128, TypeDescriptor.VARCHAR128};
+            TypeDescriptor[] arg_types = {CATALOG_TYPE_SYSTEM_IDENTIFIER, CATALOG_TYPE_SYSTEM_IDENTIFIER};
 
             createSystemProcedureOrFunction(
                 "SYSCS_SET_USER_ACCESS",
@@ -10953,7 +10953,7 @@ public final class	DataDictionaryImpl
         
         // VARCHAR(128) SYSCS_UTIL.SYSCS_SET_USER_ACCESS(USER_NAME VARCHAR(128))
         {               
-            TypeDescriptor[] arg_types = { TypeDescriptor.VARCHAR128 };
+            TypeDescriptor[] arg_types = { CATALOG_TYPE_SYSTEM_IDENTIFIER };
 
             createSystemProcedureOrFunction(
                 "SYSCS_GET_USER_ACCESS",
@@ -10963,7 +10963,7 @@ public final class	DataDictionaryImpl
                 0,
                 0,
                 RoutineAliasInfo.READS_SQL_DATA,
-                TypeDescriptor.VARCHAR128,
+                CATALOG_TYPE_SYSTEM_IDENTIFIER,
                 tc);
         }
         

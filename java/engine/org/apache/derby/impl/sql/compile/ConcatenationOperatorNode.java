@@ -196,16 +196,17 @@ public class ConcatenationOperatorNode extends BinaryOperatorNode {
 			DataTypeDescriptor dtd = DataTypeDescriptor.getBuiltInDataTypeDescriptor(
 					Types.VARCHAR, true, tc
 					.getCastToCharWidth(leftOperand							.getTypeServices()));	
-			// DERBY-2910 - Match current schema collation for implicit cast as we do for
-			// explicit casts per SQL Spec 6.12 (10)									
-			dtd.setCollationType(getSchemaDescriptor(null).getCollationType());
-			dtd.setCollationDerivation(StringDataValue.COLLATION_DERIVATION_IMPLICIT);
 
 			leftOperand = (ValueNode) getNodeFactory().getNode(
 					C_NodeTypes.CAST_NODE,
 					leftOperand,
 					dtd,
 					getContextManager());
+
+			// DERBY-2910 - Match current schema collation for implicit cast as we do for
+			// explicit casts per SQL Spec 6.12 (10)			
+			leftOperand.setCollationUsingCompilationSchema();
+						
 			((CastNode) leftOperand).bindCastNodeOnly();
 		}
 		tc = rightOperand.getTypeCompiler();
@@ -215,16 +216,17 @@ public class ConcatenationOperatorNode extends BinaryOperatorNode {
 					Types.VARCHAR, true, tc
 							.getCastToCharWidth(rightOperand
 									.getTypeServices()));
-			// DERBY-2910 - Match current schema collation for implicit cast as we do for
-			// explicit casts per SQL Spec 6.12 (10)					
-			dtd.setCollationType(getSchemaDescriptor(null).getCollationType());
-			dtd.setCollationDerivation(StringDataValue.COLLATION_DERIVATION_IMPLICIT);
 
 			rightOperand = (ValueNode) getNodeFactory().getNode(
 					C_NodeTypes.CAST_NODE,
 					rightOperand,
 					dtd,
 					getContextManager());
+			
+			// DERBY-2910 - Match current schema collation for implicit cast as we do for
+			// explicit casts per SQL Spec 6.12 (10)					
+			rightOperand.setCollationUsingCompilationSchema();
+			
 			((CastNode) rightOperand).bindCastNodeOnly();
 		}
 
@@ -494,11 +496,14 @@ public class ConcatenationOperatorNode extends BinaryOperatorNode {
 		if (leftType.getCollationDerivation() != rightType
 				.getCollationDerivation()
 				|| leftType.getCollationType() != rightType.getCollationType())
-			returnDTD
-					.setCollationDerivation(StringDataValue.COLLATION_DERIVATION_NONE);
+            
+            returnDTD = returnDTD.getCollatedType(
+                    returnDTD.getCollationDerivation(),
+                    StringDataValue.COLLATION_DERIVATION_NONE);
 		else {
-			returnDTD.setCollationDerivation(leftType.getCollationDerivation());
-			returnDTD.setCollationType(leftType.getCollationType());
+            returnDTD = returnDTD.getCollatedType(
+                    leftType.getCollationType(),
+                    leftType.getCollationDerivation());
 		}
 		return returnDTD;
 	}

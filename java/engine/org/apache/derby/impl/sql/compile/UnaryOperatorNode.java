@@ -448,8 +448,7 @@ public class UnaryOperatorNode extends ValueNode
         setType(targetType);
 		//Set the collation type to be same as the current schema's 
 		//collation type. 
-        setCollationUsingCompilationSchema(
-				StringDataValue.COLLATION_DERIVATION_IMPLICIT);
+        setCollationUsingCompilationSchema();
     }
 
 	/**

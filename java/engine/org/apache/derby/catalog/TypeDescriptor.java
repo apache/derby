@@ -58,15 +58,7 @@ public interface TypeDescriptor
     TypeDescriptor SMALLINT = 
         DataTypeDescriptor.getBuiltInDataTypeDescriptor(
             Types.SMALLINT).getCatalogType();
- 
-    
-    /**
-     * Catalog type for nullable VARCHAR(128) used for types representing
-     * system catalogs.
-     */
-    TypeDescriptor VARCHAR128 =
-        DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                Types.VARCHAR, 128).getCatalogType();
+
 
 	///////////////////////////////////////////////////////////////////////
 	//

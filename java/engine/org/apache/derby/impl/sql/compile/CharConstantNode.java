@@ -155,8 +155,7 @@ public final class CharConstantNode extends ConstantNode
 	{
 		//The DTD for this character constant should get its collation type
 		//from the schema it is getting compiled in.
-		setCollationUsingCompilationSchema(
-				StringDataValue.COLLATION_DERIVATION_IMPLICIT);
+		setCollationUsingCompilationSchema();
 	    //Once we have the collation type, we should check if the value
 	    //associated with this node should change from 
 	    //SQLChar/SQLVarchar/SQLLongvarchar/SQLClob

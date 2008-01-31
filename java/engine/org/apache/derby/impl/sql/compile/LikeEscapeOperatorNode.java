@@ -198,8 +198,7 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
             } else if (rightOperand != null && !rightOperand.requiresTypeFromContext()) {
                 receiver.setCollationInfo(rightOperand.getTypeServices());          	
             } else {
-    			receiver.setCollationUsingCompilationSchema(
-    					StringDataValue.COLLATION_DERIVATION_IMPLICIT);            	
+    			receiver.setCollationUsingCompilationSchema();            	
             }
         }
 

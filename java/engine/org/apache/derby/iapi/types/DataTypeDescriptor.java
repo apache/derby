@@ -74,6 +74,10 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 	*/
 	/**
 	 * Get a descriptor that corresponds to a nullable builtin JDBC type.
+     * If a variable length type then the size information will be set 
+     * to the maximum possible.
+     * 
+     * Collation type will be UCS_BASIC and derivation IMPLICIT.
 	 *
 	 * @param jdbcType	The int type of the JDBC type for which to get
 	 *						a corresponding SQL DataTypeDescriptor
@@ -88,7 +92,20 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 	{
 		return DataTypeDescriptor.getBuiltInDataTypeDescriptor(jdbcType, true);
 	}
-	public static DataTypeDescriptor getBuiltInDataTypeDescriptor
+    
+    /**
+     * Get a descriptor that corresponds to a nullable builtin variable
+     * length JDBC type.
+     *
+     * Collation type will be UCS_BASIC and derivation IMPLICIT.
+     * 
+     * @param jdbcType  The int type of the JDBC type for which to get
+     *                      a corresponding SQL DataTypeDescriptor
+     *
+     * @return  A new DataTypeDescriptor that corresponds to the Java type.
+     *          A null return value means there is no corresponding SQL type
+     */
+    public static DataTypeDescriptor getBuiltInDataTypeDescriptor
 	(
 		int	jdbcType,
 		int length
@@ -162,6 +179,8 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 	}
 	/**
 	 * Get a descriptor that corresponds to a builtin JDBC type.
+     * 
+     * Collation type will be UCS_BASIC and derivation IMPLICIT.
 	 *
 	 * @param jdbcType	The int type of the JDBC type for which to get
 	 *						a corresponding SQL DataTypeDescriptor
@@ -187,7 +206,9 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 		return new DataTypeDescriptor(typeId, isNullable, maxLength);
 	}
 	/**
-	 * Get a DataTypeServices that corresponds to a builtin SQL type
+	 * Get a DataTypeServices that corresponds to a nullable builtin SQL type.
+     * 
+     * Collation type will be UCS_BASIC and derivation IMPLICIT.
 	 *
 	 * @param sqlTypeName	The name of the type for which to get
 	 *						a corresponding SQL DataTypeDescriptor
@@ -204,6 +225,8 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 	}
 	/**
 	 * Get a DataTypeServices that corresponds to a builtin SQL type
+     * 
+     * Collation type will be UCS_BASIC and derivation IMPLICIT.
 	 *
 	 * @param sqlTypeName	The name of the type for which to get
 	 *						a corresponding SQL DataTypeDescriptor
@@ -631,7 +654,7 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 		boolean				nullable;
 		TypeId				thisType;
 		TypeId				otherType;
-		DataTypeDescriptor	higherType = null;
+		DataTypeDescriptor	higherType;
 		DataTypeDescriptor	lowerType = null;
 		int					maximumWidth;
 		int					precision = getPrecision();
@@ -832,23 +855,31 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 			if (getCollationDerivation() != otherDTS.getCollationDerivation()) {
 				if (getCollationDerivation() == StringDataValue.COLLATION_DERIVATION_NONE) {
 					//Step 2
-					higherType.setCollationDerivation(otherDTS.getCollationDerivation());					
-					higherType.setCollationType(otherDTS.getCollationType());					
+                    higherType = higherType.getCollatedType(
+                            otherDTS.getCollationType(),
+                            otherDTS.getCollationDerivation());                                      
+
 				} else if (otherDTS.getCollationDerivation() == StringDataValue.COLLATION_DERIVATION_NONE) {
 					//Step 2
-					higherType.setCollationDerivation(getCollationDerivation());					
-					higherType.setCollationType(getCollationType());										
+                    higherType = higherType.getCollatedType(
+                            getCollationType(),
+                            getCollationDerivation());										
 				} else {
 					//Step 3
-					higherType.setCollationDerivation(StringDataValue.COLLATION_DERIVATION_NONE);					
+                    higherType = higherType.getCollatedType(
+                            StringDataValue.COLLATION_TYPE_UCS_BASIC, // ignored
+                            StringDataValue.COLLATION_DERIVATION_NONE);					
 				}
 			} else if (getCollationType() != otherDTS.getCollationType())
 				//Step 4
-				higherType.setCollationDerivation(StringDataValue.COLLATION_DERIVATION_NONE);	
+                higherType = higherType.getCollatedType(
+                        StringDataValue.COLLATION_TYPE_UCS_BASIC, // ignored
+                        StringDataValue.COLLATION_DERIVATION_NONE);                 
 			else {
 				//Step 1
-				higherType.setCollationDerivation(getCollationDerivation());					
-				higherType.setCollationType(getCollationType());									
+                higherType = higherType.getCollatedType(
+                        getCollationType(),
+                        getCollationDerivation());
 			}
 		}
 
@@ -1030,19 +1061,6 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
     }
 
     /**
-     * Set the collation type of this TypeDescriptor
-     * @param collationTypeValue This will be COLLATION_TYPE_UCS_BASIC
-     * or COLLATION_TYPE_TERRITORY_BASED
-     * 
-     * @see StringDataValue#COLLATION_TYPE_UCS_BASIC
-     * @see StringDataValue#COLLATION_TYPE_TERRITORY_BASED
-     */
-    public void	setCollationType(int collationTypeValue)
-	{
-		typeDescriptor.setCollationType(collationTypeValue);
-	}
-
-    /**
      * Get the collation derivation for this type. This applies only for
      * character string types. For the other types, this api should be
      * ignored.
@@ -1070,7 +1088,8 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
      * with character strings with different collations (Section 9.3 Data types 
      * of results of aggregations Syntax Rule 3aii).
      *  
-     * Collation derivation will be initialized to COLLATION_DERIVATION_NONE.
+     * Collation derivation will be initialized to COLLATION_DERIVATION_IMPLICIT
+     * if not explicitly set.
      *  
      * @return Should be COLLATION_DERIVATION_NONE or COLLATION_DERIVATION_IMPLICIT
      * 
@@ -1089,22 +1108,6 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 	public	boolean isRowMultiSet()
 	{
 		return getTypeId().isRowMultiSetTypeId();
-	}
-
-    /**
-     * Set the collation derivation of this DTD
-     * @param collationDerivationValue This will be 
-     * COLLATION_DERIVATION_NONE/COLLATION_DERIVATION_IMPLICIT/COLLATION_DERIVATION_EXPLICIT
-     * In Derby 10.3, we do not expect to get value COLLATION_DERIVATION_EXPLICIT.
-     * 
-     * @see StringDataValue#COLLATION_DERIVATION_NONE
-     * @see StringDataValue#COLLATION_DERIVATION_IMPLICIT
-     * @see StringDataValue#COLLATION_DERIVATION_EXPLICIT
-
-     */
-	public void	setCollationDerivation(int collationDerivationValue)
-	{
-        collationDerivation = collationDerivationValue;
 	}
 
 	/**

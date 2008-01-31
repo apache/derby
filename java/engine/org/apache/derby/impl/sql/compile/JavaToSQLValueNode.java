@@ -251,15 +251,17 @@ public class JavaToSQLValueNode extends ValueNode
 			throw StandardException.newException(SQLState.LANG_NO_CORRESPONDING_S_Q_L_TYPE, 
 				javaNode.getJavaTypeName());
 		}
-                // For functions returning string types we should set the collation to match the 
-                // java method's schema DERBY-2972. This is propogated from 
-                // RoutineAliasInfo to javaNode.
-                       if (dts.getTypeId().isStringTypeId()){                           
-                           dts.setCollationType(javaNode.getCollationType());
-                           dts.setCollationDerivation(StringDataValue.COLLATION_DERIVATION_IMPLICIT);
-                       }
-		setType(dts);
-         
+        
+        setType(dts);
+		
+        // For functions returning string types we should set the collation to match the 
+        // java method's schema DERBY-2972. This is propogated from 
+        // RoutineAliasInfo to javaNode.
+        if (dts.getTypeId().isStringTypeId()) {
+            this.setCollationInfo(javaNode.getCollationType(),
+                    StringDataValue.COLLATION_DERIVATION_IMPLICIT);
+        }
+
 		return this;
 	}
 

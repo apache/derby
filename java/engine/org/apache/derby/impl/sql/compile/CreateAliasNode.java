@@ -287,6 +287,7 @@ public class CreateAliasNode extends DDLStatementNode
 		//the passed parameter is null and if so, then simply return.
 		if (changeTD == null) 
 			return changeTD;
+        
 		TypeId compTypeId = TypeId.getBuiltInTypeId(changeTD.getTypeName());
 		//No work to do if type id does not correspond to a character string
 		if (compTypeId != null && compTypeId.isStringTypeId()) {
@@ -296,11 +297,11 @@ public class CreateAliasNode extends DDLStatementNode
 						changeTD.getMaximumWidth());
 			//Use the collation type and info of the schema in which this
 			//function is defined for the return value of the function
-			newTDWithCorrectCollation.setCollationType(
-					getSchemaDescriptor().getCollationType());
-			newTDWithCorrectCollation.setCollationDerivation(
-	        		StringDataValue.COLLATION_DERIVATION_IMPLICIT);
-			return newTDWithCorrectCollation;
+            newTDWithCorrectCollation =
+                newTDWithCorrectCollation.getCollatedType(
+					getSchemaDescriptor().getCollationType(),
+                    StringDataValue.COLLATION_DERIVATION_IMPLICIT);
+			return newTDWithCorrectCollation.getCatalogType();
 		}
 		return changeTD;
 	}

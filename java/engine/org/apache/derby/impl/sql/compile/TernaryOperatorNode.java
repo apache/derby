@@ -534,8 +534,7 @@ public class TernaryOperatorNode extends ValueNode
             if (!leftOperand.requiresTypeFromContext()) {
                 receiver.setCollationInfo(leftOperand.getTypeServices());
             } else {
-    			receiver.setCollationUsingCompilationSchema(
-    					StringDataValue.COLLATION_DERIVATION_IMPLICIT);            	
+    			receiver.setCollationUsingCompilationSchema();            	
             }
 		}
 
@@ -633,8 +632,7 @@ public class TernaryOperatorNode extends ValueNode
 				receiver.setType(getVarcharDescriptor());
 	            //Since both receiver and leftOperands are parameters, use the
 				//collation of compilation schema for receiver.
-				receiver.setCollationUsingCompilationSchema(
-						StringDataValue.COLLATION_DERIVATION_IMPLICIT);            	
+				receiver.setCollationUsingCompilationSchema();            	
 			}
 			else
 			{
@@ -719,16 +717,18 @@ public class TernaryOperatorNode extends ValueNode
 			DataTypeDescriptor dtd = DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.VARCHAR, true,
 	                vnTC.getCastToCharWidth(
 		                    vn.getTypeServices()));
-			// DERBY-2910 - Match current schema collation for implicit cast as we do for
-			// explicit casts per SQL Spec 6.12 (10)							                    
-			dtd.setCollationType(getSchemaDescriptor(null).getCollationType());
-			dtd.setCollationDerivation(StringDataValue.COLLATION_DERIVATION_IMPLICIT);
+
 			ValueNode newNode = (ValueNode)
 						getNodeFactory().getNode(
 							C_NodeTypes.CAST_NODE,
 							vn,
 							dtd,
 							getContextManager());
+            
+            // DERBY-2910 - Match current schema collation for implicit cast as we do for
+            // explicit casts per SQL Spec 6.12 (10)                                                
+            newNode.setCollationUsingCompilationSchema();
+            
 			((CastNode) newNode).bindCastNodeOnly();
 			return newNode;
 		}
@@ -765,8 +765,7 @@ public class TernaryOperatorNode extends ValueNode
 			//because that is the only context available for us to pick up the
 			//collation. There are no other character operands to SUBSTR method
 			//to pick up the collation from.
-			receiver.setCollationUsingCompilationSchema(
-					StringDataValue.COLLATION_DERIVATION_IMPLICIT);
+			receiver.setCollationUsingCompilationSchema();
 		}
 
 		/* Is there a ? parameter on the left? */
