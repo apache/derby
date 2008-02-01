@@ -615,21 +615,7 @@ public abstract class BrokeredConnection implements EngineConnection
         return holdability;
         
     }
-	/**
-	* Add the locator and the corresponding LOB object into the
-	* HashMap
-	*
-	* @param LOBReference The object which contains the LOB object that
-	*                     that is added to the HashMap.
-	* @return an integer that represents the locator that has been
-	*         allocated to this LOB.
-	*/
-	public int addLOBMapping(Object LOBReference) throws SQLException {
-            //Forward the methods implementation to the implementation in the
-            //underlying EmbedConnection object. 
-            return getRealConnection().addLOBMapping(LOBReference);
-	}
-
+    
 	/**
 	* Clear the HashMap of all entries.
 	* Called when a commit or rollback of the transaction

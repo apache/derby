@@ -61,6 +61,9 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
 import org.apache.derby.iapi.tools.i18n.LocalizedResource;
 import org.apache.derby.iapi.jdbc.AuthenticationService;
+import org.apache.derby.iapi.jdbc.EngineBlob;
+import org.apache.derby.iapi.jdbc.EngineClob;
+import org.apache.derby.iapi.jdbc.EngineResultSet;
 import org.apache.derby.impl.jdbc.EmbedSQLException;
 import org.apache.derby.impl.jdbc.Util;
 import org.apache.derby.jdbc.InternalDriver;
@@ -7276,6 +7279,7 @@ class DRDAConnThread extends Thread {
    * @param stmt       Statement being processed
    *
    * @exception DRDAProtocolException  
+   * 
    * @exception SQLException
    *
    * @see FdocaConstants
@@ -7382,12 +7386,12 @@ class DRDAConnThread extends Thread {
 				case DRDAConstants.DRDA_TYPE_NLONGVARBYTE:
 						writer.writeLDBytes((byte[]) val, index);
 					break;
-                case DRDAConstants.DRDA_TYPE_NLOBLOC:
-                case DRDAConstants.DRDA_TYPE_NCLOBLOC:
-                    // Get locator for LOB
-                    int locator = database.getConnection().addLOBMapping(val);
-                    writer.writeInt(locator);
-                    break;
+				case DRDAConstants.DRDA_TYPE_NLOBLOC:
+					writer.writeInt(((EngineBlob) val).getLocator());
+					break;
+				case DRDAConstants.DRDA_TYPE_NCLOBLOC:
+					writer.writeInt(((EngineClob) val).getLocator());
+					break;
 				default:
 					if (SanityManager.DEBUG) 
 						trace("ndrdaType is: "+ndrdaType);

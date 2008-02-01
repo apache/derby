@@ -91,16 +91,6 @@ public interface EngineConnection extends Connection {
         throws SQLException;
 
     /**
-    * Add the locator and the corresponding LOB object into the
-    * HashMap
-    * @param LOBReference The object which contains the LOB object that
-    *                     that is added to the HashMap.
-    * @return an integer that represents the locator that has been
-    *         allocated to this LOB.
-    */
-    public int addLOBMapping(Object LOBReference) throws SQLException;
-
-    /**
     * Clear the HashTable of all entries.
     * Called when a commit or rollback of the transaction
     * happens.

@@ -24,6 +24,7 @@ package org.apache.derby.impl.jdbc;
 
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.jdbc.EngineClob;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.Resetable;
@@ -66,7 +67,7 @@ import java.sql.Clob;
         new update methods can safely be added into implementation.
    </UL>
  */
-final class EmbedClob extends ConnectionChild implements Clob
+final class EmbedClob extends ConnectionChild implements Clob, EngineClob
 {
 
     /**
@@ -78,6 +79,8 @@ final class EmbedClob extends ConnectionChild implements Clob
     /** Tells whether the Clob has been freed or not. */
     private boolean isValid = true;
 
+    private final int locator;
+    
     /**
      * Creates an empty Clob object.
      *
@@ -88,7 +91,7 @@ final class EmbedClob extends ConnectionChild implements Clob
     EmbedClob(EmbedConnection con) throws SQLException {
         super(con);
         this.clob = new TemporaryClob (con.getDBName(), this);
-        con.addLOBMapping (this);
+        this.locator = con.addLOBMapping (this);
     }
 
     /**
@@ -153,7 +156,7 @@ final class EmbedClob extends ConnectionChild implements Clob
                 throw se;
             }
         }
-        con.addLOBMapping (this);
+        this.locator = con.addLOBMapping (this);
     }
 
     /**
@@ -782,5 +785,12 @@ restartScan:
      */
     InternalClob getInternalClob() {
         return this.clob;
+    }
+
+    /**     
+     * @return locator value for this Clob.
+     */
+    public int getLocator() {
+        return locator;
     }
 }
