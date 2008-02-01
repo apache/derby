@@ -1591,7 +1591,6 @@ public class TableFunctionTest extends BaseJDBCTestCase
     {
         println( "\nExpecting good results from " + sql );
 
-        try {
             PreparedStatement    ps = prepareStatement( sql );
             ResultSet                   rs = ps.executeQuery();
 
@@ -1599,11 +1598,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
             
             rs.close();
             ps.close();
-        }
-        catch (Exception e)
-        {
-            unexpectedThrowable( e );
-        }
+
     }
 
     /**
@@ -1618,19 +1613,15 @@ public class TableFunctionTest extends BaseJDBCTestCase
 
     /**
      * Run good DDL.
+     * @throws SQLException 
      */
-    private void    goodStatement( String ddl )
+    private void    goodStatement( String ddl ) throws SQLException
     {
-        try {
             PreparedStatement    ps = chattyPrepare( ddl );
 
             ps.execute();
             ps.close();
-        }
-        catch (Exception e)
-        {
-            unexpectedThrowable( e );
-        }
+
     }
     
     /**
@@ -1646,32 +1637,17 @@ public class TableFunctionTest extends BaseJDBCTestCase
     
     /**
      * Verify that the return type of function looks good.
+     * @throws SQLException 
      */
-    private void    verifyReturnType( String functionName, String expectedReturnType )
+    private void    verifyReturnType( String functionName, String expectedReturnType ) throws SQLException
     {
         println( functionName + " should have return type = " + expectedReturnType );
         
-        try {
-            String                          ddl = "select aliasinfo from sys.sysaliases where alias=?";
-            PreparedStatement    ps = prepareStatement( ddl );
+        String ddl = "select aliasinfo from sys.sysaliases where alias=?";
+        PreparedStatement ps = prepareStatement(ddl);
+        ps.setString(1, functionName);
 
-            ps.setString( 1, functionName );
-            
-            ResultSet                   rs = ps.executeQuery();
-
-            rs.next();
-
-            String                          actualReturnType = rs.getString( 1 );
-
-            assertTrue( expectedReturnType.equals( actualReturnType ) );
-            
-            rs.close();
-            ps.close();
-        }
-        catch (Exception e)
-        {
-            unexpectedThrowable( e );
-        }
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), expectedReturnType);
     }
 
     /**
@@ -1685,7 +1661,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
         // JDBC4 metadata calls.
         if (  usingDerbyNet() ) { return; }
         
-        try {
+
             println( "\nExpecting correct function metadata from " + functionName );
             ResultSet                   rs = getFunctions(  null, "APP", functionName );
             JDBC.assertFullResultSet( rs, expectedGetFunctionsResult, false );
@@ -1696,11 +1672,6 @@ public class TableFunctionTest extends BaseJDBCTestCase
             //prettyPrint( getConnection(), getFunctionColumns(  null, "APP", functionName, "%" ) );
             JDBC.assertFullResultSet( rs, expectedGetFunctionColumnsResult, false );
             rs.close();
-        }
-        catch (Exception e)
-        {
-            unexpectedThrowable( e );
-        }
     }
 
     /**
@@ -1982,15 +1953,6 @@ public class TableFunctionTest extends BaseJDBCTestCase
             return new String( bytes, UTF8 );
         }
         else { return obj.toString(); }
-    }
-
-    /**
-     * Fail the test for an unexpected exception
-     */
-    private void    unexpectedThrowable( Throwable t )
-    {
-        printStackTrace( t );
-        fail( "Unexpected exception: " + t );
     }
     
     /**
