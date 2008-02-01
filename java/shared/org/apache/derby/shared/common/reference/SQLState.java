@@ -1757,7 +1757,7 @@ public interface SQLState {
     /*
     ** Replication XRExx
     */
-    String CANNOT_REPLICATE_READONLY_DATABASE                      = "XRE00";
+    String LOGMODULE_DOES_NOT_SUPPORT_REPLICATION                  = "XRE00";
     String REPLICATION_LOG_CORRUPTED                               = "XRE01";
     String REPLICATION_MASTER_SLAVE_VERSION_MISMATCH               = "XRE02";
     String REPLICATION_UNEXPECTED_EXCEPTION                        = "XRE03";
@@ -1770,5 +1770,9 @@ public interface SQLState {
     String REPLICATION_CONFLICTING_ATTRIBUTES                      = "XRE10";
     String REPLICATION_FAILOVER_SUCCESSFUL                         = "XRE20.D";
     String REPLICATION_FAILOVER_UNSUCCESSFUL                       = "XRE21";
+    String REPLICATION_NOT_IN_SLAVE_MODE                           = "XRE40";
+    String SLAVE_STOP_DENIED_WHILE_CONNECTED                       = "XRE41";
+    String REPLICATION_SLAVE_SHUTDOWN_OK                           = "XRE42";
+    String REPLICATION_STOPSLAVE_NOT_INITIATED                     = "XRE43";
 }
 

@@ -99,4 +99,17 @@ public class SocketConnection {
         //in this stream.
         objOutputStream.flush();
     }
+    
+    /**
+     * Closes the <code>Socket</code> and the object streams obtained
+     * from it.
+     *
+     * @throws IOException if an exception occurs while trying to close
+     *                     the socket or the streams.
+     */
+    public void tearDown() throws IOException {
+        objInputStream.close();
+        objOutputStream.close();
+        socket.close();
+    }
 }

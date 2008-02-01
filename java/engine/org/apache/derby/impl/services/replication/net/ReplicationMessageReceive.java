@@ -165,6 +165,22 @@ public class ReplicationMessageReceive {
     }
     
     /**
+     * Used to close the <code>ServerSocket</code> and the resources
+     * associated with it.
+     *
+     * @throws IOException If an exception occurs while trying to
+     *                     close the socket or the associated resources.
+     */
+    public void tearDown() throws IOException {
+        if (socketConn != null) {
+            socketConn.tearDown();
+        }
+        if (serverSocket != null) {
+            serverSocket.close();
+        }
+    }
+    
+    /**
      * Used to parse the initiator message from the master and check if the
      * slave is compatible with the master by comparing the UID of the 
      * <code>ReplicationMessage</code> class of the master, that is wrapped

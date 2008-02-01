@@ -40,6 +40,7 @@ import org.apache.derby.iapi.jdbc.AuthenticationService;
 import org.apache.derby.iapi.jdbc.EngineConnection;
 
 import org.apache.derby.iapi.db.Database;
+import org.apache.derby.impl.db.SlaveDatabase;
 import org.apache.derby.iapi.error.ExceptionSeverity;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.i18n.MessageService;
@@ -290,6 +291,12 @@ public abstract class EmbedConnection implements EngineConnection
 				}
 			}
 
+			if (isStopReplicationSlaveBoot(info)) {
+				handleStopReplicationSlave(info);
+			} else if (isInternalShutdownSlaveDatabase(info)) {
+				internalStopReplicationSlave(info);
+				return;
+			}
 
 			if (createBoot && !shutdown)
 			{
@@ -317,11 +324,7 @@ public abstract class EmbedConnection implements EngineConnection
 
 
 			if (tr.getDatabase() == null) {
-				String dbname = tr.getDBName();
-				// do not clear the TransactionResource context. It will be restored
-                // as part of the finally clause below.
-				this.setInactive();
-				throw newSQLException(SQLState.DATABASE_NOT_FOUND, dbname);
+				handleDBNotFound();
 			}
 
 
@@ -530,6 +533,14 @@ public abstract class EmbedConnection implements EngineConnection
 		return (createCount - restoreCount) == 1;
 	}
 
+    private void handleDBNotFound() throws SQLException {
+        String dbname = tr.getDBName();
+        // do not clear the TransactionResource context. It will be restored
+        // as part of the finally clause of the object creator. 
+        this.setInactive();
+        throw newSQLException(SQLState.DATABASE_NOT_FOUND, dbname);
+    }
+
 	/**
 	 * Examine boot properties and determine if a boot with the given
 	 * attributes would entail an encryption operation.
@@ -574,6 +585,38 @@ public abstract class EmbedConnection implements EngineConnection
         return ((Boolean.valueOf(
                  p.getProperty(Attribute.REPLICATION_STOP_MASTER)).
                  booleanValue()));
+    }
+    
+    /**
+     * Examine the boot properties and determine if a boot with the
+     * given attributes should stop slave replication mode.
+     * 
+     * @param p The attribute set.
+     * @return true if the stopSlave attribute has been set, false
+     * otherwise.
+     */
+    private boolean isStopReplicationSlaveBoot(Properties p) {
+        return Boolean.valueOf(
+               p.getProperty(Attribute.REPLICATION_STOP_SLAVE)).
+               booleanValue();
+    }
+
+    /**
+     * Examine the boot properties and determine if a boot with the
+     * given attributes should stop slave replication mode. A
+     * connection with this property should only be made from
+     * SlaveDatabase. Make sure to call
+     * SlaveDatabase.verifyShutdownSlave() to verify that this
+     * connection is not made from a client.
+     * 
+     * @param p The attribute set.
+     * @return true if the shutdownslave attribute has been set, false
+     * otherwise.
+     */
+    private boolean isInternalShutdownSlaveDatabase(Properties p) {
+        return Boolean.valueOf(
+               p.getProperty(Attribute.REPLICATION_INTERNAL_SHUTDOWN_SLAVE)).
+               booleanValue();
     }
 
     private void handleStartReplicationMaster(TransactionResourceImpl tr,
@@ -639,6 +682,89 @@ public abstract class EmbedConnection implements EngineConnection
         // Derby is running under.
 
         tr.getDatabase().stopReplicationMaster();
+    }
+
+    /**
+     * Stop replication slave when called from a client. Stops
+     * replication slave mode, provided that the database is in
+     * replication slave mode and has lost connection with the master
+     * database. If the connection with the master is up, the call to
+     * this method will be refused by raising an exception. The reason
+     * for refusing the stop command if the slave is connected with
+     * the master is that we cannot authenticate the user on the slave
+     * side (because the slave database has not been fully booted)
+     * whereas authentication is not a problem on the master side. If
+     * not refused, this operation will cause SlaveDatabase to call
+     * internalStopReplicationSlave
+     * 
+     * @param p The Attribute set.
+     * @exception StandardException Thrown on error, if not in replication 
+     * slave mode or if the network connection with the master is not down
+     * @exception SQLException Thrown if the database is not found
+     */
+    private void handleStopReplicationSlave(Properties p)
+        throws StandardException, SQLException {
+
+        // We cannot check authentication and authorization for
+        // databases in slave mode since the AuthenticationService has
+        // not been booted for the database
+
+        if (getTR().getDatabase() == null) {
+            handleDBNotFound();
+        }
+
+        Database database = getTR().getDatabase();
+
+        database.stopReplicationSlave();
+        // throw an exception to the client
+        throw newSQLException(SQLState.REPLICATION_SLAVE_SHUTDOWN_OK,
+                              getTR().getDBName());
+    }
+
+    /**
+     * Stop replication slave when called from SlaveDatabase. Called
+     * when slave replication mode has been stopped, and all that
+     * remains is to shutdown the database. This happens if
+     * handleStopReplicationSlave has successfully requested the slave
+     * to stop, if the replication master has requested the slave to
+     * stop using the replication network, or if a fatal exception has
+     * occurred in the database.
+     *    
+     * @param p The Attribute set.
+     * @exception StandardException Thrown on error or if not in replication 
+     * slave mode
+     * @exception SQLException Thrown if the database is not found
+     */
+    private void internalStopReplicationSlave(Properties p)
+        throws StandardException, SQLException {
+
+        // We cannot check authentication and authorization for
+        // databases in slave mode since the AuthenticationService has
+        // not been booted for the database
+
+        if (getTR().getDatabase() == null) {
+            handleDBNotFound();
+        }
+
+        Database database = getTR().getDatabase();
+
+        if (isInternalShutdownSlaveDatabase(p)) {
+            // We should only get here if the connection is made from
+            // inside SlaveDatabase. To verify, we ask SlaveDatabase
+            // if it requested this shutdown. If it didn't,
+            // verifyShutdownSlave will throw an exception
+            if (! (database instanceof SlaveDatabase)) {
+                throw newSQLException(
+                           SQLState.REPLICATION_NOT_IN_SLAVE_MODE,
+                           getTR().getDBName());
+            }
+            ((SlaveDatabase)database).verifyShutdownSlave();
+
+            // Will shutdown the database without writing to the log
+            // since the SQLException with state
+            // REPLICATION_SLAVE_SHUTDOWN_OK will be reported anyway
+            handleException(tr.shutdownDatabaseException());
+        }
     }
 
 	/**

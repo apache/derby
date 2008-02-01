@@ -25,6 +25,7 @@ package org.apache.derby.impl.services.replication.slave;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.Attribute;
 import org.apache.derby.iapi.reference.MessageId;
+import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.monitor.ModuleControl;
 import org.apache.derby.iapi.services.monitor.ModuleSupportable;
@@ -34,12 +35,14 @@ import org.apache.derby.iapi.store.raw.RawStoreFactory;
 import org.apache.derby.iapi.store.raw.log.LogFactory;
 import org.apache.derby.impl.store.raw.log.LogToFile;
 
+import org.apache.derby.impl.db.SlaveDatabase;
 import org.apache.derby.impl.services.replication.ReplicationLogger;
 import org.apache.derby.impl.services.replication.net.ReplicationMessage;
 import org.apache.derby.impl.services.replication.net.ReplicationMessageReceive;
 import org.apache.derby.iapi.services.replication.slave.SlaveFactory;
 
 import java.io.EOFException;
+import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.util.Properties;
 
@@ -72,7 +75,9 @@ public class SlaveController
     private RawStoreFactory rawStoreFactory;
     private LogToFile logToFile;
     private ReplicationMessageReceive receiver;
+    private SlaveDatabase slaveDb;
 
+    private volatile boolean connectedToMaster = false;
     private String slavehost;
     private int slaveport;
     private String dbname; // The name of the replicated database
@@ -124,12 +129,19 @@ public class SlaveController
     }
 
     /**
-     * Will tear down the replication slave service. Should be called
-     * after either stopSlave or failover have been called.
-     *
-     * Not implemented yet
+     * Will tear down the replication slave service. 
      */
-    public void stop() { }
+    public void stop() { 
+        if (inReplicationSlaveMode) {
+            // For some reason, stopSlave or failover have not been
+            // called yet. Force slave to stop.
+            try {
+                stopSlave(true);
+            } catch (StandardException se) {
+                // do nothing
+            }
+        }
+    }
 
     ////////////////////////////////////////////////////////////////
     // Implementation of methods from interface ModuleSupportable //
@@ -180,6 +192,24 @@ public class SlaveController
     public void startSlave(RawStoreFactory rawStore, LogFactory logFac)
         throws StandardException {
 
+        slaveDb = (SlaveDatabase)
+                Monitor.findService(Property.DATABASE_MODULE, dbname);
+        slaveDb.setSlaveFactory(this);
+
+        rawStoreFactory = rawStore;
+
+        try {
+            logToFile = (LogToFile)logFac;
+        } catch (ClassCastException cce) {
+            // Since there are only two implementing classes of
+            // LogFactory, the class type has to be ReadOnly if it is
+            // not LogToFile.
+            throw StandardException.newException(
+                SQLState.LOGMODULE_DOES_NOT_SUPPORT_REPLICATION);
+        }
+
+        logToFile.initializeReplicationSlaveRole();
+
         // Retry to setup a connection with the master until a
         // connection has been established or until we are no longer
         // in replication slave mode
@@ -199,19 +229,6 @@ public class SlaveController
         // from the master
         logScan = new ReplicationLogScan();
 
-        rawStoreFactory = rawStore;
-
-        try {
-            logToFile = (LogToFile)logFac;
-        } catch (ClassCastException cce) {
-            // Since there are only two implementing classes of
-            // LogFactory, the class type has to be ReadOnly if it is
-            // not LogToFile.
-            throw StandardException.newException(
-                SQLState.CANNOT_REPLICATE_READONLY_DATABASE);
-        }
-
-        logToFile.initializeReplicationSlaveRole();
         startLogReceiverThread();
 
         Monitor.logTextMessage(MessageId.REPLICATION_SLAVE_STARTED, dbname);
@@ -219,14 +236,42 @@ public class SlaveController
 
     /**
      * Will perform all work that is needed to stop replication
-     *
-     * Not implemented yet
      */
-    public void stopSlave() {
+    private void stopSlave() throws StandardException {
         inReplicationSlaveMode = false;
 
-        // todo: shutdown slave
+        try {
+            if (logReceiverThread != null) {
+                logReceiverThread.interrupt();
+            }
+        } catch (SecurityException se) {
+            // Do nothing - the logReceiverThread will get an
+            // exception when receiver.tearDown is called below
+        }
+
+        try {
+            // Unplug the replication network connection layer
+            receiver.tearDown(); 
+        } catch (IOException ioe) {
+            ReplicationLogger.logError(null, ioe, dbname);
+        }
+
+        logToFile.flushAll();
+        logToFile.stopReplicationSlaveMode();
+
         Monitor.logTextMessage(MessageId.REPLICATION_SLAVE_STOPPED, dbname);
+    }
+
+    /**
+     * @see SlaveFactory#stopSlave
+     */
+    public void stopSlave(boolean forcedStop) 
+            throws StandardException {
+        if (!forcedStop && connectedToMaster){
+            throw StandardException.newException(
+                    SQLState.SLAVE_STOP_DENIED_WHILE_CONNECTED);
+        }
+        stopSlave();
     }
 
     /**
@@ -256,7 +301,7 @@ public class SlaveController
      */
     public void failover() {
         inReplicationSlaveMode = false;
-        logToFile.stopReplicationSlaveRole();
+        logToFile.failoverSlave();
         Monitor.logTextMessage
                 (MessageId.REPLICATION_FAILOVER_SUCCESSFUL, dbname);
     }
@@ -281,6 +326,7 @@ public class SlaveController
         try {
             // timeout to check if still in replication slave mode
             receiver.initConnection(DEFAULT_SOCKET_TIMEOUT);
+            connectedToMaster = true;
             return true; // will not reach this if timeout
         } catch (StandardException se) {
             throw se;
@@ -305,16 +351,17 @@ public class SlaveController
      * without doing anything if inReplicationSlaveMode=false, which
      * means that stopSlave() has been called by another thread.
      *
-     * @param eofe The reason the connection to the master was lost
+     * @param e The reason the connection to the master was lost
      */
 
-    private void handleDisconnect(EOFException eofe) {
+    private void handleDisconnect(Exception e) {
+        connectedToMaster = false;
         if (!inReplicationSlaveMode) {
             return;
         }
 
         ReplicationLogger.
-            logError(MessageId.REPLICATION_SLAVE_LOST_CONN, eofe, dbname);
+            logError(MessageId.REPLICATION_SLAVE_LOST_CONN, e, dbname);
 
         try {
             while (!setupConnection()) {

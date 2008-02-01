@@ -482,7 +482,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 
         if (isReadOnly()) {
             throw StandardException.newException(
-                      SQLState.CANNOT_REPLICATE_READONLY_DATABASE);
+                      SQLState.LOGMODULE_DOES_NOT_SUPPORT_REPLICATION);
         }
 
         Properties replicationProps = new Properties();
@@ -512,7 +512,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
         
         if (isReadOnly()) {
             throw StandardException.newException(
-                      SQLState.CANNOT_REPLICATE_READONLY_DATABASE);
+                      SQLState.LOGMODULE_DOES_NOT_SUPPORT_REPLICATION);
         }
 
         try {

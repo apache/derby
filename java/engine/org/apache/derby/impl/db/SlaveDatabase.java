@@ -21,18 +21,21 @@
 
 package org.apache.derby.impl.db;
 
-import org.apache.derby.iapi.reference.MessageId;
+import org.apache.derby.iapi.error.PublicAPI;
+import org.apache.derby.iapi.reference.Attribute;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.jdbc.AuthenticationService;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.services.monitor.Monitor;
-import org.apache.derby.impl.services.replication.ReplicationLogger;
 import org.apache.derby.iapi.services.replication.slave.SlaveFactory;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.impl.services.monitor.UpdateServiceProperties;
 
+import java.sql.Driver;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.Properties;
 
 /**
@@ -70,7 +73,9 @@ public class SlaveDatabase extends BasicDatabase {
      * database. Does not happen until the failover command has been
      * executed for this database */
     private volatile boolean inReplicationSlaveMode;
+    private volatile boolean shutdownInitiated;
     private String dbname; // The name of the replicated database
+    private volatile SlaveFactory slaveFac;
 
     /////////////////////////////
     // ModuleControl interface //
@@ -104,6 +109,8 @@ public class SlaveDatabase extends BasicDatabase {
         throws StandardException {
 
         inReplicationSlaveMode = true;
+        shutdownInitiated = false;
+
         dbname = startParams.getProperty(SlaveFactory.SLAVE_DB);
 
         // SlaveDatabaseBootThread is an internal class
@@ -134,10 +141,35 @@ public class SlaveDatabase extends BasicDatabase {
         active=true;
     }
 
+    /**
+     * Called by Monitor when this module is stopped, i.e. when the
+     * database is shut down. When the database is shut down using the
+     * stopSlave command, the stopReplicationSlave method has already
+     * been called when this method is called. In this case, the
+     * replication functionality has already been stopped. If the
+     * database is shutdown as part of a system shutdown, however, we
+     * need to cleanup slave replication as part of database shutdown.
+     */
+    public void stop() {
+        if (inReplicationSlaveMode && slaveFac != null) {
+            try {
+                slaveFac.stopSlave(true);
+            } catch (StandardException ex) {
+            } finally {
+                slaveFac = null;
+            }
+        }
+        super.stop();
+    }
+    
     /////////////////////
     // Class interface //
     /////////////////////
     public SlaveDatabase() {
+    }
+
+    public void setSlaveFactory(SlaveFactory f) {
+        slaveFac = f;
     }
 
     ////////////////////////
@@ -167,6 +199,59 @@ public class SlaveDatabase extends BasicDatabase {
                 SQLState.CANNOT_CONNECT_TO_DB_IN_SLAVE_MODE, dbname);
         }
         return super.getAuthenticationService();
+    }
+
+    /**
+     * Verify that a connection to stop the slave has been made from
+     * here. If verified, the database context is given to the method
+     * caller. This will ensure this database is shutdown when an
+     * exception with database severity is thrown. If not verified, an
+     * exception is thrown.
+     * 
+     * @exception StandardException Thrown if a stop slave connection
+     * attempt was not made from this class
+     */
+    public void verifyShutdownSlave() throws StandardException {
+        if (!shutdownInitiated) {
+            throw StandardException.
+                newException(SQLState.REPLICATION_STOPSLAVE_NOT_INITIATED);
+        }
+        pushDbContext(ContextService.getFactory().
+                      getCurrentContextManager());
+    }
+
+    /**
+     * Stop replication slave mode if replication slave mode is active and 
+     * the network connection with the master is down
+     * 
+     * @exception SQLException Thrown on error, if not in replication 
+     * slave mode or if the network connection with the master is not down
+     */
+    public  void stopReplicationSlave() throws SQLException {
+
+        if (shutdownInitiated) {
+            // The boot thread has failed or stopReplicationSlave has
+            // already been called. There is nothing more to do to
+            // stop slave replication mode.
+            return;
+        }
+        
+        if (!inReplicationSlaveMode) {
+            StandardException se = StandardException.
+                newException(SQLState.REPLICATION_NOT_IN_SLAVE_MODE);
+            throw PublicAPI.wrapStandardException(se);
+        }
+
+        // stop slave without using force, meaning that this method
+        // call will fail with an exception if the network connection
+        // with the master is up
+        try {
+            slaveFac.stopSlave(false);
+        } catch (StandardException se) {
+            throw PublicAPI.wrapStandardException(se);
+        }
+
+        slaveFac = null;
     }
 
     /////////////////
@@ -200,18 +285,46 @@ public class SlaveDatabase extends BasicDatabase {
 
                 bootBasicDatabase(create, params); // will be blocked
 
-            } catch (StandardException se) {
-                ReplicationLogger.logError(MessageId.REPLICATION_FATAL_ERROR,
-                                           se, dbname);
-                // todo: shutdown this database
-            } finally {
-                inReplicationSlaveMode = false;
+                // if we get here, failover has been called and the
+                // database can now be connected to
+                inReplicationSlaveMode = false; 
+
                 if (bootThreadCm != null) {
                     ContextService.getFactory().
                         resetCurrentContextManager(bootThreadCm);
                     bootThreadCm = null;
                 }
+            } catch (StandardException se) {
+                // We get here when SlaveController#stopSlave has been
+                // called, or if a fatal exception has been thrown.
+                handleShutdown ();
             }
+        }
+    }
+
+    /**
+     * Shutdown this database
+     */
+    private void handleShutdown() {
+
+        try {
+            shutdownInitiated = true;
+            String driverName = 
+                "org.apache.derby.jdbc.EmbeddedDriver";
+
+            Class.forName(driverName).newInstance();
+
+            Driver embedDriver = 
+                DriverManager.getDriver(Attribute.PROTOCOL);
+
+            String conStr = "jdbc:derby:"+dbname+";"+
+                Attribute.REPLICATION_INTERNAL_SHUTDOWN_SLAVE+
+                "=true";
+
+            embedDriver.connect(conStr, (Properties) null);
+        } catch (Exception e) {
+            // Todo: report error to derby.log if exception is not
+            // SQLState.SHUTDOWN_DATABASE
         }
     }
 

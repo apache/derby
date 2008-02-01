@@ -390,6 +390,19 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
             throw PublicAPI.wrapStandardException(se);
         }
     }
+    
+    /**
+     * Only a SlaveDatabase can be in replication slave mode. Always 
+     * throws an exception
+     * 
+     * @exception SQLException Always thrown because BasicDatabase cannot 
+     * be in replication slave mode
+     */
+    public void stopReplicationSlave() throws SQLException {
+        StandardException se = StandardException.
+            newException(SQLState.REPLICATION_NOT_IN_SLAVE_MODE);
+        throw PublicAPI.wrapStandardException(se);
+    }
 
 	public void freeze() throws SQLException
 	{

@@ -4723,7 +4723,7 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
 
             <msg>
                 <name>XRE00</name>
-                <text>Cannot start replication for a read-only database.</text>
+                <text>This LogFactory module does not support replicatiosn.</text>
             </msg>
             <msg>
                 <name>XRE01</name>
@@ -4791,6 +4791,27 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
                 <name>XRE21</name>
                 <text>Error occurred while performing failover for database '{0}', Failover attempt was aborted.</text>
                 <arg>dbname</arg>
+            </msg>
+
+            <msg>
+                <name>XRE40</name>
+                <text>Could not perform operation because the database is not in replication slave mode.</text>
+            </msg>
+
+            <msg>
+                <name>XRE41</name>
+                <text>Replication operation 'failover' or 'stopSlave' refused on the slave database because the connection with the master is working. Issue the 'failover' or 'stopMaster' operation on the master database instead.</text>
+            </msg>
+
+            <msg>
+                <name>XRE42</name>
+                <text>Replicated database '{0}' shutdown.</text>
+                <arg>dbname</arg>
+            </msg>
+
+            <msg>
+                <name>XRE43</name>
+                <text>Unexpected error when trying to stop replication slave mode. To stop repliation slave mode, use operation 'stopSlave' or 'failover'.</text>
             </msg>
 
         </family>

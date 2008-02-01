@@ -424,6 +424,10 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 
     // initialized if this Derby has the SLAVE role for this database
     private boolean inReplicationSlaveMode = false;
+    /** If this exception is set while in replication slave mode, the 
+     * exception will be thrown by the thread doing recovery will. 
+     * Effectively, this whill shut down the database */
+    private volatile StandardException replicationSlaveException = null;
 
     /** True if the database has been booted in replication slave pre
      * mode, effectively turning off writes to the log file.
@@ -701,6 +705,9 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
                 while (inReplicationSlaveMode &&
                        (allowedToReadFileNumber<bootTimeLogFileNumber)) {
                     // Wait until the first log file can be read.
+                    if (replicationSlaveException != null) {
+                        throw replicationSlaveException;
+                    }
                     try {
                         slaveRecoveryMonitor.wait();
                     } catch (InterruptedException ie) {
@@ -2892,6 +2899,9 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
                 // may have changed while the thread was waiting.
                 while (inReplicationSlaveMode &&
                        (filenumber > allowedToReadFileNumber)) {
+                    if (replicationSlaveException != null) {
+                        throw replicationSlaveException;
+                    }
                     try {
                         slaveRecoveryMonitor.wait();
                     } catch (InterruptedException ie) {
@@ -5070,6 +5080,28 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
     }
 
     /**
+     * Stop the slave functionality for this LogFactory. Calling this
+     * method causes the thread currently doing recovery to stop the
+     * recovery process and throw a StandardException with SQLState
+     * SHUTDOWN_DATABASE. This should only be done when the database
+     * will be shutdown.
+     * @see org.apache.derby.impl.db.SlaveDatabase
+     */
+    public void stopReplicationSlaveMode() {
+        // Do not set inReplicationSlaveMode=false here because that
+        // will let the thread currently doing recover complete the
+        // boot process. Setting replicationSlaveException aborts the
+        // boot process.
+        replicationSlaveException =
+                StandardException.newException(
+                SQLState.SHUTDOWN_DATABASE);
+
+        synchronized (slaveRecoveryMonitor) {
+            slaveRecoveryMonitor.notify();
+        }
+    }
+
+    /**
      * Used by LogAccessFile to check if it should take the
      * replication master role, and thereby send log records to the
      * MasterFactory.
@@ -5185,7 +5217,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
      * Used to make the slave stop appending log records, complete recovery 
      * and boot the database.
      */
-    public void stopReplicationSlaveRole() {
+    public void failoverSlave() {
         inReplicationSlaveMode = false;
     }
 

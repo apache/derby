@@ -97,9 +97,21 @@ public interface SlaveFactory {
         throws StandardException;
 
     /**
-     * Will perform all work that is needed to stop replication
+     * Stop replication slave mode. Causes the database to abort the
+     * boot process, and should only be used when shutting down this
+     * database. If forcedStop is false, the method will fail with an
+     * exception if connected with the master. If forcedStop is true, the 
+     * slave will be shut down even if connected to the master. A forcedStop 
+     * value of true should only be used by system shutdown.
+     *
+     * @param forcedStop Determines whether or not an exception should
+     * be thrown when this method is called while the network
+     * connection to the master is up.
+     * @exception StandardException Thrown if slave is connected with
+     * master and forcedStop is false.
      */
-    public void stopSlave();
+    public void stopSlave(boolean forcedStop) 
+            throws StandardException;
 
     /**
      * <p>

@@ -100,6 +100,12 @@ public interface Database
     boolean wait) 
         throws SQLException;
 
+    /**
+     * Stop the replication slave role for the given database.
+     * 
+     * @exception SQLException Thrown on error
+     */
+    public void stopReplicationSlave() throws SQLException;
 
 	/**
 	 * Disables the log archival process, i.e No old log files
