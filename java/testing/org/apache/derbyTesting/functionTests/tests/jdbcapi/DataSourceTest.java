@@ -61,6 +61,7 @@ import org.apache.derby.jdbc.EmbeddedSimpleDataSource;
 import org.apache.derby.jdbc.EmbeddedXADataSource;
 import org.apache.derbyTesting.functionTests.util.SecurityCheck;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.J2EEDataSource;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.JDBCDataSource;
@@ -110,6 +111,20 @@ public class DataSourceTest extends BaseJDBCTestCase {
         super(name);
     }
     
+    /**
+     * Return a suite of tests that are run with a lower lock timeout.
+     *
+     * @param postfix suite name postfix
+     * @return A suite of tests being run with a lower lock timeout.
+     */
+    private static Test getTimeoutSuite(String postfix) {
+        TestSuite suite = new TestSuite("Lower lock timeout" + postfix);
+        suite.addTest(new DataSourceTest("timeoutTestDerby1144PooledDS"));
+        suite.addTest(new DataSourceTest("timeoutTestDerby1144XADS"));
+        // Reduce the timeout threshold to make the tests run faster.
+        return DatabasePropertyTestSetup.setLockTimeouts(suite, 3, 5);
+    }
+
     public static Test suite() {
         if (JDBC.vmSupportsJSR169())
         {
@@ -122,7 +137,13 @@ public class DataSourceTest extends BaseJDBCTestCase {
         }
         else
         {
-            return TestConfiguration.defaultSuite(DataSourceTest.class);
+            TestSuite suite = new TestSuite("DataSourceTest suite");
+            suite.addTest(TestConfiguration.defaultSuite(DataSourceTest.class));
+            // Add the tests relying on getting timeouts.
+            suite.addTest(getTimeoutSuite(":embedded"));
+            suite.addTest(TestConfiguration.clientServerDecorator(
+                    getTimeoutSuite(":client")));
+            return suite;
         }
     }
     
@@ -2622,7 +2643,7 @@ public class DataSourceTest extends BaseJDBCTestCase {
      * 
      * @throws SQLException
      */
-    public void testDerby1144PooledDS() throws SQLException {
+    public void timeoutTestDerby1144PooledDS() throws SQLException {
     
         PooledConnection pc1 = null;
 
@@ -2644,7 +2665,7 @@ public class DataSourceTest extends BaseJDBCTestCase {
         pc1.close();
     }
     
-    public void testDerby1144XADS() throws SQLException {
+    public void timeoutTestDerby1144XADS() throws SQLException {
        
         XADataSource xds = J2EEDataSource.getXADataSource();
         // Test xa connection isolation
