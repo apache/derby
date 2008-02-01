@@ -29,6 +29,7 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.reference.JDBC20Translation;
 import org.apache.derby.iapi.reference.JDBC30Translation;
+import org.apache.derby.iapi.reference.JDBC40Translation;
 
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import java.util.Properties;
@@ -219,7 +220,7 @@ public class TypeCompilerFactoryImpl implements TypeCompilerFactory
                                 return btc;
                         }
 
-                  case StoredFormatIds.XML_TYPE_ID:
+                  case JDBC40Translation.SQLXML:
                         return xmlTypeCompiler =
                                 getAnInstance(PACKAGE_NAME + "XMLTypeCompiler",
                                                                 xmlTypeCompiler,

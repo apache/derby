@@ -24,6 +24,7 @@ package org.apache.derby.iapi.types;
 import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.reference.JDBC30Translation;
+import org.apache.derby.iapi.reference.JDBC40Translation;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 
 import java.sql.Types;
@@ -51,7 +52,7 @@ public abstract class DataTypeUtilities  {
 		case Types.VARBINARY:
 		case Types.LONGVARBINARY:
 		case Types.BLOB:
-		case StoredFormatIds.XML_TYPE_ID:
+		case JDBC40Translation.SQLXML:
 				return dtd.getMaximumWidth();
 			case Types.SMALLINT:
 				return 5;
@@ -105,7 +106,7 @@ public abstract class DataTypeUtilities  {
 		          typeId == Types.VARCHAR ||
 		          typeId == Types.CLOB ||
 		          typeId == Types.LONGVARCHAR ||
-		          typeId == StoredFormatIds.XML_TYPE_ID);
+		          typeId == JDBC40Translation.SQLXML);
 	}
 	/**
 		Is the data type nullable.

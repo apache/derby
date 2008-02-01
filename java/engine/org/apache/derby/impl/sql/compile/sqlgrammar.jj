@@ -131,6 +131,7 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.reference.JDBC30Translation;
+import org.apache.derby.iapi.reference.JDBC40Translation;
 import org.apache.derby.iapi.reference.Limits;
 
 import org.apache.derby.iapi.sql.compile.CompilerContext;
@@ -3733,6 +3734,22 @@ dataTypeDDL() throws StandardException :
 	}
 }
 
+/**
+   Returns  a dataTypeDDL() as a catalog type, ie.
+   the Java interface TypeDescriptor.
+*/
+TypeDescriptor
+catalogType() throws StandardException :
+{
+	DataTypeDescriptor	typeDescriptor;
+}
+{
+	typeDescriptor = dataTypeDDL()
+	{
+		return typeDescriptor.getCatalogType();
+	}
+}
+
 
 /*
  * <A NAME="dataTypeCast">dataTypeCast</A>
@@ -4217,7 +4234,7 @@ XMLType() throws StandardException :
 	{
 		checkVersion(DataDictionary.DD_VERSION_DERBY_10_1, "XML");
 		return DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-			StoredFormatIds.XML_TYPE_ID);
+			JDBC40Translation.SQLXML);
 	}
 }
 
@@ -10093,10 +10110,10 @@ procedureParameterDefinition(Vector[] list) throws StandardException :
 	[   LOOKAHEAD( { commonDatatypeName(2, false) })
 	    parameterName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
 	]
-	typeDescriptor = dataTypeDDL() 
+	typeDescriptor = dataTypeDDL()
 	{
 		list[0].addElement(parameterName);
-		list[1].addElement(typeDescriptor);
+		list[1].addElement(typeDescriptor.getCatalogType());
 		list[2].addElement(inout);
 	}
 }
@@ -10182,7 +10199,6 @@ functionParameterDefinition(Vector[] list) throws StandardException :
 {
 	DataTypeDescriptor	typeDescriptor;
 	String				parameterName = "";
-	Integer				inout;
 }
 {
 	// Lookahead needed because token could satisfy identifier and dataTypeDDL
@@ -10192,10 +10208,11 @@ functionParameterDefinition(Vector[] list) throws StandardException :
 	typeDescriptor = dataTypeDDL() 
 	{
 		list[0].addElement(parameterName);
-		list[1].addElement(typeDescriptor);
+		list[1].addElement(typeDescriptor.getCatalogType());
 		list[2].addElement(ReuseFactory.getInteger(JDBC30Translation.PARAMETER_MODE_IN));
 	}
 }
+
 
 /*
  * <A NAME="functionReturnDataType">functionReturnDataType</A>
@@ -10207,7 +10224,7 @@ functionReturnDataType() throws StandardException :
 }
 {
     (
-        typeDescriptor = dataTypeCommon()
+        typeDescriptor = catalogType()
          |
         typeDescriptor = functionTableType()
     )
@@ -10225,7 +10242,7 @@ functionTableType() throws StandardException :
 	ArrayList                       names = new ArrayList();
 	ArrayList                         types = new ArrayList();
 	String[]                          nameArray;
-	DataTypeDescriptor[]        typeArray;
+	TypeDescriptor[]        typeArray;
 	int                                     columnCount;
 }
 {
@@ -10240,7 +10257,7 @@ functionTableType() throws StandardException :
 		columnCount = names.size();
 		nameArray = new String[ columnCount ];
 		names.toArray( nameArray );
-		typeArray = new DataTypeDescriptor[ columnCount ];
+		typeArray = new TypeDescriptor[ columnCount ];
 		types.toArray( typeArray );
 
 		//
@@ -10250,7 +10267,7 @@ functionTableType() throws StandardException :
 		//
 		for ( int i = 0; i < columnCount; i++ )
 		{
-		    if ( typeArray[ i ].getTypeId().isXMLTypeId() )
+		    if ( typeArray[ i ].getJDBCTypeId() == JDBC40Translation.SQLXML )
 		    { throw StandardException.newException( SQLState.LANG_XML_NOT_ALLOWED_DJRS ); }
 		}
 
@@ -10277,7 +10294,7 @@ throws StandardException :
 	typeDescriptor = dataTypeDDL()
 	{
 		names.add( name );
-		types.add( typeDescriptor );
+		types.add( typeDescriptor.getCatalogType() );
 	}
 }
 

@@ -262,73 +262,6 @@ public class CreateAliasNode extends DDLStatementNode
 		}
 		return false;		
 	}
-	
-	/**
-	 * Take the passed TypeDescriptor and check if it corresponds to a 
-	 * character string type. If yes, then create a new one based on it's 
-	 * typeid, length and nullability to create a new DataTypeDescriptor and 
-	 * then have it take the collation type of the schema in which the method 
-	 * is getting defined in. This is because all the character strings 
-	 * associated with the definition of the user defined function/procedure 
-	 * should take the collation of the schema in which this user defined 
-	 * function is getting created.
-	 * 
-	 * @param changeTD TypeDescriptor with incorrect collation setting
-	 * @return New TypeDescriptor with collation of the schema in which 
-	 *   the function/procedure is getting created.
-	 * @throws StandardException
-	 */
-	private TypeDescriptor typeDescriptorWithCorrectCollation(TypeDescriptor changeTD)
-	throws StandardException {
-		//We could have been called for the return type but for procedures 
-		//there is no return type and hence we should be careful that we
-		//don't run into null ptr exception. So before doing anything, check if
-		//the passed parameter is null and if so, then simply return.
-		if (changeTD == null) 
-			return changeTD;
-        
-		TypeId compTypeId = TypeId.getBuiltInTypeId(changeTD.getTypeName());
-		//No work to do if type id does not correspond to a character string
-		if (compTypeId != null && compTypeId.isStringTypeId()) {
-			DataTypeDescriptor newTDWithCorrectCollation = 
-				new DataTypeDescriptor(compTypeId, 
-						changeTD.isNullable(),
-						changeTD.getMaximumWidth());
-			//Use the collation type and info of the schema in which this
-			//function is defined for the return value of the function
-            newTDWithCorrectCollation =
-                newTDWithCorrectCollation.getCollatedType(
-					getSchemaDescriptor().getCollationType(),
-                    StringDataValue.COLLATION_DERIVATION_IMPLICIT);
-			return newTDWithCorrectCollation.getCatalogType();
-		}
-		return changeTD;
-	}
-	
-	/**
-	 * Set the collation of the columns in a Table Function's returned row set.
-	 */
-	private void    setTableFunctionCollations()
-        throws StandardException
-    {
-		if ( aliasInfo.isTableFunction() )
-        {
-            RoutineAliasInfo    info = (RoutineAliasInfo) aliasInfo;
-            TypeDescriptor[]    types = info.getReturnType().getRowTypes();
-
-            SchemaDescriptor    sd = getSchemaDescriptor();
-
-            for ( int i = 0; i < types.length; i++ )
-            {
-                TypeDescriptorImpl  tdi = (TypeDescriptorImpl) types[ i ];
-                if ( tdi.isStringType() )
-                {
-                    tdi.setCollationType( sd.getCollationType() );
-                }
-            }
-        }
-
-    }
     
 	// We inherit the generate() method from DDLStatementNode.
 
@@ -347,41 +280,13 @@ public class CreateAliasNode extends DDLStatementNode
 		//Are we dealing with user defined function or procedure?
 		if (aliasType == AliasInfo.ALIAS_TYPE_FUNCTION_AS_CHAR ||
 				aliasType == AliasInfo.ALIAS_TYPE_PROCEDURE_AS_CHAR) {
-			//Does the user defined function/procedure have any character 
-			//string types in it's definition
-			if (anyStringTypeDescriptor()){
-				RoutineAliasInfo oldAliasInfo = (RoutineAliasInfo)aliasInfo;  
-				TypeDescriptor[] newParamTypes = null;
-				int paramCount = oldAliasInfo.getParameterCount();
-				//Does the user defined functio has any parameters to it?
-				if (paramCount > 0) {
-					newParamTypes = new TypeDescriptor[paramCount];
-					TypeDescriptor[] oldParamTypes = oldAliasInfo.getParameterTypes();
-					//Go through the parameters and pick the character string
-					//type and set their collation to the collation of the
-					//schema in which the function/procedure is getting defined.
-					for (int i = 0; i < paramCount; i++) 
-						newParamTypes[i] = typeDescriptorWithCorrectCollation(oldParamTypes[i]);
-				}
-				//Now create the RoutineAliasInfo again with it's character
-				//strings associated with correct collation type
-				aliasInfo = new RoutineAliasInfo(
-						oldAliasInfo.getMethodName(),
-						oldAliasInfo.getParameterCount(),
-						oldAliasInfo.getParameterNames(), 
-						newParamTypes, 
-						oldAliasInfo.getParameterModes(), 
-						oldAliasInfo.getMaxDynamicResultSets(),
-						oldAliasInfo.getParameterStyle(),
-						oldAliasInfo.getSQLAllowed(),
-						oldAliasInfo.calledOnNullInput(), 
-						typeDescriptorWithCorrectCollation(oldAliasInfo.getReturnType()));
-
-            }
             
-            // if this is a table function, then force its string columns to
-            // have the correct collation.
-            setTableFunctionCollations();
+            // Set the collation for all string types in parameters
+            // and return types including row multi-sets to be that of
+            // the schema the routine is being defined in.
+            ((RoutineAliasInfo)aliasInfo).setCollationTypeForAllStringTypes(
+                    getSchemaDescriptor().getCollationType());
+
 		}
 		// Procedures and functions do not check class or method validity until
 		// runtime execution. Synonyms do need some validity checks.

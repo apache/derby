@@ -44,6 +44,7 @@ import org.apache.derby.iapi.types.*;
 
 import org.apache.derby.iapi.reference.JDBC20Translation;
 import org.apache.derby.iapi.reference.JDBC30Translation;
+import org.apache.derby.iapi.reference.JDBC40Translation;
 
 import java.sql.Types;
 
@@ -411,7 +412,7 @@ public final class TypeId implements Formatable
 
                   // XML is not a JDBC type, so we have to check for our
                   // internal XML type.
-                  case StoredFormatIds.XML_TYPE_ID:
+                  case JDBC40Translation.SQLXML:
                       ret = XML_ID;
                       if (ret == null)
                           ret = XML_ID = new TypeId(StoredFormatIds.XML_TYPE_ID,
@@ -506,7 +507,7 @@ public final class TypeId implements Formatable
                 }
                 else if (javaTypeName.equals("org.apache.derby.iapi.types.XML"))
                 {
-                        return getBuiltInTypeId(StoredFormatIds.XML_TYPE_ID);
+                        return getBuiltInTypeId(JDBC40Translation.SQLXML);
                 }
                 else
                 {

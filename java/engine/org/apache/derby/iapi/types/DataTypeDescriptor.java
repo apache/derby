@@ -151,6 +151,29 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
     {
         return getBuiltInDataTypeDescriptor(jdbcType).getCatalogType();
     }
+    
+    /**
+     * Get a catlog type identical to the passed in type exception
+     * that the collationType is set to the passed in value.
+     * @param catalogType Type to be based upon.
+     * @param collationType Collation type of returned type.
+     * 
+     * @return catalogType if it already has the correct collation,
+     * otherwise a new TypeDescriptor with the correct collation.
+     */
+    public static TypeDescriptor getCatalogType(TypeDescriptor catalogType,
+            int collationType)
+    {
+        if (catalogType.isRowMultiSet())
+            return getRowMultiSetCollation(catalogType, collationType);
+        
+        if (catalogType.getCollationType() == collationType)
+            return catalogType;
+        
+        // Create through a runtime type, derivation will be thrown away.
+        return getType(catalogType).getCollatedType(collationType,
+                StringDataValue.COLLATION_DERIVATION_IMPLICIT).getCatalogType();
+    }
 
 	/**
 	 * Get a descriptor that corresponds to a builtin JDBC type.
@@ -330,16 +353,9 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 	 *
 	 * @return	A new DataTypeDescriptor describing the SQL Row Multiset
 	 */
-	public static TypeDescriptor getRowMultiSet
-	(
-		String[]	                        columnNames,
-		DataTypeDescriptor[]	types
-	)
-	{
-        TypeDescriptor[] catalogTypes =
-            new TypeDescriptor[types.length];
-        for (int i = 0; i < types.length; i++)
-            catalogTypes[i] = types[i].getCatalogType();
+    public static TypeDescriptor getRowMultiSet(String[] columnNames,
+            TypeDescriptor[] catalogTypes)
+    {
 		RowMultiSetImpl rms = new RowMultiSetImpl(columnNames, catalogTypes);
 		TypeId              typeID = new TypeId( StoredFormatIds.ROW_MULTISET_CATALOG_ID, rms );
 
@@ -1140,12 +1156,18 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
     /**
      * Return a type description identical to this type
      * with the exception that its collation information is
-     * taken from the passed in information.
+     * taken from the passed in information. If the type
+     * does not represent a string type then the collation
+     * will be unchanged and this is returned.
+     * 
     * @return This if collation would be unchanged otherwise a new type.
      */   
     public DataTypeDescriptor getCollatedType(int collationType,
             int collationDerivation)
-    {
+    {        
+        if (!typeDescriptor.isStringType())
+            return this;
+        
         if ((getCollationType() == collationType) &&
             (getCollationDerivation() == collationDerivation))
             return this;
@@ -1153,6 +1175,57 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
         return new DataTypeDescriptor(this,
                 collationType,
                 collationDerivation);
+    }
+    
+    /**
+     * For a row multi set type return an identical type
+     * with the collation type changed. Note that since
+     * row types are only ever catalog types the
+     * derivation is not used (since derivation is a property
+     * of runtime types).
+     * <BR>
+     * 
+     * 
+     * @param collationType
+     * @return this  will be returned if no changes are required (e.g.
+     * no string types or collation is already correct), otherwise a
+     * new instance is returned (leaving this unchanged).
+     */
+    private static TypeDescriptor getRowMultiSetCollation(
+            TypeDescriptor catalogType, int collationType)
+    {
+        TypeDescriptor[] rowTypes = catalogType.getRowTypes();
+        
+        TypeDescriptor[] newTypes = null;
+        
+        for (int t = 0; t < rowTypes.length; t++)
+        {
+            TypeDescriptor newType = DataTypeDescriptor.getCatalogType(
+                    rowTypes[t], collationType);
+            
+            // Is it the exact same as the old type.
+            if (newType == rowTypes[t])
+                continue;
+            
+            if (newTypes == null)
+            {
+                // First different type, simply create a new
+                // array and copy all the old types across.
+                // Any new type will overwrite the old type.
+                newTypes = new TypeDescriptor[rowTypes.length];
+                System.arraycopy(rowTypes, 0, newTypes, 0, rowTypes.length);
+            }
+            
+            newTypes[t] = newType;
+        }
+        
+        // If no change then we continue to use this instance.
+        if (newTypes == null)
+            return catalogType;
+        
+        return DataTypeDescriptor.getRowMultiSet(
+                catalogType.getRowColumnNames(),
+                newTypes);
     }
 
 	/**

@@ -35,6 +35,7 @@ import org.apache.derby.iapi.services.io.StreamStorable;
 import org.apache.derby.iapi.services.i18n.MessageService;
 
 import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.iapi.reference.JDBC40Translation;
 import org.apache.derby.iapi.reference.SQLState;
 
 import org.apache.derby.iapi.services.info.JVMInfo;
@@ -391,11 +392,7 @@ public class BaseTypeIdImpl implements Formatable
 
           case StoredFormatIds.XML_TYPE_ID_IMPL:
                 SQLTypeName = TypeId.XML_NAME;
-                // RESOLVE: There isn't a JDBC type for XML, so we
-                // just use our internal type.  Is it okay to do this,
-                // or should "JDBCTypeId" be renamed since it no longer
-                // just holds JDBC types?
-                JDBCTypeId = StoredFormatIds.XML_TYPE_ID;
+                JDBCTypeId = JDBC40Translation.SQLXML;
                 wrapperTypeFormatId = StoredFormatIds.XML_TYPE_ID;
                 break;
 

@@ -42,6 +42,7 @@ import org.apache.derby.iapi.types.SqlXmlUtil;
 import org.apache.derby.iapi.store.access.Qualifier;
 
 import org.apache.derby.iapi.reference.ClassName;
+import org.apache.derby.iapi.reference.JDBC40Translation;
 import org.apache.derby.iapi.reference.SQLState;
 
 import org.apache.derby.iapi.util.JBitSet;
@@ -394,7 +395,7 @@ public class BinaryOperatorNode extends ValueNode
         // XML data value, per SQL/XML spec 6.17: "...yielding a value
         // X1 of an XML type."
             setType(DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-                StoredFormatIds.XML_TYPE_ID));
+                    JDBC40Translation.SQLXML));
         }
 
         return genSQLJavaSQLTree();

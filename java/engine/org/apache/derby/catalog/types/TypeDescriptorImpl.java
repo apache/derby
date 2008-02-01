@@ -407,7 +407,6 @@ public class TypeDescriptorImpl implements TypeDescriptor, Formatable
 		return collationType;
 	}
 
-	/** @see DataTypeDescriptor#setCollationType(int) */
 	public void	setCollationType(int collationTypeValue)
 	{
 		collationType = collationTypeValue;

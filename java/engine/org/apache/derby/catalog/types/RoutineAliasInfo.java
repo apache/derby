@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
 
 /**
  * Describe a routine (procedure or function) alias.
@@ -57,6 +58,10 @@ public class RoutineAliasInfo extends MethodAliasInfo
 
 	private int parameterCount;
 
+    /**
+     * Types of the parameters. If there are no parameters
+     * then this may be null (or a zero length array).
+     */
 	private TypeDescriptor[]	parameterTypes;
         /**
          * Name of each parameter. As of DERBY 10.3, parameter names
@@ -156,6 +161,7 @@ public class RoutineAliasInfo extends MethodAliasInfo
 			}
 
 			if (returnType != null) {
+                SanityManager.ASSERT(!(returnType instanceof DataTypeDescriptor));
 				if (!((sqlAllowed >= RoutineAliasInfo.READS_SQL_DATA) && (sqlAllowed <= RoutineAliasInfo.NO_SQL))) {
 					SanityManager.THROWASSERT("Invalid sqlAllowed for FUNCTION " + methodName + " " + sqlAllowed);
 				}
@@ -172,6 +178,10 @@ public class RoutineAliasInfo extends MethodAliasInfo
 		return parameterCount;
 	}
 
+    /**
+     * Types of the parameters. If there are no parameters
+     * then this may return null (or a zero length array).
+     */
 	public TypeDescriptor[] getParameterTypes() {
 		return parameterTypes;
 	}
@@ -360,4 +370,22 @@ public class RoutineAliasInfo extends MethodAliasInfo
 			return "UNKNOWN";
 		}
 	}
+    
+    /**
+     * Set the collation type of all string types declared for
+     * use in this routine to the given collation type.
+     * @param collationType
+     */
+    public void setCollationTypeForAllStringTypes(int collationType)
+    {
+        if (parameterCount != 0)
+        {
+            for (int p = 0; p < parameterTypes.length; p++)
+                parameterTypes[p] = DataTypeDescriptor.getCatalogType(
+                        parameterTypes[p], collationType);
+        }
+        
+        if (returnType != null)
+            returnType = DataTypeDescriptor.getCatalogType(returnType, collationType);
+    }
 }

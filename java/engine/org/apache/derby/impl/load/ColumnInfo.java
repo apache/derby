@@ -21,6 +21,7 @@
 
 package org.apache.derby.impl.load;
 
+import org.apache.derby.iapi.reference.JDBC40Translation;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 
 import java.sql.ResultSet;
@@ -211,7 +212,7 @@ class ColumnInfo {
 		return !(type == java.sql.Types.BIT ||
 				 type == java.sql.Types.JAVA_OBJECT ||
 				 type == java.sql.Types.OTHER ||
-				 type == StoredFormatIds.XML_TYPE_ID); 
+				 type == JDBC40Translation.SQLXML); 
 	}
 
 
