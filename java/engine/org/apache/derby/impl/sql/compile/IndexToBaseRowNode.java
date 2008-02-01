@@ -26,6 +26,7 @@ import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.sql.compile.AccessPath;
 import org.apache.derby.iapi.sql.compile.CostEstimate;
 import org.apache.derby.iapi.sql.compile.Optimizable;
+import org.apache.derby.iapi.sql.compile.RequiredRowOrdering;
 
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 
@@ -359,6 +360,23 @@ public class IndexToBaseRowNode extends FromTable
 		 * FBT being under a PRN, etc.
 		 */
 		source.disableBulkFetch();
+	}
+
+	/**
+	 * @see ResultSetNode#adjustForSortElimination
+	 */
+	void adjustForSortElimination(RequiredRowOrdering rowOrdering)
+		throws StandardException
+	{
+		/* rowOrdering is not important to this specific node, so
+		 * just call the no-arg version of the method.
+		 */
+		adjustForSortElimination();
+
+		/* Now pass the rowOrdering down to source, which may
+		 * need to do additional work. DERBY-3279.
+		 */
+		source.adjustForSortElimination(rowOrdering);
 	}
 
 	/** 

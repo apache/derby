@@ -28,6 +28,7 @@ import java.sql.Statement;
 import java.sql.SQLException;
 
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -617,41 +618,62 @@ public class InListMultiProbeTest extends BaseJDBCTestCase {
          * to the same column and thus do the correct sorting.
          */
 
+        BitSet colsToCheck = new BitSet(6);
+
+        colsToCheck.set(3);
+        colsToCheck.set(4);
+        colsToCheck.set(5);
+
         String [][] expRS3 =
             new String [][] {
-                {"AAAAA", "EDAM", "999.8888", "54321", "EDAM", "8.5646"},
-                {"54321", "EDAM", "8.5646", "54321", "EDAM", "8.5646"},
-                {"00000", "EDAM", "2.1111", "54321", "EDAM", "8.5646"},
-                {"AAAAA", "EDAM", "999.8888", "00000", "EDAM", "2.1111"},
-                {"54321", "EDAM", "8.5646", "00000", "EDAM", "2.1111"},
-                {"00000", "EDAM", "2.1111", "00000", "EDAM", "2.1111"}
+                {"54321", "EDAM", "8.5646"},
+                {"54321", "EDAM", "8.5646"},
+                {"54321", "EDAM", "8.5646"},
+                {"00000", "EDAM", "2.1111"},
+                {"00000", "EDAM", "2.1111"},
+                {"00000", "EDAM", "2.1111"}
             };
 
-        JDBC.assertFullResultSet(st.executeQuery(
+        /* We can't use assertFullResultSet because the query
+         * only enforces an ordering on the columns from "C2",
+         * which means that the rows in "C1" w.r.t. a given
+         * row in C2 might be in any order.  We don't want to
+         * use assertUnorderedResultSet() because there _is_
+         * a required ordering of the rows--it's just a required
+         * ordering on a _subset_ of the columns in the result
+         * set.  So we use assertPartialResultSet() to check
+         * that the rows are correctly sorted w.r.t. the ORDER
+         * BY columns, but we don't bother checking the other
+         * (non-ORDER BY) columns.
+         */
+         
+        JDBC.assertPartialResultSet(st.executeQuery(
             "SELECT * FROM CHEESE C1, CHEESE C2 " +
             "WHERE C1.CHEESE_NAME = C2.CHEESE_NAME AND " +
             "(C2.CHEESE_CODE='00000' OR C2.CHEESE_CODE='54321') " +
             "AND C1.CHEESE_NAME='EDAM' ORDER BY 4 DESC, 5 DESC, 6 DESC"),
-            expRS3);
+            expRS3,
+            colsToCheck);
 
         // Same as previous query but with ASC in the ORDER BY.
 
         String [][] expRS4 =
             new String [][] {
-                {"00000", "EDAM", "2.1111", "00000", "EDAM", "2.1111"},
-                {"54321", "EDAM", "8.5646", "00000", "EDAM", "2.1111"},
-                {"AAAAA", "EDAM", "999.8888", "00000", "EDAM", "2.1111"},
-                {"00000", "EDAM", "2.1111", "54321", "EDAM", "8.5646"},
-                {"54321", "EDAM", "8.5646", "54321", "EDAM", "8.5646"},
-                {"AAAAA", "EDAM", "999.8888", "54321", "EDAM", "8.5646"}
+                {"00000", "EDAM", "2.1111"},
+                {"00000", "EDAM", "2.1111"},
+                {"00000", "EDAM", "2.1111"},
+                {"54321", "EDAM", "8.5646"},
+                {"54321", "EDAM", "8.5646"},
+                {"54321", "EDAM", "8.5646"}
             };
 
-        JDBC.assertFullResultSet(st.executeQuery(
+        JDBC.assertPartialResultSet(st.executeQuery(
             "SELECT * FROM CHEESE C1, CHEESE C2 " +
             "WHERE C1.CHEESE_NAME = C2.CHEESE_NAME AND " +
             "(C2.CHEESE_CODE='00000' OR C2.CHEESE_CODE='54321') " +
             "AND C1.CHEESE_NAME='EDAM' ORDER BY 4 ASC, 5 DESC, 6 DESC"),
-            expRS4);
+            expRS4,
+            colsToCheck);
 
         /* Repeat the tests with parameter markers instead of literals,
          * and explicit IN lists instead of an OR clause that would
@@ -696,7 +718,7 @@ public class InListMultiProbeTest extends BaseJDBCTestCase {
 
         ps.setString(1, "00000");
         ps.setString(2, "54321");
-        JDBC.assertFullResultSet(ps.executeQuery(), expRS3);
+        JDBC.assertPartialResultSet(ps.executeQuery(), expRS3, colsToCheck);
 
         // Same as previous query but with ASC in the ORDER BY.
 
@@ -707,7 +729,150 @@ public class InListMultiProbeTest extends BaseJDBCTestCase {
 
         ps.setString(1, "00000");
         ps.setString(2, "54321");
-        JDBC.assertFullResultSet(ps.executeQuery(), expRS4);
+        JDBC.assertPartialResultSet(ps.executeQuery(), expRS4, colsToCheck);
+
+        /* Now do the same tests yet again, but remove CHEESE_COST from
+         * the index (and from the ORDER BY).  Since the index now
+         * has a subset of the columns in the base table, we'll
+         * generate an IndexToBaseRowNode above the base table.
+         * We want to make sure that the correct sorting information
+         * is passed from the IndexToBaseRowNode down to the base
+         * table in that case...
+         */
+
+        st.execute("drop index cheese_index");
+        st.execute("create index cheese_index on CHEESE " +
+            "(CHEESE_CODE DESC, CHEESE_NAME DESC)");
+
+        /* ORDER BY is DESC, so we'll eliminate the ORDER BY sort for
+         * this query.  Results should still come back in descending
+         * order, though.
+         */
+        JDBC.assertFullResultSet(st.executeQuery(
+            "SELECT * FROM CHEESE " +
+            "WHERE (CHEESE_CODE='54321' OR CHEESE_CODE='00000' " +
+            "OR CHEESE_CODE='AAAAA') AND CHEESE_NAME='EDAM' " +
+            "ORDER BY CHEESE_CODE DESC, CHEESE_NAME DESC"),
+            expRS1);
+
+        /* ORDER BY is ASC so we will not eliminate the sort; make
+         * sure the rows are still correctly ordered.
+         */
+        JDBC.assertFullResultSet(st.executeQuery(
+            "SELECT * FROM CHEESE " +
+            "WHERE (CHEESE_CODE='54321' OR CHEESE_CODE='00000' " +
+            "OR CHEESE_CODE='AAAAA') AND CHEESE_NAME='EDAM' " +
+            "ORDER BY CHEESE_CODE ASC, CHEESE_NAME DESC"),
+            expRS2);
+
+        /* Simple join where the ORDER BY is based on position in
+         * the RCL and the probe predicate is w.r.t. to the second
+         * table in the FROM list.
+         */
+        JDBC.assertPartialResultSet(st.executeQuery(
+            "SELECT * FROM CHEESE C1, CHEESE C2 " +
+            "WHERE C1.CHEESE_NAME = C2.CHEESE_NAME AND " +
+            "(C2.CHEESE_CODE='00000' OR C2.CHEESE_CODE='54321') " +
+            "AND C1.CHEESE_NAME='EDAM' ORDER BY 4 DESC, 5 DESC"),
+            expRS3,
+            colsToCheck);
+
+        // Same as previous query but with ASC in the ORDER BY.
+        JDBC.assertPartialResultSet(st.executeQuery(
+            "SELECT * FROM CHEESE C1, CHEESE C2 " +
+            "WHERE C1.CHEESE_NAME = C2.CHEESE_NAME AND " +
+            "(C2.CHEESE_CODE='00000' OR C2.CHEESE_CODE='54321') " +
+            "AND C1.CHEESE_NAME='EDAM' ORDER BY 4 ASC, 5 DESC"),
+            expRS4,
+            colsToCheck);
+
+        /* Run a few queries with multiple IN lists in it (the OR
+         * clauses here will be transformed to IN lists during
+         * preprocessing). In this case we should only do multi-
+         * probing for the IN list that's on CHEESE_CODE; we
+         * shouldn't do it for CHEESE_NAME because CHEESE_NAME
+         * is not the first column in the index and thus is not
+         * eligible for IN list multi-probing.
+         */
+
+        JDBC.assertFullResultSet(st.executeQuery(
+            "SELECT * FROM CHEESE WHERE " +
+            "(CHEESE_CODE='00000' OR CHEESE_CODE='54321') " +
+            "AND (CHEESE_NAME='EDAM' OR CHEESE_NAME='ADAM') " +
+            "ORDER BY CHEESE_CODE DESC, CHEESE_NAME DESC"),
+            new String [][] {
+                {"54321","EDAM","8.5646"},
+                {"00000","EDAM","2.1111"}
+            });
+
+        JDBC.assertFullResultSet(st.executeQuery(
+            "SELECT * FROM CHEESE WHERE " +
+            "(CHEESE_CODE='00000' OR CHEESE_CODE='54321') " +
+            "AND (CHEESE_NAME='EDAM' OR CHEESE_NAME='ADAM') " +
+            "ORDER BY CHEESE_CODE ASC, CHEESE_NAME DESC"),
+            new String [][] {
+                {"00000","EDAM","2.1111"},
+                {"54321","EDAM","8.5646"}
+            });
+
+        /* Multiple IN lists on the same column get AND-ed
+         * together.  Only one of them can be used for multi-
+         * probing, the other has to be treated as a non-probing
+         * IN list (because we only multi-probe with start/stop
+         * predicates, and there can only be one start/stop
+         * predicate per column).
+         */
+
+        JDBC.assertFullResultSet(st.executeQuery(
+            "SELECT * FROM CHEESE WHERE " +
+            "(CHEESE_CODE='00000' OR CHEESE_CODE='54321') " +
+            "AND (CHEESE_CODE='AAAAA' OR CHEESE_CODE='00000') " +
+            "ORDER BY CHEESE_CODE DESC, CHEESE_NAME DESC"),
+            new String [][] {
+                {"00000","GOUDA","1.1234"},
+                {"00000","EDAM","2.1111"}
+            });
+
+        JDBC.assertFullResultSet(st.executeQuery(
+            "SELECT * FROM CHEESE WHERE " +
+            "(CHEESE_CODE='00000' OR CHEESE_CODE='54321') " +
+            "AND (CHEESE_CODE='AAAAA' OR CHEESE_CODE='00000') " +
+            "ORDER BY CHEESE_CODE ASC, CHEESE_NAME ASC"),
+            new String [][] {
+                {"00000","EDAM","2.1111"},
+                {"00000","GOUDA","1.1234"}
+            });
+
+        /* Multiple IN lists on the same column get OR-ed
+         * together.  They will be combined into a single
+         * IN list for which we will then do multi-probing.
+         */
+
+        JDBC.assertFullResultSet(st.executeQuery(
+            "SELECT * FROM CHEESE WHERE " +
+            "(CHEESE_CODE='00000' OR CHEESE_CODE='54321') " +
+            "OR (CHEESE_CODE='AAAAA' OR CHEESE_CODE='00000') " +
+            "ORDER BY CHEESE_CODE DESC, CHEESE_NAME DESC"),
+            new String [][] {
+                {"AAAAA","EDAM","999.8888"},
+                {"54321","MUENSTER","77.9545"},
+                {"54321","EDAM","8.5646"},
+                {"00000","GOUDA","1.1234"},
+                {"00000","EDAM","2.1111"}
+            });
+
+        JDBC.assertFullResultSet(st.executeQuery(
+            "SELECT * FROM CHEESE WHERE " +
+            "(CHEESE_CODE='00000' OR CHEESE_CODE='54321') " +
+            "OR (CHEESE_CODE='AAAAA' OR CHEESE_CODE='00000') " +
+            "ORDER BY CHEESE_CODE ASC, CHEESE_NAME ASC"),
+            new String [][] {
+                {"00000","EDAM","2.1111"},
+                {"00000","GOUDA","1.1234"},
+                {"54321","EDAM","8.5646"},
+                {"54321","MUENSTER","77.9545"},
+                {"AAAAA","EDAM","999.8888"}
+            });
 
         ps.close();
         st.execute("drop table cheese");

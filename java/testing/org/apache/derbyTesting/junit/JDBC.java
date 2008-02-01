@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.Iterator;
 import java.util.ListIterator;
 
@@ -885,6 +886,69 @@ public class JDBC {
     }
 
     /**
+     * Similar to assertFullResultSet(...) above, except that this
+     * method takes a BitSet and checks the received expectedRows
+     * against the columns referenced by the BitSet.  So the assumption
+     * here is that expectedRows will only have as many columns as
+     * there are "true" bits in the received BitSet.
+     *
+     * This method is useful when we expect there to be a specific
+     * ordering on some column OC in the result set, but do not care
+     * about the ordering of the non-OC columns when OC is the
+     * same across rows.  Ex.  If we have the following results with
+     * an expected ordering on column J:
+     *
+     *   I    J
+     *   -    -
+     *   a    1
+     *   b    1
+     *   c    2
+     *   c    2
+     *
+     * Then this method allows us to verify that J is sorted as
+     * "1, 1, 2, 2" without having to worry about whether or not
+     * (a,1) comes before (b,1).  The caller would simply pass in
+     * a BitSet whose content was {1} and an expectedRows array
+     * of {{"1"},{"1"},{"2"},{"2"}}.
+     *
+     * For now this method always does comparisons with
+     * "asTrimmedStrings" set to true, and always closes
+     * the result set.
+     */
+    public static void assertPartialResultSet(ResultSet rs,
+        Object [][] expectedRows, BitSet colsToCheck)
+        throws SQLException
+    {
+        int rows;
+
+        // Assert that we have the right number of columns. If we expect an
+        // empty result set, the expected column count is unknown, so don't
+        // check.
+        if (expectedRows.length > 0) {
+            Assert.assertEquals("Unexpected column count:",
+                expectedRows[0].length, colsToCheck.cardinality());
+        }
+
+        for (rows = 0; rs.next(); rows++)
+        {
+            /* If we have more actual rows than expected rows, don't
+             * try to assert the row.  Instead just keep iterating
+             * to see exactly how many rows the actual result set has.
+             */
+            if (rows < expectedRows.length)
+            {
+                assertRowInResultSet(rs, rows + 1,
+                    expectedRows[rows], true, colsToCheck);
+            }
+        }
+
+        rs.close();
+
+        // And finally, assert the row count.
+        Assert.assertEquals("Unexpected row count:", expectedRows.length, rows);
+    }
+
+    /**
      * Assert that every column in the current row of the received
      * result set matches the corresponding column in the received
      * array.  This means that the order of the columns in the result
@@ -922,9 +986,39 @@ public class JDBC {
     private static void assertRowInResultSet(ResultSet rs, int rowNum,
         Object [] expectedRow, boolean asTrimmedStrings) throws SQLException
     {
+        assertRowInResultSet(
+            rs, rowNum, expectedRow, asTrimmedStrings, (BitSet)null);
+    }
+
+    /**
+     * See assertRowInResultSet(...) above.
+     *
+     * @param BitSet colsToCheck If non-null then for every bit b
+     *   that is set in colsToCheck, we'll compare the (b+1)-th column
+     *   of the received result set's current row to the i-th column
+     *   of expectedRow, where 0 <= i < # bits set in colsToCheck.
+     *   So if colsToCheck is { 0, 3 } then expectedRow should have
+     *   two objects and we'll check that:
+     *
+     *     expectedRow[0].equals(rs.getXXX(1));
+     *     expectedRow[1].equals(rs.getXXX(4));
+     *
+     *   If colsToCheck is null then the (i+1)-th column in the
+     *   result set is compared to the i-th column in expectedRow,
+     *   where 0 <= i < expectedRow.length.
+     */
+    private static void assertRowInResultSet(ResultSet rs,
+        int rowNum, Object [] expectedRow, boolean asTrimmedStrings,
+        BitSet colsToCheck) throws SQLException
+    {
+        int cPos = 0;
         ResultSetMetaData rsmd = rs.getMetaData();
         for (int i = 0; i < expectedRow.length; i++)
         {
+            cPos = (colsToCheck == null)
+                ? (i+1)
+                : colsToCheck.nextSetBit(cPos) + 1;
+
             Object obj;
             if (asTrimmedStrings)
             {
@@ -942,18 +1036,18 @@ public class JDBC {
                  * column is intended to be a mock boolean column.
                  */
                 if ((expectedRow[i] != null)
-                    && (rsmd.getColumnType(i+1) == Types.SMALLINT))
+                    && (rsmd.getColumnType(cPos) == Types.SMALLINT))
                 {
                     String s = expectedRow[i].toString();
                     if (s.equals("true") || s.equals("false"))
-                        obj = (rs.getShort(i+1) == 0) ? "false" : "true";
+                        obj = (rs.getShort(cPos) == 0) ? "false" : "true";
                     else
-                        obj = rs.getString(i+1);
+                        obj = rs.getString(cPos);
                         
                 }
                 else
                 {
-                    obj = rs.getString(i+1);
+                    obj = rs.getString(cPos);
 
                 }
                 
@@ -963,7 +1057,7 @@ public class JDBC {
 
             }
             else
-                obj = rs.getObject(i+1);
+                obj = rs.getObject(cPos);
 
             boolean ok = (rs.wasNull() && (expectedRow[i] == null))
                 || (!rs.wasNull()
@@ -981,13 +1075,13 @@ public class JDBC {
                     found = bytesToString((byte[] )obj);
                 }
                 Assert.fail("Column value mismatch @ column '" +
-                    rsmd.getColumnName(i+1) + "', row " + rowNum +
+                    rsmd.getColumnName(cPos) + "', row " + rowNum +
                     ":\n    Expected: >" + expected +
                     "<\n    Found:    >" + found + "<");
             }
             
             if (rs.wasNull())
-                assertResultColumnNullable(rsmd, i+1);
+                assertResultColumnNullable(rsmd, cPos);
 
         }
     }
