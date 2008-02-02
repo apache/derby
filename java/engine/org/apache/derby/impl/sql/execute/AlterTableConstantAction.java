@@ -78,6 +78,7 @@ import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.RowLocation;
 import org.apache.derby.iapi.types.StringDataValue;
+import org.apache.derby.iapi.util.IdUtil;
 import org.apache.derby.impl.sql.catalog.DDColumnDependableFinder;
 import org.apache.derby.impl.sql.compile.ColumnDefinitionNode;
 
@@ -2428,7 +2429,12 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 					// already found a nullable column so add "AND" 
 					if (foundNullable)
 						constraintText.append(" AND ");
-					constraintText.append(columnNames[colCtr] + " IS NOT NULL ");
+					// Delimiting the column name is important in case the
+					// column name uses lower case characters, spaces, or
+					// other unusual characters.
+					constraintText.append(
+						IdUtil.normalToDelimited(columnNames[colCtr]) +
+						" IS NOT NULL ");
 				}
 				foundNullable = true;
 				nullCols[colCtr] = true;
