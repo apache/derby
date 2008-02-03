@@ -1103,3 +1103,36 @@ alter table t2371 alter column a default 'another';
 describe t2371;
 insert into t2371 (a) values (default);
 select * from t2371;
+
+-- DERBY-3355: Exercise ALTER TABLE ... NOT NULL with table and column
+-- names which are in mixed case. This is important because
+-- AlterTableConstantAction.validateNotNullConstraint generates and
+-- executes some SQL on-the-fly, and it's important that it properly
+-- delimits the table and column names in that SQL. We also include a few
+-- other "unusual" table and column names.
+
+create table d3355 ( c1 varchar(10), "c2" varchar(10), c3 varchar(10));
+create table "d3355_a" ( c1 varchar(10), "c2" varchar(10), c3 varchar(10));
+create table d3355_qt_col ("""c""4" int, """""C5" int, "c 6" int);
+create table "d3355_qt_""tab" ( c4 int, c5 int, c6 int); 
+insert into d3355 values ('a', 'b', 'c');
+insert into "d3355_a" values ('d', 'e', 'f');
+insert into d3355_qt_col values (4, 5, 6);
+insert into "d3355_qt_""tab" values (4, 5, 6);
+-- All of these ALTER TABLE statements should succeed.
+alter table d3355 alter column c1 not null;
+alter table d3355 alter column "c2" not null;
+alter table d3355 alter column "C3" not null;
+alter table "d3355_a" alter column c1 not null;
+alter table "d3355_a" alter column "c2" not null;
+alter table "d3355_a" alter column "C3" not null;
+alter table d3355_qt_col alter column """""C5" not null;
+alter table d3355_qt_col alter column "c 6" not null;
+alter table "d3355_qt_""tab" alter column c5 not null;
+-- These ALTER TABLE statements should fail, with no-such-column and/or
+-- no-such-table errors:
+alter table d3355 alter column "c1" not null;
+alter table d3355 alter column c2 not null;
+alter table d3355_a alter column c1 not null;
+alter table "d3355_a" alter column "c1" not null;
+
