@@ -409,20 +409,6 @@
       <arg value="${basedir}/tools/ant/properties/release.properties"/>
       <arg value="${basedir}/tools/release/maintversion.properties"/>
     </java>
-    <antcall target="regex.masters"/>
-  </target>
-
-  <!-- this target contains the list of test masters which contain the version string. -->
-  <target name="regex.masters">
-    <property file="${basedir}/tools/release/maintversion.properties"/>
-    <antcall target="regex.version"> 
-      <param name="regex.file" value="java/testing/org/apache/derbyTesting/functionTests/master/testclientij.out"/>
-    </antcall>
-  </target>
-
-  <target name="regex.version">
-    <replaceregexp file="${regex.file}" match="${major}\.${minor}\.\d+\.\d+" 
-                   replace="${major}.${minor}.${interim}.${point}" flags="g"/>
   </target>
 
 </project>

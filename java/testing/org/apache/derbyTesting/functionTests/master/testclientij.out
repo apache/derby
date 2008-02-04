@@ -1,4 +1,3 @@
-ij version 10.4
 ij> --
 --   Licensed to the Apache Software Foundation (ASF) under one or more
 --   contributor license agreements.  See the NOTICE file distributed with
@@ -18,21 +17,17 @@ ij> --
 driver 'org.apache.derby.jdbc.ClientDriver';
 ij> --Bug 4632  Make the db italian to make sure string selects  are working
 connect 'jdbc:derby://localhost:1527/testij;create=true;territory=it' USER 'dbadmin' PASSWORD 'dbadmin';
-ij> connect 'jdbc:derby://localhost:1527/testij' USER 'dbadmin' PASSWORD 'dbadbmin';
-ij(CONNECTION1)> -- this is a comment, a comment in front of a select should not cause an error
+ij(CONNECTION1)> connect 'jdbc:derby://localhost:1527/testij' USER 'dbadmin' PASSWORD 'dbadbmin';
+ij(CONNECTION2)> -- this is a comment, a comment in front of a select should not cause an error
 select * from sys.systables where 1=0;
 TABLEID                             |TABLENAME                                                                                                                       |&|SCHEMAID                            |&
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-0 rows selected
-ij(CONNECTION1)> -- this is a comment, a comment in front of a values clauses should not cause an error
+ij(CONNECTION2)> -- this is a comment, a comment in front of a values clauses should not cause an error
 values(1);
 1          
 -----------
 1          
-
-1 row selected
-ij(CONNECTION1)> -- Try some URL attributes
+ij(CONNECTION2)> -- Try some URL attributes
 disconnect all;
 ij> connect 'jdbc:derby://localhost:1527/testij2;create=true' USER 'dbadmin' PASSWORD 'dbadbmin';
 ij> select * from APP.notthere;
