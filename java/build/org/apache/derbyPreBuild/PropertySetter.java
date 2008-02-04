@@ -103,7 +103,7 @@ public class PropertySetter extends Task
     private static  final   String  JAVA_VERSION = "java.version";
     private static  final   String  OPERATING_SYSTEM = "os.name";
 
-    private static  final   String  JDK_APPLE = "Apple Computer, Inc.";
+    private static  final   String  JDK_APPLE = "Apple ";
     private static  final   String  JDK_IBM = "IBM Corporation";
     private static  final   String  JDK_SUN = "Sun Microsystems Inc.";
 
@@ -216,7 +216,9 @@ public class PropertySetter extends Task
             //
             String  jdkVendor = getProperty( JDK_VENDOR );
 
-            if ( JDK_APPLE.equals( jdkVendor ) ) { setForAppleJDKs(); }
+            if ( jdkVendor == null ) { jdkVendor = ""; }
+
+            if (  jdkVendor.startsWith( JDK_APPLE ) ) { setForAppleJDKs(); }
             else if ( JDK_IBM.equals( jdkVendor ) ) { setForIbmJDKs(); }
             else if ( JDK_SUN.equals( jdkVendor ) ) { setForSunJDKs(); }
             
