@@ -144,7 +144,8 @@ public class T_AccessFactory extends T_Generic
 				&& insertAndUpdateExample(tc)
 				&& insertAndFetchExample(tc)
 				&& scanExample(tc)
-                && alterTable(tc)
+                && alterTable(tc, false)
+                && alterTable(tc, true)
 				&& tempTest(tc)
                 && getTableProperties(tc)
                 && insert_bench(tc)
@@ -1159,12 +1160,13 @@ public class T_AccessFactory extends T_Generic
 	 * @return true if the test succeeded.
      *
      * @param tc The transaction controller to use in the test.
+     * @param temporary flag which tells whether or not the conglomerate
+     * used in the test should be temporary
      *
 	 * @exception  StandardException  Standard exception policy.
 	 * @exception  T_Fail Unexpected behaviour from the API
      **/
-	protected boolean alterTable(
-    TransactionController tc)
+	private boolean alterTable(TransactionController tc, boolean temporary)
 		throws StandardException, T_Fail
 	{
         int key_value;
@@ -1173,6 +1175,9 @@ public class T_AccessFactory extends T_Generic
 
 		// Create a heap conglomerate.
         T_AccessRow template_row = new T_AccessRow(1);
+        int temporaryFlag = temporary ?
+            TransactionController.IS_TEMPORARY :
+            TransactionController.IS_DEFAULT;
 		long conglomid = 
             tc.createConglomerate(
                 "heap",       // create a heap conglomerate
@@ -1180,7 +1185,7 @@ public class T_AccessFactory extends T_Generic
 				null, 	// column sort order not required for heap
                 null, 	// default collation
                 null,         // default properties
-                TransactionController.IS_DEFAULT);       // not temporary
+                temporaryFlag);
 		// Open the conglomerate.
 		ConglomerateController cc =	
             tc.openConglomerate(
