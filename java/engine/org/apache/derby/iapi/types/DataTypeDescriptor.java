@@ -349,7 +349,7 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 	 * Get a catalog type that corresponds to a SQL Row Multiset
 	 *
 	 * @param columnNames   Names of the columns in the Row Muliset
-	 * @param types                 Types of the columns in the Row Muliset
+	 * @param catalogTypes  Types of the columns in the Row Muliset
 	 *
 	 * @return	A new DataTypeDescriptor describing the SQL Row Multiset
 	 */

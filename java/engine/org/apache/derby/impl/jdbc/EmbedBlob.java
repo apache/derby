@@ -997,7 +997,7 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineBlob
     /**
      * Return locator for this lob.
      * 
-     * @return
+     * @return The locator identifying this lob.
      */
     public int getLocator() {
         return locator;

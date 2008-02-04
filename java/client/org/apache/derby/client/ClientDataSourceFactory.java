@@ -43,7 +43,7 @@ import javax.naming.Reference;
  * getObjectInstance, which is called by a JNDI service provider to reconstruct an object when that object is retrieved
  * from JNDI. A JDBC driver vendor should provide an object factory as part of their JDBC 2.0 product.
  *
- * @see ClientDataSource
+ * @see org.apache.derby.jdbc.ClientDataSource
  */
 public class ClientDataSourceFactory implements javax.naming.spi.ObjectFactory {
 

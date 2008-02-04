@@ -2057,11 +2057,11 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
      * @param generatedType BY DEFAULT or ALWAYS
      * @throws Exception all errors passed on to JUnit
      */
-    private void testGeneratedIdentity(String dataType, String generateType) 
+    private void testGeneratedIdentity(String dataType, String generatedType) 
         throws Exception {
         Statement s = createStatement();
         s.execute("CREATE TABLE T(GI "+dataType+" PRIMARY KEY GENERATED "+
-                  generateType+
+                  generatedType+
                   " AS IDENTITY (START WITH 5, INCREMENT BY 10), "+
                   "L VARCHAR(8))");
         PreparedStatement implicit = 
