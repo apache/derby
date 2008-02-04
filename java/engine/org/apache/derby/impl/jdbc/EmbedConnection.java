@@ -2680,11 +2680,31 @@ public abstract class EmbedConnection implements EngineConnection
 	}
 
 	/**
-	* Return the current locator value
+	* Return the current locator value/
+        * 0x800x values are not  valid values as they are used to indicate the BLOB 
+        * is being sent by value, so we skip those values (DERBY-3243)
+        * 
 	* @return an integer that represents the most recent locator value.
 	*/
 	private int getIncLOBKey() {
-		return ++rootConnection.lobHMKey;
+                int newKey = ++rootConnection.lobHMKey;
+                // Skip 0x8000, 0x8002, 0x8004, 0x8006, for DERBY-3243
+                // Earlier versions of the Derby Network Server (<10.3) didn't
+                // support locators and would send an extended length field
+                // with one of the above mentioned values instead of a
+                // locator, even when locators were requested. To enable the
+                // client driver to detect that locators aren't supported,
+                // we don't use any of them as locator values.
+                if (newKey == 0x8000 || newKey == 0x8002 ||  newKey == 0x8004 ||
+                     newKey == 0x8006 || newKey == 0x8008)
+                    newKey = ++rootConnection.lobHMKey;
+                // Also roll over when the high bit of four byte locator is set.
+                // This will prevent us from sending a negative locator to the
+                // client. Don't allow zero since it is not a valid locator for the 
+                // client.
+                if (newKey == 0x80000000 || newKey == 0)
+                    newKey = rootConnection.lobHMKey = 1;
+                return newKey;
 	}
 
 	/**
