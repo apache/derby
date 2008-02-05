@@ -404,6 +404,17 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
             newException(SQLState.REPLICATION_NOT_IN_SLAVE_MODE);
         throw PublicAPI.wrapStandardException(se);
     }
+    
+    /**
+     * @see org.apache.derby.database.Database#failover(String dbname).
+     */
+    public void failover(String dbname) throws SQLException {
+        try {
+            af.failover(dbname);
+        } catch (StandardException se) {
+            throw PublicAPI.wrapStandardException(se);
+        }
+    }
 
 	public void freeze() throws SQLException
 	{

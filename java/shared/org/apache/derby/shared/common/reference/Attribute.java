@@ -126,6 +126,11 @@ public interface Attribute {
     String REPLICATION_SLAVE_HOST = "slaveHost";
 
     /**
+     * Attribute name to start failover for a given database..
+     */
+    String REPLICATION_FAILOVER = "failover";
+
+    /**
      * If startMaster is true, this attribute is used to specify the
      * port the master should connect to. This is an optional
      * attribute.

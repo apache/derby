@@ -122,7 +122,10 @@ public interface MasterFactory {
     
     /**
      * Will perform all work needed to failover
-     * @throws StandardException 1) If the failover succeeds
+     *
+     * @throws StandardException 1) If the failover succeeds, an exception is
+     *                              thrown to indicate that the master database
+     *                              was shutdown after a successful failover
      *                           2) If a failure occurs during network 
      *                              communication with slave.
      */

@@ -928,6 +928,13 @@ public abstract class RAMAccessManager
         throws StandardException {
         rawstore.startReplicationMaster(dbmaster, host, port, replicationMode);
     }
+    
+    /**
+     * @see org.apache.derby.iapi.store.access.AccessFactory#failover(String dbname).
+     */
+    public void failover(String dbname) throws StandardException {
+        rawstore.failover(dbname);
+    }
 
     /**
      * Stop the replication master role for this database.

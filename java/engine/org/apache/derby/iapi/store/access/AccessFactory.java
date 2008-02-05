@@ -236,6 +236,21 @@ public interface AccessFactory
      * thrown on error.
      */
     public void stopReplicationMaster() throws StandardException;
+        
+    /**
+     * Start the failover for this database.
+     *
+     * @param dbname the replication database that is being failed over.
+     * 
+     * @exception StandardException Standard Derby exception policy,
+     *                           1) If the failover succeeds, an exception is
+     *                              thrown to indicate that the master database
+     *                              was shutdown after a successful failover
+     *                           2) If a failure occurs during network 
+     *                              communication with slave.
+     */
+    public void failover(String dbname) throws StandardException;
+    
 
 	/**
 	  * Freeze the database temporarily so a backup can be taken.

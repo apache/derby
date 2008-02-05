@@ -231,11 +231,7 @@ public class MasterController
     }
 
     /**
-     * Will perform all work needed to failover.
-     *
-     * @throws StandardException 1) If the failover succeeds
-     *                           2) If a failure occurs during network 
-     *                              communication with slave.
+     * @see org.apache.derby.iapi.services.replication.master.MasterFactory#startFailover()
      */
     public void startFailover() throws StandardException {
         //acknowledgment returned from the slave containing

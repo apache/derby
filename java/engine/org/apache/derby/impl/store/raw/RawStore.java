@@ -527,6 +527,29 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
         }
         masterFactory.stopMaster();
     }
+    
+        
+    /**
+     * @see org.apache.derby.iapi.store.raw.RawStoreFactory#failover(String dbname).
+     */
+    public void failover(String dbname) throws StandardException {
+        MasterFactory masterFactory = null;
+        
+        if (isReadOnly()) {
+            throw StandardException.newException(
+                      SQLState.LOGMODULE_DOES_NOT_SUPPORT_REPLICATION);
+        }
+
+        try {
+            masterFactory = (MasterFactory) 
+                Monitor.findServiceModule(this, getMasterFactoryModule());
+        }
+        catch (StandardException se) {
+            throw StandardException.newException
+                    (SQLState.REPLICATION_FAILOVER_UNSUCCESSFUL, se, dbname);
+        }
+        masterFactory.startFailover();
+    }
 
 	public void freeze() throws StandardException
 	{

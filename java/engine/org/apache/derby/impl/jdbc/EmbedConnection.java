@@ -343,6 +343,8 @@ public abstract class EmbedConnection implements EngineConnection
 				// Stopping replication master can be done
 				// simultaneously with a database shutdown operation
 				handleStopReplicationMaster(tr, info);
+			} else if (isReplicationFailover(info)) {
+				handleFailover(tr, info);
 			}
 
 			if (isTwoPhaseEncryptionBoot ||
@@ -580,6 +582,19 @@ public abstract class EmbedConnection implements EngineConnection
                  p.getProperty(Attribute.REPLICATION_START_MASTER)).
                  booleanValue()));
     }
+    
+    /**
+     * used to verify if the failover attribute has been set.
+     * 
+     * @param p The attribute set.
+     * @return true if the failover attribute has been set.
+     *         false otherwise.
+     */
+    private boolean isReplicationFailover(Properties p) {
+        return ((Boolean.valueOf(
+                 p.getProperty(Attribute.REPLICATION_FAILOVER)).
+                 booleanValue()));
+    }
 
     private boolean isStopReplicationMasterBoot(Properties p) {
         return ((Boolean.valueOf(
@@ -766,6 +781,42 @@ public abstract class EmbedConnection implements EngineConnection
             // REPLICATION_SLAVE_SHUTDOWN_OK will be reported anyway
             handleException(tr.shutdownDatabaseException());
         }
+    }
+    
+    /**
+     * Used to authorize and verify the privileges of the user and
+     * initiate failover.
+     * 
+     * @param tr an instance of TransactionResourceImpl Links the connection 
+     *           to the database.
+     * @param p The Attribute set.
+     * @throws java.sql.SQLException 1) Thrown upon a authorization failure 
+     *                           2) If the failover succeeds, an exception is
+     *                              thrown to indicate that the master database
+     *                              was shutdown after a successful failover
+     *                           3) If a failure occurs during network 
+     *                              communication with slave.
+     */
+    private void handleFailover(TransactionResourceImpl tr,
+                                             Properties p)
+        throws SQLException {
+
+        // If authorization is turned on, we need to check if this
+        // user is database owner.
+        if (!usingNoneAuth &&
+            getLanguageConnection().usesSqlAuthorization()) {
+            checkIsDBOwner(OP_REPLICATION);
+        }
+        // TODO: If system privileges is turned on, we need to check
+        // that the user has the replication privilege. Waiting for
+        // Derby-2109
+
+        // At this point, the user is properly authenticated,
+        // authorized and has the correct system privilege to initiate 
+        // failover - depending on the security mechanisms
+        // Derby is running under.
+
+        tr.getDatabase().failover(tr.getDBName());
     }
 
 	/**
