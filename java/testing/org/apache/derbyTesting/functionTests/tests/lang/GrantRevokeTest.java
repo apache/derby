@@ -735,6 +735,14 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
         } catch (SQLException e) {
             assertSQLState("42506", e);
         }
+        
+        // clean up
+        revoke("select", "s1", "t1", "public");
+        revoke("all privileges", "s1", "t1", users[1]);
+        revoke("all privileges", "s1", "t1", users[2]);
+        assertAllPrivileges(false, users[1], "S1", "T1", null);
+        assertAllPrivileges(false, users[2], "S1", "T1", null);
+        
     }
     
     /* End testcases from grantRevokeDDL */

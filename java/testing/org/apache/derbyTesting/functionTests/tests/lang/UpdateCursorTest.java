@@ -145,6 +145,12 @@ public class UpdateCursorTest extends BaseJDBCTestCase {
 		ResultSet cursor;
 		int expectedValue = 1;
 
+		/* drop index and recreate it to be sure that it is ascending
+                 * (other subtests may have changed it)
+                 */
+		assertUpdateCount(update, 0, "drop index I11");
+		assertUpdateCount(update, 0, "create index I11 on T1 (c3, c1, c5)");
+
 		cursor = select.executeQuery(); // cursor is now open
 		cursorName = cursor.getCursorName();
 

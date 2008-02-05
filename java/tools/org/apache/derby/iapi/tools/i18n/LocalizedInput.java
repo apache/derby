@@ -20,20 +20,21 @@
  */
 package org.apache.derby.iapi.tools.i18n;
 
+import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.io.IOException;
 
-public class LocalizedInput extends InputStreamReader{
+public class LocalizedInput extends BufferedReader{
 	private InputStream in;
 	public LocalizedInput(InputStream i){
-		super(i);
+		super(new InputStreamReader(i));
 		this.in = i;
 	}
 
 	LocalizedInput(InputStream i, String encode) throws UnsupportedEncodingException{
-		super(i,encode);
+		super(new InputStreamReader(i,encode));
 		this.in = i;
 	}
 	public boolean isStandardInput(){

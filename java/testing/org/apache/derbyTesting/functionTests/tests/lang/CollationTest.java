@@ -28,6 +28,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
 
+import java.text.Collator;
+import java.util.Locale;
 import javax.sql.DataSource;
 
 import junit.framework.Test;
@@ -1247,9 +1249,33 @@ private void checkLangBasedQuery(Statement s, String query, String[][] expectedR
         suite.addTest(new CleanDatabaseTestSetup(
                 new CollationTest("testDefaultCollation")));
         suite.addTest(collatedSuite("en", "testEnglishCollation"));
-        suite.addTest(collatedSuite("no", "testNorwayCollation"));
-        suite.addTest(collatedSuite("pl", "testPolishCollation"));
-        suite.addTest(collatedSuite("fr", "testFrenchCollation"));
+         
+        // Only add tests for other locales if they are in fact supported 
+        // by the jvm.
+        Locale[] availableLocales = Collator.getAvailableLocales();
+        boolean norwegian = false; 
+        boolean polish = false;
+        boolean french = false;
+        for (int i=0; i<availableLocales.length ; i++) {
+            if("no".equals(availableLocales[i].getLanguage())) {
+                norwegian = true;
+            }
+            if("pl".equals(availableLocales[i].getLanguage())) {
+                polish = true;
+            }
+            if("fr".equals(availableLocales[i].getLanguage())) {
+                french = true;
+            }
+        }
+        if(norwegian) {
+            suite.addTest(collatedSuite("no", "testNorwayCollation"));
+        }
+        if(polish) {
+            suite.addTest(collatedSuite("pl", "testPolishCollation"));
+        }
+        if(french) {
+            suite.addTest(collatedSuite("fr", "testFrenchCollation"));
+        }
         return suite;
     }
   

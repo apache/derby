@@ -79,6 +79,10 @@ public class ForUpdateTest extends BaseJDBCTestCase {
 				s.execute("create table t2 ( s smallint, c char(10), r real, ts timestamp )");
                                 s.execute("create table t3 (i int not null constraint t3pk primary key, b char(10))");
 				s.execute("create table t4 (c1 int)");	
+                                s.execute("create index t3bi on t3(b)");
+                                s.execute("insert into t3 values (1, 'hhhh'), (2, 'uuuu'), (3, 'yyyy'), (4, 'aaaa'), (5, 'jjjj'), (6, 'rrrr')");
+                                s.execute("insert into t3 values (7, 'iiii'), (8, 'wwww'), (9, 'rrrr'), (10, 'cccc'), (11, 'hhhh'), (12, 'rrrr')");
+                                s.execute("insert into t4 (c1) values (1),(2),(3)");
             		}
         	};
     	} 
@@ -260,10 +264,6 @@ public class ForUpdateTest extends BaseJDBCTestCase {
  
 	public void testStatistics() throws SQLException {
         Statement stmt = createStatement();
-		stmt.execute("create index t3bi on t3(b)");
-		stmt.execute("insert into t3 values (1, 'hhhh'), (2, 'uuuu'), (3, 'yyyy'), (4, 'aaaa'), (5, 'jjjj'), (6, 'rrrr')");
-		stmt.execute("insert into t3 values (7, 'iiii'), (8, 'wwww'), (9, 'rrrr'), (10, 'cccc'), (11, 'hhhh'), (12, 'rrrr')");
-		commit();
 
 		String [][] expectedValues = { {"1", "hhhh"}, 
 				               {"2", "uuuu"}, 

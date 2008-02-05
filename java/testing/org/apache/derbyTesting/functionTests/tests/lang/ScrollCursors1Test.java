@@ -532,8 +532,6 @@ public class ScrollCursors1Test extends BaseJDBCTestCase {
          
             rs.close();  
             ps_c1.close();
-            s.executeUpdate("drop table t1");
-            s.executeUpdate("drop table t2");                       
         }
 
         public void testNoHoldScrollableResults() throws SQLException{
@@ -683,7 +681,7 @@ public class ScrollCursors1Test extends BaseJDBCTestCase {
             assertEquals(1, rs.getInt(1));
             assertEquals(2, rs.getInt(2));
             rs.close();
-            s.executeUpdate("drop table t1");
+            s.executeUpdate("drop table u1.t1");
         }
         
         

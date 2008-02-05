@@ -702,6 +702,25 @@ public abstract class BaseJDBCTestCase
     }
 
     /**
+     * Assert equality between two <code>java.sql.Time</code> objects.
+     * If both input references are <code>null</code>, they are considered
+     * equal.
+     *
+     * @param msg String with message to supply with AssertionFailedError
+     * @param t1 first java.sql.Time object.
+     * @param t2 second java.sql.Time object.
+     * @throws AssertionFailedError if Time objects are not equal.
+     */
+    public static void assertEquals(String msg, Time t1, Time t2) {
+        if(null == t1 && null == t2) {
+            return;
+        }
+        assertNotNull(msg, t1);
+        assertNotNull(msg, t2);
+        assertEquals(msg, t1.toString(), t2.toString());
+    }
+    
+    /**
      * Assert that SQLState is as expected.  If the SQLState for
      * the top-level exception doesn't match, look for nested
      * exceptions and, if there are any, see if they have the

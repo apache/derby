@@ -1901,8 +1901,26 @@ public class CollationTest2 extends BaseJDBCTestCase
         TestSuite suite = new TestSuite("CollationTest2");
         suite.addTest(new CollationTest2("testDefaultCollation"));
         suite.addTest(collatedTest("en", "testEnglishCollation"));
-        suite.addTest(collatedTest("no_NO", "testNorwayCollation"));
-        suite.addTest(collatedTest("pl", "testPolishCollation"));
+        
+        // Only add tests for other locales if they are in fact supported 
+        // by the jvm.
+        Locale[] availableLocales = Collator.getAvailableLocales();
+        boolean norwegian = false; 
+        boolean polish = false;
+        for (int i=0; i<availableLocales.length ; i++) {
+            if("no".equals(availableLocales[i].getLanguage())) {
+                norwegian = true;
+            }
+            if("pl".equals(availableLocales[i].getLanguage())) {
+                polish = true;
+            }
+        }
+        if(norwegian) {
+            suite.addTest(collatedTest("no_NO", "testNorwayCollation"));
+        }
+        if(polish) {
+            suite.addTest(collatedTest("pl", "testPolishCollation"));
+        }
         suite.addTest(collatedTest(null, "testDefaultJVMTerritoryCollation"));
         
         // add support to use external files for import/export calls.

@@ -632,6 +632,9 @@ public class ForBitDataTest extends BaseJDBCTestCase {
 
         /* testValues fixture */
 	public void testValues() throws SQLException {
+                // Empty the table before inserting 
+                Statement deleteStmt = createStatement();
+                deleteStmt.execute("delete from FBDVAL.T001");
 		PreparedStatement psI = prepareStatement("INSERT INTO FBDVAL.T001 VALUES(?, ?, ?, ?, ?)");
 		PreparedStatement psS = prepareStatement("SELECT C1, C2, C3, C4, ID FROM FBDVAL.T001 WHERE ID >= ? AND ID < ? ORDER BY ID");
 

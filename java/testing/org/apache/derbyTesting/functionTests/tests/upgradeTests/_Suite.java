@@ -20,6 +20,8 @@ limitations under the License.
 */
 package org.apache.derbyTesting.functionTests.tests.upgradeTests;
 
+import java.util.Enumeration;
+import java.util.Properties;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -130,9 +132,19 @@ public class _Suite extends BaseTestCase {
         for (int i = 0; i < OLD_VERSIONS.length; i++) {
             // JSR169 support was only added with 10.1, so don't
             // run 10.0 to later upgrade if that's what our jvm is supporting.
-            if (!(JDBC.vmSupportsJSR169() && 
-                (OLD_VERSIONS[i][0]==10) && (OLD_VERSIONS[i][1]==0)))
-                suite.addTest(UpgradeRun.suite(OLD_VERSIONS[i]));
+            if ((JDBC.vmSupportsJSR169() && 
+                (OLD_VERSIONS[i][0]==10) && (OLD_VERSIONS[i][1]==0))) {
+                continue;
+            }
+            // Derby 10.3.1.4 does not boot on the phoneME advanced platform,
+            // (see DERBY-3176) so don't run upgrade tests in this combination.
+            if ( System.getProperty("java.vm.name").equals("CVM")
+                  && System.getProperty("java.vm.version").startsWith("phoneme")
+                  && OLD_VERSIONS[i][0]==10 && OLD_VERSIONS[i][1]==3 
+                  && OLD_VERSIONS[i][2]==1 && OLD_VERSIONS[i][3]==4 ) {
+                continue;
+            }
+            suite.addTest(UpgradeRun.suite(OLD_VERSIONS[i]));
         }
 
         return suite;
