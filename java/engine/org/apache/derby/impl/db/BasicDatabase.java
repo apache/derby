@@ -361,6 +361,7 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 
     /**
      * Start the replication master role for this database
+     * @param dbmaster The master database that is being replicated.
      * @param host The hostname for the slave
      * @param port The port the slave is listening on
      * @param replicationMode The type of replication contract.
@@ -368,11 +369,11 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
      * 1-safe/2-safe/very-safe modes may be added later.
      * @exception SQLException Thrown on error
      */
-    public void startReplicationMaster(String host, int port,
+    public void startReplicationMaster(String dbmaster, String host, int port,
                                        String replicationMode)
         throws SQLException {
         try {
-            af.startReplicationMaster(host, port, replicationMode);
+            af.startReplicationMaster(dbmaster, host, port, replicationMode);
         } catch (StandardException se) {
             throw PublicAPI.wrapStandardException(se);
         }

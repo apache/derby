@@ -656,7 +656,8 @@ public abstract class EmbedConnection implements EngineConnection
             slaveport = Integer.valueOf(portString).intValue();
         }
 
-        tr.getDatabase().startReplicationMaster(slavehost,
+        tr.getDatabase().startReplicationMaster(getTR().getDBName(),
+                                                slavehost,
                                                 slaveport,
                                                 MasterFactory.
                                                 ASYNCHRONOUS_MODE);

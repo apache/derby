@@ -913,7 +913,8 @@ public abstract class RAMAccessManager
 	}
 
     /**
-     * Start the replication master role for this database. 
+     * Start the replication master role for this database.
+     * @param dbmaster The master database that is being replicated.
      * @param host The hostname for the slave
      * @param port The port the slave is listening on
      * @param replicationMode The type of replication contract.
@@ -922,10 +923,10 @@ public abstract class RAMAccessManager
      * @exception StandardException Standard Derby exception policy,
      * thrown on error.
      */
-    public void startReplicationMaster(String host, int port,
+    public void startReplicationMaster(String dbmaster, String host, int port,
                                        String replicationMode)
         throws StandardException {
-        rawstore.startReplicationMaster(host, port, replicationMode);
+        rawstore.startReplicationMaster(dbmaster, host, port, replicationMode);
     }
 
     /**
