@@ -78,7 +78,7 @@ import org.apache.derby.vti.VTIEnvironment;
 	<LI>TABLETYPE varchar(9) - not nullable.  'T' for user table, 'S' for system table </LI>
 	<LI>LOCKCOUNT varchar(5) - not nullable.  Internal lock count.</LI>
 	<LI>INDEXNAME varchar(128) - normally null.  If non-null, a lock is held on 
-	the index, this can only happen if this is not a user transaction.</LI>
+	the index.</LI>
 	</UL>
 
  */
