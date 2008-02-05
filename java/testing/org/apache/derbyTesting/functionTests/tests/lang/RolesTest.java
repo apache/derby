@@ -32,6 +32,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
+import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
@@ -403,8 +404,12 @@ public class RolesTest extends BaseJDBCTestCase
                sqlAuthorizationRequired, null , null /* through public */);
         doStmt("set role 'FOO'",
                sqlAuthorizationRequired, null, null);
-
-        doSetRoleInsideStoredProcedures("FOO");
+        
+        // JSR169 cannot run with tests with stored procedures that do
+        // database access - for they require a DriverManager connection to
+        // jdbc:default:connection; DriverManager is not supported with JSR169
+        if (!JDBC.vmSupportsJSR169())
+            doSetRoleInsideStoredProcedures("FOO");
 
         doStmt("set role none",
                sqlAuthorizationRequired, null , null);
