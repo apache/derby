@@ -27,7 +27,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Iterator;
+import java.util.Properties;
 
 import javax.naming.Reference;
 import javax.naming.Referenceable;
@@ -44,298 +45,443 @@ import org.apache.derbyTesting.junit.TestConfiguration;
 
 
 /**
- * Test obtaining a javax.naming.Reference from a Derby data source
- * and recreating a Derby data source from it. Tests that the recreated
- * value has the same value for all the properties the data source supports.
- * The list of properties is obtained dynamically from the getXXX methods
- * that return int, String, boolean, short, long. Should Derby data sources
- * support any other bean property types then this test should be modified
- * to pick them up and handle them. Hopefully the test should fail when such
- * a property is added.
- * 
+ * Test obtaining a <code>javax.naming.Reference</code> from a Derby data
+ * source and recreating a Derby data source from it.
+ * <p>
+ * Tests that the recreated value has the same value for all the properties
+ * the data source supports. The list of properties is obtained
+ * dynamically from the getter methods that return int, String, boolean,
+ * short and long. Should Derby data sources support any other bean
+ * property types then this test should be modified to pick them up and
+ * handle them. The test will fail when such a property is added.
+ * <p>
+ * Default values of the properties are also tested. Default and set
+ * values of the properties must be specified by creating a data source
+ * descriptor.
+ * <p>
  * At no point does this test attempt to connect using these data sources.
  */
-public class DataSourceReferenceTest extends BaseJDBCTestCase {
+public class DataSourceReferenceTest
+        extends BaseJDBCTestCase {
 
-    private static String[][][] expectedValues = {
-        // org.apache.derby.jdbc.Embedded*DataSource
-        {{"attributesAsPassword", "false"}, null, null, null, null, null, 
-         {"loginTimeout", "0"}, null, null, null}, 
-        {{"attributesAsPassword", "true"}, 
-         {"connectionAttributes", "XX_connectionAttributes_2135"},
-         {"createDatabase", "create"},
-         {"dataSourceName", "XX_dataSourceName_1420"},
-         {"databaseName", "XX_databaseName_1206"},
-         {"description", "XX_description_1188"},
-         {"loginTimeout", "1280"},
-         {"password", "XX_password_883"},
-         {"shutdownDatabase", "shutdown"},
-         {"user", "XX_user_447"}},
-        // org.apache.derby.jdbc.Client*DataSource
-        { null, null, null, null, null, {"loginTimeout", "0"}, null, 
-         {"portNumber", "tmpportno"},
-         {"retrieveMessageText", "true"},
-         {"securityMechanism", "4"},
-         {"serverName", "tmphostName"}, null, 
-         {"ssl","off"}, null, null, 
-         {"traceFileAppend", "false"},
-         {"traceLevel", "-1"},
-         {"user", "tmpUserName"}},
-        {{"connectionAttributes", "XX_connectionAttributes_2135"},
-         {"createDatabase", "create"},
-         {"dataSourceName", "XX_dataSourceName_1420"},
-         {"databaseName", "XX_databaseName_1206"},
-         {"description", "XX_description_1188"},
-         {"loginTimeout", "1280"},
-         {"password", "XX_password_883"},
-         {"portNumber", "1070"},
-         {"retrieveMessageText", "false"},
-         {"securityMechanism", "1805"},
-         {"serverName", "XX_serverName_1048"},
-         {"shutdownDatabase", "shutdown"},
-         {"ssl","basic"},
-         {"traceDirectory", "XX_traceDirectory_1476"},
-         {"traceFile", "XX_traceFile_911"},
-         {"traceFileAppend", "true"},
-         {"traceLevel", "1031"},
-         {"user", "XX_user_447"}}
-    };
-    
+    /** Lookup constant for the descriptor array. */
+    private static final int BASE_DS = 0;
+    /** Lookup constant for the descriptor array. */
+    private static final int POOL_DS = 1;
+    /** Lookup constant for the descriptor array. */
+    private static final int XA_DS = 2;
+
+    /** Descriptor for the basic embedded data source. */
+    private static final DataSourceDescriptor BASE_EMBEDDED_DS =
+            new DataSourceDescriptor("Basic embedded data source");
+
+    static {
+        BASE_EMBEDDED_DS.addProperty("attributesAsPassword", "true", "false");
+        BASE_EMBEDDED_DS.addProperty("connectionAttributes",
+                                     "XX_connectionAttributes_2135");
+        BASE_EMBEDDED_DS.addProperty("createDatabase", "create");
+        BASE_EMBEDDED_DS.addProperty("dataSourceName",
+                                     "XX_dataSourceName_1420");
+        BASE_EMBEDDED_DS.addProperty("databaseName", "XX_databaseName_1206");
+        BASE_EMBEDDED_DS.addProperty("description", "XX_description_1188");
+        BASE_EMBEDDED_DS.addProperty("loginTimeout", "1280", "0");
+        BASE_EMBEDDED_DS.addProperty("password", "XX_password_883");
+        BASE_EMBEDDED_DS.addProperty("shutdownDatabase", "shutdown");
+        BASE_EMBEDDED_DS.addProperty("user", "XX_user_447");
+    }
+
+    /** Descriptor for the basic client data source. */
+    private static final DataSourceDescriptor BASE_CLIENT_DS =
+            new DataSourceDescriptor("Basic client data source");
+
+    static {
+        // Properties with default values
+        BASE_CLIENT_DS.addProperty("loginTimeout", "1280", "0");
+        BASE_CLIENT_DS.addProperty("portNumber", "1070", "1527");
+        BASE_CLIENT_DS.addProperty("retrieveMessageText", "false", "true");
+        BASE_CLIENT_DS.addProperty("securityMechanism", "1851", "4");
+        BASE_CLIENT_DS.addProperty("serverName", "tmpHostName", "localhost");
+        BASE_CLIENT_DS.addProperty("ssl", "basic", "off");
+        BASE_CLIENT_DS.addProperty("user", "XX_user_447", "APP");
+        // Properties without default values.
+        BASE_CLIENT_DS.addProperty("connectionAttributes",
+                                   "XX_connectionAttributes_2135");
+        BASE_CLIENT_DS.addProperty("createDatabase", "create");
+        BASE_CLIENT_DS.addProperty("databaseName", "XX_databaseName_1206");
+        BASE_CLIENT_DS.addProperty("dataSourceName", "XX_dataSourceName_1420");
+        BASE_CLIENT_DS.addProperty("description", "XX_description_1188");
+        BASE_CLIENT_DS.addProperty("password", "XX_password_883");
+        BASE_CLIENT_DS.addProperty("shutdownDatabase", "shutdown");
+        BASE_CLIENT_DS.addProperty("traceFile", "XX_traceFile_911");
+        BASE_CLIENT_DS.addProperty("traceFileAppend", "true", "false");
+        BASE_CLIENT_DS.addProperty("traceLevel", "1031", "-1");
+        BASE_CLIENT_DS.addProperty("traceDirectory", "XX_traceDirectory_1476");
+    }
+
+
+    /**
+     * Creates a new fixture.
+     *
+     * @param name fixture name
+     */
     public DataSourceReferenceTest(String name) {
         super(name);
     }
-    
-    public static Test suite() {
-        if (JDBC.vmSupportsJSR169())
-        {
-            // Referencable is not supported with JSR169
-            TestSuite suite = 
-                new TestSuite("DatasourceTest cannot run with JSR169");
-            return suite;
-        }
-        else
-        {
-            return 
-                TestConfiguration.defaultSuite(DataSourceReferenceTest.class);
-        }
-    }
-    
+
     /**
-     * Test a data source
-     * <OL>
-     * <LI> Create an empty one from the class name
-     * <LI> Discover the property list
-     * <LI> Create a reference and recreate a data source
-     * <LI> Compare the two
-     * <LI> Serialize the data source and recreate
-     * <LI> Compare the two
-     * <LI> Set every property for the data source
-     * <LI> Create a reference and recreate a data source
-     * <LI> Compare the two
-     * </OL>
-     * @throws Exception
+     * Creates a suite with tests for both embedded and client data sources.
+     *
+     * @return A suite with the appropriate tests.
      */
-    public static void testDSReference() throws Exception
-    {
-        String ds;
-        ds = JDBCDataSource.getDataSource().getClass().getName();
-        int expectedArray=0;
-        if (usingDerbyNetClient())
-            expectedArray = 2;
-        assertDataSourceReference(expectedArray, ds);
-        ds = J2EEDataSource.getConnectionPoolDataSource().getClass().getName();
-        assertDataSourceReference(expectedArray, ds);
-        ds = J2EEDataSource.getXADataSource().getClass().getName();
-        assertDataSourceReference(expectedArray, ds);
+    public static Test suite() {
+       Test suite;
+       if (JDBC.vmSupportsJSR169()) {
+            // Referenceable is not supported with JSR169
+            suite = new TestSuite("DatasourceTest cannot run with JSR169");
+        } else {
+            suite = TestConfiguration.defaultSuite(
+                                                DataSourceReferenceTest.class);
+        }
+       return suite;
     }
-        
-    public static void assertDataSourceReference(
-        int expectedArrayIndex, String dsName) throws Exception {
 
-        if (usingDerbyNetClient())
-        {
-            expectedValues[expectedArrayIndex][7][1] =
-                String.valueOf(TestConfiguration.getCurrent().getPort());
-            expectedValues[expectedArrayIndex][10][1] =
-                TestConfiguration.getCurrent().getHostName();
-            expectedValues[expectedArrayIndex][17][1] =
-                TestConfiguration.getCurrent().getUserName();
+    /**
+     * Tests a data source, with focus on serialization/deserialization.
+     * <p>
+     * For each data source, the following actions are performed:
+     * <ol> <li>Create an empty data source from the class name.
+     *      <li>Discover and validate the bean property list.
+     *      <li>Create a reference and recreate the data source.
+     *      <li>Compare the original and the empty recreated data source.
+     *      <li>Serialize the data source and recreate.
+     *      <li>Compare the original and the deserialized data source.
+     *      <li>Set a value for every property of the data source.
+     *      <li>Create a reference and recreate the data source.
+     *      <li>Compare the populated original and the recreated data source.
+     *      <li>Serialize the populated data source and recreate.
+     *      <li>Compare the populated original and the deserialized data source.
+     * </ol>
+     *
+     * @throws Exception on a wide variety of error conditions...
+     */
+    public void testDataSourceReference()
+            throws Exception {
+        DataSourceDescriptor[] descriptors;
+        if (usingDerbyNetClient()) {
+            // Specify client data source descriptors.
+            descriptors = new DataSourceDescriptor[] {
+                BASE_CLIENT_DS, // Base
+                BASE_CLIENT_DS,   // Pool
+                BASE_CLIENT_DS  // XA
+            };
+        } else {
+            // Specify embedded data source descriptors.
+            descriptors = new DataSourceDescriptor[] {
+                BASE_EMBEDDED_DS, // Base
+                BASE_EMBEDDED_DS, // Pool
+                BASE_EMBEDDED_DS  // XA
+            };
         }
-        
-        Object ds = Class.forName(dsName).newInstance();
-        
-        println("DataSource class " + dsName);
-        String[] properties = getPropertyBeanList(ds);
-        assertEquals(
-            expectedValues[expectedArrayIndex+1].length, properties.length);
-        println(" property list");
-        
-        for (int i = 0; i < properties.length; i++)
-        {
-            assertEquals(
-                expectedValues[expectedArrayIndex+1][i][0], properties[i]);
-            println("  " + properties[i]);
+        // Test basic data source.
+        String className = JDBCDataSource.getDataSource().getClass().getName();
+        println("Testing base data source: " + className);
+        assertDataSourceReference(descriptors[BASE_DS], className);
+
+        // Test connection pool data source.
+        className =
+              J2EEDataSource.getConnectionPoolDataSource().getClass().getName();
+        println("Testing connection pool data source: " + className);
+        assertDataSourceReference(descriptors[POOL_DS], className);
+
+        // Test XA data source.
+        className = J2EEDataSource.getXADataSource().getClass().getName();
+        println("Testing XA data source: " + className);
+        assertDataSourceReference(descriptors[XA_DS], className);
+    }
+
+
+    /**
+     * Performs the test sequence in the data source.
+     *
+     * @param dsDesc data source descriptor
+     * @param className class name of the data source
+     * @throws Exception on a wide variety of error conditions...
+     *
+     * @see #testDataSourceReference
+     */
+    private void assertDataSourceReference(
+                                        DataSourceDescriptor dsDesc,
+                                        String className)
+        throws Exception {
+        // Instantiate a new data source object and get all its properties.
+        Object dsObj = Class.forName(className).newInstance();
+        String[] properties = getPropertyBeanList(dsObj);
+        // Validate property set (existence and naming).
+        assertDataSourceProperties(dsDesc, properties);
+        // Test recreating the data source
+        assertDataSourceReferenceEmpty(dsDesc, className);
+        assertDataSourceReferencePopulated(dsDesc, className);
+    }
+
+    /**
+     * Asserts that the properties that are in the data source descriptor are
+     * found in the list of data source properties, and that the data source
+     * does not contain properties that are not in the descriptor.
+     * <p>
+     * No property values are verified in this assert method.
+     *
+     * @param dsDesc data source descriptor
+     * @param properties list of actual data source properties
+     */
+    private void assertDataSourceProperties(
+                                        DataSourceDescriptor dsDesc,
+                                        String[] properties) {
+        println("Testing data source bean properties.");
+        // Validate the identified property names.
+        for (int i=0; i < properties.length; i++) {
+            assertTrue("Property '" + properties[i] + "' not in descriptor '" +
+                    dsDesc.getName() + "'",
+                    dsDesc.hasProperty(properties[i]));
         }
-        
-        Referenceable refDS = (Referenceable) ds;
-        
-        Reference dsAsReference = refDS.getReference();
-        
+        // Check that all keys defined by the descriptor is found, and that
+        // there is only one of each in the data source property list.
+        Iterator descPropIter = dsDesc.getPropertyIterator();
+        while (descPropIter.hasNext()) {
+            String descProp = (String)descPropIter.next();
+            boolean match = false;
+            // Iterate through all the data source properties.
+            for (int i=0; i < properties.length; i++) {
+                if (properties[i].equals(descProp)) {
+                    if (match) {
+                        fail("Duplicate entry '" + descProp + "' in data " +
+                                "source property list");
+                    }
+                    // Don't break, continue to look for duplicates.
+                    match = true;
+                }
+            }
+            assertTrue("Property '" + descProp + "' not found in data source " +
+                    "property list", match);
+        }
+        // Check if the expected number of properties are found.
+        // Do this last to hopefully get a more descriptive failure
+        // message which includes the property name above.
+        assertEquals(dsDesc.getPropertyCount(), properties.length);
+    }
+
+    /**
+     * Make sure it is possible to create a new data source using
+     * <code>Referencable</code>, that the new instance has the correct
+     * default values set for the bean properties and finally that the
+     * data source can be serialized/deserialized.
+     *
+     * @param dsDesc data source descriptor
+     * @param className data source class name
+     * @throws Exception on a wide variety of error conditions...
+     */
+    private void assertDataSourceReferenceEmpty(DataSourceDescriptor dsDesc,
+                                                String className)
+            throws Exception {
+        println("Testing recreated empty data source.");
+        // Create an empty data source.
+        Object ds = Class.forName(className).newInstance();
+        Referenceable refDs = (Referenceable)ds;
+        Reference dsAsReference = refDs.getReference();
         String factoryClassName = dsAsReference.getFactoryClassName();
-        
-        ObjectFactory factory = 
-            (ObjectFactory) Class.forName(factoryClassName).newInstance();  
-        
-        Object recreatedDS = 
+        ObjectFactory factory =
+            (ObjectFactory)Class.forName(factoryClassName).newInstance();
+        Object recreatedDs =
             factory.getObjectInstance(dsAsReference, null, null, null);
-        
-        println(" empty DataSource recreated using Reference as " +
-            recreatedDS.getClass().getName());
-        // empty DataSource recreated using Reference should not be 
-        // the same as the original
-        assertNotSame(recreatedDS, ds);
-        
-        compareDS(expectedArrayIndex, properties, ds, recreatedDS);
-        
-        // now serialize and recreate
+        // Empty, recreated data source should not be the same as the one we
+        // created earlier on.
+        assertNotNull("Recreated datasource is <null>", recreatedDs);
+        assertNotSame(recreatedDs, ds);
+        compareDataSources(dsDesc, ds, recreatedDs, true);
+
+        // Serialize and recreate data source with default values.
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ObjectOutputStream oos = new ObjectOutputStream(baos);  
+        ObjectOutputStream oos = new ObjectOutputStream(baos);
         oos.writeObject(ds);
         oos.flush();
         oos.close();
-        ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+        ByteArrayInputStream bais =
+                new ByteArrayInputStream(baos.toByteArray());
         ObjectInputStream ois = new ObjectInputStream(bais);
-        recreatedDS = ois.readObject();
-        println(" empty DataSource recreated using serialization");
-        compareDS(expectedArrayIndex, properties, ds, recreatedDS);
-        
-        // now populate the data source
-        for (int i = 0; i < properties.length; i++)
-        {
-            String property = properties[i];
-            Method getMethod = getGet(property, ds);
-            
-            Method setMethod = getSet(getMethod, ds);
-            
-            Class pt = getMethod.getReturnType();
-            
-            // generate a somewhat unique value for a property
-            int val = 0;
-            for (int j = 0; j < property.length(); j++)
-                val += property.charAt(j);
-            
-            if (pt.equals(Integer.TYPE))
-            {
-                setMethod.invoke(ds, new Object[] {new Integer(val)});
-                continue;
-            }
-            if (pt.equals(String.class))
-            {
-                String value;
-                if (property.equals("createDatabase"))
-                    value = "create";
-                else if (property.equals("shutdownDatabase"))
-                    value = "shutdown";
-                else if (property.equals("ssl"))
-                    value = "basic";
-                else
-                    value = "XX_" + property + "_" + val;
-                    
-                setMethod.invoke(ds, new Object[] {value});
-                continue;
-            }
-            if (pt.equals(Boolean.TYPE))
-            {
-                // set the opposite value
-                Object gbv = getMethod.invoke(ds, null);
-                Boolean sbv = 
-                    Boolean.FALSE.equals(gbv) ? Boolean.TRUE : Boolean.FALSE;
-                setMethod.invoke(ds, new Object[] {sbv});
-                continue;
-            }           
-            if (pt.equals(Short.TYPE))
-            {
-                setMethod.invoke(ds, new Object[] {new Short((short)val)});
-                continue;
-            }
-            if (pt.equals(Long.TYPE))
-            {
-                setMethod.invoke(ds, new Object[] {new Long(val)});
-                continue;
-            }
-            fail ( property + " not settable - update test!!");
-        }
-        
-        dsAsReference = refDS.getReference();
-        recreatedDS = 
-            factory.getObjectInstance(dsAsReference, null, null, null);
-        println(" populated DataSource recreated using Reference as " 
-            + recreatedDS.getClass().getName());
-        // again, recreated should not be same instance
-        assertNotSame(recreatedDS, ds);
-        
-        compareDS(expectedArrayIndex+1, properties, ds, recreatedDS);     
+        recreatedDs = ois.readObject();
+        compareDataSources(dsDesc, ds, recreatedDs, true);
+    }
 
-        // now serialize and recreate
-        baos = new ByteArrayOutputStream();
-        oos = new ObjectOutputStream(baos); 
+    /**
+     * Make sure it is possible to recreate and serialize/deserialize a
+     * populated data source.
+     * <p>
+     * Populated means the various bean properties have non-default
+     * values set.
+     *
+     * @param dsDesc data source descriptor
+     * @param className data source class name
+     * @throws Exception on a wide variety of error conditions...
+     */
+    private void assertDataSourceReferencePopulated(
+                                                DataSourceDescriptor dsDesc,
+                                                String className)
+            throws Exception {
+        println("Testing recreated populated data source.");
+        Object ds = Class.forName(className).newInstance();
+        // Populate the data source.
+        Iterator propIter = dsDesc.getPropertyIterator();
+        while (propIter.hasNext()) {
+            String property = (String)propIter.next();
+            String value = dsDesc.getPropertyValue(property);
+            Method getMethod = getGet(property, ds);
+            Method setMethod = getSet(getMethod, ds);
+            Class paramType = getMethod.getReturnType();
+
+            if (paramType.equals(Integer.TYPE)) {
+                setMethod.invoke(ds, new Object[] {Integer.valueOf(value)});
+            } else if (paramType.equals(String.class)) {
+                setMethod.invoke(ds, new Object[] {value});
+            } else if (paramType.equals(Boolean.TYPE)) {
+                setMethod.invoke(ds, new Object[] {Boolean.valueOf(value)});
+            } else if (paramType.equals(Short.TYPE)) {
+                setMethod.invoke(ds, new Object[] {Short.valueOf(value)});
+            } else if (paramType.equals(Long.TYPE)) {
+                setMethod.invoke(ds, new Object[] {Long.valueOf(value)});
+            } else {
+                fail("'" + property + "' not settable - update test!!");
+            }
+        }
+
+        Referenceable refDs = (Referenceable)ds;
+        Reference dsAsReference = refDs.getReference();
+        String factoryClassName = dsAsReference.getFactoryClassName();
+        ObjectFactory factory =
+            (ObjectFactory)Class.forName(factoryClassName).newInstance();
+        Object recreatedDs =
+            factory.getObjectInstance(dsAsReference, null, null, null);
+        // Recreated should not be same instance as original.
+        assertNotSame(recreatedDs, ds);
+        compareDataSources(dsDesc, ds, recreatedDs, false);
+
+        // Serialize and recreate.
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(baos);
         oos.writeObject(ds);
         oos.flush();
         oos.close();
-        bais = new ByteArrayInputStream(baos.toByteArray());
-        ois = new ObjectInputStream(bais);
-        recreatedDS = ois.readObject();
-        println(" populated DataSource recreated using serialization");
-        compareDS(expectedArrayIndex+1, properties, ds, recreatedDS);
+        ByteArrayInputStream bais =
+                new ByteArrayInputStream(baos.toByteArray());
+        ObjectInputStream ois = new ObjectInputStream(bais);
+        recreatedDs = ois.readObject();
+        compareDataSources(dsDesc, ds, recreatedDs, false);
     }
-    
-    private static String[] getPropertyBeanList(Object ds) throws Exception
-    {
-        Method[] allMethods = ds.getClass().getMethods();
-        
-        ArrayList properties = new ArrayList();
-        for (int i = 0; i < allMethods.length; i++)
-        {
-            Method m = allMethods[i];
-            String methodName = m.getName();
-            // Need at least getXX
-            if (methodName.length() < 5)
-                continue;
-            if (!methodName.startsWith("get"))
-                continue;
-            if (m.getParameterTypes().length != 0)
-                continue;
 
-            Class rt = m.getReturnType();
-            
-            if (rt.equals(Integer.TYPE) || rt.equals(String.class) || 
-                rt.equals(Boolean.TYPE) || rt.equals(Short.TYPE) ||
-                rt.equals(Long.TYPE))
-            {
-                // valid Java Bean property
-                 String beanName = methodName.substring(3,4).toLowerCase() 
-                     + methodName.substring(4);
+    /**
+     * Compares two data sources expected to be equal.
+     * <p>
+     * The data source descriptor is expected to contain both default values
+     * and set values for the relevant bean properties of the data source(s).
+     *
+     * @param dsDesc data source descriptor
+     * @param ds original data source
+     * @param rds recreated data source
+     * @param useDefaultsForComparison <code>true</code> if the default values
+     *      should be verified, <code>false</code> if the set values should be
+     *      used for verification
+     * @throws Exception on a wide variety of error conditions...
+     * @throws AssertionFailedError if the data sources are not equal
+     */
+    private void compareDataSources(DataSourceDescriptor dsDesc,
+                                       Object ds, Object rds,
+                                       boolean useDefaultsForComparison)
+            throws Exception {
+        Iterator propIter = dsDesc.getPropertyIterator();
+        while (propIter.hasNext()) {
+            String property = (String)propIter.next();
+            Method getMethod = getGet(property, ds);
+
+            // Obtain value from original data source, then the recreated one.
+            Object dsValue = getMethod.invoke(ds, null);
+            Object rdsValue = getMethod.invoke(rds, null);
+
+            if (dsValue == null) {
+                assertNull(rdsValue);
+            } else {
+                assertEquals(dsValue, rdsValue);
+            }
+            // Make sure the value is correct.
+            if (useDefaultsForComparison) {
+                if (dsValue != null) {
+                    assertEquals("Wrong default value for '" + property + "'",
+                            dsDesc.getPropertyDefault(property),
+                            dsValue.toString());
+                } else {
+                    assertNull(dsDesc.getPropertyDefault(property));
+                }
+            } else if (dsValue != null) {
+                    assertEquals("'" + property + "' has incorrect value",
+                            dsDesc.getPropertyValue(property),
+                            dsValue.toString());
+            } else {
+                // We got null from the data source, and we should have set all
+                // values to something else than null.
+                fail("Test does not handle this situation...");
+            }
+        }
+    }
+
+    /**
+     * Obtains a list of bean properties through reflection.
+     *
+     * @param ds the data source to investigate
+     * @return A list of bean property names.
+     */
+    private static String[] getPropertyBeanList(Object ds) {
+        Method[] allMethods = ds.getClass().getMethods();
+        ArrayList properties = new ArrayList();
+
+        for (int i = 0; i < allMethods.length; i++) {
+            Method method = allMethods[i];
+            String methodName = method.getName();
+            // Need at least getXX
+            if (methodName.length() < 5 || !methodName.startsWith("get") ||
+                    method.getParameterTypes().length != 0) {
+                continue;
+            }
+
+            Class rt = method.getReturnType();
+            if (rt.equals(Integer.TYPE) || rt.equals(String.class) ||
+                    rt.equals(Boolean.TYPE) || rt.equals(Short.TYPE) ||
+                    rt.equals(Long.TYPE)) {
+                // Valid Java Bean property.
+                // Convert name:
+                //    getPassword -> password
+                //    getRetrieveMessageText -> retrieveMessageText
+                String beanName = methodName.substring(3,4).toLowerCase()
+                        + methodName.substring(4);
 
                 properties.add(beanName);
-                continue;
+            } else {
+                assertFalse("Method '" + methodName + "' with primitive " +
+                    "return type not supported - update test!!",
+                    rt.isPrimitive());
             }
-        
-            
-            assertFalse(rt.isPrimitive());
-            println("if rt.isPrimitive, method " + methodName + 
-                " not supported - update test!!");
-
         }
-        
-        String[] propertyList = (String[]) properties.toArray(new String[0]);
-        
-        Arrays.sort(propertyList);
-        
-        return propertyList;
+
+        return (String[])properties.toArray(new String[properties.size()]);
     }
-    
-    private static Method getGet(String property, Object ds) throws Exception
-    {
+
+    /**
+     * Obtains the specified get method.
+     *
+     * @param property property/method name
+     * @param ds data source object
+     * @return A method object.
+     *
+     * @throws NoSuchMethodException if the method does not exist
+     */
+    private static Method getGet(String property, Object ds)
+            throws NoSuchMethodException {
         String methodName =
             "get" + property.substring(0,1).toUpperCase()
             + property.substring(1);
@@ -343,43 +489,186 @@ public class DataSourceReferenceTest extends BaseJDBCTestCase {
         return m;
     }
 
-    private static Method getSet(Method getMethod, Object ds) throws Exception
-    {
+    /**
+     * Obtains the specified set method.
+     *
+     * @param getMethod the corresponding get method
+     * @param ds data source object
+     * @return A method object.
+     *
+     * @throws NoSuchMethodException if the method does not exist
+     */private static Method getSet(Method getMethod, Object ds)
+            throws NoSuchMethodException {
         String methodName = "s" + getMethod.getName().substring(1);
         Method m = ds.getClass().getMethod(
             methodName, new Class[] {getMethod.getReturnType()});
         return m;
-    }   
-
-    private static void compareDS(int expectedValuesArrayIndex,
-        String[] properties, Object ds, Object rds) throws Exception
-    {
-        println(" Start compare recreated");
-        for (int i = 0; i < properties.length; i++)
-        {
-            Method getMethod = getGet(properties[i], ds);
-            
-            Object dsValue = getMethod.invoke(ds, null);
-            Object rdsValue = getMethod.invoke(rds, null);
-            
-            if (dsValue == null)
-            {
-                // properties[i] originally null, should be recreated as null.
-                assertNull(rdsValue);
-            }
-            else
-            {
-                // properties[i] originally dsValue, should be recreated as
-                // rdsValue
-                assertEquals(dsValue, rdsValue);
-            }
-            if (dsValue != null)
-            {
-                assertEquals(expectedValues[expectedValuesArrayIndex][i][0], 
-                    properties[i]);
-                assertEquals(expectedValues[expectedValuesArrayIndex][i][1], 
-                    dsValue.toString());
-            }
-        }
     }
+
+    /**
+     * A class describing the bean properties of a data source.
+     * <p>
+     * A data source is a class implementing
+     * <code>javax.sql.CommonDataSource</code>.
+     * <p>
+     * The data source description consists of the following:
+     * <ul> <li>A list of property names.
+     *      <li>A list of default values for the properties that have a default.
+     *      <li>A list of set values for properties.
+     * </ul>
+     * In addition it has a name for convenience.
+     */
+    private static class DataSourceDescriptor {
+
+        /** Name of the description. */
+        private final String dsName;
+        /**
+         * Set values for the data source being described.
+         * <p>
+         * Note that the keys of this property object describe which bean
+         * properties exist for the data source.
+         */
+        private final Properties propertyValues;
+        /**
+         * Default values for bean properties having a default.
+         * <p>
+         * Note that not all properties have a default, and the data source
+         * may therefore have more properties than there entries in this
+         * list of properties.
+         */
+        private final Properties propertyDefaults;
+
+        /**
+         * Creates a new data source description.
+         *
+         * @param dsName convenience name for the description/source
+         */
+        DataSourceDescriptor(String dsName) {
+            this.dsName = dsName;
+            this.propertyValues = new Properties();
+            this.propertyDefaults = new Properties();
+        }
+
+        /**
+         * Creates a new data source description, based off an existing
+         * description.
+         * <p>
+         * All properties and values defined in the existing descriptor will
+         * also be defined in the new descriptor.
+         *
+         * @param dsName convenience name for the description/source
+         * @param copyFrom existing descriptor to copy properties/values from
+         */
+        DataSourceDescriptor(String dsName, DataSourceDescriptor copyFrom) {
+            this.dsName = dsName;
+            this.propertyValues = new Properties();
+            this.propertyValues.putAll(copyFrom.propertyValues);
+            this.propertyDefaults = new Properties(copyFrom.propertyDefaults);
+            this.propertyDefaults.putAll(copyFrom.propertyDefaults);
+        }
+
+        /**
+         * Returns the convenience name of this descriptor.
+         *
+         * @return A convenience name.
+         */
+        String getName() {
+            return this.dsName;
+        }
+
+        /**
+         * Adds a property to the description, with a value and no associated
+         * default value.
+         *
+         * @param name property name
+         * @param value property value
+         * @throws NullPointerException if <code>name</code> or
+         *      <code>value</code> is <code>null</code>
+         */
+        void addProperty(String name, String value) {
+            this.propertyValues.setProperty(name, value);
+        }
+
+        /**
+         * Adds a property to the description, with a value and an associated
+         * default value.
+         *
+         * @param name property name
+         * @param value property value
+         * @param defaultValue default property value
+         * @throws NullPointerException if <code>name</code>, <code>value</code>
+         *      or <code>defaultValue</code> is <code>null</code>
+         */
+        void addProperty(String name, String value, String defaultValue) {
+            this.propertyValues.setProperty(name, value);
+            this.propertyDefaults.setProperty(name, defaultValue);
+        }
+
+        /**
+         * Returns the value of the specified property.
+         *
+         * @param name property name
+         * @return The value set for this property.
+         *
+         * @throws NullPointerException if <code>name</code> is
+         *      <code>null</code>
+         * @throws AssertionFailedError if the property name is not defined by
+         *      this descriptor
+         */
+        String getPropertyValue(String name) {
+            if (!this.propertyValues.containsKey(name)) {
+                fail("Property '" + name + "' not in data source descriptor '" +
+                        dsName + "'");
+            }
+            return this.propertyValues.getProperty(name);
+        }
+
+        /**
+         * Returns the default value for the specified property.
+         *
+         * @param name property name
+         * @return The default value if specified, <code>null<code> if a default
+         *      value is not specified.
+         *
+         * @throws NullPointerException if <code>name</code> is
+         *      <code>null</code>
+         * @throws AssertionFailedError if the property name is not defined by
+         *      this descriptor
+         */
+        String getPropertyDefault(String name) {
+            if (!this.propertyValues.containsKey(name)) {
+                fail("Property '" + name + "' not in data source descriptor '" +
+                        dsName + "'");
+            }
+            return this.propertyDefaults.getProperty(name, null);
+        }
+
+        /**
+         * Returns an iterator over all bean property names.
+         *
+         * @return An iterator.
+         */
+        Iterator getPropertyIterator() {
+            return this.propertyValues.keySet().iterator();
+        }
+
+        /**
+         * Tells if the specified property is defined by this descriptor.
+         *
+         * @param name property name
+         * @return <code>true</code> if defined, <code>false</code> if not.
+         */
+        boolean hasProperty(String name) {
+            return this.propertyValues.containsKey(name);
+        }
+
+        /**
+         * Returns the number of bean properties defined by this descriptor.
+         *
+         * @return The number of bean properties.
+         */
+        int getPropertyCount() {
+            return this.propertyValues.size();
+        }
+    } // End class DataSourceDescriptor
 }
