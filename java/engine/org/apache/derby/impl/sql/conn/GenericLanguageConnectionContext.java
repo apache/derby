@@ -2744,7 +2744,37 @@ public class GenericLanguageConnectionContext
 				continue;
 			}
 
-			a.reset();
+			if (andClose) 
+				//Since we are dealing with rollback, we need to reset the 
+				//activation no matter what the holdability might be or no
+				//matter whether the associated resultset returns rows or not.
+				a.reset();
+			else {
+				//We are dealing with commit here. 
+				if (a.getResultSet() != null) {
+					//if the activation has resultset associated with it, then 
+					//use following criteria to take the action
+					if ((a.getResultSetHoldability() == false && a.getResultSet().returnsRows()==true)){
+						//Close result sets that return rows and are not held 
+						//across commit. This is to implement closing JDBC 
+						//result sets that are CLOSE_CURSOR_ON_COMMIT at commit 
+						//time. 
+						a.getResultSet().close();
+					} else if (a.getResultSet().returnsRows()) {
+						//Clear the current row of the result sets that return
+						//rows and are held across commit. This is to implement
+						//keeping JDBC result sets open that are 
+						//HOLD_CURSORS_OVER_COMMIT at commit time and marking
+						//the resultset to be not on a valid row position. The 
+						//user will need to reposition within the resultset 
+						//before doing any row operations.
+						a.getResultSet().clearCurrentRow();
+					}
+				}
+				a.clearHeapConglomerateController();
+				if (!a.isSingleExecution())
+					a.clearWarnings();
+			}
 
 			// Only invalidate statements if we performed DDL.
 			if (andClose && dataDictionaryInWriteMode()) {
