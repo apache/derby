@@ -255,5 +255,20 @@ public class SubqueryList extends QueryTreeNodeVector
 	        subqueryNode.setHavingSubquery(true);
 	    }
 	}
+
+	/**
+	 * Mark all of the subqueries in this list as being part of a where clause
+	 * so we can avoid flattening later if needed.
+	 */
+	public void markWhereSubqueries() {
+		int size = size();
+		for (int index = 0; index < size; index++)
+		{
+			SubqueryNode    subqueryNode;
+
+			subqueryNode = (SubqueryNode) elementAt(index);
+			subqueryNode.setWhereSubquery(true);
+		}
+	}
 }
 

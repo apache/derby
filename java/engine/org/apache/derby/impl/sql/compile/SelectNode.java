@@ -112,6 +112,8 @@ public class SelectNode extends ResultSetNode
 
 	private boolean orderByAndDistinctMerged;
 
+	boolean originalWhereClauseHadSubqueries;
+	
 	/* Copy of fromList prior to generating join tree */
 	private FromList preJoinFL;
 
@@ -138,6 +140,16 @@ public class SelectNode extends ResultSetNode
 		this.groupByList = (GroupByList) groupByList;
 		this.havingClause = (ValueNode)havingClause;
 		bindTargetListOnly = false;
+		
+		this.originalWhereClauseHadSubqueries = false;
+		if (this.whereClause != null){
+			CollectNodesVisitor cnv = 
+				new CollectNodesVisitor(SubqueryNode.class, SubqueryNode.class);
+			this.whereClause.accept(cnv);
+			if (!cnv.getList().isEmpty()){
+				this.originalWhereClauseHadSubqueries = true;
+			}
+		}
 	}
 
 	/**
@@ -456,7 +468,7 @@ public class SelectNode extends ResultSetNode
 			whereClause = whereClause.bindExpression(fromListParam, 
 										whereSubquerys,
 										whereAggregates);
-
+			
 			/* RESOLVE - Temporarily disable aggregates in the HAVING clause.
 			** (We may remove them in the parser anyway.)
 			** RESOLVE - Disable aggregates in the WHERE clause.  Someday
@@ -868,6 +880,13 @@ public class SelectNode extends ResultSetNode
 		 */
 		if (whereClause != null)
 		{
+			// DERBY-3301
+			// Mark subqueries that are part of the where clause as such so
+			// that we can avoid flattening later, particularly for nested 
+			// WHERE EXISTS subqueries.
+			if (whereSubquerys != null){
+				whereSubquerys.markWhereSubqueries();
+			}
 			whereClause.preprocess(numTables,
 								   fromList, whereSubquerys,
 								   wherePredicates);

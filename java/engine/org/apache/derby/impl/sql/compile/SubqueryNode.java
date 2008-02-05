@@ -44,6 +44,7 @@ import org.apache.derby.iapi.store.access.Qualifier;
 
 import java.lang.reflect.Modifier;
 
+import java.util.Iterator;
 import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
 import org.apache.derby.impl.sql.compile.ActivationClassBuilder;
 import org.apache.derby.impl.sql.execute.OnceResultSet;
@@ -110,6 +111,9 @@ public class SubqueryNode extends ValueNode
 	/* Whether or not this subquery began life as a distinct expression subquery */
 	boolean			distinctExpression;
 
+	/* Whether or not this subquery began life as a subquery in a where clause */
+	boolean			whereSubquery;
+	
 	/* Since we do not have separate subquery operator nodes, the
 	 * type of the subquery is stored in the subqueryType field.  Most subquery
 	 * types take a left operand (except for expression and exists).  We could
@@ -614,9 +618,14 @@ public class SubqueryNode extends ValueNode
          *  o It is not a subquery in a having clause (DERBY-3257)
 		 *  o It is an expression subquery on the right side
 		 *	  of a BinaryComparisonOperatorNode.
+		 *  o Either a) it does not appear within a WHERE clause, or 
+		 *           b) it appears within a WHERE clause but does not itself 
+		 *              contain a WHERE clause with other subqueries in it. 
+		 *          (DERBY-3301)
 		 */
 		flattenable = (resultSet instanceof RowResultSetNode) &&
 					  underTopAndNode && !havingSubquery &&
+					  !isWhereExistsAnyInWithWhereSubquery() &&
 					  parentComparisonOperator instanceof BinaryComparisonOperatorNode;
 		if (flattenable)
 		{
@@ -677,11 +686,16 @@ public class SubqueryNode extends ValueNode
 		 *
 		 *	OR,
 		 *  o The subquery is NOT EXISTS, NOT IN, ALL (beetle 5173).
+		 *  o Either a) it does not appear within a WHERE clause, or 
+		 *           b) it appears within a WHERE clause but does not itself 
+		 *              contain a WHERE clause with other subqueries in it. 
+		 *          (DERBY-3301)
 		 */
 		boolean flattenableNotExists = (isNOT_EXISTS() || canAllBeFlattened());
 
 		flattenable = (resultSet instanceof SelectNode) &&
 					  underTopAndNode && !havingSubquery &&
+					  !isWhereExistsAnyInWithWhereSubquery() &&
 					  (isIN() || isANY() || isEXISTS() || flattenableNotExists ||
                        parentComparisonOperator != null);
 
@@ -2310,4 +2324,67 @@ public class SubqueryNode extends ValueNode
     public void setHavingSubquery(boolean havingSubquery) {
         this.havingSubquery = havingSubquery;
     }
+	
+
+	/**
+	 * Is this subquery part of a whereclause?
+	 *
+	 * @return true if it is part of a where clause, otherwise false
+	 */
+	public boolean isWhereSubquery() {
+		return whereSubquery;
+	}
+
+	/**
+	 * Mark this subquery as being part of a where clause.
+	 * @param whereSubquery
+	 */
+	public void setWhereSubquery(boolean whereSubquery) {
+		this.whereSubquery = whereSubquery;
+	}
+
+	/**
+	 * Check whether this is a WHERE EXISTS | ANY | IN subquery with a subquery
+	 * in its own WHERE clause. Used in flattening decision making.
+	 * 
+	 * DERBY-3301 reported wrong results from a nested WHERE EXISTS, but 
+	 * according to the derby optimizer docs this applies to a broader range of 
+	 * WHERE clauses in a WHERE EXISTS subquery. No WHERE EXISTS subquery with 
+	 * anohter subquery in it own WHERE clause can be flattened. 
+	 * 
+	 * @return true if this subquery is a WHERE EXISTS | ANY | IN subquery with 
+	 *              a subquery in its own WHERE clause
+	 */
+	public boolean isWhereExistsAnyInWithWhereSubquery() 
+			throws StandardException
+	{
+		if ( isWhereSubquery() && (isEXISTS() || isANY() || isIN()) ) {
+			if (resultSet instanceof SelectNode){
+				SelectNode sn = (SelectNode) resultSet;
+				/* 
+				 * Flattening happens in lower QueryTree nodes first and then 
+				 * removes nodes from the whereSubquerys list or whereClause. 
+				 * Hence we check the original WHERE clause for subqueries in 
+				 * SelectNode.init(), and simply check here.
+				 */ 
+				if (sn.originalWhereClauseHadSubqueries){
+					/*
+					 * This is a WHERE EXISTS | ANY |IN subquery with a subquery
+					 * in its own WHERE clause (or now in whereSubquerys).
+					 */ 
+					return true;
+				}	
+			}
+			/* 
+			 * This is a WHERE EXISTS | ANY | IN subquery, but does not contain 
+			 * a subquery in its WHERE subquerylist or clause
+			 */
+			return false;
+		} else {
+			/* 
+			 * This isn't a WHERE EXISTS | ANY | IN subquery 
+			 */
+			return false;
+		}
+	}
 }
