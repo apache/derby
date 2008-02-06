@@ -31,7 +31,6 @@ import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.replication.slave.SlaveFactory;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-import org.apache.derby.impl.services.monitor.UpdateServiceProperties;
 
 import java.sql.Driver;
 import java.sql.DriverManager;
@@ -74,6 +73,16 @@ public class SlaveDatabase extends BasicDatabase {
      * executed for this database */
     private volatile boolean inReplicationSlaveMode;
     private volatile boolean shutdownInitiated;
+
+    /** True until this database has been successfully booted. Any
+     * exception that occurs while inBoot is true will be handed to
+     * the client thread booting this database. */
+    private volatile boolean inBoot;
+
+    /** Set by the database boot thread if it fails before slave mode
+     * has been started properly (i.e., if inBoot is true). This
+     * exception will then be reported to the client connection. */
+    private volatile StandardException bootException;
     private String dbname; // The name of the replicated database
     private volatile SlaveFactory slaveFac;
 
@@ -109,6 +118,7 @@ public class SlaveDatabase extends BasicDatabase {
         throws StandardException {
 
         inReplicationSlaveMode = true;
+        inBoot = true;
         shutdownInitiated = false;
 
         dbname = startParams.getProperty(SlaveFactory.SLAVE_DB);
@@ -118,21 +128,10 @@ public class SlaveDatabase extends BasicDatabase {
             new SlaveDatabaseBootThread(create, startParams);
         new Thread(dbBootThread).start();
 
-        try {
-            // We cannot claim to be booted until the storage factory
-            // has been set in the startParams because
-            // TopService.bootModule (the caller of this method) uses
-            // the storage factory object. The storage factory is set
-            // in RawStore.boot, and we have to wait for this to
-            // happen.
-            UpdateServiceProperties usp =
-                (UpdateServiceProperties) startParams;
-            while (usp.getStorageFactory() == null){
-                Thread.sleep(500);
-            }
-        } catch (Exception e) {
-            //Todo: report exception to derby.log
-        }
+        // Check that the database was booted successfully, or throw
+        // the exception that caused the boot to fail.
+        verifySuccessfulBoot();
+        inBoot = false;
 
         // This module has now been booted (hence active=true) even
         // though submodules like store and authentication may not
@@ -166,10 +165,6 @@ public class SlaveDatabase extends BasicDatabase {
     // Class interface //
     /////////////////////
     public SlaveDatabase() {
-    }
-
-    public void setSlaveFactory(SlaveFactory f) {
-        slaveFac = f;
     }
 
     ////////////////////////
@@ -297,16 +292,80 @@ public class SlaveDatabase extends BasicDatabase {
             } catch (StandardException se) {
                 // We get here when SlaveController#stopSlave has been
                 // called, or if a fatal exception has been thrown.
-                handleShutdown ();
+                handleShutdown(se);
             }
         }
     }
 
-    /**
-     * Shutdown this database
-     */
-    private void handleShutdown() {
+    ////////////////////
+    // Private Methods//
+    ////////////////////
 
+    /**
+     * Verify that the slave functionality has been properly started.
+     * This method will block until a successful slave startup has
+     * been confirmed, or it will throw the exception that caused it
+     * to fail.
+     */
+    private void verifySuccessfulBoot() throws StandardException {
+        while (!(isSlaveFactorySet() && slaveFac.isStarted())) {
+            if (bootException != null) {
+                throw bootException;
+            } else {
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException ie) {
+                    // do nothing
+                }
+            }
+        }
+    }
+
+    /** 
+     * If slaveFac (the reference to the SlaveFactory) has not already
+     * been set, this method will try to set it by calling
+     * Monitor.findServiceModule. If slavFac was already set, the
+     * method does not do anything.
+     *
+     * @return true if slaveFac is set after calling this method,
+     * false otherwise
+     */
+    private boolean isSlaveFactorySet() {
+        if (slaveFac != null) {
+            return true;
+        }
+
+        try {
+            slaveFac = (SlaveFactory)Monitor.
+                findServiceModule(this, SlaveFactory.MODULE);
+            return true;
+        } catch (StandardException se) {
+            // We get a StandardException if SlaveFactory has not been 
+            // booted yet. Safe to retry later.
+            return false;
+        }
+    }
+
+    /**
+     * Used to shutdown this database. 
+     *
+     * If an error occurs as part of the database boot process, we
+     * hand the exception that caused boot to fail to the client
+     * thread. The client thread will in turn shut down this database.
+     *
+     * If an error occurs at a later stage than during boot, we shut
+     * down the database by setting up a connection with the shutdown
+     * attribute. The internal connection is required because database
+     * shutdown requires EmbedConnection to do cleanup.
+     *
+     * @param shutdownCause the reason why the database needs to be
+     * shutdown
+     */
+    private void handleShutdown(StandardException shutdownCause) {
+        if (inBoot) {
+            bootException = shutdownCause;
+            return;
+        } 
         try {
             shutdownInitiated = true;
             String driverName = 

@@ -4740,8 +4740,10 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
 
             <msg>
                 <name>XRE04</name>
-                <text>Could not establish a connection to the peer of the replicated database '{0}'.</text>
+                <text>Could not establish a connection to the peer of the replicated database '{0}' on address '{1}:{2}'.</text>
                 <arg>dbname</arg>
+                <arg>hostname</arg>
+                <arg>portname</arg>
             </msg>
 
             <msg>
@@ -7653,6 +7655,14 @@ Shutting down instance {0}</text>
                 <name>R010</name>
                 <text>Replication master trying to reconnect to slave for database '{0}'.</text>
                 <arg>dbname</arg>
+            </msg>
+            
+            <msg>
+                <name>R011</name>
+                <text>Replication slave database '{0}' listens for connections from master on '{1}:{2}'.</text>
+                <arg>dbname</arg>
+                <arg>hostname</arg>
+                <arg>port</arg>
             </msg>
             
             <msg>

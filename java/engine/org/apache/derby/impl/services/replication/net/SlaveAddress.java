@@ -43,7 +43,7 @@ public class SlaveAddress {
      * Used as the default port number if the port number
      * is not mentioned.
      */
-    private final int DEFAULT_PORT_NO = 8001;
+    public static final int DEFAULT_PORT_NO = 8001;
     
     /**
      *

@@ -139,5 +139,14 @@ public interface SlaveFactory {
      * @see org.apache.derby.impl.services.replication.master.MasterController#flushedTo
      */
     public void failover();
+    
+    /**
+     * Check whether or not slave replication mode has been
+     * successfully started.
+     *
+     * @return true if slave replication mode has started
+     * successfully, false if slave mode startup is not yet confirmed
+     */
+    public boolean isStarted();
 
 }

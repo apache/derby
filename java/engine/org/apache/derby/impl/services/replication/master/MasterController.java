@@ -373,10 +373,12 @@ public class MasterController
                     (SQLState.REPLICATION_MASTER_TIMED_OUT, dbname);
         } catch (IOException ioe) {
             throw StandardException.newException
-                    (SQLState.REPLICATION_CONNECTION_EXCEPTION, ioe, dbname);
+                    (SQLState.REPLICATION_CONNECTION_EXCEPTION, ioe, 
+                     dbname, slavehost, String.valueOf(slaveport));
         } catch (Exception e) {
             throw StandardException.newException
-                    (SQLState.REPLICATION_CONNECTION_EXCEPTION, e, dbname);
+                    (SQLState.REPLICATION_CONNECTION_EXCEPTION, e,
+                     dbname, slavehost, String.valueOf(slaveport));
         }
     }
     

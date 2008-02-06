@@ -25,7 +25,6 @@ package org.apache.derby.impl.services.replication.slave;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.Attribute;
 import org.apache.derby.iapi.reference.MessageId;
-import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.monitor.ModuleControl;
 import org.apache.derby.iapi.services.monitor.ModuleSupportable;
@@ -88,6 +87,14 @@ public class SlaveController
     // connection to the master, and by the thread that applies log
     // chunks received from the master.
     private volatile boolean inReplicationSlaveMode = true;
+
+    /** Whether or not this SlaveController has been successfully
+     * started, including setting up a connection with the master and
+     * starting the log receiver thread. The client connection that
+     * initiated slave replication mode on this database will not
+     * report that slave mode was successfully started (i.e., it will
+     * hang) until startupSuccessful has been set to true */
+    private volatile boolean startupSuccessful = false;
 
     // Used to parse chunks of log records received from the master.
     private ReplicationLogScan logScan;
@@ -192,10 +199,6 @@ public class SlaveController
     public void startSlave(RawStoreFactory rawStore, LogFactory logFac)
         throws StandardException {
 
-        slaveDb = (SlaveDatabase)
-                Monitor.findService(Property.DATABASE_MODULE, dbname);
-        slaveDb.setSlaveFactory(this);
-
         rawStoreFactory = rawStore;
 
         try {
@@ -213,7 +216,7 @@ public class SlaveController
         // Retry to setup a connection with the master until a
         // connection has been established or until we are no longer
         // in replication slave mode
-        receiver = new ReplicationMessageReceive(slavehost, slaveport);
+        receiver = new ReplicationMessageReceive(slavehost, slaveport, dbname);
         while (!setupConnection()) {
             if (!inReplicationSlaveMode) {
                 // If we get here, another thread has called
@@ -230,6 +233,7 @@ public class SlaveController
         logScan = new ReplicationLogScan();
 
         startLogReceiverThread();
+        startupSuccessful = true;
 
         Monitor.logTextMessage(MessageId.REPLICATION_SLAVE_STARTED, dbname);
     }
@@ -251,7 +255,9 @@ public class SlaveController
 
         try {
             // Unplug the replication network connection layer
-            receiver.tearDown(); 
+            if (receiver != null) {
+                receiver.tearDown(); 
+            }
         } catch (IOException ioe) {
             ReplicationLogger.logError(null, ioe, dbname);
         }
@@ -306,6 +312,13 @@ public class SlaveController
                 (MessageId.REPLICATION_FAILOVER_SUCCESSFUL, dbname);
     }
 
+    /**
+     * @see SlaveFactory#isStarted
+     */
+    public boolean isStarted() {
+        return startupSuccessful;
+    }
+
     ////////////////////////////////////////////////////////////
     // Private Methods                                        //
     ////////////////////////////////////////////////////////////
@@ -339,7 +352,8 @@ public class SlaveController
                 return false;
             } else {
                 throw StandardException.newException
-                    (SQLState.REPLICATION_CONNECTION_EXCEPTION, e, dbname);
+                    (SQLState.REPLICATION_CONNECTION_EXCEPTION, e,
+                    dbname, slavehost, String.valueOf(receiver.getPort()));
             }
         }
     }
@@ -424,7 +438,12 @@ public class SlaveController
             logError(MessageId.REPLICATION_FATAL_ERROR, e, dbname);
 
         // todo: notify master of the problem
-        // todo: rawStoreFactory.stopReplicationSlave();
+        try {
+            stopSlave();
+        } catch (StandardException se) {
+            ReplicationLogger.
+                logError(MessageId.REPLICATION_FATAL_ERROR, se, dbname);
+        }
     }
 
 
@@ -438,8 +457,6 @@ public class SlaveController
      */
     private class SlaveLogReceiverThread extends Thread {
         public void run() {
-            // Debug only - println will be removed
-            System.out.println("Started log receiver thread");
             try {
                 ReplicationMessage message;
                 while (inReplicationSlaveMode) {

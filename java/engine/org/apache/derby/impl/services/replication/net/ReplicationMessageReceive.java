@@ -1,3 +1,4 @@
+
 /*
  
    Derby - Class org.apache.derby.impl.services.replication.net.ReplicationMessageReceive
@@ -30,7 +31,9 @@ import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import javax.net.ServerSocketFactory;
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.MessageId;
 import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.monitor.Monitor;
 
 /**
  * This class is the Receiver (viz. Socket server or listener) part of the
@@ -64,17 +67,31 @@ public class ReplicationMessageReceive {
      *                 the slave to replicate to.
      * @param portNumber an integer that contains the port number of the
      *                   slave to replicate to.
+     * @param dbname the name of the database
      *
      * @throws StandardException If an exception occurs while trying to
      *                           resolve the host name.
      */
-    public ReplicationMessageReceive(String hostName, int portNumber)
+    public ReplicationMessageReceive(String hostName, int portNumber, 
+                                     String dbname)
         throws StandardException {
         try {
             slaveAddress = new SlaveAddress(hostName, portNumber);
+            Monitor.logTextMessage(MessageId.REPLICATION_SLAVE_NETWORK_LISTEN, 
+                                   dbname, getHostName(), 
+                                   String.valueOf(getPort()));
         } catch (UnknownHostException uhe) {
+            // cannot use getPort because SlaveAddress creator threw
+            // exception and has therefore not been initialized
+            String port;
+            if (portNumber > 0) {
+                port = String.valueOf(portNumber);
+            } else {
+                port = String.valueOf(SlaveAddress.DEFAULT_PORT_NO);
+            }
             throw StandardException.newException
-                (SQLState.REPLICATION_CONNECTION_EXCEPTION, uhe);
+                (SQLState.REPLICATION_CONNECTION_EXCEPTION, uhe, 
+                 dbname, hostName, port);
         }
     }
     
@@ -248,4 +265,24 @@ public class ReplicationMessageReceive {
         ClassNotFoundException, IOException {
         return (ReplicationMessage)socketConn.readMessage();
     }
+
+    /**
+     * Used to get the host name the slave listens for master
+     * connections on
+     *
+     * @return the host name 
+     */
+    public String getHostName() {
+        return slaveAddress.getHostAddress().getHostName();
+     }
+
+    /**
+     * Used to get the port number the slave listens for master
+     * connections on
+     *
+     * @return the port number
+     */
+    public int getPort() {
+        return slaveAddress.getPortNumber();
+     }
 }
