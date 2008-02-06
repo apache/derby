@@ -758,16 +758,22 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         toomany.execute();
         SQLWarning warn = toomany.getWarnings();
         // DERBY-159. Network Server does not get warning
-        if (usingEmbedded())
+        if (usingEmbedded()) {
+            assertNotNull(warn);
             assertEquals("0100E", warn.getSQLState());
+        }
         rs = toomany.getResultSet();
         JDBC.assertFullResultSet(rs, new String[][] { { "2", "int" } });
+        JDBC.assertNoMoreResults(toomany);
 
         toomany.setInt(1, 2);
         toomany.setInt(2, 99); // will close the second result set.
         toomany.execute();
         rs = toomany.getResultSet();
+        // Single result set returned, therefore no warnings.
+        assertNull(toomany.getWarnings());
         JDBC.assertFullResultSet(rs, new String[][] { { "2", "int" } });
+        JDBC.assertNoMoreResults(toomany);
         toomany.close();
         s.execute("drop procedure way.toomany");
 
