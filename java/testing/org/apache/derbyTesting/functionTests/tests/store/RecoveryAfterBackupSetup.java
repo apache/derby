@@ -27,7 +27,7 @@ import java.sql.Statement;
 
 import org.apache.derby.tools.ij;
 
-/*
+/**
  * This class will do the setup for testing recovery after backup.
  * This test will insert some records into a table, do a backup and
  * end without shutting down the database.  The succeeding test,
