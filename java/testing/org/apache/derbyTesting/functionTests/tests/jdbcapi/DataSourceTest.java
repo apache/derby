@@ -61,6 +61,7 @@ import org.apache.derby.jdbc.EmbeddedSimpleDataSource;
 import org.apache.derby.jdbc.EmbeddedXADataSource;
 import org.apache.derbyTesting.functionTests.util.SecurityCheck;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.J2EEDataSource;
 import org.apache.derbyTesting.junit.JDBC;
@@ -124,7 +125,71 @@ public class DataSourceTest extends BaseJDBCTestCase {
         // Reduce the timeout threshold to make the tests run faster.
         return DatabasePropertyTestSetup.setLockTimeouts(suite, 3, 5);
     }
+    
+    /**
+     * Return a suite of tests that are run with both client and embedded
+     * 
+     * @param postfix suite name postfix
+     * @return A suite of tests to be run with client and/or embedded
+     */
+    private static Test baseSuite(String postfix) {
+        TestSuite suite = new TestSuite("ClientAndEmbedded" + postfix);
+        suite.addTest(new DataSourceTest("testGlobalLocalInterleaf"));
+        suite.addTest(new DataSourceTest("testSetIsolationWithStatement"));
+        suite.addTest(new DataSourceTest("testJira95xads"));
+        suite.addTest(new DataSourceTest("testBadConnectionAttributeSyntax"));
+        suite.addTest(new DataSourceTest("testDescriptionProperty"));
+        suite.addTest(new DataSourceTest("testConnectionErrorEvent"));
+        suite.addTest(new DataSourceTest("testReadOnlyToWritableTran"));
+        suite.addTest(new DataSourceTest("testAutoCommitOnXAResourceStart"));
+        suite.addTest(new DataSourceTest("testAllDataSources"));
+        suite.addTest(new DataSourceTest("testClosedCPDSConnection"));
+        suite.addTest(new DataSourceTest("testClosedXADSConnection"));
+        suite.addTest(new DataSourceTest("testSetSchemaInXAConnection"));
+        return suite;
+    }
 
+    /**
+     * Return a suite of tests that are run with client only
+     * 
+     * @return A suite of tests being run with client only
+     */
+    private static Test getClientSuite() {
+        TestSuite suite = new TestSuite("Client/Server");
+        suite.addTest(new DataSourceTest("testClientDSConnectionAttributes"));
+        suite.addTest(new DataSourceTest(
+                "testClientTraceFileDSConnectionAttribute"));
+        suite.addTest(new DataSourceTest(
+                "testClientMessageTextConnectionAttribute"));
+        return suite;
+    }
+    
+    /**
+     * Return a suite of tests that are run with embedded only
+     * 
+     * @param postfix suite name postfix
+     * @return A suite of tests being run with embedded only
+     */
+    private static Test getEmbeddedSuite(String postfix) {
+        TestSuite suite = new TestSuite("Embedded" + postfix);
+        suite.addTest(new DataSourceTest("testDSRequestAuthentication"));
+        // Due to a bug following cannot be run for client - DERBY-3379
+        // To run this fixture with client, add to getClientSuite(),
+        // when DERBY-3379 is fixed, remove from here (and client) and
+        // move to getRunTwiceSuite.
+        suite.addTest(new DataSourceTest("testPooledReuseOnClose"));
+        // when DERBY-2498 gets fixed, move these two to getRunTwiceSuite
+        suite.addTest(new DataSourceTest("testJira95ds"));
+        suite.addTest(new DataSourceTest("testJira95pds"));
+        // Following cannot run with client because of DERBY-2533; it hangs
+        // when fixed, this can be moved to getRunTwiceSuite.
+        suite.addTest(new DataSourceTest("testReuseAcrossGlobalLocal"));
+        // Following cannot run with client because of DERBY-2533; it hangs
+        // when fixed, this can be moved to getRunTwiceSuite.
+        suite.addTest(new DataSourceTest("testAutoCommitOnXAResourceStart"));
+        return suite;
+    }
+    
     public static Test suite() {
         if (JDBC.vmSupportsJSR169())
         {
@@ -138,55 +203,51 @@ public class DataSourceTest extends BaseJDBCTestCase {
         else
         {
             TestSuite suite = new TestSuite("DataSourceTest suite");
-            suite.addTest(TestConfiguration.defaultSuite(DataSourceTest.class));
+            // Add tests that will run with both embedded
+            suite.addTest(baseSuite(":embedded"));
+            //  and network server/client
+            suite.addTest(TestConfiguration.clientServerDecorator(
+                    baseSuite(":client")));
+            // Add the tests that only run with client
+            suite.addTest(TestConfiguration.clientServerDecorator(
+                    getClientSuite()));
+            // Add the tests that only run with embedded
+            suite.addTest(getEmbeddedSuite("embedded"));
             // Add the tests relying on getting timeouts.
             suite.addTest(getTimeoutSuite(":embedded"));
             suite.addTest(TestConfiguration.clientServerDecorator(
                     getTimeoutSuite(":client")));
-            return suite;
+            // wrap all in CleanDatabaseTestSetup that creates all database
+            // objects any fixture might need.
+            // Note that not all fixtures need (all of) these.
+            return new CleanDatabaseTestSetup(suite) {
+                /**
+                 * Create and populate database objects
+                 * 
+                 * @see org.apache.derbyTesting.junit.CleanDatabaseTestSetup#decorateSQL(java.sql.Statement)
+                 */
+                protected void decorateSQL(Statement s) throws SQLException {
+                    s.executeUpdate("create table autocommitxastart(i int)");
+                    s.executeUpdate("insert into autocommitxastart values 1,2,3,4,5");
+                    s.executeUpdate("create schema SCHEMA_Patricio");
+                    s.executeUpdate("create table " +
+                    "SCHEMA_Patricio.Patricio (id VARCHAR(255), value INTEGER)");
+                    s.executeUpdate("create table intTable(i int)");
+                    s.executeUpdate("create table hold_30 " +
+                    "(id int not null primary key, b char(30))");
+                    s.executeUpdate(
+                            "create procedure checkConn2(in dsname varchar(20)) " +
+                            "parameter style java language java modifies SQL DATA " +
+                            "external name " +
+                            "'org.apache.derbyTesting.functionTests.tests.jdbcapi.DataSourceTest." +
+                            getNestedMethodName() +
+                    "'");
+                }
+            };
         }
     }
     
-    /**
-     * Set up the conection to the database.
-     */
-    public void setUp() throws  Exception {
-        Statement s = createStatement();
-        s.executeUpdate("create table autocommitxastart(i int)");
-        s.executeUpdate("insert into autocommitxastart values 1,2,3,4,5");
-        s.executeUpdate("create schema SCHEMA_Patricio");
-        s.executeUpdate("create table " +
-            "SCHEMA_Patricio.Patricio (id VARCHAR(255), value INTEGER)");
-        s.executeUpdate("create table intTable(i int)");
-        s.executeUpdate("create table hold_30 " +
-            "(id int not null primary key, b char(30))");
-        s.executeUpdate(
-            "create procedure checkConn2(in dsname varchar(20)) " +
-            "parameter style java language java modifies SQL DATA " +
-            "external name " +
-            "'org.apache.derbyTesting.functionTests.tests.jdbcapi." +
-            this.getNestedMethodName() +
-            "'");
-
-        // theoretically, commit should be unnecessary, because 
-        // autocommit should be true by default.
-        commit();
-        s.close();
-    }
-    
     public void tearDown() throws Exception {
-        getConnection().setAutoCommit(false);
-        Statement s = createStatement();
-        s.executeUpdate("drop table autocommitxastart");
-        s.executeUpdate("drop table intTable");
-        s.executeUpdate("drop table hold_30");
-        s.executeUpdate("drop table SCHEMA_Patricio.Patricio");
-        s.executeUpdate("drop schema SCHEMA_Patricio restrict");
-        s.executeUpdate("drop procedure checkConn2");
-        // should be automatic?        
-        commit();
-        s.close();
-
         // attempt to get rid of any left-over trace files
         AccessController.doPrivileged(new java.security.PrivilegedAction() {
             public Object run() {
@@ -231,7 +292,6 @@ public class DataSourceTest extends BaseJDBCTestCase {
         //Add a connection event listener to ConnectionPoolDataSource
         pc.addConnectionEventListener(aes12);
         Connection conn = pc.getConnection();
-        Statement st = conn.createStatement();
         
         dropTable(conn, "TAB1");
 
@@ -866,6 +926,8 @@ public class DataSourceTest extends BaseJDBCTestCase {
         PooledConnection pc = dsp.getPooledConnection();
         Connection c1 = pc.getConnection();
         Statement s = c1.createStatement();
+        // start by deleting all rows from intTable
+        s.executeUpdate("delete from intTable");
         c1.setAutoCommit(false);
 
         // this update should get rolled back later
@@ -1529,7 +1591,6 @@ public class DataSourceTest extends BaseJDBCTestCase {
         xac3.close();
     }
     
-    
     // test that an xastart in auto commit mode commits the existing work.
     // test fix of a bug ('beetle 5178') wherein XAresource.start() when 
     // auto-commit is true did not implictly commit any transaction
@@ -1613,6 +1674,14 @@ public class DataSourceTest extends BaseJDBCTestCase {
 
     public void testReadOnlyToWritableTran() throws SQLException, Exception
     {
+        // This fixture will run twice, once with embedded, once with client,
+        // and insert 2 rows in addition to the 5 rows inserted during setup. 
+        // The fixture tests a commit, so before running, try to remove row 
+        // 6 and 7 in case this is the second run of the fixture.
+        Statement s = createStatement();
+        s.executeUpdate("delete from autocommitxastart where i = 6");
+        s.executeUpdate("delete from autocommitxastart where i = 7");
+        
         // TESTING READ_ONLY TRANSACTION FOLLOWED BY WRITABLE TRANSACTION
         // Test following sequence of steps
         // 1)start a read-only global transaction 
@@ -1688,28 +1757,24 @@ public class DataSourceTest extends BaseJDBCTestCase {
     // XCY00 - invalid valid for property ...  
     // with DataSource
     public void testJira95ds() throws SQLException {
-        if (usingEmbedded())
-        {
-            try {
-                DataSource ds = JDBCDataSource.getDataSource();
-                // non-existent database
-                JDBCDataSource.setBeanProperty(ds, "databaseName", "jdbc:derby:wombat");
-                ds.getConnection();
-                fail ("expected an SQLException!");
-            } catch (SQLException sqle) {
-                // DERBY-2498: with client, getting a NullPointerException.
-                // Note also: the NPE does not occur with XADataSource - see
-                // testJira95xads().
-                if (usingEmbedded())
-                    assertSQLState("XCY00", sqle);
-            } catch (Exception e) {
-                e.printStackTrace();
-                // DERBY-2498, when fixed, remove 'if'
-                if (usingEmbedded())
-                    fail ("unexpected exception: " + e.toString());
-            }
-        } 
-    }
+        try {
+            DataSource ds = JDBCDataSource.getDataSource();
+            // non-existent database
+            JDBCDataSource.setBeanProperty(ds, "databaseName", "jdbc:derby:wombat");
+            ds.getConnection();
+            fail ("expected an SQLException!");
+        } catch (SQLException sqle) {
+            // DERBY-2498: with client, getting a NullPointerException.
+            // Note also: the NPE does not occur with XADataSource - see
+            // testJira95xads().
+            if (usingEmbedded())
+                assertSQLState("XCY00", sqle);
+        } catch (Exception e) {
+            // DERBY-2498, when fixed, remove 'if'
+            if (usingEmbedded())
+                fail ("unexpected exception: " + e.toString());
+        }
+    } 
 
     // test jira-derby 95 - a NullPointerException was returned when passing
     // an incorrect database name, should now give error XCY00   
@@ -1878,10 +1943,10 @@ public class DataSourceTest extends BaseJDBCTestCase {
         xads.setDatabaseName(null);
     } // End testClientDSConnectionAttributes
             
-    // Following test is similar to testClientDSRequestAuthentication, but
+    // Following test is similar to testClientDSConnectionAttributes, but
     // for embedded datasources.
-    // This subtest does not run for network server, the database shutdown
-    // is done using setDatabaseShutdown.
+    // This subtest does not run for network server, it uses
+    // setAttributesAsPassword, which isn't supported for client datasources.
     public void testDSRequestAuthentication() throws SQLException {
 
         if (usingDerbyNetClient())
@@ -3580,11 +3645,10 @@ public class DataSourceTest extends BaseJDBCTestCase {
     /**
      * Return the Java class and method for the procedure
      * for the nested connection test.
-     * checkDataSource 30 will override.
      */
-    private String getNestedMethodName()
+    private static String getNestedMethodName()
     {
-        return "DataSourceTest.checkNesConn";
+        return "checkNesConn";
     }
 
     // calling checkConnection 
