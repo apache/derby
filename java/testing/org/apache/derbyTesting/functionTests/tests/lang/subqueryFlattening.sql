@@ -103,7 +103,8 @@ select * from outer1 o where exists (select * from idx2 i, idx1 where o.c1 + 0 =
 values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
 
 -- multilevel subqueries
--- flatten all
+-- only flatten bottom of where exists, any, or in with 
+-- exists, any, or in in its own where clause. DERBY-3301.
 select * from outer1 o where exists
     (select * from idx2 i where exists
         (select * from idx1 ii 
@@ -115,8 +116,9 @@ select * from outer1 o where exists
         (select * from idx1 ii 
          where o.c1 = i.c1 and i.c2 = ii.c1));
 values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
--- flatten innermost into exists join, then flatten middle
--- into outer
+-- flatten innermost into exists join, but dont flatten middle into outer as it
+-- is a where exists, any, or in with exists, any, or in in its own where clause. 
+-- DERBY-3301.
 select * from outer1 o where exists
     (select * from idx2 i 
      where  o.c1 = i.c1 and i.c2 = 1 and exists
