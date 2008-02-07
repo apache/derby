@@ -1906,6 +1906,19 @@ public abstract class ResultSetNode extends QueryTreeNode
 		}
 	}
 
+	/**
+	 * Same goal as adjustForSortElimination above, but this version
+	 * takes a RequiredRowOrdering to allow nodes to adjust based on
+	 * the ORDER BY clause, if needed.
+	 */
+	void adjustForSortElimination(RequiredRowOrdering rowOrdering)
+		throws StandardException
+	{
+		/* Default is to ignore the row ordering; subclasses must
+		 * override if they need to use it.
+		 */
+		adjustForSortElimination();
+	}
 
 	/**
 	 * Count the number of distinct aggregates in the list.

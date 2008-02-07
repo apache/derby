@@ -40,6 +40,7 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.error.StandardException;
 
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.compile.OptimizablePredicateList;
 import org.apache.derby.iapi.sql.compile.Optimizer;
@@ -48,8 +49,8 @@ import org.apache.derby.iapi.sql.compile.Optimizable;
 import org.apache.derby.iapi.sql.compile.CostEstimate;
 import org.apache.derby.iapi.sql.compile.AccessPath;
 import org.apache.derby.iapi.sql.compile.JoinStrategy;
+import org.apache.derby.iapi.sql.compile.RequiredRowOrdering;
 import org.apache.derby.iapi.sql.compile.RowOrdering;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.Visitable;
 import org.apache.derby.iapi.sql.compile.Visitor;
 
@@ -4159,6 +4160,26 @@ public class FromBaseTable extends FromTable
 		 * FBT being under a PRN, etc.
 		 * So, we just ignore this call for now.
 		 */
+	}
+
+	/**
+	 * @see ResultSetNode#adjustForSortElimination
+	 */
+	void adjustForSortElimination(RequiredRowOrdering rowOrdering)
+		throws StandardException
+	{
+		/* We may have eliminated a sort with the assumption that
+		 * the rows from this base table will naturally come back
+		 * in the correct ORDER BY order. But in the case of IN
+		 * list probing predicates (see DERBY-47) the predicate
+		 * itself may affect the order of the rows.  In that case
+		 * we need to notify the predicate so that it does the
+		 * right thing--i.e. so that it preserves the natural
+		 * ordering of the rows as expected from this base table.
+		 * DERBY-3279.
+		 */
+		if (restrictionList != null)
+			restrictionList.adjustForSortElimination(rowOrdering);
 	}
 
 	/**

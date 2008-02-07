@@ -938,6 +938,16 @@ abstract class TableOperatorNode extends FromTable
 	}
 
 	/**
+	 * @see ResultSetNode#adjustForSortElimination
+	 */
+	void adjustForSortElimination(RequiredRowOrdering rowOrdering)
+		throws StandardException
+	{
+		leftResultSet.adjustForSortElimination(rowOrdering);
+		rightResultSet.adjustForSortElimination(rowOrdering);
+	}
+
+	/**
 	 * Accept a visitor, and call v.visit()
 	 * on child nodes as necessary.  
 	 * 

@@ -999,8 +999,8 @@ public interface ResultSetFactory {
 
 		@param probeVals List of values with which to probe the underlying
 			table. Should not be null.
-		@param probeValsAreSorted Whether or not the values in probeVals are
-			sorted.
+		@param sortRequired Which type of sort we need for the values
+			(ascending, descending, or none).
 	 */
 	NoPutResultSet getMultiProbeTableScanResultSet(
 			                    Activation activation,
@@ -1015,7 +1015,7 @@ public interface ResultSetFactory {
 								boolean sameStartStopPosition,
 								Qualifier[][] qualifiers,
 								DataValueDescriptor [] probeVals,
-								boolean probeValsAreSorted,
+								int sortRequired,
 								String tableName,
 								String userSuppliedOptimizerOverrides,
 								String indexName,

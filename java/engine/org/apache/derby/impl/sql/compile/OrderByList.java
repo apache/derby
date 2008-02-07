@@ -626,4 +626,118 @@ public class OrderByList extends OrderedColumnList
 	{
 		return sortNeeded;
 	}
+
+	/**
+	 * Determine whether or not this RequiredRowOrdering has a
+	 * DESCENDING requirement for the column referenced by the
+	 * received ColumnReference.
+	 */
+	boolean requiresDescending(ColumnReference cRef, int numOptimizables)
+		throws StandardException
+	{
+		int size = size();
+
+		/* Start by getting the table number and column position for
+		 * the table to which the ColumnReference points.
+		 */
+		JBitSet tNum = new JBitSet(numOptimizables);
+		BaseTableNumbersVisitor btnVis = new BaseTableNumbersVisitor(tNum);
+
+		cRef.accept(btnVis);
+		int crTableNumber = tNum.getFirstSetBit();
+		int crColPosition = btnVis.getColumnNumber();
+
+		if (SanityManager.DEBUG)
+		{
+			/* We assume that we only ever get here if the column
+			 * reference points to a specific column in a specific
+			 * table...
+			 */
+			if ((crTableNumber < 0) || (crColPosition < 0))
+			{
+				SanityManager.THROWASSERT(
+					"Failed to find table/column number for column '" +
+					cRef.getColumnName() + "' when checking for an " +
+					"ORDER BY requirement.");
+			}
+
+			/* Since we started with a single ColumnReference there
+			 * should be exactly one table number.
+			 */
+			if (!tNum.hasSingleBitSet())
+			{
+				SanityManager.THROWASSERT(
+					"Expected ColumnReference '" + cRef.getColumnName() +
+					"' to reference exactly one table, but tables found " +
+					"were: " + tNum);
+			}
+		}
+
+		/* Walk through the various ORDER BY elements to see if
+		 * any of them point to the same table and column that
+		 * we found above.
+		 */
+		for (int loc = 0; loc < size; loc++)
+		{
+			OrderByColumn obc = getOrderByColumn(loc);
+			ResultColumn rcOrderBy = obc.getResultColumn();
+
+			btnVis.reset();
+			rcOrderBy.accept(btnVis);
+			int obTableNumber = tNum.getFirstSetBit();
+			int obColPosition = btnVis.getColumnNumber();
+
+			/* ORDER BY target should always have a table number and
+			 * a column position.  It may not necessarily be a base
+			 * table, but there should be some FromTable for which
+			 * we have a ResultColumnList, and the ORDER BY should
+			 * reference one of the columns in that list (otherwise
+			 * we shouldn't have made it this far).
+			 */
+			if (SanityManager.DEBUG)
+			{
+				/* Since we started with a single ResultColumn there
+				 * should exactly one table number.
+				 */
+				if (!tNum.hasSingleBitSet())
+				{
+					SanityManager.THROWASSERT("Expected ResultColumn '" +
+						rcOrderBy.getColumnName() + "' to reference " +
+						"exactly one table, but found: " + tNum);
+				}
+
+				if (obColPosition < 0)
+				{
+					SanityManager.THROWASSERT(
+						"Failed to find orderBy column number " +
+						"for ORDER BY check on column '" + 
+						cRef.getColumnName() + "'.");
+				}
+			}
+
+			if (crTableNumber != obTableNumber)
+				continue;
+
+			/* They point to the same base table, so check the
+			 * column positions.
+			 */
+
+			if (crColPosition == obColPosition)
+			{
+				/* This ORDER BY element points to the same table
+				 * and column as the received ColumnReference.  So
+				 * return whether or not this ORDER BY element is
+				 * descending.
+				 */
+				return !obc.isAscending();
+			}
+		}
+
+		/* None of the ORDER BY elements referenced the same table
+		 * and column as the received ColumnReference, so there
+		 * is no descending requirement for the ColumnReference's
+		 * source (at least not from this OrderByList).
+		 */
+		return false;
+	}
 }
