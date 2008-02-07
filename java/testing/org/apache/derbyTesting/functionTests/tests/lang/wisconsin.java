@@ -40,7 +40,7 @@ public class wisconsin {
         conn.setAutoCommit(false);
         conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
         
-        createTables(conn);
+        createTables(conn, true);
         
         BufferedInputStream inStream;
         
@@ -62,7 +62,9 @@ public class wisconsin {
 		conn.commit();
 	}
 	
-	private static void createTables(Connection conn) throws SQLException{
+	public static void createTables(Connection conn, boolean compress)
+			throws SQLException {
+
 		Statement stmt = conn.createStatement();
 		
 		stmt.execute("create table TENKTUP1 ( unique1 int not null, " +
@@ -166,7 +168,11 @@ public class wisconsin {
 		stmt.execute("insert into BPRIME select * from TENKTUP2 where TENKTUP2.unique2 < 1000");
 
 		conn.commit();
-		
+
+		if (!compress) {
+			return;
+		}
+
 		PreparedStatement ps2 = conn.prepareStatement
 			("call SYSCS_UTIL.SYSCS_COMPRESS_TABLE(?, ?, ?)");
 		ps2.setString(1, "APP");
