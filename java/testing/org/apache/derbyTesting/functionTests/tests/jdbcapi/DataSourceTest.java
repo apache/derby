@@ -176,17 +176,15 @@ public class DataSourceTest extends BaseJDBCTestCase {
         // Due to a bug following cannot be run for client - DERBY-3379
         // To run this fixture with client, add to getClientSuite(),
         // when DERBY-3379 is fixed, remove from here (and client) and
-        // move to getRunTwiceSuite.
+        // move to baseSuite.
         suite.addTest(new DataSourceTest("testPooledReuseOnClose"));
-        // when DERBY-2498 gets fixed, move these two to getRunTwiceSuite
+        // when DERBY-2498 gets fixed, move these two to baseSuite
         suite.addTest(new DataSourceTest("testJira95ds"));
         suite.addTest(new DataSourceTest("testJira95pds"));
         // Following cannot run with client because of DERBY-2533; it hangs
-        // when fixed, this can be moved to getRunTwiceSuite.
+        // when fixed, this can be moved to baseSuite.
         suite.addTest(new DataSourceTest("testReuseAcrossGlobalLocal"));
-        // Following cannot run with client because of DERBY-2533; it hangs
-        // when fixed, this can be moved to getRunTwiceSuite.
-        suite.addTest(new DataSourceTest("testAutoCommitOnXAResourceStart"));
+        suite.addTest(new DataSourceTest("testXAHoldability"));
         return suite;
     }
     
