@@ -2744,42 +2744,44 @@ public class GenericLanguageConnectionContext
 				continue;
 			}
 
-			if (forRollback) 
+			if (forRollback) { 
 				//Since we are dealing with rollback, we need to reset the 
 				//activation no matter what the holdability might be or no
 				//matter whether the associated resultset returns rows or not.
 				a.reset();
-			else {
+				// Only invalidate statements if we performed DDL.
+				if (dataDictionaryInWriteMode()) {
+					ExecPreparedStatement ps = a.getPreparedStatement();
+					if (ps != null) {
+						ps.makeInvalid(DependencyManager.ROLLBACK, this);
+					}
+				}
+			} else {
 				//We are dealing with commit here. 
 				if (a.getResultSet() != null) {
+					ResultSet activationResultSet = a.getResultSet();
+					boolean resultsetReturnsRows = activationResultSet.returnsRows();
 					//if the activation has resultset associated with it, then 
 					//use following criteria to take the action
-					if ((a.getResultSetHoldability() == false && a.getResultSet().returnsRows()==true)){
-						//Close result sets that return rows and are not held 
-						//across commit. This is to implement closing JDBC 
-						//result sets that are CLOSE_CURSOR_ON_COMMIT at commit 
-						//time. 
-						a.getResultSet().close();
-					} else if (a.getResultSet().returnsRows()) {
-						//Clear the current row of the result sets that return
-						//rows and are held across commit. This is to implement
-						//keeping JDBC result sets open that are 
-						//HOLD_CURSORS_OVER_COMMIT at commit time and marking
-						//the resultset to be not on a valid row position. The 
-						//user will need to reposition within the resultset 
-						//before doing any row operations.
-						a.getResultSet().clearCurrentRow();
+					if (resultsetReturnsRows){
+						if (a.getResultSetHoldability() == false)
+							//Close result sets that return rows and are not held 
+							//across commit. This is to implement closing JDBC 
+							//result sets that are CLOSE_CURSOR_ON_COMMIT at commit 
+							//time. 
+							activationResultSet.close();
+						else 
+							//Clear the current row of the result sets that return
+							//rows and are held across commit. This is to implement
+							//keeping JDBC result sets open that are 
+							//HOLD_CURSORS_OVER_COMMIT at commit time and marking
+							//the resultset to be not on a valid row position. The 
+							//user will need to reposition within the resultset 
+							//before doing any row operations.
+							activationResultSet.clearCurrentRow();							
 					}
 				}
 				a.clearHeapConglomerateController();
-			}
-
-			// Only invalidate statements if we performed DDL.
-			if (forRollback && dataDictionaryInWriteMode()) {
-				ExecPreparedStatement ps = a.getPreparedStatement();
-				if (ps != null) {
-					ps.makeInvalid(DependencyManager.ROLLBACK, this);
-				}
 			}
 		}
 	}
