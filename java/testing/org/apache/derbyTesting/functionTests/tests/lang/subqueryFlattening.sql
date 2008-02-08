@@ -433,3 +433,77 @@ select distinct temp_t0.d from
 drop table digits;
 drop table odd;
 
+-- DERBY-3288: Optimizer does not correctly enforce EXISTS join order
+-- dependencies in the face of "short-circuited" plans.  In this test
+-- an EXISTS subquery is flattened into the outer query and thus has
+-- has a dependency on another FromTable (esp. HalfOuterJoinNode).
+-- The tables are such that the optimizer will attempt to short-
+-- circuit some relatively bad plans (namely, any join order that
+-- starts with { TAB_V, HOJ, ...}), and needs to correctly enforce
+-- join order dependencies in the process.
+
+CREATE TABLE tab_a (PId BIGINT NOT NULL); 
+CREATE TABLE tab_c (Id BIGINT NOT NULL PRIMARY KEY,
+  PAId BIGINT NOT NULL, PBId BIGINT NOT NULL);
+
+INSERT INTO tab_c VALUES (91, 81, 82);
+INSERT INTO tab_c VALUES (92, 81, 84);
+INSERT INTO tab_c VALUES (93, 81, 88);
+INSERT INTO tab_c VALUES (96, 81, 83);
+
+CREATE TABLE tab_v (OId BIGINT NOT NULL,
+  UGId BIGINT NOT NULL, val CHAR(1) NOT NULL);
+
+CREATE UNIQUE INDEX tab_v_i1 ON tab_v (OId, UGId, val);
+CREATE INDEX tab_v_i2 ON tab_v (UGId, val, OId);
+
+INSERT INTO tab_v VALUES (81, 31, 'A');
+INSERT INTO tab_v VALUES (82, 31, 'A');
+INSERT INTO tab_v VALUES (83, 31, 'A');
+INSERT INTO tab_v VALUES (84, 31, 'A');
+INSERT INTO tab_v VALUES (85, 31, 'A');
+INSERT INTO tab_v VALUES (86, 31, 'A');
+INSERT INTO tab_v VALUES (87, 31, 'A');
+INSERT INTO tab_v VALUES (81, 32, 'A');
+INSERT INTO tab_v VALUES (82, 32, 'A');
+INSERT INTO tab_v VALUES (83, 32, 'A');
+INSERT INTO tab_v VALUES (84, 32, 'A');
+INSERT INTO tab_v VALUES (85, 32, 'A');
+INSERT INTO tab_v VALUES (86, 32, 'A');
+INSERT INTO tab_v VALUES (87, 32, 'A');
+
+CREATE TABLE tab_b (Id BIGINT NOT NULL PRIMARY KEY, OId BIGINT NOT NULL);
+
+INSERT INTO tab_b VALUES (141, 81);
+INSERT INTO tab_b VALUES (142, 82);
+INSERT INTO tab_b VALUES (143, 84);
+INSERT INTO tab_b VALUES (144, 88);
+INSERT INTO tab_b VALUES (151, 81);
+INSERT INTO tab_b VALUES (152, 83);
+
+CREATE TABLE tab_d (Id BIGINT NOT NULL PRIMARY KEY,
+  PAId BIGINT NOT NULL, PBId BIGINT NOT NULL);
+
+INSERT INTO tab_d VALUES (181, 141, 142);
+INSERT INTO tab_d VALUES (182, 141, 143);
+INSERT INTO tab_d VALUES (186, 151, 152); 
+
+-- Query should return 2 rows; before DERBY-3288 was fixed, it would
+-- only return a single row due to violation of join order dependencies.
+
+SELECT tab_b.Id
+FROM tab_b JOIN tab_c ON (tab_b.OId = tab_c.PAId OR tab_b.OId = tab_c.PBId)
+LEFT OUTER JOIN tab_a ON tab_b.OId = PId
+WHERE EXISTS
+  (SELECT 'X' FROM tab_d
+    WHERE (PAId = 141 AND PBId = tab_b.Id)
+        OR (PBId = 141 AND PAId = tab_b.Id))
+  AND EXISTS
+    (SELECT 'X' FROM tab_v
+      WHERE OId = tab_b.OId AND UGId = 31 AND val = 'A');
+
+
+drop table tab_d;
+drop table tab_b;
+drop table tab_v;
+drop table tab_c;

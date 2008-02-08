@@ -596,7 +596,21 @@ public class OptimizerImpl implements Optimizer
 		*/
 		while (joinPosition >= 0)
 		{
-			int nextOptimizable = 0;
+			int nextOptimizable = proposedJoinOrder[joinPosition] + 1;
+			if (proposedJoinOrder[joinPosition] >= 0)
+			{
+				/* We are either going to try another table at the current
+				 * join order position, or we have exhausted all the tables
+				 * at the current join order position.  In either case, we
+				 * need to pull the table at the current join order position
+				 * and remove it from the join order.  Do this BEFORE we
+				 * search for the next optimizable so that assignedTableMap,
+				 * which is updated to reflect the PULL, has the correct
+				 * information for enforcing join order depdendencies.
+				 * DERBY-3288.
+				 */
+				pullOptimizableFromJoinOrder();
+			}
 
 			if (desiredJoinOrderFound || timeExceeded)
 			{
@@ -737,8 +751,6 @@ public class OptimizerImpl implements Optimizer
 			else
 			{
 				/* Find the next unused table at this join position */
-				nextOptimizable = proposedJoinOrder[joinPosition] + 1;
-
 				for ( ; nextOptimizable < numOptimizables; nextOptimizable++)
 				{
 					boolean found = false;
@@ -755,281 +767,58 @@ public class OptimizerImpl implements Optimizer
 						}
 					}
 
+					/* No need to check the dependencies if the optimizable
+					 * is already in the join order--because we should have
+					 * checked its dependencies before putting it there.
+					 */
+					if (found)
+					{
+						if (SanityManager.DEBUG)
+						{
+							// Doesn't hurt to check in SANE mode, though...
+							if ((nextOptimizable < numOptimizables) &&
+								!joinOrderMeetsDependencies(nextOptimizable))
+							{
+								SanityManager.THROWASSERT(
+									"Found optimizable '" + nextOptimizable +
+									"' in current join order even though " +
+									"its dependencies were NOT satisfied.");
+							}
+						}
+
+						continue;
+					}
+
 					/* Check to make sure that all of the next optimizable's
 					 * dependencies have been satisfied.
 					 */
-					if (nextOptimizable < numOptimizables)
+					if ((nextOptimizable < numOptimizables) &&
+						!joinOrderMeetsDependencies(nextOptimizable))
 					{
-						Optimizable nextOpt =
-								optimizableList.getOptimizable(nextOptimizable);
-						if (! (nextOpt.legalJoinOrder(assignedTableMap)))
+						if (optimizerTrace)
+						{
+							trace(SKIPPING_JOIN_ORDER, nextOptimizable, 0, 0.0, null);
+						}
+
+						/*
+						** If this is a user specified join order then it is illegal.
+						*/
+						if ( ! optimizableList.optimizeJoinOrder())
 						{
 							if (optimizerTrace)
 							{
-								trace(SKIPPING_JOIN_ORDER, nextOptimizable, 0, 0.0, null);
+								trace(ILLEGAL_USER_JOIN_ORDER, 0, 0, 0.0, null);
 							}
 
-							/*
-							** If this is a user specified join order then it is illegal.
-							*/
-							if ( ! optimizableList.optimizeJoinOrder())
-							{
-								if (optimizerTrace)
-								{
-									trace(ILLEGAL_USER_JOIN_ORDER, 0, 0, 0.0, null);
-								}
-
-								throw StandardException.newException(SQLState.LANG_ILLEGAL_FORCED_JOIN_ORDER);
-							}
-							continue;
-						}
-					}
-
-					if (! found)
-					{
-						break;
-					}
-				}
-
-			}
-
-			/*
-			** We are going to try an optimizable at the current join order
-			** position.  Is there one already at that position?
-			*/
-			if (proposedJoinOrder[joinPosition] >= 0)
-			{
-				/*
-				** We are either going to try another table at the current
-				** join order position, or we have exhausted all the tables
-				** at the current join order position.  In either case, we
-				** need to pull the table at the current join order position
-				** and remove it from the join order.
-				*/
-				Optimizable pullMe =
-					optimizableList.getOptimizable(
-											proposedJoinOrder[joinPosition]);
-
-				/*
-				** Subtract the cost estimate of the optimizable being
-				** removed from the total cost estimate.
-				**
-				** The total cost is the sum of all the costs, but the total
-				** number of rows is the number of rows returned by the
-				** innermost optimizable.
-				*/
-				double prevRowCount;
-				double prevSingleScanRowCount;
-				int prevPosition = 0;
-				if (joinPosition == 0)
-				{
-					prevRowCount = outermostCostEstimate.rowCount();
-					prevSingleScanRowCount = outermostCostEstimate.singleScanRowCount();
-				}
-				else
-				{
-					prevPosition = proposedJoinOrder[joinPosition - 1];
-					CostEstimate localCE = 
-						optimizableList.
-							getOptimizable(prevPosition).
-								getBestAccessPath().
-									getCostEstimate();
-					prevRowCount = localCE.rowCount();
-					prevSingleScanRowCount = localCE.singleScanRowCount();
-				}
-
-				/*
-				** If there is no feasible join order, the cost estimate
-				** in the best access path may never have been set.
-				** In this case, do not subtract anything from the
-				** current cost, since nothing was added to the current
-				** cost.
-				*/
-				double newCost = currentCost.getEstimatedCost();
-				double pullCost = 0.0;
-				CostEstimate pullCostEstimate =
-								pullMe.getBestAccessPath().getCostEstimate();
-				if (pullCostEstimate != null)
-				{
-					pullCost = pullCostEstimate.getEstimatedCost();
-
-					newCost -= pullCost;
-
-					/*
-					** It's possible for newCost to go negative here due to
-					** loss of precision--but that should ONLY happen if the
-					** optimizable we just pulled was at position 0.  If we
-					** have a newCost that is <= 0 at any other time, then
-					** it's the result of a different kind of precision loss--
-					** namely, the estimated cost of pullMe was so large that
-					** we lost the precision of the accumulated cost as it
-					** existed prior to pullMe. Then when we subtracted
-					** pullMe's cost out, we ended up setting newCost to zero.
-					** That's an unfortunate side effect of optimizer cost
-					** estimates that grow too large. If that's what happened
-					** here,try to make some sense of things by adding up costs
-					** as they existed prior to pullMe...
-					*/
-					if (newCost <= 0.0)
-					{
-						if (joinPosition == 0)
-							newCost = 0.0;
-						else
-							newCost = recoverCostFromProposedJoinOrder(false);
-					}
-				}
-
-				/* If we are choosing a new outer table, then
-				 * we rest the starting cost to the outermostCost.
-				 * (Thus avoiding any problems with floating point
-				 * accuracy and going negative.)
-				 */
-				if (joinPosition == 0)
-				{
-					if (outermostCostEstimate != null)
-					{
-						newCost = outermostCostEstimate.getEstimatedCost();
-					}
-					else
-					{
-						newCost = 0.0;
-					}
-				}
-
-				currentCost.setCost(
-					newCost,
-					prevRowCount,
-					prevSingleScanRowCount);
-				
-				/*
-				** Subtract from the sort avoidance cost if there is a
-				** required row ordering.
-				**
-				** NOTE: It is not necessary here to check whether the
-				** best cost was ever set for the sort avoidance path,
-				** because it considerSortAvoidancePath() would not be
-				** set if there cost were not set.
-				*/
-				if (requiredRowOrdering != null)
-				{
-					if (pullMe.considerSortAvoidancePath())
-					{
-						AccessPath ap = pullMe.getBestSortAvoidancePath();
-						double	   prevEstimatedCost = 0.0d;
-
-						/*
-						** Subtract the sort avoidance cost estimate of the
-						** optimizable being removed from the total sort
-						** avoidance cost estimate.
-						**
-						** The total cost is the sum of all the costs, but the
-						** total number of rows is the number of rows returned
-						** by the innermost optimizable.
-						*/
-						if (joinPosition == 0)
-						{
-							prevRowCount = outermostCostEstimate.rowCount();
-							prevSingleScanRowCount = outermostCostEstimate.singleScanRowCount();
-							/* If we are choosing a new outer table, then
-							 * we rest the starting cost to the outermostCost.
-							 * (Thus avoiding any problems with floating point
-							 * accuracy and going negative.)
-							 */
-							prevEstimatedCost = outermostCostEstimate.getEstimatedCost();
-						}
-						else
-						{
-							CostEstimate localCE = 
-								optimizableList.
-									getOptimizable(prevPosition).
-										getBestSortAvoidancePath().
-											getCostEstimate();
-							prevRowCount = localCE.rowCount();
-							prevSingleScanRowCount = localCE.singleScanRowCount();
-							prevEstimatedCost = currentSortAvoidanceCost.getEstimatedCost() -
-													ap.getCostEstimate().getEstimatedCost();
+							throw StandardException.newException(
+								SQLState.LANG_ILLEGAL_FORCED_JOIN_ORDER);
 						}
 
-						// See discussion above for "newCost"; same applies here.
-						if (prevEstimatedCost <= 0.0)
-						{
-							if (joinPosition == 0)
-								prevEstimatedCost = 0.0;
-							else
-							{
-								prevEstimatedCost =
-									recoverCostFromProposedJoinOrder(true);
-							}
-						}
-
-						currentSortAvoidanceCost.setCost(
-							prevEstimatedCost,
-							prevRowCount,
-							prevSingleScanRowCount);
-
-						/*
-						** Remove the table from the best row ordering.
-						** It should not be necessary to remove it from
-						** the current row ordering, because it is
-						** maintained as we step through the access paths
-						** for the current Optimizable.
-						*/
-						bestRowOrdering.removeOptimizable(
-													pullMe.getTableNumber());
-
-						/*
-						** When removing a table from the join order,
-						** the best row ordering for the remaining outer tables
-						** becomes the starting point for the row ordering of
-						** the current table.
-						*/
-						bestRowOrdering.copy(currentRowOrdering);
+						continue;
 					}
+
+					break;
 				}
-
-				/*
-				** Pull the predicates at from the optimizable and put
-				** them back in the predicate list.
-				**
-				** NOTE: This is a little inefficient because it pulls the
-				** single-table predicates, which are guaranteed to always
-				** be pushed to the same optimizable.  We could make this
-				** leave the single-table predicates where they are.
-				*/
-				pullMe.pullOptPredicates(predicateList);
-
-				/*
-				** When we pull an Optimizable we need to go through and
-				** load whatever best path we found for that Optimizable
-				** with respect to this OptimizerImpl.  The reason is that
-				** we could be pulling the Optimizable for the last time
-				** (before returning false), in which case we want it (the
-				** Optimizable) to be holding the best access path that it
-				** had at the time we found bestJoinOrder.  This ensures
-				** that the access path which is generated and executed for
-				** the Optimizable matches the the access path decisions
-				** made by this OptimizerImpl for the best join order.
-				**
-				** NOTE: We we only reload the best plan if it's necessary
-				** to do so--i.e. if the best plans aren't already loaded.
-				** The plans will already be loaded if the last complete
-				** join order we had was the best one so far, because that
-				** means we called "rememberAsBest" on every Optimizable
-				** in the list and, as part of that call, we will run through
-				** and set trulyTheBestAccessPath for the entire subtree.
-				** So if we haven't tried any other plans since then,
-				** we know that every Optimizable (and its subtree) already
-				** has the correct best plan loaded in its trulyTheBest
-				** path field.  It's good to skip the load in this case
-				** because 'reloading best plans' involves walking the
-				** entire subtree of _every_ Optimizable in the list, which
-				** can be expensive if there are deeply nested subqueries.
-				*/
-				if (reloadBestPlan)
-					pullMe.updateBestPlanMap(FromTable.LOAD_PLAN, this);
-
-				/* Mark current join position as unused */
-				proposedJoinOrder[joinPosition] = -1;
 			}
 
 			/* Have we exhausted all the optimizables at this join position? */
@@ -1118,23 +907,6 @@ public class OptimizerImpl implements Optimizer
 				/* Go back up one join position */
 				joinPosition--;
 
-				/* Clear the assigned table map for the previous position 
-				 * NOTE: We need to do this here to for the dependency tracking
-				 */
-				if (joinPosition >= 0)
-				{
-					Optimizable pullMe =
-						optimizableList.getOptimizable(
-											proposedJoinOrder[joinPosition]);
-
-					/*
-					** Clear the bits from the table at this join position.
-					** This depends on them having been set previously.
-					** NOTE: We need to do this here to for the dependency tracking
-					*/
-					assignedTableMap.xor(pullMe.getReferencedTableMap());
-				}
-
 				if (joinPosition < 0 && permuteState == WALK_HIGH) //reached peak
 				{
 					joinPosition = 0;	//reset, fall down the hill
@@ -1192,15 +964,6 @@ public class OptimizerImpl implements Optimizer
 			optimizableList.getOptimizable(nextOptimizable).
 				getBestAccessPath().setCostEstimate((CostEstimate) null);
 
-			/* Set the assigned table map to be exactly the tables
-			 * in the current join order. 
-			 */
-			assignedTableMap.clearAll();
-			for (int index = 0; index <= joinPosition; index++)
-			{
-				assignedTableMap.or(optimizableList.getOptimizable(proposedJoinOrder[index]).getReferencedTableMap());
-			}
-
 			if (optimizerTrace)
 			{
 				trace(CONSIDERING_JOIN_ORDER, 0, 0, 0.0, null);
@@ -1209,6 +972,29 @@ public class OptimizerImpl implements Optimizer
 			Optimizable nextOpt =
 							optimizableList.getOptimizable(nextOptimizable);
 
+			/* Update the assigned table map to include the newly-placed
+			 * Optimizable in the current join order.  Assumption is that
+			 * this OR can always be undone using an XOR, which will only
+			 * be true if none of the Optimizables have overlapping table
+			 * maps.  The XOR itself occurs as part of optimizable "PULL"
+			 * processing.
+			 */
+			if (SanityManager.DEBUG)
+			{
+				JBitSet optMap =
+					(JBitSet)nextOpt.getReferencedTableMap().clone();
+
+				optMap.and(assignedTableMap);
+				if (optMap.getFirstSetBit() != -1)
+				{
+					SanityManager.THROWASSERT(
+						"Found multiple optimizables that share one or " +
+						"more referenced table numbers (esp: '" +
+						optMap + "'), but that should not be the case.");
+				}
+			}
+
+			assignedTableMap.or(nextOpt.getReferencedTableMap());
 			nextOpt.startOptimizing(this, currentRowOrdering);
 
 			pushPredicates(
@@ -1297,6 +1083,274 @@ public class OptimizerImpl implements Optimizer
 		}
 
 		return recoveredCost;
+	}
+
+	/**
+	 * Check to see if the optimizable corresponding to the received
+	 * optNumber can legally be placed within the current join order.
+	 * More specifically, if the optimizable has any dependencies,
+	 * check to see if those dependencies are satisified by the table
+	 * map representing the current join order.
+	 */
+	private boolean joinOrderMeetsDependencies(int optNumber)
+		throws StandardException
+	{
+		Optimizable nextOpt = optimizableList.getOptimizable(optNumber);
+		return nextOpt.legalJoinOrder(assignedTableMap);
+	}
+
+	/**
+	 * Pull whatever optimizable is at joinPosition in the proposed
+	 * join order from the join order, and update all corresponding
+	 * state accordingly.
+	 */
+	private void pullOptimizableFromJoinOrder()
+		throws StandardException
+	{
+		Optimizable pullMe =
+			optimizableList.getOptimizable(proposedJoinOrder[joinPosition]);
+
+		/*
+		** Subtract the cost estimate of the optimizable being
+		** removed from the total cost estimate.
+		**
+		** The total cost is the sum of all the costs, but the total
+		** number of rows is the number of rows returned by the
+		** innermost optimizable.
+		*/
+		double prevRowCount;
+		double prevSingleScanRowCount;
+		int prevPosition = 0;
+		if (joinPosition == 0)
+		{
+			prevRowCount = outermostCostEstimate.rowCount();
+			prevSingleScanRowCount = outermostCostEstimate.singleScanRowCount();
+		}
+		else
+		{
+			prevPosition = proposedJoinOrder[joinPosition - 1];
+			CostEstimate localCE = 
+				optimizableList.
+					getOptimizable(prevPosition).
+						getBestAccessPath().
+							getCostEstimate();
+			prevRowCount = localCE.rowCount();
+			prevSingleScanRowCount = localCE.singleScanRowCount();
+		}
+
+		/*
+		** If there is no feasible join order, the cost estimate
+		** in the best access path may never have been set.
+		** In this case, do not subtract anything from the
+		** current cost, since nothing was added to the current
+		** cost.
+		*/
+		double newCost = currentCost.getEstimatedCost();
+		double pullCost = 0.0;
+		CostEstimate pullCostEstimate =
+						pullMe.getBestAccessPath().getCostEstimate();
+		if (pullCostEstimate != null)
+		{
+			pullCost = pullCostEstimate.getEstimatedCost();
+
+			newCost -= pullCost;
+
+			/*
+			** It's possible for newCost to go negative here due to
+			** loss of precision--but that should ONLY happen if the
+			** optimizable we just pulled was at position 0.  If we
+			** have a newCost that is <= 0 at any other time, then
+			** it's the result of a different kind of precision loss--
+			** namely, the estimated cost of pullMe was so large that
+			** we lost the precision of the accumulated cost as it
+			** existed prior to pullMe. Then when we subtracted
+			** pullMe's cost out, we ended up setting newCost to zero.
+			** That's an unfortunate side effect of optimizer cost
+			** estimates that grow too large. If that's what happened
+			** here,try to make some sense of things by adding up costs
+			** as they existed prior to pullMe...
+			*/
+			if (newCost <= 0.0)
+			{
+				if (joinPosition == 0)
+					newCost = 0.0;
+				else
+					newCost = recoverCostFromProposedJoinOrder(false);
+			}
+		}
+
+		/* If we are choosing a new outer table, then
+		 * we rest the starting cost to the outermostCost.
+		 * (Thus avoiding any problems with floating point
+		 * accuracy and going negative.)
+		 */
+		if (joinPosition == 0)
+		{
+			if (outermostCostEstimate != null)
+			{
+				newCost = outermostCostEstimate.getEstimatedCost();
+			}
+			else
+			{
+				newCost = 0.0;
+			}
+		}
+
+		currentCost.setCost(
+			newCost,
+			prevRowCount,
+			prevSingleScanRowCount);
+				
+		/*
+		** Subtract from the sort avoidance cost if there is a
+		** required row ordering.
+		**
+		** NOTE: It is not necessary here to check whether the
+		** best cost was ever set for the sort avoidance path,
+		** because it considerSortAvoidancePath() would not be
+		** set if there cost were not set.
+		*/
+		if (requiredRowOrdering != null)
+		{
+			if (pullMe.considerSortAvoidancePath())
+			{
+				AccessPath ap = pullMe.getBestSortAvoidancePath();
+				double	   prevEstimatedCost = 0.0d;
+
+				/*
+				** Subtract the sort avoidance cost estimate of the
+				** optimizable being removed from the total sort
+				** avoidance cost estimate.
+				**
+				** The total cost is the sum of all the costs, but the
+				** total number of rows is the number of rows returned
+				** by the innermost optimizable.
+				*/
+				if (joinPosition == 0)
+				{
+					prevRowCount = outermostCostEstimate.rowCount();
+					prevSingleScanRowCount =
+						outermostCostEstimate.singleScanRowCount();
+
+					/* If we are choosing a new outer table, then
+					 * we rest the starting cost to the outermostCost.
+					 * (Thus avoiding any problems with floating point
+					 * accuracy and going negative.)
+					 */
+					prevEstimatedCost =
+						outermostCostEstimate.getEstimatedCost();
+				}
+				else
+				{
+					CostEstimate localCE = 
+						optimizableList.
+							getOptimizable(prevPosition).
+								getBestSortAvoidancePath().
+									getCostEstimate();
+					prevRowCount = localCE.rowCount();
+					prevSingleScanRowCount = localCE.singleScanRowCount();
+					prevEstimatedCost =
+						currentSortAvoidanceCost.getEstimatedCost() -
+						ap.getCostEstimate().getEstimatedCost();
+				}
+
+				// See discussion above for "newCost"; same applies here.
+				if (prevEstimatedCost <= 0.0)
+				{
+					if (joinPosition == 0)
+						prevEstimatedCost = 0.0;
+					else
+					{
+						prevEstimatedCost =
+							recoverCostFromProposedJoinOrder(true);
+					}
+				}
+
+				currentSortAvoidanceCost.setCost(
+					prevEstimatedCost,
+					prevRowCount,
+					prevSingleScanRowCount);
+
+				/*
+				** Remove the table from the best row ordering.
+				** It should not be necessary to remove it from
+				** the current row ordering, because it is
+				** maintained as we step through the access paths
+				** for the current Optimizable.
+				*/
+				bestRowOrdering.removeOptimizable(pullMe.getTableNumber());
+
+				/*
+				** When removing a table from the join order,
+				** the best row ordering for the remaining outer tables
+				** becomes the starting point for the row ordering of
+				** the current table.
+				*/
+				bestRowOrdering.copy(currentRowOrdering);
+			}
+		}
+
+		/*
+		** Pull the predicates at from the optimizable and put
+		** them back in the predicate list.
+		**
+		** NOTE: This is a little inefficient because it pulls the
+		** single-table predicates, which are guaranteed to always
+		** be pushed to the same optimizable.  We could make this
+		** leave the single-table predicates where they are.
+		*/
+		pullMe.pullOptPredicates(predicateList);
+
+		/*
+		** When we pull an Optimizable we need to go through and
+		** load whatever best path we found for that Optimizable
+		** with respect to this OptimizerImpl.  The reason is that
+		** we could be pulling the Optimizable for the last time
+		** (before returning false), in which case we want it (the
+		** Optimizable) to be holding the best access path that it
+		** had at the time we found bestJoinOrder.  This ensures
+		** that the access path which is generated and executed for
+		** the Optimizable matches the the access path decisions
+		** made by this OptimizerImpl for the best join order.
+		**
+		** NOTE: We we only reload the best plan if it's necessary
+		** to do so--i.e. if the best plans aren't already loaded.
+		** The plans will already be loaded if the last complete
+		** join order we had was the best one so far, because that
+		** means we called "rememberAsBest" on every Optimizable
+		** in the list and, as part of that call, we will run through
+		** and set trulyTheBestAccessPath for the entire subtree.
+		** So if we haven't tried any other plans since then,
+		** we know that every Optimizable (and its subtree) already
+		** has the correct best plan loaded in its trulyTheBest
+		** path field.  It's good to skip the load in this case
+		** because 'reloading best plans' involves walking the
+		** entire subtree of _every_ Optimizable in the list, which
+		** can be expensive if there are deeply nested subqueries.
+		*/
+		if (reloadBestPlan)
+			pullMe.updateBestPlanMap(FromTable.LOAD_PLAN, this);
+
+		/* Mark current join position as unused */
+		proposedJoinOrder[joinPosition] = -1;
+
+		/* If we didn't advance the join position then the optimizable
+		 * which currently sits at proposedJoinOrder[joinPosition]--call
+		 * it PULL_ME--is *not* going to remain there. Instead, we're
+		 * going to pull that optimizable from its position and attempt
+		 * to put another one in its place.  That said, when we try to
+		 * figure out which of the other optimizables to place at
+		 * joinPosition, we'll first do some "dependency checking", the
+		 * result of which relies on the contents of assignedTableMap.
+		 * Since assignedTableMap currently holds info about PULL_ME
+		 * and since PULL_ME is *not* going to remain in the join order,
+		 * we need to remove the info for PULL_ME from assignedTableMap.
+		 * Otherwise an Optimizable which depends on PULL_ME could
+		 * incorrectly be placed in the join order *before* PULL_ME,
+		 * which would violate the dependency and lead to incorrect
+		 * results. DERBY-3288.
+		 */
+		assignedTableMap.xor(pullMe.getReferencedTableMap());
 	}
 
 	/*

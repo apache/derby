@@ -1040,17 +1040,25 @@ public class FromVTI extends FromTable implements VTIEnvironment
 		/* Generate the referenced table map */
 		referencedTableMap = new JBitSet(numTables);
 		referencedTableMap.set(tableNumber);
-		newInvocation.categorize(referencedTableMap, false);
 
-		// Create the dependency map
+		/* Create the dependency map.  This FromVTI depends on any
+		 * tables which are referenced by the method call.  Note,
+		 * though, that such tables should NOT appear in this node's
+		 * referencedTableMap, since that field is really meant to
+		 * hold the table numbers for any FromTables which appear
+		 * AT OR UNDER the subtree whose root is this FromVTI.  That
+		 * said, the tables referenced by newInvocation do not appear
+		 * "under" this FromVTI--on the contrary, they must appear
+		 * "above" this FromVTI within the query tree in order to
+		 * be referenced by the newInvocation.  So newInvocation table
+		 * references do _not_ belong in this.referencedTableMap.
+		 * (DERBY-3288)
+		 */
 		dependencyMap = new JBitSet(numTables);
-		for (int index = 0; index < numTables; index++)
-		{
-			if ((index != tableNumber) && referencedTableMap.get(index))
-			{
-				dependencyMap.set(index);
-			}
-		}
+		newInvocation.categorize(dependencyMap, false);
+
+		// Make sure this FromVTI does not "depend" on itself.
+		dependencyMap.clear(tableNumber);
 
 		// Get a JBitSet of the outer tables represented in the parameter list
 		correlationMap = new JBitSet(numTables);
