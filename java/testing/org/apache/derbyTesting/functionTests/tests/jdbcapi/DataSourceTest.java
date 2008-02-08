@@ -617,26 +617,25 @@ public class DataSourceTest extends BaseJDBCTestCase {
     }
     
     /**
-     * Test that a PooledConnection can be reused during the close
-     * event raised by the closing of its logical connection.
+     * Test that a PooledConnection can be reused and closed
+     * (separately) during the close event raised by the
+     * closing of its logical connection.
      * DERBY-2142.
      * @throws SQLException 
      *
      */
     public void testPooledReuseOnClose() throws SQLException
     {
-    	// TEMP - seems to fail on network client
-    	if (!usingEmbedded())
-    		return;
-    	
     	// PooledConnection from a ConnectionPoolDataSource
     	ConnectionPoolDataSource cpds =
     		J2EEDataSource.getConnectionPoolDataSource();
     	subtestPooledReuseOnClose(cpds.getPooledConnection());
+        subtestPooledCloseOnClose(cpds.getPooledConnection());
 
     	// PooledConnection from an XDataSource
     	XADataSource xads = J2EEDataSource.getXADataSource();
     	subtestPooledReuseOnClose(xads.getXAConnection());
+        subtestPooledCloseOnClose(xads.getXAConnection());
     }
     
     /**
@@ -690,6 +689,51 @@ public class DataSourceTest extends BaseJDBCTestCase {
     	c2.createStatement().close();
     	
     	pc.close();
+    }
+    
+    /**
+     * Tests that a pooled connection can successfully be closed
+     * during the processing of its close event by its listener.
+     */
+    private void subtestPooledCloseOnClose(final PooledConnection pc) throws SQLException
+    {
+        pc.addConnectionEventListener(new ConnectionEventListener() {
+
+            /**
+             * Mimic a pool handler that closes the PooledConnection
+             * (say it no longer needs it, pool size being reduced)
+             */
+            public void connectionClosed(ConnectionEvent event) {
+                PooledConnection pce = (PooledConnection) event.getSource();
+                assertSame(pc, pce);
+                try {
+                    pce.close();
+                } catch (SQLException e) {
+                    // Need to catch the exception here because
+                    // we cannot throw an exception through
+                    // the api method.
+                    fail(e.getMessage());
+                }
+            }
+
+            public void connectionErrorOccurred(ConnectionEvent event) {
+            }
+            
+        });
+        
+        // Open and close a connection to invoke the logic above
+        // through the callback
+        pc.getConnection().close();
+                
+        // The callback closed the actual pooled connection
+        // so subsequent requests to get a logical connection
+        // should fail.
+        try {
+            pc.getConnection();
+            fail("PooledConnection should be closed");
+        } catch (SQLException sqle) {
+            assertSQLState("08003", sqle);
+        }
     }
     
     public void testAllDataSources() throws SQLException, Exception
