@@ -52,6 +52,8 @@ public class TypesImplInstanceGetter extends FormatableInstanceGetter {
                           return new BaseTypeIdImpl(fmtId);
                   case StoredFormatIds.DECIMAL_TYPE_ID_IMPL:
                           return new DecimalTypeIdImpl(false);
+                  case StoredFormatIds.DATA_TYPE_SERVICES_IMPL_V01_ID:
+                      return new OldRoutineType();
                   default:
                         return null;
                 }

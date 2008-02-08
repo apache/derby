@@ -12825,8 +12825,7 @@ routineGrantStatement() throws StandardException :
 RoutineDesignator routineDesignator() throws StandardException :
 {
     Token procOrFunction;
-    RoutineDesignator routine = null;
-    TableName name = null;
+    TableName name;
     List paramTypeList = null;
 }
 {
@@ -12845,19 +12844,19 @@ RoutineDesignator routineDesignator() throws StandardException :
 /*
  * <A NAME="parameterTypeList">parameterTypeList</A>
  */
-List parameterTypeList( ) throws StandardException :
+List/*<TypeDescriptor>*/ parameterTypeList( ) throws StandardException :
 {
     ArrayList list = new ArrayList();
-    DataTypeDescriptor dtd;
+    TypeDescriptor type;
 }
 {
-    [ dtd = dataTypeCommon()
+    [ type = catalogType()
         {
-            list.add( dtd);
+            list.add(type);
         }
-      ( <COMMA> dtd = dataTypeCommon()
+      ( <COMMA> type = catalogType()
         {
-            list.add( dtd);
+            list.add(type);
         }
       ) * ]
     {

@@ -220,12 +220,22 @@ public final class TypeId implements Formatable
         ** Static runtime fields for typeIds
         ** These are put here because the system needs them init time.
         */
-        public static final TypeId              BOOLEAN_ID = new TypeId(StoredFormatIds.BOOLEAN_TYPE_ID,
-                                                                                                                        new BaseTypeIdImpl(StoredFormatIds.BOOLEAN_TYPE_ID_IMPL));
-        public static final TypeId              INTEGER_ID = new TypeId(StoredFormatIds.INT_TYPE_ID,
-                                                                                                                        new BaseTypeIdImpl(StoredFormatIds.INT_TYPE_ID_IMPL));
-        public static final TypeId              CHAR_ID = new TypeId(StoredFormatIds.CHAR_TYPE_ID,
-                                                                                                                 new BaseTypeIdImpl(StoredFormatIds.CHAR_TYPE_ID_IMPL));
+        public static final TypeId BOOLEAN_ID = new TypeId(
+            StoredFormatIds.BOOLEAN_TYPE_ID,
+               new BaseTypeIdImpl(StoredFormatIds.BOOLEAN_TYPE_ID_IMPL));
+        
+        public static final TypeId SMALLINT_ID = new TypeId(
+                StoredFormatIds.SMALLINT_TYPE_ID,
+                new BaseTypeIdImpl(StoredFormatIds.SMALLINT_TYPE_ID_IMPL));
+
+        public static final TypeId INTEGER_ID = new TypeId(
+            StoredFormatIds.INT_TYPE_ID,
+            new BaseTypeIdImpl(StoredFormatIds.INT_TYPE_ID_IMPL));
+
+        public static final TypeId CHAR_ID = new TypeId(
+            StoredFormatIds.CHAR_TYPE_ID,
+            new BaseTypeIdImpl(StoredFormatIds.CHAR_TYPE_ID_IMPL));
+        
         /*
         ** Others are created on demand by the getBuiltInTypeId(int),
         ** if they are built-in (i.e.? Part of JDBC .Types),
@@ -233,7 +243,7 @@ public final class TypeId implements Formatable
         */
 
         private static TypeId                   TINYINT_ID;
-        private static TypeId                   SMALLINT_ID;
+
         private static TypeId                   LONGINT_ID;
         private static TypeId                   REAL_ID;
         private static TypeId                   DOUBLE_ID;
@@ -288,11 +298,7 @@ public final class TypeId implements Formatable
                           break;
 
                   case Types.SMALLINT:
-                          ret = SMALLINT_ID;
-                          if (ret == null)
-                                  ret = SMALLINT_ID = new TypeId(StoredFormatIds.SMALLINT_TYPE_ID,
-                                                                        new BaseTypeIdImpl(StoredFormatIds.SMALLINT_TYPE_ID_IMPL));
-                          break;
+                          return SMALLINT_ID;
 
                   case Types.INTEGER:
                           return INTEGER_ID;
@@ -1269,7 +1275,7 @@ public final class TypeId implements Formatable
          */
         public String   toParsableString(DataTypeDescriptor dts)
         {
-                return  baseTypeId.toParsableString(dts);
+                return  baseTypeId.toParsableString(dts.getCatalogType());
         }
 
         /**

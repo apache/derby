@@ -292,7 +292,7 @@ String[] TwoByte = {
         /* 237 */       null,
         /* 238 */       null,
         /* 239 */       null,
-        /* 240 */       null,
+        /* 240 */       "org.apache.derby.iapi.types.DataTypeDescriptor",
         /* 241 */       "org.apache.derby.impl.store.raw.data.InitPageOperation",
         /* 242 */       "org.apache.derby.impl.store.raw.data.ContainerOperation",
         /* 243 */       null,
@@ -311,7 +311,7 @@ String[] TwoByte = {
         /* 256 */       "org.apache.derby.iapi.types.DTSClassInfo", //InstanceGetter
         /* 257 */       "org.apache.derby.iapi.types.DTSClassInfo", //InstanceGetter
         /* 258 */       "org.apache.derby.iapi.types.DTSClassInfo", //InstanceGetter
-        /* 259 */       "org.apache.derby.iapi.types.DataTypeDescriptor",
+        /* 259 */       "org.apache.derby.catalog.types.TypesImplInstanceGetter", // old catalog type format
         /* 260 */       "org.apache.derby.iapi.types.DTSClassInfo", //InstanceGetter
         /* 261 */       "org.apache.derby.impl.store.raw.xact.TransactionTableEntry",
         /* 262 */       "org.apache.derby.impl.store.raw.xact.TransactionTable",

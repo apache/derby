@@ -275,7 +275,16 @@ public interface StoredFormatIds {
             (MIN_ID_2 + 14);
     
     /**
-            class com.ibm.db2j.protcol.Datatypes.Execution.DataTypeDescriptor
+     * In releases prior to 10.3 this format was produced by
+     * DataTypeDescriptor. The format was incorrect used
+     * in system catalogs for routine parameter and return
+     * types. The format contained repeated information.
+     * DERBY-2775 changed the code so that these catalog
+     * types were written as TypeDescriptor (which is what
+     * always had occurred for the types in SYSCOLUMNS).
+     * <P>
+     * This format now maps to OldRoutineType and is solely
+     * used to read old routine types.
      */
     static public final int DATA_TYPE_SERVICES_IMPL_V01_ID =
             (MIN_ID_2 + 259);
@@ -509,9 +518,13 @@ public interface StoredFormatIds {
             (MIN_ID_2 + 239);
     
     /**
-    class org.apache.derby.impl.sql.catalog.ListOfRowListsImpl
+     * DataTypeDescriptor (runtime type) new format from 10.4
+     * onwards that reflects the change in role from is a TypeDescriptor
+     * to has a TypeDescriptor. Fixes the format so that information
+     * is not duplicated.
+     * Old format number was DATA_TYPE_SERVICES_IMPL_V01_ID (259).
      */
-    static public final int UNUSED_240 =
+    static public final int DATA_TYPE_DESCRIPTOR_V02_ID =
             (MIN_ID_2 + 240);
 
     /**

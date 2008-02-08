@@ -161,7 +161,6 @@ public class RoutineAliasInfo extends MethodAliasInfo
 			}
 
 			if (returnType != null) {
-                SanityManager.ASSERT(!(returnType instanceof DataTypeDescriptor));
 				if (!((sqlAllowed >= RoutineAliasInfo.READS_SQL_DATA) && (sqlAllowed <= RoutineAliasInfo.NO_SQL))) {
 					SanityManager.THROWASSERT("Invalid sqlAllowed for FUNCTION " + methodName + " " + sqlAllowed);
 				}
@@ -244,7 +243,7 @@ public class RoutineAliasInfo extends MethodAliasInfo
 		parameterCount = in.readInt();
 		parameterStyle = in.readShort();
 		sqlAllowed = in.readShort();
-		returnType = (TypeDescriptor) in.readObject();
+		returnType = getStoredType(in.readObject());
 		calledOnNullInput = in.readBoolean();
 		in.readInt(); // future expansion.
 
@@ -253,7 +252,10 @@ public class RoutineAliasInfo extends MethodAliasInfo
 			parameterTypes = new TypeDescriptor[parameterCount];
 
 			ArrayUtil.readArrayItems(in, parameterNames);
-			ArrayUtil.readArrayItems(in, parameterTypes);
+            for (int p = 0; p < parameterTypes.length; p++)
+            {
+                parameterTypes[p] = getStoredType(in.readObject());
+            }
 			parameterModes = ArrayUtil.readIntArray(in);
 
 		} else {
@@ -262,6 +264,24 @@ public class RoutineAliasInfo extends MethodAliasInfo
 			parameterModes = null;
 		}
 	}
+    
+    /**
+     * Old releases (10.3 and before) wrote out the runtime
+     * DataTypeDescriptor for routine parameter and return types.
+     * 10.4 onwards (DERBY-2775) always writes out the catalog
+     * type TypeDescriptor. Here we see what object was read from
+     * disk and if it was the old type, now mapped to OldRoutineType,
+     * we extract the catalog type and use that.
+     * 
+     * @param onDiskType The object read that represents the type.
+     * @return
+     */
+    private static TypeDescriptor getStoredType(Object onDiskType)
+    {
+        if (onDiskType instanceof OldRoutineType)
+            return ((OldRoutineType) onDiskType).getCatalogType();
+        return (TypeDescriptor) onDiskType;
+    }
 
 	/**
 	 * Write this object to a stream of stored objects.

@@ -49,9 +49,11 @@ import org.apache.derby.iapi.sql.conn.ConnectionUtil;
  * <UL>
  * <LI> Collation Derivation
  * </UL>
+ * <P>
+ * A DataTypeDescriptor is immutable.
  */
 
-public final class DataTypeDescriptor implements TypeDescriptor, Formatable
+public final class DataTypeDescriptor implements Formatable
 {
 	/********************************************************
 	**
@@ -67,7 +69,30 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 	**
 	********************************************************/
     
-    public static final DataTypeDescriptor INTEGER = new DataTypeDescriptor(TypeId.INTEGER_ID, true);
+    /**
+     * Runtime INTEGER type that is nullable.
+     */
+    public static final DataTypeDescriptor INTEGER =
+        new DataTypeDescriptor(TypeId.INTEGER_ID, true);
+    
+    /**
+     * Runtime INTEGER type that is not nullable.
+     */
+    public static final DataTypeDescriptor INTEGER_NOT_NULL =
+        INTEGER.getNullabilityType(false);
+    
+    /**
+     * Runtime SMALLINT type that is nullable.
+     */
+    public static final DataTypeDescriptor SMALLINT =
+        new DataTypeDescriptor(TypeId.SMALLINT_ID, true);
+    
+    /**
+     * Runtime INTEGER type that is not nullable.
+     */
+    public static final DataTypeDescriptor SMALLINT_NOT_NULL =
+        SMALLINT.getNullabilityType(false);
+     
 
 	/*
 	** Static creators
@@ -78,6 +103,9 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
      * to the maximum possible.
      * 
      * Collation type will be UCS_BASIC and derivation IMPLICIT.
+     * 
+     * For well known types code may also use the pre-defined
+     * runtime types that are fields of this class, such as INTEGER.
 	 *
 	 * @param jdbcType	The int type of the JDBC type for which to get
 	 *						a corresponding SQL DataTypeDescriptor
@@ -177,6 +205,12 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 
 	/**
 	 * Get a descriptor that corresponds to a builtin JDBC type.
+     * 
+     * For well known types code may also use the pre-defined
+     * runtime types that are fields of this class, such as INTEGER.
+     * E.g. using DataTypeDescriptor.INTEGER is preferred to
+     * DataTypeDescriptor.getBuiltInDataTypeDescriptor(Types.INTEGER, true)
+     * (both will return the same immutable object).
 	 *
 	 * @param jdbcType	The int type of the JDBC type for which to get
 	 *						a corresponding SQL DataTypeDescriptor
@@ -192,6 +226,18 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 		boolean	isNullable
 	)
 	{
+        // Re-use pre-defined types wherever possible.
+        switch (jdbcType)
+        {
+        case Types.INTEGER:
+            return isNullable ? INTEGER : INTEGER_NOT_NULL;
+        case Types.SMALLINT:
+            return isNullable ? SMALLINT : SMALLINT_NOT_NULL;
+        default:
+            break;
+        }
+
+        
 		TypeId typeId = TypeId.getBuiltInTypeId(jdbcType);
 		if (typeId == null)
 		{
@@ -950,14 +996,6 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 	}
 
 	/**
-	 * @see TypeDescriptor#getMaximumWidthInBytes
-	 */
-	public int	getMaximumWidthInBytes()
-	{
-		return typeDescriptor.getMaximumWidthInBytes();
-	}
-
-	/**
 	 * Gets the TypeId for the datatype.
 	 *
 	 * @return	The TypeId for the datatype.
@@ -1015,7 +1053,7 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 	 */
 	public int getJDBCTypeId()
 	{
-		return typeId.getJDBCTypeId();
+		return typeDescriptor.getJDBCTypeId();
 	}
 
 	/**
@@ -1715,13 +1753,11 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 	public void readExternal( ObjectInput in )
 		 throws IOException, ClassNotFoundException
 	{
-		/* NOTE: We only write out the generic type id.
-		 * typeId will be reset to be the generic type id
-		 * when we get read back in since the generic
-		 * one is all that is needed at execution time.
-		 */
-		typeId = (TypeId) in.readObject();
 		typeDescriptor = (TypeDescriptorImpl) in.readObject();
+        
+        typeId = TypeId.getBuiltInTypeId(this.getJDBCTypeId());
+        
+        collationDerivation = in.readInt();
 	}
 
 	/**
@@ -1734,8 +1770,8 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 	public void writeExternal( ObjectOutput out )
 		 throws IOException
 	{
-		out.writeObject( typeId );
-		out.writeObject( typeDescriptor );
+		out.writeObject(typeDescriptor);
+        out.writeInt(getCollationDerivation());
 	}
  
 	/**
@@ -1743,7 +1779,7 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
 	 *
 	 *	@return	the formatID of this class
 	 */
-	public	int	getTypeFormatId()	{ return StoredFormatIds.DATA_TYPE_SERVICES_IMPL_V01_ID; }
+	public	int	getTypeFormatId()	{ return StoredFormatIds.DATA_TYPE_DESCRIPTOR_V02_ID; }
 
     /**
      * Check to make sure that this type id is something a user can create
@@ -1822,20 +1858,6 @@ public final class DataTypeDescriptor implements TypeDescriptor, Formatable
             name = name + " (" + getCollationName() + ")";
         }
         return name;    
-    }
-
-    // TEMP: DERBY-2917 - refactoring type system
-    public String[] getRowColumnNames() {
-        if (SanityManager.DEBUG)
-            SanityManager.THROWASSERT("Row type must always be a catalog type");
-        return null;
-    }
-
-    // TEMP: DERBY-2917 - refactoring type system
-    public TypeDescriptor[] getRowTypes() {
-        if (SanityManager.DEBUG)
-            SanityManager.THROWASSERT("Row type must always be a catalog type");
-        return null;
     }
 }
 

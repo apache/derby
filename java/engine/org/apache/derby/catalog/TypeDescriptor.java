@@ -53,11 +53,21 @@ public interface TypeDescriptor
     TypeDescriptor INTEGER = DataTypeDescriptor.INTEGER.getCatalogType();
 
     /**
+     * Catalog type for not nullable INTEGER
+     */
+    TypeDescriptor INTEGER_NOT_NULL =
+        DataTypeDescriptor.INTEGER_NOT_NULL.getCatalogType();
+    
+    /**
      * Catalog type for nullable SMALLINT
      */
-    TypeDescriptor SMALLINT = 
-        DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-            Types.SMALLINT).getCatalogType();
+    TypeDescriptor SMALLINT = DataTypeDescriptor.SMALLINT.getCatalogType();
+    
+    /**
+     * Catalog type for not nullable INTEGER
+     */
+    TypeDescriptor SMALLINT_NOT_NULL =
+        DataTypeDescriptor.SMALLINT_NOT_NULL.getCatalogType();
 
 
 	///////////////////////////////////////////////////////////////////////

@@ -32,7 +32,7 @@ import java.util.List;
 /**
  * This node represents a routine signature.
  */
-public class RoutineDesignator
+class RoutineDesignator
 {
 	boolean isSpecific;
 	TableName name; // TableName is a misnomer it is really just a schema qualified name
@@ -45,7 +45,7 @@ public class RoutineDesignator
 	List paramTypeList;
 	AliasDescriptor aliasDescriptor;
 
-	public RoutineDesignator( boolean isSpecific,
+	RoutineDesignator( boolean isSpecific,
 							  TableName name,
 							  boolean isFunction,
 							  List paramTypeList)
