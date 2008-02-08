@@ -1914,9 +1914,6 @@ public class GenericLanguageConnectionContext
 
 		cc.setInUse(true);
 
-		// Save off the current isolation level on entry so that it gets restored
-		cc.setEntryIsolationLevel( getCurrentIsolationLevel());
-
 		StatementContext sc = getStatementContext();
 		if (sc.getSystemCode())
 			cc.setReliability(CompilerContext.INTERNAL_SQL_LEGAL);
@@ -1953,9 +1950,6 @@ public class GenericLanguageConnectionContext
 		cc.setCurrentDependent(null);
 
 		cc.setInUse(false);
-
-		// Restore the isolation level at the time of entry to CompilerContext
-		isolationLevel = cc.getEntryIsolationLevel();
 
 		/*
 		** Only pop the compiler context if it's not the first one

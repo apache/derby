@@ -618,22 +618,6 @@ public class CompilerContextImpl extends ContextImpl
 	}
 
 	/**
-	 * @see CompilerContext#setEntryIsolationLevel
-	 */
-	public void setEntryIsolationLevel(int isolationLevel)
-	{
-		this.entryIsolationLevel = isolationLevel;
-	}
-
-	/**
-	 * @see CompilerContext#getScanIsolationLevel
-	 */
-	public int getEntryIsolationLevel()
-	{
-		return entryIsolationLevel;
-	}
-
-	/**
 	 * @see CompilerContext#getTypeCompilerFactory
 	 */
 	public TypeCompilerFactory getTypeCompilerFactory()
@@ -915,7 +899,6 @@ public class CompilerContextImpl extends ContextImpl
 	private int					nextTableNumber;
 	private int					nextSubqueryNumber;
 	private int					nextResultSetNumber;
-	private int					entryIsolationLevel;
 	private int					scanIsolationLevel;
 	private int					nextEquivalenceClass = -1;
 	private long				nextClassName;

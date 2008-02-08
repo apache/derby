@@ -477,20 +477,6 @@ public interface CompilerContext extends Context
 	public int getScanIsolationLevel();
 
 	/**
-	 * Set the isolation level on entry to this CC so that it can be restored on exit.
-	 *
-	 * @param isolationLevel	The isolation level on entry.
-	 */
-	public void setEntryIsolationLevel(int isolationLevel);
-
-	/**
-	 * Get the entry isolation level from this CC.
-	 *
-	 * @return	The entry isolation level.
-	 */
-	public int getEntryIsolationLevel();
-
-	/**
 	 * Get the next equivalence class for equijoin clauses.
 	 *
 	 * @return The next equivalence class for equijoin clauses.
