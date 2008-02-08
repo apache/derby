@@ -1100,7 +1100,7 @@ public class GenericLanguageConnectionContext
 									  "), Committing");
 		}
 
-		resetActivations(false);
+		endTransactionActivationHandling(false);
 
 		//do the clean up work required for temporary tables at the commit time. This cleanup work
 		//can possibly remove entries from allDeclaredGlobalTempTables and that's why we need to check
@@ -1347,7 +1347,7 @@ public class GenericLanguageConnectionContext
 									  "), Rolling back");
 		}
 
-		resetActivations(true);
+		endTransactionActivationHandling(true);
 
 		currentSavepointLevel = 0; //reset the current savepoint level for the connection to 0 at the beginning of rollback work for temp tables
 		if (allDeclaredGlobalTempTables != null)
@@ -1428,7 +1428,7 @@ public class GenericLanguageConnectionContext
 				closeConglomerates = true;
 				// bug 5145 - don't forget to close the activations while rolling
 				// back to a savepoint
-				resetActivations(true);
+				endTransactionActivationHandling(true);
 			}
 			else { closeConglomerates = false; }
 
@@ -2691,15 +2691,24 @@ public class GenericLanguageConnectionContext
 	// class implementation
 	//
 
-
 	/**
-		resets all open activations, to close their result sets.
-		Also cleans up (close()) activations that have been
+		If we are called as part of rollback code path, then we will reset all 
+		the activations. 
+		
+		If we are called as part of commit code path, then we will do one of 
+		the following if the activation has resultset assoicated with it. Also,
+		we will clear the conglomerate used while scanning for update/delete
+		1)Close result sets that return rows and are not held across commit.
+		2)Clear the current row of the resultsets that return rows and are
+		held across commit.
+		3)Leave the result sets untouched if they do not return rows
+		
+		Additionally, clean up (close()) activations that have been
 		marked as unused during statement finalization.
 
 		@exception StandardException thrown on failure
 	 */
-	private void resetActivations(boolean andClose) throws StandardException {
+	private void endTransactionActivationHandling(boolean forRollback) throws StandardException {
 
 		// don't use an enumeration as the activation may remove
 		// itself from the list, thus invalidating the Enumeration
@@ -2713,15 +2722,6 @@ public class GenericLanguageConnectionContext
 
 			Activation a = (Activation) acts.get(i);
 			/*
-			** andClose true means we are here for rollback.
-			** In case of rollback, we don't care for holding
-			** cursors and that's why I am resetting holdability
-			** to false for all activations just before rollback
-			*/	
-			if (andClose)
-				a.setResultSetHoldability(false);
-
-			/*
 			** Look for stale activations.  Activations are
 			** marked as unused during statement finalization.
 			** Here, we sweep and remove this inactive ones.
@@ -2732,14 +2732,44 @@ public class GenericLanguageConnectionContext
 				continue;
 			}
 
-			a.reset();
-
-			// Only invalidate statements if we performed DDL.
-			if (andClose && dataDictionaryInWriteMode()) {
-				ExecPreparedStatement ps = a.getPreparedStatement();
-				if (ps != null) {
-					ps.makeInvalid(DependencyManager.ROLLBACK, this);
+			if (forRollback) { 
+				//Since we are dealing with rollback, we need to reset the 
+				//activation no matter what the holdability might be or no
+				//matter whether the associated resultset returns rows or not.
+				a.reset();
+				// Only invalidate statements if we performed DDL.
+				if (dataDictionaryInWriteMode()) {
+					ExecPreparedStatement ps = a.getPreparedStatement();
+					if (ps != null) {
+						ps.makeInvalid(DependencyManager.ROLLBACK, this);
+					}
 				}
+			} else {
+				//We are dealing with commit here. 
+				if (a.getResultSet() != null) {
+					ResultSet activationResultSet = a.getResultSet();
+					boolean resultsetReturnsRows = activationResultSet.returnsRows();
+					//if the activation has resultset associated with it, then 
+					//use following criteria to take the action
+					if (resultsetReturnsRows){
+						if (a.getResultSetHoldability() == false)
+							//Close result sets that return rows and are not held 
+							//across commit. This is to implement closing JDBC 
+							//result sets that are CLOSE_CURSOR_ON_COMMIT at commit 
+							//time. 
+							activationResultSet.close();
+						else 
+							//Clear the current row of the result sets that return
+							//rows and are held across commit. This is to implement
+							//keeping JDBC result sets open that are 
+							//HOLD_CURSORS_OVER_COMMIT at commit time and marking
+							//the resultset to be not on a valid row position. The 
+							//user will need to reposition within the resultset 
+							//before doing any row operations.
+							activationResultSet.clearCurrentRow();							
+					}
+				}
+				a.clearHeapConglomerateController();
 			}
 		}
 	}
