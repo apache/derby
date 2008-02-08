@@ -61,14 +61,11 @@
     </javac>
  </target>
  
- <!-- use jdk16 to compile jdk15 code -->
- <target name="compile_impl_services_jdk15" if="jdk16"
+ <target name="compile_impl_services_jdk15"
          depends="compile_impl_services_169">
    <javac
       source="1.5"
       target="1.5"
-      fork="yes"
-      executable="${jdk16}/bin/javac"
       bootclasspath="${empty}"
       nowarn="on"
       debug="${debug}"
@@ -77,10 +74,10 @@
       optimize="${optimize}"
       proceed="${proceed}"
       verbose="${verbose}"
-      srcdir="${derby.engine.src.dir};${derby.engine.src.dir}"
+      srcdir="${derby.engine.src.dir}"
       destdir="${out.dir}">
      <classpath>
-       <pathelement path="${java16compile.classpath}"/>
+       <pathelement path="${java15compile.classpath}"/>
      </classpath>
      <include name="${derby.dir}/impl/services/locks/Concurrent*.java"/>
      <include name="${derby.dir}/impl/services/cache/Concurrent*.java"/>
@@ -90,8 +87,7 @@
    </javac>
  </target>
 
- <target name="compile_impl_services"
-         depends="compile_impl_services_jdk15,compile_impl_services_169">
+ <target name="compile_impl_services" depends="compile_impl_services_jdk15">
     <javac
       source="1.4"
       target="1.4"
