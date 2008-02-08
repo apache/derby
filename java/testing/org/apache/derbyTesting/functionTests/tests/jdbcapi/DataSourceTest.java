@@ -629,11 +629,15 @@ public class DataSourceTest extends BaseJDBCTestCase {
     		J2EEDataSource.getConnectionPoolDataSource();
     	subtestPooledReuseOnClose(cpds.getPooledConnection());
         subtestPooledCloseOnClose(cpds.getPooledConnection());
+        // DERBY-3401 - removing a callback during a close causes problems.
+        //subtestPooledRemoveListenerOnClose(cpds.getPooledConnection());
 
     	// PooledConnection from an XDataSource
     	XADataSource xads = J2EEDataSource.getXADataSource();
     	subtestPooledReuseOnClose(xads.getXAConnection());
         subtestPooledCloseOnClose(xads.getXAConnection());
+        // DERBY-3401 - removing a callback during a close causes problems.
+        //subtestPooledRemoveListenerOnClose(xads.getXAConnection());
     }
     
     /**
@@ -733,6 +737,73 @@ public class DataSourceTest extends BaseJDBCTestCase {
             assertSQLState("08003", sqle);
         }
     }
+    
+    /**
+     * Tests that a listener of a pooled connection can successfully
+     * remove itself during the processing of its close event by its listener.
+     */
+    private void subtestPooledRemoveListenerOnClose(final PooledConnection pc) throws SQLException
+    {
+        
+        final int[] count1 = new int[1];
+        pc.addConnectionEventListener(new ConnectionEventListener() {
+
+            /**
+             * Mimic a pool handler that removes the listener during
+             * a logical close.
+             */
+            public void connectionClosed(ConnectionEvent event) {
+                PooledConnection pce = (PooledConnection) event.getSource();
+                assertSame(pc, pce);
+                count1[0]++;
+                pce.removeConnectionEventListener(this);
+            }
+
+            public void connectionErrorOccurred(ConnectionEvent event) {
+            }
+            
+        });
+        
+        // and have another listener to ensure removing one leaves
+        // the other working and intact.
+        final int[] count2 = new int[1];
+        pc.addConnectionEventListener(new ConnectionEventListener() {
+
+            /**
+             * Mimic a pool handler that closes the PooledConnection
+             * (say it no longer needs it, pool size being reduced)
+             */
+            public void connectionClosed(ConnectionEvent event) {             
+                PooledConnection pce = (PooledConnection) event.getSource();
+                assertSame(pc, pce);
+                count2[0]++;
+            }
+
+            public void connectionErrorOccurred(ConnectionEvent event) {
+            }
+            
+        });        
+        // no callback yet
+        assertEquals(0, count1[0]);
+        assertEquals(0, count2[0]);
+        
+        // Open and close a connection to invoke the logic above
+        // through the callback
+        pc.getConnection().close();
+        
+        // one callback for each
+        assertEquals(1, count1[0]);
+        assertEquals(1, count2[0]);
+              
+        // the callback (count1) that was removed is not called on the
+        // second close but the second callback (count2) is called.
+        pc.getConnection().close();
+        assertEquals(1, count1[0]);
+        assertEquals(2, count2[0]);
+        
+        pc.close();
+    }
+
     
     public void testAllDataSources() throws SQLException, Exception
     {
