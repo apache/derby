@@ -84,6 +84,7 @@ final class PhaseChanger extends BaseTestSetup {
             break;
             
         case UpgradeChange.PH_HARD_UPGRADE:
+            JDBCDataSource.setBeanProperty(ds, "createDatabase", "false");
             JDBCDataSource.setBeanProperty(ds, "connectionAttributes",
                     "upgrade=true");
             break;

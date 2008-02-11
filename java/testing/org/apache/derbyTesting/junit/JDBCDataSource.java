@@ -37,8 +37,9 @@ public class JDBCDataSource {
     
     /**
      * Return a new DataSource corresponding to the current
-     * configuration. The getConnection() method will return
-     * a connection identical to TestConfiguration.openDefaultConnection().
+     * configuration.
+     * <p>The getConnection() method will return a connection identical to
+     * {@link TestConfiguration#openDefaultConnection}.
      */
     public static javax.sql.DataSource getDataSource()
     {
@@ -84,6 +85,10 @@ public class JDBCDataSource {
      * Create a new DataSource object setup from the passed in TestConfiguration.
      * The getConnection() method will return a connection identical to
      * TestConfiguration.openDefaultConnection().
+     * <p>
+     * If no properties are passed in, defaults are obtained from the
+     * current <code>TestConfiguration</code> and the data source will be
+     * configured to create the specified database if it does not exist.
      */
     static javax.sql.DataSource getDataSource(TestConfiguration config,
             HashMap beanProperties)
@@ -96,6 +101,10 @@ public class JDBCDataSource {
      * Create a new DataSource object setup from the passed in
      * TestConfiguration using the received properties and data
      * source class name.
+     * <p>
+     * If no properties are passed in, defaults are obtained from the
+     * current <code>TestConfiguration</code> and the data source will be
+     * configured to create the specified database if it does not exist.
      */
     static Object getDataSource(TestConfiguration config,
         HashMap beanProperties, String dsClassName)
@@ -123,6 +132,8 @@ public class JDBCDataSource {
         beanProperties.put("databaseName", config.getDefaultDatabaseName());
         beanProperties.put("user", config.getUserName());
         beanProperties.put("password", config.getUserPassword());
+        // By default non-existing databases will be created.
+        beanProperties.put("createDatabase", "create");
 
         
         return beanProperties;

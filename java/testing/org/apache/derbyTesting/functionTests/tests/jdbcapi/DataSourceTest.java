@@ -841,6 +841,7 @@ public class DataSourceTest extends BaseJDBCTestCase {
             assertTenConnectionsUnique();
 
         DataSource dscs = JDBCDataSource.getDataSource();
+        JDBCDataSource.setBeanProperty(dscs, "createDatabase", "false");
         if (usingEmbedded()) 
                 assertToString(dscs);
 
@@ -893,6 +894,8 @@ public class DataSourceTest extends BaseJDBCTestCase {
         aes1.resetState();
 
         XADataSource dsx = J2EEDataSource.getXADataSource();
+        JDBCDataSource.setBeanProperty(dsx, "createDatabase", "false");
+
         if (usingEmbedded())
             assertToString(dsx);
 
@@ -1872,6 +1875,7 @@ public class DataSourceTest extends BaseJDBCTestCase {
     public void testJira95ds() throws SQLException {
         try {
             DataSource ds = JDBCDataSource.getDataSource();
+            JDBCDataSource.setBeanProperty(ds, "createDatabase", "false");
             // non-existent database
             JDBCDataSource.setBeanProperty(ds, "databaseName", "jdbc:derby:wombat");
             ds.getConnection();
@@ -2244,6 +2248,7 @@ public class DataSourceTest extends BaseJDBCTestCase {
 
         // DataSource
         DataSource ds = JDBCDataSource.getDataSource();
+        JDBCDataSource.setBeanProperty(ds, "createDatabase", "false");
 
         // DataSource - setTransationAttributes
         traceFile = "trace1.out";
