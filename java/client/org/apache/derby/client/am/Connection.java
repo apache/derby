@@ -99,9 +99,6 @@ public abstract class Connection implements java.sql.Connection,
 
     private boolean accumulated440ForMessageProcFailure_ = false;
     private boolean accumulated444ForMessageProcFailure_ = false;
-    private boolean accumulatedSetReadOnlyWarning_ = false;
-
-
 
     //---------------------XA-----------------------------------------------------
 
@@ -299,7 +296,7 @@ public abstract class Connection implements java.sql.Connection,
                                    java.util.Properties properties) throws SqlException {
         // clearWarningsX() will re-initialize the following properties
         // warnings_, accumulated440ForMessageProcFailure_,
-        // accumulated444ForMessageProcFailure_, and accumulatedSetReadOnlyWarning_
+        // and accumulated444ForMessageProcFailure_
         clearWarningsX();
 
         databaseName_ = databaseName;
@@ -1096,7 +1093,6 @@ public abstract class Connection implements java.sql.Connection,
         warnings_ = null;
         accumulated440ForMessageProcFailure_ = false;
         accumulated444ForMessageProcFailure_ = false;
-        accumulatedSetReadOnlyWarning_ = false;
     }
 
     //======================================================================
