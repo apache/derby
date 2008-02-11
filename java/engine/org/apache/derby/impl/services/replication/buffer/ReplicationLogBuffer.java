@@ -27,6 +27,8 @@ import java.util.Arrays;
 import java.util.NoSuchElementException;
 import java.util.LinkedList;
 
+import org.apache.derby.iapi.services.replication.master.MasterFactory;
+
 /**
  * Used for the replication master role only. When a Derby instance
  * has the replication master role for a database 'x', all log records
@@ -84,7 +86,20 @@ public class ReplicationLogBuffer {
 
     private int defaultBufferSize;
 
-    public ReplicationLogBuffer(int bufferSize) {
+    // used to notify the master controller that a log buffer element is full 
+    // and work needs to be done.
+    private MasterFactory mf;
+
+    /**
+     * Class constructor specifies the number of buffer elements
+     * and the master controller that creates this replication log
+     * buffer.
+     *
+     * @param bufferSize the default number of buffer elements
+     * @param mf         Used to notify the master controller that a log buffer
+     *                   element is full and work needs to be done.
+     */
+    public ReplicationLogBuffer(int bufferSize, MasterFactory mf) {
         defaultBufferSize = bufferSize;
 
         outBufferData = new byte[bufferSize];
@@ -299,6 +314,10 @@ public class ReplicationLogBuffer {
      * @throws LogBufferFullException if the freeBuffers list is empty
      */
     private void switchDirtyBuffer() throws LogBufferFullException{
+        //Notify the master controller that a log buffer element is full and 
+        //work needs to be done.
+        mf.workToDo();
+
         // first, move currentDirtyBuffer to dirtyBuffers list.
         // do not switch if current buffer is empty
         if (currentDirtyBuffer != null && currentDirtyBuffer.size() > 0) {
@@ -318,6 +337,19 @@ public class ReplicationLogBuffer {
                 throw new LogBufferFullException();
             }
         }
+    }
+
+    /**
+     * Used to calculate the Fill Information. The fill information
+     * is a indicator of how full the buffer is at any point of time
+     * fill information = (full buffers/Total Buffers)*100. The Fill
+     * information ranges between 0-100 (both 0 and 100 inclusive).
+     *
+     * @return an integer value between 0-100 representing the fill
+     *         information.
+     */
+    public int getFillInformation() {
+        return ((dirtyBuffers.size()*100)/DEFAULT_NUMBER_LOG_BUFFERS);
     }
 
 }

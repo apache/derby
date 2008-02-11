@@ -165,5 +165,10 @@ public interface MasterFactory {
      * @see LogFactory#flush
      */
     public void flushedTo(long instant);
+    
+    /**
+     * Used to notify the log shipper that a log buffer element is full.
+     */
+    public void workToDo(); 
 
 }

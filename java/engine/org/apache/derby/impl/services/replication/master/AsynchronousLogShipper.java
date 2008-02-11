@@ -42,15 +42,10 @@ import org.apache.derby.impl.services.replication.net.ReplicationMessageTransmit
  *
  * 2) when a request is sent from the master controller (force flushing of
  *    the log buffer).
- * </p>
- * <p>
- * The interval at which log shipping happens is configurable. The log shipper
- * accepts the interval at which the shipping should be done during
- * initialization.
  *
- * Periodic shipping and force flushing are time aware of each other (i.e.)
- * a force flush results in the time of next periodic shipping being calculated
- * from the force flush time.
+ * 3) when a notification is received from the log shipper about a log
+ *    buffer element becoming full and the load on the log buffer so
+ *    warrants a ship.
  * </p>
  */
 public class AsynchronousLogShipper extends Thread implements
@@ -75,6 +70,13 @@ public class AsynchronousLogShipper extends Thread implements
     private long shippingInterval;
     
     /**
+     * Will store the time at which the last shipping happened. Will be used
+     * to calculate the interval between the log ships upon receiving a
+     * notification from the log buffer.
+     */
+    private long lastShippingTime;
+    
+    /**
      * Indicates whether a stop shipping request has been sent.
      * true - stop shipping log records
      * false - shipping can continue without interruption.
@@ -93,6 +95,36 @@ public class AsynchronousLogShipper extends Thread implements
     private ReplicationMessage failedChunk = null;
     
     /**
+     * Fill information value indicative of a low load in the log buffer.
+     */
+    private static final int FI_LOW = 10;
+    
+    /**
+     * Fill information value indicative of a high load in the log buffer.
+     */
+    private static final int FI_HIGH = 80;
+    
+    
+    /**
+     * If the fill information (obtained from the log buffer) is less than 
+     * FI_HIGH but greater than FI_LOW the log shipper will ship with a MIN ms delay.
+     * MIN is a value that is only as large as not to affect the performance
+     * of the master database significantly.
+     */
+    private static final long MIN = 100;
+    
+    /**
+     * If the fill information is less than FI_LOW the log shipper will ship 
+     * with a MAX ms delay or when a buffer becomes full whichever comes 
+     * first. The delay however will not be smaller than MIN. 
+     * max(MAX, DEFAULT_NUMBER_LOG_BUFFERS*MIN) is the maximum delay between a 
+     * log record is committed at the master until it is replicated  to the 
+     * slave. Hence the default latency should be atleast greater than the maximum
+     * latency offered by the choice of MIN, hence MAX > DEFAULT_NUMBER_LOG_BUFFERS*MIN.
+     */
+    private static final long MAX = 5000;
+
+    /**
      * Constructor initializes the log buffer, the replication message
      * transmitter, the shipping interval and the master controller.
      *
@@ -100,37 +132,44 @@ public class AsynchronousLogShipper extends Thread implements
      *                  chunks to be transmitted to the slave.
      * @param transmitter the replication message transmitter that is used for
      *                    network transmission of retrieved log records.
-     * @param shippingInterval a long value that stores the time interval in
-     *                         milliseconds at which the log shipping takes
-     *                         place.
      * @param masterController The master controller that initialized this log
      *                         shipper.
      */
     public AsynchronousLogShipper(ReplicationLogBuffer logBuffer,
         ReplicationMessageTransmit transmitter,
-        long shippingInterval,
         MasterController masterController) {
         this.logBuffer = logBuffer;
         this.transmitter = transmitter;
-        this.shippingInterval = shippingInterval;
         this.masterController = masterController;
         this.stopShipping = false;
+        shippingInterval = MIN;
+        lastShippingTime = System.currentTimeMillis();
     }
     
     /**
      * Ships log records from the log buffer to the slave being replicated to.
-     * The log shipping happens at the configured shipping intervals unless a
-     * force flush happens, which triggers periodic shipping also since there
-     * will still be more log to send after the forceFlush has sent one chunk.
+     * The log shipping happens between shipping intervals of time, the 
+     * shipping interval being derived from the fill information (an indicator
+     * of load in the log buffer) obtained from the log buffer. The shipping
+     * can also be triggered in the following situations,
+     * 
+     * 1) Based on notifications from the log buffer, where the fill 
+     *    information is again used as the basis to decide whether a
+     *    shipping should happen or not
+     * 2) On a forceFlush triggered by the log buffer becoming full
+     *    and the LogBufferFullException being thrown. 
      */
     public void run() {
         while (!stopShipping) {
             try {
                 shipALogChunk();
-                //Make the thread wait for shipping interval of time before
-                //the next transmission happens.
+                //calculate the shipping interval (wait time) based on the
+                //fill information obtained from the log buffer.
                 synchronized(this) {
-                    wait(shippingInterval);
+                    shippingInterval = calculateSIfromFI();
+                    if (shippingInterval != -1) {
+                        wait(shippingInterval);
+                    }
                 }
             } catch (InterruptedException ie) {
                 //Interrupt the log shipping thread.
@@ -178,6 +217,7 @@ public class AsynchronousLogShipper extends Thread implements
                     ReplicationMessage.TYPE_LOG, logRecords);
                 
                 transmitter.sendMessage(mesg);
+                lastShippingTime = System.currentTimeMillis();
                 return true;
             } 
         } catch (NoSuchElementException nse) {
@@ -254,5 +294,61 @@ public class AsynchronousLogShipper extends Thread implements
      */
     public void stopLogShipment() {
         stopShipping = true;
+    }
+    
+    /**
+     * Used to notify the log shipper that a log buffer element is full.
+     * This method would basically use the following steps to decide on the 
+     * action to be taken when a notification from the log shipper is received,
+     * 
+     * a) Get FI from log buffer
+     * b) If FI >= FI_HIGH
+     *     b.1) notify the log shipper thread.
+     * c) Else If the time elapsed since last ship is greater than MIN
+     *     c.1) notify the log shipper thread.
+     */
+    public void workToDo() {
+        //Fill information obtained from the log buffer
+        int fi;
+        
+        fi = logBuffer.getFillInformation();
+        
+        if (fi >= FI_HIGH) {
+            notify();
+        } else if ((System.currentTimeMillis() - lastShippingTime) > MIN) {
+            // Minimum MIN time between messages unless buffer is almost full
+            notify();
+        }
+    }
+    
+    /**
+     * Will be used to calculate the shipping interval based on the fill
+     * information obtained from the log buffer. This method uses the following
+     * steps to arrive at the shipping interval,
+     * 
+     * a) FI >= FI_HIGH return -1 (signifies that the waiting time should be 0)
+     * b) FI >  FI_LOW and FI < FI_HIGH return MIN
+     * c) FI <= FI_LOW return MAX.
+     * 
+     * @return the shipping interval based on the fill information.
+     */
+    private long calculateSIfromFI() {
+        //Fill information obtained from the log buffer.
+        int fi;
+        
+        //shipping interval derived from the fill information.
+        long si;
+        
+        fi = logBuffer.getFillInformation();
+        
+        if (fi >= FI_HIGH) {
+            si = -1;
+        } else if (fi > FI_LOW && fi < FI_HIGH) {
+            si = MIN;
+        } else {
+            si = MAX;
+        }
+        
+        return si;
     }
 }

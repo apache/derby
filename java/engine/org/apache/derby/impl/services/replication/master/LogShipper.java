@@ -70,4 +70,9 @@ interface LogShipper {
      *
      */
     public void flushBuffer() throws IOException, StandardException;
+    
+    /**
+     * Used to notify the log shipper that a log buffer element is full.
+     */
+    public void workToDo();
 }

@@ -181,7 +181,7 @@ public class MasterController
         rawStoreFactory = rawStore;
         dataFactory = dataFac;
         logFactory = logFac;
-        logBuffer = new ReplicationLogBuffer(DEFAULT_LOG_BUFFER_SIZE);
+        logBuffer = new ReplicationLogBuffer(DEFAULT_LOG_BUFFER_SIZE, this);
 
         logFactory.startReplicationMasterRole(this);
 
@@ -190,7 +190,6 @@ public class MasterController
         if (replicationMode.equals(MasterFactory.ASYNCHRONOUS_MODE)) {
             logShipper = new AsynchronousLogShipper(logBuffer,
                                                     transmitter,
-                                                    1000,
                                                     this);
             ((Thread)logShipper).start();
         }
@@ -426,5 +425,12 @@ public class MasterController
         ReplicationLogger.
             logError(MessageId.REPLICATION_LOGSHIPPER_EXCEPTION, t, dbname);
         stopMaster();
+    }
+    
+    /**
+     * Used to notify the log shipper that a log buffer element is full.
+     */
+    public void workToDo() {
+        logShipper.workToDo();
     }
 }
