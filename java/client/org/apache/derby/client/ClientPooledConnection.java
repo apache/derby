@@ -22,6 +22,10 @@ package org.apache.derby.client;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import javax.sql.ConnectionEvent;
+import javax.sql.ConnectionEventListener;
+import java.util.ArrayList;
+import java.util.Iterator;
 import org.apache.derby.client.net.NetXAConnection;
 import org.apache.derby.iapi.error.ExceptionSeverity;
 import org.apache.derby.jdbc.ClientBaseDataSource;
@@ -40,7 +44,8 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
     /** Tells if this pooled connection is newly created. */
     private boolean newPC_ = true;
 
-    private java.util.Vector listeners_ = null;
+    //@GuardedBy("this")
+    private ArrayList listeners_ = null;
     org.apache.derby.client.am.Connection physicalConnection_ = null;
     org.apache.derby.client.net.NetConnection netPhysicalConnection_ = null;
     org.apache.derby.client.net.NetXAConnection netXAPhysicalConnection_ = null;
@@ -82,7 +87,7 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
             ds_ = ds;
             user_ = user;
             password_ = password;
-            listeners_ = new java.util.Vector();
+            listeners_ = new ArrayList();
             
             //pass the client pooled connection instance to this
             //instance of the NetConnection object 
@@ -134,7 +139,7 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
             user_ = user;
             password_ = password;
             rmId_ = rmId;
-            listeners_ = new java.util.Vector();
+            listeners_ = new ArrayList();
             netXAPhysicalConnection_ = getNetXAConnection(ds,
                     (NetLogWriter) logWriter_,
                     user,
@@ -268,18 +273,20 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
                                                         this);
     }
 
-    public synchronized void addConnectionEventListener(javax.sql.ConnectionEventListener listener) {
+    public synchronized void addConnectionEventListener(
+                                            ConnectionEventListener listener) {
         if (logWriter_ != null) {
             logWriter_.traceEntry(this, "addConnectionEventListener", listener);
         }
-        listeners_.addElement(listener);
+        listeners_.add(listener);
     }
 
-    public synchronized void removeConnectionEventListener(javax.sql.ConnectionEventListener listener) {
+    public synchronized void removeConnectionEventListener(
+                                            ConnectionEventListener listener) {
         if (logWriter_ != null) {
             logWriter_.traceEntry(this, "removeConnectionEventListener", listener);
         }
-        listeners_.removeElement(listener);
+        listeners_.remove(listener);
     }
 
     /**
@@ -288,14 +295,15 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
      * <p>
      * Not public, but needs to be visible to am.LogicalConnection
      */
-    public void recycleConnection() {
+    public synchronized void recycleConnection() {
         if (physicalConnection_.agent_.loggingEnabled()) {
             physicalConnection_.agent_.logWriter_.traceEntry(this, "recycleConnection");
         }
 
-        for (java.util.Enumeration e = listeners_.elements(); e.hasMoreElements();) {
-            javax.sql.ConnectionEventListener listener = (javax.sql.ConnectionEventListener) e.nextElement();
-            javax.sql.ConnectionEvent event = new javax.sql.ConnectionEvent(this);
+        for (Iterator e = listeners_.iterator(); e.hasNext();) {
+            ConnectionEventListener listener =
+                    (ConnectionEventListener)e.next();
+            ConnectionEvent event = new ConnectionEvent(this);
             listener.connectionClosed(event);
         }
     }
@@ -313,11 +321,14 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
 		if (exception.getErrorCode() < ExceptionSeverity.SESSION_SEVERITY)
 			return;
 
-        for (java.util.Enumeration e = listeners_.elements(); e.hasMoreElements();) {
-            javax.sql.ConnectionEventListener listener = (javax.sql.ConnectionEventListener) e.nextElement();
-            java.sql.SQLException sqle = exception.getSQLException();
-            javax.sql.ConnectionEvent event = new javax.sql.ConnectionEvent(this, sqle);
-            listener.connectionErrorOccurred(event);
+        synchronized (this) {
+            for (Iterator e = listeners_.iterator(); e.hasNext();) {
+                ConnectionEventListener listener =
+                        (ConnectionEventListener)e.next();
+                SQLException sqle = exception.getSQLException();
+                ConnectionEvent event = new ConnectionEvent(this, sqle);
+                listener.connectionErrorOccurred(event);
+            }
         }
     }
 
