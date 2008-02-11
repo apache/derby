@@ -523,7 +523,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
         }
         catch (StandardException se) {
             throw StandardException.newException(
-                      SQLState.REPLICATION_UNABLE_TO_STOP_MASTER);
+                      SQLState.REPLICATION_NOT_IN_MASTER_MODE);
         }
         masterFactory.stopMaster();
     }
@@ -546,7 +546,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
         }
         catch (StandardException se) {
             throw StandardException.newException
-                    (SQLState.REPLICATION_FAILOVER_UNSUCCESSFUL, se, dbname);
+                    (SQLState.REPLICATION_NOT_IN_MASTER_MODE);
         }
         masterFactory.startFailover();
     }

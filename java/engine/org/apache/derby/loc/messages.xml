@@ -4762,7 +4762,7 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
             
             <msg>
                 <name>XRE07</name>
-                <text>Could not stop replication because the database is not in replication master mode.</text>
+                <text>Could not perform operation because the database is not in replication master mode.</text>
             </msg>
 
             <msg>
