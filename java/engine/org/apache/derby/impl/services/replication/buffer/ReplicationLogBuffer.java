@@ -23,7 +23,6 @@ package org.apache.derby.impl.services.replication.buffer;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
-import java.util.Arrays;
 import java.util.NoSuchElementException;
 import java.util.LinkedList;
 
@@ -88,7 +87,7 @@ public class ReplicationLogBuffer {
 
     // used to notify the master controller that a log buffer element is full 
     // and work needs to be done.
-    private MasterFactory mf;
+    private final MasterFactory mf;
 
     /**
      * Class constructor specifies the number of buffer elements
@@ -253,8 +252,9 @@ public class ReplicationLogBuffer {
             if (validOutBuffer) {
                 System.arraycopy(outBufferData, 0, b, 0, getSize());
                 return b;
-            } else
+            } else {
                 throw new NoSuchElementException();
+            }
         }
     }
 
