@@ -101,6 +101,8 @@ public class ReplicationLogBuffer {
      */
     public ReplicationLogBuffer(int bufferSize, MasterFactory mf) {
         defaultBufferSize = bufferSize;
+        
+        this.mf = mf;
 
         outBufferData = new byte[bufferSize];
         outBufferStored = 0;
