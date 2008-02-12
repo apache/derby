@@ -23,7 +23,7 @@ package org.apache.derby.mbeans;
 
 /** 
 * This interface defines a Standard MBean for exposing the version information
-* of the running Derby engine.
+* of a running Derby component.
 * 
 * Refer to the getters of the interface for defined attributes. All attributes
 * are read-only.
@@ -41,10 +41,16 @@ public interface VersionMBean {
     public int getMinorVersion();
     public int getMaintVersion();
     
+    /**
+     * Return the full version string.
+     * @return Full version string.
+     */
+    public String getVersionString();
+    
     public String getBuildNumber();
     public int getBuildNumberAsInt();
     
-    public boolean getIsBeta();
+    public boolean isBeta();
     public boolean isAlpha();
     
 }

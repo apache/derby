@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.mbeans.Version
+   Derby - Class org.apache.derby.iapi.services.info.Version
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -19,9 +19,9 @@
 
 */
 
-package org.apache.derby.mbeans;
+package org.apache.derby.iapi.services.info;
 
-import org.apache.derby.iapi.services.info.ProductVersionHolder;
+import org.apache.derby.mbeans.VersionMBean;
 
 /**
  * This implementation of VersionMBean instruments a
@@ -32,52 +32,55 @@ import org.apache.derby.iapi.services.info.ProductVersionHolder;
  */
 public class Version implements VersionMBean {
     
-    private final ProductVersionHolder engineVersionRef;
+    private final ProductVersionHolder versionInfo;
     
     public Version(ProductVersionHolder pvh) {
-        engineVersionRef = pvh;
+        versionInfo = pvh;
     }
     
     // ------------------------- MBEAN ATTRIBUTES  ----------------------------
     
     public String getProductName(){
-        return engineVersionRef.getProductName();
+        return versionInfo.getProductName();
     }
     
      public String getProductTechnologyName(){
-        return engineVersionRef.getProductTechnologyName();
+        return versionInfo.getProductTechnologyName();
     }
     
     public String getProductVendorName(){
-        return engineVersionRef.getProductVendorName();
+        return versionInfo.getProductVendorName();
     }
     
+    public String getVersionString() {
+        return versionInfo.getVersionBuildString(true);
+    }
     public int getMajorVersion(){
-        return engineVersionRef.getMajorVersion();
+        return versionInfo.getMajorVersion();
     }
     
     public int getMinorVersion(){
-        return engineVersionRef.getMinorVersion();
+        return versionInfo.getMinorVersion();
     }
     
     public int getMaintVersion(){
-        return engineVersionRef.getMaintVersion();
+        return versionInfo.getMaintVersion();
     }
     
     public String getBuildNumber(){
-        return engineVersionRef.getBuildNumber();
+        return versionInfo.getBuildNumber();
     }
     
     public int getBuildNumberAsInt(){
-        return engineVersionRef.getBuildNumberAsInt();
+        return versionInfo.getBuildNumberAsInt();
     }
     
-    public boolean getIsBeta(){
-        return engineVersionRef.isBeta();
+    public boolean isBeta(){
+        return versionInfo.isBeta();
     }
     
     public boolean isAlpha(){
-        return engineVersionRef.isAlpha();
+        return versionInfo.isAlpha();
     }
   
 }

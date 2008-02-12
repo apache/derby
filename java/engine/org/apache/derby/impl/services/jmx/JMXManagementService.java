@@ -29,14 +29,16 @@ import java.util.Set;
 import javax.management.JMException;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
+import javax.management.StandardMBean;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.iapi.services.info.Version;
 import org.apache.derby.iapi.services.jmx.ManagementService;
 import org.apache.derby.iapi.services.monitor.ModuleControl;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.property.PropertyUtil;
-import org.apache.derby.mbeans.Version;
+import org.apache.derby.mbeans.VersionMBean;
 
 /** 
  * This class implements the ManagementService interface and provides a simple
@@ -108,6 +110,7 @@ public class JMXManagementService implements ManagementService, ModuleControl {
                     });
 
             registerMBean(new Version(Monitor.getMonitor().getEngineVersion()),
+                    VersionMBean.class,
                     "org.apache.derby:type=Version,jar=derby.jar");
             
         } catch (SecurityException se) {
@@ -117,14 +120,22 @@ public class JMXManagementService implements ManagementService, ModuleControl {
     }
 
     /**
-     * Registers an MBean with the MBean server. The object name instance 
+     * Registers an MBean with the MBean server as a StandardMBean.
+     * Use of the StandardMBean allows the implementation details
+     * of Derby's mbeans to be hidden from JMX, thus only exposing
+     * the MBean's interface in org.apache.derby.mbeans.
+     * 
+     * The object name instance 
      * represented by the given String will be created by this method.
      * 
-     * @param bean The MBean to register
+     * @param bean The MBean to wrap with a StandardMBean and register
+     * @param beanInterface The management interface for the MBean.
      * @param name The String representation of the MBean's object name.
      * 
      */
-    private synchronized void registerMBean(final Object bean, final String name)
+    private synchronized void registerMBean(final Object bean,
+            final Class beanInterface,
+            final String name)
             throws StandardException {
 
         if (mbeanServer == null)
@@ -132,13 +143,15 @@ public class JMXManagementService implements ManagementService, ModuleControl {
 
         try {
             final ObjectName beanName = new ObjectName(name);
+            final StandardMBean standardMBean =
+                new StandardMBean(bean, beanInterface);
             try {
 
                 AccessController
                         .doPrivileged(new PrivilegedExceptionAction<Object>() {
 
                             public Object run() throws JMException {
-                                mbeanServer.registerMBean(bean, beanName);
+                                mbeanServer.registerMBean(standardMBean, beanName);
                                 return null;
                             }
 
