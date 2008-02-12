@@ -885,6 +885,12 @@ public interface Property {
 	// Define a static string for collation derivation NONE
 	public static final String COLLATION_NONE =
 		"NONE";
+        
+    /**
+     * derby.system.jmx
+     * enable or disable JMX
+     */    
+    public final static String JMX = "derby.system.jmx";
 
     /**
      * db2j.storage.dataNotSyncedAtCheckPoint

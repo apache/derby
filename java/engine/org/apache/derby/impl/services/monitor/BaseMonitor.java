@@ -62,6 +62,7 @@ import org.apache.derby.iapi.services.context.ErrorStringBuilder;
 import org.apache.derby.iapi.services.info.JVMInfo;
 import org.apache.derby.iapi.services.i18n.BundleFinder;
 import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.iapi.services.jmx.ManagementService;
 
 import org.apache.derby.impl.services.monitor.StorageFactoryService;
 
@@ -372,6 +373,9 @@ abstract class BaseMonitor
 			uuidFactory = (UUIDFactory) Monitor.startSystemModule("org.apache.derby.iapi.services.uuid.UUIDFactory");
 
             timerFactory = (TimerFactory)Monitor.startSystemModule("org.apache.derby.iapi.services.timer.TimerFactory");
+            
+            Monitor.startSystemModule(ManagementService.MODULE);
+
 		} catch (StandardException se) {
 
 			// if we can't create an error log or a context then there's no point going on
@@ -391,6 +395,8 @@ abstract class BaseMonitor
 			dumpProperties("-- System Properties --", systemProperties);
 			dumpProperties("-- Application Properties --", applicationProperties);
 		}
+        
+        
 
 		// bootup all the service providers
 		determineSupportedServiceProviders();
