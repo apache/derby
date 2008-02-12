@@ -184,6 +184,8 @@ public class MasterController
         logBuffer = new ReplicationLogBuffer(DEFAULT_LOG_BUFFER_SIZE, this);
 
         logFactory.startReplicationMasterRole(this);
+        
+        rawStoreFactory.unfreeze();
 
         setupConnection();
 
