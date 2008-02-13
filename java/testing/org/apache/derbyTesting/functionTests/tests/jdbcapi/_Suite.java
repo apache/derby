@@ -84,6 +84,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(AIjdbcTest.suite());
         suite.addTest(LargeDataLocksTest.suite());
         suite.addTest(DMDBugsTest.suite());
+        suite.addTest(DataSourceTest.suite());
 
         // Old harness .java tests that run using the HarnessJavaTest
         // adapter and continue to use a single master file.
@@ -118,7 +119,7 @@ public class _Suite extends BaseTestCase  {
 
             // Test uses DriverManager, Pooled and XADataSources, and
             // an inner class implements ConnectionEventListener.
-            suite.addTest(DataSourceTest.suite());
+            suite.addTest(J2EEDataSourceTest.suite());
 
             //suite to test updatable reader for clob in embedded driver
             suite.addTest (ClobUpdatableReaderTest.suite());
