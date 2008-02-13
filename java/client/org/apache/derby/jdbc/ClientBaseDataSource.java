@@ -1056,6 +1056,24 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
         return this.traceFileAppend;
     }
 
+    /**
+     * Returns the maximum number of JDBC prepared statements a connection is
+     * allowed to cache.
+     * <p>
+     * A basic data source will always return zero. If statement caching is
+     * required, use a {@link javax.sql.ConnectionPoolDataSource}.
+     * <p>
+     * This method is used internally by Derby to determine if statement
+     * pooling is to be enabled or not.
+     *
+     * @return Maximum number of statements to cache, or <code>0</code> if
+     *      caching is disabled (default).
+     *
+     * @see ClientConnectionPoolDataSource
+     */
+    public int maxStatementsToPool() {
+        return 0;
+    }
 
     // --- private helper methods
 

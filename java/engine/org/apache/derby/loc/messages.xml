@@ -7459,6 +7459,12 @@ Shutting down instance {0}</text>
                 <text>The user's password for the connection</text>
             </msg>
 
+            <msg>
+                <name>J134</name>
+                <text>Negative values for the maxStatements property are not allowed: {0}</text>
+                <arg>maxStatements</arg>
+            </msg>
+
         </family>
 
 

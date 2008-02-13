@@ -118,6 +118,14 @@ public class DataSourceReferenceTest
         BASE_CLIENT_DS.addProperty("traceDirectory", "XX_traceDirectory_1476");
     }
 
+    /** Descriptor for the client connection pool data source. */
+    private static final DataSourceDescriptor POOL_CLIENT_DS =
+            new DataSourceDescriptor("Connection pool client data source",
+                                     BASE_CLIENT_DS);
+
+    static {
+        POOL_CLIENT_DS.addProperty("maxStatements", "10", "0");
+    }
 
     /**
      * Creates a new fixture.
@@ -171,7 +179,7 @@ public class DataSourceReferenceTest
             // Specify client data source descriptors.
             descriptors = new DataSourceDescriptor[] {
                 BASE_CLIENT_DS, // Base
-                BASE_CLIENT_DS,   // Pool
+                POOL_CLIENT_DS, // Pool
                 BASE_CLIENT_DS  // XA
             };
         } else {

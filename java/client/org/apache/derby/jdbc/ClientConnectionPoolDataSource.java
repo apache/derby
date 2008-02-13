@@ -21,12 +21,15 @@
 
 package org.apache.derby.jdbc;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.sql.SQLException;
 import javax.sql.ConnectionPoolDataSource;
-import javax.sql.DataSource;
 import javax.sql.PooledConnection;
 import org.apache.derby.client.am.LogWriter;
 import org.apache.derby.client.am.SqlException;
+import org.apache.derby.shared.common.i18n.MessageUtil;
+import org.apache.derby.shared.common.reference.MessageId;
 
 /**
  * ClientConnectionPoolDataSource is a factory for PooledConnection objects.
@@ -44,7 +47,21 @@ import org.apache.derby.client.am.SqlException;
 public class ClientConnectionPoolDataSource extends ClientDataSource 
                                            implements ConnectionPoolDataSource {
     private static final long serialVersionUID = -539234282156481377L;
+    /** Message utility used to obtain localized messages. */
+    private static final MessageUtil msgUtil =
+            new MessageUtil("org.apache.derby.loc.clientmessages");
     public static final String className__ = "org.apache.derby.jdbc.ClientConnectionPoolDataSource";
+
+    /**
+     * Specifies the maximum number of statements that can be cached per
+     * connection by the JDBC driver.
+     * <p>
+     * A value of <code>0</code> disables statement caching, negative values
+     * are not allowed. The default is that caching is disabled.
+     *
+     * @serial
+     */
+    private int maxStatements = 0;
 
     public ClientConnectionPoolDataSource() {
         super();
@@ -100,4 +117,73 @@ public class ClientConnectionPoolDataSource extends ClientDataSource
             return ClientDriver.getFactory().newClientPooledConnection(ds,
                     dncLogWriter, user, password);
     }   
+
+    /**
+     * Specifies the maximum size of the statement cache.
+     *
+     * @param maxStatements maximum number of cached statements
+     *
+     * @throws IllegalArgumentException if <code>maxStatements</code> is
+     *      negative
+     */
+    public void setMaxStatements(int maxStatements) {
+        // Disallow negative values.
+        if (maxStatements < 0) {
+            throw new IllegalArgumentException(msgUtil.getTextMessage(
+                    MessageId.CONN_NEGATIVE_MAXSTATEMENTS,
+                    new Integer(maxStatements)));
+        }
+        this.maxStatements = maxStatements;
+    }
+
+    /**
+     * Returns the maximum number of JDBC prepared statements a connection is
+     * allowed to cache.
+     *
+     * @return Maximum number of statements to cache, or <code>0</code> if
+     *      caching is disabled (default).
+     */
+    public int getMaxStatements() {
+        return this.maxStatements;
+    }
+
+    /**
+     * Internally used method.
+     *
+     * @see ClientBaseDataSource#maxStatementsToPool
+     */
+    public int maxStatementsToPool() {
+        return this.maxStatements;
+    }
+
+    /**
+     * Make sure the state of the de-serialized object is valid.
+     */
+    private final void validateState() {
+        // Make sure maxStatements is zero or higher.
+        if (maxStatements < 0) {
+            throw new IllegalArgumentException(msgUtil.getTextMessage(
+                    MessageId.CONN_NEGATIVE_MAXSTATEMENTS,
+                    new Integer(maxStatements)));
+        }
+    }
+
+    /**
+     * Read an object from the ObjectInputStream.
+     * <p>
+     * This implementation differs from the default one by initiating state
+     * validation of the object created.
+     *
+     * @param inputStream data stream to read objects from
+     * @throws ClassNotFoundException if instantiating a class fails
+     * @throws IOException if reading from the stream fails
+     */
+    private void readObject(ObjectInputStream inputStream)
+            throws ClassNotFoundException, IOException {
+     // Always perform the default de-serialization first
+     inputStream.defaultReadObject();
+
+     // Ensure that object state has not been corrupted or tampered with.
+     validateState();
+  }
 }

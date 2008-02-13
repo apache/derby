@@ -147,6 +147,11 @@ public interface MessageId {
     String CONN_DRDA_DATASTREAM_SYNTAX_ERROR                = "J131";
     String CONN_USERNAME_DESCRIPTION                        = "J132";
     String CONN_PASSWORD_DESCRIPTION                        = "J133";
+    /**
+     * Error message for negative values for the maxStatements property
+     * of data sources supporting statement pooling.
+     */
+    String CONN_NEGATIVE_MAXSTATEMENTS                      = "J134";
 
 	/*
 	** Authentication
