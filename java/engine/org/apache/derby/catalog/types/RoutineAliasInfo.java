@@ -21,12 +21,9 @@
 
 package org.apache.derby.catalog.types;
 
-import org.apache.derby.iapi.services.io.Formatable;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.io.ArrayUtil;
-import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.reference.JDBC30Translation;
-import org.apache.derby.catalog.AliasInfo;
 import org.apache.derby.catalog.TypeDescriptor;
 import java.io.IOException;
 import java.io.ObjectInput;
@@ -37,7 +34,7 @@ import org.apache.derby.iapi.types.DataTypeDescriptor;
 /**
  * Describe a routine (procedure or function) alias.
  *
- * @see AliasInfo
+ * @see org.apache.derby.catalog.AliasInfo
  */
 public class RoutineAliasInfo extends MethodAliasInfo
 {
@@ -274,7 +271,7 @@ public class RoutineAliasInfo extends MethodAliasInfo
      * we extract the catalog type and use that.
      * 
      * @param onDiskType The object read that represents the type.
-     * @return
+     * @return A type descriptor.
      */
     private static TypeDescriptor getStoredType(Object onDiskType)
     {
