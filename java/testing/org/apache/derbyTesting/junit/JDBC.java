@@ -508,6 +508,21 @@ public class JDBC {
     }
     
     /**
+     * Assert that no warnings were returned from a JDBC getWarnings()
+     * method such as Connection.getWarnings. Reports the contents
+     * of the warning if it is not null.
+     * @param warning Warning that should be null.
+     */
+    public static void assertNoWarnings(SQLWarning warning)
+    {
+        if (warning == null)
+            return;
+        
+        Assert.fail("Expected no SQLWarnings - got: " + warning.getSQLState() 
+                + " " + warning.getMessage());
+    }
+    
+    /**
      * Assert that the statement has no more results. Logic taken
      * from javadoc for java.sql.Statement.getMoreResults.
      * @param s Statement holding no results.

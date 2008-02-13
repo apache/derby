@@ -56,11 +56,10 @@ public class ScrollCursors2Test extends BaseJDBCTestCase {
      */
 
     public void setUp() throws SQLException {
-        Connection conn = getConnection();
 
         Statement s_i_r;
 
-        s_i_r = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
+        s_i_r = createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
                 ResultSet.CONCUR_READ_ONLY);
 
         /* Create a table */
@@ -74,10 +73,8 @@ public class ScrollCursors2Test extends BaseJDBCTestCase {
     }
 
     public void tearDown() throws SQLException, Exception {
-        Connection conn = getConnection();
-        Statement s = conn.createStatement();
-        s.execute("drop table t");
-        conn.commit();
+        dropTable("T");
+        commit();
         super.tearDown();
     }
 
@@ -85,14 +82,12 @@ public class ScrollCursors2Test extends BaseJDBCTestCase {
         Connection conn = getConnection();
         PreparedStatement ps_f_r = null;
         ResultSet rs;
-        SQLWarning warning;
         Statement s_f_r = null;
 
-        s_f_r = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY,
+        s_f_r = createStatement(ResultSet.TYPE_FORWARD_ONLY,
                 ResultSet.CONCUR_READ_ONLY);
         // We should have gotten no warnings and a read only forward only cursor
-        warning = conn.getWarnings();
-        assertNull(warning);
+        JDBC.assertNoWarnings(conn.getWarnings());
 
         conn.clearWarnings();
 
@@ -210,11 +205,10 @@ public class ScrollCursors2Test extends BaseJDBCTestCase {
         rs.close();
         s_f_r.close();
 
-        ps_f_r = conn.prepareStatement("select * from t",
+        ps_f_r = prepareStatement("select * from t",
                 ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
         // We should have gotten no warnings and a read only forward only cursor
-        warning = conn.getWarnings();
-        assertNull(warning);
+        JDBC.assertNoWarnings(conn.getWarnings());
         
         conn.clearWarnings();
 
@@ -251,16 +245,11 @@ public class ScrollCursors2Test extends BaseJDBCTestCase {
 
     public void testForwardOnlyPositive() throws SQLException {
         Connection conn = getConnection();
-        boolean passed = true;
         ResultSet rs;
-        SQLWarning warning;
-        Statement s_f_r = null;
-
-        s_f_r = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY,
+        Statement s_f_r = createStatement(ResultSet.TYPE_FORWARD_ONLY,
                 ResultSet.CONCUR_READ_ONLY);
         // We should have gotten no warnings and a read only forward only cursor
-        warning = conn.getWarnings();
-        assertNull(warning);
+        JDBC.assertNoWarnings(conn.getWarnings());
         conn.clearWarnings();
 
         // Verify that setMaxRows(4) succeeds
@@ -269,7 +258,6 @@ public class ScrollCursors2Test extends BaseJDBCTestCase {
 
         rs = s_f_r.executeQuery("values 1, 2, 3, 4, 5, 6");
         // Iterate straight thru RS, expect only 5 rows.
-        assertNotNull(rs);
         JDBC.assertDrainResults(rs, 5);
         
         s_f_r.close();
@@ -293,7 +281,7 @@ public class ScrollCursors2Test extends BaseJDBCTestCase {
         Statement s_s_r = null; // sensitive, read only
         Statement s_s_u = null; // sensitive, updatable
 
-        s_s_r = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,
+        s_s_r = createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,
                 ResultSet.CONCUR_READ_ONLY);
 
         // We should have gotten a warning and a scroll insensitive cursor
@@ -311,7 +299,7 @@ public class ScrollCursors2Test extends BaseJDBCTestCase {
         // Close the statement
         s_s_r.close();
 
-        s_s_u = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,
+        s_s_u = createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,
                 ResultSet.CONCUR_UPDATABLE);
         // We should have gotten 1 warning and a updatable scroll
         // insensitive cursor.
@@ -337,19 +325,16 @@ public class ScrollCursors2Test extends BaseJDBCTestCase {
      */
     public void testScrollInsensitivePositive() throws SQLException {
         Connection conn = getConnection();
-        boolean passed = true;
-        PreparedStatement ps_i_r = null;
-        ResultSet rs;
-        SQLWarning warning;
-        Statement s_i_r = null; // insensitive, read only
 
-        s_i_r = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
+        ResultSet rs;
+
+        // insensitive, read only
+        Statement s_i_r = createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
                 ResultSet.CONCUR_READ_ONLY);
 
         // We should not have gotten any warnings
         // and should have gotten a scroll insensitive cursor
-        warning = conn.getWarnings();
-        assertNull(warning);
+        JDBC.assertNoWarnings(conn.getWarnings());
 
         conn.clearWarnings();
 
@@ -413,13 +398,12 @@ public class ScrollCursors2Test extends BaseJDBCTestCase {
 
         rs.close();
 
-        ps_i_r = conn.prepareStatement("select * from t",
+        PreparedStatement ps_i_r = prepareStatement("select * from t",
                 ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
 
         // We should not have gotten any warnings
         // and should have gotten a prepared scroll insensitive cursor
-        warning = conn.getWarnings();
-        assertNull(warning);
+        JDBC.assertNoWarnings(conn.getWarnings());
 
         rs = ps_i_r.executeQuery();
         // make sure it's scrollable
@@ -491,18 +475,15 @@ public class ScrollCursors2Test extends BaseJDBCTestCase {
      */
     public void testScrollInsensitiveNegative() throws SQLException {
         Connection conn = getConnection();
-        boolean passed = true;
-        ResultSet rs;
-        SQLWarning warning;
-        Statement s_i_r = null; // insensitive, read only
 
-        s_i_r = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
+        ResultSet rs;
+        // insensitive, read only
+        Statement s_i_r = createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
                 ResultSet.CONCUR_READ_ONLY);
 
         // We should not have gotten any warnings
         // and should have gotten a scroll insensitive cursor
-        warning = conn.getWarnings();
-        assertNull(warning);
+        JDBC.assertNoWarnings(conn.getWarnings());
         conn.clearWarnings();
 
         // Verify that setMaxRows(-1) fails
@@ -570,7 +551,7 @@ public class ScrollCursors2Test extends BaseJDBCTestCase {
         CallableStatement cs_i_r = null; // insensitive, read only
         CallableStatement cs_f_r = null; // forward only, read only
 
-        cs_s_r = conn.prepareCall("values cast (? as Integer)",
+        cs_s_r = prepareCall("values cast (? as Integer)",
                 ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
 
         // We should have gotten 1 warnings
@@ -581,12 +562,12 @@ public class ScrollCursors2Test extends BaseJDBCTestCase {
         else
             assertEquals("01J10", warning.getSQLState());
 
-        assertNull(warning.getNextWarning());
+        JDBC.assertNoWarnings(warning.getNextWarning());
 
         conn.clearWarnings();
         cs_s_r.close();
 
-        cs_s_u = conn.prepareCall("values cast (? as Integer)",
+        cs_s_u = prepareCall("values cast (? as Integer)",
                 ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
 
         // We should have gotten 1 warning
@@ -597,26 +578,24 @@ public class ScrollCursors2Test extends BaseJDBCTestCase {
         else
             assertEquals("01J10", warning.getSQLState());
 
-        assertNull(warning.getNextWarning());
+        JDBC.assertNoWarnings(warning.getNextWarning());
         conn.clearWarnings();
         cs_s_u.close();
 
-        cs_i_r = conn.prepareCall("values cast (? as Integer)",
+        cs_i_r = prepareCall("values cast (? as Integer)",
                 ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
 
         // We should have gotten 0 warnings
-        warning = conn.getWarnings();
-        assertNull(warning);
+        JDBC.assertNoWarnings(conn.getWarnings());
 
         conn.clearWarnings();
         cs_i_r.close();
 
-        cs_f_r = conn.prepareCall("values cast (? as Integer)",
+        cs_f_r = prepareCall("values cast (? as Integer)",
                 ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 
         // We should have gotten 0 warnings
-        warning = conn.getWarnings();
-        assertNull(warning);
+        JDBC.assertNoWarnings(conn.getWarnings());
 
         conn.clearWarnings();
         cs_f_r.close();
@@ -630,14 +609,13 @@ public class ScrollCursors2Test extends BaseJDBCTestCase {
      *                Thrown if some unexpected error happens
      */
     public void testGetMetaData() throws SQLException {
-        Connection conn = getConnection();
+
         PreparedStatement ps_f_r = null; // forward only, read only
         ResultSet rs;
         ResultSetMetaData rsmd_ps;
         ResultSetMetaData rsmd_rs;
-        SQLWarning warning;
 
-        ps_f_r = conn.prepareStatement("select c50, i, 43 from t",
+        ps_f_r = prepareStatement("select c50, i, 43 from t",
                 ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 
         rsmd_ps = ps_f_r.getMetaData();
@@ -684,11 +662,9 @@ public class ScrollCursors2Test extends BaseJDBCTestCase {
      */
     private void scrollVerifyMaxRowWithFetchSize(int maxRows, int fetchSize)
             throws SQLException {
-        Connection conn = getConnection();
+
         ResultSet rs;
-        boolean passed = true;
-        Statement s_i_r = null;
-        s_i_r = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
+        Statement s_i_r = createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
                 ResultSet.CONCUR_READ_ONLY);
         s_i_r.setMaxRows(maxRows);
 

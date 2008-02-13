@@ -771,7 +771,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         toomany.execute();
         rs = toomany.getResultSet();
         // Single result set returned, therefore no warnings.
-        assertNull(toomany.getWarnings());
+        JDBC.assertNoWarnings(toomany.getWarnings());
         JDBC.assertFullResultSet(rs, new String[][] { { "2", "int" } });
         JDBC.assertNoMoreResults(toomany);
         toomany.close();

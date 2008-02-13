@@ -847,8 +847,7 @@ public class UpdatableResultSetTest  extends BaseJDBCTestCase {
         getConnection().clearWarnings();
         Statement stmt = createStatement(
                 ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
-        assertNull("FAIL - should not get a warning",
-                getConnection().getWarnings());
+        JDBC.assertNoWarnings(getConnection().getWarnings());
         assertEquals("FAIL - wrong result set type",
                 ResultSet.TYPE_FORWARD_ONLY, stmt.getResultSetType());
         assertEquals("FAIL - wrong result set concurrency",
@@ -905,8 +904,7 @@ public class UpdatableResultSetTest  extends BaseJDBCTestCase {
         getConnection().clearWarnings();
         Statement stmt = createStatement(
                 ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
-        assertNull("FAIL - should not get a warning",
-                getConnection().getWarnings());
+        JDBC.assertNoWarnings(getConnection().getWarnings());
         ResultSet rs = stmt.executeQuery("SELECT * FROM t1 FOR UPDATE");
         assertTrue("FAIL - row not found", rs.next());
         
@@ -964,8 +962,7 @@ public class UpdatableResultSetTest  extends BaseJDBCTestCase {
         getConnection().clearWarnings();
         Statement stmt = createStatement(
                 ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
-        assertNull("FAIL - should not get a warning",
-                getConnection().getWarnings());
+        JDBC.assertNoWarnings(getConnection().getWarnings());
         assertEquals("FAIL - wrong result set type",
                 ResultSet.TYPE_FORWARD_ONLY, stmt.getResultSetType());
         assertEquals("FAIL - wrong result set concurrency",
@@ -1019,8 +1016,7 @@ public class UpdatableResultSetTest  extends BaseJDBCTestCase {
         getConnection().clearWarnings();
         Statement stmt = createStatement(
                 ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
-        assertNull("FAIL - should not get a warning",
-                getConnection().getWarnings());
+        JDBC.assertNoWarnings(getConnection().getWarnings());
         ResultSet rs = stmt.executeQuery("SELECT * FROM t1");
         assertTrue("FAIL - row not found", rs.next());
         

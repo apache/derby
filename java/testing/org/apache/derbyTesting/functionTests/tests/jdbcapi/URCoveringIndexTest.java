@@ -100,7 +100,7 @@ public class URCoveringIndexTest extends BaseJDBCTestCase {
             rs.updateRow();
             w = rs.getWarnings();
         }
-        assertTrue("Update should not produce any warnings ", w == null);
+        JDBC.assertNoWarnings(w);
         rs.close();
         
         rs = roStmt.executeQuery("SELECT c1 FROM tableWithPK");
