@@ -116,6 +116,7 @@ public class _Suite extends BaseTestCase  {
 
             // Test uses JDBC 3.0 datasources, and javax.naming.Reference etc.
             suite.addTest(DataSourceReferenceTest.suite());
+            suite.addTest(DataSourceSerializationTest.suite());
 
             // Test uses DriverManager, Pooled and XADataSources, and
             // an inner class implements ConnectionEventListener.
