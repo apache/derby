@@ -1149,7 +1149,8 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
                     cs = cls.getProtectionDomain().getCodeSource ();
                 }
                 catch (SecurityException se) {
-                    return Main.getTextMessage("SIF01.V", cls, se.getMessage());
+                    return Main.getTextMessage(
+                        "SIF01.V", cls.getName(), se.getMessage());
                 }
  
                 if ( cs == null )
