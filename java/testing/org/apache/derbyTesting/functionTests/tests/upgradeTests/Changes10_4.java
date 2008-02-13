@@ -26,10 +26,13 @@ import org.apache.derbyTesting.junit.SupportFilesSetup;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.ParameterMetaData;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.CallableStatement;
+import java.sql.Types;
 
 import javax.sql.DataSource;
 
@@ -177,6 +180,50 @@ public class Changes10_4 extends UpgradeChange {
         }
 
         s.close();
+    }
+    
+    /**
+     * Test that routine parameters and return types are
+     * handled correctly with 10.4 creating a procedure
+     * in soft-upgrade. 10.4 simplified the stored
+     * format of the types by ensuring the catalog
+     * type was written. See DERBY-2917 for details.
+     * 
+     * @throws SQLException 
+     *
+     */
+    public void testRoutineParameters() throws SQLException
+    {
+        
+
+        switch (getPhase())
+        {
+        case PH_CREATE:
+          break;
+            
+        case PH_SOFT_UPGRADE:
+            Statement s = createStatement();
+            s.execute("CREATE FUNCTION TYPES_10_4" +
+                    "(A INTEGER) RETURNS CHAR(10) " +
+                    "LANGUAGE JAVA " +
+                    "PARAMETER STYLE JAVA " +
+                    "NO SQL " +
+                    "EXTERNAL NAME 'java.lang.Integer.toHexString'");
+           // fall through to test it
+            
+        case PH_HARD_UPGRADE:
+        case PH_POST_SOFT_UPGRADE:
+            PreparedStatement ps = prepareStatement(
+                    "VALUES TYPES_10_4(?)");
+            ps.setInt(1, 48879);
+            // Don't use the single value check method here
+            // because we want to check the returned value
+            // was converted to its correct type of CHAR(10)
+            // (so no trimming of values)
+            JDBC.assertFullResultSet(ps.executeQuery(),
+                    new Object[][] {{"beef      "}}, false);
+            break;
+        }
     }
 
     /**
