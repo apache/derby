@@ -109,21 +109,6 @@ public interface StringDataValue extends ConcatableDataValue
 									DataValueDescriptor escape)
 							throws StandardException;
 
-	/**
-	 * The SQL trim(), ltrim() and rtrim() functions.
-	 *
-	 * @param trimType	Type of trim
-	 * @param result	The result of a previous call to this method,
-	 *					null if not called yet.
-	 *
-	 * @return	A StringDataValue containing the result of the trim()
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
-	public StringDataValue trim(
-				int trimType,
-				StringDataValue result)
-		throws StandardException;
 
 	/**
 	 * The SQL Ansi trim function.
