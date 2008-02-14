@@ -36,6 +36,7 @@ import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.iapi.services.jmx.ManagementService;
 
 import org.apache.derby.iapi.sql.ResultSet;
 
@@ -43,6 +44,7 @@ import org.apache.derby.iapi.jdbc.AuthenticationService;
 import org.apache.derby.iapi.sql.ResultColumnDescriptor;
 
 import org.apache.derby.impl.jdbc.*;
+import org.apache.derby.mbeans.JDBCMBean;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -60,6 +62,8 @@ public abstract class InternalDriver implements ModuleControl {
     
 	private static final Object syncMe = new Object();
 	private static InternalDriver activeDriver;
+    
+    private Object mbean;
 
 	protected boolean active;
 	private ContextService contextServiceFactory;
@@ -86,6 +90,12 @@ public abstract class InternalDriver implements ModuleControl {
 		}
 
 		active = true;
+        
+        mbean = ((ManagementService)
+           Monitor.getSystemModule(ManagementService.MODULE)).registerMBean(
+                   new JDBC(this),
+                   JDBCMBean.class,
+                   "type=JDBC");
 	}
 
 	public void stop() {
@@ -94,6 +104,10 @@ public abstract class InternalDriver implements ModuleControl {
 		{
 			InternalDriver.activeDriver = null;
 		}
+        
+        ((ManagementService)
+                Monitor.getSystemModule(ManagementService.MODULE)).unregisterMBean(
+                        mbean);
 
 		active = false;
 

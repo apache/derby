@@ -26,6 +26,7 @@ import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
 
+import javax.management.InstanceNotFoundException;
 import javax.management.JMException;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
@@ -83,11 +84,7 @@ public class JMXManagementService implements ManagementService, ModuleControl {
             return;
         
         for (ObjectName mbeanName : registeredMbeans)
-            try {
-                unregisterMBean(mbeanName);
-            } catch (StandardException e) {
-                // TODO: what to do here?
-            }
+            unregisterMBean(mbeanName);
     }
 
     /**
@@ -111,7 +108,7 @@ public class JMXManagementService implements ManagementService, ModuleControl {
 
             registerMBean(new Version(Monitor.getMonitor().getEngineVersion()),
                     VersionMBean.class,
-                    "org.apache.derby:type=Version,jar=derby.jar");
+                    "type=Version,jar=derby.jar");
             
         } catch (SecurityException se) {
             // TODO: just ignoring inability to create the mbean server.
@@ -130,19 +127,21 @@ public class JMXManagementService implements ManagementService, ModuleControl {
      * 
      * @param bean The MBean to wrap with a StandardMBean and register
      * @param beanInterface The management interface for the MBean.
-     * @param name The String representation of the MBean's object name.
+     * @param nameAttributes The String representation of the MBean's attrributes,
+     * they will be added into the ObjectName with Derby's domain
      * 
      */
-    private synchronized void registerMBean(final Object bean,
+    public synchronized Object registerMBean(final Object bean,
             final Class beanInterface,
-            final String name)
+            final String nameAttributes)
             throws StandardException {
 
         if (mbeanServer == null)
-            return;
+            return null;
 
         try {
-            final ObjectName beanName = new ObjectName(name);
+            final ObjectName beanName = new ObjectName(
+                    DERBY_JMX_DOMAIN + ":" + nameAttributes);
             final StandardMBean standardMBean =
                 new StandardMBean(bean, beanInterface);
             try {
@@ -158,6 +157,7 @@ public class JMXManagementService implements ManagementService, ModuleControl {
                         });
                 
                 registeredMbeans.add(beanName);
+                return beanName;
 
             } catch (PrivilegedActionException pae) {
                 throw (JMException) pae.getException();
@@ -168,12 +168,21 @@ public class JMXManagementService implements ManagementService, ModuleControl {
     }
     
     /**
+     * Unregister an mbean using an object previous returned
+     * from registerMBean.
+     */
+    public void unregisterMBean(Object mbeanIdentifier)
+    {
+        if (mbeanIdentifier == null)
+            return;
+        unregisterMBean((ObjectName) mbeanIdentifier);
+    }
+    
+    /**
      * Unregisters an mbean that was registered  by this service.
      * @param mbeanName Bean to unregister.
-     * @throws StandardException
      */
     private synchronized void unregisterMBean(final ObjectName mbeanName)
-        throws StandardException
     {
         if (!registeredMbeans.remove(mbeanName))
             return;
@@ -194,7 +203,11 @@ public class JMXManagementService implements ManagementService, ModuleControl {
                     });
 
         } catch (PrivilegedActionException pae) {
-            throw StandardException.plainWrapException(pae.getException());
+            // TODO - this is called on shutdown where
+            // we don't really care about errors.
+            // JMException jme = (JMException) pae.getException();
+            //if (!(jme instanceof InstanceNotFoundException))
+                // throw StandardException.plainWrapException(jme);
         }
     }
 }

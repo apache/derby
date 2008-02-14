@@ -23,7 +23,15 @@ import org.apache.derby.iapi.services.jmx.ManagementService;
  * Dummy management service for environments that do not support
  * JMX, such as JDK 1.4 and J2ME.
 */
-public class NoManagementService implements ManagementService {
+public final class NoManagementService implements ManagementService {
     public NoManagementService() {
+    }
+    public Object registerMBean(final Object bean,
+            final Class beanInterface,
+            final String nameAttributes)
+    {
+        return null;
+    }
+    public void unregisterMBean(Object mbeanIdentifier) {
     }
 }
