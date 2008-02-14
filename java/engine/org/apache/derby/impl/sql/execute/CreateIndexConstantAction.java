@@ -85,6 +85,26 @@ class CreateIndexConstantAction extends IndexConstantAction
 
 	private ExecRow indexTemplateRow;
 
+	/** Conglomerate number for the conglomerate created by this
+	 * constant action; -1L if this constant action has not been
+	 * executed.  If this constant action doesn't actually create
+	 * a new conglomerate--which can happen if it finds an existing
+	 * conglomerate that satisfies all of the criteria--then this
+	 * field will hold the conglomerate number of whatever existing
+	 * conglomerate was found.
+	 */
+	private long conglomId;
+
+	/** Conglomerate number of the physical conglomerate that we
+	 * will "replace" using this constant action.  That is, if
+	 * the purpose of this constant action is to create a new physical
+	 * conglomerate to replace a dropped physical conglomerate, then
+	 * this field holds the conglomerate number of the dropped physical
+	 * conglomerate. If -1L then we are not replacing a conglomerate,
+	 * we're simply creating a new index (and backing physical
+	 * conglomerate) as normal.
+	 */
+	private long droppedConglomNum;
 
 	// CONSTRUCTORS
 	/**
@@ -126,6 +146,73 @@ class CreateIndexConstantAction extends IndexConstantAction
 		this.isConstraint = isConstraint;
 		this.conglomerateUUID = conglomerateUUID;
 		this.properties = properties;
+		this.conglomId = -1L;
+		this.droppedConglomNum = -1L;
+	}
+
+	/**
+	 * Make a ConstantAction that creates a new physical conglomerate
+	 * based on index information stored in the received descriptors.
+	 * Assumption is that the received ConglomerateDescriptor is still
+	 * valid (meaning it has corresponding entries in the system tables
+	 * and it describes some constraint/index that has _not_ been
+	 * dropped--though the physical conglomerate underneath has).
+	 *
+	 * This constructor is used in cases where the physical conglomerate
+	 * for an index has been dropped but the index still exists. That
+	 * can happen if multiple indexes share a physical conglomerate but
+	 * then the conglomerate is dropped as part of "drop index" processing
+	 * for one of the indexes. (Note that "indexes" here includes indexes
+	 * which were created to back constraints.) In that case we have to
+	 * create a new conglomerate to satisfy the remaining sharing indexes,
+	 * so that's what we're here for.  See ConglomerateDescriptor.drop()
+	 * for details on when that is necessary.
+	 */
+	CreateIndexConstantAction(ConglomerateDescriptor srcCD,
+		TableDescriptor td, Properties properties)
+	{
+		super(td.getUUID(),
+			srcCD.getConglomerateName(), td.getName(), td.getSchemaName());
+
+		this.forCreateTable = false;
+
+		/* We get here when a conglomerate has been dropped and we
+		 * need to create (or find) another one to fill its place.
+		 * At this point the received conglomerate descriptor still
+		 * references the old (dropped) conglomerate, so we can
+		 * pull the conglomerate number from there.
+		 */
+		this.droppedConglomNum = srcCD.getConglomerateNumber();
+
+		/* Plug in the rest of the information from the received
+		 * descriptors.
+		 */
+		IndexRowGenerator irg = srcCD.getIndexDescriptor();
+		this.unique = irg.isUnique();
+		this.indexType = irg.indexType();
+		this.columnNames = srcCD.getColumnNames();
+		this.isAscending = irg.isAscending();
+		this.isConstraint = srcCD.isConstraint();
+		this.conglomerateUUID = srcCD.getUUID();
+		this.properties = properties;
+		this.conglomId = -1L;
+
+		/* The ConglomerateDescriptor may not know the names of
+		 * the columns it includes.  If that's true (which seems
+		 * to be the more common case) then we have to build the
+		 * list of ColumnNames ourselves.
+		 */
+		if (columnNames == null)
+		{
+			int [] baseCols = irg.baseColumnPositions();
+			columnNames = new String[baseCols.length];
+			ColumnDescriptorList colDL = td.getColumnDescriptorList();
+			for (int i = 0; i < baseCols.length; i++)
+			{
+				columnNames[i] =
+					colDL.elementAt(baseCols[i]-1).getColumnName();
+			}
+		}
 	}
 
 	///////////////////////////////////////////////
@@ -298,33 +385,53 @@ class CreateIndexConstantAction extends IndexConstantAction
 				maxBaseColumnPosition = baseColumnPositions[i];
 		}
 
+		/* The code below tries to determine if the index that we're about
+		 * to create can "share" a conglomerate with an existing index.
+		 * If so, we will use a single physical conglomerate--namely, the
+		 * one that already exists--to support both indexes. I.e. we will
+		 * *not* create a new conglomerate as part of this constant action.
+		 */ 
+
 		// check if we have similar indices already for this table
 		ConglomerateDescriptor[] congDescs = td.getConglomerateDescriptors();
-		boolean duplicate = false;
-        long conglomId = 0;
-
+		boolean shareExisting = false;
 		for (int i = 0; i < congDescs.length; i++)
 		{
 			ConglomerateDescriptor cd = congDescs[i];
 			if ( ! cd.isIndex())
 				continue;
+
+			if (droppedConglomNum == cd.getConglomerateNumber())
+			{
+				/* We can't share with any conglomerate descriptor
+				 * whose conglomerate number matches the dropped
+				 * conglomerate number, because that descriptor's
+				 * backing conglomerate was dropped, as well.  If
+				 * we're going to share, we have to share with a
+				 * descriptor whose backing physical conglomerate
+				 * is still around.
+				 */
+				continue;
+			}
+
 			IndexRowGenerator irg = cd.getIndexDescriptor();
 			int[] bcps = irg.baseColumnPositions();
 			boolean[] ia = irg.isAscending();
 			int j = 0;
 
-			/* For an index to be considered a duplicate of already existing index, the
-			 * following conditions have to be satisfied:
+			/* The conditions which allow an index to share an existing
+			 * conglomerate are as follows:
+			 *
 			 * 1. the set of columns (both key and include columns) and their 
 			 *  order in the index is the same as that of an existing index AND 
 			 * 2. the ordering attributes are the same AND 
 			 * 3. both the previously existing index and the one being created 
 			 *  are non-unique OR the previously existing index is unique
-			 */
+			 */ 
+			boolean possibleShare = (irg.isUnique() || !unique) &&
+			    (bcps.length == baseColumnPositions.length);
 
-			if ((bcps.length == baseColumnPositions.length) &&
-			    (irg.isUnique() || !unique) &&
-				indexType.equals(irg.indexType()))
+			if (possibleShare && indexType.equals(irg.indexType()))
 			{
 				for (; j < bcps.length; j++)
 				{
@@ -333,7 +440,7 @@ class CreateIndexConstantAction extends IndexConstantAction
 				}
 			}
 
-			if (j == baseColumnPositions.length)	// duplicate
+			if (j == baseColumnPositions.length)	// share
 			{
 				/*
 				 * Don't allow users to create a duplicate index. Allow if being done internally
@@ -349,23 +456,53 @@ class CreateIndexConstantAction extends IndexConstantAction
 					return;
 				}
 
-				//Duplicate indexes share the physical conglomerate underneath
+				/* Sharing indexes share the physical conglomerate
+				 * underneath, so pull the conglomerate number from
+				 * the existing conglomerate descriptor.
+				 */
 				conglomId = cd.getConglomerateNumber();
-				indexRowGenerator = cd.getIndexDescriptor();
+
+				/* We create a new IndexRowGenerator because certain
+				 * attributes--esp. uniqueness--may be different between
+				 * the index we're creating and the conglomerate that
+				 * already exists.  I.e. even though we're sharing a
+				 * conglomerate, the new index is not necessarily
+				 * identical to the existing conglomerate. We have to
+				 * keep track of that info so that if we later drop
+				 * the shared physical conglomerate, we can figure out
+				 * what this index (the one we're creating now) is
+				 * really supposed to look like.
+				 */
+				indexRowGenerator =
+					new IndexRowGenerator(
+						indexType, unique,
+						baseColumnPositions,
+						isAscending,
+						baseColumnPositions.length);
+
 				//DERBY-655 and DERBY-1343  
-				//Duplicate indexes will have unqiue logical conglomerate UUIDs.  
+				// Sharing indexes will have unique logical conglomerate UUIDs.
 				conglomerateUUID = dd.getUUIDFactory().createUUID();
-				duplicate = true;
+				shareExisting = true;
 				break;
 			}
 		}
 
+		/* If we have a droppedConglomNum then the index we're about to
+		 * "create" already exists--i.e. it has an index descriptor and
+		 * the corresponding information is already in the system catalogs.
+		 * The only thing we're missing, then, is the physical conglomerate
+		 * to back the index (because the old conglomerate was dropped).
+		 */
+		boolean alreadyHaveConglomDescriptor = (droppedConglomNum > -1L);
+
 		/* If this index already has an essentially same one, we share the
 		 * conglomerate with the old one, and just simply add a descriptor
-		 * entry into SYSCONGLOMERATES.
+		 * entry into SYSCONGLOMERATES--unless we already have a descriptor,
+		 * in which case we don't even need to do that.
 		 */
 		DataDescriptorGenerator ddg = dd.getDataDescriptorGenerator();
-		if (duplicate)
+		if (shareExisting && !alreadyHaveConglomDescriptor)
 		{
 			ConglomerateDescriptor cgd =
 				ddg.newConglomerateDescriptor(conglomId, indexName, true,
@@ -416,7 +553,7 @@ class CreateIndexConstantAction extends IndexConstantAction
 							Integer.toString(baseColumnPositions.length + 1));
 
 		// For now, assume that all index columns are ordered columns
-		if (! duplicate)
+		if (! shareExisting)
 		{
 			indexRowGenerator = new IndexRowGenerator(indexType, unique,
 													baseColumnPositions,
@@ -527,9 +664,9 @@ class CreateIndexConstantAction extends IndexConstantAction
 				indexRowGenerator.getIndexRow(compactBaseRows[i], rl[i], indexRows[i], bitSet);
 			}
 
-			/* now that we got indexTemplateRow, done for duplicate index
+			/* now that we got indexTemplateRow, done for sharing index
 			 */
-			if (duplicate)
+			if (shareExisting)
 				return;
 
 			/* For non-unique indexes, we order by all columns + the RID.
@@ -646,21 +783,32 @@ class CreateIndexConstantAction extends IndexConstantAction
 		indexController.close();
 
 		//
-		// Create a conglomerate descriptor with the conglomId filled in and
-		// add it.
+		// Create a conglomerate descriptor with the conglomId filled
+		// in and add it--if we don't have one already.
 		//
+		if (!alreadyHaveConglomDescriptor)
+		{
+			ConglomerateDescriptor cgd =
+				ddg.newConglomerateDescriptor(
+					conglomId, indexName, true,
+					indexRowGenerator, isConstraint,
+					conglomerateUUID, td.getUUID(), sd.getUUID() );
 
-		ConglomerateDescriptor cgd =
-			ddg.newConglomerateDescriptor(conglomId, indexName, true,
-										  indexRowGenerator, isConstraint,
-										  conglomerateUUID, td.getUUID(), sd.getUUID() );
+			dd.addDescriptor(cgd, sd,
+				DataDictionary.SYSCONGLOMERATES_CATALOG_NUM, false, tc);
 
-		dd.addDescriptor(cgd, sd, DataDictionary.SYSCONGLOMERATES_CATALOG_NUM, false, tc);
+			// add newly added conglomerate to the list of conglomerate
+			// descriptors in the td.
+			ConglomerateDescriptorList cdl = td.getConglomerateDescriptorList();
+			cdl.add(cgd);
 
-		// add newly added conglomerate to the list of conglomerate descriptors
-		// in the td.
-		ConglomerateDescriptorList cdl = td.getConglomerateDescriptorList();
-		cdl.add(cgd);
+			/* Since we created a new conglomerate descriptor, load
+			 * its UUID into the corresponding field, to ensure that
+			 * it is properly set in the StatisticsDescriptor created
+			 * below.
+			 */
+			conglomerateUUID = cgd.getUUID();
+		}
 
 		CardinalityCounter cCount = (CardinalityCounter)rowSource;
 		long numRows;
@@ -670,9 +818,11 @@ class CreateIndexConstantAction extends IndexConstantAction
 			for (int i = 0; i < c.length; i++)
 			{
 				StatisticsDescriptor statDesc = 
-					new StatisticsDescriptor(dd, dd.getUUIDFactory().createUUID(),
-												cgd.getUUID(), td.getUUID(), "I", new StatisticsImpl(numRows, c[i]),
-												i + 1);
+					new StatisticsDescriptor(dd,
+						dd.getUUIDFactory().createUUID(),
+						conglomerateUUID, td.getUUID(), "I",
+						new StatisticsImpl(numRows, c[i]), i + 1);
+
 				dd.addDescriptor(statDesc, null, 
 								 DataDictionary.SYSSTATISTICS_CATALOG_NUM,
 								 true, tc);
@@ -690,6 +840,51 @@ class CreateIndexConstantAction extends IndexConstantAction
 	ExecRow getIndexTemplateRow()
 	{
 		return indexTemplateRow;
+	}
+
+	/**
+	 * Get the conglomerate number for the conglomerate that was
+	 * created by this constant action.  Will return -1L if the
+	 * constant action has not yet been executed.  This is used
+	 * for updating conglomerate descriptors which share a
+	 * conglomerate that has been dropped, in which case those
+	 * "sharing" descriptors need to point to the newly-created
+	 * conglomerate (the newly-created conglomerate replaces
+	 * the dropped one).
+	 */
+	long getCreatedConglomNumber()
+	{
+		if (SanityManager.DEBUG)
+		{
+			if (conglomId == -1L)
+			{
+				SanityManager.THROWASSERT(
+					"Called getCreatedConglomNumber() on a CreateIndex" +
+					"ConstantAction before the action was executed.");
+			}
+		}
+
+		return conglomId;
+	}
+
+	/**
+	 * If the purpose of this constant action was to "replace" a
+	 * dropped physical conglomerate, then this method returns the
+	 * conglomerate number of the dropped conglomerate.  Otherwise
+	 * this method will end up returning -1.
+	 */
+	long getReplacedConglomNumber()
+	{
+		return droppedConglomNum;
+	}
+
+	/**
+	 * Get the UUID for the conglomerate descriptor that was created
+	 * (or re-used) by this constant action.
+	 */
+	UUID getCreatedUUID()
+	{
+		return conglomerateUUID;
 	}
 
 	/**
