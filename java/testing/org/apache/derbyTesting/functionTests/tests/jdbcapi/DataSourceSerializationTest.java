@@ -23,6 +23,7 @@ package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.security.AccessController;
@@ -194,25 +195,47 @@ public class DataSourceSerializationTest
                 throw (FileNotFoundException)e.getException();
             }
 
-        ObjectInputStream ois = new ObjectInputStream(is);
-        String buildVersion = ois.readUTF();
-        String buildNumber = ois.readUTF();
-        println("Data source " + className + ", version " +
-                buildVersion + ", build " + buildNumber);
-        Object dsObj = ois.readObject();
-        assertNotNull("De-serialized data source is null", dsObj);
-        assertTrue("Unexpected class instantiated: " +
-                dsObj.getClass().getName(),
-                dsObj.getClass().getName().indexOf(className) > 0);
-        DataSource ds = (DataSource)dsObj;
-        // Just see if the object is usable.
-        int newTimeout = ds.getLoginTimeout() +9;
-        assertFalse(ds.getLoginTimeout() == newTimeout);
-        ds.setLoginTimeout(newTimeout);
-        assertEquals(newTimeout, ds.getLoginTimeout());
+        assertNotNull("FileInputStream is null", is);
+        Object dsObj = null;
+        DataSource ds = null;
+        Reference dsRef = null;
+        // Used to preserve original error information in case of exception when 
+        // closing the input stream.
+        boolean testSequencePassed = false;
+        try {
+            ObjectInputStream ois = new ObjectInputStream(is);
+            String buildVersion = ois.readUTF();
+            String buildNumber = ois.readUTF();
+            println("Data source " + className + ", version " +
+                    buildVersion + ", build " + buildNumber);
+            dsObj = ois.readObject();
+            assertNotNull("De-serialized data source is null", dsObj);
+            assertTrue("Unexpected class instantiated: " +
+                    dsObj.getClass().getName(),
+                    dsObj.getClass().getName().indexOf(className) > 0);
+            ds = (DataSource)dsObj;
+            // Just see if the object is usable.
+            int newTimeout = ds.getLoginTimeout() +9;
+            assertFalse(ds.getLoginTimeout() == newTimeout);
+            ds.setLoginTimeout(newTimeout);
+            assertEquals(newTimeout, ds.getLoginTimeout());
 
-        // Recreate the data source using reference.
-        Reference dsRef = (Reference)ois.readObject();
+            // Recreate the data source using reference.
+            dsRef = (Reference)ois.readObject();
+            ois.close();
+            testSequencePassed = true;
+        } finally {
+            if (testSequencePassed) {
+                is.close();
+            } else {
+                try {
+                    is.close();
+                } catch (IOException ioe) {
+                    // Ignore this to preserve the original exception.
+                }
+            }
+        }
+
         String factoryClassName = dsRef.getFactoryClassName();
         ObjectFactory factory =
             (ObjectFactory)Class.forName(factoryClassName).newInstance();
