@@ -773,6 +773,39 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         toomany.close();
         s.execute("drop procedure way.toomany");
 
+        //Run following test in embedded only until DERBY-3414 is fixed. As
+        //identified in DERBY-3414, the rollback inside the java procedure
+        //is not closing all the resultsets when run in network server mode.
+        if (usingEmbedded()) {
+            boolean oldAutoCommit = conn.getAutoCommit();
+            s.execute("create table dellater1(i int not null primary key, b char(15))");
+            s.executeUpdate("INSERT INTO dellater1 VALUES(1,'a'),(2,'b'),(3,'c'),(4,'d')");
+            s.executeUpdate("CREATE TABLE DELLATER2(c11 int)");
+            s.executeUpdate("INSERT INTO DELLATER2 VALUES(1),(2),(3),(4)");
+            conn.setAutoCommit(false);
+            ResultSet rs1 = s.executeQuery("SELECT * FROM dellater2");
+            rs1.next();
+
+            Statement s1 =
+                conn.createStatement(ResultSet.TYPE_FORWARD_ONLY,
+                                    ResultSet.CONCUR_READ_ONLY,
+                                    ResultSet.HOLD_CURSORS_OVER_COMMIT);
+            ResultSet resultSet = s1.executeQuery("VALUES (1, 2), (3, 4)");
+            resultSet.next();
+
+            s
+            .execute("create procedure procWithRollback(p1 int) parameter style JAVA READS SQL DATA dynamic result sets 1 language java external name 'org.apache.derbyTesting.functionTests.tests.lang.LangProcedureTest.rollbackInsideProc'");
+            drs1 = prepareCall("CALL procWithRollback(3)");
+            drs1.execute();
+            rs = drs1.getResultSet();
+
+            JDBC.assertClosed(rs1);
+            JDBC.assertClosed(resultSet);
+            s.execute("drop table dellater1");
+            s.execute("drop table dellater2");
+            conn.setAutoCommit(oldAutoCommit);
+        }
+
         s.close();
         conn2.close();
     }
@@ -1077,6 +1110,28 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         conn.close();
     }
 
+    /**
+     * A test case for DERBY-3414. An explicit rollback inside the procedure
+     * should close all the resultsets created before the call to the
+     * procedure and any resultsets created inside the procedure including
+     * the dynamic resultsets.
+     * 
+     * @param p1
+     * @param data
+     * @throws SQLException
+     */
+    public static void rollbackInsideProc(int p1, ResultSet[] data) 
+    throws SQLException {
+        Connection conn = DriverManager.getConnection(
+        		"jdbc:default:connection");
+        PreparedStatement ps = conn.prepareStatement(
+        		"select * from dellater1 where i = ?");
+        ps.setInt(1, p1);
+        data[0] = ps.executeQuery();
+        conn.rollback();
+        conn.close();
+    }
+    
     public static void selectRows(int p1, int p2, ResultSet[] data1,
             ResultSet[] data2) throws SQLException {
 
