@@ -36,8 +36,6 @@ import java.sql.Savepoint;
 import java.util.Hashtable;
 import java.util.Iterator;
 
-import org.apache.derbyTesting.functionTests.tests.jdbcapi.AssertEventCatcher;
-
 import javax.sql.ConnectionEvent;
 import javax.sql.ConnectionEventListener;
 import javax.sql.ConnectionPoolDataSource;
