@@ -55,8 +55,8 @@
       <fileset dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/testData/ConnectionMethods"
         includes="*.txt"/>
     </copy>
-    <copy todir="${out.dir}/${derby.testing.functest.dir}/testData/serialized-data-sources">
-      <fileset dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/testData/serialized-data-sources"
+    <copy todir="${out.dir}/${derby.testing.functest.dir}/testData/serializedDataSources">
+      <fileset dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/testData/serializedDataSources"
         includes="*.ser"/>
     </copy>
   </target>

@@ -43,7 +43,7 @@ import org.apache.derbyTesting.junit.SupportFilesSetup;
  * current version of the data souce.
  * <p>
  * Serialized data source from old versions are expected to be found in
- * <tt>testData/serialized-data-sources</tt>, with the following filename
+ * <tt>testData/serializedDataSources</tt>, with the following filename
  * format CLASSNAME-VERSION.ser, where CLASSNAME is the unqualified name of the
  * data source class, and VERSION is the Derby version. An example:
  * <tt>ClientPooledConnectionDataSource-10_1.ser</tt>
@@ -254,7 +254,7 @@ public class DataSourceSerializationTest
      */
     public static Test suite() {
         TestSuite suite = new TestSuite("DataSourceSerializationTest");
-        String filePrefix = "functionTests/testData/serialized-data-sources/";
+        String filePrefix = "functionTests/testData/serializedDataSources/";
         // De-serialize embedded data sources only if we have the engine code.
         if (Derby.hasEmbedded()) {
             suite.addTest(new DataSourceSerializationTest(
