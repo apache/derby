@@ -58,6 +58,33 @@ public class CleanDatabaseTestSetup extends BaseJDBCTestSetup {
     public CleanDatabaseTestSetup(Test test) {
         super(test);
     }
+    /**
+     * Constructor to use when running in a client / server 
+     * with the server already started on a given host
+     * and port.
+     */
+    /*
+     * Currently only used in o.a.dT.ft.tests.replicationTests.StandardTests
+     * for running existing JUnit tests on a client server configuration.
+     * To avoid duplicating the code inside decorateSQL() methods
+     * public static decorate() methods have been factored out
+     * for reuse in test methods in StandardTests: e.g. as AnsiTrimTest.decorate(s);
+     */
+    public CleanDatabaseTestSetup(Test test, 
+            boolean useNetworkClient,
+            String hostName,
+            int portNo) {
+        super(test);
+        if ( useNetworkClient )
+        {
+            this.jdbcClient = JDBCClient.DERBYNETCLIENT;
+        }
+        this.hostName = hostName;
+        this.portNo = portNo;
+    }
+    private JDBCClient jdbcClient = null;
+    private String hostName = null;
+    private int portNo = -1;
 
     /**
      * Clean the default database using the default connection
@@ -65,6 +92,15 @@ public class CleanDatabaseTestSetup extends BaseJDBCTestSetup {
      * initialize their schema requirments.
      */
     protected void setUp() throws Exception {
+        if (jdbcClient != null )
+        { // We have network client (useNetworkClient) on a given host and port.
+            TestConfiguration current = TestConfiguration.getCurrent();
+            TestConfiguration modified = new TestConfiguration(current, 
+                    jdbcClient,
+                    hostName, 
+                    portNo);
+            TestConfiguration.setCurrent(modified);
+        }
         Connection conn = getConnection();
         conn.setAutoCommit(false);
         

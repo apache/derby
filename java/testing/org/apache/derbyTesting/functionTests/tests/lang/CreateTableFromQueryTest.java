@@ -50,6 +50,24 @@ public final class CreateTableFromQueryTest extends BaseJDBCTestCase {
         super(name);
     }
 
+    /*
+     * Factored out for reuse in other TestCases which add
+     * the same test method in their suite() method.
+     *
+     * Currently done for a few testcases reused in replication testing:
+     * o.a.dT.ft.tests.replicationTests.StandardTests.
+     */
+    public static void decorate(Statement stmt)
+         throws SQLException
+    {
+        // create base tables t1 and t2
+        stmt.executeUpdate(
+                "create table t1(i int not null, s smallint, f float, dp "
+                + "double precision, v varchar(10) not null)");
+        
+        stmt.executeUpdate("create table t2 (a int, s varchar(5))");
+    }
+    
     /**
      * Create a suite of tests.
     */
@@ -60,13 +78,7 @@ public final class CreateTableFromQueryTest extends BaseJDBCTestCase {
 
             protected void decorateSQL(Statement stmt) throws SQLException
             {
-                // create base tables t1 and t2       
-                stmt.executeUpdate(
-                    "create table t1(i int not null, s smallint, f float, dp "
-                    + "double precision, v varchar(10) not null)");
-
-                stmt.executeUpdate("create table t2 (a int, s varchar(5))");
-
+                decorate(stmt);
             }
         };
     }

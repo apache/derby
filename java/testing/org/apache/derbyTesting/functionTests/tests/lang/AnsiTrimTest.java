@@ -46,16 +46,28 @@ public class AnsiTrimTest extends BaseJDBCTestCase {
         super(name);
     }
 
-    public static Test suite() {
+    /*
+     * Factored out for reuse in other TestCases which add
+     * the same test method in their suite() method.
+     *
+     * Currently done for a few testcases reused in replication testing:
+     * o.a.dT.ft.tests.replicationTests.StandardTests.
+     */
+    public static void decorate(Statement s)
+    throws SQLException
+    {
+        s.executeUpdate("create table tt (id int, v varchar(16), c char(16), cl clob(10240))");
+        s.executeUpdate("insert into tt values (1, 'abcaca', 'abcaca', 'abcaca')");
+        s.executeUpdate("create table nt (v varchar(2))");
+        s.executeUpdate("insert into nt values (null)");
+    }
+   public static Test suite() {
         TestSuite suite = new TestSuite("AnsiTrimTest");
         suite.addTestSuite(AnsiTrimTest.class);
         return new CleanDatabaseTestSetup(suite) {
             public void decorateSQL(Statement s)
                     throws SQLException {
-                s.executeUpdate("create table tt (id int, v varchar(16), c char(16), cl clob(10240))");
-                s.executeUpdate("insert into tt values (1, 'abcaca', 'abcaca', 'abcaca')");
-                s.executeUpdate("create table nt (v varchar(2))");
-                s.executeUpdate("insert into nt values (null)");
+                decorate(s);
             }
 
         };

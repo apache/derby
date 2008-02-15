@@ -245,12 +245,36 @@ public class TestConfiguration {
     /**
      * Equivalent to "defaultSuite" as defined above, but assumes a server
      * has already been started. 
-     * Does NOT decorate for running in embedded mode.
+     * <BR>
+     * Does NOT decorate for running in embedded mode, only for running on
+     * the already started server.
+     * <BR>
+     * Return a Test suite that contains all the test fixtures
+     * for the passed in class running in client server configuration
+     * on an already started server.
+     * <BR>
+     * The set of client server tests
+     * is decorated with a CleanDatabaseTestSetup.
+     * <BR>
+     * The client server configuration is setup using clientExistingServerSuite
      */
     public static Test defaultExistingServerSuite(Class testClass)
     {
         return defaultExistingServerSuite(testClass, true);
     }
+    
+    /**
+     * Does the work of "defaultExistingServerSuite" as defined above.  Takes
+     * a boolean argument to determine whether or not to "clean"
+     * the test database before each suite.  If the resultant
+     * suite is going to be wrapped inside a TestSetup that creates
+     * database objects to be used throughout the tests, then the
+     * cleanDB parameter should be "false" to prevent cleanup of the
+     * database objects that TestSetup created.
+     * <BR>
+     * Does NOT decorate for running in embedded mode, only for running on
+     * an already started server.
+     */
     public static Test defaultExistingServerSuite(Class testClass, boolean cleanDB)
     {
          final TestSuite suite = new TestSuite(suiteName(testClass));
@@ -262,6 +286,49 @@ public class TestConfiguration {
         else
         {
             suite.addTest(clientExistingServerSuite(testClass));
+        }
+
+        return (suite);
+    }
+
+    /**
+     * Return a Test suite that contains all the test fixtures
+     * for the passed in class running in client server configuration
+     * on an already started server on a given host and port number.
+     * <BR>
+     * Takes a boolean argument to determine whether or not to "clean"
+     * the test database before each suite.  If the resultant
+     * suite is going to be wrapped inside a TestSetup that creates
+     * database objects to be used throughout the tests, then the
+     * cleanDB parameter should be "false" to prevent cleanup of the
+     * database objects that TestSetup created.
+     * <BR>
+     * Takes a String argument to specify which host the server runs on, and
+     * takes an int argument to specify the port number to use.
+     * <BR>
+     * Does NOT decorate for running in embedded mode, only for running on
+     * an already started server.
+     * <BR>
+     * The set of client server tests
+     * is decorated with a CleanDatabaseTestSetup.
+     * <BR>
+     * The client server configuration is setup using clientExistingServerSuite
+     */
+    public static Test existingServerSuite(Class testClass, 
+            boolean cleanDB,
+            String hostName,
+            int portNumber)
+    {
+         final TestSuite suite = new TestSuite(suiteName(testClass));
+         
+        if (cleanDB)
+        {
+            suite.addTest(new CleanDatabaseTestSetup(
+                    clientExistingServerSuite(testClass, hostName, portNumber)));
+        }
+        else
+        {
+            suite.addTest(clientExistingServerSuite(testClass, hostName, portNumber));
         }
 
         return (suite);
@@ -351,6 +418,23 @@ public class TestConfiguration {
                 suiteName(testClass)+":client");
         return defaultExistingServerDecorator(suite); // Will not start server and does not stop it when done!.
     }
+    
+    /**
+     * Create a suite for the passed test class that includes
+     * all the default fixtures from the class, wrapped in
+     * a existingServerDecorator.
+     * <BR>
+     * Equivalent to 'clientServerSuite' above, but assumes server is
+     * already running. Will also NOT shut down the server.
+     *
+     */
+    public static Test clientExistingServerSuite(Class testClass, String hostName, int portNumber)
+    {
+        TestSuite suite = new TestSuite(testClass,
+                suiteName(testClass)+":client");
+        return existingServerDecorator(suite, hostName, portNumber); 
+               // Will not start server and does not stop it when done!.
+    }
 
     /**
      * Return a decorator for the passed in tests that sets the
@@ -419,6 +503,19 @@ public class TestConfiguration {
         //
         return new ServerSetup(test, DEFAULT_HOSTNAME, DEFAULT_PORT);
     }
+   /**
+    * A variant of defaultServerDecorator allowing 
+    * non-default hostname and portnumber.
+    */
+    public static Test existingServerDecorator(Test test, 
+            String hostName, int PortNumber)
+    {
+        Test r =
+                new ServerSetup(test, hostName, PortNumber);
+        ((ServerSetup)r).setJDBCClient(JDBCClient.DERBYNETCLIENT);
+        return r;
+    }
+   
     /**
      * Decorate a test to use suite's default host and Alternative port.
      */
