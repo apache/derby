@@ -23,8 +23,6 @@ package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
 import org.apache.derbyTesting.junit.BaseTestCase;
 import org.apache.derbyTesting.junit.JDBC;
-import org.apache.derbyTesting.junit.NetworkServerTestSetup;
-import org.apache.derbyTesting.junit.TestConfiguration;
 
 import junit.framework.Test; 
 import junit.framework.TestSuite;
@@ -121,6 +119,8 @@ public class _Suite extends BaseTestCase  {
             // Test uses DriverManager, Pooled and XADataSources, and
             // an inner class implements ConnectionEventListener.
             suite.addTest(J2EEDataSourceTest.suite());
+            // Test requires ClientConnectionPoolDataSource.
+            suite.addTest(ClientConnectionPoolDataSourceTest.suite());
 
             //suite to test updatable reader for clob in embedded driver
             suite.addTest (ClobUpdatableReaderTest.suite());

@@ -38,8 +38,7 @@ import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
- * Basic tests of the <code>ConnectionPoolDataSource</code> in the client
- * driver.
+ * Basic tests of the {@code ConnectionPoolDataSource} in the client driver.
  */
 public class ClientConnectionPoolDataSourceTest
     extends BaseJDBCTestCase {
@@ -49,8 +48,7 @@ public class ClientConnectionPoolDataSourceTest
     }
 
     /**
-     * Verify that handling of the <code>maxStatements</code> property is
-     * working.
+     * Verify that handling of the {@code maxStatements} property is working.
      */
     public void testMaxStatementsProperty() {
         ClientConnectionPoolDataSource cDs =
@@ -113,17 +111,7 @@ public class ClientConnectionPoolDataSourceTest
      */
     private void verifyConnection(ClientConnectionPoolDataSource cDs)
             throws SQLException {
-        PooledConnection pc = null;
-        // Workaround for "bug" in the JUnit framework, where data source
-        // connections do not create the database if it does not exist.
-        // See DERBY-3306 for more information.
-        try {
-            pc = cDs.getPooledConnection();
-        } catch (SQLException sqle) {
-            assertSQLState("08004", sqle);
-            getConnection();
-            pc = cDs.getPooledConnection();
-        }
+        PooledConnection pc = cDs.getPooledConnection();
         // Get a connection and make sure we can access the database.
         Connection con = pc.getConnection();
         Statement stmt = con.createStatement();
