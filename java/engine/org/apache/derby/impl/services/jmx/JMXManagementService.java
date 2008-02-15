@@ -22,6 +22,7 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
@@ -39,6 +40,8 @@ import org.apache.derby.iapi.services.jmx.ManagementService;
 import org.apache.derby.iapi.services.monitor.ModuleControl;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.property.PropertyUtil;
+import org.apache.derby.mbeans.Management;
+import org.apache.derby.mbeans.ManagementMBean;
 import org.apache.derby.mbeans.VersionMBean;
 
 /** 
@@ -53,7 +56,7 @@ public class JMXManagementService implements ManagementService, ModuleControl {
      * Platfrom MBean server, from ManagementFactory.getPlatformMBeanServer().
      */
     private MBeanServer mbeanServer;
-    
+   
     /**
      * The set of mbeans registered by this service.
      */
@@ -82,9 +85,14 @@ public class JMXManagementService implements ManagementService, ModuleControl {
     public synchronized void stop() {
         if (mbeanServer == null)
             return;
-        
-        for (ObjectName mbeanName : registeredMbeans)
+
+        // Need a copy of registeredMbeans since unregisterMBean will remove
+        // items from registeredMbeans and thus invalidate any iterator
+        // on it directly.
+        for (ObjectName mbeanName : new HashSet<ObjectName>(registeredMbeans))
             unregisterMBean(mbeanName);
+        
+        mbeanServer = null;
     }
 
     /**
@@ -109,6 +117,10 @@ public class JMXManagementService implements ManagementService, ModuleControl {
             registerMBean(new Version(Monitor.getMonitor().getEngineVersion()),
                     VersionMBean.class,
                     "type=Version,jar=derby.jar");
+            
+            registerMBean(this,
+                    ManagementMBean.class,
+                    "type=Management");
             
         } catch (SecurityException se) {
             // TODO: just ignoring inability to create the mbean server.
@@ -209,5 +221,17 @@ public class JMXManagementService implements ManagementService, ModuleControl {
             //if (!(jme instanceof InstanceNotFoundException))
                 // throw StandardException.plainWrapException(jme);
         }
+    }
+
+    public synchronized boolean isManagementActive() {
+        return mbeanServer != null;
+    }
+
+    public synchronized void startManagement() {
+        // TODO:
+    }
+
+    public synchronized void stopManagement() {
+        // TODO:
     }
 }

@@ -44,6 +44,7 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.uuid.UUIDFactory;
 import org.apache.derby.iapi.services.timer.TimerFactory;
+import org.apache.derby.iapi.reference.Module;
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.reference.Attribute;
@@ -374,7 +375,7 @@ abstract class BaseMonitor
 
             timerFactory = (TimerFactory)Monitor.startSystemModule("org.apache.derby.iapi.services.timer.TimerFactory");
             
-            Monitor.startSystemModule(ManagementService.MODULE);
+            Monitor.startSystemModule(Module.JMX);
 
 		} catch (StandardException se) {
 

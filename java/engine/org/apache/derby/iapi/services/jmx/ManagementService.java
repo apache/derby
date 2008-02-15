@@ -18,6 +18,8 @@
 package org.apache.derby.iapi.services.jmx;
 
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.Module;
+import org.apache.derby.mbeans.ManagementMBean;
 
 
 /**
@@ -32,16 +34,12 @@ import org.apache.derby.iapi.error.StandardException;
 * The following code can be used to locate an instance of this service
 * if running.
 *
-* ManagementService ms = (ManagementService)Monitor.getSystemModule
-*		("org.apache.derby.iapi.services.mbeans.ManagementService");
+* ManagementService ms = (ManagementService)
+*        Monitor.getSystemModule(Module.JMX);
 *
 */
-public interface ManagementService {
-	
-    /* Class name of this interface */
-    public static final String MODULE = 
-            "org.apache.derby.iapi.services.jmx.ManagementService";
-    
+public interface ManagementService extends ManagementMBean {
+   
     /**
      * The domain for all of derby's mbeans: org.apache.derby
      */

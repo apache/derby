@@ -23,6 +23,7 @@
 package org.apache.derby.jdbc;
 
 import org.apache.derby.iapi.reference.Attribute;
+import org.apache.derby.iapi.reference.Module;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.reference.MessageId;
 import org.apache.derby.iapi.services.io.FormatableProperties;
@@ -92,7 +93,7 @@ public abstract class InternalDriver implements ModuleControl {
 		active = true;
         
         mbean = ((ManagementService)
-           Monitor.getSystemModule(ManagementService.MODULE)).registerMBean(
+           Monitor.getSystemModule(Module.JMX)).registerMBean(
                    new JDBC(this),
                    JDBCMBean.class,
                    "type=JDBC");
@@ -106,7 +107,7 @@ public abstract class InternalDriver implements ModuleControl {
 		}
         
         ((ManagementService)
-                Monitor.getSystemModule(ManagementService.MODULE)).unregisterMBean(
+                Monitor.getSystemModule(Module.JMX)).unregisterMBean(
                         mbean);
 
 		active = false;

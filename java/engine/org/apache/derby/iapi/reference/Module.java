@@ -31,5 +31,7 @@ public interface Module {
 	String LockFactory = "org.apache.derby.iapi.services.locks.LockFactory";
 	String PropertyFactory = "org.apache.derby.iapi.services.property.PropertyFactory";
 	String ResourceAdapter = "org.apache.derby.iapi.jdbc.ResourceAdapter";
+    
+    String JMX = "org.apache.derby.iapi.services.jmx.ManagementService";
 
 }

@@ -34,4 +34,11 @@ public final class NoManagementService implements ManagementService {
     }
     public void unregisterMBean(Object mbeanIdentifier) {
     }
+    public boolean isManagementActive() {
+        return false;
+    }
+    public void startManagement() {
+    }
+    public void stopManagement() {
+    }
 }
