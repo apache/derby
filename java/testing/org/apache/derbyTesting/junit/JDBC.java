@@ -523,15 +523,17 @@ public class JDBC {
     }
     
     /**
-     * Assert that the statement has no more results. Logic taken
-     * from javadoc for java.sql.Statement.getMoreResults.
+     * Assert that the statement has no more results(getMoreResults) and it 
+     * indeed does not return any resultsets(by checking getResultSet). 
+     * Also, ensure that update count is -1.
      * @param s Statement holding no results.
      * @throws SQLException Exception checking results.
      */
     public static void assertNoMoreResults(Statement s) throws SQLException
     {
-        Assert.assertTrue((s.getMoreResults() == false)
-                && (s.getUpdateCount() == -1));
+    	Assert.assertFalse(s.getMoreResults());
+        Assert.assertTrue(s.getUpdateCount() == -1);
+        Assert.assertNull(s.getResultSet());
     }
     
     /**

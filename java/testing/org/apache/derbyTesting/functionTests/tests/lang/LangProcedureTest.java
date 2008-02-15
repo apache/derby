@@ -802,6 +802,12 @@ public class LangProcedureTest extends BaseJDBCTestCase {
             drs1 = prepareCall("CALL procWithRollback(3)");
             drs1.execute();
             rs = drs1.getResultSet();
+            //Following shows that the rollback inside the java procedure will
+            //cuase procedure to return no resultset (A procedure does
+            //not return closed resultsets). In 10.2 codeline though, java
+            //procedure returns a closed resultset if there is a rollback 
+            //inside the java procedure.
+            JDBC.assertNoMoreResults(drs1);
 
             JDBC.assertClosed(rs1);
             JDBC.assertClosed(resultSet);
