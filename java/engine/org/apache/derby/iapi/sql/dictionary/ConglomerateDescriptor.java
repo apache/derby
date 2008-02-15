@@ -348,14 +348,26 @@ public final class ConglomerateDescriptor extends TupleDescriptor
      * a physical index then the physical index (conglomerate)
      * and its descriptor will be dropped.
      * 
-     * @param lcc
-     * @param td
+     * @param lcc Connection context to use for dropping
+     * @param td TableDescriptor for the table to which this
+     *  conglomerate belongs
+     * @return If the conglomerate described by this descriptor
+     *  is an index conglomerate that is shared by multiple
+     *  constraints/indexes, then we may have to create a new
+     *  conglomerate to satisfy the constraints/indexes which
+     *  remain after we drop the existing conglomerate.  If that's
+     *  needed then we'll return a conglomerate descriptor which
+     *  describes what the new conglomerate must look like.  It
+     *  is then up to the caller of this method to create a new
+     *  corresponding conglomerate.  We don't create the index
+     *  here because depending on who called us, it might not
+     *  make sense to create it--esp. if we get here because of
+     *  a DROP TABLE.
      * @throws StandardException
      */
-	public void drop(LanguageConnectionContext lcc,
-	        TableDescriptor td)
-	throws StandardException
-	{     
+	public ConglomerateDescriptor drop(LanguageConnectionContext lcc,
+		TableDescriptor td) throws StandardException
+	{
         DataDictionary dd = getDataDictionary();
         DependencyManager dm = dd.getDependencyManager();
         TransactionController tc = lcc.getTransactionExecute();
@@ -383,6 +395,11 @@ public final class ConglomerateDescriptor extends TupleDescriptor
 	     ** table descriptor
 	     */
 	    td.removeConglomerateDescriptor(this);
+
+	    /* TODO: DERBY-3299 incremental development; just return null
+	     * for now.
+	     */
+	    return null;
 	}
 	
 }

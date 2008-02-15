@@ -641,10 +641,22 @@ public abstract class ConstraintDescriptor
      * the backing index and removes the constraint
      * from the list on the table descriptor.  Does NOT
      * do an dm.invalidateFor()
+     *
+     * @return If the backing conglomerate for this constraint
+     *  was a) dropped and b) shared by other constraints/indexes,
+     *  then this method will return a ConglomerateDescriptor that
+     *  describes what a new backing conglomerate must look like
+     *  to stay "sharable" across the remaining constraints/indexes.
+     *  It is then up to the caller to create a corresponding 
+     *  conglomerate.  We don't create the conglomerate here
+     *  because depending on who called us, it might not make
+     *  sense to create it--ex. if we get here because of a DROP
+     *  TABLE, the DropTable action doesn't need to create a
+     *  new backing conglomerate since the table (and all of
+     *  its constraints/indexes) are going to disappear anyway.
      */
-    public void drop(LanguageConnectionContext lcc,
-            boolean clearDependencies)
-        throws StandardException
+    public ConglomerateDescriptor drop(LanguageConnectionContext lcc,
+        boolean clearDependencies) throws StandardException
     {       
         DataDictionary dd = getDataDictionary();
         DependencyManager dm = dd.getDependencyManager();
@@ -667,6 +679,7 @@ public abstract class ConstraintDescriptor
          * force the constraint to exist at bind time, so we always
          * generate one.
          */
+        ConglomerateDescriptor newBackingConglomCD = null;
         if (hasBackingIndex())
         {
 
@@ -689,7 +702,7 @@ public abstract class ConstraintDescriptor
                 {
                     if (conglomDescs[i].isConstraint())
                     {
-                        conglomDescs[i].drop(lcc, table);
+                        newBackingConglomCD = conglomDescs[i].drop(lcc, table);
                         break;
                     }
                 }
@@ -697,6 +710,7 @@ public abstract class ConstraintDescriptor
         }
 
         table.removeConstraintDescriptor(this);
+        return newBackingConglomCD;
     }
 	
 	/** @see TupleDescriptor#getDescriptorName */
