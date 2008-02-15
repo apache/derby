@@ -41,3 +41,8 @@ org/apache/derby/tools/dblook.java
 org/apache/derby/vti/VTICosting.java
 org/apache/derby/vti/VTIEnvironment.java
 
+# package: org.apache.derby.mbeans (all)
+
+org/apache/derby/mbeans/*.java
+
+
