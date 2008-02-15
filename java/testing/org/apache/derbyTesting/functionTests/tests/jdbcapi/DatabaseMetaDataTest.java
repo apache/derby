@@ -2213,13 +2213,20 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         ODBC_COLUMN_TYPES[16] = Types.SMALLINT; // SQL_DATETIME_SUB
         ODBC_COLUMN_TYPES[18] = Types.SMALLINT; // INTERVAL_PRECISION
         
-        boolean[] ODBC_COLUMN_NULLABILITY = new boolean[ODBC_COLUMN_NAMES.length];
-        System.arraycopy(JDBC_COLUMN_NULLABILITY, 0, ODBC_COLUMN_NULLABILITY, 0,
-                JDBC_COLUMN_NULLABILITY.length);
-        //SQL_DATA_TYPE is NULL in JDBC but a valid non-null value in ODBC
-        ODBC_COLUMN_NULLABILITY[16 - 1] = false; 
-        ODBC_COLUMN_NULLABILITY[19 - 1] = true; // INTERVAL_PRECISION (extra column comapred to JDBC)
-                
+        // ODBC_COLUMN_NULLABILTY is the same as JDBC except for:
+        // column 16 - SQL_DATA_TYPE is NULL in JDBC but a valid non-null value in ODBC
+        // column 19 -  INTERVAL_PRECISION (extra column comapred to JDBC)
+        boolean[] ODBC_COLUMN_NULLABILITY = {
+                true, false, true, true,
+                true, true, false, false,
+                false, true, false,
+                true, true,
+                true, true,
+                false, true,
+                true,
+                true 
+        };
+
         CallableStatement cs = prepareCall(
                 "CALL SYSIBM.SQLGETTYPEINFO (0, 'DATATYPE=''ODBC''')");
         
@@ -4469,9 +4476,13 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         System.arraycopy(columnTypes, 0, odbcColumnTypes, 0, 19);
         System.arraycopy(columnTypes, 21 - 1, odbcColumnTypes, 20 - 1, 2);
         
-        boolean[] odbcNullability = new boolean[nullability.length - 1];
-        System.arraycopy(nullability, 0, odbcNullability, 0, 19);
-        System.arraycopy(nullability, 21 - 1, odbcNullability, 20 - 1, 2);
+        //      SQL_DATA_TYPE NULL in JDBC, valid type in ODBC.
+        // otherwise the same as JDBC
+        boolean[] odbcNullability = new boolean[] {
+                true, false, false, false, false, false, false, false, false, true,
+                true, false, true, true, false, true, true, false, false, false
+                , false};
+
         
         // And change some column names.
         odbcColumnNames[8 - 1] = "COLUMN_SIZE";
@@ -4483,8 +4494,6 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         odbcColumnTypes[6 - 1] = Types.SMALLINT;
         odbcColumnTypes[15 - 1] = Types.SMALLINT;
         odbcColumnTypes[16 - 1] = Types.SMALLINT;
-        
-        odbcNullability[15 - 1] = false; // SQL_DATA_TYPE NULL in JDBC, valid type in ODBC
              
         // odbc result set
         assertMetaDataResultSet(
