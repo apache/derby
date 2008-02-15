@@ -313,11 +313,11 @@ public class AsynchronousLogShipper extends Thread implements
         
         fi = logBuffer.getFillInformation();
         
-        if (fi >= FI_HIGH) {
-            notify();
-        } else if ((System.currentTimeMillis() - lastShippingTime) > MIN) {
-            // Minimum MIN time between messages unless buffer is almost full
-            notify();
+        if (fi >= FI_HIGH || 
+                (System.currentTimeMillis() - lastShippingTime) > MIN) {
+            synchronized (this) {
+                notify();
+            }
         }
     }
     
