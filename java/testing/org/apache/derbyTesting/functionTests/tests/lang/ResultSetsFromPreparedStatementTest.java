@@ -2054,7 +2054,7 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
      * Private helper method. Runs the same test for different
      * generated identity columns.
      * @param dataType SMALLINT, INT, or BIGINT
-     * @param generatedType BY DEFAULT or ALWAYS
+     * @param generateType BY DEFAULT or ALWAYS
      * @throws Exception all errors passed on to JUnit
      */
     private void testGeneratedIdentity(String dataType, String generateType) 
