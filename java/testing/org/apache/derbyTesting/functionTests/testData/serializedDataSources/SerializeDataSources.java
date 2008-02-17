@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class SerializeDataSources
+   Derby - Class org.apache.derbyTesting.functionTests.testData.serializedDataSources.SerializeDataSources
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -18,6 +18,7 @@
    limitations under the License.
 
  */
+package org.apache.derbyTesting.functionTests.testData.serializedDataSources;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -75,7 +76,7 @@ public class SerializeDataSources {
     /**
      * Serialize and write data sources to file.
      * 
-     * @param minorVersion Derby version string (i.e. 10.3.2.1)
+     * @param versionString Derby version string (i.e. 10.3.2.1)
      * @param buildNumber Derby build number (svn)
      * @param dataSourceClasses list of data source class names
      * @return The number of data sources serialized and written to file.

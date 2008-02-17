@@ -165,7 +165,7 @@ public class DataSourceSerializationTest
      * </ol>
      * <p>
      * If the object is successfully instantiated and cast to
-     * {@link java.sql.DataSource}
+     * {@link javax.sql.DataSource}
      *
      * @param className name of the class to de-serialize
      * @param version Derby version
