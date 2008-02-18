@@ -28,7 +28,7 @@ public final class NoManagementService implements ManagementService {
     }
     public Object registerMBean(final Object bean,
             final Class beanInterface,
-            final String nameAttributes)
+            final String keyProperties)
     {
         return null;
     }

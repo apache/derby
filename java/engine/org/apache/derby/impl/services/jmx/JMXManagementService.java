@@ -171,23 +171,23 @@ public final class JMXManagementService implements ManagementService, ModuleCont
      * of Derby's mbeans to be hidden from JMX, thus only exposing
      * the MBean's interface in org.apache.derby.mbeans.
      * 
-     * The object name instance 
-     * represented by the given String will be created by this method.
      * 
      * @param bean The MBean to wrap with a StandardMBean and register
      * @param beanInterface The management interface for the MBean.
-     * @param nameAttributes The String representation of the MBean's attrributes,
-     * they will be added into the ObjectName with Derby's domain
+     * @param keyProperties The String representation of the MBean's key properties,
+     * they will be added into the ObjectName with Derby's domain. Key
+     * type should be first with a short name for the bean, typically the
+     * class name without the package.
      * 
      */
     public synchronized Object registerMBean(final Object bean,
             final Class beanInterface,
-            final String nameAttributes)
+            final String keyProperties)
             throws StandardException {
 
         try {
             final ObjectName beanName = new ObjectName(
-                    DERBY_JMX_DOMAIN + ":" + nameAttributes);
+                    DERBY_JMX_DOMAIN + ":" + keyProperties);
             final StandardMBean standardMBean =
                 new StandardMBean(bean, beanInterface);
             

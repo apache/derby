@@ -47,14 +47,12 @@ public interface ManagementService extends ManagementMBean {
     
     /**
      * Registers an MBean with the MBean server.
-     * The object name instance 
-     * represented by the given String will be created by this method.
-     * The mbean will be unregistered automatically when Derby shutsdown.
+     * The mbean will be unregistered automatically when Derby shuts down.
      * 
      * @param bean The MBean to wrap with a StandardMBean and register
      * @param beanInterface The management interface for the MBean.
-     * @param nameAttributes The String representation of the MBean's attrributes,
-     * they will be added into the ObjectName with Derby's domain. Attribute
+     * @param keyProperties The String representation of the MBean's key properties,
+     * they will be added into the ObjectName with Derby's domain. Key
      * type should be first with a short name for the bean, typically the
      * class name without the package.
      * 
@@ -62,7 +60,7 @@ public interface ManagementService extends ManagementMBean {
      */
     public Object registerMBean(Object bean,
             Class beanInterface,
-            String nameAttributes)
+            String keyProperties)
             throws StandardException;
     
     /**
