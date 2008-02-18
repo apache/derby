@@ -57,10 +57,6 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
     // For XA Transaction
     protected int pendingEndXACallinfoOffset_ = -1;
 
-
-    // byte[] to save the connect flows for connection reset
-    protected byte[] cachedConnectBytes_ = null;
-    protected boolean wroteConnectFromCache_ = false;
     //-----------------------------state------------------------------------------
 
     // these variables store the manager levels for the connection.
@@ -870,108 +866,79 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
                 netAgent_.typdef_);
     }
 
-    private void cacheConnectBytes(int beginOffset, int endOffset) {
-        int length = endOffset - beginOffset;
-        cachedConnectBytes_ = new byte[length];
-        netAgent_.netConnectionRequest_.finalizePreviousChainedDss(false);
-        System.arraycopy(netAgent_.netConnectionRequest_.bytes_,
-                beginOffset,
-                cachedConnectBytes_,
-                0,
-                length);
-        netAgent_.netConnectionRequest_.setDssLengthLocation(netAgent_.netConnectionRequest_.offset_);
-    }
-
     private void readSecurityCheckAndAccessRdb() throws SqlException {
         netAgent_.netConnectionReply_.readSecurityCheck(this);
         netAgent_.netConnectionReply_.readAccessDatabase(this);
     }
 
     void writeDeferredReset() throws SqlException {
-        if (canUseCachedConnectBytes_ && cachedConnectBytes_ != null &&
-                (securityMechanism_ == NetConfiguration.SECMEC_USRIDPWD ||
-                securityMechanism_ == NetConfiguration.SECMEC_USRIDONL)) {
-            writeDeferredResetFromCache();
-            wroteConnectFromCache_ = true;
-        } else {
-            int beginOffset = netAgent_.netConnectionRequest_.offset_;
-            int endOffset = 0;
-            // NetConfiguration.SECMEC_USRIDPWD
-            if (securityMechanism_ == NetConfiguration.SECMEC_USRIDPWD) {
-                writeAllConnectCommandsChained(NetConfiguration.SECMEC_USRIDPWD,
+        // NetConfiguration.SECMEC_USRIDPWD
+        if (securityMechanism_ == NetConfiguration.SECMEC_USRIDPWD) {
+            writeAllConnectCommandsChained(NetConfiguration.SECMEC_USRIDPWD,
+                    user_,
+                    getDeferredResetPassword());
+        }
+        // NetConfiguration.SECMEC_USRIDONL
+        else if (securityMechanism_ == NetConfiguration.SECMEC_USRIDONL) {
+            writeAllConnectCommandsChained(NetConfiguration.SECMEC_USRIDONL,
+                    user_,
+                    null);  //password
+        }
+        // Either NetConfiguration.SECMEC_USRENCPWD,
+        // NetConfiguration.SECMEC_EUSRIDPWD or
+        // NetConfiguration.SECMEC_USRSSBPWD
+        else {
+            if (securityMechanism_ == NetConfiguration.SECMEC_USRSSBPWD)
+                initializeClientSeed();
+            else // SECMEC_USRENCPWD, SECMEC_EUSRIDPWD
+                initializePublicKeyForEncryption();
+
+            // Set the resetConnectionAtFirstSql_ to false to avoid going in an
+            // infinite loop, since all the flow methods call beginWriteChain which then
+            // calls writeDeferredResetConnection where the check for resetConnectionAtFirstSql_
+            // is done. By setting the resetConnectionAtFirstSql_ to false will avoid calling the
+            // writeDeferredReset method again.
+            resetConnectionAtFirstSql_ = false;
+
+            if (securityMechanism_ == NetConfiguration.SECMEC_USRSSBPWD)
+                flowSeedExchange(securityMechanism_, sourceSeed_);
+            else // SECMEC_USRENCPWD, SECMEC_EUSRIDPWD
+                flowServerAttributesAndKeyExchange(securityMechanism_, publicKey_);
+
+            agent_.beginWriteChainOutsideUOW();
+
+            // Reset the resetConnectionAtFirstSql_ to true since we are done
+            // with the flow method.
+            resetConnectionAtFirstSql_ = true;
+
+            // NetConfiguration.SECMEC_USRENCPWD
+            if (securityMechanism_ == NetConfiguration.SECMEC_USRENCPWD) {
+                writeSecurityCheckAndAccessRdb(NetConfiguration.SECMEC_USRENCPWD,
                         user_,
-                        getDeferredResetPassword());
-                endOffset = netAgent_.netConnectionRequest_.offset_;
-                cacheConnectBytes(beginOffset, endOffset);
+                        null, //password
+                        null, //encryptedUserid
+                        encryptedPasswordForUSRENCPWD(getDeferredResetPassword()));
             }
-            // NetConfiguration.SECMEC_USRIDONL
-            else if (securityMechanism_ == NetConfiguration.SECMEC_USRIDONL) {
-                writeAllConnectCommandsChained(NetConfiguration.SECMEC_USRIDONL,
-                        user_,
-                        null);  //password
-                endOffset = netAgent_.netConnectionRequest_.offset_;
-                cacheConnectBytes(beginOffset, endOffset);
-            }
-            // Either NetConfiguration.SECMEC_USRENCPWD,
-            // NetConfiguration.SECMEC_EUSRIDPWD or
             // NetConfiguration.SECMEC_USRSSBPWD
-            else {
-                if (securityMechanism_ == NetConfiguration.SECMEC_USRSSBPWD)
-                    initializeClientSeed();
-                else // SECMEC_USRENCPWD, SECMEC_EUSRIDPWD
-                    initializePublicKeyForEncryption();
-
-                // Set the resetConnectionAtFirstSql_ to false to avoid going in an
-                // infinite loop, since all the flow methods call beginWriteChain which then
-                // calls writeDeferredResetConnection where the check for resetConnectionAtFirstSql_
-                // is done. By setting the resetConnectionAtFirstSql_ to false will avoid calling the
-                // writeDeferredReset method again.
-                resetConnectionAtFirstSql_ = false;
-
-                if (securityMechanism_ == NetConfiguration.SECMEC_USRSSBPWD)
-                    flowSeedExchange(securityMechanism_, sourceSeed_);
-                else // SECMEC_USRENCPWD, SECMEC_EUSRIDPWD
-                    flowServerAttributesAndKeyExchange(securityMechanism_, publicKey_);
-
-                agent_.beginWriteChainOutsideUOW();
-
-                // Reset the resetConnectionAtFirstSql_ to true since we are done
-                // with the flow method.
-                resetConnectionAtFirstSql_ = true;
-
-                // NetConfiguration.SECMEC_USRENCPWD
-                if (securityMechanism_ == NetConfiguration.SECMEC_USRENCPWD) {
-                    writeSecurityCheckAndAccessRdb(NetConfiguration.SECMEC_USRENCPWD,
-                            user_,
-                            null, //password
-                            null, //encryptedUserid
-                            encryptedPasswordForUSRENCPWD(getDeferredResetPassword()));
-                }
-                // NetConfiguration.SECMEC_USRSSBPWD
-                else if (securityMechanism_ == NetConfiguration.SECMEC_USRSSBPWD) {
-                    writeSecurityCheckAndAccessRdb(NetConfiguration.SECMEC_USRSSBPWD,
-                            user_,
-                            null,
-                            null,
-                            passwordSubstituteForUSRSSBPWD(getDeferredResetPassword()));
-                }
-                else {  // NetConfiguration.SECMEC_EUSRIDPWD
-                    writeSecurityCheckAndAccessRdb(NetConfiguration.SECMEC_EUSRIDPWD,
-                            null, //user
-                            null, //password
-                            encryptedUseridForEUSRIDPWD(),
-                            encryptedPasswordForEUSRIDPWD(getDeferredResetPassword()));
-                }
+            else if (securityMechanism_ == NetConfiguration.SECMEC_USRSSBPWD) {
+                writeSecurityCheckAndAccessRdb(NetConfiguration.SECMEC_USRSSBPWD,
+                        user_,
+                        null,
+                        null,
+                        passwordSubstituteForUSRSSBPWD(getDeferredResetPassword()));
+            }
+            else {  // NetConfiguration.SECMEC_EUSRIDPWD
+                writeSecurityCheckAndAccessRdb(NetConfiguration.SECMEC_EUSRIDPWD,
+                        null, //user
+                        null, //password
+                        encryptedUseridForEUSRIDPWD(),
+                        encryptedPasswordForEUSRIDPWD(getDeferredResetPassword()));
             }
         }
     }
 
     void readDeferredReset() throws SqlException {
         resetConnectionAtFirstSql_ = false;
-        if (wroteConnectFromCache_) {
-            netAgent_.netConnectionReply_.verifyDeferredReset();
-            return;
-        }
         // either NetConfiguration.SECMEC_USRIDPWD or NetConfiguration.SECMEC_USRIDONL
         if (securityMechanism_ == NetConfiguration.SECMEC_USRIDPWD ||
                 securityMechanism_ == NetConfiguration.SECMEC_USRIDONL) {
@@ -1521,19 +1488,6 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
         }
         return array;
     }
-
-    private void writeDeferredResetFromCache() {
-        int length = cachedConnectBytes_.length;
-        System.arraycopy(cachedConnectBytes_,
-                0,
-                netAgent_.netConnectionRequest_.bytes_,
-                netAgent_.netConnectionRequest_.offset_,
-                length);
-        netAgent_.netConnectionRequest_.offset_ += length;
-        netAgent_.netConnectionRequest_.setDssLengthLocation(netAgent_.netConnectionRequest_.offset_);
-        netAgent_.netConnectionRequest_.setCorrelationID(4);
-    }
-
 
     public void writeCommitSubstitute_() throws SqlException {
         netAgent_.connectionRequest_.writeCommitSubstitute(this);

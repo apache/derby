@@ -139,7 +139,6 @@ public abstract class Connection implements java.sql.Connection,
     public int clientSSLMode_ = ClientBaseDataSource.SSL_OFF;
 
     java.util.Hashtable clientCursorNameCache_ = new java.util.Hashtable();
-    public boolean canUseCachedConnectBytes_ = false;
     public int commBufferSize_ = 32767;
 
     // indicates if a deferred reset connection is required
