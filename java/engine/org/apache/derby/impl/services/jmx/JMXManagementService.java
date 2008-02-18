@@ -22,12 +22,11 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 
-import javax.management.InstanceNotFoundException;
 import javax.management.JMException;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
@@ -40,27 +39,45 @@ import org.apache.derby.iapi.services.jmx.ManagementService;
 import org.apache.derby.iapi.services.monitor.ModuleControl;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.property.PropertyUtil;
-import org.apache.derby.mbeans.Management;
 import org.apache.derby.mbeans.ManagementMBean;
 import org.apache.derby.mbeans.VersionMBean;
 
 /** 
  * This class implements the ManagementService interface and provides a simple
  * management and monitoring service.
+ * 
+ * An mbean registered with this service remains until it is unregistered.
+ * While registered with this service it may be registered and unregistered
+ * with the jmx service a number of times.
  *
  * @see org.apache.derby.iapi.services.jmx.ManagementService
  */
-public class JMXManagementService implements ManagementService, ModuleControl {
+public final class JMXManagementService implements ManagementService, ModuleControl {
 
     /**
-     * Platfrom MBean server, from ManagementFactory.getPlatformMBeanServer().
+     * Platform MBean server, from ManagementFactory.getPlatformMBeanServer().
+     * If not null then this service has registered mbeans with the
+     * plaform MBean server.
+     * If null then this service either has no mbeans registered
+     * or one mbean registered (representing itself).
      */
     private MBeanServer mbeanServer;
    
     /**
-     * The set of mbeans registered by this service.
+     * The set of mbeans registered to this service by
+     * Derby's code. These beans are registered with
+     * the platform mbean server if mbeanServer is not null.
      */
-    private Set<ObjectName> registeredMbeans;
+    private Map<ObjectName,StandardMBean> registeredMbeans;
+    
+    /**
+     * If this object is registered as a management mbean
+     * then myManagementBean represents its name. This will
+     * be non-null when derby.system.jmx is true.
+     */
+    private ObjectName myManagementBean;
+    
+    private MBeanServer myManagementServer;
 
     public JMXManagementService() {
 
@@ -77,22 +94,50 @@ public class JMXManagementService implements ManagementService, ModuleControl {
      */
     public void boot(boolean create, Properties properties)
             throws StandardException {
-
-        if (PropertyUtil.getSystemBoolean(Property.JMX))
-            initialize();
+        
+        registeredMbeans = new HashMap<ObjectName,StandardMBean>();
+        
+        if (PropertyUtil.getSystemBoolean(Property.JMX)) {
+            findServer();
+             
+            myManagementBean = (ObjectName) registerMBean(this,
+                ManagementMBean.class,
+                "type=Management");
+            myManagementServer = mbeanServer;
+        }
+        
+        registerMBean(new Version(Monitor.getMonitor().getEngineVersion()),
+                VersionMBean.class,
+                "type=Version,jar=derby.jar");
     }
-
+    
     public synchronized void stop() {
-        if (mbeanServer == null)
-            return;
+        
+        // If we are currently not registering any mbeans
+        // then we might still have this registered as
+        // a management mbean. Need to explicitly remove this
+        // using the mbean server that created it, which
+        // possibly could not be the same as the current server.
+        if (mbeanServer == null && myManagementBean != null)
+        {
+            mbeanServer = myManagementServer;
+            unregisterMBean(myManagementBean);
+            mbeanServer = null;
+        }
 
         // Need a copy of registeredMbeans since unregisterMBean will remove
         // items from registeredMbeans and thus invalidate any iterator
         // on it directly.
-        for (ObjectName mbeanName : new HashSet<ObjectName>(registeredMbeans))
+        for (ObjectName mbeanName :
+                new HashSet<ObjectName>(registeredMbeans.keySet()))
             unregisterMBean(mbeanName);
         
         mbeanServer = null;
+        
+        // registeredMbeans == null indicates service is not active
+        registeredMbeans = null;
+        
+        myManagementServer = null;
     }
 
     /**
@@ -103,9 +148,8 @@ public class JMXManagementService implements ManagementService, ModuleControl {
      * 
      * @throws StandardException
      */
-    private synchronized void initialize() throws StandardException {
+    private synchronized void findServer() {
         
-        registeredMbeans = new HashSet<ObjectName>();
         try {
             mbeanServer = AccessController
                     .doPrivileged(new PrivilegedAction<MBeanServer>() {
@@ -113,17 +157,10 @@ public class JMXManagementService implements ManagementService, ModuleControl {
                             return ManagementFactory.getPlatformMBeanServer();
                         }
                     });
-
-            registerMBean(new Version(Monitor.getMonitor().getEngineVersion()),
-                    VersionMBean.class,
-                    "type=Version,jar=derby.jar");
-            
-            registerMBean(this,
-                    ManagementMBean.class,
-                    "type=Management");
             
         } catch (SecurityException se) {
-            // TODO: just ignoring inability to create the mbean server.
+            // TODO: just ignoring inability to create or
+            // find the mbean server.
             // or should an error or warning be raised?
         }
     }
@@ -148,40 +185,48 @@ public class JMXManagementService implements ManagementService, ModuleControl {
             final String nameAttributes)
             throws StandardException {
 
-        if (mbeanServer == null)
-            return null;
-
         try {
             final ObjectName beanName = new ObjectName(
                     DERBY_JMX_DOMAIN + ":" + nameAttributes);
             final StandardMBean standardMBean =
                 new StandardMBean(bean, beanInterface);
-            try {
-
-                AccessController
-                        .doPrivileged(new PrivilegedExceptionAction<Object>() {
-
-                            public Object run() throws JMException {
-                                mbeanServer.registerMBean(standardMBean, beanName);
-                                return null;
-                            }
-
-                        });
-                
-                registeredMbeans.add(beanName);
-                return beanName;
-
-            } catch (PrivilegedActionException pae) {
-                throw (JMException) pae.getException();
-            }
+            
+            registeredMbeans.put(beanName, standardMBean);
+            if (mbeanServer != null)
+                jmxRegister(standardMBean, beanName);
+            
+            return beanName;
+        
         } catch (JMException jme) {
             throw StandardException.plainWrapException(jme);
         }
     }
     
     /**
-     * Unregister an mbean using an object previous returned
-     * from registerMBean.
+     * Register an mbean with the platform mbean server.
+     */
+    private void jmxRegister(final StandardMBean standardMBean,
+            final ObjectName beanName) throws JMException
+    {
+        try {
+
+            AccessController
+               .doPrivileged(new PrivilegedExceptionAction<Object>() {
+
+                    public Object run() throws JMException {
+                        mbeanServer.registerMBean(standardMBean, beanName);
+                        return null;
+                    }
+
+                });
+
+        } catch (PrivilegedActionException pae) {
+            throw (JMException) pae.getException();
+        }
+    }
+    
+    /**
+     * Unregister an mbean using an object previous returned from registerMBean.
      */
     public void unregisterMBean(Object mbeanIdentifier)
     {
@@ -191,13 +236,28 @@ public class JMXManagementService implements ManagementService, ModuleControl {
     }
     
     /**
-     * Unregisters an mbean that was registered  by this service.
+     * Unregisters an mbean from this service and JMX plaform server
      * @param mbeanName Bean to unregister.
      */
     private synchronized void unregisterMBean(final ObjectName mbeanName)
     {
-        if (!registeredMbeans.remove(mbeanName))
+        if (registeredMbeans.remove(mbeanName) == null)
             return;
+        
+        if (mbeanServer == null)
+            return;
+        
+        jmxUnregister(mbeanName);
+    }
+    
+    /**
+     * Unregister an mbean from the JMX plaform server
+     * but leave it registered to this service. This
+     * is so that if jmx is reenabled we can reestablish
+     * all vaid mbeans (that are still registered with this service).
+     * @param mbeanName
+     */
+    private void jmxUnregister(final ObjectName mbeanName) {
 
         if (!mbeanServer.isRegistered(mbeanName))
             return;
@@ -228,10 +288,54 @@ public class JMXManagementService implements ManagementService, ModuleControl {
     }
 
     public synchronized void startManagement() {
-        // TODO:
+        
+        //Has this service been shut down?
+        if (registeredMbeans == null)
+            return;
+        
+        // Already active?
+        if (isManagementActive())
+            return;
+        
+        findServer();
+        
+        // If we can't find the server then we can't register.
+        if (mbeanServer == null)
+            return;
+        
+        for (ObjectName mbeanName : registeredMbeans.keySet())
+        {
+            // If we registered this as a management bean
+            // then leave it registered to allow the mbeans
+            // to be re-registered with JMX
+            if (mbeanName.equals(myManagementBean))
+                continue;
+            
+            try {
+                jmxRegister(registeredMbeans.get(mbeanName), mbeanName);
+            } catch (JMException e) {
+                // TODO - what to do here?
+            }
+        }
     }
 
     public synchronized void stopManagement() {
-        // TODO:
+        
+        // Has this service been shut down?
+        if (registeredMbeans == null)
+            return;
+        
+        if (isManagementActive()) {
+            for (ObjectName mbeanName : registeredMbeans.keySet())
+            {
+                // If we registered this as a management bean
+                // then leave it registered to allow the mbeans
+                // to be re-registered with JMX
+                if (mbeanName.equals(myManagementBean))
+                    continue;
+                jmxUnregister(mbeanName);
+            }
+            mbeanServer = null;
+        }
     }
 }
