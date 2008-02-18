@@ -878,7 +878,7 @@ public class JDBC {
     /**
      * See assertRowInResultSet(...) above.
      *
-     * @param BitSet colsToCheck If non-null then for every bit b
+     * @param colsToCheck If non-null then for every bit b
      *   that is set in colsToCheck, we'll compare the (b+1)-th column
      *   of the received result set's current row to the i-th column
      *   of expectedRow, where 0 <= i < # bits set in colsToCheck.
