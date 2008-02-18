@@ -28,46 +28,60 @@ import javax.naming.RefAddr;
 import javax.naming.Reference;
 
 /**
- * The data source factory currrently for ClientDataSource only. This factory will support XA and pooling-enabled data
- * sources in the future.
- * <p/>
- * This factory reconstructs a DERBY simple data source object when it is retrieved from JNDI. References are needed
- * since many naming services don't have the ability to store Java objects in their serialized form. When a data source
- * object is bound in this type of naming service the Reference for that object is actually stored by the JNDI
- * implementation, not the data source object itself.
- * <p/>
- * A JNDI administrator is responsible for making sure that both the object factory and data source implementation
- * classes provided by a JDBC driver vendor are accessible to the JNDI service provider at runtime.
- * <p/>
- * An object factory implements the javax.naming.spi.ObjectFactory interface. This interface contains a single method,
- * getObjectInstance, which is called by a JNDI service provider to reconstruct an object when that object is retrieved
- * from JNDI. A JDBC driver vendor should provide an object factory as part of their JDBC 2.0 product.
+ * The data source factory for Derby client driver data sources.
+ * <p>
+ * This factory reconstructs a Derby data source object when it is retrieved
+ * from JNDI. References are needed since many naming services don't have the
+ * ability to store Java objects in their serialized form. When a data source
+ * object is bound in this type of naming service the
+ * {@link javax.naming.Reference} for that object is actually stored by the
+ * JNDI implementation, not the data source object itself.
+ * <p>
+ * A JNDI administrator is responsible for making sure that both the object
+ * factory and data source implementation classes provided by a JDBC driver
+ * vendor are accessible to the JNDI service provider at runtime.
+ * <p>
+ * An object factory implements the {@link javax.naming.spi.ObjectFactory}
+ * interface. This interface contains a single method, {@code getObjectInstance}
+ * which is called by a JNDI service provider to reconstruct an object when that
+ * object is retrieved from JNDI. A JDBC driver vendor should provide an object
+ * factory as part of their JDBC 2.0 product.
  *
  * @see org.apache.derby.jdbc.ClientDataSource
+ * @see org.apache.derby.jdbc.ClientConnectionPoolDataSource
+ * @see org.apache.derby.jdbc.ClientXADataSource
  */
 public class ClientDataSourceFactory implements javax.naming.spi.ObjectFactory {
 
-    public ClientDataSourceFactory() {
-    }
+    public ClientDataSourceFactory() {}
 
     /**
-     * Reconstructs a ClientDataSource object from a JNDI data source reference.
-     * <p/>
-     * The getObjectInstance() method is passed a reference that corresponds to the object being retrieved as its first
-     * parameter. The other parameters are optional in the case of JDBC data source objects. The object factory should
-     * use the information contained in the reference to reconstruct the data source. If for some reason, a data source
-     * object cannot be reconstructed from the reference, a value of null may be returned. This allows other object
-     * factories that may be registered in JNDI to be tried. If an exception is thrown then no other object factories
-     * are tried.
+     * Reconstructs a Derby client-driver data source object from a JNDI data
+     * source reference.
+     * <p>
+     * The {@code getObjectInstance} method is passed a reference that
+     * corresponds to the object being retrieved as its first parameter. The
+     * other parameters are optional in the case of JDBC data source objects.
+     * The object factory should use the information contained in the reference
+     * to reconstruct the data source. If for some reason, a data source
+     * object cannot be reconstructed from the reference, a value of
+     * {@code null} may be returned. This allows other object factories that may
+     * be registered in JNDI to be tried. If an exception is thrown then no
+     * other object factories are tried.
      *
-     * @param refObj      The possibly null object containing location or reference information that can be used in
-     *                    creating an object.
-     * @param name        The name of this object relative to nameContext, or null if no name is specified.
-     * @param nameContext Context relative to which the name parameter is specified, or null if name is relative to the
-     *                    default initial context.
-     * @param environment Possibly null environment that is used in creating the object.
+     * @param refObj the possibly {@code null} object containing location or
+     *      reference information that can be used in creating an object
+     * @param name the name of this object relative to {@code nameContext}, or
+     *      {@code null} if no name is specified
+     * @param nameContext context relative to which the name parameter is
+     *      specified, or {@code null} if name is relative to the default
+     *      initial context.
+     * @param environment possibly {@code null} environment that is used in
+     *      creating the object.
      *
-     * @return object created; null if an object cannot be created
+     * @return Object created, or {@code null} if no attempt to create the
+     *      object is made.
+     * @throws Exception if recreating the object fails
      */
     public Object getObjectInstance(Object refObj,
                                     javax.naming.Name name,
@@ -101,7 +115,7 @@ public class ClientDataSourceFactory implements javax.naming.spi.ObjectFactory {
     /** Reflect lookup for Java bean method taking a single short arg */
     private static final Class[] SHORT_ARG = { Short.TYPE };
     
-    /*
+    /**
      * Set the Java bean properties for an object from its Reference. The
      * Reference contains a set of StringRefAddr values with the key being the
      * bean name and the value a String representation of the bean's value. This
