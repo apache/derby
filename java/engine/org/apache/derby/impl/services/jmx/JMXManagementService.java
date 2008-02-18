@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import javax.management.JMException;
+import javax.management.MBeanInfo;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import javax.management.StandardMBean;
@@ -188,8 +189,23 @@ public final class JMXManagementService implements ManagementService, ModuleCont
         try {
             final ObjectName beanName = new ObjectName(
                     DERBY_JMX_DOMAIN + ":" + keyProperties);
+            
             final StandardMBean standardMBean =
-                new StandardMBean(bean, beanInterface);
+                new StandardMBean(bean, beanInterface) {
+                
+                /**
+                 * Hide the implementation name from JMX clients
+                 * by providing the interface name as the class
+                 * name for the MBean. Allows the permissions
+                 * in a policy file to be granted to the public
+                 * MBean interfaces.
+                 */
+                protected String getClassName(MBeanInfo info) {
+                    return beanInterface.getName();
+                }
+                
+            };
+                // new StandardMBean(bean, beanInterface);
             
             registeredMbeans.put(beanName, standardMBean);
             if (mbeanServer != null)

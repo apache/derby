@@ -23,6 +23,20 @@ package org.apache.derby.mbeans;
 
 /**
  * JMX MBean inteface to control visibility of Derby's MBeans.
+ * When Derby boots it attempts to register an MBean
+ * implementing ManagementMBean if derby.system.jmx is true.
+ * It may fail due to lack of valid permissions.
+ * If Derby does not register its ManagementMBean then an
+ * application may register the Management implementation
+ * of ManagementMBean itself and use it to start Derby's
+ * JMX management.
+ * <P>
+ * Key properties for registered MBean when registered by Derby:
+ * <UL>
+ * <LI> type=Management
+ * </UL>
+ * 
+ * @see Management
  */
 public interface ManagementMBean {
     

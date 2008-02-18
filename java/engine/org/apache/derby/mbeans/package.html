@@ -16,4 +16,33 @@
 -->
 <body>
 <h2> JMX MBeans. </h2>
+If <code>derby.system.jmx</code> is true then when Derby (the embedded engine)
+is booted it will attempt to connect to the PlatformMBeanServer and register
+a number of MBeans to monitor and manage Derby.
+<P>
+Derby registers its JMX MBeans in the <code>org.apache.derby</code> domain and
+always includes a value for <code>type</code> in the MBean's ObjectName's key
+properties. Other key properties are described in the interface class for the MBean.
+<P>
+Derby registers the class name for any MBean to be the interface class for the MBean
+(i.e. <code>org.apache.derby.mbeans.*MBean</code>) to hide the implementation class
+(which is subject to change). Permissions in policy files therefore need to
+use the MBean interface to define fine grained access. E.g. the permission 
+to allow a invoking the <code>startManagement</code> of the <code>ManagementMBean</code>
+may be written as:
+<pre>
+permission javax.management.MBeanPermission
+    "org.apache.derby.mbeans.ManagementMBean#startManagement[org.apache.derby:*]",
+    "invoke";
+</pre>
+<P>
+If Derby cannot connect to the PlatformMBeanServer then no MBeans will be registered.
+Applications may use the <code>org.apache.derby.mbeans.Management</code> MBean to
+later enable Derby's JMX management.
+<P>
+If Derby cannot register a specific MBean (e.g. due to no permission to register
+that MBean) then it will simply be ignored. Subsequent re-starts of Derby's
+management service through <code>org.apache.derby.mbeans.ManagementMBean</code> will
+attempt to register such an MBean again (assuming it is still valid),
+in case the security policy has been updated.
 </body>

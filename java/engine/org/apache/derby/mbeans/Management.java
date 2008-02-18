@@ -25,7 +25,15 @@ import org.apache.derby.iapi.reference.Module;
 import org.apache.derby.iapi.services.monitor.Monitor;
 
 /** 
- * Management and information for the embedded JDBC driver.
+ * Management MBean to allow applications to dynamically
+ * control visibility of Derby's MBeans.
+ * If Derby does not register its ManagementMBean then an
+ * application may register this implementation
+ * of ManagementMBean itself and use it to start Derby's
+ * JMX management.
+ * <P>
+ * If Derby is not booted then invoking startManagement will
+ * do nothing.
 */
 public class Management implements ManagementMBean {
     

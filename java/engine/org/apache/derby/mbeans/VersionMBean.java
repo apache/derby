@@ -29,6 +29,12 @@ package org.apache.derby.mbeans;
 * are read-only.
 *
 * The MBean does not define any operations.
+ * <P>
+ * Key properties for registered MBean:
+ * <UL>
+ * <LI> type=Version
+ * <LI> jar={derby.jar|derbynet.jar}
+ * </UL>
 */
 public interface VersionMBean {
     // attributes

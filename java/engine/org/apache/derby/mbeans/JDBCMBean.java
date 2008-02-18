@@ -23,6 +23,11 @@ package org.apache.derby.mbeans;
 
 /** 
  * Management and information for the embedded JDBC driver.
+ * <P>
+ * Key properties for registered MBean:
+ * <UL>
+ * <LI> type=JDBC
+ * </UL>
 */
 public interface JDBCMBean {
     
