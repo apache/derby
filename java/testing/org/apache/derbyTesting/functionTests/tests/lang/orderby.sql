@@ -753,3 +753,65 @@ select trim(trailing ' ' from 'abc') from d2352
        group by trim(trailing ' ' from 'abc');
 drop table d2352;
 
+-- DERBY-3303: Failures in MergeSort when GROUP BY is used with
+-- an ORDER BY on an expression (as opposed to an ORDER BY on
+-- a column reference).
+
+create table d3303 (i int, j int, k int);
+insert into d3303 values (1, 1, 2), (1, 3, 3), (2, 3, 1), (2, 2, 4);
+select * from d3303;
+
+-- All of these should execute without error.  Note the variance
+-- in expressions and sort order for the ORDER BY clause.
+
+select sum(j) as s from d3303 group by i order by 1;
+select sum(j) as s from d3303 group by i order by s;
+select sum(j) as s from d3303 group by i order by s desc;
+select sum(j) as s from d3303 group by i order by abs(1), s;
+select sum(j) as s from d3303 group by i order by sum(k), s desc;
+select sum(j) as s from d3303 group by k order by abs(k) desc;
+select sum(j) as s from d3303 group by k order by abs(k) asc;
+select sum(j) as s from d3303 group by i order by abs(i);
+select sum(j) as s from d3303 group by i order by abs(i) desc;
+
+-- Sanity check that a DISTINCT with a GROUP BY is ok, too.
+select distinct sum(j) as s from d3303 group by i;
+
+-- Slightly more complex queries, more in line with the query
+-- that was reported in DERBY-3303.  Try out various ORDER
+-- BY clauses to make sure they are actually being enforced.
+
+select max(i) as m1, max(j) as m2, sum(k) - max(j) as mdiff
+  from d3303 group by j order by abs(sum(k) - max(j)) asc;
+
+select max(i) as m1, max(j) as m2, sum(k) - max(j) as mdiff
+  from d3303 group by j order by abs(sum(k) - max(j)) desc;
+
+select max(i) as m1, max(j) as m2, sum(k) - max(j) as mdiff
+  from d3303 group by j order by abs(sum(k) - max(j)) desc, m2 asc;
+
+select max(i) as m1, max(j) as m2, sum(k) - max(j) as mdiff
+  from d3303 group by j order by abs(sum(k) - max(j)) desc, m2 desc;
+
+-- Queries that include a "*" in the SELECT list and have
+-- expressions in the ORDER BY.
+
+select d3303.i as old_i, sum(d3303.k), d3303.*
+  from d3303 group by k, i, j order by j; 
+
+select d3303.i as old_i, sum(d3303.k), d3303.*
+  from d3303 group by k, i, j order by 4; 
+
+select d3303.i as old_i, sum(d3303.k), d3303.*
+  from d3303 group by k, i, j order by k+2; 
+
+-- These should all fail with error 42X77 (as opposed to an
+-- ASSERT or an IndexOutOfBoundsException or an execution time
+-- NPE).
+
+select k as s from d3303 order by 2;
+select sum(k) as s from d3303 group by i order by 2;
+select k from d3303 group by i,k order by 2;
+select k as s from d3303 group by i,k order by 2;
+
+drop table d3303;
