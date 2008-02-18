@@ -191,6 +191,170 @@ public class NestedWhereSubqueryTest extends BaseJDBCTestCase {
 		rs = s.executeQuery(sb.toString());
 		JDBC.assertUnorderedResultSet(rs, expectedRows);
 
+		/* A variation of the above WHERE EXISTS but using ANY should return the same rows */
+		sb = new StringBuffer();
+		sb.append("select unbound_e.empid, unbound_p.projid ");
+		sb.append("from departments this, ");
+		sb.append("     employees unbound_e, ");
+		sb.append("     projects unbound_p ");
+		sb.append("where exists ( "); 
+		sb.append(" select 1 from employees this_employees_e ");
+		sb.append("     where this_employees_e.empid = any ( ");
+		sb.append("         select this_employees_e_projects_p.empid ");
+		sb.append("           from project_employees this_employees_e_projects_p ");
+		sb.append("         where this_employees_e_projects_p.empid = this_employees_e.empid ");
+		sb.append("         and this_employees_e.department = this.id ");
+		sb.append("         and unbound_p.projid = this_employees_e_projects_p.projid ");
+		sb.append("         and unbound_e.empid = this_employees_e.empid) ");
+		sb.append("     )");
+
+		rs = s.executeQuery(sb.toString());
+		JDBC.assertUnorderedResultSet(rs, expectedRows);
+
+		/* 
+		 * The next 5 queries were also found problematic as part DERBY-3301 
+		 */
+		sb = new StringBuffer();
+		sb.append("select unbound_e.empid from departments this, employees unbound_e ");
+		sb.append("where exists ( ");
+		sb.append("   select 1 from employees this_employees_e ");
+		sb.append("      where this_employees_e.department = this.id and ");
+		sb.append("            unbound_e.empid = this_employees_e.empid and this.id = 2)");
+
+		rs = s.executeQuery(sb.toString());		
+		expectedRows = new String [][] {{"14"},{"15"}};		
+		JDBC.assertUnorderedResultSet(rs, expectedRows);
+		
+		sb = new StringBuffer();
+		sb.append("select this.id,unbound_e.empid,unbound_p.projid from departments this, ");
+		sb.append("        employees unbound_e, projects unbound_p ");
+		sb.append("where exists ( ");
+		sb.append("   select 1 from employees this_employees_e ");
+		sb.append("   where exists ( ");
+		sb.append("      select 1 from project_employees this_employees_e_projects_p ");
+		sb.append("      where this_employees_e_projects_p.\"EMPID\" = this_employees_e.empid and ");
+		sb.append("         unbound_p.projid = this_employees_e_projects_p.projid and ");
+		sb.append("         this_employees_e.department = this.id and ");
+		sb.append("         unbound_e.empid = this_employees_e.empid ");
+		sb.append(" )) ");		
+		
+		rs = s.executeQuery(sb.toString());
+		expectedRows = new String [][] {{"1","11","101"},
+										{"1","12","101"},
+										{"1","13","101"},
+										{"1","12","102"},
+										{"1","13","102"},
+										{"2","14","103"},
+										{"2","15","103"}};
+		JDBC.assertUnorderedResultSet(rs, expectedRows);
+		
+		sb = new StringBuffer();
+		sb.append("select unbound_e.empid,unbound_p.projid from departments this, ");
+		sb.append("       employees unbound_e, projects unbound_p ");
+		sb.append("where exists ( ");
+		sb.append("   select 1 from employees this_employees_e ");
+		sb.append("   where exists ( ");
+		sb.append("      select 1 from project_employees this_employees_e_projects_p ");
+		sb.append("      where this_employees_e_projects_p.\"EMPID\" = this_employees_e.empid ");
+		sb.append("            and unbound_p.projid = this_employees_e_projects_p.projid ");
+		sb.append("            and this_employees_e.department = this.id ");
+		sb.append("            and unbound_e.empid = this_employees_e.empid ");
+		sb.append("            and this.id = 1)) ");
+		
+		rs = s.executeQuery(sb.toString());
+		expectedRows = new String [][] {{"11","101"},
+										{"12","101"},
+										{"13","101"},
+										{"12","102"},
+										{"13","102"}};
+		JDBC.assertUnorderedResultSet(rs, expectedRows);
+		
+		sb = new StringBuffer();
+		sb.append("select unbound_e.empid,unbound_p.projid from departments this, ");
+		sb.append("       employees unbound_e, projects unbound_p ");
+		sb.append("where exists ( ");
+		sb.append("   select 1 from employees this_employees_e ");
+		sb.append("   where exists ( ");
+		sb.append("      select 1 from project_employees this_employees_e_projects_p ");
+		sb.append("      where this_employees_e_projects_p.\"EMPID\" = this_employees_e.empid ");
+		sb.append("            and unbound_p.projid = this_employees_e_projects_p.projid ");
+		sb.append("            and this_employees_e.department = this.id ");
+		sb.append("            and unbound_e.empid = this_employees_e.empid ");
+		sb.append("            and this.companyid = 1))");
+		
+		rs = s.executeQuery(sb.toString());
+		expectedRows = new String [][] {{"11","101"},
+										{"12","101"},
+										{"13","101"},
+										{"12","102"},
+										{"13","102"},
+										{"14","103"},
+										{"15","103"}};
+		JDBC.assertUnorderedResultSet(rs, expectedRows);
+		
+		sb = new StringBuffer();
+		sb.append("select unbound_e.empid, unbound_p.projid ");
+		sb.append("from departments this, ");
+		sb.append("     employees unbound_e, ");
+		sb.append("     projects unbound_p ");
+		sb.append("where exists ( ");
+		sb.append("   select 1 from employees this_employees_e ");
+		sb.append("   where 1 = 1 and exists ( ");
+		sb.append("      select 1 from project_employees this_employees_e_projects_p ");
+		sb.append("      where this_employees_e_projects_p.empid = this_employees_e.empid ");
+		sb.append("            and this_employees_e.department = this.id ");
+		sb.append("            and unbound_p.projid = this_employees_e_projects_p.projid ");
+		sb.append("            and unbound_e.empid = this_employees_e.empid) ");
+		sb.append(")");
+
+		rs = s.executeQuery(sb.toString());
+		expectedRows = new String [][] {{"11","101"},
+										{"12","101"},
+										{"13","101"},
+										{"12","102"},
+										{"13","102"},
+										{"14","103"},
+										{"15","103"}};  
+		JDBC.assertUnorderedResultSet(rs, expectedRows);
+		
+		/* Variation of the above using WHERE IN ... WHERE IN */
+		sb = new StringBuffer();
+		sb.append("select unbound_e.empid, unbound_p.projid ");
+		sb.append("from departments this, employees unbound_e, projects unbound_p ");
+		sb.append("where this.id in ( ");
+		sb.append("   select this_employees_e.department from employees this_employees_e ");
+		sb.append("   where this_employees_e.empid in ( ");
+		sb.append("      select this_employees_e_projects_p.empid ");
+		sb.append("      from project_employees this_employees_e_projects_p ");
+		sb.append("      where this_employees_e_projects_p.empid = this_employees_e.empid ");
+		sb.append("            and this_employees_e.department = this.id ");
+		sb.append("            and unbound_p.projid = this_employees_e_projects_p.projid ");
+		sb.append("            and unbound_e.empid = this_employees_e.empid)");
+		sb.append(")");
+		
+		rs = s.executeQuery(sb.toString());
+		/* Expected rows are as above */
+		JDBC.assertUnorderedResultSet(rs, expectedRows);
+
+		/* Variation of the above using WHERE ANY ... WHERE ANY */
+		sb = new StringBuffer();
+		sb.append("select unbound_e.empid, unbound_p.projid ");
+		sb.append("from departments this, employees unbound_e, projects unbound_p ");
+		sb.append("where this.id = any ( ");
+		sb.append("   select this_employees_e.department from employees this_employees_e ");
+		sb.append("   where this_employees_e.empid = any ( ");
+		sb.append("      select this_employees_e_projects_p.empid ");
+		sb.append("      from project_employees this_employees_e_projects_p ");
+		sb.append("      where this_employees_e_projects_p.empid = this_employees_e.empid ");
+		sb.append("            and this_employees_e.department = this.id ");
+		sb.append("            and unbound_p.projid = this_employees_e_projects_p.projid ");
+		sb.append("            and unbound_e.empid = this_employees_e.empid)");
+		sb.append(")");
+		
+		rs = s.executeQuery(sb.toString());
+		/* Expected rows are as above */
+		JDBC.assertUnorderedResultSet(rs, expectedRows);
+		
 		/*
 		 * Clean up the tables used.
 		 */				
