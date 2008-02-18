@@ -73,14 +73,22 @@ public class ClientDataSourceFactory implements javax.naming.spi.ObjectFactory {
                                     javax.naming.Name name,
                                     javax.naming.Context nameContext,
                                     java.util.Hashtable environment) throws java.lang.Exception {
-        javax.naming.Reference ref = (javax.naming.Reference) refObj;
+        Object ds = null;
+        if (refObj instanceof javax.naming.Reference) {
+            javax.naming.Reference ref = (javax.naming.Reference) refObj;
 
-        // Create the proper data source object shell.
-        Object ds = Class.forName(ref.getClassName()).newInstance();
+            // See if this object belongs to Derby.
+            String className = ref.getClassName();
+            if (className != null &&
+                    className.startsWith("org.apache.derby.jdbc.Client")) {
+                // Create the proper data source object shell.
+                ds = Class.forName(className).newInstance();
 
-        // Fill in the data source object shell with values from the jndi reference.
-        ClientDataSourceFactory.setBeanProperties(ds, ref);
-
+                // Fill in the data source object shell with values from the
+                // jndi reference.
+                ClientDataSourceFactory.setBeanProperties(ds, ref);
+            }
+        }
         return ds;
     }
     
