@@ -1207,12 +1207,102 @@ End Compilation Timestamp : null
 Begin Execution Timestamp : null
 End Execution Timestamp : null
 Statement Execution Plan Text: 
-Project-Restrict ResultSet (6):
+Attached subqueries:
+	Begin Subquery Number 0
+	Any ResultSet  (Attached to 2):
+	Number of opens = 2
+	Rows seen = 2
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+	Source result set:
+		Project-Restrict ResultSet (6):
+		Number of opens = 2
+		Rows seen = 1
+		Rows filtered = 0
+		restriction = false
+		projection = true
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			restriction time (milliseconds) = 0
+			projection time (milliseconds) = 0
+		Source result set:
+			Nested Loop Exists Join ResultSet:
+			Number of opens = 2
+			Rows seen from the left = 1
+			Rows seen from the right = 1
+			Rows filtered = 0
+			Rows returned = 1
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+			Left result set:
+				Index Scan ResultSet for IDX2 using index IDX2_1 at serializable isolation level using share row locking chosen by the optimizer
+				Number of opens = 2
+				Rows seen = 1
+				Rows filtered = 0
+				Fetch Size = 1
+					constructor time (milliseconds) = 0
+					open time (milliseconds) = 0
+					next time (milliseconds) = 0
+					close time (milliseconds) = 0
+					next time in milliseconds/row = 0
+				scan information: 
+					Bit set of columns fetched={0, 1}
+					Number of columns fetched=2
+					Number of deleted rows visited=0
+					Number of pages visited=2
+					Number of rows qualified=1
+					Number of rows visited=1
+					Scan type=btree
+					Tree height=1
+					start position: 
+	>= on first 2 column(s).
+	Ordered null semantics on the following columns: 
+					stop position: 
+	> on first 2 column(s).
+	Ordered null semantics on the following columns: 
+					qualifiers:
+None
+			Right result set:
+				Index Scan ResultSet for IDX1 using index IDX1_1 at serializable isolation level using share row locking chosen by the optimizer
+				Number of opens = 1
+				Rows seen = 1
+				Rows filtered = 0
+				Fetch Size = 1
+					constructor time (milliseconds) = 0
+					open time (milliseconds) = 0
+					next time (milliseconds) = 0
+					close time (milliseconds) = 0
+					next time in milliseconds/row = 0
+				scan information: 
+					Bit set of columns fetched={0}
+					Number of columns fetched=1
+					Number of deleted rows visited=0
+					Number of pages visited=1
+					Number of rows qualified=1
+					Number of rows visited=1
+					Scan type=btree
+					Tree height=1
+					start position: 
+	>= on first 1 column(s).
+	Ordered null semantics on the following columns: 
+					stop position: 
+	> on first 1 column(s).
+	Ordered null semantics on the following columns: 
+					qualifiers:
+None
+	End Subquery Number 0
+Project-Restrict ResultSet (2):
 Number of opens = 1
-Rows seen = 1
-Rows filtered = 0
-restriction = false
-projection = true
+Rows seen = 2
+Rows filtered = 1
+restriction = true
+projection = false
 	constructor time (milliseconds) = 0
 	open time (milliseconds) = 0
 	next time (milliseconds) = 0
@@ -1220,110 +1310,26 @@ projection = true
 	restriction time (milliseconds) = 0
 	projection time (milliseconds) = 0
 Source result set:
-	Nested Loop Exists Join ResultSet:
+	Table Scan ResultSet for OUTER1 at serializable isolation level using share table locking chosen by the optimizer
 	Number of opens = 1
-	Rows seen from the left = 1
-	Rows seen from the right = 1
+	Rows seen = 2
 	Rows filtered = 0
-	Rows returned = 1
+	Fetch Size = 16
 		constructor time (milliseconds) = 0
 		open time (milliseconds) = 0
 		next time (milliseconds) = 0
 		close time (milliseconds) = 0
-	Left result set:
-		Nested Loop Join ResultSet:
-		Number of opens = 1
-		Rows seen from the left = 1
-		Rows seen from the right = 1
-		Rows filtered = 0
-		Rows returned = 1
-			constructor time (milliseconds) = 0
-			open time (milliseconds) = 0
-			next time (milliseconds) = 0
-			close time (milliseconds) = 0
-		Left result set:
-			Index Scan ResultSet for IDX2 using index IDX2_1 at serializable isolation level using share table locking chosen by the optimizer
-			Number of opens = 1
-			Rows seen = 1
-			Rows filtered = 0
-			Fetch Size = 16
-				constructor time (milliseconds) = 0
-				open time (milliseconds) = 0
-				next time (milliseconds) = 0
-				close time (milliseconds) = 0
-				next time in milliseconds/row = 0
-			scan information: 
-				Bit set of columns fetched={0, 1}
-				Number of columns fetched=2
-				Number of deleted rows visited=0
-				Number of pages visited=1
-				Number of rows qualified=1
-				Number of rows visited=2
-				Scan type=btree
-				Tree height=1
-				start position: 
-	None
-				stop position: 
-	None
-				qualifiers:
-Column[0][0] Id: 1
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
-		Right result set:
-			Table Scan ResultSet for OUTER1 at serializable isolation level using share table locking chosen by the optimizer
-			Number of opens = 1
-			Rows seen = 1
-			Rows filtered = 0
-			Fetch Size = 16
-				constructor time (milliseconds) = 0
-				open time (milliseconds) = 0
-				next time (milliseconds) = 0
-				close time (milliseconds) = 0
-				next time in milliseconds/row = 0
-			scan information: 
-				Bit set of columns fetched=All
-				Number of columns fetched=3
-				Number of pages visited=1
-				Number of rows qualified=1
-				Number of rows visited=2
-				Scan type=heap
-				start position: 
-null				stop position: 
-null				qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
-	Right result set:
-		Index Scan ResultSet for IDX1 using index IDX1_1 at serializable isolation level using share row locking chosen by the optimizer
-		Number of opens = 1
-		Rows seen = 1
-		Rows filtered = 0
-		Fetch Size = 1
-			constructor time (milliseconds) = 0
-			open time (milliseconds) = 0
-			next time (milliseconds) = 0
-			close time (milliseconds) = 0
-			next time in milliseconds/row = 0
-		scan information: 
-			Bit set of columns fetched={0}
-			Number of columns fetched=1
-			Number of deleted rows visited=0
-			Number of pages visited=1
-			Number of rows qualified=1
-			Number of rows visited=1
-			Scan type=btree
-			Tree height=1
-			start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-			stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
-			qualifiers:
+		next time in milliseconds/row = 0
+	scan information: 
+		Bit set of columns fetched=All
+		Number of columns fetched=3
+		Number of pages visited=1
+		Number of rows qualified=2
+		Number of rows visited=2
+		Scan type=heap
+		start position: 
+null		stop position: 
+null		qualifiers:
 None
 ij> -- only flatten bottom
 select * from outer1 o where exists
@@ -1516,12 +1522,100 @@ End Compilation Timestamp : null
 Begin Execution Timestamp : null
 End Execution Timestamp : null
 Statement Execution Plan Text: 
-Project-Restrict ResultSet (6):
+Attached subqueries:
+	Begin Subquery Number 0
+	Any ResultSet  (Attached to 2):
+	Number of opens = 2
+	Rows seen = 2
+		constructor time (milliseconds) = 0
+		open time (milliseconds) = 0
+		next time (milliseconds) = 0
+		close time (milliseconds) = 0
+	Source result set:
+		Project-Restrict ResultSet (6):
+		Number of opens = 2
+		Rows seen = 1
+		Rows filtered = 0
+		restriction = false
+		projection = true
+			constructor time (milliseconds) = 0
+			open time (milliseconds) = 0
+			next time (milliseconds) = 0
+			close time (milliseconds) = 0
+			restriction time (milliseconds) = 0
+			projection time (milliseconds) = 0
+		Source result set:
+			Nested Loop Exists Join ResultSet:
+			Number of opens = 2
+			Rows seen from the left = 1
+			Rows seen from the right = 1
+			Rows filtered = 0
+			Rows returned = 1
+				constructor time (milliseconds) = 0
+				open time (milliseconds) = 0
+				next time (milliseconds) = 0
+				close time (milliseconds) = 0
+			Left result set:
+				Index Scan ResultSet for IDX2 using index IDX2_1 at serializable isolation level using share row locking chosen by the optimizer
+				Number of opens = 2
+				Rows seen = 1
+				Rows filtered = 0
+				Fetch Size = 1
+					constructor time (milliseconds) = 0
+					open time (milliseconds) = 0
+					next time (milliseconds) = 0
+					close time (milliseconds) = 0
+					next time in milliseconds/row = 0
+				scan information: 
+					Bit set of columns fetched={0, 1}
+					Number of columns fetched=2
+					Number of deleted rows visited=0
+					Number of pages visited=2
+					Number of rows qualified=1
+					Number of rows visited=1
+					Scan type=btree
+					Tree height=1
+					start position: 
+	>= on first 2 column(s).
+	Ordered null semantics on the following columns: 
+					stop position: 
+	> on first 2 column(s).
+	Ordered null semantics on the following columns: 
+					qualifiers:
+None
+			Right result set:
+				Index Scan ResultSet for IDX1 using index IDX1_1 at serializable isolation level using share table locking chosen by the optimizer
+				Number of opens = 1
+				Rows seen = 1
+				Rows filtered = 0
+				Fetch Size = 1
+					constructor time (milliseconds) = 0
+					open time (milliseconds) = 0
+					next time (milliseconds) = 0
+					close time (milliseconds) = 0
+					next time in milliseconds/row = 0
+				scan information: 
+					Bit set of columns fetched={}
+					Number of columns fetched=0
+					Number of deleted rows visited=0
+					Number of pages visited=1
+					Number of rows qualified=1
+					Number of rows visited=1
+					Scan type=btree
+					Tree height=1
+					start position: 
+	None
+					stop position: 
+	None
+					qualifiers:
+None
+	End Subquery Number 0
+Project-Restrict ResultSet (2):
 Number of opens = 1
-Rows seen = 1
-Rows filtered = 0
-restriction = false
-projection = true
+Rows seen = 2
+Rows filtered = 1
+restriction = true
+projection = false
 	constructor time (milliseconds) = 0
 	open time (milliseconds) = 0
 	next time (milliseconds) = 0
@@ -1529,108 +1623,26 @@ projection = true
 	restriction time (milliseconds) = 0
 	projection time (milliseconds) = 0
 Source result set:
-	Nested Loop Exists Join ResultSet:
+	Table Scan ResultSet for OUTER1 at serializable isolation level using share table locking chosen by the optimizer
 	Number of opens = 1
-	Rows seen from the left = 1
-	Rows seen from the right = 1
+	Rows seen = 2
 	Rows filtered = 0
-	Rows returned = 1
+	Fetch Size = 16
 		constructor time (milliseconds) = 0
 		open time (milliseconds) = 0
 		next time (milliseconds) = 0
 		close time (milliseconds) = 0
-	Left result set:
-		Nested Loop Join ResultSet:
-		Number of opens = 1
-		Rows seen from the left = 1
-		Rows seen from the right = 1
-		Rows filtered = 0
-		Rows returned = 1
-			constructor time (milliseconds) = 0
-			open time (milliseconds) = 0
-			next time (milliseconds) = 0
-			close time (milliseconds) = 0
-		Left result set:
-			Index Scan ResultSet for IDX2 using index IDX2_1 at serializable isolation level using share table locking chosen by the optimizer
-			Number of opens = 1
-			Rows seen = 1
-			Rows filtered = 0
-			Fetch Size = 16
-				constructor time (milliseconds) = 0
-				open time (milliseconds) = 0
-				next time (milliseconds) = 0
-				close time (milliseconds) = 0
-				next time in milliseconds/row = 0
-			scan information: 
-				Bit set of columns fetched={0, 1}
-				Number of columns fetched=2
-				Number of deleted rows visited=0
-				Number of pages visited=1
-				Number of rows qualified=1
-				Number of rows visited=2
-				Scan type=btree
-				Tree height=1
-				start position: 
-	None
-				stop position: 
-	None
-				qualifiers:
-Column[0][0] Id: 1
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
-		Right result set:
-			Table Scan ResultSet for OUTER1 at serializable isolation level using share table locking chosen by the optimizer
-			Number of opens = 1
-			Rows seen = 1
-			Rows filtered = 0
-			Fetch Size = 16
-				constructor time (milliseconds) = 0
-				open time (milliseconds) = 0
-				next time (milliseconds) = 0
-				close time (milliseconds) = 0
-				next time in milliseconds/row = 0
-			scan information: 
-				Bit set of columns fetched=All
-				Number of columns fetched=3
-				Number of pages visited=1
-				Number of rows qualified=1
-				Number of rows visited=2
-				Scan type=heap
-				start position: 
-null				stop position: 
-null				qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
-	Right result set:
-		Index Scan ResultSet for IDX1 using index IDX1_1 at serializable isolation level using share table locking chosen by the optimizer
-		Number of opens = 1
-		Rows seen = 1
-		Rows filtered = 0
-		Fetch Size = 1
-			constructor time (milliseconds) = 0
-			open time (milliseconds) = 0
-			next time (milliseconds) = 0
-			close time (milliseconds) = 0
-			next time in milliseconds/row = 0
-		scan information: 
-			Bit set of columns fetched={}
-			Number of columns fetched=0
-			Number of deleted rows visited=0
-			Number of pages visited=1
-			Number of rows qualified=1
-			Number of rows visited=1
-			Scan type=btree
-			Tree height=1
-			start position: 
-	None
-			stop position: 
-	None
-			qualifiers:
+		next time in milliseconds/row = 0
+	scan information: 
+		Bit set of columns fetched=All
+		Number of columns fetched=3
+		Number of pages visited=1
+		Number of rows qualified=2
+		Number of rows visited=2
+		Scan type=heap
+		start position: 
+null		stop position: 
+null		qualifiers:
 None
 ij> -- flatten a subquery that has a subquery in its select list
 -- verify that subquery gets copied up to outer block
