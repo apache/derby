@@ -661,10 +661,10 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
 					// back to the fixture.
 					newConn[0] = pce.getConnection();
 				} catch (SQLException e) {
-					// Need to catch the exception here because
-					// we cannot throw an exception through
-					// the api method.
-					fail(e.getMessage());
+                    // Need to catch the exception here because
+                    // we cannot throw a checked exception through
+                    // the api method. Wrap it in a RuntimeException.
+                    throw new RuntimeException(e);
 				}
 			}
 
@@ -708,9 +708,9 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
                     pce.close();
                 } catch (SQLException e) {
                     // Need to catch the exception here because
-                    // we cannot throw an exception through
-                    // the api method.
-                    fail(e.getMessage());
+                    // we cannot throw a checked exception through
+                    // the api method. Wrap it in a RuntimeException.
+                    throw new RuntimeException(e);
                 }
             }
 
@@ -1867,7 +1867,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
     // test jira-derby 95 - a NullPointerException was returned when passing
     // an incorrect database name, should now give error XCY00   
     // with ConnectionPoolDataSource
-    public void testJira95pds() throws SQLException {
+    public void testJira95pds() throws Exception {
         try {
             ConnectionPoolDataSource pds = J2EEDataSource.getConnectionPoolDataSource();
             JDBCDataSource.setBeanProperty(pds, "databaseName", "jdbc:derby:boo");
@@ -1880,7 +1880,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         } catch (Exception e) {
             // DERBY-2498 - when fixed, remove if
             if (usingEmbedded())
-                fail ("unexpected exception: " + e.toString());
+                throw e;
         }
     }
     
@@ -1895,8 +1895,6 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
             fail ("expected an SQLException!");
         } catch (SQLException sqle) {
             assertSQLState("XCY00", sqle);
-        } catch (Exception e) {
-            fail ("unexpected exception: " + e.toString());
         }
     }
     
@@ -2000,19 +1998,14 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
     // Note that DataSourceTest has some more basic testing of
     // an empty DataSource in a fixture with similar name - however
     // that fixture does not test setAttributesAsPassword
-    public void testDSRequestAuthentication() throws SQLException {
+    public void testDSRequestAuthentication() throws Exception {
 
 //        if (usingDerbyNetClient())
 //            return;
         
         JDBCClient dsclient = getTestConfiguration().getJDBCClient();
         String dsName = dsclient.getDataSourceClassName();
-        DataSource ds = null;
-        try {
-            ds = (javax.sql.DataSource) Class.forName(dsName).newInstance();
-        } catch (Exception e) {
-            fail("unable to complete test because unable to create new instance of datasource");
-        }
+        DataSource ds = (DataSource) Class.forName(dsName).newInstance();
 
         // DataSource - attributesAsPassword=true");
         JDBCDataSource.setBeanProperty(ds, "attributesAsPassword", Boolean.TRUE);
@@ -2074,14 +2067,8 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
 
         // now with ConnectionPoolDataSource
         String cpdsName = dsclient.getConnectionPoolDataSourceClassName();
-        ConnectionPoolDataSource cpds = null;
-        try {
-            cpds = (javax.sql.ConnectionPoolDataSource) 
-                Class.forName(cpdsName).newInstance();
-        } catch (Exception e) {
-            fail("unable to complete test because unable " +
-                    "to create new instance of connection pool datasource");
-        }
+        ConnectionPoolDataSource cpds =
+              (ConnectionPoolDataSource) Class.forName(cpdsName).newInstance();
 
         // ConnectionPoolDataSource - EMPTY
         dsConnectionRequests(new String[] {  
@@ -2125,12 +2112,8 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         // now with XADataSource
 //        EmbeddedXADataSource xads = new EmbeddedXADataSource();
         String xadsName = dsclient.getXADataSourceClassName();
-        DataSource xads = null;
-        try {
-            xads = (javax.sql.DataSource) Class.forName(xadsName).newInstance();
-        } catch (Exception e) {
-            fail("unable to complete test because unable to create new instance of datasource");
-        }
+        XADataSource xads =
+                (XADataSource) Class.forName(xadsName).newInstance();
 
         // XADataSource - EMPTY
         dsConnectionRequests(new String[] {  
@@ -3085,17 +3068,14 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         int[] expectedValues, Connection conn, Statement s) 
     throws SQLException {
 
-        try {
-            // DERBY-2531
-            // network server gives mismatched connections. See also
-            // comment in testAllDataSources()
-            if (usingEmbedded())
-                assertEquals(conn, s.getConnection());
-            resultSetQuery(expectedCursorName, expectedValues,
-                s.executeQuery("select * from intTable"));
-        } catch (SQLException sqle) {
-            fail (" did not expect sql exception");
+        // DERBY-2531
+        // network server gives mismatched connections. See also
+        // comment in testAllDataSources()
+        if (usingEmbedded()) {
+            assertEquals(conn, s.getConnection());
         }
+        resultSetQuery(expectedCursorName, expectedValues,
+                       s.executeQuery("select * from intTable"));
     }
 
     private static void resultSetQuery(String expectedCursorName, 
@@ -3264,7 +3244,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
             if (conn.getAutoCommit())
                 assertSQLState("XJ010", sqle);
             else if (((String)expectedValues[1]).equals("OK"))
-                fail ("unexpected JDBC 3.0 savepoint SQL Exception");
+                throw sqle;
             else 
                 assertSQLState((String)expectedValues[1], sqle);
         }
@@ -3305,7 +3285,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
                 fail (" expected an sqlexception on setTypeMap(EMPTY_MAP)");
         } catch (SQLException sqle) {
             if (((String)expectedValues[5]).equals("OK"))
-                fail ("setTypeMap(EMPTY_MAP) failed ");
+                throw sqle;
             else
                 assertSQLState((String)expectedValues[5], sqle);
         }
@@ -3326,7 +3306,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
                 fail (" expected an sqlexception on setTypeMap(map)");
         } catch (SQLException sqle) {
             if (((String)expectedValues[7]).equals("OK"))
-                fail ("setTypeMap(valid value) failed ");
+                throw sqle;
             else
                 assertSQLState((String)expectedValues[7], sqle);
         }
@@ -3335,11 +3315,8 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         conn.close();
 
         // method calls on a closed connection
-        try {
-            conn.close(); // expect no error
-        } catch (SQLException sqle) {
-            fail(" unexpected exception on <closedconn>.close() ");
-        }
+        conn.close(); // expect no error
+
         try {
             conn.createStatement();
             fail (dsName + " <closedconn>.createStatement(), " +
