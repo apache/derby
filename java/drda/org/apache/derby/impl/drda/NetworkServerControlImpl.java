@@ -62,12 +62,15 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.jdbc.DRDAServerStarter;
 import org.apache.derby.iapi.reference.Attribute;
 import org.apache.derby.iapi.reference.DRDAConstants;
+import org.apache.derby.iapi.reference.Module;
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.services.info.JVMInfo;
 import org.apache.derby.iapi.services.info.ProductGenusNames;
 import org.apache.derby.iapi.services.info.ProductVersionHolder;
+import org.apache.derby.iapi.services.info.Version;
+import org.apache.derby.iapi.services.jmx.ManagementService;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.iapi.services.sanity.SanityManager;
@@ -76,6 +79,8 @@ import org.apache.derby.iapi.tools.i18n.LocalizedResource;
 import org.apache.derby.iapi.util.CheapDateFormatter;
 import org.apache.derby.iapi.util.StringUtil;
 import org.apache.derby.impl.jdbc.EmbedSQLException;
+import org.apache.derby.mbeans.JDBCMBean;
+import org.apache.derby.mbeans.VersionMBean;
 
 /** 
 	
@@ -745,6 +750,15 @@ public final class NetworkServerControlImpl {
 								}
 							);
 		clientThread.start();
+        
+        // Now we are up and running register any MBeans
+        ManagementService mgmtService = ((ManagementService)
+                Monitor.getSystemModule(Module.JMX));
+        
+        Object versionMBean = mgmtService.registerMBean(
+                           new Version(getNetProductVersionHolder()),
+                           VersionMBean.class,
+                           "type=Version,jar=derbynet.jar");
 			
 		// wait until we are told to shutdown or someone sends an InterruptedException
         synchronized(shutdownSync) {
@@ -815,7 +829,10 @@ public final class NetworkServerControlImpl {
 		// they can close down
 		synchronized (runQueue) {
 			runQueue.notifyAll();
-		}						
+		}	
+        
+        // And now unregister any MBeans.
+        mgmtService.unregisterMBean(versionMBean);
 
 		if (shutdownDatabasesOnShutdown) {
 
