@@ -199,17 +199,17 @@ public class StatementTablePermission extends StatementPermission
 		switch( privType)
 		{
 		case Authorizer.SELECT_PRIV:
-			return "select";
+			return "SELECT";
 		case Authorizer.UPDATE_PRIV:
-			return "update";
+			return "UPDATE";
 		case Authorizer.REFERENCES_PRIV:
-			return "references";
+			return "REFERENCES";
 		case Authorizer.INSERT_PRIV:
-			return "insert";
+			return "INSERT";
 		case Authorizer.DELETE_PRIV:
-			return "delete";
+			return "DELETE";
 		case Authorizer.TRIGGER_PRIV:
-			return "trigger";
+			return "TRIGGER";
 		}
 		return "?";
 	} // end of getPrivName
