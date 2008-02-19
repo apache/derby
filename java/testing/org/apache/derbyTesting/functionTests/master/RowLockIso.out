@@ -785,7 +785,7 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |X   |*** TRANSIEN|Tablelock |GRANT|ACTIVE  
-APP     |UserTran|TABLE   |2   |X   |A           |Tablelock |GRANT|ACTIVE  
+APP     |UserTran|TABLE   |3   |X   |A           |Tablelock |GRANT|ACTIVE  
 ij> commit;
 ij> drop table a;
 0 rows inserted/updated/deleted

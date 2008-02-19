@@ -227,7 +227,7 @@ public class DropConstraintConstantAction extends ConstraintConstantAction
 		** be repeatedly changing the reference count of the referenced
 		** key and generating unnecessary I/O.
 		*/
-        conDesc.drop(lcc, !cascadeOnRefKey);
+		dropConstraint(conDesc, activation, lcc, !cascadeOnRefKey);
 
 		if (cascadeOnRefKey) 
 		{
@@ -243,7 +243,7 @@ public class DropConstraintConstantAction extends ConstraintConstantAction
 			{
 				fkcd = (ForeignKeyConstraintDescriptor) cdl.elementAt(index);
 				dm.invalidateFor(fkcd, DependencyManager.DROP_CONSTRAINT, lcc);
-				fkcd.drop(lcc, true);
+				dropConstraint(fkcd, activation, lcc, true);
 			}
 	
 			/*

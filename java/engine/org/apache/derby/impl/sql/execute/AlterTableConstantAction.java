@@ -21,6 +21,7 @@
 
 package org.apache.derby.impl.sql.execute;
 
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
@@ -813,6 +814,8 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		ConstraintDescriptorList csdl = dd.getConstraintDescriptors(td);
 		int csdl_size = csdl.size();
 
+		ArrayList newCongloms = new ArrayList();
+
 		// we want to remove referenced primary/unique keys in the second
 		// round.  This will ensure that self-referential constraints will
 		// work OK.
@@ -872,8 +875,8 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 			// drop now in all other cases
 			dm.invalidateFor(cd, DependencyManager.DROP_CONSTRAINT,
 									lcc);
-            cd.drop(lcc, true);
 
+			dropConstraint(cd, td, newCongloms, activation, lcc, true);
 			activation.addWarning(
                 StandardException.newWarning(SQLState.LANG_CONSTRAINT_DROPPED,
 				cd.getConstraintName(), td.getName()));
@@ -882,7 +885,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		for (int i = tbr_size - 1; i >= 0; i--)
 		{
 			ConstraintDescriptor cd = toBeRemoved[i];
-			cd.drop(lcc, false);
+			dropConstraint(cd, td, newCongloms, activation, lcc, false);
 
 			activation.addWarning(
                 StandardException.newWarning(SQLState.LANG_CONSTRAINT_DROPPED,
@@ -900,7 +903,8 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 									DependencyManager.DROP_CONSTRAINT,
 									lcc);
 
-                    fkcd.drop(lcc, true);
+					dropConstraint(fkcd, td,
+						newCongloms, activation, lcc, true);
 
 					activation.addWarning(
                         StandardException.newWarning(
@@ -913,6 +917,18 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 			dm.invalidateFor(cd, DependencyManager.DROP_CONSTRAINT, lcc);
 			dm.clearDependencies(lcc, cd);
 		}
+
+		/* If there are new backing conglomerates which must be
+		 * created to replace a dropped shared conglomerate
+		 * (where the shared conglomerate was dropped as part
+		 * of a "drop constraint" call above), then create them
+		 * now.  We do this *after* dropping all dependent
+		 * constraints because we don't want to waste time
+		 * creating a new conglomerate if it's just going to be
+		 * dropped again as part of another "drop constraint".
+		 */
+		createNewBackingCongloms(
+			newCongloms, (long[])null, activation, dd);
 
         /*
          * The work we've done above, specifically the possible
@@ -1733,6 +1749,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		numIndexes = compressIRGs.length;
 		indexConglomerateNumbers = indexLister.getIndexConglomerateNumbers();
 
+		ArrayList newCongloms = new ArrayList();
 		if (! (compressTable || truncateTable))		// then it's drop column
 		{
 			for (int i = 0; i < compressIRGs.length; i++)
@@ -1753,7 +1770,9 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 					 */
 					ConglomerateDescriptor cd = td.getConglomerateDescriptor
 												(indexConglomerateNumbers[i]);
-					cd.drop(activation.getLanguageConnectionContext(), td);
+
+					dropConglomerate(cd, td, true, newCongloms, activation,
+						activation.getLanguageConnectionContext());
 
 					compressIRGs[i] = null;		// mark it
 					continue;
@@ -1771,6 +1790,20 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 										cd.getConglomerateName() );
 				}
 			}
+
+			/* If there are new backing conglomerates which must be
+			 * created to replace a dropped shared conglomerate
+			 * (where the shared conglomerate was dropped as part
+			 * of a "drop conglomerate" call above), then create
+			 * them now.  We do this *after* dropping all dependent
+			 * conglomerates because we don't want to waste time
+			 * creating a new conglomerate if it's just going to be
+			 * dropped again as part of another "drop conglomerate"
+			 * call.
+			 */
+			createNewBackingCongloms(newCongloms,
+				indexConglomerateNumbers, activation, dd);
+
 			IndexRowGenerator[] newIRGs = new IndexRowGenerator[numIndexes];
 			long[] newIndexConglomNumbers = new long[numIndexes];
 
@@ -1842,6 +1875,93 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 			for (int index2 = 0; index2 < colIds.length; index2++)
 			{
 				indexedCols.set(colIds[index2]);
+			}
+		}
+	}
+
+	/**
+	 * Iterate through the received list of CreateIndexConstantActions and
+	 * execute each one, It's possible that one or more of the constant
+	 * actions in the list has been rendered "unneeded" by the time we get
+	 * here (because the index that the constant action was going to create
+	 * is no longer needed), so we have to check for that.
+	 *
+	 * @param newConglomActions Potentially empty list of constant actions
+	 *   to execute, if still needed
+	 * @param ixCongNums Optional array of conglomerate numbers; if non-null
+	 *   then any entries in the array which correspond to a dropped physical
+	 *   conglomerate (as determined from the list of constant actions) will
+	 *   be updated to have the conglomerate number of the newly-created
+	 *   physical conglomerate.
+	 */
+	private void createNewBackingCongloms(ArrayList newConglomActions,
+		long [] ixCongNums, Activation activation, DataDictionary dd)
+		throws StandardException
+	{
+		int sz = newConglomActions.size();
+		for (int i = 0; i < sz; i++)
+		{
+			CreateIndexConstantAction ca =
+				(CreateIndexConstantAction)newConglomActions.get(i);
+
+			if (dd.getConglomerateDescriptor(ca.getCreatedUUID()) == null)
+			{
+				/* Conglomerate descriptor was dropped after
+				 * being selected as the source for a new
+				 * conglomerate, so don't create the new
+				 * conglomerate after all.  Either we found
+				 * another conglomerate descriptor that can
+				 * serve as the source for the new conglom,
+				 * or else we don't need a new conglomerate
+				 * at all because all constraints/indexes
+				 * which shared it had a dependency on the
+				 * dropped column and no longer exist.
+				 */
+				continue;
+			}
+
+			executeConglomReplacement(ca, activation);
+			long oldCongNum = ca.getReplacedConglomNumber();
+			long newCongNum = ca.getCreatedConglomNumber();
+
+			/* The preceding call to executeConglomReplacement updated all
+			 * relevant ConglomerateDescriptors with the new conglomerate
+			 * number *WITHIN THE DATA DICTIONARY*.  But the table
+			 * descriptor that we have will not have been updated.
+			 * There are two approaches to syncing the table descriptor
+			 * with the dictionary: 1) refetch the table descriptor from
+			 * the dictionary, or 2) update the table descriptor directly.
+			 * We choose option #2 because the caller of this method (esp.
+			 * getAffectedIndexes()) has pointers to objects from the
+			 * table descriptor as it was before we entered this method.
+			 * It then changes data within those objects, with the
+			 * expectation that, later, those objects can be used to
+			 * persist the changes to disk.  If we change the table
+			 * descriptor here the objects that will get persisted to
+			 * disk (from the table descriptor) will *not* be the same
+			 * as the objects that were updated--so we'll lose the updates
+			 * and that will in turn cause other problems.  So we go with
+			 * option #2 and just change the existing TableDescriptor to
+			 * reflect the fact that the conglomerate number has changed.
+			 */
+			ConglomerateDescriptor [] tdCDs =
+				td.getConglomerateDescriptors(oldCongNum);
+
+			for (int j = 0; j < tdCDs.length; j++)
+				tdCDs[j].setConglomerateNumber(newCongNum);
+
+			/* If we received a list of index conglomerate numbers
+			 * then they are the "old" numbers; see if any of those
+			 * numbers should now be updated to reflect the new
+			 * conglomerate, and if so, update them.
+			 */
+			if (ixCongNums != null)
+			{
+				for (int j = 0; j < ixCongNums.length; j++)
+				{
+					if (ixCongNums[j] == oldCongNum)
+						ixCongNums[j] = newCongNum;
+				}
 			}
 		}
 	}

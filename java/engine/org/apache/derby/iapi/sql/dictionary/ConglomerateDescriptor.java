@@ -378,15 +378,107 @@ public final class ConglomerateDescriptor extends TupleDescriptor
 	    
         // only drop the conglomerate if no similar index but with different
 	    // name. Get from dd in case we drop other dup indexes with a cascade operation	    
-	    if (dd.getConglomerateDescriptors(getConglomerateNumber()).length == 1)
+	    ConglomerateDescriptor [] congDescs =
+	        dd.getConglomerateDescriptors(getConglomerateNumber());
+
+		boolean dropConglom = false;
+		ConglomerateDescriptor physicalCD = null;
+		if (congDescs.length == 1)
+			dropConglom = true;
+		else
+		{
+		 	/* There are multiple conglomerate descriptors which share
+			 * the same physical conglomerate.  That said, if we are
+			 * dropping the *ONLY* conglomerate descriptor that fully
+			 * matches the physical conglomerate, then we have to do
+			 * a little extra work.  Namely, if the physical conglomerate
+			 * is unique and this descriptor is unique, but none of the
+			 * other descriptors which share with this one are unique,
+			 * then we have to "update" the physical conglomerate to
+			 * be non-unique. This ensures correct behavior for the
+			 * remaining descriptors. (DERBY-3299)
+			 *
+			 * Note that "update the physical conglomerate" above is
+			 * currently implemented as "drop the old conglomerate"
+			 * (now) and "create a new (replacement) one" (later--let
+			 * the caller do it).  Possible improvements to that logic
+			 * may be desirable in the future...
+			 */
+
+			boolean needNewConglomerate;
+
+			/* Find a conglomerate descriptor that fully describes what
+			 * a physical conglomerate would have to look like in order
+			 * to fulfill the requirements (esp. uniqueness) of _all_
+			 * conglomerate descriptors which share a physical conglomerate
+			 * with this one. "true" in the next line means that when we
+			 * search for such a conglomerate, we should ignore "this"
+			 * descriptor--because we're going to drop this one and we
+			 * want to see what the physical conglomerate must look like
+			 * when "this" descriptor does not exist.  Note that this
+			 * call should never return null because we only get here
+			 * if more than one descriptor shares a conglom with this
+			 * one--so at the very least we'll have two descriptors,
+			 * which means the following call should return the "other"
+			 * one.
+			 */
+
+			physicalCD = describeSharedConglomerate(congDescs, true);
+			IndexRowGenerator othersIRG = physicalCD.getIndexDescriptor();
+
+			/* Let OTHERS denote the set of "other" descriptors which
+			 * share a physical conglomerate with this one.  Recall
+			 * that (for now) 1) sharing descriptors must always have
+			 * the same columns referenced in the same order, and
+			 * 2) if a unique descriptor shares a conglomerate with
+			 * a non-unique descriptor, the physical conglomerate
+			 * must itself be unique. So given that, we have four
+			 * possible cases:
+			 *
+			 *  1. "this" is unique, none of OTHERS are unique
+			 *  2. "this" is unique, 1 or more of OTHERS is unique
+			 *  3. "this" is not unique, none of OTHERS are unique
+			 *  4. "this" is not unique, 1 or more of OTHERS is unique
+			 *
+			 * In case 1 "this" conglomerate descriptor must be the
+			 * _only_ one which fully matches the physical conglom.
+			 * In case 4, "this" descriptor does _not_ fully match
+			 * the physical conglomerate. In cases 2 and 3, "this"
+			 * descriptor fully matches the physical conglom, but it
+			 * is NOT the only one to do so--which means we don't need
+			 * to update the physical conglomerate when we drop "this"
+			 * (because OTHERS need the exact same physical conglom).
+			 * The only case that actually requires an "updated"
+			 * conglomerate, then, is case 1, since the physical
+			 * conglomerate for the remaining descriptors no longer
+			 * has a uniqueness requirement.
+			 */
+			needNewConglomerate =
+				indexRowGenerator.isUnique() && !othersIRG.isUnique();
+
+			if (needNewConglomerate)
+			{
+				/* We have to create a new backing conglomerate
+				 * to correctly represent the remaing (sharing)
+				 * descriptors, so drop the physical conglomerate
+				 * now.  The caller of the method can then create
+				 * new conglomerate as/if needed.
+				 */
+				dropConglom = true;
+			}
+			else
+				physicalCD = null;
+		}
+
+	    if (dropConglom)
 	    {
 	        /* Drop statistics */
 	        dd.dropStatisticsDescriptors(td.getUUID(), getUUID(), tc);
 	        
-	        /* Drop the conglomerate */
+	        /* Drop the physical conglomerate */
 	        tc.dropConglomerate(getConglomerateNumber());
-        }	    
-	    
+	    }
+
 	    /* Drop the conglomerate descriptor */
 	    dd.dropConglomerateDescriptor(this, tc);
 	    
@@ -395,11 +487,135 @@ public final class ConglomerateDescriptor extends TupleDescriptor
 	     ** table descriptor
 	     */
 	    td.removeConglomerateDescriptor(this);
-
-	    /* TODO: DERBY-3299 incremental development; just return null
-	     * for now.
-	     */
-	    return null;
+	    return physicalCD;
 	}
-	
+
+	/**
+	 * This method searches the received array of conglom descriptors
+	 * to find all descriptors that currently share a physical conglom
+	 * with "this".  The method then searches within those sharing
+	 * descriptors to find one that fully describes what a physical
+	 * conglom would have to look like in order to support _all_ of
+	 * the sharing descriptors in the array--esp. one that correctly
+	 * enforces the uniqueness requirements for those descriptors.
+	 *
+	 * @param descriptors Array of conglomerate descriptors in
+	 *  which to search; the array may include an entry for "this";
+	 *  it should not be null.
+	 *
+	 * @param ignoreThis If true then we will NOT consider "this"
+	 *  conglomerate descriptor in our search.  That is, we will
+	 *  find a descriptor to describe what a physical conglomerate
+	 *  would have to look like in order to support all sharing
+	 *  descriptors OTHER THAN this one.
+	 *
+	 * @return A conglomerate descriptor, pulled from the received
+	 *  array, that describes what a physical conglomerate would
+	 *  have to look to like in order to support all sharing
+	 *  descriptors (minus "this" if ignoreThis is true).
+	 */
+	public ConglomerateDescriptor describeSharedConglomerate(
+		ConglomerateDescriptor [] descriptors, boolean ignoreThis)
+		throws StandardException
+	{
+		/* Descriptor for the heap always correctly describes the
+		 * physical conglomerate, as sharing of the heap is not
+		 * allowed.  So if this is a heap descriptor and "descriptors"
+		 * has any entries whose conglomerate number matches this
+		 * descriptor's conglomerate number, then that element should
+		 * be the same descriptor as "this".
+		 */
+		if (!isIndex())
+		{
+			ConglomerateDescriptor heap = null;
+			for (int i = 0; i < descriptors.length; i++)
+			{
+				if (getConglomerateNumber() !=
+					descriptors[i].getConglomerateNumber())
+				{
+					continue;
+				}
+
+				if (SanityManager.DEBUG)
+				{
+					if (!descriptors[i].getUUID().equals(getUUID()))
+					{
+						SanityManager.THROWASSERT(
+							"Should not have multiple descriptors for " +
+							"heap conglomerate " + getConglomerateNumber());
+					}
+				}
+
+				heap = descriptors[i];
+			}
+
+			return heap;
+		}
+
+		/* In order to be shared by multiple conglomerate descriptors
+		 * the physical conglomerate must necessarily satisfy the
+		 * following criteria:
+		 *
+		 *  1. If any of the sharing descriptors is unique, then
+		 *     the physical conglomerate must also be unique.
+		 *
+		 *  2. If none of the sharing descriptors are unique, the
+		 *     physical conglomerate must not be unique.
+		 *
+		 *  3. If the physical conglomerate has n columns, then all
+		 *     sharing descriptors must have n columns, as well.
+		 *
+		 * These criteria follow from the "share conglom" detection logic
+		 * found in CreateIndexConstantAction.executeConstantAction().
+		 * See that class for details.
+		 *
+		 * So walk through the conglomerate descriptors that share
+		 * a conglomerate with this one and see if any of them is
+		 * unique.
+		 */
+
+		ConglomerateDescriptor returnDesc = null;
+		for (int i = 0; i < descriptors.length; i++)
+		{
+			// Skip if it's not an index (i.e. it's a heap descriptor).
+			if (!descriptors[i].isIndex())
+				continue;
+
+			// Skip if it doesn't share with "this".
+			if (getConglomerateNumber() !=
+				descriptors[i].getConglomerateNumber())
+			{
+				continue;
+			}
+
+			// Skip if ignoreThis is true and it describes "this".
+			if (ignoreThis &&
+				getUUID().equals(descriptors[i].getUUID()))
+			{
+				continue;
+			}
+
+			returnDesc = descriptors[i];
+			if (returnDesc.getIndexDescriptor().isUnique())
+			{
+				/* Given criteria #1 and #3 described above, if we
+				 * have a unique conglomerate descriptor then we've
+				 * found what we need, so we're done.
+				 */
+				break;
+			}
+		}
+
+		if (SanityManager.DEBUG)
+		{
+			if (returnDesc == null)
+			{
+				SanityManager.THROWASSERT(
+					"Failed to find sharable conglomerate descriptor " +
+					"for index conglomerate # " + getConglomerateNumber());
+			}
+		}
+
+		return returnDesc;
+	}
 }

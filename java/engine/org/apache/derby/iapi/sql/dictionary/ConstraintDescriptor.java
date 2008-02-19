@@ -606,7 +606,25 @@ public abstract class ConstraintDescriptor
 			//depend on a privilege. None of the other constraint types 
 			//can be dependent on a privilege becuse those constraint types
 			//can not reference a table/routine.
-			drop(lcc, true);
+			ConglomerateDescriptor newBackingConglomCD = drop(lcc, true);
+			if (newBackingConglomCD != null)
+			{
+				/* Since foreign keys can never be unique, and since
+				 * we only (currently) share conglomerates if two
+				 * constraints/indexes have identical columns, dropping
+				 * a foreign key should not necessitate the creation of
+				 * another physical conglomerate.  That will change if
+				 * DERBY-2204 is implemented, but for now we don't expect
+				 * it to happen...
+				 */
+				if (SanityManager.DEBUG)
+				{
+					SanityManager.THROWASSERT(
+						"Dropped shared conglomerate due to a REVOKE " +
+						"and found that a new conglomerate was needed " +
+						"to replace it...but that shouldn't happen!");
+				}
+			}
 			return;
 		}
 

@@ -171,6 +171,14 @@ class DropIndexConstantAction extends IndexConstantAction
 			throw StandardException.newException(SQLState.LANG_INDEX_NOT_FOUND_DURING_EXECUTION, fullIndexName);
 		}
 
-		cd.drop(lcc, td);
+		/* Since we support the sharing of conglomerates across
+		 * multiple indexes, dropping the physical conglomerate
+		 * for the index might affect other indexes/constraints
+		 * which share the conglomerate.  The following call will
+		 * deal with that situation by creating a new physical
+		 * conglomerate to replace the dropped one, if necessary.
+		 */
+		dropConglomerate(cd, td, activation, lcc);
+		return;
 	}
 }
