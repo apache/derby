@@ -1011,58 +1011,6 @@ public class AutoGenJDBC30Test extends BaseJDBCTestCase {
     }
 
     /**
-     * Verifies that an exception is raised if a columnNames array is passed, 
-     * which signals the driver that the auto-generated keys indicated in the 
-     * given array should be made available for retrieval (feature not 
-     * supported).
-     * Old master Test22, Test22ps
-     * Expected result: Exception 0A000 should occur.
-     * @throws SQLException 
-     */
-    public void testColumnNamesNotImpl() throws SQLException
-    {
-        /* As of DERBY-2631 we support this with embedded.  So do nothing
-         * for this test fixture; we'll test the functionality as part
-         * of a separate fixture.
-         */
-        if (usingEmbedded())
-            return;
-
-        Statement s = createStatement();
-        String colNames[] = new String[1];
-        colNames[0] = "C11";
-
-        String sql="insert into t11_AutoGen(c11) " +
-            "select c21 from t21_noAutoGen";
-
-        try {
-            s.execute(sql, colNames);
-            fail("Expected s.execute to fail");
-        } catch (SQLException se) {
-            assertSQLState("0A000", se.getSQLState(), se);
-        }
-
-        try {
-            s.executeUpdate(sql, colNames);
-            fail("Expected s.executeUpdate to fail");
-        } catch (SQLException se) {
-            assertSQLState("0A000", se.getSQLState(), se);
-        }
-
-        try {
-            /* Deliberately not adding this prepareStatement wrapper to
-             * BaseJDBCTestCase.java because Derby doesn't support passing
-             * the array.
-             */
-            Connection conn = getConnection();
-            PreparedStatement ps=conn.prepareStatement(sql, colNames);
-            fail("Expected prepareStatement to fail");
-        } catch (SQLException se) {
-            assertSQLState("0A000", se.getSQLState(), se);
-        }
-    }
-
-    /**
      * Test that use of columnIndexes to indicate which keys should be
      * made available works as expected.
      *
@@ -1131,22 +1079,24 @@ public class AutoGenJDBC30Test extends BaseJDBCTestCase {
      */
     public void testColumnNames() throws SQLException
     {
-        /* Not supported for Derby client.  We check the "not supported"
-         * error message as part of a different fixture.
-         */
-        if (usingDerbyNetClient())
-            return;
-
+    
         // Valid (typical) usage.
 
         String [] colNames = new String [] { "C12" };
         testUserGivenColumns(null, colNames, 1);
 
+        // column name array is of length > 1
+        colNames = new String[] {"C12","C13"};
+        testUserGivenColumnsError(null, colNames);
+             
+        if (usingDerbyNetClient())
+            return;
+       
         // Non-existent column name.
 
-        colNames[0] = "NOTTHERE";
+        colNames= new String[] {"NOTTHERE"};
         testUserGivenColumnsError(null, colNames);
-
+        
         // Valid column name but not an auto-gen column.
 
         colNames[0] = "C11";
@@ -1196,6 +1146,71 @@ public class AutoGenJDBC30Test extends BaseJDBCTestCase {
     }
 
     /**
+     * Verify that if user specifies an empty array for columNames or columnIndexes,
+     * it is the same as NO_GENERATED_KEYS
+     * @throws SQLException
+     */
+    public void testUserGivenColumnsEmpty() throws SQLException
+    {
+        Statement s = createStatement();
+
+        String sql="insert into t11_AutoGen(c11) values (99)";
+
+  
+        s.execute(sql, new String[] {});
+        assertNull("Expected NULL ResultSet after s.execute()", 
+            s.getGeneratedKeys());
+
+        s.executeUpdate(sql, new String[] {});
+        assertNull("Expected NULL ResultSet after s.executeUpdate()", 
+            s.getGeneratedKeys());
+
+        PreparedStatement ps = null;
+        if (!usingEmbedded())
+        {
+            // Can't run these with embedded now because of DERBY-3430
+            ps = prepareStatement(sql, new String[] {});
+            ps.execute();
+            assertNull("Expected NULL ResultSet after ps.execute()", 
+            ps.getGeneratedKeys());
+
+            ps = prepareStatement(sql, new String[] {});
+            ps.executeUpdate();
+            assertNull("Expected NULL ResultSet after ps.executeUpdate()", 
+                    ps.getGeneratedKeys());
+        }
+       // No columnIndexes yet for derby client. 
+       if (usingDerbyNetClient())
+            return;
+       
+       s.execute(sql,  new int[] {});
+       assertNull("Expected NULL ResultSet after s.execute()", 
+           s.getGeneratedKeys());
+
+       s.executeUpdate(sql, new int[] {});
+       assertNull("Expected NULL ResultSet after s.executeUpdate()", 
+           s.getGeneratedKeys());
+
+       if (!usingEmbedded())
+       {
+           // Can't run these with embedded now because of DERBY-3430
+           ps = prepareStatement(sql, new int[] {});
+           ps.execute();
+           assertNull("Expected NULL ResultSet after ps.execute()", 
+                   ps.getGeneratedKeys());
+
+           ps = prepareStatement(sql, new int[] {});
+           ps.executeUpdate();
+           assertNull("Expected NULL ResultSet after ps.executeUpdate()", 
+                   ps.getGeneratedKeys());
+
+       }
+       
+    
+        
+    }
+    
+    /**
      * Verify that if a user specifies a *NULL* column index or column
      * name array to indicate which keys should be made available, Derby will
      * effectively disable autogenerated keys (i.e. same as if user passed
@@ -1206,24 +1221,12 @@ public class AutoGenJDBC30Test extends BaseJDBCTestCase {
      */
     public void testUserGivenColumnsNull() throws SQLException
     {
-        /* Not supported for Derby client.  We check the "not supported"
-         * error message as part of a different fixture.
-         */
-        if (usingDerbyNetClient())
-            return;
-
+        
         Statement s = createStatement();
 
         String sql="insert into t11_AutoGen(c11) values (99)";
 
-        s.execute(sql, (int[]) null);
-        assertNull("Expected NULL ResultSet after s.execute()", 
-            s.getGeneratedKeys());
-
-        s.executeUpdate(sql, (int[]) null);
-        assertNull("Expected NULL ResultSet after s.executeUpdate()", 
-            s.getGeneratedKeys());
-
+  
         s.execute(sql, (String[]) null);
         assertNull("Expected NULL ResultSet after s.execute()", 
             s.getGeneratedKeys());
@@ -1232,9 +1235,31 @@ public class AutoGenJDBC30Test extends BaseJDBCTestCase {
         assertNull("Expected NULL ResultSet after s.executeUpdate()", 
             s.getGeneratedKeys());
 
-        s.close();
 
-        PreparedStatement ps = prepareStatement(sql, (int[]) null);
+        PreparedStatement ps;
+        ps = prepareStatement(sql, (String[]) null);
+        ps.execute();
+        assertNull("Expected NULL ResultSet after ps.execute()", 
+            ps.getGeneratedKeys());
+
+        ps = prepareStatement(sql, (String[]) null);
+        ps.executeUpdate();
+        assertNull("Expected NULL ResultSet after ps.executeUpdate()", 
+            ps.getGeneratedKeys());
+        
+       // No columnIndexes yet for derby client. 
+       if (usingDerbyNetClient())
+            return;
+       
+       s.execute(sql, (int[]) null);
+       assertNull("Expected NULL ResultSet after s.execute()", 
+           s.getGeneratedKeys());
+
+       s.executeUpdate(sql, (int[]) null);
+       assertNull("Expected NULL ResultSet after s.executeUpdate()", 
+           s.getGeneratedKeys());
+
+       ps = prepareStatement(sql, (int[]) null);
         ps.execute();
         assertNull("Expected NULL ResultSet after ps.execute()", 
             ps.getGeneratedKeys());
@@ -1244,17 +1269,9 @@ public class AutoGenJDBC30Test extends BaseJDBCTestCase {
         assertNull("Expected NULL ResultSet after ps.executeUpdate()", 
             ps.getGeneratedKeys());
 
-        ps = prepareStatement(sql, (String[]) null);
-        ps.execute();
-        assertNull("Expected NULL ResultSet after ps.execute()", 
-            ps.getGeneratedKeys());
-
-        ps = prepareStatement(sql, (String[]) null);
-        ps.executeUpdate();
-        assertNull("Expected NULL ResultSet after ps.executeUpdate()", 
-            ps.getGeneratedKeys());
 
         ps.close();
+        
     }
 
     // Local utility methods.
@@ -1350,7 +1367,11 @@ public class AutoGenJDBC30Test extends BaseJDBCTestCase {
 
         boolean useIndexes = (colIndexes != null);
         String expectedSQLState = (useIndexes ? "X0X0E" : "X0X0F");
-
+        // Derby client will only give an error if colNames array is not of length 1.
+        if (usingDerbyNetClient() && colNames != null && 
+                colNames.length != 1)
+            expectedSQLState = "X0X0D";
+        
         Statement s = createStatement();
         String sql="insert into t11_AutoGen(c11) values (99)";
 

@@ -255,13 +255,10 @@ public class StatementJdbc30Test extends BaseJDBCTestCase {
      * @param ex
      */
     private void assertFailedExecuteUpdateForColumnName(SQLException ex) {
-        /*
-         * DERBY-2943 -- execute() and executeUpdate() return different
-         * SQLState in embedded and network client
-         *
-         */
+        // Derby client complains that the array is too long.
+        // Embedded is smart enough to know which column caused the problem.
         if (usingDerbyNetClient()) {
-            assertSQLState("0A000", ex);
+            assertSQLState("X0X0D", ex);
         } else {
             assertSQLState("X0X0F", ex);
         }
