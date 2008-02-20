@@ -148,7 +148,7 @@ public final class JDBCStatementCache {
          */
         protected boolean removeEldestEntry(Map.Entry eldest) {
             final boolean remove = size() > maxSize;
-            if (remove) {
+            if (remove && eldest != null) {
                 try {
                     ((PreparedStatement)eldest.getValue()).close();
                 } catch (SQLException ex) {
