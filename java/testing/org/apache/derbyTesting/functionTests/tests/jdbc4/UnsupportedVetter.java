@@ -1074,7 +1074,20 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 		}
 		
 	}
-	
+
+    private boolean savedVerbosity;
+
+    protected void setUp() {
+        // testSupportedMethods() sets the verbosity, so we need to save the
+        // original verbosity here and restore it in tearDown.
+        savedVerbosity = getTestConfiguration().isVerbose();
+    }
+
+    protected void tearDown() throws Exception {
+        getTestConfiguration().setVerbosity(savedVerbosity);
+        super.tearDown();
+    }
+
     public static Test suite() {
         return TestConfiguration.defaultSuite(UnsupportedVetter.class);
     }
