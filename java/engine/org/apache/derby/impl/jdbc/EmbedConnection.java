@@ -1213,7 +1213,7 @@ public abstract class EmbedConnection implements EngineConnection
 			JDBC20Translation.TYPE_FORWARD_ONLY,
 			JDBC20Translation.CONCUR_READ_ONLY,
 			connectionHoldAbility,
-			columnIndexes == null
+			(columnIndexes == null || columnIndexes.length == 0)
 				? JDBC30Translation.NO_GENERATED_KEYS
 				: JDBC30Translation.RETURN_GENERATED_KEYS,
 			columnIndexes,
@@ -1248,7 +1248,7 @@ public abstract class EmbedConnection implements EngineConnection
 			JDBC20Translation.TYPE_FORWARD_ONLY,
 			JDBC20Translation.CONCUR_READ_ONLY,
 			connectionHoldAbility,
-			columnNames == null
+			(columnNames == null || columnNames.length == 0)
 				? JDBC30Translation.NO_GENERATED_KEYS
 				: JDBC30Translation.RETURN_GENERATED_KEYS,
 			null,

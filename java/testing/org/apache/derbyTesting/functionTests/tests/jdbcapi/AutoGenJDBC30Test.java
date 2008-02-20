@@ -1116,19 +1116,16 @@ public class AutoGenJDBC30Test extends BaseJDBCTestCase {
             s.getGeneratedKeys());
 
         PreparedStatement ps = null;
-        if (!usingEmbedded())
-        {
-            // Can't run these with embedded now because of DERBY-3430
-            ps = prepareStatement(sql, new String[] {});
-            ps.execute();
-            assertNull("Expected NULL ResultSet after ps.execute()", 
-            ps.getGeneratedKeys());
+        
+        ps = prepareStatement(sql, new String[] {});
+        ps.execute();
+        assertNull("Expected NULL ResultSet after ps.execute()", 
+        ps.getGeneratedKeys());
 
-            ps = prepareStatement(sql, new String[] {});
-            ps.executeUpdate();
-            assertNull("Expected NULL ResultSet after ps.executeUpdate()", 
-                    ps.getGeneratedKeys());
-        }
+        ps = prepareStatement(sql, new String[] {});
+        ps.executeUpdate();
+        assertNull("Expected NULL ResultSet after ps.executeUpdate()", 
+                ps.getGeneratedKeys());       
        // No columnIndexes yet for derby client. 
        if (usingDerbyNetClient())
             return;
