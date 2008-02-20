@@ -34,6 +34,29 @@ grant codeBase "${derby.install.url}derby.jar"
 //
   permission java.io.FilePermission "<<ALL FILES>>", "read,write,delete";
 
+
+//
+// Permissions needed for JMX based management and monitoring, which is only
+// available for JVMs supporting "platform management", that is J2SE 5.0 or better.
+// JMX management of Derby is NOT enabled by default; see also DERBY-1387.
+//
+// Allows this code to create an MBeanServer:
+//
+  permission javax.management.MBeanServerPermission "createMBeanServer";
+//
+// Allows access to Derby's built-in MBeans, within the domain org.apache.derby.
+// Derby must be allowed to register and unregister these MBeans.
+// It is possible to allow access only to specific MBeans, attributes or 
+// operations. To fine tune this permission, see the javadoc of 
+// javax.management.MBeanPermission or the JMX Instrumentation and Agent 
+// Specification. 
+//
+  permission javax.management.MBeanPermission "org.apache.derby.*#[org.apache.derby:*]","registerMBean,unregisterMBean";
+//
+// Trusts Derby code to be a source of MBeans and to register these in the MBean server.
+//
+  permission javax.management.MBeanTrustPermission "register";
+
 };
 
 grant codeBase "${derby.install.url}derbynet.jar"
