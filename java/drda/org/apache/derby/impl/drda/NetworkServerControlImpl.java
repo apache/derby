@@ -66,7 +66,6 @@ import org.apache.derby.iapi.reference.Module;
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.i18n.MessageService;
-import org.apache.derby.iapi.services.info.JVMInfo;
 import org.apache.derby.iapi.services.info.ProductGenusNames;
 import org.apache.derby.iapi.services.info.ProductVersionHolder;
 import org.apache.derby.iapi.services.info.Version;
@@ -79,8 +78,8 @@ import org.apache.derby.iapi.tools.i18n.LocalizedResource;
 import org.apache.derby.iapi.util.CheapDateFormatter;
 import org.apache.derby.iapi.util.StringUtil;
 import org.apache.derby.impl.jdbc.EmbedSQLException;
-import org.apache.derby.mbeans.JDBCMBean;
 import org.apache.derby.mbeans.VersionMBean;
+import org.apache.derby.mbeans.drda.NetworkServerMBean;
 
 /** 
 	
@@ -751,7 +750,7 @@ public final class NetworkServerControlImpl {
 							);
 		clientThread.start();
         
-        // Now we are up and running register any MBeans
+        // Now that we are up and running, register any MBeans
         ManagementService mgmtService = ((ManagementService)
                 Monitor.getSystemModule(Module.JMX));
         
@@ -759,6 +758,10 @@ public final class NetworkServerControlImpl {
                            new Version(getNetProductVersionHolder()),
                            VersionMBean.class,
                            "type=Version,jar=derbynet.jar");
+        Object networkServerMBean = mgmtService.registerMBean(
+                            new NetworkServerMBeanImpl(this),
+                            NetworkServerMBean.class,
+                            "type=NetworkServer");
 			
 		// wait until we are told to shutdown or someone sends an InterruptedException
         synchronized(shutdownSync) {
@@ -833,6 +836,7 @@ public final class NetworkServerControlImpl {
         
         // And now unregister any MBeans.
         mgmtService.unregisterMBean(versionMBean);
+        mgmtService.unregisterMBean(networkServerMBean);
 
 		if (shutdownDatabasesOnShutdown) {
 
@@ -3653,7 +3657,23 @@ public final class NetworkServerControlImpl {
 	{
 		consolePropertyMessage("DRDA_SQLWarning.I", messageKey);
 	}
-	private Properties getPropertyValues()
+	
+	/**
+	 * <p>
+	 * Constructs an object containing network server related properties
+	 * and their values. Some properties are only included if set. Some 
+	 * other properties are included with a default value if not set.</p>
+	 * <p>
+	 * This method is accessing the local JVM in which the network server
+	 * instance is actually running (i.e. no networking).</p>
+	 * <p>
+	 * This method is package private to allow access from relevant MBean 
+	 * implementations in the same package.</p>
+	 * 
+	 * @return a collection of network server properties and their current 
+	 *         values
+	 */
+	Properties getPropertyValues()
 	{
 		Properties retval = new Properties();
 		retval.put(Property.DRDA_PROP_PORTNUMBER, new Integer(portNumber).toString());
