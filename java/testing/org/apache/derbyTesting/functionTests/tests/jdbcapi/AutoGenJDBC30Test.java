@@ -959,58 +959,6 @@ public class AutoGenJDBC30Test extends BaseJDBCTestCase {
     }
 
     /**
-     * Verifies that an exception is raised if a columnIndexes array is passed, 
-     * which signals the driver that the auto-generated keys indicated in the 
-     * given array should be made available for retrieval (feature not 
-     * supported).
-     * Old master Test21, Test21ps
-     * Expected result: Exception 0A000 should occur.
-     * @throws SQLException 
-     */
-    public void testColumnIndexesNotImpl() throws SQLException
-    {
-        /* As of DERBY-2631 we support this with embedded.  So do nothing
-         * for this test fixture; we'll test the functionality as part
-         * of a separate fixture.
-         */
-        if (usingEmbedded())
-            return;
-
-        Statement s = createStatement();
-        int colPositions[] = new int[1];
-        colPositions[0] = 1;
-
-        String sql="insert into t11_AutoGen(c11) " +
-            "select c21 from t21_noAutoGen";
-
-        try {
-            s.execute(sql, colPositions);
-            fail("Expected s.execute to fail");
-        } catch (SQLException se) {
-            assertSQLState("0A000", se.getSQLState(), se);
-        }
-
-        try {
-            s.executeUpdate(sql, colPositions);
-            fail("Expected s.executeUpdate to fail");
-        } catch (SQLException se) {
-            assertSQLState("0A000", se.getSQLState(), se);
-        }
-
-        try {
-            /* Deliberately not adding this prepareStatement wrapper to
-             * BaseJDBCTestCase.java because Derby doesn't support passing
-             * the array.
-             */
-            Connection conn = getConnection();
-            PreparedStatement ps=conn.prepareStatement(sql, colPositions);
-            fail("Expected prepareStatement to fail");
-        } catch (SQLException se) {
-            assertSQLState("0A000", se.getSQLState(), se);
-        }
-    }
-
-    /**
      * Test that use of columnIndexes to indicate which keys should be
      * made available works as expected.
      *
@@ -1018,20 +966,26 @@ public class AutoGenJDBC30Test extends BaseJDBCTestCase {
      */
     public void testColumnIndexes() throws SQLException
     {
-        /* Not supported for Derby client.  We check the "not supported"
-         * error message as part of a different fixture.
-         */
-        if (usingDerbyNetClient())
-            return;
 
         // Valid (typical) usage.
 
         int [] colIndexes = new int [] { 2 };
         testUserGivenColumns(colIndexes, null, 1);
+        
+
+        // Mulitple columns. one not an identity column.
+        colIndexes = new int[] {1,2};
+        testUserGivenColumnsError(colIndexes, null);
+        
+        
+        // Derby client can't differentiate between
+        // valid and invalid identity columns. So the
+        // other tests do not apply.  
+        if (usingDerbyNetClient())
+            return;
 
         // Non-existent column index.
-
-        colIndexes[0] = 100;
+        colIndexes = new int[] {100};
         testUserGivenColumnsError(colIndexes, null);
 
         // Valid column index but not an auto-gen column.
@@ -1052,10 +1006,6 @@ public class AutoGenJDBC30Test extends BaseJDBCTestCase {
         colIndexes[1] = 100;
         testUserGivenColumnsError(colIndexes, null);
 
-        // Multiple col indexes, one of which is not an auto-gen column.
-
-        colIndexes[1] = 1;
-        testUserGivenColumnsError(colIndexes, null);
 
         /* Multiple col indexes, one of which is invalid and another
          * of which is not an auto-gen column.

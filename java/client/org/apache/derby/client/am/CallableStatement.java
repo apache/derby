@@ -88,7 +88,8 @@ public class CallableStatement extends PreparedStatement
                              String sql,
                              int type, int concurrency, int holdability,
                              ClientPooledConnection cpc) throws SqlException {
-        super(agent, connection, sql, type, concurrency, holdability, java.sql.Statement.NO_GENERATED_KEYS, null,cpc);
+        super(agent, connection, sql, type, concurrency, holdability, java.sql.Statement.NO_GENERATED_KEYS, 
+                null, null,cpc);
         initCallableStatement();
     }
 
@@ -96,7 +97,8 @@ public class CallableStatement extends PreparedStatement
                                        Connection connection,
                                        String sql,
                                        int type, int concurrency, int holdability) throws SqlException {
-        super.resetPreparedStatement(agent, connection, sql, type, concurrency, holdability, java.sql.Statement.NO_GENERATED_KEYS, null);
+        super.resetPreparedStatement(agent, connection, sql, type, concurrency, holdability, java.sql.Statement.NO_GENERATED_KEYS, 
+                null,null);
         initCallableStatement();
     }
 

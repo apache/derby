@@ -2727,7 +2727,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
                         java.sql.ResultSet.CONCUR_READ_ONLY,
                         connection_.holdability(),
                         java.sql.Statement.NO_GENERATED_KEYS,
-                        null);
+                        null, null);
         return ps;
     }
 
