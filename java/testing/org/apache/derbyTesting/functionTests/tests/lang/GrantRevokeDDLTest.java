@@ -9816,4 +9816,100 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         user2.close();
         user1.close();
     }
+
+    /**
+     * Test the situation where a REVOKE leads to the dropping of
+     * a foreign key's backing conglomerate when that conglomerate
+     * is shared by other indexes/constraints.  If that happens
+     * then a new backing conglomerate must be created (or at least,
+     * the old one should be updated accordingly).  Note: Such
+     * dropping of a foreign key's shared conglomerate is not
+     * actually possible at the moment, but this test exercises the
+     * logic that checks for such a situation and ensures that it
+     * works correctly (i.e. that it does not attempt to create a
+     * a new/updated conglomerate).
+     *
+     * If DERBY-2204 and/or DERBY-3300 is implemented, then this
+     * fixture can be modified to actually test the drop and re-
+     * create of a new backing conglomerate as the result of a
+     * REVOKE--but for now that's not (shoudn't be) possible.
+     */
+    public void testRevokeDropsFKWithSharedConglom() throws SQLException
+    {
+        Connection mamta1 = openUserConnection("mamta1");
+        Statement st_mamta1 = mamta1.createStatement();
+
+        st_mamta1.execute(
+            "create table pkt1 (i int not null, j int not null)");
+        st_mamta1.execute(
+            "alter table pkt1 add constraint pkOne primary key (i, j)");
+        st_mamta1.execute("insert into pkt1 values (1, 2), (3, 4)");
+        st_mamta1.execute("grant references on pkt1 to mamta2");
+
+        st_mamta1.execute(
+            "create table pkt2 (i int not null, j int not null)");
+        st_mamta1.execute(
+            "alter table pkt2 add constraint pkTwo primary key (i, j)");
+        st_mamta1.execute("insert into pkt2 values (1, 2), (2, 3)");
+        st_mamta1.execute("grant references on pkt2 to mamta2");
+
+        // set connection mamta2
+
+        Connection mamta2 = openUserConnection("mamta2");
+        Statement st_mamta2 = mamta2.createStatement();
+
+        st_mamta2.execute("create table fkt2 (i int, j int)");
+
+        st_mamta2.execute("alter table fkt2 add constraint" +
+            " fkOne foreign key (i, j) references mamta1.pkt1");
+
+        st_mamta2.execute("alter table fkt2 add constraint" +
+            " fkDup foreign key (i, j) references mamta1.pkt2");
+
+        /* This should be fine because both foreign key constraints
+         * are satisfied.
+         */
+        st_mamta2.execute("insert into fkt2 values(1, 2)");
+
+        // This should fail because fkOne is violated.
+        assertStatementError(
+            "23503", st_mamta2, "insert into fkt2 values (2, 3)");
+
+        // This should fail because fkDup is violated.
+        assertStatementError(
+            "23503", st_mamta2, "insert into fkt2 values (3, 4)");
+
+        /* Now revoke the REFERENCES privilege on PKT1 from mamta2.
+         * This will cause fkOne to be dropped.  Since fkDup
+         * shares a conglomerate with fkOne, when we drop fkOne
+         * we should _not_ drop its backing physical conglomerate
+         * because fkDup still needs it.
+         */
+
+        st_mamta1.execute("revoke references on pkt1 from mamta2");
+
+        // This one should pass because fkOne has been dropped.
+        st_mamta2.execute("insert into fkt2 values (2, 3)");
+
+        /* This one should still fail because fkDup is still
+         * around and the row (3, 3) violates it.
+         */
+        assertStatementError(
+            "23503", st_mamta2, "insert into fkt2 values (3, 4)");
+
+        /* Sanity check that a query which uses the conglomerate
+         * backing fkDup will still execute properly.
+         */
+        JDBC.assertUnorderedResultSet(st_mamta2.executeQuery(
+            "select * from fkt2 --DERBY-PROPERTIES constraint=FKDUP"),
+            new String [][] {{"1", "2"}, {"2", "3"}});
+
+        st_mamta2.execute("drop table fkt2");
+        st_mamta1.execute("drop table pkt2");
+        st_mamta1.execute("drop table pkt1");
+        st_mamta2.close();
+        st_mamta1.close();
+        mamta2.close();
+        mamta1.close();
+    }
 }

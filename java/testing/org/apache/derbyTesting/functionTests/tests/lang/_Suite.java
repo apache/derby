@@ -123,6 +123,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(SynonymTest.suite());
         suite.addTest(CommentTest.suite());
         suite.addTest(NestedWhereSubqueryTest.suite());
+        suite.addTest(ConglomerateSharingTest.suite());
 
         // Add the XML tests, which exist as a separate suite
         // so that users can "run all XML tests" easily.
