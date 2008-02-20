@@ -64,10 +64,16 @@ public class EmbedDatabaseMetaData40 extends EmbedDatabaseMetaData {
     public boolean supportsStoredFunctionsUsingCallSyntax() throws SQLException {
         return true;
     }
-     
+
+    /**
+     * Returns whether or not all open {@code ResultSet}s on a {@code
+     * Connection} are closed if an error occurs when auto-commit in enabled.
+     *
+     * @return {@code true}, since the embedded driver will close the open
+     * {@code ResultSet}s
+     */
     public boolean autoCommitFailureClosesAllResultSets() throws SQLException {
-        // TODO - find out what this really should be 
-        return false;
+        return true;
     }
    
     public boolean providesQueryObjectGenerator() throws SQLException {
