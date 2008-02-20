@@ -178,8 +178,14 @@ public class OrderByColumn extends OrderedColumn {
 			ResultColumnList targetCols = target.getResultColumns();
 			columnPosition = ((Integer)expression.getConstantValueAsObject()).intValue();
 			resultCol = targetCols.getOrderByColumn(columnPosition);
-			
-			if (resultCol == null) {
+
+			/* Column is out of range if either a) resultCol is null, OR
+			 * b) resultCol points to a column that is not visible to the
+			 * user (i.e. it was generated internally).
+			 */
+			if ((resultCol == null) ||
+				(resultCol.getColumnPosition() > targetCols.visibleSize()))
+			{
 				throw StandardException.newException(SQLState.LANG_COLUMN_OUT_OF_RANGE, 
 								     String.valueOf(columnPosition));
 			}
@@ -201,10 +207,51 @@ public class OrderByColumn extends OrderedColumn {
 		resultCol.verifyOrderable();
 	}
 
+    /**
+     * Assuming this OrderByColumn was "pulled" into the received target's
+     * ResultColumnList (because it wasn't there to begin with), use
+     * this.addedColumnOffset to figure out which of the target's result
+     * columns is the one corresponding to "this".
+     *
+     * The desired position is w.r.t. the original, user-specified result
+     * column list--which is what "visibleSize()" gives us.  I.e. To get
+     * this OrderByColumn's position in target's RCL, first subtract out
+     * all columns which were "pulled" into the RCL for GROUP BY or ORDER
+     * BY, then add "this.addedColumnOffset". As an example, if the query
+     * was:
+     *
+     *   select sum(j) as s from t1 group by i, k order by k, sum(k)
+     *
+     * then we will internally add columns "K" and "SUM(K)" to the RCL for
+     * ORDER BY, *AND* we will add a generated column "I" to the RCL for
+     * GROUP BY.  Thus we end up with four result columns:
+     *
+     *          (1)        (2)  (3)   (4)
+     *  select sum(j) as s, K, SUM(K), I from t1 ...
+     *
+     * So when we get here and we want to find out which column "this"
+     * corresponds to, we begin by taking the total number of VISIBLE
+     * columns, which is 1 (i.e. 4 total columns minus 1 GROUP BY column
+     * minus 2 ORDER BY columns).  Then we add this.addedColumnOffset in
+     * order to find the target column position.  Since addedColumnOffset
+     * is 0-based, an addedColumnOffset value of "0" means we want the
+     * the first ORDER BY column added to target's RCL, "1" means we want
+     * the second ORDER BY column added, etc.  So if we assume that
+     * this.addedColumnOffset is "1" in this example then we add that
+     * to the RCL's "visible size". And finally, we add 1 more to account
+     * for fact that addedColumnOffset is 0-based while column positions
+     * are 1-based. This gives:
+     *
+     *  position = 1 + 1 + 1 = 3
+     *
+     * which points to SUM(K) in the RCL.  Thus an addedColumnOffset
+     * value of "1" resolves to column SUM(K) in target's RCL; similarly,
+     * an addedColumnOffset value of "0" resolves to "K". DERBY-3303.
+     */
     private void resolveAddedColumn(ResultSetNode target)
     {
         ResultColumnList targetCols = target.getResultColumns();
-        columnPosition = targetCols.size() - targetCols.getOrderBySelect() + addedColumnOffset + 1;
+        columnPosition = targetCols.visibleSize() + addedColumnOffset + 1;
         resultCol = targetCols.getResultColumn( columnPosition);
     }
 
