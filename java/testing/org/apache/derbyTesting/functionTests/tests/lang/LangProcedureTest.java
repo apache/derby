@@ -1161,7 +1161,8 @@ public class LangProcedureTest extends BaseJDBCTestCase {
      * should stay open
      * 
      * @param p1
-     * @param data
+     * @param data1
+     * @param data2
      * @throws SQLException
      */
     public static void rollbackInsideProcWith2ResultSets(int p1, 
