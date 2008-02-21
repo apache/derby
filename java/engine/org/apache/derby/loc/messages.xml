@@ -2701,6 +2701,12 @@ Guide.
             </msg>
 
             <msg>
+                <name>X0X0D.S</name>
+                <text>Invalid column array length '{0}'. To return generated keys, column array must be of length 1 and contain only the identity column.</text>
+                <arg>columnArrayLength</arg>
+            </msg>
+
+            <msg>
                 <name>X0X0E.S</name>
                 <text>Table '{1}' does not have an auto-generated column at column position '{0}'.</text>
                 <arg>columnPosition</arg>
