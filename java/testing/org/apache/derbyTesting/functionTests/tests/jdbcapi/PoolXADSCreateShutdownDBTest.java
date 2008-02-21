@@ -172,7 +172,6 @@ public class PoolXADSCreateShutdownDBTest extends BaseJDBCTestCase {
         assertUpdateCount(createStatement(), 0, "set schema APP");
    
         // check that first the value is null
-        JDBCDataSource.setBeanProperty(ds, "createDatabase", "false");
         assertGetNull(ds, dbName);
         // check that we can set & that when set we can get
         // doesn't actually open connections so a little silly.

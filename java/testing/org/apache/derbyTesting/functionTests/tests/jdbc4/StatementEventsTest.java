@@ -118,10 +118,12 @@ public class StatementEventsTest extends BaseJDBCTestCase {
     public void setUp() throws SQLException {
         if (xa) {
             XADataSource ds = J2EEDataSource.getXADataSource();
+            J2EEDataSource.setBeanProperty(ds, "createDatabase", "create");
             pooledConnection = ds.getXAConnection();
         } else {
             ConnectionPoolDataSource ds =
                 J2EEDataSource.getConnectionPoolDataSource();
+            J2EEDataSource.setBeanProperty(ds, "createDatabase", "create");
             pooledConnection = ds.getPooledConnection();
         }
         StatementEventListener listener = new StatementEventListener() {

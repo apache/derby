@@ -226,7 +226,6 @@ public class DataSourceTest extends BaseJDBCTestCase {
     public void testJira95ds() throws SQLException {
         try {
             DataSource ds = JDBCDataSource.getDataSource();
-            JDBCDataSource.setBeanProperty(ds, "createDatabase", "false");
             // non-existent database
             JDBCDataSource.setBeanProperty(ds, "databaseName", "jdbc:derby:wombat");
             ds.getConnection();
@@ -361,7 +360,6 @@ public class DataSourceTest extends BaseJDBCTestCase {
 
         // DataSource
         DataSource ds = JDBCDataSource.getDataSource();
-        JDBCDataSource.setBeanProperty(ds, "createDatabase", "false");
 
         // DataSource - setTransationAttributes
         traceFile = "trace1.out";

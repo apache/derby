@@ -639,7 +639,6 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
     {
         String dbName = "classpath:dbro";
         DataSource ds = JDBCDataSource.getDataSource(dbName);
-        JDBCDataSource.setBeanProperty(ds, "createDatabase", "false");
         
         try {
             ds.getConnection();

@@ -440,7 +440,6 @@ public class DboPowersTest extends BaseJDBCTestCase
         String bootPassword="12345678";
         DataSource ds = JDBCDataSource.getDataSource();
 
-        JDBCDataSource.setBeanProperty(ds, "createDatabase", "false");
         JDBCDataSource.setBeanProperty(ds, "connectionAttributes",
                                        "dataEncryption=true;bootPassword=" +
                                            bootPassword);
@@ -498,7 +497,6 @@ public class DboPowersTest extends BaseJDBCTestCase
         String newBootPassword="87654321";
         DataSource ds = JDBCDataSource.getDataSource();
 
-        JDBCDataSource.setBeanProperty(ds, "createDatabase", "false");
         JDBCDataSource.setBeanProperty(ds, "connectionAttributes",
                                        "bootPassword=" + bootPassword +
                                        ";newBootPassword=" + newBootPassword);
@@ -698,8 +696,6 @@ public class DboPowersTest extends BaseJDBCTestCase
         String password = getTestConfiguration().getUserPassword();
 
         DataSource ds = JDBCDataSource.getDataSource();
-
-        JDBCDataSource.setBeanProperty(ds, "createDatabase", "false");
         JDBCDataSource.setBeanProperty(
             ds, "connectionAttributes", "upgrade=true");
         JDBCDataSource.setBeanProperty(ds, "user", user);

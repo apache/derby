@@ -837,7 +837,6 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
             assertTenConnectionsUnique();
 
         DataSource dscs = JDBCDataSource.getDataSource();
-        JDBCDataSource.setBeanProperty(dscs, "createDatabase", "false");
         if (usingEmbedded()) 
                 assertToString(dscs);
 
@@ -890,7 +889,6 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         aes1.resetState();
 
         XADataSource dsx = J2EEDataSource.getXADataSource();
-        JDBCDataSource.setBeanProperty(dsx, "createDatabase", "false");
 
         if (usingEmbedded())
             assertToString(dsx);
