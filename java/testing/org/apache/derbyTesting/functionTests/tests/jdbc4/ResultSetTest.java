@@ -1611,6 +1611,22 @@ public class ResultSetTest
         stmt.close();
         stmt2.close();
     }
+
+    /**
+     * Test that a {@code ResultSet} is marked as closed after commit if its
+     * holdability is {@code CLOSE_CURSORS_AT_COMMIT} (DERBY-3404).
+     */
+    public void testIsClosedOnNonHoldableResultSet() throws SQLException {
+        getConnection().setAutoCommit(false);
+        getConnection().setHoldability(ResultSet.CLOSE_CURSORS_AT_COMMIT);
+        ResultSet rs = createStatement().executeQuery(
+            "SELECT TABLENAME FROM SYS.SYSTABLES");
+        assertEquals("ResultSet shouldn't be holdable",
+                     ResultSet.CLOSE_CURSORS_AT_COMMIT, rs.getHoldability());
+        commit();
+        assertTrue("Commit should have closed the ResultSet", rs.isClosed());
+    }
+
     /**
      * Test that an exception is thrown when methods are called
      * on a closed result set (DERBY-1060).

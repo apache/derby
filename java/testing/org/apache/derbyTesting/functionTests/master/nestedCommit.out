@@ -69,8 +69,7 @@ ij> -- call doConnStmt('call doConnStmt(''call doConnStmt(''''commit'''')'')');
 values doConnCommitInt();
 1          
 -----------
-1          
-ERROR XCL16: ResultSet not open. Operation 'next' not permitted. Verify that autocommit is OFF.
+ERROR XCL16: ResultSet not open. Operation 'getString' not permitted. Verify that autocommit is OFF.
 ij> -- values doConnStmtInt('commit');
 -- values doConnStmtInt('rollback');
 -- values doConnStmtInt('call doConnStmt(''call doConnStmt(''''commit'''')'')');
