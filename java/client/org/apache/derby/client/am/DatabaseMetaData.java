@@ -23,7 +23,6 @@ package org.apache.derby.client.am;
 
 import java.sql.SQLException;
 
-import org.apache.derby.jdbc.ClientDataSource;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.shared.common.reference.JDBC30Translation;
 
@@ -2578,19 +2577,6 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
     }
 
     /**
-     * Retrieves whether this JDBC driver provides its own
-     * <code>QueryObjectGenerator</code>.
-     *
-     * @return <code>false</code>, since Derby does not provide its
-     * own generator
-     * @exception SQLException if a database access error occurs
-     */
-    public final boolean providesQueryObjectGenerator() throws SQLException {
-        checkForClosedConnection();
-        return false;
-    }
-
-    /**
      * Get the schema names available in this database. The results
      * are ordered by schema name.
      *
@@ -2610,7 +2596,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
      * schema description
      * @exception SQLException if a database error occurs
      */
-    public ResultSet getSchemas(String catalog, String schemaPattern)
+    public java.sql.ResultSet getSchemas(String catalog, String schemaPattern)
         throws SQLException
     {
         try {
@@ -2680,7 +2666,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
      * supported client info property
      * @exception SQLException if an error occurs
      */
-    public ResultSet getClientInfoProperties() throws SQLException {
+    public java.sql.ResultSet getClientInfoProperties() throws SQLException {
         try {
             synchronized (connection_) {
                 if (agent_.loggingEnabled()) {

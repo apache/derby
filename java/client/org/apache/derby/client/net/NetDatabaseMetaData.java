@@ -23,12 +23,8 @@ package org.apache.derby.client.net;
 import org.apache.derby.client.am.Configuration;
 import org.apache.derby.client.am.ProductLevel;
 import org.apache.derby.client.am.SqlException;
-import org.apache.derby.shared.common.reference.JDBC30Translation;
-
 
 public class NetDatabaseMetaData extends org.apache.derby.client.am.DatabaseMetaData {
-
-    private final NetAgent netAgent_;
 
     /** True if the server supports QRYCLSIMP. */
     private boolean supportsQryclsimp_;
@@ -40,8 +36,6 @@ public class NetDatabaseMetaData extends org.apache.derby.client.am.DatabaseMeta
         super(netAgent, netConnection, new ProductLevel(netConnection.productID_,
                 netConnection.targetSrvclsnm_,
                 netConnection.targetSrvrlslv_));
-        // Set up cheat-links
-        netAgent_ = netAgent;
     }
 
     //---------------------------call-down methods--------------------------------

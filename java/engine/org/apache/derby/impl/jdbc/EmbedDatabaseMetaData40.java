@@ -21,22 +21,14 @@
 
 package org.apache.derby.impl.jdbc;
 
-import java.sql.ResultSet;
 import java.sql.RowIdLifetime;
-import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
-import java.sql.PreparedStatement;
-import org.apache.derby.impl.jdbc.Util;
 import org.apache.derby.iapi.reference.SQLState;
-
 
 public class EmbedDatabaseMetaData40 extends EmbedDatabaseMetaData {
     
-    private final String url;
-    
     public EmbedDatabaseMetaData40(EmbedConnection connection, String url) throws SQLException {
         super(connection,url);
-        this.url = url;
     }
 
     /**
@@ -75,12 +67,7 @@ public class EmbedDatabaseMetaData40 extends EmbedDatabaseMetaData {
     public boolean autoCommitFailureClosesAllResultSets() throws SQLException {
         return true;
     }
-   
-    public boolean providesQueryObjectGenerator() throws SQLException {
-        return false;
-    }
 
-    
     /**
      * Returns false unless <code>interfaces</code> is implemented 
      * 

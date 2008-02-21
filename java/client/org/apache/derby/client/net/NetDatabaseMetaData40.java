@@ -21,12 +21,10 @@
 
 package org.apache.derby.client.net;
 
-import java.sql.ResultSet;
 import java.sql.RowIdLifetime;
 import java.sql.SQLException;
 import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.client.am.SqlException;
-import org.apache.derby.client.am.SQLExceptionFactory;
 import org.apache.derby.shared.common.reference.SQLState;
 
 public class NetDatabaseMetaData40 extends org.apache.derby.client.net.NetDatabaseMetaData {
