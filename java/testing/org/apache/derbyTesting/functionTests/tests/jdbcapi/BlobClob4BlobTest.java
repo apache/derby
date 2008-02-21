@@ -3341,6 +3341,52 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
     }
 
 
+    /**
+     * DERBY-3243 Fix ArrayIndexOutOfBounds Exception
+     * if we retrieve more than 32K lobs
+     * 
+     */
+    public void testRetrieveMoreThan32KLobs() throws SQLException
+    {
+        int numRows = 34000;
+        // Load the database
+        Connection conn = getConnection();
+        conn.setAutoCommit(false);
+        Statement s = createStatement();
+        
+        PreparedStatement ps = prepareStatement("INSERT INTO TESTCLOB VALUES(?,?,?)");
+        for (int i = 0 ; i < numRows;i++)
+        {
+            ps.setInt(1,i);
+            ps.setInt(2,i);
+            ps.setString(3,"" + i);
+            ps.executeUpdate();
+            if (i % 1000 == 0) {
+                commit();
+            }
+        }
+        commit();
+        
+        // retrieve the data
+        
+        ResultSet rs = s.executeQuery("SELECT * from TESTCLOB");
+        while (rs.next()) {
+            rs.getInt(1);
+            Clob c = rs.getClob(3);
+            c.getSubString(1,100);
+        }
+        rs.close();
+        
+        conn.commit();
+        
+        
+    }
+
+
+
+
+        
+    
     private static final String BLOB_BAD_POSITION = "XJ070";
     private static final String BLOB_NONPOSITIVE_LENGTH = "XJ071";
     private static final String BLOB_POSITION_TOO_LARGE = "XJ076";
