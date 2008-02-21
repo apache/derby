@@ -316,7 +316,7 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
      * 
      * @param exception the exception that occurred on the connection
      */
-    public void trashConnection(SqlException exception) {
+    public void informListeners(SqlException exception) {
 		// only report fatal error  
 		if (exception.getErrorCode() < ExceptionSeverity.SESSION_SEVERITY)
 			return;

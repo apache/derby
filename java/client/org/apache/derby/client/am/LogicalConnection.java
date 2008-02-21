@@ -73,7 +73,7 @@ public class LogicalConnection implements java.sql.Connection {
 
             if (physicalConnection_.isClosed()) // connection is closed or has become stale
             {
-                pooledConnection_.trashConnection(new SqlException(null, 
+                pooledConnection_.informListeners(new SqlException(null, 
                     new ClientMessageId(
                         SQLState.PHYSICAL_CONNECTION_ALREADY_CLOSED)));
             } else {
@@ -100,7 +100,7 @@ public class LogicalConnection implements java.sql.Connection {
             if (physicalConnection_.isClosed()) // connection is closed or has become stale
             {
                 throw new SqlException(null, 
-                    new ClientMessageId(SQLState.NO_CURRENT_CONNECTION)); // no call to trashConnection()
+                    new ClientMessageId(SQLState.NO_CURRENT_CONNECTION)); // no call to informListeners()
             } else {
                 ; // no call to recycleConnection()
             }
@@ -142,7 +142,7 @@ public class LogicalConnection implements java.sql.Connection {
      */
 	final void notifyException(SQLException sqle) {
         if (physicalConnection_ != null) 
-        	pooledConnection_.trashConnection(new SqlException(sqle));
+        	pooledConnection_.informListeners(new SqlException(sqle));
 	}
 
     // ---------------------- wrapped public entry points ------------------------
