@@ -152,7 +152,7 @@ public class LogicalPreparedStatement40
         boolean closed = isLogicalEntityClosed();
         if (!closed) {
             // Consult the underlying physical statement.
-            closed = getPhysCs().isClosed();
+            closed = getPhysPs().isClosed();
         }
         return closed;
     }
