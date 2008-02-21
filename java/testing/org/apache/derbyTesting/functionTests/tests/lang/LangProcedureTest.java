@@ -801,16 +801,33 @@ public class LangProcedureTest extends BaseJDBCTestCase {
             .execute("create procedure procWithRollback(p1 int) parameter style JAVA READS SQL DATA dynamic result sets 1 language java external name 'org.apache.derbyTesting.functionTests.tests.lang.LangProcedureTest.rollbackInsideProc'");
             drs1 = prepareCall("CALL procWithRollback(3)");
             drs1.execute();
-            rs = drs1.getResultSet();
             //Following shows that the rollback inside the java procedure will
             //cuase procedure to return no resultset (A procedure does
             //not return closed resultsets). In 10.2 codeline though, java
             //procedure returns a closed resultset if there is a rollback 
             //inside the java procedure.
             JDBC.assertNoMoreResults(drs1);
-
             JDBC.assertClosed(rs1);
             JDBC.assertClosed(resultSet);
+
+            //Following shows that the rollback inside the java procedure will 
+            //only close the resultset created before the rollback. The 
+            //resultset created after the rollback will remain open and if it
+            //is a resultset returned through the procedure then it will be
+            //available to the caller of the procedure. Notice that even though
+            //the procedure is defined to 2 return dynamic resultsets, only one
+            //is returned because the other one was closed as a result of 
+            //rollback.
+            s.execute("create procedure procWithRollbackAnd2Resulsets"+
+            		"(p1 int) parameter style JAVA READS SQL DATA dynamic "+
+            		"result sets 2 language java external name "+
+            		"'org.apache.derbyTesting.functionTests.tests.lang.LangProcedureTest.rollbackInsideProcWith2ResultSets'");
+            drs1 = prepareCall("CALL procWithRollbackAnd2Resulsets(3)");
+            drs1.execute();
+            rs = drs1.getResultSet();
+            JDBC.assertDrainResults(rs);
+            JDBC.assertNoMoreResults(drs1);
+            
             s.execute("drop table dellater1");
             s.execute("drop table dellater2");
             conn.setAutoCommit(oldAutoCommit);
@@ -1133,6 +1150,35 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         ps.setInt(1, p1);
         data[0] = ps.executeQuery();
         conn.rollback();
+        conn.close();
+    }
+
+    /**
+     * A test case for DERBY-3414. An explicit rollback inside the procedure
+     * should close all the resultsets created before the call to the
+     * procedure and any resultsets created inside the procedure including
+     * the dynamic resultsets. But the resultset created after the rollback
+     * should stay open
+     * 
+     * @param p1
+     * @param data
+     * @throws SQLException
+     */
+    public static void rollbackInsideProcWith2ResultSets(int p1, 
+    		ResultSet[] data1,
+            ResultSet[] data2) 
+    throws SQLException {
+        Connection conn = DriverManager.getConnection(
+        		"jdbc:default:connection");
+        PreparedStatement ps = conn.prepareStatement(
+        		"select * from t1 where i = ?");
+        ps.setInt(1, p1);
+        data1[0] = ps.executeQuery();
+        conn.rollback();
+        ps = conn.prepareStatement(
+        		"select * from dellater1 where i = ?");
+        ps.setInt(1, p1);
+        data2[0] = ps.executeQuery();
         conn.close();
     }
     

@@ -2699,7 +2699,11 @@ public class GenericLanguageConnectionContext
 
 	/**
 		If we are called as part of rollback code path, then we will reset all 
-		the activations. 
+		the activations that have resultset returning rows associated with 
+		them. DERBY-3304 Resultsets that do not return rows should be left 
+		alone when the rollback is through the JDBC Connection object. If the 
+		rollback is caused by an exception, then at that time, all kinds of
+		resultsets should be closed. 
 		
 		If we are called as part of commit code path, then we will do one of 
 		the following if the activation has resultset assoicated with it. Also,
@@ -2738,11 +2742,26 @@ public class GenericLanguageConnectionContext
 				continue;
 			}
 
+			ResultSet activationResultSet = null;
+			boolean resultsetReturnsRows = false;
+			if (a.getResultSet() != null) {
+				activationResultSet = a.getResultSet();
+				resultsetReturnsRows = activationResultSet.returnsRows();
+			}
+
 			if (forRollback) { 
-				//Since we are dealing with rollback, we need to reset the 
-				//activation no matter what the holdability might be or no
-				//matter whether the associated resultset returns rows or not.
-				a.reset();
+				if (activationResultSet != null) 
+					if (resultsetReturnsRows)
+						//Since we are dealing with rollback, we need to reset 
+						//the activation no matter what the holdability might 
+						//be provided that resultset returns rows. An example
+						//where we do not want to close a resultset that does
+						//not return rows would be a java procedure which has
+						//user invoked rollback inside of it. That rollback
+						//should not reset the activation associated with
+						//the call to java procedure because that activation
+						//is still being used.
+						a.reset();
 				// Only invalidate statements if we performed DDL.
 				if (dataDictionaryInWriteMode()) {
 					ExecPreparedStatement ps = a.getPreparedStatement();
@@ -2752,9 +2771,7 @@ public class GenericLanguageConnectionContext
 				}
 			} else {
 				//We are dealing with commit here. 
-				if (a.getResultSet() != null) {
-					ResultSet activationResultSet = a.getResultSet();
-					boolean resultsetReturnsRows = activationResultSet.returnsRows();
+				if (activationResultSet != null) {
 					//if the activation has resultset associated with it, then 
 					//use following criteria to take the action
 					if (resultsetReturnsRows){
