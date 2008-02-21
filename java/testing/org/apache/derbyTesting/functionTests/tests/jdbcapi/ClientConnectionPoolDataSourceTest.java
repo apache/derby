@@ -111,6 +111,7 @@ public class ClientConnectionPoolDataSourceTest
      */
     private void verifyConnection(ClientConnectionPoolDataSource cDs)
             throws SQLException {
+        J2EEDataSource.setBeanProperty(cDs, "createDatabase", "create");
         PooledConnection pc = cDs.getPooledConnection();
         // Get a connection and make sure we can access the database.
         Connection con = pc.getConnection();
