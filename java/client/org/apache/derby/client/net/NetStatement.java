@@ -92,13 +92,16 @@ public class NetStatement implements org.apache.derby.client.am.MaterialStatemen
 
     // Called by abstract Connection.createStatement().newStatement() for jdbc 2 statements with scroll attributes
     NetStatement(NetAgent netAgent, NetConnection netConnection, int type, int concurrency, int holdability) throws SqlException {
-        this(ClientDriver.getFactory().newStatement(netAgent, netConnection, type, concurrency, holdability, java.sql.Statement.NO_GENERATED_KEYS, null),
+        this(ClientDriver.getFactory().newStatement(netAgent, netConnection, type, concurrency, holdability, java.sql.Statement.NO_GENERATED_KEYS, 
+                null,null
+                ),
                 netAgent,
                 netConnection);
     }
 
     void resetNetStatement(NetAgent netAgent, NetConnection netConnection, int type, int concurrency, int holdability) throws SqlException {
-        statement_.resetStatement(netAgent, netConnection, type, concurrency, holdability, java.sql.Statement.NO_GENERATED_KEYS, null);
+        statement_.resetStatement(netAgent, netConnection, type, concurrency, holdability, java.sql.Statement.NO_GENERATED_KEYS, 
+                null, null);
         resetNetStatement(statement_, netAgent, netConnection);
     }
 
