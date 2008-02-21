@@ -25,6 +25,8 @@ import org.apache.derby.client.ClientPooledConnection;
 import org.apache.derby.client.ClientXAConnection;
 import org.apache.derby.jdbc.ClientDataSource;
 import java.sql.SQLException;
+import org.apache.derby.client.am.stmtcache.JDBCStatementCache;
+import org.apache.derby.client.am.stmtcache.StatementKey;
 import org.apache.derby.jdbc.ClientBaseDataSource;
 
 /**
@@ -98,6 +100,22 @@ public interface ClientJDBCObjectFactory {
                     ClientPooledConnection pooledConnection)
         throws SqlException;
     
+   /**
+    * Returns an instance of a {@code CachingLogicalConnection}, which
+    * provides caching of prepared statements.
+    *
+    * @param physicalConnection the underlying physical connection
+    * @param pooledConnection the pooled connection
+    * @param stmtCache statement cache
+    * @return A logical connection with statement caching capabilities.
+    *
+    * @throws SqlException if creation of the logical connection fails
+    */
+    public LogicalConnection newCachingLogicalConnection(
+            org.apache.derby.client.am.Connection physicalConnection,
+            ClientPooledConnection pooledConnection,
+            JDBCStatementCache stmtCache) throws SqlException;
+
     /**
      * This method returns an instance of PreparedStatement
      * (or PreparedStatement40) which implements java.sql.PreparedStatement
@@ -162,6 +180,32 @@ public interface ClientJDBCObjectFactory {
             throws SqlException;
     
     
+    /**
+     * Returns a new logcial prepared statement object.
+     *
+     * @param ps underlying physical prepared statement
+     * @param stmtKey key for the underlying physical prepared statement
+     * @param stmtCache the statement cache
+     * @return A logical prepared statement.
+     */
+    java.sql.PreparedStatement newLogicalPreparedStatement(
+            java.sql.PreparedStatement ps,
+            StatementKey stmtKey,
+            JDBCStatementCache stmtCache);
+
+    /**
+     * Returns a new logical callable statement object.
+     *
+     * @param cs underlying physical callable statement
+     * @param stmtKey key for the underlying physical callable statement
+     * @param stmtCache the statement cache
+     * @return A logical callable statement.
+     */
+    public java.sql.CallableStatement newLogicalCallableStatement(
+            java.sql.CallableStatement cs,
+            StatementKey stmtKey,
+            JDBCStatementCache stmtCache);
+
     /**
      * This method returns an instance of NetConnection (or NetConnection40) class
      * which extends from org.apache.derby.client.am.Connection
