@@ -1388,6 +1388,12 @@ public interface SQLState {
 	String	INVALID_SCHEMA_SYS											= "42939";
 
 	/*
+	** Modelled on INVALID_SCHEMA_SYS, although not from DB2
+	*/
+	String  INVALID_ROLE_SYS                                        = "4293A";
+
+
+	/*
 		SQL standard 0A - feature not supported
 	*/
 	String UNSUPPORTED_PREFIX="0A";

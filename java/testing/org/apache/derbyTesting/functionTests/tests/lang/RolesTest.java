@@ -63,13 +63,15 @@ public class RolesTest extends BaseJDBCTestCase
 
     /* SQL states */
     private final static String sqlAuthorizationRequired = "42Z60";
-    private final static String syntaxError = "42X01";
-    private final static String roleDboOnly = "4251A";
-    private final static String invalidRole = "0P000";
-    private final static String tooLongId   = "42622";
-    private final static String revokeWarn  = "01007";
-    private final static String notIdle     = "25001";
+    private final static String syntaxError              = "42X01";
+    private final static String roleDboOnly              = "4251A";
+    private final static String invalidRole              = "0P000";
+    private final static String tooLongId                = "42622";
+    private final static String revokeWarn               = "01007";
+    private final static String notIdle                  = "25001";
+    private final static String invalidRoleName          = "4293A";
 
+    private int MAX_IDENTIFIER_LENGTH = 128;
     /**
      * Users used by all suites when when authLevel == SQLAUTHORIZATION.
      * The TestConfiguration.sqlAuthorizationDecorator decorator presumes
@@ -215,12 +217,18 @@ public class RolesTest extends BaseJDBCTestCase
                syntaxError, syntaxError, syntaxError);
         doStmt("create role current_role", // current_role is reserved word
                syntaxError, syntaxError, syntaxError);
-        String nameWithMoreThan30Chars = ("r123456789" +
-                                          "0123456789" +
-                                          "01234567890"); // 31 long
-        doStmt("create role " + nameWithMoreThan30Chars,
-               sqlAuthorizationRequired, tooLongId, tooLongId);
 
+        char[] longname = new char[MAX_IDENTIFIER_LENGTH + 1];
+        java.util.Arrays.fill(longname, 'a');
+        String nameWithMoreThanMaxChars = new String(longname);
+
+        doStmt("create role " + nameWithMoreThanMaxChars,
+               tooLongId, tooLongId, tooLongId);
+        // Check SYS-prefix ban
+        doStmt("create role sysrole",
+               sqlAuthorizationRequired, invalidRoleName, invalidRoleName);
+        doStmt("create role \"SYSROLE\"",
+               sqlAuthorizationRequired, invalidRoleName, invalidRoleName);
         _stm.close();
     }
 
@@ -250,15 +258,33 @@ public class RolesTest extends BaseJDBCTestCase
         // "role" is not a reserved word, either:
         doStmt("create role role", n_a, null, n_a);
 
-        assertSysRolesRowCount(n_a_cnt, 2, n_a_cnt);
+        // Check that role name can be longer than present user name
+        // (max 30, cf.  Limits.DB2_MAX_USERID_LENGTH).
+        String nameWithMoreThan30Chars = ("r123456789" +
+                                          "0123456789" +
+                                          "01234567890"); // 31 long
+        doStmt("create role " + nameWithMoreThan30Chars,
+               n_a, null, n_a);
+
+        assertSysRolesRowCount(n_a_cnt, 3, n_a_cnt);
 
         doStmt("grant trigger to foo", n_a, null, n_a);
         doStmt("grant role to foo", n_a, null, n_a);
         doStmt("revoke trigger from foo", n_a, null, n_a);
         doStmt("revoke role from foo", n_a, null, n_a);
 
+        doStmt("set role " + nameWithMoreThan30Chars, n_a, null, n_a);
+
+        doStmt("create table mytab(i int)", n_a, null, n_a);
+        doStmt("grant select on mytab to " + nameWithMoreThan30Chars,
+               n_a, null, n_a);
+        doStmt("revoke select on mytab from " + nameWithMoreThan30Chars,
+               n_a, null, n_a);
+        doStmt("drop table mytab", n_a, null, n_a);
+
         doStmt("drop role trigger", n_a, null, n_a);
         doStmt("drop role role", n_a, null, n_a);
+        doStmt("drop role " + nameWithMoreThan30Chars, n_a, null, n_a);
 
         assertSysRolesRowCount(n_a_cnt, 0, n_a_cnt);
 

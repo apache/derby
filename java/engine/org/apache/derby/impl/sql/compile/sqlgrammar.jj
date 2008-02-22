@@ -1650,12 +1650,6 @@ public class SQLParser
                                                 getContextManager());
     }
     
-	private void checkAuthorizationLength( String authorization)
-		throws StandardException
-	{
-		checkIdentifierLengthLimit( authorization, Limits.DB2_MAX_USERID_LENGTH);
-	}
-
     /**
         Check to see if the required claues have been added
         to a procedure or function defintion.
@@ -9688,7 +9682,12 @@ roleDefinition() throws StandardException :
 	{
 		checkVersion( DataDictionary.DD_VERSION_DERBY_10_4, "ROLES");
 		checkSqlStandardAccess("CREATE ROLE");
-		checkAuthorizationLength(roleName);
+
+		// Reserve namespace for system roles
+		if (roleName.startsWith("SYS")) {
+			throw StandardException.newException
+                            (SQLState.INVALID_ROLE_SYS, roleName);
+                }
 
 		return (StatementNode) nodeFactory.getNode(
 			C_NodeTypes.CREATE_ROLE_NODE,
@@ -12941,7 +12940,6 @@ grantee( List list)  throws StandardException :
 {
     str = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
     {
-        checkAuthorizationLength(str);
         list.add(str);
     }
 |

@@ -1344,6 +1344,12 @@ Guide.
             </msg>
 
             <msg>
+                <name>4293A</name>
+                <text>A role cannot be created with the name '{0}', the SYS prefix is reserved.</text>
+                <arg>authorizationID</arg>
+            </msg>
+
+            <msg>
                 <name>42962</name>
                 <text>Long column type column or parameter '{0}' not permitted in declared global temporary tables or procedure definitions. </text>
                 <arg>columnName</arg>
