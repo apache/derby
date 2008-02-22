@@ -26,9 +26,11 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.Reader;
 import java.io.PrintStream;
 import java.net.URL;
@@ -97,6 +99,39 @@ public abstract class BaseTestCase
     	 
         try {
             super.runBare();   
+        }
+        //To save the derby.log of failed tests. 
+        catch (Throwable running) {
+        	try{
+        		AccessController.doPrivileged(new PrivilegedExceptionAction() {
+        			public Object run() throws SQLException, FileNotFoundException,
+        			IOException {
+
+        				File origLogDir = new File("system", "derby.log");
+        				if (origLogDir.exists()) {
+        					File failDir = getFailureFolder();
+        					InputStream in = new FileInputStream(origLogDir);
+        					OutputStream out = new FileOutputStream(new File(failDir,
+        					"derby.log"));
+        					byte[] buf = new byte[32 * 1024];
+
+        					for (;;) {
+        						int read = in.read(buf);
+        						if (read == -1)
+        							break;
+        						out.write(buf, 0, read);
+        					}
+        					in.close();
+        					out.close();
+        				}
+
+        				return null;
+        			}
+        		});
+        	}
+        	finally{        		
+        			throw running;
+        	}
         }
         finally{
             if ( trace )
