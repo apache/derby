@@ -58,6 +58,9 @@ public class OETest extends BaseJDBCTestCase {
 
         suite.addTestSuite(OperationsTester.class);
         suite.addTestSuite(OETest.class);
+        
+        // Ensure the transactions left the data in a consistent state
+        suite.addTest(Checks.consistencyChecks());
                 
         return new CleanDatabaseTestSetup(suite);
     }

@@ -1887,7 +1887,43 @@
       </classpath>
     </junit>
   </target>
- 
+
+  <!--
+    Run the simplest form of any system test. Provides a sanity
+    check that the functionality works. This target is not intended
+    to have long running tests, just enough to ensure the test works
+    and Derby works with the test.
+  -->
+  <target name="junit-system-mini" depends="junit-init">
+	    <condition property="derby.junit.classpath" value="">
+	      <not>
+	        <isset property="derby.junit.classpath"/>
+	      </not>
+	    </condition>
+	         <!--
+	         Specifying max heap size (maxmemory) for JVMs spawned by this
+	         target, since the default max heap size on most systems is
+	         currently too low for some of the test suites. See DERBY-2988.
+	         -->
+	  	 <junit printsummary="on"
+	           fork="yes" forkmode="perTest"
+	           jvm="${derby.junit.jvm}" maxmemory="512m"
+	           showoutput="yes"
+	           dir="junit_${derby.junit.timestamp}"
+	  	 	   errorproperty="tests.failed"
+	  	       failureproperty="tests.failed">
+	      <sysproperty key="derbyTesting.oldReleasePath" value="${derbyTesting.oldReleasePath}"/>
+	      <formatter type="xml"/>
+	  	 	
+	<test name="org.apache.derbyTesting.system.oe.test.OETest"
+	  	todir="junit_${derby.junit.timestamp}"/>
+
+	      <classpath>
+	     	    <pathelement path="${derby.junit.classpath}"/>
+	      </classpath>
+	    </junit>
+	  </target>
+	  
   <!-- only execute jdbc4 suite if we have a pointer to a 1.6 VM -->
   <target name="junit-jdbc4" if="jdk16" depends="junit-init">
     <condition property="derby.junit.classpath" value="">
@@ -1973,6 +2009,16 @@
 	    depends="junit-all-codeline-jars-set-properties,junit-all">
 		<fail if="tests.failed">Tests Failed!</fail>
 	</target>
+
+	<!-- Run the junit-system-mini target with the classpath set to include
+	     the main derby jar files. Requires that the caller have
+	     junit.jar in CLASSPATH due to some bug in ant that is
+	     fixed in version 1.7.
+	-->
+	<target name="junit-system-mini-codeline-jars"
+	    depends="junit-all-codeline-jars-set-properties,junit-system-mini">
+		<fail if="tests.failed">Tests Failed!</fail>
+	</target>	
 	
 	<target name="junit-all-codeline-jars-set-properties" depends="setsanityname">
 		<property name="derby.jar.base" value="${basedir}/jars/${sanity.name}"/>
