@@ -21,8 +21,6 @@
 
 package org.apache.derby.iapi.services.loader;
 
-import org.apache.derby.iapi.services.info.JVMInfo;
-
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.error.StandardException;
@@ -277,11 +275,10 @@ public final class ClassInspector
 		}
 
 		// no overloading possible if there are no arguments, so perform
-		// an exact match lookup. this short-circuiting will not work if the VM
-		// level supports varargs--this is because no arguments at all will
-		// still match a signature which is just a varargs argument
-		if ( !vmSupportsVarargs() && (paramClasses.length == 0) ) {
-            try {
+		// an exact match lookup.
+		if (paramClasses.length == 0) {
+
+			try {
 				Method method = receiverClass.getMethod(methodName, paramClasses);
 
 				if (staticMethod) {
@@ -560,6 +557,7 @@ public final class ClassInspector
 				Member[] methods)
 			throws StandardException
 	{
+
 		if (SanityManager.DEBUG) {
 		  if (SanityManager.DEBUG_ON("MethodResolutionInfo"))
 		  {
@@ -582,7 +580,6 @@ public final class ClassInspector
 		boolean firstTimeAround = true;
 		boolean	ambiguous;
 		boolean somethingChanged;
-        Class[]    varargsType = new Class[ methods.length ];
 		do {
 
 			ambiguous = false;
@@ -591,8 +588,6 @@ public final class ClassInspector
 nextMethod:	for (int i = 0; i < methods.length; i++) {
 
 				Member currentMethod = methods[i];
-
-                if ( firstTimeAround ) { varargsType[ i ] = getVarargsType( currentMethod ); }
 
 				// on second and later times around there will be null entries
 				// also, don't compare ourself to ourself
@@ -621,13 +616,8 @@ nextMethod:	for (int i = 0; i < methods.length; i++) {
 
 					} else {
 
-						// regular match on parameter count. a varargs method
-						// can have fewer arguments than the invoking expression.
-						if (
-                            ( ( (currentMethodParameters.length-1) > paramClasses.length) && (varargsType[ i ] != null) ) ||
-                            ( (currentMethodParameters.length != paramClasses.length) && (varargsType[ i ] == null) )
-                            )
-                        {
+						// regular match on parameter count
+						if (currentMethodParameters.length != paramClasses.length) {
 							methods[i] = null; // remove non-applicable methods
 							continue;
 						}
@@ -670,7 +660,7 @@ nextMethod:	for (int i = 0; i < methods.length; i++) {
 
 				// can the required signature be converted to those of this method
 				if (!signatureConvertableFromTo(paramClasses, primParamClasses,
-                                                currentMethodParameters, isParam, false, varargsType[ i ])) {
+							currentMethodParameters, isParam, false)) {
 
 					if (SanityManager.DEBUG) {
 					  if (SanityManager.DEBUG_ON("MethodResolutionInfo")) {
@@ -795,8 +785,7 @@ nextMethod:	for (int i = 0; i < methods.length; i++) {
 			if (methods[candidateIndex] == null)
 				SanityManager.THROWASSERT("methods is null at index " + candidateIndex);
 		}
-
-        return methods[candidateIndex];
+		return methods[candidateIndex];
 	}
 
 	/**
@@ -904,7 +893,7 @@ nextMethod:	for (int i = 0; i < methods.length; i++) {
 			UC = ((Constructor) U).getParameterTypes();
 		}
 
-		return signatureConvertableFromTo(TC, null, UC, isParam, true, null);
+		return signatureConvertableFromTo(TC, null, UC, isParam, true);
 	}
 
 	/**
@@ -918,33 +907,23 @@ nextMethod:	for (int i = 0; i < methods.length; i++) {
 	 *	@param toTypes		to types' classes
 	 *	@param isParam		is parameter (?) or not
 	 *	@param mixTypes		mixing object/primitive types for comparison
-	 *	@param varargsType  non-array type of last toTypes if the method/constructor has a varargs signature
 	 **/
 	private boolean signatureConvertableFromTo(Class[] fromTypes, Class[] primFromTypes,
 												 Class[] toTypes, boolean[] isParam,
-                                               boolean mixTypes, Class varargsType) {
+												 boolean mixTypes) {
 
 		// In the case repeatLastParameter was true, then the two methods may have
 		// different numbers of parameters. We need to compare only the non-repeated
 		// parameters, which is the number of input parameters.
 
 		int checkCount = fromTypes.length;
-		if ( (toTypes.length < checkCount) && (varargsType == null) )
+		if (toTypes.length < checkCount)
 			checkCount = toTypes.length;
 
 		for (int i = 0; i < checkCount; i++) {
 
 			Class fromClass = fromTypes[i];
-			Class toClass;
-
-            // if the candidate method has a varargs signature, then the
-            // concluding types must all be the type of the candidate's
-            // last argument
-            if ( (i >= (toTypes.length-1)) && (varargsType != null) )
-            {
-                toClass = varargsType;
-            }
-            else { toClass = toTypes[ i ]; }
+			Class toClass = toTypes[i];
 
 			// this means an untyped null was passed in. Can only ever be in the
 			// from side as the null can only be in the signature passed in by
@@ -1136,57 +1115,6 @@ nextMethod:	for (int i = 0; i < methods.length; i++) {
 	public String getDeclaringClass(Member method)
 	{
 		return method.getDeclaringClass().getName();
-	}		
-
-    /**
-	 * Get the type of the final, varargs argument to a method or
-	 * constructor. This is the base type (we strip off the array
-	 * marker). Returns null if this is not a varargs method or constructor.
-	 */
-	public static     Class    getVarargsType( Member member )
-	{
-        if ( !memberHasVarargs( member ) ) { return null; }
-        
-		Class[] parameterClasses;
-		if (member instanceof Method) {
-			parameterClasses = ((Method) member).getParameterTypes();
-		} else {
-			parameterClasses = ((Constructor) member).getParameterTypes();
-		}
-        Class   lastParamType = parameterClasses[ parameterClasses.length - 1 ];
-
-        // now strip off the array wrapper
-        lastParamType = lastParamType.getComponentType();
-
-        return lastParamType;
-    }		
-
-    /**
-	 * Report whether a method or constructor has a variable argument list at
-	 * the end. We use reflection so that we can compile this support on and for
-	 * versions of Java prior to Java 5.
-	 */
-	public static   boolean  memberHasVarargs( Member member )
-	{
-        if ( !vmSupportsVarargs() ) { return false; }
-
-        try {
-            Method      isVarargsMethod = member.getClass().getMethod( "isVarArgs", null );
-
-            return ((Boolean) isVarargsMethod.invoke( member, null )).booleanValue();
-        }
-        catch (Exception e)
-        {
-            return false;
-        }
-	}		
-
-    /**
-	 * Report whether the VM supports varargs in method signatures.
-	 */
-	public static   boolean  vmSupportsVarargs()
-	{
-        return (JVMInfo.JDK_ID >= JVMInfo.J2SE_15);
 	}		
 
 }
