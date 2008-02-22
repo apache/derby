@@ -22,6 +22,10 @@ package org.apache.derby.client;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import javax.sql.ConnectionEvent;
+import javax.sql.ConnectionEventListener;
+import java.util.ArrayList;
+import java.util.Iterator;
 import org.apache.derby.client.net.NetXAConnection;
 import org.apache.derby.iapi.error.ExceptionSeverity;
 import org.apache.derby.jdbc.ClientBaseDataSource;
@@ -31,18 +35,28 @@ import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.net.NetLogWriter;
 import org.apache.derby.shared.common.reference.SQLState;
 
+/**
+ * A physical connection to a data source, to be used for creating logical
+ * connections to the same data source.
+ */
 public class ClientPooledConnection implements javax.sql.PooledConnection {
+
+    /** Tells if this pooled connection is newly created. */
     private boolean newPC_ = true;
 
-    private java.util.Vector listeners_ = null;
+    //@GuardedBy("this")
+    private ArrayList listeners_ = null;
     org.apache.derby.client.am.Connection physicalConnection_ = null;
     org.apache.derby.client.net.NetConnection netPhysicalConnection_ = null;
     org.apache.derby.client.net.NetXAConnection netXAPhysicalConnection_ = null;
 
+    /** The logical connection using the physical connection. */
+    //@GuardedBy("this")
     org.apache.derby.client.am.LogicalConnection logicalConnection_ = null;
 
     protected org.apache.derby.client.am.LogWriter logWriter_ = null;
 
+    /** Resource manager identificator. */
     protected int rmId_ = 0;
 
     // Cached stuff from constructor
@@ -50,9 +64,19 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
     private String user_;
     private String password_;
 
-    // Constructor for Non-XA pooled connections.
-    // Using standard Java APIs, a CPDS is passed in.
-    // user/password overrides anything on the ds.
+    /**
+     * Constructor for non-XA pooled connections.
+     * <p>
+     * Using standard Java APIs, a CPDS is passed in. Arguments for
+     * user/password overrides anything on the data source.
+     * 
+     * @param ds data source creating this pooled connection
+     * @param logWriter destination for log messages
+     * @param user user name
+     * @param password user password
+     * @throws SQLException if creating the pooled connection fails due problems
+     *      in the database, or problems communicating with the database
+     */
     public ClientPooledConnection(ClientBaseDataSource ds,
                                   org.apache.derby.client.am.LogWriter logWriter,
                                   String user,
@@ -63,7 +87,7 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
             ds_ = ds;
             user_ = user;
             password_ = password;
-            listeners_ = new java.util.Vector();
+            listeners_ = new ArrayList();
             
             //pass the client pooled connection instance to this
             //instance of the NetConnection object 
@@ -90,9 +114,20 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
         }
     }
 
-    // Constructor for XA pooled connections only.
-    // Using standard Java APIs, a CPDS is passed in.
-    // user/password overrides anything on the ds.
+    /**
+     * Constructor for XA pooled connections only.
+     * <p>
+     * Using standard Java APIs, a CPDS is passed in. Arguments for
+     * user/password overrides anything on the data source.
+     * 
+     * @param ds data source creating this pooled connection
+     * @param logWriter destination for log messages
+     * @param user user name
+     * @param password user password
+     * @param rmId resource manager id
+     * @throws SQLException if creating the pooled connection fails due problems
+     *      in the database, or problems communicating with the database
+     */
     public ClientPooledConnection(ClientBaseDataSource ds,
                                   org.apache.derby.client.am.LogWriter logWriter,
                                   String user,
@@ -104,7 +139,7 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
             user_ = user;
             password_ = password;
             rmId_ = rmId;
-            listeners_ = new java.util.Vector();
+            listeners_ = new ArrayList();
             netXAPhysicalConnection_ = getNetXAConnection(ds,
                     (NetLogWriter) logWriter_,
                     user,
@@ -116,29 +151,6 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
         }
     }
 
-    public ClientPooledConnection(ClientBaseDataSource ds,
-                                  org.apache.derby.client.am.LogWriter logWriter) throws SQLException {
-        logWriter_ = logWriter;
-        ds_ = ds;
-        listeners_ = new java.util.Vector();
-	try {
-            netPhysicalConnection_ = (org.apache.derby.client.net.NetConnection)
-            ClientDriver.getFactory().newNetConnection(
-                    (NetLogWriter) logWriter_,
-                    null,
-                    null,
-                    ds,
-                    -1,
-                    false);
-
-            physicalConnection_ = netPhysicalConnection_;
-        }
-        catch (SqlException se)
-        {
-            throw se.getSQLException();
-        }
-    }
-
     protected void finalize() throws java.lang.Throwable {
         if (logWriter_ != null) {
             logWriter_.traceEntry(this, "finalize");
@@ -146,6 +158,14 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
         close();
     }
 
+    /**
+     * Closes the physical connection to the data source and frees all
+     * assoicated resources.
+     * 
+     * @throws SQLException if closing the connection causes an error. Note that
+     *      this connection can still be considered closed even if an error
+     *      occurs.
+     */
     public synchronized void close() throws SQLException {
         try
         {
@@ -172,8 +192,15 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
         }
     }
 
-    // This is the standard API for getting a logical connection handle for a pooled connection.
-    // No "resettable" properties are passed, so user, password, and all other properties may not change.
+    /**
+     * Creates a logical connection.
+     * <p>
+     * This is the standard API for getting a logical connection handle for a
+     * pooled connection. No "resettable" properties are passed, so user,
+     * password, and all other properties may not change.
+     * 
+     * @throws SQLException if creating a new logical connection fails
+     */
     public synchronized java.sql.Connection getConnection() throws SQLException {
         try
         {
@@ -206,6 +233,16 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
         }
     }
 
+    /**
+     * Creates a new logical connection by performing all the required steps to
+     * be able to reuse the physical connection.
+     * <p>
+     * 
+     * @throws SqlException if there is no physical connection, or if any error
+     *      occurs when recycling the physical connection or closing/craeting
+     *      the logical connection
+     */
+    //@GuardedBy("this")
     private void createLogicalConnection() throws SqlException {
         if (physicalConnection_ == null) {
             throw new SqlException(logWriter_,
@@ -224,8 +261,10 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
             throw new SqlException(sqle);
         }
         
-        // Not the usual case, but if we have an existing logical connection, then we must close it by spec.
-        // We close the logical connection without notifying the pool manager that this pooled connection is availabe for reuse.
+        // Not the usual case, but if we have an existing logical connection,
+        // then we must close it by spec. We close the logical connection
+        // without notifying the pool manager that this pooled connection is
+        // availabe for reuse.
         if (logicalConnection_ != null) {
             logicalConnection_.closeWithoutRecyclingToPool();
         }
@@ -234,48 +273,69 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
                                                         this);
     }
 
-    public synchronized void addConnectionEventListener(javax.sql.ConnectionEventListener listener) {
+    public synchronized void addConnectionEventListener(
+                                            ConnectionEventListener listener) {
         if (logWriter_ != null) {
             logWriter_.traceEntry(this, "addConnectionEventListener", listener);
         }
-        listeners_.addElement(listener);
+        listeners_.add(listener);
     }
 
-    public synchronized void removeConnectionEventListener(javax.sql.ConnectionEventListener listener) {
+    public synchronized void removeConnectionEventListener(
+                                            ConnectionEventListener listener) {
         if (logWriter_ != null) {
             logWriter_.traceEntry(this, "removeConnectionEventListener", listener);
         }
-        listeners_.removeElement(listener);
+        listeners_.remove(listener);
     }
 
-    // Not public, but needs to be visible to am.LogicalConnection
-    public void recycleConnection() {
+    /**
+     * Inform listeners that the logical connection has been closed and that the
+     * physical connection is ready for reuse.
+     * <p>
+     * Not public, but needs to be visible to am.LogicalConnection
+     */
+    public synchronized void recycleConnection() {
         if (physicalConnection_.agent_.loggingEnabled()) {
             physicalConnection_.agent_.logWriter_.traceEntry(this, "recycleConnection");
         }
 
-        for (java.util.Enumeration e = listeners_.elements(); e.hasMoreElements();) {
-            javax.sql.ConnectionEventListener listener = (javax.sql.ConnectionEventListener) e.nextElement();
-            javax.sql.ConnectionEvent event = new javax.sql.ConnectionEvent(this);
+        for (Iterator e = listeners_.iterator(); e.hasNext();) {
+            ConnectionEventListener listener =
+                    (ConnectionEventListener)e.next();
+            ConnectionEvent event = new ConnectionEvent(this);
             listener.connectionClosed(event);
         }
     }
 
-    // Not public, but needs to be visible to am.LogicalConnection
+    /**
+     * Inform listeners that an error has occured on the connection, if the
+     * error severity is high enough.
+     * <p>
+     * Not public, but needs to be visible to am.LogicalConnection
+     * 
+     * @param exception the exception that occurred on the connection
+     */
     public void trashConnection(SqlException exception) {
 		// only report fatal error  
 		if (exception.getErrorCode() < ExceptionSeverity.SESSION_SEVERITY)
 			return;
 
-        for (java.util.Enumeration e = listeners_.elements(); e.hasMoreElements();) {
-            javax.sql.ConnectionEventListener listener = (javax.sql.ConnectionEventListener) e.nextElement();
-            java.sql.SQLException sqle = exception.getSQLException();
-            javax.sql.ConnectionEvent event = new javax.sql.ConnectionEvent(this, sqle);
-            listener.connectionErrorOccurred(event);
+        synchronized (this) {
+            for (Iterator e = listeners_.iterator(); e.hasNext();) {
+                ConnectionEventListener listener =
+                        (ConnectionEventListener)e.next();
+                SQLException sqle = exception.getSQLException();
+                ConnectionEvent event = new ConnectionEvent(this, sqle);
+                listener.connectionErrorOccurred(event);
+            }
         }
     }
 
-    // Used by LogicalConnection close when it disassociates itself from the ClientPooledConnection
+    /**
+     * Used by <code>LogicalConnection.close</code> when it disassociates itself
+     * from the pooled connection.
+     */
     public synchronized void nullLogicalConnection() {
         logicalConnection_ = null;
     }

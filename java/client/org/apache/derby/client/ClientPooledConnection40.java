@@ -61,11 +61,6 @@ public class ClientPooledConnection40 extends ClientPooledConnection {
         
     }
     
-    public ClientPooledConnection40(ClientBaseDataSource ds,
-        org.apache.derby.client.am.LogWriter logWriter) throws SQLException {
-        super(ds,logWriter);
-    }
-    
      /**
      *
      * Registers a StatementEventListener with this PooledConnection object. 
