@@ -183,17 +183,27 @@ public class MasterController
         logFactory = logFac;
         logBuffer = new ReplicationLogBuffer(DEFAULT_LOG_BUFFER_SIZE, this);
 
-        logFactory.startReplicationMasterRole(this);
+        try {
+            logFactory.startReplicationMasterRole(this);
         
-        rawStoreFactory.unfreeze();
+            rawStoreFactory.unfreeze();
 
-        setupConnection();
+            setupConnection();
 
-        if (replicationMode.equals(MasterFactory.ASYNCHRONOUS_MODE)) {
-            logShipper = new AsynchronousLogShipper(logBuffer,
-                                                    transmitter,
-                                                    this);
-            ((Thread)logShipper).start();
+            if (replicationMode.equals(MasterFactory.ASYNCHRONOUS_MODE)) {
+                logShipper = new AsynchronousLogShipper(logBuffer,
+                                                        transmitter,
+                                                        this);
+                ((Thread)logShipper).start();
+            }
+        } catch (StandardException se) {
+            // cleanup everything that may have been started before
+            // the exception was thrown
+            ReplicationLogger.logError(MessageId.REPLICATION_FATAL_ERROR, null,
+                                       dbname);
+            logFactory.stopReplicationMasterRole();
+            teardownNetwork();
+            throw se;
         }
 
         // Add code that initializes replication by sending the
@@ -212,13 +222,7 @@ public class MasterController
         logFactory.stopReplicationMasterRole();
         try {
             logShipper.flushBuffer();
-            
-            logShipper.stopLogShipment();
-
-            ReplicationMessage mesg = new ReplicationMessage(
-                        ReplicationMessage.TYPE_STOP, null);
-
-            transmitter.sendMessage(mesg);
+            teardownNetwork();
         } catch (IOException ioe) {
             ReplicationLogger.
                 logError(MessageId.REPLICATION_LOGSHIPPER_EXCEPTION,
@@ -368,7 +372,22 @@ public class MasterController
     private void setupConnection() throws StandardException {
         try {
             transmitter = new ReplicationMessageTransmit(slavehost, slaveport);
-            transmitter.initConnection(SLAVE_CONNECTION_ATTEMPT_TIMEOUT);
+            // getHighestShippedInstant is -1 until the first log
+            // chunk has been shipped to the slave. If a log chunk has
+            // been shipped, use the instant of the latest shipped log
+            // record to synchronize log files. If no log has been
+            // shipped yet, use the end position of the log (i.e.,
+            // logToFile.getFirstUnflushedInstantAsLong). 
+            if (logShipper != null && 
+                logShipper.getHighestShippedInstant() != -1) {
+                transmitter.initConnection(SLAVE_CONNECTION_ATTEMPT_TIMEOUT,
+                                           logShipper.
+                                           getHighestShippedInstant());
+            } else {
+                transmitter.initConnection(SLAVE_CONNECTION_ATTEMPT_TIMEOUT,
+                                           logFactory.
+                                           getFirstUnflushedInstantAsLong());
+            }
         } catch (SocketTimeoutException ste) {
             throw StandardException.newException
                     (SQLState.REPLICATION_MASTER_TIMED_OUT, dbname);
@@ -376,6 +395,8 @@ public class MasterController
             throw StandardException.newException
                     (SQLState.REPLICATION_CONNECTION_EXCEPTION, ioe, 
                      dbname, slavehost, String.valueOf(slaveport));
+        } catch (StandardException se) {
+            throw se;
         } catch (Exception e) {
             throw StandardException.newException
                     (SQLState.REPLICATION_CONNECTION_EXCEPTION, e,
@@ -401,8 +422,21 @@ public class MasterController
                 try {
                     transmitter = new ReplicationMessageTransmit
                             (slavehost, slaveport);
-                    transmitter.initConnection
-                            (SLAVE_CONNECTION_ATTEMPT_TIMEOUT);
+
+                    // see comment in setupConnection
+                    if (logShipper != null &&
+                        logShipper.getHighestShippedInstant() != -1) {
+                        transmitter.
+                            initConnection(SLAVE_CONNECTION_ATTEMPT_TIMEOUT,
+                                           logShipper.
+                                           getHighestShippedInstant());
+                    } else {
+                        transmitter.
+                            initConnection(SLAVE_CONNECTION_ATTEMPT_TIMEOUT,
+                                           logFactory.
+                                           getFirstUnflushedInstantAsLong());
+                    }
+
                     break;
                 } catch (SocketTimeoutException ste) {
                     continue;
@@ -435,4 +469,27 @@ public class MasterController
     public void workToDo() {
         logShipper.workToDo();
     }
+
+    /**
+     * Stop log shipping, notify slave that replication is stopped and
+     * tear down network connection with slave.
+     */
+    private void teardownNetwork() {
+
+        if (logShipper != null) {
+            logShipper.stopLogShipment();
+        }
+
+        if (transmitter != null) {
+            try {
+                ReplicationMessage mesg =
+                    new ReplicationMessage(ReplicationMessage.TYPE_STOP, null);
+                transmitter.sendMessage(mesg);
+            } catch (IOException ioe) {}
+            try {
+                transmitter.tearDown();
+            } catch (IOException ioe) {}
+        }
+    }
+
 }

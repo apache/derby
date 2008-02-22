@@ -93,6 +93,10 @@ public class AsynchronousLogShipper extends Thread implements
      * so that it can be re-shipped to the slave.
      */
     private ReplicationMessage failedChunk = null;
+    /** The highest log instant in failedChunk  */
+    private long failedChunkHighestInstant = -1;
+    /** The highest log instant shipped so far  */
+    private long highestShippedInstant = -1;
     
     /**
      * Fill information value indicative of a low load in the log buffer.
@@ -206,6 +210,7 @@ public class AsynchronousLogShipper extends Thread implements
             //log buffer.
             if (failedChunk != null) {
                 transmitter.sendMessage(failedChunk);
+                highestShippedInstant = failedChunkHighestInstant;
                 failedChunk = null;
             }
             //transmit the log record that is at the head of
@@ -217,6 +222,7 @@ public class AsynchronousLogShipper extends Thread implements
                     ReplicationMessage.TYPE_LOG, logRecords);
                 
                 transmitter.sendMessage(mesg);
+                highestShippedInstant = logBuffer.getLastInstant();
                 lastShippingTime = System.currentTimeMillis();
                 return true;
             } 
@@ -229,7 +235,10 @@ public class AsynchronousLogShipper extends Thread implements
         } catch (IOException ioe) {
             //An exception occurred while transmitting the log record.
             //Store the previous log record so that it can be re-transmitted
-            failedChunk = (mesg==null) ? failedChunk : mesg;
+            if (mesg != null) {
+                failedChunk = mesg;
+                failedChunkHighestInstant = logBuffer.getLastInstant();
+            }
             throw ioe;
         }
         return false;
@@ -273,6 +282,14 @@ public class AsynchronousLogShipper extends Thread implements
         }
     }
     
+    /**
+     * Get the highest log instant shipped so far
+     * @return the highest log instant shipped so far
+     */
+    public long getHighestShippedInstant() {
+        return highestShippedInstant;
+    }
+
     /**
      * updates the information about the latest instance of the log record
      * that has been flushed to the disk. Calling this method has no effect

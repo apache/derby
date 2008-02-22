@@ -289,6 +289,12 @@ public class StandardException extends Exception
 		Object[] oa = new Object[] {a1};
 		return new StandardException(messageID, oa);
 	}
+
+	public static StandardException newException(String messageID,
+												 Object[] a1) {
+		return new StandardException(messageID, a1);
+	}
+
 	public static StandardException newException(String messageID, Throwable t, Object a1) {
 		Object[] oa = new Object[] {a1};
 		return new StandardException(messageID, t, oa);

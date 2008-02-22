@@ -227,6 +227,13 @@ public class ReadOnly implements LogFactory, ModuleSupportable {
 		return null;
 	}
 
+	public long getFirstUnflushedInstantAsLong() {
+		if (SanityManager.DEBUG) {
+			SanityManager.THROWASSERT("functionality not implemented");
+		}
+		return LogCounter.INVALID_LOG_INSTANT;
+	}
+
 	/**
 	  @exception StandardException functionality not implmented
 	  */

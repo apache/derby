@@ -31,6 +31,7 @@ import org.apache.derby.iapi.services.monitor.ModuleSupportable;
 import org.apache.derby.iapi.services.monitor.Monitor;
 
 import org.apache.derby.iapi.store.raw.RawStoreFactory;
+import org.apache.derby.impl.store.raw.log.LogCounter;
 import org.apache.derby.iapi.store.raw.log.LogFactory;
 import org.apache.derby.impl.store.raw.log.LogToFile;
 
@@ -81,11 +82,17 @@ public class SlaveController
     private int slaveport;
     private String dbname; // The name of the replicated database
 
-    // Whether or not replication slave mode is still on. Will be set
-    // to false when slave replication is shut down. The value of this
-    // variable is checked after every timeout when trying to set up a
-    // connection to the master, and by the thread that applies log
-    // chunks received from the master.
+    /** The instant of the latest log record received from the master 
+     * and processed so far. Used to check that master and slave log files 
+     * are in synch */
+    private volatile long highestLogInstant = -1;
+
+    /**
+     * Whether or not replication slave mode is still on. Will be set
+     * to false when slave replication is shut down. The value of this
+     * variable is checked after every timeout when trying to set up a
+     * connection to the master, and by the thread that applies log
+     * chunks received from the master. */
     private volatile boolean inReplicationSlaveMode = true;
 
     /** Whether or not this SlaveController has been successfully
@@ -262,8 +269,7 @@ public class SlaveController
             ReplicationLogger.logError(null, ioe, dbname);
         }
 
-        logToFile.flushAll();
-        logToFile.stopReplicationSlaveMode();
+        logToFile.stopReplicationSlaveRole();
 
         Monitor.logTextMessage(MessageId.REPLICATION_SLAVE_STOPPED, dbname);
     }
@@ -337,8 +343,24 @@ public class SlaveController
     private boolean setupConnection() throws StandardException {
 
         try {
-            // timeout to check if still in replication slave mode
-            receiver.initConnection(DEFAULT_SOCKET_TIMEOUT);
+            // highestLogInstant is -1 until the first log chunk has
+            // been received from the master. If a log chunk has been
+            // received, use the instant of the latest received log
+            // record to synchronize log files. If no log has been
+            // received yet, use the end position of the log (i.e.,
+            // logToFile.getFlushedInstant)
+            if (highestLogInstant != -1) {
+                // timeout to check if still in replication slave mode
+                receiver.initConnection(DEFAULT_SOCKET_TIMEOUT,
+                                        highestLogInstant,
+                                        dbname);
+            } else {
+                // timeout to check if still in replication slave mode
+                receiver.initConnection(DEFAULT_SOCKET_TIMEOUT,
+                                        logToFile.
+                                        getFirstUnflushedInstantAsLong(),
+                                        dbname);
+            }
             connectedToMaster = true;
             return true; // will not reach this if timeout
         } catch (StandardException se) {
@@ -536,10 +558,17 @@ public class SlaveController
                         throw StandardException.newException
                             (SQLState.REPLICATION_LOG_OUT_OF_SYNCH,
                              dbname,
-                             new Long(logScan.getInstant()),
-                             new Long(localInstant));
-
+                             new Long(LogCounter.
+                                      getLogFileNumber(logScan.getInstant())),
+                             new Long(LogCounter.
+                                      getLogFilePosition(logScan.
+                                                         getInstant())),
+                             new Long(LogCounter.
+                                      getLogFileNumber(localInstant)),
+                             new Long(LogCounter.
+                                      getLogFilePosition(localInstant)));
                     }
+                    highestLogInstant = localInstant;
                 }
             }
         }

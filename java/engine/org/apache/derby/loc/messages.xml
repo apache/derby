@@ -4760,10 +4760,12 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
 
             <msg>
                 <name>XRE05</name>
-                <text>The log received from the master is not in synch with the local log for replicated database '{0}'. The received log instant is {1}, whereas the local instant is {2}. This is FATAL for replication - replication will be stopped.</text>
+                <text>The log files on the master and slave are not in synch for replicated database '{0}'. The master log instant is {1}:{2}, whereas the slave log instant is {3}:{4}. This is FATAL for replication - replication will be stopped.</text>
                 <arg>dbname</arg>
-                <arg>masterinstant</arg>
-                <arg>slaveinstant</arg>
+                <arg>masterfile</arg>
+                <arg>masteroffset</arg>
+                <arg>slavefile</arg>
+                <arg>slaveoffset</arg>
             </msg>
             
             <msg>
@@ -4793,6 +4795,14 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
                 <name>XRE10</name>
                 <text>Conflicting attributes specified. See reference manual for attributes allowed in combination with replication attribute '{0}'.</text>
                 <arg>attribute</arg>
+            </msg>
+            
+            <msg>
+                <name>XRE12</name>
+                <text>Replication network protocol error for database '{0}'. Expected message type '{1}', but received type '{2}'.</text>
+                <arg>dbname</arg>
+                <arg>expectedtype</arg>
+                <arg>receivedtype</arg>
             </msg>
             
             <msg>

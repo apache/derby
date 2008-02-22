@@ -290,7 +290,8 @@ public class ReplicationLogBuffer {
     /**
      * Can be used so that only the necessary log records are sent
      * when a flush(LogInstant flush_to_this) is called in the log
-     * factory.
+     * factory. Returns the highest log instant in the chunk of log that can 
+     * be read with getData().
      *
      * @return The highest log instant in the chunk of log returned by
      * getData().

@@ -4352,6 +4352,12 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 		return new LogCounter(logFileNumber,lastFlush);
 	}
 
+    public synchronized long getFirstUnflushedInstantAsLong() {
+        if (SanityManager.DEBUG) {
+            SanityManager.ASSERT(logFileNumber > 0 && lastFlush > 0);
+        }
+        return LogCounter.makeLogInstantAsLong(logFileNumber,lastFlush);
+    }
 
 	/**
 	 * Backup restore - stop sending log record to the log stream
@@ -5085,13 +5091,17 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
      * recovery process and throw a StandardException with SQLState
      * SHUTDOWN_DATABASE. This should only be done when the database
      * will be shutdown.
+     * @throws StandardException Standard Derby exception policy
      * @see org.apache.derby.impl.db.SlaveDatabase
      */
-    public void stopReplicationSlaveMode() {
+    public void stopReplicationSlaveRole() throws StandardException {
         // Do not set inReplicationSlaveMode=false here because that
         // will let the thread currently doing recover complete the
         // boot process. Setting replicationSlaveException aborts the
         // boot process.
+        if (!stopped) {
+            flushAll();
+        }
         replicationSlaveException =
                 StandardException.newException(
                 SQLState.SHUTDOWN_DATABASE);

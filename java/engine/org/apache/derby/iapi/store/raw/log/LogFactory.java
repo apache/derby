@@ -172,6 +172,16 @@ public interface LogFactory extends Corruptable {
 	  */
     LogInstant getFirstUnflushedInstant();
 
+    /**
+     * Get the log instant long value of the first log record that has not 
+     * been flushed. Only works after recover() has finished, or (if in slave 
+     * replication mode) after calling initializeReplicationSlaveRole.
+     *
+     * @return the log instant long value of the first log record that has not 
+     * been flushed
+     */
+    public long getFirstUnflushedInstantAsLong();
+
 	/**
 		Backup restore support
 	 */

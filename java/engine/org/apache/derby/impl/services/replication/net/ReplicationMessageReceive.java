@@ -34,6 +34,7 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.MessageId;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.monitor.Monitor;
+import org.apache.derby.impl.store.raw.log.LogCounter;
 
 /**
  * This class is the Receiver (viz. Socket server or listener) part of the
@@ -105,6 +106,13 @@ public class ReplicationMessageReceive {
      * has been established before the timeout, a
      * PrivilegedExceptionAction is raised with cause
      * java.net.SocketTimeoutException
+     * @param synchOnInstant the slave log instant, used to check that
+     * the master and slave log files are in synch. If no chunks of log
+     * records have been received from the master yet, this is the
+     * end position in the current log file. If a chunk of log has been
+     * received, this is the instant of the log record received last.
+     * Note that there is a difference!
+     * @param dbname the name of the replicated database
      *
      * @throws PrivilegedActionException if an exception occurs while trying
      *                                   to open a connection.
@@ -117,7 +125,8 @@ public class ReplicationMessageReceive {
      * @throws StandardException if an incompatible database version is found.
      *
      */
-    public void initConnection(int timeout) throws
+    public void initConnection(int timeout, long synchOnInstant, String dbname)
+        throws
         PrivilegedActionException,
         IOException,
         StandardException,
@@ -143,20 +152,11 @@ public class ReplicationMessageReceive {
         //create the SocketConnection object using the client connection.
         socketConn = new SocketConnection(client);
         
-        //wait for the initiator message on the SocketConnection
-        ReplicationMessage initMesg = readMessage();
-        
-        //Check if this message is an initiator message, if not
-        //throw an exception
-        if (initMesg.getType() != ReplicationMessage.TYPE_INITIATE) {
-            //The message format was not recognized. Hence throw
-            //an unexpected exception.
-            throw StandardException.newException
-                (SQLState.REPLICATION_UNEXPECTED_EXCEPTION);
-        }
-        
-        //parse the initiator message and perform appropriate action
-        parseInitiatorMessage(initMesg);
+        // exchange initiator messages to check that master and slave are at 
+        // the same version...
+        parseAndAckVersion(readMessage(), dbname);
+        // ...and have equal log files
+        parseAndAckInstant(readMessage(), synchOnInstant, dbname);
     }
     
     /**
@@ -204,17 +204,32 @@ public class ReplicationMessageReceive {
      * in the initiator message, with the UID of the same class in the slave.
      *
      * @param initiatorMessage the object containing the UID.
+     * @param dbname the name of the replicated database
      *
      * @throws IOException If an exception occurs while sending the
      *                     acknowledgment.
      *
      * @throws StandardException If the UID's do not match.
      */
-    private void parseInitiatorMessage(ReplicationMessage initiatorMessage)
+    private void parseAndAckVersion(ReplicationMessage initiatorMessage, 
+                                    String dbname)
         throws IOException, StandardException {
         //Holds the replication message that will be sent
         //to the master.
         ReplicationMessage ack = null;
+
+        //Check if this message is an initiate version message, if not
+        //throw an exception
+        if (initiatorMessage.getType() != 
+                ReplicationMessage.TYPE_INITIATE_VERSION) {
+            // The message format was not recognized. Notify master and throw
+            // an exception
+            String expectedMsgId = String.
+                valueOf(ReplicationMessage.TYPE_INITIATE_VERSION);
+            String receivedMsgId = String.valueOf(initiatorMessage.getType());
+            handleUnexpectedMessage(dbname, expectedMsgId, receivedMsgId);
+        }
+
         //Get the UID of the master
         long masterVersion = ((Long)initiatorMessage.getMessage()).longValue();
         //If the UID's are equal send the acknowledgment message
@@ -223,17 +238,119 @@ public class ReplicationMessageReceive {
                 (ReplicationMessage.TYPE_ACK, "UID OK");
             socketConn.writeMessage(ack);
         } else {
-            //If the UID's are not equal send an error message
+            //If the UID's are not equal send an error message. The
+            //object of a TYPE_ERROR message must be a String[]
             ack = new ReplicationMessage
                 (ReplicationMessage.TYPE_ERROR,
-                SQLState.REPLICATION_MASTER_SLAVE_VERSION_MISMATCH);
-            
+                 new String[]{SQLState.
+                              REPLICATION_MASTER_SLAVE_VERSION_MISMATCH});
+            socketConn.writeMessage(ack);
+
             //The UID's do not match.
             throw StandardException.newException
                 (SQLState.REPLICATION_MASTER_SLAVE_VERSION_MISMATCH);
         }
     }
+
+    /**
+     * Used to parse the log instant initiator message from the master and 
+     * check that the master and slave log files are in synch.
+     *
+     * @param initiatorMessage the object containing the UID.
+     * @param synchOnInstant the slave log instant, used to check that
+     * the master and slave log files are in synch. If no chunks of log
+     * records have been received from the master yet, this is the
+     * end position in the current log file. If a chunk of log has been
+     * received, this is the instant of the log record received last.
+     * Note that there is a difference!
+     * @param dbname the name of the replicated database
+     *
+     * @throws IOException If an exception occurs while sending the
+     *                     acknowledgment.
+     *
+     * @throws StandardException If the log files are not in synch
+     */
+    private void parseAndAckInstant(ReplicationMessage initiatorMessage,
+                                    long synchOnInstant, String dbname)
+        throws IOException, StandardException {
+        ReplicationMessage ack = null;
+
+        //Check if this message is a log synch message, if not throw
+        //an exception
+        if (initiatorMessage.getType() !=
+            ReplicationMessage.TYPE_INITIATE_INSTANT) {
+            // The message format was not recognized. Notify master and throw 
+            // an exception
+            String expectedMsgId = String.
+                valueOf(ReplicationMessage.TYPE_INITIATE_INSTANT);
+            String receivedMsgId = String.valueOf(initiatorMessage.getType());
+            handleUnexpectedMessage(dbname, expectedMsgId, receivedMsgId);
+        }
+
+        // Get the log instant of the master
+        long masterInstant = ((Long)initiatorMessage.getMessage()).longValue();
+
+        if (masterInstant == synchOnInstant) {
+            // Notify the master that the logs are in synch
+            ack = new ReplicationMessage
+                (ReplicationMessage.TYPE_ACK, "Instant OK");
+            socketConn.writeMessage(ack);
+        } else {
+            // Notify master that the logs are out of synch
+            // See ReplicationMessage#TYPE_ERROR
+            String[] exception = new String[6];
+            exception[0] = dbname;
+            exception[1] = String.valueOf(LogCounter.
+                                          getLogFileNumber(masterInstant));
+            exception[2] = String.valueOf(LogCounter.
+                                          getLogFilePosition(masterInstant));
+            exception[3] = String.valueOf(LogCounter.
+                                          getLogFileNumber(synchOnInstant));
+            exception[4] = String.valueOf(LogCounter.
+                                          getLogFilePosition(synchOnInstant));
+            exception[5] = SQLState.REPLICATION_LOG_OUT_OF_SYNCH;
+            ack = new ReplicationMessage(ReplicationMessage.TYPE_ERROR, 
+                                         exception);
+            socketConn.writeMessage(ack);
+
+            throw StandardException.
+                newException(SQLState.REPLICATION_LOG_OUT_OF_SYNCH, exception);
+        }
+    }
     
+    /**
+     * Notify other replication peer that the message type was unexpected and 
+     * throw a StandardException
+     *
+     * @param dbname the name of the replicated database
+     * @param expextedMsgId the expected message type
+     * @param receivedMsgId the received message type
+     *
+     * @throws StandardException exception describing that an unexpected
+     * message was received is always thrown 
+     * @throws java.io.IOException thrown if an exception occurs while sending
+     * the error message 
+     */
+    private void handleUnexpectedMessage(String dbname, 
+                                         String expextedMsgId,
+                                         String receivedMsgId)
+        throws StandardException, IOException {
+        String[] exception = new String[4];
+        exception[0] = dbname;
+        exception[1] = expextedMsgId;
+        exception[2] = receivedMsgId;
+        exception[3] = SQLState.REPLICATION_UNEXPECTED_MESSAGEID;
+
+        ReplicationMessage ack = 
+            new ReplicationMessage(ReplicationMessage.TYPE_ERROR, exception);
+
+        socketConn.writeMessage(ack);
+
+        throw StandardException.
+            newException(SQLState.REPLICATION_UNEXPECTED_MESSAGEID, exception);
+
+    }
+
     /**
      * Used to send a replication message to the master.
      *

@@ -31,19 +31,6 @@ import java.io.ObjectOutput;
  * slave during Replication. The message is composed of a type flag
  * and corresponding object. Each type flag indicating the type of the 
  * content bundled inside the message.
- *
- * For now the following message types are defined
- *
- * TYPE_LOG - This flag will be used for all messages will carry LogRecords.
- * TYPE_ACK - this flag is used to send a acknowledgment of successful
- *            completion of a requested operation. It will however not
- *            be used to signify reception for every message transmission
- *            since tcp would automatically take care of this.
- * TYPE_ERROR - Indicates that the requested operation was not able to be
- *              completed successfully.
- * TYPE_INITIATE - used during the intial handshake between the master and
- *                 the slave. The initial handshake helps to negotiate the
- *                 message UIDs and send a appropriate error or acknowledgment.
  */
 public class ReplicationMessage implements Externalizable {
     /**
@@ -66,12 +53,31 @@ public class ReplicationMessage implements Externalizable {
     private int type;
     
     /**
+     * used during the intial handshake between the master and
+     * the slave. The initial handshake helps to negotiate the
+     * message UIDs and send a appropriate error or acknowledgment.
+     * The object this message contains will be a <code>Long</code>.
+     * IMPORTANT: This constant must not be changed in future versions since 
+     * we need it to decide slave/master version mismatch
+     */
+    public static final int TYPE_INITIATE_VERSION = 0;
+
+    /**
+     * Used during the intial handshake between the master and
+     * the slave. Messages of this type are used to ensure that master and 
+     * slave have identical log files by checking that they will insert 
+     * the next log record on the same byte position in the log.
+     * The object this message contains will be a <code>Long</code>.
+     */
+    public static final int TYPE_INITIATE_INSTANT = 1;
+
+    /**
      * This flag will be used for all messages that carry log records.
      * The Object this message type contains will be a <code>byte</code>
      * array. The content of the byte array is the log records in the
      * binary form.
      */
-    public static final int TYPE_LOG = 0;
+    public static final int TYPE_LOG = 10;
     
     /**
      * This flag is used to send an acknowledgment of successful completion
@@ -80,34 +86,34 @@ public class ReplicationMessage implements Externalizable {
      * type contains will be a <code>String</code>. The SQLState of the
      * error message can be used here.
      */
-    public static final int TYPE_ACK = 1;
+    public static final int TYPE_ACK = 11;
     
     /**
      * Indicates that the requested operation was not able to be
      * completed successfully. The object this message type contains
-     * will be a <code>String</code>.
+     * will be a <code>String[]</code> where the first length-1 fields
+     * are used as arguments to create the exception and the last
+     * field contains the SQLState. The SQLState is the last element
+     * in the Array, because this means that the whole Array can be
+     * used as input to the StandardException creator. The SQLState
+     * will be ignored by the exception creator because there is one
+     * argument too many. This way we don't have to make a copy of the
+     * received Array, containing all elements except the SQLState
+     * element.
      */
-    public static final int TYPE_ERROR = 2;
-    
-    /**
-     * used during the intial handshake between the master and
-     * the slave. The initial handshake helps to negotiate the
-     * message UIDs and send a appropriate error or acknowledgment.
-     * The object this message contains will be a <code>Long</code>.
-     */
-    public static final int TYPE_INITIATE = 3;
+    public static final int TYPE_ERROR = 12;
     
     /**
      * Used to send a stop replication signal to the slave. Since this
      * is a control signal the object this message contains will be null.
      */
-    public static final int TYPE_STOP = 4;
+    public static final int TYPE_STOP = 20;
     
     /**
      * Used to signal the slave that it must failover. The object associated
      * with this message will be null.
      */
-    public static final int TYPE_FAILOVER = 5;
+    public static final int TYPE_FAILOVER = 21;
     
     /**
      * public No args constructor required with Externalizable.
