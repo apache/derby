@@ -93,45 +93,45 @@ public abstract class BaseTestCase
         {
             if (config.defaultSecurityManagerSetup())
             {
-    		assertSecurityManager();
+                assertSecurityManager();
             }
         }
-    	 
+
         try {
             super.runBare();   
         }
         //To save the derby.log of failed tests. 
         catch (Throwable running) {
-        	try{
-        		AccessController.doPrivileged(new PrivilegedExceptionAction() {
-        			public Object run() throws SQLException, FileNotFoundException,
-        			IOException {
+            try{
+                AccessController.doPrivileged(new PrivilegedExceptionAction() {
+                    public Object run() throws SQLException, FileNotFoundException,
+                    IOException {
 
-        				File origLogDir = new File("system", "derby.log");
-        				if (origLogDir.exists()) {
-        					File failDir = getFailureFolder();
-        					InputStream in = new FileInputStream(origLogDir);
-        					OutputStream out = new FileOutputStream(new File(failDir,
-        					"derby.log"));
-        					byte[] buf = new byte[32 * 1024];
+                        File origLogDir = new File("system", "derby.log");
+                        if (origLogDir.exists()) {
+                            File failDir = getFailureFolder();
+                            InputStream in = new FileInputStream(origLogDir);
+                            OutputStream out = new FileOutputStream(new File(failDir,
+                            "derby.log"));
+                            byte[] buf = new byte[32 * 1024];
 
-        					for (;;) {
-        						int read = in.read(buf);
-        						if (read == -1)
-        							break;
-        						out.write(buf, 0, read);
-        					}
-        					in.close();
-        					out.close();
-        				}
+                            for (;;) {
+                                int read = in.read(buf);
+                                if (read == -1)
+                                    break;
+                                out.write(buf, 0, read);
+                            }
+                            in.close();
+                            out.close();
+                        }
 
-        				return null;
-        			}
-        		});
-        	}
-        	finally{        		
-        			throw running;
-        	}
+                        return null;
+                    }
+                });
+            }
+            finally{        		
+                throw running;
+            }
         }
         finally{
             if ( trace )
