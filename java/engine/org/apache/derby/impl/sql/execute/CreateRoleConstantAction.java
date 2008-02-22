@@ -81,6 +81,8 @@ class CreateRoleConstantAction extends DDLConstantAction {
         //
         final String currentAuthId = lcc.getAuthorizationId();
 
+        dd.startWriting(lcc);
+
         //
         // Check if this role already exists. If it does, throw.
         //
@@ -105,7 +107,6 @@ class CreateRoleConstantAction extends DDLConstantAction {
             true,         // with admin option
             true);        // is definition
 
-        dd.startWriting(lcc);
         dd.addDescriptor(rd,
                          null,  // parent
                          DataDictionary.SYSROLES_CATALOG_NUM,
