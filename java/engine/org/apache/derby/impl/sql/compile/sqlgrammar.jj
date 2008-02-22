@@ -12723,14 +12723,8 @@ grantStatement() throws StandardException :
 				   getToken(3).kind == TO)) ||
 				 !isPrivilegeKeywordExceptTrigger(getToken(2).kind)) } )
 	<GRANT>
-	{
-		checkSqlStandardAccess("GRANT <role>");
-		checkVersion( DataDictionary.DD_VERSION_DERBY_10_4, "ROLES");
-	}
 	( node = roleGrantStatement() )
 	{
-		checkVersion( DataDictionary.DD_VERSION_DERBY_10_2, "GRANT");
-		checkSqlStandardAccess( "GRANT");
 		return node;
 	}
 }
@@ -12970,6 +12964,9 @@ roleGrantStatement() throws StandardException :
 	<TO>
 	grantees = granteeList()
 	{
+		checkSqlStandardAccess("GRANT <role>");
+		checkVersion( DataDictionary.DD_VERSION_DERBY_10_4, "ROLES");
+
 		return (StatementNode) nodeFactory.getNode
 			(C_NodeTypes.GRANT_ROLE_NODE,
 			 rolesGranted,
