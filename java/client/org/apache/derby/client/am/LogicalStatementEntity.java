@@ -81,20 +81,20 @@ class LogicalStatementEntity {
      *
      * @param physicalPs a physical {@link java.sql.PreparedStatement}
      * @param stmtKey cache key for the physical statement
-     * @param cache statement cache
+     * @param cacheInteractor creating statement cache interactor
      * @throws IllegalArgumentException if {@code cache} is {@code null}
      */
     protected LogicalStatementEntity(java.sql.PreparedStatement physicalPs,
                                      StatementKey stmtKey,
-                                     JDBCStatementCache cache) {
-        if (cache == null) {
+                                     StatementCacheInteractor cacheInteractor) {
+        if (cacheInteractor.getCache() == null) {
             // Internal check, failure indicates programming error.
             // No need to localize error message.
             throw new IllegalArgumentException(
                     "statement cache reference cannot be <null>");
         }
         this.stmtKey = stmtKey;
-        this.cache = cache;
+        this.cache = cacheInteractor.getCache();
         this.physicalPs = physicalPs;
         if (physicalPs instanceof CallableStatement) {
             this.hasCallableStmt = true;

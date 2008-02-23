@@ -40,7 +40,6 @@ import java.sql.SQLWarning;
 import java.sql.Time;
 import java.sql.Timestamp;
 
-import org.apache.derby.client.am.stmtcache.JDBCStatementCache;
 import org.apache.derby.client.am.stmtcache.StatementKey;
 
 /**
@@ -64,13 +63,13 @@ public class LogicalPreparedStatement
      *
      * @param physicalPs underlying physical statement
      * @param stmtKey key for the physical statement
-     * @param cache associated statement cache
+     * @param cacheInteractor creating statement cache interactor
      * @throws IllegalArgumentException if {@code cache} is {@code null}
      */
     public LogicalPreparedStatement(java.sql.PreparedStatement physicalPs,
                                     StatementKey stmtKey,
-                                    JDBCStatementCache cache) {
-        super(physicalPs, stmtKey, cache);
+                                    StatementCacheInteractor cacheInteractor) {
+        super(physicalPs, stmtKey, cacheInteractor);
     }
 
     public int executeUpdate() throws SQLException {

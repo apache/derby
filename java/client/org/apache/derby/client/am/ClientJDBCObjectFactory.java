@@ -185,26 +185,26 @@ public interface ClientJDBCObjectFactory {
      *
      * @param ps underlying physical prepared statement
      * @param stmtKey key for the underlying physical prepared statement
-     * @param stmtCache the statement cache
+     * @param cacheInteractor the statement cache interactor
      * @return A logical prepared statement.
      */
-    java.sql.PreparedStatement newLogicalPreparedStatement(
+    LogicalPreparedStatement newLogicalPreparedStatement(
             java.sql.PreparedStatement ps,
             StatementKey stmtKey,
-            JDBCStatementCache stmtCache);
+            StatementCacheInteractor cacheInteractor);
 
     /**
      * Returns a new logical callable statement object.
      *
      * @param cs underlying physical callable statement
      * @param stmtKey key for the underlying physical callable statement
-     * @param stmtCache the statement cache
+     * @param cacheInteractor the statement cache interactor
      * @return A logical callable statement.
      */
-    public java.sql.CallableStatement newLogicalCallableStatement(
+    LogicalCallableStatement newLogicalCallableStatement(
             java.sql.CallableStatement cs,
             StatementKey stmtKey,
-            JDBCStatementCache stmtCache);
+            StatementCacheInteractor cacheInteractor);
 
     /**
      * This method returns an instance of NetConnection (or NetConnection40) class

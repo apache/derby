@@ -37,7 +37,9 @@ import org.apache.derby.client.am.PreparedStatement;
 import org.apache.derby.client.am.PreparedStatement40;
 import org.apache.derby.client.am.ParameterMetaData;
 import org.apache.derby.client.am.ParameterMetaData40;
+import org.apache.derby.client.am.LogicalCallableStatement;
 import org.apache.derby.client.am.LogicalCallableStatement40;
+import org.apache.derby.client.am.LogicalPreparedStatement;
 import org.apache.derby.client.am.LogicalPreparedStatement40;
 import org.apache.derby.client.am.LogWriter;
 import org.apache.derby.client.am.Agent;
@@ -45,6 +47,7 @@ import org.apache.derby.client.am.SQLExceptionFactory40;
 import org.apache.derby.client.am.Section;
 import org.apache.derby.client.am.Statement;
 import org.apache.derby.client.am.Statement40;
+import org.apache.derby.client.am.StatementCacheInteractor;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.Cursor;
 import org.apache.derby.client.am.stmtcache.JDBCStatementCache;
@@ -210,14 +213,14 @@ public class ClientJDBCObjectFactoryImpl40 implements ClientJDBCObjectFactory{
      *
      * @param ps underlying physical prepared statement
      * @param stmtKey key for the underlying physical prepared statement
-     * @param stmtCache the statement cache
+     * @param cacheInteractor the statement cache interactor
      * @return A logical prepared statement.
      */
-    public java.sql.PreparedStatement newLogicalPreparedStatement(
+    public LogicalPreparedStatement newLogicalPreparedStatement(
             java.sql.PreparedStatement ps,
             StatementKey stmtKey,
-            JDBCStatementCache stmtCache) {
-        return new LogicalPreparedStatement40(ps, stmtKey, stmtCache);
+            StatementCacheInteractor cacheInteractor) {
+        return new LogicalPreparedStatement40(ps, stmtKey, cacheInteractor);
     }
 
     /**
@@ -225,14 +228,14 @@ public class ClientJDBCObjectFactoryImpl40 implements ClientJDBCObjectFactory{
      *
      * @param cs underlying physical callable statement
      * @param stmtKey key for the underlying physical callable statement
-     * @param stmtCache the statement cache
+     * @param cacheInteractor the statement cache interactor
      * @return A logical callable statement.
      */
-    public java.sql.CallableStatement newLogicalCallableStatement(
+    public LogicalCallableStatement newLogicalCallableStatement(
             java.sql.CallableStatement cs,
             StatementKey stmtKey,
-            JDBCStatementCache stmtCache) {
-        return new LogicalCallableStatement40(cs, stmtKey, stmtCache);
+            StatementCacheInteractor cacheInteractor) {
+        return new LogicalCallableStatement40(cs, stmtKey, cacheInteractor);
     }
 
     /**

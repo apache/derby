@@ -35,7 +35,6 @@ import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Map;
 
-import org.apache.derby.client.am.stmtcache.JDBCStatementCache;
 import org.apache.derby.client.am.stmtcache.StatementKey;
 
 /**
@@ -59,13 +58,13 @@ public class LogicalCallableStatement
      *
      * @param physicalCs underlying physical statement
      * @param stmtKey key for the physical statement
-     * @param cache associated statement cache
+     * @param cacheInteractor creating statement cache interactor
      * @throws IllegalArgumentException if {@code cache} is {@code null}
      */
     public LogicalCallableStatement(java.sql.CallableStatement physicalCs,
                                     StatementKey stmtKey,
-                                    JDBCStatementCache cache) {
-        super(physicalCs, stmtKey, cache);
+                                    StatementCacheInteractor cacheInteractor) {
+        super(physicalCs, stmtKey, cacheInteractor);
     }
 
     public boolean wasNull() throws SQLException {

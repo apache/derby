@@ -29,7 +29,6 @@ import java.sql.RowId;
 import java.sql.SQLException;
 import java.sql.SQLXML;
 
-import org.apache.derby.client.am.stmtcache.JDBCStatementCache;
 import org.apache.derby.client.am.stmtcache.StatementKey;
 
 import org.apache.derby.shared.common.reference.SQLState;
@@ -48,13 +47,13 @@ public class LogicalCallableStatement40
      *
      * @param physicalCs underlying physical statement
      * @param stmtKey key for the physical statement
-     * @param cache associated statement cache
+     * @param cacheInteractor creating statement cache interactor
      * @throws IllegalArgumentException if {@code cache} is {@code null}
      */
     public LogicalCallableStatement40(java.sql.CallableStatement physicalCs,
                                       StatementKey stmtKey,
-                                      JDBCStatementCache cache) {
-        super(physicalCs, stmtKey, cache);
+                                      StatementCacheInteractor cacheInteractor){
+        super(physicalCs, stmtKey, cacheInteractor);
     }
 
     public void setRowId(int arg0, RowId arg1)

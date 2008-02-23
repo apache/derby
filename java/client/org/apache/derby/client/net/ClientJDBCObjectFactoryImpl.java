@@ -47,6 +47,7 @@ import org.apache.derby.client.net.NetLogWriter;
 import org.apache.derby.jdbc.ClientBaseDataSource;
 import org.apache.derby.jdbc.ClientXADataSource;
 import org.apache.derby.client.am.ColumnMetaData;
+import org.apache.derby.client.am.StatementCacheInteractor;
 
 /**
  * Implements the the ClientJDBCObjectFactory interface and returns the classes
@@ -212,14 +213,14 @@ public class ClientJDBCObjectFactoryImpl implements ClientJDBCObjectFactory{
      *
      * @param ps underlying physical prepared statement
      * @param stmtKey key for the underlying physical prepared statement
-     * @param stmtCache the statement cache
+     * @param cacheInteractor the statement cache interactor
      * @return A logical prepared statement.
      */
-    public java.sql.PreparedStatement newLogicalPreparedStatement(
+    public LogicalPreparedStatement newLogicalPreparedStatement(
             java.sql.PreparedStatement ps,
             StatementKey stmtKey,
-            JDBCStatementCache stmtCache) {
-        return new LogicalPreparedStatement(ps, stmtKey, stmtCache);
+            StatementCacheInteractor cacheInteractor) {
+        return new LogicalPreparedStatement(ps, stmtKey, cacheInteractor);
     }
 
     /**
@@ -227,14 +228,14 @@ public class ClientJDBCObjectFactoryImpl implements ClientJDBCObjectFactory{
      *
      * @param cs underlying physical callable statement
      * @param stmtKey key for the underlying physical callable statement
-     * @param stmtCache the statement cache
+     * @param cacheInteractor the statement cache interactor
      * @return A logical callable statement.
      */
-    public java.sql.CallableStatement newLogicalCallableStatement(
+    public LogicalCallableStatement newLogicalCallableStatement(
             java.sql.CallableStatement cs,
             StatementKey stmtKey,
-            JDBCStatementCache stmtCache) {
-        return new LogicalCallableStatement(cs, stmtKey, stmtCache);
+            StatementCacheInteractor cacheInteractor) {
+        return new LogicalCallableStatement(cs, stmtKey, cacheInteractor);
     }
 
     /**

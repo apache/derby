@@ -28,13 +28,12 @@ import org.apache.derby.client.am.stmtcache.JDBCStatementCache;
 import org.apache.derby.client.am.stmtcache.StatementKey;
 import org.apache.derby.client.am.stmtcache.StatementKeyFactory;
 
-import org.apache.derby.jdbc.ClientDriver;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
- * Tests for the handling of logical prepared statements.
+ * Tests for the handling of logical statements.
  */
 public class LogicalStatementEntityTest
     extends BaseJDBCTestCase {
@@ -52,13 +51,11 @@ public class LogicalStatementEntityTest
     public void testCloseBehaviorExternalPs()
             throws SQLException {
         final String sql = "values 7";
-        final String schema = "APP";
         java.sql.PreparedStatement ps = prepareStatement(sql);
-        StatementKey stmtKey = StatementKeyFactory.newPrepared(
-                sql, schema, getConnection().getHoldability());
         JDBCStatementCache cache = new JDBCStatementCache(10);
+        insertStatementIntoCache(cache, ps, sql);
         LogicalStatementEntity logic =
-                new LogicalStatementEntityClass(ps, stmtKey, cache);
+                createLogicalStatementEntity(sql, false, cache);
         assertSame(ps, logic.getPhysPs());
         assertFalse(logic.isLogicalEntityClosed());
         logic.close();
@@ -83,13 +80,11 @@ public class LogicalStatementEntityTest
     public void testCloseBehaviorExternalCs()
             throws SQLException {
         final String sql = "values 3";
-        final String schema = "APP";
         java.sql.CallableStatement cs = prepareCall(sql);
-        StatementKey stmtKey = StatementKeyFactory.newCallable(
-                sql, schema, getConnection().getHoldability());
         JDBCStatementCache cache = new JDBCStatementCache(10);
+        insertStatementIntoCache(cache, cs, sql);
         LogicalStatementEntity logic =
-                new LogicalStatementEntityClass(cs, stmtKey, cache);
+                createLogicalStatementEntity(sql, true, cache);
         assertSame(cs, logic.getPhysCs());
         assertFalse(logic.isLogicalEntityClosed());
         logic.close();
@@ -115,28 +110,30 @@ public class LogicalStatementEntityTest
             throws SQLException {
         // Initial setup.
         final String sql = "values 7";
-        final String schema = "APP";
         java.sql.PreparedStatement ps = prepareStatement(sql);
-        StatementKey stmtKey = StatementKeyFactory.newPrepared(
-                sql, schema, getConnection().getHoldability());
         JDBCStatementCache cache = new JDBCStatementCache(10);
+        StatementKey stmtKey = insertStatementIntoCache(cache, ps, sql);
         LogicalStatementEntity logic =
-                new LogicalStatementEntityClass(ps, stmtKey, cache);
+                createLogicalStatementEntity(sql, false, cache);
         assertSame(ps, logic.getPhysPs());
         assertFalse(logic.isLogicalEntityClosed());
 
         // Put a statement into the cache.
-        assertTrue(cache.cacheStatement(stmtKey, ps));
+        //assertTrue(cache.cacheStatement(stmtKey, ps));
         // Create a second statement, equal to the first.
         java.sql.PreparedStatement psDupe = prepareStatement(sql);
+        insertStatementIntoCache(cache, psDupe, sql);
         LogicalStatementEntity logicDupe =
-                new LogicalStatementEntityClass(psDupe, stmtKey, cache);
+                createLogicalStatementEntity(sql, false, cache);
+        // Close the first logical entry, to put the physical statement back
+        // into the cache.
+        logic.close();
         // When we ask the logical entity to close the statement now, the
         // underlying physical prepared statement should actually be closed.
         logicDupe.close();
         assertTrue(logicDupe.isLogicalEntityClosed());
-        // Since we are possibly running in pre-JDBC 4, try do do something to
-        // provoke exception.
+        // Since we are possibly running in a pre-JDBC 4 environment, try do do
+        // something to provoke an exception.
         try {
             psDupe.execute();
             fail("Statement should have been closed and throw an exception");
@@ -161,13 +158,11 @@ public class LogicalStatementEntityTest
             throws SQLException {
         // Initial setup.
         final String sql = "values 9";
-        final String schema = "APP";
         java.sql.PreparedStatement ps = prepareStatement(sql);
-        StatementKey stmtKey = StatementKeyFactory.newPrepared(
-                sql, schema, getConnection().getHoldability());
         JDBCStatementCache cache = new JDBCStatementCache(10);
+        StatementKey stmtKey = insertStatementIntoCache(cache, ps, sql);
         LogicalStatementEntity logic =
-                new LogicalStatementEntityClass(ps, stmtKey, cache);
+                createLogicalStatementEntity(sql, false, cache);
         assertSame(ps, logic.getPhysPs());
         assertFalse(logic.isLogicalEntityClosed());
 
@@ -192,17 +187,15 @@ public class LogicalStatementEntityTest
             throws SQLException {
         // Initial setup.
         final String sql = "values 19";
-        final String schema = "APP";
         java.sql.PreparedStatement ps = prepareStatement(sql);
-        StatementKey stmtKey = StatementKeyFactory.newPrepared(
-                sql, schema, getConnection().getHoldability());
         JDBCStatementCache cache = new JDBCStatementCache(10);
+        insertStatementIntoCache(cache, ps, sql);
         LogicalStatementEntity logic =
-                new LogicalStatementEntityClass(ps, stmtKey, cache);
+                createLogicalStatementEntity(sql, false, cache);
         assertSame(ps, logic.getPhysPs());
         assertFalse(logic.isLogicalEntityClosed());
-        java.sql.PreparedStatement logicalPs = ClientDriver.getFactory().
-                newLogicalPreparedStatement(ps, stmtKey, cache);
+        java.sql.PreparedStatement logicalPs =
+                (java.sql.PreparedStatement)logic;
         assertNotNull(logicalPs.getMetaData());
         ps.close();
         try {
@@ -227,24 +220,29 @@ public class LogicalStatementEntityTest
             throws SQLException {
         // Initial setup.
         JDBCStatementCache cache = new JDBCStatementCache(2);
-        final String schema = "APP";
-        java.sql.PreparedStatement ps1 = prepareStatement("values 1");
-        java.sql.PreparedStatement ps2 = prepareStatement("values 2");
-        java.sql.PreparedStatement ps3 = prepareStatement("values 3");
-        StatementKey stmtKey1 = StatementKeyFactory.newPrepared(
-                "values 1", schema, getConnection().getHoldability());
-        StatementKey stmtKey2 = StatementKeyFactory.newPrepared(
-                "values 2", schema, getConnection().getHoldability());
-        StatementKey stmtKey3 = StatementKeyFactory.newPrepared(
-                "values 3", schema, getConnection().getHoldability());
+        final String sql1 = "values 1";
+        final String sql2 = "values 2";
+        final String sql3 = "values 3";
+        // Create three physical prepares statements.
+        java.sql.PreparedStatement ps1 = prepareStatement(sql1);
+        java.sql.PreparedStatement ps2 = prepareStatement(sql2);
+        java.sql.PreparedStatement ps3 = prepareStatement(sql3);
+        // Insert the two first physical statements, the get logical wrappers.
+        StatementKey stmtKey1 = insertStatementIntoCache(cache, ps1, sql1);
+        StatementKey stmtKey2 = insertStatementIntoCache(cache, ps2, sql2);
         LogicalStatementEntity logic1 =
-                new LogicalStatementEntityClass(ps1, stmtKey1, cache);
+                createLogicalStatementEntity(sql1, false, cache);
         LogicalStatementEntity logic2 =
-                new LogicalStatementEntityClass(ps2, stmtKey2, cache);
+                createLogicalStatementEntity(sql2, false, cache);
+        // Insert the last physical statement and get the logical wrapper.
+        StatementKey stmtKey3 = insertStatementIntoCache(cache, ps3, sql3);
         LogicalStatementEntity logic3 =
-                new LogicalStatementEntityClass(ps3, stmtKey3, cache);
+                createLogicalStatementEntity(sql3, false, cache);
+        assertSame(ps1, logic1.getPhysPs());
+        assertSame(ps2, logic2.getPhysPs());
+        assertSame(ps3, logic3.getPhysPs());
 
-        // Close the two first logical statements, putting them into the cache.
+        // Close two first logical statements, putting them back into the cache.
         logic1.close();
         logic2.close();
         // Assert both of the statements are open.
@@ -278,21 +276,58 @@ public class LogicalStatementEntityTest
     }
 
     /**
-     * Class used to represent a logical statement.
+     * Creates a logical statement entity.
+     * <p>
+     * The entity represents a prepared statement.
+     *
+     * @param sql the SQL text
+     * @param isCallable whether the entity is a callable statement or not
+     * @param cache the statement cache to interact with.
+     * @return A logical statement entity.
+     * @throws SQLException if creating the entity fails
      */
-    private static class LogicalStatementEntityClass
-            extends LogicalStatementEntity {
-
-        /**
-         * Constructor creating an object handling closing of a logical
-         * prepared / callable statement.
-         *
-         * @param ps underlying physical prepared / callable statement
-         */
-        public LogicalStatementEntityClass(java.sql.PreparedStatement ps,
-                                           StatementKey key,
-                                           JDBCStatementCache cache) {
-            super(ps, key, cache);
+    private LogicalStatementEntity createLogicalStatementEntity(
+                                        String sql,
+                                        boolean isCallable,
+                                        JDBCStatementCache cache)
+            throws SQLException {
+        StatementCacheInteractor cacheInteractor =
+                new StatementCacheInteractor(
+                    cache,
+                    ((org.apache.derby.client.am.Connection)getConnection()));
+        LogicalStatementEntity entity;
+        if (isCallable) {
+            entity = (LogicalStatementEntity)cacheInteractor.prepareCall(sql);
+        } else {
+            entity =(LogicalStatementEntity)
+                    cacheInteractor.prepareStatement(sql);
         }
+        return entity;
+    }
+
+    /**
+     * Insers the statement into the cache.
+     *
+     * @param cache the to insert into
+     * @param ps the statement to insert
+     * @param sql the SQL text of the statement
+     * @return The key the statement was inserted with.
+     *
+     * @throws SQLException if getting the connection holdability fails
+     */
+    private StatementKey insertStatementIntoCache(
+                            JDBCStatementCache cache,
+                            java.sql.PreparedStatement ps,
+                            String sql) throws SQLException {
+        StatementKey key;
+        if (ps instanceof java.sql.CallableStatement) {
+            key = StatementKeyFactory.newCallable(sql, "APP",
+                    getConnection().getHoldability());
+        } else {
+            key = StatementKeyFactory.newPrepared(sql, "APP",
+                    getConnection().getHoldability());
+        }
+        assertTrue(cache.cacheStatement(key, ps));
+        return key;
     }
 }
