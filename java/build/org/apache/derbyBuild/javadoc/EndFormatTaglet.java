@@ -24,8 +24,6 @@ import com.sun.tools.doclets.Taglet;
 import com.sun.javadoc.*;
 import java.util.Map;
 
-// Adapted from ToDoTaglet.java, Copyright  2002.
-
 public class EndFormatTaglet implements Taglet {
     private String NAME = "end_format";
     private String ROWNAME = "end_format";
