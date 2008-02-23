@@ -116,7 +116,7 @@ public class CachingLogicalConnection40
             // For now, disable statement pooling and fail in sane builds only,
             // or in the relevant parts of the driver if still not supported.
             ps = super.prepareStatement(sql, columnIndexes);
-            // If we get this far, the driver rest of the driver has extended
+            // If we get this far, the rest of the driver has extended
             // its capabilities and this class is lagging behind...
             if (SanityManager.DEBUG) {
                 SanityManager.THROWASSERT("CachingLogicalConnection is " +
@@ -145,7 +145,7 @@ public class CachingLogicalConnection40
             // For now, disable statement pooling and fail in sane builds only,
             // or in the relevant parts of the driver if still not supported.
             ps = super.prepareStatement(sql, columnNames);
-            // If we get this far, the driver rest of the driver has extended
+            // If we get this far, the rest of the driver has extended
             // its capabilities and this class is lagging behind...
             if (SanityManager.DEBUG) {
                 SanityManager.THROWASSERT("CachingLogicalConnection is " +
