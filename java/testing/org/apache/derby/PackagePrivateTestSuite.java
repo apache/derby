@@ -40,6 +40,7 @@ public class PackagePrivateTestSuite
         TestSuite suite = new TestSuite("Package-private tests");
 
         suite.addTest(org.apache.derby.impl.jdbc._Suite.suite());
+        suite.addTest(org.apache.derby.client.am._Suite.suite());
 
         return suite;
     }
