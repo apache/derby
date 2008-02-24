@@ -821,12 +821,10 @@ public abstract class ResultSetNode extends QueryTreeNode
 	ResultSetNode genProjectRestrictForReordering()
 				throws StandardException
 	{
-		ResultColumnList	prRCList;
-
 		/* We get a shallow copy of the ResultColumnList and its 
 		 * ResultColumns.  (Copy maintains ResultColumn.expression for now.)
 		 */
-		prRCList = resultColumns;
+        ResultColumnList prRCList = resultColumns;
 		resultColumns = resultColumns.copyListAndObjects();
 
 		/* Replace ResultColumn.expression with new VirtualColumnNodes
@@ -1344,12 +1342,10 @@ public abstract class ResultSetNode extends QueryTreeNode
 	public ResultSetNode genProjectRestrict()
 				throws StandardException
 	{
-		ResultColumnList	prRCList;
-
 		/* We get a shallow copy of the ResultColumnList and its 
 		 * ResultColumns.  (Copy maintains ResultColumn.expression for now.)
 		 */
-		prRCList = resultColumns;
+        ResultColumnList prRCList = resultColumns;
 		resultColumns = resultColumns.copyListAndObjects();
 
 		/* Replace ResultColumn.expression with new VirtualColumnNodes
@@ -1401,7 +1397,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 	}
 
 	/** 
-	 * Put a NormalizeResultSetNode on top of the specified ResultSetNode.
+	 * Put a NormalizeResultSetNode on top of this ResultSetNode.
 	 * ColumnReferences must continue to point to the same ResultColumn, so
 	 * that ResultColumn must percolate up to the new PRN.  However,
 	 * that ResultColumn will point to a new expression, a VirtualColumnNode, 
@@ -1418,7 +1414,6 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 * sort has to agree with what the sort expects.
 	 * (insert into t1 (smallintcol) values 1 union all values 2;
 	 *
-	 * @param normalizeChild	Child result set for new NRSN.
 	 * @param forUpdate			If the normalize result set is being used as a
 	 * child for an update statement, then this is true. 
 	 *
@@ -1428,18 +1423,14 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 * @see NormalizeResultSetNode#init
 	 */
 
-	public NormalizeResultSetNode 
-		genNormalizeResultSetNode(ResultSetNode	normalizeChild, 
-								  boolean forUpdate)
+	NormalizeResultSetNode 
+		genNormalizeResultSetNode(boolean forUpdate)
 				throws StandardException
 	{
-		NormalizeResultSetNode	nrsn;
-		ResultColumnList		prRCList;
-
 		/* We get a shallow copy of the ResultColumnList and its 
 		 * ResultColumns.  (Copy maintains ResultColumn.expression for now.)
 		 */
-		prRCList = resultColumns;
+        ResultColumnList prRCList = resultColumns;
 		resultColumns = resultColumns.copyListAndObjects();
 
 		// Remove any columns that were generated.
@@ -1453,16 +1444,17 @@ public abstract class ResultSetNode extends QueryTreeNode
 
 		
 		/* Finally, we create the new NormalizeResultSetNode */
-		nrsn = (NormalizeResultSetNode) getNodeFactory().getNode(
+        NormalizeResultSetNode nrsn =
+            (NormalizeResultSetNode) getNodeFactory().getNode(
 								C_NodeTypes.NORMALIZE_RESULT_SET_NODE,
-								normalizeChild,
+								this,
 								prRCList,
 								null, new Boolean(forUpdate),
 								getContextManager());
 		// Propagate the referenced table map if it's already been created
-		if (normalizeChild.getReferencedTableMap() != null)
+		if (getReferencedTableMap() != null)
 		{
-			nrsn.setReferencedTableMap((JBitSet) normalizeChild.getReferencedTableMap().clone());
+			nrsn.setReferencedTableMap((JBitSet) getReferencedTableMap().clone());
 		}
 		return nrsn;
 	}

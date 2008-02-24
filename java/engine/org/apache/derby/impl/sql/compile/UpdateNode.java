@@ -548,7 +548,7 @@ public final class UpdateNode extends DMLModStatementNode
 		 */
 		if (! resultColumnList.columnTypesAndLengthsMatch())
  		{
-			resultSet = resultSet.genNormalizeResultSetNode(resultSet, true);
+			resultSet = resultSet.genNormalizeResultSetNode(true);
 			resultColumnList.copyTypesAndLengthsToSource(resultSet.getResultColumns());
 								
  			if (hasCheckConstraints(dataDictionary, targetTableDescriptor))

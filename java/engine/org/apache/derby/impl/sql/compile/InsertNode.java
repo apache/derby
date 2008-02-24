@@ -422,7 +422,7 @@ public final class InsertNode extends DMLModStatementNode
 		if (! resultColumnList.columnTypesAndLengthsMatch(
 												resultSet.getResultColumns()))
 		{
-			resultSet = resultSet.genNormalizeResultSetNode(resultSet, false);
+			resultSet = resultSet.genNormalizeResultSetNode(false);
 			resultColumnList.copyTypesAndLengthsToSource(resultSet.getResultColumns());
 		}
 

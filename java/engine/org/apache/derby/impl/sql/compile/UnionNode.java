@@ -410,7 +410,7 @@ public class UnionNode extends SetOperatorNode
 			 */
 			if (! columnTypesAndLengthsMatch())
 			{
-				treeTop = genNormalizeResultSetNode(this, false);	
+				treeTop = genNormalizeResultSetNode(false);	
 			}
 
 			treeTop = (ResultSetNode) getNodeFactory().getNode(
