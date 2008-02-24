@@ -50,10 +50,17 @@ import org.apache.derby.iapi.util.StringUtil;
  * statements, the result column represents an column in a stored table.
  * So, a ResultColumn has to be bound differently depending on the type of
  * statement it appears in.
- * 
+ * <P>
  * The type of the ResultColumn can differ from its underlying expression,
  * for example in certain joins the ResultColumn can be nullable even if
- * its underlying column is not.
+ * its underlying column is not. In an INSERT or UPDATE the ResultColumn
+ * will represent the type of the column in the table, the type of
+ * the underlying expresion will be the type of the source of the
+ * value to be insert or updated. The method columnTypeAndLengthMatch()
+ * can be used to detect when normalization is required between
+ * the expression and the tyoe of ResultColumn. This class does
+ * not implement any type normalization (conversion), this is
+ * typically handled by a NormalizeResultSetNode.
  *
  */
 
@@ -911,7 +918,7 @@ public class ResultColumn extends ValueNode
 		mb.upCast(ClassName.DataValueDescriptor);
 	}
 
-	/*
+	/**
 	** Check whether the column length and type of this result column
 	** match the expression under the columns.  This is useful for
 	** INSERT and UPDATE statements.  For SELECT statements this method
@@ -921,7 +928,6 @@ public class ResultColumn extends ValueNode
 	** @return	true means the column matches its expressions,
 	**			false means it doesn't match.
 	*/
-
 	boolean columnTypeAndLengthMatch()
 		throws StandardException
 	{
@@ -947,9 +953,6 @@ public class ResultColumn extends ValueNode
         
         
         DataTypeDescriptor  expressionType = getExpression().getTypeServices();
-        
-        if (expressionType == null)
-            System.out.println(getExpression().getClass());
         
         if (!getTypeServices().isExactTypeAndLengthMatch(expressionType))
             return false;
