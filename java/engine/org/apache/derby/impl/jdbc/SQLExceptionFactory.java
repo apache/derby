@@ -56,7 +56,7 @@ public class SQLExceptionFactory {
 	 */
 	public	SQLException	getArgumentFerry(SQLException se)
 	{
-		return se;
+		return StandardException.getArgumentFerry(se);
 	}
 
 }

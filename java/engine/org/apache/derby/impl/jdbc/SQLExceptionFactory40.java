@@ -102,22 +102,6 @@ public class SQLExceptionFactory40 extends SQLExceptionFactory {
     }        
 
 	/**
-	 * Unpack the exception, looking for an EmbedSQLException which carries
-	 * the Derby messageID and args which we will serialize across DRDA so
-	 * that the client can reconstitute a SQLException with appropriate text.
-	 * If we are running JDBC4, then the
-	 * passed-in exception will hopefully wrap an informative EmbedSQLException.
-	 * See wrapArgsForTransportAcrossDRDA() below.
-	 */
-	public	SQLException	getArgumentFerry(SQLException se)
-	{
-		Throwable	cause = se.getCause();
-
-		if ( (cause == null) || !(cause instanceof EmbedSQLException ))	{ return se; }
-		else	{ return (SQLException) cause; }
-	}
-
-	/**
 	 * <p>
 	 * The following method helps handle DERBY-1178. The problem is that we may
 	 * need to serialize our final SQLException across the DRDA network layer.

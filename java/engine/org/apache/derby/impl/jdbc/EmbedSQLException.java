@@ -21,11 +21,10 @@
 
 package org.apache.derby.impl.jdbc;
 
-import org.apache.derby.iapi.error.StandardException;
-
+import org.apache.derby.iapi.error.DerbySQLException;
 import java.sql.SQLException;
-import java.io.PrintStream;
-import java.io.PrintWriter;
+
+import org.apache.derby.iapi.error.StandardException;
 
 /**
 	This class is what gets send over the wire in client/server
@@ -37,7 +36,7 @@ import java.io.PrintWriter;
     on the server side and it also decreases the size of client
     jar file tremendously.
 */
-public class EmbedSQLException extends SQLException {
+public class EmbedSQLException extends SQLException implements DerbySQLException {
 
 	private transient Object[] arguments;
 	private String messageId;
