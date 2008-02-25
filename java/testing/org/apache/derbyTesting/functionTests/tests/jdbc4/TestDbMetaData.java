@@ -99,7 +99,11 @@ public class TestDbMetaData extends BaseJDBCTestCase {
     }
 
     public void testAutoCommitFailureClosesAllResultSets() throws SQLException {
-        assertFalse(meta.autoCommitFailureClosesAllResultSets());
+        if (usingEmbedded()) {
+            assertTrue(meta.autoCommitFailureClosesAllResultSets());
+        } else {
+            assertFalse(meta.autoCommitFailureClosesAllResultSets());
+        }
     }
 
     public void testGetClientInfoProperties() throws SQLException {
@@ -464,33 +468,57 @@ public class TestDbMetaData extends BaseJDBCTestCase {
      * @exception SQLException if an unexpected database error occurs
      */
     public void testAutoCommitFailure() throws SQLException {
-        Connection con = getConnection();
-        con.setAutoCommit(true);
 
-        Statement s1 =
-            con.createStatement(ResultSet.TYPE_FORWARD_ONLY,
-                                ResultSet.CONCUR_READ_ONLY,
-                                ResultSet.HOLD_CURSORS_OVER_COMMIT);
-        ResultSet resultSet = s1.executeQuery("VALUES (1, 2), (3, 4)");
+        // IMPORTANT: use auto-commit
+        getConnection().setAutoCommit(true);
 
-        Statement s2 = con.createStatement();
+        ResultSet[] rss = new ResultSet[2];
+        // Use different statements so that both result sets are kept open
+        rss[0] = createStatement().executeQuery("VALUES 1, 2, 3, 4");
+        rss[1] = createStatement().executeQuery(
+                "SELECT * FROM SYSIBM.SYSDUMMY1");
+
+        // We want to test holdable result sets
+        for (ResultSet rs : rss) {
+            assertEquals("ResultSet should be holdable",
+                         ResultSet.HOLD_CURSORS_OVER_COMMIT,
+                         rs.getHoldability());
+        }
+
         try {
             String query =
                 "SELECT dummy, nonexistent, phony FROM imaginarytable34521";
-            s2.execute(query);
+            // Create a new statement so we don't close any of the open result
+            // sets by re-executing a statement.
+            createStatement().execute(query);
             fail("Query didn't fail.");
         } catch (SQLException e) {
             // should fail, but we don't care how
         }
 
+        int closedResultSets = 0;
+        for (ResultSet rs : rss) {
+            // check if an operation fails with "ResultSet is closed"
+            try {
+                rs.next();
+                // OK, didn't fail, ResultSet wasn't closed
+            } catch (SQLException sqle) {
+                assertSQLState("XCL16", sqle);
+                // OK, ResultSet is closed, increase counter
+                closedResultSets++;
+            }
+        }
+
+        boolean allResultSetsWereClosed = (closedResultSets == rss.length);
+
         assertEquals("autoCommitFailureClosesAllResultSets() returned value " +
                      "which doesn't match actual behaviour.",
-                     resultSet.isClosed(),
+                     allResultSetsWereClosed,
                      meta.autoCommitFailureClosesAllResultSets());
 
-        resultSet.close();
-        s1.close();
-        s2.close();
+        for (ResultSet rs : rss) {
+            rs.close();
+        }
     }
 
     public void testIsWrapperForPositive() throws SQLException {
