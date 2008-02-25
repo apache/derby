@@ -89,14 +89,13 @@ final class GenericStatementContext
 		this.lcc = lcc;
 		this.tc = tc;
 
-		internalSavePointName = "ISSP" + hashCode();
-
 		if (SanityManager.DEBUG)
 		{
 			SanityManager.ASSERT((lcc != null),
 					"Failed to get language connection context");
 		}
 
+        internalSavePointName = lcc.getUniqueSavepointName();
 	}
 
 	// StatementContext Interface
