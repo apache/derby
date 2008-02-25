@@ -46,7 +46,8 @@ import org.apache.derby.shared.common.sanity.SanityManager;
  * synchronized in the physical statement itself .
  */
 //@ThreadSafe
-class LogicalStatementEntity {
+abstract class LogicalStatementEntity
+        implements java.sql.Statement {
 
     /**
      * Tells if we're holding a callable statement or not.
@@ -103,6 +104,7 @@ class LogicalStatementEntity {
             this.hasCallableStmt = false;
             this.physicalCs = null;
         }
+        ((PreparedStatement)physicalPs).setOwner(this);
     }
 
     /**
@@ -153,6 +155,9 @@ class LogicalStatementEntity {
             // Nullify both references.
             physicalPs = null;
             physicalCs = null;
+
+            // Reset the owner of the physical statement.
+            temporaryPsRef.setOwner(null);
 
             // If the underlying statement has become closed, don't cache it.
             if (temporaryPsRef.isClosed()) {

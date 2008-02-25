@@ -3788,7 +3788,12 @@ public abstract class ResultSet implements java.sql.ResultSet,
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceExit(this, "getStatement", statement_);
         }
-        return statement_;
+        if (statement_.getOwner() != null) {
+            return statement_.getOwner();
+        } else {
+            return statement_;
+        }
+
     }
 
     //-------------------------- JDBC 3.0 ----------------------------------------

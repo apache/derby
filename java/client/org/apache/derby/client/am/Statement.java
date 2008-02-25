@@ -51,6 +51,8 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
     public Section section_;
     Agent agent_;
 
+    /** The owner of this statement, if any. */
+    private java.sql.Statement owner = null;
     ResultSet resultSet_;
 
     // Use -1, if there is no update count returned, ie. when result set is returned. 0 is a valid update count for DDL.
@@ -1561,6 +1563,23 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
         updateCount_ = updateCount;
     }
 
+    /**
+     * Designates the owner of this statement, typically a logical statement.
+     *
+     * @param owner the owning statement, if any
+     */
+    protected final void setOwner(java.sql.Statement owner) {
+        this.owner = owner;
+    }
+
+    /**
+     * Returns the owner of this statement, if any.
+     *
+     * @return The designated owner of this statement, or {@code null} if none.
+     */
+    final java.sql.Statement getOwner() {
+        return this.owner;
+    }
 
     private boolean willTickleServer(int number, boolean allowAutoCommits) throws SqlException {
         boolean requiresAutocommit = false;
