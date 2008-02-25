@@ -5228,7 +5228,17 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
      * and boot the database.
      */
     public void failoverSlave() {
+        if (!stopped) {
+            try {
+                flushAll();
+            } catch (StandardException ex) {
+            // do nothing
+            }
+        }
         inReplicationSlaveMode = false;
+        synchronized (slaveRecoveryMonitor) {
+            slaveRecoveryMonitor.notify();
+        }
     }
 
 	/**

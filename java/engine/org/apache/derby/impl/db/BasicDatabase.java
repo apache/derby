@@ -405,6 +405,10 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
         throw PublicAPI.wrapStandardException(se);
     }
     
+    public boolean isInSlaveMode() {
+        return false;
+    }
+    
     /**
      * @see org.apache.derby.database.Database#failover(String dbname).
      */

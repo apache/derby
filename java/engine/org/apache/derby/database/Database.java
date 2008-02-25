@@ -114,6 +114,12 @@ public interface Database
     public void failover(String dbname) throws SQLException;
 
     /**
+     * Returns true if this database is in replication slave mode,
+     * false otherwise
+     */
+    public boolean isInSlaveMode();
+
+    /**
      * Stop the replication slave role for the given database.
      * 
      * @exception SQLException Thrown on error

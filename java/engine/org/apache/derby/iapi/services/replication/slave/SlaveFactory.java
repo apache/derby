@@ -116,7 +116,8 @@ public interface SlaveFactory {
     /**
      * <p>
      * Used to turn this slave instance of the database into a normal
-     * instance that clients can connect to. This is typically done in
+     * instance that clients can connect to, assuming that the
+     * connection with the master is down. This is typically done in
      * cases where a fatal error has happened on the master instance
      * of the database, or when the master database is unreachable due
      * to network problems.
@@ -135,10 +136,12 @@ public interface SlaveFactory {
      * replication strategy used by the MasterFactory.
      * </p>
      *
+     * @exception StandardException Thrown if slave is connected with
+     * master
      * @see org.apache.derby.iapi.services.replication.master.MasterFactory
      * @see org.apache.derby.impl.services.replication.master.MasterController#flushedTo
      */
-    public void failover();
+    public void failover() throws StandardException;
     
     /**
      * Check whether or not slave replication mode has been

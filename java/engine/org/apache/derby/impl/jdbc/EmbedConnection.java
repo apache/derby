@@ -235,6 +235,25 @@ public abstract class EmbedConnection implements EngineConnection
 											 isHardUpgradeBoot(info));
 			boolean isStartSlaveBoot = isStartReplicationSlaveBoot(info);
 
+            boolean isFailoverMasterBoot = false;
+            boolean isFailoverSlaveBoot = false;
+            if (isReplicationFailover(info)) {
+                // Check that the database has been booted - otherwise throw 
+                // exception.
+                checkDatabaseBooted(database, 
+                                    Attribute.REPLICATION_FAILOVER, 
+                                    tr.getDBName());
+                // The failover command is the same for master and slave 
+                // databases. If the db is not in slave replication mode, we
+                // assume that it is in master mode. If not in any replication 
+                // mode, the connection attempt will fail with an exception
+                if (database.isInSlaveMode()) {
+                    isFailoverSlaveBoot = true;
+                } else {
+                    isFailoverMasterBoot = true;
+                }
+            }
+
 			// Save original properties if we modified them for
 			// two phase encryption or upgrade boot.
 			Properties savedInfo = null;
@@ -275,6 +294,12 @@ public abstract class EmbedConnection implements EngineConnection
             } else if (isInternalShutdownSlaveDatabase(info)) {
                 internalStopReplicationSlave(database, info);
                 return;
+            } else if (isFailoverSlaveBoot) {
+                // failover on slave must be done before tr.startTransaction
+                // because startTrans will try to establish a connection to 
+                // the database through Database.setupConnection, which throws
+                // an exception in slave mode.
+                handleFailoverSlave(database);
             }
 
 			if (database != null)
@@ -348,8 +373,11 @@ public abstract class EmbedConnection implements EngineConnection
 				// Stopping replication master can be done
 				// simultaneously with a database shutdown operation
 				handleStopReplicationMaster(tr, info);
-			} else if (isReplicationFailover(info)) {
-				handleFailover(tr, info);
+			} else if (isFailoverMasterBoot) {
+				// failover on master must be done after tr.startTransaction
+				// because that will establish a connection with the database,
+				// which in turn is used to check authentication/authorization
+				handleFailoverMaster(tr);
 			}
 
 			if (isTwoPhaseEncryptionBoot ||
@@ -482,6 +510,28 @@ public abstract class EmbedConnection implements EngineConnection
 		}
 	}
 
+    /**
+     * Check that a database has already been booted. Throws an exception 
+     * otherwise
+     *
+     * @param database The database that should have been booted
+     * @param operation The operation that requires that the database has 
+     * already been booted, used in the exception message if not booted
+     * @param dbname The name of the database that should have been booted, 
+     * used in the exception message if not booted
+     * @throws java.sql.SQLException thrown if database is not booted
+     */
+    private void checkDatabaseBooted(Database database,
+                                     String operation, 
+                                     String dbname) throws SQLException {
+        if (database == null) {
+            // Do not clear the TransactionResource context. It will
+            // be restored as part of the finally clause of the constructor.
+            this.setInactive();
+            throw newSQLException(SQLState.REPLICATION_DB_NOT_BOOTED, 
+                                  operation, dbname);
+        }
+    }
 
 	/**
 	  Examine the attributes set provided for illegal boot
@@ -736,12 +786,10 @@ public abstract class EmbedConnection implements EngineConnection
         // Cannot get the database by using getTR().getDatabase()
         // because getTR().setDatabase() has not been called in the
         // constructor at this point.
-        if (database == null) {
-            // Do not clear the TransactionResource context. It will
-            // be restored as part of the finally clause of the constructor.
-            this.setInactive();
-            throw newSQLException(SQLState.REPLICATION_NOT_IN_SLAVE_MODE);
-        }
+
+        // Check that the database has been booted - otherwise throw exception
+        checkDatabaseBooted(database, Attribute.REPLICATION_STOP_SLAVE, 
+                            tr.getDBName());
 
         database.stopReplicationSlave();
         // throw an exception to the client
@@ -777,12 +825,11 @@ public abstract class EmbedConnection implements EngineConnection
         // Cannot get the database by using getTR().getDatabase()
         // because getTR().setDatabase() has not been called in the
         // constructor at this point.
-        if (database == null) {
-            // Do not clear the TransactionResource context. It will
-            // be restored as part of the finally clause of the constructor.
-            this.setInactive();
-            throw newSQLException(SQLState.REPLICATION_NOT_IN_SLAVE_MODE);
-        }
+
+        // Check that the database has been booted - otherwise throw exception.
+        checkDatabaseBooted(database, 
+                            Attribute.REPLICATION_INTERNAL_SHUTDOWN_SLAVE,
+                            tr.getDBName());
 
         // We should only get here if the connection is made from
         // inside SlaveDatabase. To verify, we ask SlaveDatabase
@@ -805,7 +852,6 @@ public abstract class EmbedConnection implements EngineConnection
      * 
      * @param tr an instance of TransactionResourceImpl Links the connection 
      *           to the database.
-     * @param p The Attribute set.
      * @throws java.sql.SQLException 1) Thrown upon a authorization failure 
      *                           2) If the failover succeeds, an exception is
      *                              thrown to indicate that the master database
@@ -813,8 +859,7 @@ public abstract class EmbedConnection implements EngineConnection
      *                           3) If a failure occurs during network 
      *                              communication with slave.
      */
-    private void handleFailover(TransactionResourceImpl tr,
-                                             Properties p)
+    private void handleFailoverMaster(TransactionResourceImpl tr)
         throws SQLException {
 
         // If authorization is turned on, we need to check if this
@@ -835,6 +880,34 @@ public abstract class EmbedConnection implements EngineConnection
         tr.getDatabase().failover(tr.getDBName());
     }
 
+    /**
+     * Used to perform failover on a database in slave replication
+     * mode. Performs failover, provided that the database is in
+     * replication slave mode and has lost connection with the master
+     * database. If the connection with the master is up, the call to
+     * this method will be refused by raising an exception. The reason
+     * for refusing the failover command if the slave is connected
+     * with the master is that we cannot authenticate the user on the
+     * slave side (because the slave database has not been fully
+     * booted) whereas authentication is not a problem on the master
+     * side. If not refused, this method will apply all operations
+     * received from the master and complete the booting of the
+     * database so that it can be connected to.
+     * 
+     * @param database The database the failover operation will be
+     * performed on
+     * @exception SQLException Thrown on error, if not in replication 
+     * slave mode or if the network connection with the master is not down
+     */
+    private void handleFailoverSlave(Database database)
+        throws SQLException {
+
+        // We cannot check authentication and authorization for
+        // databases in slave mode since the AuthenticationService has
+        // not been booted for the database
+
+        database.failover(getTR().getDBName());
+    }
 	/**
 	 * Remove any encryption or upgarde properties from the given properties
 	 *

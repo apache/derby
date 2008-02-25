@@ -35,7 +35,6 @@ import org.apache.derby.impl.store.raw.log.LogCounter;
 import org.apache.derby.iapi.store.raw.log.LogFactory;
 import org.apache.derby.impl.store.raw.log.LogToFile;
 
-import org.apache.derby.impl.db.SlaveDatabase;
 import org.apache.derby.impl.services.replication.ReplicationLogger;
 import org.apache.derby.impl.services.replication.net.ReplicationMessage;
 import org.apache.derby.impl.services.replication.net.ReplicationMessageReceive;
@@ -75,7 +74,6 @@ public class SlaveController
     private RawStoreFactory rawStoreFactory;
     private LogToFile logToFile;
     private ReplicationMessageReceive receiver;
-    private SlaveDatabase slaveDb;
 
     private volatile boolean connectedToMaster = false;
     private String slavehost;
@@ -281,37 +279,27 @@ public class SlaveController
             throws StandardException {
         if (!forcedStop && connectedToMaster){
             throw StandardException.newException(
-                    SQLState.SLAVE_STOP_DENIED_WHILE_CONNECTED);
+                    SQLState.SLAVE_OPERATION_DENIED_WHILE_CONNECTED);
         }
         stopSlave();
     }
 
+    public void failover() throws StandardException {
+        if (connectedToMaster){
+            throw StandardException.newException(
+                SQLState.SLAVE_OPERATION_DENIED_WHILE_CONNECTED);
+        }
+        doFailover();
+    } 
+
     /**
-     * <p>
-     * Used to turn this slave instance of the database into a normal
-     * instance that clients can connect to. This is typically done in
-     * cases where a fatal error has happened on the master instance
-     * of the database, or when the master database is unreachable due
-     * to network problems.
-     * </p>
-     * <p>
-     * By calling failover, this slave instance of the database will
-     * be recovered so that all committed operations that have been
-     * received from the master are reflected here. On the other hand,
-     * operations from transactions where the commit log record has
-     * not been received from the master will not be reflected.
-     * </p>
-     * <p>
-     * Note that even though an operation has been executed (and even
-     * committed) on the master, it is not neccessarily reflected in
-     * the slave instance of the database. This depends on the
-     * replication strategy used by the MasterFactory.
-     * </p>
-     *
-     * @see org.apache.derby.iapi.services.replication.master.MasterFactory
-     * @see org.apache.derby.impl.services.replication.master.MasterController#flushedTo
+     * Performs failover on this database. May be called because a
+     * failover command has been received from the master, or because
+     * a client has requested a failover after the network connection
+     * with the master has been lost.
+     * @see SlaveFactory#failover
      */
-    public void failover() {
+    private void doFailover() {
         inReplicationSlaveMode = false;
         logToFile.failoverSlave();
         Monitor.logTextMessage
@@ -490,7 +478,7 @@ public class SlaveController
                         handleLogChunk(logChunk);
                         break;
                     case ReplicationMessage.TYPE_FAILOVER:
-                        failover();
+                        doFailover();
                         ReplicationMessage ack = new ReplicationMessage
                             (ReplicationMessage.TYPE_ACK, "failover succeeded");
                         receiver.sendMessage(ack);

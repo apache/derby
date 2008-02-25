@@ -170,6 +170,10 @@ public class SlaveDatabase extends BasicDatabase {
     ////////////////////////
     // Database interface //
     ////////////////////////
+    public boolean isInSlaveMode() {
+        return inReplicationSlaveMode;
+    }
+    
     public LanguageConnectionContext setupConnection(ContextManager cm, 
                                                      String user, 
                                                      String drdaID, 
@@ -249,6 +253,33 @@ public class SlaveDatabase extends BasicDatabase {
         slaveFac = null;
     }
 
+    public void failover(String dbname) throws SQLException {
+        try {
+            if (inReplicationSlaveMode) {
+                slaveFac.failover();
+                // SlaveFactory#failover will make the 
+                // SlaveDatabaseBootThread complete booting of the store 
+                // modules, and inReplicationSlaveMode will then be set to 
+                // false (see SlaveDatabaseBootThread#run). 
+                // Wait until store is completely booted before returning from 
+                // this method
+                while (inReplicationSlaveMode) {
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException ie) {
+                    // do nothing
+                    }
+                }
+            } else {
+                // If failover is performed on a master that has been a slave 
+                // earlier
+                super.failover(dbname);
+            }
+        } catch (StandardException se) {
+            throw PublicAPI.wrapStandardException(se);
+        }
+    }
+    
     /////////////////
     // Inner Class //
     /////////////////
