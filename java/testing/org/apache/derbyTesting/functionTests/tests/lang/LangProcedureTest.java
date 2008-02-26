@@ -1132,7 +1132,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
     }
 
     /**
-     * A test case for DERBY-3414. An explicit rollback inside the procedure
+     * A test case for DERBY-3304. An explicit rollback inside the procedure
      * should close all the resultsets created before the call to the
      * procedure and any resultsets created inside the procedure including
      * the dynamic resultsets.
@@ -1154,7 +1154,7 @@ public class LangProcedureTest extends BaseJDBCTestCase {
     }
 
     /**
-     * A test case for DERBY-3414. The procedure is attempting to insert a
+     * A test case for DERBY-3304. The procedure is attempting to insert a
      * duplicate key into a table which causes an internal rollback (vs a
      * user-initiated rollback). This internal rollback should close the
      * internal resultset associated with Java procedure along with closing
