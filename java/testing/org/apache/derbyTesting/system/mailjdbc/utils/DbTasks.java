@@ -44,7 +44,7 @@ import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetReader;
 import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetStream;
 import org.apache.derbyTesting.system.mailjdbc.MailJdbc;
 
-public class DbTasks extends Thread {
+public class DbTasks {
 
 	public static LogFile log = new LogFile("performance.out");
 
@@ -62,10 +62,8 @@ public class DbTasks extends Thread {
 
 	public static Random Rn = new Random();
 
-	public static Properties prop = new Properties();
-
 	public static void jdbcLoad(String driverType) {
-		setSystemProperty("derby.database.sqlAuthorization", "true");
+
 		if (driverType.equalsIgnoreCase("embedded")) {
 			setSystemProperty("driver", "org.apache.derby.jdbc.EmbeddedDriver");
 			MailJdbc.logAct
@@ -118,10 +116,9 @@ public class DbTasks extends Thread {
 		try {
 			// Returns the Connection object
 			Class.forName(System.getProperty("driver")).newInstance();
-			prop.setProperty("user", usr);
-			prop.setProperty("password", passwd);
+
 			Connection con = DriverManager.getConnection(System
-					.getProperty("database"), prop);
+					.getProperty("database"), usr, passwd);
 			return con;
 		} catch (Exception e) {
 			log.logMsg(LogFile.ERROR
@@ -172,12 +169,9 @@ public class DbTasks extends Thread {
 			log.logMsg(LogFile.INFO + thread_name + " : "
 					+ "Time taken to scan the entire REFRESH.INBOX for count :"
 					+ PerfTime.readableTime(e_select - s_select));
-			if (rs != null)
-				rs.close();
-			if (stmt != null)
-				stmt1.close();
-			if (rs1 != null)
-				rs1.close();
+			rs.close();
+			stmt1.close();
+			rs1.close();
 		} catch (SQLException sqe) {
 			MailJdbc.logAct.logMsg(LogFile.ERROR + thread_name + " : "
 					+ "SQL Exception while reading : " + sqe.getMessage());
@@ -210,8 +204,7 @@ public class DbTasks extends Thread {
 			} else
 				MailJdbc.logAct.logMsg(LogFile.INFO + thread_name + " : "
 						+ "no attachment");
-			if (rs != null)
-				rs.close();
+			rs.close();
 
 			long end = System.currentTimeMillis();
 			log.logMsg(LogFile.INFO + thread_name + " : "
@@ -233,10 +226,8 @@ public class DbTasks extends Thread {
 			log.logMsg(LogFile.INFO + thread_name + " : "
 					+ "Time taken to get the clob :"
 					+ PerfTime.readableTime(end_t - start_t));
-			if (rs != null)
-				rs.close();
-			if (stmt != null)
-				stmt.close();
+			rs.close();
+			stmt.close();
 			conn.commit();
 			conn.setAutoCommit(saveAutoCommit);
 		} catch (SQLException sqe) {
@@ -301,12 +292,9 @@ public class DbTasks extends Thread {
 			MailJdbc.logAct.logMsg(LogFile.INFO + thread_name + " : "
 					+ "The number of mails marked to be deleted  by user:"
 					+ delete_count);
-			if (rs != null)
-				rs.close();
-			if (updateUser != null)
-				updateUser.close();
-			if (stmt != null)
-				stmt.close();
+			rs.close();
+			updateUser.close();
+			stmt.close();
 			conn.commit();
 			conn.setAutoCommit(saveAutoCommit);
 		} catch (SQLException sqe) {
@@ -347,12 +335,9 @@ public class DbTasks extends Thread {
 			MailJdbc.logAct.logMsg(LogFile.INFO + thread_name + " : " + count
 					+ " rows deleted");
 			delete_count = delete_count + count;
-			if (deleteThread != null)
-				deleteThread.close();
-			if (rs != null)
-				rs.close();
-			if (stmt != null)
-				stmt.close();
+			deleteThread.close();
+			rs.close();
+			stmt.close();
 			conn.commit();
 			conn.setAutoCommit(saveAutoCommit);
 		} catch (SQLException sqe) {
@@ -406,12 +391,9 @@ public class DbTasks extends Thread {
 						+ "Mail with id : " + message_id
 						+ " is moved to folder with id : " + folder_id);
 			}
-			if (stmt != null)
-				stmt.close();
-			if (moveToFolder != null)
-				moveToFolder.close();
-			if (rs != null)
-				rs.close();
+			stmt.close();
+			moveToFolder.close();
+			rs.close();
 			conn.commit();
 			conn.setAutoCommit(saveAutoCommit);
 		} catch (SQLException sqe) {
@@ -479,8 +461,7 @@ public class DbTasks extends Thread {
 						insertFirst.setInt(5, rs.getInt(1) + 1);
 					}
 
-					if (rs != null)
-						rs.close();
+					rs.close();
 					conn
 							.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
 				} else
@@ -495,8 +476,7 @@ public class DbTasks extends Thread {
 					insert_count = insert_count + 1;
 				}
 			}
-			if (insertFirst != null)
-				insertFirst.close();
+			insertFirst.close();
 			conn.commit();
 			streamReader.close();
 
@@ -559,14 +539,10 @@ public class DbTasks extends Thread {
 					+ "Time taken to insert " + row_count + "attachments :"
 					+ PerfTime.readableTime(a_end - a_start));
 			id_count++;
-			if (rs != null)
-				rs.close();
-			if (stmt != null)
-				stmt.close();
-			if (stmt1 != null)
-				stmt1.close();
-			if (insertAttach != null)
-				insertAttach.close();
+			rs.close();
+			stmt.close();
+			stmt1.close();
+			insertAttach.close();
 			conn.commit();
 			conn.setAutoCommit(saveAutoCommit);
 		} catch (SQLException sqe) {
@@ -606,10 +582,8 @@ public class DbTasks extends Thread {
 			MailJdbc.logAct.logMsg(LogFile.INFO + thread_name + " : "
 					+ " number of mails deleted : " + count);
 			delete_count = delete_count + count;
-			if (deleteExp != null)
-				deleteExp.close();
-			if (selExp != null)
-				selExp.close();
+			deleteExp.close();
+			selExp.close();
 			conn.commit();
 			conn.setAutoCommit(saveAutoCommit);
 		} catch (SQLException sqe) {
@@ -735,20 +709,14 @@ public class DbTasks extends Thread {
 											+ idArray.get(i));
 
 				}
-				if (rs1 != null)
-					rs1.close();
+				rs1.close();
 			}
 			delete_count = delete_count + del_count;
-			if (rs != null)
-				rs.close();
-			if (stmt != null)
-				stmt.close();
-			if (stmt1 != null)
-				stmt1.close();
-			if (stmt2 != null)
-				stmt2.close();
-			if (stmt3 != null)
-				stmt3.close();
+			rs.close();
+			stmt.close();
+			stmt1.close();
+			stmt2.close();
+			stmt3.close();
 		} catch (Exception fe) {
 			MailJdbc.logAct.logMsg(LogFile.ERROR + thread_name + " :  "
 					+ fe.getMessage());
@@ -785,8 +753,7 @@ public class DbTasks extends Thread {
 			stmt.execute(Statements.grantExe5);
 			conn.commit();
 			conn.setAutoCommit(saveAutoCommit);
-			if (stmt != null)
-				stmt.close();
+			stmt.close();
 			MailJdbc.logAct.logMsg(LogFile.INFO + thread_name + " : "
 					+ "Finished Granting permissions");
 		} catch (Throwable sqe) {
