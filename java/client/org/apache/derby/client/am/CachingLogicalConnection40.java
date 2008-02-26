@@ -59,12 +59,14 @@ public class CachingLogicalConnection40
                 new StatementCacheInteractor(stmtCache, physicalConnection);
     }
 
-    public void close()
+    public synchronized void close()
             throws SQLException {
-        // Nullify reference to cache interactor to allow it to be GC'ed.
-        // It should not be used again when the logical connection is closed.
-        this.cacheInteractor = null;
-        super.close();
+        if (this.cacheInteractor != null) {
+            // Nullify reference to cache interactor to allow it to be GC'ed.
+            // It should not be used again, the logical connection is closed.
+            this.cacheInteractor = null;
+            super.close();
+        }
     }
 
     public synchronized PreparedStatement prepareStatement(String sql)
