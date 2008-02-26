@@ -72,6 +72,7 @@ public class TestConfiguration {
     private final static String DEFAULT_FRAMEWORK = "embedded";
     public final static String DEFAULT_HOSTNAME = "localhost";
     public final static String DEFAULT_SSL = "off";
+    public final static int DEFAULT_JMX_PORT = 9999; // 9999 is arbitrary
 
     public  final   static  String  TEST_DBO = "TEST_DBO";
 
@@ -92,6 +93,7 @@ public class TestConfiguration {
     private final static String KEY_VERBOSE = "derby.tests.debug";    
     private final static String KEY_TRACE = "derby.tests.trace";
     private final static String KEY_SSL = "ssl";
+    private final static String KEY_JMX_PORT = "jmxPort";
     
     /**
      * Simple count to provide a unique number for database
@@ -905,6 +907,7 @@ public class TestConfiguration {
         
         this.jdbcClient = JDBCClient.getDefaultEmbedded();
         this.ssl = null;
+        this.jmxPort = DEFAULT_JMX_PORT;
         url = createJDBCUrlWithDatabaseName(defaultDbName);
         initConnector(null);
  
@@ -924,6 +927,7 @@ public class TestConfiguration {
         this.isVerbose = copy.isVerbose;
         this.doTrace = copy.doTrace;
         this.port = copy.port;
+        this.jmxPort = copy.jmxPort;
         
         this.jdbcClient = copy.jdbcClient;
         this.hostName = copy.hostName;
@@ -946,6 +950,7 @@ public class TestConfiguration {
         this.isVerbose = copy.isVerbose;
         this.doTrace = copy.doTrace;
         this.port = port;
+        this.jmxPort = copy.jmxPort;
         
         this.jdbcClient = client;
         this.hostName = hostName;
@@ -977,6 +982,7 @@ public class TestConfiguration {
         this.isVerbose = copy.isVerbose;
         this.doTrace = copy.doTrace;
         this.port = copy.port;
+        this.jmxPort = copy.jmxPort;
         
         this.jdbcClient = copy.jdbcClient;
         this.hostName = copy.hostName;
@@ -1035,6 +1041,7 @@ public class TestConfiguration {
         this.isVerbose = copy.isVerbose;
         this.doTrace = copy.doTrace;
         this.port = copy.port;
+        this.jmxPort = copy.jmxPort;
         
         this.jdbcClient = copy.jdbcClient;
         this.hostName = copy.hostName;
@@ -1073,6 +1080,19 @@ public class TestConfiguration {
             }
         } else {
             port = DEFAULT_PORT;
+        }
+        String jmxPortStr = props.getProperty(KEY_JMX_PORT);
+        if (jmxPortStr != null) {
+            try {
+                jmxPort = Integer.parseInt(jmxPortStr);
+            } catch (NumberFormatException nfe) {
+                // We lose stacktrace here, but it is not important. 
+                throw new NumberFormatException(
+                        "JMX Port number must be an integer. Value: " 
+                        + jmxPortStr); 
+            }
+        } else {
+            jmxPort = DEFAULT_JMX_PORT;
         }
 
         ssl = props.getProperty(KEY_SSL);
@@ -1258,6 +1278,16 @@ public class TestConfiguration {
         else
             possiblePort = getPort() + 1;
         return possiblePort;
+    }
+    
+    /**
+     * Gets the value of the port number that may be used for "remote"
+     * JMX monitoring and management.
+     * @return the port number on which the JMX MBean server is listening for 
+     *         connections
+     */
+    public int getJmxPort() {
+        return jmxPort;
     }
 
     /**
@@ -1546,6 +1576,7 @@ public class TestConfiguration {
     private final int port;
     private final String hostName;
     private final JDBCClient jdbcClient;
+    private final int jmxPort;
     private boolean isVerbose;
     private boolean doTrace;
     private String ssl;
