@@ -147,7 +147,10 @@ public class ConnectionPoolDataSourceConnector implements Connector {
     }
 
     public void shutEngine() throws SQLException {
-        Assert.fail("shutdown engine not implemened");
+        ConnectionPoolDataSource tmpDs =
+                singleUseDS("shutdownDatabase", "shutdown");
+        JDBCDataSource.setBeanProperty(tmpDs, "databaseName", "");
+        tmpDs.getPooledConnection();
     }
     
     /**
