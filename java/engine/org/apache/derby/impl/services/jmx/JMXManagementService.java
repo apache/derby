@@ -93,19 +93,17 @@ public final class JMXManagementService implements ManagementService, ModuleCont
      * <LI> registering a Version mbean representing the system
      * </UL>
      */
-    public void boot(boolean create, Properties properties)
+    public synchronized void boot(boolean create, Properties properties)
             throws StandardException {
         
         registeredMbeans = new HashMap<ObjectName,StandardMBean>();
         
-        if (PropertyUtil.getSystemBoolean(Property.JMX)) {
-            findServer();
+        findServer();
              
-            myManagementBean = (ObjectName) registerMBean(this,
+        myManagementBean = (ObjectName) registerMBean(this,
                 ManagementMBean.class,
                 "type=Management");
-            myManagementServer = mbeanServer;
-        }
+        myManagementServer = mbeanServer;
         
         registerMBean(new Version(Monitor.getMonitor().getEngineVersion()),
                 VersionMBean.class,
