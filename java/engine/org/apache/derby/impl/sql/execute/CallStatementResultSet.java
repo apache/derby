@@ -169,8 +169,8 @@ class CallStatementResultSet extends NoRowsResultSetImpl
 	/**
 	 * @see org.apache.derby.iapi.sql.ResultSet#cleanUp
 	 */
-	public void	cleanUp() 
+	public void	cleanUp() throws StandardException
 	{
-		/* Nothing to do */
+			close();
 	}
 }
