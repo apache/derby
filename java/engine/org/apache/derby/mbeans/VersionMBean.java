@@ -45,7 +45,7 @@ public interface VersionMBean {
     
     public int getMajorVersion();
     public int getMinorVersion();
-    public int getMaintVersion();
+    public int getMaintenanceVersion();
     
     /**
      * Return the full version string.
@@ -54,7 +54,6 @@ public interface VersionMBean {
     public String getVersionString();
     
     public String getBuildNumber();
-    public int getBuildNumberAsInt();
     
     public boolean isBeta();
     public boolean isAlpha();

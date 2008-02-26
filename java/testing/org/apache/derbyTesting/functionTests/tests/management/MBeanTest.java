@@ -22,16 +22,27 @@
 package org.apache.derbyTesting.functionTests.tests.management;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 
 import javax.management.InstanceAlreadyExistsException;
+import javax.management.InstanceNotFoundException;
+import javax.management.JMException;
+import javax.management.MBeanException;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
+import javax.management.ReflectionException;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
 import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.NetworkServerTestSetup;
+import org.apache.derbyTesting.junit.SecurityManagerSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
@@ -42,6 +53,74 @@ abstract class MBeanTest extends BaseTestCase {
     
     public MBeanTest(String name) {
         super(name);
+    }
+    
+    protected static Test suite(Class testClass, String suiteName) {
+        
+        // TODO -
+        // Check for J2SE 5.0 or better? Or java.lang.management.ManagementFactory?
+        // Older VMs will get UnsupportedClassVersionError anyway...
+        
+        // Create a suite of all "test..." methods in the class.
+        TestSuite suite = new TestSuite(testClass,  suiteName);
+
+        /* Connecting to an MBean server using a URL requires setting up remote
+         * JMX in the JVM to which we want to connect. This is usually done by
+         * setting a few system properties at JVM startup.
+         * A quick solution is to set up a new network server JVM with
+         * the required jmx properties.
+         * A future improvement could be to fork a new JVM for embedded (?).
+         *
+         * This requires that the default security policy of the network server
+         * includes the permissions required to perform the actions of these 
+         * tests. Otherwise, we'd probably have to supply a custom policy file
+         * and specify this using additional command line properties at server 
+         * startup.
+         */
+        NetworkServerTestSetup networkServerTestSetup = 
+                new NetworkServerTestSetup (
+                        suite, // run all tests in this class in the same setup
+                        getCommandLineProperties(), // need to set up JMX in JVM
+                        new String[0], // no server arguments needed
+                        true,   // wait for the server to start properly
+                        new InputStream[1] // no need to check server output
+                );
+
+        /* Since the server will be started in a new process we need "execute" 
+         * FilePermission on all files (at least Java executables)...
+         * Will run without SecurityManager for now, but could probably add a 
+         * JMX specific policy file later. Or use the property trick reported
+         * on derby-dev 2008-02-26 and add the permission to the generic 
+         * policy.
+         */
+        Test testSetup = 
+                SecurityManagerSetup.noSecurityManager(networkServerTestSetup);
+        // this decorator makes sure the suite is empty if this configration
+        // does not support the network server:
+        return TestConfiguration.defaultServerDecorator(testSetup);
+    }
+    
+    // ---------- UTILITY METHODS ------------
+    
+    /**
+     * Returns a set of startup properties suitable for VersionMBeanTest.
+     * These properties are used to configure JMX in a different JVM.
+     * Will set up remote JMX using the port 9999 (TODO: make this 
+     * configurable), and with JMX security (authentication & SSL) disabled.
+     * 
+     * @return a set of Java system properties to be set on the command line
+     *         when starting a new JVM in order to enable remote JMX.
+     */
+    private static String[] getCommandLineProperties()
+    {
+        ArrayList<String> list = new ArrayList<String>();
+        list.add("com.sun.management.jmxremote.port=" 
+                + TestConfiguration.getCurrent().getJmxPort());
+        list.add("com.sun.management.jmxremote.authenticate=false");
+        list.add("com.sun.management.jmxremote.ssl=false");
+        String[] result = new String[list.size()];
+        list.toArray(result);
+        return result;
     }
     
   
@@ -109,21 +188,11 @@ abstract class MBeanTest extends BaseTestCase {
      * @throws Exception JMX-related exceptions if an unexpected error occurs.
      */
     protected void enableManagement() throws Exception {
-        // prepare the Management mbean. Use the same ObjectName that Derby uses
-        // by default, to avoid creating multiple instances of the same bean
-        ObjectName mgmtObjName 
-                = new ObjectName("org.apache.derby", "type", "Management");
-        // create/register the MBean. If the same MBean has already been
-        // registered with the MBeanServer, that MBean will be referenced.
-        //ObjectInstance mgmtObj = 
-        MBeanServerConnection serverConn = getMBeanServerConnection();
         
-        try {
-            serverConn.createMBean("org.apache.derby.mbeans.Management", 
-                    mgmtObjName);
-        } catch (InstanceAlreadyExistsException e) {
-            // Derby's ManagementMBean has already been created
-        }
+        ObjectName mgmtObjName = getApplicationManagementMBean();
+        
+        MBeanServerConnection serverConn = getMBeanServerConnection();
+
         // check the status of the management service
         Boolean active = (Boolean) 
                 serverConn.getAttribute(mgmtObjName, "ManagementActive");
@@ -143,6 +212,49 @@ abstract class MBeanTest extends BaseTestCase {
     }
     
     /**
+     * Get the ObjectName for the application
+     * created ManagementMBean. The MBean will be
+     * created if it is not already registered.
+     * @return
+     * @throws Exception
+     */
+    protected ObjectName getApplicationManagementMBean() throws Exception
+    {
+        // prepare the Management mbean. Use the same ObjectName that Derby uses
+        // by default, to avoid creating multiple instances of the same bean
+        ObjectName mgmtObjName 
+                = new ObjectName("org.apache.derby", "type", "Management");
+        // create/register the MBean. If the same MBean has already been
+        // registered with the MBeanServer, that MBean will be referenced.
+        //ObjectInstance mgmtObj = 
+        MBeanServerConnection serverConn = getMBeanServerConnection();
+        
+        if (!serverConn.isRegistered(mgmtObjName))
+        {
+        
+            serverConn.createMBean(
+                    "org.apache.derby.mbeans.Management", 
+                    mgmtObjName);
+        }
+        
+        return mgmtObjName;
+    }
+    
+    /**
+     * Invoke an operation with no arguments.
+     * @param objName MBean to operate on
+     * @param name Operation name.
+     */
+    protected void invokeOperation(ObjectName objName, String name)
+        throws Exception
+    {
+        getMBeanServerConnection().invoke(
+                objName, 
+                name, 
+                new Object[0], new String[0]); // no arguments
+    }
+    
+    /**
      * Gets the value of a given attribute that is exposed by the MBean 
      * represented by the given object name.
      * @param objName the object name defining a specific MBean instance
@@ -154,6 +266,14 @@ abstract class MBeanTest extends BaseTestCase {
             throws Exception {
         
         return getMBeanServerConnection().getAttribute(objName, name);
+    }
+    
+    protected void assertBooleanAttribute(boolean expected,
+            ObjectName objName, String name) throws Exception
+    {
+        Boolean bool = (Boolean) getAttribute(objName, name);
+        assertNotNull(bool);
+        assertEquals(expected, bool.booleanValue());
     }
     
     /**

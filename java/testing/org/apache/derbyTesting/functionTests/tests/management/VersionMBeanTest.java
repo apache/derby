@@ -57,75 +57,11 @@ public class VersionMBeanTest extends MBeanTest {
     }
     
     public static Test suite() {
-                
-        // TODO -
-        // Check for J2SE 5.0 or better? Or java.lang.management.ManagementFactory?
-        // Older VMs will get UnsupportedClassVersionError anyway...
         
-        // Create a suite of all "test..." methods in this class.
-        TestSuite suite = new TestSuite(VersionMBeanTest.class, 
+        return MBeanTest.suite(VersionMBeanTest.class, 
                                         "VersionMBeanTest:client");
-
-        /* Connecting to an MBean server using a URL requires setting up remote
-         * JMX in the JVM to which we want to connect. This is usually done by
-         * setting a few system properties at JVM startup.
-         * A quick solution is to set up a new network server JVM with
-         * the required jmx properties.
-         * A future improvement could be to fork a new JVM for embedded (?).
-         *
-         * This requires that the default security policy of the network server
-         * includes the permissions required to perform the actions of these 
-         * tests. Otherwise, we'd probably have to supply a custom policy file
-         * and specify this using additional command line properties at server 
-         * startup.
-         */
-        NetworkServerTestSetup networkServerTestSetup = 
-                new NetworkServerTestSetup (
-                        suite, // run all tests in this class in the same setup
-                        getCommandLineProperties(), // need to set up JMX in JVM
-                        new String[0], // no server arguments needed
-                        true,   // wait for the server to start properly
-                        new InputStream[1] // no need to check server output
-                );
-
-        /* Since the server will be started in a new process we need "execute" 
-         * FilePermission on all files (at least Java executables)...
-         * Will run without SecurityManager for now, but could probably add a 
-         * JMX specific policy file later. Or use the property trick reported
-         * on derby-dev 2008-02-26 and add the permission to the generic 
-         * policy.
-         */
-        Test testSetup = 
-                SecurityManagerSetup.noSecurityManager(networkServerTestSetup);
-        // this decorator makes sure the suite is empty if this configration
-        // does not support the network server:
-        return TestConfiguration.defaultServerDecorator(testSetup);
     }
     
-    // ---------- UTILITY METHODS ------------
-    
-    /**
-     * Returns a set of startup properties suitable for VersionMBeanTest.
-     * These properties are used to configure JMX in a different JVM.
-     * Will set up remote JMX using the port 9999 (TODO: make this 
-     * configurable), and with JMX security (authentication & SSL) disabled.
-     * 
-     * @return a set of Java system properties to be set on the command line
-     *         when starting a new JVM in order to enable remote JMX.
-     */
-    private static String[] getCommandLineProperties()
-    {
-        ArrayList<String> list = new ArrayList<String>();
-        list.add("com.sun.management.jmxremote.port=" 
-                + TestConfiguration.getCurrent().getJmxPort());
-        list.add("com.sun.management.jmxremote.authenticate=false");
-        list.add("com.sun.management.jmxremote.ssl=false");
-        String[] result = new String[list.size()];
-        list.toArray(result);
-        return result;
-    }
-    
-
     /**
      * <p>
      * Creates an object name instance for the MBean whose object name's textual

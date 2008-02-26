@@ -63,16 +63,12 @@ public class Version implements VersionMBean {
         return versionInfo.getMinorVersion();
     }
     
-    public int getMaintVersion(){
+    public int getMaintenanceVersion(){
         return versionInfo.getMaintVersion();
     }
     
     public String getBuildNumber(){
         return versionInfo.getBuildNumber();
-    }
-    
-    public int getBuildNumberAsInt(){
-        return versionInfo.getBuildNumberAsInt();
     }
     
     public boolean isBeta(){
