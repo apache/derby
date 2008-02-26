@@ -554,7 +554,8 @@ final class ClockPolicy implements ReplacementPolicy {
      * by a single thread at a time, and should not be called concurrently
      * with <code>trimMe()</code>.
      *
-     * @return <code>true</code> if the
+     * @return {@code true} if the clock shrunk as a result of calling this
+     * method
      */
     private boolean shrinkMe() {
 
