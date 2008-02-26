@@ -828,8 +828,29 @@ public class LangProcedureTest extends BaseJDBCTestCase {
             JDBC.assertDrainResults(rs);
             JDBC.assertNoMoreResults(drs1);
             
-            s.execute("drop table dellater1");
-            s.execute("drop table dellater2");
+            //Create a procedure which does an insert into a table. Then call 
+            //it with parameters such that insert will fail because of 
+            //duplicate key. The procedure also has couple select statements
+            //The exception thrown for duplicate key should close the
+            //resultsets associated with select statement and we should be
+            //able to drop the tables used in the select queries without
+            //running into locking issues.
+            s
+            .execute("create procedure insertCausingRollback"+
+            		"(p1 int, p2 CHAR(20))  MODIFIES SQL DATA "+
+            		"dynamic result sets 1 language java external "+
+            		"name 'org.apache.derbyTesting.functionTests.tests.lang.LangProcedureTest.insertCausingRollback' "+
+            		"parameter style java");
+            s.executeUpdate("CREATE TABLE DELLATER3(c31 int)");
+            s.executeUpdate("INSERT INTO DELLATER3 VALUES(1),(2),(3),(4)");
+            conn.commit();
+            drs1 = prepareCall("CALL insertCausingRollback(3,'3')");
+            assertStatementError("23505",drs1);
+            JDBC.assertNoMoreResults(drs1);
+            s.execute("DROP TABLE DELLATER1");
+            s.execute("DROP TABLE DELLATER2");
+            s.execute("DROP TABLE DELLATER3");
+
             conn.setAutoCommit(oldAutoCommit);
         }
 
@@ -1180,6 +1201,51 @@ public class LangProcedureTest extends BaseJDBCTestCase {
         		"select * from dellater1 where i = ?");
         ps.setInt(1, p1);
         data2[0] = ps.executeQuery();
+        conn.close();
+    }
+
+    /**
+     * A test case for DERBY-3414. The procedure is attempting to insert a
+     * duplicate key into a table which causes an internal rollback (vs a
+     * user-initiated rollback). This internal rollback should close the
+     * internal resultset associated with Java procedure along with closing
+     * the resulsets for 2 SELECT queries.
+     * 
+     * @param p1
+     * @param p2
+     * @param data
+     * @throws SQLException
+     */
+    public static void insertCausingRollback(int p1, String p2, ResultSet[] data) throws SQLException {
+        Connection conn = DriverManager
+                .getConnection("jdbc:default:connection");
+        
+        //The resultset created here is a dynamic resultset and will be
+        //available to the caller of the java procedure (provided that there
+        //is no SQL exception thrown inside of this procedure. An exception 
+        //will cause Derby to close this resultset).
+        PreparedStatement ps = conn.prepareStatement(
+        		"select * from dellater2 where c11 = ?");
+        ps.setInt(1, p1);
+        data[0] = ps.executeQuery();
+        
+        //The resultset created here has the lifetime of this procedure
+        //and is not available to the caller of the procedure.
+        PreparedStatement ps1 = conn.prepareStatement(
+        		"select * from dellater3 where c31 = ?");
+        ps1.setInt(1, p1);
+        ps1.executeQuery();
+        
+        //Depending on the value of p1, following may throw duplicate key 
+        //exception. If that happens, both the dynamic resultset and local
+        //resultset created above will get closed and locks held by them
+        //and insert statement will be released
+        PreparedStatement ps2 = conn
+                .prepareStatement("insert into dellater1 values (?, ?)");
+        ps2.setInt(1, p1);
+        ps2.setString(2, p2);
+        ps2.executeUpdate();
+        ps2.close();
         conn.close();
     }
     
