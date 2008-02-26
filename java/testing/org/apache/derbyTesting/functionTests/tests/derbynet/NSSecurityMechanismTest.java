@@ -191,17 +191,13 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
     }
     
     public void tearDown() throws Exception {
-        try {
-            AccessController.doPrivileged
-            (new java.security.PrivilegedAction(){
-                public Object run(){
-                    return System.getProperties().remove(
-                            "derby.drda.securityMechanism");
-                }
-            });
-        } catch (Exception e) {
-            fail("warning: could not remove secmec settings");
-        }
+        AccessController.doPrivileged
+        (new java.security.PrivilegedAction(){
+            public Object run(){
+                return System.getProperties().remove(
+                        "derby.drda.securityMechanism");
+            }
+        });
         super.tearDown();
     }
 
@@ -1033,24 +1029,20 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
      * @throws Exception if there is any error
      */
     private void assertConnectionOK(Connection conn)
-    throws Exception
+    throws SQLException
     {
         Statement stmt = conn.createStatement();
         ResultSet rs = null;
         // To test our connection, we will try to do a select from the 
         // system catalog tables
-        try {
-            rs = stmt.executeQuery("select count(*) from sys.systables");
-            int updatecount=0;
-            while(rs.next())
-            {
-                rs.getInt(1); // assume ok if no exception, ignore result
-                updatecount++;
-            }
-            assertEquals(1,updatecount);
-        } catch (SQLException sqle) {
-            fail("should not have failed");
+        rs = stmt.executeQuery("select count(*) from sys.systables");
+        int updatecount=0;
+        while(rs.next())
+        {
+            rs.getInt(1); // assume ok if no exception, ignore result
+            updatecount++;
         }
+        assertEquals(1,updatecount);
         
         if(rs != null)
             rs.close();
@@ -1102,7 +1094,7 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
      * the security mechanism.
      */
     private void assertDerby1080Fixed(String expectedValue)
-    {
+            throws Exception {
         try
         {
             // simulate connection re-set using connection pooling on a pooled
@@ -1127,10 +1119,6 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
             // for debugging, uncomment:
             // dumpSQLException(sqle.getNextException());
         }
-        catch (Exception e)
-        {
-            fail("did not expect an exception");
-        }
     }
 
     /**
@@ -1143,100 +1131,92 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
      * @throws Exception if there an unexpected error
      */
     private void assertUSRSSBPWD_with_BUILTIN(String[] expectedValues)
-    {
+            throws Exception {
         // Turn on Derby BUILTIN authentication and attempt connecting with
         // USRSSBPWD security mechanism.
-        try
-        {
-            println("Turning ON Derby BUILTIN authentication");
-            Connection conn = getDataSourceConnectionWithSecMec(
-                "neelima", "lee", new Short(SECMEC_USRSSBPWD));
-            if (conn == null)
-                return; // Exception would have been raised
+        println("Turning ON Derby BUILTIN authentication");
+        Connection conn = getDataSourceConnectionWithSecMec(
+            "neelima", "lee", new Short(SECMEC_USRSSBPWD));
+        if (conn == null)
+            return; // Exception would have been raised
 
-            // Turn on BUILTIN authentication
-            CallableStatement cs = conn.prepareCall(
-                "CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(?, ?)");
-
-            cs.setString(1, "derby.user.neelima");
-            cs.setString(2, "lee");
-            cs.execute();
-
-            cs.setString(1, "derby.user.APP");
-            cs.setString(2, "APP");
-            cs.execute();
-
-            cs.setString(1, "derby.database.fullAccessUsers");
-            cs.setString(2, "neelima,APP");
-            cs.execute();
-
-            cs.setString(1, "derby.connection.requireAuthentication");
-            cs.setString(2, "true");
-            cs.execute();
-
-            cs.close();
-            cs = null;
-
-            conn.close();
-
-            // Shutdown database for BUILTIN
-            // authentication to take effect the next time it is
-            // booted - derby.connection.requireAuthentication is a
-            // static property.
-            assertConnectionUsingDriverManager(getJDBCUrl(
-                "user=APP;password=APP;shutdown=true;securityMechanism=" +
-                SECMEC_USRSSBPWD),"USRSSBPWD (T0):", expectedValues[1]);
-
-            // Now test some connection(s) with SECMEC_USRSSBPWD
-            // via DriverManager and Datasource
-            assertConnectionUsingDriverManager(getJDBCUrl(
-                "user=neelima;password=lee;securityMechanism=" +
-                SECMEC_USRSSBPWD),"USRSSBPWD + BUILTIN (T1):", expectedValues[2]);
-            assertSecurityMechanismOK(
-                "neelima","lee",new Short(SECMEC_USRSSBPWD),
-                "TEST_DS - USRSSBPWD + BUILTIN (T2):", expectedValues[2]);
-            // Attempting to connect with some invalid user
-            assertConnectionUsingDriverManager(getJDBCUrl(
-                "user=invalid;password=user;securityMechanism=" +
-                SECMEC_USRSSBPWD),"USRSSBPWD + BUILTIN (T3):",expectedValues[3]);
-            assertSecurityMechanismOK(
-                "invalid","user",new Short(SECMEC_USRSSBPWD),
-                "TEST_DS - USRSSBPWD + BUILTIN (T4):", expectedValues[3]);
-
-            // Prepare to turn OFF Derby BUILTIN authentication
-            conn = getDataSourceConnectionWithSecMec("neelima", "lee",
-                new Short(SECMEC_USRSSBPWD));
-            if (conn == null)
-                return; // Exception would have been raised
-
-            // Turn off BUILTIN authentication
-            cs = conn.prepareCall(
+        // Turn on BUILTIN authentication
+        CallableStatement cs = conn.prepareCall(
             "CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(?, ?)");
 
-            cs.setString(1, "derby.connection.requireAuthentication");
-            cs.setString(2, "false");
-            cs.execute();
+        cs.setString(1, "derby.user.neelima");
+        cs.setString(2, "lee");
+        cs.execute();
 
-            cs.close();
-            cs = null;
-            conn.close();
+        cs.setString(1, "derby.user.APP");
+        cs.setString(2, "APP");
+        cs.execute();
 
-            // Shutdown 'wombat' database for BUILTIN authentication
-            // to take effect the next time it is booted
-            assertConnectionUsingDriverManager(getJDBCUrl(
-                "user=APP;password=APP;shutdown=true;securityMechanism=" +
-                SECMEC_USRSSBPWD),"USRSSBPWD + BUILTIN (T5):", expectedValues[4]);
-        } 
-        catch (Exception e)
-        {
-            fail("unexpected exception testing USRSSBPWD_with_BUILTIN()");
-        }
+        cs.setString(1, "derby.database.fullAccessUsers");
+        cs.setString(2, "neelima,APP");
+        cs.execute();
+
+        cs.setString(1, "derby.connection.requireAuthentication");
+        cs.setString(2, "true");
+        cs.execute();
+
+        cs.close();
+        cs = null;
+
+        conn.close();
+
+        // Shutdown database for BUILTIN
+        // authentication to take effect the next time it is
+        // booted - derby.connection.requireAuthentication is a
+        // static property.
+        assertConnectionUsingDriverManager(getJDBCUrl(
+            "user=APP;password=APP;shutdown=true;securityMechanism=" +
+            SECMEC_USRSSBPWD),"USRSSBPWD (T0):", expectedValues[1]);
+
+        // Now test some connection(s) with SECMEC_USRSSBPWD
+        // via DriverManager and Datasource
+        assertConnectionUsingDriverManager(getJDBCUrl(
+            "user=neelima;password=lee;securityMechanism=" +
+            SECMEC_USRSSBPWD),"USRSSBPWD + BUILTIN (T1):", expectedValues[2]);
+        assertSecurityMechanismOK(
+            "neelima","lee",new Short(SECMEC_USRSSBPWD),
+            "TEST_DS - USRSSBPWD + BUILTIN (T2):", expectedValues[2]);
+        // Attempting to connect with some invalid user
+        assertConnectionUsingDriverManager(getJDBCUrl(
+            "user=invalid;password=user;securityMechanism=" +
+            SECMEC_USRSSBPWD),"USRSSBPWD + BUILTIN (T3):",expectedValues[3]);
+        assertSecurityMechanismOK(
+            "invalid","user",new Short(SECMEC_USRSSBPWD),
+            "TEST_DS - USRSSBPWD + BUILTIN (T4):", expectedValues[3]);
+
+        // Prepare to turn OFF Derby BUILTIN authentication
+        conn = getDataSourceConnectionWithSecMec("neelima", "lee",
+            new Short(SECMEC_USRSSBPWD));
+        if (conn == null)
+            return; // Exception would have been raised
+
+        // Turn off BUILTIN authentication
+        cs = conn.prepareCall(
+        "CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(?, ?)");
+
+        cs.setString(1, "derby.connection.requireAuthentication");
+        cs.setString(2, "false");
+        cs.execute();
+
+        cs.close();
+        cs = null;
+        conn.close();
+
+        // Shutdown 'wombat' database for BUILTIN authentication
+        // to take effect the next time it is booted
+        assertConnectionUsingDriverManager(getJDBCUrl(
+            "user=APP;password=APP;shutdown=true;securityMechanism=" +
+            SECMEC_USRSSBPWD),"USRSSBPWD + BUILTIN (T5):", expectedValues[4]);
     }
     
     private Connection getDataSourceConnectionWithSecMec(
         String user, String password, Short secMec)
-    {
-        Connection conn = null;
+            throws Exception {
         String securityMechanismProperty = "SecurityMechanism";
         Class[] argType = { Short.TYPE };
         String methodName = getSetterName(securityMechanismProperty);
@@ -1244,23 +1224,9 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
         args[0] = secMec;
 
         DataSource ds = getDS(user, password);
-        try {
-            Method sh = ds.getClass().getMethod(methodName, argType);
-            sh.invoke(ds, args);
-            conn = ds.getConnection();
-        }
-        catch (SQLException sqle)
-        {
-            // Exceptions expected in certain cases depending on JCE used for 
-            // running the test, but in this case, we don't expect any
-            // sqlexceptions
-            fail("did not expect an sqlexception.");
-        }
-        catch (Exception e)
-        {
-            fail("did not expect exception.");
-        }
-        return conn;
+        Method sh = ds.getClass().getMethod(methodName, argType);
+        sh.invoke(ds, args);
+        return ds.getConnection();
     }
 
     private String getJDBCUrl(String attrs) {
