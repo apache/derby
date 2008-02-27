@@ -21,6 +21,7 @@
 package org.apache.derby.client.am;
 
 import java.sql.SQLException;
+import java.util.Arrays;
 
 import org.apache.derby.shared.common.reference.JDBC30Translation;
 import org.apache.derby.shared.common.reference.SQLState;
@@ -156,7 +157,7 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
     // This collection is used for two different purposes:
     //   For statement batching it contains the batched SQL strings.
     //   For prepared statement batching it contains the batched input rows.
-    java.util.ArrayList batch_ = new java.util.ArrayList();
+    final java.util.ArrayList batch_ = new java.util.ArrayList();
 
 
     // Scrollable cursor attributes
@@ -200,15 +201,15 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
 
     //---------------------constructors/finalizer/accessors--------------------
 
-    private Statement() throws SqlException {
+    private Statement() {
         initStatement();
     }
 
-    private void resetStatement() throws SqlException {
+    private void resetStatement() {
         initStatement();
     }
 
-    private void initStatement() throws SqlException {
+    private void initStatement() {
         materialStatement_ = null;
         connection_ = null;
         agent_ = null;
@@ -223,7 +224,7 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
         initResetStatement();
     }
 
-    private void initResetStatement() throws SqlException {
+    private void initResetStatement() {
         initResetPreparedStatement();
 
         //section_ = null; // don't set section to null because write piggyback command require a section
@@ -258,11 +259,7 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
         isCatalogQuery_ = false;
         isAutoCommittableStatement_ = true;
 
-        if (batch_ == null) {
-            batch_ = new java.util.ArrayList();
-        } else {
-            batch_.clear();
-        }
+        batch_.clear();
         fetchSize_ = 0;
         fetchDirection_ = java.sql.ResultSet.FETCH_FORWARD;
         singletonRowData_ = null;
@@ -1074,9 +1071,7 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
         // This is done to account for "chain-breaking" errors where we cannot
         // read any more replies
         int[] updateCounts = new int[batch_.size()];
-        for (int i = 0; i < batch_.size(); i++) {
-            updateCounts[i] = -3;
-        }
+        Arrays.fill(updateCounts, -3);
         flowExecuteBatch(updateCounts);
         return updateCounts;
     }

@@ -99,10 +99,7 @@ public class PreparedStatement extends Statement
     protected void initResetPreparedStatement() {
         outputRegistered_ = false;
         isPreparedStatement_ = true;
-
-        if (parameterMetaData_ != null) {
-            resetParameters();
-        }
+        resetParameters();
     }
 
     public void reset(boolean fullReset) throws SqlException {
@@ -115,10 +112,10 @@ public class PreparedStatement extends Statement
     }
 
     private void resetParameters() {
-        for (int i = 0; i < parameterMetaData_.columns_; i++) {
-            parameters_[i] = null;
-            parameterSet_[i] = false;
-            parameterRegistered_[i] = false;
+        if (parameterMetaData_ != null) {
+            Arrays.fill(parameters_, null);
+            Arrays.fill(parameterSet_, false);
+            Arrays.fill(parameterRegistered_, false);
         }
     }
 
@@ -1537,13 +1534,8 @@ public class PreparedStatement extends Statement
                 }
                 checkForClosedStatement();
                 if (parameterMetaData_ != null) {
-                    for (int i = 0; i < parameters_.length; i++) {
-                        parameters_[i] = null;
-                    }
-
-                    for (int i = 0; i < parameterSet_.length; i++) {
-                        parameterSet_[i] = false;
-                    }
+                    Arrays.fill(parameters_, null);
+                    Arrays.fill(parameterSet_, false);
                 }
             }
         }
@@ -1835,9 +1827,8 @@ public class PreparedStatement extends Statement
         // If CALLs are not describable then nothing gets clobbered because we won't
         // parse out extended describe, so again  no problem.
         if (sqlMode_ != isCall__ && parameterMetaData_ != null) {
-            for (int i = 0; i < parameterMetaData_.columns_; i++) {
-                parameterMetaData_.sqlxParmmode_[i] = 1;  // 1 means IN parameter
-            }
+            // 1 means IN parameter
+            Arrays.fill(parameterMetaData_.sqlxParmmode_, (short)1);
         }
 
         if (agent_.loggingEnabled()) {
@@ -2513,9 +2504,7 @@ public class PreparedStatement extends Statement
         // Apparently, the JVM is not smart enough to traverse parameters_[] and null
         // out its members when the entire array is set to null (parameters_=null;).
         if (parameters_ != null) {
-            for (int i = 0; i < parameters_.length; i++) {
-                parameters_[i] = null;
-            }
+            Arrays.fill(parameters_, null);
         }
         parameters_ = null;
 
