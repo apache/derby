@@ -42,7 +42,7 @@ public class ManagementMBeanTest extends MBeanTest {
     public static Test suite() {
         
         return MBeanTest.suite(ManagementMBeanTest.class, 
-                                        "ManagementMBeanTest:client");
+                                        "ManagementMBeanTest");
     }
     
     /**

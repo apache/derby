@@ -43,7 +43,7 @@ public class JMXTest extends MBeanTest {
     public static Test suite() {
         
         return MBeanTest.suite(JMXTest.class, 
-                                        "JMXTest:client");
+                                        "JMXTest");
     }
     
     /**

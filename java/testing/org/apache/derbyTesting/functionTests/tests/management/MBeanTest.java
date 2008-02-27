@@ -21,28 +21,17 @@
 
 package org.apache.derbyTesting.functionTests.tests.management;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Set;
 
-import javax.management.InstanceAlreadyExistsException;
-import javax.management.InstanceNotFoundException;
-import javax.management.JMException;
-import javax.management.MBeanException;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
-import javax.management.ReflectionException;
-import javax.management.remote.JMXConnector;
-import javax.management.remote.JMXConnectorFactory;
-import javax.management.remote.JMXServiceURL;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.BaseTestCase;
-import org.apache.derbyTesting.junit.BaseTestSetup;
 import org.apache.derbyTesting.junit.NetworkServerTestSetup;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -63,8 +52,19 @@ abstract class MBeanTest extends BaseTestCase {
         // Check for J2SE 5.0 or better? Or java.lang.management.ManagementFactory?
         // Older VMs will get UnsupportedClassVersionError anyway...
         
+        TestSuite outerSuite = new TestSuite(suiteName);
+        
+        // TODO: Run with no security for the moment, requires changes in the
+        // test policy files that may clash with a couple of outstanding patches.
+        Test platform = SecurityManagerSetup.noSecurityManager(
+                new TestSuite(testClass,  suiteName + ":platform"))
+                ;
+        platform = JMXConnectionDecorator.platformMBeanServer(platform);
+        // TODO: Disabled - failing at the moment when Derby has not been started.
+        //outerSuite.addTest(platform);
+        
         // Create a suite of all "test..." methods in the class.
-        Test suite = new TestSuite(testClass,  suiteName);
+        Test suite = new TestSuite(testClass,  suiteName + ":client");
         
         // Set up to get JMX connections using remote JMX
         suite = JMXConnectionDecorator.remoteNoSecurity(suite);
@@ -102,7 +102,9 @@ abstract class MBeanTest extends BaseTestCase {
                 SecurityManagerSetup.noSecurityManager(networkServerTestSetup);
         // this decorator makes sure the suite is empty if this configration
         // does not support the network server:
-        return TestConfiguration.defaultServerDecorator(testSetup);
+        outerSuite.addTest(TestConfiguration.defaultServerDecorator(testSetup));
+        
+        return outerSuite;
     }
     
     // ---------- UTILITY METHODS ------------
@@ -201,7 +203,6 @@ abstract class MBeanTest extends BaseTestCase {
      * Get the ObjectName for the application
      * created ManagementMBean. The MBean will be
      * created if it is not already registered.
-     * @return
      * @throws Exception
      */
     protected ObjectName getApplicationManagementMBean() throws Exception

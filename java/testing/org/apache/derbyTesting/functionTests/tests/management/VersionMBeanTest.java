@@ -59,7 +59,7 @@ public class VersionMBeanTest extends MBeanTest {
     public static Test suite() {
         
         return MBeanTest.suite(VersionMBeanTest.class, 
-                                        "VersionMBeanTest:client");
+                                        "VersionMBeanTest");
     }
     
     /**

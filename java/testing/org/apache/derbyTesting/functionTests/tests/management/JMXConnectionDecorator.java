@@ -45,6 +45,15 @@ class JMXConnectionDecorator extends BaseTestSetup {
         return new JMXConnectionDecorator(test, true);
     }
     
+    /**
+     * Decorate a test to use JMX connections directly from the platform
+     * MBean Server.
+     */
+    static Test platformMBeanServer(Test test)
+    {
+        return new JMXConnectionDecorator(test, false);
+    }
+    
     // ignored for now
     private final boolean remote;
     private JMXConnectionGetter oldGetter;
@@ -59,8 +68,12 @@ class JMXConnectionDecorator extends BaseTestSetup {
         super.setUp();
         oldGetter =
             JMXConnectionGetter.mbeanServerConnector.get();
-        JMXConnectionGetter.mbeanServerConnector.set(
-                new RemoteConnectionGetter( getJmxUrl()));
+        
+        JMXConnectionGetter getter = remote ?
+                new RemoteConnectionGetter(getJmxUrl()) :
+                new PlatformConnectionGetter();
+                
+        JMXConnectionGetter.mbeanServerConnector.set(getter);
     }
     
     @Override
