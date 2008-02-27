@@ -21,6 +21,8 @@
 
 package org.apache.derbyTesting.functionTests.tests.management;
 
+import java.util.Set;
+
 import javax.management.ObjectName;
 
 import junit.framework.Test;
@@ -43,6 +45,10 @@ public class ManagementMBeanTest extends MBeanTest {
                                         "ManagementMBeanTest:client");
     }
     
+    /**
+     * Test that the MBean created by the application can
+     * successfully start and stop Derby's JMX management.
+     */
     public void testStartStopManagementFromApplication()
         throws Exception
     {
@@ -50,22 +56,40 @@ public class ManagementMBeanTest extends MBeanTest {
         startStopManagement(appMgmtBean);
     }
     
+    /**
+     * Test that the MBean with the passed in name can
+     * successfully start and stop Derby's JMX management.
+     */
     private void startStopManagement(ObjectName mbean) throws Exception
     {
         // Test fixtures start off active
         assertBooleanAttribute(true, mbean, "ManagementActive");
         
+        int derbyMbeanCount = getDerbyDomainMBeans().size();
+        assertTrue(derbyMbeanCount > 0);
+        
         // Should be a no-op
         invokeOperation(mbean, "startManagement");
         assertBooleanAttribute(true, mbean, "ManagementActive");
+        
+        // so should have the same number of MBeans registered
+        assertEquals(derbyMbeanCount, getDerbyDomainMBeans().size());
         
         // now stop management
         invokeOperation(mbean, "stopManagement");
         assertBooleanAttribute(false, mbean, "ManagementActive");
         
-        // now start management again
+        // leaving only management MBeans.
+        Set<ObjectName> managementOnly = getDerbyDomainMBeans();
+        assertEquals(1, managementOnly.size());
+        for (ObjectName name : managementOnly)
+        {
+            assertEquals("Management", name.getKeyProperty("type"));
+        }
+        
+        // now start management again and have the same MBeans.
         invokeOperation(mbean, "startManagement");
         assertBooleanAttribute(true, mbean, "ManagementActive");
-
+        assertEquals(derbyMbeanCount, getDerbyDomainMBeans().size());
     }
 }
