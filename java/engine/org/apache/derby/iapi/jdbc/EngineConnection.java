@@ -92,4 +92,12 @@ public interface EngineConnection extends Connection {
     * @return the LOB Object corresponding to this locator.
     */
     public Object getLOBMapping(int key) throws SQLException;
+
+    /**
+     * Obtain the name of the current schema, so that the NetworkServer can
+     * use it for piggy-backing
+     * @return the current schema name
+     * @throws java.sql.SQLException
+     */
+    public String getCurrentSchemaName() throws SQLException;
 }

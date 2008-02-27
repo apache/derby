@@ -637,4 +637,22 @@ public abstract class BrokeredConnection implements EngineConnection
             //underlying EmbedConnection object. 
             return getRealConnection().getLOBMapping(key);
 	}
+
+    /**
+     * Obtain the name of the current schema. Not part of the
+     * java.sql.Connection interface, but is accessible through the
+     * EngineConnection interface, so that the NetworkServer can get at the
+     * current schema for piggy-backing
+     * @return the current schema name
+     * @throws java.sql.SQLException
+     */
+    public String getCurrentSchemaName() throws SQLException {
+        try {
+            return getRealConnection().getCurrentSchemaName();
+        }
+        catch (SQLException se) {
+            notifyException(se);
+            throw se;
+        }
+    }
 }

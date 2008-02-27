@@ -211,12 +211,21 @@ public class NetStatementReply extends NetPackageReply implements StatementReply
             break;
         }
 
+        peekCP = peekCodePoint();
+        if (peekCP == CodePoint.PBSD) {
+            parsePBSD();
+        }
     }
 
-    // Parse the reply for the Open Query Command.
-    // This method handles the parsing of all command replies and reply data for the opnqry command.
-    // will be replaced by parseOPNQRYreply (see parseOPNQRYreplyProto)
-    private void parseOPNQRYreply(StatementCallbackInterface statementI) throws DisconnectException {
+    /**
+     * Parse the reply for the Open Query Command. This method handles the
+     * parsing of all command replies and reply data for the opnqry command.
+     * will be replaced by parseOPNQRYreply (see parseOPNQRYreplyProto)
+     * @param statementI statement to invoke callbacks on
+     * @throws org.apache.derby.client.am.DisconnectException
+     */
+    private void parseOPNQRYreply(StatementCallbackInterface statementI)
+            throws DisconnectException {
         int peekCP = peekCodePoint();
 
         if (peekCP == CodePoint.OPNQRYRM) {
@@ -238,6 +247,9 @@ public class NetStatementReply extends NetPackageReply implements StatementReply
             peekCP = peekCodePoint();
         }
 
+        if (peekCP == CodePoint.PBSD) {
+            parsePBSD();
+        }
     }
 
     // Called by NETSetClientPiggybackCommand.read()
@@ -288,6 +300,11 @@ public class NetStatementReply extends NetPackageReply implements StatementReply
             peekCP = peekCodePoint();
             if (peekCP == CodePoint.RDBUPDRM) {
                 parseRDBUPDRM();
+                peekCP = peekCodePoint();
+            }
+
+            if (peekCP == CodePoint.PBSD) {
+                parsePBSD();
             }
             return;
         }
@@ -302,6 +319,7 @@ public class NetStatementReply extends NetPackageReply implements StatementReply
             NetSqlca netSqlca = parseSQLCARD(null);
 
             statementI.completeExecute(netSqlca);
+            peekCP = peekCodePoint();
         } else if (peekCP == CodePoint.SQLDTARD) {
             // in the case of singleton select or if a stored procedure was called which had
             // parameters but no result sets, an SQLSTARD may be returned
@@ -332,6 +350,10 @@ public class NetStatementReply extends NetPackageReply implements StatementReply
             parseExecuteError(statementI);
         }
 
+        if (peekCP == CodePoint.PBSD) {
+            parsePBSD();
+            peekCP = peekCodePoint();
+        }
     }
 
     protected void parseResultSetProcedure(StatementCallbackInterface statementI) throws DisconnectException {

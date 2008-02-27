@@ -2130,7 +2130,11 @@ public class NetConnectionReply extends Reply
 
     // This method handles the parsing of all command replies and reply data
     // for the SYNCCTL command.
-    protected int parseSYNCCTLreply(ConnectionCallbackInterface connection) throws DisconnectException {
+    protected int parseSYNCCTLreply(ConnectionCallbackInterface connection) 
+        throws DisconnectException {
+        if (peekCodePoint() == CodePoint.PBSD) {
+            parsePBSD();
+        }
         return 0;
     }
 
@@ -3301,6 +3305,35 @@ public class NetConnectionReply extends Reply
         int count = ((rowsetSqlca == null) ? 0 : rowsetSqlca.length);
         for (int i = row; i < count; i++) {
             rowsetSqlca[i] = null;
+        }
+    }
+
+    /**
+     * Parse a PBSD - PiggyBackedSessionData code point. Can contain one or
+     * both of, a PBSD_ISO code point followed by a byte representing the jdbc
+     * isolation level, and a PBSD_SCHEMA code point followed by the name of the
+     * current schema as an UTF-8 String.
+     * @throws org.apache.derby.client.am.DisconnectException
+     */
+    protected void parsePBSD() throws DisconnectException {
+        parseLengthAndMatchCodePoint(CodePoint.PBSD);
+        int peekCP = peekCodePoint();
+        while (peekCP != END_OF_SAME_ID_CHAIN) {
+            parseLengthAndMatchCodePoint(peekCP);
+            switch (peekCP) {
+            case CodePoint.PBSD_ISO:
+                netAgent_.netConnection_.
+                    completePiggyBackIsolation(readUnsignedByte());
+                break;
+            case CodePoint.PBSD_SCHEMA:
+                netAgent_.netConnection_.
+                    completePiggyBackSchema
+                    (readString(getDdmLength(), "UTF-8"));
+                break;
+            default:
+                parseCommonError(peekCP);
+            }
+            peekCP = peekCodePoint();
         }
     }
 }

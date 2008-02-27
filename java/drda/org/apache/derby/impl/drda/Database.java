@@ -122,6 +122,10 @@ class Database
 	final void setConnection(EngineConnection conn)
 		throws SQLException
 	{
+        if (this.conn != conn) {
+            // Need to drop the pb session data when switching connections
+            pbsd_ = null;
+        }
 		this.conn = conn;
 		if(conn != null)
 			defaultStatement.setStatement(conn);
@@ -451,5 +455,27 @@ class Database
         userId = null;
         password = null;
         securityMechanism = 0;
+    }
+
+    /**
+     * Piggy-backed session data. Null if no piggy-backing
+     * has happened yet. Lazy initialization is acceptable since the client's
+     * cache initially is empty so that any request made prior to the first
+     * round of piggy-backing will trigger an actual request to the server.
+     */
+    private PiggyBackedSessionData pbsd_ = null;
+
+    /**
+     * Get a reference (handle) to the PiggyBackedSessionData object. Null will
+     * be returned either if Database.conn is not a valid connection, or if the
+     * create argument is false and no object has yet been created.
+     * @param createOnDemand if true create the PiggyBackedSessionData on demand
+     * @return a reference to the PBSD object or null
+     * @throws java.sql.SQLException
+     */
+    public PiggyBackedSessionData getPiggyBackedSessionData(
+            boolean createOnDemand) throws SQLException {
+        pbsd_ = PiggyBackedSessionData.getInstance(pbsd_, conn, createOnDemand);
+        return pbsd_;
     }
 }

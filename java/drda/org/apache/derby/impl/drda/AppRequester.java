@@ -295,4 +295,7 @@ class AppRequester
 		
 	}
 
+	protected boolean supportsSessionDataCaching() {
+		return (clientType == DNC_CLIENT && greaterThanOrEqualTo(10, 4, 0));
+	}
 }

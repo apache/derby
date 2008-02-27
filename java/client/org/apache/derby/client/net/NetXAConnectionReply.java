@@ -219,6 +219,9 @@ public class NetXAConnectionReply extends NetResultSetReply {
             netAgent_.netConnection_.xares_.addSpecialRegisters(s);
             peekCP = peekCodePoint();
         }
+        if (peekCP == CodePoint.PBSD) {
+            parsePBSD();
+        }
 
         return retval;
     }

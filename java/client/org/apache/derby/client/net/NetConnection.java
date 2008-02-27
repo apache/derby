@@ -1740,6 +1740,18 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
     
     
     /**
+     * Check whether the server supports session data caching
+     * @return true session data caching is supported
+     */
+    protected final boolean supportsSessionDataCaching() {
+
+        NetDatabaseMetaData metadata =
+            (NetDatabaseMetaData) databaseMetaData_;
+
+        return metadata.serverSupportsSessionDataCaching();
+    }
+
+    /**
      * Returns if a transaction is in process
      * @return open
      */

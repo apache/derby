@@ -680,6 +680,16 @@ class CodePoint
 	// FDOCA Triplet offset
 	static final int FDOTRPOFF = 0x212A;
 
+    // --- Product-specific 0xC000-0xFFFF ---
+    // Piggy-backed session data (product-specific)
+    static final int PBSD = 0xC000;
+
+    // Isolation level as a byte (product-specific)
+    static final int PBSD_ISO = 0xC001;
+
+    // Current schema as UTF8 String (product-specific)
+    static final int PBSD_SCHEMA = 0xC002;
+
 	//--------------------------ddm error code points---------------------------------
 	static final int SYNERRCD_DSS_LESS_THAN_6 = 0x01;
 	static final int SYNERRCD_DSS_LENGTH_BYTE_NUMBER_MISMATCH = 0x02;

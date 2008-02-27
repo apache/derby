@@ -31,6 +31,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
 import java.sql.ResultSet;
+import java.util.Arrays;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
@@ -212,10 +213,38 @@ public class CacheSessionDataTest extends BaseJDBCTestCase {
                         ".getCycleIsolationJDBC'");
  
                 s.execute("CREATE FUNCTION GET_CYCLE_ISOLATION_SQL " +
-                        "() RETURNS VARCHAR(2) READS SQL DATA LANGUAGE JAVA PARAMETER " +
-                        "STYLE JAVA EXTERNAL NAME '" +
+                        "() RETURNS VARCHAR(2) READS SQL DATA LANGUAGE JAVA " +
+                        "PARAMETER STYLE JAVA EXTERNAL NAME '" +
                         CacheSessionDataTest.class.getName() + 
                         ".getCycleIsolationSQL'");
+
+                // Schema testing
+                s.execute("CREATE SCHEMA FOO");
+                String unicodeschema = "\u00bbMY\u20ac\u00ab";
+                s.execute("CREATE SCHEMA \"" + unicodeschema + "\"");
+
+                s.execute("CREATE PROCEDURE APP.SET_SCHEMA (SCHEMANAME " +
+                        "VARCHAR(128)) MODIFIES SQL DATA LANGUAGE JAVA " +
+                        "PARAMETER STYLE JAVA EXTERNAL NAME '" +
+                        CacheSessionDataTest.class.getName() + ".setSchema'");
+
+                s.execute("CREATE FUNCTION APP.GET_SCHEMA_TRANSITION " +
+                        "(SCHEMANAME VARCHAR(128)) RETURNS VARCHAR(128) READS " +
+                        "SQL DATA LANGUAGE JAVA PARAMETER STYLE JAVA EXTERNAL " +
+                        "NAME '" + CacheSessionDataTest.class.getName() +
+                        ".getSchemaTransition'");
+
+                s.execute("CREATE TABLE APP.LARGE(X VARCHAR(32000), " +
+                        "SCHEMANAME VARCHAR(128), Y VARCHAR(32000))");
+
+                char[] carray = new char[32000];
+                Arrays.fill(carray, 'x');
+                String xs = new String(carray);
+                Arrays.fill(carray, 'y');
+                String ys = new String(carray);
+
+                s.execute("INSERT INTO APP.LARGE (SELECT '" + xs + "', " +
+                        "SCHEMANAME, " + " '" + ys + "' FROM SYS.SYSSCHEMAS)");
             }
         };
     } // End baseSuite
@@ -341,6 +370,41 @@ public class CacheSessionDataTest extends BaseJDBCTestCase {
         return sqlName;
     }
 
+    /**
+     * Implementation of the SQL procedure SET_SCHEMA.
+     * Sets a different schema on the default Connection.
+     * @param schemaName name of the new schema
+     * @throws java.sql.SQLException
+     */
+    public static void setSchema(String schemaName)
+            throws SQLException {
+        Connection c = DriverManager.getConnection("jdbc:default:connection");
+        Statement s = c.createStatement();
+        s.execute("SET SCHEMA " + schemaName);
+        s.close();
+    }
+
+    /**
+     * Implementation of the SQL function GET_SCHEMA_TRANSITION.
+     * Sets the current schema to the name given as argument and returns the
+     * schema transition.
+     * @param nextSchema schema to transition to
+     * @return a string of the form oldSchema->newSchema
+     * @throws java.sql.SQLException
+     */
+    public static String getSchemaTransition(String nextSchema)
+            throws SQLException {
+        Connection c = DriverManager.getConnection("jdbc:default:connection");
+        Statement s = c.createStatement();
+        ResultSet rs = s.executeQuery("VALUES CURRENT SCHEMA");
+        rs.next();
+        String prevSchema = rs.getString(1);
+        rs.close();
+        s.execute("SET SCHEMA \"" + nextSchema + "\"");
+        s.close();
+        return (prevSchema + "->" + nextSchema);
+    }
+
     // Utilities
     private static IsoLevel[] isoLevels;    
     private static int isolationIndex = -1;
@@ -384,6 +448,21 @@ public class CacheSessionDataTest extends BaseJDBCTestCase {
         assertEquals(serverJdbc, client);
     }
     
+    private void verifyCachedSchema(Connection c) throws SQLException {
+        if (c instanceof org.apache.derby.client.am.Connection) {
+            String cached =
+                    ((org.apache.derby.client.am.Connection) c).
+                    getCurrentSchemaName();
+            Statement s = c.createStatement();
+            ResultSet rs = s.executeQuery("VALUES CURRENT SCHEMA");
+            rs.next();
+            String reported = rs.getString(1);
+            assertEquals(reported, cached);
+        } else {
+            println("Cannot verify cached schema for "+c.getClass());
+        }
+    }
+
     // Test cases (fixtures) 
     // Change the isolation level using SQL
     public void testChangeIsoLevelStatementSQL() throws SQLException {
@@ -728,7 +807,8 @@ public class CacheSessionDataTest extends BaseJDBCTestCase {
         preparedCursorTest("BIG", ResultSet.TYPE_SCROLL_SENSITIVE,
                 ResultSet.CONCUR_READ_ONLY);
     }
-    public void testLargePreparedScrollInsensitiveReadOnly() throws SQLException {
+    public void testLargePreparedScrollInsensitiveReadOnly()
+            throws SQLException {
         preparedCursorTest("BIG", ResultSet.TYPE_SCROLL_INSENSITIVE,
                 ResultSet.CONCUR_READ_ONLY);
     }
@@ -736,12 +816,90 @@ public class CacheSessionDataTest extends BaseJDBCTestCase {
         preparedCursorTest("BIG", ResultSet.TYPE_FORWARD_ONLY,
                 ResultSet.CONCUR_UPDATABLE);
     }
-    public void testLargePreparedScrollSensitiveUpdatable() throws SQLException {
+    public void testLargePreparedScrollSensitiveUpdatable()
+            throws SQLException {
         preparedCursorTest("BIG", ResultSet.TYPE_SCROLL_SENSITIVE,
                 ResultSet.CONCUR_UPDATABLE);
     }
-    public void testLargePreparedScrollInsensitiveUpdatable() throws SQLException {
+    public void testLargePreparedScrollInsensitiveUpdatable()
+            throws SQLException {
         preparedCursorTest("BIG", ResultSet.TYPE_SCROLL_INSENSITIVE,
                 ResultSet.CONCUR_UPDATABLE);
+    }
+
+    // Test that the current schema is piggy-backed correctly
+    public void testSetSchema() throws SQLException {
+        Statement s = createStatement();
+        s.execute("SET SCHEMA FOO");
+        verifyCachedSchema(getConnection());
+        s.execute("SET SCHEMA \"\u00bbMY\u20ac\u00ab\"");
+        verifyCachedSchema(getConnection());
+    }
+    public void testPreparedSetSchema() throws SQLException {
+        PreparedStatement ps = prepareStatement("SET SCHEMA ?");
+        ps.setString(1, "FOO");
+        ps.execute();
+        verifyCachedSchema(getConnection());
+        ps.setString(1, "\u00bbMY\u20ac\u00ab");
+        ps.execute();
+        verifyCachedSchema(getConnection());
+    }
+    public void testSetSchemaProcedure() throws SQLException {
+        Statement s = createStatement();
+        s.execute("CALL APP.SET_SCHEMA('FOO')");
+        verifyCachedSchema(getConnection());
+        s.execute("CALL APP.SET_SCHEMA('\"\u00bbMY\u20ac\u00ab\"')");
+        verifyCachedSchema(getConnection());
+    }
+    public void testPreparedSetSchemaProcedure() throws SQLException {
+        CallableStatement cs = prepareCall("CALL APP.SET_SCHEMA(?)");
+        cs.setString(1, "FOO");
+        cs.execute();
+        verifyCachedSchema(getConnection());
+        cs.setString(1, "\"\u00bbMY\u20ac\u00ab\"");
+        cs.execute();
+        verifyCachedSchema(getConnection());
+    }
+
+    public void testSetSchemaFunction() throws SQLException {
+        Statement s = createStatement();
+        ResultSet rs = s.executeQuery("SELECT " +
+                "APP.GET_SCHEMA_TRANSITION(SCHEMANAME) FROM SYS.SYSSCHEMAS");
+        while (rs.next()) {
+            assertTrue(rs.getString(1).length() > 2);
+            verifyCachedSchema(getConnection());
+        }
+    }
+
+    public void testPreparedSetSchemaFunction() throws SQLException {
+        PreparedStatement ps = prepareStatement("SELECT " +
+                "APP.GET_SCHEMA_TRANSITION(SCHEMANAME) FROM SYS.SYSSCHEMAS");
+        ResultSet rs = ps.executeQuery();
+        while (rs.next()) {
+            assertTrue(rs.getString(1).length() > 2);
+            verifyCachedSchema(getConnection());
+        }
+    }
+
+    public void testSetSchemaFunctionLarge() throws SQLException {
+        Statement s = createStatement();
+        ResultSet rs = s.executeQuery("SELECT X, " +
+                "APP.GET_SCHEMA_TRANSITION(SCHEMANAME), " +
+                "Y FROM APP.LARGE");
+        while (rs.next()) {
+            assertTrue(rs.getString(2).length() > 2);
+            verifyCachedSchema(getConnection());
+        }
+    }
+
+    public void testPreparedSetSchemaFunctionLarge() throws SQLException {
+        PreparedStatement ps = prepareStatement("SELECT X, " +
+                "APP.GET_SCHEMA_TRANSITION(SCHEMANAME), " +
+                "Y FROM APP.LARGE");
+        ResultSet rs = ps.executeQuery();
+        while (rs.next()) {
+            assertTrue(rs.getString(2).length() > 2);
+            verifyCachedSchema(getConnection());
+        }
     }
 }

@@ -31,6 +31,11 @@ public class NetDatabaseMetaData extends org.apache.derby.client.am.DatabaseMeta
     
     private boolean supportsLayerBStreaming_;
 
+    /**
+     * True if the server supports session data caching
+     */
+    private boolean supportsSessionDataCaching_;
+
     public NetDatabaseMetaData(NetAgent netAgent, NetConnection netConnection) {
         // Consider setting product level during parse
         super(netAgent, netConnection, new ProductLevel(netConnection.productID_,
@@ -86,6 +91,9 @@ public class NetDatabaseMetaData extends org.apache.derby.client.am.DatabaseMeta
         
         supportsLayerBStreaming_ = 
             productLevel_.greaterThanOrEqualTo(10, 3, 0);
+
+        supportsSessionDataCaching_ =
+                productLevel_.greaterThanOrEqualTo(10, 4, 0);
     }
 
     /**
@@ -102,4 +110,11 @@ public class NetDatabaseMetaData extends org.apache.derby.client.am.DatabaseMeta
         return supportsLayerBStreaming_;
     }
 
+    /**
+     * Check if server supports session data caching
+     * @return true if the server supports this
+     */
+    final boolean serverSupportsSessionDataCaching() {
+        return supportsSessionDataCaching_;
+    }
 }

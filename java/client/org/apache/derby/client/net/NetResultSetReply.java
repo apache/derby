@@ -126,6 +126,9 @@ public class NetResultSetReply extends NetStatementReply implements ResultSetRep
                     parseRDBUPDRM();
                     peekCP = peekCodePoint();
                 }
+                if (peekCP == CodePoint.PBSD) {
+                    parsePBSD();
+                }
                 return;
             }
             do {
@@ -175,10 +178,15 @@ public class NetResultSetReply extends NetStatementReply implements ResultSetRep
         if (peekCP == CodePoint.RDBUPDRM) {
             found = true;
             parseRDBUPDRM();
+            peekCP = peekCodePoint();
         }
 
         if (!found) {
             parseFetchError(resultSetI);
+        }
+
+        if (peekCP == CodePoint.PBSD) {
+            parsePBSD();
         }
 
         if (longBufferForDecryption_ != null) {

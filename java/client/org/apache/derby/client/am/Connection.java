@@ -27,6 +27,7 @@ import org.apache.derby.shared.common.reference.JDBC30Translation;
 import org.apache.derby.shared.common.reference.SQLState;
 
 import java.sql.SQLException;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 public abstract class Connection implements java.sql.Connection,
         ConnectionCallbackInterface {
@@ -93,7 +94,24 @@ public abstract class Connection implements java.sql.Connection,
     protected boolean open_ = true;
     private boolean availableForReuse_ = false;
 
-    public int isolation_ = Configuration.defaultIsolation;
+    /**
+     * Constant indicating that isolation_ has not been updated through
+     * piggy-backing, (or that the previously stored value was invalidated,
+     * e.g. by an XA state change).
+     */
+    private static final int TRANSACTION_UNKNOWN = -1;
+    /**
+     * Cached copy of the isolation level. Kept in sync with server through
+     * piggy-backing.
+     */
+    private int isolation_ = TRANSACTION_UNKNOWN;
+
+    /**
+     * Cached copy of the schema name. Updated through piggy-backing and used
+     * to implement statement caching.
+     */
+    private String currentSchemaName_ = null;
+
     public boolean autoCommit_ = true;
     protected boolean inUnitOfWork_ = false; // This means a transaction is in progress.
 
@@ -274,7 +292,8 @@ public abstract class Connection implements java.sql.Connection,
             // property: open_
             // this should already be true
 
-            isolation_ = Configuration.defaultIsolation;
+            isolation_ = TRANSACTION_UNKNOWN;
+            currentSchemaName_ = null;
             autoCommit_ = true;
             inUnitOfWork_ = false;
 
@@ -311,7 +330,8 @@ public abstract class Connection implements java.sql.Connection,
         // property: open_
         // this should already be true
 
-        isolation_ = Configuration.defaultIsolation;
+        isolation_ = TRANSACTION_UNKNOWN;
+        currentSchemaName_ = null;
         autoCommit_ = true;
         inUnitOfWork_ = false;
 
@@ -975,13 +995,22 @@ public abstract class Connection implements java.sql.Connection,
             // transaction so we have to clean up locally.
             completeLocalCommit();
 
-            isolation_ = level;
+            if (SanityManager.DEBUG && supportsSessionDataCaching()) {
+                SanityManager.ASSERT(isolation_ == level);
+            }
         }
         catch ( SqlException se )
         {
             throw se.getSQLException();
         }
     }
+
+    /**
+     * Finds out if the underlaying database connection supports session data
+     * caching.
+     * @return true if sessionData is supported
+     */
+    protected abstract boolean supportsSessionDataCaching();
 
     public int getTransactionIsolation() throws SQLException {
     	
@@ -997,6 +1026,15 @@ public abstract class Connection implements java.sql.Connection,
                 agent_.logWriter_.traceExit(this, "getTransactionIsolation", isolation_);
             }
             
+            if (isolation_ != TRANSACTION_UNKNOWN) {
+                if (SanityManager.DEBUG) {
+                    SanityManager.ASSERT(supportsSessionDataCaching(),
+                            "Cannot return cached isolation when caching is " +
+                            "not supported!");
+                }
+                return isolation_;
+            }
+
             // Set auto-commit to false when executing the statement as we do not want to
             // cause an auto-commit from getTransactionIsolation() method. 
             autoCommit_ = false;
@@ -1007,6 +1045,14 @@ public abstract class Connection implements java.sql.Connection,
             // also happen when isolation is set using SQL instead of JDBC. So we try to get the
             // value from the server by calling the "current isolation" function. If we fail to 
             // get the value, return the value stored in the client's connection object.
+            // DERBY-3192 - Cache session data in the client driver allows
+            // the re-introduction of isolation level caching. Changes to the
+            // isolation level triggered from SQL are now handled by
+            // piggybacking the modified isolation level on messages going
+            // back to the client.
+            // The XA-problem is handled by letting XA state changes set the
+            // cached isolation level to TRANSACTION_UNKNOWN which will trigger
+            // a refresh from the server.
             if (getTransactionIsolationStmt == null  || 
             		!(getTransactionIsolationStmt.openOnClient_ &&
             				getTransactionIsolationStmt.openOnServer_)) {
@@ -1020,13 +1066,35 @@ public abstract class Connection implements java.sql.Connection,
             rs = getTransactionIsolationStmt.executeQuery("values current isolation");
             rs.next();
             String isolationStr = rs.getString(1);
-            isolation_ = translateIsolation(isolationStr);
+
+            int isolation = translateIsolation(isolationStr);
+            if (isolation_ == TRANSACTION_UNKNOWN &&
+                    supportsSessionDataCaching()) {
+                // isolation_ will be TRANSACTION_UNKNOWN if the connection has
+                // been reset on
+                // the client. The server will not observe a
+                // change in isolation level so no information is
+                // piggy-backed. Update the cached value here, rather than
+                // waiting for the isolation to change on the server.
+                isolation_ = isolation;
+            }
+            if (SanityManager.DEBUG) {
+                SanityManager.ASSERT(!supportsSessionDataCaching() ||
+                        (isolation_ == isolation),
+                        "Cached isolation_ not updated, (isolation_="+
+                        isolation_+")!=(isolation="+isolation+")");
+                SanityManager.ASSERT(supportsSessionDataCaching() ||
+                        (isolation_ == TRANSACTION_UNKNOWN),
+                        "isolation_ modified when caching is not supported");
+            }
             rs.close();	
             // So... of we did not have an active transaction before
             // the query, we pretend to still not have an open
             // transaction. The result set is closed, so this should
             // not be problematic. DERBY-2084
             inUnitOfWork_ = savedInUnitOfWork;
+
+            return isolation;
         }
         catch ( SqlException se )
         {
@@ -1038,10 +1106,43 @@ public abstract class Connection implements java.sql.Connection,
         	if(rs != null)
         		rs.close();
         }
-        
-        return isolation_;
     }
   
+    /**
+     * Returns the current schema (the schema that would be used for
+     * compilation. This is not part of the java.sql.Connection interface, and
+     * is only intended for use with statement caching.
+     * @return the name of the current schema
+     * @throws java.sql.SQLException
+     */
+    public String getCurrentSchemaName() throws SQLException {
+        try {
+            checkForClosedConnection();
+        } catch (SqlException se) {
+            throw se.getSQLException();
+        }
+        if (currentSchemaName_ == null) {
+            if (agent_.loggingEnabled()) {
+               agent_.logWriter_.traceEntry(this,
+                  "getCurrentSchemaName() executes query");
+            }
+            java.sql.Statement s = createStatement();
+            java.sql.ResultSet rs = s.executeQuery("VALUES CURRENT SCHEMA");
+            rs.next();
+            String schema = rs.getString(1);
+            rs.close();
+            s.close();
+            return schema;
+        }
+        if (SanityManager.DEBUG) {
+            SanityManager.ASSERT(supportsSessionDataCaching(),
+                    "A cached schema name ("+currentSchemaName_+
+                    ") is not expected when session data caching is not" +
+                    "supported");
+        }
+        return currentSchemaName_;
+    }
+
     /**
      * Translates the isolation level from a SQL string to the JDBC int value
      *  
@@ -1969,6 +2070,20 @@ public abstract class Connection implements java.sql.Connection,
         } else if (sqlca.getSqlCode() < 0) {
             agent_.accumulateReadException(new SqlException(agent_.logWriter_, sqlca));
         }
+    }
+
+    public void completePiggyBackIsolation(int pbIsolation) {
+        if (SanityManager.DEBUG) {
+            SanityManager.ASSERT(supportsSessionDataCaching());
+        }
+        isolation_ = pbIsolation;
+    }
+
+    public void completePiggyBackSchema(String pbSchema) {
+        if (SanityManager.DEBUG) {
+            SanityManager.ASSERT(supportsSessionDataCaching());
+        }
+        currentSchemaName_ = pbSchema;
     }
 
     public abstract void addSpecialRegisters(String s);

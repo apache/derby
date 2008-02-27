@@ -17,11 +17,7 @@
    limitations under the License.
 
 */
-/**
- * This class translates DRDA protocol from an application requester to JDBC
- * for Derby and then translates the results from Derby to DRDA
- * for return to the application requester.
- */
+
 package org.apache.derby.impl.drda;
 
 import java.io.ByteArrayInputStream;
@@ -34,7 +30,6 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.sql.CallableStatement;
 import java.sql.Connection;
-import java.sql.Driver;
 import java.sql.ParameterMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -70,6 +65,11 @@ import org.apache.derby.impl.jdbc.Util;
 import org.apache.derby.jdbc.InternalDriver;
 import org.apache.derby.iapi.jdbc.EnginePreparedStatement;
 
+/**
+ * This class translates DRDA protocol from an application requester to JDBC
+ * for Derby and then translates the results from Derby to DRDA
+ * for return to the application requester.
+ */
 class DRDAConnThread extends Thread {
 
     private static final String leftBrace = "{";
@@ -724,6 +724,7 @@ class DRDAConnThread extends Thread {
 							}
 							// Send any warnings if JCC can handle them
 							checkWarning(null, null, stmt.getResultSet(), 0, false, sendWarningsOnCNTQRY);
+                            writePBSD();
 						}
 					}
 					catch(SQLException e)
@@ -754,6 +755,7 @@ class DRDAConnThread extends Thread {
 						// we need to set update count in SQLCARD
 						checkWarning(null, database.getDefaultStatement().getStatement(),
 							null, updateCount, true, true);
+                        writePBSD();
 					} catch (SQLException e)
 					{
 						writer.clearDSSesBackToMark(writerMark);
@@ -851,6 +853,7 @@ class DRDAConnThread extends Thread {
 								}
 							}
 						}
+                        writePBSD();
 					}
 					catch (SQLException e)
 					{
@@ -991,6 +994,7 @@ class DRDAConnThread extends Thread {
 						DRDAStatement curStmt = database.getCurrentStatement();
 						if (curStmt != null)
 							curStmt.rsSuspend();
+                        writePBSD();
 					} catch (SQLException e)
 					{
 						skipRemainder(true);
@@ -1007,10 +1011,45 @@ class DRDAConnThread extends Thread {
 					if (xaProto == null)
 						xaProto = new DRDAXAProtocol(this);
 					xaProto.parseSYNCCTL();
+ 					try {
+ 						writePBSD();
+ 					} catch (SQLException se) {
+						server.consoleExceptionPrint(se);
+ 						errorInChain(se);
+ 					}
 					break;
 				default:
 					codePointNotSupported(codePoint);
 			}
+
+            if (SanityManager.DEBUG) {
+                String cpStr = new CodePointNameTable().lookup(codePoint);
+                try {
+                    PiggyBackedSessionData pbsd =
+                            database.getPiggyBackedSessionData(false);
+                    if (pbsd != null) {
+                        // Session data has already been piggy-backed. Refresh
+                        // the data from the connection, to make sure it has
+                        // not changed behind our back.
+                        pbsd.refresh();
+                        if (codePoint != CodePoint.SYNCCTL) {
+                            // We expect the session attributes to have changed
+                            // after SYNCCTL, but this is handled by the client
+                            // and is not a problem
+                            SanityManager.ASSERT(!pbsd.isModified(),
+                                "Unexpected PBSD modification: " + pbsd +
+                                " after codePoint " + cpStr);
+                        }
+                    }
+                    // Not having a pbsd here is ok. No data has been
+                    // piggy-backed and the client has no cached values.
+                    // If needed it will send an explicit request to get
+                    // session data
+                } catch (SQLException sqle) {
+                    SanityManager.THROWASSERT("Unexpected exception after " +
+                            "codePoint "+cpStr, sqle);
+                }
+            }
 
 			// Set the correct chaining bits for whatever
 			// reply DSS(es) we just wrote.  If we've reached
@@ -2613,6 +2652,54 @@ class DRDAConnThread extends Thread {
 			stmt.setOutovr_drdaType(outovr_drdaType);
 		}
 	}
+
+    /**
+     * Piggy-back any modified session attributes on the current message. Writes
+     * a PBSD conataining one or both of PBSD_ISO and PBSD_SCHEMA. PBSD_ISO is
+     * followed by the jdbc isolation level as an unsigned byte. PBSD_SCHEMA is
+     * followed by the name of the current schema as an UTF-8 String.
+     * @throws java.sql.SQLException
+     * @throws org.apache.derby.impl.drda.DRDAProtocolException
+     */
+    private void writePBSD() throws SQLException, DRDAProtocolException
+    {
+        if (!appRequester.supportsSessionDataCaching()) {
+            return;
+        }
+        PiggyBackedSessionData pbsd = database.getPiggyBackedSessionData(true);
+        if (SanityManager.DEBUG) {
+            SanityManager.ASSERT(pbsd != null, "pbsd is not expected to be null");
+        }
+
+        pbsd.refresh();
+        if (pbsd.isModified()) {
+            writer.createDssReply();
+            writer.startDdm(CodePoint.PBSD);
+
+            if (pbsd.isIsoModified()) {
+                writer.writeScalar1Byte(CodePoint.PBSD_ISO, pbsd.getIso());
+            }
+
+            if (pbsd.isSchemaModified()) {
+                writer.startDdm(CodePoint.PBSD_SCHEMA);
+                writer.writeString(pbsd.getSchema());
+                writer.endDdm();
+            }
+            writer.endDdmAndDss();
+        }
+        pbsd.setUnmodified();
+        if (SanityManager.DEBUG) {
+            PiggyBackedSessionData pbsdNew =
+                database.getPiggyBackedSessionData(true);
+            SanityManager.ASSERT(pbsdNew == pbsd,
+                                 "pbsdNew and pbsd are expected to reference " +
+                                 "the same object");
+            pbsd.refresh();
+            SanityManager.ASSERT
+                (!pbsd.isModified(),
+                 "pbsd=("+pbsd+") is not expected to be modified");
+        }
+    }
 
 	/**
 	 * Write OPNQRYRM - Open Query Complete

@@ -44,4 +44,18 @@ public interface ConnectionCallbackInterface {
      *
      */
     public void completeAbnormalUnitOfWork(UnitOfWorkListener uwl);
+
+    /**
+     * Completes piggy-backing of the new current isolation level by
+     * updating the cached copy in am.Connection.
+     * @param pbIsolation new isolation level from the server
+     */
+    public void completePiggyBackIsolation(int pbIsolation);
+
+    /**
+     * Completes piggy-backing of the new current schema by updating
+     * the cached copy in am.Connection.
+     * @param pbSchema new current schema from the server
+     */
+    public void completePiggyBackSchema(String pbSchema);
 }
