@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Set;
 
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.InstanceNotFoundException;
@@ -209,6 +210,18 @@ abstract class MBeanTest extends BaseTestCase {
         }
         
         assertTrue("Failed to activate Derby's JMX management", active);
+    }
+    
+    /**
+     * Get all MBeans registered in Derby's domain.
+     * @return Set of ObjectNames for all of Derby's registered MBeans.
+     * @throws Exception
+     */
+    protected Set<ObjectName> getDerbyDomainMBeans() throws Exception
+    {
+        ObjectName derbyDomain = new ObjectName("org.apache.derby:*");
+        return  (Set<ObjectName>)
+            getMBeanServerConnection().queryNames(derbyDomain, null);
     }
     
     /**

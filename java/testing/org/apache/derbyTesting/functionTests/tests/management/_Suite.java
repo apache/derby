@@ -51,6 +51,7 @@ public class _Suite extends BaseTestCase {
 
         TestSuite suite = new TestSuite("management");
 
+        suite.addTest(JMXTest.suite());
         suite.addTest(ManagementMBeanTest.suite());
         suite.addTest(VersionMBeanTest.suite());
         
