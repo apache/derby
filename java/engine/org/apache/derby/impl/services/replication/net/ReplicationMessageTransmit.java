@@ -119,6 +119,13 @@ public class ReplicationMessageTransmit {
             }
         });
         
+        //The reads on the InputStreams obtained from the socket on the
+        //transmitter should not hang indefinitely. Use the timeout
+        //used for the connection establishment here to ensure that the
+        //reads timeout after the timeout period mentioned for the
+        //connection.
+        s.setSoTimeout(timeout_);
+        
         socketConn = new SocketConnection(s);
         
         //send the initiate message and receive acknowledgment

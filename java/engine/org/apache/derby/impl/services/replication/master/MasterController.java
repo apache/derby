@@ -274,9 +274,10 @@ public class MasterController
         } else if (ack.getType() == ReplicationMessage.TYPE_ACK) {
             //An exception is thrown to indicate the successful completion 
             //of failover. Also the AsynchronousLogShipper thread is terminated.
+            //The socket connection that is obtained needs to be torn down.
             //The exception thrown is of Database Severity, this shuts
             //down the master database.
-            logShipper.stopLogShipment();
+            teardownNetwork();
             throw StandardException.newException
                     (SQLState.REPLICATION_FAILOVER_SUCCESSFUL, dbname);  
         } else {
@@ -299,6 +300,7 @@ public class MasterController
      */
     private void handleFailoverFailure(Throwable t) 
     throws StandardException {
+        teardownNetwork();
         rawStoreFactory.unfreeze();
         if (t != null) {
             throw StandardException.newException
