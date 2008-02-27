@@ -42,6 +42,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.BaseTestSetup;
 import org.apache.derbyTesting.junit.NetworkServerTestSetup;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -63,7 +64,10 @@ abstract class MBeanTest extends BaseTestCase {
         // Older VMs will get UnsupportedClassVersionError anyway...
         
         // Create a suite of all "test..." methods in the class.
-        TestSuite suite = new TestSuite(testClass,  suiteName);
+        Test suite = new TestSuite(testClass,  suiteName);
+        
+        // Set up to get JMX connections using remote JMX
+        suite = JMXConnectionDecorator.remoteNoSecurity(suite);
 
         /* Connecting to an MBean server using a URL requires setting up remote
          * JMX in the JVM to which we want to connect. This is usually done by
@@ -139,45 +143,14 @@ abstract class MBeanTest extends BaseTestCase {
     }
     
     /**
-     * Creates a URL for connecting to the platform MBean server on the host
-     * specified by the network server hostname of this test configuration.
-     * The JMX port number used is also retreived from the test configuration.
-     * @return a service URL for connecting to the platform MBean server
-     * @throws MalformedURLException if the URL is malformed
-     */
-    private JMXServiceURL getJmxUrl() throws MalformedURLException {
-        
-        // NOTE: This hostname is only valid in a client/server configuration
-        String hostname = TestConfiguration.getCurrent().getHostName();
-        //String hostname = TestConfiguration.DEFAULT_HOSTNAME; // for embedded?
-        int jmxPort = TestConfiguration.getCurrent().getJmxPort();
-                
-        /* "jmxrmi" is the name of the RMI server connector of the platform
-         * MBean server, which is used by Derby */
-        JMXServiceURL url = new JMXServiceURL(
-                "service:jmx:rmi:///jndi/rmi://" 
-                    + hostname
-                    + ":" + jmxPort + "/jmxrmi");
-        
-        return url;
-    }
-    
-    /**
-     * Creates a client connector for JMX and uses this to obtain a connection
-     * to an MBean server. This method assumes that JMX security has been
-     * disabled, meaning that authentication credentials and SSL configuration 
-     * details are not supplied to the MBeanServer.
+     * Obtains a connection to an MBean server. Assumes th
      * 
      * @return a plain connection to an MBean server
-     * @throws MalformedURLException if the JMX Service URL used is invalid
-     * @throws IOException if connecting to the MBean server fails
      */
     protected MBeanServerConnection getMBeanServerConnection() 
-            throws MalformedURLException, IOException {
-                
-        // assumes that JMX authentication and SSL is not required (hence null)
-        JMXConnector jmxc = JMXConnectorFactory.connect(getJmxUrl(), null);
-        return jmxc.getMBeanServerConnection();
+            throws Exception {
+        
+        return JMXConnectionGetter.mbeanServerConnector.get().getMBeanServerConnection();
     }
     
     /**
