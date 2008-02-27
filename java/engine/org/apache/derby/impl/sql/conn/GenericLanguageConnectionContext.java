@@ -2742,26 +2742,26 @@ public class GenericLanguageConnectionContext
 				continue;
 			}
 
-			ResultSet activationResultSet = null;
-			boolean resultsetReturnsRows = false;
-			if (a.getResultSet() != null) {
-				activationResultSet = a.getResultSet();
-				resultsetReturnsRows = activationResultSet.returnsRows();
-			}
+			//Determine if the activation has a resultset and if that resultset
+			//returns rows. For such an activation, we need to take special
+			//actions during commit and rollback as explained in the comments
+			//below.
+			ResultSet activationResultSet = a.getResultSet();
+			boolean resultsetReturnsRows =  
+				(activationResultSet != null) && activationResultSet.returnsRows(); ;
 
 			if (forRollback) { 
-				if (activationResultSet != null) 
-					if (resultsetReturnsRows)
-						//Since we are dealing with rollback, we need to reset 
-						//the activation no matter what the holdability might 
-						//be provided that resultset returns rows. An example
-						//where we do not want to close a resultset that does
-						//not return rows would be a java procedure which has
-						//user invoked rollback inside of it. That rollback
-						//should not reset the activation associated with
-						//the call to java procedure because that activation
-						//is still being used.
-						a.reset();
+				if (resultsetReturnsRows)
+					//Since we are dealing with rollback, we need to reset 
+					//the activation no matter what the holdability might 
+					//be provided that resultset returns rows. An example
+					//where we do not want to close a resultset that does
+					//not return rows would be a java procedure which has
+					//user invoked rollback inside of it. That rollback
+					//should not reset the activation associated with
+					//the call to java procedure because that activation
+					//is still being used.
+					a.reset();
 				// Only invalidate statements if we performed DDL.
 				if (dataDictionaryInWriteMode()) {
 					ExecPreparedStatement ps = a.getPreparedStatement();
@@ -2771,26 +2771,22 @@ public class GenericLanguageConnectionContext
 				}
 			} else {
 				//We are dealing with commit here. 
-				if (activationResultSet != null) {
-					//if the activation has resultset associated with it, then 
-					//use following criteria to take the action
-					if (resultsetReturnsRows){
-						if (a.getResultSetHoldability() == false)
-							//Close result sets that return rows and are not held 
-							//across commit. This is to implement closing JDBC 
-							//result sets that are CLOSE_CURSOR_ON_COMMIT at commit 
-							//time. 
-							activationResultSet.close();
-						else 
-							//Clear the current row of the result sets that return
-							//rows and are held across commit. This is to implement
-							//keeping JDBC result sets open that are 
-							//HOLD_CURSORS_OVER_COMMIT at commit time and marking
-							//the resultset to be not on a valid row position. The 
-							//user will need to reposition within the resultset 
-							//before doing any row operations.
-							activationResultSet.clearCurrentRow();							
-					}
+				if (resultsetReturnsRows){
+					if (a.getResultSetHoldability() == false)
+						//Close result sets that return rows and are not held 
+						//across commit. This is to implement closing JDBC 
+						//result sets that are CLOSE_CURSOR_ON_COMMIT at commit 
+						//time. 
+						activationResultSet.close();
+					else 
+						//Clear the current row of the result sets that return
+						//rows and are held across commit. This is to implement
+						//keeping JDBC result sets open that are 
+						//HOLD_CURSORS_OVER_COMMIT at commit time and marking
+						//the resultset to be not on a valid row position. The 
+						//user will need to reposition within the resultset 
+						//before doing any row operations.
+						activationResultSet.clearCurrentRow();							
 				}
 				a.clearHeapConglomerateController();
 			}
