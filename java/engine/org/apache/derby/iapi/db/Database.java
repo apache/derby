@@ -42,7 +42,7 @@ import java.util.Locale;
  * which this interface extends, provides all the externally visible
  * methods).
  * <P>
- * At the present moment, this file defines methods which will at 
+ * At the present moment, this file defines methods which will at
  * some point be moved to to the external database interface.
  *
  * <B> There are a bunch of the unimplemninted interface that used to be in
@@ -122,21 +122,21 @@ public interface Database extends org.apache.derby.database.Database, LocaleFind
 
 	/** Set the Locale that is returned by this LocaleFinder */
 	public	void	setLocale(Locale locale);
-    
+
     /**
      * Return the DataDictionary for this database, set up at boot time.
      */
     public DataDictionary getDataDictionary();
-        
+
     /**
      * Start failover for the given database.
-     * 
+     *
      * @param dbname the replication database that is being failed over.
      *
      * @exception SQLException   1) If the failover succeeds, an exception is
      *                              thrown to indicate that the master database
      *                              was shutdown after a successful failover
-     *                           2) If a failure occurs during network 
+     *                           2) If a failure occurs during network
      *                              communication with slave.
      */
     public void failover(String dbname) throws SQLException;
@@ -152,11 +152,11 @@ public interface Database extends org.apache.derby.database.Database, LocaleFind
 
     /**
      * Stop the replication slave role for the given database.
-     * 
+     *
      * @exception SQLException Thrown on error
      */
     public void stopReplicationSlave() throws SQLException;
-    
+
     /**
      * Start the replication master role for this database
      * @param dbmaster The master database that is being replicated.
@@ -167,13 +167,13 @@ public interface Database extends org.apache.derby.database.Database, LocaleFind
      * 1-safe/2-safe/very-safe modes may be added later.
      * @exception SQLException Thrown on error
      */
-    public void startReplicationMaster(String dbmaster, String host, int port, 
+    public void startReplicationMaster(String dbmaster, String host, int port,
                                        String replicationMode)
         throws SQLException;
-    
+
     /**
      * Stop the replication master role for the given database.
-     * 
+     *
      * @exception SQLException Thrown on error
      */
     public void stopReplicationMaster() throws SQLException;
