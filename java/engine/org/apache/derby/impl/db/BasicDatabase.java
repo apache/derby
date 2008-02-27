@@ -410,7 +410,7 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
     }
     
     /**
-     * @see org.apache.derby.database.Database#failover(String dbname).
+     * @see org.apache.derby.iapi.db.Database#failover(String)
      */
     public void failover(String dbname) throws SQLException {
         try {
