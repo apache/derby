@@ -33,10 +33,12 @@ package org.apache.derby.mbeans;
  * <P>
  * Key properties for registered MBean when registered by Derby:
  * <UL>
- * <LI> type=Management
+ * <LI> <code>type=Management</code>
+ * <LI> <code>system=</code><em>runtime system identifier</em> (see overview)
  * </UL>
  * 
  * @see Management
+ * @see ManagementMBean#getSystemIdentifier()
  */
 public interface ManagementMBean {
     
@@ -47,6 +49,15 @@ public interface ManagementMBean {
      * registered any beans.
      */
     public boolean isManagementActive();
+    
+    /**
+     * Get the system identifier that this MBean is managing.
+     * The system identifier is a runtime value to disambiguate
+     * multiple Derby systems in the same virtual machine but
+     * different class loaders.
+     * @return Runtime identifier for the system, null if Derby is not running.
+     */
+    public String getSystemIdentifier();
     
     /**
      * Inform Derby to start its JMX management by registering

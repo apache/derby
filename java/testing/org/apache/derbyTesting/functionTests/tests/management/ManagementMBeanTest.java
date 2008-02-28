@@ -79,9 +79,11 @@ public class ManagementMBeanTest extends MBeanTest {
         invokeOperation(mbean, "stopManagement");
         assertBooleanAttribute(false, mbean, "ManagementActive");
         
-        // leaving only management MBeans.
+        // leaving only management MBeans, the one registered
+        // by this test and the one registered by Derby
+        // (which has the system key property).
         Set<ObjectName> managementOnly = getDerbyDomainMBeans();
-        assertEquals(1, managementOnly.size());
+        assertEquals(2, managementOnly.size());
         for (ObjectName name : managementOnly)
         {
             assertEquals("Management", name.getKeyProperty("type"));

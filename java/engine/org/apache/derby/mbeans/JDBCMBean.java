@@ -26,7 +26,8 @@ package org.apache.derby.mbeans;
  * <P>
  * Key properties for registered MBean:
  * <UL>
- * <LI> type=JDBC
+ * <LI> <code>type=JDBC</code>
+ * <LI> <code>system=</code><em>runtime system identifier</em> (see overview)
  * </UL>
 */
 public interface JDBCMBean {

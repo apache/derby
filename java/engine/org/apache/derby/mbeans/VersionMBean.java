@@ -32,8 +32,9 @@ package org.apache.derby.mbeans;
  * <P>
  * Key properties for registered MBean:
  * <UL>
- * <LI> type=Version
- * <LI> jar={derby.jar|derbynet.jar}
+ * <LI> <code>type=Version</code>
+ * <LI> <code>jar={derby.jar|derbynet.jar}</code>
+ * <LI> <code>system=</code><em>runtime system identifier</em> (see overview)
  * </UL>
 */
 public interface VersionMBean {

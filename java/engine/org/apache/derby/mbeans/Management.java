@@ -73,4 +73,15 @@ public class Management implements ManagementMBean {
              return false;
         return mgmtService.isManagementActive();
     }
+
+    /**
+     * Return the system identifier that this MBean is managing.
+     * @see ManagementMBean#getSystemIdentifier()
+     */
+    public String getSystemIdentifier() {
+        ManagementMBean mgmtService = getManagementService();
+        if (mgmtService == null)
+             return null;
+        return mgmtService.getSystemIdentifier();
+    }
 }

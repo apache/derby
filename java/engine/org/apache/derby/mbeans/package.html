@@ -21,8 +21,20 @@ is booted it will attempt to connect to the PlatformMBeanServer and register
 a number of MBeans to monitor and manage Derby.
 <P>
 Derby registers its JMX MBeans in the <code>org.apache.derby</code> domain and
-always includes a value for <code>type</code> in the MBean's ObjectName's key
+always includes values for <code>type</code> and <code>system</code> in the MBean's ObjectName's key
 properties. Other key properties are described in the interface class for the MBean.
+<UL>
+<LI> <code>type</code> Set to the class name of the MBean's interface class without
+the package and without <code>MBean</code>. E.g. for <code>org.apache.derby.mbeans.VersionMBean</code>
+the key property <code>type</code> will be set to <code>Version</code>. The javadoc for each MBean
+also indicates what <code>type</code> will be set to.
+<LI> <code>system</code> Set to a runtime identifier that allows Derby and applications
+to disambiguate multiple Derby systems in the same virtual machine but different class loaders.
+Currently a new value is created each time Derby is booted. An application may discover the
+value of the identifier by registering the MBean <code>org.apache.derby.mbeans.Management</code>
+and accessing the <code>SystemIdentifier</code>. This application created <code>ManagementMBean</code>
+must be running in the same class loader as Derby.
+</UL>
 <P>
 Derby registers the class name for any MBean to be the interface class for the MBean
 (i.e. <code>org.apache.derby.mbeans.*MBean</code>) to hide the implementation class

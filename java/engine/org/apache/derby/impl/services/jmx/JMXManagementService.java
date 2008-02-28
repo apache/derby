@@ -18,6 +18,7 @@
 package org.apache.derby.impl.services.jmx;
 
 import java.lang.management.ManagementFactory;
+import java.security.AccessControlException;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
@@ -42,6 +43,7 @@ import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.mbeans.ManagementMBean;
 import org.apache.derby.mbeans.VersionMBean;
+import org.apache.derby.security.SystemPermission;
 
 /** 
  * This class implements the ManagementService interface and provides a simple
@@ -79,6 +81,14 @@ public final class JMXManagementService implements ManagementService, ModuleCont
     private ObjectName myManagementBean;
     
     private MBeanServer myManagementServer;
+    
+    /**
+     * Runtime value to disambiguate
+     * multiple Derby systems in the same virtual machine but
+     * different class loaders. Set as the system attribute in
+     * the ObjectName for all MBeans registered.
+     */
+    private String systemIdentifier;
 
     public JMXManagementService() {
 
@@ -97,6 +107,9 @@ public final class JMXManagementService implements ManagementService, ModuleCont
             throws StandardException {
         
         registeredMbeans = new HashMap<ObjectName,StandardMBean>();
+        
+        systemIdentifier =
+            Monitor.getMonitor().getUUIDFactory().createUUID().toString();
         
         findServer();
              
@@ -186,7 +199,8 @@ public final class JMXManagementService implements ManagementService, ModuleCont
 
         try {
             final ObjectName beanName = new ObjectName(
-                    DERBY_JMX_DOMAIN + ":" + keyProperties);
+                    DERBY_JMX_DOMAIN + ":" + keyProperties
+                    + ",system=" + systemIdentifier);
             
             final StandardMBean standardMBean =
                 new StandardMBean(bean, beanInterface) {
@@ -307,6 +321,8 @@ public final class JMXManagementService implements ManagementService, ModuleCont
         if (registeredMbeans == null)
             return;
         
+        checkJMXControl();
+        
         // Already active?
         if (isManagementActive())
             return;
@@ -339,6 +355,8 @@ public final class JMXManagementService implements ManagementService, ModuleCont
         if (registeredMbeans == null)
             return;
         
+        checkJMXControl();
+        
         if (isManagementActive()) {
             for (ObjectName mbeanName : registeredMbeans.keySet())
             {
@@ -351,5 +369,22 @@ public final class JMXManagementService implements ManagementService, ModuleCont
             }
             mbeanServer = null;
         }
+    }
+
+    private void checkJMXControl() {
+        /* FUTURE DERBY-3462
+        try {
+            AccessController.checkPermission(new SystemPermission("jmxControl"));
+        } catch (AccessControlException e) {
+            // Need to throw a simplified version as AccessControlException
+            // will have a reference to Derby's SystemPermission which most likely
+            // will not be available on the client.
+            throw new SecurityException(e.getMessage());
+        }
+        */
+    }
+
+    public String getSystemIdentifier() {
+        return systemIdentifier;
     }
 }

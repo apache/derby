@@ -21,11 +21,15 @@
 
 package org.apache.derbyTesting.functionTests.tests.management;
 
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.sql.SQLException;
 import java.util.Set;
 
 import javax.management.MBeanInfo;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
+import javax.sql.DataSource;
 
 import junit.framework.Test;
 
@@ -71,6 +75,15 @@ public class JMXTest extends MBeanTest {
             // Is the class name in the public api
             assertTrue(mbeanClassName.startsWith("org.apache.derby.mbeans."));
             
+            // See if it was the application created ManagementMBean
+            // This will have the implementation class registered
+            // as the class name since it is not registered by Derby.
+            if ("Management".equals(type)
+                    && "org.apache.derby.mbeans.Management".equals(mbeanClassName))
+            {
+                continue;
+            }
+                    
             // and is a Derby specific MBean.
             assertTrue(mbeanClassName.endsWith("MBean"));
             

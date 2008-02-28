@@ -23,6 +23,7 @@ package org.apache.derbyTesting.functionTests.tests.management;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.Set;
 
 import javax.management.MBeanServerConnection;
@@ -225,6 +226,24 @@ abstract class MBeanTest extends BaseTestCase {
         }
         
         return mgmtObjName;
+    }
+    
+    /**
+     * Get the ObjectName for an MBean registered by Derby for a set of
+     * key properties. The ObjectName has the org.apache.derby and
+     * the key property <code>system</code> will be set to the system identifier
+     * for the Derby system under test (if Derby is running).
+     * @param keyProperties Set of key properties, may be modified by this call.
+     * @return ObjectName to access MBean.
+     */
+    protected ObjectName getDerbyMBeanName(Hashtable<String,String> keyProperties)
+        throws Exception
+    {
+        String systemIdentifier = (String)
+                  getAttribute(getApplicationManagementMBean(), "SystemIdentifier");
+        if (systemIdentifier != null)
+            keyProperties.put("system", systemIdentifier);
+        return new ObjectName("org.apache.derby", keyProperties);
     }
     
     /**

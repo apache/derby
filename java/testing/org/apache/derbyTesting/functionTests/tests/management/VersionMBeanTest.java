@@ -74,13 +74,13 @@ public class VersionMBeanTest extends MBeanTest {
      * @throws MalformedObjectNameException if the object name is not valid
      */
     private ObjectName getDerbyJarObjectName() 
-            throws MalformedObjectNameException {
+            throws Exception {
         
         // get a reference to the VersionMBean instance for derby.jar
         Hashtable<String, String> keyProps = new Hashtable<String, String>();
         keyProps.put("type", "Version");
         keyProps.put("jar", "derby.jar");
-        return new ObjectName("org.apache.derby", keyProps);
+        return getDerbyMBeanName(keyProps);
     }
     
     //

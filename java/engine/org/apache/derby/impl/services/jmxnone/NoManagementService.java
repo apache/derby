@@ -41,4 +41,7 @@ public final class NoManagementService implements ManagementService {
     }
     public void stopManagement() {
     }
+    public String getSystemIdentifier() {
+        return null;
+    }
 }
