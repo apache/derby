@@ -156,6 +156,12 @@ class DDMReader
     
     // State whether doing layer B Streaming or not.
     private boolean doingLayerBStreaming = false;;
+    
+    // For JMX statistics. Volatile to ensure we 
+    // get one complete long, but we don't bother to synchronize, 
+    // since this is just statistics.
+    
+    volatile long totalByteCount = 0;
 
 	// constructor
 	DDMReader (DRDAConnThread agent, DssTrace dssTrace)
@@ -1931,6 +1937,7 @@ class DDMReader
 				  "InputStream.read()", "insufficient data", "*");
 			}
 		}
+        totalByteCount += totalBytesRead;
 	}
 
 	/**

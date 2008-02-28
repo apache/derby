@@ -3844,7 +3844,44 @@ public final class NetworkServerControlImpl {
 		
 		return s;
 	}
+    
+    long getBytesRead() {
+        long count=0;
+        for (int i = 0; i < threadList.size(); i++) {
+            count += ((DRDAConnThread)threadList.get(i)).getBytesRead();
+        }
+        return count;
+    }
+    
+     long getBytesWritten() {
+        long count=0;
+        for (int i = 0; i < threadList.size(); i++) {
+            count += ((DRDAConnThread)threadList.get(i)).getBytesWritten();
+        }
+        return count;
+    }
+     
+    int getActiveSessions() {
+        int count=0;
+        for (int i = 0; i < threadList.size(); i++) {
+           if (((DRDAConnThread)threadList.get(i)).hasSession()) {
+               count++;
+           }
+        }
+        return count;
+    }
 
+    int getRunQueueSize() {
+        return runQueue.size();
+    }
+    
+    int getThreadListSize() {
+        return threadList.size();
+    }
+    
+    int getConnectionNumber() {
+        return connNum;
+    }
 
 	protected void setClientLocale(String locale)
 	{

@@ -205,9 +205,60 @@ class NetworkServerMBeanImpl implements NetworkServerMBean {
     }
      **/
     
+    public int getActiveSessions() {
+        return server.getActiveSessions();
+    }
     
+    public int getWaitingSessions() {
+        return server.getRunQueueSize();
+    }
     
+    public int getConnectionThreads() {
+        return server.getThreadListSize();
+    }
      
+    public int getNumberOfConnections() {
+        return server.getConnectionNumber();
+    }
+    
+    public long getBytesReceived() {
+        return server.getBytesRead();
+    }
+    
+    public long getBytesSent() {
+        return server.getBytesWritten();
+    }
+    
+    private long lastReceiveTime = System.currentTimeMillis();
+    private long lastReceiveBytes = 0;
+    private int receiveResult = 0;
+    
+    public int getBytesReceivedPerSecond(){
+        long now = System.currentTimeMillis();
+        if (now - lastReceiveTime >= 1000) {
+            long count = getBytesReceived();
+            receiveResult = (int)((count - lastReceiveBytes)/((now - lastReceiveTime)/1000));
+            lastReceiveTime = now;
+            lastReceiveBytes = count;
+        }
+        return receiveResult;
+    }
+
+    private long lastSentTime = System.currentTimeMillis();
+    private long lastSentBytes = 0;
+    private int sentResult = 0;
+
+    public int getBytesSentPerSecond(){
+        long now = System.currentTimeMillis();
+        if (now - lastSentTime >= 1000) {
+            long count = getBytesSent();
+            sentResult = (int)((count - lastSentBytes)/((now - lastSentTime)/1000));
+            lastSentTime = now;
+            lastSentBytes = count;
+        }
+        return sentResult;
+    }
+
     // ------------------------- MBEAN OPERATIONS  ----------------------------
     
     /**

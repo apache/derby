@@ -137,6 +137,59 @@ public interface NetworkServerMBean {
     public String getDrdaTraceDirectory();
     //public void setDrdaTraceDirectory(String dir) throws Exception;
 
+    /**
+     * Get the number of active sessions
+     * @return number of active sessions
+     */
+    public int getActiveSessions();
+    
+    /**
+     * get the number of waiting sessions. Always 0 if drdaMaxThreads is 0.
+     * @return number of waiting sessions
+     */
+    public int getWaitingSessions();
+    
+    /**
+     * Get the size of the thread pool.
+     * @return size of thread pool
+     */
+    public int getConnectionThreads();
+    
+    /**
+     * Get the accumulated number of connections.
+     * @return number of connections.
+     */
+    public int getNumberOfConnections();
+    
+    /**
+     * Get the total number of bytes read
+     * @return number of bytes
+     */
+    public long getBytesReceived();
+    
+    /** 
+     * Get the total number of bytes written.
+     * @return number of bytes
+     */
+    public long getBytesSent();
+    
+    /**
+     * Get the number of bytes received pr second. 
+     * Shortest interval measured is 1 second.
+     * @return bytes per millisecond
+     */
+    
+    public int getBytesReceivedPerSecond();
+    
+     /**
+     * Get the number of bytes sent pr second. 
+     * Shortest interval measured is 1 second.
+     * @return bytes per millisecond
+     */
+    
+    public int getBytesSentPerSecond();
+    
+    
     
     // ---
     // ----------------- MBean operations ------------------------------------

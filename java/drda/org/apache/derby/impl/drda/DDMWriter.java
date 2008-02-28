@@ -111,6 +111,12 @@ class DDMWriter
 	/** Encoder which encodes strings with the server's default encoding. */
 	private final CharsetEncoder encoder;
 
+    // For JMX statistics. Volatile to ensure we 
+    // get one complete long, but we don't bother to synchronize, 
+    // since this is just statistics.
+    
+    volatile long totalByteCount = 0;
+    
 	DDMWriter (CcsidManager ccsidManager, DRDAConnThread agent, DssTrace dssTrace)
 	{
 		this.buffer = ByteBuffer.allocate(DEFAULT_BUFFER_SIZE);
@@ -1214,6 +1220,7 @@ class DDMWriter
 			}
 			reset(dssTrace);
 		}
+        totalByteCount += length;
 	}
 
 	// private methods

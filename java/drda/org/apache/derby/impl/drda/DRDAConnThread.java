@@ -8232,11 +8232,22 @@ class DRDAConnThread extends Thread {
 			writeSQLCARDs(reportWarning, updateCount);
 	}
 
+    boolean hasSession() {
+        return session != null;
+    }
+    
+    long getBytesRead() {
+        return reader.totalByteCount;
+    }
+    
+    long getBytesWritten() {
+        return writer.totalByteCount;
+    }
 
 	protected String buildRuntimeInfo(String indent, LocalizedResource localLangUtil )
 	{
 		String s ="";
-		if (session == null)
+		if (!hasSession())
 			return s;
 		else
 			s += session.buildRuntimeInfo("", localLangUtil);
