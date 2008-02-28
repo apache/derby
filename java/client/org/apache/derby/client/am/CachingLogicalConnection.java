@@ -67,6 +67,7 @@ public class CachingLogicalConnection
     public synchronized void close()
             throws SQLException {
         if (this.cacheInteractor != null) {
+            this.cacheInteractor.closeOpenLogicalStatements();
             // Nullify reference to cache interactor to allow it to be GC'ed.
             // It should not be used again when, logical connection is closed.
             this.cacheInteractor = null;

@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import org.apache.derby.client.am.stmtcache.JDBCStatementCache;
 import org.apache.derby.client.am.stmtcache.StatementKey;
@@ -41,6 +42,12 @@ public final class StatementCacheInteractor {
     /** List of open logical statements created by this cache interactor. */
     //@GuardedBy("this")
     private final ArrayList openLogicalStatements = new ArrayList();
+    /**
+     * Tells if this interactor is in the process of shutting down.
+     * <p>
+     * If this is true, it means that the logical connection is being closed.
+     */
+    private boolean connCloseInProgress = false;
 
     /**
      * Creates a new JDBC statement cache interactor.
@@ -175,6 +182,46 @@ public final class StatementCacheInteractor {
                     resultSetHoldability);
         }
         return createLogicalCallableStatement(cs, stmtKey);
+    }
+
+    /**
+     * Closes all open logical statements created by this cache interactor.
+     * <p>
+     * A cache interactor is bound to a single (caching) logical connection.
+     * @throws SQLException if closing an open logical connection fails
+     */
+    public synchronized void closeOpenLogicalStatements()
+            throws SQLException {
+        // Transist to closing state, to avoid changing the list of open
+        // statements as we work our way through the list.
+        this.connCloseInProgress = true;
+        // Iterate through the list and close the logical statements.
+        Iterator logicalStatements = this.openLogicalStatements.iterator();
+        while (logicalStatements.hasNext()) {
+            LogicalStatementEntity logicalStatement =
+                    (LogicalStatementEntity)logicalStatements.next();
+            logicalStatement.close();
+        }
+        // Clear the list for good measure.
+        this.openLogicalStatements.clear();
+    }
+
+    /**
+     * Designates the specified logical statement as closed.
+     *
+     * @param logicalStmt the logical statement being closed
+     */
+    public synchronized void markClosed(LogicalStatementEntity logicalStmt) {
+        // If we are not in the process of shutting down the logical connection,
+        // remove the notifying statement from the list of open statements.
+        if (!connCloseInProgress) {
+            boolean removed = this.openLogicalStatements.remove(logicalStmt);
+            if (SanityManager.DEBUG) {
+                SanityManager.ASSERT(removed,
+                    "Tried to remove unregistered logical statement: " +
+                    logicalStmt);
+            }
+        }
     }
 
     /**

@@ -71,6 +71,8 @@ abstract class LogicalStatementEntity
      */
     //@GuardedBy("this)
     private java.sql.CallableStatement physicalCs;
+    /** The owner of this logical entity. */
+    private StatementCacheInteractor owner;
     /** The key for the associated statement. */
     private final StatementKey stmtKey;
     /** Cache for physical statements. */
@@ -96,6 +98,7 @@ abstract class LogicalStatementEntity
         }
         this.stmtKey = stmtKey;
         this.cache = cacheInteractor.getCache();
+        this.owner = cacheInteractor;
         this.physicalPs = physicalPs;
         if (physicalPs instanceof CallableStatement) {
             this.hasCallableStmt = true;
@@ -156,9 +159,12 @@ abstract class LogicalStatementEntity
             physicalPs = null;
             physicalCs = null;
 
+            this.owner.markClosed(this);
+            // Nullify the reference, since the entity object might stick around
+            // for a while.
+            this.owner = null;
             // Reset the owner of the physical statement.
             temporaryPsRef.setOwner(null);
-
             // If the underlying statement has become closed, don't cache it.
             if (temporaryPsRef.isClosed()) {
                 return;
