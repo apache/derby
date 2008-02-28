@@ -23,7 +23,7 @@
 package org.apache.derby.impl.services.replication;
 
 import org.apache.derby.iapi.reference.MessageId;
-import org.apache.derby.iapi.services.context.ErrorStringBuilder;
+import org.apache.derby.iapi.error.ErrorStringBuilder;
 import org.apache.derby.iapi.services.monitor.Monitor;
 
 public class ReplicationLogger {

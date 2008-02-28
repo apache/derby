@@ -35,12 +35,13 @@ import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.context.Context;
 import org.apache.derby.iapi.services.context.ContextService;
-import org.apache.derby.iapi.services.context.ShutdownException;
 
 import org.apache.derby.iapi.services.stream.InfoStreams;
 import org.apache.derby.iapi.services.stream.PrintWriterGetHeader;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.error.ErrorStringBuilder;
+import org.apache.derby.iapi.error.ShutdownException;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.uuid.UUIDFactory;
 import org.apache.derby.iapi.services.timer.TimerFactory;
@@ -58,7 +59,6 @@ import org.apache.derby.iapi.error.ExceptionSeverity;
 
 import  org.apache.derby.io.StorageFactory;
 
-import org.apache.derby.iapi.services.context.ErrorStringBuilder;
 
 import org.apache.derby.iapi.services.info.JVMInfo;
 import org.apache.derby.iapi.services.i18n.BundleFinder;

@@ -21,6 +21,7 @@
 
 package org.apache.derby.iapi.services.context;
 
+import org.apache.derby.iapi.error.ShutdownException;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.stream.HeaderPrintWriter;

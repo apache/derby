@@ -21,8 +21,8 @@
 
 package org.apache.derby.iapi.services.i18n;
 
+import org.apache.derby.iapi.error.ShutdownException;
 import org.apache.derby.iapi.services.info.JVMInfo;
-import org.apache.derby.iapi.services.context.ShutdownException;
 
 import java.util.Locale;
 import java.util.MissingResourceException;

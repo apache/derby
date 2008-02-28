@@ -19,7 +19,7 @@
 
  */
 
-package org.apache.derby.iapi.services.context;
+package org.apache.derby.iapi.error;
 
 import org.apache.derby.iapi.services.stream.PrintWriterGetHeader;
 

@@ -29,7 +29,6 @@ import org.apache.derby.impl.store.raw.log.LogRecord;
 import org.apache.derby.impl.store.raw.log.StreamLogScan;
 
 // need this to print nested exception that corrupts the database
-import org.apache.derby.iapi.services.context.ErrorStringBuilder;
 
 import org.apache.derby.iapi.services.info.ProductGenusNames;
 import org.apache.derby.iapi.services.info.ProductVersionHolder;
@@ -42,7 +41,6 @@ import org.apache.derby.iapi.services.daemon.DaemonService;
 import org.apache.derby.iapi.services.daemon.Serviceable;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.context.ContextService;
-import org.apache.derby.iapi.services.context.ShutdownException;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.monitor.ModuleControl;
 import org.apache.derby.iapi.services.monitor.ModuleSupportable;
@@ -55,6 +53,8 @@ import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
 import org.apache.derby.iapi.services.stream.PrintWriterGetHeader;
 import org.apache.derby.iapi.services.stream.InfoStreams;
+import org.apache.derby.iapi.error.ErrorStringBuilder;
+import org.apache.derby.iapi.error.ShutdownException;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.store.access.AccessFactory;
