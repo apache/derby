@@ -78,6 +78,12 @@ permission java.util.PropertyPermission "derby.storage.jvmInstanceId",
   permission java.security.SecurityPermission "insertProvider.SunJCE";
   permission java.security.SecurityPermission "insertProvider.IBMJCE";
  
+  // These permissions are needed when testing code instrumented with EMMA.
+  // They will only be used if the emma.active system property property is set,
+  // which should be set to "" for the permissions to be correct.
+  permission java.util.PropertyPermission "${emma.active}user.dir", "read";
+  permission java.io.FilePermission "${emma.active}${user.dir}${/}coverage.ec", "read, write";
+  permission java.lang.RuntimePermission "${emma.active}writeFileDescriptor";
 };
 
 //
@@ -157,7 +163,10 @@ grant codeBase "${derbyTesting.testjar}derbyTesting.jar" {
   // streams. Currently the nist suite runs with useprocess=false.
   permission java.lang.RuntimePermission "setSecurityManager";
   permission java.security.SecurityPermission "getPolicy";
-  permission java.lang.RuntimePermission "setIO"; 
+  permission java.lang.RuntimePermission "setIO";  
+
+  // These permissions are needed when testing code instrumented with EMMA.
+  permission java.lang.RuntimePermission "${emma.active}writeFileDescriptor";
 };
 
 //
@@ -206,6 +215,14 @@ grant codeBase "${derbyTesting.junit}" {
     permission java.util.PropertyPermission "user.home", "read";
     permission java.io.FilePermission "${user.home}${/}junit.properties", "read";
     permission java.io.FilePermission "${user.home}${/}.junitsession", "write";
+
+    // This permission is needed when running the tests using ant 1.7
+    permission java.io.FilePermission "${user.dir}${/}*", "write";
+  
+    // These permissions are needed when testing code instrumented with EMMA.
+    permission java.util.PropertyPermission "${emma.active}user.dir", "read";
+    permission java.io.FilePermission "${emma.active}${user.dir}${/}coverage.ec", "read, write";
+    permission java.lang.RuntimePermission "${emma.active}writeFileDescriptor";
 };
 
 // Due to a problem running tests/derbynet/CompatibilityTest in the old test
@@ -222,6 +239,14 @@ grant {
 // current one.
 grant codeBase "${derbyTesting.antjunit}" {
     permission java.lang.RuntimePermission "setIO";
+
+    // This permission is needed when running the tests using ant 1.7
+    permission java.io.FilePermission "${user.dir}${/}*", "write";
+
+    // These permissions are needed when testing code instrumented with EMMA.
+    permission java.util.PropertyPermission "${emma.active}user.dir", "read";
+    permission java.io.FilePermission "${emma.active}${user.dir}${/}coverage.ec", "read, write";
+    permission java.lang.RuntimePermission "${emma.active}writeFileDescriptor";
 };
 
 // functionTests.tests.lang.RoutineSecurityTest requires this grant
@@ -239,3 +264,12 @@ grant codeBase "${derbyTesting.jaxpjar}" {
   permission java.io.FilePermission "${user.dir}${/}extin${/}-", "read";
 };
 
+
+// These permissions are needed when testing code instrumented with EMMA.
+// They are all related to writing coverage statistics to a file that by default
+// is named coverage.ec placed in the directory where the test is executed.
+grant codeBase "${derbyTesting.emma}" {
+    permission java.util.PropertyPermission "user.dir", "read";
+    permission java.io.FilePermission "${user.dir}${/}coverage.ec", "read, write";
+    permission java.lang.RuntimePermission "writeFileDescriptor";
+};

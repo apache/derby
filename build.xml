@@ -1850,9 +1850,14 @@
            jvm="${derby.junit.jvm}" maxmemory="512m"
            showoutput="yes"
            dir="junit_${derby.junit.timestamp}"
+           tempdir="junit_${derby.junit.timestamp}"
   	 	   errorproperty="tests.failed"
   	       failureproperty="tests.failed">
       <sysproperty key="derbyTesting.oldReleasePath" value="${derbyTesting.oldReleasePath}"/>
+      <!-- This property is needed to keep EMMA silent when measuring codecoverage -->
+      <sysproperty key="emma.verbosity.level" value="silent"/>
+      <!-- Use the system property below to debug lacking java security permissions -->
+<!--      <sysproperty key="java.security.debug" value="access:failure"/> -->
       <formatter type="xml"/>
   	 	
 <test name="org.apache.derbyTesting.functionTests.tests.jdbcapi.AutoloadTest"
@@ -1884,6 +1889,8 @@
 
       <classpath>
      	    <pathelement path="${derby.junit.classpath}"/>
+            <!-- ant 1.7 finds junit.jar if it is on the classpath of the <junit> task -->
+            <pathelement location="${junit}"/>
       </classpath>
     </junit>
   </target>
@@ -1935,6 +1942,7 @@
            jvm="${jdk16}/bin/java"
            showoutput="yes"
            dir="junit_${derby.junit.timestamp}"
+           tempdir="junit_${derby.junit.timestamp}"
   	 	   errorproperty="tests.failed"
   	       failureproperty="tests.failed">
       <formatter type="xml"/>
@@ -1943,6 +1951,7 @@
       	todir="junit_${derby.junit.timestamp}"/>
         <classpath>
        	    <pathelement path="${derby.junit.classpath}"/>
+            <pathelement location="${junit}"/>
         </classpath>
       </junit>	
   </target>
@@ -1953,6 +1962,7 @@
             fork="yes" forkmode="once"
             showoutput="yes"
             dir="junit_${derby.junit.timestamp}"
+            tempdir="junit_${derby.junit.timestamp}"
             errorproperty="tests.failed"
             failureproperty="tests.failed">
         <formatter type="xml"/>
@@ -1963,6 +1973,7 @@
         <classpath>
             <pathelement location="${out.pptesting.dir}"/>
             <pathelement location="${out.dir}"/>
+            <pathelement location="${junit}"/>
         </classpath>
     </junit>
   </target>
@@ -2026,5 +2037,74 @@
 	</target>
 	
 	
+
+<!-- =================================================================== -->
+<!--                         EMMA utility targets                       -->
+<!-- =================================================================== -->
+
+
+    <!-- directory that will contain the instrumented jar-files: -->
+    <property name="emmabase" value="${jarsdist.dir}/emma"/>
+    <property name="instrumented.jars" value="${emmabase}/lib"/>
+    <property name="instrumented.classes" value="${emmabase}/classes"/>
+
+    <target name="emma-clean">
+        <delete includeEmptyDirs="true">
+            <fileset dir="${emmabase}" includes="**"/>
+        </delete>
+    </target>
+    
+    <!-- These targets depend upon emma.jar and emma_ant.jar being installed under tools/java/ -->
+
+    <target name="emma-init" depends="initjars">
+        <!-- EMMA distribution: -->
+        <path id="emma.lib">
+            <pathelement location="${emma}"/>
+            <pathelement location="${emma_ant}"/>
+        </path>
+        <taskdef resource="emma_ant.properties" classpathref="emma.lib"/>
+        <mkdir dir="${emmabase}"/>
+    </target>
+    
+    <target name="emma-instrumentation" depends="emma-init,junit-init">
+        <!-- Apply emma instrumentation to the classes in instrpath and copy to destdir -->
+	<emma verbosity="verbose">
+            <instr outfile="junit_${derby.junit.timestamp}/coverage.em" destdir="${emmabase}" merge="true" mode="fullcopy">
+	        <instrpath>
+                    <pathelement path="${derby.jar.dir}/derby.jar"/>
+                    <pathelement path="${derby.jar.dir}/derbyclient.jar"/>
+                    <pathelement path="${derby.jar.dir}/derbynet.jar"/>
+                    <pathelement path="${derby.jar.dir}/derbytools.jar"/>
+                </instrpath>
+            </instr>
+	</emma>
+        <!-- Change the classpath used for junit tests to use the jars instrumented by EMMA -->
+        <property name="derby.junit.classpath" value="${emma}:${derby.jar.dir}/derbyTesting.jar:${instrumented.jars}/derby.jar:${instrumented.jars}/derbyclient.jar:${instrumented.jars}/derbynet.jar:${instrumented.jars}/derbytools.jar" />
+    </target>
+    
+    <target name="emma-all" depends="emma-instrumentation,junit-all">
+        <fail if="tests.failed">EMMA instrumented tests failed!</fail>
+    </target>
+
+    <target name="emma-report" depends="emma-all">
+        <emma>
+            <report verbosity="verbose" depth="method">
+                <sourcepath>
+                    <pathelement path="${derby.client.src.dir}" />
+                    <pathelement path="${derby.demo.src.dir}" />
+                    <pathelement path="${derby.drda.src.dir}" />
+                    <pathelement path="${derby.engine.src.dir}" />
+                    <pathelement path="${derby.shared.src.dir}" />
+                    <pathelement path="${derby.storeless.src.dir}" />
+                    <pathelement path="${derby.tools.src.dir}" />
+                </sourcepath>
+                <infileset dir="junit_${derby.junit.timestamp}" includes="coverage.em,coverage.ec" />
+                <!-- Three reports: txt, xml and html -->
+                <txt outfile="junit_${derby.junit.timestamp}/coverage.txt"/>
+                <xml outfile="junit_${derby.junit.timestamp}/coverage.xml"/>
+                <html outfile="junit_${derby.junit.timestamp}/coverage.html"/>
+            </report>
+        </emma>
+    </target>
 
 </project>

@@ -443,6 +443,7 @@ public class SecureServerTest extends BaseJDBCTestCase
 
         buffer.append( "java -classpath " );
         buffer.append( classpath );
+        buffer.append( " -Demma.verbosity.level=silent");
         buffer.append( " org.apache.derby.drda.NetworkServerControl -p " + portNumber + " " + commandSpecifics );
 
         final   String  command = buffer.toString();

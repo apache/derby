@@ -220,6 +220,9 @@ grant codeBase "${derbyTesting.junit}" {
     permission java.util.PropertyPermission "user.home", "read";
     permission java.io.FilePermission "${user.home}${/}junit.properties", "read";
     permission java.io.FilePermission "${user.home}${/}.junitsession", "write";
+
+    // This permission is needed when running the tests using ant 1.7
+    permission java.io.FilePermission "${user.dir}${/}*", "write";
 };
 
 // Due to a problem running tests/derbynet/CompatibilityTest in the old test
@@ -236,6 +239,9 @@ grant {
 // current one.
 grant codeBase "${derbyTesting.antjunit}" {
     permission java.lang.RuntimePermission "setIO";
+
+    // This permission is needed when running the tests using ant 1.7
+    permission java.io.FilePermission "${user.dir}${/}*", "write";
 };
 
 // functionTests.tests.lang.RoutineSecurityTest requires this grant

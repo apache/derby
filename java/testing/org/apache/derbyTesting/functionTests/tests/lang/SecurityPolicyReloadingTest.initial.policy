@@ -72,3 +72,30 @@ grant codeBase "${derbyTesting.testjar}derbyTesting.jar"
   permission java.security.SecurityPermission "getPolicy";
   permission java.lang.RuntimePermission "setIO"; 
 };
+
+grant codeBase "${derbyTesting.junit}" {
+    // This permission is needed when running the tests using ant 1.7
+    permission java.io.FilePermission "${user.dir}${/}*", "write";
+};
+
+// Ant's junit runner requires setOut to redirect the System output streams
+// to the forked JVM used when running junit tests inside Ant. Ant requires
+// forking the JVM if you want to run tests in a different directory than the
+// current one.
+grant codeBase "${derbyTesting.antjunit}" {
+    permission java.lang.RuntimePermission "setIO";
+
+    // This permission is needed when running the tests using ant 1.7
+    permission java.io.FilePermission "${user.dir}${/}*", "write";
+};
+
+// These permissions are needed when testing code instrumented with EMMA.
+// They are all related to writing coverage statistics to a file that by default
+// is named coverage.ec placed in the directory where the test is executed.
+// They will only be used if the emma.active system property property is set,
+// which should be set to "" for the permissions to be correct.
+grant {
+    permission java.util.PropertyPermission "${emma.active}user.dir", "read";
+    permission java.io.FilePermission "${emma.active}${user.dir}${/}coverage.ec", "read, write";
+    permission java.lang.RuntimePermission "${emma.active}writeFileDescriptor";
+};

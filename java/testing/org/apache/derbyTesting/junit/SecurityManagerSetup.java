@@ -257,6 +257,13 @@ public final class SecurityManagerSetup extends TestSetup {
         if (antjunit != null)
             classPathSet.setProperty("derbyTesting.antjunit", antjunit.toExternalForm());
 
+        // Load indirectly, normally no EMMA jars in the classpath.
+        // This property is needed to set correct permissions in policy files.
+        URL emma = getURL("com.vladium.emma.EMMAException");
+        if (emma != null) {
+            classPathSet.setProperty("emma.active", "");
+            classPathSet.setProperty("derbyTesting.emma", emma.toExternalForm());
+        }
 		
         /* When inserting XML values that use external DTD's, the JAXP
          * parser needs permission to read the DTD files.  So here we set
