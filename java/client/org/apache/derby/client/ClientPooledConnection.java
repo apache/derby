@@ -32,6 +32,7 @@ import org.apache.derby.jdbc.ClientBaseDataSource;
 import org.apache.derby.jdbc.ClientDriver;
 import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.client.am.SqlException;
+import org.apache.derby.client.am.stmtcache.JDBCStatementCache;
 import org.apache.derby.client.net.NetLogWriter;
 import org.apache.derby.shared.common.reference.SQLState;
 
@@ -49,6 +50,13 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
     org.apache.derby.client.am.Connection physicalConnection_ = null;
     org.apache.derby.client.net.NetConnection netPhysicalConnection_ = null;
     org.apache.derby.client.net.NetXAConnection netXAPhysicalConnection_ = null;
+
+    /**
+     * The statement cache for the underlying physical connection.
+     * <p>
+     * This will be {@code null} if statement caching is disabled (default).
+     */
+    private final JDBCStatementCache statementCache;
 
     /** The logical connection using the physical connection. */
     //@GuardedBy("this")
@@ -81,14 +89,21 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
                                   org.apache.derby.client.am.LogWriter logWriter,
                                   String user,
                                   String password) throws SQLException {
-        try
-        {
-            logWriter_ = logWriter;
-            ds_ = ds;
-            user_ = user;
-            password_ = password;
-            listeners_ = new ArrayList();
-            
+        logWriter_ = logWriter;
+        ds_ = ds;
+        user_ = user;
+        password_ = password;
+        listeners_ = new ArrayList();
+
+        if (ds.maxStatementsToPool() <= 0) {
+            this.statementCache = null;
+        } else {
+            // Disabled for now.
+            this.statementCache = null;
+            //        new JDBCStatementCache(ds.maxStatementsToPool());
+        }
+
+        try {
             //pass the client pooled connection instance to this
             //instance of the NetConnection object 
             //this object is then used to pass the close and the error events 
@@ -105,13 +120,10 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
                     -1,
                     false,
                     this);
-        
-        physicalConnection_ = netPhysicalConnection_;
-        }
-        catch ( SqlException se )
-        {
+        } catch (SqlException se) {
             throw se.getSQLException();
         }
+        physicalConnection_ = netPhysicalConnection_;
     }
 
     /**
@@ -133,22 +145,40 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
                                   String user,
                                   String password,
                                   int rmId) throws SQLException {
+        logWriter_ = logWriter;
+        ds_ = ds;
+        user_ = user;
+        password_ = password;
+        rmId_ = rmId;
+        listeners_ = new ArrayList();
+
+        if (ds.maxStatementsToPool() <= 0) {
+            this.statementCache = null;
+        } else {
+            // NOTE: Disable statement pooling for XA for now.
+            this.statementCache = null;
+            //        new JDBCStatementCache(ds.maxStatementsToPool());
+        }
+
         try {
-            logWriter_ = logWriter;
-            ds_ = ds;
-            user_ = user;
-            password_ = password;
-            rmId_ = rmId;
-            listeners_ = new ArrayList();
             netXAPhysicalConnection_ = getNetXAConnection(ds,
                     (NetLogWriter) logWriter_,
                     user,
                     password,
                     rmId);
-            physicalConnection_ = netXAPhysicalConnection_.getNetConnection();
         } catch ( SqlException se ) {
             throw se.getSQLException();
         }
+        physicalConnection_ = netXAPhysicalConnection_.getNetConnection();
+    }
+
+    /**
+     * Tells is statement pooling is enabled or not.
+     *
+     * @return {@code true} if enabled, {@code false} if disabled.
+     */
+    public boolean isStatementPoolingEnabled() {
+        return this.statementCache != null;
     }
 
     protected void finalize() throws java.lang.Throwable {
@@ -268,9 +298,15 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
         if (logicalConnection_ != null) {
             logicalConnection_.closeWithoutRecyclingToPool();
         }
-        logicalConnection_ = ClientDriver.getFactory().newLogicalConnection(
+        if (this.statementCache == null) {
+            logicalConnection_ = ClientDriver.getFactory().newLogicalConnection(
                                                         physicalConnection_,
                                                         this);
+        } else {
+            logicalConnection_ = ClientDriver.getFactory().
+                    newCachingLogicalConnection(
+                            physicalConnection_, this, statementCache);
+        }
     }
 
     public synchronized void addConnectionEventListener(
