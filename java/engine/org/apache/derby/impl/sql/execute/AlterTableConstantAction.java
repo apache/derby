@@ -1486,7 +1486,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 				updateStatistics = true;
 			}
 			else
-				cCount = tc.openSortRowSource(sortIds[index]);
+				cCount = new CardinalityCounter(tc.openSortRowSource(sortIds[index]));
 
 			newIndexCongloms[index] = tc.createAndLoadConglomerate(
 								   "BTREE",
@@ -1497,6 +1497,32 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 								   cCount,
 								   (long[]) null);
 
+			//For an index, if the statistics already exist, then drop them.
+			//The statistics might not exist for an index if the index was
+			//created when the table was empty.
+			//At ALTER TABLE COMPRESS time, for both kinds of indexes 
+			//(ie one with preexisting statistics and with no statistics), 
+			//create statistics for them if the table is not empty. 
+			//DERBY-737 "SYSCS_UTIL.SYSCS_COMPRESS_TABLE should create
+			//statistics if they do not exist"
+			if (updateStatistics)
+				dd.dropStatisticsDescriptors(td.getUUID(), cd.getUUID(), tc);
+			
+			long numRows;
+			if ((numRows = ((CardinalityCounter)cCount).getRowCount()) > 0)
+			{
+				long[] c = ((CardinalityCounter)cCount).getCardinality();
+				for (int i = 0; i < c.length; i++)
+				{
+					StatisticsDescriptor statDesc =
+						new StatisticsDescriptor(dd, dd.getUUIDFactory().createUUID(),
+								cd.getUUID(), td.getUUID(), "I", new StatisticsImpl(numRows, c[i]),
+								i + 1);
+					dd.addDescriptor(statDesc, null, // no parent descriptor
+							DataDictionary.SYSSTATISTICS_CATALOG_NUM,
+							true, tc);	// no error on duplicate.
+				}
+			}
 		}else
 		{
 			newIndexCongloms[index] = tc.createConglomerate(
@@ -1511,26 +1537,6 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 			//rowscount is zero and existing statistic will be invalid.
 			if (td.statisticsExist(cd))
 				dd.dropStatisticsDescriptors(td.getUUID(), cd.getUUID(), tc);
-		}
-
-		if (updateStatistics)
-		{
-			dd.dropStatisticsDescriptors(td.getUUID(), cd.getUUID(), tc);
-			long numRows;
-			if ((numRows = ((CardinalityCounter)cCount).getRowCount()) > 0)
-			{
-				long[] c = ((CardinalityCounter)cCount).getCardinality();
-				for (int i = 0; i < c.length; i++)
-				{
-					StatisticsDescriptor statDesc = 
-						new StatisticsDescriptor(dd, dd.getUUIDFactory().createUUID(),
-													cd.getUUID(), td.getUUID(), "I", new StatisticsImpl(numRows, c[i]),
-													i + 1);
-					dd.addDescriptor(statDesc, null, // no parent descriptor
-									 DataDictionary.SYSSTATISTICS_CATALOG_NUM,
-									 true, tc);	// no error on duplicate.
-				}
-			}
 		}
 
 		/* Update the DataDictionary
@@ -1551,7 +1557,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 
 
 	/**
-	 * Get info on the indexes on the table being compress. 
+	 * Get info on the indexes on the table being compressed. 
 	 *
 	 * @return	Nothing
 	 *
