@@ -24,7 +24,6 @@ package org.apache.derby.impl.drda;
 import java.sql.Types;
 import java.sql.SQLException;
 import org.apache.derby.iapi.reference.DRDAConstants;
-import org.apache.derby.iapi.reference.JDBC30Translation;
 
 
 
@@ -145,7 +144,7 @@ class SQLTypes {
 
 	  switch(jdbctype)
 	  {
-		  case JDBC30Translation.BOOLEAN:
+		  case Types.BOOLEAN:
 		  case java.sql.Types.BIT:
 		  case java.sql.Types.TINYINT:
 		  case java.sql.Types.SMALLINT:

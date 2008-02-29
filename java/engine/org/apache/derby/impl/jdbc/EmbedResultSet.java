@@ -3053,7 +3053,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	public void updateObject(int columnIndex, Object x) throws SQLException {
 		checksBeforeUpdateXXX("updateObject", columnIndex);
 		int colType = getColumnType(columnIndex);
-		if (colType == org.apache.derby.iapi.reference.JDBC20Translation.SQL_TYPES_JAVA_OBJECT) {
+		if (colType == Types.JAVA_OBJECT) {
 			try {
 				((UserDataValue) getDVDforColumnToBeUpdated(columnIndex, "updateObject")).setValue(x);
 				return;

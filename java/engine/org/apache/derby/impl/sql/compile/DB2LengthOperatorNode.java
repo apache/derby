@@ -151,7 +151,7 @@ public final class DB2LengthOperatorNode extends UnaryOperatorNode
         {
         case Types.BIGINT:
             return 8;
-		case org.apache.derby.iapi.reference.JDBC30Translation.SQL_TYPES_BOOLEAN:
+		case Types.BOOLEAN:
         case Types.BIT:
             return 1;
         case Types.BINARY:

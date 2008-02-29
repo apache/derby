@@ -27,8 +27,6 @@ import org.apache.derby.iapi.types.TypeId;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
-import org.apache.derby.iapi.reference.JDBC20Translation;
-import org.apache.derby.iapi.reference.JDBC30Translation;
 import org.apache.derby.iapi.reference.JDBC40Translation;
 
 import org.apache.derby.iapi.services.io.StoredFormatIds;
@@ -92,7 +90,7 @@ public class TypeCompilerFactoryImpl implements TypeCompilerFactory
                                                                         typeId);
 
                   case Types.BIT:
-                  case JDBC30Translation.SQL_TYPES_BOOLEAN:
+                  case Types.BOOLEAN:
                         return booleanTypeCompiler =
                                         getAnInstance(PACKAGE_NAME + "BooleanTypeCompiler",
                                                                 booleanTypeCompiler,
@@ -130,7 +128,7 @@ public class TypeCompilerFactoryImpl implements TypeCompilerFactory
                                                                 longintTypeCompiler,
                                                                 typeId);
 
-                  case JDBC20Translation.SQL_TYPES_BLOB:
+                  case Types.BLOB:
                         return blobTypeCompiler =
                                 getAnInstance(PACKAGE_NAME + "LOBTypeCompiler",
                                                           blobTypeCompiler,
@@ -142,7 +140,7 @@ public class TypeCompilerFactoryImpl implements TypeCompilerFactory
                                                           longvarbitTypeCompiler,
                                                           typeId);
 
-                  case JDBC20Translation.SQL_TYPES_CLOB:
+                  case Types.CLOB:
                       sqlTypeName = typeId.getSQLTypeName();
                       return clobTypeCompiler =
                           getAnInstance(PACKAGE_NAME + "CLOBTypeCompiler",
@@ -202,7 +200,7 @@ public class TypeCompilerFactoryImpl implements TypeCompilerFactory
                                                       varcharTypeCompiler,
                                                       typeId);
 
-                  case org.apache.derby.iapi.reference.JDBC20Translation.SQL_TYPES_JAVA_OBJECT:
+                  case Types.JAVA_OBJECT:
                   case Types.OTHER:
                         if (typeId.isRefTypeId())
                         {

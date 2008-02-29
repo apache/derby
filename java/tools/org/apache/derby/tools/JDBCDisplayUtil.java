@@ -677,7 +677,7 @@ public class JDBCDisplayUtil {
 			default:
 				s = LocalizedResource.getInstance().getLocalizedString(rs, rsmd, colnum );
 				break;
-			case org.apache.derby.iapi.reference.JDBC20Translation.SQL_TYPES_JAVA_OBJECT:
+			case Types.JAVA_OBJECT:
 			case Types.OTHER:
 			{
 				Object o = rs.getObject(colnum);
@@ -1187,7 +1187,7 @@ public class JDBCDisplayUtil {
 			default:
 				s = rs.getString(colnum);
 				break;
-			case org.apache.derby.iapi.reference.JDBC20Translation.SQL_TYPES_JAVA_OBJECT:
+			case Types.JAVA_OBJECT:
 			case Types.OTHER:
 			{
 				Object o = rs.getObject(colnum);

@@ -1628,7 +1628,7 @@ public final class DataTypeDescriptor implements Formatable
 
 		switch (jdbcType) {
 		case Types.BIT:
-		case org.apache.derby.iapi.reference.JDBC30Translation.SQL_TYPES_BOOLEAN:
+		case Types.BOOLEAN:
 		case Types.TINYINT:
 		case Types.SMALLINT:
 		case Types.INTEGER:

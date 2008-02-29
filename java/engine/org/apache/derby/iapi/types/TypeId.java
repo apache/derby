@@ -42,8 +42,6 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.types.*;
 import org.apache.derby.iapi.types.*;
 
-import org.apache.derby.iapi.reference.JDBC20Translation;
-import org.apache.derby.iapi.reference.JDBC30Translation;
 import org.apache.derby.iapi.reference.JDBC40Translation;
 
 import java.sql.Types;
@@ -371,7 +369,7 @@ public final class TypeId implements Formatable
                                                                         new BaseTypeIdImpl(StoredFormatIds.TIMESTAMP_TYPE_ID_IMPL));
                           break;
                   case Types.BIT:
-                  case JDBC30Translation.SQL_TYPES_BOOLEAN:
+                  case Types.BOOLEAN:
                           return BOOLEAN_ID;
 
                   case Types.BINARY:
@@ -402,14 +400,14 @@ public final class TypeId implements Formatable
                                                             new BaseTypeIdImpl(StoredFormatIds.LONGVARCHAR_TYPE_ID_IMPL));
                       break;
 
-                  case JDBC20Translation.SQL_TYPES_BLOB:
+                  case Types.BLOB:
                       ret = BLOB_ID;
                       if (ret == null)
                           ret = BLOB_ID = new TypeId(StoredFormatIds.BLOB_TYPE_ID,
                                                      new BaseTypeIdImpl(StoredFormatIds.BLOB_TYPE_ID_IMPL));
                       break;
                                                 
-                  case JDBC20Translation.SQL_TYPES_CLOB:
+                  case Types.CLOB:
                       ret = CLOB_ID;
                       if (ret == null)
                           ret = CLOB_ID = new TypeId(StoredFormatIds.CLOB_TYPE_ID,
@@ -505,11 +503,11 @@ public final class TypeId implements Formatable
                 }
                 else if (javaTypeName.equals("java.sql.Blob"))
                 {
-                        return getBuiltInTypeId(JDBC20Translation.SQL_TYPES_BLOB);
+                        return getBuiltInTypeId(Types.BLOB);
                 }
                 else if (javaTypeName.equals("java.sql.Clob"))
                 {
-                        return getBuiltInTypeId(JDBC20Translation.SQL_TYPES_CLOB);
+                        return getBuiltInTypeId(Types.CLOB);
                 }
                 else if (javaTypeName.equals("org.apache.derby.iapi.types.XML"))
                 {
@@ -597,10 +595,10 @@ public final class TypeId implements Formatable
                         return getBuiltInTypeId(Types.LONGVARBINARY);
                 }
                 if (SQLTypeName.equals(TypeId.BLOB_NAME)) {
-                        return getBuiltInTypeId(JDBC20Translation.SQL_TYPES_BLOB);
+                        return getBuiltInTypeId(Types.BLOB);
                 }
                 if (SQLTypeName.equals(TypeId.CLOB_NAME)) {
-                        return getBuiltInTypeId(JDBC20Translation.SQL_TYPES_CLOB);
+                        return getBuiltInTypeId(Types.CLOB);
                 }
                 if (SQLTypeName.equals(TypeId.XML_NAME)) {
                         return getBuiltInTypeId(StoredFormatIds.XML_TYPE_ID);

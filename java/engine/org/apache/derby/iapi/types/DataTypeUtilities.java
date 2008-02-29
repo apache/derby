@@ -23,7 +23,6 @@ package org.apache.derby.iapi.types;
 
 import org.apache.derby.iapi.error.StandardException;
 
-import org.apache.derby.iapi.reference.JDBC30Translation;
 import org.apache.derby.iapi.reference.JDBC40Translation;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 
@@ -56,7 +55,7 @@ public abstract class DataTypeUtilities  {
 				return dtd.getMaximumWidth();
 			case Types.SMALLINT:
 				return 5;
-			case JDBC30Translation.SQL_TYPES_BOOLEAN:
+			case Types.BOOLEAN:
 				return 1;
 		}
     	
@@ -194,7 +193,7 @@ public abstract class DataTypeUtilities  {
 				size = 20;
 				break;
 			case Types.BIT:
-			case JDBC30Translation.SQL_TYPES_BOOLEAN:
+			case Types.BOOLEAN:
 				// Types.BIT == SQL BOOLEAN, so 5 chars for 'false'
 				// In JDBC 3.0, Types.BIT or Types.BOOLEAN = SQL BOOLEAN
 				size = 5;

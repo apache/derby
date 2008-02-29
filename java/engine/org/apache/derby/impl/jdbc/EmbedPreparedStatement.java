@@ -1192,7 +1192,7 @@ public abstract class EmbedPreparedStatement
 			throw dataTypeConversion(parameterIndex, "null");
 		}
 		
-		if (colType == org.apache.derby.iapi.reference.JDBC20Translation.SQL_TYPES_JAVA_OBJECT) {
+		if (colType == Types.JAVA_OBJECT) {
 			try {
 				/* JDBC is one-based, DBMS is zero-based */
 				getParms().setParameterAsObject(parameterIndex - 1, x);
@@ -1730,7 +1730,7 @@ public abstract class EmbedPreparedStatement
 
         switch (dataType) {
         case Types.ARRAY:
-        case JDBC30Translation.DATALINK:
+        case Types.DATALINK:
         case JDBC40Translation.NCHAR:
         case JDBC40Translation.NCLOB:
         case JDBC40Translation.NVARCHAR:

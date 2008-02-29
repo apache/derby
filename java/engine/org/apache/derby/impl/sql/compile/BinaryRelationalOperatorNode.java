@@ -22,7 +22,6 @@
 package	org.apache.derby.impl.sql.compile;
 
 import org.apache.derby.iapi.reference.ClassName;
-import org.apache.derby.iapi.reference.JDBC30Translation;
 
 import org.apache.derby.iapi.util.JBitSet;
 
@@ -968,7 +967,7 @@ public class BinaryRelationalOperatorNode
 			typeId = rightOperand.getTypeId();
 
 		if (typeId != null && (typeId.getJDBCTypeId() == Types.BIT ||
-		typeId.getJDBCTypeId() == JDBC30Translation.SQL_TYPES_BOOLEAN))
+		typeId.getJDBCTypeId() == Types.BOOLEAN))
 			retval = 0.5d;
 
 		return retval;

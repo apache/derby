@@ -41,7 +41,6 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.info.JVMInfo;
 
 import java.sql.Types;
-import org.apache.derby.iapi.reference.JDBC20Translation; // needed for BLOB/CLOB types
 
 import java.io.InputStream;
 import java.io.ByteArrayInputStream;
@@ -344,7 +343,7 @@ public class BaseTypeIdImpl implements Formatable
 
           case StoredFormatIds.CLOB_TYPE_ID_IMPL:
                 SQLTypeName = TypeId.CLOB_NAME;
-                JDBCTypeId = JDBC20Translation.SQL_TYPES_CLOB;
+                JDBCTypeId = Types.CLOB;
                 wrapperTypeFormatId = StoredFormatIds.CLOB_TYPE_ID;
                 break;
 
@@ -368,7 +367,7 @@ public class BaseTypeIdImpl implements Formatable
 
           case StoredFormatIds.BLOB_TYPE_ID_IMPL:
                 SQLTypeName = TypeId.BLOB_NAME;
-                JDBCTypeId = JDBC20Translation.SQL_TYPES_BLOB;
+                JDBCTypeId = Types.BLOB;
                 wrapperTypeFormatId = StoredFormatIds.BLOB_TYPE_ID;
                 break;
 

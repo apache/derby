@@ -21,6 +21,8 @@
 
 package org.apache.derby.iapi.services.info;
 
+import java.sql.Types;
+
 
 /**
 	This class is used to determine which Java specification Derby will run at.
@@ -142,7 +144,7 @@ public abstract class JVMInfo
 		JDK_ID = id;
 		J2ME = isJ2ME;
 		JAVA_SQL_TYPES_BOOLEAN = (isJ2ME || id >= J2SE_14) ?
-			org.apache.derby.iapi.reference.JDBC30Translation.SQL_TYPES_BOOLEAN :java.sql.Types.BIT;
+			Types.BOOLEAN :java.sql.Types.BIT;
 	}
 
 	/**

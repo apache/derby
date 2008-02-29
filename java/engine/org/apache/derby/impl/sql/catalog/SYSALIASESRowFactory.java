@@ -21,10 +21,11 @@
 
 package org.apache.derby.impl.sql.catalog;
 
+import java.sql.Types;
+
 import org.apache.derby.catalog.AliasInfo;
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.reference.JDBC30Translation;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.uuid.UUIDFactory;
 import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
@@ -371,7 +372,7 @@ class SYSALIASESRowFactory extends CatalogRowFactory
         SystemColumnImpl.getIndicatorColumn("ALIASTYPE"),
         SystemColumnImpl.getIndicatorColumn("NAMESPACE"),
         SystemColumnImpl.getColumn("SYSTEMALIAS",
-                JDBC30Translation.SQL_TYPES_BOOLEAN, false),
+                Types.BOOLEAN, false),
         SystemColumnImpl.getJavaColumn("ALIASINFO",
                 "org.apache.derby.catalog.AliasInfo", true),
         SystemColumnImpl.getIdentifierColumn("SPECIFICNAME", false)

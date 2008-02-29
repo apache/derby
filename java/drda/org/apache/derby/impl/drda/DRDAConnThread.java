@@ -4486,7 +4486,7 @@ class DRDAConnThread extends Thread {
 				if (SanityManager.DEBUG)
 					trace("short parameter value is: "+paramVal);
  				// DB2 does not have a BOOLEAN java.sql.bit type, it's sent as small
-				if (pmeta.getParameterType(i+1) == JDBC30Translation.BOOLEAN)
+				if (pmeta.getParameterType(i+1) == Types.BOOLEAN)
 					ps.setBoolean(i+1, (paramVal == 1));
 				else
 					ps.setShort(i+1, paramVal);

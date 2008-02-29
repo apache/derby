@@ -21,7 +21,6 @@
 package org.apache.derby.client.am;
 
 import org.apache.derby.iapi.reference.DRDAConstants;
-import org.apache.derby.iapi.reference.JDBC30Translation;
 import org.apache.derby.iapi.reference.JDBC40Translation;
 
 // This enumeration of types represents the typing scheme used by our jdbc driver.
@@ -36,7 +35,7 @@ public class Types {
     // Not currently supported as a DERBY column type.  Mapped to SMALLINT.
     //public final static int TINYINT 	= java.sql.Types.TINYINT;       // -6;
 
-    public final static int BOOLEAN = JDBC30Translation.BOOLEAN;       // 16;
+    public final static int BOOLEAN = java.sql.Types.BOOLEAN;       // 16;
 
     public final static int SMALLINT = java.sql.Types.SMALLINT;      // 5;
 

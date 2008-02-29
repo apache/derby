@@ -34,7 +34,6 @@ import org.apache.derby.iapi.sql.compile.TypeCompiler;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.ClassName;
-import org.apache.derby.iapi.reference.JDBC20Translation;
 
 import java.sql.Types;
 
@@ -110,8 +109,8 @@ public final class LengthOperatorNode extends UnaryOperatorNode
 				case Types.VARBINARY:
 				case Types.LONGVARBINARY:
 				case Types.LONGVARCHAR:
-                case JDBC20Translation.SQL_TYPES_BLOB:
-                case JDBC20Translation.SQL_TYPES_CLOB:
+                case Types.BLOB:
+                case Types.CLOB:
 					break;
 			
 				default:

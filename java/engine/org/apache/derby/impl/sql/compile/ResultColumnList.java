@@ -3239,7 +3239,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 				int jdbcColumnType = rsmd.getColumnType(index);
 
 				switch (jdbcColumnType) {
-				case org.apache.derby.iapi.reference.JDBC20Translation.SQL_TYPES_JAVA_OBJECT:
+				case Types.JAVA_OBJECT:
 				case Types.OTHER:
 				{
 					cti = TypeId.getUserDefinedTypeId(rsmd.getColumnTypeName(index), false);

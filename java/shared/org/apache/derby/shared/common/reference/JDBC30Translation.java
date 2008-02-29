@@ -23,7 +23,6 @@ package org.apache.derby.shared.common.reference;
 import java.sql.ParameterMetaData;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import java.sql.Types;
 /**
         This class contains public statics that map directly
         to the new public statics in the jdbc 3.0 classes.
@@ -69,15 +68,4 @@ public interface JDBC30Translation {
         public static final int EXECUTE_FAILED = Statement.EXECUTE_FAILED;
         public static final int RETURN_GENERATED_KEYS = Statement.RETURN_GENERATED_KEYS;
         public static final int NO_GENERATED_KEYS = Statement.NO_GENERATED_KEYS;
-
-        /*
-        ** public statics from 3.0 version of java.sql.Types
-        */
-        public static final int DATALINK = Types.DATALINK;
-        public static final int BOOLEAN = Types.BOOLEAN;
-
-        /*
-        ** New types in JDBC 3.0
-        */
-        public static final int SQL_TYPES_BOOLEAN = Types.BOOLEAN;
 }

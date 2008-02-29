@@ -45,7 +45,6 @@ import org.apache.derby.iapi.sql.compile.TypeCompiler;
 import org.apache.derby.iapi.util.StringUtil;
 
 import org.apache.derby.iapi.reference.ClassName;
-import org.apache.derby.iapi.reference.JDBC30Translation;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 
 import org.apache.derby.iapi.sql.compile.Visitable;
@@ -285,9 +284,9 @@ public class CastNode extends ValueNode
 			switch (sourceJDBCTypeId)
 			{
 				case Types.BIT:
-				case JDBC30Translation.SQL_TYPES_BOOLEAN:
+				case Types.BOOLEAN:
 					// (BIT is boolean)
-					if (destJDBCTypeId == Types.BIT || destJDBCTypeId == JDBC30Translation.SQL_TYPES_BOOLEAN)
+					if (destJDBCTypeId == Types.BIT || destJDBCTypeId == Types.BOOLEAN)
 					{
 						retNode = castOperand;
 					}
@@ -450,7 +449,7 @@ public class CastNode extends ValueNode
 		switch (destJDBCTypeId)
 		{
 			case Types.BIT:
-			case JDBC30Translation.SQL_TYPES_BOOLEAN:
+			case Types.BOOLEAN:
 				if (cleanCharValue.equals("TRUE"))
 				{
 					return (ValueNode) getNodeFactory().getNode(

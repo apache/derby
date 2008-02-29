@@ -23,7 +23,6 @@ package org.apache.derby.iapi.reference;
 
 import java.sql.ResultSet;
 import javax.transaction.xa.XAResource;
-import java.sql.Types;
 
 /**
         This class contains public statics that map directly
@@ -78,12 +77,4 @@ public interface JDBC20Translation {
         public static final int XA_STARTRSCAN = XAResource.TMSTARTRSCAN;
         public static final int XA_SUCCESS = XAResource.TMSUCCESS;
         public static final int XA_SUSPEND = XAResource.TMSUSPEND;
-
-
-        /*
-        ** New types in JDBC 2.0
-        */
-        public static final int SQL_TYPES_JAVA_OBJECT = Types.JAVA_OBJECT;
-        public static final int SQL_TYPES_BLOB = Types.BLOB;
-        public static final int SQL_TYPES_CLOB = Types.CLOB;
 }

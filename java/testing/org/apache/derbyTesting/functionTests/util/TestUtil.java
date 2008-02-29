@@ -37,7 +37,6 @@ import java.security.PrivilegedExceptionAction;
 import java.security.PrivilegedActionException;
 import javax.sql.DataSource;
 
-import org.apache.derby.iapi.reference.JDBC30Translation;
 import org.apache.derby.iapi.services.info.JVMInfo;
 import org.apache.derbyTesting.functionTests.harness.RunTest;
 
@@ -525,7 +524,7 @@ public class TestUtil {
 	  public static String sqlNameFromJdbc(int jdbcType) {
 		switch (jdbcType) {
 			case Types.BIT 		:  return "Types.BIT";
-			case JDBC30Translation.SQL_TYPES_BOOLEAN  : return "Types.BOOLEAN";
+			case Types.BOOLEAN  : return "Types.BOOLEAN";
 			case Types.TINYINT 	:  return "Types.TINYINT";
 			case Types.SMALLINT	:  return "SMALLINT";
 			case Types.INTEGER 	:  return "INTEGER";
@@ -560,7 +559,7 @@ public class TestUtil {
 	  public static String getNameFromJdbcType(int jdbcType) {
 		switch (jdbcType) {
 			case Types.BIT 		:  return "Types.BIT";
-			case JDBC30Translation.SQL_TYPES_BOOLEAN  : return "Types.BOOLEAN";
+			case Types.BOOLEAN  : return "Types.BOOLEAN";
 			case Types.TINYINT 	:  return "Types.TINYINT";
 			case Types.SMALLINT	:  return "Types.SMALLINT";
 			case Types.INTEGER 	:  return "Types.INTEGER";

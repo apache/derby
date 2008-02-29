@@ -32,7 +32,6 @@ import org.apache.derby.iapi.error.ExceptionSeverity;
 
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.reference.MessageId;
-import org.apache.derby.iapi.reference.JDBC30Translation;
 import org.apache.derby.iapi.reference.JDBC40Translation;
 
 import java.sql.SQLException;
@@ -301,8 +300,8 @@ public abstract class Util  {
 		switch (jdbcType) {
 			case Types.ARRAY: return TypeId.ARRAY_NAME;
 			case Types.BIT 		:  return TypeId.BIT_NAME;
-			case JDBC30Translation.SQL_TYPES_BOOLEAN  : return TypeId.BOOLEAN_NAME;
-			case JDBC30Translation.DATALINK: return TypeId.DATALINK_NAME;
+			case Types.BOOLEAN  : return TypeId.BOOLEAN_NAME;
+			case Types.DATALINK: return TypeId.DATALINK_NAME;
 			case Types.TINYINT 	:  return TypeId.TINYINT_NAME;
 			case Types.SMALLINT	:  return TypeId.SMALLINT_NAME;
 			case Types.INTEGER 	:  return TypeId.INTEGER_NAME;

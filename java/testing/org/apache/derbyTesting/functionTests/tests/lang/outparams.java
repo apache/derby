@@ -23,7 +23,6 @@ package org.apache.derbyTesting.functionTests.tests.lang;
 import java.sql.*;
 
 import org.apache.derby.tools.ij;
-import org.apache.derby.iapi.reference.JDBC30Translation;
 import java.io.PrintStream;
 import java.math.BigInteger;
 import java.math.BigDecimal;
@@ -337,7 +336,7 @@ public class outparams
 	static final int types[] =
 	{
 		Types.BIT,
-		JDBC30Translation.SQL_TYPES_BOOLEAN,
+		Types.BOOLEAN,
 		Types.TINYINT,
 		Types.SMALLINT,
 		Types.INTEGER,
@@ -1015,7 +1014,7 @@ public class outparams
 		switch (type)	
 		{
 			case Types.BIT:
-			case JDBC30Translation.SQL_TYPES_BOOLEAN:
+			case Types.BOOLEAN:
 				strbuf.append("setObject("+arg+", true)");
 				cs.setObject(arg, new Boolean(true));
 				break;
@@ -1102,7 +1101,7 @@ public class outparams
 		switch (type)	
 		{
 			case Types.BIT:
-			case JDBC30Translation.SQL_TYPES_BOOLEAN:
+			case Types.BOOLEAN:
 				strbuf.append("setBoolean("+arg+", true)");
 				cs.setBoolean(arg, true);
 				break;
@@ -1190,7 +1189,7 @@ public class outparams
 		switch (type)	
 		{
 			case Types.BIT:
-			case JDBC30Translation.SQL_TYPES_BOOLEAN:
+			case Types.BOOLEAN:
 				strbuf.append("getBoolean("+arg+") = ");
 				strbuf.append(cs.getBoolean(arg));
 				break;
@@ -1342,7 +1341,7 @@ public class outparams
 				return "00680065006c006c006f";
 
 			case Types.BIT:
-			case JDBC30Translation.SQL_TYPES_BOOLEAN:
+			case Types.BOOLEAN:
 				return "true";
 
 			default:

@@ -93,7 +93,7 @@ public class SimpleStringOperatorNode extends UnaryOperatorNode
 				case Types.LONGVARCHAR:
 				case Types.CLOB:
 					break;
-				case org.apache.derby.iapi.reference.JDBC20Translation.SQL_TYPES_JAVA_OBJECT:
+				case Types.JAVA_OBJECT:
 				case Types.OTHER:	
 				{
 					throw StandardException.newException(SQLState.LANG_UNARY_FUNCTION_BAD_TYPE, 
