@@ -26,11 +26,6 @@ import java.util.Enumeration;
 
 import javax.naming.RefAddr;
 import javax.naming.Reference;
-import org.apache.derby.jdbc.ClientBaseDataSource;
-
-import org.apache.derby.jdbc.ClientConnectionPoolDataSource;
-import org.apache.derby.jdbc.ClientDataSource;
-import org.apache.derby.jdbc.ClientXADataSource;
 
 /**
  * The data source factory currrently for ClientDataSource only. This factory will support XA and pooling-enabled data
@@ -78,23 +73,22 @@ public class ClientDataSourceFactory implements javax.naming.spi.ObjectFactory {
                                     javax.naming.Name name,
                                     javax.naming.Context nameContext,
                                     java.util.Hashtable environment) throws java.lang.Exception {
-        javax.naming.Reference ref = (javax.naming.Reference) refObj;
+        Object ds = null;
+        if (refObj instanceof javax.naming.Reference) {
+            javax.naming.Reference ref = (javax.naming.Reference) refObj;
 
-        // Create the proper data source object shell.
-        ClientBaseDataSource ds = null;
-        if (ref.getClassName().equals(ClientDataSource.className__)) {
-            ds = new ClientDataSource();
-        } else if (ref.getClassName().equals(ClientXADataSource.className__)) {
-            ds = new ClientXADataSource();
-        } else if (ref.getClassName().equals(ClientConnectionPoolDataSource.className__)) {
-            ds = new ClientConnectionPoolDataSource();
-        } else {
-            return null;
+            // See if this object belongs to Derby.
+            String className = ref.getClassName();
+            if (className != null &&
+                    className.startsWith("org.apache.derby.jdbc.Client")) {
+                // Create the proper data source object shell.
+                ds = Class.forName(className).newInstance();
+
+                // Fill in the data source object shell with values from the
+                // jndi reference.
+                ClientDataSourceFactory.setBeanProperties(ds, ref);
+            }
         }
-
-        // Fill in the data source object shell with values from the jndi reference.
-        ClientDataSourceFactory.setBeanProperties(ds, ref);
-
         return ds;
     }
     
