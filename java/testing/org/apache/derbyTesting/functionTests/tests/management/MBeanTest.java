@@ -193,6 +193,7 @@ abstract class MBeanTest extends BaseTestCase {
      * @return Set of ObjectNames for all of Derby's registered MBeans.
      * @throws Exception
      */
+    @SuppressWarnings("unchecked")
     protected Set<ObjectName> getDerbyDomainMBeans() throws Exception
     {
         ObjectName derbyDomain = new ObjectName("org.apache.derby:*");
