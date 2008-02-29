@@ -121,6 +121,8 @@ public class _Suite extends BaseTestCase  {
             suite.addTest(J2EEDataSourceTest.suite());
             // Test requires ClientConnectionPoolDataSource.
             suite.addTest(ClientConnectionPoolDataSourceTest.suite());
+            // Test requires ClientConnectionPoolDataSource.
+            suite.addTest(StatementPoolingTest.suite());
 
             //suite to test updatable reader for clob in embedded driver
             suite.addTest (ClobUpdatableReaderTest.suite());

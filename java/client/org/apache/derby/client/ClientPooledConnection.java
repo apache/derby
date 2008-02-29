@@ -99,8 +99,8 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
             this.statementCache = null;
         } else {
             // Disabled for now.
-            this.statementCache = null;
-            //        new JDBCStatementCache(ds.maxStatementsToPool());
+            this.statementCache =
+                    new JDBCStatementCache(ds.maxStatementsToPool());
         }
 
         try {
