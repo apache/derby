@@ -20,7 +20,6 @@
  */
 
 package org.apache.derby.shared.common.reference;
-import java.sql.DatabaseMetaData;
 import java.sql.ParameterMetaData;
 import java.sql.ResultSet;
 import java.sql.Statement;
@@ -42,11 +41,6 @@ import java.sql.Types;
 */
 
 public interface JDBC30Translation {
-        /*
-        ** public statics from 3.0 version of java.sql.DatabaseMetaData
-        */
-        public static final int SQL_STATE_XOPEN = DatabaseMetaData.sqlStateXOpen;
-        public static final int SQL_STATE_SQL99 = DatabaseMetaData.sqlStateSQL99;
 
         /*
         ** public statics from 3.0 version of java.sql.ParameterMetaData

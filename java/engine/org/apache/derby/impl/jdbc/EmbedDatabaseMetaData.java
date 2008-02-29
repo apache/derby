@@ -3262,7 +3262,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 	*/
 	public int getSQLStateType()
 	{
-		return JDBC30Translation.SQL_STATE_SQL99;
+		return sqlStateSQL99;
 	}
 
 	/**
