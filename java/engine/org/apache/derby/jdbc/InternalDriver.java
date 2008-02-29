@@ -44,6 +44,8 @@ import org.apache.derby.iapi.sql.ResultSet;
 import org.apache.derby.iapi.jdbc.AuthenticationService;
 import org.apache.derby.iapi.sql.ResultColumnDescriptor;
 
+import org.apache.derby.security.SystemPermission;
+
 import org.apache.derby.impl.jdbc.*;
 import org.apache.derby.mbeans.JDBCMBean;
 
@@ -53,6 +55,11 @@ import java.sql.SQLException;
 
 import java.util.Properties;
 import java.util.StringTokenizer;
+
+import java.security.Permission;
+import java.security.AccessControlException;
+
+import org.apache.derby.iapi.util.IdUtil;
 
 
 /**
@@ -188,8 +195,7 @@ public abstract class InternalDriver implements ModuleControl {
 			*/
 			boolean shutdown = Boolean.valueOf(finfo.getProperty(Attribute.SHUTDOWN_ATTR)).booleanValue();
 			
-			if (shutdown) {
-				
+			if (shutdown) {				
 				// If we are shutting down the system don't attempt to create
 				// a connection; but we validate users credentials if we have to.
 				// In case of datbase shutdown, we ask the database authentication
@@ -217,7 +223,13 @@ public abstract class InternalDriver implements ModuleControl {
                                     getTextMessage(MessageId.AUTH_INVALID));
 					}
 
+					// check for shutdown privileges
+                    // Disabled until more of the patch can be applied.
+					//final String user = IdUtil.getUserNameFromURLProps(finfo);
+                    //checkShutdownPrivileges(user);
+
 					Monitor.getMonitor().shutdown();
+
 					throw Util.generateCsSQLException(
                                          SQLState.CLOUDSCAPE_SYSTEM_SHUTDOWN);
 				}
@@ -244,6 +256,65 @@ public abstract class InternalDriver implements ModuleControl {
 			    finfo.clearDefaults();
 		}
 	}
+
+    /**
+     * Checks for System Privileges.
+     *
+     * Abstract since some of the javax security classes are not available
+     * on all platforms.
+     *
+     * @param user The user to be checked for having the permission
+     * @param perm The permission to be checked
+     * @throws AccessControlException if permissions are missing
+     * @throws Exception if the privileges check fails for some other reason
+     */
+    abstract public void checkSystemPrivileges(String user,
+                                               Permission perm)
+        throws Exception;
+
+    /**
+     * Checks for shutdown System Privileges.
+     *
+     * To perform this check the following policy grant is required
+     * <ul>
+     * <li> to run the encapsulated test:
+     *      permission javax.security.auth.AuthPermission "doAsPrivileged";
+     * </ul>
+     * or a SQLException will be raised detailing the cause.
+     * <p>
+     * In addition, for the test to succeed
+     * <ul>
+     * <li> the given user needs to be covered by a grant:
+     *      principal org.apache.derby.authentication.SystemPrincipal "..." {}
+     * <li> that lists a shutdown permission:
+     *      permission org.apache.derby.security.SystemPermission "shutdown";
+     * </ul>
+     * or it will fail with a SQLException detailing the cause.
+     *
+     * @param user The user to be checked for shutdown privileges
+     * @throws SQLException if the privileges check fails
+     */
+    public void checkShutdownPrivileges(String user) throws SQLException {
+        // approve action if not running under a security manager
+        if (System.getSecurityManager() == null) {
+            return;
+        }
+
+        // the check
+        try {
+            final Permission sp
+                = new SystemPermission(SystemPermission.SHUTDOWN);
+            checkSystemPrivileges(user, sp);
+        } catch (AccessControlException ace) {
+            throw Util.generateCsSQLException(
+				SQLState.AUTH_SHUTDOWN_MISSING_PERMISSION,
+				user, (Object)ace); // overloaded method
+        } catch (Exception e) {
+            throw Util.generateCsSQLException(
+				SQLState.AUTH_SHUTDOWN_MISSING_PERMISSION,
+				user, (Object)e); // overloaded method
+        }
+    }
 
 	public int getMajorVersion() {
 		return Monitor.getMonitor().getEngineVersion().getMajorVersion();

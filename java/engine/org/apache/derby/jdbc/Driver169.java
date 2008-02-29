@@ -31,6 +31,9 @@ import java.sql.SQLException;
 
 import java.util.Properties;
 
+import java.security.Permission;
+import java.security.AccessControlException;
+
 
 /**
     Driver169 - JDBC "driver" for J2ME/CDC/Foundation/JSR169, really
@@ -129,8 +132,19 @@ public class Driver169 extends InternalDriver {
 	    return new EmbedResultSet169(conn, results, forMetaData, statement, isAtomic);
 	}
 
-
-
+    /**
+     * Checks for System Privileges.
+     *
+     * @param user The user to be checked for having the permission
+     * @param perm The permission to be checked
+     * @throws AccessControlException if permissions are missing
+     * @throws Exception if the privileges check fails for some other reason
+     */
+    public void checkSystemPrivileges(String user,
+                                      Permission perm)
+        throws Exception {
+        // no checks -- some of the javax security classes not available
+    }
 }
 
 

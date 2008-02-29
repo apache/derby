@@ -392,6 +392,28 @@ Guide.
             </msg>
 
             <msg>
+                <name>08004.C.9</name>
+                <text>Missing permission for user '{0}' to shutdown system [{1}].</text>
+                <arg>authorizationID</arg>
+                <arg>exceptionMsg</arg>
+            </msg>
+
+            <msg>
+                <name>08004.C.10</name>
+                <text>Cannot check system permission to create database '{0}' [{1}].</text>
+                <arg>databaseName</arg>
+                <arg>exceptionMsg</arg>
+            </msg>
+
+            <msg>
+                <name>08004.C.11</name>
+                <text>Missing permission for user '{0}' to create database '{1}' [{2}].</text>
+                <arg>authorizationID</arg>
+                <arg>databaseName</arg>
+                <arg>exceptionMsg</arg>
+            </msg>
+
+            <msg>
                 <name>08006.C</name>
                 <text>A network protocol error was encountered and the connection has been terminated: {0}</text>
 		<arg>error</arg>

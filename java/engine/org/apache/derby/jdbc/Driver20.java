@@ -36,6 +36,7 @@ import org.apache.derby.iapi.jdbc.BrokeredConnectionControl;
 import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.io.FormatableProperties;
+import org.apache.derby.iapi.security.SecurityUtil;
 
 import org.apache.derby.impl.jdbc.*;
 
@@ -44,6 +45,9 @@ import java.sql.SQLException;
 import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.DriverPropertyInfo;
+
+import java.security.Permission;
+import java.security.AccessControlException;
 
 import java.util.Properties;
 
@@ -203,4 +207,18 @@ public abstract class Driver20 extends InternalDriver implements Driver {
 
 		return new DriverPropertyInfo[0];
 	}
+
+    /**
+     * Checks for System Privileges.
+     *
+     * @param user The user to be checked for having the permission
+     * @param perm The permission to be checked
+     * @throws AccessControlException if permissions are missing
+     * @throws Exception if the privileges check fails for some other reason
+     */
+    public void checkSystemPrivileges(String user,
+                                      Permission perm)
+        throws Exception {
+        SecurityUtil.checkUserHasPermission(user, perm);
+    }
 }

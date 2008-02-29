@@ -1598,6 +1598,12 @@ public interface SQLState {
     //DERBY-1828: AUTH_x_NOT_DB_OWNER used to be "2850H/I/J.C";
     String CANNOT_CONNECT_TO_DB_IN_SLAVE_MODE               = "08004.C.7";
     String AUTH_REPLICATION_NOT_DB_OWNER                    = "08004.C.8";
+    //DERBY-2109: new state/msg (considered sql state 28101.C not appropriate)
+    String AUTH_SHUTDOWN_MISSING_PERMISSION                 = "08004.C.9";
+    //DERBY-2109: new state/msg
+    String AUTH_DATABASE_CREATE_EXCEPTION                   = "08004.C.10";
+    //DERBY-2109: new state/msg
+    String AUTH_DATABASE_CREATE_MISSING_PERMISSION          = "08004.C.11";
 
     // There can be multiple causes for 08003, which according
     // to SQL2003 spec means "connection does not exist"
