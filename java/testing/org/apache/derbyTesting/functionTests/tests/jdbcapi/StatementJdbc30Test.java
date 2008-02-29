@@ -28,7 +28,6 @@ import java.sql.Statement;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.apache.derby.iapi.reference.JDBC30Translation;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -129,7 +128,7 @@ public class StatementJdbc30Test extends BaseJDBCTestCase {
     public void testGetMoreResults() throws SQLException {
 
         Statement stmt = createStatement();
-        assertFalse(stmt.getMoreResults(JDBC30Translation.CLOSE_CURRENT_RESULT));
+        assertFalse(stmt.getMoreResults(Statement.CLOSE_CURRENT_RESULT));
 
     }
 
@@ -143,7 +142,7 @@ public class StatementJdbc30Test extends BaseJDBCTestCase {
 
         Statement stmt = createStatement();
         stmt.executeUpdate("insert into tab1 values(2, 3, 4.1)",
-                JDBC30Translation.NO_GENERATED_KEYS);
+                Statement.NO_GENERATED_KEYS);
         assertNull("Expected NULL ResultSet after stmt.execute()", stmt
                 .getGeneratedKeys());
 
@@ -202,7 +201,7 @@ public class StatementJdbc30Test extends BaseJDBCTestCase {
     public void testSelectNoGenKeys() throws SQLException {
 
         Statement stmt = createStatement();
-        stmt.execute("select * from tab1", JDBC30Translation.NO_GENERATED_KEYS);
+        stmt.execute("select * from tab1", Statement.NO_GENERATED_KEYS);
         assertNull("Expected NULL ResultSet after stmt.execute()", stmt
                 .getGeneratedKeys());
 

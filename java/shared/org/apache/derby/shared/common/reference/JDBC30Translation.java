@@ -22,7 +22,6 @@
 package org.apache.derby.shared.common.reference;
 import java.sql.ParameterMetaData;
 import java.sql.ResultSet;
-import java.sql.Statement;
 /**
         This class contains public statics that map directly
         to the new public statics in the jdbc 3.0 classes.
@@ -57,15 +56,4 @@ public interface JDBC30Translation {
         */
         public static final int HOLD_CURSORS_OVER_COMMIT = ResultSet.HOLD_CURSORS_OVER_COMMIT;
         public static final int CLOSE_CURSORS_AT_COMMIT = ResultSet.CLOSE_CURSORS_AT_COMMIT;
-
-        /*
-        ** public statics from 3.0 version of java.sql.Statement
-        */
-        public static final int CLOSE_CURRENT_RESULT = Statement.CLOSE_CURRENT_RESULT;
-        public static final int KEEP_CURRENT_RESULT = Statement.KEEP_CURRENT_RESULT;
-        public static final int CLOSE_ALL_RESULTS = Statement.CLOSE_ALL_RESULTS;
-        public static final int SUCCESS_NO_INFO = Statement.SUCCESS_NO_INFO;
-        public static final int EXECUTE_FAILED = Statement.EXECUTE_FAILED;
-        public static final int RETURN_GENERATED_KEYS = Statement.RETURN_GENERATED_KEYS;
-        public static final int NO_GENERATED_KEYS = Statement.NO_GENERATED_KEYS;
 }

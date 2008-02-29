@@ -703,7 +703,7 @@ class DRDAStatement
 			}
 			// For normal selects we are done, but procedures might
 			// have more resultSets
-		}while (isCallable && getMoreResults(JDBC30Translation.KEEP_CURRENT_RESULT));
+		}while (isCallable && getMoreResults(Statement.KEEP_CURRENT_RESULT));
 
 		return hasResultSet;
 

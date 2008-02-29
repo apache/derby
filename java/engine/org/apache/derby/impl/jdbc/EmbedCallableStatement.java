@@ -37,6 +37,7 @@ import java.sql.CallableStatement;
 import java.sql.Clob;
 import java.sql.SQLException;
 import java.sql.Date;
+import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Calendar;
@@ -69,7 +70,7 @@ public abstract class EmbedCallableStatement extends EmbedPreparedStatement
 			  resultSetType,
 			  resultSetConcurrency,
 			  resultSetHoldability,
-			  JDBC30Translation.NO_GENERATED_KEYS,
+			  Statement.NO_GENERATED_KEYS,
 			  null,
 			  null);
 
