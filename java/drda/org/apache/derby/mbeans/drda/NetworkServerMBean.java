@@ -189,6 +189,19 @@ public interface NetworkServerMBean {
     
     public int getBytesSentPerSecond();
     
+    /**
+     * Return the start time of the network server.
+     * @return Time in milli-seconds since the epoch that the network server started.
+     * @see System#currentTimeMillis()
+     */
+    public long getStartTime();
+    
+    /**
+     * Return the time the network server has been running.
+     * @return Time in milli-seconds the server has been running.
+     */
+    public long getUptime(); 
+    
     
     
     // ---

@@ -45,8 +45,11 @@ class NetworkServerMBeanImpl implements NetworkServerMBean {
     /* The instrumented server implementation */
     private NetworkServerControlImpl server;
     
+    private final long startTime;
+    
     NetworkServerMBeanImpl(NetworkServerControlImpl nsc) {
         this.server = nsc;
+        startTime = System.currentTimeMillis();
     }
 
     // Some of the code is disabled (commented out) due to security concerns,
@@ -258,6 +261,21 @@ class NetworkServerMBeanImpl implements NetworkServerMBean {
         }
         return sentResult;
     }
+    
+    /**
+     * Return start time.
+     */
+    public long getStartTime() {
+        return startTime;
+    }
+
+    /**
+     * Return time server has been running.
+     */
+    public long getUptime() {
+        return System.currentTimeMillis() - startTime;
+        
+    }
 
     // ------------------------- MBEAN OPERATIONS  ----------------------------
     
@@ -360,5 +378,4 @@ class NetworkServerMBeanImpl implements NetworkServerMBean {
    private String getServerProperty(String property) {
         return server.getPropertyValues().getProperty(property);     
    }
-
 }
