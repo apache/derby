@@ -387,9 +387,17 @@ public class Monitor {
 		return module;
 	}
 
-	public static Object getSystemModule(String factoryInterface)
-	{
-		Object module = getMonitor().findModule((Object) null,
+    /**
+     * Return a system module. If it cannot be found or the monitor is
+     * not running then null is returned.
+     */
+    public static Object getSystemModule(String factoryInterface)
+    {
+        ModuleFactory monitor = getMonitor();
+        if (monitor == null)
+            return null;
+        
+		Object module = monitor.findModule((Object) null,
 									  factoryInterface, (String) null);
 		return module;
 	}
