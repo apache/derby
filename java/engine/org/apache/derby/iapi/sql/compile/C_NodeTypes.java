@@ -226,8 +226,12 @@ public interface C_NodeTypes
     static final int GRANT_ROLE_NODE = 215;
     static final int REVOKE_ROLE_NODE = 216;
 
+    // OLAP Window functions
+    static final int WINDOW_NODE = 220;
+    static final int ROW_NUMBER_COLUMN_NODE = 221;
+
     // Final value in set, keep up to date!
-    static final int FINAL_VALUE = REVOKE_ROLE_NODE;
+    static final int FINAL_VALUE = ROW_NUMBER_COLUMN_NODE;
 
     /**
      * Extensions to this interface can use nodetypes > MAX_NODE_TYPE with out fear of collision

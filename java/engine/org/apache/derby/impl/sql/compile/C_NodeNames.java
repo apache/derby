@@ -228,6 +228,8 @@ public interface C_NodeNames
 	static final String REVOKE_ROLE_NODE_NAME =
 		"org.apache.derby.impl.sql.compile.RevokeRoleNode";
 
+	static final String ROW_NUMBER_COLUMN_NODE_NAME = "org.apache.derby.impl.sql.compile.RowNumberColumnNode";    
+
 	static final String ROW_RESULT_SET_NODE_NAME = "org.apache.derby.impl.sql.compile.RowResultSetNode";
 
 	static final String SQL_BOOLEAN_CONSTANT_NODE_NAME = "org.apache.derby.impl.sql.compile.SQLBooleanConstantNode";
@@ -292,6 +294,8 @@ public interface C_NodeNames
 
 	static final String VIRTUAL_COLUMN_NODE_NAME = "org.apache.derby.impl.sql.compile.VirtualColumnNode";
 
+	static final String WINDOW_NODE_NAME = "org.apache.derby.impl.sql.compile.WindowNode";
+        
 	static final String SAVEPOINT_NODE_NAME = "org.apache.derby.impl.sql.compile.SavepointNode";
 
 	static final String XML_CONSTANT_NODE_NAME = "org.apache.derby.impl.sql.compile.XMLConstantNode";

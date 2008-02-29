@@ -1710,4 +1710,35 @@ public class ResultColumn extends ValueNode
         return false;
 	}
 
+	/**
+	 * Check whether this ResultColumn immediate expression is a window function 
+	 * column or not.
+	 *
+	 * @return true if RCs expression is a window function column, false if not.
+	 */
+	public boolean expressionIsWindowFunction() 
+	{			
+		if (getExpression() instanceof WindowFunctionColumnNode){
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * Check whether this ResultColumn is a window function column or not, but 
+	 * do not traverse the complete chain of references.
+	 *
+	 * @return true if RC is a window function column, false if not.
+	 */
+	public boolean isWindowFunction() 
+	{	
+		ValueNode expr = getExpression();
+		
+		if (expr instanceof WindowFunctionColumnNode || 
+			(expr instanceof VirtualColumnNode && 
+			 expr.getSourceResultColumn().getExpression() instanceof WindowFunctionColumnNode)){
+			return true;
+		}
+		return false;
+	}
 }

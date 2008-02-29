@@ -1465,7 +1465,8 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 				for (Enumeration e = colRefs.elements(); e.hasMoreElements(); )
 				{
 					ColumnReference ref = (ColumnReference)e.nextElement();
-					if (!ref.pointsToColumnReference())
+					if (!ref.pointsToColumnReference() &&
+						!ref.pointsToWindowFunction())
 					{
 						state = false;
 						break;

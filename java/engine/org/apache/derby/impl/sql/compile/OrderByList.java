@@ -748,4 +748,34 @@ public class OrderByList extends OrderedColumnList
 		 */
 		return false;
 	}
+
+	/**
+	 * Adjust the OrderByList after removal of window function columns.
+	 *
+	 * @exception StandardException		Thrown on error
+	 */
+	public void adjustForWindowFunctionColumns() 	
+		throws StandardException
+	{	
+		/* 
+		 * Recreate the template due to removal of window function columns 
+		 * in the resultToSort RCL.
+		 */
+		resultRow =				
+				resultToSort.getResultColumns().buildEmptyRow().getRowArray();				
+		/*
+		 * Adjust the VirtualColumnIds OrderByColumns to the updated RCL. 
+		 */
+		for (int index = 0; index < size(); index++)
+		{
+			OrderByColumn obc = (OrderByColumn) elementAt(index);
+			obc.bindOrderByColumn(resultToSort, this);
+		}
+		/* 
+		 * Update the columOrdering
+		 *
+		 * TODO - is this really necessary?
+		 */
+		columnOrdering = getColumnOrdering();		
+	}
 }

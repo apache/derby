@@ -629,6 +629,31 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 			 */
 			childResult = childResult.modifyAccessPaths(restrictionList);
 
+			/*
+			 * If we have a subquery select with window function columns, we 
+			 * have the following simplified querytre before the above call:
+			 *    SELECT -> PRN -> SELECT
+			 * where middle PRN is what was originally a FromSubquery node.
+			 * With window functions we pull any WindowNodes into the tree, 
+			 * modify the lower selects RCL, and put a (noop) PRN on top in the 
+			 * above call. This results in:
+			 *    SELECT -> PRN -> PRN(noop) -> WN -> ...			 
+			 * Note that the RCL for the initial PRN and its child SELECT used 
+			 * to be the same object. After the above call, the initial PRNs RCL 
+			 * is incorrect, and we need to regenerate the VCNs. 
+			 */
+			if (childResult instanceof ProjectRestrictNode){
+				ProjectRestrictNode prn = (ProjectRestrictNode) childResult;
+				if (prn.childResult instanceof WindowNode){
+					/* 
+					 * We have a window function column in the RCL of our child 
+					 * PRN, and need to regenerate the VCNs.
+					 */					
+					resultColumns.genVirtualColumnNodes( prn.childResult, 
+														 prn.childResult.getResultColumns() );
+				}
+			}
+			
 			/* Mark this node as having the truly ... for
 			 * the underlying tree.
 			 */
@@ -1093,8 +1118,10 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 		 * view or derived table which couldn't be flattened, then see
 		 * if we can push any of the predicates which just got pushed
 		 * down to our level into the SelectNode.
-		 */
-		if (pushPList != null && (childResult instanceof SelectNode))
+		 */			
+		if (pushPList != null && 
+			childResult instanceof SelectNode &&
+			!resultColumns.containsWindowFunctionResultColumn() )
 		{
 			pushPList.pushExpressionsIntoSelect((SelectNode) childResult, false);
 		}
@@ -1382,9 +1409,7 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
    		// }
    		// static Method exprN = method pointer to exprN;
 
-
-
-
+	
 		// Map the result columns to the source columns
 		int[] mapArray = resultColumns.mapSourceColumns();
 		int mapArrayItem = acb.addItem(new ReferencedColumnsDescriptorImpl(mapArray));
@@ -1432,7 +1457,7 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 		 *  arg11: estimated cost
 		 *  arg12: close method
 		 */
-
+		
 		acb.pushGetResultSetFactoryExpression(mb);
 		if (genChildResultSet)
 			childResult.generateResultSet(acb, mb);

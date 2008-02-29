@@ -614,6 +614,12 @@ public class NodeFactoryImpl extends NodeFactory implements ModuleControl, Modul
           case C_NodeTypes.TABLE_PRIVILEGES_NODE:
             return C_NodeNames.TABLE_PRIVILEGES_NAME;
 
+          case C_NodeTypes.WINDOW_NODE:
+            return C_NodeNames.WINDOW_NODE_NAME;
+
+          case C_NodeTypes.ROW_NUMBER_COLUMN_NODE:
+            return C_NodeNames.ROW_NUMBER_COLUMN_NODE_NAME;
+		  	
 		  // WARNING: WHEN ADDING NODE TYPES HERE, YOU MUST ALSO ADD
 		  // THEM TO tools/jar/DBMSnodes.properties
 

@@ -23,7 +23,6 @@ package org.apache.derby.iapi.sql.execute;
 
 import org.apache.derby.iapi.error.StandardException;
 
-import org.apache.derby.iapi.sql.ResultDescription;
 import org.apache.derby.iapi.sql.ResultSet;
 import org.apache.derby.iapi.sql.Activation;
 
@@ -1090,6 +1089,35 @@ public interface ResultSetFactory {
 								double optimizerEstimatedCost)
 			throws StandardException;
 
+        /**
+		A WindowResultSet is used for gathering rows from OLAP window functions.
+
+		<p>
+
+		@param source	the source result set, which is expected to provide
+						rows for the WindowResultSet
+		@param resultSetNumber	The resultSetNumber for the ResultSet
+		@param restriction		The restriction, if any, to be applied to the base row
+		@param optimizerEstimatedRowCount	Estimated total # of rows by
+											optimizer
+		@param optimizerEstimatedCost		Estimated total cost by optimizer
+
+		@return the window function as a result set.
+		@exception StandardException thrown when unable to create the
+			result set
+	 */
+	public NoPutResultSet getWindowResultSet(
+								Activation activation,
+								NoPutResultSet source,
+								GeneratedMethod rowAllocator,
+								int resultSetNumber,
+								int level,
+								int erdNumber,
+								GeneratedMethod restriction,
+								double optimizerEstimatedRowCount,
+								double optimizerEstimatedCost)
+	   	throws StandardException;
+        
 	/**
 		A nested loop left outer join result set forms a result set on top of
 		2 other result sets.

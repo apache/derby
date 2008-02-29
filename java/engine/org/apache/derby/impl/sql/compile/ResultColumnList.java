@@ -1092,6 +1092,10 @@ public class ResultColumnList extends QueryTreeNodeVector
 				{
 					continue;
 				}
+				/* Window function columns are added by the WindowResultSet for this levels RCL */
+				if (rc.isWindowFunction()) {
+					continue;
+				}
 			}
 
 
@@ -4115,4 +4119,40 @@ public class ResultColumnList extends QueryTreeNodeVector
 	{
 		return size() - orderBySelect - numGeneratedColumns();
 	}
+	
+	/**
+	 * Return whether or not this RCL contains any window ResultColumns
+	 *
+	 * @return Whether or not this RCL contains any window ResultColumns
+	 */
+	public boolean containsWindowFunctionResultColumn()
+	{		
+		int size = size();
+		for (int index = 0; index < size; index++) {
+			ResultColumn rc = (ResultColumn) elementAt(index);			
+			if (rc.isWindowFunction()){
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/*
+	 * Remove all window functions columns from this list
+	 */
+	void removeWindowFunctionColumns() {
+		/* Walk the list backwards as we are removing elements */
+		int sz = size();
+		for (int index = sz - 1; index >= 0; index--) {
+			ResultColumn rc = (ResultColumn) elementAt(index);			
+			if (rc.isWindowFunction()){
+				removeElementAt(index);
+			}
+		}
+		/* 
+		 * Remap VirtualColumnIds now that window function columns are gone. 
+		 * Needed for ordering to work.
+		 */
+		resetVirtualColumnIds();
+	}	
 }

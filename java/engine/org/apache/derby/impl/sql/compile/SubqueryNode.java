@@ -622,10 +622,12 @@ public class SubqueryNode extends ValueNode
 		 *           b) it appears within a WHERE clause but does not itself 
 		 *              contain a WHERE clause with other subqueries in it. 
 		 *          (DERBY-3301)
+		 *  o It does not contain a window function column.
 		 */
 		flattenable = (resultSet instanceof RowResultSetNode) &&
 					  underTopAndNode && !havingSubquery &&
 					  !isWhereExistsAnyInWithWhereSubquery() &&
+					  !hasWindowFunctionColumn() &&
 					  parentComparisonOperator instanceof BinaryComparisonOperatorNode;
 		if (flattenable)
 		{
@@ -690,12 +692,14 @@ public class SubqueryNode extends ValueNode
 		 *           b) it appears within a WHERE clause but does not itself 
 		 *              contain a WHERE clause with other subqueries in it. 
 		 *          (DERBY-3301)
+		 *  o The subquery has a window function column.
 		 */
 		boolean flattenableNotExists = (isNOT_EXISTS() || canAllBeFlattened());
 
 		flattenable = (resultSet instanceof SelectNode) &&
 					  underTopAndNode && !havingSubquery &&
 					  !isWhereExistsAnyInWithWhereSubquery() &&
+					  !hasWindowFunctionColumn() &&
 					  (isIN() || isANY() || isEXISTS() || flattenableNotExists ||
                        parentComparisonOperator != null);
 
@@ -2386,5 +2390,36 @@ public class SubqueryNode extends ValueNode
 			 */
 			return false;
 		}
+	}
+	
+	/**
+	 * Check whether this subquery has a window function column. 
+	 * Used in flattening decision making.
+	 * 
+	 * @return true if this subquery has a windowfunction column.	 
+	 */
+	public boolean hasWindowFunctionColumn() 
+			throws StandardException
+	{
+		if (resultSet instanceof SelectNode){
+			/*
+			 * Check the subquery select for a window function column in the RCL 
+			 */
+			SelectNode sn = (SelectNode) resultSet;
+			ResultColumnList rcl = sn.getResultColumns();
+			/*
+			CollectNodesVisitor cnv = 
+					new CollectNodesVisitor(WindowFunctionColumnNode.class,
+											WindowFunctionColumnNode.class);
+			rcl.accept(cnv);
+			return !cnv.getList().isEmpty();
+			 */
+			/*
+			 * Check this SelectNodes immediate RCL, 
+			 * and not traverse the full tree 
+			 */
+			rcl.containsWindowFunctionResultColumn();
+		}
+		return false;
 	}
 }

@@ -611,6 +611,7 @@ public class ColumnReference extends ValueNode
 		referencedTabs.set(tableNumber);
 
 		return ( ! replacesAggregate ) &&
+			   ( ! source.isWindowFunction() ) && 
 			   ( (source.getExpression() instanceof ColumnReference) ||
 			     (source.getExpression() instanceof VirtualColumnNode) ||
 				 (source.getExpression() instanceof ConstantNode));
@@ -1003,6 +1004,22 @@ public class ColumnReference extends ValueNode
 		return (source.getExpression() instanceof ColumnReference);
 	}
 
+	/**
+	 * Return whether or not the source of this ColumnReference is a window 
+	 * function.
+	 * 
+	 * Note that we only care about the immediate source here.
+	 * This enables a push into a subquery that again has a windowfunction 
+	 * column in its subquery RCL.
+	 *
+	 * @return Whether or not the source of this ColumnReference 
+	 *         is a window function.
+	 */
+	boolean pointsToWindowFunction()
+	{ 
+		return (source.isWindowFunction());
+	}
+	
 	/**
 	 * The type of a ColumnReference is the type of its
      * source unless the source is null then it is
