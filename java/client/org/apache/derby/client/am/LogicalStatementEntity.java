@@ -172,10 +172,9 @@ abstract class LogicalStatementEntity
 
             // Reset the statement for reuse.
             try {
-                // WARNING: This is just a placeholder and is incorrect!!!
-                //          A proper reset procedure must be implemented.
-                temporaryPsRef.reset(true);
+                temporaryPsRef.resetForReuse();
             } catch (SqlException sqle) {
+                // Get a wrapper and throw it.
                 throw sqle.getSQLException();
             }
 

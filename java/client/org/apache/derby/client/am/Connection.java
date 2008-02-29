@@ -273,6 +273,7 @@ public abstract class Connection implements java.sql.Connection,
                                    String user,
                                    ClientBaseDataSource ds,
                                    boolean recomputeFromDataSource) throws SqlException {
+        // Transaction isolation level is handled in completeReset.
         // clearWarningsX() will re-initialize the following properties
         clearWarningsX();
 
@@ -292,7 +293,6 @@ public abstract class Connection implements java.sql.Connection,
             // property: open_
             // this should already be true
 
-            isolation_ = TRANSACTION_UNKNOWN;
             currentSchemaName_ = null;
             autoCommit_ = true;
             inUnitOfWork_ = false;
@@ -822,7 +822,7 @@ public abstract class Connection implements java.sql.Connection,
                         e.getSQLException(), accumulatedExceptions);
         }
 
-        markClosed();
+        markClosed(false);
         try {
             agent_.close();
         } catch (SqlException e) {
@@ -835,7 +835,8 @@ public abstract class Connection implements java.sql.Connection,
 
     // Just like closeX except the socket is not pulled.
     // Physical resources are not closed.
-    synchronized public void closeForReuse() throws SqlException {
+    synchronized public void closeForReuse(boolean statementPooling)
+            throws SqlException {
         if (!open_) {
             return;
         }
@@ -847,7 +848,7 @@ public abstract class Connection implements java.sql.Connection,
             accumulatedExceptions = e;
         }
         if (open_) {
-            markClosedForReuse();
+            markClosedForReuse(statementPooling);
         }
         if (accumulatedExceptions != null) {
             throw accumulatedExceptions;
@@ -874,19 +875,21 @@ public abstract class Connection implements java.sql.Connection,
 
     protected abstract void markClosed_();
 
-    public void markClosed() // called by LogicalConnection.close()
+    public void markClosed(boolean statementPooling) // called by LogicalConnection.close()
     {
         open_ = false;
         inUnitOfWork_ = false;
-        markStatementsClosed();
+        if (!statementPooling) {
+            markStatementsClosed();
+        }
         CommitAndRollbackListeners_.clear();
         markClosed_();
     }
 
 
-    private void markClosedForReuse() {
+    private void markClosedForReuse(boolean statementPooling) {
         availableForReuse_ = true;
-        markClosed();
+        markClosed(statementPooling);
     }
 
     private void markStatementsClosed() {
@@ -2158,6 +2161,21 @@ public abstract class Connection implements java.sql.Connection,
             ClientBaseDataSource ds, 
             boolean recomputerFromDataSource) throws SqlException;
 
+    /**
+     * <br>NOTE:</br>The following comments are valid for the changes done as
+     * part of implementing statement caching only (see DERBY-3313 and linked
+     * issues).
+     * <p>
+     * We don't reset the isolation level to unknown unconditionally, as this
+     * forces us to go to the server all the time. Since the value should now
+     * be valid (DERBY-3192), we check if it has been changed from the default.
+     *
+     * @param recomputeFromDataSource is now used to differentiate between
+     *      cases where statement pooling is enabled or not. If {@code true}, it
+     *      means statement pooling is disabled and the statements are fully
+     *      reset, which includes a re-prepare. If {@code false}, statement
+     *      pooling is enabled, and a more lightweight reset procedure is used.
+     */
     protected void completeReset(boolean isDeferredReset, boolean recomputeFromDataSource) throws SqlException {
         open_ = true;
 
@@ -2167,11 +2185,25 @@ public abstract class Connection implements java.sql.Connection,
         // Notice that these physical statements may not belong to this logical connection.
         // Iterate through the physical statements and re-enable them for reuse.
 
-        java.util.Set keySet = openStatements_.keySet();
-        for (java.util.Iterator i = keySet.iterator(); i.hasNext();) {
-            Object o = i.next();
-            ((Statement) o).reset(recomputeFromDataSource);
-
+        if (recomputeFromDataSource) {
+            // NOTE: This is to match previous behavior.
+            //       Investigate and check if it is really necessary.
+            this.isolation_ = TRANSACTION_UNKNOWN;
+            java.util.Set keySet = openStatements_.keySet();
+            for (java.util.Iterator i = keySet.iterator(); i.hasNext();) {
+                Object o = i.next();
+                ((Statement) o).reset(recomputeFromDataSource);
+            }
+        } else {
+            // Must reset transaction isolation level if it has been changed.
+            if (isolation_ != Connection.TRANSACTION_READ_COMMITTED) {
+                // This might not fare well with connection pools, if it has
+                // been configured to deliver connection with a different
+                // isolation level, i.e. it has to set the isolation level again
+                // when it returns connection to client.
+                // TODO: Investigate optimization options.
+                setTransactionIsolationX(Connection.TRANSACTION_READ_COMMITTED);
+            }
         }
 
         if (!isDeferredReset && agent_.loggingEnabled()) {

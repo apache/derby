@@ -77,7 +77,8 @@ public class LogicalConnection implements java.sql.Connection {
                     new ClientMessageId(
                         SQLState.PHYSICAL_CONNECTION_ALREADY_CLOSED)));
             } else {
-                physicalConnection_.closeForReuse();
+                physicalConnection_.closeForReuse(
+                        pooledConnection_.isStatementPoolingEnabled());
                 if (!physicalConnection_.isGlobalPending_()) {
                     pooledConnection_.recycleConnection();
                 }
@@ -105,7 +106,8 @@ public class LogicalConnection implements java.sql.Connection {
                 ; // no call to recycleConnection()
             }
         } finally {
-            physicalConnection_.closeForReuse();  //poolfix
+            physicalConnection_.closeForReuse(
+                    pooledConnection_.isStatementPoolingEnabled());  //poolfix
             physicalConnection_ = null;
         }
     }

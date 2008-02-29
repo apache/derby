@@ -51,8 +51,8 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
     //The PreparedStatement then uses this to pass the close and the error
     //occurred conditions back to the PooledConnection which can then throw the 
     //appropriate events.
-    protected ClientPooledConnection pooledConnection_ = null;
-
+    private final ClientPooledConnection pooledConnection_;
+    private final boolean closeStatementsOnClose;
 
     // For XA Transaction
     protected int pendingEndXACallinfoOffset_ = -1;
@@ -185,6 +185,8 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
                          String databaseName,
                          java.util.Properties properties) throws SqlException {
         super(netLogWriter, 0, "", -1, databaseName, properties);
+        this.pooledConnection_ = null;
+        this.closeStatementsOnClose = true;
     }
 
     public NetConnection(NetLogWriter netLogWriter,
@@ -192,6 +194,8 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
                          String user,
                          String password) throws SqlException {
         super(netLogWriter, user, password, dataSource);
+        this.pooledConnection_ = null;
+        this.closeStatementsOnClose = true;
         setDeferredResetPassword(password);
     }
 
@@ -203,6 +207,8 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
                          String databaseName,
                          java.util.Properties properties) throws SqlException {
         super(netLogWriter, driverManagerLoginTimeout, serverName, portNumber, databaseName, properties);
+        this.pooledConnection_ = null;
+        this.closeStatementsOnClose = true;
         netAgent_ = (NetAgent) super.agent_;
         if (netAgent_.exceptionOpeningSocket_ != null) {
             throw netAgent_.exceptionOpeningSocket_;
@@ -223,6 +229,8 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
                          int rmId,
                          boolean isXAConn) throws SqlException {
         super(netLogWriter, user, password, isXAConn, dataSource);
+        this.pooledConnection_ = null;
+        this.closeStatementsOnClose = true;
         netAgent_ = (NetAgent) super.agent_;
         initialize(user, password, dataSource, rmId, isXAConn);
     }
@@ -233,6 +241,8 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
                          org.apache.derby.jdbc.ClientBaseDataSource dataSource,
                          boolean isXAConn) throws SqlException {
         super(netLogWriter, isXAConn, dataSource);
+        this.pooledConnection_ = null;
+        this.closeStatementsOnClose = true;
         netAgent_ = (NetAgent) super.agent_;
         if (netAgent_.exceptionOpeningSocket_ != null) {
             throw netAgent_.exceptionOpeningSocket_;
@@ -275,6 +285,7 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
         netAgent_ = (NetAgent) super.agent_;
         initialize(user, password, dataSource, rmId, isXAConn);
         this.pooledConnection_=cpc;
+        this.closeStatementsOnClose = !cpc.isStatementPoolingEnabled();
     }
 
     private void initialize(String user,
@@ -409,7 +420,12 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
     }
 
     protected void completeReset(boolean isDeferredReset, boolean recomputeFromDataSource) throws SqlException {
-        super.completeReset(isDeferredReset, recomputeFromDataSource);
+        // NB! Override the recomputFromDataSource flag.
+        //     This was done as a temporary, minimal intrusive fix to support
+        //     JDBC statement pooling.
+        //     See DERBY-3341 for details.
+        super.completeReset(isDeferredReset,
+                recomputeFromDataSource && closeStatementsOnClose);
     }
 
     public void flowConnect(String password,
@@ -1550,7 +1566,7 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
     }
 
     protected boolean doCloseStatementsOnClose_() {
-        return true;
+        return closeStatementsOnClose;
     }
 
     protected boolean allowCloseInUOW_() {
@@ -1796,7 +1812,7 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
      */
     synchronized public void closeForReuse() throws SqlException {
         // call super.close*() to do the close*
-        super.closeForReuse();
+        super.closeForReuse(closeStatementsOnClose);
         if (!isXAConnection_)
             return;
         if (isOpen()) {
