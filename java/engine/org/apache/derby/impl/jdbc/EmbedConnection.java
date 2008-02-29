@@ -852,15 +852,15 @@ public abstract class EmbedConnection implements EngineConnection
      * 
      * @param tr an instance of TransactionResourceImpl Links the connection 
      *           to the database.
-     * @throws java.sql.SQLException 1) Thrown upon a authorization failure 
-     *                           2) If the failover succeeds, an exception is
+     * @throws StandardException 1) If the failover succeeds, an exception is
      *                              thrown to indicate that the master database
      *                              was shutdown after a successful failover
-     *                           3) If a failure occurs during network 
+     *                           2) If a failure occurs during network
      *                              communication with slave.
+     * @throws SQLException      1) Thrown upon a authorization failure.
      */
     private void handleFailoverMaster(TransactionResourceImpl tr)
-        throws SQLException {
+        throws SQLException, StandardException {
 
         // If authorization is turned on, we need to check if this
         // user is database owner.
@@ -906,7 +906,11 @@ public abstract class EmbedConnection implements EngineConnection
         // databases in slave mode since the AuthenticationService has
         // not been booted for the database
 
-        database.failover(getTR().getDBName());
+        try {
+            database.failover(getTR().getDBName());
+        } catch (StandardException se) {
+            throw Util.generateCsSQLException(se);
+        }
     }
 	/**
 	 * Remove any encryption or upgarde properties from the given properties

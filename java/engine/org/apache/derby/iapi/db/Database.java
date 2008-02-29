@@ -133,13 +133,14 @@ public interface Database extends org.apache.derby.database.Database, LocaleFind
      *
      * @param dbname the replication database that is being failed over.
      *
-     * @exception SQLException   1) If the failover succeeds, an exception is
-     *                              thrown to indicate that the master database
-     *                              was shutdown after a successful failover
-     *                           2) If a failure occurs during network
-     *                              communication with slave.
+     * @exception StandardException 1) If the failover succeeds, an exception
+     *                                 is thrown to indicate that the master
+     *                                 database was shutdown after a successful
+     *                                 failover
+     *                              2) If a failure occurs during network
+     *                                 communication with slave.
      */
-    public void failover(String dbname) throws SQLException;
+    public void failover(String dbname) throws StandardException;
 
     /**
      * Used to indicated whether the database is in the replication

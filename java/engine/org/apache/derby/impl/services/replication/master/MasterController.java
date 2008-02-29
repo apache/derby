@@ -278,6 +278,13 @@ public class MasterController
             //The exception thrown is of Database Severity, this shuts
             //down the master database.
             teardownNetwork();
+
+            //If we require an exception of Database Severity to shutdown the
+            //database to shutdown the database we need to unfreeze first
+            //before throwing the exception. Unless we unfreeze the shutdown
+            //hangs.
+            rawStoreFactory.unfreeze();
+
             throw StandardException.newException
                     (SQLState.REPLICATION_FAILOVER_SUCCESSFUL, dbname);  
         } else {
