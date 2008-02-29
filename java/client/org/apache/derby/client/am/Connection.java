@@ -940,68 +940,85 @@ public abstract class Connection implements java.sql.Connection,
     private static String DERBY_TRANSACTION_READ_UNCOMMITTED = "UR";
 
     synchronized public void setTransactionIsolation(int level) throws SQLException {
-        try
-        {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "setTransactionIsolation", level);
-            }
+        if (agent_.loggingEnabled()) {
+            agent_.logWriter_.traceEntry(this, "setTransactionIsolation", level);
+        }
+        try {
             // Per jdbc spec (see java.sql.Connection.close() javadoc).
             checkForClosedConnection();
-
-            // Javadoc for this method:
-            //   If this method is called during a transaction, the result is implementation-defined.
-            //
-            //
-            // REPEATABLE_READ = JDBC: TRANSACTION_SERIALIZABLE, DERBY: RR, PROTOCOL: repeatable read
-            // READ_STABILITY = JDBC: TRANSACTION_REPEATABLE_READ, DERBY: RS, PROTOCOL: All
-            // CURSOR_STABILITY = JDBC: TRANSACTION_READ_COMMITTED, DERBY: CS, PROTOCOL: Cursor stability
-            // UNCOMMITTED_READ = JDBC: TRANSACTION_READ_UNCOMMITTED, DERBY: UR , PROTOCOL: Change
-            // NO_COMMIT = JDBC: TRANSACTION_NONE, DERBY: NC, PROTOCOL: No commit
-            //
-            String levelString = null;
-            switch (level) {
-            case java.sql.Connection.TRANSACTION_REPEATABLE_READ:
-                levelString = DERBY_TRANSACTION_REPEATABLE_READ;
-                break;
-            case java.sql.Connection.TRANSACTION_READ_COMMITTED:
-                levelString = DERBY_TRANSACTION_READ_COMMITTED;
-                break;
-            case java.sql.Connection.TRANSACTION_SERIALIZABLE:
-                levelString = DERBY_TRANSACTION_SERIALIZABLE;
-                break;
-            case java.sql.Connection.TRANSACTION_READ_UNCOMMITTED:
-                levelString = DERBY_TRANSACTION_READ_UNCOMMITTED;
-                break;
-                // Per javadoc:
-                //   Note that Connection.TRANSACTION_NONE cannot be used because it specifies that transactions are not supported.
-            case java.sql.Connection.TRANSACTION_NONE:
-            default:
-                throw new SqlException(agent_.logWriter_,
-                    new ClientMessageId (SQLState.UNIMPLEMENTED_ISOLATION_LEVEL),
-                    new Integer(level));                        
-            }
-            if (setTransactionIsolationStmt == null  || 
-            		!(setTransactionIsolationStmt.openOnClient_ &&
-            				setTransactionIsolationStmt.openOnServer_)) {
-                setTransactionIsolationStmt =
-                        createStatementX(java.sql.ResultSet.TYPE_FORWARD_ONLY,
-                                java.sql.ResultSet.CONCUR_READ_ONLY,
-                                holdability());
-            }
-
-            setTransactionIsolationStmt.executeUpdate("SET CURRENT ISOLATION = " + levelString);
-
-            // The server has now implicitely committed the
-            // transaction so we have to clean up locally.
-            completeLocalCommit();
-
-            if (SanityManager.DEBUG && supportsSessionDataCaching()) {
-                SanityManager.ASSERT(isolation_ == level);
-            }
-        }
-        catch ( SqlException se )
-        {
+            setTransactionIsolationX(level);
+        } catch (SqlException se) {
             throw se.getSQLException();
+        }
+    }
+
+    /**
+     * Set the transaction isolation level as specified.
+     * <p>
+     * If this method is called during a transaction, the result is
+     * implementation-defined.
+     * <p>
+     * Information about Derby specific isolation level handling:
+     * <ul> <li>REPEATABLE_READ = JDBC: TRANSACTION_SERIALIZABLE, DERBY: RR,
+     *          PROTOCOL: repeatable read</li>
+     *      <li>READ_STABILITY = JDBC: TRANSACTION_REPEATABLE_READ, DERBY: RS,
+     *          PROTOCOL: All</li>
+     *      <li>CURSOR_STABILITY = JDBC: TRANSACTION_READ_COMMITTED, DERBY: CS,
+     *          PROTOCOL: Cursor stability</li>
+     *      <li>UNCOMMITTED_READ = JDBC: TRANSACTION_READ_UNCOMMITTED,
+     *          DERBY: UR, PROTOCOL: Change</li>
+     *      <li>NO_COMMIT = JDBC: TRANSACTION_NONE, DERBY: NC, PROTOCOL:
+     *          No commit</li>
+     * </ul>
+     */
+    //@GuardedBy("this")
+    private void setTransactionIsolationX(int level)
+            throws SqlException {
+        String levelString = null;
+        switch (level) {
+        case java.sql.Connection.TRANSACTION_REPEATABLE_READ:
+            levelString = DERBY_TRANSACTION_REPEATABLE_READ;
+            break;
+        case java.sql.Connection.TRANSACTION_READ_COMMITTED:
+            levelString = DERBY_TRANSACTION_READ_COMMITTED;
+            break;
+        case java.sql.Connection.TRANSACTION_SERIALIZABLE:
+            levelString = DERBY_TRANSACTION_SERIALIZABLE;
+            break;
+        case java.sql.Connection.TRANSACTION_READ_UNCOMMITTED:
+            levelString = DERBY_TRANSACTION_READ_UNCOMMITTED;
+            break;
+            // Per javadoc:
+            //   Note that Connection.TRANSACTION_NONE cannot be used because it
+            //   specifies that transactions are not supported.
+        case java.sql.Connection.TRANSACTION_NONE:
+        default:
+            throw new SqlException(agent_.logWriter_,
+                new ClientMessageId (SQLState.UNIMPLEMENTED_ISOLATION_LEVEL),
+                new Integer(level));
+        }
+        if (setTransactionIsolationStmt == null  ||
+                !(setTransactionIsolationStmt.openOnClient_ &&
+                        setTransactionIsolationStmt.openOnServer_)) {
+            setTransactionIsolationStmt =
+                    createStatementX(java.sql.ResultSet.TYPE_FORWARD_ONLY,
+                            java.sql.ResultSet.CONCUR_READ_ONLY,
+                            holdability());
+        }
+
+        try {
+            setTransactionIsolationStmt.executeUpdate(
+                "SET CURRENT ISOLATION = " + levelString);
+        } catch (SQLException sqle) {
+            throw new SqlException(sqle);
+        }
+
+        // The server has now implicitly committed the
+        // transaction so we have to clean up locally.
+        completeLocalCommit();
+
+        if (SanityManager.DEBUG && supportsSessionDataCaching()) {
+            SanityManager.ASSERT(isolation_ == level);
         }
     }
 
