@@ -129,17 +129,17 @@ xxxxxxFILTERED-TIMESTAMPxxxxx
 xxxxxxFILTERED-TIMESTAMPxxxxx
 ij> -- show comparisons with mixed types don't work
 select e from t where e <= i;
-ERROR 42818: Comparisons between 'DATE' and 'INTEGER' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
+ERROR 42818: Comparisons between 'DATE' and 'INTEGER' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. SELECT tablename FROM sys.systables WHERE CAST(tablename AS VARCHAR(128)) = 'T1')
 ij> select e from t where t < s;
-ERROR 42818: Comparisons between 'TIME' and 'SMALLINT' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
+ERROR 42818: Comparisons between 'TIME' and 'SMALLINT' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. SELECT tablename FROM sys.systables WHERE CAST(tablename AS VARCHAR(128)) = 'T1')
 ij> select e from t where p > d;
-ERROR 42818: Comparisons between 'TIMESTAMP' and 'DOUBLE' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
+ERROR 42818: Comparisons between 'TIMESTAMP' and 'DOUBLE' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. SELECT tablename FROM sys.systables WHERE CAST(tablename AS VARCHAR(128)) = 'T1')
 ij> select e from t where e >= t;
-ERROR 42818: Comparisons between 'DATE' and 'TIME' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
+ERROR 42818: Comparisons between 'DATE' and 'TIME' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. SELECT tablename FROM sys.systables WHERE CAST(tablename AS VARCHAR(128)) = 'T1')
 ij> select e from t where t <> p;
-ERROR 42818: Comparisons between 'TIME' and 'TIMESTAMP' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
+ERROR 42818: Comparisons between 'TIME' and 'TIMESTAMP' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. SELECT tablename FROM sys.systables WHERE CAST(tablename AS VARCHAR(128)) = 'T1')
 ij> select e from t where p = e;
-ERROR 42818: Comparisons between 'TIMESTAMP' and 'DATE' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. select tablename from sys.systables where CAST(tablename as VARCHAR(128)) = 'T1')
+ERROR 42818: Comparisons between 'TIMESTAMP' and 'DATE' are not supported. Types must be comparable. String types must also have matching collation. If collation does not match, a possible solution is to cast operands to force them to the default collation (e.g. SELECT tablename FROM sys.systables WHERE CAST(tablename AS VARCHAR(128)) = 'T1')
 ij> -- check limit values
 values( date('0001-1-1'), date('9999-12-31'), date('2/29/2000'), date('29.2.2004'));
 1         |2         |3         |4         
