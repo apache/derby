@@ -24,7 +24,6 @@ package org.apache.derby.jdbc;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.error.ExceptionSeverity;
-import org.apache.derby.iapi.reference.JDBC30Translation;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 
 /* import impl class */
@@ -38,6 +37,7 @@ import org.apache.derby.impl.jdbc.EmbedCallableStatement;
 
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.PreparedStatement;
@@ -225,8 +225,8 @@ class EmbedPooledConnection implements javax.sql.PooledConnection, BrokeredConne
 		if (realConnection.isReadOnly() != defaultReadOnly)
 			realConnection.setReadOnly(defaultReadOnly);
 
-		if (realConnection.getHoldability() != JDBC30Translation.HOLD_CURSORS_OVER_COMMIT)
-			realConnection.setHoldability(JDBC30Translation.HOLD_CURSORS_OVER_COMMIT);
+		if (realConnection.getHoldability() != ResultSet.HOLD_CURSORS_OVER_COMMIT)
+			realConnection.setHoldability(ResultSet.HOLD_CURSORS_OVER_COMMIT);
 
 		// reset any remaining state of the connection
 		realConnection.resetFromPool();

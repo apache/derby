@@ -1605,13 +1605,13 @@ class DRDAStatement
 		if (isDynamicPkgid(pkgid))
 		{       
 			if(pkgid.charAt(4) == 'N')
-				withHoldCursor = JDBC30Translation.CLOSE_CURSORS_AT_COMMIT;
+				withHoldCursor = ResultSet.CLOSE_CURSORS_AT_COMMIT;
 			else  
-				withHoldCursor = JDBC30Translation.HOLD_CURSORS_OVER_COMMIT;
+				withHoldCursor = ResultSet.HOLD_CURSORS_OVER_COMMIT;
 		}
 		else 
 		{            
-			withHoldCursor = JDBC30Translation.HOLD_CURSORS_OVER_COMMIT;
+			withHoldCursor = ResultSet.HOLD_CURSORS_OVER_COMMIT;
 		
 		}
 	}

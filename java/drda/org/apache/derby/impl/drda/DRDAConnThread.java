@@ -2743,7 +2743,7 @@ class DRDAConnThread extends Thread {
 		//hold cursors over commit set. In case of stored procedures which use server-side
 		//JDBC, the holdability of the ResultSet will be the holdability of the statement 
 		//in the stored procedure, not the holdability of the calling statement.
-		if (stmt.getCurrentDrdaResultSet().withHoldCursor == JDBC30Translation.HOLD_CURSORS_OVER_COMMIT)
+		if (stmt.getCurrentDrdaResultSet().withHoldCursor == ResultSet.HOLD_CURSORS_OVER_COMMIT)
 			writer.writeScalar1Byte(CodePoint.SQLCSRHLD, CodePoint.TRUE);
 		if (sqlamLevel >= MGRLVL_7)
 		{
@@ -3759,7 +3759,7 @@ class DRDAConnThread extends Thread {
 
 		if (attrs.indexOf("WITH HOLD") != -1)
 		{
-			stmt.withHoldCursor = JDBC30Translation.HOLD_CURSORS_OVER_COMMIT;
+			stmt.withHoldCursor = ResultSet.HOLD_CURSORS_OVER_COMMIT;
 			validAttribute = true;
 		}
 

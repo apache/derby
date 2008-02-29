@@ -41,7 +41,6 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Calendar;
 
-import org.apache.derby.iapi.reference.JDBC20Translation;
 
 /**
 
@@ -277,7 +276,7 @@ public abstract class UpdatableVTITemplate implements PreparedStatement
 	 */
 	public int getResultSetConcurrency() throws SQLException
 	{
-        return JDBC20Translation.CONCUR_UPDATABLE;
+        return ResultSet.CONCUR_UPDATABLE;
 	}
 
     //

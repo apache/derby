@@ -21,6 +21,8 @@
 
 package org.apache.derby.client.net;
 
+import java.sql.ResultSet;
+
 import org.apache.derby.client.am.ColumnMetaData;
 import org.apache.derby.client.am.DisconnectException;
 import org.apache.derby.client.am.PreparedStatementCallbackInterface;
@@ -35,7 +37,6 @@ import org.apache.derby.client.am.Utils;
 import org.apache.derby.jdbc.ClientDriver;
 import org.apache.derby.client.am.ClientJDBCObjectFactory;
 import org.apache.derby.shared.common.i18n.MessageUtil;
-import org.apache.derby.shared.common.reference.JDBC30Translation;
 import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.shared.common.reference.MessageId;
@@ -2386,9 +2387,9 @@ public class NetStatementReply extends NetPackageReply implements StatementReply
 
     private int calculateResultSetHoldability(int sqlcsrhld) {
         if (sqlcsrhld == 0xF0) {
-            return JDBC30Translation.CLOSE_CURSORS_AT_COMMIT;
+            return ResultSet.CLOSE_CURSORS_AT_COMMIT;
         } else {
-            return JDBC30Translation.HOLD_CURSORS_OVER_COMMIT;
+            return ResultSet.HOLD_CURSORS_OVER_COMMIT;
         }
     }
 

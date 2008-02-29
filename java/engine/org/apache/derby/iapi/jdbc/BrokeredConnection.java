@@ -22,6 +22,7 @@
 package org.apache.derby.iapi.jdbc;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.PreparedStatement;
 import java.sql.CallableStatement;
@@ -37,7 +38,6 @@ import java.io.ObjectInput;
 
 import java.lang.reflect.*;
 
-import org.apache.derby.iapi.reference.JDBC30Translation;
 import org.apache.derby.iapi.error.PublicAPI;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.shared.common.reference.SQLState;
@@ -50,7 +50,7 @@ public abstract class BrokeredConnection implements EngineConnection
 {
 	
 	// default for Derby
-	int stateHoldability = JDBC30Translation.HOLD_CURSORS_OVER_COMMIT;
+	int stateHoldability = ResultSet.HOLD_CURSORS_OVER_COMMIT;
 
 	final BrokeredConnectionControl control;
 	private boolean isClosed;

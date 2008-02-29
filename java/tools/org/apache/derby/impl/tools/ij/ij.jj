@@ -35,7 +35,6 @@ PARSER_BEGIN(ij)
 package org.apache.derby.impl.tools.ij;
 
 import org.apache.derby.iapi.reference.JDBC20Translation;
-import org.apache.derby.iapi.reference.JDBC30Translation;
 
 import org.apache.derby.tools.JDBCDisplayUtil;
 
@@ -1997,7 +1996,7 @@ throws SQLException
 :
 {
 	haveConnection();
-	int scrollType = JDBC20Translation.TYPE_FORWARD_ONLY;
+	int scrollType = ResultSet.TYPE_FORWARD_ONLY;
 	Token s;
 	Token scrolling = null;
 	Token withtoken = null;
@@ -2050,12 +2049,12 @@ throws SQLException
 {
 	<INSENSITIVE>
 	{
-		return JDBC20Translation.TYPE_SCROLL_INSENSITIVE;
+		return ResultSet.TYPE_SCROLL_INSENSITIVE;
 	}
 |
 	<SENSITIVE>
 	{
-		return JDBC20Translation.TYPE_SCROLL_SENSITIVE;
+		return ResultSet.TYPE_SCROLL_SENSITIVE;
 	}
 }	
 
@@ -2068,12 +2067,12 @@ throws SQLException
 {
 	<HOLD>
 	{
-		return JDBC30Translation.HOLD_CURSORS_OVER_COMMIT;
+		return ResultSet.HOLD_CURSORS_OVER_COMMIT;
 	}
 |
 	<NOHOLD>
 	{
-		return JDBC30Translation.CLOSE_CURSORS_AT_COMMIT;
+		return ResultSet.CLOSE_CURSORS_AT_COMMIT;
 	}
 }	
 

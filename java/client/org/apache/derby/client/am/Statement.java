@@ -23,7 +23,6 @@ package org.apache.derby.client.am;
 import java.sql.SQLException;
 import java.util.Arrays;
 
-import org.apache.derby.shared.common.reference.JDBC30Translation;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.shared.common.sanity.SanityManager;
 
@@ -412,8 +411,8 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
         }
 
         switch (holdability) {
-        case JDBC30Translation.CLOSE_CURSORS_AT_COMMIT:
-        case JDBC30Translation.HOLD_CURSORS_OVER_COMMIT:
+        case ResultSet.CLOSE_CURSORS_AT_COMMIT:
+        case ResultSet.HOLD_CURSORS_OVER_COMMIT:
             resultSetHoldability_ = holdability;
             break;
         default:

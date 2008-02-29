@@ -21,7 +21,6 @@
 
 package org.apache.derby.iapi.reference;
 
-import java.sql.ResultSet;
 import javax.transaction.xa.XAResource;
 
 /**
@@ -41,30 +40,6 @@ import javax.transaction.xa.XAResource;
 */
 
 public interface JDBC20Translation {
-        /*
-        ** public statics from 2.0 version of java.sql.ResultSet
-        */
-
-        /**
-         *      java.sql.ResultSet - result set concurrency
-         */
-        public static final int CONCUR_READ_ONLY = ResultSet.CONCUR_READ_ONLY;
-
-        public static final int CONCUR_UPDATABLE = ResultSet.CONCUR_UPDATABLE;
-
-        /**
-         *      java.sql.ResultSet - result set type
-         */
-        public static final int TYPE_FORWARD_ONLY = ResultSet.TYPE_FORWARD_ONLY;
-        public static final int TYPE_SCROLL_INSENSITIVE = ResultSet.TYPE_SCROLL_INSENSITIVE;
-        public static final int TYPE_SCROLL_SENSITIVE = ResultSet.TYPE_SCROLL_SENSITIVE;
-
-        /**
-         *      java.sql.ResultSet - fetch direction
-         */
-        public static final int FETCH_FORWARD = ResultSet.FETCH_FORWARD;
-        public static final int FETCH_REVERSE = ResultSet.FETCH_REVERSE;
-        public static final int FETCH_UNKNOWN = ResultSet.FETCH_UNKNOWN;
 
         /*
         ** public statics from javax.transaction.xa.XAResource

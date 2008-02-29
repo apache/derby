@@ -23,7 +23,6 @@ package org.apache.derby.client.am;
 
 import org.apache.derby.jdbc.ClientBaseDataSource;
 import org.apache.derby.jdbc.ClientDataSource;
-import org.apache.derby.shared.common.reference.JDBC30Translation;
 import org.apache.derby.shared.common.reference.SQLState;
 
 import java.sql.SQLException;
@@ -71,7 +70,7 @@ public abstract class Connection implements java.sql.Connection,
      * to ensure the correct value is returned for an
      * XA connection.
      */
-    private int holdability = JDBC30Translation.HOLD_CURSORS_OVER_COMMIT;
+    private int holdability = ResultSet.HOLD_CURSORS_OVER_COMMIT;
     
     public String databaseName_;
 
@@ -300,7 +299,7 @@ public abstract class Connection implements java.sql.Connection,
             loginTimeout_ = ds.getLoginTimeout();
             dataSource_ = ds;
             
-            holdability = JDBC30Translation.HOLD_CURSORS_OVER_COMMIT;
+            holdability = ResultSet.HOLD_CURSORS_OVER_COMMIT;
         }
 
         
@@ -1429,7 +1428,7 @@ public abstract class Connection implements java.sql.Connection,
             // commits, as the engine does not support it.
             if (this.isXAConnection_ && this.xaState_ == XA_T1_ASSOCIATED)
             {
-                if (holdability == JDBC30Translation.HOLD_CURSORS_OVER_COMMIT)
+                if (holdability == ResultSet.HOLD_CURSORS_OVER_COMMIT)
                     throw new SqlException(agent_.logWriter_, 
                             new ClientMessageId(SQLState.CANNOT_HOLD_CURSOR_XA));
             }
@@ -1701,8 +1700,8 @@ public abstract class Connection implements java.sql.Connection,
         // engine and handled there.
         if (this.isXAConnection_ && this.xaState_ == XA_T1_ASSOCIATED)
         {
-            if (resultSetHoldability == JDBC30Translation.HOLD_CURSORS_OVER_COMMIT) {
-                resultSetHoldability = JDBC30Translation.CLOSE_CURSORS_AT_COMMIT;
+            if (resultSetHoldability == ResultSet.HOLD_CURSORS_OVER_COMMIT) {
+                resultSetHoldability = ResultSet.CLOSE_CURSORS_AT_COMMIT;
                 accumulateWarning(new SqlWarning(agent_.logWriter_, 
                         new ClientMessageId(SQLState.HOLDABLE_RESULT_SET_NOT_AVAILABLE)));
             }
@@ -2303,7 +2302,7 @@ public abstract class Connection implements java.sql.Connection,
     final int holdability()
     {
         if (this.isXAConnection_ && this.xaState_ == XA_T1_ASSOCIATED)
-            return JDBC30Translation.CLOSE_CURSORS_AT_COMMIT;
+            return ResultSet.CLOSE_CURSORS_AT_COMMIT;
         return holdability;
     }
     

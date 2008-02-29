@@ -44,7 +44,6 @@ import org.apache.derby.iapi.services.io.LimitReader;
 
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.reference.JDBC40Translation;
-import org.apache.derby.iapi.reference.JDBC20Translation;
 
 import java.util.Calendar;
 import java.util.Vector;
@@ -127,11 +126,14 @@ public abstract class EmbedPreparedStatement
 
 			try {
 			    preparedStatement = lcc.prepareInternalStatement
-				(lcc.getDefaultSchema(), sql, resultSetConcurrency==JDBC20Translation.CONCUR_READ_ONLY, forMetaData);
+				(lcc.getDefaultSchema(), sql,
+                        resultSetConcurrency == java.sql.ResultSet.CONCUR_READ_ONLY,
+                        forMetaData);
 			    
 			    addWarning(preparedStatement.getCompileTimeWarnings());
 
-			    activation = preparedStatement.getActivation(lcc, resultSetType == JDBC20Translation.TYPE_SCROLL_INSENSITIVE);
+			    activation = preparedStatement.getActivation(lcc,
+                        resultSetType == java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE);
 
 				checkRequiresCallableStatement(activation);
 

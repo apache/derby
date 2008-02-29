@@ -23,7 +23,6 @@ package org.apache.derby.catalog;
 
 import org.apache.derby.iapi.db.Factory;
 import org.apache.derby.iapi.db.TriggerExecutionContext;
-import org.apache.derby.iapi.reference.JDBC20Translation;
 
 import java.sql.Connection;
 import java.sql.Statement;
@@ -82,7 +81,7 @@ public class TriggerOldTransitionRows extends org.apache.derby.vti.UpdatableVTIT
        }
         
        public int getResultSetConcurrency() {
-            return JDBC20Translation.CONCUR_READ_ONLY;
+            return ResultSet.CONCUR_READ_ONLY;
        }
        public void close() throws SQLException {
            resultSet.close();

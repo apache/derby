@@ -52,8 +52,6 @@ import org.apache.derby.iapi.services.io.StreamStorable;
 import org.apache.derby.iapi.services.io.LimitInputStream;
 import org.apache.derby.iapi.services.io.NewByteArrayInputStream;
 import org.apache.derby.iapi.error.ExceptionSeverity;
-import org.apache.derby.iapi.reference.JDBC20Translation;
-import org.apache.derby.iapi.reference.JDBC30Translation;
 import org.apache.derby.iapi.reference.SQLState;
 
 /* can't import these due to name overlap:
@@ -239,16 +237,16 @@ public abstract class EmbedResultSet extends ConnectionChild
 		//If the underlying language resultset is not updateable, then the concurrency of the ResultSet object will be CONCUR_READ_ONLY
 		//and a warning will be issued on the ResultSet object.
 		if (stmt == null)
-			concurrencyOfThisResultSet = JDBC20Translation.CONCUR_READ_ONLY;
-		else if (stmt.resultSetConcurrency == JDBC20Translation.CONCUR_READ_ONLY)
-			concurrencyOfThisResultSet = JDBC20Translation.CONCUR_READ_ONLY;
+			concurrencyOfThisResultSet = java.sql.ResultSet.CONCUR_READ_ONLY;
+		else if (stmt.resultSetConcurrency == java.sql.ResultSet.CONCUR_READ_ONLY)
+			concurrencyOfThisResultSet = java.sql.ResultSet.CONCUR_READ_ONLY;
 		else {
 			if (!isForUpdate()) { //language resultset not updatable
-				concurrencyOfThisResultSet = JDBC20Translation.CONCUR_READ_ONLY;
+				concurrencyOfThisResultSet = java.sql.ResultSet.CONCUR_READ_ONLY;
 				SQLWarning w = StandardException.newWarning(SQLState.QUERY_NOT_QUALIFIED_FOR_UPDATABLE_RESULTSET);
 				addWarning(w);
 			} else
-					concurrencyOfThisResultSet = JDBC20Translation.CONCUR_UPDATABLE;
+					concurrencyOfThisResultSet = java.sql.ResultSet.CONCUR_UPDATABLE;
 		}
 
 		// Fill in the column types
@@ -256,7 +254,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 		
 		// Only incur the cost of allocating and maintaining
 		// updated column information if the columns can be updated.
-		if (concurrencyOfThisResultSet == JDBC20Translation.CONCUR_UPDATABLE)
+		if (concurrencyOfThisResultSet == java.sql.ResultSet.CONCUR_UPDATABLE)
 		{
             final int columnCount = resultDescription.getColumnCount();
             final ExecutionFactory factory = conn.getLanguageConnection().
@@ -284,7 +282,7 @@ public abstract class EmbedResultSet extends ConnectionChild
         if (stmt != null)
         {
            // At connectivity level we handle only for forward only cursor
-           if (stmt.resultSetType == JDBC20Translation.TYPE_FORWARD_ONLY)
+           if (stmt.resultSetType == java.sql.ResultSet.TYPE_FORWARD_ONLY)
                maxRows = stmt.maxRows;
 
            maxFieldSize = stmt.MaxFieldSize;
@@ -406,7 +404,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 				 */
                 StatementContext statementContext =
                     lcc.pushStatementContext(isAtomic, 
-					     concurrencyOfThisResultSet==JDBC20Translation.CONCUR_READ_ONLY, 
+					     concurrencyOfThisResultSet==java.sql.ResultSet.CONCUR_READ_ONLY, 
 					     getSQLText(),
 					     getParameterValueSet(),
                                              false, timeoutMillis);
@@ -550,7 +548,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 								// underlying connection.  Do this outside of
 								// the connection synchronization.
 		// Would like to throw an exception if already closed, but
-		// some code assumes you can close a ResultSet more than once.
+		// some code assumes you can close a java.sql.ResultSet more than once.
 		// checkIfClosed("close");
 
 		// synchronize out here so the close and the autocommit are
@@ -1614,9 +1612,9 @@ public abstract class EmbedResultSet extends ConnectionChild
     public final int getHoldability() throws SQLException {
         checkIfClosed("getHoldability");
         if (theResults.getActivation().getResultSetHoldability()) {
-            return JDBC30Translation.HOLD_CURSORS_OVER_COMMIT;
+            return java.sql.ResultSet.HOLD_CURSORS_OVER_COMMIT;
         }
-        return JDBC30Translation.CLOSE_CURSORS_AT_COMMIT;
+        return java.sql.ResultSet.CLOSE_CURSORS_AT_COMMIT;
     }
 
     /**
@@ -4436,7 +4434,7 @@ public abstract class EmbedResultSet extends ConnectionChild
      */
     private void checkScrollCursor(String methodName) throws SQLException {
 		checkIfClosed(methodName);
-		if (stmt.getResultSetType() == JDBC20Translation.TYPE_FORWARD_ONLY)
+		if (stmt.getResultSetType() == java.sql.ResultSet.TYPE_FORWARD_ONLY)
 			throw Util
 					.newEmbedSQLException(
 							SQLState.NOT_ON_FORWARD_ONLY_CURSOR,
@@ -4446,7 +4444,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	}
     
     private void checkUpdatableCursor(String operation) throws SQLException {
-        if (getConcurrency() != JDBC20Translation.CONCUR_UPDATABLE) {
+        if (getConcurrency() != java.sql.ResultSet.CONCUR_UPDATABLE) {
             throw Util.generateCsSQLException(
                     SQLState.UPDATABLE_RESULTSET_API_DISALLOWED, 
                     operation);
@@ -4474,7 +4472,7 @@ public abstract class EmbedResultSet extends ConnectionChild
                     // No timeout for this operation (use 0)
 					StatementContext statementContext =
                         lcc.pushStatementContext(isAtomic, 
-						 concurrencyOfThisResultSet==JDBC20Translation.CONCUR_READ_ONLY,
+						 concurrencyOfThisResultSet==java.sql.ResultSet.CONCUR_READ_ONLY,
 						 getSQLText(),
                                                  getParameterValueSet(),
                                                  false, 0L);

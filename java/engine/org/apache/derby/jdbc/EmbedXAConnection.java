@@ -26,9 +26,9 @@ import org.apache.derby.iapi.jdbc.EngineConnection;
 import org.apache.derby.iapi.jdbc.ResourceAdapter;
 
 import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.reference.JDBC30Translation;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.PreparedStatement;
@@ -85,12 +85,12 @@ class EmbedXAConnection extends EmbedPooledConnection
 	public int  checkHoldCursors(int holdability, boolean downgrade)
         throws SQLException
     {
-		if (holdability == JDBC30Translation.HOLD_CURSORS_OVER_COMMIT) {		
+		if (holdability == ResultSet.HOLD_CURSORS_OVER_COMMIT) {		
 			if (xaRes.getCurrentXid () != null) {
                 if (!downgrade)
                     throw Util.generateCsSQLException(SQLState.CANNOT_HOLD_CURSOR_XA);
                 
-                holdability = JDBC30Translation.CLOSE_CURSORS_AT_COMMIT;
+                holdability = ResultSet.CLOSE_CURSORS_AT_COMMIT;
             }
 		}
 

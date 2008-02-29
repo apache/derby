@@ -24,7 +24,6 @@ package org.apache.derby.client.am;
 import java.sql.SQLException;
 
 import org.apache.derby.shared.common.reference.SQLState;
-import org.apache.derby.shared.common.reference.JDBC30Translation;
 
 // Note:
 //   Tag members using the strictest visibility.
@@ -1438,7 +1437,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
         cs.setStringX(3, "");
         cs.setStringX(4, "%");
         int cursorHold;
-        if (connection_.holdability() == JDBC30Translation.HOLD_CURSORS_OVER_COMMIT) {
+        if (connection_.holdability() == ResultSet.HOLD_CURSORS_OVER_COMMIT) {
             cursorHold = 1;
         } else {
             cursorHold = 0;
@@ -1783,7 +1782,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
         cs.setStringX(6, table);
         // We're passing the keyword EXPORTEDKEY, but this support may not be in the GA version of SPs.
         // As a workaround in getCrossReference(), we'll just "select * where 0=1" when primaryTable==""
-        if (connection_.holdability() == JDBC30Translation.HOLD_CURSORS_OVER_COMMIT) {
+        if (connection_.holdability() == ResultSet.HOLD_CURSORS_OVER_COMMIT) {
             cs.setStringX(7, "DATATYPE='JDBC';IMPORTEDKEY=1; CURSORHOLD=1");
         } else {
             cs.setStringX(7, "DATATYPE='JDBC';IMPORTEDKEY=1; CURSORHOLD=0");
@@ -1840,7 +1839,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
         cs.setStringX(6, "");
         // We're passing the keyword EXPORTEDKEY, but this support may not be in the GA version of SPs.
         // As a workaround in getCrossReference(), we'll just "select * where 0=1" when foreignTable==""
-        if (connection_.holdability() == JDBC30Translation.HOLD_CURSORS_OVER_COMMIT) {
+        if (connection_.holdability() == ResultSet.HOLD_CURSORS_OVER_COMMIT) {
             cs.setStringX(7, "DATATYPE='JDBC';EXPORTEDKEY=1; CURSORHOLD=1");
         } else {
             cs.setStringX(7, "DATATYPE='JDBC';EXPORTEDKEY=1; CURSORHOLD=0");
@@ -2064,7 +2063,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
     // helper method for the catalog queries only
     private String getOptions() {
         int cursorHold;
-        if (connection_.holdability() == JDBC30Translation.HOLD_CURSORS_OVER_COMMIT) {
+        if (connection_.holdability() == ResultSet.HOLD_CURSORS_OVER_COMMIT) {
             cursorHold = 1;
         } else {
             cursorHold = 0;

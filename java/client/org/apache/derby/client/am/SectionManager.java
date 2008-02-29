@@ -23,7 +23,6 @@ package org.apache.derby.client.am;
 
 import java.lang.ref.WeakReference;
 
-import org.apache.derby.shared.common.reference.JDBC30Translation;
 
 import org.apache.derby.shared.common.reference.SQLState;
 
@@ -103,9 +102,9 @@ public class SectionManager {
      *                             CLOSE_CURSORS_AT_COMMIT
      */
     public void setPKGNAMCBytes(byte[] b, int resultSetHoldability) {
-        if (resultSetHoldability == JDBC30Translation.HOLD_CURSORS_OVER_COMMIT) {
+        if (resultSetHoldability == ResultSet.HOLD_CURSORS_OVER_COMMIT) {
             agent_.sectionManager_.holdPKGNAMCBytes = b;
-        } else if (resultSetHoldability == JDBC30Translation.CLOSE_CURSORS_AT_COMMIT) {
+        } else if (resultSetHoldability == ResultSet.CLOSE_CURSORS_AT_COMMIT) {
             agent_.sectionManager_.noHoldPKGNAMCBytes = b;
         }
     }
@@ -116,9 +115,9 @@ public class SectionManager {
     // Get a section for either a jdbc update or query statement.
     public Section getDynamicSection(int resultSetHoldability) throws SqlException {
         int cursorHoldIndex;
-        if (resultSetHoldability == JDBC30Translation.HOLD_CURSORS_OVER_COMMIT) {
+        if (resultSetHoldability == ResultSet.HOLD_CURSORS_OVER_COMMIT) {
             return getSection(freeSectionsHold_, packageNameWithHold__, cursorNamePrefixWithHold__, resultSetHoldability);
-        } else if (resultSetHoldability == JDBC30Translation.CLOSE_CURSORS_AT_COMMIT) {
+        } else if (resultSetHoldability == ResultSet.CLOSE_CURSORS_AT_COMMIT) {
             return getSection(freeSectionsNonHold_, packageNameWithNoHold__, cursorNamePrefixWithNoHold__, resultSetHoldability);
         } else {
             throw new SqlException(agent_.logWriter_,
@@ -145,9 +144,9 @@ public class SectionManager {
     }
 
     public void freeSection(Section section, int resultSetHoldability) {
-        if (resultSetHoldability == JDBC30Translation.HOLD_CURSORS_OVER_COMMIT) {
+        if (resultSetHoldability == ResultSet.HOLD_CURSORS_OVER_COMMIT) {
             this.freeSectionsHold_.push(section);
-        } else if (resultSetHoldability == JDBC30Translation.CLOSE_CURSORS_AT_COMMIT) {
+        } else if (resultSetHoldability == ResultSet.CLOSE_CURSORS_AT_COMMIT) {
             this.freeSectionsNonHold_.push(section);
         }
     }

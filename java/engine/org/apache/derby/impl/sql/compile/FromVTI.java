@@ -54,7 +54,6 @@ import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 
 import org.apache.derby.iapi.reference.ClassName;
-import org.apache.derby.iapi.reference.JDBC20Translation;
 import org.apache.derby.iapi.reference.SQLState;
 
 import org.apache.derby.iapi.sql.Activation;
@@ -694,7 +693,7 @@ public class FromVTI extends FromTable implements VTIEnvironment
 			{
 				ps = (PreparedStatement) getNewInstance();
 
-				if (ps.getResultSetConcurrency() != JDBC20Translation.CONCUR_UPDATABLE)
+				if (ps.getResultSetConcurrency() != ResultSet.CONCUR_UPDATABLE)
 				{
 					throw StandardException.newException(SQLState.LANG_UPDATABLE_VTI_NON_UPDATABLE_RS, 
 														 getVTIName());

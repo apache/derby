@@ -21,7 +21,6 @@
 
 package org.apache.derby.shared.common.reference;
 import java.sql.ParameterMetaData;
-import java.sql.ResultSet;
 /**
         This class contains public statics that map directly
         to the new public statics in the jdbc 3.0 classes.
@@ -50,10 +49,4 @@ public interface JDBC30Translation {
         public static final int PARAMETER_MODE_IN = ParameterMetaData.parameterModeIn;
         public static final int PARAMETER_MODE_IN_OUT = ParameterMetaData.parameterModeInOut;
         public static final int PARAMETER_MODE_OUT = ParameterMetaData.parameterModeOut;
-
-        /*
-        ** public statics from 3.0 version of java.sql.ResultSet
-        */
-        public static final int HOLD_CURSORS_OVER_COMMIT = ResultSet.HOLD_CURSORS_OVER_COMMIT;
-        public static final int CLOSE_CURSORS_AT_COMMIT = ResultSet.CLOSE_CURSORS_AT_COMMIT;
 }

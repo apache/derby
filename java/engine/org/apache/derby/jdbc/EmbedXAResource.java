@@ -21,6 +21,7 @@
 
 package org.apache.derby.jdbc;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 
@@ -32,7 +33,6 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.jdbc.BrokeredConnection;
 import org.apache.derby.iapi.jdbc.ResourceAdapter;
 import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.reference.JDBC30Translation;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.services.info.JVMInfo;
@@ -637,7 +637,7 @@ class EmbedXAResource implements XAResource {
                     // and holdability false (cannot hold cursors across 
                     // XA transactions.
                     con.realConnection.setHoldability(
-                            JDBC30Translation.CLOSE_CURSORS_AT_COMMIT);
+                            ResultSet.CLOSE_CURSORS_AT_COMMIT);
                     
                     con.realConnection.getLanguageConnection().
                             getTransactionExecute().

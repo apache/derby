@@ -39,8 +39,6 @@ import org.apache.derby.impl.sql.execute.GenericExecutionFactory;
 
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.reference.Limits;
-import org.apache.derby.iapi.reference.JDBC20Translation;
-import org.apache.derby.iapi.reference.JDBC30Translation;
 
 import java.util.Properties;
 
@@ -2818,8 +2816,8 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      * @see Connection
      */
 	public boolean supportsResultSetType(int type) {
-		if ((type == JDBC20Translation.TYPE_FORWARD_ONLY) ||
-		    (type == JDBC20Translation.TYPE_SCROLL_INSENSITIVE)) {
+		if ((type == ResultSet.TYPE_FORWARD_ONLY) ||
+		    (type == ResultSet.TYPE_SCROLL_INSENSITIVE)) {
 			return true;
 		}
     //we don't support TYPE_SCROLL_SENSITIVE yet.
@@ -2838,7 +2836,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      * @see Connection
      */
 	public boolean supportsResultSetConcurrency(int type, int concurrency) {
- 		if (type == JDBC20Translation.TYPE_SCROLL_SENSITIVE) {
+ 		if (type == ResultSet.TYPE_SCROLL_SENSITIVE) {
  			// (TYPE_SCROLL_SENSITIVE, *)
   			return false;
  		} else {
@@ -2859,7 +2857,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      * @return true if updates are visible for the result set type
      */
     public boolean ownUpdatesAreVisible(int type)   {
- 		if (type == JDBC20Translation.TYPE_SCROLL_INSENSITIVE) {
+ 		if (type == ResultSet.TYPE_SCROLL_INSENSITIVE) {
  			return true;
  		} else {
  			return false;
@@ -2875,7 +2873,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      * @return true if deletes are visible for the result set type
      */
     public boolean ownDeletesAreVisible(int type)   {
- 		if (type == JDBC20Translation.TYPE_SCROLL_INSENSITIVE) {
+ 		if (type == ResultSet.TYPE_SCROLL_INSENSITIVE) {
  			return true;
  		} else {
  			return false;
@@ -2907,7 +2905,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
        * @return true if updates are visible for the result set type
        */
     public boolean othersUpdatesAreVisible(int type) {
-		if (type == JDBC20Translation.TYPE_FORWARD_ONLY)
+		if (type == ResultSet.TYPE_FORWARD_ONLY)
 			return true;
 		return false;
 	}
@@ -2921,7 +2919,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      * @return true if deletes are visible for the result set type
      */
     public boolean othersDeletesAreVisible(int type)  {
-		if (type == JDBC20Translation.TYPE_FORWARD_ONLY)
+		if (type == ResultSet.TYPE_FORWARD_ONLY)
 			return true;
 		return false;
 	}
@@ -2935,7 +2933,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      * @return true if inserts are visible for the result set type
      */
     public boolean othersInsertsAreVisible(int type)  {
-		if (type == JDBC20Translation.TYPE_FORWARD_ONLY)
+		if (type == ResultSet.TYPE_FORWARD_ONLY)
 			return true;
 		return false;
 	}
@@ -2950,7 +2948,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      * @return true if updates are detected by the resultset type
      */
     public boolean updatesAreDetected(int type) {
-		if (type == JDBC20Translation.TYPE_SCROLL_INSENSITIVE) {
+		if (type == ResultSet.TYPE_SCROLL_INSENSITIVE) {
 			return true;
 		} else {
 			// For forward only resultsets, we move to before the next
@@ -2971,7 +2969,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      * @return true if deletes are detected by the resultset type
      */
     public boolean deletesAreDetected(int type) {
-		if (type == JDBC20Translation.TYPE_SCROLL_INSENSITIVE) {
+		if (type == ResultSet.TYPE_SCROLL_INSENSITIVE) {
 			return true;
 		} else {
 			// For forward only resultsets, we move to before the next
@@ -3191,7 +3189,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 	*/
 	public int getResultSetHoldability()
   {
-		return JDBC30Translation.HOLD_CURSORS_OVER_COMMIT;
+		return ResultSet.HOLD_CURSORS_OVER_COMMIT;
 	}
 
 	/**

@@ -21,8 +21,6 @@
 
 package org.apache.derby.impl.jdbc;
 
-import org.apache.derby.iapi.reference.JDBC20Translation;
-import org.apache.derby.iapi.reference.JDBC30Translation;
 import org.apache.derby.iapi.reference.SQLState;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
@@ -93,7 +91,7 @@ public class EmbedStatement extends ConnectionChild
 	String SQLText;
 
     private int fetchSize = 1;
-    private int fetchDirection = JDBC20Translation.FETCH_FORWARD;
+    private int fetchDirection = java.sql.ResultSet.FETCH_FORWARD;
     int MaxFieldSize;
 	/**
 	 * Query timeout in milliseconds. By default, no statements time
@@ -606,9 +604,11 @@ public class EmbedStatement extends ConnectionChild
 			Activation activation;
 			try {
 				PreparedStatement preparedStatement = lcc.prepareInternalStatement
-				    (lcc.getDefaultSchema(), sql, resultSetConcurrency==JDBC20Translation.CONCUR_READ_ONLY, false);
+				    (lcc.getDefaultSchema(), sql, resultSetConcurrency==
+                        java.sql.ResultSet.CONCUR_READ_ONLY, false);
 				activation =
-					preparedStatement.getActivation(lcc, resultSetType == JDBC20Translation.TYPE_SCROLL_INSENSITIVE);
+					preparedStatement.getActivation(lcc, resultSetType ==
+                        java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE);
 				checkRequiresCallableStatement(activation);
 			 } catch (Throwable t) {
 				throw handleException(t);
@@ -804,9 +804,9 @@ public class EmbedStatement extends ConnectionChild
                 /* fetch direction is meaningless to us. we just save
                  * it off if it is valid  and return the current value if asked.
                  */
-                if (direction == JDBC20Translation.FETCH_FORWARD || 
-                    direction == JDBC20Translation.FETCH_REVERSE ||
-                    direction == JDBC20Translation.FETCH_UNKNOWN )
+                if (direction == java.sql.ResultSet.FETCH_FORWARD || 
+                    direction == java.sql.ResultSet.FETCH_REVERSE ||
+                    direction == java.sql.ResultSet.FETCH_UNKNOWN )
                 {
                     fetchDirection = direction;
                 }else
@@ -1706,7 +1706,7 @@ public class EmbedStatement extends ConnectionChild
      */
     private boolean getExecuteHoldable() throws SQLException
     {
-        if (resultSetHoldability  == JDBC30Translation.CLOSE_CURSORS_AT_COMMIT)
+        if (resultSetHoldability  == java.sql.ResultSet.CLOSE_CURSORS_AT_COMMIT)
             return false;
         
         // Simple non-XA case
@@ -1714,7 +1714,7 @@ public class EmbedStatement extends ConnectionChild
             return true;
         
         return applicationStatement.getResultSetHoldability() ==
-            JDBC30Translation.HOLD_CURSORS_OVER_COMMIT;
+            java.sql.ResultSet.HOLD_CURSORS_OVER_COMMIT;
     }
 
 	/**
