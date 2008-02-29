@@ -1,0 +1,25 @@
+Running replication tests
+*************************
+
+cd <testing dir>/ # ${user.dir}
+
+java  -Djava.security.policy="<NONE>" \
+      junit.textui.TestRunner \
+          org.apache.derbyTesting.functionTests.tests.replicationTests.ReplicationRun
+
+which runs (*the only test* - the "test framework") ReplicationRun.testReplication.
+See README.testReplication for a description.
+
+
+ReplicationRun.testReplication relies on '${user.dir}/replicationtest.properties'
+to find 
+- master and slave jar files (special Derby code variants in the Proof of Concept code)
+- test and test verification code to be run (the actual test...)
+- master and slave server hostnames and portnumbers
+- test client host names
+- load client hostnames
+- ..
+- .
+See README.properties for a description of properties used by 
+org.apache.derbyTesting.functionTests.tests.replicationTests.ReplicationRun 
+and tests.

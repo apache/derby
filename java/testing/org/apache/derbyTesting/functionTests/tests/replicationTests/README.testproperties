@@ -1,0 +1,103 @@
+${user.dir}/replicationtest.properties
+**************************************
+
+The test framework for replication testing relies on the file
+'replicationtest.properties' which must be located in 'user.dir'.
+
+The replication test framework assumes tests are run from jar files.
+
+The replication test framework allows different jars to be specified for 
+the master server, the slave server and the server used when verifying
+database consistency of the slave database after completing the 
+replication itself.
+
+
+The following properties are used by the replication test framework:
+
+
+Derby server hosts and port numbers:
+------------------------------------
+test.masterServerHost - where to run the master server
+test.masterServerPort
+
+test.slaveServerHost - where to run the slave server
+test.slaveServerPort
+
+test.slaveReplPort - which port to use on slave server for receiving replication data from master.
+
+test.testClientHost - host where the replication test is to be run.
+
+
+Derby master and slave database locations:
+-----------------------------------------
+test.master.databasepath - absolute path specifying where on master server the test database should reside.
+test.slave.databasepath - ditto for slave
+test.databaseName - name of database to be replicated.
+ - the full database path name on the master / slave will be
+   <test.master.databasepath>/db_master/<test.databaseName> /
+   <test.slave.databasepath>/db_slave/<test.databaseName>
+
+
+Replication tests and associated verification:
+----------------------------------------------
+test.replicationTest - either
+  a sql script - e.g. /home/os136789/Replication/testing/insert.sql or 
+  a JUnit test - e.g. org.apache.derbyTesting.functionTests.tests.replicationTests.SimplePerfTest
+test.replicationVerify - the verification "test" to be run against the slave server after the
+  test.replicationTest is completed.
+
+test.derbyTestingJar - jar files of Derby version where tests are available
+jvm.version - jvm version used by test client(s)
+
+jvm.masterversion - jvm version used by master server
+jvm.slaveversion  - ditto for slave
+
+derby.version - Derby version used.
+  Observe that while using the PoC (Proof of concept) code we have 
+  specific variants of the Derby code for master and slave respectivly - both
+  being modifications to the "plain" Derby code.
+  Thus while using the PoC derby.version represents the Derby used by the test client(s),
+  and load clients.
+
+derby.masterversion - Specific variant of Derby for master PoC.
+derby.slaveversion  - ditto for slave
+
+junit_jar - JUnit jars to use in tests and loads.
+
+test.sleepTime
+
+test.runUnReplicated - set to true to include a test run without replication:
+  Used for simple (performance) comparisons.
+
+
+Load specific properties:
+------------------------
+test.sqlLoadInit - sql script to initialize load client database. 
+                   NB! FIXME! must be specific per load id below!
+
+Properties that specifies if load clients are to be started at predefined states 
+during the replication process:
+test.masterPreRepl   - start a load client against the master server before 'startreplication'.
+test.masterPostRepl  - start a load client against the master server when 'startreplication' is done.
+test.slavePreSlave   - start a load client against the slave server when 'startreplication' is done,
+                       but before 'startslave' is done.
+test.masterPostSlave - start a load client against the master server after 'startslave' is done.
+test.slavePostSlave  - start a load client against the slave server after 'startslave' is done.
+(I.e. test.<load id>)
+
+For each of these load "id"s we have properties specifying
+"test." + id + ".load"       - the sql script or JUnit test to use for load.
+"test." + id + ".database"   - database name in <test.master.databasepath>/db_master/ or 
+                                                <test.slave.databasepath>/db_slave/
+"test." + id + ".existingDB" - whether the database exists or should be created before running the load.
+"test." + id + ".clientHost" - the host to run the load client.
+
+General:
+--------
+test.testUser
+test.printDebug
+test.showSysinfo
+
+-------------------------------
+See java/testing/org/apache/derbyTesting/functionTests/tests/replicationTests/replicationtest.properties
+for an example.

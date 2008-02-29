@@ -1,0 +1,137 @@
+ReplicationRun.testReplication
+******************************
+
+The test method testReplication in org.apache.derbyTesting.functionTests.tests.replicationTests.ReplicationRun 
+executes the replication tests:
+
+
+Short story:
+------------
+
+startServer 
+    -  start server on master host.
+
+startServer 
+    - start server on slave host.
+
+startReplication 
+    - tells master server that the/a database is to be replicated on 
+      the slave server.
+
+startSlave 
+    - tells slave server to act as slave for the database on master 
+      server which is to be replicated.
+
+runTest 
+    - runs the specified test while replication is active.
+
+stopReplication 
+    - tells the master server to stop replicating the database 
+      - "NOOP" in PoC (Proof of concept) code.
+
+stopServer 
+    - In the PoC code shutdown of or killing the master server
+      forces failover on the slave.
+
+
+
+Detailed story:
+--------------
+
+initEnvironment() 
+    - gets test specifications from the ${user.dir}/replicationtest.properties file.
+
+initMaster(masterServerHost,replicatedDb) 
+    - The PoC code (Proof of concept) requires that the master database is copied by OS commands
+      from some original database (possibly empty) to the master database (in 
+      <test.master.databasepath>/db_master/). Also see README.properties.
+
+startServer(masterJvmVersion, derbyMasterVersion,
+                masterServerHost,
+                ALL_INTERFACES,
+                masterServerPort,
+                masterDatabasePath +PS+ masterDbSubPath)
+    - start the master server
+
+startLoad(masterPreRepl,
+                masterDbSubPath,
+                masterServerHost,
+                masterServerPort)
+    
+    - Optionally start load on the master server.
+
+startServer(slaveJvmVersion, derbySlaveVersion,
+                slaveServerHost,
+                ALL_INTERFACES,
+                slaveServerPort,
+                slaveDatabasePath +PS+ slaveDbSubPath)
+    - start the slave server
+
+startReplication(jvmVersion, replicatedDb,
+                masterServerHost, // Where the startreplication command must be given
+                masterServerPort, // master server interface accepting client requests
+                masterServerHost, // An interface on the master: masterClientInterface (==masterServerHost),
+                slaveServerPort,
+                slaveServerHost,
+                slaveReplPort)
+    - tell master server to start replication 'replicatedDb' on 'slaveServerHost'.
+
+startLoad(masterPostRepl,
+                masterDbSubPath,
+                masterServerHost,
+                masterServerPort)
+    - Optionally start load on master server.
+
+startLoad(slavePreSlave,
+                slaveDbSubPath,
+                slaveServerHost,
+                slaveServerPort)
+    - Optionally start load on slave server.
+
+startSlave(jvmVersion, replicatedDb,
+                masterServerHost, // masterClientInterface (==masterServerHost)
+                masterServerPort, // masterServerPort
+                slaveServerHost, // slaveClientInterface // where the startslave command must be given
+                slaveServerPort,
+                slaveServerHost, // for slaveReplInterface
+                slaveReplPort)
+    - Tell slave server to take replication slave role for database 'replicatedDb' on (master) 
+      server 'masterServerHost' with port 'masterServerPort'.
+
+startLoad(masterPostSlave,
+                masterDbSubPath,
+                masterServerHost,
+                masterServerPort)
+    - Optionally start load on master server.
+ 
+startLoad(slavePostSlave,
+                slaveDbSubPath,
+                slaveServerHost,
+                slaveServerPort)
+    - Optionally start load on slave server.
+
+runTest(replicationTest,
+                jvmVersion,
+                testClientHost,
+                masterServerHost, masterServerPort,
+                replicatedDb)
+    - Run the 'replicationTest' against the 'replicatedDb' on the master server.
+
+stopReplication(replicatedDb)
+    - Tell master server to stop replication of 'replicatedDb'. A "NOOP" on PoC:
+
+stopServer(masterJvmVersion, derbyMasterVersion, // V2b: forces failover on slave
+                masterServerHost, masterServerPort)
+    - In the PoC shutdown of or killing the master server forces failover on
+      the slave server, i.e. "simulating" a "failover" command on the slave!
+
+verifySlave()
+    - run the sql script or JUnit "test" to verify correct state in the replicated database on the slave server.
+
+
+Full story:
+-----------
+See org.apache.derbyTesting.functionTests.tests.replicationTests.ReplicationRun.
+
+
+

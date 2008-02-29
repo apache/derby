@@ -1,0 +1,45 @@
+The current replication tests are run against the Proof of Concept (PoC) code for 
+replication.
+
+The intention is that when the replication code is enabled on trunk, the 
+replication test framework and tests are in place.
+
+
+The test framework for replication testing is so far only available for running
+on Unix'es, specifically Linux and Solaris. 
+Cygwin on Windows should also work but this has not yet been tried.
+
+The test frame work relies on Secure Shell (ssh) to start servers on the master and slave hosts,
+and to run test clients and load clients on a set of client and load hosts.
+
+The PoC code has special variants of the Derby code for the master and slave servers.
+This must be specified in the '${user.dir}/replicationtest.properties' file
+which will contain property definitions similar to what is shown below:
+
+#######################
+# Derby version to be used for client and as default for master and slave:
+#-----------------------------
+derby.version=/home/os136789/Apache/myDerbySandbox/trunk/jars/insane
+
+# Optional specific Derby to be used for master. REQUIRED for PoC code!
+derby.masterversion=/home/os136789/Replication/trunk_master/jars/insane
+
+# Optional specific Derby to be used for slave. REQUIRED for PoC code!
+derby.slaveversion=/home/os136789/Replication/trunk_slave/jars/insane
+#-----------------------------
+#######################
+
+See README.properties for a description of the '${user.dir}/replicationtest.properties' file
+
+See java/testing/org/apache/derbyTesting/functionTests/tests/replicationTests/replicationtest.properties
+for a complete replicationtest.properties file example.
+
+
+See DERBY-2872 / proof-of-concept_v2b-howto.txt for a description of how to create and build
+the PoC code.
+
+
+See README.runningTests for how to run replication tests.
+
+
+See README.testReplication for a description of ReplicationRun.testReplication.
