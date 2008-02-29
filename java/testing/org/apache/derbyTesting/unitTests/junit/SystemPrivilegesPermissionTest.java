@@ -33,17 +33,17 @@ import java.util.HashSet;
 import java.io.IOException;
 
 import java.security.PrivilegedAction;
-import java.security.PrivilegedExceptionAction;
-import java.security.PrivilegedActionException;
 import java.security.AccessController;
 import java.security.AccessControlException;
 import java.security.Permission;
 import javax.security.auth.Subject;
 
-import org.apache.derby.authentication.DatabasePrincipal;
+import org.apache.derby.authentication.SystemPrincipal;
 import org.apache.derby.security.SystemPermission;
 import org.apache.derby.security.DatabasePermission;
 
+import org.apache.derby.iapi.util.IdUtil;
+import org.apache.derby.iapi.error.StandardException;
 
 /**
  * This class tests the basic permission classes for system privileges.
@@ -117,7 +117,7 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
     /**
      * The matrix defining which of the above directory paths imply each other.
      *
-     * For instance, dirPathImplications[1][2] shows the expected value for:
+     * For instance, dirPathImpls[1][2] shows the expected value for:
      * <ul>
      * <li> DP("directory:*").implies(DP(directory:level0"))
      * <li> DP("directory:./*").implies(DP(directory:./level0"))
@@ -125,7 +125,7 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
      * <li> DP("directory:/dummy/..*").implies(DP(directory:/dummy/..level0"))
      * </ul>
      */
-    static private final boolean[][] dirPathImplications = {
+    static private final boolean[][] dirPathImpls = {
         { true, true, true, true, true, true, true, true }, 
         { false, true, true, true, false, false, false, false },
         { false, false, true, false, false, false, false, false },
@@ -141,11 +141,10 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
      * with this test's policy file.
      */
     static private Test decorateTest(String method) {
-        final SystemPrivilegesPermissionTest undecoratedTest
-            = new SystemPrivilegesPermissionTest(method);
+        final Test undecorated = new SystemPrivilegesPermissionTest(method);
 
         // install a security manager using this test's policy file
-        return new SecurityManagerSetup(undecoratedTest, POLICY_FILE_NAME);
+        return new SecurityManagerSetup(undecorated, POLICY_FILE_NAME);
     }
     
 
@@ -175,66 +174,42 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
      * Test case that does a check of the XXX
      */
     public void testSystemPrivileges() throws IOException {
-        //System.out.println("--> testSystemPrivileges()");
-        //System.out.println("    java.security.policy = "
-        //                   + System.getProperty("java.security.policy"));
-        //System.out.println("    System.getSecurityManager() = "
-        //                   + System.getSecurityManager());
+        println("");
+        println("testing System Privileges ...");
         assertSecurityManager();
         execute();
-        //System.out.println("<-- testSystemPrivileges()");
+        println("testing System Privileges: done.");
+        println("");
     }
 
     /**
      * Tests SystemPermissions.
      */
     public void execute() throws IOException {
-        checkDatabasePrincipal();
+        checkSystemPrincipal();
         checkSystemPermission();
         checkDatabasePermission();
     }
     
     /**
-     * Tests DatabasePrincipal.
+     * Tests SystemPrincipal.
      */
-    private void checkDatabasePrincipal() throws IOException {
-        // test DatabasePrincipal with null name argument
+    private void checkSystemPrincipal() throws IOException {
+        // test SystemPrincipal with null name argument
         try {
-            new DatabasePrincipal(null);
+            new SystemPrincipal(null);
             fail("expected NullPointerException");
         } catch (NullPointerException ex) {
             // expected exception
         }
 
-        // test DatabasePrincipal with empty name argument
+        // test SystemPrincipal with empty name argument
         try {
-            new DatabasePrincipal("");
+            new SystemPrincipal("");
             fail("expected IllegalArgumentException");
         } catch (IllegalArgumentException ex) {
             // expected exception
         }
-        
-        // test DatabasePrincipal with illegal name argument
-        try {
-            new DatabasePrincipal("disallowed: unescaped *");
-            fail("expected IllegalArgumentException");
-        } catch (IllegalArgumentException ex) {
-            // expected exception
-        }
-
-        // test DatabasePrincipal with illegal name argument
-        try {
-            new DatabasePrincipal("not yet supported: userName@databaseName");
-            fail("expected IllegalArgumentException");
-        } catch (IllegalArgumentException ex) {
-            // expected exception
-        }
-
-        // test DatabasePrincipal with legal name argument
-        new DatabasePrincipal("supported: userNameWith\\\\character");
-        new DatabasePrincipal("supported: userNameWith\\*character");
-        new DatabasePrincipal("supported: userNameWith\\@character");
-        new DatabasePrincipal("*");
     }
     
     /**
@@ -288,14 +263,14 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
         assertTrue(sp1.implies(sp0));
 
         // test SystemPermission for authorized user against policy file
-        final DatabasePrincipal authorizedUser
-            = new DatabasePrincipal("authorizedSystemUser");
-        execute(authorizedUser, new ShutdownEngineAction(sp0), true);
+        final SystemPrincipal authorizedUser
+            = new SystemPrincipal("authorizedSystemUser");
+        execute(authorizedUser, new ShutdownAction(sp0), true);
         
         // test SystemPermission for unauthorized user against policy file
-        final DatabasePrincipal unAuthorizedUser
-            = new DatabasePrincipal("unAuthorizedSystemUser");
-        execute(unAuthorizedUser, new ShutdownEngineAction(sp0), false);
+        final SystemPrincipal unAuthorizedUser
+            = new SystemPrincipal("unAuthorizedSystemUser");
+        execute(unAuthorizedUser, new ShutdownAction(sp0), false);
     }
     
     /**
@@ -326,14 +301,18 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
             // expected exception
         }
 
+        // this test's commented out because it's platform-dependent
+        // (no reliable way to make it pass on Unix)
         // test DatabasePermission with non-canonicalizable URL
-        try {
-            new DatabasePermission("directory:.*/\\:///../",
-                                   DatabasePermission.CREATE);
-            fail("expected IOException");
-        } catch (IOException ex) {
-            // expected exception
-        }
+        //try {
+        //    //new DatabasePermission("directory:.*/\\:///../",
+        //    //                       DatabasePermission.CREATE);
+        //    new DatabasePermission("directory:\n/../../../.*/\\:///../",
+        //                           DatabasePermission.CREATE);
+        //    fail("expected IOException");
+        //} catch (IOException ex) {
+        //    // expected exception
+        //}
 
         // test DatabasePermission with null actions
         try {
@@ -376,93 +355,106 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
         }
 
         // test DatabasePermission on relative directory paths
-        final DatabasePermission[] relDirPathPermissions
+        final DatabasePermission[] relDirPathPerms
             = new DatabasePermission[relDirPaths.length];
         for (int i = 0; i < relDirPaths.length; i++) {
-            relDirPathPermissions[i]
+            relDirPathPerms[i]
                 = new DatabasePermission(relDirPaths[i],
                                          DatabasePermission.CREATE);
         }
-        checkNameAndActions(relDirPathPermissions,
-                            relDirPaths);
-        checkHashCodeAndEquals(relDirPathPermissions,
-                               relDirPathPermissions);
-        checkImplies(relDirPathPermissions,
-                     relDirPathPermissions);
+        checkNameAndActions(relDirPathPerms, relDirPaths);
+        checkHashCodeAndEquals(relDirPathPerms, relDirPathPerms);
+        checkImplies(relDirPathPerms, relDirPathPerms, dirPathImpls);
 
         // test DatabasePermission on relative directory path aliases
-        final DatabasePermission[] relDirPathAliasPermissions
+        final DatabasePermission[] relDirPathAliasPerms
             = new DatabasePermission[relDirPathAliases.length];
         for (int i = 0; i < relDirPathAliases.length; i++) {
-            relDirPathAliasPermissions[i]
+            relDirPathAliasPerms[i]
                 = new DatabasePermission(relDirPathAliases[i],
                                          DatabasePermission.CREATE);
         }
-        checkNameAndActions(relDirPathAliasPermissions,
-                            relDirPathAliases);
-        checkHashCodeAndEquals(relDirPathPermissions,
-                               relDirPathAliasPermissions);
-        checkImplies(relDirPathPermissions,
-                     relDirPathAliasPermissions);
+        checkNameAndActions(relDirPathAliasPerms, relDirPathAliases);
+        checkHashCodeAndEquals(relDirPathPerms, relDirPathAliasPerms);
+        checkImplies(relDirPathPerms, relDirPathAliasPerms, dirPathImpls);
+        checkImplies(relDirPathAliasPerms, relDirPathPerms, dirPathImpls);
 
         // test DatabasePermission on absolute directory paths
-        final DatabasePermission[] absDirPathPermissions
+        final DatabasePermission[] absDirPathPerms
             = new DatabasePermission[absDirPaths.length];
         for (int i = 0; i < absDirPaths.length; i++) {
-            absDirPathPermissions[i]
+            absDirPathPerms[i]
                 = new DatabasePermission(absDirPaths[i],
                                          DatabasePermission.CREATE);
         }
-        checkNameAndActions(absDirPathPermissions,
-                            absDirPaths);
-        checkHashCodeAndEquals(absDirPathPermissions,
-                               absDirPathPermissions);
-        checkImplies(absDirPathPermissions,
-                     absDirPathPermissions);
+        checkNameAndActions(absDirPathPerms, absDirPaths);
+        checkHashCodeAndEquals(absDirPathPerms, absDirPathPerms);
+        checkImplies(absDirPathPerms, absDirPathPerms, dirPathImpls);
 
         // test DatabasePermission on absolute directory path aliases
-        final DatabasePermission[] absDirPathAliasPermissions
+        final DatabasePermission[] absDirPathAliasPerms
             = new DatabasePermission[absDirPathAliases.length];
         for (int i = 0; i < absDirPathAliases.length; i++) {
-            absDirPathAliasPermissions[i]
+            absDirPathAliasPerms[i]
                 = new DatabasePermission(absDirPathAliases[i],
                                          DatabasePermission.CREATE);
         }
-        checkNameAndActions(absDirPathAliasPermissions,
-                            absDirPathAliases);
-        checkHashCodeAndEquals(absDirPathPermissions,
-                               absDirPathAliasPermissions);
-        checkImplies(absDirPathPermissions,
-                     absDirPathAliasPermissions);
+        checkNameAndActions(absDirPathAliasPerms, absDirPathAliases);
+        checkHashCodeAndEquals(absDirPathPerms, absDirPathAliasPerms);
+        checkImplies(absDirPathPerms, absDirPathAliasPerms, dirPathImpls);
+        checkImplies(absDirPathAliasPerms, absDirPathPerms, dirPathImpls);
         
+        // test DatabasePermission for the inclusive path specification
+        final String inclPermissionUrl = "directory:<<ALL FILES>>";
+        final DatabasePermission[] inclPerms
+            = { new DatabasePermission(inclPermissionUrl,
+                                       DatabasePermission.CREATE) };
+        checkNameAndActions(inclPerms,
+                            new String[]{ inclPermissionUrl });
+        final DatabasePermission[] inclPerms1
+            = { new DatabasePermission(inclPermissionUrl,
+                                       DatabasePermission.CREATE) };
+        checkHashCodeAndEquals(inclPerms, inclPerms1);
+        checkImplies(inclPerms, inclPerms1, new boolean[][]{ { true } });
+        final boolean[][] allTrue = new boolean[1][dirPaths.length];
+        for (int j = 0; j < dirPaths.length; j++) {
+            allTrue[0][j] = true;
+        }
+        final boolean[][] allFalse = new boolean[dirPaths.length][1];
+        for (int i = 0; i < dirPaths.length; i++) {
+            allFalse[i][0] = false;
+        }
+        checkImplies(inclPerms, relDirPathPerms, allTrue);
+        checkImplies(relDirPathPerms, inclPerms, allFalse);
+        checkImplies(inclPerms, relDirPathAliasPerms, allTrue);
+        checkImplies(relDirPathAliasPerms, inclPerms, allFalse);
+        checkImplies(inclPerms, absDirPathPerms, allTrue);
+        checkImplies(absDirPathPerms, inclPerms, allFalse);
+        checkImplies(inclPerms, absDirPathAliasPerms, allTrue);
+        checkImplies(absDirPathAliasPerms, inclPerms, allFalse);
 
-        // test DatabasePermission for authorized user against policy file
-        final DatabasePrincipal authorizedUser
-            = new DatabasePrincipal("authorizedSystemUser");
-        execute(authorizedUser,
-                new CreateDatabaseAction(relDirPathPermissions[2]), true);
-        execute(authorizedUser,
-                new CreateDatabaseAction(relDirPathPermissions[3]), true);
-        execute(authorizedUser,
-                new CreateDatabaseAction(relDirPathPermissions[6]), false);
-        execute(authorizedUser,
-                new CreateDatabaseAction(relDirPathPermissions[7]), true);
+        // test DatabasePermission for unauthorized, authorized, and
+        // all-authorized users against policy file
+        final int[] singleLocPaths = { 2, 3, 6, 7 };
+        final SystemPrincipal authorizedUser
+            = new SystemPrincipal("authorizedSystemUser");
+        final SystemPrincipal unAuthorizedUser
+            = new SystemPrincipal("unAuthorizedSystemUser");
+        final SystemPrincipal superUser
+            = new SystemPrincipal("superUser");
+        for (int i = 0; i < singleLocPaths.length; i++) {
+            final int j = singleLocPaths[i];
+            execute(unAuthorizedUser,
+                    new CreateDatabaseAction(relDirPathPerms[j]), false);
+            execute(authorizedUser,
+                    new CreateDatabaseAction(relDirPathPerms[j]), (j != 6));
+            execute(superUser,
+                    new CreateDatabaseAction(relDirPathPerms[j]), true);
+        }
 
-        // test DatabasePermission for unauthorized user against policy file
-        final DatabasePrincipal unAuthorizedUser
-            = new DatabasePrincipal("unAuthorizedSystemUser");
-        execute(unAuthorizedUser,
-                new CreateDatabaseAction(relDirPathPermissions[2]), false);
-        execute(unAuthorizedUser,
-                new CreateDatabaseAction(relDirPathPermissions[3]), false);
-        execute(unAuthorizedUser,
-                new CreateDatabaseAction(relDirPathPermissions[6]), false);
-        execute(unAuthorizedUser,
-                new CreateDatabaseAction(relDirPathPermissions[7]), false);
-
-        // test DatabasePermission for authorized user against policy file
-        final DatabasePrincipal anyUser
-            = new DatabasePrincipal("anyUser");
+        // test DatabasePermission for any user against policy file
+        final SystemPrincipal anyUser
+            = new SystemPrincipal("anyUser");
         final DatabasePermission dbPerm
             = new DatabasePermission("directory:dir",
                                      DatabasePermission.CREATE);
@@ -471,29 +463,28 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
     }
 
     /**
-     * Runs a privileges user action for a given principal.
+     * Runs a privileged user action for a given principal.
      */
-    private void execute(DatabasePrincipal principal,
-                         PrivilegedExceptionAction action,
+    private void execute(SystemPrincipal principal,
+                         PrivilegedAction action,
                          boolean isGrantExpected) {
-        //System.out.println();
-        //System.out.println("    testing action " + action);
+        //println();
+        //println("    testing action " + action);
+        
         final RunAsPrivilegedUserAction runAsPrivilegedUserAction
             = new RunAsPrivilegedUserAction(principal, action);
         try {
             AccessController.doPrivileged(runAsPrivilegedUserAction);
-            //System.out.println("    Congrats! access granted " + action);
+            //println("    Congrats! access granted " + action);
             if (!isGrantExpected) {
                 fail("expected AccessControlException");
             }
-        } catch (PrivilegedActionException pae) {
-            //System.out.println("    Error: " + pae.getMessage());
-            throw new RuntimeException(pae);
         } catch (AccessControlException ace) {
+            //println("    Yikes! " + ace.getMessage());
             if (isGrantExpected) {
-                fail("caught AccessControlException");
+                //fail("caught AccessControlException");
+                throw ace;
             }
-            //System.out.println("    Yikes! " + ace.getMessage());
         }
     }
     
@@ -539,36 +530,36 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
      * Tests DatabasePermission.implies().
      */
     private void checkImplies(DatabasePermission[] dbp0,
-                              DatabasePermission[] dbp1)
+                              DatabasePermission[] dbp1,
+                              boolean[][] impls)
         throws IOException {
-        //assert(dbp0.length == dbp1.length)
         for (int i = 0; i < dbp0.length; i++) {
             final DatabasePermission p0 = dbp0[i];
-            for (int j = 0; j < dbp0.length; j++) {
+            for (int j = 0; j < dbp1.length; j++) {
                 final DatabasePermission p1 = dbp1[j];
                 assertEquals("test: " + p0 + ".implies" + p1,
-                             dirPathImplications[i][j], p0.implies(p1));
-                assertEquals("test: " + p1 + ".implies" + p0,
-                             dirPathImplications[j][i], p1.implies(p0));
+                             impls[i][j], p0.implies(p1));
+                //assertEquals("test: " + p1 + ".implies" + p0,
+                //             impls[j][i], p1.implies(p0));
             }
         }
     }
     
     /**
-     * Represents a Shutdown Engine action.
+     * Represents a Shutdown server and engine action.
      */
-    public class ShutdownEngineAction
-        implements PrivilegedExceptionAction {
+    public class ShutdownAction
+        implements PrivilegedAction {
         protected final Permission permission;
 
-        public ShutdownEngineAction(Permission permission) {
+        public ShutdownAction(Permission permission) {
             this.permission = permission;
         }
     
-        public Object run() throws Exception {
-            //System.out.println("    checking access " + permission + "...");
+        public Object run() {
+            //println("    checking access " + permission + "...");
             AccessController.checkPermission(permission);
-            //System.out.println("    granted access " + this);
+            //println("    granted access " + this);
             return null;
         }
 
@@ -581,17 +572,17 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
      * Represents a Create Database action.
      */
     public class CreateDatabaseAction
-        implements PrivilegedExceptionAction {
+        implements PrivilegedAction {
         protected final Permission permission;
 
-        public CreateDatabaseAction(Permission permission) throws IOException {
+        public CreateDatabaseAction(Permission permission) {
             this.permission = permission;
         }
-    
-        public Object run() throws Exception {
-            //System.out.println("    checking access " + permission + "...");
+
+        public Object run() {
+            //println("    checking access " + permission + "...");
             AccessController.checkPermission(permission);
-            //System.out.println("    granted access " + this);
+            //println("    granted access " + this);
             return null;
         }
 
@@ -601,35 +592,71 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
     }
 
     /**
+     * Returns the Authorization Identifier for a principal name.
+     *
+     * @param name the name of the principal
+     * @return the authorization identifier for this principal
+     */
+    static private String getAuthorizationId(String name) {
+        // RuntimeException messages not localized
+        if (name == null) {
+            throw new NullPointerException("name can't be null");
+        }
+        if (name.length() == 0) {
+            throw new IllegalArgumentException("name can't be empty");
+        }
+        try {
+            return IdUtil.getUserAuthorizationId(name);
+        } catch (StandardException se) {
+            throw new IllegalArgumentException(se.getMessage());
+		}
+    }
+
+    /**
      * Represents a Privileged User action.
      */
-    public class RunAsPrivilegedUserAction
-        implements PrivilegedExceptionAction {
-        final private DatabasePrincipal principal;
-        final private PrivilegedExceptionAction action;
+    static public class RunAsPrivilegedUserAction
+        implements PrivilegedAction {
+        final private SystemPrincipal principal;
+        final private PrivilegedAction action;
 
-        public RunAsPrivilegedUserAction(DatabasePrincipal principal,
-                                         PrivilegedExceptionAction action) {
+        public RunAsPrivilegedUserAction(SystemPrincipal principal,
+                                         PrivilegedAction action) {
             this.principal = principal;
             this.action = action;
         }
         
-        public Object run() throws PrivilegedActionException {
-            final Set principalSet = new HashSet();
-            final Set noPublicCredentials = new HashSet();
-            final Set noPrivateCredentials = new HashSet();
+        public Object run() {
+            final boolean readOnly = true;
+            final Set principals = new HashSet();
+            final Set publicCredentials = new HashSet();
+            final Set privateCredentials = new HashSet();
             // add the given principal
-            principalSet.add(principal);
-            // add a principal that matches an "all user names" grant
-            principalSet.add(DatabasePrincipal.ANY_DATABASE_PRINCIPAL);
-            final Subject subject = new Subject(true, principalSet,
-                                                noPublicCredentials,
-                                                noPrivateCredentials);
-        
-            // Subject.doAs(subject, action) not strong enough
-            //System.out.println("    run doAsPrivileged() as " + principal
-            //                   + "...");
+            principals.add(principal);
+            // also add a principal with the "normalized" name for testing
+            // authorization ids
+            final String normalized = getAuthorizationId(principal.getName());
+            principals.add(new SystemPrincipal(normalized));
+            final Subject subject = new Subject(readOnly,
+                                                principals,
+                                                publicCredentials,
+                                                privateCredentials);
+
+            // check subject's permission with a fresh AccessControlContext,
+            // not the thread's current one (Subject.doAs(subject, action))
+            // println("    run doAsPrivileged() as " + principal + "...");
+            // The alternative approach to use Subject.doAs(subject, action)
+            // instead of Subject.doAsPrivileged(subject, action, null) has
+            // issues: there are subtile differences between these methods
+            // regarding the checking of the caller's protection domain.  To
+            // make doAs() work, the shutdown/createDatabase permissions must
+            // be granted to the codebase (class RunAsPrivilegedUserAction).
+            // This, however, defeats the purpose since everyone now's granted
+            // permission.  In contrast, doAsPrivileged() with a null ACC
+            // seems to effectively ignore the caller's protection domain, so
+            // the check now only depends on the principal's permissions.
             Subject.doAsPrivileged(subject, action, null);
+            //Subject.doAs(subject, action);
             return null;
         }
     }

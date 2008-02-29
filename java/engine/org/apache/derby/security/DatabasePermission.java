@@ -22,6 +22,10 @@
 package org.apache.derby.security;
 
 import java.security.Permission;
+import java.security.PrivilegedAction;
+import java.security.PrivilegedExceptionAction;
+import java.security.PrivilegedActionException;
+import java.security.AccessController;
 
 import java.util.Set;
 import java.util.HashSet;
@@ -51,12 +55,22 @@ import java.io.ObjectOutputStream;
  * @see SystemPermission
  * @see java.io.FilePermission
  */
-public class DatabasePermission extends Permission {
+final public class DatabasePermission extends Permission {
 
     /**
      * The URL protocol scheme specifying a directory location.
      */
     static public final String URL_PROTOCOL_DIRECTORY = "directory:";
+
+    /**
+     * The location text matching any database anywhere.
+     */
+    static public final String URL_PATH_INCLUSIVE_STRING = "<<ALL FILES>>";
+
+    /**
+     * The path type character matching any database anywhere.
+     */
+    static public final char URL_PATH_INCLUSIVE_CHAR = 'I';
 
     /**
      * The URL file path separator character.
@@ -69,14 +83,13 @@ public class DatabasePermission extends Permission {
     static public final char URL_PATH_RELATIVE_CHAR = '.';
 
     /**
-     * The wildcard character specifying arbitrarily named databases
-     * under a directory path.
+     * The wildcard character matching any database in a directory.
      */
     static public final char URL_PATH_WILDCARD_CHAR = '*';
 
     /**
-     * The wildcard character specifying arbitrarily named databases
-     * anywhere under a path and its subdirectories.
+     * The wildcard character matching any database under a directory
+     * or its subdirectories.
      */
     static public final char URL_PATH_RECURSIVE_CHAR = '-';
 
@@ -120,10 +133,11 @@ public class DatabasePermission extends Permission {
      *
      * The path consists of a canonicalized form of the user-specified URL,
      * stripped off the protocol specification and any recursive/wildcard
-     * characters.  The canonical path is used when testing permissions
-     * with implies(), where real directory locations, not just notational
-     * differences, ought to be compared.  Analog to java.io.FilePermission,
-     * the canonical path is also used by equals() and hashCode() to support
+     * characters, or {@code "<<ALL FILES>>"} for the "anywhere" permission.
+     * The canonical path is used when testing permissions with implies(),
+     * where real directory locations, not just notational differences,
+     * ought to be compared.  Analog to java.io.FilePermission, the
+     * canonical path is also used by equals() and hashCode() to support
      * hashing and mapping of permissions by their real directory locations.
      *
      * Because canonical file paths are platform dependent, this field
@@ -134,7 +148,7 @@ public class DatabasePermission extends Permission {
 
     /**
      * The parent directory of this permission's canonical directory path,
-     * or null if this permission's path does not name a parent directory.
+     * or null if this permission's path does not have a parent directory.
      *
      * Because canonical file paths are platform dependent, this field
      * must not be serialized (hence transient) but be recomputed from
@@ -143,13 +157,13 @@ public class DatabasePermission extends Permission {
     private transient String parentPath;
 
     /**
-     * Indicates whether the path denotes a recursive, wildcard, or single
-     * location.
+     * Indicates whether the path denotes an inclusive, recursive, wildcard,
+     * or single location.
      *
-     * If the path denotes a recursive or wildcard location, this field's
-     * value is URL_PATH_RECURSIVE_CHAR or URL_PATH_WILDCARD_CHAR,
-     * respectively; otherwise, it's URL_PATH_SEPARATOR_CHAR denoting a
-     * single location.
+     * If the path denotes an inclusive, recursive or wildcard location,
+     * this field's value is URL_PATH_INCLUSIVE_CHAR, URL_PATH_RECURSIVE_CHAR,
+     * or URL_PATH_WILDCARD_CHAR, respectively; otherwise, it's
+     * URL_PATH_SEPARATOR_CHAR denoting a single location.
      */
     private char pathType;
 
@@ -171,17 +185,16 @@ public class DatabasePermission extends Permission {
      * <ul>
      * <li> "directory:location" - refers to a database called
      *      <i>location</i>,
-     * <li> "directory:location/*" - refers to any database in the
+     * <li> "directory:location/*" - matches any database in the
      *      directory <i>location</i>,
-     * <li> "directory:location/-" - refers to any database anywhere under
+     * <li> "directory:location/-" - matches any database under
      *      <i>location</i> or its subdirectories.
-     * <li> "directory:*" - refers to any database in the user's current
+     * <li> "directory:*" - matches any database in the user's current
      *      working directory.
-     * <li> "directory:-" - refers to any database anywhere under the
+     * <li> "directory:-" - matches any database under the
      *      user's current working directory or its subdirectories.
+     * <li> {@code "directory:<<ALL FILES>>"} matches any database anywhere.
      * </ul>
-     * Note that in contrast to FilePermission, there is no reasonable use
-     * for a special pathname "<<ALL FILES>>" matching all locations.
      *
      * @param url the database URL
      * @param actions the action string
@@ -209,18 +222,14 @@ public class DatabasePermission extends Permission {
      * @throws IllegalArgumentException if not a list of legal actions
      */
     protected void initActions(String actions) {
-        // note that exception messages on the action list aren't localized,
-        // as is the general rule with runtime exceptions indicating
-        // internal coding errors
-
         // analog to java.security.BasicPermission, we check that actions
         // is not null nor empty
-	if (actions == null) {
-	    throw new NullPointerException("actions can't be null");
+        if (actions == null) {
+            throw new NullPointerException("actions can't be null");
         }
-	if (actions.length() == 0) {
-	    throw new IllegalArgumentException("actions can't be empty");
-	}
+        if (actions.length() == 0) {
+            throw new IllegalArgumentException("actions can't be empty");
+        }
 
         // splitting the comma-separated list into the individual actions
         // may throw a java.util.regex.PatternSyntaxException, which is a
@@ -249,18 +258,14 @@ public class DatabasePermission extends Permission {
      */
     protected void initLocation(String url)
         throws IOException {
-        // note that exception messages on the URL aren't localized,
-        // as is the general rule with runtime exceptions indicating
-        // internal coding errors
-
         // analog to java.security.BasicPermission, we check that URL
         // is not null nor empty
-	if (url == null) {
-	    throw new NullPointerException("URL can't be null");
+        if (url == null) {
+            throw new NullPointerException("URL can't be null");
         }
-	if (url.length() == 0) {
-	    throw new IllegalArgumentException("URL can't be empty");
-	}
+        if (url.length() == 0) {
+            throw new IllegalArgumentException("URL can't be empty");
+        }
 
         // check URL's protocol scheme and initialize path
         if (!url.startsWith(URL_PROTOCOL_DIRECTORY)) {
@@ -270,9 +275,13 @@ public class DatabasePermission extends Permission {
         }
         String p = url.substring(URL_PROTOCOL_DIRECTORY.length());
 
-        // check path for relative/recursive/wildcard specifications,
+        // check path for inclusive/relative/recursive/wildcard specifications,
         // split path into real pathname and the path type
-        if (p.equals(URL_PATH_RECURSIVE_STRING)) {
+        if (p.equals(URL_PATH_INCLUSIVE_STRING)) {
+            // inclusive:  "<<ALL FILES>>" --> 'I', "<<ALL FILES>>"
+            pathType = URL_PATH_INCLUSIVE_CHAR;
+            // p = p;
+        } else if (p.equals(URL_PATH_RECURSIVE_STRING)) {
             // relative & recursive:  "-" --> '-', "./"
             pathType = URL_PATH_RECURSIVE_CHAR;
             p = URL_PATH_RELATIVE_PREFIX;
@@ -294,29 +303,60 @@ public class DatabasePermission extends Permission {
             // p = p;
         }
 
-        // resolve against user's working directory if relative pathname
-        if (p.startsWith(URL_PATH_RELATIVE_PREFIX)) {
-            final String cwd = System.getProperty("user.dir");
-            // concatenated path "<cwd>/./<path>" will be canonicalized
-            p = cwd + URL_PATH_SEPARATOR_STRING + p;
+        // canonicalize the path and assign parentPath
+        if (pathType == URL_PATH_INCLUSIVE_CHAR) {
+            path = URL_PATH_INCLUSIVE_STRING;
+            //assert(parentPath == null);
+        } else {
+            // resolve against user's working directory if relative pathname;
+            // the read access to the system property is encapsulated in a
+            // doPrivileged() block to allow for confined codebase permission
+            // grants
+            if (p.startsWith(URL_PATH_RELATIVE_PREFIX)) {
+                final String cwd = (String)AccessController.doPrivileged(
+                    new PrivilegedAction() {
+                        public Object run() {
+                            return System.getProperty("user.dir");
+                        }
+                    });
+                // concatenated path "<cwd>/./<path>" will be canonicalized
+                p = cwd + URL_PATH_SEPARATOR_STRING + p;
+            }
+            final String absPath = p;
+
+            // store canonicalized path as required for implies(Permission);
+            // may throw IOException; canonicalization reads the "user.dir"
+            // system property, which we encapsulate in a doPrivileged()
+            // block to allow for confined codebase permission grants
+            final File f;
+            try {
+                f = (File)AccessController.doPrivileged(
+                    new PrivilegedExceptionAction() {
+                        public Object run() throws IOException {
+                            return (new File(absPath)).getCanonicalFile();
+                        }
+                    });
+            } catch (PrivilegedActionException pae) {
+                // pae.getCause() should be an instance of IOException,
+                // as only checked exceptions will be wrapped
+                throw (IOException)pae.getCause();
+            }
+            path = f.getPath();
+
+            // store canonicalized path of parent file as required for
+            // implies(Permission); may throw IOException; note that
+            // the path already denotes parent directory if of wildcard type:
+            // for example, the parent of "/a/-" or "/a/*" is "/a"
+            parentPath = ((pathType != URL_PATH_SEPARATOR_CHAR)
+                          ? path : f.getParent());
         }
 
-        // store canonicalized path as required for implies(Permission);
-        // may throw IOException 
-        final File f = (new File(p)).getCanonicalFile();
-        this.path = f.getPath();
-
-        // store canonicalized path of parent file as required for
-        // implies(Permission); may throw IOException; note that
-        // the path already denotes parent directory if of wildcard type:
-        // for example, the parent of "/a/-" or "/a/*" is "/a"
-        this.parentPath = ((pathType != URL_PATH_SEPARATOR_CHAR)
-                           ? path : f.getParent());
-
-        //assert (pathType == URL_PATH_SEPARATOR_CHAR
-        //        || pathType == URL_PATH_WILDCARD_CHAR
-        //        || pathType == URL_PATH_RECURSIVE_CHAR);
-        //assert (path != null);
+        //assert(pathType == URL_PATH_SEPARATOR_CHAR
+        //       || pathType == URL_PATH_WILDCARD_CHAR
+        //       || pathType == URL_PATH_RECURSIVE_CHAR
+        //       || pathType == URL_PATH_INCLUSIVE_CHAR);
+        //assert(path != null);
+        //assert(parentPath == null || parentPath != null);
     }
 
     /**
@@ -345,36 +385,46 @@ public class DatabasePermission extends Permission {
         }
         final DatabasePermission that = (DatabasePermission)p;
 
+        // an inclusive permission implies any other
+        if (this.pathType == URL_PATH_INCLUSIVE_CHAR) {
+            return true;
+        }
+        //assert(this.pathType != URL_PATH_INCLUSIVE_CHAR);
+
+        // a non-inclusive permission cannot imply an inclusive one
+        if (that.pathType == URL_PATH_INCLUSIVE_CHAR) {
+            return false;
+        }
+        //assert(that.pathType != URL_PATH_INCLUSIVE_CHAR);
+
         // a recursive permission implies any other if a path prefix
         if (this.pathType == URL_PATH_RECURSIVE_CHAR) {
             return (that.parentPath != null
                     && that.parentPath.startsWith(this.path));
         }
-        //assert (this.pathType != URL_PATH_RECURSIVE_CHAR);
+        //assert(this.pathType != URL_PATH_RECURSIVE_CHAR);
 
         // a non-recursive permission cannot imply a recursive one
         if (that.pathType == URL_PATH_RECURSIVE_CHAR) {
             return false;
         }
-        //assert (that.pathType != URL_PATH_RECURSIVE_CHAR);
+        //assert(that.pathType != URL_PATH_RECURSIVE_CHAR);
 
-        //System.out.println("");
-        
         // a wildcard permission implies another if a parent directory
         if (this.pathType == URL_PATH_WILDCARD_CHAR) {
             return this.path.equals(that.parentPath);
         }
-        //assert (this.pathType != URL_PATH_WILDCARD_CHAR);
+        //assert(this.pathType != URL_PATH_WILDCARD_CHAR);
 
         // a non-wildcard permission cannot imply a wildcard one
         if (that.pathType == URL_PATH_WILDCARD_CHAR) {
             return false;
         }
-        //assert (that.pathType != URL_PATH_WILDCARD_CHAR);
+        //assert(that.pathType != URL_PATH_WILDCARD_CHAR);
 
         // non-recursive, non-wildcard permissions imply when paths are equal
-        //assert (this.pathType == URL_PATH_SEPARATOR_CHAR);
-        //assert (that.pathType == URL_PATH_SEPARATOR_CHAR);
+        //assert(this.pathType == URL_PATH_SEPARATOR_CHAR);
+        //assert(that.pathType == URL_PATH_SEPARATOR_CHAR);
         return this.path.equals(that.path);
     }
 
@@ -401,7 +451,7 @@ public class DatabasePermission extends Permission {
         final DatabasePermission that = (DatabasePermission)obj;
 
         // compare canonicalized URLs
-        return (path.equals(that.path) && pathType == that.pathType);
+        return (pathType == that.pathType && path.equals(that.path));
     }
 
     /**

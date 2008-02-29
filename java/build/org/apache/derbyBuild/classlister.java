@@ -494,6 +494,7 @@ public class classlister {
 				|| className.startsWith("org.apache.derby.impl.jdbc")
 				|| className.startsWith("org.apache.derby.impl.services")
 				|| className.startsWith("org.apache.derby.iapi.")
+				|| className.startsWith("org.apache.derby.security.")
 				)
 			{
 				return;

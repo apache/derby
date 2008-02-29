@@ -21,19 +21,18 @@
 //     with the NetworkServerControl start command
 
 
-// PROVISIONAL: Universally granted permissions for testing System Privileges
-// When consolidated, these permissions should be moved/copied into the
+// Permissions required by System Privileges
+// We are liberal here and grant these permissions to all codebases
+// (it's not a goal to make the test harness or tests secure).
+// If that is of a concern, however, copy these permissions into sections
 //   ${derbyTesting.codejar}
 //   ${derbyTesting.codeclasses}
-//   ${derbyTesting.junit}
-// sections
 grant {
   // System Privileges need to run "doAsPrivileged".
   permission javax.security.auth.AuthPermission "doAsPrivileged";
 
   // System Privileges need to be allowed to resolve relative directory names,
   // which requires a property-read permission.
-  //permission java.util.PropertyPermission "*", "read,write";
   permission java.util.PropertyPermission "user.dir", "read";
 
   // System Privileges need to be allowed to canonicalize directory names,
@@ -45,48 +44,58 @@ grant {
   permission java.io.FilePermission "<<ALL FILES>>", "read";
 };
 
-// specific test authorizations for System Privileges
-grant principal org.apache.derby.authentication.DatabasePrincipal "authorizedSystemUser" {
-  permission org.apache.derby.security.SystemPermission "shutdownEngine";
+// Specific test authorizations for System Privileges
+grant principal org.apache.derby.authentication.SystemPrincipal "AUTHORIZEDSYSTEMUSER" {
+  permission org.apache.derby.security.SystemPermission "shutdown";
   permission org.apache.derby.security.DatabasePermission "directory:*", "create";
   permission org.apache.derby.security.DatabasePermission "directory:level0/level1/-", "create";
   permission org.apache.derby.security.DatabasePermission "directory:/*", "create";
   permission org.apache.derby.security.DatabasePermission "directory:/level0/level1/-", "create";
 };
 
-// specific test authorizations for System Privileges
-grant principal org.apache.derby.authentication.DatabasePrincipal "*" {
+// Specific test authorizations for System Privileges
+grant principal org.apache.derby.authentication.SystemPrincipal "SUPERUSER" {
+  permission org.apache.derby.security.SystemPermission "shutdown";
+  permission org.apache.derby.security.DatabasePermission "directory:<<ALL FILES>>", "create";
+};
+
+// Specific test authorizations for System Privileges
+grant principal org.apache.derby.authentication.SystemPrincipal * {
   permission org.apache.derby.security.DatabasePermission "directory:dir", "create";
 };
 
 //
-// Permissions for the tests (derbyTesting.jar)
-// We are liberal here, it's not a goal to make the test harness
-// or tests secure.
+// Permissions for running the test on the jars files
 //
-grant codeBase "${derbyTesting.codejar}" {
-  // Support for debugging test.
-  permission java.util.PropertyPermission "java.security.policy", "read";
-
-  // When running with useprocess=false need to install and uninstall
-  // the security manager and allow setIO to change the system err and out
-  // streams. Currently the nist suite runs with useprocess=false.
+grant codeBase "${derbyTesting.codejar}*" {
+  // Allow tests to install and uninstall the security manager and
+  // to refresh the policy
+  permission java.util.PropertyPermission "java.security.policy", "read,write";
   permission java.lang.RuntimePermission "setSecurityManager";
+  permission java.security.SecurityPermission "getPolicy";
+
+  // Allow setIO to change the system err and out streams
   permission java.lang.RuntimePermission "setIO"; 
+
+  // derbyTesting.junit.TestConfiguration... calls System.getProperties()
+  permission java.util.PropertyPermission "*", "read,write";
 };
 
 //
-// super-set of the jar permissions for running out of the classes directory
+// Permissions for running the test on the class files
 //
 grant codeBase "${derbyTesting.codeclasses}" {
-  // Support for debugging test.
-  permission java.util.PropertyPermission "java.security.policy", "read";
-
-  // When running with useprocess=false need to install and uninstall
-  // the security manager and allow setIO to change the system err and out
-  // streams. Currently the nist suite runs with useprocess=false.
+  // Allow tests to install and uninstall the security manager and
+  // to refresh the policy
+  permission java.util.PropertyPermission "java.security.policy", "read,write";
   permission java.lang.RuntimePermission "setSecurityManager";
+  permission java.security.SecurityPermission "getPolicy";
+
+  // Allow setIO to change the system err and out streams
   permission java.lang.RuntimePermission "setIO"; 
+
+  // derbyTesting.junit.TestConfiguration... calls System.getProperties()
+  permission java.util.PropertyPermission "*", "read,write";
 };
 
 // JUnit jar file tries to read junit.properties in the user's

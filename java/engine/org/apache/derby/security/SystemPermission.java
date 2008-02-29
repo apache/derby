@@ -28,12 +28,12 @@ import java.util.HashSet;
 /**
  * This class represents access to system-wide Derby privileges.
  */
-public class SystemPermission extends BasicPermission {
+final public class SystemPermission extends BasicPermission {
 
     /**
-     * The engine shutdown permission.
+     * The server and engine shutdown permission.
      */
-    static public final String SHUTDOWN = "shutdownEngine";
+    static public final String SHUTDOWN = "shutdown";
 
     /**
      * The legal system permission names.
@@ -56,10 +56,6 @@ public class SystemPermission extends BasicPermission {
         // (NullPointerException) or empty (IllegalArgumentException)
         //assert(name != null);
         //assert(!name.equals(""));
-
-        // note that exception messages on the name aren't localized,
-        // as is the general rule with runtime exceptions indicating
-        // internal coding errors
         if (!LEGAL_PERMISSIONS.contains(name)) {
             throw new IllegalArgumentException("Unknown permission " + name);
         }
