@@ -791,10 +791,11 @@
              breakiterator="true"
              destdir="${public.api.dir}"
     	     Overview="${basedir}/published_api_overview.html"
-             Windowtitle="Apache Derby ${major}.${minor} API Documentation"
-             Doctitle="Apache Derby ${major}.${minor} API Documentation"
+             Windowtitle="Apache Derby ${major}.${minor} API Documentation"   
+             Header="Apache Derby ${major}.${minor}"
              Footer="${javadoc.Footer}"
-             bottom="Apache Derby ${major}.${minor} API Documentation  -  &lt;i&gt;Copyright &amp;copy; 2004,2007 The Apache Software Foundation. All Rights Reserved.&lt;/i&gt;">
+             bottom="Apache Derby ${major}.${minor} API Documentation  -  &lt;i&gt;Copyright &amp;copy; 2004,2008 The Apache Software Foundation. All Rights Reserved.&lt;/i&gt;">   
+      <Doctitle><![CDATA[<img src="resources/derby_logo64.png" align="center"> Apache Derby ${major}.${minor} API Documentation]]></Doctitle>   
       <fileset dir="${derby.engine.src.dir}"
                includesfile="${javadoc.inclusions}"/>
       <fileset dir="${derby.client.src.dir}"
@@ -807,6 +808,11 @@
 
     <delete dir="${out.javadoc.dir}/sourcedir"/>
     <delete dir="${javadoc.temp.dir}"/>
+   
+    <!-- Copy the logo needed by the Doctitle attribute above -->
+    <copy file="${javadoctools.dir}/logo/derby_logo64.png" 
+          todir="${public.api.dir}/resources"/> 
+    
 
   </target>
 
