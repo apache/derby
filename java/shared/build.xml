@@ -66,7 +66,7 @@
       includes="org/apache/derby/shared/**"
       destdir="${out.dir}">
       <classpath>
-          <pathelement path="${compile.classpath}"/>
+          <pathelement path="${java14compile.classpath}"/>
       </classpath>
       <include name="org/apache/derby/shared/**"/>
     </javac>
