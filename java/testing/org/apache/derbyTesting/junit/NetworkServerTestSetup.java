@@ -373,19 +373,20 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
         throws Exception
     {
         TestConfiguration config = TestConfiguration.getCurrent();
+        final InetAddress host = InetAddress.getByName(config.getHostName());
+        final int port = config.getPort();
+        final String user = config.getUserName();
+        final String password = config.getUserPassword();
         if (config.getSsl() == null) {
-            return new NetworkServerControl
-                (InetAddress.getByName(config.getHostName()), 
-                 config.getPort());
+            return new NetworkServerControl(host, port, user, password);
         } else {
             // This is a hack. A NetworkServerControl constructor with
             // the needed interface to control sslMode (and possibly
             // more) would be better.
             String oldValue = BaseTestCase.getSystemProperty("derby.drda.sslMode");
             BaseTestCase.setSystemProperty("derby.drda.sslMode", config.getSsl());
-            NetworkServerControl control = new NetworkServerControl
-                (InetAddress.getByName(config.getHostName()), 
-                 config.getPort());
+            NetworkServerControl control
+                = new NetworkServerControl(host, port, user, password);
                
             if (oldValue == null) {
 
@@ -408,9 +409,10 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
         throws Exception
     {
         TestConfiguration config = TestConfiguration.getCurrent();
-            return new NetworkServerControl
-            (InetAddress.getByName(config.getHostName()), 
-             port);
+        final InetAddress host = InetAddress.getByName(config.getHostName());
+        final String user = config.getUserName();
+        final String password = config.getUserPassword();
+        return new NetworkServerControl(host, port, user, password);
     }
     
     /**
@@ -422,7 +424,9 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
         throws Exception
     {
         TestConfiguration config = TestConfiguration.getCurrent();
-            return new NetworkServerControl();
+        final String user = config.getUserName();
+        final String password = config.getUserPassword();
+        return new NetworkServerControl(user, password);
     }
     
     /**

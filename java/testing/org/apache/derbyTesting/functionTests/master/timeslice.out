@@ -10,7 +10,7 @@ Invalid value, -12, for timeslice.
 Usage: NetworkServerControl <commands> 
 Commands:
 start [-h <host>] [-p <portnumber>] [-noSecurityManager] [-ssl <sslmode>]
-shutdown [-h <host>][-p <portnumber>] [-ssl <sslmode>]
+shutdown [-h <host>][-p <portnumber>] [-ssl <sslmode>] [-user <username>] [-password <password>]
 ping [-h <host>][-p <portnumber>] [-ssl <sslmode>]
 sysinfo [-h <host>][-p <portnumber>] [-ssl <sslmode>]
 runtimeinfo [-h <host>][-p <portnumber>] [-ssl <sslmode>]
@@ -35,7 +35,7 @@ Invalid value, a, for timeslice.
 Usage: NetworkServerControl <commands> 
 Commands:
 start [-h <host>] [-p <portnumber>] [-noSecurityManager] [-ssl <sslmode>]
-shutdown [-h <host>][-p <portnumber>] [-ssl <sslmode>]
+shutdown [-h <host>][-p <portnumber>] [-ssl <sslmode>] [-user <username>] [-password <password>]
 ping [-h <host>][-p <portnumber>] [-ssl <sslmode>]
 sysinfo [-h <host>][-p <portnumber>] [-ssl <sslmode>]
 runtimeinfo [-h <host>][-p <portnumber>] [-ssl <sslmode>]

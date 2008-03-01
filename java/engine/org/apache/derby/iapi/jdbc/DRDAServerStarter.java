@@ -84,6 +84,8 @@ public final class DRDAServerStarter implements ModuleControl, Runnable
 	
 	private InetAddress listenAddress =null;
 	private int portNumber = -1;
+	private String userArg = null;
+	private String passwordArg = null;
 	private PrintWriter consoleWriter = null;
 
     /**
@@ -92,6 +94,24 @@ public final class DRDAServerStarter implements ModuleControl, Runnable
 //     public static void start()
 //     {
 
+
+	/**
+	 * Sets configuration information for the network server to be started.
+	 * @param address InetAddress to listen on
+	 * @param portNumber portNumber to listen on
+	 * @param userName the user name for actions requiring authorization
+	 * @param password the password for actions requiring authorization
+	 * @throws Exception on error
+	 * @see NetworkServerControl
+	 */
+	public void setStartInfo(InetAddress listenAddress, int portNumber,
+                             String userName, String password,
+                             PrintWriter consoleWriter)
+	{
+		this.userArg = userName;
+		this.passwordArg = password;
+        setStartInfo(listenAddress, portNumber, consoleWriter);
+    }
 
 	public void setStartInfo(InetAddress listenAddress, int portNumber, PrintWriter
 							 consoleWriter)
@@ -164,12 +184,16 @@ public final class DRDAServerStarter implements ModuleControl, Runnable
 						  public Object run() throws NoSuchMethodException, SecurityException
 						  {
 							  if (listenAddress == null)
-								  return serverClass.getConstructor(null);
+								  return serverClass.getConstructor(
+                                      new Class[]{String.class, String.class});
 							  else
 								  return
 									  serverClass.getConstructor(new
 										  Class[] {java.net.InetAddress.class,
-												   Integer.TYPE});}
+												   Integer.TYPE,
+                                                   String.class,
+                                                   String.class});
+                          }
 					  }
 				  );
             }
@@ -185,11 +209,14 @@ public final class DRDAServerStarter implements ModuleControl, Runnable
             
             findStartStopMethods(serverClass);
             
-			if (listenAddress == null)
-				server = serverConstructor.newInstance( null);
-			else
+			if (listenAddress == null) {
+				server = serverConstructor.newInstance(
+                    new Object[]{userArg, passwordArg});
+            } else {
 				server = serverConstructor.newInstance(new Object[]
-					{listenAddress, new Integer(portNumber)});
+					{listenAddress, new Integer(portNumber),
+                     userArg, passwordArg});
+            }
 
             serverThread = Monitor.getMonitor().getDaemonThread( this, "NetworkServerStarter", false);
             serverThread.start();

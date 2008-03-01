@@ -332,7 +332,7 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
                 nsctrl.shutdown();
             }
         } catch (Exception e) {
-            return "failed to shutdown server with API parameter";
+            return "failed to shutdown server with API parameter (" + e + ")";
         }
         if (canPingServer(port,false)) {
             return "Can still ping server";

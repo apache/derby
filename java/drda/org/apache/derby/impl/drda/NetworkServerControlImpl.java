@@ -41,7 +41,9 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.SSLServerSocketFactory;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
+import java.security.Permission;
 import java.security.AccessController;
+import java.security.AccessControlException;
 import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
@@ -58,6 +60,7 @@ import java.util.StringTokenizer;
 import java.util.Vector;
 
 import org.apache.derby.drda.NetworkServerControl;
+import org.apache.derby.security.SystemPermission;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.jdbc.DRDAServerStarter;
 import org.apache.derby.iapi.reference.Attribute;
@@ -78,6 +81,10 @@ import org.apache.derby.iapi.tools.i18n.LocalizedResource;
 import org.apache.derby.iapi.util.CheapDateFormatter;
 import org.apache.derby.iapi.util.StringUtil;
 import org.apache.derby.impl.jdbc.EmbedSQLException;
+import org.apache.derby.impl.jdbc.Util;
+import org.apache.derby.iapi.jdbc.AuthenticationService;
+import org.apache.derby.iapi.reference.MessageId;
+import org.apache.derby.iapi.security.SecurityUtil;
 import org.apache.derby.mbeans.VersionMBean;
 import org.apache.derby.mbeans.drda.NetworkServerMBean;
 
@@ -124,25 +131,27 @@ public final class NetworkServerControlImpl {
 	public final static int COMMAND_STOP_REPLICATION = 14;
 	public final static int COMMAND_UNKNOWN = -1;
 	public final static String [] DASHARGS =
-	{"p","d","u","ld","ea","ep", "b", "h", "s", "noSecurityManager", "ssl", 
-	"slavehost", "slaveport"};
+	{"p", "d", "user", "password", "ld", "ea", "ep", "b", "h", "s",
+		 "noSecurityManager", "ssl", "slavehost", "slaveport"};
 	public final static int DASHARG_PORT = 0;
 	public final static int DASHARG_DATABASE = 1;
 	public final static int DASHARG_USER = 2;
-	public final static int DASHARG_LOADSYSIBM = 3;
-	public final static int DASHARG_ENCALG = 4;
-	public final static int DASHARG_ENCPRV = 5;
-	public final static int DASHARG_BOOTPASSWORD = 6;
-	public final static int DASHARG_HOST = 7;
-	public final static int DASHARG_SESSION = 8;
-	public final static int DASHARG_UNSECURE = 9;
-	private final static int DASHARG_SSL = 10;
-	private final static int DASHARG_SLAVEHOST = 11;
-	private final static int DASHARG_SLAVEPORT = 12;
+	public final static int DASHARG_PASSWORD = 3;
+	public final static int DASHARG_LOADSYSIBM = 4;
+	public final static int DASHARG_ENCALG = 5;
+	public final static int DASHARG_ENCPRV = 6;
+	public final static int DASHARG_BOOTPASSWORD = 7;
+	public final static int DASHARG_HOST = 8;
+	public final static int DASHARG_SESSION = 9;
+	public final static int DASHARG_UNSECURE = 10;
+	private final static int DASHARG_SSL = 11;
+	private final static int DASHARG_SLAVEHOST = 12;
+	private final static int DASHARG_SLAVEPORT = 13;
 
 	// command protocol version - you need to increase this number each time
 	// the command protocol changes 
-	private final static int PROTOCOL_VERSION = 1;
+    // DERBY-2109: shutdown command now transmits user credentials
+	private final static int PROTOCOL_VERSION = 2;
 	private final static String COMMAND_HEADER = "CMD:";
 	private final static String REPLY_HEADER = "RPY:";
 	private final static int REPLY_HEADER_LENGTH = REPLY_HEADER.length();
@@ -164,7 +173,7 @@ public final class NetworkServerControlImpl {
 	private final static int DEFAULT_MAXTHREADS = 0; //for now create whenever needed
 	private final static int DEFAULT_TIMESLICE = 0;	//for now never yield
 
-   private final static String DEFAULT_HOST = "localhost";
+	private final static String DEFAULT_HOST = "localhost";
 	private final static String DRDA_MSG_PREFIX = "DRDA_";
 	private final static String DEFAULT_LOCALE= "en";
 	private final static String DEFAULT_LOCALE_COUNTRY="US";
@@ -230,8 +239,12 @@ public final class NetworkServerControlImpl {
 	// command argument information
 	private Vector commandArgs = new Vector();
 	private String databaseArg;
-	private String userArg;
-	private String passwordArg;
+	// DERBY-2109: Note that derby JDBC clients have a default user name
+    // "APP" (= Property.DEFAULT_USER_NAME) assigned if they don't provide
+    // credentials.  We could do the same for NetworkServerControl clients
+    // here, but this class is robust enough to allow for null as default.
+	private String userArg = null;
+	private String passwordArg = null;
 	private String bootPasswordArg;
 	private String encAlgArg;
 	private String encPrvArg;
@@ -393,22 +406,53 @@ public final class NetworkServerControlImpl {
 		getPropertyInfo();
     }
 
-
 	/**
 	 * Internal constructor for NetworkServerControl API. 
-	 * @param address - InetAddress to listen on, May not be null.  Throws NPE if null
-	 * @param portNumber - portNumber to listen on, -1 use propert or default.
+	 * @param address InetAddress to listen on, throws NPE if null
+	 * @param portNumber portNumber to listen on, -1 use property or default
 	 * @throws Exception on error
 	 * @see NetworkServerControl
 	 */
 	public NetworkServerControlImpl(InetAddress address, int portNumber) throws Exception
 	{
-		init();
-		getPropertyInfo();
+		this();
 		this.hostAddress = address;
 		this.portNumber = (portNumber <= 0) ?
 			this.portNumber: portNumber;
 		this.hostArg = address.getHostAddress();
+	}
+
+	/**
+	 * Internal constructor for NetworkServerControl API. 
+	 * @param userName the user name for actions requiring authorization
+	 * @param password the password for actions requiring authorization
+	 * @throws Exception on error
+	 * @see NetworkServerControl
+	 */
+	public NetworkServerControlImpl(String userName, String password)
+		throws Exception
+	{
+        this();
+		this.userArg = userName;
+		this.passwordArg = password;
+	}
+
+	/**
+	 * Internal constructor for NetworkServerControl API. 
+	 * @param address InetAddress to listen on, throws NPE if null
+	 * @param portNumber portNumber to listen on, -1 use property or default
+	 * @param userName the user name for actions requiring authorization
+	 * @param password the password for actions requiring authorization
+	 * @throws Exception on error
+	 * @see NetworkServerControl
+	 */
+	public NetworkServerControlImpl(InetAddress address, int portNumber,
+									String userName, String password)
+		throws Exception
+	{
+		this(address, portNumber);
+		this.userArg = userName;
+		this.passwordArg = password;
 	}
 
     private void init() throws Exception
@@ -842,13 +886,22 @@ public final class NetworkServerControlImpl {
 
 			// Shutdown Derby
 			try {
-				if (cloudscapeDriver != null)
-					cloudscapeDriver.connect("jdbc:derby:;shutdown=true",
-											 (Properties) null);
+				// tell driver to shutdown the engine
+				if (cloudscapeDriver != null) {
+					// DERBY-2109: pass user credentials for driver shutdown
+					final Properties p = new Properties();
+					if (userArg != null) {
+						p.setProperty("user", userArg);
+					}
+					if (passwordArg != null) {
+						p.setProperty("password", passwordArg);
+					}
+					cloudscapeDriver.connect("jdbc:derby:;shutdown=true", p);
+				}
 			} catch (SQLException sqle) {
-				// If we can't shutdown Derby. Perhaps authentication is
-				// set to true or some other reason. We will just print a
-				// message to the console and proceed.
+				// If we can't shutdown Derby, perhaps, authentication has
+				// failed or System Privileges weren't granted. We will just
+				// print a message to the console and proceed.
 				String expectedState =
 					StandardException.getSQLStateFromIdentifier(
 							SQLState.CLOUDSCAPE_SYSTEM_SHUTDOWN);
@@ -862,8 +915,6 @@ public final class NetworkServerControlImpl {
 		consolePropertyMessage("DRDA_ShutdownSuccess.I", new String [] 
 						        {att_srvclsnm, versionString, 
 								getFormattedTimestamp()});
-		
-
     }
 	
 	/** 
@@ -947,6 +998,9 @@ public final class NetworkServerControlImpl {
 	{
 		setUpSocket();
 		writeCommandHeader(COMMAND_SHUTDOWN);
+		// DERBY-2109: transmit user credentials for System Privileges check
+		writeLDString(userArg);
+		writeLDString(passwordArg);
 		send();
 		readResult();
 		// Wait up to 10 seconds for things to really shut down
@@ -985,17 +1039,97 @@ public final class NetworkServerControlImpl {
 		return;
 	}
 
+    /**
+     * Authenticates the user and checks for shutdown System Privileges.
+     * No Network communication needed.
+     *
+     * To perform this check the following policy grant is required
+     * <ul>
+     * <li> to run the encapsulated test:
+     *      permission javax.security.auth.AuthPermission "doAsPrivileged";
+     * </ul>
+     * or a SQLException will be raised detailing the cause.
+     * <p>
+     * In addition, for the test to succeed
+     * <ul>
+     * <li> the given user needs to be covered by a grant:
+     *      principal org.apache.derby.authentication.SystemPrincipal "..." {}
+     * <li> that lists a shutdown permission:
+     *      permission org.apache.derby.security.SystemPermission "shutdown";
+     * </ul>
+     * or it will fail with a SQLException detailing the cause.
+     *
+     * @param user The user to be checked for shutdown privileges
+     * @throws SQLException if the privileges check fails
+     */
+    /**
+     * @throws SQLException if authentication or privileges check fails
+     */
+    public void checkShutdownPrivileges() throws SQLException {    
+        // get the system's authentication service
+        final AuthenticationService auth
+            = ((AuthenticationService)
+               Monitor.findService(AuthenticationService.MODULE,
+                                   "authentication"));
+
+        // authenticate user
+        if (auth != null) {
+            final Properties finfo = new Properties();
+            if (userArg != null) {
+                finfo.setProperty("user", userArg);
+            }
+            if (passwordArg != null) {
+                finfo.setProperty("password", passwordArg);
+            }
+            if (!auth.authenticate((String)null, finfo)) {
+                // not a valid user
+                throw Util.generateCsSQLException(
+                SQLState.NET_CONNECT_AUTH_FAILED,
+                MessageService.getTextMessage(MessageId.AUTH_INVALID));
+            }
+        }
+
+        // approve action if not running under a security manager
+        if (System.getSecurityManager() == null) {
+            return;
+        }
+
+        // the check
+        try {
+            final Permission sp
+                = new SystemPermission(SystemPermission.SHUTDOWN);
+            // For porting the network server to J2ME/CDC, consider calling
+            // abstract method InternalDriver.checkShutdownPrivileges(user)
+            // instead of static SecurityUtil.checkUserHasPermission().
+            // SecurityUtil.checkUserHasPermission(userArg, sp);
+        } catch (AccessControlException ace) {
+            throw Util.generateCsSQLException(
+				SQLState.AUTH_SHUTDOWN_MISSING_PERMISSION,
+				userArg, (Object)ace); // overloaded method
+        }
+    }
+
 	/*
 	 Shutdown the server directly (If you have the original object)
 	 No Network communication needed.
 	*/
-	public void directShutdown() 	{
+	public void directShutdown() throws SQLException {
+		// DERBY-2109: the public shutdown method now checks privileges
+		checkShutdownPrivileges();
+		directShutdownInternal();
+	}
+	
+	/*
+	 Shutdown the server directly (If you have the original object)
+	 No Network communication needed.
+	*/
+	private void directShutdownInternal() {
+		// DERBY-2109: the direct, unchecked shutdown is made private
 		shutdown = true;
 		synchronized(shutdownSync) {						
 			// wake up the server thread
 			shutdownSync.notifyAll();
 		}
-		
 	}
 
 
@@ -1335,8 +1469,12 @@ public final class NetworkServerControlImpl {
 	 * 	Protocol:
 	 * 		1 byte		- 0 off, 1 on
 	 * 
-	 * 	Command: shutdown
-	 * 	No parameters
+	 *	Command: shutdown
+	 *		// DERBY-2109: transmit user credentials for System Privileges check
+	 *		2 bytes		- length of user name
+	 *		n bytes		- user name
+	 *		2 bytes		- length of password
+	 *		n bytes		- password
 	 * 
 	 * 	Command: sysinfo
 	 * 	No parameters
@@ -1451,8 +1589,20 @@ public final class NetworkServerControlImpl {
 			switch(command)
 			{
 				case COMMAND_SHUTDOWN:
-					sendOK(writer);
-					directShutdown();
+					// DERBY-2109: receive user credentials for shutdown
+					// System Privileges check
+					userArg = reader.readCmdString();
+					passwordArg = reader.readCmdString();
+					try {
+						checkShutdownPrivileges();
+						sendOK(writer);
+						directShutdownInternal();
+					} catch (SQLException sqle) {
+						sendSQLMessage(writer, sqle, SQLERROR);
+						// also print a message to the console
+						consolePropertyMessage("DRDA_ShutdownWarning.I",
+											   sqle.getMessage());
+					}
 					break;
 				case COMMAND_TRACE:
 					sessionArg = reader.readNetworkInt();
@@ -2212,16 +2362,15 @@ public final class NetworkServerControlImpl {
 				break;
 			case DASHARG_USER:
 				if (pos < args.length)
-				{
-					userArg = args[pos++];
-					if (pos < args.length)
-						passwordArg = args[pos];
-					else
-						consolePropertyMessage("DRDA_MissingValue.U", 
-							"DRDA_Password.I");
-				}
+					userArg = args[pos];
 				else
 					consolePropertyMessage("DRDA_MissingValue.U", "DRDA_User.I");
+				break;
+			case DASHARG_PASSWORD:
+				if (pos < args.length)
+					passwordArg = args[pos];
+				else
+					consolePropertyMessage("DRDA_MissingValue.U", "DRDA_Password.I");
 				break;
 			case DASHARG_ENCALG:
 				if (pos < args.length)

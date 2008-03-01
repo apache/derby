@@ -50,8 +50,7 @@ import org.apache.derby.impl.drda.NetworkServerControlImpl;
 	on a specific interface on a  multiple IP machine. 
     For documentation on &lt;sslmode&gt;, consult the Server and Administration Guide.</LI>
 
-	<LI>shutdown [-h &lt;host>][-p &lt;portnumber>] [-ssl &lt;sslmode&gt;]: This shutdowns the network 	server on the host and port specified or on the local host and port 
-	1527(default) if no host or port is specified.  </LI> 
+	<LI>shutdown [-h &lt;host&gt;][-p &lt;portnumber&gt;] [-ssl &lt;sslmode&gt;] [-user &lt;username&gt;] [-password &lt;password&gt;]: This shutdowns the network server with given user credentials on the host and port specified or on the local host and port 1527(default) if no host or port is specified.  </LI> 
 
 	<LI>ping [-h &lt;host>] [-p &lt;portnumber>] [-ssl &lt;sslmode&gt;]
 	This will test whether the Network Server is up.
@@ -187,6 +186,48 @@ public class NetworkServerControl{
 	// constructor
 
 	/**
+	 * Creates a NetworkServerControl object that is configured to control
+	 * a Network Server on a specified port and InetAddress with given
+	 * user credentials.
+	 *
+	 * @param address	  The IP address of the Network Server host.
+	 *					   address cannot be null.
+	 *
+	 * @param portNumber  port number server is to used. If <= 0,
+	 *					  default port number is used
+	 *						 
+	 * @param userName	  The user name for actions requiring authorization.
+	 *						 
+	 * @param password	  The password for actions requiring authorization.
+	 *						 
+	 * @throws			   Exception on error
+	 */
+	public NetworkServerControl(InetAddress address, int portNumber,
+								String userName, String password)
+			throws Exception
+	{
+		serverImpl = new NetworkServerControlImpl(address, portNumber,
+												  userName, password);
+	}
+
+	/**
+	 * Creates a NetworkServerControl object that is configured to control
+	 * a Network Server on the default host and the default port with given
+	 * user credentials.
+	 *
+	 * @param userName	  The user name for actions requiring authorization.
+	 *						 
+	 * @param password	  The password for actions requiring authorization.
+	 *						 
+	 * @throws			   Exception on error
+	 */
+	public NetworkServerControl(String userName, String password)
+			throws Exception
+	{
+		serverImpl = new NetworkServerControlImpl(userName, password);
+	}
+
+	/**
 	 * 
 	 * Creates a NetworkServerControl object that is configured to control
 	 * a Network Server on a  specified port and InetAddress.
@@ -209,12 +250,9 @@ public class NetworkServerControl{
 	 */
 	public NetworkServerControl(InetAddress address,int portNumber) throws Exception
 	{
-		
-		serverImpl = new NetworkServerControlImpl(address, 
-										portNumber);
-
+		serverImpl = new NetworkServerControlImpl(address, portNumber);
 	}
-	
+
 
 	/**
 	 * 
@@ -234,9 +272,7 @@ public class NetworkServerControl{
 	 */
 	public NetworkServerControl() throws Exception
 	{
-		
 		serverImpl = new NetworkServerControlImpl();
-
 	}
 	
     

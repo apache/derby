@@ -344,7 +344,9 @@ public class AutoloadTest extends BaseJDBCTestCase
         boolean serverShouldBeUp =
             nsAutoBoot && fullEngineAutoBoot();
         
-        NetworkServerControl control = new NetworkServerControl();
+        String user = getTestConfiguration().getUserName();
+        String pw = getTestConfiguration().getUserPassword();
+        NetworkServerControl control = new NetworkServerControl(user, pw);
         
         boolean isServerUp = NetworkServerTestSetup.pingForServerStart(control);
         

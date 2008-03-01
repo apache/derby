@@ -271,6 +271,10 @@ public class SecureServerTest extends BaseJDBCTestCase
         }
 
         Test        test = TestConfiguration.defaultServerDecorator( testSetup );
+        // DERBY-2109: add support for user credentials
+        test = TestConfiguration.changeUserDecorator( test,
+                                                      SST_USER_NAME,
+                                                      SST_PASSWORD );
 
         return test;
     }
@@ -367,9 +371,12 @@ public class SecureServerTest extends BaseJDBCTestCase
     private void    connectToServer()
         throws Exception
     {
-        String  url =
-            "jdbc:derby://localhost:" + getTestConfiguration().getPort() + "/" + "wombat;create=true" +
-            ";user=" + SST_USER_NAME + ";password=" + SST_PASSWORD;
+        final TestConfiguration config = getTestConfiguration();
+        String  url
+            = ( "jdbc:derby://localhost:" + config.getPort()
+                + "/" + "wombat;create=true"
+                + ";user=" + config.getUserName()
+                + ";password=" + config.getUserPassword() );
 
         println( "XXX in connectToServer(). url = " + url );
 
