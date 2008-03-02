@@ -43,6 +43,14 @@ class SubstituteExpressionVisitor implements Visitor
 		skipOverClass = skipThisClass;
 	}
 
+	/**
+	 * used by GroupByNode to process expressions by complexity level.
+	 */
+	public ValueNode getSource()
+	{
+		return source;
+	}
+
 	public Visitable visit(Visitable node) throws StandardException 
 	{
 		if (!(node instanceof ValueNode))

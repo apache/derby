@@ -122,6 +122,127 @@ public class GroupByExpressionTest extends BaseJDBCTestCase
                         {9,13,2}});
     }
     
+    /**
+     * queries which combine compound expressions and simple column refs.
+     */
+    public void testDerby3094Expressions() throws Exception
+    {
+        verifyQueryResults(
+                "Q1",
+                "select c1+c2, sum(c3) from test group by c1+c2, c1",
+                new int[][] {
+                        {11, 100}, 
+                        {12, 100},  // c1=1, c2=11
+                        {12, 100},  // c1=2, c2=10
+                        {13, 202}});
+        verifyQueryResults(
+                "Q2",
+                "select c1+c2, sum(c3) from test group by c1, c1+c2",
+                new int[][] {
+                        {11, 100}, 
+                        {12, 100},  // c1=1, c2=11
+                        {12, 100},  // c1=2, c2=10
+                        {13, 202}});
+        verifyQueryResults(
+                "Q3",
+                "select c1, c1+c2 from test group by c1, c1+c2",
+                new int[][] {
+                        {1, 11}, 
+                        {1, 12},
+                        {2, 12},
+                        {2, 13}});
+        verifyQueryResults(
+                "Q4",
+                "select c1+c2, sum(c3) from test group by c1+c2",
+                new int[][] {
+                        {11, 100}, 
+                        {12, 200},
+                        {13, 202}});
+        verifyQueryResults(
+                "Q5",
+                "select c1,c2,c1+c2,sum(c3) from test group by c1,c2,c1+c2",
+                new int[][] {
+                        {1, 10, 11, 100},
+                        {1, 11, 12, 100},
+                        {2, 10, 12, 100},
+                        {2, 11, 13, 202}});
+        verifyQueryResults(
+                "Q6",
+                "select c1,c2,sum(c3) from test group by c2, c1",
+                new int[][] {
+                        {1, 10, 100},
+                        {2, 10, 100},
+                        {1, 11, 100},
+                        {2, 11, 202}});
+        verifyQueryResults(
+                "Q7",
+                "select c1 as c2, sum(c3) from test group by c1,c2",
+                new int[][] {
+                        {1, 100},
+                        {1, 100},
+                        {2, 100},
+                        {2, 202}});
+        verifyQueryResults(
+                "Q8",
+                "select c1 as c2, sum(c3) from test group by c1",
+                new int[][] {
+                        {1, 200},
+                        {2, 302}});
+        verifyQueryResults(
+                "Q9",
+            "select c1+c2, sum(c3) from test group by c1+c2 having c1+c2 > 11",
+                new int[][] {
+                        {12, 200},
+                        {13, 202}});
+        verifyQueryResults(
+                "Q10",
+            "select c1+c2, sum(c3) from test " +
+                     "group by c1, c1+c2 having c1+c2 > 11",
+                new int[][] {
+                        {12, 100},
+                        {12, 100},
+                        {13, 202}});
+        verifyQueryResults(
+                "Q11",
+                "select c1*((c1+c2)/2), count(*) from test " +
+                " group by (c1+c2),  c1*((c1+c2)/2)",
+                new int[][] {
+                        {5, 1},
+                        {6, 1},
+                        {12, 1},
+                        {12, 2}});
+        verifyQueryResults(
+                "Q12",
+                "select c1, c1+c2, (c1+c2)+c3, count(*) from test " +
+                " group by c1, c1+c2, (c1+c2)+c3",
+                new int[][] {
+                        {1, 11, 111, 1},
+                        {1, 12, 112, 1},
+                        {2, 12, 112, 1},
+                        {2, 13, 114, 2}});
+        verifyQueryResults(
+                "Q13",
+                "select (c1+c2)+c3, count(*) from test " +
+                " group by c3, c1+c2",
+                new int[][] {
+                        {111, 1},
+                        {112, 2},
+                        {114, 2}});
+        assertCompileError(
+                "42Y30", "select c1+c2, sum(c3) from test group by c1");
+        assertCompileError(
+                "42Y30", "select c1,c2, sum(c3) from test group by c1+c2,c1");
+        assertCompileError(
+                "42Y30", "select c1+c2, sum(c3) from test group by 1");
+        assertCompileError(
+            "42X04", "select c1+c2 as expr, sum(c3) from test group by expr");
+        assertCompileError(
+            "42X04", "select c1 as c1a, c2, sum(c3) from test group by c1a,c2");
+        assertCompileError(
+                "42Y30", "select c1 as c2, sum(c3) from test group by c2");
+        assertCompileError(
+                "42Y30", "select c1+(c2+c3), sum(c3) from test group by c3, (c1+c2)");
+    }
     
     public void testSubSelect() throws Exception
     {

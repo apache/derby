@@ -23,6 +23,9 @@ package	org.apache.derby.impl.sql.compile;
 
 import java.util.Iterator;
 import java.util.Vector;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Collections;
 
 import org.apache.derby.catalog.IndexDescriptor;
 import org.apache.derby.iapi.error.StandardException;
@@ -343,6 +346,10 @@ public class GroupByNode extends SingleChildResultSetNode
 		ResultColumnList bottomRCL  = childResult.getResultColumns();
 		ResultColumnList groupByRCL = resultColumns;
 
+		ArrayList referencesToSubstitute = new ArrayList();
+		ArrayList havingRefsToSubstitute = null;
+		if (havingClause != null)
+			havingRefsToSubstitute = new ArrayList();
 		int sz = groupingList.size();
 		for (int i = 0; i < sz; i++) 
 		{
@@ -385,12 +392,27 @@ public class GroupByNode extends SingleChildResultSetNode
 			// in the projection list with a virtual column node
 			// that effectively points to a result column 
 			// in the result set doing the group by
-			SubstituteExpressionVisitor se = 
-				new SubstituteExpressionVisitor(
-						gbc.getColumnExpression(),
-						vc,
+			//
+			// Note that we don't perform the replacements
+			// immediately, but instead we accumulate them
+			// until the end of the loop. This allows us to
+			// sort the expressions and process them in
+			// descending order of complexity, necessary
+			// because a compound expression may contain a
+			// reference to a simple grouped column, but in
+			// such a case we want to process the expression
+			// as an expression, not as individual column
+			// references. E.g., if the statement was:
+			//   SELECT ... GROUP BY C1, C1 * (C2 / 100), C3
+			// then we don't want the replacement of the
+			// simple column reference C1 to affect the
+			// compound expression C1 * (C2 / 100). DERBY-3094.
+			//
+			ValueNode vn = gbc.getColumnExpression();
+			SubstituteExpressionVisitor vis =
+				new SubstituteExpressionVisitor(vn, vc,
 						AggregateNode.class);
-			parent.getResultColumns().accept(se);
+			referencesToSubstitute.add(vis);
 			
 			// Since we always need a PR node on top of the GB 
 			// node to perform projection we can use it to perform 
@@ -414,15 +436,26 @@ public class GroupByNode extends SingleChildResultSetNode
 			// GBN (RCL) -> (C1, SUM(C2), <input>, <aggregator>, MAX(C3), <input>, <aggregator>
 			//              |
 			//       FBT (C1, C2)
-			if (havingClause != null) {
+			if (havingClause != null)
+			{
 				SubstituteExpressionVisitor havingSE =
-					new SubstituteExpressionVisitor(
-							gbc.getColumnExpression(),
-							vc, null);
-				havingClause.accept(havingSE);
+					new SubstituteExpressionVisitor(vn,vc,null);
+				havingRefsToSubstitute.add(havingSE);
 			}
 			gbc.setColumnPosition(bottomRCL.size());
 		}
+		Comparator sorter = new ExpressionSorter();
+		Collections.sort(referencesToSubstitute,sorter);
+		for (int r = 0; r < referencesToSubstitute.size(); r++)
+			parent.getResultColumns().accept(
+				(SubstituteExpressionVisitor)referencesToSubstitute.get(r));
+		if (havingRefsToSubstitute != null)
+		{
+			Collections.sort(havingRefsToSubstitute,sorter);
+			for (int r = 0; r < havingRefsToSubstitute.size(); r++)
+				havingClause.accept(
+					(SubstituteExpressionVisitor)havingRefsToSubstitute.get(r));
+}
 	}
 
 	/**
@@ -1222,6 +1255,48 @@ public class GroupByNode extends SingleChildResultSetNode
 						singleInputRowOptimization = true;
 					}
 				}
+			}
+		}
+	}
+
+	/**
+	 * Comparator class for GROUP BY expression substitution.
+	 *
+	 * This class enables the sorting of a collection of
+	 * SubstituteExpressionVisitor instances. We sort the visitors
+	 * during the tree manipulation processing in order to process
+	 * expressions of higher complexity prior to expressions of
+	 * lower complexity. Processing the expressions in this order ensures
+	 * that we choose the best match for an expression, and thus avoids
+	 * problems where we substitute a sub-expression instead of the
+	 * full expression. For example, if the statement is:
+	 *   ... GROUP BY a+b, a, a*(a+b), a+b+c
+	 * we'll process those expressions in the order: a*(a+b),
+	 * a+b+c, a+b, then a.
+	 */
+	private static final class ExpressionSorter implements Comparator
+	{
+		public int compare(Object o1, Object o2)
+		{
+			try {
+				ValueNode v1 = ((SubstituteExpressionVisitor)o1).getSource();
+				ValueNode v2 = ((SubstituteExpressionVisitor)o2).getSource();
+				int refCount1, refCount2;
+				CollectNodesVisitor vis = new CollectNodesVisitor(
+				ColumnReference.class);
+				v1.accept(vis);
+				refCount1 = vis.getList().size();
+				vis = new CollectNodesVisitor(ColumnReference.class);
+				v2.accept(vis);
+				refCount2 = vis.getList().size();
+				// The ValueNode with the larger number of refs
+				// should compare lower. That way we are sorting
+				// the expressions in descending order of complexity.
+				return refCount2 - refCount1;
+			}
+			catch (StandardException e)
+			{
+				throw new RuntimeException(e);
 			}
 		}
 	}
