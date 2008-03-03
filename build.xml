@@ -1896,7 +1896,7 @@
       <classpath>
      	    <pathelement path="${derby.junit.classpath}"/>
             <!-- ant 1.7 finds junit.jar if it is on the classpath of the <junit> task -->
-            <pathelement location="${junit}"/>
+            <pathelement location="${javatools.dir}/junit.jar"/>
       </classpath>
     </junit>
   </target>
@@ -1932,6 +1932,7 @@
         todir="junit_${derby.junit.timestamp}"/>
           <classpath>
                <pathelement path="${derby.junit.classpath}"/>
+               <pathelement location="${javatools.dir}/junit.jar"/>
           </classpath>
          </junit>
   </target>
@@ -1957,7 +1958,7 @@
       	todir="junit_${derby.junit.timestamp}"/>
         <classpath>
        	    <pathelement path="${derby.junit.classpath}"/>
-            <pathelement location="${junit}"/>
+            <pathelement location="${javatools.dir}/junit.jar"/>
         </classpath>
       </junit>	
   </target>
@@ -1979,11 +1980,46 @@
         <classpath>
             <pathelement location="${out.pptesting.dir}"/>
             <pathelement location="${out.dir}"/>
-            <pathelement location="${junit}"/>
+            <pathelement location="${javatools.dir}/junit.jar"/>
         </classpath>
     </junit>
   </target>
 
+  <!-- Run a single junit test or suite -->
+  <target name="junit-single" depends="junit-init">
+    <condition property="derby.junit.classpath" value="">
+      <not>
+        <isset property="derby.junit.classpath"/>
+      </not>
+    </condition>
+    <condition property="noTestclassSet" value="">
+      <not>
+        <isset property="derby.junit.testclass"/>
+      </not>
+    </condition>
+    <fail if="noTestclassSet">No testclass selected! Set property derby.junit.testclass</fail>
+    <junit printsummary="on"
+           fork="yes" forkmode="perTest"
+           jvm="${derby.junit.jvm}" maxmemory="512m"
+           showoutput="yes"
+           dir="junit_${derby.junit.timestamp}"
+           tempdir="junit_${derby.junit.timestamp}"
+           errorproperty="tests.failed"
+           failureproperty="tests.failed">
+      <!-- This property is needed to keep EMMA silent when measuring codecoverage -->
+      <sysproperty key="emma.verbosity.level" value="silent"/>
+      <formatter type="xml"/>
+      
+      <test name="${derby.junit.testclass}" todir="junit_${derby.junit.timestamp}"/>
+
+      <classpath>
+     	    <pathelement path="${derby.junit.classpath}"/>
+            <pathelement location="${javatools.dir}/junit.jar"/>
+      </classpath>
+    </junit>
+      
+  </target>
+   
   <target name="junit-all" depends="junit-core,junit-jdbc4">
   </target>
  
@@ -2088,11 +2124,17 @@
         <property name="derby.junit.classpath" value="${emma}:${derby.jar.dir}/derbyTesting.jar:${instrumented.jars}/derby.jar:${instrumented.jars}/derbyclient.jar:${instrumented.jars}/derbynet.jar:${instrumented.jars}/derbytools.jar" />
     </target>
     
-    <target name="emma-all" depends="emma-instrumentation,junit-all">
+    <target name="emma-all" depends="emma-instrumentation,junit-all,emma-report">
         <fail if="tests.failed">EMMA instrumented tests failed!</fail>
+        <echo level="info" message="Finished measuring code coverage with EMMA."/>
     </target>
 
-    <target name="emma-report" depends="emma-all">
+    <target name="emma-single" depends="emma-instrumentation,junit-single,emma-report">
+        <fail if="tests.failed">EMMA instrumented test failed!</fail>
+        <echo level="info" message="Finished measuring code coverage with EMMA."/>
+    </target>
+    
+    <target name="emma-report" depends="emma-instrumentation">
         <emma>
             <report verbosity="verbose" depth="method">
                 <sourcepath>
