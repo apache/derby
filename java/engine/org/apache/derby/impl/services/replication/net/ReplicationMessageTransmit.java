@@ -30,6 +30,7 @@ import java.security.PrivilegedExceptionAction;
 import javax.net.SocketFactory;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.shared.common.reference.MessageId;
 
 /**
  * Used to send replication messages to the slave. Called by the
@@ -140,7 +141,9 @@ public class ReplicationMessageTransmit {
      *                     down the network connection
      */
     public void tearDown() throws IOException {
-        socketConn.tearDown();
+        if(socketConn != null) {
+            socketConn.tearDown();
+        }
     }
 
     /**
@@ -149,10 +152,12 @@ public class ReplicationMessageTransmit {
      * @param message a <code>ReplicationMessage</code> object that contains
      *                the message to be transmitted.
      *
-     * @throws IOException if an exception occurs while transmitting
-     *                     the message.
+     * @throws IOException 1) if an exception occurs while transmitting
+     *                        the message.
+     *                     2) if the connection handle is invalid.
      */
     public void sendMessage(ReplicationMessage message) throws IOException {
+        checkSocketConnection();
         socketConn.writeMessage(message);
     }
     
@@ -166,11 +171,13 @@ public class ReplicationMessageTransmit {
      * @throws ClassNotFoundException Class of a serialized object cannot
      *                                be found.
      *
-     * @throws IOException if an exception occurs while reading from the
-     *                     stream.
+     * @throws IOException 1) if an exception occurs while reading from the
+     *                        stream.
+     *                     2) if the connection handle is invalid.
      */
     public ReplicationMessage readMessage() throws
         ClassNotFoundException, IOException {
+        checkSocketConnection();
         return (ReplicationMessage)socketConn.readMessage();
     }
     
@@ -245,6 +252,19 @@ public class ReplicationMessageTransmit {
             //an unexpected exception.
             throw StandardException.newException
                 (SQLState.REPLICATION_UNEXPECTED_EXCEPTION);
+        }
+    }
+    
+    /**
+     * Verifies if the <code>SocketConnection</code> is valid.
+     *
+     * @throws IOException If the socket connection object is not
+     *                     valid (is null).
+     */
+    private void checkSocketConnection() throws IOException {
+        if (socketConn == null) {
+            throw new IOException
+                    (MessageId.REPLICATION_INVALID_CONNECTION_HANDLE);
         }
     }
 }

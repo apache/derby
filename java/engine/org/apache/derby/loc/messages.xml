@@ -7723,6 +7723,11 @@ Shutting down instance {0}</text>
             </msg>
             
             <msg>
+                <name>R012</name>
+                <text>Replication connection handle invalid.</text>
+            </msg>
+            
+            <msg>
                 <name>R020</name>
                 <text>Failover perfomed successfully for database '{0}'.</text>
                 <arg>dbname</arg>

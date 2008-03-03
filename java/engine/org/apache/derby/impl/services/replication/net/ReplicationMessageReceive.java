@@ -236,7 +236,7 @@ public class ReplicationMessageReceive {
         if (masterVersion == ReplicationMessage.serialVersionUID) {
             ack = new ReplicationMessage
                 (ReplicationMessage.TYPE_ACK, "UID OK");
-            socketConn.writeMessage(ack);
+            sendMessage(ack);
         } else {
             //If the UID's are not equal send an error message. The
             //object of a TYPE_ERROR message must be a String[]
@@ -244,7 +244,7 @@ public class ReplicationMessageReceive {
                 (ReplicationMessage.TYPE_ERROR,
                  new String[]{SQLState.
                               REPLICATION_MASTER_SLAVE_VERSION_MISMATCH});
-            socketConn.writeMessage(ack);
+            sendMessage(ack);
 
             //The UID's do not match.
             throw StandardException.newException
@@ -294,7 +294,7 @@ public class ReplicationMessageReceive {
             // Notify the master that the logs are in synch
             ack = new ReplicationMessage
                 (ReplicationMessage.TYPE_ACK, "Instant OK");
-            socketConn.writeMessage(ack);
+            sendMessage(ack);
         } else {
             // Notify master that the logs are out of synch
             // See ReplicationMessage#TYPE_ERROR
@@ -311,7 +311,7 @@ public class ReplicationMessageReceive {
             exception[5] = SQLState.REPLICATION_LOG_OUT_OF_SYNCH;
             ack = new ReplicationMessage(ReplicationMessage.TYPE_ERROR, 
                                          exception);
-            socketConn.writeMessage(ack);
+            sendMessage(ack);
 
             throw StandardException.
                 newException(SQLState.REPLICATION_LOG_OUT_OF_SYNCH, exception);
@@ -344,7 +344,7 @@ public class ReplicationMessageReceive {
         ReplicationMessage ack = 
             new ReplicationMessage(ReplicationMessage.TYPE_ERROR, exception);
 
-        socketConn.writeMessage(ack);
+        sendMessage(ack);
 
         throw StandardException.
             newException(SQLState.REPLICATION_UNEXPECTED_MESSAGEID, exception);
@@ -357,10 +357,12 @@ public class ReplicationMessageReceive {
      * @param message a <code>ReplicationMessage</code> object that contains
      *                the message to be transmitted.
      *
-     * @throws IOException if an exception occurs while transmitting
-     *                     the message.
+     * @throws IOException 1) if an exception occurs while transmitting
+     *                        the message,
+     *                     2) if the connection handle is invalid.
      */
     public void sendMessage(ReplicationMessage message) throws IOException {
+        checkSocketConnection();
         socketConn.writeMessage(message);
     }
     
@@ -375,11 +377,13 @@ public class ReplicationMessageReceive {
      * @throws ClassNotFoundException Class of a serialized object cannot
      *                                be found.
      *
-     * @throws IOException if an exception occurs while reading from the
-     *                     stream.
+     * @throws IOException 1) if an exception occurs while reading from the
+     *                        stream,
+     *                     2) if the connection handle is invalid.
      */
     public ReplicationMessage readMessage() throws
         ClassNotFoundException, IOException {
+        checkSocketConnection();
         return (ReplicationMessage)socketConn.readMessage();
     }
 
@@ -402,4 +406,17 @@ public class ReplicationMessageReceive {
     public int getPort() {
         return slaveAddress.getPortNumber();
      }
+        
+    /**
+     * Verifies if the <code>SocketConnection</code> is valid.
+     *
+     * @throws IOException If the socket connection object is not
+     *                     valid (is null).
+     */
+    private void checkSocketConnection() throws IOException {
+        if (socketConn == null) {
+            throw new IOException
+                    (MessageId.REPLICATION_INVALID_CONNECTION_HANDLE);
+        }
+    }
 }

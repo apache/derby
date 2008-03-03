@@ -189,6 +189,7 @@ public interface MessageId {
     String REPLICATION_LOGSHIPPER_EXCEPTION              = "R009";
     String REPLICATION_MASTER_RECONN                     = "R010";
     String REPLICATION_SLAVE_NETWORK_LISTEN              = "R011";    
+    String REPLICATION_INVALID_CONNECTION_HANDLE         = "R012";
     String REPLICATION_FAILOVER_SUCCESSFUL               = "R020";
 
 }
