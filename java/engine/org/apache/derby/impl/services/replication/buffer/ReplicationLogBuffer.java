@@ -53,6 +53,11 @@ import org.apache.derby.iapi.services.replication.master.MasterFactory;
  * Threads: ReplicationLogBuffer is threadsafe. It can be used by a
  * logger (LogToFile) and a log consumer (LogShipping service)
  * concurrently without further synchronization.
+ * 
+ * Important: If methods in this class calls methods outside this package
+ * (e.g. MasterFactory#workToDo), make sure that deadlocks are not 
+ * introduced. If possible, a call to any method in another package should be 
+ * done without holding latches in this class.
  */
 
 public class ReplicationLogBuffer {
@@ -135,17 +140,22 @@ public class ReplicationLogBuffer {
                           byte[] log, int logOffset, int logLength)
         throws LogBufferFullException{
 
+        boolean switchedBuffer = false; 
         synchronized (listLatch) {
             if (currentDirtyBuffer == null) {
                 switchDirtyBuffer();
                 // either sets the currentDirtyBuffer to a buffer
-                // element or throws a LogBufferFullException
+                // element or throws a LogBufferFullException. No need to call
+                // MasterFactory.workToDo becase switchDirtyBuffer will not add
+                // a buffer to the dirty buffer list when currentDirtyBuffer 
+                // is null
             }
 
             // switch buffer if current buffer does not have enough space
             // for the incoming data
             if (logLength > currentDirtyBuffer.freeSize()) {
                 switchDirtyBuffer();
+                switchedBuffer = true;
             }
 
             if (logLength <= currentDirtyBuffer.freeSize()) {
@@ -163,6 +173,13 @@ public class ReplicationLogBuffer {
                 // the dirtyBuffers list, and an empty one is in
                 // place, so no need to touch currentDirtyBuffer here
             }
+        }
+        // DERBY-3472 - we need to release the listLatch before calling workToDo
+        // to avoid deadlock with the logShipper thread
+        if (switchedBuffer) {
+            // Notify the master controller that a log buffer element is full 
+            // and work needs to be done.
+            mf.workToDo();
         }
     }
 
@@ -186,6 +203,9 @@ public class ReplicationLogBuffer {
                 // returned.
                 try {
                     switchDirtyBuffer();
+                    // No need to call MasterFactory.workToDo because the 
+                    // caller of next() will perform the work required on the 
+                    // buffer that was just moved to the dirty buffer list.
                 } catch (LogBufferFullException lbfe) {
                     // should not be possible when dirtyBuffers.size() == 0
                     if (SanityManager.DEBUG){
@@ -317,9 +337,6 @@ public class ReplicationLogBuffer {
      * @throws LogBufferFullException if the freeBuffers list is empty
      */
     private void switchDirtyBuffer() throws LogBufferFullException{
-        //Notify the master controller that a log buffer element is full and 
-        //work needs to be done.
-        mf.workToDo();
 
         // first, move currentDirtyBuffer to dirtyBuffers list.
         // do not switch if current buffer is empty
