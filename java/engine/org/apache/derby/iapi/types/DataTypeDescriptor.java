@@ -148,15 +148,11 @@ public final class DataTypeDescriptor implements Formatable
 	public static DataTypeDescriptor getType(TypeDescriptor catalogType)
 	{
 		TypeDescriptorImpl typeDescriptor = (TypeDescriptorImpl) catalogType;
-        BaseTypeIdImpl typeId = typeDescriptor.getTypeId();
-
-		/*
-		** The BaseTypeIdImpl tells what type of TypeId it is supposed to
-		** be wrapped in.
-		*/
-        TypeId wrapperTypeId = new TypeId(typeId.wrapperTypeFormatId(), typeId);
+        
+        TypeId typeId = TypeId.getTypeId(catalogType);
+ 
 		DataTypeDescriptor dtd =
-            new DataTypeDescriptor(typeDescriptor, wrapperTypeId);
+            new DataTypeDescriptor(typeDescriptor, typeId);
         
         // By definition, any catalog type (column in a table,
         // procedure etc.) is derivation implicit.
@@ -403,9 +399,7 @@ public final class DataTypeDescriptor implements Formatable
             TypeDescriptor[] catalogTypes)
     {
 		RowMultiSetImpl rms = new RowMultiSetImpl(columnNames, catalogTypes);
-		TypeId              typeID = new TypeId( StoredFormatIds.ROW_MULTISET_CATALOG_ID, rms );
-
-		return new DataTypeDescriptor( typeID, true).getCatalogType();
+        return new TypeDescriptorImpl(rms, true, -1);
 	}
 
 	/*
@@ -1165,14 +1159,6 @@ public final class DataTypeDescriptor implements Formatable
 	public int	getCollationDerivation()
 	{
 		return collationDerivation;
-	}
-
-	/**
-	* @see TypeDescriptor#isRowMultiSet
-	 */
-	public	boolean isRowMultiSet()
-	{
-		return getTypeId().isRowMultiSetTypeId();
 	}
 
 	/**

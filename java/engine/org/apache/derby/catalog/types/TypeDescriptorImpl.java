@@ -21,21 +21,15 @@
 
 package org.apache.derby.catalog.types;
 
-import org.apache.derby.shared.common.reference.JDBC40Translation;
-
-import org.apache.derby.iapi.services.io.StoredFormatIds;
-import org.apache.derby.iapi.services.io.Formatable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+import java.sql.Types;
 
 import org.apache.derby.catalog.TypeDescriptor;
-
-import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.services.io.Formatable;
+import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.types.StringDataValue;
-import org.apache.derby.iapi.reference.Property;
-
-import java.io.ObjectOutput;
-import java.io.ObjectInput;
-import java.io.IOException;
-import java.sql.Types;
                              
 public class TypeDescriptorImpl implements TypeDescriptor, Formatable
 {

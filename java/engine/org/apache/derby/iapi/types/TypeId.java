@@ -21,30 +21,17 @@
 
 package org.apache.derby.iapi.types;
 
-import org.apache.derby.iapi.services.io.Formatable;
-import org.apache.derby.iapi.services.io.StoredFormatIds;
-import org.apache.derby.iapi.services.monitor.Monitor;
-import org.apache.derby.iapi.services.loader.ClassFactory;
+import java.sql.Types;
 
-import org.apache.derby.iapi.error.StandardException;
-
+import org.apache.derby.catalog.TypeDescriptor;
 import org.apache.derby.catalog.types.BaseTypeIdImpl;
 import org.apache.derby.catalog.types.DecimalTypeIdImpl;
 import org.apache.derby.catalog.types.UserDefinedTypeIdImpl;
-
-import org.apache.derby.iapi.reference.Limits;
-
-import java.io.ObjectOutput;
-import java.io.ObjectInput;
-import java.io.IOException;
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.types.*;
-import org.apache.derby.iapi.types.*;
-
 import org.apache.derby.iapi.reference.JDBC40Translation;
-
-import java.sql.Types;
+import org.apache.derby.iapi.reference.Limits;
+import org.apache.derby.iapi.services.io.StoredFormatIds;
+import org.apache.derby.iapi.services.loader.ClassFactory;
+import org.apache.derby.iapi.services.sanity.SanityManager;
 
 /**
  * TypeId describes the static information about a SQL type
@@ -576,6 +563,26 @@ public final class TypeId
         }
         return null;
     }
+      
+    /**
+     * Get the TypeId (fundemental type information)
+     * for a catalog type.
+     * @param catalogType
+     * @return TypeId that represents the base type, null if not applicable.
+     */
+    static TypeId getTypeId(TypeDescriptor catalogType)
+    {
+        final int jdbcType = catalogType.getJDBCTypeId();
+        TypeId typeId = TypeId.getBuiltInTypeId(jdbcType);
+        if (typeId != null)
+            return typeId;
+        
+        if (jdbcType == Types.JAVA_OBJECT) {
+            return TypeId.getUserDefinedTypeId(catalogType.getTypeName(), false);
+        }
+        
+        return null;
+    }
 
         /*
          * * Instance fields and methods
@@ -1051,16 +1058,6 @@ public final class TypeId
         {
                return (formatId == StoredFormatIds.XML_TYPE_ID);
         }
-
-        /** 
-         *Is this a ROW MULTISET?
-         * @return true if this is XML
-         */
-        public boolean isRowMultiSetTypeId()
-        {
-               return (formatId == StoredFormatIds.ROW_MULTISET_CATALOG_ID);
-        }
-
 
 	
         /**
