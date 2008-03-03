@@ -222,7 +222,6 @@ public class MasterController
         logFactory.stopReplicationMasterRole();
         try {
             logShipper.flushBuffer();
-            teardownNetwork();
         } catch (IOException ioe) {
             ReplicationLogger.
                 logError(MessageId.REPLICATION_LOGSHIPPER_EXCEPTION,
@@ -231,6 +230,8 @@ public class MasterController
             ReplicationLogger.
                 logError(MessageId.REPLICATION_LOGSHIPPER_EXCEPTION, 
                          se, dbname);
+        } finally {
+            teardownNetwork();
         }
         Monitor.logTextMessage(MessageId.REPLICATION_MASTER_STOPPED, dbname);
     }
