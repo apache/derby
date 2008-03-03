@@ -1032,20 +1032,16 @@ class DRDAConnThread extends Thread {
                         // the data from the connection, to make sure it has
                         // not changed behind our back.
                         pbsd.refresh();
-                        if (codePoint != CodePoint.SYNCCTL) {
-                            // We expect the session attributes to have changed
-                            // after SYNCCTL, but this is handled by the client
-                            // and is not a problem
-                            SanityManager.ASSERT(!pbsd.isModified(),
-                                "Unexpected PBSD modification: " + pbsd +
-                                " after codePoint " + cpStr);
-                        }
+                        SanityManager.ASSERT(!pbsd.isModified(),
+                              "Unexpected PBSD modification: " + pbsd +
+                              " after codePoint " + cpStr);
                     }
                     // Not having a pbsd here is ok. No data has been
                     // piggy-backed and the client has no cached values.
                     // If needed it will send an explicit request to get
                     // session data
                 } catch (SQLException sqle) {
+                    server.consoleExceptionPrint(sqle);
                     SanityManager.THROWASSERT("Unexpected exception after " +
                             "codePoint "+cpStr, sqle);
                 }
