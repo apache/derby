@@ -336,7 +336,7 @@ public final class SecurityManagerSetup extends TestSetup {
      * Get the URL of the code base from a class name.
      * If the class cannot be loaded, null is returned.
      */
-    static URL getURL(String className) {
+    public static URL getURL(String className) {
         try {
             return getURL(Class.forName(className));
         } catch (ClassNotFoundException e) {
