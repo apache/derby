@@ -23,6 +23,7 @@ package org.apache.derby.impl.sql.execute;
 
 import java.util.Vector;
 
+import org.apache.derby.iapi.error.SQLWarningFactory;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.loader.ClassFactory;
@@ -32,7 +33,6 @@ import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.execute.ExecIndexRow;
 import org.apache.derby.iapi.sql.execute.ExecRow;
 import org.apache.derby.iapi.sql.execute.NoPutResultSet;
-import org.apache.derby.impl.jdbc.EmbedSQLWarning;
 
 /**
  * Generic aggregation utilities.
@@ -174,7 +174,7 @@ abstract class GenericAggregateResultSet extends NoPutResultSetImpl
 		}
 
 		if (eliminatedNulls)
-			addWarning(EmbedSQLWarning.newEmbedSQLWarning(SQLState.LANG_NULL_ELIMINATED_IN_SET_FUNCTION));
+			addWarning(SQLWarningFactory.newSQLWarning(SQLState.LANG_NULL_ELIMINATED_IN_SET_FUNCTION));
 	
 		return row;
 	}

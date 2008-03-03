@@ -30,7 +30,6 @@ import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 
-import org.apache.derby.impl.jdbc.EmbedSQLWarning;
 import org.apache.derby.impl.jdbc.Util;
 
 import java.io.ObjectOutput;
@@ -39,6 +38,7 @@ import java.io.ObjectInput;
 import java.lang.reflect.*;
 
 import org.apache.derby.iapi.error.PublicAPI;
+import org.apache.derby.iapi.error.SQLWarningFactory;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.shared.common.reference.SQLState;
 
@@ -607,7 +607,7 @@ public abstract class BrokeredConnection implements EngineConnection
         int holdability = control.checkHoldCursors(resultSetHoldability, true);
         if (holdability != resultSetHoldability) {
             SQLWarning w =
-                 EmbedSQLWarning.newEmbedSQLWarning(SQLState.HOLDABLE_RESULT_SET_NOT_AVAILABLE);
+                 SQLWarningFactory.newSQLWarning(SQLState.HOLDABLE_RESULT_SET_NOT_AVAILABLE);
             
             addWarning(w);
         }

@@ -40,6 +40,7 @@ import org.apache.derby.iapi.jdbc.EngineConnection;
 import org.apache.derby.iapi.db.Database;
 import org.apache.derby.impl.db.SlaveDatabase;
 import org.apache.derby.iapi.error.ExceptionSeverity;
+import org.apache.derby.iapi.error.SQLWarningFactory;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
@@ -346,7 +347,7 @@ public abstract class EmbedConnection implements EngineConnection
 				// database
 
 				if (tr.getDatabase() != null) {
-					addWarning(EmbedSQLWarning.newEmbedSQLWarning(SQLState.DATABASE_EXISTS, getDBName()));
+					addWarning(SQLWarningFactory.newSQLWarning(SQLState.DATABASE_EXISTS, getDBName()));
 				} else {
 
 					// check for user's credential and authenticate the user
@@ -499,7 +500,7 @@ public abstract class EmbedConnection implements EngineConnection
 
 			// Raise a warning in sqlAuthorization mode if authentication is not ON
 			if (usingNoneAuth && getLanguageConnection().usesSqlAuthorization())
-				addWarning(EmbedSQLWarning.newEmbedSQLWarning(SQLState.SQL_AUTHORIZATION_WITH_NO_AUTHENTICATION));
+				addWarning(SQLWarningFactory.newSQLWarning(SQLState.SQL_AUTHORIZATION_WITH_NO_AUTHENTICATION));
 		}
         catch (OutOfMemoryError noMemory)
 		{
@@ -2318,7 +2319,7 @@ public abstract class EmbedConnection implements EngineConnection
 			if (Monitor.createPersistentService(Property.DATABASE_MODULE, dbname, info) == null) 
 			{
 				// service already exists, create a warning
-				addWarning(EmbedSQLWarning.newEmbedSQLWarning(SQLState.DATABASE_EXISTS, dbname));
+				addWarning(SQLWarningFactory.newSQLWarning(SQLState.DATABASE_EXISTS, dbname));
 			}
 		} catch (StandardException mse) {
             throw Util.seeNextException(SQLState.CREATE_DATABASE_FAILED,
@@ -2669,7 +2670,7 @@ public abstract class EmbedConnection implements EngineConnection
 		 */
 		if (resultSetType == ResultSet.TYPE_SCROLL_SENSITIVE)
 		{
-			addWarning(EmbedSQLWarning.newEmbedSQLWarning(SQLState.NO_SCROLL_SENSITIVE_CURSORS));
+			addWarning(SQLWarningFactory.newSQLWarning(SQLState.NO_SCROLL_SENSITIVE_CURSORS));
 			resultSetType = ResultSet.TYPE_SCROLL_INSENSITIVE;
 		}
 		return resultSetType;
