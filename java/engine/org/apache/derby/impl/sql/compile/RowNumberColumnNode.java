@@ -48,7 +48,7 @@ public final class RowNumberColumnNode extends WindowFunctionColumnNode
 	/**
 	 * Initializer for a RowNumberColumn node
 	 *
-	 * @paran arg1 The window definition
+	 * @param arg1 The window definition
 	 *
 	 * @exception StandardException
 	 */

@@ -68,7 +68,7 @@ abstract class WindowFunctionColumnNode extends ResultColumn
 	/**
 	 * setWindowNode
 	 *
-	 * @param	the WindowNode with the window definition for this 
+	 * @param wn The WindowNode with the window definition for this 
 	 *			window function column 
 	 */	
 	public void setWindowNode(WindowNode wn)
@@ -161,8 +161,7 @@ abstract class WindowFunctionColumnNode extends ResultColumn
 
 	/**
 	 * Window functions do not have a (base)tablename, so we return null.
-	 *
-	 * @override
+	 * Overrides method from parent class.
 	 */
 	public String getTableName()
 	{

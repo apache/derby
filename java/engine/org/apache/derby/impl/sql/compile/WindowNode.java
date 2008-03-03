@@ -269,7 +269,7 @@ public class WindowNode extends SingleChildResultSetNode {
 	 * Set the windowFunctionLevel of this WindowNode in case there are 
 	 * multiple window functions in a RCL.
 	 *
-	 * @param	the window function level of this window function column 
+	 * @param level The window function level of this window function column 
 	 */	
 	public void setWindowFunctionLevel(int level)
 	{
