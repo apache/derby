@@ -25,6 +25,7 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
 import org.apache.derby.catalog.TypeDescriptor;
+import org.apache.derby.iapi.services.io.FormatIdUtil;
 import org.apache.derby.iapi.services.io.Formatable;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.sanity.SanityManager;
@@ -47,7 +48,12 @@ final class OldRoutineType implements Formatable {
     public void readExternal(ObjectInput in) throws IOException,
             ClassNotFoundException {
         
-        in.readObject(); // Redundant TypeId object
+        // Redundant old TypeId object, just ignore,
+        // comprised of two parts the old wrapper format number
+        // and then a BaseTypeId. Information was duplicated
+        // in the catalog type.
+        FormatIdUtil.readFormatIdInteger(in);
+        in.readObject(); 
         catalogType = (TypeDescriptor) in.readObject();
     }
 

@@ -51,7 +51,12 @@ import java.sql.Types;
  * independent of any specific attributes of the type such
  * as length. So the TypeId for CHARACTER describes the
  * fundamental information about CHARACTER. A specific
- * type (e.g. CHARACTER(10)) is described by a DataTypeDescriptor.
+ * type (e.g. CHARACTER(10)) is described by a TypeDescriptor for
+ * a catlog type and a DataTypeDescriptor for a runtime type.
+ * (note a DataTypeDescriptor adds runtime attributes to the
+ * TypeDescriptor it has).
+ * <P>
+ * A TypeId is immutable.
    <P>
  * The equals(Object) method can be used to determine if two typeIds are for the same type,
  * which defines type id equality.
@@ -60,7 +65,7 @@ import java.sql.Types;
    @see DataTypeDescriptor
  */
 
-public final class TypeId implements Formatable
+public final class TypeId
 {
         /**
          * Various fixed numbers related to datatypes.
@@ -218,21 +223,17 @@ public final class TypeId implements Formatable
         ** Static runtime fields for typeIds
         ** These are put here because the system needs them init time.
         */
-        public static final TypeId BOOLEAN_ID = new TypeId(
-            StoredFormatIds.BOOLEAN_TYPE_ID,
-               new BaseTypeIdImpl(StoredFormatIds.BOOLEAN_TYPE_ID_IMPL));
+        public static final TypeId BOOLEAN_ID = create(
+            StoredFormatIds.BOOLEAN_TYPE_ID, StoredFormatIds.BOOLEAN_TYPE_ID_IMPL);
         
-        public static final TypeId SMALLINT_ID = new TypeId(
-                StoredFormatIds.SMALLINT_TYPE_ID,
-                new BaseTypeIdImpl(StoredFormatIds.SMALLINT_TYPE_ID_IMPL));
+        public static final TypeId SMALLINT_ID = create(
+            StoredFormatIds.SMALLINT_TYPE_ID, StoredFormatIds.SMALLINT_TYPE_ID_IMPL);
 
-        public static final TypeId INTEGER_ID = new TypeId(
-            StoredFormatIds.INT_TYPE_ID,
-            new BaseTypeIdImpl(StoredFormatIds.INT_TYPE_ID_IMPL));
+        public static final TypeId INTEGER_ID = create(
+            StoredFormatIds.INT_TYPE_ID, StoredFormatIds.INT_TYPE_ID_IMPL);
 
-        public static final TypeId CHAR_ID = new TypeId(
-            StoredFormatIds.CHAR_TYPE_ID,
-            new BaseTypeIdImpl(StoredFormatIds.CHAR_TYPE_ID_IMPL));
+        public static final TypeId CHAR_ID = create(
+            StoredFormatIds.CHAR_TYPE_ID, StoredFormatIds.CHAR_TYPE_ID_IMPL);
         
         /*
         ** Others are created on demand by the getBuiltInTypeId(int),
@@ -240,26 +241,42 @@ public final class TypeId implements Formatable
         ** or by getBuiltInTypeId(string) if they are REF_NAME type.
         */
 
-        private static TypeId                   TINYINT_ID;
+        private static final TypeId TINYINT_ID = create(
+                StoredFormatIds.TINYINT_TYPE_ID, StoredFormatIds.TINYINT_TYPE_ID_IMPL);;
 
-        private static TypeId                   LONGINT_ID;
-        private static TypeId                   REAL_ID;
-        private static TypeId                   DOUBLE_ID;
-        private static TypeId                   DECIMAL_ID;
-        private static TypeId                   NUMERIC_ID;
-        private static TypeId                   VARCHAR_ID;
-        private static TypeId                   DATE_ID;
-        private static TypeId                   TIME_ID;
-        private static TypeId                   TIMESTAMP_ID;
-        private static TypeId                   BIT_ID;
-        private static TypeId                   VARBIT_ID;
-        private static TypeId                   REF_ID;
-        private static TypeId                   LONGVARCHAR_ID;
-        private static TypeId                   LONGVARBIT_ID;
+        private static final TypeId BIGINT_ID = create(
+            StoredFormatIds.LONGINT_TYPE_ID, StoredFormatIds.LONGINT_TYPE_ID_IMPL);
+        private static final TypeId REAL_ID = create(
+                StoredFormatIds.REAL_TYPE_ID, StoredFormatIds.REAL_TYPE_ID_IMPL);
+        private static final TypeId DOUBLE_ID = create(
+                StoredFormatIds.DOUBLE_TYPE_ID, StoredFormatIds.DOUBLE_TYPE_ID_IMPL);
+        private static final TypeId DECIMAL_ID =  new TypeId(StoredFormatIds.DECIMAL_TYPE_ID, new DecimalTypeIdImpl(false));
+        private static final TypeId NUMERIC_ID =  new TypeId(StoredFormatIds.DECIMAL_TYPE_ID, new DecimalTypeIdImpl(true));
+        private static final TypeId VARCHAR_ID = create(
+                StoredFormatIds.VARCHAR_TYPE_ID, StoredFormatIds.VARCHAR_TYPE_ID_IMPL);
+        private static final TypeId DATE_ID = create(
+                StoredFormatIds.DATE_TYPE_ID, StoredFormatIds.DATE_TYPE_ID_IMPL);
+        private static final TypeId TIME_ID = create(
+                StoredFormatIds.TIME_TYPE_ID, StoredFormatIds.TIME_TYPE_ID_IMPL);
+        private static final TypeId TIMESTAMP_ID = create(
+                StoredFormatIds.TIMESTAMP_TYPE_ID, StoredFormatIds.TIMESTAMP_TYPE_ID_IMPL);
+        private static final TypeId BIT_ID = create(
+                StoredFormatIds.BIT_TYPE_ID, StoredFormatIds.BIT_TYPE_ID_IMPL);
+        private static final TypeId VARBIT_ID = create(
+                StoredFormatIds.VARBIT_TYPE_ID, StoredFormatIds.VARBIT_TYPE_ID_IMPL);
+        private static final TypeId REF_ID = create(
+                StoredFormatIds.REF_TYPE_ID, StoredFormatIds.REF_TYPE_ID_IMPL);
+        private static final TypeId LONGVARCHAR_ID = create(
+                StoredFormatIds.LONGVARCHAR_TYPE_ID, StoredFormatIds.LONGVARCHAR_TYPE_ID_IMPL);
+        private static final TypeId LONGVARBIT_ID = create(
+                StoredFormatIds.LONGVARBIT_TYPE_ID, StoredFormatIds.LONGVARBIT_TYPE_ID_IMPL);
 
-        private static TypeId                   BLOB_ID;
-        private static TypeId                   CLOB_ID;
-        private static TypeId                   XML_ID;
+        private static final TypeId BLOB_ID = create(
+                StoredFormatIds.BLOB_TYPE_ID, StoredFormatIds.BLOB_TYPE_ID_IMPL);
+        private static final TypeId CLOB_ID = create(
+                StoredFormatIds.CLOB_TYPE_ID, StoredFormatIds.CLOB_TYPE_ID_IMPL);
+        private static final TypeId XML_ID = create(
+                StoredFormatIds.XML_TYPE_ID, StoredFormatIds.XML_TYPE_ID_IMPL);
 
         /**
          * Implementation of DECIMAL datatype for generating holders through getNull.
@@ -270,6 +287,18 @@ public final class TypeId implements Formatable
         /*
         ** Static methods to obtain TypeIds
         */
+        
+        /**
+         * Create a TypeId for the given format identifiers using
+         * a BaseTypeIdImpl. Used to create the static final variables
+         * of this class.
+         */
+        private static TypeId create(int typeFormatId, int implTypeFormatId)
+        {
+            return new TypeId(typeFormatId, new BaseTypeIdImpl(implTypeFormatId)); 
+        }
+        
+        
         /**
          * Get a TypeId of the given JDBC type.  This factory method is
          * intended to be used for built-in types.  For user-defined types,
@@ -282,149 +311,78 @@ public final class TypeId implements Formatable
          *                      TypeId.
          */
 
-        public static TypeId getBuiltInTypeId(int JDBCTypeId)
-        {
-                TypeId ret = null;
+        public static TypeId getBuiltInTypeId(int JDBCTypeId) {
 
-                switch (JDBCTypeId)
-                {
-                  case Types.TINYINT:
-                          ret = TINYINT_ID;
-                          if (ret == null)
-                                  ret = TINYINT_ID = new TypeId(StoredFormatIds.TINYINT_TYPE_ID,
-                                                                        new BaseTypeIdImpl(StoredFormatIds.TINYINT_TYPE_ID_IMPL));
-                          break;
+        switch (JDBCTypeId) {
+        case Types.TINYINT:
+            return TINYINT_ID;
 
-                  case Types.SMALLINT:
-                          return SMALLINT_ID;
+        case Types.SMALLINT:
+            return SMALLINT_ID;
 
-                  case Types.INTEGER:
-                          return INTEGER_ID;
+        case Types.INTEGER:
+            return INTEGER_ID;
 
-                  case Types.BIGINT:
-                          ret = LONGINT_ID;
-                          if (ret == null)
-                                  ret = LONGINT_ID = new TypeId(StoredFormatIds.LONGINT_TYPE_ID,
-                                                                        new BaseTypeIdImpl(StoredFormatIds.LONGINT_TYPE_ID_IMPL));
-                          break;
+        case Types.BIGINT:
+            return BIGINT_ID;
 
-                  case Types.REAL:
-                          ret = REAL_ID;
-                          if (ret == null)
-                                  ret = REAL_ID = new TypeId(StoredFormatIds.REAL_TYPE_ID,
-                                                                        new BaseTypeIdImpl(StoredFormatIds.REAL_TYPE_ID_IMPL));
-                          break;
+        case Types.REAL:
+            return REAL_ID;
 
-                  case Types.FLOAT:
-                  case Types.DOUBLE:
-                          ret = DOUBLE_ID;
-                          if (ret == null)
-                                  ret = DOUBLE_ID = new TypeId(StoredFormatIds.DOUBLE_TYPE_ID,
-                                                                        new BaseTypeIdImpl(StoredFormatIds.DOUBLE_TYPE_ID_IMPL));
-                          break;
+        case Types.FLOAT:
+        case Types.DOUBLE:
+            return DOUBLE_ID;
 
-                  case Types.DECIMAL:
-                          ret = DECIMAL_ID;
-                          if (ret == null)
-                                  ret = DECIMAL_ID = new TypeId(StoredFormatIds.DECIMAL_TYPE_ID,
-                                                                        new DecimalTypeIdImpl(false));
-                          break;
+        case Types.DECIMAL:
+            return DECIMAL_ID;
 
-                  case Types.NUMERIC:
-                          ret = NUMERIC_ID;
-                          if (ret == null) {
-                                  DecimalTypeIdImpl numericTypeIdImpl = new DecimalTypeIdImpl(true);
-                                  ret = NUMERIC_ID = new TypeId(StoredFormatIds.DECIMAL_TYPE_ID, numericTypeIdImpl);
-                          }
-                          break;
+        case Types.NUMERIC:
+            return NUMERIC_ID;
 
-                  case Types.CHAR:
-                          return CHAR_ID;
+        case Types.CHAR:
+            return CHAR_ID;
 
-                  case Types.VARCHAR:
-                          ret = VARCHAR_ID;
-                          if (ret == null)
-                                  ret = VARCHAR_ID = new TypeId(StoredFormatIds.VARCHAR_TYPE_ID,
-                                                                        new BaseTypeIdImpl(StoredFormatIds.VARCHAR_TYPE_ID_IMPL));
-                          break;
+        case Types.VARCHAR:
+            return VARCHAR_ID;
 
-                  case Types.DATE:
-                          ret = DATE_ID;
-                          if (ret == null)
-                                  ret = DATE_ID = new TypeId(StoredFormatIds.DATE_TYPE_ID,
-                                                                        new BaseTypeIdImpl(StoredFormatIds.DATE_TYPE_ID_IMPL));
-                          break;
+        case Types.DATE:
+            return DATE_ID;
+        case Types.TIME:
+            return TIME_ID;
 
-                  case Types.TIME:
-                          ret = TIME_ID;
-                          if (ret == null)
-                                  ret = TIME_ID = new TypeId(StoredFormatIds.TIME_TYPE_ID,
-                                                                        new BaseTypeIdImpl(StoredFormatIds.TIME_TYPE_ID_IMPL));
-                          break;
+        case Types.TIMESTAMP:
+            return TIMESTAMP_ID;
 
-                  case Types.TIMESTAMP:
-                          ret = TIMESTAMP_ID;
-                          if (ret == null)
-                                  ret = TIMESTAMP_ID = new TypeId(StoredFormatIds.TIMESTAMP_TYPE_ID,
-                                                                        new BaseTypeIdImpl(StoredFormatIds.TIMESTAMP_TYPE_ID_IMPL));
-                          break;
-                  case Types.BIT:
-                  case Types.BOOLEAN:
-                          return BOOLEAN_ID;
+        case Types.BIT:
+        case Types.BOOLEAN:
+            return BOOLEAN_ID;
 
-                  case Types.BINARY:
-                          ret = BIT_ID;
-                          if (ret == null)
-                                  ret = BIT_ID = new TypeId(StoredFormatIds.BIT_TYPE_ID,
-                                                                        new BaseTypeIdImpl(StoredFormatIds.BIT_TYPE_ID_IMPL));
-                          break;
+        case Types.BINARY:
+            return BIT_ID;
 
-                  case Types.VARBINARY:
-                          ret = VARBIT_ID;
-                          if (ret == null)
-                                  ret = VARBIT_ID = new TypeId(StoredFormatIds.VARBIT_TYPE_ID,
-                                                                        new BaseTypeIdImpl(StoredFormatIds.VARBIT_TYPE_ID_IMPL));
-                          break;
+        case Types.VARBINARY:
+            return VARBIT_ID;
 
-                  case Types.LONGVARBINARY:
-                          ret = LONGVARBIT_ID;
-                          if (ret == null)
-                                  ret = LONGVARBIT_ID = new TypeId(StoredFormatIds.LONGVARBIT_TYPE_ID,
-                                                                        new BaseTypeIdImpl(StoredFormatIds.LONGVARBIT_TYPE_ID_IMPL));
-                          break;
+        case Types.LONGVARBINARY:
+            return LONGVARBIT_ID;
 
-                  case Types.LONGVARCHAR:
-                      ret = LONGVARCHAR_ID;
-                      if (ret == null)
-                          ret = LONGVARCHAR_ID = new TypeId(StoredFormatIds.LONGVARCHAR_TYPE_ID,
-                                                            new BaseTypeIdImpl(StoredFormatIds.LONGVARCHAR_TYPE_ID_IMPL));
-                      break;
+        case Types.LONGVARCHAR:
+            return LONGVARCHAR_ID;
 
-                  case Types.BLOB:
-                      ret = BLOB_ID;
-                      if (ret == null)
-                          ret = BLOB_ID = new TypeId(StoredFormatIds.BLOB_TYPE_ID,
-                                                     new BaseTypeIdImpl(StoredFormatIds.BLOB_TYPE_ID_IMPL));
-                      break;
-                                                
-                  case Types.CLOB:
-                      ret = CLOB_ID;
-                      if (ret == null)
-                          ret = CLOB_ID = new TypeId(StoredFormatIds.CLOB_TYPE_ID,
-                                                     new BaseTypeIdImpl(StoredFormatIds.CLOB_TYPE_ID_IMPL));
-                      break;
 
-                  // XML is not a JDBC type, so we have to check for our
-                  // internal XML type.
-                  case JDBC40Translation.SQLXML:
-                      ret = XML_ID;
-                      if (ret == null)
-                          ret = XML_ID = new TypeId(StoredFormatIds.XML_TYPE_ID,
-                                                     new BaseTypeIdImpl(StoredFormatIds.XML_TYPE_ID_IMPL));
-                      break;
-                }
-                return ret;
+        case Types.BLOB:
+            return BLOB_ID;
+
+        case Types.CLOB:
+            return CLOB_ID;
+
+        case JDBC40Translation.SQLXML:
+            return XML_ID;
+            
+        default:
+            return null;
         }
+    }
 
         public static TypeId getUserDefinedTypeId(String className, boolean delimitedIdentifier)
         {
@@ -434,84 +392,86 @@ public final class TypeId implements Formatable
         }
 
         /**
-         * Get a TypeId for the class that corresponds to the given
-         * Java type name.
-         *
-         * @param javaTypeName          The name of the Java type
-         *
-         * @return      A TypeId for the SQL type that corresponds to
-         *                      the Java type, null if there is no corresponding type.
+         * Get a TypeId for the class that corresponds to the given Java type
+         * name.
+         * 
+         * @param javaTypeName
+         *            The name of the Java type
+         * 
+         * @return A TypeId for the SQL type that corresponds to the Java type,
+         *         null if there is no corresponding type.
          */
         public static TypeId getSQLTypeForJavaType(String javaTypeName)
         {
                 if (javaTypeName.equals("java.lang.Boolean") ||
                         javaTypeName.equals("boolean"))
                 {
-                        return TypeId.BOOLEAN_ID;
+                        return BOOLEAN_ID;
                 }
                 else if (javaTypeName.equals("byte[]"))
                 {
-                        return getBuiltInTypeId(Types.VARBINARY);
+                        return VARBIT_ID;
                 }
                 else if (javaTypeName.equals("java.lang.String"))
                 {
-                        return getBuiltInTypeId(Types.VARCHAR);
+                        return VARCHAR_ID;
                 }
                 else if (javaTypeName.equals("java.lang.Integer") ||
                                 javaTypeName.equals("int"))
                 {
-                        return TypeId.INTEGER_ID;
+                        return INTEGER_ID;
                 }
                 else if (javaTypeName.equals("byte"))
                 {
-                        return getBuiltInTypeId(Types.TINYINT);
+                        return TINYINT_ID;
                 }
                 else if (javaTypeName.equals("short"))
                 {
-                        return getBuiltInTypeId(Types.SMALLINT);
+                    return SMALLINT_ID;
                 }
                 else if (javaTypeName.equals("java.lang.Long") ||
                                 javaTypeName.equals("long"))
                 {
-                        return getBuiltInTypeId(Types.BIGINT);
+                     return BIGINT_ID;
                 }
                 else if (javaTypeName.equals("java.lang.Float") ||
                                 javaTypeName.equals("float"))
                 {
-                        return getBuiltInTypeId(Types.REAL);
+                     return REAL_ID;
                 }
                 else if (javaTypeName.equals("java.lang.Double") ||
                                 javaTypeName.equals("double"))
                 {
-                        return getBuiltInTypeId(Types.DOUBLE);
+                    return DOUBLE_ID;
                 }
                 else if (javaTypeName.equals("java.math.BigDecimal"))
                 {
-                        return getBuiltInTypeId(Types.DECIMAL);
+                    return DECIMAL_ID;
                 }
                 else if (javaTypeName.equals("java.sql.Date"))
                 {
-                        return getBuiltInTypeId(Types.DATE);
+                    return DATE_ID;
                 }
                 else if (javaTypeName.equals("java.sql.Time"))
                 {
-                        return getBuiltInTypeId(Types.TIME);
+                    return TIME_ID;
                 }
                 else if (javaTypeName.equals("java.sql.Timestamp"))
                 {
-                        return getBuiltInTypeId(Types.TIMESTAMP);
+                    return TIMESTAMP_ID;
                 }
                 else if (javaTypeName.equals("java.sql.Blob"))
                 {
-                        return getBuiltInTypeId(Types.BLOB);
+                    return BLOB_ID;
                 }
                 else if (javaTypeName.equals("java.sql.Clob"))
                 {
-                        return getBuiltInTypeId(Types.CLOB);
+                    return CLOB_ID;
+
                 }
                 else if (javaTypeName.equals("org.apache.derby.iapi.types.XML"))
                 {
-                        return getBuiltInTypeId(JDBC40Translation.SQLXML);
+                    return XML_ID;
                 }
                 else
                 {
@@ -535,90 +495,91 @@ public final class TypeId implements Formatable
                 }
         }
 
+        /**
+         * Given a SQL type name return the corresponding TypeId.
+         * @param SQLTypeName Name of SQL type
+         * @return TypeId or null if there is no corresponding SQL type.
+         */
         public static TypeId getBuiltInTypeId(String SQLTypeName) {
 
-                if (SQLTypeName.equals(TypeId.BOOLEAN_NAME)) {
-                        return TypeId.BOOLEAN_ID;
-                }
-                if (SQLTypeName.equals(TypeId.CHAR_NAME)) {
-                        return TypeId.CHAR_ID;
-                }
-                if (SQLTypeName.equals(TypeId.DATE_NAME)) {
-                        return getBuiltInTypeId(Types.DATE);
-                }
-                if (SQLTypeName.equals(TypeId.DOUBLE_NAME)) {
-                        return getBuiltInTypeId(Types.DOUBLE);
-                }
-                if (SQLTypeName.equals(TypeId.FLOAT_NAME)) {
-                        return getBuiltInTypeId(Types.DOUBLE);
-                }
-                if (SQLTypeName.equals(TypeId.INTEGER_NAME)) {
-                        return TypeId.INTEGER_ID;
-                }
-                if (SQLTypeName.equals(TypeId.LONGINT_NAME)) {
-                        return getBuiltInTypeId(Types.BIGINT);
-                }
-                if (SQLTypeName.equals(TypeId.REAL_NAME)) {
-                        return getBuiltInTypeId(Types.REAL);
-                }
-                if (SQLTypeName.equals(TypeId.SMALLINT_NAME)) {
-                        return getBuiltInTypeId(Types.SMALLINT);
-                }
-                if (SQLTypeName.equals(TypeId.TIME_NAME)) {
-                        return getBuiltInTypeId(Types.TIME);
-                }
-                if (SQLTypeName.equals(TypeId.TIMESTAMP_NAME)) {
-                        return getBuiltInTypeId(Types.TIMESTAMP);
-                }
-                if (SQLTypeName.equals(TypeId.VARCHAR_NAME)) {
-                        return getBuiltInTypeId(Types.VARCHAR);
-                }
-                if (SQLTypeName.equals(TypeId.BIT_NAME)) {
-                        return getBuiltInTypeId(Types.BINARY);
-                }
-                if (SQLTypeName.equals(TypeId.VARBIT_NAME)) {
-                        return getBuiltInTypeId(Types.VARBINARY);
-                }
-                if (SQLTypeName.equals(TypeId.TINYINT_NAME)) {
-                        return getBuiltInTypeId(Types.TINYINT);
-                }
-                if (SQLTypeName.equals(TypeId.DECIMAL_NAME)) {
-                        return getBuiltInTypeId(Types.DECIMAL);
-                }
-                if (SQLTypeName.equals(TypeId.NUMERIC_NAME)) {
-                        return getBuiltInTypeId(Types.NUMERIC);
-                }
-                if (SQLTypeName.equals(TypeId.LONGVARCHAR_NAME)) {
-                        return getBuiltInTypeId(Types.LONGVARCHAR);
-                }
-                if (SQLTypeName.equals(TypeId.LONGVARBIT_NAME)) {
-                        return getBuiltInTypeId(Types.LONGVARBINARY);
-                }
-                if (SQLTypeName.equals(TypeId.BLOB_NAME)) {
-                        return getBuiltInTypeId(Types.BLOB);
-                }
-                if (SQLTypeName.equals(TypeId.CLOB_NAME)) {
-                        return getBuiltInTypeId(Types.CLOB);
-                }
-                if (SQLTypeName.equals(TypeId.XML_NAME)) {
-                        return getBuiltInTypeId(StoredFormatIds.XML_TYPE_ID);
-                }
-
-                TypeId ret = null;
-
-                // Types defined below here are SQL types and non-JDBC types that are supported by Derby
-                if (SQLTypeName.equals(TypeId.REF_NAME)) {
-                        ret = REF_ID;
-                        if (ret == null)
-                                ret = REF_ID = new TypeId(StoredFormatIds.REF_TYPE_ID,
-                                                                        new BaseTypeIdImpl(StoredFormatIds.REF_TYPE_ID_IMPL));
-                }
-                return ret;
+        if (SQLTypeName.equals(BOOLEAN_NAME)) {
+            return BOOLEAN_ID;
+        }
+        if (SQLTypeName.equals(CHAR_NAME)) {
+            return CHAR_ID;
+        }
+        if (SQLTypeName.equals(DATE_NAME)) {
+            return DATE_ID;
+        }
+        if (SQLTypeName.equals(DOUBLE_NAME)) {
+            return DOUBLE_ID;
+        }
+        if (SQLTypeName.equals(FLOAT_NAME)) {
+            return DOUBLE_ID;
+        }
+        if (SQLTypeName.equals(INTEGER_NAME)) {
+            return INTEGER_ID;
+        }
+        if (SQLTypeName.equals(LONGINT_NAME)) {
+            return BIGINT_ID;
+        }
+        if (SQLTypeName.equals(REAL_NAME)) {
+            return REAL_ID;
+        }
+        if (SQLTypeName.equals(SMALLINT_NAME)) {
+            return SMALLINT_ID;
+        }
+        if (SQLTypeName.equals(TIME_NAME)) {
+            return TIME_ID;
+        }
+        if (SQLTypeName.equals(TIMESTAMP_NAME)) {
+            return TIMESTAMP_ID;
+        }
+        if (SQLTypeName.equals(VARCHAR_NAME)) {
+            return VARCHAR_ID;
+        }
+        if (SQLTypeName.equals(BIT_NAME)) {
+            return BIT_ID;
+        }
+        if (SQLTypeName.equals(VARBIT_NAME)) {
+            return VARBIT_ID;
+        }
+        if (SQLTypeName.equals(TINYINT_NAME)) {
+            return TINYINT_ID;
+        }
+        if (SQLTypeName.equals(DECIMAL_NAME)) {
+            return DECIMAL_ID;
+        }
+        if (SQLTypeName.equals(NUMERIC_NAME)) {
+            return NUMERIC_ID;
+        }
+        if (SQLTypeName.equals(LONGVARCHAR_NAME)) {
+            return LONGVARCHAR_ID;
+        }
+        if (SQLTypeName.equals(LONGVARBIT_NAME)) {
+            return LONGVARBIT_ID;
+        }
+        if (SQLTypeName.equals(BLOB_NAME)) {
+            return BLOB_ID;
+        }
+        if (SQLTypeName.equals(CLOB_NAME)) {
+            return CLOB_ID;
+        }
+        if (SQLTypeName.equals(XML_NAME)) {
+            return XML_ID;
         }
 
+        // Types defined below here are SQL types and non-JDBC types that are
+        // supported by Derby
+        if (SQLTypeName.equals(REF_NAME)) {
+            return REF_ID;
+        }
+        return null;
+    }
+
         /*
-        ** Instance fields and methods
-        */
+         * * Instance fields and methods
+         */
 
         private BaseTypeIdImpl  baseTypeId;
         private int                             formatId;
@@ -643,18 +604,6 @@ public final class TypeId implements Formatable
         private int                             typePrecedence;
         private String                  javaTypeName;
         private int                             maxMaxWidth;
-
-        /**
-         * 1 argmument constructor. Needed for Formatable interface to work.
-         *
-         * @param formatId      Format id of specific type id.
-         */
-
-        public  TypeId(int formatId) 
-        {
-                this.formatId = formatId;
-                setTypeIdSpecificInstanceVariables();
-        }
 
         /**
          * Constructor for a TypeId
@@ -973,19 +922,6 @@ public final class TypeId implements Formatable
         public int getMaximumScale()
         {
                 return maxScale;
-        }
-
-        /**
-         * Set the nested BaseTypeId in this TypeId.
-         */
-        public void setNestedTypeId(BaseTypeIdImpl typeId)
-        {
-                baseTypeId = typeId;
-                switch (formatId)
-                {
-                        case StoredFormatIds.USERDEFINED_TYPE_ID_V3:
-                                setUserTypeIdInfo();
-                }
         }
 
         private void setUserTypeIdInfo()
@@ -1368,44 +1304,6 @@ public final class TypeId implements Formatable
                 return isUserDefinedTypeId;
         }
 
-        // Formatable interface
-
-        /**
-         * Read this object from a stream of stored objects.
-         *
-         * @param in read this.
-         *
-         * @exception IOException                                       thrown on error
-         * @exception ClassNotFoundException            thrown on error
-         */
-        public void readExternal( ObjectInput in )
-                 throws IOException, ClassNotFoundException
-        {
-                baseTypeId = (BaseTypeIdImpl) in.readObject();
-                /* We need to set the type specific variables
-                 * for user types when reading back off of the
-                 * disk becuse the baseTypeId was null when the
-                 * 0 argument constructor was called.
-                 */
-                switch (formatId)
-                {
-                        case StoredFormatIds.USERDEFINED_TYPE_ID_V3:
-                                setTypeIdSpecificInstanceVariables();
-                }
-        }
-
-        /**
-         * Write this object to a stream of stored objects.
-         *
-         * @param out write bytes here.
-         *
-         * @exception IOException               thrown on error
-         */
-        public void writeExternal( ObjectOutput out )
-                 throws IOException
-        {
-                out.writeObject( baseTypeId );
-        }
 
         /**
          * Get the formatID which corresponds to this class.

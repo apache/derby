@@ -988,6 +988,8 @@ public final class DataTypeDescriptor implements Formatable
 	}
 
 	/**
+     * Shorthand method for getCatalogType().getMaximumWidth().
+
 	* @see TypeDescriptor#getMaximumWidth
 	 */
 	public int	getMaximumWidth()
@@ -1046,6 +1048,7 @@ public final class DataTypeDescriptor implements Formatable
 	/**
 	 * Get the jdbc type id for this type.  JDBC type can be
 	 * found in java.sql.Types. 
+     * Shorthand method for getCatalogType().getJDBCTypeId().
 	 *
 	 * @return	a jdbc type, e.g. java.sql.Types.DECIMAL 
 	 *
@@ -1058,9 +1061,11 @@ public final class DataTypeDescriptor implements Formatable
 
 	/**
 	 * Returns the number of decimal digits for the datatype, if applicable.
+     * Shorthand method for getCatalogType().getPrecision().
 	 *
 	 * @return	The number of decimal digits for the datatype.  Returns
 	 *		zero for non-numeric datatypes.
+     * @see TypeDescriptor#getPrecision()
 	 */
 	public int	getPrecision()
 	{
@@ -1070,16 +1075,22 @@ public final class DataTypeDescriptor implements Formatable
 	/**
 	 * Returns the number of digits to the right of the decimal for
 	 * the datatype, if applicable.
+     * Shorthand method for getCatalogType().getScale().
 	 *
 	 * @return	The number of digits to the right of the decimal for
 	 *		the datatype.  Returns zero for non-numeric datatypes.
+     * @see TypeDescriptor#getScale()
 	 */
 	public int	getScale()
 	{
 		return typeDescriptor.getScale();
 	}
 
-	/** @see TypeDescriptor#getCollationType() */
+	/**
+     * Obtain the collation type of the underlying catalog type.
+     * Shorthand method for getCatalogType().getCollationType().
+     * @see TypeDescriptor#getCollationType()
+     */
 	public int	getCollationType()
 	{
 		return typeDescriptor.getCollationType();
@@ -1168,6 +1179,7 @@ public final class DataTypeDescriptor implements Formatable
 	 * Returns TRUE if the datatype can contain NULL, FALSE if not.
 	 * JDBC supports a return value meaning "nullability unknown" -
 	 * I assume we will never have columns where the nullability is unknown.
+     * Shorthand method for getCatalogType().isNullable();
 	 *
 	 * @return	TRUE if the datatype can contain NULL, FALSE if not.
 	 */

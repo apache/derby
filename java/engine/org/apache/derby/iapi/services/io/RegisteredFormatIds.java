@@ -56,16 +56,16 @@ String[] TwoByte = {
         /* 1 */         null, // String marker
         /* 2 */         null, // Serializable marker
         /* 3 */         null,
-        /* 4 */         "org.apache.derby.iapi.types.DTSClassInfo", //InstanceGetter
-        /* 5 */         "org.apache.derby.iapi.types.DTSClassInfo", //InstanceGetter
-        /* 6 */         "org.apache.derby.iapi.types.DTSClassInfo", //InstanceGetter
-        /* 7 */         "org.apache.derby.iapi.types.DTSClassInfo", //InstanceGetter
-        /* 8 */         "org.apache.derby.iapi.types.DTSClassInfo", //InstanceGetter
-        /* 9 */         "org.apache.derby.iapi.types.DTSClassInfo", //InstanceGetter
-        /* 10 */        "org.apache.derby.iapi.types.DTSClassInfo", //InstanceGetter
-        /* 11 */        "org.apache.derby.iapi.types.DTSClassInfo", //InstanceGetter
+        /* 4 */         null,
+        /* 5 */         null,
+        /* 6 */         null,
+        /* 7 */         null,
+        /* 8 */         null,
+        /* 9 */         null,
+        /* 10 */        null,
+        /* 11 */        null,
         /* 12 */        null,
-        /* 13 */        "org.apache.derby.iapi.types.DTSClassInfo", //InstanceGetter
+        /* 13 */        null,
         /* 14 */        "org.apache.derby.catalog.types.TypeDescriptorImpl",
         /* 15 */        "org.apache.derby.impl.store.access.PC_XenaVersion",
         /* 16 */        "org.apache.derby.catalog.types.TypesImplInstanceGetter",
@@ -79,20 +79,20 @@ String[] TwoByte = {
         /* 24 */        null,
         /* 25 */        "org.apache.derby.catalog.types.TypesImplInstanceGetter",
         /* 26 */        null,
-        /* 27 */        "org.apache.derby.iapi.types.DTSClassInfo", //InstanceGetter
+        /* 27 */        null,
         /* 28 */        "org.apache.derby.catalog.types.TypesImplInstanceGetter",
-        /* 29 */        "org.apache.derby.iapi.types.DTSClassInfo", //InstanceGetter
+        /* 29 */        null,
         /* 30 */        "org.apache.derby.catalog.types.TypesImplInstanceGetter",
         /* 31 */        "org.apache.derby.iapi.types.DTSClassInfo", //InstanceGetter
         /* 32 */        "org.apache.derby.catalog.types.TypesImplInstanceGetter",
         /* 33 */        "org.apache.derby.catalog.types.TypesImplInstanceGetter",
         /* 34 */        "org.apache.derby.catalog.types.TypesImplInstanceGetter",
-        /* 35 */        "org.apache.derby.iapi.types.DTSClassInfo", //InstanceGetter
-        /* 36 */        "org.apache.derby.iapi.types.DTSClassInfo", //InstanceGetter
+        /* 35 */        null,
+        /* 36 */        null,
         /* 37 */        "org.apache.derby.impl.sql.execute.DeleteConstantAction",
         /* 38 */        "org.apache.derby.impl.sql.execute.InsertConstantAction",
         /* 39 */        "org.apache.derby.impl.sql.execute.UpdateConstantAction",
-        /* 40 */        "org.apache.derby.iapi.types.DTSClassInfo", //InstanceGetter
+        /* 40 */        null,
         /* 41 */        null,
         /* 42 */        null,
         /* 43 */        null,
@@ -249,7 +249,7 @@ String[] TwoByte = {
         /* 194 */       null,
         /* 195 */       "org.apache.derby.iapi.types.DTSClassInfo", //InstanceGetter
         /* 196 */       "org.apache.derby.catalog.types.TypesImplInstanceGetter",
-        /* 197 */       "org.apache.derby.iapi.types.DTSClassInfo", //InstanceGetter
+        /* 197 */       null,
         /* 198 */       "org.apache.derby.catalog.types.TypesImplInstanceGetter",
         /* 199 */       "org.apache.derby.iapi.types.DTSClassInfo", //InstanceGetter,
         /* 200 */       null, // DECIMAL - register dynamically by DataValueFactory implementation
@@ -282,9 +282,9 @@ String[] TwoByte = {
         /* 227 */       null,
         /* 228 */       "org.apache.derby.impl.sql.GenericResultDescription",
         /* 229 */       null,
-        /* 230 */       "org.apache.derby.iapi.types.DTSClassInfo", //InstanceGetter
+        /* 230 */       null,
         /* 231 */       "org.apache.derby.catalog.types.TypesImplInstanceGetter",
-        /* 232 */       "org.apache.derby.iapi.types.DTSClassInfo", //InstanceGetter
+        /* 232 */       null,
         /* 233 */       "org.apache.derby.catalog.types.TypesImplInstanceGetter",
         /* 234 */       "org.apache.derby.iapi.types.DTSClassInfo", //InstanceGetter,
         /* 235 */       "org.apache.derby.iapi.types.DTSClassInfo", //InstanceGetter,
@@ -319,7 +319,7 @@ String[] TwoByte = {
         /* 264 */       "org.apache.derby.catalog.types.UserDefinedTypeIdImpl",
         /* 265 */       "org.apache.derby.iapi.types.DTSClassInfo", //InstanceGetter
         /* 266 */       "org.apache.derby.iapi.types.DTSClassInfo", //InstanceGetter
-        /* 267 */       "org.apache.derby.iapi.types.DTSClassInfo", //InstanceGetter
+        /* 267 */       null,
         /* 268 */       "org.apache.derby.iapi.sql.dictionary.IndexRowGenerator",
         /* 269 */       "org.apache.derby.iapi.services.io.FormatableBitSet",
         /* 270 */       "org.apache.derby.iapi.services.io.FormatableArrayHolder",
@@ -494,13 +494,13 @@ String[] TwoByte = {
         /* 439 */   "org.apache.derby.impl.sql.execute.rts.RealDeleteCascadeResultSetStatistics",    
 
     /// --- BLOB is copying LONGVARBIT in implementation
-        /* 440 */   "org.apache.derby.iapi.types.DTSClassInfo", //InstanceGetter, BLOB_TYPE_ID
+        /* 440 */   null,
         /* 441 */   "org.apache.derby.iapi.types.DTSClassInfo", //InstanceGetter, BLOB_COMPILATION_TYPE_ID
         /* 442 */   "org.apache.derby.catalog.types.TypesImplInstanceGetter", // BLOB_TYPE_ID_IMPL
         /* 443 */   "org.apache.derby.iapi.types.DTSClassInfo", //InstanceGetter, SQL_BLOB_ID
 
     /// --- CLOB is copying LONGVARCHAR in implementation
-        /* 444 */   "org.apache.derby.iapi.types.DTSClassInfo", //InstanceGetter
+        /* 444 */   null,
         /* 445 */   "org.apache.derby.iapi.types.DTSClassInfo", //InstanceGetter
         /* 446 */   "org.apache.derby.catalog.types.TypesImplInstanceGetter",
         /* 447 */   "org.apache.derby.iapi.types.DTSClassInfo", //InstanceGetter,
@@ -517,7 +517,7 @@ String[] TwoByte = {
 		/* 453 */   "org.apache.derby.impl.store.raw.log.ChecksumOperation",
 		/* 454 */   "org.apache.derby.impl.store.raw.data.CompressSpacePageOperation10_2",
 		/* 455 */   "org.apache.derby.catalog.types.SynonymAliasInfo",
-        /* 456 */   "org.apache.derby.iapi.types.DTSClassInfo", //InstanceGetter, XML_TYPE_ID
+        /* 456 */   null,
         /* 457 */   "org.apache.derby.catalog.types.TypesImplInstanceGetter", // XML_TYPE_ID_IMPL
         /* 458 */   "org.apache.derby.iapi.types.DTSClassInfo", //InstanceGetter, XML_ID
         /* 459 */   "org.apache.derby.impl.store.raw.data.EncryptContainerOperation",
