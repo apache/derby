@@ -248,24 +248,7 @@ public class SlaveController
      */
     private void stopSlave() throws StandardException {
         inReplicationSlaveMode = false;
-
-        try {
-            if (logReceiverThread != null) {
-                logReceiverThread.interrupt();
-            }
-        } catch (SecurityException se) {
-            // Do nothing - the logReceiverThread will get an
-            // exception when receiver.tearDown is called below
-        }
-
-        try {
-            // Unplug the replication network connection layer
-            if (receiver != null) {
-                receiver.tearDown(); 
-            }
-        } catch (IOException ioe) {
-            ReplicationLogger.logError(null, ioe, dbname);
-        }
+        teardownNetwork();
 
         logToFile.stopReplicationSlaveRole();
 
@@ -290,6 +273,7 @@ public class SlaveController
                 SQLState.SLAVE_OPERATION_DENIED_WHILE_CONNECTED);
         }
         doFailover();
+        teardownNetwork();
     } 
 
     /**
@@ -456,6 +440,17 @@ public class SlaveController
         }
     }
 
+    private void teardownNetwork() {
+        try {
+            // Unplug the replication network connection layer
+            if (receiver != null) {
+                receiver.tearDown();
+                receiver = null;
+            }
+        } catch (IOException ioe) {
+            ReplicationLogger.logError(null, ioe, dbname);
+        }
+    }
 
     ///////////////////////////////////////////////////////////////////////////
     // Inner Class - Thread used to apply chunks of log received from master //
@@ -482,6 +477,7 @@ public class SlaveController
                         ReplicationMessage ack = new ReplicationMessage
                             (ReplicationMessage.TYPE_ACK, "failover succeeded");
                         receiver.sendMessage(ack);
+                        teardownNetwork();
                         break;
                     case ReplicationMessage.TYPE_STOP:
                         stopSlave();

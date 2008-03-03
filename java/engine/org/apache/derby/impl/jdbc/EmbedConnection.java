@@ -236,6 +236,22 @@ public abstract class EmbedConnection implements EngineConnection
 
             boolean isFailoverMasterBoot = false;
             boolean isFailoverSlaveBoot = false;
+
+            // check that a replication operation is not combined with
+            // other operations
+            String replicationOp = getReplicationOperation(info);
+            if (replicationOp!= null) {
+                if (createBoot ||
+                    shutdown ||
+                    isTwoPhaseEncryptionBoot ||
+                    isTwoPhaseUpgradeBoot) {
+                    throw StandardException.
+                        newException(SQLState.
+                                     REPLICATION_CONFLICTING_ATTRIBUTES,
+                                     replicationOp);
+                }
+            }
+
             if (isReplicationFailover(info)) {
                 // Check that the database has been booted - otherwise throw 
                 // exception.
@@ -262,13 +278,6 @@ public abstract class EmbedConnection implements EngineConnection
                     throw StandardException.newException(
                         SQLState.CANNOT_START_SLAVE_ALREADY_BOOTED,
                         getTR().getDBName());
-                } else if (createBoot ||
-                           shutdown ||
-                           isTwoPhaseEncryptionBoot ||
-                           isTwoPhaseUpgradeBoot) {
-                    throw StandardException.newException(
-                        SQLState.REPLICATION_CONFLICTING_ATTRIBUTES,
-                        Attribute.REPLICATION_START_SLAVE);
                 }
 
                 // We need to boot the slave database two times. The
@@ -283,10 +292,10 @@ public abstract class EmbedConnection implements EngineConnection
                                  SlaveFactory.SLAVE_PRE_MODE);
             }
 
-            // DERBY-3383: stopSlave must be performed before
-            // bootDatabase so that we don't accidentally boot the db
-            // if stopSlave is requested on an unbooted db
             if (isStopReplicationSlaveBoot(info)) {
+                // DERBY-3383: stopSlave must be performed before
+                // bootDatabase so that we don't accidentally boot the db
+                // if stopSlave is requested on an unbooted db.
                 // An exception is always thrown from this method. If
                 // stopSlave is requested, we never get past this point
                 handleStopReplicationSlave(database, info);
@@ -294,11 +303,15 @@ public abstract class EmbedConnection implements EngineConnection
                 internalStopReplicationSlave(database, info);
                 return;
             } else if (isFailoverSlaveBoot) {
-                // failover on slave must be done before tr.startTransaction
-                // because startTrans will try to establish a connection to 
-                // the database through Database.setupConnection, which throws
-                // an exception in slave mode.
+                // For slave side failover, we perform failover before 
+                // connecting to the db (tr.startTransaction further down sets
+                // up the connection). If a connection had been
+                // established first, the connection attempt would throw an 
+                // exception saying that a database in slave mode cannot be 
+                // connected to
                 handleFailoverSlave(database);
+                // db is no longer in slave mode - proceed with normal 
+                // connection attempt
             }
 
 			if (database != null)
@@ -366,18 +379,26 @@ public abstract class EmbedConnection implements EngineConnection
 			// the rest.
 			tr.startTransaction();
 
-			if (isStartReplicationMasterBoot(info) && !shutdown) {
-				handleStartReplicationMaster(tr, info);
-			} else if (isStopReplicationMasterBoot(info)) {
-				// Stopping replication master can be done
-				// simultaneously with a database shutdown operation
-				handleStopReplicationMaster(tr, info);
-			} else if (isFailoverMasterBoot) {
-				// failover on master must be done after tr.startTransaction
-				// because that will establish a connection with the database,
-				// which in turn is used to check authentication/authorization
-				handleFailoverMaster(tr);
-			}
+            if (isStartReplicationMasterBoot(info) ||
+                isStopReplicationMasterBoot(info) ||
+                isFailoverMasterBoot) {
+
+                if (!usingNoneAuth &&
+                    getLanguageConnection().usesSqlAuthorization()) {
+                    // a failure here leaves database booted, but no
+                    // operation has taken place and the connection is
+                    // rejected.
+                    checkIsDBOwner(OP_REPLICATION);
+                }
+
+                if (isStartReplicationMasterBoot(info)) {
+                    handleStartReplicationMaster(tr, info);
+                } else if (isStopReplicationMasterBoot(info)) {
+                    handleStopReplicationMaster(tr, info);
+                } else if (isFailoverMasterBoot) {
+                    handleFailoverMaster(tr);
+                }
+            }
 
 			if (isTwoPhaseEncryptionBoot ||
 				isTwoPhaseUpgradeBoot ||
@@ -686,6 +707,44 @@ public abstract class EmbedConnection implements EngineConnection
         return Boolean.valueOf(
                p.getProperty(Attribute.REPLICATION_INTERNAL_SHUTDOWN_SLAVE)).
                booleanValue();
+    }
+
+    private String getReplicationOperation(Properties p) 
+        throws StandardException {
+
+        String operation = null;
+        int opcount = 0;
+        if (isStartReplicationSlaveBoot(p)) {
+            operation = Attribute.REPLICATION_START_SLAVE;
+            opcount++;
+        } 
+        if (isStartReplicationMasterBoot(p)) {
+            operation = Attribute.REPLICATION_START_MASTER;
+            opcount++;
+        }
+        if (isStopReplicationSlaveBoot(p)) {
+            operation = Attribute.REPLICATION_STOP_SLAVE;
+            opcount++;
+        }
+        if (isInternalShutdownSlaveDatabase(p)) {
+            operation = Attribute.REPLICATION_INTERNAL_SHUTDOWN_SLAVE;
+            opcount++;
+        }
+        if (isStopReplicationMasterBoot(p)) {
+            operation = Attribute.REPLICATION_STOP_MASTER;
+            opcount++;
+        } 
+        if (isReplicationFailover(p)) {
+            operation = Attribute.REPLICATION_FAILOVER;
+            opcount++;
+        }
+
+        if (opcount > 1) {
+            throw StandardException.
+                newException(SQLState.REPLICATION_CONFLICTING_ATTRIBUTES,
+                             operation);
+        }
+        return operation;
     }
 
     private void handleStartReplicationMaster(TransactionResourceImpl tr,
