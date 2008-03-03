@@ -41,9 +41,10 @@ public class SlaveAddress {
     
     /**
      * Used as the default port number if the port number
-     * is not mentioned.
+     * is not mentioned. Port number 4851 is registered for Derby Replication
+     * at IANA (See: http://www.iana.org/assignments/port-numbers)
      */
-    public static final int DEFAULT_PORT_NO = 8001;
+    public static final int DEFAULT_PORT_NO = 4851;
     
     /**
      *
