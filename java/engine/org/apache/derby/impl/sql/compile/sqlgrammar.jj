@@ -5000,10 +5000,6 @@ selectSublist(ResultColumnList resultColumns) throws StandardException :
 			/*
 			 * If there is no AS clause, use the windowfunction name as the result column name.
 			 */
-			if (columnName == null)
-			{
-				columnName = "row_number()";
-			}
 			WindowNode windowNode = (WindowNode) nodeFactory.getNode(
 											C_NodeTypes.WINDOW_NODE,
 											null,  // name
