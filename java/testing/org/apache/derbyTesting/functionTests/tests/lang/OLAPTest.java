@@ -230,7 +230,67 @@ public class OLAPTest extends BaseJDBCTestCase {
 							"where x1.r1 = 2 * x2.r2 and x2.c4 = t1.a");
 		expectedRows = new String[][]{{"100", "20", "200"}, {"200", "40", "400"}};
 		JDBC.assertFullResultSet(rs, expectedRows);
-			
+
+		/* Group by and having */
+		rs = s.executeQuery("select r from (select a, row_number() over() as r, b from t1) x group by r");
+		expectedRows = new String[][]{{"1"}, {"2"}, {"3"}, {"4"}, {"5"}};
+		JDBC.assertFullResultSet(rs, expectedRows);
+		
+		rs = s.executeQuery("select * from (select a, row_number() over() as r, b from t1) x group by a, b, r");
+		expectedRows = new String[][]{{"10", "1", "100"}, 
+										{"20", "2", "200"},
+										{"30", "3", "300"},
+										{"40", "4", "400"},
+										{"50", "5", "500"}};
+		JDBC.assertFullResultSet(rs, expectedRows);
+		
+		rs = s.executeQuery("select * from (select a, row_number() over() as r, b from t1) x group by b, r, a");
+		expectedRows = new String[][]{{"10", "1", "100"}, 
+										{"20", "2", "200"},
+										{"30", "3", "300"},
+										{"40", "4", "400"},
+										{"50", "5", "500"}};
+		JDBC.assertFullResultSet(rs, expectedRows);
+		
+		rs = s.executeQuery("select * from "+
+							"(select a, row_number() over() as r, b from t1) x "+
+							"group by b, r, a "+
+							"having r > 2");
+		expectedRows = new String[][]{{"30", "3", "300"},
+										{"40", "4", "400"}, 
+										{"50", "5", "500"}};
+		JDBC.assertFullResultSet(rs, expectedRows);
+		
+		rs = s.executeQuery("select * from "+
+							"(select a, row_number() over() as r, b from t1) x "+
+							"group by b, r, a "+
+							"having r > 2 and a >=30 "+
+							"order by a desc");
+		expectedRows = new String[][]{{"50", "5", "500"},
+										{"40", "4", "400"}, 
+										{"30", "3", "300"}};
+		JDBC.assertFullResultSet(rs, expectedRows);
+		 
+		rs = s.executeQuery("select * from "+
+							"(select a, row_number() over() as r, b from t1) x "+
+							"group by b, r, a "+
+							"having r > 2 and a >=30 "+
+							"order by r desc");
+		expectedRows = new String[][]{{"50", "5", "500"},
+										{"40", "4", "400"}, 
+										{"30", "3", "300"}};
+		JDBC.assertFullResultSet(rs, expectedRows);
+		
+		rs = s.executeQuery("select * from "+
+							"(select a, row_number() over() as r, b from t1) x "+
+							"group by b, r, a "+
+							"having r > 2 and a >=30 "+
+							"order by a asc, r desc");
+		expectedRows = new String[][]{{"30", "3", "300"},
+										{"40", "4", "400"}, 
+										{"50", "5", "500"}};
+		JDBC.assertFullResultSet(rs, expectedRows);
+		
 		/*
 		 * Negative testing of Statements
 		 */
