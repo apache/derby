@@ -49,16 +49,6 @@ public class ReplicationRun_Distributed extends ReplicationRun
         super(testcaseName);
     }
     
-    protected void setUp() throws Exception
-    {
-        super.setUp();
-    }
-    
-    protected void tearDown() throws Exception
-    {
-        super.tearDown();
-    }
-    
     public static Test suite()
     {
         TestSuite suite = new TestSuite("ReplicationRun_Distributed Suite");

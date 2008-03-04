@@ -30,10 +30,11 @@ import org.apache.derbyTesting.functionTests.suites.EncryptionSuite;
 import org.apache.derbyTesting.functionTests.tests.derbynet.PrepareStatementTest;
 import org.apache.derbyTesting.functionTests.tests.lang.AnsiTrimTest;
 import org.apache.derbyTesting.functionTests.tests.lang.CreateTableFromQueryTest;
+import org.apache.derbyTesting.functionTests.tests.lang.DatabaseClassLoadingTest;
+import org.apache.derbyTesting.functionTests.tests.lang.LangScripts;
 import org.apache.derbyTesting.functionTests.tests.lang.SimpleTest;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
-import org.apache.derbyTesting.junit.JDBCClient;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
@@ -138,6 +139,47 @@ public class StandardTests extends BaseJDBCTestCase
         };
         return cdts;
     }
+    
+    public static Test databaseClassLoadingTest(String hostName, int portNo)
+    {
+        return TestConfiguration.existingServerSuite(DatabaseClassLoadingTest.class,
+                false,hostName, portNo);
+    }
+    
+    public static Test dynamicLikeOptimizationTest(String hostName, int portNo)
+    {
+        System.out.println("********* FIXME!");return null;
+        /* factor out DynamicLikeOptimizationTest.decorate()
+        return TestConfiguration.existingServerSuite(DynamicLikeOptimizationTest.class,
+                false,hostName, portNo);
+         */
+    }
+    public static Test grantRevokeTest(String hostName, int portNo)
+    {
+        System.out.println("********* FIXME!");return null;
+        /* factor out GrantRevokeTest.decorate()
+        return TestConfiguration.existingServerSuite(GrantRevokeTest.class,
+                false,hostName, portNo);
+        */
+    }
+    
+    public static Test groupByExpressionTest(String hostName, int portNo)
+    {
+        System.out.println("********* FIXME!");return null;
+        /* factor out GrantRevokeTest.decorate() 
+        return TestConfiguration.existingServerSuite(GroupByExpressionTest.class,
+                false,hostName, portNo);
+        */
+    }
+
+    public static Test langScripts(String hostName, int portNo)
+    {
+        // System.out.println("********* FIXME!");return null;
+        /* factor out GrantRevokeTest.decorate() */
+        return TestConfiguration.existingServerSuite(LangScripts.class,
+                false,hostName, portNo);
+    }
+
     
     /* All the above are pure Tests. To handle suites
      * we will have to duplicate the .suite() structure starting at .suites.all!

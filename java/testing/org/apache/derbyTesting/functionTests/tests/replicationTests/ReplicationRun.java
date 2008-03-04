@@ -20,20 +20,17 @@ limitations under the License.
  */
 package org.apache.derbyTesting.functionTests.tests.replicationTests;
 
-import java.nio.channels.FileChannel;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.apache.derby.drda.NetworkServerControl;
 import java.net.InetAddress;
-import java.net.Inet6Address;
+import java.util.Properties;
 
 import java.sql.*;
 import java.io.*;
-import java.util.*;
 
 import org.apache.derbyTesting.junit.BaseTestCase;
-import org.apache.derbyTesting.junit.JDBC;
 
 /**
  * Framework to run replication tests.
@@ -166,7 +163,7 @@ public class ReplicationRun extends BaseTestCase
         
         TestSuite suite = new TestSuite("Replication Suite");
         
-        suite.addTestSuite( ReplicationRun.class );
+        suite.addTestSuite( ReplicationRun.class ); // Make sure to rename in subclasses!
         
         return suite;
     }
@@ -190,296 +187,8 @@ public class ReplicationRun extends BaseTestCase
     public void testReplication()
     throws Exception
     {
-        cleanAllTestHosts();
-        
-        initEnvironment();
-        
-        /* 'testReplication' steps through all states of the
-         * replication process.
-         * Tests required to be run in these states
-         * should be specified in the replicationtest.properties file.
-         */
-        if ( runUnReplicated )  // test.runUnReplicated
-        {
-            util.DEBUG("**** BEGIN Running test without replication.");
-            initMaster(masterServerHost,
-                    replicatedDb);
-            startServer(masterJvmVersion, derbyVersion, // No replication
-                    masterServerHost,
-                    ALL_INTERFACES, // masterServerHost, // "0.0.0.0", // All. or use masterServerHost for interfacesToListenOn,
-                    masterServerPort,
-                    masterDatabasePath +FS+ masterDbSubPath); // Distinguishing master/slave
-            runTest(replicationTest,
-                    jvmVersion,
-                    testClientHost,
-                    masterServerHost, masterServerPort,
-                    replicatedDb);
-            stopServer(masterJvmVersion, derbyMasterVersion,
-                    masterServerHost, masterServerPort);
-            util.DEBUG("**** END Running test without replication.");
-            // util.sleep(5000L, "End of runUnReplicated"); // Just for testing....
-        }
-        
-        ///////////////////////////////////////////////////////
-        // State: PreStartedMasterServer, PreStartedSlaveServer
-            if (state.testPreStartedMasterServer()) return;
-                
-        initMaster(masterServerHost,
-                replicatedDb); // Prototype V2: copy orig (possibly empty) db to db_master.
-        
-        masterServer = startServer(masterJvmVersion, derbyMasterVersion,
-                masterServerHost,
-                ALL_INTERFACES, // masterServerHost, // "0.0.0.0", // All. or use masterServerHost for interfacesToListenOn,
-                masterServerPort,
-                masterDatabasePath +FS+ masterDbSubPath); // Distinguishing master/slave
-        ///////////////////////////////////////////////////////
-        // State: PostStartedMasterServer, PreStartedSlaveServer
-        
-        startOptionalLoad(masterPreRepl,
-                masterDbSubPath,
-                masterServerHost,
-                masterServerPort);
-        
-            if (state.testPreStartedSlaveServer()) return; // + stop master server!
-        
-        // Thread.sleep(5000L); // Just for testing....
-        slaveServer = startServer(slaveJvmVersion, derbySlaveVersion,
-                slaveServerHost,
-                ALL_INTERFACES, // slaveServerHost, // "0.0.0.0", // All. or use slaveServerHost for interfacesToListenOn,
-                slaveServerPort,
-                slaveDatabasePath +FS+ slaveDbSubPath); // Distinguishing master/slave
-        ///////////////////////////////////////////////////////
-        // State: PostStartedMasterServer, PostStartedSlaveServer
-        //        PreStartedMaster,        PreStartedSlave
-        
-        // Thread.sleep(15000L); // Just for testing....
-        startServerMonitor(slaveServerHost);
-        
-        xFindServerPID(slaveServerHost, slaveServerPort); // JUST DEBUGGING!
-        
-        bootMasterDatabase(jvmVersion,
-                masterDatabasePath +FS+ masterDbSubPath,
-                replicatedDb,
-                masterServerHost, // Where the startreplication command must be given
-                masterServerPort, // master server interface accepting client requests
-                null // bootLoad, // The "test" to start when booting db.
-                );
-        
-        ///////////////////////////////////////////////////////
-        // State: PostStartedMasterServer, PostStartedSlaveServer
-        //        PostStartedMaster,       PreStartedSlave
-        
-        startOptionalLoad(masterPostRepl,
-                masterDbSubPath,
-                masterServerHost,
-                masterServerPort);
-        
-        startOptionalLoad(slavePreSlave,
-                slaveDbSubPath,
-                slaveServerHost,
-                slaveServerPort);
-        
-        // util.sleep(sleepTime, "Before initSlave"); // A. 'Something wrong with the instants!' if removed!
-        // 5secs is too little! 15secs is too little sometimes...!
-        // 30secs is too little w/ShutdownSlave!
-        
-        
-            if (state.testPreInitSlave()) return;
-
-        initSlave(/*slaveHost*/ slaveServerHost,
-                jvmVersion,
-                replicatedDb); // Trunk and Prototype V2: copy master db to db_slave.
-        
-
-            if (state.testPreStartedSlave()) return;
-                
-         startSlave(jvmVersion, replicatedDb,
-                slaveServerHost, // slaveClientInterface // where the slave db runs
-                slaveServerPort,
-                slaveServerHost, // for slaveReplInterface
-                slaveReplPort,
-                testClientHost);
-
-            if (state.testPreStartedMaster()) return;
-        
-       startMaster(jvmVersion, replicatedDb,
-                masterServerHost, // Where the startMaster command must be given
-                masterServerPort, // master server interface accepting client requests
-                masterServerHost, // An interface on the master: masterClientInterface (==masterServerHost),
-                slaveServerPort, // Not used since slave don't allow clients.
-                slaveServerHost, // for slaveReplInterface
-                slaveReplPort);
-        
-        ///////////////////////////////////////////////////////
-        // State: PostStartedMasterServer, PostStartedSlaveServer
-        //        PostStartedMaster,       PostStartedSlave
-        
-        startOptionalLoad(masterPostSlave,
-                masterDbSubPath,
-                masterServerHost,
-                masterServerPort);
-        
-        startOptionalLoad(slavePostSlave,
-                slaveDbSubPath,
-                slaveServerHost,
-                slaveServerPort);
-        
-        // Thread.sleep(5000L); // Just for testing....
-        // util.sleep(10000L, "Before runTest"); // Perf. testing....
-        
-            if (state.testPostStartedMasterAndSlave()) return;
-            // Could be run concurrently with runTest below?
-        
-        // Used to run positive tests? Handle negative testing in State.testPostStartedMasterAndSlave()?
-        // Observe that it will not be meaningful to do runTest if State.XXXX() 
-        // has led to incorrect replication state wrt. replicationTest.
-        runTest(replicationTest, // Returns immediatly if replicationTest is null.
-                jvmVersion,
-                testClientHost,
-                masterServerHost, masterServerPort,
-                replicatedDb);
-        
-        ///////////////////////////////////////////////////////
-        // State: PostStartedMasterServer, PostStartedSlaveServer
-        //        PostStartedMaster,       PostStartedSlave
-        //        PreStoppedMaster,        PreStoppedSlave
-            if (state.testPreStoppedMaster()) return;
-        
-// PoC        stopMaster(replicatedDb); // v7: RENAMED! FIXME! when 'stopMaster' cmd. available! // master..
-/*         stopMaster_ij(jvmVersion, replicatedDb,
-                masterServerHost,
-                masterServerPort,
-                testClientHost);
- */
-        ///////////////////////////////////////////////////////
-        // State: PostStartedMasterServer, PostStartedSlaveServer
-        //        PostStartedMaster,       PostStartedSlave
-        //        PostStoppedMaster,       PreStoppedSlave,       PreFailover
-        
-        // Thread.sleep(5000L); // Just for testing....
-        
-            if (state.testPreStoppedMasterServer()) return;
-        
-/* PoC        stopServer(masterJvmVersion, derbyMasterVersion, // v7: NA // PoC V2b: forces failover on slave
-                masterServerHost, masterServerPort);
- */
-        ///////////////////////////////////////////////////////
-        // State: PostStartedMasterServer, PostStartedSlaveServer
-        //        PostStartedMaster,       PostStartedSlave
-        //        PostStoppedMaster,       PreStoppedSlave
-        //        PostStoppedMasterServer, PreStoppedSlaveServer,  PoC:  PostFailover
-            if (state.testPreStoppedSlave()) return;
-        
-        // Thread.sleep(5000L); // Just for testing....
-// PoC        stopSlave(replicatedDb); // v7: NEW! FIXME! when 'stopSlave' cmd. available!
-/*         stopSlave_ij(jvmVersion, replicatedDb,
-                slaveServerHost,
-                slaveServerPort,
-                testClientHost);
- */
-        ///////////////////////////////////////////////////////
-        // State: PostStartedMasterServer, PostStartedSlaveServer
-        //        PostStartedMaster,       PostStartedSlave
-        //        PostStoppedMaster,       PostStoppedSlave
-        //        PostStoppedMasterServer, PreStoppedSlaveServer,  PreFailover // PoC:  PostFailover
-        
-        // Thread.sleep(5000L); // Just for testing....
-        failOver(jvmVersion, // On master, which is the normal case.
-            masterDatabasePath, masterDbSubPath, replicatedDb,
-            masterServerHost,  // Where the master db is run.
-            masterServerPort,
-            testClientHost);
-
-// PoC        failOver(replicatedDb); // FIXME! when 'failOver' cmd. available!
-
-        ///////////////////////////////////////////////////////
-        // State: PostStartedMasterServer, PostStartedSlaveServer
-        //        PostStartedMaster,       PostStartedSlave
-        //        PostStoppedMaster,       PostStoppedSlave
-        //        PostStoppedMasterServer, PreStoppedSlaveServer,  PostFailover
-        
-        // util.sleep(10000L, "After failover"); // Try to avoid DERBY-3463....
-        connectPing(slaveDatabasePath+FS+slaveDbSubPath+FS+replicatedDb,
-                slaveServerHost,slaveServerPort,
-                testClientHost);
-        
-        // If the slave server was shutdown, killed or died, start a "default" server on
-        // the same server and port to do the verification:
-        int slavePid = xFindServerPID(slaveServerHost, slaveServerPort);
-        if ( slavePid == -1 )
-        {
-            util.DEBUG("WARNING: slave server not available. Starting.");
-            slaveServer = startServer(jvmVersion, derbyVersion,
-                    slaveServerHost,
-                    ALL_INTERFACES, // slaveServerHost, // "0.0.0.0", // All. or use slaveServerHost for interfacesToListenOn,
-                    slaveServerPort,
-                    slaveDatabasePath +FS+ slaveDbSubPath); // Distinguishing master/slave
-        }
-        /* BEGIN Failover do not yet clean replication mode on slave! Must restart the server!*/
-        else{
-          if (true)
-          {
-            util.DEBUG("*********************** DERBY-3205/svn 630806. failover does now unset replication mode on slave.");
-          }
-          else // failover does not unset replication mode on slave.
-          {
-            util.DEBUG("*********************** DERBY-3205. failover does not unset replication mode on slave.");
-            /* That also blocks for connecting!:
-            // Do slave db shutdown (and reconnect) to unset... PRELIMINARY!!!
-            shutdownDb(slaveServerHost,slaveServerPort,
-                    slaveDatabasePath +FS+ slaveDbSubPath,replicatedDb);
-             */
-            /* */
-            restartServer(jvmVersion, derbyVersion, // restart server is too strong!
-                    slaveServerHost,
-                    ALL_INTERFACES,
-                    slaveServerPort,
-                    slaveDatabasePath +FS+ slaveDbSubPath); // Distinguishing master/slave
-            /* */
-          }
-        }/* END */
-        
-        verifySlave();
-        
-        // We should verify the master as well, at least to see that we still can connect.
-        // If the slave server was shutdown, killed or died, start a "default" server on
-        // the same server and port to do the verification:
-        int masterPid = xFindServerPID(masterServerHost, masterServerPort);
-        if ( masterPid == -1 )
-        {
-            util.DEBUG("WARNING: master server not available. Starting.");
-            masterServer = startServer(jvmVersion, derbyVersion,
-                    masterServerHost,
-                    ALL_INTERFACES, // masterServerHost, // "0.0.0.0", // All. or use slaveServerHost for interfacesToListenOn,
-                    masterServerPort,
-                    masterDatabasePath +FS+ masterDbSubPath); // Distinguishing master/slave
-        }
-        verifyMaster(); // NB NB Hangs here with localhost/ReplicationTestRun!
-        
-        xFindServerPID(slaveServerHost, slaveServerPort); // JUST DEBUGGING!
-        
-        // Thread.sleep(5000L); // Just for testing....
-        stopServer(jvmVersion, derbyVersion,
-                slaveServerHost, slaveServerPort);
-        ///////////////////////////////////////////////////////
-        // State: PostStartedMasterServer, PostStartedSlaveServer
-        //        PostStartedMaster,       PostStartedSlave
-        //        PostStoppedMaster,       PostStoppedSlave
-        //        PostStoppedMasterServer, PostStoppedSlaveServer,  PostFailover
-        
-            if (state.testPostStoppedSlaveServer()) return;
-        
-        // Shutdown master:
-        stopServer(jvmVersion, derbyVersion,
-                masterServerHost, masterServerPort);
-        // As of 2008-02-06 master does not accept shutdown after replication, so:
-        masterPid = xFindServerPID(masterServerHost, masterServerPort);
-        if ( masterPid != -1 )
-        {
-        util.DEBUG("*********************** DERBY-3394. master does not accept shutdown after failover.");
-        killMaster(masterServerHost,masterServerPort);
-        }
-        
+        System.out.println("WARNING: Override in subclass of ReplicationRun. "
+                + "See ReplicationRun_Local for an example.");
     }
 
     void connectPing(String fullDbPath, 
@@ -515,7 +224,7 @@ public class ReplicationRun extends BaseTestCase
                 && (state.equalsIgnoreCase(expectedState) ) )
                 {
                     util.DEBUG("Failover not complete.");
-                    Thread.sleep(100L); // ms.
+                    Thread.sleep(200L); // ms.
                 }
                 else
                 {
@@ -524,7 +233,7 @@ public class ReplicationRun extends BaseTestCase
                 }
             }
             
-            assertTrue("Failover did not succeed.", count++ < 100); // 100*100ms = 10s.
+            assertTrue("Failover did not succeed.", count++ < 100); // 100*200ms = 20s.
         }
     }
     
@@ -1105,7 +814,7 @@ public class ReplicationRun extends BaseTestCase
                     int errCode = se.getErrorCode();
                     String msg = se.getMessage();
                     String state = se.getSQLState();
-                    String expectedState = "XJ001"; // Currently NPE! FIXME! when ready "XRE??";
+                    String expectedState = "XRE04";
                     util.DEBUG("startSlave Got SQLException: " + errCode + " " + state + " " + msg);
                     if ( (errCode == -1)
                     && (state.equalsIgnoreCase(expectedState) ) )
@@ -2128,13 +1837,6 @@ public class ReplicationRun extends BaseTestCase
     void initMaster(String host, String dbName)
     throws Exception
     {
-        // Should this just be "connect ...;create=true"?
-        /*
-         * FIXME! PoC code requires something like:
-         * cd /home/user/Replication/testing/db_master
-         * rm -rf test derby.log ij_master
-         * cp -r ../origdb/test/ .
-         */
         
         util.DEBUG("initMaster");
         
@@ -2144,10 +1846,12 @@ public class ReplicationRun extends BaseTestCase
         if ( host.equalsIgnoreCase("localhost") || localEnv )
         {
             String dir = masterDatabasePath+FS+masterDbSubPath;
+            util.mkDirs(dir); // Create the dir if non-existing.
             util.cleanDir(dir, false); // false: do not delete the directory itself.
             
             // Ditto for slave:
             dir = slaveDatabasePath+FS+slaveDbSubPath;
+            util.mkDirs(dir); // Create the dir if non-existing.
             util.cleanDir(dir, false); // false: do not delete the directory itself.
             
             // util.writeToFile(derbyProperties, dir+FS+"derby.properties");
@@ -2350,15 +2054,18 @@ public class ReplicationRun extends BaseTestCase
         }
         
         String shellCmd = null;
-        if ( serverHost.equalsIgnoreCase("localhost") /* && false Need a property: startServer_direct */ )
+        /*
+        if ( serverHost.equalsIgnoreCase("localhost") )
         {
-            // Can not select jvm or Derby version in this case.
+            // 1. Can not select jvm or Derby version in this case.
+            // 2. Master and slave would run in same VM. Mixing derby.logs!
             return startServer_direct(serverHost, 
                     interfacesToListenOn, serverPort, 
                     fullDbDirPath,
                     securityOption);
         }
-        else if ( serverHost.equalsIgnoreCase("localhost") ) // NEVER USED! Historical reasons...
+        else */
+        if ( serverHost.equalsIgnoreCase("localhost") )
         {
             util.DEBUG(debugId+"Starting server on localhost "+ serverHost);
             shellCmd = fullCmd;
@@ -2368,8 +2075,7 @@ public class ReplicationRun extends BaseTestCase
             util.DEBUG(debugId+"Starting server on non-local host "+ serverHost);
             
             String[] shEnvElements = {"setenv CLASS_PATH "+serverClassPath
-                    , "setenv PATH "+serverVM+FS+".."+FS+"bin:${PATH}"
-                    };
+                    , "setenv PATH "+serverVM+FS+".."+FS+"bin:${PATH}"};
             String shellEnv = "";
             for ( int i=0;i<shEnvElements.length;i++)
             {shellEnv = shellEnv + shEnvElements[i] + ";";}
@@ -2427,24 +2133,27 @@ public class ReplicationRun extends BaseTestCase
             String fullDbDirPath,
             String securityOption) // FIXME? true/false?
     throws Exception
-    { // Only partly tested!
+    { // Wotk in progress. Not currently used! Only partly tested!
         util.DEBUG("startServer_direct " + serverHost 
                 + " " + interfacesToListenOn +  " " + serverPort
                 + " " + fullDbDirPath);
         assertTrue("Attempt to start server on non-localhost: " + serverHost, 
                 serverHost.equalsIgnoreCase("localhost"));
-        Properties p = System.getProperties();
-        p.setProperty("derby.system.home", fullDbDirPath);
+        
+        System.setProperty("derby.system.home", fullDbDirPath);
+        System.setProperty("user.dir", fullDbDirPath);
+        
         NetworkServerControl server = new NetworkServerControl(
                 InetAddress.getByName(interfacesToListenOn), serverPort);
+        
         server.start(null); 
         pingServer(serverHost, serverPort, 5);
+        
         Properties sp = server.getCurrentProperties();
         sp.setProperty("noSecurityManager", 
                 securityOption.equalsIgnoreCase("-noSecurityManager")?"true":"false");
-        sp.setProperty("derby.system.home",fullDbDirPath);
-        sp.setProperty("derby.infolog.append","true");
         // derby.log for both master and slave ends up in masters system!
+        // Both are run in the same VM! Not a good idea?
         return server;
     }
 
@@ -2736,7 +2445,7 @@ public class ReplicationRun extends BaseTestCase
         
     }
 
-    private void startOptionalLoad(Load load,
+    void startOptionalLoad(Load load,
             String dbSubPath,
             String serverHost,
             int serverPort)
@@ -2750,7 +2459,7 @@ public class ReplicationRun extends BaseTestCase
                 serverHost,
                 serverPort);
     }
-    private void startLoad(String load,
+    void startLoad(String load,
             String dbSubPath,
             String database,
             boolean existingDB,
@@ -2925,7 +2634,7 @@ public class ReplicationRun extends BaseTestCase
                     + testPostStoppedSlaveServerReturn);
         }
         
-    private boolean testPreStartedMasterServer()
+    boolean testPreStartedMasterServer()
         throws Exception
     {
         /*
@@ -2949,7 +2658,7 @@ test.preStartedMasterServer.return=true
         return testPreStartedMasterServerReturn;
     }
 
-    private boolean testPreStartedSlaveServer()
+    boolean testPreStartedSlaveServer()
         throws Exception
     {
         /*
@@ -2971,7 +2680,7 @@ test.preStartedSlaveServer.return=true
         return testPreStartedSlaveServerReturn;
     }
 
-    private boolean testPreStartedMaster()
+    boolean testPreStartedMaster()
         throws Exception
     {
         /*
@@ -2994,7 +2703,7 @@ test.preStartedMaster.return=true
         return testPreStartedMasterReturn;
     }
 
-    private boolean testPreInitSlave()
+    boolean testPreInitSlave()
         throws Exception
     {
         /*
@@ -3017,7 +2726,7 @@ test.preInitSlave.return=true
         return testPreInitSlaveReturn;
     }
 
-    private boolean testPreStartedSlave()
+    boolean testPreStartedSlave()
         throws Exception
     {
         /*
@@ -3040,7 +2749,7 @@ test.preStartedSlave.return=true
         return testPreStartedSlaveReturn;
     }
 
-    private boolean testPostStartedMasterAndSlave()
+    boolean testPostStartedMasterAndSlave()
         throws Exception
     {
         /*
@@ -3064,7 +2773,7 @@ test.postStartedMasterAndSlave.return=true
         return testPostStartedMasterAndSlaveReturn;
     }
 
-    private boolean testPreStoppedMaster()
+    boolean testPreStoppedMaster()
         throws Exception
     {
         /*
@@ -3087,7 +2796,7 @@ test.preStoppedMaster.return=true
         return testPreStoppedMasterReturn;
     }
 
-    private boolean testPreStoppedMasterServer()
+    boolean testPreStoppedMasterServer()
         throws Exception
     {
         /*
@@ -3110,7 +2819,7 @@ test.preStoppedMasterServer.return=true
         return testPreStoppedMasterServerReturn;
     }
 
-    private boolean testPreStoppedSlave()
+    boolean testPreStoppedSlave()
         throws Exception
     {
         /*
@@ -3133,7 +2842,7 @@ test.preStoppedSlave.return=true
         return testPreStoppedSlaveReturn;
     }
 
-    private boolean testPreStoppedSlaveServer()
+    boolean testPreStoppedSlaveServer()
         throws Exception
     {
         /*
@@ -3156,7 +2865,7 @@ test.preStoppedSlaveServer.return=true
         return testPreStoppedSlaveServerReturn;
     }
 
-    private boolean testPostStoppedSlaveServer()
+    boolean testPostStoppedSlaveServer()
         throws Exception
     {
         /*

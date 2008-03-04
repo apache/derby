@@ -23,13 +23,7 @@ package org.apache.derbyTesting.functionTests.tests.replicationTests;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
-import org.apache.derbyTesting.functionTests.tests.derbynet.PrepareStatementTest;
-import org.apache.derbyTesting.functionTests.tests.lang.AnsiTrimTest;
-import org.apache.derbyTesting.functionTests.tests.lang.CreateTableFromQueryTest;
-import org.apache.derbyTesting.functionTests.tests.lang.SimpleTest;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.JDBCClient;
-import org.apache.derbyTesting.junit.TestConfiguration;
 
 public class ReplicationTestRun extends BaseJDBCTestCase
 {
@@ -54,10 +48,8 @@ public class ReplicationTestRun extends BaseJDBCTestCase
         suite.addTest(StandardTests.simpleTest(masterHostName, masterPortNo));
         System.out.println("*** Done suite.addTest(StandardTests.simpleTest())");
         
-        /* PoC: Gives 'Something wrong with the instants!' Seems to be volume related? * /
         suite.addTest(StandardTests.prepareStatementTest(masterHostName, masterPortNo)); 
         System.out.println("*** Done suite.addTest(StandardTests.prepareStatementTest())");
-        / * */
         
         suite.addTest(StandardTests.ansiTrimTest(masterHostName, masterPortNo)); // Something wrong with the instants!
         System.out.println("*** Done suite.addTest(StandardTests.ansiTrimTest())");
@@ -65,13 +57,29 @@ public class ReplicationTestRun extends BaseJDBCTestCase
         suite.addTest(StandardTests.createTableFromQueryTest(masterHostName, masterPortNo));
         System.out.println("*** Done suite.addTest(StandardTests.createTableFromQueryTest())");
         
+        /* Need decoration?
+        suite.addTest(StandardTests.databaseClassLoadingTest(masterHostName, masterPortNo));
+        System.out.println("*** Done suite.addTest(StandardTests.databaseClassLoadingTest())"); */
+        
+        /* Need decoration!
+        suite.addTest(StandardTests.dynamicLikeOptimizationTest(masterHostName, masterPortNo));
+        System.out.println("*** Done suite.addTest(StandardTests.dynamicLikeOptimizationTest())"); */
+
+        // suite.addTest(ExistsWithSetOpsTest.suite()); GONE!
+        
+        /* Need decoration!
+        suite.addTest(StandardTests.grantRevokeTest(masterHostName, masterPortNo));
+        System.out.println("*** Done suite.addTest(StandardTests.grantRevokeTest())"); */
+        
+        /* Need decoration!
+        suite.addTest(StandardTests.groupByExpressionTest(masterHostName, masterPortNo));
+        System.out.println("*** Done suite.addTest(StandardTests.groupByExpressionTest())"); */
+      
+        /* Need decoration?
+        suite.addTest(StandardTests.langScripts(masterHostName, masterPortNo));
+        System.out.println("*** Done suite.addTest(StandardTests.langScripts())"); */
+        
         /*
-        suite.addTest(DatabaseClassLoadingTest.suite());
-        suite.addTest(DynamicLikeOptimizationTest.suite());
-        suite.addTest(ExistsWithSetOpsTest.suite());
-        suite.addTest(GrantRevokeTest.suite());
-        suite.addTest(GroupByExpressionTest.suite());
-		suite.addTest(LangScripts.suite());
         suite.addTest(MathTrigFunctionsTest.suite());
         suite.addTest(PrepareExecuteDDL.suite());
         suite.addTest(RoutineSecurityTest.suite());

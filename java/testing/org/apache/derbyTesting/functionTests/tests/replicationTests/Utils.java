@@ -21,19 +21,8 @@ limitations under the License.
 package org.apache.derbyTesting.functionTests.tests.replicationTests;
 
 import java.nio.channels.FileChannel;
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
-import org.apache.derby.drda.NetworkServerControl;
-import java.net.InetAddress;
-import java.net.Inet6Address;
-
-import java.sql.*;
 import java.io.*;
-import java.util.*;
 
-import org.apache.derbyTesting.junit.BaseTestCase;
-import org.apache.derbyTesting.junit.JDBC;
 
 /**
  * Utilities for replication test framework:
@@ -56,7 +45,6 @@ class Utils
      * NB! May also delete subdirectories!
      * @param dir where to delete files.
      * @param deleteRootDirectory if true deletes also the given root directory.
-     * @return number of files/directories deleted.
      * @throws IOException if operation fails.
      */
     void cleanDir(String dir, boolean deleteRootDirectory)
@@ -129,7 +117,6 @@ class Utils
      * Copy directory sourcePath into directory destPath
      * @param sourcePath Directory to copy
      * @param destPath Directory to copy into
-     * @return number of files copied.
      * @throws IOException If copying failed.
      */
     void copyDir(String sourcePath, String destPath)
@@ -142,13 +129,12 @@ class Utils
     * @param srcPath Directory or file to copy from
     * @param destPath Directory or file to copy to
     * @throws IOException If copying failed.
-    * @return number of files copied.
     */
-    void copyFiles(String srcDir, String destDir) 
+    void copyFiles(String srcPath, String destPath) 
     throws IOException
     {
-        File src = new File(srcDir);
-        File dest = new File(destDir);
+        File src = new File(srcPath);
+        File dest = new File(destPath);
         
         if (src.isDirectory())
         {
@@ -199,6 +185,12 @@ class Utils
         FileWriter out = new FileWriter(outFile);
         out.write(text);
         out.close();
+    }
+
+    void mkDirs(String dirPath)
+    {
+        File dir = new File(dirPath);
+        dir.mkdirs();
     }
     
     ///////////////////////////////////////////////////////////////////////////////////

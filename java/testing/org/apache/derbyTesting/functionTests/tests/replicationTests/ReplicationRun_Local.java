@@ -133,7 +133,6 @@ public class ReplicationRun_Local extends ReplicationRun
         replicationTest = "org.apache.derbyTesting.functionTests.tests.replicationTests.ReplicationTestRun";
         util.DEBUG("replicationTest: " + replicationTest);
         replicationVerify = "org.apache.derbyTesting.functionTests.tests.replicationTests.ReplicationTestRun_Verify";
-        // replicationVerify = "/home/os136789/Replication/testing/verify_ReplicationTestRun.sql";
         util.DEBUG("replicationVerify: " + replicationVerify);
 
         runTest(replicationTest, // Returns immediatly if replicationTest is null.
