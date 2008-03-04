@@ -64,4 +64,13 @@ public class EnvTest extends TestCase {
 	public void testHasTools() {
 		setName(Derby.hasTools() + "_hasTools");
 	}
+    /*
+    ** XML related tests
+    */
+    public void testClasspathHasXalanAndJAXP() {
+        setName(XML.classpathHasXalanAndJAXP() + "_classpathHasXalanAndJAXP");
+    }
+    public void testClasspathMeetsXMLReqs() {
+        setName(XML.classpathMeetsXMLReqs() + "_classpathMeetsXMLReqs");
+    }
 }
