@@ -2075,6 +2075,16 @@
         <fail if="tests.failed">Tests Failed!</fail>
     </target>	
 	
+    <!-- Run the junit-single target with the classpath set to include
+         the main derby jar files. Requires that the caller have
+         junit.jar in CLASSPATH due to some bug in ant that is
+         fixed in version 1.7.
+    -->
+    <target name="junit-single-codeline-jars"
+        depends="junit-all-codeline-jars-set-properties,junit-single">
+        <fail if="tests.failed">Tests Failed!</fail>
+    </target>
+
 	<target name="junit-all-codeline-jars-set-properties" depends="setsanityname">
 		<property name="derby.jar.base" value="${basedir}/jars/${sanity.name}"/>
 	    <property name="derby.junit.classpath"
@@ -2084,9 +2094,34 @@
 	
 
 <!-- =================================================================== -->
-<!--                         EMMA utility targets                       -->
+<!--                         EMMA utility targets                        -->
 <!-- =================================================================== -->
 
+<!--
+There are three "top-level" targets that use EMMA:
+
+'emma-clean' will delete any classes and jar files that have been instrumented
+with EMMA.
+
+Before using the 'emma-all' and 'emma-single' targets, you should build jar
+files using the 'buildjars' target.
+
+'emma-all' will instrument your jar files using EMMA, and run the 'junit-all' 
+target, before producting code coverage reports from the testrun.
+
+'emma-single' will instrument your jar files using EMMA, and run the 
+'junit-single' target, before producing code coverage reports from the testrun.
+To select which test or suite to run with the 'emma-single' target you must set
+the system property derby.junit.testclass to the full classname of the suite or
+test you want to run.
+
+These targets use EMMA code, and depend upon emma.jar and emma_ant.jar being 
+copied to your tools/java/ directory. You can download these from
+http://emma.sourceforge.net/downloads.html.
+
+If you use ant 1.6.5 you will have to add junit to your classpath, with ant 1.7
+you should not have to do this.
+-->
 
     <!-- directory that will contain the instrumented jar-files: -->
     <property name="emmabase" value="${jarsdist.dir}/emma"/>
@@ -2098,8 +2133,6 @@
             <fileset dir="${emmabase}" includes="**"/>
         </delete>
     </target>
-    
-    <!-- These targets depend upon emma.jar and emma_ant.jar being installed under tools/java/ -->
 
     <target name="emma-init" depends="initjars">
         <!-- EMMA distribution: -->
