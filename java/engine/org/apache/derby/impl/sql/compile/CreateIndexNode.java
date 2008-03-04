@@ -288,19 +288,20 @@ public class CreateIndexNode extends DDLStatementNode
         }
 
 
-		return	getGenericConstantActionFactory().getCreateIndexConstantAction(               
-                false, // not for CREATE TABLE
-                unique,
-											  indexType,
-											  sd.getSchemaName(),
-											  indexName.getTableName(),
-											  tableName.getTableName(),
-											  td.getUUID(),
-											  columnNames,
-											  isAscending,
-											  false,
-											  null,
-											  properties);
+		return getGenericConstantActionFactory().getCreateIndexConstantAction(
+                    false, // not for CREATE TABLE
+                    unique,
+                    false, //its not a UniqueWithDuplicateNulls Index
+                    indexType,
+                    sd.getSchemaName(),
+                    indexName.getTableName(),
+                    tableName.getTableName(),
+                    td.getUUID(),
+                    columnNames,
+                    isAscending,
+                    false,
+                    null,
+                    properties);
 	}
 
 	/**

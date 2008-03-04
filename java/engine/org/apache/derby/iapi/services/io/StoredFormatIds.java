@@ -773,6 +773,7 @@ public interface StoredFormatIds {
      */
     static public final int INDEX_DESCRIPTOR_IMPL_V02_ID =
             (MIN_ID_2 + 387);
+    
 
     /**
         class org.apache.derby.iapi.types.TinyintTypeId
@@ -1655,6 +1656,8 @@ public interface StoredFormatIds {
     public static final int ACCESS_HEAP_V3_ID =
             (MIN_ID_2 + 467);
 
+    public static final int ACCESS_B2I_V5_ID = 
+            (MIN_ID_2 + 470);
     /******************************************************************
     **
     ** PropertyConglomerate
@@ -1892,7 +1895,7 @@ public interface StoredFormatIds {
      * Make sure this is updated when a new module is added
      */
     public static final int MAX_ID_2 =
-            (MIN_ID_2 + 469);
+            (MIN_ID_2 + 470);
 
     // DO NOT USE 4 BYTE IDS ANYMORE
     static public final int MAX_ID_4 =

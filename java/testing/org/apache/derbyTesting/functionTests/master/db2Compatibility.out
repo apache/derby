@@ -113,20 +113,6 @@ ij> create table customer (id  int NOT NULL, id2 int, name char(100), primary ke
 0 rows inserted/updated/deleted
 ij> drop table customer;
 0 rows inserted/updated/deleted
-ij> -- Unique key constraint, DB2 requires NOT null on the columns.
-create table customer (id int unique, name char(100));
-ERROR 42831: 'ID' cannot be a column of a primary key or unique key because it can contain null values.
-ij> create table customer (id  int NOT NULL, id2 int, constraint custCon unique(id, id2));
-ERROR 42831: 'ID2' cannot be a column of a primary key or unique key because it can contain null values.
-ij> -- check they actually work!
-create table customer (id int NOT NULL primary key, name char(100));
-0 rows inserted/updated/deleted
-ij> drop table customer;
-0 rows inserted/updated/deleted
-ij> create table customer (id  int NOT NULL, id2 int NOT NULL, name char(100), primary key (id, id2));
-0 rows inserted/updated/deleted
-ij> drop table customer;
-0 rows inserted/updated/deleted
 ij> -- drop schema requires restrict
 create schema fred;
 0 rows inserted/updated/deleted
@@ -1720,7 +1706,7 @@ create table t1 (c1 int, c2 int);
 ij> alter table t1 add constraint pk1 primary key (c1);
 ERROR 42831: 'C1' cannot be a column of a primary key or unique key because it can contain null values.
 ij> alter table t1 add constraint uc1 unique (c2);
-ERROR 42831: 'C2' cannot be a column of a primary key or unique key because it can contain null values.
+0 rows inserted/updated/deleted
 ij> -- positive tests
 create table t2 (c1 int not null, c2 char(10) not null);
 0 rows inserted/updated/deleted

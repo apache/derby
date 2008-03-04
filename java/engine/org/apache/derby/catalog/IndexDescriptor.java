@@ -37,6 +37,11 @@ public interface IndexDescriptor
 	 * Returns true if the index is unique.
 	 */
 	boolean			isUnique();
+	/**
+	 * Returns true if the index is duplicate keys only for null key parts. 
+     * This is effective only if isUnique is false.
+	 */
+	boolean			isUniqueWithDuplicateNulls();
 
 	/**
 	 * Returns an array of column positions in the base table.  Each index

@@ -119,6 +119,17 @@ public class ExternalSortFactory implements
 	{
 		return formatUUID;
 	}
+        
+	/**
+	 * Returns merge sort implementation. Extending classes can overide this 
+	 * method to customize sorting.
+     *
+	 * @returns MergeSort implementation
+	 */
+	protected MergeSort getMergeSort() 
+    {
+		return new MergeSort();
+	}
 
 	/*
 	** Methods of SortFactory
@@ -143,7 +154,7 @@ public class ExternalSortFactory implements
     int                     estimatedRowSize)
         throws StandardException
 	{
-		MergeSort sort = new MergeSort();
+		MergeSort sort = getMergeSort();
 
         // RESOLVE - mikem change this to use estimatedRows and 
         // estimatedRowSize to come up with a smarter number for sortBufferMax

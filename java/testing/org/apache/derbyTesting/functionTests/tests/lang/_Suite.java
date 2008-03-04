@@ -124,6 +124,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(CommentTest.suite());
         suite.addTest(NestedWhereSubqueryTest.suite());
         suite.addTest(ConglomerateSharingTest.suite());
+        suite.addTest(NullableUniqueConstraintTest.suite());
         suite.addTest(OLAPTest.suite());
 
         // Add the XML tests, which exist as a separate suite

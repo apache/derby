@@ -33,6 +33,8 @@ import org.apache.derby.iapi.services.io.FormatableBitSet;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.store.raw.Page;
+import org.apache.derby.impl.store.access.btree.ControlRow;
 
 import org.apache.derby.impl.store.access.conglomerate.ConglomerateUtil;
 import org.apache.derby.iapi.store.access.conglomerate.LogicalUndo;
@@ -143,8 +145,70 @@ import org.apache.derby.iapi.store.access.conglomerate.Conglomerate;
  *            conglomerate id itself.  There exists a single B2IFactory which
  *            must be able to read all btree format id's.  
  *
+ *            This format was used for all Derby database B2I's in version 10.3.
+ *
+ * @upgrade   The format id of this object is currently always read from disk
+ *            as the first field of the conglomerate itself.  A bootstrap
+ *            problem exists as we don't know the format id of the B2I 
+ *            until we are in the "middle" of reading the B2I.  Thus the
+ *            base B2I implementation must be able to read and write 
+ *            all formats based on the reading the 
+ *            "format_of_this_conglomerate". 
+ *
+ *            soft upgrade to ACCESS_B2I_V5_ID:
+ *                read:
+ *                    old format is readable by current B2I implementation,
+ *                    with automatic in memory creation of default
+ *                    isUniqueWithDuplicateNulls value of false.
+ *                    No code other than readExternal and writeExternal need 
+ *                    know about old format.
+ *                write:
+ *                    will never write out new format id in soft upgrade mode.
+ *                    Code in readExternal and writeExternal handles writing
+ *                    correct version.  Code in the factory handles making
+ *                    sure new conglomerates use the B2I_v10_3 class
+ *                    that will write out old format info.
+ *
+ *            hard upgrade to ACCESS_B2I_V5_ID:
+ *                read:
+ *                    old format is readable by current B2I implementation,
+ *                    with automatic in memory creation of default
+ *                    isUniqueWithDuplicateNulls value of false.
+ *
+ *                write:
+ *                    Only "lazy" upgrade will happen.  New format will only
+ *                    get written for new conglomerate created after the 
+ *                    upgrade.  Old conglomerates continue to be handled the
+ *                    same as soft upgrade.
+ *
+ * @disk_layout 
+ *     format_of_this_conlgomerate(byte[])
+ *     containerid(long)
+ *     segmentid(int)
+ *     number_of_key_fields(int)
+ *     number_of_unique_columns(int)
+ *     allow_duplicates(boolean)
+ *     maintain_parent_links(boolean)
+ *     array_of_format_ids(byte[][])
+ *     baseConglomerateId(long)
+ *     rowLocationColumn(int)
+ *     ascend_column_info(FormatableBitSet)
+ *     collation_ids(compressed array of ints)
+ *
+ */
+
+/*
+ * @format_id ACCESS_B2I_V5_ID
+ *
+ * @purpose   The tag that describes the on disk representation of the B2I
+ *            conglomerate object.  Access contains no "directory" of 
+ *            conglomerate information.  In order to bootstrap opening a file
+ *            it encodes the factory that can open the conglomerate in the 
+ *            conglomerate id itself.  There exists a single B2IFactory which
+ *            must be able to read all btree format id's.  
+ *
  *            This format is the current version id of B2I and has been used 
- *            in versions of Derby after the 10.2 release.
+ *            in versions of Derby after the 10.3 release.
  *
  * @upgrade   This is the current version, no upgrade necessary.
  *
@@ -161,7 +225,7 @@ import org.apache.derby.iapi.store.access.conglomerate.Conglomerate;
  *     rowLocationColumn(int)
  *     ascend_column_info(FormatableBitSet)
  *     collation_ids(compressed array of ints)
- *
+ *     isUniqueWithDuplicateNulls(boolean)
  */
 
 /**
@@ -187,7 +251,7 @@ public class B2I extends BTree
     private static final String PROPERTY_BASECONGLOMID = "baseConglomerateId";
     private static final String PROPERTY_ROWLOCCOLUMN  = "rowLocationColumn";
 
-    static final int FORMAT_NUMBER = StoredFormatIds.ACCESS_B2I_V4_ID;
+    static final int FORMAT_NUMBER = StoredFormatIds.ACCESS_B2I_V5_ID;
 
 	/*
 	** Fields of B2I.
@@ -377,7 +441,7 @@ public class B2I extends BTree
 
         return(cc);
     }
-
+    
     /**************************************************************************
 	 *  Private methods of B2I, arranged alphabetically.
      **************************************************************************
@@ -996,7 +1060,7 @@ public class B2I extends BTree
 	*/
 	public int getTypeFormatId() 
     {
-		return StoredFormatIds.ACCESS_B2I_V4_ID;
+		return StoredFormatIds.ACCESS_B2I_V5_ID;
 	}
 
 
@@ -1037,18 +1101,34 @@ public class B2I extends BTree
      *
      * @see java.io.Externalizable#writeExternal
      **/
-	public void writeExternal(ObjectOutput out) 
+	public void writeExternal_v10_3(ObjectOutput out) 
         throws IOException 
     {
         // First part of ACCESS_B2I_V4_ID format is the ACCESS_B2I_V3_ID format.
         writeExternal_v10_2(out);
-
-		if (conglom_format_id == StoredFormatIds.ACCESS_B2I_V4_ID)
+		if (conglom_format_id == StoredFormatIds.ACCESS_B2I_V4_ID
+                || conglom_format_id == StoredFormatIds.ACCESS_B2I_V5_ID)
         {
             // Now append sparse array of collation ids
             ConglomerateUtil.writeCollationIdArray(collation_ids, out);
         }
-	}
+    }
+
+
+    /**
+     * Store the stored representation of the column value in the
+     * stream.
+     * <p>
+     * For more detailed description of the ACCESS_B2I_V3_ID and 
+     * ACCESS_B2I_V5_ID formats see documentation at top of file.
+     *
+     * @see java.io.Externalizable#writeExternal
+     **/
+    public void writeExternal(ObjectOutput out) throws IOException {
+        writeExternal_v10_3 (out);
+        if (conglom_format_id == StoredFormatIds.ACCESS_B2I_V5_ID)
+            out.writeBoolean (isUniqueWithDuplicateNulls());
+    }
 
     /**
      * Restore the in-memory representation from the stream.
@@ -1064,7 +1144,6 @@ public class B2I extends BTree
 		throws IOException, ClassNotFoundException
 	{
 		super.readExternal(in);
-		
 		baseConglomerateId = in.readLong();
 		rowLocationColumn  = in.readInt();
 
@@ -1074,7 +1153,7 @@ public class B2I extends BTree
         ascDescInfo = new boolean[ascDescBits.getLength()];
         for(int i =0 ; i < ascDescBits.getLength(); i++)
             ascDescInfo[i] = ascDescBits.isSet(i);
-
+        
         // In memory maintain a collation id per column in the template.
         collation_ids = new int[format_ids.length];
 
@@ -1084,10 +1163,15 @@ public class B2I extends BTree
         for (int i = 0; i < format_ids.length; i++)
             collation_ids[i] = StringDataValue.COLLATION_TYPE_UCS_BASIC;
 
-		if (conglom_format_id == StoredFormatIds.ACCESS_B2I_V4_ID)
+        // initialize the unique with null setting to false, to be reset
+        // below when read from disk.  For version ACCESS_B2I_V3_ID and
+        // ACCESS_B2I_V4_ID, this is the default and no resetting is necessary.
+        setUniqueWithDuplicateNulls(false);
+
+		if (conglom_format_id == StoredFormatIds.ACCESS_B2I_V4_ID
+                || conglom_format_id == StoredFormatIds.ACCESS_B2I_V5_ID)
         {
             // current format id, read collation info from disk
-
             if (SanityManager.DEBUG)
             {
                 // length must include row location column and at least
@@ -1101,7 +1185,7 @@ public class B2I extends BTree
         }
         else if (conglom_format_id != StoredFormatIds.ACCESS_B2I_V3_ID)
         {
-            // Currently only V3 and V4 should be possible in a Derby DB.
+            // Currently only V3, V4 and V5 should be possible in a Derby DB.
             // Actual work for V3 is handled by default code above, so no
             // special work is necessary.
 
@@ -1110,6 +1194,9 @@ public class B2I extends BTree
                 SanityManager.THROWASSERT(
                     "Unexpected format id: " + conglom_format_id);
             }
+        }
+        if (conglom_format_id == StoredFormatIds.ACCESS_B2I_V5_ID) {
+            setUniqueWithDuplicateNulls(in.readBoolean());
         }
 	}
 

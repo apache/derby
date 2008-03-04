@@ -4775,8 +4775,6 @@ ij> CREATE INDEX "APP"."NEW_INDEX3" ON "APP"."COLLS" ("COLLID");
 0 rows inserted/updated/deleted
 ij> CREATE INDEX "APP"."NEW_INDEX2" ON "APP"."COLLS" ("ID");
 0 rows inserted/updated/deleted
-ij> ALTER TABLE "APP"."COLLS" ADD CONSTRAINT "NEW_KEY2" UNIQUE ("ID", "COLLID");
-ERROR 42831: 'ID' cannot be a column of a primary key or unique key because it can contain null values.
 ij> insert into colls values ('123', 2);
 1 row inserted/updated/deleted
 ij> insert into colls values ('124', -5);

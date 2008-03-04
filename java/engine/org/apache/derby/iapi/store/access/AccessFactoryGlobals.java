@@ -71,6 +71,8 @@ public interface AccessFactoryGlobals
 
 	public static final String SORT_EXTERNAL = "sort external";
 	public static final String SORT_INTERNAL = "sort internal";
+    public static final String SORT_UNIQUEWITHDUPLICATENULLS_EXTERNAL 
+                                    = "sort almost unique external";
 
 	public static final String NESTED_READONLY_USER_TRANS = "nestedReadOnlyUserTransaction";
 	public static final String NESTED_UPDATE_USER_TRANS = "nestedUpdateUserTransaction";

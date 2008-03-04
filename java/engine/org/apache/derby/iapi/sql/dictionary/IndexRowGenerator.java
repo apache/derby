@@ -70,8 +70,48 @@ public class IndexRowGenerator implements IndexDescriptor, Formatable
 								boolean[] isAscending,
 								int numberOfOrderedColumns)
 	{
+		id = new IndexDescriptorImpl(
+                        indexType,
+                        isUnique, //default uniqueWithDuplicateNulls to false
+                        false,
+                        baseColumnPositions,
+                        isAscending,
+                        numberOfOrderedColumns);
+
+		if (SanityManager.DEBUG)
+		{
+			SanityManager.ASSERT(baseColumnPositions != null,
+				"baseColumnPositions are null");
+		}
+	}
+        
+    /**
+     * Constructor for an IndexRowGeneratorImpl
+     * 
+     * @param indexType		The type of index
+     * @param isUnique		True means the index is unique
+     * @param isUniqueWithDuplicateNulls means the index is almost unique
+     *                              i.e. unique only for non null keys
+     * @param baseColumnPositions	An array of column positions in the base
+     * 								table.  Each index column corresponds to a
+     * 								column position in the base table.
+     * @param isAscending	An array of booleans telling asc/desc on each
+     * 						column.
+     * @param numberOfOrderedColumns	In the future, it will be possible
+     * 									to store non-ordered columns in an
+     * 									index.  These will be useful for
+     * 									covered queries.
+     */
+	public IndexRowGenerator(String indexType,
+								boolean isUnique,
+								boolean isUniqueWithDuplicateNulls,
+								int[] baseColumnPositions,
+								boolean[] isAscending,
+								int numberOfOrderedColumns)
+	{
 		id = new IndexDescriptorImpl(indexType,
 									isUnique,
+									isUniqueWithDuplicateNulls,
 									baseColumnPositions,
 									isAscending,
 									numberOfOrderedColumns);
@@ -229,6 +269,13 @@ public class IndexRowGenerator implements IndexDescriptor, Formatable
 	{
 	}
 
+	/**
+     * @see IndexDescriptor#isisUniqueWithDuplicateNulls
+     */
+	public boolean isUniqueWithDuplicateNulls()
+	{
+		return id.isUniqueWithDuplicateNulls();
+	}
 	/** @see IndexDescriptor#isUnique */
 	public boolean isUnique()
 	{

@@ -58,30 +58,46 @@ public class IndexDescriptorImpl implements IndexDescriptor, Formatable
 	private boolean[]	isAscending;
 	private int			numberOfOrderedColumns;
 	private String		indexType;
+	//attribute to indicate the indicates allows duplicate only in
+	//case of non null keys. This attribute has no effect if the isUnique
+    //is true. If isUnique is false and isUniqueWithDuplicateNulls is set 
+    //to true the index will allow duplicate nulls but for non null keys 
+    //will act like a unique index.
+	private boolean     isUniqueWithDuplicateNulls;
 
 	/**
-	 * Constructor for an IndexDescriptorImpl
-	 *
-	 * @param indexType		The type of index
-	 * @param isUnique		True means the index is unique
-	 * @param baseColumnPositions	An array of column positions in the base
-	 *								table.  Each index column corresponds to a
-	 *								column position in the base table.
-	 * @param isAscending	An array of booleans telling asc/desc on each
-	 *						column.
-	 * @param numberOfOrderedColumns	In the future, it will be possible
-	 *									to store non-ordered columns in an
-	 *									index.  These will be useful for
-	 *									covered queries.
-	 */
+     * Constructor for an IndexDescriptorImpl
+     * 
+     * @param indexType		The type of index
+     * @param isUnique		True means the index is unique
+     * @param isUniqueWithDuplicateNulls True means the index will be unique
+     *                              for non null values but duplicate nulls
+     *                              will be allowed.
+     *                              This parameter has no effect if the isUnique
+     *                              is true. If isUnique is false and 
+     *                              isUniqueWithDuplicateNulls is set to true the
+     *                              index will allow duplicate nulls but for
+     *                              non null keys will act like a unique index.
+     * @param baseColumnPositions	An array of column positions in the base
+     * 								table.  Each index column corresponds to a
+     * 								column position in the base table.
+     * @param isAscending	An array of booleans telling asc/desc on each
+     * 						column.
+     * @param numberOfOrderedColumns	In the future, it will be possible
+     * 									to store non-ordered columns in an
+     * 									index.  These will be useful for
+     * 									covered queries.
+     */
 	public IndexDescriptorImpl(String indexType,
 								boolean isUnique,
+								boolean isUniqueWithDuplicateNulls,
 								int[] baseColumnPositions,
 								boolean[] isAscending,
 								int numberOfOrderedColumns)
 	{
 		this.indexType = indexType;
 		this.isUnique = isUnique;
+		this.isUniqueWithDuplicateNulls = isUniqueWithDuplicateNulls;
 		this.baseColumnPositions = baseColumnPositions;
 		this.isAscending = isAscending;
 		this.numberOfOrderedColumns = numberOfOrderedColumns;
@@ -90,6 +106,16 @@ public class IndexDescriptorImpl implements IndexDescriptor, Formatable
 	/** Zero-argument constructor for Formatable interface */
 	public IndexDescriptorImpl()
 	{
+	}
+
+	/**
+     * 
+     * 
+     * @see IndexDescriptor#isUniqueWithDuplicateNulls
+     */
+	public boolean isUniqueWithDuplicateNulls()
+	{
+		return isUniqueWithDuplicateNulls;
 	}
 
 	/** @see IndexDescriptor#isUnique */
@@ -189,6 +215,8 @@ public class IndexDescriptorImpl implements IndexDescriptor, Formatable
 
 		if (isUnique)
 			sb.append("UNIQUE ");
+		else if (isUniqueWithDuplicateNulls)
+			sb.append ("ALMOST UNIQUE");
 
 		sb.append(indexType);
 
@@ -230,6 +258,13 @@ public class IndexDescriptorImpl implements IndexDescriptor, Formatable
 		}
 		numberOfOrderedColumns = fh.getInt("orderedColumns");
 		indexType = (String)fh.get("indexType");
+		//isUniqueWithDuplicateNulls attribute won't be present if the index
+		//was created in older versions  
+		if (fh.containsKey("isUniqueWithDuplicateNulls"))
+			isUniqueWithDuplicateNulls = fh.getBoolean(
+                                    "isUniqueWithDuplicateNulls");
+		else
+			isUniqueWithDuplicateNulls = false;
 	}
 
 	/**
@@ -249,7 +284,10 @@ public class IndexDescriptorImpl implements IndexDescriptor, Formatable
 		}
 		fh.putInt("orderedColumns", numberOfOrderedColumns);
 		fh.put("indexType", indexType);
-		out.writeObject(fh);
+		//write the new attribut older versions will simply ignore it
+		fh.putBoolean("isUniqueWithDuplicateNulls", 
+                                        isUniqueWithDuplicateNulls);
+        out.writeObject(fh);
 	}
 
 	/* TypedFormat interface */
@@ -281,10 +319,11 @@ public class IndexDescriptorImpl implements IndexDescriptor, Formatable
 			** elements (this is hardest, so save for last)
 			*/
 			if ((id.isUnique == this.isUnique) &&
+				(id.isUnique == this.isUnique) &&
 				(id.baseColumnPositions.length ==
 										this.baseColumnPositions.length) &&
 				(id.numberOfOrderedColumns == this.numberOfOrderedColumns) &&
-				(id.indexType.equals(this.indexType)))
+					(id.indexType.equals(this.indexType)))
 			{
 				/*
 				** Everything but array elements known to be true -

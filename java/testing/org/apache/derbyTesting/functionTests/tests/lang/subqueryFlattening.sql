@@ -284,7 +284,6 @@ drop table colls;
 CREATE TABLE "APP"."COLLS" ("ID" VARCHAR(128), "COLLID" SMALLINT NOT NULL);
 CREATE INDEX "APP"."NEW_INDEX3" ON "APP"."COLLS" ("COLLID");
 CREATE INDEX "APP"."NEW_INDEX2" ON "APP"."COLLS" ("ID");
-ALTER TABLE "APP"."COLLS" ADD CONSTRAINT "NEW_KEY2" UNIQUE ("ID", "COLLID");
 insert into colls values ('123', 2);
 insert into colls values ('124', -5);
 insert into colls values ('24', 1);

@@ -144,8 +144,6 @@ public class PrimaryKeyTest extends BaseJDBCTestCase
 		assertUpdateCount(s , 1 , "insert into pos1(c1) values(1)");
 		assertStatementError("23505" , s , "insert into pos1(c1) values(1)");
 		assertStatementError("23502" , s , "insert into pos1(c1) values(null)");
-		//-- verify that a unique key can not contain nulls
-		assertStatementError("42831" , s , "create table pos1 (c1 int unique, c2 int)");
 		assertUpdateCount(s , 0 , "drop table pos1");
 	}
 	/**

@@ -527,9 +527,10 @@ String[] TwoByte = {
         /* 463 */   "org.apache.derby.impl.sql.catalog.CoreDDFinderClassInfo",
         /* 464 */   "org.apache.derby.iapi.types.SqlXmlUtil",        
 		/* 465 */   "org.apache.derby.impl.store.raw.data.CompressSpacePageOperation",
-        /* 466 */   "org.apache.derby.impl.store.access.btree.index.B2I",
+        /* 466 */   "org.apache.derby.impl.store.access.btree.index.B2I_10_3",
         /* 467 */   "org.apache.derby.impl.store.access.heap.Heap",
-        /* 468 */       "org.apache.derby.iapi.types.DTSClassInfo",
-        /* 469 */       "org.apache.derby.catalog.types.RowMultiSetImpl"
+        /* 468 */   "org.apache.derby.iapi.types.DTSClassInfo",
+        /* 469 */   "org.apache.derby.catalog.types.RowMultiSetImpl",
+        /* 470 */   "org.apache.derby.impl.store.access.btree.index.B2I",
 };
 }

@@ -112,6 +112,11 @@ public abstract class BTree extends GenericConglomerate
     public static final String PROPERTY_NUNIQUECOLUMNS  = "nUniqueColumns";
     public static final String PROPERTY_PARENTLINKS     = "maintainParentLinks";
 
+    //property key to indicate if the index will allow duplicate nulls, but
+    //otherwise insure unique keys
+    public static final String PROPERTY_UNIQUE_WITH_DUPLICATE_NULLS 
+                                                    = "uniqueWithDuplicateNulls";
+
 
 
     /**************************************************************************
@@ -146,6 +151,15 @@ public abstract class BTree extends GenericConglomerate
 	consistency checking at the cost of run-time efficiency.
 	**/
 	boolean maintainParentLinks;
+
+	/**
+	Attribute to indicate the index allows duplicate only in
+	case of keys with no part null.  This attribute has no effect if unique
+    is true. If unique is false and isUniqueWithDuplicateNulls is set 
+    to true the index will allow duplicates of any key with at least one
+    column null, but for non null keys will act like a unique index.
+	**/
+	boolean uniqueWithDuplicateNulls = false;
 
     /**
     Maximum rows per page to place on a btree leaf or nonleaf page.  Used
@@ -302,6 +316,27 @@ public abstract class BTree extends GenericConglomerate
     {
         return(nKeyFields != nUniqueColumns);
     }
+    
+
+    /**
+     * Set if the index is unique only for non null keys
+     * 
+     * @param uniqueWithDuplicateNulls true if the index will be unique only for
+     *                                 non null keys
+     */
+    public void setUniqueWithDuplicateNulls (boolean uniqueWithDuplicateNulls) 
+    {
+        this.uniqueWithDuplicateNulls = uniqueWithDuplicateNulls;
+    }
+
+    /**
+     * Returns if the index type is uniqueWithDuplicateNulls.
+     * @return is index type is uniqueWithDuplicateNulls
+     */
+    public boolean isUniqueWithDuplicateNulls()
+    {
+        return uniqueWithDuplicateNulls;
+    }
 
     /**************************************************************************
      * Public Methods of Conglomerate Interface:
@@ -408,8 +443,9 @@ public abstract class BTree extends GenericConglomerate
         }
 
         // Check input arguments
-        allowDuplicates = (Boolean.valueOf(
-            properties.getProperty(PROPERTY_ALLOWDUPLICATES, "false"))).booleanValue();
+        allowDuplicates = 
+            (Boolean.valueOf(properties.getProperty(
+                PROPERTY_ALLOWDUPLICATES, "false"))).booleanValue();
 
         result_string = properties.getProperty(PROPERTY_NKEYFIELDS);
         if (result_string == null)
@@ -433,6 +469,11 @@ public abstract class BTree extends GenericConglomerate
         {
             nUniqueColumns = Integer.parseInt(result_string);
         }
+        
+        result_string = 
+            properties.getProperty(
+                PROPERTY_UNIQUE_WITH_DUPLICATE_NULLS, "false");
+        uniqueWithDuplicateNulls = new Boolean (result_string).booleanValue();
 
 
         if (SanityManager.DEBUG)

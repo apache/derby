@@ -606,8 +606,8 @@ public class IndexChanger
 		 throws StandardException
 	{
 		setOurIndexRow(newRow, baseRowLocation);
-
-		if (irg.isUnique())
+		//defer inserts if its on unique or UniqueWhereNotNull index
+		if (irg.isUnique() || irg.isUniqueWithDuplicateNulls())
 		{
 			doDeferredInsert();
 		}

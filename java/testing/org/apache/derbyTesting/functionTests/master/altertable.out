@@ -544,7 +544,7 @@ ij> -- add primary key constraint to table with > 1 row
 alter table t3 add column c3 int;
 0 rows inserted/updated/deleted
 ij> alter table t3 add unique(c3);
-ERROR 42831: 'C3' cannot be a column of a primary key or unique key because it can contain null values.
+0 rows inserted/updated/deleted
 ij> -- add unique constraint to 0 and 1 row tables and verify 
 alter table t0_2 add column c2 int not null unique default 0;
 0 rows inserted/updated/deleted
@@ -564,7 +564,7 @@ ij> insert into t1_1 values (1, 1);
 1 row inserted/updated/deleted
 ij> -- add unique constraint to table with > 1 row
 alter table t3 add unique(c1);
-ERROR 42831: 'C1' cannot be a column of a primary key or unique key because it can contain null values.
+0 rows inserted/updated/deleted
 ij> -- verify prepared alter table dependent on underlying table
 prepare p1 as 'alter table xxx add check(c2 = 1)';
 ERROR 42Y55: 'ALTER TABLE' cannot be performed on 'XXX' because it does not exist.

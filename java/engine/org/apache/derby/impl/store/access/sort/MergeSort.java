@@ -58,9 +58,8 @@ import java.util.Vector;
 
 **/
 
-final class MergeSort implements Sort
+class MergeSort implements Sort
 {
-
 	/*
 	 * Fields
 	 */
@@ -115,17 +114,17 @@ final class MergeSort implements Sort
     column to compare.  To find the column id to compare as the i'th column
     look in columnOrderingMap[i].
 	**/
-	private int columnOrderingMap[];
+	protected int columnOrderingMap[];
 
 	/**
     A lookup table to speed up lookup of Ascending state of a column, 
 	**/
-	private boolean columnOrderingAscendingMap[];
+	protected boolean columnOrderingAscendingMap[];
 
 	/**
     A lookup table to speed up lookup of nulls-low ordering of a column, 
 	**/
-	private boolean columnOrderingNullsLowMap[];
+	protected boolean columnOrderingNullsLowMap[];
 
 	/**
 	The sort observer.  May be null.  Used as a callback.
@@ -478,7 +477,7 @@ final class MergeSort implements Sort
         }
 	}
 
-	int compare(
+	protected int compare(
     DataValueDescriptor[] r1, 
     DataValueDescriptor[] r2)
 		throws StandardException

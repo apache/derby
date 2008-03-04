@@ -208,6 +208,7 @@ public final class ConglomerateDescriptor extends TupleDescriptor
 		name = newName;
 	}
 
+
 	/**
 	 * Gets the index row generator for this conglomerate, null if the
 	 * conglomerate is not an index.
@@ -218,6 +219,7 @@ public final class ConglomerateDescriptor extends TupleDescriptor
 	{
 		return indexRowGenerator;
 	}
+
 
 	/**
 	 * Set the column names for this conglomerate descriptor.

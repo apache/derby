@@ -85,20 +85,6 @@ drop table customer;
 create table customer (id  int NOT NULL, id2 int, name char(100), primary key (id, id2));
 drop table customer;
 
--- Unique key constraint, DB2 requires NOT null on the columns.
-
-create table customer (id int unique, name char(100));
-
-create table customer (id  int NOT NULL, id2 int, constraint custCon unique(id, id2));
-
--- check they actually work!
-create table customer (id int NOT NULL primary key, name char(100));
-drop table customer;
-
-create table customer (id  int NOT NULL, id2 int NOT NULL, name char(100), primary key (id, id2));
-drop table customer;
-
-
 -- drop schema requires restrict
 create schema fred;
 drop schema fred;

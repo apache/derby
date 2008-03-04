@@ -192,25 +192,32 @@ public class GenericConstantActionFactory
 
 
 	/**
-	 *	Make the ConstantAction for a CREATE INDEX statement.
-	 *
-     *  @param forCreateTable Executed as part of a CREATE TABLE
-	 *  @param unique		True means it will be a unique index
-	 *  @param indexType	The type of index (BTREE, for example)
-	 *  @param schemaName			the schema that table (and index) lives in.
-	 *  @param indexName	Name of the index
-	 *  @param tableName	Name of table the index will be on
-	 *	@param tableId		UUID of table.
-	 *  @param columnNames	Names of the columns in the index, in order
-	 *  @param isAscending	Array of booleans telling asc/desc on each column
-	 *  @param isConstraint	TRUE if index is backing up a constraint, else FALSE
-	 *  @param conglomerateUUID	ID of conglomerate
-	 *  @param properties	The optional properties list associated with the index.
-	 */
+     * 	Make the ConstantAction for a CREATE INDEX statement.
+     * 
+     * @param forCreateTable Executed as part of a CREATE TABLE
+     * @param unique		True means it will be a unique index
+     * @param uniqueWithDuplicateNulls  True means index check and disallow
+     *                                  any duplicate key if key has no 
+     *                                  column with a null value.  If any 
+     *                                  column in the key has a null value,
+     *                                  no checking is done and insert will
+     *                                  always succeed.
+     * @param indexType	The type of index (BTREE, for example)
+     * @param schemaName			the schema that table (and index) lives in.
+     * @param indexName	Name of the index
+     * @param tableName	Name of table the index will be on
+     * @param tableId		UUID of table.
+     * @param columnNames	Names of the columns in the index, in order
+     * @param isAscending	Array of booleans telling asc/desc on each column
+     * @param isConstraint	TRUE if index is backing up a constraint, else FALSE
+     * @param conglomerateUUID	ID of conglomerate
+     * @param properties	The optional properties list associated with the index.
+     */
 	public	CreateIndexConstantAction	getCreateIndexConstantAction
 	(
         boolean forCreateTable,
 		boolean			unique,
+		boolean			uniqueWithDuplicateNulls,
 		String			indexType,
 		String			schemaName,
 		String			indexName,
@@ -224,7 +231,8 @@ public class GenericConstantActionFactory
     )
 	{
 		return	new CreateIndexConstantAction
-			( forCreateTable, unique, indexType, schemaName, indexName, tableName, tableId,
+			( forCreateTable, unique, uniqueWithDuplicateNulls, indexType, 
+				schemaName, indexName, tableName, tableId,
 			  columnNames, isAscending, isConstraint,
 			  conglomerateUUID, properties );
 	}

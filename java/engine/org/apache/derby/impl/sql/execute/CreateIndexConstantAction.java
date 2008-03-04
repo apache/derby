@@ -47,6 +47,7 @@ import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
 import org.apache.derby.iapi.sql.execute.ExecIndexRow;
 import org.apache.derby.iapi.sql.execute.ExecRow;
+import org.apache.derby.iapi.store.access.AccessFactoryGlobals;
 import org.apache.derby.iapi.store.access.ColumnOrdering;
 import org.apache.derby.iapi.store.access.ConglomerateController;
 import org.apache.derby.iapi.store.access.GroupFetchScanController;
@@ -76,6 +77,7 @@ class CreateIndexConstantAction extends IndexConstantAction
     private final boolean forCreateTable;
 
 	private boolean			unique;
+	private boolean			uniqueWithDuplicateNulls;
 	private String			indexType;
 	private String[]		columnNames;
 	private boolean[]		isAscending;
@@ -108,38 +110,52 @@ class CreateIndexConstantAction extends IndexConstantAction
 
 	// CONSTRUCTORS
 	/**
-	 *	Make the ConstantAction to create an index.
-	 *
-     *  @param forCreateTable Being executed within a CREATE TABLE statement
-	 *  @param unique		True means it will be a unique index
-	 *  @param indexType	The type of index (BTREE, for example)
-	 *  @param schemaName	the schema that table (and index) lives in.
-	 *  @param indexName	Name of the index
-	 *  @param tableName	Name of table the index will be on
-	 *  @param tableId		UUID of table
-	 *  @param columnNames	Names of the columns in the index, in order
-	 *	@param isAscending	Array of booleans telling asc/desc on each column
-	 *  @param isConstraint	TRUE if index is backing up a constraint, else FALSE
-	 *  @param conglomerateUUID	ID of conglomerate
-	 *  @param properties	The optional properties list associated with the index.
-	 */
+     * 	Make the ConstantAction to create an index.
+     * 
+     * @param forCreateTable                Being executed within a CREATE TABLE
+     *                                      statement
+     * @param unique		                True means it will be a unique index
+     * @param isUniqueWithDuplicateNulls    True means index check and disallow
+     *                                      any duplicate key if key has no 
+     *                                      column with a null value.  If any 
+     *                                      column in the key has a null value,
+     *                                      no checking is done and insert will
+     *                                      always succeed.
+     * @param indexType	                    type of index (BTREE, for example)
+     * @param schemaName	                schema that table (and index) 
+     *                                      lives in.
+     * @param indexName	                    Name of the index
+     * @param tableName	                    Name of table the index will be on
+     * @param tableId		                UUID of table
+     * @param columnNames	                Names of the columns in the index, 
+     *                                      in order
+     * @param isAscending	                Array of booleans telling asc/desc 
+     *                                      on each column
+     * @param isConstraint	                TRUE if index is backing up a 
+     *                                      constraint, else FALSE
+     * @param conglomerateUUID	            ID of conglomerate
+     * @param properties	                The optional properties list 
+     *                                      associated with the index.
+     */
 	CreateIndexConstantAction(
-            boolean forCreateTable,
-								boolean			unique,
-								String			indexType,
-								String			schemaName,
-								String			indexName,
-								String			tableName,
-								UUID			tableId,
-								String[]		columnNames,
-								boolean[]		isAscending,
-								boolean			isConstraint,
-								UUID			conglomerateUUID,
-								Properties		properties)
+            boolean         forCreateTable,
+            boolean			unique,
+            boolean			uniqueWithDuplicateNulls,
+            String			indexType,
+            String			schemaName,
+            String			indexName,
+            String			tableName,
+            UUID			tableId,
+            String[]		columnNames,
+            boolean[]		isAscending,
+            boolean			isConstraint,
+            UUID			conglomerateUUID,
+            Properties		properties)
 	{
 		super(tableId, indexName, tableName, schemaName);
         this.forCreateTable = forCreateTable;
 		this.unique = unique;
+		this.uniqueWithDuplicateNulls = uniqueWithDuplicateNulls;
 		this.indexType = indexType;
 		this.columnNames = columnNames;
 		this.isAscending = isAscending;
@@ -214,7 +230,7 @@ class CreateIndexConstantAction extends IndexConstantAction
 			}
 		}
 	}
-
+        
 	///////////////////////////////////////////////
 	//
 	// OBJECT SHADOWS
@@ -535,6 +551,25 @@ class CreateIndexConstantAction extends IndexConstantAction
 		// Tell it the conglomerate id of the base table
 		indexProperties.put("baseConglomerateId",
 							Long.toString(td.getHeapConglomerateId()));
+        
+		if (uniqueWithDuplicateNulls) 
+        {
+			if (lcc.getDataDictionary().checkVersion(
+				DataDictionary.DD_VERSION_DERBY_10_4, null)) 
+            {
+				indexProperties.put(
+                    "uniqueWithDuplicateNulls", Boolean.toString(true));
+			}
+			else 
+            {
+				// for lower version of DD there is no unique with nulls 
+                // index creating a unique index instead.
+				if (uniqueWithDuplicateNulls) 
+                {
+					unique = true;
+				}
+			}
+		}
 
 		// All indexes are unique because they contain the RowLocation.
 		// The number of uniqueness columns must include the RowLocation
@@ -543,7 +578,6 @@ class CreateIndexConstantAction extends IndexConstantAction
 					Integer.toString(unique ? baseColumnPositions.length :
 												baseColumnPositions.length + 1)
 							);
-
 		// By convention, the row location column is the last column
 		indexProperties.put("rowLocationColumn",
 							Integer.toString(baseColumnPositions.length));
@@ -555,10 +589,26 @@ class CreateIndexConstantAction extends IndexConstantAction
 		// For now, assume that all index columns are ordered columns
 		if (! shareExisting)
 		{
-			indexRowGenerator = new IndexRowGenerator(indexType, unique,
-													baseColumnPositions,
-													isAscending,
-													baseColumnPositions.length);
+			if (lcc.getDataDictionary().checkVersion(
+					DataDictionary.DD_VERSION_DERBY_10_4, null)) 
+            {
+                indexRowGenerator = new IndexRowGenerator(
+                                            indexType, 
+                                            unique, 
+                                            uniqueWithDuplicateNulls,
+                                            baseColumnPositions,
+                                            isAscending,
+                                            baseColumnPositions.length);
+			}
+			else 
+            {
+				indexRowGenerator = new IndexRowGenerator(
+                                            indexType, 
+                                            unique,
+                                            baseColumnPositions,
+                                            isAscending,
+                                            baseColumnPositions.length);
+			}
 		}
 
 		/* Now add the rows from the base table to the conglomerate.
@@ -679,9 +729,8 @@ class CreateIndexConstantAction extends IndexConstantAction
 			 */
 			int numColumnOrderings;
 			SortObserver sortObserver = null;
-			if (unique)
+			if (unique || uniqueWithDuplicateNulls)
 			{
-				numColumnOrderings = baseColumnPositions.length;
 				// if the index is a constraint, use constraintname in possible error messagge
 				String indexOrConstraintName = indexName;
 				if  (conglomerateUUID != null)
@@ -694,11 +743,40 @@ class CreateIndexConstantAction extends IndexConstantAction
 						indexOrConstraintName = conDesc.getConstraintName();
 					}
 				}
-				sortObserver = new UniqueIndexSortObserver(true, isConstraint, 
-														   indexOrConstraintName,
-														   indexTemplateRow,
-														   true,
-														   td.getName());
+
+				if (unique) 
+				{
+                    numColumnOrderings = baseColumnPositions.length;
+
+					sortObserver = 
+                        new UniqueIndexSortObserver(
+                                true, 
+                                isConstraint, 
+                                indexOrConstraintName,
+                                indexTemplateRow,
+                                true,
+                                td.getName());
+				}
+				else 
+                {
+                    // unique with duplicate nulls allowed.
+
+					numColumnOrderings = baseColumnPositions.length + 1;
+
+					properties = new Properties();
+					properties.put(
+                        AccessFactoryGlobals.IMPL_TYPE, 
+                        AccessFactoryGlobals.SORT_UNIQUEWITHDUPLICATENULLS_EXTERNAL);
+					//use sort operator which treats nulls unequal
+					sortObserver = 
+                        new UniqueWithDuplicateNullsIndexSortObserver(
+                                true, 
+                                isConstraint, 
+                                indexOrConstraintName,
+                                indexTemplateRow,
+                                true,
+                                td.getName());
+				}
 			}
 			else
 			{
@@ -719,7 +797,7 @@ class CreateIndexConstantAction extends IndexConstantAction
 			}
 
 			// create the sorter
-			sortId = tc.createSort((Properties)null, 
+			sortId = tc.createSort((Properties)properties, 
 					indexTemplateRow.getRowArrayClone(),
 					order,
 					sortObserver,

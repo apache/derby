@@ -322,9 +322,16 @@ public class TableElementList extends QueryTreeNodeVector
             }
             else if (cdn.hasUniqueKeyConstraint())
             {
-                // for UNIQUE, check that columns are unique and NOT NULL
+                // for UNIQUE, check that columns are unique
                 verifyUniqueColumnList(ddlStmt, cdn);
-                checkForNullColumns(cdn, td);
+
+                // unique constraints on nullable columns added in 10.4, 
+                // disallow until database hard upgraded at least to 10.4.
+                if (!dd.checkVersion(
+                        DataDictionary.DD_VERSION_DERBY_10_4, null))
+                {
+                    checkForNullColumns(cdn, td);
+                }
             }
             else if (cdn.hasForeignKeyConstraint())
             {
@@ -672,12 +679,47 @@ public class TableElementList extends QueryTreeNodeVector
 			 */
 			if (constraintDN.requiresBackingIndex())
 			{
-				indexAction = genIndexAction(
-                        forCreateTable,
-                        constraintDN.requiresUniqueIndex(),
-											 null, constraintDN, 
-											 columnNames, true, tableSd, tableName,
-											 constraintType, dd);
+                // implement unique constraints using a unique backing index 
+                // unless it is soft upgrade in version before 10.4, or if 
+                // constraint contains no nullable columns.  In 10.4 use 
+                // "unique with duplicate null" backing index for constraints 
+                // that contain at least one nullable column.
+
+				if (constraintDN.constraintType ==
+					DataDictionary.UNIQUE_CONSTRAINT && 
+					(dd.checkVersion(
+                         DataDictionary.DD_VERSION_DERBY_10_4, null))) 
+                {
+                    boolean contains_nullable_columns = 
+                        areColumnsNullable(constraintDN, td);
+
+                    // if all the columns are non nullable, continue to use
+                    // a unique backing index.
+                    boolean unique = 
+                        !contains_nullable_columns;
+
+                    // Only use a "unique with duplicate nulls" backing index
+                    // for constraints with nullable columns.
+                    boolean uniqueWithDuplicateNulls = 
+                        contains_nullable_columns;
+
+					indexAction = genIndexAction(
+						forCreateTable,
+						unique,
+                        uniqueWithDuplicateNulls,
+						null, constraintDN,
+						columnNames, true, tableSd, tableName,
+						constraintType, dd);
+				} 
+                else 
+                {
+					indexAction = genIndexAction(
+						forCreateTable,
+						constraintDN.requiresUniqueIndex(), false,
+						null, constraintDN,
+						columnNames, true, tableSd, tableName,
+						constraintType, dd);
+				}
 			}
 
 			if (constraintType == DataDictionary.DROP_CONSTRAINT)
@@ -772,54 +814,88 @@ public class TableElementList extends QueryTreeNodeVector
 		return true;
 	}
 
+    /**
+     * utility to generated the call to create the index.
+     * <p>
+     *
+     *
+     * @param forCreateTable                Executed as part of a CREATE TABLE
+     * @param isUnique		                True means it will be a unique index
+     * @param isUniqueWithDuplicateNulls    True means index check and disallow
+     *                                      any duplicate key if key has no 
+     *                                      column with a null value.  If any 
+     *                                      column in the key has a null value,
+     *                                      no checking is done and insert will
+     *                                      always succeed.
+     * @param indexName	                    The type of index (BTREE, for 
+     *                                      example)
+     * @param cdn
+     * @param columnNames	                Names of the columns in the index,
+     *                                      in order.
+     * @param isConstraint	                TRUE if index is backing up a 
+     *                                      constraint, else FALSE.
+     * @param sd
+     * @param tableName	                    Name of table the index will be on
+     * @param constraintType
+     * @param dd
+     **/
 	private IndexConstantAction genIndexAction(
-            boolean forCreateTable,
-										boolean	isUnique,
-										String indexName,
-										ConstraintDefinitionNode cdn,
-										String[] columnNames,
-										boolean isConstraint,
-										SchemaDescriptor sd,
-										String tableName,
-										int constraintType,
-										DataDictionary dd)
+    boolean                     forCreateTable,
+    boolean                     isUnique,
+    boolean                     isUniqueWithDuplicateNulls,
+    String                      indexName,
+    ConstraintDefinitionNode    cdn,
+    String[]                    columnNames,
+    boolean                     isConstraint,
+    SchemaDescriptor            sd,
+    String                      tableName,
+    int                         constraintType,
+    DataDictionary              dd)
 		throws StandardException
 	{
-		if ( indexName == null ) { indexName = cdn.getBackingIndexName(dd); }
+		if (indexName == null) 
+        { 
+            indexName = cdn.getBackingIndexName(dd); 
+        }
 
 		if (constraintType == DataDictionary.DROP_CONSTRAINT)
 		{
             if (SanityManager.DEBUG)
             {
                 if (forCreateTable)
-                    SanityManager.THROWASSERT("DROP INDEX with forCreateTable true");
+                    SanityManager.THROWASSERT(
+                        "DROP INDEX with forCreateTable true");
             }
-			return	getGenericConstantActionFactory().getDropIndexConstantAction(
-									  null,
-									  indexName,
-									  tableName,
-									  sd.getSchemaName(),
-									  td.getUUID(),
-									  td.getHeapConglomerateId());
+
+			return getGenericConstantActionFactory().getDropIndexConstantAction(
+                      null,
+                      indexName,
+                      tableName,
+                      sd.getSchemaName(),
+                      td.getUUID(),
+                      td.getHeapConglomerateId());
 		}
 		else
 		{
 			boolean[]	isAscending = new boolean[columnNames.length];
+
 			for (int i = 0; i < isAscending.length; i++)
 				isAscending[i] = true;
+
 			return	getGenericConstantActionFactory().getCreateIndexConstantAction(
-                    forCreateTable,
-									isUnique,
-									"BTREE", // indexType
-									sd.getSchemaName(),
-									indexName,
-									tableName,
-									((td != null) ? td.getUUID() : (UUID) null),
-									columnNames,
-									isAscending,
-									isConstraint,
-									cdn.getBackingIndexUUID(),
-									cdn.getProperties());
+                    forCreateTable, 
+                    isUnique, 
+                    isUniqueWithDuplicateNulls,
+                    "BTREE", // indexType
+                    sd.getSchemaName(),
+                    indexName,
+                    tableName,
+                    ((td != null) ? td.getUUID() : (UUID) null),
+                    columnNames,
+                    isAscending,
+                    isConstraint,
+                    cdn.getBackingIndexUUID(),
+                    cdn.getProperties());
 		}
 	}
 
@@ -940,6 +1016,40 @@ public class TableElementList extends QueryTreeNodeVector
         }
 	}
 
+    /**
+     * Checks if any of the columns in the constraint can be null.
+     *
+     * @param cdn Constraint node
+     * @param td tabe descriptor of the target table
+     *
+     * @return true if any of the column can be null false other wise
+     */
+    private boolean areColumnsNullable (
+    ConstraintDefinitionNode    cdn, 
+    TableDescriptor             td) 
+    {
+        ResultColumnList rcl = cdn.getColumnList();
+        int rclSize = rcl.size();
+        for (int index = 0; index < rclSize; index++)
+        {
+            String colName = ((ResultColumn) rcl.elementAt(index)).getName();
+            DataTypeDescriptor dtd;
+            if (td == null)
+            {
+                dtd = getColumnDataTypeDescriptor(colName);
+            }
+            else
+            {
+                dtd = getColumnDataTypeDescriptor(colName, td);
+            }
+            // todo dtd may be null if the column does not exist, we should check that first
+            if (dtd != null && dtd.isNullable())
+            {
+                return true;
+            }
+        }
+        return false;
+    }
 
     private void checkForNullColumns(ConstraintDefinitionNode cdn, TableDescriptor td) throws StandardException
     {

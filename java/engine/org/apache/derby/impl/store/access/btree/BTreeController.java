@@ -42,6 +42,7 @@ import org.apache.derby.iapi.store.raw.ContainerHandle;
 import org.apache.derby.iapi.store.raw.FetchDescriptor;
 import org.apache.derby.iapi.store.raw.LockingPolicy;
 import org.apache.derby.iapi.store.raw.Page;
+import org.apache.derby.iapi.store.raw.RecordHandle;
 import org.apache.derby.iapi.store.raw.Transaction;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
@@ -74,6 +75,11 @@ public class BTreeController extends OpenBTree implements ConglomerateController
      * has already been gotten when the row was inserted into the base table.
      **/
     boolean get_insert_row_lock;
+    
+    //constants for the status of dupicate checking
+    private static final int NO_MATCH = 0;
+    private static final int MATCH_FOUND = 1;
+    private static final int RESCAN_REQUIRED = 2;
 
     /* Constructors: */
 
@@ -350,6 +356,207 @@ public class BTreeController extends OpenBTree implements ConglomerateController
 
         return(new_leaf_pageno);
     }
+    
+    /**
+     * Compares the oldrow with the one at 'slot' or the one left to it. 
+     * If the slot is first slot it will move to the left sibiling of 
+     * the 'leaf' and will compare with the record from the last slot.
+     * @param slot slot number to start with
+     * @param leaf LeafControlRow of the current page
+     * @param rows DataValueDescriptot array to fill it with fetched values
+     * @return  0 if no duplicate
+     *          1 if duplicate 
+     *          2 if rescan required
+     * @throws StandardException
+     */
+    private int comparePreviousRecord (int slot, 
+                                    LeafControlRow  leaf, 
+                                    DataValueDescriptor [] rows,
+                                    DataValueDescriptor [] oldRows) 
+                                        throws StandardException {
+        RecordHandle rh = null;
+        boolean newLeaf = false;
+        LeafControlRow originalLeaf = leaf;
+        while (leaf != null) {
+            if (slot == 0) {
+                try {
+                    LeafControlRow oldLeaf = leaf;
+                    //slot is pointing before the first slot
+                    //get left sibiling
+                    leaf = (LeafControlRow) leaf.getLeftSibling(this);
+                    //no left sibiling
+                    if (leaf == null)
+                        return NO_MATCH;
+                    //set the slot to last slot number
+                    slot = leaf.page.recordCount() - 1;
+                    if (newLeaf)
+                        oldLeaf.release();
+                    newLeaf = true;
+                } catch (WaitError we) {
+                    throw StandardException.plainWrapException(we);
+                }
+            }
+            rh = leaf.page.fetchFromSlot(null, slot, rows, null, true);
+            if (rh != null) {
+                int ret = compareRowsForInsert(rows, oldRows, leaf, slot);
+                //release the page if required
+                if (ret == RESCAN_REQUIRED && newLeaf) {
+                    originalLeaf.release();
+                }
+                if (ret != RESCAN_REQUIRED && newLeaf) {
+                    leaf.release();
+                }
+                return ret;
+            }
+            slot++;
+        }
+        return NO_MATCH;
+    }
+    
+    /**
+     * Compares the new record with the one at slot or the one 
+     * right to it. If the slot is last slot in the page it will move to 
+     * the right to sibling of the leaf and will compare with the record 
+     * from the last slot. 
+     * @param slot slot number to start with
+     * @param leaf LeafControlRow of the current page
+     * @param rows DataValueDescriptot array to fill it with fetched values
+     * @return  0 if no duplicate
+     *          1 if duplicate 
+     *          2 if rescan required
+     * @throws StandardException
+     */
+    private int compareNextRecord (int slot, 
+                                    LeafControlRow  leaf, 
+                                    DataValueDescriptor [] rows,
+                                    DataValueDescriptor [] oldRows) 
+                                        throws StandardException {
+        RecordHandle rh = null;
+        boolean newLeaf = false;
+        LeafControlRow originalLeaf = leaf;
+        while (leaf != null) {
+            if (slot >= leaf.page.recordCount()) {
+                //slot is pointing to last slot
+                //get next sibling
+                LeafControlRow oldLeaf = leaf;
+                leaf = (LeafControlRow) leaf.getRightSibling(this);
+                if (newLeaf) {
+                    oldLeaf.release();
+                }
+                newLeaf = true;
+                //this was right most leaf
+                //no record at the right
+                if (leaf == null)
+                    return NO_MATCH;
+                //point slot to the first record of new leaf
+                slot = 1;
+            }
+            rh = leaf.page.fetchFromSlot(null, slot, rows, null, true);
+            if (rh != null) {
+                int ret =  compareRowsForInsert(rows, oldRows, leaf, slot);
+                if (ret == RESCAN_REQUIRED && newLeaf) {
+                    originalLeaf.release();
+                }
+                if (ret != RESCAN_REQUIRED && newLeaf) {
+                    leaf.release();
+                }
+                return ret;
+            }
+            slot++;
+        }
+        return NO_MATCH;
+    }
+    
+    /**
+     * Compares two row for insert. If the two rows are equal it checks if the 
+     * row in tree is deleted. If not MATCH_FOUND is returned. If the row is 
+     * deleted it tries to get a lock on that. If a lock is obtained without 
+     * waiting (ie without losing the latch) the row was deleted within the 
+     * same transaction and its safe to insert. NO_MATCH is returned in this 
+     * case. If latch is released while waiting for lock rescaning the tree 
+     * is required as the tree might have been rearanged by some other 
+     * transaction. RESCAN_REQUIRED is returned in this case.
+     * In case of NO_MATCH and MATCH_FOUND latch is also released.
+     * @param originalRow row from the tree
+     * @param newRow row to be inserted
+     * @param leaf leaf where originalRow resides
+     * @param slot slot where originalRow
+     * @return  0 if no duplicate
+     *          1 if duplicate 
+     *          2 if rescan required
+     */
+    private int compareRowsForInsert (DataValueDescriptor [] originalRow,
+                                      DataValueDescriptor [] newRow,
+                                      LeafControlRow leaf, int slot) 
+                                            throws StandardException {
+        for (int i = 0; i < originalRow.length - 1; i++) {
+            if (!originalRow [i].equals(newRow [i]))
+                return NO_MATCH;
+        }
+        //It might be a deleted record try getting a lock on it
+        DataValueDescriptor[] template = runtime_mem.get_template(getRawTran());
+        FetchDescriptor lock_fetch_desc = RowUtil.getFetchDescriptorConstant(
+                                                    template.length - 1);
+        RowLocation lock_row_loc = 
+            (RowLocation) scratch_template[scratch_template.length - 1];
+        boolean latch_released = !getLockingPolicy().lockNonScanRowOnPage(
+                this.getConglomerate(), leaf, slot, lock_fetch_desc,template, 
+                lock_row_loc, ConglomerateController.LOCK_UPD);
+        //if latch was released some other transaction was operating on this
+        //record and might have changed the tree by now
+        if (latch_released)
+            return RESCAN_REQUIRED;
+        //there is match check if its not deleted
+        if (!leaf.page.isDeletedAtSlot(slot)) {
+            //its a genuine match
+            return MATCH_FOUND;
+        }
+        //it is a deleted record within same transaction
+        //safe to insert
+        return NO_MATCH;
+    }
+    
+    /**
+     * Compares immidiate left and right records to check for duplicates.
+     * This methods compares new record (being inserted) with the record 
+     * in immidate left and right postion to see if its duplicate (only for
+     * almost unique index and for non null keys)
+     * @param rowToInsert row being inserted
+     * @param insert_slot slot where rowToInsert is being inserted
+     * @param targetleaf page where rowToInsert
+     * @return  0 if no duplicate
+     *          1 if duplicate 
+     *          2 if rescan required
+     * @throws StandardException
+     */
+    private int compareLeftAndRightSiblings (
+                            DataValueDescriptor[] rowToInsert, 
+                            int insert_slot, 
+                            LeafControlRow  targetleaf) throws StandardException {
+        //proceed only if almost unique index
+        if (this.getConglomerate().isUniqueWithDuplicateNulls()) {
+            int keyParts = rowToInsert.length - 1;
+            boolean hasnull = false;
+            for (int i = 0; i < keyParts; i++) {
+                //keys with null in it are unique
+                //no need to compare
+                if (rowToInsert [i].isNull()) {
+                    return NO_MATCH;
+                }
+            }
+            if (!hasnull) {
+                DataValueDescriptor index [] =  
+                        runtime_mem.get_template(getRawTran());
+                int ret = comparePreviousRecord(insert_slot - 1, 
+                        targetleaf, index, rowToInsert);
+                if (ret > 0) {
+                    return ret;                        
+                }
+                return compareNextRecord(insert_slot, targetleaf, index, rowToInsert);
+            }
+        }
+        return NO_MATCH;
+    }
 
 	/**
     Insert a row into the conglomerate.
@@ -600,7 +807,14 @@ public class BTreeController extends OpenBTree implements ConglomerateController
                 // on the page returned by the search.
                 insert_slot = sp.resultSlot + 1;
                 result_slot = insert_slot + 1;
-
+                if (getConglomerate().isUniqueWithDuplicateNulls()) {
+                    int ret = compareLeftAndRightSiblings(rowToInsert, 
+                            insert_slot, targetleaf);
+                    if (ret == MATCH_FOUND)
+                        return ConglomerateController.ROWISDUPLICATE;
+                    if (ret == RESCAN_REQUIRED)
+                        continue;
+                }
                 // By default maxRowsPerPage is set to MAXINT, some tests
                 // set it small to cause splitting to happen quicker with
                 // less data.
@@ -630,7 +844,14 @@ public class BTreeController extends OpenBTree implements ConglomerateController
 
                 // start splitting ...
             }
-
+            if (getConglomerate().isUniqueWithDuplicateNulls()) {
+                int ret = compareLeftAndRightSiblings(rowToInsert, 
+                        insert_slot, targetleaf);
+                if (ret == MATCH_FOUND)
+                    return ConglomerateController.ROWISDUPLICATE;
+                if (ret == RESCAN_REQUIRED)
+                    continue;
+            }
             
             // Create some space by splitting pages.
 

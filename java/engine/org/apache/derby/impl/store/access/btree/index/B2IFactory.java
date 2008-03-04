@@ -175,13 +175,25 @@ public class B2IFactory implements ConglomerateFactory, ModuleControl
 
         if (xact_mgr.checkVersion(
                 RawStoreFactory.DERBY_STORE_MAJOR_VERSION_10,
-                RawStoreFactory.DERBY_STORE_MINOR_VERSION_3,
-                null))
+                RawStoreFactory.DERBY_STORE_MINOR_VERSION_4,
+                null)) 
         {
-            // on disk databases with version higher than 10.2 should use
+            // on disk databases with version higher than 10.3 should use
             // current disk format B2I.  This includes new databases or
             // hard upgraded databases.
             btree = new B2I();
+            
+        }
+        else if (xact_mgr.checkVersion(
+                RawStoreFactory.DERBY_STORE_MAJOR_VERSION_10,
+                RawStoreFactory.DERBY_STORE_MINOR_VERSION_3,
+                null))
+        {
+            // Old databases that are running in new versions of the software,
+            // but are running in soft upgrade mode at release level 10.3
+            // use the 10.3 B2I version.  This version will
+            // continue to write metadata that can be read by 10.3.
+            btree = new B2I_10_3();
         }
         else
         {

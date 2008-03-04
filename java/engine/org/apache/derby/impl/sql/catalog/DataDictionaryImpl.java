@@ -7553,15 +7553,33 @@ public final class	DataDictionaryImpl
 
 		boolean[] isAscending = new boolean[baseColumnPositions.length];
 		for (int i = 0; i < baseColumnPositions.length; i++)
-			isAscending[i] = true;
+			isAscending[i]        = true;
+
+        IndexRowGenerator irg = null;
+
+        if (softwareVersion.checkVersion(
+                DataDictionary.DD_VERSION_DERBY_10_4,null)) 
+        {
+            irg = new IndexRowGenerator(
+                "BTREE", ti.isIndexUnique(indexNumber),
+                false,
+                baseColumnPositions,
+                isAscending,
+                baseColumnPositions.length);
+        }
+        else 
+        {
+            //older version of Data Disctionary
+            //use old constructor
+            irg = new IndexRowGenerator (
+                "BTREE", ti.isIndexUnique(indexNumber),
+                baseColumnPositions,
+                isAscending,
+                baseColumnPositions.length);
+        }
 
 		// For now, assume that all index columns are ordered columns
-		ti.setIndexRowGenerator(indexNumber, 
-								new IndexRowGenerator(
-											"BTREE", ti.isIndexUnique(indexNumber),
-											baseColumnPositions,
-											isAscending,
-											baseColumnPositions.length));
+		ti.setIndexRowGenerator(indexNumber, irg);
 	}
 
 	/**
