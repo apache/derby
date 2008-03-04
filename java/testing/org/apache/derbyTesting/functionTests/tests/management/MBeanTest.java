@@ -160,8 +160,10 @@ abstract class MBeanTest extends BaseTestCase {
     protected void tearDown() throws Exception {
         super.tearDown();
         
-        // Does not appear to be a method to close!
-        jmxConnection = null;
+        if (jmxConnection != null) {
+           JMXConnectionGetter.mbeanServerConnector.get().close(jmxConnection);
+           jmxConnection = null;
+        }
     }
     
     /**

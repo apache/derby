@@ -20,6 +20,9 @@
  */
 package org.apache.derbyTesting.functionTests.tests.management;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.management.MBeanServerConnection;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
@@ -31,6 +34,9 @@ import javax.management.remote.JMXServiceURL;
  *
  */
 class RemoteConnectionGetter implements JMXConnectionGetter {
+    
+    static final ThreadLocal<Map<MBeanServerConnection,JMXConnector>> connections =
+        new ThreadLocal<Map<MBeanServerConnection,JMXConnector>>();
 
     private final JMXServiceURL url;
 
@@ -41,6 +47,22 @@ class RemoteConnectionGetter implements JMXConnectionGetter {
     public MBeanServerConnection getMBeanServerConnection() throws Exception {
         // assumes that JMX authentication and SSL is not required (hence null)
         JMXConnector jmxc = JMXConnectorFactory.connect(url, null);
-        return jmxc.getMBeanServerConnection();
+        MBeanServerConnection jmxConn =  jmxc.getMBeanServerConnection();
+        
+        Map<MBeanServerConnection,JMXConnector> conns = connections.get();
+        if (conns == null) {
+            conns = new HashMap<MBeanServerConnection,JMXConnector>();
+            connections.set(conns);
+        }
+        
+        conns.put(jmxConn, jmxc);
+        
+        return jmxConn;
+    }
+
+    public void close(MBeanServerConnection jmxConnection) throws Exception {
+        Map<MBeanServerConnection,JMXConnector> conns = connections.get();
+        JMXConnector jmxc = conns.remove(jmxConnection);
+        jmxc.close();
     }
 }

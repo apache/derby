@@ -25,9 +25,6 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 
 import javax.management.MBeanServerConnection;
-import javax.management.remote.JMXConnector;
-import javax.management.remote.JMXConnectorFactory;
-import javax.management.remote.JMXServiceURL;
 
 /**
  * JMXConnectionGetter using the platform MBean server.
@@ -45,5 +42,9 @@ class PlatformConnectionGetter implements JMXConnectionGetter {
             public MBeanServerConnection run() {
                 return ManagementFactory.getPlatformMBeanServer(); 
             }});     
+    }
+
+    public void close(MBeanServerConnection jmxConnection)  {
+        // nothing to do.
     }
 }

@@ -41,4 +41,6 @@ interface JMXConnectionGetter {
      * Get a connection to the platform MBean Server.
      */
     MBeanServerConnection getMBeanServerConnection() throws Exception;
+    
+    void close(MBeanServerConnection jmxConnection) throws Exception;
 }
