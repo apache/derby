@@ -78,8 +78,6 @@ public class BaseTypeIdImpl implements Formatable
      */
     transient int           JDBCTypeId;
 
-    private int   wrapperTypeFormatId;
-
     /**
      * niladic constructor. Needed for Formatable interface to work.
      *
@@ -219,16 +217,6 @@ public class BaseTypeIdImpl implements Formatable
     }
 
     /**
-     * Get the format id for the wrapper type id that corresponds to
-     * this type id.
-     */
-    public int wrapperTypeFormatId()
-    {
-        return wrapperTypeFormatId;
-    }
-
-
-    /**
      * Get the formatID which corresponds to this class.
      *
      * @return      the formatID of this class
@@ -272,127 +260,106 @@ public class BaseTypeIdImpl implements Formatable
           case StoredFormatIds.BOOLEAN_TYPE_ID_IMPL:
                 SQLTypeName = TypeId.BOOLEAN_NAME;
                 JDBCTypeId = JVMInfo.JAVA_SQL_TYPES_BOOLEAN;
-                wrapperTypeFormatId = StoredFormatIds.BOOLEAN_TYPE_ID;
                 break;
 
           case StoredFormatIds.INT_TYPE_ID_IMPL:
                 SQLTypeName = TypeId.INTEGER_NAME;
                 JDBCTypeId = Types.INTEGER;
-                wrapperTypeFormatId = StoredFormatIds.INT_TYPE_ID;
-                break;
+                 break;
 
           case StoredFormatIds.SMALLINT_TYPE_ID_IMPL:
                 SQLTypeName = TypeId.SMALLINT_NAME;
                 JDBCTypeId = Types.SMALLINT;
-                wrapperTypeFormatId = StoredFormatIds.SMALLINT_TYPE_ID;
                 break;
 
           case StoredFormatIds.TINYINT_TYPE_ID_IMPL:
                 SQLTypeName = TypeId.TINYINT_NAME;
                 JDBCTypeId = Types.TINYINT;
-                wrapperTypeFormatId = StoredFormatIds.TINYINT_TYPE_ID;
                 break;
 
           case StoredFormatIds.LONGINT_TYPE_ID_IMPL:
                 SQLTypeName = TypeId.LONGINT_NAME;
                 JDBCTypeId = Types.BIGINT;
-                wrapperTypeFormatId = StoredFormatIds.LONGINT_TYPE_ID;
                 break;
 
           case StoredFormatIds.DECIMAL_TYPE_ID_IMPL:
                 SQLTypeName = TypeId.DECIMAL_NAME;
                 JDBCTypeId = Types.DECIMAL;
-                wrapperTypeFormatId = StoredFormatIds.DECIMAL_TYPE_ID;
                 break;
 
           case StoredFormatIds.DOUBLE_TYPE_ID_IMPL:
                 SQLTypeName = TypeId.DOUBLE_NAME;
                 JDBCTypeId = Types.DOUBLE;
-                wrapperTypeFormatId = StoredFormatIds.DOUBLE_TYPE_ID;
                 break;
 
           case StoredFormatIds.REAL_TYPE_ID_IMPL:
                 SQLTypeName = TypeId.REAL_NAME;
                 JDBCTypeId = Types.REAL;
-                wrapperTypeFormatId = StoredFormatIds.REAL_TYPE_ID;
                 break;
                 
           case StoredFormatIds.REF_TYPE_ID_IMPL:
                 SQLTypeName = TypeId.REF_NAME;
                 JDBCTypeId = Types.OTHER;
-                wrapperTypeFormatId = StoredFormatIds.REF_TYPE_ID;
                 break;
 
           case StoredFormatIds.CHAR_TYPE_ID_IMPL:
                 SQLTypeName = TypeId.CHAR_NAME;
                 JDBCTypeId = Types.CHAR;
-                wrapperTypeFormatId = StoredFormatIds.CHAR_TYPE_ID;
                 break;
 
           case StoredFormatIds.VARCHAR_TYPE_ID_IMPL:
                 SQLTypeName = TypeId.VARCHAR_NAME;
                 JDBCTypeId = Types.VARCHAR;
-                wrapperTypeFormatId = StoredFormatIds.VARCHAR_TYPE_ID;
                 break;
 
           case StoredFormatIds.LONGVARCHAR_TYPE_ID_IMPL:
                 SQLTypeName = TypeId.LONGVARCHAR_NAME;
                 JDBCTypeId = Types.LONGVARCHAR;
-                wrapperTypeFormatId = StoredFormatIds.LONGVARCHAR_TYPE_ID;
                 break;
 
           case StoredFormatIds.CLOB_TYPE_ID_IMPL:
                 SQLTypeName = TypeId.CLOB_NAME;
                 JDBCTypeId = Types.CLOB;
-                wrapperTypeFormatId = StoredFormatIds.CLOB_TYPE_ID;
                 break;
 
           case StoredFormatIds.BIT_TYPE_ID_IMPL:
                 SQLTypeName = TypeId.BIT_NAME;
                 JDBCTypeId = Types.BINARY;
-                wrapperTypeFormatId = StoredFormatIds.BIT_TYPE_ID;
                 break;
 
           case StoredFormatIds.VARBIT_TYPE_ID_IMPL:
                 SQLTypeName = TypeId.VARBIT_NAME;
                 JDBCTypeId = Types.VARBINARY;
-                wrapperTypeFormatId = StoredFormatIds.VARBIT_TYPE_ID;
-                break;
+               break;
 
           case StoredFormatIds.LONGVARBIT_TYPE_ID_IMPL:
                 SQLTypeName = TypeId.LONGVARBIT_NAME;
                 JDBCTypeId = Types.LONGVARBINARY;
-                wrapperTypeFormatId = StoredFormatIds.LONGVARBIT_TYPE_ID;
                 break;
 
           case StoredFormatIds.BLOB_TYPE_ID_IMPL:
                 SQLTypeName = TypeId.BLOB_NAME;
                 JDBCTypeId = Types.BLOB;
-                wrapperTypeFormatId = StoredFormatIds.BLOB_TYPE_ID;
                 break;
 
           case StoredFormatIds.DATE_TYPE_ID_IMPL:
                 SQLTypeName = TypeId.DATE_NAME;
                 JDBCTypeId = Types.DATE;
-                wrapperTypeFormatId = StoredFormatIds.DATE_TYPE_ID;
                 break;
 
           case StoredFormatIds.TIME_TYPE_ID_IMPL:
                 SQLTypeName = TypeId.TIME_NAME;
                 JDBCTypeId = Types.TIME;
-                wrapperTypeFormatId = StoredFormatIds.TIME_TYPE_ID;
-                break;
+                 break;
 
           case StoredFormatIds.TIMESTAMP_TYPE_ID_IMPL:
                 SQLTypeName = TypeId.TIMESTAMP_NAME;
                 JDBCTypeId = Types.TIMESTAMP;
-                wrapperTypeFormatId = StoredFormatIds.TIMESTAMP_TYPE_ID;
                 break;
 
           case StoredFormatIds.XML_TYPE_ID_IMPL:
                 SQLTypeName = TypeId.XML_NAME;
                 JDBCTypeId = JDBC40Translation.SQLXML;
-                wrapperTypeFormatId = StoredFormatIds.XML_TYPE_ID;
                 break;
 
           default:

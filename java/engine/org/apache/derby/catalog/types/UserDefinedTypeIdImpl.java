@@ -115,10 +115,4 @@ public class UserDefinedTypeIdImpl extends BaseTypeIdImpl
 	 *	@return	the formatID of this class
 	 */
 	public	int	getTypeFormatId()	{ return StoredFormatIds.USERDEFINED_TYPE_ID_IMPL_V3; }
-
-	/**
-	 * Get the format id for the wrapper type id that corresponds to
-	 * this type id.
-	 */
-	public int wrapperTypeFormatId() { return StoredFormatIds.USERDEFINED_TYPE_ID_V3; }
 }

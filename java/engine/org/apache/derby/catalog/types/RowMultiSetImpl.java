@@ -156,20 +156,6 @@ public class RowMultiSetImpl extends BaseTypeIdImpl
     {
         return Types.OTHER;
     }
-    
-    /**
-     * Get the format id for the wrapper type id that corresponds to
-     * this type id. Should not be called.
-     */
-    public int wrapperTypeFormatId()
-    {
-        if (SanityManager.DEBUG)
-        {
-            SanityManager.THROWASSERT("RowMultiSetImpl.wrapperTypeFormatId() unexpectedly called. " );
-        }
-        
-        return -1;
-    }
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
