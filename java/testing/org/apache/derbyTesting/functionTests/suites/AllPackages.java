@@ -62,12 +62,14 @@ public class AllPackages extends BaseTestCase {
         // Suites that are compiled using Java SE 6 target need to
         // be added this way, otherwise creating the suite
         // will throw an invalid class version error
-        if (JDBC.vmSupportsJDBC4())
-        {
-            suite.addTest(
+        suite.addTest(
                     addSuiteByReflection(
                             "org.apache.derbyTesting.functionTests.tests.jdbc4._Suite"));
-        }
+        
+        // JMX management tests are compiled and require JDK 1.5
+        suite.addTest(
+                addSuiteByReflection(
+                        "org.apache.derbyTesting.functionTests.tests.management._Suite"));
 
         // Adding JUnit unit tests here to avoid creating a new JUnit
         // harness above the functionTests and unitTests
@@ -89,11 +91,16 @@ public class AllPackages extends BaseTestCase {
      */
     private static Test addSuiteByReflection(String className) throws Exception
     {
-        Class clz = Class.forName(className);
-        
-        Method sm = clz.getMethod("suite", null);
-              
-        return (Test) sm.invoke(null, null);
+        try {
+            Class clz = Class.forName(className);
+            
+            Method sm = clz.getMethod("suite", null);
+                  
+            return (Test) sm.invoke(null, null);
+        } catch (LinkageError  e) {
+            return new TestSuite("SKIPPED: " + className + " - " +
+                    e.getMessage());
+        }
     }
 
 }
