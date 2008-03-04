@@ -1472,6 +1472,14 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 		 throws StandardException
 	{
 
+		if (inReplicationSlavePreMode) {
+			// Writing a checkpoing updates the log files and the log.ctrl
+			// file. This cannot be allowed in slave pre mode because the slave
+			// and master log files need to be equal when the database is
+			// booted in slave mode (the next phase of the start slave command).
+			return true;
+		}
+
 		// call checkpoint with no pre-started transaction
 		boolean done = checkpointWithTran(null, rsf, df, tf);
 
