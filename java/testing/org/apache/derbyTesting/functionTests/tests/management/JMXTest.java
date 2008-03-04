@@ -21,15 +21,11 @@
 
 package org.apache.derbyTesting.functionTests.tests.management;
 
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.sql.SQLException;
 import java.util.Set;
 
 import javax.management.MBeanInfo;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
-import javax.sql.DataSource;
 
 import junit.framework.Test;
 
@@ -61,6 +57,9 @@ public class JMXTest extends MBeanTest {
     public void testDerbyRegisteredMBeansSimpleInfo() throws Exception
     {        
         Set<ObjectName> derbyMBeans = getDerbyDomainMBeans();
+        
+        // We expect Derby to have registered MBeans.
+        assertTrue(derbyMBeans.size() > 0);
         
         MBeanServerConnection jmx = getMBeanServerConnection();
         for (ObjectName name : derbyMBeans)

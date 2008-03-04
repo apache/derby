@@ -55,14 +55,20 @@ abstract class MBeanTest extends BaseTestCase {
         
         TestSuite outerSuite = new TestSuite(suiteName);
         
+        Test platform = new TestSuite(testClass,  suiteName + ":platform");
+        
+        // Start the network server to ensure Derby is running and
+        // all the MBeans are running.
+        platform = TestConfiguration.clientServerDecorator(platform);
+        platform = JMXConnectionDecorator.platformMBeanServer(platform);
+        
         // TODO: Run with no security for the moment, requires changes in the
         // test policy files that may clash with a couple of outstanding patches.
-        Test platform = SecurityManagerSetup.noSecurityManager(
-                new TestSuite(testClass,  suiteName + ":platform"))
-                ;
-        platform = JMXConnectionDecorator.platformMBeanServer(platform);
-        // TODO: Disabled - failing at the moment when Derby has not been started.
-        //outerSuite.addTest(platform);
+        platform = SecurityManagerSetup.noSecurityManager(platform);
+        
+        // Set of tests that run within the same virtual machine using
+        // the platform MBeanServer directly.
+        outerSuite.addTest(platform);
         
         // Create a suite of all "test..." methods in the class.
         Test suite = new TestSuite(testClass,  suiteName + ":client");
