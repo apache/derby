@@ -1865,7 +1865,8 @@
       <!-- Use the system property below to debug lacking java security permissions -->
 <!--      <sysproperty key="java.security.debug" value="access:failure"/> -->
       <formatter type="xml"/>
-  	 	
+<test name="org.apache.derbyTesting.junit.EnvTest"
+    todir="junit_${derby.junit.timestamp}"/>  	 	
 <test name="org.apache.derbyTesting.functionTests.tests.jdbcapi.AutoloadTest"
   	todir="junit_${derby.junit.timestamp}"/>
 <test name="org.apache.derbyTesting.functionTests.tests.jdbcapi.JDBCDriversEmbeddedTest"
@@ -1888,6 +1889,8 @@
 	todir="junit_${derby.junit.timestamp}"/>
 <test name="org.apache.derbyTesting.functionTests.tests.engine._Suite"
 	todir="junit_${derby.junit.timestamp}"/>
+<test name="org.apache.derbyTesting.unitTests.junit._Suite"
+    todir="junit_${derby.junit.timestamp}"/>
 <test name="org.apache.derbyTesting.functionTests.tests.upgradeTests._Suite"
   	todir="junit_${derby.junit.timestamp}"/>
 <test name="org.apache.derbyTesting.functionTests.suites.EncryptionSuite"
@@ -2121,7 +2124,7 @@
             </instr>
 	</emma>
         <!-- Change the classpath used for junit tests to use the jars instrumented by EMMA -->
-        <property name="derby.junit.classpath" value="${emma}:${derby.jar.dir}/derbyTesting.jar:${instrumented.jars}/derby.jar:${instrumented.jars}/derbyclient.jar:${instrumented.jars}/derbynet.jar:${instrumented.jars}/derbytools.jar" />
+        <property name="derby.junit.classpath" value="${emma}:${derby.jar.dir}/derbyTesting.jar:${instrumented.jars}/derbyclient.jar:${instrumented.jars}/derbynet.jar:${instrumented.jars}/derbytools.jar" />
     </target>
     
     <target name="emma-all" depends="emma-instrumentation,junit-all,emma-report">
