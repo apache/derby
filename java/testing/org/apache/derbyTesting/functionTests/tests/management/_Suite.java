@@ -53,6 +53,7 @@ public class _Suite extends BaseTestCase {
 
         suite.addTest(JMXTest.suite());
         suite.addTest(ManagementMBeanTest.suite());
+        suite.addTest(InactiveManagementMBeanTest.suite());
         suite.addTest(VersionMBeanTest.suite());
         
         return suite;

@@ -150,6 +150,7 @@ public final class JMXManagementService implements ManagementService, ModuleCont
         registeredMbeans = null;
         
         myManagementServer = null;
+        systemIdentifier = null;
     }
 
     /**
@@ -384,7 +385,7 @@ public final class JMXManagementService implements ManagementService, ModuleCont
         */
     }
 
-    public String getSystemIdentifier() {
+    public synchronized String getSystemIdentifier() {
         return systemIdentifier;
     }
 }

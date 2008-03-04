@@ -43,6 +43,11 @@ import org.apache.derbyTesting.junit.TestConfiguration;
  */
 abstract class MBeanTest extends BaseTestCase {
     
+    /**
+     * JMX connection to use throughout the instance.
+     */
+    private MBeanServerConnection jmxConnection;
+    
     public MBeanTest(String name) {
         super(name);
     }
@@ -151,6 +156,14 @@ abstract class MBeanTest extends BaseTestCase {
         enableManagement();
     }
     
+    @Override
+    protected void tearDown() throws Exception {
+        super.tearDown();
+        
+        // Does not appear to be a method to close!
+        jmxConnection = null;
+    }
+    
     /**
      * Obtains a connection to an MBean server. Assumes th
      * 
@@ -159,7 +172,19 @@ abstract class MBeanTest extends BaseTestCase {
     protected MBeanServerConnection getMBeanServerConnection() 
             throws Exception {
         
-        return JMXConnectionGetter.mbeanServerConnector.get().getMBeanServerConnection();
+        if (jmxConnection == null)
+            jmxConnection = 
+            JMXConnectionGetter.mbeanServerConnector.get().getMBeanServerConnection();
+        return jmxConnection;
+    }
+    
+    /**
+     * Is the JMX connecting using platform JMX.
+     * @return True jmx connections via the platform server, false remote connections. 
+     */
+    protected boolean isPlatformJMXClient() {
+        return JMXConnectionGetter.mbeanServerConnector.get()
+            instanceof PlatformConnectionGetter;
     }
     
     /**
