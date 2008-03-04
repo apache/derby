@@ -142,6 +142,7 @@ public class AsynchronousLogShipper extends Thread implements
     public AsynchronousLogShipper(ReplicationLogBuffer logBuffer,
         ReplicationMessageTransmit transmitter,
         MasterController masterController) {
+        super("derby.master.logger-" + masterController.getDbName());
         this.logBuffer = logBuffer;
         this.transmitter = transmitter;
         this.masterController = masterController;

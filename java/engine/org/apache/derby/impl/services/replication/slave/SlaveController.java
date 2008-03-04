@@ -461,6 +461,15 @@ public class SlaveController
      * applies chunks of log records to the local log files.
      */
     private class SlaveLogReceiverThread extends Thread {
+        
+        /**
+         * Creates a new instance of <tt>SlaveLogReceiverThread</tt>
+         * with a debugging-friendly thread name.
+         */
+        SlaveLogReceiverThread() {
+            super("derby.slave.logger-" + dbname);
+        }
+        
         public void run() {
             try {
                 ReplicationMessage message;

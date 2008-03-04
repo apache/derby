@@ -502,4 +502,22 @@ public class MasterController
         }
     }
 
+    /**
+     * <p>
+     * Returns a name of a database associated with this master
+     * controller.
+     * </p>
+     * 
+     * <p>
+     * Note: The only purpose of the method as of now is to give a 
+     * meaningful name to a log shipper thread. The log shipper thread 
+     * name should contain a name of a corresponding master database,
+     * and this method is used to access it.
+     * </p>
+     * 
+     * @return a master database name
+     */
+    String getDbName() {
+        return this.dbname;
+    }
 }
