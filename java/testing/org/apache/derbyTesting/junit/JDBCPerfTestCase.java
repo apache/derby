@@ -151,6 +151,11 @@ public class JDBCPerfTestCase extends BaseJDBCTestCase {
             testRunNum++;
         }
         
+        // For a single run no point in printing a summary that's
+        // identical to the one run output.
+        if (repeats == 1 && iterations == 1)
+            return;
+        
         long total=0;
         
         if ( repeats > 1) 
