@@ -19,8 +19,8 @@
  */
 package org.apache.derbyTesting.system.oe.run;
 
-import java.sql.SQLException;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 
 import junit.framework.Assert;
@@ -28,7 +28,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.JDBCPerfTestCase;
-import org.apache.derbyTesting.system.oe.client.Load;
+import org.apache.derbyTesting.system.oe.util.HandleCheckError;
 import org.apache.derbyTesting.system.oe.util.OEChecks;
 
 /**
@@ -65,7 +65,11 @@ public class Checks extends JDBCPerfTestCase {
     public void setUp() throws Exception
     {
         this.check = new OEChecks();
-        check.initialize(getConnection(),scale);
+        check.initialize(new HandleCheckError() {
+            public void handleCheckError(String error) {
+                fail(error);
+            }
+        }, getConnection(),scale);
     }
     /**
      * Return suite of tests that checks the row counts for all the tables in

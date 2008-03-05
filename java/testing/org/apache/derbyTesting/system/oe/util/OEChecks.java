@@ -30,6 +30,11 @@ import org.apache.derbyTesting.system.oe.client.Load;
  * Do some OEChecks on the Order Entry database.
  */
 public class OEChecks  {
+    
+    /**
+     * How to report an error.
+     */
+    private HandleCheckError errorHandler;
 
     /**
      * Warehouse scaling factor
@@ -38,9 +43,11 @@ public class OEChecks  {
 
     private Connection conn = null;
 
-    public void initialize(Connection conn, short scale)
+    public void initialize(HandleCheckError errorHandler,
+            Connection conn, short scale)
     throws Exception
     {
+        this.errorHandler = errorHandler;
         this.conn = conn;
         conn.setAutoCommit(false);
         this.scale = scale;
@@ -154,7 +161,7 @@ public class OEChecks  {
      */
     private void checkCountStar(String table, int expected) throws Exception {
         if( expected != rowsInTable(table))
-            System.out.println("ERROR:Number of rows loaded for " + table +
+            errorHandler.handleCheckError("ERROR:Number of rows loaded for " + table +
                     " not correct, expected="+expected +" rows found="+ 
                     rowsInTable(table));
 
@@ -196,7 +203,7 @@ public class OEChecks  {
         double low = ((double) expected) * 0.99;
         double high = ((double) expected) * 1.01;
         if ( (count < low) || (count >high))
-            System.out.println("ERROR! Initial rows" + count + " in " + 
+            errorHandler.handleCheckError("ERROR! Initial rows" + count + " in " + 
                 tableName + " is out of range.[" + low + "-" + high + "]");
         
     }

@@ -24,6 +24,7 @@ import java.sql.DriverManager;
 import java.sql.Connection;
 import org.apache.derbyTesting.system.oe.client.Load;
 import org.apache.derbyTesting.system.oe.load.SimpleInsert;
+import org.apache.derbyTesting.system.oe.util.HandleCheckError;
 import org.apache.derbyTesting.system.oe.util.OEChecks;
 
 /**
@@ -138,7 +139,7 @@ public class DriverUtility {
      */
     public void allChecks() throws Exception {
         OEChecks checks = new OEChecks();
-        checks.initialize(getConnection(), scale);
+        checks.initialize(new HandleCheckError(), getConnection(), scale);
         long start = System.currentTimeMillis();
         checks.checkAllRowCounts();
         long stop = System.currentTimeMillis();
