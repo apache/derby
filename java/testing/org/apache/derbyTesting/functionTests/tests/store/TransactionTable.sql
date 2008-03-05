@@ -19,11 +19,15 @@ maximumdisplaywidth 9000;
 
 connect 'wombat' as c1;
 set isolation to rr;
+
+-- Only look at user transactions.  Depending on timing of background 
+-- threads for post commit and checkpoint there may be system and 
+-- and internal transactions that vary from machine to machine.
 create view xactTable as
 select username, type, status,
 case when first_instant is NULL then 'readonly' else 'not readonly' end as readOnly, cast(sql_text as varchar(512)) sql_text
   from syscs_diag.transaction_table
-    where type != 'InternalTransaction';
+    where type = 'UserTransaction';
 commit;
 select * from xactTable order by username, sql_text, status, type;
 
