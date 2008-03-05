@@ -1926,9 +1926,9 @@
                jvm="${derby.junit.jvm}" maxmemory="512m"
                showoutput="yes"
                dir="junit_${derby.junit.timestamp}"
+               tempdir="junit_${derby.junit.timestamp}"
                errorproperty="tests.failed"
                failureproperty="tests.failed">
-          <sysproperty key="derbyTesting.oldReleasePath" value="${derbyTesting.oldReleasePath}"/>
           <formatter type="xml"/>
 
     <test name="org.apache.derbyTesting.system.oe.test.OETest"
