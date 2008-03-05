@@ -141,25 +141,25 @@ public interface NetworkServerMBean {
      * Get the number of active sessions
      * @return number of active sessions
      */
-    public int getActiveSessions();
+    public int getActiveConnections();
     
     /**
      * get the number of waiting sessions. Always 0 if drdaMaxThreads is 0.
      * @return number of waiting sessions
      */
-    public int getWaitingSessions();
+    public int getWaitingConnections();
     
     /**
      * Get the size of the thread pool.
      * @return size of thread pool
      */
-    public int getConnectionThreads();
+    public int getConnectionThreadPoolSize();
     
     /**
      * Get the accumulated number of connections.
      * @return number of connections.
      */
-    public int getNumberOfConnections();
+    public int getConnectionCounter();
     
     /**
      * Get the total number of bytes read

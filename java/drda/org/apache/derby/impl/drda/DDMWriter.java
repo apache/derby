@@ -1679,6 +1679,7 @@ class DDMWriter
 	final int length = buffer.position();
     try {
       socketOutputStream.write(bytes, 0, length);
+      totalByteCount += length;
       if(flashStream)
 	  socketOutputStream.flush();
     }

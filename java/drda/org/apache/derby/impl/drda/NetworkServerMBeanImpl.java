@@ -208,19 +208,19 @@ class NetworkServerMBeanImpl implements NetworkServerMBean {
     }
      **/
     
-    public int getActiveSessions() {
+    public int getActiveConnections() {
         return server.getActiveSessions();
     }
     
-    public int getWaitingSessions() {
+    public int getWaitingConnections() {
         return server.getRunQueueSize();
     }
     
-    public int getConnectionThreads() {
+    public int getConnectionThreadPoolSize() {
         return server.getThreadListSize();
     }
      
-    public int getNumberOfConnections() {
+    public int getConnectionCounter() {
         return server.getConnectionNumber();
     }
     
@@ -236,11 +236,11 @@ class NetworkServerMBeanImpl implements NetworkServerMBean {
     private long lastReceiveBytes = 0;
     private int receiveResult = 0;
     
-    public int getBytesReceivedPerSecond(){
+    synchronized public int getBytesReceivedPerSecond(){
         long now = System.currentTimeMillis();
         if (now - lastReceiveTime >= 1000) {
             long count = getBytesReceived();
-            receiveResult = (int)((count - lastReceiveBytes)/((now - lastReceiveTime)/1000));
+            receiveResult = (int)((count - lastReceiveBytes) * 1000 /((now - lastReceiveTime)));
             lastReceiveTime = now;
             lastReceiveBytes = count;
         }
@@ -251,11 +251,11 @@ class NetworkServerMBeanImpl implements NetworkServerMBean {
     private long lastSentBytes = 0;
     private int sentResult = 0;
 
-    public int getBytesSentPerSecond(){
+    synchronized public int getBytesSentPerSecond(){
         long now = System.currentTimeMillis();
         if (now - lastSentTime >= 1000) {
             long count = getBytesSent();
-            sentResult = (int)((count - lastSentBytes)/((now - lastSentTime)/1000));
+            sentResult = (int) ((count - lastSentBytes) * 1000 / (now - lastSentTime));
             lastSentTime = now;
             lastSentBytes = count;
         }
