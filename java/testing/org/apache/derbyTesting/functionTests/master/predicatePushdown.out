@@ -52,6 +52,16 @@ ij> create view V1 as select i, j from T1 union select i,j from T2;
 0 rows inserted/updated/deleted
 ij> create view V2 as select a,b from T3 union select a,b from T4;
 0 rows inserted/updated/deleted
+ij> -- Run compression on the test tables to try to get a consistent
+-- set of row count stats for the tables (DERBY-1902, DERBY-3479).
+call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('APP', 'T1', 1);
+0 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('APP', 'T2', 1);
+0 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('APP', 'T3', 1);
+0 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('APP', 'T4', 1);
+0 rows inserted/updated/deleted
 ij> -- Now that we have the basic tables and views for the tests, run
 -- some quick queries to make sure that the optimizer will still 
 -- consider NOT pushing the predicates and will instead do a hash
@@ -136,7 +146,7 @@ Left result set:
 			scan information: 
 				Bit set of columns fetched=All
 				Number of columns fetched=2
-				Number of pages visited=1
+				Number of pages visited=2
 				Number of rows qualified=5
 				Number of rows visited=5
 				Scan type=heap
@@ -158,7 +168,7 @@ None
 			scan information: 
 				Bit set of columns fetched=All
 				Number of columns fetched=2
-				Number of pages visited=1
+				Number of pages visited=2
 				Number of rows qualified=5
 				Number of rows visited=5
 				Scan type=heap
@@ -222,7 +232,7 @@ Negate comparison result: false
 				scan information: 
 					Bit set of columns fetched=All
 					Number of columns fetched=2
-					Number of pages visited=1
+					Number of pages visited=2
 					Number of rows qualified=19
 					Number of rows visited=19
 					Scan type=heap
@@ -244,7 +254,7 @@ None
 				scan information: 
 					Bit set of columns fetched=All
 					Number of columns fetched=2
-					Number of pages visited=1
+					Number of pages visited=2
 					Number of rows qualified=12
 					Number of rows visited=12
 					Scan type=heap
@@ -336,7 +346,7 @@ Source result set:
 				scan information: 
 					Bit set of columns fetched=All
 					Number of columns fetched=2
-					Number of pages visited=1
+					Number of pages visited=2
 					Number of rows qualified=5
 					Number of rows visited=5
 					Scan type=heap
@@ -358,7 +368,7 @@ None
 				scan information: 
 					Bit set of columns fetched=All
 					Number of columns fetched=2
-					Number of pages visited=1
+					Number of pages visited=2
 					Number of rows qualified=5
 					Number of rows visited=5
 					Scan type=heap
@@ -422,7 +432,7 @@ Negate comparison result: false
 					scan information: 
 						Bit set of columns fetched=All
 						Number of columns fetched=2
-						Number of pages visited=1
+						Number of pages visited=2
 						Number of rows qualified=19
 						Number of rows visited=19
 						Scan type=heap
@@ -444,7 +454,7 @@ None
 					scan information: 
 						Bit set of columns fetched=All
 						Number of columns fetched=2
-						Number of pages visited=1
+						Number of pages visited=2
 						Number of rows qualified=12
 						Number of rows visited=12
 						Scan type=heap
@@ -600,7 +610,7 @@ Left result set:
 							scan information: 
 								Bit set of columns fetched=All
 								Number of columns fetched=2
-								Number of pages visited=1
+								Number of pages visited=2
 								Number of rows qualified=5
 								Number of rows visited=5
 								Scan type=heap
@@ -622,7 +632,7 @@ None
 							scan information: 
 								Bit set of columns fetched=All
 								Number of columns fetched=2
-								Number of pages visited=1
+								Number of pages visited=2
 								Number of rows qualified=5
 								Number of rows visited=5
 								Scan type=heap
@@ -644,7 +654,7 @@ None
 					scan information: 
 						Bit set of columns fetched=All
 						Number of columns fetched=2
-						Number of pages visited=1
+						Number of pages visited=2
 						Number of rows qualified=5
 						Number of rows visited=5
 						Scan type=heap
@@ -666,7 +676,7 @@ None
 			scan information: 
 				Bit set of columns fetched=All
 				Number of columns fetched=2
-				Number of pages visited=1
+				Number of pages visited=2
 				Number of rows qualified=5
 				Number of rows visited=5
 				Scan type=heap
@@ -754,7 +764,7 @@ Negate comparison result: false
 						scan information: 
 							Bit set of columns fetched=All
 							Number of columns fetched=2
-							Number of pages visited=1
+							Number of pages visited=2
 							Number of rows qualified=19
 							Number of rows visited=19
 							Scan type=heap
@@ -776,7 +786,7 @@ None
 						scan information: 
 							Bit set of columns fetched=All
 							Number of columns fetched=2
-							Number of pages visited=1
+							Number of pages visited=2
 							Number of rows qualified=12
 							Number of rows visited=12
 							Scan type=heap
@@ -798,7 +808,7 @@ None
 				scan information: 
 					Bit set of columns fetched=All
 					Number of columns fetched=2
-					Number of pages visited=1
+					Number of pages visited=2
 					Number of rows qualified=12
 					Number of rows visited=12
 					Scan type=heap
@@ -881,7 +891,7 @@ Left result set:
 		scan information: 
 			Bit set of columns fetched=All
 			Number of columns fetched=2
-			Number of pages visited=1
+			Number of pages visited=2
 			Number of rows qualified=5
 			Number of rows visited=5
 			Scan type=heap
@@ -903,7 +913,7 @@ None
 		scan information: 
 			Bit set of columns fetched=All
 			Number of columns fetched=2
-			Number of pages visited=1
+			Number of pages visited=2
 			Number of rows qualified=5
 			Number of rows visited=5
 			Scan type=heap
@@ -967,7 +977,7 @@ Negate comparison result: false
 				scan information: 
 					Bit set of columns fetched=All
 					Number of columns fetched=2
-					Number of pages visited=1
+					Number of pages visited=2
 					Number of rows qualified=19
 					Number of rows visited=19
 					Scan type=heap
@@ -989,7 +999,7 @@ None
 				scan information: 
 					Bit set of columns fetched=All
 					Number of columns fetched=2
-					Number of pages visited=1
+					Number of pages visited=2
 					Number of rows qualified=12
 					Number of rows visited=12
 					Scan type=heap
@@ -1081,7 +1091,7 @@ Left result set:
 			scan information: 
 				Bit set of columns fetched=All
 				Number of columns fetched=2
-				Number of pages visited=1
+				Number of pages visited=2
 				Number of rows qualified=5
 				Number of rows visited=5
 				Scan type=heap
@@ -1103,7 +1113,7 @@ None
 			scan information: 
 				Bit set of columns fetched=All
 				Number of columns fetched=2
-				Number of pages visited=1
+				Number of pages visited=2
 				Number of rows qualified=5
 				Number of rows visited=5
 				Scan type=heap
@@ -1153,7 +1163,7 @@ Negate comparison result: false
 			scan information: 
 				Bit set of columns fetched=All
 				Number of columns fetched=2
-				Number of pages visited=1
+				Number of pages visited=2
 				Number of rows qualified=19
 				Number of rows visited=19
 				Scan type=heap
@@ -1175,7 +1185,7 @@ None
 			scan information: 
 				Bit set of columns fetched=All
 				Number of columns fetched=2
-				Number of pages visited=1
+				Number of pages visited=2
 				Number of rows qualified=12
 				Number of rows visited=12
 				Scan type=heap
@@ -1256,7 +1266,7 @@ Left result set:
 		scan information: 
 			Bit set of columns fetched=All
 			Number of columns fetched=2
-			Number of pages visited=1
+			Number of pages visited=2
 			Number of rows qualified=5
 			Number of rows visited=5
 			Scan type=heap
@@ -1278,7 +1288,7 @@ None
 		scan information: 
 			Bit set of columns fetched=All
 			Number of columns fetched=2
-			Number of pages visited=1
+			Number of pages visited=2
 			Number of rows qualified=5
 			Number of rows visited=5
 			Scan type=heap
@@ -1328,7 +1338,7 @@ Negate comparison result: false
 			scan information: 
 				Bit set of columns fetched=All
 				Number of columns fetched=2
-				Number of pages visited=1
+				Number of pages visited=2
 				Number of rows qualified=19
 				Number of rows visited=19
 				Scan type=heap
@@ -1350,7 +1360,7 @@ None
 			scan information: 
 				Bit set of columns fetched=All
 				Number of columns fetched=2
-				Number of pages visited=1
+				Number of pages visited=2
 				Number of rows qualified=12
 				Number of rows visited=12
 				Scan type=heap
@@ -2045,6 +2055,20 @@ ij> create view xxunion as select all ii, jj, kk, mm from xx1 union all select i
 0 rows inserted/updated/deleted
 ij> create view yyunion as select all ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1;
 0 rows inserted/updated/deleted
+ij> -- Run compression on the test tables to try to get a consistent
+-- set of row count stats for the tables (DERBY-1902, DERBY-3479).
+call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('APP', 'T1', 1);
+0 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('APP', 'T2', 1);
+0 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('APP', 'T3', 1);
+0 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('APP', 'T4', 1);
+0 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('APP', 'T5', 1);
+0 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('APP', 'T6', 1);
+0 rows inserted/updated/deleted
 ij> -- And finally, run more extensive tests using the larger tables
 -- that have indexes.  In these tests the optimizer should consider
 -- pushing predicates where possible.  We can tell if a predicate
@@ -2148,7 +2172,7 @@ Left result set:
 			scan information: 
 				Bit set of columns fetched=All
 				Number of columns fetched=2
-				Number of pages visited=1
+				Number of pages visited=2
 				Number of rows qualified=5
 				Number of rows visited=5
 				Scan type=heap
@@ -2170,7 +2194,7 @@ None
 			scan information: 
 				Bit set of columns fetched=All
 				Number of columns fetched=2
-				Number of pages visited=1
+				Number of pages visited=2
 				Number of rows qualified=5
 				Number of rows visited=5
 				Scan type=heap
@@ -2357,7 +2381,7 @@ Source result set:
 				scan information: 
 					Bit set of columns fetched=All
 					Number of columns fetched=2
-					Number of pages visited=1
+					Number of pages visited=2
 					Number of rows qualified=5
 					Number of rows visited=5
 					Scan type=heap
@@ -2379,7 +2403,7 @@ None
 				scan information: 
 					Bit set of columns fetched=All
 					Number of columns fetched=2
-					Number of pages visited=1
+					Number of pages visited=2
 					Number of rows qualified=5
 					Number of rows visited=5
 					Scan type=heap
@@ -2621,7 +2645,7 @@ Source result set:
 								scan information: 
 									Bit set of columns fetched=All
 									Number of columns fetched=2
-									Number of pages visited=1
+									Number of pages visited=2
 									Number of rows qualified=5
 									Number of rows visited=5
 									Scan type=heap
@@ -2656,7 +2680,7 @@ None
 								scan information: 
 									Bit set of columns fetched=All
 									Number of columns fetched=2
-									Number of pages visited=1
+									Number of pages visited=2
 									Number of rows qualified=5
 									Number of rows visited=5
 									Scan type=heap
@@ -2702,7 +2726,7 @@ None
 						scan information: 
 							Bit set of columns fetched=All
 							Number of columns fetched=2
-							Number of pages visited=434
+							Number of pages visited=435
 							Number of rows qualified=54579
 							Number of rows visited=54579
 							Scan type=heap
@@ -2724,7 +2748,7 @@ None
 						scan information: 
 							Bit set of columns fetched=All
 							Number of columns fetched=2
-							Number of pages visited=388
+							Number of pages visited=389
 							Number of rows qualified=48812
 							Number of rows visited=48812
 							Scan type=heap
@@ -2850,7 +2874,7 @@ Source result set:
 							scan information: 
 								Bit set of columns fetched=All
 								Number of columns fetched=2
-								Number of pages visited=1
+								Number of pages visited=2
 								Number of rows qualified=5
 								Number of rows visited=5
 								Scan type=heap
@@ -2876,7 +2900,7 @@ Negate comparison result: true
 							scan information: 
 								Bit set of columns fetched=All
 								Number of columns fetched=2
-								Number of pages visited=1
+								Number of pages visited=2
 								Number of rows qualified=3
 								Number of rows visited=5
 								Scan type=heap
@@ -2926,7 +2950,7 @@ Negate comparison result: true
 						scan information: 
 							Bit set of columns fetched=All
 							Number of columns fetched=2
-							Number of pages visited=434
+							Number of pages visited=435
 							Number of rows qualified=54579
 							Number of rows visited=54579
 							Scan type=heap
@@ -2948,7 +2972,7 @@ None
 						scan information: 
 							Bit set of columns fetched=All
 							Number of columns fetched=2
-							Number of pages visited=388
+							Number of pages visited=389
 							Number of rows qualified=48812
 							Number of rows visited=48812
 							Scan type=heap
@@ -3058,7 +3082,7 @@ Left result set:
 					scan information: 
 						Bit set of columns fetched=All
 						Number of columns fetched=2
-						Number of pages visited=1
+						Number of pages visited=2
 						Number of rows qualified=5
 						Number of rows visited=5
 						Scan type=heap
@@ -3093,7 +3117,7 @@ None
 					scan information: 
 						Bit set of columns fetched=All
 						Number of columns fetched=2
-						Number of pages visited=1
+						Number of pages visited=2
 						Number of rows qualified=5
 						Number of rows visited=5
 						Scan type=heap
@@ -3284,7 +3308,7 @@ Left result set:
 			scan information: 
 				Bit set of columns fetched=All
 				Number of columns fetched=2
-				Number of pages visited=1
+				Number of pages visited=2
 				Number of rows qualified=5
 				Number of rows visited=5
 				Scan type=heap
@@ -3306,7 +3330,7 @@ None
 			scan information: 
 				Bit set of columns fetched=All
 				Number of columns fetched=2
-				Number of pages visited=1
+				Number of pages visited=2
 				Number of rows qualified=5
 				Number of rows visited=5
 				Scan type=heap
@@ -3497,7 +3521,7 @@ Left result set:
 			scan information: 
 				Bit set of columns fetched=All
 				Number of columns fetched=2
-				Number of pages visited=1
+				Number of pages visited=2
 				Number of rows qualified=5
 				Number of rows visited=5
 				Scan type=heap
@@ -3519,7 +3543,7 @@ None
 			scan information: 
 				Bit set of columns fetched=All
 				Number of columns fetched=2
-				Number of pages visited=1
+				Number of pages visited=2
 				Number of rows qualified=5
 				Number of rows visited=5
 				Scan type=heap
@@ -3640,7 +3664,7 @@ Left result set:
 		scan information: 
 			Bit set of columns fetched=All
 			Number of columns fetched=2
-			Number of pages visited=1
+			Number of pages visited=2
 			Number of rows qualified=5
 			Number of rows visited=5
 			Scan type=heap
@@ -3662,7 +3686,7 @@ None
 		scan information: 
 			Bit set of columns fetched=All
 			Number of columns fetched=2
-			Number of pages visited=1
+			Number of pages visited=2
 			Number of rows qualified=5
 			Number of rows visited=5
 			Scan type=heap
@@ -3839,7 +3863,7 @@ Left result set:
 		scan information: 
 			Bit set of columns fetched=All
 			Number of columns fetched=2
-			Number of pages visited=1
+			Number of pages visited=2
 			Number of rows qualified=5
 			Number of rows visited=5
 			Scan type=heap
@@ -3861,7 +3885,7 @@ None
 		scan information: 
 			Bit set of columns fetched=All
 			Number of columns fetched=2
-			Number of pages visited=1
+			Number of pages visited=2
 			Number of rows qualified=5
 			Number of rows visited=5
 			Scan type=heap
@@ -4037,7 +4061,7 @@ Left result set:
 				scan information: 
 					Bit set of columns fetched=All
 					Number of columns fetched=2
-					Number of pages visited=1
+					Number of pages visited=2
 					Number of rows qualified=5
 					Number of rows visited=5
 					Scan type=heap
@@ -4059,7 +4083,7 @@ None
 				scan information: 
 					Bit set of columns fetched=All
 					Number of columns fetched=2
-					Number of pages visited=1
+					Number of pages visited=2
 					Number of rows qualified=5
 					Number of rows visited=5
 					Scan type=heap
@@ -4207,7 +4231,7 @@ Left result set:
 			scan information: 
 				Bit set of columns fetched=All
 				Number of columns fetched=2
-				Number of pages visited=1
+				Number of pages visited=2
 				Number of rows qualified=5
 				Number of rows visited=5
 				Scan type=heap
@@ -4229,7 +4253,7 @@ None
 			scan information: 
 				Bit set of columns fetched=All
 				Number of columns fetched=2
-				Number of pages visited=1
+				Number of pages visited=2
 				Number of rows qualified=5
 				Number of rows visited=5
 				Scan type=heap
@@ -4417,7 +4441,7 @@ Left result set:
 			scan information: 
 				Bit set of columns fetched=All
 				Number of columns fetched=2
-				Number of pages visited=1
+				Number of pages visited=2
 				Number of rows qualified=5
 				Number of rows visited=5
 				Scan type=heap
@@ -4439,7 +4463,7 @@ None
 			scan information: 
 				Bit set of columns fetched=All
 				Number of columns fetched=2
-				Number of pages visited=1
+				Number of pages visited=2
 				Number of rows qualified=5
 				Number of rows visited=5
 				Scan type=heap
@@ -4660,7 +4684,7 @@ Source result set:
 						scan information: 
 							Bit set of columns fetched=All
 							Number of columns fetched=2
-							Number of pages visited=1
+							Number of pages visited=2
 							Number of rows qualified=5
 							Number of rows visited=5
 							Scan type=heap
@@ -4682,7 +4706,7 @@ None
 						scan information: 
 							Bit set of columns fetched=All
 							Number of columns fetched=2
-							Number of pages visited=388
+							Number of pages visited=389
 							Number of rows qualified=48812
 							Number of rows visited=48812
 							Scan type=heap
@@ -4746,7 +4770,7 @@ Negate comparison result: false
 							scan information: 
 								Bit set of columns fetched=All
 								Number of columns fetched=2
-								Number of pages visited=1
+								Number of pages visited=2
 								Number of rows qualified=5
 								Number of rows visited=5
 								Scan type=heap
@@ -4768,7 +4792,7 @@ None
 							scan information: 
 								Bit set of columns fetched=All
 								Number of columns fetched=2
-								Number of pages visited=434
+								Number of pages visited=435
 								Number of rows qualified=54579
 								Number of rows visited=54579
 								Scan type=heap
@@ -4928,7 +4952,7 @@ Left result set:
 							scan information: 
 								Bit set of columns fetched=All
 								Number of columns fetched=2
-								Number of pages visited=1
+								Number of pages visited=2
 								Number of rows qualified=5
 								Number of rows visited=5
 								Scan type=heap
@@ -4950,7 +4974,7 @@ None
 							scan information: 
 								Bit set of columns fetched=All
 								Number of columns fetched=2
-								Number of pages visited=1
+								Number of pages visited=2
 								Number of rows qualified=5
 								Number of rows visited=5
 								Scan type=heap
@@ -4972,7 +4996,7 @@ None
 					scan information: 
 						Bit set of columns fetched=All
 						Number of columns fetched=2
-						Number of pages visited=1
+						Number of pages visited=2
 						Number of rows qualified=5
 						Number of rows visited=5
 						Scan type=heap
@@ -4994,7 +5018,7 @@ None
 			scan information: 
 				Bit set of columns fetched=All
 				Number of columns fetched=2
-				Number of pages visited=1
+				Number of pages visited=2
 				Number of rows qualified=5
 				Number of rows visited=5
 				Scan type=heap
@@ -5302,7 +5326,7 @@ Source result set:
 							scan information: 
 								Bit set of columns fetched=All
 								Number of columns fetched=2
-								Number of pages visited=1
+								Number of pages visited=2
 								Number of rows qualified=5
 								Number of rows visited=5
 								Scan type=heap
@@ -5328,7 +5352,7 @@ Negate comparison result: true
 							scan information: 
 								Bit set of columns fetched=All
 								Number of columns fetched=2
-								Number of pages visited=1
+								Number of pages visited=2
 								Number of rows qualified=5
 								Number of rows visited=5
 								Scan type=heap
@@ -5354,7 +5378,7 @@ Negate comparison result: true
 					scan information: 
 						Bit set of columns fetched=All
 						Number of columns fetched=2
-						Number of pages visited=1
+						Number of pages visited=2
 						Number of rows qualified=5
 						Number of rows visited=5
 						Scan type=heap
@@ -5380,7 +5404,7 @@ Negate comparison result: true
 			scan information: 
 				Bit set of columns fetched=All
 				Number of columns fetched=2
-				Number of pages visited=1
+				Number of pages visited=2
 				Number of rows qualified=5
 				Number of rows visited=5
 				Scan type=heap
@@ -5563,7 +5587,7 @@ Source result set:
 										scan information: 
 											Bit set of columns fetched=All
 											Number of columns fetched=2
-											Number of pages visited=1
+											Number of pages visited=2
 											Number of rows qualified=5
 											Number of rows visited=5
 											Scan type=heap
@@ -5585,7 +5609,7 @@ None
 										scan information: 
 											Bit set of columns fetched=All
 											Number of columns fetched=2
-											Number of pages visited=1
+											Number of pages visited=2
 											Number of rows qualified=5
 											Number of rows visited=5
 											Scan type=heap
@@ -5607,7 +5631,7 @@ None
 								scan information: 
 									Bit set of columns fetched=All
 									Number of columns fetched=2
-									Number of pages visited=434
+									Number of pages visited=435
 									Number of rows qualified=54579
 									Number of rows visited=54579
 									Scan type=heap
@@ -5629,7 +5653,7 @@ None
 						scan information: 
 							Bit set of columns fetched=All
 							Number of columns fetched=2
-							Number of pages visited=388
+							Number of pages visited=389
 							Number of rows qualified=48812
 							Number of rows visited=48812
 							Scan type=heap
@@ -5718,7 +5742,7 @@ Left result set:
 			scan information: 
 				Bit set of columns fetched=All
 				Number of columns fetched=2
-				Number of pages visited=1
+				Number of pages visited=2
 				Number of rows qualified=5
 				Number of rows visited=5
 				Scan type=heap
@@ -5740,7 +5764,7 @@ None
 			scan information: 
 				Bit set of columns fetched=All
 				Number of columns fetched=2
-				Number of pages visited=1
+				Number of pages visited=2
 				Number of rows qualified=5
 				Number of rows visited=5
 				Scan type=heap
@@ -5967,7 +5991,7 @@ Left result set:
 					scan information: 
 						Bit set of columns fetched=All
 						Number of columns fetched=2
-						Number of pages visited=1
+						Number of pages visited=2
 						Number of rows qualified=5
 						Number of rows visited=5
 						Scan type=heap
@@ -6051,7 +6075,7 @@ None
 			scan information: 
 				Bit set of columns fetched=All
 				Number of columns fetched=2
-				Number of pages visited=1
+				Number of pages visited=2
 				Number of rows qualified=5
 				Number of rows visited=5
 				Scan type=heap
@@ -6255,7 +6279,7 @@ Source result set:
 				scan information: 
 					Bit set of columns fetched=All
 					Number of columns fetched=2
-					Number of pages visited=1
+					Number of pages visited=2
 					Number of rows qualified=5
 					Number of rows visited=5
 					Scan type=heap
@@ -6340,7 +6364,7 @@ None
 		scan information: 
 			Bit set of columns fetched=All
 			Number of columns fetched=2
-			Number of pages visited=1
+			Number of pages visited=2
 			Number of rows qualified=5
 			Number of rows visited=5
 			Scan type=heap
@@ -6496,7 +6520,7 @@ Left result set:
 					scan information: 
 						Bit set of columns fetched=All
 						Number of columns fetched=2
-						Number of pages visited=1
+						Number of pages visited=2
 						Number of rows qualified=5
 						Number of rows visited=5
 						Scan type=heap
@@ -6580,7 +6604,7 @@ None
 			scan information: 
 				Bit set of columns fetched=All
 				Number of columns fetched=2
-				Number of pages visited=1
+				Number of pages visited=2
 				Number of rows qualified=5
 				Number of rows visited=5
 				Scan type=heap
@@ -6663,7 +6687,7 @@ Right result set:
 						scan information: 
 							Bit set of columns fetched=All
 							Number of columns fetched=2
-							Number of pages visited=434
+							Number of pages visited=435
 							Number of rows qualified=54579
 							Number of rows visited=54579
 							Scan type=heap
@@ -6970,7 +6994,7 @@ Source result set:
 				scan information: 
 					Bit set of columns fetched=All
 					Number of columns fetched=2
-					Number of pages visited=1
+					Number of pages visited=2
 					Number of rows qualified=5
 					Number of rows visited=5
 					Scan type=heap
@@ -6993,7 +7017,7 @@ None
 		scan information: 
 			Bit set of columns fetched=All
 			Number of columns fetched=2
-			Number of pages visited=1
+			Number of pages visited=2
 			Number of rows qualified=3
 			Number of rows visited=3
 			Scan type=heap
@@ -7162,7 +7186,7 @@ Source result set:
 							scan information: 
 								Bit set of columns fetched=All
 								Number of columns fetched=2
-								Number of pages visited=1
+								Number of pages visited=2
 								Number of rows qualified=5
 								Number of rows visited=5
 								Scan type=heap
@@ -7184,7 +7208,7 @@ None
 							scan information: 
 								Bit set of columns fetched=All
 								Number of columns fetched=2
-								Number of pages visited=1
+								Number of pages visited=2
 								Number of rows qualified=5
 								Number of rows visited=5
 								Scan type=heap
@@ -7326,7 +7350,7 @@ None
 						scan information: 
 							Bit set of columns fetched=All
 							Number of columns fetched=2
-							Number of pages visited=434
+							Number of pages visited=435
 							Number of rows qualified=54579
 							Number of rows visited=54579
 							Scan type=heap
@@ -7348,7 +7372,7 @@ None
 						scan information: 
 							Bit set of columns fetched=All
 							Number of columns fetched=2
-							Number of pages visited=388
+							Number of pages visited=389
 							Number of rows qualified=48812
 							Number of rows visited=48812
 							Scan type=heap
@@ -7484,7 +7508,7 @@ Source result set:
 							scan information: 
 								Bit set of columns fetched=All
 								Number of columns fetched=2
-								Number of pages visited=1
+								Number of pages visited=2
 								Number of rows qualified=5
 								Number of rows visited=5
 								Scan type=heap
@@ -7506,7 +7530,7 @@ None
 							scan information: 
 								Bit set of columns fetched=All
 								Number of columns fetched=2
-								Number of pages visited=1
+								Number of pages visited=2
 								Number of rows qualified=5
 								Number of rows visited=5
 								Scan type=heap
@@ -7814,7 +7838,7 @@ Source result set:
 				scan information: 
 					Bit set of columns fetched=All
 					Number of columns fetched=2
-					Number of pages visited=434
+					Number of pages visited=435
 					Number of rows qualified=54579
 					Number of rows visited=54579
 					Scan type=heap
@@ -7836,7 +7860,7 @@ None
 				scan information: 
 					Bit set of columns fetched=All
 					Number of columns fetched=2
-					Number of pages visited=388
+					Number of pages visited=389
 					Number of rows qualified=48812
 					Number of rows visited=48812
 					Scan type=heap
@@ -7937,7 +7961,7 @@ Negate comparison result: false
 								scan information: 
 									Bit set of columns fetched=All
 									Number of columns fetched=2
-									Number of pages visited=1
+									Number of pages visited=2
 									Number of rows qualified=5
 									Number of rows visited=5
 									Scan type=heap
@@ -7976,7 +8000,7 @@ None
 					scan information: 
 						Bit set of columns fetched=All
 						Number of columns fetched=2
-						Number of pages visited=1
+						Number of pages visited=2
 						Number of rows qualified=5
 						Number of rows visited=5
 						Scan type=heap
@@ -8089,7 +8113,7 @@ Source result set:
 				scan information: 
 					Bit set of columns fetched=All
 					Number of columns fetched=2
-					Number of pages visited=434
+					Number of pages visited=435
 					Number of rows qualified=54579
 					Number of rows visited=54579
 					Scan type=heap
@@ -8111,7 +8135,7 @@ None
 				scan information: 
 					Bit set of columns fetched=All
 					Number of columns fetched=2
-					Number of pages visited=388
+					Number of pages visited=389
 					Number of rows qualified=48812
 					Number of rows visited=48812
 					Scan type=heap
@@ -8199,7 +8223,7 @@ Negate comparison result: false
 							scan information: 
 								Bit set of columns fetched=All
 								Number of columns fetched=2
-								Number of pages visited=1
+								Number of pages visited=2
 								Number of rows qualified=5
 								Number of rows visited=5
 								Scan type=heap
@@ -8223,7 +8247,7 @@ None
 								Bit set of columns fetched={0}
 								Number of columns fetched=1
 								Number of deleted rows visited=0
-								Number of pages visited=298
+								Number of pages visited=297
 								Number of rows qualified=54579
 								Number of rows visited=54579
 								Scan type=btree
@@ -8254,7 +8278,7 @@ Negate comparison result: false
 					scan information: 
 						Bit set of columns fetched=All
 						Number of columns fetched=2
-						Number of pages visited=1
+						Number of pages visited=2
 						Number of rows qualified=5
 						Number of rows visited=5
 						Scan type=heap
@@ -8379,7 +8403,7 @@ Left result set:
 						scan information: 
 							Bit set of columns fetched=All
 							Number of columns fetched=2
-							Number of pages visited=1
+							Number of pages visited=2
 							Number of rows qualified=5
 							Number of rows visited=5
 							Scan type=heap
@@ -8418,7 +8442,7 @@ None
 			scan information: 
 				Bit set of columns fetched=All
 				Number of columns fetched=2
-				Number of pages visited=1
+				Number of pages visited=2
 				Number of rows qualified=5
 				Number of rows visited=5
 				Scan type=heap
@@ -8519,7 +8543,7 @@ Negate comparison result: false
 							scan information: 
 								Bit set of columns fetched=All
 								Number of columns fetched=2
-								Number of pages visited=1
+								Number of pages visited=2
 								Number of rows qualified=5
 								Number of rows visited=5
 								Scan type=heap
@@ -8558,7 +8582,7 @@ None
 				scan information: 
 					Bit set of columns fetched=All
 					Number of columns fetched=2
-					Number of pages visited=1
+					Number of pages visited=2
 					Number of rows qualified=5
 					Number of rows visited=5
 					Scan type=heap
@@ -8706,7 +8730,7 @@ Source result set:
 							scan information: 
 								Bit set of columns fetched=All
 								Number of columns fetched=2
-								Number of pages visited=1
+								Number of pages visited=2
 								Number of rows qualified=5
 								Number of rows visited=5
 								Scan type=heap
@@ -8728,7 +8752,7 @@ None
 							scan information: 
 								Bit set of columns fetched=All
 								Number of columns fetched=2
-								Number of pages visited=1
+								Number of pages visited=2
 								Number of rows qualified=5
 								Number of rows visited=5
 								Scan type=heap
@@ -8981,7 +9005,7 @@ Source result set:
 								scan information: 
 									Bit set of columns fetched=All
 									Number of columns fetched=2
-									Number of pages visited=1
+									Number of pages visited=2
 									Number of rows qualified=5
 									Number of rows visited=5
 									Scan type=heap
@@ -9039,7 +9063,7 @@ None
 					scan information: 
 						Bit set of columns fetched={0}
 						Number of columns fetched=1
-						Number of pages visited=1
+						Number of pages visited=2
 						Number of rows qualified=0
 						Number of rows visited=0
 						Scan type=heap
@@ -9164,7 +9188,7 @@ Source result set:
 			scan information: 
 				Bit set of columns fetched=All
 				Number of columns fetched=2
-				Number of pages visited=1
+				Number of pages visited=2
 				Number of rows qualified=5
 				Number of rows visited=5
 				Scan type=heap
@@ -9202,7 +9226,7 @@ None
 				scan information: 
 					Bit set of columns fetched=All
 					Number of columns fetched=2
-					Number of pages visited=434
+					Number of pages visited=435
 					Number of rows qualified=54579
 					Number of rows visited=54579
 					Scan type=heap
@@ -9327,7 +9351,7 @@ Source result set:
 					scan information: 
 						Bit set of columns fetched=All
 						Number of columns fetched=2
-						Number of pages visited=1
+						Number of pages visited=2
 						Number of rows qualified=5
 						Number of rows visited=5
 						Scan type=heap
@@ -9352,7 +9376,7 @@ None
 					scan information: 
 						Bit set of columns fetched=All
 						Number of columns fetched=2
-						Number of pages visited=1
+						Number of pages visited=2
 						Number of rows qualified=5
 						Number of rows visited=5
 						Scan type=heap
@@ -9390,7 +9414,7 @@ None
 					scan information: 
 						Bit set of columns fetched=All
 						Number of columns fetched=2
-						Number of pages visited=434
+						Number of pages visited=435
 						Number of rows qualified=54579
 						Number of rows visited=54579
 						Scan type=heap
@@ -9428,7 +9452,7 @@ None
 				scan information: 
 					Bit set of columns fetched=All
 					Number of columns fetched=2
-					Number of pages visited=388
+					Number of pages visited=389
 					Number of rows qualified=48812
 					Number of rows visited=48812
 					Scan type=heap
@@ -9569,7 +9593,7 @@ Source result set:
 						scan information: 
 							Bit set of columns fetched=All
 							Number of columns fetched=2
-							Number of pages visited=1
+							Number of pages visited=2
 							Number of rows qualified=5
 							Number of rows visited=5
 							Scan type=heap
@@ -9591,7 +9615,7 @@ None
 						scan information: 
 							Bit set of columns fetched=All
 							Number of columns fetched=2
-							Number of pages visited=1
+							Number of pages visited=2
 							Number of rows qualified=5
 							Number of rows visited=5
 							Scan type=heap
@@ -9613,7 +9637,7 @@ None
 				scan information: 
 					Bit set of columns fetched={0}
 					Number of columns fetched=1
-					Number of pages visited=1
+					Number of pages visited=2
 					Number of rows qualified=0
 					Number of rows visited=0
 					Scan type=heap
@@ -9813,7 +9837,7 @@ Source result set:
 					scan information: 
 						Bit set of columns fetched=All
 						Number of columns fetched=2
-						Number of pages visited=1
+						Number of pages visited=2
 						Number of rows qualified=5
 						Number of rows visited=5
 						Scan type=heap
@@ -9835,7 +9859,7 @@ None
 					scan information: 
 						Bit set of columns fetched=All
 						Number of columns fetched=2
-						Number of pages visited=1
+						Number of pages visited=2
 						Number of rows qualified=5
 						Number of rows visited=5
 						Scan type=heap
@@ -9856,7 +9880,7 @@ None
 			scan information: 
 				Bit set of columns fetched={}
 				Number of columns fetched=0
-				Number of pages visited=1
+				Number of pages visited=2
 				Number of rows qualified=0
 				Number of rows visited=0
 				Scan type=heap
@@ -10061,7 +10085,7 @@ Source result set:
 						scan information: 
 							Bit set of columns fetched=All
 							Number of columns fetched=2
-							Number of pages visited=1
+							Number of pages visited=2
 							Number of rows qualified=5
 							Number of rows visited=5
 							Scan type=heap
@@ -10083,7 +10107,7 @@ None
 						scan information: 
 							Bit set of columns fetched=All
 							Number of columns fetched=2
-							Number of pages visited=1
+							Number of pages visited=2
 							Number of rows qualified=5
 							Number of rows visited=5
 							Scan type=heap
@@ -10105,7 +10129,7 @@ None
 				scan information: 
 					Bit set of columns fetched={0}
 					Number of columns fetched=1
-					Number of pages visited=1
+					Number of pages visited=2
 					Number of rows qualified=0
 					Number of rows visited=0
 					Scan type=heap

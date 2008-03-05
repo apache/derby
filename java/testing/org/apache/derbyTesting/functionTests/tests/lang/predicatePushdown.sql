@@ -47,6 +47,14 @@ update t4 set b = 2 * a where a > 10;
 create view V1 as select i, j from T1 union select i,j from T2;
 create view V2 as select a,b from T3 union select a,b from T4;
 
+-- Run compression on the test tables to try to get a consistent
+-- set of row count stats for the tables (DERBY-1902, DERBY-3479).
+
+call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('APP', 'T1', 1);
+call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('APP', 'T2', 1);
+call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('APP', 'T3', 1);
+call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('APP', 'T4', 1);
+
 -- Now that we have the basic tables and views for the tests, run
 -- some quick queries to make sure that the optimizer will still 
 -- consider NOT pushing the predicates and will instead do a hash
@@ -600,6 +608,16 @@ ALTER TABLE "APP"."XX1" ADD CONSTRAINT "PK_XX1" PRIMARY KEY ("II");
 create view xxunion as select all ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1 union all select ii, jj, kk, mm from xx1;
 
 create view yyunion as select all ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1 union all select ii, jj, kk, aa from yy1;
+
+-- Run compression on the test tables to try to get a consistent
+-- set of row count stats for the tables (DERBY-1902, DERBY-3479).
+
+call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('APP', 'T1', 1);
+call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('APP', 'T2', 1);
+call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('APP', 'T3', 1);
+call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('APP', 'T4', 1);
+call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('APP', 'T5', 1);
+call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('APP', 'T6', 1);
 
 -- And finally, run more extensive tests using the larger tables
 -- that have indexes.  In these tests the optimizer should consider
