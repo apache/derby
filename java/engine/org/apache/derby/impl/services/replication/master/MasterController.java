@@ -320,7 +320,8 @@ public class MasterController
     }
     
     /**
-     * Append a chunk of log records to the log buffer.
+     * Append a chunk of log records to the log buffer. The method is not 
+     * threadsafe; only one thread should access this method at a time. 
      *
      * @param greatestInstant   the instant of the log record that was
      *                          added last to this chunk of log
@@ -337,6 +338,8 @@ public class MasterController
         } catch (LogBufferFullException lbfe) {
             try {
                 logShipper.forceFlush();
+                // There should now be room for this log chunk in the buffer
+                appendLog(greatestInstant, log, logOffset, logLength);
             } catch (IOException ioe) {
                 printStackAndStopMaster(ioe);
             } catch (StandardException se) {
