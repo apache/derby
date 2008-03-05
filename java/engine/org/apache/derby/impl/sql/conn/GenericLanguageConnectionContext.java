@@ -2693,7 +2693,11 @@ public class GenericLanguageConnectionContext
 
 	/**
 		If we are called as part of rollback code path, then we will reset all 
-		the activations. 
+		the activations that have resultset returning rows associated with 
+		them. DERBY-3304 Resultsets that do not return rows should be left 
+		alone when the rollback is through the JDBC Connection object. If the 
+		rollback is caused by an exception, then at that time, all kinds of
+		resultsets should be closed. 
 		
 		If we are called as part of commit code path, then we will do one of 
 		the following if the activation has resultset assoicated with it. Also,
@@ -2732,11 +2736,26 @@ public class GenericLanguageConnectionContext
 				continue;
 			}
 
+			//Determine if the activation has a resultset and if that resultset
+			//returns rows. For such an activation, we need to take special
+			//actions during commit and rollback as explained in the comments
+			//below.
+			ResultSet activationResultSet = a.getResultSet();
+			boolean resultsetReturnsRows =  
+				(activationResultSet != null) && activationResultSet.returnsRows(); ;
+
 			if (forRollback) { 
-				//Since we are dealing with rollback, we need to reset the 
-				//activation no matter what the holdability might be or no
-				//matter whether the associated resultset returns rows or not.
-				a.reset();
+				if (resultsetReturnsRows)
+					//Since we are dealing with rollback, we need to reset 
+					//the activation no matter what the holdability might 
+					//be provided that resultset returns rows. An example
+					//where we do not want to close a resultset that does
+					//not return rows would be a java procedure which has
+					//user invoked rollback inside of it. That rollback
+					//should not reset the activation associated with
+					//the call to java procedure because that activation
+					//is still being used.
+					a.reset();
 				// Only invalidate statements if we performed DDL.
 				if (dataDictionaryInWriteMode()) {
 					ExecPreparedStatement ps = a.getPreparedStatement();
@@ -2746,28 +2765,22 @@ public class GenericLanguageConnectionContext
 				}
 			} else {
 				//We are dealing with commit here. 
-				if (a.getResultSet() != null) {
-					ResultSet activationResultSet = a.getResultSet();
-					boolean resultsetReturnsRows = activationResultSet.returnsRows();
-					//if the activation has resultset associated with it, then 
-					//use following criteria to take the action
-					if (resultsetReturnsRows){
-						if (a.getResultSetHoldability() == false)
-							//Close result sets that return rows and are not held 
-							//across commit. This is to implement closing JDBC 
-							//result sets that are CLOSE_CURSOR_ON_COMMIT at commit 
-							//time. 
-							activationResultSet.close();
-						else 
-							//Clear the current row of the result sets that return
-							//rows and are held across commit. This is to implement
-							//keeping JDBC result sets open that are 
-							//HOLD_CURSORS_OVER_COMMIT at commit time and marking
-							//the resultset to be not on a valid row position. The 
-							//user will need to reposition within the resultset 
-							//before doing any row operations.
-							activationResultSet.clearCurrentRow();							
-					}
+				if (resultsetReturnsRows){
+					if (a.getResultSetHoldability() == false)
+						//Close result sets that return rows and are not held 
+						//across commit. This is to implement closing JDBC 
+						//result sets that are CLOSE_CURSOR_ON_COMMIT at commit 
+						//time. 
+						activationResultSet.close();
+					else 
+						//Clear the current row of the result sets that return
+						//rows and are held across commit. This is to implement
+						//keeping JDBC result sets open that are 
+						//HOLD_CURSORS_OVER_COMMIT at commit time and marking
+						//the resultset to be not on a valid row position. The 
+						//user will need to reposition within the resultset 
+						//before doing any row operations.
+						activationResultSet.clearCurrentRow();							
 				}
 				a.clearHeapConglomerateController();
 			}

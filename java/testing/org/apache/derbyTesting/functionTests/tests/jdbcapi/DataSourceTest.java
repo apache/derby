@@ -2517,10 +2517,7 @@ public class DataSourceTest extends BaseJDBCTestCase {
             rsh.next();
             fail("rsh's connection not active id ");
         } catch (SQLException sqle) {
-            if (usingEmbedded())
-                assertSQLState("08003", sqle);
-            else if (usingDerbyNetClient())
-                assertSQLState("XCL16", sqle);
+            assertSQLState("XCL16", sqle);
         }
 
         // resume XA transaction and keep using rs");

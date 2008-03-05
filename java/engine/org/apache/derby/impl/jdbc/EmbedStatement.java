@@ -1613,8 +1613,15 @@ public class EmbedStatement extends ConnectionChild
             return null;
 
         // ignore closed result sets.
-        if (lrs.isClosed)
-            return null;
+        try {
+        	//following will check if the JDBC ResultSet or the language
+        	//ResultSet is closed. If yes, then it will throw an exception.
+        	//So, the exception indicates that the ResultSet is closed and
+        	//hence we should ignore it. 
+        	lrs.checkIfClosed("");
+        } catch (SQLException ex) {
+            return null;        	
+        }
         
         lrs.setDynamicResultSet(callStatement);
 

@@ -8,7 +8,7 @@ ERROR 08003: No current connection.
 ERROR 08003: No current connection.
 ERROR 08003: No current connection.
 ERROR 08003: No current connection.
-ERROR 08003: No current connection.
+ERROR XCL16: ResultSet not open. Operation 'next' not permitted. Verify that autocommit is OFF.
 ERROR 08003: No current connection.
 ERROR 08003: No current connection.
 Test database shutdown ...

@@ -2266,7 +2266,6 @@ public abstract class EmbedResultSet extends ConnectionChild
 	//1)Make sure JDBC ResultSet is not closed
 	//2)Make sure this is an updatable ResultSet
 	//3)Make sure JDBC ResultSet is positioned on a row
-	//4)Make sure underneath language resultset is not closed
 	protected void checksBeforeUpdateOrDelete(String methodName, int columnIndex) throws SQLException {
 
       //1)Make sure JDBC ResultSet is not closed
@@ -2277,13 +2276,6 @@ public abstract class EmbedResultSet extends ConnectionChild
 
       //3)Make sure JDBC ResultSet is positioned on a row
       if (!isOnInsertRow) checkOnRow(); // make sure there's a current row
-      //in case of autocommit on, if there was an exception which caused runtime rollback in this transaction prior to this call,
-      //the rollback code will mark the language resultset closed (it doesn't mark the JDBC ResultSet closed).
-      //That is why alongwith the earlier checkIfClosed call in this method, there is a check for language resultset close as well.
-
-      //4)Make sure underneath language resultset is not closed
-      if (theResults.isClosed())
-        throw Util.generateCsSQLException(SQLState.LANG_RESULT_SET_NOT_OPEN, methodName);
 	}
 
 	//mark the column as updated and return DataValueDescriptor for it. It will be used by updateXXX methods to put new values
@@ -2299,7 +2291,6 @@ public abstract class EmbedResultSet extends ConnectionChild
      * 1) Make sure JDBC ResultSet is not closed
      * 2) Make sure this is an updatable ResultSet
      * 3) Make sure JDBC ResultSet is positioned on insertRow
-     * 4) Make sure underneath language resultset is not closed
      */
     protected void checksBeforeInsert() throws SQLException {
         // 1)Make sure JDBC ResultSet is not closed
@@ -2312,11 +2303,6 @@ public abstract class EmbedResultSet extends ConnectionChild
         // 3)Make sure JDBC ResultSet is positioned on insertRow
         if (!isOnInsertRow) {
             throw newSQLException(SQLState.CURSOR_NOT_POSITIONED_ON_INSERT_ROW);
-        }
-
-        // 4)Make sure underneath language resultset is not closed
-        if (theResults.isClosed()) {
-            throw Util.generateCsSQLException(SQLState.LANG_RESULT_SET_NOT_OPEN, "insertRow");
         }
     }
 
@@ -4276,7 +4262,21 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 * @exception SQLException		Thrown if this ResultSet is closed.
 	 */
 	final void checkIfClosed(String operation) throws SQLException {
-		if (isClosed) {
+		// If the JDBC ResultSet has been explicitly closed, isClosed is
+		// true. In some cases, the underlying language ResultSet can be closed
+		// without setting isClosed in the JDBC ResultSet. This happens if the
+		// ResultSet is non-holdable and the transaction has been committed, or
+		// if an error in auto-commit mode causes a rollback of the
+		// transaction.
+		if (isClosed || theResults.isClosed()) {
+
+			// The JDBC ResultSet hasn't been explicitly closed. Perform some
+			// basic cleanup and mark it as closed.
+			if (!isClosed) {
+				closeCurrentStream();
+				isClosed = true;
+			}
+
 			throw newSQLException(SQLState.LANG_RESULT_SET_NOT_OPEN, operation);
 		}
 	}
