@@ -1310,8 +1310,12 @@ public class SelectNode extends ResultSetNode
 			eliminateSort = eliminateSort || gbn.getIsInSortedOrder();
 		}
 
-		// if it is distinct, that must also be taken care of.
-		if (isDistinct)
+		/* 
+		 * If it is distinct, that must also be taken care of. But, if there is 
+		 * a window function in the RCL we must delay duplicate elimination
+		 * until after the window function has been evaluated.
+		 */
+		if (isDistinct && !hasWindowFunction)
 		{
 			// We first verify that a distinct is valid on the
 			// RCL.
@@ -1504,13 +1508,39 @@ public class SelectNode extends ResultSetNode
 				}
 			}
 
+			/* 
+			 * After evaluation of the window function, we can do duplicate 
+			 * elimination for distinct queries.
+			 */
+			if (isDistinct)
+			{
+				/* Verify that a distinct is valid on the RCL. */
+				prnRSN.getResultColumns().verifyAllOrderable();
+
+				/*
+				 * We cannot push duplicate elimination into store via a hash 
+				 * scan when there is a window function in the RCL, but it may 
+				 * be possible to filter out duplicates without a sorter.
+				 */
+				boolean inSortedOrder = isOrderedResult(prnRSN.getResultColumns(), 
+														prnRSN, 
+														!(orderByAndDistinctMerged));
+				prnRSN = (ResultSetNode) getNodeFactory().getNode(
+											C_NodeTypes.DISTINCT_NODE,
+											prnRSN,
+											new Boolean(inSortedOrder),
+											null,
+											getContextManager());
+				prnRSN.costEstimate = costEstimate.cloneMe();
+			}
+			
 			/*
 			 * Top off with a PRN as this is the intent of this method. Even 
 			 * though this PRN is a noop and will never be generated, we should 
 			 * leave it here as other parts of the code expects to find 
-			 * PRN -> WN.
+			 * PRN -> WN, or PRN -> DN -> WN.
 			 */
-			ResultColumnList newRCL = windowFunctionRCL.copyListAndObjects(); 
+			ResultColumnList newRCL = prnRSN.getResultColumns().copyListAndObjects(); 
 			newRCL.genVirtualColumnNodes(prnRSN, prnRSN.getResultColumns());
 						
 			prnRSN = (ResultSetNode) getNodeFactory().getNode(

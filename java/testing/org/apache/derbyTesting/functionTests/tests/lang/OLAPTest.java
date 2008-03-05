@@ -291,6 +291,23 @@ public class OLAPTest extends BaseJDBCTestCase {
 										{"50", "5", "500"}};
 		JDBC.assertFullResultSet(rs, expectedRows);
 		
+		/* A couple of distinct queries */
+		rs = s.executeQuery("select distinct row_number() over (), 'ABC' from t1");
+		expectedRows = new String[][]{{"1", "ABC"},
+										{"2", "ABC"},
+										{"3", "ABC"},
+										{"4", "ABC"},
+										{"5", "ABC"}};
+		JDBC.assertFullResultSet(rs, expectedRows);
+		
+		rs = s.executeQuery("select * from (select distinct row_number() over (), 'ABC' from t1) tmp");
+		expectedRows = new String[][]{{"1", "ABC"},
+										{"2", "ABC"},
+										{"3", "ABC"},
+										{"4", "ABC"},
+										{"5", "ABC"}};
+		JDBC.assertFullResultSet(rs, expectedRows);
+		
 		/*
 		 * Negative testing of Statements
 		 */
