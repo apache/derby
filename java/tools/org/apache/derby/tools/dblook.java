@@ -584,13 +584,16 @@ public final class dblook {
 		// have multiple ResultSets open on the same connection).
 		this.conn.setAutoCommit(false);
 
+		// Set the system schema to ensure that UCS_BASIC collation is used.
+		Statement stmt = conn.createStatement();
+		stmt.executeUpdate("SET SCHEMA SYS");
+
 		// Prepare statements.
 		getColNameFromNumberQuery = conn.prepareStatement(
 			"SELECT COLUMNNAME FROM SYS.SYSCOLUMNS WHERE " +
 			"REFERENCEID = ? AND COLUMNNUMBER = ?");
 
 		// Load list of user tables and table ids, for general use.
-		Statement stmt = conn.createStatement();
 		ResultSet rs = stmt.executeQuery("SELECT T.TABLEID, T.TABLENAME, " +
 				"S.SCHEMANAME FROM SYS.SYSTABLES T, SYS.SYSSCHEMAS S " + 
 				"WHERE T.TABLETYPE = 'T' AND T.SCHEMAID = S.SCHEMAID");

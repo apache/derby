@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derbyTesting.functionTests.tests.derbynet.dblook_test_net
+   Derby - Class org.apache.derbyTesting.functionTests.tests.derbynet.dblook_test_net_territory
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -21,9 +21,11 @@
 
 package org.apache.derbyTesting.functionTests.tests.derbynet;
 
+import java.io.File;
+
 import org.apache.derbyTesting.functionTests.tests.tools.dblook_test;
 
-public class dblook_test_net extends dblook_test {
+public class dblook_test_net_territory extends dblook_test {
 
 	// This test runs dblook on a test database using
 	// a connection to the Network Server.
@@ -31,11 +33,14 @@ public class dblook_test_net extends dblook_test {
 	public static void main (String [] args) {
 
 		System.out.println("\n-= Start dblook (net server) Test. =-");
+
+		territoryBased = ";territory=nl_NL;collation=TERRITORY_BASED";
+		testDirectory = "territory_dblook_test_net/";
+		expectedCollation = "TERRITORY_BASED";
 		separator = System.getProperty("file.separator");
-		testDirectory = "dblook_test_net/";
-		new dblook_test_net().doTest();
+		new dblook_test_net_territory().doTest();
 		System.out.println("\n[ Done. ]\n");
-		renameDbLookLog("dblook_test_net");
+		renameDbLookLog("dblook_test_net_territory");
 
 	}
 

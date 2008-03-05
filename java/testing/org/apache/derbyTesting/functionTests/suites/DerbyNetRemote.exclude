@@ -7,6 +7,8 @@
 #     a database cannot be loaded by 2 different instances.
 # derbynet/dblook_test_net because it tries to search derby.log, which is on
 #     the server machine
+# derbynet/dblook_test_net_territory because it tries to search derby.log, which is on
+#     the server machine
 # derbynet/getCurrentProperties for it exercises NetworkServerControl statements
 #     that are only supported on localhost
 # derbynet/maxthreads - tries to use NetworkServerControl statements
@@ -22,6 +24,7 @@
 # 
 store/bootLock.java
 derbynet/dblook_test_net.java
+derbynet/dblook_test_net_territory.java
 derbynet/getCurrentProperties.java
 derbynet/maxthreads.java
 derbynet/runtimeinfo.java

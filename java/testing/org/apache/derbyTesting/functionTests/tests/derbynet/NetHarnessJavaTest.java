@@ -37,6 +37,7 @@ import org.apache.derbyTesting.junit.SupportFilesSetup;
  * The following tests could not be run this way, reasons for the
  * 
  * dblook_test_net - filters output
+ * dblook_test_net_territory - filters output 
  * getCurrentProperties - ExceptionInInitializerError, needs investigation
  * maxthreads - forks VM
  * runtimeinfo" - filters output
