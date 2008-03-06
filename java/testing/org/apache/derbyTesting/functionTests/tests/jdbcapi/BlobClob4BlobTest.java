@@ -183,6 +183,18 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
     }
 
     /**
+     * Test that it is possible to change the isolation level after reading a
+     * BLOB (DERBY-3427).
+     */
+    public void testIsolationLevelChangeAfterRead() throws SQLException {
+        ResultSet rs =
+            createStatement().executeQuery("VALUES CAST(X'FFFF' AS BLOB)");
+        JDBC.assertDrainResults(rs);
+        getConnection().setTransactionIsolation(
+            Connection.TRANSACTION_SERIALIZABLE);
+    }
+
+    /**
      * Tests PreparedStatement.setCharacterStream
      */
     public void testSetCharacterStream() throws Exception {

@@ -41,7 +41,6 @@ import java.lang.reflect.Array;
 
 import org.apache.derby.iapi.jdbc.BrokeredConnection;
 import org.apache.derby.iapi.jdbc.BrokeredPreparedStatement;
-import org.apache.derby.iapi.jdbc.EngineConnection;
 import org.apache.derby.iapi.jdbc.EnginePreparedStatement;
 import org.apache.derby.iapi.jdbc.EngineResultSet;
 import org.apache.derby.iapi.reference.JDBC30Translation;
@@ -622,18 +621,21 @@ class DRDAStatement
 			isolationSet = true;
 		}
 		
+		parsePkgidToFindHoldability();
+
 		if (isCallableSQL(sqlStmt))
 		{
 			isCall = true;
-			ps = database.getConnection().prepareCall(sqlStmt);
+			ps = database.getConnection().prepareCall(
+				sqlStmt, scrollType, concurType, withHoldCursor);
 			setupCallableStatementParams((CallableStatement)ps);
-			if (isolationSet)
-				database.setPrepareIsolation(saveIsolationLevel);
-			return ps;
 		}
-		parsePkgidToFindHoldability();
-		ps = prepareStatementJDBC3(sqlStmt, scrollType, concurType, 
-									   withHoldCursor);
+		else
+		{
+			ps = database.getConnection().prepareStatement(
+				sqlStmt, scrollType, concurType, withHoldCursor);
+		}
+
 		// beetle 3849  -  Need to change the cursor name to what
 		// JCC thinks it will be, since there is no way in the 
 		// protocol to communicate the actual cursor name.  JCC keeps 
@@ -1616,37 +1618,6 @@ class DRDAStatement
 		}
 	}
 
-
-	/**
-	 *  prepare a statement using Connection.prepareStatement.
-     *  
-	 *  @param sqlStmt - SQL statement text
-	 *  @param scrollType - scroll type
-	 *  @param concurType - concurrency type
-	 *  @param withHoldCursor - holdability
-	 * 
-	 *  @throws SQLException
-	 *  @return Prepared Statement
-	 *  @see java.sql.Connection#prepareStatement
-	 */
-	private PreparedStatement prepareStatementJDBC3(String sqlStmt, int
-													scrollType, int concurType,
-													int withHoldCursor) throws SQLException
-	{
-        EngineConnection conn = database.getConnection();
-        if (withHoldCursor == -1) {
-            // Holdability not explictly set, let the
-            // connection provide the default.
-            return conn.prepareStatement(sqlStmt,
-                    scrollType, concurType);
-        }
-        
-        // Holdability explictly set. 
-        return conn.prepareStatement(sqlStmt,
-                scrollType, concurType, withHoldCursor);
-	}
-
-	
 	/** 
 	 * Retrieve the ParameterMetaData for the prepared statement. 
 	 * @return ParameterMetaData for the prepared statement. 
