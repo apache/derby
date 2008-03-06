@@ -374,4 +374,225 @@ public class Changes10_4 extends UpgradeChange {
             break;
         }
     }
+    
+
+    /**
+     * Tests whether or not indexes are exibiting their expected behaviour.
+     *
+     * @param s         Statement 
+     * @param tableName table name to be used for testing
+     * @param val       value to be used for insertion
+     * @param nulls     if nulls are allowed 
+     * @param duplicate if duplicates are allowed
+     */
+    private void testIndexes (Statement s, String tableName, int val,
+            boolean nulls, boolean duplicate) throws Exception {
+
+        //clean table first
+        s.executeUpdate("delete from " + tableName);
+        s.executeUpdate("insert into " + tableName + " values (" + val +")");
+
+        // verify insert of input value results in expected duplicate behavior
+        try {
+            s.executeUpdate(
+                "insert into " + tableName + " values (" + val +")");
+
+            if (!duplicate)
+                fail("no duplicates allowed");
+        }
+        catch (SQLException e) {
+            //throw 23505
+            if (!duplicate) {
+                assertSQLState("duplicate record", "23505", e);
+            }
+            else {
+                throw e;
+            }
+        }
+
+        // verify insert of a null value results in expected behavior
+        try {
+            s.executeUpdate("insert into " + tableName + " values (null)");
+            if (!nulls)
+                fail("null in a not null column");
+        }
+        catch (SQLException e) {
+            if (!nulls) { //23502
+                assertSQLState("null in not null column", "23502", e);
+            }
+            else {
+                throw e;
+            }
+        }
+
+        // if nulls are allowed, verify expected behavior of 2nd null insert.
+        if (!nulls)
+            return;
+        try {
+            s.executeUpdate("insert into " + tableName + " values (null)");
+            if (!duplicate)
+                fail("no duplicates allowed");
+        }
+        catch (SQLException e) {
+        if (!duplicate) {
+                assertSQLState("duplicate record", "23505", e);
+            }
+            else {
+                throw e;
+            }
+        }
+    }
+    
+    /**
+     * Creates tables to test indexes during and after soft and hard 
+     * upgrades
+     * @param s Statement
+     * @param prefix prefix for table names
+     */
+    private void createTablesForIndexTesting (Statement s, String prefix) 
+                                    throws Exception {
+
+        // unique index on non-null column
+        s.executeUpdate("create table  " + prefix + "_indextest1" +
+                "(col1 integer not null)"); 
+        s.executeUpdate("create unique index "+ prefix
+                + "_uinn on " + prefix + "_indextest1 (col1)");
+
+        // unique index on nullable column
+        s.executeUpdate("create table  " + prefix + "_indextest2" +
+                "(col1 integer)"); 
+        s.executeUpdate("create unique index "+ prefix
+                + "_uin on " + prefix + "_indextest2 (col1)");
+
+        // non-unique index on non-nullable column
+        s.executeUpdate("create table  " + prefix + "_indextest3" +
+                "(col1 integer not null)");     
+        s.executeUpdate("create index "+ prefix
+                + "_nuinn on " + prefix + "_indextest3 (col1)");
+
+        // non-unique index on nullable column
+        s.executeUpdate("create table  " + prefix + "_indextest4" +
+                "(col1 integer)"); 
+        s.executeUpdate("create index "+ prefix
+                + "_nuin on " + prefix + "_indextest4 (col1)");
+    }
+    /**
+     * Test index created before upgrades to insure their behaviour 
+     * remains same after soft and hard upgrades.  This is an index
+     * test and does not apply to constraint behavior.
+     */
+    public void testIndexes () throws Exception {
+        Statement s = createStatement();
+        switch (getPhase()) {
+            case PH_CREATE:
+                //create tables for testing in soft and hard upgrade
+                createTablesForIndexTesting (s, "ph_create");
+                //test if indexes are created properly
+                testIndexes(s, "ph_create_indextest1", 1, false, false);
+                testIndexes(s, "ph_create_indextest2", 1, true, false);
+                testIndexes(s, "ph_create_indextest3", 1, false, true);
+                testIndexes(s, "ph_create_indextest4", 1, true, true);
+                break;
+                
+            case PH_SOFT_UPGRADE:
+                //test old tables
+                testIndexes(s, "ph_create_indextest1", 2, false, false);
+                testIndexes(s, "ph_create_indextest2", 2, true, false);
+                testIndexes(s, "ph_create_indextest3", 2, false, true);
+                testIndexes(s, "ph_create_indextest4", 2, true, true);
+                //create one more set of tables
+                createTablesForIndexTesting (s, "ph__soft_upg");
+                //test newly created tables
+                testIndexes(s, "ph__soft_upg_indextest1", 2, false, false);
+                testIndexes(s, "ph__soft_upg_indextest2", 2, true, false);
+                testIndexes(s, "ph__soft_upg_indextest3", 2, false, true);
+                testIndexes(s, "ph__soft_upg_indextest4", 2, true, true);
+                break;
+                
+            case PH_POST_SOFT_UPGRADE:
+                //test tables created so far
+                testIndexes(s, "ph_create_indextest1", 3, false, false);
+                testIndexes(s, "ph_create_indextest2", 3, true, false);
+                testIndexes(s, "ph_create_indextest3", 3, false, true);
+                testIndexes(s, "ph_create_indextest4", 3, true, true);
+
+                
+                testIndexes(s, "ph__soft_upg_indextest1", 3, false, false);
+                testIndexes(s, "ph__soft_upg_indextest2", 3, true, false);
+                testIndexes(s, "ph__soft_upg_indextest3", 3, false, true);
+                testIndexes(s, "ph__soft_upg_indextest4", 3, true, true);
+                break;
+                
+            case PH_HARD_UPGRADE:
+                //test tables created so far
+                testIndexes(s, "ph_create_indextest1", 4, false, false);
+                testIndexes(s, "ph_create_indextest2", 4, true, false);
+                testIndexes(s, "ph_create_indextest3", 4, false, true);
+                testIndexes(s, "ph_create_indextest4", 4, true, true);
+
+                
+                testIndexes(s, "ph__soft_upg_indextest1", 4, false, false);
+                testIndexes(s, "ph__soft_upg_indextest2", 4, true, false);
+                testIndexes(s, "ph__soft_upg_indextest3", 4, false, true);
+                testIndexes(s, "ph__soft_upg_indextest4", 4, true, true);
+                
+                //create final set of tables
+                createTablesForIndexTesting (s, "ph_upgrade");
+                //test them
+                testIndexes(s, "ph_upgrade_indextest1", 4, false, false);
+                testIndexes(s, "ph_upgrade_indextest2", 4, true, false);
+                testIndexes(s, "ph_upgrade_indextest3", 4, false, true);
+                testIndexes(s, "ph_upgrade_indextest4", 4, true, true);
+                break;
+        }
+        s.close();
+    }
+    /**
+     * Tests Unique constraint in soft and hard upgrade enviornment. 
+     * Under soft upgrade environment creation of unique constrant 
+     * over nullable columns and setting columns from unique constraint
+     * to null should fail. Also the constraint created during soft 
+     * upgrade run should work fine when running under privious version.
+     * @throws SQLException at any unexpected failure.
+     */
+    public void testUniqueConstraint () throws SQLException {
+        Statement s = createStatement();
+        switch (getPhase()) {
+            case PH_CREATE:
+                //create a table with unique constraint
+                s.executeUpdate("create table constraintest1 (i integer not null" +
+                        ", j integer, k integer, constraint ucon unique (i))");
+                //and one without constraint
+                s.executeUpdate("create table constraintest2 (i integer" +
+                        ", j integer, k integer)");
+                s.executeUpdate("create table constraintest3 (" +
+                        "i integer not null, j integer, k integer)");
+                break;
+            case PH_SOFT_UPGRADE:
+                //try setting i to nullable 42Z20
+                assertStatementError("42Z20", s, "alter table constraintest1 " +
+                        "alter column i null");
+                //try creating index without seting column as not null 
+                assertStatementError ("42831", s, "alter table constraintest2 " +
+                        "add constraint ucon1 unique(i, j)");
+                //this should work fine
+                s.execute ("alter table constraintest3 add " +
+                        "constraint ucon2 unique(i)");
+                break;
+            case PH_POST_SOFT_UPGRADE:
+                //try violating ucon2
+                s.executeUpdate ("insert into constraintest3 (i) values (1)");
+                //duplicate key violation 23505
+                assertStatementError ("23505", s, 
+                            "insert into constraintest3 (i) values (1)");
+                break;
+            case PH_HARD_UPGRADE:
+                //test unique constraint
+                s.executeUpdate ("insert into constraintest1 (i) values (2)");
+                //duplicate key violation 23505
+                assertStatementError ("23505", s, 
+                            "insert into constraintest1 (i) values (2)");
+        }
+        s.close();
+    }
 }
