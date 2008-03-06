@@ -99,8 +99,7 @@ abstract class MBeanTest extends BaseTestCase {
                         suite, // run all tests in this class in the same setup
                         getCommandLineProperties(), // need to set up JMX in JVM
                         new String[0], // no server arguments needed
-                        true,   // wait for the server to start properly
-                        new InputStream[1] // no need to check server output
+                        true   // wait for the server to start properly
                 );
 
         /* Since the server will be started in a new process we need "execute" 

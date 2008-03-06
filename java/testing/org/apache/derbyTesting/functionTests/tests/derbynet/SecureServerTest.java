@@ -41,6 +41,7 @@ import org.apache.derbyTesting.junit.Derby;
 import org.apache.derbyTesting.junit.NetworkServerTestSetup;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 import org.apache.derbyTesting.junit.ServerSetup;
+import org.apache.derbyTesting.junit.SpawnedProcess;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
 import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -121,9 +122,6 @@ public class SecureServerTest extends BaseJDBCTestCase
     // expected outcomes
     private Outcome _outcome;
 
-    // helper state for intercepting server error messages
-    private InputStream[]  _inputStreamHolder;
-
     
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -149,8 +147,6 @@ public class SecureServerTest extends BaseJDBCTestCase
          _wildCardHost = wildCardHost;
 
          _outcome = outcome;
-
-         _inputStreamHolder = new InputStream[ 1 ];
     }
 
     ///////////////////////////////////////////////////////////////////////////////////
@@ -197,14 +193,6 @@ public class SecureServerTest extends BaseJDBCTestCase
         
         return suite;
     }
-    
-    /**
-     * Release resources.
-     */
-    protected void tearDown() throws Exception
-    {
-        _inputStreamHolder = null;
-    }
 
 
     ///////////////////////////////////////////////////////////////////////////////////
@@ -248,8 +236,7 @@ public class SecureServerTest extends BaseJDBCTestCase
              secureServerTest,
              startupProperties,
              startupArgs,
-             secureServerTest._outcome.serverShouldComeUp(),
-             secureServerTest._inputStreamHolder
+             secureServerTest._outcome.serverShouldComeUp()
              );
 
         secureServerTest.nsTestSetup = networkServerTestSetup;
@@ -474,26 +461,20 @@ public class SecureServerTest extends BaseJDBCTestCase
                  }
              }
             );
-
-        InputStream is = serverProcess.getInputStream();
         
-        return getProcessOutput( is, 10000 );
+        SpawnedProcess spawned = new SpawnedProcess(serverProcess,
+                commandSpecifics);
+        
+        // Ensure it completes without failures.
+        assertEquals(0, spawned.complete(false));
+        
+        return spawned.getFullServerOutput();
     }
 
     private String  getServerOutput()
         throws Exception
     {
-        return getProcessOutput( _inputStreamHolder[ 0 ], 1000 );
-    }
-
-    private String  getProcessOutput( InputStream is, int bufferLength )
-        throws Exception
-    {
-        byte[]          inputBuffer = new byte[ bufferLength ];
-
-        int             bytesRead = is.read( inputBuffer );
-
-        return new String( inputBuffer, 0, bytesRead );
+        return nsTestSetup.getServerProcess().getNextServerOutput();
     }
 
     private static  String  serverBootedOK()
@@ -506,7 +487,7 @@ public class SecureServerTest extends BaseJDBCTestCase
     {
         return NetworkServerTestSetup.pingForServerUp(
             NetworkServerTestSetup.getNetworkServerControl(),
-            nsTestSetup.getServerProcess(), true);
+            nsTestSetup.getServerProcess().getProcess(), true);
     }
 
 }

@@ -60,10 +60,6 @@ import org.apache.derbyTesting.junit.Utilities;
 
 public class ServerPropertiesTest  extends BaseJDBCTestCase {
     
-    // helper state for intercepting server error messages;
-    // needed by fixture testToggleTrace
-    private InputStream[]  _inputStreamHolder;
-    
     //create own policy file
     private static String POLICY_FILE_NAME = 
         "functionTests/tests/derbynet/ServerPropertiesTest.policy";
@@ -72,7 +68,6 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
     
     public ServerPropertiesTest(String name) {
         super(name);
-        _inputStreamHolder = new InputStream[1];
     }
     
     public static Test suite()
@@ -133,7 +128,6 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
         super.tearDown();
         POLICY_FILE_NAME = null;
         TARGET_POLICY_FILE_NAME = null;
-        _inputStreamHolder = null;
         if (portsSoFar != null)
         {
             for (int i = 0 ; i < portsSoFar.length ; i++)
@@ -171,7 +165,7 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
         {
             // start networkServer as a process
             networkServerTestSetup = new NetworkServerTestSetup(
-                spt, startupProps, startupArgs, true, spt._inputStreamHolder);
+                spt, startupProps, startupArgs, true);
         }
         else
         {

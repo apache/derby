@@ -23,10 +23,13 @@ import java.io.FileNotFoundException;
 import java.net.InetAddress;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import junit.framework.Test;
 import org.apache.derby.drda.NetworkServerControl;
@@ -47,10 +50,10 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
      *  systems with fast port turnaround as the actual code loops for 
      *  SLEEP_TIME intervals, so should never see WAIT_TIME.
      */
-    private static final long WAIT_TIME = 300000;
+    private static final long WAIT_TIME = 10000;
     
     /** Sleep for 500 ms before pinging the network server (again) */
-    private static final int SLEEP_TIME = 500;
+    private static final int SLEEP_TIME = 100;
 
     public static final String HOST_OPTION = "-h";
 
@@ -62,7 +65,6 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
     private final boolean startServerAtSetup;
     private final boolean useSeparateProcess;
     private final boolean serverShouldComeUp;
-    private final InputStream[] inputStreamHolder;
     
     /**
      * System properties to set on the command line (using -D)
@@ -74,8 +76,11 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
      * Startup arguments for the command line
      * only when starting the server in a separate virtual machine.
      */
-    private final String[]    startupArgs;
-    private Process serverProcess;
+    private String[]    startupArgs;
+    /**
+     * The server as a process if started in a different vm.
+     */
+    private SpawnedProcess spawnedServer;
     
     /**
      * Decorator this test with the NetworkServerTestSetup.
@@ -97,7 +102,6 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
         this.startupArgs = null;
         this.useSeparateProcess = false;
         this.serverShouldComeUp = true;
-        this.inputStreamHolder = null;
         this.startServerAtSetup = true;
 }
 
@@ -122,7 +126,6 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
         this.startupArgs = null;
         this.useSeparateProcess = false;
         this.serverShouldComeUp = true;
-        this.inputStreamHolder = null;
 
         this.startServerAtSetup = startServerAtSetup;
     }
@@ -131,14 +134,24 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
      * Decorator for starting up with specific command args
      * and system properties. Server is always started up
      * in a separate process with a separate virtual machine.
+     * <P>
+     * If the classes are being loaded from the classes
+     * folder instead of jar files then this will start
+     * the server up with no security manager using -noSecurityManager,
+     * unless the systemProperties or startupArgs set up any security
+     * manager.
+     * This is because the default policy
+     * installed by the network server only works from jar files.
+     * If this not desired then the test should skip the
+     * fixtures when loading from classes or
+     * install its own security manager.
      */
     public NetworkServerTestSetup
         (
          Test test,
          String[] systemProperties,
          String[] startupArgs,
-         boolean serverShouldComeUp,
-         InputStream[] inputStreamHolder
+         boolean serverShouldComeUp
         )
     {
         super(test);
@@ -149,7 +162,6 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
         this.startupArgs = startupArgs;
         this.useSeparateProcess = true;
         this.serverShouldComeUp = serverShouldComeUp;
-        this.inputStreamHolder = inputStreamHolder;
         this.startServerAtSetup = true;
     }
 
@@ -164,13 +176,26 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
         if (startServerAtSetup)
         {
             if (useSeparateProcess)
-            { serverProcess = startSeparateProcess(); }
+            { spawnedServer = startSeparateProcess(); }
             else if (asCommand)
             { startWithCommand(); }
             else
             { startWithAPI(); }
 
-            if ( serverShouldComeUp ) { waitForServerStart(networkServerController); }
+            if (serverShouldComeUp)
+            {
+                if (!pingForServerStart(networkServerController)) {
+                    String msg = "Timed out waiting for network server to start";
+                    // Dump the output from the spawned process
+                    // and destroy it.
+                    if (spawnedServer != null) {
+                        spawnedServer.complete(true);
+                        msg = spawnedServer.getFailMessage(msg);
+                        spawnedServer = null;
+                    }
+                    fail(msg);
+                }
+            }
         }
     }
 
@@ -214,7 +239,7 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
         }, "NetworkServerTestSetup command").start();
     }
 
-    private Process startSeparateProcess() throws Exception
+    private SpawnedProcess startSeparateProcess() throws Exception
     {
         ArrayList       al = new ArrayList();
         String              classpath = BaseTestCase.getSystemProperty( "java.class.path" );
@@ -223,6 +248,36 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
         al.add( "java" );
         al.add( "-classpath" );
         al.add( classpath );
+        
+        // Loading from classes need to work-around the limitation
+        // of the default policy file doesn't work with classes.
+        if (!TestConfiguration.loadingFromJars())
+        {
+            boolean setNoSecurityManager = true;
+            for (int i = 0; i < systemProperties.length; i++)
+            {
+                if (systemProperties[i].startsWith("java.security."))
+                {
+                    setNoSecurityManager = false;
+                    break;
+                }
+            }
+            for (int i = 0; i < startupArgs.length; i++)
+            {
+                if (startupArgs[i].equals("-noSecurityManager"))
+                {
+                    setNoSecurityManager = false;
+                    break;
+                }
+            }
+            if (setNoSecurityManager)
+            {
+                String[] newArgs = new String[startupArgs.length + 1];
+                System.arraycopy(startupArgs, 0, newArgs, 0, startupArgs.length);
+                newArgs[newArgs.length - 1] = "-noSecurityManager";
+                startupArgs = newArgs;
+            }
+        }
 
         int         count = systemProperties.length;
         for ( int i = 0; i < count; i++ )
@@ -264,34 +319,33 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
         System.out.println();
         */
 
-        Process     serverProcess = (Process) AccessController.doPrivileged
-            (
-             new PrivilegedAction()
-             {
-                 public Object run()
+        Process serverProcess;
+        
+        try {
+            serverProcess = (Process)
+                AccessController.doPrivileged
+                (
+                 new PrivilegedExceptionAction()
                  {
-                     Process    result = null;
-                     try {
-                        result = Runtime.getRuntime().exec( command );
-                     } catch (Exception ex) {
-                         ex.printStackTrace();
+                     public Object run() throws IOException
+                     {
+                         return Runtime.getRuntime().exec(command);
                      }
-                     
-                     return result;
                  }
-             }
-            );
+                );
+        } catch (PrivilegedActionException e) {
+            throw e.getException();
+        }
 
-        inputStreamHolder[ 0 ] = serverProcess.getInputStream();
-        return serverProcess;
+        return new SpawnedProcess(serverProcess, "SpawnedNetworkServer");
     }
 
     /**
      * Returns the <code>Process</code> object for the server process or <code>null</code> if the
      * network server does not run in a separate process
      */
-    public Process getServerProcess() {
-        return serverProcess;
+    public SpawnedProcess getServerProcess() {
+        return spawnedServer;
     }
 
     /**
@@ -322,9 +376,9 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
             networkServerController = null;
             serverOutput = null;
 
-            if (serverProcess != null) {
-                serverProcess.waitFor();
-                serverProcess = null;
+            if (spawnedServer != null) {
+                spawnedServer.complete(false);
+                spawnedServer = null;
             }
         }
     }
@@ -436,8 +490,9 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
     public static void waitForServerStart(NetworkServerControl networkServerController)
        throws InterruptedException 
     {
-        if (!pingForServerStart(networkServerController))
-            fail("Timed out waiting for network server to start");
+        if (!pingForServerStart(networkServerController)) {
+             fail("Timed out waiting for network server to start");
+        }
     }
     
      /**

@@ -54,15 +54,11 @@ import org.apache.derby.drda.NetworkServerControl;
 
 public class SSLTest extends BaseJDBCTestCase
 {
-    // helper state for intercepting server error messages
-    private InputStream[]  _inputStreamHolder;
-
     // Constructors
 
     public SSLTest(String testName)
     {
         super(testName);
-        _inputStreamHolder = new InputStream[1];
     }
     
     // JUnit machinery
@@ -86,17 +82,7 @@ public class SSLTest extends BaseJDBCTestCase
         suite.addTest(decorateTest("testSSLBasicDSConnect"));
         suite.addTest(decorateTest("testSSLBasicDSPlainConnect"));
         return suite;
-    }
-    
-    /**
-     * Release resources.
-     */
-
-    protected void tearDown() throws Exception
-    {
-        _inputStreamHolder = null;
-    }
-    
+    }   
 
     // Test decoration
     
@@ -120,8 +106,7 @@ public class SSLTest extends BaseJDBCTestCase
             new NetworkServerTestSetup(sslTest,
                                        startupProperties,
                                        startupArgs,
-                                       true, 
-                                       sslTest._inputStreamHolder);
+                                       true);
         
         Test testSetup =
             SecurityManagerSetup.noSecurityManager(networkServerTestSetup);
