@@ -207,12 +207,16 @@ class NetworkServerMBeanImpl implements NetworkServerMBean {
         }
     }
      **/
+
+    public int getConnectionCount() {
+        return getActiveConnectionCount() + getWaitingConnectionCount();
+    }
     
-    public int getActiveConnections() {
+    public int getActiveConnectionCount() {
         return server.getActiveSessions();
     }
     
-    public int getWaitingConnections() {
+    public int getWaitingConnectionCount() {
         return server.getRunQueueSize();
     }
     
@@ -220,7 +224,7 @@ class NetworkServerMBeanImpl implements NetworkServerMBean {
         return server.getThreadListSize();
     }
      
-    public int getConnectionCounter() {
+    public int getAccumulatedConnectionCount() {
         return server.getConnectionNumber();
     }
     

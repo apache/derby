@@ -136,18 +136,31 @@ public interface NetworkServerMBean {
      */
     public String getDrdaTraceDirectory();
     //public void setDrdaTraceDirectory(String dir) throws Exception;
+    /**
+     * Get the number of connections.
+     * @return number of connections.
+     */
+    public int getConnectionCount();
 
     /**
-     * Get the number of active sessions
-     * @return number of active sessions
+     * Get the number of active connections. All connections are active if drdaMaxThreads is 0.
+     * <p>
+     * If drdaMaxThreads is > 0 and drdaTimeSlice is 0, connections remain active until they are
+     * closed. If there are more than drdaMaxThreads connections, connections will be waiting for some 
+     * connection to close and the call to getConnection will return when the connection becomes active.
+     * <p>
+     * If drdaMaxThreads is > 0 and drdaTimeSlice > 0, connections will be alternating beetween active 
+     * and waiting according to Derby's time slicing algorithm.
+     * @return number of active connections
      */
-    public int getActiveConnections();
+    public int getActiveConnectionCount();
     
     /**
-     * get the number of waiting sessions. Always 0 if drdaMaxThreads is 0.
-     * @return number of waiting sessions
+     * get the number of waiting connections. Always 0 if drdaMaxThreads is 0. 
+     * @return number of waiting connections
+     * @see NetworkServerMBean#getActiveConnectionCount
      */
-    public int getWaitingConnections();
+    public int getWaitingConnectionCount();
     
     /**
      * Get the size of the thread pool.
@@ -159,7 +172,7 @@ public interface NetworkServerMBean {
      * Get the accumulated number of connections.
      * @return number of connections.
      */
-    public int getConnectionCounter();
+    public int getAccumulatedConnectionCount();
     
     /**
      * Get the total number of bytes read
