@@ -591,7 +591,18 @@ public class SelectNode extends ResultSetNode
 	public void bindTargetExpressions(FromList fromListParam)
 					throws StandardException
 	{
-		bindTargetListOnly = true;
+		/*
+		 * With a FromSubquery in the FromList we cannot bind target expressions 
+		 * at this level (DERBY-3321)
+		 */
+		CollectNodesVisitor cnv = new CollectNodesVisitor(FromSubquery.class, 
+														  FromSubquery.class);
+		fromList.accept(cnv);
+		if (!cnv.getList().isEmpty()){		
+			bindTargetListOnly = false;
+		} else {
+			bindTargetListOnly = true;				
+		}		
 		bindExpressions(fromListParam);
 		bindTargetListOnly = false;
 	}
