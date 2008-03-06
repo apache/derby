@@ -73,19 +73,7 @@ public interface MasterFactory {
         "org.apache.derby.iapi.services.replication.master.MasterFactory";
 
     /* Property names that are used as key values in the Properties objects*/
-
-    /** Property key used to specify which slave host to connect to */
-    public static final String SLAVE_HOST =
-        Property.PROPERTY_RUNTIME_PREFIX + "replication.master.slavehost";
-
-    /** Property key to specify which slave port to connect to */
-    public static final String SLAVE_PORT =
-        Property.PROPERTY_RUNTIME_PREFIX + "replication.master.slaveport";
     
-    /** Property key to specify the name of the database */
-    public static final String MASTER_DB =
-        Property.PROPERTY_RUNTIME_PREFIX + "replication.master.dbname";
-
     /** Property key to specify replication mode */
     public static final String REPLICATION_MODE =
         Property.PROPERTY_RUNTIME_PREFIX + "replication.master.mode";
@@ -108,17 +96,27 @@ public interface MasterFactory {
      * @param rawStore The RawStoreFactory for the database
      * @param dataFac The DataFactory for this database
      * @param logFac The LogFactory ensuring recoverability for this database
+     * @param slavehost The hostname for the slave
+     * @param slaveport The port the slave is listening on
+     * @param dbname The master database that is being replicated.
      * @exception StandardException Standard Derby exception policy,
      * thrown on replication startup error. 
      */
     public void startMaster(RawStoreFactory rawStore,
-                            DataFactory dataFac, LogFactory logFac)
-        throws StandardException;
+                            DataFactory dataFac,
+                            LogFactory logFac,
+                            String slavehost,
+                            int slaveport,
+                            String dbname)
+                            throws StandardException;
 
     /**
-     * Will perform all work that is needed to shut down replication
+     * Will perform all work that is needed to shut down replication.
+     *
+     * @throws StandardException If the replication master has been stopped
+     *                           already.
      */
-    public void stopMaster();
+    public void stopMaster() throws StandardException;
     
     /**
      * Will perform all work needed to failover

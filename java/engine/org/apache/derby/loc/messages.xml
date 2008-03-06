@@ -4847,6 +4847,12 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
             </msg>
 
             <msg>
+                <name>XRE22</name>
+                <text>Replication master has already been booted for database '{0}'</text>
+                <arg>dbname</arg>
+            </msg>
+
+            <msg>
                 <name>XRE40</name>
                 <text>Could not perform operation because the database is not in replication slave mode.</text>
             </msg>

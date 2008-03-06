@@ -1785,6 +1785,7 @@ public interface SQLState {
     String REPLICATION_UNEXPECTED_MESSAGEID                        = "XRE12";
     String REPLICATION_FAILOVER_SUCCESSFUL                         = "XRE20.D";
     String REPLICATION_FAILOVER_UNSUCCESSFUL                       = "XRE21";
+    String REPLICATION_MASTER_ALREADY_BOOTED                       = "XRE22";
     String REPLICATION_NOT_IN_SLAVE_MODE                           = "XRE40";
     String SLAVE_OPERATION_DENIED_WHILE_CONNECTED                  = "XRE41";
     String REPLICATION_SLAVE_SHUTDOWN_OK                           = "XRE42";

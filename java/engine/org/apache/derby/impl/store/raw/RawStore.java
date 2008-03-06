@@ -487,10 +487,6 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
         }
 
         Properties replicationProps = new Properties();
-        replicationProps.setProperty(MasterFactory.MASTER_DB, dbmaster);
-        replicationProps.setProperty(MasterFactory.SLAVE_HOST, host);
-        replicationProps.setProperty(MasterFactory.SLAVE_PORT,
-                                     new Integer(port).toString());
 
         replicationProps.setProperty(MasterFactory.REPLICATION_MODE,
                                      replicationMode);
@@ -498,7 +494,8 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
         MasterFactory masterFactory = (MasterFactory)
             Monitor.bootServiceModule(true, this, getMasterFactoryModule(),
                                       replicationProps);
-        masterFactory.startMaster(this, dataFactory, logFactory);
+        masterFactory.startMaster(this, dataFactory, logFactory,
+                host, port, dbmaster);
 
     }
     

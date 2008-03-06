@@ -76,8 +76,9 @@ public class MasterController
     private int slaveport;
     private String dbname;
     
-    //Set to true when stopMaster is called
-    private boolean stopMasterController = false;
+    //Indicates whether the Master Controller is currently
+    //active
+    private boolean active = false;
 
     //How long to wait before reporting the failure to
     //establish a connection with the slave.
@@ -95,33 +96,26 @@ public class MasterController
     ////////////////////////////////////////////////////////////
 
     /**
-     * Used by Monitor.bootServiceModule to start the service. Will:
-     *
-     * Set up basic variables
-     * Connect to the slave using the network service (DERBY-2921)
-     *
-     * Not implemented yet
+     * Used by Monitor.bootServiceModule to start the service. Currently
+     * only used to set up the replication mode.
      *
      * @param create Currently ignored
      * @param properties Properties used to start the service in the
-     * correct mode
+     *                   correct mode. Currently initializes only the
+     *                   replicationMode property.
      * @exception StandardException Standard Derby exception policy,
      * thrown on error.
      */
     public void boot(boolean create, Properties properties)
         throws StandardException {
-
+        //The boot method is loaded only once, because of that the
+        //boot time parameters once wrong would result in repeated
+        //startMaster attempts failing. In order to allow for
+        //multiple start master attempts the slave host name, port
+        //number and the dbname have been moved to the startMaster
+        //method.
         replicationMode =
             properties.getProperty(MasterFactory.REPLICATION_MODE);
-
-        slavehost = properties.getProperty(MasterFactory.SLAVE_HOST);
-
-        String port = properties.getProperty(MasterFactory.SLAVE_PORT);
-        if (port != null) {
-            slaveport = new Integer(port).intValue();
-        }
-
-        dbname = properties.getProperty(MasterFactory.MASTER_DB);
     }
 
     ////////////////////////////////////////////////////////////////
@@ -171,13 +165,34 @@ public class MasterController
      * @param rawStore The RawStoreFactory for the database
      * @param dataFac The DataFactory for this database
      * @param logFac The LogFactory ensuring recoverability for this database
+     * @param slavehost The hostname of the slave
+     * @param slaveport The port the slave is listening on
+     * @param dbname The master database that is being replicated.
      * @exception StandardException Standard Derby exception policy,
-     * thrown on replication startup error. 
+     *                              1) thrown on replication startup error
+     *                              2) thrown if the master has already been
+     *                                 booted.
+     *                              3) thrown if the specified replication mode
+     *                                 is not supported.
      */
     public void startMaster(RawStoreFactory rawStore,
-                            DataFactory dataFac, LogFactory logFac) 
+                            DataFactory dataFac,
+                            LogFactory logFac,
+                            String slavehost,
+                            int slaveport,
+                            String dbname)
                             throws StandardException {
-        stopMasterController = false;
+        if (active) {
+            //It is wrong to attempt startMaster on a already
+            //started master.
+            throw StandardException.newException
+                    (SQLState.REPLICATION_MASTER_ALREADY_BOOTED, dbname);
+        }
+
+        this.slavehost = slavehost;
+        this.slaveport = new Integer(slaveport).intValue();
+        this.dbname = dbname;
+
         rawStoreFactory = rawStore;
         dataFactory = dataFac;
         logFactory = logFac;
@@ -206,6 +221,9 @@ public class MasterController
             throw se;
         }
 
+        //The master has been started successfully.
+        active = true;
+
         // Add code that initializes replication by sending the
         // database to the slave, making logFactory add logrecords to
         // the buffer etc. Repliation should be up and running when
@@ -215,10 +233,17 @@ public class MasterController
     }
 
     /**
-     * Will perform all work that is needed to shut down replication
+     * Will perform all work that is needed to shut down replication.
+     *
+     * @throws StandardException If the replication master has been stopped
+     *                           already.
      */
-    public void stopMaster() {
-        stopMasterController = true;
+    public void stopMaster() throws StandardException {
+        if (!active) {
+            throw StandardException.newException
+                    (SQLState.REPLICATION_NOT_IN_MASTER_MODE);
+        }
+        active = false;
         logFactory.stopReplicationMasterRole();
         try {
             logShipper.flushBuffer();
@@ -240,11 +265,22 @@ public class MasterController
      * @see org.apache.derby.iapi.services.replication.master.MasterFactory#startFailover()
      */
     public void startFailover() throws StandardException {
+        if (!active) {
+            //It is not correct to stop the master and then attempt a failover.
+            //The control would come here because the master module is already
+            //loaded and a findService for the master module will not fail. But
+            //since this module has been stopped failover does not suceed.
+            throw StandardException.newException
+                    (SQLState.REPLICATION_NOT_IN_MASTER_MODE);
+        }
+
         //acknowledgment returned from the slave containing
         //the status of the failover performed.
         ReplicationMessage ack = null;
         
-        stopMasterController = true;
+        //A failover stops the master controller and shuts down
+        //the master database.
+        active = false;
         
         //freeze the database to stop clients when this command is received
         rawStoreFactory.freeze();
@@ -431,7 +467,7 @@ public class MasterController
                          exception, dbname);
             Monitor.logTextMessage(MessageId.REPLICATION_MASTER_RECONN, dbname);
             
-            while (!stopMasterController) {
+            while (active) {
                 try {
                     transmitter = new ReplicationMessageTransmit
                             (slavehost, slaveport);
@@ -473,7 +509,14 @@ public class MasterController
     private void printStackAndStopMaster(Throwable t) {
         ReplicationLogger.
             logError(MessageId.REPLICATION_LOGSHIPPER_EXCEPTION, t, dbname);
-        stopMaster();
+        try {
+            stopMaster();
+        } catch (Throwable t_stopmaster) {
+            //The stop master threw an exception saying the replication
+            //has been stopped already.
+            ReplicationLogger.
+                logError(MessageId.REPLICATION_MASTER_STOPPED, t, dbname);
+        }
     }
     
     /**
