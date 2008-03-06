@@ -241,8 +241,9 @@ abstract class MBeanTest extends BaseTestCase {
      */
     protected ObjectName getApplicationManagementMBean() throws Exception
     {
-        // prepare the Management mbean. Use the same ObjectName that Derby uses
-        // by default, to avoid creating multiple instances of the same bean
+        /* prepare the Management mbean, which is (so far) the only MBean that
+         * can be created/registered from a JMX client, and without knowing the
+         * system identifier */
         ObjectName mgmtObjName 
                 = new ObjectName("org.apache.derby", "type", "Management");
         // create/register the MBean. If the same MBean has already been
@@ -263,7 +264,7 @@ abstract class MBeanTest extends BaseTestCase {
     
     /**
      * Get the ObjectName for an MBean registered by Derby for a set of
-     * key properties. The ObjectName has the org.apache.derby and
+     * key properties. The ObjectName has the domain org.apache.derby, and
      * the key property <code>system</code> will be set to the system identifier
      * for the Derby system under test (if Derby is running).
      * @param keyProperties Set of key properties, may be modified by this call.

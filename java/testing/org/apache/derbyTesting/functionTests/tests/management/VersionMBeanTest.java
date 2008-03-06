@@ -21,19 +21,9 @@
 
 package org.apache.derbyTesting.functionTests.tests.management;
 
-import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Hashtable;
-
-import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
-
 import junit.framework.Test;
-import junit.framework.TestSuite;
-
-import org.apache.derbyTesting.junit.NetworkServerTestSetup;
-import org.apache.derbyTesting.junit.SecurityManagerSetup;
-import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * <p>
@@ -58,19 +48,28 @@ public class VersionMBeanTest extends MBeanTest {
     
     public static Test suite() {
         
+        /* The current test fixtures of this class assume that both instances
+         * of the version MBean are accessible, i.e. both for derby.jar and
+         * derbynet.jar. This means that it is assumed that the Network Server
+         * is running and that JMX is enabled. This is being handled by the
+         * super class. */
         return MBeanTest.suite(VersionMBeanTest.class, 
                                         "VersionMBeanTest");
     }
     
     /**
      * <p>
-     * Creates an object name instance for the MBean whose object name's textual
-     * representation is:</p>
-     * <pre>
-     *     org.apache.derby:type=Version,jar=derby.jar
-     * </pre>
+     * Creates an object name instance for the Derby MBean whose object name's 
+     * textual representation includes the following key properties:</p>
+     * <ul>
+     *   <li>type=Version</li>
+     *   <li>jar=derby.jar</li>
+     * </ul>
+     * <p>
+     * The object name may also include other key properties such as a system
+     * identifier (DERBY-3466).</p>
      * @return the object name representing the VersionMBean for the derby 
-     *         engine
+     *         engine in this Derby system.
      * @throws MalformedObjectNameException if the object name is not valid
      */
     private ObjectName getDerbyJarObjectName() 
@@ -80,6 +79,32 @@ public class VersionMBeanTest extends MBeanTest {
         Hashtable<String, String> keyProps = new Hashtable<String, String>();
         keyProps.put("type", "Version");
         keyProps.put("jar", "derby.jar");
+        return getDerbyMBeanName(keyProps);
+    }
+    
+    /**
+     * <p>
+     * Creates an object name instance for the Derby MBean whose object name's 
+     * textual representation includes the following key properties:</p>
+     * <ul>
+     *   <li>type=Version</li>
+     *   <li>jar=derbynet.jar</li>
+     * </ul>
+     * <p>
+     * The object name may also include other key properties such as a system
+     * identifier (DERBY-3466).</p>
+     * @return the object name representing the VersionMBean for the Network 
+     *         Server running the Derby system represented by the system
+     *         identifier obtained from Derby's management service.
+     * @throws MalformedObjectNameException if the object name is not valid
+     */
+    private ObjectName getDerbynetJarObjectName() 
+            throws Exception {
+        
+        // get a reference to the VersionMBean instance for derbynet.jar
+        Hashtable<String, String> keyProps = new Hashtable<String, String>();
+        keyProps.put("type", "Version");
+        keyProps.put("jar", "derbynet.jar");
         return getDerbyMBeanName(keyProps);
     }
     
@@ -95,29 +120,56 @@ public class VersionMBeanTest extends MBeanTest {
         checkBooleanAttributeValue(getDerbyJarObjectName(), "Alpha");
     }
     
+    public void testDerbynetJarAttributeAlpha() throws Exception {
+        checkBooleanAttributeValue(getDerbynetJarObjectName(), "Alpha");
+    }
+    
     public void testDerbyJarAttributeBeta() throws Exception {
         checkBooleanAttributeValue(getDerbyJarObjectName(), "Beta");
+    }
+    
+    public void testDerbynetJarAttributeBeta() throws Exception {
+        checkBooleanAttributeValue(getDerbynetJarObjectName(), "Beta");
     }
     
     public void testDerbyJarAttributeBuildNumber() throws Exception {
         checkStringAttributeValue(getDerbyJarObjectName(), "BuildNumber");
     }
     
-    // Will fail until the MBean is updated (MaintVersion -> MaintenanceVersion)
+    public void testDerbynetJarAttributeBuildNumber() throws Exception {
+        checkStringAttributeValue(getDerbynetJarObjectName(), "BuildNumber");
+    }
+    
     public void testDerbyJarAttributeMaintenanceVersion() throws Exception {
         checkIntAttributeValue(getDerbyJarObjectName(), "MaintenanceVersion");
+    }
+    
+    public void testDerbynetJarAttributeMaintenanceVersion() throws Exception {
+        checkIntAttributeValue(getDerbynetJarObjectName(), "MaintenanceVersion");
     }
     
     public void testDerbyJarAttributeMajorVersion() throws Exception {
         checkIntAttributeValue(getDerbyJarObjectName(), "MajorVersion");
     }
     
+    public void testDerbynetJarAttributeMajorVersion() throws Exception {
+        checkIntAttributeValue(getDerbynetJarObjectName(), "MajorVersion");
+    }
+    
     public void testDerbyJarAttributeMinorVersion() throws Exception {
         checkIntAttributeValue(getDerbyJarObjectName(), "MinorVersion");
     }
     
+    public void testDerbynetJarAttributeMinorVersion() throws Exception {
+        checkIntAttributeValue(getDerbynetJarObjectName(), "MinorVersion");
+    }
+    
     public void testDerbyJarAttributeProductName() throws Exception {
         checkStringAttributeValue(getDerbyJarObjectName(), "ProductName");
+    }
+    
+    public void testDerbynetJarAttributeProductName() throws Exception {
+        checkStringAttributeValue(getDerbynetJarObjectName(), "ProductName");
     }
     
     public void testDerbyJarAttributeProductTechnologyName() throws Exception {
@@ -125,12 +177,25 @@ public class VersionMBeanTest extends MBeanTest {
                                    "ProductTechnologyName");
     }
     
+    public void testDerbynetJarAttributeProductTechnologyName() throws Exception {
+        checkStringAttributeValue(getDerbynetJarObjectName(), 
+                                   "ProductTechnologyName");
+    }
+    
     public void testDerbyJarAttributeProductVendorName() throws Exception {
         checkStringAttributeValue(getDerbyJarObjectName(), "ProductVendorName");
+    }
+    
+    public void testDerbynetJarAttributeProductVendorName() throws Exception {
+        checkStringAttributeValue(getDerbynetJarObjectName(), "ProductVendorName");
     }
     
     public void testDerbyJarAttributeVersionString() throws Exception {
         checkStringAttributeValue(getDerbyJarObjectName(), "VersionString");
     }
-
+    
+    public void testDerbynetJarAttributeVersionString() throws Exception {
+        checkStringAttributeValue(getDerbynetJarObjectName(), "VersionString");
+    }
+    
 }
