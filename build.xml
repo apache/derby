@@ -108,7 +108,17 @@
 
     <fail unless="compilerAtCorrectLevel" message="Compiler level must be Java 5 or later."/>
   </target>
-
+  
+  <!-- checkVMLevel:
+       This target determines to some degree the JVM version used to run ant.
+       The resulting properties will indicate the VM level, and may for instance
+       be checked before running junit tests requiring a certain JVM version.
+  -->
+  <target name="checkVMLevel">
+    <!-- The java.lang.ManagementFactory class was new in J2SE 5.0 -->
+    <available classname="java.lang.management.ManagementFactory" 
+               property="vmLevelIsAtLeast1.5"/>
+  </target>
 
 <!-- ==================================================================== -->
 <!--                     Build version info files                         -->
@@ -1966,6 +1976,27 @@
       </junit>	
   </target>
 
+  <!-- Runs Derby's JMX tests if the required VM level (1.5 or higher) is detected -->
+  <target name="junit-jmx" depends="checkVMLevel,junit-init" if="vmLevelIsAtLeast1.5">
+    <junit  printsummary="on"
+            fork="yes" forkmode="once"
+            showoutput="yes"
+            dir="junit_${derby.junit.timestamp}"
+            tempdir="junit_${derby.junit.timestamp}"
+            errorproperty="tests.failed"
+            failureproperty="tests.failed">
+        <formatter type="xml"/>
+
+        <test name="org.apache.derbyTesting.functionTests.tests.management._Suite"
+              todir="junit_${derby.junit.timestamp}"/>
+
+        <classpath>
+            <pathelement path="${derby.junit.classpath}"/>
+            <pathelement location="${javatools.dir}/junit.jar"/>
+        </classpath>
+    </junit>
+  </target>
+
   <!-- Run the package private tests against the classes directories. -->
   <target name="junit-pptesting" depends="junit-init">
     <junit  printsummary="on"
@@ -2023,7 +2054,7 @@
       
   </target>
    
-  <target name="junit-all" depends="junit-core,junit-jdbc4">
+  <target name="junit-all" depends="junit-core,junit-jdbc4,junit-jmx">
   </target>
  
   <target name="junitreport" depends="junit-sysinfo,junit-all">
