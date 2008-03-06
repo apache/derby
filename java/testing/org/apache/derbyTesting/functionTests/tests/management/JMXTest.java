@@ -58,8 +58,11 @@ public class JMXTest extends MBeanTest {
     {        
         Set<ObjectName> derbyMBeans = getDerbyDomainMBeans();
         
-        // We expect Derby to have registered MBeans.
-        assertTrue(derbyMBeans.size() > 0);
+        // We expect Derby to have registered MBeans
+        // including a management MBean and the one registered
+        // by our setUp method.
+        assertTrue("Derby MBEan count:" + derbyMBeans.size(),
+                derbyMBeans.size() >= 2);
         
         MBeanServerConnection jmx = getMBeanServerConnection();
         for (ObjectName name : derbyMBeans)

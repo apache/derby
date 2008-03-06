@@ -339,7 +339,8 @@ public final class JMXManagementService implements ManagementService, ModuleCont
             // If we registered this as a management bean
             // then leave it registered to allow the mbeans
             // to be re-registered with JMX
-            if (mbeanName.equals(myManagementBean))
+            if (mbeanName.equals(myManagementBean) &&
+                    mbeanServer.isRegistered(myManagementBean))
                 continue;
             
             try {

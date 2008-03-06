@@ -66,7 +66,7 @@ public class ManagementMBeanTest extends MBeanTest {
         assertBooleanAttribute(true, mbean, "ManagementActive");
         
         int derbyMbeanCount = getDerbyDomainMBeans().size();
-        assertTrue(derbyMbeanCount > 0);
+        assertTrue("DerbyMBeanCount:" + derbyMbeanCount, derbyMbeanCount >= 2);
         
         // Should be a no-op
         invokeOperation(mbean, "startManagement");
