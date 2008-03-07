@@ -3,11 +3,11 @@
     <type>org.netbeans.modules.ant.freeform</type>
     <configuration>
         <general-data xmlns="http://www.netbeans.org/ns/freeform-project/1">
-            <name>derby-repl</name>
+            <name>derby</name>
         </general-data>
         <general-data xmlns="http://www.netbeans.org/ns/freeform-project/2">
             <!-- Do not use Project Properties customizer when editing this file manually. -->
-            <name>derby-repl</name>
+            <name>derby</name>
             <properties>
                 <property name="project.dir">../../../..</property>
                 <property name="ant.script">${project.dir}/build.xml</property>
@@ -69,11 +69,6 @@
                     <label>java/tools</label>
                     <type>java</type>
                     <location>${project.dir}/java/tools</location>
-                    <encoding>UTF-8</encoding>
-                </source-folder>
-                <source-folder>
-                    <label>derby-repl</label>
-                    <location>.</location>
                     <encoding>UTF-8</encoding>
                 </source-folder>
             </folders>
