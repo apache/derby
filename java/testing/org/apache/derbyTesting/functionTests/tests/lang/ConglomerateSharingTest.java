@@ -468,6 +468,257 @@ public final class ConglomerateSharingTest extends BaseJDBCTestCase {
     }
 
     /**
+     * Test conglomerate sharing when a unique constraint having one or
+     * more nullable columns is in play (possible as of DERBY-3330).
+     * @throws SQLException
+     */
+    public void testUniqueConstraintWithNullsBackingIndex ()
+        throws SQLException
+    {
+        PreparedStatement countCongloms =
+            prepareStatement(COUNT_TABLE_CONGLOMS);
+        
+        Statement stmt = createStatement();
+        stmt.execute("create table t1 (i int, j int not null, k int)");
+        stmt.executeUpdate("insert into t1 values (1, -1, 1), (2, -2, 4), " +
+                "(4, -4, 16), (3, -3, 9)");
+        //create a non unique index
+        stmt.executeUpdate("create index nuix on t1(i,j)");
+        /* Should have 2 conglomerates on T1:
+         *
+         *  1. Heap
+         *  2. nuix
+         */
+        countConglomerates("T1", countCongloms, 2);
+        
+        stmt.executeUpdate("insert into t1 values (null, 1, -1)");
+        stmt.executeUpdate("alter table t1 add constraint uc unique(i,j)"); 
+        /* Should have 3 conglomerates on T1:
+         *
+         *  1. Heap
+         *  2. unix
+         *  3. uc
+         */
+        countConglomerates("T1", countCongloms, 3);
+        stmt.executeUpdate("insert into t1 values (null, 1, -1)");
+        stmt.executeUpdate("insert into t1 values (null, 1, -1)");
+
+        assertStatementError("23505", stmt, 
+                "insert into t1 values (1, -1, 1)");
+        //clean the table to try unique index
+        stmt.executeUpdate("delete from t1");
+        stmt.executeUpdate("drop index nuix");
+        /* Should have 2 conglomerates on T1:
+         *
+         *  1. Heap
+         *  2. uc
+         */
+        countConglomerates("T1", countCongloms, 2);
+        stmt.executeUpdate("alter table t1 drop constraint uc");
+        /* Should have 1 conglomerates on T1:
+         *
+         *  1. Heap
+         */
+        countConglomerates("T1", countCongloms, 1);
+        stmt.executeUpdate("insert into t1 values (1, -1, 1), (2, -2, 4), " +
+                "(4, -4, 16), (3, -3, 9)");
+        stmt.executeUpdate("create unique index uix on t1(i,j)");
+        /* Should have 2 conglomerates on T1:
+         *
+         *  1. Heap
+         *  2. uix
+         */
+        countConglomerates("T1", countCongloms, 2);
+        stmt.executeUpdate("insert into t1 values (null, 1, -1)");
+        stmt.executeUpdate("alter table t1 add constraint uc unique(i,j)");
+        /* Should have 2 conglomerates on T1:
+         *
+         *  1. Heap
+         *  2. uix
+         * Unique Constraint uc should use uix
+         */
+        countConglomerates("T1", countCongloms, 2);
+        //make sure that unique index is effective
+        assertStatementError("23505", stmt, 
+                "insert into t1 values (null, 1, -1)");
+        //drop unique index
+        stmt.executeUpdate("drop index uix");
+        /* Should have 2 conglomerates on T1:
+         *
+         *  1. Heap
+         *  2. uc
+         */
+        countConglomerates("T1", countCongloms, 2);  
+        //make sure that its a new index and not a unique index
+        stmt.executeUpdate("insert into t1 values (null, 1, -1)");
+        //drop constraint
+        stmt.executeUpdate("alter table t1 drop constraint uc");
+        //clean table
+        stmt.executeUpdate("delete from t1");
+        /* Should have 1 conglomerates on T1:
+         *
+         *  1. Heap
+         */
+        countConglomerates("T1", countCongloms, 1);
+
+        stmt.executeUpdate("insert into t1 values (1, -1, 1), (2, -2, 4), " +
+                "(4, -4, 16), (3, -3, 9)");
+        stmt.executeUpdate("insert into t1 values (null, 1, -1)");
+        stmt.executeUpdate("alter table t1 add constraint uc unique(i,j)"); 
+        
+        /* Should have 2 conglomerates on T1:
+         *
+         *  1. Heap
+         *  2. uc
+         */
+        countConglomerates("T1", countCongloms, 2);  
+        
+        stmt.executeUpdate("create table t2 (a int not null, b int not null)");
+        stmt.executeUpdate("alter table t2 add constraint pkt2 primary key(a,b)");
+        
+        /* Should have 2 conglomerates on T2:
+         *
+         *  1. Heap
+         *  2. pkt2
+         */
+        countConglomerates("T2", countCongloms, 2);
+        stmt.executeUpdate("insert into t2 values (1, -1), (2, -2), " +
+                "(4, -4), (3, -3)"); 
+        
+        stmt.executeUpdate("alter table t1 add constraint fkt1 " +
+                "foreign key (i,j) references t2");
+        
+        /* Should have 2 conglomerates on T1:
+         *
+         *  1. Heap
+         *  2. uc
+         * fkt1 should share index with uc
+         */
+        countConglomerates("T1", countCongloms, 2);  
+        
+        //ensure there is no change in backing index
+        assertStatementError("23505", stmt, "insert into " +
+                "t1(i,j) values (1, -1)");
+        stmt.executeUpdate("alter table t1 drop constraint uc");
+        
+        /* Should have 2 conglomerates on T1:
+         *
+         *  1. Heap
+         *  2. fkt1
+         */
+       countConglomerates("T1", countCongloms, 2);  
+       
+       //ensure that it allows duplicate keys
+       stmt.executeUpdate("insert into t1(i,j) values (1, -1)");
+        
+       //clean tables
+       stmt.executeUpdate("alter table t1 drop constraint fkt1");
+       stmt.executeUpdate("alter table t2 drop constraint pkt2");
+       stmt.executeUpdate("delete from t1");
+       stmt.executeUpdate("delete from t2");
+       
+        /* Should have 1 conglomerates on T1:
+         *
+         *  1. Heap
+         */
+       countConglomerates("T1", countCongloms, 1);
+        /* Should have 1 conglomerates on T2:
+         *
+         *  1. Heap
+         */
+       countConglomerates("T2", countCongloms, 1);  
+
+       stmt.executeUpdate("insert into t1 values (1, -1, 1), (2, -2, 4), " +
+               "(4, -4, 16), (3, -3, 9)");
+
+       stmt.executeUpdate("alter table t2 add constraint " +
+                                                "pkt2 primary key(a,b)");
+        /* Should have 2 conglomerates on T2:
+         *
+         *  1. Heap
+         *  2. pkt2
+         */
+       countConglomerates("T2", countCongloms, 2);  
+       
+       stmt.executeUpdate("insert into t2 values (1, -1), (2, -2)," +
+                                                        "(4, -4), (3, -3)");
+
+       stmt.executeUpdate("create unique index uix on t1(i,j)");
+       
+        /* Should have 2 conglomerates on T1:
+         *
+         *  1. Heap
+         *  2. uix
+         */
+       countConglomerates("T1", countCongloms, 2);  
+
+       stmt.executeUpdate("alter table t1 add constraint uc unique(i,j)");
+
+        /* Should have 2 conglomerates on T1:
+         *
+         *  1. Heap
+         *  2. uix
+         *  uc should share uix's index
+         */
+       countConglomerates("T1", countCongloms, 2);  
+
+       //create a foreign key shouldn;t create any new index
+       stmt.executeUpdate("alter table t1 add constraint fkt1 " +
+               "foreign key (i,j) references t2");
+       
+        /* Should have 2 conglomerates on T1:
+         *
+         *  1. Heap
+         *  2. uix
+         *  uc and fkt1 should share uix's index
+         */
+       countConglomerates("T1", countCongloms, 2);  
+
+        //Should fail due to UIX
+        assertStatementError("23505", stmt, "insert into t1(i,j) values (1, -1)");
+
+        //Drop the unique index UIX. The conglomerate for UC and FKT1 should
+        //be re-created as non-unique with uniqueWithDuplicateNulls set to true.
+        stmt.executeUpdate("drop index uix");
+        
+        /* Should have 2 conglomerates on T1:
+         *
+         *  1. Heap
+         *  2. uc
+         *  fkt1 should share uc's index
+         */
+       countConglomerates("T1", countCongloms, 2);  
+
+       //Should work.
+       stmt.executeUpdate("insert into t1(i,j) values (null, 2)");
+
+       //Should also work since UIX is no longer around.
+       stmt.executeUpdate("insert into t1(i,j) values (null, 2)");
+
+       //Should fail due to UC
+       assertStatementError("23505", stmt,"insert into t1 values (1, -1, 1)");
+        
+       //drop uc a new non unique should be created
+       stmt.executeUpdate("alter table t1 drop constraint uc");
+       
+        /* Should have 2 conglomerates on T1:
+         *
+         *  1. Heap
+         *  2. fkt1
+         */
+       countConglomerates("T1", countCongloms, 2);  
+       
+       //should work because there is no uc
+       stmt.executeUpdate("insert into t1 values (1, -1, 1)");
+       
+       //cleanup
+       stmt.executeUpdate("drop table t1");
+       stmt.executeUpdate("drop table t2");
+       stmt.close();
+       countCongloms.close();
+    }
+
+    /**
      * Count the number of physical conglomerates that exist for
      * the received table, and assert that the number found matches
      * the expected number.

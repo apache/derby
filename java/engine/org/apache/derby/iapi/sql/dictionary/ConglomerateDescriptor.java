@@ -456,7 +456,9 @@ public final class ConglomerateDescriptor extends TupleDescriptor
 			 * has a uniqueness requirement.
 			 */
 			needNewConglomerate =
-				indexRowGenerator.isUnique() && !othersIRG.isUnique();
+				(indexRowGenerator.isUnique() && !othersIRG.isUnique()) ||
+					(indexRowGenerator.isUniqueWithDuplicateNulls() && 
+						!othersIRG.isUniqueWithDuplicateNulls());
 
 			if (needNewConglomerate)
 			{
@@ -561,10 +563,15 @@ public final class ConglomerateDescriptor extends TupleDescriptor
 		 *  1. If any of the sharing descriptors is unique, then
 		 *     the physical conglomerate must also be unique.
 		 *
-		 *  2. If none of the sharing descriptors are unique, the
-		 *     physical conglomerate must not be unique.
+		 *  2. If none of sharing descriptors are unique and any of 
+		 *     the descriptors are UniqueWithDuplicateNulls the physical
+		 *     conglomerate must also be UniqueWithDuplicateNulls
 		 *
-		 *  3. If the physical conglomerate has n columns, then all
+		 *  3. If none of the sharing descriptors are unique or 
+		 *     UniqueWithDuplicateNulls, the physical conglomerate 
+		 *     must not be unique.
+		 *
+		 *  4. If the physical conglomerate has n columns, then all
 		 *     sharing descriptors must have n columns, as well.
 		 *
 		 * These criteria follow from the "share conglom" detection logic
@@ -597,14 +604,30 @@ public final class ConglomerateDescriptor extends TupleDescriptor
 				continue;
 			}
 
-			returnDesc = descriptors[i];
-			if (returnDesc.getIndexDescriptor().isUnique())
+			if (descriptors[i].getIndexDescriptor().isUnique())
 			{
-				/* Given criteria #1 and #3 described above, if we
+				/* Given criteria #1 and #4 described above, if we
 				 * have a unique conglomerate descriptor then we've
 				 * found what we need, so we're done.
 				 */
+				returnDesc = descriptors[i];
 				break;
+			}
+
+			if (descriptors[i].getIndexDescriptor()
+					.isUniqueWithDuplicateNulls())
+			{
+				/* Criteria #2. Remember this descriptor. If we don't find
+				 * any unique descriptor we will use this.
+				 */
+				returnDesc = descriptors[i];
+			}
+			else if (returnDesc == null)
+			{
+				/* Criteria #3 If no other descriptor found satifying
+				 * #1 or #2 this descriptor will be used.
+				 */
+				 returnDesc = descriptors[i];
 			}
 		}
 

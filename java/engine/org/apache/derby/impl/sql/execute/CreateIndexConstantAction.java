@@ -205,6 +205,7 @@ class CreateIndexConstantAction extends IndexConstantAction
 		 */
 		IndexRowGenerator irg = srcCD.getIndexDescriptor();
 		this.unique = irg.isUnique();
+		this.uniqueWithDuplicateNulls = irg.isUniqueWithDuplicateNulls();
 		this.indexType = irg.indexType();
 		this.columnNames = srcCD.getColumnNames();
 		this.isAscending = irg.isAscending();
@@ -440,12 +441,33 @@ class CreateIndexConstantAction extends IndexConstantAction
 			 *
 			 * 1. the set of columns (both key and include columns) and their 
 			 *  order in the index is the same as that of an existing index AND 
+			 *
 			 * 2. the ordering attributes are the same AND 
-			 * 3. both the previously existing index and the one being created 
-			 *  are non-unique OR the previously existing index is unique
+			 *
+			 * 3. one of the following is true:
+			 *    a) the existing index is unique, OR
+			 *    b) the existing index is non-unique with uniqueWhenNotNulls
+			 *       set to TRUE and the index being created is non-unique, OR
+			 *    c) both the existing index and the one being created are
+			 *       non-unique and have uniqueWithDuplicateNulls set to FALSE.
 			 */ 
 			boolean possibleShare = (irg.isUnique() || !unique) &&
 			    (bcps.length == baseColumnPositions.length);
+
+			//check if existing index is non unique and uniqueWithDuplicateNulls
+			//is set to true (backing index for unique constraint)
+			if (possibleShare && !irg.isUnique ())
+			{
+				/* If the existing index has uniqueWithDuplicateNulls set to
+				 * TRUE it can be shared by other non-unique indexes; otherwise
+				 * the existing non-unique index has uniqueWithDuplicateNulls
+				 * set to FALSE, which means the new non-unique conglomerate
+				 * can only share if it has uniqueWithDuplicateNulls set to
+				 * FALSE, as well.
+				 */
+				possibleShare = (irg.isUniqueWithDuplicateNulls() ||
+								! uniqueWithDuplicateNulls);
+			}
 
 			if (possibleShare && indexType.equals(irg.indexType()))
 			{
@@ -491,7 +513,7 @@ class CreateIndexConstantAction extends IndexConstantAction
 				 */
 				indexRowGenerator =
 					new IndexRowGenerator(
-						indexType, unique,
+						indexType, unique, uniqueWithDuplicateNulls,
 						baseColumnPositions,
 						isAscending,
 						baseColumnPositions.length);
