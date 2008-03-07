@@ -1020,6 +1020,7 @@
   <target name="testing-javadoc" depends="init-javadoc-tool,initjars">
     <javadoc
        executable="${javadoc.tool}"
+       additionalparam="-J-mx320M"
        packagenames="org.*"
        access="private"
        breakiterator="yes"
