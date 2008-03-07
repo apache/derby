@@ -24,13 +24,9 @@ package org.apache.derbyTesting.functionTests.tests.replicationTests;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import junit.framework.Test;
 import junit.framework.TestSuite;
-import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
@@ -78,7 +74,9 @@ public class TestPreStartedMaster extends ClientRunner
     /**
      *
      *
-     * @throws SQLException, IOException, InterruptedException
+     * @throws java.sql.SQLException 
+     * @throws java.io.IOException 
+     * @throws java.lang.InterruptedException 
      */
     public void testStartMasterConnect_OK()
     throws SQLException, IOException, InterruptedException
@@ -112,7 +110,8 @@ public class TestPreStartedMaster extends ClientRunner
         
         System.out.println("2. startMaster attempt should fail on: " + connectionURL);
         System.out.println("********************'' 2. CURRENTLY HANGS!!!! Skipping.");
-        if (false){ // FIXME! PRELIM Hangs!!
+        // if (false)
+        { // FIXME! PRELIM Hangs!!
         // A 2. StartMaster connect should fail:
         try
         {

@@ -22,6 +22,7 @@ package org.apache.derbyTesting.functionTests.tests.replicationTests;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
+import org.apache.derbyTesting.junit.SecurityManagerSetup;
 
 public class ReplicationRun_Full extends ReplicationRun
 {
@@ -40,7 +41,7 @@ public class ReplicationRun_Full extends ReplicationRun
         
         suite.addTestSuite( ReplicationRun_Full.class );
         
-        return suite;
+        return SecurityManagerSetup.noSecurityManager(suite);
     }
     
     //////////////////////////////////////////////////////////////

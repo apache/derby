@@ -20,6 +20,9 @@ limitations under the License.
  */
 package org.apache.derbyTesting.functionTests.tests.replicationTests;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
@@ -32,36 +35,26 @@ import org.apache.derbyTesting.junit.SecurityManagerSetup;
  * 
  */
 
-public class ReplicationRun_Local extends ReplicationRun
+public class ReplicationRun_Local_StateTest_part1_3 extends ReplicationRun
 {
     
     /**
-     * Creates a new instance of ReplicationRun_Local
+     * Creates a new instance of ReplicationRun_Local_StateTest_part1
+     * 
      * @param testcaseName Identifying the test.
      */
-    public ReplicationRun_Local(String testcaseName)
+    public ReplicationRun_Local_StateTest_part1_3(String testcaseName)
     {
         super(testcaseName);
     }
-    
-    protected void setUp() throws Exception
-    {
-        super.setUp();
-    }
-    
-    protected void tearDown() throws Exception
-    {
-        super.tearDown();
-    }
-    
+        
     public static Test suite()
     {
-        TestSuite suite = new TestSuite("ReplicationRun_Local Suite");
+        TestSuite suite = new TestSuite("ReplicationRun_Local_StateTest_part1_3 Suite");
         
-        suite.addTestSuite( ReplicationRun_Local.class );
+        suite.addTestSuite( ReplicationRun_Local_StateTest_part1_3.class );
         
         return SecurityManagerSetup.noSecurityManager(suite);
-
     }
     
     //////////////////////////////////////////////////////////////
@@ -75,7 +68,7 @@ public class ReplicationRun_Local extends ReplicationRun
     ////
     //////////////////////////////////////////////////////////////
     
-    public void testReplication_Local()
+    public void testReplication_Local_StateTest_part1_3()
     throws Exception
     {
         cleanAllTestHosts();
@@ -126,46 +119,65 @@ public class ReplicationRun_Local extends ReplicationRun
                 slaveServerHost, // for slaveReplInterface
                 slaveReplPort);
         
-        
-        // Used to run positive tests.
-        // Handle negative testing in State.testPostStartedMasterAndSlave().
-        // Observe that it will not be meaningful to do runTest if State.XXXX()
-        // has led to incorrect replication state wrt. replicationTest.
-        
-        replicationTest = "org.apache.derbyTesting.functionTests.tests.replicationTests.ReplicationTestRun";
-        util.DEBUG("replicationTest: " + replicationTest);
-        replicationVerify = "org.apache.derbyTesting.functionTests.tests.replicationTests.ReplicationTestRun_Verify";
-        util.DEBUG("replicationVerify: " + replicationVerify);
-
-        runTest(replicationTest, // Returns immediatly if replicationTest is null.
-                jvmVersion,
-                testClientHost,
-                masterServerHost, masterServerPort,
-                replicatedDb);
-        
-        failOver(jvmVersion,
-                masterDatabasePath, masterDbSubPath, replicatedDb,
-                masterServerHost,  // Where the master db is run.
-                masterServerPort,
-                testClientHost);
-        
-        connectPing(slaveDatabasePath+FS+slaveDbSubPath+FS+replicatedDb,
-                slaveServerHost,slaveServerPort,
-                testClientHost);
-        
-        verifySlave();
-        
-        // We should verify the master as well, at least to see that we still can connect.
-        verifyMaster();
+        _testPostStartedMasterAndSlave_Failover(); // Not in a state to continue!
         
         stopServer(jvmVersion, derbyVersion,
                 slaveServerHost, slaveServerPort);
         
         stopServer(jvmVersion, derbyVersion,
                 masterServerHost, masterServerPort);
-        // As of 2008-02-06 master does not accept shutdown after replication, so:
-        // do a 'kill pid' after ending the test run
         
+    }
+
+    private void _testPostStartedMasterAndSlave_Failover()
+    {
+        Connection conn = null;
+        String db = slaveDatabasePath +"/"+ReplicationRun.slaveDbSubPath +"/"+ replicatedDb;
+        String connectionURL = "jdbc:derby:"  
+                + "//" + slaveServerHost + ":" + slaveServerPort + "/"
+                + db
+                + ";failover=true";
+        util.DEBUG("1. testPostStartedMasterAndSlave_Failover: " + connectionURL);
+        try
+        {
+            conn = DriverManager.getConnection(connectionURL);
+            util.DEBUG("Successfully connected as: " + connectionURL);
+            assertTrue("Successfully connected as: " + connectionURL, false);
+        }
+        catch (SQLException se)
+        {
+            int ec = se.getErrorCode();
+            String ss = se.getSQLState();
+            String msg = "As expected: Failover on slave should fail: " + ec + " " + ss + " " + se.getMessage();
+            util.DEBUG(msg);
+        }
+        // Default replication test sequence still OK.
+        
+        // Failover on master should succeed:
+        db = masterDatabasePath +"/"+ReplicationRun.masterDbSubPath +"/"+ replicatedDb;
+        connectionURL = "jdbc:derby:"  
+                + "//" + masterServerHost + ":" + masterServerPort + "/"
+                + db
+                + ";failover=true";
+        util.DEBUG("2. testPostStartedMasterAndSlave_Failover: " + connectionURL);
+        try
+        {
+            conn = DriverManager.getConnection(connectionURL);
+            util.DEBUG("Unexpectedly connected as: " + connectionURL);
+            assertTrue("Unexpectedly connected as: " + connectionURL, false);
+        }
+        catch (SQLException se)
+        {
+            int ec = se.getErrorCode();
+            String ss = se.getSQLState();
+            String msg = ec + " " + ss + " " + se.getMessage();
+            // Failover OK: SQLCODE: -1, SQLSTATE: XRE20
+            assertTrue("connectionURL " + " failed: " + msg, 
+                    // SQLState.REPLICATION_FAILOVER_SUCCESSFUL.equals(ss)); // "XRE20.D"
+                    "XRE20".equals(ss));
+            util.DEBUG("Failover on master succeeded: " + connectionURL + " " + msg);
+        }
+        // Not meaningful to continue default replication test sequence after this point!
     }
     
 }

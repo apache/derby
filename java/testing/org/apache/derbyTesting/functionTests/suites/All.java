@@ -25,6 +25,7 @@ import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.BaseTestCase;
 import org.apache.derbyTesting.junit.EnvTest;
+import org.apache.derbyTesting.functionTests.tests.replicationTests.ReplicationSuite;
 
 public class All extends BaseTestCase {
       
@@ -38,7 +39,7 @@ public class All extends BaseTestCase {
     public static Test suite() throws Exception {
 
         TestSuite suite = new TestSuite("All");
-        
+
         // Simple "test" that displays environment information
         // as fixture names.
         suite.addTestSuite(EnvTest.class);
@@ -48,6 +49,9 @@ public class All extends BaseTestCase {
         
         // Encrypted tests
         suite.addTest(EncryptionSuite.suite());
+        
+        // Replication tests
+        suite.addTest(ReplicationSuite.suite());
         
         return suite;
     }

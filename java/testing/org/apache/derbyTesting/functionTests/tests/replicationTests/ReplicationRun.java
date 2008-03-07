@@ -29,8 +29,10 @@ import java.util.Properties;
 
 import java.sql.*;
 import java.io.*;
+import org.apache.derby.shared.common.reference.SQLState;
 
 import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.SecurityManagerSetup;
 
 /**
  * Framework to run replication tests.
@@ -155,6 +157,12 @@ public class ReplicationRun extends BaseTestCase
      */
     protected void tearDown() throws Exception
     {
+        stopServer(jvmVersion, derbyVersion,
+                slaveServerHost, slaveServerPort);
+        
+        stopServer(jvmVersion, derbyVersion,
+                masterServerHost, masterServerPort);
+
         super.tearDown();
     }
     
@@ -165,7 +173,7 @@ public class ReplicationRun extends BaseTestCase
         
         suite.addTestSuite( ReplicationRun.class ); // Make sure to rename in subclasses!
         
-        return suite;
+        return SecurityManagerSetup.noSecurityManager(suite);
     }
     
     //////////////////////////////////////////////////////////////
@@ -184,12 +192,14 @@ public class ReplicationRun extends BaseTestCase
     ////
     //////////////////////////////////////////////////////////////
     
+    /* Template
     public void testReplication()
     throws Exception
     {
-        System.out.println("WARNING: Override in subclass of ReplicationRun. "
+        util.DEBUG("WARNING: Define in subclass of ReplicationRun. "
                 + "See ReplicationRun_Local for an example.");
     }
+     */
 
     void connectPing(String fullDbPath, 
             String serverHost, int serverPort, 
@@ -237,18 +247,25 @@ public class ReplicationRun extends BaseTestCase
         }
     }
     
-    private void shutdownDb(String serverHost, int serverPort, 
-            String dbPath, String replicatedDb)
-        throws SQLException
+    void shutdownDb(String jvmVersion, // Not yet used
+            String serverHost, int serverPort, 
+            String dbPath, String replicatedDb,
+            String clientHost) // Not yet used
     {
         String serverURL = "jdbc:derby:"
                 +"//"+serverHost+":"+serverPort+"/";
         String dbURL = serverURL
                 +dbPath
                 +"/"+replicatedDb;
-        System.out.println("**** DriverManager.getConnection(\"" + dbURL+";shutdown=true\");");
+        util.DEBUG("**** DriverManager.getConnection(\"" + dbURL+";shutdown=true\");");
 
-        DriverManager.getConnection(dbURL+";shutdown=true");
+        try{
+            DriverManager.getConnection(dbURL+";shutdown=true");
+        }
+        catch (SQLException se)
+        {
+            
+        }
         
     }
     
@@ -316,7 +333,7 @@ public class ReplicationRun extends BaseTestCase
             }
             command = clientJvm
                     + " -Dderby.tests.trace=true"
-                    + " -Djava.security.policy=\"<NONE>\"" // To allow the test to e.g. kill servers...
+                    // + " -Djava.security.policy=\"<NONE>\"" // Now using noSecurityManager decorator
                     + " -Dtest.serverHost=" + serverHost  // Tell the test what server
                     + " -Dtest.serverPort=" + serverPort  // and port to connect to.
                     + " -Dtest.inserts=" + tuplesToInsert // for SimplePerfTest
@@ -340,7 +357,7 @@ public class ReplicationRun extends BaseTestCase
             results = runUserCommandRemotely(command, testClientHost, testUser,
                     "runTest ");
         }
-        System.out.println("Time: " + (System.currentTimeMillis() - startTime) / 1000.0);
+        util.DEBUG("Time: " + (System.currentTimeMillis() - startTime) / 1000.0);
         
     }
     void runTestOnSlave(String replicationTest,
@@ -400,7 +417,7 @@ public class ReplicationRun extends BaseTestCase
             }
             command = clientJvm
                     + " -Dderby.tests.trace=true"
-                    + " -Djava.security.policy=\"<NONE>\"" // To allow the test to e.g. kill servers...
+                    // + " -Djava.security.policy=\"<NONE>\""  // Now using noSecurityManager decorator
                     + " -Dtest.serverHost=" + serverHost  // Tell the test what server
                     + " -Dtest.serverPort=" + serverPort  // and port to connect to.
                     + " -Dtest.inserts=" + tuplesToInsert // for SimplePerfTest
@@ -424,7 +441,7 @@ public class ReplicationRun extends BaseTestCase
             results = runUserCommandRemotely(command, testClientHost, testUser,
                     "runTest ");
         }
-        System.out.println("Time: " + (System.currentTimeMillis() - startTime) / 1000.0);
+        util.DEBUG("Time: " + (System.currentTimeMillis() - startTime) / 1000.0);
         
     }
     
@@ -484,7 +501,7 @@ public class ReplicationRun extends BaseTestCase
             /* BEGIN For junit: */
             command = clientJvm // "java"
                     + " -Dderby.tests.trace=true"
-                    + " -Djava.security.policy=\"<NONE>\"" // To allow the test to e.g. kill servers...
+                    // + " -Djava.security.policy=\"<NONE>\""  // Now using noSecurityManager decorator
                     + " -classpath " + testingClassPath
                     + " junit.textui.TestRunner"
                     + " " + load //
@@ -559,7 +576,7 @@ public class ReplicationRun extends BaseTestCase
             command = "cd "+ userDir +";" // Must be positioned where the properties file is located.
                     + clientJvm 
                     + " -Dderby.tests.trace=true"
-                    + " -Djava.security.policy=\"<NONE>\"" // To allow the test to e.g. kill servers...
+                    // + " -Djava.security.policy=\"<NONE>\""  // Now using noSecurityManager decorator
                     + " -classpath " + testingClassPath
                     + " junit.textui.TestRunner"
                     + " " + stateTest
@@ -624,7 +641,7 @@ public class ReplicationRun extends BaseTestCase
                 testUser,
                 "bootMasterDatabase ");
         }
-        System.out.println(results);
+        util.DEBUG(results);
         
         
         // NB! should be done by startMaster. Preliminary needs to freeze db before copying to slave and setting replication mode.
@@ -779,7 +796,7 @@ public class ReplicationRun extends BaseTestCase
                 testClientHost,
                 testUser,
                 "startMaster_ij ");
-        System.out.println(results);
+        util.DEBUG(results);
     }
     private void startMaster_direct(String dbName,
             String masterHost,  // Where the master db is run.
@@ -808,6 +825,7 @@ public class ReplicationRun extends BaseTestCase
                     conn = DriverManager.getConnection(URL);
                     done = true;
                     conn.close();
+                    util.DEBUG("startMaster OK");
                 }
                 catch ( SQLException se )
                 {
@@ -815,17 +833,25 @@ public class ReplicationRun extends BaseTestCase
                     String msg = se.getMessage();
                     String state = se.getSQLState();
                     String expectedState = "XRE04";
-                    util.DEBUG("startSlave Got SQLException: " + errCode + " " + state + " " + msg);
+                    util.DEBUG("startSlave Got SQLException: " 
+                            + errCode + " " + state + " " + msg);
                     if ( (errCode == -1)
                     && (state.equalsIgnoreCase(expectedState) ) )
                     {
-                        util.DEBUG("Not ready to startMaster");
+                        util.DEBUG("Not ready to startMaster. "
+                                +"Beware: Will also report "
+                                + "'... got a fatal error for database '...../<dbname>'"
+                                + " in master derby-log.");
                         Thread.sleep(100L); // ms.
                     }
                     else
                     {
-                        se.printStackTrace(); // FIXME!
-                        return;
+                        if (SQLState.REPLICATION_MASTER_TIMED_OUT.equals(state)) // FIXME! CANNOT_START_MASTER_ALREADY_BOOTED
+                        {
+                            util.DEBUG("Master already started?");
+                        }
+                        se.printStackTrace(System.out);
+                        return; // Trying to continue. Is that reasonable?
                     }
                 }
 
@@ -945,7 +971,7 @@ public class ReplicationRun extends BaseTestCase
                 testClientHost,
                 testUser,
                 "startSlave_ij ");
-        System.out.println(results); */
+        util.DEBUG(results); */
         // 618220 + failover_impl_3205_v3.diff + derby-3361-1a.diff :
         runUserCommandInThreadRemotely(command,
                 testClientHost,
@@ -988,11 +1014,11 @@ public class ReplicationRun extends BaseTestCase
                         String msg = se.getMessage();
                         String state = se.getSQLState();
                         String expectedState = "XRE08";
-                        System.out.println("startSlave Got SQLException: " + errCode + " " + state + " " + msg);
+                        util.DEBUG("startSlave Got SQLException: " + errCode + " " + state + " " + msg);
                         if ( (errCode == -1)
                         && (state.equalsIgnoreCase(expectedState) ) )
                         {
-                            System.out.println("As expected.");
+                            util.DEBUG("As expected.");
 
                         }
                         else
@@ -1049,7 +1075,7 @@ public class ReplicationRun extends BaseTestCase
                 testClientHost,
                 testUser,
                 "stopSlave_ij ");
-        System.out.println(results);
+        util.DEBUG(results);
     }
     
     void failOver(String jvmVersion,
@@ -1105,7 +1131,7 @@ public class ReplicationRun extends BaseTestCase
                 testClientHost,
                 testUser,
                 "failOver_ij ");
-        System.out.println(results);
+        util.DEBUG(results);
     }
     private void failOver_direct(String dbPath, String dbSubPath, String dbName,
             String host,  // Where the db is run.
@@ -1132,22 +1158,21 @@ public class ReplicationRun extends BaseTestCase
                 String msg = se.getMessage();
                 String state = se.getSQLState();
                 String expectedState = "XRE20";
-                System.out.println("failOver_direct Got SQLException: " + errCode + " " + state + " " + msg);
+                util.DEBUG("failOver_direct Got SQLException: " + errCode + " " + state + " " + msg);
                 if ( (errCode == -1)
                 && (state.equalsIgnoreCase(expectedState) ) )
                 {
-                    System.out.println("As expected.");
-                    
+                    util.DEBUG("As expected.");
                 }
                 else
                 {
-                    se.printStackTrace(); // FIXME!
+                    se.printStackTrace(System.out); // FIXME!
                 }
                 ;
             }
             catch (Exception ex)
             {
-                ex.printStackTrace(); // FIXME!
+                ex.printStackTrace(System.out); // FIXME!
             }
    }
     
@@ -1190,7 +1215,7 @@ public class ReplicationRun extends BaseTestCase
                 testClientHost,
                 testUser,
                 "stopSlave_ij ");
-        System.out.println(results);
+        util.DEBUG(results);
     }
     
     int xFindServerPID(String serverHost, int serverPort)
@@ -1319,7 +1344,7 @@ public class ReplicationRun extends BaseTestCase
                     // dbName,
                     "runSlaveVerificationCLient ");
         }
-        System.out.println(results);
+        util.DEBUG(results);
        */
     }
     
@@ -1370,7 +1395,7 @@ public class ReplicationRun extends BaseTestCase
                     // dbName,
                     "runMasterVerificationCLient ");
         }
-        System.out.println(results);
+        util.DEBUG(results);
        */
     }
     
@@ -1386,7 +1411,7 @@ public class ReplicationRun extends BaseTestCase
         }
         catch (Exception e)
         {
-            System.out.println("Failed to create connection: " + url + ", " + e.getMessage());
+            util.DEBUG("Failed to create connection: " + url + ", " + e.getMessage());
             e.printStackTrace();
         }
         return con;
@@ -1691,121 +1716,122 @@ public class ReplicationRun extends BaseTestCase
     void initEnvironment()
     throws IOException
     {
-        System.out.println("*** ReplicationRun.initEnvironment -----------------------------------------");
-        System.out.println("*** Properties -----------------------------------------");
+        util.DEBUG("*** ReplicationRun.initEnvironment -----------------------------------------");
+        util.DEBUG("*** Properties -----------------------------------------");
         userDir = System.getProperty("user.dir");
-        System.out.println("user.dir:          " + userDir);
+        util.DEBUG("user.dir:          " + userDir);
         
-        System.out.println("derby.system.home: " + System.getProperty("derby.system.home"));
+        util.DEBUG("derby.system.home: " + System.getProperty("derby.system.home"));
         
-        util.printDebug = true;
-        System.out.println("printDebug: " + util.printDebug);
+        util.printDebug = System.getProperty("derby.tests.repltrace", "false")
+                                                     .equalsIgnoreCase("true");
+        util.DEBUG("printDebug: " + util.printDebug);
         
         showSysinfo = true;
-        System.out.println("showSysinfo: " + showSysinfo);
+        util.DEBUG("showSysinfo: " + showSysinfo);
         
         testUser = null;
-        System.out.println("testUser: " + testUser);
+        util.DEBUG("testUser: " + testUser);
         
         masterServerHost = "localhost";
-        System.out.println("masterServerHost: " + masterServerHost);
+        util.DEBUG("masterServerHost: " + masterServerHost);
         
         masterServerPort = 1527;
-        System.out.println("masterServerPort: " + masterServerPort);
+        util.DEBUG("masterServerPort: " + masterServerPort);
         
         slaveServerHost = "localhost";
-        System.out.println("slaveServerHost: " + slaveServerHost);
+        util.DEBUG("slaveServerHost: " + slaveServerHost);
         
         slaveServerPort = 4527;
-        System.out.println("slaveServerPort: " + slaveServerPort);
+        util.DEBUG("slaveServerPort: " + slaveServerPort);
         
         slaveReplPort = 8888;
-        System.out.println("slaveReplPort: " + slaveReplPort);
+        util.DEBUG("slaveReplPort: " + slaveReplPort);
         
         testClientHost = "localhost";
-        System.out.println("testClientHost: " + testClientHost);
+        util.DEBUG("testClientHost: " + testClientHost);
         
         masterDatabasePath = userDir;
-        System.out.println("masterDatabasePath: " + masterDatabasePath);
+        util.DEBUG("masterDatabasePath: " + masterDatabasePath);
         
         slaveDatabasePath = userDir;
-        System.out.println("slaveDatabasePath: " + slaveDatabasePath);
+        util.DEBUG("slaveDatabasePath: " + slaveDatabasePath);
         
         replicatedDb = "wombat";
-        System.out.println("replicatedDb: " + replicatedDb);
+        util.DEBUG("replicatedDb: " + replicatedDb);
         
         bootLoad = null;
-        System.out.println("bootLoad: " + bootLoad);
+        util.DEBUG("bootLoad: " + bootLoad);
         
         freezeDB = null;
-        System.out.println("freezeDB: " + freezeDB);
+        util.DEBUG("freezeDB: " + freezeDB);
         
         unFreezeDB = null;
-        System.out.println("unFreezeDB: " + unFreezeDB);
+        util.DEBUG("unFreezeDB: " + unFreezeDB);
         
         /* Done in subclasses
         replicationTest = "org.apache.derbyTesting.functionTests.tests.replicationTests.ReplicationTestRun";
-        System.out.println("replicationTest: " + replicationTest);
+        util.DEBUG("replicationTest: " + replicationTest);
         replicationVerify = "org.apache.derbyTesting.functionTests.tests.replicationTests.ReplicationTestRunVerify";
-        System.out.println("replicationVerify: " + replicationVerify);
+        util.DEBUG("replicationVerify: " + replicationVerify);
          */
         
         sqlLoadInit = null;
-        System.out.println("sqlLoadInit: " + sqlLoadInit);
+        util.DEBUG("sqlLoadInit: " + sqlLoadInit);
 
         
         specialTestingJar = null;
-        System.out.println("specialTestingJar: " + specialTestingJar);
+        util.DEBUG("specialTestingJar: " + specialTestingJar);
         
         jvmVersion = System.getProperty("java.home") +FS+"lib";
-        System.out.println("jvmVersion: " + jvmVersion);
+        util.DEBUG("jvmVersion: " + jvmVersion);
         
         masterJvmVersion = null;
         if ( masterJvmVersion == null )
         {masterJvmVersion = jvmVersion;}
-        System.out.println("masterJvmVersion: " + masterJvmVersion);
+        util.DEBUG("masterJvmVersion: " + masterJvmVersion);
         
         slaveJvmVersion = null;
         if ( slaveJvmVersion == null )
         {slaveJvmVersion = jvmVersion;}
-        System.out.println("slaveJvmVersion: " + slaveJvmVersion);
+        util.DEBUG("slaveJvmVersion: " + slaveJvmVersion);
         
         classPath = System.getProperty("java.class.path"); util.DEBUG("classPath: " + classPath);
         int sep = classPath.indexOf("derby.jar:"); util.DEBUG("sep: " + sep);
         String tclassPath = classPath.substring(0,sep); util.DEBUG("classPath: " + classPath);
         sep = tclassPath.lastIndexOf("/"); util.DEBUG("sep: " + sep);
         derbyVersion = tclassPath.substring(0,sep);
-        System.out.println("derbyVersion: " + derbyVersion);
+        util.DEBUG("derbyVersion: " + derbyVersion);
         
         derbyMasterVersion = null;
         if ( derbyMasterVersion == null )
         {derbyMasterVersion = derbyVersion;}
-        System.out.println("derbyMasterVersion: " + derbyMasterVersion);
+        util.DEBUG("derbyMasterVersion: " + derbyMasterVersion);
         
         derbySlaveVersion = null;
         if ( derbySlaveVersion == null )
         {derbySlaveVersion = derbyVersion;}
-        System.out.println("derbySlaveVersion: " + derbySlaveVersion);
+        util.DEBUG("derbySlaveVersion: " + derbySlaveVersion);
         
         String derbyTestingJar = derbyVersion + FS+"derbyTesting.jar";
         if ( specialTestingJar != null )  derbyTestingJar = specialTestingJar;
-        System.out.println("derbyTestingJar: " + derbyTestingJar);
+        util.DEBUG("derbyTestingJar: " + derbyTestingJar);
         
         junit_jar = derbyVersion + FS+"junit.jar";
-        System.out.println("junit_jar: " + junit_jar);
+        util.DEBUG("junit_jar: " + junit_jar);
         
         test_jars = derbyTestingJar
                 + ":" + junit_jar;
-        System.out.println("test_jars: " + test_jars);
+        util.DEBUG("test_jars: " + test_jars);
         
         sleepTime = 15000;
-        System.out.println("sleepTime: " + sleepTime);
+        util.DEBUG("sleepTime: " + sleepTime);
         
         runUnReplicated = false;
-        System.out.println("runUnReplicated: " + runUnReplicated);
+        util.DEBUG("runUnReplicated: " + runUnReplicated);
         
         localEnv = false;
-        System.out.println("localEnv: " + localEnv);
+        util.DEBUG("localEnv: " + localEnv);
         
         derbyProperties = 
                  "derby.infolog.append=true"+LF
@@ -1813,7 +1839,7 @@ public class ReplicationRun extends BaseTestCase
                 +"derby.drda.traceAll=true"+LF;
 
         
-        System.out.println("--------------------------------------------------------");
+        util.DEBUG("--------------------------------------------------------");
         
         masterPreRepl = null; // FIXME!
         masterPostRepl = null; // FIXME!
@@ -1821,16 +1847,16 @@ public class ReplicationRun extends BaseTestCase
         masterPostSlave = null; // FIXME!
         slavePostSlave = null; // FIXME!
         
-        System.out.println("--------------------------------------------------------");
+        util.DEBUG("--------------------------------------------------------");
         // for SimplePerfTest
         tuplesToInsert = 10000;
         commitFreq = 1000; // "0" is autocommit
         
-        System.out.println("--------------------------------------------------------");
+        util.DEBUG("--------------------------------------------------------");
         
             // FIXME! state.initEnvironment(cp);
         
-        System.out.println("--------------------------------------------------------");
+        util.DEBUG("--------------------------------------------------------");
 
     }
     
@@ -1877,7 +1903,7 @@ public class ReplicationRun extends BaseTestCase
                 // dbName, // unneccessary?
                 "initMaster ");
         }
-        System.out.println(results);
+        util.DEBUG(results);
         
         
     }
@@ -1901,7 +1927,7 @@ public class ReplicationRun extends BaseTestCase
                 testUser,
                 // dbName, // unneccessary?
                 "removeSlaveDBfiles ");
-        System.out.println(results);
+        util.DEBUG(results);
         
     }
     void initSlave(String host, String clientVM, String dbName)
@@ -1948,7 +1974,7 @@ public class ReplicationRun extends BaseTestCase
                 // dbName, // unneccessary?
                 "initSlave ");
         }
-        System.out.println(results);
+        util.DEBUG(results);
         
         // Preliminary needs to freeze db before copying to slave and setting replication mode.
         // Should do: Assuming startMaster does unfreeze! 
@@ -2161,18 +2187,32 @@ public class ReplicationRun extends BaseTestCase
     void killMaster(String masterServerHost, int masterServerPort)
     throws InterruptedException
     {
-        /* Problem doing getProperty()...
-        stopServer(slaveJvmVersion, derbySlaveVersion,
-                slaveServerHost, slaveServerPort);
-         so instead */
-        int pid = xFindServerPID(masterServerHost,masterServerPort);
-        xStopServer(masterServerHost, pid);
+        util.DEBUG("killMaster: " + masterServerHost +":" + masterServerPort);
+        if ( masterServerHost.equals("localhost") )
+        {
+            stopServer(masterJvmVersion, derbyMasterVersion,
+                    masterServerHost, masterServerPort);
+        }
+        else
+        {
+            int pid = xFindServerPID(masterServerHost,masterServerPort);
+            xStopServer(masterServerHost, pid);
+        }
     }
     void killSlave(String slaveServerHost, int slaveServerPort)
     throws InterruptedException
     {
-        int pid = xFindServerPID(slaveServerHost, slaveServerPort);
-        xStopServer(slaveServerHost, pid);
+        util.DEBUG("killSlave: " + slaveServerHost +":" + slaveServerPort);
+        if ( slaveServerHost.equals("localhost") )
+        {
+            stopServer(slaveJvmVersion, derbySlaveVersion,
+                    slaveServerHost, slaveServerPort);
+        }
+        else
+        {
+            int pid = xFindServerPID(slaveServerHost, slaveServerPort);
+            xStopServer(slaveServerHost, pid);
+        }
     }
     void destroySlaveDB(String slaveServerHost)
     throws InterruptedException
@@ -2421,7 +2461,7 @@ public class ReplicationRun extends BaseTestCase
         util.DEBUG("--- pingServer");
     }
     
-    private	static void	ping( NetworkServerControl controller, int iterations )
+    private	void ping( NetworkServerControl controller, int iterations )
     throws Exception
     {
         Exception	finalException = null;
@@ -2440,7 +2480,7 @@ public class ReplicationRun extends BaseTestCase
             Thread.sleep( SLEEP_TIME_MILLIS );
         }
         
-        System.out.println( "Server did not come up: " + finalException.getMessage() );
+        util.DEBUG( "Server did not come up: " + finalException.getMessage() );
         finalException.printStackTrace();
         
     }
@@ -2475,7 +2515,7 @@ public class ReplicationRun extends BaseTestCase
                 );
         if ( load == null )
         {
-            System.out.println("No load supplied!");
+            util.DEBUG("No load supplied!");
             return;
         }
         if ( !existingDB )
@@ -2521,7 +2561,7 @@ public class ReplicationRun extends BaseTestCase
      */
     void cleanAllTestHosts()
     {
-        System.out.println("************************** cleanAllTestHosts() Not yet implemented");
+        util.DEBUG("************************** cleanAllTestHosts() Not yet implemented");
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -2901,7 +2941,7 @@ test.postStoppedSlaveServer.return=true
     
     ///////////////////////////////////////////////////////////////////////////
     /* Load started in different states of replication. */
-    static class Load
+    class Load
     {
         Load(String load, String database, boolean existingDB, String clientHost)
         {
@@ -2912,12 +2952,12 @@ test.postStoppedSlaveServer.return=true
         }
         Load(String id, Properties testRunProperties)
         {
-            System.out.println("Load(): " + id);
+            util.DEBUG("Load(): " + id);
             
             String pid = "test." + id;
             if ( testRunProperties.getProperty(pid,"false").equalsIgnoreCase("false") )
             {
-                System.out.println(pid + " Not defined or set to false!");
+                util.DEBUG(pid + " Not defined or set to false!");
             }
             else
             {
@@ -2925,19 +2965,19 @@ test.postStoppedSlaveServer.return=true
                 pid = "test." + id + ".load";
                 load = testRunProperties.getProperty(pid,
                         "org.apache.derbyTesting.functionTests.tests.replicationTests.DefaultLoad");
-                System.out.println(pid+": " + load);
+                util.DEBUG(pid+": " + load);
                 
                 pid = "test." + id + ".database";
                 database = testRunProperties.getProperty(pid, id);
-                System.out.println(pid+": " + database);
+                util.DEBUG(pid+": " + database);
                 
                 pid = "test." + id + ".existingDB";
                 existingDB = testRunProperties.getProperty(pid,"false").equalsIgnoreCase("true");
-                System.out.println(pid+": " + existingDB);
+                util.DEBUG(pid+": " + existingDB);
                 
                 pid = "test." + id + ".clientHost";
                 clientHost = testRunProperties.getProperty(pid, testClientHost);
-                System.out.println(pid+": " + clientHost);
+                util.DEBUG(pid+": " + clientHost);
                 
             }
             
