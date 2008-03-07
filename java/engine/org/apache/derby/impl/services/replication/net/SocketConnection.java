@@ -93,6 +93,8 @@ public class SocketConnection {
      *                     stream.
      */
     public void writeMessage(Object message) throws IOException {
+        // reset stream so that previously shipped objects can be gc'ed
+        objOutputStream.reset();
         objOutputStream.writeObject(message);
         //flush the stream to ensure that all the data that is part
         //of the message object is written and no data remains
