@@ -760,7 +760,7 @@ public final class NetworkServerControlImpl {
 		// sure we print the error message before doing so (Beetle 5033).
 			throwUnexpectedException(e);
 		}
-
+        
 		switch (getSSLMode()) {
 		default:
 		case SSL_OFF:
@@ -806,7 +806,7 @@ public final class NetworkServerControlImpl {
                             new NetworkServerMBeanImpl(this),
                             NetworkServerMBean.class,
                             "type=NetworkServer");
-			
+        			
 		// wait until we are told to shutdown or someone sends an InterruptedException
         synchronized(shutdownSync) {
             try {
@@ -817,7 +817,6 @@ public final class NetworkServerControlImpl {
                 shutdown = true;
             }
         }
-
         
         AccessController.doPrivileged(
                 new PrivilegedAction() {
@@ -860,10 +859,7 @@ public final class NetworkServerControlImpl {
  			}
  			threadList.clear();
 		}
-	   
- 
-
-	
+	   	
 	    // close the listener socket
 	    try{
 	       serverSocket.close();
@@ -996,39 +992,45 @@ public final class NetworkServerControlImpl {
 	public void shutdown()
 		throws Exception
 	{
-		setUpSocket();
-		writeCommandHeader(COMMAND_SHUTDOWN);
-		// DERBY-2109: transmit user credentials for System Privileges check
-		writeLDString(userArg);
-		writeLDString(passwordArg);
-		send();
-		readResult();
 		// Wait up to 10 seconds for things to really shut down
 		// need a quiet ping so temporarily disable the logwriter
-		PrintWriter savWriter = logWriter;
-		// DERBY-1571: If logWriter is null, stack traces are printed to
-		// System.err. Set logWriter to a silent stream to suppress stack
-		// traces too.
-		FilterOutputStream silentStream = new FilterOutputStream(null) {
-				public void write(int b) { }
-				public void flush() { }
-				public void close() { }
-			};
-		setLogWriter(new PrintWriter(silentStream));
+		PrintWriter savWriter;
 		int ntry;
-		for (ntry = 0; ntry < SHUTDOWN_CHECK_ATTEMPTS; ntry++)
-		{
-			Thread.sleep(SHUTDOWN_CHECK_INTERVAL);
-			try {
-                pingWithNoOpen();
-			} catch (Exception e) 
-			{
-                // as soon as we can't ping return
-				break;
-			}
-		}
-        closeSocket();
-        
+        try {
+            setUpSocket();
+            writeCommandHeader(COMMAND_SHUTDOWN);
+            // DERBY-2109: transmit user credentials for System Privileges check
+            writeLDString(userArg);
+            writeLDString(passwordArg);
+            send();
+            readResult();
+            savWriter = logWriter;
+            // DERBY-1571: If logWriter is null, stack traces are printed to
+            // System.err. Set logWriter to a silent stream to suppress stack
+            // traces too.
+            FilterOutputStream silentStream = new FilterOutputStream(null) {
+                public void write(int b) {
+                }
+
+                public void flush() {
+                }
+
+                public void close() {
+                }
+            };
+            setLogWriter(new PrintWriter(silentStream));
+            for (ntry = 0; ntry < SHUTDOWN_CHECK_ATTEMPTS; ntry++) {
+                Thread.sleep(SHUTDOWN_CHECK_INTERVAL);
+                try {
+                    pingWithNoOpen();
+                } catch (Exception e) {
+                    // as soon as we can't ping return
+                    break;
+                }
+            }
+        } finally {
+            closeSocket();
+        }		
         
         if (ntry == SHUTDOWN_CHECK_ATTEMPTS)
             consolePropertyMessage("DRDA_ShutdownError.S", new String [] {
@@ -1152,9 +1154,12 @@ public final class NetworkServerControlImpl {
      */
 	public void ping() throws Exception
 	{
-        setUpSocket();
-        pingWithNoOpen();
-        closeSocket();
+        try {
+            setUpSocket();
+            pingWithNoOpen();
+        } finally {
+            closeSocket();
+        }
     }
     
     /**
@@ -1204,14 +1209,18 @@ public final class NetworkServerControlImpl {
 	public void trace(int connNum, boolean on)
 		throws Exception
 	{
-		setUpSocket();
-		writeCommandHeader(COMMAND_TRACE);
-		commandOs.writeInt(connNum);
-		writeByte(on ? 1 : 0);
-		send();
-		readResult();
-		consoleTraceMessage(connNum, on);
-        closeSocket();
+        try {
+            setUpSocket();
+            writeCommandHeader(COMMAND_TRACE);
+            commandOs.writeInt(connNum);
+            writeByte(on ? 1 : 0);
+            send();
+            readResult();
+            consoleTraceMessage(connNum, on);
+        } finally {
+            closeSocket();
+        }
+        
 	}
 
 	/**
@@ -1246,12 +1255,15 @@ public final class NetworkServerControlImpl {
 	public void logConnections(boolean on)
 		throws Exception
 	{
-		setUpSocket();
-		writeCommandHeader(COMMAND_LOGCONNECTIONS);
-		writeByte(on ? 1 : 0);
-		send();
-		readResult();
-        closeSocket();
+        try {
+            setUpSocket();
+            writeCommandHeader(COMMAND_LOGCONNECTIONS);
+            writeByte(on ? 1 : 0);
+            send();
+            readResult();
+        } finally {
+            closeSocket();
+        }		
 	}
 
 	/**
@@ -1260,12 +1272,16 @@ public final class NetworkServerControlImpl {
 	public void sendSetTraceDirectory(String traceDirectory)
 		throws Exception
 	{
-		setUpSocket();
-		writeCommandHeader(COMMAND_TRACEDIRECTORY);
-		writeLDString(traceDirectory);
-		send();
-		readResult();
-        closeSocket();
+        try {
+            setUpSocket();
+            writeCommandHeader(COMMAND_TRACEDIRECTORY);
+            writeLDString(traceDirectory);
+            send();
+            readResult();
+        } finally {
+            closeSocket();
+        }		
+        
 	}
 
 	/**
@@ -1323,15 +1339,19 @@ public final class NetworkServerControlImpl {
 	 */
 	public void netSetMaxThreads(int max) throws Exception
 	{
-		setUpSocket();
-		writeCommandHeader(COMMAND_MAXTHREADS);
-		commandOs.writeInt(max);
-		send();
-		readResult();
-		int newval = readInt();
-		consolePropertyMessage("DRDA_MaxThreadsChange.I", 
- 					new Integer(newval).toString());
-        closeSocket();
+        try {
+            setUpSocket();
+            writeCommandHeader(COMMAND_MAXTHREADS);
+            commandOs.writeInt(max);
+            send();
+            readResult();
+            int newval = readInt();
+            consolePropertyMessage("DRDA_MaxThreadsChange.I", new Integer(
+                    newval).toString());
+        } finally {
+            closeSocket();
+        }		
+        
 	}
 
 	/**
@@ -1345,15 +1365,18 @@ public final class NetworkServerControlImpl {
 	public void netSetTimeSlice(int timeslice)
 		throws Exception
 	{
-		setUpSocket();
-		writeCommandHeader(COMMAND_TIMESLICE);
-		commandOs.writeInt(timeslice);
-		send();
-		readResult();
-		int newval = readInt();
-		consolePropertyMessage("DRDA_TimeSliceChange.I", 
-									   new Integer(newval).toString());
-        closeSocket();
+        try {
+            setUpSocket();
+            writeCommandHeader(COMMAND_TIMESLICE);
+            commandOs.writeInt(timeslice);
+            send();
+            readResult();
+            int newval = readInt();
+            consolePropertyMessage("DRDA_TimeSliceChange.I",
+                    new Integer(newval).toString());
+        } finally {
+            closeSocket();
+        }  
 	}
 
 	/**
@@ -1365,20 +1388,23 @@ public final class NetworkServerControlImpl {
 	public Properties getCurrentProperties() 
 		throws Exception
 	{
-		setUpSocket();
-		writeCommandHeader(COMMAND_PROPERTIES);
-		send();
-		byte [] val = readBytesReply("DRDA_PropertyError.S");
-        closeSocket();
-		Properties p = new Properties();
-		try {
-			ByteArrayInputStream bs = new ByteArrayInputStream(val);
-			p.load(bs);
-		} catch (IOException io) {
-			consolePropertyMessage("DRDA_IOException.S", 
-						io.getMessage());
-		}
-		return p;
+        try {
+            setUpSocket();
+            writeCommandHeader(COMMAND_PROPERTIES);
+            send();
+            byte[] val = readBytesReply("DRDA_PropertyError.S");
+            
+            Properties p = new Properties();
+            try {
+                ByteArrayInputStream bs = new ByteArrayInputStream(val);
+                p.load(bs);
+            } catch (IOException io) {
+                consolePropertyMessage("DRDA_IOException.S", io.getMessage());
+            }
+            return p;
+        } finally {
+            closeSocket();
+        }		
 	}
 
 	/**
@@ -2511,7 +2537,7 @@ public final class NetworkServerControlImpl {
 									{
 										if (hostAddress == null)
 											hostAddress = InetAddress.getByName(hostArg);
-
+                                        
 										switch(getSSLMode()) {
 										case SSL_BASIC:
 											SSLSocket s1 = (SSLSocket)NaiveTrustManager.getSocketFactory().
