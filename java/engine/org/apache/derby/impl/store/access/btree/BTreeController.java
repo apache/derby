@@ -807,11 +807,15 @@ public class BTreeController extends OpenBTree implements ConglomerateController
                 // on the page returned by the search.
                 insert_slot = sp.resultSlot + 1;
                 result_slot = insert_slot + 1;
-                if (getConglomerate().isUniqueWithDuplicateNulls()) {
+                if (getConglomerate().isUniqueWithDuplicateNulls()) 
+                {
                     int ret = compareLeftAndRightSiblings(rowToInsert, 
                             insert_slot, targetleaf);
-                    if (ret == MATCH_FOUND)
-                        return ConglomerateController.ROWISDUPLICATE;
+                    if (ret == MATCH_FOUND) 
+                    {
+                        ret_val = ConglomerateController.ROWISDUPLICATE;
+                        break;
+                    }
                     if (ret == RESCAN_REQUIRED)
                         continue;
                 }
@@ -844,11 +848,15 @@ public class BTreeController extends OpenBTree implements ConglomerateController
 
                 // start splitting ...
             }
-            if (getConglomerate().isUniqueWithDuplicateNulls()) {
+            if (getConglomerate().isUniqueWithDuplicateNulls()) 
+            {
                 int ret = compareLeftAndRightSiblings(rowToInsert, 
                         insert_slot, targetleaf);
-                if (ret == MATCH_FOUND)
-                    return ConglomerateController.ROWISDUPLICATE;
+                if (ret == MATCH_FOUND) 
+                {
+                    ret_val = ConglomerateController.ROWISDUPLICATE;
+                    break;
+                }
                 if (ret == RESCAN_REQUIRED)
                     continue;
             }

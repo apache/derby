@@ -216,7 +216,7 @@ public class IndexDescriptorImpl implements IndexDescriptor, Formatable
 		if (isUnique)
 			sb.append("UNIQUE ");
 		else if (isUniqueWithDuplicateNulls)
-			sb.append ("ALMOST UNIQUE");
+			sb.append ("UNIQUE WITH DUPLICATE NULLS");
 
 		sb.append(indexType);
 
@@ -318,12 +318,14 @@ public class IndexDescriptorImpl implements IndexDescriptor, Formatable
 			** Check all the fields for equality except for the array
 			** elements (this is hardest, so save for last)
 			*/
-			if ((id.isUnique == this.isUnique) &&
-				(id.isUnique == this.isUnique) &&
-				(id.baseColumnPositions.length ==
-										this.baseColumnPositions.length) &&
-				(id.numberOfOrderedColumns == this.numberOfOrderedColumns) &&
-					(id.indexType.equals(this.indexType)))
+			if ((id.isUnique == this.isUnique)       &&
+                (id.isUniqueWithDuplicateNulls == 
+                    this.isUniqueWithDuplicateNulls) &&
+                (id.baseColumnPositions.length ==
+                    this.baseColumnPositions.length) &&
+                (id.numberOfOrderedColumns     == 
+                    this.numberOfOrderedColumns)     &&
+                (id.indexType.equals(this.indexType)))
 			{
 				/*
 				** Everything but array elements known to be true -
@@ -335,8 +337,8 @@ public class IndexDescriptorImpl implements IndexDescriptor, Formatable
 				{
 					/* If any array element is not equal, return false */
 					if ((id.baseColumnPositions[i] !=
-						this.baseColumnPositions[i]) || (id.isAscending[i] !=
-						this.isAscending[i]))
+						 this.baseColumnPositions[i]) || 
+                        (id.isAscending[i] != this.isAscending[i]))
 					{
 						retval = false;
 						break;

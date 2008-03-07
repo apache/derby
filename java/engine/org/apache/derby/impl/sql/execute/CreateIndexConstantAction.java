@@ -727,19 +727,23 @@ class CreateIndexConstantAction extends IndexConstantAction
 			 * so that we can reuse the wrappers during an external
 			 * sort.
 			 */
-			int numColumnOrderings;
-			SortObserver sortObserver = null;
+			int             numColumnOrderings;
+			SortObserver    sortObserver   = null;
+            Properties      sortProperties = null;
 			if (unique || uniqueWithDuplicateNulls)
 			{
-				// if the index is a constraint, use constraintname in possible error messagge
+				// if the index is a constraint, use constraintname in 
+                // possible error message
 				String indexOrConstraintName = indexName;
 				if  (conglomerateUUID != null)
 				{
-					ConglomerateDescriptor cd = dd.getConglomerateDescriptor(conglomerateUUID);
-					if ((isConstraint) && (cd != null && cd.getUUID() != null && td != null))
+					ConglomerateDescriptor cd = 
+                        dd.getConglomerateDescriptor(conglomerateUUID);
+					if ((isConstraint) && 
+                        (cd != null && cd.getUUID() != null && td != null))
 					{
-						ConstraintDescriptor conDesc = dd.getConstraintDescriptor(td,
-                                                                      cd.getUUID());
+						ConstraintDescriptor conDesc = 
+                            dd.getConstraintDescriptor(td, cd.getUUID());
 						indexOrConstraintName = conDesc.getConstraintName();
 					}
 				}
@@ -763,8 +767,10 @@ class CreateIndexConstantAction extends IndexConstantAction
 
 					numColumnOrderings = baseColumnPositions.length + 1;
 
-					properties = new Properties();
-					properties.put(
+                    // tell transaction controller to use the unique with 
+                    // duplicate nulls sorter, when making createSort() call.
+					sortProperties = new Properties();
+					sortProperties.put(
                         AccessFactoryGlobals.IMPL_TYPE, 
                         AccessFactoryGlobals.SORT_UNIQUEWITHDUPLICATENULLS_EXTERNAL);
 					//use sort operator which treats nulls unequal
@@ -797,7 +803,7 @@ class CreateIndexConstantAction extends IndexConstantAction
 			}
 
 			// create the sorter
-			sortId = tc.createSort((Properties)properties, 
+			sortId = tc.createSort((Properties)sortProperties, 
 					indexTemplateRow.getRowArrayClone(),
 					order,
 					sortObserver,
