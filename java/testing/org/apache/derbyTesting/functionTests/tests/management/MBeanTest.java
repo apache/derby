@@ -21,7 +21,12 @@
 
 package org.apache.derbyTesting.functionTests.tests.management;
 
-import java.io.InputStream;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Set;
@@ -32,16 +37,20 @@ import javax.management.ObjectName;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.NetworkServerTestSetup;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * Class that provided utility methods for the
- * testing of Derby's MBeans.
+ * testing of Derby's MBeans. Requires J2SE 5.0 or higher (platform management).
+ * 
+ * Subclasses may require JDBC access for verifying values returned by the
+ * MBeans, which is why this class extends BaseJDBCTestCase instead of 
+ * BaseTestCase.
  */
-abstract class MBeanTest extends BaseTestCase {
+abstract class MBeanTest extends BaseJDBCTestCase {
     
     /**
      * JMX connection to use throughout the instance.
@@ -123,8 +132,8 @@ abstract class MBeanTest extends BaseTestCase {
     /**
      * Returns a set of startup properties suitable for VersionMBeanTest.
      * These properties are used to configure JMX in a different JVM.
-     * Will set up remote JMX using the port 9999 (TODO: make this 
-     * configurable), and with JMX security (authentication & SSL) disabled.
+     * Will set up remote JMX using the port defined by the current test 
+     * configuration, and with JMX security (authentication & SSL) disabled.
      * 
      * @return a set of Java system properties to be set on the command line
      *         when starting a new JVM in order to enable remote JMX.
@@ -191,7 +200,7 @@ abstract class MBeanTest extends BaseTestCase {
     /**
      * Enables Derby's MBeans in the MBeanServer by accessing Derby's 
      * ManagementMBean. If Derby JMX management has already been enabled, no 
-     * changes will be made. The test fixtures in this class require that
+     * changes will be made. The test fixtures in some subclasses require that
      * JMX Management is enabled in Derby, hence this method.
      * 
      * @throws Exception JMX-related exceptions if an unexpected error occurs.
@@ -281,17 +290,40 @@ abstract class MBeanTest extends BaseTestCase {
     }
     
     /**
-     * Invoke an operation with no arguments.
+     * Invokes an operation with no arguments.
      * @param objName MBean to operate on
      * @param name Operation name.
+     * @return the value returned by the operation being invoked, or 
+     *         <code>null</code> if there is no return value.
      */
-    protected void invokeOperation(ObjectName objName, String name)
-        throws Exception
+    protected Object invokeOperation(ObjectName objName, String name)
+            throws Exception
     {
-        getMBeanServerConnection().invoke(
+        return invokeOperation(objName, name, new Object[0], new String[0]);
+    }
+    
+    /**
+     * Invokes an operation with arguments.
+     * 
+     * @param objName MBean to operate on
+     * @param name Operation name.
+     * @param params An array containing the parameters to be set when the 
+     *        operation is invoked.
+     * @param sign An array containing the signature of the operation, i.e.
+     *        the types of the parameters.
+     * @return the value returned by the operation being invoked, or 
+     *         <code>null</code> if there is no return value.
+     */
+    protected Object invokeOperation(ObjectName objName, 
+                                     String name, 
+                                     Object[] params, 
+                                     String[] sign)
+            throws Exception
+    {
+        return getMBeanServerConnection().invoke(
                 objName, 
                 name, 
-                new Object[0], new String[0]); // no arguments
+                params, sign);
     }
     
     /**
@@ -314,6 +346,22 @@ abstract class MBeanTest extends BaseTestCase {
         Boolean bool = (Boolean) getAttribute(objName, name);
         assertNotNull(bool);
         assertEquals(expected, bool.booleanValue());
+    }
+    
+    protected void assertIntAttribute(int expected,
+            ObjectName objName, String name) throws Exception
+    {
+        Integer integer = (Integer) getAttribute(objName, name);
+        assertNotNull(integer);
+        assertEquals(expected, integer.intValue());
+    }
+    
+    protected void assertStringAttribute(String expected,
+            ObjectName objName, String name) throws Exception
+    {
+        String str = (String) getAttribute(objName, name);
+        assertNotNull(str);
+        assertEquals(expected, str);
     }
     
     /**
@@ -361,5 +409,47 @@ abstract class MBeanTest extends BaseTestCase {
         
         String value = (String)getAttribute(objName, name);
         println(name + " = " + value); // for debugging
+    }
+    
+    /**
+     * Calls the public method <code>getInfo</code> of the sysinfo tool within
+     * this JVM and returns a <code>BufferedReader</code> for reading its 
+     * output. This is useful for obtaining system information that could be 
+     * used to verify (for example) values returned by Derby MBeans.
+     * 
+     * @return a buffering character-input stream containing the output from
+     *         sysinfo
+     * @see org.apache.derby.tools.sysinfo#getInfo(java.io.PrintWriter out)
+     */
+    protected BufferedReader getSysinfoLocally() {
+        ByteArrayOutputStream byteStream = new ByteArrayOutputStream(20 * 1024);
+        PrintWriter pw = new PrintWriter(byteStream, true); // autoflush
+        org.apache.derby.tools.sysinfo.getInfo(pw);
+        pw.flush();
+        pw.close();
+        byte[] outBytes = byteStream.toByteArray();
+        BufferedReader sysinfoOutput = new BufferedReader(
+                    new InputStreamReader(
+                            new ByteArrayInputStream(outBytes)));
+        return sysinfoOutput;
+    }
+    
+    /**
+     * <p>Calls the public method <code>getSysInfo()</code> of the Network 
+     * Server instance associated with the current test configuration and 
+     * returns the result as a BufferedReader, making it easy to analyse the 
+     * output line by line.</p>
+     * 
+     * <p>This is useful for obtaining system information that could be 
+     * used to verify (for example) values returned by Derby MBeans.</p>
+     * 
+     * @return a buffering character-input stream containing the output from 
+     *         the server's sysinfo.
+     * @see org.apache.derby.drda.NetworkServerControl#getSysinfo()
+     */
+    protected BufferedReader getSysinfoFromServer() throws Exception {
+        
+        return new BufferedReader(new StringReader(
+                NetworkServerTestSetup.getNetworkServerControl().getSysinfo()));
     }
 }
