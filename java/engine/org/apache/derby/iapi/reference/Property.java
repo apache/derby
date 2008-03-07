@@ -728,6 +728,23 @@ public interface Property {
 	
 	
 	/*
+	** Replication
+	*/
+
+	/** Property name for specifying the size of the replication log buffers */
+	public static final String REPLICATION_LOG_BUFFER_SIZE= "derby.replication.logBufferSize";
+
+	/** Property name for specifying the minimum log shipping interval*/
+	public static final String REPLICATION_MIN_SHIPPING_INTERVAL = "derby.replication.minLogShippingInterval";
+
+	/** Property name for specifying the maximum log shipping interval*/
+	public static final String REPLICATION_MAX_SHIPPING_INTERVAL = "derby.replication.maxLogShippingInterval";
+
+	/** Property name for specifying whether or not replication messages are
+	 * written to the log*/
+	public static final String REPLICATION_VERBOSE = "derby.replication.verbose";
+
+	/*
 	** Upgrade
 	*/
 	

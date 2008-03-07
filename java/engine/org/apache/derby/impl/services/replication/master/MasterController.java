@@ -30,6 +30,9 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.monitor.ModuleControl;
 import org.apache.derby.iapi.services.monitor.ModuleSupportable;
 import org.apache.derby.iapi.services.monitor.Monitor;
+import org.apache.derby.iapi.services.property.PropertyUtil;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.reference.Property;
 
 import org.apache.derby.iapi.store.raw.RawStoreFactory;
 import org.apache.derby.iapi.store.raw.log.LogFactory;
@@ -63,6 +66,8 @@ public class MasterController
         implements MasterFactory, ModuleControl, ModuleSupportable {
 
     private static final int DEFAULT_LOG_BUFFER_SIZE = 32768; //32K
+    private static final int LOG_BUFFER_SIZE_MIN = 8192; //8KB
+    private static final int LOG_BUFFER_SIZE_MAX = 1024*1024; //1MB
 
     private RawStoreFactory rawStoreFactory;
     private DataFactory dataFactory;
@@ -70,11 +75,13 @@ public class MasterController
     private ReplicationLogBuffer logBuffer;
     private AsynchronousLogShipper logShipper;
     private ReplicationMessageTransmit transmitter; 
+    private ReplicationLogger repLogger;
 
     private String replicationMode;
     private String slavehost;
     private int slaveport;
     private String dbname;
+    private int logBufferSize = 0;
     
     //Indicates whether the Master Controller is currently
     //active
@@ -196,7 +203,10 @@ public class MasterController
         rawStoreFactory = rawStore;
         dataFactory = dataFac;
         logFactory = logFac;
-        logBuffer = new ReplicationLogBuffer(DEFAULT_LOG_BUFFER_SIZE, this);
+
+        repLogger = new ReplicationLogger(dbname);
+        getMasterProperties();
+        logBuffer = new ReplicationLogBuffer(logBufferSize, this);
 
         try {
             logFactory.startReplicationMasterRole(this);
@@ -208,14 +218,14 @@ public class MasterController
             if (replicationMode.equals(MasterFactory.ASYNCHRONOUS_MODE)) {
                 logShipper = new AsynchronousLogShipper(logBuffer,
                                                         transmitter,
-                                                        this);
+                                                        this,
+                                                        repLogger);
                 ((Thread)logShipper).start();
             }
         } catch (StandardException se) {
             // cleanup everything that may have been started before
             // the exception was thrown
-            ReplicationLogger.logError(MessageId.REPLICATION_FATAL_ERROR, null,
-                                       dbname);
+            repLogger.logError(MessageId.REPLICATION_FATAL_ERROR, se);
             logFactory.stopReplicationMasterRole();
             teardownNetwork();
             throw se;
@@ -248,13 +258,11 @@ public class MasterController
         try {
             logShipper.flushBuffer();
         } catch (IOException ioe) {
-            ReplicationLogger.
-                logError(MessageId.REPLICATION_LOGSHIPPER_EXCEPTION,
-                         ioe, dbname);
+            repLogger.
+                logError(MessageId.REPLICATION_LOGSHIPPER_EXCEPTION, ioe);
         } catch(StandardException se) {
-            ReplicationLogger.
-                logError(MessageId.REPLICATION_LOGSHIPPER_EXCEPTION, 
-                         se, dbname);
+            repLogger.
+                logError(MessageId.REPLICATION_LOGSHIPPER_EXCEPTION, se);
         } finally {
             teardownNetwork();
         }
@@ -329,6 +337,33 @@ public class MasterController
             //ideally not contain any other type. The program should
             //ideally not come here.
            handleFailoverFailure(null);
+        }
+    }
+
+    /**
+     * Load relevant system property: replication log buffer size
+     */
+    private void getMasterProperties() {
+        logBufferSize =
+            PropertyUtil.getSystemInt(Property.REPLICATION_LOG_BUFFER_SIZE,
+                                      DEFAULT_LOG_BUFFER_SIZE);
+
+        if (logBufferSize < LOG_BUFFER_SIZE_MIN) {
+            logBufferSize = LOG_BUFFER_SIZE_MIN;
+            if (SanityManager.DEBUG) {
+                repLogger.logText("Replication log buffer size " +
+                                  "property too small. Set to " +
+                                  "minimum value: " + logBufferSize,
+                                  false);
+            }
+        }  else if (logBufferSize > LOG_BUFFER_SIZE_MAX) {
+            logBufferSize = LOG_BUFFER_SIZE_MAX;
+            if (SanityManager.DEBUG) {
+                repLogger.logText("Replication log buffer size " +
+                                  "property too big. Set to " +
+                                  "maximum value: " + logBufferSize,
+                                  false);
+            }
         }
     }
     
@@ -462,9 +497,8 @@ public class MasterController
      */
     void handleExceptions(Exception exception) {
         if (exception instanceof IOException) {
-            ReplicationLogger.
-                logError(MessageId.REPLICATION_LOGSHIPPER_EXCEPTION, 
-                         exception, dbname);
+            repLogger.logError(MessageId.REPLICATION_LOGSHIPPER_EXCEPTION,
+                               exception);
             Monitor.logTextMessage(MessageId.REPLICATION_MASTER_RECONN, dbname);
             
             while (active) {
@@ -507,15 +541,14 @@ public class MasterController
      * @param t the throwable that needs to be handled.
      */
     private void printStackAndStopMaster(Throwable t) {
-        ReplicationLogger.
-            logError(MessageId.REPLICATION_LOGSHIPPER_EXCEPTION, t, dbname);
+        repLogger.logError(MessageId.REPLICATION_LOGSHIPPER_EXCEPTION, t);
         try {
             stopMaster();
         } catch (Throwable t_stopmaster) {
             //The stop master threw an exception saying the replication
             //has been stopped already.
-            ReplicationLogger.
-                logError(MessageId.REPLICATION_MASTER_STOPPED, t, dbname);
+            repLogger.
+                logError(MessageId.REPLICATION_MASTER_STOPPED, t);
         }
     }
     

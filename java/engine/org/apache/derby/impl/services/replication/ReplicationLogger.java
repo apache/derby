@@ -22,36 +22,45 @@
 
 package org.apache.derby.impl.services.replication;
 
+import java.util.Date;
 import org.apache.derby.iapi.reference.MessageId;
+import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.error.ErrorStringBuilder;
 import org.apache.derby.iapi.services.monitor.Monitor;
+import org.apache.derby.iapi.services.property.PropertyUtil;
 
 public class ReplicationLogger {
 
     /** Whether or not to print log messages to derby.log. Defaults to
      * true, but can be set to false with derby property
-     * "derby.replication.logerrormessages=true"
+     * "derby.replication.verbose=false".
      */
-    // TODO: make this configurable through the aforementioned
-    // property
-    private static final boolean LOG_REPLICATION_MESSAGES = true;
+    private final boolean verbose;
 
+    /** The name of the replicated database */
+    private final String dbname;
+
+    public ReplicationLogger(String dbname) {
+        verbose = PropertyUtil.getSystemBoolean(Property.REPLICATION_VERBOSE,
+                                                true);
+        this.dbname = dbname;
+    }
 
     /**
      * Print error message and the stack trace of the throwable to the
-     * log (usually derby.log) provided that LOG_REPLICATION_MESSAGES
-     * is true. If LOG_REPLICATION_MESSAGES is false, nothing is
+     * log (usually derby.log) provided that verbose
+     * is true. If verbose is false, nothing is
      * logged.
      *
      * @param msgId The error message id
      * @param t Error trace starts from this error
-     * @param dbname The name of the replicated database
      */
-    public static void logError(String msgId, Throwable t, String dbname) {
+    public void logError(String msgId, Throwable t) {
 
-        if (LOG_REPLICATION_MESSAGES) {
+        if (verbose) {
 
-            Monitor.logTextMessage(MessageId.REPLICATION_ERROR_BEGIN);
+            Monitor.logTextMessage(MessageId.REPLICATION_ERROR_BEGIN,
+                                   new Date());
 
             if (msgId != null) {
                 Monitor.logTextMessage(msgId, dbname);
@@ -65,6 +74,31 @@ public class ReplicationLogger {
                 esb.reset();
             }
             Monitor.logTextMessage(MessageId.REPLICATION_ERROR_END);
+        }
+    }
+
+    /**
+     * Print a text to the log (usually derby.log), provided that
+     * verbose is true.
+     * @param text The text that will be logged
+     * @param writeHeader if true, encapsulates message in "begin
+     * error message" and "end error message" lines. If false,
+     * timestamps the text and writes it to the log without the header
+     * and footer.
+     */
+    public void logText(String text, boolean writeHeader) {
+
+        if (verbose) {
+            if (writeHeader) {
+                Monitor.logTextMessage(MessageId.REPLICATION_ERROR_BEGIN,
+                                       new Date());
+                Monitor.logMessage(text);
+                Monitor.logTextMessage(MessageId.REPLICATION_ERROR_END);
+            } else {
+                Monitor.
+                    logTextMessage(MessageId.REPLICATION_ONELINE_MSG_HEADER,
+                                   new Date(), text);
+            }
         }
     }
 

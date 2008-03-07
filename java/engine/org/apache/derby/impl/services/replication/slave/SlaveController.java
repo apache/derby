@@ -74,6 +74,7 @@ public class SlaveController
     private RawStoreFactory rawStoreFactory;
     private LogToFile logToFile;
     private ReplicationMessageReceive receiver;
+    private ReplicationLogger repLogger;
 
     private volatile boolean connectedToMaster = false;
     private String slavehost;
@@ -138,6 +139,7 @@ public class SlaveController
         }
 
         dbname = properties.getProperty(SlaveFactory.SLAVE_DB);
+        repLogger = new ReplicationLogger(dbname);
     }
 
     /**
@@ -368,8 +370,7 @@ public class SlaveController
             return;
         }
 
-        ReplicationLogger.
-            logError(MessageId.REPLICATION_SLAVE_LOST_CONN, e, dbname);
+        repLogger.logError(MessageId.REPLICATION_SLAVE_LOST_CONN, e);
 
         try {
             while (!setupConnection()) {
@@ -428,15 +429,13 @@ public class SlaveController
             return;
         }
 
-        ReplicationLogger.
-            logError(MessageId.REPLICATION_FATAL_ERROR, e, dbname);
+        repLogger.logError(MessageId.REPLICATION_FATAL_ERROR, e);
 
         // todo: notify master of the problem
         try {
             stopSlave();
         } catch (StandardException se) {
-            ReplicationLogger.
-                logError(MessageId.REPLICATION_FATAL_ERROR, se, dbname);
+            repLogger.logError(MessageId.REPLICATION_FATAL_ERROR, se);
         }
     }
 
@@ -448,7 +447,7 @@ public class SlaveController
                 receiver = null;
             }
         } catch (IOException ioe) {
-            ReplicationLogger.logError(null, ioe, dbname);
+            repLogger.logError(null, ioe);
         }
     }
 

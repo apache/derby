@@ -7665,12 +7665,13 @@ Shutting down instance {0}</text>
             <title>Undocumented Replication Messages from MessageId.java</title>
             <msg>
                 <name>R001</name>
-                <text>--------  BEGIN REPLICATION ERROR MESSAGE ---------</text>
+                <text>----  BEGIN REPLICATION ERROR MESSAGE ({0}) ----</text>
+                <arg>timestamp</arg>
             </msg>
 
             <msg>
                 <name>R002</name>
-                <text>---------  END REPLICATION ERROR MESSAGE ----------</text>
+                <text>--------------------  END REPLICATION ERROR MESSAGE ---------------------</text>
             </msg>
 
             <msg>
@@ -7731,6 +7732,13 @@ Shutting down instance {0}</text>
             <msg>
                 <name>R012</name>
                 <text>Replication connection handle invalid.</text>
+            </msg>
+
+            <msg>
+                <name>R013</name>
+                <text>Replication message ({0}): {1}</text>
+                <arg>timestamp</arg>
+                <arg>message</arg>
             </msg>
             
             <msg>

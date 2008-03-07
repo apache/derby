@@ -25,8 +25,12 @@ import java.io.IOException;
 import java.util.NoSuchElementException;
 
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.property.PropertyUtil;
+import org.apache.derby.iapi.services.sanity.SanityManager;
 
+import org.apache.derby.impl.services.replication.ReplicationLogger;
 import org.apache.derby.impl.services.replication.buffer.ReplicationLogBuffer;
 import org.apache.derby.impl.services.replication.net.ReplicationMessage;
 import org.apache.derby.impl.services.replication.net.ReplicationMessageTransmit;
@@ -68,6 +72,20 @@ public class AsynchronousLogShipper extends Thread implements
      * Time interval (in milliseconds) at which the log shipping takes place.
      */
     private long shippingInterval;
+    /**
+     * Minimum interval (in milliseconds) between log shipping.
+     * Defaults to MIN, but can be configured using system property
+     * derby.replication.minLogShippingInterval
+     * @see MIN
+     */
+    private long minShippingInterval;
+    /**
+     * Minimum interval (in milliseconds) between log shipping.
+     * Defaults to MAX, but can be configured using system property
+     * derby.replication.maxLogShippingInterval
+     * @see MAX
+     */
+    private long maxShippingInterval;
     
     /**
      * Will store the time at which the last shipping happened. Will be used
@@ -128,6 +146,8 @@ public class AsynchronousLogShipper extends Thread implements
      */
     private static final long MAX = 5000;
 
+    private final ReplicationLogger repLogger;
+
     /**
      * Constructor initializes the log buffer, the replication message
      * transmitter, the shipping interval and the master controller.
@@ -138,16 +158,23 @@ public class AsynchronousLogShipper extends Thread implements
      *                    network transmission of retrieved log records.
      * @param masterController The master controller that initialized this log
      *                         shipper.
+     * @param repLogger The replication logger that will write messages to
+     * the log file (typically derby.log)
      */
     public AsynchronousLogShipper(ReplicationLogBuffer logBuffer,
-        ReplicationMessageTransmit transmitter,
-        MasterController masterController) {
+                                  ReplicationMessageTransmit transmitter,
+                                  MasterController masterController,
+                                  ReplicationLogger repLogger) {
         super("derby.master.logger-" + masterController.getDbName());
         this.logBuffer = logBuffer;
         this.transmitter = transmitter;
         this.masterController = masterController;
         this.stopShipping = false;
-        shippingInterval = MIN;
+        this.repLogger = repLogger;
+
+        getLogShipperProperties();
+        shippingInterval = minShippingInterval;
+
         lastShippingTime = System.currentTimeMillis();
     }
     
@@ -322,7 +349,8 @@ public class AsynchronousLogShipper extends Thread implements
      * a) Get FI from log buffer
      * b) If FI >= FI_HIGH
      *     b.1) notify the log shipper thread.
-     * c) Else If the time elapsed since last ship is greater than MIN
+     * c) Else If the time elapsed since last ship is greater than
+     *    minShippingInterval
      *     c.1) notify the log shipper thread.
      */
     public void workToDo() {
@@ -332,7 +360,8 @@ public class AsynchronousLogShipper extends Thread implements
         fi = logBuffer.getFillInformation();
         
         if (fi >= FI_HIGH || 
-                (System.currentTimeMillis() - lastShippingTime) > MIN) {
+                (System.currentTimeMillis() - lastShippingTime) >
+                 minShippingInterval) {
             synchronized (this) {
                 notify();
             }
@@ -345,8 +374,8 @@ public class AsynchronousLogShipper extends Thread implements
      * steps to arrive at the shipping interval,
      * 
      * a) FI >= FI_HIGH return -1 (signifies that the waiting time should be 0)
-     * b) FI >  FI_LOW and FI < FI_HIGH return MIN
-     * c) FI <= FI_LOW return MAX.
+     * b) FI >  FI_LOW and FI < FI_HIGH return minShippingInterval
+     * c) FI <= FI_LOW return maxShippingInterval.
      * 
      * @return the shipping interval based on the fill information.
      */
@@ -362,11 +391,38 @@ public class AsynchronousLogShipper extends Thread implements
         if (fi >= FI_HIGH) {
             si = -1;
         } else if (fi > FI_LOW && fi < FI_HIGH) {
-            si = MIN;
+            si = minShippingInterval;
         } else {
-            si = MAX;
+            si = maxShippingInterval;
         }
         
         return si;
+    }
+
+    /**
+     * Load relevant system properties: max and min log shipping interval
+     */
+    private void getLogShipperProperties() {
+        minShippingInterval = PropertyUtil.
+            getSystemInt(Property.REPLICATION_MIN_SHIPPING_INTERVAL, (int)MIN);
+        maxShippingInterval = PropertyUtil.
+            getSystemInt(Property.REPLICATION_MAX_SHIPPING_INTERVAL, (int)MAX);
+
+        // To guarantee a maximum log shipping delay,
+        // minShippingInterval cannot be higher than
+        // maxShippingInterval / #logbuffers. See javadoc for MAX
+        int buffers = logBuffer.DEFAULT_NUMBER_LOG_BUFFERS;
+        if (minShippingInterval > maxShippingInterval / buffers) {
+            minShippingInterval = maxShippingInterval / buffers;
+            if (SanityManager.DEBUG) {
+                repLogger.logText("Minimum log shipping " +
+                                  "interval too large to guarantee " +
+                                  "the current maximum interval (" +
+                                  maxShippingInterval +
+                                  "). New minimum interval: " +
+                                  minShippingInterval,
+                                  false);
+            }
+        }
     }
 }

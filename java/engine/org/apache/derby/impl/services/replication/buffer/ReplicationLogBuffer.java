@@ -62,7 +62,7 @@ import org.apache.derby.iapi.services.replication.master.MasterFactory;
 
 public class ReplicationLogBuffer {
 
-    private static final int DEFAULT_NUMBER_LOG_BUFFERS = 10;
+    public static final int DEFAULT_NUMBER_LOG_BUFFERS = 10;
 
     private final LinkedList dirtyBuffers;// LogBufferElements with unsent log
     private final LinkedList freeBuffers; // currently unused LogBufferElements

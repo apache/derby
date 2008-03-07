@@ -334,16 +334,30 @@ public class PropertyUtil {
 	/**
 		Get a system wide property as a boolean.
 
+		@param key The name of the system property
 		@return true of the property is set to 'true, TRUE', false otherwise
 	*/
 	public static boolean getSystemBoolean(String key) {
+		return getSystemBoolean(key, false);
+	}
+
+    /**
+     * Get a system wide property as a boolean.
+     *
+     * @param key The name of the system property
+     * @param defaultValue The value to use if the property has not been set
+     * @return return defaultValue if the property is not set, returns true if
+     *  the property is set to 'true, TRUE', returns false otherwise.
+     */
+    public static boolean getSystemBoolean(String key, boolean defaultValue) {
 
         String value = PropertyUtil.getSystemProperty(key);
-
-		return( 
-            Boolean.valueOf(
-                (value != null ? value.trim() : value)).booleanValue());
-	}
+        if (value == null) {
+            return defaultValue;
+        } else {
+            return (Boolean.valueOf(value.trim()).booleanValue());
+        }
+    }
 
 	/**
 		Get a service wide property as a boolean.

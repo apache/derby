@@ -190,6 +190,7 @@ public interface MessageId {
     String REPLICATION_MASTER_RECONN                     = "R010";
     String REPLICATION_SLAVE_NETWORK_LISTEN              = "R011";    
     String REPLICATION_INVALID_CONNECTION_HANDLE         = "R012";
+    String REPLICATION_ONELINE_MSG_HEADER                = "R013";
     String REPLICATION_FAILOVER_SUCCESSFUL               = "R020";
 
 }
