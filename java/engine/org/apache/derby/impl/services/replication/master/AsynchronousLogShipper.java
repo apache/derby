@@ -76,14 +76,14 @@ public class AsynchronousLogShipper extends Thread implements
      * Minimum interval (in milliseconds) between log shipping.
      * Defaults to MIN, but can be configured using system property
      * derby.replication.minLogShippingInterval
-     * @see MIN
+     * @see #MIN
      */
     private long minShippingInterval;
     /**
      * Minimum interval (in milliseconds) between log shipping.
      * Defaults to MAX, but can be configured using system property
      * derby.replication.maxLogShippingInterval
-     * @see MAX
+     * @see #MAX
      */
     private long maxShippingInterval;
     
