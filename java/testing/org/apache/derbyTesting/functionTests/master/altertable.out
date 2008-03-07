@@ -939,11 +939,11 @@ create table atmcn_4 (a integer not null, b integer);
 0 rows inserted/updated/deleted
 ij> alter table atmcn_4 alter a null;
 0 rows inserted/updated/deleted
-ij> -- show that a column which has a UNIQUE constraint cannot be modified NULL:
+ij> --set column, part of unique constraint, to null
 create table atmcn_5 (a integer not null, b integer not null unique);
 0 rows inserted/updated/deleted
 ij> alter table atmcn_5 alter column b null;
-ERROR 42Z20: Column 'B' cannot be made nullable. It is part of a primary key or unique constraint, which cannot have any nullable columns.
+0 rows inserted/updated/deleted
 ij> -- tests for ALTER TABLE ALTER COLUMN DEFAULT
 create table atmod_1 (a integer, b varchar(10));
 0 rows inserted/updated/deleted

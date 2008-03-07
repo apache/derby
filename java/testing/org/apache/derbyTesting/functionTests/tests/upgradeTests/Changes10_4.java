@@ -592,6 +592,19 @@ public class Changes10_4 extends UpgradeChange {
                 //duplicate key violation 23505
                 assertStatementError ("23505", s, 
                             "insert into constraintest1 (i) values (2)");
+                //should able to drop nullablity
+                s.executeUpdate("alter table constraintest1 " +
+                        "alter column i null");
+                //try creating index without seting column as not null
+                s.executeUpdate("alter table constraintest2 " +
+                        "add constraint ucon1 unique(i, j)");
+                //test null values in unique constraint
+                s.executeUpdate ("insert into constraintest1 (j) values (1)");
+                s.executeUpdate ("insert into constraintest1 (j) values (1)");
+                //test null values in new index
+                s.executeUpdate ("insert into constraintest2 (j) values (1)");
+                s.executeUpdate ("insert into constraintest2 (j) values (1)");
+                break;
         }
         s.close();
     }

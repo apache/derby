@@ -185,14 +185,22 @@ public class ModifyColumnNode extends ColumnDefinitionNode
 			
 			else
 			{
-				// a column that is part of a primary key or unique constraint
+				//if a column is part of unique constraint it can't be
+				//made nullable in soft upgrade mode
+				if ((existingConstraint.getConstraintType() == 
+								DataDictionary.UNIQUE_CONSTRAINT)) {
+					if (!dd.checkVersion(
+							DataDictionary.DD_VERSION_DERBY_10_4, null))
+						throw StandardException.newException(
+								SQLState.LANG_MODIFY_COLUMN_EXISTING_CONSTRAINT,
+								name);
+				}
+				// a column that is part of a primary key
                 // is being made nullable; can't be done.
 				if ((getNodeType() == 
 					 C_NodeTypes.MODIFY_COLUMN_CONSTRAINT_NODE) &&
 					((existingConstraint.getConstraintType() == 
-					 DataDictionary.PRIMARYKEY_CONSTRAINT) ||
-					 (existingConstraint.getConstraintType() == 
-					 DataDictionary.UNIQUE_CONSTRAINT)))
+					 DataDictionary.PRIMARYKEY_CONSTRAINT)))
 				{
 				throw StandardException.newException(
 					 SQLState.LANG_MODIFY_COLUMN_EXISTING_CONSTRAINT, name);

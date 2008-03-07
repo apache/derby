@@ -594,7 +594,7 @@ alter table atmcn_3 alter column b null;
 -- statement is optional:
 create table atmcn_4 (a integer not null, b integer);
 alter table atmcn_4 alter a null;
--- show that a column which has a UNIQUE constraint cannot be modified NULL:
+--set column, part of unique constraint, to null
 create table atmcn_5 (a integer not null, b integer not null unique);
 alter table atmcn_5 alter column b null;
 
