@@ -538,17 +538,17 @@ public class MasterController
      * used to print the error stack for the given exception and
      * stop the master.
      *
-     * @param t the throwable that needs to be handled.
+     * @param e the exception that needs to be handled.
      */
-    private void printStackAndStopMaster(Throwable t) {
-        repLogger.logError(MessageId.REPLICATION_LOGSHIPPER_EXCEPTION, t);
+    private void printStackAndStopMaster(Exception e) {
+        repLogger.logError(MessageId.REPLICATION_LOGSHIPPER_EXCEPTION, e);
         try {
             stopMaster();
-        } catch (Throwable t_stopmaster) {
+        } catch (StandardException se) {
             //The stop master threw an exception saying the replication
             //has been stopped already.
             repLogger.
-                logError(MessageId.REPLICATION_MASTER_STOPPED, t);
+                logError(MessageId.REPLICATION_MASTER_STOPPED, se);
         }
     }
     
