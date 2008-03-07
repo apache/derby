@@ -475,6 +475,16 @@ public class Changes10_4 extends UpgradeChange {
                 "(col1 integer)"); 
         s.executeUpdate("create index "+ prefix
                 + "_nuin on " + prefix + "_indextest4 (col1)");
+
+        // behavior of unique constraint on non-nullable columns 
+        // should not change, should match behavior of unique index
+        // on non-null column.
+        s.executeUpdate("create table  " + prefix + "_indextest5" +
+                "(col1 integer not null)"); 
+        //try creating index without seting column as not null 
+        s.executeUpdate("alter table " + prefix + "_indextest5 " +
+                "add constraint " + 
+                prefix + "_cons1 unique(col1)");
     }
     /**
      * Test index created before upgrades to insure their behaviour 
@@ -492,6 +502,7 @@ public class Changes10_4 extends UpgradeChange {
                 testIndexes(s, "ph_create_indextest2", 1, true, false);
                 testIndexes(s, "ph_create_indextest3", 1, false, true);
                 testIndexes(s, "ph_create_indextest4", 1, true, true);
+                testIndexes(s, "ph_create_indextest5", 1, false, false);
                 break;
                 
             case PH_SOFT_UPGRADE:
@@ -500,6 +511,7 @@ public class Changes10_4 extends UpgradeChange {
                 testIndexes(s, "ph_create_indextest2", 2, true, false);
                 testIndexes(s, "ph_create_indextest3", 2, false, true);
                 testIndexes(s, "ph_create_indextest4", 2, true, true);
+                testIndexes(s, "ph_create_indextest5", 2, false, false);
                 //create one more set of tables
                 createTablesForIndexTesting (s, "ph__soft_upg");
                 //test newly created tables
@@ -507,6 +519,7 @@ public class Changes10_4 extends UpgradeChange {
                 testIndexes(s, "ph__soft_upg_indextest2", 2, true, false);
                 testIndexes(s, "ph__soft_upg_indextest3", 2, false, true);
                 testIndexes(s, "ph__soft_upg_indextest4", 2, true, true);
+                testIndexes(s, "ph__soft_upg_indextest5", 2, false, false);
                 break;
                 
             case PH_POST_SOFT_UPGRADE:
@@ -515,12 +528,14 @@ public class Changes10_4 extends UpgradeChange {
                 testIndexes(s, "ph_create_indextest2", 3, true, false);
                 testIndexes(s, "ph_create_indextest3", 3, false, true);
                 testIndexes(s, "ph_create_indextest4", 3, true, true);
+                testIndexes(s, "ph_create_indextest5", 3, false, false);
 
                 
                 testIndexes(s, "ph__soft_upg_indextest1", 3, false, false);
                 testIndexes(s, "ph__soft_upg_indextest2", 3, true, false);
                 testIndexes(s, "ph__soft_upg_indextest3", 3, false, true);
                 testIndexes(s, "ph__soft_upg_indextest4", 3, true, true);
+                testIndexes(s, "ph__soft_upg_indextest5", 3, false, false);
                 break;
                 
             case PH_HARD_UPGRADE:
@@ -529,12 +544,14 @@ public class Changes10_4 extends UpgradeChange {
                 testIndexes(s, "ph_create_indextest2", 4, true, false);
                 testIndexes(s, "ph_create_indextest3", 4, false, true);
                 testIndexes(s, "ph_create_indextest4", 4, true, true);
+                testIndexes(s, "ph_create_indextest5", 4, false, false);
 
                 
                 testIndexes(s, "ph__soft_upg_indextest1", 4, false, false);
                 testIndexes(s, "ph__soft_upg_indextest2", 4, true, false);
                 testIndexes(s, "ph__soft_upg_indextest3", 4, false, true);
                 testIndexes(s, "ph__soft_upg_indextest4", 4, true, true);
+                testIndexes(s, "ph__soft_upg_indextest5", 5, false, false);
                 
                 //create final set of tables
                 createTablesForIndexTesting (s, "ph_upgrade");
@@ -543,6 +560,7 @@ public class Changes10_4 extends UpgradeChange {
                 testIndexes(s, "ph_upgrade_indextest2", 4, true, false);
                 testIndexes(s, "ph_upgrade_indextest3", 4, false, true);
                 testIndexes(s, "ph_upgrade_indextest4", 4, true, true);
+                testIndexes(s, "ph_upgrade_indextest5", 4, false, false);
                 break;
         }
         s.close();
@@ -552,7 +570,7 @@ public class Changes10_4 extends UpgradeChange {
      * Under soft upgrade environment creation of unique constrant 
      * over nullable columns and setting columns from unique constraint
      * to null should fail. Also the constraint created during soft 
-     * upgrade run should work fine when running under privious version.
+     * upgrade run should work fine when running under previous version.
      * @throws SQLException at any unexpected failure.
      */
     public void testUniqueConstraint () throws SQLException {
@@ -560,8 +578,9 @@ public class Changes10_4 extends UpgradeChange {
         switch (getPhase()) {
             case PH_CREATE:
                 //create a table with unique constraint
-                s.executeUpdate("create table constraintest1 (i integer not null" +
-                        ", j integer, k integer, constraint ucon unique (i))");
+                s.executeUpdate(
+                    "create table constraintest1 (i integer not null" +
+                    ", j integer, k integer, constraint ucon unique (i))");
                 //and one without constraint
                 s.executeUpdate("create table constraintest2 (i integer" +
                         ", j integer, k integer)");
@@ -573,7 +592,7 @@ public class Changes10_4 extends UpgradeChange {
                 assertStatementError("42Z20", s, "alter table constraintest1 " +
                         "alter column i null");
                 //try creating index without seting column as not null 
-                assertStatementError ("42831", s, "alter table constraintest2 " +
+                assertStatementError("42831", s, "alter table constraintest2 " +
                         "add constraint ucon1 unique(i, j)");
                 //this should work fine
                 s.execute ("alter table constraintest3 add " +
