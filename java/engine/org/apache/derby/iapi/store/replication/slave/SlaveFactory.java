@@ -1,7 +1,7 @@
 /*
  
    Derby - Class
-   org.apache.derby.iapi.services.replication.slave.SlaveFactory
+   org.apache.derby.iapi.store.replication.slave.SlaveFactory
  
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -20,7 +20,7 @@
  
 */
 
-package org.apache.derby.iapi.services.replication.slave;
+package org.apache.derby.iapi.store.replication.slave;
 
 import org.apache.derby.iapi.error.StandardException;
 
@@ -44,7 +44,7 @@ public interface SlaveFactory {
 
     /** The name of the Slave Factory, used to boot the service.  */
     public static final String MODULE =
-        "org.apache.derby.iapi.services.replication.slave.SlaveFactory";
+        "org.apache.derby.iapi.store.replication.slave.SlaveFactory";
 
     /* Strings used as keys in the Properties objects*/
 
@@ -138,8 +138,8 @@ public interface SlaveFactory {
      *
      * @exception StandardException Thrown if slave is connected with
      * master
-     * @see org.apache.derby.iapi.services.replication.master.MasterFactory
-     * @see org.apache.derby.impl.services.replication.master.MasterController#flushedTo
+     * @see org.apache.derby.iapi.store.replication.master.MasterFactory
+     * @see org.apache.derby.impl.store.replication.master.MasterController#flushedTo
      */
     public void failover() throws StandardException;
     

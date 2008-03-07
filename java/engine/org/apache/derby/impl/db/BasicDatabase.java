@@ -73,7 +73,7 @@ import org.apache.derby.impl.sql.execute.JarUtil;
 import org.apache.derby.io.StorageFile;
 import org.apache.derby.catalog.UUID;
 
-import org.apache.derby.iapi.services.replication.slave.SlaveFactory;
+import org.apache.derby.iapi.store.replication.slave.SlaveFactory;
 
 import java.io.InputStream;
 import java.io.OutputStream;

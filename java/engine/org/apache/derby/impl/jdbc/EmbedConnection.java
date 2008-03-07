@@ -48,8 +48,8 @@ import org.apache.derby.iapi.sql.execute.ExecutionContext;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.store.access.XATransactionController;
 
-import org.apache.derby.iapi.services.replication.master.MasterFactory;
-import org.apache.derby.iapi.services.replication.slave.SlaveFactory;
+import org.apache.derby.iapi.store.replication.master.MasterFactory;
+import org.apache.derby.iapi.store.replication.slave.SlaveFactory;
 
 /* can't import due to name overlap:
 import java.sql.Connection;

@@ -1,6 +1,6 @@
 /*
  
-   Derby - Class org.apache.derby.impl.services.replication.net.SlaveAddress
+   Derby - Class org.apache.derby.impl.store.replication.net.SlaveAddress
  
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -19,7 +19,7 @@
  
  */
 
-package org.apache.derby.impl.services.replication.net;
+package org.apache.derby.impl.store.replication.net;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;

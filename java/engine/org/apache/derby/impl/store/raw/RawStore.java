@@ -88,8 +88,8 @@ import java.net.URL;
 import java.security.PrivilegedExceptionAction;
 import java.lang.SecurityException;
 
-import org.apache.derby.iapi.services.replication.master.MasterFactory;
-import org.apache.derby.iapi.services.replication.slave.SlaveFactory;
+import org.apache.derby.iapi.store.replication.master.MasterFactory;
+import org.apache.derby.iapi.store.replication.slave.SlaveFactory;
 
 /**
 	A Raw store that implements the RawStoreFactory module by delegating all the

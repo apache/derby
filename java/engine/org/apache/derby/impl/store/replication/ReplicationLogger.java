@@ -1,7 +1,7 @@
 /*
  
    Derby - Class
-   org.apache.derby.impl.services.replication.ReplicationLogger
+   org.apache.derby.impl.store.replication.ReplicationLogger
  
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -20,7 +20,7 @@
  
  */
 
-package org.apache.derby.impl.services.replication;
+package org.apache.derby.impl.store.replication;
 
 import java.util.Date;
 import org.apache.derby.iapi.reference.MessageId;

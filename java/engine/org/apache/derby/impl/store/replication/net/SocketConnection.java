@@ -1,6 +1,6 @@
 /*
  
-   Derby - Class org.apache.derby.impl.services.replication.net.SocketConnection
+   Derby - Class org.apache.derby.impl.store.replication.net.SocketConnection
  
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -19,7 +19,7 @@
  
  */
 
-package org.apache.derby.impl.services.replication.net;
+package org.apache.derby.impl.store.replication.net;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;

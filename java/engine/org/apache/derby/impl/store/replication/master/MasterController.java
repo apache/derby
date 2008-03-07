@@ -1,7 +1,7 @@
 /*
  
    Derby - Class
-   org.apache.derby.impl.services.replication.master.MasterController
+   org.apache.derby.impl.store.replication.master.MasterController
  
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -20,7 +20,7 @@
  
 */
 
-package org.apache.derby.impl.services.replication.master;
+package org.apache.derby.impl.store.replication.master;
 
 import java.io.IOException;
 import java.net.SocketTimeoutException;
@@ -38,13 +38,13 @@ import org.apache.derby.iapi.store.raw.RawStoreFactory;
 import org.apache.derby.iapi.store.raw.log.LogFactory;
 import org.apache.derby.iapi.store.raw.data.DataFactory;
 
-import org.apache.derby.iapi.services.replication.master.MasterFactory;
+import org.apache.derby.iapi.store.replication.master.MasterFactory;
 
-import org.apache.derby.impl.services.replication.net.ReplicationMessage;
-import org.apache.derby.impl.services.replication.ReplicationLogger;
-import org.apache.derby.impl.services.replication.net.ReplicationMessageTransmit;
-import org.apache.derby.impl.services.replication.buffer.ReplicationLogBuffer;
-import org.apache.derby.impl.services.replication.buffer.LogBufferFullException;
+import org.apache.derby.impl.store.replication.net.ReplicationMessage;
+import org.apache.derby.impl.store.replication.ReplicationLogger;
+import org.apache.derby.impl.store.replication.net.ReplicationMessageTransmit;
+import org.apache.derby.impl.store.replication.buffer.ReplicationLogBuffer;
+import org.apache.derby.impl.store.replication.buffer.LogBufferFullException;
 
 import java.util.Properties;
 

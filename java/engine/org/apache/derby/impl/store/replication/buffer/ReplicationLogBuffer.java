@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.impl.services.replication.buffer.ReplicationLogBuffer
+   Derby - Class org.apache.derby.impl.store.replication.buffer.ReplicationLogBuffer
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -19,14 +19,14 @@
 
 */
 
-package org.apache.derby.impl.services.replication.buffer;
+package org.apache.derby.impl.store.replication.buffer;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import java.util.NoSuchElementException;
 import java.util.LinkedList;
 
-import org.apache.derby.iapi.services.replication.master.MasterFactory;
+import org.apache.derby.iapi.store.replication.master.MasterFactory;
 
 /**
  * Used for the replication master role only. When a Derby instance

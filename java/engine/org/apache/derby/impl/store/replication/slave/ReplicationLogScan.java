@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.impl.services.replication.slave.ReplicationLogScan
+   Derby - Class org.apache.derby.impl.store.replication.slave.ReplicationLogScan
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -19,7 +19,7 @@
 
  */
 
-package org.apache.derby.impl.services.replication.slave;
+package org.apache.derby.impl.store.replication.slave;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;

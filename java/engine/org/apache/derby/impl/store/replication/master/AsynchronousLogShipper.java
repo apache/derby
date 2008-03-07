@@ -1,6 +1,6 @@
 /*
  
-   Derby - Class org.apache.derby.impl.services.replication.master.AsynchronousLogShipper
+   Derby - Class org.apache.derby.impl.store.replication.master.AsynchronousLogShipper
  
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -19,7 +19,7 @@
  
  */
 
-package org.apache.derby.impl.services.replication.master;
+package org.apache.derby.impl.store.replication.master;
 
 import java.io.IOException;
 import java.util.NoSuchElementException;
@@ -30,10 +30,10 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
-import org.apache.derby.impl.services.replication.ReplicationLogger;
-import org.apache.derby.impl.services.replication.buffer.ReplicationLogBuffer;
-import org.apache.derby.impl.services.replication.net.ReplicationMessage;
-import org.apache.derby.impl.services.replication.net.ReplicationMessageTransmit;
+import org.apache.derby.impl.store.replication.ReplicationLogger;
+import org.apache.derby.impl.store.replication.buffer.ReplicationLogBuffer;
+import org.apache.derby.impl.store.replication.net.ReplicationMessage;
+import org.apache.derby.impl.store.replication.net.ReplicationMessageTransmit;
 
 /**
  * <p>

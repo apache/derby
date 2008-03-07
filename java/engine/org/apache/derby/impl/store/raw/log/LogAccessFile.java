@@ -36,7 +36,7 @@ import java.util.LinkedList;
 
 import org.apache.derby.iapi.services.io.FormatIdOutputStream;
 import org.apache.derby.iapi.services.io.ArrayOutputStream;
-import org.apache.derby.iapi.services.replication.master.MasterFactory;
+import org.apache.derby.iapi.store.replication.master.MasterFactory;
 import org.apache.derby.iapi.store.raw.RawStoreFactory;
 
 

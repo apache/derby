@@ -74,8 +74,8 @@ import org.apache.derby.iapi.store.raw.data.DataFactory;
 import org.apache.derby.iapi.services.property.PersistentSet;
 
 //for replication
-import org.apache.derby.iapi.services.replication.master.MasterFactory;
-import org.apache.derby.iapi.services.replication.slave.SlaveFactory;
+import org.apache.derby.iapi.store.replication.master.MasterFactory;
+import org.apache.derby.iapi.store.replication.slave.SlaveFactory;
 import org.apache.derby.iapi.services.io.ArrayInputStream;
 
 import org.apache.derby.iapi.store.access.DatabaseInstant;

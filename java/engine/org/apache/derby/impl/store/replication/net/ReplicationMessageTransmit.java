@@ -1,6 +1,6 @@
 /*
  
-   Derby - Class org.apache.derby.impl.services.replication.net.ReplicationMessageTransmit
+   Derby - Class org.apache.derby.impl.store.replication.net.ReplicationMessageTransmit
  
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -18,7 +18,7 @@
    limitations under the License.
  
  */
-package org.apache.derby.impl.services.replication.net;
+package org.apache.derby.impl.store.replication.net;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;

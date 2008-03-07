@@ -29,7 +29,7 @@ import org.apache.derby.iapi.jdbc.AuthenticationService;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.services.monitor.Monitor;
-import org.apache.derby.iapi.services.replication.slave.SlaveFactory;
+import org.apache.derby.iapi.store.replication.slave.SlaveFactory;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 
 import java.sql.Driver;

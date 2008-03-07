@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.impl.services.replication.buffer.LogBufferElement
+   Derby - Class org.apache.derby.impl.store.replication.buffer.LogBufferElement
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -19,7 +19,7 @@
 
  */
 
-package org.apache.derby.impl.services.replication.buffer;
+package org.apache.derby.impl.store.replication.buffer;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 

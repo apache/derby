@@ -1,7 +1,7 @@
 /*
  
    Derby - Class
-   org.apache.derby.iapi.services.replication.master.MasterFactory
+   org.apache.derby.iapi.store.replication.master.MasterFactory
  
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -20,7 +20,7 @@
  
 */
 
-package org.apache.derby.iapi.services.replication.master;
+package org.apache.derby.iapi.store.replication.master;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.Property;
@@ -70,7 +70,7 @@ public interface MasterFactory {
 
     /** The name of the Master Factory, used to boot the service.  */
     public static final String MODULE =
-        "org.apache.derby.iapi.services.replication.master.MasterFactory";
+        "org.apache.derby.iapi.store.replication.master.MasterFactory";
 
     /* Property names that are used as key values in the Properties objects*/
     

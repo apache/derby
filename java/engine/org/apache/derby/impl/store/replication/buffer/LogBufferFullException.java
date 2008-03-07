@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.impl.services.replication.buffer.LogBufferFullException
+   Derby - Class org.apache.derby.impl.store.replication.buffer.LogBufferFullException
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -19,7 +19,7 @@
 
  */
 
-package org.apache.derby.impl.services.replication.buffer;
+package org.apache.derby.impl.store.replication.buffer;
 
 public class LogBufferFullException extends Exception{
 

@@ -37,7 +37,7 @@ import org.apache.derby.iapi.store.raw.log.LogFactory;
 import org.apache.derby.iapi.store.raw.log.LogInstant;
 import org.apache.derby.iapi.store.raw.log.Logger;
 import org.apache.derby.iapi.store.raw.log.LogScan;
-import org.apache.derby.iapi.services.replication.master.MasterFactory;
+import org.apache.derby.iapi.store.replication.master.MasterFactory;
 
 import org.apache.derby.iapi.store.raw.data.DataFactory;
 import org.apache.derby.iapi.store.raw.xact.TransactionFactory;

@@ -1,7 +1,7 @@
 /*
  
    Derby - Class
-   org.apache.derby.impl.services.replication.slave.SlaveController
+   org.apache.derby.impl.store.replication.slave.SlaveController
  
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -20,7 +20,7 @@
  
  */
 
-package org.apache.derby.impl.services.replication.slave;
+package org.apache.derby.impl.store.replication.slave;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.Attribute;
@@ -35,10 +35,10 @@ import org.apache.derby.impl.store.raw.log.LogCounter;
 import org.apache.derby.iapi.store.raw.log.LogFactory;
 import org.apache.derby.impl.store.raw.log.LogToFile;
 
-import org.apache.derby.impl.services.replication.ReplicationLogger;
-import org.apache.derby.impl.services.replication.net.ReplicationMessage;
-import org.apache.derby.impl.services.replication.net.ReplicationMessageReceive;
-import org.apache.derby.iapi.services.replication.slave.SlaveFactory;
+import org.apache.derby.impl.store.replication.ReplicationLogger;
+import org.apache.derby.impl.store.replication.net.ReplicationMessage;
+import org.apache.derby.impl.store.replication.net.ReplicationMessageReceive;
+import org.apache.derby.iapi.store.replication.slave.SlaveFactory;
 
 import java.io.EOFException;
 import java.io.IOException;
