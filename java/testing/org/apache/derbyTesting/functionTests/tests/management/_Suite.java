@@ -56,6 +56,7 @@ public class _Suite extends BaseTestCase {
         suite.addTest(InactiveManagementMBeanTest.suite());
         suite.addTest(VersionMBeanTest.suite());
         suite.addTest(JDBCMBeanTest.suite());
+        suite.addTest(NetworkServerMBeanTest.suite());
         
         return suite;
     }

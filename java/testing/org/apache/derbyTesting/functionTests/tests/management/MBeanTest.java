@@ -356,6 +356,14 @@ abstract class MBeanTest extends BaseJDBCTestCase {
         assertEquals(expected, integer.intValue());
     }
     
+    protected void assertLongAttribute(int expected,
+            ObjectName objName, String name) throws Exception
+    {
+        Long longNumber = (Long) getAttribute(objName, name);
+        assertNotNull(longNumber);
+        assertEquals(expected, longNumber.longValue());
+    }
+    
     protected void assertStringAttribute(String expected,
             ObjectName objName, String name) throws Exception
     {
@@ -393,6 +401,22 @@ abstract class MBeanTest extends BaseJDBCTestCase {
         
         Object value = getAttribute(objName, name);
         int unboxedValue = ((Integer)value).intValue();
+        println(name + " = " + unboxedValue); // for debugging
+    }
+    
+    /**
+     * Checks the readability and type of an attribute value that is supposed 
+     * to be a long.
+     * @param objName the object name representing the MBean instance from which
+     *        the attribute value will be retreived
+     * @param name the name of the attribute
+     * @throws java.lang.Exception if an unexpected error occurs
+     */
+    protected void checkLongAttributeValue(ObjectName objName, String name) 
+            throws Exception {
+        
+        Object value = getAttribute(objName, name);
+        long unboxedValue = ((Long)value).longValue();
         println(name + " = " + unboxedValue); // for debugging
     }
     
