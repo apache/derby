@@ -216,7 +216,7 @@ public abstract class Driver20 extends InternalDriver implements Driver {
      * @throws AccessControlException if permissions are missing
      * @throws Exception if the privileges check fails for some other reason
      */
-    public void checkSystemPrivileges(String user,
+    void checkSystemPrivileges(String user,
                                       Permission perm)
         throws Exception {
         SecurityUtil.checkUserHasPermission(user, perm);

@@ -268,7 +268,7 @@ public abstract class InternalDriver implements ModuleControl {
      * @throws AccessControlException if permissions are missing
      * @throws Exception if the privileges check fails for some other reason
      */
-    abstract public void checkSystemPrivileges(String user,
+    abstract void checkSystemPrivileges(String user,
                                                Permission perm)
         throws Exception;
 
@@ -294,7 +294,7 @@ public abstract class InternalDriver implements ModuleControl {
      * @param user The user to be checked for shutdown privileges
      * @throws SQLException if the privileges check fails
      */
-    public void checkShutdownPrivileges(String user) throws SQLException {
+    private void checkShutdownPrivileges(String user) throws SQLException {
         // approve action if not running under a security manager
         if (System.getSecurityManager() == null) {
             return;

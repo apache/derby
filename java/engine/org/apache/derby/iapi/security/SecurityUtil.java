@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.security.SystemPermission
+   Derby - Class org.apache.derby.iapi.security.SecurityUtil
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -45,7 +45,8 @@ import org.apache.derby.iapi.error.StandardException;
 public class SecurityUtil {
 
     /**
-     * Creates a (read-only) Subject representing a given user.
+     * Creates a (read-only) Subject representing a given user
+     * as a System user within Derby.
      *
      * @param user the user name
      * @return a Subject representing the user by its exact and normalized name
@@ -126,7 +127,8 @@ public class SecurityUtil {
         final PrivilegedAction runCheckAsPrivilegedUser
             = new PrivilegedAction() {
                     public Object run() {
-                        // run check as subject with new access control context
+                        // run check only using the the subject
+                        // (by using null as the AccessControlContext)
                         final AccessControlContext acc = null;
                         Subject.doAsPrivileged(subject, runCheck, acc);
                         return null;
