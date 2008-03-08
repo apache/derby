@@ -257,44 +257,61 @@ abstract class DDLSingleTableConstantAction extends DDLConstantAction
     
     /**
      * Recreate backing index of unique constraint.
+     *
      * It first drops the existing index and creates it again with 
      * uniqueness set to false and uniqueWhenNotNull set to true. It reuses
      * the uuid so there is no need to update ConstraintDescriptor.
-     * @param cd ConglomerateDescritor to recreate
-     * @param td TableDescriptor for the table on which congDesc exists
-     * @param activation Activation used when creating a new backing
-     *  index (if a new backing index is needed)
-     * @param lcc LanguageConnectionContext used for dropping
+     *
+     * @param cd            ConglomerateDescritor to recreate
+     * @param td            TableDescriptor for table on which congDesc exists
+     * @param activation    Activation used when creating a new backing index 
+     *                      (if a new backing index is needed)
+     * @param lcc           LanguageConnectionContext used for dropping
+     *
      * @throws StandardException
      */
-    void recreateUniqueConstraintBackingIndex (
-            ConglomerateDescriptor  cd,
-            TableDescriptor td,
-            Activation activation, 
-            LanguageConnectionContext lcc) throws StandardException {
-        Properties prop = new Properties ();
+    void recreateUniqueConstraintBackingIndexAsUniqueWhenNotNull(
+    ConglomerateDescriptor      cd,
+    TableDescriptor             td,
+    Activation                  activation, 
+    LanguageConnectionContext   lcc) 
+        throws StandardException 
+    {
         //get index property
+        Properties prop = new Properties ();
         loadIndexProperties(lcc, cd, prop);
         ArrayList list = new ArrayList();
+
+        // drop the existing index.
         dropConglomerate(cd, td, false, list, activation, lcc);
+
+
         String [] cols = cd.getColumnNames();
-        if (cols == null) {
-            //column list wasn't stored in conglomerateDescritor
+        if (cols == null) 
+        {
+            //column list wasn't stored in conglomerateDescriptor
             //fetch is from table descriptor
             int [] pos = cd.getIndexDescriptor().baseColumnPositions();
-            cols = new String [pos.length];
-            for (int i = 0; i < cols.length; i++) {
-                cols [i] = td.getColumnDescriptor(pos [i]).getColumnName();
+            cols       = new String [pos.length];
+
+            for (int i = 0; i < cols.length; i++) 
+            {
+                cols[i] = td.getColumnDescriptor(pos[i]).getColumnName();
             }
         }
         
         //create new index action
         CreateIndexConstantAction action =
-                new CreateIndexConstantAction (false, false, true, 
-                cd.getIndexDescriptor().indexType(), td.getSchemaName(), 
-                cd.getConglomerateName(), td.getName(), td.getUUID(),
-                cols, cd.getIndexDescriptor().isAscending(),
-                true, cd.getUUID(), prop);
+                new CreateIndexConstantAction(
+                        false,          // not part of create table 
+                        false,          // not unique
+                        true,           // create as unique when not null index
+                        cd.getIndexDescriptor().indexType(), 
+                        td.getSchemaName(), 
+                        cd.getConglomerateName(), td.getName(), td.getUUID(),
+                        cols, cd.getIndexDescriptor().isAscending(),
+                        true, cd.getUUID(), prop);
+
         //create index
         action.executeConstantAction(activation);
     }

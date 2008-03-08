@@ -26,7 +26,6 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
-import org.apache.derby.catalog.Dependable;
 
 import org.apache.derby.catalog.DependableFinder;
 import org.apache.derby.catalog.IndexDescriptor;
@@ -1052,7 +1051,9 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 										boolean nullability)
 		throws StandardException								
 	{
-		LanguageConnectionContext lcc = activation.getLanguageConnectionContext();
+		LanguageConnectionContext lcc = 
+            activation.getLanguageConnectionContext();
+
 		DataDictionary dd = lcc.getDataDictionary();
 		TransactionController tc = lcc.getTransactionExecute();
 
@@ -1064,31 +1065,36 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		DataTypeDescriptor dataType =
             columnDescriptor.getType().getNullabilityType(nullability);
 
-        //check if there any unique constraint to update
+        //check if there are any unique constraints to update
         ConstraintDescriptorList cdl = dd.getConstraintDescriptors(td);
         int columnPostion = columnDescriptor.getPosition();
-        for (int i = 0; i < cdl.size(); i++) {
+        for (int i = 0; i < cdl.size(); i++) 
+        {
             ConstraintDescriptor cd = cdl.elementAt(i);
-            if (cd.getConstraintType() == DataDictionary.UNIQUE_CONSTRAINT) {
+            if (cd.getConstraintType() == DataDictionary.UNIQUE_CONSTRAINT) 
+            {
                 ColumnDescriptorList columns = cd.getColumnDescriptors();
-                for (int count = 0; count < columns.size(); count++) {
-                    if (columns.elementAt(count).getPosition()
-                                                            != columnPostion)
+                for (int count = 0; count < columns.size(); count++) 
+                {
+                    if (columns.elementAt(count).getPosition() != columnPostion)
                         break;
+
                     //get backing index
-                    ConglomerateDescriptor desc 
-                            = td.getConglomerateDescriptor(
-                                    cd.getConglomerateId());
+                    ConglomerateDescriptor desc = 
+                        td.getConglomerateDescriptor(cd.getConglomerateId());
+
                     //check if the backing index was created when the column
                     //not null ie is backed by unique index
                     if (!desc.getIndexDescriptor().isUnique())
                         break;
-                    //need to replace the index
-                    recreateUniqueConstraintBackingIndex (desc, td,
-                            activation, lcc);
+
+                    // replace backing index with a unique when not null index.
+                    recreateUniqueConstraintBackingIndexAsUniqueWhenNotNull(
+                        desc, td, activation, lcc);
                 }
             }
         }
+
 		newColumnDescriptor = 
 			 new ColumnDescriptor(colName,
 									columnDescriptor.getPosition(),
@@ -1099,9 +1105,6 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 									columnDescriptor.getDefaultUUID(),
 									columnDescriptor.getAutoincStart(),
 									columnDescriptor.getAutoincInc());
-		
-
-
         
 		// Update the ColumnDescriptor with new default info
 		dd.dropColumnDescriptor(td.getUUID(), colName, tc);

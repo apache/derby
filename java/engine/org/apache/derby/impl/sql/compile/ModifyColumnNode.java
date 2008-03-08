@@ -131,9 +131,11 @@ public class ModifyColumnNode extends ColumnDefinitionNode
 	}
 	
 	/**
-	 * If the type of a column is being changed (for mulan, the length of the
-	 * column is being increased then make sure that this does not violate
-	 * any key constraints; 
+     * Check if the the column can be modified, and throw error if not.
+     *
+	 * If the type of a column is being changed (for instance if the length 
+     * of the column is being increased) then make sure that this does not 
+     * violate any key constraints; 
 	 * the column being altered is 
 	 *   1. part of foreign key constraint 
 	 *         ==> ERROR. This references a Primary Key constraint and the
@@ -155,15 +157,16 @@ public class ModifyColumnNode extends ColumnDefinitionNode
 			(getNodeType() != C_NodeTypes.MODIFY_COLUMN_CONSTRAINT_NOT_NULL_NODE))
 			return;
 
-		DataDictionary dd = getDataDictionary();
-		ConstraintDescriptorList cdl = dd.getConstraintDescriptors(td);
-		int intArray[] = new int[1];
-		intArray[0] = columnPosition;
+		DataDictionary           dd          = getDataDictionary();
+		ConstraintDescriptorList cdl         = dd.getConstraintDescriptors(td);
+		int                      intArray[]  = new int[1];
+		intArray[0]                          = columnPosition;
 
 		for (int index = 0; index < cdl.size(); index++)
 		{
 			ConstraintDescriptor existingConstraint =
 				                                cdl.elementAt(index);
+
 			if (!(existingConstraint instanceof KeyConstraintDescriptor))
 				continue;
 
@@ -180,21 +183,25 @@ public class ModifyColumnNode extends ColumnDefinitionNode
 				(getNodeType() == C_NodeTypes.MODIFY_COLUMN_TYPE_NODE))
 			{
 				throw StandardException.newException(
-					 SQLState.LANG_MODIFY_COLUMN_FKEY_CONSTRAINT, name, existingConstraint.getConstraintName());
+					 SQLState.LANG_MODIFY_COLUMN_FKEY_CONSTRAINT, 
+                     name, existingConstraint.getConstraintName());
 			}	
-			
 			else
 			{
 				//if a column is part of unique constraint it can't be
-				//made nullable in soft upgrade mode
+				//made nullable in soft upgrade mode from a pre-10.4 db.
 				if ((existingConstraint.getConstraintType() == 
-								DataDictionary.UNIQUE_CONSTRAINT)) {
+								DataDictionary.UNIQUE_CONSTRAINT)) 
+                {
 					if (!dd.checkVersion(
 							DataDictionary.DD_VERSION_DERBY_10_4, null))
+                    {
 						throw StandardException.newException(
 								SQLState.LANG_MODIFY_COLUMN_EXISTING_CONSTRAINT,
 								name);
+                    }
 				}
+
 				// a column that is part of a primary key
                 // is being made nullable; can't be done.
 				if ((getNodeType() == 
@@ -202,8 +209,8 @@ public class ModifyColumnNode extends ColumnDefinitionNode
 					((existingConstraint.getConstraintType() == 
 					 DataDictionary.PRIMARYKEY_CONSTRAINT)))
 				{
-				throw StandardException.newException(
-					 SQLState.LANG_MODIFY_COLUMN_EXISTING_CONSTRAINT, name);
+                    throw StandardException.newException(
+                         SQLState.LANG_MODIFY_COLUMN_EXISTING_CONSTRAINT, name);
 				}
 				// unique key or primary key.
 				ConstraintDescriptorList 
@@ -212,7 +219,8 @@ public class ModifyColumnNode extends ColumnDefinitionNode
 				if (refcdl.size() > 0)
 				{
 					throw StandardException.newException(
-						 SQLState.LANG_MODIFY_COLUMN_REFERENCED, name, refcdl.elementAt(0).getConstraintName());
+						 SQLState.LANG_MODIFY_COLUMN_REFERENCED, 
+                         name, refcdl.elementAt(0).getConstraintName());
 				}
 				
 				// Make the statement dependent on the primary key constraint.

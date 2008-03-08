@@ -219,7 +219,7 @@ class UpgradeRun {
                    //junit tests after checking for the phase of the current
                    //run. 
                    suite.addTest(Changes10_3.suite(phase));
-                 }
+                }
                 if (oldMinor < 4)
                 	suite.addTest(Changes10_4.suite(phase));
             }
