@@ -183,95 +183,66 @@ final class ConcurrentCache implements CacheManager {
     }
 
     /**
-     * Find or create an object in the cache. If the object is not presently
-     * in the cache, it will be added to the cache.
+     * Insert a {@code CacheEntry} into a free slot in the {@code
+     * ReplacementPolicy}'s internal data structure, and return a {@code
+     * Cacheable} that the caller can reuse. The entry must have been locked
+     * before this method is called.
      *
-     * @param key the identity of the object to find or create
-     * @param create whether or not the object should be created
-     * @param createParameter used as argument to <code>createIdentity()</code>
-     * when <code>create</code> is <code>true</code>
-     * @return the cached object, or <code>null</code> if it cannot be found
-     * @throws StandardException if an error happens when accessing the object
+     * @param key the identity of the object being inserted
+     * @param entry the entry that is being inserted
+     * @return a {@code Cacheable} object that the caller can reuse
+     * @throws StandardException if an error occurs while inserting the entry
+     * or while allocating a new {@code Cacheable}
      */
-    private Cacheable findOrCreateObject(Object key, boolean create,
-                                         Object createParameter)
+    private Cacheable insertIntoFreeSlot(Object key, CacheEntry entry)
             throws StandardException {
 
-        if (SanityManager.DEBUG) {
-            SanityManager.ASSERT(createParameter == null || create,
-                    "createParameter should be null when create is false");
-        }
-
-        if (stopped) {
-            return null;
-        }
-
-        // A free cacheable which we'll initialize if we don't find the object
-        // in the cache.
-        Cacheable free;
-
-        CacheEntry entry = getEntry(key);
         try {
-            Cacheable item = entry.getCacheable();
+            replacementPolicy.insertEntry(entry);
+        } catch (StandardException se) {
+            // Failed to insert the entry into the replacement policy. Make
+            // sure that it's also removed from the hash table.
+            removeEntry(key);
+            throw se;
+        }
+
+        Cacheable free = entry.getCacheable();
+
+        if (free == null) {
+            // We didn't get a reusable cacheable. Create a new one.
+            free = holderFactory.newCacheable(this);
+        }
+
+        entry.keep(true);
+
+        return free;
+    }
+
+    /**
+     * Complete the setting of the identity. This includes notifying the
+     * threads that are waiting for the setting of the identity to complete,
+     * so that they can wake up and continue. If setting the identity failed,
+     * the entry will be removed from the cache.
+     *
+     * @param key the identity of the object being inserted
+     * @param entry the entry which is going to hold the cached object
+     * @param item a {@code Cacheable} object with the identity set (if
+     * the identity was successfully set), or {@code null} if setting the
+     * identity failed
+     */
+    private void settingIdentityComplete(
+            Object key, CacheEntry entry, Cacheable item) {
+        entry.lock();
+        try {
+            entry.settingIdentityComplete();
             if (item != null) {
-                if (create) {
-                    throw StandardException.newException(
-                            SQLState.OBJECT_EXISTS_IN_CACHE, name, key);
-                }
-                entry.keep(true);
-                return item;
-            }
-
-            // not currently in the cache
-            try {
-                replacementPolicy.insertEntry(entry);
-            } catch (StandardException se) {
+                entry.setCacheable(item);
+            } else {
                 removeEntry(key);
-                throw se;
             }
-
-            free = entry.getCacheable();
-            if (free == null) {
-                // We didn't get a reusable cacheable. Create a new one.
-                free = holderFactory.newCacheable(this);
-            }
-
-            entry.keep(true);
-
         } finally {
             entry.unlock();
         }
-
-        // Set the identity in a try/finally so that we can remove the entry
-        // if the operation fails. We have released the lock on the entry so
-        // that we don't run into deadlocks if the user code (setIdentity() or
-        // createIdentity()) reenters the cache.
-        Cacheable c = null;
-        try {
-            if (create) {
-                c = free.createIdentity(key, createParameter);
-            } else {
-                c = free.setIdentity(key);
-            }
-        } finally {
-            entry.lock();
-            try {
-                // Notify the entry that setIdentity() or createIdentity() has
-                // finished.
-                entry.settingIdentityComplete();
-                if (c == null) {
-                    // Setting identity failed, or the object was not found.
-                    removeEntry(key);
-                } else {
-                    // Successfully set the identity.
-                    entry.setCacheable(c);
-                }
-            } finally {
-                entry.unlock();
-            }
-        }
-
-        return c;
     }
 
     // Implementation of the CacheManager interface
@@ -285,7 +256,44 @@ final class ConcurrentCache implements CacheManager {
      * @return the cached object, or <code>null</code> if it cannot be found
      */
     public Cacheable find(Object key) throws StandardException {
-        return findOrCreateObject(key, false, null);
+
+        if (stopped) {
+            return null;
+        }
+
+        CacheEntry entry = getEntry(key);
+
+        Cacheable item;
+        try {
+            item = entry.getCacheable();
+            if (item != null) {
+                // The object is already cached. Increase the use count and
+                // return it.
+                entry.keep(true);
+                return item;
+            } else {
+                // The object is not cached. Insert the entry into a free
+                // slot and retrieve a reusable Cacheable.
+                item = insertIntoFreeSlot(key, entry);
+            }
+        } finally {
+            entry.unlock();
+        }
+
+        // Set the identity without holding the lock on the entry. If we
+        // hold the lock, we may run into a deadlock if the user code in
+        // setIdentity() re-enters the buffer manager.
+        Cacheable itemWithIdentity = null;
+        try {
+            itemWithIdentity = item.setIdentity(key);
+        } finally {
+            // Always invoke settingIdentityComplete(), also on error,
+            // otherwise other threads may wait forever. If setIdentity()
+            // fails, itemWithIdentity is going to be null.
+            settingIdentityComplete(key, entry, itemWithIdentity);
+        }
+
+        return itemWithIdentity;
     }
 
     /**
@@ -340,7 +348,41 @@ final class ConcurrentCache implements CacheManager {
      */
     public Cacheable create(Object key, Object createParameter)
             throws StandardException {
-        return findOrCreateObject(key, true, createParameter);
+
+        if (stopped) {
+            return null;
+        }
+
+        CacheEntry entry = new CacheEntry();
+        entry.lock();
+
+        if (cache.putIfAbsent(key, entry) != null) {
+            // We can't create the object if it's already in the cache.
+            throw StandardException.newException(
+                    SQLState.OBJECT_EXISTS_IN_CACHE, name, key);
+        }
+
+        Cacheable item;
+        try {
+            item = insertIntoFreeSlot(key, entry);
+        } finally {
+            entry.unlock();
+        }
+
+        // Create the identity without holding the lock on the entry.
+        // Otherwise, we may run into a deadlock if the user code in
+        // createIdentity() re-enters the buffer manager.
+        Cacheable itemWithIdentity = null;
+        try {
+            itemWithIdentity = item.createIdentity(key, createParameter);
+        } finally {
+            // Always invoke settingIdentityComplete(), also on error,
+            // otherwise other threads may wait forever. If createIdentity()
+            // fails, itemWithIdentity is going to be null.
+            settingIdentityComplete(key, entry, itemWithIdentity);
+        }
+
+        return itemWithIdentity;
     }
 
     /**
