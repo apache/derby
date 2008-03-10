@@ -474,8 +474,11 @@ final class ClockPolicy implements ReplacementPolicy {
                 // Ask the background cleaner to clean the entry.
                 BackgroundCleaner cleaner = cacheManager.getBackgroundCleaner();
                 if (cleaner != null && cleaner.scheduleClean(e)) {
-                    // Successfully scheduled the clean operation. Move on to
-                    // the next entry.
+                    // Successfully scheduled the clean operation. We can't
+                    // evict it until the clean operation has finished. Since
+                    // we'd like to be as responsive as possible, move on to
+                    // the next entry instead of waiting for the clean
+                    // operation to finish.
                     continue;
                 }
 
@@ -493,6 +496,16 @@ final class ClockPolicy implements ReplacementPolicy {
 
             // Clean the entry and unkeep it.
             cacheManager.cleanAndUnkeepEntry(e, dirty);
+
+            // If no one has touched the entry while we were cleaning it, we
+            // could reuse it at this point. The old buffer manager (Clock)
+            // would however under high load normally move on to the next
+            // entry in the clock instead of reusing the one it recently
+            // cleaned. Some of the performance tests performed as part of
+            // DERBY-2911 indicated that not reusing the entry that was just
+            // cleaned made the replacement algorithm more efficient. For now
+            // we try to stay as close to the old buffer manager as possible
+            // and don't reuse the entry immediately.
         }
 
         return null;
