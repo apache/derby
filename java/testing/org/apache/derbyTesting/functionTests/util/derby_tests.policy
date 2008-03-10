@@ -165,6 +165,11 @@ grant codeBase "${derbyTesting.testjar}derbyTesting.jar" {
   permission java.security.SecurityPermission "getPolicy";
   permission java.lang.RuntimePermission "setIO";  
 
+  // These permissions are needed by stress.multi to dump the thread stack
+  // traces upon failure.
+  permission java.lang.RuntimePermission "getStackTrace";
+  permission java.lang.RuntimePermission "modifyThreadGroup";
+
   // These permissions are needed when testing code instrumented with EMMA.
   permission java.lang.RuntimePermission "${emma.active}writeFileDescriptor";
 };
@@ -205,6 +210,12 @@ grant codeBase "${derbyTesting.codeclasses}" {
   // streams. Currently the nist suite runs with useprocess=false.
   permission java.lang.RuntimePermission "setSecurityManager";
   permission java.lang.RuntimePermission "setIO"; 
+
+  // These permissions are needed by stress.multi to dump the thread stack
+  // traces upon failure.
+  permission java.lang.RuntimePermission "getStackTrace";
+  permission java.lang.RuntimePermission "modifyThreadGroup";
+
 };
 
 // JUnit jar file tries to read junit.properties in the user's

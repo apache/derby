@@ -38,6 +38,7 @@ import java.security.PrivilegedActionException;
 import javax.sql.DataSource;
 
 import org.apache.derby.iapi.services.info.JVMInfo;
+import org.apache.derbyTesting.functionTests.harness.JavaVersionHolder;
 import org.apache.derbyTesting.functionTests.harness.RunTest;
 
 
@@ -913,5 +914,57 @@ public class TestUtil {
 		return false;
 	}
 
+	/**
+	 * For JDK 1.5 or higher print all stack traces to the
+	 * specified PrintWriter.
+	 * 
+	 * @param log  PrintWriter to print to
+	 */
+    public static void dumpAllStackTracesIfSupported(PrintWriter log)
+	{
+		try {
+			String version =  (String) AccessController.doPrivileged
+				(new java.security.PrivilegedAction(){
+						public Object run(){
+							return System.getProperty("java.version");
+						}
+					}
+				 );
+                   
+			JavaVersionHolder j=  new JavaVersionHolder(version); 
+			
+			if (j.atLeast(1,5)){
+				Class c = Class.forName("org.apache.derbyTesting.functionTests.util.ThreadDump");
+				final Method m = c.getMethod("getStackDumpString",new Class[] {});
+				
+				String dump;
+				try {
+					dump = (String) AccessController.doPrivileged
+						(new PrivilegedExceptionAction(){
+								public Object run() throws 
+									IllegalArgumentException, 
+									IllegalAccessException, 
+									InvocationTargetException{
+									return m.invoke(null, null);
+								}
+							}
+						 );
+				}     catch (PrivilegedActionException e) {
+					throw  e.getException();
+				}
+				log.println(dump);                    
+			}                     
+		}
+		catch (Exception e){
+			// if we get an exception trying to get a thread dump. Just print it to the log and continue.
+			log.println("Error trying to dump thread stack traces");
+			if (e instanceof InvocationTargetException)
+				((InvocationTargetException) e).getTargetException().printStackTrace(log);
+			else
+				e.printStackTrace(log);
+		}
+		
+	}
 }
+
 

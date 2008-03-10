@@ -65,6 +65,7 @@
       <include name="${this.dir}/streams/*.java"/> 
       <include name="${this.dir}/corruptio/*.java"/>
       <exclude name="${this.dir}/XATestUtil.java"/>
+      <exclude name="${this.dir}/ThreadDump.java"/>
     </javac>
     <javac
       source="1.4"
@@ -84,6 +85,25 @@
       </classpath>
       <!--exclude name=""/-->
 	  <include name="${this.dir}/XATestUtil.java"/>
+    </javac>
+
+    <javac
+      source="1.5"
+      target="1.5"
+      bootclasspath="${empty}"
+      nowarn="on"
+      debug="true"
+      depend="${depend}"
+      deprecation="${deprecation}"
+      optimize="${optimize}"
+      proceed="${proceed}"
+      verbose="${verbose}"
+      srcdir="${derby.testing.src.dir}"
+      destdir="${out.dir}">
+      <classpath>
+        <pathelement path="${java15compile.classpath}"/>
+      </classpath>
+    <include name="${this.dir}/ThreadDump.java"/>
     </javac>
   </target>
 
