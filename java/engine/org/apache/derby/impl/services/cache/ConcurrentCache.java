@@ -168,11 +168,16 @@ final class ConcurrentCache implements CacheManager {
     }
 
     /**
-     * Remove an entry from the cache. Clear the identity of its
-     * <code>Cacheable</code> and set it to null. This method is called when
-     * the replacement algorithm needs to evict an entry from the cache in
-     * order to make room for a new entry. The caller must have locked the
-     * entry that is about to be evicted.
+     * Evict an entry to make room for a new entry that is being inserted into
+     * the cache. Clear the identity of its {@code Cacheable} and set it to
+     * {@code null}. When this method is called, the caller has already chosen
+     * the {@code Cacheable} for reuse. Therefore, this method won't call
+     * {@code CacheEntry.free()} as that would make the {@code Cacheable} free
+     * for reuse by other entries as well.
+     *
+     * <p>
+     *
+     * The caller must have locked the entry that is about to be evicted.
      *
      * @param key identity of the entry to remove
      */
@@ -310,8 +315,8 @@ final class ConcurrentCache implements CacheManager {
             return null;
         }
 
-        // We don't want to insert it if it's not there, so there's no need to
-        // use getEntry().
+        // Use get() instead of getEntry() so that we don't insert an empty
+        // entry if the requested object isn't there.
         CacheEntry entry = cache.get(key);
         if (entry == null) {
             // No such object was found in the cache.
@@ -392,7 +397,10 @@ final class ConcurrentCache implements CacheManager {
      * @param item a <code>Cacheable</code> value
      */
     public void release(Cacheable item) {
-        // The entry must be present, so we don't need to call getEntry().
+        // The entry must be present and kept when this method is called, so we
+        // don't need the complexity of getEntry() to ensure that the entry is
+        // not added to or removed from the cache before we have locked
+        // it. Just call get() which is cheaper.
         CacheEntry entry = cache.get(item.getIdentity());
         entry.lock();
         try {
@@ -416,9 +424,14 @@ final class ConcurrentCache implements CacheManager {
      * @param item the object to remove from the cache
      */
     public void remove(Cacheable item) throws StandardException {
-        // The entry must be present, so we don't need to call getEntry().
         Object key = item.getIdentity();
+
+        // The entry must be present and kept when this method is called, so we
+        // don't need the complexity of getEntry() to ensure that the entry is
+        // not added to or removed from the cache before we have locked
+        // it. Just call get() which is cheaper.
         CacheEntry entry = cache.get(key);
+
         entry.lock();
         try {
             if (SanityManager.DEBUG) {
