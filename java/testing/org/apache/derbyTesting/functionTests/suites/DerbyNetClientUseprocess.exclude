@@ -8,6 +8,7 @@
 # junitTests/derbyNet/CompatibilityTest.java - exits the suite
 # derbynet/DerbyNetAutoStart.java - exits the suite...
 # derbynet/dblook_test_net.java - expects different dir structure
+# derbynet/dblook_test_net_territory.java - expects different dir structure
 # stress/stress.multi - exits suite
 # derbynet/getCurrentProperties.java - fails, different sessions
 # derbynet/runtimeinfo.java - different sessions
@@ -27,6 +28,7 @@ jdbcapi/bestrowidentifier.sql
 junitTests/derbyNet/CompatibilityTest.java
 derbynet/DerbyNetAutoStart.java
 derbynet/dblook_test_net.java
+derbynet/dblook_test_net_territory.java
 derbynet/getCurrentProperties.java
 derbynet/runtimeinfo.java
 derbynet/sysinfo.java

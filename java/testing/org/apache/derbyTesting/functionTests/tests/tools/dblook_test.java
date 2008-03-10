@@ -63,13 +63,15 @@ public class dblook_test {
 	private static final char TEST_DELIMITER='#';
 
 	protected static String testDirectory = "dblook_test";
-	protected static final String testDBName = "wombat";
+	protected static String testDBName = "wombat";
 	protected static String separator;
 
 	private static String dbPath;
 	private static int duplicateCounter = 0;
 	private static int sysNameCount = 0;
 	private static String jdbcProtocol;
+	protected static String territoryBased = "";
+	protected static String expectedCollation = "UCS_BASIC";
 
 	/* **********************************************
 	 * main:
@@ -80,6 +82,7 @@ public class dblook_test {
 		separator = System.getProperty("file.separator");
 		new dblook_test().doTest();
 		System.out.println("\n[ Done. ]\n");
+		renameDbLookLog("dblook_test");
 
 	}
 
@@ -720,7 +723,29 @@ public class dblook_test {
 		Connection conn = DriverManager.getConnection(
 				"jdbc:derby:" + dbName);
 		conn.setAutoCommit(false);
+
+		// Set the system schema to ensure that UCS_BASIC collation is used.
 		Statement stmt = conn.createStatement();
+		stmt.executeUpdate("SET SCHEMA SYS");
+
+		// Ensure that the database has the expected collation type. 
+		ResultSet rs = null;
+		try {
+			rs = stmt.executeQuery("VALUES SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY('derby.database.collation')");
+			rs.next();
+			String collation = rs.getString(1); 
+			if (collation == null || !collation.equals(expectedCollation)) {
+				throw new SQLException("Collation doesn't match with the expected type " + 
+						expectedCollation);
+			}
+		} catch (Exception e) {
+			System.out.println("FAILED: incorrect database collation\n");
+			System.out.println(e.getMessage());
+		} finally {
+			if (rs != null) {
+				rs.close();
+			}
+		}
 
 		// Load any id-to-name mappings that will be useful
 		// when dumping the catalogs.
@@ -731,7 +756,7 @@ public class dblook_test {
 		// won't cause diffs.
 
 		writeOut("\n========== SYSALIASES ==========\n");
-		ResultSet rs =
+		rs =
 			stmt.executeQuery("select schemaid, sys.sysaliases.* from sys.sysaliases");
 		dumpResultSet(rs, idToNameMap, null);
 
@@ -1187,7 +1212,7 @@ public class dblook_test {
 			"' from ddl script '" + scriptName + "'");
 
 		Connection conn = DriverManager.getConnection(
-			"jdbc:derby:" + newDBName + ";create=true");
+				"jdbc:derby:" + newDBName + ";create=true" + territoryBased);
 
 		Statement stmt = conn.createStatement();
 		BufferedReader ddlScript =
@@ -1503,6 +1528,39 @@ public class dblook_test {
 
 		return;
 
+	}
+
+	/* **********************************************
+	 * renameDbLookLog:
+	 * Checks if the logfile of dblook exists and
+	 * tries to rename it to prevent possible 
+	 * next tests from failing. The log should not be 
+	 * deleted because the output may be examined in 
+	 * case a test fails.
+	 * The new name of dblook.log should be dblook_testname#.log,
+	 * where # is a 'version' number. The 'version' number is
+	 * needed because the same test may be run multiple
+	 * times with different parameters.
+	 * @param nameOfTest Name of the finished test.
+	 ****/
+
+	protected static void renameDbLookLog(String nameOfTest)
+	{
+		File dbLookTestLog = new File("dblook.log");
+		if (dbLookTestLog.exists()) {
+			int i = 0;
+			String renamedLogName = nameOfTest + i + ".log";
+			File renamedLog = new File(renamedLogName);
+			while (renamedLog.exists()) {
+				i++;
+				renamedLogName = nameOfTest + i + ".log";
+				renamedLog = new File(renamedLogName);
+			}
+			if (!dbLookTestLog.renameTo(renamedLog)) {
+				System.out.println("Failed to rename dblook.org to " + 
+						renamedLogName);
+			}
+		}
 	}
 
 	/* **********************************************

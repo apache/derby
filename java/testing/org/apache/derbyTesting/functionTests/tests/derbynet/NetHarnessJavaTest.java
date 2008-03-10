@@ -38,6 +38,7 @@ import org.apache.derbyTesting.junit.SupportFilesSetup;
  * 
  * dblook_test_net - filters output
  * dataSourcePermissions_net - InvocationTargetException, needs investigation
+ * dblook_test_net_territory - filters output 
  * getCurrentProperties - ExceptionInInitializerError, needs investigation
  * maxthreads - forks VM
  * runtimeinfo" - filters output

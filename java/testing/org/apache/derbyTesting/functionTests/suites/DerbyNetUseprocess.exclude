@@ -9,6 +9,7 @@
 # derbynet/DerbyNetAutoStart.java - exits suite...
 # derbynet/getCurrentProperties.java - fails with different sessions
 # derbynet/dblook_test_net.java - fails, test misses properties
+# derbynet/dblook_test_net_territory.java - fails, test misses properties
 # derbynet/runtimeinfo.java - fails with already existing threads (maybe intermittent)
 # derbynet/sysinfo.java - fails because not access to java.class.path
 # derbynet/sysinfo_withproperties.java - fails because not access to java.class.path
@@ -25,6 +26,7 @@ jdbcapi/bestrowidentifier.sql
 derbynet/DerbyNetAutoStart.java
 derbynet/getCurrentProperties.java
 derbynet/dblook_test_net.java
+derbynet/dblook_test_net_territory.java
 derbynet/runtimeinfo.java
 derbynet/sysinfo.java
 derbynet/sysinfo_withproperties.java
