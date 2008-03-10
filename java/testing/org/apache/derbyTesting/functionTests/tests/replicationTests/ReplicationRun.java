@@ -100,6 +100,7 @@ public class ReplicationRun extends BaseTestCase
     static String test_jars = null; // Path for derbyTesting.jar:junit_jar
     
     final static String FS = File.separator;
+    final static String PS = File.pathSeparator;
     final static String JVMloc = FS+".."+FS+"bin"+FS+"java"; // "/../bin/java"
     
     static boolean showSysinfo = false;
@@ -204,7 +205,7 @@ public class ReplicationRun extends BaseTestCase
     void connectPing(String fullDbPath, 
             String serverHost, int serverPort, 
             String testClientHost)
-        throws InterruptedException
+        throws Exception
     {
         
         String serverURL = "jdbc:derby:"
@@ -218,6 +219,7 @@ public class ReplicationRun extends BaseTestCase
         {
             try
             {
+                Class.forName(DRIVER_CLASS_NAME); // Needed when running from classes!
                 conn = DriverManager.getConnection(dbURL);
                 done = true;
                 util.DEBUG("Connected");
@@ -251,15 +253,17 @@ public class ReplicationRun extends BaseTestCase
             String serverHost, int serverPort, 
             String dbPath, String replicatedDb,
             String clientHost) // Not yet used
+        throws Exception
     {
         String serverURL = "jdbc:derby:"
                 +"//"+serverHost+":"+serverPort+"/";
         String dbURL = serverURL
                 +dbPath
-                +"/"+replicatedDb;
+                +FS+replicatedDb;
         util.DEBUG("**** DriverManager.getConnection(\"" + dbURL+";shutdown=true\");");
 
         try{
+            Class.forName(DRIVER_CLASS_NAME); // Needed when running from classes!
             DriverManager.getConnection(dbURL+";shutdown=true");
         }
         catch (SQLException se)
@@ -295,15 +299,15 @@ public class ReplicationRun extends BaseTestCase
         
         String URL = DB_PROTOCOL
                 +"://"+serverHost
-                +":"+serverPort
-                +FS+masterDatabasePath+FS+masterDbSubPath+FS+dbName;
+                +":"+serverPort+"/"
+                +masterDatabasePath+FS+masterDbSubPath+FS+dbName;
         String ijClassPath = derbyVersion +FS+ "derbyclient.jar"
-                + ":" + derbyVersion +FS+ "derbyTesting.jar"
-                + ":" + derbyVersion +FS+ "derbytools.jar";
+                + PS + derbyVersion +FS+ "derbyTesting.jar"
+                + PS + derbyVersion +FS+ "derbytools.jar";
         String testingClassPath = derbyVersion +FS+ "derbyclient.jar"
-                + ":" + derbyVersion +FS+ "derbynet.jar" // WHY IS THIS NEEDED?
+                + PS + derbyVersion +FS+ "derbynet.jar" // WHY IS THIS NEEDED?
                 // See TestConfiguration: startNetworkServer and stopNetworkServer
-                + ":" + test_jars;
+                + PS + test_jars;
         
         String clientJvm = clientVM+JVMloc;
         
@@ -379,15 +383,15 @@ public class ReplicationRun extends BaseTestCase
         
         String URL = DB_PROTOCOL
                 +"://"+serverHost
-                +":"+serverPort
-                +FS+slaveDatabasePath+FS+slaveDbSubPath+FS+dbName;
+                +":"+serverPort+"/"
+                +slaveDatabasePath+FS+slaveDbSubPath+FS+dbName;
         String ijClassPath = derbyVersion +FS+ "derbyclient.jar"
-                + ":" + derbyVersion +FS+ "derbyTesting.jar"
-                + ":" + derbyVersion +FS+ "derbytools.jar";
+                + PS + derbyVersion +FS+ "derbyTesting.jar"
+                + PS + derbyVersion +FS+ "derbytools.jar";
         String testingClassPath = derbyVersion +FS+ "derbyclient.jar"
-                + ":" + derbyVersion +FS+ "derbynet.jar" // WHY IS THIS NEEDED?
+                + PS + derbyVersion +FS+ "derbynet.jar" // WHY IS THIS NEEDED?
                 // See TestConfiguration: startNetworkServer and stopNetworkServer
-                + ":" + test_jars;
+                + PS + test_jars;
         
         String clientJvm = clientVM+JVMloc;
         
@@ -399,6 +403,11 @@ public class ReplicationRun extends BaseTestCase
             return;
         } 
         
+        if ( serverHost.equals("localhost") )
+        { // Use full classpath when running locally. Can not vary server versions!
+            ijClassPath = classPath;
+            testingClassPath = classPath;
+        }
         util.DEBUG("replicationTest: " + replicationTest);
         if ( replicationTest.indexOf(".sql") >= 0 )
         {
@@ -470,22 +479,27 @@ public class ReplicationRun extends BaseTestCase
         
         String URL = DB_PROTOCOL
                 +"://"+masterHost
-                +":"+masterPort
-                +FS+masterDatabasePath+ /* FS+masterDbSubPath+ */ FS+dbSubPath;
+                +":"+masterPort+"/"
+                +masterDatabasePath+ /* FS+masterDbSubPath+ */ FS+dbSubPath;
         String ijClassPath = derbyVersion +FS+ "derbyclient.jar"
-                + ":" + derbyVersion +FS+ "derbyTesting.jar"
+                + PS + derbyVersion +FS+ "derbyTesting.jar"
                 // Needed for 'run resource 'createTestProcedures.subsql';' cases?
                 // Nope? what is 'resource'?
-                + ":" + derbyVersion +FS+ "derbytools.jar";
+                + PS + derbyVersion +FS+ "derbytools.jar";
         String testingClassPath = derbyVersion +FS+ "derbyclient.jar"
-                + ":" + derbyVersion +FS+ "derbynet.jar" // WHY IS THIS NEEDED?
+                + PS + derbyVersion +FS+ "derbynet.jar" // WHY IS THIS NEEDED?
                 // See TestConfiguration: startNetworkServer and stopNetworkServer
-                + ":" + test_jars;
+                + PS + test_jars;
         
         String clientJvm = clientVM+JVMloc;
         
         String command = null;
         
+        if ( masterHost.equals("localhost") )
+        { // Use full classpath when running locally. Can not vary server versions!
+            ijClassPath = classPath;
+            testingClassPath = classPath;
+        }
         util.DEBUG("load: " + load);
         if ( load.indexOf(".sql") >= 0 )
         {
@@ -544,22 +558,27 @@ public class ReplicationRun extends BaseTestCase
         
         String URL = DB_PROTOCOL
                 +"://"+masterHost
-                +":"+masterPort
-                +FS+masterDatabasePath+ /* FS+masterDbSubPath+ */ FS+dbSubPath;
+                +":"+masterPort+"/"
+                +masterDatabasePath+ /* FS+masterDbSubPath+ */ FS+dbSubPath;
         String ijClassPath = derbyVersion +FS+ "derbyclient.jar"
-                + ":" + derbyVersion +FS+ "derbyTesting.jar"
+                + PS + derbyVersion +FS+ "derbyTesting.jar"
                 // Needed for 'run resource 'createTestProcedures.subsql';' cases?
                 // Nope? what is 'resource'?
-                + ":" + derbyVersion +FS+ "derbytools.jar";
+                + PS + derbyVersion +FS+ "derbytools.jar";
         String testingClassPath = derbyVersion +FS+ "derbyclient.jar"
-                + ":" + derbyVersion +FS+ "derbynet.jar" // WHY IS THIS NEEDED?
+                + PS + derbyVersion +FS+ "derbynet.jar" // WHY IS THIS NEEDED?
                 // See TestConfiguration: startNetworkServer and stopNetworkServer
-                + ":" + test_jars;
+                + PS + test_jars;
         
         String clientJvm = clientVM+JVMloc;
         
         String command = null;
         
+        if ( masterHost.equals("localhost") )
+        { // Use full classpath when running locally. Can not vary server versions!
+            ijClassPath = classPath;
+            testingClassPath = classPath;
+        }
         util.DEBUG("stateTest: " + stateTest);
         if ( stateTest.indexOf(".sql") >= 0 )
         {
@@ -605,13 +624,17 @@ public class ReplicationRun extends BaseTestCase
         
         String URL = DB_PROTOCOL
                 +"://"+masterHost
-                +":"+masterServerPort
-                +FS+masterDatabasePath+FS+masterDbSubPath+FS+dbName
+                +":"+masterServerPort+"/"
+                +masterDatabasePath+FS+masterDbSubPath+FS+dbName
                 +";create=true";
 
         String ijClassPath = derbyVersion +FS+ "derbyclient.jar"
-                + ":" + derbyVersion +FS+ "derbytools.jar";
+                + PS + derbyVersion +FS+ "derbytools.jar";
         
+        if ( masterHost.equals("localhost") )
+        { // Use full classpath when running locally. Can not vary server versions!
+            ijClassPath = classPath;
+        }
         String clientJvm = jvmVersion+JVMloc;
         
         String command = clientJvm 
@@ -629,6 +652,7 @@ public class ReplicationRun extends BaseTestCase
                 testUser,
                 "bootMasterDatabase "); */
             util.DEBUG("bootMasterDatabase getConnection("+URL+")");
+            Class.forName(DRIVER_CLASS_NAME); // Needed when running from classes!
             Connection conn = DriverManager.getConnection(URL);
             conn.close();
         }
@@ -650,8 +674,9 @@ public class ReplicationRun extends BaseTestCase
         {
              URL = DB_PROTOCOL
                 +"://"+masterServerHost
-                +":"+masterServerPort
-                +FS+masterDatabasePath+FS+masterDbSubPath+FS+dbName;
+                +":"+masterServerPort+"/"
+                +masterDatabasePath+FS+masterDbSubPath+FS+dbName;
+            Class.forName(DRIVER_CLASS_NAME); // Needed when running from classes!
             util.DEBUG("bootMasterDatabase getConnection("+URL+")");
             Connection conn = DriverManager.getConnection(URL);
             Statement s = conn.createStatement();
@@ -730,6 +755,10 @@ public class ReplicationRun extends BaseTestCase
         
         String clientJvm = clientVM+JVMloc;
         
+        if ( masterHost.equals("localhost") )
+        { // Use full classpath when running locally. Can not vary server versions!
+            masterClassPath = classPath;
+        }
         /* java -classpath ${MASTER_LIB}/derbynet.jar \
          *       org.apache.derby.drda.NetworkServerControl startreplication test \
          *       -slavehost ${SLAVEREPLINTERFACE} -slaveport ${SLAVEREPLPORT} \
@@ -771,15 +800,23 @@ public class ReplicationRun extends BaseTestCase
     {
         
         String masterClassPath = derbyMasterVersion +FS+ "derbynet.jar";
+        if ( masterHost.equals("localhost") )
+        { // Use full classpath when running locally. Can not vary server versions!
+            masterClassPath = classPath;
+        }
                 
         String URL = DB_PROTOCOL
                 +"://"+masterHost
-                +":"+masterServerPort
-                +FS+masterDatabasePath+FS+masterDbSubPath+FS+dbName
+                +":"+masterServerPort+"/"
+                +masterDatabasePath+FS+masterDbSubPath+FS+dbName
                 +";startMaster=true;slaveHost="+slaveReplInterface
                 +";slavePort="+slaveReplPort;
         String ijClassPath = derbyVersion +FS+ "derbyclient.jar"
-                + ":" + derbyVersion +FS+ "derbytools.jar";
+                + PS + derbyVersion +FS+ "derbytools.jar";
+        if ( masterHost.equals("localhost") )
+        { // Use full classpath when running locally. Can not vary server versions!
+            ijClassPath = classPath;
+        }
         
         String clientJvm = jvmVersion+JVMloc;
         
@@ -809,8 +846,8 @@ public class ReplicationRun extends BaseTestCase
         
         String URL = DB_PROTOCOL
                 +"://"+masterHost
-                +":"+masterServerPort
-                +FS+masterDatabasePath+FS+masterDbSubPath+FS+dbName
+                +":"+masterServerPort+"/"
+                +masterDatabasePath+FS+masterDbSubPath+FS+dbName
                 +";startMaster=true;slaveHost="+slaveReplInterface
                 +";slavePort="+slaveReplPort;
                 
@@ -822,6 +859,7 @@ public class ReplicationRun extends BaseTestCase
             {
                 try
                 {
+                    Class.forName(DRIVER_CLASS_NAME); // Needed when running from classes!
                     conn = DriverManager.getConnection(URL);
                     done = true;
                     conn.close();
@@ -905,6 +943,10 @@ public class ReplicationRun extends BaseTestCase
     {
         
         String slaveClassPath = derbySlaveVersion +FS+ "derbynet.jar";
+        if ( slaveClientInterface.equals("localhost") )
+        { // Use full classpath when running locally. Can not vary server versions!
+            slaveClassPath = classPath;
+        }
         
         String clientJvm = clientVM+JVMloc;
         
@@ -945,16 +987,23 @@ public class ReplicationRun extends BaseTestCase
             throws Exception
     {
         
-        String masterClassPath = derbyMasterVersion +FS+ "derbynet.jar";
-                
+        String slaveClassPath = derbySlaveVersion +FS+ "derbynet.jar";
+        if ( slaveHost.equals("localhost") )
+        { // Use full classpath when running locally. Can not vary server versions!
+            slaveClassPath = classPath;
+        }
         String URL = DB_PROTOCOL
                 +"://"+slaveHost
-                +":"+slaveServerPort
-                +FS+slaveDatabasePath+FS+slaveDbSubPath+FS+dbName
+                +":"+slaveServerPort+"/"
+                +slaveDatabasePath+FS+slaveDbSubPath+FS+dbName
                 +";startSlave=true;slaveHost="+slaveReplInterface
                 +";slavePort="+slaveReplPort;
         String ijClassPath = derbyVersion +FS+ "derbyclient.jar"
-                + ":" + derbyVersion +FS+ "derbytools.jar";
+                + PS + derbyVersion +FS+ "derbytools.jar";
+        if ( slaveHost.equals("localhost") )
+        { // Use full classpath when running locally. Can not vary server versions!
+            ijClassPath = classPath;
+        }
         
         String clientJvm = jvmVersion+JVMloc;
         
@@ -990,8 +1039,8 @@ public class ReplicationRun extends BaseTestCase
     {
         final String URL = DB_PROTOCOL
                 +"://"+slaveHost
-                +":"+slaveServerPort
-                +FS+slaveDatabasePath+FS+slaveDbSubPath+FS+dbName
+                +":"+slaveServerPort+"/"
+                +slaveDatabasePath+FS+slaveDbSubPath+FS+dbName
                 +";startSlave=true;slaveHost="+slaveReplInterface
                 +";slavePort="+slaveReplPort;
         
@@ -1005,6 +1054,7 @@ public class ReplicationRun extends BaseTestCase
                     Connection conn = null;
                     try {
                         // NB! WIll hang here until startMaster is executed!
+                        Class.forName(DRIVER_CLASS_NAME); // Needed when running from classes!
                         conn = DriverManager.getConnection(URL);
                         // conn.close();
                     }
@@ -1054,11 +1104,15 @@ public class ReplicationRun extends BaseTestCase
                 
         String URL = DB_PROTOCOL
                 +"://"+slaveHost
-                +":"+slaveServerPort
-                +FS+slaveDatabasePath+FS+slaveDbSubPath+FS+dbName
+                +":"+slaveServerPort+"/"
+                +slaveDatabasePath+FS+slaveDbSubPath+FS+dbName
                 +";stopSlave=true";
         String ijClassPath = derbyVersion +FS+ "derbyclient.jar"
-                + ":" + derbyVersion +FS+ "derbytools.jar";
+                + PS + derbyVersion +FS+ "derbytools.jar";
+        if ( slaveHost.equals("localhost") )
+        { // Use full classpath when running locally. Can not vary server versions!
+            ijClassPath = classPath;
+        }
         
         String clientJvm = jvmVersion+JVMloc;
         
@@ -1110,11 +1164,15 @@ public class ReplicationRun extends BaseTestCase
                 
         String URL = DB_PROTOCOL
                 +"://"+host
-                +":"+serverPort
-                +FS+dbPath+FS+dbSubPath+FS+dbName
+                +":"+serverPort+"/"
+                +dbPath+FS+dbSubPath+FS+dbName
                 +";failover=true";
         String ijClassPath = derbyVersion +FS+ "derbyclient.jar"
-                + ":" + derbyVersion +FS+ "derbytools.jar";
+                + PS + derbyVersion +FS+ "derbytools.jar";
+        if ( host.equals("localhost") )
+        { // Use full classpath when running locally. Can not vary server versions!
+            ijClassPath = classPath;
+        }
         
         String clientJvm = jvmVersion+JVMloc;
         
@@ -1140,8 +1198,8 @@ public class ReplicationRun extends BaseTestCase
     {
         String URL = DB_PROTOCOL
                 +"://"+host
-                +":"+serverPort
-                +FS+dbPath+FS+dbSubPath+FS+dbName
+                +":"+serverPort+"/"
+                +dbPath+FS+dbSubPath+FS+dbName
                 +";failover=true";
                
             util.DEBUG("failOver_direct getConnection("+URL+")");
@@ -1149,6 +1207,7 @@ public class ReplicationRun extends BaseTestCase
             Connection conn = null;
             try
             {
+                Class.forName(DRIVER_CLASS_NAME); // Needed when running from classes!
                 conn = DriverManager.getConnection(URL);
                 // conn.close();
             }
@@ -1191,14 +1250,22 @@ public class ReplicationRun extends BaseTestCase
     {
         
         String masterClassPath = derbyMasterVersion +FS+ "derbynet.jar";
+        if ( masterHost.equals("localhost") )
+        { // Use full classpath when running locally. Can not vary server versions!
+            masterClassPath = classPath;
+        }
                 
         String URL = DB_PROTOCOL
                 +"://"+masterHost
-                +":"+masterServerPort
-                +FS+masterDatabasePath+FS+masterDbSubPath+FS+dbName
+                +":"+masterServerPort+"/"
+                +masterDatabasePath+FS+masterDbSubPath+FS+dbName
                 +";stopSlave=true";
         String ijClassPath = derbyVersion +FS+ "derbyclient.jar"
-                + ":" + derbyVersion +FS+ "derbytools.jar";
+                + PS + derbyVersion +FS+ "derbytools.jar";
+        if ( masterHost.equals("localhost") )
+        { // Use full classpath when running locally. Can not vary server versions!
+            ijClassPath = classPath;
+        }
         
         String clientJvm = jvmVersion+JVMloc;
         
@@ -1315,10 +1382,10 @@ public class ReplicationRun extends BaseTestCase
         /*
         String URL = DB_PROTOCOL
                 +"://"+serverHost
-                +":"+serverPort
-                +FS+slaveDatabasePath+FS+slaveDbSubPath+FS+dbName;
+                +":"+serverPort+"/"
+                +slaveDatabasePath+FS+slaveDbSubPath+FS+dbName;
         String ijClassPath = derbyVersion +FS+ "derbyclient.jar"
-                + ":" + derbyVersion +FS+ "derbytools.jar";
+                + PS + derbyVersion +FS+ "derbytools.jar";
         
         String clientJvm = jvmVersion+JVMloc;
         
@@ -1365,10 +1432,10 @@ public class ReplicationRun extends BaseTestCase
         /*
         String URL = DB_PROTOCOL
                 +"://"+serverHost
-                +":"+serverPort
-                +FS+masterDatabasePath+FS+masterDbSubPath+FS+dbName;
+                +":"+serverPort+"/"
+                +masterDatabasePath+FS+masterDbSubPath+FS+dbName;
         String ijClassPath = derbyVersion +FS+ "derbyclient.jar"
-                + ":" + derbyVersion +FS+ "derbytools.jar";
+                + PS + derbyVersion +FS+ "derbytools.jar";
         
         String clientJvm = jvmVersion+JVMloc;
         
@@ -1797,10 +1864,16 @@ public class ReplicationRun extends BaseTestCase
         util.DEBUG("slaveJvmVersion: " + slaveJvmVersion);
         
         classPath = System.getProperty("java.class.path"); util.DEBUG("classPath: " + classPath);
-        int sep = classPath.indexOf("derby.jar:"); util.DEBUG("sep: " + sep);
+        
+        /* Assuming running off jars. Instead allow using full classpath. */
+        if (false ) // FIXME! Need a property to tell we assume jars in the distributed case!
+        {
+        int sep = classPath.indexOf("derby.jar"+PS); util.DEBUG("sep: " + sep);
         String tclassPath = classPath.substring(0,sep); util.DEBUG("classPath: " + classPath);
-        sep = tclassPath.lastIndexOf("/"); util.DEBUG("sep: " + sep);
+        sep = tclassPath.lastIndexOf(FS); util.DEBUG("sep: " + sep);
         derbyVersion = tclassPath.substring(0,sep);
+        }
+        /* */
         util.DEBUG("derbyVersion: " + derbyVersion);
         
         derbyMasterVersion = null;
@@ -1821,7 +1894,7 @@ public class ReplicationRun extends BaseTestCase
         util.DEBUG("junit_jar: " + junit_jar);
         
         test_jars = derbyTestingJar
-                + ":" + junit_jar;
+                + PS + junit_jar;
         util.DEBUG("test_jars: " + test_jars);
         
         sleepTime = 15000;
@@ -1984,9 +2057,10 @@ public class ReplicationRun extends BaseTestCase
         {
              String URL = DB_PROTOCOL
                 +"://"+masterServerHost
-                +":"+masterServerPort
-                +FS+masterDatabasePath+FS+masterDbSubPath+FS+dbName;
+                +":"+masterServerPort+"/"
+                +masterDatabasePath+FS+masterDbSubPath+FS+dbName;
             util.DEBUG("initSlave getConnection("+URL+")");
+            Class.forName(DRIVER_CLASS_NAME); // Needed when running from classes!
             Connection conn = DriverManager.getConnection(URL);
             Statement s = conn.createStatement();
             s.execute("call syscs_util.syscs_unfreeze_database()");
@@ -2036,7 +2110,11 @@ public class ReplicationRun extends BaseTestCase
         
         String serverJvm = serverVM+JVMloc;
         String serverClassPath = serverVersion + FS+"derby.jar"
-                + ":" + serverVersion + FS+"derbynet.jar";
+                + PS + serverVersion + FS+"derbynet.jar";
+        if ( serverHost.equals("localhost") )
+        { // Use full classpath when running locally. Can not vary server versions!
+            serverClassPath = classPath;
+        }
         
         String command = "start";
         String securityOption = "";
@@ -2229,7 +2307,11 @@ public class ReplicationRun extends BaseTestCase
         
         String serverJvm = serverVM+JVMloc;
         String serverClassPath = serverVersion + FS+"derby.jar"
-                + ":" + serverVersion + FS+"derbynet.jar";
+                + PS + serverVersion + FS+"derbynet.jar";
+        if ( serverHost.equals("localhost") )
+        { // Use full classpath when running locally. Can not vary server versions!
+            serverClassPath = classPath;
+        }
         
         String command = "shutdown";
         int port = serverPort;
@@ -2523,12 +2605,16 @@ public class ReplicationRun extends BaseTestCase
             // Create it!
             String URL = DB_PROTOCOL
                     +"://"+serverHost
-                    +":"+serverPort
-                    +FS+masterDatabasePath+FS+dbSubPath+FS+database // FIXME! for slave load!
+                    +":"+serverPort+"/"
+                    +masterDatabasePath+FS+dbSubPath+FS+database // FIXME! for slave load!
                     +";create=true"; // Creating!
             String ijClassPath = derbyVersion +FS+ "derbyclient.jar"
-                    + ":" + derbyVersion +FS+ "derbyTesting.jar"
-                    + ":" + derbyVersion +FS+ "derbytools.jar";
+                    + PS + derbyVersion +FS+ "derbyTesting.jar"
+                    + PS + derbyVersion +FS+ "derbytools.jar";
+        if ( serverHost.equals("localhost") )
+        { // Use full classpath when running locally. Can not vary server versions!
+            ijClassPath = classPath;
+        }
             String clientJvm = jvmVersion+JVMloc;
             String command = "rm -rf /"+masterDatabasePath+FS+dbSubPath+FS+database+";" // FIXME! for slave load!
                     + clientJvm // "java"
