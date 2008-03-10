@@ -454,15 +454,17 @@ class BTreePostCommit implements Serviceable
     OpenBTree           open_btree)
         throws StandardException
     {
-        ControlRow  controlRow              = null; 
+        LeafControlRow leaf = null;
 
         try
         {
-
-            if ((controlRow = ControlRow.get(open_btree, page_number)) == null)
+            // The following can fail, returning null, either if it can't get
+            // the latch or somehow the page requested no longer exists.  In 
+            // either case the post commit work will just skip it.
+            leaf = (LeafControlRow) 
+                ControlRow.getNoWait(open_btree, page_number);
+            if (leaf == null)
                 return;
-
-            LeafControlRow leaf = (LeafControlRow) controlRow;
 
             BTreeLockingPolicy  btree_locking_policy = 
                 open_btree.getLockingPolicy();
@@ -517,8 +519,8 @@ class BTreePostCommit implements Serviceable
         }
         finally
         {
-            if (controlRow != null)
-                controlRow.release();
+            if (leaf != null)
+                leaf.release();
         }
     }
 }
