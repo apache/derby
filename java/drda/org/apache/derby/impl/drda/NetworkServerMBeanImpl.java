@@ -51,6 +51,20 @@ class NetworkServerMBeanImpl implements NetworkServerMBean {
         this.server = nsc;
         startTime = System.currentTimeMillis();
     }
+    
+    /**
+     * Ensure the caller has permission to control the network server.
+     */
+    private void checkControl() { 
+        // TODO: implement check
+    }
+
+    /**
+     * Ensure the caller has permission to monitor the network server.
+     */
+    private void checkMonitor() { 
+//      TODO: implement check
+    }
 
     // Some of the code is disabled (commented out) due to security concerns,
     // see DERBY-1387 for details.
@@ -60,6 +74,9 @@ class NetworkServerMBeanImpl implements NetworkServerMBean {
     //
     
     public String getDrdaHost() {
+        // Since this is sensitive information require control permission.
+        checkControl();
+
         String host = getServerProperty(Property.DRDA_PROP_HOSTNAME);
         return host;
     }
@@ -70,6 +87,8 @@ class NetworkServerMBeanImpl implements NetworkServerMBean {
     }
     
     public int getDrdaMaxThreads() {
+        checkMonitor();
+        
         int maxThreads = 0; // default
         String maxThreadsStr = getServerProperty(Property.DRDA_PROP_MAXTHREADS);
         if (maxThreadsStr != null) {
@@ -95,6 +114,9 @@ class NetworkServerMBeanImpl implements NetworkServerMBean {
     }*/
     
     public int getDrdaPortNumber() {
+        // Since this is sensitive information require control permission.
+        checkControl();
+
         int portNumber = NetworkServerControl.DEFAULT_PORTNUMBER; // the default
         String portString = getServerProperty(Property.DRDA_PROP_PORTNUMBER);
         try {
@@ -106,6 +128,9 @@ class NetworkServerMBeanImpl implements NetworkServerMBean {
     }
     
     public String getDrdaSecurityMechanism() {
+        // Since this is sensitive information require control permission.
+        checkControl();
+
         String secmec = getServerProperty(Property.DRDA_PROP_SECURITYMECHANISM);
         if (secmec == null) {
             // default is none (represented by the empty string)
@@ -115,6 +140,9 @@ class NetworkServerMBeanImpl implements NetworkServerMBean {
     }
     
     public String getDrdaSslMode() {
+        // Since this is sensitive information require control permission.
+        checkControl();
+
         // may be null if not set (?)
         String SSLMode = getServerProperty(Property.DRDA_PROP_SSL_MODE);
         return SSLMode;
@@ -122,6 +150,8 @@ class NetworkServerMBeanImpl implements NetworkServerMBean {
     
     
     public String getDrdaStreamOutBufferSize() {
+        checkMonitor();
+        
         // TODO - Fix NetworkServerControlImpl so that this setting is included
         //        in the property values returned by getPropertyValues()?
         //String size = getServerProperty(Property.DRDA_PROP_STREAMOUTBUFFERSIZE);
@@ -132,6 +162,8 @@ class NetworkServerMBeanImpl implements NetworkServerMBean {
 
        
     public int getDrdaTimeSlice() {
+        checkMonitor();
+        
         // relying on server to return the default if not set
         return server.getTimeSlice();
     }
@@ -149,6 +181,8 @@ class NetworkServerMBeanImpl implements NetworkServerMBean {
     }*/
     
     public boolean getDrdaTraceAll() {
+        checkMonitor();
+        
         String on = getServerProperty(Property.DRDA_PROP_TRACEALL);
         return ("true".equals(on) ? true : false );
     }
@@ -166,6 +200,10 @@ class NetworkServerMBeanImpl implements NetworkServerMBean {
     }*/
     
     public String getDrdaTraceDirectory() {
+        // Since this is sensitive information require control
+        // (gives away information about the file system).
+        checkControl();
+        
         String traceDirectory = null;
         traceDirectory = getServerProperty(Property.DRDA_PROP_TRACEDIRECTORY);
         if(traceDirectory == null){
@@ -209,30 +247,44 @@ class NetworkServerMBeanImpl implements NetworkServerMBean {
      **/
 
     public int getConnectionCount() {
+        checkMonitor();
+        
         return getActiveConnectionCount() + getWaitingConnectionCount();
     }
     
     public int getActiveConnectionCount() {
+        checkMonitor();
+
         return server.getActiveSessions();
     }
     
     public int getWaitingConnectionCount() {
+        checkMonitor();
+        
         return server.getRunQueueSize();
     }
     
     public int getConnectionThreadPoolSize() {
+        checkMonitor();
+        
         return server.getThreadListSize();
     }
      
     public int getAccumulatedConnectionCount() {
+        checkMonitor();
+        
         return server.getConnectionNumber();
     }
     
     public long getBytesReceived() {
+        checkMonitor();
+        
         return server.getBytesRead();
     }
     
     public long getBytesSent() {
+        checkMonitor();
+        
         return server.getBytesWritten();
     }
     
@@ -241,6 +293,8 @@ class NetworkServerMBeanImpl implements NetworkServerMBean {
     private int receiveResult = 0;
     
     synchronized public int getBytesReceivedPerSecond(){
+        checkMonitor();
+        
         long now = System.currentTimeMillis();
         if (now - lastReceiveTime >= 1000) {
             long count = getBytesReceived();
@@ -256,6 +310,8 @@ class NetworkServerMBeanImpl implements NetworkServerMBean {
     private int sentResult = 0;
 
     synchronized public int getBytesSentPerSecond(){
+        checkMonitor();
+        
         long now = System.currentTimeMillis();
         if (now - lastSentTime >= 1000) {
             long count = getBytesSent();
@@ -270,6 +326,8 @@ class NetworkServerMBeanImpl implements NetworkServerMBean {
      * Return start time.
      */
     public long getStartTime() {
+        checkMonitor();
+        
         return startTime;
     }
 
@@ -277,8 +335,9 @@ class NetworkServerMBeanImpl implements NetworkServerMBean {
      * Return time server has been running.
      */
     public long getUptime() {
-        return System.currentTimeMillis() - startTime;
+        checkMonitor();
         
+        return System.currentTimeMillis() - startTime;
     }
 
     // ------------------------- MBEAN OPERATIONS  ----------------------------
@@ -290,6 +349,8 @@ class NetworkServerMBeanImpl implements NetworkServerMBean {
      * @throws Exception if the ping fails.
      */
     public void ping() throws Exception {
+        checkMonitor();
+        
         //String feedback = "Server pinged successfully.";
         //boolean success = true;
         try {

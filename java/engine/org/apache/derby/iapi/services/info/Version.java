@@ -34,48 +34,74 @@ public class Version implements VersionMBean {
     
     private final ProductVersionHolder versionInfo;
     
-    public Version(ProductVersionHolder pvh) {
+    /**
+     * Permission name for the object the version
+     * information applies to.
+     */
+    private final String permissionName;
+    
+    public Version(ProductVersionHolder pvh, String permissionName) {
         versionInfo = pvh;
+        this.permissionName = permissionName;
+    }
+    
+    /*
+    ** Security checks(non-Javadoc)
+    */
+    
+    private void checkMonitor() {
+        // TODO: Add actual check
+        //new SystemPermission(permissionName, SystemPermission.MONITOR);
     }
     
     // ------------------------- MBEAN ATTRIBUTES  ----------------------------
     
     public String getProductName(){
+        checkMonitor();
         return versionInfo.getProductName();
     }
     
      public String getProductTechnologyName(){
+         checkMonitor();
         return versionInfo.getProductTechnologyName();
     }
     
     public String getProductVendorName(){
+        checkMonitor();
         return versionInfo.getProductVendorName();
     }
     
     public String getVersionString() {
+        checkMonitor();
         return versionInfo.getVersionBuildString(true);
     }
     public int getMajorVersion(){
+        checkMonitor();
         return versionInfo.getMajorVersion();
     }
     
     public int getMinorVersion(){
+        checkMonitor();
         return versionInfo.getMinorVersion();
     }
     
     public int getMaintenanceVersion(){
+        checkMonitor();
         return versionInfo.getMaintVersion();
     }
     
     public String getBuildNumber(){
+        checkMonitor();
         return versionInfo.getBuildNumber();
     }
     
     public boolean isBeta(){
+        checkMonitor();
         return versionInfo.isBeta();
     }
     
     public boolean isAlpha(){
+        checkMonitor();
         return versionInfo.isAlpha();
     }
   
