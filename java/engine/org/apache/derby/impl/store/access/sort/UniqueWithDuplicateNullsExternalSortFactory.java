@@ -20,28 +20,38 @@
  */
 
 package org.apache.derby.impl.store.access.sort;
+
+// for javadoc
+import org.apache.derby.iapi.store.access.conglomerate.MethodFactory;
+
 /**
  * Method factory to support sorting of Almost unique index. This class 
  * overrides getMergeSort of ExternalSortFactory to return UniqueWithDuplicateNullsMergeSort.
  */
-public class UniqueWithDuplicateNullsExternalSortFactory extends ExternalSortFactory {
-    private static final String IMPLEMENTATIONID = "sort almost unique external";
+public class UniqueWithDuplicateNullsExternalSortFactory 
+    extends ExternalSortFactory 
+{
+    private static final String IMPLEMENTATIONID = 
+        "sort almost unique external";
     
-    protected MergeSort getMergeSort() {
+    protected MergeSort getMergeSort() 
+    {
         return new UniqueWithDuplicateNullsMergeSort ();
     }
 
     /**
      * @see MethodFactory#primaryImplementationType
      */
-    public String primaryImplementationType() {
+    public String primaryImplementationType() 
+    {
         return IMPLEMENTATIONID;
     }
 
     /**
      * @see MethodFactory#supportsImplementation
      */
-    public boolean supportsImplementation(String implementationId) {
-        return IMPLEMENTATIONID.equals (implementationId);
+    public boolean supportsImplementation(String implementationId) 
+    {
+        return IMPLEMENTATIONID.equals(implementationId);
     }
 }

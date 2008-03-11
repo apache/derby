@@ -270,7 +270,7 @@ public class IndexRowGenerator implements IndexDescriptor, Formatable
 	}
 
 	/**
-     * @see IndexDescriptor#isisUniqueWithDuplicateNulls
+     * @see IndexDescriptor#isUniqueWithDuplicateNulls
      */
 	public boolean isUniqueWithDuplicateNulls()
 	{
