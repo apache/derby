@@ -19,10 +19,6 @@ maxthreads <max>[-h <host>][-p <portnumber>] [-ssl <sslmode>]
 timeslice <milliseconds>[-h <host>][-p <portnumber>] [-ssl <sslmode>]
 trace {on |off} [-s <session id>][-h <host>][-p <portnumber>] [-ssl <sslmode>]
 tracedirectory <traceDirectory>[-h <host>][-p <portnumber>] [-ssl <sslmode>]
-startreplication <dbname> [-slavehost <host>] [-slaveport <portnumber>] [-h <host>] [-p <portnumber>] [-ssl <sslmode>]
-startslave <dbname> [-slavehost <host>] [-slaveport <portnumber>] [-h <host>] [-p <portnumber>] [-ssl <sslmode>]
-failover <dbname> [-h <host>] [-p <portnumber>] [-ssl <sslmode>]
-stopreplication <dbname> [-h <host>] [-p <portnumber>] [-ssl <sslmode>]
 PASS - time slice value, 0 is correct
 org.apache.derby.drda.NetworkServerControl timeslice 2147483647 
 Time slice changed to 2147483647.
@@ -44,10 +40,6 @@ maxthreads <max>[-h <host>][-p <portnumber>] [-ssl <sslmode>]
 timeslice <milliseconds>[-h <host>][-p <portnumber>] [-ssl <sslmode>]
 trace {on |off} [-s <session id>][-h <host>][-p <portnumber>] [-ssl <sslmode>]
 tracedirectory <traceDirectory>[-h <host>][-p <portnumber>] [-ssl <sslmode>]
-startreplication <dbname> [-slavehost <host>] [-slaveport <portnumber>] [-h <host>] [-p <portnumber>] [-ssl <sslmode>]
-startslave <dbname> [-slavehost <host>] [-slaveport <portnumber>] [-h <host>] [-p <portnumber>] [-ssl <sslmode>]
-failover <dbname> [-h <host>] [-p <portnumber>] [-ssl <sslmode>]
-stopreplication <dbname> [-h <host>] [-p <portnumber>] [-ssl <sslmode>]
 PASS - time slice value, 0 is correct
 PASS - time slice value, 0 is correct
 Expecting exception:DRDA_InvalidValue.U:Invalid value, -2, for timeslice.
