@@ -44,9 +44,17 @@ class RemoteConnectionGetter implements JMXConnectionGetter {
         this.url = url;
     }
 
-    public MBeanServerConnection getMBeanServerConnection() throws Exception {
-        // assumes that JMX authentication and SSL is not required (hence null)
-        JMXConnector jmxc = JMXConnectorFactory.connect(url, null);
+    public MBeanServerConnection getMBeanServerConnection(String user,
+            String password) throws Exception {
+        
+        HashMap<String,String[]> env = new HashMap<String,String[]>();
+        if (user != null) {
+           String[] credentials = new String[] {
+                   user, password };
+           env.put("jmx.remote.credentials", credentials);
+        }
+        
+        JMXConnector jmxc = JMXConnectorFactory.connect(url, env);
         MBeanServerConnection jmxConn =  jmxc.getMBeanServerConnection();
         
         Map<MBeanServerConnection,JMXConnector> conns = connections.get();

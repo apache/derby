@@ -51,7 +51,7 @@ import org.apache.derbyTesting.junit.TestConfiguration;
  * BaseTestCase.
  */
 abstract class MBeanTest extends BaseJDBCTestCase {
-    
+     
     /**
      * JMX connection to use throughout the instance.
      */
@@ -61,7 +61,7 @@ abstract class MBeanTest extends BaseJDBCTestCase {
         super(name);
     }
     
-    protected static Test suite(Class testClass, String suiteName) {
+    protected static Test suite(Class<? extends MBeanTest> testClass, String suiteName) {
         
         // TODO -
         // Check for J2SE 5.0 or better? Or java.lang.management.ManagementFactory?
@@ -106,7 +106,7 @@ abstract class MBeanTest extends BaseJDBCTestCase {
         NetworkServerTestSetup networkServerTestSetup = 
                 new NetworkServerTestSetup (
                         suite, // run all tests in this class in the same setup
-                        getCommandLineProperties(), // need to set up JMX in JVM
+                        getCommandLineProperties(false), // need to set up JMX in JVM
                         new String[0], // no server arguments needed
                         true   // wait for the server to start properly
                 );
@@ -117,13 +117,15 @@ abstract class MBeanTest extends BaseJDBCTestCase {
          * JMX specific policy file later. Or use the property trick reported
          * on derby-dev 2008-02-26 and add the permission to the generic 
          * policy.
+         * Note that the remote server will be running with a security
+         * manager (by default) if testing with jars.
          */
         Test testSetup = 
                 SecurityManagerSetup.noSecurityManager(networkServerTestSetup);
         // this decorator makes sure the suite is empty if this configration
         // does not support the network server:
         outerSuite.addTest(TestConfiguration.defaultServerDecorator(testSetup));
-        
+       
         return outerSuite;
     }
     
@@ -138,13 +140,21 @@ abstract class MBeanTest extends BaseJDBCTestCase {
      * @return a set of Java system properties to be set on the command line
      *         when starting a new JVM in order to enable remote JMX.
      */
-    private static String[] getCommandLineProperties()
+    private static String[] getCommandLineProperties(boolean authentication)
     {
         ArrayList<String> list = new ArrayList<String>();
         list.add("com.sun.management.jmxremote.port=" 
                 + TestConfiguration.getCurrent().getJmxPort());
-        list.add("com.sun.management.jmxremote.authenticate=false");
+        list.add("com.sun.management.jmxremote.authenticate=" +
+                Boolean.toString(authentication));
         list.add("com.sun.management.jmxremote.ssl=false");
+        
+        if (authentication) {
+            list.add("com.sun.management.jmxremote.password.file=" +
+                    "extin/jmx.password");
+            list.add("com.sun.management.jmxremote.access.file=" +
+                    "extin/jmx.access");
+        }
         String[] result = new String[list.size()];
         list.toArray(result);
         return result;
@@ -175,7 +185,10 @@ abstract class MBeanTest extends BaseJDBCTestCase {
     }
     
     /**
-     * Obtains a connection to an MBean server. Assumes th
+     * Obtains a connection to an MBean server with
+     * no user name or password,
+     * opens a single connection for the lifetime
+     * of the fixture
      * 
      * @return a plain connection to an MBean server
      */
@@ -184,8 +197,21 @@ abstract class MBeanTest extends BaseJDBCTestCase {
         
         if (jmxConnection == null)
             jmxConnection = 
-            JMXConnectionGetter.mbeanServerConnector.get().getMBeanServerConnection();
+            JMXConnectionGetter.mbeanServerConnector.get()
+                .getMBeanServerConnection(null, null);
         return jmxConnection;
+    }
+    
+    /**
+     * Obtains a connection to an MBean server with
+     * a user name or password. A new connection is
+     * returned for each call.
+     */
+    protected MBeanServerConnection getMBeanServerConnection(
+            String user, String password) throws Exception {
+
+        return JMXConnectionGetter.mbeanServerConnector.get()
+                    .getMBeanServerConnection(user, password);
     }
     
     /**
@@ -434,6 +460,7 @@ abstract class MBeanTest extends BaseJDBCTestCase {
         String value = (String)getAttribute(objName, name);
         println(name + " = " + value); // for debugging
     }
+    
     
     /**
      * Calls the public method <code>getInfo</code> of the sysinfo tool within
