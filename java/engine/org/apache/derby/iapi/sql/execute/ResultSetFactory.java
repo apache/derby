@@ -21,6 +21,8 @@
 
 package org.apache.derby.iapi.sql.execute;
 
+import org.apache.derby.catalog.TypeDescriptor;
+
 import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.sql.ResultSet;
@@ -641,6 +643,7 @@ public interface ResultSetFactory {
 											optimizer
 		@param optimizerEstimatedCost		Estimated total cost by optimizer
 		@param isDerbyStyleTableFunction    True if this is a Derby-style table function
+		@param returnType The name of the return type (a multi-set) as a string
 		@return the row as a result set.
 		@exception StandardException thrown when unable to create the
 			result set
@@ -657,7 +660,8 @@ public interface ResultSetFactory {
 									 int scanIsolationLevel,
 									 double optimizerEstimatedRowCount,
 									 double optimizerEstimatedCost,
-									 boolean isDerbyStyleTableFunction
+                                     boolean isDerbyStyleTableFunction,
+                                     String returnType
                                           )
 		 throws StandardException;
 

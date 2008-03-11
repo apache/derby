@@ -25,6 +25,7 @@ import java.lang.reflect.*;
 import java.io.*;
 import java.sql.*;
 import java.text.NumberFormat;
+import java.util.Arrays;
 import java.util.ArrayList;
 
 import org.apache.derby.shared.common.reference.JDBC40Translation;
@@ -49,7 +50,9 @@ public class TableFunctionTest extends BaseJDBCTestCase
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
-    private static  final   String  UTF8 = "UTF8";
+    private static  final   String  UTF8 = "UTF-8";
+
+    private static  final   int MAX_VARIABLE_DATA_TYPE_LENGTH = 32700;
     
     // functions to drop at teardown time
     private static  final   String[]    FUNCTION_NAMES =
@@ -64,6 +67,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
         "constructorException",
         "goodVTICosting",
         "allStringTypesFunction",
+        "coercionFunction",
     };
     
     // tables to drop at teardown time
@@ -173,7 +177,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
     private static  final   String[][]  ALL_STRING_TYPES_ROWS =
     {
         {
-            "char col",   // CHAR
+            "char col            ",   // CHAR
             //"clob col", long string types are not comparable
             //"long varchar col",   // LONG VARCHAR long string types are not comparable
             "varchar col",   // VARCHAR
@@ -919,6 +923,8 @@ public class TableFunctionTest extends BaseJDBCTestCase
         
         collationTest();
         subqueryTest();
+
+        coercionTest();
     }
     
     /**
@@ -1077,6 +1083,47 @@ public class TableFunctionTest extends BaseJDBCTestCase
              SIMPLE_ROWS,
              new int[] { Types.VARCHAR, Types.VARCHAR }
              );
+        
+        goodStatement
+        (
+         "create function returnsACoupleRowsAsCHAR()\n" +
+         "returns TABLE\n" +
+         "  (\n" +
+         "     column0 char( 10 ),\n" +
+         "     column1 char( 10 )\n" +
+         "  )\n" +
+         "language java\n" +
+         "parameter style DERBY_JDBC_RESULT_SET\n" +
+         "no sql\n" +
+         "external name '" + getClass().getName() + ".returnsACoupleRows'\n"
+         );   
+        
+        String[][] CHAR_ROWS = new String[SIMPLE_ROWS.length][];
+        for (int r = 0; r < CHAR_ROWS.length; r++)
+        {
+        	CHAR_ROWS[r] = new String[SIMPLE_ROWS[r].length];
+        	for (int c = 0; c < CHAR_ROWS[r].length; c++)
+        	{
+        		String cv = SIMPLE_ROWS[r][c];
+        		if (cv != null)
+        		{
+        			if (cv.length() < 10)
+        			{
+        				StringBuffer sb = new StringBuffer(cv);
+        				for (int p = cv.length(); p < 10; p++)
+        					sb.append(' ');
+        				CHAR_ROWS[r][c] = sb.toString();
+        			}	
+        		}
+        	}
+        }
+        assertResults
+        (
+         "select s.*\n" +
+         "    from TABLE( returnsACoupleRowsAsCHAR() ) s\n",
+         CHAR_ROWS,
+         new int[] { Types.CHAR, Types.CHAR }
+         );        
     }
     
     /**
@@ -1514,6 +1561,130 @@ public class TableFunctionTest extends BaseJDBCTestCase
              );
     }
     
+    /**
+     * Verify that variable length data values are coerced to their
+     * declared types, regardless of what actually is returned by the
+     * user-coded ResultSet. See DERBY-3341.
+     */
+    private void  coercionTest()
+        throws Exception
+    {
+        goodStatement
+            (
+             "create function coercionFunction( )\n" +
+             "returns TABLE\n" +
+             "  (\n" +
+             "     keyCol int,\n" +
+             "     charCol char( 5 ),\n" +
+             "     varcharCol varchar( 5 ),\n" +
+             "     charForBitDataCol char( 5 ) for bit data,\n" +
+             "     varcharForBitDataCol varchar( 5 ) for bit data,\n" +
+             "     decimalCol decimal( 5, 2 ),\n" +
+             "     longvarcharCol long varchar,\n" +
+             "     longvarcharForBitDataCol long varchar for bit data\n" +
+             "  )\n" +
+             "language java\n" +
+             "parameter style DERBY_JDBC_RESULT_SET\n" +
+             "no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.TableFunctionTest.coercionFunction'\n"
+             );
+        
+        assertResults
+            (
+             "select *\n" +
+             "from TABLE( coercionFunction( ) ) as f order by keyCol\n",
+             new String[]
+             {
+                 "KEYCOL",
+                 "CHARCOL",
+                 "VARCHARCOL",
+                 "CHARFORBITDATACOL",
+                 "VARCHARFORBITDATACOL",
+                 "DECIMALCOL",
+                 "LONGVARCHARCOL",
+                 "LONGVARCHARFORBITDATACOL",
+             },
+             makeCoercionOutputs(),
+             new int[]
+             {
+                 Types.INTEGER,
+                 Types.CHAR,
+                 Types.VARCHAR,
+                 Types.BINARY,
+                 Types.VARBINARY,
+                 Types.DECIMAL,
+                 Types.LONGVARCHAR,
+                 Types.LONGVARBINARY,
+             }
+             );
+    }
+    
+    /**
+     * <p>
+     * Make the input rows for the coercion function.
+     * </p>
+     */
+    private static  String[][]  makeCoercionInputs()
+    {
+        return new String[][]
+        {
+            { "1", "abc", "abc", "abc", "abc", "12.3", makeString( 5 ), makeByteString( 5 )  },    // too short
+            { "2", "abcdef", "abcdef", "abcdef", "abcdef", "12.345", makeString( 32700 + 1 ), makeByteString( 32700 + 1 ) },   // too long
+            { "3", "abcde", "abcde", "abcde", "abcde", "123.45", makeString( 5 ), makeByteString( 5 ) },  //  just right
+        };
+    }
+
+    /**
+     * <p>
+     * Make the expected output rows which should come back from the coercion function.
+     * </p>
+     */
+    private static  String[][]  makeCoercionOutputs()
+    {
+        return new String[][]
+        {
+            { "1", "abc  ", "abc", "abc  ", "abc", "12.30", makeString( 5 ), makeByteString( 5 ) },
+            { "2", "abcde", "abcde", "abcde", "abcde", "12.34", makeString( 32700 ), makeByteString( 32700 ) },
+            { "3", "abcde", "abcde", "abcde", "abcde", "123.45", makeString( 5 ), makeByteString( 5 ) },
+        };
+    }
+
+    /**
+     * <p>
+     * Return a String of the specified length.
+     * </p>
+     */
+    private static  String  makeString( int count )
+    {
+        char[]  raw = new char[ count ];
+
+        Arrays.fill( raw, 'a' );
+
+        return new String( raw );
+    }
+    
+    /**
+     * <p>
+     * Return a String encoding a byte array of the specified length.
+     * </p>
+     */
+    private static  String  makeByteString( int count )
+    {
+        try {
+            byte[]  raw = new byte[ count ];
+            byte    value = (byte) 1;
+
+            Arrays.fill( raw, value );
+
+            return new String( raw, UTF8 );
+        }
+        catch (Throwable t)
+        {
+            println( t.getMessage() );
+            return null;
+        }
+    }
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // Derby FUNCTIONS
@@ -1564,6 +1735,14 @@ public class TableFunctionTest extends BaseJDBCTestCase
         };
 
         return makeVTI( kernel );
+    }
+
+    /**
+     * A VTI which returns variable-length data typed columns.
+     */
+    public  static  ResultSet coercionFunction()
+    {
+        return makeVTI( makeCoercionInputs() );
     }
 
     ///////////////////////////////////////////////////////////////////////////////////
@@ -1843,7 +2022,9 @@ public class TableFunctionTest extends BaseJDBCTestCase
                 case Types.BINARY:
                 case Types.VARBINARY:
                 case Types.LONGVARBINARY:
-                    actualValue = squeezeString(  rs.getBytes( column ) );
+                    byte[]  bytes = rs.getBytes( column );
+
+                    actualValue = squeezeString(  bytes );
                     actualValueByName = squeezeString(  rs.getBytes( columnName ) );
                     break;
 
@@ -1871,7 +2052,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
                 assertEquals( (expectedValue == null), rs.wasNull() );
                 
                 if ( expectedValue == null )    { assertNull( actualValue ); }
-                else { assertTrue( expectedValue.equals( actualValue ) ); }
+                else { assertEquals(expectedValue, actualValue); }
             }
         }
 
@@ -2056,6 +2237,5 @@ public class TableFunctionTest extends BaseJDBCTestCase
 
         return 0.0;
     }
-
 
 }

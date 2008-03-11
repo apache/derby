@@ -21,6 +21,8 @@
 
 package	org.apache.derby.impl.sql.compile;
 
+import org.apache.derby.iapi.services.io.DynamicByteArrayOutputStream;
+import org.apache.derby.iapi.services.io.FormatIdOutputStream;
 import org.apache.derby.iapi.services.loader.ClassInspector;
 import org.apache.derby.iapi.services.loader.GeneratedMethod;
 
@@ -1323,7 +1325,18 @@ public class FromVTI extends FromTable implements VTIEnvironment
 		// Whether or not this is a Derby-style Table Function
 		mb.push(isDerbyStyleTableFunction);
 
-		return 15;
+		// Push the return type
+        if ( isDerbyStyleTableFunction )
+        {
+            String  returnType = freezeReturnType( methodCall.getRoutineInfo().getReturnType() );
+            mb.push( returnType );
+        }
+        else
+        {
+			mb.pushNull( String.class.getName());
+        }
+
+		return 16;
 	}
 
 	private void generateConstructor(ActivationClassBuilder acb,
@@ -1675,4 +1688,27 @@ public class FromVTI extends FromTable implements VTIEnvironment
         }
     }
 
+    /**
+     * Serialize a row multi set as a string.
+     */
+    private String  freezeReturnType( TypeDescriptor td )
+        throws StandardException
+    {
+        try {
+            DynamicByteArrayOutputStream    dbaos = new DynamicByteArrayOutputStream();
+            FormatIdOutputStream                fios = new FormatIdOutputStream( dbaos );
+
+            fios.writeObject( td );
+            dbaos.flush();
+
+            byte[]      rawResult = dbaos.getByteArray();
+
+            return new String( rawResult );
+            
+        } catch (Throwable t)
+        {
+            throw StandardException.unexpectedUserException( t );
+        }
+    }
+    
 }

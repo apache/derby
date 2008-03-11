@@ -406,7 +406,9 @@ public  abstract    class   StringColumnVTI extends VTITemplate
         if ( columnValue == null ) { return null; }
         else
         {
-            return columnValue.getBytes();
+            try {
+                return columnValue.getBytes( "UTF-8" );
+            } catch (Throwable t) { throw new SQLException( t.getMessage() ); }
         }
     }
 

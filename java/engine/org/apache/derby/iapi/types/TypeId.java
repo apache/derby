@@ -1037,6 +1037,15 @@ public final class TypeId
 				return (formatId == StoredFormatIds.LONGVARCHAR_TYPE_ID);
 		}
 
+		/** 
+		 *Is this a LongVarbinary?
+		 * @return true if this is LongVarbinary
+		 */
+		public boolean isLongVarbinaryTypeId()
+		{
+				return (formatId == StoredFormatIds.LONGVARBIT_TYPE_ID);
+		}
+
 
 		/** 
 		 * Is this DATE/TIME or TIMESTAMP?

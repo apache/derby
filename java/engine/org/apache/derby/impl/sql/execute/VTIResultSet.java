@@ -21,6 +21,7 @@
 
 package org.apache.derby.impl.sql.execute;
 
+import org.apache.derby.catalog.TypeDescriptor;
 import org.apache.derby.iapi.services.loader.ClassFactory;
 import org.apache.derby.iapi.services.loader.ClassInspector;
 
@@ -37,13 +38,17 @@ import org.apache.derby.iapi.sql.execute.NoPutResultSet;
 
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.ResultDescription;
+import org.apache.derby.iapi.types.TypeId;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataValueDescriptor;
+import org.apache.derby.iapi.types.VariableSizeDataValue;
 import org.apache.derby.iapi.sql.execute.ExecutionContext;
 
 import org.apache.derby.iapi.store.access.Qualifier;
 
 import org.apache.derby.iapi.error.StandardException;
 
+import org.apache.derby.iapi.services.io.FormatIdInputStream;
 import org.apache.derby.iapi.services.loader.GeneratedMethod;
 
 import org.apache.derby.iapi.types.RowLocation;
@@ -56,6 +61,7 @@ import org.apache.derby.vti.DeferModification;
 import org.apache.derby.vti.IFastPath;
 import org.apache.derby.vti.VTIEnvironment;
 
+import java.io.ByteArrayInputStream;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -94,6 +100,10 @@ class VTIResultSet extends NoPutResultSetImpl
 
 	private boolean isDerbyStyleTableFunction;
 
+    private String  returnType;
+
+    private DataTypeDescriptor[]    returnColumnTypes;
+
 	/**
 		Specified isolation level of SELECT (scan). If not set or
 		not application, it will be set to ExecutionContext.UNSPECIFIED_ISOLATION_LEVEL
@@ -114,7 +124,8 @@ class VTIResultSet extends NoPutResultSetImpl
 				 int scanIsolationLevel,
 			     double optimizerEstimatedRowCount,
 				 double optimizerEstimatedCost,
-				 boolean isDerbyStyleTableFunction
+				 boolean isDerbyStyleTableFunction,
+                 String returnType
                  ) 
 		throws StandardException
 	{
@@ -129,6 +140,7 @@ class VTIResultSet extends NoPutResultSetImpl
 		this.pushedQualifiers = pushedQualifiers;
 		this.scanIsolationLevel = scanIsolationLevel;
 		this.isDerbyStyleTableFunction = isDerbyStyleTableFunction;
+        this.returnType = returnType;
 
 		if (erdNumber != -1)
 		{
@@ -541,6 +553,12 @@ class VTIResultSet extends NoPutResultSetImpl
 	{
 		try
 		{
+            DataTypeDescriptor[]    columnTypes = null;
+            if ( isDerbyStyleTableFunction )
+            {
+                    columnTypes = getReturnColumnTypes();
+            }
+
 			boolean[] nullableColumn = setNullableColumnList();
 			DataValueDescriptor[] columns = row.getRowArray();
 			// ExecRows are 0-based, ResultSets are 1-based
@@ -563,7 +581,19 @@ class VTIResultSet extends NoPutResultSetImpl
 									 */
 									nullableColumn[rsColNumber]);
 				rsColNumber++;
-			}
+
+                // for Derby-style table functions, coerce the value coming out
+                // of the ResultSet to the declared SQL type of the return
+                // column
+                if ( isDerbyStyleTableFunction )
+                {
+                    DataTypeDescriptor  dtd = columnTypes[ index ];
+                    DataValueDescriptor dvd = columns[ index ];
+
+                    cast( dtd, dvd );
+                }
+
+            }
 
 		} catch (StandardException se) {
 			throw se;
@@ -626,4 +656,121 @@ class VTIResultSet extends NoPutResultSetImpl
 
 		return compileTimeConstants.get(key);
 	}
+
+    /**
+     * <p>
+     * Get the types of the columns returned by a Derby-style table function.
+     * </p>
+     */
+    private DataTypeDescriptor[]    getReturnColumnTypes()
+        throws StandardException
+    {
+        if ( returnColumnTypes == null )
+        {
+            TypeDescriptor      td = thawReturnType( returnType );
+            TypeDescriptor[]    columnTypes = td.getRowTypes();
+            int                         count = columnTypes.length;
+
+            returnColumnTypes = new DataTypeDescriptor[ count ];
+            for ( int i = 0; i < count; i++ )
+            {
+                returnColumnTypes[ i ] = DataTypeDescriptor.getType( columnTypes[ i ] );
+            }
+        }
+
+        return returnColumnTypes;
+    }
+
+    /**
+     * <p>
+     * Deserialize a type descriptor from a string.
+     * </p>
+     */
+    private TypeDescriptor  thawReturnType( String ice )
+        throws StandardException
+    {
+        try {
+            byte[]                                          bytes = ice.getBytes();
+            ByteArrayInputStream                    bais = new ByteArrayInputStream( bytes );
+            FormatIdInputStream                     fiis = new FormatIdInputStream( bais );
+            TypeDescriptor                              td = (TypeDescriptor) fiis.readObject();
+
+            return td;
+            
+        } catch (Throwable t)
+        {
+            throw StandardException.unexpectedUserException( t );
+        }
+    }
+    
+    /**
+     * <p>
+     * Cast the value coming out of the user-coded ResultSet. The
+     * rules are described in CastNode.getDataValueConversion().
+     * </p>
+     */
+    private void    cast( DataTypeDescriptor dtd, DataValueDescriptor dvd )
+        throws StandardException
+    {
+        TypeId      typeID = dtd.getTypeId();
+
+        if ( !typeID.isBlobTypeId() && !typeID.isClobTypeId() )
+        {
+            if ( typeID.isLongVarcharTypeId() ) { castLongvarchar( dtd, dvd ); }
+            else if ( typeID.isLongVarbinaryTypeId() ) { castLongvarbinary( dtd, dvd ); }
+            else
+            {
+                Object      o = dvd.getObject();
+
+                dvd.setObjectForCast( o, true, typeID.getCorrespondingJavaTypeName() );
+
+                if ( typeID.variableLength() )
+                {
+                    VariableSizeDataValue   vsdv = (VariableSizeDataValue) dvd;
+                    int                                 width;
+                    if ( typeID.isNumericTypeId() ) { width = dtd.getPrecision(); }
+                    else { width = dtd.getMaximumWidth(); }
+            
+                    vsdv.setWidth( width, dtd.getScale(), false );
+                }
+            }
+
+        }
+
+    }
+
+    /**
+     * <p>
+     * Truncate long varchars to the legal maximum.
+     * </p>
+     */
+    private void    castLongvarchar( DataTypeDescriptor dtd, DataValueDescriptor dvd )
+        throws StandardException
+    {
+        if ( dvd.getLength() > TypeId.LONGVARCHAR_MAXWIDTH )
+        {
+            dvd.setValue( dvd.getString().substring( 0, TypeId.LONGVARCHAR_MAXWIDTH ) );
+        }
+    }
+    
+    /**
+     * <p>
+     * Truncate long varbinary values to the legal maximum.
+     * </p>
+     */
+    private void    castLongvarbinary( DataTypeDescriptor dtd, DataValueDescriptor dvd )
+        throws StandardException
+    {
+        if ( dvd.getLength() > TypeId.LONGVARBIT_MAXWIDTH )
+        {
+            byte[]  original = dvd.getBytes();
+            byte[]  result = new byte[ TypeId.LONGVARBIT_MAXWIDTH ];
+
+            System.arraycopy( original, 0, result, 0, TypeId.LONGVARBIT_MAXWIDTH );
+            
+            dvd.setValue( result );
+        }
+    }
+    
+    
 }
