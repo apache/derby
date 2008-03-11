@@ -21,6 +21,7 @@
 
 package org.apache.derby.impl.sql.execute;
 
+import org.apache.derby.catalog.TypeDescriptor;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.loader.GeneratedMethod;
 import org.apache.derby.iapi.services.sanity.SanityManager;
@@ -444,7 +445,8 @@ public class GenericResultSetFactory implements ResultSetFactory
 									 int scanIsolationLevel,
 									 double optimizerEstimatedRowCount,
 									 double optimizerEstimatedCost,
-									 boolean isDerbyStyleTableFunction
+                                     boolean isDerbyStyleTableFunction,
+                                     String returnType
                                           )
 		throws StandardException
 	{
@@ -459,7 +461,8 @@ public class GenericResultSetFactory implements ResultSetFactory
 								scanIsolationLevel,
 							    optimizerEstimatedRowCount,
 								optimizerEstimatedCost,
-								isDerbyStyleTableFunction
+								isDerbyStyleTableFunction,
+                                returnType
                                 );
 	}
 
