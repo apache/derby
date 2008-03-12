@@ -949,7 +949,7 @@ public abstract class BaseJDBCTestCase
      * If there are extra chained SQLExceptions that are 
      * not in sqlStates, this method will not fail.
      * 
-     * @param sqlStates[]  expected sql state.
+     * @param sqlStates  expected sql states.
      * @param st Statement object on which to execute.
      * @param query the query to compile and execute.
      */
