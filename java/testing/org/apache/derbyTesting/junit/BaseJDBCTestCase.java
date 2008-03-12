@@ -940,28 +940,60 @@ public abstract class BaseJDBCTestCase
     /**
      * Assert that the query fails (either in compilation,
      * execution, or retrieval of results--doesn't matter)
-     * and throws a SQLException with the expected state.
+     * and throws a SQLException with the expected states.
      *
      * Assumption is that 'query' does *not* have parameters
      * that need binding and thus can be executed using a
      * simple Statement.execute() call.
+     *
+     * If there are extra chained SQLExceptions that are 
+     * not in sqlStates, this method will not fail.
      * 
-     * @param sqlState expected sql state.
+     * @param sqlStates  expected sql states.
      * @param st Statement object on which to execute.
      * @param query the query to compile and execute.
      */
-    public static void assertStatementError(String sqlState,
+    public static void assertStatementError(String[] sqlStates,
         Statement st, String query)
     {
         try {
             boolean haveRS = st.execute(query);
             fetchAndDiscardAllResults(st, haveRS);
-            fail("Expected error '" + sqlState +
-                "' but no error was thrown.");
+            String errorMsg = "Expected error(s) '" ;
+            for (int i = 0; i < sqlStates.length;i++)
+                errorMsg += " " + sqlStates[i];
+            errorMsg += "' but no error was thrown.";            
+            fail(errorMsg);            
         } catch (SQLException se) {
-            assertSQLState(sqlState, se);
+            int count = 0;
+            do {
+                assertSQLState(sqlStates[count], se);
+                count++;
+                se = se.getNextException();
+            } while (se != null && count < sqlStates.length);
+            // We must have at least as many exceptions as 
+            // we expected.
+            assertEquals("Got " +
+                    count + " exceptions. Expected at least"+
+                    sqlStates.length,count,sqlStates.length);
+            
         }
     }
+
+    /**
+     * Assert that the query fails with a single error
+     *  
+     * @param sqlState  Expected SQLState of exception
+     * @param st         
+     * @param query
+     * @see #assertStatementError(String[], Statement, String)
+     */
+    public static void assertStatementError(String sqlState, Statement st, String query) {
+        assertStatementError(new String[] {sqlState},st,query);
+    }
+        
+   
+   
     /**
      * Assert that the query fails (either in compilation,
      * execution, or retrieval of results--doesn't matter)
