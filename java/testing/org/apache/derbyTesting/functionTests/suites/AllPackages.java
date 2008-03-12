@@ -20,6 +20,7 @@
  */
 package org.apache.derbyTesting.functionTests.suites;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import junit.framework.Test;
@@ -100,6 +101,14 @@ public class AllPackages extends BaseTestCase {
         } catch (LinkageError  e) {
             return new TestSuite("SKIPPED: " + className + " - " +
                     e.getMessage());
+        } catch (InvocationTargetException ite) {
+            Throwable cause = ite.getCause();
+            if (cause instanceof LinkageError) {
+               return new TestSuite("SKIPPED: " + className + " - " +
+                       cause.getMessage());
+            } else {
+               throw ite;
+            }
         }
     }
 
