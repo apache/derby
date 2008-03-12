@@ -21,11 +21,17 @@
 
 package org.apache.derbyTesting.functionTests.tests.management;
 
+import java.io.IOException;
+import java.security.AccessController;
+import java.security.PrivilegedExceptionAction;
 import java.util.Set;
 
+import javax.management.InstanceNotFoundException;
+import javax.management.IntrospectionException;
 import javax.management.MBeanInfo;
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
+import javax.management.ReflectionException;
 
 import junit.framework.Test;
 
@@ -64,14 +70,20 @@ public class JMXTest extends MBeanTest {
         assertTrue("Derby MBEan count:" + derbyMBeans.size(),
                 derbyMBeans.size() >= 2);
         
-        MBeanServerConnection jmx = getMBeanServerConnection();
-        for (ObjectName name : derbyMBeans)
+        final MBeanServerConnection jmx = getMBeanServerConnection();
+        for (final ObjectName name : derbyMBeans)
         {
             String type = name.getKeyProperty("type");
             // Every Derby MBean has a type.
             assertNotNull(type);
             
-            MBeanInfo mbeanInfo = jmx.getMBeanInfo(name);
+            MBeanInfo mbeanInfo = AccessController.doPrivileged(
+                    new PrivilegedExceptionAction<MBeanInfo>() {
+                        public MBeanInfo run() throws InstanceNotFoundException, IntrospectionException, ReflectionException, IOException {
+                            return jmx.getMBeanInfo(name);
+                       }   
+                    }
+                );
             
             String mbeanClassName = mbeanInfo.getClassName();
             // Is the class name in the public api

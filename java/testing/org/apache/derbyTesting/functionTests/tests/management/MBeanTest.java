@@ -249,7 +249,7 @@ abstract class MBeanTest extends BaseJDBCTestCase {
 
         // check the status of the management service
         Boolean active = (Boolean) 
-                serverConn.getAttribute(mgmtObjName, "ManagementActive");
+                getAttribute(mgmtObjName, "ManagementActive");
 
         if (!active.booleanValue()) {
             // JMX management is not active, so activate it by invoking the
@@ -259,7 +259,7 @@ abstract class MBeanTest extends BaseJDBCTestCase {
                     "startManagement", 
                     new Object[0], new String[0]); // no arguments
             active = (Boolean) 
-                    serverConn.getAttribute(mgmtObjName, "ManagementActive");
+                    getAttribute(mgmtObjName, "ManagementActive");
         }
         
         assertTrue("Failed to activate Derby's JMX management", active);
@@ -273,9 +273,16 @@ abstract class MBeanTest extends BaseJDBCTestCase {
     @SuppressWarnings("unchecked")
     protected Set<ObjectName> getDerbyDomainMBeans() throws Exception
     {
-        ObjectName derbyDomain = new ObjectName("org.apache.derby:*");
-        return  (Set<ObjectName>)
-            getMBeanServerConnection().queryNames(derbyDomain, null);
+        final ObjectName derbyDomain = new ObjectName("org.apache.derby:*");
+        final MBeanServerConnection serverConn = getMBeanServerConnection(); 
+        
+        return  (Set<ObjectName>) AccessController.doPrivileged(
+            new PrivilegedExceptionAction<Object>() {
+                public Object run() throws IOException {
+                    return serverConn.queryNames(derbyDomain, null);
+               }   
+            }
+        );   
     }
     
     /**
@@ -297,8 +304,7 @@ abstract class MBeanTest extends BaseJDBCTestCase {
         final MBeanServerConnection serverConn = getMBeanServerConnection();
         
         if (!serverConn.isRegistered(mgmtObjName))
-        {
-        
+        {       
             AccessController.doPrivileged(
                 new PrivilegedExceptionAction<Object>() {
                     public Object run() throws InstanceAlreadyExistsException, MBeanRegistrationException, NotCompliantMBeanException, ReflectionException, MBeanException, IOException {
@@ -357,16 +363,22 @@ abstract class MBeanTest extends BaseJDBCTestCase {
      * @return the value returned by the operation being invoked, or 
      *         <code>null</code> if there is no return value.
      */
-    protected Object invokeOperation(ObjectName objName, 
-                                     String name, 
-                                     Object[] params, 
-                                     String[] sign)
+    protected Object invokeOperation(final ObjectName objName, 
+                                     final String name, 
+                                     final Object[] params, 
+                                     final String[] sign)
             throws Exception
     {
-        return getMBeanServerConnection().invoke(
-                objName, 
-                name, 
-                params, sign);
+        final MBeanServerConnection jmxConn = getMBeanServerConnection();
+        
+        return AccessController.doPrivileged(
+            new PrivilegedExceptionAction<Object>() {
+                public Object run() throws InstanceNotFoundException, MBeanException, ReflectionException, IOException  {
+                    return jmxConn.invoke(objName, name,
+                            params, sign);
+                }
+            }
+        );
     }
     
     /**
