@@ -1,4 +1,3 @@
------ listing properties --
 derby.drda.traceDirectory=MACHINE_SPECIFIC_DIR
 derby.drda.maxThreads=0
 derby.drda.sslMode=off
@@ -11,7 +10,6 @@ derby.drda.startNetworkServer=false
 derby.drda.host=xxxFILTERED_HOSTNAMExxx
 derby.drda.traceAll=false
 Properties with tracing on
------ listing properties --
 derby.drda.traceDirectory=MACHINE_SPECIFIC_DIR
 derby.drda.maxThreads=0
 derby.drda.sslMode=off
@@ -25,7 +23,6 @@ derby.drda.startNetworkServer=false
 derby.drda.host=xxxFILTERED_HOSTNAMExxx
 derby.drda.traceAll=false
 Properties with tracing on
------ listing properties --
 derby.drda.traceDirectory=MACHINE_SPECIFIC_DIR
 derby.drda.maxThreads=0
 derby.drda.sslMode=off

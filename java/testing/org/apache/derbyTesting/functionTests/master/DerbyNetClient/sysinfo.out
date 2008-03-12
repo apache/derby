@@ -1,7 +1,6 @@
 Testing Sysinfo
 org.apache.derby.drda.NetworkServerControl sysinfo 
 ----- Derby Network Server Information --------
------ listing properties --
 derby.drda.maxThreads=0
 derby.drda.sslMode=off
 derby.drda.keepAlive=true
@@ -33,7 +32,6 @@ Found support for locale: [zh_TW]
 End test
 Testing Sysinfo (method)
 ----- Derby Network Server Information --------
------ listing properties --
 derby.drda.maxThreads=0
 derby.drda.sslMode=off
 derby.drda.keepAlive=true
@@ -66,7 +64,6 @@ End test (method)
 Testing Sysinfo (locale)
 -----Duser.language=err -Duser.country=DE org.apache.derby.drda.NetworkServerControl sysinfo 
 ----- Derby Network Server Information --------
------ listing properties --
 derby.drda.maxThreads=0
 derby.drda.sslMode=off
 derby.drda.keepAlive=true
