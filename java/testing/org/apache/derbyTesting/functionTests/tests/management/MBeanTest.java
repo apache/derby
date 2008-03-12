@@ -72,11 +72,7 @@ abstract class MBeanTest extends BaseJDBCTestCase {
     }
     
     protected static Test suite(Class<? extends MBeanTest> testClass, String suiteName) {
-        
-        // TODO -
-        // Check for J2SE 5.0 or better? Or java.lang.management.ManagementFactory?
-        // Older VMs will get UnsupportedClassVersionError anyway...
-        
+                
         TestSuite outerSuite = new TestSuite(suiteName);
         
         Test platform = new TestSuite(testClass,  suiteName + ":platform");
@@ -86,10 +82,6 @@ abstract class MBeanTest extends BaseJDBCTestCase {
         platform = TestConfiguration.clientServerDecorator(platform);
         platform = JMXConnectionDecorator.platformMBeanServer(platform);
                 
-        // TODO: Run with no security for the moment, requires changes in the
-        // test policy files that may clash with a couple of outstanding patches.
-        platform = SecurityManagerSetup.noSecurityManager(platform);
-
         // Set of tests that run within the same virtual machine using
         // the platform MBeanServer directly.
         outerSuite.addTest(platform);
