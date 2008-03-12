@@ -218,7 +218,7 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
     private void checkSystemPermission() throws IOException {
         // test SystemPermission with null name argument
         try {
-            new SystemPermission(null);
+            new SystemPermission(null, null);
             fail("expected NullPointerException");
         } catch (NullPointerException ex) {
             // expected exception
@@ -226,7 +226,7 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
 
         // test SystemPermission with empty name argument
         try {
-            new SystemPermission("");
+            new SystemPermission("", null);
             fail("expected IllegalArgumentException");
         } catch (IllegalArgumentException ex) {
             // expected exception
@@ -234,21 +234,23 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
         
         // test SystemPermission with illegal name argument
         try {
-            new SystemPermission("illegal_name");
+            new SystemPermission("illegal_name", null);
             fail("expected IllegalArgumentException");
         } catch (IllegalArgumentException ex) {
             // expected exception
         }
 
         // test SystemPermission with legal name argument
-        final Permission sp0 = new SystemPermission(SystemPermission.SHUTDOWN);
-        final Permission sp1 = new SystemPermission(SystemPermission.SHUTDOWN);
+        final Permission sp0 = new SystemPermission(
+                SystemPermission.SERVER, SystemPermission.SHUTDOWN);
+        final Permission sp1 = new SystemPermission(
+                SystemPermission.SERVER, SystemPermission.SHUTDOWN);
 
         // test SystemPermission.getName()
-        assertEquals(sp0.getName(), SystemPermission.SHUTDOWN);
+        assertEquals(sp0.getName(), SystemPermission.SERVER);
 
         // test SystemPermission.getActions()
-        assertEquals(sp0.getActions(), "");
+        assertEquals(sp0.getActions(), SystemPermission.SHUTDOWN);
 
         // test SystemPermission.hashCode()
         assertTrue(sp0.hashCode() == sp1.hashCode());

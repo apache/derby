@@ -302,8 +302,8 @@ public abstract class InternalDriver implements ModuleControl {
 
         // the check
         try {
-            final Permission sp
-                = new SystemPermission(SystemPermission.SHUTDOWN);
+            final Permission sp = new SystemPermission(
+                SystemPermission.ENGINE, SystemPermission.SHUTDOWN);
             checkSystemPrivileges(user, sp);
         } catch (AccessControlException ace) {
             throw Util.generateCsSQLException(

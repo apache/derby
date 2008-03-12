@@ -1078,8 +1078,8 @@ public final class NetworkServerControlImpl {
 
         // the check
         try {
-            final Permission sp
-                = new SystemPermission(SystemPermission.SHUTDOWN);
+            final Permission sp  = new SystemPermission(
+                  SystemPermission.SERVER, SystemPermission.SHUTDOWN);
             // For porting the network server to J2ME/CDC, consider calling
             // abstract method InternalDriver.checkShutdownPrivileges(user)
             // instead of static SecurityUtil.checkUserHasPermission().

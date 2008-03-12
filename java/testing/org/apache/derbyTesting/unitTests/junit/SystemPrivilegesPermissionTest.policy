@@ -46,7 +46,7 @@ grant {
 
 // Specific test authorizations for System Privileges
 grant principal org.apache.derby.authentication.SystemPrincipal "AUTHORIZEDSYSTEMUSER" {
-  permission org.apache.derby.security.SystemPermission "shutdown";
+  permission org.apache.derby.security.SystemPermission "server", "shutdown";
   permission org.apache.derby.security.DatabasePermission "directory:*", "create";
   permission org.apache.derby.security.DatabasePermission "directory:level0/level1/-", "create";
   permission org.apache.derby.security.DatabasePermission "directory:/*", "create";
@@ -55,7 +55,7 @@ grant principal org.apache.derby.authentication.SystemPrincipal "AUTHORIZEDSYSTE
 
 // Specific test authorizations for System Privileges
 grant principal org.apache.derby.authentication.SystemPrincipal "SUPERUSER" {
-  permission org.apache.derby.security.SystemPermission "shutdown";
+  permission org.apache.derby.security.SystemPermission "server", "shutdown";
   permission org.apache.derby.security.DatabasePermission "directory:<<ALL FILES>>", "create";
 };
 

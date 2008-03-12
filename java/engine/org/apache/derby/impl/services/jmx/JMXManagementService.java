@@ -375,18 +375,20 @@ public final class JMXManagementService implements ManagementService, ModuleCont
             mbeanServer = null;
         }
     }
+    
+    private final static SystemPermission CONTROL =
+        new SystemPermission(
+                SystemPermission.JMX, SystemPermission.CONTROL);
 
     private void checkJMXControl() {
-        /* FUTURE DERBY-3462
         try {
-            AccessController.checkPermission(new SystemPermission("jmxControl"));
+            // AccessController.checkPermission(CONTROL);
         } catch (AccessControlException e) {
             // Need to throw a simplified version as AccessControlException
             // will have a reference to Derby's SystemPermission which most likely
             // will not be available on the client.
             throw new SecurityException(e.getMessage());
         }
-        */
     }
 
     public synchronized String getSystemIdentifier() {
