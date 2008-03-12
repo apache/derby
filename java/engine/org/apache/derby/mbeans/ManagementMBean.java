@@ -55,6 +55,7 @@ public interface ManagementMBean {
      * The system identifier is a runtime value to disambiguate
      * multiple Derby systems in the same virtual machine but
      * different class loaders.
+     * 
      * @return Runtime identifier for the system, null if Derby is not running.
      */
     public String getSystemIdentifier();
@@ -63,12 +64,22 @@ public interface ManagementMBean {
      * Inform Derby to start its JMX management by registering
      * MBeans relevant to its current state. If Derby is not
      * booted then no action is taken.
+     * <P>
+     * Require SystemPermission("jmx", "control") if a security
+     * manager is installed.
+     * 
+     * @see org.apache.derby.security.SystemPermission
      */
     public void startManagement();
     
     /**
      * Inform Derby to stop its JMX management by unregistering
      * its MBeans. If Derby is not booted then no action is taken.
+     * <P>
+     * Require SystemPermission("jmx", "control") if a security
+     * manager is installed.
+     * 
+     * @see org.apache.derby.security.SystemPermission
      */
     public void stopManagement();
 }

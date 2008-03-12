@@ -376,13 +376,21 @@ public final class JMXManagementService implements ManagementService, ModuleCont
         }
     }
     
+    /**
+     * Control permission (permissions are immutable).
+     */
     private final static SystemPermission CONTROL =
         new SystemPermission(
                 SystemPermission.JMX, SystemPermission.CONTROL);
 
+    /**
+     * Require SystemPermission("jmx", "control") to change
+     * the management state.
+     */
     private void checkJMXControl() {
         try {
-            // AccessController.checkPermission(CONTROL);
+            if (System.getSecurityManager() != null)
+                AccessController.checkPermission(CONTROL);
         } catch (AccessControlException e) {
             // Need to throw a simplified version as AccessControlException
             // will have a reference to Derby's SystemPermission which most likely

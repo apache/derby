@@ -96,6 +96,13 @@ permission java.util.PropertyPermission "derby.storage.jvmInstanceId",
 // Trusts Derby code to be a source of MBeans and to register these in the MBean server.
 //
   permission javax.management.MBeanTrustPermission "register";
+
+  // Gives permission for jmx to be used against Derby but
+  // only if JMX authentication is not being used.
+  // In that case the application would need to create
+  // a whole set of fine-grained permissions to allow specific
+  // users access to MBeans and actions they perform.
+  permission org.apache.derby.security.SystemPermission "jmx", "control";
   
  
   // These permissions are needed when testing code instrumented with EMMA.
@@ -201,6 +208,10 @@ grant codeBase "${derbyTesting.testjar}derbyTesting.jar" {
   permission javax.management.MBeanPermission "org.apache.derby.mbeans.*#-[org.apache.derby:*]", "getMBeanInfo";
   permission javax.management.MBeanPermission "-#-[-]", "queryNames";
   permission javax.management.MBeanPermission "org.apache.derby.mbeans.*#-[org.apache.derby:*]", "queryNames";
+  
+  // Test code needs this as well for the platform MBeanServer
+  // tests where the testing code is in the stack frame.
+  permission org.apache.derby.security.SystemPermission "jmx", "control";
 
   // These permissions are needed when testing code instrumented with EMMA.
   permission java.lang.RuntimePermission "${emma.active}writeFileDescriptor";
@@ -263,7 +274,8 @@ grant codeBase "${derbyTesting.codeclasses}" {
   permission javax.management.MBeanPermission "org.apache.derby.mbeans.*#-[org.apache.derby:*]", "getMBeanInfo";
   permission javax.management.MBeanPermission "-#-[-]", "queryNames";
   permission javax.management.MBeanPermission "org.apache.derby.mbeans.*#-[org.apache.derby:*]", "queryNames";
-
+  
+  permission org.apache.derby.security.SystemPermission "jmx", "control";
 };
 
 // JUnit jar file tries to read junit.properties in the user's
