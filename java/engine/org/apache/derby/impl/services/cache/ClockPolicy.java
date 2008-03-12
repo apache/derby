@@ -70,6 +70,12 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
  */
 final class ClockPolicy implements ReplacementPolicy {
 
+    /**
+     * The minimum number of items to check before we decide to give up
+     * looking for evictable entries when rotating the clock.
+     */
+    private static final int MIN_ITEMS_TO_CHECK = 20;
+
     /** The cache manager for which this replacement policy is used. */
     private final ConcurrentCache cacheManager;
 
@@ -122,10 +128,9 @@ final class ClockPolicy implements ReplacementPolicy {
      * entries available for reuse, increase the size of the cache.
      *
      * @param entry the entry to insert (must be locked)
-     * @return callback object used by the cache manager
      * @exception StandardException if an error occurs when inserting the entry
      */
-    public Callback insertEntry(CacheEntry entry) throws StandardException {
+    public void insertEntry(CacheEntry entry) throws StandardException {
 
         final int size;
         synchronized (clock) {
@@ -134,7 +139,8 @@ final class ClockPolicy implements ReplacementPolicy {
                 if (freeEntries.get() == 0) {
                     // We have not reached the maximum size yet, and there's no
                     // free entry to reuse. Make room by growing.
-                    return grow(entry);
+                    clock.add(new Holder(entry));
+                    return;
                 }
             }
         }
@@ -156,13 +162,12 @@ final class ClockPolicy implements ReplacementPolicy {
         // has reached its maximum size. Otherwise, we only look for invalid
         // entries and rather grow the cache than evict valid entries.
         Holder h = rotateClock(entry, (float) 0.2, size >= maxSize);
-        if (h != null) {
-            return h;
-        }
 
-        // didn't find a victim, so we need to grow
-        synchronized (clock) {
-            return grow(entry);
+        if (h == null) {
+            // didn't find a victim, so we need to grow
+            synchronized (clock) {
+                clock.add(new Holder(entry));
+            }
         }
     }
 
@@ -349,19 +354,6 @@ final class ClockPolicy implements ReplacementPolicy {
     }
 
     /**
-     * Increase the size of the clock by one and return a new holder. The
-     * caller must be synchronized on <code>clock</code>.
-     *
-     * @param entry the entry to insert into the clock
-     * @return a new holder which wraps the entry
-     */
-    private Holder grow(CacheEntry entry) {
-        Holder h = new Holder(entry);
-        clock.add(h);
-        return h;
-    }
-
-    /**
      * Rotate the clock in order to find a free space for a new entry. If
      * <code>allowEvictions</code> is <code>true</code>, an not recently used
      * object might be evicted to make room for the new entry. Otherwise, only
@@ -384,25 +376,16 @@ final class ClockPolicy implements ReplacementPolicy {
                                boolean allowEvictions)
             throws StandardException {
 
-        // calculate how many items to check
-        int itemsToCheck;
+        // Calculate how many items we need to check before we give up
+        // finding an evictable one. If we don't allow evictions, none should
+        // be checked (however, we may search for unused entries in the loop
+        // below).
+        int itemsToCheck = 0;
         if (allowEvictions) {
-            final int size;
             synchronized (clock) {
-                size = clock.size();
+                itemsToCheck = Math.max(MIN_ITEMS_TO_CHECK,
+                                        (int) (clock.size() * partOfClock));
             }
-            if (size < 20) {
-                // if we have a very small cache, allow two rounds before
-                // giving up
-                itemsToCheck = size * 2;
-            } else {
-                // otherwise, just check a fraction of the clock
-                itemsToCheck = (int) (size * partOfClock);
-            }
-        } else {
-            // we don't allow evictions, so we shouldn't check any items unless
-            // there are unused ones
-            itemsToCheck = 0;
         }
 
         // Check up to itemsToCheck entries before giving up, but don't give up
@@ -432,32 +415,7 @@ final class ClockPolicy implements ReplacementPolicy {
 
             e.lock();
             try {
-                if (h.getEntry() != e) {
-                    // Someone else evicted this entry before we obtained the
-                    // lock. Move on to the next entry.
-                    continue;
-                }
-
-                if (e.isKept()) {
-                    // The entry is in use. Move on to the next entry.
-                    continue;
-                }
-
-                if (SanityManager.DEBUG) {
-                    // At this point the entry must be valid. If it's not, it's
-                    // either removed (in which case we shouldn't get here), or
-                    // it is setting it's identity (in which case it is kept,
-                    // and we shouldn't get here).
-                    SanityManager.ASSERT(e.isValid(),
-                            "Holder contains invalid entry");
-                    SanityManager.ASSERT(!h.isEvicted(),
-                            "Trying to reuse an evicted holder");
-                }
-
-                if (h.recentlyUsed) {
-                    // The object has been used recently. Clear the
-                    // recentlyUsed flag and move on to the next entry.
-                    h.recentlyUsed = false;
+                if (!isEvictable(e, h, true)) {
                     continue;
                 }
 
@@ -509,6 +467,56 @@ final class ClockPolicy implements ReplacementPolicy {
         }
 
         return null;
+    }
+
+    /**
+     * Check if an entry can be evicted. Only entries that still are present in
+     * the cache, are not kept and not recently used, can be evicted. This
+     * method does not check whether the {@code Cacheable} contained in the
+     * entry is dirty, so it may be necessary to clean it before an eviction
+     * can take place even if the method returns {@code true}. The caller must
+     * hold the lock on the entry before calling this method.
+     *
+     * @param e the entry to check
+     * @param h the holder which holds the entry
+     * @param clearRecentlyUsedFlag tells whether or not the recently used flag
+     * should be cleared on the entry ({@code true} only when called as part of
+     * a normal clock rotation)
+     * @return whether or not this entry can be evicted (provided that its
+     * {@code Cacheable} is cleaned first)
+     */
+    private boolean isEvictable(CacheEntry e, Holder h,
+                                boolean clearRecentlyUsedFlag) {
+
+        if (h.getEntry() != e) {
+            // Someone else evicted this entry before we obtained the
+            // lock, so we can't evict it.
+            return false;
+        }
+
+        if (e.isKept()) {
+            // The entry is in use and cannot be evicted.
+            return false;
+        }
+
+        if (SanityManager.DEBUG) {
+            // At this point the entry must be valid. If it's not, it's either
+            // removed (in which case getEntry() != e and we shouldn't get
+            // here), or it is setting its identity (in which case it is kept
+            // and we shouldn't get here).
+            SanityManager.ASSERT(e.isValid(), "Holder contains invalid entry");
+            SanityManager.ASSERT(!h.isEvicted(), "Holder is evicted");
+        }
+
+        if (h.recentlyUsed) {
+            // The object has been used recently, so it cannot be evicted.
+            if (clearRecentlyUsedFlag) {
+                h.recentlyUsed = false;
+            }
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -633,29 +641,7 @@ final class ClockPolicy implements ReplacementPolicy {
 
             e.lock();
             try {
-                if (h.getEntry() != e) {
-                    // Entry got evicted before we got the lock. Move on.
-                    continue;
-                }
-
-                if (e.isKept()) {
-                    // Don't evict entries currently in use.
-                    continue;
-                }
-
-                if (SanityManager.DEBUG) {
-                    // At this point the entry must be valid. If it's not, it's
-                    // either removed (in which case we shouldn't get here), or
-                    // it is setting it's identity (in which case it is kept,
-                    // and we shouldn't get here).
-                    SanityManager.ASSERT(e.isValid(),
-                            "Holder contains invalid entry");
-                    SanityManager.ASSERT(!h.isEvicted(),
-                            "Trying to evict already evicted holder");
-                }
-
-                if (h.recentlyUsed) {
-                    // Don't evict recently used entries.
+                if (!isEvictable(e, h, false)) {
                     continue;
                 }
 
