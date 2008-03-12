@@ -2058,7 +2058,10 @@
   <target name="junit-all" depends="junit-core,junit-jdbc4,junit-jmx">
   </target>
  
-  <target name="junitreport" depends="junit-sysinfo,junit-all">
+  <target name="junitreport" depends="junit-all,junit-html"/>
+  
+  <!-- Convert the junit xml format to HTML -->
+  <target name="junit-html" depends="junit-sysinfo">
     <junitreport todir="junit_${derby.junit.timestamp}">
       <fileset dir="junit_${derby.junit.timestamp}">
         <include name="TEST-*.xml"/>
