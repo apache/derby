@@ -190,14 +190,9 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
         return suite;
     }
     
-    public void tearDown() throws Exception {
-        AccessController.doPrivileged
-        (new java.security.PrivilegedAction(){
-            public Object run(){
-                return System.getProperties().remove(
-                        "derby.drda.securityMechanism");
-            }
-        });
+    protected void tearDown() throws Exception {
+        removeSystemProperty("derby.drda.securityMechanism");
+
         super.tearDown();
     }
 
@@ -416,15 +411,9 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
             }
         }
 
+        setSystemProperty("derby.drda.securityMechanism",
+                derby_drda_securityMechanism);
         try {
-            AccessController.doPrivileged
-            (new java.security.PrivilegedAction(){
-                public Object run(){
-                    return System.setProperty(
-                        "derby.drda.securityMechanism",
-                        derby_drda_securityMechanism);
-                }
-            });
             
             // if the security mechanism isn't supported or invalid, getting a
             // networkservercontrol will fail.
@@ -1139,8 +1128,6 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
         println("Turning ON Derby BUILTIN authentication");
         Connection conn = getDataSourceConnectionWithSecMec(
             "neelima", "lee", new Short(SECMEC_USRSSBPWD));
-        if (conn == null)
-            return; // Exception would have been raised
 
         // Turn on BUILTIN authentication
         CallableStatement cs = conn.prepareCall(
@@ -1194,8 +1181,6 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
         // Prepare to turn OFF Derby BUILTIN authentication
         conn = getDataSourceConnectionWithSecMec("neelima", "lee",
             new Short(SECMEC_USRSSBPWD));
-        if (conn == null)
-            return; // Exception would have been raised
 
         // Turn off BUILTIN authentication
         cs = conn.prepareCall(
