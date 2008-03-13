@@ -32,8 +32,8 @@ import org.apache.derby.iapi.reference.SQLState;
 
 public class BrokeredPreparedStatement40 extends BrokeredPreparedStatement30{
     
-    public BrokeredPreparedStatement40(BrokeredStatementControl control, int jdbcLevel, String sql, Object generatedKeys) throws SQLException {
-        super(control, jdbcLevel, sql,generatedKeys);
+    public BrokeredPreparedStatement40(BrokeredStatementControl control, String sql, Object generatedKeys) throws SQLException {
+        super(control, sql,generatedKeys);
     }
     
     public void setRowId(int parameterIndex, RowId x) throws SQLException{

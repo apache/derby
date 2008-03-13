@@ -30,8 +30,8 @@ import java.net.URL;
 public class BrokeredPreparedStatement30 extends BrokeredPreparedStatement {
 
 	private final Object generatedKeys;
-	public BrokeredPreparedStatement30(BrokeredStatementControl control, int jdbcLevel, String sql, Object generatedKeys) throws SQLException {
-		super(control, jdbcLevel, sql);
+	public BrokeredPreparedStatement30(BrokeredStatementControl control, String sql, Object generatedKeys) throws SQLException {
+		super(control,sql);
 		this.generatedKeys = generatedKeys;
 	}
 

@@ -34,8 +34,8 @@ import org.apache.derby.impl.jdbc.Util;
 
 public class BrokeredCallableStatement40 extends  BrokeredCallableStatement30{
     
-    public BrokeredCallableStatement40(BrokeredStatementControl control, int jdbcLevel, String sql) throws SQLException{
-        super(control,jdbcLevel,sql);
+    public BrokeredCallableStatement40(BrokeredStatementControl control, String sql) throws SQLException{
+        super(control, sql);
     }
     
     public Reader getCharacterStream(int parameterIndex)

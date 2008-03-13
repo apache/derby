@@ -189,12 +189,10 @@ public class BrokeredConnection30 extends BrokeredConnection
 	}
 
 	public BrokeredPreparedStatement newBrokeredStatement(BrokeredStatementControl statementControl, String sql, Object generatedKeys) throws SQLException {
-		return new BrokeredPreparedStatement30(statementControl, getJDBCLevel(), sql, generatedKeys);
+		return new BrokeredPreparedStatement30(statementControl, sql, generatedKeys);
 	}
 	public BrokeredCallableStatement newBrokeredStatement(BrokeredStatementControl statementControl, String sql) throws SQLException {
-		return new BrokeredCallableStatement30(statementControl, getJDBCLevel(), sql);
+		return new BrokeredCallableStatement30(statementControl, sql);
 	}
-
-	int getJDBCLevel() { return 3;}
 
 }
