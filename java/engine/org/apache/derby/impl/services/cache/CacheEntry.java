@@ -119,11 +119,16 @@ final class CacheEntry {
 
     /**
      * Block until this entry's cacheable has been initialized (that is, until
-     * <code>settingIdentityComplete()</code> has been called on this object)
-     * and the current thread is granted exclusive access to the entry.
+     * {@code settingIdentityComplete()} has been called on this object). If
+     * the cacheable has been initialized before this method is called, it will
+     * return immediately. The entry must have been locked for exclusive access
+     * before this method is called. If the method needs to wait, it will
+     * release the lock and reobtain it when it wakes up again.
      */
-    void lockWhenIdentityIsSet() {
-        lock();
+    void waitUntilIdentityIsSet() {
+        if (SanityManager.DEBUG) {
+            SanityManager.ASSERT(mutex.isHeldByCurrentThread());
+        }
         while (settingIdentity != null) {
             settingIdentity.awaitUninterruptibly();
         }

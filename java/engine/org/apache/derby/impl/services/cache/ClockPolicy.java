@@ -76,6 +76,18 @@ final class ClockPolicy implements ReplacementPolicy {
      */
     private static final int MIN_ITEMS_TO_CHECK = 20;
 
+    /**
+     * How large part of the clock to look at before giving up in
+     * {@code rotateClock()}.
+     */
+    private static final float MAX_ROTATION = 0.2f;
+
+    /**
+     * How large part of the clock to look at before giving up finding
+     * an evictable entry in {@code shrinkMe()}.
+     */
+    private static final float PART_OF_CLOCK_FOR_SHRINK = 0.1f;
+
     /** The cache manager for which this replacement policy is used. */
     private final ConcurrentCache cacheManager;
 
@@ -161,7 +173,7 @@ final class ClockPolicy implements ReplacementPolicy {
         // find free space for the entry. Only allow evictions if the cache
         // has reached its maximum size. Otherwise, we only look for invalid
         // entries and rather grow the cache than evict valid entries.
-        Holder h = rotateClock(entry, (float) 0.2, size >= maxSize);
+        Holder h = rotateClock(entry, size >= maxSize);
 
         if (h == null) {
             // didn't find a victim, so we need to grow
@@ -359,21 +371,18 @@ final class ClockPolicy implements ReplacementPolicy {
      * object might be evicted to make room for the new entry. Otherwise, only
      * unused entries are searched for. When evictions are allowed, entries are
      * marked as not recently used when the clock hand sweeps over them. The
-     * search stops when a reusable entry is found, or when as many entries as
-     * specified by <code>partOfClock</code> have been checked. If there are
+     * search stops when a reusable entry is found, or when more than a certain
+     * percentage of the entries have been visited. If there are
      * free (unused) entries, the search will continue until a reusable entry
      * is found, regardless of how many entries that need to be checked.
      *
      * @param entry the entry to insert
-     * @param partOfClock how large part of the clock to look at before we give
-     * up
      * @param allowEvictions tells whether evictions are allowed (normally
      * <code>true</code> if the cache is full and <code>false</code> otherwise)
      * @return a holder that we can reuse, or <code>null</code> if we didn't
      * find one
      */
-    private Holder rotateClock(CacheEntry entry, float partOfClock,
-                               boolean allowEvictions)
+    private Holder rotateClock(CacheEntry entry, boolean allowEvictions)
             throws StandardException {
 
         // Calculate how many items we need to check before we give up
@@ -384,7 +393,7 @@ final class ClockPolicy implements ReplacementPolicy {
         if (allowEvictions) {
             synchronized (clock) {
                 itemsToCheck = Math.max(MIN_ITEMS_TO_CHECK,
-                                        (int) (clock.size() * partOfClock));
+                                        (int) (clock.size() * MAX_ROTATION));
             }
         }
 
@@ -585,8 +594,8 @@ final class ClockPolicy implements ReplacementPolicy {
                     "Called shrinkMe() without ensuring exclusive access");
         }
 
-        // Look at 10% of the cache to find candidates for shrinking
-        int maxLooks = Math.max(1, maxSize / 10);
+        // Max number of candidates to look at (always at least 1).
+        int maxLooks = Math.max(1, (int) (maxSize * PART_OF_CLOCK_FOR_SHRINK));
 
         // Since we don't scan the entire cache, start at the clock hand so
         // that we don't always scan the first 10% of the cache.

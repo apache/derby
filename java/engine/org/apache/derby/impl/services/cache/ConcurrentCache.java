@@ -117,9 +117,11 @@ final class ConcurrentCache implements CacheManager {
         CacheEntry entry = cache.get(key);
         while (true) {
             if (entry != null) {
-                // Found an entry in the cache. Lock it, but wait until its
-                // identity has been set.
-                entry.lockWhenIdentityIsSet();
+                // Found an entry in the cache, lock it.
+                entry.lock();
+                // If someone else is setting the identity of the Cacheable
+                // in this entry, we'll need to wait for them to complete.
+                entry.waitUntilIdentityIsSet();
                 if (entry.isValid()) {
                     // Entry is still valid. Return it.
                     return entry;
@@ -324,8 +326,12 @@ final class ConcurrentCache implements CacheManager {
         }
 
         // Lock the entry, but wait until its identity has been set.
-        entry.lockWhenIdentityIsSet();
+        entry.lock();
         try {
+            // If the identity of the cacheable is being set, we need to wait
+            // for it to complete so that we don't return a cacheable that
+            // isn't fully initialized.
+            entry.waitUntilIdentityIsSet();
             // Return the cacheable. If the entry was removed right before we
             // locked it, getCacheable() returns null and so should we do.
             Cacheable item = entry.getCacheable();
