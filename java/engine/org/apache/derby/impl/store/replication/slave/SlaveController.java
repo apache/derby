@@ -224,6 +224,10 @@ public class SlaveController
         // connection has been established or until we are no longer
         // in replication slave mode
         receiver = new ReplicationMessageReceive(slavehost, slaveport, dbname);
+        // If slaveport was not specified when starting the slave, the
+        // receiver will use the default port. Set slaveport to the port
+        // actually used by the receiver
+        slaveport = receiver.getPort();
         while (!setupConnection()) {
             if (!inReplicationSlaveMode) {
                 // If we get here, another thread has called
@@ -349,7 +353,7 @@ public class SlaveController
             } else {
                 throw StandardException.newException
                     (SQLState.REPLICATION_CONNECTION_EXCEPTION, e,
-                    dbname, slavehost, String.valueOf(receiver.getPort()));
+                    dbname, slavehost, String.valueOf(slaveport));
             }
         }
     }
