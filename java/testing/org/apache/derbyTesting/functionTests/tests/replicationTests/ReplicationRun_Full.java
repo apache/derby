@@ -81,7 +81,7 @@ public class ReplicationRun_Full extends ReplicationRun
                     masterServerHost,
                     ALL_INTERFACES, // masterServerHost, // "0.0.0.0", // All. or use masterServerHost for interfacesToListenOn,
                     masterServerPort,
-                    masterDatabasePath +FS+ masterDbSubPath); // Distinguishing master/slave
+                    masterDbSubPath); // Distinguishing master/slave
             runTest(replicationTest,
                     jvmVersion,
                     testClientHost,
@@ -104,7 +104,7 @@ public class ReplicationRun_Full extends ReplicationRun
                 masterServerHost,
                 ALL_INTERFACES, // masterServerHost, // "0.0.0.0", // All. or use masterServerHost for interfacesToListenOn,
                 masterServerPort,
-                masterDatabasePath +FS+ masterDbSubPath); // Distinguishing master/slave
+                masterDbSubPath); // Distinguishing master/slave
         ///////////////////////////////////////////////////////
         // State: PostStartedMasterServer, PreStartedSlaveServer
         
@@ -120,7 +120,7 @@ public class ReplicationRun_Full extends ReplicationRun
                 slaveServerHost,
                 ALL_INTERFACES, // slaveServerHost, // "0.0.0.0", // All. or use slaveServerHost for interfacesToListenOn,
                 slaveServerPort,
-                slaveDatabasePath +FS+ slaveDbSubPath); // Distinguishing master/slave
+                slaveDbSubPath); // Distinguishing master/slave
         ///////////////////////////////////////////////////////
         // State: PostStartedMasterServer, PostStartedSlaveServer
         //        PreStartedMaster,        PreStartedSlave
@@ -286,7 +286,7 @@ public class ReplicationRun_Full extends ReplicationRun
                     slaveServerHost,
                     ALL_INTERFACES, // slaveServerHost, // "0.0.0.0", // All. or use slaveServerHost for interfacesToListenOn,
                     slaveServerPort,
-                    slaveDatabasePath +FS+ slaveDbSubPath); // Distinguishing master/slave
+                    slaveDbSubPath); // Distinguishing master/slave
         }
         /* BEGIN Failover do not yet clean replication mode on slave! Must restart the server!*/
         else{
@@ -307,7 +307,7 @@ public class ReplicationRun_Full extends ReplicationRun
                     slaveServerHost,
                     ALL_INTERFACES,
                     slaveServerPort,
-                    slaveDatabasePath +FS+ slaveDbSubPath); // Distinguishing master/slave
+                    slaveDbSubPath); // Distinguishing master/slave
             /* */
           }
         }/* END */
@@ -325,7 +325,7 @@ public class ReplicationRun_Full extends ReplicationRun
                     masterServerHost,
                     ALL_INTERFACES, // masterServerHost, // "0.0.0.0", // All. or use slaveServerHost for interfacesToListenOn,
                     masterServerPort,
-                    masterDatabasePath +FS+ masterDbSubPath); // Distinguishing master/slave
+                    masterDbSubPath); // Distinguishing master/slave
         }
         verifyMaster(); // NB NB Hangs here with localhost/ReplicationTestRun!
         

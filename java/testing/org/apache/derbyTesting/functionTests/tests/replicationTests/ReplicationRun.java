@@ -1536,7 +1536,7 @@ public class ReplicationRun extends BaseTestCase
         return output;
     }
     private void runUserCommandLocally(String command, String userDir, String ID)
-    {
+    { // Running on localhost.
         util.DEBUG("");
         final String debugId = "runUserCommandLocally " + ID + " ";
         util.DEBUG("+++ runUserCommandLocally " + command + " / " + userDir);
@@ -1549,11 +1549,13 @@ public class ReplicationRun extends BaseTestCase
         
         final String fullCmd = command;
         
-        String[] envElements = {""};
+        String[] envElements = null;
+        /*
         tmp ="";
         for ( int i=0;i<envElements.length;i++)
         {tmp = tmp + envElements[i] + " ";}
         util.DEBUG(debugId+"envElements: " + tmp);
+         */
         
         final File workingDir = new File(workingDirName);
         
@@ -1708,7 +1710,7 @@ public class ReplicationRun extends BaseTestCase
                 }; */
         final String[] envElements = {"CLASS_PATH="+""
                 , "PATH="+FS+"home"+FS+testUser+FS+"bin:$PATH" // "/../bin"
-        };
+                };
         
         String workingDirName = System.getProperty("user.dir");
         util.DEBUG(ID+"user.dir: " + workingDirName);
@@ -2085,7 +2087,7 @@ public class ReplicationRun extends BaseTestCase
             String serverHost,
             String interfacesToListenOn,
             int serverPort,
-            String fullDbDirPath)
+            String dbSubDirPath)
             throws Exception
     {
             stopServer(serverVM, serverVersion,
@@ -2095,16 +2097,17 @@ public class ReplicationRun extends BaseTestCase
                     serverHost,
                     interfacesToListenOn, 
                     serverPort,
-                    fullDbDirPath); // Distinguishing master/slave
+                    dbSubDirPath); // Distinguishing master/slave
     }
     NetworkServerControl startServer(String serverVM, String serverVersion,
             String serverHost,
             String interfacesToListenOn,
             int serverPort,
-            String fullDbDirPath)
+            String dbSubDirPath) // fullDbDirPath)
             throws Exception
     {
         util.DEBUG("");
+         
         final String debugId = "startServer@" + serverHost + ":" + serverPort + " ";
         util.DEBUG(debugId+"+++ StartServer " + serverVM + " / " + serverVersion);
         
@@ -2131,11 +2134,15 @@ public class ReplicationRun extends BaseTestCase
                 , " -p ", serverPort+""
                 , " " + securityOption
                 };
-        final String[] envElements = {"CLASS_PATH="+serverClassPath
+        String[] envElements = {"CLASS_PATH="+serverClassPath
                 , "PATH="+serverVM+FS+".."+FS+"bin"
                 };
+        if ( serverHost.equals("localhost") )
+        { // Simply inherit environment:
+            envElements = null;
+        }
         
-        String workingDirName = fullDbDirPath;
+        String workingDirName = userDir+FS+dbSubDirPath;// was fullDbDirPath; // "system" for this server, typically <user.dir>/db_master or ..slave
         util.DEBUG(debugId+"user.dir: " + workingDirName);
         String tmp ="";
         
@@ -2145,8 +2152,11 @@ public class ReplicationRun extends BaseTestCase
         
         final String fullCmd = tmp;
         tmp ="";
-        for ( int i=0;i<envElements.length;i++)
-        {tmp = tmp + envElements[i] + " ";}
+        if ( envElements != null )
+        {
+            for ( int i=0;i<envElements.length;i++)
+            {tmp = tmp + envElements[i] + " ";}
+        }
         util.DEBUG(debugId+"envElements: " + tmp);
         
         final File workingDir = new File(workingDirName);
@@ -2158,7 +2168,7 @@ public class ReplicationRun extends BaseTestCase
         }
         
         String shellCmd = null;
-        /*
+        /* 
         if ( serverHost.equalsIgnoreCase("localhost") )
         {
             // 1. Can not select jvm or Derby version in this case.
@@ -2200,6 +2210,7 @@ public class ReplicationRun extends BaseTestCase
             final String localCommand = shellCmd;
             util.DEBUG(debugId+"localCommand: " + localCommand);
             
+            final String[] fEnvElements = envElements;
             Thread serverThread = new Thread(
                     new Runnable()
             {
@@ -2209,7 +2220,7 @@ public class ReplicationRun extends BaseTestCase
                     try
                     {
                         util.DEBUG(debugId+"************** In run().");
-                        proc = Runtime.getRuntime().exec(localCommand,envElements,workingDir);
+                        proc = Runtime.getRuntime().exec(localCommand,fEnvElements,workingDir);
                         util.DEBUG(debugId+"************** Done exec().");
                         processDEBUGOutput(debugId+"pDo ", proc);
                     }
@@ -2223,7 +2234,7 @@ public class ReplicationRun extends BaseTestCase
             );
             util.DEBUG(debugId+"************** Do .start().");
             serverThread.start();
-            pingServer(serverHost, serverPort, 5); // Wait for the server to come up in a reasonable time....
+            pingServer(serverHost, serverPort, 15); // Wait for the server to come up in a reasonable time....
             
         }
         
@@ -2251,7 +2262,7 @@ public class ReplicationRun extends BaseTestCase
                 InetAddress.getByName(interfacesToListenOn), serverPort);
         
         server.start(null); 
-        pingServer(serverHost, serverPort, 5);
+        pingServer(serverHost, serverPort, 15);
         
         Properties sp = server.getCurrentProperties();
         sp.setProperty("noSecurityManager", 
@@ -2325,9 +2336,13 @@ public class ReplicationRun extends BaseTestCase
                 , " -p ", serverPort+""
                 // , " " + securityOption
                 };
-        final String[] envElements = {"CLASS_PATH="+serverClassPath
+        String[] envElements = {"CLASS_PATH="+serverClassPath
                 , "PATH="+serverVM+FS+".."+FS+"bin"
                 };
+        if ( serverHost.equals("localhost") )
+        {
+            envElements =null;
+        }
         
         String workingDirName = System.getProperty("user.dir"); // Means we will do the shutdown wherever we are
         util.DEBUG(debugId+"user.dir: " + workingDirName);
@@ -2339,8 +2354,11 @@ public class ReplicationRun extends BaseTestCase
         
         final String fullCmd = tmp;
         tmp ="";
-        for ( int i=0;i<envElements.length;i++)
-        {tmp = tmp + envElements[i] + " ";}
+        if ( envElements != null )
+        {
+            for ( int i=0;i<envElements.length;i++)
+            {tmp = tmp + envElements[i] + " ";}
+        }
         util.DEBUG(debugId+"envElements: " + tmp);
         
         final File workingDir = new File(workingDirName);

@@ -86,7 +86,7 @@ public class ReplicationRun_Local_StateTest_part1 extends ReplicationRun
                 masterServerHost,
                 ALL_INTERFACES, // masterServerHost, // "0.0.0.0", // All. or use masterServerHost for interfacesToListenOn,
                 masterServerPort,
-                masterDatabasePath +FS+ masterDbSubPath); // Distinguishing master/slave
+                masterDbSubPath); // Distinguishing master/slave
         
         // State test. 
         _testPreStartedSlaveServer(); 
@@ -95,7 +95,7 @@ public class ReplicationRun_Local_StateTest_part1 extends ReplicationRun
                 slaveServerHost,
                 ALL_INTERFACES, // slaveServerHost, // "0.0.0.0", // All. or use slaveServerHost for interfacesToListenOn,
                 slaveServerPort,
-                slaveDatabasePath +FS+ slaveDbSubPath); // Distinguishing master/slave
+                slaveDbSubPath); // Distinguishing master/slave
         
         startServerMonitor(slaveServerHost);
         
@@ -183,7 +183,7 @@ public class ReplicationRun_Local_StateTest_part1 extends ReplicationRun
     private void _testPreStartedMasterServer()
     {
         Connection conn = null;
-        String db = masterDatabasePath +"/"+ReplicationRun.masterDbSubPath +"/"+ replicatedDb;
+        String db = masterDatabasePath +FS+ReplicationRun.masterDbSubPath +FS+ replicatedDb;
         String connectionURL = "jdbc:derby:"
                 + "//" + masterServerHost + ":" + masterServerPort + "/"
                 + db
@@ -211,7 +211,7 @@ public class ReplicationRun_Local_StateTest_part1 extends ReplicationRun
     private void _testPreStartedSlaveServer()
     {
         Connection conn = null;
-        String db = slaveDatabasePath +"/"+ReplicationRun.slaveDbSubPath +"/"+ replicatedDb;
+        String db = slaveDatabasePath +FS+ReplicationRun.slaveDbSubPath +FS+ replicatedDb;
         String connectionURL = "jdbc:derby:"  
                 + "//" + slaveServerHost + ":" + slaveServerPort + "/"
                 + db
@@ -243,7 +243,7 @@ public class ReplicationRun_Local_StateTest_part1 extends ReplicationRun
         Connection conn = null;
         
         // 1.  stopMaster on master: fail
-        db = masterDatabasePath +"/"+ReplicationRun.masterDbSubPath +"/"+ replicatedDb;
+        db = masterDatabasePath +FS+ReplicationRun.masterDbSubPath +FS+ replicatedDb;
         connectionURL = "jdbc:derby:"
                 + "//" + masterServerHost + ":" + masterServerPort + "/"
                 + db
@@ -268,7 +268,7 @@ public class ReplicationRun_Local_StateTest_part1 extends ReplicationRun
         }
         
         // 2. stopSlave on slave: fail
-        db = slaveDatabasePath +"/"+ReplicationRun.slaveDbSubPath +"/"+ replicatedDb;
+        db = slaveDatabasePath +FS+ReplicationRun.slaveDbSubPath +FS+ replicatedDb;
         connectionURL = "jdbc:derby:"
                 + "//" + slaveServerHost + ":" + slaveServerPort + "/"
                 + db
@@ -294,7 +294,7 @@ public class ReplicationRun_Local_StateTest_part1 extends ReplicationRun
     private void _testPreStartedSlave()
     {
         Connection conn = null;
-        String db = slaveDatabasePath +"/"+ReplicationRun.slaveDbSubPath +"/"+ replicatedDb;
+        String db = slaveDatabasePath +FS+ReplicationRun.slaveDbSubPath +FS+ replicatedDb;
         String connectionURL = "jdbc:derby:"  
                 + "//" + slaveServerHost + ":" + slaveServerPort + "/"
                 + db
@@ -344,7 +344,7 @@ public class ReplicationRun_Local_StateTest_part1 extends ReplicationRun
     throws Exception
     {
         Connection conn = null;
-        String db = masterDatabasePath +"/"+ReplicationRun.masterDbSubPath +"/"+ replicatedDb;
+        String db = masterDatabasePath +FS+ReplicationRun.masterDbSubPath +FS+ replicatedDb;
         String connectionURL = "jdbc:derby:"  
                 + "//" + masterServerHost + ":" + masterServerPort + "/"
                 + db
@@ -406,7 +406,7 @@ public class ReplicationRun_Local_StateTest_part1 extends ReplicationRun
         
         // A 2. StartSlave connect should fail:
         util.DEBUG("startSlave attempt should fail on: " + connectionURL);
-        db = slaveDatabasePath +"/"+ReplicationRun.slaveDbSubPath +"/"+ replicatedDb;
+        db = slaveDatabasePath +FS+ReplicationRun.slaveDbSubPath +FS+ replicatedDb;
         connectionURL = "jdbc:derby:"  
                 + "//" + slaveServerHost + ":" + slaveServerPort + "/"
                 + db

@@ -89,13 +89,13 @@ public class ReplicationRun_Local extends ReplicationRun
                 masterServerHost,
                 ALL_INTERFACES, // masterServerHost, // "0.0.0.0", // All. or use masterServerHost for interfacesToListenOn,
                 masterServerPort,
-                masterDatabasePath +FS+ masterDbSubPath); // Distinguishing master/slave
+                masterDbSubPath); // Distinguishing master/slave
         
         slaveServer = startServer(slaveJvmVersion, derbySlaveVersion,
                 slaveServerHost,
                 ALL_INTERFACES, // slaveServerHost, // "0.0.0.0", // All. or use slaveServerHost for interfacesToListenOn,
                 slaveServerPort,
-                slaveDatabasePath +FS+ slaveDbSubPath); // Distinguishing master/slave
+                slaveDbSubPath); // Distinguishing master/slave
         
         startServerMonitor(slaveServerHost);
         
