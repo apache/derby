@@ -132,9 +132,10 @@ final public class SystemPermission extends BasicPermission {
         actions = actions.trim().toLowerCase(Locale.ENGLISH);
         
         boolean[] seenAction = new boolean[LEGAL_ACTIONS.size()];
-        StringTokenizer st = new StringTokenizer(actions);
+        StringTokenizer st = new StringTokenizer(actions, ",");
         while (st.hasMoreTokens()) {
-            int validAction = LEGAL_ACTIONS.indexOf(st.nextElement());
+            String action = st.nextToken().trim().toLowerCase(Locale.ENGLISH);
+            int validAction = LEGAL_ACTIONS.indexOf(action);
             if (validAction != -1)
                 seenAction[validAction] = true;
         }
@@ -191,10 +192,9 @@ final public class SystemPermission extends BasicPermission {
      * and can be used for the implies method.
      */
     private static int getActionMask(String actions) {
-        actions = actions.trim().toLowerCase(Locale.ENGLISH);
         
         int mask = 0;
-        StringTokenizer st = new StringTokenizer(actions);
+        StringTokenizer st = new StringTokenizer(actions, ",");
         while (st.hasMoreTokens()) {
             int validAction = LEGAL_ACTIONS.indexOf(st.nextElement());
             if (validAction != -1)

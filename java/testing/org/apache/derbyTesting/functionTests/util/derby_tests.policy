@@ -128,7 +128,7 @@ grant codeBase "${derbyTesting.codejar}derbynet.jar" {
   permission java.net.SocketPermission "${derbyTesting.serverhost}", "accept,connect";
   
     // Needed for NetworkServerMBean access (see JMX section above)
-  permission org.apache.derby.security.SystemPermission "server", "monitor";
+  permission org.apache.derby.security.SystemPermission "server", "control,monitor";
   
 };
 
@@ -217,7 +217,7 @@ grant codeBase "${derbyTesting.testjar}derbyTesting.jar" {
   // tests where the testing code is in the stack frame.
   permission org.apache.derby.security.SystemPermission "jmx", "control";
   permission org.apache.derby.security.SystemPermission "engine", "monitor";
-  permission org.apache.derby.security.SystemPermission "server", "monitor";
+  permission org.apache.derby.security.SystemPermission "server", "control,monitor";
   
   // These permissions are needed when testing code instrumented with EMMA.
   permission java.lang.RuntimePermission "${emma.active}writeFileDescriptor";

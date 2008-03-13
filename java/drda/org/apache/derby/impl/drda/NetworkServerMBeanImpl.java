@@ -67,7 +67,7 @@ class NetworkServerMBeanImpl implements NetworkServerMBean {
      * Ensure the caller has permission to control the network server.
      */
     private static void checkControl() { 
-        // checkPermission(CONTROL);
+        checkPermission(CONTROL);
     }
 
     /**

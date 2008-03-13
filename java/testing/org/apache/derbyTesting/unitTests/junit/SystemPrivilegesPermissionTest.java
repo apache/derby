@@ -213,40 +213,114 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
         } catch (IllegalArgumentException ex) {
             // expected exception
         }
+        
+        String[] validNames = {
+            SystemPermission.ENGINE,
+            SystemPermission.JMX,
+            SystemPermission.SERVER
+        };
+        
+        // In order of the canonical actions expected
+        String[] validActions = {
+            SystemPermission.CONTROL,
+            SystemPermission.MONITOR,
+            SystemPermission.SHUTDOWN,
+        };
+        
+        // Check all valid combinations (which is all) with
+        // a single action
+        Permission[] all = new Permission[
+                        validNames.length * validActions.length];
+        
+        int c = 0;
+        for (int tn = 0; tn < validNames.length; tn++)
+        {
+            for (int a = 0; a < validActions.length; a++) {
+                Permission p = new SystemPermission(
+                        validNames[tn], validActions[a]);
+                
+                assertEquals(validNames[tn], p.getName());
+                assertEquals(validActions[a], p.getActions());
+                
+                // test SystemPermission.equals()
+                assertFalse(p.equals(null));
+                assertFalse(p.equals(new Object()));
+                
+                this.assertEquivalentPermissions(p, p);
 
-        // test SystemPermission with legal name argument
-        final Permission sp0 = new SystemPermission(
-                SystemPermission.SERVER, SystemPermission.SHUTDOWN);
-        final Permission sp1 = new SystemPermission(
-                SystemPermission.SERVER, SystemPermission.SHUTDOWN);
-
-        // test SystemPermission.getName()
-        assertEquals(sp0.getName(), SystemPermission.SERVER);
-
-        // test SystemPermission.getActions()
-        assertEquals(sp0.getActions(), SystemPermission.SHUTDOWN);
-
-        // test SystemPermission.hashCode()
-        assertTrue(sp0.hashCode() == sp1.hashCode());
-
-        // test SystemPermission.equals()
-        assertTrue(sp0.equals(sp1));
-        assertTrue(!sp0.equals(null));
-        assertTrue(!sp0.equals(new Object()));
-
-        // test SystemPermission.implies()
-        assertTrue(sp0.implies(sp1));
-        assertTrue(sp1.implies(sp0));
+                all[c++] = p;
+            }
+        }
+        // All the permissions are different.
+        checkDistinctPermissions(all);
+        
+        // Check two actions
+        for (int n = 0; n < validNames.length; n++)
+        {
+            for (int a = 0; a < validActions.length; a++)
+            {
+                Permission base = new SystemPermission(
+                        validNames[n], validActions[a]);
+                
+                // Two actions
+                for (int oa = 0; oa < validActions.length; oa++)
+                {
+                    Permission p = new SystemPermission(
+                            validNames[n],                           
+                            validActions[a] + "," + validActions[oa]);
+                    
+                    if (oa == a)
+                    {
+                        // Same action added twice
+                        assertEquivalentPermissions(base, p);
+                        // Canonical form should collapse into a single action
+                        assertEquals(validActions[a], p.getActions());
+                    }
+                    else
+                    {
+                        // Implies logic, the one with one permission
+                        // is implied by the other but not vice-versa.
+                        assertTrue(p.implies(base));
+                        assertFalse(base.implies(p));
+                        
+                        // Names in canonical form
+                        int f;
+                        int s;
+                        if (oa < a)
+                        {
+                            f = oa;
+                            s = a;
+                        }
+                        else
+                        {
+                            f = a;
+                            s = oa;
+                        }
+                        if (oa < a)
+                        assertEquals(validActions[f] + "," + validActions[s],
+                                p.getActions());
+                    }
+                }
+                
+                
+                
+            }
+        }
 
         // test SystemPermission for authorized user against policy file
+        
+        Permission shutdown = new SystemPermission(
+                SystemPermission.SERVER,
+                SystemPermission.SHUTDOWN);
+        
         final SystemPrincipal authorizedUser
             = new SystemPrincipal("authorizedSystemUser");
-        execute(authorizedUser, new ShutdownAction(sp0), true);
+        execute(authorizedUser, new ShutdownAction(shutdown), true);
         
         // test SystemPermission for unauthorized user against policy file
         final SystemPrincipal unAuthorizedUser
             = new SystemPrincipal("unAuthorizedSystemUser");
-        execute(unAuthorizedUser, new ShutdownAction(sp0), false);
+        execute(unAuthorizedUser, new ShutdownAction(shutdown), false);
     }
     
     /**
@@ -525,6 +599,47 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
                 //             impls[j][i], p1.implies(p0));
             }
         }
+    }
+    
+    /**
+     * Check thet a set of Permission objects are distinct,
+     * do not equal or imply each other.
+     */
+    private void checkDistinctPermissions(Permission[] set)
+    {
+        for (int i = 0; i < set.length; i++)
+        {
+            Permission pi = set[i];
+            for (int j = 0; j < set.length; j++) {
+                
+                Permission pj = set[j];
+                
+                if (i == j)
+                {
+                    // Permission is itself
+                    assertEquivalentPermissions(pi, pj);
+                    continue;
+                }
+                
+                assertFalse(pi.equals(pj));
+                assertFalse(pj.equals(pi));
+                
+                assertFalse(pi.implies(pj));
+                assertFalse(pj.implies(pi));
+            }
+        }
+    }
+    
+    private void assertEquivalentPermissions(Permission p1,
+            Permission p2) {
+        assertTrue(p1.equals(p2));
+        assertTrue(p2.equals(p1));
+        
+        
+        assertEquals(p1.hashCode(), p2.hashCode());
+        
+        assertTrue(p1.implies(p2));
+        assertTrue(p1.implies(p2));
     }
     
     /**

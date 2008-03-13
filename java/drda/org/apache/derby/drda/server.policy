@@ -90,7 +90,7 @@ grant codeBase "${derby.install.url}derbynet.jar"
   permission java.io.FilePermission "${derby.drda.traceDirectory}${/}-", "read,write,delete";
   
   // Needed for NetworkServerMBean access (see JMX section above)
-  permission org.apache.derby.security.SystemPermission "server", "monitor";
+  permission org.apache.derby.security.SystemPermission "server", "control,monitor";
 
 //
 // Needed by sysinfo. The file permission is needed to
