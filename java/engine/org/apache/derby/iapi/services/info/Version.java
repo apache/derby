@@ -21,7 +21,11 @@
 
 package org.apache.derby.iapi.services.info;
 
+import java.security.AccessControlException;
+import java.security.AccessController;
+
 import org.apache.derby.mbeans.VersionMBean;
+import org.apache.derby.security.SystemPermission;
 
 /**
  * This implementation of VersionMBean instruments a
@@ -35,7 +39,7 @@ public class Version implements VersionMBean {
     private final ProductVersionHolder versionInfo;
     
     /**
-     * Permission name for the object the version
+     * Permission target name for the object the version
      * information applies to.
      */
     private final String permissionName;
@@ -49,9 +53,22 @@ public class Version implements VersionMBean {
     ** Security checks(non-Javadoc)
     */
     
+    /**
+     * Ensure caller has permission to monitor Derby.
+     */
     private void checkMonitor() {
-        // TODO: Add actual check
-        //new SystemPermission(permissionName, SystemPermission.MONITOR);
+
+        try {
+            if (System.getSecurityManager() != null)
+                AccessController.checkPermission(
+                        new SystemPermission(permissionName,
+                                SystemPermission.MONITOR));
+        } catch (AccessControlException e) {
+            // Need to throw a simplified version as AccessControlException
+            // will have a reference to Derby's SystemPermission which most likely
+            // will not be available on the client.
+            throw new SecurityException(e.getMessage());
+        }
     }
     
     // ------------------------- MBEAN ATTRIBUTES  ----------------------------

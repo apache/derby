@@ -23,10 +23,9 @@ package org.apache.derby.mbeans;
 
 /**
  * JMX MBean inteface to control visibility of Derby's MBeans.
- * When Derby boots it attempts to register an MBean
- * implementing ManagementMBean if derby.system.jmx is true.
+ * When Derby boots it attempts to register its MBeans.
  * It may fail due to lack of valid permissions.
- * If Derby does not register its ManagementMBean then an
+ * If Derby does not register its MBeans then an
  * application may register the Management implementation
  * of ManagementMBean itself and use it to start Derby's
  * JMX management.
@@ -65,7 +64,7 @@ public interface ManagementMBean {
      * MBeans relevant to its current state. If Derby is not
      * booted then no action is taken.
      * <P>
-     * Require SystemPermission("jmx", "control") if a security
+     * Require <code>SystemPermission("jmx", "control")</code> if a security
      * manager is installed.
      * 
      * @see org.apache.derby.security.SystemPermission
@@ -76,7 +75,7 @@ public interface ManagementMBean {
      * Inform Derby to stop its JMX management by unregistering
      * its MBeans. If Derby is not booted then no action is taken.
      * <P>
-     * Require SystemPermission("jmx", "control") if a security
+     * Require <code>SystemPermission("jmx", "control")</code> if a security
      * manager is installed.
      * 
      * @see org.apache.derby.security.SystemPermission

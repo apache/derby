@@ -121,7 +121,7 @@ public final class JMXManagementService implements ManagementService, ModuleCont
         registerMBean(
                 new Version(
                         Monitor.getMonitor().getEngineVersion(),
-                        null /* SystemPermission.ENGINE */),
+                        SystemPermission.ENGINE),
                 VersionMBean.class,
                 "type=Version,jar=derby.jar");
     }
