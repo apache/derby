@@ -82,13 +82,13 @@ public class ReplicationRun_Local_StateTest_part2 extends ReplicationRun
                 masterServerHost,
                 ALL_INTERFACES,
                 masterServerPort,
-                masterDatabasePath +FS+ masterDbSubPath);
+                masterDbSubPath);
         
         slaveServer = startServer(slaveJvmVersion, derbySlaveVersion,
                 slaveServerHost,
                 ALL_INTERFACES,
                 slaveServerPort,
-                slaveDatabasePath +FS+ slaveDbSubPath);
+                slaveDbSubPath);
         
         startServerMonitor(slaveServerHost);
         
@@ -310,7 +310,7 @@ public class ReplicationRun_Local_StateTest_part2 extends ReplicationRun
             String slaveDatabasePath, String replicatedDb,
             int slaveReplPort)
     {
-        String db = slaveDatabasePath +"/"+ReplicationRun.slaveDbSubPath +"/"+ replicatedDb;
+        String db = slaveDatabasePath +FS+ReplicationRun.slaveDbSubPath +FS+ replicatedDb;
         String connectionURL = "jdbc:derby:"  
                 + "//" + slaveServerHost + ":" + slaveServerPort + "/"
                 + db
@@ -334,7 +334,7 @@ public class ReplicationRun_Local_StateTest_part2 extends ReplicationRun
             String slaveDatabasePath, String replicatedDb, 
             int slaveReplPort)
     {
-        String db = slaveDatabasePath +"/"+ReplicationRun.slaveDbSubPath +"/"+ replicatedDb;
+        String db = slaveDatabasePath +FS+ReplicationRun.slaveDbSubPath +FS+ replicatedDb;
         String connectionURL = "jdbc:derby:"  
                 + "//" + slaveServerHost + ":" + slaveServerPort + "/"
                 + db
@@ -357,7 +357,7 @@ public class ReplicationRun_Local_StateTest_part2 extends ReplicationRun
     SQLException failOver(String serverHost, int serverPort, 
             String databasePath, String dbSubPath, String replicatedDb)
     {
-        String db = databasePath +"/"+dbSubPath +"/"+ replicatedDb;
+        String db = databasePath +FS+dbSubPath +FS+ replicatedDb;
         String connectionURL = "jdbc:derby:"  
                 + "//" + serverHost + ":" + serverPort + "/"
                 + db
@@ -380,7 +380,7 @@ public class ReplicationRun_Local_StateTest_part2 extends ReplicationRun
             String slaveServerHost,
             int slaveReplPort)
     {
-        String db = databasePath +"/"+ReplicationRun.masterDbSubPath +"/"+ replicatedDb;
+        String db = databasePath +FS+ReplicationRun.masterDbSubPath +FS+ replicatedDb;
         String connectionURL = "jdbc:derby:"  
                 + "//" + masterServerHost + ":" + masterServerPort + "/"
                 + db
@@ -404,7 +404,7 @@ public class ReplicationRun_Local_StateTest_part2 extends ReplicationRun
             String databasePath, String dbSubPath, String replicatedDb)
         throws SQLException
     {
-        String db = databasePath +"/"+dbSubPath +"/"+ replicatedDb;
+        String db = databasePath +FS+dbSubPath +FS+ replicatedDb;
         String connectionURL = "jdbc:derby:"  
                 + "//" + serverHost + ":" + serverPort + "/"
                 + db;
@@ -415,7 +415,7 @@ public class ReplicationRun_Local_StateTest_part2 extends ReplicationRun
     SQLException connectTo(String serverHost, int serverPort,
             String databasePath, String dbSubPath, String replicatedDb)
     {
-        String db = databasePath +"/"+dbSubPath +"/"+ replicatedDb;
+        String db = databasePath +FS+dbSubPath +FS+ replicatedDb;
         String connectionURL = "jdbc:derby:"  
                 + "//" + serverHost + ":" + serverPort + "/"
                 + db;

@@ -83,13 +83,13 @@ public class ReplicationRun_Local_StateTest_part1_1 extends ReplicationRun
                 masterServerHost,
                 ALL_INTERFACES, // masterServerHost, // "0.0.0.0", // All. or use masterServerHost for interfacesToListenOn,
                 masterServerPort,
-                masterDatabasePath +FS+ masterDbSubPath); // Distinguishing master/slave
+                masterDbSubPath); // Distinguishing master/slave
                 
         slaveServer = startServer(slaveJvmVersion, derbySlaveVersion,
                 slaveServerHost,
                 ALL_INTERFACES, // slaveServerHost, // "0.0.0.0", // All. or use slaveServerHost for interfacesToListenOn,
                 slaveServerPort,
-                slaveDatabasePath +FS+ slaveDbSubPath); // Distinguishing master/slave
+                slaveDbSubPath); // Distinguishing master/slave
         
         startServerMonitor(slaveServerHost);
         
@@ -145,7 +145,7 @@ public class ReplicationRun_Local_StateTest_part1_1 extends ReplicationRun
         Connection conn = null;
         
         // 1. stopSlave to slave with connection to master should fail.
-        db = slaveDatabasePath +"/"+ReplicationRun.slaveDbSubPath +"/"+ replicatedDb;
+        db = slaveDatabasePath +FS+ReplicationRun.slaveDbSubPath +FS+ replicatedDb;
         connectionURL = "jdbc:derby:"  
                 + "//" + slaveServerHost + ":" + slaveServerPort + "/"
                 + db
@@ -169,7 +169,7 @@ public class ReplicationRun_Local_StateTest_part1_1 extends ReplicationRun
         // Default replication test sequence still OK.
         
         // 2. stopSlave to a master server should fail:
-        db = masterDatabasePath +"/"+ReplicationRun.masterDbSubPath +"/"+ replicatedDb;
+        db = masterDatabasePath +FS+ReplicationRun.masterDbSubPath +FS+ replicatedDb;
         connectionURL = "jdbc:derby:"  
                 + "//" + masterServerHost + ":" + masterServerPort + "/"
                 + db
@@ -200,7 +200,7 @@ public class ReplicationRun_Local_StateTest_part1_1 extends ReplicationRun
         Thread.sleep(5000L); // TEMPORARY to see if slave sees that master is gone!
         
         // 3.  stopSlave on slave should now be allowed. Observe that the database shall be shutdown.
-        db = slaveDatabasePath +"/"+ReplicationRun.slaveDbSubPath +"/"+ replicatedDb;
+        db = slaveDatabasePath +FS+ReplicationRun.slaveDbSubPath +FS+ replicatedDb;
         connectionURL = "jdbc:derby:"  
                 + "//" + slaveServerHost + ":" + slaveServerPort + "/"
                 + db
@@ -218,11 +218,13 @@ public class ReplicationRun_Local_StateTest_part1_1 extends ReplicationRun
             int ec = se.getErrorCode();
             String ss = se.getSQLState();
             String msg = ec + " " + ss + " " + se.getMessage();
-            assertTrue("connectionURL +  failed: " + msg, 
+            util.DEBUG("3. Got "+msg + " Expected: " + SQLState.REPLICATION_SLAVE_SHUTDOWN_OK);
+            assertTrue(connectionURL + " failed: " + msg, 
                     SQLState.REPLICATION_SLAVE_SHUTDOWN_OK.equals(ss));
             util.DEBUG("3. Failed as expected: " + connectionURL +  " " + msg);
             stopSlaveCorrect = true;
         }
+        
         // Default replication test sequence will NOT be OK after this point.
         
         if ( stopSlaveCorrect )

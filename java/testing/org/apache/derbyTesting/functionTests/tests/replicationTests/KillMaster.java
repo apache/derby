@@ -21,7 +21,6 @@ limitations under the License.
 
 package org.apache.derbyTesting.functionTests.tests.replicationTests;
 
-import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -131,7 +130,7 @@ public class KillMaster extends BaseJDBCTestCase
                 masterServerHost,
                 ReplicationRun.ALL_INTERFACES, // masterServerHost, // "0.0.0.0", // All. or use masterServerHost for interfacesToListenOn,
                 masterServerPort,
-                ReplicationRun.masterDatabasePath +File.separator+ ReplicationRun.masterDbSubPath); // Distinguishing master/slave
+                ReplicationRun.masterDbSubPath); // Distinguishing master/slave
                                                   // Will only work if default/initial values are used!
                                                   // MUST BE FULL PATH!!!
                 

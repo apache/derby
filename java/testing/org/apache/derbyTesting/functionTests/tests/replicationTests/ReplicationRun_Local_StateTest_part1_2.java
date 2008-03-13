@@ -83,14 +83,14 @@ public class ReplicationRun_Local_StateTest_part1_2 extends ReplicationRun
                 masterServerHost,
                 ALL_INTERFACES, // masterServerHost, // "0.0.0.0", // All. or use masterServerHost for interfacesToListenOn,
                 masterServerPort,
-                masterDatabasePath +FS+ masterDbSubPath); // Distinguishing master/slave
+                masterDbSubPath); // Distinguishing master/slave
         
         
         slaveServer = startServer(slaveJvmVersion, derbySlaveVersion,
                 slaveServerHost,
                 ALL_INTERFACES, // slaveServerHost, // "0.0.0.0", // All. or use slaveServerHost for interfacesToListenOn,
                 slaveServerPort,
-                slaveDatabasePath +FS+ slaveDbSubPath); // Distinguishing master/slave
+                slaveDbSubPath); // Distinguishing master/slave
         
         startServerMonitor(slaveServerHost);
         
@@ -146,8 +146,8 @@ public class ReplicationRun_Local_StateTest_part1_2 extends ReplicationRun
         String connectionURL = null;
         
         // 1. Attempt to perform stopMaster on slave. Should fail.
-        db = slaveDatabasePath +"/"+ReplicationRun.slaveDbSubPath 
-                +"/"+ replicatedDb;
+        db = slaveDatabasePath +FS+ReplicationRun.slaveDbSubPath 
+                +FS+ replicatedDb;
         connectionURL = "jdbc:derby:"  
                 + "//" + slaveServerHost + ":" + slaveServerPort + "/"
                 + db
@@ -174,8 +174,8 @@ public class ReplicationRun_Local_StateTest_part1_2 extends ReplicationRun
         // Default replication test sequence still OK.
         
         // 2. stopMaster on master: OK
-        db = masterDatabasePath +"/"+ReplicationRun.masterDbSubPath 
-                +"/"+ replicatedDb;
+        db = masterDatabasePath +FS+ReplicationRun.masterDbSubPath 
+                +FS+ replicatedDb;
         connectionURL = "jdbc:derby:"  
                 + "//" + masterServerHost + ":" + masterServerPort + "/"
                 + db
@@ -198,7 +198,7 @@ public class ReplicationRun_Local_StateTest_part1_2 extends ReplicationRun
         // Not meaningful to continue default replication test sequence after this point!
         
         // 3. Connect to slave which now is not in non-replication mode is OK.
-        db = slaveDatabasePath +"/"+ReplicationRun.slaveDbSubPath +"/"+ replicatedDb;
+        db = slaveDatabasePath +FS+ReplicationRun.slaveDbSubPath +FS+ replicatedDb;
         connectionURL = "jdbc:derby:"  
                 + "//" + slaveServerHost + ":" + slaveServerPort + "/"
                 + db;
@@ -222,7 +222,7 @@ public class ReplicationRun_Local_StateTest_part1_2 extends ReplicationRun
         }
         
         // 4. stopMaster on slave which now is not in replication mode should fail.
-        db = slaveDatabasePath +"/"+ReplicationRun.slaveDbSubPath +"/"+ replicatedDb;
+        db = slaveDatabasePath +FS+ReplicationRun.slaveDbSubPath +FS+ replicatedDb;
         connectionURL = "jdbc:derby:"  
                 + "//" + slaveServerHost + ":" + slaveServerPort + "/"
                 + db
@@ -247,7 +247,7 @@ public class ReplicationRun_Local_StateTest_part1_2 extends ReplicationRun
         }
         
         // 5. Connect master which now is now in non-replication mode should succeed.
-        db = masterDatabasePath +"/"+ReplicationRun.masterDbSubPath +"/"+ replicatedDb;
+        db = masterDatabasePath +FS+ReplicationRun.masterDbSubPath +FS+ replicatedDb;
         connectionURL = "jdbc:derby:"  
                 + "//" + masterServerHost + ":" + masterServerPort + "/"
                 + db;
@@ -269,8 +269,8 @@ public class ReplicationRun_Local_StateTest_part1_2 extends ReplicationRun
         }
 
         // 6. Attempt to do stopmaster on master which now is now in non-replication mode should fail.
-        db = masterDatabasePath +"/"+ReplicationRun.masterDbSubPath 
-                +"/"+ replicatedDb;
+        db = masterDatabasePath +FS+ReplicationRun.masterDbSubPath 
+                +FS+ replicatedDb;
         connectionURL = "jdbc:derby:"  
                 + "//" + masterServerHost + ":" + masterServerPort + "/"
                 + db
