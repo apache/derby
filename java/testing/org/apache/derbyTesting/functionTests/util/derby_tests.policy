@@ -127,6 +127,9 @@ grant codeBase "${derbyTesting.codejar}derbynet.jar" {
   permission java.net.SocketPermission "${derbyTesting.clienthost}", "accept,connect";
   permission java.net.SocketPermission "${derbyTesting.serverhost}", "accept,connect";
   
+    // Needed for NetworkServerMBean access (see JMX section above)
+  permission org.apache.derby.security.SystemPermission "server", "monitor";
+  
 };
 
 //
