@@ -680,7 +680,42 @@ SELECT DISTINCT name FROM person ORDER BY age;
 SELECT DISTINCT name FROM person ORDER BY name;
 -- This query should return two rows, ordered by name descending:
 SELECT DISTINCT name FROM person ORDER BY name desc;
+-- Some test cases involving column aliasing:
+select distinct name as first_name from person order by name;
+select distinct name as first_name from person order by first_name;
+select distinct person.name from person order by name;
+select distinct name as first_name from person order by person.name;
+select distinct name as age from person order by age;
+select distinct name as age from person order by person.age;
+select distinct name, name from person order by name;
+select distinct name, name as first_name from person order by name;
+select distinct name, name as first_name from person order by 2;
+-- Some test cases combining column aliasing with table aliasing:
+select distinct name nm from person p order by name;
+select distinct name nm from person p order by nm;
+select distinct name nm from person p order by p.name;
+select distinct name nm from person p order by person.name;
+select distinct name nm from person p order by person.nm;
+select distinct name nm from person p order by p.nm;
+create table pets (name varchar(10), age int);
+insert into pets values ('Rover', 3), ('Fido', 5), ('Buster', 1);
+select distinct name from person union select distinct name from pets order by name;
+select distinct name from person, pets order by name;
+select distinct person.name as person_name, pets.name as pet_name from person,pets order by name;
+select distinct person.name as person_name, pets.name from person,pets order by name;
+select distinct person.name as person_name, pets.name from person,pets order by person.name;
+select distinct person.name as name, pets.name as pet_name from person,pets order by name;
+select distinct person.name as name, pets.name as pet_name from person,pets order by pets.name;
+-- Include some of the error cases from above without the DISTINCT
+-- specification to investigate how that affects the behavior:
+select name as age from person order by person.age;
+select name from person, pets order by name;
+select person.name as person_name, pets.name as pet_name from person,pets order by name;
+select person.name as person_name, pets.name from person,pets order by person.name;
+select person.name as person_name, pets.name from person,pets order by name;
+select person.name as name, pets.name as pet_name from person,pets order by name;
 drop table person;
+drop table pets;
 
 
 create table d2887_types(

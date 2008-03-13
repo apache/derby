@@ -1759,7 +1759,140 @@ NAME
 ----------
 Mary      
 John      
+ij> -- Some test cases involving column aliasing:
+select distinct name as first_name from person order by name;
+FIRST_NAME
+----------
+John      
+Mary      
+ij> select distinct name as first_name from person order by first_name;
+FIRST_NAME
+----------
+John      
+Mary      
+ij> select distinct person.name from person order by name;
+NAME      
+----------
+John      
+Mary      
+ij> select distinct name as first_name from person order by person.name;
+FIRST_NAME
+----------
+John      
+Mary      
+ij> select distinct name as age from person order by age;
+AGE       
+----------
+John      
+Mary      
+ij> select distinct name as age from person order by person.age;
+ERROR 42879: The ORDER BY clause may not contain column 'AGE', since the query specifies DISTINCT and that column does not appear in the query result.
+ij> select distinct name, name from person order by name;
+NAME      |NAME      
+---------------------
+John      |John      
+Mary      |Mary      
+ij> select distinct name, name as first_name from person order by name;
+NAME      |FIRST_NAME
+---------------------
+John      |John      
+Mary      |Mary      
+ij> select distinct name, name as first_name from person order by 2;
+NAME      |FIRST_NAME
+---------------------
+John      |John      
+Mary      |Mary      
+ij> -- Some test cases combining column aliasing with table aliasing:
+select distinct name nm from person p order by name;
+NM        
+----------
+John      
+Mary      
+ij> select distinct name nm from person p order by nm;
+NM        
+----------
+John      
+Mary      
+ij> select distinct name nm from person p order by p.name;
+NM        
+----------
+John      
+Mary      
+ij> select distinct name nm from person p order by person.name;
+ERROR 42X04: Column 'PERSON.NAME' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'PERSON.NAME' is not a column in the target table.
+ij> select distinct name nm from person p order by person.nm;
+ERROR 42X04: Column 'PERSON.NM' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'PERSON.NM' is not a column in the target table.
+ij> select distinct name nm from person p order by p.nm;
+ERROR 42X04: Column 'P.NM' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'P.NM' is not a column in the target table.
+ij> create table pets (name varchar(10), age int);
+0 rows inserted/updated/deleted
+ij> insert into pets values ('Rover', 3), ('Fido', 5), ('Buster', 1);
+3 rows inserted/updated/deleted
+ij> select distinct name from person union select distinct name from pets order by name;
+NAME      
+----------
+Buster    
+Fido      
+John      
+Mary      
+Rover     
+ij> select distinct name from person, pets order by name;
+ERROR 42X03: Column name 'NAME' is in more than one table in the FROM list.
+ij> select distinct person.name as person_name, pets.name as pet_name from person,pets order by name;
+ERROR 42X79: Column name 'NAME' appears more than once in the result of the query expression.
+ij> select distinct person.name as person_name, pets.name from person,pets order by name;
+ERROR 42X79: Column name 'NAME' appears more than once in the result of the query expression.
+ij> select distinct person.name as person_name, pets.name from person,pets order by person.name;
+PERSON_NA&|NAME      
+---------------------
+John      |Buster    
+John      |Fido      
+John      |Rover     
+Mary      |Buster    
+Mary      |Fido      
+Mary      |Rover     
+ij> select distinct person.name as name, pets.name as pet_name from person,pets order by name;
+ERROR 42X79: Column name 'NAME' appears more than once in the result of the query expression.
+ij> select distinct person.name as name, pets.name as pet_name from person,pets order by pets.name;
+NAME      |PET_NAME  
+---------------------
+John      |Buster    
+Mary      |Buster    
+John      |Fido      
+Mary      |Fido      
+John      |Rover     
+Mary      |Rover     
+ij> -- Include some of the error cases from above without the DISTINCT
+-- specification to investigate how that affects the behavior:
+select name as age from person order by person.age;
+AGE       
+----------
+John      
+Mary      
+John      
+ij> select name from person, pets order by name;
+ERROR 42X03: Column name 'NAME' is in more than one table in the FROM list.
+ij> select person.name as person_name, pets.name as pet_name from person,pets order by name;
+ERROR 42X79: Column name 'NAME' appears more than once in the result of the query expression.
+ij> select person.name as person_name, pets.name from person,pets order by person.name;
+PERSON_NA&|NAME      
+---------------------
+John      |Buster    
+John      |Fido      
+John      |Rover     
+John      |Buster    
+John      |Fido      
+John      |Rover     
+Mary      |Buster    
+Mary      |Fido      
+Mary      |Rover     
+ij> select person.name as person_name, pets.name from person,pets order by name;
+ERROR 42X79: Column name 'NAME' appears more than once in the result of the query expression.
+ij> select person.name as name, pets.name as pet_name from person,pets order by name;
+ERROR 42X79: Column name 'NAME' appears more than once in the result of the query expression.
 ij> drop table person;
+0 rows inserted/updated/deleted
+ij> drop table pets;
 0 rows inserted/updated/deleted
 ij> create table d2887_types(
    id             int,
