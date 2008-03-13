@@ -534,16 +534,11 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
         Short secmec, String msg, String expectedValue)
     {
         Connection conn;
-        String securityMechanismProperty = "SecurityMechanism";
-        Class[] argType = { Short.TYPE };
-        String methodName = getSetterName(securityMechanismProperty);
-        Object[] args = new Short[1];
-        args[0] = secmec;
 
         DataSource ds = getDS(user,password);
         try {
-            Method sh = ds.getClass().getMethod(methodName, argType);
-            sh.invoke(ds, args);
+            JDBCDataSource.setBeanProperty(ds,
+                    "SecurityMechanism", secmec);
             conn = ds.getConnection(user, password);
             conn.close();
             // EUSRIDPWD is supported with some jvm( version)s, not with others
@@ -988,25 +983,18 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
      */
     private void assertSecMecWithConnPoolingOK(
         String user, String password, Short secmec) throws Exception
-    {
-        Connection conn;
-        String securityMechanismProperty = "SecurityMechanism";
-        Class[] argType = { Short.TYPE };
-        String methodName = getSetterName(securityMechanismProperty);
-        Object[] args = new Short[1];
-        args[0] = secmec;
-        
+    {     
         ConnectionPoolDataSource cpds = getCPDS(user,password);
         
         // call setSecurityMechanism with secmec.
-        Method sh = cpds.getClass().getMethod(methodName, argType);
-        sh.invoke(cpds, args);
+        JDBCDataSource.setBeanProperty(cpds,
+                "SecurityMechanism", secmec);
         
         // simulate case when connection will be re-used by getting 
         // a connection, closing it and then the next call to
         // getConnection will re-use the previous connection.  
         PooledConnection pc = cpds.getPooledConnection();
-        conn = pc.getConnection();
+        Connection conn = pc.getConnection();
         conn.close();
         conn = pc.getConnection();
         assertConnectionOK(conn);
@@ -1204,15 +1192,10 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
     private Connection getDataSourceConnectionWithSecMec(
         String user, String password, Short secMec)
             throws Exception {
-        String securityMechanismProperty = "SecurityMechanism";
-        Class[] argType = { Short.TYPE };
-        String methodName = getSetterName(securityMechanismProperty);
-        Object[] args = new Short[1];
-        args[0] = secMec;
 
         DataSource ds = getDS(user, password);
-        Method sh = ds.getClass().getMethod(methodName, argType);
-        sh.invoke(ds, args);
+        JDBCDataSource.setBeanProperty(ds,
+                "SecurityMechanism", secMec);
         return ds.getConnection();
     }
 
@@ -1303,12 +1286,6 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
             JDBCDataSource.setBeanProperty(cpds, property, value);
         }
         return cpds;
-    }
-
-    private static String getSetterName(String attribute)
-    {
-        return "set" + Character.toUpperCase(attribute.charAt(0)) +
-            attribute.substring(1);
     }
     
     private void assertSQLState08001(String expectedValue, SQLException sqle)

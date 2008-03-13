@@ -195,6 +195,8 @@ public class JDBCDataSource {
             clazz = Integer.TYPE;
         else if (Boolean.class.equals(clazz))
             clazz = Boolean.TYPE;
+        else if (Short.class.equals(clazz))
+            clazz = Short.TYPE;
 
         try {
             Method setter = ds.getClass().getMethod(setterName,
