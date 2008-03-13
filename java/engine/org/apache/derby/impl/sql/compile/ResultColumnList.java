@@ -1647,6 +1647,15 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 * Copy the types and lengths for this RCL (the target)
 	 * to another RCL (the source).  
 	 * This is useful when adding a NormalizeResultSetNode.
+	 * It is called on the NormalizeResultSetNode to copy 
+	 * the types from the insert or update ResultColumnList (sourceRCL).
+	 * The type of the underlying expression should not be changed 
+	 * (DERBY-3310)
+	 * because that same expression is pointed to by the child result set's
+	 * result column list.  Only NormalizeResultSetNode should have a 
+	 * type that is different than its expresssion. See Army's write up
+	 * attached to DERBY-3310 for a detailed analysis of the role of 
+	 * copyTypesAndLengthsToSource.
 	 *
 	 * @param sourceRCL	The source RCL
 	 */
@@ -1659,7 +1668,6 @@ public class ResultColumnList extends QueryTreeNodeVector
 			ResultColumn sourceRC = (ResultColumn) sourceRCL.elementAt(index);
 			ResultColumn resultColumn = (ResultColumn) elementAt(index);
 			sourceRC.setType(resultColumn.getTypeServices());
-			sourceRC.getExpression().setType(resultColumn.getTypeServices());
 		}
 	}
 		

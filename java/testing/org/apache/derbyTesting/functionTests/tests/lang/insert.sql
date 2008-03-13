@@ -622,3 +622,22 @@ INSERT INTO POLICY_STATEMENTS VALUES
 select count(*) from POLICY_STATEMENTS;
 
 drop table POLICY_STATEMENTS;
+
+-- DERBY-3310 type conversions in insert
+
+create table  U (SNAME varchar(32000), TNAME Varchar(32000), C1 bigint);
+insert into U(SNAME, TNAME, C1) select distinct SCHEMANAME, TABLENAME, 2
+ from SYS.SYSTABLES T join  SYS.SYSSCHEMAS S on T.SCHEMAID = S.SCHEMAID where TABLENAME = 'U';
+select * from U;
+drop table  U;
+
+create table d3310 (x bigint);
+insert into d3310 select distinct * from (values 2.0, 2.1, 2.2) v;
+select * from d3310;
+drop table d3310;
+
+
+
+
+
+
