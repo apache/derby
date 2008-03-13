@@ -19,7 +19,6 @@ First shutdown server started on default port by the test harness
 org.apache.derby.drda.NetworkServerControl shutdown -p 1527 
 Apache Derby Network Server - 10.3.2.2 -(EXPECTED SUBVERSION INFO)  shutdown at xxxxxxFILTERED-TIMESTAMPxxxxxGMT
 -----Dderby.drda.logConnections -Dderby.drda.traceAll -Dderby.drda.traceDirectory -Dderby.drda.keepAlive -Dderby.drda.timeSlice -Dderby.drda.host -Dderby.drda.portNumber -Dderby.drda.minThreads -Dderby.drda.maxThreads -Dderby.drda.startNetworkServer -Dderby.drda.debug org.apache.derby.drda.NetworkServerControl start -noSecurityManager 
------ listing properties --
 derby.drda.maxThreads=0
 derby.drda.sslMode=off
 derby.drda.keepAlive=true
@@ -35,7 +34,6 @@ Trace turned on for all sessions.
 Trace turned on for all sessions.
 org.apache.derby.drda.NetworkServerControl logconnections on -p 1527 
 Log Connections changed to on.
------ listing properties --
 derby.drda.maxThreads=0
 derby.drda.sslMode=off
 derby.drda.keepAlive=true
@@ -49,7 +47,6 @@ derby.drda.traceAll=true
 org.apache.derby.drda.NetworkServerControl trace off -p 1527 
 Trace turned off for all sessions.
 Trace turned off for all sessions.
------ listing properties --
 derby.drda.maxThreads=0
 derby.drda.sslMode=off
 derby.drda.keepAlive=true
