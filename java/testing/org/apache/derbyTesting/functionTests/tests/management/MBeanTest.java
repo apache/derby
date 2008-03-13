@@ -231,8 +231,6 @@ abstract class MBeanTest extends BaseJDBCTestCase {
         
         ObjectName mgmtObjName = getApplicationManagementMBean();
         
-        MBeanServerConnection serverConn = getMBeanServerConnection();
-
         // check the status of the management service
         Boolean active = (Boolean) 
                 getAttribute(mgmtObjName, "ManagementActive");
@@ -240,10 +238,8 @@ abstract class MBeanTest extends BaseJDBCTestCase {
         if (!active.booleanValue()) {
             // JMX management is not active, so activate it by invoking the
             // startManagement operation.
-            serverConn.invoke(
-                    mgmtObjName, 
-                    "startManagement", 
-                    new Object[0], new String[0]); // no arguments
+            invokeOperation(mgmtObjName, "startManagement");
+
             active = (Boolean) 
                     getAttribute(mgmtObjName, "ManagementActive");
         }
