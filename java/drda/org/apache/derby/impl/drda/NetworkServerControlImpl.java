@@ -776,17 +776,17 @@ public final class NetworkServerControlImpl {
         ManagementService mgmtService = ((ManagementService)
                 Monitor.getSystemModule(Module.JMX));
         
-        Object versionMBean = mgmtService.registerMBean(
+        final Object versionMBean = mgmtService.registerMBean(
                            new Version(
                                    getNetProductVersionHolder(),
                                    null /*SystemPermission.SERVER*/),
                            VersionMBean.class,
                            "type=Version,jar=derbynet.jar");
-        Object networkServerMBean = mgmtService.registerMBean(
+        final Object networkServerMBean = mgmtService.registerMBean(
                             new NetworkServerMBeanImpl(this),
                             NetworkServerMBean.class,
                             "type=NetworkServer");
-        			
+                			
 		// wait until we are told to shutdown or someone sends an InterruptedException
         synchronized(shutdownSync) {
             try {
