@@ -41,7 +41,7 @@ import java.security.Principal;
  * <p>
  * According to JAASRefGuide, Principal classes must implement Serializable.
  *
- * @see Principal#name
+ * @see Principal#getName
  * @see <a href="http://java.sun.com/javase/6/docs/technotes/guides/security/jaas/JAASRefGuide.html#Principals">JAASRefGuide on Principals</a> 
  */
 final public class SystemPrincipal implements Principal, Serializable {
