@@ -34,6 +34,8 @@ import org.apache.derby.impl.tools.ij.*;
 
 import org.apache.derby.iapi.tools.i18n.LocalizedResource;
 import org.apache.derby.iapi.tools.i18n.LocalizedOutput;
+import org.apache.derbyTesting.functionTests.util.TestUtil;
+
 
 /**
  * MultiTest is a multiuser test harness.  It
@@ -285,7 +287,9 @@ public class MultiTest
 	
 		/*	
 		** Now stop everyone that hasn't already stopped.
+		* First get thread dumps for jdk 15.
 		*/
+		TestUtil.dumpAllStackTracesIfSupported(log);
 		for (i = 0; i < MAX_WAIT_FOR_COMPLETION && (tg.isDestroyed() == false ); i++) 
 		{ 
 
