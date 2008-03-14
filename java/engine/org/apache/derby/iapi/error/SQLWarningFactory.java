@@ -25,6 +25,10 @@ import java.sql.SQLWarning;
 
 import org.apache.derby.iapi.services.i18n.MessageService;
 
+
+// for javadoc 
+import org.apache.derby.shared.common.reference.SQLState;
+
 /**
  * This class generates SQLWarning instances. It has an understanding of Derby's
  * internal error/warning message Ids, and transforms these to localised error

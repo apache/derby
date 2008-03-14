@@ -270,7 +270,7 @@ public class MasterController
     }
 
     /**
-     * @see org.apache.derby.iapi.services.replication.master.MasterFactory#startFailover()
+     * @see MasterFactory#startFailover()
      */
     public void startFailover() throws StandardException {
         if (!active) {
