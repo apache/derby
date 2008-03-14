@@ -418,9 +418,9 @@ ij> -- add constraint
 alter table t0 add column c3 int;
 0 rows inserted/updated/deleted
 ij> alter table t0 add constraint cons1 primary key(c3);
-ERROR 42831: 'C3' cannot be a column of a primary key or unique key because it can contain null values.
+ERROR 42831: 'C3' cannot be a column of a primary key because it can contain null values.
 ij> alter table t0 add primary key(c3);
-ERROR 42831: 'C3' cannot be a column of a primary key or unique key because it can contain null values.
+ERROR 42831: 'C3' cannot be a column of a primary key because it can contain null values.
 ij> -- add constraint references non-existant column
 alter table t4 add constraint t4pk primary key("c1");
 ERROR 42X14: 'c1' is not a column in table or VTI 'T4'.
@@ -609,7 +609,7 @@ alter table t1 drop constraint p1;
 ERROR 42X86: ALTER TABLE failed. There is no constraint 'APP.P1' on table '"APP"."T1"'. 
 ij> -- In DB2 compatibility mode, we cann't add a nullable primary key
 alter table t0_1 add constraint p2 primary key(c1);
-ERROR 42831: 'C1' cannot be a column of a primary key or unique key because it can contain null values.
+ERROR 42831: 'C1' cannot be a column of a primary key because it can contain null values.
 ij> alter table t0_1 drop constraint p2;
 ERROR 42X86: ALTER TABLE failed. There is no constraint 'APP.P2' on table '"APP"."T0_1"'. 
 ij> -- positive tests
@@ -926,13 +926,13 @@ ij> -- show that a column which is part of the PRIMARY KEY cannot be modified NU
 create table atmcn_2 (a integer not null primary key, b integer not null);
 0 rows inserted/updated/deleted
 ij> alter table atmcn_2 alter column a null;
-ERROR 42Z20: Column 'A' cannot be made nullable. It is part of a primary key or unique constraint, which cannot have any nullable columns.
+ERROR 42Z20: Column 'A' cannot be made nullable. It is part of a primary key, which cannot have any nullable columns.
 ij> create table atmcn_3 (a integer not null, b integer not null);
 0 rows inserted/updated/deleted
 ij> alter table atmcn_3 add constraint atmcn_3_pk primary key(a, b);
 0 rows inserted/updated/deleted
 ij> alter table atmcn_3 alter column b null;
-ERROR 42Z20: Column 'B' cannot be made nullable. It is part of a primary key or unique constraint, which cannot have any nullable columns.
+ERROR 42Z20: Column 'B' cannot be made nullable. It is part of a primary key, which cannot have any nullable columns.
 ij> -- verify that the keyword "column" in the ALTER TABLE ... ALTER COLUMN ...
 -- statement is optional:
 create table atmcn_4 (a integer not null, b integer);

@@ -2601,10 +2601,17 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 									lcc,
 									false))
 			{	
-				if (errorMsg.equals(SQLState.LANG_NULL_DATA_IN_PRIMARY_KEY))
+				if (errorMsg.equals(SQLState.LANG_NULL_DATA_IN_PRIMARY_KEY_OR_UNIQUE_CONSTRAINT))
+				{	//alter table add primary key
+					 //soft upgrade mode
+					throw StandardException.newException(
+						SQLState.LANG_NULL_DATA_IN_PRIMARY_KEY_OR_UNIQUE_CONSTRAINT, 
+						td.getQualifiedName());
+				}
+				else if (errorMsg.equals(SQLState.LANG_NULL_DATA_IN_PRIMARY_KEY)) 
 				{	//alter table add primary key
 					throw StandardException.newException(
-						SQLState.LANG_NULL_DATA_IN_PRIMARY_KEY, 
+						SQLState.LANG_NULL_DATA_IN_PRIMARY_KEY,
 						td.getQualifiedName());
 				}
 				else 

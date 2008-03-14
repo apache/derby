@@ -61,7 +61,7 @@ create table a (a1 int not null, a2 int);
 ij> insert into a values(1, NULL);
 1 row inserted/updated/deleted
 ij> alter table a add constraint ap1 primary key(a1, a2);
-ERROR 42831: 'A2' cannot be a column of a primary key or unique key because it can contain null values.
+ERROR 42831: 'A2' cannot be a column of a primary key because it can contain null values.
 ij> drop table a;
 0 rows inserted/updated/deleted
 ij> -- try with multiple columns
@@ -69,7 +69,7 @@ create table a (a1 int, a2 int, a3 int);
 0 rows inserted/updated/deleted
 ij> -- This is an error in DB2 compatibility mode
 alter table a add constraint ap1 primary key(a1, a2, a3);
-ERROR 42831: 'A1' cannot be a column of a primary key or unique key because it can contain null values.
+ERROR 42831: 'A1' cannot be a column of a primary key because it can contain null values.
 ij> drop table a;
 0 rows inserted/updated/deleted
 ij> -- try with multiple null columns
@@ -79,7 +79,7 @@ ij> insert into a values(1,1,1);
 1 row inserted/updated/deleted
 ij> -- table with no null data should work
 alter table a add constraint ap1 primary key(a1, a2, a3);
-ERROR 42831: 'A2' cannot be a column of a primary key or unique key because it can contain null values.
+ERROR 42831: 'A2' cannot be a column of a primary key because it can contain null values.
 ij> -- insert a null into one of the primary key columns should fail
 insert into a values(1, NULL, 1);
 1 row inserted/updated/deleted
@@ -92,7 +92,7 @@ ij> insert into a values(1,NULL,1);
 1 row inserted/updated/deleted
 ij> -- table with some null data should fail
 alter table a add constraint ap1 primary key(a1, a2, a3);
-ERROR 42831: 'A2' cannot be a column of a primary key or unique key because it can contain null values.
+ERROR 42831: 'A2' cannot be a column of a primary key because it can contain null values.
 ij> -- defining primarykey column constraint for explicitly nullable column
 -- gives error
 create table a1(ac1 int null primary key);

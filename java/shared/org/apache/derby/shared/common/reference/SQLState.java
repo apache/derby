@@ -771,6 +771,7 @@ public interface SQLState {
 	String LANG_DB2_INVALID_COLS_SPECIFIED                             = "42802";
         String LANG_DB2_INVALID_SELECT_COL_FOR_HAVING = "42803";
 	String LANG_DB2_ADD_UNIQUE_OR_PRIMARY_KEY_ON_NULL_COLS			   = "42831";
+	String LANG_ADD_PRIMARY_KEY_ON_NULL_COLS                           = "42831.S.1";
 	String LANG_DB2_REPLACEMENT_ERROR								   = "42815.S.713";
 	String LANG_DB2_COALESCE_DATATYPE_MISMATCH								   = "42815.S.171";
 	String LANG_DB2_TOO_LONG_FLOATING_POINT_LITERAL			           = "42820";
@@ -988,6 +989,7 @@ public interface SQLState {
 	String LANG_MODIFY_COLUMN_FKEY_CONSTRAINT						   = "42Z18";
 	String LANG_MODIFY_COLUMN_REFERENCED							   = "42Z19";
 	String LANG_MODIFY_COLUMN_EXISTING_CONSTRAINT					   = "42Z20";
+	String LANG_MODIFY_COLUMN_EXISTING_PRIMARY_KEY					   = "42Z20.S.1";
 
 	String LANG_AI_INVALID_INCREMENT								   = "42Z21";
 	String LANG_AI_INVALID_TYPE										   = "42Z22";
@@ -1301,7 +1303,8 @@ public interface SQLState {
 	String LANG_ADDING_NON_NULL_COLUMN_TO_NON_EMPTY_TABLE              = "X0Y57.S";
 	String LANG_ADD_PRIMARY_KEY_FAILED1                                = "X0Y58.S";
 	String LANG_ADD_CHECK_CONSTRAINT_FAILED                            = "X0Y59.S";
-	String LANG_NULL_DATA_IN_PRIMARY_KEY                 	   	   	   = "X0Y63.S";
+	String LANG_NULL_DATA_IN_PRIMARY_KEY_OR_UNIQUE_CONSTRAINT      	   = "X0Y63.S";
+	String LANG_NULL_DATA_IN_PRIMARY_KEY                               = "X0Y63.S.1";
 	String LANG_NO_COMMIT_IN_NESTED_CONNECTION                         = "X0Y66.S";
 	String LANG_NO_ROLLBACK_IN_NESTED_CONNECTION                       = "X0Y67.S";
 	String LANG_OBJECT_ALREADY_EXISTS                                  = "X0Y68.S";

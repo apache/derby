@@ -209,8 +209,13 @@ public class ModifyColumnNode extends ColumnDefinitionNode
 					((existingConstraint.getConstraintType() == 
 					 DataDictionary.PRIMARYKEY_CONSTRAINT)))
 				{
-                    throw StandardException.newException(
-                         SQLState.LANG_MODIFY_COLUMN_EXISTING_CONSTRAINT, name);
+					String errorState = 
+						(getLanguageConnectionContext().getDataDictionary()
+								.checkVersion(DataDictionary.DD_VERSION_DERBY_10_4, 
+								null))
+						? SQLState.LANG_MODIFY_COLUMN_EXISTING_PRIMARY_KEY
+						: SQLState.LANG_MODIFY_COLUMN_EXISTING_CONSTRAINT;
+					throw StandardException.newException(errorState, name);
 				}
 				// unique key or primary key.
 				ConstraintDescriptorList 

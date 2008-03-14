@@ -1704,7 +1704,7 @@ ij> -- Beetle 5717: Disable adding primary or unique constraints on non-nullable
 create table t1 (c1 int, c2 int);
 0 rows inserted/updated/deleted
 ij> alter table t1 add constraint pk1 primary key (c1);
-ERROR 42831: 'C1' cannot be a column of a primary key or unique key because it can contain null values.
+ERROR 42831: 'C1' cannot be a column of a primary key because it can contain null values.
 ij> alter table t1 add constraint uc1 unique (c2);
 0 rows inserted/updated/deleted
 ij> -- positive tests

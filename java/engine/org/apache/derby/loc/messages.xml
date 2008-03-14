@@ -1259,6 +1259,12 @@ Guide.
             </msg>
 
             <msg>
+                <name>42831.S.1</name>
+                <text>'{0}' cannot be a column of a primary key because it can contain null values.</text>
+                <arg>columnName</arg>
+            </msg>
+
+            <msg>
                 <name>42834</name>
                 <text>SET NULL cannot be specified because FOREIGN KEY '{0}'  cannot contain null values.  </text>
                 <arg>key</arg>
@@ -2393,6 +2399,12 @@ Guide.
             </msg>
 
             <msg>
+                <name>42Z20.S.1</name>
+                <text>Column '{0}' cannot be made nullable. It is part of a primary key, which cannot have any nullable columns.</text>
+                <arg>columnName</arg>
+            </msg>
+
+            <msg>
                 <name>42Z21</name>
                 <text>Invalid increment specified for identity for column '{0}'. Increment cannot be zero.  </text>
                 <arg>columnName</arg>
@@ -3073,6 +3085,12 @@ Guide.
             <msg>
                 <name>X0Y63.S</name>
                 <text>The command on table '{0}' failed because null data was found in the primary key or unique constraint/index column(s). All columns in a primary or unique index key must not be null.  </text>
+                <arg>tableName</arg>
+            </msg>
+
+            <msg>
+                <name>X0Y63.S.1</name>
+                <text>The command on table '{0}' failed because null data was found in the primary key/index column(s). All columns in a primary key must not be null.  </text>
                 <arg>tableName</arg>
             </msg>
 

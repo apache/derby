@@ -313,10 +313,10 @@ public class SQLParser
 		@param version Data Dictionary major version (DataDictionary.DD_ constant)
 		@param feature SQL Feature name, for error text.
 	*/
-	private void checkVersion(int version, String feature) throws StandardException
+	private boolean checkVersion(int version, String feature) throws StandardException
 	{
-		getLanguageConnectionContext().getDataDictionary().checkVersion(
-				version, feature);
+		return getLanguageConnectionContext()
+				.getDataDictionary().checkVersion(version, feature);
 	}
 
     /**
@@ -11876,7 +11876,10 @@ uniqueConstraintDefinition(TableName constraintName) throws StandardException :
 				String primaryKeyColumnName = ((ResultColumn) uniqueColumnList.elementAt(index)).getName();
 				if (explicitlyNullableColumnsList.contains(primaryKeyColumnName))
 				{
-					String errorState = SQLState.LANG_DB2_ADD_UNIQUE_OR_PRIMARY_KEY_ON_NULL_COLS;
+					String errorState = 
+						(checkVersion (DataDictionary.DD_VERSION_DERBY_10_4, null))
+							? SQLState.LANG_ADD_PRIMARY_KEY_ON_NULL_COLS
+							: SQLState.LANG_DB2_ADD_UNIQUE_OR_PRIMARY_KEY_ON_NULL_COLS;
 					throw StandardException.newException(errorState, primaryKeyColumnName);
 				}
 			}
@@ -11913,7 +11916,11 @@ uniqueSpecification(String columnName) throws StandardException :
 		//a column-level constraint of primary key on it will result in an error.
 		if (explicitNull) 
 		{
-			String errorState = SQLState.LANG_DB2_ADD_UNIQUE_OR_PRIMARY_KEY_ON_NULL_COLS;
+			String errorState = 
+				(checkVersion (DataDictionary.DD_VERSION_DERBY_10_4, null))
+					? SQLState.LANG_ADD_PRIMARY_KEY_ON_NULL_COLS
+					: SQLState.LANG_DB2_ADD_UNIQUE_OR_PRIMARY_KEY_ON_NULL_COLS;
+
 			throw StandardException.newException(errorState, columnName);
 		}
 		return DataDictionary.PRIMARYKEY_CONSTRAINT;

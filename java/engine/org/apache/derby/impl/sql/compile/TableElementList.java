@@ -1070,7 +1070,13 @@ public class TableElementList extends QueryTreeNodeVector
             // todo dtd may be null if the column does not exist, we should check that first
             if (dtd != null && dtd.isNullable())
             {
-                throw StandardException.newException(SQLState.LANG_DB2_ADD_UNIQUE_OR_PRIMARY_KEY_ON_NULL_COLS, colName);
+                String errorState = 
+                   (getLanguageConnectionContext().getDataDictionary()
+                        .checkVersion(DataDictionary.DD_VERSION_DERBY_10_4, null))
+                    ? SQLState.LANG_ADD_PRIMARY_KEY_ON_NULL_COLS
+                    : SQLState.LANG_DB2_ADD_UNIQUE_OR_PRIMARY_KEY_ON_NULL_COLS;
+
+                throw StandardException.newException(errorState, colName);
             }
         }
     }
