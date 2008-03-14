@@ -1029,7 +1029,7 @@
        windowtitle="Apache Derby V${major}.${minor} Test Javadoc"
        doctitle="Apache Derby V${major}.${minor} Test Javadoc"
        Footer="${javadoc.Footer}"
-       bottom="Apache Derby V${major}.${minor} Internals - &lt;i&gt;Copyright &amp;copy; 2004,2007 The Apache Software Foundation. All Rights Reserved.&lt;/i&gt;"
+       bottom="Apache Derby V${major}.${minor} Internals - &lt;i&gt;Copyright &amp;copy; 2004,2008 The Apache Software Foundation. All Rights Reserved.&lt;/i&gt;"
        source="${derbyTesting.javadoc.vmlevel}"
        sourcepath="${derby.testing.src.dir}"
        excludepackagenames="${derbyTesting.javadoc.excludes}"/>
