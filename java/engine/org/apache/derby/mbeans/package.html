@@ -16,9 +16,8 @@
 -->
 <body>
 <h2> JMX MBeans. </h2>
-If <code>derby.system.jmx</code> is true then when Derby (the embedded engine)
-is booted it will attempt to connect to the PlatformMBeanServer and register
-a number of MBeans to monitor and manage Derby.
+When Derby (the embedded engine) is booted it will attempt to connect
+to the PlatformMBeanServer and register a number of MBeans to monitor and manage Derby.
 <P>
 Derby registers its JMX MBeans in the <code>org.apache.derby</code> domain and
 always includes values for <code>type</code> and <code>system</code> in the MBean's ObjectName's key

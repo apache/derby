@@ -776,17 +776,17 @@ public final class NetworkServerControlImpl {
         ManagementService mgmtService = ((ManagementService)
                 Monitor.getSystemModule(Module.JMX));
         
-        Object versionMBean = mgmtService.registerMBean(
+        final Object versionMBean = mgmtService.registerMBean(
                            new Version(
                                    getNetProductVersionHolder(),
-                                   null /*SystemPermission.SERVER*/),
+                                   SystemPermission.SERVER),
                            VersionMBean.class,
                            "type=Version,jar=derbynet.jar");
-        Object networkServerMBean = mgmtService.registerMBean(
+        final Object networkServerMBean = mgmtService.registerMBean(
                             new NetworkServerMBeanImpl(this),
                             NetworkServerMBean.class,
                             "type=NetworkServer");
-        			
+                			
 		// wait until we are told to shutdown or someone sends an InterruptedException
         synchronized(shutdownSync) {
             try {
@@ -1078,8 +1078,8 @@ public final class NetworkServerControlImpl {
 
         // the check
         try {
-            final Permission sp
-                = new SystemPermission(SystemPermission.SHUTDOWN);
+            final Permission sp  = new SystemPermission(
+                  SystemPermission.SERVER, SystemPermission.SHUTDOWN);
             // For porting the network server to J2ME/CDC, consider calling
             // abstract method InternalDriver.checkShutdownPrivileges(user)
             // instead of static SecurityUtil.checkUserHasPermission().

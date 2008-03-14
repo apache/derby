@@ -40,7 +40,7 @@ import javax.security.auth.Subject;
 
 import org.apache.derby.authentication.SystemPrincipal;
 import org.apache.derby.security.SystemPermission;
-import org.apache.derby.security.DatabasePermission;
+//import org.apache.derby.security.DatabasePermission;
 
 import org.apache.derby.iapi.util.IdUtil;
 import org.apache.derby.iapi.error.StandardException;
@@ -135,18 +135,6 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
         { false, false, false, false, false, false, true, false },
         { false, false, false, false, false, false, false, true }
     };    
-    
-    /**
-     * Add decorators to a test run to establish a security manager
-     * with this test's policy file.
-     */
-    static private Test decorateTest(String method) {
-        final Test undecorated = new SystemPrivilegesPermissionTest(method);
-
-        // install a security manager using this test's policy file
-        return new SecurityManagerSetup(undecorated, POLICY_FILE_NAME);
-    }
-    
 
     /**
      * Create a test with the given name.
@@ -163,38 +151,24 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
      * @throws Exception
      */
     public static Test suite() {
-        //final TestSuite ts
-        //    = new TestSuite("SystemPrivilegesPermissionTest suite");
-        //ts.addTest(decorateTest("testSystemPrivileges"));
-        //return ts;
-        return decorateTest("testSystemPrivileges");
+        TestSuite suite = new TestSuite(
+                SystemPrivilegesPermissionTest.class,
+                "SystemPrivilegesPermissionTest");
+         return new SecurityManagerSetup(suite, POLICY_FILE_NAME);
     }
 
     /**
      * Test case that does a check of the XXX
      */
-    public void testSystemPrivileges() throws IOException {
-        println("");
-        println("testing System Privileges ...");
+    public void testIsSecurityManager() {
         assertSecurityManager();
-        execute();
-        println("testing System Privileges: done.");
-        println("");
-    }
+     }
 
-    /**
-     * Tests SystemPermissions.
-     */
-    public void execute() throws IOException {
-        checkSystemPrincipal();
-        checkSystemPermission();
-        checkDatabasePermission();
-    }
     
     /**
      * Tests SystemPrincipal.
      */
-    private void checkSystemPrincipal() throws IOException {
+    public void testSystemPrincipal() {
         // test SystemPrincipal with null name argument
         try {
             new SystemPrincipal(null);
@@ -215,10 +189,10 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
     /**
      * Tests SystemPermission.
      */
-    private void checkSystemPermission() throws IOException {
+    public void testSystemPermission() {
         // test SystemPermission with null name argument
         try {
-            new SystemPermission(null);
+            new SystemPermission(null, null);
             fail("expected NullPointerException");
         } catch (NullPointerException ex) {
             // expected exception
@@ -226,7 +200,7 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
 
         // test SystemPermission with empty name argument
         try {
-            new SystemPermission("");
+            new SystemPermission("", null);
             fail("expected IllegalArgumentException");
         } catch (IllegalArgumentException ex) {
             // expected exception
@@ -234,49 +208,127 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
         
         // test SystemPermission with illegal name argument
         try {
-            new SystemPermission("illegal_name");
+            new SystemPermission("illegal_name", null);
             fail("expected IllegalArgumentException");
         } catch (IllegalArgumentException ex) {
             // expected exception
         }
+        
+        String[] validNames = {
+            SystemPermission.ENGINE,
+            SystemPermission.JMX,
+            SystemPermission.SERVER
+        };
+        
+        // In order of the canonical actions expected
+        String[] validActions = {
+            SystemPermission.CONTROL,
+            SystemPermission.MONITOR,
+            SystemPermission.SHUTDOWN,
+        };
+        
+        // Check all valid combinations (which is all) with
+        // a single action
+        Permission[] all = new Permission[
+                        validNames.length * validActions.length];
+        
+        int c = 0;
+        for (int tn = 0; tn < validNames.length; tn++)
+        {
+            for (int a = 0; a < validActions.length; a++) {
+                Permission p = new SystemPermission(
+                        validNames[tn], validActions[a]);
+                
+                assertEquals(validNames[tn], p.getName());
+                assertEquals(validActions[a], p.getActions());
+                
+                // test SystemPermission.equals()
+                assertFalse(p.equals(null));
+                assertFalse(p.equals(new Object()));
+                
+                this.assertEquivalentPermissions(p, p);
 
-        // test SystemPermission with legal name argument
-        final Permission sp0 = new SystemPermission(SystemPermission.SHUTDOWN);
-        final Permission sp1 = new SystemPermission(SystemPermission.SHUTDOWN);
-
-        // test SystemPermission.getName()
-        assertEquals(sp0.getName(), SystemPermission.SHUTDOWN);
-
-        // test SystemPermission.getActions()
-        assertEquals(sp0.getActions(), "");
-
-        // test SystemPermission.hashCode()
-        assertTrue(sp0.hashCode() == sp1.hashCode());
-
-        // test SystemPermission.equals()
-        assertTrue(sp0.equals(sp1));
-        assertTrue(!sp0.equals(null));
-        assertTrue(!sp0.equals(new Object()));
-
-        // test SystemPermission.implies()
-        assertTrue(sp0.implies(sp1));
-        assertTrue(sp1.implies(sp0));
+                all[c++] = p;
+            }
+        }
+        // All the permissions are different.
+        checkDistinctPermissions(all);
+        
+        // Check two actions
+        for (int n = 0; n < validNames.length; n++)
+        {
+            for (int a = 0; a < validActions.length; a++)
+            {
+                Permission base = new SystemPermission(
+                        validNames[n], validActions[a]);
+                
+                // Two actions
+                for (int oa = 0; oa < validActions.length; oa++)
+                {
+                    Permission p = new SystemPermission(
+                            validNames[n],                           
+                            validActions[a] + "," + validActions[oa]);
+                    
+                    if (oa == a)
+                    {
+                        // Same action added twice
+                        assertEquivalentPermissions(base, p);
+                        // Canonical form should collapse into a single action
+                        assertEquals(validActions[a], p.getActions());
+                    }
+                    else
+                    {
+                        // Implies logic, the one with one permission
+                        // is implied by the other but not vice-versa.
+                        assertTrue(p.implies(base));
+                        assertFalse(base.implies(p));
+                        
+                        // Names in canonical form
+                        int f;
+                        int s;
+                        if (oa < a)
+                        {
+                            f = oa;
+                            s = a;
+                        }
+                        else
+                        {
+                            f = a;
+                            s = oa;
+                        }
+                        if (oa < a)
+                        assertEquals(validActions[f] + "," + validActions[s],
+                                p.getActions());
+                    }
+                }
+                
+                
+                
+            }
+        }
 
         // test SystemPermission for authorized user against policy file
+        
+        Permission shutdown = new SystemPermission(
+                SystemPermission.SERVER,
+                SystemPermission.SHUTDOWN);
+        
         final SystemPrincipal authorizedUser
             = new SystemPrincipal("authorizedSystemUser");
-        execute(authorizedUser, new ShutdownAction(sp0), true);
+        execute(authorizedUser, new ShutdownAction(shutdown), true);
         
         // test SystemPermission for unauthorized user against policy file
         final SystemPrincipal unAuthorizedUser
             = new SystemPrincipal("unAuthorizedSystemUser");
-        execute(unAuthorizedUser, new ShutdownAction(sp0), false);
+        execute(unAuthorizedUser, new ShutdownAction(shutdown), false);
     }
     
     /**
      * Tests DatabasePermission.
      */
-    private void checkDatabasePermission() throws IOException {
+   
+    public void XXtestDatabasePermission() throws IOException {
+ /*********************************************
         // test DatabasePermission with null url
         try {
             new DatabasePermission(null, DatabasePermission.CREATE);
@@ -300,7 +352,8 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
         } catch (IllegalArgumentException ex) {
             // expected exception
         }
-
+***********************************************/
+        
         // this test's commented out because it's platform-dependent
         // (no reliable way to make it pass on Unix)
         // test DatabasePermission with non-canonicalizable URL
@@ -313,7 +366,7 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
         //} catch (IOException ex) {
         //    // expected exception
         //}
-
+/**********************************************
         // test DatabasePermission with null actions
         try {
             new DatabasePermission("directory:dir", null);
@@ -460,6 +513,7 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
                                      DatabasePermission.CREATE);
         execute(anyUser,
                 new CreateDatabaseAction(dbPerm), true);
+***********************************************/
     }
 
     /**
@@ -491,6 +545,7 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
     /**
      * Tests DatabasePermission.getName() and .getActions().
      */
+/************88
     private void checkNameAndActions(DatabasePermission[] dbperm,
                                      String[] dbpath)
         throws IOException {
@@ -503,18 +558,19 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
                          DatabasePermission.CREATE, dbp.getActions());
         }
     }
+***************/
 
     /**
      * Tests DatabasePermission.hashCode() and .equals().
      */
-    private void checkHashCodeAndEquals(DatabasePermission[] dbp0,
-                                        DatabasePermission[] dbp1)
+    private void checkHashCodeAndEquals(Permission[] dbp0,
+                                        Permission[] dbp1)
         throws IOException {
         //assert(dbp0.length == dbp1.length)
         for (int i = 0; i < dbp0.length; i++) {
-            final DatabasePermission p0 = dbp0[i];
+            final Permission p0 = dbp0[i];
             for (int j = 0; j < dbp0.length; j++) {
-                final DatabasePermission p1 = dbp1[j];
+                final Permission p1 = dbp1[j];
                 if (i == j) {
                     assertTrue(p0.hashCode() == p1.hashCode());
                     assertTrue(p0.equals(p1));
@@ -529,20 +585,61 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
     /**
      * Tests DatabasePermission.implies().
      */
-    private void checkImplies(DatabasePermission[] dbp0,
-                              DatabasePermission[] dbp1,
+    private void checkImplies(Permission[] dbp0,
+                              Permission[] dbp1,
                               boolean[][] impls)
         throws IOException {
         for (int i = 0; i < dbp0.length; i++) {
-            final DatabasePermission p0 = dbp0[i];
+            final Permission p0 = dbp0[i];
             for (int j = 0; j < dbp1.length; j++) {
-                final DatabasePermission p1 = dbp1[j];
+                final Permission p1 = dbp1[j];
                 assertEquals("test: " + p0 + ".implies" + p1,
                              impls[i][j], p0.implies(p1));
                 //assertEquals("test: " + p1 + ".implies" + p0,
                 //             impls[j][i], p1.implies(p0));
             }
         }
+    }
+    
+    /**
+     * Check thet a set of Permission objects are distinct,
+     * do not equal or imply each other.
+     */
+    private void checkDistinctPermissions(Permission[] set)
+    {
+        for (int i = 0; i < set.length; i++)
+        {
+            Permission pi = set[i];
+            for (int j = 0; j < set.length; j++) {
+                
+                Permission pj = set[j];
+                
+                if (i == j)
+                {
+                    // Permission is itself
+                    assertEquivalentPermissions(pi, pj);
+                    continue;
+                }
+                
+                assertFalse(pi.equals(pj));
+                assertFalse(pj.equals(pi));
+                
+                assertFalse(pi.implies(pj));
+                assertFalse(pj.implies(pi));
+            }
+        }
+    }
+    
+    private void assertEquivalentPermissions(Permission p1,
+            Permission p2) {
+        assertTrue(p1.equals(p2));
+        assertTrue(p2.equals(p1));
+        
+        
+        assertEquals(p1.hashCode(), p2.hashCode());
+        
+        assertTrue(p1.implies(p2));
+        assertTrue(p1.implies(p2));
     }
     
     /**

@@ -19,18 +19,21 @@
  */
 package org.apache.derbyTesting.junit;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 
-import junit.framework.Assert;
 
 /**
  * General non-JDBC related utilities relocated from TestUtil
@@ -194,6 +197,48 @@ public class Utilities {
             }
             
             return pr;
-        }       
+        }
+        
+    /**
+     * Calls the public method <code>getInfo</code> of the sysinfo tool within
+     * this JVM and returns a <code>BufferedReader</code> for reading its 
+     * output. This is useful for obtaining system information that could be 
+     * used to verify, for example, values returned by Derby MBeans.
+     * 
+     * @return a buffering character-input stream containing the output from
+     *         sysinfo
+     * @see org.apache.derby.tools.sysinfo#getInfo(java.io.PrintWriter out)
+     */
+    public static BufferedReader getSysinfoLocally() {
+        ByteArrayOutputStream byteStream = new ByteArrayOutputStream(20 * 1024);
+        PrintWriter pw = new PrintWriter(byteStream, true); // autoflush
+        org.apache.derby.tools.sysinfo.getInfo(pw);
+        pw.flush();
+        pw.close();
+        byte[] outBytes = byteStream.toByteArray();
+        BufferedReader sysinfoOutput = new BufferedReader(
+                    new InputStreamReader(
+                            new ByteArrayInputStream(outBytes)));
+        return sysinfoOutput;
+    }
+    
+    /**
+     * <p>Calls the public method <code>getSysInfo()</code> of the Network 
+     * Server instance associated with the current test configuration and 
+     * returns the result as a BufferedReader, making it easy to analyse the 
+     * output line by line.</p>
+     * 
+     * <p>This is useful for obtaining system information that could be 
+     * used to verify, for example, values returned by Derby MBeans.</p>
+     * 
+     * @return a buffering character-input stream containing the output from 
+     *         the server's sysinfo.
+     * @see org.apache.derby.drda.NetworkServerControl#getSysinfo()
+     */
+    public static BufferedReader getSysinfoFromServer() throws Exception {
+        
+        return new BufferedReader(new StringReader(
+                NetworkServerTestSetup.getNetworkServerControl().getSysinfo()));
+    }
 
 }

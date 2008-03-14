@@ -83,13 +83,14 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
     private SpawnedProcess spawnedServer;
     
     /**
-     * Decorator this test with the NetworkServerTestSetup.
+     * Decorates a test with the NetworkServerTestSetup.
      * 
      * Runs the server using the current configuration (at the time
      * of setup).
      * 
      * @param asCommand True to start using NetworkServerControl.main()
-     * within the same virtual machine, false to use NetworkServerControl.start.
+     * within the same virtual machine, false to use NetworkServerControl.start
+     * (also within the same JVM).
      * 
      * @see NetworkServerControl#main(String[])
      * @see NetworkServerControl#start(PrintWriter)
@@ -106,19 +107,25 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
 }
 
     /**
-     * Decorator this test with the NetworkServerTestSetup.
+     * Decorates a test with the NetworkServerTestSetup.
      * 
-     * Sets up the server using the current configuration, but does not start.
+     * Sets up the server using the current configuration. Whether or not the
+     * server is actually started at setup time is determined by the value of 
+     * the passed parameters.
      * 
      * @param test the Test for which this setup is used
      * @param asCommand True to start using NetworkServerControl.main()
-     * within the same virtual machine, false to use NetworkServerControl.start.
-     * @param startServerAtSetup False to start using NetworkServerControl.main()
+     * within the same virtual machine, false to use NetworkServerControl.start()
+     * (also within the same virtual machine).
+     * @param startServerAtSetup True to start the Network Server at setup time,
+     *        False otherwise.
      * 
      * @see NetworkServerControl#main(String[])
      * @see NetworkServerControl#start(PrintWriter)
      */
-    public NetworkServerTestSetup(Test test, boolean asCommand, boolean startServerAtSetup) {
+    public NetworkServerTestSetup(  Test test, 
+                                    boolean asCommand, 
+                                    boolean startServerAtSetup) {
         super(test);
         this.asCommand = asCommand;
 

@@ -31,7 +31,7 @@ package org.apache.derby.mbeans.drda;
  * For more information on Managed Beans, refer to the JMX specification.
  *
  * @see org.apache.derby.drda.NetworkServerControl
- *
+ * @see org.apache.derby.security.SystemPermission
  */
 public interface NetworkServerMBean {
     
@@ -48,6 +48,10 @@ public interface NetworkServerMBean {
      * the Network Server is listening for connections. "<code>0.0.0.0</code>" 
      * means that the server allows connections from any host on the network.
      * 
+     * <P>
+     * Require <code>SystemPermission("server", "control")</code> if a security
+     * manager is installed.
+     *
      * @return the value of <code>derby.drda.host</code>
      */
     public String getDrdaHost();
@@ -56,6 +60,10 @@ public interface NetworkServerMBean {
      * Gets the value of the <code>derby.drda.keepAlive</code> network server
      * setting. 
      * 
+     * <P>
+     * Require <code>SystemPermission("server", "monitor")</code> if a security
+     * manager is installed.
+     *
      * @see <a href="http://db.apache.org/derby/docs/dev/adminguide/radmindrdakeepalive.html"><code>derby.drda.keepAlive</code> documentation</a>
      * @return the value of <code>derby.drda.keepAlive</code>
      */
@@ -64,6 +72,10 @@ public interface NetworkServerMBean {
     /**
      * Gets the value of the <code>derby.drda.maxThreads</code> network server 
      * setting.
+     * <P>
+     * Require <code>SystemPermission("server", "monitor")</code> if a security
+     * manager is installed.
+     *
      * @return the value of the <code>derby.drda.maxThreads</code> network 
      *         server setting
      */
@@ -75,6 +87,10 @@ public interface NetworkServerMBean {
      * setting. This is the port number on which the Network Server is listening
      * for client connections.
      * 
+     * <P>
+     * Require <code>SystemPermission("server", "control")</code> if a security
+     * manager is installed.
+     *
      * @return the port number on which the Network Server is listening
      *         for client connections.
      */
@@ -84,6 +100,10 @@ public interface NetworkServerMBean {
      * Gets the value of the <code>derby.drda.securityMechanism</code> network 
      * server setting. 
      * 
+     * <P>
+     * Require <code>SystemPermission("server", "control")</code> if a security
+     * manager is installed.
+     *
      * @return the value of the <code>derby.drda.securityMechanism</code> 
      *         network server setting.
      */
@@ -93,6 +113,10 @@ public interface NetworkServerMBean {
      * Gets the value of the <code>derby.drda.sslMode</code> network server 
      * setting. 
      * 
+     * <P>
+     * Require <code>SystemPermission("server", "control")</code> if a security
+     * manager is installed.
+     *
      * @return the value of the <code>derby.drda.sslMode</code> network server 
      *         setting.
      */
@@ -104,6 +128,10 @@ public interface NetworkServerMBean {
      * This setting is used to configure the size of the buffer used for 
      * streaming blob/clob from server to client.
      * 
+     * <P>
+     * Require <code>SystemPermission("server", "monitor")</code> if a security
+     * manager is installed.
+     *
      * @return the size of the buffer used for streaming blob/clob from server 
      *         to client
      */
@@ -112,6 +140,10 @@ public interface NetworkServerMBean {
     /**
      * Gets the value of the <code>derby.drda.timeSlice</code> network server 
      * setting.
+     * <P>
+     * Require <code>SystemPermission("server", "monitor")</code> if a security
+     * manager is installed.
+     *
      * @return the value of the <code>derby.drda.timeSlice</code> network 
      *         server setting
      */
@@ -121,6 +153,10 @@ public interface NetworkServerMBean {
     /**
      * Gets the value of the <code>derby.drda.traceAll</code> network server 
      * setting.
+     * <P>
+     * Require <code>SystemPermission("server", "monitor")</code> if a security
+     * manager is installed.
+     *
      * @return the value of the <code>derby.drda.traceAll</code> network 
      *         server setting
      */
@@ -133,11 +169,19 @@ public interface NetworkServerMBean {
      * network server administrator, the default value is returned.
      * @return the value of the <code>derby.drda.timeSlice</code> network 
      *         server setting
+     * <P>
+     * Require <code>SystemPermission("server", "control")</code> if a security
+     * manager is installed.
+     *
      */
     public String getDrdaTraceDirectory();
     //public void setDrdaTraceDirectory(String dir) throws Exception;
     /**
      * Get the number of connections.
+     * <P>
+     * Require <code>SystemPermission("server", "monitor")</code> if a security
+     * manager is installed.
+     *
      * @return number of connections.
      */
     public int getConnectionCount();
@@ -151,12 +195,20 @@ public interface NetworkServerMBean {
      * <p>
      * If drdaMaxThreads is > 0 and drdaTimeSlice > 0, connections will be alternating beetween active 
      * and waiting according to Derby's time slicing algorithm.
+     * <P>
+     * Require <code>SystemPermission("server", "monitor")</code> if a security
+     * manager is installed.
+     *
      * @return number of active connections
      */
     public int getActiveConnectionCount();
     
     /**
      * get the number of waiting connections. Always 0 if drdaMaxThreads is 0. 
+     * <P>
+     * Require <code>SystemPermission("server", "monitor")</code> if a security
+     * manager is installed.
+     *
      * @return number of waiting connections
      * @see NetworkServerMBean#getActiveConnectionCount
      */
@@ -164,24 +216,40 @@ public interface NetworkServerMBean {
     
     /**
      * Get the size of the thread pool.
+     * <P>
+     * Require <code>SystemPermission("server", "monitor")</code> if a security
+     * manager is installed.
+     *
      * @return size of thread pool
      */
     public int getConnectionThreadPoolSize();
     
     /**
      * Get the accumulated number of connections.
+     * <P>
+     * Require <code>SystemPermission("server", "monitor")</code> if a security
+     * manager is installed.
+     *
      * @return number of connections.
      */
     public int getAccumulatedConnectionCount();
     
     /**
      * Get the total number of bytes read
+     * <P>
+     * Require <code>SystemPermission("server", "monitor")</code> if a security
+     * manager is installed.
+     *
      * @return number of bytes
      */
     public long getBytesReceived();
     
     /** 
      * Get the total number of bytes written.
+     * <P>
+     * Require <code>SystemPermission("server", "monitor")</code> if a security
+     * manager is installed.
+     *
      * @return number of bytes
      */
     public long getBytesSent();
@@ -189,6 +257,10 @@ public interface NetworkServerMBean {
     /**
      * Get the number of bytes received pr second. 
      * Shortest interval measured is 1 second.
+     * <P>
+     * Require <code>SystemPermission("server", "monitor")</code> if a security
+     * manager is installed.
+     *
      * @return bytes per millisecond
      */
     
@@ -197,6 +269,10 @@ public interface NetworkServerMBean {
      /**
      * Get the number of bytes sent pr second. 
      * Shortest interval measured is 1 second.
+     * <P>
+     * Require <code>SystemPermission("server", "monitor")</code> if a security
+     * manager is installed.
+     *
      * @return bytes per millisecond
      */
     
@@ -204,6 +280,10 @@ public interface NetworkServerMBean {
     
     /**
      * Return the start time of the network server.
+     * <P>
+     * Require <code>SystemPermission("server", "monitor")</code> if a security
+     * manager is installed.
+     *
      * @return Time in milli-seconds since the epoch that the network server started.
      * @see System#currentTimeMillis()
      */
@@ -211,6 +291,10 @@ public interface NetworkServerMBean {
     
     /**
      * Return the time the network server has been running.
+     * <P>
+     * Require <code>SystemPermission("server", "monitor")</code> if a security
+     * manager is installed.
+     *
      * @return Time in milli-seconds the server has been running.
      */
     public long getUptime(); 
@@ -224,6 +308,10 @@ public interface NetworkServerMBean {
     /**
      * Executes the network server's <code>ping</code> command.
      * Returns without errors if the server was successfully pinged.
+     * <P>
+     * Require <code>SystemPermission("server", "monitor")</code> if a security
+     * manager is installed.
+     *
      * @throws java.lang.Exception if the ping attempt fails (an indication that
      *         the network server is not running properly)
      */

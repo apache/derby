@@ -36,6 +36,15 @@ package org.apache.derby.mbeans;
  * <LI> <code>jar={derby.jar|derbynet.jar}</code>
  * <LI> <code>system=</code><em>runtime system identifier</em> (see overview)
  * </UL>
+ * <P>
+ * If a security manager is installed these permissions are required:
+ * <UL>
+ * <LI> <code>SystemPermission("server", "monitor")</code> for version information
+ * specific to derbynet.jar
+ * <LI> <code>SystemPermission("engine", "monitor")</code> for version information
+ * specific to derby.jar
+ * </UL>
+ * @see org.apache.derby.security.SystemPermission
 */
 public interface VersionMBean {
     // attributes

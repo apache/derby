@@ -21,13 +21,7 @@
 
 package org.apache.derbyTesting.functionTests.tests.management;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.io.StringReader;
 import java.security.AccessController;
 import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
@@ -72,11 +66,7 @@ abstract class MBeanTest extends BaseJDBCTestCase {
     }
     
     protected static Test suite(Class<? extends MBeanTest> testClass, String suiteName) {
-        
-        // TODO -
-        // Check for J2SE 5.0 or better? Or java.lang.management.ManagementFactory?
-        // Older VMs will get UnsupportedClassVersionError anyway...
-        
+                
         TestSuite outerSuite = new TestSuite(suiteName);
         
         Test platform = new TestSuite(testClass,  suiteName + ":platform");
@@ -86,10 +76,6 @@ abstract class MBeanTest extends BaseJDBCTestCase {
         platform = TestConfiguration.clientServerDecorator(platform);
         platform = JMXConnectionDecorator.platformMBeanServer(platform);
                 
-        // TODO: Run with no security for the moment, requires changes in the
-        // test policy files that may clash with a couple of outstanding patches.
-        platform = SecurityManagerSetup.noSecurityManager(platform);
-
         // Set of tests that run within the same virtual machine using
         // the platform MBeanServer directly.
         outerSuite.addTest(platform);
@@ -245,8 +231,6 @@ abstract class MBeanTest extends BaseJDBCTestCase {
         
         ObjectName mgmtObjName = getApplicationManagementMBean();
         
-        MBeanServerConnection serverConn = getMBeanServerConnection();
-
         // check the status of the management service
         Boolean active = (Boolean) 
                 getAttribute(mgmtObjName, "ManagementActive");
@@ -254,10 +238,8 @@ abstract class MBeanTest extends BaseJDBCTestCase {
         if (!active.booleanValue()) {
             // JMX management is not active, so activate it by invoking the
             // startManagement operation.
-            serverConn.invoke(
-                    mgmtObjName, 
-                    "startManagement", 
-                    new Object[0], new String[0]); // no arguments
+            invokeOperation(mgmtObjName, "startManagement");
+
             active = (Boolean) 
                     getAttribute(mgmtObjName, "ManagementActive");
         }
@@ -498,46 +480,4 @@ abstract class MBeanTest extends BaseJDBCTestCase {
         println(name + " = " + value); // for debugging
     }
     
-    
-    /**
-     * Calls the public method <code>getInfo</code> of the sysinfo tool within
-     * this JVM and returns a <code>BufferedReader</code> for reading its 
-     * output. This is useful for obtaining system information that could be 
-     * used to verify (for example) values returned by Derby MBeans.
-     * 
-     * @return a buffering character-input stream containing the output from
-     *         sysinfo
-     * @see org.apache.derby.tools.sysinfo#getInfo(java.io.PrintWriter out)
-     */
-    protected BufferedReader getSysinfoLocally() {
-        ByteArrayOutputStream byteStream = new ByteArrayOutputStream(20 * 1024);
-        PrintWriter pw = new PrintWriter(byteStream, true); // autoflush
-        org.apache.derby.tools.sysinfo.getInfo(pw);
-        pw.flush();
-        pw.close();
-        byte[] outBytes = byteStream.toByteArray();
-        BufferedReader sysinfoOutput = new BufferedReader(
-                    new InputStreamReader(
-                            new ByteArrayInputStream(outBytes)));
-        return sysinfoOutput;
-    }
-    
-    /**
-     * <p>Calls the public method <code>getSysInfo()</code> of the Network 
-     * Server instance associated with the current test configuration and 
-     * returns the result as a BufferedReader, making it easy to analyse the 
-     * output line by line.</p>
-     * 
-     * <p>This is useful for obtaining system information that could be 
-     * used to verify (for example) values returned by Derby MBeans.</p>
-     * 
-     * @return a buffering character-input stream containing the output from 
-     *         the server's sysinfo.
-     * @see org.apache.derby.drda.NetworkServerControl#getSysinfo()
-     */
-    protected BufferedReader getSysinfoFromServer() throws Exception {
-        
-        return new BufferedReader(new StringReader(
-                NetworkServerTestSetup.getNetworkServerControl().getSysinfo()));
-    }
 }

@@ -22,10 +22,13 @@
 package org.apache.derbyTesting.functionTests.tests.management;
 
 import java.io.BufferedReader;
-import java.sql.DatabaseMetaData;
+import java.sql.Driver;
 import java.util.Hashtable;
 import javax.management.ObjectName;
 import junit.framework.Test;
+import junit.framework.Test;
+import junit.framework.TestSuite;
+import org.apache.derbyTesting.junit.Utilities;
 
 
 /**
@@ -92,7 +95,7 @@ public class JDBCMBeanTest extends MBeanTest {
     public void testAttributeDriverLevel() throws Exception {
         String expected = "[Unable to get driver level from sysinfo]";
         // Get the expected value from sysinfo
-        BufferedReader sysinfoOutput = getSysinfoFromServer();
+        BufferedReader sysinfoOutput = Utilities.getSysinfoFromServer();
         String line = null;
         while ((line = sysinfoOutput.readLine()) != null) {
             /* Looking for:
@@ -109,15 +112,53 @@ public class JDBCMBeanTest extends MBeanTest {
         assertStringAttribute(expected,getJdbcMBeanObjectName(), "DriverLevel");
     }
     
+    /**
+     * <p>
+     * Tests the MajorVersion attribute of the JDBCMBean. Will test that there
+     * exists an attribute with that name that we are able to read, that it 
+     * returns the correct type, and that the return value is as expected.</p>
+     * <p>
+     * The expected value is retreived from the embedded driver that is directly
+     * accessible to this JVM, making the assumption that this driver's version
+     * information is the same as the version information of the embedded driver
+     * used in the JVM being instrumented using JMX (this may or may not be the
+     * same JVM).</p>
+     * 
+     * @throws java.lang.Exception if an error occurs, or if the test fails.
+     */
     public void testAttributeMajorVersion() throws Exception {
-        DatabaseMetaData dbmd = getConnection().getMetaData();
-        int expected = dbmd.getDriverMajorVersion();
+        /* since the JDBCMBean instruments the embedded driver (InternalDriver),
+         * we need to get expected values from the embedded driver even if
+         * this test configuration is client/server.
+         * Assuming that the embedded driver is available in the classpath.
+         */
+        Driver d = new org.apache.derby.jdbc.EmbeddedDriver();
+        int expected = d.getMajorVersion();
         assertIntAttribute(expected, getJdbcMBeanObjectName(), "MajorVersion");
     }
     
+    /**
+     * <p>
+     * Tests the MinorVersion attribute of the JDBCMBean. Will test that there
+     * exists an attribute with that name that we are able to read, that it 
+     * returns the correct type, and that the return value is as expected.</p>
+     * <p>
+     * The expected value is retreived from the embedded driver that is directly
+     * accessible to this JVM, making the assumption that this driver's version
+     * information is the same as the version information of the embedded driver
+     * used in the JVM being instrumented using JMX (this may or may not be the
+     * same JVM).</p>
+     * 
+     * @throws java.lang.Exception if an error occurs, or if the test fails.
+     */
     public void testAttributeMinorVersion() throws Exception {
-        DatabaseMetaData dbmd = getConnection().getMetaData();
-        int expected = dbmd.getDriverMinorVersion();
+        /* since the JDBCMBean instruments the embedded driver (InternalDriver),
+         * we need to get expected values from the embedded driver even if
+         * this test configuration is client/server.
+         * Assuming that DriverManager is available in the classpath.
+         */
+        Driver d = new org.apache.derby.jdbc.EmbeddedDriver();
+        int expected = d.getMinorVersion();
         assertIntAttribute(expected, getJdbcMBeanObjectName(), "MinorVersion");
     }
 

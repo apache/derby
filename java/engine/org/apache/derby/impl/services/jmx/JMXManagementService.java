@@ -121,7 +121,7 @@ public final class JMXManagementService implements ManagementService, ModuleCont
         registerMBean(
                 new Version(
                         Monitor.getMonitor().getEngineVersion(),
-                        null /* SystemPermission.ENGINE */),
+                        SystemPermission.ENGINE),
                 VersionMBean.class,
                 "type=Version,jar=derby.jar");
     }
@@ -175,9 +175,12 @@ public final class JMXManagementService implements ManagementService, ModuleCont
                     });
             
         } catch (SecurityException se) {
-            // TODO: just ignoring inability to create or
-            // find the mbean server.
-            // or should an error or warning be raised?
+            // Ignoring inability to create or
+            // find the mbean server. MBeans can continue
+            // to be registered with this service and
+            // startMangement() can be called to get
+            // them registered with JMX if someone else
+            // starts the MBean server.
         }
     }
 
@@ -240,6 +243,11 @@ public final class JMXManagementService implements ManagementService, ModuleCont
     private void jmxRegister(final StandardMBean standardMBean,
             final ObjectName beanName) throws JMException
     {
+        // Already registered? Can happen if we don't have permission
+        // to unregister the MBeans.
+        if (mbeanServer.isRegistered(beanName))
+            return;
+            
         try {
 
             AccessController
@@ -254,6 +262,10 @@ public final class JMXManagementService implements ManagementService, ModuleCont
 
         } catch (PrivilegedActionException pae) {
             throw (JMException) pae.getException();
+        } catch (SecurityException se) {
+            // If we can't register the MBean then so be it.
+            // The application can later enabled the MBeans
+            // by using org.apache.derby.mbeans.Management
         }
     }
     
@@ -312,6 +324,10 @@ public final class JMXManagementService implements ManagementService, ModuleCont
             // JMException jme = (JMException) pae.getException();
             //if (!(jme instanceof InstanceNotFoundException))
                 // throw StandardException.plainWrapException(jme);
+        } catch (SecurityException se) {
+            // Can't unregister the MBean we registered due to permission
+            // problems, oh-well just leave it there. We are fail-safe
+            // if we attempt to re-register it.
         }
     }
 
@@ -375,18 +391,28 @@ public final class JMXManagementService implements ManagementService, ModuleCont
             mbeanServer = null;
         }
     }
+    
+    /**
+     * Control permission (permissions are immutable).
+     */
+    private final static SystemPermission CONTROL =
+        new SystemPermission(
+                SystemPermission.JMX, SystemPermission.CONTROL);
 
+    /**
+     * Require SystemPermission("jmx", "control") to change
+     * the management state.
+     */
     private void checkJMXControl() {
-        /* FUTURE DERBY-3462
         try {
-            AccessController.checkPermission(new SystemPermission("jmxControl"));
+            if (System.getSecurityManager() != null)
+                AccessController.checkPermission(CONTROL);
         } catch (AccessControlException e) {
             // Need to throw a simplified version as AccessControlException
             // will have a reference to Derby's SystemPermission which most likely
             // will not be available on the client.
             throw new SecurityException(e.getMessage());
         }
-        */
     }
 
     public synchronized String getSystemIdentifier() {

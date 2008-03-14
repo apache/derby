@@ -57,6 +57,11 @@
             </classpath>
             <include name="${this.dir}/*.java"/>
         </javac>
+        <copy todir="${out.dir}/${derby.testing.functest.dir}/tests/management">
+          <fileset dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/management"
+        	 includes="jmx.*"/>
+        </copy>
+
     </target>
 
 </project>

@@ -21,7 +21,11 @@
 
 package org.apache.derby.impl.drda;
 
+import java.security.AccessControlException;
+import java.security.AccessController;
+
 import org.apache.derby.mbeans.drda.NetworkServerMBean;
+import org.apache.derby.security.SystemPermission;
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.drda.NetworkServerControl;
@@ -52,18 +56,38 @@ class NetworkServerMBeanImpl implements NetworkServerMBean {
         startTime = System.currentTimeMillis();
     }
     
+    private static final SystemPermission CONTROL =
+        new SystemPermission(SystemPermission.SERVER,
+                SystemPermission.CONTROL);
+    private static final SystemPermission MONITOR =
+        new SystemPermission(SystemPermission.SERVER,
+                SystemPermission.MONITOR);
+    
     /**
      * Ensure the caller has permission to control the network server.
      */
-    private void checkControl() { 
-        // TODO: implement check
+    private static void checkControl() { 
+        checkPermission(CONTROL);
     }
 
     /**
      * Ensure the caller has permission to monitor the network server.
      */
-    private void checkMonitor() { 
-//      TODO: implement check
+    private static void checkMonitor() { 
+        checkPermission(MONITOR);
+    }
+    
+    private static void checkPermission(SystemPermission permission)
+    {
+        try {
+            if (System.getSecurityManager() != null)
+                AccessController.checkPermission(permission);
+        } catch (AccessControlException e) {
+            // Need to throw a simplified version as AccessControlException
+            // will have a reference to Derby's SystemPermission which most likely
+            // will not be available on the client.
+            throw new SecurityException(e.getMessage());
+        }  
     }
 
     // Some of the code is disabled (commented out) due to security concerns,
@@ -82,6 +106,7 @@ class NetworkServerMBeanImpl implements NetworkServerMBean {
     }
     
     public boolean getDrdaKeepAlive() {
+        checkMonitor();
         String on = getServerProperty(Property.DRDA_PROP_KEEPALIVE);
         return ( "true".equals(on) ? true : false);
     }
