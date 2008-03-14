@@ -777,7 +777,9 @@ public final class NetworkServerControlImpl {
                 Monitor.getSystemModule(Module.JMX));
         
         Object versionMBean = mgmtService.registerMBean(
-                           new Version(getNetProductVersionHolder()),
+                           new Version(
+                                   getNetProductVersionHolder(),
+                                   null /*SystemPermission.SERVER*/),
                            VersionMBean.class,
                            "type=Version,jar=derbynet.jar");
         Object networkServerMBean = mgmtService.registerMBean(

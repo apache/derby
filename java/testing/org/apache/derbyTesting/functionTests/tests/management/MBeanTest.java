@@ -24,15 +24,25 @@ package org.apache.derbyTesting.functionTests.tests.management;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringReader;
+import java.security.AccessController;
+import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Set;
 
+import javax.management.AttributeNotFoundException;
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.InstanceNotFoundException;
+import javax.management.MBeanException;
+import javax.management.MBeanRegistrationException;
 import javax.management.MBeanServerConnection;
+import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
+import javax.management.ReflectionException;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -51,7 +61,7 @@ import org.apache.derbyTesting.junit.TestConfiguration;
  * BaseTestCase.
  */
 abstract class MBeanTest extends BaseJDBCTestCase {
-    
+     
     /**
      * JMX connection to use throughout the instance.
      */
@@ -61,7 +71,7 @@ abstract class MBeanTest extends BaseJDBCTestCase {
         super(name);
     }
     
-    protected static Test suite(Class testClass, String suiteName) {
+    protected static Test suite(Class<? extends MBeanTest> testClass, String suiteName) {
         
         // TODO -
         // Check for J2SE 5.0 or better? Or java.lang.management.ManagementFactory?
@@ -75,11 +85,11 @@ abstract class MBeanTest extends BaseJDBCTestCase {
         // all the MBeans are running.
         platform = TestConfiguration.clientServerDecorator(platform);
         platform = JMXConnectionDecorator.platformMBeanServer(platform);
-        
+                
         // TODO: Run with no security for the moment, requires changes in the
         // test policy files that may clash with a couple of outstanding patches.
         platform = SecurityManagerSetup.noSecurityManager(platform);
-        
+
         // Set of tests that run within the same virtual machine using
         // the platform MBeanServer directly.
         outerSuite.addTest(platform);
@@ -106,7 +116,7 @@ abstract class MBeanTest extends BaseJDBCTestCase {
         NetworkServerTestSetup networkServerTestSetup = 
                 new NetworkServerTestSetup (
                         suite, // run all tests in this class in the same setup
-                        getCommandLineProperties(), // need to set up JMX in JVM
+                        getCommandLineProperties(false), // need to set up JMX in JVM
                         new String[0], // no server arguments needed
                         true   // wait for the server to start properly
                 );
@@ -117,13 +127,15 @@ abstract class MBeanTest extends BaseJDBCTestCase {
          * JMX specific policy file later. Or use the property trick reported
          * on derby-dev 2008-02-26 and add the permission to the generic 
          * policy.
+         * Note that the remote server will be running with a security
+         * manager (by default) if testing with jars.
          */
         Test testSetup = 
                 SecurityManagerSetup.noSecurityManager(networkServerTestSetup);
         // this decorator makes sure the suite is empty if this configration
         // does not support the network server:
         outerSuite.addTest(TestConfiguration.defaultServerDecorator(testSetup));
-        
+       
         return outerSuite;
     }
     
@@ -138,13 +150,21 @@ abstract class MBeanTest extends BaseJDBCTestCase {
      * @return a set of Java system properties to be set on the command line
      *         when starting a new JVM in order to enable remote JMX.
      */
-    private static String[] getCommandLineProperties()
+    protected static String[] getCommandLineProperties(boolean authentication)
     {
         ArrayList<String> list = new ArrayList<String>();
         list.add("com.sun.management.jmxremote.port=" 
                 + TestConfiguration.getCurrent().getJmxPort());
-        list.add("com.sun.management.jmxremote.authenticate=false");
+        list.add("com.sun.management.jmxremote.authenticate=" +
+                Boolean.toString(authentication));
         list.add("com.sun.management.jmxremote.ssl=false");
+        
+        if (authentication) {
+            list.add("com.sun.management.jmxremote.password.file=" +
+                    "extin/jmx.password");
+            list.add("com.sun.management.jmxremote.access.file=" +
+                    "extin/jmx.access");
+        }
         String[] result = new String[list.size()];
         list.toArray(result);
         return result;
@@ -175,7 +195,10 @@ abstract class MBeanTest extends BaseJDBCTestCase {
     }
     
     /**
-     * Obtains a connection to an MBean server. Assumes th
+     * Obtains a connection to an MBean server with
+     * no user name or password,
+     * opens a single connection for the lifetime
+     * of the fixture
      * 
      * @return a plain connection to an MBean server
      */
@@ -184,8 +207,21 @@ abstract class MBeanTest extends BaseJDBCTestCase {
         
         if (jmxConnection == null)
             jmxConnection = 
-            JMXConnectionGetter.mbeanServerConnector.get().getMBeanServerConnection();
+            JMXConnectionGetter.mbeanServerConnector.get()
+                .getMBeanServerConnection(null, null);
         return jmxConnection;
+    }
+    
+    /**
+     * Obtains a connection to an MBean server with
+     * a user name or password. A new connection is
+     * returned for each call.
+     */
+    protected MBeanServerConnection getMBeanServerConnection(
+            String user, String password) throws Exception {
+
+        return JMXConnectionGetter.mbeanServerConnector.get()
+                    .getMBeanServerConnection(user, password);
     }
     
     /**
@@ -213,7 +249,7 @@ abstract class MBeanTest extends BaseJDBCTestCase {
 
         // check the status of the management service
         Boolean active = (Boolean) 
-                serverConn.getAttribute(mgmtObjName, "ManagementActive");
+                getAttribute(mgmtObjName, "ManagementActive");
 
         if (!active.booleanValue()) {
             // JMX management is not active, so activate it by invoking the
@@ -223,7 +259,7 @@ abstract class MBeanTest extends BaseJDBCTestCase {
                     "startManagement", 
                     new Object[0], new String[0]); // no arguments
             active = (Boolean) 
-                    serverConn.getAttribute(mgmtObjName, "ManagementActive");
+                    getAttribute(mgmtObjName, "ManagementActive");
         }
         
         assertTrue("Failed to activate Derby's JMX management", active);
@@ -237,9 +273,16 @@ abstract class MBeanTest extends BaseJDBCTestCase {
     @SuppressWarnings("unchecked")
     protected Set<ObjectName> getDerbyDomainMBeans() throws Exception
     {
-        ObjectName derbyDomain = new ObjectName("org.apache.derby:*");
-        return  (Set<ObjectName>)
-            getMBeanServerConnection().queryNames(derbyDomain, null);
+        final ObjectName derbyDomain = new ObjectName("org.apache.derby:*");
+        final MBeanServerConnection serverConn = getMBeanServerConnection(); 
+        
+        return  (Set<ObjectName>) AccessController.doPrivileged(
+            new PrivilegedExceptionAction<Object>() {
+                public Object run() throws IOException {
+                    return serverConn.queryNames(derbyDomain, null);
+               }   
+            }
+        );   
     }
     
     /**
@@ -253,19 +296,25 @@ abstract class MBeanTest extends BaseJDBCTestCase {
         /* prepare the Management mbean, which is (so far) the only MBean that
          * can be created/registered from a JMX client, and without knowing the
          * system identifier */
-        ObjectName mgmtObjName 
+        final ObjectName mgmtObjName 
                 = new ObjectName("org.apache.derby", "type", "Management");
         // create/register the MBean. If the same MBean has already been
         // registered with the MBeanServer, that MBean will be referenced.
         //ObjectInstance mgmtObj = 
-        MBeanServerConnection serverConn = getMBeanServerConnection();
+        final MBeanServerConnection serverConn = getMBeanServerConnection();
         
         if (!serverConn.isRegistered(mgmtObjName))
-        {
-        
-            serverConn.createMBean(
-                    "org.apache.derby.mbeans.Management", 
-                    mgmtObjName);
+        {       
+            AccessController.doPrivileged(
+                new PrivilegedExceptionAction<Object>() {
+                    public Object run() throws InstanceAlreadyExistsException, MBeanRegistrationException, NotCompliantMBeanException, ReflectionException, MBeanException, IOException {
+                        serverConn.createMBean(
+                                "org.apache.derby.mbeans.Management", 
+                                mgmtObjName);
+                        return null;
+                   }   
+                }
+            );
         }
         
         return mgmtObjName;
@@ -314,16 +363,22 @@ abstract class MBeanTest extends BaseJDBCTestCase {
      * @return the value returned by the operation being invoked, or 
      *         <code>null</code> if there is no return value.
      */
-    protected Object invokeOperation(ObjectName objName, 
-                                     String name, 
-                                     Object[] params, 
-                                     String[] sign)
+    protected Object invokeOperation(final ObjectName objName, 
+                                     final String name, 
+                                     final Object[] params, 
+                                     final String[] sign)
             throws Exception
     {
-        return getMBeanServerConnection().invoke(
-                objName, 
-                name, 
-                params, sign);
+        final MBeanServerConnection jmxConn = getMBeanServerConnection();
+        
+        return AccessController.doPrivileged(
+            new PrivilegedExceptionAction<Object>() {
+                public Object run() throws InstanceNotFoundException, MBeanException, ReflectionException, IOException  {
+                    return jmxConn.invoke(objName, name,
+                            params, sign);
+                }
+            }
+        );
     }
     
     /**
@@ -334,10 +389,18 @@ abstract class MBeanTest extends BaseJDBCTestCase {
      * @return the value of the attribute
      * @throws java.lang.Exception if an unexpected error occurs
      */
-    protected Object getAttribute(ObjectName objName, String name) 
+    protected Object getAttribute(final ObjectName objName, final String name) 
             throws Exception {
         
-        return getMBeanServerConnection().getAttribute(objName, name);
+        final MBeanServerConnection jmxConn = getMBeanServerConnection();
+        
+        return AccessController.doPrivileged(
+            new PrivilegedExceptionAction<Object>() {
+                public Object run() throws AttributeNotFoundException, InstanceNotFoundException, MBeanException, ReflectionException, IOException {
+                    return jmxConn.getAttribute(objName, name);
+                }
+            }
+        );
     }
     
     protected void assertBooleanAttribute(boolean expected,
@@ -434,6 +497,7 @@ abstract class MBeanTest extends BaseJDBCTestCase {
         String value = (String)getAttribute(objName, name);
         println(name + " = " + value); // for debugging
     }
+    
     
     /**
      * Calls the public method <code>getInfo</code> of the sysinfo tool within

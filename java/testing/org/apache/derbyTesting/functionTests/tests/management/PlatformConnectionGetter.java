@@ -35,7 +35,11 @@ class PlatformConnectionGetter implements JMXConnectionGetter {
     PlatformConnectionGetter() {
     }
 
-    public MBeanServerConnection getMBeanServerConnection() throws Exception {
+    /**
+     * User name ignored, only applicable for remote connections.
+     */
+    public MBeanServerConnection getMBeanServerConnection(String user,
+            String password) throws Exception {
         
         return AccessController.doPrivileged(new PrivilegedAction<MBeanServerConnection>() {
 
