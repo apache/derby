@@ -122,4 +122,7 @@ grant {
 // current one.
 grant codeBase "${derbyTesting.antjunit}" {
     permission java.lang.RuntimePermission "setIO";
+    
+    // This permission is needed when running the tests using ant 1.7
+    permission java.io.FilePermission "${user.dir}${/}*", "write";
 };
