@@ -32,38 +32,58 @@ import java.util.StringTokenizer;
 
 /**
  * This class represents access to system-wide Derby privileges.
+ * <P>
+  <table border = "1">
+  <tr> <th>Permission <th>Description <th>Risk </tr>
+  <tr> <th> "jmx" "control" <td> Controls the ability of JMX clients to control
+  Derby and view security sensitive attributes through Derby's MBeans.
+     <td> JMX clients may be able to change the state of the running system </tr>
+  <tr> <th> "jmx" "monitor" <td> Controls the ability of JMX clients to
+      monitor Derby through Derby's MBeans, such as viewing number of current connections and
+      configuration settings. <em> Note: security related settings require</em> <code>control</code>
+      <em>action on</em> <code>jmx</code> <td> JMX clients can see information about a runing system
+      including software versions. </tr>
+ </table>
  */
 final public class SystemPermission extends BasicPermission {
     
+    private static final long serialVersionUID = 1965420504091489898L;
+    
     /**
-     * Permission target name for actions applicable
+     * Permission target name (<code>"server"</code>) for actions applicable
      * to the network server.
      */
     public static final String SERVER = "server";
     /**
-     * Permission target name for actions applicable
+     * Permission target name (<code>"engine"</code>) for actions applicable
      * to the core database engine.
      */
     public static final String ENGINE = "engine";
     /**
-     * Permission target name for actions applicable
+     * Permission target name (<code>"jmx"</code>) for actions applicable
      * to management of Derby's JMX MBeans.
      */
     public static final String JMX = "jmx";
 
     /**
-     * The server and engine shutdown action.
+     * The server and engine shutdown action (<code>"shutdown"</code>).
      */
     static public final String SHUTDOWN = "shutdown";
     
     /**
-     * Permission to perform control actions through JMX
+     * Action (<code>"control"</code>) to perform control actions through JMX
      * on engine, server or jmx.
+     * <P>
+     * For JMX control permission is required to get
+     * attributes that are deemed sensiive from a security
+     * aspect, such as the network server's port number,
+     * security mechanisms and any information about the
+     * file system.
      */
     public static final String CONTROL = "control";
     
     /**
-     * Permission to perform monitoring actions through JMX
+     * Action (<code>"monitor"</code>) to perform monitoring actions through JMX
      * on engine and server.
      */
     public static final String MONITOR = "monitor";
