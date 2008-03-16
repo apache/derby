@@ -441,6 +441,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 			 *	o  The RC is not qualified, but its expression is a ColumnReference
 			 *	   from the same table (as determined by the tableNumbers).
 			 */
+                        boolean columnNameMatches;
 			if (tableName != null)
 			{
                 ValueNode rcExpr = resultColumn.getExpression();
@@ -450,7 +451,13 @@ public class ResultColumnList extends QueryTreeNodeVector
                 ColumnReference cr = (ColumnReference) rcExpr;
                 if( (! tableName.equals( cr.getTableNameNode())) && tableNumber != cr.getTableNumber())
                     continue;
+				columnNameMatches =
+					columnName.equals( resultColumn.getSourceColumnName() );
 			}
+			else
+				columnNameMatches =
+					resultColumn.columnNameMatches(columnName);
+
 
 			/* We finally got past the qualifiers, now see if the column
 			 * names are equal. If they are, then we appear to have found
@@ -469,7 +476,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 			* should be removed from the ResultColumnList and returned
 			* to the caller.
 			 */
-			if (columnName.equals( resultColumn.getName()) )
+			if (columnNameMatches)
 			{
 				if (retVal == null)
 				{
@@ -558,6 +565,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 			// exposedName will not be null and "*" will not have an expression
 			// or tablename.
 			// We may be checking on "ORDER BY T.A" against "SELECT T.B, T.A".
+                        boolean columnNameMatches;
 			if (tableName != null)
 			{
 				ValueNode rcExpr = resultColumn.getExpression();
@@ -568,12 +576,17 @@ public class ResultColumnList extends QueryTreeNodeVector
 				ColumnReference cr = (ColumnReference) rcExpr;
                 if( ! tableName.equals( cr.getTableNameNode()))
                     continue;
+				columnNameMatches =
+					columnName.equals( resultColumn.getSourceColumnName() );
 			}
+			else
+				columnNameMatches =
+					resultColumn.columnNameMatches(columnName);
 
 			/* We finally got past the qualifiers, now see if the column
 			 * names are equal.
 			 */
-			if (columnName.equals( resultColumn.getName()) )
+			if (columnNameMatches)
 			{
 				if (retVal == null)
 				{
