@@ -215,10 +215,6 @@ public class OrderByColumn extends OrderedColumn {
             resolveAddedColumn(target);
 		if (resultCol == null)
 			throw StandardException.newException(SQLState.LANG_UNION_ORDER_BY);
-			if (addedColumnOffset >= 0 &&
-					target instanceof SelectNode &&
-					( (SelectNode)target ).hasDistinct())
-				throw StandardException.newException(SQLState.LANG_DISTINCT_ORDER_BY_EXPRESSION);
 		}
 
 		// Verify that the column is orderable
