@@ -791,4 +791,29 @@ ij> select count(*) from POLICY_STATEMENTS;
 356        
 ij> drop table POLICY_STATEMENTS;
 0 rows inserted/updated/deleted
+ij> -- DERBY-3310 type conversions in insert
+
+create table  U (SNAME varchar(32000), TNAME Varchar(32000), C1 bigint);
+0 rows inserted/updated/deleted
+ij> insert into U(SNAME, TNAME, C1) select distinct SCHEMANAME, TABLENAME, 2
+ from SYS.SYSTABLES T join  SYS.SYSSCHEMAS S on T.SCHEMAID = S.SCHEMAID where TABLENAME = 'U';
+1 row inserted/updated/deleted
+ij> select * from U;
+SNAME                                                                                                                           |TNAME                                                                                                                           |C1                  
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+APP                                                                                                                             |U                                                                                                                               |2                   
+ij> drop table  U;
+0 rows inserted/updated/deleted
+ij> create table d3310 (x bigint);
+0 rows inserted/updated/deleted
+ij> insert into d3310 select distinct * from (values 2.0, 2.1, 2.2) v;
+3 rows inserted/updated/deleted
+ij> select * from d3310;
+X                   
+--------------------
+2                   
+2                   
+2                   
+ij> drop table d3310;
+0 rows inserted/updated/deleted
 ij> 
