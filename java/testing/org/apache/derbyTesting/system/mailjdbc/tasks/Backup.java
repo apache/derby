@@ -28,15 +28,16 @@ import org.apache.derbyTesting.system.mailjdbc.MailJdbc;
 import org.apache.derbyTesting.system.mailjdbc.utils.DbTasks;
 import org.apache.derbyTesting.system.mailjdbc.utils.LogFile;
 
-public class Backup extends Thread {
+public class Backup extends Thread{
 	private boolean isRunning = false;
 
 	private DbTasks dbtasks = new DbTasks();
 
-	private Connection conn = DbTasks.getConnection("BACKUP", "Backup");
-
-	public Backup(String name) {
+	private Connection conn = null;
+	
+	public Backup(String name)throws Exception{
 		setName(name);
+		conn = DbTasks.getConnection("BACKUP", "Backup");
 	}
 
 	public void run() {
@@ -74,12 +75,12 @@ public class Backup extends Thread {
 		}
 	}
 
-	public void DoCompress() {
+	public void DoCompress() throws Exception{
 		dbtasks.compressTable(conn, "INBOX", this.getName());
 		dbtasks.compressTable(conn, "ATTACH", this.getName());
 	}
 
-	public void DoBackup() {
+	public void DoBackup() throws Exception{
 		dbtasks.Backup(conn, this.getName());
 	}
 

@@ -35,11 +35,12 @@ public class Refresh extends Thread {
 
 	private DbTasks dbtasks = new DbTasks();
 
-	private Connection conn = DbTasks.getConnection("REFRESH", "Refresh");
+	private Connection conn = null;
 
-	public Refresh(String name) {
+	public Refresh(String name) throws Exception{
 		//sets the thread name
 		setName(name);
+		conn = DbTasks.getConnection("REFRESH", "Refresh");
 	}
 
 	public void run() {

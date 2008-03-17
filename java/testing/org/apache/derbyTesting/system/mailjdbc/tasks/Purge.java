@@ -35,11 +35,11 @@ public class Purge extends Thread {
 	//and deletes them.
 	private DbTasks dbtasks = new DbTasks();
 
-	private Connection conn = DbTasks.getConnection("PURGE", "Purge");
-
-	public Purge(String name) {
+	private Connection conn = null;
+	public Purge(String name) throws Exception{
 		//Sets the thread name
 		setName(name);
+		conn = DbTasks.getConnection("PURGE", "Purge");
 	}
 
 	public void run() {
@@ -63,11 +63,11 @@ public class Purge extends Thread {
 		}
 	}
 
-	public void purgeFromInbox(Connection conn) {
+	public void purgeFromInbox(Connection conn) throws Exception{
 		dbtasks.deleteMailByExp(conn, this.getName());
 	}
 
-	public void DoDbSizeCheck() {
+	public void DoDbSizeCheck() throws Exception{
 		dbtasks.checkDbSize(conn, this.getName());
 	}
 }

@@ -37,18 +37,14 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Properties;
 import java.util.Random;
 import org.apache.derbyTesting.functionTests.util.streams.CharAlphabet;
 import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetReader;
 import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetStream;
 import org.apache.derbyTesting.system.mailjdbc.MailJdbc;
-
 public class DbTasks {
 
 	public static LogFile log = new LogFile("performance.out");
-
-	static boolean saveAutoCommit;
 
 	private static int id_count = 0;
 
@@ -72,7 +68,7 @@ public class DbTasks {
 			MailJdbc.logAct
 					.logMsg("\n\n*****************************************************");
 			// setting the properties like user, password etc for both the
-			// database and the backup datatbase
+			// database and the backup database
 			setSystemProperty("database", "jdbc:derby:mailsdb;create=true");
 			setSystemProperty("ij.user", "REFRESH");
 			setSystemProperty("ij.password", "Refresh");
@@ -112,7 +108,7 @@ public class DbTasks {
 
 	}
 
-	public static Connection getConnection(String usr, String passwd) {
+	public  static Connection getConnection(String usr, String passwd){
 		try {
 			// Returns the Connection object
 			Class.forName(System.getProperty("driver")).newInstance();
@@ -130,20 +126,20 @@ public class DbTasks {
 		}
 	}
 
-	public void readMail(Connection conn, String thread_name) {
+	public void readMail(Connection conn, String thread_name) throws Exception{
 		// This function will be reading mails from the inbox.
-		// Getiing the number of rows in the table and getting the
+		// Getting the number of rows in the table and getting the
 		// size of the attachment (Blob) for a randomly selected row
+		boolean saveAutoCommit = conn.getAutoCommit();
+		int saveIsolation = conn.getTransactionIsolation();
 		Statement stmt = null;
 		Statement stmt1 = null;
 		int count = 0;
 		int count1 = 0;
 		long size = 0;
 		try {
-			saveAutoCommit = conn.getAutoCommit();
 			conn.setAutoCommit(false);
-			conn
-					.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+			conn.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
 			long s_select = System.currentTimeMillis();
 			stmt = conn.createStatement();
 			stmt1 = conn.createStatement();
@@ -177,14 +173,8 @@ public class DbTasks {
 					+ "SQL Exception while reading : " + sqe.getMessage());
 			sqe.printStackTrace();
 			errorPrint(sqe);
-			try {
-				conn.rollback();
-			} catch (SQLException sq) {
-				MailJdbc.logAct.logMsg(LogFile.ERROR + thread_name + " : "
-						+ "Exception while rolling back: " + sq);
-				errorPrint(sq);
-				sq.printStackTrace();
-			}
+			conn.rollback();
+			throw sqe;
 		}
 		try {
 			int attach_id = 0;
@@ -229,7 +219,6 @@ public class DbTasks {
 			rs.close();
 			stmt.close();
 			conn.commit();
-			conn.setAutoCommit(saveAutoCommit);
 		} catch (SQLException sqe) {
 			MailJdbc.logAct
 					.logMsg(LogFile.ERROR
@@ -239,27 +228,25 @@ public class DbTasks {
 							+ sqe.getMessage());
 			sqe.printStackTrace();
 			errorPrint(sqe);
-			try {
-				conn.rollback();
-			} catch (SQLException sq) {
-				MailJdbc.logAct.logMsg(LogFile.ERROR + thread_name + " : "
-						+ "Exception while rolling back: " + sq);
-				sq.printStackTrace();
-				errorPrint(sq);
-			}
+			conn.rollback();
+			throw sqe;
+		}
+		finally{
+			conn.setAutoCommit(saveAutoCommit);
+			conn.setTransactionIsolation(saveIsolation);
 		}
 
 	}
 
-	public synchronized void deleteMailByUser(Connection conn,
-			String thread_name) {
+	public synchronized void deleteMailByUser (Connection conn,
+			String thread_name) throws Exception{
 		// Delete done by the user. Thre user will mark the mails to be deleted
 		// and then
+		boolean saveAutoCommit = conn.getAutoCommit();
 		int id_count = 0;
 		int id = 0;
 		int for_id = 0;
 		try {
-			saveAutoCommit = conn.getAutoCommit();
 			conn.setAutoCommit(false);
 			PreparedStatement updateUser = conn
 					.prepareStatement(Statements.updateStr);
@@ -296,29 +283,25 @@ public class DbTasks {
 			updateUser.close();
 			stmt.close();
 			conn.commit();
-			conn.setAutoCommit(saveAutoCommit);
 		} catch (SQLException sqe) {
 			MailJdbc.logAct.logMsg(LogFile.ERROR + thread_name + " : "
 					+ "Exception while deleting mail by user: "
 					+ sqe.getMessage());
 			sqe.printStackTrace();
 			errorPrint(sqe);
-			try {
-				conn.rollback();
-			} catch (SQLException sq) {
-				MailJdbc.logAct.logMsg(LogFile.ERROR + thread_name + " : "
-						+ "Exception while rolling back: " + sq);
-				sq.printStackTrace();
-				errorPrint(sq);
-			}
+			conn.rollback();
+			throw sqe;
+		}
+		finally{
+			conn.setAutoCommit(saveAutoCommit);
 		}
 	}
 
 	public void deleteMailByThread(Connection conn, String thread_name)
 			throws Exception {
 		// Deleting mails which are marked to be deleted
+		boolean saveAutoCommit = conn.getAutoCommit();
 		try {
-			saveAutoCommit = conn.getAutoCommit();
 			conn.setAutoCommit(false);
 			PreparedStatement deleteThread = conn
 					.prepareStatement(Statements.deleteStr);
@@ -339,30 +322,25 @@ public class DbTasks {
 			rs.close();
 			stmt.close();
 			conn.commit();
-			conn.setAutoCommit(saveAutoCommit);
 		} catch (SQLException sqe) {
 			MailJdbc.logAct.logMsg(LogFile.ERROR + thread_name + " : "
 					+ "Exception while deleting mail by Thread: "
 					+ sqe.getMessage());
 			sqe.printStackTrace();
 			errorPrint(sqe);
-			try {
-				conn.rollback();
-			} catch (SQLException sq) {
-				MailJdbc.logAct.logMsg(LogFile.ERROR + thread_name + " : "
-						+ "Exception while rolling back: " + sq);
-				sq.printStackTrace();
-				errorPrint(sq);
-				throw sqe;
-			}
+			conn.rollback();
+			throw sqe;
+		}
+		finally{
+			conn.setAutoCommit(saveAutoCommit);
 		}
 
 	}
 
-	public void moveToFolders(Connection conn, String thread_name) {
+	public void moveToFolders(Connection conn, String thread_name) throws Exception{
 		// Changing the folder id of randomly selected rows
+		boolean saveAutoCommit = conn.getAutoCommit();
 		try {
-			saveAutoCommit = conn.getAutoCommit();
 			conn.setAutoCommit(false);
 			Statement stmt = conn.createStatement();
 			PreparedStatement moveToFolder = conn
@@ -395,23 +373,18 @@ public class DbTasks {
 			moveToFolder.close();
 			rs.close();
 			conn.commit();
-			conn.setAutoCommit(saveAutoCommit);
 		} catch (SQLException sqe) {
 			MailJdbc.logAct.logMsg(LogFile.ERROR + thread_name + " : "
 					+ "Exception while moving mail to folders: "
 					+ sqe.getMessage());
 			sqe.printStackTrace();
 			errorPrint(sqe);
-			try {
-				conn.rollback();
-			} catch (SQLException sq) {
-				MailJdbc.logAct.logMsg(LogFile.ERROR + thread_name + " : "
-						+ "Exception while rolling back: " + sq);
-				sq.printStackTrace();
-				errorPrint(sq);
-			}
+			conn.rollback();
+			throw sqe;
 		}
-
+		finally{
+			conn.setAutoCommit(saveAutoCommit);
+		}
 	}
 
 	public void insertMail(Connection conn, String thread_name)
@@ -423,8 +396,9 @@ public class DbTasks {
 		int num = Rn.nextInt(10 - 1);
 		InputStream streamIn = null;
 		Reader streamReader = null;
+		boolean saveAutoCommit = conn.getAutoCommit();
+		int saveIsolation = conn.getTransactionIsolation();
 		try {
-			saveAutoCommit = conn.getAutoCommit();
 			conn.setAutoCommit(false);
 			PreparedStatement insertFirst = conn.prepareStatement(
 					Statements.insertStr, Statement.RETURN_GENERATED_KEYS);
@@ -462,8 +436,7 @@ public class DbTasks {
 					}
 
 					rs.close();
-					conn
-							.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+					conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
 				} else
 					insertFirst.setInt(5, 0);
 				insertFirst
@@ -493,15 +466,8 @@ public class DbTasks {
 					+ sqe.getMessage());
 			sqe.printStackTrace();
 			errorPrint(sqe);
-			try {
-				conn.rollback();
-			} catch (SQLException sq) {
-				MailJdbc.logAct.logMsg(LogFile.INFO + thread_name + " : "
-						+ "Exception while rolling back: " + sq);
-				sq.printStackTrace();
-				errorPrint(sq);
-				throw sqe;
-			}
+			conn.rollback();
+			throw sqe;
 		}
 		try {
 			PreparedStatement insertAttach = conn
@@ -544,28 +510,24 @@ public class DbTasks {
 			stmt1.close();
 			insertAttach.close();
 			conn.commit();
-			conn.setAutoCommit(saveAutoCommit);
 		} catch (SQLException sqe) {
 			MailJdbc.logAct.logMsg(LogFile.INFO + thread_name + " : "
 					+ "Error while inserting attachments:" + sqe.getMessage());
 			sqe.printStackTrace();
 			errorPrint(sqe);
-			try {
-				conn.rollback();
-			} catch (SQLException sq) {
-				MailJdbc.logAct.logMsg(LogFile.INFO + thread_name + " : "
-						+ "Exception while rolling back: " + sq);
-				sq.printStackTrace();
-				errorPrint(sq);
-				throw sqe;
-			}
+			conn.rollback();
+			throw sqe;
+		}
+		finally{
+			conn.setTransactionIsolation(saveIsolation);
+			conn.setAutoCommit(saveAutoCommit);
 		}
 	}
 
-	public synchronized void deleteMailByExp(Connection conn, String thread_name) {
+	public synchronized void deleteMailByExp(Connection conn, String thread_name) throws Exception{
+		boolean saveAutoCommit = conn.getAutoCommit();
 		try {
 			// Deleting mails which are older than 1 day
-			saveAutoCommit = conn.getAutoCommit();
 			conn.setAutoCommit(false);
 			long s_delExp = System.currentTimeMillis();
 			Statement selExp = conn.createStatement();
@@ -585,30 +547,26 @@ public class DbTasks {
 			deleteExp.close();
 			selExp.close();
 			conn.commit();
-			conn.setAutoCommit(saveAutoCommit);
 		} catch (SQLException sqe) {
 			MailJdbc.logAct.logMsg(LogFile.ERROR + thread_name + " : "
 					+ "Error while deleting mails by expiry manager: "
 					+ sqe.getMessage());
 			sqe.printStackTrace();
 			errorPrint(sqe);
-			try {
-				conn.rollback();
-			} catch (SQLException sq) {
-				MailJdbc.logAct.logMsg(LogFile.ERROR + thread_name + " : "
-						+ "Exception while rolling back: " + sq);
-				sq.printStackTrace();
-				errorPrint(sq);
-			}
+			conn.rollback();
+			throw sqe;
+		}
+		finally {
+			conn.setAutoCommit(saveAutoCommit);
 		}
 	}
 
-	public void Backup(Connection conn, String thread_name) {
+	public void Backup(Connection conn, String thread_name) throws Exception{
 		// when the backup thread kicks in, it will use this function to
 		// take the periodic backups
+		boolean saveAutoCommit = conn.getAutoCommit();
 		long s_backup = System.currentTimeMillis();
 		try {
-			saveAutoCommit = conn.getAutoCommit();
 			conn.setAutoCommit(true);
 			CallableStatement cs = conn
 					.prepareCall("CALL SYSCS_UTIL.SYSCS_BACKUP_DATABASE_AND_ENABLE_LOG_ARCHIVE_MODE_NOWAIT(?, ?)");
@@ -620,13 +578,15 @@ public class DbTasks {
 			MailJdbc.logAct.logMsg(LogFile.INFO + thread_name + " : "
 					+ "Finished backing up the Database");
 			conn.commit();
-			conn.setAutoCommit(saveAutoCommit);
 		} catch (Throwable sqe) {
 			MailJdbc.logAct.logMsg(LogFile.ERROR + thread_name + " : "
 					+ "Error while doing the backup system procedure: "
 					+ sqe.getMessage());
 			sqe.printStackTrace();
 			errorPrint(sqe);
+		}
+		finally{
+			conn.setAutoCommit(saveAutoCommit);
 		}
 		long e_backup = System.currentTimeMillis();
 		log.logMsg(LogFile.INFO + thread_name + " : "
@@ -636,8 +596,8 @@ public class DbTasks {
 	}
 
 	public void compressTable(Connection conn, String tabname,
-			String thread_name)
-	// preiodically compresses the table to get back the free spaces available
+			String thread_name) throws Exception
+	// periodically compresses the table to get back the free spaces available
 	// after
 	// the deletion of some rows
 	{
@@ -645,8 +605,8 @@ public class DbTasks {
 		long dbsize = databaseSize("mailsdb/seg0");
 		MailJdbc.logAct.logMsg(LogFile.INFO + thread_name + " : "
 				+ "dbsize before compress : " + dbsize);
+		boolean saveAutoCommit = conn.getAutoCommit();
 		try {
-			boolean saveAutoCommit = conn.getAutoCommit();
 			conn.setAutoCommit(true);
 			CallableStatement cs = conn
 					.prepareCall("CALL SYSCS_UTIL.SYSCS_INPLACE_COMPRESS_TABLE(?, ?, ?, ?, ?)");
@@ -656,7 +616,6 @@ public class DbTasks {
 			cs.setShort(4, (short) 1);
 			cs.setShort(5, (short) 1);
 			cs.execute();
-			conn.setAutoCommit(saveAutoCommit);
 			cs.close();
 		} catch (Throwable sqe) {
 			MailJdbc.logAct.logMsg(LogFile.ERROR + thread_name + " : "
@@ -664,6 +623,9 @@ public class DbTasks {
 					+ sqe.getMessage());
 			sqe.printStackTrace();
 			errorPrint(sqe);
+		}
+		finally{
+		    conn.setAutoCommit(saveAutoCommit);
 		}
 		long e_compress = System.currentTimeMillis();
 		MailJdbc.logAct.logMsg(LogFile.INFO + thread_name + " : "
@@ -725,10 +687,10 @@ public class DbTasks {
 
 	}
 
-	public void grantRevoke(Connection conn, String thread_name) {
+	public void grantRevoke(Connection conn, String thread_name) throws Exception{
+		boolean saveAutoCommit = conn.getAutoCommit();
 		try {
-			// Giving appropriate permission to eahc threads
-			saveAutoCommit = conn.getAutoCommit();
+			// Giving appropriate permission to each threads
 			Statement stmt = conn.createStatement();
 			stmt.execute(Statements.grantSel1);
 			stmt.execute(Statements.grantSel2);
@@ -752,7 +714,6 @@ public class DbTasks {
 			stmt.execute(Statements.grantExe4);
 			stmt.execute(Statements.grantExe5);
 			conn.commit();
-			conn.setAutoCommit(saveAutoCommit);
 			stmt.close();
 			MailJdbc.logAct.logMsg(LogFile.INFO + thread_name + " : "
 					+ "Finished Granting permissions");
@@ -761,11 +722,11 @@ public class DbTasks {
 					+ "Error while doing Grant Revoke: " + sqe.getMessage());
 			sqe.printStackTrace();
 			errorPrint(sqe);
-
 		}
-
+		finally {
+			conn.setAutoCommit(saveAutoCommit);
+		}
 	}
-
 	public static long databaseSize(String dbname) {
 		File dir = new File(dbname);
 		File[] files = dir.listFiles();
@@ -818,7 +779,7 @@ public class DbTasks {
 					isAll0 = false;
 					break;
 				}
-			}
+			} 
 			if (isAll0 == true) {
 				buff.deleteCharAt(0);
 				for (int i = 0; i < buff.length(); i++) {

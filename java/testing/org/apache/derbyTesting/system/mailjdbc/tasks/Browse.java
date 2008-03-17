@@ -32,11 +32,11 @@ import org.apache.derbyTesting.system.mailjdbc.utils.LogFile;
 public class Browse extends Thread {
 	private DbTasks dbtasks = new DbTasks();
 
-	private Connection conn = DbTasks.getConnection("BROWSE", "Browse");
-
-	public Browse(String name) {
+	private Connection conn = null;
+	public Browse(String name) throws Exception{
 		//sets the name of the thread
 		setName(name);
+		conn = DbTasks.getConnection("BROWSE", "Browse");
 	}
 
 	public void run() {
@@ -69,16 +69,16 @@ public class Browse extends Thread {
 
 	}
 
-	public void readInbox(Connection conn, String thread_name) {
+	public void readInbox(Connection conn, String thread_name) throws Exception{
 		dbtasks.readMail(conn, thread_name);
 		dbtasks.totals();
 	}
 
-	public void deleteMailByUser(Connection conn, String thread_name) {
+	public void deleteMailByUser(Connection conn, String thread_name) throws Exception{
 		dbtasks.deleteMailByUser(conn, thread_name);
 	}
 
-	public void moveToFolders(Connection conn, String thread_name) {
+	public void moveToFolders(Connection conn, String thread_name) throws Exception{
 		dbtasks.moveToFolders(conn, thread_name);
 	}
 }
