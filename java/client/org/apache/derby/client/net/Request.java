@@ -191,19 +191,21 @@ public class Request {
             }
         }
 
+        // RQSDSS header is 6 bytes long: (ll)(Cf)(rc)
         ensureLength(offset_ + 6);
 
-        // save the length position and skip
-        // note: the length position is saved so it can be updated
-        // with a different value later.
+        // Save the position of the length bytes, so they can be updated with a
+        // different value at a later time.
         dssLengthLocation_ = offset_;
-        // always turn on chaining flags... this is helpful for lobs...
-        // these bytes will get rest if dss lengths are finalized.
+        // Dummy values for the DSS length (token ll above).
+        // The correct length will be inserted when the DSS is finalized.
         bytes_[offset_++] = (byte) 0xFF;
         bytes_[offset_++] = (byte) 0xFF;
 
-        // insert the manditory 0xD0 and the dssType
+        // Insert the mandatory 0xD0 (token C).
         bytes_[offset_++] = (byte) 0xD0;
+        // Insert the dssType (token f), which also tells if the DSS is chained
+        // or not. See DSSFMT in the DRDA specification for details.
         if (chainedToNextStructure) {
             dssType |= DssConstants.GDSCHAIN;
             if (nextHasSameCorrelator) {
@@ -212,7 +214,7 @@ public class Request {
         }
         bytes_[offset_++] = (byte) (dssType & 0xff);
 
-        // write the request correlation id
+        // Write the request correlation id (two bytes, token rc).
         // use method that writes a short
         bytes_[offset_++] = (byte) ((corrId >>> 8) & 0xff);
         bytes_[offset_++] = (byte) (corrId & 0xff);
@@ -821,15 +823,20 @@ public class Request {
         return offset_ != 0;
     }
 
-    // signal the completion of a Dss Layer A object. The length of
-    // dss object will be calculated based on the difference between the
-    // start of the dss, saved on the beginDss call, and the current
-    // offset into the buffer which marks the end of the data.  In the event
-    // the length requires the use of continuation Dss headers, one for each 32k
-    // chunk of data, the data will be shifted and the continuation headers
-    // will be inserted with the correct values as needed.
-    // Note: In the future, we may try to optimize this approach
-    // in an attempt to avoid these shifts.
+    /**
+     * Signal the completion of a DSS Layer A object.
+     * <p>
+     * The length of the DSS object will be calculated based on the difference
+     * between the start of the DSS, saved in the variable
+     * {@link #dssLengthLocation_}, and the current offset into the buffer which
+     * marks the end of the data.
+     * <p>
+     * In the event the length requires the use of continuation DSS headers,
+     * one for each 32k chunk of data, the data will be shifted and the
+     * continuation headers will be inserted with the correct values as needed.
+     * Note: In the future, we may try to optimize this approach
+     * in an attempt to avoid these shifts.
+     */
     protected final void finalizeDssLength() {
         // calculate the total size of the dss and the number of bytes which would
         // require continuation dss headers.  The total length already includes the
