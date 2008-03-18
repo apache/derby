@@ -477,6 +477,15 @@ class ProjectRestrictResultSet extends NoPutResultSetImpl
 		// No need to use reflection if reusing the result
 		if (reuseResult && projRow != null)
 		{
+			/* Make sure we reset the current row based on the re-used
+			 * result.  Otherwise, if the "current row" for this result
+			 * set was nulled out in a previous call to getNextRow(),
+			 * which can happen if this node is the right-side of
+			 * a left outer join, the "current row" stored for this
+			 * result set in activation.row would remain null, which
+			 * would be wrong. DERBY-3538.
+			 */
+			setCurrentRow(projRow);
 			return projRow;
 		}
 
