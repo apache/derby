@@ -445,13 +445,22 @@ public class BrokeredConnection implements EngineConnection
 	}
 
 	public BrokeredStatement newBrokeredStatement(BrokeredStatementControl statementControl) throws SQLException {
-		return new BrokeredStatement(statementControl, getJDBCLevel());
+		// DERBY-3513 - Possible IBM 1.5 JIT bug workaround.
+		// create local variable for jdbcLevel
+		int jdbcLevel = getJDBCLevel();
+		return new BrokeredStatement(statementControl, jdbcLevel);
 	}
 	public BrokeredPreparedStatement newBrokeredStatement(BrokeredStatementControl statementControl, String sql, Object generatedKeys) throws SQLException {
-		return new BrokeredPreparedStatement(statementControl, getJDBCLevel(), sql);
+		//DERBY-3513 - Possible IBM 1.5 JIT bug workaround.
+		// create local variable for jdbcLevel
+		int jdbcLevel = getJDBCLevel();
+		return new BrokeredPreparedStatement(statementControl, jdbcLevel, sql);
 	}
 	public BrokeredCallableStatement newBrokeredStatement(BrokeredStatementControl statementControl, String sql) throws SQLException {
-		return new BrokeredCallableStatement(statementControl, getJDBCLevel(), sql);
+		// DERBY-3513 - Possible IBM 1.5 JIT bug workaround.
+		// create local variable for jdbcLevel
+		int jdbcLevel = getJDBCLevel();
+		return new BrokeredCallableStatement(statementControl, jdbcLevel, sql);
 	}
 
 	/**
