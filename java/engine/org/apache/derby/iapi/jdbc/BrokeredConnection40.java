@@ -257,7 +257,7 @@ public class BrokeredConnection40 extends BrokeredConnection30 {
     public final BrokeredStatement newBrokeredStatement
             (BrokeredStatementControl statementControl) throws SQLException {
         try {
-            return new BrokeredStatement40(statementControl, getJDBCLevel());
+            return new BrokeredStatement40(statementControl);
         } catch (SQLException sqle) {
             notifyException(sqle);
             throw sqle;
@@ -265,7 +265,7 @@ public class BrokeredConnection40 extends BrokeredConnection30 {
     }
     public final BrokeredPreparedStatement newBrokeredStatement(BrokeredStatementControl statementControl, String sql, Object generatedKeys) throws SQLException {
         try {
-            return new BrokeredPreparedStatement40(statementControl, getJDBCLevel(), sql, generatedKeys);
+            return new BrokeredPreparedStatement40(statementControl, sql, generatedKeys);
         } catch (SQLException sqle) {
             notifyException(sqle);
             throw sqle;
@@ -273,7 +273,7 @@ public class BrokeredConnection40 extends BrokeredConnection30 {
     }
     public final BrokeredCallableStatement newBrokeredStatement(BrokeredStatementControl statementControl, String sql) throws SQLException {
         try {
-            return new BrokeredCallableStatement40(statementControl, getJDBCLevel(), sql);
+            return new BrokeredCallableStatement40(statementControl, sql);
         } catch (SQLException sqle) {
             notifyException(sqle);
             throw sqle;
@@ -294,8 +294,6 @@ public class BrokeredConnection40 extends BrokeredConnection30 {
             throw se;
         }
     }
-    
-    final int getJDBCLevel() { return 4;}
     
     /**
      * Returns false unless <code>interfaces</code> is implemented 

@@ -35,8 +35,8 @@ import java.util.Map;
 public class BrokeredCallableStatement30 extends BrokeredCallableStatement
 {
 
-	public BrokeredCallableStatement30(BrokeredStatementControl control, int jdbcLevel, String sql) throws SQLException {
-		super(control, jdbcLevel, sql);
+	public BrokeredCallableStatement30(BrokeredStatementControl control, String sql) throws SQLException {
+		super(control, sql);
 	}
     public final void setURL(java.lang.String parameterName, java.net.URL value) throws SQLException {
 		getCallableStatement().setURL(parameterName, value);

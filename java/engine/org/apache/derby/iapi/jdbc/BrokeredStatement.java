@@ -50,7 +50,6 @@ public class BrokeredStatement implements EngineStatement
 	*/
 	final BrokeredStatementControl control;
 
-	final int jdbcLevel;
 	final int resultSetType;
 	final int resultSetConcurrency;
 	final int resultSetHoldability;
@@ -61,10 +60,9 @@ public class BrokeredStatement implements EngineStatement
 	private String cursorName;
 	private Boolean escapeProcessing;
 
-    BrokeredStatement(BrokeredStatementControl control, int jdbcLevel) throws SQLException
+    BrokeredStatement(BrokeredStatementControl control) throws SQLException
     {
 		this.control = control;
-		this.jdbcLevel = jdbcLevel;
 
 		// save the state of the Statement while we are pretty much guaranteed the
 		// underlying statement is open.
@@ -487,11 +485,7 @@ public class BrokeredStatement implements EngineStatement
 	public Statement createDuplicateStatement(Connection conn, Statement oldStatement) throws SQLException {
 
 		Statement newStatement;
-		
-		if (jdbcLevel == 2)
-			newStatement = conn.createStatement(resultSetType, resultSetConcurrency);
-		else
-			newStatement = conn.createStatement(resultSetType, resultSetConcurrency,
+		newStatement = conn.createStatement(resultSetType, resultSetConcurrency,
                     resultSetHoldability);
 
 		setStatementState(oldStatement, newStatement);

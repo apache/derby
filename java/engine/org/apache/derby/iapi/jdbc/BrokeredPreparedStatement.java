@@ -41,9 +41,9 @@ public abstract class BrokeredPreparedStatement extends BrokeredStatement
 	*/
 	final String	sql;
 
-    public BrokeredPreparedStatement(BrokeredStatementControl control, int jdbcLevel, String sql) throws SQLException
+    public BrokeredPreparedStatement(BrokeredStatementControl control, String sql) throws SQLException
     {
-        super(control, jdbcLevel);
+        super(control);
 		this.sql = sql;
     }
 
