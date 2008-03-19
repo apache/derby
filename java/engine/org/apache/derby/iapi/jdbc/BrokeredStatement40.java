@@ -31,14 +31,13 @@ public class BrokeredStatement40 extends BrokeredStatement {
      * calls the superclass constructor to pass the parameters
      *
      * @param control   BrokeredStatementControl
-     * @param jdbcLevel int
      * @throws java.sql.SQLException
      *
      */
     
-    BrokeredStatement40(BrokeredStatementControl control, int jdbcLevel) 
+    BrokeredStatement40(BrokeredStatementControl control) 
                                                     throws SQLException {
-        super(control, jdbcLevel);
+        super(control);
     }
     
     /**

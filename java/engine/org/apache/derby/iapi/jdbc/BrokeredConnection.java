@@ -447,7 +447,7 @@ public abstract class BrokeredConnection implements EngineConnection
 	}
 
 	public BrokeredStatement newBrokeredStatement(BrokeredStatementControl statementControl) throws SQLException {
-		return new BrokeredStatement(statementControl, getJDBCLevel());
+		return new BrokeredStatement(statementControl);
 	}
 	public abstract BrokeredPreparedStatement
         newBrokeredStatement(BrokeredStatementControl statementControl,
@@ -546,8 +546,6 @@ public abstract class BrokeredConnection implements EngineConnection
         
         return connString;
     }
-
-	int getJDBCLevel() { return 2;}
 
     /*
      * JDBC 3.0 methods that are exposed through EngineConnection.

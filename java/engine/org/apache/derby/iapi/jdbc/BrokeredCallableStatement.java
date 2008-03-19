@@ -35,8 +35,8 @@ public abstract class BrokeredCallableStatement extends BrokeredPreparedStatemen
           implements CallableStatement
 {
 
-	public BrokeredCallableStatement(BrokeredStatementControl control, int jdbcLevel, String sql) throws SQLException {
-		super(control, jdbcLevel, sql);
+	public BrokeredCallableStatement(BrokeredStatementControl control, String sql) throws SQLException {
+		super(control,sql);
 	}
 
     public final void registerOutParameter(int parameterIndex,
