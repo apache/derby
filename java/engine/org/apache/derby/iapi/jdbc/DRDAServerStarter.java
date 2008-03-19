@@ -103,7 +103,6 @@ public final class DRDAServerStarter implements ModuleControl, Runnable
 	 * @param password      the password for actions requiring authorization
      *
 	 * @throws Exception on error
-	 * @see NetworkServerControl
 	 */
 	public void setStartInfo(InetAddress listenAddress, int portNumber,
                              String userName, String password,
