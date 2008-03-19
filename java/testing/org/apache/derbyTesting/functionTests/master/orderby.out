@@ -1698,10 +1698,14 @@ C1         |C2
 2          |b         
 3          |a         
 4          |c         
-ij> -- DERBY-2351 causes this statement to return 4 rows, which it should
--- instead show an error:
+ij> -- This statement is legitimate. Even though c1+1 is not distinct, c1 is:
 select distinct c1, c2 from t1 order by c1+1;
-ERROR 4287A: The ORDER BY clause may not specify an expression, since the query specifies DISTINCT.
+C1         |C2        
+----------------------
+1          |c         
+2          |b         
+3          |a         
+4          |c         
 ij> -- DERBY-2351 causes this statement to return 4 rows, which it should
 -- instead show an error. Note that the rows returned are not distinct!
 select distinct c2 from t1 order by c1;
@@ -1721,9 +1725,14 @@ C1         |C2
 2          |b         
 1          |c         
 4          |c         
-ij> -- This query should not work because the expanded * does not include c1+1:
+ij> -- After the * is expanded, the query contains c1, so this is legitimate:
 select distinct * from t1 order by c1+1;
-ERROR 4287A: The ORDER BY clause may not specify an expression, since the query specifies DISTINCT.
+C1         |C2        
+----------------------
+1          |c         
+2          |b         
+3          |a         
+4          |c         
 ij> -- This query also should not work because the order by col is not in result:
 select distinct t1.* from t1, t2 where t1.c1=t2.t2c1 order by t2c1;
 ERROR 42879: The ORDER BY clause may not contain column 'T2C1', since the query specifies DISTINCT and that column does not appear in the query result.
@@ -1757,6 +1766,25 @@ ij> -- This query should return two rows, ordered by name descending:
 SELECT DISTINCT name FROM person ORDER BY name desc;
 NAME      
 ----------
+Mary      
+John      
+ij> -- Ordering by an expression involving name is legitimate:
+select distinct name from person order by upper(name);
+NAME      
+----------
+John      
+Mary      
+ij> -- Ordering by an expression involving an unselected column is not. However,
+-- Derby does not currently enforce this restriction. Note that the answer
+-- that Derby returns is incorrect: Derby returns two rows with duplicate
+-- 'name' values. This is because Derby currently implicitly includes the
+-- 'age' column into the 'distinct' processing due to its presence in the
+-- ORDER BY clause. DERBY-2351 and DERBY-3373 discuss this situation in
+-- more detail.
+select distinct name from person order by age*2;
+NAME      
+----------
+John      
 Mary      
 John      
 ij> -- Some test cases involving column aliasing:
