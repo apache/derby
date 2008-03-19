@@ -37,6 +37,17 @@ import junit.framework.TestSuite;
  *
  */
 public final class SecurityManagerSetup extends TestSetup {
+    
+    /**
+     * Does the JVM support Subjects for
+     * authorization through Java security manager.
+     * J2ME/CDC/Foundation 1.1 does not support Subjects.
+     */
+    public static final boolean JVM_HAS_SUBJECT_AUTHORIZATION;
+    static {
+        JVM_HAS_SUBJECT_AUTHORIZATION = JDBC.haveClass("javax.security.auth.Subject");
+    }
+    
 	
 	private static final Properties classPathSet = new Properties();
     
