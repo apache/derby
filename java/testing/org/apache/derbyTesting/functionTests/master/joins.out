@@ -613,6 +613,23 @@ ij> select * from j1089_dest;
 DEST_ID    |SOURCE_ID_1|SOURCE_ID_2
 -----------------------------------
 1          |0          |0          
+ij> -- DERBY-3538 NullPointerException during execution for query with LEFT
+-- OUTER JOIN whose inner table selects all constants.
+create table t3538 (i int, j int);
+0 rows inserted/updated/deleted
+ij> insert into t3538 values (-1, -2), (-2, -4), (-3, -9);
+3 rows inserted/updated/deleted
+ij> select * from
+t3538 left outer join
+    (select -1 a, 1 b from t3538) x0 --DERBY-PROPERTIES joinStrategy=NESTEDLOOP
+   on x0.a = t3538.i;
+I          |J          |A          |B          
+-----------------------------------------------
+-1         |-2         |-1         |1          
+-1         |-2         |-1         |1          
+-1         |-2         |-1         |1          
+-2         |-4         |NULL       |NULL       
+-3         |-9         |NULL       |NULL       
 ij> -----------------------------------
 -- clean up
 ----------------------------------
@@ -641,5 +658,7 @@ ij> drop table y;
 ij> drop table j1089_source;
 0 rows inserted/updated/deleted
 ij> drop table j1089_dest;
+0 rows inserted/updated/deleted
+ij> drop table t3538;
 0 rows inserted/updated/deleted
 ij> 
