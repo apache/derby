@@ -283,7 +283,7 @@ public class ParameterMetaDataJdbc30Test extends BaseJDBCTestCase {
 			fail("DERBY-44 failed (didn't get SQLSTATE 22019)");
           		rs.close();
       		} catch (SQLException e) {
-			assertSQLState("22019", e.getSQLState(), e);
+			assertSQLState("22019", e);
       		}
 		ps.close();
 	}
@@ -723,26 +723,33 @@ public class ParameterMetaDataJdbc30Test extends BaseJDBCTestCase {
 	static void dumpParameterMetaDataNegative(ParameterMetaData paramMetaData) throws SQLException {
 
                 int numParam = paramMetaData.getParameterCount();
+
+		/*
+                *  DERBY-3039 - ParameterMetaData.isNullable() returns differenet SQLState in Embedded  
+                *  and Network Client 
+                */
+		String expectedSQLState = (usingEmbedded())?"XCL13":"XCL14";
+	
 		try {
        			paramMetaData.isNullable(-1);
        			fail("parameterMetaData.isNullable(-1) should have failed");
    		} catch (SQLException se)
        		{
-       			assertSQLState("XCL13",se.getSQLState(), se);
+       			assertSQLState(expectedSQLState, se);
        		}
 		try {
                         paramMetaData.isNullable(0);
                         fail("parameterMetaData.isNullable(0) should have failed");
                 } catch (SQLException se)
                 {
-                        assertSQLState("XCL13",se.getSQLState(), se);
+                        assertSQLState(expectedSQLState, se);
                 }
 		try {
                         paramMetaData.isNullable(numParam+1);
                         fail("parameterMetaData.isNullable("+(numParam+1)+") should have failed");
                 } catch (SQLException se)
                 {
-                        assertSQLState("XCL13",se.getSQLState(), se);
+                        assertSQLState(expectedSQLState, se);
                 }
 
 	}
@@ -810,5 +817,5 @@ public class ParameterMetaDataJdbc30Test extends BaseJDBCTestCase {
          * @param in_param4 
          */
         public static void dummyDecimal(BigDecimal in_param, BigDecimal in_param2, BigDecimal[] in_param3, BigDecimal[] in_param4) {
-        }
+	 }
 }
