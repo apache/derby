@@ -1065,7 +1065,7 @@
        <mkdir dir="${derby.jar.dir}/${plugin.tmp.dir}/${plugin.dir}/${plugin.core.dir}"/>
 
        <copy todir="${derby.jar.dir}/${plugin.tmp.dir}/${plugin.dir}/${plugin.core.dir}">
-               <fileset dir="${derby.jar.dir}" includes="derby*.jar" excludes="derbyTesting.jar,derbyLocale*.jar"/>
+               <fileset dir="${derby.jar.dir}" includes="derby*.jar" excludes="derbyTesting.jar,derbyLocale*.jar,derbyrun.jar"/>
        </copy>
        <copy todir="${derby.jar.dir}/${plugin.tmp.dir}/${plugin.dir}/${plugin.core.dir}">
                <fileset dir="${derby.jar.dir}/${plugin.tmp.dir}" includes="plugin*.xml"/>
