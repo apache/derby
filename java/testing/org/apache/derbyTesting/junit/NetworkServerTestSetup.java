@@ -369,13 +369,14 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
             } catch (Exception e) {
             }
       
+            Throwable failedShutdown = null;
             if (running)
             {
                 try {
                     networkServerController.shutdown();
                 } catch (Throwable t)
                 {
-                    t.printStackTrace( System.out );
+                    failedShutdown = t;
                 }
             }
  
@@ -384,9 +385,23 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
             serverOutput = null;
 
             if (spawnedServer != null) {
-                spawnedServer.complete(false);
+                // Destroy the process if a failed shutdown
+                // to avoid hangs running tests as the complete()
+                // waits for the process to complete.
+                spawnedServer.complete(failedShutdown != null);
                 spawnedServer = null;
             }
+            
+            // Throw an error to record the fact that the
+            // shutdown failed.
+            if (failedShutdown != null)
+            {
+                if (failedShutdown instanceof Exception)
+                    throw (Exception) failedShutdown;
+                
+                throw (Error) failedShutdown;
+            }
+                
         }
     }
     
