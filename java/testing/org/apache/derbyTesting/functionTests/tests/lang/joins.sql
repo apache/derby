@@ -352,6 +352,17 @@ insert into j1089_dest (source_id_1, source_id_2)
             join j1089_source as s2 on 1 = 1;
 select * from j1089_dest;
 
+
+-- DERBY-3538 NullPointerException during execution for query with LEFT
+-- OUTER JOIN whose inner table selects all constants.
+create table t3538 (i int, j int);
+insert into t3538 values (-1, -2), (-2, -4), (-3, -9);
+
+select * from
+t3538 left outer join
+    (select -1 a, 1 b from t3538) x0 --DERBY-PROPERTIES joinStrategy=NESTEDLOOP
+   on x0.a = t3538.i; 
+
 -----------------------------------
 -- clean up
 ----------------------------------
@@ -368,3 +379,4 @@ drop table x;
 drop table y;
 drop table j1089_source;
 drop table j1089_dest;
+drop table t3538;
