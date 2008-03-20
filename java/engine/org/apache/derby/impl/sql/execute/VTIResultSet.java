@@ -718,6 +718,7 @@ class VTIResultSet extends NoPutResultSetImpl
         {
             if ( typeID.isLongVarcharTypeId() ) { castLongvarchar( dtd, dvd ); }
             else if ( typeID.isLongVarbinaryTypeId() ) { castLongvarbinary( dtd, dvd ); }
+            else if ( typeID.isDecimalTypeId() ) { castDecimal( dtd, dvd ); }
             else
             {
                 Object      o = dvd.getObject();
@@ -770,6 +771,19 @@ class VTIResultSet extends NoPutResultSetImpl
             
             dvd.setValue( result );
         }
+    }
+    
+    /**
+     * <p>
+     * Set the correct precision and scale for a decimal value.
+     * </p>
+     */
+    private void    castDecimal( DataTypeDescriptor dtd, DataValueDescriptor dvd )
+        throws StandardException
+    {
+        VariableSizeDataValue   vsdv = (VariableSizeDataValue) dvd;
+            
+        vsdv.setWidth( dtd.getPrecision(), dtd.getScale(), false );
     }
     
     
