@@ -170,6 +170,17 @@ select a1,b1,c1,c3,d1,d3
   from D join ((B join C on b2=c2) right outer join A on a1=b1) 
     on d3=b3 and d1=a2;
 
+
+-- DERBY-3538 NullPointerException during execution for query with LEFT
+-- OUTER JOIN whose inner table selects all constants.
+create table t3538 (i int, j int);
+insert into t3538 values (-1, -2), (-2, -4), (-3, -9);
+
+select * from
+t3538 left outer join
+    (select -1 a, 1 b from t3538) x0 --DERBY-PROPERTIES joinStrategy=NESTEDLOOP
+   on x0.a = t3538.i; 
+
 -----------------------------------
 -- clean up
 ----------------------------------
@@ -184,3 +195,5 @@ drop table t4;
 drop table instab;
 drop table x;
 drop table y;
+drop table t3538;
+
