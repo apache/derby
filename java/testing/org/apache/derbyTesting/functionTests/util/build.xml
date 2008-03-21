@@ -37,7 +37,7 @@
   <property name="this.dir" value="${derby.testing.functest.dir}/util"/>
 
 <!-- Targets -->
-  <target name="util" depends="FTpolicy,compile,copyfiles"/>
+  <target name="util" depends="FTpolicy,compile,compile_threaddump,copyfiles"/>
   
   <target name="FTpolicy" depends="copyfiles,compile"/>
 
@@ -87,6 +87,9 @@
 	  <include name="${this.dir}/XATestUtil.java"/>
     </javac>
 
+  </target>
+
+<target name="compile_threaddump" if="jdk16">
     <javac
       source="1.5"
       target="1.5"
@@ -107,8 +110,7 @@
       </classpath>
     <include name="${this.dir}/ThreadDump.java"/>
     </javac>
-  </target>
-
+</target>
 
   <target name="copyfiles">
     <copy todir="${out.dir}/${derby.testing.functest.dir}/util">
