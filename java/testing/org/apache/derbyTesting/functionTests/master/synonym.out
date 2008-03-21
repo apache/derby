@@ -523,9 +523,7 @@ IDCOLUMN1           |IDCOLUMN2
 -----------------------------------------
 1                   |1                   
 ij> select t1.id as idcolumn1, t1.id as idcolumn2 from t1 order by t1.idcolumn1, t1.idcolumn2;
-IDCOLUMN1           |IDCOLUMN2           
------------------------------------------
-1                   |1                   
+ERROR 42X04: Column 'T1.IDCOLUMN1' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'T1.IDCOLUMN1' is not a column in the target table.
 ij> select t1.id from (select t1.id from t1) t1 order by t1.id;
 ID                  
 --------------------

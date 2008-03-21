@@ -220,6 +220,35 @@ public class ResultColumn extends ValueNode
 	}
 
 	/**
+	 * Return TRUE if this result column matches the provided column name.
+	 *
+	 * This function is used by ORDER BY column resolution. For the
+	 * ORDER BY clause, Derby will prefer to match on the column's
+	 * alias (exposedName), but will also successfully match on the
+	 * underlying column name. Thus the following statements are
+	 * treated equally:
+	 *  select name from person order by name;
+	 *  select name as person_name from person order by name;
+	 *  select name as person_name from person order by person_name;
+	 * See DERBY-2351 for more discussion.
+	 */
+	boolean columnNameMatches(String columnName)
+	{
+		return columnName.equals(exposedName) ||
+			columnName.equals(name) ||
+			columnName.equals(getSourceColumnName());
+	}
+	/**
+	 * Returns the underlying source column name, if this ResultColumn
+	 * is a simple direct reference to a table column, or NULL otherwise.
+	 */
+	String getSourceColumnName()
+	{
+		if (expression instanceof ColumnReference)
+			return ((ColumnReference)expression).getColumnName();
+		return null;
+	}
+	/**
 	 * The following methods implement the ResultColumnDescriptor
 	 * interface.  See the Language Module Interface for details.
 	 */
