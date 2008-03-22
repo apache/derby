@@ -651,8 +651,7 @@ insert into t1 values (3, 'a'), (4, 'c'), (2, 'b'), (1, 'c');
 insert into t2 values (4), (3);
 -- This query should return 4 distinct rows, ordered by column c1:
 select distinct c1, c2 from t1 order by c1;
--- DERBY-2351 causes this statement to return 4 rows, which it should
--- instead show an error:
+-- This statement is legitimate. Even though c1+1 is not distinct, c1 is:
 select distinct c1, c2 from t1 order by c1+1;
 -- DERBY-2351 causes this statement to return 4 rows, which it should
 -- instead show an error. Note that the rows returned are not distinct!
@@ -661,7 +660,7 @@ select distinct c2 from t1 order by c1;
 select distinct c2 from t1 order by c2;
 -- This query should work because * will be expanded to include c2:
 select distinct * from t1 order by c2;
--- This query should not work because the expanded * does not include c1+1:
+-- After the * is expanded, the query contains c1, so this is legitimate:
 select distinct * from t1 order by c1+1;
 -- This query also should not work because the order by col is not in result:
 select distinct t1.* from t1, t2 where t1.c1=t2.t2c1 order by t2c1;
@@ -680,6 +679,16 @@ SELECT DISTINCT name FROM person ORDER BY age;
 SELECT DISTINCT name FROM person ORDER BY name;
 -- This query should return two rows, ordered by name descending:
 SELECT DISTINCT name FROM person ORDER BY name desc;
+-- Ordering by an expression involving name is legitimate:
+select distinct name from person order by upper(name);
+-- Ordering by an expression involving an unselected column is not. However,
+-- Derby does not currently enforce this restriction. Note that the answer
+-- that Derby returns is incorrect: Derby returns two rows with duplicate
+-- 'name' values. This is because Derby currently implicitly includes the
+-- 'age' column into the 'distinct' processing due to its presence in the
+-- ORDER BY clause. DERBY-2351 and DERBY-3373 discuss this situation in
+-- more detail.
+select distinct name from person order by age*2;
 -- Some test cases involving column aliasing:
 select distinct name as first_name from person order by name;
 select distinct name as first_name from person order by first_name;
