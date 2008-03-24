@@ -70,23 +70,68 @@ public class NormalizeResultSetNode extends SingleChildResultSetNode
 
 	/**
 	 * Initializer for a NormalizeResultSetNode.
+	 ** ColumnReferences must continue to point to the same ResultColumn, so
+	 * that ResultColumn must percolate up to the new PRN.  However,
+	 * that ResultColumn will point to a new expression, a VirtualColumnNode, 
+	 * which points to the FromTable and the ResultColumn that is the source for
+	 * the ColumnReference.  
+	 * (The new NRSN will have the original of the ResultColumnList and
+	 * the ResultColumns from that list.  The FromTable will get shallow copies
+	 * of the ResultColumnList and its ResultColumns.  ResultColumn.expression
+	 * will remain at the FromTable, with the PRN getting a new 
+	 * VirtualColumnNode for each ResultColumn.expression.)
+	 *
+	 * This is useful for UNIONs, where we want to generate a DistinctNode above
+	 * the UnionNode to eliminate the duplicates, because the type going into the
+	 * sort has to agree with what the sort expects.
+	 * (insert into t1 (smallintcol) values 1 union all values 2;
 	 *
 	 * @param childResult	The child ResultSetNode
-	 * @param rcl			The RCL for the node
 	 * @param tableProperties	Properties list associated with the table
 	 * @param forUpdate 	tells us if the normalize operation is being
 	 * performed on behalf of an update statement. 
+	 * @throws StandardException 
 	 */
 
 	public void init(
 							Object childResult,
-							Object rcl,
 							Object tableProperties,
-							Object forUpdate)
+							Object forUpdate) throws StandardException
 	{
 		super.init(childResult, tableProperties);
-		resultColumns = (ResultColumnList) rcl;
 		this.forUpdate = ((Boolean)forUpdate).booleanValue();
+
+		ResultSetNode rsn  = (ResultSetNode) childResult;
+		ResultColumnList rcl = rsn.getResultColumns();
+
+		/* We get a shallow copy of the ResultColumnList and its 
+		 * ResultColumns.  (Copy maintains ResultColumn.expression for now.)
+		 * 
+		 * Setting this.resultColumns to the modified child result column list,
+		 * and making a new copy for the child result set node
+		 * ensures that the ProjectRestrictNode restrictions still points to 
+		 * the same list.  See d3494_npe_writeup-4.html in DERBY-3494 for a
+		 * detailed explanation of how this works.
+		 */
+		ResultColumnList prRCList = rcl;
+		rsn.setResultColumns(rcl.copyListAndObjects());
+		// Remove any columns that were generated.
+		prRCList.removeGeneratedGroupingColumns();
+
+		/* Replace ResultColumn.expression with new VirtualColumnNodes
+		 * in the NormalizeResultSetNode's ResultColumnList.  (VirtualColumnNodes include
+		 * pointers to source ResultSetNode, rsn, and source ResultColumn.)
+		 */
+		prRCList.genVirtualColumnNodes(rsn, rsn.getResultColumns());
+        
+		this.resultColumns = prRCList;
+		// Propagate the referenced table map if it's already been created
+		if (rsn.getReferencedTableMap() != null)
+		    {
+			setReferencedTableMap((JBitSet) getReferencedTableMap().clone());
+		    }
+        
+        
 	}
 
 

@@ -1396,70 +1396,9 @@ public abstract class ResultSetNode extends QueryTreeNode
 		return genProjectRestrict();
 	}
 
-	/** 
-	 * Put a NormalizeResultSetNode on top of this ResultSetNode.
-	 * ColumnReferences must continue to point to the same ResultColumn, so
-	 * that ResultColumn must percolate up to the new PRN.  However,
-	 * that ResultColumn will point to a new expression, a VirtualColumnNode, 
-	 * which points to the FromTable and the ResultColumn that is the source for
-	 * the ColumnReference.  
-	 * (The new NRSN will have the original of the ResultColumnList and
-	 * the ResultColumns from that list.  The FromTable will get shallow copies
-	 * of the ResultColumnList and its ResultColumns.  ResultColumn.expression
-	 * will remain at the FromTable, with the PRN getting a new 
-	 * VirtualColumnNode for each ResultColumn.expression.)
-	 *
-	 * This is useful for UNIONs, where we want to generate a DistinctNode above
-	 * the UnionNode to eliminate the duplicates, because the type going into the
-	 * sort has to agree with what the sort expects.
-	 * (insert into t1 (smallintcol) values 1 union all values 2;
-	 *
-	 * @param forUpdate			If the normalize result set is being used as a
-	 * child for an update statement, then this is true. 
-	 *
-	 * @return The generated NormalizeResultSetNode atop the original UnionNode.
-	 *
-	 * @exception StandardException		Thrown on error
-	 * @see NormalizeResultSetNode#init
-	 */
-
-	NormalizeResultSetNode 
-		genNormalizeResultSetNode(boolean forUpdate)
-				throws StandardException
-	{
-		/* We get a shallow copy of the ResultColumnList and its 
-		 * ResultColumns.  (Copy maintains ResultColumn.expression for now.)
-		 */
-        ResultColumnList prRCList = resultColumns;
-		resultColumns = resultColumns.copyListAndObjects();
-
-		// Remove any columns that were generated.
-		prRCList.removeGeneratedGroupingColumns();
-
-		/* Replace ResultColumn.expression with new VirtualColumnNodes
-		 * in the NormalizeResultSetNode's ResultColumnList.  (VirtualColumnNodes include
-		 * pointers to source ResultSetNode, this, and source ResultColumn.)
-		 */
-		prRCList.genVirtualColumnNodes(this, resultColumns);
-
-		
-		/* Finally, we create the new NormalizeResultSetNode */
-        NormalizeResultSetNode nrsn =
-            (NormalizeResultSetNode) getNodeFactory().getNode(
-								C_NodeTypes.NORMALIZE_RESULT_SET_NODE,
-								this,
-								prRCList,
-								null, new Boolean(forUpdate),
-								getContextManager());
-		// Propagate the referenced table map if it's already been created
-		if (getReferencedTableMap() != null)
-		{
-			nrsn.setReferencedTableMap((JBitSet) getReferencedTableMap().clone());
-		}
-		return nrsn;
-	}
-
-	/**
+	
+    
+    /**
 	 * Generate the code for a NormalizeResultSet.
 	   The call must push two items before calling this method
 	   <OL>
