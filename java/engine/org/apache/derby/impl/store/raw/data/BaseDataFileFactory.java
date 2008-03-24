@@ -669,7 +669,8 @@ public class BaseDataFileFactory
 
 				// make sure everything is logged if logArchived is turn on
 				// clear all UNLOGGED flag
-				if (logFactory.logArchived()) {
+				if (logFactory.logArchived() || 
+                                        logFactory.inReplicationMasterMode()) {
 					mode &= ~(ContainerHandle.MODE_UNLOGGED |
 							  ContainerHandle.MODE_CREATE_UNLOGGED);
 

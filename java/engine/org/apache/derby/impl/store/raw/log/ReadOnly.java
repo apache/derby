@@ -463,6 +463,16 @@ public class ReadOnly implements LogFactory, ModuleSupportable {
         throw StandardException.newException(
                   SQLState.LOGMODULE_DOES_NOT_SUPPORT_REPLICATION);
     }
+    
+    /**
+     * Replication not applicable on readonly databases.
+     *
+     * @return false always since replication is not applicable here.
+     */
+    
+    public boolean inReplicationMasterMode() {
+        return false;
+    }
 
     /** Replication not applicable on readonly databases */
     public void stopReplicationMasterRole() {
