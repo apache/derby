@@ -295,6 +295,16 @@ public class CallableTest extends BaseJDBCTestCase {
         cs.close();
     }
 
+    public void testIsolationLevelChangeAfterFunctionCall()
+            throws SQLException {
+        CallableStatement cs = prepareCall("? = CALL NO_IN_ONE_OUT_FUNC()");
+        cs.registerOutParameter(1, java.sql.Types.INTEGER);
+        cs.execute();
+        assertEquals(55, cs.getInt(1));
+        getConnection().setTransactionIsolation(
+            Connection.TRANSACTION_SERIALIZABLE);
+    }
+
     /**
      * Calls a SQL procedure that outputs a message with System.out.println.
      * Converted from the original test, but initially disabled because of the
