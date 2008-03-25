@@ -85,6 +85,8 @@ public abstract class BaseTestCase
         if ( trace )
         {
             startTime = System.currentTimeMillis();
+            out.println();
+            out.print(getName() + " ");
         }
 
         // install a default security manager if one has not already been
@@ -137,8 +139,7 @@ public abstract class BaseTestCase
             if ( trace )
             {
                 long timeUsed = System.currentTimeMillis() - startTime;
-                out.println();
-                out.print(getName() + " used " + timeUsed + " ms ");
+                out.print("used " + timeUsed + " ms ");
             }
         }
     }
