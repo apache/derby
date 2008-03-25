@@ -1289,14 +1289,23 @@ private void checkLangBasedQuery(Statement s, String query, String[][] expectedR
    */
   private static Test collatedSuite(String locale, String baseFixture)
   {
-      TestSuite suite = new TestSuite("CollationTest:territory="+locale);
+      TestSuite suite = new TestSuite("CollationTest:territory=" + locale);
       suite.addTest(new CollationTest(baseFixture));
       
       // DMD.getTables() should not fail after the fix to DERBY-2896
-      suite.addTest(DatabaseMetaDataTest.suite());
-      suite.addTest(BatchUpdateTest.embeddedSuite());
-      suite.addTest(GroupByExpressionTest.suite());
-      suite.addTest(UpdatableResultSetTest.suite());
+      /*
+       * The following check condition was added because it would be 
+       * sufficient forthese testsuites to run with a single locale 
+       * and would save some time running tests.
+       * Related To: JIRA DERBY-3554
+       */
+      
+      if ("en".equals(locale)) {
+    	  suite.addTest(DatabaseMetaDataTest.suite());
+          suite.addTest(BatchUpdateTest.embeddedSuite());
+          suite.addTest(GroupByExpressionTest.suite());
+          suite.addTest(UpdatableResultSetTest.suite());    	  
+      }
       return Decorator.territoryCollatedDatabase(suite, locale);
   }
 
