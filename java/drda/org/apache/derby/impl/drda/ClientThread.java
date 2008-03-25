@@ -102,8 +102,8 @@ final class ClientThread extends Thread {
                     // ... we need to do a controlled shutdown of the
                     // server, since SSL for some reason will not
                     // work.
-                    
-                    parent.directShutdown();
+                    // DERBY-3537: circumvent any shutdown security checks
+                    parent.directShutdownInternal();
                     
                     return; // Exit the thread
                     
