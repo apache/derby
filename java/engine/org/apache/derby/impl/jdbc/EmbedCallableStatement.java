@@ -150,6 +150,7 @@ public abstract class EmbedCallableStatement extends EmbedPreparedStatement
 					throw EmbedResultSet.noStateChangeException(e);
 				}
 				finally {
+					results.close();
 					results = null;
 				}
 
