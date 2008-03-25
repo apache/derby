@@ -1105,7 +1105,7 @@ public final class NetworkServerControlImpl {
 	 Shutdown the server directly (If you have the original object)
 	 No Network communication needed.
 	*/
-	private void directShutdownInternal() {
+    void directShutdownInternal() {
 		// DERBY-2109: the direct, unchecked shutdown is made private
 		shutdown = true;
 		synchronized(shutdownSync) {						
