@@ -474,8 +474,12 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
      * @param replicationMode The type of replication contract.
      * Currently only asynchronous replication is supported, but
      * 1-safe/2-safe/very-safe modes may be added later.
-     * @exception StandardException Standard Derby exception policy,
-     * thrown on error.
+     * @exception StandardException 1) If replication is started on a read-only
+     *                                 database
+     *                              2) If replication is started when unlogged
+     *                                 operations are running
+     *                              3) If an error occurs while trying to boot
+     *                                 the master.
      */
     public void startReplicationMaster(String dbmaster, String host, int port,
                                        String replicationMode)
@@ -484,6 +488,21 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
         if (isReadOnly()) {
             throw StandardException.newException(
                       SQLState.LOGMODULE_DOES_NOT_SUPPORT_REPLICATION);
+        }
+        
+        RawTransaction t = 
+                xactFactory.findUserTransaction(
+                this,
+                ContextService.getFactory().getCurrentContextManager(), 
+                AccessFactoryGlobals.USER_TRANS_NAME);
+
+        //back up blocking operations are unlogged operations.
+        //Check if any unlogged operations are active and if
+        //yes do not allow replication to start.
+        if (t.isBlockingBackup())
+        {
+            throw StandardException.newException(
+                  SQLState.REPLICATION_UNLOGGED_OPERATIONS_IN_PROGRESS);  
         }
 
         Properties replicationProps = new Properties();

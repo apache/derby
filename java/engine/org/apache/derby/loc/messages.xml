@@ -4851,6 +4851,11 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
                 <text>Replication master has already been booted for database '{0}'</text>
                 <arg>dbname</arg>
             </msg>
+            
+            <msg>
+                <name>XRE23</name>
+                <text>Replication master cannot be started since unlogged operations are in progress, unfreeze to allow unlogged operations to complete and restart replication</text>
+            </msg>
 
             <msg>
                 <name>XRE40</name>

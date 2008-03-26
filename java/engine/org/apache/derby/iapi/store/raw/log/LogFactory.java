@@ -203,6 +203,17 @@ public interface LogFactory extends Corruptable {
 	   @return true if the log is being archived.
 	*/
 	public boolean logArchived();
+        
+        /**
+         * Used to determine if the replication master mode has been started,
+         * and the logging for unlogged operations needs to be enabled.
+         *
+         * @return true If the master replication mode is turned on and the 
+         *              unlogged operations need to be logged.
+         *         false If the master replication mode is turned off and the 
+         *               unlogged operations need not be logged.
+         */
+        public boolean inReplicationMasterMode();
 
 	/**
 		Get JBMS properties relavent to the log factory
