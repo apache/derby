@@ -7497,6 +7497,8 @@ currentRoleNode() throws StandardException :
 {
 	<CURRENT_ROLE>
 	{
+		throw StandardException.newException
+            (SQLState.NOT_IMPLEMENTED, "ROLES");
 		checkVersion( DataDictionary.DD_VERSION_DERBY_10_4, "ROLES");
 		checkSqlStandardAccess("CURRENT_ROLE");
 		return (ValueNode) nodeFactory.getNode(
@@ -9728,6 +9730,8 @@ roleDefinition() throws StandardException :
 	 */
 	<ROLE> roleName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
 	{
+		throw StandardException.newException
+            (SQLState.NOT_IMPLEMENTED, "ROLES");
 		checkVersion( DataDictionary.DD_VERSION_DERBY_10_4, "ROLES");
 		checkSqlStandardAccess("CREATE ROLE");
 
@@ -11527,6 +11531,11 @@ StatementNode
 setRoleSpecification() throws StandardException :
 {
 	String roleName = null;
+	boolean quiesceCompilerUnreachableStatement = true;
+	if (quiesceCompilerUnreachableStatement) {
+		throw StandardException.newException
+			(SQLState.NOT_IMPLEMENTED, "ROLES");
+	}
         checkVersion( DataDictionary.DD_VERSION_DERBY_10_4, "ROLES");
         checkSqlStandardAccess("SET ROLE");
 }
@@ -12185,6 +12194,8 @@ dropRoleStatement() throws StandardException :
 	 */
 	<ROLE> roleName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
 	{
+		throw StandardException.newException
+            (SQLState.NOT_IMPLEMENTED, "ROLES");
 		checkVersion( DataDictionary.DD_VERSION_DERBY_10_4, "ROLES");
 		checkSqlStandardAccess("DROP ROLE");
 
@@ -13099,6 +13110,8 @@ revokeStatement() throws StandardException :
 				 !isPrivilegeKeywordExceptTrigger(getToken(2).kind)) } )
 	<REVOKE>
 	{
+		throw StandardException.newException
+            (SQLState.NOT_IMPLEMENTED, "ROLES");
 		checkVersion( DataDictionary.DD_VERSION_DERBY_10_4, "ROLES");
 		checkSqlStandardAccess("REVOKE <role>");
 	}

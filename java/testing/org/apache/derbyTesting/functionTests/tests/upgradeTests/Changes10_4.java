@@ -232,7 +232,7 @@ public class Changes10_4 extends UpgradeChange {
      * @throws SQLException
      *
      */
-    public void testSQLRolesBasic() throws SQLException
+    public void disabledTill10_5_testSQLRolesBasic() throws SQLException
     {
         // The standard upgrade database doesn't have sqlAuthorization
         // set, so we can only check if the system tables for roles is
@@ -271,7 +271,7 @@ public class Changes10_4 extends UpgradeChange {
      * @throws SQLException
      *
      */
-    public void testSQLRoles() throws SQLException
+    public void disabledTill10_5_testSQLRoles() throws SQLException
     {
         // Do rudimentary sanity checking: that we can create and drop roles
         // when we are database owner. If so, we can presume SYS.SYSROLES
