@@ -151,8 +151,8 @@ class Utils
         }
         else
         {
-            // copy(src,dest);
-            NIOcopy(src,dest);
+            copy(src,dest);  // Also works w/ JVM 1.4
+            // NIOcopy(src,dest); // Requires JVM 1.5 or 1.6
         }
     }
     private void copy(File source, File dest) 

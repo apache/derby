@@ -29,6 +29,7 @@ import java.util.Properties;
 
 import java.sql.*;
 import java.io.*;
+import org.apache.derby.jdbc.ClientDataSource;
 import org.apache.derby.shared.common.reference.SQLState;
 
 import org.apache.derbyTesting.junit.BaseTestCase;
@@ -859,8 +860,21 @@ public class ReplicationRun extends BaseTestCase
             {
                 try
                 {
+                    /* On 1.5 locking of Drivermanager.class prevents
+                     * using DriverManager.getConnection() concurrently
+                     * in startMaster and startSlave!
                     Class.forName(DRIVER_CLASS_NAME); // Needed when running from classes!
                     conn = DriverManager.getConnection(URL);
+                     */
+                    ClientDataSource ds = new org.apache.derby.jdbc.ClientDataSource();
+                    ds.setDatabaseName(masterDatabasePath+FS+masterDbSubPath+FS+dbName);
+                    ds.setServerName(masterHost);
+                    ds.setPortNumber(masterServerPort);
+                    ds.setConnectionAttributes("startMaster=true"
+                            +";slaveHost="+slaveReplInterface
+                            +";slavePort="+slaveReplPort);
+                    conn = ds.getConnection();
+                    
                     done = true;
                     conn.close();
                     util.DEBUG("startMaster OK");
@@ -871,7 +885,7 @@ public class ReplicationRun extends BaseTestCase
                     String msg = se.getMessage();
                     String state = se.getSQLState();
                     String expectedState = "XRE04";
-                    util.DEBUG("startSlave Got SQLException: " 
+                    util.DEBUG("startMaster Got SQLException: " 
                             + errCode + " " + state + " " + msg);
                     if ( (errCode == -1)
                     && (state.equalsIgnoreCase(expectedState) ) )
@@ -1046,6 +1060,12 @@ public class ReplicationRun extends BaseTestCase
         
             util.DEBUG("startSlave_direct getConnection("+URL+")");
             
+            final String fDbPath = slaveDatabasePath+FS+slaveDbSubPath+FS+dbName;
+            final String fSlaveHost = slaveHost;
+            final int fSlaveServerPort = slaveServerPort;
+            final String fConnAttrs = "startSlave=true"
+                                +";slaveHost="+slaveReplInterface
+                                +";slavePort="+slaveReplPort;
             Thread connThread = new Thread(
                     new Runnable()
             {
@@ -1054,9 +1074,19 @@ public class ReplicationRun extends BaseTestCase
                     Connection conn = null;
                     try {
                         // NB! WIll hang here until startMaster is executed!
+                        /*On 1.5 locking of Drivermanager.class prevents
+                         * using DriverManager.getConnection() concurrently
+                         * in startMaster and startSlave!
                         Class.forName(DRIVER_CLASS_NAME); // Needed when running from classes!
                         conn = DriverManager.getConnection(URL);
-                        // conn.close();
+                         */
+                        ClientDataSource ds = new org.apache.derby.jdbc.ClientDataSource();
+                        ds.setDatabaseName(fDbPath);
+                        ds.setServerName(fSlaveHost);
+                        ds.setPortNumber(fSlaveServerPort);
+                        ds.setConnectionAttributes(fConnAttrs);
+                        conn = ds.getConnection();
+                        conn.close();
                     }
                     catch (SQLException se)
                     {
@@ -1069,17 +1099,18 @@ public class ReplicationRun extends BaseTestCase
                         && (state.equalsIgnoreCase(expectedState) ) )
                         {
                             util.DEBUG("As expected.");
-
                         }
                         else
                         {
-                            se.printStackTrace(); // FIXME!
+                            util.DEBUG("Got Exception " + msg);
+                            se.printStackTrace();
                         }
                         ;
                     }
                     catch (Exception ex)
                     {
-                        ex.printStackTrace(); // FIXME!
+                        util.DEBUG("Got Exception " + ex.getMessage());
+                        ex.printStackTrace();
                     }
                 }
             }
@@ -2050,35 +2081,6 @@ public class ReplicationRun extends BaseTestCase
                 "initSlave ");
         }
         util.DEBUG(results);
-        
-        // Preliminary needs to freeze db before copying to slave and setting replication mode.
-        // Should do: Assuming startMaster does unfreeze! 
-        /* */
-        util.DEBUG("*************************** DERBY-3384. Must manually unfreeze.");
-        if ( host.equalsIgnoreCase("localhost") || localEnv )
-        {
-             String URL = DB_PROTOCOL
-                +"://"+masterServerHost
-                +":"+masterServerPort+"/"
-                +masterDatabasePath+FS+masterDbSubPath+FS+dbName;
-            util.DEBUG("initSlave getConnection("+URL+")");
-            Class.forName(DRIVER_CLASS_NAME); // Needed when running from classes!
-            Connection conn = DriverManager.getConnection(URL);
-            Statement s = conn.createStatement();
-            s.execute("call syscs_util.syscs_unfreeze_database()");
-            conn.close();
-        }
-        else
-        {
-            runTest(unFreezeDB,
-                    clientVM,
-                    testClientHost,
-                    masterServerHost, masterServerPort,
-                    dbName
-                    );
-        }
-         /* */
-
         
     }
     // ?? The following should be moved to a separate class, subclass this and
