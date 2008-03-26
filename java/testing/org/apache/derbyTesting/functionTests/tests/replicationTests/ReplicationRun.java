@@ -32,6 +32,7 @@ import java.io.*;
 import org.apache.derby.jdbc.ClientDataSource;
 import org.apache.derby.shared.common.reference.SQLState;
 
+import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.BaseTestCase;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 
@@ -133,6 +134,11 @@ public class ReplicationRun extends BaseTestCase
 
     String classPath = null; // Used in "localhost" testing.
     
+    /** A Connection to the master database*/
+    private Connection masterConn = null;
+    /** The exception thrown as a result of a startSlave connection attempt  */
+    private volatile Exception startSlaveException = null;
+
     /**
      * Creates a new instance of ReplicationRun
      * @param testcaseName Identifying the test.
@@ -902,8 +908,7 @@ public class ReplicationRun extends BaseTestCase
                         {
                             util.DEBUG("Master already started?");
                         }
-                        se.printStackTrace(System.out);
-                        return; // Trying to continue. Is that reasonable?
+                        throw se;
                     }
                 }
 
@@ -911,6 +916,38 @@ public class ReplicationRun extends BaseTestCase
             }
     }
     
+    /**
+     * Get a connection to the master database.
+     * @return A connection to the master database
+     */
+    protected Connection getMasterConnection() {
+        if (masterConn == null) {
+            String url = DB_PROTOCOL + "://" + masterServerHost + ":" +
+                         masterServerPort + "/" +
+                         masterDatabasePath + FS + masterDbSubPath + FS +
+                         replicatedDb;
+            try {
+                masterConn = DriverManager.getConnection(url);
+            } catch (SQLException sqle) {
+                fail("Could not connect to master database");
+            }
+        }
+        return masterConn;
+    }
+
+
+    /**
+     * Execute SQL on the master database through a Statement
+     * @param sql The sql that should be executed on the master database
+     * @throws java.sql.SQLException thrown if an error occured while
+     * executing the sql
+     */
+    protected void executeOnMaster(String sql) throws SQLException {
+         Statement s = getMasterConnection().createStatement();
+         s.execute(sql);
+         s.close();
+    }
+
     /**
      * Set slave db in replication slave mode
      */
@@ -1046,7 +1083,6 @@ public class ReplicationRun extends BaseTestCase
     private void startSlave_direct(String dbName,
             String slaveHost,  // Where the slave db is run.
             int slaveServerPort, // slave server interface accepting client requests
-            
             String slaveReplInterface,
             int slaveReplPort)
             throws Exception
@@ -1071,6 +1107,7 @@ public class ReplicationRun extends BaseTestCase
             {
                 public void run()
                 {
+                    startSlaveException = null;
                     Connection conn = null;
                     try {
                         // NB! WIll hang here until startMaster is executed!
@@ -1090,6 +1127,8 @@ public class ReplicationRun extends BaseTestCase
                     }
                     catch (SQLException se)
                     {
+                        startSlaveException = se;
+                        /*
                         int errCode = se.getErrorCode();
                         String msg = se.getMessage();
                         String state = se.getSQLState();
@@ -1105,12 +1144,12 @@ public class ReplicationRun extends BaseTestCase
                             util.DEBUG("Got Exception " + msg);
                             se.printStackTrace();
                         }
-                        ;
+                        ;*/
                     }
                     catch (Exception ex)
                     {
+                        startSlaveException = ex;
                         util.DEBUG("Got Exception " + ex.getMessage());
-                        ex.printStackTrace();
                     }
                 }
             }
@@ -3100,5 +3139,37 @@ test.postStoppedSlaveServer.return=true
     static Load masterPostSlave;
     static Load slavePostSlave;
     ///////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Assert that the latest startSlave connection attempt got the expected
+     * SQLState. The method will wait for upto 5 seconds for the startSlave
+     * connection attemt to complete. If the connection attempt has not
+     * completed after 5 seconds it is assumed to have failed.
+     * @param expected the expected SQLState
+     * @throws java.lang.Exception the Exception to check the SQLState of
+     */
+    protected void assertSqlStateSlaveConn(String expected) throws Exception {
+        boolean verified = false;
+        for (int i = 0; i < 10; i++) {
+            if (startSlaveException != null) {
+                if (startSlaveException instanceof SQLException) {
+                    BaseJDBCTestCase.
+                        assertSQLState("Unexpexted SQL State",
+                                       expected,
+                                       (SQLException)startSlaveException);
+                    verified = true;
+                    break;
+                } else {
+                    throw startSlaveException;
+                }
+            } else {
+                Thread.sleep(500);
+            }
+        }
+        if (!verified) {
+            fail("Attempt to start slave hangs. Expected SQL state " +
+                 expected);
+        }
+    }
     
 }
