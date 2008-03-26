@@ -20,8 +20,10 @@ limitations under the License.
  */
 package org.apache.derbyTesting.functionTests.tests.replicationTests;
 
+import java.sql.SQLException;
 import junit.framework.Test;
 import junit.framework.TestSuite;
+import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 
 
@@ -167,5 +169,90 @@ public class ReplicationRun_Local extends ReplicationRun
         // do a 'kill pid' after ending the test run
         
     }
+
+    /**
+     * DERBY-3382: Test that start replication fails if master db is updated
+     * after copying the db to the slave location
+     * @throws java.lang.Exception on test errors.
+     */
+    public void testLogFilesSynched() throws Exception {
+
+        cleanAllTestHosts();
+        initEnvironment();
+        initMaster(masterServerHost, replicatedDb);
+
+        masterServer = startServer(masterJvmVersion,
+                                   derbyMasterVersion,
+                                   masterServerHost,
+                                   ALL_INTERFACES,
+                                   masterServerPort,
+                                   masterDbSubPath);
+        slaveServer = startServer(slaveJvmVersion,
+                                  derbySlaveVersion,
+                                  slaveServerHost,
+                                  ALL_INTERFACES,
+                                  slaveServerPort,
+                                  slaveDbSubPath);
+
+        startServerMonitor(slaveServerHost);
+
+        bootMasterDatabase(jvmVersion,
+                           masterDatabasePath + FS + masterDbSubPath,
+                           replicatedDb,
+                           masterServerHost,
+                           masterServerPort,
+                           null);
+
+        // copy db to slave
+        initSlave(slaveServerHost,
+                  jvmVersion,
+                  replicatedDb);
+
+        // database has now been copied to slave. Updating the master
+        // database at this point will cause unsynced log files
+        executeOnMaster("call syscs_util.syscs_unfreeze_database()");
+        executeOnMaster("create table breakLogSynch (v varchar(20))");
+        executeOnMaster("drop table breakLogSynch");
+
+        // startSlave is supposed do fail. We check the sql state in
+        // assertSqlStateSlaveConn below
+        startSlave(jvmVersion, replicatedDb,
+                   slaveServerHost,
+                   slaveServerPort,
+                   slaveServerHost,
+                   slaveReplPort,
+                   testClientHost);
+
+        SQLException sqlexception = null;
+        try {
+            startMaster(jvmVersion, replicatedDb,
+                        masterServerHost,
+                        masterServerPort,
+                        masterServerHost,
+                        slaveServerPort,
+                        slaveServerHost,
+                        slaveReplPort);
+        } catch (SQLException sqle) {
+            sqlexception = sqle;
+        }
+        // the startMaster connection attempt should fail with exception XRE05
+        if (sqlexception == null) {
+            fail("Start master did not get the expected SQL Exception XRE05");
+        } else {
+            BaseJDBCTestCase.assertSQLState("Unexpected SQL state.",
+                                            "XRE05",
+                                            sqlexception);
+        }
+
+        // The startSlave connection attempt should fail with exception XJ040
+        assertSqlStateSlaveConn("XJ040");
+
+        stopServer(jvmVersion, derbyVersion,
+                   masterServerHost, masterServerPort);
+        stopServer(jvmVersion, derbyVersion,
+                   slaveServerHost, slaveServerPort);
+
+    }
+
     
 }
