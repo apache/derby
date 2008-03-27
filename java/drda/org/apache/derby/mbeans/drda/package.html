@@ -1,0 +1,62 @@
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<body>
+<p>This package contains JMX MBeans that are intended to provide monitoring
+and management capabilities of the Derby Network Server.</p>
+<p>
+Derby's management service (including JMX management and monitoring 
+capabilities) will be enabled automatically on Network Server startup if a
+set of requirements are met. See 
+<a href="../package-summary.html">org.apache.derby.mbeans</a>
+for details.</p>
+<p>
+Upon startup, the Network Server will attempt to register MBeans related to
+the Network server. In addition to the MBeans included in this package, an
+instance of the <a href="../VersionMBean.html">VersionMBean</a> will be 
+registered, providing access to Network Server version information.</p>
+<p>
+When the Network Server starts, Derby's embedded driver is automatically booted
+in the server JVM. This means that any MBeans that are automatically registered
+at Derby system startup (booting/loading of the embedded driver) will also be
+attempted registered with the MBean server at this point. Such MBeans are 
+described in the <a href="../package-summary.html">org.apache.derby.mbeans</a> 
+package.</p>
+<p>
+Derby registers its JMX MBeans in the <code>org.apache.derby</code> domain and
+always includes values for <code>type</code> and <code>system</code> in the 
+key properties of each MBean's ObjectName. The <code>system</code> key property
+is described in the package description for 
+<a href="../package-summary.html#package_description">org.apache.derby.mbeans</a>.
+Conventions for how the main key property values are defined are also described 
+there. Other key properties are described in the interface class for each MBean.
+
+<!-- TODO - INCLUDE INFO ABOUT NETWORK SERVER JMX SECURITY PERMISSIONS, SEE
+     E.G. DERBY-3462, DERBY-3491
+
+<h3>Security</h3>
+    
+<p> OLD:
+Permissions in policy files need to use the MBean interface to define fine 
+grained access. For example, the permission to allow access to the 
+<a href="NetworkServerMBean.html#getUpTime()"<code>UpTime</code> attribute</a>
+of the <a href="NetworkServerMBean.html">NetworkServerMBean</a> may be written 
+as:
+<pre>
+
+</pre>
+-->
+</body>
