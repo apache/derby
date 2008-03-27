@@ -627,4 +627,98 @@ public class Changes10_4 extends UpgradeChange {
         }
         s.close();
     }
+    
+    /**
+     * Verifies error messages priviously generated.
+     */
+    private void verifyError() throws SQLException {
+        Statement stmt = createStatement();
+        PreparedStatement ps = prepareStatement("select text " +
+                                    "from errormessage where state = ?");
+        if (oldAtLeast(10,2)) {
+            try {
+                stmt.execute("alter table t1 alter column i null");
+                fail ("expected error while setting primary key " +
+                        "column to nullable");
+            } catch (SQLException e) {
+                assertSQLState("expected state 42Z20", "42Z20", e);
+                ps.setString(1, e.getSQLState());
+                ResultSet rs = ps.executeQuery();
+                rs.next();
+                assertEquals("error message mismatch", rs.getString(1),
+                                        e.getMessage());
+                rs.close();
+            }
+        }
+        try {
+            stmt.execute("alter table t1 add constraint  uidx " +
+                    "unique(j)");
+            fail ("expected error while creating unique constraint " +
+                    "over nullable column");
+
+        } catch (SQLException e) {
+            assertSQLState("expected state 42831", "42831", e);
+            ps.setString(1, e.getSQLState());
+            ResultSet rs = ps.executeQuery();
+            rs.next();
+            assertEquals("error message mismatch", rs.getString(1),
+                                    e.getMessage());
+            rs.close();
+        }
+        stmt.close();
+        ps.close();
+    }
+    
+    /**
+     * Generates error messages and stores in a table.
+     */
+    private void prepareTable() throws SQLException {
+        Statement stmt = createStatement();
+        stmt.executeUpdate("create table errormessage (state varchar (6), " +
+                                            "text varchar (200))");
+        PreparedStatement ps = prepareStatement("insert into errormessage " +
+                    "(state, text) values (?, ?)");
+        stmt.executeUpdate("create table t1 (i integer not null primary key, " +
+                                                            "j integer)");
+        if (oldAtLeast(10,2)) {
+            try {
+                stmt.execute("alter table t1 alter column i null");
+                fail ("expected error while setting primary key " +
+                        "column to nullable");
+            } catch (SQLException e) {
+                assertSQLState("expected state 42Z20", "42Z20", e);
+                ps.setString(1, e.getSQLState());
+                ps.setString(2, e.getMessage());
+                ps.executeUpdate();
+            }
+        }
+        try {
+            stmt.execute("alter table t1 add constraint  uidx " +
+                    "unique(j)");
+            fail ("expected error while creating unique constraint " +
+                    "over nullable column");
+        } catch (SQLException e) {
+            assertSQLState("expected state 42831", "42831", e);
+            ps.setString(1, e.getSQLState());
+            ps.setString(2, e.getMessage());
+            ps.executeUpdate();
+        }
+        stmt.close();
+        ps.close();
+    }
+    
+    /**
+     * check if error message generated during soft upgrade is 
+     * same as privious version.
+     */
+    public void testErrorMessage () throws Exception {
+        switch (getPhase()) {
+            case PH_CREATE:
+                prepareTable();
+                break;
+            case PH_SOFT_UPGRADE:
+                verifyError();
+                break;
+        }
+    }
 }
