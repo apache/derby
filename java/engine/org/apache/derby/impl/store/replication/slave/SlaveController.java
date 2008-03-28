@@ -400,6 +400,7 @@ public class SlaveController
      */
     private void startLogReceiverThread() {
         logReceiverThread = new SlaveLogReceiverThread();
+        logReceiverThread.setDaemon(true);
         logReceiverThread.start();
     }
 

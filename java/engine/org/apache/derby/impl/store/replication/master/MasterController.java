@@ -156,11 +156,17 @@ public class MasterController
     }
     
     /**
-     * Will stop the replication master service
-     *
-     * Not implemented yet
+     * Will stop the replication master service.
      */
-    public void stop() { }
+    public void stop() { 
+        try {
+            stopMaster();
+        } catch (StandardException se) {
+            repLogger.
+                logError(MessageId.REPLICATION_MASTER_STOPPED, se);
+        }
+       
+    }
 
     ////////////////////////////////////////////////////////////
     // Implementation of methods from interface MasterFactory //
@@ -220,7 +226,8 @@ public class MasterController
                                                         transmitter,
                                                         this,
                                                         repLogger);
-                ((Thread)logShipper).start();
+                logShipper.setDaemon(true);
+                logShipper.start();
             }
         } catch (StandardException se) {
             // cleanup everything that may have been started before
