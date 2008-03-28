@@ -427,7 +427,7 @@ public class ReplicationRun_Local_StateTest_part1 extends ReplicationRun
             String msg = ec + " " + ss + " " + se.getMessage();
             util.DEBUG("3. startSlave No connection as expected: " + msg);
             assertTrue("3. Unexpected SQLException: " + msg, 
-                    SQLState.CANNOT_START_SLAVE_ALREADY_BOOTED.equals(ss));
+                   SQLState.CANNOT_CONNECT_TO_DB_IN_SLAVE_MODE.startsWith(ss));
         }
     }
     
