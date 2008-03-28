@@ -51,8 +51,7 @@ public class All extends BaseTestCase {
         suite.addTest(EncryptionSuite.suite());
         
         // Replication tests
-        // These tests currently don't behave well on Windows:
-        // suite.addTest(ReplicationSuite.suite());
+        suite.addTest(ReplicationSuite.suite());
         
         return suite;
     }
