@@ -107,6 +107,12 @@ public class AsynchronousLogShipper extends Thread implements
     private MasterController masterController = null;
     
     /**
+     * Object used to synchronize on while the log shipper thread
+     * is moved into the wait state, or while notifying it.
+     */
+    private Object objLSTSync = new Object(); // LST->Log Shippper Thread
+    
+    /**
      * Store the log chunk that failed during a previous shipping attempt
      * so that it can be re-shipped to the slave.
      */
@@ -197,10 +203,10 @@ public class AsynchronousLogShipper extends Thread implements
                 shipALogChunk();
                 //calculate the shipping interval (wait time) based on the
                 //fill information obtained from the log buffer.
-                synchronized(this) {
-                    shippingInterval = calculateSIfromFI();
-                    if (shippingInterval != -1) {
-                        wait(shippingInterval);
+                shippingInterval = calculateSIfromFI();
+                if (shippingInterval != -1) {
+                    synchronized(objLSTSync) {
+                        objLSTSync.wait(shippingInterval);
                     }
                 }
             } catch (InterruptedException ie) {
@@ -302,11 +308,11 @@ public class AsynchronousLogShipper extends Thread implements
             shipALogChunk();
         }
         
-        synchronized(this) {
+        synchronized(objLSTSync) {
             //There will still be more log to send after the forceFlush
             //has sent one chunk.  Notify the log shipping thread that
             //it is time for another send.
-            notify();
+            objLSTSync.notify();
         }
     }
     
@@ -362,8 +368,8 @@ public class AsynchronousLogShipper extends Thread implements
         if (fi >= FI_HIGH || 
                 (System.currentTimeMillis() - lastShippingTime) >
                  minShippingInterval) {
-            synchronized (this) {
-                notify();
+            synchronized (objLSTSync) {
+                objLSTSync.notify();
             }
         }
     }
