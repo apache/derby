@@ -26,8 +26,7 @@ import java.sql.Clob;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-import org.apache.derby.iapi.jdbc.EngineBlob;
-import org.apache.derby.iapi.jdbc.EngineClob;
+import org.apache.derby.iapi.jdbc.EngineLOB;
 import org.apache.derby.iapi.reference.SQLState;
 
 /**
@@ -43,7 +42,7 @@ public class LOBStoredProcedure {
      * @throws SQLException
      */
     public static int CLOBCREATELOCATOR() throws SQLException {
-        EngineClob clob = (EngineClob) getEmbedConnection().createClob();
+        EngineLOB clob = (EngineLOB)getEmbedConnection().createClob();
         return clob.getLocator();
     }
 
@@ -203,7 +202,7 @@ public class LOBStoredProcedure {
      * @throws SQLException
      */
     public static int BLOBCREATELOCATOR() throws SQLException {
-        EngineBlob blob = (EngineBlob) getEmbedConnection().createBlob();
+        EngineLOB blob = (EngineLOB)getEmbedConnection().createBlob();
         return blob.getLocator();
     }
 
