@@ -115,9 +115,9 @@ final class ClockPolicy implements ReplacementPolicy {
     private final AtomicInteger freeEntries = new AtomicInteger();
 
     /**
-     * Tells whether there currently is a thread in the <code>doShrink()</code>
-     * or <code>trimToSize()</code> methods. If this variable is
-     * <code>true</code> a call to any one of those methods will be a no-op.
+     * Tells whether there currently is a thread in the {@code doShrink()}
+     * method. If this variable is {@code true} a call to {@code doShrink()}
+     * will be a no-op.
      */
     private final AtomicBoolean isShrinking = new AtomicBoolean();
 
@@ -549,31 +549,14 @@ final class ClockPolicy implements ReplacementPolicy {
     public void doShrink() {
         // If we're already performing a shrink, ignore this request. We'll get
         // a new call later by someone else if the current shrink operation is
-        // not enough.
+        // not enough. If we manage to change isShrinking atomically from false
+        // to true, no one else is currently inside shrinkMe(), and others will
+        // be blocked from entering it until we reset isShrinking to false.
         if (isShrinking.compareAndSet(false, true)) {
             try {
-                if (shrinkMe()) {
-                    // the clock shrunk, try to trim it too
-                    trimMe();
-                }
+                shrinkMe();
             } finally {
-                isShrinking.set(false);
-            }
-        }
-    }
-
-    /**
-     * Try to reduce the size of the clock as much as possible by removing
-     * invalid entries. In most cases, this method will do nothing.
-     *
-     * @see #trimMe()
-     */
-    public void trimToSize() {
-        // ignore this request if we're already performing trim or shrink
-        if (isShrinking.compareAndSet(false, true)) {
-            try {
-                trimMe();
-            } finally {
+                // allow others to call shrinkMe()
                 isShrinking.set(false);
             }
         }
@@ -581,13 +564,9 @@ final class ClockPolicy implements ReplacementPolicy {
 
     /**
      * Perform the shrinking of the clock. This method should only be called
-     * by a single thread at a time, and should not be called concurrently
-     * with <code>trimMe()</code>.
-     *
-     * @return {@code true} if the clock shrunk as a result of calling this
-     * method
+     * by a single thread at a time.
      */
-    private boolean shrinkMe() {
+    private void shrinkMe() {
 
         if (SanityManager.DEBUG) {
             SanityManager.ASSERT(isShrinking.get(),
@@ -603,8 +582,6 @@ final class ClockPolicy implements ReplacementPolicy {
         synchronized (clock) {
             pos = hand;
         }
-
-        boolean shrunk = false;
 
         while (maxLooks-- > 0) {
 
@@ -641,7 +618,6 @@ final class ClockPolicy implements ReplacementPolicy {
                 // The holder does not hold an entry. Try to remove it.
                 if (h.evictIfFree()) {
                     removeHolder(index, h);
-                    shrunk = true;
                     // move position back because of the removal so that we
                     // don't skip one clock element
                     pos = index;
@@ -677,88 +653,9 @@ final class ClockPolicy implements ReplacementPolicy {
                 // skip one clock element
                 pos = index;
 
-                shrunk = true;
-
             } finally {
                 e.unlock();
             }
-        }
-
-        return shrunk;
-    }
-
-    /**
-     * The number of times <code>trimMe()</code> has been called since the last
-     * time <code>trimMe()</code> tried to do some real work. This variable is
-     * used by <code>trimMe()</code> to decide whether it's about time to
-     * actually do something.
-     */
-    private int trimRequests;
-
-    /**
-     * Perform the trimming of the clock. This method should only be called by
-     * a single thread at a time, and should not be called concurrently with
-     * <code>shrinkMe()</code>.
-     *
-     * This method will not do anything unless it has been called a substantial
-     * number of times. Also, it won't do anything if less than 25% of the
-     * clock entries are unused.
-     */
-    private void trimMe() {
-
-        if (SanityManager.DEBUG) {
-            SanityManager.ASSERT(isShrinking.get(),
-                    "Called trimMe() without ensuring exclusive access");
-        }
-
-        // Only trim the clock occasionally, as it's an expensive operation.
-        if (++trimRequests < maxSize / 8) {
-            return;
-        }
-        trimRequests = 0;
-
-        // Get the current size of the clock.
-        final int size;
-        synchronized (clock) {
-            size = clock.size();
-        }
-
-        // no need to trim a small clock
-        if (size < 32) {
-            return;
-        }
-
-        final int unused = freeEntries.get();
-
-        if (unused < size / 4) {
-            // don't trim unless more than 25% of the entries are unused
-            return;
-        }
-
-        // We still want 10% unused entries as a pool for new objects.
-        final int minUnused = (size - unused) / 10;
-
-        // Search for unused entries from the end since it's cheaper to remove
-        // elements near the end of an ArrayList. Since no one else can shrink
-        // the cache while we are in this method, we know that the size of the
-        // clock still must be the same as or greater than the size variable,
-        // so it's OK to search from position (size-1).
-        for (int i = size - 1; i >= 0 && freeEntries.get() > minUnused; i--) {
-            final Holder h;
-            synchronized (clock) {
-                h = clock.get(i);
-            }
-            // Index will be stable since no one else is allowed to remove
-            // elements from the list, and new elements will be appended at the
-            // end of the list.
-            if (h.evictIfFree()) {
-                removeHolder(i, h);
-            }
-        }
-
-        // Finally, trim the underlying array.
-        synchronized (clock) {
-            clock.trimToSize();
         }
     }
 }
