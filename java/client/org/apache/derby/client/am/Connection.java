@@ -308,37 +308,6 @@ public abstract class Connection implements java.sql.Connection,
         }
     }
 
-    protected void resetConnection(LogWriter logWriter,
-                                   String databaseName,
-                                   java.util.Properties properties) throws SqlException {
-        // clearWarningsX() will re-initialize the following properties
-        // warnings_, accumulated440ForMessageProcFailure_,
-        // and accumulated444ForMessageProcFailure_
-        clearWarningsX();
-
-        databaseName_ = databaseName;
-        user_ = ClientDataSource.getUser(properties);
-
-        retrieveMessageText_ = ClientDataSource.getRetrieveMessageText(properties);
-
-
-        // property encryptionManager_
-        // if needed this will later be initialized by NET calls to initializePublicKeyForEncryption()
-        encryptionManager_ = null;
-
-        // property: open_
-        // this should already be true
-
-        isolation_ = TRANSACTION_UNKNOWN;
-        currentSchemaName_ = null;
-        autoCommit_ = true;
-        inUnitOfWork_ = false;
-
-        this.agent_.resetAgent(this, logWriter, loginTimeout_, serverNameIP_, portNumber_);
-
-    }
-
-
     // For jdbc 1 connections
     protected Connection(LogWriter logWriter,
                          int driverManagerLoginTimeout,
