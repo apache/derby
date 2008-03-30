@@ -24,7 +24,7 @@ package org.apache.derby.impl.jdbc;
 
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.jdbc.EngineClob;
+import org.apache.derby.iapi.jdbc.EngineLOB;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.Resetable;
@@ -67,7 +67,7 @@ import java.sql.Clob;
         new update methods can safely be added into implementation.
    </UL>
  */
-final class EmbedClob extends ConnectionChild implements Clob, EngineClob
+final class EmbedClob extends ConnectionChild implements Clob, EngineLOB
 {
 
     /**

@@ -69,6 +69,7 @@ import java.util.HashMap;
 import java.util.Properties;
 import java.util.Iterator;
 
+import org.apache.derby.iapi.jdbc.EngineLOB;
 import org.apache.derby.impl.jdbc.authentication.NoneAuthenticationServiceImpl;
 
 /**
@@ -2869,15 +2870,9 @@ public abstract class EmbedConnection implements EngineConnection
 		//the hash table object to null.
 		HashMap map = rootConnection.lobHashMap;
 		if (map != null) {
-			for (Iterator it = map.values().iterator(); it.hasNext(); ) {
-				Object obj = it.next();
-				if (obj instanceof EmbedClob) {
-					((EmbedClob) obj).free();
-				} else if (obj instanceof EmbedBlob) {
-					((EmbedBlob) obj).free();
-				} else if (SanityManager.DEBUG) {
-					SanityManager.THROWASSERT("Unexpected value: " + obj);
-				}
+            Iterator it = map.values().iterator();
+            while (it.hasNext()) {
+                ((EngineLOB)it.next()).free();
 			}
 			map.clear();
 		}

@@ -24,7 +24,7 @@ package org.apache.derby.impl.jdbc;
 
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.jdbc.EngineBlob;
+import org.apache.derby.iapi.jdbc.EngineLOB;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.types.DataValueDescriptor;
@@ -68,7 +68,7 @@ import java.io.IOException;
 
  */
 
-final class EmbedBlob extends ConnectionChild implements Blob, EngineBlob
+final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
 {
     // blob is either materialized or still in stream
     private boolean         materialized;
