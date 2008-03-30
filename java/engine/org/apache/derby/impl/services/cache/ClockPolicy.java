@@ -611,20 +611,24 @@ final class ClockPolicy implements ReplacementPolicy {
             final Holder h;
             final int size;
 
-            // The index of the holder we're looking at. Since no one else than
-            // us can remove elements from the clock while we're in this
-            // method, and new elements will be added at the end of the list,
-            // the index for a holder does not change until we remove it.
-            final int index;
-
+            // Fetch the next holder from the clock.
             synchronized (clock) {
                 size = clock.size();
                 if (pos >= size) {
                     pos = 0;
                 }
-                index = pos++;
-                h = clock.get(index);
+                h = clock.get(pos);
             }
+
+            // The index of the holder we're looking at. Since no one else than
+            // us can remove elements from the clock while we're in this
+            // method, and new elements will be added at the end of the list,
+            // the index for a holder does not change until we remove it.
+            final int index = pos;
+
+            // Let pos point at the index of the holder we'll look at in the
+            // next iteration.
+            pos++;
 
             // No need to shrink if the size isn't greater than maxSize.
             if (size <= maxSize) {
