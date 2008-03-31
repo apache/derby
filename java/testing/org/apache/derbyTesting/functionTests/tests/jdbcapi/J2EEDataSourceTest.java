@@ -143,6 +143,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         suite.addTest(new J2EEDataSourceTest("testClosedCPDSConnection"));
         suite.addTest(new J2EEDataSourceTest("testClosedXADSConnection"));
         suite.addTest(new J2EEDataSourceTest("testSetSchemaInXAConnection"));
+        suite.addTest(new J2EEDataSourceTest("testPooledReuseOnClose"));
         return suite;
     }
 
@@ -170,11 +171,6 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
     private static Test getEmbeddedSuite(String postfix) {
         TestSuite suite = new TestSuite("Embedded" + postfix);
         suite.addTest(new J2EEDataSourceTest("testDSRequestAuthentication"));
-        // Due to a bug following cannot be run for client - DERBY-3379
-        // To run this fixture with client, add to getClientSuite(),
-        // when DERBY-3379 is fixed, remove from here (and client) and
-        // move to baseSuite.
-        suite.addTest(new J2EEDataSourceTest("testPooledReuseOnClose"));
         // when DERBY-2498 gets fixed, move this one to baseSuite
         suite.addTest(new J2EEDataSourceTest("testJira95pds"));
         // Following cannot run with client because of DERBY-2533; it hangs
