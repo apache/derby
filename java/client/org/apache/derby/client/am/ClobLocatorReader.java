@@ -23,7 +23,10 @@ package org.apache.derby.client.am;
 
 import java.io.IOException;
 
+import java.sql.SQLException;
 import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.error.ExceptionUtil;
+import org.apache.derby.shared.common.reference.SQLState;
 
 /**
  * An <code>Reader</code> that will use an locator to fetch the
@@ -66,6 +69,13 @@ public class ClobLocatorReader extends java.io.Reader {
      */
     private boolean isClosed = false;
     
+    /**
+     * If true, the underlying Blob will be freed when the underlying stream is
+     * closed.  Used to implement correct behavior for streams obtained from
+     * result sets.
+     */
+    private boolean freeClobOnClose = false;
+
     /**
      * Create an <code>Reader</code> for reading the
      * <code>Clob</code> value represented by the given locator based
@@ -165,8 +175,32 @@ public class ClobLocatorReader extends java.io.Reader {
             return;
         }
         isClosed = true;
+        
+        try {
+            if (clob != null && freeClobOnClose) {
+                clob.free();
+            }
+        } catch (SQLException ex) {
+            if (ex.getSQLState().compareTo
+                    (ExceptionUtil.getSQLStateFromIdentifier
+                            (SQLState.LOB_OBJECT_INVALID)) == 0) {
+                // Clob has already been freed, probably because of autocommit
+                return;  // Ignore error
+            }
+
+            IOException ioEx = new IOException();
+            ioEx.initCause(ex);
+            throw ioEx;
+        }
     }
-    
+
+    /**
+     * Tell stream to free the underlying Clob when it is closed.
+     */
+    public void setFreeClobOnClose() {
+        freeClobOnClose = true;
+    }
+
     /**
      * Check to see if this <code>Reader</code> is closed. If it
      * is closed throw an <code>IOException</code> that states that

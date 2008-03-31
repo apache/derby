@@ -197,7 +197,7 @@ public class LargeDataLocksTest extends BaseJDBCTestCase {
         TestSuite suite = new TestSuite("LargeDataLocksTest");
         suite.addTest(baseSuite("LargeDataLocksTest:embedded"));
         // Disable for client until DERBY-2892 is fixed
-        //suite.addTest(TestConfiguration.clientServerDecorator(baseSuite("LargeDataLocksTest:client")));
+        suite.addTest(TestConfiguration.clientServerDecorator(baseSuite("LargeDataLocksTest:client")));
         return suite;
 
     }
