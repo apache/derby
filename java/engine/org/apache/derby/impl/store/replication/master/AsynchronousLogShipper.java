@@ -417,7 +417,7 @@ public class AsynchronousLogShipper extends Thread implements
         // To guarantee a maximum log shipping delay,
         // minShippingInterval cannot be higher than
         // maxShippingInterval / #logbuffers. See javadoc for MAX
-        int buffers = logBuffer.DEFAULT_NUMBER_LOG_BUFFERS;
+        int buffers = ReplicationLogBuffer.DEFAULT_NUMBER_LOG_BUFFERS;
         if (minShippingInterval > maxShippingInterval / buffers) {
             minShippingInterval = maxShippingInterval / buffers;
             if (SanityManager.DEBUG) {
@@ -431,4 +431,5 @@ public class AsynchronousLogShipper extends Thread implements
             }
         }
     }
+
 }

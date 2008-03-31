@@ -76,7 +76,6 @@ public class SlaveController
     private ReplicationMessageReceive receiver;
     private ReplicationLogger repLogger;
 
-    private volatile boolean connectedToMaster = false;
     private String slavehost;
     private int slaveport;
     private String dbname; // The name of the replicated database
@@ -266,7 +265,7 @@ public class SlaveController
      */
     public void stopSlave(boolean forcedStop) 
             throws StandardException {
-        if (!forcedStop && connectedToMaster){
+        if (!forcedStop && isConnectedToMaster()){
             throw StandardException.newException(
                     SQLState.SLAVE_OPERATION_DENIED_WHILE_CONNECTED);
         }
@@ -274,7 +273,7 @@ public class SlaveController
     }
 
     public void failover() throws StandardException {
-        if (connectedToMaster){
+        if (isConnectedToMaster()){
             throw StandardException.newException(
                 SQLState.SLAVE_OPERATION_DENIED_WHILE_CONNECTED);
         }
@@ -339,7 +338,6 @@ public class SlaveController
                                         getFirstUnflushedInstantAsLong(),
                                         dbname);
             }
-            connectedToMaster = true;
             return true; // will not reach this if timeout
         } catch (StandardException se) {
             throw se;
@@ -369,7 +367,6 @@ public class SlaveController
      */
 
     private void handleDisconnect(Exception e) {
-        connectedToMaster = false;
         if (!inReplicationSlaveMode) {
             return;
         }
@@ -390,6 +387,18 @@ public class SlaveController
             startLogReceiverThread();
         } catch (StandardException se) {
             handleFatalException(se);
+        }
+    }
+
+    /**
+     * Check if the repliation network connection to the master is working
+     * @return true if the network connection is working, false otherwise
+     */
+    private boolean isConnectedToMaster() {
+        if (receiver == null) {
+            return false;
+        } else {
+            return receiver.isConnectedToMaster();
         }
     }
 
