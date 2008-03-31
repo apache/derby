@@ -426,6 +426,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
         if (!openOnClient_) {
             return;
         }
+        closeCloseFilterInputStream();
         preClose_();
         try {
             if (openOnServer_) {
