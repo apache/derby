@@ -1494,6 +1494,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		{
 			indexRows = new ExecIndexRow[numIndexes];
 			ordering  = new ColumnOrdering[numIndexes][];
+			collation = new int[numIndexes][];
 
 			for (int index = 0; index < numIndexes; index++)
 			{
