@@ -223,7 +223,7 @@ public class NetworkServerMBeanTest extends MBeanTest {
     
     public void testAttributeDrdaStreamOutBufferSize() throws Exception {
         // assuming that the buffer size is 0 (default)
-        assertStringAttribute("0", 
+        assertIntAttribute(0,
                 getNetworkServerMBeanObjectName(), 
                 "DrdaStreamOutBufferSize");
     }

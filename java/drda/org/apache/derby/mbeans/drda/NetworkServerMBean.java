@@ -29,14 +29,17 @@ package org.apache.derby.mbeans.drda;
  * This MBean is created and registered automatically at Network Server startup
  * if all requirements are met (J2SE 5.0 or better).</p>
  * <p>
- * Key properties for the registered MBean:
+ * Key properties for the registered MBean:</p>
  * <ul>
  * <li><code>type=NetworkServer</code></li>
  * <li><code>system=</code><em>runtime system identifier</em> (see 
  *     <a href="../package-summary.html#package_description">description of 
  * package org.apache.derby.mbeans</a>)</li>
  * </ul>
- * 
+ * <p>
+ * If a security manager is installed, accessing attributes and operations of
+ * this MBean may require a <code>SystemPermission</code>; see individual method
+ * documentation for details.</p>
  * <p>
  * For more information on Managed Beans, refer to the JMX specification.</p>
  *
@@ -194,7 +197,7 @@ public interface NetworkServerMBean {
      * @return the size of the buffer used for streaming blob/clob from server 
      *         to client (<code>derby.drda.streamOutBufferSize</code>)
      */
-    public String getDrdaStreamOutBufferSize();
+    public int getDrdaStreamOutBufferSize();
     
     /**
      * <p>
