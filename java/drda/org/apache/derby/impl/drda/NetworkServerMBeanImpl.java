@@ -174,14 +174,14 @@ class NetworkServerMBeanImpl implements NetworkServerMBean {
     }
     
     
-    public String getDrdaStreamOutBufferSize() {
+    public int getDrdaStreamOutBufferSize() {
         checkMonitor();
         
         // TODO - Fix NetworkServerControlImpl so that this setting is included
         //        in the property values returned by getPropertyValues()?
         //String size = getServerProperty(Property.DRDA_PROP_STREAMOUTBUFFERSIZE);
-        String size = PropertyUtil.getSystemProperty(
-                Property.DRDA_PROP_STREAMOUTBUFFERSIZE, "0");
+        int size = PropertyUtil.getSystemInt(
+                Property.DRDA_PROP_STREAMOUTBUFFERSIZE, 0);
         return size;
     }
 
