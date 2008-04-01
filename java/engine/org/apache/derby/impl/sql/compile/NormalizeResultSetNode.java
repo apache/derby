@@ -87,6 +87,9 @@ public class NormalizeResultSetNode extends SingleChildResultSetNode
 	 * (insert into t1 (smallintcol) values 1 union all values 2;
 	 *
 	 * @param childResult	The child ResultSetNode
+     * @param targetResultColumnList The target resultColumnList from 
+     *                          the InsertNode or UpdateNode. These will
+     *                          be the types used for the NormalizeResultSetNode.
 	 * @param tableProperties	Properties list associated with the table
 	 * @param forUpdate 	tells us if the normalize operation is being
 	 * performed on behalf of an update statement. 
@@ -95,6 +98,7 @@ public class NormalizeResultSetNode extends SingleChildResultSetNode
 
 	public void init(
 							Object childResult,
+                            Object targetResultColumnList,
 							Object tableProperties,
 							Object forUpdate) throws StandardException
 	{
@@ -103,7 +107,8 @@ public class NormalizeResultSetNode extends SingleChildResultSetNode
 
 		ResultSetNode rsn  = (ResultSetNode) childResult;
 		ResultColumnList rcl = rsn.getResultColumns();
-
+		ResultColumnList targetRCL = (ResultColumnList) targetResultColumnList;
+        
 		/* We get a shallow copy of the ResultColumnList and its 
 		 * ResultColumns.  (Copy maintains ResultColumn.expression for now.)
 		 * 
@@ -132,6 +137,14 @@ public class NormalizeResultSetNode extends SingleChildResultSetNode
 		    }
         
         
+		if (targetResultColumnList != null) {
+		    int size = Math.min(targetRCL.size(), resultColumns.size());
+		    for (int index = 0; index < size; index++) {
+			ResultColumn sourceRC = (ResultColumn) resultColumns.elementAt(index);
+			ResultColumn resultColumn = (ResultColumn) targetRCL.elementAt(index);
+			sourceRC.setType(resultColumn.getTypeServices());
+		    }
+		}
 	}
 
 

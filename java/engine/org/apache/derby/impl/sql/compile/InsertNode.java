@@ -425,10 +425,9 @@ public final class InsertNode extends DMLModStatementNode
             
 			resultSet = 
 			(NormalizeResultSetNode) getNodeFactory().getNode(
-			C_NodeTypes.NORMALIZE_RESULT_SET_NODE,
-			resultSet, null, Boolean.FALSE,
+			C_NodeTypes.NORMALIZE_RESULT_SET_NODE, resultSet,
+			resultColumnList, null, Boolean.FALSE,
 			getContextManager());
-			resultColumnList.copyTypesAndLengthsToSource(resultSet.getResultColumns());
 		}
 
 		if (targetTableDescriptor != null)
