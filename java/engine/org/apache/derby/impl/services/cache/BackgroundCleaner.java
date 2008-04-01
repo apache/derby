@@ -29,8 +29,10 @@ import org.apache.derby.iapi.services.daemon.DaemonService;
 import org.apache.derby.iapi.services.daemon.Serviceable;
 
 /**
- * A background cleaner which can be used by <code>ConcurrentCache</code> so
- * that it doesn't have to wait for clean operations to finish. When the
+ * A background cleaner that {@code ConcurrentCache} can use to clean {@code
+ * Cacheable}s asynchronously in a background instead of synchronously in the
+ * user threads. It is normally used by the replacement algorithm in order to
+ * make dirty {@code Cacheable}s clean and evictable in the future. When the
  * background cleaner is asked to clean an item, it puts the item in a queue
  * and requests to be serviced by a <code>DaemonService</code> running in a
  * separate thread.
@@ -177,6 +179,8 @@ final class BackgroundCleaner implements Serviceable {
      * @return <code>false</code>
      */
     public boolean serviceImmediately() {
+        // This method isn't actually used by BasicDaemon, but we still need to
+        // implement it in order to satisfy the Serviceable interface.
         return false;
     }
 }

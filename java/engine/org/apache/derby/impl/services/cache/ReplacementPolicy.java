@@ -37,29 +37,23 @@ interface ReplacementPolicy {
      * with a <code>Cacheable</code> which is ready to be reused. It is also
      * possible that the <code>Cacheable</code> is still <code>null</code> when
      * the method returns, in which case the caller must allocate one itself.
+     * The entry will be associated with a {@code Callback} object that it can
+     * use to communicate back to the replacement policy events (for instance,
+     * that it has been accessed or become invalid).
      *
      * @param entry the entry to insert
-     * @return a callback object that can be used to notify the replacement
-     * algorithm about operations performed on the cached object
      * @exception StandardException if an error occurs while inserting the
      * entry
+     *
+     * @see CacheEntry#setCallback(ReplacementPolicy.Callback)
      */
-    Callback insertEntry(CacheEntry entry) throws StandardException;
+    void insertEntry(CacheEntry entry) throws StandardException;
 
     /**
      * Try to shrink the cache if it has exceeded its maximum size. It is not
      * guaranteed that the cache will actually shrink.
      */
     void doShrink();
-
-    /**
-     * Try to reduce the size of the cache as much as possible by removing
-     * invalid entries. Depending on the underlying data structure, this might
-     * be a very expensive operation. The implementations are therefore allowed
-     * to ignore calls to this method when they think the cost outweighs the
-     * benefit.
-     */
-    void trimToSize();
 
     /**
      * The interface for the callback objects that <code>ConcurrentCache</code>
