@@ -5103,7 +5103,9 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
     public void stopReplicationMasterRole() {
         inReplicationMasterMode = false;
         masterFactory = null;
-        logOut.stopReplicationMasterRole();
+        if(logOut != null) {
+            logOut.stopReplicationMasterRole();
+        }
     }
 
     /**

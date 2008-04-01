@@ -199,7 +199,10 @@ public class ReplicationRun_Local_StateTest_part1_1 extends ReplicationRun
         killMaster(masterServerHost, masterServerPort);
         Thread.sleep(5000L); // TEMPORARY to see if slave sees that master is gone!
         
-        // 3.  stopSlave on slave should now be allowed. Observe that the database shall be shutdown.
+        // 3.  stopSlave on slave should now result in an exception stating that
+        //     the slave database has been shutdown. A master shutdown results
+        //     in a behaviour that is similar to what happens when a stopMaster
+        //     is called.
         db = slaveDatabasePath +FS+ReplicationRun.slaveDbSubPath +FS+ replicatedDb;
         connectionURL = "jdbc:derby:"  
                 + "//" + slaveServerHost + ":" + slaveServerPort + "/"
@@ -218,9 +221,10 @@ public class ReplicationRun_Local_StateTest_part1_1 extends ReplicationRun
             int ec = se.getErrorCode();
             String ss = se.getSQLState();
             String msg = ec + " " + ss + " " + se.getMessage();
-            util.DEBUG("3. Got "+msg + " Expected: " + SQLState.REPLICATION_SLAVE_SHUTDOWN_OK);
+            util.DEBUG("3. Got "+msg + " Expected: " + 
+                    SQLState.REPLICATION_DB_NOT_BOOTED);
             assertTrue(connectionURL + " failed: " + msg, 
-                    SQLState.REPLICATION_SLAVE_SHUTDOWN_OK.equals(ss));
+                    SQLState.REPLICATION_DB_NOT_BOOTED.equals(ss));
             util.DEBUG("3. Failed as expected: " + connectionURL +  " " + msg);
             stopSlaveCorrect = true;
         }

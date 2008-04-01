@@ -126,7 +126,10 @@ public class SlaveDatabase extends BasicDatabase {
         // SlaveDatabaseBootThread is an internal class
         SlaveDatabaseBootThread dbBootThread =
             new SlaveDatabaseBootThread(create, startParams);
-        new Thread(dbBootThread, "derby.slave.boot-" + dbname).start();
+        Thread sdbThread = 
+                new Thread(dbBootThread, "derby.slave.boot-" + dbname);
+        sdbThread.setDaemon(true);
+        sdbThread.start();
 
         // Check that the database was booted successfully, or throw
         // the exception that caused the boot to fail.
