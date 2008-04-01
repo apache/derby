@@ -667,22 +667,19 @@ public final class	DataDictionaryImpl
 			//method.
 			String userDefinedCollation;		
 			if (create) {
-				// Get the collation attribute from the JDBC url. It can only have one of
-				// 2 possible values - UCS_BASIC or TERRITORY_BASED
-				// This attribute can only be specified at database create time.
-				userDefinedCollation = startParams.getProperty(Attribute.COLLATION);		
-				if (userDefinedCollation == null)
-					userDefinedCollation = Property.UCS_BASIC_COLLATION;
-				else {//Invalid value handling
-					if (!userDefinedCollation.equalsIgnoreCase(Property.UCS_BASIC_COLLATION)
-							&& !userDefinedCollation.equalsIgnoreCase(Property.TERRITORY_BASED_COLLATION))
-						throw StandardException.newException(SQLState.INVALID_COLLATION, userDefinedCollation);
-					}
+				//Get the collation attribute from the JDBC url. It can only 
+				//have one of 2 possible values - UCS_BASIC or TERRITORY_BASED
+				//This attribute can only be specified at database create time. 
+				//The attribute value has already been verified in DVF.boot and
+				//hence we can be assured that the attribute value if provided
+				//is either UCS_BASIC or TERRITORY_BASED. If none provided, 
+				//then we will take it to be the default which is UCS_BASIC.
+				userDefinedCollation = startParams.getProperty(
+						Attribute.COLLATION, Property.UCS_BASIC_COLLATION);		
 				bootingTC.setProperty(Property.COLLATION,userDefinedCollation,true);
 			} else {
-				userDefinedCollation = startParams.getProperty(Property.COLLATION);
-				if (userDefinedCollation == null)
-					userDefinedCollation = Property.UCS_BASIC_COLLATION;
+				userDefinedCollation = startParams.getProperty(
+						Property.COLLATION, Property.UCS_BASIC_COLLATION);
 			}
 
 			//Initialize the collation type of user schemas after looking at 

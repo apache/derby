@@ -160,6 +160,7 @@ public final class ErrorCodeTest extends BaseJDBCTestCase {
         		{"XBM01","Startup failed due to an exception. See next exception for details. ","45000"},
         		{"XBM02","Startup failed due to missing functionality for {0}. Please ensure your classpath includes the correct Derby software.","45000"},
         		{"XBM03","Supplied value '{0}' for collation attribute is invalid, expecting UCS_BASIC or TERRITORY_BASED.","45000"},
+        		{"XBM04","Collator support not available from the JVM for the database's locale '{0}'.","45000"},
         		{"XBM05","Startup failed due to missing product version information for {0}.","45000"},
         		{"XBM06","Startup failed. An encrypted database cannot be accessed without the correct boot password.  ","45000"},
         		{"XBM07","Startup failed. Boot password must be at least 8 bytes long.","45000"},
