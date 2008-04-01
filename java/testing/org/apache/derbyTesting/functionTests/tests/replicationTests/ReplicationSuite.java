@@ -48,6 +48,8 @@ public class ReplicationSuite extends BaseTestCase
 
 		suite.addTest(ReplicationRun_Local.suite());
         
+		suite.addTest(ReplicationRun_Local_1.suite());
+        
 		suite.addTest(ReplicationRun_Local_StateTest_part1.suite());
 		suite.addTest(ReplicationRun_Local_StateTest_part1_1.suite());
 		suite.addTest(ReplicationRun_Local_StateTest_part1_2.suite());
