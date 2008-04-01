@@ -2745,13 +2745,15 @@ public class Xact extends RawTransaction implements Limit  {
 
 
 	/**	
-		perform a  checkpoint during rollforward recovery
-	*/
+	 * Perform a checkpoint during rollforward recovery.
+     * 
+     * @throws org.apache.derby.iapi.error.StandardException 
+     */
 	public void checkpointInRollForwardRecovery(LogInstant cinstant,
-												long redoLWM) 
+												long redoLWM, long undoLWM)
 		throws StandardException
 	{
-		logFactory.checkpointInRFR(cinstant, redoLWM, dataFactory);
+		logFactory.checkpointInRFR(cinstant, redoLWM, undoLWM, dataFactory);
 	}
 
 }

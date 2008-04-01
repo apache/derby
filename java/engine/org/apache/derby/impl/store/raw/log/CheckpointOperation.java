@@ -132,7 +132,8 @@ public class CheckpointOperation implements Loggable
 		//redo the checkpoint if we are in roll-forward recovery only
 		if(((RawTransaction)xact).inRollForwardRecovery())
 		{
-			((RawTransaction)xact).checkpointInRollForwardRecovery(instant, redoLWM);
+			((RawTransaction)xact).
+				checkpointInRollForwardRecovery(instant, redoLWM, undoLWM);
 		}
 		return;
 	}

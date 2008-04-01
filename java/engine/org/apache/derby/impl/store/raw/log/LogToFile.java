@@ -2194,12 +2194,19 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 	 */
 	private void truncateLog(CheckpointOperation checkpoint)
 	{
-		long oldFirstLog;
 		long firstLogNeeded;
-
-		if (keepAllLogs)
-			return;
 		if ((firstLogNeeded = getFirstLogNeeded(checkpoint))==-1)
+			return;
+		truncateLog(firstLogNeeded);
+	}
+
+	/** Get rid of old and unnecessary log files
+	 * @param firstLogNeeded The log file number of the oldest log file
+	 * needed for recovery.
+	 */
+	private void truncateLog(long firstLogNeeded) {
+		long oldFirstLog;
+		if (keepAllLogs)
 			return;
 		
 		// when  backup is in progress, log files that are yet to
@@ -5049,8 +5056,12 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 
 	/**	
 	 *	redo a checkpoint during rollforward recovery
-	*/
-	public void checkpointInRFR(LogInstant cinstant, long redoLWM, DataFactory df) throws StandardException
+     * 
+     * @throws org.apache.derby.iapi.error.StandardException 
+     */
+	public void checkpointInRFR(LogInstant cinstant, long redoLWM,
+								long undoLWM, DataFactory df)
+								throws StandardException
 	{
 		//sync the data
 		df.checkpoint();
@@ -5073,6 +5084,9 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 		//remove the stub files
 		df.removeDroppedContainerFileStubs(new LogCounter(redoLWM));
 		
+		if (inReplicationSlaveMode) {
+			truncateLog(LogCounter.getLogFileNumber(undoLWM));
+		}
 	}
 
     /**
