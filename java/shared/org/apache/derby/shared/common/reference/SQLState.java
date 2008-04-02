@@ -1774,7 +1774,8 @@ public interface SQLState {
     String REPLICATION_LOG_CORRUPTED                               = "XRE01";
     String REPLICATION_MASTER_SLAVE_VERSION_MISMATCH               = "XRE02";
     String REPLICATION_UNEXPECTED_EXCEPTION                        = "XRE03";
-    String REPLICATION_CONNECTION_EXCEPTION                        = "XRE04";
+    String REPLICATION_CONNECTION_EXCEPTION                        = "XRE04.U.1";
+    String REPLICATION_CONNECTION_LOST                             = "XRE04.U.2";
     String REPLICATION_LOG_OUT_OF_SYNCH                            = "XRE05";
     String REPLICATION_MASTER_TIMED_OUT                            = "XRE06";
     String REPLICATION_NOT_IN_MASTER_MODE                          = "XRE07";

@@ -4773,11 +4773,17 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
             </msg>
 
             <msg>
-                <name>XRE04</name>
+                <name>XRE04.U.1</name>
                 <text>Could not establish a connection to the peer of the replicated database '{0}' on address '{1}:{2}'.</text>
                 <arg>dbname</arg>
                 <arg>hostname</arg>
                 <arg>portname</arg>
+            </msg>
+
+            <msg>
+                <name>XRE04.U.2</name>
+                <text>Connection lost for replicated database '{0}'.</text>
+                <arg>dbname</arg>
             </msg>
 
             <msg>

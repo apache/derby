@@ -59,6 +59,35 @@ public class ReplicationMessageReceive {
      */
     private SocketConnection socketConn;
     
+    /* -- Ping-thread related fields start -- */
+
+    /** The maximum number of millis to wait before giving up waiting for
+     * a ping response*/
+    private static final int DEFAULT_PING_TIMEOUT = 5000; // 5 seconds
+
+    /** Thread used to send ping messages to master to check if the connection
+     * is working. The ping message must be sent from a separate thread
+     * because failed message shipping over TCP does not timeout for two
+     * minutes (not configurable). */
+    private Thread pingThread = null;
+
+    /** Used to terminate the ping thread. */
+    private boolean killPingThread = false;
+
+    /** Whether or not the connection with the master is confirmed to be
+     * working. Set to false by isConnectedToMaster, set to true when
+     * a pong (i.e., a response to a ping) is received. Field protected by
+     * receivePongSemephore */
+    private boolean connectionConfirmed = false;
+
+    /** Used for synchronization of the ping thread */
+    private final Object sendPingSemaphore = new Object();
+
+    /** Used for synchronization when waiting for a ping reply message */
+    private final Object receivePongSemaphore = new Object();
+
+    /* -- Ping-thread related fields stop -- */
+
     /**
      * Constructor initializes the slave address used in replication. Accepts
      * the host name and port number that constitute the slave address as
@@ -157,6 +186,12 @@ public class ReplicationMessageReceive {
         parseAndAckVersion(readMessage(), dbname);
         // ...and have equal log files
         parseAndAckInstant(readMessage(), synchOnInstant, dbname);
+
+        killPingThread = false;
+        pingThread = new SlavePingThread(dbname);
+        pingThread.setDaemon(true);
+        pingThread.start();
+
     }
     
     /**
@@ -189,6 +224,11 @@ public class ReplicationMessageReceive {
      *                     close the socket or the associated resources.
      */
     public void tearDown() throws IOException {
+        synchronized (sendPingSemaphore) {
+            killPingThread = true;
+            sendPingSemaphore.notify();
+        }
+
         if (socketConn != null) {
             socketConn.tearDown();
         }
@@ -369,7 +409,9 @@ public class ReplicationMessageReceive {
     /**
      * Used to read a replication message sent by the master. This method
      * would wait on the connection from the master until a message is received
-     * or a connection failure occurs.
+     * or a connection failure occurs. Replication network layer specific
+     * messages (i.e. ping/pong messages) are handled internally and are not
+     * returned.
      *
      * @return a <code>ReplicationMessage</code> object that contains
      *         the reply that is sent.
@@ -384,7 +426,19 @@ public class ReplicationMessageReceive {
     public ReplicationMessage readMessage() throws
         ClassNotFoundException, IOException {
         checkSocketConnection();
-        return (ReplicationMessage)socketConn.readMessage();
+        ReplicationMessage msg = (ReplicationMessage)socketConn.readMessage();
+
+        if (msg.getType() == ReplicationMessage.TYPE_PONG) {
+            // If a pong is received, connection is confirmed to be working.
+            synchronized (receivePongSemaphore) {
+                connectionConfirmed = true;
+                receivePongSemaphore.notify();
+            }
+            // Pong messages are network layer specific. Do not return these
+            return readMessage();
+        } else {
+            return msg;
+        }
     }
 
     /**
@@ -417,6 +471,73 @@ public class ReplicationMessageReceive {
         if (socketConn == null) {
             throw new IOException
                     (MessageId.REPLICATION_INVALID_CONNECTION_HANDLE);
+        }
+    }
+
+    /**
+     * Check if the repliation network is working. Tries to send a ping
+     * message to the master and returns the network status based on the
+     * success or failure of sending this message and receiving a pong reply.
+     * MT: Currently, only one thread is allowed to check the network status at
+     * any time to keep the code complexity down.
+     * @return true if the pong message was received before timing out after
+     * DEFAULT_PING_TIMEOUT millis, false otherwise
+     * @see #DEFAULT_PING_TIMEOUT
+     */
+    public synchronized boolean isConnectedToMaster() {
+        // synchronize on receivePongSemaphore so that this thread is
+        // guaraneed to get to receivePongSemaphore.wait before the pong
+        // message is processed in readMessage
+        synchronized (receivePongSemaphore) {
+            connectionConfirmed = false;
+            synchronized (sendPingSemaphore) {
+                // Make ping thread send a ping message to the master
+                sendPingSemaphore.notify();
+            }
+
+            try {
+                // Wait for the pong response message
+                receivePongSemaphore.wait(DEFAULT_PING_TIMEOUT);
+            } catch (InterruptedException ex) {
+            }
+        }
+        return connectionConfirmed;
+    }
+
+    /////////////////
+    // Inner Class //
+    /////////////////
+    /**
+     * Thread that sends ping messages to the master on request to check if the
+     * replication network is working
+     */
+    private class SlavePingThread extends Thread {
+
+        private final ReplicationMessage pingMsg =
+            new ReplicationMessage(ReplicationMessage.TYPE_PING, null);
+
+        SlavePingThread(String dbname) {
+            super("derby.slave.ping-" + dbname);
+        }
+
+        public void run() {
+            try {
+                while (!killPingThread) {
+                    synchronized (sendPingSemaphore) {
+                        sendPingSemaphore.wait();
+                    }
+                    if (killPingThread) {
+                        // The thread was notified to terminate
+                        break;
+                    }
+
+                    sendMessage(pingMsg);
+                }
+            } catch (InterruptedException ie) {
+            } catch (IOException ioe) {
+            // For both exceptions: Do nothing. isConnectedToMaster will return
+            // 'false' and appropriate action will be taken.
+            }
         }
     }
 }

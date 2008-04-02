@@ -308,14 +308,11 @@ public class MasterController
             //acknowledgement.
             ReplicationMessage mesg = new ReplicationMessage(
                         ReplicationMessage.TYPE_FAILOVER, null);
-            transmitter.sendMessage(mesg);
-            ack = transmitter.readMessage();
+            ack = transmitter.sendMessageWaitForReply(mesg);
         } catch (IOException ioe) {
             handleFailoverFailure(ioe);
         } catch (StandardException se) {
             handleFailoverFailure(se);
-        } catch (ClassNotFoundException cnfe) {
-            handleFailoverFailure(cnfe);
         }
         
         //check the contents of the acknowledgement received from the slave
@@ -462,7 +459,12 @@ public class MasterController
      */
     private void setupConnection() throws StandardException {
         try {
-            transmitter = new ReplicationMessageTransmit(slavehost, slaveport);
+            if (transmitter != null) {
+                transmitter.tearDown();
+            }
+            transmitter = new ReplicationMessageTransmit(slavehost,
+                                                         slaveport,
+                                                         dbname);
             // getHighestShippedInstant is -1 until the first log
             // chunk has been shipped to the slave. If a log chunk has
             // been shipped, use the instant of the latest shipped log
@@ -510,8 +512,12 @@ public class MasterController
             
             while (active) {
                 try {
-                    transmitter = new ReplicationMessageTransmit
-                            (slavehost, slaveport);
+                    if (transmitter != null) {
+                        transmitter.tearDown();
+                    }
+                    transmitter = new ReplicationMessageTransmit(slavehost,
+                                                                 slaveport,
+                                                                 dbname);
 
                     // see comment in setupConnection
                     if (logShipper != null &&

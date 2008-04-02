@@ -102,6 +102,16 @@ public class ReplicationMessage implements Externalizable {
      * element.
      */
     public static final int TYPE_ERROR = 12;
+
+    /** A message used to check if the replication network is working. This
+     * message type has no object
+     */
+    public static final int TYPE_PING = 13;
+
+    /** A message sent as a response to a TYPE_PING message. This
+     * message type has no object
+     */
+    public static final int TYPE_PONG = 14;
     
     /**
      * Used to send a stop replication signal to the slave. Since this
