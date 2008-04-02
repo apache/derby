@@ -321,9 +321,11 @@ public class ReadOnly implements LogFactory, ModuleSupportable {
 	}
 
 	/**	
-		perform a  checkpoint during rollforward recovery
-	*/
-	public void checkpointInRFR(LogInstant cinstant, long redoLWM, 
+	 *	Perform a checkpoint during rollforward recovery.
+     * 
+     * @throws org.apache.derby.iapi.error.StandardException 
+     */
+	public void checkpointInRFR(LogInstant cinstant, long redoLWM, long undoLWM,
 								DataFactory df) throws StandardException
 	{
 		//do nothing

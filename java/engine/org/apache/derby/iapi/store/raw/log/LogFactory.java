@@ -269,12 +269,13 @@ public interface LogFactory extends Corruptable {
 
 	/**	
 	 * redoing a checkpoint  during rollforward recovery
-	 @param cinstant The LogInstant of the checkpoint
-	 @param redoLWM  Redo Low Water Mark in the check point record
-	 @param df - the data factory
-	 @exception StandardException - encounter exception during checkpoint
+	 * @param cinstant The LogInstant of the checkpoint
+	 * @param redoLWM  Redo Low Water Mark in the check point record
+	 * @param undoLWM Undo Low Water Mark in the checkpoint
+	 * @param df - the data factory
+	 * @exception StandardException - encounter exception during checkpoint
 	 */
-	public void checkpointInRFR(LogInstant cinstant, long redoLWM, 
+	public void checkpointInRFR(LogInstant cinstant, long redoLWM, long undoLWM,
 								DataFactory df) throws StandardException;
 
 	

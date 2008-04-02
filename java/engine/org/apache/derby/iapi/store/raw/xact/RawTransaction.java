@@ -321,10 +321,16 @@ public abstract class RawTransaction extends Observable implements Transaction {
 
 
 	/**	
-	 * redo a checkpoint during rollforward recovery
+     * Redo a checkpoint during rollforward recovery.
+     *
+     * @param cinstant The LogInstant of the checkpoint
+     * @param redoLWM  Redo Low Water Mark in the check point record
+     * @param undoLWM Undo Low Water Mark in the checkpoint
+     * @exception StandardException Exception encountered during checkpoint
 	 */
 	public abstract void checkpointInRollForwardRecovery(LogInstant cinstant,
-														 long redoLWM) 
+														 long redoLWM,
+														 long undoLWM)
 		throws StandardException;
 
 	
