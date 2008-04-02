@@ -354,43 +354,6 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
         resetNetConnection(logWriter, user, password, ds, recomputeFromDataSource);
     }
 
-    protected void reset_(org.apache.derby.client.am.LogWriter logWriter,
-                          ClientBaseDataSource ds,
-                          boolean recomputeFromDataSource) throws SqlException {
-        checkResetPreconditions(logWriter, null, null, ds);
-        resetNetConnection(logWriter, ds, recomputeFromDataSource);
-    }
-
-    private void resetNetConnection(org.apache.derby.client.am.LogWriter logWriter,
-                            org.apache.derby.jdbc.ClientBaseDataSource ds,
-                            boolean recomputeFromDataSource) throws SqlException {
-        super.resetConnection(logWriter, null, ds, recomputeFromDataSource);
-        //----------------------------------------------------
-        if (recomputeFromDataSource) {
-            // do not reset managers on a connection reset.  this information shouldn't
-            // change and can be used to check secmec support.
-
-            targetExtnam_ = null;
-            targetSrvclsnm_ = null;
-            targetSrvnam_ = null;
-            targetSrvrlslv_ = null;
-            publicKey_ = null;
-            targetPublicKey_ = null;
-            sourceSeed_ = null;
-            targetSeed_ = null;
-            targetSecmec_ = 0;
-            if (ds != null && securityMechanism_ == 0) {
-                securityMechanism_ = ds.getSecurityMechanism();
-            }
-            resetConnectionAtFirstSql_ = false;
-        }
-        // properties prddta_ and crrtkn_ will be initialized by
-        // calls to constructPrddta() and constructCrrtkn()
-        //----------------------------------------------------------
-        boolean isDeferredReset = flowReconnect(null, securityMechanism_);
-        completeReset(isDeferredReset, recomputeFromDataSource);
-    }
-
     protected void checkResetPreconditions(org.apache.derby.client.am.LogWriter logWriter,
                                            String user,
                                            String password,
