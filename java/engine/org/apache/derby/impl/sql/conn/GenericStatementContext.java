@@ -33,12 +33,14 @@ import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.conn.StatementContext;
+import org.apache.derby.iapi.sql.conn.SQLSessionContext;
 
 import org.apache.derby.iapi.sql.depend.Dependency;
 import org.apache.derby.iapi.sql.depend.DependencyManager;
 
 import org.apache.derby.iapi.sql.execute.NoPutResultSet;
 
+import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.ResultSet;
 import org.apache.derby.iapi.sql.ParameterValueSet;
 
@@ -95,6 +97,16 @@ final class GenericStatementContext
 		Set to one of RoutineAliasInfo.{MODIFIES_SQL_DATA, READS_SQL_DATA, CONTAINS_SQL, NO_SQL}
 	*/
 	private short			sqlAllowed = -1;
+
+	/**
+	 * The activation associated with this context, or null
+	 */
+	private Activation activation;
+
+	/**
+	 * The SQLSessionContext associated with a statement context.
+	 */
+	private SQLSessionContext sqlSessionContext;
 
 	/*
 	   constructor
@@ -228,7 +240,9 @@ final class GenericStatementContext
             cancelTask = null;
         }
         cancellationFlag = false;
-	}
+        activation = null;
+		sqlSessionContext = null;
+    }
 
 	/**
 	 * @see StatementContext#setSavePoint
@@ -743,5 +757,33 @@ final class GenericStatementContext
 		}
 		return sb;
 
+	}
+
+	/**
+	 * @see StatementContext#setActivation(Activation a)
+	 */
+	public void setActivation(Activation a) {
+		activation = a;
+	}
+
+	/**
+	 * @see StatementContext#getActivation
+	 */
+	public Activation getActivation() {
+		return activation;
+	}
+
+	/**
+	 * @see StatementContext#getSQLSessionContext
+	 */
+	public SQLSessionContext getSQLSessionContext() {
+		return sqlSessionContext;
+	}
+
+	/**
+	 * @see StatementContext#setSQLSessionContext(SQLSessionContext ctx)
+	 */
+	public void setSQLSessionContext(SQLSessionContext ctx) {
+		sqlSessionContext = ctx;
 	}
 }

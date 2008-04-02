@@ -609,6 +609,35 @@ public class StaticMethodCallNode extends MethodCallNode
 	}
 
 	/**
+	 * Add code to set up the SQL session context for a stored
+	 * procedure or function which needs a nested SQL session
+	 * context (only needed for those which can contain SQL).
+	 *
+	 * The generated code calls setupNestedSessionContext.
+	 * @see org.apache.derby.iapi.sql.conn.LanguageConnectionContext#setupNestedSessionContext
+	 *
+	 * @param acb activation class builder
+	 * @param mb  method builder
+	 */
+	private void generateSetupNestedSessionContext(ActivationClassBuilder acb,
+												   MethodBuilder mb) {
+
+		// Generates the following Java code:
+		// ((Activation)this).getLanguageConnectionContext().
+		//       setupNestedSessionContext((Activation)this);
+
+		acb.pushThisAsActivation(mb);
+		mb.callMethod(VMOpcode.INVOKEINTERFACE, null,
+					  "getLanguageConnectionContext",
+					  ClassName.LanguageConnectionContext, 0);
+		acb.pushThisAsActivation(mb);
+		mb.callMethod(VMOpcode.INVOKEINTERFACE, null,
+					  "setupNestedSessionContext",
+					  "void", 1);
+	}
+
+
+	/**
 		Push extra code to generate the casts within the
 		arrays for the parameters passed as arrays.
 	*/
@@ -868,6 +897,13 @@ public class StaticMethodCallNode extends MethodCallNode
 			if (isSystemCode) {
 				mb.callMethod(VMOpcode.INVOKEINTERFACE, null,
 									"setSystemCode", "void", 0);
+			}
+
+			// If no SQL, there is no need to setup a nested session
+			// context.
+			if (sqlAllowed != RoutineAliasInfo.NO_SQL) {
+				generateSetupNestedSessionContext((ActivationClassBuilder) acb,
+												  mb);
 			}
 
 			// for a function we need to fetch the current SQL control

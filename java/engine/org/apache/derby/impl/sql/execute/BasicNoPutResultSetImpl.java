@@ -781,6 +781,7 @@ implements NoPutResultSet
 			{
 				subqueryTrackingArray = statementContext.getSubqueryTrackingArray();
 			}
+            statementContext.setActivation(activation);
 		}
 
 	}

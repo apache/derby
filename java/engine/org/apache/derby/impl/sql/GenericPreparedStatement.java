@@ -240,7 +240,17 @@ public class GenericPreparedStatement
 		// deadlock.
 		lcc.closeUnusedActivations();
 
-		ac.setCallActivation(lcc.getCaller());
+		Activation callingAct = null;
+		StatementContext stmctx = lcc.getStatementContext();
+
+		if (stmctx != null) {
+			// if not null, callingAct represents the activation of
+			// a calling statement and this activation corresponds to
+			// a statement inside a stored procedure or function
+			callingAct = stmctx.getActivation();
+		}
+
+		ac.setCallActivation(callingAct);
 
 		return ac;
 	}
@@ -349,6 +359,8 @@ recompileOutOfDatePlan:
 
 			StatementContext statementContext = lccToUse.pushStatementContext(
 				isAtomic, updateMode==CursorNode.READ_ONLY, getSource(), pvs, rollbackParentContext, timeoutMillis);
+
+			statementContext.setActivation(activation);
 
 			if (needsSavepoint())
 			{

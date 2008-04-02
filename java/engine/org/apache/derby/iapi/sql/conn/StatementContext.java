@@ -36,6 +36,7 @@ import org.apache.derby.iapi.sql.depend.Dependency;
 
 import org.apache.derby.iapi.types.DataValueFactory;
 import org.apache.derby.iapi.sql.LanguageFactory;
+import org.apache.derby.iapi.sql.conn.SQLSessionContext;
 
 /**
  * StatementContext keeps the context for a statement.
@@ -248,5 +249,32 @@ public interface StatementContext extends Context {
 		too.
 	*/
 	public void setParentRollback();
+
+	/**
+     * Mark this statement context as associated with this activation.
+	 *
+	 * @param a activation
+     */
+	public void setActivation(Activation a);
+
+	/**
+     * Get activation associated with this statement context, if any.
+	 * Used to link up stack of activations of calls in nested
+	 * connections, see GenericPreparedStatement#getActivation.
+     */
+	public Activation getActivation();
+
+
+	/**
+	 * Get the current SQL session context
+	 */
+	public SQLSessionContext getSQLSessionContext();
+
+	/**
+	 * Set the current SQL session context
+	 *
+	 * @param ctx the SQL session context
+	 */
+	public void setSQLSessionContext(SQLSessionContext ctx);
 
 }

@@ -96,7 +96,7 @@ class DropSchemaConstantAction extends DDLConstantAction
 
         SchemaDescriptor sd = dd.getSchemaDescriptor(schemaName, null, true);
 
-        sd.drop(lcc);
+        sd.drop(lcc, activation);
 
 	}
 

@@ -424,16 +424,32 @@ public interface LanguageConnectionContext extends Context {
 	public String getAuthorizationId();
 
 	/**
-	 *	Get the current default schema for the connection.
+	 * Get the default schema (used at compile-time when no activation
+	 * is yet available, cf. the activation argument overload version.
 	 *
-	 * @return SchemaDescriptor	the current schema
+	 * @return SchemaDescriptor	the default schema
 	 */
 	public SchemaDescriptor getDefaultSchema(); 
 
 	/**
-	 *	Set the current default schema
+	 * Get the default schema (used at execution time).  At execution
+	 * time, the current statement context is not always a reliable
+	 * place to find the correct SQL session context, viz. when a
+	 * dynamic result set referencing CURRENT SCHEMA is accessed after
+	 * a called procedure has returned only the activation of the call
+	 * is live and still holds the correct session context.
+	 * @param a current activation
 	 *
-	 * @param sd the new default schema
+	 * @return SchemaDescriptor	the default schema
+	 */
+	public SchemaDescriptor getDefaultSchema(Activation a);
+
+	/**
+	 * Set the default schema (at compile-time, see explanations for
+	 * getDefaultSchema overloads).
+	 *
+	 * @param sd the new default schema.
+	 * If null, then the default schema descriptor is used.
 	 *
 	 * @exception StandardException thrown on failure
 	 */
@@ -441,11 +457,46 @@ public interface LanguageConnectionContext extends Context {
 		throws StandardException;
 
 	/**
-	 *	Get the current schema name
+	 * Set the default schema (at execution time, see explanations for
+	 * getDefaultSchema overloads); This version is used by SET SCHEMA.
+	 *
+	 * @param a current activation
+	 * @param sd the new default schema.
+	 * If null, then the default schema descriptor is used.
+	 *
+	 * @exception StandardException thrown on failure
+	 */
+	public void setDefaultSchema(Activation a, SchemaDescriptor sd)
+		throws StandardException;
+
+	/**
+	 * Reset any occurence of schemaName as current default schema in
+	 * the SQLSessionContext stack to the initial default, presumably
+	 * because schemaName is no longer a valid schema.
+	 *
+	 * @param activation current activation
+	 * @param schemaName the schema name occurences of which is to be reset
+	 *
+	 * @throws StandardException
+	 */
+	public void resetSchemaUsages(Activation activation, String schemaName)
+		throws StandardException;
+
+	/**
+	 *	Get the current schema name (at compile-time, see explanations for
+	 * getDefaultSchema overloads).
 	 *
 	 * @return SchemaDescriptor	the current schema
 	 */
 	public String getCurrentSchemaName();
+
+	/**
+	 * Get the current schema name (at execution time, see explanations for
+	 * getDefaultSchema overloads); This version is used by CURRENT SCHEMA.
+	 *
+	 * @return SchemaDescriptor	the current schema
+	 */
+	public String getCurrentSchemaName(Activation a);
 
 	/**
 	 * Get the identity column value most recently generated.
@@ -540,7 +591,7 @@ public interface LanguageConnectionContext extends Context {
      * @param timeoutMillis Timeout value for this statement, in milliseconds.
      *  Zero means no timeout.
 	 *
-	 * @return StatementContext	The statement context.
+	 * @return StatementContext The statement context.
 	 *
 	 */
 	StatementContext pushStatementContext(boolean isAtomic, boolean isForReadOnly, String stmtText,
@@ -1034,22 +1085,6 @@ public interface LanguageConnectionContext extends Context {
 	public void closeUnusedActivations() throws StandardException;
 
 	/**
-	 * Remember most recent (call stack top) caller's activation when
-	 * invoking a method, see CallStatementResultSet#open.
-	 */
-	public void pushCaller(Activation a);
-
-	/**
-	 * Companion of pushCaller. See usage in CallStatementResultSet#open.
-	 */
-	public void popCaller();
-
-	/**
-	 * Get most recent (call stack top) caller's activation
-	 */
-	public Activation getCaller();
-
-    /**
 	 * Set the current role
 	 *
 	 * @param a activation of set role statement
@@ -1066,4 +1101,27 @@ public interface LanguageConnectionContext extends Context {
 	 */
 	public String getCurrentRoleId(Activation a);
 
+	/**
+	 * Create a new SQL session context for the current activation
+	 * on the basis of the existing SQL session context (logical
+	 * session context analogue to call stack push, i.e. this happens
+	 * when a stored procedure or function that can contain SQL is
+	 * invoked. Called from generated code, see
+	 * StaticMethodCallNode#generateSetupNestedSessionContext.
+	 *
+	 * The new SQL session context is also set in the current statement
+	 * context (of the invocation).
+	 *
+	 * @see org.apache.derby.impl.sql.compile.StaticMethodCallNode#generateSetupNestedSessionContext
+	 * @see StatementContext#getSQLSessionContext
+	 *
+	 * @param a activation of the statement which performs the call.
+	 */
+	public void setupNestedSessionContext(Activation a);
+
+	/**
+	 * Create a fresh SQLSessionContext
+	 * @return new SQLSessionContext
+	 */
+	public SQLSessionContext createSQLSessionContext();
 }

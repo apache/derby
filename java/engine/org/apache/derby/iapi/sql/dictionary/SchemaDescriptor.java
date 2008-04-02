@@ -24,6 +24,7 @@ package org.apache.derby.iapi.sql.dictionary;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.depend.DependencyManager;
 import org.apache.derby.iapi.sql.depend.Provider;
+import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.catalog.DependableFinder;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
@@ -394,7 +395,8 @@ public final class SchemaDescriptor extends TupleDescriptor
      * reset through the language connection context.
      * @throws StandardException Schema could not be dropped.
      */
-	public void drop(LanguageConnectionContext lcc) throws StandardException
+	public void drop(LanguageConnectionContext lcc,
+					 Activation activation) throws StandardException
 	{
         DataDictionary dd = getDataDictionary();
         DependencyManager dm = dd.getDependencyManager();
@@ -434,11 +436,6 @@ public final class SchemaDescriptor extends TupleDescriptor
 	     ** LCC is free to set the new default schema to 
 	     ** some system defined default.
 	     */
-	    SchemaDescriptor currentDefault = lcc.getDefaultSchema();
-	    if ((currentDefault != null) &&
-                getSchemaName().equals(currentDefault.getSchemaName()))
-	    {
-	        lcc.setDefaultSchema((SchemaDescriptor)null);
-	    }        
+		lcc.resetSchemaUsages(activation, getSchemaName());
 	}
 }

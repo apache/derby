@@ -232,7 +232,9 @@ public class SpecialFunctionNode extends ValueNode
 											 ClassName.LanguageConnectionContext, 0);
 		int argCount = 0;
 
-		if (methodName.equals("getCurrentRoleId")) {
+		if (methodName.equals("getCurrentRoleId") ||
+			methodName.equals("getCurrentSchemaName")) {
+
 			acb.pushThisAsActivation(mb);
 			argCount++;
 		}

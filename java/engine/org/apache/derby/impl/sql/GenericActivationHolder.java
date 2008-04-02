@@ -22,6 +22,7 @@
 package org.apache.derby.impl.sql;
 
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
+import org.apache.derby.iapi.sql.conn.SQLSessionContext;
 
 import org.apache.derby.iapi.types.DataValueFactory;
 
@@ -564,12 +565,8 @@ final class GenericActivationHolder implements Activation
 		return ac.getTargetVTI();
 	}
 
-	public void setNestedCurrentRole(String role) {
-		ac.setNestedCurrentRole(role);
-    }
-
-    public String getNestedCurrentRole() {
-		return ac.getNestedCurrentRole();
+	public SQLSessionContext getNestedSQLSessionContext() {
+		return ac.getNestedSQLSessionContext();
     }
 
 	public void setCallActivation(Activation a) {

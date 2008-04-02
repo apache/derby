@@ -47,10 +47,10 @@ import org.apache.derby.iapi.error.ExceptionSeverity;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionFactory;
 import org.apache.derby.iapi.sql.conn.StatementContext;
+import org.apache.derby.iapi.sql.conn.SQLSessionContext;
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptorList;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.RoleDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.types.DataValueFactory;
@@ -73,7 +73,6 @@ import org.apache.derby.iapi.sql.ParameterValueSet;
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.store.access.XATransactionController;
 import org.apache.derby.iapi.util.IdUtil;
-import org.apache.derby.iapi.util.StringUtil;
 
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.sql.execute.RunTimeStatistics;
@@ -163,18 +162,6 @@ public class GenericLanguageConnectionContext
 	 */
 	private int queryNestingDepth;
 
-	/**
-	 * 'callers' keeps track of which, if any, stored procedure
-	 * activations are active. This helps implement the "authorization
-	 * stack" of SQL 2003, vol 2, section 4.34.1.1 and 4.27.3.
-	 *
-	 * For the top level, the current role is kept here,
-	 * cf. 'currentRole'.  For dynamic call contexts, the current role
-	 * is kept in the activation of the calling statement,
-	 * cf. 'getCurrentRoleId'.
-	 */
-	private ArrayList callers = new ArrayList(); // used as a stack only
-
 	protected DataValueFactory dataFactory;
 	protected LanguageFactory langFactory;
 	protected TypeCompilerFactory tcf;
@@ -197,8 +184,22 @@ public class GenericLanguageConnectionContext
     protected Authorizer authorizer;
 	protected String userName = null; //The name the user connects with.
 	                                  //May still be quoted.
-	protected String currentRole;
-	protected SchemaDescriptor	sd;
+	/**
+	 * The top SQL session context stack frame (SQL 2003, section
+	 * 4.37.3), is kept in topLevelSSC. For nested session contexts,
+	 * the SQL session context is held by the activation of the
+	 * calling statement, cf. setupNestedSessionContext and it is
+	 * accessible through the current statement context
+	 * (compile-time), or via the current activation (execution-time).
+	 * @see GenericLanguageConnectionContext#getTopLevelSQLSessionContext
+	 */
+	private SQLSessionContext topLevelSSC;
+
+	/**
+	 * Used to hold the computed value of the initial default schema,
+	 * cf logic in initDefaultSchemaDescriptor.
+	 */
+	private SchemaDescriptor cachedInitialDefaultSchemaDescr = null;
 
 	// RESOLVE - How do we want to set the default.
     private int defaultIsolationLevel = ExecutionContext.READ_COMMITTED_ISOLATION_LEVEL;
@@ -345,6 +346,13 @@ public class GenericLanguageConnectionContext
 		setDefaultSchema(initDefaultSchemaDescriptor());
 	}
 
+	/**
+	 * Compute the initial default schema and set
+	 * cachedInitialDefaultSchemaDescr accordingly.
+	 *
+	 * @return computed initial default schema value for this session
+	 * @throws StandardException
+	 */
 	protected SchemaDescriptor initDefaultSchemaDescriptor()
 		throws StandardException {
 		/*
@@ -355,17 +363,36 @@ public class GenericLanguageConnectionContext
 		** user.
         ** - Else Set the default schema to APP.
         */
-		// SchemaDescriptor sd;
+		if (cachedInitialDefaultSchemaDescr == null) {
+			DataDictionary dd = getDataDictionary();
+			String authorizationId = getAuthorizationId();
+			SchemaDescriptor sd =
+				dd.getSchemaDescriptor(
+					authorizationId, getTransactionCompile(), false);
 
-		DataDictionary dd = getDataDictionary();
-        String authorizationId = getAuthorizationId();
-	
-		if ( (sd = dd.getSchemaDescriptor(authorizationId, getTransactionCompile(), false)) == null )
-		{
-			sd = new SchemaDescriptor(dd, authorizationId, authorizationId, (UUID) null, false);
+			if (sd == null) {
+				sd = new SchemaDescriptor(
+					dd, authorizationId, authorizationId, (UUID) null, false);
+			}
+
+			cachedInitialDefaultSchemaDescr = sd;
 		}
-		return sd;
+		return cachedInitialDefaultSchemaDescr;
 	}
+
+	/**
+	 * Get the computed value for the initial default schema.
+	 * @return the schema descriptor of the computed initial default schema
+	 */
+	private SchemaDescriptor getInitialDefaultSchemaDescriptor() {
+		if (SanityManager.DEBUG) {
+			SanityManager.ASSERT(cachedInitialDefaultSchemaDescr != null,
+								 "cachedInitialDefaultSchemaDescr is null!");
+		}
+
+		return cachedInitialDefaultSchemaDescr;
+	}
+	
 
 	//
 	// LanguageConnectionContext interface
@@ -774,7 +801,8 @@ public class GenericLanguageConnectionContext
         public PreparedStatement prepareInternalStatement(String sqlText) 
 	    throws StandardException 
         {
-    	    return connFactory.getStatement(sd, sqlText, true).prepare(this);
+			return connFactory.
+				getStatement(getDefaultSchema(), sqlText, true).prepare(this);
     	}      
 
 	/**
@@ -1780,45 +1808,118 @@ public class GenericLanguageConnectionContext
 		return authorizer.getAuthorizationId();
 	}
 
-
 	/**
-	 *	Get the default schema
-	 *
-	 * @return SchemaDescriptor	the default schema
+	 * @see LanguageConnectionContext#getDefaultSchema
 	 */
 	public SchemaDescriptor getDefaultSchema() 
 	{ 
-		return sd; 
-	}
-	/**
-	 * Get the current schema name
-	 *
-	 * @return current schema name
-	 */
-	public String getCurrentSchemaName()
-	{
-        if( null == sd)
-            return null;
-		return sd.getSchemaName();
+		return getCurrentSQLSessionContext().getDefaultSchema();
 	}
 
 	/**
-	 * Set the default schema -- used by SET SCHEMA.
-	 * 
-	 * @param sd the new default schema.
-	 * If null, then the default schema descriptor is used.
-	 *
-	 * @exception StandardException thrown on failure
+	 * @see LanguageConnectionContext#getDefaultSchema(Activation a)
+	 */
+	public SchemaDescriptor getDefaultSchema(Activation a) {
+		return getCurrentSQLSessionContext(a.getCallActivation()).
+			getDefaultSchema();
+	}
+
+	/**
+	 * @see LanguageConnectionContext#getCurrentSchemaName()
+	 */
+	public String getCurrentSchemaName()
+	{
+		// getCurrentSchemaName with no arg is used even
+		// at run-time but only in places(*) where the statement context
+		// can be relied on, AFAICT.
+		//
+		// (*) SpaceTable#getConglomInfo,
+		//     SystemProcedures#{INSTALL|REPLACE|REMOVE}_JAR
+
+		SchemaDescriptor s = getDefaultSchema();
+		if( null == s)
+			return null;
+		return s.getSchemaName();
+	}
+
+
+	/**
+	 * @see LanguageConnectionContext#getCurrentSchemaName(Activation a)
+	 */
+	public String getCurrentSchemaName(Activation a)
+	{
+		SchemaDescriptor s = getDefaultSchema(a);
+		if( null == s)
+			return null;
+		return s.getSchemaName();
+	}
+
+	/**
+	 * @see LanguageConnectionContext#setDefaultSchema(SchemaDescriptor sd)
 	 */
 	public void setDefaultSchema(SchemaDescriptor sd)
 		throws StandardException
 	{ 	
-		if (sd == null)
-		{	
-		    sd = initDefaultSchemaDescriptor();
+		if (sd == null) {	
+		    sd = getInitialDefaultSchemaDescriptor();
 		}
-		this.sd = sd;
-		
+
+		getCurrentSQLSessionContext().setDefaultSchema(sd);
+	}
+
+	/**
+	 * @see LanguageConnectionContext#setDefaultSchema(Activation a,
+	 * SchemaDescriptor sd)
+	 */
+	public void setDefaultSchema(Activation a, SchemaDescriptor sd)
+		throws StandardException
+	{
+		Activation caller = a.getCallActivation();
+
+		if (sd == null) {
+			sd = getInitialDefaultSchemaDescriptor();
+		}
+
+		getCurrentSQLSessionContext(caller).setDefaultSchema(sd);
+	}
+
+
+	/**
+	 * @see LanguageConnectionContext#resetSchemaUsages(Activation activation,
+	 *      String schemaName)
+	 */
+	public void resetSchemaUsages(Activation activation, String schemaName)
+			throws StandardException {
+
+		Activation caller = activation.getCallActivation();
+		SchemaDescriptor defaultSchema = getInitialDefaultSchemaDescriptor();
+
+		// walk SQL session context chain
+		while (caller != null) {
+			SQLSessionContext ssc = caller.getNestedSQLSessionContext();
+			SchemaDescriptor s = ssc.getDefaultSchema();
+
+			if (SanityManager.DEBUG) {
+				SanityManager.ASSERT(s != null, "s should not be empty here");
+			}
+
+			if (schemaName.equals(s.getSchemaName())) {
+				ssc.setDefaultSchema(defaultSchema);
+			}
+			caller = caller.getCallActivation();
+		}
+
+		// finally top level
+		SQLSessionContext top = getTopLevelSQLSessionContext();
+		SchemaDescriptor sd = top.getDefaultSchema();
+
+		if (SanityManager.DEBUG) {
+			SanityManager.ASSERT(sd != null, "sd should not be empty here");
+		}
+
+		if (schemaName.equals(sd.getSchemaName())) {
+			top.setDefaultSchema(defaultSchema);
+		}
 	}
 
 	/**
@@ -1968,6 +2069,10 @@ public class GenericLanguageConnectionContext
 	/**
 	 * Push a StatementContext on the context stack.
 	 *
+	 * Inherit SQL session state a priori (statementContext will get
+	 * its own SQL session state if this statement executes a call,
+	 * cf. setupNestedSessionContext.
+
 	 * @param isAtomic whether this statement is atomic or not
 	 * @param isForReadOnly whether this statement is for a read only resultset
 	 * @param stmtText the text of the statement.  Needed for any language
@@ -2000,9 +2105,12 @@ public class GenericLanguageConnectionContext
 		** If we haven't allocated any statement contexts yet, allocate
 		** the outermost stmt context now and push it.
 		*/
+
 		if (statementContext == null)
 		{
 			statementContext = statementContexts[0] = new GenericStatementContext(this);
+			statementContext.
+				setSQLSessionContext(getTopLevelSQLSessionContext());
 		}
 		else if (statementDepth > 0)
 		{
@@ -2028,11 +2136,17 @@ public class GenericLanguageConnectionContext
 				statementContext = new GenericStatementContext(this);
 			}
 
+			statementContext.setSQLSessionContext(
+				parentStatementContext.getSQLSessionContext());
+
 			inTrigger = parentStatementContext.inTrigger() || (outermostTrigger == parentStatementDepth);
 			parentIsAtomic = parentStatementContext.isAtomic();
 			statementContext.setSQLAllowed(parentStatementContext.getSQLAllowed(), false);
 			if (parentStatementContext.getSystemCode())
 				statementContext.setSystemCode();
+		} else {
+			statementContext.
+				setSQLSessionContext(getTopLevelSQLSessionContext());
 		}
 
 		incrementStatementDepth();
@@ -3112,74 +3226,130 @@ public class GenericLanguageConnectionContext
 		return sb;
 	}
 
+	
 	/**
-	 * Remember most recent (call stack top) caller's activation when
-	 * invoking a method, see CallStatementResultSet#open.
-	 */
-	public void pushCaller(Activation a) {
-		callers.add(a);
-	}
-
-	/**
-	 * Companion of pushCaller. See usage in CallStatementResultSet#open.
-	 */
-	public void popCaller() {
-		callers.remove(callers.size() - 1);
-	}
-
-
-	/**
-	 * Get most recent (call stack top) caller's activation
-	 * or null, if not in a call context.
-	 */
-	public Activation getCaller() {
-		if (callers.isEmpty()) {
-			return null;
-		} else {
-			return (Activation)callers.get(callers.size() - 1);
-		}
-	}
-
-
-	/**
-	 * Set the current role
-	 *
-	 * @param a activation of set role statement
-	 * @param role	the id of the role to be set to current
+	 * @see LanguageConnectionContext#setCurrentRole(Activation a, String role)
 	 */
 	public void setCurrentRole(Activation a, String role) {
-		Activation caller = a.getCallActivation();
-
-		if (caller != null ) {
-			//inside a stored procedure context
-			caller.setNestedCurrentRole(role);
-		} else {
-			// top level
-			this.currentRole = role;
-		}
+		getCurrentSQLSessionContext(a.getCallActivation()).
+			setRole(role);
 	}
 
 
 	/**
-	 * Get the current role authorization identifier of the dynamic
-	 * call context associated with this activation.
-	 *
-	 * @param a activation  of statement needing current role
-	 * @return String	the role id
+	 * @see LanguageConnectionContext#getCurrentRoleId(Activation a)
 	 */
 	public String getCurrentRoleId(Activation a) {
-		Activation caller = a.getCallActivation();
-
-		if (caller != null ) {
-			// Want current role of stored procedure context
-			// Note that it may have returned at this point, but the
-			// activation still keeps track on what the current role
-			// was when we returned.
-			return caller.getNestedCurrentRole();
-		} else {
-			// Top level current role, no stored procedure call
-			// context.
-			return currentRole;
-		}
+		return getCurrentSQLSessionContext(a.getCallActivation()).
+			getRole();
 	}
+
+
+	/**
+	 * Return the current SQL session context based on caller
+	 *
+	 * @param caller the activation of the caller, if any, of the
+	 * current activation
+	 */
+	private SQLSessionContext getCurrentSQLSessionContext(Activation caller) {
+		SQLSessionContext curr;
+
+		if (caller == null ) {
+			// top level
+			curr = getTopLevelSQLSessionContext();
+		} else {
+			// inside a nested SQL session context (stored
+			// procedure/function), the SQL session context is
+			// maintained in the activation of the caller
+			curr = caller.getNestedSQLSessionContext();
+		}
+
+		return curr;
+	}
+
+
+	/**
+	 * Return the current SQL session context based on statement context
+	 */
+	private SQLSessionContext getCurrentSQLSessionContext() {
+		StatementContext ctx = getStatementContext();
+		SQLSessionContext curr;
+		
+		if (ctx == null || !ctx.inUse()) {
+			curr = getTopLevelSQLSessionContext();
+		} else {
+			// We are inside a nested connection in a procedure of
+			// function.
+			curr = ctx.getSQLSessionContext();
+
+			if (SanityManager.DEBUG) {
+				SanityManager.ASSERT(
+					curr != null,
+					"SQL session context should never be empty here");
+			}
+		}
+
+		return curr;
+	}
+
+
+	/**
+	 * @see LanguageConnectionContext#setupNestedSessionContext(Activation a)
+	 */
+	public void setupNestedSessionContext(Activation a) {
+		SQLSessionContext sc = a.getNestedSQLSessionContext();
+
+		// Semantics for roles dictate (SQL 4.34.1.1 and 4.27.3.) that the
+		// role is initially inherited from the current session
+		// context. (Since we always run with INVOKER security
+		// characteristic. Derby can't yet run with DEFINER's rights).
+		//
+		sc.setRole(getCurrentRoleId(a));
+
+		// Inherit current default schema. The initial value of the
+		// default schema is implementation defined. In Derby we
+		// inherit it when we invoke stored procedures and functions.
+		sc.setDefaultSchema(getDefaultSchema(a));
+
+		StatementContext stmctx = getStatementContext();
+
+		// Since the statement is an invocation, it will now be
+		// associated with the pushed SQLSessionContext (and no longer
+		// just share that of its caller (or top).  The statement
+		// contexts of nested connection statements will inherit sc so
+		// the SQL session context is available when nested statements
+		// are compiled (and executed, for the most part).  However,
+		// for dynamic result sets, the relevant statement context
+		// (originating result set) is no longer available for
+		// execution time references to the SQL session context, so we
+		// rely on the activation of the caller for accessing it,
+		// cf. e.g. overload variants of
+		// getDefaultSchema/setDefaultSchema.  If such nested
+		// connections themselves turn out to be invocations, they in
+		// turn get a new SQLSessionContext associated with them etc.
+		stmctx.setSQLSessionContext(sc);
+	}
+
+
+	/**
+	 * Get the value of topLevelSSC, possibly initializing it first.
+	 * @see GenericLanguageConnectionContext#topLevelSSC
+	 */
+	private SQLSessionContext getTopLevelSQLSessionContext() {
+		if (topLevelSSC == null) {
+			topLevelSSC = new SQLSessionContextImpl(
+				getInitialDefaultSchemaDescriptor());
+		}
+		return topLevelSSC;
+	}
+
+
+	/**
+	 * @see LanguageConnectionContext#createSQLSessionContext
+	 */
+	public SQLSessionContext createSQLSessionContext() {
+		return new SQLSessionContextImpl(
+			getInitialDefaultSchemaDescriptor());
+	}
+
 }

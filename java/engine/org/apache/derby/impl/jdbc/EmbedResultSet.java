@@ -3612,6 +3612,8 @@ public abstract class EmbedResultSet extends ConnectionChild
                         lcc.prepareInternalStatement(insertSQL.toString());
                 Activation act = ps.getActivation(lcc, false);
 
+                statementContext.setActivation(act);
+
                 // in this for loop we are assigning values for parameters 
                 //in sql constructed earlier VALUES (?, ..)
                 for (int i=1, paramPosition=0; i<=resultDescription.getColumnCount(); i++) { 
@@ -3691,6 +3693,8 @@ public abstract class EmbedResultSet extends ConnectionChild
             org.apache.derby.iapi.sql.PreparedStatement ps = lcc.prepareInternalStatement(updateWhereCurrentOfSQL.toString());
             Activation act = ps.getActivation(lcc, false);
 
+            statementContext.setActivation(act);
+
             //in this for loop we are assigning values for parameters in sql constructed earlier with columnname=?,... 
             for (int i=1, paramPosition=0; i<=resultDescription.getColumnCount(); i++) { 
                 if (columnGotUpdated[i-1])  //if the column got updated, do following
@@ -3757,6 +3761,9 @@ public abstract class EmbedResultSet extends ConnectionChild
                 org.apache.derby.iapi.sql.PreparedStatement ps = lcc.prepareInternalStatement(deleteWhereCurrentOfSQL.toString());
                 // Get activation, so that we can get the warning from it
                 Activation act = ps.getActivation(lcc, false);
+
+                statementContext.setActivation(act);
+
                 // Don't set any timeout when deleting rows (use 0)
                 //execute delete where current of sql
                 org.apache.derby.iapi.sql.ResultSet rs = 

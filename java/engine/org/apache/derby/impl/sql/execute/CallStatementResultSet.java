@@ -73,25 +73,7 @@ class CallStatementResultSet extends NoRowsResultSetImpl
 	{
 		setup();
 
-        LanguageConnectionContext lcc =
-            activation.getLanguageConnectionContext();
-
-        // Push the "authorization stack" of SQL 2003, vol 2, section
-        // 4.34.1.1 and 4.27.3.
-        lcc.pushCaller(activation);
-
-        // Copy the current role into top cell of stack. Activations
-        // inside nested connections look to this activation for
-        // keeping its current role rather than rely on what's in lcc
-        // (top level only).
-        activation.setNestedCurrentRole(lcc.getCurrentRoleId(activation));
-
-        try {
-            methodCall.invoke(activation);
-        }
-        finally {
-            activation.getLanguageConnectionContext().popCaller();
-        }
+        methodCall.invoke(activation);
     }
 
     /**

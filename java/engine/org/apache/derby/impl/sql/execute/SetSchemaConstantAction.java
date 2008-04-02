@@ -121,6 +121,6 @@ class SetSchemaConstantAction implements ConstantAction
 
                 SchemaDescriptor sd = dd.getSchemaDescriptor(thisSchemaName,
                         lcc.getTransactionExecute(), true);
-		lcc.setDefaultSchema(sd);
+		lcc.setDefaultSchema(activation, sd);
 	}
 }

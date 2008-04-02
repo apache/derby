@@ -24,6 +24,7 @@ package org.apache.derby.iapi.sql;
 import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
+import org.apache.derby.iapi.sql.conn.SQLSessionContext;
 
 import org.apache.derby.iapi.sql.dictionary.IndexRowGenerator;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
@@ -586,23 +587,13 @@ public interface Activation
 	*/
 	public int getMaxDynamicResults();
 
-	/**
-	 * Set the current role name of the dynamic call context stemming
-	 * from this activation (which must be a stored
-	 * procedure/function) call.
-	 *
-	 * @param role The name of the current role
-	 */
-	public void setNestedCurrentRole(String role);
 
 	/**
-	 * Get the current role name of the dynamic call context stemming
-	 * from this activation (which must be a stored
-	 * procedure/function) call.
-	 *
-	 * @return The name of the current role
+	 * Return the current SQL session context for all immediately
+	 * nested connections stemming from the call or function
+	 * invocation of the statement corresponding to this activation.
 	 */
-    public String getNestedCurrentRole();
+	public SQLSessionContext getNestedSQLSessionContext();
 
 	/**
 	 * This activation is created in a dynamic call context, remember
