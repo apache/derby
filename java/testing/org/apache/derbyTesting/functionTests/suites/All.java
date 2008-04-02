@@ -26,6 +26,7 @@ import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseTestCase;
 import org.apache.derbyTesting.junit.EnvTest;
 import org.apache.derbyTesting.functionTests.tests.replicationTests.ReplicationSuite;
+import org.apache.derbyTesting.junit.JDBC;
 
 public class All extends BaseTestCase {
       
@@ -50,8 +51,9 @@ public class All extends BaseTestCase {
         // Encrypted tests
         suite.addTest(EncryptionSuite.suite());
         
-        // Replication tests
-        suite.addTest(ReplicationSuite.suite());
+        // Replication tests. Implementation require DataSource. 
+        // Not supp. by JSR169
+        if (JDBC.vmSupportsJDBC3()) suite.addTest(ReplicationSuite.suite());
         
         return suite;
     }
