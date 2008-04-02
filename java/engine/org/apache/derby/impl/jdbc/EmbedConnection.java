@@ -235,6 +235,10 @@ public abstract class EmbedConnection implements EngineConnection
 			boolean isTwoPhaseUpgradeBoot = (!createBoot &&
 											 isHardUpgradeBoot(info));
 			boolean isStartSlaveBoot = isStartReplicationSlaveBoot(info);
+            // Set to true if startSlave command is attempted on an
+            // already booted database. Will raise an exception when
+            // credentials have been verified
+            boolean slaveDBAlreadyBooted = false;
 
             boolean isFailoverMasterBoot = false;
             boolean isFailoverSlaveBoot = false;
@@ -277,21 +281,26 @@ public abstract class EmbedConnection implements EngineConnection
 
             if (isStartSlaveBoot) {
                 if (database != null) {
-                    throw StandardException.newException(
-                        SQLState.CANNOT_START_SLAVE_ALREADY_BOOTED,
-                        getTR().getDBName());
+                    // If the slave database has already been booted,
+                    // the command should fail. Setting
+                    // slaveDBAlreadyBooted to true will cause an
+                    // exception to be thrown, but not until after
+                    // credentials have been verified so that db boot
+                    // information is not exposed to unauthorized
+                    // users
+                    slaveDBAlreadyBooted = true;
+                } else {
+                    // We need to boot the slave database two times. The
+                    // first boot will check authentication and
+                    // authorization. The second boot will put the
+                    // database in replication slave mode. SLAVE_PRE_MODE
+                    // ensures that log records are not written to disk
+                    // during the first boot. This is necessary because
+                    // the second boot needs a log that is exactly equal
+                    // to the log at the master.
+                    info.setProperty(SlaveFactory.REPLICATION_MODE,
+                                     SlaveFactory.SLAVE_PRE_MODE);
                 }
-
-                // We need to boot the slave database two times. The
-                // first boot will check authentication and
-                // authorization. The second boot will put the
-                // database in replication slave mode. SLAVE_PRE_MODE
-                // ensures that log records are not written to disk
-                // during the first boot. This is necessary because
-                // the second boot needs a log that is exactly equal
-                // to the log at the master.
-                info.setProperty(SlaveFactory.REPLICATION_MODE,
-                                 SlaveFactory.SLAVE_PRE_MODE);
             }
 
             if (isStopReplicationSlaveBoot(info)) {
@@ -375,7 +384,23 @@ public abstract class EmbedConnection implements EngineConnection
 			// Check User's credentials and if it is a valid user of
 			// the database
 			//
-			checkUserCredentials(tr.getDBName(), info);
+            try {
+                checkUserCredentials(tr.getDBName(), info);
+            } catch (SQLException sqle) {
+                if (isStartSlaveBoot && !slaveDBAlreadyBooted) {
+                    // Failing credentials check on a previously
+                    // unbooted db should not leave the db booted
+                    // for startSlave command.
+
+                    // tr.startTransaction is needed to get the
+                    // Database context. Without this context,
+                    // handleException will not shutdown the
+                    // database
+                    tr.startTransaction();
+                    handleException(tr.shutdownDatabaseException());
+                }
+                throw sqle;
+            }
 
 			// Make a real connection into the database, setup lcc, tc and all
 			// the rest.
@@ -438,6 +463,14 @@ public abstract class EmbedConnection implements EngineConnection
 				}
 
 				if (isStartSlaveBoot) {
+					// Throw an exception if the database had been
+					// booted before this startSlave connection attempt.
+					if (slaveDBAlreadyBooted) {
+						throw StandardException.newException(
+						SQLState.CANNOT_START_SLAVE_ALREADY_BOOTED,
+						getTR().getDBName());
+					}
+
 					// Let the next boot of the database be
 					// replication slave mode
 					info.setProperty(SlaveFactory.REPLICATION_MODE,
