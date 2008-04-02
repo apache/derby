@@ -354,10 +354,14 @@ final class ClockPolicy implements ReplacementPolicy {
      * Get the holder under the clock hand, and move the hand to the next
      * holder.
      *
-     * @return the holder under the clock hand
+     * @return the holder under the clock hand, or {@code null} if the clock is
+     * empty
      */
     private Holder moveHand() {
         synchronized (clock) {
+            if (clock.isEmpty()) {
+                return null;
+            }
             if (hand >= clock.size()) {
                 hand = 0;
             }
@@ -402,6 +406,13 @@ final class ClockPolicy implements ReplacementPolicy {
         while (itemsToCheck-- > 0 || freeEntries.get() > 0) {
 
             final Holder h = moveHand();
+
+            if (h == null) {
+                // There are no elements in the clock, hence there is no
+                // reusable entry.
+                return null;
+            }
+
             final CacheEntry e = h.getEntry();
 
             if (e == null) {
