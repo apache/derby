@@ -28,6 +28,7 @@ import java.sql.SQLException;
 import org.apache.derby.client.am.SQLExceptionFactory;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.shared.common.i18n.MessageUtil;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 public abstract class ResultSet implements java.sql.ResultSet,
         ResultSetCallbackInterface {
@@ -37,6 +38,8 @@ public abstract class ResultSet implements java.sql.ResultSet,
     public ColumnMetaData resultSetMetaData_; // As obtained from the SQLDA
     private SqlWarning warnings_;
     public Cursor cursor_;
+    /** Tracker object for LOB state, used to free locators on the server. */
+    private LOBStateTracker lobState = null;
     protected Agent agent_;
 
     public Section generatedSection_ = null;
@@ -427,6 +430,12 @@ public abstract class ResultSet implements java.sql.ResultSet,
             return;
         }
         closeCloseFilterInputStream();
+        // See if there are open locators on the current row, if valid.
+        if (isValidCursorPosition_ && !isOnInsertRow_) {
+            lobState.checkCurrentRow(cursor_);
+        }
+        // NOTE: The preClose_ method must also check for locators if
+        //       prefetching of data is enabled for result sets containing LOBs.
         preClose_();
         try {
             if (openOnServer_) {
@@ -3758,6 +3767,12 @@ public abstract class ResultSet implements java.sql.ResultSet,
         }
     }
     
+    /**
+     * Moves off the insert row if positioned there, and checks the current row
+     * for releasable LOB locators if positioned on a valid data row.
+     *
+     * @throws SqlException if releasing a LOB locator fails
+     */
     private void moveToCurrentRowX() throws SqlException {
         if (isOnInsertRow_) {
             resetUpdatedColumns();
@@ -3767,6 +3782,14 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 updateColumnInfoFromCache();
             }
             isValidCursorPosition_ = true;
+        }
+        if (isValidCursorPosition_) {
+            // isOnInsertRow must be false here.
+            if (SanityManager.DEBUG) {
+                SanityManager.ASSERT(!isOnInsertRow_,
+                        "Cannot check current row if positioned on insert row");
+            }
+            lobState.checkCurrentRow(cursor_);
         }
     }
 
@@ -4339,6 +4362,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
 
     public void completeLocalCommit(java.util.Iterator listenerIterator) {
         cursorUnpositionedOnServer_ = true;
+        lobState.discardState(); // Locators released on server side.
         markAutoCommitted();
         if (!cursorHold_) {
             // only non-held cursors need to be closed at commit
@@ -4351,6 +4375,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     }
 
     public void completeLocalRollback(java.util.Iterator listenerIterator) {
+        lobState.discardState(); // Locators released on server side.
         markAutoCommitted();
         // all cursors need to be closed at rollback
         markClosed();
@@ -6172,6 +6197,54 @@ public abstract class ResultSet implements java.sql.ResultSet,
             updateClob(findColumnX(columnLabel), x);
         } catch (SqlException se) {
             throw se.getSQLException();
+        }
+    }
+
+    /**
+     * Marks the LOB at the specified column as accessed.
+     * <p>
+     * When a LOB is marked as accessed, the release mechanism will not be
+     * invoked by the result set. It is expected that the code accessing the
+     * LOB releases the locator when it is done with the LOB.
+     *
+     * @param index 1-based column index
+     */
+    public final void markLOBAsAccessed(int index) {
+        this.lobState.markAccessed(index);
+    }
+
+    /**
+     * Initializes the LOB state tracker.
+     * <p>
+     * The state tracker is used to free LOB locators on the server.
+     */
+    final void createLOBColumnTracker() {
+        if (SanityManager.DEBUG) {
+            SanityManager.ASSERT(this.lobState == null,
+                    "LOB state tracker already initialized.");
+        }
+        if (this.resultSetMetaData_.hasLobColumns()) {
+            final int columnCount = this.resultSetMetaData_.columns_;
+            int lobCount = 0;
+            int[] tmpIndexes = new int[columnCount];
+            boolean[] tmpIsBlob = new boolean[columnCount];
+            for (int i=0; i < columnCount; i++) {
+                int type = this.resultSetMetaData_.types_[i];
+                if (type == Types.BLOB || type == Types.CLOB) {
+                    tmpIndexes[lobCount] = i +1; // Convert to 1-based index.
+                    tmpIsBlob[lobCount++] = (type == Types.BLOB);
+                }
+            }
+            // Create a tracker for the LOB columns found.
+            int[] lobIndexes = new int[lobCount];
+            boolean[] isBlob = new boolean[lobCount];
+            System.arraycopy(tmpIndexes, 0, lobIndexes, 0, lobCount);
+            System.arraycopy(tmpIsBlob, 0, isBlob, 0, lobCount);
+            this.lobState = new LOBStateTracker(lobIndexes, isBlob,
+                    this.connection_.serverSupportsLocators());
+        } else {
+            // Use a no-op state tracker to simplify code expecting a tracker.
+            this.lobState = LOBStateTracker.NO_OP_TRACKER;
         }
     }
 }

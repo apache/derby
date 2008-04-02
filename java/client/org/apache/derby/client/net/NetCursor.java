@@ -1054,11 +1054,14 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
     
     /**
      * Get locator for LOB of the designated column
+     * <p>
+     * Note that this method cannot be invoked on a LOB column that is NULL.
+     *
      * @param column column number, starts at 1
      * @return locator value, <code>Lob.INVALID_LOCATOR</code> if LOB
      *         value was sent instead of locator
      */
-    private int locator(int column)
+    protected int locator(int column)
     {
         int locator = get_INTEGER(column);
         // If Lob value was sent instead of locator, the value will be
@@ -1075,6 +1078,7 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
 
     public Blob getBlobColumn_(int column, Agent agent) throws SqlException 
     {
+        netResultSet_.markLOBAsAccessed(column);
         // Check for locator
         int locator = locator(column);
         if (locator > 0) { // Create locator-based LOB object
@@ -1109,6 +1113,7 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
 
 
     public Clob getClobColumn_(int column, Agent agent) throws SqlException {
+        netResultSet_.markLOBAsAccessed(column);
         // Check for locator
         int locator = locator(column);
         if (locator > 0) { // Create locator-based LOB object

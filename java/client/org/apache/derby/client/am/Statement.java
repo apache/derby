@@ -1489,6 +1489,8 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
         }
         resultSet.resultSetMetaData_ = resultSetMetaData_;
         resultSet.resultSetMetaData_.resultSetConcurrency_ = resultSet.resultSetConcurrency_;
+        // Create tracker for LOB locator columns.
+        resultSet.createLOBColumnTracker();
 
         // only cache the Cursor object for a PreparedStatement and if a Cursor object is
         // not already cached.
@@ -1521,6 +1523,8 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
         resultSet.completeSqlca(sqlca);
         // For CallableStatements we can't just clobber the resultSet_ here, must use setResultSetEvent() separately
         resultSet.resultSetMetaData_ = resultSetMetaData;
+        // Create tracker for LOB locator columns.
+        resultSet.createLOBColumnTracker();
 
         // The following two assignments should have already happened via prepareEvent(),
         // but are included here for safety for the time being.

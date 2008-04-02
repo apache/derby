@@ -1000,6 +1000,13 @@ public abstract class Connection implements java.sql.Connection,
      */
     protected abstract boolean supportsSessionDataCaching();
 
+    /**
+     * Checks whether the server supports locators for large objects.
+     *
+     * @return {@code true} if LOB locators are supported.
+     */
+    protected abstract boolean serverSupportsLocators();
+
     public int getTransactionIsolation() throws SQLException {
     	
     	// Store the current auto-commit value and use it to restore 
