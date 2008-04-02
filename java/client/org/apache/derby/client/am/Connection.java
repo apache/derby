@@ -2098,21 +2098,6 @@ public abstract class Connection implements java.sql.Connection,
         }
     }
 
-    synchronized public void reset(LogWriter logWriter, ClientBaseDataSource ds, 
-            boolean recomputeFromDataSource) throws SqlException {
-        if (logWriter != null) {
-            logWriter.traceConnectResetEntry(this, logWriter, null, (ds != null) ? ds : dataSource_);
-        }
-        try {
-            reset_(logWriter, ds, recomputeFromDataSource);
-        } catch (SqlException sqle) {
-            DisconnectException de = new DisconnectException(agent_, 
-                new ClientMessageId(SQLState.CONNECTION_FAILED_ON_RESET));
-            de.setNextException(sqle);
-            throw de;
-        }
-    }
-
     synchronized public void lightReset() throws SqlException {
         if (!open_ && !availableForReuse_) {
             return;
@@ -2123,10 +2108,6 @@ public abstract class Connection implements java.sql.Connection,
 
     abstract protected void reset_(LogWriter logWriter, String user, 
             String password, ClientBaseDataSource ds, 
-            boolean recomputerFromDataSource) throws SqlException;
-
-    abstract protected void reset_(LogWriter logWriter, 
-            ClientBaseDataSource ds, 
             boolean recomputerFromDataSource) throws SqlException;
 
     /**
