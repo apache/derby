@@ -188,18 +188,20 @@ public class ModifyColumnNode extends ColumnDefinitionNode
 			}	
 			else
 			{
-				//if a column is part of unique constraint it can't be
-				//made nullable in soft upgrade mode from a pre-10.4 db.
-				if ((existingConstraint.getConstraintType() == 
-								DataDictionary.UNIQUE_CONSTRAINT)) 
-                {
-					if (!dd.checkVersion(
-							DataDictionary.DD_VERSION_DERBY_10_4, null))
-                    {
+				if (!dd.checkVersion(
+					DataDictionary.DD_VERSION_DERBY_10_4, null)) 
+				{
+					//if a column is part of unique constraint it can't be
+					//made nullable in soft upgrade mode from a pre-10.4 db.
+					if ((getNodeType() == 
+						C_NodeTypes.MODIFY_COLUMN_CONSTRAINT_NODE) &&
+						(existingConstraint.getConstraintType() == 
+							DataDictionary.UNIQUE_CONSTRAINT)) 
+					{
 						throw StandardException.newException(
-								SQLState.LANG_MODIFY_COLUMN_EXISTING_CONSTRAINT,
-								name);
-                    }
+							SQLState.LANG_MODIFY_COLUMN_EXISTING_CONSTRAINT,
+							name);
+					}
 				}
 
 				// a column that is part of a primary key

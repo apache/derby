@@ -627,4 +627,31 @@ public class Changes10_4 extends UpgradeChange {
         }
         s.close();
     }
+    
+    /**
+     * Tests if alter column works for a column in unique constraint.
+     */
+    public void testAlterColumnOfUniqueConstraint () throws Exception {
+        Statement stmt = createStatement();
+        switch (getPhase()) {
+           case PH_CREATE:
+               stmt.executeUpdate("create table datatype_test (fl1 varchar (2) " +
+                       "not null)");
+               stmt.executeUpdate("alter table datatype_test " +
+                       "add constraint ucon_datatype_test unique (fl1)");
+               stmt.executeUpdate("alter table datatype_test alter column fl1" +
+                       " set data type varchar (3)");
+               break;
+           case PH_SOFT_UPGRADE:
+               stmt.executeUpdate("alter table datatype_test alter column fl1 " +
+                       " set data type varchar (4)");
+               break;
+
+           case PH_HARD_UPGRADE:
+               stmt.executeUpdate("alter table datatype_test alter column fl1 " +
+                       " set data type varchar (5)");
+               break;
+        }
+        stmt.close();
+    }
 }
