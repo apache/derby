@@ -76,7 +76,12 @@ grant codeBase "${derbyTesting.codejar}derby.jar" {
   // JDK14 has the JCE  preloaded
   permission java.security.SecurityPermission "insertProvider.SunJCE";
   permission java.security.SecurityPermission "insertProvider.IBMJCE";
- 
+
+  // This permission is needed to avoid test failures in subsequent tests that
+  // may be testing JMX functionality. Without this permission, old MBeans
+  // might not be unregistered from the MBean server. See DERBY-3561.
+  permission javax.management.MBeanPermission "org.apache.derby.*#[org.apache.derby:*]","unregisterMBean";
+
 };
 
 //
