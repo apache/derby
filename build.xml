@@ -805,7 +805,7 @@
              Header="Apache Derby ${major}.${minor}"
              Footer="${javadoc.Footer}"
              bottom="Apache Derby ${major}.${minor} API Documentation  -  &lt;i&gt;Copyright &amp;copy; 2004,2008 The Apache Software Foundation. All Rights Reserved.&lt;/i&gt;">   
-      <Doctitle><![CDATA[<img src="resources/derby_logo64.png" align="center"> Apache Derby ${major}.${minor} API Documentation]]></Doctitle>   
+      <Doctitle> Apache Derby ${major}.${minor} API Documentation</Doctitle>   
       <fileset dir="${derby.engine.src.dir}"
                includesfile="${javadoc.inclusions}"/>
       <fileset dir="${derby.client.src.dir}"
