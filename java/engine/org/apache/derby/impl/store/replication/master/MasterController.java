@@ -503,8 +503,11 @@ public class MasterController
      *
      * @param exception the exception which caused the log shipper to terminate
      *                  in an unexcepted manner.
+     *
+     * @return an instance of the transmitter used to transmit messages to the
+     *         slave.
      */
-    void handleExceptions(Exception exception) {
+    ReplicationMessageTransmit handleExceptions(Exception exception) {
         if (exception instanceof IOException) {
             repLogger.logError(MessageId.REPLICATION_LOGSHIPPER_EXCEPTION,
                                exception);
@@ -540,11 +543,14 @@ public class MasterController
                     continue;
                 } catch (Exception e) {
                     printStackAndStopMaster(e);
+                    return null;
                 }
             }
         } else if (exception instanceof StandardException) {
             printStackAndStopMaster(exception);
+            return null;
         }
+        return transmitter;
     }
     
     /**
