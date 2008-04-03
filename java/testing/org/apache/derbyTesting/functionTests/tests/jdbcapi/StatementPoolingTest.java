@@ -59,6 +59,7 @@ public class StatementPoolingTest
         ConnectionPoolDataSource cpDs =
                 J2EEDataSource.getConnectionPoolDataSource();
         J2EEDataSource.setBeanProperty(cpDs, "maxStatements", new Integer(11));
+        J2EEDataSource.setBeanProperty(cpDs, "createDatabase", "create");
         PooledConnection pc = cpDs.getPooledConnection();
         Connection con = pc.getConnection();
         for (int i=0; i < stmtCount; i++) {
@@ -231,6 +232,7 @@ public class StatementPoolingTest
         ConnectionPoolDataSource cpDs =
                 J2EEDataSource.getConnectionPoolDataSource();
         J2EEDataSource.setBeanProperty(cpDs, "maxStatements", new Integer(7));
+        J2EEDataSource.setBeanProperty(cpDs, "createDatabase", "create");
         PooledConnection pc = cpDs.getPooledConnection();
         // Keep track of our own connection, the framework currently creates
         // a new pooled connection and then obtains a connection from that.
@@ -290,6 +292,7 @@ public class StatementPoolingTest
         ConnectionPoolDataSource cpDs =
                 J2EEDataSource.getConnectionPoolDataSource();
         J2EEDataSource.setBeanProperty(cpDs, "maxStatements", new Integer(7));
+        J2EEDataSource.setBeanProperty(cpDs, "createDatabase", "create");
         PooledConnection pc = cpDs.getPooledConnection();
         // Keep track of our own connection, the framework currently creates
         // a new pooled connection and then obtains a connection from that.
@@ -342,6 +345,7 @@ public class StatementPoolingTest
         ConnectionPoolDataSource cpDs =
                 J2EEDataSource.getConnectionPoolDataSource();
         J2EEDataSource.setBeanProperty(cpDs, "maxStatements", new Integer(7));
+        J2EEDataSource.setBeanProperty(cpDs, "createDatabase", "create");
         PooledConnection pc = cpDs.getPooledConnection();
         // Keep track of our own connection, the framework currently creates
         // a new pooled connection and then obtains a connection from that.
@@ -509,6 +513,47 @@ public class StatementPoolingTest
     public void resTestHoldCursorsOverCommit()
             throws SQLException {
         doTestResultSetCloseForHoldability(ResultSet.HOLD_CURSORS_OVER_COMMIT);
+    }
+
+    /**
+     * Tests that a temporary table crated in one logical connection is gone
+     * in the next logical connection.
+     *
+     * @throws SQLException if the test fails for some reason
+     */
+    public void testTemporaryTablesAreDeletedInNewLogicalConnection()
+            throws SQLException {
+        ConnectionPoolDataSource cpds =
+                J2EEDataSource.getConnectionPoolDataSource();
+        J2EEDataSource.setBeanProperty(cpds, "maxStatements", new Integer(3));
+        J2EEDataSource.setBeanProperty(cpds, "createDatabase", "create");
+        PooledConnection pc = cpds.getPooledConnection();
+        Connection lcOne = pc.getConnection();
+
+        // Create the first logical connection and the temporary table.
+        Statement stmt = lcOne.createStatement();
+        stmt.executeUpdate("DECLARE GLOBAL TEMPORARY TABLE cpds_temp_table " +
+                "(id int) ON COMMIT PRESERVE ROWS NOT LOGGED");
+        // The temporary table is created in SESSION.
+        JDBC.assertEmpty(
+                stmt.executeQuery("select * from SESSION.cpds_temp_table"));
+        stmt.executeUpdate("insert into SESSION.cpds_temp_table values 1");
+        lcOne.commit();
+        lcOne.close();
+
+        // Create the second logical connection and try to query the temp table.
+        Connection lcTwo = pc.getConnection();
+        stmt = lcTwo.createStatement();
+        try {
+            stmt.executeQuery("select * from SESSION.cpds_temp_table");
+            fail("Temporary table still existing in new logical connection.");
+        } catch (SQLException sqle) {
+            // Expect syntax error.
+            assertSQLState("42X05", sqle);
+        }
+        lcTwo.rollback();
+        lcTwo.close();
+        pc.close();
     }
 
     /**
