@@ -270,22 +270,13 @@ public class AllocPage extends StoredPage
      *
 	 * @exception  StandardException  Standard exception policy.
      **/
-	protected void createPage(PageKey newIdentity, int[] args) 
+	protected void createPage(PageKey newIdentity, PageCreationArgs args)
 		 throws StandardException
 	{
 
 		super.createPage(newIdentity, args);
 
-		// args[0] is the format id
-		// args[1] is whether to sync the page to disk or not
-		// args[2] is the pagesize (used by StoredPage)
-		// args[3] is the spareSize (used by StoredPage)
-		// args[4] is the number of bytes to reserve for container header
-		// args[5] is the minimumRecordSize
-		// NOTE: the arg list here must match the one in FileContainer
-		int pageSize = args[2];
-		int minimumRecordSize = args[5];
-		borrowedSpace = args[4];
+		borrowedSpace = args.containerInfoSize;
 
 		if (SanityManager.DEBUG)
 		{
@@ -321,7 +312,7 @@ public class AllocPage extends StoredPage
 		// the pages this extent is going to manage starts from pageNum+1
 		// starting physical offset is pageSize*(pageNum+1) since we have
 		// no logical to physical mapping yet...
-		extent = createExtent(newIdentity.getPageNumber()+1, pageSize, 0 /* pagesAlloced */, maxSpace);
+		extent = createExtent(newIdentity.getPageNumber()+1, getPageSize(), 0 /* pagesAlloced */, maxSpace);
 	}
 
 	private AllocExtent createExtent(long pageNum, int pageSize, int pagesAlloced, int availspace)
