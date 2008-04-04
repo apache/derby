@@ -25,7 +25,6 @@ package org.apache.derby.impl.store.replication.net;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
@@ -93,36 +92,17 @@ public class ReplicationMessageReceive {
      * the host name and port number that constitute the slave address as
      * parameters.
      *
-     * @param hostName a <code>String</code> that contains the host name of
-     *                 the slave to replicate to.
-     * @param portNumber an integer that contains the port number of the
-     *                   slave to replicate to.
-     * @param dbname the name of the database
-     *
-     * @throws StandardException If an exception occurs while trying to
-     *                           resolve the host name.
+     * @param slaveAddress the address (host name and port number) of the slave
+     *                     to connect to.
+     * @param dbname the name of the database.
      */
-    public ReplicationMessageReceive(String hostName, int portNumber, 
-                                     String dbname)
-        throws StandardException {
-        try {
-            slaveAddress = new SlaveAddress(hostName, portNumber);
-            Monitor.logTextMessage(MessageId.REPLICATION_SLAVE_NETWORK_LISTEN, 
-                                   dbname, getHostName(), 
-                                   String.valueOf(getPort()));
-        } catch (UnknownHostException uhe) {
-            // cannot use getPort because SlaveAddress creator threw
-            // exception and has therefore not been initialized
-            String port;
-            if (portNumber > 0) {
-                port = String.valueOf(portNumber);
-            } else {
-                port = String.valueOf(SlaveAddress.DEFAULT_PORT_NO);
-            }
-            throw StandardException.newException
-                (SQLState.REPLICATION_CONNECTION_EXCEPTION, uhe, 
-                 dbname, hostName, port);
-        }
+    public ReplicationMessageReceive(SlaveAddress slaveAddress, 
+                                     String dbname) {
+        this.slaveAddress = slaveAddress;
+        Monitor.logTextMessage(MessageId.REPLICATION_SLAVE_NETWORK_LISTEN,
+                               dbname, 
+                               slaveAddress.getHostAddress().getHostName(),
+                               String.valueOf(slaveAddress.getPortNumber()));
     }
     
     /**
@@ -440,26 +420,6 @@ public class ReplicationMessageReceive {
             return msg;
         }
     }
-
-    /**
-     * Used to get the host name the slave listens for master
-     * connections on
-     *
-     * @return the host name 
-     */
-    public String getHostName() {
-        return slaveAddress.getHostAddress().getHostName();
-     }
-
-    /**
-     * Used to get the port number the slave listens for master
-     * connections on
-     *
-     * @return the port number
-     */
-    public int getPort() {
-        return slaveAddress.getPortNumber();
-     }
         
     /**
      * Verifies if the <code>SocketConnection</code> is valid.

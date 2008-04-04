@@ -24,6 +24,7 @@ package org.apache.derby.impl.store.replication.master;
 
 import java.io.IOException;
 import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.MessageId;
 import org.apache.derby.iapi.reference.SQLState;
@@ -47,6 +48,7 @@ import org.apache.derby.impl.store.replication.buffer.ReplicationLogBuffer;
 import org.apache.derby.impl.store.replication.buffer.LogBufferFullException;
 
 import java.util.Properties;
+import org.apache.derby.impl.store.replication.net.SlaveAddress;
 
 /**
  * <p> 
@@ -78,8 +80,7 @@ public class MasterController
     private ReplicationLogger repLogger;
 
     private String replicationMode;
-    private String slavehost;
-    private int slaveport;
+    private SlaveAddress slaveAddr;
     private String dbname;
     private int logBufferSize = 0;
     
@@ -202,8 +203,15 @@ public class MasterController
                     (SQLState.REPLICATION_MASTER_ALREADY_BOOTED, dbname);
         }
 
-        this.slavehost = slavehost;
-        this.slaveport = new Integer(slaveport).intValue();
+        try {
+            slaveAddr = new SlaveAddress(slavehost, 
+                    (new Integer(slaveport)).intValue());
+        } catch (UnknownHostException uhe) {
+            throw StandardException.newException
+                    (SQLState.REPLICATION_CONNECTION_EXCEPTION, uhe, 
+                     dbname, getHostName(), String.valueOf(getPortNumber()));
+        }
+        
         this.dbname = dbname;
 
         rawStoreFactory = rawStore;
@@ -468,9 +476,8 @@ public class MasterController
             if (transmitter != null) {
                 transmitter.tearDown();
             }
-            transmitter = new ReplicationMessageTransmit(slavehost,
-                                                         slaveport,
-                                                         dbname);
+            transmitter = new ReplicationMessageTransmit(slaveAddr);
+            
             // getHighestShippedInstant is -1 until the first log
             // chunk has been shipped to the slave. If a log chunk has
             // been shipped, use the instant of the latest shipped log
@@ -493,13 +500,13 @@ public class MasterController
         } catch (IOException ioe) {
             throw StandardException.newException
                     (SQLState.REPLICATION_CONNECTION_EXCEPTION, ioe, 
-                     dbname, slavehost, String.valueOf(slaveport));
+                     dbname, getHostName(), String.valueOf(getPortNumber()));
         } catch (StandardException se) {
             throw se;
         } catch (Exception e) {
             throw StandardException.newException
                     (SQLState.REPLICATION_CONNECTION_EXCEPTION, e,
-                     dbname, slavehost, String.valueOf(slaveport));
+                     dbname, getHostName(), String.valueOf(getPortNumber()));
         }
     }
     
@@ -521,13 +528,7 @@ public class MasterController
             
             while (active) {
                 try {
-                    if (transmitter != null) {
-                        transmitter.tearDown();
-                    }
-                    transmitter = new ReplicationMessageTransmit(slavehost,
-                                                                 slaveport,
-                                                                 dbname);
-
+                    transmitter = new ReplicationMessageTransmit(slaveAddr);
                     // see comment in setupConnection
                     if (logShipper != null &&
                         logShipper.getHighestShippedInstant() != -1) {
@@ -623,5 +624,25 @@ public class MasterController
      */
     String getDbName() {
         return this.dbname;
+    }
+    
+    /**
+     * Used to return the host name of the slave being connected to.
+     *
+     * @return a String containing the host name of the slave being
+     *         connected to.
+     */
+    private String getHostName() {
+        return slaveAddr.getHostAddress().getHostName();
+    }
+    
+    /**
+     * Used to return the port number of the slave being connected to.
+     *
+     * @return an Integer that represents the port number of the slave
+     *         being connected to.
+     */
+    private int getPortNumber() {
+        return slaveAddr.getPortNumber();
     }
 }

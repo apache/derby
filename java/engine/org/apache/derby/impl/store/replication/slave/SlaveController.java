@@ -34,6 +34,7 @@ import org.apache.derby.iapi.store.raw.RawStoreFactory;
 import org.apache.derby.impl.store.raw.log.LogCounter;
 import org.apache.derby.iapi.store.raw.log.LogFactory;
 import org.apache.derby.impl.store.raw.log.LogToFile;
+import org.apache.derby.impl.store.replication.net.SlaveAddress;
 
 import org.apache.derby.impl.store.replication.ReplicationLogger;
 import org.apache.derby.impl.store.replication.net.ReplicationMessage;
@@ -43,6 +44,7 @@ import org.apache.derby.iapi.store.replication.slave.SlaveFactory;
 import java.io.EOFException;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
 import java.util.Properties;
 
 /**
@@ -76,8 +78,7 @@ public class SlaveController
     private ReplicationMessageReceive receiver;
     private ReplicationLogger repLogger;
 
-    private String slavehost;
-    private int slaveport;
+    private SlaveAddress slaveAddr;
     private String dbname; // The name of the replicated database
 
     /** The instant of the latest log record received from the master 
@@ -130,11 +131,22 @@ public class SlaveController
     public void boot(boolean create, Properties properties)
         throws StandardException {
 
-        slavehost = properties.getProperty(Attribute.REPLICATION_SLAVE_HOST);
-
         String port = properties.getProperty(Attribute.REPLICATION_SLAVE_PORT);
-        if (port != null) {
-            slaveport = new Integer(port).intValue();
+        
+        try {
+            //if slavePort is -1 the default port
+            //value will be used.
+            int slavePort = -1;
+            if (port != null) {
+                slavePort = (new Integer(port)).intValue();
+            }
+            slaveAddr = new SlaveAddress(
+                    properties.getProperty(Attribute.REPLICATION_SLAVE_HOST), 
+                    slavePort);
+        } catch (UnknownHostException uhe) {
+            throw StandardException.newException
+                    (SQLState.REPLICATION_CONNECTION_EXCEPTION, uhe, 
+                     dbname, getHostName(), String.valueOf(getPortNumber()));
         }
 
         dbname = properties.getProperty(SlaveFactory.SLAVE_DB);
@@ -222,11 +234,7 @@ public class SlaveController
         // Retry to setup a connection with the master until a
         // connection has been established or until we are no longer
         // in replication slave mode
-        receiver = new ReplicationMessageReceive(slavehost, slaveport, dbname);
-        // If slaveport was not specified when starting the slave, the
-        // receiver will use the default port. Set slaveport to the port
-        // actually used by the receiver
-        slaveport = receiver.getPort();
+        receiver = new ReplicationMessageReceive(slaveAddr, dbname);
         while (!setupConnection()) {
             if (!inReplicationSlaveMode) {
                 // If we get here, another thread has called
@@ -351,7 +359,7 @@ public class SlaveController
             } else {
                 throw StandardException.newException
                     (SQLState.REPLICATION_CONNECTION_EXCEPTION, e,
-                    dbname, slavehost, String.valueOf(slaveport));
+                    dbname, getHostName(), String.valueOf(getPortNumber()));
             }
         }
     }
@@ -463,6 +471,24 @@ public class SlaveController
         } catch (IOException ioe) {
             repLogger.logError(null, ioe);
         }
+    }
+    
+    /**
+     * Used to return the host name of the slave.
+     *
+     * @return a String containing the host name of the slave.
+     */
+    private String getHostName() {
+        return slaveAddr.getHostAddress().getHostName();
+    }
+    
+    /**
+     * Used to return the port number of the slave.
+     *
+     * @return an Integer that represents the port number of the slave.
+     */
+    private int getPortNumber() {
+        return slaveAddr.getPortNumber();
     }
 
     ///////////////////////////////////////////////////////////////////////////
