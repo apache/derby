@@ -79,7 +79,7 @@ final class EmbedClob extends ConnectionChild implements Clob, EngineLOB
     /** Tells whether the Clob has been freed or not. */
     private boolean isValid = true;
 
-    private final int locator;
+    private int locator;
     
     /**
      * Creates an empty Clob object.
@@ -91,7 +91,7 @@ final class EmbedClob extends ConnectionChild implements Clob, EngineLOB
     EmbedClob(EmbedConnection con) throws SQLException {
         super(con);
         this.clob = new TemporaryClob (con.getDBName(), this);
-        this.locator = con.addLOBMapping (this);
+        con.addLOBReference (this);
     }
 
     /**
@@ -156,7 +156,7 @@ final class EmbedClob extends ConnectionChild implements Clob, EngineLOB
                 throw se;
             }
         }
-        this.locator = con.addLOBMapping (this);
+        con.addLOBReference (this);
     }
 
     /**
@@ -663,6 +663,7 @@ restartScan:
             } catch (IOException e) {
                 throw Util.setStreamFailure(e);
             } finally {
+                localConn.removeLOBMapping(locator);
                 this.clob = null;
             }
         }
@@ -791,6 +792,9 @@ restartScan:
      * @return locator value for this Clob.
      */
     public int getLocator() {
+        if (locator == 0) {
+            locator = localConn.addLOBMapping(this);
+        }
         return locator;
     }
 }
