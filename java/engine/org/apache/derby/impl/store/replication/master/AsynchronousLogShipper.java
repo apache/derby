@@ -66,7 +66,7 @@ public class AsynchronousLogShipper extends Thread implements
      * transmission of the log records retrieved from the log buffer
      * (on the master) to the slave being replicated to.
      */
-    final private ReplicationMessageTransmit transmitter;
+    private ReplicationMessageTransmit transmitter;
     
     /**
      * Time interval (in milliseconds) at which the log shipping takes place.
@@ -213,7 +213,14 @@ public class AsynchronousLogShipper extends Thread implements
                 //Interrupt the log shipping thread.
                 return;
             } catch (IOException ioe) {
-                masterController.handleExceptions(ioe);
+                //The transmitter is recreated if the connection to the
+                //slave can be re-established.
+                transmitter = masterController.handleExceptions(ioe);
+                //The transmitter cannot be recreated hence stop the log
+                //shipper thread.
+                if (transmitter != null) {
+                    continue;
+                }
             } catch (StandardException se) {
                 masterController.handleExceptions(se);
             }
