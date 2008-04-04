@@ -99,7 +99,7 @@ public class AsynchronousLogShipper extends Thread implements
      * true - stop shipping log records
      * false - shipping can continue without interruption.
      */
-    private boolean stopShipping = false;
+    private volatile boolean stopShipping = false;
     
     /**
      * The master controller that initialized this log shipper.
@@ -111,6 +111,13 @@ public class AsynchronousLogShipper extends Thread implements
      * is moved into the wait state, or while notifying it.
      */
     private Object objLSTSync = new Object(); // LST->Log Shippper Thread
+
+    /** Used to synchronize forceFlush calls */
+    private Object forceFlushSemaphore = new Object();
+
+    /** The number of millis a call to forceFlush will wait before giving
+     * up sending a chunk of log to the slave */
+    public static final int DEFAULT_FORCEFLUSH_TIMEOUT = 5000;
     
     /**
      * Store the log chunk that failed during a previous shipping attempt
@@ -201,6 +208,10 @@ public class AsynchronousLogShipper extends Thread implements
         while (!stopShipping) {
             try {
                 shipALogChunk();
+                synchronized (forceFlushSemaphore) {
+                    // Wake up a thread waiting for forceFlush, if any
+                    forceFlushSemaphore.notify();
+                }
                 //calculate the shipping interval (wait time) based on the
                 //fill information obtained from the log buffer.
                 shippingInterval = calculateSIfromFI();
@@ -310,16 +321,20 @@ public class AsynchronousLogShipper extends Thread implements
      * @throws StandardException If an exception occurs while trying to read
      *                           log records from the log buffer.
      */
-    public void forceFlush() throws IOException, StandardException {
-        if (!stopShipping) {
-            shipALogChunk();
-        }
-        
-        synchronized(objLSTSync) {
-            //There will still be more log to send after the forceFlush
-            //has sent one chunk.  Notify the log shipping thread that
-            //it is time for another send.
-            objLSTSync.notify();
+    public void forceFlush() throws IOException, StandardException 
+    {
+        if (stopShipping) return;
+        synchronized (forceFlushSemaphore) {
+            synchronized (objLSTSync) {
+                // Notify the log shipping thread that
+                // it is time for another send.
+                objLSTSync.notify();
+            }
+
+            try {
+                forceFlushSemaphore.wait(DEFAULT_FORCEFLUSH_TIMEOUT);
+            } catch (InterruptedException ex) {
+            }
         }
     }
     
@@ -348,7 +363,7 @@ public class AsynchronousLogShipper extends Thread implements
     /**
      * Stop shipping log records. If a ship is currently in progress
      * it will not be interrupted, shipping will stop only after the
-     * current shippment is done.
+     * current shipment is done.
      */
     public void stopLogShipment() {
         stopShipping = true;

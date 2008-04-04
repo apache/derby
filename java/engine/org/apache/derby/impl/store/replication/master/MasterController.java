@@ -413,8 +413,14 @@ public class MasterController
         } catch (LogBufferFullException lbfe) {
             try {
                 logShipper.forceFlush();
-                // There should now be room for this log chunk in the buffer
-                appendLog(greatestInstant, log, logOffset, logLength);
+                // Either the forceFlush succeeded in sending a chunk of log
+                // (making room for this log chunk in the buffer), or
+                // forceFlush did not succeed (in which case replication is
+                // stopped)
+                logBuffer.appendLog(greatestInstant, log,
+                                    logOffset, logLength);
+            } catch (LogBufferFullException lbfe2) {
+                printStackAndStopMaster(lbfe2);
             } catch (IOException ioe) {
                 printStackAndStopMaster(ioe);
             } catch (StandardException se) {
