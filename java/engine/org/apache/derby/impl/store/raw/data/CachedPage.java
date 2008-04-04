@@ -256,9 +256,10 @@ public abstract class CachedPage extends BasePage implements Cacheable
 
 		PageKey newIdentity = (PageKey) key;
 
-		int[] createArgs = (int[]) createParameter;
+		PageCreationArgs createArgs = (PageCreationArgs) createParameter;
+        int formatId = createArgs.formatId;
 
-		if (createArgs[0] == -1)
+		if (formatId == -1)
         {
 			throw StandardException.newException(
                     SQLState.DATA_UNKNOWN_PAGE_FORMAT, newIdentity);
@@ -267,10 +268,10 @@ public abstract class CachedPage extends BasePage implements Cacheable
 		// createArgs[0] contains the integer form of the formatId 
 		// if it is not the same as this instance's formatId, instantiate the
 		// real page object
-		if (createArgs[0] != getTypeFormatId())
+		if (formatId != getTypeFormatId())
 		{
 			return(
-                changeInstanceTo(createArgs[0], newIdentity).createIdentity(
+                changeInstanceTo(formatId, newIdentity).createIdentity(
                         key, createParameter));
 		}
 		
@@ -296,22 +297,23 @@ public abstract class CachedPage extends BasePage implements Cacheable
 		 *	will be a SYNC call after all the pages are preallocated
 		 * 0 means creating a page that has already been preallocated.
 		 */
-		if ((createArgs[1] & WRITE_SYNC) != 0 ||
-			(createArgs[1] & WRITE_NO_SYNC) != 0)
-			writePage(newIdentity, (createArgs[1] & WRITE_SYNC) != 0);
+        int syncFlag = createArgs.syncFlag;
+		if ((syncFlag & WRITE_SYNC) != 0 ||
+			(syncFlag & WRITE_NO_SYNC) != 0)
+			writePage(newIdentity, (syncFlag & WRITE_SYNC) != 0);
 
 		if (SanityManager.DEBUG)
 		{
 			if (SanityManager.DEBUG_ON(FileContainer.SPACE_TRACE))
 			{
-				String syncFlag = 
-                    ((createArgs[1] & WRITE_SYNC) != 0)     ? "Write_Sync" :
-					(((createArgs[1] & WRITE_NO_SYNC) != 0) ? "Write_NO_Sync" : 
+				String sync =
+                    ((syncFlag & WRITE_SYNC) != 0)     ? "Write_Sync" :
+					(((syncFlag & WRITE_NO_SYNC) != 0) ? "Write_NO_Sync" :
 					                                          "No_write");
 
 				SanityManager.DEBUG(
                     FileContainer.SPACE_TRACE,
-                    "creating new page " + newIdentity + " with " + syncFlag);
+                    "creating new page " + newIdentity + " with " + sync);
 			}
 		}
 
@@ -900,7 +902,7 @@ public abstract class CachedPage extends BasePage implements Cacheable
 
 
 	// create the page
-	protected abstract void createPage(PageKey id, int[] args) 
+	protected abstract void createPage(PageKey id, PageCreationArgs args)
         throws StandardException;
 
 	// page is about to be written, write everything to pageData array

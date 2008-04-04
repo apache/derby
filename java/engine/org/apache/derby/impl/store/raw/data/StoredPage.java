@@ -746,23 +746,18 @@ public class StoredPage extends CachedPage
      *
      * @param newIdentity   The key describing page (segment,container,page).
      * @param args          information stored about the page, once in the 
-     *                      container header and passed in through the array.
+     *                      container header and passed in through the object.
      *
 	 * @exception  StandardException  Standard exception policy.
      **/
-	protected void createPage(
-    PageKey newIdentity, 
-    int[]   args) 
+	protected void createPage(PageKey newIdentity, PageCreationArgs args)
 		 throws StandardException
 	{
-		// arg[0] is the formatId of the page
-		// arg[1] is whether to sync the page to disk or not
 
-		int pageSize        = args[2];
-		spareSpace          = args[3];
-		minimumRecordSize   = args[4];
+		spareSpace          = args.spareSpace;
+		minimumRecordSize   = args.minimumRecordSize;
 
-        setPageArray(pageSize);
+        setPageArray(args.pageSize);
 
 		cleanPage();			// clean up the page array
 

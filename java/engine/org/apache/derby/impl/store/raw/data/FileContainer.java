@@ -290,12 +290,6 @@ abstract class FileContainer
 		CONTAINER_FORMAT_ID_SIZE+4+4+4+4+2+2+8+8+8+8+CHECKSUM_SIZE+8+8;
 
 	/**
-		the number of arguments we need to pass to alloc page for create
-	*/
-	protected static final int STORED_PAGE_ARG_NUM = 5;
-	protected static final int ALLOC_PAGE_ARG_NUM  = 6;
-
-	/**
 	 * where the first alloc page is located - 
 	 * the logical page number and the physical page offset
 	 * NOTE if it is not 0 this is not going to work for Stream 
@@ -1768,13 +1762,13 @@ abstract class FileContainer
 			    // 2'nd element is pagesize
 			    // 3'rd element is spareSpace
 
-			    int[] createPageArgs = new int[STORED_PAGE_ARG_NUM];
-			    createPageArgs[0] = StoredPage.FORMAT_NUMBER;
-			    createPageArgs[1] = prealloced ? 
-                                        0 : (noIO ? 0 : CachedPage.WRITE_SYNC);
-			    createPageArgs[2] = pageSize;
-			    createPageArgs[3] = spareSpace;
-			    createPageArgs[4] = minimumRecordSize;
+                PageCreationArgs createPageArgs = new PageCreationArgs(
+                        StoredPage.FORMAT_NUMBER,
+                        prealloced ? 0 : (noIO ? 0 : CachedPage.WRITE_SYNC),
+                        pageSize,
+                        spareSpace,
+                        minimumRecordSize,
+                        0 /* containerInfoSize - unused for StoredPage */);
 
 			    // RESOLVE: right now, there is no re-mapping of pages, so
 			    // pageOffset = pageNumber*pageSize
@@ -1797,7 +1791,7 @@ abstract class FileContainer
                         SanityManager.DEBUG_PRINT("FileContainer",
                             "got exception from initPage:"  +
                             "\nreuse = " + reuse +
-                            "\ncreatePageArgs[1] = " + createPageArgs[1] +
+                            "\nsyncFlag = " + createPageArgs.syncFlag +
                             "\nallocPage = " + allocPage
                             );
                     }
@@ -2223,13 +2217,13 @@ abstract class FileContainer
 		boolean noIO = (handle.getMode() & ContainerHandle.MODE_UNLOGGED) ==
 			ContainerHandle.MODE_UNLOGGED;
 
-		int[] createAllocPageArgs = new int[ALLOC_PAGE_ARG_NUM];
-		createAllocPageArgs[0] = AllocPage.FORMAT_NUMBER;	
-		createAllocPageArgs[1] = noIO ? 0 : CachedPage.WRITE_SYNC;
-		createAllocPageArgs[2] = pageSize;
-		createAllocPageArgs[3] = 0;		// allocation page has no need for spare
-		createAllocPageArgs[4] = containerInfoSize;
-		createAllocPageArgs[5] = minimumRecordSize;
+		PageCreationArgs createAllocPageArgs = new PageCreationArgs(
+                AllocPage.FORMAT_NUMBER,
+                noIO ? 0 : CachedPage.WRITE_SYNC,
+                pageSize,
+                0,        // allocation page has no need for spare
+                minimumRecordSize,
+                containerInfoSize);
 
 		if (SanityManager.DEBUG)
         {
@@ -2271,7 +2265,7 @@ abstract class FileContainer
 
 		@param allochandle the contianer handle to initialize the page with - the ntt
 		@param pkey the page number of the page to be initialized
-		@param createArgs the int array for page creation
+		@param createArgs the arguments for page creation
 		@param reuse is true if we are reusing a page that has 
 				already been initialized once
 
@@ -2279,7 +2273,7 @@ abstract class FileContainer
 	*/
 	protected BasePage initPage(BaseContainerHandle allochandle, 
 								PageKey pkey,
-								int[] createArgs,
+								PageCreationArgs createArgs,
 								long pageOffset,
 								boolean reuse,
 								boolean overflow) throws StandardException
@@ -2553,20 +2547,20 @@ abstract class FileContainer
 		// no address translation necessary
 		PageKey pkey = new PageKey(identity, pageNumber);
 
-		int[] reCreatePageArgs = null;
+		PageCreationArgs reCreatePageArgs;
 
 		if (pageFormat == StoredPage.FORMAT_NUMBER)
 		{
-			reCreatePageArgs = new int[STORED_PAGE_ARG_NUM];
-			reCreatePageArgs[0] = pageFormat;
-			reCreatePageArgs[1] = CachedPage.WRITE_SYNC;
-			reCreatePageArgs[2] = pageSize;
-			reCreatePageArgs[3] = spareSpace;
-			reCreatePageArgs[4] = minimumRecordSize;
+            reCreatePageArgs = new PageCreationArgs(
+                    pageFormat,
+                    CachedPage.WRITE_SYNC,
+                    pageSize,
+                    spareSpace,
+                    minimumRecordSize,
+                    0 /* containerInfoSize - unused for StoredPage */);
 		}
 		else if (pageFormat == AllocPage.FORMAT_NUMBER)
 		{
-			reCreatePageArgs = new int[ALLOC_PAGE_ARG_NUM];
 
 			// only the first allocation page have borrowed space for the
 			// container info
@@ -2579,13 +2573,14 @@ abstract class FileContainer
 				firstAllocPageOffset = pageOffset;
 			}
 
+            reCreatePageArgs = new PageCreationArgs(
+                    pageFormat,
+                    CachedPage.WRITE_SYNC,
+                    pageSize,
+                    0, // allocation page has no need for spare
+                    minimumRecordSize,
+                    containerInfoSize);
 
-			reCreatePageArgs[0] = pageFormat;
-			reCreatePageArgs[1] = CachedPage.WRITE_SYNC;
-			reCreatePageArgs[2] = pageSize;
-			reCreatePageArgs[3] = 0; // allocation page has no need for spare
-			reCreatePageArgs[4] = containerInfoSize;
-			reCreatePageArgs[5] = minimumRecordSize;
 		}
 		else
 		{
@@ -3251,12 +3246,13 @@ abstract class FileContainer
 								 "how can we be Preallocating pages in a read only database?");
 
 		// initialize and a new page in cache
-		int[] createArgs = new int[5];
-		createArgs[0] = StoredPage.FORMAT_NUMBER;	// default is a stored page
-		createArgs[1] = CachedPage.WRITE_NO_SYNC;	// write it but no sync
-		createArgs[2] = pageSize;
-		createArgs[3] = spareSpace;
-		createArgs[4] = minimumRecordSize;
+        PageCreationArgs createArgs = new PageCreationArgs(
+                StoredPage.FORMAT_NUMBER, // default is a stored page
+                CachedPage.WRITE_NO_SYNC, // write it but no sync
+                pageSize,
+                spareSpace,
+                minimumRecordSize,
+                0 /* containerInfoSize - unused for StoredPage */);
 
 		StoredPage page = new StoredPage();
 		page.setFactory(dataFactory);
