@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
-import java.net.UnknownHostException;
 import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
@@ -80,20 +79,11 @@ public class ReplicationMessageTransmit {
     /**
      * Constructor initializes the slave address used in replication.
      *
-     * @param hostName a <code>String</code> that contains the host name of
-     *                 the slave to replicate to.
-     * @param portNumber an integer that contains the port number of the
-     *                   slave to replicate to.
-     * @param dbname The name of the replicated database
-     *
-     * @throws UnknownHostException If an exception occurs while trying to
-     *                              resolve the host name.
+     * @param slaveAddress contains the address (host name and port number)
+     *                     of the slave to connect to.
      */
-    public ReplicationMessageTransmit(String hostName, int portNumber,
-                                      String dbname)
-        throws UnknownHostException {
-        this.dbname = dbname;
-        slaveAddress = new SlaveAddress(hostName, portNumber);
+    public ReplicationMessageTransmit(SlaveAddress slaveAddress) {
+        this.slaveAddress = slaveAddress;
     }
     
     /**
