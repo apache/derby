@@ -3525,6 +3525,12 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
             </msg>
 
             <msg>
+                <name>XBM04.D</name>
+                <text>Collator support not available from the JVM for the database's locale '{0}'.</text>
+                <arg>value</arg>
+            </msg>
+
+            <msg>
                 <name>XBM0Y.D</name>
                 <text>Backup database directory {0} not found. Please make sure that the specified backup path is right.</text>
                 <arg>directoryName</arg>

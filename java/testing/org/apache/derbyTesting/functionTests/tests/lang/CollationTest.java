@@ -22,6 +22,7 @@
 package org.apache.derbyTesting.functionTests.tests.lang;
 
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -33,6 +34,7 @@ import java.util.Locale;
 import javax.sql.DataSource;
 
 import junit.framework.Test;
+import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.functionTests.tests.jdbcapi.BatchUpdateTest;
@@ -1237,6 +1239,26 @@ private void checkLangBasedQuery(Statement s, String query, String[][] expectedR
     else
     	JDBC.assertFullResultSet(rs,expectedResult);
 }
+
+/**
+ * We should get a locale unavailable message because there is no support for 
+ * locale xx.
+ */
+public void testMissingCollatorSupport() throws SQLException {
+      String url = TestConfiguration.getCurrent().getJDBCUrl("localeXXdb");
+
+      loadDriver();
+      String defaultdburl = url + ";create=true;territory=xx;collation=TERRITORY_BASED";
+	  try {
+	      DriverManager.getConnection(defaultdburl);
+	  } catch (SQLException sqle) {
+          //Database can't be created because Collator support does not exist
+		  //for the requested locale
+		  BaseJDBCTestCase.assertSQLState("Unexpected error when connecting to database ",
+                  "XBM04",
+                  sqle);
+      }
+}
     
   /**
    * Tests only need to run in embedded since collation
@@ -1245,6 +1267,12 @@ private void checkLangBasedQuery(Statement s, String query, String[][] expectedR
   public static Test suite() {
       
       TestSuite suite = new TestSuite("CollationTest");
+      //Add the test case for a locale which does not exist. We have asked for
+      //locale as 'xx' and since there is not support Collator support for such
+      //a locale, we will get an exception during database create time.
+      TestCase missingCollatorDbTest = new CollationTest(
+    		  "testMissingCollatorSupport");
+      suite.addTest(missingCollatorDbTest);
 
         suite.addTest(new CleanDatabaseTestSetup(
                 new CollationTest("testDefaultCollation")));
@@ -1278,7 +1306,21 @@ private void checkLangBasedQuery(Statement s, String query, String[][] expectedR
         }
         return suite;
     }
-  
+
+  /**
+     Load the appropriate driver for the current framework
+   */
+  private static void loadDriver()
+  {
+      String driverClass =
+          TestConfiguration.getCurrent().getJDBCClient().getJDBCDriverName();
+      try {
+          Class.forName(driverClass).newInstance();
+      } catch (Exception e) {
+          fail ("could not instantiate driver");
+      }
+  }
+ 
   /**
    * Return a suite that uses a single use database with
    * a primary fixture from this test plus potentially other
