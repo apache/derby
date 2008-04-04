@@ -75,7 +75,7 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
     private InputStream     myStream;
     
     // locator key for lob. used by Network Server.
-    private int             locator;
+    private final int             locator;
     
     /*
      * Length of the BLOB if known. Set to -1 if
@@ -117,7 +117,7 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
              materialized = true;
              //add entry in connection so it can be cleared 
              //when transaction is not valid
-             con.addLOBReference (this);
+             locator = con.addLOBMapping (this);
          }
          catch (IOException e) {
              throw Util.setStreamFailure (e);
@@ -193,7 +193,7 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
         pos = 0;
         //add entry in connection so it can be cleared 
         //when transaction is not valid
-        con.addLOBReference (this);
+        this.locator = con.addLOBMapping (this);
     }
 
 
@@ -906,8 +906,6 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
         //valid
         isValid = false;
         
-        //remove entry from connection
-        localConn.removeLOBMapping(locator);
         //initialialize length to default value -1
         myLength = -1;
         
@@ -1002,9 +1000,6 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
      * @return The locator identifying this lob.
      */
     public int getLocator() {
-        if (locator == 0) {
-            locator = localConn.addLOBMapping(this);
-        }
         return locator;
     }
 }
