@@ -857,9 +857,11 @@ public abstract class CachedPage extends BasePage implements Cacheable
             // Just in case memory is low.
             pageData = null; 
 			pageData = new byte[pageSize];
-				
-			usePageBuffer(pageData);
 		}
+
+        // Always call usePageBuffer(), even when we reuse the buffer, so that
+        // totalSpace and friends are recalculated (DERBY-3116).
+        usePageBuffer(pageData);
 	}
 
 

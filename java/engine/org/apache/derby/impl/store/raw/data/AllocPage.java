@@ -274,9 +274,11 @@ public class AllocPage extends StoredPage
 		 throws StandardException
 	{
 
-		super.createPage(newIdentity, args);
+        // We need to set borrowedSpace before we call super.createPage() so
+        // that totalSpace is initialized correctly (DERBY-3116).
+        borrowedSpace = args.containerInfoSize;
 
-		borrowedSpace = args.containerInfoSize;
+		super.createPage(newIdentity, args);
 
 		if (SanityManager.DEBUG)
 		{
@@ -307,12 +309,19 @@ public class AllocPage extends StoredPage
 		reserved1 = reserved2 = reserved3 = reserved4 = 0;
 
 		// calculate how much space we have left for the extent map
-		int maxSpace = getMaxFreeSpace();
+        if (SanityManager.DEBUG) {
+            // totalSpace used to be incorrect (DERBY-3116), so check it here
+            int maxFreeSpace = getMaxFreeSpace();
+            SanityManager.ASSERT(totalSpace == maxFreeSpace,
+                                 "totalSpace = " + totalSpace +
+                                 ", getMaxFreeSpace() = " + maxFreeSpace);
+        }
 
 		// the pages this extent is going to manage starts from pageNum+1
 		// starting physical offset is pageSize*(pageNum+1) since we have
 		// no logical to physical mapping yet...
-		extent = createExtent(newIdentity.getPageNumber()+1, getPageSize(), 0 /* pagesAlloced */, maxSpace);
+        extent = createExtent(newIdentity.getPageNumber()+1, getPageSize(),
+                              0 /* pagesAlloced */, totalSpace);
 	}
 
 	private AllocExtent createExtent(long pageNum, int pageSize, int pagesAlloced, int availspace)
