@@ -31,7 +31,7 @@ with real information.
 
     E.g.: 10.3.0.3
 -->
-<releaseID>10.3.0.0</releaseID>
+<releaseID>10.4.1.0</releaseID>
 
 <!--
     Identifier of previous release. The release notes describe the
@@ -40,30 +40,36 @@ with real information.
     E.g.: 10.2.1.7
 
 -->
-<previousReleaseID>10.2.2.0</previousReleaseID>
+<previousReleaseID>10.3.2.1</previousReleaseID>
 
 <buildInfo>
 
   <!-- Name of the branch. E.g.: 10.3 -->
-  <branch>10.3</branch>
+  <branch>10.4</branch>
 
   <!-- Machine environment. E.g.:  Cygwin on Microsoft Windows XP Professional Version 2002 Service Pack 2. -->
-  <machine>Cygwin on Microsoft Windows XP Professional Version 2002 Service Pack 2.</machine>
+  <machine>SunOS khepri32 5.10 Generic_127112-01 i86pc i386 i86pc</machine>
 
   <!-- Ant version. E.g.:  Apache Ant version 1.6.5 compiled on June 2 2005. -->
-  <antVersion>Apache Ant version 1.6.5 compiled on June 2 2005.</antVersion>
+  <antVersion>Apache Ant version 1.7.0 compiled on December 13 2006</antVersion>
 
   <!-- Output of "java -version" run from your jdk1.4 installation. E.g.:  Java(TM) 2 Runtime Environment, Standard Edition (build 1.4.2_12-b03). -->
-  <jdk1.4>Java(TM) 2 Runtime Environment, Standard Edition (build 1.4.2_12-b03).</jdk1.4>
+  <jdk1.4>java version "1.4.2_05"
+Java(TM) 2 Runtime Environment, Standard Edition (build 1.4.2_05-b04)
+Java HotSpot(TM) Client VM (build 1.4.2_05-b04, mixed mode)
+</jdk1.4>
 
   <!-- Output of "java -version" run from your Java 6 installation. E.g.:  Java(TM) 2 Runtime Environment, Standard Edition (build 1.6.0-b105). -->
-  <java6> Java(TM) 2 Runtime Environment, Standard Edition (build 1.6.0-b105).</java6>
+  <java6>java version "1.6.0_04"
+Java(TM) SE Runtime Environment (build 1.6.0_04-b06)
+Java HotSpot(TM) Server VM (build 10.0-b18, mixed mode)
+</java6>
 
   <!--
          Say here whether you used osgi.jar to build org.apache.derby.osgi.EmbeddedActivator.
          E.g.:  The osgi.jar was used to build org.apache.derby.osgi.EmbeddedActivator.
   -->
-  <osgi>The osgi.jar was used to build org.apache.derby.osgi.EmbeddedActivator.</osgi>
+  <osgi>The felix.jar was used to build org.apache.derby.osgi.EmbeddedActivator.</osgi>
 
   <!--
          Say which compilers you used.
@@ -72,15 +78,15 @@ with real information.
            The 1.4.2_12-b03 javac was used to compile all classes
            except for the JDBC4 drivers. The JDBC4 driver classes were compiled using the 1.6.0-b105 javac.
   -->
-  <compilers>The 1.4.2_12-b03 javac was used to compile all classes
-           except for the JDBC4 drivers. The JDBC4 driver classes were compiled using the 1.6.0-b105 javac.</compilers>
-
+  <compilers>
+The 1.6.0_04 javac was used to compile all classes.
+  </compilers>
   <!--
          Say here whether you built the J2ME support and, if so, which
          tookit you used.
          E.g.: J2ME support was built using java.sun.com/j2me (j2me_cdc_fp-1_0_2).
   -->
-  <jsr169>J2ME support was built using java.sun.com/j2me (j2me_cdc_fp-1_0_2).</jsr169>
+  <jsr169>J2ME support was built using java.sun.com/j2me (cdc-1_1-fr-ri, jdbc_cdc1.0).</jsr169>
 
 </buildInfo>
 
@@ -107,9 +113,35 @@ Derby functionality includes:
 <newFeatures>
 
 <p>
-This is a minor release. The following new features were added:
+This is a feature release. The following new features were added:
 </p>
+<ul>
+<li>SQL ROW_NUMBER() window function, as described in the SQL 2003
+standard section 6.10, for an empty, inlined window specification. The
+<em>window clause</em>, as described in section 7.11 is not
+implemented.</li>
 
+<li>Unique constraints on nullable columns. SQL Feature T591.</li>
+	
+<li>Asynchronous replication with manual fail-over.</li>
+
+<li>VTI Table Functions.</li>
+
+<li>Java Management Extensions (JMX) for Derby, allowing local and remote
+monitoring and management of a running Derby system (this release
+includes a basic set of MBeans - it is expected that more JMX
+functionality will be added in later releases).</li>
+	
+<li>SQL bracketed comments (/*..*/). SQL Feature T351.</li>
+
+<li>ij continuation marker. Interactive ij shows > prompt until ; is entered.</li>
+	
+<li>A JDBC statement object cache in the client driver. Some limitations imposed by the presence of DERBY-3596.</li>
+
+<li>Caching of the isolation level and the current schema in the client driver.</li>
+
+<li>Implement a new multi-threaded buffer manager to get better scalability on machines with multiple CPUs or multiple cores.</li>
+</ul>
 </newFeatures>
 
 </summary>
