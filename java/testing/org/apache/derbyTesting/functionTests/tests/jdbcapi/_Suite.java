@@ -83,6 +83,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(LargeDataLocksTest.suite());
         suite.addTest(DMDBugsTest.suite());
         suite.addTest(DataSourceTest.suite());
+        suite.addTest(SavepointJdbc30Test.suite());
 
         // Old harness .java tests that run using the HarnessJavaTest
         // adapter and continue to use a single master file.

@@ -24,7 +24,6 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.functionTests.util.HarnessJavaTest;
-import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
@@ -59,10 +58,6 @@ public class JDBCHarnessJavaTest extends HarnessJavaTest {
             // "testRelative", TODO: passes embedded, fails client - investigate failure/convert
             "rsgetXXXcolumnNames",
             
-            // from old jdk14.runall
-            // "savepointJdbc30_JSR169", TODO: convert - different canon for client
-            // "savepointJdbc30_XA", TODO: convert - different canon for client
-            
     };
 
     /**
@@ -70,21 +65,18 @@ public class JDBCHarnessJavaTest extends HarnessJavaTest {
      */
     private static final String[] JDBCAPI_TESTS_EMEBDDED=
     {
-        // Tests that run ok in embedded but have a different client master file.
-        "savepointJdbc30_JSR169",
-        
         // Tests that pass on embedded but fail on client
         "testRelative",
     };
     
-    /**
-     * Tests that require JDBC 3.
-     */
-    private static final String[] JDBCAPI_TESTS_EMEBDDED_JDBC3 =
-    {
-        // Tests that run ok in embedded but have a different client master file.
-        "savepointJdbc30_XA",
-    };
+//    /**
+//     * Tests that require JDBC 3.
+//     */
+//    private static final String[] JDBCAPI_TESTS_EMEBDDED_JDBC3 =
+//    {
+//        // Tests that run ok in embedded but have a different client master file.
+//        "savepointJdbc30_XA",
+//    };
     
     
     private JDBCHarnessJavaTest(String name) {
@@ -100,11 +92,11 @@ public class JDBCHarnessJavaTest extends HarnessJavaTest {
         TestSuite suite = new TestSuite("jdbcapi: old harness java tests");
         suite.addTest(baseSuite("embedded", JDBCAPI_TESTS_BOTH));
         suite.addTest(baseSuite("embedded", JDBCAPI_TESTS_EMEBDDED));
-        if (JDBC.vmSupportsJDBC3())
-        {
-            suite.addTest(baseSuite("embedded_JDBC3",
-                    JDBCAPI_TESTS_EMEBDDED_JDBC3));
-        }
+//        if (JDBC.vmSupportsJDBC3())
+//        {
+//            suite.addTest(baseSuite("embedded_JDBC3",
+//                    JDBCAPI_TESTS_EMEBDDED_JDBC3));
+//        }
         
         suite.addTest(TestConfiguration.clientServerDecorator(
                 baseSuite("clientserver", JDBCAPI_TESTS_BOTH)));
