@@ -48,6 +48,7 @@ import org.apache.derbyTesting.junit.Decorator;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.JDBCDataSource;
 import org.apache.derbyTesting.junit.TestConfiguration;
+import org.apache.derbyTesting.functionTests.util.TestUtil;
 
 public class CollationTest extends BaseJDBCTestCase {
 
@@ -1245,12 +1246,14 @@ private void checkLangBasedQuery(Statement s, String query, String[][] expectedR
  * locale xx.
  */
 public void testMissingCollatorSupport() throws SQLException {
-      String url = TestConfiguration.getCurrent().getJDBCUrl("localeXXdb");
-
-      loadDriver();
-      String defaultdburl = url + ";create=true;territory=xx;collation=TERRITORY_BASED";
+      String createDBurl = ";create=true;territory=xx;collation=TERRITORY_BASED";
 	  try {
-	      DriverManager.getConnection(defaultdburl);
+		  //Use following utility method rather than 
+		  //DriverManager.getConnection because the following utility method 
+		  //will use DataSource or DriverManager depending on the VM that is 
+		  //being used. Use of DriverManager to get a Connection will faile
+		  //on JSR169 VMs. DERBY-3052
+		  TestUtil.getConnection("missingCollatorDB", createDBurl);
 	  } catch (SQLException sqle) {
           //Database can't be created because Collator support does not exist
 		  //for the requested locale
