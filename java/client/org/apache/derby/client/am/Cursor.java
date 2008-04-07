@@ -663,6 +663,29 @@ public abstract class Cursor {
         return recyclableCalendar_;
     }
 
+    /**
+     * Returns a reference to the locator procedures.
+     * <p>
+     * These procedures are used to operate on large objects referenced on the
+     * server by locators.
+     *
+     * @return The locator procedures object.
+     */
+    CallableLocatorProcedures getLocatorProcedures() {
+        return agent_.connection_.locatorProcedureCall();
+    }
+
+    /**
+     * Obtains the locator for the specified LOB column.
+     * <p>
+     * Note that this method cannot be invoked on a LOB column that is NULL.
+     *
+     * @param column 1-based column index
+     * @return A positive integer locator if valid, {@link Lob#INVALID_LOCATOR}
+     *      otherwise.
+     */
+    protected abstract int locator(int column);
+
     abstract public Blob getBlobColumn_(int column, Agent agent) throws SqlException;
 
     abstract public Clob getClobColumn_(int column, Agent agent) throws SqlException;

@@ -1731,6 +1731,17 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
     }
 
     /**
+     * Checks whether the server supports locators for large objects.
+     *
+     * @return {@code true} if LOB locators are supported.
+     */
+    protected final boolean serverSupportsLocators() {
+        // Support for locators was added in the same version as layer B
+        // streaming.
+        return serverSupportsLayerBStreaming();
+    }
+
+    /**
      * Returns if a transaction is in process
      * @return open
      */
