@@ -31,8 +31,6 @@ import java.sql.Timestamp;
 
 import java.text.RuleBasedCollator;
 
-import java.util.Locale;
-
 /**
  * This interface is how we get data values of different types.
  * 
@@ -607,7 +605,8 @@ public interface DataValueFactory
          * otherwise set it to null and return that value.
          */
         StringDataValue         getNullChar(StringDataValue dataValue,
-                int collationType);
+                int collationType)
+        throws StandardException;
 
         /**
          * Get a SQL VARCHAR (UCS_BASIC) with a SQL null value. If the supplied value
@@ -623,7 +622,8 @@ public interface DataValueFactory
          * otherwise set it to null and return that value.
          */
         StringDataValue         getNullVarchar(StringDataValue dataValue,
-                int collationType);
+                int collationType)
+        throws StandardException;
 
         /**
          * Get a SQL LONG VARCHAR (UCS_BASIC) with a SQL null value. If the supplied value
@@ -639,7 +639,8 @@ public interface DataValueFactory
          * otherwise set it to null and return that value.
          */
         StringDataValue         getNullLongvarchar(StringDataValue dataValue,
-                int collationType);
+                int collationType)
+        throws StandardException;
 
         /**
          * Get a SQL CLOB (UCS_BASIC) with a SQL null value. If the supplied value
@@ -655,7 +656,8 @@ public interface DataValueFactory
          * otherwise set it to null and return that value.
          */
         StringDataValue         getNullClob(StringDataValue dataValue,
-                int collationType);
+                int collationType)
+        throws StandardException;
 
         /**
          * Get a User-defined data value with a SQL null value. If the supplied value
@@ -702,27 +704,16 @@ public interface DataValueFactory
          * that value.
          */
         XMLDataValue            getNullXML(XMLDataValue dataValue);
-
-        /**
-         * Set the locale on DVF. This method gets called by the boot method of
-         * BasicDatabase after BasicDatabase has finished booting DVF. This 
-         * Locale will be either the Locale obtained from the territory 
-         * attribute supplied by the user on the JDBC url at database create 
-         * time or if user didn't provide the territory attribute at database
-         * create time, then it will be set to the default JVM locale. The 
-         * Locale object will be used to construct the Collator object if user 
-         * has requested territory based collation.
-         *
-         * @param localeOfTheDatabase Use this object to construct the 
-         *   Collator object
-         */
-        void setLocale(Locale localeOfTheDatabase);
         
         /**
          * Return the RuleBasedCollator depending on the collation type. 
          * If the collation type is UCS_BASIC, then this method will return 
          * null. If the collation type is TERRITORY_BASED then the return
          * value will be the Collator derived from the database's locale.
+         * If this is the first time Collator is being requested for a
+         * database with collation type of TERRITORY_BASED, then we will check 
+         * to make sure that JVM supports the Collator for the database's 
+         * locale. If not, we will throw an exception 
          * 
          * This method will be used when Store code is trying to create a DVD
          * template row using the format ids and the collation types. First a
@@ -742,7 +733,8 @@ public interface DataValueFactory
          * @return Collator null if the collation type is UCS_BASIC.
          *  Collator based on territory if the collation type is TERRITORY_BASED
          */
-        RuleBasedCollator getCharacterCollator(int collationType);
+        RuleBasedCollator getCharacterCollator(int collationType) 
+        throws StandardException;
         
         /**
          * Return an object based on the format id and collation type. For

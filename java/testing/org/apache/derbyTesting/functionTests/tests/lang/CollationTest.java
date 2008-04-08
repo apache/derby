@@ -22,6 +22,7 @@
 package org.apache.derbyTesting.functionTests.tests.lang;
 
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -31,6 +32,7 @@ import java.sql.Types;
 import javax.sql.DataSource;
 
 import junit.framework.Test;
+import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.functionTests.tests.jdbcapi.DatabaseMetaDataTest;
@@ -42,6 +44,7 @@ import org.apache.derbyTesting.junit.Decorator;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.JDBCDataSource;
 import org.apache.derbyTesting.junit.TestConfiguration;
+import org.apache.derbyTesting.functionTests.util.TestUtil;
 
 public class CollationTest extends BaseJDBCTestCase {
 
@@ -1234,6 +1237,28 @@ private void checkLangBasedQuery(Statement s, String query, String[][] expectedR
     else
     	JDBC.assertFullResultSet(rs,expectedResult);
 }
+
+/**
+ * We should get a locale unavailable message because there is no support for 
+ * locale xx.
+ */
+public void testMissingCollatorSupport() throws SQLException {
+      String createDBurl = ";create=true;territory=xx;collation=TERRITORY_BASED";
+	  try {
+		  //Use following utility method rather than 
+		  //DriverManager.getConnection because the following utility method 
+		  //will use DataSource or DriverManager depending on the VM that is 
+		  //being used. Use of DriverManager to get a Connection will faile
+		  //on JSR169 VMs. DERBY-3052
+		  TestUtil.getConnection("missingCollatorDB", createDBurl);
+	  } catch (SQLException sqle) {
+          //Database can't be created because Collator support does not exist
+		  //for the requested locale
+		  BaseJDBCTestCase.assertSQLState("Unexpected error when connecting to database ",
+                  "XBM04",
+                  sqle);
+      }
+}
     
   /**
    * Tests only need to run in embedded since collation
@@ -1242,6 +1267,12 @@ private void checkLangBasedQuery(Statement s, String query, String[][] expectedR
   public static Test suite() {
       
       TestSuite suite = new TestSuite("CollationTest");
+      //Add the test case for a locale which does not exist. We have asked for
+      //locale as 'xx' and since there is not support Collator support for such
+      //a locale, we will get an exception during database create time.
+      TestCase missingCollatorDbTest = new CollationTest(
+    		  "testMissingCollatorSupport");
+      suite.addTest(missingCollatorDbTest);
 
         suite.addTest(new CleanDatabaseTestSetup(
                 new CollationTest("testDefaultCollation")));
@@ -1250,7 +1281,21 @@ private void checkLangBasedQuery(Statement s, String query, String[][] expectedR
         suite.addTest(collatedSuite("pl", "testPolishCollation"));
         return suite;
     }
-  
+
+  /**
+     Load the appropriate driver for the current framework
+   */
+  private static void loadDriver()
+  {
+      String driverClass =
+          TestConfiguration.getCurrent().getJDBCClient().getJDBCDriverName();
+      try {
+          Class.forName(driverClass).newInstance();
+      } catch (Exception e) {
+          fail ("could not instantiate driver");
+      }
+  }
+ 
   /**
    * Return a suite that uses a single use database with
    * a primary fixture from this test plus potentially other
