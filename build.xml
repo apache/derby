@@ -2165,7 +2165,7 @@ you should not have to do this.
 
     <target name="emma-clean">
         <delete includeEmptyDirs="true">
-            <fileset dir="${emmabase}" includes="**"/>
+            <fileset dir="${jarsdist.dir}" includes="emma/**"/>
         </delete>
     </target>
 
