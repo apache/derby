@@ -37,7 +37,7 @@ public class SavepointJdbc30Test extends BaseJDBCTestCase {
      * Set up the test suite for embedded mode, client mode, and embedded mode
      * with XADataSources 
      * 
-     * @return
+     * @return A suite containing embedded, client and embedded with XA suites
      */
     public static Test suite() {
         TestSuite suite = new TestSuite("SavepointJdbc30_JSR169Test suite");
