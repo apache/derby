@@ -686,9 +686,31 @@ public abstract class Cursor {
      */
     protected abstract int locator(int column);
 
-    abstract public Blob getBlobColumn_(int column, Agent agent) throws SqlException;
+    /**
+     * Returns a {@code Blob} object.
+     *
+     * @param column 1-based column index
+     * @param agent associated agent
+     * @param toBePublished whether the Blob will be published to the user
+     * @return A {@linkplain java.sql.Blob Blob} object.
+     * @throws SqlException if getting the {@code Blob} fails
+     */
+    public abstract Blob getBlobColumn_(int column, Agent agent,
+                                        boolean toBePublished)
+            throws SqlException;
 
-    abstract public Clob getClobColumn_(int column, Agent agent) throws SqlException;
+    /**
+     * Returns a {@code Clob} object.
+     *
+     * @param column 1-based column index
+     * @param agent associated agent
+     * @param toBePublished whether the Clob will be published to the user
+     * @return A {@linkplain java.sql.Clob Clob} object.
+     * @throws SqlException if getting the {@code Clob} fails
+     */
+    public abstract Clob getClobColumn_(int column, Agent agent,
+                                        boolean toBePublished)
+            throws SqlException;
 
     // get the raw clob bytes, without translation.  dataOffset must be int[1]
     abstract public byte[] getClobBytes_(int column, int[] dataOffset /*output*/) throws SqlException;
@@ -1004,15 +1026,13 @@ public abstract class Cursor {
                 return (maxFieldSize_ == 0) ? tempString :
                         tempString.substring(0, java.lang.Math.min(maxFieldSize_, tempString.length()));
             case java.sql.Types.BLOB:
-                Blob b = getBlobColumn_(column, agent_);
+                Blob b = getBlobColumn_(column, agent_, false);
                 tempString = agent_.crossConverters_.
                         getStringFromBytes(b.getBytes(1, (int) b.length()));
-                b.free();  // Free resources from underlying Blob
                 return tempString;
             case java.sql.Types.CLOB:
-                Clob c = getClobColumn_(column, agent_);
+                Clob c = getClobColumn_(column, agent_, false);
                 tempString = c.getSubString(1, (int) c.length());
-                c.free();  // Free resources from underlying Clob
                 return tempString;
             default:
                 throw new ColumnTypeConversionException(agent_.logWriter_,
@@ -1032,9 +1052,8 @@ public abstract class Cursor {
             case java.sql.Types.LONGVARBINARY:
                 return get_VARCHAR_FOR_BIT_DATA(column);
             case java.sql.Types.BLOB:
-                Blob b = getBlobColumn_(column, agent_);
+                Blob b = getBlobColumn_(column, agent_, false);
                 byte[] bytes = b.getBytes(1, (int) b.length());
-                b.free(); // Free resources from underlying Blob
                 return bytes;
             default:
                 throw new ColumnTypeConversionException(agent_.logWriter_,
@@ -1055,12 +1074,10 @@ public abstract class Cursor {
             case java.sql.Types.LONGVARBINARY:
                 return new java.io.ByteArrayInputStream(get_VARCHAR_FOR_BIT_DATA(column));
             case java.sql.Types.BLOB:
-                Blob b = getBlobColumn_(column, agent_);
+                Blob b = getBlobColumn_(column, agent_, false);
                 if (b.isLocator()) {
                     BlobLocatorInputStream is 
                             = new BlobLocatorInputStream(agent_.connection_, b);
-                    // Underlying Blob should be released when stream is closed
-                    is.setFreeBlobOnClose();
                     return new BufferedInputStream(is);
                 } else {
                     return b.getBinaryStreamX();
@@ -1076,12 +1093,10 @@ public abstract class Cursor {
     {
         switch (jdbcTypes_[column - 1]) {
             case java.sql.Types.CLOB:
-                Clob c = getClobColumn_(column, agent_);
+                Clob c = getClobColumn_(column, agent_, false);
                 if (c.isLocator()) {
                     ClobLocatorInputStream is 
                             = new ClobLocatorInputStream(agent_.connection_, c);
-                    // Underlying Clob should be released when stream is closed
-                    is.setFreeClobOnClose();
                     return new BufferedInputStream(is);
                 } else {
                     return c.getAsciiStreamX();
@@ -1121,9 +1136,8 @@ public abstract class Cursor {
             switch (jdbcTypes_[column - 1]) {
             case java.sql.Types.CLOB:
                 {
-                    Clob c = getClobColumn_(column, agent_);
+                    Clob c = getClobColumn_(column, agent_, false);
                     String s = c.getSubString(1L, (int) c.length());
-                    c.free(); // Release resources from underlying Clob
                     try {
                         return new java.io.ByteArrayInputStream(s.getBytes("UTF-8"));
                     } catch (java.io.UnsupportedEncodingException e) {
@@ -1172,12 +1186,10 @@ public abstract class Cursor {
     {
         switch (jdbcTypes_[column - 1]) {
             case java.sql.Types.CLOB:
-                Clob c = getClobColumn_(column, agent_);
+                Clob c = getClobColumn_(column, agent_, false);
                 if (c.isLocator()) {
                     ClobLocatorReader reader
                             = new ClobLocatorReader(agent_.connection_, c);
-                    //  Make sure underlying Blob is released when reader is closed
-                    reader.setFreeClobOnClose();
                     return new BufferedReader(reader);
                 } else {
                     return c.getCharacterStreamX();
@@ -1222,7 +1234,7 @@ public abstract class Cursor {
     public final java.sql.Blob getBlob(int column) throws SqlException {
         switch (jdbcTypes_[column - 1]) {
         case Types.BLOB:
-            return getBlobColumn_(column, agent_);
+            return getBlobColumn_(column, agent_, true);
         default:
             throw new ColumnTypeConversionException(agent_.logWriter_,
                 "java.sql.Types " + jdbcTypes_[column -1], "java.sql.Blob");
@@ -1232,7 +1244,7 @@ public abstract class Cursor {
     public final java.sql.Clob getClob(int column) throws SqlException {
         switch (jdbcTypes_[column - 1]) {
         case Types.CLOB:
-            return getClobColumn_(column, agent_);
+            return getClobColumn_(column, agent_, true);
         default:
             throw new ColumnTypeConversionException(agent_.logWriter_,
                 "java.sql.Types " + jdbcTypes_[column -1], "java.sql.Clob");
@@ -1281,9 +1293,9 @@ public abstract class Cursor {
         case java.sql.Types.LONGVARBINARY:
             return get_VARCHAR_FOR_BIT_DATA(column);
         case java.sql.Types.BLOB:
-            return getBlobColumn_(column, agent_);
+            return getBlobColumn_(column, agent_, true);
         case java.sql.Types.CLOB:
-            return getClobColumn_(column, agent_);
+            return getClobColumn_(column, agent_, true);
         default:
             throw new ColumnTypeConversionException(agent_.logWriter_,
                 "java.sql.Types " + jdbcTypes_[column -1], "Object");
