@@ -167,6 +167,25 @@ class RAFContainer4 extends RAFContainer {
     protected void readPage(long pageNumber, byte[] pageData)
          throws IOException, StandardException
     {
+        // If this is the first alloc page, there may be another thread
+        // accessing the container information in the borrowed space on the
+        // same page. In that case, we synchronize the entire method call, just
+        // like RAFContainer.readPage() does, in order to avoid conflicts. For
+        // all other pages it is safe to skip the synchronization, since
+        // concurrent threads will access different pages and therefore don't
+        // interfere with each other.
+        if (pageNumber == FIRST_ALLOC_PAGE_NUMBER) {
+            synchronized (this) {
+                readPage0(pageNumber, pageData);
+            }
+        } else {
+            readPage0(pageNumber, pageData);
+        }
+    }
+
+    private void readPage0(long pageNumber, byte[] pageData)
+         throws IOException, StandardException
+    {
         FileChannel ioChannel;
         synchronized (this) {
             ioChannel = ourChannel;
@@ -231,6 +250,25 @@ class RAFContainer4 extends RAFContainer {
      *  @exception IOException IO error accessing page
      */
     protected void writePage(long pageNumber, byte[] pageData, boolean syncPage)
+         throws IOException, StandardException
+    {
+        // If this is the first alloc page, there may be another thread
+        // accessing the container information in the borrowed space on the
+        // same page. In that case, we synchronize the entire method call, just
+        // like RAFContainer.writePage() does, in order to avoid conflicts. For
+        // all other pages it is safe to skip the synchronization, since
+        // concurrent threads will access different pages and therefore don't
+        // interfere with each other.
+        if (pageNumber == FIRST_ALLOC_PAGE_NUMBER) {
+            synchronized (this) {
+                writePage0(pageNumber, pageData, syncPage);
+            }
+        } else {
+            writePage0(pageNumber, pageData, syncPage);
+        }
+    }
+
+    private void writePage0(long pageNumber, byte[] pageData, boolean syncPage)
          throws IOException, StandardException
     {
         FileChannel ioChannel;
