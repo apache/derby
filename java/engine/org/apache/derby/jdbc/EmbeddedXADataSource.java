@@ -231,4 +231,14 @@ public class EmbeddedXADataSource extends EmbeddedDataSource implements
             this, ra, user, password, requestPassword);
     }
 
+
+    /**
+     *
+     * @return The ResourceAdapter instance for
+     *         the underlying database
+     */
+    public ResourceAdapter getResourceAdapter()
+    {
+        return ra;
+    }
 }

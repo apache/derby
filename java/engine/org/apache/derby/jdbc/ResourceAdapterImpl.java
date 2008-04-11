@@ -29,7 +29,6 @@ import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.jdbc.ResourceAdapter;
-//import org.apache.derby.iapi.jdbc.XATransactionResource;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.store.access.AccessFactory;
@@ -40,6 +39,7 @@ import org.apache.derby.iapi.store.access.xa.XAXactId;
 import java.util.Properties;
 import java.util.Hashtable;
 import java.util.Enumeration;
+import javax.transaction.xa.XAException;
 
 
 public class ResourceAdapterImpl
@@ -119,6 +119,18 @@ public class ResourceAdapterImpl
 
 		return connectionTable.remove(xid);
 
+	}
+
+	/** @see org.apache.derby.iapi.jdbc.ResourceAdapter#cancelXATransaction(XAXactId, String)
+	 */
+	public void cancelXATransaction(XAXactId xid, String messageId)
+	throws XAException
+	{
+		XATransactionState xaState = (XATransactionState) findConnection(xid);
+
+		if (xaState != null) {
+			xaState.cancel(messageId);
+		}
 	}
 
 

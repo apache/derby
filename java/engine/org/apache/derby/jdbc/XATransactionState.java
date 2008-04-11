@@ -37,6 +37,7 @@ import org.apache.derby.iapi.store.access.xa.XAXactId;
 import org.apache.derby.iapi.reference.SQLState;
 import java.util.HashMap;
 import javax.transaction.xa.XAException;
+import org.apache.derby.shared.common.reference.MessageId;
 
 /** 
 */
@@ -81,9 +82,8 @@ final class XATransactionState extends ContextImpl {
 	*/
 	boolean isPrepared;
 
-    /** Has this transaction been finished (committed
-      * or rolled back)? */
-    boolean isFinished;
+    /** Indicates whether this transaction is supposed to be rolled back by timeout. */
+    boolean performTimeoutRollback;
 
     /** A timer task scheduled for the time when the transaction will timeout. */
     CancelXATransactionTask timeoutTask = null;
@@ -100,9 +100,9 @@ final class XATransactionState extends ContextImpl {
         /** Runs the cancel task of the global transaction */
         public void run() {
             try {
-                XATransactionState.this.cancel();
-            } catch (XAException ex) {
-                Monitor.logThrowable(ex);
+                XATransactionState.this.cancel(MessageId.CONN_XA_TRANSACTION_TIMED_OUT);
+            } catch (Throwable th) {
+                Monitor.logThrowable(th);
             }
         }
     }
@@ -118,8 +118,7 @@ final class XATransactionState extends ContextImpl {
 		this.creatingResource = resource;
 		this.associationState = XATransactionState.T1_ASSOCIATED;
 		this.xid = xid;
-        this.isFinished = false;
-
+		this.performTimeoutRollback = false; // there is no transaction yet
 	}
 
 	public void cleanupOnError(Throwable t) {
@@ -309,6 +308,8 @@ final class XATransactionState extends ContextImpl {
     *                      the transaction will be rolled back.
     */
     synchronized void scheduleTimeoutTask(long timeoutMillis) {
+        // Mark the transaction to be rolled back bby timeout
+        performTimeoutRollback = true;
         // schedule a time out task if the timeout was specified
         if (timeoutMillis > 0) {
             // take care of the transaction timeout
@@ -347,14 +348,14 @@ final class XATransactionState extends ContextImpl {
         return retVal;
     }
 
-    /** This method cancels timeoutTask and marks the transaction
-      * as finished by assigning 'isFinished = true'.
+    /** This method cancels timeoutTask and assigns
+      * 'performTimeoutRollback = false'.
       */
     synchronized void xa_finalize() {
         if (timeoutTask != null) {
             timeoutTask.cancel();
         }
-        isFinished = true;
+        performTimeoutRollback = false;
     }
 
     /**
@@ -363,12 +364,17 @@ final class XATransactionState extends ContextImpl {
      *
      * @see CancelXATransactionTask
      */
-    private synchronized void cancel() throws XAException {
-        // Check isFinished just to be sure that
+    synchronized void cancel(String messageId) throws XAException {
+        // Check performTimeoutRollback just to be sure that
         // the cancellation task was not started
         // just before the xa_commit/rollback
         // obtained this object's monitor.
-        if (!isFinished) {
+        if (performTimeoutRollback) {
+
+            // Log the message about the transaction cancelled
+            if (messageId != null)
+                Monitor.logTextMessage(messageId, xid.toString());
+
             // Check whether the transaction is associated
             // with any EmbedXAResource instance.
             if (associationState == XATransactionState.T1_ASSOCIATED) {

@@ -34,9 +34,9 @@ import java.util.Enumeration;
 
 
 import org.apache.derby.jdbc.EmbeddedXADataSource;
-import org.apache.derby.impl.drda.DRDAXid;
-import  org.apache.derby.iapi.jdbc.BrokeredConnection;
+import org.apache.derby.iapi.jdbc.BrokeredConnection;
 import org.apache.derby.iapi.jdbc.EngineConnection;
+import org.apache.derby.iapi.jdbc.ResourceAdapter;
 
 /**
  * This class contains database state specific to XA,
@@ -51,6 +51,7 @@ class XADatabase extends Database {
 
 	private XAResource xaResource;
 	private XAConnection xaConnection;
+	private ResourceAdapter ra;
 
 	
 	XADatabase (String dbName)
@@ -81,6 +82,7 @@ class XADatabase extends Database {
 		if (conn == null)
 		{
 			xaConnection = xaDataSource.getXAConnection(userId,password);
+			ra = xaDataSource.getResourceAdapter();
 			setXAResource(xaConnection.getXAResource());
 		}
 		else // this is just a connection reset. Close the logical connection.
@@ -114,14 +116,13 @@ class XADatabase extends Database {
 		return this.xaResource;
 	}
 
-
+	/**
+	 * @return The ResourceAdapter instance for
+	 *         the underlying database.
+	 */
+	ResourceAdapter getResourceAdapter()
+	{
+		return this.ra;
+	}
 }
-
-
-
-
-
-
-
-
 

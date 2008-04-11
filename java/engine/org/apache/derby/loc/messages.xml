@@ -7556,7 +7556,17 @@ Shutting down instance {0}</text>
                 <text>Negative values for the maxStatements property are not allowed: {0}</text>
                 <arg>maxStatements</arg>
             </msg>
+            <msg>
+                <name>J135</name>
+                <text>The XA transaction timed out and is going to be rolled back. The transaction Xid is {0}.</text>
+                <arg>transactionXid</arg>
+            </msg>
 
+            <msg>
+                <name>J136</name>
+                <text>There was an XA transaction associated with the connection being closed. The transaction is going to be rolled back. The transaction Xid is {0}.</text>
+                <arg>transactionXid</arg>
+            </msg>
         </family>
 
 

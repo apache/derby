@@ -21,6 +21,7 @@
 
 package org.apache.derby.iapi.jdbc;
 
+import javax.transaction.xa.XAException;
 import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.store.access.xa.XAResourceManager;
 import org.apache.derby.iapi.store.access.xa.XAXactId;
@@ -410,4 +411,14 @@ public interface ResourceAdapter {
 
 	public Object removeConnection(XAXactId xid);
 
+	/**
+	 * Cancel the XA transaction identified by the specified xid.  The
+	 * method will atomically cancel any running statement on behalf
+	 * of the transaction, end the transaction association with the
+	 * XAResource instance, and rollback of the global transaction.
+	 * @param xid tranaction id to cancel
+	 * @param messageId error to report when canceling
+	 */
+	public void cancelXATransaction(XAXactId xid, String messageId) 
+		throws XAException;
 }

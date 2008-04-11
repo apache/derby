@@ -20,8 +20,12 @@
  */
 
 package org.apache.derby.impl.drda;
+import org.apache.derby.iapi.jdbc.ResourceAdapter;
+import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.store.access.xa.XAXactId;
 import javax.transaction.xa.*;
+import org.apache.derby.shared.common.reference.MessageId;
 
 /**
  * This class translates DRDA XA protocol from an application requester to XA
@@ -716,6 +720,15 @@ class DRDAXAProtocol {
 	}
 
     /**
+     * @return The ResourceAdapter instance for
+     *         the underlying database.
+     */
+    ResourceAdapter getResourceAdapter()
+    {
+        return ((XADatabase)connThread.getDatabase()).getResourceAdapter();
+    }
+
+    /**
      * This function rollbacks the current global transaction associated
      * with the XAResource or a local transaction. The function should
      * be called only in exceptional cases - like client socket
@@ -724,31 +737,25 @@ class DRDAXAProtocol {
     {
         if (xid != null) {
             boolean local  = ( xid.getFormatId() == -1);
-            try {
-                // if the transaction is not local disassociate the transaction from
-                // the connection first because the rollback can not be performed
-                // on a transaction associated with the XAResource
+            if (!local) {
                 try {
-                    if (!local) {
-                        XAResource xaResource = getXAResource();
-                        // this will throw the XAException (because TMFAIL
-                        // will throw an exception)
-                        xaResource.end(xid, XAResource.TMFAIL);
-                    }
+                    XAXactId xid_im = new XAXactId(xid);
+                    getResourceAdapter().cancelXATransaction(
+                        xid_im,
+                        MessageId.CONN_CLOSE_XA_TRANSACTION_ROLLED_BACK
+                    );
                 } catch (XAException e) {
-                    // do not print out the exception generally thrown
-                    // when TMFAIL flag is present
-                    if (e.errorCode < XAException.XA_RBBASE
-                        || e.errorCode > XAException.XA_RBEND) {
-                        connThread.getServer().consoleExceptionPrint(e);
-                    }
+                    Monitor.logThrowable(e);
                 }
-                rollbackTransaction(xid, false);
-            } catch  (DRDAProtocolException e) {
-                // because we do not dump any DRDA stuff to the socket
-                // the exception can not be thrown in this case
-                // However, we will dump the exception to the console
-                connThread.getServer().consoleExceptionPrint(e);
+            } else {
+                try {
+                    rollbackTransaction(xid, false);
+                } catch  (DRDAProtocolException e) {
+                    // because we do not dump any DRDA stuff to the socket
+                    // the exception can not be thrown in this case
+                    // However, we will log the exception to the monitor
+                    Monitor.logThrowable(e);
+                }
             }
             xid = null;
         }

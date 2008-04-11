@@ -152,6 +152,8 @@ public interface MessageId {
      * of data sources supporting statement pooling.
      */
     String CONN_NEGATIVE_MAXSTATEMENTS                      = "J134";
+    String CONN_XA_TRANSACTION_TIMED_OUT                    = "J135";
+    String CONN_CLOSE_XA_TRANSACTION_ROLLED_BACK            = "J136";
 
 	/*
 	** Authentication

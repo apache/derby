@@ -21,6 +21,7 @@
 
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -39,6 +40,7 @@ import org.apache.derby.client.ClientXid;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.shared.common.reference.SQLState;
 
+import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.J2EEDataSource;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
@@ -48,6 +50,8 @@ import org.apache.derbyTesting.junit.TestConfiguration;
   */
 public class XATransactionTest extends BaseJDBCTestCase {
 
+    /** Tests whether it is possible to reconstruct the original Xid value
+      * correctly from SYSCS_DIAG.TRANSACTION_TABLE. */
     public void testGlobalXIDinTransactionTable() throws Exception {
         Statement stm = getConnection().createStatement();
         stm.execute("create table XATT2 (i int, text char(10))");
@@ -86,8 +90,8 @@ public class XATransactionTest extends BaseJDBCTestCase {
         stm = null;
 
         try {
-
-            // check the output of the global xid in syscs_diag.transaction_table
+            // check the output of the global xid in 
+            // syscs_diag.transaction_table
             stm = getConnection().createStatement();
 
             String query = "select global_xid from syscs_diag.transaction_table"
@@ -97,14 +101,14 @@ public class XATransactionTest extends BaseJDBCTestCase {
             rs = stm.executeQuery(query);
 
             // there should be at least one globaltransaction in progress
-            Assert.assertTrue(rs.next());
+            assertTrue(rs.next());
 
             // check whether the xid obtained matches the original xid
             Xid rXid = parseXid(rs.getString(1));
-            Assert.assertEquals(xid, rXid);
+            assertEquals(xid, rXid);
 
             // there should be at most one global transaction in progress
-            Assert.assertFalse(rs.next());
+            assertFalse(rs.next());
 
         } catch (Exception ex) {
             try {
@@ -140,7 +144,7 @@ public class XATransactionTest extends BaseJDBCTestCase {
 
     /** Tests the functionality of the XA transaction timeout.
       * <p>
-      * It executes 1000 global transactions during the test. Everyone
+      * It executes 66 global transactions during the test. Everyone
       * of them just inserts a row into XATT table. The rows inserted
       * by the transactions are different. Some of these transactions
       * are committed and some of them are left in different stages.
@@ -164,14 +168,14 @@ public class XATransactionTest extends BaseJDBCTestCase {
     public void testXATransactionTimeout() throws Exception {
 
         /* The number of statements to execute in timeout related test. */
-        int timeoutStatementsToExecute = 1000;
+        int timeoutStatementsToExecute = 66;
 
         /* Specifies the number of total executed statements per one
-           commited statement in timout related test. */
+           commited statement in timeout related test. */
         int timeoutCommitEveryStatement = 3;
 
         /* Specifies the number of statements that should be commited
-           during a timout related test. */
+           during a timeout related test. */
         int timeoutStatementsCommitted
             = (timeoutStatementsToExecute + timeoutCommitEveryStatement - 1)
                 / timeoutCommitEveryStatement;
@@ -180,17 +184,17 @@ public class XATransactionTest extends BaseJDBCTestCase {
         stm.execute("create table XATT (i int, text char(10))");
 
         XADataSource xaDataSource = J2EEDataSource.getXADataSource();
-        XAConnection xaConn = null;
+        XAConnection[] xaConn = new XAConnection[timeoutStatementsToExecute];
         XAResource xaRes = null;
         Connection conn = null;
 
         for (int i=0; i < timeoutStatementsToExecute; i++) {
-            xaConn = xaDataSource.getXAConnection();
-            xaRes = xaConn.getXAResource();
-            conn = xaConn.getConnection();
+            xaConn[i] = xaDataSource.getXAConnection();
+            xaRes = xaConn[i].getXAResource();
+            conn = xaConn[i].getConnection();
 
             Xid xid = createXid(123, i);
-            xaRes.setTransactionTimeout(5);
+            xaRes.setTransactionTimeout(8);
             xaRes.start(xid, XAResource.TMNOFLAGS);
 
             stm = conn.createStatement();
@@ -201,13 +205,12 @@ public class XATransactionTest extends BaseJDBCTestCase {
                 xaRes.end(xid, XAResource.TMSUCCESS);
                 xaRes.prepare(xid);
                 xaRes.commit(xid, false);
-                xaConn.close();
             } else if (i % 11 != 0) {
-                // check the timout for transactions disassociated
+                // check the tiemout for transactions disassociated
                 // with failure.
                 try {
                     xaRes.end(xid, XAResource.TMFAIL);
-                    Assert.fail();
+                    fail();
                 } catch (XAException ex) {
                     if (ex.errorCode < XAException.XA_RBBASE
                         || ex.errorCode > XAException.XA_RBEND)
@@ -216,31 +219,28 @@ public class XATransactionTest extends BaseJDBCTestCase {
                     }
                 }
                 stm.close();
-                xaConn.close();
             } else if (i % 2 == 0) {
-                // check the timout for transactions disassociated
+                // check the timeout for transactions disassociated
                 // with success.
                 xaRes.end(xid, XAResource.TMSUCCESS);
                 stm.close();
-                xaConn.close();
-            } else {
-                // check the timout for associated transactions
-                ;
-            }
+            } 
         }
 
+        ResultSet rs = null;
+
         stm = getConnection().createStatement();
-        ResultSet rs = stm.executeQuery("select count(*) from XATT");
+        rs = stm.executeQuery("select count(*) from XATT");
         rs.next();
 
         // Check whether the correct number of transactions
         // was rolled back
-        Assert.assertTrue(rs.getInt(1) == timeoutStatementsCommitted);
+        assertTrue(rs.getInt(1) == timeoutStatementsCommitted);
 
-        // test the timout during the statement is run
-        xaConn = xaDataSource.getXAConnection();
-        xaRes = xaConn.getXAResource();
-        conn = xaConn.getConnection();
+        // test the timeout during the statement run
+        XAConnection xaConn2 = xaDataSource.getXAConnection();
+        xaRes = xaConn2.getXAResource();
+        conn = xaConn2.getConnection();
 
         Xid xid = createXid(124, 100);
         xaRes.setTransactionTimeout(10);
@@ -250,28 +250,40 @@ public class XATransactionTest extends BaseJDBCTestCase {
 
         // Check whether the statement was correctly timed out
         // and the appropriate exception was thrown
-        boolean exceptionThrown = false;
         try {
+            // Run this kind of statement just to be sure
+            // it will not finish before it will time out
             rs = stm.executeQuery(
-                 "select * from XATT a, XATT b, XATT c, XATT d, XATT e "
-               + "order by a.i");
+                 "select count(*) from sys.syscolumns a, sys.syscolumns b, "
+               + "sys.syscolumns c, sys.syscolumns d, sys.syscolumns e "
+               + "group by a.referenceid, b.referenceid, c.referenceid, "
+               + "d.referenceid");
+            fail("An exception is expected here");
         } catch (SQLException ex) {
             // Check the sql state of the thrown exception
             assertSQLState(
                 SQLState.LANG_STATEMENT_CANCELLED_OR_TIMED_OUT.substring(0,5),
-                ex
-            );
-            exceptionThrown = true;
+                ex);
         }
-        Assert.assertTrue(exceptionThrown);
 
+        // perform a select on the table just to be sure that all
+        // the transactions were rolled back.
         stm = getConnection().createStatement();
         rs = stm.executeQuery("select count(*) from XATT");
         rs.next();
 
+        // Go throught the XA Connections just to be sure that no code
+        // optimization would garbage collect them before (and thus
+        // the transactions might get rolled back by a different
+        // code).
+        for (int i=0; i < timeoutStatementsToExecute; i++) {
+            assertNotNull(xaConn[i]);
+            xaConn[i].close();
+        }
+
         // Again, check whether the correct number of transactions
         // was rolled back
-        Assert.assertTrue(rs.getInt(1) == timeoutStatementsCommitted);
+        assertTrue(rs.getInt(1) == timeoutStatementsCommitted);
     }
 
 
@@ -296,15 +308,15 @@ public class XATransactionTest extends BaseJDBCTestCase {
       * @return The xid object corresponding to the xid specified in a string.
       */
     private static Xid parseXid(String str) {
-        Assert.assertNotNull(str);
-        Assert.assertTrue(str.matches("\\(\\p{Digit}+,\\p{XDigit}+,\\p{XDigit}+\\)"));
+        assertNotNull(str);
+        assertTrue(str.matches("\\(\\p{Digit}+,\\p{XDigit}+,\\p{XDigit}+\\)"));
 
         String formatIdS = str.substring(1, str.indexOf(','));
         String gtidS = str.substring(str.indexOf(',')+1, str.lastIndexOf(','));
         String bqualS = str.substring(str.lastIndexOf(',')+1, str.length()-1);
 
-        Assert.assertTrue(gtidS.length() % 2 == 0);
-        Assert.assertTrue(bqualS.length() % 2 == 0);
+        assertTrue(gtidS.length() % 2 == 0);
+        assertTrue(bqualS.length() % 2 == 0);
 
         int fmtid = Integer.parseInt(formatIdS);
         byte[] gtid = new byte[gtidS.length()/2];
@@ -332,7 +344,12 @@ public class XATransactionTest extends BaseJDBCTestCase {
     public static Test suite() {
         // the test requires XADataSource to run
         if (JDBC.vmSupportsJDBC3()) {
-            return TestConfiguration.defaultSuite(XATransactionTest.class);
+            Test test = TestConfiguration.defaultSuite(XATransactionTest.class);
+            // Set the lock timeout back to the default, because when
+            // running in a bigger suite the value may have been
+            // altered by an earlier test
+            test = DatabasePropertyTestSetup.setLockTimeouts(test, 20, 60);
+            return test;
         }
 
         return new TestSuite("XATransactionTest cannot run without XA support");
