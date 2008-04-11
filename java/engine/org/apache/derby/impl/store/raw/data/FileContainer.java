@@ -26,19 +26,11 @@ import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.Limits;
 import org.apache.derby.iapi.reference.SQLState;
 
-import org.apache.derby.impl.store.raw.data.BaseContainer;
-import org.apache.derby.impl.store.raw.data.BaseContainerHandle;
-import org.apache.derby.impl.store.raw.data.BasePage;
-import org.apache.derby.impl.store.raw.data.PageVersion;
-
 import org.apache.derby.iapi.services.cache.Cacheable;
 import org.apache.derby.iapi.services.cache.CacheManager;
 import org.apache.derby.iapi.services.context.ContextService;
-import org.apache.derby.iapi.services.daemon.DaemonService;
-import org.apache.derby.iapi.services.daemon.Serviceable;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.services.io.FormatIdUtil;
 import org.apache.derby.iapi.services.io.FormatIdOutputStream;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.io.TypedFormat;
@@ -46,11 +38,8 @@ import org.apache.derby.iapi.services.io.TypedFormat;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.store.raw.ContainerHandle;
 import org.apache.derby.iapi.store.raw.ContainerKey;
-import org.apache.derby.iapi.store.raw.LockingPolicy;
-import org.apache.derby.iapi.store.raw.Loggable;
 import org.apache.derby.iapi.store.raw.Page;
 import org.apache.derby.iapi.store.raw.PageKey;
-import org.apache.derby.iapi.store.raw.PageTimeStamp;
 import org.apache.derby.iapi.store.raw.RecordHandle;
 import org.apache.derby.iapi.store.raw.RawStoreFactory;
 import org.apache.derby.iapi.store.raw.Transaction;
@@ -69,11 +58,11 @@ import org.apache.derby.iapi.util.ByteArray;
 
 import java.io.IOException;
 import java.io.DataInput;
-import java.io.DataOutput;
 
 import java.util.Properties;
 import java.util.zip.CRC32;
 
+import org.apache.derby.io.StorageRandomAccessFile;
 
 /**
 	FileContainer is an abstract base class for containers
@@ -692,39 +681,33 @@ abstract class FileContainer
     }
 
 	/**
-		Read the container's header.  Assumes the input stream (fileData)
-		is positioned at the beginning of the file.
+        Read the container's header.
 
-		Subclass that implements openContainer is expected to manufacture a DataInput 
-		stream which is used here to read the header.
+        When this method is called, the embryonic page that is passed in must
+        have been read directly from the file or the input stream, even if the
+        alloc page may still be in cache.  This is because a stubbify operation
+        only writes the stub to disk, it does not get rid of any stale page
+        from the page cache.  So if it so happens that the stubbified container
+        object is aged out of the container cache but the first alloc page
+        hasn't, then when any stale page of this container wants to be written
+        out, the container needs to be reopened, which is when this routine is
+        called.  We must not get the alloc page in cache because it may be
+        stale page and it may still say the container has not been dropped.
 
 		<BR> MT - single thread required - Enforced by caller.
 
+        @param epage the embryonic page to read the header from
 		@exception StandardException Derby Standard error policy
 		@exception IOException error in reading the header from file
 	*/
-	protected void readHeader(DataInput fileData) 
+	protected void readHeader(byte[] epage)
 		 throws IOException, StandardException
 	{
-		// Always read the header from the input stread even if the alloc page may
-		// still be in cache.  This is because a stubbify operation only writes
-		// the stub to disk, it did not get rid of any stale page from the page
-		// cache.  So if it so happen that the stubbified container object is
-		// aged out of the container cache but the first alloc page hasn't,
-		// then when any stale page of this container wants to be written out,
-		// the container needs to be reopened, which is when this routine is
-		// called.  We must not get the alloc page in cache because it may be
-		// stale page and it may still say the container has not been dropped.
-
-		byte[] epage = getEmbryonicPage(fileData);
-
 		// read persistent container header into containerInfo
 		AllocPage.ReadContainerInfo(containerInfo, epage);
 
 		// initialize header from information stored in containerInfo
 		readHeaderFromArray(containerInfo);
-
-		epage = null;
 	}
 
 	// initialize header information so this container object can be safely
@@ -869,8 +852,7 @@ abstract class FileContainer
 	}
 
 	/**
-		Write the container header directly to output stream (fileData).
-		Assumes the output stream is positioned at the beginning of the file.
+		Write the container header directly to file.
 
 		Subclasses that can writes the container header is expected to
 		manufacture a DataOutput stream which is used here.
@@ -880,7 +862,8 @@ abstract class FileContainer
 		@exception StandardException Derby Standard error policy
 		@exception IOException error in writing the header to file
 	 */
-	protected void writeHeader(DataOutput fileData, boolean create, byte[] epage)
+	protected void writeHeader(StorageRandomAccessFile file,
+                               boolean create, byte[] epage)
 		 throws IOException, StandardException
 	{
 		// write out the current containerInfo in the borrowed space to byte
@@ -903,13 +886,30 @@ abstract class FileContainer
 		dataFactory.writeInProgress();
 		try
 		{
-			fileData.write(epage);
+            writeAtOffset(file, epage, FIRST_ALLOC_PAGE_OFFSET);
 		}
 		finally
 		{
 			dataFactory.writeFinished();
 		}
 	}
+
+    /**
+     * Write a sequence of bytes at the given offset in a file. This method
+     * is not thread safe, so the caller must make sure that no other thread
+     * is performing operations that may change current position in the file.
+     *
+     * @param file the file to write to
+     * @param bytes the bytes to write
+     * @param offset the offset to start writing at
+     * @throws IOException if an I/O error occurs while writing
+     */
+    void writeAtOffset(StorageRandomAccessFile file, byte[] bytes, long offset)
+            throws IOException
+    {
+        file.seek(offset);
+        file.write(bytes);
+    }
 
 	/**
 		Get an embryonic page from the dataInput stream.
@@ -933,6 +933,26 @@ abstract class FileContainer
 		}
 		return epage;
 	}
+
+    /**
+     * Read an embryonic page (that is, a section of the first alloc page that
+     * is so large that we know all the borrowed space is included in it) from
+     * the specified offset in a {@code StorageRandomAccessFile}. This method
+     * is not thread safe, so the caller must make sure that no other thread
+     * is performing operations that may change current position in the file.
+     *
+     * @param file the file to read from
+     * @param offset where to start reading (normally
+     * {@code FileContainer.FIRST_ALLOC_PAGE_OFFSET})
+     * @return a byte array containing the embryonic page
+     * @throws IOException if an I/O error occurs while reading
+     */
+    byte[] getEmbryonicPage(StorageRandomAccessFile file, long offset)
+            throws IOException
+    {
+        file.seek(offset);
+        return getEmbryonicPage(file);
+    }
 
 	/**
 		Write containerInfo into a byte array
