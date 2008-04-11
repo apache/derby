@@ -125,7 +125,11 @@ implemented.</li>
 	
 <li>Asynchronous replication with manual fail-over.</li>
 
-<li>VTI Table Functions.</li>
+<li>Table Functions. SQL Feature T326. This lets you run queries against
+any external data source which can be presented as a JDBC ResultSet. Table Functions are useful
+for data migration and integration. For more information, please consult
+the "Programming Derby-style table functions" section of the Derby Developer's Guide
+as well as the functional specification attached to DERBY-716.</li>
 
 <li>Java Management Extensions (JMX) for Derby, allowing local and remote
 monitoring and management of a running Derby system (this release
