@@ -679,14 +679,11 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
 		}
 		else
 		{
-			file.seek(FIRST_ALLOC_PAGE_OFFSET);
-			epage = getEmbryonicPage(file);
+			epage = getEmbryonicPage(file, FIRST_ALLOC_PAGE_OFFSET);
 		}
 
 		// need to check for frozen state
 
-
-		file.seek(FIRST_ALLOC_PAGE_OFFSET);
 		writeHeader(file, create, epage);
 
 		// leave the end of the file at a page boundry. This
@@ -1393,8 +1390,8 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
              try {
 
                  fileData = file.getRandomAccessFile(canUpdate ? "rw" : "r");
-                 fileData.seek(FIRST_ALLOC_PAGE_OFFSET);
-                 readHeader(fileData);
+                 readHeader(getEmbryonicPage(fileData,
+                                             FIRST_ALLOC_PAGE_OFFSET));
 
                  if (SanityManager.DEBUG)
                  {
@@ -1435,7 +1432,8 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
                          fileData = 
                              stub.getRandomAccessFile(canUpdate ? "rw" : "r");
 
-                         readHeader(fileData);
+                         readHeader(getEmbryonicPage(fileData,
+                                                     FIRST_ALLOC_PAGE_OFFSET));
                      }
                      catch (IOException ioe2)
                      {

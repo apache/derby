@@ -24,9 +24,7 @@ package org.apache.derby.impl.store.raw.data;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.services.io.FormatIdUtil;
 
-import org.apache.derby.impl.store.raw.data.BaseDataFileFactory;
 import org.apache.derby.iapi.store.raw.ContainerKey;
 
 import java.io.EOFException;
@@ -35,6 +33,7 @@ import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ClosedChannelException;
+import org.apache.derby.io.StorageRandomAccessFile;
 
 /**
  * RAFContainer4 overrides a few methods in RAFContainer in an attempt to use
@@ -84,6 +83,51 @@ class RAFContainer4 extends RAFContainer {
         super(factory);
     }
 
+    /**
+     * Return the {@code FileChannel} for the specified
+     * {@code StorageRandomAccessFile} if it is a {@code RandomAccessFile}.
+     * Otherwise, return {@code null}.
+     *
+     * @param file the file to get the channel for
+     * @return a {@code FileChannel} if {@code file} is an instance of
+     * {@code RandomAccessFile}, {@code null} otherwise
+     */
+    private FileChannel getChannel(StorageRandomAccessFile file) {
+        if (file instanceof RandomAccessFile) {
+            /** XXX - this cast isn't testing friendly.
+             * A testing class that implements StorageRandomAccessFile but isn't
+             * a RandomAccessFile will be "worked around" by this class. An
+             * example of such a class is
+             * functionTests/util/corruptio/CorruptRandomAccessFile.java.
+             * An interface rework may be necessary.
+             */
+            return ((RandomAccessFile) file).getChannel();
+        }
+        return null;
+    }
+
+    /**
+     * <p>
+     * Return the file channel for the current value of the {@code fileData}
+     * field. If {@code fileData} doesn't support file channels, return
+     * {@code null}.
+     * </p>
+     *
+     * <p>
+     * Callers of this method must synchronize on the container object since
+     * two shared fields ({@code fileData} and {@code ourChannel}) are
+     * accessed.
+     * </p>
+     *
+     * @return a {@code FileChannel} object, if supported, or {@code null}
+     */
+    private FileChannel getChannel() {
+        if (ourChannel == null) {
+            ourChannel = getChannel(fileData);
+        }
+        return ourChannel;
+    }
+
     /*
      * Wrapping methods that retrieve the FileChannel from RAFContainer's
      * fileData after calling the real methods in RAFContainer.
@@ -95,21 +139,11 @@ class RAFContainer4 extends RAFContainer {
             SanityManager.ASSERT(iosInProgress == 0,
                     "Container opened while IO operations are in progress. "
                     + "This should not happen.");
+            SanityManager.ASSERT(fileData == null, "fileData isn't null");
+            SanityManager.ASSERT(ourChannel == null, "ourChannel isn't null");
         }
 
-        boolean result = super.openContainer(newIdentity);
-        if (result == true && super.fileData != null &&
-                super.fileData instanceof java.io.RandomAccessFile) {
-            /** XXX - this cast isn't testing friendly.
-             * A testing class that implements StorageRandomAccessFile but isn't
-             * a RandomAccessFile will be "worked around" by this class. An
-             * example of such a class is
-             * functionTests/util/corruptio/CorruptRandomAccessFile.java.
-             * An interface rework may be necessary.
-             */
-            ourChannel = ((RandomAccessFile)super.fileData).getChannel();
-        }
-        return result;
+        return super.openContainer(newIdentity);
     }
 
     synchronized void createContainer(ContainerKey newIdentity)
@@ -119,14 +153,10 @@ class RAFContainer4 extends RAFContainer {
             SanityManager.ASSERT(iosInProgress == 0,
                     "Container created while IO operations are in progress. "
                     + "This should not happen.");
+            SanityManager.ASSERT(fileData == null, "fileData isn't null");
+            SanityManager.ASSERT(ourChannel == null, "ourChannel isn't null");
         }
         super.createContainer(newIdentity);
-
-        if (super.fileData != null &&
-                super.fileData instanceof java.io.RandomAccessFile) {
-            // XXX - see "XXX" comment above.
-            ourChannel = ((RandomAccessFile) super.fileData).getChannel();
-        }
     }
 
 
@@ -188,18 +218,10 @@ class RAFContainer4 extends RAFContainer {
     {
         FileChannel ioChannel;
         synchronized (this) {
-            ioChannel = ourChannel;
             if (SanityManager.DEBUG) {
                 SanityManager.ASSERT(!getCommittedDropState());
-                // If ioChannel == null and fileData supports getChannel()
-                // we have a problem. See this.openContainer(ContainerKey 
-                // newIdentity).
-                SanityManager.ASSERT(! ((ioChannel == null) &&
-                        super.fileData instanceof java.io.RandomAccessFile),
-                        "RAFContainer4: New style readPage attempted" +
-                        " with uninitialized ioChannel");
-
             }
+            ioChannel = getChannel();
         }
 
         if(ioChannel != null) {
@@ -272,21 +294,14 @@ class RAFContainer4 extends RAFContainer {
          throws IOException, StandardException
     {
         FileChannel ioChannel;
-        synchronized(this) {
+        synchronized (this) {
             // committed and dropped, do nothing.
             // This file container may only be a stub
             if (getCommittedDropState())
                 return;
-            ioChannel = ourChannel;
-            if (SanityManager.DEBUG) {
-                // If ioChannel == null and fileData supports getChannel()
-                // we have a problem
-                SanityManager.ASSERT(! ((ioChannel == null) &&
-                        super.fileData instanceof java.io.RandomAccessFile),
-                        "RAFContainer4: New style writePage attempted " +
-                        "with uninitialized ioChannel");
-            }
+            ioChannel = getChannel();
         }
+
         if(ioChannel != null) {
             ///////////////////////////////////////////////////
             //
@@ -398,6 +413,49 @@ class RAFContainer4 extends RAFContainer {
         }
     }
 
+    /**
+     * Write a sequence of bytes at the given offset in a file.
+     *
+     * @param file the file to write to
+     * @param bytes the bytes to write
+     * @param offset the offset to start writing at
+     * @throws IOException if an I/O error occurs while writing
+     */
+    void writeAtOffset(StorageRandomAccessFile file, byte[] bytes, long offset)
+            throws IOException
+    {
+        FileChannel ioChannel = getChannel(file);
+        if (ioChannel != null) {
+            writeFull(ByteBuffer.wrap(bytes), ioChannel, offset);
+        } else {
+            super.writeAtOffset(file, bytes, offset);
+        }
+    }
+
+    /**
+     * Read an embryonic page (that is, a section of the first alloc page that
+     * is so large that we know all the borrowed space is included in it) from
+     * the specified offset in a {@code StorageRandomAccessFile}.
+     *
+     * @param file the file to read from
+     * @param offset where to start reading (normally
+     * {@code FileContainer.FIRST_ALLOC_PAGE_OFFSET})
+     * @return a byte array containing the embryonic page
+     * @throws IOException if an I/O error occurs while reading
+     */
+    byte[] getEmbryonicPage(StorageRandomAccessFile file, long offset)
+            throws IOException
+    {
+        FileChannel ioChannel = getChannel(file);
+        if (ioChannel != null) {
+            ByteBuffer buffer =
+                    ByteBuffer.allocate(AllocPage.MAX_BORROWED_SPACE);
+            readFull(buffer, ioChannel, offset);
+            return buffer.array();
+        } else {
+            return super.getEmbryonicPage(file, offset);
+        }
+    }
 
     /**
      * Attempts to fill buf completely from start until it's full.
