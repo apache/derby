@@ -154,16 +154,15 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
         TestSuite suite = new TestSuite(
                 SystemPrivilegesPermissionTest.class,
                 "SystemPrivilegesPermissionTest");
-         return new SecurityManagerSetup(suite, POLICY_FILE_NAME);
+        
+        if (SecurityManagerSetup.JVM_HAS_SUBJECT_AUTHORIZATION)
+        {
+            suite.addTest(new SecurityManagerSetup(
+                new SystemPrivilegesPermissionTest("policyTestSystemGrants"),
+                POLICY_FILE_NAME));
+        }
+        return suite;
     }
-
-    /**
-     * Test case that does a check of the XXX
-     */
-    public void testIsSecurityManager() {
-        assertSecurityManager();
-     }
-
     
     /**
      * Tests SystemPrincipal.
@@ -301,11 +300,11 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
                                 p.getActions());
                     }
                 }
-                
-                
-                
             }
         }
+    }
+    
+    public void policyTestSystemGrants() {
 
         // test SystemPermission for authorized user against policy file
         
