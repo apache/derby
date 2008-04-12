@@ -124,7 +124,7 @@ public class ExternalSortFactory implements
 	 * Returns merge sort implementation. Extending classes can overide this 
 	 * method to customize sorting.
      *
-	 * @returns MergeSort implementation
+	 * @return MergeSort implementation
 	 */
 	protected MergeSort getMergeSort() 
     {

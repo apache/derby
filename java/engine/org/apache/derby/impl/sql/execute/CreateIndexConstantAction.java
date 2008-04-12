@@ -115,7 +115,7 @@ class CreateIndexConstantAction extends IndexConstantAction
      * @param forCreateTable                Being executed within a CREATE TABLE
      *                                      statement
      * @param unique		                True means it will be a unique index
-     * @param isUniqueWithDuplicateNulls    True means index check and disallow
+     * @param uniqueWithDuplicateNulls      True means index check and disallow
      *                                      any duplicate key if key has no 
      *                                      column with a null value.  If any 
      *                                      column in the key has a null value,
@@ -153,17 +153,18 @@ class CreateIndexConstantAction extends IndexConstantAction
             Properties		properties)
 	{
 		super(tableId, indexName, tableName, schemaName);
-        this.forCreateTable = forCreateTable;
-		this.unique = unique;
-		this.uniqueWithDuplicateNulls = uniqueWithDuplicateNulls;
-		this.indexType = indexType;
-		this.columnNames = columnNames;
-		this.isAscending = isAscending;
-		this.isConstraint = isConstraint;
-		this.conglomerateUUID = conglomerateUUID;
-		this.properties = properties;
-		this.conglomId = -1L;
-		this.droppedConglomNum = -1L;
+
+        this.forCreateTable             = forCreateTable;
+		this.unique                     = unique;
+		this.uniqueWithDuplicateNulls   = uniqueWithDuplicateNulls;
+		this.indexType                  = indexType;
+		this.columnNames                = columnNames;
+		this.isAscending                = isAscending;
+		this.isConstraint               = isConstraint;
+		this.conglomerateUUID           = conglomerateUUID;
+		this.properties                 = properties;
+		this.conglomId                  = -1L;
+		this.droppedConglomNum          = -1L;
 	}
 
 	/**

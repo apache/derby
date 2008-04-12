@@ -47,15 +47,17 @@ public class UniqueWithDuplicateNullsIndexSortObserver extends BasicSortObserver
      * 		if language is reusing row wrappers.
      * @param isConstraint is this part of a constraint
      * @param indexOrConstraintName name of index of constraint
-     * @param distinct	If true, toss out duplicates.
-     * 		Otherwise, retain them.
      * @param execRow	ExecRow to use as source of clone for store.
      * @param reuseWrappers	Whether or not we can reuse the wrappers
      * @param tableName name of the table
      */
-    public UniqueWithDuplicateNullsIndexSortObserver(boolean doClone, boolean isConstraint,
-            String indexOrConstraintName, ExecRow execRow,
-            boolean reuseWrappers, String tableName) {
+    public UniqueWithDuplicateNullsIndexSortObserver(
+    boolean doClone, 
+    boolean isConstraint,
+    String  indexOrConstraintName, 
+    ExecRow execRow,
+    boolean reuseWrappers, 
+    String  tableName) {
         super(doClone, false, execRow, reuseWrappers);
         this.isConstraint = isConstraint;
         this.indexOrConstraintName = indexOrConstraintName;
@@ -67,7 +69,7 @@ public class UniqueWithDuplicateNullsIndexSortObserver extends BasicSortObserver
      * exception if the duplicates has no null part in the key. 
      * @param in new key
      * @param dup the new key is duplicate of this key
-     * @returns DVD [] if there is at least one null in
+     * @return DVD [] if there is at least one null in
      * the key else thorws StandardException
      * @throws StandardException is the duplicate key has all non null parts
      */
