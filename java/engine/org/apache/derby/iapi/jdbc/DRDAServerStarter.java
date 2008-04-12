@@ -97,10 +97,11 @@ public final class DRDAServerStarter implements ModuleControl, Runnable
 
 	/**
 	 * Sets configuration information for the network server to be started.
-	 * @param address InetAddress to listen on
-	 * @param portNumber portNumber to listen on
-	 * @param userName the user name for actions requiring authorization
-	 * @param password the password for actions requiring authorization
+	 * @param listenAddress InetAddress to listen on
+	 * @param portNumber    portNumber to listen on
+	 * @param userName      the user name for actions requiring authorization
+	 * @param password      the password for actions requiring authorization
+     *
 	 * @throws Exception on error
 	 * @see NetworkServerControl
 	 */
