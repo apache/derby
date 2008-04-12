@@ -407,7 +407,8 @@ public class EmbeddedDataSource extends ReferenceableDataSource implements
 	}
 
 	/*
-	 * DataSource methods 
+	 * DataSource methods - keep these non-final so that others can
+	 * extend Derby's classes if they choose to.
 	 */
 
 
@@ -417,7 +418,7 @@ public class EmbeddedDataSource extends ReferenceableDataSource implements
 	 * @return  a Connection to the database
 	 * @exception SQLException if a database-access error occurs.
 	 */
-	public final Connection getConnection() throws SQLException
+	public Connection getConnection() throws SQLException
 	{
 		return this.getConnection(getUser(), getPassword(), false);
 	}
@@ -434,7 +435,7 @@ public class EmbeddedDataSource extends ReferenceableDataSource implements
 	 * @return  a Connection to the database
 	 * @exception SQLException if a database-access error occurs.
 	 */
-	public final Connection getConnection(String username, String password) 
+	public Connection getConnection(String username, String password) 
 		 throws SQLException
 	{
 		return this.getConnection(username, password, true);
