@@ -1076,9 +1076,15 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
         }
     }
 
-    public Blob getBlobColumn_(int column, Agent agent) throws SqlException 
-    {
-        netResultSet_.markLOBAsAccessed(column);
+    /**
+     * @see org.apache.derby.client.am.Cursor#getBlobColumn_
+     */
+    public Blob getBlobColumn_(int column, Agent agent, boolean toBePublished)
+            throws SqlException {
+        // Only inform the tracker if the Blob is published to the user.
+        if (toBePublished) {
+            netResultSet_.markLOBAsAccessed(column);
+        }
         // Check for locator
         int locator = locator(column);
         if (locator > 0) { // Create locator-based LOB object
@@ -1112,8 +1118,15 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
     }
 
 
-    public Clob getClobColumn_(int column, Agent agent) throws SqlException {
-        netResultSet_.markLOBAsAccessed(column);
+    /**
+     * @see org.apache.derby.client.am.Cursor#getClobColumn_
+     */
+    public Clob getClobColumn_(int column, Agent agent, boolean toBePublished)
+            throws SqlException {
+        // Only inform the tracker if the Clob is published to the user.
+        if (toBePublished) {
+            netResultSet_.markLOBAsAccessed(column);
+        }
         // Check for locator
         int locator = locator(column);
         if (locator > 0) { // Create locator-based LOB object
