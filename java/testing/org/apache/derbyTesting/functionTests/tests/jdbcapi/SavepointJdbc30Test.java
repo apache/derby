@@ -1,3 +1,22 @@
+/*
+ *
+ * Derby - Class org.apache.derbyTesting.functionTests.tests.jdbcapi/SavepointJdbc30Test
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied. See the License for the specific
+ * language governing permissions and limitations under the License.
+ */
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
 import java.lang.reflect.Method;
@@ -57,14 +76,20 @@ public class SavepointJdbc30Test extends BaseJDBCTestCase {
 
         // Repeat the embedded tests obtaining a connection from
         // an XA data source if it is supported. This is not supported
-        // under JSR169
+        // under JSR169.
         if (JDBC.vmSupportsJDBC3()) {
-        	embedded = new TestSuite(
-        	"SavepointJdbc30_JSR169Test:embedded XADataSource");
-        	embedded.addTestSuite(SavepointJdbc30Test.class);
-        	embedded.addTest(getEmbeddedSuite("SavepointJdbc30_JSR169Test:"
+            embedded = new TestSuite(
+            "SavepointJdbc30_JSR169Test:embedded XADataSource");
+            embedded.addTestSuite(SavepointJdbc30Test.class);
+            embedded.addTest(getEmbeddedSuite("SavepointJdbc30_JSR169Test:"
         			+ "embedded only XADataSource"));
-        	suite.addTest(TestConfiguration.connectionXADecorator(embedded));
+            suite.addTest(TestConfiguration.connectionXADecorator(embedded));
+            //        	 Repeat the client tests obtaining a connection from
+            // an XA data source if it is supported. This is not supported
+            // under JSR169.
+            client = new TestSuite("SavepointJdbc30_JSR169Test:client XADatasource");
+            client.addTestSuite(SavepointJdbc30Test.class);
+            suite.addTest(TestConfiguration.clientServerDecorator(TestConfiguration.connectionXADecorator(client)));        	
         }	
         // return suite;
         return new CleanDatabaseTestSetup(suite) {
