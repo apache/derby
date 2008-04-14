@@ -347,19 +347,21 @@ to specify your environment and options:
     not your Cygwin home directory.
 
     NOTE TO WINDOWS USERS: *use forward slashes* ("/") in your
-    path specifications.  Backward-slashes ("\") confuse Ant.
-    Check your path specifications for correct use of slashes in 
-    ant.properties if you get errors during the build saying java.lang 
-    can not be found.
+    path specifications.  Backward-slashes ("\") confuse Ant because it 
+    behaves as escape character for it. Check your path specifications 
+    for correct use of slashes in ant.properties if you get errors during 
+    the build saying java.lang can not be found.
 
     For example, you should have:
 
-      j14lib=c:/jdk1.4.2/jre/lib
+      j14lib=C:/jdk1.4.2/jre/lib
+         or 
+      j14lib=C:\\jdk1.4.2\\jre\\lib (Double Slashes)   
 
     NOT
  
-      j14lib=c:\jdk1.4.2\jre\lib
-
+      j14lib=C:\jdk1.4.2\jre\lib
+       
    
     - j14lib
 
