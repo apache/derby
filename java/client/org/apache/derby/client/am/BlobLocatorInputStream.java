@@ -21,12 +21,8 @@
 
 package org.apache.derby.client.am;
 
-import java.sql.SQLException;
-
 import java.io.IOException;
 
-import org.apache.derby.shared.common.error.ExceptionUtil;
-import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.shared.common.sanity.SanityManager;
 
 /**
@@ -189,38 +185,6 @@ public class BlobLocatorInputStream extends java.io.InputStream
     }
 
     /**
-     * Closes this input stream and releases any system resources associated
-     * with the stream.  This will release the underlying Blob value. 
-     *  
-     * @throws java.io.IOException
-     */
-    public void close() throws IOException {
-        try {
-            if (blob != null  && freeBlobOnClose) {
-                blob.free();
-            }
-        } catch (SQLException ex) {
-            if (ex.getSQLState().compareTo
-                    (ExceptionUtil.getSQLStateFromIdentifier
-                            (SQLState.LOB_OBJECT_INVALID)) == 0) {
-                // Blob has already been freed, probably because of autocommit
-                return;  // Ignore error
-            }
-
-            IOException ioEx = new IOException();
-            ioEx.initCause(ex);
-            throw ioEx;
-        }
-    }
-
-    /**
-     * Tell stream to free the underlying Blob when it is closed.
-     */
-    public void setFreeBlobOnClose() {
-        freeBlobOnClose = true;
-    }
-    
-    /**
      * Connection used to read Blob from server.
      */
     private final Connection connection;
@@ -241,11 +205,4 @@ public class BlobLocatorInputStream extends java.io.InputStream
      * maxPos starts counting from 1.
      */
     private final long maxPos;
- 
-    /**
-     * If true, the underlying Blob will be freed when the underlying stream is
-     * closed.  Used to implement correct behavior for streams obtained from
-     * result sets.
-     */
-    private boolean freeBlobOnClose = false;
 }
