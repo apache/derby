@@ -64,13 +64,6 @@ public class ClobLocatorInputStream extends java.io.InputStream {
     private long currentPos;
     
     /**
-     * If true, the underlying Blob will be freed when the underlying stream is
-     * closed.  Used to implement correct behavior for streams obtained from
-     * result sets.
-     */
-    private boolean freeClobOnClose = false;
-
-    /**
      * Create an <code>InputStream</code> for reading the
      * <code>Clob</code> value represented by the given locator based
      * <code>Clob</code> object.
@@ -166,39 +159,6 @@ public class ClobLocatorInputStream extends java.io.InputStream {
             throw ioEx;
         }
     }
-
-    /**
-     * Closes this input stream and releases any system resources associated
-     * with the stream.  This will release the underlying Clob value. 
-     *  
-     * @throws java.io.IOException
-     */
-    public void close() throws IOException {
-        try {
-            if (clob != null  && freeClobOnClose) {
-                clob.free();
-            }
-        } catch (SQLException ex) {
-            if (ex.getSQLState().compareTo
-                    (ExceptionUtil.getSQLStateFromIdentifier
-                            (SQLState.LOB_OBJECT_INVALID)) == 0) {
-                // Clob has already been freed, probably because of autocommit
-                return;  // Ignore error
-            }
-
-            IOException ioEx = new IOException();
-            ioEx.initCause(ex);
-            throw ioEx;
-        }
-    }
-      
-    /**
-     * Tell stream to free the underlying Clob when it is closed.
-     */
-    public void setFreeClobOnClose() {
-        freeClobOnClose = true;
-    }
-    
 
     /**
      * Returns a <code>Byte</code> array from the
