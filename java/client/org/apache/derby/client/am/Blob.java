@@ -30,9 +30,7 @@ import org.apache.derby.shared.common.reference.SQLState;
 
 public class Blob extends Lob implements java.sql.Blob {
     
-    //This boolean variable indicates whether the Blob object has
-    //been invalidated by calling free() on it
-    private boolean isValid = true;
+    
     
     //-----------------------------state------------------------------------------
 
@@ -608,11 +606,12 @@ public class Blob extends Lob implements java.sql.Blob {
         throws SQLException {
         
         //calling free() on a already freed object is treated as a no-op
-        if (!isValid) return;
+        if (!isValid_) return;
         
         //now that free has been called the Blob object is no longer
         //valid
-        isValid = false;
+        
+        isValid_ = false;
         try {            
             synchronized (agent_.connection_) {
                 if (agent_.loggingEnabled()) {
@@ -736,18 +735,7 @@ public class Blob extends Lob implements java.sql.Blob {
         return true;
     }
     
-    /**
-     * Checks is isValid is true. If it is not true throws 
-     * a SQLException stating that a method has been called on
-     * an invalid LOB object
-     *
-     * @throws SQLException if isValid is not true
-     */
-    private void checkValidity() throws SQLException{
-        if(!isValid)
-            throw new SqlException(null,new ClientMessageId(SQLState.LOB_OBJECT_INVALID))
-                                                  .getSQLException();
-    }
+    
     
 
     /**

@@ -1359,6 +1359,14 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
             if (clobLength == 26)
                 shortClob = rs.getClob(1);
         }
+        
+        /**
+         * We call it before the commit(); to cache the result
+         * DERBY-3574
+         */
+        clob.length();
+        shortClob.length();
+        
         rs.close();
         stmt.close();
         commit();
