@@ -472,7 +472,7 @@ public interface NetworkServerMBean {
      * value if so desired. The required value will depend on the value of the
      * <code>-h</code> (or <code>derby.drda.host</code>) (host) and 
      * <code>-p</code> (or <code>derby.drda.portNumber</code>) (port) settings
-     * of the Netowrk Server.</p>
+     * of the Network Server.</p>
      * <p>
      * Requires <code>SystemPermission("server", "monitor")</code> if a security
      * manager is installed.</p>
