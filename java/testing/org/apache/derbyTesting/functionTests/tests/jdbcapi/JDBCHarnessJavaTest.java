@@ -51,7 +51,6 @@ public class JDBCHarnessJavaTest extends HarnessJavaTest {
             // from old jdbcapi.runall
             // "derbyStress",       TODO: Need a way to control heap size from Junit tests
             // "prepStmtMetaData",  TODO: convert - different canon for client
-            // "resultsetStream", TODO: investigate failure/convert needs ext files
             "maxfieldsize",
             //"LOBTest", TODO: investigate failure/convert
             "SetQueryTimeoutTest",
@@ -69,16 +68,6 @@ public class JDBCHarnessJavaTest extends HarnessJavaTest {
         "testRelative",
     };
     
-//    /**
-//     * Tests that require JDBC 3.
-//     */
-//    private static final String[] JDBCAPI_TESTS_EMEBDDED_JDBC3 =
-//    {
-//        // Tests that run ok in embedded but have a different client master file.
-//        "savepointJdbc30_XA",
-//    };
-    
-    
     private JDBCHarnessJavaTest(String name) {
         super(name);
      }
@@ -92,12 +81,6 @@ public class JDBCHarnessJavaTest extends HarnessJavaTest {
         TestSuite suite = new TestSuite("jdbcapi: old harness java tests");
         suite.addTest(baseSuite("embedded", JDBCAPI_TESTS_BOTH));
         suite.addTest(baseSuite("embedded", JDBCAPI_TESTS_EMEBDDED));
-//        if (JDBC.vmSupportsJDBC3())
-//        {
-//            suite.addTest(baseSuite("embedded_JDBC3",
-//                    JDBCAPI_TESTS_EMEBDDED_JDBC3));
-//        }
-        
         suite.addTest(TestConfiguration.clientServerDecorator(
                 baseSuite("clientserver", JDBCAPI_TESTS_BOTH)));
         return suite;
