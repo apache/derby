@@ -29,9 +29,7 @@ import java.sql.SQLException;
 import org.apache.derby.shared.common.reference.SQLState;
 
 public class Blob extends Lob implements java.sql.Blob {
-    
-    
-    
+
     //-----------------------------state------------------------------------------
 
     byte[] binaryString_ = null;
@@ -610,7 +608,6 @@ public class Blob extends Lob implements java.sql.Blob {
         
         //now that free has been called the Blob object is no longer
         //valid
-        
         isValid_ = false;
         try {            
             synchronized (agent_.connection_) {
@@ -734,9 +731,6 @@ public class Blob extends Lob implements java.sql.Blob {
 
         return true;
     }
-    
-    
-    
 
     /**
      * Materialize the stream used for input to the database.

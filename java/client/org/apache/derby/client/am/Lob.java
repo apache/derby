@@ -58,7 +58,7 @@ public abstract class Lob implements UnitOfWorkListener {
      * invalidated by calling free() on it
      */
     protected boolean isValid_ = true;
-    
+
     final private boolean willBeLayerBStreamed_;
     
         
@@ -76,7 +76,7 @@ public abstract class Lob implements UnitOfWorkListener {
      * This integer identifies which transaction the Lob is associated with
      */
     private int transactionID_;
-    
+
     //-----------------------------messageId------------------------------------------
     final static protected ClientMessageId LOB_OBJECT_LENGTH_UNKNOWN_YET =
         new ClientMessageId( SQLState.LOB_OBJECT_LENGTH_UNKNOWN_YET );
@@ -110,7 +110,7 @@ public abstract class Lob implements UnitOfWorkListener {
      */
     long sqlLength() throws SqlException 
     {
-    	if (lengthObtained_) return sqlLength_;
+        if (lengthObtained_) return sqlLength_;
         
         if (isLocator()) {
             sqlLength_ = getLocatorLength();
@@ -387,24 +387,23 @@ public abstract class Lob implements UnitOfWorkListener {
     }
     
     /**
-     * Checks is isValid is true and whether the transaction that
-     * created the Lob is still active. If any of which is not true throws 
+     * Checks if isValid is true and whether the transaction that
+     * created the Lob is still active. If any of which is not true throws
      * a SQLException stating that a method has been called on
-     * an invalid LOB object
+     * an invalid LOB object.
      *
-     * @throws SQLException if isValid is not true
+     * @throws SQLException if isValid is not true or the transaction that
+     * created the Lob is not active
      */
     protected void checkValidity() throws SQLException{
-    	
-    	/**
-    	 * If there isn't an open connection, the Lob is invalid.
-    	 */
-    	try{
-    		agent_.connection_.checkForClosedConnection();
-    	}catch(SqlException se){
-    		throw se.getSQLException();
-    	}
-    	
+
+        // If there isn't an open connection, the Lob is invalid.
+        try {
+            agent_.connection_.checkForClosedConnection();
+        } catch (SqlException se) {
+            throw se.getSQLException();
+        }
+
         if(!isValid_ || transactionID_ != agent_.connection_.getTransactionID())
             throw new SqlException(null,new ClientMessageId(SQLState.LOB_OBJECT_INVALID))
                                                   .getSQLException();

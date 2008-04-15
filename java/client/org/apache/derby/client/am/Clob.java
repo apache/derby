@@ -48,17 +48,12 @@ public class Clob extends Lob implements java.sql.Clob {
 
     protected String encoding_ = "UNICODE";
 
- 
-
-    
-    
     //---------------------constructors/finalizer---------------------------------
     public Clob(Agent agent, String string) {
 
         this(agent,
              false);
 
-                
         string_ = string;
         setSqlLength(string_.length());
         dataType_ |= STRING;
@@ -241,7 +236,6 @@ public class Clob extends Lob implements java.sql.Clob {
         }
     }
 
-    
   /**
    * Returns a copy of the specified substring
    * in the <code>CLOB</code> value

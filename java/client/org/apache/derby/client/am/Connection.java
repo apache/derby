@@ -118,7 +118,7 @@ public abstract class Connection implements java.sql.Connection,
     private boolean accumulated444ForMessageProcFailure_ = false;
 
     private int transactionID_ = 0;
-    
+
     //---------------------XA-----------------------------------------------------
 
     protected boolean isXAConnection_ = false; // Indicates an XA connection
@@ -561,7 +561,7 @@ public abstract class Connection implements java.sql.Connection,
             // internal code will call commitX which will ignore the commit request
             // while in a Global transaction
             checkForInvalidXAStateOnCommitOrRollback();
-            flowCommit();            
+            flowCommit();
         }
         catch ( SqlException se )
         {
@@ -1110,9 +1110,9 @@ public abstract class Connection implements java.sql.Connection,
      * @return the ID of the active transaction
      */
     public int getTransactionID(){
-    	return transactionID_;
+        return transactionID_;
     }
-    
+
     /**
      * Returns the current schema (the schema that would be used for
      * compilation. This is not part of the java.sql.Connection interface, and
