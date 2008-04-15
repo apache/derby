@@ -271,19 +271,13 @@ public abstract class Connection implements java.sql.Connection,
 
     // This is a callback method, called by subsystem - NetConnection
     protected void resetConnection(LogWriter logWriter,
-                                   String user,
                                    ClientBaseDataSource ds,
                                    boolean recomputeFromDataSource) throws SqlException {
         // Transaction isolation level is handled in completeReset.
         // clearWarningsX() will re-initialize the following properties
         clearWarningsX();
 
-        user_ = (user != null) ? user : user_;
-
         if (ds != null && recomputeFromDataSource) { // no need to reinitialize connection state if ds hasn't changed
-            user_ = (user != null) ? user : ds.getUser();
-            ;
-
             retrieveMessageText_ = ds.getRetrieveMessageText();
 
 
@@ -2100,15 +2094,14 @@ public abstract class Connection implements java.sql.Connection,
     // can this be called in a unit of work
     // can this be called from within a stored procedure
     //
-    synchronized public void reset(LogWriter logWriter, String user, 
-            String password, ClientBaseDataSource ds, 
+    synchronized public void reset(LogWriter logWriter, ClientBaseDataSource ds, 
             boolean recomputeFromDataSource) throws SqlException {
         if (logWriter != null) {
-            logWriter.traceConnectResetEntry(this, logWriter, user, 
+            logWriter.traceConnectResetEntry(this, logWriter, user_, 
                                             (ds != null) ? ds : dataSource_);
         }
         try {
-            reset_(logWriter, user, password, ds, recomputeFromDataSource);
+            reset_(logWriter, ds, recomputeFromDataSource);
         } catch (SqlException sqle) {
             DisconnectException de = new DisconnectException(agent_, 
                 new ClientMessageId(SQLState.CONNECTION_FAILED_ON_RESET));
@@ -2125,8 +2118,7 @@ public abstract class Connection implements java.sql.Connection,
         availableForReuse_ = false;
     }
 
-    abstract protected void reset_(LogWriter logWriter, String user, 
-            String password, ClientBaseDataSource ds, 
+    abstract protected void reset_(LogWriter logWriter, ClientBaseDataSource ds, 
             boolean recomputerFromDataSource) throws SqlException;
 
     /**

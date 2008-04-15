@@ -232,7 +232,7 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
         this.pooledConnection_ = null;
         this.closeStatementsOnClose = true;
         netAgent_ = (NetAgent) super.agent_;
-        initialize(user, password, dataSource, rmId, isXAConn);
+        initialize(password, dataSource, rmId, isXAConn);
     }
 
     public NetConnection(NetLogWriter netLogWriter,
@@ -283,13 +283,12 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
                          ClientPooledConnection cpc) throws SqlException {
         super(netLogWriter, user, password, isXAConn, dataSource);
         netAgent_ = (NetAgent) super.agent_;
-        initialize(user, password, dataSource, rmId, isXAConn);
+        initialize(password, dataSource, rmId, isXAConn);
         this.pooledConnection_=cpc;
         this.closeStatementsOnClose = !cpc.isStatementPoolingEnabled();
     }
 
-    private void initialize(String user,
-                            String password,
+    private void initialize(String password,
                             org.apache.derby.jdbc.ClientBaseDataSource dataSource,
                             int rmId,
                             boolean isXAConn) throws SqlException {
@@ -308,11 +307,9 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
     // preferably without password in the method signature.
     // We can probally get rid of flowReconnect method.
     public void resetNetConnection(org.apache.derby.client.am.LogWriter logWriter,
-                                   String user,
-                                   String password,
                                    org.apache.derby.jdbc.ClientBaseDataSource ds,
                                    boolean recomputeFromDataSource) throws SqlException {
-        super.resetConnection(logWriter, user, ds, recomputeFromDataSource);
+        super.resetConnection(logWriter, ds, recomputeFromDataSource);
         //----------------------------------------------------
         if (recomputeFromDataSource) {
             // do not reset managers on a connection reset.  this information shouldn't
@@ -328,40 +325,30 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
             targetSeed_ = null;
             targetSecmec_ = 0;
             if (ds != null && securityMechanism_ == 0) {
-                securityMechanism_ = ds.getSecurityMechanism(password);
+                securityMechanism_ =
+                        ds.getSecurityMechanism(getDeferredResetPassword());
             }
             resetConnectionAtFirstSql_ = false;
 
         }
-        if (password != null) {
-            deferredResetPassword_ = null;
-        } else {
-            password = getDeferredResetPassword();
-        }
         // properties prddta_ and crrtkn_ will be initialized by
         // calls to constructPrddta() and constructCrrtkn()
         //----------------------------------------------------------
-        boolean isDeferredReset = flowReconnect(password, securityMechanism_);
+        boolean isDeferredReset = flowReconnect(getDeferredResetPassword(),
+                                                securityMechanism_);
         completeReset(isDeferredReset, recomputeFromDataSource);
     }
 
 
     protected void reset_(org.apache.derby.client.am.LogWriter logWriter,
-                          String user, String password,
                           ClientBaseDataSource ds,
                           boolean recomputeFromDataSource) throws SqlException {
-        checkResetPreconditions(logWriter, user, password, ds);
-        resetNetConnection(logWriter, user, password, ds, recomputeFromDataSource);
-    }
-
-    protected void checkResetPreconditions(org.apache.derby.client.am.LogWriter logWriter,
-                                           String user,
-                                           String password,
-                                           ClientBaseDataSource ds) throws SqlException {
         if (inUnitOfWork_) {
             throw new SqlException(logWriter, 
-                new ClientMessageId(SQLState.NET_CONNECTION_RESET_NOT_ALLOWED_IN_UNIT_OF_WORK));
+                new ClientMessageId(
+                    SQLState.NET_CONNECTION_RESET_NOT_ALLOWED_IN_UNIT_OF_WORK));
         }
+        resetNetConnection(logWriter, ds, recomputeFromDataSource);
     }
 
     java.util.List getSpecialRegisters() {
