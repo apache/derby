@@ -48,6 +48,11 @@ import java.io.IOException;
  */
 public final class FormatIdUtil
 {
+	private	static	final	int		BYTE_MASK = 0xFF;
+	private	static	final	int		NIBBLE_MASK = 0xF;
+	private	static	final	int		NIBBLE_SHIFT = 4;
+	private	static	final	int		HEX_RADIX = 16;
+
 	private FormatIdUtil() {
 	}
 
@@ -76,4 +81,61 @@ public final class FormatIdUtil
 
 		return Integer.toString(fmtId);
 	}
+
+	/**
+	 * <p>
+	 * Encode a byte array as a string.
+	 * </p>
+	 */
+	public	static	String	toString( byte[] written, int count )
+	{
+		char[]	chars = new char[ count * 2 ];
+		int		charIdx = 0;
+
+		for ( int i = 0; i < count; i++ )
+		{
+			int		current = written[ i ] & BYTE_MASK;
+			int		lowNibble = current & NIBBLE_MASK;
+			int		highNibble = current >>> NIBBLE_SHIFT;
+
+			chars[ charIdx++ ] = encodeNibble( lowNibble );
+			chars[ charIdx++ ] = encodeNibble( highNibble );
+		}
+
+		return new String( chars );
+	}
+
+	/**
+	 * <p>
+	 * Decode a byte array which had been encoded as a string.
+	 * </p>
+	 */
+	public	static	byte[]	fromString( String objString )
+	{
+		char[]	chars = objString.toCharArray();
+		int		count = chars.length;
+		byte[]	bytes = new byte[ count / 2 ];
+		int		byteIdx = 0;
+
+		for ( int i = 0; i < count; i = i + 2 )
+		{
+			int lowNibble = decodeNibble( chars[ i ] );
+			int highNibble = decodeNibble( chars[ i + 1 ] );
+
+			bytes[ byteIdx++ ] = (byte) ( ( highNibble << NIBBLE_SHIFT ) | lowNibble );
+		}
+
+		return bytes;
+	}
+
+	private	static	char	encodeNibble( int nibble )
+	{
+		return Character.forDigit( nibble, HEX_RADIX );
+	}
+
+	private	static	int		decodeNibble( char c )
+	{
+		return Character.digit( c, HEX_RADIX );
+	}
+    
 }
