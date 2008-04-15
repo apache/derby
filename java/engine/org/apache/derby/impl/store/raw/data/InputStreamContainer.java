@@ -89,7 +89,7 @@ final class InputStreamContainer extends FileContainer  {
 			// of the first allocation page. And it is because we
 			// just opened the stream and the first allocation page
 			// is located at the beginning of the file.
-			readHeader(dis);
+			readHeader(getEmbryonicPage(dis));
 
 			return true;
 
