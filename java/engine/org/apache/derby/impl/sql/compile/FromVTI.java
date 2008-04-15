@@ -23,6 +23,7 @@ package	org.apache.derby.impl.sql.compile;
 
 import org.apache.derby.iapi.services.io.DynamicByteArrayOutputStream;
 import org.apache.derby.iapi.services.io.FormatIdOutputStream;
+import org.apache.derby.iapi.services.io.FormatIdUtil;
 import org.apache.derby.iapi.services.loader.ClassInspector;
 import org.apache.derby.iapi.services.loader.GeneratedMethod;
 
@@ -1702,13 +1703,17 @@ public class FromVTI extends FromTable implements VTIEnvironment
             dbaos.flush();
 
             byte[]      rawResult = dbaos.getByteArray();
+            int         count = dbaos.getUsed();
 
-            return new String( rawResult );
+            String  retval = FormatIdUtil.toString( rawResult, count );
+
+            return retval;
             
         } catch (Throwable t)
         {
             throw StandardException.unexpectedUserException( t );
         }
     }
-    
+
+   
 }

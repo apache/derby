@@ -49,6 +49,7 @@ import org.apache.derby.iapi.store.access.Qualifier;
 import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.services.io.FormatIdInputStream;
+import org.apache.derby.iapi.services.io.FormatIdUtil;
 import org.apache.derby.iapi.services.loader.GeneratedMethod;
 
 import org.apache.derby.iapi.types.RowLocation;
@@ -690,7 +691,7 @@ class VTIResultSet extends NoPutResultSetImpl
         throws StandardException
     {
         try {
-            byte[]                                          bytes = ice.getBytes();
+            byte[]                                          bytes = FormatIdUtil.fromString( ice );
             ByteArrayInputStream                    bais = new ByteArrayInputStream( bytes );
             FormatIdInputStream                     fiis = new FormatIdInputStream( bais );
             TypeDescriptor                              td = (TypeDescriptor) fiis.readObject();
@@ -785,6 +786,5 @@ class VTIResultSet extends NoPutResultSetImpl
             
         vsdv.setWidth( dtd.getPrecision(), dtd.getScale(), false );
     }
-    
     
 }
