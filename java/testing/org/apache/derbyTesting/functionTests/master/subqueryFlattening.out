@@ -4301,8 +4301,8 @@ None
 			Right result set:
 				Project-Restrict ResultSet (6):
 				Number of opens = 6
-				Rows seen = 7
-				Rows filtered = 1
+				Rows seen = 6
+				Rows filtered = 0
 				restriction = true
 				projection = true
 					constructor time (milliseconds) = 0
@@ -4314,7 +4314,7 @@ None
 				Source result set:
 					Index Row to Base Row ResultSet for COLLS:
 					Number of opens = 6
-					Rows seen = 7
+					Rows seen = 6
 					Columns accessed from heap = {0}
 						constructor time (milliseconds) = 0
 						open time (milliseconds) = 0
@@ -4322,7 +4322,7 @@ None
 						close time (milliseconds) = 0
 						Index Scan ResultSet for COLLS using index NEW_INDEX3 at serializable isolation level using share row locking chosen by the optimizer
 						Number of opens = 6
-						Rows seen = 7
+						Rows seen = 6
 						Rows filtered = 0
 						Fetch Size = 1
 							constructor time (milliseconds) = 0
@@ -4335,8 +4335,8 @@ None
 							Number of columns fetched=2
 							Number of deleted rows visited=0
 							Number of pages visited=6
-							Number of rows qualified=7
-							Number of rows visited=7
+							Number of rows qualified=6
+							Number of rows visited=6
 							Scan type=btree
 							Tree height=1
 							start position: 
@@ -4445,8 +4445,8 @@ None
 			Right result set:
 				Project-Restrict ResultSet (6):
 				Number of opens = 6
-				Rows seen = 7
-				Rows filtered = 1
+				Rows seen = 6
+				Rows filtered = 0
 				restriction = true
 				projection = true
 					constructor time (milliseconds) = 0
@@ -4458,7 +4458,7 @@ None
 				Source result set:
 					Index Row to Base Row ResultSet for COLLS:
 					Number of opens = 6
-					Rows seen = 7
+					Rows seen = 6
 					Columns accessed from heap = {0}
 						constructor time (milliseconds) = 0
 						open time (milliseconds) = 0
@@ -4466,7 +4466,7 @@ None
 						close time (milliseconds) = 0
 						Index Scan ResultSet for COLLS using index NEW_INDEX3 at serializable isolation level using share row locking chosen by the optimizer
 						Number of opens = 6
-						Rows seen = 7
+						Rows seen = 6
 						Rows filtered = 0
 						Fetch Size = 1
 							constructor time (milliseconds) = 0
@@ -4479,8 +4479,8 @@ None
 							Number of columns fetched=2
 							Number of deleted rows visited=0
 							Number of pages visited=6
-							Number of rows qualified=7
-							Number of rows visited=7
+							Number of rows qualified=6
+							Number of rows visited=6
 							Scan type=btree
 							Tree height=1
 							start position: 
@@ -6139,8 +6139,8 @@ None
 			Right result set:
 				Project-Restrict ResultSet (6):
 				Number of opens = 7
-				Rows seen = 19
-				Rows filtered = 15
+				Rows seen = 21
+				Rows filtered = 17
 				restriction = true
 				projection = true
 					constructor time (milliseconds) = 0
@@ -6152,15 +6152,15 @@ None
 				Source result set:
 					Index Row to Base Row ResultSet for COLLS:
 					Number of opens = 7
-					Rows seen = 19
+					Rows seen = 21
 					Columns accessed from heap = {0}
 						constructor time (milliseconds) = 0
 						open time (milliseconds) = 0
 						next time (milliseconds) = 0
 						close time (milliseconds) = 0
 						Index Scan ResultSet for COLLS using index NEW_INDEX3 at serializable isolation level using share row locking chosen by the optimizer
-						Number of opens = 10
-						Rows seen = 19
+						Number of opens = 11
+						Rows seen = 21
 						Rows filtered = 0
 						Fetch Size = 1
 							constructor time (milliseconds) = 0
@@ -6172,9 +6172,9 @@ None
 							Bit set of columns fetched=All
 							Number of columns fetched=2
 							Number of deleted rows visited=0
-							Number of pages visited=10
-							Number of rows qualified=19
-							Number of rows visited=25
+							Number of pages visited=11
+							Number of rows qualified=21
+							Number of rows visited=28
 							Scan type=btree
 							Tree height=1
 							start position: 
