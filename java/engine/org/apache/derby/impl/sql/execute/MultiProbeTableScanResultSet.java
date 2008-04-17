@@ -242,34 +242,50 @@ class MultiProbeTableScanResultSet extends TableScanResultSet
      */
     public void reopenCore() throws StandardException
     {
-        /* There are two scenarios for which we reopen this kind of scan:
-         *
-         *   A - The first is for join processing.  In this case we have
-         * a(nother) row from some outer table and we want to reopen this
-         * scan to look for rows matching the new outer row.
-         *
-         *   B - The second is for multi-probing.  Here we want to reopen
-         * the scan on this table to look for rows matching the next value
-         * in the probe list.
-         *
-         * If we are reopening the scan for scenario A (join processing)
-         * then we need to reset our position within the probe list. 
-         * If we are reopening the scan for scenario B then we do *not*
-         * want to reset our position within the probe list because that
-         * position tells us where to find the next probe value.
-         *
-         * The way we tell the difference between the two scenarios is
-         * by looking at our current position in the probe list (i.e. the
-         * value of probeValIndex): if our current position is beyond the
-         * length of the probe list then we know that we are reopening the
-         * scan for scenario A.  Or put another away, we should never get
-         * here for scenario B if probeValIndex is greater than or equal
-         * to the length of the probe list.  The reason is that the call
-         * to reopenCore() for scenario B will only ever happen when
-         * moreInListVals() returns true--and in that case we know that
-         * probeValIndex will be less than the length of the probeValues.
-         */
-        if (probeValIndex >= probeValues.length)
+        reopenCore(false);
+    }
+
+    /**
+     * There are two scenarios for which we reopen this kind of scan:
+     *
+     *   A - The first is for join processing.  In this case we have
+     * a(nother) row from some outer table and we want to reopen this
+     * scan to look for rows matching the new outer row.
+     *
+     *   B - The second is for multi-probing.  Here we want to reopen
+     * the scan on this table to look for rows matching the next value
+     * in the probe list.
+     *
+     * If we are reopening the scan for scenario A (join processing)
+     * then we need to reset our position within the probe list. 
+     * If we are reopening the scan for scenario B then we do *not*
+     * want to reset our position within the probe list because that
+     * position tells us where to find the next probe value.
+     *
+     * That said, this method does the work of reopenCore() using
+     * the received boolean to determine which of the two scenarios
+     * we are in.  Note that if our current position (i.e. the value
+     * of probeValIndex) is beyond the length of the probe list then
+     * we know that we are reopening the scan for scenario A.  Or put
+     * another away, we should never get here for scenario B if
+     * probeValIndex is greater than or equal to the length of the
+     * probe list.  The reason is that the call to reopenCore() for
+     * scenario B will only ever happen when moreInListVals() returns
+     * true--and in that case we know that probeValIndex will be less
+     * than the length of the probeValues.  But the opposite is not
+     * true: i.e. it is *not* safe to say that a probeValIndex which
+     * is less than the length of probe list is always for scenario
+     * B.  That's not true because it's possible that the join to
+     * which this scan belongs is a "oneRowRightSide" join, meaning
+     * that this, the "right" side scan, will be "interrupted" after
+     * we return a single row for the current outer row.  If we then
+     * come back with a new outer row we need to reset our position--
+     * even though probeValIndex will be less than probeValues.length
+     * in that case.  DERBY-3603.
+     */
+    private void reopenCore(boolean forNextProbe) throws StandardException
+    {
+        if (!forNextProbe)
             probeValIndex = 0;
 
         super.reopenCore();
@@ -346,7 +362,7 @@ class MultiProbeTableScanResultSet extends TableScanResultSet
              * figure out what the next probe value should be (and thus
              * where to position the scan).
              */
-            reopenCore();
+            reopenCore(true);
             result = super.getNextRowCore();
         }
 

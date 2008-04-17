@@ -208,9 +208,23 @@ public class InListMultiProbeTest extends BaseJDBCTestCase {
                     " ADD CONSTRAINT " + DATA_TABLE + "_PK " +
                     "PRIMARY KEY (ID)";
                 s.executeUpdate(ddl);
+                
+                for (int i = 0; i < DERBY_3603_Objects.length; i++)
+                    s.executeUpdate(DERBY_3603_Objects[i]);
             }
         };
     }
+    private static String []DERBY_3603_Objects = {
+        "create table d3603_a (a_id integer, c_id integer)",
+        "create table d3603_c (c_id integer not null, primary key(c_id)," +
+            " d_id integer, t_o bigint, t_i bigint)",
+        "insert into d3603_a (a_id, c_id) values (1, 1)",
+        "insert into d3603_a (a_id, c_id) values (2, 2)",
+        "insert into d3603_a (a_id, c_id) values (3, 1)",
+        "insert into d3603_c (c_id, d_id, t_o, t_i) values (1, 1, 1, 1)",
+        "insert into d3603_c (c_id, d_id, t_o, t_i) values (2, 2, 1, 1)",
+        "insert into d3603_c (c_id, d_id, t_o, t_i) values (21, 1, 1, 1)",
+    };
 
     /**
      * Executes three different types of queries ("strategies") repeatedly
@@ -877,6 +891,37 @@ public class InListMultiProbeTest extends BaseJDBCTestCase {
         ps.close();
         st.execute("drop table cheese");
         st.close();
+    }
+
+    public void testDerby3603()
+        throws SQLException
+    {
+        Statement s = createStatement();
+
+        JDBC.assertFullResultSet(s.executeQuery(
+                    "select count(*) from d3603_a, d3603_c " +
+                    "   where d3603_a.a_id <> 2 and d3603_c.c_id in (1, 21)"+
+                    "         and d3603_a.c_id = d3603_c.c_id"),
+                new String[][] {
+                    {"2"}
+                });
+        JDBC.assertUnorderedResultSet(s.executeQuery(
+                    "select d3603_a.a_id from d3603_a, d3603_c " +
+                    "   where d3603_a.a_id <> 2 and d3603_c.c_id in (1, 21)"+
+                    "         and d3603_a.c_id = d3603_c.c_id"),
+                new String[][] {
+                    {"1"},
+                    {"3"}
+                });
+        JDBC.assertUnorderedResultSet(s.executeQuery(
+                    "select d3603_a.a_id,d3603_c.d_id " +
+                    "       from d3603_a, d3603_c " +
+                    "   where d3603_a.a_id <> 2 and d3603_c.c_id in (1, 21)" +
+                    "         and d3603_a.c_id = d3603_c.c_id"),
+                new String[][] {
+                    {"1","1"},
+                    {"3","1"}
+                    });
     }
 
     /**
