@@ -21,9 +21,6 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.services.io.DynamicByteArrayOutputStream;
-import org.apache.derby.iapi.services.io.FormatIdOutputStream;
-import org.apache.derby.iapi.services.io.FormatIdUtil;
 import org.apache.derby.iapi.services.loader.ClassInspector;
 import org.apache.derby.iapi.services.loader.GeneratedMethod;
 
@@ -1327,15 +1324,12 @@ public class FromVTI extends FromTable implements VTIEnvironment
 		mb.push(isDerbyStyleTableFunction);
 
 		// Push the return type
+        int rtNum = -1;
         if ( isDerbyStyleTableFunction )
         {
-            String  returnType = freezeReturnType( methodCall.getRoutineInfo().getReturnType() );
-            mb.push( returnType );
+            rtNum = acb.addItem(methodCall.getRoutineInfo().getReturnType());
         }
-        else
-        {
-			mb.pushNull( String.class.getName());
-        }
+        mb.push(rtNum);
 
 		return 16;
 	}
@@ -1688,32 +1682,4 @@ public class FromVTI extends FromTable implements VTIEnvironment
             throw StandardException.unexpectedUserException( t );
         }
     }
-
-    /**
-     * Serialize a row multi set as a string.
-     */
-    private String  freezeReturnType( TypeDescriptor td )
-        throws StandardException
-    {
-        try {
-            DynamicByteArrayOutputStream    dbaos = new DynamicByteArrayOutputStream();
-            FormatIdOutputStream                fios = new FormatIdOutputStream( dbaos );
-
-            fios.writeObject( td );
-            dbaos.flush();
-
-            byte[]      rawResult = dbaos.getByteArray();
-            int         count = dbaos.getUsed();
-
-            String  retval = FormatIdUtil.toString( rawResult, count );
-
-            return retval;
-            
-        } catch (Throwable t)
-        {
-            throw StandardException.unexpectedUserException( t );
-        }
-    }
-
-   
 }

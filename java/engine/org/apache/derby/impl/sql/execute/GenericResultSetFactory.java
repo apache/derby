@@ -446,7 +446,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 									 double optimizerEstimatedRowCount,
 									 double optimizerEstimatedCost,
                                      boolean isDerbyStyleTableFunction,
-                                     String returnType
+                                     int returnTypeNumber
                                           )
 		throws StandardException
 	{
@@ -462,7 +462,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 							    optimizerEstimatedRowCount,
 								optimizerEstimatedCost,
 								isDerbyStyleTableFunction,
-                                returnType
+                                returnTypeNumber
                                 );
 	}
 

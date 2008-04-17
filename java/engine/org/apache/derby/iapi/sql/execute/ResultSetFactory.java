@@ -643,7 +643,8 @@ public interface ResultSetFactory {
 											optimizer
 		@param optimizerEstimatedCost		Estimated total cost by optimizer
 		@param isDerbyStyleTableFunction    True if this is a Derby-style table function
-		@param returnType The name of the return type (a multi-set) as a string
+		@param returnTypeNumber	Which saved object contains the return type
+								(a multi-set) serialized as a byte array
 		@return the row as a result set.
 		@exception StandardException thrown when unable to create the
 			result set
@@ -661,7 +662,7 @@ public interface ResultSetFactory {
 									 double optimizerEstimatedRowCount,
 									 double optimizerEstimatedCost,
                                      boolean isDerbyStyleTableFunction,
-                                     String returnType
+                                     int returnTypeNumber
                                           )
 		 throws StandardException;
 

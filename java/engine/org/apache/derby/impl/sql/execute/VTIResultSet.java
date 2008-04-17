@@ -48,8 +48,6 @@ import org.apache.derby.iapi.store.access.Qualifier;
 
 import org.apache.derby.iapi.error.StandardException;
 
-import org.apache.derby.iapi.services.io.FormatIdInputStream;
-import org.apache.derby.iapi.services.io.FormatIdUtil;
 import org.apache.derby.iapi.services.loader.GeneratedMethod;
 
 import org.apache.derby.iapi.types.RowLocation;
@@ -62,7 +60,6 @@ import org.apache.derby.vti.DeferModification;
 import org.apache.derby.vti.IFastPath;
 import org.apache.derby.vti.VTIEnvironment;
 
-import java.io.ByteArrayInputStream;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -101,7 +98,7 @@ class VTIResultSet extends NoPutResultSetImpl
 
 	private boolean isDerbyStyleTableFunction;
 
-    private String  returnType;
+    private final TypeDescriptor returnType;
 
     private DataTypeDescriptor[]    returnColumnTypes;
 
@@ -126,7 +123,7 @@ class VTIResultSet extends NoPutResultSetImpl
 			     double optimizerEstimatedRowCount,
 				 double optimizerEstimatedCost,
 				 boolean isDerbyStyleTableFunction,
-                 String returnType
+                 int returnTypeNumber
                  ) 
 		throws StandardException
 	{
@@ -141,7 +138,10 @@ class VTIResultSet extends NoPutResultSetImpl
 		this.pushedQualifiers = pushedQualifiers;
 		this.scanIsolationLevel = scanIsolationLevel;
 		this.isDerbyStyleTableFunction = isDerbyStyleTableFunction;
-        this.returnType = returnType;
+
+        this.returnType = returnTypeNumber == -1 ? null :
+            (TypeDescriptor)
+            activation.getPreparedStatement().getSavedObject(returnTypeNumber);
 
 		if (erdNumber != -1)
 		{
@@ -668,8 +668,7 @@ class VTIResultSet extends NoPutResultSetImpl
     {
         if ( returnColumnTypes == null )
         {
-            TypeDescriptor      td = thawReturnType( returnType );
-            TypeDescriptor[]    columnTypes = td.getRowTypes();
+            TypeDescriptor[] columnTypes = returnType.getRowTypes();
             int                         count = columnTypes.length;
 
             returnColumnTypes = new DataTypeDescriptor[ count ];
@@ -682,28 +681,6 @@ class VTIResultSet extends NoPutResultSetImpl
         return returnColumnTypes;
     }
 
-    /**
-     * <p>
-     * Deserialize a type descriptor from a string.
-     * </p>
-     */
-    private TypeDescriptor  thawReturnType( String ice )
-        throws StandardException
-    {
-        try {
-            byte[]                                          bytes = FormatIdUtil.fromString( ice );
-            ByteArrayInputStream                    bais = new ByteArrayInputStream( bytes );
-            FormatIdInputStream                     fiis = new FormatIdInputStream( bais );
-            TypeDescriptor                              td = (TypeDescriptor) fiis.readObject();
-
-            return td;
-            
-        } catch (Throwable t)
-        {
-            throw StandardException.unexpectedUserException( t );
-        }
-    }
-    
     /**
      * <p>
      * Cast the value coming out of the user-coded ResultSet. The
