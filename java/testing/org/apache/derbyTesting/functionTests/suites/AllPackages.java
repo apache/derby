@@ -109,6 +109,9 @@ public class AllPackages extends BaseTestCase {
             } else {
                throw ite;
             }
+        } catch (ClassNotFoundException ce) { // Do not add a suite not built.
+            return new TestSuite("SKIPPED: Class not found: " + className + 
+                    " - " + ce.getMessage());
         }
     }
 
