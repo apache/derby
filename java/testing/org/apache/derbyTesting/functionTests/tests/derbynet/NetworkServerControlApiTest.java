@@ -32,7 +32,6 @@ import org.apache.derbyTesting.junit.SupportFilesSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.security.AccessController;
@@ -59,6 +58,43 @@ public class NetworkServerControlApiTest extends BaseJDBCTestCase {
      *  TODO: Add tests for other API calls.
      */
     
+    /**
+     *   Test other commands. These should all give a helpful error and the
+     *   usage message
+     */
+    public void testWrongUsage() throws Exception
+    {
+        final String nsc = "org.apache.derby.drda.NetworkServerControl";
+        // we'll assume that we get the full message if we get 'Usage'
+        // because sometimes, the message gets returned with carriage return,
+        // and sometimes it doesn't, checking for two different parts...
+        final String usage = "Usage: ";
+
+        // no arguments
+        String[] cmd = new String[] {nsc};
+        assertExecJavaCmdAsExpected(new String[] 
+            {"No command given.", usage}, cmd, 1);
+
+        // some option but no command
+        cmd = new String[] {nsc, "-h", "localhost"};
+        assertExecJavaCmdAsExpected(new String[] 
+            {"No command given.", usage}, cmd, 1);
+
+        // unknown command
+        cmd = new String[] {nsc, "unknowncmd"};
+        assertExecJavaCmdAsExpected(new String[] 
+            {"Command unknowncmd is unknown.", usage}, cmd, 1);
+
+        // unknown option
+        cmd = new String[] {nsc, "-unknownarg"};
+        assertExecJavaCmdAsExpected(new String[] 
+            {"Argument -unknownarg is unknown.", usage}, cmd, 1);
+
+        // wrong number of arguments
+        cmd = new String[] {nsc, "ping", "arg1"};
+        assertExecJavaCmdAsExpected(new String[] 
+            {"Invalid number of arguments for command ping.", usage}, cmd, 1);
+    }
     
      /** 
      * @throws Exception

@@ -2103,12 +2103,10 @@ public final class NetworkServerControlImpl {
         // For convenience just use NetworkServerControlImpls log writer for user messages
         logWriter = makePrintWriter(System.out);
 
-        int command = COMMAND_START; 
-        if (args.length > 0)
-            command = findCommand(args);
-        else
+        int command = findCommand(args);
+        if (command == COMMAND_UNKNOWN)
         {
-            consolePropertyMessage("DRDA_NoArgs.U");
+            consolePropertyMessage("DRDA_NoCommand.U");
         }
 
         return command;
@@ -2273,10 +2271,11 @@ public final class NetworkServerControlImpl {
 						return i;
 					}
 				}
+
+				// didn't find command
+				consolePropertyMessage("DRDA_UnknownCommand.U", 
+					(String) commandArgs.firstElement());
 			}
-			// didn't find command
-			consolePropertyMessage("DRDA_UnknownCommand.U", 
-				(String) commandArgs.firstElement());
 		} catch (Exception e) {
 			if (e.getMessage().equals(NetworkServerControlImpl.UNEXPECTED_ERR))
 				throw e;
