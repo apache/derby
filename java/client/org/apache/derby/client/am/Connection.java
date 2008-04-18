@@ -2277,7 +2277,7 @@ public abstract class Connection implements java.sql.Connection,
      * <code>Clob</code> interface can not be constructed.
      */
     
-    public Clob createClob() throws SQLException {
+    public java.sql.Clob createClob() throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "createClob");
         }
@@ -2337,7 +2337,7 @@ public abstract class Connection implements java.sql.Connection,
      *
      */
     
-    public Blob createBlob() throws SQLException {
+    public java.sql.Blob createBlob() throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "createBlob");
         }
