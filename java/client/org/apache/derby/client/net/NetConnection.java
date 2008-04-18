@@ -307,9 +307,8 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
     // preferably without password in the method signature.
     // We can probally get rid of flowReconnect method.
     public void resetNetConnection(org.apache.derby.client.am.LogWriter logWriter,
-                                   org.apache.derby.jdbc.ClientBaseDataSource ds,
                                    boolean recomputeFromDataSource) throws SqlException {
-        super.resetConnection(logWriter, ds, recomputeFromDataSource);
+        super.resetConnection(logWriter, recomputeFromDataSource);
         //----------------------------------------------------
         if (recomputeFromDataSource) {
             // do not reset managers on a connection reset.  this information shouldn't
@@ -324,10 +323,6 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
             sourceSeed_ = null;
             targetSeed_ = null;
             targetSecmec_ = 0;
-            if (ds != null && securityMechanism_ == 0) {
-                securityMechanism_ =
-                        ds.getSecurityMechanism(getDeferredResetPassword());
-            }
             resetConnectionAtFirstSql_ = false;
 
         }
@@ -341,14 +336,13 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
 
 
     protected void reset_(org.apache.derby.client.am.LogWriter logWriter,
-                          ClientBaseDataSource ds,
                           boolean recomputeFromDataSource) throws SqlException {
         if (inUnitOfWork_) {
             throw new SqlException(logWriter, 
                 new ClientMessageId(
                     SQLState.NET_CONNECTION_RESET_NOT_ALLOWED_IN_UNIT_OF_WORK));
         }
-        resetNetConnection(logWriter, ds, recomputeFromDataSource);
+        resetNetConnection(logWriter, recomputeFromDataSource);
     }
 
     java.util.List getSpecialRegisters() {

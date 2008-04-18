@@ -67,9 +67,6 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
     /** Resource manager identificator. */
     protected int rmId_ = 0;
 
-    // Cached stuff from constructor
-    private ClientBaseDataSource ds_;
-
     /**
      * Constructor for non-XA pooled connections.
      * <p>
@@ -88,7 +85,6 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
                                   String user,
                                   String password) throws SQLException {
         logWriter_ = logWriter;
-        ds_ = ds;
         listeners_ = new ArrayList();
 
         if (ds.maxStatementsToPool() <= 0) {
@@ -141,7 +137,6 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
                                   String password,
                                   int rmId) throws SQLException {
         logWriter_ = logWriter;
-        ds_ = ds;
         rmId_ = rmId;
         listeners_ = new ArrayList();
 
@@ -238,7 +233,7 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
             	// to reset the connection state to the default on 
             	// PooledConnection.getConnection() otherwise the 
             	// isolation level and holdability was not correct and out of sync with the server.
-                physicalConnection_.reset(logWriter_, ds_, true);
+                physicalConnection_.reset(logWriter_, true);
             }
             else {
                 physicalConnection_.lightReset();    //poolfix

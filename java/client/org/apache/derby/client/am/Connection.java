@@ -271,16 +271,12 @@ public abstract class Connection implements java.sql.Connection,
 
     // This is a callback method, called by subsystem - NetConnection
     protected void resetConnection(LogWriter logWriter,
-                                   ClientBaseDataSource ds,
                                    boolean recomputeFromDataSource) throws SqlException {
         // Transaction isolation level is handled in completeReset.
         // clearWarningsX() will re-initialize the following properties
         clearWarningsX();
 
-        if (ds != null && recomputeFromDataSource) { // no need to reinitialize connection state if ds hasn't changed
-            retrieveMessageText_ = ds.getRetrieveMessageText();
-
-
+        if (recomputeFromDataSource) { // no need to reinitialize connection state if ds hasn't changed
             // property encryptionManager_
             // if needed this will later be initialized by NET calls to initializePublicKeyForEncryption()
             encryptionManager_ = null;
@@ -291,10 +287,6 @@ public abstract class Connection implements java.sql.Connection,
             currentSchemaName_ = null;
             autoCommit_ = true;
             inUnitOfWork_ = false;
-
-            loginTimeout_ = ds.getLoginTimeout();
-            dataSource_ = ds;
-            
             holdability = ResultSet.HOLD_CURSORS_OVER_COMMIT;
         }
 
@@ -2094,14 +2086,14 @@ public abstract class Connection implements java.sql.Connection,
     // can this be called in a unit of work
     // can this be called from within a stored procedure
     //
-    synchronized public void reset(LogWriter logWriter, ClientBaseDataSource ds, 
+    synchronized public void reset(LogWriter logWriter, 
             boolean recomputeFromDataSource) throws SqlException {
         if (logWriter != null) {
             logWriter.traceConnectResetEntry(this, logWriter, user_, 
-                                            (ds != null) ? ds : dataSource_);
+                                             dataSource_);
         }
         try {
-            reset_(logWriter, ds, recomputeFromDataSource);
+            reset_(logWriter, recomputeFromDataSource);
         } catch (SqlException sqle) {
             DisconnectException de = new DisconnectException(agent_, 
                 new ClientMessageId(SQLState.CONNECTION_FAILED_ON_RESET));
@@ -2118,7 +2110,7 @@ public abstract class Connection implements java.sql.Connection,
         availableForReuse_ = false;
     }
 
-    abstract protected void reset_(LogWriter logWriter, ClientBaseDataSource ds, 
+    abstract protected void reset_(LogWriter logWriter, 
             boolean recomputerFromDataSource) throws SqlException;
 
     /**
