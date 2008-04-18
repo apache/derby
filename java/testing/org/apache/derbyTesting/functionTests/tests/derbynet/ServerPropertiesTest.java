@@ -108,8 +108,8 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
                 badServerProperties, new String[] {}, true));
         
         // The other fixtures, testToggleTrace (trace on/off), 
-        // testToggleLogConnections (logconnections on/off) , and
-        // testWrongCommands can all use the default setup with adjusted policy
+        // and testToggleLogConnections (logconnections on/off)
+        // can all use the default setup with adjusted policy
         
         // need english locale so we can compare command output for those tests 
         if (!Locale.getDefault().getLanguage().equals("en"))
@@ -636,34 +636,5 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
         assertSuccessfulCmd("Log Connections changed to off.", cmd);
         // traceAll should be back to false
         verifyProperties(expectedLogConnectionsOff);    
-    }
-
-    
-    /**
-     *   Test other commands. These should all give a helpful error and the
-     *   usage message
-     *   Note: maybe these test cases should be moved to another Test,
-     *   as they don't actually test any properties. 
-     */
-    public void testWrongCommands() 
-    throws SQLException, IOException, InterruptedException
-    {
-        String nsc = "org.apache.derby.drda.NetworkServerControl";
-        // no arguments
-        String[] cmd = new String[] {nsc};
-        // we'll assume that we get the full message if we get 'Usage'
-        // because sometimes, the message gets returned with carriage return,
-        // and sometimes it doesn't, checking for two different parts...
-        assertExecJavaCmdAsExpected(new String[] 
-            {"No arguments given.", "Usage: "}, cmd, 1);
-        //Unknown command
-        cmd = new String[] {nsc, "unknowncmd"};
-        assertExecJavaCmdAsExpected(new String[] 
-            {"Command unknowncmd is unknown.", "Usage: "}, cmd, 0);
-        // wrong number of arguments
-        cmd = new String[] {nsc, "ping", "arg1"};
-        assertExecJavaCmdAsExpected(new String[] 
-            {"Invalid number of arguments for command ping.",
-             "Usage: "}, cmd, 1);
     }
 }
