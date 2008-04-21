@@ -25,6 +25,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.Random;
 
 /**
@@ -40,22 +41,28 @@ public class SingleRecordSelectClient implements Client {
     private final PreparedStatement[] pss;
     private final Random r;
     private final int tableSize;
+    private final int dataType;
 
     /**
      * Construct a new single-record select client.
      *
      * @param records the number of records in each table in the test
      * @param tables the number of tables in the test
+     * @param type the data type of the text column
+     * ({@code java.sql.Types.VARCHAR}, {@code java.sql.Types.BLOB} or
+     * {@code java.sql.Types.CLOB})
      */
-    public SingleRecordSelectClient(int records, int tables) {
+    public SingleRecordSelectClient(int records, int tables, int type) {
         tableSize = records;
         r = new Random();
         pss = new PreparedStatement[tables];
+        dataType = type;
     }
 
     public void init(Connection c) throws SQLException {
         for (int i = 0; i < pss.length; i++) {
-            String tableName = SingleRecordFiller.getTableName(tableSize, i);
+            String tableName =
+                    SingleRecordFiller.getTableName(tableSize, i, dataType);
             String sql = "SELECT * FROM " + tableName + " WHERE ID = ?";
             pss[i] = c.prepareStatement(sql);
         }
@@ -69,8 +76,25 @@ public class SingleRecordSelectClient implements Client {
         ResultSet rs = ps.executeQuery();
         rs.next();
         rs.getInt(1);
-        rs.getString(2);
+        fetchTextColumn(rs, 2);
         rs.close();
         conn.commit();
+    }
+
+    /**
+     * Make sure the text column is retrieved and read. Different methods
+     * are used for the retrieval based on whether the column is a VARCHAR,
+     * a BLOB or a CLOB.
+     */
+    private void fetchTextColumn(ResultSet rs, int column) throws SQLException {
+        if (dataType == Types.VARCHAR) {
+            rs.getString(column);
+        } else if (dataType == Types.CLOB) {
+            rs.getClob(column).getSubString(1, SingleRecordFiller.TEXT_SIZE);
+        } else if (dataType == Types.BLOB) {
+            rs.getBlob(column).getBytes(1, SingleRecordFiller.TEXT_SIZE);
+        } else {
+            throw new IllegalArgumentException();
+        }
     }
 }

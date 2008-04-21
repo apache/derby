@@ -24,6 +24,7 @@ package org.apache.derbyTesting.perf.clients;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.Random;
 
 /**
@@ -54,7 +55,8 @@ public class SingleRecordUpdateClient implements Client {
 
     public void init(Connection c) throws SQLException {
         for (int i = 0; i < pss.length; i++) {
-            String tableName = SingleRecordFiller.getTableName(tableSize, i);
+            String tableName =
+                SingleRecordFiller.getTableName(tableSize, i, Types.VARCHAR);
             String sql = "UPDATE " + tableName + " SET TEXT = ? WHERE ID = ?";
             pss[i] = c.prepareStatement(sql);
         }

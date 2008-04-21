@@ -25,6 +25,7 @@ import java.io.PrintStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.sql.Types;
 
 /**
  * Class used for running a performance test from the command line. To learn
@@ -166,7 +167,8 @@ public class Runner {
 "  -init: initialize database (otherwise, reuse database)\n" +
 "  -load: type of load, required argument, valid types:\n" +
 "      * sr_select - single-record (primary key) select from table with\n" +
-"                    100 000 rows\n" +
+"                    100 000 rows. If _blob or _clob is appended to the\n" +
+"                    name, BLOB/CLOB is used for the data columns.\n" +
 "      * sr_update - single-record (primary key) update on table with\n" +
 "                    100 000 rows\n" +
 "      * sr_select_big - single-record (primary key) select from table with\n" +
@@ -204,13 +206,17 @@ public class Runner {
      */
     private static DBFiller getDBFiller() {
         if (load.equals("sr_select") || load.equals("sr_update")) {
-            return new SingleRecordFiller(100000, 1);
+            return new SingleRecordFiller(100000, 1, Types.VARCHAR);
+        } else if (load.equals("sr_select_blob")) {
+            return new SingleRecordFiller(100000, 1, Types.BLOB);
+        } else if (load.equals("sr_select_clob")) {
+            return new SingleRecordFiller(100000, 1, Types.CLOB);
         } else if (load.equals("sr_select_big") ||
                        load.equals("sr_update_big")) {
-            return new SingleRecordFiller(100000000, 1);
+            return new SingleRecordFiller(100000000, 1, Types.VARCHAR);
         } else if (load.equals("sr_select_multi") ||
                        load.equals("sr_update_multi")) {
-            return new SingleRecordFiller(1, 32);
+            return new SingleRecordFiller(1, 32, Types.VARCHAR);
         } else if (load.equals("index_join")) {
             return new WisconsinFiller();
         }
@@ -227,15 +233,19 @@ public class Runner {
      */
     private static Client newClient() {
         if (load.equals("sr_select")) {
-            return new SingleRecordSelectClient(100000, 1);
+            return new SingleRecordSelectClient(100000, 1, Types.VARCHAR);
+        } else if (load.equals("sr_select_blob")) {
+            return new SingleRecordSelectClient(100000, 1, Types.BLOB);
+        } else if (load.equals("sr_select_clob")) {
+            return new SingleRecordSelectClient(100000, 1, Types.CLOB);
         } else if (load.equals("sr_update")) {
             return new SingleRecordUpdateClient(100000, 1);
         } else if (load.equals("sr_select_big")) {
-            return new SingleRecordSelectClient(100000000, 1);
+            return new SingleRecordSelectClient(100000000, 1, Types.VARCHAR);
         } else if (load.equals("sr_update_big")) {
             return new SingleRecordUpdateClient(100000000, 1);
         } else if (load.equals("sr_select_multi")) {
-            return new SingleRecordSelectClient(1, 32);
+            return new SingleRecordSelectClient(1, 32, Types.VARCHAR);
         } else if (load.equals("sr_update_multi")) {
             return new SingleRecordUpdateClient(1, 32);
         } else if (load.equals("index_join")) {
