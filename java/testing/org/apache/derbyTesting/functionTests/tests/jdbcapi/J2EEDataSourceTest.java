@@ -26,6 +26,7 @@ import java.io.Serializable;
 import java.security.AccessController;
 import java.sql.CallableStatement;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.ParameterMetaData;
 import java.sql.PreparedStatement;
@@ -2684,6 +2685,37 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         // END XA HOLDABILITY TEST");
     }
     
+    /**
+     * Tests that DatabaseMetaData.getConnection does not leak references to
+     * physical connections or other logical connections.
+     *
+     * @throws SQLException if something goes wrong
+     */
+    // Disabled because the test fails. It fails in different ways for client
+    // and embedded. See DERBY-3431 for information.
+    // To enable, remove 'DISABLED_' from the method name and add the test
+    // to the appropriate suite (i.e. baseSuite).
+    public void DISABLED_testConnectionLeakInDatabaseMetaData()
+            throws SQLException {
+        ConnectionPoolDataSource cpDs =
+                J2EEDataSource.getConnectionPoolDataSource();
+        PooledConnection pc = cpDs.getPooledConnection();
+        // Get first logical connection and a meta data object.
+        Connection con1 = pc.getConnection();
+        DatabaseMetaData dmd1 = con1.getMetaData();
+        assertSame(con1, dmd1.getConnection());
+        con1.close();
+        // Get second logical connection and a meta data object.
+        Connection con2 = pc.getConnection();
+        DatabaseMetaData dmd2 = con2.getMetaData();
+        con2.close();
+        pc.close();
+        // The first meta data object should not return a reference to the
+        // second logical connection.
+        assertSame(con2, dmd2.getConnection());
+        assertNotSame(con2, dmd1.getConnection());
+    }
+
     /**
      * Tests for DERBY-1144
      * 
