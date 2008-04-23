@@ -87,6 +87,10 @@ public class GroupByTest extends BaseJDBCTestCase {
         st.executeUpdate("create table t5653 (c1 float)");
         st.executeUpdate("insert into t5653 values 0.0, 90.0");
 
+        st.executeUpdate("create table d3613 (a int, b int, c int, d int)");
+        st.executeUpdate("insert into d3613 values (1,2,1,2), (1,2,3,4), " +
+                "(1,3,5,6), (2,2,2,2)");
+
         // create an all types tables
         
         st.executeUpdate(
@@ -1485,6 +1489,85 @@ public class GroupByTest extends BaseJDBCTestCase {
         String [][] expectedRows = {{"A","2"},{"B","2"}};
         JDBC.assertFullResultSet(rs, expectedRows);
         s.executeUpdate("DROP TABLE TAB");
+    }
+
+    /**
+      * DERBY-3613 check combinations of DISTINCT and GROUP BY
+      */
+    public void testDistinctGroupBy() throws SQLException
+    {
+        Statement s = createStatement();
+        ResultSet rs;
+        // First, a number of queries without aggregates:
+        rs = s.executeQuery("select distinct a from d3613 group by a");
+        JDBC.assertUnorderedResultSet(rs, new String[][] {{"2"},{"1"}});
+        rs = s.executeQuery("select distinct a from d3613 group by a,b");
+        JDBC.assertUnorderedResultSet(rs, new String[][] {{"2"},{"1"}});
+        rs = s.executeQuery("select a,b from d3613");
+        JDBC.assertUnorderedResultSet(rs,
+                new String[][] {{"1","2"},{"1","2"},{"1","3"},{"2","2"}});
+        rs = s.executeQuery("select distinct a,b from d3613 group by a,b,c");
+        JDBC.assertUnorderedResultSet(rs,
+                new String[][] {{"1","2"},{"1","3"},{"2","2"}});
+        rs = s.executeQuery("select distinct a,b from d3613 group by a,b");
+        JDBC.assertUnorderedResultSet(rs,
+                new String[][] {{"1","2"},{"1","3"},{"2","2"}});
+        rs = s.executeQuery("select distinct a,b from d3613 group by a,c,b");
+        JDBC.assertUnorderedResultSet(rs,
+                new String[][] {{"1","2"},{"1","3"},{"2","2"}});
+        // Second, a number of similar queries, with aggregates:
+        rs = s.executeQuery("select a,sum(b) from d3613 group by a,b");
+        JDBC.assertUnorderedResultSet(rs,
+                new String[][] {{"1","4"},{"1","3"},{"2","2"}});
+        rs = s.executeQuery("select distinct a,sum(b) from d3613 group by a,b");
+        JDBC.assertUnorderedResultSet(rs,
+                new String[][] {{"1","4"},{"1","3"},{"2","2"}});
+        rs = s.executeQuery("select a,sum(b) from d3613 group by a,c");
+        JDBC.assertUnorderedResultSet(rs,
+                new String[][] {{"1","2"},{"1","2"},{"1","3"},{"2","2"}});
+        rs = s.executeQuery("select distinct a,sum(b) from d3613 group by a,c");
+        JDBC.assertUnorderedResultSet(rs,
+                new String[][] {{"1","2"},{"1","3"},{"2","2"}});
+        rs = s.executeQuery(
+                "select a,sum(b) from d3613 group by a,b,c");
+        JDBC.assertUnorderedResultSet(rs,
+                new String[][] {{"1","2"},{"1","2"},{"1","3"},{"2","2"}});
+        rs = s.executeQuery(
+                "select distinct a,sum(b) from d3613 group by a,b,c");
+        JDBC.assertUnorderedResultSet(rs,
+                new String[][] {{"1","2"},{"1","3"},{"2","2"}});
+        rs = s.executeQuery(
+                "select distinct a,sum(b) from d3613 group by a");
+        JDBC.assertUnorderedResultSet(rs,
+                new String[][] {{"1","7"},{"2","2"}});
+        // A few error cases:
+        assertStatementError("42Y30", s,
+            "select distinct a,b from d3613 group by a");
+        assertStatementError("42Y30", s,
+            "select distinct a,b from d3613 group by a,c");
+        assertStatementError("42Y30", s,
+            "select distinct a,b,sum(b) from d3613 group by a");
+        
+        // A few queries from other parts of this suite, with DISTINCT added:
+        JDBC.assertFullResultSet(
+            s.executeQuery("select distinct t.t_i, m.t_i from " +
+                           "(select a, b from bug280 group by a, b) " +
+                           "t (t_i, t_dt), " +
+                           "(select a, b from bug280 group by a, b) " +
+                           "m (t_i, t_dt) " +
+                           "where t.t_i = m.t_i and t.t_dt = m.t_dt " +
+                           "group by t.t_i, t.t_dt, m.t_i, m.t_dt " +
+                           "order by t.t_i,m.t_i"),
+            new String[][] {  {"1","1"}, {"2","2"} } );
+
+        JDBC.assertFullResultSet(
+            s.executeQuery(
+                " select distinct t.i from t group by i, dt, b order by i"),
+            new String [][] { {"0"}, {"1"}, {null} });
+        JDBC.assertFullResultSet(
+            s.executeQuery(
+                " select distinct t.dt from t group by i, dt, b order by dt"),
+            new String [][] { {"1992-01-01"}, {"1992-09-09"}, {null} });
     }
 }
 

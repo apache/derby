@@ -172,8 +172,13 @@ public class GroupByList extends OrderedColumnList
 			}
 			/* If no match found in the SELECT list, then add a matching
 			 * ResultColumn/ColumnReference pair to the SelectNode's RCL.
+			 * However, don't add additional result columns if the query
+			 * specified DISTINCT, because distinct processing considers
+			 * the entire RCL and including extra columns could change the
+			 * results: e.g. select distinct a,b from t group by a,b,c
+			 * should not consider column c in distinct processing (DERBY-3613)
 			 */
-			if (! matchFound && 
+			if (! matchFound && !select.hasDistinct() &&
 			    groupingCol.getColumnExpression() instanceof ColumnReference) 
 			{
 			    	// only add matching columns for column references not 
