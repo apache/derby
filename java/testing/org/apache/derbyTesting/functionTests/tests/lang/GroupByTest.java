@@ -166,5 +166,70 @@ public class GroupByTest extends BaseJDBCTestCase {
 
 		s.executeUpdate("drop table yy");
 	}
+
+
+    /**
+      * DERBY-3613 check combinations of DISTINCT and GROUP BY
+      */
+    public void testDistinctGroupBy() throws SQLException
+    {
+        Statement s = createStatement();
+        ResultSet rs;
+        s.executeUpdate("create table d3613 (a int, b int, c int, d int)");
+        s.executeUpdate("insert into d3613 values (1,2,1,2), (1,2,3,4), " +
+                "(1,3,5,6), (2,2,2,2)");
+
+        // First, a number of queries without aggregates:
+        rs = s.executeQuery("select distinct a from d3613 group by a");
+        JDBC.assertUnorderedResultSet(rs, new String[][] {{"2"},{"1"}});
+        rs = s.executeQuery("select distinct a from d3613 group by a,b");
+        JDBC.assertUnorderedResultSet(rs, new String[][] {{"2"},{"1"}});
+        rs = s.executeQuery("select a,b from d3613");
+        JDBC.assertUnorderedResultSet(rs,
+                new String[][] {{"1","2"},{"1","2"},{"1","3"},{"2","2"}});
+        rs = s.executeQuery("select distinct a,b from d3613 group by a,b,c");
+        JDBC.assertUnorderedResultSet(rs,
+                new String[][] {{"1","2"},{"1","3"},{"2","2"}});
+        rs = s.executeQuery("select distinct a,b from d3613 group by a,b");
+        JDBC.assertUnorderedResultSet(rs,
+                new String[][] {{"1","2"},{"1","3"},{"2","2"}});
+        rs = s.executeQuery("select distinct a,b from d3613 group by a,c,b");
+        JDBC.assertUnorderedResultSet(rs,
+                new String[][] {{"1","2"},{"1","3"},{"2","2"}});
+        // Second, a number of similar queries, with aggregates:
+        rs = s.executeQuery("select a,sum(b) from d3613 group by a,b");
+        JDBC.assertUnorderedResultSet(rs,
+                new String[][] {{"1","4"},{"1","3"},{"2","2"}});
+        rs = s.executeQuery("select distinct a,sum(b) from d3613 group by a,b");
+        JDBC.assertUnorderedResultSet(rs,
+                new String[][] {{"1","4"},{"1","3"},{"2","2"}});
+        rs = s.executeQuery("select a,sum(b) from d3613 group by a,c");
+        JDBC.assertUnorderedResultSet(rs,
+                new String[][] {{"1","2"},{"1","2"},{"1","3"},{"2","2"}});
+        rs = s.executeQuery("select distinct a,sum(b) from d3613 group by a,c");
+        JDBC.assertUnorderedResultSet(rs,
+                new String[][] {{"1","2"},{"1","3"},{"2","2"}});
+        rs = s.executeQuery(
+                "select a,sum(b) from d3613 group by a,b,c");
+        JDBC.assertUnorderedResultSet(rs,
+                new String[][] {{"1","2"},{"1","2"},{"1","3"},{"2","2"}});
+        rs = s.executeQuery(
+                "select distinct a,sum(b) from d3613 group by a,b,c");
+        JDBC.assertUnorderedResultSet(rs,
+                new String[][] {{"1","2"},{"1","3"},{"2","2"}});
+        rs = s.executeQuery(
+                "select distinct a,sum(b) from d3613 group by a");
+        JDBC.assertUnorderedResultSet(rs,
+                new String[][] {{"1","7"},{"2","2"}});
+        // A few error cases:
+        assertStatementError("42Y30", s,
+            "select distinct a,b from d3613 group by a");
+        assertStatementError("42Y30", s,
+            "select distinct a,b from d3613 group by a,c");
+        assertStatementError("42Y30", s,
+            "select distinct a,b,sum(b) from d3613 group by a");
+        
+    }
+
 }
 
