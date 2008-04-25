@@ -356,12 +356,42 @@ public class NestedWhereSubqueryTest extends BaseJDBCTestCase {
 		JDBC.assertUnorderedResultSet(rs, expectedRows);
 		
 		/*
+		 * DERBY-3321 revealed an NPE with a subquery in the [NOT] EXIST subuery FromList.
+		 */
+		s.executeUpdate("create table a (aa int, bb int)");
+		s.executeUpdate("create table b (bb int)");
+		s.executeUpdate("insert into a values (1,1),(1,2),(2,2)");
+		s.executeUpdate("insert into b values (1)");
+		
+		/* NOT EXISTS */
+		sb = new StringBuffer();
+		sb.append("select * from a ");
+		sb.append("where not exists ");
+		sb.append("(select bb from (select bb from b) p where a.bb=p.bb)");
+		rs = s.executeQuery(sb.toString());
+		expectedRows = new String [][] {{"1","2"},		
+										{"2","2"}};
+		JDBC.assertUnorderedResultSet(rs, expectedRows);		
+		
+		/* EXISTS */
+		sb = new StringBuffer();
+		sb.append("select * from a ");
+		sb.append("where exists ");
+		sb.append("(select bb from (select bb from b) p where a.bb=p.bb)");
+		rs = s.executeQuery(sb.toString());
+		expectedRows = new String [][] {{"1","1"}};										
+		JDBC.assertUnorderedResultSet(rs, expectedRows);	
+		
+		/*
 		 * Clean up the tables used.
 		 */				
 		s.executeUpdate("drop table project_employees");	
 		s.executeUpdate("drop table projects");
 		s.executeUpdate("drop table employees");
 		s.executeUpdate("drop table departments");			
+		
+		s.executeUpdate("drop table a");	
+		s.executeUpdate("drop table b");	
 		
 		s.close();
 	}
