@@ -28,7 +28,8 @@ Project info
 
 Releases from trunk:
 
- * 10.4.0.0 : In development 
+ * 10.5.0.0 : In development 
+ * 10.4.1.3 : Released 04/26/2008
  * 10.3.2.1 : Released 12/10/2007
  * 10.3.1.4 : Released 8/10/2007
  * 10.2.2.0 : Released 12/19/2006
@@ -48,26 +49,34 @@ RESOLVED ISSUES SINCE LAST STATUS
 
 New committers:
 
-Øystein Grøvlen
-Dyre Tjeldvoll
-
+V. Narayanan
+Jørgen Løland
+Thomas Nielsen
+John Embretsen
+Camilla Haase
 
 RECENT VOTES
 =================================
+V. Narayanan elected as a committer
+   April 11, 2008
+   See http://www.nabble.com/-RESULT---VOTE--V.-Narayanan-as-a-committer--tt16622866.html#a16622866
 
-Require Java 5 (or later) compiler to build Derby
-   October 3, 2007
-   See http://www.nabble.com/-VOTE--Require-Java-5-%28or-later%29-compiler-to-build-Derby-tf4522491.html#a13030783
+Jørgen Løland elected as a committer
+   April 11, 2008
+   See http://www.nabble.com/-RESULT---VOTE--J%C3%B8rgen-L%C3%B8land-as-a-committer--tt16622854.html#a16622854
 
-Dyre Tjeldvoll elected as a committer
-   September 17, 2007
-   See http://mail-archives.apache.org/mod_mbox/db-derby-dev/200709.mbox/%3c46F01512.5030705@sun.com%3e
+Thomas Nielsen elected as a committer
+   April 5, 2008
+   See http://www.nabble.com/-RESULT---VOTE--Thomas-Nielsen-as-a-Derby-committer-tt16508562.html#a16508562
 
-Øystein Grøvlen elected as a committer
-   August 28, 2007
-   See http://mail-archives.apache.org/mod_mbox/db-derby-dev/200708.mbox/%3c46D578A1.4020801@sun.com%3e
+John Embretsen elected as a committer
+   April 4, 2008
+   See http://www.nabble.com/-VOTE--John-H-Embretsen-as-a-Derby-committer-tt16308653.html#a16500937
 
-
+Camilla Haase elected as a committer
+   March 11, 2008
+   See http://www.nabble.com/-RESULT---VOTE--Kim-Haase-as-a-committer-tt15982963.html#a15982963
+  
 
 OTHER NEWS
 ==========
@@ -77,7 +86,7 @@ OTHER NEWS
 RELEASE STATUS
 ==============
 
-Derby 10.4.0.0 is open for development.
+Derby 10.5.0.0 is open for development.
 
 No currently outstanding issues.
 
