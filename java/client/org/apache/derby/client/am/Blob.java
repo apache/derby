@@ -21,7 +21,6 @@
 
 package org.apache.derby.client.am;
 
-import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -260,7 +259,7 @@ public class Blob extends Lob implements java.sql.Blob {
         }
     }
 
-    private java.io.InputStream getBinaryStreamX() throws SqlException {
+    java.io.InputStream getBinaryStreamX() throws SqlException {
         checkForClosedConnection();
 
         if (isBinaryStream())    // this Lob is used for input
@@ -651,8 +650,6 @@ public class Blob extends Lob implements java.sql.Blob {
      * @throws SQLException if pos is less than 1 or if pos is greater than
      * the number of bytes in the <code>Blob</code> or if pos + length is
      * greater than the number of bytes in the <code>Blob</code>
-     *
-     * @throws SQLException.
      */
     public InputStream getBinaryStream(long pos, long length)
         throws SQLException {

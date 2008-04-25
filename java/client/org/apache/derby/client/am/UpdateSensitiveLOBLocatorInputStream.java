@@ -160,6 +160,13 @@ public abstract class UpdateSensitiveLOBLocatorInputStream extends InputStream {
         currentPos += ret;
         return ret;
     }
+
+    public void close() throws IOException 
+    {
+       if (is != null) {
+            is.close();
+        }
+    }
     
     /**
      * Verifies whether the current updateCount matches

@@ -55,8 +55,8 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(SecureServerTest.suite());
         suite.addTest(SSLTest.suite());
         suite.addTest(NetIjTest.suite());
+        suite.addTest(LOBLocatorReleaseTest.suite());
         suite.addTest(NSinSameJVMTest.suite());
-        
         
         // Disabled due to "java.sql.SQLSyntaxErrorException: The class
         // 'org.apache.derbyTesting.functionTests.tests.derbynet.checkSecMgr'

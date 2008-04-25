@@ -363,7 +363,7 @@ public class Clob extends Lob implements java.sql.Clob {
         }
     }
 
-    private java.io.Reader getCharacterStreamX() throws SqlException {
+    java.io.Reader getCharacterStreamX() throws SqlException {
         checkForClosedConnection();
 
         //check is this Lob is locator enabled
@@ -409,7 +409,7 @@ public class Clob extends Lob implements java.sql.Clob {
         }
     }
 
-    private java.io.InputStream getAsciiStreamX() throws SqlException {
+    java.io.InputStream getAsciiStreamX() throws SqlException {
         checkForClosedConnection();
 
         if (isAsciiStream())  // this Lob is used for input
