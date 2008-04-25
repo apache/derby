@@ -62,7 +62,7 @@ public class LangHarnessJavaTest extends HarnessJavaTest {
         // "currentof", being converted
         // "cursor", TODO: investigate/convert
         "dbManagerLimits",
-        "deadlockMode",
+        //"deadlockMode", CONVERTED (DeadlockModeTest)
         // "declareGlobalTempTableJava", TODO: investigate/convert
         // "declareGlobalTempTableJavaJDBC30", TODO: uses TestUtil.isNetFramework()
         // "errorStream", TODO: investigate/convert
