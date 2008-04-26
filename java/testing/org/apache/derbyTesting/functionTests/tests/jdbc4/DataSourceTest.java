@@ -29,6 +29,7 @@ import org.apache.derby.jdbc.EmbeddedConnectionPoolDataSource;
 import org.apache.derbyTesting.functionTests.tests.jdbcapi.AssertEventCatcher;
 import org.apache.derbyTesting.functionTests.util.TestUtil;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.J2EEDataSource;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.JDBCDataSource;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -310,6 +311,130 @@ public class DataSourceTest extends BaseJDBCTestCase {
         // Get a new connection to the database
         conn = getConnection();
         conn.close();
+    }
+    
+    /**
+     * Test that a PooledConnection can be reused and closed
+     * (separately) during the close event raised by the
+     * closing of its logical connection.
+     * DERBY-2142.
+     * @throws SQLException 
+     *
+     */
+    public void testPooledReuseOnClose() throws SQLException
+    {
+    	// PooledConnection from a ConnectionPoolDataSource
+    	ConnectionPoolDataSource cpds =
+    		J2EEDataSource.getConnectionPoolDataSource();
+    	subtestPooledReuseOnClose(cpds.getPooledConnection());
+        subtestPooledCloseOnClose(cpds.getPooledConnection());
+        // DERBY-3401 - removing a callback during a close causes problems.
+        //subtestPooledRemoveListenerOnClose(cpds.getPooledConnection());
+
+    	// PooledConnection from an XDataSource
+    	XADataSource xads = J2EEDataSource.getXADataSource();
+    	subtestPooledReuseOnClose(xads.getXAConnection());
+        subtestPooledCloseOnClose(xads.getXAConnection());
+        // DERBY-3401 - removing a callback during a close causes problems.
+        //subtestPooledRemoveListenerOnClose(xads.getXAConnection());
+    }
+    
+    /**
+     * Tests that a pooled connection can successfully be reused
+     * (a new connection obtained from it) during the processing
+     * of its close event by its listener.
+     * Sections 11.2 & 12.5 of JDBC 4 specification indicate that the
+     * connection can be returned to the pool when the
+     * ConnectionEventListener.connectionClosed() is called.
+     */
+    private void subtestPooledReuseOnClose(final PooledConnection pc) throws SQLException
+    {
+    	final Connection[] newConn = new Connection[1];
+    	pc.addConnectionEventListener(new ConnectionEventListener() {
+
+    		/**
+    		 * Mimic a pool handler that returns the PooledConnection
+    		 * to the pool and then reallocates it to a new logical connection.
+    		 */
+			public void connectionClosed(ConnectionEvent event) {
+				PooledConnection pce = (PooledConnection) event.getSource();
+				assertSame(pc, pce);
+				try {
+					// open a new logical connection and pass
+					// back to the fixture.
+					newConn[0] = pce.getConnection();
+				} catch (SQLException e) {
+                    // Need to catch the exception here because
+                    // we cannot throw a checked exception through
+                    // the api method. Wrap it in a RuntimeException.
+                    throw new RuntimeException(e);
+				}
+			}
+
+			public void connectionErrorOccurred(ConnectionEvent event) {
+			}
+    		
+    	});
+    	
+    	// Open a connection then close it to trigger the
+    	// fetching of a new connection in the callback.
+    	Connection c1 = pc.getConnection();
+    	c1.close();
+    	
+    	// Fetch the connection created in the close callback
+    	Connection c2 = newConn[0];
+    	assertNotNull(c2);
+    	
+    	// Ensure the connection is useable, this hit a NPE before DERBY-2142
+    	// was fixed (for embedded).
+    	c2.createStatement().close();
+    	
+    	pc.close();
+    }
+    
+    /**
+     * Tests that a pooled connection can successfully be closed
+     * during the processing of its close event by its listener.
+     */
+    private void subtestPooledCloseOnClose(final PooledConnection pc) throws SQLException
+    {
+        pc.addConnectionEventListener(new ConnectionEventListener() {
+
+            /**
+             * Mimic a pool handler that closes the PooledConnection
+             * (say it no longer needs it, pool size being reduced)
+             */
+            public void connectionClosed(ConnectionEvent event) {
+                PooledConnection pce = (PooledConnection) event.getSource();
+                assertSame(pc, pce);
+                try {
+                    pce.close();
+                } catch (SQLException e) {
+                    // Need to catch the exception here because
+                    // we cannot throw a checked exception through
+                    // the api method. Wrap it in a RuntimeException.
+                    throw new RuntimeException(e);
+                }
+            }
+
+            public void connectionErrorOccurred(ConnectionEvent event) {
+            }
+            
+        });
+        
+        // Open and close a connection to invoke the logic above
+        // through the callback
+        pc.getConnection().close();
+                
+        // The callback closed the actual pooled connection
+        // so subsequent requests to get a logical connection
+        // should fail.
+        try {
+            pc.getConnection();
+            fail("PooledConnection should be closed");
+        } catch (SQLException sqle) {
+            assertSQLState("08003", sqle);
+        }
     }
     /**
      * Stop the network server

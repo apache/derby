@@ -300,6 +300,10 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
             physicalConnection_.agent_.logWriter_.traceEntry(this, "recycleConnection");
         }
 
+        // Null out the reference to the logical connection that is currently
+        // being closed.
+        this.logicalConnection_ = null;
+
         for (Iterator e = listeners_.iterator(); e.hasNext();) {
             ConnectionEventListener listener =
                     (ConnectionEventListener)e.next();
@@ -333,8 +337,8 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
     }
 
     /**
-     * Used by <code>LogicalConnection.close</code> when it disassociates itself
-     * from the pooled connection.
+     * Used by {@code LogicalConnection.close} in some circumstances when
+     * it disassociates itself from the pooled connection.
      */
     public synchronized void nullLogicalConnection() {
         logicalConnection_ = null;

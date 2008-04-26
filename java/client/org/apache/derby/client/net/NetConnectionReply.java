@@ -57,18 +57,6 @@ public class NetConnectionReply extends Reply
         agent_.checkForChainBreakingException_();
     }
 
-    void verifyDeferredReset() throws SqlException {
-        readDssHeader();
-        verifyConnectReply(CodePoint.EXCSATRD);
-        readDssHeader();
-        verifyConnectReply(CodePoint.ACCSECRD);
-        readDssHeader();
-        verifyConnectReply(CodePoint.SECCHKRM);
-        readDssHeader();
-        verifyConnectReply(CodePoint.ACCRDBRM);
-        agent_.checkForChainBreakingException_();
-    }
-
     void verifyConnectReply(int codept) throws SqlException {
         if (peekCodePoint() != codept) {
             parseConnectError();
