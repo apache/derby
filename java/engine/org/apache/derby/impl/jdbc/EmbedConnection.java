@@ -61,10 +61,13 @@ import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
 
+import java.util.Map;
+import java.util.WeakHashMap;
 import java.util.HashMap;
 import java.util.Properties;
 import java.util.Iterator;
 
+import org.apache.derby.iapi.jdbc.EngineLOB;
 import org.apache.derby.impl.jdbc.authentication.NoneAuthenticationServiceImpl;
 
 /**
@@ -125,6 +128,13 @@ public abstract class EmbedConnection implements EngineConnection
 
 	private HashMap lobHashMap = null;
 	private int lobHMKey = 0;
+
+    /**
+     * Map to keep track of all the lobs associated with this
+     * connection. These lobs will be cleared after the transaction
+     * is no longer valid or when connection is closed
+     */
+    private WeakHashMap lobReferences = null;
 
 	//////////////////////////////////////////////////////////
 	// STATE (copied to new nested connections, but nesting
@@ -2358,21 +2368,17 @@ public abstract class EmbedConnection implements EngineConnection
 		//free all the lob resources in the HashMap
 		//initialize the locator value to 0 and
 		//the hash table object to null.
-		if (rootConnection.lobHashMap != null) {
-			for (Iterator e = getlobHMObj().values().iterator();
-				e.hasNext() ;) {
-				Object obj = e.next();
-				if (obj instanceof Clob)  {
-					EmbedClob temp = (EmbedClob)obj;
-					temp.free();
-				}
-				if (obj instanceof Blob) {
-					EmbedBlob temp = (EmbedBlob)obj;
-					temp.free();
-				}
+		Map map = rootConnection.lobReferences;
+		if (map != null) {
+            Iterator it = map.keySet ().iterator ();
+            while (it.hasNext()) {
+                ((EngineLOB)it.next()).free();
 			}
-			getlobHMObj().clear();
+			map.clear();
 		}
+        if (rootConnection.lobHashMap != null) {
+            rootConnection.lobHashMap.clear ();
+        }
 	}
 
 	/**
@@ -2402,6 +2408,18 @@ public abstract class EmbedConnection implements EngineConnection
                     newKey = rootConnection.lobHMKey = 1;
                 return newKey;
 	}
+
+    /**
+     * Adds an entry of the lob in WeakHashMap. These entries are used
+     * for cleanup during commit/rollback or close.
+     * @param lobReference LOB Object
+     */
+    void addLOBReference (Object lobReference) {
+        if (rootConnection.lobReferences == null) {
+            rootConnection.lobReferences = new WeakHashMap ();
+        }
+        rootConnection.lobReferences.put (lobReference, null);
+    }
 
 	/**
 	* Return the Hash Map in the root connection

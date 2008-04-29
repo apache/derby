@@ -24,7 +24,7 @@ package org.apache.derby.impl.jdbc;
 
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.jdbc.EngineClob;
+import org.apache.derby.iapi.jdbc.EngineLOB;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.Resetable;
@@ -67,7 +67,7 @@ import java.sql.Clob;
         new update methods can safely be added into implementation.
    </UL>
  */
-final class EmbedClob extends ConnectionChild implements Clob, EngineClob
+final class EmbedClob extends ConnectionChild implements Clob, EngineLOB
 {
 
     /**
@@ -79,7 +79,7 @@ final class EmbedClob extends ConnectionChild implements Clob, EngineClob
     /** Tells whether the Clob has been freed or not. */
     private boolean isValid = true;
 
-    private final int locator;
+    private int locator;
     
     /**
      * Creates an empty Clob object.
@@ -91,7 +91,7 @@ final class EmbedClob extends ConnectionChild implements Clob, EngineClob
     EmbedClob(EmbedConnection con) throws SQLException {
         super(con);
         this.clob = new TemporaryClob (con.getDBName(), this);
-        this.locator = con.addLOBMapping (this);
+        con.addLOBReference (this);
     }
 
     /**
@@ -156,7 +156,7 @@ final class EmbedClob extends ConnectionChild implements Clob, EngineClob
                 throw se;
             }
         }
-        this.locator = con.addLOBMapping (this);
+        con.addLOBReference (this);
     }
 
     /**
@@ -663,6 +663,7 @@ restartScan:
             } catch (IOException e) {
                 throw Util.setStreamFailure(e);
             } finally {
+                localConn.removeLOBMapping(locator);
                 this.clob = null;
             }
         }
@@ -791,6 +792,9 @@ restartScan:
      * @return locator value for this Clob.
      */
     public int getLocator() {
+        if (locator == 0) {
+            locator = localConn.addLOBMapping(this);
+        }
         return locator;
     }
 }

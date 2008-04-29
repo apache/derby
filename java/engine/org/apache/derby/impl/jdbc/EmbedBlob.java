@@ -24,7 +24,7 @@ package org.apache.derby.impl.jdbc;
 
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.jdbc.EngineBlob;
+import org.apache.derby.iapi.jdbc.EngineLOB;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.types.DataValueDescriptor;
@@ -68,14 +68,14 @@ import java.io.IOException;
 
  */
 
-final class EmbedBlob extends ConnectionChild implements Blob, EngineBlob
+final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
 {
     // blob is either materialized or still in stream
     private boolean         materialized;
     private InputStream     myStream;
     
     // locator key for lob. used by Network Server.
-    private final int             locator;
+    private int             locator;
     
     /*
      * Length of the BLOB if known. Set to -1 if
@@ -117,7 +117,7 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineBlob
              materialized = true;
              //add entry in connection so it can be cleared 
              //when transaction is not valid
-             locator = con.addLOBMapping (this);
+             con.addLOBReference (this);
          }
          catch (IOException e) {
              throw Util.setStreamFailure (e);
@@ -193,7 +193,7 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineBlob
         pos = 0;
         //add entry in connection so it can be cleared 
         //when transaction is not valid
-        this.locator = con.addLOBMapping (this);
+        con.addLOBReference (this);
     }
 
 
@@ -906,6 +906,8 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineBlob
         //valid
         isValid = false;
         
+        //remove entry from connection
+        localConn.removeLOBMapping(locator);
         //initialialize length to default value -1
         myLength = -1;
         
@@ -1000,6 +1002,9 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineBlob
      * @return The locator identifying this blob
      */
     public int getLocator() {
+        if (locator == 0) {
+            locator = localConn.addLOBMapping(this);
+        }
         return locator;
     }
 }
