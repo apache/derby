@@ -22,6 +22,7 @@ limitations under the License.
 package org.apache.derbyTesting.functionTests.tests.lang;
 
 import  java.sql.*;
+import java.util.Arrays;
 
 import org.apache.derby.vti.VTICosting;
 import org.apache.derby.vti.VTIEnvironment;
@@ -42,6 +43,13 @@ public    class   StringArrayVTI  extends StringColumnVTI
 
     public  static  final   double  FAKE_ROW_COUNT = 13.0;
     public  static  final   double  FAKE_INSTANTIATION_COST = 3149.0;
+
+    private static  final   String[]    EXPECTED_STACK =
+    {
+        "deduceGetXXXCaller",
+        "getRawColumn",
+        "getString",
+    };
     
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -173,16 +181,13 @@ public    class   StringArrayVTI  extends StringColumnVTI
     //
     private String  deduceGetXXXCaller() throws SQLException
     {
+        StackTraceElement[]     stack = null;
         try {
-            StackTraceElement[]     stack = (new Throwable()).getStackTrace();
-            StackTraceElement       callersCaller = stack[ 3 ];
-            String                  callersCallerMethod = callersCaller.getMethodName();
-
-            if ( !callersCallerMethod.startsWith( "get" ) ) { callersCallerMethod = "getString"; }
-
-            return  callersCallerMethod;
-        } catch (Throwable t) { throw new SQLException( t.getMessage() ); }
-    }
+            stack = (new Throwable()).getStackTrace();
+         } catch (Throwable t) { throw new SQLException( t.getMessage() ); }
+        
+        return locateGetXXXCaller( stack );
+   }
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -214,6 +219,97 @@ public    class   StringArrayVTI  extends StringColumnVTI
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
+    /**
+     * <p>
+     * Find the getXXX() method above us on the stack. The stack looks
+     * like this:
+     * </p>
+     *
+     * <ul>
+     * <li>getXXX()</li>
+     * <li>getString()</li>
+     * <li>getRawColumn()</li>
+     * <li>deduceGetXXXCaller()</li>
+     * </ul>
+     *
+     * </p>    
+     * Except if the actual getXXX() method is getString()
+     * </p>
+     */
+    private String  locateGetXXXCaller( StackTraceElement[] stack ) throws SQLException
+    {
+        String[]        actualMethodNames = squeezeMethodNames( stack );
+        String[]        expectedMethodNames = EXPECTED_STACK;
+        int             actualIdx = findIndex( "getString", actualMethodNames );
+
+        if ( actualIdx < 0 ) { throw badStack( EXPECTED_STACK, actualMethodNames ); }
+       
+        String      result = actualMethodNames[ ++actualIdx ];
+
+        if ( !result.startsWith( "get" ) ) { result = "getString"; }
+
+        return result;
+    }
+
+    /**
+     * <p>
+     * Complain that we don't like the stack.
+     * </p>
+     */
+    private SQLException   badStack( String[] expected, String[] actual )
+    {
+        return new SQLException
+            ( "Expected stack to include " + stringify( expected ) + ", but the stack was actually this: " + stringify( actual ) );
+    }
+    
+    /**
+     * <p>
+     * Look for a  method name on a stack and return its location as an
+     * index into the stack. Returns -1 if the expected name is not found.
+     * </p>
+     */
+    private int findIndex( String expectedMethod, String[] actualMethodNames )
+    {
+        int         count = actualMethodNames.length;
+        for ( int i = 0; i < count; i++ )
+        {
+            if ( expectedMethod.equals( actualMethodNames[ i ] ) ) { return i; }
+        }
+
+        return -1;
+    }
+
+    /**
+     * <p>
+     * Extract the names of methods on a stack.
+     * </p>
+     */
+    private String[]    squeezeMethodNames( StackTraceElement[] stack )
+    {
+        if ( stack == null ) { stack = new StackTraceElement[] {}; }
+        int         count = stack.length;
+        String[]    result = new String[ count ];
+
+        for ( int i = 0; i < count; i++ )
+        {
+            result[ i ] = stack[ i ].getMethodName();
+        }
+
+        return result;
+    }
+
+
+    /**
+     * <p>
+     * Turn an array into a printable String.
+     * </p>
+     */
+    private String  stringify( Object[] raw )
+    {
+        if ( raw == null ) { raw = new Object[] {}; }
+
+        return Arrays.asList( raw ).toString();
+    }
 
 
 }
