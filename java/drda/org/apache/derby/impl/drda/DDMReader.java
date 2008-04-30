@@ -530,32 +530,32 @@ class DDMReader
 			switch (numberOfExtendedLenBytes) {
 			case 8:
 				 ddmScalarLen =
-					((buffer[pos++] & 0xff) << 56) +
-					((buffer[pos++] & 0xff) << 48) +
-					((buffer[pos++] & 0xff) << 40) +
-					((buffer[pos++] & 0xff) << 32) +
-					((buffer[pos++] & 0xff) << 24) +
-					((buffer[pos++] & 0xff) << 16) +
-					((buffer[pos++] & 0xff) << 8) +
-					((buffer[pos++] & 0xff) << 0);
+					((buffer[pos++] & 0xFFL) << 56) +
+					((buffer[pos++] & 0xFFL) << 48) +
+					((buffer[pos++] & 0xFFL) << 40) +
+					((buffer[pos++] & 0xFFL) << 32) +
+					((buffer[pos++] & 0xFFL) << 24) +
+					((buffer[pos++] & 0xFFL) << 16) +
+					((buffer[pos++] & 0xFFL) << 8) +
+					((buffer[pos++] & 0xFFL) << 0);
 				adjustSize = 12;
 				break;
 			case 6:
 				ddmScalarLen =
-					((buffer[pos++] & 0xff) << 40) +
-					((buffer[pos++] & 0xff) << 32) +
-					((buffer[pos++] & 0xff) << 24) +
-					((buffer[pos++] & 0xff) << 16) +
-					((buffer[pos++] & 0xff) << 8) +
-					((buffer[pos++] & 0xff) << 0);
+					((buffer[pos++] & 0xFFL) << 40) +
+					((buffer[pos++] & 0xFFL) << 32) +
+					((buffer[pos++] & 0xFFL) << 24) +
+					((buffer[pos++] & 0xFFL) << 16) +
+					((buffer[pos++] & 0xFFL) << 8) +
+					((buffer[pos++] & 0xFFL) << 0);
 				adjustSize = 10;
 				break;
 			case 4:
 				ddmScalarLen =
-					((buffer[pos++] & 0xff) << 24) +
-					((buffer[pos++] & 0xff) << 16) +
-					((buffer[pos++] & 0xff) << 8) +
-					((buffer[pos++] & 0xff) << 0);
+					((buffer[pos++] & 0xFFL) << 24) +
+					((buffer[pos++] & 0xFFL) << 16) +
+					((buffer[pos++] & 0xFFL) << 8) +
+					((buffer[pos++] & 0xFFL) << 0);
 				adjustSize = 8;
 				break;
                 
