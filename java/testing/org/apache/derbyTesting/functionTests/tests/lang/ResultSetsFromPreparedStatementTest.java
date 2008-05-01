@@ -2096,4 +2096,40 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
     public void testBigintGeneratedAlwaysAsIdentity() throws Exception {
         testGeneratedIdentity("BIGINT","ALWAYS");
     }
+
+    /**
+     * Tests that the {@code maxRows} setting takes effect, data is obtained
+     * from a table select.
+     */
+    public void testSetMaxRowsTable()
+            throws SQLException {
+        createTestTable("emp", ES+","+DNO+")", "emp_data");
+        PreparedStatement ps = prepareStatement("select * from emp_data",
+                ResultSet.TYPE_SCROLL_INSENSITIVE,
+                ResultSet.CONCUR_READ_ONLY);
+        // Just make sure we have enough rows in the result set first.
+        // Execute without explicitly specifying maxRows.
+        assertTrue(JDBC.assertDrainResults(ps.executeQuery()) >= 20);
+
+        // Specify maxRows
+        ps.setMaxRows(5);
+        JDBC.assertDrainResults(ps.executeQuery(), 5);
+        ps.setMaxRows(20);
+        JDBC.assertDrainResults(ps.executeQuery(), 20);
+    }
+
+    /**
+     * Tests that the {@code maxRows} setting takes effect, data is obtained
+     * from a value clause.
+     */
+    public void testSetMaxRowsValues()
+            throws SQLException {
+        PreparedStatement ps = prepareStatement("values 0,1,2,3,4,5,6,7,8,9",
+                ResultSet.TYPE_SCROLL_INSENSITIVE,
+                ResultSet.CONCUR_READ_ONLY);
+        ps.setMaxRows(10);
+        JDBC.assertDrainResults(ps.executeQuery(), 10);
+        ps.setMaxRows(2);
+        JDBC.assertDrainResults(ps.executeQuery(), 2);
+    }
 }

@@ -245,6 +245,7 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 		positionInSource = 0;
 		seenFirst = false;
 		seenLast = false;
+		maxRows = activation.getMaxRows();
 
 		openTime += getElapsedMillis(beginTime);
 		setBeforeFirstRow();
