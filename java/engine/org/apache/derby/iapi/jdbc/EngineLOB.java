@@ -38,7 +38,8 @@ public interface EngineLOB {
     /**
      * Returns LOB locator key.
      * <p>
-     * The key can be used with {@link EmbedConnection#getLobMapping} to
+     * The key can be used with
+     * {@link org.apache.derby.impl.jdbc.EmbedConnection#getLOBMapping} to
      * retrieve this LOB at a later time.
      *
      * @return Locator key for this LOB
