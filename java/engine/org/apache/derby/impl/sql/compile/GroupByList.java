@@ -220,6 +220,13 @@ public class GroupByList extends OrderedColumnList
 				*/
 				numColsAddedHere++;
 			}
+			if (groupingCol.getColumnExpression() instanceof JavaToSQLValueNode) 
+			{
+				// disallow any expression which involves native java computation. 
+				// Not possible to consider java expressions for equivalence.
+				throw StandardException.newException(					
+						SQLState.LANG_INVALID_GROUPED_SELECT_LIST);
+			}
 		}
 
 		/* Verify that no subqueries got added to the dummy list */
