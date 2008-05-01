@@ -119,15 +119,7 @@ public class VerifyAggregateExpressionsVisitor implements Visitor
 							SQLState.LANG_INVALID_NON_GROUPED_SELECT_LIST :
 							SQLState.LANG_INVALID_GROUPED_SELECT_LIST);
 			}
-		} else if (node instanceof JavaToSQLValueNode) 
-		{
-			// disallow any expression which involves native java computation. 
-		    	// Not possible to consider java expressions for equivalence.
-			throw StandardException.newException( (groupByList == null) ?
-					SQLState.LANG_INVALID_NON_GROUPED_SELECT_LIST :
-						SQLState.LANG_INVALID_GROUPED_SELECT_LIST);
 		}
-
 		return node;
 	}
 
