@@ -23,6 +23,7 @@ package org.apache.derbyTesting.functionTests.tests.lang;
 
 import java.io.UnsupportedEncodingException;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Time;
@@ -461,6 +462,23 @@ public class RoutineTest extends BaseJDBCTestCase {
         s.close();
     }
     
+    /**
+     * Test function with an aggregate argument. DERBY-3649
+     * @throws SQLException
+     */
+    public void testAggregateArgument() throws SQLException
+    {
+    	Statement s = createStatement();
+    	s.executeUpdate("CREATE TABLE TEST (I INT)");
+    	s.executeUpdate("INSERT INTO TEST VALUES(1)");
+    	s.executeUpdate("INSERT INTO TEST VALUES(2)");
+    	s.executeUpdate("CREATE FUNCTION CheckCount(count integer) RETURNS INTEGER PARAMETER STYLE JAVA NO SQL LANGUAGE JAVA EXTERNAL NAME 'org.apache.derbyTesting.functionTests.tests.lang.RoutineTest.checkCount'");
+    	ResultSet rs = s.executeQuery("select checkCount(count(*)) from test");
+    	JDBC.assertSingleValueResultSet(rs, "2");
+    	
+    	
+    }
+    
     /*
     ** Routine implementations called from the tests but do
     *  not use DriverManager so that this test can be used on
@@ -492,5 +510,19 @@ public class RoutineTest extends BaseJDBCTestCase {
         
         return t;
     }
+    
+
+    public static int checkCount(int count)
+               throws SQLException {
+           //   throws ZeroException {
+
+           if (count == 0) {
+               //throw new ZeroException();
+               throw new SQLException("No results found", "38777");
+           }
+
+           return count;
+       }
+
 }
 

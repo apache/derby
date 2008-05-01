@@ -478,7 +478,9 @@ public class GroupByExpressionTest extends BaseJDBCTestCase
         // disallow java function 
         assertCompileError(
                 "42Y30", "select r(), count(*) from test group by r()");
-
+        
+        assertCompileError(
+                "42Y30", "select count(*) from test group by r()");
         // invalid grouping expression.
         assertCompileError(
                 "42Y30", "select c1+1, count(*) from test group by c1+2");
