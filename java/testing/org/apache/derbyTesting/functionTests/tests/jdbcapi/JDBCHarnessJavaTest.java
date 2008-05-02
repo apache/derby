@@ -54,18 +54,8 @@ public class JDBCHarnessJavaTest extends HarnessJavaTest {
             "maxfieldsize",
             //"LOBTest", TODO: investigate failure/convert
             "SetQueryTimeoutTest",
-            // "testRelative", TODO: passes embedded, fails client - investigate failure/convert
             "rsgetXXXcolumnNames",
             
-    };
-
-    /**
-     * Tests that only run in embedded.
-     */
-    private static final String[] JDBCAPI_TESTS_EMEBDDED=
-    {
-        // Tests that pass on embedded but fail on client
-        "testRelative",
     };
     
     private JDBCHarnessJavaTest(String name) {
@@ -80,7 +70,6 @@ public class JDBCHarnessJavaTest extends HarnessJavaTest {
     {
         TestSuite suite = new TestSuite("jdbcapi: old harness java tests");
         suite.addTest(baseSuite("embedded", JDBCAPI_TESTS_BOTH));
-        suite.addTest(baseSuite("embedded", JDBCAPI_TESTS_EMEBDDED));
         suite.addTest(TestConfiguration.clientServerDecorator(
                 baseSuite("clientserver", JDBCAPI_TESTS_BOTH)));
         return suite;

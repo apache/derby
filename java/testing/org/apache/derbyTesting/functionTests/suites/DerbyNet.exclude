@@ -1,9 +1,7 @@
-# excluding jdbcapi/testRelative.java because this is a new test contributed by Shreyas Kaushik and needs to be debugged with JCC  in order to get it running with network server
 # excluding jdbcapi/SetQueryTimeoutTest.java because neither the JCC driver nor the ClientDriver support setQueryTimeout() yet.
 # excluding jdbcapi/rsgetXXXcolumnNames.java as it fails incorrectly, according to JDBC spec. Forwarding test case to JCC team.
 # excluding largedata/LobLimits.java to run with the network server because currently lobs are materialized and this test tests for 2G lobs.
 # 			see DERBY-326 and DERBY-550 issues
-jdbcapi/testRelative.java
 jdbcapi/rsgetXXXcolumnNames.java
 jdbcapi/SetQueryTimeoutTest.java
 # excluding jdbcapi/derbyStress.java - jcc runs out of memory with this test
