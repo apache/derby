@@ -105,6 +105,12 @@ class LOBStateTracker {
                     if (locator == this.lastLocatorSeen[i]) {
                         // We are being called on the same row twice...
                         return;
+                    } else if (locator == Lob.INVALID_LOCATOR) {
+                        // The locator is invalid, probably because the
+                        // database is running in soft upgrade mode and
+                        // doesn't have the neccessary stored procedures.
+                        // Don't try to release an invalid locator.
+                        return;
                     }
                     this.lastLocatorSeen[i] = locator;
                     if (this.isBlob[i]) {
