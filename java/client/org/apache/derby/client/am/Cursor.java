@@ -676,7 +676,12 @@ public abstract class Cursor {
     }
 
     /**
-     * Obtains the locator for the specified LOB column.
+     * Returns the locator for the specified LOB column, or {@link
+     * Lob#INVALID_LOCATOR} if the LOB was not sent as a locator. The server
+     * may send the LOB value instead of a locator if it is running an old
+     * version which doesn't support locators, or if the database it accesses
+     * is soft upgraded from a version that doesn't have the necessary
+     * stored procedures for locator support.
      * <p>
      * Note that this method cannot be invoked on a LOB column that is NULL.
      *
