@@ -31,7 +31,7 @@ with real information.
 
     E.g.: 10.3.0.4
 -->
-<releaseID>10.3.2.1</releaseID>
+<releaseID>10.3.3.0</releaseID>
 
 <!--
     Identifier of previous release. The release notes describe the
@@ -40,7 +40,7 @@ with real information.
     E.g.: 10.2.1.7
 
 -->
-<previousReleaseID>10.3.1.4</previousReleaseID>
+<previousReleaseID>10.3.2.1</previousReleaseID>
 
 <buildInfo>
 
@@ -63,7 +63,7 @@ with real information.
          Say here whether you used osgi.jar to build org.apache.derby.osgi.EmbeddedActivator.
          E.g.:  The osgi.jar was used to build org.apache.derby.osgi.EmbeddedActivator.
   -->
-  <osgi>The osgi.jar was used to build org.apache.derby.osgi.EmbeddedActivator.</osgi>
+  <osgi>osgi.jar was used to build org.apache.derby.osgi.EmbeddedActivator.</osgi>
 
   <!--
          Say which compilers you used.
@@ -102,12 +102,66 @@ Derby functionality includes:
 <li>Command line tools: ij (SQL scripting), dblook (schema dump) and sysinfo (system info)</li>
 </ul>
 
+
+<p>
+  <b>IMPORTANT NOTICE:</b><br/>
+<br/>
+  If you are currently using Derby 10.3.1.4 or Derby 10.3.2.1, it is strongly<br/>
+  recommended that you upgrade to Derby 10.4.1.3 or 10.3.3.0 to avoid<br/>
+  any chance of database corruption due to an issue with multiple threads<br/>
+  accessing a database that is documented in <a
+href="issues.apache.org/jira/browse/DERBY-3347">DERBY-3347</a>.<br/>
+<br/>
+  This bug can cause unrecoverable database corruption during periods of<br/>
+  heavy, multi-thread I/O operations.  The error produced in the test case<br/>
+  used to diagnose the problem was:<br/>
+<br/>
+  ERROR XSDB3: Container information cannot change once written: was 0, now 80.<br/>
+<br/>
+  It is felt that other errors might also be generated when this type of<br/>
+  corruption occurs.  The corruption message will most likely refer to page 0<br/>
+  of the container. For example:<br/>
+<br/>
+  ERROR XSDG1: Page Page(0 ,Container(0, 5856)) could not be<br/>
+  written...<br/>
+<br/>
+  This bug corrupts the pages on disk and can go unnoticed.  If you do not<br/>
+  run database consistency checks regularly it is recommended you begin doing<br/>
+  so as soon as possible after the upgrade.  To insure that corruption has not<br/>
+  already occurred in existing databases, after upgrade run the database<br/>
+  consistency check at least once to validate all tables in the database.  This<br/>
+  process is documented at:<br/>
+<br/>
+  <a href="http://wiki.apache.org/db-derby/DatabaseConsistencyCheck">http://wiki.apache.org/db-derby/DatabaseConsistencyCheck</a><br/>
+<br/>
+If the corruption has already occurred there is no guaranteed recovery of data<br/>
+other than to recover from the last good backup.  When doing so one should<br/>
+also check that the previous backup did not also have the corruption.<br/>
+<br/>
+In some cases one may recover data from the existing<br/>
+database, depending on the extent of the corruption, but will require<br/>
+by hand data recovery.  Depending on the type of corruption this may<br/>
+be successful or not. one should consult the Derby list if attempting<br/>
+this recovery - no automatic software solution to this recovery exists.<br/>
+<br/>
+  Version 10.3.3.0 can be downloaded from:<br/>
+  <a href="http://db.apache.org/derby/releases/release-10.3.3.0.cgi">http://db.apache.org/derby/releases/release-10.3.3.0.cgi</a><br/>
+<br/>
+  Version 10.4.1.3 can be downloaded from:<br/>
+  <a href="http://db.apache.org/derby/releases/release-10.4.1.3.cgi">http://db.apache.org/derby/releases/release-10.4.1.3.cgi</a><br/>
+<br/>
+  For help or questions, please post to the Derby User list.<br/>
+  For instructions on how to subcribe and post to the Derby User list,<br/>
+  please see:<br/>
+<br/>
+  http://db.apache.org/derby/derby_mail.html<br/>
+</p>
 </overview>
 
 <newFeatures>
 
 <p>
-This is a maintenance release. No new features have been added.
+This is a bugfix release. No new features have been added.
 </p>
 
 </newFeatures>

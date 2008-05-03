@@ -43,7 +43,7 @@
   <property name="src.dirs.includes" value="frameworks/**,java/**,plugins/**,bin/**,maven/**"/>
   <property name="src.includes" value="${src.top.includes},${src.tools.includes},${src.dirs.includes}"/>
 
-  <property name="src.excludes" value="tools/**/db2jcc*,tools/**/osgi.jar,tools/**/junit.jar,tools/**/jdbc2_0*,tools/java/jce*,tools/**/packaging.properties,java/demo/toursdb/toursdb/**,java/demo/toursdb/toursdb.out,java/demo/toursdb/toursdb.jar,tools/testing/derby/**,**/derby.log"/>
+  <property name="src.excludes" value="tools/**/db2jcc*,tools/**/osgi.jar,tools/**/junit.jar,tools/**/jdbc2_0*,tools/java/jce*,tools/**/packaging.properties,java/demo/toursdb/toursdb/**,java/demo/toursdb/toursdb.out,java/demo/toursdb/toursdb.jar,tools/testing/derby/**,**/derby.log,releaseSummary.xml,releaseNotesList.xml,fixedBugsList.xml"/>
 
   <!-- Doc Source Files to be included with and excluded from the source distribution -->
   <property name="src.docstop.includes" value="COPYRIGHT,LICENSE,NOTICE,build.xml,docs.properties"/>

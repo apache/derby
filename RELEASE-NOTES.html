@@ -1,10 +1,10 @@
 <html>
-<title>Release Notes for Derby 10.3.2.1</title>
+<title>Release Notes for Derby 10.3.3.0</title>
 <body>
 <h1>
-<a name="Release Notes for Derby 10.3.2.1"></a>Release Notes for Derby 10.3.2.1</h1>
+<a name="Release Notes for Derby 10.3.3.0"></a>Release Notes for Derby 10.3.3.0</h1>
 <blockquote>
-<p>These notes describe the difference between Derby release 10.3.2.1 and the preceding release 10.3.1.4.</p>
+<p>These notes describe the difference between Derby release 10.3.3.0 and the preceding release 10.3.2.1.</p>
 </blockquote>
 <ul>
 <li>
@@ -52,6 +52,82 @@ Derby functionality includes:
 </ul>
 
 
+
+<p>
+  
+<b>IMPORTANT NOTICE:</b>
+<br>
+
+<br>
+  If you are currently using Derby 10.3.1.4 or Derby 10.3.2.1, it is strongly<br>
+  recommended that you upgrade to Derby 10.4.1.3 or 10.3.3.0 to avoid<br>
+  any chance of database corruption due to an issue with multiple threads<br>
+  accessing a database that is documented in <a href="issues.apache.org/jira/browse/DERBY-3347">DERBY-3347</a>.<br>
+
+<br>
+  This bug can cause unrecoverable database corruption during periods of<br>
+  heavy, multi-thread I/O operations.  The error produced in the test case<br>
+  used to diagnose the problem was:<br>
+
+<br>
+  ERROR XSDB3: Container information cannot change once written: was 0, now 80.<br>
+
+<br>
+  It is felt that other errors might also be generated when this type of<br>
+  corruption occurs.  The corruption message will most likely refer to page 0<br>
+  of the container. For example:<br>
+
+<br>
+  ERROR XSDG1: Page Page(0 ,Container(0, 5856)) could not be<br>
+  written...<br>
+
+<br>
+  This bug corrupts the pages on disk and can go unnoticed.  If you do not<br>
+  run database consistency checks regularly it is recommended you begin doing<br>
+  so as soon as possible after the upgrade.  To insure that corruption has not<br>
+  already occurred in existing databases, after upgrade run the database<br>
+  consistency check at least once to validate all tables in the database.  This<br>
+  process is documented at:<br>
+
+<br>
+  
+<a href="http://wiki.apache.org/db-derby/DatabaseConsistencyCheck">http://wiki.apache.org/db-derby/DatabaseConsistencyCheck</a>
+<br>
+
+<br>
+If the corruption has already occurred there is no guaranteed recovery of data<br>
+other than to recover from the last good backup.  When doing so one should<br>
+also check that the previous backup did not also have the corruption.<br>
+
+<br>
+In some cases one may recover data from the existing<br>
+database, depending on the extent of the corruption, but will require<br>
+by hand data recovery.  Depending on the type of corruption this may<br>
+be successful or not. one should consult the Derby list if attempting<br>
+this recovery - no automatic software solution to this recovery exists.<br>
+
+<br>
+  Version 10.3.3.0 can be downloaded from:<br>
+  
+<a href="http://db.apache.org/derby/releases/release-10.3.3.0.cgi">http://db.apache.org/derby/releases/release-10.3.3.0.cgi</a>
+<br>
+
+<br>
+  Version 10.4.1.3 can be downloaded from:<br>
+  
+<a href="http://db.apache.org/derby/releases/release-10.4.1.3.cgi">http://db.apache.org/derby/releases/release-10.4.1.3.cgi</a>
+<br>
+
+<br>
+  For help or questions, please post to the Derby User list.<br>
+  For instructions on how to subcribe and post to the Derby User list,<br>
+  please see:<br>
+
+<br>
+  http://db.apache.org/derby/derby_mail.html<br>
+
+</p>
+
 </blockquote>
 <h2>
 <a name="New Features"></a>New Features</h2>
@@ -59,7 +135,7 @@ Derby functionality includes:
 
 
 <p>
-This is a maintenance release. No new features have been added.
+This is a bugfix release. No new features have been added.
 </p>
 
 
@@ -67,248 +143,600 @@ This is a maintenance release. No new features have been added.
 <h2>
 <a name="Bug Fixes"></a>Bug Fixes</h2>
 <blockquote>
-<p>The following issues are addressed by Derby release 10.3.2.1. These issues are not addressed in the preceding 10.3.1.4 release.</p>
+<p>The following issues are addressed by Derby release 10.3.3.0. These issues are not addressed in the preceding 10.3.2.1 release.</p>
 <table border="2">
 <tr>
 <td><b>Issue Id</b></td><td><b>Description</b></td>
 </tr>
 <tr>
-<td><a href="http://issues.apache.org/jira/browse/DERBY-3232">DERBY-3232</a></td><td>Top-level index.html in releases incorrectly indicates support for JDBC 2.1 in 10.3 releases</td>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3658">DERBY-3658</a></td><td>LOBStateTracker should not use SYSIBM.CLOBRELEASELOCATOR when the database is soft-upgraded from 10.2</td>
 </tr>
 <tr>
-<td><a href="http://issues.apache.org/jira/browse/DERBY-3216">DERBY-3216</a></td><td>do row level lock space reclamation in btree of indiv rows.</td>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3649">DERBY-3649</a></td><td>can't call a stored function with an aggregate argument without getting the following error: ERROR 42Y29</td>
 </tr>
 <tr>
-<td><a href="http://issues.apache.org/jira/browse/DERBY-3190">DERBY-3190</a></td><td>New simple demo suitable for supported Java ME platforms</td>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3611">DERBY-3611</a></td><td>ERROR XSDG2: Invalid checksum on Page occurs during mass inserts into two-column bigint PK table</td>
 </tr>
 <tr>
-<td><a href="http://issues.apache.org/jira/browse/DERBY-3187">DERBY-3187</a></td><td>SimpleApp (demo) does not work in a client setting</td>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3603">DERBY-3603</a></td><td>'IN' clause ignores valid results, incorrect qualifier handling suspected</td>
 </tr>
 <tr>
-<td><a href="http://issues.apache.org/jira/browse/DERBY-3176">DERBY-3176</a></td><td>J2ME support for phoneME platform disabled in 10.3</td>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3576">DERBY-3576</a></td><td>Merge EngineBlob and EngineClob into a single interface</td>
 </tr>
 <tr>
-<td><a href="http://issues.apache.org/jira/browse/DERBY-3175">DERBY-3175</a></td><td>NullPointerException on INSERT after ALTER TABLE ... DROP COLUMN</td>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3571">DERBY-3571</a></td><td>LOB locators are not released if the LOB columns are not accessed by the client</td>
 </tr>
 <tr>
-<td><a href="http://issues.apache.org/jira/browse/DERBY-3172">DERBY-3172</a></td><td>ConnectionEventListener.connectionErrorOccurred not being executed when SQLState 08006 Error is thrown</td>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3560">DERBY-3560</a></td><td>build failure: Error running ${jdk16}/bin/javac compiler if jdk16 is not set on 10.3</td>
 </tr>
 <tr>
-<td><a href="http://issues.apache.org/jira/browse/DERBY-3159">DERBY-3159</a></td><td>SYSCS_SET_USER_ACCESS fails if the user name contains characters not allowed in regular identifiers. </td>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3538">DERBY-3538</a></td><td>NullPointerException during execution for query with LEFT OUTER JOIN whose inner table selects all constants.</td>
 </tr>
 <tr>
-<td><a href="http://issues.apache.org/jira/browse/DERBY-3158">DERBY-3158</a></td><td>Repeat calls to SYSCS_UTIL.SYSCS_SET_USER_ACCESS() for the same user and permission fail with repeated user in list exception.</td>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3525">DERBY-3525</a></td><td>Remove unneeded code to get JDBC level in BrokeredConnection and BrokeredStatement classes</td>
 </tr>
 <tr>
-<td><a href="http://issues.apache.org/jira/browse/DERBY-3147">DERBY-3147</a></td><td>Remove unused code that allow identifiers to be lower-cased.</td>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3496">DERBY-3496</a></td><td>CallableStatement with output parameter leaves cursor open after execution</td>
 </tr>
 <tr>
-<td><a href="http://issues.apache.org/jira/browse/DERBY-3142">DERBY-3142</a></td><td>sysinfo ignores derby.ui.locale</td>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3458">DERBY-3458</a></td><td>dblook fails on TERRITORY_BASED databases</td>
 </tr>
 <tr>
-<td><a href="http://issues.apache.org/jira/browse/DERBY-3136">DERBY-3136</a></td><td>Cut down on object creations in LIKE clause implementation of territory based characters.</td>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3426">DERBY-3426</a></td><td>Remove unused code for autogenerated keys columnNames</td>
 </tr>
 <tr>
-<td><a href="http://issues.apache.org/jira/browse/DERBY-3133">DERBY-3133</a></td><td>Syntax for GRANT table permission does not mention that several privileges may be specified in a list</td>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3422">DERBY-3422</a></td><td>Embedded returns wrong value for DatabaseMetaData.autoCommitFailureClosesAllResultSets()</td>
 </tr>
 <tr>
-<td><a href="http://issues.apache.org/jira/browse/DERBY-3126">DERBY-3126</a></td><td>Inserting BigDecimal value in PreparedStatement with setBigDecimal into double column loses fractional digits</td>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3421">DERBY-3421</a></td><td>Remove unused code for caching of connect bytes</td>
 </tr>
 <tr>
-<td><a href="http://issues.apache.org/jira/browse/DERBY-3123">DERBY-3123</a></td><td>Style sheet (CSS) references in demo HTML files are incorrect</td>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3397">DERBY-3397</a></td><td>Derby 10.3.1.4 and 10.3.2.1 break scrollable result sets? Hibernate Query.setFirstResult and/or setMaxResults</td>
 </tr>
 <tr>
-<td><a href="http://issues.apache.org/jira/browse/DERBY-3119">DERBY-3119</a></td><td>Derby does not resolve functions to methods with Integer return type.</td>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3379">DERBY-3379</a></td><td>"No Current connection" on PooledConnection.getConnection() if pooled connection is reused during connectionClosed processing</td>
 </tr>
 <tr>
-<td><a href="http://issues.apache.org/jira/browse/DERBY-3118">DERBY-3118</a></td><td>Simple demo is out of date</td>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3373">DERBY-3373</a></td><td>SQL "distinct" and "order by" needed together</td>
 </tr>
 <tr>
-<td><a href="http://issues.apache.org/jira/browse/DERBY-3110">DERBY-3110</a></td><td>server hangs after trace on command fails</td>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3365">DERBY-3365</a></td><td>Network Server stores a duplicate entry in the lob hash map for every lob</td>
 </tr>
 <tr>
-<td><a href="http://issues.apache.org/jira/browse/DERBY-3109">DERBY-3109</a></td><td>Nonexistent property derby.database.defaultAccessMode shown in Developers Guide: User Authentication examples</td>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3354">DERBY-3354</a></td><td>Select from large lob table with embedded gives OutOfMemoryError</td>
 </tr>
 <tr>
-<td><a href="http://issues.apache.org/jira/browse/DERBY-3107">DERBY-3107</a></td><td>On client, Clob.free() does not release locators.</td>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3347">DERBY-3347</a></td><td>ERROR XSDB3: Container information cannot change once written</td>
 </tr>
 <tr>
-<td><a href="http://issues.apache.org/jira/browse/DERBY-3099">DERBY-3099</a></td><td>Possible bug in interaction with buffer manager causing pages not to be freed on rollback to savepoint</td>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3343">DERBY-3343</a></td><td>Subsequent calls to PreparedStatement cause SQLIntegrityConstraintViolationException on column that is  "Generated always"</td>
 </tr>
 <tr>
-<td><a href="http://issues.apache.org/jira/browse/DERBY-3098">DERBY-3098</a></td><td>LOB locks are not released after free().</td>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3321">DERBY-3321</a></td><td>NullPointerException for 'NOT EXISTS' with nested subquery</td>
 </tr>
 <tr>
-<td><a href="http://issues.apache.org/jira/browse/DERBY-3096">DERBY-3096</a></td><td>SSL handshake throws "bad_certificate" when server tries to authenticate client</td>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3316">DERBY-3316</a></td><td>Leak in client if ResultSet not closed</td>
 </tr>
 <tr>
-<td><a href="http://issues.apache.org/jira/browse/DERBY-3093">DERBY-3093</a></td><td>Intermittent transaction failure caused by internal duplicate savepoint name for triggers</td>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3315">DERBY-3315</a></td><td>Should UCS_BASIC character types have to look at collation elements when dealing with escape character in the LIKE clause?</td>
 </tr>
 <tr>
-<td><a href="http://issues.apache.org/jira/browse/DERBY-3086">DERBY-3086</a></td><td>The server policy needs to grant derbynet.jar more permissions so that sysinfo and drda tracing will work</td>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3309">DERBY-3309</a></td><td>Minor cleanups in ClientPooledConnection40 and ClientPooledConnection</td>
 </tr>
 <tr>
-<td><a href="http://issues.apache.org/jira/browse/DERBY-3085">DERBY-3085</a></td><td>Fails to handle BLOB fields with a PreparedStatement with size &gt;32750 bytes</td>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3308">DERBY-3308</a></td><td>Broken synchronization for event handling in ClientPooledConnection40</td>
 </tr>
 <tr>
-<td><a href="http://issues.apache.org/jira/browse/DERBY-3081">DERBY-3081</a></td><td>cannot create instance of generated class because of java.lang.VerifyError in 4 tests on IBM iseries</td>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3304">DERBY-3304</a></td><td>Explicit commit inside a java procedure makes a dynamic result sets passed out unavailable</td>
 </tr>
 <tr>
-<td><a href="http://issues.apache.org/jira/browse/DERBY-3080">DERBY-3080</a></td><td>With TERRITORY_BASED collation, when multiple characters map to a single collation element '_'  matches a single collation element rather than a single character</td>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3303">DERBY-3303</a></td><td>ArrayIndexOutOfBoundsException at MergeSort.compare</td>
 </tr>
 <tr>
-<td><a href="http://issues.apache.org/jira/browse/DERBY-3077">DERBY-3077</a></td><td>Trying to reconnect with derby client after bringing server down throws SQL Exception 58009 rather than 08XXX exception</td>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3302">DERBY-3302</a></td><td>NullPointerException during recovery of database with territory-based collation</td>
 </tr>
 <tr>
-<td><a href="http://issues.apache.org/jira/browse/DERBY-3075">DERBY-3075</a></td><td>Client error: 08001 Error connecting to server.. throws SQLTransientConnectionException instead of SQLNonTransientConnectionException</td>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3301">DERBY-3301</a></td><td>Incorrect result from query with nested EXIST</td>
 </tr>
 <tr>
-<td><a href="http://issues.apache.org/jira/browse/DERBY-3074">DERBY-3074</a></td><td>Database shutdown exception 08006 throws SQLTransientConnectionException instead of SQLNonTransientConnectionException</td>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3288">DERBY-3288</a></td><td>wrong query result in presence of a unique index</td>
 </tr>
 <tr>
-<td><a href="http://issues.apache.org/jira/browse/DERBY-3061">DERBY-3061</a></td><td>Wrong results from query with two conjuncts</td>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3279">DERBY-3279</a></td><td>Derby 10.3.X ignores ORDER BY DESC when target column has an index and is used in an OR clause or an IN list.</td>
 </tr>
 <tr>
-<td><a href="http://issues.apache.org/jira/browse/DERBY-3046">DERBY-3046</a></td><td>setObj(int,Object,int) causes NPE if no parameter markers are present; should generate SQLException as for setObject(int,Object)</td>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3260">DERBY-3260</a></td><td>NullPointerException caused by race condition in GenericActivationHolder</td>
 </tr>
 <tr>
-<td><a href="http://issues.apache.org/jira/browse/DERBY-3038">DERBY-3038</a></td><td>SYSCS_IMPORT_TABLE FAILS  with No current connection after shutdown/reconnect to encrypted database : 10.3.1.4 regression </td>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3257">DERBY-3257</a></td><td>SELECT with HAVING clause containing OR conditional incorrectly return 1 row - should return 2 rows - works correctly with 10.2 DB</td>
 </tr>
 <tr>
-<td><a href="http://issues.apache.org/jira/browse/DERBY-3033">DERBY-3033</a></td><td>select query results in nullpointer exception in skipScan()</td>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3253">DERBY-3253</a></td><td>NullPointer Exception (NPE) from query with IN predicate containing two values and joining a view with a large table.  ERROR 38000: The exception 'java.lang.NullPointerException' was thrown while evaluating an expression.</td>
 </tr>
 <tr>
-<td><a href="http://issues.apache.org/jira/browse/DERBY-3032">DERBY-3032</a></td><td>java.lang.ClassCastException returning null from a case statement  in subquery</td>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3247">DERBY-3247</a></td><td>Activation for a dynamic ResultSet created from an Prepared/CallableStatement will not be closed until garbage collection indicates it is unused to the LCC and the LCC closes it</td>
 </tr>
 <tr>
-<td><a href="http://issues.apache.org/jira/browse/DERBY-3025">DERBY-3025</a></td><td>NPE when connecting to database with securityMechanism=8</td>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3244">DERBY-3244</a></td><td>NullPointerException in ....B2IRowLocking3.searchLeftAndLockPreviousKey</td>
 </tr>
 <tr>
-<td><a href="http://issues.apache.org/jira/browse/DERBY-3007">DERBY-3007</a></td><td>Documentation - SYSCS EXPORT TABLE system procedures cannot export data to an existing file</td>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3243">DERBY-3243</a></td><td>(jdbc net client) exception during normal iteration through "ResultSet" of "select * from t"</td>
 </tr>
 <tr>
-<td><a href="http://issues.apache.org/jira/browse/DERBY-3000">DERBY-3000</a></td><td>getTables() call with 10.3 causes java.sql.SQLException: The parameter position '8' is out of range.  The number of parameters for this prepared  statement is '7'.</td>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3238">DERBY-3238</a></td><td>When table contains large LOB values (&gt; ~32K) trigger execution fails for that row with ERROR XCL30: An IOException was thrown when reading a 'BLOB' </td>
 </tr>
 <tr>
-<td><a href="http://issues.apache.org/jira/browse/DERBY-2989">DERBY-2989</a></td><td>Insert into table with constraints fails if the table name is "indicator" (or any other SQL keyword)</td>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3231">DERBY-3231</a></td><td>Sorting on COUNT with OR and GROUP BY delivers wrong results.</td>
 </tr>
 <tr>
-<td><a href="http://issues.apache.org/jira/browse/DERBY-2986">DERBY-2986</a></td><td>Query involving CASE statement significantly slower in 10.3.1.4 than in 10.2.2.0</td>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3230">DERBY-3230</a></td><td>Selecting data from a Table raises Error XN008: Query processing has been terminated due to an error on the server</td>
 </tr>
 <tr>
-<td><a href="http://issues.apache.org/jira/browse/DERBY-2972">DERBY-2972</a></td><td>Update or select with function in the where clause causes with TERRITORY_BASED collation fails with ERROR 42818: Comparisons between 'VARCHAR' and 'VARCHAR' are not supported.</td>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3229">DERBY-3229</a></td><td>testSysinfoLocale fails if derbyTools.jar is first in the classpath</td>
 </tr>
 <tr>
-<td><a href="http://issues.apache.org/jira/browse/DERBY-2967">DERBY-2967</a></td><td>Single character does not match high value unicode character with collation TERRITORY_BASED</td>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3221">DERBY-3221</a></td><td>"java.sql.SQLException: The conglomerate (-5) requested does not exist." from Derby 10.3.1.4 embedded within Eclipse 3.3 and RAD 7.0</td>
 </tr>
 <tr>
-<td><a href="http://issues.apache.org/jira/browse/DERBY-2961">DERBY-2961</a></td><td>TriggerTest.testTypesINActionStatement fails with 'ASSERT FAILED col1.getClass() (class org.apache.derby.iapi.types.SQLClob) expected to be the same as col2.getClass() (class org.apache.derby.iapi.types.CollatorSQLClob)</td>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3214">DERBY-3214</a></td><td>Optimizer can see negative cost estimates when pulling Optimizables from the join order.</td>
 </tr>
 <tr>
-<td><a href="http://issues.apache.org/jira/browse/DERBY-2957">DERBY-2957</a></td><td>ASSERT FAILED col1.getClass() (class org.apache.derby.iapi.types.SQLChar) expected to be the same as col2.getClass() (class org.apache.derby.iapi.types.CollatorSQLChar) in NistScripts dml002 test with collated database</td>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3194">DERBY-3194</a></td><td>LOCALIZEDDISPLAY of CURRENT_TIMESTAMP returns only the TIME</td>
 </tr>
 <tr>
-<td><a href="http://issues.apache.org/jira/browse/DERBY-2910">DERBY-2910</a></td><td>SimpleStringOperatorNode in it's bindExpression method generates a character string CAST if required but does not set the correct collation.</td>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3094">DERBY-3094</a></td><td>Grouping of expressions causes NullPointerException</td>
 </tr>
 <tr>
-<td><a href="http://issues.apache.org/jira/browse/DERBY-2906">DERBY-2906</a></td><td>derbynet.jar &amp; derbytools.jar incorrectly have a META-INF/services/java.sql.Driver entry</td>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3044">DERBY-3044</a></td><td>Typos in documentation</td>
 </tr>
 <tr>
-<td><a href="http://issues.apache.org/jira/browse/DERBY-2902">DERBY-2902</a></td><td>AS IDENTITY (START WITH -9223372036854775808) fails</td>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3037">DERBY-3037</a></td><td>Language ResultSet.finish() is called even when the ResultSet is going to be re-used.</td>
 </tr>
 <tr>
-<td><a href="http://issues.apache.org/jira/browse/DERBY-2564">DERBY-2564</a></td><td>ContextService.notifyAllActiveThreads()  and network server code need a privileged block around the calls to Thread.interrupt()</td>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3023">DERBY-3023</a></td><td>Different result rows depending on the sequence of INNER JOIN and OUTER JOIN</td>
 </tr>
 <tr>
-<td><a href="http://issues.apache.org/jira/browse/DERBY-2352">DERBY-2352</a></td><td>Assertion Failure with order by and group by expression</td>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-2935">DERBY-2935</a></td><td>DDMReader.readLengthAndCodePoint() decodes long integer incorrectly</td>
+</tr>
+<tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-2892">DERBY-2892</a></td><td>Closing a resultset after retrieving a large &gt; 32665 bytes value with Network Server does not release locks</td>
+</tr>
+<tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-2720">DERBY-2720</a></td><td>remove dead code associated with unsupported National Char implementation</td>
+</tr>
+<tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-2653">DERBY-2653</a></td><td>Expose existing auto-generated key functionality through more JDBC APIs in Derby Client.</td>
+</tr>
+<tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-2559">DERBY-2559</a></td><td>recreating a datasource using javax.naming.Reference from a ClientDataSource40 fails</td>
 </tr>
 <tr>
 <td><a href="http://issues.apache.org/jira/browse/DERBY-2351">DERBY-2351</a></td><td>ORDER BY with expression with distinct in the select list returns incorrect result</td>
 </tr>
 <tr>
-<td><a href="http://issues.apache.org/jira/browse/DERBY-2297">DERBY-2297</a></td><td>In the Dev Guide example derby.database.readOnlyAccessUsers is incorrectly mentioned as derby.database.readAccessUsers </td>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-2182">DERBY-2182</a></td><td>Documentation for derby.system.bootAll is missing</td>
 </tr>
 <tr>
-<td><a href="http://issues.apache.org/jira/browse/DERBY-2188">DERBY-2188</a></td><td>Developer's Guide talks about a jdbc url property "locale" which is not supported by Derby.</td>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-2142">DERBY-2142</a></td><td>NullPointerException while using XAConnection/PooledConnection in a heavily contended multithreaded scenario</td>
 </tr>
 <tr>
-<td><a href="http://issues.apache.org/jira/browse/DERBY-2073">DERBY-2073</a></td><td>Inserting BigDecimal value in PreparedStatement into double column loses fractional digits</td>
-</tr>
-<tr>
-<td><a href="http://issues.apache.org/jira/browse/DERBY-2016">DERBY-2016</a></td><td>ArrayIndexOutOfBoundsException for COALESCE with aggregate functions</td>
-</tr>
-<tr>
-<td><a href="http://issues.apache.org/jira/browse/DERBY-1790">DERBY-1790</a></td><td>DatabaseMetaData.getTables() with passed in table type of SYNONYM returns system tables and not SYNONYMS</td>
-</tr>
-<tr>
-<td><a href="http://issues.apache.org/jira/browse/DERBY-1769">DERBY-1769</a></td><td>Add mention that Derby supports rowUpdated, rowDeleted with a result set concurrency of  CONCUR_READ_ONLY</td>
-</tr>
-<tr>
-<td><a href="http://issues.apache.org/jira/browse/DERBY-974">DERBY-974</a></td><td>ClientDriver can lose some connection properties</td>
-</tr>
-<tr>
-<td><a href="http://issues.apache.org/jira/browse/DERBY-857">DERBY-857</a></td><td>LDAP user authentication fails under a security manager</td>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-1585">DERBY-1585</a></td><td>derbylang/procedureInTrigger: not able to create trigger due to an open ResultSet</td>
 </tr>
 </table>
 </blockquote>
 <h2>
 <a name="Issues"></a>Issues</h2>
 <blockquote>
-<p>Compared with the previous release (10.3.1.4), Derby release 10.3.2.1 introduces the following new features and incompatibilities. These merit your special attention.</p>
+<p>Compared with the previous release (10.3.2.1), Derby release 10.3.3.0 introduces the following new important fixes. These merit your special attention.</p>
 <ul>
 <li>
-<a href="#Note for DERBY-2967">
-<p>Note for DERBY-2967: 
-  Databases with territory based collation might see the behavior of LIKE predicate in WHERE clause has changed. 
+<a href="#Note for DERBY-3347">
+<p>Note for DERBY-3347: 
+A bug that could cause unrecoverable database corruption has been fixed.
 </p>
+</a>
+</li>
+<li>
+<a href="#Note for DERBY-3301">
+<p>Note for DERBY-3301: 
+Queries with nested EXIST, ANY or IN clauses now return correct results.
+</p>
+</a>
+</li>
+<li>
+<a href="#Note for DERBY-2351">
+<p>Note for DERBY-2351: An ORDER BY clause of a DISTINCT query which specifies to order by a
+column which was not in the DISTINCT list is now rejected, because the
+intent of the query is ambiguous. Previously, Derby instead produced
+non-distinct results.
+Also, an ORDER BY clause which specifies a table-name-qualified column alias
+is now rejected as invalid, where previously it was accepted.</p>
 </a>
 </li>
 </ul>
 <hr>
 <h3>
-<a name="Note for DERBY-2967"></a>Note for DERBY-2967</h3>
+<a name="Note for DERBY-3347"></a>Note for DERBY-3347</h3>
 <blockquote>
+
+<!-- 
+  SUMMARIZE THE ISSUE. This is a one line summary of the issue.
+
+  For instance:
+
+  Applications may no longer open two InputStreams on the same ResultSet column.
+-->
 
 
 <h4>Summary of Change</h4>
 
 <p>
-  Databases with territory based collation might see the behavior of LIKE predicate in WHERE clause has changed. 
+A bug that could cause unrecoverable database corruption has been fixed.
 </p>
+
+
+<!-- 
+  DESCRIBE WHAT IT IS THAT THE USER ACTUALLY SEES WHEN THE PROBLEM OCCURS.
+
+  For instance:
+
+  In the previous release, applications were able to open two
+  InputStreams on the same column. Depending on how these streams
+  interacted, the value siphoned out of the column was erratic. Now
+  Derby raises a SQLException when the application attempts to create
+  the second InputStream.
+-->
 
 
 <h4>Symptoms Seen by Applications Affected by Change</h4>
 
 <p>
-In territory based databases, the LIKE predicate will now comply with SQL specification(Derby already follows SQL specification for UCS_BASIC databases). SQL specification for LIKE predicate requires that database should do one character comparison at a time. Prior to the fix that went in as part of DERBY-2967, Derby did string comparison rather than character comparison for LIKE. This causes a problem with territory based database because the collation element(s) for a string of characters may not be same as the collation element(s) for inidivdual characters that make up that string. 
-In addition, the metacharacter _ in the pattern in a LIKE predicate will now consume exactly one character rather than working on number of collation elements.
-To show the impact on application, consider following eg. Say we are working with a territory where character 'z' has same collation elements as 'xy'. For such a territory consider following LIKE predicate 
-'zcb' LIKE 'xy_b' 
-Prior to DERBY-2967, Derby will return TRUE because collation elements for 'z' matched 'xy' and 'c' was consumed by '_' and 'b' matched 'b'. But this does not follow SQL specification. SQL specification requires one character comparison at a time in LIKE. With the fix for DERBY-2967, the LIKE predicate in this example will return FALSE because the collation element(s) for 'z' does not match collation element(s) for 'x'. 
-In addition, the metacharacter _ in pattern for LIKE will consume *one* character in the string value. So for an eg clause 'xycb' LIKE '_cb' will return FALSE because metacharacter _ will consume 'x' and since 'c' does not match 'y', Derby will return FALSE.
+A bug that could cause database corruption was introduced in the 10.3
+codeline and affects the following releases:
 </p>
 
+
+<ul>
+  
+<li>Apache Derby 10.3.1.4</li>
+  
+<li>Apache Derby 10.3.2.1</li>
+
+</ul>
+
+
+<p>
+Users who are hit by this bug may experience exceptions at various
+times during execution of SQL statements, booting or shutdown of a
+database, or during checkpointing. It may result in a number of
+different error messages, including any of these:
+</p>
+
+
+<pre>
+ERROR XSDB3: Container information cannot change once written: was 0, now 80
+ERROR XSDG1: Page Page(1039,Container(0, 5856)) could not be written to disk, please check if disk is full.
+ERROR XSDG2: Invalid checksum on Page Page(0,Container(0, 1313))
+ERROR XSDG3: Meta-data for Container org.apache.derby.impl.store.raw.data.RAFContainer4@1afb0c7 could not be accessed
+ERROR XSLA1: Log Record has been sent to the stream, but it cannot be applied to the store (Object null). This may cause recovery problems also.
+</pre>
+
+<!-- 
+  OPTIONAL: DESCRIBE INCOMPATIBILITIES WITH PREVIOUS RELEASE, IF ANY.
+
+  For instance:
+
+  Applications which open two InputStreams on the ResultSet column now
+  fail.
+-->
+
+
+<h4>Incompatibilities with Previous Release</h4>
+
+<p>
+None.
+</p>
+
+
+<!-- 
+  DESCRIBE WHY THE CHANGE WAS MADE.
+
+  For instance:
+
+  The previous behavior violated the JDBC standard. The new behavior
+  is correct.
+-->
 
 
 <h4>Rationale for Change</h4>
 
 <p>
-The previous behavior violated the SQL specification. The new behavior is correct.
+Database corruption is bad.
 </p>
 
 
+<!-- 
+  OPTIONAL: DESCRIBE HOW TO REVERT TO THE PREVIOUS BEHAVIOR OR
+  OTHERWISE AVOID THE INCOMPATIBILITIES INTRODUCED BY THIS CHANGE.
+
+  For instance:
+
+  Users must recode applications which open multiple streams on the same column.
+-->
+
+
+<h4>Application Changes Required</h4>
+
+<p>
+No changes are required. However, since the database corruption may go
+unnoticed for a while, users may want to check the consistency of
+their databases after upgrading Derby. The process is described on the
+following wiki page:
+<a href="http://wiki.apache.org/db-derby/DatabaseConsistencyCheck">
+http://wiki.apache.org/db-derby/DatabaseConsistencyCheck
+</a>. If a corruption is detected, restoring the database from backup
+is the only reliable way to recover.
+</p>
+
+
+
+</blockquote>
+<hr>
+<h3>
+<a name="Note for DERBY-3301"></a>Note for DERBY-3301</h3>
+<blockquote>
+
+<!-- 
+  SUMMARIZE THE ISSUE. This is a one line summary of the issue.
+
+  For instance:
+
+  Applications may no longer open two InputStreams on the same ResultSet column.
+-->
+
+
+<h4>Summary of Change</h4>
+
+<p>
+Queries with nested EXIST, ANY or IN clauses now return correct results.
+</p>
+
+
+<!-- 
+  DESCRIBE WHAT IT IS THAT THE USER ACTUALLY SEES WHEN THE PROBLEM OCCURS.
+
+  For instance:
+
+  In the previous release, applications were able to open two
+  InputStreams on the same column. Depending on how these streams
+  interacted, the value siphoned out of the column was erratic. Now
+  Derby raises a SQLException when the application attempts to create
+  the second InputStream.
+-->
+
+
+<h4>Symptoms Seen by Applications Affected by Change</h4>
+
+<p>
+In the previous release, applications that executed SQL statements 
+containing nested EXISTS, ANY or IN clauses could see fewer rows
+than those satisfying the query. In particular, rows that had the
+same value for one of the selected columns as another row might not
+have been returned.
+</p>
+
+
+<!-- 
+  OPTIONAL: DESCRIBE INCOMPATIBILITIES WITH PREVIOUS RELEASE, IF ANY.
+
+  For instance:
+
+  Applications which open two InputStreams on the ResultSet column now
+  fail.
+
+-->
+
+
+<h4>Incompatibilities with Previous Release</h4>
+
+<p>
+None.
+</p>
+
+<!-- 
+  DESCRIBE WHY THE CHANGE WAS MADE.
+
+  For instance:
+
+  The previous behavior violated the JDBC standard. The new behavior
+  is correct.
+-->
+
+
+<h4>Rationale for Change</h4>
+
+<p>
+The previous behavior violated the ANSI SQL standard. The new 
+behavior is correct.
+</p>
+
+
+<!-- 
+  OPTIONAL: DESCRIBE HOW TO REVERT TO THE PREVIOUS BEHAVIOR OR
+  OTHERWISE AVOID THE INCOMPATIBILITIES INTRODUCED BY THIS CHANGE.
+
+  For instance:
+
+  Users must recode applications which open multiple streams on the same column.
+-->
+
+
+<h4>Application Changes Required</h4>
+
+<p>
+Typically none, but applications must handle that the correct results are now returned.
+</p>
+
+
+</blockquote>
+<hr>
+<h3>
+<a name="Note for DERBY-2351"></a>Note for DERBY-2351</h3>
+<blockquote>
+<!-- 
+  SUMMARIZE THE ISSUE. This is a one line summary of the issue.
+
+  For instance:
+
+  Applications may no longer open two InputStreams on the same ResultSet column.
+-->
+
+<h4>Summary of Change</h4>
+
+<p>An ORDER BY clause of a DISTINCT query which specifies to order by a
+column which was not in the DISTINCT list is now rejected, because the
+intent of the query is ambiguous. Previously, Derby instead produced
+non-distinct results.
+Also, an ORDER BY clause which specifies a table-name-qualified column alias
+is now rejected as invalid, where previously it was accepted.</p>
+<!-- 
+  DESCRIBE WHAT IT IS THAT THE USER ACTUALLY SEES WHEN THE PROBLEM OCCURS.
+
+  For instance:
+
+  In the previous release, applications were able to open two
+  InputStreams on the same column. Depending on how these streams
+  interacted, the value siphoned out of the column was erratic. Now
+  Derby raises a SQLException when the application attempts to create
+  the second InputStream.
+-->
+
+<h4>Symptoms Seen by Applications Affected by Change</h4>
+
+<h5>New rules for DISTINCT and ORDER BY</h5>
+
+<p>
+Applications which specify certain combinations of SELECT DISTINCT with
+ORDER BY will now receive an error message, whereas formerly such applications
+received non-distinct results.</p>
+
+<p>As an example, take the following: </p>
+
+<p style="font-family: monospace;">
+create table person (name varchar(10), age int);<br>
+insert into person values ('John', 10);<br>
+insert into person values ('John', 30);<br>
+insert into person values ('Mary', 20);<br>
+
+<br>
+SELECT DISTINCT name FROM person ORDER BY age;<br>
+
+</p>
+
+<p>The query above is now rejected, with the error message:</p>
+
+<blockquote>
+	ERROR 42879: The ORDER BY clause may not contain column 'AGE',
+	since the query specifies DISTINCT and that column does not appear
+	in the query result.
+</blockquote>
+
+<p>If the AGE column is included in the DISTINCT list in the above query,
+there is no ambiguity</p>
+
+<h5>New column alias rules</h5>
+
+<p>
+Applications which specify a column alias for a column in the SELECT
+statement, and which specify an ORDER BY clause which specifies that
+column alias qualified by the table name, will now receive an error
+indicating that the ORDER BY clause is invalid.
+</p>
+
+<p>As an example, take the following: </p>
+
+<p style="font-family: monospace;">  create table t1 (i int, j int);<br>
+  select t1.id as idcolumn1, t1.id as idcolumn2 from t1 order by t1.idcolumn1, t1.idcolumn2;</p>
+
+<p>This query is now rejected, as there is no column named 'idcolumn1'
+in table 't1'. The error message is:</p>
+
+<blockquote>
+	ERROR 42X04: Column 'T1.IDCOLUMN1' is either not in any table in
+	the FROM list or appears within a join specification and is outside
+	the scope of the join specification or appears in a HAVING clause
+	and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE 
+	statement then 'T1.IDCOLUMN1' is not a column in the target table.
+</blockquote>
+
+<p>Valid forms of the query above are:</p>
+
+<p style="font-family: monospace;">
+  select t1.id as idcolumn1, t1.id as idcolumn2 from t1 order by idcolumn1, idcolumn2;</p>
+
+<p>or</p>
+
+<p style="font-family: monospace;">
+  select t1.id as idcolumn1, t1.id as idcolumn2 from t1 order by t1.id, t1.id;</p>
+
+
+<h4>Rationale for Change</h4>
+
+<p>When the query ambiguously specifies both DISTINCT and ORDER BY, Derby
+was unsure whether to return the rows properly ordered, but non-distinct,
+or to return a distinct set of rows, but in an unknown order. Since no
+clear resolution of the ambiguity could be found, we chose instead to
+reject the query.</p>
+
+<p>The rules for resolving column references in ORDER BY clauses have been
+enhanced to consider column aliases and column names more fully.
+Derby now uses different resolution rules depending on whether
+the ORDER BY column reference is table.column, or just column:
+<ul>
+	
+<li>if the table name is provided, we match against the
+	underlying table name, and don't consider any aliases</li>
+	
+<li>if the table name is NOT provided, we first match against
+	the alias name, if present, and if no alias name matches
+	then we match against the underlying source column name. </li>
+
+</ul>
+
+</p>
+<!-- 
+  OPTIONAL: DESCRIBE HOW TO REVERT TO THE PREVIOUS BEHAVIOR OR
+  OTHERWISE AVOID THE INCOMPATIBILITIES INTRODUCED BY THIS CHANGE.
+
+  For instance:
+
+  Users must recode applications which open multiple streams on the same column.
+-->
+
+<h4>Application Changes Required</h4>
+
+<p>
+A query which specifies ordering by a non-distinct column should instead
+include the ORDER BY column in the DISTINCT list, to resolve the ambiguity
+about which values of that column should be used to distinctly identify
+the resulting rows.</p>
+
+<p>
+A query which specifies table-name.alias-name should be rewritten to specify
+either simply alias-name, or table-name.column-name.
+</p>
 
 </blockquote>
 </blockquote>
 <h2>
 <a name="Build Environment"></a>Build Environment</h2>
 <blockquote>
-<p>Derby release 10.3.2.1 was built using the following environment:</p>
+<p>Derby release 10.3.3.0 was built using the following environment:</p>
 <ul>
 <li>
 <b>Branch</b> - Source code came from the 10.3 branch.</li>
 <li>
-<b>Machine</b> - MKS Toolkit 8.1 on Microsoft Windows XP Professional Version 2002 Service Pack 2.</li>
+<b>Machine</b> - Cygwin on Microsoft Windows XP Professional Version 2002 Service Pack 2.</li>
 <li>
 <b>Ant</b> - Apache Ant version 1.7.0  compiled on December 13 2006.</li>
 <li>
@@ -316,7 +744,7 @@ The previous behavior violated the SQL specification. The new behavior is correc
 <li>
 <b>Java 6</b> -  Java(TM) SE Runtime Environment (build 1.6.0_01-b06).</li>
 <li>
-<b>OSGi</b> - The osgi.jar was used to build org.apache.derby.osgi.EmbeddedActivator.</li>
+<b>OSGi</b> - osgi.jar was used to build org.apache.derby.osgi.EmbeddedActivator.</li>
 <li>
 <b>Compiler</b> - The 1.4.2_07-b05 javac was used to compile all classes
            except for the JDBC4 drivers. The JDBC4 driver classes were compiled using the 1.6.0_01-b06 javac.</li>
