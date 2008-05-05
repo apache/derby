@@ -38,7 +38,6 @@ grant codeBase "${derby.install.url}derby.jar"
 //
 // Permissions needed for JMX based management and monitoring, which is only
 // available for JVMs supporting "platform management", that is J2SE 5.0 or better.
-// JMX management of Derby is NOT enabled by default; see also DERBY-1387.
 //
 // Allows this code to create an MBeanServer:
 //
@@ -79,6 +78,12 @@ grant codeBase "${derby.install.url}derbynet.jar"
 // Needed for server tracing.
 //
   permission java.io.FilePermission "${derby.drda.traceDirectory}${/}-", "read,write,delete";
+
+//
+// JMX: Uncomment this permission to allow the ping operation of the 
+//      NetworkServerMBean to connect to the Network Server.
+//permission java.net.SocketPermission "*", "connect,resolve";
+
 
 //
 // Needed by sysinfo. The file permission is needed to
