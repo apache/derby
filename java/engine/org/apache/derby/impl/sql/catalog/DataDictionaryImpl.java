@@ -11545,7 +11545,7 @@ public final class	DataDictionaryImpl
 		UUIDStringOrderable = getIDValueAsCHAR(uuid);
 
 		/* Set up the start/stop position for the scan */
-		ExecIndexRow keyRow = exFactory.getIndexableRow(2);
+		ExecIndexRow keyRow = exFactory.getIndexableRow(1);
 		keyRow.setColumn(1, UUIDStringOrderable);
 
 		return (RoleDescriptor)
