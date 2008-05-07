@@ -229,19 +229,19 @@ public class GroupByExpressionTest extends BaseJDBCTestCase
                         {112, 2},
                         {114, 2}});
         assertCompileError(
-                "42Y30", "select c1+c2, sum(c3) from test group by c1");
+                "42Y36", "select c1+c2, sum(c3) from test group by c1");
         assertCompileError(
-                "42Y30", "select c1,c2, sum(c3) from test group by c1+c2,c1");
+                "42Y36", "select c1,c2, sum(c3) from test group by c1+c2,c1");
         assertCompileError(
-                "42Y30", "select c1+c2, sum(c3) from test group by 1");
+                "42Y36", "select c1+c2, sum(c3) from test group by 1");
         assertCompileError(
             "42X04", "select c1+c2 as expr, sum(c3) from test group by expr");
         assertCompileError(
             "42X04", "select c1 as c1a, c2, sum(c3) from test group by c1a,c2");
         assertCompileError(
-                "42Y30", "select c1 as c2, sum(c3) from test group by c2");
+                "42Y36", "select c1 as c2, sum(c3) from test group by c2");
         assertCompileError(
-                "42Y30", "select c1+(c2+c3), sum(c3) from test group by c3, (c1+c2)");
+                "42Y36", "select c1+(c2+c3), sum(c3) from test group by c3, (c1+c2)");
     }
     
     public void testSubSelect() throws Exception
@@ -483,48 +483,48 @@ public class GroupByExpressionTest extends BaseJDBCTestCase
                 "42Y30", "select count(*) from test group by r()");
         // invalid grouping expression.
         assertCompileError(
-                "42Y30", "select c1+1, count(*) from test group by c1+2");
+                "42Y36", "select c1+1, count(*) from test group by c1+2");
         
         // again invalid grouping expression because cast type is different.
         assertCompileError(
-                "42Y30", "select (cast (c as char(2))), count(*) " +
+                "42Y36", "select (cast (c as char(2))), count(*) " +
                 " from alltypes group by (cast (c as char(3)))");
 
         // same column name, same table but different tablenumber in the query
         assertCompileError(
-                "42Y30", 
+                "42Y36", 
                 "select t1.c1, count(*) from test t1, test t2 " + 
                 " group by t2.c1");
         // ternary operator, not equivalent test.
         assertCompileError(
-                "42Y30",
+                "42Y36",
                 "select substr(c, 3, 4) from alltypes group by substr(v, 3, 4)");
 
         // DERBY-2008
         // invalid grouping expression 
         assertCompileError(
-                "42Y30",
+                "42Y36",
                 "select substr(c1, 3, 4) from t1 group by substr(c1, 3)");
         assertCompileError(
-                "42Y30",
+                "42Y36",
                 "select substr(c1, 3) from t1 group by substr(c1, 3, 4)");
         assertCompileError(
-                "42Y30",
+                "42Y36",
                 "select locate(c1, 'abc') from t2 group by locate(c1, 'abc',3)");
         assertCompileError(
-                "42Y30",
+                "42Y36",
                 "select locate(c1, 'abc',2) from t2 group by locate(c1, 'abc')");
         assertCompileError(
-                "42Y30",
+                "42Y36",
                 "select locate(c1, 'abc',2) from t2 group by locate(c1, 'abc',3)");
 
         // DERBY-2014
         // invalid grouping expression
         assertCompileError(
-                "42Y30",
+                "42Y36",
                 "select nullif(c1,c2) from t3 group by nullif(c2,c1)");
         assertCompileError(
-                "42Y30",
+                "42Y36",
                 "select nullif(c1,100) from t3 group by nullif(c1,200)");
 
         // aggregates in group by list.

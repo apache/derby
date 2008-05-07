@@ -91,6 +91,10 @@ public class GroupByTest extends BaseJDBCTestCase {
         st.executeUpdate("insert into d3613 values (1,2,1,2), (1,2,3,4), " +
                 "(1,3,5,6), (2,2,2,2)");
 
+        st.executeUpdate("create table d2085 (a int, b int, c int, d int)");
+        st.executeUpdate("insert into d2085 values (1,1,1,1), (1,2,3,4), " +
+                "(4,3,2,1), (2,2,2,2)");
+
         // create an all types tables
         
         st.executeUpdate(
@@ -234,7 +238,7 @@ public class GroupByTest extends BaseJDBCTestCase {
         // group by constant. should compile but fail because it 
         // is not a valid grouping expression.
         
-        assertStatementError("42Y30", st,
+        assertStatementError("42Y36", st,
             "select * from t1 group by 1");
         
         // column in group by list not in from list
@@ -244,13 +248,13 @@ public class GroupByTest extends BaseJDBCTestCase {
         
         // column in group by list not in select list
         
-        assertStatementError("42Y30", st,
+        assertStatementError("42Y36", st,
             "select a as b from t1 group by b");
         
-        assertStatementError("42Y30", st,
+        assertStatementError("42Y36", st,
             " select a from t1 group by b");
         
-        assertStatementError("42Y30", st,
+        assertStatementError("42Y36", st,
             " select a, char(b) from t1 group by a");
         
         // cursor with group by is not updatable
@@ -1541,11 +1545,11 @@ public class GroupByTest extends BaseJDBCTestCase {
         JDBC.assertUnorderedResultSet(rs,
                 new String[][] {{"1","7"},{"2","2"}});
         // A few error cases:
-        assertStatementError("42Y30", s,
+        assertStatementError("42Y36", s,
             "select distinct a,b from d3613 group by a");
-        assertStatementError("42Y30", s,
+        assertStatementError("42Y36", s,
             "select distinct a,b from d3613 group by a,c");
-        assertStatementError("42Y30", s,
+        assertStatementError("42Y36", s,
             "select distinct a,b,sum(b) from d3613 group by a");
         
         // A few queries from other parts of this suite, with DISTINCT added:
@@ -1568,6 +1572,20 @@ public class GroupByTest extends BaseJDBCTestCase {
             s.executeQuery(
                 " select distinct t.dt from t group by i, dt, b order by dt"),
             new String [][] { {"1992-01-01"}, {"1992-09-09"}, {null} });
+    }
+    /**
+      * DERBY-2085 check message on order by of non-grouped column
+      */
+    public void testOrderByNonGroupedColumn() throws SQLException
+    {
+        Statement s = createStatement();
+        ResultSet rs;
+        assertStatementError("42Y36", s,
+            "select a from d2085 group by a order by b");
+        assertStatementError("42Y36", s,
+            "select a from d2085 group by a,b order by c");
+        assertStatementError("42Y36", s,
+            "select a,b from d2085 group by a,b order by c*2");
     }
 }
 

@@ -82,7 +82,7 @@ public class VerifyAggregateExpressionsVisitor implements Visitor
 
 			if (groupByList.findGroupingColumn(cr) == null)
 			{
-				throw StandardException.newException(SQLState.LANG_INVALID_GROUPED_SELECT_LIST);
+				throw StandardException.newException(SQLState.LANG_INVALID_COL_REF_GROUPED_SELECT_LIST, cr.getSQLColumnName());
 			}
 		} 
 		
