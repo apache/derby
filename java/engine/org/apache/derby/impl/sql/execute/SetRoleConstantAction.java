@@ -130,25 +130,10 @@ class SetRoleConstantAction implements ConstantAction
                         (SQLState.ROLE_INVALID_SPECIFICATION, thisRoleName);
                 }
 
-                if (!currentAuthId.equals(dbo)) {
-                    // is it granted to us mere mortals?
-                    rd = dd.getRoleGrantDescriptor(thisRoleName,
-                                                   currentAuthId,
-                                                   dbo);
-                    if (rd == null) {
-                        // or if not, via PUBLIC?
-                        rd = dd.getRoleGrantDescriptor
-                            (thisRoleName,
-                             Authorizer.PUBLIC_AUTHORIZATION_ID,
-                             dbo);
-
-                        // Nope, we can't set this role, so throw.
-                        if (rd == null) {
-                            throw StandardException.newException
+                if (!lcc.roleIsSettable(thisRoleName)) {
+                    throw StandardException.newException
                               (SQLState. ROLE_INVALID_SPECIFICATION_NOT_GRANTED,
                                thisRoleName);
-                        }
-                    }
                 }
             } finally {
                 // reading above changes idle state, so reestablish it

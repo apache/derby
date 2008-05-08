@@ -260,7 +260,7 @@ public class SQLSessionContextTest extends BaseJDBCTestCase
         // for dropper.
         _stm.execute("call test_dbo.dropper()");
 
-        String[] expected = new String[]{"OUTERMOST", "TEST_DBO"};
+        String[] expected = new String[]{null, "TEST_DBO"};
         for (int i= 0; i < 1; i++) {
             rs = ps[i].executeQuery();
             assertCurrent(variableKeywords[i], rs, expected[i]);
@@ -367,9 +367,17 @@ public class SQLSessionContextTest extends BaseJDBCTestCase
         assertTrue("result set empty", rs.next());
         String actualCurrent = rs.getString(1);
 
-        assertTrue(comment + "current is " + actualCurrent +
+        if (expected != null) {
+            assertTrue(comment + "current is " + actualCurrent +
                        ", expected " + expected,
-                   expected.equals(actualCurrent));
+                       expected.equals(actualCurrent));
+        } else {
+            assertTrue(comment + "current is " + actualCurrent +
+                       ", expected null",
+                       actualCurrent == null);
+        }
+
+
 
         // cardinality should be 1
         assertFalse("result set not empty", rs.next());
@@ -680,11 +688,10 @@ public class SQLSessionContextTest extends BaseJDBCTestCase
      * current value is correctly reset. For roles, the current role
      * is unchanged, since it is lazily checked (and potentially reset
      * to NONE if it no longer exists or it is no longer granted to
-     * session user) only when it is attempted used for anything
-     * except retrieving its current value. For schema, the current
-     * schema should revert back to the session's default schema. This
-     * holds for all frames on the session context stack (see also
-     * caller's check).
+     * session user) only when it is attempted used for anything. For
+     * schema, the current schema should revert back to the session's
+     * default schema. This holds for all frames on the session
+     * context stack (see also caller's check).
      */
     public static void dropper() throws SQLException
     {
@@ -699,7 +706,7 @@ public class SQLSessionContextTest extends BaseJDBCTestCase
             stm.executeUpdate("drop schema outermost restrict");
             stm.close();
 
-            String[] expected = new String[]{"OUTERMOST", "TEST_DBO"};
+            String[] expected = new String[]{null, "TEST_DBO"};
 
             // check that we revert correctly
             for (int i= 0; i < variableKeywords.length; i++) {

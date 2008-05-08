@@ -158,10 +158,10 @@ public class SpecialFunctionNode extends ValueNode
 
 		case C_NodeTypes.CURRENT_ROLE_NODE:
 			sqlName = "CURRENT_ROLE";
-			methodName = "getCurrentRoleId";
+			methodName = "getCurrentRoleIdChecked";
 			methodType = "java.lang.String";
 			dtd = DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-				Types.VARCHAR, false, 128);
+				Types.VARCHAR, true, 128);
 			//SQL spec Section 6.4 Syntax Rule 4 says that the collation type
 			//of these functions will be the collation of character set
 			//SQL_IDENTIFIER. In Derby's case, that will mean, the collation of
@@ -232,7 +232,7 @@ public class SpecialFunctionNode extends ValueNode
 											 ClassName.LanguageConnectionContext, 0);
 		int argCount = 0;
 
-		if (methodName.equals("getCurrentRoleId") ||
+		if (methodName.equals("getCurrentRoleIdChecked") ||
 			methodName.equals("getCurrentSchemaName")) {
 
 			acb.pushThisAsActivation(mb);

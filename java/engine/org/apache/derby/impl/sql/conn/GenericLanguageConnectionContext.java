@@ -53,6 +53,7 @@ import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptorList;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
+import org.apache.derby.iapi.sql.dictionary.RoleDescriptor;
 import org.apache.derby.iapi.types.DataValueFactory;
 import org.apache.derby.iapi.sql.compile.TypeCompilerFactory;
 import org.apache.derby.iapi.sql.depend.DependencyManager;
@@ -3226,7 +3227,7 @@ public class GenericLanguageConnectionContext
 		return sb;
 	}
 
-	
+
 	/**
 	 * @see LanguageConnectionContext#setCurrentRole(Activation a, String role)
 	 */
@@ -3244,6 +3245,58 @@ public class GenericLanguageConnectionContext
 			getRole();
 	}
 
+
+	/**
+	 * @see LanguageConnectionContext#getCurrentRoleIdChecked(Activation a)
+	 */
+	public String getCurrentRoleIdChecked(Activation a)
+			throws StandardException {
+
+		String role = getCurrentSQLSessionContext(a.getCallActivation()).
+			getRole();
+
+		if (role != null) {
+			beginNestedTransaction(true);
+
+			try {
+				if (!roleIsSettable(role)) {
+					// invalid role, so reset it.
+					setCurrentRole(a, null);
+					role = null;
+				}
+			} finally {
+				commitNestedTransaction();
+			}
+
+		}
+
+		return role;
+	}
+
+
+	/**
+	 * @see LanguageConnectionContext#roleIsSettable(String role)
+	 */
+	public boolean roleIsSettable(String role) throws StandardException {
+		DataDictionary dd = getDataDictionary();
+		String dbo = dd.getAuthorizationDatabaseOwner();
+
+		RoleDescriptor grantDesc = null;
+
+		if (getAuthorizationId().equals(dbo)) {
+			grantDesc = dd.getRoleDefinitionDescriptor(role);
+		} else {
+			grantDesc = dd.getRoleGrantDescriptor
+				(role, getAuthorizationId(), dbo);
+
+			if (grantDesc == null) {
+				// or if not, via PUBLIC?
+				grantDesc = dd.getRoleGrantDescriptor
+					(role, Authorizer.PUBLIC_AUTHORIZATION_ID,dbo);
+			}
+		}
+		return grantDesc != null;
+	}
 
 	/**
 	 * Return the current SQL session context based on caller
@@ -3274,7 +3327,7 @@ public class GenericLanguageConnectionContext
 	private SQLSessionContext getCurrentSQLSessionContext() {
 		StatementContext ctx = getStatementContext();
 		SQLSessionContext curr;
-		
+
 		if (ctx == null || !ctx.inUse()) {
 			curr = getTopLevelSQLSessionContext();
 		} else {

@@ -1102,6 +1102,31 @@ public interface LanguageConnectionContext extends Context {
 	public String getCurrentRoleId(Activation a);
 
 	/**
+	 * Get the current role authorization identifier of the dynamic
+	 * call context associated with this activation. It is checked
+	 * whether it is still valid, that is, not revoked or dropped.
+	 * @param a activation of statement needing current role
+	 * @return String	the role id
+	 *
+	 * @throws StandardException  standard exception policy
+	 */
+	public String getCurrentRoleIdChecked(Activation a)
+			throws StandardException;
+
+	/**
+	 * Checks whether the given role can be legally set for the current user.
+	 *
+	 * This method will read (potentially) the dictionary, so it needs
+	 * a transaction context.
+	 *
+	 * @param role string containing role name
+	 *
+	 * @return true if the role can be set
+	 * @throws StandardException standard exception policy
+	 */
+	public boolean roleIsSettable(String role) throws StandardException;
+
+	/**
 	 * Create a new SQL session context for the current activation
 	 * on the basis of the existing SQL session context (logical
 	 * session context analogue to call stack push, i.e. this happens
