@@ -2099,7 +2099,7 @@ Guide.
 
             <msg>
                 <name>42Y36</name>
-                <text>Column reference '{0}' is invalid.  For a SELECT list with a GROUP BY, the list may only contain valid grouping expressions and valid aggregate expressions.  </text>
+                <text>Column reference '{0}' is invalid, or is part of an invalid expression.  For a SELECT list with a GROUP BY, the columns and expressions being selected may only contain valid grouping expressions and valid aggregate expressions.</text>
                 <arg>reference</arg>
             </msg>
 
