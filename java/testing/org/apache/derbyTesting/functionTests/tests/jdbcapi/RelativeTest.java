@@ -71,6 +71,8 @@ public class RelativeTest extends BaseJDBCTestCase {
 			 * Therefore, attempting to get value will throw an exception.
 			 */
 			rs.getString("name");
+			fail("FAIL - Attempting to read from an invalid row should have " +
+					"thrown an exception");
 		} catch (SQLException sqle) {
 			/**
 			 * sets the expected sql state for the expected exceptions,
@@ -114,6 +116,8 @@ public class RelativeTest extends BaseJDBCTestCase {
 			 * Therefore, attempting to get value now will throw an exception.
 			 */
 			rs.getString("name");
+			fail("FAIL - Attempting to read from an invalid row should have " +
+				"thrown an exception");
 		} catch (SQLException sqle) {
 			/**
 			 * sets the expected sql state for the expected exceptions,
