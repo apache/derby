@@ -67,7 +67,7 @@ grant principal org.apache.derby.authentication.SystemPrincipal * {
 //
 // Permissions for running the test on the jars files
 //
-grant codeBase "${derbyTesting.codejar}*" {
+grant codeBase "${derbyTesting.testjar}derbyTesting.jar" {
   // Allow tests to install and uninstall the security manager and
   // to refresh the policy
   permission java.util.PropertyPermission "java.security.policy", "read,write";
