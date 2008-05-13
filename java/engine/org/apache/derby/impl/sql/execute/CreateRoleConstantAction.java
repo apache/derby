@@ -75,6 +75,11 @@ class CreateRoleConstantAction extends DDLConstantAction {
         TransactionController tc = lcc.getTransactionExecute();
         DataDescriptorGenerator ddg = dd.getDataDescriptorGenerator();
 
+        if (roleName.equals(Authorizer.PUBLIC_AUTHORIZATION_ID)) {
+            throw StandardException.
+                newException(SQLState.AUTH_PUBLIC_ILLEGAL_AUTHORIZATION_ID);
+        }
+
         // currentAuthId is currently always the database owner since
         // role definition is a database owner power. This may change
         // in the future since this SQL is more liberal.

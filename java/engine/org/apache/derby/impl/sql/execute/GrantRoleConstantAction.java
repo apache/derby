@@ -28,6 +28,7 @@ import java.util.List;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
+import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.dictionary.DataDescriptorGenerator;
 import org.apache.derby.iapi.sql.dictionary.RoleDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
@@ -87,6 +88,11 @@ class GrantRoleConstantAction extends DDLConstantAction {
 
         for (Iterator rIter = roleNames.iterator(); rIter.hasNext();) {
             String role = (String)rIter.next();
+
+            if (role.equals(Authorizer.PUBLIC_AUTHORIZATION_ID)) {
+                throw StandardException.
+                    newException(SQLState.AUTH_PUBLIC_ILLEGAL_AUTHORIZATION_ID);
+            }
 
             for (Iterator gIter = grantees.iterator(); gIter.hasNext();) {
                 String grantee = (String)gIter.next();

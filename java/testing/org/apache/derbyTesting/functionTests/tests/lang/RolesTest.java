@@ -71,6 +71,7 @@ public class RolesTest extends BaseJDBCTestCase
     private final static String revokeWarn               = "01007";
     private final static String notIdle                  = "25001";
     private final static String invalidRoleName          = "4293A";
+    private final static String invalidPUBLIC            = "4251B";
     private final static String userException = "38000";
 
     private int MAX_IDENTIFIER_LENGTH = 128;
@@ -231,6 +232,14 @@ public class RolesTest extends BaseJDBCTestCase
                sqlAuthorizationRequired, invalidRoleName, invalidRoleName);
         doStmt("create role \"SYSROLE\"",
                sqlAuthorizationRequired, invalidRoleName, invalidRoleName);
+        doStmt("create role public",
+               syntaxError, syntaxError, syntaxError);
+        doStmt("create role \"PUBLIC\"",
+               sqlAuthorizationRequired, invalidPUBLIC, roleDboOnly);
+        doStmt("grant \"PUBLIC\" to " + users[1],
+               sqlAuthorizationRequired, invalidPUBLIC, invalidPUBLIC);
+        doStmt("revoke \"PUBLIC\" from " + users[1],
+               sqlAuthorizationRequired, invalidPUBLIC, invalidPUBLIC);
         _stm.close();
     }
 
