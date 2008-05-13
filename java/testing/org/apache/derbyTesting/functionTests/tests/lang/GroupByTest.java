@@ -95,6 +95,13 @@ public class GroupByTest extends BaseJDBCTestCase {
         st.executeUpdate("insert into d2085 values (1,1,1,1), (1,2,3,4), " +
                 "(4,3,2,1), (2,2,2,2)");
 
+        st.executeUpdate("create table d2457_o (name varchar(20), ord int)");
+        st.executeUpdate("create table d2457_a (ord int, amount int)");
+        st.executeUpdate("insert into d2457_o values ('John', 1)," +
+                " ('Jerry', 2), ('Jerry', 3), ('John', 4), ('John', 5)");
+        st.executeUpdate("insert into d2457_a values (1, 12), (2, 23), " +
+                "(3, 34), (4, 45), (5, 56)");
+
         // create an all types tables
         
         st.executeUpdate(
@@ -1586,6 +1593,103 @@ public class GroupByTest extends BaseJDBCTestCase {
             "select a from d2085 group by a,b order by c");
         assertStatementError("42Y36", s,
             "select a,b from d2085 group by a,b order by c*2");
+    }
+
+    /**
+      * DERBY-2457: Derby does not support column aliases in the
+      * GROUP BY and HAVING clauses.
+      */
+    public void testColumnAliasInGroupByAndHaving() throws SQLException
+    {
+        Statement s = createStatement();
+        // 1) Using the underlying column names works fine, with or
+        // without a table alias:
+        JDBC.assertUnorderedResultSet(
+                s.executeQuery("select name, count(ord) from d2457_o " +
+                    " group by name having count(ord) > 2"),
+            new String[][] {  {"John","3"} } );
+        JDBC.assertUnorderedResultSet(
+                s.executeQuery("select name as col1, count(ord) as col2 " +
+                    " from d2457_o group by name having count(ord) > 2"),
+            new String[][] {  {"John","3"} } );
+        JDBC.assertUnorderedResultSet(
+                s.executeQuery("select name as col1, count(ord) as col2 " +
+                    " from d2457_o ordertable group by name " +
+                    " having count(ord) > 2"),
+            new String[][] {  {"John","3"} } );
+        JDBC.assertUnorderedResultSet(
+                s.executeQuery("select ordertable.name as col1, " +
+                    " count(ord) as col2 from d2457_o ordertable " +
+                    " group by name having count(ord) > 2"),
+            new String[][] {  {"John","3"} } );
+        // 2) References to column aliases in GROUP BY and HAVING are
+        // rejected with an error message:
+        assertStatementError("42X04", s,
+                "select name as col1, count(ord) as col2 from d2457_o " +
+                " group by name having col2 > 2");
+        assertStatementError("42X04", s,
+                "select name as col1, count(ord) as col2 from d2457_o " +
+                " group by col1 having col2 > 2");
+        assertStatementError("42X04", s,
+                "select name as col1, count(ord) as col2 from d2457_o " +
+                " group by col1 having count(ord) > 2");
+        assertStatementError("42X04", s,
+                "select name as col1, sum(amount) as col2 " +
+                " from d2457_o, d2457_a where d2457_o.ord = d2457_a.ord " +
+                " group by col1 having col2 > 2");
+        assertStatementError("42X04", s,
+                "select name as col1, sum(amount) as col2 " +
+                " from d2457_o t1, d2457_a t2 where t1.ord = t2.ord " +
+                " group by col1 having col2 > 2");
+        assertStatementError("42X04", s,
+                "select name as col1, sum(amount) as col2 " +
+                " from d2457_o t1, d2457_a t2 where t1.ord = t2.ord " +
+                " group by col1 having sum(amount) > 2");
+        assertStatementError("42X04", s,
+                "select name as col1, sum(amount) as col2 " +
+                " from d2457_o t1, d2457_a t2 where t1.ord = t2.ord " +
+                " group by col1 having col2 > 2");
+        assertStatementError("42X04", s,
+                "select * from (select t1.name as col, sum(amount) " +
+                " from d2457_o t1, d2457_a t2 where t1.ord = t2.ord " +
+                " group by col) as t12(col1, col2) where col2 > 2");
+        // 3) Demonstrate that column aliasing works correctly when the
+        // GROUP BY is packaged as a subquery:
+        JDBC.assertUnorderedResultSet(
+                s.executeQuery("select * from " +
+                    "(select name, count(ord) from d2457_o ordertable " +
+                    " group by ordertable.name) as ordertable(col1, col2) " +
+                    " where col2 > 2"),
+            new String[][] {  {"John","3"} } );
+        JDBC.assertUnorderedResultSet(
+                s.executeQuery("select * from " +
+                    "(select name as col, sum(amount) " +
+                    " from d2457_o t1, d2457_a t2 where t1.ord = t2.ord " +
+                    " group by name) as t12(col1, col2) where col2 > 2"),
+            new String[][] {  {"Jerry", "57"}, {"John","113"} } );
+        // 4) Demonatrate that table aliases can be used in GROUP BY and
+        // HAVING clauses
+        JDBC.assertUnorderedResultSet(
+                s.executeQuery("select t1.name as col1, " +
+                    " sum(t2.amount) as col2 from d2457_o t1, d2457_a t2 " +
+                    " where t1.ord = t2.ord group by t1.name " +
+                    " having sum(t2.amount) > 2"),
+            new String[][] {  {"Jerry", "57"}, {"John","113"} } );
+        JDBC.assertUnorderedResultSet(
+                s.executeQuery("select name as col1, sum(amount) as col2 " +
+                    " from d2457_o t1, d2457_a t2 where t1.ord = t2.ord " +
+                    " group by name having sum(amount) > 2"),
+            new String[][] {  {"Jerry", "57"}, {"John","113"} } );
+        JDBC.assertUnorderedResultSet(
+                s.executeQuery("select t1.name as col1, sum(amount) as col2 " +
+                    " from d2457_o t1, d2457_a t2 where t1.ord = t2.ord " +
+                    " group by name having sum(amount) > 2"),
+            new String[][] {  {"Jerry", "57"}, {"John","113"} } );
+        JDBC.assertUnorderedResultSet(
+                s.executeQuery("select name as col1, sum(t2.amount) as col2 " +
+                    " from d2457_o t1, d2457_a t2 where t1.ord = t2.ord " +
+                    " group by name having sum(amount) > 2"),
+            new String[][] {  {"Jerry", "57"}, {"John","113"} } );
     }
 }
 
