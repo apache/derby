@@ -53,6 +53,12 @@ public class AlterTableNode extends DDLStatementNode
 	public  char				lockGranularity;
 	public	boolean				compressTable = false;
 	public	boolean				sequential = false;
+	//The following three (purge, defragment and truncateEndOfTable) apply for 
+	//inplace compress
+	public	boolean				purge = false;
+	public	boolean				defragment = false;
+	public	boolean				truncateEndOfTable = false;
+	
 	public	int					behavior;	// currently for drop column
 
 	public	TableDescriptor		baseTable;
@@ -98,7 +104,8 @@ public class AlterTableNode extends DDLStatementNode
 	}
 
 	/**
-	 * Initializer for a AlterTableNode for COMPRESS
+	 * Initializer for a AlterTableNode for COMPRESS using temporary tables
+	 * rather than inplace compress
 	 *
 	 * @param objectName		The name of the table being altered
 	 * @param sequential		Whether or not the COMPRESS is SEQUENTIAL
@@ -120,12 +127,43 @@ public class AlterTableNode extends DDLStatementNode
 	}
 
 	/**
+	 * Initializer for a AlterTableNode for INPLACE COMPRESS
+	 *
+	 * @param objectName			The name of the table being altered
+	 * @param purge					PURGE during INPLACE COMPRESS?
+	 * @param defragment			DEFRAGMENT during INPLACE COMPRESS?
+	 * @param truncateEndOfTable	TRUNCATE END during INPLACE COMPRESS?
+	 *
+	 * @exception StandardException		Thrown on error
+	 */
+
+	public void init(Object objectName,
+			 Object purge,
+			 Object defragment,
+			 Object truncateEndOfTable)
+		throws StandardException
+	{
+		initAndCheck(objectName);
+
+		this.purge = ((Boolean) purge).booleanValue();
+		this.defragment = ((Boolean) defragment).booleanValue();
+		this.truncateEndOfTable = ((Boolean) truncateEndOfTable).booleanValue();
+		compressTable = true;
+		schemaDescriptor = getSchemaDescriptor(true, false);
+	}
+
+	/**
 	 * Initializer for a AlterTableNode
 	 *
 	 * @param objectName		The name of the table being altered
 	 * @param tableElementList	The alter table action
 	 * @param lockGranularity	The new lock granularity, if any
 	 * @param changeType		ADD_TYPE or DROP_TYPE
+	 * @param behavior			If drop column is CASCADE or RESTRICTED
+	 * @param sequential		Whether or not the COMPRESS is SEQUENTIAL
+	 * @param purge				PURGE during INPLACE COMPRESS?
+	 * @param defragment		DEFRAGMENT during INPLACE COMPRESS?
+	 * @param truncateEndOfTable	TRUNCATE END during INPLACE COMPRESS?
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -136,7 +174,10 @@ public class AlterTableNode extends DDLStatementNode
 							Object lockGranularity,
 							Object changeType,
 							Object behavior,
-							Object sequential )
+							Object sequential,
+							Object purge,
+							Object defragment,
+							Object truncateEndOfTable )
 		throws StandardException
 	{
 		initAndCheck(objectName);
@@ -148,6 +189,12 @@ public class AlterTableNode extends DDLStatementNode
 		this.behavior = bh[0];
 		boolean[]	seq = (boolean[]) sequential;
 		this.sequential = seq[0];
+		boolean[]	booleanPurge = (boolean[]) purge;
+		this.purge = booleanPurge[0];
+		boolean[]	booleanDefragment = (boolean[]) defragment;
+		this.defragment = booleanDefragment[0];
+		boolean[]	booleanTruncateEndOfTable = (boolean[]) truncateEndOfTable;
+		this.truncateEndOfTable = booleanTruncateEndOfTable[0];
 		switch ( this.changeType )
 		{
 		    case ADD_TYPE:
@@ -182,7 +229,10 @@ public class AlterTableNode extends DDLStatementNode
 				"lockGranularity: " + "\n" + lockGranularity + "\n" +
 				"compressTable: " + "\n" + compressTable + "\n" +
 				"sequential: " + "\n" + sequential + "\n" +
-				"truncateTable: " + "\n" + truncateTable + "\n";
+				"truncateTable: " + "\n" + truncateTable + "\n" +
+				"purge: " + "\n" + purge + "\n" +
+				"defragment: " + "\n" + defragment + "\n" +
+				"truncateEndOfTable: " + "\n" + truncateEndOfTable + "\n";
 		}
 		else
 		{
@@ -221,7 +271,17 @@ public class AlterTableNode extends DDLStatementNode
 		** Get the table descriptor.  Checks the schema
 		** and the table.
 		*/
-		baseTable = getTableDescriptor();
+		if(compressTable && (purge || defragment || truncateEndOfTable)) {
+			//We are dealing with inplace compress here and inplace compress is 
+			//allowed on system schemas. In order to support inplace compress
+			//on user as well as system tables, we need to use special 
+			//getTableDescriptor(boolean) call to get TableDescriptor. This
+			//getTableDescriptor(boolean) allows getting TableDescriptor for
+			//system tables without throwing an exception.
+			baseTable = getTableDescriptor(false);
+		} else
+			baseTable = getTableDescriptor();
+
 		//throw an exception if user is attempting to alter a temporary table
 		if (baseTable.getTableType() == TableDescriptor.GLOBAL_TEMPORARY_TABLE_TYPE)
 		{
@@ -364,7 +424,10 @@ public class AlterTableNode extends DDLStatementNode
 											 compressTable,
 											 behavior,
         								     sequential,
- 										     truncateTable);
+ 										     truncateTable,
+ 										     purge,
+ 										     defragment,
+ 										     truncateEndOfTable );
 	}
 
 	/**

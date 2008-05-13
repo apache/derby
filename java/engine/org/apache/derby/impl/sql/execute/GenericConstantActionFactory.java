@@ -127,6 +127,10 @@ public class GenericConstantActionFactory
 	 *	@param compressTable	Whether or not this is a compress table
 	 *	@param behavior			drop behavior of dropping column
 	 *	@param sequential	If compress table/drop column, whether or not sequential
+	 *  @param truncateTable	    Whether or not this is a truncate table
+	 *  @param purge				PURGE during INPLACE COMPRESS?
+	 *  @param defragment			DEFRAGMENT during INPLACE COMPRESS?
+	 *  @param truncateEndOfTable	TRUNCATE END during INPLACE COMPRESS?
 	 */
 	public	ConstantAction	getAlterTableConstantAction
 	(
@@ -142,13 +146,17 @@ public class GenericConstantActionFactory
 		boolean						compressTable,
 		int							behavior,
 		boolean						sequential,
-		boolean                     truncateTable
+		boolean                     truncateTable,
+		boolean						purge,
+		boolean						defragment,
+		boolean						truncateEndOfTable 
     )
 	{
 		return new	AlterTableConstantAction( sd, tableName, tableId, tableConglomerateId, 
 											  tableType, columnInfo, constraintActions, 
 											  lockGranularity, compressTable,
-											  behavior, sequential, truncateTable);
+											  behavior, sequential, truncateTable,
+											  purge, defragment, truncateEndOfTable);
 	}
 
 	/**

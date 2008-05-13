@@ -750,7 +750,7 @@ public final class SysDiagVTIMappingTest extends BaseJDBCTestCase {
             "call SYSCS_UTIL.SYSCS_INPLACE_COMPRESS_TABLE(?, ?, 1, 1, 1)");
         cSt.setString(1, "SYSCS_DIAG");
         cSt.setString(2, vtiTableName.toUpperCase());
-        assertStatementError("42X05", cSt);
+        assertStatementError("42Y55", cSt);
 
         assertStatementError("42X08", st,
             "update new org.apache.derby.diag." + vtiMethodName + args

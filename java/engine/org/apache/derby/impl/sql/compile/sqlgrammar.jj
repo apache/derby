@@ -2301,6 +2301,7 @@ TOKEN [IGNORE_CASE] :
 |	<CURSORS: "cursors">
 |	<DB2SQL: "db2sql">
 |	<DERBY_JDBC_RESULT_SET: "derby_jdbc_result_set">
+|	<DEFRAGMENT: "defragment">
 |       <DIRTY: "dirty">
 |	<DOCUMENT: "document">
 |	<EACH: "each">
@@ -2308,6 +2309,7 @@ TOKEN [IGNORE_CASE] :
 |	<EXCLUSIVE: "exclusive">
 |	<FN: "fn">
 |	<INDEX: "index">
+|	<INPLACE: "inplace">
 |	<JAVA: "java">
 |   <LCASE: "lcase">
 |   <LOCATE: "locate">
@@ -2326,6 +2328,7 @@ TOKEN [IGNORE_CASE] :
 |	<PARAMETER: "parameter">
 |	<PASSING: "passing">
 |	<PROPERTIES: "properties">
+|	<PURGE: "purge">
 |	<READS: "reads">
 |	<REF: "ref">
 |	<REFERENCING: "referencing">
@@ -2347,6 +2350,7 @@ TOKEN [IGNORE_CASE] :
 |   <STRIP: "strip">
 |   <STYLE: "style">
 |	<TRIGGER: "trigger">
+|	<TRUNCATE_END: "truncate_end">
 |   <UCASE: "ucase">
 |   <UR: "ur">
 |   <WHITESPACE: "whitespace">
@@ -12237,28 +12241,30 @@ alterTableStatement() throws StandardException :
 StatementNode
 alterTableBody(TableName tableName) throws StandardException :
 {
-	StatementNode qtn;
+	StatementNode sn;
 	char				lockGranularity = '\0';
 	String               newTableName;
 	TableElementList	tableElementList =
 									(TableElementList) nodeFactory.getNode(
 												C_NodeTypes.TABLE_ELEMENT_LIST,
 												getContextManager());
-	Token				tok = null;
 	int[]				changeType = new int[1];
 	int[]				behavior = new int[1];
 	boolean[]			sequential = new boolean[1];
+	boolean[]			purge = new boolean[1];
+	boolean[]			defragment = new boolean[1];
+	boolean[]			truncateEndOfTable = new boolean[1];
 }
 {
 //insert special key before compress so that only internal SP can know
-	<COMPRESS> [ tok = <SEQUENTIAL> ]
-	{		
-		checkInternalFeature("COMPRESS");
-		return (StatementNode) nodeFactory.getNode(
-							C_NodeTypes.ALTER_TABLE_NODE,
-							tableName,
-							new Boolean(tok != null),
-							getContextManager());
+	<COMPRESS>
+	(
+		sn = inplaceCompress(tableName)
+		|
+		sn = sequentialCompress(tableName)
+	)
+	{
+		return sn;
 	}
 |
 	lockGranularity = alterTableAction( tableElementList, changeType, behavior, sequential )
@@ -12270,10 +12276,59 @@ alterTableBody(TableName tableName) throws StandardException :
 							new Character(lockGranularity),
 							changeType,
 							behavior,
-							sequential,
+							sequential, 
+							purge, 
+							defragment, 
+							truncateEndOfTable,
 							getContextManager());
 	}
 }
+
+StatementNode
+inplaceCompress(TableName tableName) throws StandardException :
+{
+        Token purge = null;
+        Token defragment = null;
+        Token truncate = null;
+}
+{
+	<INPLACE>
+        (
+		[ purge = <PURGE> ]
+		[ defragment = <DEFRAGMENT> ]
+		[ truncate = <TRUNCATE_END> ]
+        )
+	{
+		checkInternalFeature("COMPRESS");
+		return (StatementNode) nodeFactory.getNode(
+							C_NodeTypes.ALTER_TABLE_NODE,
+							tableName,
+							new Boolean(purge != null),
+							new Boolean(defragment != null),
+							new Boolean(truncate != null),
+							getContextManager());
+	}
+}
+
+
+
+StatementNode
+sequentialCompress(TableName tableName) throws StandardException :
+{
+	Token				tok = null;
+}
+{
+	[ tok = <SEQUENTIAL> ]
+	{
+		checkInternalFeature("COMPRESS");
+		return (StatementNode) nodeFactory.getNode(
+							C_NodeTypes.ALTER_TABLE_NODE,
+							tableName,
+							new Boolean(tok != null),
+							getContextManager());
+	}
+}
+
 
 /*
  * <A NAME="alterTableRenameTableStatement">alterTableRenameTableStatement</A>
@@ -13547,6 +13602,7 @@ nonReservedKeyword()  :
 	|	tok = <DATA>
 	|	tok = <DATE>
 	|	tok = <DAY>
+	|	tok = <DEFRAGMENT>
         |	tok = <DIRTY>
 	|	tok = <DYNAMIC>
     |   tok = <DATABASE>
@@ -13563,6 +13619,7 @@ nonReservedKeyword()  :
 	|	tok = <INCREMENT>
 	|	tok = <INDEX>
 	|	tok = <INITIAL>
+	|	tok = <INPLACE>
 // SQL92 says it is reserved, but we want it to be non-reserved.
 	|	tok = <INTERVAL>
 	|   tok = <JAVA>
@@ -13606,6 +13663,7 @@ nonReservedKeyword()  :
 	|	tok = <PLI>
 	|	tok = <PRECISION>
 	|	tok = <PROPERTIES>
+	|	tok = <PURGE>
 	|	tok = <READS>
 	|	tok = <REF>
 // SQL92 says it is reserved, but we want it to be non-reserved.
@@ -13658,6 +13716,7 @@ nonReservedKeyword()  :
 	|	tok = <TIMESTAMPDIFF>
     |   tok = <TRIGGER>
 	|	tok = <TRUNCATE>
+	|	tok = <TRUNCATE_END>
 	|	tok = <TS>
 	|	tok = <TYPE>
     |   tok = <UCASE>

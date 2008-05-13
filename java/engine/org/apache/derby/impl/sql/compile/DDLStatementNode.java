@@ -203,22 +203,42 @@ abstract class DDLStatementNode extends StatementNode
 	*/
 	protected final SchemaDescriptor getSchemaDescriptor() throws StandardException
 	{
-		return getSchemaDescriptor(true);
+		return getSchemaDescriptor(true, true);
 	}
 
 	/**
 	* Get a schema descriptor for this DDL object.
 	* Uses this.objectName.  Always returns a schema,
 	* we lock in the schema name prior to execution.
+	* 
+	* The most common call to this method is with 2nd 
+	* parameter true which says that SchemaDescriptor
+	* should not be requested for system schema. The only
+	* time this method will get called with 2nd parameter
+	* set to false will be when user has requested for
+	* inplace compress using 
+	* SYSCS_UTIL.SYSCS_INPLACE_COMPRESS_TABLE
+	* Above inplace compress can be invoked on system tables.
+	* A call to SYSCS_UTIL.SYSCS_INPLACE_COMPRESS_TABLE 
+	* internally gets translated into ALTER TABLE sql.
+	* When ALTER TABLE is executed for SYSCS_INPLACE_COMPRESS_TABLE,
+	* we want to allow SchemaDescriptor request for system
+	* tables. DERBY-1062
 	*
 	* @param ownerCheck		If check for schema owner is needed
+	* @param doSystemSchemaCheck   If check for system schema is needed.
+	*    If set to true, then throw an exception if schema descriptor
+	*    is requested for a system schema. The only time this param 
+	*    will be set to false is when user is asking for inplace
+	*    compress of a system table. DERBY-1062
 	*
 	* @return Schema Descriptor
 	*
 	* @exception	StandardException	throws on schema name
 	*						that doesn't exist	
 	*/
-	protected final SchemaDescriptor getSchemaDescriptor(boolean ownerCheck)
+	protected final SchemaDescriptor getSchemaDescriptor(boolean ownerCheck,
+			boolean doSystemSchemaCheck)
 		 throws StandardException
 	{
 		String schemaName = objectName.getSchemaName();
@@ -247,9 +267,11 @@ abstract class DDLStatementNode extends StatementNode
 						Authorizer.MODIFY_SCHEMA_PRIV);
 
 		/*
-		** Catch the system schema here.
+		** Catch the system schema here if the caller wants us to.
+		** Currently, the only time we allow system schema is for inplace
+		** compress table calls.
 		*/	 
-		if (sd.isSystemSchema())
+		if (doSystemSchemaCheck && sd.isSystemSchema())
 		{
 			throw StandardException.newException(SQLState.LANG_NO_USER_DDL_IN_SYSTEM_SCHEMA,
 							statementToString(), sd);
@@ -263,16 +285,38 @@ abstract class DDLStatementNode extends StatementNode
 		return getTableDescriptor(objectName);
 	}
 
+	/**
+	 * Validate that the table is ok for DDL -- e.g.
+	 * that it exists, it is not a view. It is ok for
+	 * it to be a system table. Also check that its 
+	 * schema is ok. Currently, the only time this method
+	 * is called is when user has asked for inplace 
+	 * compress. eg
+	 * call SYSCS_UTIL.SYSCS_INPLACE_COMPRESS_TABLE('SYS','SYSTABLES',1,1,1);
+	 * Inplace compress is allowed on both system and
+	 * user tables.
+	 *
+	 * @return the validated table descriptor, never null
+	 *
+	 * @exception StandardException on error
+	 */
+	protected final TableDescriptor getTableDescriptor(boolean doSystemTableCheck)
+	throws StandardException
+	{
+		TableDescriptor td = justGetDescriptor(objectName);
+		td = checkTableDescriptor(td,doSystemTableCheck);
+		return td;
+	}
+
 	protected final TableDescriptor getTableDescriptor(UUID tableId)
 		throws StandardException {
 
 		TableDescriptor td = getDataDictionary().getTableDescriptor(tableId);
 
-		td = checkTableDescriptor(td);
+		td = checkTableDescriptor(td,true);
 		return td;
 
 	}
-
 
 	/**
 	 * Validate that the table is ok for DDL -- e.g.
@@ -286,6 +330,28 @@ abstract class DDLStatementNode extends StatementNode
 	protected final TableDescriptor getTableDescriptor(TableName tableName)
 		throws StandardException
 	{
+		TableDescriptor td = justGetDescriptor(tableName);
+
+		/* beetle 4444, td may have changed when we obtain shared lock */
+		td = checkTableDescriptor(td, true);
+		return td;
+
+	}
+
+	/**
+	 * Just get the table descriptor. Don't worry if it belongs to a view,
+	 * system table, synonym or a real table. Let the caller decide what
+	 * to do.
+	 * 
+	 * @param tableName
+	 * 
+	 * @return TableDescriptor for the give TableName
+	 * 
+	 * @throws StandardException on error
+	 */
+	private TableDescriptor justGetDescriptor(TableName tableName)
+	throws StandardException
+	{
 		String schemaName = tableName.getSchemaName();
 		SchemaDescriptor sd = getSchemaDescriptor(schemaName);
 		
@@ -296,27 +362,31 @@ abstract class DDLStatementNode extends StatementNode
 			throw StandardException.newException(SQLState.LANG_OBJECT_DOES_NOT_EXIST, 
 						statementToString(), tableName);
 		}
-
-		/* beetle 4444, td may have changed when we obtain shared lock */
-		td = checkTableDescriptor(td);
 		return td;
-
 	}
 
-	private TableDescriptor checkTableDescriptor(TableDescriptor td)
+	private TableDescriptor checkTableDescriptor(TableDescriptor td, 
+			boolean doSystemTableCheck)
 		throws StandardException
 	{
 		String sqlState = null;
 
 		switch (td.getTableType()) {
 		case TableDescriptor.VTI_TYPE:
-		case TableDescriptor.SYSTEM_TABLE_TYPE:
-
-			/*
-			** Not on system tables (though there are no constraints on
-			** system tables as of the time this is writen
-			*/
 			sqlState = SQLState.LANG_INVALID_OPERATION_ON_SYSTEM_TABLE;
+			break;
+
+		case TableDescriptor.SYSTEM_TABLE_TYPE:
+			if (doSystemTableCheck)
+				/*
+				** Not on system tables (though there are no constraints on
+				** system tables as of the time this is writen
+				*/
+				sqlState = SQLState.LANG_INVALID_OPERATION_ON_SYSTEM_TABLE;
+			else
+				//allow system table. The only time this happens currently is
+				//when user is requesting inplace compress on system table
+				return td;
 			break;
 
 		case TableDescriptor.BASE_TABLE_TYPE:

@@ -21,6 +21,7 @@
 
 package org.apache.derby.impl.sql.execute;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -32,6 +33,7 @@ import org.apache.derby.catalog.IndexDescriptor;
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.catalog.types.ReferencedColumnsDescriptorImpl;
 import org.apache.derby.catalog.types.StatisticsImpl;
+import org.apache.derby.iapi.error.PublicAPI;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
@@ -41,6 +43,7 @@ import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.PreparedStatement;
 import org.apache.derby.iapi.sql.ResultSet;
 import org.apache.derby.iapi.sql.StatementType;
+import org.apache.derby.iapi.sql.conn.ConnectionUtil;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.depend.DependencyManager;
 import org.apache.derby.iapi.sql.dictionary.CheckConstraintDescriptor;
@@ -106,8 +109,11 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
     private     int						    behavior;
     private	    boolean					    sequential;
     private     boolean                     truncateTable;
-
-
+	//The following three (purge, defragment and truncateEndOfTable) apply for 
+	//inplace compress
+    private	    boolean					    purge;
+    private	    boolean					    defragment;
+    private	    boolean					    truncateEndOfTable;
 
     // Alter table compress and Drop column
     private     boolean					    doneScan;
@@ -161,6 +167,9 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 	 *	@param sequential	        If compress table/drop column, 
      *	                            whether or not sequential
 	 *  @param truncateTable	    Whether or not this is a truncate table
+	 *  @param purge				PURGE during INPLACE COMPRESS?
+	 *  @param defragment			DEFRAGMENT during INPLACE COMPRESS?
+	 *  @param truncateEndOfTable	TRUNCATE END during INPLACE COMPRESS?
 	 */
 	AlterTableConstantAction(
     SchemaDescriptor            sd,
@@ -174,7 +183,10 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
     boolean			            compressTable,
     int				            behavior,
     boolean			            sequential,
-    boolean                     truncateTable)
+    boolean                     truncateTable,
+    boolean                     purge,
+    boolean                     defragment,
+    boolean                     truncateEndOfTable)
 	{
 		super(tableId);
 		this.sd                     = sd;
@@ -188,6 +200,9 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		this.behavior               = behavior;
 		this.sequential             = sequential;
 		this.truncateTable          = truncateTable;
+		this.purge          		= purge;
+		this.defragment          	= defragment;
+		this.truncateEndOfTable     = truncateEndOfTable;
 
 		if (SanityManager.DEBUG)
 		{
@@ -231,6 +246,36 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 
 		int							numRows = 0;
         boolean						tableScanned = false;
+
+        //Following if is for inplace compress. Compress using temporary
+        //tables to do the compression is done later in this method.
+		if (compressTable)
+		{
+			if (purge || defragment || truncateEndOfTable)
+			{
+				td = dd.getTableDescriptor(tableId);
+				if (td == null)
+				{
+					throw StandardException.newException(
+						SQLState.LANG_TABLE_NOT_FOUND_DURING_EXECUTION, tableName);
+				}
+	            // Each of the following may give up locks allowing ddl on the
+	            // table, so each phase needs to do the data dictionary lookup.
+	            // The order is important as it makes sense to first purge
+	            // deleted rows, then defragment existing non-deleted rows, and
+	            // finally to truncate the end of the file which may have been
+	            // made larger by the previous purge/defragment pass.
+	            if (purge)
+	                purgeRows(tc);
+
+	            if (defragment)
+	                defragmentRows(tc, lcc);
+
+	            if (truncateEndOfTable)
+	                truncateEnd(tc);            
+	            return;				
+			}
+		}
 
 		/*
 		** Inform the data dictionary that we are about to write to it.
@@ -534,6 +579,450 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 			truncateTable(activation);
 		}
 	}
+
+    /**
+     * Truncate end of conglomerate.
+     * <p>
+     * Returns the contiguous free space at the end of the table back to
+     * the operating system.  Takes care of space allocation bit maps, and
+     * OS call to return the actual space.
+     * <p>
+     *
+     * @param schemaName        schema of table to defragment
+     * @param tableName         name of table to defragment
+     * @param data_dictionary   An open data dictionary to look up the table in.
+     * @param tc                transaction controller to use to do updates.
+     *
+     **/
+	private void truncateEnd(
+    TransactionController   tc)
+        throws StandardException
+	{
+        switch (td.getTableType())
+        {
+        /* Skip views and vti tables */
+        case TableDescriptor.VIEW_TYPE:
+        case TableDescriptor.VTI_TYPE:
+        	break;
+        // other types give various errors here
+        // DERBY-719,DERBY-720
+        default:
+          {
+          ConglomerateDescriptor[] conglom_descriptors = 
+                td.getConglomerateDescriptors();
+
+            for (int cd_idx = 0; cd_idx < conglom_descriptors.length; cd_idx++)
+            {
+                ConglomerateDescriptor cd = conglom_descriptors[cd_idx];
+
+                tc.compressConglomerate(cd.getConglomerateNumber());
+            }
+          }
+        }
+
+        return;
+    }
+
+    /**
+     * Defragment rows in the given table.
+     * <p>
+     * Scans the rows at the end of a table and moves them to free spots
+     * towards the beginning of the table.  In the same transaction all
+     * associated indexes are updated to reflect the new location of the
+     * base table row.
+     * <p>
+     * After a defragment pass, if was possible, there will be a set of
+     * empty pages at the end of the table which can be returned to the
+     * operating system by calling truncateEnd().  The allocation bit
+     * maps will be set so that new inserts will tend to go to empty and
+     * half filled pages starting from the front of the conglomerate.
+     *
+     * @param schemaName        schema of table to defragment
+     * @param tableName         name of table to defragment
+     * @param data_dictionary   An open data dictionary to look up the table in.
+     * @param tc                transaction controller to use to do updates.
+     *
+     **/
+	private void defragmentRows(
+			TransactionController tc,
+			LanguageConnectionContext lcc)
+        throws StandardException
+	{
+        GroupFetchScanController base_group_fetch_cc = null;
+        int                      num_indexes         = 0;
+
+        int[][]                  index_col_map       =  null;
+        ScanController[]         index_scan          =  null;
+        ConglomerateController[] index_cc            =  null;
+        DataValueDescriptor[][]  index_row           =  null;
+
+		TransactionController     nested_tc = null;
+
+		try {
+
+            nested_tc = 
+                tc.startNestedUserTransaction(false);
+
+            switch (td.getTableType())
+            {
+            /* Skip views and vti tables */
+            case TableDescriptor.VIEW_TYPE:
+            case TableDescriptor.VTI_TYPE:
+            	return;
+            // other types give various errors here
+            // DERBY-719,DERBY-720
+            default:
+            	break;
+            }
+
+
+			ConglomerateDescriptor heapCD = 
+                td.getConglomerateDescriptor(td.getHeapConglomerateId());
+
+			/* Get a row template for the base table */
+			ExecRow baseRow = 
+                lcc.getLanguageConnectionFactory().getExecutionFactory().getValueRow(
+                    td.getNumberOfColumns());
+
+
+			/* Fill the row with nulls of the correct type */
+			ColumnDescriptorList cdl = td.getColumnDescriptorList();
+			int					 cdlSize = cdl.size();
+
+			for (int index = 0; index < cdlSize; index++)
+			{
+				ColumnDescriptor cd = (ColumnDescriptor) cdl.elementAt(index);
+				baseRow.setColumn(cd.getPosition(), cd.getType().getNull());
+			}
+
+            DataValueDescriptor[][] row_array = new DataValueDescriptor[100][];
+            row_array[0] = baseRow.getRowArray();
+            RowLocation[] old_row_location_array = new RowLocation[100];
+            RowLocation[] new_row_location_array = new RowLocation[100];
+
+            // Create the following 3 arrays which will be used to update
+            // each index as the scan moves rows about the heap as part of
+            // the compress:
+            //     index_col_map - map location of index cols in the base row, 
+            //                     ie. index_col_map[0] is column offset of 1st
+            //                     key column in base row.  All offsets are 0 
+            //                     based.
+            //     index_scan - open ScanController used to delete old index row
+            //     index_cc   - open ConglomerateController used to insert new 
+            //                  row
+
+            ConglomerateDescriptor[] conglom_descriptors = 
+                td.getConglomerateDescriptors();
+
+            // conglom_descriptors has an entry for the conglomerate and each 
+            // one of it's indexes.
+            num_indexes = conglom_descriptors.length - 1;
+
+            // if indexes exist, set up data structures to update them
+            if (num_indexes > 0)
+            {
+                // allocate arrays
+                index_col_map   = new int[num_indexes][];
+                index_scan      = new ScanController[num_indexes];
+                index_cc        = new ConglomerateController[num_indexes];
+                index_row       = new DataValueDescriptor[num_indexes][];
+
+                setup_indexes(
+                    nested_tc,
+                    td,
+                    index_col_map,
+                    index_scan,
+                    index_cc,
+                    index_row);
+
+            }
+
+			/* Open the heap for reading */
+			base_group_fetch_cc = 
+                nested_tc.defragmentConglomerate(
+                    td.getHeapConglomerateId(), 
+                    false,
+                    true, 
+                    TransactionController.OPENMODE_FORUPDATE, 
+				    TransactionController.MODE_TABLE,
+					TransactionController.ISOLATION_SERIALIZABLE);
+
+            int num_rows_fetched = 0;
+            while ((num_rows_fetched = 
+                        base_group_fetch_cc.fetchNextGroup(
+                            row_array, 
+                            old_row_location_array, 
+                            new_row_location_array)) != 0)
+            {
+                if (num_indexes > 0)
+                {
+                    for (int row = 0; row < num_rows_fetched; row++)
+                    {
+                        for (int index = 0; index < num_indexes; index++)
+                        {
+                            fixIndex(
+                                row_array[row],
+                                index_row[index],
+                                old_row_location_array[row],
+                                new_row_location_array[row],
+                                index_cc[index],
+                                index_scan[index],
+                                index_col_map[index]);
+                        }
+                    }
+                }
+            }
+
+            // TODO - It would be better if commits happened more frequently
+            // in the nested transaction, but to do that there has to be more
+            // logic to catch a ddl that might jump in the middle of the 
+            // above loop and invalidate the various table control structures
+            // which are needed to properly update the indexes.  For example
+            // the above loop would corrupt an index added midway through
+            // the loop if not properly handled.  See DERBY-1188.  
+            nested_tc.commit();
+			
+		}
+		finally
+		{
+                /* Clean up before we leave */
+                if (base_group_fetch_cc != null)
+                {
+                    base_group_fetch_cc.close();
+                    base_group_fetch_cc = null;
+                }
+
+                if (num_indexes > 0)
+                {
+                    for (int i = 0; i < num_indexes; i++)
+                    {
+                        if (index_scan != null && index_scan[i] != null)
+                        {
+                            index_scan[i].close();
+                            index_scan[i] = null;
+                        }
+                        if (index_cc != null && index_cc[i] != null)
+                        {
+                            index_cc[i].close();
+                            index_cc[i] = null;
+                        }
+                    }
+                }
+
+                if (nested_tc != null)
+                {
+                    nested_tc.destroy();
+                }
+
+		}
+
+		return;
+	}
+
+    private static void setup_indexes(
+    TransactionController       tc,
+    TableDescriptor             td,
+    int[][]                     index_col_map,
+    ScanController[]            index_scan,
+    ConglomerateController[]    index_cc,
+    DataValueDescriptor[][]     index_row)
+		throws StandardException
+    {
+
+        // Initialize the following 3 arrays which will be used to update
+        // each index as the scan moves rows about the heap as part of
+        // the compress:
+        //     index_col_map - map location of index cols in the base row, ie.
+        //                     index_col_map[0] is column offset of 1st key
+        //                     column in base row.  All offsets are 0 based.
+        //     index_scan - open ScanController used to delete old index row
+        //     index_cc   - open ConglomerateController used to insert new row
+
+        ConglomerateDescriptor[] conglom_descriptors =
+                td.getConglomerateDescriptors();
+
+
+        int index_idx = 0;
+        for (int cd_idx = 0; cd_idx < conglom_descriptors.length; cd_idx++)
+        {
+            ConglomerateDescriptor index_cd = conglom_descriptors[cd_idx];
+
+            if (!index_cd.isIndex())
+            {
+                // skip the heap descriptor entry
+                continue;
+            }
+
+            // ScanControllers are used to delete old index row
+            index_scan[index_idx] = 
+                tc.openScan(
+                    index_cd.getConglomerateNumber(),
+                    true,	// hold
+                    TransactionController.OPENMODE_FORUPDATE,
+                    TransactionController.MODE_TABLE,
+                    TransactionController.ISOLATION_SERIALIZABLE,
+                    null,   // full row is retrieved, 
+                            // so that full row can be used for start/stop keys
+                    null,	// startKeyValue - will be reset with reopenScan()
+                    0,		// 
+                    null,	// qualifier
+                    null,	// stopKeyValue  - will be reset with reopenScan()
+                    0);		// 
+
+            // ConglomerateControllers are used to insert new index row
+            index_cc[index_idx] = 
+                tc.openConglomerate(
+                    index_cd.getConglomerateNumber(),
+                    true,  // hold
+                    TransactionController.OPENMODE_FORUPDATE,
+                    TransactionController.MODE_TABLE,
+                    TransactionController.ISOLATION_SERIALIZABLE);
+
+            // build column map to allow index row to be built from base row
+            int[] baseColumnPositions   = 
+                index_cd.getIndexDescriptor().baseColumnPositions();
+            int[] zero_based_map        = 
+                new int[baseColumnPositions.length];
+
+            for (int i = 0; i < baseColumnPositions.length; i++)
+            {
+                zero_based_map[i] = baseColumnPositions[i] - 1; 
+            }
+
+            index_col_map[index_idx] = zero_based_map;
+
+            // build row array to delete from index and insert into index
+            //     length is length of column map + 1 for RowLocation.
+            index_row[index_idx] = 
+                new DataValueDescriptor[baseColumnPositions.length + 1];
+
+            index_idx++;
+        }
+
+        return;
+    }
+
+
+    /**
+     * Delete old index row and insert new index row in input index.
+     * <p>
+     *
+     * @param base_row      all columns of base row
+     * @param index_row     an index row template, filled in by this routine
+     * @param old_row_loc   old location of base row, used to delete index
+     * @param new_row_loc   new location of base row, used to update index
+     * @param index_cc      index conglomerate to insert new row
+     * @param index_scan    index scan to delete old entry
+     * @param index_col_map description of mapping of index row to base row,
+     *                      
+     *
+	 * @exception  StandardException  Standard exception policy.
+     **/
+    private static void fixIndex(
+    DataValueDescriptor[]   base_row,
+    DataValueDescriptor[]   index_row,
+    RowLocation             old_row_loc,
+    RowLocation             new_row_loc,
+    ConglomerateController  index_cc,
+    ScanController          index_scan,
+	int[]					index_col_map)
+        throws StandardException
+    {
+        if (SanityManager.DEBUG)
+        {
+            // baseColumnPositions should describe all columns in index row
+            // except for the final column, which is the RowLocation.
+            SanityManager.ASSERT(index_col_map != null);
+            SanityManager.ASSERT(index_row != null);
+            SanityManager.ASSERT(
+                (index_col_map.length == (index_row.length - 1)));
+        }
+
+        // create the index row to delete from from the base row, using map
+        for (int index = 0; index < index_col_map.length; index++)
+        {
+            index_row[index] = base_row[index_col_map[index]];
+        }
+        // last column in index in the RowLocation
+        index_row[index_row.length - 1] = old_row_loc;
+
+        // position the scan for the delete, the scan should already be open.
+        // This is done by setting start scan to full key, GE and stop scan
+        // to full key, GT.
+        index_scan.reopenScan(
+            index_row,
+            ScanController.GE,
+            (Qualifier[][]) null,
+            index_row,
+            ScanController.GT);
+
+        // position the scan, serious problem if scan does not find the row.
+        if (index_scan.next())
+        {
+            index_scan.delete();
+        }
+        else
+        {
+            // Didn't find the row we wanted to delete.
+            if (SanityManager.DEBUG)
+            {
+                SanityManager.THROWASSERT(
+                    "Did not find row to delete." +
+                    "base_row = " + RowUtil.toString(base_row) +
+                    "index_row = " + RowUtil.toString(index_row));
+            }
+        }
+
+        // insert the new index row into the conglomerate
+        index_row[index_row.length - 1] = new_row_loc;
+
+        index_cc.insert(index_row);
+
+        return;
+    }
+
+    /**
+     * Purge committed deleted rows from conglomerate.
+     * <p>
+     * Scans the table and purges any committed deleted rows from the 
+     * table.  If all rows on a page are purged then page is also 
+     * reclaimed.
+     * <p>
+     *
+     * @param schemaName        schema of table to defragment
+     * @param tableName         name of table to defragment
+     * @param data_dictionary   An open data dictionary to look up the table in.
+     * @param tc                transaction controller to use to do updates.
+     *
+     **/
+	private void purgeRows(TransactionController   tc)
+        throws StandardException
+	{
+        switch (td.getTableType())
+        {
+        /* Skip views and vti tables */
+        case TableDescriptor.VIEW_TYPE:
+        case TableDescriptor.VTI_TYPE:
+        	break;
+        // other types give various errors here
+        // DERBY-719,DERBY-720
+        default:
+          {
+
+            ConglomerateDescriptor[] conglom_descriptors = 
+                td.getConglomerateDescriptors();
+
+            for (int cd_idx = 0; cd_idx < conglom_descriptors.length; cd_idx++)
+            {
+                ConglomerateDescriptor cd = conglom_descriptors[cd_idx];
+
+                tc.purgeConglomerate(cd.getConglomerateNumber());
+            }
+          }
+        }
+
+        return;
+    }
 
 	/**
 	 * Workhorse for adding a new column to a table.

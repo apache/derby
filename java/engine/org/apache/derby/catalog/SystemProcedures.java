@@ -930,23 +930,143 @@ public class SystemProcedures  {
         return(ret_val ? 1 : 0);
     }
 
+    /**
+
+    Implementation of SYSCS_UTIL.SYSCS_INPLACE_COMPRESS_TABLE().
+    <p>
+    Code which implements the following system procedure:
+
+    void SYSCS_UTIL.SYSCS_INPLACE_COMPRESS_TABLE(
+        IN SCHEMANAME        VARCHAR(128),
+        IN TABLENAME         VARCHAR(128),
+        IN PURGE_ROWS        SMALLINT,
+        IN DEFRAGMENT_ROWS   SMALLINT,
+        IN TRUNCATE_END      SMALLINT)
+    <p>
+    Use the SYSCS_UTIL.SYSCS_INPLACE_COMPRESS_TABLE system procedure to reclaim 
+    unused, allocated space in a table and its indexes. Typically, unused allocated
+    space exists when a large amount of data is deleted from a table, and there
+    have not been subsequent inserts to use the space freed by the deletes.  
+    By default, Derby does not return unused space to the operating system. For 
+    example, once a page has been allocated to a table or index, it is not 
+    automatically returned to the operating system until the table or index is 
+    destroyed. SYSCS_UTIL.SYSCS_INPLACE_COMPRESS_TABLE allows you to return unused 
+    space to the operating system.
+    <p>
+    This system procedure can be used to force 3 levels of in place compression
+    of a SQL table: PURGE_ROWS, DEFRAGMENT_ROWS, TRUNCATE_END.  Unlike 
+    SYSCS_UTIL.SYSCS_COMPRESS_TABLE() all work is done in place in the existing
+    table/index.
+    <p>
+    Syntax:
+    SYSCS_UTIL.SYSCS_INPLACE_COMPRESS_TABLE(
+        IN SCHEMANAME        VARCHAR(128),
+        IN TABLENAME         VARCHAR(128),
+        IN PURGE_ROWS        SMALLINT,
+        IN DEFRAGMENT_ROWS   SMALLINT,
+        IN TRUNCATE_END      SMALLINT)
+    <p>
+    SCHEMANAME: 
+    An input argument of type VARCHAR(128) that specifies the schema of the table. Passing a null will result in an error.
+    <p>
+    TABLENAME:
+    An input argument of type VARCHAR(128) that specifies the table name of the 
+    table. The string must exactly match the case of the table name, and the 
+    argument of "Fred" will be passed to SQL as the delimited identifier 'Fred'. 
+    Passing a null will result in an error.
+    <p>
+    PURGE_ROWS:
+    If PURGE_ROWS is set to non-zero then a single pass is made through the table 
+    which will purge committed deleted rows from the table.  This space is then
+    available for future inserted rows, but remains allocated to the table.
+    As this option scans every page of the table, it's performance is linearly 
+    related to the size of the table.
+    <p>
+    DEFRAGMENT_ROWS:
+    If DEFRAGMENT_ROWS is set to non-zero then a single defragment pass is made
+    which will move existing rows from the end of the table towards the front
+    of the table.  The goal of the defragment run is to empty a set of pages
+    at the end of the table which can then be returned to the OS by the
+    TRUNCATE_END option.  It is recommended to only run DEFRAGMENT_ROWS, if also
+    specifying the TRUNCATE_END option.  This option scans the whole table and
+    needs to update index entries for every base table row move, and thus execution
+    time is linearly related to the size of the table.
+    <p>
+    TRUNCATE_END:
+    If TRUNCATE_END is set to non-zero then all contiguous pages at the end of
+    the table will be returned to the OS.  Running the PURGE_ROWS and/or 
+    DEFRAGMENT_ROWS passes options may increase the number of pages affected.  
+    This option itself does no scans of the table, so performs on the order of a 
+    few system calls.
+    <p>
+    SQL example:
+    To compress a table called CUSTOMER in a schema called US, using all 
+    available compress options:
+    call SYSCS_UTIL.SYSCS_INPLACE_COMPRESS_TABLE('US', 'CUSTOMER', 1, 1, 1);
+
+    To quickly just return the empty free space at the end of the same table, 
+    this option will run much quicker than running all phases but will likely
+    return much less space:
+    call SYSCS_UTIL.SYSCS_INPLACE_COMPRESS_TABLE('US', 'CUSTOMER', 0, 0, 1);
+
+    Java example:
+    To compress a table called CUSTOMER in a schema called US, using all 
+    available compress options:
+
+    CallableStatement cs = conn.prepareCall
+    ("CALL SYSCS_UTIL.SYSCS_COMPRESS_TABLE(?, ?, ?, ?, ?)");
+    cs.setString(1, "US");
+    cs.setString(2, "CUSTOMER");
+    cs.setShort(3, (short) 1);
+    cs.setShort(4, (short) 1);
+    cs.setShort(5, (short) 1);
+    cs.execute();
+
+    To quickly just return the empty free space at the end of the same table, 
+    this option will run much quicker than running all phases but will likely
+    return much less space:
+
+    CallableStatement cs = conn.prepareCall
+    ("CALL SYSCS_UTIL.SYSCS_COMPRESS_TABLE(?, ?, ?, ?, ?)");
+    cs.setString(1, "US");
+    cs.setString(2, "CUSTOMER");
+    cs.setShort(3, (short) 0);
+    cs.setShort(4, (short) 0);
+    cs.setShort(5, (short) 1);
+    cs.execute();
+
+    <p>
+    It is recommended that the SYSCS_UTIL.SYSCS_COMPRESS_TABLE procedure is 
+    issued in auto-commit mode.
+    Note: This procedure acquires an exclusive table lock on the table being compressed. All statement plans dependent on the table or its indexes are invalidated. For information on identifying unused space, see the Derby Server and Administration Guide.
+
+    TODO LIST:
+    o defragment requires table level lock in nested user transaction, which
+      will conflict with user lock on same table in user transaction.
+
+    **/
     public static void SYSCS_INPLACE_COMPRESS_TABLE(
     String  schema,
     String  tablename,
     int     purgeRows,
-    int     defragementRows,
+    int     defragmentRows,
     int     truncateEnd)
 		throws SQLException
     {
  
-        org.apache.derby.iapi.db.OnlineCompress.compressTable(
-            schema, 
-            tablename, 
-            (purgeRows != 0),
-            (defragementRows != 0),
-            (truncateEnd != 0));
+        String query = 
+            "alter table " + "\"" + schema + "\"" + "." + "\"" +  tablename + "\"" + 
+			" compress inplace" +  (purgeRows != 0 ? " purge" : "")
+			 +  (defragmentRows != 0 ? " defragment" : "")
+			  +  (truncateEnd != 0 ? " truncate_end" : "");
 
-        return;
+		Connection conn = getDefaultConn();
+        
+        PreparedStatement ps = conn.prepareStatement(query);
+		ps.executeUpdate();
+        ps.close();
+
+		conn.close();
     }
 
     public static String SYSCS_GET_RUNTIMESTATISTICS()

@@ -1058,7 +1058,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             " call "
             + "SYSCS_UTIL.SYSCS_INPLACE_COMPRESS_TABLE('SWIPER', "
             + "'MYTAB', 1, 1, 1)");
-        assertUpdateCount(cSt, 0);
+        assertStatementError("38000", cSt);
         cSt.close();
         
         // Try other system routines. All should fail
