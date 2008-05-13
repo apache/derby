@@ -146,7 +146,8 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
 		grant("select", "s1", "t1", users[1]);
 		assertSelectPrivilege(true, users[1], "s1", "t1", null);
 		assertSelectPrivilege(false, users[2], "s1", "t1", null);
-		assertSelectPrivilege(false, users[2], "s1", "t1", null);
+		assertSelectPrivilege(false, users[2], "s2", "t1", null);
+		assertSelectPrivilege(false, users[2], "s2", "t2", null);
 		revoke("select", "s1", "t1", users[1]);
 	}
 	
