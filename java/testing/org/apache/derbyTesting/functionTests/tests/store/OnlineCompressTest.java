@@ -21,8 +21,6 @@
 
 package org.apache.derbyTesting.functionTests.tests.store;
 
-import org.apache.derby.iapi.db.OnlineCompress;
-
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import java.sql.CallableStatement;
