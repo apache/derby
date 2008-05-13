@@ -1046,8 +1046,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         assertUpdateCount(cSt, 0);
         cSt.close();
         
-        // Try compressing tables not owned... INPLACE_COMPRESS 
-        // currently passes, pending DERBY-1062
+        // Try compressing tables not owned.
         
         cSt = samConnection.prepareCall(
             "call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('SWIPER', 'MYTAB', 1)");
