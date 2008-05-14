@@ -588,9 +588,6 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
      * OS call to return the actual space.
      * <p>
      *
-     * @param schemaName        schema of table to defragment
-     * @param tableName         name of table to defragment
-     * @param data_dictionary   An open data dictionary to look up the table in.
      * @param tc                transaction controller to use to do updates.
      *
      **/
@@ -637,10 +634,8 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
      * maps will be set so that new inserts will tend to go to empty and
      * half filled pages starting from the front of the conglomerate.
      *
-     * @param schemaName        schema of table to defragment
-     * @param tableName         name of table to defragment
-     * @param data_dictionary   An open data dictionary to look up the table in.
      * @param tc                transaction controller to use to do updates.
+	 * @param lcc				the language connection context
      *
      **/
 	private void defragmentRows(
@@ -989,9 +984,6 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
      * reclaimed.
      * <p>
      *
-     * @param schemaName        schema of table to defragment
-     * @param tableName         name of table to defragment
-     * @param data_dictionary   An open data dictionary to look up the table in.
      * @param tc                transaction controller to use to do updates.
      *
      **/
