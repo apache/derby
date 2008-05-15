@@ -52,7 +52,10 @@ import org.apache.derby.impl.load.Export;
 import org.apache.derby.impl.load.Import;
 import org.apache.derby.impl.sql.execute.JarUtil;
 import org.apache.derby.jdbc.InternalDriver;
-
+import org.apache.derby.iapi.store.access.TransactionController;
+import org.apache.derby.iapi.sql.dictionary.DataDictionary;
+import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
+import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 
 /**
 	Some system built-in procedures, and help routines.  Now used for network server.
@@ -1053,7 +1056,33 @@ public class SystemProcedures  {
     int     truncateEnd)
 		throws SQLException
     {
- 
+    	//Inplace compress let's the user call compress on VTI but it
+    	//is really a no-op. In order to avoid having to go throught
+    	//the ALTER TABLE code just for a no-op, we simply do the check
+    	//here and return if we are dealing with VTI.
+		LanguageConnectionContext lcc       = ConnectionUtil.getCurrentLCC();
+		TransactionController     tc        = lcc.getTransactionExecute();
+
+		try 
+        {
+            DataDictionary data_dictionary = lcc.getDataDictionary();
+            SchemaDescriptor sd = 
+                data_dictionary.getSchemaDescriptor(schema, tc, true);
+            TableDescriptor  td = 
+                data_dictionary.getTableDescriptor(tablename, sd, tc);
+
+            if (td != null && td.getTableType() == TableDescriptor.VTI_TYPE)
+            {
+                return;
+            }
+        }
+		catch (StandardException se)
+		{
+			throw PublicAPI.wrapStandardException(se);
+		}
+
+		//Send all the other inplace compress requests to ALTER TABLE
+		//machinery
         String query = 
             "alter table " + "\"" + schema + "\"" + "." + "\"" +  tablename + "\"" + 
 			" compress inplace" +  (purgeRows != 0 ? " purge" : "")
