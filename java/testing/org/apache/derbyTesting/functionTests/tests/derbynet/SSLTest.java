@@ -21,32 +21,21 @@
 
 package org.apache.derbyTesting.functionTests.tests.derbynet;
 
-import java.io.InputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.Properties;
-import java.sql.DriverManager;
 import java.sql.Connection;
-import javax.sql.DataSource;
 import java.sql.SQLException;
+import javax.sql.DataSource;
 
-import junit.extensions.TestSetup;
 import junit.framework.Test;
 import junit.framework.TestSuite;
-import org.apache.derbyTesting.junit.BaseTestCase;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.Derby;
 import org.apache.derbyTesting.junit.NetworkServerTestSetup;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
-import org.apache.derbyTesting.junit.ServerSetup;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
-import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.junit.JDBCDataSource;
 
-import org.apache.derby.drda.NetworkServerControl;
 
 /**
  * Tests connects to an SSL server
