@@ -997,7 +997,7 @@ public class TestConfiguration {
      * Obtains a new configuration identical to the passed in one, except for
      * the default SSL mode.
      * <p>
-     * The modes supported at moment are <tt>basic</tt> and <tt>off</tt>.
+     * The modes supported at the moment are <tt>basic</tt> and <tt>off</tt>.
      * The mode <tt>peerAuthentication</tt> is not yet supported.
      *
      * @param copy configuration to copy
