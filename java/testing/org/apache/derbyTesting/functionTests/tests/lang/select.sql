@@ -66,6 +66,12 @@ select * from t where i;
 -- invalid correlation name for "*"
 select asdf.* from t; 
 
+-- Column aliases are not supported in WHERE clause:
+select s as col_s from t where col_s = 475;
+-- Column references in WHERE clause always refer to the base table column:
+select s as i from t where s = 475;
+select s as i from t where i = 1956;
+
 -- cleanup
 drop table t;
 

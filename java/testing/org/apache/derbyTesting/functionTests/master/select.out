@@ -89,6 +89,18 @@ ERROR 42X19: The WHERE or HAVING clause or CHECK CONSTRAINT definition is a 'INT
 ij> -- invalid correlation name for "*"
 select asdf.* from t;
 ERROR 42X10: 'ASDF' is not an exposed table name in the scope in which it appears.
+ij> -- Column aliases are not supported in WHERE clause:
+select s as col_s from t where col_s = 475;
+ERROR 42X04: Column 'COL_S' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'COL_S' is not a column in the target table.
+ij> -- Column references in WHERE clause always refer to the base table column:
+select s as i from t where s = 475;
+I     
+------
+475   
+ij> select s as i from t where i = 1956;
+I     
+------
+475   
 ij> -- cleanup
 drop table t;
 0 rows inserted/updated/deleted
