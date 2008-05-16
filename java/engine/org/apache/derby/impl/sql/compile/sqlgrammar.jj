@@ -12250,10 +12250,6 @@ alterTableBody(TableName tableName) throws StandardException :
 												getContextManager());
 	int[]				changeType = new int[1];
 	int[]				behavior = new int[1];
-	boolean[]			sequential = new boolean[1];
-	boolean[]			purge = new boolean[1];
-	boolean[]			defragment = new boolean[1];
-	boolean[]			truncateEndOfTable = new boolean[1];
 }
 {
 //insert special key before compress so that only internal SP can know
@@ -12267,7 +12263,7 @@ alterTableBody(TableName tableName) throws StandardException :
 		return sn;
 	}
 |
-	lockGranularity = alterTableAction( tableElementList, changeType, behavior, sequential )
+	lockGranularity = alterTableAction( tableElementList, changeType, behavior )
 	{
 		return (StatementNode) nodeFactory.getNode(
 							C_NodeTypes.ALTER_TABLE_NODE,
@@ -12276,10 +12272,6 @@ alterTableBody(TableName tableName) throws StandardException :
 							new Character(lockGranularity),
 							changeType,
 							behavior,
-							sequential, 
-							purge, 
-							defragment, 
-							truncateEndOfTable,
 							getContextManager());
 	}
 }
@@ -12379,7 +12371,7 @@ ReuseFactory.getInteger(StatementType.RENAME_COLUMN),
 }
 */
 char
-alterTableAction(TableElementList tableElementList, int[] changeType, int[] behavior, boolean[] sequential) throws StandardException :
+alterTableAction(TableElementList tableElementList, int[] changeType, int[] behavior) throws StandardException :
 {
 	char				lockGranularity = '\0';
 	TableElementNode	tableElement;

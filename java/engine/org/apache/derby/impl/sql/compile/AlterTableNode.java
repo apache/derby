@@ -160,10 +160,6 @@ public class AlterTableNode extends DDLStatementNode
 	 * @param lockGranularity	The new lock granularity, if any
 	 * @param changeType		ADD_TYPE or DROP_TYPE
 	 * @param behavior			If drop column is CASCADE or RESTRICTED
-	 * @param sequential		Whether or not the COMPRESS is SEQUENTIAL
-	 * @param purge				PURGE during INPLACE COMPRESS?
-	 * @param defragment		DEFRAGMENT during INPLACE COMPRESS?
-	 * @param truncateEndOfTable	TRUNCATE END during INPLACE COMPRESS?
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -173,11 +169,7 @@ public class AlterTableNode extends DDLStatementNode
 							Object tableElementList,
 							Object lockGranularity,
 							Object changeType,
-							Object behavior,
-							Object sequential,
-							Object purge,
-							Object defragment,
-							Object truncateEndOfTable )
+							Object behavior )
 		throws StandardException
 	{
 		initAndCheck(objectName);
@@ -187,14 +179,6 @@ public class AlterTableNode extends DDLStatementNode
 		int[]	ct = (int[]) changeType, bh = (int[]) behavior;
 		this.changeType = ct[0];
 		this.behavior = bh[0];
-		boolean[]	seq = (boolean[]) sequential;
-		this.sequential = seq[0];
-		boolean[]	booleanPurge = (boolean[]) purge;
-		this.purge = booleanPurge[0];
-		boolean[]	booleanDefragment = (boolean[]) defragment;
-		this.defragment = booleanDefragment[0];
-		boolean[]	booleanTruncateEndOfTable = (boolean[]) truncateEndOfTable;
-		this.truncateEndOfTable = booleanTruncateEndOfTable[0];
 		switch ( this.changeType )
 		{
 		    case ADD_TYPE:
