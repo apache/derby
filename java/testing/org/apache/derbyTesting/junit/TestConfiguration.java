@@ -994,10 +994,14 @@ public class TestConfiguration {
     }
 
     /**
-     * Obtain a new configuration identical to the passed in
-     * one except for the default user and password.
-     * @param copy Configuration to copy.
-     * @param ssl New default ssl mode
+     * Obtains a new configuration identical to the passed in one, except for
+     * the default SSL mode.
+     * <p>
+     * The modes supported at moment are <tt>basic</tt> and <tt>off</tt>.
+     * The mode <tt>peerAuthentication</tt> is not yet supported.
+     *
+     * @param copy configuration to copy
+     * @param ssl default SSL mode
      */
     TestConfiguration(TestConfiguration copy, String ssl)
     {
