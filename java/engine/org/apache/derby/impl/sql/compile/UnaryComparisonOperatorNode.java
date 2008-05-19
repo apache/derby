@@ -409,7 +409,7 @@ public class UnaryComparisonOperatorNode extends UnaryOperatorNode
 		if (bestCD.isIndex())
 		{
 			columnPosition = bestCD.getIndexDescriptor().
-			  getKeyColumnPosition(new Integer(columnPosition)).intValue();
+			  getKeyColumnPosition(columnPosition);
 
 			if (SanityManager.DEBUG)
 			{

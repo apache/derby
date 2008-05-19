@@ -131,12 +131,6 @@ public class IndexDescriptorImpl implements IndexDescriptor, Formatable
 	}
 
 	/** @see IndexDescriptor#getKeyColumnPosition */
-	public Integer getKeyColumnPosition(Integer heapColumnPosition)
-	{
-		return new Integer(getKeyColumnPosition(heapColumnPosition.intValue()));
-	}
-
-	/** @see IndexDescriptor#getKeyColumnPosition */
 	public int getKeyColumnPosition(int heapColumnPosition)
 	{
 		/* Return 0 if column is not in the key */

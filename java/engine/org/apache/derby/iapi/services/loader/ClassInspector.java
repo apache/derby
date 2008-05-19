@@ -535,7 +535,14 @@ public final class ClassInspector
 	 *  types, second pass try to match any combination of "object" and
 	 *  "primitive" types.  Find the closest match among all the qualified
 	 *  candidates.  If there's a tie, it's ambiguous.
-	 *
+     *
+     *  The preceding paragraph is a bit misleading. As of release 10.4, the
+     *  second pass did not consider arbitrary combinations of primitive and
+     *  wrapper types. This is because the first pass removed from consideration
+     *  candidates which would be allowed under ANSI rules. As a fix for bug
+     *  DERBY-3652, we now allow primitive and wrapper type matches during
+     *  the first pass. The ANSI rules are documented in DERBY-3652.
+     *
 	 *  @param receiverClass 	the class who holds the methods
 	 *  @param methodName		the name of method
 	 *	@param paramClasses		object type classes of input parameters
@@ -657,10 +664,15 @@ nextMethod:	for (int i = 0; i < methods.length; i++) {
 				  }
 				}
 
-
-				// can the required signature be converted to those of this method
+                //
+                // According to the ANSI rules, primitives and their
+                // corresponding wrapper types are equally good for resolving
+                // numeric arguments of user-coded functions and procedures. See
+                // DERBY-3652 for a description of the ANSI rules.
+                //
+				// can the required signature be converted to those of this method?
 				if (!signatureConvertableFromTo(paramClasses, primParamClasses,
-							currentMethodParameters, isParam, false)) {
+							currentMethodParameters, isParam, true)) {
 
 					if (SanityManager.DEBUG) {
 					  if (SanityManager.DEBUG_ON("MethodResolutionInfo")) {
