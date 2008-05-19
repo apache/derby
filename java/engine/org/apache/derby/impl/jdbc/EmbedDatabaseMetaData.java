@@ -3536,14 +3536,15 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 		PreparedStatement s;
 		//We can safely goto system table since we are not in soft upgrade
 		//mode and hence metadata sql in system tables are uptodate
-		//with this Derby release.
-		if (notInSoftUpgradeMode())
+		//with this Derby release. We also need to be writable so 
+                // that we can update SPS statements (DERBY-3546)
+		if (notInSoftUpgradeMode() && !isReadOnly())
 			s = getPreparedQueryUsingSystemTables(queryName, net);
 		else {
 			try {
 				//Can't use stored prepared statements because we are in soft upgrade
-				//mode and hence need to get metadata sql from metadata.properties file 
-				//or metadata_net.properties
+				//mode or are read only, and hence need to get metadata sql from 
+                                //metadata.properties file or metadata_net.properties
 				String queryText = getQueryFromDescription(queryName, net);
 				s = getEmbedConnection().prepareMetaDataStatement(queryText);
 			} catch (Throwable t) {
