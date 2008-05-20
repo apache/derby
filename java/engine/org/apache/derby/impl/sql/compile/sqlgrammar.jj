@@ -393,34 +393,6 @@ public class SQLParser
 		return cm;
 	}
 
-	/*
-	** Compress 2 adjacent (single or double) quotes into a single (s or d) quote when
-	** found in the middle of a String.
-	** NOTE:  """" or '''' will be compressed into "" or ''.
-	** 		  This function assumes that the leading and trailing quote from a
-	** 		  string or delimited identifier have already been removed.
-	*/
-	private static String compressQuotes(String source, String quotes)
-	{
-		String	result = source;
-		int		index;
-	
-		/* Find the first occurrence of adjacent quotes. */
-		index = result.indexOf(quotes);
-
-		/* Replace each occurrence with a single quote and begin the
-		 * search for the next occurrence from where we left off.
-		 */
-		while (index != -1)
-		{
-			result = result.substring(0, index + 1) + result.substring(index + 2);
-
-			index = result.indexOf(quotes, index + 1);
-		}
-
-		return result;
-	}
-	
 	private static void verifyImageLength(String image) throws StandardException
 		{
 		// beetle 2758.  For right now throw an error for literals > 64K
@@ -437,7 +409,7 @@ public class SQLParser
 	*/
 	private static String normalizeDelimitedID(String str)
 	{
-		str = compressQuotes(str, DOUBLEQUOTES);
+		str = StringUtil.compressQuotes(str, DOUBLEQUOTES);
 		return str;
 	}
 	private static boolean isDATETIME(int val)
@@ -9865,10 +9837,10 @@ propertyList(boolean propertiesUseAllowed) throws StandardException :
 				verifyImageLength(value);
 				/* Trim off the leading and trailing ', and compress all '' to ' */
 				if (value.startsWith("'") && value.endsWith("'"))
-					value = compressQuotes(value.substring(1, value.length() - 1), SINGLEQUOTES);
+					value = StringUtil.compressQuotes(value.substring(1, value.length() - 1), SINGLEQUOTES);
 				/* Trim off the leading and trailing ", and compress all "" to " */
 				else if (value.startsWith("\"") && value.endsWith("\""))
-					value = compressQuotes(value.substring(1, value.length() - 1), DOUBLEQUOTES);
+					value = StringUtil.compressQuotes(value.substring(1, value.length() - 1), DOUBLEQUOTES);
 				else 
 					value = value.toUpperCase();
 				// Do not allow user to specify multiple values for the same key
@@ -11065,7 +11037,7 @@ string() throws StandardException :
 	{
 		verifyImageLength(tok.image);
 		/* Trim off the leading and trailing ', and compress all '' to ' */
-		return compressQuotes(tok.image.substring(1, tok.image.length() - 1),
+		return StringUtil.compressQuotes(tok.image.substring(1, tok.image.length() - 1),
 							  SINGLEQUOTES);
 	}
 }
@@ -11085,7 +11057,7 @@ stringLiteral() throws StandardException :
 		//there is a maximum limit on the length of the string
 		if (tok.image.length()-2 > Limits.DB2_MAX_CHARACTER_LITERAL_LENGTH)//-2 is for the beginning and ending quote
 			throw StandardException.newException(SQLState.LANG_DB2_STRING_CONSTANT_TOO_LONG, StringUtil.formatForPrint(tok.image));
-		string = compressQuotes(tok.image.substring(1, tok.image.length() - 1), SINGLEQUOTES);
+		string = StringUtil.compressQuotes(tok.image.substring(1, tok.image.length() - 1), SINGLEQUOTES);
 		/* Trim quotes from string. */
 		return (CharConstantNode) nodeFactory.getNode(
 								C_NodeTypes.CHAR_CONSTANT_NODE,

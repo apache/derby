@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class com.ihost.cs.IdUtil
+   Derby - Class org.apache.derby.iapi.util.IdUtil
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -209,6 +209,73 @@ public abstract class IdUtil
 		catch (IOException ioe){
 			throw StandardException.newException(SQLState.ID_PARSE_ERROR,ioe);
 		}
+	}
+
+
+	/**
+	 * Given an internal SQL authorization identifier, convert it to a
+	 * form that may be compared with the username of Derby builtin
+	 * authentication, which uses Java properties of the from
+	 * derby.user.<username>.
+	 *
+	 * The returned form is suitable for comparing to the property
+	 * string after it has been parsed by Java, e.g. any backslash
+	 * quotes has been processed. That is, this method does not add
+	 * backslash quotes, either.
+	 *
+	 * E.g.
+	 *  EVE -> eve   (never eVe, or EVE, or EVe: we use a lower case canonical
+	 *                form) [external property form: derby.user.eve]
+	 *  eVe -> "eVe"        [external property form: derby.user."eVe"]
+	 *  "eve" -> "eve"      [external property form: derby.user."\"eVe\""]
+	 *  \eve\ -> "\eve\"    [external property form: derby.user."\\eve\\"]
+	 *
+	 * Since parseSQLIdentifier maps many-to-one, the backward mapping
+	 * is non-unique, so the chosen lower case canonical from is
+	 * arbitrary.
+	 *
+	 * E.g. we will not be able to correctly map back the non-canonical:
+	 *
+	 *                     [external property form: derby.user.eVe]
+	 *
+	 * since this is internally EVE (but see DERBY-3150), and maps back as eve.
+	 *
+	 * Note that the returned form is not necessarily parsable back
+	 * using parseSQLIdentifier; it may need further quoting, cf. examples
+	 * above of external property forms.
+	 *
+	 */
+	public static String SQLIdentifier2CanonicalPropertyUsername(String authid){
+		boolean needsQuote = false;
+		String result;
+
+		for (int i=0; i < authid.length(); i++) {
+			char c = authid.charAt(i);
+			// The only external form that needs no quoting contains
+			// only uppercase ASCII, underscore, and if not the first
+			// character, a decimal number. In all other cases, we
+			// envelop in double quotes.
+			if (!( (c >= 'A' && c <= 'Z') ||
+				   (c == '_') ||
+				   (i > 0 && (c >= '0' && c <= '9')))) {
+				needsQuote = true;
+				break;
+			}
+		}
+
+		if (!needsQuote) {
+			result = authid.toLowerCase();
+		} else {
+			StringBuffer b = new StringBuffer();
+			b.append("\"");
+			for (int i=0; i < authid.length(); i++) {
+				b.append(authid.charAt(i));
+			}
+			b.append("\"");
+			result = b.toString();
+		}
+
+		return result;
 	}
 
     /**

@@ -71,8 +71,9 @@ public class RolesTest extends BaseJDBCTestCase
     private final static String revokeWarn               = "01007";
     private final static String notIdle                  = "25001";
     private final static String invalidRoleName          = "4293A";
+    private final static String userException            = "38000";
+    private final static String userAlreadyExists        = "X0Y68";
     private final static String invalidPUBLIC            = "4251B";
-    private final static String userException = "38000";
 
     private int MAX_IDENTIFIER_LENGTH = 128;
     /**
@@ -81,9 +82,15 @@ public class RolesTest extends BaseJDBCTestCase
      * TEST_DBO as dbo, so add it to set of valid users. It uses a fresh db
      * 'dbsqlauth', not 'wombat'.
      */
-    private final static String[] users = {"TEST_DBO", "DonaldDuck"};
-    private final static int dboIndex        = 0;
-    private final static int nonDboIndex = 1;
+    private final static String[] users =
+        {"TEST_DBO", "DonaldDuck", "\"additional\"\"user\""};
+
+    private final static int
+        dboIndex            = 0; // used for connections
+    private final static int
+        nonDboIndex         = 1; // used for connections
+    private final static int
+        additionaluserIndex = 2; // *not* used for connections
 
     private boolean isDbo()
     {
@@ -135,13 +142,13 @@ public class RolesTest extends BaseJDBCTestCase
             TestConfiguration.clientServerDecorator(
                 positiveSyntaxSuite("suite: positive syntax, client")));
 
-        /* Positive tests */
+        /* Semantic tests */
         suite.addTest(
-            positiveSuite("suite: positive, embedded"));
+            semanticSuite("suite: semantic, embedded"));
 
         suite.addTest(
             TestConfiguration.clientServerDecorator(
-                positiveSuite("suite: positive, client")));
+                semanticSuite("suite: semantic, client")));
 
         return suite;
     }
@@ -304,17 +311,17 @@ public class RolesTest extends BaseJDBCTestCase
 
     /**
      *
-     * Construct suite of positive tests
+     * Construct suite of semantic tests
      *
      * @param framework Derby framework indication
      *
-     * @return A suite containing the positive test cases incarnated only
+     * @return A suite containing the semantic test cases incarnated only
      * for security level sqlAuthorization.
      *
      * It has one instance for dbo, and one for an ordinary user, so there
      * are in all three incarnations of tests.
      */
-    private static Test positiveSuite(String framework)
+    private static Test semanticSuite(String framework)
     {
         /*
          * Tests running without sql authorization set.  The purpose
@@ -322,7 +329,7 @@ public class RolesTest extends BaseJDBCTestCase
          */
         TestSuite noauthSuite = new TestSuite(
             "suite: security level=noSqlAuthorization");
-        noauthSuite.addTest(new RolesTest("testPositive",
+        noauthSuite.addTest(new RolesTest("testSemantics",
                                           NO_SQLAUTHORIZATION,
                                           null,
                                           null));
@@ -334,7 +341,7 @@ public class RolesTest extends BaseJDBCTestCase
         TestSuite suite = new TestSuite("roles:"+framework);
 
         suite.addTest(noauthSuite);
-        suite.addTest(wrapInAuthorization("testPositive"));
+        suite.addTest(wrapInAuthorization("testSemantics"));
 
         return suite;
     }
@@ -351,9 +358,9 @@ public class RolesTest extends BaseJDBCTestCase
         TestSuite usersSuite =
             new TestSuite("suite: security level=sqlAuthorization");
 
-        // First decorate with users, then with authorization
-        // decorator
-        for (int userNo = 0; userNo < users.length; userNo++) {
+        // First decorate with users (except "additionaluser"), then
+        // with authorization decorator
+        for (int userNo = 0; userNo <= users.length - 2; userNo++) {
             usersSuite.addTest
                 (TestConfiguration.changeUserDecorator
                  (new RolesTest(testName,
@@ -370,15 +377,15 @@ public class RolesTest extends BaseJDBCTestCase
     }
 
     /**
-     * Positive tests for roles (well, positive for dbo at least!)
+     * Semantic tests for roles.
      * Side effect from the dbo run are needed for the nonDbo run
      * which follows (since only dbo can create and grant roles).
      *
      * @throws SQLException
      */
-    public void testPositive() throws SQLException
+    public void testSemantics() throws SQLException
     {
-        println("testPositive: auth=" + this._authLevel +
+        println("testSemantics: auth=" + this._authLevel +
                 " user="+getTestConfiguration().getUserName());
 
         _conn = getConnection();
@@ -399,6 +406,33 @@ public class RolesTest extends BaseJDBCTestCase
         doStmt("create role \"NONE\"", // quoted role id should work
                 sqlAuthorizationRequired, null , roleDboOnly);
 
+        // Verify that we can't create a role which has the same auth
+        // id as a known user.
+        //
+        // a) built-in user:
+        doStmt("create role " + users[dboIndex], sqlAuthorizationRequired,
+               userAlreadyExists, roleDboOnly);
+
+        // specified with mixed case : DonalDuck
+        doStmt("create role " + users[nonDboIndex],
+                sqlAuthorizationRequired, userAlreadyExists, roleDboOnly);
+
+        // delimited identifier with embedded text quote inside
+        doStmt("create role " + users[additionaluserIndex],
+                sqlAuthorizationRequired, userAlreadyExists, roleDboOnly);
+
+
+        // b) A grant to this auth id exists (see setup), even though
+        // it is not a built-in user, so the presumption is, it is a
+        // user defined externally:
+        doStmt("create role whoever", sqlAuthorizationRequired,
+               userAlreadyExists, roleDboOnly);
+
+        // c) A schema exists which has an authid we did not see
+        // through properties; user has been removed, but his schema
+        // lingers..
+        doStmt("create role schemaowner", sqlAuthorizationRequired,
+               userAlreadyExists, roleDboOnly);
 
         /*
          * GRANT <role>
@@ -441,7 +475,7 @@ public class RolesTest extends BaseJDBCTestCase
                sqlAuthorizationRequired, null , null /* through public */);
         doStmt("set role 'FOO'",
                sqlAuthorizationRequired, null, null);
-        
+
         doStmt("set role none",
                sqlAuthorizationRequired, null , null);
 
@@ -533,10 +567,11 @@ public class RolesTest extends BaseJDBCTestCase
 
         assertSysTablePermsRowCount(0,
                                     // role admin not dropped yet:
-                                    1,
+                                    // + grant to whoever int setup
+                                    2,
                                     // role admin has been dropped, so
                                     // this run's grant to admin is de
-                                    // facto to a user named admin:
+                                    // facto to a user named admin
                                     1);
 
         assertSysColPermsRowCount(0, 2, 2);
@@ -557,11 +592,13 @@ public class RolesTest extends BaseJDBCTestCase
 
         doStmt("drop role admin",
                sqlAuthorizationRequired, null , roleDboOnly);
-        assertSysTablePermsRowCount(0, 0,
+        assertSysTablePermsRowCount(0,
+                                    // grant to whoever in setup:
+                                    1,
                                     // nonDbo run: role admin has
                                     // been dropped, so this run's
                                     // grant to admin is de facto to a
-                                    // user named admin:
+                                    // user named admin
                                     1);
         assertSysColPermsRowCount(0, 0,
                                   // nonDbo run: role admin has
@@ -590,8 +627,11 @@ public class RolesTest extends BaseJDBCTestCase
         doStmt("revoke execute on function f1 from admin restrict",
                sqlAuthorizationRequired, null , null );
 
-        // assert blank slate
-        assertSysTablePermsRowCount(0,0,0);
+        // assert (almost) blank slate
+        assertSysTablePermsRowCount(0,
+                                    // grant to whoever in setup:
+                                    1,
+                                    0);
         assertSysColPermsRowCount(0,0,0);
         assertSysRoutinePermsRowCount(5,5,5);
 
@@ -628,12 +668,40 @@ public class RolesTest extends BaseJDBCTestCase
         } catch (SQLException se) {
         }
 
+        if (_authLevel == SQLAUTHORIZATION && isDbo()) {
+            // create a table grant to an (uknown) user WHOEVER.
+            // This is used to test that create role detects the
+            // presence of existing user ids before allowing a
+            // role creation with that id.
+            _stm.executeUpdate("create table t1(i int)");
+            _stm.executeUpdate("grant select on t1 to whoever");
+
+            // create a schema for (uknown) user SCHEMAOWNER.
+            // This is used to test that create role detects the
+            // presence of existing user ids before allowing a
+            // role creation with that id.
+            _stm.executeUpdate(
+                "create schema lingerSchema authorization schemaowner");
+        }
+
         _stm.close();
     }
 
 
     protected void tearDown() throws Exception
     {
+        if (_authLevel == SQLAUTHORIZATION &&  isDbo()) {
+            _stm = createStatement();
+
+            try {
+                _stm.executeUpdate("revoke select on t1 from whoever");
+                _stm.executeUpdate("drop table t1");
+                _stm.executeUpdate("drop schema lingerSchema restrict");
+            } catch (SQLException se) {
+                System.err.println("Test error + " + se);
+            }
+        }
+
         if (_stm != null) {
             _stm.close();
             _stm = null;
@@ -648,9 +716,9 @@ public class RolesTest extends BaseJDBCTestCase
 
 
     private void doStmt(String stmt,
-                             String noAuthState,
-                             String authDboState,
-                             String authNotDboState)
+                        String noAuthState,
+                        String authDboState,
+                        String authNotDboState)
     {
         doStmt(stmt, noAuthState, authDboState, authNotDboState, false);
     }
@@ -709,7 +777,7 @@ public class RolesTest extends BaseJDBCTestCase
             } else { // SQLAUTHORIZATION
                 if (isDbo()) {
                     if (authDboState[0] != null) {
-                        fail("exception " + noAuthState[0] + " expected: (" +
+                        fail("exception " + authDboState[0] + " expected: (" +
                              stmt);
                     }
                     if (authDboState[1] != null) {
@@ -719,8 +787,8 @@ public class RolesTest extends BaseJDBCTestCase
                     }
                 } else {
                     if (authNotDboState[0] != null) {
-                        fail("exception " + noAuthState[0] + " expected: (" +
-                             stmt);
+                        fail("exception " + authNotDboState[0] +
+                             " expected: (" + stmt);
                     }
                     if (authNotDboState[1] != null) {
                         SQLWarning w = _stm.getWarnings();

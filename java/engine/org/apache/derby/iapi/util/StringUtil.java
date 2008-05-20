@@ -363,5 +363,65 @@ public class StringUtil
 
 	}
 
+
+	/**
+	 * Normalize a SQL identifer, up-casing if <regular identifer>,
+	 * and handling of <delimited identifer> (SQL 2003, section 5.2).
+	 * The normal form is used internally in Derby.
+	 *
+	 * @param id syntacically correct SQL identifier
+	 */
+	public static String normalizeSQLIdentifier(String id) {
+		if (id.length() == 0) {
+			return id;
+		}
+
+		if (id.charAt(0) == '"' &&
+				id.length() >= 3   &&
+				id.charAt(id.length() - 1) == '"') {
+			// assume syntax is OK, thats is, any quotes inside are doubled:
+
+			return StringUtil.compressQuotes(
+				id.substring(1, id.length() - 1), "\"\"");
+
+		} else {
+			return StringUtil.SQLToUpperCase(id);
+		}
+	}
+
+
+	/**
+	 * Compress 2 adjacent (single or double) quotes into a single (s or d)
+	 * quote when found in the middle of a String.
+	 *
+	 * NOTE:  """" or '''' will be compressed into "" or ''.
+	 * This function assumes that the leading and trailing quote from a
+	 * string or delimited identifier have already been removed.
+	 * @param source string to be compressed
+	 * @param quotes string containing two single or double quotes.
+	 * @returns String where quotes have been compressed
+	 */
+	public static String compressQuotes(String source, String quotes)
+	{
+		String	result = source;
+		int		index;
+
+		/* Find the first occurrence of adjacent quotes. */
+		index = result.indexOf(quotes);
+
+		/* Replace each occurrence with a single quote and begin the
+		 * search for the next occurrence from where we left off.
+		 */
+		while (index != -1) {
+			result = result.substring(0, index + 1) +
+					 result.substring(index + 2);
+			index = result.indexOf(quotes, index + 1);
+		}
+
+		return result;
+	}
+
+
+
 }
 

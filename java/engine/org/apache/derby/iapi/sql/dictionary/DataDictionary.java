@@ -350,6 +350,20 @@ public interface DataDictionary
 						throws StandardException;
 
 	/**
+	 * Return true of there exists a schema whose authorizationId
+	 * equals authid, i.e.  SYSSCHEMAS contains a row whose column
+	 * AUTHORIZATIONID equals authid.
+	 *
+	 * @param authid authorizationId
+	 * @param tc TransactionController
+	 * @returns true iff there is a matching schema
+	 * @exception StandardException
+	 */
+	public boolean existsSchemaOwnedBy(String authid,
+									   TransactionController tc)
+			throws StandardException;
+
+	/**
 	 * Get the descriptor for the system schema. Schema descriptors include 
      * authorization ids and schema ids.
      *
@@ -1934,4 +1948,15 @@ public interface DataDictionary
 									   boolean wait) 
 				throws StandardException;	
 
+	/**
+	 * Check all dictionary tables and return true if there is any GRANT
+	 * descriptor containing <code>authId</code> as its grantee.
+	 *
+	 * @param authId grantee for which a grant exists or not
+	 * @param tc TransactionController for the transaction
+	 * @return boolean true if such a grant exists
+	 */
+	public boolean existsGrantToAuthid(String authId,
+									   TransactionController tc)
+				throws StandardException;
 }	

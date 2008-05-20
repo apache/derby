@@ -29,10 +29,12 @@ import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.monitor.ModuleFactory;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.util.StringUtil;
+import org.apache.derby.iapi.util.IdUtil;
 
 import java.util.Properties;
 import java.io.Serializable;
 import java.util.Dictionary;
+import java.util.Enumeration;
 
 /**
 	There are 5 property objects within a JBMS system.
@@ -515,6 +517,110 @@ public class PropertyUtil {
 	{
 		for (int i = 0; i < PropertyUtil.servicePropertyList.length; i++) 
 			if (key.equals(PropertyUtil.servicePropertyList[i])) return true;
+		return false;
+	}
+
+
+	/**
+	 * Return true if username is defined as an effective property
+	 * i.e. there exists a property "<code>derby.user.</code><userid>"
+	 * in the database (or, possibly, in system properties if not
+	 * forbidden by derby.database.propertiesOnly). Note that <userid>
+	 * found in a property will be normalized to internal form before
+	 * comparison is performed against username, which is presumed
+	 * normalized already.
+	 *
+	 * @param object which implements PersistentSet interface
+	 *        (TransactionController)
+	 * @param username Normalized authorization identifier
+	 *
+	 * @returns true if match found
+	 *
+	 * @exception StandardException
+	 */
+	public static boolean existsBuiltinUser (
+		PersistentSet set,
+		String username)
+			throws StandardException
+	{
+		if (propertiesContainsBuiltinUser(set.getProperties(), username)) {
+			return true;
+		}
+		
+		// check system level propery, if allowed by
+		// derby.database.propertiesOnly
+		boolean dbOnly = false;
+		dbOnly = Boolean.valueOf(
+			PropertyUtil.getDatabaseProperty(
+				set,
+				Property.DATABASE_PROPERTIES_ONLY)).booleanValue();
+
+		if (!dbOnly &&
+				systemPropertiesExistsBuiltinUser(username)){
+			return true;
+		}
+
+		return false;
+	}
+
+
+	/**
+	 * Return true if username is defined as a system property
+	 * i.e. there exists a property "<code>derby.user.</code><userid>"
+	 * in the system properties. Note that <userid> will be
+	 * normalized to internal form before comparison is performed
+	 * against username, which is presumed normalized already.
+	 * @param username Normalized authorization identifier
+	 * @returns true if match found
+	 */
+	private static boolean systemPropertiesExistsBuiltinUser(String username)
+	{
+		ModuleFactory monitor = Monitor.getMonitorLite();
+
+		try {
+			Properties JVMProperties = System.getProperties();
+
+			if (propertiesContainsBuiltinUser(JVMProperties, username)) {
+				return true;
+			}
+		} catch (SecurityException e) {
+			// Running with security manager and we can't get at all
+			// JVM properties, to try to map the back the authid to
+			// how the user may have specified a matching id (1->many,
+			// since userids are subject to SQL up-casing).
+			String key= Property.USER_PROPERTY_PREFIX +
+				IdUtil.SQLIdentifier2CanonicalPropertyUsername(username);
+
+			if (monitor.getJVMProperty(key) != null) {
+				return true;
+			}
+		}
+
+		Properties applicationProperties = monitor.getApplicationProperties();
+
+		return propertiesContainsBuiltinUser(applicationProperties, username);
+	}
+
+	private static boolean propertiesContainsBuiltinUser(Properties props,
+														 String username)
+	{
+		if (props != null) {
+			Enumeration e = props.propertyNames();
+		
+			while (e.hasMoreElements()) {
+				String p = (String)e.nextElement();
+
+				if (p.startsWith(Property.USER_PROPERTY_PREFIX)) {
+					String userAsSpecified = StringUtil.normalizeSQLIdentifier(
+						p.substring(Property.USER_PROPERTY_PREFIX.length()));
+
+					if (username.equals(userAsSpecified)) {
+						return true;
+					}
+				}
+			}
+		}
+
 		return false;
 	}
 }

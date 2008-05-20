@@ -135,6 +135,13 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
 		return null;
 	}
 
+	public boolean existsSchemaOwnedBy(String authid,
+									   TransactionController tc)
+			throws StandardException {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 	public SchemaDescriptor getSystemSchemaDescriptor()
 			throws StandardException {
 		// TODO Auto-generated method stub
@@ -215,6 +222,13 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
 		throws StandardException {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	public boolean existsGrantToAuthid(String authId,
+									   TransactionController tc)
+			throws StandardException {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 	public TableDescriptor getTableDescriptor(String tableName,
@@ -765,9 +779,8 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
 	public void addDescriptor(TupleDescriptor tuple, TupleDescriptor parent,
 			int catalogNumber, boolean allowsDuplicates,
 			TransactionController tc, boolean wait) throws StandardException {
-		// TODO Auto-generated method stub
-
 	}
+
 
 	public void dropDependentsStoredDependencies(UUID dependentsUUID,
 			TransactionController tc, boolean wait) throws StandardException {

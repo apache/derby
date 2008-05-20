@@ -23,7 +23,10 @@ package org.apache.derby.impl.sql.execute;
 
 import org.apache.derby.iapi.sql.execute.ConstantAction;
 
+import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.util.IdUtil;
+import org.apache.derby.iapi.jdbc.AuthenticationService;
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
@@ -31,8 +34,9 @@ import org.apache.derby.iapi.sql.dictionary.DataDescriptorGenerator;
 import org.apache.derby.iapi.sql.dictionary.RoleDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.store.access.TransactionController;
+import org.apache.derby.impl.jdbc.authentication.BasicAuthenticationServiceImpl;
 import org.apache.derby.shared.common.reference.SQLState;
-
+import org.apache.derby.iapi.reference.Property;
 
 /**
  *  This class performs actions that are ALWAYS performed for a
@@ -96,13 +100,18 @@ class CreateRoleConstantAction extends DDLConstantAction {
         if (rd != null) {
             throw StandardException.
                 newException(SQLState.LANG_OBJECT_ALREADY_EXISTS,
-                             "Role" , roleName);
+                             rd.getDescriptorType(), roleName);
         }
 
-        // FIXME: Check if the proposed role id exists as a user id in
+        // Check if the proposed role id exists as a user id in
         // a privilege grant or as a built-in user ("best effort"; we
         // can't guarantee against collision if users are externally
         // defined or added later).
+        if (knownUser(roleName, currentAuthId, lcc, dd, tc)) {
+            throw StandardException.
+                newException(SQLState.LANG_OBJECT_ALREADY_EXISTS,
+                             "User", roleName);
+        }
 
         rd = ddg.newRoleDescriptor(
             dd.getUUIDFactory().createUUID(),
@@ -127,5 +136,58 @@ class CreateRoleConstantAction extends DDLConstantAction {
         // Do not put this under SanityManager.DEBUG - it is needed for
         // error reporting.
         return "CREATE ROLE " + roleName;
+    }
+
+    // PRIVATE METHODS
+
+    /**
+     * Heuristically, try to determine is a proposed role identifier
+     * is already known to Derby as a user name. Method: If BUILTIN
+     * authentication is used, check if there is such a user. If
+     * external authentication is used, we lose.  If there turns out
+     * to be collision, and we can't detect it here, we should block
+     * such a user from connecting (FIXME), since there is now a role
+     * with that name.
+     */
+    private boolean knownUser(String roleName,
+                              String currentUser,
+                              LanguageConnectionContext lcc,
+                              DataDictionary dd,
+                              TransactionController tc)
+            throws StandardException {
+        //
+        AuthenticationService s = lcc.getDatabase().getAuthenticationService();
+
+        if (currentUser.equals(roleName)) {
+            return true;
+        }
+
+        if (s instanceof BasicAuthenticationServiceImpl) {
+            // Derby builtin authentication
+
+            if (PropertyUtil.existsBuiltinUser(tc,roleName)) {
+                return true;
+            }
+        } else {
+            // Does LDAP  offer a way to ask if a user exists?
+            // User supplied authentication?
+            // See DERBY-866. Would be nice to have a dictionary table of users
+            // synchronized against external authentication providers.
+        }
+
+        // Goto through all grants to see if there is a grant to an
+        // authorization identifier which is not a role (hence, it
+        // must be a user).
+        if (dd.existsGrantToAuthid(roleName, tc)) {
+            return true;
+        }
+
+        // Go through all schemas to see if any one of them is owned by a authid
+        // the same as the proposed roleName.
+        if (dd.existsSchemaOwnedBy(roleName, tc)) {
+            return true;
+        }
+
+        return false;
     }
 }

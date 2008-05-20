@@ -142,11 +142,13 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.Properties;
 import java.util.Vector;
 
 import java.util.List;
 import java.util.Iterator;
+import java.util.LinkedList;
 
 import java.util.Enumeration;
 import java.io.InputStream;
@@ -1564,6 +1566,7 @@ public final class	DataDictionaryImpl
 						false);
 	}
 
+
     /**
      * Get the SchemaDescriptor for the given schema identifier. 
      *
@@ -1628,6 +1631,76 @@ public final class	DataDictionaryImpl
 
 		return locateSchemaRow(schemaId, tc);
 	}
+
+
+	/**
+	 * Return true of there exists a schema whose authorizationId equals
+	 * authid, i.e.  SYS.SYSSCHEMAS contains a row whose column
+	 * (AUTHORIZATIONID) equals authid.
+	 *
+	 * @param authid authorizationId
+	 * @param tc TransactionController
+	 * @returns true iff there is a matching schema
+	 * @exception StandardException
+	 */
+	public boolean existsSchemaOwnedBy(String authid,
+									   TransactionController tc)
+			throws StandardException {
+
+		TabInfoImpl ti = coreInfo[SYSSCHEMAS_CORE_NUM];
+		SYSSCHEMASRowFactory
+			rf = (SYSSCHEMASRowFactory)ti.getCatalogRowFactory();
+		ConglomerateController
+			heapCC = tc.openConglomerate(
+				ti.getHeapConglomerate(), false, 0,
+				TransactionController.MODE_RECORD,
+				TransactionController.ISOLATION_REPEATABLE_READ);
+
+		DataValueDescriptor authIdOrderable = new SQLVarchar(authid);
+		ScanQualifier[][] scanQualifier = exFactory.getScanQualifier(1);
+
+		scanQualifier[0][0].setQualifier(
+			SYSSCHEMASRowFactory.SYSSCHEMAS_SCHEMAAID - 1,	/* to zero-based */
+			authIdOrderable,
+			Orderable.ORDER_OP_EQUALS,
+			false,
+			false,
+			false);
+
+		ScanController sc = tc.openScan(
+			ti.getHeapConglomerate(),
+			false,   // don't hold open across commit
+			0,       // for update
+			TransactionController.MODE_RECORD,
+			TransactionController.ISOLATION_REPEATABLE_READ,
+			(FormatableBitSet) null,      // all fields as objects
+			(DataValueDescriptor[]) null, // start position -
+			0,                            // startSearchOperation - none
+			scanQualifier,                //
+			(DataValueDescriptor[]) null, // stop position -through last row
+			0);                           // stopSearchOperation - none
+
+		boolean result = false;
+
+		try {
+			ExecRow outRow = rf.makeEmptyRow();
+
+			if (sc.fetchNext(outRow.getRowArray())) {
+				result = true;
+			}
+		} finally {
+			if (sc != null) {
+				sc.close();
+			}
+
+			if (heapCC != null) {
+				heapCC.close();
+			}
+		}
+
+		return result;
+	}
+
 
 	/** 
 	 * @see DataDictionary#addDescriptor
@@ -2692,11 +2765,38 @@ public final class	DataDictionaryImpl
 		TabInfoImpl ti = getNonCoreTI(SYSROLES_CATALOG_NUM);
 		SYSROLESRowFactory rf = (SYSROLESRowFactory)ti.getCatalogRowFactory();
 
-		dropRoleGrants(ti,
-					   rf,
-					   rf.SYSROLES_GRANTEE_COLPOS_IN_INDEX_ID_EE_OR,
-					   grantee,
-					   tc);
+		visitRoleGrants(ti,
+						rf,
+						rf.SYSROLES_GRANTEE_COLPOS_IN_INDEX_ID_EE_OR,
+						grantee,
+						tc,
+						DataDictionaryImpl.DROP);
+	}
+
+
+	/**
+	 * Return true if there exists a role grant to authorization
+	 * identifier.
+	 *
+	 * @param grantee authorization identifier
+	 * @param tc      Transaction Controller
+	 *
+	 * @return true if there exists such a grant
+	 * @exception StandardException Thrown on failure
+	 */
+	public boolean existsRoleGrantByGrantee(String grantee,
+											TransactionController tc)
+			throws StandardException
+	{
+		TabInfoImpl ti = getNonCoreTI(SYSROLES_CATALOG_NUM);
+		SYSROLESRowFactory rf = (SYSROLESRowFactory)ti.getCatalogRowFactory();
+
+		return visitRoleGrants(ti,
+							   rf,
+							   rf.SYSROLES_GRANTEE_COLPOS_IN_INDEX_ID_EE_OR,
+							   grantee,
+							   tc,
+							   DataDictionaryImpl.EXISTS);
 	}
 
 
@@ -2716,28 +2816,42 @@ public final class	DataDictionaryImpl
 		TabInfoImpl ti = getNonCoreTI(SYSROLES_CATALOG_NUM);
 		SYSROLESRowFactory rf = (SYSROLESRowFactory)ti.getCatalogRowFactory();
 
-		dropRoleGrants(ti,
-					   rf,
-					   rf.SYSROLES_ROLEID_COLPOS_IN_INDEX_ID_EE_OR,
-					   roleName,
-					   tc);
+		visitRoleGrants(ti,
+						rf,
+						rf.SYSROLES_ROLEID_COLPOS_IN_INDEX_ID_EE_OR,
+						roleName,
+						tc,
+						DataDictionaryImpl.DROP);
 	}
 
-	/*
-	 * There is no index on roleid/grantee column only on SYSROLES, so
-	 * we use the index which contains roleid/grantee and scan that,
-	 * setting up a scan qualifier to match the roleid/grantee, then
-	 * delete the catalog entry.
+	/**
+	 * Scan the {roleid, grantee, grantor} index on SYSROLES,
+	 * locate rows containing authId in column columnNo.
 	 *
-	 * If this proves too slow, we should add an index on
-	 * roleid/grantee only.
+	 * The action argument can be either <code>EXISTS</code> or
+	 * <code>DROP</code> (to check for existence, or to drop that row).
+	 *
+	 * If the scan proves too slow, we should add more indexes.  only.
+	 *
+	 * @param ti <code>TabInfoImpl</code> for SYSROLES.
+	 * @param rf row factory for SYSROLES
+	 * @param columnNo the column number to match <code>authId</code> against
+	 * @param tc transaction controller
+	 * @param action drop matching rows (<code>DROP</code>), or return
+	 *        <code>true</code> if there is a matching row
+	 *        (<code>EXISTS</code>)
+	 *
+	 * @returns boolean action=EXISTS: return <code>true</true> if there is a
+	 *                  matching row else return <code>false</code>.
+	 * @exception StandardException
 	 */
-	private void dropRoleGrants(TabInfoImpl ti,
-								SYSROLESRowFactory rf,
-								int columnInIndex1,
-								String authId,
-								TransactionController tc)
-		throws StandardException
+	private boolean visitRoleGrants(TabInfoImpl ti,
+									SYSROLESRowFactory rf,
+									int columnNo,
+									String authId,
+									TransactionController tc,
+									int action)
+			throws StandardException
 	{
 		ConglomerateController heapCC = tc.openConglomerate(
 			ti.getHeapConglomerate(), false, 0,
@@ -2748,7 +2862,7 @@ public final class	DataDictionaryImpl
 		ScanQualifier[][] scanQualifier = exFactory.getScanQualifier(1);
 
 		scanQualifier[0][0].setQualifier(
-			columnInIndex1 - 1,	/* to zero-based */
+			columnNo - 1,	/* to zero-based */
 			authIdOrderable,
 			Orderable.ORDER_OP_EQUALS,
 			false,
@@ -2776,8 +2890,12 @@ public final class	DataDictionaryImpl
 				outRow);
 
 			while (sc.fetchNext(indexRow.getRowArray())) {
-				ti.deleteRow(tc, indexRow,
-							 rf.SYSROLES_INDEX_ID_EE_OR_IDX);
+				if (action == DataDictionaryImpl.EXISTS) {
+					return true;
+				} else if (action == DataDictionaryImpl.DROP) {
+					ti.deleteRow(tc, indexRow,
+								 rf.SYSROLES_INDEX_ID_EE_OR_IDX);
+				}
 			}
 		} finally {
 			if (sc != null) {
@@ -2788,6 +2906,7 @@ public final class	DataDictionaryImpl
 				heapCC.close();
 			}
 		}
+		return false;
 	}
 
 
@@ -2830,20 +2949,11 @@ public final class	DataDictionaryImpl
 	}
 
 
-	/*
-	 * Presently only used when dropping roles - user dropping is not
-	 * under Derby control (well, built-in users are), any permissions
-	 * granted to users remain in place even if the user is no more.
-	 *
-	 * There is no index on grantee column only on on any of the
-	 * permissions tables, so we use the index which contain grantee
-	 * and scan that, setting up a scan qualifier to match the
-	 * grantee, then fetch the case row to set up the permission
-	 * descriptor, then remove any cached entry, then finally delete
-	 * the catalog entry.
-	 *
-	 * If this proves too slow, we should add an index on grantee
-	 * only.
+	/**
+	 * Presently only used when dropping roles - user dropping is not under
+	 * Derby control (well, built-in users are if properties are stored in
+	 * database), any permissions granted to users remain in place even if the
+	 * user is no more.
 	 */
 	private void dropPermsByGrantee(String authId,
 									TransactionController tc,
@@ -2851,6 +2961,81 @@ public final class	DataDictionaryImpl
 									int indexNo,
 									int granteeColnoInIndex)
 		throws StandardException
+	{
+		visitPermsByGrantee(authId,
+							tc,
+							catalog,
+							indexNo,
+							granteeColnoInIndex,
+							DataDictionaryImpl.DROP);
+	}
+
+	/**
+	 * Return true if there exists a permission grant descriptor to this
+	 * authorization id.
+	 */
+	private boolean existsPermByGrantee(String authId,
+									 TransactionController tc,
+									 int catalog,
+									 int indexNo,
+									 int granteeColnoInIndex)
+		throws StandardException
+	{
+		return visitPermsByGrantee(authId,
+								   tc,
+								   catalog,
+								   indexNo,
+								   granteeColnoInIndex,
+								   DataDictionaryImpl.EXISTS);
+	}
+
+
+	/**
+	 * Possible action for visitPermsByGrantee and visitRoleGrants.
+	 */
+	static final int DROP   = 0;
+	/**
+	 * Possible action for visitPermsByGrantee and visitRoleGrants.
+	 */
+	static final int EXISTS = 1;
+
+	/**
+	 * Scan <code>indexNo</code> index on a permission table
+	 * <code>catalog</code>, looking for match(es) for the grantee column
+	 * (given by granteeColnoInIndex for the catalog in question).
+	 *
+	 * The action argument can be either <code>EXISTS</code> or
+	 * <code>DROP</code> (to check for existence, or to drop that row).
+	 *
+	 * There is no index on grantee column only on on any of the
+	 * permissions tables, so we use the index which contain grantee
+	 * and scan that, setting up a scan qualifier to match the
+	 * grantee, then fetch the base row.
+	 *
+	 * If this proves too slow, we should add an index on grantee
+	 * only.
+	 *
+	 * @param authId grantee to match against
+	 * @param tc transaction controller
+	 * @param catalog the underlying permission table to visit
+	 * @param indexNo the number of the index by which to access the catalog
+	 * @param granteeColnoInIndex the column number to match
+	 *        <code>authId</code> against
+	 * @param action drop matching rows (<code>DROP</code>), or return
+	 *        <code>true</code> if there is a matching row
+	 *        (<code>EXISTS</code>)
+	 *
+	 * @returns boolean action=EXISTS: return <code>true</true> if there is a
+	 *                  matching row else return <code>false</code>.
+	 * @exception StandardException
+	 */
+	private boolean visitPermsByGrantee(String authId,
+										TransactionController tc,
+										int catalog,
+										int indexNo,
+										int granteeColnoInIndex,
+										int action)
+			throws StandardException
 	{
 		TabInfoImpl ti = getNonCoreTI(catalog);
 		PermissionsCatalogRowFactory rf =
@@ -2909,12 +3094,16 @@ public final class	DataDictionaryImpl
 										 "base row doesn't exist");
 				}
 
-				PermissionsDescriptor perm = (PermissionsDescriptor)rf.
-					buildDescriptor(outRow,
-									(TupleDescriptor) null,
-									this);
-				removePermEntryInCache(perm);
-				ti.deleteRow(tc, indexRow, indexNo);
+				if (action == DataDictionaryImpl.EXISTS) {
+					return true;
+				} else if (action == DataDictionaryImpl.DROP) {
+					PermissionsDescriptor perm = (PermissionsDescriptor)rf.
+						buildDescriptor(outRow,
+										(TupleDescriptor) null,
+										this);
+					removePermEntryInCache(perm);
+					ti.deleteRow(tc, indexRow, indexNo);
+				}
 			}
 		} finally {
 			if (sc != null) {
@@ -2925,6 +3114,7 @@ public final class	DataDictionaryImpl
 				heapCC.close();
 			}
 		}
+		return false;
 	}
 
 
@@ -11669,5 +11859,43 @@ public final class	DataDictionaryImpl
 				(TupleDescriptor) null,
 				(List) null,
 				false);
+	}
+
+
+	/**
+	 * Check all dictionary tables and return true if there is any GRANT
+	 * descriptor containing <code>authId</code> as its grantee.
+	 *
+	 * @param authId grantee for which a grant exists or not
+	 * @param tc TransactionController for the transaction
+	 * @return boolean true if such a grant exists
+	 */
+	public boolean existsGrantToAuthid(String authId,
+									   TransactionController tc)
+			throws StandardException {
+
+		return
+			(existsPermByGrantee(
+				authId,
+				tc,
+				SYSTABLEPERMS_CATALOG_NUM,
+				SYSTABLEPERMSRowFactory.GRANTEE_TABLE_GRANTOR_INDEX_NUM,
+				SYSTABLEPERMSRowFactory.
+				GRANTEE_COL_NUM_IN_GRANTEE_TABLE_GRANTOR_INDEX) ||
+			 existsPermByGrantee(
+				 authId,
+				 tc,
+				 SYSCOLPERMS_CATALOG_NUM,
+				 SYSCOLPERMSRowFactory.GRANTEE_TABLE_TYPE_GRANTOR_INDEX_NUM,
+				 SYSCOLPERMSRowFactory.
+				 GRANTEE_COL_NUM_IN_GRANTEE_TABLE_TYPE_GRANTOR_INDEX) ||
+			 existsPermByGrantee(
+				 authId,
+				 tc,
+				 SYSROUTINEPERMS_CATALOG_NUM,
+				 SYSROUTINEPERMSRowFactory.GRANTEE_ALIAS_GRANTOR_INDEX_NUM,
+				 SYSROUTINEPERMSRowFactory.
+				 GRANTEE_COL_NUM_IN_GRANTEE_ALIAS_GRANTOR_INDEX) ||
+			 existsRoleGrantByGrantee(authId, tc));
 	}
 }
