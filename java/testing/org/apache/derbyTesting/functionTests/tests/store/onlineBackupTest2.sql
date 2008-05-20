@@ -21,7 +21,7 @@
 --      to the  backup thread. 
 
 connect 'wombat' as c1 ;
-create procedure sleep(t INTEGER) dynamic result sets 0  
+create procedure sleep(t BIGINT) dynamic result sets 0  
 language java external name 'java.lang.Thread.sleep' 
 parameter style java;
 

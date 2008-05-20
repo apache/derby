@@ -344,40 +344,40 @@ public class AnsiSignaturesTest extends BaseJDBCTestCase
     public  void    test_integer_unres_int()
         throws Exception
     {
-        //FIXME declareAndFailFunction
-        //FIXME ( "integer_unres_int", "int", new String[] { "int" }, "3", "3", MISSING_METHOD_SQLSTATE );
+        declareAndFailFunction
+            ( "integer_unres_int", "int", new String[] { "int" }, "3", "3", TRIED_ALL_COMBINATIONS );
     }
     public  void    test_integer_unres_Integer()
         throws Exception
     {
-        //FIXME declareAndFailFunction
-        //FIXME ( "integer_unres_Integer", "int", new String[] { "int" }, "3", "3", MISSING_METHOD_SQLSTATE );
+        declareAndFailFunction
+            ( "integer_unres_Integer", "int", new String[] { "int" }, "3", "3", TRIED_ALL_COMBINATIONS );
     }
     
     public  void    test_bigint_unres_long()
         throws Exception
     {
-        //FIXME declareAndFailFunction
-        //FIXME ( "bigint_unres_long", "bigint", new String[] { "bigint" }, "3", "3", MISSING_METHOD_SQLSTATE );
+        declareAndFailFunction
+            ( "bigint_unres_long", "bigint", new String[] { "bigint" }, "3", "3", TRIED_ALL_COMBINATIONS );
     }
     public  void    test_bigint_unres_Long()
         throws Exception
     {
-        //FIXME declareAndFailFunction
-        //FIXME ( "bigint_unres_Long", "bigint", new String[] { "bigint" }, "3", "3", MISSING_METHOD_SQLSTATE );
+        declareAndFailFunction
+            ( "bigint_unres_Long", "bigint", new String[] { "bigint" }, "3", "3", TRIED_ALL_COMBINATIONS );
     }
         
     public  void    test_real_unres_float()
         throws Exception
     {
-        //FIXME declareAndFailFunction
-        //FIXME ( "real_unres_float", "real", new String[] { "real" }, "3.0", "3.0", MISSING_METHOD_SQLSTATE );
+        declareAndFailFunction
+            ( "real_unres_float", "real", new String[] { "real" }, "3.0", "3.0", TRIED_ALL_COMBINATIONS );
     }
     public  void    test_real_unres_Float()
         throws Exception
     {
-        //FIXME declareAndFailFunction
-        //FIXME ( "real_unres_Float", "real", new String[] { "real" }, "3.0", "3.0", MISSING_METHOD_SQLSTATE );
+        declareAndFailFunction
+            ( "real_unres_Float", "real", new String[] { "real" }, "3.0", "3.0", TRIED_ALL_COMBINATIONS );
     }
         
     public  void    test_double_unres_double()

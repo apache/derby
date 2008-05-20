@@ -1041,21 +1041,15 @@ nextMethod:	for (int i = 0; i < methods.length; i++) {
 				return true;
 		} else if ((fromClass == Integer.TYPE) || fromName.equals(nonPrimTypeNames[4]))
 		{
-			if ((toClass == Integer.TYPE) || toName.equals(nonPrimTypeNames[4]) ||
-				(toClass == Long.TYPE) ||
-				(toClass == Float.TYPE) ||
-				(toClass == Double.TYPE) )
+			if ((toClass == Integer.TYPE) || toName.equals(nonPrimTypeNames[4]) )
 				return true;
 		} else if ((fromClass == Long.TYPE) || fromName.equals(nonPrimTypeNames[5]))
 		{
-			if ((toClass == Long.TYPE) || toName.equals(nonPrimTypeNames[5]) ||
-				(toClass == Float.TYPE) ||
-				(toClass == Double.TYPE) )
+			if ((toClass == Long.TYPE) || toName.equals(nonPrimTypeNames[5]) )
 				return true;
 		} else if ((fromClass == Float.TYPE) || fromName.equals(nonPrimTypeNames[6]))
 		{
-			if ((toClass == Float.TYPE) || toName.equals(nonPrimTypeNames[6]) ||
-				(toClass == Double.TYPE) )
+			if ((toClass == Float.TYPE) || toName.equals(nonPrimTypeNames[6]) )
 				return true;
 		} else if ((fromClass == Double.TYPE) || fromName.equals(nonPrimTypeNames[7]))
 		{

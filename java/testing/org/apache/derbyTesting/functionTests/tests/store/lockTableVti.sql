@@ -16,7 +16,7 @@
 --
 --test to make sure WAIT state is displayed when lock table is printed
 connect 'wombat;user=c1' AS C1;
-create procedure c1.sleep(t INTEGER) dynamic result sets 0  language java external name 'java.lang.Thread.sleep' parameter style java;
+create procedure c1.sleep(t BIGINT) dynamic result sets 0  language java external name 'java.lang.Thread.sleep' parameter style java;
 create table c1.account (a int primary key not null, b int);
 autocommit off;
 insert into c1.account values (0, 1);

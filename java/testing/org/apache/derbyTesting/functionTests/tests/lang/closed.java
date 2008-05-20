@@ -121,7 +121,7 @@ public class closed implements Runnable {
 
 		c3a.createStatement().execute("CREATE TABLE CLOSED.LOCKME(i int)");
 		
-		c3a.createStatement().execute("create procedure sleep(t INTEGER) dynamic result sets 0 language java external name 'java.lang.Thread.sleep' parameter style java");
+		c3a.createStatement().execute("create procedure sleep(t BIGINT) dynamic result sets 0 language java external name 'java.lang.Thread.sleep' parameter style java");
 		c3a.setAutoCommit(false);
 		c3a.createStatement().execute("LOCK TABLE CLOSED.LOCKME IN SHARE MODE");
 		

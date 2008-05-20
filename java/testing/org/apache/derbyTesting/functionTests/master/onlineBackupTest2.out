@@ -20,7 +20,7 @@ ij> --
 -- 3) when unlogged operations are running in parallel 
 --      to the  backup thread. 
 connect 'wombat' as c1 ;
-ij(C1)> create procedure sleep(t INTEGER) dynamic result sets 0  
+ij(C1)> create procedure sleep(t BIGINT) dynamic result sets 0  
 language java external name 'java.lang.Thread.sleep' 
 parameter style java;
 0 rows inserted/updated/deleted
