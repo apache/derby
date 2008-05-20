@@ -1033,11 +1033,7 @@ nextMethod:	for (int i = 0; i < methods.length; i++) {
 				return true;
 		} else if ((fromClass == Short.TYPE) || fromName.equals(nonPrimTypeNames[3]))
 			{
-			if ((toClass == Short.TYPE) || toName.equals(nonPrimTypeNames[3]) ||
-				(toClass == Integer.TYPE) ||
-				(toClass == Long.TYPE) ||
-				(toClass == Float.TYPE) ||
-				(toClass == Double.TYPE) )
+			if ((toClass == Short.TYPE) || toName.equals(nonPrimTypeNames[4]) )
 				return true;
 		} else if ((fromClass == Integer.TYPE) || fromName.equals(nonPrimTypeNames[4]))
 		{

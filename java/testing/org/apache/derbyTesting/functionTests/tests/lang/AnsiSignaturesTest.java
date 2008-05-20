@@ -109,20 +109,20 @@ public class AnsiSignaturesTest extends BaseJDBCTestCase
     public  void    test_smallint_short_Integer()
         throws Exception
     {
-        // FIXME declareAndRunFunction
-        // FIXME ( "smallint_short_Integer", "smallint", new String[] { "smallint" }, "3", "3" );
+        declareAndRunFunction
+            ( "smallint_short_Integer", "smallint", new String[] { "smallint" }, "3", "3" );
     }
     public  void    test_smallint_Integer_short()
         throws Exception
     {
-        // FIXME declareAndRunFunction
-        // FIXME ( "smallint_Integer_short", "smallint", new String[] { "smallint" }, "3", "3" );
+        declareAndRunFunction
+            ( "smallint_Integer_short", "smallint", new String[] { "smallint" }, "3", "3" );
     }
     public  void    test_smallint_Integer_Integer()
         throws Exception
     {
-        // FIXME declareAndRunFunction
-        // FIXME ( "smallint_Integer_Integer", "smallint", new String[] { "smallint" }, "3", "3" );
+        declareAndRunFunction
+            ( "smallint_Integer_Integer", "smallint", new String[] { "smallint" }, "3", "3" );
     }
 
     public  void    test_integer_int_int()
@@ -236,7 +236,7 @@ public class AnsiSignaturesTest extends BaseJDBCTestCase
         throws Exception
     {
         declareAndFailFunction
-            ( "smallint_bad_short_Short", "smallint", new String[] { "smallint" }, "3", "3", MISSING_METHOD_SQLSTATE );
+            ( "smallint_bad_short_Short", "smallint", new String[] { "smallint" }, "3", "3", TRIED_ALL_COMBINATIONS );
     }
     public  void    test_smallint_bad_Short_short()
         throws Exception
@@ -260,14 +260,14 @@ public class AnsiSignaturesTest extends BaseJDBCTestCase
     public  void    test_smallint_amb_short_short()
         throws Exception
     {
-        // FIXME declareAndFailFunction
-        // FIXME ( "smallint_amb_short_short", "smallint", new String[] { "smallint" }, "3", "3", AMBIGUOUS );
+        //FIXME declareAndFailFunction
+        //FIXME ( "smallint_amb_short_short", "smallint", new String[] { "smallint" }, "3", "3", AMBIGUOUS );
     }
     public  void    test_smallint_amb_Integer_short()
         throws Exception
     {
-        // FIXME declareAndFailFunction
-        // FIXME ( "smallint_amb_Integer_short", "smallint", new String[] { "smallint" }, "3", "3", AMBIGUOUS );
+        //FIXME declareAndFailFunction
+        //FIXME ( "smallint_amb_Integer_short", "smallint", new String[] { "smallint" }, "3", "3", AMBIGUOUS );
     }
 
     public  void    test_integer_amb_int_int()
@@ -332,13 +332,13 @@ public class AnsiSignaturesTest extends BaseJDBCTestCase
         throws Exception
     {
         declareAndFailFunction
-            ( "smallint_unres_short", "smallint", new String[] { "smallint" }, "3", "3", MISSING_METHOD_SQLSTATE );
+            ( "smallint_unres_short", "smallint", new String[] { "smallint" }, "3", "3", TRIED_ALL_COMBINATIONS );
     }
     public  void    test_smallint_unres_Short()
         throws Exception
     {
-        //FIXME declareAndFailFunction
-        //FIXME ( "smallint_unres_Short", "smallint", new String[] { "smallint" }, "3", "3", MISSING_METHOD_SQLSTATE );
+        declareAndFailFunction
+            ( "smallint_unres_Short", "smallint", new String[] { "smallint" }, "3", "3", TRIED_ALL_COMBINATIONS );
     }
 
     public  void    test_integer_unres_int()

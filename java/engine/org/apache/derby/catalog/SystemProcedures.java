@@ -719,7 +719,7 @@ public class SystemProcedures  {
     public static void SYSCS_COMPRESS_TABLE(
     String  schema,
     String  tablename,
-    int     sequential)
+    short     sequential)
         throws SQLException
     {
 
@@ -841,7 +841,7 @@ public class SystemProcedures  {
      */
     public static void SYSCS_BACKUP_DATABASE_AND_ENABLE_LOG_ARCHIVE_MODE(
     String  backupDir,
-    int     deleteOnlineArchivedLogFiles)
+    short     deleteOnlineArchivedLogFiles)
 		throws SQLException
     {
 
@@ -877,7 +877,7 @@ public class SystemProcedures  {
      */
     public static void SYSCS_BACKUP_DATABASE_AND_ENABLE_LOG_ARCHIVE_MODE_NOWAIT(
     String  backupDir,
-    int     deleteOnlineArchivedLogFiles)
+    short     deleteOnlineArchivedLogFiles)
 		throws SQLException
     {
 
@@ -899,7 +899,7 @@ public class SystemProcedures  {
 	 */
 
     public static void SYSCS_DISABLE_LOG_ARCHIVE_MODE(
-    int     deleteOnlineArchivedLogFiles)
+    short     deleteOnlineArchivedLogFiles)
 		throws SQLException
     {
         Factory.getDatabaseOfConnection().disableLogArchiveMode(
@@ -908,14 +908,14 @@ public class SystemProcedures  {
 
 
     public static void SYSCS_SET_RUNTIMESTATISTICS(
-    int     enable)
+    short     enable)
 		throws SQLException
     {
 		ConnectionUtil.getCurrentLCC().setRunTimeStatisticsMode(enable != 0 ? true : false);
     }
 
     public static void SYSCS_SET_STATISTICS_TIMING(
-    int     enable)
+    short     enable)
 		throws SQLException
     {
 		ConnectionUtil.getCurrentLCC().setStatisticsTiming(enable != 0 ? true : false);
@@ -1051,9 +1051,9 @@ public class SystemProcedures  {
     public static void SYSCS_INPLACE_COMPRESS_TABLE(
     String  schema,
     String  tablename,
-    int     purgeRows,
-    int     defragmentRows,
-    int     truncateEnd)
+    short     purgeRows,
+    short     defragmentRows,
+    short     truncateEnd)
 		throws SQLException
     {
     	//Inplace compress let's the user call compress on VTI but it
