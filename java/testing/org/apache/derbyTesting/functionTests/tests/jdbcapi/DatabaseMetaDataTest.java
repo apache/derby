@@ -194,6 +194,15 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         TestSuite suite = new TestSuite("DatabaseMetaDataTest");
         suite.addTest(
             TestConfiguration.defaultSuite(DatabaseMetaDataTest.class));
+
+        // Add some tests to be run with connection pooling enabled.
+        suite.addTest(connectionPoolingSuite("embedded"));
+        /*
+         * DISABLED until DERBY-3431 has been fixed.
+        suite.addTest(TestConfiguration.clientServerDecorator(
+                    connectionPoolingSuite("client")));
+        */
+
         // Test for DERBY-2584 needs a fresh database to ensure that the
         // meta-data queries haven't already been compiled. No need to run the
         // test in client/server mode since it only tests the compilation of
@@ -207,6 +216,30 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         return suite;
     }
     
+    /**
+     * Returns a suite of tests to be run with connection pooling enabled.
+     *
+     * @param jdbcClient name of the client being used (for verbosity only)
+     * @return A suite of tests.
+     */
+    private static Test connectionPoolingSuite(String jdbcClient) {
+        TestSuite baseCpSuite = new TestSuite("Base connection pooling suite");
+        // Add the tests here.
+        baseCpSuite.addTest(new DatabaseMetaDataTest("testConnectionSpecific"));
+
+        // Setup the two configurations; CPDS and XADS.
+        TestSuite fullCpSuite = new TestSuite(
+                "DatabaseMetaData with connection pooling:" + jdbcClient);
+        TestSuite cpSuite = new TestSuite("ConnectionPoolDataSource");
+        TestSuite xaSuite = new TestSuite("XADataSource");
+        cpSuite.addTest(TestConfiguration.connectionCPDecorator(baseCpSuite));
+        xaSuite.addTest(TestConfiguration.connectionXADecorator(baseCpSuite));
+        fullCpSuite.addTest(cpSuite);
+        fullCpSuite.addTest(xaSuite);
+
+        return fullCpSuite;
+    }
+
     /**
      * Return the identifiers used to create schemas,
      * tables etc. in the order the database stores them.
