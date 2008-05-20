@@ -1087,7 +1087,6 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
                                            String procedureNamePattern,
                                            String columnNamePattern) throws SqlException {
         checkForClosedConnectionX();
-        ;
 
         PreparedStatement cs = prepareMetaDataQuery("SYSIBM.SQLPROCEDURECOLS(?,?,?,?,?)");
 
@@ -1371,8 +1370,6 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
             throw new SqlException(se);
         }
         
-        ;
-
         PreparedStatement cs = prepareMetaDataQuery("SYSIBM.SQLTABLES('', '', '', '', 'GETSCHEMAS=1')");
         return (ResultSet) cs.executeQueryX();
     }
@@ -1427,7 +1424,6 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
 
     private ResultSet getTableTypesX() throws SqlException {
         checkForClosedConnectionX();
-        ;
 
         PreparedStatement cs = null;
         cs = prepareMetaDataQuery("SYSIBM.SQLTABLES(?,?,?,?,?)");
@@ -1571,7 +1567,6 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
                                           String schemaPattern,
                                           String tableNamePattern) throws SqlException {
         checkForClosedConnectionX();
-        ;
 
         PreparedStatement cs = prepareMetaDataQuery("SYSIBM.SQLTABLEPRIVILEGES(?,?,?,?)");
 
@@ -1618,7 +1613,6 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
                                             int scope,
                                             boolean nullable) throws SqlException {
         checkForClosedConnectionX();
-        ;
 
         // check input params
         //
@@ -1716,7 +1710,6 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
                                       String schema,
                                       String table) throws SqlException {
         checkForClosedConnectionX();
-        ;
 
         // validate the input table name
         if (table == null) {
@@ -1822,7 +1815,6 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
                                        String schema,
                                        String table) throws SqlException {
         checkForClosedConnectionX();
-        ;
 
         // validate the table name
         if (table == null) {
@@ -1887,7 +1879,6 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
                                          String foreignSchema,
                                          String foreignTable) throws SqlException {
         checkForClosedConnectionX();
-        ;
 
         // check input params, primaryTable and foreignTable cannot be null
         if (primaryTable == null) {
@@ -1937,7 +1928,6 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
 
     private ResultSet getTypeInfoX() throws SqlException {
         checkForClosedConnectionX();
-        ;
 
         // check if the last call's resultset is closed or not.
         PreparedStatement cs = prepareMetaDataQuery("SYSIBM.SQLGETTYPEINFO(?,?)");
@@ -2038,7 +2028,6 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
                                String typeNamePattern,
                                int[] types) throws SqlException {
         checkForClosedConnectionX();
-        ;
 
         PreparedStatement cs = prepareMetaDataQuery("SYSIBM.SQLUDTS(?,?,?,?,?)");
 
