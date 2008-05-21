@@ -260,14 +260,14 @@ public class AnsiSignaturesTest extends BaseJDBCTestCase
     public  void    test_smallint_amb_short_short()
         throws Exception
     {
-        //FIXME declareAndFailFunction
-        //FIXME ( "smallint_amb_short_short", "smallint", new String[] { "smallint" }, "3", "3", AMBIGUOUS );
+        declareAndFailFunction
+            ( "smallint_amb_short_short", "smallint", new String[] { "smallint" }, "3", "3", AMBIGUOUS );
     }
     public  void    test_smallint_amb_Integer_short()
         throws Exception
     {
-        //FIXME declareAndFailFunction
-        //FIXME ( "smallint_amb_Integer_short", "smallint", new String[] { "smallint" }, "3", "3", AMBIGUOUS );
+        declareAndFailFunction
+            ( "smallint_amb_Integer_short", "smallint", new String[] { "smallint" }, "3", "3", AMBIGUOUS );
     }
 
     public  void    test_integer_amb_int_int()

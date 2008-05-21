@@ -705,48 +705,13 @@ nextMethod:	for (int i = 0; i < methods.length; i++) {
 					continue;
 				}
 
-				/* Not the first match, so find out which one, if either one,
-				 * has the best match on the parameters.  (No narrowing
-				 * conversions.)  15.11 of Java Language Specification.
-				 */
-
-				Member candidateMethod = methods[candidateIndex];
-
-				// If the candidate method is more specific than the current
-				// method then the candidate method is still the maximally specific method
-				// Note at this point we could still have a ambiguous situation.
-
-				boolean candidateMoreOrEqual = isMethodMoreSpecificOrEqual(
-							candidateMethod, currentMethod, isParam);
-				boolean currentMoreOrEqual = isMethodMoreSpecificOrEqual(
-							currentMethod, candidateMethod, isParam);
-				if (candidateMoreOrEqual && ! currentMoreOrEqual) {
-					if (SanityManager.DEBUG) {
-					  if (SanityManager.DEBUG_ON("MethodResolutionInfo")) {
-						SanityManager.DEBUG("MethodResolutionInfo",
-						"MRI - Candidate is still maximally specific");
-					  }
-					}
-					methods[i] = null; // remove non-applicable methods
-					continue;
-				}
-
-				// if the current method is more specific than the candidiate
-				// method then it becomes the new maximally specific method
-				// Note at this point we could still have a ambiguous situation.
-
-				if (currentMoreOrEqual && ! candidateMoreOrEqual) {
-					if (SanityManager.DEBUG) {
-					  if (SanityManager.DEBUG_ON("MethodResolutionInfo")) {
-						SanityManager.DEBUG("MethodResolutionInfo",
-						"MRI - Current method is now candidate, replaced previous candidate");
-					  }
-					}
-					methods[candidateIndex] = null; // remove non-applicable methods
-					candidateIndex = i;
-					somethingChanged = true;
-					continue;
-				}
+                //
+                // Before the fixes to DERBY-3652, we used to weed out
+                // ambiguities by applying the rules from section 15.11
+                // of the Java Language Specification. These are not the
+                // ANSI resolution rules however. The code to weed out
+                // ambiguities has been removed.
+                //
 
 				/* We have seen an ambiguous situation; one of the cases may
 				 * tie on each parameter.

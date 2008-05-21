@@ -86,7 +86,6 @@ public  class   AnsiSignatures
     public  static  Short   smallint_unres_Short( double a ) { return new Short( (short) a ); }
     public  static  Short   smallint_unres_Short( Byte a ) { return new Short( a.shortValue() ); }
     public  static  Short   smallint_unres_Short( Short a ) { return new Short( a.shortValue() ); }
-    public  static  Short   smallint_unres_Short( Integer a ) { return new Short( a.shortValue() ); }
     public  static  Short   smallint_unres_Short( Long a ) { return new Short( a.shortValue() ); }
     public  static  Short   smallint_unres_Short( Float a ) { return new Short( a.shortValue() ); }
     public  static  Short   smallint_unres_Short( Double a ) { return new Short( a.shortValue() ); }
