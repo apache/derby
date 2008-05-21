@@ -723,8 +723,10 @@ public class SystemProcedures  {
         throws SQLException
     {
 
+        String escapedSchema = escapeSQLIdentifier(schema);
+        String escapedTableName = escapeSQLIdentifier(tablename);
         String query = 
-            "alter table " + "\"" + schema + "\"" + "." + "\"" +  tablename + "\"" + 
+            "alter table " + escapedSchema + "." + escapedTableName +
 			" compress" +  (sequential != 0 ? " sequential" : "");
 
 		Connection conn = getDefaultConn();
@@ -734,6 +736,22 @@ public class SystemProcedures  {
         ps.close();
 
 		conn.close();
+    }
+
+    /**
+     * Escape an SQL identifier to preserve mixed case and special characters.
+     */
+    private static String escapeSQLIdentifier(String identifier) {
+        StringBuffer buffer = new StringBuffer(identifier.length() + 2);
+        buffer.append('"');
+        for (int i = 0; i < identifier.length(); i++) {
+            char c = identifier.charAt(i);
+            // if c is a double quote, escape it with an extra double quote
+            if (c == '"') buffer.append('"');
+            buffer.append(c);
+        }
+        buffer.append('"');
+        return buffer.toString();
     }
 
     /**
@@ -1083,8 +1101,10 @@ public class SystemProcedures  {
 
 		//Send all the other inplace compress requests to ALTER TABLE
 		//machinery
+        String escapedSchema = escapeSQLIdentifier(schema);
+        String escapedTableName = escapeSQLIdentifier(tablename);
         String query = 
-            "alter table " + "\"" + schema + "\"" + "." + "\"" +  tablename + "\"" + 
+            "alter table " + escapedSchema + "." + escapedTableName +
 			" compress inplace" +  (purgeRows != 0 ? " purge" : "")
 			 +  (defragmentRows != 0 ? " defragment" : "")
 			  +  (truncateEnd != 0 ? " truncate_end" : "");
