@@ -530,11 +530,11 @@ public class PropertyUtil {
 	 * comparison is performed against username, which is presumed
 	 * normalized already.
 	 *
-	 * @param object which implements PersistentSet interface
+	 * @param set object which implements PersistentSet interface
 	 *        (TransactionController)
 	 * @param username Normalized authorization identifier
 	 *
-	 * @returns true if match found
+	 * @return {@code true} if match found
 	 *
 	 * @exception StandardException
 	 */
@@ -571,7 +571,7 @@ public class PropertyUtil {
 	 * normalized to internal form before comparison is performed
 	 * against username, which is presumed normalized already.
 	 * @param username Normalized authorization identifier
-	 * @returns true if match found
+	 * @return {@code true} if match found
 	 */
 	private static boolean systemPropertiesExistsBuiltinUser(String username)
 	{

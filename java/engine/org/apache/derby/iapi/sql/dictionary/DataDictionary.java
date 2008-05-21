@@ -356,7 +356,7 @@ public interface DataDictionary
 	 *
 	 * @param authid authorizationId
 	 * @param tc TransactionController
-	 * @returns true iff there is a matching schema
+	 * @return true iff there is a matching schema
 	 * @exception StandardException
 	 */
 	public boolean existsSchemaOwnedBy(String authid,

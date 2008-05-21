@@ -399,7 +399,7 @@ public class StringUtil
 	 * string or delimited identifier have already been removed.
 	 * @param source string to be compressed
 	 * @param quotes string containing two single or double quotes.
-	 * @returns String where quotes have been compressed
+	 * @return String where quotes have been compressed
 	 */
 	public static String compressQuotes(String source, String quotes)
 	{

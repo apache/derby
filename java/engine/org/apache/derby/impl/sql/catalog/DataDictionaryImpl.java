@@ -1640,7 +1640,7 @@ public final class	DataDictionaryImpl
 	 *
 	 * @param authid authorizationId
 	 * @param tc TransactionController
-	 * @returns true iff there is a matching schema
+	 * @return true iff there is a matching schema
 	 * @exception StandardException
 	 */
 	public boolean existsSchemaOwnedBy(String authid,
@@ -2841,8 +2841,8 @@ public final class	DataDictionaryImpl
 	 *        <code>true</code> if there is a matching row
 	 *        (<code>EXISTS</code>)
 	 *
-	 * @returns boolean action=EXISTS: return <code>true</true> if there is a
-	 *                  matching row else return <code>false</code>.
+	 * @return action=EXISTS: return {@code true} if there is a matching row
+ 	 *      else return {@code false}.
 	 * @exception StandardException
 	 */
 	private boolean visitRoleGrants(TabInfoImpl ti,
@@ -3025,8 +3025,8 @@ public final class	DataDictionaryImpl
 	 *        <code>true</code> if there is a matching row
 	 *        (<code>EXISTS</code>)
 	 *
-	 * @returns boolean action=EXISTS: return <code>true</true> if there is a
-	 *                  matching row else return <code>false</code>.
+	 * @return action=EXISTS: return {@code true} if there is a matching row
+	 *      else return {@code false}.
 	 * @exception StandardException
 	 */
 	private boolean visitPermsByGrantee(String authId,
