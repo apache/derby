@@ -1,8 +1,8 @@
 This branch of the Demo subtree contains sample table functions.
 
-To build the code, invoke the vti-demo build target in the
-top level build script. To build the javadoc, invoke the demodocs
-target in the top level build script.
+This code is now built as part of the standard Derby build.
+To build the javadoc, invoke the demodocs target in the top level
+build script.
 
 Two sql scripts are provided to test-drive these table functions.
 Use Derby's ij tool to run these scripts:
