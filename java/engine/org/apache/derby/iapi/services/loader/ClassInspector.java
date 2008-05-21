@@ -53,6 +53,9 @@ public final class ClassInspector
 		 "java.lang.Short", "java.lang.Integer", "java.lang.Long",
 		 "java.lang.Float", "java.lang.Double"};
 
+    private static final String OBJECT_TYPE_NAME = "java.lang.Object";
+    private static final String STRING_TYPE_NAME = "java.lang.String";
+
 	private final ClassFactory cf;
 
 	/**
@@ -945,7 +948,27 @@ nextMethod:	for (int i = 0; i < methods.length; i++) {
 	 **/
 	protected boolean classConvertableFromTo(Class fromClass, Class toClass, boolean mixTypes) {
 
-		if (toClass.isAssignableFrom(fromClass)) {
+        //
+        // Don't allow widening of String to Object. Otherwise, the SQL
+        // signature
+        //
+        //    f( a varchar( 10 ) ) returns varchar( 10 )
+        //
+        // will incorrectly match the Java signature
+        //
+        //   public static String f( Object a )
+        //
+        // For a description of the ANSI signature matching rules, see
+        // DERBY-3652.
+        //
+		if (
+            !(
+              STRING_TYPE_NAME.equals( fromClass.getName() ) &&
+              OBJECT_TYPE_NAME.equals( toClass.getName() )
+              ) &&
+            toClass.isAssignableFrom(fromClass)
+            )
+        {            
 			return true;
 		}
 

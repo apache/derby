@@ -546,6 +546,6 @@ public  class   AnsiSignatures
     public  static  String   varchar_String_String( Long a ) { return "-1"; }
     public  static  String   varchar_String_String( Float a ) { return "-1"; }
     public  static  String   varchar_String_String( Double a ) { return "-1"; }
-    //    public  static  String   varchar_String_String( Object a ) { return "-1"; }
+    public  static  String   varchar_String_String( Object a ) { return "-1"; }
     
 }
