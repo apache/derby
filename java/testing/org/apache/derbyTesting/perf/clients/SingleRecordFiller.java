@@ -29,6 +29,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.Random;
+import org.apache.derbyTesting.functionTests.util.UniqueRandomSequence;
 
 /**
  * Class which generates and populates tables that can be used by
@@ -38,12 +39,42 @@ import java.util.Random;
  */
 public class SingleRecordFiller implements DBFiller {
 
+    /** The number of tables to distribute the load over. */
     private final int numberOfTables;
+    /** The number of rows in each table. */
     private final int tableSize;
+    /**
+     * The data type of the text column (a constant from
+     * {@code java.sql.Types}).
+     */
     private final int dataType;
+    /** SQL name of the data type specified by {@code dataType}. */
     private final String dataTypeString;
+    /**
+     * Whether or not the table includes an integer column with unique values
+     * in random order. A UNIQUE index will be created for the column.
+     */
+    private final boolean withSecIndexColumn;
+    /**
+     * Whether or not the table includes an integer column with unique values
+     * in random order not backed by an index.
+     */
+    private final boolean withNonIndexedColumn;
 
     static final int TEXT_SIZE = 100;
+
+    /**
+     * Generate a filler that creates the specified number of tables, each of
+     * which contains the specified number of records. When this constructor
+     * is used, the table only contains two columns: a primary key column (INT)
+     * and a text column (VARCHAR(100)).
+     *
+     * @param records the number of records in each table
+     * @param tables the number of tables to create
+     */
+    public SingleRecordFiller(int records, int tables) {
+        this(records, tables, Types.VARCHAR, false, false);
+    }
 
     /**
      * Generate a filler that creates the specified number of tables, each of
@@ -55,7 +86,8 @@ public class SingleRecordFiller implements DBFiller {
      * {@code java.sql.Types.VARCHAR}, {@code java.sql.Types.BLOB} and
      * {@code java.sql.Types.CLOB}.
      */
-    public SingleRecordFiller(int records, int tables, int type) {
+    public SingleRecordFiller(int records, int tables, int type,
+                              boolean withSecIndex, boolean withNonIndexed) {
         tableSize = records;
         numberOfTables = tables;
         dataType = type;
@@ -72,38 +104,78 @@ public class SingleRecordFiller implements DBFiller {
             default:
                 throw new IllegalArgumentException("type = " + type);
         }
+        withSecIndexColumn = withSecIndex;
+        withNonIndexedColumn = withNonIndexed;
     }
 
     public void fill(Connection c) throws SQLException {
         c.setAutoCommit(false);
         Statement s = c.createStatement();
         for (int table = 0; table < numberOfTables; table++) {
-            String tableName = getTableName(tableSize, table, dataType);
+            String tableName = getTableName(tableSize, table, dataType,
+                    withSecIndexColumn, withNonIndexedColumn);
             WisconsinFiller.dropTable(c, tableName);
             s.executeUpdate(
                     "CREATE TABLE " + tableName + "(ID INT PRIMARY KEY, " +
+                    (withSecIndexColumn ? "SEC INT, " : "") +
+                    (withNonIndexedColumn ? "NI INT, " : "") +
                     "TEXT " + dataTypeString + "(" + TEXT_SIZE + "))");
+
+            String extraCols = "";
+            String extraParams = "";
+            if (withSecIndexColumn) {
+                extraCols += ", SEC";
+                extraParams += ", ?";
+            }
+            if (withNonIndexedColumn) {
+                extraCols += ", NI";
+                extraParams += ", ?";
+            }
 
             PreparedStatement ps =
                 c.prepareStatement("INSERT INTO " + tableName +
-                                   "(ID, TEXT) VALUES (?, ?)");
+                                   "(ID, TEXT" + extraCols +
+                                   ") VALUES (?, ?" + extraParams + ")");
+
+            UniqueRandomSequence secIdSequence = null;
+            if (withSecIndexColumn) {
+                secIdSequence = new UniqueRandomSequence(tableSize);
+            }
+
+            UniqueRandomSequence nonIndexedSequence = null;
+            if (withNonIndexedColumn) {
+                nonIndexedSequence = new UniqueRandomSequence(tableSize);
+            }
 
             for (int i = 0; i < tableSize; i++) {
-                ps.setInt(1, i);
+                int col = 1;
+                ps.setInt(col++, i);
                 if (dataType == Types.VARCHAR) {
-                    ps.setString(2, randomString(i));
+                    ps.setString(col++, randomString(i));
                 } else if (dataType == Types.CLOB) {
                     StringReader reader = new StringReader(randomString(i));
-                    ps.setCharacterStream(2, reader, TEXT_SIZE);
+                    ps.setCharacterStream(col++, reader, TEXT_SIZE);
                 } else if (dataType == Types.BLOB) {
                     ByteArrayInputStream stream =
                             new ByteArrayInputStream(randomBytes(i));
-                    ps.setBinaryStream(2, stream, TEXT_SIZE);
+                    ps.setBinaryStream(col++, stream, TEXT_SIZE);
+                }
+                if (withSecIndexColumn) {
+                    ps.setInt(col++, secIdSequence.nextValue());
+                }
+                if (withNonIndexedColumn) {
+                    ps.setInt(col++, nonIndexedSequence.nextValue());
                 }
                 ps.executeUpdate();
                 if ((i % 1000) == 0) {
                     c.commit();
                 }
+            }
+
+            if (withSecIndexColumn) {
+                s.executeUpdate(
+                        "CREATE INDEX " + tableName + "_SECONDARY_INDEX ON " +
+                        tableName + "(SEC)");
             }
 
             ps.close();
@@ -162,17 +234,24 @@ public class SingleRecordFiller implements DBFiller {
      * data type of the text column
      * @return the name of the table specified by the arguments
      */
-    static String getTableName(int records, int table, int dataType) {
-        String suffix;
+    static String getTableName(int records, int table, int dataType,
+                               boolean withSecIndex, boolean withNonIndexed) {
+        String name = "SINGLE_RECORD_" + records + "_" + table;
+        if (withSecIndex) {
+            name += "_SECIDX";
+        }
+        if (withNonIndexed) {
+            name += "_NONIDX";
+        }
         if (dataType == Types.VARCHAR) {
-            suffix = "";
+            name += "_VARCHAR";
         } else if (dataType == Types.BLOB) {
-            suffix = "_BLOB";
+            name += "_BLOB";
         } else if (dataType == Types.CLOB) {
-            suffix = "_CLOB";
+            name += "_CLOB";
         } else {
             throw new IllegalArgumentException("dataType = " + dataType);
         }
-        return "SINGLE_RECORD_" + records + "_" + table + suffix;
+        return name;
     }
 }

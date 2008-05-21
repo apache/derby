@@ -26,6 +26,8 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.Arrays;
+import java.util.HashSet;
 
 /**
  * Class used for running a performance test from the command line. To learn
@@ -56,6 +58,8 @@ public class Runner {
     private static boolean init = false;
     /** The name of the type of load to use in the test. */
     private static String load; // required argument
+    /** Set of load-specific options. */
+    private final static HashSet loadOpts = new HashSet();
     /** The name of the load generator to use in the test. */
     private static String generator = "b2b";
     /** The number of client threads to use in the test. */
@@ -137,6 +141,8 @@ public class Runner {
                 init = true;
             } else if (args[i].equals("-load")) {
                 load = args[++i];
+            } else if (args[i].equals("-load_opts")) {
+                loadOpts.addAll(Arrays.asList(args[++i].split(",")));
             } else if (args[i].equals("-gen")) {
                 generator = args[++i];
             } else if (args[i].equals("-threads")) {
@@ -167,10 +173,16 @@ public class Runner {
 "  -init: initialize database (otherwise, reuse database)\n" +
 "  -load: type of load, required argument, valid types:\n" +
 "      * sr_select - single-record (primary key) select from table with\n" +
-"                    100 000 rows. If _blob or _clob is appended to the\n" +
-"                    name, BLOB/CLOB is used for the data columns.\n" +
+"                    100 000 rows. It accepts the following load-specific\n" +
+"                    options (see also -load_opts):\n" +
+"            - blob or clob: use BLOB or CLOB data instead of VARCHAR\n" +
+"            - secondary: select on a column with a secondary (non-unique)\n" +
+"              index instead of the primary key\n" +
+"            - nonIndexed: select on a non-indexed column instead of the\n" +
+"              primary key\n" +
 "      * sr_update - single-record (primary key) update on table with\n" +
-"                    100 000 rows\n" +
+"                    100 000 rows. It accepts the same load-specific\n" +
+"                    options as sr_select.\n" +
 "      * sr_select_big - single-record (primary key) select from table with\n" +
 "                    100 000 000 rows\n" +
 "      * sr_update_big - single-record (primary key) update on table with\n" +
@@ -180,6 +192,7 @@ public class Runner {
 "      * sr_update_multi - single-record update on a random table\n" +
 "                    (32 tables with a single row each)\n" +
 "      * index_join - join of two tables (using indexed columns)\n" +
+"  -load_opts: comma-separated list of load-specific options\n" +
 "  -gen: load generator, default: b2b, valid types:\n" +
 "      * b2b - clients perform operations back-to-back\n" +
 "      * poisson - load is Poisson distributed\n" +
@@ -199,6 +212,28 @@ public class Runner {
     }
 
     /**
+     * Get the data type to be used for sr_select and sr_update types of load.
+     *
+     * @return one of the {@code java.sql.Types} data type constants
+     */
+    private static int getTextType() {
+        boolean blob = loadOpts.contains("blob");
+        boolean clob = loadOpts.contains("clob");
+        if (blob && clob) {
+            System.err.println("Cannot specify both 'blob' and 'clob'");
+            printUsage(System.err);
+            System.exit(1);
+        }
+        if (blob) {
+            return Types.BLOB;
+        }
+        if (clob) {
+            return Types.CLOB;
+        }
+        return Types.VARCHAR;
+    }
+
+    /**
      * Find the {@code DBFiller} instance for the load specified on the
      * command line.
      *
@@ -206,17 +241,15 @@ public class Runner {
      */
     private static DBFiller getDBFiller() {
         if (load.equals("sr_select") || load.equals("sr_update")) {
-            return new SingleRecordFiller(100000, 1, Types.VARCHAR);
-        } else if (load.equals("sr_select_blob")) {
-            return new SingleRecordFiller(100000, 1, Types.BLOB);
-        } else if (load.equals("sr_select_clob")) {
-            return new SingleRecordFiller(100000, 1, Types.CLOB);
+            return new SingleRecordFiller(100000, 1, getTextType(),
+                                          loadOpts.contains("secondary"),
+                                          loadOpts.contains("nonIndexed"));
         } else if (load.equals("sr_select_big") ||
                        load.equals("sr_update_big")) {
-            return new SingleRecordFiller(100000000, 1, Types.VARCHAR);
+            return new SingleRecordFiller(100000000, 1);
         } else if (load.equals("sr_select_multi") ||
                        load.equals("sr_update_multi")) {
-            return new SingleRecordFiller(1, 32, Types.VARCHAR);
+            return new SingleRecordFiller(1, 32);
         } else if (load.equals("index_join")) {
             return new WisconsinFiller();
         }
@@ -233,19 +266,19 @@ public class Runner {
      */
     private static Client newClient() {
         if (load.equals("sr_select")) {
-            return new SingleRecordSelectClient(100000, 1, Types.VARCHAR);
-        } else if (load.equals("sr_select_blob")) {
-            return new SingleRecordSelectClient(100000, 1, Types.BLOB);
-        } else if (load.equals("sr_select_clob")) {
-            return new SingleRecordSelectClient(100000, 1, Types.CLOB);
+            return new SingleRecordSelectClient(100000, 1, getTextType(),
+                    loadOpts.contains("secondary"),
+                    loadOpts.contains("nonIndexed"));
         } else if (load.equals("sr_update")) {
-            return new SingleRecordUpdateClient(100000, 1);
+            return new SingleRecordUpdateClient(100000, 1, getTextType(),
+                    loadOpts.contains("secondary"),
+                    loadOpts.contains("nonIndexed"));
         } else if (load.equals("sr_select_big")) {
-            return new SingleRecordSelectClient(100000000, 1, Types.VARCHAR);
+            return new SingleRecordSelectClient(100000000, 1);
         } else if (load.equals("sr_update_big")) {
             return new SingleRecordUpdateClient(100000000, 1);
         } else if (load.equals("sr_select_multi")) {
-            return new SingleRecordSelectClient(1, 32, Types.VARCHAR);
+            return new SingleRecordSelectClient(1, 32);
         } else if (load.equals("sr_update_multi")) {
             return new SingleRecordUpdateClient(1, 32);
         } else if (load.equals("index_join")) {

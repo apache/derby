@@ -21,6 +21,8 @@ limitations under the License.
 
 package org.apache.derbyTesting.perf.clients;
 
+import java.io.ByteArrayInputStream;
+import java.io.StringReader;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -40,6 +42,9 @@ public class SingleRecordUpdateClient implements Client {
     private final PreparedStatement[] pss;
     private final Random r;
     private final int tableSize;
+    private final int dataType;
+    private final boolean secondaryIndex;
+    private final boolean noIndex;
 
     /**
      * Construct a new single-record update client.
@@ -48,16 +53,42 @@ public class SingleRecordUpdateClient implements Client {
      * @param tables the number of tables in the test
      */
     public SingleRecordUpdateClient(int records, int tables) {
+        this(records, tables, Types.VARCHAR, false, false);
+    }
+
+    /**
+     * Construct a new single-record update client.
+     *
+     * @param records the number of records in each table in the test
+     * @param tables the number of tables in the test
+     */
+    public SingleRecordUpdateClient(int records, int tables, int type,
+                                    boolean secIndex, boolean nonIndexed) {
         tableSize = records;
         r = new Random();
         pss = new PreparedStatement[tables];
+        dataType = type;
+        if (secIndex && nonIndexed) {
+            throw new IllegalArgumentException(
+                "Cannot select on both secondary index and non-index column");
+        }
+        secondaryIndex = secIndex;
+        noIndex = nonIndexed;
     }
 
     public void init(Connection c) throws SQLException {
         for (int i = 0; i < pss.length; i++) {
             String tableName =
-                SingleRecordFiller.getTableName(tableSize, i, Types.VARCHAR);
-            String sql = "UPDATE " + tableName + " SET TEXT = ? WHERE ID = ?";
+                SingleRecordFiller.getTableName(tableSize, i, dataType,
+                                                secondaryIndex, noIndex);
+            String column = "ID";
+            if (secondaryIndex) {
+                column = "SEC";
+            } else if (noIndex) {
+                column = "NI";
+            }
+            String sql = "UPDATE " + tableName + " SET TEXT = ? WHERE " +
+                    column + " = ?";
             pss[i] = c.prepareStatement(sql);
         }
         c.setAutoCommit(false);
@@ -66,7 +97,20 @@ public class SingleRecordUpdateClient implements Client {
 
     public void doWork() throws SQLException {
         PreparedStatement ps = pss[r.nextInt(pss.length)];
-        ps.setString(1, SingleRecordFiller.randomString(r.nextInt()));
+        int seed = r.nextInt();
+        if (dataType == Types.VARCHAR) {
+            ps.setString(1, SingleRecordFiller.randomString(seed));
+        } else if (dataType == Types.BLOB) {
+            byte[] bytes = SingleRecordFiller.randomBytes(seed);
+            ps.setBinaryStream(1, new ByteArrayInputStream(bytes),
+                               SingleRecordFiller.TEXT_SIZE);
+        } else if (dataType == Types.CLOB) {
+            String string = SingleRecordFiller.randomString(seed);
+            ps.setCharacterStream(1, new StringReader(string),
+                                  SingleRecordFiller.TEXT_SIZE);
+        } else {
+            throw new IllegalArgumentException();
+        }
         ps.setInt(2, r.nextInt(tableSize));
         ps.executeUpdate();
         conn.commit();

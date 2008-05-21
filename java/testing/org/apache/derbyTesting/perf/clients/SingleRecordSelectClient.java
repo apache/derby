@@ -42,6 +42,19 @@ public class SingleRecordSelectClient implements Client {
     private final Random r;
     private final int tableSize;
     private final int dataType;
+    private final boolean secondaryIndex;
+    private final boolean noIndex;
+
+    /**
+     * Construct a new single-record select client which fetches VARCHAR data
+     * by primary key.
+     *
+     * @param records the number of records in each table in the test
+     * @param tables the number of tables in the test
+     */
+    public SingleRecordSelectClient(int records, int tables) {
+        this(records, tables, Types.VARCHAR, false, false);
+    }
 
     /**
      * Construct a new single-record select client.
@@ -51,19 +64,39 @@ public class SingleRecordSelectClient implements Client {
      * @param type the data type of the text column
      * ({@code java.sql.Types.VARCHAR}, {@code java.sql.Types.BLOB} or
      * {@code java.sql.Types.CLOB})
+     * @param secIndex if {@code true}, select by secondary index column
+     * instead of primary key column
+     * @param nonIndexed if {@code true}, select by non-indexed column
+     * instead of primary key column
      */
-    public SingleRecordSelectClient(int records, int tables, int type) {
+    public SingleRecordSelectClient(int records, int tables, int type,
+                                    boolean secIndex, boolean nonIndexed) {
         tableSize = records;
         r = new Random();
         pss = new PreparedStatement[tables];
         dataType = type;
+        if (secIndex && nonIndexed) {
+            throw new IllegalArgumentException(
+                "Cannot select on both secondary index and non-index column");
+        }
+        secondaryIndex = secIndex;
+        noIndex = nonIndexed;
     }
 
     public void init(Connection c) throws SQLException {
         for (int i = 0; i < pss.length; i++) {
             String tableName =
-                    SingleRecordFiller.getTableName(tableSize, i, dataType);
-            String sql = "SELECT * FROM " + tableName + " WHERE ID = ?";
+                    SingleRecordFiller.getTableName(tableSize, i, dataType,
+                                                    secondaryIndex, noIndex);
+            String column = "ID";
+            if (secondaryIndex) {
+                column = "SEC";
+            } else if (noIndex) {
+                column = "NI";
+            }
+            String sql =
+                    "SELECT ID, TEXT FROM " + tableName +
+                    " WHERE " + column + " = ?";
             pss[i] = c.prepareStatement(sql);
         }
         c.setAutoCommit(false);
