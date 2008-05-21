@@ -225,6 +225,12 @@ public class AnsiSignaturesTest extends BaseJDBCTestCase
             ( "double_Double_Double", "double", new String[] { "double" }, "3.0", "3.0" );
     }
 
+    public  void    test_varchar_String_String()
+        throws Exception
+    {
+        declareAndRunFunction
+            ( "varchar_String_String", "varchar( 10 )", new String[] { "varchar( 10 )" }, "'3.0'", "3.0" );
+    }
     
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -253,6 +259,47 @@ public class AnsiSignaturesTest extends BaseJDBCTestCase
     
     ///////////////////////////////////////////////////////////////////////////////////
     //
+    // BAD RETURN TYPES
+    //
+    ///////////////////////////////////////////////////////////////////////////////////
+
+    public  void    test_smallint_badreturn_byte_short()
+        throws Exception
+    {
+        declareAndFailFunction
+            ( "smallint_badreturn_byte_short", "smallint", new String[] { "smallint" }, "3", "3", TRIED_ALL_COMBINATIONS );
+    }
+
+    public  void    test_integer_badreturn_byte_int()
+        throws Exception
+    {
+        declareAndFailFunction
+            ( "integer_badreturn_byte_int", "int", new String[] { "int" }, "3", "3", TRIED_ALL_COMBINATIONS );
+    }
+
+    public  void    test_bigint_badreturn_byte_long()
+        throws Exception
+    {
+        declareAndFailFunction
+            ( "bigint_badreturn_byte_long", "bigint", new String[] { "bigint" }, "3", "3",  TRIED_ALL_COMBINATIONS );
+    }
+
+    public  void    test_real_badreturn_byte_float()
+        throws Exception
+    {
+        declareAndFailFunction
+            ( "real_badreturn_byte_float", "real", new String[] { "real" }, "3.0", "3.0", TRIED_ALL_COMBINATIONS );
+    }
+
+     public  void    test_double_badreturn_byte_double()
+        throws Exception
+    {
+        declareAndFailFunction
+            ( "double_badreturn_byte_double", "double", new String[] { "double" }, "3.0", "3.0", TRIED_ALL_COMBINATIONS );
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////
+    //
     // AMBIGUOUS METHODS
     //
     ///////////////////////////////////////////////////////////////////////////////////
@@ -269,6 +316,12 @@ public class AnsiSignaturesTest extends BaseJDBCTestCase
         declareAndFailFunction
             ( "smallint_amb_Integer_short", "smallint", new String[] { "smallint" }, "3", "3", AMBIGUOUS );
     }
+    public  void    test_smallint_amb_byte_short()
+        throws Exception
+    {
+        declareAndFailFunction
+            ( "smallint_amb_byte_short", "smallint", new String[] { "smallint" }, "3", "3", AMBIGUOUS );
+    }
 
     public  void    test_integer_amb_int_int()
         throws Exception
@@ -281,6 +334,12 @@ public class AnsiSignaturesTest extends BaseJDBCTestCase
     {
         declareAndFailFunction
             ( "integer_amb_Integer_int", "int", new String[] { "int" }, "3", "3", AMBIGUOUS );
+    }
+    public  void    test_integer_amb_byte_int()
+        throws Exception
+    {
+        declareAndFailFunction
+             ( "integer_amb_byte_int", "int", new String[] { "int" }, "3", "3", AMBIGUOUS );
     }
 
     public  void    test_bigint_amb_long_long()
@@ -295,6 +354,12 @@ public class AnsiSignaturesTest extends BaseJDBCTestCase
         declareAndFailFunction
             ( "bigint_amb_Long_long", "bigint", new String[] { "bigint" }, "3", "3", AMBIGUOUS );
     }
+    public  void    test_bigint_amb_byte_long()
+        throws Exception
+    {
+        declareAndFailFunction
+            ( "bigint_amb_byte_long", "bigint", new String[] { "bigint" }, "3", "3", AMBIGUOUS );
+    }
 
     public  void    test_real_amb_float_float()
         throws Exception
@@ -307,6 +372,12 @@ public class AnsiSignaturesTest extends BaseJDBCTestCase
     {
         declareAndFailFunction
             ( "real_amb_Float_float", "real", new String[] { "real" }, "3.0", "3.0", AMBIGUOUS );
+    }
+    public  void    test_real_amb_byte_float()
+        throws Exception
+    {
+        declareAndFailFunction
+            ( "real_amb_byte_float", "real", new String[] { "real" }, "3.0", "3.0", AMBIGUOUS );
     }
 
     public  void    test_double_amb_double_double()
@@ -321,7 +392,14 @@ public class AnsiSignaturesTest extends BaseJDBCTestCase
         declareAndFailFunction
             ( "double_amb_Double_double", "double", new String[] { "double" }, "3.0", "3.0", AMBIGUOUS );
     }
+    public  void    test_double_amb_byte_double()
+        throws Exception
+    {
+        declareAndFailFunction
+            ( "double_amb_byte_double", "double", new String[] { "double" }, "3.0", "3.0", AMBIGUOUS );
+    }
     
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // UNRESOLVABLE METHODS
