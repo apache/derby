@@ -440,7 +440,7 @@
     <ant dir="${derby.build.src.dir}"/>
   </target>
 
-  <target name="demo" depends="buildsource">
+  <target name="demo" depends="buildsource,vti-demo">
     <ant dir="${derby.demo.src.dir}"/>
   </target>
 

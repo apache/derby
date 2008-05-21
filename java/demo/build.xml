@@ -131,6 +131,7 @@
     <javac
       source="1.5"
       target="1.5"
+      bootclasspath="${empty}"
       nowarn="on"
       debug="${debug}"
       depend="${depend}"
@@ -140,6 +141,9 @@
       verbose="${verbose}"
       srcdir="${derby.demo.src.dir}/vtis/java"
       destdir="${out.dir}">
+      <classpath>
+        <pathelement path="${java15compile.classpath}"/>
+      </classpath>
     </javac>
   </target>
 
