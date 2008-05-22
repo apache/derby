@@ -30,7 +30,7 @@ import java.io.UTFDataFormatException;
 /**
  * Utility methods for handling UTF-8 encoded byte streams.
  * <p>
- * Note that when the <code>skip<code> methods mention detection of invalid
+ * Note that when the {@code skip} methods mention detection of invalid
  * UTF-8 encodings, it only checks the first byte of a character. For multibyte
  * encodings, the second and third byte are not checked for correctness, just
  * skipped and ignored.
