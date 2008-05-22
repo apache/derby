@@ -120,7 +120,7 @@ public    abstract  class Subscription    extends QueryVTIHelper
     public  static  void  createSubscription( String subscriptionClassName, String connectionURL )
         throws Exception
     {
-        Class                   subscriptionClass = Class.forName( subscriptionClassName );
+        Class<?>                   subscriptionClass = Class.forName( subscriptionClassName );
         SubscriptionSignature   subscriptionSignature = (SubscriptionSignature) subscriptionClass.getAnnotation( SubscriptionSignature.class );
         String                  jdbcDriverName = subscriptionSignature.jdbcDriverName();
         String[]                subscriptionParameters = subscriptionSignature.parameters();
@@ -166,7 +166,7 @@ public    abstract  class Subscription    extends QueryVTIHelper
     public  static  void  dropSubscription( String subscriptionClassName )
         throws Exception
     {
-        Class                   subscriptionClass = Class.forName( subscriptionClassName );
+        Class<?>                   subscriptionClass = Class.forName( subscriptionClassName );
         SubscriptionSignature   subscriptionSignature = (SubscriptionSignature) subscriptionClass.getAnnotation( SubscriptionSignature.class );
         Method[]                methods = subscriptionClass.getMethods();
         int                     methodCount = methods.length;
@@ -203,7 +203,7 @@ public    abstract  class Subscription    extends QueryVTIHelper
     public  static  void  refreshSubscription( String subscriptionClassName, String connectionURL, String... parameterValues )
         throws Exception
     {
-        Class                   subscriptionClass = Class.forName( subscriptionClassName );
+        Class<?>                   subscriptionClass = Class.forName( subscriptionClassName );
         SubscriptionSignature   subscriptionSignature = (SubscriptionSignature) subscriptionClass.getAnnotation( SubscriptionSignature.class );
         String                  jdbcDriverName = subscriptionSignature.jdbcDriverName();
         String[]                parameterNames = subscriptionSignature.parameters();
@@ -540,7 +540,7 @@ public    abstract  class Subscription    extends QueryVTIHelper
         ( String subscriptionClassName, String[] parameterValues, String connectionURL )
         throws Exception
     {
-        Class                       subscriptionClass = Class.forName( subscriptionClassName );
+        Class<?>                       subscriptionClass = Class.forName( subscriptionClassName );
         SubscriptionSignature       subscriptionSignature = (SubscriptionSignature) subscriptionClass.getAnnotation( SubscriptionSignature.class );
         HashMap<String, String>     parameterMap = null;
         String[]                    parameterNames = subscriptionSignature.parameters();
