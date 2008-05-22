@@ -223,6 +223,11 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * @return A suite of tests.
      */
     private static Test connectionPoolingSuite(String jdbcClient) {
+        // Return an empty suite if running in JavaME environment.
+        if (JDBC.vmSupportsJSR169()) {
+            return new TestSuite("Base connection pooling suite:DISABLED");
+        }
+
         TestSuite baseCpSuite = new TestSuite("Base connection pooling suite");
         // Add the tests here.
         baseCpSuite.addTest(new DatabaseMetaDataTest("testConnectionSpecific"));
