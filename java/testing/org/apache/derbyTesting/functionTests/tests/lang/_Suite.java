@@ -154,6 +154,8 @@ public class _Suite extends BaseTestCase  {
 
             // test uses regex classes that are not available in Foundation 1.1
             suite.addTest(ErrorMessageTest.suite());
+            // Test uses DriverManager to connect to database in jar.
+            suite.addTest(DBInJarTest.suite());
         }
 
         return suite;
