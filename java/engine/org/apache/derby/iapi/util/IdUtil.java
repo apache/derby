@@ -266,17 +266,7 @@ public abstract class IdUtil
 		if (!needsQuote) {
 			result = authid.toLowerCase();
 		} else {
-			StringBuffer b = new StringBuffer();
-			b.append("\"");
-			for (int i=0; i < authid.length(); i++) {
-				char c = authid.charAt(i);
-				if (c == '"') {
-					b.append('"'); // " must be escaped as two quotes ("")
-				}
-				b.append(c);
-			}
-			b.append("\"");
-			result = b.toString();
+			result = normalToDelimited(authid);
 		}
 
 		return result;
