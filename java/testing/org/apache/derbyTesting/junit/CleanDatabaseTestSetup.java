@@ -164,6 +164,7 @@ public class CleanDatabaseTestSetup extends BaseJDBCTestSetup {
          removeObjects(conn);
          if (compress)
              compressObjects(conn);
+         removeRoles(conn);
      }
      
      /**
@@ -238,6 +239,25 @@ public class CleanDatabaseTestSetup extends BaseJDBCTestSetup {
                 return;
         }
         throw sqle;
+    }
+
+    private static void removeRoles(Connection conn) throws SQLException {
+        // No metadata for roles, so do a query against SYSROLES
+        Statement stm = conn.createStatement();
+        Statement dropStm = conn.createStatement();
+
+        // cast to overcome territory differences in some cases:
+        ResultSet rs = stm.executeQuery(
+            "select roleid from sys.sysroles where " +
+            "cast(isdef as char(1)) = 'Y'");
+
+        while (rs.next()) {
+            dropStm.executeUpdate("DROP ROLE " + rs.getString(1));
+        }
+
+        stm.close();
+        dropStm.close();
+        conn.commit();
     }
 
      /**

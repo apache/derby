@@ -47,6 +47,7 @@ import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.execute.ExecutionContext;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.store.access.XATransactionController;
+import org.apache.derby.iapi.store.access.TransactionController;
 
 import org.apache.derby.iapi.store.replication.master.MasterFactory;
 import org.apache.derby.iapi.store.replication.slave.SlaveFactory;
@@ -1124,7 +1125,11 @@ public abstract class EmbedConnection implements EngineConnection
 
 			throw newSQLException(SQLState.LOGIN_FAILED, failedString);
 		}
-		
+
+		if (dbname != null) {
+			checkUserIsNotARole();
+		}
+
 		// Let's authenticate now
 			
 		if (!authenticationService.authenticate(
@@ -1142,6 +1147,55 @@ public abstract class EmbedConnection implements EngineConnection
 		// to its implementation here, since it will always be present.
 		if (authenticationService instanceof NoneAuthenticationServiceImpl)
 			usingNoneAuth = true;
+	}
+
+
+	/**
+	 * If applicable, check that we don't connect with a user name
+	 * that equals a role.
+	 *
+	 * @exception SQLException Will throw if the current authorization
+	 *            id in {@code lcc} (which is already normalized to
+	 *            case normal form - CNF) equals an existing role name
+	 *            (which is also stored in CNF).
+	 */
+	private void checkUserIsNotARole() throws SQLException {
+		TransactionResourceImpl tr = getTR();
+
+		try {
+			tr.startTransaction();
+			LanguageConnectionContext lcc = tr.getLcc();
+			String username = lcc.getAuthorizationId();
+
+			DataDictionary dd = lcc.getDataDictionary();
+
+			// Check is only performed if we have
+			// derby.database.sqlAuthorization == true and we have
+			// upgraded dictionary to at least level 10.4 (roles
+			// introduced in 10.4):
+			if (lcc.usesSqlAuthorization() &&
+				dd.checkVersion(DataDictionary.DD_VERSION_DERBY_10_4, null)) {
+
+				TransactionController tc = lcc.getTransactionExecute();
+
+				String failedString =
+					MessageService.getTextMessage(MessageId.AUTH_INVALID);
+
+				if (dd.getRoleDefinitionDescriptor(username) != null) {
+					throw newSQLException(SQLState.NET_CONNECT_AUTH_FAILED,
+										  failedString);
+				}
+			}
+
+			tr.rollback();
+		} catch (StandardException e) {
+			try {
+				tr.rollback();
+			} catch (StandardException ee) {
+			}
+
+			throw handleException(e);
+		}
 	}
 
 	/* Enumerate operations controlled by database owner powers */

@@ -88,8 +88,11 @@ public class DriverManagerConnector implements Connector {
             if (!expectedState.equals(e.getSQLState()))
                 throw e;
             
-            return getConnectionByAttributes(url,
-                    "create", "true");          
+            Properties attributes = new Properties();
+            attributes.setProperty("user", user);
+            attributes.setProperty("password", password);
+            attributes.setProperty("create", "true");
+            return DriverManager.getConnection(url, attributes);
         }
     }
 

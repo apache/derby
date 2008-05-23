@@ -74,6 +74,7 @@ public class RolesTest extends BaseJDBCTestCase
     private final static String userException            = "38000";
     private final static String userAlreadyExists        = "X0Y68";
     private final static String invalidPUBLIC            = "4251B";
+    private final static String loginFailed              = "08004";
 
     private int MAX_IDENTIFIER_LENGTH = 128;
     /**
@@ -407,7 +408,7 @@ public class RolesTest extends BaseJDBCTestCase
                 sqlAuthorizationRequired, null , roleDboOnly);
 
         // Verify that we can't create a role which has the same auth
-        // id as a known user.
+        // id as a known user (DERBY-3673).
         //
         // a) built-in user:
         doStmt("create role " + users[dboIndex], sqlAuthorizationRequired,
@@ -433,6 +434,8 @@ public class RolesTest extends BaseJDBCTestCase
         // lingers..
         doStmt("create role schemaowner", sqlAuthorizationRequired,
                userAlreadyExists, roleDboOnly);
+
+        testLoginWithUsernameWhichIsARole();
 
         /*
          * GRANT <role>
@@ -641,6 +644,46 @@ public class RolesTest extends BaseJDBCTestCase
         _stm.close();
     }
 
+
+    /**
+     * Create a user that has the same name as a role and try to
+     * log in with it; should be denied. This will catch cases
+     * where we can't check up front when roles are created,
+     * e.g. external authentication, or users are added after the
+     * role is created (DERBY-3681).
+     * @exception Exception
+     */
+    private void testLoginWithUsernameWhichIsARole() throws SQLException {
+        if (_authLevel == SQLAUTHORIZATION && isDbo()) {
+            _stm.execute("CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY" +
+                         "('derby.user.soonarole', 'whatever')");
+
+            // should work, not defined as a role yet
+            openDefaultConnection("soonarole","whatever").close();
+
+            // remove the user so we can create a role
+            _stm.execute("CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY" +
+                         "('derby.user.soonarole', NULL)");
+            _stm.execute("create role soonarole");
+
+            // reintroduce the colliding user name now that we have a role
+            _stm.execute("CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY" +
+                         "('derby.user.soonarole', 'whatever')");
+
+            try {
+                // should fail now
+                openDefaultConnection("soonarole","whatever").close();
+                fail("Exception expected connecting with " +
+                     "user name equal to a role");
+            } catch (SQLException e) {
+                assertSQLState(loginFailed, e);
+            }
+
+            _stm.execute("drop role soonarole");
+            _stm.execute("CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY" +
+                         "('derby.user.soonarole', NULL)");
+        }
+    }
 
     protected void setUp() throws Exception
     {
