@@ -36,6 +36,7 @@ import org.apache.derby.impl.sql.catalog.DDdependableFinder;
  * This class is used by rows in the SYS.SYSROLES system table.
  */
 public class RoleDescriptor extends TupleDescriptor
+                                    implements Provider
 {
     private final UUID uuid;
     private final String roleName;
@@ -137,5 +138,65 @@ public class RoleDescriptor extends TupleDescriptor
         TransactionController tc = lcc.getTransactionExecute();
 
         dd.dropRoleDescriptor(roleName, grantee, grantor, tc);
+    }
+
+    //////////////////////////////////////////////
+    //
+    // PROVIDER INTERFACE
+    //
+    //////////////////////////////////////////////
+
+    /**
+     * Get the provider's UUID
+     *
+     * @return The provider's UUID
+     */
+    public UUID getObjectID()
+    {
+        return uuid;
+    }
+
+    /**
+     * Is this provider persistent?  A stored dependency will be required
+     * if both the dependent and provider are persistent.
+     *
+     * @return boolean              Whether or not this provider is persistent.
+     */
+    public boolean isPersistent()
+    {
+        return true;
+    }
+
+    /**
+     * Return the name of this Provider.  (Useful for errors.)
+     *
+     * @return String   The name of this provider.
+     */
+    public String getObjectName()
+    {
+        return ((isDef ? "CREATE ROLE: " : "GRANT ROLE: ") + roleName +
+                " GRANT TO: " + grantee +
+                " GRANTED BY: " + grantor +
+                (withAdminOption? " WITH ADMIN OPTION" : ""));
+    }
+
+    /**
+     * Get the provider's type.
+     *
+     * @return char         The provider's type.
+     */
+    public String getClassType()
+    {
+        return Dependable.ROLE_GRANT;
+    }
+
+    /**
+     *  @return the stored form of this provider
+     *
+     *  @see Dependable#getDependableFinder
+     */
+    public DependableFinder getDependableFinder()
+    {
+        return new DDdependableFinder(StoredFormatIds.ROLE_GRANT_FINDER_V01_ID);
     }
 }

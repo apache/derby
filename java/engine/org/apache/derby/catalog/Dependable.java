@@ -61,6 +61,7 @@ public interface Dependable
 	public static final String TABLE_PERMISSION             = "TablePrivilege";
 	public static final String COLUMNS_PERMISSION           = "ColumnsPrivilege";
 	public static final String ROUTINE_PERMISSION           = "RoutinePrivilege";
+	public static final String ROLE_GRANT                   = "RoleGrant";
 
 
 	/**
