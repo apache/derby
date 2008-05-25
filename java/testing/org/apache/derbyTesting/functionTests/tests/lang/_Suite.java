@@ -142,6 +142,8 @@ public class _Suite extends BaseTestCase  {
             // also, test calls procedures which use DriverManager
             // to get the default connection.
             suite.addTest(GrantRevokeDDLTest.suite());
+            // Test uses DriverManager to connect to database in jar.
+            suite.addTest(DBInJarTest.suite());
         }
 
         return suite;

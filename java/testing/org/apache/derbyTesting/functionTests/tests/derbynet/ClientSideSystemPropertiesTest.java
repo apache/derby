@@ -89,33 +89,8 @@ public class ClientSideSystemPropertiesTest extends BaseJDBCTestCase {
     protected void tearDown() throws Exception
     {
         super.tearDown();
-        //Making ClientSideSystemPropertiesTest class implement 
-        //java.security.PrivilegedExceptionAction didn't work because compiler
-        //kept getting confused between the run method in
-        //java.security.PrivilegedExceptionAction and the run method in
-        //junit.framework.TestCase
-        //To get around this, I have created an inline class which implements
-        //java.security.PrivilegedAction and implements the run method 
-        //to delete the traceDirector and all the files under it.
-    	AccessController.doPrivileged
-	    (new java.security.PrivilegedAction(){
-		    public Object run(){
-		        File dir = new File(getSystemProperty("derby.client.traceDirectory"));
-	    		int fileCounter = 0;
-	            File[] list = dir.listFiles();
-	            File tempFile;
-	            //delete all the files under trace Directory
-	            for (;fileCounter<list.length; fileCounter++)
-	            {
-	            	tempFile = list[fileCounter];
-	            	tempFile.delete();
-	            }
-	            //now delete the trace Directory
-				dir.delete();
-	            return null;
-		    }
-		}	 
-	    );
+        
+        removeDirectory(getSystemProperty("derby.client.traceDirectory"));
     }
     
     /* ------------------- end helper methods  -------------------------- */
