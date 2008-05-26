@@ -48,10 +48,6 @@ public class Clob extends Lob implements java.sql.Clob {
 
     protected String encoding_ = "UNICODE";
 
-    //This boolean variable indicates whether the Clob object has
-    //been invalidated by calling free() on it
-    private boolean isValid = true;
-
     //---------------------constructors/finalizer---------------------------------
     public Clob(Agent agent, String string) {
 
@@ -816,11 +812,11 @@ public class Clob extends Lob implements java.sql.Clob {
         throws SQLException {
 
         //calling free() on a already freed object is treated as a no-op
-        if (!isValid) return;
+        if (!isValid_) return;
 
         //now that free has been called the Blob object is no longer
         //valid
-        isValid = false;
+        isValid_ = false;
 
         try {
             synchronized (agent_.connection_) {
@@ -1021,18 +1017,7 @@ public class Clob extends Lob implements java.sql.Clob {
     }
 
 
-    /*
-     * Checks is isValid is true. If it is not true throws
-     * a SQLException stating that a method has been called on
-     * an invalid LOB object
-     *
-     * throws SQLException if isvalid is not true.
-     */
-    private void checkValidity() throws SQLException{
-        if(!isValid)
-            throw new SqlException(null,new ClientMessageId(SQLState.LOB_OBJECT_INVALID))
-                                                  .getSQLException();
-    }
+
 
     /**
      * Materialize the stream used for input to the database.

@@ -117,6 +117,8 @@ public abstract class Connection implements java.sql.Connection,
     private boolean accumulated440ForMessageProcFailure_ = false;
     private boolean accumulated444ForMessageProcFailure_ = false;
 
+    private int transactionID_ = 0;
+
     //---------------------XA-----------------------------------------------------
 
     protected boolean isXAConnection_ = false; // Indicates an XA connection
@@ -1104,6 +1106,14 @@ public abstract class Connection implements java.sql.Connection,
     }
   
     /**
+     * Returns the ID of the active transaction for this connection.
+     * @return the ID of the active transaction
+     */
+    public int getTransactionID(){
+        return transactionID_;
+    }
+
+    /**
      * Returns the current schema (the schema that would be used for
      * compilation. This is not part of the java.sql.Connection interface, and
      * is only intended for use with statement caching.
@@ -1973,6 +1983,7 @@ public abstract class Connection implements java.sql.Connection,
             listener.completeLocalCommit(i);
         }
         inUnitOfWork_ = false;
+        transactionID_++;
     }
 
     public abstract void writeLocalRollback_() throws SqlException;
@@ -1989,6 +2000,7 @@ public abstract class Connection implements java.sql.Connection,
             listener.completeLocalRollback(i);
         }
         inUnitOfWork_ = false;
+        transactionID_++;
     }
     
     /**
