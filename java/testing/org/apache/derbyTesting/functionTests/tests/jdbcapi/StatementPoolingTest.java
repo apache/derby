@@ -321,12 +321,12 @@ public class StatementPoolingTest
     }
 
     /**
-     * Tests that closing the connection closes the logical prepared statement,
-     * but not the physical statement.
+     * Tests that closing the caching logical connection closes the logical
+     * prepared statement, but not the physical prepared statement.
      * <p>
-     * Since there are not public interface methods to test this, the approcah
-     * taken will be this:
-     * <ol> <li>Create a new table</li>
+     * Since there are no public interface methods to test this, the approach
+     * taken will be as follows:
+     * <ol> <li>Create a new table.</li>
      *      <li>Prepare a statement selecting from the table.</li>
      *      <li>Close the statement, putting it into the cache.</li>
      *      <li>Delete the table.</li>
@@ -336,12 +336,13 @@ public class StatementPoolingTest
      * If the physical statement was closed when closing the caching logical
      * connection, the prepare will fail. If it was left open, the prepare will
      * succeed because the statement is fetched from the cache, but the
-     * execution will fail becuase the table no longer exists.
+     * execution will fail because the table no longer exists.
      *
      * @throws SQLException if something goes wrong...
      */
-    public void testCachingLogicalConnectionCloseLeavesStatementsOpen()
+    public void testCachingLogicalConnectionCloseLeavesPhysicalStatementsOpen()
             throws SQLException {
+        final String SELECT_SQL = "select * from clcclso";
         ConnectionPoolDataSource cpDs =
                 J2EEDataSource.getConnectionPoolDataSource();
         J2EEDataSource.setBeanProperty(cpDs, "maxStatements", new Integer(7));
@@ -354,11 +355,13 @@ public class StatementPoolingTest
         con.setAutoCommit(false);
         Statement stmt = createStatement();
         stmt.executeUpdate("create table clcclso (id int)");
-        PreparedStatement ps = con.prepareStatement("select * from clcclso");
+        PreparedStatement ps = con.prepareStatement(SELECT_SQL);
         commit();
         con.close();
         try {
+            // Should fail because the logical statement has been closed.
             ps.execute();
+            fail("Logical connection close did not close logical statement.");
         } catch (SQLException sqle) {
             // Already closed.
             assertSQLState("XJ012", sqle);
@@ -369,8 +372,9 @@ public class StatementPoolingTest
         // If an exception is thrown here, statement pooling is disabled or not
         // working correctly.
         con = pc.getConnection();
-        ps = con.prepareStatement("select * from clcclso");
+        ps = con.prepareStatement(SELECT_SQL); // From cache.
         try {
+            // Should fail here because the referenced table has been deleted.
             ps.execute();
             fail("Execution should have failed");
         } catch (SQLException sqle) {
