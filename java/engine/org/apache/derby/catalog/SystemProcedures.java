@@ -723,8 +723,8 @@ public class SystemProcedures  {
         throws SQLException
     {
 
-        String escapedSchema = escapeSQLIdentifier(schema);
-        String escapedTableName = escapeSQLIdentifier(tablename);
+        String escapedSchema = IdUtil.normalToDelimited(schema);
+        String escapedTableName = IdUtil.normalToDelimited(tablename);
         String query = 
             "alter table " + escapedSchema + "." + escapedTableName +
 			" compress" +  (sequential != 0 ? " sequential" : "");
@@ -736,22 +736,6 @@ public class SystemProcedures  {
         ps.close();
 
 		conn.close();
-    }
-
-    /**
-     * Escape an SQL identifier to preserve mixed case and special characters.
-     */
-    private static String escapeSQLIdentifier(String identifier) {
-        StringBuffer buffer = new StringBuffer(identifier.length() + 2);
-        buffer.append('"');
-        for (int i = 0; i < identifier.length(); i++) {
-            char c = identifier.charAt(i);
-            // if c is a double quote, escape it with an extra double quote
-            if (c == '"') buffer.append('"');
-            buffer.append(c);
-        }
-        buffer.append('"');
-        return buffer.toString();
     }
 
     /**
@@ -1101,8 +1085,8 @@ public class SystemProcedures  {
 
 		//Send all the other inplace compress requests to ALTER TABLE
 		//machinery
-        String escapedSchema = escapeSQLIdentifier(schema);
-        String escapedTableName = escapeSQLIdentifier(tablename);
+        String escapedSchema = IdUtil.normalToDelimited(schema);
+        String escapedTableName = IdUtil.normalToDelimited(tablename);
         String query = 
             "alter table " + escapedSchema + "." + escapedTableName +
 			" compress inplace" +  (purgeRows != 0 ? " purge" : "")
@@ -1585,16 +1569,26 @@ public class SystemProcedures  {
         throws SQLException
     {
 		Connection conn = getDefaultConn();
-		
-		String entityName = (schemaName == null ? tableName : schemaName + "." + tableName); 
+
+        // Use default schema if schemaName is null. This isn't consistent
+        // with the other procedures, as they would fail if schema was null.
+        String entityName = IdUtil.normalToDelimited(tableName);
+        if (schemaName != null) {
+            entityName =
+                    IdUtil.normalToDelimited(schemaName) + "." + entityName;
+        }
+
 		String binsertSql = 
 			"insert into " + entityName +
 			" --DERBY-PROPERTIES insertMode=bulkInsert \n" +
-			"select * from new " + vtiName + 
+			"select * from new " + IdUtil.normalToDelimited(vtiName) +
 			"(" + 
-			"'" + schemaName + "'" + ", " + 
-			"'" + tableName + "'" +  ", " + 
-			"'" + vtiArg + "'" +  ")" + 
+			// Ideally, we should have used parameter markers and setString(),
+			// but some of the VTIs need the parameter values when compiling
+			// the statement. Therefore, insert the strings into the SQL text.
+			StringUtil.quoteStringLiteral(schemaName) + ", " +
+			StringUtil.quoteStringLiteral(tableName) + ", " +
+			StringUtil.quoteStringLiteral(vtiArg) + ")" +
 			" as t"; 
 
 		PreparedStatement ps = conn.prepareStatement(binsertSql);

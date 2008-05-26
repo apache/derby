@@ -1259,7 +1259,16 @@ public class JDBC {
 	 */
 	public static String escape(String name)
 	{
-		return "\"" + name + "\"";
+        StringBuffer buffer = new StringBuffer(name.length() + 2);
+        buffer.append('"');
+        for (int i = 0; i < name.length(); i++) {
+            char c = name.charAt(i);
+            // escape double quote characters with an extra double quote
+            if (c == '"') buffer.append('"');
+            buffer.append(c);
+        }
+        buffer.append('"');
+        return buffer.toString();
 	}	
 	/**
 	 * Escape a schama-qualified name so that it is suitable
@@ -1267,7 +1276,7 @@ public class JDBC {
 	 */
 	public static String escape(String schema, String name)
 	{
-		return "\"" + schema + "\".\"" + name + "\"";
+        return escape(schema) + "." + escape(name);
 	}
          
         /**

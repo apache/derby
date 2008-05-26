@@ -63,18 +63,7 @@ public abstract class IdUtil
 	  */
 	public static String normalToDelimited(String id)
 	{
-		StringBuffer quotedBuffer = new StringBuffer();
-		quotedBuffer.append('\"');
-        
-		for (int ix = 0; ix < id.length(); ix++){
-			char currentChar = id.charAt(ix);
-			quotedBuffer.append(currentChar);
-			if (currentChar == '\"')
-				quotedBuffer.append('\"');
-		}
-		quotedBuffer.append('\"');
-		
-		return quotedBuffer.toString();
+        return StringUtil.quoteString(id, '"');
 	}
 
 	/**

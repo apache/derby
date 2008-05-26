@@ -20,6 +20,7 @@
 package org.apache.derbyTesting.functionTests.tests.lang;
 
  
+import java.sql.CallableStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.ResultSet;
@@ -33,21 +34,27 @@ import org.apache.derbyTesting.junit.JDBC;
  * Add tests that use VTI 
  */
  public class VTITest extends BaseJDBCTestCase {
-     
+
+     private final String tableName;
 
      public static Test suite()
      {
          TestSuite suite = new TestSuite("VTITest");
          // requires DriverManager support
-         if (JDBC.vmSupportsJDBC2())
-            suite.addTest(new VTITest("bulkInsertVtiTest"));
+         if (JDBC.vmSupportsJDBC2()) {
+            suite.addTest(new VTITest("bulkInsertVtiTest", "WAREHOUSE"));
+            // Run the same test again, but now insert into a table whose name
+            // contains single and double quote characters (DERBY-3682)
+            suite.addTest(new VTITest("bulkInsertVtiTest", "test\"'table"));
+         }
          
          return suite;
      }
      
 
-     public VTITest(String name) {
+     private VTITest(String name, String tableName) {
          super(name);
+         this.tableName = tableName;
      }
      
 
@@ -56,7 +63,7 @@ import org.apache.derbyTesting.junit.JDBC;
       */
      protected void setUp() throws SQLException {
          Statement stmt = createStatement();
-         stmt.execute("CREATE TABLE warehouse (id int)");
+         stmt.execute("CREATE TABLE " + JDBC.escape(tableName) + "(id int)");
          stmt.close();
      }
      
@@ -67,7 +74,7 @@ import org.apache.derbyTesting.junit.JDBC;
      protected void tearDown()
          throws Exception {
          Statement stmt = createStatement();
-         stmt.execute("DROP TABLE warehouse");
+         stmt.execute("DROP TABLE " + JDBC.escape(tableName));
          stmt.close();
          super.tearDown();
      }
@@ -81,16 +88,17 @@ import org.apache.derbyTesting.junit.JDBC;
      throws SQLException
      {
         int expectedRows = 10;
-        Statement stmt = createStatement();
-        stmt.execute("call  SYSCS_UTIL.SYSCS_BULK_INSERT('APP','WAREHOUSE'," +
-                "'org.apache.derbyTesting.functionTests.tests.lang.WarehouseVTI',"
-                +"\'"+expectedRows+"')");
-        stmt.close();
-        stmt = createStatement();
-        ResultSet  rs  = stmt.executeQuery("SELECT COUNT(*) from warehouse");
-        rs.next();
-        assertEquals(expectedRows,rs.getInt(1));
-        rs.close();
-        stmt.close();
+
+        CallableStatement cs =
+                prepareCall("CALL SYSCS_UTIL.SYSCS_BULK_INSERT(?, ?, ?, ?)");
+        cs.setString(1, "APP");
+        cs.setString(2, tableName);
+        cs.setString(3, WarehouseVTI.class.getName());
+        cs.setInt(4, expectedRows);
+        cs.execute();
+
+        ResultSet rs = createStatement().executeQuery(
+                "SELECT 1 FROM " + JDBC.escape(tableName));
+        JDBC.assertDrainResults(rs, expectedRows);
      }
  }   

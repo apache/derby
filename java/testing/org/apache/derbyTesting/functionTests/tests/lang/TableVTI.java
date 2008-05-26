@@ -35,6 +35,7 @@ import java.sql.Ref;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.Array;
+import org.apache.derbyTesting.junit.JDBC;
 
 /**
     This class has been adapted from org.apache.derby.vti.VTITemplate 
@@ -73,7 +74,7 @@ public abstract class TableVTI implements ResultSet {
         Connection conn = DriverManager
         .getConnection("jdbc:default:connection");
         Statement s = conn.createStatement();
-        ResultSet rs = s.executeQuery("select * from " + tableName
+        ResultSet rs = s.executeQuery("select * from " + JDBC.escape(tableName)
                 + " where 1 = 0 ");
         rsmd = rs.getMetaData();
         rs.close();

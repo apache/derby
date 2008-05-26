@@ -421,7 +421,42 @@ public class StringUtil
 		return result;
 	}
 
+    /**
+     * Quote a string so that it can be used as an identifier or a string
+     * literal in SQL statements. Identifiers are surrounded by double quotes
+     * and string literals are surrounded by single quotes. If the string
+     * contains quote characters, they are escaped.
+     *
+     * @param source the string to quote
+     * @param quote the character to quote the string with (' or &quot;)
+     * @return a string quoted with the specified quote character
+     * @see #quoteStringLiteral(String)
+     * @see IdUtil#normalToDelimited(String)
+     */
+    static String quoteString(String source, char quote) {
+        // Normally, the quoted string is two characters longer than the source
+        // string (because of start quote and end quote).
+        StringBuffer quoted = new StringBuffer(source.length() + 2);
+        quoted.append(quote);
+        for (int i = 0; i < source.length(); i++) {
+            char c = source.charAt(i);
+            // if the character is a quote, escape it with an extra quote
+            if (c == quote) quoted.append(quote);
+            quoted.append(c);
+        }
+        quoted.append(quote);
+        return quoted.toString();
+    }
 
-
+    /**
+     * Quote a string so that it can be used as a string literal in an
+     * SQL statement.
+     *
+     * @param string the string to quote
+     * @return the string surrounded by single quotes and with proper escaping
+     * of any single quotes inside the string
+     */
+    public static String quoteStringLiteral(String string) {
+        return quoteString(string, '\'');
+    }
 }
-
