@@ -55,6 +55,7 @@ public final class ClassInspector
 
     private static final String OBJECT_TYPE_NAME = "java.lang.Object";
     private static final String STRING_TYPE_NAME = "java.lang.String";
+    private static final String BIGDECIMAL_TYPE_NAME = "java.math.BigDecimal";
 
 	private final ClassFactory cf;
 
@@ -688,7 +689,6 @@ nextMethod:	for (int i = 0; i < methods.length; i++) {
 					continue;
 				}
 
-
 			if (SanityManager.DEBUG) {
 				  if (SanityManager.DEBUG_ON("MethodResolutionInfo")) {
 					SanityManager.DEBUG("MethodResolutionInfo",	"MRI - Match found ");
@@ -958,13 +958,25 @@ nextMethod:	for (int i = 0; i < methods.length; i++) {
         //
         //   public static String f( Object a )
         //
+        // Also don't allow the widening of BigDecimal to Object. Otherwise, the
+        // SQL signature
+        //
+        //    f( a numeric( 7, 2 ) ) returns numeric( 7, 2 )
+        //
+        // will incorrectly match the Java signature
+        //
+        //   public static BigDecimal f( Object a )
+        //
+        //
         // For a description of the ANSI signature matching rules, see
         // DERBY-3652.
         //
 		if (
             !(
-              STRING_TYPE_NAME.equals( fromClass.getName() ) &&
-              OBJECT_TYPE_NAME.equals( toClass.getName() )
+              (
+               STRING_TYPE_NAME.equals( fromClass.getName() ) ||
+               BIGDECIMAL_TYPE_NAME.equals( fromClass.getName() )
+               ) && OBJECT_TYPE_NAME.equals( toClass.getName() )
               ) &&
             toClass.isAssignableFrom(fromClass)
             )

@@ -225,13 +225,20 @@ public class AnsiSignaturesTest extends BaseJDBCTestCase
             ( "double_Double_Double", "double", new String[] { "double" }, "3.0", "3.0" );
     }
 
+    public  void    test_numeric_BigDecimal_BigDecimal()
+        throws Exception
+    {
+        declareAndRunFunction
+            ( "numeric_BigDecimal_BigDecimal", "numeric( 7, 2 )", new String[] { "numeric( 7, 2 )" }, "12345.67", "12345.67" );
+    }
+    
     public  void    test_varchar_String_String()
         throws Exception
     {
         declareAndRunFunction
             ( "varchar_String_String", "varchar( 10 )", new String[] { "varchar( 10 )" }, "'3.0'", "3.0" );
     }
-    
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // SHOULD NOT RESOLVE
