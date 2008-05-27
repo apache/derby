@@ -1237,6 +1237,24 @@ public class JDBC {
     }
 
     /**
+     * Asserts that the current schema is the same as the one specified.
+     *
+     * @param con connection to check schema in
+     * @param schema expected schema name
+     * @throws SQLException if something goes wrong
+     */
+    public static void assertCurrentSchema(Connection con, String schema)
+            throws SQLException {
+        Statement stmt = con.createStatement();
+        try {
+            JDBC.assertSingleValueResultSet(
+                    stmt.executeQuery("VALUES CURRENT SCHEMA"), schema);
+        } finally {
+            stmt.close();
+        }
+    }
+
+    /**
      * Convert byte array to String.
      * Each byte is converted to a hexadecimal string representation.
      *
