@@ -145,6 +145,8 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         suite.addTest(new J2EEDataSourceTest("testClosedXADSConnection"));
         suite.addTest(new J2EEDataSourceTest("testSetSchemaInXAConnection"));
         suite.addTest(new J2EEDataSourceTest("testPooledReuseOnClose"));
+        suite.addTest(new J2EEDataSourceTest("testSchemaIsReset"));
+        suite.addTest(new J2EEDataSourceTest("testSchemaIsResetWhenDeleted"));
         return suite;
     }
 
@@ -1697,7 +1699,105 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         conn3.close();
         xac3.close();
     }
-    
+
+    /**
+     * Verifies that the schema is reset when creating a new logical connection.
+     * <p>
+     * The test is run in a non-statement pooling configuration first,
+     * and then with statement pooling enabled if the environment supports it.
+     * <p>
+     * Relevant Jira issue: DERBY-3690.
+     *
+     * @throws SQLException if something goes wrong
+     */
+    public void testSchemaIsReset()
+            throws SQLException {
+        final String userSchema = "USERSCHEMA";
+        ConnectionPoolDataSource cpDs =
+                J2EEDataSource.getConnectionPoolDataSource();
+        J2EEDataSource.setBeanProperty(cpDs, "createDatabase", "create");
+        // Connect with a user specified, which should cause the schema to be
+        // set to the user name.
+        // Test without statement pooling first.
+        doTestSchemaIsReset(cpDs.getPooledConnection(userSchema, "secret"),
+                userSchema);
+
+        // Try to enable statement pooling.
+        // This is currently only implemented in the client driver.
+        if (usingDerbyNetClient()) {
+            J2EEDataSource.setBeanProperty(
+                    cpDs, "maxStatements",new Integer(7));
+            doTestSchemaIsReset(cpDs.getPooledConnection(userSchema, "secret"),
+                    userSchema);
+        }
+    }
+
+    /**
+     * Executes a test sequence to make sure the schema is reset between
+     * logical connections.
+     *
+     * @param pc pooled connection to get logical connections from
+     * @param userSchema name of the default schema for the connection (user)
+     * @throws SQLException if something goes wrong...
+     */
+    private void doTestSchemaIsReset(PooledConnection pc, String userSchema)
+            throws SQLException {
+        Connection con1 = pc.getConnection();
+        JDBC.assertCurrentSchema(con1, userSchema);
+        Statement stmt1 = con1.createStatement();
+        // Change the schema.
+        stmt1.execute("set schema APP");
+        stmt1.close();
+        JDBC.assertCurrentSchema(con1, "APP");
+        // Close the logical connection and get a new one.
+        con1.close();
+        Connection con2 = pc.getConnection();
+        // Make sure the schema has been reset from APP to the user name.
+        JDBC.assertCurrentSchema(con2, userSchema);
+        con2.close();
+        // Try a third time, but don't change the schema now.
+        Connection con3 = pc.getConnection();
+        JDBC.assertCurrentSchema(con3, userSchema);
+        con3.close();
+        pc.close();
+    }
+
+    /**
+     * Tests that deleting the current / default schema doesn't cause the next
+     * logical connection to fail.
+     * <p>
+     * Relevant Jira issue: DERBY-3690.
+     *
+     * @throws SQLException if something goes wrong
+     */
+    public void testSchemaIsResetWhenDeleted()
+            throws SQLException {
+        final String userSchema = "AUSER";
+        ConnectionPoolDataSource cpDs =
+                J2EEDataSource.getConnectionPoolDataSource();
+        J2EEDataSource.setBeanProperty(cpDs, "createDatabase", "create");
+        PooledConnection pc = cpDs.getPooledConnection(userSchema, "secret");
+        // Get first connection, create a table, then drop schema.
+        Connection con = pc.getConnection();
+        JDBC.assertCurrentSchema(con, userSchema);
+        Statement stmt = con.createStatement();
+        stmt.executeUpdate("create table schematest (id int)");
+        stmt.executeUpdate("drop table schematest");
+        stmt.executeUpdate("drop schema " + userSchema + " restrict");
+        stmt.close();
+        con.close();
+        // Get second connection.
+        con = pc.getConnection();
+        JDBC.assertCurrentSchema(con, userSchema);
+        stmt = con.createStatement();
+        stmt.executeUpdate("create table schematest (id int)");
+        stmt.executeUpdate("drop table schematest");
+        stmt.close();
+        JDBC.assertCurrentSchema(con, userSchema);
+        con.close();
+        pc.close();
+    }
+
     // test that an xastart in auto commit mode commits the existing work.
     // test fix of a bug ('beetle 5178') wherein XAresource.start() when 
     // auto-commit is true did not implictly commit any transaction

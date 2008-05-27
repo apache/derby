@@ -611,6 +611,9 @@ public class GenericLanguageConnectionContext
 
 		// drop all temp tables.
 		dropAllDeclaredGlobalTempTables();
+
+        // Reset the current schema (see DERBY-3690).
+        setDefaultSchema(null);
 	}
 
 	/**
