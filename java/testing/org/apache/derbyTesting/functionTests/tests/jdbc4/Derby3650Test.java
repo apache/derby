@@ -72,11 +72,11 @@ public class Derby3650Test extends BaseJDBCTestCase {
         ResultSet rs = ps.executeQuery();
         while (rs.next()) {
             Clob clob = rs.getClob(1);
+            verify40KClob(clob.getCharacterStream());
             if (freelob)
                 clob.free();
             if (commitAfterLobVerify)
                 commit();
-            verify40KClob(clob.getCharacterStream());
         }
         rs.close();
         rs = ps.executeQuery();
