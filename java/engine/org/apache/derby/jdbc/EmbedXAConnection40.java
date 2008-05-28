@@ -21,9 +21,9 @@
 
 package org.apache.derby.jdbc;
 
-import java.util.Vector;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.concurrent.CopyOnWriteArrayList;
 import javax.sql.StatementEvent;
 import javax.sql.StatementEventListener;
 import javax.sql.XAConnection;
@@ -35,9 +35,14 @@ import org.apache.derby.iapi.jdbc.ResourceAdapter;
 final class EmbedXAConnection40 extends EmbedXAConnection
         implements XAConnection {
     
-    //using generics to avoid casting problems
-    protected final Vector<StatementEventListener> statementEventListeners =
-            new Vector<StatementEventListener>();
+    /**
+     * List of statement event listeners. The list is copied on each write,
+     * ensuring that it can be safely iterated over even if other threads or
+     * the listeners fired in the same thread add or remove listeners.
+     */
+    private final CopyOnWriteArrayList<StatementEventListener>
+            statementEventListeners =
+                    new CopyOnWriteArrayList<StatementEventListener>();
     
     /**
      * Creates EmbedXAConnection40.
@@ -67,7 +72,7 @@ final class EmbedXAConnection40 extends EmbedXAConnection
     public void removeStatementEventListener(StatementEventListener listener) {
         if (listener == null)
             return;
-        statementEventListeners.removeElement(listener);
+        statementEventListeners.remove(listener);
     }
 
     /**
@@ -90,7 +95,7 @@ final class EmbedXAConnection40 extends EmbedXAConnection
             return;
         if (listener == null)
             return;
-        statementEventListeners.addElement(listener);
+        statementEventListeners.add(listener);
     }
     
     /**
@@ -101,12 +106,8 @@ final class EmbedXAConnection40 extends EmbedXAConnection
     public void onStatementClose(PreparedStatement statement) {
         if (!statementEventListeners.isEmpty()){
             StatementEvent event = new StatementEvent(this,statement);
-            //synchronized block on statementEventListeners to make it thread
-            //safe
-            synchronized(statementEventListeners) {
-                for (StatementEventListener l : statementEventListeners) {
-                    l.statementClosed(event);
-                }
+            for (StatementEventListener l : statementEventListeners) {
+                l.statementClosed(event);
             }
         }
     }
@@ -120,12 +121,8 @@ final class EmbedXAConnection40 extends EmbedXAConnection
     public void onStatementErrorOccurred(PreparedStatement statement,SQLException sqle) {
         if (!statementEventListeners.isEmpty()){
             StatementEvent event = new StatementEvent(this,statement,sqle);
-            //synchronized block on statementEventListeners to make it thread
-            //safe
-            synchronized(statementEventListeners) {
-                for (StatementEventListener l : statementEventListeners){
-                    l.statementErrorOccurred(event);
-                }
+            for (StatementEventListener l : statementEventListeners) {
+                l.statementErrorOccurred(event);
             }
         }
     }

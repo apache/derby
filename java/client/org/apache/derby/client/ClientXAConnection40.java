@@ -23,14 +23,9 @@ package org.apache.derby.client;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.Enumeration;
-import java.util.Vector;
+import java.util.concurrent.CopyOnWriteArrayList;
 import javax.sql.StatementEvent;
 import javax.sql.StatementEventListener;
-import org.apache.derby.client.am.SqlException;
-import org.apache.derby.client.net.NetLogWriter;
-import org.apache.derby.client.net.NetXAConnection;
-import org.apache.derby.jdbc.ClientDataSource;
 import org.apache.derby.jdbc.ClientXADataSource;
 
 /**
@@ -38,10 +33,14 @@ import org.apache.derby.jdbc.ClientXADataSource;
  */ 
 public class ClientXAConnection40 extends ClientXAConnection {
     
-    //using generics to avoid casting problems
-     protected final Vector<StatementEventListener> statementEventListeners = 
-             new Vector<StatementEventListener>();
-
+    /**
+     * List of statement event listeners. The list is copied on each write,
+     * ensuring that it can be safely iterated over even if other threads or
+     * the listeners fired in the same thread add or remove listeners.
+     */
+    private final CopyOnWriteArrayList<StatementEventListener>
+            statementEventListeners =
+                     new CopyOnWriteArrayList<StatementEventListener>();
     
     /**
      * Constructor for ClientXAConnection40.
@@ -73,7 +72,7 @@ public class ClientXAConnection40 extends ClientXAConnection {
         if (logWriter_ != null) {
             logWriter_.traceEntry(this, "removeConnectionEventListener", listener);
         }
-        statementEventListeners.removeElement(listener);
+        statementEventListeners.remove(listener);
     }
     
     /**
@@ -92,7 +91,7 @@ public class ClientXAConnection40 extends ClientXAConnection {
         if (logWriter_ != null) {
             logWriter_.traceEntry(this, "addStatementEventListener", listener);
         }
-        statementEventListeners.addElement(listener);
+        statementEventListeners.add(listener);
     }
     
     /**
@@ -103,12 +102,8 @@ public class ClientXAConnection40 extends ClientXAConnection {
     public void onStatementClose(PreparedStatement statement) {
         if (!statementEventListeners.isEmpty()) {
             StatementEvent event = new StatementEvent(this,statement);
-            //synchronized block on statementEventListeners to make it thread
-            //safe
-            synchronized(statementEventListeners) {
-                for (StatementEventListener l : statementEventListeners) {
-                    l.statementClosed(event);
-                }
+            for (StatementEventListener l : statementEventListeners) {
+                l.statementClosed(event);
             }
         }
     }
@@ -127,12 +122,8 @@ public class ClientXAConnection40 extends ClientXAConnection {
                     SQLException sqle) {
         if (!statementEventListeners.isEmpty()) {
             StatementEvent event = new StatementEvent(this,statement,sqle);
-            //synchronized block on statementEventListeners to make it thread
-            //safe
-            synchronized(statementEventListeners) {
-                for (StatementEventListener l : statementEventListeners) {
-                    l.statementErrorOccurred(event);
-                }
+            for (StatementEventListener l : statementEventListeners) {
+                l.statementErrorOccurred(event);
             }
         }
     }   
