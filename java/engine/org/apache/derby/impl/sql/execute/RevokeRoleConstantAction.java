@@ -29,7 +29,7 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.conn.Authorizer;
-import org.apache.derby.iapi.sql.dictionary.RoleDescriptor;
+import org.apache.derby.iapi.sql.dictionary.RoleGrantDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.shared.common.reference.SQLState;
@@ -93,7 +93,7 @@ class RevokeRoleConstantAction extends DDLConstantAction {
                 String grantee = (String)gIter.next();
 
                 // check that role exists
-                RoleDescriptor rd = dd.getRoleDefinitionDescriptor(role);
+                RoleGrantDescriptor rd = dd.getRoleDefinitionDescriptor(role);
 
                 if (rd == null) {
                     throw StandardException.
@@ -112,14 +112,13 @@ class RevokeRoleConstantAction extends DDLConstantAction {
                 // rd = dd.findRoleGrantWithAdminToRoleOrPublic(grantor)
                 // if (rd != null) {
                 //   :
-                if (grantor.equals(rd.getGrantee())) {
+                if (grantor.equals(lcc.getDataDictionary().
+                                       getAuthorizationDatabaseOwner())) {
                     // All ok, we are database owner
                     if (SanityManager.DEBUG) {
                         SanityManager.ASSERT(
-                            lcc.getDataDictionary().
-                            getAuthorizationDatabaseOwner().
-                            equals(grantor),
-                            "expected database owner in role descriptor");
+                            rd.getGrantee().equals(grantor),
+                            "expected database owner in role grant descriptor");
                         SanityManager.ASSERT(
                             rd.isWithAdminOption(),
                             "expected role definition to have ADMIN OPTION");

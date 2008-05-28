@@ -53,7 +53,7 @@ import org.apache.derby.iapi.sql.dictionary.ColPermsDescriptor;
 import org.apache.derby.iapi.sql.dictionary.RoutinePermsDescriptor;
 import org.apache.derby.iapi.sql.dictionary.PermissionsDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ReferencedKeyConstraintDescriptor;
-import org.apache.derby.iapi.sql.dictionary.RoleDescriptor;
+import org.apache.derby.iapi.sql.dictionary.RoleGrantDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SPSDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.CheckConstraintDescriptor;
@@ -1784,19 +1784,12 @@ public final class	DataDictionaryImpl
 
 
 	/**
-	 * Drop the descriptor for a role
-	 *
-	 * @param roleName	The name of the role to drop
-	 * @param grantee	The grantee of the descriptor
-	 * @param grantor	The grantor of the descriptor
-	 * @param tc		TransactionController for the transaction
-	 *
-	 * @exception StandardException Thrown on error
+	 * @see DataDictionary#dropRoleGrant
 	 */
-	public void dropRoleDescriptor(String roleName,
-								   String grantee,
-								   String grantor,
-								   TransactionController tc)
+	public void dropRoleGrant(String roleName,
+							  String grantee,
+							  String grantor,
+							  TransactionController tc)
 		throws StandardException
 	{
 		DataValueDescriptor roleNameOrderable;
@@ -2750,13 +2743,7 @@ public final class	DataDictionaryImpl
 
 
 	/**
-	 * Drop all role descriptors corresponding to a grant of (any)
-	 * role to a named authentication identifier
-	 *
-	 * @param grantee The grantee of the descriptor
-	 * @param tc      Transaction Controller
-	 *
-	 * @exception StandardException Thrown on failure
+	 * @see DataDictionary#dropRoleGrantsByGrantee
 	 */
 	public void dropRoleGrantsByGrantee(String grantee,
 										TransactionController tc)
@@ -2784,8 +2771,8 @@ public final class	DataDictionaryImpl
 	 * @return true if there exists such a grant
 	 * @exception StandardException Thrown on failure
 	 */
-	public boolean existsRoleGrantByGrantee(String grantee,
-											TransactionController tc)
+	private boolean existsRoleGrantByGrantee(String grantee,
+											 TransactionController tc)
 			throws StandardException
 	{
 		TabInfoImpl ti = getNonCoreTI(SYSROLES_CATALOG_NUM);
@@ -2801,13 +2788,7 @@ public final class	DataDictionaryImpl
 
 
 	/**
-	 * Drop all role descriptors corresponding to a grant of the
-	 * named role to any authentication identifier
-	 *
-	 * @param roleName The role name granted
-	 * @param tc       Transaction Controller
-	 *
-	 * @exception StandardException Thrown on failure
+	 * @see DataDictionary#dropRoleGrantsByName
 	 */
 	public void dropRoleGrantsByName(String roleName,
 									 TransactionController tc)
@@ -2975,10 +2956,10 @@ public final class	DataDictionaryImpl
 	 * authorization id.
 	 */
 	private boolean existsPermByGrantee(String authId,
-									 TransactionController tc,
-									 int catalog,
-									 int indexNo,
-									 int granteeColnoInIndex)
+										TransactionController tc,
+										int catalog,
+										int indexNo,
+										int granteeColnoInIndex)
 		throws StandardException
 	{
 		return visitPermsByGrantee(authId,
@@ -11696,33 +11677,9 @@ public final class	DataDictionaryImpl
 
 
 	/**
-	 * Get the descriptor for the named role.
-	 *
-	 * @param roleName	The role name
-	 *
-	 * @return The descriptor for the role. Can be null if not found.
-	 *
-	 * @exception StandardException  Thrown on error
+	 * @see DataDictionary#getRoleGrantDescriptor(UUID)
 	 */
-	public RoleDescriptor getRoleDefinitionDescriptor(String roleName)
-		throws StandardException
-	{
-		RoleDescriptor rd = locateRoleDefinitionRow(roleName);
-
-		return rd;
-	}
-
-	
-	/**
-	 * Get the descriptor corresponding to the uuid
-	 *
-	 * @param uuid
-	 *
-	 * @return The descriptor for the role (definition or grant descriptor)
-	 *
-	 * @exception StandardException  Thrown on error
-	 */
-	public RoleDescriptor getRoleDescriptor(UUID uuid)
+	public RoleGrantDescriptor getRoleGrantDescriptor(UUID uuid)
 		throws StandardException
 	{
 		DataValueDescriptor UUIDStringOrderable;
@@ -11738,7 +11695,7 @@ public final class	DataDictionaryImpl
 		ExecIndexRow keyRow = exFactory.getIndexableRow(1);
 		keyRow.setColumn(1, UUIDStringOrderable);
 
-		return (RoleDescriptor)
+		return (RoleGrantDescriptor)
 					getDescriptorViaIndex(
 						SYSROLESRowFactory.SYSROLES_INDEX_UUID_IDX,
 						keyRow,
@@ -11751,26 +11708,6 @@ public final class	DataDictionaryImpl
 
 
 	/**
-	 * Get a role descriptor for a role grant
-	 *
-	 * @param roleName The name of the role whose definition we seek
-	 * @param grantee  The grantee
-	 * @param grantor  The grantor
-	 *
-	 * @throws StandardException error
-	 */
-	public RoleDescriptor getRoleGrantDescriptor(String roleName,
-												 String grantee,
-												 String grantor)
-		throws StandardException
-	{
-		RoleDescriptor rd = locateRoleGrantRow(roleName, grantee, grantor);
-
-		return rd;
-	}
-
-
-	/**
 	 * Get the target role definition by searching for a matching row
 	 * in SYSROLES by rolename where isDef==true.  Read only scan.
 	 * Uses index on (rolename, isDef) columns.
@@ -11778,10 +11715,11 @@ public final class	DataDictionaryImpl
 	 * @param roleName The name of the role we're interested in.
 	 *
 	 * @return The descriptor (row) for the role
-	 *
 	 * @exception StandardException Thrown on error
+	 *
+	 * @see DataDictionary#getRoleDefinitionDescriptor
 	 */
-	private RoleDescriptor locateRoleDefinitionRow(String roleName)
+	public RoleGrantDescriptor getRoleDefinitionDescriptor(String roleName)
 			throws StandardException
 	{
 		DataValueDescriptor roleNameOrderable;
@@ -11800,7 +11738,7 @@ public final class	DataDictionaryImpl
 		keyRow.setColumn(1, roleNameOrderable);
 		keyRow.setColumn(2, isDefOrderable);
 
-		return (RoleDescriptor)
+		return (RoleGrantDescriptor)
 					getDescriptorViaIndex(
 						SYSROLESRowFactory.SYSROLES_INDEX_ID_DEF_IDX,
 						keyRow,
@@ -11821,13 +11759,15 @@ public final class	DataDictionaryImpl
 	 * @param grantee       The grantee
 	 * @param grantor       The grantor
 	 *
-	 * @return	            The descriptor (row) for the role grant
+	 * @return	            The descriptor for the role grant
 	 *
 	 * @exception StandardException  Thrown on error
+	 *
+	 * @see DataDictionary#getRoleGrantDescriptor(String, String, String)
 	 */
-	private RoleDescriptor locateRoleGrantRow(String roleName,
-											  String grantee,
-											  String grantor)
+	public RoleGrantDescriptor getRoleGrantDescriptor(String roleName,
+													   String grantee,
+													   String grantor)
 		throws StandardException
 	{
 		DataValueDescriptor roleNameOrderable;
@@ -11850,7 +11790,7 @@ public final class	DataDictionaryImpl
 		keyRow.setColumn(2, granteeOrderable);
 		keyRow.setColumn(3, grantorOrderable);
 
-		return (RoleDescriptor)
+		return (RoleGrantDescriptor)
 			getDescriptorViaIndex(
 				SYSROLESRowFactory.SYSROLES_INDEX_ID_EE_OR_IDX,
 				keyRow,

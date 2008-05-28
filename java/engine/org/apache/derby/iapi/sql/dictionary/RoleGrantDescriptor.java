@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.iapi.sql.dictionary.RoleDescriptor
+   Derby - Class org.apache.derby.iapi.sql.dictionary.RoleGrantDescriptor
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -34,9 +34,21 @@ import org.apache.derby.impl.sql.catalog.DDdependableFinder;
 
 /**
  * This class is used by rows in the SYS.SYSROLES system table.
+ *
+ * An instance contains information for exactly:
+ * One <role definition>, cf. ISO/IEC 9075-2:2003 section 12.4 *or*
+ * one <grant role statement>, section 12.5.
+ *
+ * A role definition is also modeled as a role grant (hence the class
+ * name), but with the special grantor "_SYSTEM", and with a grantee
+ * of the definer, in Derby this is always the current user. For a
+ * role definition, the WITH ADMIN flag is also set. The information
+ * contained in the isDef flag is usually redundant, but was added as
+ * a precaution against a real user named _SYSTEM, for example when
+ * upgrading an older database that did not forbid this.
  */
-public class RoleDescriptor extends TupleDescriptor
-                                    implements Provider
+public class RoleGrantDescriptor extends TupleDescriptor
+    implements Provider
 {
     private final UUID uuid;
     private final String roleName;
@@ -59,13 +71,13 @@ public class RoleDescriptor extends TupleDescriptor
      * @param isDef
      *
      */
-    RoleDescriptor(DataDictionary dd,
-                   UUID uuid,
-                   String roleName,
-                   String grantee,
-                   String grantor,
-                   boolean withAdminOption,
-                   boolean isDef) {
+    RoleGrantDescriptor(DataDictionary dd,
+                        UUID uuid,
+                        String roleName,
+                        String grantee,
+                        String grantor,
+                        boolean withAdminOption,
+                        boolean isDef) {
         super(dd);
         this.uuid = uuid;
         this.roleName = roleName;
@@ -137,7 +149,7 @@ public class RoleDescriptor extends TupleDescriptor
         DataDictionary dd = getDataDictionary();
         TransactionController tc = lcc.getTransactionExecute();
 
-        dd.dropRoleDescriptor(roleName, grantee, grantor, tc);
+        dd.dropRoleGrant(roleName, grantee, grantor, tc);
     }
 
     //////////////////////////////////////////////

@@ -53,7 +53,7 @@ import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptorList;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
-import org.apache.derby.iapi.sql.dictionary.RoleDescriptor;
+import org.apache.derby.iapi.sql.dictionary.RoleGrantDescriptor;
 import org.apache.derby.iapi.types.DataValueFactory;
 import org.apache.derby.iapi.sql.compile.TypeCompilerFactory;
 import org.apache.derby.iapi.sql.depend.DependencyManager;
@@ -3284,7 +3284,7 @@ public class GenericLanguageConnectionContext
 		DataDictionary dd = getDataDictionary();
 		String dbo = dd.getAuthorizationDatabaseOwner();
 
-		RoleDescriptor grantDesc = null;
+		RoleGrantDescriptor grantDesc = null;
 
 		if (getAuthorizationId().equals(dbo)) {
 			grantDesc = dd.getRoleDefinitionDescriptor(role);

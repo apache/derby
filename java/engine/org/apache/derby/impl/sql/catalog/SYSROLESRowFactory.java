@@ -30,7 +30,7 @@ import org.apache.derby.iapi.types.DataValueFactory;
 import org.apache.derby.iapi.sql.dictionary.CatalogRowFactory;
 import org.apache.derby.iapi.sql.dictionary.DataDescriptorGenerator;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.RoleDescriptor;
+import org.apache.derby.iapi.sql.dictionary.RoleGrantDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TupleDescriptor;
 import org.apache.derby.iapi.sql.execute.ExecutionFactory;
 import org.apache.derby.iapi.sql.execute.ExecRow;
@@ -105,7 +105,7 @@ public class SYSROLESRowFactory extends CatalogRowFactory
     /**
      * Make a SYSROLES row
      *
-     * @param td a role descriptor
+     * @param td a role grant descriptor
      * @param parent unused
      *
      * @return  Row suitable for inserting into SYSROLES.
@@ -126,14 +126,14 @@ public class SYSROLESRowFactory extends CatalogRowFactory
 
         if (td != null)
         {
-            RoleDescriptor roleDescriptor = (RoleDescriptor)td;
+            RoleGrantDescriptor rgd = (RoleGrantDescriptor)td;
 
-            roleid = roleDescriptor.getRoleName();
-            grantee = roleDescriptor.getGrantee();
-            grantor = roleDescriptor.getGrantor();
-            wao = roleDescriptor.isWithAdminOption();
-            isdef = roleDescriptor.isDef();
-            UUID oid = roleDescriptor.getUUID();
+            roleid = rgd.getRoleName();
+            grantee = rgd.getGrantee();
+            grantor = rgd.getGrantor();
+            wao = rgd.isWithAdminOption();
+            isdef = rgd.isDef();
+            UUID oid = rgd.getUUID();
             oid_string = oid.toString();
         }
 
@@ -186,7 +186,7 @@ public class SYSROLESRowFactory extends CatalogRowFactory
         throws StandardException {
 
         DataValueDescriptor         col;
-        RoleDescriptor              descriptor;
+        RoleGrantDescriptor              descriptor;
         String                      oid_string;
         String                      roleid;
         String                      grantee;
@@ -201,7 +201,7 @@ public class SYSROLESRowFactory extends CatalogRowFactory
                                  "Wrong number of columns for a SYSROLES row");
         }
 
-        // first column is uuid of this role descriptor (char(36))
+        // first column is uuid of this role grant descriptor (char(36))
         col = row.getColumn(1);
         oid_string = col.getString();
 
@@ -225,7 +225,7 @@ public class SYSROLESRowFactory extends CatalogRowFactory
         col = row.getColumn(6);
         isdef = col.getString();
 
-        descriptor = ddg.newRoleDescriptor
+        descriptor = ddg.newRoleGrantDescriptor
             (getUUIDFactory().recreateUUID(oid_string),
              roleid,
              grantee,

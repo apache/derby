@@ -259,9 +259,9 @@ public class DDdependableFinder implements	DependableFinder, Formatable
                 return dd.getRoutinePermissions(dependableObjectID);
 
 		    case StoredFormatIds.ROLE_GRANT_FINDER_V01_ID:
-				return dd.getRoleDescriptor(dependableObjectID);
+				return dd.getRoleGrantDescriptor(dependableObjectID);
 
-			default:
+		default:
 				if (SanityManager.DEBUG)
 				{
 					SanityManager.THROWASSERT(

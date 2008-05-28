@@ -27,7 +27,7 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.RoleDescriptor;
+import org.apache.derby.iapi.sql.dictionary.RoleGrantDescriptor;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.iapi.store.access.TransactionController;
 
@@ -99,7 +99,7 @@ class DropRoleConstantAction extends DDLConstantAction
         */
         dd.startWriting(lcc);
 
-        RoleDescriptor rd = dd.getRoleDefinitionDescriptor(roleName);
+        RoleGrantDescriptor rd = dd.getRoleDefinitionDescriptor(roleName);
 
         if (rd == null) {
             throw StandardException.newException(

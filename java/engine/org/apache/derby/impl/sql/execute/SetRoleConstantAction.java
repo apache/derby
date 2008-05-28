@@ -24,7 +24,7 @@ package org.apache.derby.impl.sql.execute;
 
 import org.apache.derby.iapi.sql.execute.ConstantAction;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.RoleDescriptor;
+import org.apache.derby.iapi.sql.dictionary.RoleGrantDescriptor;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.ParameterValueSet;
 import org.apache.derby.iapi.sql.StatementType;
@@ -118,7 +118,7 @@ class SetRoleConstantAction implements ConstantAction
             thisRoleName = dvs.getString();
         }
 
-        RoleDescriptor rd = null;
+        RoleGrantDescriptor rd = null;
 
         if (thisRoleName != null) {
             try {

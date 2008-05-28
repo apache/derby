@@ -417,27 +417,27 @@ public interface DataDictionary
     
 
 	/**
-	 * Drop the descriptor for a role
+	 * Drop a role grant
 	 *
 	 * @param roleName	The name of the role to drop
-     * @param grantee   The grantee of the descriptor
-     * @param grantor   The grantor of the descriptor
+     * @param grantee   The grantee
+     * @param grantor   The grantor
 	 * @param tc        Transaction Controller
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	public void	dropRoleDescriptor(String roleName,
-                                   String grantee,
-                                   String grantor,
-								   TransactionController tc)
+	public void	dropRoleGrant(String roleName,
+							  String grantee,
+							  String grantor,
+							  TransactionController tc)
 			throws StandardException;
 
 
 	/**
-	 * Drop all role descriptors corresponding to a grant of (any)
+	 * Drop all role grants corresponding to a grant of (any)
 	 * role to a named authentication identifier
 	 *
-     * @param grantee   The grantee of the descriptor
+     * @param grantee   The grantee
 	 * @param tc        Transaction Controller
 	 *
 	 * @exception StandardException		Thrown on failure
@@ -448,7 +448,7 @@ public interface DataDictionary
 
 
 	/**
-	 * Drop all role descriptors corresponding to a grant of the
+	 * Drop all role grants corresponding to a grant of the
 	 * named role to any authentication identifier
 	 *
      * @param roleName  The role name granted
@@ -1865,29 +1865,29 @@ public interface DataDictionary
 
 
 	/**
-	 * Get a role descriptor for a role definition.
+	 * Get a role grant descriptor for a role definition.
 	 *
 	 * @param roleName The name of the role whose definition we seek
 	 *
 	 * @throws StandardException error
 	 */
-	public RoleDescriptor getRoleDefinitionDescriptor(String roleName)
+	public RoleGrantDescriptor getRoleDefinitionDescriptor(String roleName)
 			throws StandardException;
 
 	/**
-	 * Get the descriptor corresponding to the uuid
+	 * Get the role grant descriptor corresponding to the uuid provided
 	 *
 	 * @param uuid
 	 *
-	 * @return The descriptor for the role (definition or grant descriptor)
+	 * @return The descriptor for the role grant descriptor
 	 *
 	 * @exception StandardException  Thrown on error
 	 */
-	public RoleDescriptor getRoleDescriptor(UUID uuid)
+	public RoleGrantDescriptor getRoleGrantDescriptor(UUID uuid)
 			throws StandardException;
 
 	/**
-	 * Get a role descriptor for a role grant
+	 * Get a descriptor for a role grant
 	 *
 	 * @param roleName The name of the role whose definition we seek
 	 * @param grantee  The grantee
@@ -1895,9 +1895,9 @@ public interface DataDictionary
 	 *
 	 * @throws StandardException error
 	 */
-	public RoleDescriptor getRoleGrantDescriptor(String roleName,
-												 String grantee,
-												 String grantor)
+	public RoleGrantDescriptor getRoleGrantDescriptor(String roleName,
+													  String grantee,
+													  String grantor)
 		throws StandardException;
 
 

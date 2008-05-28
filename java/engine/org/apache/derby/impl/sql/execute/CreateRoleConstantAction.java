@@ -31,7 +31,7 @@ import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.dictionary.DataDescriptorGenerator;
-import org.apache.derby.iapi.sql.dictionary.RoleDescriptor;
+import org.apache.derby.iapi.sql.dictionary.RoleGrantDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.impl.jdbc.authentication.BasicAuthenticationServiceImpl;
@@ -95,7 +95,7 @@ class CreateRoleConstantAction extends DDLConstantAction {
         //
         // Check if this role already exists. If it does, throw.
         //
-        RoleDescriptor rd = dd.getRoleDefinitionDescriptor(roleName);
+        RoleGrantDescriptor rd = dd.getRoleDefinitionDescriptor(roleName);
 
         if (rd != null) {
             throw StandardException.
@@ -113,7 +113,7 @@ class CreateRoleConstantAction extends DDLConstantAction {
                              "User", roleName);
         }
 
-        rd = ddg.newRoleDescriptor(
+        rd = ddg.newRoleGrantDescriptor(
             dd.getUUIDFactory().createUUID(),
             roleName,
             currentAuthId,// grantee

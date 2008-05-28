@@ -48,7 +48,7 @@ import org.apache.derby.iapi.sql.dictionary.PermissionsDescriptor;
 import org.apache.derby.iapi.sql.dictionary.RoutinePermsDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SPSDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
-import org.apache.derby.iapi.sql.dictionary.RoleDescriptor;
+import org.apache.derby.iapi.sql.dictionary.RoleGrantDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SubKeyConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TablePermsDescriptor;
@@ -165,10 +165,10 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
 		return false;
 	}
 
-	public void	dropRoleDescriptor(String roleName,
-                                   String grantee,
-                                   String grantor,
-								   TransactionController tc)
+	public void	dropRoleGrant(String roleName,
+							  String grantee,
+							  String grantor,
+							  TransactionController tc)
 			throws StandardException {
 		// TODO Auto-generated method stub
 	}
@@ -202,23 +202,23 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
 		return false;
 	}
 
-	public RoleDescriptor getRoleDefinitionDescriptor(String roleName)
+	public RoleGrantDescriptor getRoleDefinitionDescriptor(String roleName)
 			throws StandardException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 
-	public RoleDescriptor getRoleDescriptor(UUID uuid)
+	public RoleGrantDescriptor getRoleGrantDescriptor(UUID uuid)
 			throws StandardException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 
-	public RoleDescriptor getRoleGrantDescriptor(String roleName,
-												 String grantee,
-												 String grantor)
+	public RoleGrantDescriptor getRoleGrantDescriptor(String roleName,
+													  String grantee,
+													  String grantor)
 		throws StandardException {
 		// TODO Auto-generated method stub
 		return null;
