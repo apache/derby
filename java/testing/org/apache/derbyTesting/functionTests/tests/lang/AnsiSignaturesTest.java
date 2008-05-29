@@ -36,6 +36,7 @@ import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
+import org.apache.derbyTesting.junit.JDBC;
 
 /**
  * <p>
@@ -228,6 +229,12 @@ public class AnsiSignaturesTest extends BaseJDBCTestCase
     public  void    test_numeric_BigDecimal_BigDecimal()
         throws Exception
     {
+        //
+        // On small device platforms, this raises an exception in the byte-code
+        // compiler. See DERBY-3697.
+        //
+        if ( JDBC.vmSupportsJSR169() ) { return; }
+        
         declareAndRunFunction
             ( "numeric_BigDecimal_BigDecimal", "numeric( 7, 2 )", new String[] { "numeric( 7, 2 )" }, "12345.67", "12345.67" );
     }

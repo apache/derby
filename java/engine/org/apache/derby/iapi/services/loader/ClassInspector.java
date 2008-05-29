@@ -949,40 +949,9 @@ nextMethod:	for (int i = 0; i < methods.length; i++) {
 	protected boolean classConvertableFromTo(Class fromClass, Class toClass, boolean mixTypes) {
 
         //
-        // Don't allow widening of String to Object. Otherwise, the SQL
-        // signature
+        // ANSI rules do not allow widening
         //
-        //    f( a varchar( 10 ) ) returns varchar( 10 )
-        //
-        // will incorrectly match the Java signature
-        //
-        //   public static String f( Object a )
-        //
-        // Also don't allow the widening of BigDecimal to Object. Otherwise, the
-        // SQL signature
-        //
-        //    f( a numeric( 7, 2 ) ) returns numeric( 7, 2 )
-        //
-        // will incorrectly match the Java signature
-        //
-        //   public static BigDecimal f( Object a )
-        //
-        //
-        // For a description of the ANSI signature matching rules, see
-        // DERBY-3652.
-        //
-		if (
-            !(
-              (
-               STRING_TYPE_NAME.equals( fromClass.getName() ) ||
-               BIGDECIMAL_TYPE_NAME.equals( fromClass.getName() )
-               ) && OBJECT_TYPE_NAME.equals( toClass.getName() )
-              ) &&
-            toClass.isAssignableFrom(fromClass)
-            )
-        {            
-			return true;
-		}
+        if ( fromClass.getName().equals( toClass.getName() ) ) { return true; }
 
 		// When comparing two candidate methods to see which one is closer,
 		// we want to mix object type and primitive type, because they could
