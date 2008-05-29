@@ -91,7 +91,9 @@ public class ClientXAConnection40 extends ClientXAConnection {
         if (logWriter_ != null) {
             logWriter_.traceEntry(this, "addStatementEventListener", listener);
         }
-        statementEventListeners.add(listener);
+        if (listener != null) {
+            statementEventListeners.add(listener);
+        }
     }
     
     /**

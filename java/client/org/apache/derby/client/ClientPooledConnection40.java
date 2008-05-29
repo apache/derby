@@ -81,7 +81,9 @@ public class ClientPooledConnection40 extends ClientPooledConnection {
         if (logWriter_ != null) {
             logWriter_.traceEntry(this, "addStatementEventListener", listener);
         }
-        statementEventListeners.add(listener);
+        if (listener != null) {
+            statementEventListeners.add(listener);
+        }
     }
     
     /**
