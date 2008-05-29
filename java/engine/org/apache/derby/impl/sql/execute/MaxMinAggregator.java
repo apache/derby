@@ -88,11 +88,18 @@ public final class MaxMinAggregator
 	// 
 	// FORMATABLE INTERFACE
 	// 
+	// Formatable implementations usually invoke the super()
+	// version of readExternal or writeExternal first, then
+	// do the additional actions here. However, since the
+	// superclass of this class requires that its externalized
+	// data must be the last data in the external stream, we
+	// invoke the superclass's read/writeExternal method
+	// last, not first. See DERBY-3219 for more discussion.
 	/////////////////////////////////////////////////////////////
 	public void writeExternal(ObjectOutput out) throws IOException
 	{
-		super.writeExternal(out);
 		out.writeBoolean(isMax);
+		super.writeExternal(out);
 	}
 
 	/** 
@@ -103,8 +110,8 @@ public final class MaxMinAggregator
 	 */
 	public void readExternal(ObjectInput in) 
 		throws IOException, ClassNotFoundException {
-		super.readExternal(in);
 		isMax = in.readBoolean();
+		super.readExternal(in);
 	}
 	/**
 	 * Get the formatID which corresponds to this class.

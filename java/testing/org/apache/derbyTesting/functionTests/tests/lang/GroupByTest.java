@@ -29,6 +29,8 @@ import java.sql.PreparedStatement;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.apache.derby.shared.common.sanity.SanityManager;
+
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
@@ -94,6 +96,8 @@ public class GroupByTest extends BaseJDBCTestCase {
         st.executeUpdate("create table d2085 (a int, b int, c int, d int)");
         st.executeUpdate("insert into d2085 values (1,1,1,1), (1,2,3,4), " +
                 "(4,3,2,1), (2,2,2,2)");
+
+        st.execute("create table d3219 (a varchar(10), b varchar(1000))");
 
         st.executeUpdate("create table d2457_o (name varchar(20), ord int)");
         st.executeUpdate("create table d2457_a (ord int, amount int)");
@@ -1594,6 +1598,69 @@ public class GroupByTest extends BaseJDBCTestCase {
         assertStatementError("42Y36", s,
             "select a,b from d2085 group by a,b order by c*2");
     }
+
+    /**
+     * DERBY-3219: Check that MaxMinAggregator's external format works
+     * properly with a string of length 0.
+     */
+    public void testGroupByMaxWithEmptyString() throws SQLException
+    {
+        // Force all sorts to be external sorts, for DERBY-3219. This
+        // property only takes effect for debug sane builds, but that
+        // should be adequate since at least some developers routinely
+        // run tests in that configuration.
+        boolean wasSet = false;
+        if (SanityManager.DEBUG)
+        {
+            wasSet = SanityManager.DEBUG_ON("testSort");
+            SanityManager.DEBUG_SET("testSort");
+        }
+            
+        Statement st = createStatement();
+        loadRows();
+        ResultSet rs = st.executeQuery("select b,max(a) from d3219 group by b");
+        while (rs.next());
+        // If we can read the results, the test passed. DERBY-3219 resulted
+        // in an externalization data failure during the group by processing.
+        if (SanityManager.DEBUG)
+        {
+            if (! wasSet)
+                SanityManager.DEBUG_CLEAR("testSort");
+        }
+    }
+
+    /**
+     * Load enough rows into the table to get some externalized
+     * MaxMinAggregator instances. To ensure that the values are externalized,
+     * we set up this test to run with -Dderby.debug.true=testSort. Note that
+     * we load the column 'a' with a string of length 0, because DERBY-3219
+     * occurs when the computed MAX value is a string of length 0.
+     */
+    private void loadRows()
+        throws SQLException
+    {
+        PreparedStatement ps = prepareStatement(
+                "insert into d3219 (a, b) values ('', ?)");
+
+        for (int i = 0; i < 2000; i++)
+        {
+            ps.setString(1, genString(1000));
+            ps.executeUpdate();
+        }
+    }
+    private static String genString(int len)
+    {
+        StringBuffer buf = new StringBuffer(len);
+
+        for (int i = 0; i < len; i++)
+            buf.append(chars[(int) (chars.length * Math.random())]);
+        return buf.toString();
+    }
+    private static char []chars = {
+        'q','w','e','r','t','y','u','i','o','p',
+        'a','s','d','f','g','h','j','k','l',
+        'z','x','c','v','b','n','m'
+    };
 
     /**
       * DERBY-2457: Derby does not support column aliases in the
