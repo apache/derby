@@ -33,9 +33,11 @@ import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.memory.LowMemory;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.services.property.PropertyUtil;
 
 import org.apache.derby.iapi.jdbc.AuthenticationService;
 import org.apache.derby.iapi.jdbc.EngineConnection;
+import org.apache.derby.security.DatabasePermission;
 
 import org.apache.derby.iapi.db.Database;
 import org.apache.derby.impl.db.SlaveDatabase;
@@ -51,6 +53,13 @@ import org.apache.derby.iapi.store.access.TransactionController;
 
 import org.apache.derby.iapi.store.replication.master.MasterFactory;
 import org.apache.derby.iapi.store.replication.slave.SlaveFactory;
+
+import org.apache.derby.iapi.util.IdUtil;
+
+import java.io.IOException;
+
+import java.security.Permission;
+import java.security.AccessControlException;
 
 /* can't import due to name overlap:
 import java.sql.Connection;
@@ -372,11 +381,6 @@ public abstract class EmbedConnection implements EngineConnection
 
 					// check for user's credential and authenticate the user
 					// with system level authentication service.
-					// FIXME: We should also check for CREATE DATABASE operation
-					//		  authorization for the user if authorization was
-					//		  set at the system level.
-					//		  Right now, the authorization service does not
-					//		  restrict/account for Create database op.
 					checkUserCredentials(null, info);
 					
 					// Process with database creation
@@ -2412,6 +2416,11 @@ public abstract class EmbedConnection implements EngineConnection
 
 		info = filterProperties(info);
 
+		// check for create database privileges
+		// DERBY-3495: uncomment to enable system privileges checks
+		//final String user = IdUtil.getUserNameFromURLProps(info);
+		//checkDatabaseCreatePrivileges(user, dbname);
+
 		try {
 			if (Monitor.createPersistentService(Property.DATABASE_MODULE, dbname, info) == null) 
 			{
@@ -2432,6 +2441,90 @@ public abstract class EmbedConnection implements EngineConnection
 		return (Database) Monitor.findService(Property.DATABASE_MODULE, dbname);
 	}
 
+	/**
+	 * Checks that a user has the system privileges to create a database.
+	 * To perform this check the following policy grants are required
+	 * <ul>
+	 * <li> to run the encapsulated test:
+	 *		permission javax.security.auth.AuthPermission "doAsPrivileged";
+	 * <li> to resolve relative path names:
+	 *		permission java.util.PropertyPermission "user.dir", "read";
+	 * <li> to canonicalize path names:
+	 *		permission java.io.FilePermission "...", "read";
+	 * </ul>
+	 * or a SQLException will be raised detailing the cause.
+	 * <p>
+	 * In addition, for the test to succeed
+	 * <ul>
+	 * <li> the given user needs to be covered by a grant:
+	 *		principal org.apache.derby.authentication.SystemPrincipal "..." {}
+	 * <li> that lists a permission covering the database location:
+	 *		permission org.apache.derby.security.DatabasePermission "directory:...", "create";
+	 * </ul>
+	 * or it will fail with a SQLException detailing the cause.
+	 *
+	 * @param user The user to be checked for database create privileges
+	 * @param dbname the name of the database to create
+	 * @throws SQLException if the privileges check fails
+	 */
+	private void checkDatabaseCreatePrivileges(String user,
+											   String dbname)
+		throws SQLException {
+		// approve action if not running under a security manager
+		if (System.getSecurityManager() == null) {
+			return;
+		}
+		if (dbname == null) {
+			throw new NullPointerException("dbname can't be null");
+		}
+        
+		// the check
+		try {
+			// raises IOException if dbname is non-canonicalizable
+			final String url
+				= (DatabasePermission.URL_PROTOCOL_DIRECTORY
+				   + stripSubSubProtocolPrefix(dbname));
+			final Permission dp
+				= new DatabasePermission(url, DatabasePermission.CREATE);
+            
+			factory.checkSystemPrivileges(user, dp);
+		} catch (AccessControlException ace) {
+			throw Util.generateCsSQLException(
+                                              SQLState.AUTH_DATABASE_CREATE_MISSING_PERMISSION,
+                                              user, dbname, ace);
+		} catch (IOException ioe) {
+			throw Util.generateCsSQLException(
+                                              SQLState.AUTH_DATABASE_CREATE_EXCEPTION,
+                                              dbname, (Object)ioe); // overloaded method
+		} catch (Exception e) {
+			throw Util.generateCsSQLException(
+                                              SQLState.AUTH_DATABASE_CREATE_EXCEPTION,
+                                              dbname, (Object)e); // overloaded method
+		}
+	}
+
+    /**
+     * Strips any sub-sub-protocol prefix from a database name.
+     *
+     * @param dbname a database name
+     * @return the database name without any sub-sub-protocol prefixes
+     * @throws NullPointerException if dbname is null
+     */
+    static public String stripSubSubProtocolPrefix(String dbname) {
+        // check if database name starts with a sub-sub-protocol tag
+        final int i = dbname.indexOf(':');
+        if (i > 0) {
+            // construct the sub-sub-protocol's system property name
+            final String prop
+                = Property.SUB_SUB_PROTOCOL_PREFIX + dbname.substring(0, i);
+            
+            // test for existence of a system property (JVM + derby.properties)
+            if (PropertyUtil.getSystemProperty(prop, null) != null) {
+                return dbname.substring(i + 1); // the stripped database name
+            }
+        }
+        return dbname; // the unmodified database name
+    }
 
 	/**
 	 * Boot database.

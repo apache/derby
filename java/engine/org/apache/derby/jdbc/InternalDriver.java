@@ -224,9 +224,9 @@ public abstract class InternalDriver implements ModuleControl {
 					}
 
 					// check for shutdown privileges
-                    // Disabled until more of the patch can be applied.
+					// DERBY-3495: uncomment to enable system privileges checks
 					//final String user = IdUtil.getUserNameFromURLProps(finfo);
-                    //checkShutdownPrivileges(user);
+					//checkShutdownPrivileges(user);
 
 					Monitor.getMonitor().shutdown();
 
@@ -268,7 +268,7 @@ public abstract class InternalDriver implements ModuleControl {
      * @throws AccessControlException if permissions are missing
      * @throws Exception if the privileges check fails for some other reason
      */
-    abstract void checkSystemPrivileges(String user,
+    abstract public void checkSystemPrivileges(String user,
                                                Permission perm)
         throws Exception;
 

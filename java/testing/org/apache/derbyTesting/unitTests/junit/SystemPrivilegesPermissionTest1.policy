@@ -21,30 +21,10 @@
 //     with the NetworkServerControl start command
 
 // PLEASE NOTE WHEN EDITING: This policy file is almost identical to
-//     SystemPrivilegesPermissionTest1.policy
+//     SystemPrivilegesPermissionTest.policy
 // except for the SystemPrincipal authorization grants.  The duplicity of
 // information cannot be avoided unless there's an automated generation of
 // policy files as proposed by DERBY-3547 (or a policy include mechanism).
-
-// Specific test authorizations for System Privileges
-grant principal org.apache.derby.authentication.SystemPrincipal "AUTHORIZEDSYSTEMUSER" {
-  permission org.apache.derby.security.SystemPermission "server", "shutdown";
-  permission org.apache.derby.security.DatabasePermission "directory:*", "create";
-  permission org.apache.derby.security.DatabasePermission "directory:level0/level1/-", "create";
-  permission org.apache.derby.security.DatabasePermission "directory:/*", "create";
-  permission org.apache.derby.security.DatabasePermission "directory:/level0/level1/-", "create";
-};
-
-// Specific test authorizations for System Privileges
-grant principal org.apache.derby.authentication.SystemPrincipal "SUPERUSER" {
-  permission org.apache.derby.security.SystemPermission "server", "shutdown";
-  permission org.apache.derby.security.DatabasePermission "directory:<<ALL FILES>>", "create";
-};
-
-// Specific test authorizations for System Privileges
-grant principal org.apache.derby.authentication.SystemPrincipal * {
-  permission org.apache.derby.security.DatabasePermission "directory:dir", "create";
-};
 
 //
 // Permissions for the tests (derbyTesting.jar)

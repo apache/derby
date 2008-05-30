@@ -26,9 +26,11 @@ import java.security.PrivilegedAction;
 import java.security.PrivilegedExceptionAction;
 import java.security.PrivilegedActionException;
 import java.security.AccessController;
+import org.apache.derby.iapi.util.StringUtil;
 
 import java.util.Set;
 import java.util.HashSet;
+import java.util.Locale;
 
 import java.io.File;
 import java.io.IOException;
@@ -119,7 +121,7 @@ final public class DatabasePermission extends Permission {
      */
     static protected final Set LEGAL_ACTIONS = new HashSet();
     static {
-        // when adding new actions, check method: implies(Permission)
+        // when adding new actions, check: implies(Permission), getActions()
         LEGAL_ACTIONS.add(CREATE);
     };
 
@@ -231,18 +233,14 @@ final public class DatabasePermission extends Permission {
             throw new IllegalArgumentException("actions can't be empty");
         }
 
-        // splitting the comma-separated list into the individual actions
-        // may throw a java.util.regex.PatternSyntaxException, which is a
-        // java.lang.IllegalArgumentException, hence directly applicable
-        final String[] s = actions.split(",");
-
         // check for any illegal actions
+        actions = actions.toLowerCase(Locale.ENGLISH);
+        final String[] s = StringUtil.split(actions, ',');
         for (int i = 0; i < s.length; i++) {
             final String action = s[i].trim();
             if (!LEGAL_ACTIONS.contains(action)) {
                 // report illegal action
                 final String msg = "Illegal action '" + action + "'";
-                //System.out.println("DatabasePermission: " + msg);
                 throw new IllegalArgumentException(msg);
             }
         }
@@ -270,7 +268,6 @@ final public class DatabasePermission extends Permission {
         // check URL's protocol scheme and initialize path
         if (!url.startsWith(URL_PROTOCOL_DIRECTORY)) {
             final String msg = "Unsupported protocol in URL '" + url + "'";
-            //System.out.println("DatabasePermission: " + msg);
             throw new IllegalArgumentException(msg);
         }
         String p = url.substring(URL_PROTOCOL_DIRECTORY.length());
@@ -376,9 +373,6 @@ final public class DatabasePermission extends Permission {
      * @see Permission#implies(Permission)
      */
     public boolean implies(Permission p) {
-        //System.out.println("this = " + this);
-        //System.out.println("that = " + p);
-
         // can only imply other DatabasePermissions
         if (!(p instanceof DatabasePermission)) {
             return false;

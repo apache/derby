@@ -40,7 +40,7 @@ import javax.security.auth.Subject;
 
 import org.apache.derby.authentication.SystemPrincipal;
 import org.apache.derby.security.SystemPermission;
-//import org.apache.derby.security.DatabasePermission;
+import org.apache.derby.security.DatabasePermission;
 
 import org.apache.derby.iapi.util.IdUtil;
 import org.apache.derby.iapi.error.StandardException;
@@ -51,10 +51,16 @@ import org.apache.derby.iapi.error.StandardException;
 public class SystemPrivilegesPermissionTest extends BaseTestCase {
 
     /**
-     * This test's policy file.
+     * The policy file name for the subject authorization tests.
      */
     static private String POLICY_FILE_NAME
         = "org/apache/derbyTesting/unitTests/junit/SystemPrivilegesPermissionTest.policy";
+
+    /**
+     * The policy file name for the DatabasePermission API test.
+     */
+    static private String POLICY_FILE_NAME1
+        = "org/apache/derbyTesting/unitTests/junit/SystemPrivilegesPermissionTest1.policy";
 
     /**
      * Some directory paths for testing DatabasePermissions.
@@ -151,19 +157,38 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
      * @throws Exception
      */
     public static Test suite() {
-        TestSuite suite = new TestSuite(
-                SystemPrivilegesPermissionTest.class,
-                "SystemPrivilegesPermissionTest");
-        
-        if (SecurityManagerSetup.JVM_HAS_SUBJECT_AUTHORIZATION)
-        {
+        // this suite cannot be constructed with automatic test extraction
+        // (by passing a class argument); instead, the tests need to be added
+        // manually since some of them require their own policy file
+        TestSuite suite = new TestSuite("SystemPrivilegesPermissionTest");
+
+        // add API tests for the basic security framework classes
+        suite.addTest(
+            new SystemPrivilegesPermissionTest("testSystemPrincipal"));
+        suite.addTest(
+            new SystemPrivilegesPermissionTest("testSystemPermission"));
+        // the DatabasePermission test attempts to canonicalize various
+        // directory path names and requires an all-files-read-permission,
+        // which is not granted by default derby_tests.policy
+        suite.addTest(new SecurityManagerSetup(
+            new SystemPrivilegesPermissionTest("testDatabasePermission"),
+            POLICY_FILE_NAME1));
+
+        // add authorization tests for security permissions; requires
+        // class javax.security.auth.Subject, which is not available
+        // on all JVM platforms
+        if (SecurityManagerSetup.JVM_HAS_SUBJECT_AUTHORIZATION) {
             suite.addTest(new SecurityManagerSetup(
-                new SystemPrivilegesPermissionTest("policyTestSystemGrants"),
-                POLICY_FILE_NAME));
+                new SystemPrivilegesPermissionTest("policyTestSystemPermissionGrants"),
+                     POLICY_FILE_NAME));
+            suite.addTest(new SecurityManagerSetup(
+                new SystemPrivilegesPermissionTest("policyTestDatabasePermissionGrants"),
+                     POLICY_FILE_NAME));
         }
+
         return suite;
     }
-    
+
     /**
      * Tests SystemPrincipal.
      */
@@ -304,19 +329,21 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
         }
     }
     
-    public void policyTestSystemGrants() {
-
-        // test SystemPermission for authorized user against policy file
-        
-        Permission shutdown = new SystemPermission(
+    /**
+     * Tests SystemPermissions against the Policy.
+     */
+    public void policyTestSystemPermissionGrants() {
+        final Permission shutdown
+            = new SystemPermission(
                 SystemPermission.SERVER,
                 SystemPermission.SHUTDOWN);
         
+        // test SystemPermission for authorized user
         final SystemPrincipal authorizedUser
             = new SystemPrincipal("authorizedSystemUser");
         execute(authorizedUser, new ShutdownAction(shutdown), true);
         
-        // test SystemPermission for unauthorized user against policy file
+        // test SystemPermission for unauthorized user
         final SystemPrincipal unAuthorizedUser
             = new SystemPrincipal("unAuthorizedSystemUser");
         execute(unAuthorizedUser, new ShutdownAction(shutdown), false);
@@ -324,10 +351,8 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
     
     /**
      * Tests DatabasePermission.
-     */
-   
-    public void XXtestDatabasePermission() throws IOException {
- /*********************************************
+     */   
+    public void testDatabasePermission() throws IOException {
         // test DatabasePermission with null url
         try {
             new DatabasePermission(null, DatabasePermission.CREATE);
@@ -351,7 +376,6 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
         } catch (IllegalArgumentException ex) {
             // expected exception
         }
-***********************************************/
         
         // this test's commented out because it's platform-dependent
         // (no reliable way to make it pass on Unix)
@@ -365,7 +389,7 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
         //} catch (IOException ex) {
         //    // expected exception
         //}
-/**********************************************
+
         // test DatabasePermission with null actions
         try {
             new DatabasePermission("directory:dir", null);
@@ -484,9 +508,22 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
         checkImplies(absDirPathPerms, inclPerms, allFalse);
         checkImplies(inclPerms, absDirPathAliasPerms, allTrue);
         checkImplies(absDirPathAliasPerms, inclPerms, allFalse);
+    }
+
+    /**
+     * Tests DatabasePermissions against the Policy.
+     */
+    public void policyTestDatabasePermissionGrants() throws IOException {
+        final DatabasePermission[] relDirPathPerms
+            = new DatabasePermission[relDirPaths.length];
+        for (int i = 0; i < relDirPaths.length; i++) {
+            relDirPathPerms[i]
+                = new DatabasePermission(relDirPaths[i],
+                                         DatabasePermission.CREATE);
+        }
 
         // test DatabasePermission for unauthorized, authorized, and
-        // all-authorized users against policy file
+        // all-authorized users
         final int[] singleLocPaths = { 2, 3, 6, 7 };
         final SystemPrincipal authorizedUser
             = new SystemPrincipal("authorizedSystemUser");
@@ -504,7 +541,7 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
                     new CreateDatabaseAction(relDirPathPerms[j]), true);
         }
 
-        // test DatabasePermission for any user against policy file
+        // test DatabasePermission for any user
         final SystemPrincipal anyUser
             = new SystemPrincipal("anyUser");
         final DatabasePermission dbPerm
@@ -512,7 +549,6 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
                                      DatabasePermission.CREATE);
         execute(anyUser,
                 new CreateDatabaseAction(dbPerm), true);
-***********************************************/
     }
 
     /**
@@ -544,7 +580,6 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
     /**
      * Tests DatabasePermission.getName() and .getActions().
      */
-/************88
     private void checkNameAndActions(DatabasePermission[] dbperm,
                                      String[] dbpath)
         throws IOException {
@@ -557,7 +592,6 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
                          DatabasePermission.CREATE, dbp.getActions());
         }
     }
-***************/
 
     /**
      * Tests DatabasePermission.hashCode() and .equals().
@@ -705,7 +739,7 @@ public class SystemPrivilegesPermissionTest extends BaseTestCase {
             return IdUtil.getUserAuthorizationId(name);
         } catch (StandardException se) {
             throw new IllegalArgumentException(se.getMessage());
-		}
+        }
     }
 
     /**
