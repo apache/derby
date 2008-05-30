@@ -4628,4 +4628,21 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     public static int getpc4b() {
         return 4;
     }
+
+    /**
+     * Reading of DatabaseMetaData obtained earlier, after a connection
+     * is closed.
+     */
+    public void testDMDconnClosed() throws SQLException {
+        ResultSet rs_ = getConnection().getMetaData().
+        getTables("%","%","%",null); // should work
+        getConnection().close();
+        try {
+            //should throw exception since the connection is closed
+            rs_.next();
+            fail("No Exception throw when getting metadata.");
+        } catch(SQLException sqle) {
+            assertSQLState("XCL16", sqle);
+        }
+    }
 }
