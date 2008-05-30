@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLWarning;
+import java.util.Properties;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -13,6 +14,9 @@ import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.RuntimeStatisticsParser;
+import org.apache.derbyTesting.junit.SQLUtilities;
+import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /*
@@ -45,17 +49,18 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
     }
 
     public static Test suite() {
+        Properties systemProperties = new Properties();
+        systemProperties.setProperty("derby.optimizer.noTimeout","true");
         TestSuite suite = new TestSuite("predicatePushdown Test");
-        suite.addTest(new CleanDatabaseTestSetup(TestConfiguration
-                .embeddedSuite(PredicatePushdownTest.class)));
+        suite.addTest(new SystemPropertyTestSetup(new CleanDatabaseTestSetup(TestConfiguration
+                .embeddedSuite(PredicatePushdownTest.class)),systemProperties));
         return suite;
     }
 
     public void test_predicatePushdown() throws Exception {
         ResultSet rs = null;
         ResultSetMetaData rsmd;
-        SQLWarning sqlWarn = null;
-
+       
         PreparedStatement pSt;
         CallableStatement cSt;
         Statement st = createStatement();
@@ -153,19 +158,23 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
         // tables or else we have relatively small tables. Start
         // by checking the case of small (~20 row) tables. We
         // should see hash joins and table scans in ALL of these
-        // cases. call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1)
-        // maximumdisplaywidth 20000 Basic cases.
+        // cases. 
+        st.execute("CALL SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1)");
+       
+      
+        
 
         rs = st.executeQuery("select * from V1, V2 where V1.j = V2.b");
 
         expColNames = new String[] { "I", "J", "A", "B" };
         JDBC.assertColumnNames(rs, expColNames);
-
+        
         expRS = new String[][] { { "1", "2", "2", "2" }, { "2", "4", "4", "4" } };
 
         JDBC.assertFullResultSet(rs, expRS, true);
-
-        // values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS()
+        RuntimeStatisticsParser p = SQLUtilities.getRuntimeStatisticsParser(st);
+        assertTrue("Expected table scan", p.usedTableScan());
+        assertTrue("Expected hash join", p.usedHashJoin());
 
         rs = st.executeQuery("select * from V2, V1 where V1.j = V2.b");
 
@@ -175,6 +184,9 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
         expRS = new String[][] { { "2", "2", "1", "2" }, { "4", "4", "2", "4" } };
 
         JDBC.assertFullResultSet(rs, expRS, true);
+        p = SQLUtilities.getRuntimeStatisticsParser(st);
+        assertTrue("Expected table scan", p.usedTableScan());
+        assertTrue("Expected hash join", p.usedHashJoin());
 
         // Nested unions.
 
@@ -194,8 +206,10 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
                 { "4", "8", "4", "4" }, { "4", "8", "4", "16" } };
 
         JDBC.assertFullResultSet(rs, expRS, true);
+        p = SQLUtilities.getRuntimeStatisticsParser(st);
+        assertTrue("Expected table scan", p.usedTableScan());
+        assertTrue("Expected hash join", p.usedHashJoin());
 
-        // values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS() UNION ALLs.
 
         rs = st
                 .executeQuery("select * from (select * from t1 union all select * "
@@ -214,6 +228,9 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
                 { "4", "-8", "4", "16" } };
 
         JDBC.assertFullResultSet(rs, expRS, true);
+        p = SQLUtilities.getRuntimeStatisticsParser(st);
+        assertTrue("Expected table scan", p.usedTableScan());
+        assertTrue("Expected hash join", p.usedHashJoin());
 
         rs = st
                 .executeQuery("select * from (select * from t1 union select * from "
@@ -230,8 +247,10 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
                 { "4", "8", "4", "4" }, { "4", "8", "4", "16" } };
 
         JDBC.assertFullResultSet(rs, expRS, true);
+        p = SQLUtilities.getRuntimeStatisticsParser(st);
+        assertTrue("Expected table scan", p.usedTableScan());
+        assertTrue("Expected hash join", p.usedHashJoin());
 
-        // values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS()
 
         rs = st
                 .executeQuery("select * from (select * from t1 union all select * "
@@ -250,6 +269,9 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
                 { "4", "-8", "4", "16" } };
 
         JDBC.assertFullResultSet(rs, expRS, true);
+        p = SQLUtilities.getRuntimeStatisticsParser(st);
+        assertTrue("Expected table scan", p.usedTableScan());
+        assertTrue("Expected hash join", p.usedHashJoin());
 
         // Next set of queries tests pushdown of predicates whose
         // column references do not reference base tables--ex. they
@@ -1112,8 +1134,10 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
         expRS = new String[][] { { "1", "2", "2", "2" }, { "2", "4", "4", "4" } };
 
         JDBC.assertFullResultSet(rs, expRS, true);
-
-        // values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS()
+        p = SQLUtilities.getRuntimeStatisticsParser(st);  
+        assertTrue("Expected index scan on T3", p.usedIndexScan("T3"));
+        assertTrue("Expected index scan on T4", p.usedIndexScan("T4"));
+      
 
         rs = st.executeQuery("select * from V2, V1 where V1.j = V2.b");
 
@@ -1123,7 +1147,10 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
         expRS = new String[][] { { "2", "2", "1", "2" }, { "4", "4", "2", "4" } };
 
         JDBC.assertFullResultSet(rs, expRS, true);
-
+        p = SQLUtilities.getRuntimeStatisticsParser(st);  
+        assertTrue("Expected index scan on T3", p.usedIndexScan("T3"));
+        assertTrue("Expected index scan on T4", p.usedIndexScan("T4"));
+      
         // Changes for DERBY-805 don't affect non-join predicates
         // (ex. "IN" or one- sided predicates), but make sure
         // things still behave--i.e. these queries should still
@@ -1138,9 +1165,11 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
         expRS = new String[][] { { "404" } };
 
         JDBC.assertFullResultSet(rs, expRS, true);
-
-        // values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS()
-
+        
+        p = SQLUtilities.getRuntimeStatisticsParser(st);  
+        assertTrue("Expected table scan on T3", p.usedTableScan("T3"));
+        assertTrue("Expected table scan on T4", p.usedTableScan("T4"));
+      
         rs = st.executeQuery("select count(*) from V1, V2 where V1.j > 0");
 
         expColNames = new String[] { "1" };
@@ -1149,7 +1178,11 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
         expRS = new String[][] { { "505" } };
 
         JDBC.assertFullResultSet(rs, expRS, true);
-
+     
+        p = SQLUtilities.getRuntimeStatisticsParser(st);  
+        assertTrue("Expected table scan on T3", p.usedTableScan("T3"));
+        assertTrue("Expected table scan on T4", p.usedTableScan("T4"));
+      
         // Combination of join predicate and non-join predicate:
         // the join predicate should be pushed to V2 (T3 and T4),
         // the non-join predicate should operate as usual.
@@ -1163,8 +1196,12 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
         expRS = new String[][] { { "2", "4", "4", "4" } };
 
         JDBC.assertFullResultSet(rs, expRS, true);
+        p = SQLUtilities.getRuntimeStatisticsParser(st);  
+        assertTrue("Expected index scan on T3", p.usedIndexScan("T3"));
+        assertTrue("Expected index scan on T4", p.usedIndexScan("T4"));
+      
 
-        // values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS() Make
+        //  Make
         // sure predicates are pushed even if the subquery is
         // explicit (as opposed to a view). Should see index scans
         // on T3 and T4.
@@ -1184,6 +1221,9 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
                 { "4", "8", "4", "4" }, { "4", "8", "4", "16" } };
 
         JDBC.assertFullResultSet(rs, expRS, true);
+        p = SQLUtilities.getRuntimeStatisticsParser(st);
+        assertTrue("Expected index scan on T3", p.usedIndexScan("T3"));
+        assertTrue("Expected index scan on T4", p.usedIndexScan("T4"));
 
         // In this case optimizer will consider pushing predicate
         // to X1 but will choose not to because it's cheaper to
@@ -1203,8 +1243,11 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
                 { "4", "8", "4", "4" } };
 
         JDBC.assertFullResultSet(rs, expRS, true);
-
-        // values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS() UNION
+        p = SQLUtilities.getRuntimeStatisticsParser(st);
+        assertTrue("Expected Table Scan ResultSet for T1", p.usedTableScan("T1"));
+        assertTrue("Expected Table Scan ResultSet for T2", p.usedTableScan("T2"));
+        
+        // UNION
         // ALL should behave just like normal UNION. I.e.
         // predicates should still be pushed to T3 and T4.
 
@@ -1226,7 +1269,10 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
         
         
         JDBC.assertFullResultSet(rs, expRS, true);
-        //     values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS()
+        p = SQLUtilities.getRuntimeStatisticsParser(st);
+        assertTrue("Expected index scan on T3", p.usedIndexScan("T3"));
+        assertTrue("Expected index scan on T4", p.usedIndexScan("T4"));
+
         rs = st
                 .executeQuery("select * from (select * from t1 union all select * "
                         + "from t2) x1, (select * from t3 union all select * "
@@ -1244,8 +1290,11 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
                 { "4", "-8", "4", "16" } };
 
         JDBC.assertFullResultSet(rs, expRS, true);
+        p = SQLUtilities.getRuntimeStatisticsParser(st);
+        assertTrue("Expected index scan on T3", p.usedIndexScan("T3"));
+        assertTrue("Expected index scan on T4", p.usedIndexScan("T4"));
 
-        // values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS()
+        
         // Predicate with both sides referencing same UNION isn't a
         // join predicate, so no pushing should happen. So should
         // see regular table scans on all tables.
@@ -1256,7 +1305,12 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
         JDBC.assertColumnNames(rs, expColNames);
  
         JDBC.assertEmpty(rs);
-        //      values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+        p = SQLUtilities.getRuntimeStatisticsParser(st);
+        assertTrue("Expected Table Scan ResultSet for T1", p.usedTableScan("T1"));
+        assertTrue("Expected Table Scan ResultSet for T2", p.usedTableScan("T2"));
+        assertTrue("Expected Table Scan ResultSet for T3", p.usedTableScan("T3"));
+        assertTrue("Expected Table Scan ResultSet for T4", p.usedTableScan("T4"));
+  
         // Pushing predicates should still work even if user
         // specifies explicit column names. In these two queries
         // we push to X2 (T3 and T4).
@@ -1276,8 +1330,10 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
                 { "4", "8", "4", "4" }, { "4", "8", "4", "16" } };
 
         JDBC.assertFullResultSet(rs, expRS, true);
+        p = SQLUtilities.getRuntimeStatisticsParser(st);
+        assertTrue("Expected index scan on T3", p.usedIndexScan("T3"));
+        assertTrue("Expected index scan on T4", p.usedIndexScan("T4"));
 
-        // values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS()
 
         rs = st
                 .executeQuery("select * from (select * from t1 union select * from "
@@ -1294,8 +1350,9 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
                 { "4", "8", "4", "4" }, { "4", "8", "4", "16" }};
         
         JDBC.assertFullResultSet(rs, expRS, true);
-
-        // values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+        p = SQLUtilities.getRuntimeStatisticsParser(st);
+        assertTrue("Expected index scan on T3", p.usedIndexScan("T3"));
+        assertTrue("Expected index scan on T4", p.usedIndexScan("T4"));
 
         // In this query the optimizer will consider pushing, but
         // will find that it's cheaper to do a hash join and thus
@@ -1308,12 +1365,15 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
 
         expColNames = new String[] { "1" };
         JDBC.assertColumnNames(rs, expColNames);
-
+            
         expRS = new String[][] { { "103" } };
 
         JDBC.assertFullResultSet(rs, expRS, true);
+        p = SQLUtilities.getRuntimeStatisticsParser(st);
+        assertTrue("Expected Table Scan ResultSet for T3", p.usedTableScan("T3"));
+        assertTrue("Expected Hash Join",p.usedHashJoin());
 
-        // values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS() If we
+        // If we
         // have nested unions, the predicate should get pushed all
         // the way down to the base table(s) for every level of
         // nesting. Should see index scans for T3 and for _both_
@@ -1336,7 +1396,10 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
         
         
         JDBC.assertFullResultSet(rs, expRS, true);
-       // values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+        p = SQLUtilities.getRuntimeStatisticsParser(st);
+        assertTrue("Expected index scan on T3", p.usedIndexScan("T3"));
+        assertTrue("Expected index scan on T4", p.usedIndexScan("T4"));
+
 
         // Nested unions with non-join predicates should work as
         // usual (no change with DERBY-805). So should see scalar
@@ -1354,8 +1417,10 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
                 { "3", "6" }, { "4", "-8" }, { "4", "8" }, { "5", "10" } };
 
         JDBC.assertFullResultSet(rs, expRS, true);
-
-        // values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS() In this
+        p = SQLUtilities.getRuntimeStatisticsParser(st);
+        // Expect to see scalar qualifiers with <= operator for four scans.
+        p.findString("Operator: <=", 4);
+        //  In this
         // case there are no qualifiers, but the restriction is
         // enforced at the ProjectRestrictNode level. That hasn't
         // changed with DERBY-805.
@@ -1372,7 +1437,12 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
 
         JDBC.assertFullResultSet(rs, expRS, true);
         
-       //values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS()
+        p = SQLUtilities.getRuntimeStatisticsParser(st);
+        assertTrue("Expected Table Scan ResultSet for T1", p.usedTableScan("T1"));
+        assertTrue("Expected Table Scan ResultSet for T2", p.usedTableScan("T2"));
+        assertTrue("Expected Table Scan ResultSet for T3", p.usedTableScan("T3"));
+        assertTrue("Expected Table Scan ResultSet for T4", p.usedTableScan("T4"));
+  
         // Predicate pushdown should work with explicit use of
         // "inner join" just like it does for implicit join. So
         // should see index scans on T3 and T4.
@@ -1388,9 +1458,12 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
         expRS = new String[][] { { "1", "2", "2", "2" }, { "2", "4", "4", "4" } };
 
         JDBC.assertFullResultSet(rs, expRS, true);
+        p = SQLUtilities.getRuntimeStatisticsParser(st);
+        assertTrue("Expected index scan on T3", p.usedIndexScan("T3"));
+        assertTrue("Expected index scan on T4", p.usedIndexScan("T4"));
 
-        // values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS() Can't
-        // push predicates into VALUES clauses. Predicate should
+        
+        // Can't push predicates into VALUES clauses. Predicate should
         // end up at V2 (T3 and T4).
 
         rs = st.executeQuery("select * from ( select i,j from t2 union values "
@@ -1410,8 +1483,12 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
                 { "4", "8", "4", "4" }, { "4", "8", "4", "16" }};
 
         JDBC.assertFullResultSet(rs, expRS, true);
-        
-        // values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS()
+
+        p = SQLUtilities.getRuntimeStatisticsParser(st);
+        assertTrue("Expected index scan on T3", p.usedIndexScan("T3"));
+        assertTrue("Expected index scan on T4", p.usedIndexScan("T4"));
+
+
         // Can't push predicates into VALUES clauses. Optimizer
         // might consider pushing but shouldn't do it; in the end
         // we'll do a hash join between X1 and T2.
@@ -1431,7 +1508,9 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
 
         JDBC.assertFullResultSet(rs, expRS, true);
 
-        // values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS() Can't
+        p = SQLUtilities.getRuntimeStatisticsParser(st);
+        assertTrue("Expected Hash Join", p.usedHashJoin());
+        // Can't
         // push predicates into VALUES clause. We'll try to push
         // it to X1, but it will only make it to T4; it won't make
         // it to T3 because the "other side" of the union with T3
@@ -1460,8 +1539,9 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
                 { "4", "8", "4", "4" }, { "4", "8", "4", "5" },
                 { "4", "8", "4", "16" }, { "5", "10", "5", "6" }};
         JDBC.assertFullResultSet(rs, expRS, true);
-        
-       //values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+        p = SQLUtilities.getRuntimeStatisticsParser(st);
+        assertTrue("Expected table scan on T3", p.usedTableScan("T3"));
+        assertTrue("Expected index scan on T4", p.usedIndexScan("T4"));
 
         
         // Make sure optimizer is still considering predicates for
@@ -1485,7 +1565,10 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
 
         JDBC.assertFullResultSet(rs, expRS, true);
 
-        // values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS() When we
+        p = SQLUtilities.getRuntimeStatisticsParser(st);
+        assertTrue("Expected hash join", p.usedHashJoin());
+
+        // When we
         // have very deeply nested union queries, make sure
         // predicate push- down logic still works (esp. the scoping
         // logic). These queries won't return any results, but the
@@ -1542,8 +1625,15 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
         expRS = new String[][] { { "909" } };
 
         JDBC.assertFullResultSet(rs, expRS, true);
+        p = SQLUtilities.getRuntimeStatisticsParser(st);
+        assertTrue("Expected table scan on T1", p.usedTableScan("T1"));
+        assertTrue("Expected table scan on T2", p.usedTableScan("T2"));
+        assertTrue("Expected table scan on T3", p.usedTableScan("T3"));
+        assertTrue("Expected index scan on T3", p.usedIndexScan("T3"));
+        assertTrue("Expected table scan on T4", p.usedTableScan("T4"));
+        assertTrue("Expected index scan on T4", p.usedIndexScan("T4"));
 
-        // values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS() Here we
+        // Here we
         // should see index scans for both instances of T3 and for
         // both instances of T4.
 
@@ -1558,8 +1648,10 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
 
         expRS = new String[][] { { "9" }};
         JDBC.assertFullResultSet(rs, expRS, true);
+        p = SQLUtilities.getRuntimeStatisticsParser(st);
+        assertTrue("Expected index scan on T3", p.usedIndexScan("T3"));
+        assertTrue("Expected index scan on T4", p.usedIndexScan("T4"));
 
-        //values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS()
 
         // Predicates pushed from outer queries shouldn't
         // interfere with inner predicates for subqueries. Mostly
@@ -1592,8 +1684,9 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
                 { "3", "6", "6", "24" }, { "5", "10", "10", "40" } };
 
         JDBC.assertFullResultSet(rs, expRS, true);
-
-        // values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS() Outer
+        p = SQLUtilities.getRuntimeStatisticsParser(st);
+        assertTrue("Expected hash join", p.usedHashJoin());
+        //  Outer
         // predicate should either get pushed to V2 (T3 and T4) or
         // else used for a hash join; similarly, inner predicate
         // should either get pushed to T3 or else used for hash
@@ -1613,8 +1706,9 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
                 { "4", "-8", "4", "16" }, { "4", "8", "4", "16" }};
         
         JDBC.assertFullResultSet(rs, expRS, true);
-        
-        // values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+        p = SQLUtilities.getRuntimeStatisticsParser(st);
+        assertTrue("Expected hash join", p.usedHashJoin());
+ 
 
         // Inner predicates treated as restrictions, outer
         // predicate either pushed to X2 (T2 and T1) or used for
@@ -1632,8 +1726,9 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
         expRS = new String[][] { { "1", "2", "2", "4" } };
 
         JDBC.assertFullResultSet(rs, expRS, true);
-
-        // values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS()
+        p = SQLUtilities.getRuntimeStatisticsParser(st);
+        assertTrue("Expected hash join", p.usedHashJoin());
+ 
         // Following queries deal with nested subqueries, which
         // deserve extra testing because "best paths" for outer
         // queries might not agree with "best paths" for inner
@@ -1652,8 +1747,11 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
         expRS = new String[][] { { "2" }};
 
         JDBC.assertFullResultSet(rs, expRS, true);
+        p = SQLUtilities.getRuntimeStatisticsParser(st);
+        assertTrue("Expected index scan on T3", p.usedIndexScan("T3"));
+        assertTrue("Expected index scan on T4", p.usedIndexScan("T4"));
 
-       // values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS(); 
+ 
         // Multiple subqueries but NO UNIONs. All predicates are
         // used for joins at their current level (no pushing).
 
@@ -1664,8 +1762,13 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
         expColNames = new String[] { "I", "P" };
         JDBC.assertColumnNames(rs, expColNames);
         JDBC.assertDrainResults(rs, 0);
-
-                // anything.
+        p = SQLUtilities.getRuntimeStatisticsParser(st);
+        assertTrue("Expected hash join", p.usedHashJoin());
+        assertTrue("Expected table scan on T1", p.usedTableScan("T1"));
+        assertTrue("Expected index row to base row for T3", p.usedIndexRowToBaseRow("T3"));
+        
+        // Multiple, non-flattenable subqueries, but NO UNIONs.  Shouldn't push
+        // anything.
 
         rs = st
                 .executeQuery("select x1.j, x2.b from (select distinct i,j from "
@@ -1679,9 +1782,12 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
                 { "8", "4" } };
 
         JDBC.assertFullResultSet(rs, expRS, true);
-
-        // values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS()
-
+        p = SQLUtilities.getRuntimeStatisticsParser(st);
+        assertTrue("Expected distinct scan on T1", p.usedDistinctScan("T1"));
+        assertTrue("Expected distinct scan  T3", p.usedDistinctScan("T3"));
+    
+       
+       
         rs = st
                 .executeQuery("select x1.j, x2.b from (select distinct i,j from "
                         + "t1) x1, (select distinct a,b from t3) x2, (select "
@@ -1695,8 +1801,12 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
                 { "4", "2" }, { "6", "3" }, { "6", "3" }, { "8", "4" },
                 { "8", "4" }};
         JDBC.assertFullResultSet(rs, expRS, true);
-       
-        // values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+        p = SQLUtilities.getRuntimeStatisticsParser(st);
+        assertTrue("Expected distinct scan on T1", p.usedDistinctScan("T1"));
+        assertTrue("Expected distinct scan  T2", p.usedDistinctScan("T2"));
+        assertTrue("Expected distinct scan on T3", p.usedDistinctScan("T3"));
+        assertTrue("Expected distinct scan  T4", p.usedDistinctScan("T4"));
+   
         // Multiple subqueries that are UNIONs. Outer-most
         // predicate X0.b = X2.j can be pushed to union X0 but NOT
         // to subquery X2. Inner predicate T6.p = X1.i is eligible
@@ -1714,8 +1824,12 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
         expColNames = new String[] { "A", "I" };
         JDBC.assertColumnNames(rs, expColNames);
         JDBC.assertDrainResults(rs, 0);
+        p = SQLUtilities.getRuntimeStatisticsParser(st);
+        assertTrue("Expected hash join", p.usedHashJoin());
+        assertTrue("Expected index scan on T3", p.usedIndexScan("T3"));
+        assertTrue("Expected index scan on T4", p.usedIndexScan("T4"));
 
-        // values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS() Same as
+        // Same as
         // above but without the inner predicate (so no hash on T6).
 
         rs = st
@@ -1730,7 +1844,9 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
     
 
         JDBC.assertEmpty(rs);
-        //values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS(); 
+        p = SQLUtilities.getRuntimeStatisticsParser(st);
+        assertTrue("Expected index scan on T3", p.usedIndexScan("T3"));
+        assertTrue("Expected index scan on T4", p.usedIndexScan("T4"));
 
         // Same as above, but without the outer predicate. Should
         // see table scan on T3 and T4 (because nothing is pushed).
@@ -1745,7 +1861,10 @@ public final class PredicatePushdownTest extends BaseJDBCTestCase {
         JDBC.assertColumnNames(rs, expColNames);
         JDBC.assertDrainResults(rs, 0);
 
-        // values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS()
+        p = SQLUtilities.getRuntimeStatisticsParser(st);
+        assertTrue("Expected table scan on T3", p.usedTableScan("T3"));
+        assertTrue("Expected table scan on T4", p.usedTableScan("T4"));
+
         // Additional tests with VALUES clauses. Mostly just
         // checking to make sure these queries compile and execute,
         // and to ensure that all predicates are enforced even if

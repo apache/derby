@@ -37,7 +37,6 @@ lang/outerjoin.sql
 lang/outparams.java
 lang/paramij.sql
 lang/partdml.sql
-lang/predicatePushdown.sql
 lang/predicatesIntoViews.sql
 lang/refActions.sql
 lang/refActions2.sql

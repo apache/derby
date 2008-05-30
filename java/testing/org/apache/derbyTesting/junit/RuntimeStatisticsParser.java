@@ -74,6 +74,7 @@ public class RuntimeStatisticsParser {
 
         qualifiers = findQualifiers();
     }
+    
 
     /**
      * Class which represents a qualifier used in a scan.
@@ -160,6 +161,26 @@ public class RuntimeStatisticsParser {
     public boolean usedTableScan() {
     	return tableScan;
     }
+    
+    /**
+     * @param tableName
+     * @return true if a Table Scan ResultSet was used for tableName
+     */
+    public boolean usedTableScan(String tableName){
+        return (statistics.indexOf("Table Scan ResultSet for " + 
+                    tableName)!= -1);
+    }
+    /**
+     * @param tableName
+     * @return true if an Index Scan ResultSet was used for tableName
+     */
+    public boolean usedIndexScan(String tableName){
+        return (statistics.indexOf("Index Scan ResultSet for " + 
+                    tableName)!= -1);
+    }
+    
+    
+    
 
     /**
      * Return whether or not an index scan result set was used in the query.
@@ -175,6 +196,30 @@ public class RuntimeStatisticsParser {
     public boolean usedIndexRowToBaseRow() {
         return indexRowToBaseRow;
     }
+    
+    /**
+     * @param tableName
+     * @return true if Index Row to Base Row ResultSet was used for tableName
+     */
+    public boolean usedIndexRowToBaseRow(String tableName) {
+       
+            return (statistics.indexOf("Index Row to Base Row ResultSet for " + 
+                        tableName)!= -1);
+       
+    }
+    
+    
+    /**
+     * @param tableName
+     * @return true if Used Distinct Scan ResultSet for tablenName
+     */
+    public boolean usedDistinctScan(String tableName) {
+        return (statistics.indexOf("Distinct Scan ResultSet for " + 
+                tableName)!= -1);
+
+    }
+   
+    
     
     /**
      * Return whether or not the query involved a sort that eliminated
@@ -202,6 +247,8 @@ public class RuntimeStatisticsParser {
     public boolean hasLessThanQualifier() {
         return qualifiers.contains(new Qualifier("<", false));
     }
+  
+    
 
     /**
      * Return whether or not the query plan includes a line of the form
@@ -219,4 +266,38 @@ public class RuntimeStatisticsParser {
         return (statistics.indexOf("Number of rows qualified=" +
             qualRows + "\n") != -1);
     }
+    
+    /**
+     * @return true if a hash join was used
+     */
+    public boolean usedHashJoin()
+    {
+        return (statistics.indexOf("Hash Join ResultSet") != -1);
+    }
+
+    /**
+     * Search the RuntimeStatistics for a string.  It must occur
+     * at least instances times.
+     * @param stringToFind
+     * @param instances
+     * @return true if stringToFind is found instances times.
+     */
+    public boolean findString(String stringToFind, int instances)
+    {
+        int foundCount=0;
+        int currentOffset=0;
+        String stat = statistics;
+        for (int i = 0; i < instances; i++) {
+            currentOffset = stat.indexOf(stringToFind);
+            if (currentOffset != -1) {
+                foundCount++;
+                stat = stat.substring(currentOffset + stringToFind.length());
+            } else {    
+                break;
+            }   
+            }    
+            return (foundCount >=instances);
+                
+        }
 }
+    
