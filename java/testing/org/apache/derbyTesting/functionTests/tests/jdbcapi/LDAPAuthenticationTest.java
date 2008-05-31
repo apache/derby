@@ -107,9 +107,10 @@ public class LDAPAuthenticationTest extends BaseJDBCTestCase {
                 "-DderbyTesting.dnString=myJNDIstring");
 
         TestSuite suite = new TestSuite("LDAPAuthenticationTest");
-        suite.addTest(baseSuite("LDAPAuthenticationTest:embedded", "testConnection"));
+        suite.addTest(baseSuite("LDAPAuthenticationTest:embedded",
+            "testLDAPConnection"));
         suite.addTest(TestConfiguration.clientServerDecorator(
-                baseSuite("LDAPAuthenticationTest:client", "testConnection")));
+            baseSuite("LDAPAuthenticationTest:client", "testLDAPConnection")));
         Test test = decorateWithPolicy(suite);
         return test;            
     }
@@ -201,7 +202,7 @@ public class LDAPAuthenticationTest extends BaseJDBCTestCase {
         return value;
     }    
      
-    public void testConnection() throws SQLException {
+    public void testLDAPConnection() throws SQLException {
         // setup 
         String dbName = TestConfiguration.getCurrent().getDefaultDatabaseName();
         DataSource ds = JDBCDataSource.getDataSource();

@@ -149,6 +149,7 @@ public class _Suite extends BaseTestCase  {
             else
                 suite.addTest(LDAPAuthenticationTest.suite());
             suite.addTest(InvalidLDAPServerAuthenticationTest.suite());
+            suite.addTest(XAJNDITest.suite());
         }
 
         return suite;
