@@ -141,15 +141,17 @@ public class _Suite extends BaseTestCase  {
             // functionality. 
             // Also, LDAPAuthentication needs properties passed in or is 
             // pointless (unless we can find a test LDAP Server)
-            String ldapUser=getSystemProperty("derbyTesting.ldapServer");
-            if (ldapUser == null || ldapUser.length() < 1)
-                suite.addTest(new TestSuite("LDAPAuthenticationTest requires properties " +
-                        "derbyTesting." +
-                "[ldapServer, ldapPort ldapUser, ldapPassword, dnString]"));
+            String ldapServer=getSystemProperty("derbyTesting.ldapServer");
+            if (ldapServer == null || ldapServer.length() < 1)
+                suite.addTest(new TestSuite(
+                    "LDAPAuthenticationTest and XAJNDITest require " +
+                    "derbyTesting.ldap* properties."));
             else
+            {
                 suite.addTest(LDAPAuthenticationTest.suite());
+                suite.addTest(XAJNDITest.suite());
+            }
             suite.addTest(InvalidLDAPServerAuthenticationTest.suite());
-            suite.addTest(XAJNDITest.suite());
         }
 
         return suite;
