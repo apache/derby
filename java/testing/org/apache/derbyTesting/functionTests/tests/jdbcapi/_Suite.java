@@ -132,11 +132,25 @@ public class _Suite extends BaseTestCase  {
             //truncate test for clob
             suite.addTest (ClobTruncateTest.suite());
 
-	    //JSR169 does not support ParameterMetaData
-	    suite.addTest(ParameterMetaDataJdbc30Test.suite());
+            //JSR169 does not support ParameterMetaData
+            suite.addTest(ParameterMetaDataJdbc30Test.suite());
             suite.addTest(CacheSessionDataTest.suite());
+
+            // LDAPAuthentication and InvalidLDAPSrvAuth cannot run with JSR169
+            // implementation because of missing support for authentication 
+            // functionality. 
+            // Also, LDAPAuthentication needs properties passed in or is 
+            // pointless (unless we can find a test LDAP Server)
+            String ldapUser=getSystemProperty("derbyTesting.ldapServer");
+            if (ldapUser == null || ldapUser.length() < 1)
+                suite.addTest(new TestSuite("LDAPAuthenticationTest requires properties " +
+                        "derbyTesting." +
+                "[ldapServer, ldapPort ldapUser, ldapPassword, dnString]"));
+            else
+                suite.addTest(LDAPAuthenticationTest.suite());
+            suite.addTest(InvalidLDAPServerAuthenticationTest.suite());
         }
-		
+
         return suite;
 	}
 }
