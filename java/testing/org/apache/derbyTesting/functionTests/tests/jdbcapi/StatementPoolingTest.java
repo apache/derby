@@ -142,10 +142,7 @@ public class StatementPoolingTest
         if (JDBC.vmSupportsJDBC4() && !expectedName.endsWith("40")) {
             expectedName += "40";
         }
-        if (!simpleName.equals(expectedName)) {
-            fail("Expected class name " + expectedName + ", got " +
-                    simpleName);
-        }
+        assertEquals(expectedName, simpleName);
     }
 
     /**
