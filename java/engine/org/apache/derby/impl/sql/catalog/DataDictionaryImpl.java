@@ -1522,7 +1522,8 @@ public final class	DataDictionaryImpl
 						ti,
 						(TupleDescriptor) null,
 						(List) null,
-						false);
+						false,
+						tc);
 	}
 		
 	/**
@@ -1563,7 +1564,8 @@ public final class	DataDictionaryImpl
 						ti,
 						(TupleDescriptor) null,
 						(List) null,
-						false);
+						false,
+						tc);
 	}
 
 
@@ -8042,8 +8044,8 @@ public final class	DataDictionaryImpl
 	 * @param keyRow	The supplied ExecIndexRow for search
 	 * @param ti		The TabInfoImpl to use
 	 * @param parentTupleDescriptor		The parentDescriptor, if applicable.
-	 * @param list		The list to build, if supplied.  If null, then caller expects
-	 *					a single descriptor
+	 * @param list      The list to build, if supplied.  If null, then
+	 *                  caller expects a single descriptor
 	 * @param forUpdate	Whether or not to open the index for update.
 	 *
 	 * @return	The last matching descriptor
@@ -8060,6 +8062,76 @@ public final class	DataDictionaryImpl
 						boolean forUpdate)
 			throws StandardException
 	{
+		// Get the current transaction controller
+		TransactionController tc = getTransactionCompile();
+
+		return getDescriptorViaIndexMinion(indexId,
+										   keyRow,
+										   scanQualifiers,
+										   ti,
+										   parentTupleDescriptor,
+										   list,
+										   forUpdate,
+										   tc);
+	}
+
+	/**
+	 * Return a (single or list of) catalog row descriptor(s) from a
+	 * system table where the access is from the index to the heap.
+	 *
+	 * This overload variant takes an explicit tc, in contrast to the normal
+	 * one which uses the one returned by getTransactionCompile.
+	 *
+	 * @param indexId	The id of the index (0 to # of indexes on table) to use
+	 * @param keyRow	The supplied ExecIndexRow for search
+	 * @param ti		The TabInfoImpl to use
+	 * @param parentTupleDescriptor		The parentDescriptor, if applicable.
+	 * @param list      The list to build, if supplied.  If null, then
+	 *					caller expects a single descriptor
+	 * @param forUpdate	Whether or not to open the index for update.
+	 * @param tc        Transaction controller
+	 *
+	 * @return	The last matching descriptor
+	 *
+	 * @exception StandardException		Thrown on error
+	 */
+	private final TupleDescriptor getDescriptorViaIndex(
+						int indexId,
+						ExecIndexRow keyRow,
+						ScanQualifier [][] scanQualifiers,
+						TabInfoImpl ti,
+						TupleDescriptor parentTupleDescriptor,
+						List list,
+						boolean forUpdate,
+						TransactionController tc)
+			throws StandardException
+	{
+		if (tc == null) {
+			tc = getTransactionCompile();
+		}
+
+		return getDescriptorViaIndexMinion(indexId,
+										   keyRow,
+										   scanQualifiers,
+										   ti,
+										   parentTupleDescriptor,
+										   list,
+										   forUpdate,
+										   tc);
+	}
+
+
+	private final TupleDescriptor getDescriptorViaIndexMinion(
+						int indexId,
+						ExecIndexRow keyRow,
+						ScanQualifier [][] scanQualifiers,
+						TabInfoImpl ti,
+						TupleDescriptor parentTupleDescriptor,
+						List list,
+						boolean forUpdate,
+						TransactionController tc)
+			throws StandardException
+	{
 		CatalogRowFactory		rf = ti.getCatalogRowFactory();
 		ConglomerateController	heapCC;
 		ExecIndexRow	  		indexRow1;
@@ -8067,11 +8139,7 @@ public final class	DataDictionaryImpl
 		ExecRow 				outRow;
 		RowLocation				baseRowLocation;
 		ScanController			scanController;
-		TransactionController	tc;
 		TupleDescriptor			td = null;
-
-		// Get the current transaction controller
-		tc = getTransactionCompile();
 
 		outRow = rf.makeEmptyRow();
 

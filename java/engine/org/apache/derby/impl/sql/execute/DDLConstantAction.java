@@ -27,6 +27,9 @@ import java.util.List;
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.iapi.services.property.PropertyUtil;
+import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
@@ -79,8 +82,8 @@ abstract class DDLConstantAction implements ConstantAction
 	   the passed in schema.
 	 *
 	 * @param dd the data dictionary
-	   @param activation activation
-	   @param schemaName name of the schema
+	 * @param activation activation
+	 * @param schemaName name of the schema
 	 *
 	 * @return the schema descriptor
 	 *
@@ -92,30 +95,97 @@ abstract class DDLConstantAction implements ConstantAction
 						String schemaName)
 		throws StandardException
 	{
-		TransactionController tc = activation.getLanguageConnectionContext().getTransactionExecute();
+		TransactionController tc = activation.
+			getLanguageConnectionContext().getTransactionExecute();
+
 		SchemaDescriptor sd = dd.getSchemaDescriptor(schemaName, tc, false);
 
 		if (sd == null || sd.getUUID() == null) {
-            ConstantAction csca 
+            CreateSchemaConstantAction csca
                 = new CreateSchemaConstantAction(schemaName, (String) null);
 
-            try {
-                csca.executeConstantAction(activation);
-            } catch (StandardException se) {
-                if (se.getMessageId()
-                    .equals(SQLState.LANG_OBJECT_ALREADY_EXISTS)) {
-                    // Ignore "Schema already exists". Another thread has 
-                    // probably created it after we checked for it
-                } else {
-                    throw se;
-                }
-            }
-            
+			// DERBY-48: This operation creates a schema and we don't
+			// want to hold a lock for SYSSCHEMAS for the duration of
+			// the user transaction, so we perform the creation in a
+			// nested transaction if possible.
+			TransactionController useTc    = null;
+			TransactionController nestedTc = null;
+
+			try {
+				nestedTc = tc.startNestedUserTransaction(false);
+				useTc = nestedTc;
+			} catch (StandardException e) {
+				if (SanityManager.DEBUG) {
+					SanityManager.THROWASSERT(
+						"Unexpected: not able to start nested transaction " +
+						"to auto-create schema", e);
+				}
+				useTc = tc;
+			}
+
+			// Try max twice: if nested transaction times out, try
+			// again in the outer transaction because it may be a
+			// self-lock, that is, the outer transaction may hold some
+			// lock(s) that make the nested transaction attempt to set
+			// a write lock time out.  Trying it again in the outer
+			// transaction will then succeed. If the reason is some
+			// other transaction barring us, trying again in the outer
+			// transaction will possibly time out again.
+			//
+			// Also, if creating a nested transaction failed, only try
+			// once in the outer transaction.
+			while (true) {
+				try {
+					csca.executeConstantAction(activation, useTc);
+				} catch (StandardException se) {
+					if (se.getMessageId().equals(SQLState.LOCK_TIMEOUT)) {
+						// We don't test for SQLState.DEADLOCK or
+						// .LOCK_TIMEOUT_LOG here because a) if it is a
+						// deadlock, it may be better to expose it, and b)
+						// LOCK_TIMEOUT_LOG happens when the app has set
+						// derby.locks.deadlockTrace=true, in which case we
+						// don't want to mask the timeout.  So in both the
+						// latter cases we just throw.
+						if (useTc == nestedTc) {
+
+							// clean up after use of nested transaction,
+							// then try again in outer transaction
+							useTc = tc;
+							nestedTc.destroy();
+							continue;
+						}
+					} else if (se.getMessageId()
+							.equals(SQLState.LANG_OBJECT_ALREADY_EXISTS)) {
+						// Ignore "Schema already exists". Another thread has
+						// probably created it after we checked for it
+						break;
+					}
+
+					// We got an non-expected exception, either in
+					// the nested transaction or in the outer
+					// transaction; we had better pass that on
+					if (useTc == nestedTc) {
+						nestedTc.destroy();
+					}
+
+					throw se;
+				}
+				break;
+			}
+
+			// We either succeeded or got LANG_OBJECT_ALREADY_EXISTS.
+			// Clean up if we did this in a nested transaction.
+			if (useTc == nestedTc) {
+				nestedTc.commit();
+				nestedTc.destroy();
+			}
+
 			sd = dd.getSchemaDescriptor(schemaName, tc, true);
 		}
 
 		return sd;
 	}
+
 
 	/**
 	 * Lock the table in exclusive or share mode to prevent deadlocks.

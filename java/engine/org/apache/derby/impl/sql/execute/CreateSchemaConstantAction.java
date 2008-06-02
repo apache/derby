@@ -98,9 +98,35 @@ class CreateSchemaConstantAction extends DDLConstantAction
 	public void	executeConstantAction( Activation activation )
 						throws StandardException
 	{
+		TransactionController tc = activation.
+			getLanguageConnectionContext().getTransactionExecute();
+
+		executeConstantActionMinion(activation, tc);
+	}
+
+	/**
+	 *	This is the guts of the Execution-time logic for CREATE SCHEMA.
+	 *  This is variant is used when we to pass in a tc other than the default
+	 *  used in executeConstantAction(Activation).
+	 *
+	 * @param activation current activation
+	 * @param tc transaction controller
+	 *
+	 * @exception StandardException		Thrown on failure
+	 */
+	public void	executeConstantAction(Activation activation,
+									  TransactionController tc)
+			throws StandardException {
+
+		executeConstantActionMinion(activation, tc);
+	}
+
+	private void executeConstantActionMinion(Activation activation,
+											 TransactionController tc)
+			throws StandardException {
+
 		LanguageConnectionContext lcc = activation.getLanguageConnectionContext();
 		DataDictionary dd = lcc.getDataDictionary();
-		TransactionController tc = lcc.getTransactionExecute();
 		DataDescriptorGenerator ddg = dd.getDataDescriptorGenerator();
 
 		SchemaDescriptor sd = dd.getSchemaDescriptor(schemaName, lcc.getTransactionExecute(), false);

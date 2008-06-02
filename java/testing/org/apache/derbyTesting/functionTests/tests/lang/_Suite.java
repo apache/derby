@@ -109,6 +109,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(SimpleTest.suite());
         suite.addTest(GrantRevokeDDLTest.suite());
         suite.addTest(ReleaseCompileLocksTest.suite());
+        suite.addTest(LazyDefaultSchemaCreationTest.suite());
         suite.addTest(ErrorCodeTest.suite());
         suite.addTest(TimestampArithTest.suite());
         suite.addTest(SpillHashTest.suite());
