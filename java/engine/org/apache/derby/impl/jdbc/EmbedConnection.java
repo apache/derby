@@ -2441,67 +2441,67 @@ public abstract class EmbedConnection implements EngineConnection
 		return (Database) Monitor.findService(Property.DATABASE_MODULE, dbname);
 	}
 
-	/**
-	 * Checks that a user has the system privileges to create a database.
-	 * To perform this check the following policy grants are required
-	 * <ul>
-	 * <li> to run the encapsulated test:
-	 *		permission javax.security.auth.AuthPermission "doAsPrivileged";
-	 * <li> to resolve relative path names:
-	 *		permission java.util.PropertyPermission "user.dir", "read";
-	 * <li> to canonicalize path names:
-	 *		permission java.io.FilePermission "...", "read";
-	 * </ul>
-	 * or a SQLException will be raised detailing the cause.
-	 * <p>
-	 * In addition, for the test to succeed
-	 * <ul>
-	 * <li> the given user needs to be covered by a grant:
-	 *		principal org.apache.derby.authentication.SystemPrincipal "..." {}
-	 * <li> that lists a permission covering the database location:
-	 *		permission org.apache.derby.security.DatabasePermission "directory:...", "create";
-	 * </ul>
-	 * or it will fail with a SQLException detailing the cause.
-	 *
-	 * @param user The user to be checked for database create privileges
-	 * @param dbname the name of the database to create
-	 * @throws SQLException if the privileges check fails
-	 */
-	private void checkDatabaseCreatePrivileges(String user,
-											   String dbname)
-		throws SQLException {
-		// approve action if not running under a security manager
-		if (System.getSecurityManager() == null) {
-			return;
-		}
-		if (dbname == null) {
-			throw new NullPointerException("dbname can't be null");
-		}
+    /**
+     * Checks that a user has the system privileges to create a database.
+     * To perform this check the following policy grants are required
+     * <ul>
+     * <li> to run the encapsulated test:
+     *        permission javax.security.auth.AuthPermission "doAsPrivileged";
+     * <li> to resolve relative path names:
+     *        permission java.util.PropertyPermission "user.dir", "read";
+     * <li> to canonicalize path names:
+     *        permission java.io.FilePermission "...", "read";
+     * </ul>
+     * or a SQLException will be raised detailing the cause.
+     * <p>
+     * In addition, for the test to succeed
+     * <ul>
+     * <li> the given user needs to be covered by a grant:
+     *        principal org.apache.derby.authentication.SystemPrincipal "..." {}
+     * <li> that lists a permission covering the database location:
+     *        permission org.apache.derby.security.DatabasePermission "directory:...", "create";
+     * </ul>
+     * or it will fail with a SQLException detailing the cause.
+     *
+     * @param user The user to be checked for database create privileges
+     * @param dbname the name of the database to create
+     * @throws SQLException if the privileges check fails
+     */
+    private void checkDatabaseCreatePrivileges(String user,
+                                               String dbname)
+        throws SQLException {
+        // approve action if not running under a security manager
+        if (System.getSecurityManager() == null) {
+            return;
+        }
+        if (dbname == null) {
+            throw new NullPointerException("dbname can't be null");
+        }
         
-		// the check
-		try {
-			// raises IOException if dbname is non-canonicalizable
-			final String url
-				= (DatabasePermission.URL_PROTOCOL_DIRECTORY
-				   + stripSubSubProtocolPrefix(dbname));
-			final Permission dp
-				= new DatabasePermission(url, DatabasePermission.CREATE);
+        // the check
+        try {
+            // raises IOException if dbname is non-canonicalizable
+            final String url
+                = (DatabasePermission.URL_PROTOCOL_DIRECTORY
+                   + stripSubSubProtocolPrefix(dbname));
+            final Permission dp
+                = new DatabasePermission(url, DatabasePermission.CREATE);
             
-			factory.checkSystemPrivileges(user, dp);
-		} catch (AccessControlException ace) {
-			throw Util.generateCsSQLException(
-                                              SQLState.AUTH_DATABASE_CREATE_MISSING_PERMISSION,
-                                              user, dbname, ace);
-		} catch (IOException ioe) {
-			throw Util.generateCsSQLException(
-                                              SQLState.AUTH_DATABASE_CREATE_EXCEPTION,
-                                              dbname, (Object)ioe); // overloaded method
-		} catch (Exception e) {
-			throw Util.generateCsSQLException(
-                                              SQLState.AUTH_DATABASE_CREATE_EXCEPTION,
-                                              dbname, (Object)e); // overloaded method
-		}
-	}
+            factory.checkSystemPrivileges(user, dp);
+        } catch (AccessControlException ace) {
+            throw Util.generateCsSQLException(
+                    SQLState.AUTH_DATABASE_CREATE_MISSING_PERMISSION,
+                    user, dbname, ace);
+        } catch (IOException ioe) {
+            throw Util.generateCsSQLException(
+                    SQLState.AUTH_DATABASE_CREATE_EXCEPTION,
+                    dbname, (Object)ioe); // overloaded method
+        } catch (Exception e) {
+            throw Util.generateCsSQLException(
+                    SQLState.AUTH_DATABASE_CREATE_EXCEPTION,
+                    dbname, (Object)e); // overloaded method
+        }
+    }
 
     /**
      * Strips any sub-sub-protocol prefix from a database name.
