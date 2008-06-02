@@ -197,11 +197,8 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
 
         // Add some tests to be run with connection pooling enabled.
         suite.addTest(connectionPoolingSuite("embedded"));
-        /*
-         * DISABLED until DERBY-3431 has been fixed.
         suite.addTest(TestConfiguration.clientServerDecorator(
                     connectionPoolingSuite("client")));
-        */
 
         // Test for DERBY-2584 needs a fresh database to ensure that the
         // meta-data queries haven't already been compiled. No need to run the

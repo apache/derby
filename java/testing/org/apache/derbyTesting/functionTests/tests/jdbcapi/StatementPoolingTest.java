@@ -84,6 +84,7 @@ public class StatementPoolingTest
         final String conClass = "CachingLogicalConnection";
         final String psClass = "LogicalPreparedStatement";
         final String csClass = "LogicalCallableStatement";
+        final String dmdClass = "LogicalDatabaseMetaData";
         Connection con = getConnection();
         assertClassName(con, conClass);
         assertClassName(con.prepareStatement("values 1"), psClass);
@@ -117,6 +118,7 @@ public class StatementPoolingTest
                                         ResultSet.CONCUR_READ_ONLY,
                                         ResultSet.CLOSE_CURSORS_AT_COMMIT),
                         csClass);
+        assertClassName(con.getMetaData(), dmdClass);
     }
 
     /**
@@ -124,6 +126,9 @@ public class StatementPoolingTest
      * <p>
      * The assert does not consider package names, only the name passed in as
      * {@code expectedName} and the passed in name concatenated with "40".
+     * <p>
+     * <b>WARNING</b>: This method is not a general utility method. Please look
+     * at the implementation to determine if you can use it.
      *
      * @param obj object to check
      * @param expectedName the expected name of the class
@@ -133,12 +138,13 @@ public class StatementPoolingTest
         assertNotNull("The expected name cannot be <null>", expectedName);
         assertNotNull("The object cannot be <null>", obj);
         String[] names = obj.getClass().getName().split("\\.");
-        String simpleName = names[names.length -1];
+        final String simpleName = names[names.length -1];
+        if (JDBC.vmSupportsJDBC4() && !expectedName.endsWith("40")) {
+            expectedName += "40";
+        }
         if (!simpleName.equals(expectedName)) {
-            if (!simpleName.equals(expectedName + "40")) {
-                fail("Expected class name " + expectedName + " or " +
-                        expectedName + "40, got " + simpleName);
-            }
+            fail("Expected class name " + expectedName + ", got " +
+                    simpleName);
         }
     }
 

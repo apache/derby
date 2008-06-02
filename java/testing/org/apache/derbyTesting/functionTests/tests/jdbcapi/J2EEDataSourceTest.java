@@ -2791,11 +2791,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
      *
      * @throws SQLException if something goes wrong
      */
-    // Disabled because the test fails. It fails in different ways for client
-    // and embedded. See DERBY-3431 for information.
-    // To enable, remove 'DISABLED_' from the method name and add the test
-    // to the appropriate suite (i.e. baseSuite).
-    public void DISABLED_testConnectionLeakInDatabaseMetaData()
+    public void testConnectionLeakInDatabaseMetaData()
             throws SQLException {
         ConnectionPoolDataSource cpDs =
                 J2EEDataSource.getConnectionPoolDataSource();
@@ -2808,12 +2804,23 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         // Get second logical connection and a meta data object.
         Connection con2 = pc.getConnection();
         DatabaseMetaData dmd2 = con2.getMetaData();
-        con2.close();
-        pc.close();
         // The first meta data object should not return a reference to the
         // second logical connection.
         assertSame(con2, dmd2.getConnection());
-        assertNotSame(con2, dmd1.getConnection());
+        try {
+            dmd1.getConnection();
+            fail("Should have thrown no current connection exception");
+        } catch (SQLException sqle) {
+            assertSQLState("08003", sqle);
+        }
+        con2.close();
+        pc.close();
+        try {
+            dmd2.getConnection();
+            fail("Should have thrown no current connection exception");
+        } catch (SQLException sqle) {
+            assertSQLState("08003", sqle);
+        }
     }
 
     /**

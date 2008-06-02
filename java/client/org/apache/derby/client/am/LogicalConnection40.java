@@ -29,7 +29,6 @@ import java.sql.NClob;
 import java.sql.SQLXML;
 import java.sql.SQLException;
 import java.sql.Struct;
-import java.sql.Wrapper;
 import java.util.Properties;
 
 import org.apache.derby.client.ClientPooledConnection;
@@ -166,6 +165,17 @@ public class LogicalConnection40
 			notifyException(sqle);
 			throw sqle;
 		}
+    }
+
+    /**
+     * Returns a newly created logical database metadata object.
+     *
+     * @return A logical database metadata object for JDBC 4 environments.
+     */
+    protected LogicalDatabaseMetaData newLogicalDatabaseMetaData()
+            throws SQLException {
+        return new LogicalDatabaseMetaData40(
+                                this, physicalConnection_.agent_.logWriter_);
     }
 
     /**

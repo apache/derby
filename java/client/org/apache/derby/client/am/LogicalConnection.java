@@ -36,6 +36,13 @@ import java.sql.SQLException;
 public class LogicalConnection implements java.sql.Connection {
     protected Connection physicalConnection_ = null; // reset to null when the logical connection is closed.
     private org.apache.derby.client.ClientPooledConnection pooledConnection_ = null;
+    /**
+     * Logical database metadata object created on demand and then cached.
+     * The lifetime of the metadata object is the same as this logical
+     * connection, in the sense that it will raise exceptions on method
+     * invocations after the logical connection has been closed.
+     */
+    private LogicalDatabaseMetaData logicalDatabaseMetaData = null;
 
     public LogicalConnection(Connection physicalConnection,
                              org.apache.derby.client.ClientPooledConnection pooledConnection) throws SqlException {
@@ -279,14 +286,70 @@ public class LogicalConnection implements java.sql.Connection {
 		}
     }
 
-    public java.sql.DatabaseMetaData getMetaData() throws SQLException {
+    /**
+     * Retrieves a {@code DatabaseMetaData} object that contains metadata about
+     * the database to which this {@code Connection} object represents a
+     * connection.
+     * <p>
+     * The database metadata object is logical in the sense that it has the
+     * same lifetime as the logical connection. If the logical connection is
+     * closed, the underlying physical connection will not be accessed to
+     * obtain metadata, even if it is still open. Also, the reference to the
+     * logical connection instead of the underlying physical connection will be
+     * returned by {@link LogicalDatabaseMetaData#getConnection}.
+     *
+     * @return A database metadata object.
+     * @throws SQLException if an error occurs
+     */
+    public synchronized java.sql.DatabaseMetaData getMetaData()
+            throws SQLException {
 		try {
 	        checkForNullPhysicalConnection();
-	        return physicalConnection_.getMetaData();
+            // Create metadata object on demand, then cache it for later use.
+            if (this.logicalDatabaseMetaData == null) {
+                this.logicalDatabaseMetaData = newLogicalDatabaseMetaData();
+            }
+            return this.logicalDatabaseMetaData;
 		} catch (SQLException sqle) {
 			notifyException(sqle);
 			throw sqle;
 		}
+    }
+
+    /**
+     * Returns a newly created logical database metadata object.
+     * <p>
+     * Subclasses should override this method to return an instance of the
+     * correct implementation class of the logical metadata object.
+     *
+     * @return A logical database metadata object.
+     */
+    protected LogicalDatabaseMetaData newLogicalDatabaseMetaData()
+            throws SQLException {
+        return new LogicalDatabaseMetaData(
+                                this, physicalConnection_.agent_.logWriter_);
+    }
+
+    /**
+     * Returns the real underlying database metadata object.
+     *
+     * @return The metadata object from the underlying physical connection.
+     * @throws SQLException if the logical connection has been closed
+     */
+    final synchronized java.sql.DatabaseMetaData getRealMetaDataObject()
+            throws SQLException {
+        // Check if the logical connection has been closed.
+        // isClosed also checks if physicalConnection_ is null.
+        if (isClosed()) {
+            throw new SqlException(
+                    // Log this if we can.
+                    this.physicalConnection_ == null ?
+                        null :
+                        this.physicalConnection_.agent_.logWriter_,
+                    new ClientMessageId(SQLState.NO_CURRENT_CONNECTION)
+                ).getSQLException();
+        }
+        return this.physicalConnection_.getMetaData();
     }
 
     synchronized public void setReadOnly(boolean readOnly) throws SQLException {
