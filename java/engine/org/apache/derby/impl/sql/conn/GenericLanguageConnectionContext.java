@@ -200,6 +200,12 @@ public class GenericLanguageConnectionContext
 	protected String currentRole;
 	protected SchemaDescriptor	sd;
 
+    /**
+     * Used to hold the computed value of the initial default schema,
+     * cf logic in initDefaultSchemaDescriptor.
+     */
+    private SchemaDescriptor cachedInitialDefaultSchemaDescr = null;
+
 	// RESOLVE - How do we want to set the default.
     private int defaultIsolationLevel = ExecutionContext.READ_COMMITTED_ISOLATION_LEVEL;
 	protected int isolationLevel = defaultIsolationLevel;
@@ -345,6 +351,13 @@ public class GenericLanguageConnectionContext
 		setDefaultSchema(initDefaultSchemaDescriptor());
 	}
 
+    /**
+     * Compute the initial default schema and set
+     * cachedInitialDefaultSchemaDescr accordingly.
+     *
+     * @return computed initial default schema value for this session
+     * @throws StandardException
+     */
 	protected SchemaDescriptor initDefaultSchemaDescriptor()
 		throws StandardException {
 		/*
@@ -355,17 +368,33 @@ public class GenericLanguageConnectionContext
 		** user.
         ** - Else Set the default schema to APP.
         */
-		// SchemaDescriptor sd;
+        if (cachedInitialDefaultSchemaDescr == null) {
+            DataDictionary dd = getDataDictionary();
+            String authorizationId = getAuthorizationId();
+            SchemaDescriptor sd =
+                dd.getSchemaDescriptor(
+                    authorizationId, getTransactionCompile(), false);
+            if (sd == null) {
+                sd = new SchemaDescriptor(
+                    dd, authorizationId, authorizationId, (UUID)null, false);
+            }
+            cachedInitialDefaultSchemaDescr = sd;
+        }
+        return cachedInitialDefaultSchemaDescr;
+    }
 
-		DataDictionary dd = getDataDictionary();
-        String authorizationId = getAuthorizationId();
-	
-		if ( (sd = dd.getSchemaDescriptor(authorizationId, getTransactionCompile(), false)) == null )
-		{
-			sd = new SchemaDescriptor(dd, authorizationId, authorizationId, (UUID) null, false);
-		}
-		return sd;
-	}
+    /**
+     * Get the computed value for the initial default schema.
+     * @return the schema descriptor of the computed initial default schema
+     */
+    private SchemaDescriptor getInitialDefaultSchemaDescriptor() {
+        if (SanityManager.DEBUG) {
+            SanityManager.ASSERT(cachedInitialDefaultSchemaDescr != null,
+                                 "cachedInitialDefaultSchemaDescr is null!");
+        }
+
+        return cachedInitialDefaultSchemaDescr;
+    }
 
 	//
 	// LanguageConnectionContext interface
@@ -777,7 +806,8 @@ public class GenericLanguageConnectionContext
         public PreparedStatement prepareInternalStatement(String sqlText) 
 	    throws StandardException 
         {
-    	    return connFactory.getStatement(sd, sqlText, true).prepare(this);
+        return connFactory.getStatement(
+                getDefaultSchema(), sqlText, true).prepare(this);
     	}      
 
 	/**
@@ -1818,7 +1848,7 @@ public class GenericLanguageConnectionContext
 	{ 	
 		if (sd == null)
 		{	
-		    sd = initDefaultSchemaDescriptor();
+		    sd = getInitialDefaultSchemaDescriptor();
 		}
 		this.sd = sd;
 		
