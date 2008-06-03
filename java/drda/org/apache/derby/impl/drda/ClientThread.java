@@ -113,7 +113,9 @@ final class ClientThread extends Thread {
                     // shutdown
                     synchronized (parent.getShutdownSync()) {
                         if (!parent.getShutdown()) {
-                            parent.consolePropertyMessage("DRDA_UnableToAccept.S");
+                            parent.consoleExceptionPrintTrace(ioe);
+                            if (clientSocket != null)
+                                clientSocket.close();
                         }
                     }
                     return; // Exit the thread
@@ -122,6 +124,13 @@ final class ClientThread extends Thread {
                 // Catch and log all other exceptions
                 
                 parent.consoleExceptionPrintTrace(e);
+                try {
+                    if (clientSocket != null)
+                        clientSocket.close();
+                } catch (IOException closeioe)
+                {
+                    parent.consoleExceptionPrintTrace(closeioe);
+                }
             } // end outer try/catch block
             
         } // end for(;;)
