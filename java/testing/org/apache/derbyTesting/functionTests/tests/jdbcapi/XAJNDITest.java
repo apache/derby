@@ -1,6 +1,5 @@
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
-import java.io.File;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -17,8 +16,6 @@ import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.J2EEDataSource;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.JDBCDataSource;
-import org.apache.derbyTesting.junit.SecurityManagerSetup;
-import org.apache.derbyTesting.junit.SupportFilesSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 public class XAJNDITest extends BaseJDBCTestCase {
@@ -26,12 +23,6 @@ public class XAJNDITest extends BaseJDBCTestCase {
     private static String ldapPort;
     private static String dnString;
     private InitialDirContext ic = getInitialDirContext();
-
-
-    //to create own policy file
-    private static String POLICY_FILE_NAME = 
-        "functionTests/tests/jdbcapi/XAJNDITest.policy";
-    private static String TARGET_POLICY_FILE_NAME = "derby_tests.policy";
 
     public XAJNDITest(String name) {
         super(name);
@@ -50,50 +41,9 @@ public class XAJNDITest extends BaseJDBCTestCase {
             if (dnString == null || dnString.length() < 1)
                 return new TestSuite("XAJNDITest requires property derbyTesting.dnString for setting o=, eg: -DderbyTesting.dnString=myJNDIstring");
             
-            Test test = decorateWithPolicy
-            (TestConfiguration.defaultSuite(XAJNDITest.class));
-            return test;            
+            return TestConfiguration.defaultSuite(XAJNDITest.class);
         }
         return new TestSuite("XAJNDITest cannot run without XA support");
-    }
-    
-    // grant ALL FILES execute, and getPolicy permissions, as well
-    // as resolve/connect for the ldap server identified with the property
-    private static Test decorateWithPolicy(Test test) {
-        String ldapPolicyName = new XAJNDITest("test").makeServerPolicyName();
-        //
-        // Install a security manager using the initial policy file.
-        //
-        test = new SecurityManagerSetup(test,ldapPolicyName );
-        // Copy over the policy file we want to use.
-        //
-        test = new SupportFilesSetup(
-            test, null, new String[] {POLICY_FILE_NAME},
-            null, new String[] {TARGET_POLICY_FILE_NAME}
-        );
-        return test;
-    }
-
-
-    /**
-     * Construct the name of the server policy file.
-     */
-    private String makeServerPolicyName()
-    {
-        try {
-            String  userDir = getSystemProperty( "user.dir" );
-            String  fileName = userDir + File.separator + SupportFilesSetup.EXTINOUT + File.separator + TARGET_POLICY_FILE_NAME;
-            File      file = new File( fileName );
-            String  urlString = file.toURL().toExternalForm();
-
-            return urlString;
-        }
-        catch (Exception e)
-        {
-            System.out.println( "Unexpected exception caught by makeServerPolicyName(): " + e );
-
-            return null;
-        }
     }
     
     public void tearDown() throws Exception {
@@ -101,8 +51,6 @@ public class XAJNDITest extends BaseJDBCTestCase {
         ldapPort=null;
         // need to hold on to dnString value and ic as the fixture runs
         // twice (embedded & networkserver) and they're used inside it
-        POLICY_FILE_NAME=null;
-        TARGET_POLICY_FILE_NAME=null;
         super.tearDown();
     }
 

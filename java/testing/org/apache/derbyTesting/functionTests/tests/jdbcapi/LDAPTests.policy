@@ -21,7 +21,9 @@
 
 //
 // Policy file with minimal set of permissions to run derby's
-// functional tests.
+// functional tests, to be used in tests needing connect/resolve permissions to
+// an LDAPServer as passsed in with property derbyTesting.ldapServer, such as
+// LDAPAuthenticationTest.
 //
 // The test harness sets up four variables used by this policy file
 //
@@ -112,6 +114,9 @@ permission java.util.PropertyPermission "derby.storage.jvmInstanceId",
   permission java.util.PropertyPermission "${emma.active}user.dir", "read";
   permission java.io.FilePermission "${emma.active}${user.dir}${/}coverage.ec", "read, write";
   permission java.lang.RuntimePermission "${emma.active}writeFileDescriptor";
+
+  // resolve is needed to run ldap related tests 
+  permission java.net.SocketPermission "${derbyTesting.ldapServer}", "connect, resolve";
 };
 
 //

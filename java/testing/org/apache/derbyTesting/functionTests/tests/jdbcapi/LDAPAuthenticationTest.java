@@ -58,10 +58,9 @@ public class LDAPAuthenticationTest extends BaseJDBCTestCase {
     private static String ldapUser; // existing valid user on ldap server
     private static String ldapPassword; // password for existing valid user on ldap server
 
-    // create own policy file, use the one from XAJNDITest so
-    // we can connect to the ldap server
+    // create own policy file, so we can connect to the ldap server
     private static String POLICY_FILE_NAME = 
-        "functionTests/tests/jdbcapi/XAJNDITest.policy";
+        "functionTests/tests/jdbcapi/LDAPTests.policy";
     private static String TARGET_POLICY_FILE_NAME = "derby_tests.policy";
     
     /** Creates a new instance of the Test */
