@@ -402,6 +402,12 @@
 <!-- ==================================================================== -->
 
   <target name="engine" depends="shared,state,parsers">
+
+    <!-- Create the emtpy dir that we put in the boot classpath to
+         prevent the default Java runtime libraries from being loaded.
+      -->
+    <mkdir dir="${empty}"/>
+
     <ant dir="${derby.engine.src.dir}"/>
     <antcall target="build"/>
     <ant dir="${derby.engine.dir}/loc"/>
