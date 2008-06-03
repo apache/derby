@@ -231,7 +231,6 @@ on J2ME, or J2SE, write once run anywhere.
 Note: After following the steps in sections 2.2.3-2.2.5 of this
 document, you should have the following:
 
-${derby.source}/tools/java/empty.jar
 ${derby.source}/tools/java/geronimo-spec-servlet-2.4-rc4.jar
 ${derby.source}/tools/java/jakarta-oro-2.0.8.jar
 ${derby.source}/tools/java/javacc.jar
