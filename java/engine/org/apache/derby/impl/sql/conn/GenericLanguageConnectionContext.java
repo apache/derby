@@ -386,11 +386,6 @@ public class GenericLanguageConnectionContext
 	 * @return the schema descriptor of the computed initial default schema
 	 */
 	private SchemaDescriptor getInitialDefaultSchemaDescriptor() {
-		if (SanityManager.DEBUG) {
-			SanityManager.ASSERT(cachedInitialDefaultSchemaDescr != null,
-								 "cachedInitialDefaultSchemaDescr is null!");
-		}
-
 		return cachedInitialDefaultSchemaDescr;
 	}
 	
