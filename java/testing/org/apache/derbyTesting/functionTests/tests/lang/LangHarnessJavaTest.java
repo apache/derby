@@ -71,7 +71,6 @@ public class LangHarnessJavaTest extends HarnessJavaTest {
         // "holdCursorJavaReflection", TODO don't care holdability supported.
         "JitTest",
         // "logStream", TODO: investigate/convert
-        "longStringColumn",
         // "maxMemPerTab", TODO: investigate/convert
         // "outparams", TODO: investigate/convert
         // "procedure", TODO: uses TestUtil.isNetFramework()
