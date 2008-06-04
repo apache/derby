@@ -2945,7 +2945,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         assertIsoLocks(newconn, Connection.TRANSACTION_READ_COMMITTED);
     }
 
-    /*
+    /**
      * insert two rows into the simple table for DERBY-1144 tests
      * @param conn
      * @throws SQLException
@@ -2959,12 +2959,12 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         conn.commit ();
     }
     
-    /* 
+    /**
      * Checks locks for designated isolation level on the connection.
      * Currently only supports TRANSACTION_READ_COMMITTED and 
      * TRANSACTION_READ_UNCOMMITTED
      * @param conn   Connection to test
-     * @param isoLevel expected isolation level
+     * @param expectedIsoLevel expected isolation level
      *
      */
     private void assertIsoLocks(Connection conn, int expectedIsoLevel)
@@ -2984,7 +2984,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         }
     }
     
-    /*
+    /**
      * Determine if a select on this connection during update will timeout.
      * Used to establish isolation level.  If the connection isolation level
      * is <code> Connection.TRANSACTION_READ_UNCOMMITTED </code> it will not
@@ -3010,9 +3010,9 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
 
             // now see if we can select them
             Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery("Select * from intTable");
-            while (rs.next()){};
-            rs.close();
+            JDBC.assertDrainResults(
+                stmt.executeQuery("Select * from intTable"));
+            stmt.close();
         }
         catch (SQLException e)
         {
