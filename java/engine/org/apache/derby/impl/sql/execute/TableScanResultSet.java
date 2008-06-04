@@ -1271,19 +1271,16 @@ class TableScanResultSet extends ScanResultSet
 		
 		if (positioner == null)
 		{
+			if (numOpens == 0)
+				return "\t" + MessageService.getTextMessage(
+					SQLState.LANG_POSITION_NOT_AVAIL) +
+                                    "\n";
 			try
 			{
 				positioner = (ExecIndexRow)positionGetter.invoke(activation);
 			}
 			catch (StandardException e)
 			{
-				// the positionGetter will fail with a NullPointerException
-				// if the outer table is empty
-				// (this isn't a problem since we won't call it on the inner
-				// table if there are no rows on the outer table)
-				if (e.getSQLState() == SQLState.LANG_UNEXPECTED_USER_EXCEPTION )
-					return "\t" + MessageService.getTextMessage(
-						SQLState.LANG_POSITION_NOT_AVAIL);
 				return "\t" + MessageService.getTextMessage(
 						SQLState.LANG_UNEXPECTED_EXC_GETTING_POSITIONER,
 						e.toString());

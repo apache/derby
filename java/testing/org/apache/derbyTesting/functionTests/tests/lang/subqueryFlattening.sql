@@ -434,6 +434,55 @@ select distinct temp_t0.d from
 drop table digits;
 drop table odd;
 
+-- regression test from old Cloudscape bug 4736 which demonstrates that
+-- the fix for DERBY-3097 is correct. This query used to cause a NPE in
+-- BaseActivation.getColumnFromRow, but the optimizer data structures are
+-- now generated correctly and the NPE no longer occurs.
+
+create table a (a1 int not null primary key, a2 int, a3 int, a4
+int, a5 int, a6 int);
+create table b (b1 int not null primary key, b2 int, b3 int, b4
+int, b5 int, b6 int);
+create table c (c1 int not null, c2 int, c3 int not null, c4
+int, c5 int, c6 int);
+create table d (d1 int not null, d2 int, d3 int not null, d4
+int, d5 int, d6 int);
+
+alter table c add primary key (c1,c3);
+alter table d add primary key (d1,d3);
+
+insert into a values
+(1,1,3,6,NULL,2),(2,3,2,4,2,2),(3,4,2,NULL,NULL,NULL),
+                     
+(4,NULL,4,2,5,2),(5,2,3,5,7,4),(7,1,4,2,3,4),
+                     (8,8,8,8,8,8),(6,7,3,2,3,4);
+
+insert into b values
+(6,7,2,3,NULL,1),(4,5,9,6,3,2),(1,4,2,NULL,NULL,NULL),
+                     
+(5,NULL,2,2,5,2),(3,2,3,3,1,4),(7,3,3,3,3,3),(9,3,3,3,3,3);
+
+insert into c values
+(3,7,7,3,NULL,1),(8,3,9,1,3,2),(1,4,1,NULL,NULL,NULL),
+                     
+(3,NULL,1,2,4,2),(2,2,5,3,2,4),(1,7,2,3,1,1),(3,8,4,2,4,6);
+
+insert into d values
+(1,7,2,3,NULL,3),(2,3,9,1,1,2),(2,2,2,NULL,3,2),
+                     
+(1,NULL,3,2,2,1),(2,2,5,3,2,3),(2,5,6,3,7,2);
+
+
+
+select a1,b1,c1,c3,d1,d3
+  from D join (A left outer join (B join C on b2=c2) on a1=b1)
+on d3=b3 and d1=a2; 
+
+drop table a;
+drop table b;
+drop table c;
+drop table d;
+
 -- DERBY-3288: Optimizer does not correctly enforce EXISTS join order
 -- dependencies in the face of "short-circuited" plans.  In this test
 -- an EXISTS subquery is flattened into the outer query and thus has

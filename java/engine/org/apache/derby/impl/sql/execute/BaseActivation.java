@@ -1376,13 +1376,6 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 	protected final DataValueDescriptor getColumnFromRow(int rsNumber, int colId)
 		throws StandardException {
 
-        if( row[rsNumber] == null)
-        {
-            /* This actually happens. NoPutResultSetImpl.clearOrderableCache attempts to prefetch invariant values
-             * into a cache. This fails in some deeply nested joins. See Beetle 4736 and 4880.
-             */
-            return null;
-        }
 		return row[rsNumber].getColumn(colId);
 	}
 
