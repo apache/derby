@@ -1,4 +1,3 @@
-store/aes.sql
 store/encryptParams.sql
 store/encryptDatabaseTest1.sql
 store/encryptDatabaseTest2.sql

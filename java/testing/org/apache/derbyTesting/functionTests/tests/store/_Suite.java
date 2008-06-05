@@ -60,6 +60,7 @@ public class _Suite extends BaseTestCase  {
             suite.addTest(EncryptionKeyAESTest.suite());
             suite.addTest(EncryptionKeyBlowfishTest.suite());
             suite.addTest(EncryptionKeyDESTest.suite());
+            suite.addTest(EncryptionAESTest.suite());
         }
         
         return suite;

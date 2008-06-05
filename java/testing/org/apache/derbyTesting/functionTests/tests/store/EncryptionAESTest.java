@@ -211,8 +211,9 @@ extends BaseJDBCTestCase {
         // Pop a message to the console and only test encryptionKeyLength 128.
         if (con == null)
         {
-            System.out.println("no unrestricted policy jars; cannot test AES " +
-                "encryption with encryptionKeyLengths 192 nor 256");
+            if (TestConfiguration.getCurrent().doTrace())
+                System.out.println("no unrestricted policy jars; cannot test AES " +
+                    "encryption with encryptionKeyLengths 192 nor 256");
             return;
         }
         validateDBContents(con);
