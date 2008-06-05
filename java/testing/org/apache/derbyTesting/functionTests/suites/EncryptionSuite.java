@@ -106,7 +106,7 @@ public final class EncryptionSuite extends BaseJDBCTestCase {
      * the booted encrypted database.
      * @throws SQLException
      */
-    public void testConnection() throws SQLException
+    public void testEncryptedDBConnection() throws SQLException
     {
         getConnection().close();
     }
