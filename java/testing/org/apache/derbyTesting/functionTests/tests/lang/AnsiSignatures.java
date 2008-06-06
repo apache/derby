@@ -620,6 +620,27 @@ public  class   AnsiSignatures
     public  static  String   varchar_String_String( Double a ) { return "-1"; }
     public  static  String   varchar_String_String( Object a ) { return "-1"; }
     
+    //
+    // Mixed types
+    //
+    public static long bigint__smallint_int_bigint_real_double
+        (
+         short a,
+         Integer b,
+         long c,
+         Float d,
+         double e
+         )
+    { return c; }
 
+    public static Long flipped_bigint__smallint_int_bigint_real_double
+        (
+         Integer a,
+         int b,
+         Long c,
+         float d,
+         Double e
+         )
+    { return c; }
 
 }

@@ -246,6 +246,32 @@ public class AnsiSignaturesTest extends BaseJDBCTestCase
             ( "varchar_String_String", "varchar( 10 )", new String[] { "varchar( 10 )" }, "'3.0'", "3.0" );
     }
 
+    public  void    test_bigint__smallint_int_bigint_real_double()
+        throws Exception
+    {
+        declareAndRunFunction
+            (
+             "bigint__smallint_int_bigint_real_double",
+             "bigint",
+              new String[] { "smallint", "int", "bigint", "real", "double" },
+             "3, 3, 3, 3.0, 3.0",
+             "3"
+             );
+    }
+
+    public  void    test_flipped_bigint__smallint_int_bigint_real_double()
+        throws Exception
+    {
+        declareAndRunFunction
+            (
+             "flipped_bigint__smallint_int_bigint_real_double",
+             "bigint",
+              new String[] { "smallint", "int", "bigint", "real", "double" },
+             "3, 3, 3, 3.0, 3.0",
+             "3"
+             );
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // SHOULD NOT RESOLVE
