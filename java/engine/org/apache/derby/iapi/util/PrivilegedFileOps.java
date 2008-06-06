@@ -121,4 +121,29 @@ public final class PrivilegedFileOps {
             throw (SecurityException)pae.getException();
         }
     }
+    
+    /**
+     * Creates the directory named by this abstract pathname and
+     * parent directories
+     * 
+     * @param file   directory to create
+     * @return  <code> true </true> if directory was created.
+     */
+    public static boolean mkdirs(final File file) {
+     
+        if (file == null) {
+            throw new IllegalArgumentException("file cannot be <null>");
+        }
+        try {
+            return ((Boolean) AccessController.doPrivileged(
+                        new PrivilegedExceptionAction() {
+                            public Object run() throws SecurityException {
+                                return new Boolean(file.mkdirs());
+                            }
+                        })).booleanValue();
+        } catch (PrivilegedActionException pae) {
+            throw (SecurityException)pae.getException();
+        }
+    }
+    
 } // End class PrivilegedFileOps

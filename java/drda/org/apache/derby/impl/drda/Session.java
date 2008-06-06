@@ -70,6 +70,9 @@ class Session
 										// client
 
 	private	Hashtable	dbtable;		// Table of databases accessed in this session
+	private NetworkServerControlImpl nsctrl;        // NetworkServerControlImpl needed for logging
+                                                        // message if tracing fails.
+                                                        
 
 	// constructor
 	/**
@@ -82,9 +85,10 @@ class Session
 	 *
 	 * @exception throws IOException
 	 */
-	Session (int connNum, Socket clientSocket, String traceDirectory,
-			boolean traceOn) throws IOException
+	Session (NetworkServerControlImpl nsctrl, int connNum, Socket clientSocket, String traceDirectory,
+			boolean traceOn) throws Exception
 	{
+                this.nsctrl = nsctrl;
 		this.connNum = connNum;
 		this.clientSocket = clientSocket;
 		this.traceOn = traceOn;
@@ -123,9 +127,11 @@ class Session
 	 * initialize a server trace for the DRDA protocol
 	 * 
 	 * @param traceDirectory - directory for trace file
+         * @param throwException - true if we should throw an exception if turning on tracing fails.
+         *                         We do this for NetworkServerControl API commands.
 	 * @throws IOException 
 	 */
-	protected void initTrace(String traceDirectory) throws IOException 
+	protected void initTrace(String traceDirectory, boolean throwException)  throws Exception
 	{
 		if (traceDirectory != null)
 			traceFileName = traceDirectory + "/" + TRACENAME_PREFIX+
@@ -135,21 +141,31 @@ class Session
 		
 		if (dssTrace == null)
 			dssTrace = new DssTrace();
-		dssTrace.startComBufferTrace (traceFileName);
-		traceOn = true;
+                try {
+                    dssTrace.startComBufferTrace (traceFileName);
+                    traceOn = true;
+                } catch (Exception e)
+                {   
+                    if (throwException)
+                        throw e;
+                    // If there is an error starting tracing for the session,
+                    // log to the console and derby.log and do not turn tracing on.
+                    // let connection continue.
+                    nsctrl.consoleExceptionPrintTrace(e);
+                }              
 	}
 
 	/**
 	 * Set tracing on
 	 * 
 	 * @param traceDirectory 	directory for trace files
-	 * @throws IOException 
+	 * @throws Exception 
 	 */
-	protected void setTraceOn(String traceDirectory) throws IOException
+	protected void setTraceOn(String traceDirectory, boolean throwException) throws Exception
 	{
 		if (traceOn)
 			return;
-		initTrace(traceDirectory);    
+		initTrace(traceDirectory, throwException);    
 	}
 
 	/**
@@ -253,12 +269,12 @@ class Session
 	 * @param traceDirectory	- directory for trace files
 	 */
 	private void initialize(String traceDirectory)
-		throws IOException
+		throws Exception
 	{
 		sessionInput = clientSocket.getInputStream();
 		sessionOutput = clientSocket.getOutputStream();
 		if (traceOn)
-			initTrace(traceDirectory);
+			initTrace(traceDirectory,false);
 		state = INIT;
 	}
 

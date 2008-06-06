@@ -29,7 +29,9 @@ import org.apache.derbyTesting.junit.Derby;
 import org.apache.derbyTesting.junit.NetworkServerTestSetup;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
+import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
+
 
 import java.io.File;
 import java.net.InetAddress;
@@ -38,7 +40,10 @@ import java.security.AccessController;
 import java.security.Policy;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Enumeration;
+import java.util.Properties;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -127,7 +132,41 @@ public class NetworkServerControlApiTest extends BaseJDBCTestCase {
     
                         
     }
-
+    
+    /**
+     * Test tracing with system properties if we have no permission
+     * to write to the trace directory. Make sure we can still 
+     * get a connection.  Trace directory set to "/" in test setup.
+     * 
+     */
+    public void xtestTraceSystemPropertiesNoPermission() throws SQLException{
+        // our connection should go through fine and there should be an
+        // exception in the derby.log.
+        //access denied (java.io.FilePermission \\ read). I verified 
+        // this manually when creating this fixture but do not know 
+        // how to check in the test.
+        assertEquals(getSystemProperty("derby.drda.traceAll"),"true");
+        assertEquals(getSystemProperty("derby.drda.traceDirectory"),"/");
+        Connection conn = getConnection();
+        assertFalse(conn.getMetaData().isReadOnly());
+    }
+    
+    /**
+     * Test tracing with system properties when we have permissions
+     * to write to the trace directory. 
+     * Check that the tracing file is there.
+     * 
+     */
+    public void xtestTraceSystemPropertiesHasPermission() throws SQLException{
+        String derbysystemhome = getSystemProperty("derby.system.home");
+        assertEquals(getSystemProperty("derby.drda.traceAll"),"true");
+        assertEquals(getSystemProperty("derby.drda.traceDirectory"),derbysystemhome + "/trace");
+        Connection conn = getConnection();
+        assertFalse(conn.getMetaData().isReadOnly());
+        assertTrue(fileExists(derbysystemhome+"/trace/Server1.trace"));
+    }
+    
+    
     /**
      * Test NetworkServerControl ping command.
      * @throws Exception
@@ -253,6 +292,7 @@ public class NetworkServerControlApiTest extends BaseJDBCTestCase {
              new String[] { TARGET_POLICY_FILE_NAME}
              );
 
+       
         return test;
     }
     
@@ -264,7 +304,29 @@ public class NetworkServerControlApiTest extends BaseJDBCTestCase {
         // Need derbynet.jar in the classpath!
         if (!Derby.hasServer())
             return suite;
+        suite.addTest(decorateTest());
         
-        return decorateTest();
+        suite = decorateSystemPropertyTests(suite);
+                    
+        return suite;
+    }
+
+    private static TestSuite decorateSystemPropertyTests(TestSuite suite) {
+        Properties traceProps = new Properties();
+        traceProps.put("derby.drda.traceDirectory","/");
+        traceProps.put("derby.drda.traceAll","true");
+        suite.addTest(new SystemPropertyTestSetup(TestConfiguration.clientServerDecorator(
+                new NetworkServerControlApiTest("xtestTraceSystemPropertiesNoPermission")),
+                    traceProps));
+        
+        Properties traceProps2 = new Properties();
+        
+        traceProps2.put("derby.drda.traceDirectory",getSystemProperty("derby.system.home") + "/trace");
+        traceProps2.put("derby.drda.traceAll","true");
+        suite.addTest(new SystemPropertyTestSetup(TestConfiguration.clientServerDecorator(
+                new NetworkServerControlApiTest("xtestTraceSystemPropertiesHasPermission")),
+                    traceProps2));
+        
+        return suite;
     }
 }
