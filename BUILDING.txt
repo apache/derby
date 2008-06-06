@@ -237,7 +237,6 @@ ${derby.source}/tools/java/javacc.jar
 ${derby.source}/tools/java/junit.jar
 ${derby.source}/tools/java/felix.jar
 ${derby.source}/tools/java/xercesImpl.jar
-${derby.source}/tools/java/xml-apis.jar
 
 ---------------------------------------------------------------
 3     Build instructions

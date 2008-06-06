@@ -54,7 +54,7 @@ import junit.framework.Assert;
  * <li>Download the latest version of Xalan (2.7.0 as of this writing).</li>
  * <li>Copy all of the downloaded jars into the jre/lib/endorsed directory
  * of your JDK 1.4 installation. Those jar files are:
- * serializer.jar, xalan.jar, xercesImpl.jar, xml-apis.jar, and xsltc.jar.</li>
+ * serializer.jar, xalan.jar, xercesImpl.jar, and xsltc.jar.</li>
  * </ul>
  *
  * <p>

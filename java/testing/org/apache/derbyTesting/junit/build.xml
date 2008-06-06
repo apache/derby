@@ -74,7 +74,6 @@
       <classpath>
         <pathelement path="${java14compile.classpath}"/>
         <pathelement path="${junit}"/>
-        <pathelement path="${xml-apis}"/>
       </classpath>
 	  <include name="${derby.testing.junit.dir}/JAXPFinder.java"/>
     </javac>

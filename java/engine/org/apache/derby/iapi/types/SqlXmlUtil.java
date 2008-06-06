@@ -180,7 +180,7 @@ public class SqlXmlUtil implements Formatable
                  * DocumentBuilderFactory, it's because there's no
                  * JAXP implementation.  This can happen in the
                  * (admittedly unlikely) case where the classpath
-                 * contains the JAXP _interfaces_ (ex. via xml-apis.jar)
+                 * contains the JAXP _interfaces_
                  * and the Xalan classes but does not actually
                  * contain a JAXP _implementation_.  In that case the
                  * check in XML.checkXMLRequirements() will pass
