@@ -27,7 +27,7 @@ import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 
 /**
- * A collection of operations on {$@link java.io.File} that wraps the
+ * A collection of operations on {@link java.io.File} that wraps the
  * operations in privileged block of code.
  * <p>
  * Derby needs to use privileged blocks in some places to avoid
@@ -127,7 +127,7 @@ public final class PrivilegedFileOps {
      * parent directories
      * 
      * @param file   directory to create
-     * @return  <code> true </true> if directory was created.
+     * @return {@code true} if directory was created.
      */
     public static boolean mkdirs(final File file) {
      
