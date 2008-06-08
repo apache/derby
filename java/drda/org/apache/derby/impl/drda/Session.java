@@ -88,7 +88,7 @@ class Session
 	Session (NetworkServerControlImpl nsctrl, int connNum, Socket clientSocket, String traceDirectory,
 			boolean traceOn) throws Exception
 	{
-                this.nsctrl = nsctrl;
+        this.nsctrl = nsctrl;
 		this.connNum = connNum;
 		this.clientSocket = clientSocket;
 		this.traceOn = traceOn;
@@ -127,8 +127,9 @@ class Session
 	 * initialize a server trace for the DRDA protocol
 	 * 
 	 * @param traceDirectory - directory for trace file
-         * @param throwException - true if we should throw an exception if turning on tracing fails.
-         *                         We do this for NetworkServerControl API commands.
+     * @param throwException - true if we should throw an exception if
+     *                         turning on tracing fails.  We do this
+     *                         for NetworkServerControl API commands.
 	 * @throws IOException 
 	 */
 	protected void initTrace(String traceDirectory, boolean throwException)  throws Exception
@@ -141,18 +142,18 @@ class Session
 		
 		if (dssTrace == null)
 			dssTrace = new DssTrace();
-                try {
-                    dssTrace.startComBufferTrace (traceFileName);
-                    traceOn = true;
-                } catch (Exception e)
-                {   
-                    if (throwException)
-                        throw e;
-                    // If there is an error starting tracing for the session,
-                    // log to the console and derby.log and do not turn tracing on.
-                    // let connection continue.
-                    nsctrl.consoleExceptionPrintTrace(e);
-                }              
+        try {
+            dssTrace.startComBufferTrace(traceFileName);
+            traceOn = true;
+        } catch (Exception e) {   
+            if (throwException) {
+                throw e;
+            }
+            // If there is an error starting tracing for the session,
+            // log to the console and derby.log and do not turn tracing on.
+            // let connection continue.
+            nsctrl.consoleExceptionPrintTrace(e);
+        }              
 	}
 
 	/**
