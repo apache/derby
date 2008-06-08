@@ -1609,14 +1609,14 @@ class: </p>
         <li>framework - specifies which framework to run with. For
 example:<br>
 java -Dframework=DerbyNetClient
-org.apache.derbyTesting.functionTests.RunTest <br>
+org.apache.derbyTesting.functionTests.harness.RunTest <br>
           <br>
 lang/supersimple.sql<br>
         </li>
         <li>verbose - Shows more detailed output if set to "true". For
 example:<br>
           <small>java -Dverbose=true
-org.apache.derbyTesting.functionTests.RunTest lang/arithmetic.sql</small><br>
+org.apache.derbyTesting.functionTests.harness.RunTest lang/arithmetic.sql</small><br>
           <br>
         </li>
         <li>keepfiles - Indicates to not clean up any of the files if
@@ -1630,7 +1630,7 @@ be set using
 -DtestSpecialProps=&lt;prop-1&gt;=&lt;value-1&gt;^
 ... ^&lt;prop-n&gt;=&lt;value-n&gt;. For example:<br>
           <small>java -DTestSpecialProps=derby.infolog.append=true
-org.apache.derbyTesting.functionTests.RunTest lang/arithmetic.sql</small>
+org.apache.derbyTesting.functionTests.harness.RunTest lang/arithmetic.sql</small>
           <br>
           <br>
         </li>
@@ -1647,7 +1647,7 @@ because the 'highest' level properties are passed to the jvm last. Setting this 
 for a test that runs with useprocess=false cannot have any effect.
 Example: <br>
           <small>java -Djvmflags=-Xms32M^-Xmx128M
-org.apache.derbyTesting.functionTests.RunTest lang/concateTests.java</small><br>
+org.apache.derbyTesting.functionTests.harness.RunTest lang/concateTests.java</small><br>
           <br>
         </li>
         <li>excludeJCC -
