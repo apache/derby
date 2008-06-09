@@ -232,6 +232,35 @@ public class StatementEventsTest extends BaseJDBCTestCase {
     }
 
     /**
+     * Test that you don't get a NullPointerException when the listeners are
+     * triggered and one of them is null. DERBY-3695
+     */
+    public void testAddNullEvent() throws SQLException {
+        pooledConnection.addStatementEventListener(null);
+        PreparedStatement ps = prepare("VALUES (1)");
+        ps.close(); // trigger close event
+        assertEquals(1, closedCount);
+        assertEquals(0, errorCount);
+        ps = prepare("VALUES (1)");
+        connection.close();
+        try {
+            ps.execute();
+            fail("Execute should fail on closed connection");
+        } catch (SQLNonTransientConnectionException e) {
+            assertSQLState("08003", e);
+        }
+        assertEquals(1, errorCount);
+    }
+
+    /**
+     * Test that you can call {@code removeStatementEventListener()} with a
+     * {@code null} argument.
+     */
+    public void testRemoveNullEvent() throws SQLException {
+        pooledConnection.removeStatementEventListener(null);
+    }
+
+    /**
      * Test whether a close event is raised when a connection is
      * closed. (Client should raise a close event since the connection calls
      * <code>close()</code> on its statements. Embedded should not raise a
