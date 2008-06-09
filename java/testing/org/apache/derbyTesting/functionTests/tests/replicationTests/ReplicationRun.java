@@ -252,7 +252,7 @@ public class ReplicationRun extends BaseTestCase
                 }
             }
             
-            assertTrue("Failover did not succeed.", count++ < 100); // 100*200ms = 20s.
+            assertTrue("Failover did not succeed.", count++ < 600); // 600*200ms = 120s = 2mins.
         }
     }
     
@@ -908,12 +908,13 @@ public class ReplicationRun extends BaseTestCase
                         {
                             util.DEBUG("Master already started?");
                         }
-                        util.DEBUG("Got: "+state+" Expected "+expectedState);
+                        util.DEBUG("startMaster_direct Got: "
+                                +state+" Expected "+expectedState);
                         throw se;
                     }
                 }
 
-                this.assertTrue("startMaster did not succeed.", count++ < 100); // 100*100ms = 10s.
+                assertTrue("startMaster did not succeed.", count++ < 1200); // 1200*100ms = 120s = 2mins.
             }
             util.DEBUG("startMaster_direct exit.");
     }
