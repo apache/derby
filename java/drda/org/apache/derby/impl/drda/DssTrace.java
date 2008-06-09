@@ -180,7 +180,7 @@ public class DssTrace
                 // If we can't create the directory the exception will occur 
                 // when trying to create the trace file.
                 File traceDirectory = new File(fileName).getParentFile();
-                if (!PrivilegedFileOps.exists(traceDirectory))
+                if (traceDirectory != null)
                 {
                     PrivilegedFileOps.mkdirs(traceDirectory);
                 }
