@@ -624,14 +624,16 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
     	subtestPooledReuseOnClose(cpds.getPooledConnection());
         subtestPooledCloseOnClose(cpds.getPooledConnection());
         // DERBY-3401 - removing a callback during a close causes problems.
-        //subtestPooledRemoveListenerOnClose(cpds.getPooledConnection());
+        subtestPooledRemoveListenerOnClose(cpds.getPooledConnection());
+        subtestPooledAddListenerOnClose(cpds.getPooledConnection());
 
     	// PooledConnection from an XDataSource
     	XADataSource xads = J2EEDataSource.getXADataSource();
     	subtestPooledReuseOnClose(xads.getXAConnection());
         subtestPooledCloseOnClose(xads.getXAConnection());
         // DERBY-3401 - removing a callback during a close causes problems.
-        //subtestPooledRemoveListenerOnClose(xads.getXAConnection());
+        subtestPooledRemoveListenerOnClose(xads.getXAConnection());
+        subtestPooledAddListenerOnClose(xads.getXAConnection());
     }
     
     /**
@@ -735,6 +737,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
     /**
      * Tests that a listener of a pooled connection can successfully
      * remove itself during the processing of its close event by its listener.
+     * Failed before DERBY-3401 was fixed.
      */
     private void subtestPooledRemoveListenerOnClose(final PooledConnection pc) throws SQLException
     {
@@ -798,7 +801,61 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         pc.close();
     }
 
-    
+    /**
+     * Tests that a listener of a pooled connection can successfully add
+     * another listener when processing a close event. Failed before DERBY-3401
+     * was fixed.
+     */
+    private void subtestPooledAddListenerOnClose(final PooledConnection pc)
+            throws SQLException {
+
+        // Holder for the two counts { number of times the main listener
+        // has been triggered, number of times added listeners have been
+        // triggered }.
+        final int[] count = new int[2];
+
+        // Register the main listener
+        pc.addConnectionEventListener(new ConnectionEventListener() {
+
+            public void connectionClosed(ConnectionEvent event) {
+                assertSame(pc, event.getSource());
+                count[0]++;
+                // Register a new listener
+                pc.addConnectionEventListener(new ConnectionEventListener() {
+                    public void connectionClosed(ConnectionEvent e) {
+                        assertSame(pc, e.getSource());
+                        count[1]++;
+                    }
+                    public void connectionErrorOccurred(ConnectionEvent e) {
+                    }
+                });
+            }
+
+            public void connectionErrorOccurred(ConnectionEvent event) {
+            }
+        });
+
+        // Number of times we expect the added listener to have been called.
+        int expectedAdded = 0;
+
+        // Trigger some close events and check the count between each event.
+        for (int i = 0; i < 5; i++) {
+            assertEquals("close count (main)", i, count[0]);
+            assertEquals("close count (added)", expectedAdded, count[1]);
+
+            // In the next iteration, we expect that the number of times the
+            // listeners added by the main listener have been called, has
+            // increased by the number of times the main listener has been
+            // called (i).
+            expectedAdded = expectedAdded + i;
+
+            // Trigger a close event
+            pc.getConnection().close();
+        }
+
+        pc.close();
+    }
+
     public void testAllDataSources() throws SQLException, Exception
     {
         Connection dmc = getConnection();

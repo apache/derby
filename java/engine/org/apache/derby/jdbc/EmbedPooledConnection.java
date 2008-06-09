@@ -43,12 +43,10 @@ import java.sql.Statement;
 import java.sql.PreparedStatement;
 import java.sql.CallableStatement;
 
-import java.util.Vector;
-import java.util.Enumeration;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 /* -- New jdbc 20 extension types --- */
-import javax.sql.DataSource;
-import javax.sql.PooledConnection;
 import javax.sql.ConnectionEventListener;
 import javax.sql.ConnectionEvent;
 
@@ -75,8 +73,21 @@ class EmbedPooledConnection implements javax.sql.PooledConnection, BrokeredConne
     
     /** the connection string */
     private String connString;
-    
-	private Vector eventListener; // who wants to know I am closed or error
+
+    /**
+     * The list of {@code ConnectionEventListener}s. It is initially {@code
+     * null} and will be initialized lazily when the first listener is added.
+     */
+    private ArrayList eventListener;
+
+    /**
+     * The number of iterators going through the list of connection event
+     * listeners at the current time. Only one thread may be iterating over the
+     * list at any time (because of synchronization), but a single thread may
+     * have multiple iterators if for instance an event listener performs
+     * database calls that trigger a new event.
+     */
+    private int eventIterators;
 
 	EmbedConnection realConnection;
 	int defaultIsolationLevel;
@@ -191,7 +202,7 @@ class EmbedPooledConnection implements javax.sql.PooledConnection, BrokeredConne
 	private void closeCurrentConnectionHandle() throws SQLException {
 		if (currentConnectionHandle != null)
 		{
-			Vector tmpEventListener = eventListener;
+			ArrayList tmpEventListener = eventListener;
 			eventListener = null;
 
 			try {
@@ -271,9 +282,16 @@ class EmbedPooledConnection implements javax.sql.PooledConnection, BrokeredConne
 			return;
 		if (listener == null)
 			return;
-		if (eventListener == null)
-			eventListener = new Vector();
-		eventListener.addElement(listener);
+        if (eventListener == null) {
+            eventListener = new ArrayList();
+        } else if (eventIterators > 0) {
+            // DERBY-3401: Someone is iterating over the ArrayList, and since
+            // we were able to synchronize on this, that someone is us. Clone
+            // the list of listeners in order to prevent invalidation of the
+            // iterator.
+            eventListener = (ArrayList) eventListener.clone();
+        }
+        eventListener.add(listener);
 	}
 
 	/**
@@ -281,10 +299,17 @@ class EmbedPooledConnection implements javax.sql.PooledConnection, BrokeredConne
 	 */
 	public final synchronized void removeConnectionEventListener(ConnectionEventListener listener)
 	{
-		if (listener == null)
+        if (listener == null || eventListener == null) {
 			return;
-		if (eventListener != null)
-			eventListener.removeElement(listener);
+        }
+        if (eventIterators > 0) {
+            // DERBY-3401: Someone is iterating over the ArrayList, and since
+            // we were able to synchronize on this, that someone is us. Clone
+            // the list of listeners in order to prevent invalidation of the
+            // iterator.
+            eventListener = (ArrayList) eventListener.clone();
+        }
+        eventListener.remove(listener);
 	}
 
 	/*
@@ -323,22 +348,36 @@ class EmbedPooledConnection implements javax.sql.PooledConnection, BrokeredConne
 			return;
 
 		// tell my listeners an exception is about to be thrown
-		if (eventListener != null && eventListener.size() > 0)
-		{
-			ConnectionEvent errorEvent = new ConnectionEvent(this, exception);
-
-			for (Enumeration e = eventListener.elements();
-				 e.hasMoreElements(); )
-			{
-				ConnectionEventListener l =
-					(ConnectionEventListener)e.nextElement();
-				l.connectionErrorOccurred(errorEvent);
-			}
-		}
+        fireConnectionEventListeners(exception);
 	}
 
-
-       
+    /**
+     * Fire all the {@code ConnectionEventListener}s registered. Callers must
+     * synchronize on {@code this} to prevent others from modifying the list of
+     * listeners.
+     *
+     * @param exception the exception that caused the event, or {@code null} if
+     * it is a close event
+     */
+    private void fireConnectionEventListeners(SQLException exception) {
+        if (eventListener != null && !eventListener.isEmpty()) {
+            ConnectionEvent event = new ConnectionEvent(this, exception);
+            eventIterators++;
+            try {
+                for (Iterator it = eventListener.iterator(); it.hasNext();) {
+                    ConnectionEventListener l =
+                            (ConnectionEventListener) it.next();
+                    if (exception == null) {
+                        l.connectionClosed(event);
+                    } else {
+                        l.connectionErrorOccurred(event);
+                    }
+                }
+            } finally {
+                eventIterators--;
+            }
+        }
+    }
 
 	final void checkActive() throws SQLException {
 		if (!isActive)
@@ -434,18 +473,7 @@ class EmbedPooledConnection implements javax.sql.PooledConnection, BrokeredConne
 		//the newly assigned currentConnectionHandle null, resulting in an NPE.
 		currentConnectionHandle = null;
 		// tell my listeners I am closed 
-		if (eventListener != null && eventListener.size() > 0)
-		{
-			ConnectionEvent closeEvent = new ConnectionEvent(this);
-
-			for (Enumeration e = eventListener.elements();
-				 e.hasMoreElements(); )
-			{
-				ConnectionEventListener l =
-					(ConnectionEventListener)e.nextElement();
-				l.connectionClosed(closeEvent);
-			}
-		}
+        fireConnectionEventListeners(null);
 
 		return false;
 	}

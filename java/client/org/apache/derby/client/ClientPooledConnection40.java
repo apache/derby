@@ -23,7 +23,7 @@ package org.apache.derby.client;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.ArrayList;
+import java.util.concurrent.CopyOnWriteArrayList;
 import javax.sql.StatementEventListener;
 import javax.sql.StatementEvent;
 import org.apache.derby.jdbc.ClientBaseDataSource;
@@ -38,10 +38,14 @@ import org.apache.derby.jdbc.ClientBaseDataSource;
 
 public class ClientPooledConnection40 extends ClientPooledConnection {
     
-    /** List of statement event listeners. */
-    //@GuardedBy("this")
-    private final ArrayList<StatementEventListener> statementEventListeners = 
-             new ArrayList<StatementEventListener>();
+    /**
+     * List of statement event listeners. The list is copied on each write,
+     * ensuring that it can be safely iterated over even if other threads or
+     * the listeners fired in the same thread add or remove listeners.
+     */
+    private final CopyOnWriteArrayList<StatementEventListener>
+            statementEventListeners =
+                    new CopyOnWriteArrayList<StatementEventListener>();
 
     public ClientPooledConnection40(ClientBaseDataSource ds,
         org.apache.derby.client.am.LogWriter logWriter,
@@ -73,7 +77,7 @@ public class ClientPooledConnection40 extends ClientPooledConnection {
      *                  interface and wants to be notified of Statement closed or 
      *                  or Statement error occurred events
      */
-    public synchronized void addStatementEventListener(StatementEventListener listener){
+    public void addStatementEventListener(StatementEventListener listener) {
         if (logWriter_ != null) {
             logWriter_.traceEntry(this, "addStatementEventListener", listener);
         }
@@ -89,7 +93,7 @@ public class ClientPooledConnection40 extends ClientPooledConnection {
      * @param listener The previously registered event listener that needs to be
      *                 removed from the list of components
      */
-    public synchronized void removeStatementEventListener(StatementEventListener listener){
+    public void removeStatementEventListener(StatementEventListener listener) {
         if (logWriter_ != null) {
             logWriter_.traceEntry(this, "removeConnectionEventListener", listener);
         }
@@ -104,7 +108,7 @@ public class ClientPooledConnection40 extends ClientPooledConnection {
      * @param statement The PreparedStatement that was closed
      *
      */
-    public synchronized void onStatementClose(PreparedStatement statement) {
+    public void onStatementClose(PreparedStatement statement) {
         if (!statementEventListeners.isEmpty()) {
             StatementEvent event = new StatementEvent(this,statement);
             for (StatementEventListener l : statementEventListeners) {
@@ -123,9 +127,8 @@ public class ClientPooledConnection40 extends ClientPooledConnection {
      *                  caused the invalidation of the PreparedStatements
      *
      */
-    public synchronized void onStatementErrorOccurred(
-                                                    PreparedStatement statement,
-                                                    SQLException sqle) {
+    public void onStatementErrorOccurred(PreparedStatement statement,
+                                         SQLException sqle) {
         if (!statementEventListeners.isEmpty()) {
             StatementEvent event = new StatementEvent(this,statement,sqle);
             for (StatementEventListener l : statementEventListeners) {

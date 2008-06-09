@@ -22,6 +22,7 @@
 package org.apache.derbyTesting.functionTests.tests.jdbc4;
 
 import java.sql.*;
+import java.util.Arrays;
 import javax.sql.*;
 import junit.framework.*;
 
@@ -273,4 +274,221 @@ public class StatementEventsTest extends BaseJDBCTestCase {
             assertEquals("Incorrect error count.", 1, errorCount);
         }
     }
+
+    /**
+     * Test that removing a listener from a listener works. (DERBY-3401)
+     */
+    public void testRemoveListenerFromListener() throws SQLException {
+
+        // First element is number of times the close listeners below have
+        // been triggered, second element is number of times the error
+        // listeners have been triggered.
+        final int[] counters = new int[2];
+
+        // Add some listeners that remove themselves
+        for (int i = 0; i < 5; i++) {
+            StatementEventListener close = new StatementEventListener() {
+
+                public void statementClosed(StatementEvent event) {
+                    pooledConnection.removeStatementEventListener(this);
+                    counters[0]++;
+                }
+
+                public void statementErrorOccurred(StatementEvent event) {
+                }
+            };
+            pooledConnection.addStatementEventListener(close);
+
+            StatementEventListener error = new StatementEventListener() {
+
+                public void statementClosed(StatementEvent event) {
+                }
+
+                public void statementErrorOccurred(StatementEvent event) {
+                    pooledConnection.removeStatementEventListener(this);
+                    counters[1]++;
+                }
+            };
+            pooledConnection.addStatementEventListener(error);
+        }
+
+        // Generate close event twice. The close listeners remove themselves
+        // in the first iteration, so no updates of the counters are expected
+        // in the second iteration.
+        for (int i = 0; i < 2; i++) {
+            prepare("VALUES (1)").close();
+            assertEquals("unexpected number of close events", 5, counters[0]);
+            assertEquals("unexpected number of error events", 0, counters[1]);
+        }
+
+        // reset counters
+        Arrays.fill(counters, 0);
+
+        // Generate error event twice. Only expect counters to be updated in
+        // the first iteration since the listeners remove themselves.
+        for (int i = 0; i < 2; i++) {
+            PreparedStatement ps = prepare("VALUES (1)");
+            connection.close();
+            try {
+                ps.execute();
+                fail("Execute on closed connection should fail");
+            } catch (SQLNonTransientConnectionException e) {
+                assertSQLState("08003", e);
+            }
+            assertEquals("unexpected number of close events", 0, counters[0]);
+            assertEquals("unexpected number of error events", 5, counters[1]);
+            connection = pooledConnection.getConnection();
+        }
+
+        // The listeners that are automatically added for all test cases have
+        // been active all the time.
+        assertEquals("Incorrect error count", 2, errorCount);
+        // Embedded doesn't receive close events when the connection is
+        // closed, whereas the client driver does. This is therefore an
+        // expected difference.
+        if (usingEmbedded()) {
+            assertEquals("Incorrect close count", 2, closedCount);
+        } else if (usingDerbyNetClient()) {
+            assertEquals("Incorrect close count", 4, closedCount);
+        } else {
+            fail("unknown framework");
+        }
+    }
+
+    /**
+     * Test that adding a listener from a listener works. (DERBY-3401)
+     */
+    public void testAddListenerFromListener() throws SQLException {
+
+        // First element is number of times the close listeners below have
+        // been triggered, second element is number of times the error
+        // listeners have been triggered. Third element is the number of
+        // times listeners added by close listeners have been triggered,
+        // fourth element is the number of times listeners added by error
+        // listeners have been triggered.
+        final int[] counters = new int[4];
+
+        // Add some listeners that add another listener
+        for (int i = 0; i < 5; i++) {
+            StatementEventListener close = new StatementEventListener() {
+
+                public void statementClosed(StatementEvent event) {
+                    counters[0]++;
+                    pooledConnection.addStatementEventListener(
+                            new StatementEventListener() {
+                        public void statementClosed(StatementEvent e) {
+                            counters[2]++;
+                        }
+                        public void statementErrorOccurred(StatementEvent e) {
+                            counters[2]++;
+                        }
+                    });
+                }
+
+                public void statementErrorOccurred(StatementEvent event) {
+                }
+            };
+
+            pooledConnection.addStatementEventListener(close);
+
+            StatementEventListener error = new StatementEventListener() {
+
+                public void statementClosed(StatementEvent event) {
+                }
+
+                public void statementErrorOccurred(StatementEvent event) {
+                    counters[1]++;
+                    pooledConnection.addStatementEventListener(
+                            new StatementEventListener() {
+                        public void statementClosed(StatementEvent e) {
+                            counters[3]++;
+                        }
+                        public void statementErrorOccurred(StatementEvent e) {
+                            counters[3]++;
+                        }
+                    });
+                }
+            };
+
+            pooledConnection.addStatementEventListener(error);
+        }
+
+        // Generate close event
+        prepare("VALUES (1)").close();
+        assertEquals("unexpected number of close events", 5, counters[0]);
+        assertEquals("unexpected number of error events", 0, counters[1]);
+        assertEquals("unexpected number of added close listeners triggered",
+                     0, counters[2]);
+        assertEquals("unexpected number of added error listeners triggered",
+                     0, counters[3]);
+
+        // Generate another close event
+        prepare("VALUES (1)").close();
+        assertEquals("unexpected number of close events", 10, counters[0]);
+        assertEquals("unexpected number of error events", 0, counters[1]);
+        assertEquals("unexpected number of added close listeners triggered",
+                     5, counters[2]);
+        assertEquals("unexpected number of added error listeners triggered",
+                     0, counters[3]);
+
+        // Generate a statement that doesn't work
+        PreparedStatement ps = prepare("VALUES (1)");
+        connection.close();
+        // reset counters
+        Arrays.fill(counters, 0);
+
+        // Generate an error event
+        try {
+            ps.execute();
+            fail("Execute on closed connection should fail");
+        } catch (SQLNonTransientConnectionException e) {
+            assertSQLState("08003", e);
+        }
+
+        assertEquals("unexpected number of close events", 0, counters[0]);
+        assertEquals("unexpected number of error events", 5, counters[1]);
+        // difference between embedded and client because client gets
+        // statement-closed event when the connection is closed, whereas
+        // embedded doesn't
+        assertEquals("unexpected number of added close listeners triggered",
+                     usingEmbedded() ? 10 : 15, counters[2]);
+        assertEquals("unexpected number of added error listeners triggered",
+                     0, counters[3]);
+
+        // reset counters
+        Arrays.fill(counters, 0);
+
+        // Generate another error event, now with more listeners active
+        try {
+            ps.execute();
+            fail("Execute on closed connection should fail");
+        } catch (SQLNonTransientConnectionException e) {
+            assertSQLState("08003", e);
+        }
+
+        assertEquals("unexpected number of close events", 0, counters[0]);
+        assertEquals("unexpected number of error events", 5, counters[1]);
+        // difference between embedded and client because client gets
+        // statement-closed event when the connection is closed, whereas
+        // embedded doesn't
+        assertEquals("unexpected number of added close listeners triggered",
+                     usingEmbedded() ? 10 : 15, counters[2]);
+        assertEquals("unexpected number of added error listeners triggered",
+                     5, counters[3]);
+
+        // The listeners that are automatically added for all test cases have
+        // been active all the time.
+        assertEquals("Incorrect error count", 2, errorCount);
+        // Embedded doesn't receive close events when the connection is
+        // closed, whereas the client driver does. This is therefore an
+        // expected difference.
+        if (usingEmbedded()) {
+            assertEquals("Incorrect close count", 2, closedCount);
+        } else if (usingDerbyNetClient()) {
+            assertEquals("Incorrect close count", 3, closedCount);
+        } else {
+            fail("unknown framework");
+        }
+    }
+
 }

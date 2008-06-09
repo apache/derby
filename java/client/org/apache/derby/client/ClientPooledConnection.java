@@ -46,7 +46,18 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
     private boolean newPC_ = true;
 
     //@GuardedBy("this")
-    private ArrayList listeners_ = null;
+    /** List of {@code ConnectionEventListener}s. Never {@code null}. */
+    private ArrayList listeners_ = new ArrayList();
+
+    /**
+     * The number of iterators going through the list of connection event
+     * listeners at the current time. Only one thread may be iterating over the
+     * list at any time (because of synchronization), but a single thread may
+     * have multiple iterators if for instance an event listener performs
+     * database calls that trigger a new event.
+     */
+    private int eventIterators;
+
     org.apache.derby.client.am.Connection physicalConnection_ = null;
     org.apache.derby.client.net.NetConnection netPhysicalConnection_ = null;
     org.apache.derby.client.net.NetXAConnection netXAPhysicalConnection_ = null;
@@ -85,7 +96,6 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
                                   String user,
                                   String password) throws SQLException {
         logWriter_ = logWriter;
-        listeners_ = new ArrayList();
 
         if (ds.maxStatementsToPool() <= 0) {
             this.statementCache = null;
@@ -138,7 +148,6 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
                                   int rmId) throws SQLException {
         logWriter_ = logWriter;
         rmId_ = rmId;
-        listeners_ = new ArrayList();
 
         if (ds.maxStatementsToPool() <= 0) {
             this.statementCache = null;
@@ -302,6 +311,13 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
         if (logWriter_ != null) {
             logWriter_.traceEntry(this, "addConnectionEventListener", listener);
         }
+        if (eventIterators > 0) {
+            // DERBY-3401: Someone is iterating over the ArrayList, and since
+            // we were able to synchronize on this, that someone is us. Clone
+            // the list of listeners in order to prevent invalidation of the
+            // iterator.
+            listeners_ = (ArrayList) listeners_.clone();
+        }
         listeners_.add(listener);
     }
 
@@ -309,6 +325,13 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
                                             ConnectionEventListener listener) {
         if (logWriter_ != null) {
             logWriter_.traceEntry(this, "removeConnectionEventListener", listener);
+        }
+        if (eventIterators > 0) {
+            // DERBY-3401: Someone is iterating over the ArrayList, and since
+            // we were able to synchronize on this, that someone is us. Clone
+            // the list of listeners in order to prevent invalidation of the
+            // iterator.
+            listeners_ = (ArrayList) listeners_.clone();
         }
         listeners_.remove(listener);
     }
@@ -328,12 +351,7 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
         // being closed.
         this.logicalConnection_ = null;
 
-        for (Iterator e = listeners_.iterator(); e.hasNext();) {
-            ConnectionEventListener listener =
-                    (ConnectionEventListener)e.next();
-            ConnectionEvent event = new ConnectionEvent(this);
-            listener.connectionClosed(event);
-        }
+        fireConnectionEventListeners(null);
     }
 
     /**
@@ -350,12 +368,36 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
 			return;
 
         synchronized (this) {
-            for (Iterator e = listeners_.iterator(); e.hasNext();) {
-                ConnectionEventListener listener =
-                        (ConnectionEventListener)e.next();
-                SQLException sqle = exception.getSQLException();
-                ConnectionEvent event = new ConnectionEvent(this, sqle);
-                listener.connectionErrorOccurred(event);
+            fireConnectionEventListeners(exception);
+        }
+    }
+
+    /**
+     * Fire all the {@code ConnectionEventListener}s registered. Callers must
+     * synchronize on {@code this} to prevent others from modifying the list of
+     * listeners.
+     *
+     * @param exception the exception that caused the event, or {@code null} if
+     * it is a close event
+     */
+    private void fireConnectionEventListeners(SqlException exception) {
+        if (!listeners_.isEmpty()) {
+            final ConnectionEvent event = (exception == null) ?
+                new ConnectionEvent(this) :
+                new ConnectionEvent(this, exception.getSQLException());
+            eventIterators++;
+            try {
+                for (Iterator it = listeners_.iterator(); it.hasNext(); ) {
+                    final ConnectionEventListener listener =
+                        (ConnectionEventListener) it.next();
+                    if (exception == null) {
+                        listener.connectionClosed(event);
+                    } else {
+                        listener.connectionErrorOccurred(event);
+                    }
+                }
+            } finally {
+                eventIterators--;
             }
         }
     }
