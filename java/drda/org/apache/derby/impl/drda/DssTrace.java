@@ -20,11 +20,14 @@
  */
 package org.apache.derby.impl.drda;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
+
+import org.apache.derby.iapi.util.PrivilegedFileOps;
 
 
 // Generic process and error tracing encapsulation.
@@ -167,14 +170,13 @@ public class DssTrace
   // Start the communications buffer trace.
   // The name of the file to place the trace is passed to this method.
   // After calling this method, calls to isComBufferTraceOn() will return true.
-  protected void startComBufferTrace (final String fileName) throws IOException 
+  protected void startComBufferTrace (final String fileName) throws Exception 
   {
     synchronized (comBufferSync) {
         // Only start the trace if it is off.
         if (comBufferTraceOn == false) {
-          // The writer will be buffered for effeciency.
             try {
-                
+                // The writer will be buffered for effeciency.
                 comBufferWriter =  ((PrintWriter)AccessController.doPrivileged(
                             new PrivilegedExceptionAction() {
                                 public Object run() throws SecurityException, IOException {
@@ -182,11 +184,8 @@ public class DssTrace
                                 }
                             }));
             } catch (PrivilegedActionException pae) {
-               Exception e = pae.getException();
-               if (e instanceof SecurityException)
-                   throw (SecurityException)pae.getException();
-               else
-                   throw (IOException) pae.getException();
+               throw  pae.getException();
+               
             }
           
           // Turn on the trace flag.

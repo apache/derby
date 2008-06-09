@@ -3502,7 +3502,7 @@ public final class NetworkServerControlImpl {
 				    Session session = (Session) e.nextElement();
 					if (on)
 						try {
-							session.setTraceOn(traceDirectory);
+							session.setTraceOn(traceDirectory,true);
 						} catch (Exception te ) {
 							consoleExceptionPrintTrace(te);
 							setTraceSuccessful = false;
@@ -3522,7 +3522,7 @@ public final class NetworkServerControlImpl {
 			{	
 				if (on)
 					try {                         
-						session.setTraceOn(traceDirectory);
+						session.setTraceOn(traceDirectory,true);
 					}catch (Exception te) {
 						consoleExceptionPrintTrace(te);
 						setTraceSuccessful = false;
@@ -3838,7 +3838,7 @@ public final class NetworkServerControlImpl {
 		// Note that we always re-fetch the tracing configuration because it
 		// may have changed (there are administrative commands which allow
 		// dynamic tracing reconfiguration).
-		Session session = new Session(connectionNumber, clientSocket,
+		Session session = new Session(this,connectionNumber, clientSocket,
 									  getTraceDirectory(), getTraceAll());
 
 		sessionTable.put(new Integer(connectionNumber), session);
