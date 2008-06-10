@@ -352,6 +352,13 @@ public abstract class BaseJDBCTestCase
     }
     
     /**
+     * Utility method to set auto commit behaviour.
+     * @param commit false if autoCommit should be disabled.
+     */
+    public void setAutoCommit(boolean commit) throws SQLException {
+    	getConnection().setAutoCommit(commit);
+    }
+    /**
      * Utility method to commit using the connection
      * returned by getConnection.
      * @throws SQLException
@@ -360,6 +367,7 @@ public abstract class BaseJDBCTestCase
     {
         getConnection().commit();
     }  
+    
     /**
      * Utility method to rollback using the connection
      * returned by getConnection.

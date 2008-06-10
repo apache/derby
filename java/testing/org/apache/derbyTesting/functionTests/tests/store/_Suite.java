@@ -52,7 +52,7 @@ public class _Suite extends BaseTestCase  {
         TestSuite suite = new TestSuite("store");
         
         suite.addTest(BootAllTest.suite());
-
+        suite.addTest(StreamingColumnTest.suite());
         // Encryption only supported for Derby in J2SE/J2EE environments.
         // J2ME (JSR169) does not support encryption.
         if (JDBC.vmSupportsJDBC3()) {
