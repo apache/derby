@@ -311,6 +311,13 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
         if (logWriter_ != null) {
             logWriter_.traceEntry(this, "addConnectionEventListener", listener);
         }
+
+        if (listener == null) {
+            // Ignore the listener if it is null. Otherwise, an exception is
+            // thrown when a connection event occurs (DERBY-3307).
+            return;
+        }
+
         if (eventIterators > 0) {
             // DERBY-3401: Someone is iterating over the ArrayList, and since
             // we were able to synchronize on this, that someone is us. Clone

@@ -137,6 +137,8 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         suite.addTest(new J2EEDataSourceTest("testBadConnectionAttributeSyntax"));
         suite.addTest(new J2EEDataSourceTest("testDescriptionProperty"));
         suite.addTest(new J2EEDataSourceTest("testConnectionErrorEvent"));
+        suite.addTest(new J2EEDataSourceTest(
+                              "testConnectionEventListenerIsNull"));
         suite.addTest(new J2EEDataSourceTest("testReadOnlyToWritableTran"));
         suite.addTest(new J2EEDataSourceTest("testAutoCommitOnXAResourceStart"));
         suite.addTest(new J2EEDataSourceTest("testAllDataSources"));
@@ -607,7 +609,64 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         conn = getConnection();
         conn.close();
     }
-    
+
+    /**
+     * Test that event notification doesn't fail when a null listener has
+     * been registered (DERBY-3307).
+     */
+    public void testConnectionEventListenerIsNull() throws SQLException {
+        ConnectionPoolDataSource cpds =
+            J2EEDataSource.getConnectionPoolDataSource();
+        subtestCloseEventWithNullListener(cpds.getPooledConnection());
+        subtestErrorEventWithNullListener(cpds.getPooledConnection());
+
+        XADataSource xads = J2EEDataSource.getXADataSource();
+        subtestCloseEventWithNullListener(xads.getXAConnection());
+        subtestErrorEventWithNullListener(xads.getXAConnection());
+    }
+
+    /**
+     * Test that notification of a close event doesn't fail when the
+     * listener is null.
+     */
+    private void subtestCloseEventWithNullListener(PooledConnection pc)
+        throws SQLException
+    {
+        pc.addConnectionEventListener(null);
+        // Trigger a close event
+        pc.getConnection().close();
+        pc.close();
+    }
+
+    /**
+     * Test that notification of an error event doesn't fail when the
+     * listener is null.
+     */
+    private void subtestErrorEventWithNullListener(PooledConnection pc)
+        throws SQLException
+    {
+        pc.addConnectionEventListener(null);
+        Connection c = pc.getConnection();
+        // Shut down the database to invalidate all connections
+        getTestConfiguration().shutdownDatabase();
+        try {
+            // Should trigger an error event since the connection is no
+            // longer valid
+            c.prepareStatement("VALUES 1");
+            fail("Statement should fail after database shutdown");
+        } catch (SQLException e) {
+            if (usingEmbedded()) {
+                // No current connection is expected on embedded
+                assertSQLState("08003", e);
+            } else {
+                // The client driver reports communication error
+                assertSQLState("08006", e);
+            }
+        }
+        c.close();
+        pc.close();
+    }
+
     /**
      * Test that a PooledConnection can be reused and closed
      * (separately) during the close event raised by the
