@@ -1022,11 +1022,7 @@ public class PreparedStatement extends Statement
                 
                 checkTypeForSetBinaryStream(parameterIndex);
 
-                 if(length > Integer.MAX_VALUE) {
-                    throw new SqlException(agent_.logWriter_,
-                        new ClientMessageId(SQLState.CLIENT_LENGTH_OUTSIDE_RANGE_FOR_DATATYPE),
-                        new Long(length), new Integer(Integer.MAX_VALUE)).getSQLException();
-                }
+                checkStreamLength(length);
                 setBinaryStreamX(parameterIndex, x, (int)length);
             }
         }
@@ -1088,7 +1084,8 @@ public class PreparedStatement extends Statement
         {
             synchronized (connection_) {
                 if (agent_.loggingEnabled()) {
-                    agent_.logWriter_.traceEntry(this, "setAsciiStream", parameterIndex, "<input stream>", new Long(length));
+                    agent_.logWriter_.traceEntry(this, "setAsciiStream",
+                            parameterIndex, "<input stream>", new Long(length));
                 }
                 
                 checkTypeForSetAsciiStream(parameterIndex);
@@ -1098,11 +1095,7 @@ public class PreparedStatement extends Statement
                     setNull(parameterIndex, java.sql.Types.LONGVARCHAR);
                     return;
                 }
-                if(length > Integer.MAX_VALUE) {
-                    throw new SqlException(agent_.logWriter_,
-                        new ClientMessageId(SQLState.CLIENT_LENGTH_OUTSIDE_RANGE_FOR_DATATYPE),
-                        new Long(length), new Integer(Integer.MAX_VALUE)).getSQLException();
-                }
+                checkStreamLength(length);
                 setInput(parameterIndex, new Clob(agent_, x, "ISO-8859-1", (int)length));
             }
         }
@@ -1127,7 +1120,30 @@ public class PreparedStatement extends Statement
         setAsciiStream(parameterIndex,x,(long)length);
     }
     
-
+    /**
+     * Check the length passed in for the stream that is to be set. If length is
+     * larger than Integer.MAX_VALUE or smaller that 0, we fail by throwing an 
+     * SQLException.
+     * @param length The length of the stream being set
+     * @throws SQLException Thrown for a negative or too large length.
+     */
+    private void checkStreamLength(long length) throws SQLException {
+        if(length > Integer.MAX_VALUE) {
+            throw new SqlException(
+                        agent_.logWriter_,
+                        new ClientMessageId(
+                            SQLState.CLIENT_LENGTH_OUTSIDE_RANGE_FOR_DATATYPE),
+                        new Long(length),
+                        new Integer(Integer.MAX_VALUE)
+                    ).getSQLException();
+        } else if (length < 0) {
+            throw new SqlException(
+                        agent_.logWriter_,
+                        new ClientMessageId(SQLState.NEGATIVE_STREAM_LENGTH)
+                    ).getSQLException();
+        }
+    }
+    
     private void checkTypeForSetAsciiStream(int parameterIndex)
             throws SqlException, SQLException {
         int paramType = getColumnMetaDataX().getColumnType(parameterIndex);
@@ -1276,11 +1292,7 @@ public class PreparedStatement extends Statement
                     setNull(parameterIndex, java.sql.Types.LONGVARCHAR);
                     return;
                 }
-                if(length > Integer.MAX_VALUE) {
-                    throw new SqlException(agent_.logWriter_,
-                        new ClientMessageId(SQLState.CLIENT_LENGTH_OUTSIDE_RANGE_FOR_DATATYPE),
-                        new Long(length), new Integer(Integer.MAX_VALUE)).getSQLException();
-                }
+                checkStreamLength(length);
                 setInput(parameterIndex, new Clob(agent_, x, (int)length));
             }
         }
