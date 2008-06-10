@@ -205,6 +205,18 @@ class DRDAConnThread extends Thread {
     // to the apparent classloader bug in the JVM.
 	private static final DRDAProtocolExceptionInfo dummy =
 		new DRDAProtocolExceptionInfo(0,0,0,false);
+    /**
+     * Tells if the reset / connect request is a deferred request.
+     * This information is used to work around a bug (DERBY-3596) in a
+     * compatible manner, which also avoids any changes in the client driver.
+     * <p>
+     * The bug manifests itself when a connection pool data source is used and
+     * logical connections are obtained from the physical connection associated
+     * with the data source. Each new logical connection causes a new physical
+     * connection on the server, including a new transaction. These connections
+     * and transactions are not closed / cleaned up.
+     */
+    private boolean deferredReset = false;
 
 	// constructor
 	/**
@@ -1026,7 +1038,12 @@ class DRDAConnThread extends Thread {
                 try {
                     PiggyBackedSessionData pbsd =
                             database.getPiggyBackedSessionData(false);
-                    if (pbsd != null) {
+                    // DERBY-3596
+                    // Don't perform this assert if a deferred reset is
+                    // happening or has recently taken place, because the
+                    // connection state has been changed under the feet of the
+                    // piggy-backing mechanism.
+                    if (!this.deferredReset && pbsd != null) {
                         // Session data has already been piggy-backed. Refresh
                         // the data from the connection, to make sure it has
                         // not changed behind our back.
@@ -1470,8 +1487,17 @@ class DRDAConnThread extends Thread {
 
 		// If we have already exchanged attributes once just 
 		// process any new manager levels and return (case 2 and 3 above)
+        this.deferredReset = false; // Always reset, only set to true below.
 		if (appRequester != null)
 		{
+            // DERBY-3596
+            // Don't mess with XA requests, as the logic for these are handled
+            // by the server side (embedded) objects. Note that XA requests
+            // results in a different database object implementation, and it
+            // does not have the bug we are working around.
+            if (!appRequester.isXARequester()) {
+                this.deferredReset = true; // Non-XA deferred reset detected.
+            }
 			parseEXCSAT2();
 			return;
 		}
@@ -1890,8 +1916,15 @@ class DRDAConnThread extends Thread {
 					else
                     {
                         // reset database for connection re-use 
-                        d.reset();
-						database = d;
+                        // DERBY-3596
+                        // If we are reusing resources for a new physical
+                        // connection, reset the database object. If the client
+                        // is in the process of creating a new logical
+                        // connection only, don't reset the database object.
+                        if (!deferredReset) {
+                            d.reset();
+                        }
+                        database = d;
                     }
 					break;
 				//optional - depending on security Mechanism 
@@ -2665,7 +2698,13 @@ class DRDAConnThread extends Thread {
         if (SanityManager.DEBUG) {
             SanityManager.ASSERT(pbsd != null, "pbsd is not expected to be null");
         }
-
+        // DERBY-3596
+        // Reset the flag. In sane builds it is used to avoid an assert, but
+        // we want to reset it as soon as possible to avoid masking real bugs.
+        // We have to do this because we are changing the connection state
+        // at an unexpected time (deferred reset, see parseSECCHK). This was
+        // done to avoid having to change the client code.
+        this.deferredReset = false;
         pbsd.refresh();
         if (pbsd.isModified()) {
             writer.createDssReply();
@@ -2938,6 +2977,28 @@ class DRDAConnThread extends Thread {
 		databaseAccessException = null;
 		reader.markCollection();
 		codePoint = reader.getCodePoint();
+        if (this.deferredReset) {
+            // Skip the SECCHK, but assure a minimal degree of correctness.
+            while (codePoint != -1) {
+                switch (codePoint) {
+                    // Note the fall-through.
+                    // Minimal level of checking to detect protocol errors.
+                    // NOTE: SECMGR level 8 code points are not handled.
+                    case CodePoint.SECMGRNM:
+                    case CodePoint.SECMEC:
+                    case CodePoint.SECTKN:
+                    case CodePoint.PASSWORD:
+                    case CodePoint.NEWPASSWORD:
+                    case CodePoint.USRID:
+                    case CodePoint.RDBNAM:
+                        reader.skipBytes();
+                        break;
+                    default:
+                        invalidCodePoint(codePoint);
+                }
+                codePoint = reader.getCodePoint();
+            }
+        } else {
 		while (codePoint != -1)
 		{
 			switch (codePoint)
@@ -3110,11 +3171,29 @@ class DRDAConnThread extends Thread {
 		}
 		// RESOLVE - when we do security we need to decrypt encrypted userid & password
 		// before proceeding
+        } // End "if (deferredReset) ... else ..." block
 
 		// verify userid and password, if we haven't had any errors thus far.
 		if ((securityCheckCode == 0) && (databaseAccessException == null))
-		{
-			securityCheckCode = verifyUserIdPassword();
+        {
+            // DERBY-3596: Reset server side (embedded) physical connection for
+            //     use with a new logical connection on the client.
+            if (this.deferredReset) {
+                // Reset the existing connection here.
+                try {
+                    database.getConnection().resetFromPool();
+                    database.getConnection().setHoldability(
+                            ResultSet.HOLD_CURSORS_OVER_COMMIT);
+                    // Reset isolation level to default, as the client is in
+                    // the process of creating a new logical connection.
+                    database.getConnection().setTransactionIsolation(
+                            Connection.TRANSACTION_READ_COMMITTED);
+                } catch (SQLException sqle) {
+                    handleException(sqle);
+                }
+            } else {
+                securityCheckCode = verifyUserIdPassword();
+            }
 		}
 
 		// Security all checked 
@@ -3124,6 +3203,7 @@ class DRDAConnThread extends Thread {
 		return securityCheckCode;
 
 	}
+
 	/**
 	 * Write security check reply
 	 * Instance variables

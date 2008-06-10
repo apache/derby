@@ -653,4 +653,12 @@ public abstract class BrokeredConnection implements EngineConnection
             throw se;
         }
     }
+
+    /**
+     * @see org.apache.derby.iapi.jdbc.EngineConnection
+     */
+    public void resetFromPool()
+            throws SQLException {
+        getRealConnection().resetFromPool();
+    }
 }
