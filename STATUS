@@ -15,7 +15,7 @@ Project Status
   send an empty message to derby-dev-subscribe@db.apache.org.
 
   Derby graduated from incubation in July, 2005 and is now a
-  full-fledged Apache DB project..
+  full-fledged Apache DB project.
 
 Project info
 
@@ -102,28 +102,28 @@ Website         www       http://db.apache.org/derby/
 Mailing list    dev       derby-dev@db.apache.org
 Mailing list    users     derby-user@db.apache.org
 Source code     SVN       /repos/asf/db/derby/code/trunk/
-Committers      jta                        Jean Anderson (CLA on file)
-Committers      kahatlen              Knut Anders Hatlen (CLA on file)
-Committers      oyvind                  Øyvind Bakksjø (CLA on file)
-Committers      satheesh              Satheesh Bandaram (CLA on file)
-Committers      jboynes                 Jeremy Boynes (CLA on file)
-Committers      abrown                 Army Brown (CLA on file)
-Committers      coar                      Ken Coar (CLA on file)
-Committers      djd                        Daniel Debrunner (CLA on file)
-Committers      rhillegas               Rick Hillegas (CLA on file)
-Committers      bernt                    Bernt M. Johnsen (CLA on file)
-Committers      andreask              Andreas Korneliussen (CLA on file)
+Committers      jta                  Jean Anderson (CLA on file)
+Committers      kahatlen             Knut Anders Hatlen (CLA on file)
+Committers      oyvind               Øyvind Bakksjø (CLA on file)
+Committers      satheesh             Satheesh Bandaram (CLA on file)
+Committers      jboynes              Jeremy Boynes (CLA on file)
+Committers      abrown               Army Brown (CLA on file)
+Committers      coar                 Ken Coar (CLA on file)
+Committers      djd                  Daniel Debrunner (CLA on file)
+Committers      rhillegas            Rick Hillegas (CLA on file)
+Committers      bernt                Bernt M. Johnsen (CLA on file)
+Committers      andreask             Andreas Korneliussen (CLA on file)
 Committers      kmarsden             Katherine Marsden (CLA on file)
-Committers      mikem                  Mike Matrigali (CLA on file)
-Committers      mcintyre              Samuel McIntyre (CLA on file)
-Committers      tmnk                    Tomohito Nakayama (CLA on file)
-Committers      bryanpendleton  Bryan Pendleton (CLA on file)
+Committers      mikem                Mike Matrigali (CLA on file)
+Committers      mcintyre             Samuel McIntyre (CLA on file)
+Committers      tmnk                 Tomohito Nakayama (CLA on file)
+Committers      bryanpendleton       Bryan Pendleton (CLA on file)
 Committers      fernanda             Fernanda Pizzorno (CLA on file)
-Committers      suresht               Suresh Thalamati (CLA on file)
-Committers      davidvc               David Van Couvering (CLA on file)
+Committers      suresht              Suresh Thalamati (CLA on file)
+Committers      davidvc              David Van Couvering (CLA on file)
 Committers      myrnavl              Myrna Van Lunteren (CLA on file)
 Committers      mamta                Mamta Satoor (CLA on file)
-Committers      scotsmatrix        Laura Stewart (CLA on file)
+Committers      scotsmatrix          Laura Stewart (CLA on file)
 Committers      kristwaa             Kristian Waagan (CLA on file)
 Committers      dag                  Dag H. Wanvik (CLA on file)
 Committers      oysteing             Øystein Grøvlen (CLA on file)
