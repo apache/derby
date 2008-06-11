@@ -33,8 +33,6 @@ import javax.sql.DataSource;
 
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.security.PrivilegedActionException;
-import java.security.PrivilegedExceptionAction;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.JDBCDataSource;
@@ -616,8 +614,8 @@ public abstract class EncryptionKeyTest
      */
     protected Connection createAndPopulateDB(String dbName)
             throws SQLException {
-        Connection con = getConnection(dbName, CORRECT_KEY);
-        SQLWarning warning = con.getWarnings();
+        Connection newCon = getConnection(dbName, CORRECT_KEY);
+        SQLWarning warning = newCon.getWarnings();
         // If the database already exists, fail the test.
         if (warning != null) {
             if ("01J01".equals(warning.getSQLState())) {
@@ -625,11 +623,11 @@ public abstract class EncryptionKeyTest
                         warning.getMessage() + ">");
             }
         }
-        Statement stmt = con.createStatement();
+        Statement stmt = newCon.createStatement();
         stmt.executeUpdate("CREATE TABLE " + TABLE + " (id int NOT NULL, " +
                 "val int NOT NULL, PRIMARY KEY(id))");
         stmt.close();
-        PreparedStatement ps = con.prepareStatement("INSERT INTO " + TABLE +
+        PreparedStatement ps = newCon.prepareStatement("INSERT INTO " + TABLE +
                 " (id, val) VALUES (?,?)");
         for (int i=0; i < DATA.length; i++) {
             ps.setInt(1, i);
@@ -637,7 +635,7 @@ public abstract class EncryptionKeyTest
             ps.executeUpdate();
         }
         ps.close();
-        return con;
+        return newCon;
     }
 
     /**
