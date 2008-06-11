@@ -157,11 +157,6 @@ public class LazyDefaultSchemaCreationTest extends BaseJDBCTestCase {
         c1.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
         Statement s1 = c1.createStatement();
 
-        s1.executeUpdate(
-            "CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(" +
-                "'derby.locks.deadlockTrace', 'true')");
-
-
         // Set read locks in parent transaction
         s1.executeQuery("select count(*) from sys.sysschemas");
 
@@ -180,6 +175,37 @@ public class LazyDefaultSchemaCreationTest extends BaseJDBCTestCase {
             ("select * from sys.sysschemas where schemaname='NEWUSER'"));
 
         c1.rollback();
+    }
+
+    /**
+     * Test that the timeout lock diagnostics do not create an
+     * infinite recursion as in DERBY-3678 (although that particular
+     * use case will not cause an infinite recursion after the fix to
+     * DERBY-48). The scenario in this test case does create the
+     * infinite recursion prior to the fix of DERBY-3678, however.
+     */
+    public void testDerby3678 ()
+            throws SQLException
+    {
+        Connection c1 = openUserConnection("newuser");
+        Connection c2 = null;
+
+        c1.setAutoCommit(false);
+        Statement s1 = c1.createStatement();
+
+        // set locks in connection 1:
+        s1.executeUpdate("create schema newuser");
+        s1.executeUpdate("create table t(i int)");
+
+        // ..which conflicts with the next connect
+        try {
+            c2 = openUserConnection("newuser");
+            fail("Expected exception " + LOCK_TIMEOUT_LOG);
+        } catch (SQLException e) {
+            assertSQLState("Expected state: ", LOCK_TIMEOUT_LOG, e);
+        } finally {
+            c1.rollback();
+        }
     }
 
     protected void  tearDown() throws Exception {
@@ -217,6 +243,15 @@ public class LazyDefaultSchemaCreationTest extends BaseJDBCTestCase {
                  (new DatabasePropertyTestSetup
                   (new LazyDefaultSchemaCreationTest
                    ("testDerby48SelfLockingRecoveryDeadlockDetectionOn"),
+                   p, false),
+                  2,   // deadlock timeout
+                  1)); // wait timeout
+
+            suites[i].addTest
+                (DatabasePropertyTestSetup.setLockTimeouts
+                 (new DatabasePropertyTestSetup
+                  (new LazyDefaultSchemaCreationTest
+                   ("testDerby3678"),
                    p, false),
                   2,   // deadlock timeout
                   1)); // wait timeout

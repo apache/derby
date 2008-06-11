@@ -1504,6 +1504,47 @@ public final class	DataDictionaryImpl
 								TransactionController tc)
 		throws StandardException
 	{
+		return locateSchemaRowBody(
+			schemaId,
+			TransactionController.ISOLATION_REPEATABLE_READ,
+			tc);
+	}
+
+
+	/**
+	 * Get the target schema by searching for a matching row
+	 * in SYSSCHEMAS by schemaId.  Read only scan.
+	 *
+	 * @param schemaId		The id of the schema we're interested in.
+	 *						If non-null, overrides schemaName
+	 * @param isolationLevel Use this explicit isolation level. Only
+	 *                      ISOLATION_REPEATABLE_READ (normal usage) or
+	 *                      ISOLATION_READ_UNCOMMITTED (corner cases)
+	 *                      supported for now.
+	 * @param tc			TransactionController.  If null, one
+	 *						is gotten off of the language connection context.
+	 *
+	 * @return	The row for the schema
+	 *
+	 * @exception StandardException		Thrown on error
+	 */
+	private SchemaDescriptor locateSchemaRow(UUID schemaId,
+											 int isolationLevel,
+											 TransactionController tc)
+		throws StandardException
+	{
+		return locateSchemaRowBody(
+			schemaId,
+			isolationLevel,
+			tc);
+	}
+
+
+	private SchemaDescriptor locateSchemaRowBody(UUID schemaId,
+												 int isolationLevel,
+												 TransactionController tc)
+		throws StandardException
+	{
 		DataValueDescriptor		UUIDStringOrderable;
 		TabInfoImpl					ti = coreInfo[SYSSCHEMAS_CORE_NUM];
 
@@ -1523,6 +1564,7 @@ public final class	DataDictionaryImpl
 						(TupleDescriptor) null,
 						(List) null,
 						false,
+						isolationLevel,
 						tc);
 	}
 		
@@ -1585,6 +1627,40 @@ public final class	DataDictionaryImpl
 									TransactionController tc)
 		throws StandardException
 	{
+		return getSchemaDescriptorBody(
+			schemaId,
+			TransactionController.ISOLATION_REPEATABLE_READ,
+			tc);
+	}
+
+	/**
+	 * Get the SchemaDescriptor for the given schema identifier.
+	 *
+	 * @param schemaId the uuid of the schema we want a descriptor for
+	 * @param isolationLevel use this explicit isolation level. Only
+	 *                       ISOLATION_REPEATABLE_READ (normal usage) or
+	 *                       ISOLATION_READ_UNCOMMITTED (corner cases)
+	 *                       supported for now.
+	 * @param tc transaction controller
+	 * @throws StandardException thrown on error
+	 */
+	public SchemaDescriptor	getSchemaDescriptor(UUID schemaId,
+												int isolationLevel,
+												TransactionController tc)
+		throws StandardException
+	{
+		return getSchemaDescriptorBody(
+			schemaId,
+			isolationLevel,
+			tc);
+	}
+
+
+	private SchemaDescriptor getSchemaDescriptorBody(
+		UUID schemaId,
+		int isolationLevel,
+		TransactionController tc) throws StandardException
+	{
 		SchemaDescriptor		sd = null;
 		
 		if ( tc == null )
@@ -1631,7 +1707,7 @@ public final class	DataDictionaryImpl
 			}
 		}
 
-		return locateSchemaRow(schemaId, tc);
+		return locateSchemaRow(schemaId, isolationLevel, tc);
 	}
 
 
@@ -5811,9 +5887,10 @@ public final class	DataDictionaryImpl
 	}
 
 	/**
-	 * Get all of the TableDescriptors in the database and hash them by TableId
-	 * This is useful as a performance optimization for the locking VTIs.
-	 * NOTE:  This method will scan SYS.SYSTABLES at READ UNCOMMITTED.
+	 * Get all of the TableDescriptors in the database and hash them
+	 * by TableId This is useful as a performance optimization for the
+	 * locking VTIs.  NOTE: This method will scan SYS.SYSTABLES and
+	 * SYS.SYSSCHEMAS at READ UNCOMMITTED.
 	 *
 	 * @param tc		TransactionController for the transaction
 	 *
@@ -5855,8 +5932,11 @@ public final class	DataDictionaryImpl
 		while(scanController.fetchNext(outRow.getRowArray()))
 		{
 			TableDescriptor td = (TableDescriptor)
-				rf.buildDescriptor(outRow, (TupleDescriptor)null,
-								   this);
+				rf.buildDescriptor(
+					outRow,
+					(TupleDescriptor)null,
+					this,
+					TransactionController.ISOLATION_READ_UNCOMMITTED);
 			ht.put(td.getUUID(), td);
 		}
 		scanController.close();
@@ -8065,14 +8145,16 @@ public final class	DataDictionaryImpl
 		// Get the current transaction controller
 		TransactionController tc = getTransactionCompile();
 
-		return getDescriptorViaIndexMinion(indexId,
-										   keyRow,
-										   scanQualifiers,
-										   ti,
-										   parentTupleDescriptor,
-										   list,
-										   forUpdate,
-										   tc);
+		return getDescriptorViaIndexMinion(
+			indexId,
+			keyRow,
+			scanQualifiers,
+			ti,
+			parentTupleDescriptor,
+			list,
+			forUpdate,
+			TransactionController.ISOLATION_REPEATABLE_READ,
+			tc);
 	}
 
 	/**
@@ -8110,6 +8192,62 @@ public final class	DataDictionaryImpl
 			tc = getTransactionCompile();
 		}
 
+		return getDescriptorViaIndexMinion(
+			indexId,
+			keyRow,
+			scanQualifiers,
+			ti,
+			parentTupleDescriptor,
+			list,
+			forUpdate,
+			TransactionController.ISOLATION_REPEATABLE_READ,
+			tc);
+	}
+
+	/**
+	 * Return a (single or list of) catalog row descriptor(s) from a
+	 * system table where the access is from the index to the heap.
+	 *
+	 * This overload variant takes an explicit tc, in contrast to the normal
+	 * one which uses the one returned by getTransactionCompile.
+	 *
+	 * @param indexId   The id of the index (0 to # of indexes on table) to use
+	 * @param keyRow    The supplied ExecIndexRow for search
+	 * @param ti        The TabInfoImpl to use
+	 * @param parentTupleDescriptor The parentDescriptor, if applicable.
+	 * @param list      The list to build, if supplied.  If null, then
+	 *                  caller expects a single descriptor
+	 * @param forUpdate Whether or not to open the index for update.
+	 * @param isolationLevel
+	 *                  Use this explicit isolation level. Only
+	 *                  ISOLATION_REPEATABLE_READ (normal usage) or
+	 *                  ISOLATION_READ_UNCOMMITTED (corner cases)
+	 *                  supported for now.
+	 * @param tc        Transaction controller
+	 *
+	 * @return The last matching descriptor. If isolationLevel is
+	 *         ISOLATION_READ_UNCOMMITTED, the base row may be gone by the
+	 *         time we access it via the index; in such a case a null is
+	 *         returned.
+	 *
+	 * @exception StandardException Thrown on error.
+	 */
+	private final TupleDescriptor getDescriptorViaIndex(
+						int indexId,
+						ExecIndexRow keyRow,
+						ScanQualifier [][] scanQualifiers,
+						TabInfoImpl ti,
+						TupleDescriptor parentTupleDescriptor,
+						List list,
+						boolean forUpdate,
+						int isolationLevel,
+						TransactionController tc)
+			throws StandardException
+	{
+		if (tc == null) {
+			tc = getTransactionCompile();
+		}
+
 		return getDescriptorViaIndexMinion(indexId,
 										   keyRow,
 										   scanQualifiers,
@@ -8117,6 +8255,7 @@ public final class	DataDictionaryImpl
 										   parentTupleDescriptor,
 										   list,
 										   forUpdate,
+										   isolationLevel,
 										   tc);
 	}
 
@@ -8129,6 +8268,7 @@ public final class	DataDictionaryImpl
 						TupleDescriptor parentTupleDescriptor,
 						List list,
 						boolean forUpdate,
+						int isolationLevel,
 						TransactionController tc)
 			throws StandardException
 	{
@@ -8141,12 +8281,27 @@ public final class	DataDictionaryImpl
 		ScanController			scanController;
 		TupleDescriptor			td = null;
 
+		if (SanityManager.DEBUG) {
+			SanityManager.ASSERT
+				(isolationLevel ==
+				 TransactionController.ISOLATION_REPEATABLE_READ ||
+				 isolationLevel ==
+				 TransactionController.ISOLATION_READ_UNCOMMITTED);
+
+			if (isolationLevel ==
+				 TransactionController.ISOLATION_READ_UNCOMMITTED) {
+				// list not used for this case
+				SanityManager.ASSERT(list == null);
+			}
+
+		}
+
 		outRow = rf.makeEmptyRow();
 
 		heapCC = tc.openConglomerate(
                 ti.getHeapConglomerate(), false, 0,
                 TransactionController.MODE_RECORD,
-                TransactionController.ISOLATION_REPEATABLE_READ);
+                isolationLevel);
 
 		/* Scan the index and go to the data pages for qualifying rows to
 		 * build the column descriptor.
@@ -8156,7 +8311,7 @@ public final class	DataDictionaryImpl
 				false, // don't hold open across commit
 				(forUpdate) ? TransactionController.OPENMODE_FORUPDATE : 0,
                 TransactionController.MODE_RECORD,
-                TransactionController.ISOLATION_REPEATABLE_READ,
+                isolationLevel,
 				(FormatableBitSet) null,         // all fields as objects
 				keyRow.getRowArray(),   // start position - first row
 				ScanController.GE,      // startSearchOperation
@@ -8164,7 +8319,7 @@ public final class	DataDictionaryImpl
 				keyRow.getRowArray(),   // stop position - through last row
 				ScanController.GT);     // stopSearchOperation
 
-		while (scanController.next())
+		while (true)
 		{
  			// create an index row template
 			indexRow1 = getIndexRowFromHeapRow(
@@ -8172,7 +8327,14 @@ public final class	DataDictionaryImpl
 									heapCC.newRowLocationTemplate(),
 									outRow);
 
-			scanController.fetch(indexRow1.getRowArray());
+			// It is important for read uncommitted scans to use fetchNext()
+			// rather than fetch, so that the fetch happens while latch is
+			// held, otherwise the next() might position the scan on a row,
+			// but the subsequent fetch() may find the row deleted or purged
+			// from the table.
+			if (!scanController.fetchNext(indexRow1.getRowArray())) {
+				break;
+			}
 
 			baseRowLocation = (RowLocation)	indexRow1.getColumn(
 												indexRow1.nColumns());
@@ -8222,8 +8384,9 @@ public final class	DataDictionaryImpl
             {
                 // it can not be possible for heap row to disappear while
                 // holding scan cursor on index at ISOLATION_REPEATABLE_READ.
-				if (! base_row_exists)
-				{
+				if (! base_row_exists &&
+						(isolationLevel ==
+							 TransactionController.ISOLATION_REPEATABLE_READ)) {
 					StringBuffer strbuf = new StringBuffer("Error retrieving base row in table "+ti.getTableName());
 					strbuf.append(": could not locate a row matching index row "+indexRow1+" from index "+ti.getIndexName(indexId)+", conglom number "+ti.getIndexConglomerate(indexId));
                     debugGenerateInfo(strbuf,tc,heapCC,ti,indexId);
@@ -8236,7 +8399,41 @@ public final class	DataDictionaryImpl
 				}
             }
 
-			td = rf.buildDescriptor(outRow, parentTupleDescriptor, this);
+			if (!base_row_exists &&
+					(isolationLevel ==
+						 TransactionController.ISOLATION_READ_UNCOMMITTED)) {
+				// If isolationLevel == ISOLATION_READ_UNCOMMITTED we may
+				// possibly see that the base row does not exist even if the
+				// index row did.  This mode is currently only used by
+				// TableNameInfo's call to hashAllTableDescriptorsByTableId,
+				// cf. DERBY-3678. A table's schema descriptor is attempted
+				// read, and if the base row for the schema has gone between
+				// reading the index and the base table, the table that needs
+				// this information has gone, too.  So, the table should not
+				// be needed for printing lock timeout or deadlock
+				// information, so we can safely just return an empty (schema)
+				// descriptor. Furthermore, neither Timeout or DeadLock
+				// diagnostics access the schema of a table descriptor, so it
+				// seems safe to just return an empty schema descriptor for
+				// the table.
+				//
+				// There is a theoretical chance another row may have taken
+				// the first one's place, but only if a compress of the base
+				// table managed to run between the time we read the index and
+				// the base row, which seems unlikely so we ignore that.
+				//
+				// Even the index row may be gone in the above use case, of
+				// course, and that case also returns an empty descriptor
+				// since no match is found.
+
+				td = null;
+
+			} else {
+				// normal case
+				td = rf.buildDescriptor(outRow, parentTupleDescriptor, this);
+			}
+
+
 
 			/* If list is null, then caller only wants a single descriptor - we're done
 			 * else just add the current descriptor to the list.

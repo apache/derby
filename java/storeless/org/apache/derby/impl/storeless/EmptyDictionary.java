@@ -135,6 +135,14 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
 		return null;
 	}
 
+	public SchemaDescriptor	getSchemaDescriptor(UUID schemaId,
+												int isolationLevel,
+												TransactionController tc)
+			throws StandardException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 	public boolean existsSchemaOwnedBy(String authid,
 									   TransactionController tc)
 			throws StandardException {

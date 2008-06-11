@@ -48,6 +48,7 @@ import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.services.uuid.UUIDFactory;
+import org.apache.derby.iapi.store.access.TransactionController;
 
 /**
  * Factory for creating a SYSTABLES row.
@@ -256,6 +257,32 @@ class SYSTABLESRowFactory extends CatalogRowFactory
 		return	row;
 	}
 
+	/**
+	 * Make a TableDescriptor out of a SYSTABLES row
+	 *
+	 * @param row a SYSTABLES row
+	 * @param parentTupleDescriptor	Null for this kind of descriptor.
+	 * @param dd dataDictionary
+	 * @param isolationLevel use this explicit isolation level. Only
+	 *                       ISOLATION_REPEATABLE_READ (normal usage)
+	 *                       or ISOLATION_READ_UNCOMMITTED (corner
+	 *                       cases) supported for now.
+	 * @exception   StandardException thrown on failure
+	 */
+	TupleDescriptor buildDescriptor(
+		ExecRow					row,
+		TupleDescriptor			parentTupleDescriptor,
+		DataDictionary 			dd,
+		int                     isolationLevel)
+					throws StandardException
+	{
+		return buildDescriptorBody(row,
+								   parentTupleDescriptor,
+								   dd,
+								   isolationLevel);
+	}
+
+
 	///////////////////////////////////////////////////////////////////////////
 	//
 	//	ABSTRACT METHODS TO BE IMPLEMENTED BY CHILDREN OF CatalogRowFactory
@@ -278,6 +305,21 @@ class SYSTABLESRowFactory extends CatalogRowFactory
 		ExecRow					row,
 		TupleDescriptor			parentTupleDescriptor,
 		DataDictionary 			dd )
+					throws StandardException
+	{
+		return buildDescriptorBody(
+			row,
+			parentTupleDescriptor,
+			dd,
+			TransactionController.ISOLATION_REPEATABLE_READ);
+	}
+
+
+	public TupleDescriptor buildDescriptorBody(
+		ExecRow					row,
+		TupleDescriptor			parentTupleDescriptor,
+		DataDictionary 			dd,
+		int                     isolationLevel)
 					throws StandardException
 	{
 		if (SanityManager.DEBUG)
@@ -338,7 +380,7 @@ class SYSTABLESRowFactory extends CatalogRowFactory
 		schemaUUIDString = col.getString();
 		schemaUUID = getUUIDFactory().recreateUUID(schemaUUIDString);
 		
-		schema = dd.getSchemaDescriptor(schemaUUID, null);
+		schema = dd.getSchemaDescriptor(schemaUUID, isolationLevel, null);
 
 		/* 5th column is LOCKGRANULARITY (char(1)) */
 		col = row.getColumn(SYSTABLES_LOCKGRANULARITY);

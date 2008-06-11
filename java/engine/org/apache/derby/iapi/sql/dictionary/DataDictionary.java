@@ -350,6 +350,24 @@ public interface DataDictionary
 						throws StandardException;
 
 	/**
+	 * Get the SchemaDescriptor for the given schema identifier.
+	 *
+	 * @param schemaId	The id of the schema we're interested in.
+	 *
+	 * @param isolationLevel use this explicit isolation level
+	 * @param tc		The transaction controller to us when scanning
+	 *					SYSSCHEMAS
+	 *
+	 * @return	The descriptor for the schema, null if no such schema exists.
+	 *
+	 * @exception StandardException		Thrown on failure
+	 */
+	public SchemaDescriptor	getSchemaDescriptor(UUID schemaId,
+												int isolationLevel,
+												TransactionController tc)
+						throws StandardException;
+
+	/**
 	 * Return true of there exists a schema whose authorizationId
 	 * equals authid, i.e.  SYSSCHEMAS contains a row whose column
 	 * AUTHORIZATIONID equals authid.
