@@ -183,12 +183,10 @@ final class GenericStatementContext
          * other executing statements.
          */
         public void forgetContext() {
-            boolean mayStillRun = !cancel();
-            if (mayStillRun) {
-                synchronized (this) {
-                    statementContext = null;
-                }
+            synchronized (this) {
+                statementContext = null;
             }
+            cancel();
         }
     }
 
