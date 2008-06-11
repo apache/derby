@@ -1294,20 +1294,7 @@ public class ReplicationRun extends BaseTestCase
                 String state = se.getSQLState();
                 String expectedState = "XRE20";
                 util.DEBUG("failOver_direct Got SQLException: " + errCode + " " + state + " " + msg);
-                if ( (errCode == -1)
-                && (state.equalsIgnoreCase(expectedState) ) )
-                {
-                    util.DEBUG("As expected.");
-                }
-                else
-                {
-                    se.printStackTrace(System.out); // FIXME!
-                }
-                ;
-            }
-            catch (Exception ex)
-            {
-                ex.printStackTrace(System.out); // FIXME!
+                BaseJDBCTestCase.assertSQLState(expectedState, se);
             }
    }
     
