@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.impl.drda.TestProto
+   Derby - Class org.apache.derby.impl.drda.ProtocolTest
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -47,7 +47,7 @@ import java.util.Vector;
     this class.
 */
 
-public class TestProto {
+public class ProtocolTest {
 
     private static final CodePointNameTable codePointNameTable = new CodePointNameTable();
     private static final Hashtable codePointValueTable = new Hashtable();
@@ -132,7 +132,7 @@ public class TestProto {
     private int port;
 
     // constructors
-    public TestProto(String filename, int port) 
+    public ProtocolTest(String filename, int port) 
     {
         current_filename = filename;
         this.port = port;
