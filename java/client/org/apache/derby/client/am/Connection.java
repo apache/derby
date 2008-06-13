@@ -270,30 +270,23 @@ public abstract class Connection implements java.sql.Connection,
     }
 
     // This is a callback method, called by subsystem - NetConnection
-    protected void resetConnection(LogWriter logWriter,
-                                   boolean recomputeFromDataSource) throws SqlException {
+    protected void resetConnection(LogWriter logWriter)
+            throws SqlException {
         // Transaction isolation level is handled in completeReset.
         // clearWarningsX() will re-initialize the following properties
         clearWarningsX();
 
-        if (recomputeFromDataSource) { // no need to reinitialize connection state if ds hasn't changed
-            // property encryptionManager_
-            // if needed this will later be initialized by NET calls to initializePublicKeyForEncryption()
-            encryptionManager_ = null;
+        // property encryptionManager_
+        // if needed this will later be initialized by NET calls to initializePublicKeyForEncryption()
+        encryptionManager_ = null;
 
-            // property: open_
-            // this should already be true
+        currentSchemaName_ = null;
+        autoCommit_ = true;
+        inUnitOfWork_ = false;
+        holdability = ResultSet.HOLD_CURSORS_OVER_COMMIT;
 
-            currentSchemaName_ = null;
-            autoCommit_ = true;
-            inUnitOfWork_ = false;
-            holdability = ResultSet.HOLD_CURSORS_OVER_COMMIT;
-        }
-
-        
-        if (recomputeFromDataSource) {
-            this.agent_.resetAgent(this, logWriter, loginTimeout_, serverNameIP_, portNumber_);
-        }
+        this.agent_.resetAgent(
+                this, logWriter, loginTimeout_, serverNameIP_, portNumber_);
     }
 
     // For jdbc 1 connections
@@ -2090,14 +2083,14 @@ public abstract class Connection implements java.sql.Connection,
     // can this be called in a unit of work
     // can this be called from within a stored procedure
     //
-    synchronized public void reset(LogWriter logWriter, 
-            boolean recomputeFromDataSource) throws SqlException {
+    synchronized public void reset(LogWriter logWriter)
+            throws SqlException {
         if (logWriter != null) {
             logWriter.traceConnectResetEntry(this, logWriter, user_, 
                                              dataSource_);
         }
         try {
-            reset_(logWriter, recomputeFromDataSource);
+            reset_(logWriter);
         } catch (SqlException sqle) {
             DisconnectException de = new DisconnectException(agent_, 
                 new ClientMessageId(SQLState.CONNECTION_FAILED_ON_RESET));
@@ -2114,8 +2107,7 @@ public abstract class Connection implements java.sql.Connection,
         availableForReuse_ = false;
     }
 
-    abstract protected void reset_(LogWriter logWriter, 
-            boolean recomputerFromDataSource) throws SqlException;
+    abstract protected void reset_(LogWriter logWriter) throws SqlException;
 
     /**
      * <br>NOTE:</br>The following comments are valid for the changes done as
@@ -2126,13 +2118,15 @@ public abstract class Connection implements java.sql.Connection,
      * forces us to go to the server all the time. Since the value should now
      * be valid (DERBY-3192), we check if it has been changed from the default.
      *
-     * @param recomputeFromDataSource is now used to differentiate between
+     * @param closeStatementsOnClose is used to differentiate between
      *      cases where statement pooling is enabled or not. If {@code true}, it
      *      means statement pooling is disabled and the statements are fully
      *      reset, which includes a re-prepare. If {@code false}, statement
      *      pooling is enabled, and a more lightweight reset procedure is used.
      */
-    protected void completeReset(boolean isDeferredReset, boolean recomputeFromDataSource) throws SqlException {
+    protected void completeReset(boolean isDeferredReset,
+                                 boolean closeStatementsOnClose)
+            throws SqlException {
         open_ = true;
 
         completeLocalRollback(); // this will close the cursors if the physical connection hadn't been closed for reuse properly
@@ -2141,14 +2135,14 @@ public abstract class Connection implements java.sql.Connection,
         // Notice that these physical statements may not belong to this logical connection.
         // Iterate through the physical statements and re-enable them for reuse.
 
-        if (recomputeFromDataSource) {
+        if (closeStatementsOnClose) {
             // NOTE: This is to match previous behavior.
             //       Investigate and check if it is really necessary.
             this.isolation_ = TRANSACTION_UNKNOWN;
             java.util.Set keySet = openStatements_.keySet();
             for (java.util.Iterator i = keySet.iterator(); i.hasNext();) {
                 Object o = i.next();
-                ((Statement) o).reset(recomputeFromDataSource);
+                ((Statement) o).reset(closeStatementsOnClose);
             }
         } else {
             // Must reset transaction isolation level if it has been changed.
