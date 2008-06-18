@@ -497,6 +497,7 @@ public interface SQLState {
 	String DATA_MULTIPLE_JBMS_FORCE_LOCK                        = "XSDB8.D";
 	String DATA_CORRUPT_STREAM_CONTAINER                        = "XSDB9.D";
 	String DATA_OBJECT_ALLOCATION_FAILED                        = "XSDBA.D";
+	String DATA_UNKNOWN_PAGE_FORMAT_2                           = "XSDBB.D";
 
 	/*
 	** RawStore - Data.Filesystem statement exceptions

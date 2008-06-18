@@ -5338,6 +5338,13 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
                 <arg>object</arg>
             </msg>
 
+            <msg>
+                <name>XSDBB.D</name>
+                <text>Unknown page format at page {0}, page dump follows: {1} </text>
+                <arg>page</arg>
+                <arg>value</arg>
+            </msg>
+
         </family>
 
 
