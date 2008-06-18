@@ -82,4 +82,28 @@ public class PrivilegedFileOpsForTests {
         }
     }
 
+    /**
+     * Check if the file exists.
+     *
+     * @return <code>true</code> if file exists, <code>false</code> otherwise
+     * @throws SecurityException if the required permissions to read the file,
+     *      or the path it is in, are missing
+     * @see File#exists
+     */
+    public static boolean exists(final File file)
+            throws SecurityException {
+        if (file == null) {
+            throw new IllegalArgumentException("file cannot be <null>");
+        }
+        try {
+            return ((Boolean)AccessController.doPrivileged(
+                        new PrivilegedExceptionAction() {
+                            public Object run() throws SecurityException {
+                                return new Boolean(file.exists());
+                            }
+                        })).booleanValue();
+        } catch (PrivilegedActionException pae) {
+            throw (SecurityException)pae.getException();
+        }
+    }
 }
