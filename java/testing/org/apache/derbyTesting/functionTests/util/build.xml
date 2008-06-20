@@ -65,6 +65,7 @@
       <include name="${this.dir}/streams/*.java"/> 
       <include name="${this.dir}/corruptio/*.java"/>
       <exclude name="${this.dir}/XATestUtil.java"/>
+      <exclude name="${this.dir}/ProtocolTestGrammar.java"/>
       <exclude name="${this.dir}/ThreadDump.java"/>
     </javac>
     <javac
@@ -104,6 +105,7 @@
         <pathelement path="${java15compile.classpath}"/>
       </classpath>
     <include name="${this.dir}/ThreadDump.java"/>
+    <include name="${this.dir}/ProtocolTestGrammar.java"/>
     </javac>
   </target>
 
