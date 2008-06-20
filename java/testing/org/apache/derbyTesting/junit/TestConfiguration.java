@@ -31,8 +31,6 @@ import java.util.Properties;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
-import org.apache.derby.drda.NetworkServerControl;
-
 import junit.extensions.TestSetup;
 import junit.framework.Assert;
 import junit.framework.Test;
@@ -1387,8 +1385,8 @@ public class TestConfiguration {
      */
     public void stopNetworkServer() {
         try {
-            NetworkServerControl networkServer =
-                NetworkServerTestSetup.getNetworkServerControl();
+            NetworkServerControlWrapper networkServer =
+                    new NetworkServerControlWrapper();
 
             networkServer.shutdown();
             if (serverOutput != null) {
@@ -1409,9 +1407,9 @@ public class TestConfiguration {
         Exception failException = null;
         try {
             
-            NetworkServerControl networkServer =
-                NetworkServerTestSetup.getNetworkServerControl();
-	    
+            NetworkServerControlWrapper networkServer =
+                    new NetworkServerControlWrapper();
+
  	    serverOutput = (FileOutputStream)
             AccessController.doPrivileged(new PrivilegedAction() {
                 public Object run() {
