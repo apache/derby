@@ -1149,6 +1149,13 @@ Guide.
             </msg>
 
             <msg>
+                <name>4251C</name>
+                <text>Role {0} cannot be granted to {1} because this would create a circularity.</text>
+                <arg>authorizationID</arg>
+                <arg>authorizationID</arg>
+            </msg>
+
+            <msg>
                 <name>42601</name>
                 <text>In an ALTER TABLE statement, the column '{0}' has been specified as NOT NULL and either the DEFAULT clause was not specified or was specified as DEFAULT NULL.</text>
                 <arg>columnName</arg>

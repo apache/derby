@@ -49,6 +49,7 @@ import org.apache.derby.iapi.sql.dictionary.RoutinePermsDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SPSDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.RoleGrantDescriptor;
+import org.apache.derby.iapi.sql.dictionary.RoleClosureIterator;
 import org.apache.derby.iapi.sql.dictionary.SubKeyConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TablePermsDescriptor;
@@ -191,6 +192,15 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
 									 TransactionController tc)
 			throws StandardException {
 		// TODO Auto-generated method stub
+	}
+
+	public RoleClosureIterator createRoleClosureIterator
+		(TransactionController tc,
+		 String role,
+		 boolean inverse
+		) throws StandardException {
+		// TODO Auto-generated method stub
+		return (RoleClosureIterator)null;
 	}
 
 	public void	dropAllPermsByGrantee(String authid,

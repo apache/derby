@@ -761,6 +761,7 @@ public interface SQLState {
 	String AUTH_INTERNAL_BAD_UUID                                      = "4250E";
     String AUTH_ROLE_DBO_ONLY                                          = "4251A";
 	String AUTH_PUBLIC_ILLEGAL_AUTHORIZATION_ID                        = "4251B";
+	String AUTH_ROLE_GRANT_CIRCULARITY                                 = "4251C";
 
 	String LANG_DB2_NOT_NULL_COLUMN_INVALID_DEFAULT                    = "42601";
 	String LANG_DB2_INVALID_HEXADECIMAL_CONSTANT                    = "42606";

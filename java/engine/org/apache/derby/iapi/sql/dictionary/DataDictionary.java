@@ -63,6 +63,7 @@ import java.util.Vector;
  */
 
 public interface DataDictionary
+
 {
 	String MODULE = "org.apache.derby.iapi.sql.dictionary.DataDictionary";
 
@@ -477,6 +478,30 @@ public interface DataDictionary
 	public void	dropRoleGrantsByName(String roleName,
 									 TransactionController tc)
 			throws StandardException;
+
+
+	/**
+	 * This method creates a new iterator over the closure of role
+	 * grants starting or ending with a given role.
+	 *
+	 * This method will cause reading of dictionary, so should be
+	 * called inside a transaction, after a {@code dd.startReading()}
+	 * or {@code dd.startWriting()} call.
+	 *
+	 * @param tc transaction controller
+	 * @param role name of starting point for closure
+	 * @param inverse If {@code true}, compute closure on inverse of
+	 *        relation GRANT role-a TO role-b that is, we look at
+	 *        closure of all roles granted <bold>to</bold> {@code role}. If
+	 *        {@code false}, we look at closure of all roles that have
+	 *        been granted {@code role}.
+	 * @throws StandardException
+	 */
+	public RoleClosureIterator createRoleClosureIterator
+		(TransactionController tc,
+		 String role,
+		 boolean inverse
+		) throws StandardException;
 
 
 	/**
@@ -1977,4 +2002,4 @@ public interface DataDictionary
 	public boolean existsGrantToAuthid(String authId,
 									   TransactionController tc)
 				throws StandardException;
-}	
+}

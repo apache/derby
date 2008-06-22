@@ -54,6 +54,7 @@ import org.apache.derby.iapi.sql.dictionary.RoutinePermsDescriptor;
 import org.apache.derby.iapi.sql.dictionary.PermissionsDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ReferencedKeyConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.RoleGrantDescriptor;
+import org.apache.derby.iapi.sql.dictionary.RoleClosureIterator;
 import org.apache.derby.iapi.sql.dictionary.SPSDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.CheckConstraintDescriptor;
@@ -2966,6 +2967,110 @@ public final class	DataDictionaryImpl
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Return an in-memory representation of the role grant graph (sans
+	 * grant of roles to users, only role-role relation.
+	 *
+	 * @param tc        Transaction Controller
+	 * @param inverse   make graph on inverse grant relation
+	 * @return          hash map representing role grant graph.
+	 *                  <ul><li>Key: rolename,</li>
+	 *                      <li>Value: List<RoleGrantDescriptor> representing a
+	 *                      grant of that rolename to another role (not user).
+	 *                      </li>
+	 *                  </ul>
+	 *
+	 * FIXME: Need to cache graph and invalidate when role graph is modified.
+	 * Currently, we always read from SYSROLES.
+	 */
+	private HashMap getRoleGrantGraph(TransactionController tc, boolean inverse)
+			throws StandardException {
+
+		HashMap hm = new HashMap();
+
+		TabInfoImpl ti = getNonCoreTI(SYSROLES_CATALOG_NUM);
+		SYSROLESRowFactory rf = (SYSROLESRowFactory) ti.getCatalogRowFactory();
+
+		DataValueDescriptor isDefOrderable = new SQLVarchar("N");
+		ScanQualifier[][] scanQualifier = exFactory.getScanQualifier(1);
+
+		scanQualifier[0][0].setQualifier(
+			SYSROLESRowFactory.SYSROLES_ISDEF - 1, /* to zero-based */
+			isDefOrderable,
+			Orderable.ORDER_OP_EQUALS,
+			false,
+			false,
+			false);
+
+		ScanController sc = tc.openScan(
+			ti.getHeapConglomerate(),
+			false,   // don't hold open across commit
+			0,       // for update
+			TransactionController.MODE_RECORD,
+			TransactionController.ISOLATION_REPEATABLE_READ,
+			(FormatableBitSet) null,      // all fields as objects
+			(DataValueDescriptor[]) null, // start position -
+			0,                            // startSearchOperation - none
+			scanQualifier,                //
+			(DataValueDescriptor[]) null, // stop position -through last row
+			0);                           // stopSearchOperation - none
+
+		ExecRow outRow =  rf.makeEmptyRow();
+		RoleGrantDescriptor grantDescr;
+
+		while (sc.fetchNext(outRow.getRowArray())) {
+			grantDescr = (RoleGrantDescriptor)rf.buildDescriptor(
+				outRow,
+				(TupleDescriptor) null,
+				this);
+
+			// Next call is potentially inefficient.  We could read in
+			// definitions first in a separate hash table limiting
+			// this to a 2-pass scan.
+			RoleGrantDescriptor granteeDef = getRoleDefinitionDescriptor
+				(grantDescr.getGrantee());
+
+			if (granteeDef == null) {
+				// not a role, must be user authid, skip
+				continue;
+			}
+
+			String hashKey;
+			if (inverse) {
+				hashKey = granteeDef.getRoleName();
+			} else {
+				hashKey = grantDescr.getRoleName();
+			}
+
+			List arcs = (List)hm.get(hashKey);
+			if (arcs == null) {
+				arcs = new LinkedList();
+			}
+
+			arcs.add(grantDescr);
+			hm.put(hashKey, arcs);
+		}
+
+		sc.close();
+
+		return hm;
+
+	}
+
+	/**
+	 * @see DataDictionary#createRoleClosureIterator
+	 */
+	public RoleClosureIterator createRoleClosureIterator
+		(TransactionController tc,
+		 String role,
+		 boolean inverse
+		) throws StandardException {
+
+		HashMap graph = getRoleGrantGraph(tc, inverse);
+
+		return new RoleClosureIteratorImpl(role, inverse, graph);
 	}
 
 

@@ -93,9 +93,10 @@ class RevokeRoleConstantAction extends DDLConstantAction {
                 String grantee = (String)gIter.next();
 
                 // check that role exists
-                RoleGrantDescriptor rd = dd.getRoleDefinitionDescriptor(role);
+                RoleGrantDescriptor rdDef =
+                    dd.getRoleDefinitionDescriptor(role);
 
-                if (rd == null) {
+                if (rdDef == null) {
                     throw StandardException.
                         newException(SQLState.ROLE_INVALID_SPECIFICATION, role);
                 }
@@ -117,10 +118,10 @@ class RevokeRoleConstantAction extends DDLConstantAction {
                     // All ok, we are database owner
                     if (SanityManager.DEBUG) {
                         SanityManager.ASSERT(
-                            rd.getGrantee().equals(grantor),
+                            rdDef.getGrantee().equals(grantor),
                             "expected database owner in role grant descriptor");
                         SanityManager.ASSERT(
-                            rd.isWithAdminOption(),
+                            rdDef.isWithAdminOption(),
                             "expected role definition to have ADMIN OPTION");
                     }
                 } else {
@@ -128,7 +129,8 @@ class RevokeRoleConstantAction extends DDLConstantAction {
                         (SQLState.AUTH_ROLE_DBO_ONLY, "REVOKE role");
                 }
 
-                rd = dd.getRoleGrantDescriptor(role, grantee, grantor);
+                RoleGrantDescriptor rd =
+                    dd.getRoleGrantDescriptor(role, grantee, grantor);
 
                 if (rd != null && withAdminOption) {
                     // NOTE: Never called yet, withAdminOption not yet
@@ -139,6 +141,13 @@ class RevokeRoleConstantAction extends DDLConstantAction {
                     if (rd.isWithAdminOption()) {
                         // Remove old descriptor and add a new one
                         // without admin option.
+
+                        if (SanityManager.DEBUG) {
+                            SanityManager.NOTREACHED();
+                        }
+
+                        // do some invalidation
+
                         rd.drop(lcc);
                         rd.setWithAdminOption(false);
                         dd.addDescriptor(rd,

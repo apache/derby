@@ -32,6 +32,7 @@ import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.dictionary.DataDescriptorGenerator;
 import org.apache.derby.iapi.sql.dictionary.RoleGrantDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
+import org.apache.derby.iapi.sql.dictionary.RoleClosureIterator;
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.iapi.services.sanity.SanityManager;
@@ -98,9 +99,10 @@ class GrantRoleConstantAction extends DDLConstantAction {
                 String grantee = (String)gIter.next();
 
                 // check that role exists
-                RoleGrantDescriptor rd = dd.getRoleDefinitionDescriptor(role);
+                RoleGrantDescriptor rdDef =
+                    dd.getRoleDefinitionDescriptor(role);
 
-                if (rd == null) {
+                if (rdDef == null) {
                     throw StandardException.
                         newException(SQLState.ROLE_INVALID_SPECIFICATION, role);
                 }
@@ -114,18 +116,18 @@ class GrantRoleConstantAction extends DDLConstantAction {
                 // descriptor will not suffice in that case, so we
                 // need something like:
                 //
-                // rd = dd.findRoleGrantWithAdminToRoleOrPublic(grantor)
-                // if (rd != null) {
+                // rdDef = dd.findRoleGrantWithAdminToRoleOrPublic(grantor)
+                // if (rdDef != null) {
                 //   :
                 if (grantor.equals(lcc.getDataDictionary().
                                        getAuthorizationDatabaseOwner())) {
                     // All ok, we are database owner
                     if (SanityManager.DEBUG) {
                         SanityManager.ASSERT(
-                            rd.getGrantee().equals(grantor),
+                            rdDef.getGrantee().equals(grantor),
                             "expected database owner in role grant descriptor");
                         SanityManager.ASSERT(
-                            rd.isWithAdminOption(),
+                            rdDef.isWithAdminOption(),
                             "expected role definition to have ADMIN OPTION");
                     }
                 } else {
@@ -134,31 +136,34 @@ class GrantRoleConstantAction extends DDLConstantAction {
                 }
 
                 // Has it already been granted?
-                rd = dd.getRoleGrantDescriptor(role, grantee, grantor);
+                RoleGrantDescriptor rgd =
+                    dd.getRoleGrantDescriptor(role, grantee, grantor);
 
-                if (rd != null && withAdminOption && !rd.isWithAdminOption()) {
+                if (rgd != null &&
+                        withAdminOption && !rgd.isWithAdminOption()) {
+
                     // NOTE: Never called yet, withAdminOption not yet
                     // implemented.
 
                     // Remove old descriptor and add a new one with admin
                     // option: cf. SQL 2003, section 12.5, general rule 3
-                    rd.drop(lcc);
-                    rd.setWithAdminOption(true);
-                    dd.addDescriptor(rd,
+                    rgd.drop(lcc);
+                    rgd.setWithAdminOption(true);
+                    dd.addDescriptor(rgd,
                                      null,  // parent
                                      DataDictionary.SYSROLES_CATALOG_NUM,
                                      false, // no duplicatesAllowed
                                      tc);
-                } else if (rd == null) {
+                } else if (rgd == null) {
                     // Check if the grantee is a role (if not, it is a user)
-                    RoleGrantDescriptor gd =
+                    RoleGrantDescriptor granteeDef =
                         dd.getRoleDefinitionDescriptor(grantee);
 
-                    if (gd != null) {
-                        // FIXME: Grantee is role, need to check for circularity
+                    if (granteeDef != null) {
+                        checkCircularity(role, grantee, grantor, tc, dd);
                     }
 
-                    rd = ddg.newRoleGrantDescriptor(
+                    rgd = ddg.newRoleGrantDescriptor(
                         dd.getUUIDFactory().createUUID(),
                         role,
                         grantee,
@@ -166,7 +171,7 @@ class GrantRoleConstantAction extends DDLConstantAction {
                         withAdminOption,
                         false);  // not definition
                     dd.addDescriptor(
-                        rd,
+                        rgd,
                         null,  // parent
                         DataDictionary.SYSROLES_CATALOG_NUM,
                         false, // no duplicatesAllowed
@@ -176,6 +181,54 @@ class GrantRoleConstantAction extends DDLConstantAction {
         }
     }
 
+    /**
+     * Check that allowing this grant to go ahead does nto create a
+     * circularity in the GRANT role relation graph, cf. Section 12.5,
+     * Syntax rule 1 of ISO/IEC 9075-2 2003.
+     *
+     * @param role The role about to be granted
+     * @param grantee The role to which {@code role} is to be granted
+     * @param grantor Who does the granting
+     * @throws StandardException normal error policy. Throws
+     *                           AUTH_ROLE_GRANT_CIRCULARITY if a
+     *                           circularity is detected.
+     */
+    private void checkCircularity(String role,
+                                  String grantee,
+                                  String grantor,
+                                  TransactionController tc,
+                                  DataDictionary dd)
+            throws StandardException {
+
+        // The grantee is role, not a user id, so we need to check for
+        // circularity. If there exists a grant back to the role being
+        // granted now, from one of the roles in the grant closure of
+        // grantee, there is a circularity.
+
+        // Trivial circularity: a->a
+        if (role.equals(grantee)) {
+            throw StandardException.newException
+                (SQLState.AUTH_ROLE_GRANT_CIRCULARITY,
+                 role, grantee);
+        }
+
+
+        // Via grant closure of grantee
+        RoleClosureIterator rci =
+            dd.createRoleClosureIterator(tc, grantee, false);
+        try {
+            String r;
+            while ((r = rci.next()) != null) {
+                if (role.equals(r)) {
+                    throw StandardException.newException
+                        (SQLState.AUTH_ROLE_GRANT_CIRCULARITY,
+                         role, grantee);
+                }
+            }
+        } finally {
+            rci.close();
+        }
+    }
 
     // OBJECT SHADOWS
 

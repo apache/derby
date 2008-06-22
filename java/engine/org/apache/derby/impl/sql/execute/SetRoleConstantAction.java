@@ -118,14 +118,14 @@ class SetRoleConstantAction implements ConstantAction
             thisRoleName = dvs.getString();
         }
 
-        RoleGrantDescriptor rd = null;
+        RoleGrantDescriptor rdDef = null;
 
         if (thisRoleName != null) {
             try {
-                rd = dd.getRoleDefinitionDescriptor(thisRoleName);
+                rdDef = dd.getRoleDefinitionDescriptor(thisRoleName);
 
                 // SQL 2003, section 18.3, General rule 4:
-                if (rd == null) {
+                if (rdDef == null) {
                     throw StandardException.newException
                         (SQLState.ROLE_INVALID_SPECIFICATION, thisRoleName);
                 }
@@ -141,6 +141,6 @@ class SetRoleConstantAction implements ConstantAction
             }
         }
 
-        lcc.setCurrentRole(activation, rd != null ? thisRoleName : null);
+        lcc.setCurrentRole(activation, rdDef != null ? thisRoleName : null);
     }
 }

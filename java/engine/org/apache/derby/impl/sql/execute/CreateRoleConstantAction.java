@@ -95,12 +95,12 @@ class CreateRoleConstantAction extends DDLConstantAction {
         //
         // Check if this role already exists. If it does, throw.
         //
-        RoleGrantDescriptor rd = dd.getRoleDefinitionDescriptor(roleName);
+        RoleGrantDescriptor rdDef = dd.getRoleDefinitionDescriptor(roleName);
 
-        if (rd != null) {
+        if (rdDef != null) {
             throw StandardException.
                 newException(SQLState.LANG_OBJECT_ALREADY_EXISTS,
-                             rd.getDescriptorType(), roleName);
+                             rdDef.getDescriptorType(), roleName);
         }
 
         // Check if the proposed role id exists as a user id in
@@ -113,7 +113,7 @@ class CreateRoleConstantAction extends DDLConstantAction {
                              "User", roleName);
         }
 
-        rd = ddg.newRoleGrantDescriptor(
+        rdDef = ddg.newRoleGrantDescriptor(
             dd.getUUIDFactory().createUUID(),
             roleName,
             currentAuthId,// grantee
@@ -121,7 +121,7 @@ class CreateRoleConstantAction extends DDLConstantAction {
             true,         // with admin option
             true);        // is definition
 
-        dd.addDescriptor(rd,
+        dd.addDescriptor(rdDef,
                          null,  // parent
                          DataDictionary.SYSROLES_CATALOG_NUM,
                          false, // duplicatesAllowed

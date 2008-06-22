@@ -53,7 +53,7 @@ public class SYSROLESRowFactory extends CatalogRowFactory
     private static final int SYSROLES_GRANTEE = 3;
     private static final int SYSROLES_GRANTOR = 4;
     private static final int SYSROLES_WITHADMINOPTION = 5;
-    private static final int SYSROLES_ISDEF = 6;
+    static final int SYSROLES_ISDEF = 6;
 
     private static final int[][] indexColumnPositions =
     {
@@ -62,16 +62,15 @@ public class SYSROLESRowFactory extends CatalogRowFactory
         {SYSROLES_ROLE_UUID}
     };
 
+    static final int SYSROLES_ROLEID_COLPOS_IN_INDEX_ID_EE_OR = 1;
+    static final int SYSROLES_GRANTEE_COLPOS_IN_INDEX_ID_EE_OR = 2;
+
     // (role)ID_(grant)EE_(grant)OR
     static final int SYSROLES_INDEX_ID_EE_OR_IDX = 0;
     // (role)ID_(is)DEF
     static final int SYSROLES_INDEX_ID_DEF_IDX = 1;
     // UUID
     static final int SYSROLES_INDEX_UUID_IDX = 2;
-
-
-    static final int SYSROLES_ROLEID_COLPOS_IN_INDEX_ID_EE_OR = 1;
-    static final int SYSROLES_GRANTEE_COLPOS_IN_INDEX_ID_EE_OR = 2;
 
     private static  final   boolean[]   uniqueness = {
         true,

@@ -75,6 +75,7 @@ public class RolesTest extends BaseJDBCTestCase
     private final static String userAlreadyExists        = "X0Y68";
     private final static String invalidPUBLIC            = "4251B";
     private final static String loginFailed              = "08004";
+    private final static String roleGrantCircularity     = "4251C";
 
     private int MAX_IDENTIFIER_LENGTH = 128;
     /**
@@ -414,7 +415,7 @@ public class RolesTest extends BaseJDBCTestCase
         doStmt("create role " + users[dboIndex], sqlAuthorizationRequired,
                userAlreadyExists, roleDboOnly);
 
-        // specified with mixed case : DonalDuck
+        // specified with mixed case : DonaldDuck
         doStmt("create role " + users[nonDboIndex],
                 sqlAuthorizationRequired, userAlreadyExists, roleDboOnly);
 
@@ -470,6 +471,7 @@ public class RolesTest extends BaseJDBCTestCase
                                // bar granted to nonDbo, so 4!
                                4);
 
+        checkGrantCircularity();
 
         /*
          * SET ROLE
@@ -685,6 +687,69 @@ public class RolesTest extends BaseJDBCTestCase
         }
     }
 
+
+    private void checkGrantCircularity() {
+        if (isDbo()) {
+            // Test circularity in role grant relation given this a
+            // priori graph:
+            //
+            //          s8
+            //           |   s1<---s3
+            //           | / |
+            //           V/  |
+            //          s4   |
+            //         / |\  |
+            //        /  V \ V
+            //       s5  s6  s2
+            //           |
+            //           s7
+
+            String NA = null; // we only run this as dbo
+
+            for(int i=1; i <= 8; i++) {
+                doStmt("create role s" + i, NA, null, NA);
+            }
+
+            // This establishes the role grant graph shown above. None
+            // of these grants should fail.
+            doStmt("grant s1 to s2", NA, null, NA);
+            doStmt("grant s3 to s1", NA, null, NA);
+            doStmt("grant s1 to s4", NA, null, NA);
+            doStmt("grant s4 to s2", NA, null, NA);
+            doStmt("grant s4 to s6", NA, null, NA);
+            doStmt("grant s4 to s5", NA, null, NA);
+            doStmt("grant s6 to s7", NA, null, NA);
+            doStmt("grant s8 to s4", NA, null, NA);
+
+            // These statements all represent illegal grants in that
+            // they would cause a circularity, so we expect all to
+            // throw.
+            doStmt("grant s1 to s1", NA, roleGrantCircularity, NA);
+            doStmt("grant s2 to s3", NA, roleGrantCircularity, NA);
+            doStmt("grant s2 to s8", NA, roleGrantCircularity, NA);
+            doStmt("grant s7 to s1", NA, roleGrantCircularity, NA);
+            doStmt("grant s7 to s4", NA, roleGrantCircularity, NA);
+            doStmt("grant s7 to s6", NA, roleGrantCircularity, NA);
+            doStmt("grant s7 to s3", NA, roleGrantCircularity, NA);
+            doStmt("grant s2 to s1", NA, roleGrantCircularity, NA);
+            doStmt("grant s2 to s8", NA, roleGrantCircularity, NA);
+            doStmt("grant s2 to s4", NA, roleGrantCircularity, NA);
+            doStmt("grant s6 to s1", NA, roleGrantCircularity, NA);
+            doStmt("grant s6 to s8", NA, roleGrantCircularity, NA);
+            doStmt("grant s6 to s3", NA, roleGrantCircularity, NA);
+            doStmt("grant s6 to s4", NA, roleGrantCircularity, NA);
+            doStmt("grant s5 to s1", NA, roleGrantCircularity, NA);
+            doStmt("grant s5 to s3", NA, roleGrantCircularity, NA);
+            doStmt("grant s5 to s4", NA, roleGrantCircularity, NA);
+            doStmt("grant s5 to s8", NA, roleGrantCircularity, NA);
+
+            for(int i=1; i <= 8; i++) {
+                doStmt("drop role s" + i, NA, null, NA);
+            }
+        }
+    }
+
+
     protected void setUp() throws Exception
     {
         super.setUp();
@@ -844,7 +909,7 @@ public class RolesTest extends BaseJDBCTestCase
             if (_authLevel == NO_SQLAUTHORIZATION) {
                 if (noAuthState[0] == null) {
                     fail("stmt " + stmt + " failed with exception " +
-                         e.getSQLState());
+                         e.getSQLState(), e);
                 } else {
                     assertSQLState("Stmt " + stmt, noAuthState[0], e);
                 }
@@ -853,14 +918,14 @@ public class RolesTest extends BaseJDBCTestCase
                 if (isDbo()) {
                     if (authDboState[0] == null) {
                         fail("stmt " + stmt + " failed with exception " +
-                             e.getSQLState());
+                             e.getSQLState(), e);
                     } else {
                         assertSQLState("Stmt " + stmt, authDboState[0], e);
                     }
                 } else {
                     if (authNotDboState[0] == null) {
                         fail("stmt " + stmt + " failed with exception " +
-                             e.getSQLState());
+                             e.getSQLState(), e);
                     } else {
                         assertSQLState("Stmt " + stmt, authNotDboState[0], e);
                     }
@@ -887,7 +952,7 @@ public class RolesTest extends BaseJDBCTestCase
                  assertSQLState(sqlAuthorizationRequired, e);
                  return;
              } else {
-                 fail("prepare of set role ? failed:" + e);
+                 fail("prepare of set role ? failed:" + e, e);
              }
         }
 
@@ -896,7 +961,7 @@ public class RolesTest extends BaseJDBCTestCase
             int rowcnt = pstmt.executeUpdate();
             assertEquals("rowcount from set role ? not 0", rowcnt, 0);
         } catch (SQLException e) {
-            fail("execute of set role ? failed: [foo]" + e);
+            fail("execute of set role ? failed: [foo]" + e, e);
         }
 
 
@@ -905,7 +970,7 @@ public class RolesTest extends BaseJDBCTestCase
             int rowcnt = pstmt.executeUpdate();
             assertEquals("rowcount from set role ? not 0", rowcnt, 0);
         } catch (SQLException e) {
-            fail("execute of set role ? failed: [NONE] " + e);
+            fail("execute of set role ? failed: [NONE] " + e, e);
         }
 
         if (isDbo()) {
@@ -920,7 +985,7 @@ public class RolesTest extends BaseJDBCTestCase
                 assertRoleInRs(rs, "NONE", n_a);
                 rs.close();
             } catch (SQLException e) {
-                fail("execute of set role ? failed: [NONE] " + e);
+                fail("execute of set role ? failed: [NONE] " + e, e);
             }
         }
 

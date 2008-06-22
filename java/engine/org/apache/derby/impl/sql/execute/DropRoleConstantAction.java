@@ -99,14 +99,14 @@ class DropRoleConstantAction extends DDLConstantAction
         */
         dd.startWriting(lcc);
 
-        RoleGrantDescriptor rd = dd.getRoleDefinitionDescriptor(roleName);
+        RoleGrantDescriptor rdDef = dd.getRoleDefinitionDescriptor(roleName);
 
-        if (rd == null) {
+        if (rdDef == null) {
             throw StandardException.newException(
                 SQLState.ROLE_INVALID_SPECIFICATION, roleName);
         }
 
-        rd.drop(lcc);
+        rdDef.drop(lcc);
 
         /*
          * We dropped a role, now drop all dependents:
