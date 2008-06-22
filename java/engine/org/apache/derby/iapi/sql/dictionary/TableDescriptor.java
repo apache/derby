@@ -24,6 +24,7 @@ package org.apache.derby.iapi.sql.dictionary;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
+import java.util.WeakHashMap;
 
 import org.apache.derby.catalog.Dependable;
 import org.apache.derby.catalog.DependableFinder;
@@ -112,7 +113,39 @@ public class TableDescriptor extends TupleDescriptor
 	ConstraintDescriptorList		constraintDescriptorList;
 	private	GenericDescriptorList	triggerDescriptorList;
 	ViewDescriptor					viewDescriptor;
-	FormatableBitSet							referencedColumnMap;
+
+	/**
+	 * referencedColumnMap is thread local (since DERBY-2861)
+	 *
+	 * It contains a weak hash map keyed by the the TableDescriptor
+	 * and the value is the actual referencedColumnMap bitmap.  So,
+	 * each thread has a weak hash map it uses to find the appropriate
+	 * referencedColumnMap for 'this' TableDescriptor.
+	 *
+	 * Since the hash map is weak, when the TableDescriptor is no
+	 * longer referenced the hash entry can be garbage collected (it
+	 * is the *key* of a weak hash map that is weak, not the value).
+	 */
+	private static ThreadLocal referencedColumnMap = new ThreadLocal() {
+			protected Object initialValue() {
+				// Key: TableDescriptor
+				// Value: FormatableBitSet
+				return new WeakHashMap();
+			}
+		};
+
+	private FormatableBitSet referencedColumnMapGet() {
+		WeakHashMap map = (WeakHashMap)(referencedColumnMap.get());
+
+		return (FormatableBitSet) (map.get(this));
+	}
+
+	private void referencedColumnMapPut
+		(FormatableBitSet newReferencedColumnMap) {
+
+		WeakHashMap map = (WeakHashMap)(referencedColumnMap.get());
+		map.put(this, newReferencedColumnMap);
+	}
 
 	/** A list of statistics pertaining to this table-- 
 	 */
@@ -363,7 +396,7 @@ public class TableDescriptor extends TupleDescriptor
 	 */
 	public FormatableBitSet getReferencedColumnMap()
 	{
-		return referencedColumnMap;
+		return referencedColumnMapGet();
 	}
 
 	/**
@@ -374,7 +407,7 @@ public class TableDescriptor extends TupleDescriptor
 	 */
 	public void setReferencedColumnMap(FormatableBitSet referencedColumnMap)
 	{
-		this.referencedColumnMap = referencedColumnMap;
+		referencedColumnMapPut(referencedColumnMap);
 	}
 
 	/**
@@ -749,11 +782,12 @@ public class TableDescriptor extends TupleDescriptor
 	 */
 	public DependableFinder getDependableFinder()
 	{
-		if (referencedColumnMap == null) 
+		if (referencedColumnMapGet() == null)
 			return	getDependableFinder(StoredFormatIds.TABLE_DESCRIPTOR_FINDER_V01_ID);
 		else
-			return getColumnDependableFinder(StoredFormatIds.COLUMN_DESCRIPTOR_FINDER_V01_ID,
-											 referencedColumnMap.getByteArray());
+			return getColumnDependableFinder
+				(StoredFormatIds.COLUMN_DESCRIPTOR_FINDER_V01_ID,
+				 referencedColumnMapGet().getByteArray());
 	}
 
 	/**
@@ -763,16 +797,17 @@ public class TableDescriptor extends TupleDescriptor
 	 */
 	public String getObjectName()
 	{
-		if (referencedColumnMap == null)
+		if (referencedColumnMapGet() == null)
 			return tableName;
 		else
 		{
 			String name = new String(tableName);
 			boolean first = true;
+
 			for (int i = 0; i < columnDescriptorList.size(); i++)
 			{
 				ColumnDescriptor cd = (ColumnDescriptor) columnDescriptorList.elementAt(i);
-				if (referencedColumnMap.isSet(cd.getPosition()))
+				if (referencedColumnMapGet().isSet(cd.getPosition()))
 				{
 					if (first)
 					{
