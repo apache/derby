@@ -18,24 +18,42 @@
    limitations under the License.
 
  */
-
 package org.apache.derby.impl.drda;
 
 import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.Reader;
 import java.io.StreamTokenizer;
+import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
+
 import java.net.Socket;
+import java.net.URL;
 import java.net.UnknownHostException;
-import java.util.Enumeration;
+
+import java.nio.charset.Charset;
+
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.Locale;
-import java.util.Vector;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
+import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
+import org.apache.derbyTesting.functionTests.util.ProtocolTestGrammar;
+import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.SupportFilesSetup;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
     This class is used to test error conditions in the protocol.
@@ -45,327 +63,210 @@ import java.util.Vector;
     To add tests, modify the file protocol.tests.
     Tests can also be done as separate files and given as an argument to
     this class.
+
+   NOTE: This test was copied / converted from testProto.
 */
 
-public class ProtocolTest {
+public class ProtocolTest
+    extends BaseTestCase {
 
-    private static final CodePointNameTable codePointNameTable = new CodePointNameTable();
-    private static final Hashtable codePointValueTable = new Hashtable();
-    private static final Hashtable commandTable = new Hashtable();
-    private    static final CcsidManager ccsidManager = new EbcdicCcsidManager();
-    //commands
-    private static final int CREATE_DSS_REQUEST = 1;
-    private static final int CREATE_DSS_OBJECT = 2;
-    private static final int END_DSS = 3;
-    private static final int END_DDM_AND_DSS = 4;
-    private static final int START_DDM = 5;
-    private static final int END_DDM = 6;
-    private static final int WRITE_BYTE = 7;
-    private static final int WRITE_NETWORK_SHORT = 8;
-    private static final int WRITE_NETWORK_INT = 9;
-    private static final int WRITE_BYTES = 10;
-    private static final int WRITE_CODEPOINT_4BYTES = 11;
-    private static final int WRITE_SCALAR_1BYTE = 12;
-    private static final int WRITE_SCALAR_2BYTES = 13;
-    private static final int WRITE_SCALAR_BYTES = 14;
-    private static final int WRITE_SCALAR_HEADER = 15;
-    private static final int WRITE_SCALAR_STRING = 16;
-    private static final int WRITE_SCALAR_PADDED_STRING = 17;
-    private static final int WRITE_SCALAR_PADDED_BYTES = 18;
-    private static final int WRITE_SHORT = 19;
-    private static final int WRITE_INT = 20;
-    private static final int WRITE_LONG = 21;
-    private static final int WRITE_FLOAT = 22;
-    private static final int WRITE_DOUBLE = 23;
-    private static final int READ_REPLY_DSS = 24;
-    private static final int READ_LENGTH_AND_CODEPOINT = 25;
-    private static final int READ_CODEPOINT = 26;
-    private static final int MARK_COLLECTION = 27;
-    private static final int GET_CODEPOINT = 28;
-    private static final int READ_BYTE = 29;
-    private static final int READ_NETWORK_SHORT = 30;
-    private static final int READ_SHORT = 31;
-    private static final int READ_NETWORK_INT = 32;
-    private static final int READ_INT = 33;
-    private static final int READ_LONG = 34;
-    private static final int READ_BOOLEAN = 35;
-    private static final int READ_STRING = 36;
-    private static final int READ_BYTES = 37;
-    private static final int FLUSH = 38;
-    private static final int DISPLAY = 39;
-    private static final int CHECKERROR = 40;
-    private static final int RESET = 41;
-    private static final int CREATE_DSS_REPLY = 42;
-    private static final int SKIP_DSS = 43;
-    private static final int READ_SCALAR_2BYTES = 44;
-    private static final int READ_SCALAR_1BYTE = 45;
-    private static final int END_TEST = 46;
-    private static final int SKIP_DDM = 47;
-    private static final int INCLUDE = 48;
-    private static final int SKIP_BYTES = 49;
-    private static final int WRITE_PADDED_STRING = 50;
-    private static final int WRITE_STRING = 51;
-    private static final int WRITE_ENCODED_STRING = 52;
-    private static final int WRITE_ENCODED_LDSTRING = 53;
-    private static final int CHECK_SQLCARD = 54;
-    private static final int MORE_DATA = 55;
-    private static final int COMPLETE_TEST = 56;
-    private static final int READ_SECMEC_SECCHKCD = 57;
+    /** Newline character(s). */
+    private static final String NL =
+            BaseTestCase.getSystemProperty("line.separator");
+    private static final CodePointNameTable codePointNameTable =
+            new CodePointNameTable();
+    /** Mapping from code point value to code point name. */
+    private static final Hashtable<String,Integer> codePointValueTable =
+        new Hashtable<String,Integer>();
+    private static final CcsidManager ccsidManager = new EbcdicCcsidManager();
 
+    // Constants used to encode / represent multiple values for a command.
     private static final String MULTIVAL_START = "MULTIVALSTART";
     private static final String MULTIVAL_SEP = "SEP";
     private static final String MULTIVAL_END = "MULTIVALEND";
-    // initialize hash tables
+
     static {
-            init();
-            }
-
-
-    private Socket monitorSocket = null;
-    private InputStream monitorIs = null;
-    private OutputStream monitorOs = null;
-    private DDMWriter writer = new DDMWriter(ccsidManager, null, null);
-    private DDMReader reader;
-    private boolean failed = false;
-    private StreamTokenizer tkn;
-    private String current_filename;
-    private int port;
-
-    // constructors
-    public ProtocolTest(String filename, int port) 
-    {
-        current_filename = filename;
-        this.port = port;
-        getConnection();
-
-        try 
-        {
-            reader = new DDMReader(ccsidManager, monitorIs);
-            processFile(filename);
-        }
-        catch (Exception e)
-        {
-            int line = 0;
-            if (tkn != null)
-                line = tkn.lineno();
-            System.err.println("Unexpected exception in line " + line + " file: " + current_filename);
-            e.printStackTrace();
-        }
-        finally
-        {
-            closeConnection();
+        // Create a mapping from code point value to name.
+        Iterator cpnIter = codePointNameTable.keySet().iterator();
+        while (cpnIter.hasNext()) {
+            Integer key = (Integer)cpnIter.next();
+            codePointValueTable.put((String)codePointNameTable.get(key), key);
         }
     }
 
+    /** Name of the file from which the test is obtained. */
+    private final String filename;
+    /** The start line of the test from the input file. */
+    private final int startLine;
+    /** Number of lines this test is composed of. */
+    private final int lineCount;
     /**
-     * Process include file
-     *
-     * @exception     IOException, DRDAProtocolException     error reading file or protocol
+     * The sequence of commands this test is composed of.
+     * <p>
+     * The sequence is expected to be line oriented, that is a one command and
+     * optionally its arguments per line. The lines must be separated by a
+     * newline token.
      */
-    private void processIncludeFile()
-        throws IOException, DRDAProtocolException
-    {
-        String fileName = getString();
-        StreamTokenizer saveTkn = tkn;
-        processFile(fileName);
-        tkn = saveTkn;
+    private String commandSequence;
+    
+    /**
+     * Creates a new test case.
+     *
+     * @param file name of file containing the protocol tests (for verbosity)
+     * @param cmds the sequence of commands (see {@link #commandSequence})
+     * @param startLine starting line in the source file
+     * @param lines number of lines from the source file
+     */
+    private ProtocolTest(String file, String cmds, int startLine, int lines) {
+        super("testProtocolSequence");
+        this.filename = file;
+        this.commandSequence = cmds;
+        this.startLine = startLine;
+        this.lineCount = lines;
     }
 
     /**
-     * Process a command file
+     * Executes the test sequence.
      *
-     * @param  filename
-     * @exception     IOException, DRDAProtocolException     error reading file or protocol
+     * @throws DRDAProtocolException if Derby detects an unexpected protocol
+     *      error
+     * @throws IOException if accessing a file or the socket fails
+     * @throws UnknownHostException if the server host cannot be resolved
      */
-    private void processFile(String filename)
-        throws IOException, DRDAProtocolException
-    {
-        String prev_filename = current_filename;
-        current_filename = filename;
-           String hostName=getHostName();
-        BufferedReader fr;
+    public void testProtocolSequence()
+            throws DRDAProtocolException, IOException, UnknownHostException {
+        // Update the name of the test.
+        super.setName(
+                filename + "_" + startLine + "_" + (startLine + lineCount));
+        println(getName() + " :: STARTED");
+        // Validate the line count. Expects a newline also at end of last line.
+        assertEquals("Actual line count does not match the specified count",
+                this.lineCount, this.commandSequence.length() -
+                this.commandSequence.replaceAll("\n", "").length() -1);
+
+
+        // Create a connection and initialize the required resources.
+        Socket monitorSocket = createSocket();
+        InputStream monitorIs = monitorSocket.getInputStream();
+        OutputStream monitorOs = monitorSocket.getOutputStream();
         try {
-            fr = new BufferedReader(new InputStreamReader(new FileInputStream(filename),"UTF-8"));
-        } catch (FileNotFoundException fnfe) {
-            // if useprocess=false & we're running in a suite, 
-            // the location is different, try it
-            String userdir =  System.getProperty("user.dir");
-            String sep =  System.getProperty("file.separator");
-            fr = new BufferedReader (new InputStreamReader(new FileInputStream(userdir + sep + filename),"UTF-8"));
+            Reader cmdStream = new StringReader(this.commandSequence);
+            processCommands(cmdStream,
+                            new DDMReader(ccsidManager, monitorIs),
+                            new DDMWriter(ccsidManager, null, null),
+                            monitorOs);
+        } finally {
+            monitorIs.close();
+            monitorOs.close();
+            monitorSocket.close();
         }
-        tkn = new StreamTokenizer(fr);
+    }
+
+    /**
+     * Initializes a socket to the server.
+     *
+     * @return A socket connected to the server.
+     * @throws IOException if reading/writing to the socket fails
+     * @throws UnknownHostException if the server host cannot be resolved
+     */
+    private Socket createSocket()
+            throws IOException, UnknownHostException {
+        Socket socket = null;
+        final TestConfiguration cfg = getTestConfiguration();
+        try {
+            socket = AccessController.doPrivileged (
+                new java.security.PrivilegedExceptionAction<Socket>() {
+                    public Socket run()
+                            throws IOException, UnknownHostException {
+                        return new Socket(cfg.getHostName(), cfg.getPort());
+                    }
+                }
+            );
+        } catch (PrivilegedActionException pae) {
+            if (pae.getCause() instanceof IOException) {
+                throw (IOException)pae.getCause();
+            } else if (pae.getCause() instanceof UnknownHostException) {
+                throw (UnknownHostException)pae.getCause();
+            }
+            fail("Unhandled exception", pae);
+        }
+        return socket;
+    }
+
+    /**
+     * Executes the test commands in the specified file.
+     *
+     * @param fileName file containing the test
+     * @param reader reader object associated with the connection
+     * @param writer writer object associated with the connection
+     * @param monitorOs output stream of the connection
+     * @throws DRDAProtocolException on DRDA protocol errors detected by Derby
+     * @throws IOException on errors reading from the file or reading / writing
+     *      to the socket
+     */
+    private void processFile(String fileName, DDMReader reader,
+                             DDMWriter writer, OutputStream monitorOs)
+            throws DRDAProtocolException, IOException {
+       File incFile = SupportFilesSetup.getReadOnly(fileName);
+       assertTrue("Missing file: " + fileName,
+               PrivilegedFileOpsForTests.exists(incFile));
+       processCommands(new BufferedReader(
+               PrivilegedFileOpsForTests.getFileReader(incFile)),
+               reader, writer, monitorOs);
+    }
+
+    /**
+     * Processes the test commands in the stream.
+     *
+     * @param cmdStream command stream (see {@link #commandSequence})
+     * @param reader reader object associated with the connection
+     * @param writer writer object associated with the connection
+     * @param monitorOs output stream of the connection
+     * @throws DRDAProtocolException on DRDA protocol errors detected by Derby
+     * @throws IOException on errors reading from the command stream or
+     *      reading / writing to the socket
+     */
+    private void processCommands(Reader cmdStream, DDMReader reader,
+            DDMWriter writer, OutputStream monitorOs)
+            throws  DRDAProtocolException, IOException {
+        StreamTokenizer tkn = new StreamTokenizer(cmdStream);
+        boolean endSignalled = false;
         int val;
-        while ( (val = tkn.nextToken()) != StreamTokenizer.TT_EOF)
-        {
-            switch(val)
-            {
+        while ( (val = tkn.nextToken()) != StreamTokenizer.TT_EOF) {
+            assertFalse("End signalled, data to process left: " + tkn.sval,
+                    endSignalled);
+            switch(val) {
                 case StreamTokenizer.TT_NUMBER:
                     break;
                 case StreamTokenizer.TT_WORD:
-                    processCommand();
+                    endSignalled =
+                            processCommand(tkn, reader, writer, monitorOs);
                     break;
                 case StreamTokenizer.TT_EOL:
                     break;
             }
         }
-        current_filename = prev_filename;
     }
 
     /**
-     * Set up a connection to the Network server
+     * Process a command.
      */
-    private void getConnection() 
-    {
-        String hostName=getHostName();
-        try {
-            monitorSocket = new Socket(hostName, port);
-        } catch (UnknownHostException e) {
-            System.err.println("Don't know about host: " + hostName);
-            System.exit(1);
-        } catch (IOException e) {
-            System.err.println("Couldn't get I/O for the connection to: " + hostName);
-            System.exit(1);
-        }
-        try
-        {
-           monitorIs = monitorSocket.getInputStream();
-           monitorOs = monitorSocket.getOutputStream();
-        }
-        catch (IOException e)
-        {
-            System.err.println("Couldn't get I/O for the connection to: " + hostName);
-            System.exit(1);
-        }
-    }
-
-    /**
-     * Close connection to the network server
-     */
-    private void closeConnection()
-    {
-        try {
-            monitorIs.close();
-            monitorOs.close();
-            monitorSocket.close();
-        }
-        catch (Exception e) {} //Ignore exceptions when closing the connection
-    }
-
-    /**
-     * Reset connection for another test
-     */
-    private void reset()
-    {
-        closeConnection();
-        getConnection();
-        reader.initialize(monitorIs);
-        writer.reset(null);
-    }
-
-    /**
-     * finish by cleaning up the last connection
-     */
-    private void completeTest()
-    {
-        closeConnection();
-    }
-
-    /**
-     * Initialize hashtable for commands and set up a table to translate from
-     * the codepoint name to the codepoint value
-     */
-    private static void init()
-    {
-        commandTable.put("createdssrequest", new Integer(CREATE_DSS_REQUEST));
-        commandTable.put("createdssobject", new Integer(CREATE_DSS_OBJECT));
-        commandTable.put("createdssreply", new Integer(CREATE_DSS_REPLY));
-        commandTable.put("enddss", new Integer(END_DSS));
-        commandTable.put("enddss", new Integer(END_DSS));
-        commandTable.put("endddmanddss", new Integer(END_DDM_AND_DSS));
-        commandTable.put("startddm", new Integer(START_DDM));
-        commandTable.put("endddm", new Integer(END_DDM));
-        commandTable.put("writebyte", new Integer(WRITE_BYTE));
-        commandTable.put("writenetworkshort", new Integer(WRITE_NETWORK_SHORT));
-        commandTable.put("writenetworkint", new Integer(WRITE_NETWORK_INT));
-        commandTable.put("writebytes", new Integer(WRITE_BYTES));
-        commandTable.put("writecodepoint4bytes", new Integer(WRITE_CODEPOINT_4BYTES));
-        commandTable.put("writescalar1byte", new Integer(WRITE_SCALAR_1BYTE));
-        commandTable.put("writescalar2bytes", new Integer(WRITE_SCALAR_2BYTES));
-        commandTable.put("writescalarbytes", new Integer(WRITE_SCALAR_BYTES));
-        commandTable.put("writescalarheader", new Integer(WRITE_SCALAR_HEADER));
-        commandTable.put("writescalarstring", new Integer(WRITE_SCALAR_STRING));
-        commandTable.put("writescalarpaddedstring", new Integer(WRITE_SCALAR_PADDED_STRING));
-        commandTable.put("writescalarpaddedbytes", new Integer(WRITE_SCALAR_PADDED_BYTES));
-        commandTable.put("writeshort", new Integer(WRITE_SHORT));
-        commandTable.put("writeint", new Integer(WRITE_INT));
-        commandTable.put("writelong", new Integer(WRITE_LONG));
-        commandTable.put("writefloat", new Integer(WRITE_FLOAT));
-        commandTable.put("writedouble", new Integer(WRITE_DOUBLE));
-        commandTable.put("readreplydss", new Integer(READ_REPLY_DSS));
-        commandTable.put("readlengthandcodepoint", new Integer(READ_LENGTH_AND_CODEPOINT));
-        commandTable.put("readcodepoint", new Integer(READ_CODEPOINT));
-        commandTable.put("markcollection", new Integer(MARK_COLLECTION));
-        commandTable.put("getcodepoint", new Integer(GET_CODEPOINT));
-        commandTable.put("readbyte", new Integer(READ_BYTE));
-        commandTable.put("readnetworkshort", new Integer(READ_NETWORK_SHORT));
-        commandTable.put("readshort", new Integer(READ_SHORT));
-        commandTable.put("readint", new Integer(READ_INT));
-        commandTable.put("readlong", new Integer(READ_LONG));
-        commandTable.put("readboolean", new Integer(READ_BOOLEAN));
-        commandTable.put("readstring", new Integer(READ_STRING));
-        commandTable.put("readbytes", new Integer(READ_BYTES));
-        commandTable.put("flush", new Integer(FLUSH));
-        commandTable.put("display", new Integer(DISPLAY));
-        commandTable.put("checkerror", new Integer(CHECKERROR));
-        commandTable.put("reset", new Integer(RESET));
-        commandTable.put("skipdss", new Integer(SKIP_DSS));
-        commandTable.put("skipddm", new Integer(SKIP_DDM));
-        commandTable.put("readscalar2bytes", new Integer(READ_SCALAR_2BYTES));
-        commandTable.put("readscalar1byte", new Integer(READ_SCALAR_1BYTE));
-        commandTable.put("endtest", new Integer(END_TEST));
-        commandTable.put("include", new Integer(INCLUDE));
-        commandTable.put("skipbytes", new Integer(SKIP_BYTES));
-        commandTable.put("writepaddedstring", new Integer(WRITE_PADDED_STRING));
-        commandTable.put("writestring", new Integer(WRITE_STRING));
-        commandTable.put("writeencodedstring", new Integer(WRITE_ENCODED_STRING));
-        commandTable.put("writeencodedldstring", new Integer(WRITE_ENCODED_LDSTRING));
-        commandTable.put("checksqlcard", new Integer(CHECK_SQLCARD));
-        commandTable.put("moredata", new Integer(MORE_DATA));
-        commandTable.put("completetest", new Integer(COMPLETE_TEST));
-        commandTable.put("readsecmecandsecchkcd", new Integer(READ_SECMEC_SECCHKCD));
-        
-        Integer key;
-        for (Enumeration e = codePointNameTable.keys(); e.hasMoreElements(); )
-        {
-            key = (Integer)e.nextElement();
-            codePointValueTable.put(codePointNameTable.get(key), key);
-        }
-        
-    }
-
-    /**
-     * Process a command
-       */
-    private void processCommand()
+    private boolean processCommand(StreamTokenizer tkn, DDMReader reader,
+            DDMWriter writer, OutputStream monitorOs)
         throws IOException, DRDAProtocolException
     {
-        Integer icmd  = (Integer)commandTable.get(tkn.sval.toLowerCase(Locale.ENGLISH));
-        if (icmd == null)
-        {
-            System.err.println("Unknown command, " + tkn.sval + " in line " +
-                tkn.lineno());
-            System.exit(1);
+        ProtocolTestGrammar cmd = ProtocolTestGrammar.cmdFromString(
+                                        tkn.sval.toLowerCase(Locale.ENGLISH));
+        if (cmd == null) { // To avoid generating string for each command.
+            fail("Unknown command '" + tkn.sval + "' in line " + ln(tkn));
         }
-        int cmd  = icmd.intValue();
-        int codepoint;
         int val;
-        int reqVal;
         String str;
 
         switch (cmd)
         {
             case INCLUDE:
-                processIncludeFile();
+                processFile(getString(tkn), reader, writer, monitorOs);
                 break;
             case CREATE_DSS_REQUEST:
                 writer.createDssRequest();
@@ -381,7 +282,7 @@ public class ProtocolTest {
                 tkn.pushBack();
                 if ((tkn.sval != null) && tkn.sval.startsWith("0x"))
                 // use specified chaining.
-                    writer.endDss((getBytes())[0]);
+                    writer.endDss((getBytes(tkn))[0]);
                 else
                 // use default chaining
                     writer.endDss();
@@ -393,53 +294,53 @@ public class ProtocolTest {
                 writer.endDdmAndDss();
                 break;
             case START_DDM:
-                writer.startDdm(getCP());
+                writer.startDdm(getCP(tkn));
                 break;
             case WRITE_SCALAR_STRING:
-                writer.writeScalarString(getCP(), getString());
+                writer.writeScalarString(getCP(tkn), getString(tkn));
                 break;
             case WRITE_SCALAR_2BYTES:
-                writer.writeScalar2Bytes(getCP(),getIntOrCP());
+                writer.writeScalar2Bytes(getCP(tkn),getIntOrCP(tkn));
                 break;
             case WRITE_SCALAR_1BYTE:
-                writer.writeScalar1Byte(getCP(),getInt());
+                writer.writeScalar1Byte(getCP(tkn),getInt(tkn));
                 break;
             case WRITE_SCALAR_BYTES:
-                writer.writeScalarBytes(getCP(),getBytes());
+                writer.writeScalarBytes(getCP(tkn),getBytes(tkn));
                 break;
             case WRITE_SCALAR_PADDED_BYTES:
-                writer.writeScalarPaddedBytes(getCP(), getBytes(), getInt(),
+                writer.writeScalarPaddedBytes(getCP(tkn), getBytes(tkn), getInt(tkn),
                     ccsidManager.space);
                 break;
             case WRITE_BYTE:
-                writer.writeByte(getInt());
+                writer.writeByte(getInt(tkn));
                 break;
             case WRITE_BYTES:
-                writer.writeBytes(getBytes());
+                writer.writeBytes(getBytes(tkn));
                 break;
             case WRITE_SHORT:
-                writer.writeShort(getInt());
+                writer.writeShort(getInt(tkn));
                 break;
             case WRITE_INT:
-                writer.writeInt(getInt());
+                writer.writeInt(getInt(tkn));
                 break;
             case WRITE_CODEPOINT_4BYTES:
-                writer.writeCodePoint4Bytes(getCP(), getInt());
+                writer.writeCodePoint4Bytes(getCP(tkn), getInt(tkn));
                 break;
             case WRITE_STRING:
-                str = getString();
+                str = getString(tkn);
                 writer.writeBytes(getEBCDIC(str));
                 break;
             case WRITE_ENCODED_STRING:
-                writeEncodedString(getString(), getString());
+                writeEncodedString(getString(tkn), getString(tkn), writer);
                 break;
             case WRITE_ENCODED_LDSTRING:
-                writeEncodedLDString(getString(), getString(), getInt());
+                writeEncodedLDString(getString(tkn), getString(tkn), getInt(tkn), writer);
                 break;
             case WRITE_PADDED_STRING:
-                str = getString();
+                str = getString(tkn);
                 writer.writeBytes(getEBCDIC(str));
-                int reqLen = getInt();
+                int reqLen = getInt(tkn);
                 int strLen = str.length();
                 if (strLen < reqLen)
                     writer.padBytes(ccsidManager.space, reqLen-strLen);
@@ -448,94 +349,73 @@ public class ProtocolTest {
                 reader.readReplyDss();
                 break;
             case SKIP_DSS:
-                skipDss();
+                skipDss(reader);
                 break;
             case SKIP_DDM:
-                skipDdm();
+                skipDdm(reader);
                 break;
             case MORE_DATA:
-                boolean expbool;
-                str = getString();
-                if (str.equalsIgnoreCase("true"))
-                    expbool = true;
-                else
-                    expbool = false;
-                if (reader.moreData() && expbool == false )
-                    fail("Failed - more data left");
-                if (!reader.moreData() && expbool == true )
-                    fail("Failed - no data left");
+                str = getString(tkn);
+                boolean expbool = Boolean.parseBoolean(str);
+                assertEquals("Too much/little data",
+                        expbool, reader.moreData());
                 break;
             case READ_LENGTH_AND_CODEPOINT:
-                readLengthAndCodePoint();
+                readLengthAndCodePoint(tkn, reader);
                 break;
             case READ_SCALAR_2BYTES:
-                readLengthAndCodePoint();
+                readLengthAndCodePoint(tkn, reader);
                 val = reader.readNetworkShort();
-                checkIntOrCP(val);
+                checkIntOrCP(tkn, val);
                 break;
             case READ_SCALAR_1BYTE:
-                readLengthAndCodePoint();
+                readLengthAndCodePoint(tkn, reader);
                 val = reader.readByte();
-                checkIntOrCP(val);
+                checkIntOrCP(tkn, val);
                 break;
-            case READ_SECMEC_SECCHKCD:
-                readSecMecAndSECCHKCD();
+            case READ_SECMEC_AND_SECCHKCD:
+                readSecMecAndSECCHKCD(reader);
                 break;
             case READ_BYTES:
-                byte[] byteArray = reader.readBytes();
-                byte[] reqArray = getBytes();
-                if (byteArray.length != reqArray.length)
-                        fail("Failed - byte array didn't match");
-                for (int i = 0; i < byteArray.length; i++)
-                    if (byteArray[i] != reqArray[i])
-                        fail("Failed - byte array didn't match");
+                assertTrue("Mismatch between the byte arrays",
+                        Arrays.equals(getBytes(tkn), reader.readBytes()));
                 break;
             case READ_NETWORK_SHORT:
                 val = reader.readNetworkShort();
-                checkIntOrCP(val);
+                checkIntOrCP(tkn, val);
                 break;
             case FLUSH:
                 writer.finalizeChain(reader.getCurrChainState(), monitorOs);
                 writer.reset(null);
                 break;
             case DISPLAY:
-                System.out.println(getString());
+                println(getString(tkn));
                 break;
             case CHECKERROR:
-                checkError();
+                checkError(tkn, reader);
                 break;
             case CHECK_SQLCARD:
-                checkSQLCARD(getInt(), getString());
-                break;
-            case COMPLETE_TEST:
-                completeTest();
+                checkSQLCARD(getInt(tkn), getString(tkn), reader);
                 break;
             case END_TEST:
-                // print that we passed the test if we haven't failed
-                if (failed == false)
-                    System.out.println("PASSED");
-                failed = false;
-                reset();
-                break;
-            case RESET:
-                reset();
-                break;
+                // Nothing to do for ending the test, as resources are closed
+                // elsewhere.
+                println(getName() + " :: FINISHED");
+                return true;
             case SKIP_BYTES:
                 reader.skipBytes();
                 break;
             default:
-                System.out.println("unknown command in line " + tkn.lineno());
-                // skip remainder of line
-                while (tkn.nextToken() !=  StreamTokenizer.TT_EOL)
-                        ;
-    
+                fail("Command in line " + ln(tkn) + " not implemented: " +
+                        cmd.toString());
         }
+        return false;
     }
 
     /**
      * Skip a DSS communication 
      */
-    private void skipDss() throws DRDAProtocolException
+    private void skipDss(DDMReader reader) throws DRDAProtocolException
     {
         reader.readReplyDss();
         reader.skipDss();
@@ -544,7 +424,7 @@ public class ProtocolTest {
     /**
      * Skip the a Ddm communication
      */
-    private void skipDdm() throws DRDAProtocolException
+    private void skipDdm(DDMReader reader) throws DRDAProtocolException
     {
         reader.readLengthAndCodePoint( false );
         reader.skipBytes();
@@ -554,7 +434,7 @@ public class ProtocolTest {
      * Read an int from the command file
      * Negative numbers are preceded by "-"
      */
-    private int getInt() throws IOException
+    private int getInt(StreamTokenizer tkn) throws IOException
     {
         int mult = 1;
         int val = tkn.nextToken();
@@ -566,19 +446,14 @@ public class ProtocolTest {
 
         if (val != StreamTokenizer.TT_NUMBER)
         {
-            if (tkn.sval == null)
-            {
-                System.err.println("Invalid string on line " + tkn.lineno());
-                System.exit(1);
-            }
+            assertNotNull("Invalid string on line " + ln(tkn), tkn.sval);
             String str = tkn.sval.toLowerCase(Locale.ENGLISH);
-            if (!str.startsWith("0x"))
-            {
-                System.err.println("Expecting number, got " + tkn.sval + " on line " + tkn.lineno());
-                System.exit(1);
+            if (!str.startsWith("0x")) {
+                fail("Expecting number, got " + tkn.sval + " on line " +
+                        ln(tkn));
+            } else {
+                return convertHex(str, ln(tkn));
             }
-            else
-                return convertHex(str);
         }
         return (new Double(tkn.nval).intValue() * mult);
     }
@@ -586,15 +461,14 @@ public class ProtocolTest {
     /**
      * Convert a token in hex format to int from the command file
      */
-    private int convertHex(String str) throws IOException
+    private int convertHex(String str, int lineNumber) throws IOException
     {
         int retval = 0;
         int len = str.length(); 
         if ((len % 2) == 1 || len > 10)
         {
-            System.err.println("Invalid length for byte string, " + len + 
-            " on line " + tkn.lineno());
-            System.exit(1);
+            fail("Invalid length for byte string, " + len +
+                    " on line " + lineNumber);
         }
         for (int i = 2; i < len; i++)
         {
@@ -610,39 +484,34 @@ public class ProtocolTest {
      * FORMAT for Multiple Values 
      * MULTIVALSTART 10 SEP 32 SEP 40 MULTIVALEND
      **/
-    private boolean checkIntOrCP(int val)  throws IOException
-    {
+    private boolean checkIntOrCP(StreamTokenizer tkn, int val)
+            throws IOException {
         boolean rval = false;
-        int tknType  = tkn.nextToken();
+        int tknType = tkn.nextToken();
         String reqVal = " ";
-
         
-        if (tknType == StreamTokenizer.TT_WORD && tkn.sval.trim().equals(MULTIVAL_START))
-        {
+        if (tknType == StreamTokenizer.TT_WORD &&
+                tkn.sval.trim().equals(MULTIVAL_START)) {
             do {
-                int nextVal = getIntOrCP();
+                int nextVal = getIntOrCP(tkn);
                 reqVal = reqVal + nextVal + " ";
-                // System.out.println("Checking MULTIVAL (" + val + "==" + nextVal + ")");
                 rval = rval || (val == nextVal);
                 tkn.nextToken();
             }
             while(tkn.sval.trim().equals(MULTIVAL_SEP));
             
             if (! (tkn.sval.trim().equals(MULTIVAL_END)))
-                fail("Invalid test file format requires " + MULTIVAL_END + 
-                     " got: " + tkn.sval);
-            
+                fail("Invalid test file format, requires " + MULTIVAL_END +
+                     ", got: " + tkn.sval);
         }
         else
         {
             tkn.pushBack();
-            int nextVal = getIntOrCP();
+            int nextVal = getIntOrCP(tkn);
             reqVal = " " + nextVal;
-            // System.out.println("Checking Single Value (" + val + "==" + nextVal + ")");
             rval = (val == nextVal);
         }
-        if (rval == false)
-            fail("Failed - wrong val = " + val + " Required Value: " + reqVal);
+        assertTrue("Expected '" + reqVal + "', got '" + val + "'", rval);
 
         return rval;
     }
@@ -651,22 +520,15 @@ public class ProtocolTest {
     /**
      * Read an int or codepoint - codepoint is given as a string
      */
-    private int getIntOrCP() throws IOException
+    private int getIntOrCP(StreamTokenizer tkn) throws IOException
     {
         int val = tkn.nextToken();
-        if (val == StreamTokenizer.TT_NUMBER)
-        {
-            return new Double(tkn.nval).intValue();
-        }
-        else if (val == StreamTokenizer.TT_WORD)
-        {
-            return decodeCP(tkn.sval);
-        }
-        else
-        {
-            fail("Expecting number, got " + tkn.sval + " on line "
-                               + tkn.lineno());
-            System.exit(1);
+        if (val == StreamTokenizer.TT_NUMBER) {
+            return Double.valueOf(tkn.nval).intValue();
+        } else if (val == StreamTokenizer.TT_WORD) {
+            return decodeCP(tkn.sval, ln(tkn));
+        } else {
+            fail("Expecting number, got '" + tkn.sval + "' on line " + ln(tkn));
         }
         return 0;
     }
@@ -679,15 +541,11 @@ public class ProtocolTest {
      *
      * @return byte array
      */
-    private byte []  getBytes() throws IOException
+    private byte []  getBytes(StreamTokenizer tkn) throws IOException
     {
         byte[] retval = null;
-        int val = tkn.nextToken();
-        if (tkn.sval == null)
-        {
-            System.err.println("Invalid string on line " + tkn.lineno());
-            System.exit(1);
-        }
+        tkn.nextToken();
+        assertNotNull("Missing input on line " + ln(tkn), tkn.sval);
         String str = tkn.sval.toLowerCase(Locale.ENGLISH);
         if (!str.startsWith("0x"))
         {
@@ -697,11 +555,9 @@ public class ProtocolTest {
         else
         {
             int len = str.length(); 
-            if ((len % 2) == 1)
-            {
-                System.err.println("Invalid length for byte string, " + len + 
-                " on line " + tkn.lineno());
-                System.exit(1);
+            if ((len % 2) == 1) {
+                fail("Invalid length for byte string, " + len +
+                        " on line " + ln(tkn));
             }
             retval = new byte[(len-2)/2]; 
             int j = 0;
@@ -720,14 +576,11 @@ public class ProtocolTest {
      * @return string found in file
      * @exception     IOException     error reading file
      */
-    private String getString() throws IOException
+    private String getString(StreamTokenizer tkn) throws IOException
     {
         int val = tkn.nextToken();
-        if (val == StreamTokenizer.TT_NUMBER)
-        {
-            System.err.println("Expecting word, got " + tkn.nval + " on line " + tkn.lineno());
-            System.exit(1);
-        }
+        assertTrue("Expected string, got number '" + tkn.nval + "' on line " +
+                ln(tkn), val != StreamTokenizer.TT_NUMBER);
         return tkn.sval;
     }
 
@@ -736,10 +589,10 @@ public class ProtocolTest {
      *
      * @exception     IOException     error reading file
      */
-    private int getCP() throws IOException
-    {
-        String strval = getString();
-        return decodeCP(strval);
+    private int getCP(StreamTokenizer tkn)
+            throws IOException {
+        String strval = getString(tkn);
+        return decodeCP(strval, ln(tkn));
     }
 
     /**
@@ -748,43 +601,11 @@ public class ProtocolTest {
      * @param strval    string codepoint
      * @return         integer value of codepoint
      */
-    private int decodeCP(String strval) 
-    {
-        Integer cp = (Integer)codePointValueTable.get(strval);
-        if (cp == null)
-        {
-           System.err.println("Unknown codepoint, "+ strval + " in line " 
-                + tkn.lineno());
-           Exception e = new Exception();
-           e.printStackTrace();
-            System.exit(1);
-        }
+    private int decodeCP(String strval, int lineNumber) {
+        Integer cp = codePointValueTable.get(strval);
+        assertNotNull("Unknown codepoint '" + strval + "' in line " +
+                lineNumber, cp);
         return cp.intValue();
-    }
-
-    /**
-     * Print failure message and skip to the next test
-      *
-     * @exception     IOException     error reading file
-     */
-    private void fail(String msg) throws IOException
-    {
-        System.out.println("FAILED - " + msg + " in line " + tkn.lineno());
-        // skip remainder of the test look for endtest or end of file
-        int val = tkn.nextToken();
-        while (val != StreamTokenizer.TT_EOF)
-        {
-            if (val == StreamTokenizer.TT_WORD && tkn.sval.toLowerCase(Locale.ENGLISH).equals("endtest"))
-                break;
-
-            val = tkn.nextToken();
-        }
-        failed = true;
-        // get ready for next test
-        reset();
-        // print out stack trace so we know where the failure occurred
-        Exception e = new Exception();
-        e.printStackTrace();
     }
 
     /**
@@ -792,23 +613,20 @@ public class ProtocolTest {
       *
      * @exception     IOException, DRDAProtocolException     error reading file or protocol
      */
-    private void checkError() throws IOException, DRDAProtocolException
-    {
+    private void checkError(StreamTokenizer tkn, DDMReader reader)
+            throws IOException, DRDAProtocolException {
         int svrcod = 0;
         int invalidCodePoint = 0;
         int prccnvcd = 0;
         int synerrcd = 0;
         int codepoint;
         int reqVal;
-        Vector manager = new Vector(), managerLevel = new Vector() ;
+        ArrayList<Integer> manager = new ArrayList<Integer>();
+        ArrayList<Integer> managerLevel = new ArrayList<Integer>() ;
         reader.readReplyDss();
         int error = reader.readLengthAndCodePoint( false );
-        int reqCP = getCP();
-        if (error != reqCP)
-        {
-            cpError(error, reqCP);
-            return;
-        }
+        int reqCP = getCP(tkn);
+        assertCP(reqCP, error);
         while (reader.moreDssData())
         {
             codepoint = reader.readLengthAndCodePoint( false );
@@ -829,69 +647,48 @@ public class ProtocolTest {
                 case CodePoint.MGRLVLLS:
                     while (reader.moreDdmData())
                     {
-                        manager.addElement(new Integer(reader.readNetworkShort()));
-                        managerLevel.addElement(new Integer(reader.readNetworkShort()));
+                        manager.add(Integer.valueOf(reader.readNetworkShort()));
+                        managerLevel.add(Integer.valueOf(reader.readNetworkShort()));
                     }
                     break;
                 default:
                     //ignore codepoints we don't understand
                     reader.skipBytes();
+                    println("Skipped bytes for codepoint " + codepoint + " (" +
+                            codePointNameTable.lookup(codepoint) + ")");
     
             }
         }
-        reqVal = getInt();
-        if (svrcod != reqVal)
-        {
-            fail("wrong svrcod val = " + Integer.toHexString(svrcod)
-                    + ", required val = " + Integer.toHexString(reqVal));
-            return;
+        reqVal = getInt(tkn);
+        assertEquals("Wrong svrcod (0x" + Integer.toHexString(reqVal) +
+                " != 0x" + Integer.toHexString(svrcod) + ")", reqVal, svrcod);
+        if (error == CodePoint.PRCCNVRM) {
+            reqVal = getInt(tkn);
+            assertEquals("Wrong prccnvcd (0x" + Integer.toHexString(reqVal) +
+                " != 0x" + Integer.toHexString(prccnvcd) + ")",
+                reqVal, prccnvcd);
         }
-        if (error == CodePoint.PRCCNVRM)
-        {
-            reqVal = getInt();
-            if (prccnvcd != reqVal)
-            {
-                fail("wrong prccnvd, val = " + Integer.toHexString(prccnvcd)
-                    + ", required val = " + Integer.toHexString(reqVal));
-                return;
-            }
-        }
-        if (error == CodePoint.SYNTAXRM)
-        {
-            reqVal = getInt();
-            if (synerrcd != reqVal)
-            {
-                fail("wrong synerrcd, val = " + Integer.toHexString(synerrcd)
-                    + ", required val = " + Integer.toHexString(reqVal));
-                return;
-            }
-            reqVal = getIntOrCP();
-            if (invalidCodePoint != reqVal)
-            {
-                cpError(invalidCodePoint, reqVal);
-                return;
-            }
+        if (error == CodePoint.SYNTAXRM) {
+            reqVal = getInt(tkn);
+            assertEquals("Wrong synerrcd (0x" + Integer.toHexString(reqVal) +
+                " != 0x" + Integer.toHexString(synerrcd) + ")",
+                reqVal, synerrcd);
+            reqVal = getIntOrCP(tkn);
+            assertCP(reqVal, invalidCodePoint);
         }
         if (error == CodePoint.MGRLVLRM)
         {
             int mgr, mgrLevel;
             for (int i = 0; i < manager.size(); i++)
             {
-                reqVal = getCP();
-                mgr = ((Integer)(manager.elementAt(i))).intValue();
-                if (mgr != reqVal)
-                {
-                    cpError(mgr, reqVal);
-                    return;
-                }
-                mgrLevel = ((Integer)(managerLevel.elementAt(i))).intValue();
-                reqVal = getInt();
-                if (mgrLevel != reqVal)
-                {
-                    fail("wrong manager level, level = " + Integer.toHexString(mgrLevel)
-                    + ", required val = " + Integer.toHexString(reqVal));
-                    return;
-                }
+                reqVal = getCP(tkn);
+                mgr = manager.get(i);
+                assertCP(reqVal, mgr);
+                mgrLevel = managerLevel.get(i);
+                reqVal = getInt(tkn);
+                assertEquals("Wrong manager level (0x" +
+                        Integer.toHexString(reqVal) + " != 0x" +
+                        Integer.toHexString(mgrLevel) + ")", reqVal, mgrLevel);
             }
         }
     }
@@ -901,12 +698,11 @@ public class ProtocolTest {
       *
      * @exception     IOException, DRDAProtocolException     error reading file or protocol
      */
-    private void readLengthAndCodePoint() throws IOException, DRDAProtocolException
-    {
+    private void readLengthAndCodePoint(StreamTokenizer tkn, DDMReader reader)
+            throws IOException, DRDAProtocolException {
         int codepoint = reader.readLengthAndCodePoint( false );
-        int reqCP = getCP();
-        if (codepoint != reqCP)
-            cpError(codepoint, reqCP);
+        int reqCP = getCP(tkn);
+        assertCP(reqCP, codepoint);
     }
     
     /**
@@ -917,7 +713,7 @@ public class ProtocolTest {
      * can actually support it or not.
      * @exception   IOException, DRDAProtocolException  error reading file or protocol
      */
-    private void readSecMecAndSECCHKCD() throws IOException, DRDAProtocolException
+    private void readSecMecAndSECCHKCD(DDMReader reader) throws IOException, DRDAProtocolException
     {
         int codepoint;
         boolean notDone = true;
@@ -929,16 +725,14 @@ public class ProtocolTest {
             {
               case CodePoint.SECMEC:
               {
-                  System.out.print("SECMEC=");
                   val = reader.readNetworkShort();
-                  System.out.print(val+" ");
+                  println("SECMEC=" + val);
               }
               break;
               case CodePoint.SECCHKCD:
               {
-                  System.out.print("SECCHKCD=");
                   val = reader.readByte();
-                  System.out.println(val);
+                  println("SECCHKCD=" + val);
                   notDone = false;
               }
               break;
@@ -954,14 +748,12 @@ public class ProtocolTest {
       *
      * @exception IOException error reading command file
      */
-    private void cpError(int cp, int reqCP) throws IOException
-    {
+    private void assertCP(int reqCP, int cp) {
         String cpName = codePointNameTable.lookup(cp);
         String reqCPName = codePointNameTable.lookup(reqCP);
-        fail("wrong codepoint val = " + Integer.toHexString(cp) + 
-             "("+cpName+")" +
-             ", required codepoint = " + Integer.toHexString(reqCP) +
-             "("+reqCPName+")");
+        assertEquals("Wrong codepoint (0x" + Integer.toHexString(reqCP) +
+             "/" + reqCPName + " != 0x" + Integer.toHexString(cp) +
+             "/" + cpName + ")", reqCP, cp);
     }
 
     /**
@@ -982,14 +774,13 @@ public class ProtocolTest {
      * @param encoding    Java encoding to use
      * @exception IOException
      */
-    private void writeEncodedString(String str, String encoding)
-        throws IOException
-    {
+    private void writeEncodedString(String str, String encoding,
+            DDMWriter writer) {
         try {
             byte [] buf = str.getBytes(encoding);
             writer.writeBytes(buf);
         } catch (UnsupportedEncodingException e) {
-            fail("Unsupported encoding " + encoding);    
+            fail("Unsupported encoding " + encoding, e);
         }
     }
 
@@ -1001,9 +792,8 @@ public class ProtocolTest {
      * @param len            Size of length value (2 or 4 bytes)
      * @exception IOException
      */
-    private void writeEncodedLDString(String str, String encoding, int len)
-        throws IOException
-    {
+    private void writeEncodedLDString(String str, String encoding, int len,
+            DDMWriter writer) {
         try {
             byte [] buf = str.getBytes(encoding);
             if (len == 2)
@@ -1012,7 +802,7 @@ public class ProtocolTest {
                 writer.writeInt(buf.length);
             writer.writeBytes(buf);
         } catch (UnsupportedEncodingException e) {
-            fail("Unsupported encoding " + encoding);    
+            fail("Unsupported encoding " + encoding, e);
         }
     }
 
@@ -1023,39 +813,93 @@ public class ProtocolTest {
      * @param sqlState    SQLSTATE value
      * @exception IOException, DRDAProtocolException
      */
-    private void checkSQLCARD(int sqlCode, String sqlState)
+    private void checkSQLCARD(int sqlCode, String sqlState, DDMReader reader)
         throws IOException, DRDAProtocolException
     {
         reader.readReplyDss();
         int codepoint = reader.readLengthAndCodePoint( false );
-        if (codepoint != CodePoint.SQLCARD)
-        {
-            fail("Expecting SQLCARD got "+ Integer.toHexString(codepoint));
-            return;
-        }
-        int nullind = reader.readByte();
+        assertEquals("Expected SQLCARD (0x2408), got " +
+                Integer.toHexString(codepoint), CodePoint.SQLCARD, codepoint);
+        reader.readByte(); // Skip null indicator.
         //cheating here and using readNetworkInt since the byteorder is the same
         int code = reader.readNetworkInt();
-        if (code != sqlCode)
-        {
-            fail("Expecting sqlCode " + sqlCode + " got "+ Integer.toHexString(code));
-            return;
-        }
+        assertEquals("Expected " + Integer.toHexString(sqlCode) + ", got " +
+                Integer.toHexString(code), sqlCode, code);
         String state = reader.readString(5, "UTF-8");
-        if (!state.equals(sqlState))
-        {
-            fail("Expecting sqlState " + sqlState + " got "+ state);
-            return;
-        }
+        assertEquals("Wrong SQL state", sqlState, state);
         // skip the rest of the SQLCARD
         reader.skipBytes();
     }
 
-    private static String getHostName()
-    {
-        String hostName = (System.getProperty("hostName"));
-        if (hostName == null)
-            hostName="localhost";
-        return hostName;
+    /**
+     * Calculates the current line number from the source file.
+     * <p>
+     * The intention is to be able to print which line number the test failed
+     * on, so that the source of the error can be easily located.
+     *
+     * @param st processing stream tokenizer
+     * @return The calculated current line number.
+     */
+    private final int ln(StreamTokenizer st) {
+        return (this.startLine + st.lineno() -1);
+    }
+
+    /**
+     * Creates a suite of tests dynamically from a file describing protocol
+     * tests.
+     *
+     * @return A suite of tests.
+     * @throws Exception if creating the suite fails for some reason
+     */
+    public static Test suite()
+            throws Exception {
+        TestSuite suite = new TestSuite("Derby DRDA protocol tests");
+        // Process the list of files and create test cases for the sub-tests.
+        // NOTE: We cannot assume anything about the order in which the tests
+        //      are executed.
+        final String testFile = "org/apache/derbyTesting/functionTests/" +
+                                "tests/derbynet/protocol.tests";
+        final URL testFileURL = BaseTestCase.getTestResource(testFile);
+        BufferedReader bIn = new BufferedReader(
+                new InputStreamReader(
+                    openTestResource(testFileURL),
+                    Charset.forName("UTF-8")));
+
+        // Split the tests into individual tests.
+        final String END_TEST = ProtocolTestGrammar.END_TEST.toCmdString();
+        int currentLine = 1;
+        int startLine = 1; // First line is line number one.
+        ArrayList<String> cmdLines = new ArrayList<String>();
+        StringBuilder str = new StringBuilder();
+        String line;
+        // Iterate until the end of test token is reached.
+        while ((line = bIn.readLine()) != null) {
+            cmdLines.add(line);
+            str.append(line).append(NL);
+            if (line.toLowerCase(Locale.ENGLISH).startsWith(END_TEST)) {
+                // Create a new test case.
+                suite.addTest(new ProtocolTest(
+                        "protocol.tests",
+                        str.toString(),
+                        startLine,
+                        currentLine - startLine));
+                cmdLines.clear();
+                str.setLength(0);
+                startLine = currentLine +1;
+            }
+            currentLine++;
+        }
+
+        // Copy the required include files.
+        final String resourcePath = "functionTests/tests/derbynet";
+        return TestConfiguration.clientServerDecorator(
+                new SupportFilesSetup(suite, new String[] {
+                        resourcePath + "/connect.inc",
+                        resourcePath + "/excsat_accsecrd1.inc",
+                        resourcePath + "/excsat_accsecrd2.inc",
+                        resourcePath + "/excsat_secchk.inc",
+                        resourcePath + "/values1.inc",
+                        resourcePath + "/values64kblksz.inc",
+                    }));
     }
 }

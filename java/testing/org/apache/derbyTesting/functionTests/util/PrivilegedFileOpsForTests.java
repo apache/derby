@@ -23,6 +23,7 @@ package org.apache.derbyTesting.functionTests.util;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
@@ -104,6 +105,33 @@ public class PrivilegedFileOpsForTests {
                         })).booleanValue();
         } catch (PrivilegedActionException pae) {
             throw (SecurityException)pae.getException();
+        }
+    }
+
+    /**
+     * Obtains a reader for the specified file.
+     *
+     * @param file the file to obtain a reader for
+     * @return An unbuffered reader for the specified file.
+     * @throws FileNotFoundException if the specified file does not exist
+     * @throws SecurityException if the required privileges to read the file
+     *      are missing
+     */
+    public static FileReader getFileReader(final File file)
+            throws FileNotFoundException {
+        if (file == null) {
+            throw new IllegalArgumentException("file cannot be <null>");
+        }
+        try {
+            return (FileReader)AccessController.doPrivileged(
+                    new PrivilegedExceptionAction() {
+                        public Object run()
+                                throws FileNotFoundException {
+                            return new FileReader(file);
+                        }
+                    });
+        } catch (PrivilegedActionException pae) {
+            throw (FileNotFoundException)pae.getCause();
         }
     }
 }
