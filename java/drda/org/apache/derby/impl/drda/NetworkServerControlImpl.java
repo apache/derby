@@ -2155,8 +2155,9 @@ public final class NetworkServerControlImpl {
 					break;
 				}
 			case COMMAND_TRACEDIRECTORY:
-				setTraceDirectory((String) commandArgs.elementAt(0));
-				consolePropertyMessage("DRDA_TraceDirectoryChange.I", traceDirectory);
+				String directory = (String) commandArgs.elementAt(0);
+				sendSetTraceDirectory(directory);
+				consolePropertyMessage("DRDA_TraceDirectoryChange.I", directory);
 				break;
 			case COMMAND_TESTCONNECTION:
 				ping();

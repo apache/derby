@@ -21,6 +21,7 @@
 
 package org.apache.derbyTesting.functionTests.tests.derbynet;
 
+import java.io.File;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -45,6 +46,7 @@ import org.apache.derbyTesting.junit.SpawnedProcess;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
 import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
+import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
 
 import org.apache.derby.drda.NetworkServerControl;
 
@@ -353,6 +355,35 @@ public class SecureServerTest extends BaseJDBCTestCase
         //
         runsysinfo();
         enableTracing();
+        setTraceDirectory();
+        disableTracing();
+        
+    }
+
+    private void disableTracing() throws Exception {
+
+        String traceOffOutput = runServerCommand( "trace off" );
+
+        println( "Output for trace off command:\n\n" + traceOffOutput );
+
+        if ( traceOffOutput.indexOf( "Trace turned off for all sessions." ) < 0 )
+        { fail( "Failed to turn trace off:\n\n:" + traceOffOutput ); }
+    }
+
+    private void setTraceDirectory() throws Exception {
+    	PrivilegedFileOpsForTests.mkdirs(new File("trace"));
+        String  traceDirectoryOutput = runServerCommand( "tracedirectory trace" );
+        println( "Output for tracedirectory trace command:\n\n" + traceDirectoryOutput );
+
+        if ( traceDirectoryOutput.indexOf( "Trace directory changed to trace." ) < 0 )
+        { fail( "Unexpected output in setting trace directory:" + traceDirectoryOutput ); }
+
+        String pingOutput = runServerCommand( "ping" );
+
+        if (pingOutput.indexOf("Connection obtained for host:") < 0)
+        { fail ("Failed ping after changing trace directory: " + pingOutput);}
+        assertTrue("Trace file does not exist",
+                PrivilegedFileOpsForTests.exists(new File("trace/Server6.trace")));
     }
 
     private void    connectToServer()
