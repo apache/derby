@@ -643,4 +643,82 @@ public  class   AnsiSignatures
          )
     { return c; }
 
+    //
+    // BINARY
+    //
+    
+    // legal resolutions
+
+    public  static  byte[]  binary_bytes_bytes( byte[] a ) { return a; }
+    public  static  byte[]  binary_bytes_bytes( byte a ) { return new byte[] { (byte) -1 }; }
+    public  static  byte[]  binary_bytes_bytes( int a ) { return new byte[] { (byte) -1 }; }
+    public  static  byte[]  binary_bytes_bytes( long a ) { return new byte[] { (byte) -1 }; }
+    public  static  byte[]  binary_bytes_bytes( float a ) { return new byte[] { (byte) -1 }; }
+    public  static  byte[]  binary_bytes_bytes( double a ) { return new byte[] { (byte) -1 }; }
+    public  static  byte[]  binary_bytes_bytes( Byte a ) { return new byte[] { (byte) -1 }; }
+    public  static  byte[]  binary_bytes_bytes( Short a ) { return new byte[] { (byte) -1 }; }
+    public  static  byte[]  binary_bytes_bytes( Long a ) { return new byte[] { (byte) -1 }; }
+    public  static  byte[]  binary_bytes_bytes( Float a ) { return new byte[] { (byte) -1 }; }
+    public  static  byte[]  binary_bytes_bytes( Double a ) { return new byte[] { (byte) -1 }; }
+    public  static  byte[]  binary_bytes_bytes( BigDecimal a ) { return new byte[] { (byte) -1 }; }
+    public  static  byte[]  binary_bytes_bytes( String a ) { return new byte[] { (byte) -1 }; }
+    public  static  byte[]  binary_bytes_bytes( Object a ) { return new byte[] { (byte) -1 }; }
+
+    public  static  byte[]  binary_bytes_int( int a ) { return new byte[] { (byte) a }; }
+
+    // bad return type
+    public  static  int  binary_badreturn_bytes_bytes( byte[] a ) { return -1; }
+    
+    //
+    // VARBINARY
+    //
+    
+    // legal resolutions
+
+    public  static  byte[]  varbinary_bytes_bytes( byte[] a ) { return a; }
+    public  static  byte[]  varbinary_bytes_bytes( byte a ) { return new byte[] { (byte) -1 }; }
+    public  static  byte[]  varbinary_bytes_bytes( int a ) { return new byte[] { (byte) -1 }; }
+    public  static  byte[]  varbinary_bytes_bytes( long a ) { return new byte[] { (byte) -1 }; }
+    public  static  byte[]  varbinary_bytes_bytes( float a ) { return new byte[] { (byte) -1 }; }
+    public  static  byte[]  varbinary_bytes_bytes( double a ) { return new byte[] { (byte) -1 }; }
+    public  static  byte[]  varbinary_bytes_bytes( Byte a ) { return new byte[] { (byte) -1 }; }
+    public  static  byte[]  varbinary_bytes_bytes( Short a ) { return new byte[] { (byte) -1 }; }
+    public  static  byte[]  varbinary_bytes_bytes( Long a ) { return new byte[] { (byte) -1 }; }
+    public  static  byte[]  varbinary_bytes_bytes( Float a ) { return new byte[] { (byte) -1 }; }
+    public  static  byte[]  varbinary_bytes_bytes( Double a ) { return new byte[] { (byte) -1 }; }
+    public  static  byte[]  varbinary_bytes_bytes( BigDecimal a ) { return new byte[] { (byte) -1 }; }
+    public  static  byte[]  varbinary_bytes_bytes( String a ) { return new byte[] { (byte) -1 }; }
+    public  static  byte[]  varbinary_bytes_bytes( Object a ) { return new byte[] { (byte) -1 }; }
+
+    public  static  byte[]  varbinary_bytes_int( int a ) { return new byte[] { (byte) a }; }
+
+    // bad return type
+    public  static  int  varbinary_badreturn_bytes_bytes( byte[] a ) { return -1; }
+    
+
+    //
+    // LONGVARBINARY
+    //
+    
+    // legal resolutions
+
+    public  static  byte[]  longvarbinary_bytes_bytes( byte[] a ) { return a; }
+    public  static  byte[]  longvarbinary_bytes_bytes( byte a ) { return new byte[] { (byte) -1 }; }
+    public  static  byte[]  longvarbinary_bytes_bytes( int a ) { return new byte[] { (byte) -1 }; }
+    public  static  byte[]  longvarbinary_bytes_bytes( long a ) { return new byte[] { (byte) -1 }; }
+    public  static  byte[]  longvarbinary_bytes_bytes( float a ) { return new byte[] { (byte) -1 }; }
+    public  static  byte[]  longvarbinary_bytes_bytes( double a ) { return new byte[] { (byte) -1 }; }
+    public  static  byte[]  longvarbinary_bytes_bytes( Byte a ) { return new byte[] { (byte) -1 }; }
+    public  static  byte[]  longvarbinary_bytes_bytes( Short a ) { return new byte[] { (byte) -1 }; }
+    public  static  byte[]  longvarbinary_bytes_bytes( Long a ) { return new byte[] { (byte) -1 }; }
+    public  static  byte[]  longvarbinary_bytes_bytes( Float a ) { return new byte[] { (byte) -1 }; }
+    public  static  byte[]  longvarbinary_bytes_bytes( Double a ) { return new byte[] { (byte) -1 }; }
+    public  static  byte[]  longvarbinary_bytes_bytes( BigDecimal a ) { return new byte[] { (byte) -1 }; }
+    public  static  byte[]  longvarbinary_bytes_bytes( String a ) { return new byte[] { (byte) -1 }; }
+    public  static  byte[]  longvarbinary_bytes_bytes( Object a ) { return new byte[] { (byte) -1 }; }
+
+    public  static  byte[]  longvarbinary_bytes_int( int a ) { return new byte[] { (byte) a }; }
+
+    // bad return type
+    public  static  int  longvarbinary_badreturn_bytes_bytes( byte[] a ) { return -1; }
 }

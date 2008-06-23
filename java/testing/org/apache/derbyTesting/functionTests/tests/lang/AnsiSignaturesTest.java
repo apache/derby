@@ -272,6 +272,48 @@ public class AnsiSignaturesTest extends BaseJDBCTestCase
              );
     }
 
+    public  void    test_binary_bytes_bytes()
+        throws Exception
+    {
+        declareAndRunFunction
+            ( "binary_bytes_bytes", "char( 2 ) for bit data", new String[] { "char( 2 ) for bit data" }, "X'a1b2'", "a1b2" );
+    }
+
+    public  void    test_binary_bytes_int()
+        throws Exception
+    {
+        declareAndRunFunction
+            ( "binary_bytes_int", "char( 1 ) for bit data", new String[] { "integer" }, "3", "03" );
+    }
+
+    public  void    test_varbinary_bytes_bytes()
+        throws Exception
+    {
+        declareAndRunFunction
+            ( "varbinary_bytes_bytes", "varchar( 2 ) for bit data", new String[] { "varchar( 2 ) for bit data" }, "X'a1b2'", "a1b2" );
+    }
+
+    public  void    test_varbinary_bytes_int()
+        throws Exception
+    {
+        declareAndRunFunction
+            ( "varbinary_bytes_int", "char( 1 ) for bit data", new String[] { "integer" }, "3", "03" );
+    }
+
+    public  void    test_longvarbinary_bytes_bytes()
+        throws Exception
+    {
+        declareAndRunFunction
+            ( "longvarbinary_bytes_bytes", "long varchar for bit data", new String[] { "varchar(2) for bit data" }, "X'a1b2'", "a1b2" );
+    }
+
+    public  void    test_longvarbinary_bytes_int()
+        throws Exception
+    {
+        declareAndRunFunction
+            ( "longvarbinary_bytes_int", "long varchar for bit data", new String[] { "integer" }, "3", "03" );
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // SHOULD NOT RESOLVE
@@ -336,6 +378,27 @@ public class AnsiSignaturesTest extends BaseJDBCTestCase
     {
         declareAndFailFunction
             ( "double_badreturn_byte_double", "double", new String[] { "double" }, "3.0", "3.0", TRIED_ALL_COMBINATIONS );
+    }
+
+     public  void    test_binary_badreturn_bytes_bytes()
+        throws Exception
+    {
+        declareAndFailFunction
+            ( "binary_badreturn_bytes_bytes", "char( 2 ) for bit data", new String[] { "char( 2 ) for bit data" }, "X'a1b2'", "a1b2", TRIED_ALL_COMBINATIONS );
+    }
+
+     public  void    test_varbinary_badreturn_bytes_bytes()
+        throws Exception
+    {
+        declareAndFailFunction
+            ( "varbinary_badreturn_bytes_bytes", "varchar( 2 ) for bit data", new String[] { "varchar( 2 ) for bit data" }, "X'a1b2'", "a1b2", TRIED_ALL_COMBINATIONS );
+    }
+
+     public  void    test_longvarbinary_badreturn_bytes_bytes()
+        throws Exception
+    {
+        declareAndFailFunction
+            ( "longvarbinary_badreturn_bytes_bytes", "long varchar for bit data", new String[] { "char( 2 ) for bit data" }, "X'a1b2'", "a1b2", TRIED_ALL_COMBINATIONS );
     }
 
     ///////////////////////////////////////////////////////////////////////////////////
