@@ -61,7 +61,7 @@ public abstract class Connection implements java.sql.Connection,
     // ------------------------properties set for life of connection--------------
 
     // See ClientDataSource pre-connect settings
-    public transient String user_;
+    protected final String user_;
     public boolean retrieveMessageText_;
     protected boolean jdbcReadOnly_;
     /**
@@ -171,7 +171,8 @@ public abstract class Connection implements java.sql.Connection,
                          String password,
                          org.apache.derby.jdbc.ClientBaseDataSource dataSource) 
                                                            throws SqlException {
-        initConnection(logWriter, user, dataSource);
+        this.user_ = user;
+        initConnection(logWriter, dataSource);
     }
 
     protected Connection(org.apache.derby.client.am.LogWriter logWriter,
@@ -180,20 +181,18 @@ public abstract class Connection implements java.sql.Connection,
                          boolean isXAConn,
                          org.apache.derby.jdbc.ClientBaseDataSource dataSource) 
                                                            throws SqlException {
+        this.user_ = user;
         isXAConnection_ = isXAConn;
-        initConnection(logWriter, user, dataSource);
+        initConnection(logWriter, dataSource);
     }
 
     // For jdbc 2 connections
     protected void initConnection(org.apache.derby.client.am.LogWriter logWriter,
-                                  String user,
                                   org.apache.derby.jdbc.ClientBaseDataSource
                                             dataSource) throws SqlException {
         if (logWriter != null) {
             logWriter.traceConnectEntry(dataSource);
         }
-
-        user_ = user;
 
         // Extract common properties.
         // Derby-409 fix - Append connectionAttributes only if it is non-null. 
@@ -280,7 +279,8 @@ public abstract class Connection implements java.sql.Connection,
         // if needed this will later be initialized by NET calls to initializePublicKeyForEncryption()
         encryptionManager_ = null;
 
-        currentSchemaName_ = null;
+        // DERBY-3723: Reset schema to user name.
+        currentSchemaName_ = this.user_;
         autoCommit_ = true;
         inUnitOfWork_ = false;
         holdability = ResultSet.HOLD_CURSORS_OVER_COMMIT;
