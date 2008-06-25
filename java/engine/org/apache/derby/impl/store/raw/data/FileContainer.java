@@ -914,12 +914,9 @@ abstract class FileContainer
 	/**
 		Get an embryonic page from the dataInput stream.
 
-		If fileData is not null, then the embyronic page will be read 
+		The embryonic page will be read
 		in from the input stream (fileData), which is assumed to be 
 		positioned at the beginning of the first allocation page.
-
-		if fileData is null, then just manufacture an array which
-		is the size of an embryonic page.
 
 		@exception IOException error in read the embryonic page from file
 	*/
@@ -927,10 +924,8 @@ abstract class FileContainer
 	{
 		byte[] epage = new byte[AllocPage.MAX_BORROWED_SPACE];
 
-		if (fileData != null)
-		{
-			fileData.readFully(epage);
-		}
+		fileData.readFully(epage);
+
 		return epage;
 	}
 

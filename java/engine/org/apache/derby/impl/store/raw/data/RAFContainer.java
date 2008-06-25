@@ -675,7 +675,18 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
 		if (create)
 		{
 			// the file doesn't exist yet, get an embryonic page buffer
-			epage = getEmbryonicPage((DataInput)null); 
+
+            // Allocating AllocPage.MAX_BORROWED_SPACE bytes for the
+            // embryonic page should be enough, but we want to leave
+            // the end of the file at a page boundary. This is to work
+            // around bugs in the EPOC jvm where a seek beyond the end
+            // of a file does not throw an exception but just moves
+            // the offset to the end of the file. This only occurs
+            // when the second page is written after the header has
+            // been written, ending up with the page at the incorrect
+            // offset.
+
+            epage = new byte[pageSize];
 		}
 		else
 		{
@@ -685,16 +696,6 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
 		// need to check for frozen state
 
 		writeHeader(file, create, epage);
-
-		// leave the end of the file at a page boundry. This
-		// is to work around bugs in the EPOC jvm where a seek
-		// beyond the end of a file does not throw an exception
-		// but just moves the offset to the end of the file. This only
-		// occurs when the second page is written after the header has
-		// been written, ending up with the page at the incorrect offset.
-		if (create) {
-			padFile(file, pageSize);
-		}
 
 		if (syncFile)
 		{
@@ -710,8 +711,6 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
 				dataFactory.writeFinished();
 			}
 		}
-
-		epage = null;
 	}
 
 	/**
