@@ -147,10 +147,61 @@ public interface RawStoreFactory extends Corruptable {
 	*/
 	public static final int PAGE_CACHE_SIZE_MAXIMUM = Integer.MAX_VALUE;
 
+
+	/** Property name for the number of open files to maintain associated with
+        the page cache.  Internally this is referred to as the "ContainerCache".
+
+        Each object in this cache maps to a java level "open" file on a file
+        in the database directory.  Although actual implementation depends on
+        JVM implementation, this usually maps to underlying open file resources
+        in the underlying operating system.  Setting this number too high
+        may result in I/O failures reported by Derby, which are the result 
+        of hitting some user and/or OS limit on the number of open files
+        allowed.  These I/O errors may happen during read, write and/or open 
+        operations.  
+        Sometimes these limits can be avoided simply by executing an OS 
+        specific command to raise the maximum open files allowed by whatever
+        mechanism is used to control resources allowed to be consumed by
+        the JVM.
+
+        Derby may also open other files separate from this cache, so exausting
+        the open file resource may cause other operations than I/O to data
+        pages to fail.  A partial list of these operations includes: 
+        recovery logging, error logging, external sorting, and 
+        LOB disk overflow.
+
+        The default maximum size of this cache is 100 open files.
+        The minimum size of this cache is 2 open files, attempting to set this
+        cache to a smaller size or a negative number will result in a size 2
+        cache.  Setting the cache size to a number bigger than an INT, or any
+        sort of illegal format number will result in a cache size of 100
+        open files.
+
+        Equal to 'derby.storage.fileCacheSize'
+	*/
+	public static final String CONTAINER_CACHE_SIZE_PARAMETER = 
+        "derby.storage.fileCacheSize";
+
+	/**
+		Default value for CONTAINER_CACHE_SIZE_PARAMETER (100).
+	*/
+	public static final int CONTAINER_CACHE_SIZE_DEFAULT = 100;
+
+	/**
+		Minimum container cache size accepted (2).
+	*/
+	public static final int CONTAINER_CACHE_SIZE_MINIMUM = 2;
+
+	/**
+		Maximum container cache size we will accept (MAXINT).
+	*/
+	public static final int CONTAINER_CACHE_SIZE_MAXIMUM = Integer.MAX_VALUE;
+
 	/**
 		Maximum number of initial pages when a container is created
 	*/
 	public static final short MAX_CONTAINER_INITIAL_PAGES = 1000;
+
 
 	/** Property name for the default minimum record size to be used in the 
         storage area. Minimum record size is the minimum number of bytes that a 

@@ -377,6 +377,7 @@ public class BaseDataFileFactory
             Monitor.startSystemModule(
                 org.apache.derby.iapi.reference.Module.CacheFactory);
 
+        // Initialize the page cache
 	    int pageCacheSize = getIntParameter(
 					RawStoreFactory.PAGE_CACHE_SIZE_PARAMETER,
                     null,
@@ -385,17 +386,16 @@ public class BaseDataFileFactory
                     RawStoreFactory.PAGE_CACHE_SIZE_MAXIMUM);
 
 		pageCache =
-				cf.newCacheManager(this,
-                    "PageCache",
-                    pageCacheSize / 2,
-                    pageCacheSize);
+            cf.newCacheManager(
+                this, "PageCache", pageCacheSize / 2, pageCacheSize);
 
+        // Initialize the container cache
 	    int fileCacheSize = getIntParameter(
-					"derby.storage.fileCacheSize",
+                    RawStoreFactory.CONTAINER_CACHE_SIZE_PARAMETER,
                     null,
-                    100,
-                    2,
-                    100);
+                    RawStoreFactory.CONTAINER_CACHE_SIZE_DEFAULT,
+                    RawStoreFactory.CONTAINER_CACHE_SIZE_MINIMUM,
+                    RawStoreFactory.CONTAINER_CACHE_SIZE_MAXIMUM);
 
 		containerCache = 
             cf.newCacheManager(
@@ -408,7 +408,6 @@ public class BaseDataFileFactory
 
 			inCreateNoLog = 
                 (noLog != null && Boolean.valueOf(noLog).booleanValue());
-
 		}
 
 		freezeSemaphore = new Object();
