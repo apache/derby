@@ -1036,7 +1036,7 @@ public final class DataTypeDescriptor implements Formatable
 	 */
 	public	String		getTypeName()
 	{
-		return typeId.getSQLTypeName();
+		return typeDescriptor.getTypeName();
 	}
 
 	/**
@@ -1753,7 +1753,7 @@ public final class DataTypeDescriptor implements Formatable
 	{
 		typeDescriptor = (TypeDescriptorImpl) in.readObject();
         
-        typeId = TypeId.getBuiltInTypeId(this.getJDBCTypeId());
+        typeId = TypeId.getBuiltInTypeId(this.getTypeName());
         
         collationDerivation = in.readInt();
 	}

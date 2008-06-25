@@ -399,6 +399,46 @@ public class TriggerTest extends BaseJDBCTestCase {
     {
         ((List) TRIGGER_INFO.get()).add(info);  
     }
+
+    /** 
+     * Test for DERBY-3718 NPE when a trigger is fired
+     * 
+     * @throws SQLException
+     * @throws IOException
+     */
+    public void testNPEinTriggerFire() throws SQLException
+    {
+        Statement s = createStatement();
+        
+    	String sql = " CREATE TABLE TRADE(ID INT PRIMARY KEY GENERATED "+
+    	"BY DEFAULT AS IDENTITY (START WITH 1000), BUYID INT NOT NULL," +
+    	"QTY FLOAT(2) NOT NULL)";
+        s.executeUpdate(sql);
+
+        sql = "CREATE TABLE TOTAL(BUYID INT NOT NULL, TOTALQTY FLOAT(2) NOT NULL)";
+        s.executeUpdate(sql);
+        
+        sql = "CREATE TRIGGER TRADE_INSERT AFTER INSERT ON TRADE REFERENCING "+ 
+        "NEW AS NEWROW FOR EACH ROW MODE DB2SQL UPDATE TOTAL SET TOTALQTY "+
+        "= NEWROW.QTY WHERE BUYID = NEWROW.BUYID"; 
+        s.executeUpdate(sql);
+        
+        s.executeUpdate("INSERT INTO TOTAL VALUES (1, 0)");
+        //Before DERBY-3718 was fixed, following would cause NPE in 10.4 and 
+        //trunk. This happened because starting 10.4, rather than saving the
+        //TypeId of the DataTypeDescriptor (in writeExternal method), we rely
+        //on reconstructing TypeId (in readExternal) by using the Types.xxx 
+        //information(DERBY-2917 revision r619995). This approach does not
+        //work for internal datatype REF, because we use Types.OTHER for REF
+        //datatypes. Types.OTHER is not enough to know that the type to be 
+        //constructed is REF. 
+        //To get around the problem, for reconstructing TypeId, we will
+        //use the type name rather than Types.xxx. Since we have the correct
+        //type name for internal datatype REF, we can successfully reconstruct
+        //REF datatype. 
+        s.executeUpdate("INSERT INTO TRADE VALUES(1, 1, 10)");
+        commit();      
+    }
     
     /** 
      * Test for DERBY-3238 trigger fails with IOException if triggering table has large lob.
