@@ -36,13 +36,18 @@ import java.util.Arrays;
 public class BankAccountFiller implements DBFiller {
 
     /** Name of the account table. */
-    private static final String ACCOUNT_TABLE = "ACCOUNTS";
+    static final String ACCOUNT_TABLE = "ACCOUNTS";
     /** Name of the branch table. */
-    private static final String BRANCH_TABLE = "BRANCHES";
+    static final String BRANCH_TABLE = "BRANCHES";
     /** Name of the teller table. */
-    private static final String TELLER_TABLE = "TELLERS";
+    static final String TELLER_TABLE = "TELLERS";
     /** Name of the history table. */
-    private static final String HISTORY_TABLE = "HISTORY";
+    static final String HISTORY_TABLE = "HISTORY";
+
+    /** The number of tellers per branch, if not specified. */
+    static final int DEFAULT_TELLERS_PER_BRANCH = 10;
+    /** The number of accounts per branch, if not specified. */
+    static final int DEFAULT_ACCOUNTS_PER_BRANCH = 100000;
 
     /**
      * Number of extra bytes needed to make the rows in the account
@@ -74,30 +79,31 @@ public class BankAccountFiller implements DBFiller {
      * table has three INT columns (4 bytes each), one BIGINT column
      * (8 bytes) and one TIMESTAMP column (12 bytes).
      */
-    private static final int HISTORY_EXTRA = 50 - 4 - 4 - 4 - 8 - 12;
+    static final int HISTORY_EXTRA = 50 - 4 - 4 - 4 - 8 - 12;
 
-    /** Number of records in the account table. */
-    private final int accountRecords;
-    /** Number of records in the teller table. */
-    private final int tellerRecords;
     /** Number of records in the branch table. */
-    private final int branchRecords;
+    private final int branches;
+    /** Number of tellers per branch. */
+    private final int tellersPerBranch;
+    /** Number of accounts per branch. */
+    private final int accountsPerBranch;
 
     /**
      * Create a filler that generates tables with the given sizes.
      *
-     * @param accounts number of records in the account table
-     * @param tellers number of records in the teller table
-     * @param branches number of records in the branch table
+     * @param branches number of branches
+     * @param tellersPerBranch number of tellers per branch
+     * @param accountsPerBranch number of accounts per branch
      */
-    public BankAccountFiller(int accounts, int tellers, int branches) {
-        if (accounts <= 0 || tellers <= 0 || branches <= 0) {
+    public BankAccountFiller(int branches, int tellersPerBranch,
+                             int accountsPerBranch) {
+        if (branches <= 0 || tellersPerBranch <= 0 || accountsPerBranch <= 0) {
             throw new IllegalArgumentException(
                 "all arguments must be greater than 0");
         }
-        accountRecords = accounts;
-        tellerRecords = tellers;
-        branchRecords = branches;
+        this.branches = branches;
+        this.tellersPerBranch = tellersPerBranch;
+        this.accountsPerBranch = accountsPerBranch;
     }
 
     /**
@@ -107,10 +113,10 @@ public class BankAccountFiller implements DBFiller {
      * table has 1 row. If the scale factor is different from 1, the
      * number of rows is multiplied with the scale factor.
      *
-     * @param tps the scale factor for this database
+     * @param scale the scale factor for this database
      */
-    public BankAccountFiller(int tps) {
-        this(tps * 100000, tps * 10, tps * 1);
+    public BankAccountFiller(int scale) {
+        this(scale, DEFAULT_TELLERS_PER_BRANCH, DEFAULT_ACCOUNTS_PER_BRANCH);
     }
 
     /**
@@ -191,9 +197,9 @@ public class BankAccountFiller implements DBFiller {
                                "(ACCOUNT_ID, BRANCH_ID, ACCOUNT_BALANCE, " +
                                "EXTRA_DATA) VALUES (?, ?, 0, ?)");
         atIns.setString(3, createJunk(ACCOUNT_EXTRA)); // same for all rows
-        for (int id = 0; id < accountRecords; id++) {
+        for (int id = 0; id < accountsPerBranch * branches; id++) {
             atIns.setInt(1, id);
-            atIns.setInt(2, id % branchRecords);
+            atIns.setInt(2, id / accountsPerBranch);
             atIns.executeUpdate();
         }
         atIns.close();
@@ -204,7 +210,7 @@ public class BankAccountFiller implements DBFiller {
                                "(BRANCH_ID, BRANCH_BALANCE, EXTRA_DATA) " +
                                "VALUES (?, 0, ?)");
         btIns.setString(2, createJunk(BRANCH_EXTRA)); // same for all rows
-        for (int id = 0; id < branchRecords; id++) {
+        for (int id = 0; id < branches; id++) {
             btIns.setInt(1, id);
             btIns.executeUpdate();
         }
@@ -216,9 +222,9 @@ public class BankAccountFiller implements DBFiller {
                                "(TELLER_ID, BRANCH_ID, TELLER_BALANCE, " +
                                "EXTRA_DATA) VALUES (?, ?, 0, ?)");
         ttIns.setString(3, createJunk(TELLER_EXTRA)); // same for all rows
-        for (int id = 0; id < tellerRecords; id++) {
+        for (int id = 0; id < tellersPerBranch * branches; id++) {
             ttIns.setInt(1, id);
-            ttIns.setInt(2, id % branchRecords);
+            ttIns.setInt(2, id / tellersPerBranch);
             ttIns.executeUpdate();
         }
         ttIns.close();
@@ -236,21 +242,9 @@ public class BankAccountFiller implements DBFiller {
      * @param length the length of the string
      * @return a string of the specified length
      */
-    private static String createJunk(int length) {
+    static String createJunk(int length) {
         char[] junk = new char[length];
         Arrays.fill(junk, 'x');
         return new String(junk);
-    }
-
-    // For testing until the test client that uses the database has
-    // been written.
-    public static void main(String[] args) throws Exception {
-        Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
-        Connection c = java.sql.DriverManager.getConnection(
-            "jdbc:derby:wombat;create=true");
-        DBFiller f = new BankAccountFiller(4000, 20, 3);
-        System.out.print("filling...");
-        f.fill(c);
-        System.out.println("done!");
     }
 }
