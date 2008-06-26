@@ -621,6 +621,46 @@ public  class   AnsiSignatures
     public  static  String   varchar_String_String( Object a ) { return "-1"; }
     
     //
+    // CHAR
+    //
+    
+    // legal resolutions
+    public  static  String   char_String_String( String a ) { return a; }
+    public  static  String   char_String_String( byte a ) { return "-1"; }
+    public  static  String   char_String_String( short a ) { return "-1"; }
+    public  static  String   char_String_String( int a ) { return "-1"; }
+    public  static  String   char_String_String( long a ) { return "-1"; }
+    public  static  String   char_String_String( float a ) { return "-1"; }
+    public  static  String   char_String_String( double a ) { return "-1"; }
+    public  static  String   char_String_String( Byte a ) { return "-1"; }
+    public  static  String   char_String_String( Short a ) { return "-1"; }
+    public  static  String   char_String_String( Integer a ) { return "-1"; }
+    public  static  String   char_String_String( Long a ) { return "-1"; }
+    public  static  String   char_String_String( Float a ) { return "-1"; }
+    public  static  String   char_String_String( Double a ) { return "-1"; }
+    public  static  String   char_String_String( Object a ) { return "-1"; }
+    
+    //
+    // LONGVARCHAR
+    //
+    
+    // legal resolutions
+    public  static  String   longvarchar_String_String( String a ) { return a; }
+    public  static  String   longvarchar_String_String( byte a ) { return "-1"; }
+    public  static  String   longvarchar_String_String( short a ) { return "-1"; }
+    public  static  String   longvarchar_String_String( int a ) { return "-1"; }
+    public  static  String   longvarchar_String_String( long a ) { return "-1"; }
+    public  static  String   longvarchar_String_String( float a ) { return "-1"; }
+    public  static  String   longvarchar_String_String( double a ) { return "-1"; }
+    public  static  String   longvarchar_String_String( Byte a ) { return "-1"; }
+    public  static  String   longvarchar_String_String( Short a ) { return "-1"; }
+    public  static  String   longvarchar_String_String( Integer a ) { return "-1"; }
+    public  static  String   longvarchar_String_String( Long a ) { return "-1"; }
+    public  static  String   longvarchar_String_String( Float a ) { return "-1"; }
+    public  static  String   longvarchar_String_String( Double a ) { return "-1"; }
+    public  static  String   longvarchar_String_String( Object a ) { return "-1"; }
+    
+    //
     // Mixed types
     //
     public static long bigint__smallint_int_bigint_real_double

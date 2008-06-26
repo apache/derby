@@ -246,6 +246,21 @@ public class AnsiSignaturesTest extends BaseJDBCTestCase
             ( "varchar_String_String", "varchar( 10 )", new String[] { "varchar( 10 )" }, "'3.0'", "3.0" );
     }
 
+    public  void    test_char_String_String()
+        throws Exception
+    {
+        declareAndRunFunction
+            ( "char_String_String", "char( 10 )", new String[] { "char( 10 )" }, "'3.0'", "3.0       " );
+    }
+
+    public  void    test_longvarchar_String_String()
+        throws Exception
+    {
+        // long varchar is not allowed as an argument type in a Derby routine
+        declareAndRunFunction
+            ( "longvarchar_String_String", "long varchar", new String[] { "varchar( 10 )" }, "'3.0'", "3.0" );
+    }
+
     public  void    test_bigint__smallint_int_bigint_real_double()
         throws Exception
     {
