@@ -26,6 +26,7 @@ import org.apache.derby.drda.NetworkServerControl;
 import org.apache.derby.tools.dblook;
 import org.apache.derby.tools.ij;
 import org.apache.derby.tools.sysinfo;
+import org.apache.derby.tools.SignatureChecker;
 import org.apache.derby.iapi.tools.i18n.LocalizedResource;
 
 /**
@@ -37,6 +38,7 @@ import org.apache.derby.iapi.tools.i18n.LocalizedResource;
   java -jar derbyrun.jar sysinfo [-cp ...] [-cp help]<br>
   java -jar derbyrun.jar dblook [args] (or no arguments for usage)<br>
   java -jar derbyrun.jar server [args] (or no arguments for usage)<br>
+  java -jar derbyrun.jar SignatureChecker [args] (or no arguments for usage)<br>
 */
 public class run {
 
@@ -55,6 +57,8 @@ public class run {
           dblook.main(trimArgs(args));
       } else if (args[0].equals("server")) {
           NetworkServerControl.main(trimArgs(args));
+      } else if (args[0].equals("SignatureChecker")) {
+          SignatureChecker.main(trimArgs(args));
       } else printUsage();
   }
 
