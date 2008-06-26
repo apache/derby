@@ -28,6 +28,7 @@
   <!-- Compiler settings -->
   <property file="${properties.dir}/sane${sanity}.properties"/>
 
+
 <!-- Targets -->
 
   <target name="buildsource" depends="checkCompilerLevel,init,prebuild,setCompilerProperties,engine,storeless,tools,drda,client,build,versioninfo,localeinfo"/>
@@ -200,6 +201,12 @@
     <property file="${properties.dir}/compilepath.properties"/>
     <!-- Release and version info -->
     <property file="${properties.dir}/release.properties"/>
+
+    <!-- 
+            If the user hasn't already set this property, point it at our stub
+            implementation of JSR169.
+    -->
+    <property name="jsr169compile.classpath" value="${out.jsr169.dir}:${java14compile.classpath}"/>
 
   </target>
 
@@ -438,7 +445,7 @@
     <ant dir="${derby.client.src.dir}"/>
   </target>
 
-  <target name="prebuild">
+  <target name="prebuild" depends="jsr169stubs">
     <ant dir="${derby.build.src.dir}/org/apache/derbyPreBuild"/>
   </target>
 
@@ -567,6 +574,33 @@
       <fileset dir="${derby.tools.dir}/impl/tools/ij"
             includes="ij.java,ijTokenManager.java,ijConstants.java,Token.java,mtGrammar.java,mtGrammarConstants.java,mtGrammarTokenManager.java,CharStream.java,SimpleCharStream.java,TokenMgrError.java"/>
     </delete>
+  </target>
+
+<!-- =================================================================== -->
+<!--                     Build the stub implementation of JSR169                  -->
+<!-- =================================================================== -->
+  <target name="jsr169stubs">
+    <mkdir dir="${out.stubs.dir}"/>
+    <mkdir dir="${out.jsr169.dir}"/>
+
+    <javac
+      source="1.4"
+      target="1.4"
+      bootclasspath="${empty}"
+      nowarn="on"
+      debug="${debug}"
+      depend="${depend}"
+      deprecation="${deprecation}"
+      optimize="${optimize}"
+      proceed="${proceed}"
+      verbose="${verbose}"
+      srcdir="${derby.jsr169.src.dir}"
+      destdir="${out.jsr169.dir}">
+      <classpath>
+        <pathelement path="${compile.classpath}"/>
+      </classpath>
+     </javac>
+
   </target>
 
 <!-- =================================================================== -->

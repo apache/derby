@@ -29,3 +29,13 @@ International Business Machines Corporation in accordance with the NIST
 Software Acknowledgment and Redistribution document at
 http://www.itl.nist.gov/div897/ctg/sql_form.htm
 
+
+The JDBC api for small devices (under java/stubs/jsr169) was produced by
+trimming sources supplied by the Apache Harmony project. The following
+notice covers the Harmony sources:
+
+Portions of Harmony were originally developed by
+Intel Corporation and are licensed to the Apache Software
+Foundation under the "Software Grant and Corporate Contribution
+License Agreement", informally known as the "Intel Harmony CLA".
+
