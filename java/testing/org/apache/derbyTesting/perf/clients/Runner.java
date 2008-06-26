@@ -27,7 +27,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.HashMap;
 
 /**
  * Class used for running a performance test from the command line. To learn
@@ -58,8 +58,8 @@ public class Runner {
     private static boolean init = false;
     /** The name of the type of load to use in the test. */
     private static String load; // required argument
-    /** Set of load-specific options. */
-    private final static HashSet loadOpts = new HashSet();
+    /** Map containing load-specific options. */
+    private final static HashMap loadOpts = new HashMap();
     /** The name of the load generator to use in the test. */
     private static String generator = "b2b";
     /** The number of client threads to use in the test. */
@@ -142,7 +142,7 @@ public class Runner {
             } else if (args[i].equals("-load")) {
                 load = args[++i];
             } else if (args[i].equals("-load_opts")) {
-                loadOpts.addAll(Arrays.asList(args[++i].split(",")));
+                parseLoadOpts(args[++i]);
             } else if (args[i].equals("-gen")) {
                 generator = args[++i];
             } else if (args[i].equals("-threads")) {
@@ -160,6 +160,49 @@ public class Runner {
         if (load == null) {
             throw new Exception("required parameter -load not specified");
         }
+    }
+
+    /**
+     * Parse the load-specific options. It's a comma-separated list of options,
+     * where each option is either a keyword or a (keyword, value) pair
+     * separated by an equals sign (=). The parsed options will be put into the
+     * map {@link #loadOpts}.
+     *
+     * @param optsString the comma-separated list of options
+     */
+    private static void parseLoadOpts(String optsString) {
+        String[] opts = optsString.split(",");
+        for (int i = 0; i < opts.length; i++) {
+            String[] keyValue = opts[i].split("=", 2);
+            if (keyValue.length == 2) {
+                loadOpts.put(keyValue[0], keyValue[1]);
+            } else {
+                loadOpts.put(opts[i], null);
+            }
+        }
+    }
+
+    /**
+     * Checks whether the specified option is set.
+     *
+     * @param option the name of the option
+     * @return {@code true} if the option is set
+     */
+    private static boolean hasOption(String option) {
+        return loadOpts.keySet().contains(option);
+    }
+
+    /**
+     * Get the {@code int} value of the specified option.
+     *
+     * @param option the name of the option
+     * @param defaultValue the value to return if the option is not set
+     * @return the value of the option
+     * @throws NumberFormatException if the value is not an {@code int}
+     */
+    private static int getLoadOpt(String option, int defaultValue) {
+        String val = (String) loadOpts.get(option);
+        return val == null ? defaultValue : Integer.parseInt(val);
     }
 
     /** String to print when there are errors in the command line arguments. */
@@ -192,6 +235,14 @@ public class Runner {
 "      * sr_update_multi - single-record update on a random table\n" +
 "                    (32 tables with a single row each)\n" +
 "      * index_join - join of two tables (using indexed columns)\n" +
+"      * bank_tx - emulate simple bank transactions, similar to TPC-B. The\n" +
+"                  following load-specific options are accepted:\n" +
+"            - branches=NN: specifies the number of branches in the db\n" +
+"                           (default: 1)\n" +
+"            - tellersPerBranch=NN: specifies how many tellers each branch\n" +
+"              in the database has (default: 10)\n" +
+"            - accountsPerBranch=NN: specifies the number of accounts in\n" +
+"              each branch (default: 100000)\n" +
 "  -load_opts: comma-separated list of load-specific options\n" +
 "  -gen: load generator, default: b2b, valid types:\n" +
 "      * b2b - clients perform operations back-to-back\n" +
@@ -217,8 +268,8 @@ public class Runner {
      * @return one of the {@code java.sql.Types} data type constants
      */
     private static int getTextType() {
-        boolean blob = loadOpts.contains("blob");
-        boolean clob = loadOpts.contains("clob");
+        boolean blob = hasOption("blob");
+        boolean clob = hasOption("clob");
         if (blob && clob) {
             System.err.println("Cannot specify both 'blob' and 'clob'");
             printUsage(System.err);
@@ -242,8 +293,8 @@ public class Runner {
     private static DBFiller getDBFiller() {
         if (load.equals("sr_select") || load.equals("sr_update")) {
             return new SingleRecordFiller(100000, 1, getTextType(),
-                                          loadOpts.contains("secondary"),
-                                          loadOpts.contains("nonIndexed"));
+                                          hasOption("secondary"),
+                                          hasOption("nonIndexed"));
         } else if (load.equals("sr_select_big") ||
                        load.equals("sr_update_big")) {
             return new SingleRecordFiller(100000000, 1);
@@ -252,6 +303,11 @@ public class Runner {
             return new SingleRecordFiller(1, 32);
         } else if (load.equals("index_join")) {
             return new WisconsinFiller();
+        } else if (load.equals("bank_tx")) {
+            return new BankAccountFiller(
+                getLoadOpt("branches", 1),
+                getLoadOpt("tellersPerBranch", 10),
+                getLoadOpt("accountsPerBranch", 100000));
         }
         System.err.println("unknown load: " + load);
         printUsage(System.err);
@@ -267,12 +323,10 @@ public class Runner {
     private static Client newClient() {
         if (load.equals("sr_select")) {
             return new SingleRecordSelectClient(100000, 1, getTextType(),
-                    loadOpts.contains("secondary"),
-                    loadOpts.contains("nonIndexed"));
+                    hasOption("secondary"), hasOption("nonIndexed"));
         } else if (load.equals("sr_update")) {
             return new SingleRecordUpdateClient(100000, 1, getTextType(),
-                    loadOpts.contains("secondary"),
-                    loadOpts.contains("nonIndexed"));
+                    hasOption("secondary"), hasOption("nonIndexed"));
         } else if (load.equals("sr_select_big")) {
             return new SingleRecordSelectClient(100000000, 1);
         } else if (load.equals("sr_update_big")) {
@@ -283,6 +337,11 @@ public class Runner {
             return new SingleRecordUpdateClient(1, 32);
         } else if (load.equals("index_join")) {
             return new IndexJoinClient();
+        } else if (load.equals("bank_tx")) {
+            return new BankTransactionClient(
+                getLoadOpt("branches", 1),
+                getLoadOpt("tellersPerBranch", 10),
+                getLoadOpt("accountsPerBranch", 100000));
         }
         System.err.println("unknown load: " + load);
         printUsage(System.err);
