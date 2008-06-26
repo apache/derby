@@ -1367,8 +1367,29 @@ public class StoredPage extends CachedPage
 		return((freeSpace - bytesNeeded) >= 0);
 	}
 
-	protected boolean spaceForCopy(int spaceNeeded)
+    /**
+     * Does this page have enough space to move the row to it.
+     * <p>
+     * Calculate if a row of length "spaceNeeded" with current record id
+     * "source_id" will fit on this page.
+     *
+     * @param spaceNeeded   length of the row encoded with source_id record id.
+     * @param source_id     record id of the row being moved. 
+     *
+	 * @return true if the record will fit on this page, after being given a
+     *         new record id as the next id on this page.
+     *
+     * @exception  StandardException  Standard exception policy.
+     **/
+	protected boolean spaceForCopy(
+    int spaceNeeded, 
+    int source_id)
 	{
+        spaceNeeded = 
+            spaceNeeded 
+            - StoredRecordHeader.getStoredSizeRecordId(source_id) 
+            + StoredRecordHeader.getStoredSizeRecordId(nextId);
+
         // add up the space needed by the rows, add in minimumRecordSize
         // if length of actual row is less than minimumRecordSize.
         int bytesNeeded = slotEntrySize + 
@@ -6859,6 +6880,7 @@ public class StoredPage extends CachedPage
                 false);
 
             int row_size = getRecordPortionLength(slot);
+            int record_id = getHeaderAtSlot(slot).getId();
 
             // first see if row will fit on current page being used to insert
             StoredPage dest_page = 
@@ -6867,7 +6889,7 @@ public class StoredPage extends CachedPage
             if (dest_page != null)
             {
                 if ((dest_page.getPageNumber() >= getPageNumber()) ||
-                    (!dest_page.spaceForCopy(row_size)))
+                    (!dest_page.spaceForCopy(row_size, record_id)))
                 {
                     // page won't work
                     dest_page.unlatch();
@@ -6885,7 +6907,7 @@ public class StoredPage extends CachedPage
                 if (dest_page != null)
                 {
                     if ((dest_page.getPageNumber() >= getPageNumber()) ||
-                        (!dest_page.spaceForCopy(row_size)))
+                        (!dest_page.spaceForCopy(row_size, record_id)))
                     {
                         // page won't work
                         dest_page.unlatch();
@@ -7989,8 +8011,6 @@ public class StoredPage extends CachedPage
      * 00000130: 0000 0000 0000 0000 0000 0000 0000 0000  ................
      *
      * <p>
-     * RESOLVE - this has been hacked together and is not efficient.  There
-     * are probably some java utilities to use.
      *
 	 * @return The string with the hex dump in it.
      *
@@ -8001,26 +8021,31 @@ public class StoredPage extends CachedPage
 		return org.apache.derby.iapi.util.StringUtil.hexDump(data);
     }
 
-	private String pageHeaderToString()
-	{
-		if (SanityManager.DEBUG) {
-			return "page id " + getIdentity() + 
-				" Overflow: " + isOverflowPage +
-				" PageVersion: " + getPageVersion() +
-				" SlotsInUse: " + slotsInUse +
-				" DeletedRowCount: " + deletedRowCount +
-				" PageStatus: " + getPageStatus() + 
-				" NextId: " + nextId + 
-				" firstFreeByte: " + firstFreeByte + 
-				" freeSpace: " + freeSpace + 
-				" totalSpace: " + totalSpace + 
-				" spareSpace: " + spareSpace + 
-                " PageSize: " + getPageSize() +
+    private String pageHeaderToString()
+    {
+        if (SanityManager.DEBUG) 
+        {
+            return 
+                "page id: "             + getIdentity()     + 
+                " Overflow: "           + isOverflowPage    +
+                " PageVersion: "        + getPageVersion()  +
+                " SlotsInUse: "         + slotsInUse        +
+                " DeletedRowCount: "    + deletedRowCount   +
+                " PageStatus: "         + getPageStatus()   + 
+                " NextId: "             + nextId            + 
+                " firstFreeByte: "      + firstFreeByte     + 
+                " freeSpace: "          + freeSpace         + 
+                " totalSpace: "         + totalSpace        + 
+                " spareSpace: "         + spareSpace        + "%" + 
+                " minimumRecordSize : " + minimumRecordSize +
+                " PageSize: "           + getPageSize()     +
                 "\n";
-		}
-		else
-			return null;
-	}
+        }
+        else
+        {
+            return null;
+        }
+    }
 
 	private String recordToString(int slot)
 	{
