@@ -759,6 +759,19 @@ public final class StoredRecordHeader
         return;
 	}
 
+    /**
+     * Return length on disk of the record id portion of the record header
+     *
+     * Record id is part of the record header and is stored in an internal
+     * compressed format.  The length of this format depends on the value
+     * of the record id.
+     *
+     * @return length of encoded record id on disk.
+     **/
+    public static final int getStoredSizeRecordId(int record_id)
+    {
+        return(CompressedNumber.sizeInt(record_id));
+    }
 
 	public String toString()
 	{
