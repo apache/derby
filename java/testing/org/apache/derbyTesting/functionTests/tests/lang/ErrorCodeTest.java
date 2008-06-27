@@ -203,6 +203,7 @@ public final class ErrorCodeTest extends BaseJDBCTestCase {
         		{"XSDB8","WARNING: Derby (instance {0}) is attempting to boot the database {1} even though Derby (instance {2}) may still be active.  Only one instance of Derby should boot a database at a time. Severe and non-recoverable corruption can result if 2 instances of Derby boot on the same database at the same time.  The db2j.database.forceDatabaseLock=true property has been set, so the database will not boot until the db.lck is no longer present.  Normally this file is removed when the first instance of Derby to boot on the database exits, but it may be left behind in some shutdowns.  It will be necessary to remove the file by hand in that case.  It is important to verify that no other VM is accessing the database before deleting the db.lck file by hand.","45000"},
         		{"XSDB9","Stream container {0} is corrupt.","45000"},
         		{"XSDBA","Attempt to allocate object {0} failed.","45000"},
+        		{"XSDBB", "Unknown page format at page {0}, page dump follows: {1} ", "45000"},
         		{"XSDG0","Page {0} could not be read from disk.","45000"},
         		{"XSDG1","Page {0} could not be written to disk, please check if disk is full.","45000"},
         		{"XSDG2","Invalid checksum on Page {0}, expected={1}, on-disk version={2}, page dump follows: {3}","45000"},
