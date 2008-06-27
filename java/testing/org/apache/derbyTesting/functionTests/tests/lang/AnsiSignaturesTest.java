@@ -239,6 +239,19 @@ public class AnsiSignaturesTest extends BaseJDBCTestCase
             ( "numeric_BigDecimal_BigDecimal", "numeric( 7, 2 )", new String[] { "numeric( 7, 2 )" }, "12345.67", "12345.67" );
     }
     
+    public  void    test_decimal_BigDecimal_BigDecimal()
+        throws Exception
+    {
+        //
+        // On small device platforms, this raises an exception in the byte-code
+        // compiler. See DERBY-3697.
+        //
+        if ( JDBC.vmSupportsJSR169() ) { return; }
+        
+        declareAndRunFunction
+            ( "decimal_BigDecimal_BigDecimal", "decimal( 7, 2 )", new String[] { "decimal( 7, 2 )" }, "12345.67", "12345.67" );
+    }
+    
     public  void    test_varchar_String_String()
         throws Exception
     {
@@ -328,6 +341,35 @@ public class AnsiSignaturesTest extends BaseJDBCTestCase
         declareAndRunFunction
             ( "longvarbinary_bytes_int", "long varchar for bit data", new String[] { "integer" }, "3", "03" );
     }
+
+    public  void    test_date_Date_Date()
+        throws Exception
+    {
+        declareAndRunFunction
+            ( "date_Date_Date", "date", new String[] { "date" }, "date('1994-02-23')", "1994-02-23" );
+    }
+
+    public  void    test_time_Time_Time()
+        throws Exception
+    {
+        declareAndRunFunction
+            ( "time_Time_Time", "time", new String[] { "time" }, "time('15:09:02')", "15:09:02" );
+    }
+
+    public  void    test_timestamp_Timestamp_Timestamp()
+        throws Exception
+    {
+        declareAndRunFunction
+            ( "timestamp_Timestamp_Timestamp", "timestamp", new String[] { "timestamp" }, "timestamp('1962-09-23 03:23:34.234')", "1962-09-23 03:23:34.234" );
+    }
+
+    // FIXME
+    //    public  void    test_clob_Clob_String()
+    //        throws Exception
+    //    {
+    //        declareAndRunFunction
+    //            ( "clob_Clob_String", "clob", new String[] { "varchar( 10 )" }, "'3'", "3" );
+    //    }
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
