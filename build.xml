@@ -31,7 +31,7 @@
 
 <!-- Targets -->
 
-  <target name="buildsource" depends="checkCompilerLevel,init,prebuild,setCompilerProperties,engine,storeless,tools,drda,client,build,versioninfo,localeinfo"/>
+  <target name="buildsource" depends="checkCompilerLevel,init,prebuild,setCompilerProperties,jsr169stubs,engine,storeless,tools,drda,client,build,versioninfo,localeinfo"/>
   <target name="all" depends="buildsource,demo,testing,pptesting"/>
 
 <!-- ==================================================================== -->
@@ -445,7 +445,7 @@
     <ant dir="${derby.client.src.dir}"/>
   </target>
 
-  <target name="prebuild" depends="jsr169stubs">
+  <target name="prebuild">
     <ant dir="${derby.build.src.dir}/org/apache/derbyPreBuild"/>
   </target>
 

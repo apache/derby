@@ -274,7 +274,7 @@ public class Timestamp extends Date {
      * Private method to format the time
      */
     private String format(int date, int digits) {
-        StringBuilder dateStringBuffer = new StringBuilder(String.valueOf(date));
+        StringBuffer dateStringBuffer = new StringBuffer(String.valueOf(date));
         while (dateStringBuffer.length() < digits) {
             dateStringBuffer = dateStringBuffer.insert(0, '0');
         }
