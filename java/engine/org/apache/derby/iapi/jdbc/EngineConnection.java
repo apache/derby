@@ -100,4 +100,14 @@ public interface EngineConnection extends Connection {
      * @throws java.sql.SQLException
      */
     public String getCurrentSchemaName() throws SQLException;
+
+    /**
+     * Resets the connection before it is returned from a PooledConnection
+     * to a new application request (wrapped by a BrokeredConnection).
+     * <p>
+     * Note that resetting the transaction isolation level is not performed as
+     * part of this method. Temporary tables, IDENTITY_VAL_LOCAL and current
+     * schema are reset.
+     */
+    public void resetFromPool() throws SQLException;
 }
