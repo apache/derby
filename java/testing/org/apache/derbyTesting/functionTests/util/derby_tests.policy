@@ -355,3 +355,15 @@ grant codeBase "${derbyTesting.emma}" {
     permission java.io.FilePermission "${user.dir}${/}coverage.ec", "read, write";
     permission java.lang.RuntimePermission "writeFileDescriptor";
 };
+
+// Permissions for package-private tests run from 'classes.pptesting'
+grant codeBase "${derbyTesting.ppcodeclasses}" {
+
+  // Needed for ProtocolTest - allows connection to a server
+  permission java.net.SocketPermission "127.0.0.1", "connect,resolve";
+  permission java.net.SocketPermission "localhost", "connect,resolve";
+  permission java.net.SocketPermission "${derbyTesting.serverhost}", "connect,resolve";
+
+  // Allows reading support files in 'extin'
+  permission java.io.FilePermission "${user.dir}${/}extin${/}-", "read";
+};

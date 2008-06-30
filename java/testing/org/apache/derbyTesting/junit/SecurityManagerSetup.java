@@ -234,6 +234,10 @@ public final class SecurityManagerSetup extends TestSetup {
 	 * Classpath:
 	 * <BR>
 	 * derbyTesting.codeclasses set to URL of classes folder
+     * <BR>
+     * derbyTesting.ppcodeclasses set to URL of the 'classes.pptesting' folder
+     * if it exists on the classpath. The existence of the package private tests
+     * is determined via org.apache.derby.PackagePrivateTestSuite
 	 * <P>
 	 * Jar files:
 	 * <BR>
@@ -287,11 +291,18 @@ public final class SecurityManagerSetup extends TestSetup {
             classPathSet.setProperty("derbyTesting.jaxpjar", jaxp);
 
 		URL testing = getURL(SecurityManagerSetup.class);
+        URL ppTesting = getURL("org.apache.derby.PackagePrivateTestSuite");
 		
 		boolean isClasspath = testing.toExternalForm().endsWith("/");
 		if (isClasspath) {
 			classPathSet.setProperty("derbyTesting.codeclasses",
 					testing.toExternalForm());
+            // ppTesting can be null, for instance if 'classes.pptesting' is
+            // not on the classpath.
+            if (ppTesting != null) {
+                classPathSet.setProperty("derbyTesting.ppcodeclasses",
+                    ppTesting.toExternalForm());
+            }
             isJars = false;
 			return false;
 		}
