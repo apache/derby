@@ -242,7 +242,7 @@ public class ClientPooledConnection implements javax.sql.PooledConnection {
             	// to reset the connection state to the default on 
             	// PooledConnection.getConnection() otherwise the 
             	// isolation level and holdability was not correct and out of sync with the server.
-                physicalConnection_.reset(logWriter_, true);
+                physicalConnection_.reset(logWriter_);
             }
             else {
                 physicalConnection_.lightReset();    //poolfix

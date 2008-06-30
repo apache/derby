@@ -34,7 +34,6 @@ import org.apache.derby.shared.common.i18n.MessageUtil;
 import org.apache.derby.client.am.Statement;
 import org.apache.derby.client.am.Utils;
 import org.apache.derby.jdbc.ClientBaseDataSource;
-import org.apache.derby.jdbc.ClientDataSource;
 import org.apache.derby.jdbc.ClientDriver;
 import org.apache.derby.client.ClientPooledConnection;
 
@@ -306,43 +305,40 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
 
     // preferably without password in the method signature.
     // We can probally get rid of flowReconnect method.
-    public void resetNetConnection(org.apache.derby.client.am.LogWriter logWriter,
-                                   boolean recomputeFromDataSource) throws SqlException {
-        super.resetConnection(logWriter, recomputeFromDataSource);
+    public void resetNetConnection(org.apache.derby.client.am.LogWriter logWriter)
+            throws SqlException {
+        super.resetConnection(logWriter);
         //----------------------------------------------------
-        if (recomputeFromDataSource) {
-            // do not reset managers on a connection reset.  this information shouldn't
-            // change and can be used to check secmec support.
+        // do not reset managers on a connection reset.  this information shouldn't
+        // change and can be used to check secmec support.
 
-            targetExtnam_ = null;
-            targetSrvclsnm_ = null;
-            targetSrvnam_ = null;
-            targetSrvrlslv_ = null;
-            publicKey_ = null;
-            targetPublicKey_ = null;
-            sourceSeed_ = null;
-            targetSeed_ = null;
-            targetSecmec_ = 0;
-            resetConnectionAtFirstSql_ = false;
-
-        }
+        targetExtnam_ = null;
+        targetSrvclsnm_ = null;
+        targetSrvnam_ = null;
+        targetSrvrlslv_ = null;
+        publicKey_ = null;
+        targetPublicKey_ = null;
+        sourceSeed_ = null;
+        targetSeed_ = null;
+        targetSecmec_ = 0;
+        resetConnectionAtFirstSql_ = false;
         // properties prddta_ and crrtkn_ will be initialized by
         // calls to constructPrddta() and constructCrrtkn()
         //----------------------------------------------------------
         boolean isDeferredReset = flowReconnect(getDeferredResetPassword(),
                                                 securityMechanism_);
-        completeReset(isDeferredReset, recomputeFromDataSource);
+        completeReset(isDeferredReset);
     }
 
 
-    protected void reset_(org.apache.derby.client.am.LogWriter logWriter,
-                          boolean recomputeFromDataSource) throws SqlException {
+    protected void reset_(org.apache.derby.client.am.LogWriter logWriter)
+            throws SqlException {
         if (inUnitOfWork_) {
             throw new SqlException(logWriter, 
                 new ClientMessageId(
                     SQLState.NET_CONNECTION_RESET_NOT_ALLOWED_IN_UNIT_OF_WORK));
         }
-        resetNetConnection(logWriter, recomputeFromDataSource);
+        resetNetConnection(logWriter);
     }
 
     java.util.List getSpecialRegisters() {
@@ -363,13 +359,9 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
         super.completeConnect();
     }
 
-    protected void completeReset(boolean isDeferredReset, boolean recomputeFromDataSource) throws SqlException {
-        // NB! Override the recomputFromDataSource flag.
-        //     This was done as a temporary, minimal intrusive fix to support
-        //     JDBC statement pooling.
-        //     See DERBY-3341 for details.
-        super.completeReset(isDeferredReset,
-                recomputeFromDataSource && closeStatementsOnClose);
+    protected void completeReset(boolean isDeferredReset)
+            throws SqlException {
+        super.completeReset(isDeferredReset, closeStatementsOnClose);
     }
 
     public void flowConnect(String password,
