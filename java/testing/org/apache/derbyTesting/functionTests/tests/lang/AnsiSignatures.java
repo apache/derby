@@ -22,6 +22,7 @@ limitations under the License.
 package org.apache.derbyTesting.functionTests.tests.lang;
 
 import java.math.BigDecimal;
+import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.Date;
 import java.sql.Time;
@@ -71,6 +72,8 @@ public  class   AnsiSignatures
     public  static  short   smallint_short_short( Time a ) { return (short) -1; }
     public  static  short   smallint_short_short( Timestamp a ) { return (short) -1; }
     public  static  short   smallint_short_short( String a ) { return (short) -1; }
+    public  static  short   smallint_short_short( Clob a ) { return (short) -1; }
+    public  static  short   smallint_short_short( Blob a ) { return (short) -1; }
     public  static  short   smallint_short_short( Object a ) { return (short) -1; }
     
     public  static  short   smallint_short_Integer( Integer a ) { return a.shortValue(); }
@@ -89,6 +92,8 @@ public  class   AnsiSignatures
     public  static  short   smallint_short_Integer( Time a ) { return (short) -1; }
     public  static  short   smallint_short_Integer( Timestamp a ) { return (short) -1; }
     public  static  short   smallint_short_Integer( String a ) { return (short) -1; }
+    public  static  short   smallint_short_Integer( Clob a ) { return (short) -1; }
+    public  static  short   smallint_short_Integer( Blob a ) { return (short) -1; }
     public  static  short   smallint_short_Integer( Object a ) { return (short) -1; }
 
     public  static  Integer smallint_Integer_short( short a ) { return new Integer( a ); }
@@ -107,6 +112,8 @@ public  class   AnsiSignatures
     public  static  Integer smallint_Integer_short( Time a ) { return new Integer( -1 ); }
     public  static  Integer smallint_Integer_short( Timestamp a ) { return new Integer( -1 ); }
     public  static  Integer smallint_Integer_short( String a ) { return new Integer( -1 ); }
+    public  static  Integer smallint_Integer_short( Clob a ) { return new Integer( -1 ); }
+    public  static  Integer smallint_Integer_short( Blob a ) { return new Integer( -1 ); }
     public  static  Integer smallint_Integer_short( Object a ) { return new Integer( -1 ); }
 
     public  static  Integer smallint_Integer_Integer( Integer a ) { return a; }
@@ -125,6 +132,8 @@ public  class   AnsiSignatures
     public  static  Integer smallint_Integer_Integer( Time a ) { return new Integer( -1 ); }
     public  static  Integer smallint_Integer_Integer( Timestamp a ) { return new Integer( -1 ); }
     public  static  Integer smallint_Integer_Integer( String a ) { return new Integer( -1 ); }
+    public  static  Integer smallint_Integer_Integer( Clob a ) { return new Integer( -1 ); }
+    public  static  Integer smallint_Integer_Integer( Blob a ) { return new Integer( -1 ); }
     public  static  Integer smallint_Integer_Integer( Object a ) { return new Integer( -1 ); }
     
     // outside the spec. these should not resolve.
@@ -159,6 +168,8 @@ public  class   AnsiSignatures
     public  static  short   smallint_unres_short( Time a ) { return (short) -1; }
     public  static  short   smallint_unres_short( Timestamp a ) { return (short) -1; }
     public  static  short   smallint_unres_short( String a ) { return (short) -1; }
+    public  static  short   smallint_unres_short( Clob a ) { return (short) -1; }
+    public  static  short   smallint_unres_short( Blob a ) { return (short) -1; }
     public  static  short   smallint_unres_short( Object a ) { return (short) -1; }
 
     public  static  Short   smallint_unres_Short( byte a ) { return new Short( (short) -1 ); }
@@ -177,6 +188,8 @@ public  class   AnsiSignatures
     public  static  Short   smallint_unres_Short( Time a ) { return new Short( (short) -1 ); }
     public  static  Short   smallint_unres_Short( Timestamp a ) { return new Short( (short) -1 ); }
     public  static  Short   smallint_unres_Short( String a ) { return new Short( (short) -1 ); }
+    public  static  Short   smallint_unres_Short( Clob a ) { return new Short( (short) -1 ); }
+    public  static  Short   smallint_unres_Short( Blob a ) { return new Short( (short) -1 ); }
     public  static  Short   smallint_unres_Short( Object a ) { return new Short( (short) -1 ); }
 
 
@@ -202,6 +215,8 @@ public  class   AnsiSignatures
     public  static  int   integer_int_int( Time a ) { return -1; }
     public  static  int   integer_int_int( Timestamp a ) { return -1; }
     public  static  int   integer_int_int( String a ) { return -1; }
+    public  static  int   integer_int_int( Clob a ) { return -1; }
+    public  static  int   integer_int_int( Blob a ) { return -1; }
     public  static  int   integer_int_int( Object a ) { return -1; }
 
     public  static  int   integer_int_Integer( Integer a ) { return a.intValue(); }
@@ -220,6 +235,8 @@ public  class   AnsiSignatures
     public  static  int   integer_int_Integer( Time a ) { return -1; }
     public  static  int   integer_int_Integer( Timestamp a ) { return -1; }
     public  static  int   integer_int_Integer( String a ) { return -1; }
+    public  static  int   integer_int_Integer( Clob a ) { return -1; }
+    public  static  int   integer_int_Integer( Blob a ) { return -1; }
     public  static  int   integer_int_Integer( Object a ) { return -1; }
 
     public  static  Integer integer_Integer_int( int a ) { return new Integer( a ); }
@@ -238,6 +255,8 @@ public  class   AnsiSignatures
     public  static  Integer integer_Integer_int( Time a ) { return new Integer( -1 ); }
     public  static  Integer integer_Integer_int( Timestamp a ) { return new Integer( -1 ); }
     public  static  Integer integer_Integer_int( String a ) { return new Integer( -1 ); }
+    public  static  Integer integer_Integer_int( Clob a ) { return new Integer( -1 ); }
+    public  static  Integer integer_Integer_int( Blob a ) { return new Integer( -1 ); }
     public  static  Integer integer_Integer_int( Object a ) { return new Integer( -1 ); }
 
     public  static  Integer integer_Integer_Integer( Integer a ) { return a; }
@@ -256,6 +275,8 @@ public  class   AnsiSignatures
     public  static  Integer integer_Integer_Integer( Time a ) { return new Integer( -1 ); }
     public  static  Integer integer_Integer_Integer( Timestamp a ) { return new Integer( -1 ); }
     public  static  Integer integer_Integer_Integer( String a ) { return new Integer( -1 ); }
+    public  static  Integer integer_Integer_Integer( Clob a ) { return new Integer( -1 ); }
+    public  static  Integer integer_Integer_Integer( Blob a ) { return new Integer( -1 ); }
     public  static  Integer integer_Integer_Integer( Object a ) { return new Integer( -1 ); }
     
     // bad return type
@@ -285,6 +306,8 @@ public  class   AnsiSignatures
     public  static  int   integer_unres_int( Time a ) { return -1; }
     public  static  int   integer_unres_int( Timestamp a ) { return -1; }
     public  static  int   integer_unres_int( String a ) { return -1; }
+    public  static  int   integer_unres_int( Clob a ) { return -1; }
+    public  static  int   integer_unres_int( Blob a ) { return -1; }
     public  static  int   integer_unres_int( Object a ) { return -1; }
 
     public  static  Integer   integer_unres_Integer( byte a ) { return new Integer( -1 ); }
@@ -302,6 +325,8 @@ public  class   AnsiSignatures
     public  static  Integer   integer_unres_Integer( Time a ) { return new Integer( -1 ); }
     public  static  Integer   integer_unres_Integer( Timestamp a ) { return new Integer( -1 ); }
     public  static  Integer   integer_unres_Integer( String a ) { return new Integer( -1 ); }
+    public  static  Integer   integer_unres_Integer( Clob a ) { return new Integer( -1 ); }
+    public  static  Integer   integer_unres_Integer( Blob a ) { return new Integer( -1 ); }
     public  static  Integer   integer_unres_Integer( Object a ) { return new Integer( -1 ); }
 
     //
@@ -325,6 +350,8 @@ public  class   AnsiSignatures
     public  static  long   bigint_long_long( Time a ) { return -1L; }
     public  static  long   bigint_long_long( Timestamp a ) { return -1L; }
     public  static  long   bigint_long_long( String a ) { return -1L; }
+    public  static  long   bigint_long_long( Clob a ) { return -1L; }
+    public  static  long   bigint_long_long( Blob a ) { return -1L; }
     public  static  long   bigint_long_long( Object a ) { return -1L; }
 
     public  static  long   bigint_long_Long( Long a ) { return a.longValue(); }
@@ -343,6 +370,8 @@ public  class   AnsiSignatures
     public  static  long   bigint_long_Long( Time a ) { return -1L; }
     public  static  long   bigint_long_Long( Timestamp a ) { return -1L; }
     public  static  long   bigint_long_Long( String a ) { return -1L; }
+    public  static  long   bigint_long_Long( Clob a ) { return -1L; }
+    public  static  long   bigint_long_Long( Blob a ) { return -1L; }
     public  static  long   bigint_long_Long( Object a ) { return -1L; }
 
     public  static  Long bigint_Long_long( long a ) { return new Long( a ); }
@@ -361,6 +390,8 @@ public  class   AnsiSignatures
     public  static  Long bigint_Long_long( Time a ) { return new Long( -1L ); }
     public  static  Long bigint_Long_long( Timestamp a ) { return new Long( -1L ); }
     public  static  Long bigint_Long_long( String a ) { return new Long( -1L ); }
+    public  static  Long bigint_Long_long( Clob a ) { return new Long( -1L ); }
+    public  static  Long bigint_Long_long( Blob a ) { return new Long( -1L ); }
     public  static  Long bigint_Long_long( Object a ) { return new Long( -1L ); }
 
     public  static  Long bigint_Long_Long( Long a ) { return a; }
@@ -379,6 +410,8 @@ public  class   AnsiSignatures
     public  static  Long bigint_Long_Long( Time a ) { return new Long( -1L ); }
     public  static  Long bigint_Long_Long( Timestamp a ) { return new Long( -1L ); }
     public  static  Long bigint_Long_Long( String a ) { return new Long( -1L ); }
+    public  static  Long bigint_Long_Long( Clob a ) { return new Long( -1L ); }
+    public  static  Long bigint_Long_Long( Blob a ) { return new Long( -1L ); }
     public  static  Long bigint_Long_Long( Object a ) { return new Long( -1L ); }
     
     // bad return type
@@ -408,6 +441,8 @@ public  class   AnsiSignatures
     public  static  long   bigint_unres_long( Time a ) { return -1L; }
     public  static  long   bigint_unres_long( Timestamp a ) { return -1L; }
     public  static  long   bigint_unres_long( String a ) { return -1L; }
+    public  static  long   bigint_unres_long( Clob a ) { return -1L; }
+    public  static  long   bigint_unres_long( Blob a ) { return -1L; }
     public  static  long   bigint_unres_long( Object a ) { return -1L; }
 
     public  static  Long   bigint_unres_Long( byte a ) { return new Long( -1L ); }
@@ -425,6 +460,8 @@ public  class   AnsiSignatures
     public  static  Long   bigint_unres_Long( Time a ) { return new Long( -1L ); }
     public  static  Long   bigint_unres_Long( Timestamp a ) { return new Long( -1L ); }
     public  static  Long   bigint_unres_Long( String a ) { return new Long( -1L ); }
+    public  static  Long   bigint_unres_Long( Clob a ) { return new Long( -1L ); }
+    public  static  Long   bigint_unres_Long( Blob a ) { return new Long( -1L ); }
     public  static  Long   bigint_unres_Long( Object a ) { return new Long( -1L ); }
     
     //
@@ -448,6 +485,8 @@ public  class   AnsiSignatures
     public  static  float   real_float_float( Time a ) { return -1.0F; }
     public  static  float   real_float_float( Timestamp a ) { return -1.0F; }
     public  static  float   real_float_float( String a ) { return -1.0F; }
+    public  static  float   real_float_float( Clob a ) { return -1.0F; }
+    public  static  float   real_float_float( Blob a ) { return -1.0F; }
     public  static  float   real_float_float( Object a ) { return -1.0F; }
 
     public  static  float   real_float_Float( Float a ) { return a.floatValue(); }
@@ -466,6 +505,8 @@ public  class   AnsiSignatures
     public  static  float   real_float_Float( Time a ) { return -1.0F; }
     public  static  float   real_float_Float( Timestamp a ) { return -1.0F; }
     public  static  float   real_float_Float( String a ) { return -1.0F; }
+    public  static  float   real_float_Float( Clob a ) { return -1.0F; }
+    public  static  float   real_float_Float( Blob a ) { return -1.0F; }
     public  static  float   real_float_Float( Object a ) { return -1.0F; }
 
     public  static  Float real_Float_float( float a ) { return new Float( a ); }
@@ -484,6 +525,8 @@ public  class   AnsiSignatures
     public  static  Float real_Float_float( Time a ) { return new Float( -1.0F ); }
     public  static  Float real_Float_float( Timestamp a ) { return new Float( -1.0F ); }
     public  static  Float real_Float_float( String a ) { return new Float( -1.0F ); }
+    public  static  Float real_Float_float( Clob a ) { return new Float( -1.0F ); }
+    public  static  Float real_Float_float( Blob a ) { return new Float( -1.0F ); }
     public  static  Float real_Float_float( Object a ) { return new Float( -1.0F ); }
 
     public  static  Float real_Float_Float( Float a ) { return a; }
@@ -502,6 +545,8 @@ public  class   AnsiSignatures
     public  static  Float real_Float_Float( Time a ) { return new Float( -1.0F ); }
     public  static  Float real_Float_Float( Timestamp a ) { return new Float( -1.0F ); }
     public  static  Float real_Float_Float( String a ) { return new Float( -1.0F ); }
+    public  static  Float real_Float_Float( Clob a ) { return new Float( -1.0F ); }
+    public  static  Float real_Float_Float( Blob a ) { return new Float( -1.0F ); }
     public  static  Float real_Float_Float( Object a ) { return new Float( -1.0F ); }
     
     // bad return type
@@ -531,6 +576,8 @@ public  class   AnsiSignatures
     public  static  float   real_unres_float( Time a ) { return -1.0F; }
     public  static  float   real_unres_float( Timestamp a ) { return -1.0F; }
     public  static  float   real_unres_float( String a ) { return -1.0F; }
+    public  static  float   real_unres_float( Clob a ) { return -1.0F; }
+    public  static  float   real_unres_float( Blob a ) { return -1.0F; }
     public  static  float   real_unres_float( Object a ) { return -1.0F; }
 
     public  static  Float   real_unres_Float( byte a ) { return new Float( -1.0F ); }
@@ -548,6 +595,8 @@ public  class   AnsiSignatures
     public  static  Float   real_unres_Float( Time a ) { return new Float( -1.0F ); }
     public  static  Float   real_unres_Float( Timestamp a ) { return new Float( -1.0F ); }
     public  static  Float   real_unres_Float( String a ) { return new Float( -1.0F ); }
+    public  static  Float   real_unres_Float( Clob a ) { return new Float( -1.0F ); }
+    public  static  Float   real_unres_Float( Blob a ) { return new Float( -1.0F ); }
     public  static  Float   real_unres_Float( Object a ) { return new Float( -1.0F ); }
 
     //
@@ -571,6 +620,8 @@ public  class   AnsiSignatures
     public  static  double   double_double_double( Time a ) { return -1.0; }
     public  static  double   double_double_double( Timestamp a ) { return -1.0; }
     public  static  double   double_double_double( String a ) { return -1.0; }
+    public  static  double   double_double_double( Clob a ) { return -1.0; }
+    public  static  double   double_double_double( Blob a ) { return -1.0; }
     public  static  double   double_double_double( Object a ) { return -1.0; }
 
     public  static  double   double_double_Double( Double a ) { return a.doubleValue(); }
@@ -589,6 +640,8 @@ public  class   AnsiSignatures
     public  static  double   double_double_Double( Time a ) { return -1.0; }
     public  static  double   double_double_Double( Timestamp a ) { return -1.0; }
     public  static  double   double_double_Double( String a ) { return -1.0; }
+    public  static  double   double_double_Double( Clob a ) { return -1.0; }
+    public  static  double   double_double_Double( Blob a ) { return -1.0; }
     public  static  double   double_double_Double( Object a ) { return -1.0; }
 
     public  static  Double double_Double_double( double a ) { return new Double( a ); }
@@ -607,6 +660,8 @@ public  class   AnsiSignatures
     public  static  Double double_Double_double( Time a ) { return new Double( -1.0 ); }
     public  static  Double double_Double_double( Timestamp a ) { return new Double( -1.0 ); }
     public  static  Double double_Double_double( String a ) { return new Double( -1.0 ); }
+    public  static  Double double_Double_double( Clob a ) { return new Double( -1.0 ); }
+    public  static  Double double_Double_double( Blob a ) { return new Double( -1.0 ); }
     public  static  Double double_Double_double( Object a ) { return new Double( -1.0 ); }
 
     public  static  Double double_Double_Double( Double a ) { return a; }
@@ -625,6 +680,8 @@ public  class   AnsiSignatures
     public  static  Double double_Double_Double( Time a ) { return new Double( -1.0 ); }
     public  static  Double double_Double_Double( Timestamp a ) { return new Double( -1.0 ); }
     public  static  Double double_Double_Double( String a ) { return new Double( -1.0 ); }
+    public  static  Double double_Double_Double( Clob a ) { return new Double( -1.0 ); }
+    public  static  Double double_Double_Double( Blob a ) { return new Double( -1.0 ); }
     public  static  Double double_Double_Double( Object a ) { return new Double( -1.0 ); }
     
     // bad return type
@@ -654,6 +711,8 @@ public  class   AnsiSignatures
     public  static  double   double_unres_double( Time a ) { return -1.0; }
     public  static  double   double_unres_double( Timestamp a ) { return -1.0; }
     public  static  double   double_unres_double( String a ) { return -1.0; }
+    public  static  double   double_unres_double( Clob a ) { return -1.0; }
+    public  static  double   double_unres_double( Blob a ) { return -1.0; }
     public  static  double   double_unres_double( Object a ) { return -1.0; }
  
     public  static  Double   double_unres_Double( byte a ) { return new Double( -1.0 ); }
@@ -671,6 +730,8 @@ public  class   AnsiSignatures
     public  static  Double   double_unres_Double( Time a ) { return new Double( -1.0 ); }
     public  static  Double   double_unres_Double( Timestamp a ) { return new Double( -1.0 ); }
     public  static  Double   double_unres_Double( String a ) { return new Double( -1.0 ); }
+    public  static  Double   double_unres_Double( Clob a ) { return new Double( -1.0 ); }
+    public  static  Double   double_unres_Double( Blob a ) { return new Double( -1.0 ); }
     public  static  Double   double_unres_Double( Object a ) { return new Double( -1.0 ); }
 
     //
@@ -695,6 +756,8 @@ public  class   AnsiSignatures
     public  static  BigDecimal   numeric_BigDecimal_BigDecimal( Time a ) { return new BigDecimal( -1.0 ); }
     public  static  BigDecimal   numeric_BigDecimal_BigDecimal( Timestamp a ) { return new BigDecimal( -1.0 ); }
     public  static  BigDecimal   numeric_BigDecimal_BigDecimal( String a ) { return new BigDecimal( -1.0 ); }
+    public  static  BigDecimal   numeric_BigDecimal_BigDecimal( Clob a ) { return new BigDecimal( -1.0 ); }
+    public  static  BigDecimal   numeric_BigDecimal_BigDecimal( Blob a ) { return new BigDecimal( -1.0 ); }
     public  static  BigDecimal   numeric_BigDecimal_BigDecimal( Object a ) { return new BigDecimal( -1.0 ); }
 
     //
@@ -719,6 +782,8 @@ public  class   AnsiSignatures
     public  static  BigDecimal   decimal_BigDecimal_BigDecimal( Time a ) { return new BigDecimal( -1.0 ); }
     public  static  BigDecimal   decimal_BigDecimal_BigDecimal( Timestamp a ) { return new BigDecimal( -1.0 ); }
     public  static  BigDecimal   decimal_BigDecimal_BigDecimal( String a ) { return new BigDecimal( -1.0 ); }
+    public  static  BigDecimal   decimal_BigDecimal_BigDecimal( Clob a ) { return new BigDecimal( -1.0 ); }
+    public  static  BigDecimal   decimal_BigDecimal_BigDecimal( Blob a ) { return new BigDecimal( -1.0 ); }
     public  static  BigDecimal   decimal_BigDecimal_BigDecimal( Object a ) { return new BigDecimal( -1.0 ); }
 
     //
@@ -742,6 +807,8 @@ public  class   AnsiSignatures
     public  static  String   varchar_String_String( Date a ) { return "-1"; }
     public  static  String   varchar_String_String( Time a ) { return "-1"; }
     public  static  String   varchar_String_String( Timestamp a ) { return "-1"; }
+    public  static  String   varchar_String_String( Clob a ) { return "-1"; }
+    public  static  String   varchar_String_String( Blob a ) { return "-1"; }
     public  static  String   varchar_String_String( Object a ) { return "-1"; }
     
     //
@@ -765,6 +832,8 @@ public  class   AnsiSignatures
     public  static  String   char_String_String( Date a ) { return "-1"; }
     public  static  String   char_String_String( Time a ) { return "-1"; }
     public  static  String   char_String_String( Timestamp a ) { return "-1"; }
+    public  static  String   char_String_String( Clob a ) { return "-1"; }
+    public  static  String   char_String_String( Blob a ) { return "-1"; }
     public  static  String   char_String_String( Object a ) { return "-1"; }
     
     //
@@ -788,6 +857,8 @@ public  class   AnsiSignatures
     public  static  String   longvarchar_String_String( Date a ) { return "-1"; }
     public  static  String   longvarchar_String_String( Time a ) { return "-1"; }
     public  static  String   longvarchar_String_String( Timestamp a ) { return "-1"; }
+    public  static  String   longvarchar_String_String( Clob a ) { return "-1"; }
+    public  static  String   longvarchar_String_String( Blob a ) { return "-1"; }
     public  static  String   longvarchar_String_String( Object a ) { return "-1"; }
     
     //
@@ -835,6 +906,8 @@ public  class   AnsiSignatures
     public  static  byte[]  binary_bytes_bytes( Time a ) { return new byte[] { (byte) -1 }; }
     public  static  byte[]  binary_bytes_bytes( Timestamp a ) { return new byte[] { (byte) -1 }; }
     public  static  byte[]  binary_bytes_bytes( String a ) { return new byte[] { (byte) -1 }; }
+    public  static  byte[]  binary_bytes_bytes( Clob a ) { return new byte[] { (byte) -1 }; }
+    public  static  byte[]  binary_bytes_bytes( Blob a ) { return new byte[] { (byte) -1 }; }
     public  static  byte[]  binary_bytes_bytes( Object a ) { return new byte[] { (byte) -1 }; }
 
     public  static  byte[]  binary_bytes_int( int a ) { return new byte[] { (byte) a }; }
@@ -864,6 +937,8 @@ public  class   AnsiSignatures
     public  static  byte[]  varbinary_bytes_bytes( Time a ) { return new byte[] { (byte) -1 }; }
     public  static  byte[]  varbinary_bytes_bytes( Timestamp a ) { return new byte[] { (byte) -1 }; }
     public  static  byte[]  varbinary_bytes_bytes( String a ) { return new byte[] { (byte) -1 }; }
+    public  static  byte[]  varbinary_bytes_bytes( Clob a ) { return new byte[] { (byte) -1 }; }
+    public  static  byte[]  varbinary_bytes_bytes( Blob a ) { return new byte[] { (byte) -1 }; }
     public  static  byte[]  varbinary_bytes_bytes( Object a ) { return new byte[] { (byte) -1 }; }
 
     public  static  byte[]  varbinary_bytes_int( int a ) { return new byte[] { (byte) a }; }
@@ -894,6 +969,8 @@ public  class   AnsiSignatures
     public  static  byte[]  longvarbinary_bytes_bytes( Time a ) { return new byte[] { (byte) -1 }; }
     public  static  byte[]  longvarbinary_bytes_bytes( Timestamp a ) { return new byte[] { (byte) -1 }; }
     public  static  byte[]  longvarbinary_bytes_bytes( String a ) { return new byte[] { (byte) -1 }; }
+    public  static  byte[]  longvarbinary_bytes_bytes( Clob a ) { return new byte[] { (byte) -1 }; }
+    public  static  byte[]  longvarbinary_bytes_bytes( Blob a ) { return new byte[] { (byte) -1 }; }
     public  static  byte[]  longvarbinary_bytes_bytes( Object a ) { return new byte[] { (byte) -1 }; }
 
     public  static  byte[]  longvarbinary_bytes_int( int a ) { return new byte[] { (byte) a }; }
@@ -922,6 +999,8 @@ public  class   AnsiSignatures
     public  static  Date   date_Date_Date( Time a ) { return new Date( -1L ); }
     public  static  Date   date_Date_Date( Timestamp a ) { return new Date( -1L ); }
     public  static  Date   date_Date_Date( String a ) { return new Date( -1L ); }
+    public  static  Date   date_Date_Date( Clob a ) { return new Date( -1L ); }
+    public  static  Date   date_Date_Date( Blob a ) { return new Date( -1L ); }
     public  static  Date   date_Date_Date( Object a ) { return new Date( -1L ); }
 
     //
@@ -945,6 +1024,8 @@ public  class   AnsiSignatures
     public  static  Time   time_Time_Time( Date a ) { return new Time( -1L ); }
     public  static  Time   time_Time_Time( Timestamp a ) { return new Time( -1L ); }
     public  static  Time   time_Time_Time( String a ) { return new Time( -1L ); }
+    public  static  Time   time_Time_Time( Clob a ) { return new Time( -1L ); }
+    public  static  Time   time_Time_Time( Blob a ) { return new Time( -1L ); }
     public  static  Time   time_Time_Time( Object a ) { return new Time( -1L ); }
 
     //
@@ -968,6 +1049,8 @@ public  class   AnsiSignatures
     public  static  Timestamp   timestamp_Timestamp_Timestamp( Date a ) { return new Timestamp( -1L ); }
     public  static  Timestamp   timestamp_Timestamp_Timestamp( Time a ) { return new Timestamp( -1L ); }
     public  static  Timestamp   timestamp_Timestamp_Timestamp( String a ) { return new Timestamp( -1L ); }
+    public  static  Timestamp   timestamp_Timestamp_Timestamp( Clob a ) { return new Timestamp( -1L ); }
+    public  static  Timestamp   timestamp_Timestamp_Timestamp( Blob a ) { return new Timestamp( -1L ); }
     public  static  Timestamp   timestamp_Timestamp_Timestamp( Object a ) { return new Timestamp( -1L ); }
 
     //
@@ -992,6 +1075,32 @@ public  class   AnsiSignatures
     public  static  Clob  clob_Clob_String( Time a ) { return new StringColumnVTI.SimpleClob( "-1" ); }
     public  static  Clob  clob_Clob_String( Timestamp a ) { return new StringColumnVTI.SimpleClob( "-1" ); }
     public  static  Clob  clob_Clob_String( Clob a ) { return new StringColumnVTI.SimpleClob( "-1" ); }
+    public  static  Clob  clob_Clob_String( Blob a ) { return new StringColumnVTI.SimpleClob( "-1" ); }
     public  static  Clob  clob_Clob_String( Object a ) { return new StringColumnVTI.SimpleClob( "-1" ); }
+
+    //
+    // BLOB
+    //
+    
+    // legal resolutions
+
+    public  static  Blob  blob_Blob_String( String a ) throws Exception { return new StringColumnVTI.SimpleBlob( a.getBytes( "UTF-8" ) ); }
+    public  static  Blob  blob_Blob_String( byte a ) { return new StringColumnVTI.SimpleBlob( new byte[] { (byte) -1 } ); }
+    public  static  Blob  blob_Blob_String( int a ) { return new StringColumnVTI.SimpleBlob( new byte[] { (byte) -1 } ); }
+    public  static  Blob  blob_Blob_String( long a ) { return new StringColumnVTI.SimpleBlob( new byte[] { (byte) -1 } ); }
+    public  static  Blob  blob_Blob_String( float a ) { return new StringColumnVTI.SimpleBlob( new byte[] { (byte) -1 } ); }
+    public  static  Blob  blob_Blob_String( double a ) { return new StringColumnVTI.SimpleBlob( new byte[] { (byte) -1 } ); }
+    public  static  Blob  blob_Blob_String( Byte a ) { return new StringColumnVTI.SimpleBlob( new byte[] { (byte) -1 } ); }
+    public  static  Blob  blob_Blob_String( Short a ) { return new StringColumnVTI.SimpleBlob( new byte[] { (byte) -1 } ); }
+    public  static  Blob  blob_Blob_String( Long a ) { return new StringColumnVTI.SimpleBlob( new byte[] { (byte) -1 } ); }
+    public  static  Blob  blob_Blob_String( Float a ) { return new StringColumnVTI.SimpleBlob( new byte[] { (byte) -1 } ); }
+    public  static  Blob  blob_Blob_String( Double a ) { return new StringColumnVTI.SimpleBlob( new byte[] { (byte) -1 } ); }
+    public  static  Blob  blob_Blob_String( BigDecimal a ) { return new StringColumnVTI.SimpleBlob( new byte[] { (byte) -1 } ); }
+    public  static  Blob  blob_Blob_String( Date a ) { return new StringColumnVTI.SimpleBlob( new byte[] { (byte) -1 } ); }
+    public  static  Blob  blob_Blob_String( Time a ) { return new StringColumnVTI.SimpleBlob( new byte[] { (byte) -1 } ); }
+    public  static  Blob  blob_Blob_String( Timestamp a ) { return new StringColumnVTI.SimpleBlob( new byte[] { (byte) -1 } ); }
+    public  static  Blob  blob_Blob_String( Clob a ) { return new StringColumnVTI.SimpleBlob( new byte[] { (byte) -1 } ); }
+    public  static  Blob  blob_Blob_String( Blob a ) { return new StringColumnVTI.SimpleBlob( new byte[] { (byte) -1 } ); }
+    public  static  Blob  blob_Blob_String( Object a ) { return new StringColumnVTI.SimpleBlob( new byte[] { (byte) -1 } ); }
 
 }

@@ -371,6 +371,14 @@ public class AnsiSignaturesTest extends BaseJDBCTestCase
     //            ( "clob_Clob_String", "clob", new String[] { "varchar( 10 )" }, "'3'", "3" );
     //    }
 
+    // FIXME
+    //    public  void    test_blob_Blob_String()
+    //        throws Exception
+    //    {
+    //        declareAndRunFunction
+    //            ( "blob_Blob_String", "blob", new String[] { "varchar( 10 )" }, "'3'", "3" );
+    //    }
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // SHOULD NOT RESOLVE
