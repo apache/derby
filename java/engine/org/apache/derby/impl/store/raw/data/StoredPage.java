@@ -6921,8 +6921,24 @@ public class StoredPage extends CachedPage
                 // last and unfilled page did not work, try getting a free page
                 dest_page = (StoredPage) owner.addPage();
 
-                if (dest_page.getPageNumber() >= getPageNumber())
+                if ((dest_page.getPageNumber() >= getPageNumber()) ||
+                    (!dest_page.spaceForCopy(row_size, record_id)))
                 {
+                    // The only time a new page might not have enough space is
+                    // if the source row fills or almost fills a page by itself
+                    // and has a record id that is smaller than the record id
+                    // will be on the destination page such that the increase
+                    // in space.  Record id's are stored on the page in a 
+                    // compressed format such that depending on the value they
+                    // may store in 1, 2, or 4 bytes, thus the destination page
+                    // may need an additional 1, 2 or 3 bytes
+                    // depending on the source and destination row id's.
+                    // Because of record header overhead this can only happen
+                    // if there is just one row on a page.  For now just going
+                    // to give up on moving this row.  Future work could 
+                    // improve the algorithm to find a page with an equal or
+                    // smaller stored record id in this case.
+                
                     owner.removePage(dest_page);
                     dest_page = null;
                 }
