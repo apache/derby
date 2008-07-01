@@ -54,6 +54,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(BootAllTest.suite());
 
         suite.addTest(Derby3625Test.suite());
+        suite.addTest(PositionedStoreStreamTest.suite());
         // Encryption only supported for Derby in J2SE/J2EE environments.
         // J2ME (JSR169) does not support encryption.
         if (JDBC.vmSupportsJDBC3()) {

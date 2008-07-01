@@ -22,14 +22,16 @@
 package org.apache.derbyTesting.functionTests.util.streams;
 
 import java.io.InputStream;
-import java.io.IOException;
+
+import org.apache.derby.iapi.types.Resetable;
 
 /**
  * A stream returning a cycle of the 26 lowercase letters of the modern Latin
  * alphabet.
  */
 public class LoopingAlphabetStream
-    extends InputStream {
+    extends InputStream
+    implements Resetable {
 
     /**
      * Maximum size of buffer.
@@ -56,7 +58,18 @@ public class LoopingAlphabetStream
         this(length, 0);
     }
 
+    /**
+     * Creates a looping alphabet stream with the specified length, in which the
+     * last characters are blanks.
+     *
+     * @param length total length of the stream
+     * @param trailingBlanks number of trailing blanks
+     */
     public LoopingAlphabetStream(long length, int trailingBlanks) {
+        if (trailingBlanks > length) {
+            throw new IllegalArgumentException("Number of trailing blanks " +
+                    "cannot be greater than the total length.");
+        }
         this.length = length;
         this.trailingBlanks = trailingBlanks;
         this.remainingNonBlanks = length - trailingBlanks;
@@ -183,5 +196,19 @@ public class LoopingAlphabetStream
             }
         }
         return i;
+    }
+
+    // Resetable interface
+
+    public void resetStream() {
+        reset();
+    }
+
+    public void initStream() {
+        reset();
+    }
+
+    public void closeStream() {
+        // Does nothing for this stream.
     }
 } // End class LoopingAlphabetStream

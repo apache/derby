@@ -96,9 +96,7 @@ public class PositionedStoreStream
      */
     public int read(byte[] b)
             throws IOException {
-        int ret = this.stream.read(b);
-        this.pos += ret;
-        return ret;
+        return read(b, 0, b.length);
     }
 
     /**
@@ -112,7 +110,9 @@ public class PositionedStoreStream
     public int read(byte[] b, int off, int len)
             throws IOException {
         int ret = this.stream.read(b, off, len);
-        this.pos += ret;
+        if (ret > -1) {
+            this.pos += ret;
+        }
         return ret;
     }
 
