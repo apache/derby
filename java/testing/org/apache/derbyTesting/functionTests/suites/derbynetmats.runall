@@ -10,7 +10,6 @@ derbynet/testProtocol.java
 derbynet/timeslice.java
 jdbcapi/metadataMultiConn.java
 lang/optimizerOverrides.sql
-lang/big.sql
 lang/holdCursorIJ.sql
 lang/wisconsin.java
 lang/ShutdownDatabase.java

@@ -5,7 +5,6 @@ derbynet/maxthreads.java
 derbynet/runtimeinfo.java
 derbynet/timeslice.java
 jdbcapi/metadataMultiConn.java
-lang/big.sql
 lang/holdCursorIJ.sql
 store/holdCursorExternalSortJDBC30.sql
 store/holdCursorJDBC30.sql
