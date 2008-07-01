@@ -120,19 +120,24 @@ public final class ArrayInputStream extends InputStream implements LimitObjectIn
 		return len;
 	}
 
+    /**
+     * Skip as many bytes as possible, but no more than {@code count}.
+     *
+     * @param count the number of bytes to skip
+     * @return the number of bytes that were skipped
+     */
 	public long skip(long count)  throws IOException {
 
-		if ((position + count) > end) {
+        // return 0 on non-positive count, per javadoc for
+        // InputStream.skip(long)
+        if (count <= 0) {
+            return 0;
+        }
 
-			count = end - position;
-
-			if (count == 0)
-				return 0; // end of file
-		}
-
-		position += count;
-
-		return count;
+        // don't skip more bytes than we have available
+        long toSkip = Math.min(count, available());
+        position += toSkip;
+        return toSkip;
 
 	}
 
@@ -218,12 +223,14 @@ public final class ArrayInputStream extends InputStream implements LimitObjectIn
 		position += len;
 	}
 
+    /**
+     * Skip as many bytes as possible, but no more than {@code n}.
+     *
+     * @param n the number of bytes to skip
+     * @return the number of bytes that were skipped
+     */
     public final int skipBytes(int n) throws IOException {
-		if ((position + n) > end) {
-            n = end - position;
-		}
-		position += n;
-		return n;
+        return (int) skip(n);
     }
 
     public final boolean readBoolean() throws IOException {
