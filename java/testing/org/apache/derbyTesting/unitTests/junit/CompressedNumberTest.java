@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derbyTesting.unitTests.CompressedNumberTest
+   Derby - Class org.apache.derbyTesting.unitTests.junit.CompressedNumberTest
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -70,15 +70,33 @@ public class CompressedNumberTest extends TestCase {
                 Long.MAX_VALUE - 2, Long.MAX_VALUE - 1,
                 Long.MAX_VALUE,
                 };
+        int[] length = {2, 2, 2,
+                2, 2,
+                2,
+                4, 4,
+                4, 4, 4, 4,
+                4,
+                8, 8, 8, 8,
+                8, 8,
+                8,
+                8, 8,
+                8, 8,
+                8,
+        };
 
         for(int i = 0; i < dataToTest.length; i++){
-            checkLong(dataToTest[i]);
+            checkLong(dataToTest[i], length[i]);
         }
     }
 
     public void testLongWidely() throws IOException{
-        for (int i = 0; i < 0xf0000; i++){
-            checkLong(i);
+        for (long l = 0; l < 0xf0000; l++){
+            if(l <= 0x3fff)
+                checkLong(l, 2);
+            else if(l <= 0x3fffffff)
+                checkLong(l, 4);
+            else
+                checkLong(l, 8);
         }
     }
 
@@ -97,20 +115,44 @@ public class CompressedNumberTest extends TestCase {
                 Integer.MAX_VALUE - 2, Integer.MAX_VALUE - 1,
                 Integer.MAX_VALUE,
                 };
+        int[] length = { 1, 1, 1,
+                1, 1, 1, 1,
+                1,
+                2, 2, 2, 2,
+                2, 2, 2, 2,
+                2,
+                2, 2, 2, 2,
+                2, 2, 2, 2,
+                2,
+                4, 4, 4, 4,
+                4, 4,
+                4, 4,
+                4,
+        };
 
         for(int i = 0; i < dataToTest.length; i++){
-            checkInt(dataToTest[i]);
+            checkInt(dataToTest[i], length[i]);
         }
     }
 
     public void testIntWidely() throws IOException{
         for (int i = 0; i < 0xf0000; i++){
-             checkInt(i);
+            if(i <= 0x3f)
+                checkInt(i, 1);
+            else if(i <= 0x3fff)
+                checkInt(i, 2);
+            else
+                checkInt(i, 4);
         }
 
          //takes 30 minutes to run.
 //         for (int i = 0; i < Integer.MAX_VALUE; i++) {
-//             checkInt(i);
+//             if(i <= 0x3f)
+//                 checkInt(i, 1);
+//             else if(i <= 0x3fff)
+//                 checkInt(i, 2);
+//             else
+//                 checkInt(i, 4);
 //         }
     }
 
@@ -119,11 +161,14 @@ public class CompressedNumberTest extends TestCase {
      *
      * @param i
      *            the integer to be checked.
+     * @param expectedLength
+     *            the length expected of i after compressed.
      * @throws IOException
      */
-    private void checkInt(int i) throws IOException {
+    private void checkInt(int i, int expectedLength) throws IOException {
         aos.setPosition(0);
         int length = CompressedNumber.writeInt(out, i);
+        assertEquals("Invalid length after compressed", expectedLength, length);
 
         assertEquals("MISMATCH written bytes", length, aos.getPosition());
 
@@ -162,11 +207,14 @@ public class CompressedNumberTest extends TestCase {
      *
      * @param l
      *            the long number to be checked.
+     * @param expectedLength
+     *            the length expected of l after compressed.
      * @throws IOException
      */
-    private void checkLong(long l) throws IOException {
+    private void checkLong(long l, int expectedLength) throws IOException {
         aos.setPosition(0);
         int length = CompressedNumber.writeLong(out, l);
+        assertEquals("Invalid length after compressed", expectedLength, length);
 
         assertEquals("MISMATCH written bytes", length, aos.getPosition());
 
