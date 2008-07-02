@@ -59,6 +59,7 @@ public class AllPackages extends BaseTestCase {
 	 suite.addTest(org.apache.derbyTesting.functionTests.tests.tools._Suite.suite());
         suite.addTest(org.apache.derbyTesting.functionTests.tests.engine._Suite.suite());
         suite.addTest(org.apache.derbyTesting.functionTests.tests.demo._Suite.suite());
+        suite.addTest(org.apache.derbyTesting.functionTests.tests.memory._Suite.suite());
 
         // Suites that are compiled using Java SE 6 target need to
         // be added this way, otherwise creating the suite
