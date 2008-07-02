@@ -1247,6 +1247,7 @@
 
     <manifest file="${derby.jar.dir}/lists/smf.mf"  mode="update">
       <attribute name="Bundle-Activator" value="org.apache.derby.osgi.EmbeddedActivator"/>
+      <attribute name="Bundle-SymbolicName" value="derby"/>
       <attribute name="DynamicImport-Package" value="*"/>
       <attribute name="Export-Package" value="org.apache.derby.authentication,org.apache.derby.database,org.apache.derby.io,org.apache.derby.jdbc,org.apache.derby.vti"/> 
     </manifest> 
