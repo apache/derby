@@ -597,6 +597,51 @@ public class StatementPoolingTest
     }
 
     /**
+     * Make sure {@link ResultSet#getStatement} returns the same object as the
+     * one that created the result set.
+     */
+    public void testGetStatementCallable()
+            throws SQLException {
+        doTestGetStatement(prepareCall("values 7653"));
+    }
+
+    /**
+     * Make sure {@link ResultSet#getStatement} returns the same object as the
+     * one that created the result set.
+     */
+    public void testGetStatementPrepared()
+            throws SQLException {
+        doTestGetStatement(prepareStatement("values 7652"));
+    }
+
+    /**
+     * Make sure {@link ResultSet#getStatement} returns the same object as the
+     * one that created the result set.
+     *
+     * @param ps prepared or callable statement to test with
+     * @throws SQLException if something goes wrong...
+     */
+    private void doTestGetStatement(PreparedStatement ps)
+            throws SQLException {
+        ResultSet psRs = ps.executeQuery();
+        assertSame(ps, psRs.getStatement());
+        psRs.close();
+        // Try another way.
+        ps.execute();
+        psRs = ps.getResultSet();
+        assertSame(ps, psRs.getStatement());
+        assertFalse(ps.getMoreResults());
+        assertNull(ps.getResultSet());
+        // This one should fail.
+        try {
+            psRs = ps.executeQuery("values 99");
+            fail("executeQuery(String) should be disallowed");
+        } catch (SQLException sqle) {
+            assertSQLState("XJ016", sqle);
+        }
+    }
+
+    /**
      * Checks if closing the logical connection closes the logical statement.
      *
      * @throws SQLException if something goes wrong...
