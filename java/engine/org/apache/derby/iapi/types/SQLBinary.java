@@ -229,7 +229,7 @@ abstract class SQLBinary
 		}
 		catch (IOException ioe)
 		{
-			throw StandardException.newException(SQLState.LANG_STREAMING_COLUMN_I_O_EXCEPTION, ioe, getTypeName());
+			throwStreamingIOException(ioe);
 		}
 		return dataValue;
 	}
@@ -242,12 +242,49 @@ abstract class SQLBinary
 	public final int	getLength() throws StandardException
 	{
 		if (stream != null) {
-
 			if (streamValueLength != -1)
 				return streamValueLength;
+			else if (stream instanceof Resetable){
+				try {
+					// If we have the stream length encoded.
+					// just read that.
+					streamValueLength = readBinaryLength((ObjectInput) stream);
+					if (streamValueLength != 0)
+						return streamValueLength;
+					// Otherwise we will have to read the whole stream.
+					for (;;) {
+						long skipsize = stream.skip(Integer.MAX_VALUE);
+						streamValueLength += skipsize;
+						if (stream.read() == -1)
+							break;
+						else
+							streamValueLength++;
+					}
+					return streamValueLength;
+				}
+				catch (IOException ioe) {
+					throwStreamingIOException(ioe);
+				}
+				finally {
+					try {
+						((Resetable) stream).resetStream();
+					} catch (IOException ioe) {
+						throwStreamingIOException(ioe);
+					}
+				}
+				
+			}
 		}
+		byte[] bytes = getBytes();
+		return (bytes == null) ? 0 : bytes.length;
+		
+	}
 
-		return (getBytes() == null) ? 0 : getBytes().length;
+
+	private void throwStreamingIOException(IOException ioe) throws StandardException {
+		throw StandardException.
+			newException(SQLState.LANG_STREAMING_COLUMN_I_O_EXCEPTION,
+						 ioe, getTypeName());
 	}
 
 	/*
