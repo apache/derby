@@ -6839,7 +6839,7 @@ public class StoredPage extends CachedPage
      * input arrays - whichever is smaller.
      * <B>Locking Policy</B>
      * <P>
-     * MUST be called with table locked, not locks are requested.  Because
+     * MUST be called with table locked, no locks are requested.  Because
      * it is called with table locks the call will go ahead and purge any
      * row which is marked deleted.  It will also use purge rather than
      * delete to remove the old row after it moves it to a new page.  This
