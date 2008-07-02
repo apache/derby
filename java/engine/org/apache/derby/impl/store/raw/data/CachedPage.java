@@ -262,7 +262,9 @@ public abstract class CachedPage extends BasePage implements Cacheable
 		if (formatId == -1)
         {
 			throw StandardException.newException(
-                    SQLState.DATA_UNKNOWN_PAGE_FORMAT, newIdentity);
+                    SQLState.DATA_UNKNOWN_PAGE_FORMAT_2, 
+                    newIdentity,
+                    org.apache.derby.iapi.util.StringUtil.hexDump(pageData));
         }
 
 		// createArgs[0] contains the integer form of the formatId 
@@ -341,6 +343,7 @@ public abstract class CachedPage extends BasePage implements Cacheable
 		 throws StandardException
 	{
 		CachedPage realPage;
+
 		try 
         {
 			realPage = 
@@ -356,7 +359,9 @@ public abstract class CachedPage extends BasePage implements Cacheable
             else
             {
                 throw StandardException.newException(
-                    SQLState.DATA_UNKNOWN_PAGE_FORMAT, se, newIdentity);
+                    SQLState.DATA_UNKNOWN_PAGE_FORMAT_2, 
+                    newIdentity,
+                    org.apache.derby.iapi.util.StringUtil.hexDump(pageData));
             }
 		}
 
