@@ -163,20 +163,9 @@ public class StatementTest
             con.close();
             fail("Invalid transaction state exception was not thrown");
         } catch (SQLException sqle) {
-            // The SQL State is incorrect in the embedded client, see
-            // JIRA id DERBY-1168
             String expectedState =
                 SQLStateConstants.INVALID_TRANSACTION_STATE_ACTIVE_SQL_TRANSACTION;
-            
-            if ( ! expectedState.equals(sqle.getSQLState()) )
-            {
-                System.err.println("ERROR: Unexpected SQL State encountered; "
-                    + "got " + sqle.getSQLState() + ", expected " 
-                    + expectedState +
-                    ". Unexpected exception message is " + sqle.getMessage());
-                
-                throw sqle;
-            }
+            assertSQLState(expectedState, sqle);
         }
         assertFalse("Statement should still be open, because " +
                 "Connection.close() failed", stmt.isClosed());
