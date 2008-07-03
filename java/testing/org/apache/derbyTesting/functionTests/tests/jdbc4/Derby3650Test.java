@@ -20,6 +20,9 @@ import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
+import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetReader;
+import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetStream;
+
 /*
 Class org.apache.derbyTesting.functionTests.tests.jdbc4.Derby3650Test
 
@@ -39,70 +42,201 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 */
+
 /** 
  * These are tests to test the cases for DERBY-3650.
  * The tests won't pass until that bug is fixed. 
  */
 
-public class Derby3650Test extends BaseJDBCTestCase {
+public class Derby3650Test extends BaseJDBCTestCase 
+{
+    /**************************************************************************
+     * Fields of the class
+     **************************************************************************
+     */
 
-    public Derby3650Test(String name) {
+    // DERBY-3749 causes tests that commit after looking at the stream to 
+    // break while trying to access the streams in subsequent rows.  When
+    // that bug gets fixed, enable these tests.
+    private static final boolean runDerby3749tests = false;
+
+    /**************************************************************************
+     * Constructors for This class:
+     **************************************************************************
+     */
+
+    public Derby3650Test(String name) 
+    {
         super(name);
-     
     }
     
-    public void setup() throws SQLException{
-        
+    public void setUp() 
+        throws SQLException
+    {
         getConnection().setAutoCommit(false);
     }
 
-   
-    /**
-     * If join returns clob in more than one row, test that the 
-     * stream can be retrieved if free is not called.
-     * @param freelob  true if we should free the lob after it has been retrieved and verified.
-     * @param commitAfterLobVerify true if we should commit after the lob has been retrieved and verified
-     * @throws SQLException
-     * @throws IOException
+
+    /**************************************************************************
+     * Private/Protected methods of This class:
+     **************************************************************************
      */
-    public void test1ToManyJoinClob(boolean freelob, boolean commitAfterLobVerify) throws SQLException, IOException     
-    {           
-        PreparedStatement ps = prepareStatement(
-        "select c from testClob join jointab on jointab.id = testClob.id");
+
+    /**
+     * Test select of multiple rows containing single clob column.
+     * <p>
+     * Expects input query to return 3 column's per row, which should be:
+     * (id, length of clob, clob)  
+     *
+     * Will verify clob using verifyClob().
+     * <p>
+     * Runs the query 4 times testing the following combinations:
+     *     free clob on each row = true,  commit xact after each row = true
+     *     free clob on each row = true,  commit xact after each row = false
+     *     free clob on each row = false, commit xact after each row = true
+     *     free clob on each row = false, commit xact after each row = false
+     *
+     * @param query                 query to run.
+     *
+     * @exception  StandardException  Standard exception policy.
+     **/
+    private void runQueryCasesClob(
+    String query)
+        throws SQLException, IOException
+    {
+        if (runDerby3749tests)
+            runQueryClob(query, true,  true);
+        runQueryClob(query, true,  false);
+        if (runDerby3749tests)
+            runQueryClob(query, false, true);
+        runQueryClob(query, false, false);
+    }
+
+    /**
+     * Test select of multiple rows containing single clob column.
+     * <p>
+     * Expects input query to return 3 column's per row, which should be:
+     * (id, length of clob, clob)  
+     *
+     * Will verify clob using verifyClob().
+     * <p>
+     *
+     * @param query                 query to run.
+     * @param freelob               true if we should free the lob after it has
+     *                              been retrieved and verified.
+     * @param commitAfterLobVerify  true if we should commit after the lob has
+     *                              been retrieved and verified.
+     *
+     * @exception  StandardException  Standard exception policy.
+     **/
+    private void runQueryClob(
+    String  query,
+    boolean freelob,
+    boolean commitAfterLobVerify)
+        throws SQLException, IOException
+    {
+        PreparedStatement ps = prepareStatement(query);
+
         ResultSet rs = ps.executeQuery();
-        while (rs.next()) {
-            Clob clob = rs.getClob(1);
-            verify40KClob(clob.getCharacterStream());
+        while (rs.next()) 
+        {
+            int  id     = rs.getInt(1);
+            int  length = rs.getInt(2);
+            Clob clob   = rs.getClob(3);
+
+            // verify that stream can be read and is right.
+            verifyClob(
+                clob.getCharacterStream(), 
+                length,
+                new LoopingAlphabetReader(length));
+
             if (freelob)
                 clob.free();
             if (commitAfterLobVerify)
                 commit();
         }
         rs.close();
+        commit();
+
         rs = ps.executeQuery();
-        while (rs.next()) {
-            verify40KClob(rs.getCharacterStream(1));            
+        while (rs.next()) 
+        {
+            int  id     = rs.getInt(1);
+            int  length = rs.getInt(2);
+
+            // verify that stream can be read and is right.
+            verifyClob(
+                rs.getCharacterStream(3),
+                length,
+                new LoopingAlphabetReader(length));
+
+            if (commitAfterLobVerify)
+                commit();
         }
+        rs.close();
+        commit();
+
+        ps.close();
+
     }
-    
+
     /**
-     * If join returns clob in more than one row, test that the 
-     * stream can be retrieved.
-     * 
-     * @param freelob  true if we should free the lob after it has been retrieved and verified.
-     * @param commitAfterLobVerify true if we should commit after the lob has been retrieved and verified
-     * @throws SQLException
-     * @throws IOException
-     */
-    
-    public void test1ToManyJoinBlob(boolean freelob, boolean commitAfterLobVerify) throws SQLException, IOException     
+     * Test select of multiple rows containing single blob column.
+     * <p>
+     * Expects input query to return 3 column's per row, which should be:
+     * (id, length of clob, clob)  
+     * Will verify blob using verifyBlob().
+     * <p>
+     * Runs the query 4 times testing the following combinations:
+     *     free blob on each row = true,  commit xact after each row = true
+     *     free blob on each row = true,  commit xact after each row = false
+     *     free blob on each row = false, commit xact after each row = true
+     *     free blob on each row = false, commit xact after each row = false
+     *
+     * @param query                 query to run.
+     *
+     * @exception  StandardException  Standard exception policy.
+     **/
+    private void runQueryCasesBlob(
+    String query)
+        throws SQLException, IOException
+    {
+        if (runDerby3749tests)
+            runQueryBlob(query, true,  true);
+        runQueryBlob(query, true,  false);
+        if (runDerby3749tests)
+            runQueryBlob(query, false, true);
+        runQueryBlob(query, false, false);
+    }
+
+    /**
+     * Test select of multiple rows containing single blob column.
+     * <p>
+     * Expects input query to return single column per row, which is a blob.
+     * Will verify blob using verifyBlob().
+     * <p>
+     *
+     * @param query                 query to run.
+     * @param freelob               true if we should free the lob after it has
+     *                              been retrieved and verified.
+     * @param commitAfterLobVerify  true if we should commit after the lob has
+     *                              been retrieved and verified.
+     *
+     * @exception  StandardException  Standard exception policy.
+     **/
+    private void runQueryBlob(
+    String  query,
+    boolean freelob,
+    boolean commitAfterLobVerify)
+        throws SQLException, IOException
     {     
-        PreparedStatement ps = prepareStatement(
-        "select c from testBlob join jointab on jointab.id = testBlob.id");
+        PreparedStatement ps = prepareStatement(query);
+
         ResultSet rs = ps.executeQuery();
-        while (rs.next()) {
-            Blob blob = rs.getBlob(1);
-            verify40KBlob(blob.getBinaryStream());
+        while (rs.next()) 
+        {
+            Blob blob = rs.getBlob(3);
+            verifyBlob(blob.getBinaryStream(), rs.getInt(2), rs.getInt(1));
             if (freelob)
                 blob.free();
             if (commitAfterLobVerify)
@@ -110,80 +244,337 @@ public class Derby3650Test extends BaseJDBCTestCase {
         }
         rs.close();
         rollback();
-        rs = ps.executeQuery();
-        while (rs.next()) {
-            verify40KBlob(rs.getBinaryStream(1));            
-        }
 
-        
+        rs = ps.executeQuery();
+        while (rs.next()) 
+        {
+            // note, the order of "getXXX" is important.  This routine will
+            // fail in network client if the 3rd arg is requested before the
+            // 1st arg.  In that case attempts to read from the stream get
+            // a closed error.  This is why the values are retrieved first
+            // and then passed to the call.
+            int         id      = rs.getInt(1);
+            int         length  = rs.getInt(2);
+            InputStream stream  = rs.getBinaryStream(3);
+
+            verifyBlob(stream, length, id);
+
+            if (commitAfterLobVerify)
+                commit();
+        }
+        rs.close();
+        commit();
+
+        ps.close();
     }
-    
-    public void test1ToManyJoinBlobNoFree() throws SQLException, IOException {
-        test1ToManyJoinBlob(false,false);
-        
-    }
-    
-    public void test1ToManyJoinBlobWithFree() throws SQLException, IOException {
-        test1ToManyJoinBlob(false,true); 
-    }
-    
-    public void test1ToManyJoinBlobWithCommit() throws SQLException, IOException {
-        test1ToManyJoinBlob(true,false); 
-    }
-    
-    
-    public void test1ToManyJoinClobNoFree() throws SQLException, IOException {
-        test1ToManyJoinClob(false,false);
-        
-    }
-    
-    public void test1ToManyJoinClobWithFree() throws SQLException, IOException {
-        test1ToManyJoinClob(false,true); 
-    }
-    
-    public void test1ToManyJoinClobWithCommit() throws SQLException, IOException {
-        test1ToManyJoinClob(true,false); 
-    }
-    
-    
-    
-    private void verify40KClob(Reader r) throws SQLException, IOException {
-        
-        int c;
+
+    private void verifyClob(Reader input, int length, Reader expected) 
+        throws SQLException, IOException 
+    {
+        int input_char;
+        int expect_char;
         int charcount = 0;
-        do {
-            c = r.read();
-            if (c != -1) {
+
+        do 
+        {
+            input_char  = input.read();
+            expect_char = expected.read();
+
+            if (input_char != -1) 
+            {
                 charcount++;
-                if ((char) c != 'a') {
-                    fail("Unexpected Character " + (char)c);
+                if ((char) input_char != expect_char) 
+                {
+                    fail("Unexpected Character " + (char) input_char + 
+                            " expected " + (char) expect_char);
                 }
             }
+
+        } while (input_char != -1) ;
+
+        if (charcount != length)
+        {
+           fail("Unexpected character count " + charcount + 
+                   "expected: " + length);
         }
-        while (c != -1);
-        if (charcount != 40000)
-           fail("Unexcpected character count " + charcount);
-     
     }
     
-    private void verify40KBlob(InputStream is ) throws SQLException, IOException {
+    private void verifyBlob(InputStream is, int length, int id) 
+        throws SQLException, IOException 
+    {
         int b;
         int bytecount = 0;
-        do {
+        do 
+        {
             b = is.read();
-            if (b != -1) {
+            if (b != -1) 
+            {
                 bytecount++;
-                if ((byte) b != (byte) 'a') {
-                    fail("Unexpected byte value " + (byte) b);                    
+                if ((byte) b != id) 
+                {
+                    fail("Unexpected byte value " + (byte) b + 
+                            " expected: " + id);
                 }
             }
+        } while (b != -1);
+
+        if (bytecount != length)
+        {
+            fail("Unexpected byte count, got " + bytecount + 
+                    "  expected " + length);
         }
-        while (b != -1);
-        if (bytecount != 40000)
-            fail("Unexpected byte count");
-     
+    }
+
+    /**************************************************************************
+     * Public Methods of This class:
+     **************************************************************************
+     */
+
+
+    /**
+     * Test a nested loop join for clobs.
+     * <p>
+     * Test case of a 1 to many row join where the 1 row contains and returns
+     * a clob as a stream.  Before fix for DERBY-3650 each row returned from
+     * this join would contain a reference to the same stream which would fail
+     * in various ways depending on commit, free, and reading the stream.
+     *
+     * @throws SQLException
+     * @throws IOException
+     */
+    public void test1ToManyJoinClob() 
+        throws SQLException, IOException     
+    {           
+        runQueryCasesClob(
+            "select testClob.id, length, c from testClob " + 
+                "join jointab on jointab.id = testClob.id");
+    }
+
+    /**
+     * Test a nested loop join for blobs.
+     * <p>
+     * Test case of a 1 to many row join where the 1 row contains and returns
+     * a blob as a stream.  Before fix for DERBY-3650 each row returned from
+     * this join would contain a reference to the same stream which would fail
+     * in various ways depending on commit, free, and reading the stream.
+     *
+     * @throws SQLException
+     * @throws IOException
+     */
+    public void test1ToManyJoinBlob() 
+        throws SQLException, IOException     
+    {     
+        runQueryCasesBlob(
+            "select testBlob.id, length, c from testBlob " +
+                "join jointab on jointab.id = testBlob.id");
+    }
+
+
+    public void test1ToManyHashJoinClob() 
+        throws SQLException, IOException     
+    {           
+        runQueryCasesClob(
+            "select testClob.id, length, c from " + 
+            "--DERBY-PROPERTIES joinOrder=FIXED \n" + 
+            "testClob --DERBY-PROPERTIES joinStrategy=HASH \n" + 
+            "join jointab on jointab.id = testClob.id");
+
+        runQueryCasesClob(
+            "select jointab.id, length, c from " + 
+            "--DERBY-PROPERTIES joinOrder=FIXED \n" + 
+            "jointab --DERBY-PROPERTIES joinStrategy=HASH \n" + 
+            "join testClob on jointab.id = testClob.id");
+    }
+
+    public void test1ToManyHashJoinBlob() 
+        throws SQLException, IOException     
+    {           
+        runQueryCasesBlob(
+            "select testBlob.id, length, c from " + 
+            "--DERBY-PROPERTIES joinOrder=FIXED \n" + 
+            "testBlob --DERBY-PROPERTIES joinStrategy=HASH \n" + 
+            "join jointab on jointab.id = testBlob.id");
+
+        runQueryCasesBlob(
+            "select testBlob.id, length, c from " + 
+            "--DERBY-PROPERTIES joinOrder=FIXED \n" + 
+            "jointab --DERBY-PROPERTIES joinStrategy=HASH \n" + 
+            "join testBlob on jointab.id = testBlob.id");
+    }
+
+    public void test1ToManyleftOuterJoinClob() 
+        throws SQLException, IOException     
+    {           
+        runQueryCasesClob(
+            "select testClob.id, length, c from testClob " + 
+                "left outer join jointab on jointab.id = testClob.id");
+
+        runQueryCasesClob(
+            "select jointab.id, length, c from jointab " + 
+                "left outer join testClob on jointab.id = testClob.id");
+    }
+
+    public void test1ToManyleftOuterJoinBlob() 
+        throws SQLException, IOException     
+    {           
+        runQueryCasesBlob(
+            "select testBlob.id, length, c from testBlob " + 
+                "left outer join jointab on jointab.id = testBlob.id");
+        runQueryCasesBlob(
+            "select jointab.id, length, c from jointab " + 
+                "left outer join testBlob on jointab.id = testBlob.id");
+    }
+
+
+    /**
+     * Test straight select from a heap scan of multiple rows containing clobs.
+     *
+     * @param freelob               true if we should free the lob after it has
+     *                              been retrieved and verified.
+     *
+     * @param commitAfterLobVerify  true if we should commit after the lob has 
+     *                              been retrieved and verified
+     * @throws SQLException
+     * @throws IOException
+     */
+    public void testClobSelect() 
+        throws SQLException, IOException     
+    {           
+        runQueryCasesClob("select id, length, c from testMultipleClob");
+    }
+
+    /**
+     * Test straight select from a heap scan of multiple rows containing blobs.
+     *
+     * @throws SQLException
+     * @throws IOException
+     */
+    public void testBlobSelect() 
+        throws SQLException, IOException     
+    {     
+        runQueryCasesBlob("select id, length, c from testMultipleBlob");
     }
     
+    private static void initializeClobTables(Statement stmt) 
+        throws SQLException, IOException
+    {
+        // CLOB TEST SETUP...........................................
+        stmt.executeUpdate(
+            "CREATE TABLE testClob (id int, length int, c CLOB(2M))");
+
+        Connection conn = stmt.getConnection();
+        PreparedStatement ps = 
+            conn.prepareStatement("INSERT INTO TestClob VALUES(?,?,?)");
+
+        // insert 4 rows into "left" table containing clobs of join: 
+        //     (1, clob), (1, clob), (2, clob), (2, clob)
+        ps.setInt(            1, 1);
+        ps.setInt(            2, 40000);
+        ps.setCharacterStream(3, new LoopingAlphabetReader(40000));
+        ps.executeUpdate();
+
+        ps.setInt(            1, 1);
+        ps.setInt(            2, 40001);
+        ps.setCharacterStream(3, new LoopingAlphabetReader(40001));
+        ps.executeUpdate();
+
+        ps.setInt(            1, 2);
+        ps.setInt(            2, 40002);
+        ps.setCharacterStream(3, new LoopingAlphabetReader(40002));
+        ps.executeUpdate();
+
+        ps.setInt(            1, 2);
+        ps.setInt(            2, 40003);
+        ps.setCharacterStream(3, new LoopingAlphabetReader(40003));
+        ps.executeUpdate();
+        ps.close();
+
+        stmt.executeUpdate(
+            "CREATE TABLE testMultipleClob (id int, length int, c CLOB(2M))");
+        ps = conn.prepareStatement(
+                "INSERT INTO testMultipleClob VALUES(?,?,?)");
+
+        for (int i = 0; i < 100; i++)
+        {
+            ps.setInt(            1, i);
+            ps.setInt(            2, 40000 + i);
+            ps.setCharacterStream(3, new LoopingAlphabetReader(40000 + i));
+            ps.executeUpdate();
+        }
+        ps.close();
+        conn.commit();
+    }
+
+    private static void initializeBlobTables(Statement stmt) 
+        throws SQLException, IOException
+    {
+        // BLOB TEST SETUP...........................................
+        stmt.executeUpdate(
+                "CREATE TABLE testBlob (id int, length int, c BLOB(2M))");
+
+        Connection conn = stmt.getConnection();
+        PreparedStatement ps = 
+            conn.prepareStatement("INSERT INTO TestBlob VALUES(?,?,?)");
+
+        // insert 4 rows into "left" blob of join: 
+        //     (1, 40000, blob), (1, 40001, blob), 
+        //     (2, 40002, blob), (2, 40003, blob)
+        byte[] mybytes = new byte[40000];
+        Arrays.fill(mybytes, (byte) 1);
+        ps.setInt(  1, 1);
+        ps.setInt(  2, 40000);
+        ps.setBytes(3, mybytes);
+        ps.executeUpdate();
+
+        mybytes = new byte[40001];
+        Arrays.fill(mybytes, (byte) 1);
+        ps.setInt(  1, 1);
+        ps.setInt(  2, 40001);
+        ps.setBytes(3, mybytes);
+        ps.executeUpdate();
+
+        mybytes = new byte[40002];
+        Arrays.fill(mybytes, (byte) 2);
+        ps.setInt(  1, 2);
+        ps.setInt(  2, 40002);
+        ps.setBytes(3, mybytes);
+        ps.executeUpdate();
+
+        mybytes = new byte[40003];
+        Arrays.fill(mybytes, (byte) 2);
+        ps.setInt(  1, 2);
+        ps.setInt(  2, 40003);
+        ps.setBytes(3, mybytes);
+        ps.executeUpdate();
+
+        ps.close();
+
+        // insert 4 rows into "right" table of join: 
+        stmt.executeUpdate("CREATE TABLE jointab (id int)");
+        stmt.executeUpdate("INSERT INTO jointab values(1)");
+        stmt.executeUpdate("INSERT INTO jointab values(1)");
+        stmt.executeUpdate("INSERT INTO jointab values(2)");
+        stmt.executeUpdate("INSERT INTO jointab values(2)");
+
+        stmt.executeUpdate(
+            "CREATE TABLE testMultipleBlob (id int, length int, c BLOB(2M))");
+        ps = conn.prepareStatement(
+                "INSERT INTO testMultipleBlob VALUES(?,?,?)");
+
+        for (int i = 0; i < 100; i++)
+        {
+            mybytes = new byte[40000 + i];
+            Arrays.fill(mybytes, (byte) i);
+
+            ps.setInt(  1, i);
+            ps.setInt(  2, 40000 + i);
+            ps.setBytes(3,mybytes);
+            ps.executeUpdate();
+        }
+        ps.close();
+        conn.commit();
+    }
+
     
     protected static Test baseSuite(String name) {
         TestSuite suite = new TestSuite(name);
@@ -197,33 +588,22 @@ public class Derby3650Test extends BaseJDBCTestCase {
              */
             protected void decorateSQL(Statement stmt) throws SQLException
             {
-                stmt.executeUpdate("CREATE TABLE testClob (id int, c CLOB(2M))");
-                Connection conn = stmt.getConnection();
-                PreparedStatement ps = conn.prepareStatement("INSERT INTO TestClob VALUES(?,?)");
-                ps.setInt(1,1);
-                char[] myval = new char[40000];
-                Arrays.fill(myval,'a');
-                ps.setString(2,new String(myval));
-                ps.executeUpdate();
-                ps.close();
-                stmt.executeUpdate("CREATE TABLE testBlob (id int, c BLOB(2M))");
-                ps = conn.prepareStatement("INSERT INTO TestBlob VALUES(?,?)");
-                ps.setInt(1,1);
-                byte[] mybytes = new byte[40000];
-                Arrays.fill(mybytes, (byte) 'a');
-                ps.setBytes(2,mybytes);
-                ps.executeUpdate();
-                ps.close();
-                stmt.executeUpdate("CREATE TABLE jointab (id int)");
-                stmt.executeUpdate("INSERT INTO jointab values(1)");
-                stmt.executeUpdate("INSERT INTO jointab values(1)");
-           
-           
-                
+                try
+                {
+                    initializeClobTables(stmt);
+                    initializeBlobTables(stmt);
+                }
+                catch (IOException ioe)
+                {
+                    fail("Unexpected I/O exception during setup: " + ioe);
+                }
             }
         };
     }
-    public static Test suite() {
+
+
+    public static Test suite() 
+    {
         TestSuite suite = new TestSuite("Derby3650Test");
         suite.addTest(baseSuite("Derby3650Test:embedded"));
         suite.addTest(TestConfiguration.clientServerDecorator(
@@ -232,4 +612,3 @@ public class Derby3650Test extends BaseJDBCTestCase {
 
     }
 }
-    
