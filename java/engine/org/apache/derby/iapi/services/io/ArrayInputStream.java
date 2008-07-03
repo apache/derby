@@ -105,15 +105,19 @@ public final class ArrayInputStream extends InputStream implements LimitObjectIn
 	}
 
 	public int read(byte b[], int off, int len) throws IOException {
+        final int available = available();
 
-		if ((position + len) > end) {
+        if (len > available) {
+            // attempted to read more bytes than available
 
-			len = end - position;
+            if (available == 0) {
+                // no bytes available, return -1 to report end of file
+                return -1;
+            }
 
-			if (len == 0) {
-				return -1; // end of file
-			}
-		}
+            // read all the available bytes
+            len = available;
+        }
 
 		System.arraycopy(pageData, position, b, off, len);
 		position += len;
@@ -214,8 +218,7 @@ public final class ArrayInputStream extends InputStream implements LimitObjectIn
 
     public final void readFully(byte b[], int off, int len) throws IOException {
 
-		if ((position + len) > end) {
-
+		if (len > available()) {
 			throw new EOFException();
 		}
 
