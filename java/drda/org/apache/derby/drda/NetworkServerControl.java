@@ -663,7 +663,7 @@ public class NetworkServerControl{
         //
         String  successMessage = server.localizeMessage( "DRDA_SecurityInstalled.I", null );
         
-        server.consoleMessage( successMessage );
+        server.consoleMessage( successMessage, true );
     }
 
     /**

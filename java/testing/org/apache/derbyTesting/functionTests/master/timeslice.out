@@ -1,12 +1,12 @@
 Testing timeslice
 org.apache.derby.drda.NetworkServerControl timeslice 0 
-Time slice changed to 0.
+xxxxxxFILTERED-TIMESTAMPxxxxxGMT : Time slice changed to 0.
 PASS - time slice value, 0 is correct
 org.apache.derby.drda.NetworkServerControl timeslice -1 -h xxxFILTERED_HOSTNAMExxx -p 1527 
-Time slice changed to 0.
+xxxxxxFILTERED-TIMESTAMPxxxxxGMT : Time slice changed to 0.
 PASS - time slice value, 0 is correct
 org.apache.derby.drda.NetworkServerControl timeslice -12 
-Invalid value, -12, for timeslice.
+xxxxxxFILTERED-TIMESTAMPxxxxxGMT : Invalid value, -12, for timeslice.
 Usage: NetworkServerControl <commands> 
 Commands:
 start [-h <host>] [-p <portnumber>] [-noSecurityManager] [-ssl <sslmode>]
@@ -21,13 +21,13 @@ trace {on |off} [-s <session id>][-h <host>][-p <portnumber>] [-ssl <sslmode>]
 tracedirectory <traceDirectory>[-h <host>][-p <portnumber>] [-ssl <sslmode>]
 PASS - time slice value, 0 is correct
 org.apache.derby.drda.NetworkServerControl timeslice 2147483647 
-Time slice changed to 2147483647.
+xxxxxxFILTERED-TIMESTAMPxxxxxGMT : Time slice changed to 2147483647.
 PASS - time slice value, 2147483647 is correct
 org.apache.derby.drda.NetworkServerControl timeslice 9000 
-Time slice changed to 9000.
+xxxxxxFILTERED-TIMESTAMPxxxxxGMT : Time slice changed to 9000.
 PASS - time slice value, 9000 is correct
 org.apache.derby.drda.NetworkServerControl timeslice a 
-Invalid value, a, for timeslice.
+xxxxxxFILTERED-TIMESTAMPxxxxxGMT : Invalid value, a, for timeslice.
 Usage: NetworkServerControl <commands> 
 Commands:
 start [-h <host>] [-p <portnumber>] [-noSecurityManager] [-ssl <sslmode>]

@@ -538,7 +538,7 @@ public final class NetworkServerControlImpl {
 	public void consoleError(String msg)
 		throws Exception
 	{
-		consoleMessage(msg);
+		consoleMessage(msg, true);
 		throw new Exception(msg);
 	}
 
@@ -564,7 +564,7 @@ public final class NetworkServerControlImpl {
 	 */
 	public void consoleExceptionPrintTrace(Throwable e)
 	{
-		consoleMessage(e.getMessage());
+		consoleMessage(e.getMessage(), true);
 		PrintWriter lw = logWriter;
 		if (lw != null)
 		{
@@ -593,15 +593,20 @@ public final class NetworkServerControlImpl {
 	 * Write a message to console output stream
 	 *
 	 * @param msg	message
+     * @param printTimeStamp Whether to prepend a timestamp to the message or not
 	 */
-	public void consoleMessage(String msg)
+	public void consoleMessage(String msg, boolean printTimeStamp)
 	{
 		// print to console if we have one
 		PrintWriter lw = logWriter;
 		if (lw != null)
 		{
 			synchronized(lw) {
-				lw.println(msg);
+                if (printTimeStamp) {
+                    lw.println(getFormattedTimestamp() + " : " + msg);
+                } else {
+                    lw.println(msg);                    
+                }
 			}
 		}
 		// always print to derby.log
@@ -609,7 +614,11 @@ public final class NetworkServerControlImpl {
 		if (lw != null)
 			synchronized(lw)
 			{
-				Monitor.logMessage(msg);
+				if (printTimeStamp) {
+                    Monitor.logMessage(getFormattedTimestamp() + " : " + msg);
+                } else {
+                    Monitor.logMessage(msg);
+                }
 			}
 	}
 
@@ -743,18 +752,15 @@ public final class NetworkServerControlImpl {
 		default:
 		case SSL_OFF:
 			consolePropertyMessage("DRDA_Ready.I", new String [] 
-				{Integer.toString(portNumber), att_srvclsnm, versionString,
-				 getFormattedTimestamp()});
+				{Integer.toString(portNumber), att_srvclsnm, versionString});
 			break;
 		case SSL_BASIC:
 			consolePropertyMessage("DRDA_SSLReady.I", new String [] 
-				{Integer.toString(portNumber), att_srvclsnm, versionString,
-				 getFormattedTimestamp()});
+				{Integer.toString(portNumber), att_srvclsnm, versionString});
 			break;
 		case SSL_PEER_AUTHENTICATION:
 			consolePropertyMessage("DRDA_SSLClientAuthReady.I", new String [] 
-				{Integer.toString(portNumber), att_srvclsnm, versionString,
-				 getFormattedTimestamp()});
+				{Integer.toString(portNumber), att_srvclsnm, versionString});
 			break;
 		}
 		
@@ -844,7 +850,7 @@ public final class NetworkServerControlImpl {
 	    try{
 	       serverSocket.close();
 	    }catch(IOException e){
-			consolePropertyMessage("DRDA_ListenerClose.S");
+			consolePropertyMessage("DRDA_ListenerClose.S", true);
 	    }
 
 
@@ -889,8 +895,7 @@ public final class NetworkServerControlImpl {
 		}
 
 		consolePropertyMessage("DRDA_ShutdownSuccess.I", new String [] 
-						        {att_srvclsnm, versionString, 
-								getFormattedTimestamp()});
+						        {att_srvclsnm, versionString});
     }
 	
 	/** 
@@ -1304,7 +1309,7 @@ public final class NetworkServerControlImpl {
 	{
 		try {
 		for (int i = 1; i <= NO_USAGE_MSGS; i++)
-			consolePropertyMessage("DRDA_Usage"+i+".I");
+			consolePropertyMessage("DRDA_Usage"+i+".I", false);
 		} catch (Exception e) {}	// ignore exceptions - there shouldn't be any
 	}
 
@@ -1820,13 +1825,14 @@ public final class NetworkServerControlImpl {
 	 * Put property message on console
 	 *
 	 * @param msgProp		message property key
-	 *
-	 * @throws Exception if an error occurs
+	 * @param printTimeStamp whether to prepend a timestamp to the message
+     *
+     * @throws Exception if an error occurs
 	 */
-	protected void consolePropertyMessage(String msgProp)
+	protected void consolePropertyMessage(String msgProp, boolean printTimeStamp)
 		throws Exception
 	{
-		consolePropertyMessageWork(msgProp, null);
+		consolePropertyMessageWork(msgProp, null, printTimeStamp);
 	}
 	/**
 	 * Put property message on console
@@ -1839,7 +1845,7 @@ public final class NetworkServerControlImpl {
 	protected void consolePropertyMessage(String msgProp, String arg)
 		throws Exception
 	{
-		consolePropertyMessageWork(msgProp, new String [] {arg});
+		consolePropertyMessageWork(msgProp, new String [] {arg}, true);
 	}
 	/**
 	 * Put property message on console
@@ -1852,7 +1858,7 @@ public final class NetworkServerControlImpl {
 	protected void consolePropertyMessage(String msgProp, String [] args)
 		throws Exception
 	{
-		consolePropertyMessageWork(msgProp, args);
+		consolePropertyMessageWork(msgProp, args, true);
 	}
 	/**
 	 * Is this the command protocol
@@ -2106,7 +2112,7 @@ public final class NetworkServerControlImpl {
         int command = findCommand(args);
         if (command == COMMAND_UNKNOWN)
         {
-            consolePropertyMessage("DRDA_NoCommand.U");
+            consolePropertyMessage("DRDA_NoCommand.U", true);
         }
 
         return command;
@@ -2144,8 +2150,7 @@ public final class NetworkServerControlImpl {
 			case COMMAND_SHUTDOWN:
 				shutdown();
 				consolePropertyMessage("DRDA_ShutdownSuccess.I", new String [] 
-								{att_srvclsnm, versionString, 
-								getFormattedTimestamp()});
+								{att_srvclsnm, versionString});
 				break;
 			case COMMAND_TRACE:
 				{
@@ -2174,7 +2179,7 @@ public final class NetworkServerControlImpl {
 			case COMMAND_SYSINFO:
 				{
 					String info = sysinfo();
-					consoleMessage(info);
+					consoleMessage(info, false);
 					break;
 				}
 			case COMMAND_MAXTHREADS:
@@ -2193,7 +2198,7 @@ public final class NetworkServerControlImpl {
 				break;
 			case COMMAND_RUNTIME_INFO:
 				String reply = runtimeInfo();
-				consoleMessage(reply);
+				consoleMessage(reply, false);
 				break;
 			case COMMAND_TIMESLICE:
 				int timeslice = 0;
@@ -2510,7 +2515,7 @@ public final class NetworkServerControlImpl {
 		   clientIs = clientSocket.getInputStream();
 	       clientOs = clientSocket.getOutputStream();
 		} catch (IOException e) {
-			consolePropertyMessage("DRDA_NoInputStream.I");
+			consolePropertyMessage("DRDA_NoInputStream.I", true);
 			throw e;
         }
 	}
@@ -2703,7 +2708,7 @@ public final class NetworkServerControlImpl {
 		fillReplyBuffer();
 		readCommandReplyHeader();
 		if (replyBufferPos >= replyBufferCount)
-			consolePropertyMessage("DRDA_InvalidReplyTooShort.S");
+			consolePropertyMessage("DRDA_InvalidReplyTooShort.S", true);
 		int messageType = replyBuffer[replyBufferPos++] & 0xFF;
 		if (messageType == OK)		// O.K.
 			return;
@@ -2714,7 +2719,7 @@ public final class NetworkServerControlImpl {
 		else if (messageType == SQLWARNING)
 			wrapSQLWarning(message);
 		else
-			consolePropertyMessage(message);
+			consolePropertyMessage(message, true);
 	}
 
 	
@@ -2763,7 +2768,7 @@ public final class NetworkServerControlImpl {
 			clientSocketError(e);
 		}
 		if (replyBufferCount == -1)
-			consolePropertyMessage("DRDA_InvalidReplyTooShort.S");
+			consolePropertyMessage("DRDA_InvalidReplyTooShort.S", true);
 		replyBufferPos = 0;
 	}
 	/**
@@ -2793,7 +2798,7 @@ public final class NetworkServerControlImpl {
 	{
 		ensureDataInBuffer(2);
 		if (replyBufferPos + 2 > replyBufferCount)
-			consolePropertyMessage("DRDA_InvalidReplyTooShort.S");
+			consolePropertyMessage("DRDA_InvalidReplyTooShort.S", true);
 	 	return ((replyBuffer[replyBufferPos++] & 0xff) << 8) + 
 			    (replyBuffer[replyBufferPos++] & 0xff);
 	}
@@ -2805,7 +2810,7 @@ public final class NetworkServerControlImpl {
 	{
 		ensureDataInBuffer(4);
 		if (replyBufferPos + 4 > replyBufferCount)
-			consolePropertyMessage("DRDA_InvalidReplyTooShort.S");
+			consolePropertyMessage("DRDA_InvalidReplyTooShort.S", true);
 	 	return ((replyBuffer[replyBufferPos++] & 0xff) << 24) + 
 	 	 	((replyBuffer[replyBufferPos++] & 0xff) << 16) + 
 	 		((replyBuffer[replyBufferPos++] & 0xff) << 8) + 
@@ -2825,7 +2830,7 @@ public final class NetworkServerControlImpl {
 		if (replyBuffer[replyBufferPos++] == 0)		// O.K.
 			return readLDString();
 		else
-			consolePropertyMessage(msgKey);
+			consolePropertyMessage(msgKey, true);
 		return null;
 			
 	}
@@ -2844,7 +2849,7 @@ public final class NetworkServerControlImpl {
 		int strlen = readShort();
 		ensureDataInBuffer(strlen);
 		if (replyBufferPos + strlen > replyBufferCount)
-			consolePropertyMessage("DRDA_InvalidReplyTooShort.S");
+			consolePropertyMessage("DRDA_InvalidReplyTooShort.S", true);
 		String retval= new String(replyBuffer, replyBufferPos, strlen, DEFAULT_ENCODING);
 		replyBufferPos += strlen;
 		return retval;
@@ -2863,7 +2868,7 @@ public final class NetworkServerControlImpl {
 		if (replyBuffer[replyBufferPos++] == 0)		// O.K.
 			return readLDBytes();
 		else
-			consolePropertyMessage(msgKey);
+			consolePropertyMessage(msgKey, true);
 		return null;
 			
 	}
@@ -2878,7 +2883,7 @@ public final class NetworkServerControlImpl {
 		int len = readShort();
 		ensureDataInBuffer(len);
 		if (replyBufferPos + len > replyBufferCount)
-			consolePropertyMessage("DRDA_InvalidReplyTooShort.S");
+			consolePropertyMessage("DRDA_InvalidReplyTooShort.S", true);
 		byte [] retval =  new byte[len];
 		for (int i = 0; i < len; i++)
 			retval[i] = replyBuffer[replyBufferPos++];
@@ -3133,10 +3138,11 @@ public final class NetworkServerControlImpl {
 	 *
 	 * @param messageKey	message key
 	 * @param args			arguments to message
-	 *
-	 * @throws Exception if an error occurs
+	 * @param printTimeStamp whether to prepend a timestamp to the message
+     *
+     * @throws Exception if an error occurs
 	 */
-	private void consolePropertyMessageWork(String messageKey, String [] args)
+	private void consolePropertyMessageWork(String messageKey, String [] args, boolean printTimeStamp)
 		throws Exception
 	{
 		String locMsg = null;
@@ -3149,7 +3155,7 @@ public final class NetworkServerControlImpl {
 			locMsg = localizeMessage(messageKey, langUtil, args);
 
 		//display on the console
-		consoleMessage(locMsg);
+		consoleMessage(locMsg, printTimeStamp);
 
 		//if it is a user error display usage
 		if (type == ERRTYPE_USER)

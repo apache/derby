@@ -8030,7 +8030,7 @@ class DRDAConnThread extends Thread {
 	protected  void trace(String value)
 	{
 		if (SanityManager.DEBUG && server.debugOutput == true)
-			server.consoleMessage(value);
+			server.consoleMessage(value, true);
 	}
 
 	/***
