@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class 
+   Derby - Class
    org.apache.derbyTesting.functionTests.tests.multi.StressMulti50x59
 
    Licensed to the Apache Software Foundation (ASF) under one or more
@@ -30,8 +30,8 @@ import junit.framework.TestCase;
  *
  */
 public class StressMulti50x59 extends TestCase {
-	
-	public static Test suite() {
-		return StressMultiTest.suite(50,59);
-	}
+
+    public static Test suite() {
+        return StressMultiTest.suite(50,59);
+    }
 }
