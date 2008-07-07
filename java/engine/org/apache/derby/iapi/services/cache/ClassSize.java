@@ -71,8 +71,12 @@ public class ClassSize
 
         // Figure out whether this is a 32 or 64 bit machine.
         Runtime runtime = Runtime.getRuntime();
+        runtime.gc();
+        runtime.runFinalization();
         long memBase = runtime.totalMemory() - runtime.freeMemory();
         Object[] junk = new Object[10000];
+        runtime.gc();
+        runtime.runFinalization();
         long memUsed = runtime.totalMemory() - runtime.freeMemory() - memBase;
         int sz = (int)((memUsed + junk.length/2)/junk.length);
         refSize = ( 4 > sz) ? 4 : sz;
