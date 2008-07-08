@@ -2847,24 +2847,24 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 .valueOf("2004-02-14 00:00:00.0"), "java.sql.Timestamp", 10);
         s.getConnection().commit();
 
-        if (!usingDerbyNetClient()) {
-            {
-                ResultSet rsc = s
-                        .executeQuery("SELECT B FROM PM.LOB_GET WHERE ID = 1");
-                rsc.next();
-                Blob tester = rsc.getBlob(1);
-                rsc.close();
-                setXXX_setObject(s, psi, psq, type, tester, "java.sql.Blob", 11);
-            }
+        // Test setObject with Blob
+        {
+            ResultSet rsc = s
+                    .executeQuery("SELECT B FROM PM.LOB_GET WHERE ID = 1");
+            rsc.next();
+            Blob tester = rsc.getBlob(1);
+            rsc.close();
+            setXXX_setObject(s, psi, psq, type, tester, "java.sql.Blob", 11);
+        }
 
-            {
-                ResultSet rsc = s
-                        .executeQuery("SELECT C FROM PM.LOB_GET WHERE ID = 1");
-                rsc.next();
-                Clob tester = rsc.getClob(1);
-                rsc.close();
-                setXXX_setObject(s, psi, psq, type, tester, "java.sql.Clob", 12);
-            }
+        // Test setObject with Clob
+        {
+            ResultSet rsc = s
+                    .executeQuery("SELECT C FROM PM.LOB_GET WHERE ID = 1");
+            rsc.next();
+            Clob tester = rsc.getClob(1);
+            rsc.close();
+            setXXX_setObject(s, psi, psq, type, tester, "java.sql.Clob", 12);
         }
     }
 
