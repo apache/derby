@@ -328,6 +328,8 @@ public class CreateConstraintConstantAction extends ConstraintConstantAction
 								enabled
 								);
 				dd.addConstraintDescriptor(conDesc, tc);
+				storeConstraintDependenciesOnPrivileges
+					(activation, conDesc, null);
 				break;
 
 			case DataDictionary.FOREIGNKEY_CONSTRAINT:

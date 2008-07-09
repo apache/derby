@@ -6064,7 +6064,23 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             " create table d1589t31ConstraintTest (c311 int, "
             + "c312 int, foreign key(c311, c312) references "
             + "mamta1.d1589t11ConstraintTest)");
-        
+
+        // DERBY-3743
+        st.executeUpdate(
+            "CREATE FUNCTION F_ABS(P1 INT) RETURNS INT NO "
+            + "SQL RETURNS NULL ON NULL INPUT EXTERNAL NAME "
+            + "'java.lang.Math.abs' LANGUAGE JAVA PARAMETER STYLE JAVA");
+        st.executeUpdate(
+            " grant execute on function f_abs to mamta3");
+        st_mamta3.executeUpdate(
+            " create table dhw(i int check(mamta1.f_abs(i) > 0))");
+        assertStatementError("23513", st_mamta3, "insert into dhw values 0");
+        assertStatementError
+            ("X0Y25", st,
+             "revoke execute on function f_abs from mamta3 restrict");
+        st_mamta3.executeUpdate(" drop table dhw");
+        st.executeUpdate("DROP FUNCTION F_ABS");
+
         // set connection mamta2
         //ij(MAMTA3)> -- DERBY-1847 SELECT statement asserts with 
         // XJ001 when attempted to select a newly added column 

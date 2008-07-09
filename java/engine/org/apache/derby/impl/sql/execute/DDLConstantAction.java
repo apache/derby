@@ -299,10 +299,9 @@ abstract class DDLConstantAction implements ConstantAction
 						//privilege in the required privileges list
 						if (!statementTablePermission.getTableUUID().equals(refTableUUID))
 							continue;
-					} else if (statPerm instanceof StatementSchemaPermission 
-							|| statPerm instanceof StatementRoutinePermission)
+					} else if (statPerm instanceof StatementSchemaPermission) { 
 						continue;
-
+					}
 					//We know that we are working with a REFERENCES 
 					//privilege. Find all the PermissionDescriptors for
 					//this privilege and make constraint depend on it

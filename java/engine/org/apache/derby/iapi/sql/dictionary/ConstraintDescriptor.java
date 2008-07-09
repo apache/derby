@@ -557,6 +557,7 @@ public abstract class ConstraintDescriptor
 			//don't do anything here. Later in makeInvalid method, we make  
 			//the ConstraintDescriptor drop itself. 
 		    case DependencyManager.REVOKE_PRIVILEGE:
+		    case DependencyManager.INTERNAL_RECOMPILE_REQUEST:
 				break;
 
 			/*
@@ -634,7 +635,8 @@ public abstract class ConstraintDescriptor
 		if ((action != DependencyManager.SET_CONSTRAINTS_DISABLE) &&
 			(action != DependencyManager.SET_CONSTRAINTS_ENABLE) &&
 			(action != DependencyManager.SET_TRIGGERS_ENABLE) &&
-			(action != DependencyManager.SET_TRIGGERS_DISABLE)
+			(action != DependencyManager.SET_TRIGGERS_DISABLE) &&
+			(action != DependencyManager.INTERNAL_RECOMPILE_REQUEST)
 		   )
 		{
 			/* 
