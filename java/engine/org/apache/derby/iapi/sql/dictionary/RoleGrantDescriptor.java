@@ -71,13 +71,13 @@ public class RoleGrantDescriptor extends TupleDescriptor
      * @param isDef
      *
      */
-    RoleGrantDescriptor(DataDictionary dd,
-                        UUID uuid,
-                        String roleName,
-                        String grantee,
-                        String grantor,
-                        boolean withAdminOption,
-                        boolean isDef) {
+    public RoleGrantDescriptor(DataDictionary dd,
+                               UUID uuid,
+                               String roleName,
+                               String grantee,
+                               String grantor,
+                               boolean withAdminOption,
+                               boolean isDef) {
         super(dd);
         this.uuid = uuid;
         this.roleName = roleName;

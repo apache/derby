@@ -21,13 +21,15 @@
 
 package org.apache.derby.impl.sql.catalog;
 
-import org.apache.derby.iapi.sql.dictionary.RoleGrantDescriptor;
-import org.apache.derby.iapi.sql.dictionary.RoleClosureIterator;
-import org.apache.derby.iapi.error.StandardException;
 import java.util.List;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Iterator;
+import org.apache.derby.iapi.sql.dictionary.RoleGrantDescriptor;
+import org.apache.derby.iapi.sql.dictionary.RoleClosureIterator;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.store.access.TransactionController;
 
 /**
  * Allows iterator over the role grant closure defined by the relation
@@ -79,6 +81,31 @@ public class RoleClosureIteratorImpl implements RoleClosureIterator
     private Iterator currNodeIter;
 
     /**
+     * DataDictionaryImpl used to get closure graph
+     */
+    private DataDictionaryImpl dd;
+
+    /**
+     * TransactionController used to get closure graph
+     */
+    private TransactionController tc;
+
+    /**
+     * The role for which we compute the closure.
+     */
+    private String root;
+
+    /**
+     * true before next is called the first time
+     */
+    private boolean initial;
+
+    /**
+     * true of iterator is open and next can be called
+     */
+    private boolean open;
+
+    /**
      * Constructor (package private).
      * Use {@code createRoleClosureIterator} to obtain an instance.
      * @see org.apache.derby.iapi.sql.dictionary.DataDictionary#createRoleClosureIterator
@@ -86,33 +113,64 @@ public class RoleClosureIteratorImpl implements RoleClosureIterator
      * @param root The role name for which to compute the closure
      * @param inverse If {@code true}, {@code graph} represents the
      *                grant<sup>-1</sup> relation.
-     * @param graph The grant graph for which to construct a closure
-     *              and iterator.
+     * @param dd data dictionary
+     * @param tc transaction controller
      *
      */
     RoleClosureIteratorImpl(String root, boolean inverse,
-                            HashMap graph) {
+                            DataDictionaryImpl dd,
+                            TransactionController tc) {
         this.inverse = inverse;
-        this.graph = graph;
-
-        // we omit root from closure, so don't add it here.
+        this.graph = null;
+        this.root = root;
+        this.dd = dd;
+        this.tc = tc;
         seenSoFar = new HashMap();
         lifo      = new ArrayList(); // remaining work stack
-        // present iterator of outgoing arcs of the node we are
-        // currently looking at
-        List outgoingArcs = (List)graph.get(root);
-        if (outgoingArcs != null) {
-            this.currNodeIter = outgoingArcs.iterator();
-        } else {
-            // empty
-            this.currNodeIter = new ArrayList().iterator();
-        }
 
-
+        RoleGrantDescriptor dummy = new RoleGrantDescriptor
+            (null,
+             null,
+             inverse ? root : null,
+             inverse ? null : root,
+             null,
+             false,
+             false);
+        List dummyList = new ArrayList();
+        dummyList.add(dummy);
+        currNodeIter = dummyList.iterator();
+        initial = true;
+        open = true;
     }
 
 
-    public String next() {
+    public String next() throws StandardException {
+        if (!open) {
+            if (SanityManager.DEBUG) {
+                SanityManager.
+                    THROWASSERT("next called on a closed RoleClosureIterator");
+            }
+
+            return null;
+        }
+
+        if (initial) {
+            // Optimization so we don't compute the closure for the current
+            // role if unnecessary (when next is only called once).
+            initial = false;
+            seenSoFar.put(root, null);
+
+            return root;
+
+        } else if (graph == null) {
+            // We get here the second time next is called.
+            graph = dd.getRoleGrantGraph(tc, inverse);
+            List outArcs = (List)graph.get(root);
+            if (outArcs != null) {
+                currNodeIter = outArcs.iterator();
+            }
+        }
+
         RoleGrantDescriptor result = null;
 
         while (result == null) {
@@ -161,9 +219,9 @@ public class RoleClosureIteratorImpl implements RoleClosureIterator
         }
 
         if (result != null) {
-            seenSoFar.put(inverse ? result.getRoleName(): result.getGrantee(),
-                          null);
-            return inverse ? result.getRoleName() : result.getGrantee();
+            String role = inverse ? result.getRoleName(): result.getGrantee();
+            seenSoFar.put(role, null);
+            return role;
         } else {
             return null;
         }
@@ -171,9 +229,12 @@ public class RoleClosureIteratorImpl implements RoleClosureIterator
 
 
     public void close() throws StandardException{
-        seenSoFar = null;
+        open = false;
         graph = null;
         lifo = null;
+        seenSoFar = null;
         currNodeIter = null;
+        dd = null;
+        tc = null;
     }
 }

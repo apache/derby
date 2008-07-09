@@ -27,7 +27,6 @@ import java.sql.Connection;
 import java.sql.Statement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.DriverManager;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
@@ -122,9 +121,6 @@ public class RolesTest extends BaseJDBCTestCase
      * Construct top level suite in this JUnit test
      *
      * @return A suite containing embedded and client suites.
-     *         Client/server suite commented out to speed up this test as
-     *         it does not add much value given the nature of the changes
-     *         (SQL language only).
      */
     public static Test suite()
     {

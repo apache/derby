@@ -21,8 +21,6 @@
 
 package org.apache.derby.impl.sql.execute;
 
-import org.apache.derby.iapi.sql.execute.ConstantAction;
-
 import java.util.Iterator;
 import java.util.List;
 import org.apache.derby.iapi.error.StandardException;
@@ -204,14 +202,6 @@ class GrantRoleConstantAction extends DDLConstantAction {
         // circularity. If there exists a grant back to the role being
         // granted now, from one of the roles in the grant closure of
         // grantee, there is a circularity.
-
-        // Trivial circularity: a->a
-        if (role.equals(grantee)) {
-            throw StandardException.newException
-                (SQLState.AUTH_ROLE_GRANT_CIRCULARITY,
-                 role, grantee);
-        }
-
 
         // Via grant closure of grantee
         RoleClosureIterator rci =

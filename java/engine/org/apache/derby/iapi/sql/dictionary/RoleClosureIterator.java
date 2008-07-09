@@ -20,9 +20,7 @@
  */
 package org.apache.derby.iapi.sql.dictionary;
 
-import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.error.StandardException;
-import java.util.HashMap;
 
 /**
  * Allows iterator over the role grant closure defined by the relation
@@ -34,8 +32,8 @@ public interface RoleClosureIterator
 {
 
     /**
-     * Returns the next (as yet unseen) role in the closure of the
-     * grant or grant<sup>-1</sup> relation. 
+     * Returns the next (as yet unreturned) role in the transitive closure of
+     * the grant or grant<sup>-1</sup> relation.
      *
      * The grant relation forms a DAG (directed acyclic graph).
      * <pre>
@@ -70,20 +68,21 @@ public interface RoleClosureIterator
      * An iterator on the inverse relation starting at h for the above
      * grant graph will return:
      * <pre>
-     *       closure(h, grant-inv) = {e, b, a1, f, c, a2, d, a3}
+     *       closure(h, grant-inv) = {h, e, b, a1, f, c, a2, d, a3}
      * </pre>
      * <p>
      * An iterator on normal (not inverse) relation starting at a1 for
      * the above grant graph will return:
      * <pre>
-     *       closure(a1, grant)    = {b, j, e, h, f, c}
+     *       closure(a1, grant)    = {a1, b, j, e, h, f, c}
      * </pre>
      *
-     * @return a role name identifying a yet unseen node, or null if
-     *         the closure is exhausted.  The order in which the nodes
-     *         are returned is not defined.
+     * @return a role name identifying a yet unseen node, or null if the
+     *         closure is exhausted.  The order in which the nodes are returned
+     *         is not defined, except that the root is always returned first (h
+     *         and a1 in the above examples).
      */
-    public String next();
+    public String next() throws StandardException;
 
 
     /**

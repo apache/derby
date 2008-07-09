@@ -2969,6 +2969,7 @@ public final class	DataDictionaryImpl
 		return false;
 	}
 
+
 	/**
 	 * Return an in-memory representation of the role grant graph (sans
 	 * grant of roles to users, only role-role relation.
@@ -2985,7 +2986,7 @@ public final class	DataDictionaryImpl
 	 * FIXME: Need to cache graph and invalidate when role graph is modified.
 	 * Currently, we always read from SYSROLES.
 	 */
-	private HashMap getRoleGrantGraph(TransactionController tc, boolean inverse)
+	HashMap getRoleGrantGraph(TransactionController tc, boolean inverse)
 			throws StandardException {
 
 		HashMap hm = new HashMap();
@@ -3068,9 +3069,7 @@ public final class	DataDictionaryImpl
 		 boolean inverse
 		) throws StandardException {
 
-		HashMap graph = getRoleGrantGraph(tc, inverse);
-
-		return new RoleClosureIteratorImpl(role, inverse, graph);
+		return new RoleClosureIteratorImpl(role, inverse, this, tc);
 	}
 
 
