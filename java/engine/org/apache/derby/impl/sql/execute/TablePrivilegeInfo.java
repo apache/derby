@@ -276,6 +276,16 @@ public class TablePrivilegeInfo extends PrivilegeInfo
 					{
 						privileges_revoked = true;
 						dd.getDependencyManager().invalidateFor(colPermsDescs[i], DependencyManager.REVOKE_PRIVILEGE, lcc);
+						// When revoking a privilege from a Table we need to
+						// invalidate all GPSs refering to it. But GPSs aren't
+						// Dependents of colPermsDescs[i], but of the
+						// TableDescriptor itself, so we must send
+						// INTERNAL_RECOMPILE_REQUEST to the TableDescriptor's
+						// Dependents.
+						dd.getDependencyManager().invalidateFor
+							(td,
+							 DependencyManager.INTERNAL_RECOMPILE_REQUEST,
+							 lcc);
 					}
 				}
 			}
