@@ -9088,8 +9088,45 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // expect error
         
         assertStatementError("42502", pSt2);
-        
-        
+
+        // -----------------------------------
+        // Now try with column level privilege
+        // DERBY-3736
+        st_user1.executeUpdate(
+            " grant select(i) on ttt2 to user2");
+
+        // set connection user2
+        // prepare statement, ok
+
+        pSt2 = user2.prepareStatement(
+            "select * from user1.ttt2");
+
+        // ok
+
+        rs = pSt2.executeQuery();
+        expColNames = new String [] {"I"};
+        JDBC.assertColumnNames(rs, expColNames);
+
+        expRS = new String [][]
+        {
+            {"8"}
+        };
+
+        JDBC.assertFullResultSet(rs, expRS, true);
+
+        // set connection user1
+
+        st_user1.executeUpdate(
+            " revoke select(i) on ttt2 from user2");
+
+        // set connection user2
+        // expect error
+
+        assertStatementError("42502", pSt2);
+
+        // end of test case for DERBY-3736
+        // --------------------------------
+
         // set connection user2
         // 
         // ---------------------------------------------------------
