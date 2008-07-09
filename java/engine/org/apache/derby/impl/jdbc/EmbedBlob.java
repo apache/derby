@@ -25,18 +25,15 @@ package org.apache.derby.impl.jdbc;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.jdbc.EngineLOB;
-import org.apache.derby.iapi.services.monitor.Monitor;
+import org.apache.derby.iapi.reference.Limits;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.Resetable;
-import org.apache.derby.iapi.services.io.NewByteArrayInputStream;
 import org.apache.derby.iapi.services.io.InputStreamUtil;
-import org.apache.derby.iapi.services.io.ArrayInputStream;
 
 import java.sql.SQLException;
 import java.sql.Blob;
 import java.io.InputStream;
-import java.io.EOFException;
 import java.io.IOException;
 
 /**
@@ -299,10 +296,19 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
                 // Otherwise have to read the entire stream!
                 for (;;)
                 {
-                    int size = biStream.read(buf);
-                    if (size == -1)
-                        break;
-                    pos += size;
+                    long skipped = biStream.skip(Limits.DB2_LOB_MAXWIDTH);
+                    if (SanityManager.DEBUG) {
+                        SanityManager.ASSERT(skipped >= 0);
+                    }
+                    pos += skipped;
+                    // If skip reports zero bytes skipped, verify EOF.
+                    if (skipped == 0) {
+                        if (biStream.read() == -1) {
+                            break; // Exit the loop, no more data.
+                        } else {
+                            pos++;
+                        }
+                    }
                 }
                 // Save for future uses.
                 myLength = pos;
