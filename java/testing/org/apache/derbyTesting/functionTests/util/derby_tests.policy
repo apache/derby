@@ -56,6 +56,13 @@ permission java.util.PropertyPermission "derby.storage.jvmInstanceId",
   permission java.util.PropertyPermission "derbyTesting.unittest.*", "write";
 
   permission java.lang.RuntimePermission "createClassLoader";
+
+  // permissions so that we can set the context class loader to
+  // null for daemon threads to avoid class loader leak.
+  // DERBY-3745
+  permission java.lang.RuntimePermission "getClassLoader";
+  permission java.lang.RuntimePermission "setContextClassLoader";
+
   permission java.security.SecurityPermission "getPolicy";
   
   permission java.io.FilePermission "${derby.system.home}${/}derby.properties", "read";
@@ -175,6 +182,13 @@ grant codeBase "${derbyTesting.codeclasses}" {
   
   permission java.util.PropertyPermission "derby.*", "read";
   permission java.lang.RuntimePermission "createClassLoader";
+
+  // permissions so that we can set the context class loader to
+  // null for daemon threads to avoid class loader leak.
+  // DERBY-3745
+  permission java.lang.RuntimePermission "getClassLoader";
+  permission java.lang.RuntimePermission "setContextClassLoader";
+
   permission java.security.SecurityPermission "getPolicy";
    
   permission java.io.FilePermission "${derby.system.home}${/}derby.properties", "read";

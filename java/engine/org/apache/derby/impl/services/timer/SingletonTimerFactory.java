@@ -23,7 +23,7 @@ package org.apache.derby.impl.services.timer;
 
 import org.apache.derby.iapi.services.timer.TimerFactory;
 import org.apache.derby.iapi.services.monitor.ModuleControl;
-
+import org.apache.derby.iapi.util.PrivilegedThreadOps;
 import org.apache.derby.iapi.error.StandardException;
 
 import java.util.Timer;
@@ -61,7 +61,28 @@ public class SingletonTimerFactory
          * a) We avoid synchronizing access to singletonTimer later
          * b) We don't need any properties
          */
+         // DERBY-3745 We want to avoid leaking class loaders, so 
+         // we make sure the context class loader is null before
+         // creating the thread
+        ClassLoader savecl = null;
+        boolean hasGetClassLoaderPerms = false;
+        try {
+            savecl = PrivilegedThreadOps.getContextClassLoader(
+                    Thread.currentThread());
+            hasGetClassLoaderPerms = true;
+        } catch (SecurityException se) {
+            // Ignore security exception. Versions of Derby before
+            // the DERBY-3745 fix did not require getClassLoader 
+            // privs.  We may leak class loaders if we are not
+            // able to do this but we can't just fail.
+        }
+        if (hasGetClassLoaderPerms)
+            PrivilegedThreadOps.setContextClassLoaderIfPrivileged(
+                    Thread.currentThread(), null);
         singletonTimer = new Timer(true); // Run as daemon
+        if (hasGetClassLoaderPerms)
+            PrivilegedThreadOps.setContextClassLoaderIfPrivileged(
+                    Thread.currentThread(), savecl);
     }
 
     /**
