@@ -105,7 +105,8 @@ public class StressMultiTest extends BaseJDBCTestCase {
      *
      * @param threads
      * @param minutes
-     * @return
+     * @return  suite after changing <code>THREADS</code> and 
+     * <code> MINUTES </code>
      */
     public static Test suite(int threads, int minutes) {
         THREADS = threads;

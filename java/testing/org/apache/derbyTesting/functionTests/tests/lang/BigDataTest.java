@@ -210,7 +210,7 @@ public class BigDataTest extends BaseJDBCTestCase {
     /**
      * Valid content in defined table.
      * 
-     * @param exected
+     * @param expected
      *            the values expected, it has the same order with the table.
      *            i.e.expected[0] means the expected values for the first row in rs.
      * @param tableName
