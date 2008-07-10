@@ -70,8 +70,11 @@ public class IjTestCase extends ScriptTestCase {
 	
 	/**
 	 * Run a .sql test, calling ij's main method.
-	 * Then, take the output filre and read it into our OutputStream
+	 * Then, take the output file and read it into our OutputStream
 	 * so that it can be compared via compareCanon().
+	 * TODO:
+	 * Note that the output will include a version number;
+	 * this should get filtered/ignored in compareCanon
 	 */
 	public void runTest() throws Throwable {
 		String [] args = { "-fr", scriptName };
