@@ -106,7 +106,7 @@ public class SysinfoCPCheckTest extends BaseJDBCTestCase {
                 {"nonexist.class", "6", "    (nonexist not found.)", null}
         };
 
-        final String outputEncoding = "US-ASCII";
+        
 
         PrintStream out = System.out;
 
@@ -116,14 +116,10 @@ public class SysinfoCPCheckTest extends BaseJDBCTestCase {
             ByteArrayOutputStream rawBytes = getOutputStream();
 
             // First obtain the output for the sysinfo command
-            try {
-                PrintStream testOut = new PrintStream(rawBytes,
-                    false, outputEncoding);
-                setSystemOut(testOut);
-            } catch (UnsupportedEncodingException uee) {
-                uee.printStackTrace();
-            }
-
+            PrintStream testOut = new PrintStream(rawBytes,
+                    false);
+            setSystemOut(testOut);
+         
             if (!checkClientOrServer(tstargs[tst][0]))
                 continue;
 
@@ -148,8 +144,7 @@ public class SysinfoCPCheckTest extends BaseJDBCTestCase {
             try {
                 BufferedReader sysinfoOutput = new BufferedReader(
                     new InputStreamReader(
-                        new ByteArrayInputStream(testRawBytes),
-                            outputEncoding));
+                        new ByteArrayInputStream(testRawBytes)));
 
                 // evaluate the output
                 // compare the sentence picked
