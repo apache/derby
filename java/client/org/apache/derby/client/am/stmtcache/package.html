@@ -1,0 +1,126 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <title>org.apache.derby.client.am.stmtcache</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  </head>
+  <body>
+        <p>Core client side JDBC statement cache implementation files. The
+        purpose of the client side JDBC statement cache is primarily to avoid
+        the performance penalty of going over the network from the client to
+        the server when preparing a statement that has already been prepared
+        on the same connection.</p>
+
+      <h2>Core cache implementation</h2>
+        <p>The core cache implementation has three responsibilities:
+        <ol>
+            <li><b>Hold items in the cache</b>
+                <p>The current implementation stores either
+                <tt>PreparedStatement</tt>s or <tt>CallableStatement</tt>s in
+                the cache. A key is computed for each item, and there can only
+                by one instance of an item per key.</p></li>
+            <li><b>Determine if an item is in the cache, and if so return it</b>
+                <p>When a statement is prepared, the cache is consulted to
+                see if there is already a statement available. All statements
+                in the cache are by design free and available for use. A key
+                for the statement is computed to do the lookup. If there is a
+                statement available, it is taken out from the cache. When the
+                client is done with the statement, the cache is consulted again
+                to see if an identical statement (with the same key) has been
+                inserted. If so, the statement is closed. If not, it is
+                reinserted into the cache. This procedure allows us to use the
+                LRU algorithm for eviction.</p></li>
+            <li><b>Throw out items when the cache capacity is exceeded</b>
+                <p>A LRU (least recently used) algorithm is used to select
+                which item to throw out. When a statement is thrown out, it is
+                permanently closed and all references to the object are
+                released.</p></li>
+        </ol></p>
+
+      <h2>Behavioral implications</h2>
+        <p>When the JDBC cache is enabled, there is one difference in behavior.
+        Some errors that were previously encountered during the prepare call,
+        might now happen during execute. As an example, consider a statement
+        referring a deleted table.</p>
+        <p>Say table <tt>A</tt> is created and populated, then queried using a
+        prepared statement. This statement will be cached. If table <tt>A</tt>
+        is later deleted, the prepared query referring to it will not be
+        invalidated. If the query is prepared again on the same connection,
+        the cached object will be fetched from the cache and the prepare seems
+        to have succeeded (it actually hasn't been performed). When the prepared
+        statement is executed, the error is detected on the server side and the
+        client is notified.</p>
+
+      <h2>Performance considerations and requirements</h2>
+        <p>In order to allow for improved performance from using the JDBC
+        statement cache, there are three requirements:</p>
+        <ul>
+            <li>Enable the JDBC statement cache. Currently, this can only be
+                done when using <tt>ClientConnectionPoolDataSource</tt>.</li>
+            <li>Use prepared or callable statements to interact with the
+                database.</li>
+            <li>Close the statements to return them to the cache. This happens
+                automatically when the logical connection is closed, but
+                must (and should) be done explicitly to fully utilize the cache
+                within a single logical connection.</li>
+        </ul>
+
+        <p>Using the JDBC statement cache will make each physical connection
+        use more memory. The amount depends on how many statements the
+        connection is allowed to cache and how many statements are actually
+        cached.</p>
+
+      <h2>Enabling the cache through JDBC</h2>
+        <p>Currently, the JDBC statement cache can only be enabled by using
+        <tt>ClientConnectionPoolDataSource</tt>. Sample code:</p>
+        <pre>
+ClientConnectionPoolDataSource cpds = new ClientConnectionPoolDataSource();
+// Set the number of statements the cache is allowed to cache.
+// Any number greater than zero will enable the cache.
+cpds.setMaxStatements(20);
+// This physical connection will have JDBC statement caching enabled.
+PooledConnection pc = cpds.getPooledConnection();
+// Create a logical connection.
+Connection con = pc.getConnection();
+// Interact with the database.
+PreparedStatement ps = con.prepareStatement(
+    "select * from myTable where id = ?");
+...
+ps.close(); // Inserts/returns statement to the cache
+...
+con.close();
+
+// The next logical connection can gain from using the cache.
+con = pc.getConnection();
+// This prepare will cause a statement to be fetched from the local cache.
+PreparedStatement ps = con.prepareStatement(
+    "select * from myTable where id = ?");
+...
+
+// This disposes of the cache.
+pc.close();
+        </pre>
+
+
+      <h2>Implementation note</h2>
+        <p>The client XA connection pool reuses the same code as the
+        connection pool data source, and enabling the JDBC statement cache
+        for XA connections is a matter of changing a few lines of code.
+        However, it has not been investigated whether the XA aspect requires
+        something more with regards to statement caching.</p>
+
+        <p>The main JIRA issue for the client side JDBC statement cache is
+        <a href='https://issues.apache.org/jira/browse/DERBY-3313'>DERBY-3313</a>.
+
+        <p>Most important classes interacting with the statement cache
+        (directly or indirectly):</p>
+        <ul>
+            <li>{@link org.apache.derby.client.am.StatementCacheInteractor}
+                </li>
+            <li>{@link org.apache.derby.client.am.CachingLogicalConnection}
+                </li>
+            <li>{@link org.apache.derby.client.am.LogicalStatementEntity}
+                </li>
+        </ul>
+  </body>
+</html>
