@@ -56,6 +56,7 @@ import org.apache.derby.iapi.services.loader.ClassInfo;
 import org.apache.derby.iapi.services.loader.InstanceGetter;
 import org.apache.derby.iapi.services.io.FormatableInstanceGetter;
 import org.apache.derby.iapi.error.ExceptionSeverity;
+import org.apache.derby.iapi.util.PrivilegedThreadOps;
 
 import  org.apache.derby.io.StorageFactory;
 
@@ -2078,8 +2079,30 @@ nextModule:
 	}
 
 	public Thread getDaemonThread(Runnable task, String name, boolean setMinPriority) {
+		// DERBY-3745 We want to avoid the thread leaking class loaders,
+		// so we make the context class loader null before we create the
+		// thread.
+		ClassLoader savecl = null;
+		boolean hasGetClassLoaderPerms = false;
+		try {
+			savecl = PrivilegedThreadOps.getContextClassLoader(Thread.currentThread());
+			hasGetClassLoaderPerms = true;
+		}  catch (SecurityException se) {
+			// ignore security exception. Earlier versions of Derby, before
+			// the DERBY-3745 fix did not require getClassLoader permissions.
+			// We may leak class loaders if we are not able to get the 
+			// class loader, but we cannot just fail.
+		}
+		if (hasGetClassLoaderPerms)
+			PrivilegedThreadOps.setContextClassLoaderIfPrivileged(
+								 Thread.currentThread(), null);
 		Thread t =  new Thread(daemonGroup, task, "derby.".concat(name));
+		if (hasGetClassLoaderPerms)
+			PrivilegedThreadOps.setContextClassLoaderIfPrivileged(
+							  Thread.currentThread(), savecl);
+
 		t.setDaemon(true);
+
 		if (setMinPriority) {
 			t.setPriority(Thread.MIN_PRIORITY);
 		}

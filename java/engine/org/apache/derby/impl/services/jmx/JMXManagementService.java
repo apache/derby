@@ -41,6 +41,7 @@ import org.apache.derby.iapi.services.jmx.ManagementService;
 import org.apache.derby.iapi.services.monitor.ModuleControl;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.property.PropertyUtil;
+import org.apache.derby.iapi.util.PrivilegedThreadOps;
 import org.apache.derby.mbeans.ManagementMBean;
 import org.apache.derby.mbeans.VersionMBean;
 import org.apache.derby.security.SystemPermission;
@@ -163,7 +164,24 @@ public final class JMXManagementService implements ManagementService, ModuleCont
      * can be enabled on the fly.
      */
     private synchronized void findServer() {
-        
+        //DERBY-3745 We want to avoid the timer leaking class loaders, so we make
+        // sure the context class loader is null before we start the MBean
+        // server which will create threads that we want to have a null context
+        // class loader
+        ClassLoader savecl = null;
+        boolean hasGetClassLoaderPerms=false;
+        try {
+            savecl = PrivilegedThreadOps.getContextClassLoader(Thread.currentThread());
+            hasGetClassLoaderPerms = true;
+        } catch (SecurityException se) {
+           // ignore security exception.  Earlier versions of Derby, before the 
+           // DERBY-3745 fix did not require getClassloader permissions.
+           // We may leak class loaders if we are not able to get this, but 
+           // cannot just fail.        
+        }
+        if (hasGetClassLoaderPerms)
+            PrivilegedThreadOps.setContextClassLoaderIfPrivileged(Thread.
+                          currentThread(), null);
         try {
             mbeanServer = AccessController
                     .doPrivileged(new PrivilegedAction<MBeanServer>() {
@@ -180,6 +198,9 @@ public final class JMXManagementService implements ManagementService, ModuleCont
             // them registered with JMX if someone else
             // starts the MBean server.
         }
+        if (hasGetClassLoaderPerms)
+            PrivilegedThreadOps.setContextClassLoaderIfPrivileged(Thread.currentThread(),
+                    savecl);
     }
 
     /**
