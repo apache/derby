@@ -3249,7 +3249,7 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
             if (numBytes >= 0) {
                 byte[] readBytes = new byte[numBytes];
                 System.arraycopy(value, 0, readBytes, 0, numBytes);
-                valueString = new String(readBytes);
+                valueString = new String(readBytes, "US-ASCII");
                 assertEquals("FAIL - wrong substring value",
                         valueString, subStr);
             } else {
