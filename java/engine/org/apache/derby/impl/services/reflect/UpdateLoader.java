@@ -101,7 +101,7 @@ final class UpdateLoader {
         this.normalizeToUpper = normalizeToUpper;
 		this.parent = parent;
 		lf = (LockFactory) Monitor.getServiceModule(parent, Module.LockFactory);
-		compat = lf.createCompatibilitySpace(this);
+		compat = (lf != null) ? lf.createCompatibilitySpace(this) : null;
 
 		if (verbose) {
 			vs = Monitor.getStream();
