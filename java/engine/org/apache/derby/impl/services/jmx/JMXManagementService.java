@@ -161,8 +161,6 @@ public final class JMXManagementService implements ManagementService, ModuleCont
      * MBeanServer and registering system beans. Separate from
      * boot() to allow future changes where the jmx management
      * can be enabled on the fly.
-     * 
-     * @throws StandardException
      */
     private synchronized void findServer() {
         
