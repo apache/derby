@@ -705,16 +705,30 @@ public abstract class Connection implements java.sql.Connection,
         closeX();
     }
 
+    /**
+     * Check if the transaction is in progress and the connection cannot be
+     * closed.
+     *
+     * @throws SqlException if the connection cannot be closed because the
+     * transaction is active
+     */
     void checkForTransactionInProgress() throws SqlException {
         // The following precondition matches CLI semantics, see SQLDisconnect()
-        if (transactionInProgress() && !allowCloseInUOW_()) {
+        if (transactionInProgress()) {
             throw new SqlException(agent_.logWriter_,
                     new ClientMessageId (SQLState.CANNOT_CLOSE_ACTIVE_CONNECTION));                   
         }
     }
-    
+
+    /**
+     * Check if there are uncommitted operations in the current transaction
+     * that prevent us from closing the connection.
+     *
+     * @return {@code true} if the connection cannot be closed due to
+     * uncommitted operations in the transaction
+     */
     public boolean transactionInProgress() {
-        return !autoCommit_ && inUnitOfWork_;
+        return inUnitOfWork_ && !allowCloseInUOW_();
     }
 
     // This is a no-op if the connection is already closed.

@@ -153,11 +153,6 @@ class EmbedPooledConnection implements javax.sql.PooledConnection, BrokeredConne
 	{
 		checkActive();
 
-		// need to do this in case the connection is forcibly removed without
-		// first being closed.
-		closeCurrentConnectionHandle();
-
-
 		// RealConnection is not null if the app server yanks a local
 		// connection from one client and give it to another.  In this case,
 		// the real connection is ready to be used.  Otherwise, set it up
@@ -170,6 +165,12 @@ class EmbedPooledConnection implements javax.sql.PooledConnection, BrokeredConne
 		{
 			resetRealConnection();
 		}
+
+        // Need to do this in case the connection is forcibly removed without
+        // first being closed. Must be performed after resetRealConnection(),
+        // otherwise closing the logical connection may fail if the transaction
+        // is not idle.
+        closeCurrentConnectionHandle();
 
 		// now make a brokered connection wrapper and give this to the user
 		// we reuse the EmbedConnection(ie realConnection).
@@ -451,6 +452,13 @@ class EmbedPooledConnection implements javax.sql.PooledConnection, BrokeredConne
 	*/
 	public void checkCommit() throws SQLException {
 	}
+
+    /** @see BrokeredConnectionControl#checkClose() */
+    public void checkClose() throws SQLException {
+        if (realConnection != null) {
+            realConnection.checkForTransactionInProgress();
+        }
+    }
 
 	/**
 		Close called on BrokeredConnection. If this call

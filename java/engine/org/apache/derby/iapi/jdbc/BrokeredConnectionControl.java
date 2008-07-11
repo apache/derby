@@ -63,6 +63,14 @@ public interface BrokeredConnectionControl
 	*/
 	public void checkCommit() throws SQLException;
 
+    /**
+     * Check if the brokered connection can be closed.
+     *
+     * @throws SQLException if it is not allowed to call close on the brokered
+     * connection
+     */
+    public void checkClose() throws SQLException;
+
 	/**
 		Can cursors be held across commits.
         @param downgrade true to downgrade the holdability,

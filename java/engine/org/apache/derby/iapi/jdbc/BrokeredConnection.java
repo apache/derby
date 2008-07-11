@@ -166,6 +166,8 @@ public abstract class BrokeredConnection implements EngineConnection
 			return;
 
 		try {
+            control.checkClose();
+
 			if (!control.closingConnection()) {
 				isClosed = true;
 				return;

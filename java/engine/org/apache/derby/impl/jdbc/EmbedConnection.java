@@ -1778,16 +1778,25 @@ public abstract class EmbedConnection implements EngineConnection
      * @exception SQLException if a database-access error occurs.
      */
     public void close() throws SQLException {
-		// JDK 1.4 javadoc indicates close on a closed connection is a no-op
-		if (!isClosed() &&
-				(rootConnection == this) && 
-				(!autoCommit && !transactionIsIdle())) {
-			throw newSQLException(
-				SQLState.CANNOT_CLOSE_ACTIVE_CONNECTION);
-		}
-		
+        checkForTransactionInProgress();
 		close(exceptionClose);
 	}
+
+    /**
+     * Check if the transaction is active so that we cannot close down the
+     * connection. If auto-commit is on, the transaction is committed when the
+     * connection is closed, so it is always OK to close the connection in that
+     * case. Otherwise, throw an exception if a transaction is in progress.
+     *
+     * @throws SQLException if this transaction is active and the connection
+     * cannot be closed
+     */
+    public void checkForTransactionInProgress() throws SQLException {
+        if (!isClosed() && (rootConnection == this) &&
+                !autoCommit && !transactionIsIdle()) {
+            throw newSQLException(SQLState.CANNOT_CLOSE_ACTIVE_CONNECTION);
+        }
+    }
 
 	// This inner close takes the exception and calls 
 	// the context manager to make the connection close.

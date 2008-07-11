@@ -84,6 +84,7 @@ public class LogicalConnection implements java.sql.Connection {
                     new ClientMessageId(
                         SQLState.PHYSICAL_CONNECTION_ALREADY_CLOSED)));
             } else {
+                physicalConnection_.checkForTransactionInProgress();
                 physicalConnection_.closeForReuse(
                         pooledConnection_.isStatementPoolingEnabled());
                 if (!physicalConnection_.isGlobalPending_()) {

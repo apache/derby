@@ -359,7 +359,7 @@ public class StatementPoolingTest
         Statement stmt = createStatement();
         stmt.executeUpdate("create table clcclso (id int)");
         PreparedStatement ps = con.prepareStatement(SELECT_SQL);
-        commit();
+        con.commit();
         con.close();
         try {
             // Should fail because the logical statement has been closed.
@@ -586,6 +586,7 @@ public class StatementPoolingTest
         if (holdability == ResultSet.HOLD_CURSORS_OVER_COMMIT) {
             assertTrue(rs.next());
             assertEquals(2, rs.getInt(1));
+            rollback();
         }
         getConnection().close();
         try {
@@ -829,9 +830,8 @@ public class StatementPoolingTest
                 "resTestNoCommitOnReuse"));
         reqDataSuite.addTest(new StatementPoolingTest(
                 "resTestCommitOnReuse"));
-        // This test fails, DERBY-3319 is probably the cause.
-        //reqDataSuite.addTest(new StatementPoolingTest(
-        //        "resTestNoDataCommittedOnInvalidTransactionState"));
+        reqDataSuite.addTest(new StatementPoolingTest(
+                "resTestNoDataCommittedOnInvalidTransactionState"));
         suite.addTest(TestConfiguration.connectionCPDecorator(
                 new BaseJDBCTestSetup(reqDataSuite) {
                 public void setUp() throws Exception {

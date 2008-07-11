@@ -1505,13 +1505,33 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
         return closeStatementsOnClose;
     }
 
+    /**
+     * Check if the connection can be closed when there are uncommitted
+     * operations.
+     *
+     * @return if this connection can be closed when it has uncommitted
+     * operations, {@code true}; otherwise, {@code false}
+     */
     protected boolean allowCloseInUOW_() {
-        return false;
+        // We allow closing in unit of work in two cases:
+        //
+        //   1) if auto-commit is on, since then Connection.close() will cause
+        //   a commit so we won't leave uncommitted changes around
+        //
+        //   2) if we're not allowed to commit or roll back the transaction via
+        //   the connection object (because the it is part of an XA
+        //   transaction). In that case, commit and rollback are performed via
+        //   the XAResource, and it is therefore safe to close the connection.
+        //
+        // Otherwise, the transaction must be idle before a call to close() is
+        // allowed.
+
+        return autoCommit_ || !allowLocalCommitRollback_();
     }
 
     // Driver-specific determination if local COMMIT/ROLLBACK is allowed;
     // Allow local COMMIT/ROLLBACK only if we are not in an XA transaction
-    protected boolean allowLocalCommitRollback_() throws org.apache.derby.client.am.SqlException {
+    protected boolean allowLocalCommitRollback_() {
        
     	if (getXAState() == XA_T0_NOT_ASSOCIATED) {
             return true;

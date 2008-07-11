@@ -136,6 +136,12 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         suite.addTest(new J2EEDataSourceTest("testSetIsolationWithStatement"));
         suite.addTest(new J2EEDataSourceTest("testJira95xads"));
         suite.addTest(new J2EEDataSourceTest("testBadConnectionAttributeSyntax"));
+        suite.addTest(new J2EEDataSourceTest("testCloseActiveConnection_DS"));
+        suite.addTest(new J2EEDataSourceTest("testCloseActiveConnection_CP"));
+        suite.addTest(
+            new J2EEDataSourceTest("testCloseActiveConnection_XA_local"));
+        suite.addTest(
+            new J2EEDataSourceTest("testCloseActiveConnection_XA_global"));
         suite.addTest(new J2EEDataSourceTest("testDescriptionProperty"));
         suite.addTest(new J2EEDataSourceTest("testConnectionErrorEvent"));
         suite.addTest(new J2EEDataSourceTest(
@@ -666,6 +672,109 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         }
         c.close();
         pc.close();
+    }
+
+    /**
+     * Test that {@code Connection.close()} behaves as expected when the
+     * transaction is active (DERBY-3319).
+     *
+     * @param c the connection to test
+     * @param autoCommit the expected auto-commit value. When auto-commit is
+     * on, {@code close()} shouldn't fail when the transaction is active.
+     * @param global tells whether the connection is part of a global XA
+     * transaction. If it is, {@code close()} shouldn't fail, since the
+     * transaction can be finished later without using the connection.
+     */
+    private void testCloseActiveConnection(Connection c, boolean autoCommit,
+                                           boolean global)
+        throws SQLException
+    {
+        if (global) {
+            assertFalse("auto-commit should be false in XA", autoCommit);
+        }
+        assertEquals("auto-commit", autoCommit, c.getAutoCommit());
+        Statement s = c.createStatement();
+        JDBC.assertDrainResults(s.executeQuery("SELECT * FROM SYS.SYSTABLES"));
+        s.close();
+        try {
+            c.close();
+            // should not fail in auto-commit or global XA, but should fail
+            // otherwise
+            assertTrue("close() should fail", autoCommit || global);
+        } catch (SQLException e) {
+            // no exception expected in auto-commit or global XA, re-throw
+            if (autoCommit || global) {
+                throw e;
+            }
+            assertSQLState("25001", e);
+        }
+        if (!autoCommit && !global) {
+            c.rollback();
+        }
+        c.close();
+    }
+
+    /**
+     * Test that connections retrieved from {@code DataSource} behave as
+     * expected when {@code close()} is called and the transaction is active.
+     */
+    public void testCloseActiveConnection_DS() throws SQLException {
+        DataSource ds = JDBCDataSource.getDataSource();
+        testCloseActiveConnection(ds.getConnection(), true, false);
+        Connection c = ds.getConnection();
+        c.setAutoCommit(false);
+        testCloseActiveConnection(c, false, false);
+    }
+
+    /**
+     * Test that connections retrieved from {@code ConnectionPoolDataSource}
+     * behave as expected when {@code close()} is called and the transaction is
+     * active.
+     */
+    public void testCloseActiveConnection_CP() throws SQLException {
+        ConnectionPoolDataSource ds =
+            J2EEDataSource.getConnectionPoolDataSource();
+        PooledConnection pc = ds.getPooledConnection();
+        testCloseActiveConnection(pc.getConnection(), true, false);
+        Connection c = pc.getConnection();
+        c.setAutoCommit(false);
+        testCloseActiveConnection(c, false, false);
+    }
+
+    /**
+     * Test that connections retrieved from {@code XADataSource} that are not
+     * part of a global XA transaction, behave as expected when {@code close()}
+     * is called and the transaction is active.
+     */
+    public void testCloseActiveConnection_XA_local() throws SQLException {
+        XADataSource ds = J2EEDataSource.getXADataSource();
+        XAConnection xa = ds.getXAConnection();
+        testCloseActiveConnection(xa.getConnection(), true, false);
+        Connection c = xa.getConnection();
+        c.setAutoCommit(false);
+        testCloseActiveConnection(c, false, false);
+    }
+
+    /**
+     * Test that connections retrieved from {@code XADataSource} that are part
+     * of a global XA transaction, behave as expected when {@code close()} is
+     * called and the transaction is active.
+     */
+    public void testCloseActiveConnection_XA_global()
+        throws SQLException, XAException
+    {
+        XADataSource ds = J2EEDataSource.getXADataSource();
+        XAConnection xa = ds.getXAConnection();
+        XAResource xar = xa.getXAResource();
+        Xid xid = new cdsXid(1, (byte) 2, (byte) 3);
+        xar.start(xid, XAResource.TMNOFLAGS);
+        // auto-commit is always off in XA transactions, so we expect
+        // getAutoCommit() to return false without having set it explicitly
+        testCloseActiveConnection(xa.getConnection(), false, true);
+        Connection c = xa.getConnection();
+        c.setAutoCommit(false);
+        testCloseActiveConnection(c, false, true);
+        xar.end(xid, XAResource.TMSUCCESS);
     }
 
     /**

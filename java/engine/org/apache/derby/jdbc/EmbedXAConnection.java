@@ -53,6 +53,16 @@ class EmbedXAConnection extends EmbedPooledConnection
                 xaRes = new EmbedXAResource (this, ra);
 	}
 
+    /**
+     * Check if this connection is part of a global XA transaction.
+     *
+     * @return {@code true} if the transaction is global, {@code false} if the
+     * transaction is local
+     */
+    private boolean isGlobal() {
+        return xaRes.getCurrentXid () != null;
+    }
+
 	/*
 	** XAConnection methods
 	*/
@@ -69,7 +79,7 @@ class EmbedXAConnection extends EmbedPooledConnection
 		Allow control over setting auto commit mode.
 	*/
 	public void checkAutoCommit(boolean autoCommit) throws SQLException {
-		if (autoCommit && (xaRes.getCurrentXid () != null))
+		if (autoCommit && isGlobal())
 			throw Util.generateCsSQLException(SQLState.CANNOT_AUTOCOMMIT_XA);
 
 		super.checkAutoCommit(autoCommit);
@@ -86,7 +96,7 @@ class EmbedXAConnection extends EmbedPooledConnection
         throws SQLException
     {
 		if (holdability == ResultSet.HOLD_CURSORS_OVER_COMMIT) {		
-			if (xaRes.getCurrentXid () != null) {
+			if (isGlobal()) {
                 if (!downgrade)
                     throw Util.generateCsSQLException(SQLState.CANNOT_HOLD_CURSOR_XA);
                 
@@ -102,7 +112,7 @@ class EmbedXAConnection extends EmbedPooledConnection
 	*/
 	public void checkSavepoint() throws SQLException {
 
-		if (xaRes.getCurrentXid () != null)
+		if (isGlobal())
 			throw Util.generateCsSQLException(SQLState.CANNOT_ROLLBACK_XA);
 
 		super.checkSavepoint();
@@ -113,7 +123,7 @@ class EmbedXAConnection extends EmbedPooledConnection
 	*/
 	public void checkRollback() throws SQLException {
 
-		if (xaRes.getCurrentXid () != null)
+		if (isGlobal())
 			throw Util.generateCsSQLException(SQLState.CANNOT_ROLLBACK_XA);
 
 		super.checkRollback();
@@ -123,18 +133,32 @@ class EmbedXAConnection extends EmbedPooledConnection
 	*/
 	public void checkCommit() throws SQLException {
 
-		if (xaRes.getCurrentXid () != null)
+		if (isGlobal())
 			throw Util.generateCsSQLException(SQLState.CANNOT_COMMIT_XA);
 
 		super.checkCommit();
 	}
+
+    /**
+     * @see org.apache.derby.iapi.jdbc.BrokeredConnectionControl#checkClose()
+     */
+    public void checkClose() throws SQLException {
+        if (isGlobal()) {
+            // It is always OK to close a connection associated with a global
+            // XA transaction, even if it isn't idle, since we still can commit
+            // or roll back the global transaction with the XAResource after
+            // the connection has been closed.
+        } else {
+            super.checkClose();
+        }
+    }
 
 	public Connection getConnection() throws SQLException
 	{
 		Connection handle;
 
 		// Is this just a local transaction?
-		if (xaRes.getCurrentXid () == null) {
+		if (!isGlobal()) {
 			handle = super.getConnection();
 		} else {
 
