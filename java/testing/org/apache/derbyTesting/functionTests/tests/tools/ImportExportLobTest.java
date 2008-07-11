@@ -337,7 +337,7 @@ public class ImportExportLobTest extends ImportExportBaseTest
 
         // perform import with column names specified in random order.
         doImportDataLobsFromExtFile(null, "BOOKS_IMP", "PIC, CONTENT, NAME, ID", 
-                                  "4, 3, 2, 1", fileName, null, null, null, 1);
+                                  "4, 3, 2, 1", fileName, null, null, "8859_1", 1);
         verifyData("PIC, CONTENT, NAME, ID");
 
 	//DERBY-2925: need to delete export files first
