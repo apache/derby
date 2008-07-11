@@ -20,6 +20,7 @@
 
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
+import java.io.UnsupportedEncodingException;
 import java.sql.Blob;
 import java.sql.CallableStatement;
 import java.sql.Statement;
@@ -43,9 +44,7 @@ public class BlobStoredProcedureTest extends BaseJDBCTestCase {
     //The test string that will be used in all the test runs.
     final String testStr = "I am a simple derby test case";
 
-    //Byte array obatined from the string
-    final byte [] strBytes = testStr.getBytes();
-
+   
     //The length of the test string that will be used.
     final long testStrLength = testStr.length();
 
@@ -73,9 +72,13 @@ public class BlobStoredProcedureTest extends BaseJDBCTestCase {
 
     /**
      * Setup the test.
+     * @throws UnsupportedEncodingException 
      * @throws a SQLException.
      */
-    protected void setUp() throws SQLException {
+    protected void setUp() throws SQLException, UnsupportedEncodingException {
+    	 //Byte array obatined from the string
+    	byte [] strBytes = testStr.getBytes("US-ASCII");
+
         //initialize the locator to a default value.
         int locator = -1;
         //set auto commit to false for the connection
@@ -113,14 +116,15 @@ public class BlobStoredProcedureTest extends BaseJDBCTestCase {
     /**
      * test the BLOBGETBYTES stored procedure which will
      * be used in the implementation of Blob.getBytes.
+     * @throws UnsupportedEncodingException 
      *
      * @throws a SQLException.
      */
-    public void testBlobGetBytesSP() throws SQLException {
+    public void testBlobGetBytesSP() throws SQLException, UnsupportedEncodingException {
         // This string represents the substring that is got from the
         // stored procedure
         String testSubStr = testStr.substring(0, 10);
-        byte [] testSubBytes = testSubStr.getBytes();
+        byte [] testSubBytes = testSubStr.getBytes("US-ASCII");
 
         //create a callable statement and execute it to call the stored
         //procedure BLOBGETBYTES that will get the bytes
@@ -227,7 +231,7 @@ public class BlobStoredProcedureTest extends BaseJDBCTestCase {
         cs.setInt(2, 1);
         //find the position of the bytes corresponding to
         //the String simple in the test string.
-        cs.setBytes(3, (new String("simple")).getBytes());
+        cs.setBytes(3, (new String("simple")).getBytes("US-ASCII"));
         cs.setLong(4, 1L);
         cs.executeUpdate();
         //check to see that the returned position and the expected position
@@ -239,12 +243,13 @@ public class BlobStoredProcedureTest extends BaseJDBCTestCase {
 
     /**
      * Tests the stored procedure SYSIBM.BLOBSETBYTES
+     * @throws UnsupportedEncodingException 
      *
      * @throws SQLException.
      */
-    public void testBlobSetBytes() throws SQLException {
+    public void testBlobSetBytes() throws SQLException, UnsupportedEncodingException {
         String newString = "123456789012345";
-        byte [] newBytes = newString.getBytes();
+        byte [] newBytes = newString.getBytes("US-ASCII");
         //initialize the locator to a default value.
         int locator = -1;
         //call the stored procedure to return the created locator.
@@ -315,12 +320,13 @@ public class BlobStoredProcedureTest extends BaseJDBCTestCase {
 
     /**
      * Tests the SYSIBM.BLOBGETPOSITIONFROMLOCATOR stored procedure.
+     * @throws UnsupportedEncodingException 
      *
      * @throws SQLException.
      */
-    public void testBlobGetPositionFromLocatorSP() throws SQLException {
+    public void testBlobGetPositionFromLocatorSP() throws SQLException, UnsupportedEncodingException {
         String newString = "simple";
-        byte [] newBytes = newString.getBytes();
+        byte [] newBytes = newString.getBytes("US-ASCII");
         //initialize the locator to a default value.
         int locator = -1;
         //call the stored procedure to return the created locator.
