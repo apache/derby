@@ -173,8 +173,6 @@ implements Resetable
      * are read the state of this stream is updated with then next overflow
      * page.
      *
-     * @return The identifier to be used to open the conglomerate later.
-     *
      * @param overflowPage  Page number containing the next segment of the
      *                      long column.  -1 if there are no more segments.
      *
@@ -194,9 +192,7 @@ implements Resetable
      * are read the state of this stream is updated with then next overflow
      * page.
      *
-     * @return The identifier to be used to open the conglomerate later.
-     *
-     * @param overflowPage  Page number containing the next segment of the
+     * @param overflowId    Page number containing the next segment of the
      *                      long column.  -1 if there are no more segments.
      *
      **/
