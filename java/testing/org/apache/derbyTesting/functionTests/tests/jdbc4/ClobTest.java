@@ -558,7 +558,7 @@ public class ClobTest
          //that is obtained from the Blob after
          //the update.
          ByteArrayInputStream str_is = new ByteArrayInputStream
-                 (str.getBytes());
+                 (str.getBytes("US-ASCII"));
          
          //create the empty Clob.
          Clob clob = getConnection().createClob();
