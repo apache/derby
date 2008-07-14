@@ -23,14 +23,10 @@
 package org.apache.derby.impl.jdbc;
 
 import java.io.EOFException;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.RandomAccessFile;
-import java.security.AccessControlException;
 import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.sql.SQLException;
@@ -40,7 +36,6 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.store.raw.data.DataFactory;
 import org.apache.derby.io.StorageFile;
-import org.apache.derby.io.StorageRandomAccessFile;
 import org.apache.derby.shared.common.error.ExceptionUtil;
 
 /**
@@ -287,7 +282,6 @@ class LOBStreamControl {
             return -1;
         int lengthFromPos = dataBytes.length - (int) pos;
         int actualLength = len > lengthFromPos ? lengthFromPos : len;
-        byte [] result = new byte[actualLength];
         System.arraycopy(dataBytes, (int) pos, b, off, actualLength);
         return actualLength;
     }
