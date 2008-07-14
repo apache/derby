@@ -67,18 +67,34 @@ import java.io.IOException;
 
 final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
 {
-    // blob is either materialized or still in stream
+    /**
+     * Tells whether the Blob has been materialized or not.
+     * <p>
+     * Materialization happens when the Blob is updated by the user. A
+     * materialized Blob is represented either in memory or in a temporary file
+     * on disk, depending on size.
+     * <p>
+     * A Blob that has not been materialized is represented by a stream into the
+     * Derby store, and is read-only.
+     */
     private boolean         materialized;
     private InputStream     myStream;
     
-    // locator key for lob. used by Network Server.
-    private int             locator;
-    
-    /*
-     * Length of the BLOB if known. Set to -1 if
-     * the current length of the BLOB is not known.
+    /**
+     * Locator value for this Blob, used as a handle by the client driver to
+     * map operations to the correct Blob on the server side.
+     *
+     * @see #getLocator()
      */
-    private long myLength = -1;
+    private int locator = 0;
+    
+    /**
+     * Length of the stream representing the Blob.
+     * <p>
+     * Set to -1 when the stream has been materialized {@link #materialized} or
+     * the length of the stream is not currently known.
+     */
+    private long streamLength = -1;
     
     // note: cannot control position of the stream since user can do a getBinaryStream
     private long            pos;
@@ -180,6 +196,8 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
                 if (se.getMessageId().equals(SQLState.DATA_CONTAINER_CLOSED)) {
                     throw StandardException
                             .newException(SQLState.BLOB_ACCESSED_AFTER_COMMIT);
+                } else {
+                    throw se;
                 }
             }
             // set up the buffer for trashing the bytes to set the position of
@@ -272,8 +290,8 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
         catch (IOException e) {
             throw Util.setStreamFailure (e);
         }
-        if (myLength != -1)
-            return myLength;
+        if (streamLength != -1)
+            return streamLength;
         
         boolean pushStack = false;
         try
@@ -288,9 +306,9 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
                 setPosition(0);
                 // If possible get the length from the encoded
                 // length at the front of the raw stream.
-                if ((myLength = biStream.getLength()) != -1) {
+                if ((streamLength = biStream.getLength()) != -1) {
                     biStream.close();
-                   return myLength;
+                   return streamLength;
                 }
                 
                 // Otherwise have to read the entire stream!
@@ -311,7 +329,7 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
                     }
                 }
                 // Save for future uses.
-                myLength = pos;
+                streamLength = pos;
                 biStream.close();
                 return pos;
             }
@@ -801,6 +819,7 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
                 control.copyData (myStream, length());
                 len = (int) control.write(bytes, offset, len, pos - 1);
                 myStream.close();
+                streamLength = -1;
                 materialized = true;
             }
             return len;
@@ -841,6 +860,7 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
                                             getEmbedConnection().getDBName());
                     control.copyData (myStream, pos - 1);
                     myStream.close ();
+                    streamLength = -1;
                     materialized = true;
                     return control.getOutputStream(pos - 1);
 
@@ -878,6 +898,7 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
                     control = new LOBStreamControl (getEmbedConnection().getDBName());
                     control.copyData (myStream, len);
                     myStream.close();
+                    streamLength = -1;
                     materialized = true;
                 }
             }
@@ -912,10 +933,12 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
         //valid
         isValid = false;
         
-        //remove entry from connection
-        localConn.removeLOBMapping(locator);
+        // Remove entry from connection if a locator has been created.
+        if (this.locator != 0) {
+            localConn.removeLOBMapping(locator);
+        }
         //initialialize length to default value -1
-        myLength = -1;
+        streamLength = -1;
         
         //if it is a stream then close it.
         //if a array of bytes then initialize it to null
