@@ -168,6 +168,7 @@ public class _Suite extends BaseTestCase  {
         
         suite.addTest(BigDataTest.suite());
         suite.addTest(MixedCaseExpressionTest.suite());
+        suite.addTest(MiscErrorsTest.suite());
 
         return suite;
 	}

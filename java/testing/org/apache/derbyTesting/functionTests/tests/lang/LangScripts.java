@@ -81,7 +81,6 @@ public final class LangScripts extends ScriptTestCase {
         "intersect",
         "joins",
         "logop",
-        "miscerrors",
         "modifyColumn",
         "nonreserved",
         "orderby",
