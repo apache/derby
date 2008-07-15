@@ -8,7 +8,6 @@ lang/checkConstraint.sql
 lang/closed.java
 lang/columnDefaults.sql
 lang/compressTable.sql
-lang/connect.sql
 lang/consistencyChecker.sql
 lang/currentSchema.sql
 lang/cursorerrors.sql

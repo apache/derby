@@ -164,6 +164,7 @@ public class _Suite extends BaseTestCase  {
             suite.addTest(ErrorMessageTest.suite());
             // Test uses DriverManager to connect to database in jar.
             suite.addTest(DBInJarTest.suite());
+            suite.addTest(ConnectTest.suite());
         }
         
         suite.addTest(BigDataTest.suite());
