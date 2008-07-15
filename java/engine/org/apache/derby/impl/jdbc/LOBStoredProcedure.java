@@ -27,6 +27,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 import org.apache.derby.iapi.jdbc.EngineLOB;
+import org.apache.derby.iapi.reference.Limits;
 import org.apache.derby.iapi.reference.SQLState;
 
 /**
@@ -34,6 +35,15 @@ import org.apache.derby.iapi.reference.SQLState;
  * LOB client side methods.
  */
 public class LOBStoredProcedure {
+
+    /**
+     * The maximum length of the data returned from the LOB stored procedures.
+     * <p>
+     * This value is currently dictated by the maximum length of
+     * VARCHAR/VARBINARY, because these are the return types of the stored
+     * procedures.
+     */
+    public static final int MAX_RETURN_LENGTH = Limits.DB2_VARCHAR_MAXWIDTH;
 
     /**
      * Creates a new empty Clob and registers it in the HashMap in the
@@ -128,19 +138,26 @@ public class LOBStoredProcedure {
     }
 
     /**
-     * returns the String starting from pos and of len length
-     * from the LOB corresponding to LOCATOR.
+     * Returns the {@code String} starting from {@code pos} and consisting of
+     * up to {@code len} consecutive characters from the {@code Clob}
+     * corresponding to {@code LOCATOR}.
+     *
      * @param LOCATOR an integer that represents the LOCATOR used
      *                to retrieve an instance of the LOB.
      * @param pos a long that represents the position from which
      *            the substring begins.
-     * @param len an integer that represents the length of the substring.
-     * @return the substring conforming to the indexes we requested for from
-     *         inside the LOB.
+     * @param len an integer representing the maximum length of the substring.
+     *      The value will be reduced to the maximum allowed return length if
+     *      required (see {@link #MAX_RETURN_LENGTH}).
+     * @return A substring from the {@code Clob} starting at the given position,
+     *      not longer than {@code len} characters.
      * @throws SQLException
      */
     public static String CLOBGETSUBSTRING(int LOCATOR,
         long pos, int len) throws SQLException {
+        // Don't read more than what we can represent as a VARCHAR.
+        // See DERBY-3769.
+        len = Math.min(len, MAX_RETURN_LENGTH);
         return getClobObjectCorrespondingtoLOCATOR(LOCATOR).getSubString(pos, len);
     }
 
@@ -275,22 +292,30 @@ public class LOBStoredProcedure {
     }
 
     /**
-     * Returns the Byte array containing the bytes starting from pos and
-     * of length len
+     * Reads up to len bytes from the associated {@code Blob} and returns a
+     * byte array containing the bytes read.
+     * <p>
+     * Note that a smaller number of bytes than requested might be returned. The
+     * number of bytes returned can be found by checking the length of the
+     * returned byte array.
      *
      * @param LOCATOR the locator value of the Blob from which the byte array
      *                needs to be retrieved.
-     * @param len the length of the byte array that needs to be retrieved from
-     *            pos
+     * @param len the maximum number of bytes to read. The value will be
+     *      reduced to the maximum allowed return length if required
+     *      (see {@link #MAX_RETURN_LENGTH}).
      * @param pos the position from which the bytes from the Blob need to be
      *            retrieved.
-     * @return a byte array containing the bytes stating from pos and
-     *         of length len.
+     * @return A byte array containing the bytes read, starting from position
+     *      {@code pos} in the {@code Blob}.
      * @throws SQLException
      *
      */
     public static byte[] BLOBGETBYTES(int LOCATOR, long pos, int len)
     throws SQLException {
+        // Don't read more than what we can represent as a VARBINARY.
+        // See DERBY-3769.
+        len = Math.min(len, MAX_RETURN_LENGTH);
         return getBlobObjectCorrespondingtoLOCATOR(LOCATOR).getBytes(pos, len);
     }
 

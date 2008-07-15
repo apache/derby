@@ -81,7 +81,6 @@ import org.apache.derby.iapi.types.NumberDataValue;
 import org.apache.derby.iapi.types.SQLChar;
 import org.apache.derby.iapi.types.SQLVarchar;
 import org.apache.derby.iapi.types.StringDataValue;
-import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
@@ -136,11 +135,9 @@ import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.locks.CompatibilitySpace;
 import org.apache.derby.iapi.services.locks.ShExLockable;
 import org.apache.derby.iapi.services.locks.ShExQual;
-import org.apache.derby.iapi.util.StringUtil;
 import org.apache.derby.iapi.util.IdUtil;
 
 import java.util.Calendar;
-import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Hashtable;
 import java.util.HashMap;
@@ -156,6 +153,9 @@ import java.io.InputStream;
 import java.io.IOException;
 
 import java.sql.Types;
+
+// LOBStoredProcedure is imported only to get hold of a constant.
+import org.apache.derby.impl.jdbc.LOBStoredProcedure;
 
 /**
  * Standard database implementation of the data dictionary
@@ -11050,7 +11050,8 @@ public final class	DataDictionaryImpl
                 0,
                 RoutineAliasInfo.CONTAINS_SQL,
                 DataTypeDescriptor.getCatalogType(
-                    Types.VARCHAR, Limits.DB2_VARCHAR_MAXWIDTH),
+                    Types.VARCHAR,
+                    LOBStoredProcedure.MAX_RETURN_LENGTH),
                 tc,
                 "org.apache.derby.impl.jdbc.LOBStoredProcedure");
         }
@@ -11229,7 +11230,8 @@ public final class	DataDictionaryImpl
                 0,
                 RoutineAliasInfo.CONTAINS_SQL,
                 DataTypeDescriptor.getCatalogType(
-                    Types.VARBINARY, Limits.DB2_VARCHAR_MAXWIDTH),
+                    Types.VARBINARY,
+                    LOBStoredProcedure.MAX_RETURN_LENGTH),
                 tc,
                 "org.apache.derby.impl.jdbc.LOBStoredProcedure");
         }
