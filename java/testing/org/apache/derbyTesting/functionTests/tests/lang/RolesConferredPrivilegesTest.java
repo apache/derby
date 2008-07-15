@@ -54,8 +54,8 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
     private final static String NOCOLUMNPERMISSION   = "42502";
     private final static String TABLENOTFOUND        = "42X05";
     private final static String OBJECTNOTFOUND       = "42X94";
-	private final static String FKVIOLATION          = "23503";
-	private final static String CHECKCONSTRAINTVIOLATED = "23513";
+    private final static String FKVIOLATION          = "23503";
+    private final static String CHECKCONSTRAINTVIOLATED = "23513";
     private final static String ALREADYCLOSED        = "XJ012";
     private final static String CONSTRAINTDROPPED    = "01500";
     private final static String VIEWDROPPED          = "01501";
@@ -410,19 +410,25 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
                                         Connection c,
                                         String schema,
                                         String function) throws SQLException {
+        Statement stm = c.createStatement();
+
         try {
             ResultSet rs =
-                c.createStatement().
-                executeQuery("values " + schema + "." + function + "()");
+                stm.executeQuery("values " + schema + "." + function + "()");
 
             rs.next();
             rs.close();
+            stm.close();
 
             if (hasPrivilege == NOPRIV) {
                 fail("expected no EXECUTE privilege on function. " +
                      formatArgs(c, schema, function));
             }
         } catch (SQLException e) {
+            if (stm != null) {
+                stm.close();
+            }
+
             if (hasPrivilege == NOPRIV)
                 assertSQLState(NOEXECUTEPERMISSION, e);
             else {
@@ -674,8 +680,6 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
                                        String schema,
                                        String table,
                                        String[] columns) throws SQLException {
-        Statement s = c.createStatement();
-
         assertSelectPrivilege
             (hasPrivilege, c, schema, table, columns, NOCOLUMNPERMISSION);
     }
@@ -783,10 +787,12 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
                                          String table,
                                          String[] columns) throws SQLException {
         ResultSet rs;
-        rs = c.createStatement().executeQuery("values current_user");
+        Statement stm = c.createStatement();
+        rs = stm.executeQuery("values current_user");
         rs.next();
         String user = rs.getString(1);
         rs.close();
+        stm.close();
 
         if (isOwner(schema, user)) {
             //  NOTE: Does not work for table owner, who has no manifest entry
@@ -893,12 +899,14 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
 
     private boolean isOwner(String schema, String user) throws SQLException {
         Connection c = getConnection();
-        ResultSet rs = c.createStatement().executeQuery
+        Statement stm = c.createStatement();
+        ResultSet rs = stm.executeQuery
             ("select schemaname, authorizationid from sys.sysschemas " +
              "where schemaname='" + JDBC.identifierToCNF(schema) + "'");
         rs.next();
         boolean result = rs.getString(2).equals(JDBC.identifierToCNF(user));
         rs.close();
+        stm.close();
         return result;
     }
 
@@ -969,8 +977,8 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
                                      String dbObject)  throws SQLException {
 
         ResultSet rs;
-
-        rs = c.createStatement().executeQuery("values current_user");
+        Statement stm =  c.createStatement();
+        rs = stm.executeQuery("values current_user");
         rs.next();
         String user = rs.getString(1);
 
@@ -978,6 +986,7 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
         rs.next();
         String role = rs.getString(1);
         rs.close();
+        stm.close();
 
         return
             "User: " + user +
