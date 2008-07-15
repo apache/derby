@@ -66,7 +66,6 @@ public final class LangScripts extends ScriptTestCase {
         "aggregate",        
         "cast",
         "comparisons",
-        "constantExpression",
         "delete",
         "derived",
         "depend",
