@@ -2233,7 +2233,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 
 		ContextManager cm = getContextManager();
 
-		int size = size();
+		int size = visibleSize();
 		for (int index = 0; index < size; index++)
 		{
 			boolean		 nullableResult;
@@ -2344,7 +2344,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 */
 	public boolean isExactTypeAndLengthMatch(ResultColumnList otherRCL) throws StandardException
 	{
-		int size = size();
+		int size = visibleSize();
 		for (int index = 0; index < size; index++)
 		{
 			ResultColumn thisRC = (ResultColumn) elementAt(index);

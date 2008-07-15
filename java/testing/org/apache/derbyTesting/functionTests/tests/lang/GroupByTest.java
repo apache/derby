@@ -1758,5 +1758,22 @@ public class GroupByTest extends BaseJDBCTestCase {
                     " group by name having sum(amount) > 2"),
             new String[][] {  {"Jerry", "57"}, {"John","113"} } );
     }
+
+    /**
+     * Test that GROUP BY can be used in the sub-queries of a UNION.
+     * DERBY-3764.
+     */
+    public void testUnionAndGroupBy() throws SQLException {
+        PreparedStatement ps1 =
+            prepareStatement("select sum(a) from yy group by a union values 1");
+        // The bug is not completely fixed, so executing the statement fail
+        // JDBC.assertDrainResults(ps1.executeQuery());
+
+        PreparedStatement ps2 =
+            prepareStatement("select sum(a) from yy group by a union " +
+                             "select sum(a) from yy group by a");
+        // The bug is not completely fixed, so executing the statement fail
+        // JDBC.assertDrainResults(ps2.executeQuery());
+    }
 }
 
