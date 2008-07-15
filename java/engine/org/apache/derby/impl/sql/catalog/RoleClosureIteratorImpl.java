@@ -101,11 +101,6 @@ public class RoleClosureIteratorImpl implements RoleClosureIterator
     private boolean initial;
 
     /**
-     * true of iterator is open and next can be called
-     */
-    private boolean open;
-
-    /**
      * Constructor (package private).
      * Use {@code createRoleClosureIterator} to obtain an instance.
      * @see org.apache.derby.iapi.sql.dictionary.DataDictionary#createRoleClosureIterator
@@ -140,20 +135,10 @@ public class RoleClosureIteratorImpl implements RoleClosureIterator
         dummyList.add(dummy);
         currNodeIter = dummyList.iterator();
         initial = true;
-        open = true;
     }
 
 
     public String next() throws StandardException {
-        if (!open) {
-            if (SanityManager.DEBUG) {
-                SanityManager.
-                    THROWASSERT("next called on a closed RoleClosureIterator");
-            }
-
-            return null;
-        }
-
         if (initial) {
             // Optimization so we don't compute the closure for the current
             // role if unnecessary (when next is only called once).
@@ -225,16 +210,5 @@ public class RoleClosureIteratorImpl implements RoleClosureIterator
         } else {
             return null;
         }
-    }
-
-
-    public void close() throws StandardException{
-        open = false;
-        graph = null;
-        lifo = null;
-        seenSoFar = null;
-        currNodeIter = null;
-        dd = null;
-        tc = null;
     }
 }

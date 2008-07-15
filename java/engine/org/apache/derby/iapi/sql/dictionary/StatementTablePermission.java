@@ -26,6 +26,7 @@ import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.sql.Activation;
 
 /**
  * This class describes a table permission required by a statement.
@@ -107,13 +108,14 @@ public class StatementTablePermission extends StatementPermission
 	 */
 	public void check( LanguageConnectionContext lcc,
 					   String authorizationId,
-					   boolean forGrant)
+					   boolean forGrant,
+					   Activation activation)
 		throws StandardException
 	{
 		DataDictionary dd = lcc.getDataDictionary();
-	
-		if( ! hasPermissionOnTable( dd, authorizationId, forGrant))
-		{
+
+		if (!hasPermissionOnTable(lcc, activation,
+									  authorizationId, forGrant)) {
 			TableDescriptor td = getTableDescriptor( dd);
 			throw StandardException.newException( forGrant ? SQLState.AUTH_NO_TABLE_PERMISSION_FOR_GRANT
 												  : SQLState.AUTH_NO_TABLE_PERMISSION,
@@ -133,13 +135,75 @@ public class StatementTablePermission extends StatementPermission
 	} // end of getTableDescriptor
 
 	/*
-	 * Check if authorizationId has permission on the table
+	 * Check if current session has permission on the table (current user,
+	 * PUBLIC or role).
 	 */
-	protected boolean hasPermissionOnTable(DataDictionary dd, String authorizationId, boolean forGrant)
+	protected boolean hasPermissionOnTable(LanguageConnectionContext lcc,
+										   Activation activation,
+										   String authorizationId,
+										   boolean forGrant)
 		throws StandardException
 	{
-		return oneAuthHasPermissionOnTable( dd, Authorizer.PUBLIC_AUTHORIZATION_ID, forGrant)
-		  || oneAuthHasPermissionOnTable( dd, authorizationId, forGrant);
+		DataDictionary dd = lcc.getDataDictionary();
+
+		boolean result =
+			oneAuthHasPermissionOnTable(dd,
+										Authorizer.PUBLIC_AUTHORIZATION_ID,
+										forGrant) ||
+			oneAuthHasPermissionOnTable(dd,
+										authorizationId,
+										forGrant);
+		if (!result) {
+			// Since no permission exists for the current user or PUBLIC,
+			// check if a permission exists for the current role (if set).
+			String role = lcc.getCurrentRoleId(activation);
+
+			if (role != null) {
+
+				// Check that role is still granted to current user or
+				// to PUBLIC: A revoked role which is current for this
+				// session, is lazily set to none when it is attempted
+				// used.
+				String dbo = dd.getAuthorizationDatabaseOwner();
+				RoleGrantDescriptor rd = dd.getRoleGrantDescriptor
+					(role, authorizationId, dbo);
+
+				if (rd == null) {
+					rd = dd.getRoleGrantDescriptor(
+						role,
+						Authorizer.PUBLIC_AUTHORIZATION_ID,
+						dbo);
+				}
+
+				if (rd == null) {
+					// We have lost the right to set this role, so we can't
+					// make use of any permission granted to it or its
+					// ancestors.
+					lcc.setCurrentRole(activation, null);
+				} else {
+					// The current role is OK, so we can make use of
+					// any permission granted to it.
+					//
+					// Look at the current role and, if necessary, the
+					// transitive closure of roles granted to current role to
+					// see if permission has been granted to any of the
+					// applicable roles.
+
+					RoleClosureIterator rci =
+						dd.createRoleClosureIterator
+						(activation.getTransactionController(),
+						 role, true /* inverse relation*/);
+
+					String r;
+
+					while (!result && (r = rci.next()) != null) {
+						result = oneAuthHasPermissionOnTable
+							(dd, r, forGrant);
+					}
+				}
+			}
+		}
+		return result;
 	}
 
 	protected boolean oneAuthHasPermissionOnTable(DataDictionary dd, String authorizationId, boolean forGrant)
@@ -213,4 +277,9 @@ public class StatementTablePermission extends StatementPermission
 		}
 		return "?";
 	} // end of getPrivName
+
+	public String toString()
+	{
+		return "StatementTablePermission: " + getPrivName() + " " + tableUUID;
+	}
 }

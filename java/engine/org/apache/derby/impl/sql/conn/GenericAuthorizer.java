@@ -183,8 +183,8 @@ implements Authorizer
                         for (Iterator iter = requiredPermissionsList.iterator(); 
                             iter.hasNext();) 
                         {
-                            ((StatementPermission) iter.next()).check(lcc, 
-                                authorizationId, false);
+                            ((StatementPermission) iter.next()).check
+								(lcc, authorizationId, false, activation);
                         }
                     } 
                     finally 

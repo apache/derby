@@ -318,7 +318,8 @@ abstract class DDLConstantAction implements ConstantAction
 						//authorizer at table or column level.
 						//REFERENCES privilege has to exist at at PUBLIC level
 						permDesc = statPerm.getPermissionDescriptor(Authorizer.PUBLIC_AUTHORIZATION_ID, dd);
-						if (!(permDesc.checkOwner(lcc.getAuthorizationId())))
+						if (permDesc != null &&
+							!(permDesc.checkOwner(lcc.getAuthorizationId())))
 							dm.addDependency(dependent, permDesc, lcc.getContextManager());
 					} else 
 						//if the object on which permission is required is owned by the
@@ -426,7 +427,8 @@ abstract class DDLConstantAction implements ConstantAction
 						//If the user accessing the object is the owner of that 
 						//object, then no privilege tracking is needed for the
 						//owner.
-						if (!(permDesc.checkOwner(lcc.getAuthorizationId())))
+						if (permDesc != null &&
+							!(permDesc.checkOwner(lcc.getAuthorizationId())))
 							dm.addDependency(dependent, permDesc, lcc.getContextManager());
 						continue;
 					}

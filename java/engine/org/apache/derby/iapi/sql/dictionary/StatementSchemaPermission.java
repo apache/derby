@@ -28,6 +28,7 @@ import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.Activation;
 
 /**
  * This class describes a schema permission required by a statement.
@@ -61,11 +62,12 @@ public class StatementSchemaPermission extends StatementPermission
 	 */
 	public void check( LanguageConnectionContext lcc,
 					   String authid,
-					   boolean forGrant) throws StandardException
+					   boolean forGrant,
+					   Activation activation) throws StandardException
 	{
 		DataDictionary dd =	lcc.getDataDictionary();
 		TransactionController tc = lcc.getTransactionExecute();
-	
+
 		switch ( privType )
 		{
 			case Authorizer.MODIFY_SCHEMA_PRIV:
@@ -113,5 +115,24 @@ public class StatementSchemaPermission extends StatementPermission
 	throws StandardException
 	{
 		return null;
+	}
+
+    private String getPrivName( )
+	{
+		switch(privType) {
+		case Authorizer.CREATE_SCHEMA_PRIV:
+			return "CREATE_SCHEMA";
+		case Authorizer.MODIFY_SCHEMA_PRIV:
+			return "MODIFY_SCHEMA";
+		case Authorizer.DROP_SCHEMA_PRIV:
+			return "DROP_SCHEMA";
+        default:
+            return "?";
+        }
+    }
+
+	public String toString() {
+		return "StatementSchemaPermission: " + schemaName + " owner:" +
+			aid + " " + getPrivName();
 	}
 }

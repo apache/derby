@@ -83,14 +83,4 @@ public interface RoleClosureIterator
      *         and a1 in the above examples).
      */
     public String next() throws StandardException;
-
-
-    /**
-     * This method should be called after the iteration is completed.
-     *
-     * @throws StandardException
-     */
-    public void close() throws StandardException;
-
-
 }

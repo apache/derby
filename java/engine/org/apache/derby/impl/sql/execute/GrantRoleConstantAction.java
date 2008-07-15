@@ -207,17 +207,14 @@ class GrantRoleConstantAction extends DDLConstantAction {
         // Via grant closure of grantee
         RoleClosureIterator rci =
             dd.createRoleClosureIterator(tc, grantee, false);
-        try {
-            String r;
-            while ((r = rci.next()) != null) {
-                if (role.equals(r)) {
-                    throw StandardException.newException
-                        (SQLState.AUTH_ROLE_GRANT_CIRCULARITY,
-                         role, grantee);
-                }
+
+        String r;
+        while ((r = rci.next()) != null) {
+            if (role.equals(r)) {
+                throw StandardException.newException
+                    (SQLState.AUTH_ROLE_GRANT_CIRCULARITY,
+                     role, grantee);
             }
-        } finally {
-            rci.close();
         }
     }
 

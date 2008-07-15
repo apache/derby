@@ -23,6 +23,7 @@ package org.apache.derby.iapi.sql.dictionary;
 
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.sql.Activation;
 
 /**
  * This class describes a permission require by a statement.
@@ -43,12 +44,14 @@ public abstract class StatementPermission
 	 * @param lcc				LanguageConnectionContext
 	 * @param authorizationId	AuthorizationId
 	 * @param forGrant
+	 * @param activation        activation for statement needing check
 	 *
 	 * @exception StandardException if the permission has not been granted
 	 */
 	public abstract void check( LanguageConnectionContext lcc,
 								String authorizationId,
-								boolean forGrant) throws StandardException;
+								boolean forGrant,
+								Activation activation) throws StandardException;
 
 	/**
 	 * 

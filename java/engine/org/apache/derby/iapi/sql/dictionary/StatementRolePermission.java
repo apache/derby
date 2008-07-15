@@ -27,6 +27,7 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.Activation;
 
 /**
  * This class describes a role permission required by a statement.
@@ -54,7 +55,9 @@ public class StatementRolePermission extends StatementPermission
      */
     public void check(LanguageConnectionContext lcc,
                       String authid,
-                      boolean forGrant) throws StandardException
+                      boolean forGrant,
+                      Activation activation
+                      ) throws StandardException
     {
         DataDictionary dd = lcc.getDataDictionary();
         TransactionController tc = lcc.getTransactionExecute();
@@ -91,5 +94,23 @@ public class StatementRolePermission extends StatementPermission
         throws StandardException
     {
         return null;
+    }
+
+
+    private String getPrivName( )
+    {
+        switch(privType) {
+        case Authorizer.CREATE_ROLE_PRIV:
+            return "CREATE_ROLE";
+        case Authorizer.DROP_ROLE_PRIV:
+            return "DROP_ROLE";
+        default:
+            return "?";
+        }
+    }
+
+    public String toString()
+    {
+        return "StatementRolePermission: " + roleName + " " + getPrivName();
     }
 }
