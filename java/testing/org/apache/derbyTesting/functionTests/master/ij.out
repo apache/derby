@@ -97,11 +97,9 @@ help;
                                -- each column to integerValue
   ASYNC name 'SQL-J text';     -- run the command in another thread
   WAIT FOR name;               -- wait for result of ASYNC'd command
-  GET [SCROLL INSENSITIVE] CURSOR name AS 'SQL-J query';
+  GET [SCROLL INSENSITIVE] [WITH  {HOLD | NOHOLD}] CURSOR name AS 'SQL-J query';
                                -- gets a cursor (JDBC result set) on the query
-                               -- SCROLL cursors are only available 
-                               -- in JDBC 2.0 and higher. 
-                               -- (Cursor scroll type is ignored in JDBC 1.X.) 
+                               -- the default is a forward-only cursor with holdability
   NEXT name;                   -- gets the next row from the named cursor
   FIRST name;                  -- gets the first row from the named scroll cursor
   LAST name;                   -- gets the last row from the named scroll cursor
