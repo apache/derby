@@ -63,8 +63,7 @@ public final class LangScripts extends ScriptTestCase {
      */
     private static final String[] EMBEDDED_TESTS = {
         "aggbuiltin",
-        "aggregate",
-        "arithmetic",
+        "aggregate",        
         "cast",
         "comparisons",
         "constantExpression",
