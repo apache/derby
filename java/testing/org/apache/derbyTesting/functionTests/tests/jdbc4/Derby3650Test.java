@@ -429,11 +429,6 @@ public class Derby3650Test extends BaseJDBCTestCase
     /**
      * Test straight select from a heap scan of multiple rows containing clobs.
      *
-     * @param freelob               true if we should free the lob after it has
-     *                              been retrieved and verified.
-     *
-     * @param commitAfterLobVerify  true if we should commit after the lob has 
-     *                              been retrieved and verified
      * @throws SQLException
      * @throws IOException
      */
