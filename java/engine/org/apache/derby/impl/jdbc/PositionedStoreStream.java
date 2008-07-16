@@ -60,9 +60,6 @@ public class PositionedStoreStream
     /** Underlying store stream serving bytes. */
     //@GuardedBy("EmbedConnection.getConnectionSynchronization()")
     private final InputStream stream;
-    /** Convenience reference to the stream as a resettable stream. */
-    //@GuardedBy("EmbedConnection.getConnectionSynchronization()")
-    private final Resetable resettable;
     /**
      * Position of the underlying store stream.
      * Note that the position is maintained by this class, not the underlying
@@ -78,12 +75,9 @@ public class PositionedStoreStream
      * stream.
      *
      * @param in a {@link Resetable}-stream
-     * @throws ClassCastException if the inputstream does not implement
-     *      {@link Resetable}
      */
     public PositionedStoreStream(InputStream in) {
         this.stream = in;
-        this.resettable = (Resetable)in;
     }
 
     /**
@@ -153,7 +147,7 @@ public class PositionedStoreStream
      */
     public void resetStream()
             throws IOException, StandardException {
-        this.resettable.resetStream();
+        ((Resetable)this.stream).resetStream();
         this.pos = 0L;
     }
 
@@ -165,7 +159,7 @@ public class PositionedStoreStream
      */
     public void initStream()
             throws StandardException {
-        this.resettable.initStream();
+        ((Resetable)this.stream).initStream();
         this.pos = 0L;
     }
 
@@ -175,7 +169,7 @@ public class PositionedStoreStream
      * @see Resetable#closeStream
      */
     public void closeStream() {
-        this.resettable.closeStream();
+        ((Resetable)this.stream).closeStream();
     }
 
     /**
