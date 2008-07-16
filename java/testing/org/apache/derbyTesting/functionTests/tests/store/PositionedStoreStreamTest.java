@@ -22,6 +22,7 @@
  */
 package org.apache.derbyTesting.functionTests.tests.store;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -197,6 +198,45 @@ public class PositionedStoreStreamTest
         // This failed, because we tried skipping more bytes than there are in
         // the stream to get to position 0.
         pss.reposition(0);
+    }
+
+    /**
+     * Tests that trying to move past the end of the stream leaves the stream
+     * object in a consistent state, and can be repositioned again after the
+     * failed reposition attempt.
+     * <p>
+     * Issue logged in Jira as DERBY-3781
+     *
+     * @throws IOException if reading the stream fails unexpectedly
+     * @throws StandardException will never happen
+     */
+    public void testDerby3781()
+            throws IOException, StandardException {
+        final long size = 10;
+        InputStream in = new LoopingAlphabetStream(size);
+        PositionedStoreStream pss = new PositionedStoreStream(in);
+        assertEquals("Invalid initial position", 0L, pss.getPosition());
+        pss.reposition(size -1); // Goto end.
+        assertEquals(size -1, pss.getPosition());
+        assertEquals('j', pss.read());
+        assertEquals(size, pss.getPosition());
+        assertEquals(-1, pss.read());
+        // This step is crucial, position must be different than zero when the
+        // first exception below is thrown.
+        pss.reposition(size / 2); // Goto middle.
+        assertEquals(size / 2, pss.getPosition());
+        try {
+            pss.reposition(size *2); // Try to go past end.
+            fail("Should have failed with EOFException");
+        } catch (EOFException eofe) {
+            // Ignore this exception
+        }
+        // Failed here before, because internal state was inconsistent.
+        // Assumed: pos = 5, underlying stream at pos 5, skipped (size -1 - pos)
+        // Actual: pos = 5, underlying stream at pos (size -1)
+        pss.reposition(size -1); // Goto end.
+        assertEquals(size -1, pss.getPosition());
+        assertEquals('j', pss.read());
     }
 
     public static Test suite() {
