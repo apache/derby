@@ -170,11 +170,7 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
             try {
                 control = new LOBStreamControl (
                             getEmbedConnection().getDBName(), dvdBytes);
-            }
-            catch (SQLException e) {
-                throw StandardException.newException (e.getSQLState());
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 throw StandardException.newException (
                                         SQLState.SET_STREAM_FAILURE, e);
             }

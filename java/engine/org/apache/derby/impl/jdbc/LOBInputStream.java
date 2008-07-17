@@ -24,7 +24,6 @@ package org.apache.derby.impl.jdbc;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.SQLException;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.i18n.MessageService;
@@ -123,11 +122,17 @@ public class LOBInputStream extends InputStream {
                 return ret;
             }
             return -1;
-        } catch (SQLException e) {
-            return handleSQLException (e);
-        }
-        catch (StandardException se) {
-            throw new IOException (se.getMessage());
+        } catch (StandardException se) {
+            String state = se.getSQLState();
+            if (state.equals(ExceptionUtil.getSQLStateFromIdentifier(
+                                        SQLState.BLOB_POSITION_TOO_LARGE))) {
+                return -1;
+            } else if (state.equals(ExceptionUtil.getSQLStateFromIdentifier(
+                                            SQLState.BLOB_INVALID_OFFSET))) {
+                throw new ArrayIndexOutOfBoundsException(se.getMessage());
+            } else {
+                throw new IOException(se.getMessage());
+            }
         }
     }
 
@@ -167,25 +172,11 @@ public class LOBInputStream extends InputStream {
             if (ret != -1)
                 pos += 1;
             return ret;
-        } catch (SQLException e) {
-            throw new IOException(e.getMessage());
         } catch (StandardException se) {
             throw new IOException (se.getMessage());
         }
     }
 
-    private int handleSQLException (SQLException e) throws IOException {
-        if (e.getSQLState().equals(
-                ExceptionUtil.getSQLStateFromIdentifier(
-                              SQLState.BLOB_POSITION_TOO_LARGE)))
-            return -1;
-        if (e.getSQLState().equals(
-                ExceptionUtil.getSQLStateFromIdentifier(
-                              SQLState.BLOB_INVALID_OFFSET)))
-                throw new ArrayIndexOutOfBoundsException (e.getMessage());
-            throw new IOException(e.getMessage());
-    }
-    
     /**
      * Checks if underlying StreamControl has been updated.
      * @return if stream is modified since created
