@@ -60,9 +60,6 @@ public class PositionedStoreStream
     /** Underlying store stream serving bytes. */
     //@GuardedBy("EmbedConnection.getConnectionSynchronization()")
     private final InputStream stream;
-    /** Convenience reference to the stream as a resettable stream. */
-    //@GuardedBy("EmbedConnection.getConnectionSynchronization()")
-    private final Resetable resettable;
     /**
      * Position of the underlying store stream.
      * Note that the position is maintained by this class, not the underlying
@@ -78,12 +75,9 @@ public class PositionedStoreStream
      * stream.
      *
      * @param in a {@link Resetable}-stream
-     * @throws ClassCastException if the inputstream does not implement
-     *      {@link Resetable}
      */
     public PositionedStoreStream(InputStream in) {
         this.stream = in;
-        this.resettable = (Resetable)in;
     }
 
     /**
@@ -153,7 +147,7 @@ public class PositionedStoreStream
      */
     public void resetStream()
             throws IOException, StandardException {
-        this.resettable.resetStream();
+        ((Resetable)this.stream).resetStream();
         this.pos = 0L;
     }
 
@@ -165,7 +159,7 @@ public class PositionedStoreStream
      */
     public void initStream()
             throws StandardException {
-        this.resettable.initStream();
+        ((Resetable)this.stream).initStream();
         this.pos = 0L;
     }
 
@@ -175,7 +169,7 @@ public class PositionedStoreStream
      * @see Resetable#closeStream
      */
     public void closeStream() {
-        this.resettable.closeStream();
+        ((Resetable)this.stream).closeStream();
     }
 
     /**
@@ -185,22 +179,34 @@ public class PositionedStoreStream
      * stream, which changes the position of it. If a class is dependent on the
      * underlying stream not changing its position, it must call reposition with
      * the position it expects before using the stream again.
+     * <p>
+     * If the repositioning fails because the stream is exhausted, most likely
+     * because of an invalid position specified by the user, the stream is
+     * reset to position zero and the {@code EOFException} is rethrown.
      *
+     * @throws EOFException if the stream is exhausted before the requested
+     *      position is reached
      * @throws IOException if reading from the store stream fails
      * @throws StandardException if resetting the store in stream fails, or
      *      some other exception happens in store
      * @see #getPosition
      */
-    public void reposition(long requestedPos)
+    public void reposition(final long requestedPos)
             throws IOException, StandardException {
+        if (this.pos > requestedPos) {
+            // Reset stream to reposition from start.
+            resetStream();
+        }
         if (this.pos < requestedPos) {
-            // Reposition from current position.
-            skipFully(requestedPos - this.pos);
-            this.pos = requestedPos;
-        } else if (this.pos > requestedPos) {
-            // Reposition from start.
-            this.resettable.resetStream();
-            skipFully(requestedPos);
+            try {
+                skipFully(requestedPos - this.pos);
+            } catch (EOFException eofe) {
+                // A position after the end of the stream was requested.
+                // To recover, and for consistency, reset to position zero.
+                resetStream();
+                throw eofe;
+            }
+            // Operation successful, update position.
             this.pos = requestedPos;
         }
     }
