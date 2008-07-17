@@ -78,7 +78,12 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
      * Derby store, and is read-only.
      */
     private boolean         materialized;
-    private InputStream     myStream;
+    /**
+     * The underlying positionable store stream, if any.
+     * <p>
+     * If {@link #materialized} is {@code true}, the stream is {@code null}.
+     */
+    private PositionedStoreStream myStream;
     
     /**
      * Locator value for this Blob, used as a handle by the client driver to
@@ -91,7 +96,7 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
     /**
      * Length of the stream representing the Blob.
      * <p>
-     * Set to -1 when the stream has been materialized {@link #materialized} or
+     * Set to -1 when the stream has been {@link #materialized} or
      * the length of the stream is not currently known.
      */
     private long streamLength = -1;
@@ -152,8 +157,8 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
         if (SanityManager.DEBUG)
             SanityManager.ASSERT(!dvd.isNull(), "blob is created on top of a null column");
 
-        myStream = dvd.getStream();
-        if (myStream == null)
+        InputStream dvdStream = dvd.getStream();
+        if (dvdStream == null)
         {
             materialized = true;
             // copy bytes into memory so that blob can live after result set
@@ -186,12 +191,14 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
              implementing the getStream() method for dvd.getStream(), does not
              guarantee this for us
              */
-            if (SanityManager.DEBUG)
-                SanityManager.ASSERT(myStream instanceof Resetable);
-            //make myStream a position aware stream
-            myStream = new PositionedStoreStream (myStream);
+            if (SanityManager.DEBUG) {
+                SanityManager.ASSERT(dvdStream instanceof Resetable);
+            }
+            // Create a position aware stream on top of dvdStream so we can
+            // more easily move back and forth in the Blob.
+            myStream = new PositionedStoreStream(dvdStream);
             try {
-                ((Resetable) myStream).initStream();
+                myStream.initStream();
             } catch (StandardException se) {
                 if (se.getMessageId().equals(SQLState.DATA_CONTAINER_CLOSED)) {
                     throw StandardException
@@ -246,9 +253,17 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
     }
 
 
-    /*
-        Reads one byte, either from the byte array or else from the stream.
-    */
+    /**
+     * Reads one byte from the Blob at the specified position.
+     * <p>
+     * Depending on the representation, this might result in a read from a byte
+     * array, a temporary file on disk or from a Derby store stream.
+     *
+     * @param pos the 0-based position in the Blob to read
+     * @return The byte at the specified position.
+     * @throws IOException if reading from the underlying data representation
+     *      fails
+     */
     private int read() throws IOException, SQLException {
         int c;
         if (materialized)
@@ -482,7 +497,9 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
                     if (pushStack)
                         setupContextStack();
 
-                    ((Resetable)myStream).resetStream();
+                    // Reset stream, because AutoPositionigStream wants to read
+                    // the encoded length bytes.
+                    myStream.resetStream();
                     return new UpdatableBlobStream (this, 
                             new AutoPositioningStream (this, myStream, this));
                 }
@@ -748,7 +765,7 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
     protected void finalize()
     {
         if (!materialized)
-            ((Resetable)myStream).closeStream();
+            myStream.closeStream();
     }
 
 	/**
@@ -889,7 +906,7 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
 	{
             if (len > length())
                 throw Util.generateCsSQLException(
-                    SQLState.BLOB_LENGTH_TOO_LONG, new Long(pos));
+                    SQLState.BLOB_LENGTH_TOO_LONG, new Long(len));
             try {
                 if (materialized) {
                     control.truncate (len);
@@ -943,9 +960,10 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
         //if it is a stream then close it.
         //if a array of bytes then initialize it to null
         //to free up space
-        if (!materialized)
-            ((Resetable)myStream).closeStream();
-        else {
+        if (!materialized) {
+            myStream.closeStream();
+            myStream = null;
+        } else {
             try {
                 control.free ();
                 control = null;
