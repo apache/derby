@@ -29,7 +29,6 @@ import java.io.OutputStream;
 import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
-import java.sql.SQLException;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.SQLState;
@@ -81,7 +80,7 @@ class LOBStreamControl {
      * @param data initial value
      */
     LOBStreamControl (String dbName, byte [] data)
-                throws IOException, SQLException, StandardException {
+            throws IOException, StandardException {
         this.dbName = dbName;
         updateCount = 0;
         bufferSize = Math.max (DEFAULT_MAX_BUF_SIZE, data.length);
@@ -89,7 +88,7 @@ class LOBStreamControl {
     }
 
     private void init(byte [] b, long len)
-                    throws IOException, SQLException, StandardException {
+            throws IOException, StandardException {
         try {
             AccessController.doPrivileged (new PrivilegedExceptionAction() {
                 public Object run() throws IOException, StandardException {
@@ -112,11 +111,9 @@ class LOBStreamControl {
         catch (PrivilegedActionException pae) {
             Exception e = pae.getException();
             if (e instanceof StandardException)
-                throw Util.generateCsSQLException ((StandardException) e);
+                throw (StandardException)e;
             if (e instanceof IOException)
                 throw (IOException) e;
-            if (e instanceof RuntimeException)
-                throw (RuntimeException) e;
             IOException ioe = new IOException (e.getMessage());
             ioe.initCause (e);
             throw ioe;
@@ -129,7 +126,7 @@ class LOBStreamControl {
     }
 
     private long updateData(byte[] bytes, int offset, int len, long pos)
-    throws SQLException {
+            throws StandardException {
         if (dataBytes == null) {
             if ((int) pos == 0) {
                 dataBytes = new byte [len];
@@ -138,14 +135,14 @@ class LOBStreamControl {
             }
             else {
                 //invalid postion
-                throw Util.generateCsSQLException(
+                throw StandardException.newException(
                         SQLState.BLOB_POSITION_TOO_LARGE, new Long(pos));
             }
         }
         else {
             if (pos > dataBytes.length) {
                 //invalid postion
-                throw Util.generateCsSQLException(
+                throw StandardException.newException(
                         SQLState.BLOB_POSITION_TOO_LARGE, new Long(pos));
             }
             else {
@@ -164,32 +161,32 @@ class LOBStreamControl {
     }
 
     private void isValidPostion(long pos)
-                        throws SQLException, IOException {
+            throws IOException, StandardException {
         if (pos < 0)
-            throw Util.generateCsSQLException(
+            throw StandardException.newException(
                     SQLState.BLOB_NONPOSITIVE_LENGTH, new Long(pos + 1));
         if (pos > Integer.MAX_VALUE)
-            throw Util.generateCsSQLException(
+            throw StandardException.newException(
                     SQLState.BLOB_POSITION_TOO_LARGE, new Long(pos + 1));
 
         if (isBytes) {
             if (dataBytes == null) {
                 if (pos != 0)
-                    throw Util.generateCsSQLException(
+                    throw StandardException.newException(
                             SQLState.BLOB_POSITION_TOO_LARGE, new Long(pos + 1));
             } else if (dataBytes.length < pos)
-                throw Util.generateCsSQLException(
+                throw StandardException.newException(
                         SQLState.BLOB_POSITION_TOO_LARGE, new Long(pos + 1));
         } else {
             if (pos > tmpFile.length())
-                throw Util.generateCsSQLException(
+                throw StandardException.newException(
                         SQLState.BLOB_POSITION_TOO_LARGE, new Long(pos + 1));
         }
     }
 
-    private void isValidOffset(int off, int length) throws SQLException {
+    private void isValidOffset(int off, int length) throws StandardException {
         if (off < 0 || off > length)
-            throw Util.generateCsSQLException(
+            throw StandardException.newException(
                     SQLState.BLOB_INVALID_OFFSET, new Integer(off));
     }
 
@@ -198,10 +195,10 @@ class LOBStreamControl {
      * @param b byte
      * @param pos
      * @return new postion
-     * @throws IOException, SQLException, StandardException
+     * @throws IOException, StandardException
      */
     synchronized long write(int b, long pos)
-                throws IOException, SQLException, StandardException {
+            throws IOException, StandardException {
         isValidPostion(pos);
         updateCount++;
         if (isBytes) {
@@ -225,15 +222,14 @@ class LOBStreamControl {
      * @param len number of bytes to be copied
      * @param pos starting postion
      * @return new postion
-     * @throws IOException, SQLException, StandardException
+     * @throws IOException, StandardException
      */
     synchronized long write(byte[] b, int off, int len, long pos)
-                        throws IOException, SQLException, StandardException {
+            throws IOException, StandardException {
+        isValidPostion(pos);
         try {
-            isValidPostion(pos);
             isValidOffset(off, b.length);
-        }
-        catch (SQLException e) {
+        } catch (StandardException e) {
             if (e.getSQLState().equals(
                     ExceptionUtil.getSQLStateFromIdentifier(
                                   SQLState.BLOB_INVALID_OFFSET)))
@@ -257,10 +253,10 @@ class LOBStreamControl {
      * Reads one byte.
      * @param pos postion from where to read
      * @return byte
-     * @throws IOException, SQLException, StandardException
+     * @throws IOException, StandardException
      */
     synchronized int read(long pos)
-                throws IOException, SQLException, StandardException {
+            throws IOException, StandardException {
         isValidPostion(pos);
         if (isBytes) {
             if (dataBytes.length == pos)
@@ -294,10 +290,10 @@ class LOBStreamControl {
      * @param len number of bytes to read
      * @param pos initial postion before reading
      * @return number new postion
-     * @throws IOException, SQLException, StandardException
+     * @throws IOException, StandardException
      */
     synchronized int read(byte[] buff, int off, int len, long pos)
-    throws IOException, SQLException, StandardException {
+            throws IOException, StandardException {
         isValidPostion(pos);
         isValidOffset(off, buff.length);
         if (isBytes) {
@@ -339,10 +335,10 @@ class LOBStreamControl {
     /**
      * Resets the size.
      * @param size new size should be smaller than exisiting size
-     * @throws IOException, SQLException
+     * @throws IOException
      */
     synchronized void truncate(long size)
-                        throws IOException, SQLException, StandardException {
+            throws IOException, StandardException {
         isValidPostion(size);
         if (isBytes) {
             byte [] tmpByte = new byte [(int) size];
@@ -356,12 +352,7 @@ class LOBStreamControl {
                 tmpFile.close();
                 tmpFile = null;
             } else {
-                try {
-                    tmpFile.setLength(size);
-                }
-                catch (StandardException se) {
-                    Util.generateCsSQLException (se);
-                }
+                tmpFile.setLength(size);
             }
         }
     }
@@ -370,10 +361,10 @@ class LOBStreamControl {
      * Copies bytes from stream to local storage.
      * @param inStream
      * @param length length to be copied
-     * @throws IOException, SQLException, StandardException
+     * @throws IOException, StandardException
      */
-    synchronized void copyData(InputStream inStream,
-            long length) throws IOException, SQLException, StandardException {
+    synchronized void copyData(InputStream inStream, long length)
+            throws IOException, StandardException {
         byte [] data = new byte [bufferSize];
         long sz = 0;
         while (sz < length) {
@@ -437,10 +428,9 @@ class LOBStreamControl {
      * @return Current position after write.
      * @throws IOExcepton if writing to temporary file fails
      * @throws StandardException
-     * @throws SQLException
      */
-    synchronized long replaceBytes (byte [] buf, long stPos, long endPos) 
-                         throws IOException, SQLException, StandardException {
+    synchronized long replaceBytes (byte [] buf, long stPos, long endPos)
+            throws IOException, StandardException {
         long length = getLength();
         long finalLength = length - endPos + stPos + buf.length;
         if (isBytes) {
