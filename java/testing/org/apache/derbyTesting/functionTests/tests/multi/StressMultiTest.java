@@ -22,6 +22,8 @@
 
 package org.apache.derbyTesting.functionTests.tests.multi;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -31,7 +33,6 @@ import java.util.Random;
 
 import junit.framework.AssertionFailedError;
 import junit.framework.Test;
-import junit.framework.TestResult;
 import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
@@ -41,25 +42,60 @@ import org.apache.derbyTesting.junit.Decorator;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
- * Stresstest running any number of threads performing "random" operations on
+ * Stress-test running any number of threads performing "random" operations on
  * a database for any number of minutes. Default values are 10 threads for 10
  * minutes. The operations are create, select, insert, update and rollback.
  *
  * To test with a different number of threads and minutes set up a suite by
- * calling getSuite(int threads, int minutes). See StressMulti50x59.java for
+ * calling getSuite(int threads, int minutes). See StressMulti10x1.java for
  * an example.
+ * 
+ * To run only the embedded run, use embeddedSuite(int threads, int minutes).
+ * 
+ * The test will fail on the first exception thrown by any of the treads and
+ * this will be the reported cause of failure and the threads will be stopped.
+ * Other threads may throw exceptions before they have time to stop and these
+ * can be found in the log, but they will not be reported as errors or failures
+ * by the test.
+ * 
+ * SQLExceptions are reported as failures and any other exceptions as errors.
+ * 
+ * Some SQLExceptions are ignored by the test, but will show up in the log.
+ * 
  */
 public class StressMultiTest extends BaseJDBCTestCase {
 
-    private static int THREADS = 10; //Default number of threads we will run.
-    private static int MINUTES = 10; //Default number of minutes we will run.
-    private static boolean DEBUG = false; //Force verbosity, used for debugging.
-
+    /**
+     * The number of threads the test will run. Default is 10
+     */
+    private static int THREADS = 10;
+    
+    /**
+     * The number of minutes the test will run. Default is 10.
+     */
+    private static int MINUTES = 10;
+    
+    /**
+     * Force verbosity, used for debugging. Will print alot of information
+     * to the screen. 
+     */
+    private static boolean DEBUG = false;
+    
+    /**
+     * This holds the first throwable thrown by by any of the threads,
+     *  and will thrown as the cause of failure for the fixture.   
+     */
+    private Throwable thrown = null;
+    
     private Thread threads[] = null;
-    private TestResult testResult = null;
     private Random rnd = new Random();
+    
+    /**
+     * Setting this will cause the threads to terminate normally.
+     */
     private boolean complete = false;
-
+    
+    
     public StressMultiTest(String s) {
         super(s);
     }
@@ -100,8 +136,8 @@ public class StressMultiTest extends BaseJDBCTestCase {
     }
 
     /**
-     * Get a testsuite that runs the specified number of threads
-     * for the specified number of minutes.
+     * Get a testsuite that runs all the 3 runs (embedded, client and encrypted) 
+     * with the given number of threads for the given number of minutes.
      *
      * @param threads
      * @param minutes
@@ -113,7 +149,33 @@ public class StressMultiTest extends BaseJDBCTestCase {
         MINUTES = minutes;
         return suite();
     }
+    
+    /**
+     * Get at testsuite that runs only the embedded suite with 
+     * the given number of threads for the given number of minutes. 
+     * 
+     * @param threads
+     * @param minutes
+     * @return
+     */
+    public static Test embeddedSuite(int threads, int minutes) {
+        THREADS = threads;
+        MINUTES = minutes;
+        
+        Properties sysprops = System.getProperties();
+        sysprops.put("derby.locks.deadlockTimeout", "2");
+        sysprops.put("derby.locks.waitTimeout", "3");
+        sysprops.put("derby.language.logStatementText", "true");
+        sysprops.put("derby.storage.keepTransactionLog", "true");
+        sysprops.put("derby.infolog.append", "true");
 
+        TestSuite embedded = new TestSuite("StressMultiTest:embedded, " + THREADS +
+            " Threads " + MINUTES + " Minutes");
+        embedded.addTestSuite(StressMultiTest.class);
+        
+        return newCleanDatabase(embedded);
+    }
+    
     /*
      * Create a CleanDatabaseTestSetup that sets up the testdatabase.
      */
@@ -179,7 +241,6 @@ public class StressMultiTest extends BaseJDBCTestCase {
      * Make sure we clear the fields when done.
      */
     public void tearDown() throws Exception{
-        testResult = null;
         rnd = null;
         threads = null;
         super.tearDown();
@@ -188,9 +249,14 @@ public class StressMultiTest extends BaseJDBCTestCase {
     /**
      * This is the actual fixture run by the JUnit framework.
      * Creates all the runnables we need and pass them on to
-     * runTestCaseRunnables
+     * runTestCaseRunnables. If any exception was thrown
+     * when they are done it is thrown for JUnit to catch and
+     * handle normally.
      */
-    public void testStressMulti() {
+    public void testStressMulti() throws Throwable{
+        
+        thrown = null;
+        
         StressMultiRunnable[] tct = new StressMultiRunnable[THREADS];
 
         for (int i = 0; i < tct.length; i++) {
@@ -198,6 +264,8 @@ public class StressMultiTest extends BaseJDBCTestCase {
         }
         runTestCaseRunnables (tct);
         tct = null;
+        
+        if (thrown!=null) throw thrown;
      }
 
 
@@ -231,26 +299,26 @@ public class StressMultiTest extends BaseJDBCTestCase {
         threads = null;
     }
 
-    public void run(final TestResult result) {
-        testResult = result;
-        super.run(result);
-        testResult = null;
-    }
-
+    
     /*
      * Handles any exceptions we get in the threads
      */
-    private void handleException(final Throwable t, String message) {
-        synchronized(testResult) {
-            println("Exception handled!!: "+ message + " - " + t);
-            complete = true; //This stops the tests.
-            if(t instanceof AssertionFailedError) {
-                testResult.addFailure(this, (AssertionFailedError)t);
-            }
-            else {
-                testResult.addError(this, t);
-            }
-        }
+    private synchronized void handleException(final Throwable t, String message) {
+            complete = true; //This stops the threads.
+            if (thrown == null) {
+                if(t instanceof AssertionFailedError) {
+                    thrown = (AssertionFailedError) t;
+                } else if (t instanceof SQLException) {
+                    ByteArrayOutputStream b = new ByteArrayOutputStream();
+                    t.printStackTrace(new PrintStream(b));
+                    thrown = new AssertionFailedError("Caused by: \n" + b.toString());
+                }
+                else {
+                    thrown = t;
+                }
+                println("Exception handled!!: "+ message + " - " + t);
+            } else 
+            println("Exception discarded because another was already caught and the threads are terminating..:\n"+ message + " - " + t);
     }
 
 
@@ -268,7 +336,7 @@ public class StressMultiTest extends BaseJDBCTestCase {
             super();
             this.name = name;
             starttime = System.currentTimeMillis();
-            runtime = minutes*60*1000; //convert min to ms
+            runtime = minutes*60*1000; //convert minutes to ms
             try {
                 con = openDefaultConnection();
                 con.setAutoCommit(false);
@@ -288,7 +356,6 @@ public class StressMultiTest extends BaseJDBCTestCase {
                 while (!complete) {
                     i++;
                     int r = rnd.nextInt(100);
-
                     if (r < 10) {
                         String n = "x";
                         switch (rnd.nextInt(4)) {
@@ -337,9 +404,11 @@ public class StressMultiTest extends BaseJDBCTestCase {
             }
             catch(Throwable t) {
                println("Exception in " + name + ": " + t);
-               handleException(t, name + " - " +
+                
+                   handleException(t, name + " - " +
                        new Date(System.currentTimeMillis()).toString());
             }
+            
             println(name + " terminated!");
         }
 
@@ -369,7 +438,8 @@ public class StressMultiTest extends BaseJDBCTestCase {
                         || e.equals("42Y55") || e.equals("42000")
                         || e.equals("40001") || e.equals("40XL1")
                         || e.equals("40XL2") || e.equals("42Y07")
-                        || e.equals("42Y55")) {
+                        || e.equals("42Y55")
+                        ) {
                     //Ignore these
                 } else {
                     throw se;

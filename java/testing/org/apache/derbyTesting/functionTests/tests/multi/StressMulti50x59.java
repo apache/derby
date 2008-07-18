@@ -32,6 +32,6 @@ import junit.framework.TestCase;
 public class StressMulti50x59 extends TestCase {
 
     public static Test suite() {
-        return StressMultiTest.suite(50,59);
+        return StressMultiTest.embeddedSuite(50,59);
     }
 }
