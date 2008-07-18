@@ -105,7 +105,7 @@ public class UpdatableResultSetTest extends BaseJDBCTestCase {
     public static Test suite() {
 
         // Test will fail with JCC.
-        if (usingDerbyNet()) {
+        if (usingDB2Client()) {
             // empty suite
             return new TestSuite();
         }

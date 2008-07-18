@@ -123,7 +123,7 @@ public class ResultSetCloseTest extends BaseJDBCTestCase {
         // DB2 client doesn't implement result set closing
         // correctly wrt ensuring all its methods subsequently
         // throw an exception.
-        if (usingDerbyNet())
+        if (usingDB2Client())
             return new TestSuite("empty");
         
         return TestConfiguration.defaultSuite(ResultSetCloseTest.class);

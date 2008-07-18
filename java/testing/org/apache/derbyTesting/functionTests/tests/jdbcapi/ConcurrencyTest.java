@@ -879,7 +879,7 @@ public class ConcurrencyTest extends SURBaseTest {
             suite.addTest(new ConcurrencyTest("testSharedAndUpdateLocks2"));
             
             // The following testcases do use updatable result sets.            
-            if (!usingDerbyNet()) { // DB2 client does not support UR with Derby
+            if (!usingDB2Client()) { // DB2 client does not support UR with Derby
                 suite.addTest(new ConcurrencyTest ("testUpdatePurgedTuple2"));
                 suite.addTest(new ConcurrencyTest("testUpdatePurgedTuple3"));
                 suite.addTest(new ConcurrencyTest("testUpdatePurgedTuple4"));

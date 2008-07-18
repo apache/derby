@@ -543,7 +543,7 @@ public class SURQueryMixTest extends SURBaseTest
         TestSuite mainSuite = new TestSuite("SURQueryMixTest suite");
         
         // DB2 client doesn't support this functionality
-        if (usingDerbyNet())
+        if (usingDB2Client())
             return mainSuite;
         
         mainSuite.addTest(baseSuite("SURQueryMixTest:embedded"));
