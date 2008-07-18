@@ -1275,7 +1275,7 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
     {
         String hostName = TestConfiguration.DEFAULT_HOSTNAME;
         int port = TestConfiguration.DEFAULT_PORT;
-        if (usingDerbyNet())
+        if (usingDB2Client())
         {
             //attrs.put("retrieveMessagesFromServerOnGetMessage","true");
             attrs.put("driverType","4");

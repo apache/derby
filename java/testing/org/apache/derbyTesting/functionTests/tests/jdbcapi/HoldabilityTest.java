@@ -37,7 +37,7 @@ public class HoldabilityTest extends SURBaseTest {
     public static Test suite() {
                
         // DB2 client doesn't support this functionality
-        if (usingDerbyNet())
+        if (usingDB2Client())
             return new TestSuite();
         
         return TestConfiguration.defaultSuite(HoldabilityTest.class);

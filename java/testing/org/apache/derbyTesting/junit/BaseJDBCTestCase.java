@@ -576,12 +576,12 @@ public abstract class BaseJDBCTestCase
     }
     
     /**
-    * Tell if the client is DerbyNet.
+    * Tell if the client is DB2Client.
     *
-    * @return <code>true</code> if using the DerbyNet client
+    * @return <code>true</code> if using the DB2 client driver,
     *         <code>false</code> otherwise.
     */
-    public static boolean usingDerbyNet() {
+    public static boolean usingDB2Client() {
         return TestConfiguration.getCurrent().getJDBCClient().isDB2Client();
     }
     
@@ -761,7 +761,7 @@ public abstract class BaseJDBCTestCase
                 // Some VMs don't support initCause(). It is OK if they fail.
             }
 
-            if (usingDerbyNet())
+            if (usingDB2Client())
             {
                 /* For JCC the error message is a series of tokens representing
                  * different things like SQLSTATE, SQLCODE, nested SQL error
@@ -829,7 +829,7 @@ public abstract class BaseJDBCTestCase
 
         try {
             PreparedStatement pSt = prepareStatement(sql);
-            if (usingDerbyNet())
+            if (usingDB2Client())
             {
                 /* For JCC the prepares are deferred until execution,
                  * so we have to actually execute in order to see the

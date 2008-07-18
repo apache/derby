@@ -602,7 +602,7 @@ public class ProcedureTest extends BaseJDBCTestCase {
      * @param sqle a <code>SQLException</code> value
      */
     private void assertNoResultSetFromExecuteQuery(SQLException sqle) {
-        if (usingDerbyNet()) {
+        if (usingDB2Client()) {
             assertNull("Unexpected SQL state.", sqle.getSQLState());
         } else {
             assertSQLState("Unexpected SQL state.", "X0Y78", sqle);
@@ -617,7 +617,7 @@ public class ProcedureTest extends BaseJDBCTestCase {
      */
     private void assertMultipleResultsFromExecuteQuery(SQLException sqle)
     {
-        if (usingDerbyNet()) {
+        if (usingDB2Client()) {
             assertNull("Unexpected SQL state.", sqle.getSQLState());
         } else {
             assertSQLState("Unexpected SQL state.", "X0Y78", sqle);
@@ -631,7 +631,7 @@ public class ProcedureTest extends BaseJDBCTestCase {
      * @param sqle a <code>SQLException</code> value
      */
     private void assertResultsFromExecuteUpdate(SQLException sqle) {
-        if (usingDerbyNet()) {
+        if (usingDB2Client()) {
             assertNull("Unexpected SQL state.", sqle.getSQLState());
         } else {
             assertSQLState("Unexpected SQL state.", "X0Y79", sqle);

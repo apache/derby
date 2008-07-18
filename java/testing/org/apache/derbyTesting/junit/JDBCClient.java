@@ -104,11 +104,11 @@ public final class JDBCClient {
 
     /**
      * The DB2 Universal JDBC network client.
-     * AKA: JCC or DerbyNet.
-     * (the "old net" client for Derby).
+     * AKA: JCC or DB2 client (was called DerbyNet earlier, the "old net"
+     * client for Derby).
      */
     static final JDBCClient DB2CLIENT= new JDBCClient(
-            "DerbyNet",
+            "DB2Client",
             "com.ibm.db2.jcc.DB2Driver",
             null, null, null,
             "jdbc:derby:net://");

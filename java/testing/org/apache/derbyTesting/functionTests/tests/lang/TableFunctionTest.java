@@ -1838,7 +1838,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
     {
         // skip this test if using the DB2 client, which does not support the
         // JDBC4 metadata calls.
-        if (  usingDerbyNet() ) { return; }
+        if (  usingDB2Client() ) { return; }
         
 
             println( "\nExpecting correct function metadata from " + functionName );
