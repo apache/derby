@@ -131,6 +131,13 @@ public class GenericConstantActionFactory
 	 *  @param purge				PURGE during INPLACE COMPRESS?
 	 *  @param defragment			DEFRAGMENT during INPLACE COMPRESS?
 	 *  @param truncateEndOfTable	TRUNCATE END during INPLACE COMPRESS?
+	 *  @param updateStatistics		TRUE means we are here to update statistics
+	 *  @param updateStatisticsAll	TRUE means we are here to update statistics
+	 *  	of all the indexes. False means we are here to update statistics of
+	 *  	only one index.
+	 *  @param indexNameForUpdateStatistics	Will name the index whose statistics
+	 *  	will be updated. This param is looked at only if updateStatisticsAll
+	 *  	is set to false.
 	 */
 	public	ConstantAction	getAlterTableConstantAction
 	(
@@ -149,14 +156,20 @@ public class GenericConstantActionFactory
 		boolean                     truncateTable,
 		boolean						purge,
 		boolean						defragment,
-		boolean						truncateEndOfTable 
+		boolean						truncateEndOfTable,
+		boolean						updateStatistics,
+		boolean						updateStatisticsAll,
+		String						indexNameForUpdateStatistics
     )
 	{
 		return new	AlterTableConstantAction( sd, tableName, tableId, tableConglomerateId, 
 											  tableType, columnInfo, constraintActions, 
 											  lockGranularity, compressTable,
 											  behavior, sequential, truncateTable,
-											  purge, defragment, truncateEndOfTable);
+											  purge, defragment, truncateEndOfTable,
+											  updateStatistics, 
+											  updateStatisticsAll,
+											  indexNameForUpdateStatistics);
 	}
 
 	/**
@@ -945,39 +958,6 @@ public class GenericConstantActionFactory
 	)
 	{
 		return new DropTriggerConstantAction(sd, triggerName, tableId);
-	}
-	
-	/**
-	 * Make the constant action for a UPDATE STATISTICS statement.
-	 *
-	 * @param forTable		whether for an index or table.
-	 * @param objectName	name of the object (either table or index) for which
-	 * this statistic is being created.
-	 * @param tableUUID		UUID of the table for which statistics are being
-	 * created.
-	 * @param objectUUID    array of UUID's, one for each index conglomerate for
-	 * which statistics are being created. 
-	 * @param conglomerateNumber array of conglomerate numbers, one for each
-	 * index conglomerate for which statistics are being created.
-	 * @param indexRow		array of index rows, one for each index. This row is
-	 * used by the constant action to read data from the indices.
-	 */
-	public ConstantAction getUpdateStatisticsConstantAction
-	(
-	 boolean forTable,
-	 String objectName,
-	 UUID tableUUID,
-	 UUID[] objectUUID,
-	 long[] conglomerateNumber,
-	 ExecIndexRow[] indexRow
-	)
-	{
-		return new UpdateStatisticsConstantAction(forTable, 
-												  objectName,
-												  tableUUID,
-												  objectUUID,
-												  conglomerateNumber,
-												  indexRow);
 	}
 
 	/**

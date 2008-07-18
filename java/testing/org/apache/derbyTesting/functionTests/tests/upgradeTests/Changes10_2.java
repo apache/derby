@@ -335,7 +335,8 @@ public class Changes10_2 extends UpgradeChange {
                     {"SYSCS_GET_RUNTIMESTATISTICS"},
                     {"SYSCS_INPLACE_COMPRESS_TABLE"},
                     {"SYSCS_SET_RUNTIMESTATISTICS"},
-                    {"SYSCS_SET_STATISTICS_TIMING"}}
+                    {"SYSCS_SET_STATISTICS_TIMING"},
+                    {"SYSCS_UPDATE_STATISTICS"}}
                     );
 
             rs.close();

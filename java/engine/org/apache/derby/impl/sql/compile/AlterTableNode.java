@@ -30,6 +30,7 @@ import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
+import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
@@ -51,6 +52,25 @@ public class AlterTableNode extends DDLStatementNode
 	// The alter table action
 	public	TableElementList	tableElementList = null;
 	public  char				lockGranularity;
+
+	/**
+	 * updateStatistics will indicate that we are here for updating the
+	 * statistics. It could be statistics of just one index or all the
+	 * indexes on a given table. 
+	 */
+	private	boolean				updateStatistics = false;
+	/**
+	 * The flag updateStatisticsAll will tell if we are going to update the 
+	 * statistics of all indexes or just one index on a table. 
+	 */
+	private	boolean				updateStatisticsAll = false;
+	/**
+	 * If statistic is getting updated for just one index, then 
+	 * indexNameForUpdateStatistics will tell the name of the specific index 
+	 * whose statistics need to be updated.
+	 */
+	private	String				indexNameForUpdateStatistics;
+	
 	public	boolean				compressTable = false;
 	public	boolean				sequential = false;
 	//The following three (purge, defragment and truncateEndOfTable) apply for 
@@ -103,6 +123,33 @@ public class AlterTableNode extends DDLStatementNode
 		}
 	}
 
+	/**
+	 * Initializer for a AlterTableNode for updating the statistics. The user
+	 * can ask for update statistic of all the indexes or only a specific index
+	 *
+	 * @param objectName		The name of the table whose index(es) will have
+	 *                          their statistics updated.
+	 * @param updateStatisticsAll	If true then update the statistics of all 
+	 *                          the indexes on the table. If false, then update
+	 *                          the statistics of only the index provided as
+	 *                          3rd parameter here
+	 * @param indexName			Only used if updateStatisticsAll is set to 
+	 *                          false. 
+	 *
+	 * @exception StandardException		Thrown on error
+	 */
+	public void init(Object objectName,
+			Object updateStatisticsAll,
+			Object indexName)
+	throws StandardException
+	{
+		initAndCheck(objectName);
+		this.updateStatisticsAll = ((Boolean) updateStatisticsAll).booleanValue();
+		this.indexNameForUpdateStatistics = (String)indexName;
+		schemaDescriptor = getSchemaDescriptor();
+		updateStatistics = true;
+	}
+	
 	/**
 	 * Initializer for a AlterTableNode for COMPRESS using temporary tables
 	 * rather than inplace compress
@@ -216,7 +263,10 @@ public class AlterTableNode extends DDLStatementNode
 				"truncateTable: " + "\n" + truncateTable + "\n" +
 				"purge: " + "\n" + purge + "\n" +
 				"defragment: " + "\n" + defragment + "\n" +
-				"truncateEndOfTable: " + "\n" + truncateEndOfTable + "\n";
+				"truncateEndOfTable: " + "\n" + truncateEndOfTable + "\n" +
+				"updateStatistics: " + "\n" + updateStatistics + "\n" +
+				"updateStatisticsAll: " + "\n" + updateStatisticsAll + "\n" +
+				"indexNameForUpdateStatistics: " + "\n" + indexNameForUpdateStatistics + "\n";
 		}
 		else
 		{
@@ -364,6 +414,23 @@ public class AlterTableNode extends DDLStatementNode
 
 		}
 
+		//Check if we are in alter table to update the statistics. If yes, then
+		//check if we are here to update the statistics of a specific index. If
+		//yes, then verify that the indexname provided is a valid one.
+		if (updateStatistics && !updateStatisticsAll)
+		{
+			ConglomerateDescriptor	cd = null;
+			if (schemaDescriptor.getUUID() != null) 
+				cd = dd.getConglomerateDescriptor(indexNameForUpdateStatistics, schemaDescriptor, false);
+
+			if (cd == null)
+			{
+				throw StandardException.newException(
+						SQLState.LANG_INDEX_NOT_FOUND, 
+						schemaDescriptor.getSchemaName() + "." + indexNameForUpdateStatistics);
+			}			
+		}
+
 		/* Unlike most other DDL, we will make this ALTER TABLE statement
 		 * dependent on the table being altered.  In general, we try to
 		 * avoid this for DDL, but we are already requiring the table to
@@ -411,7 +478,10 @@ public class AlterTableNode extends DDLStatementNode
  										     truncateTable,
  										     purge,
  										     defragment,
- 										     truncateEndOfTable );
+ 										     truncateEndOfTable,
+ 										     updateStatistics,
+ 										     updateStatisticsAll,
+ 										     indexNameForUpdateStatistics);
 	}
 
 	/**

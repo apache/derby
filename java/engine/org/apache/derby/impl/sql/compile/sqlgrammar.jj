@@ -2311,6 +2311,7 @@ TOKEN [IGNORE_CASE] :
 |	<RETURNING: "returning">
 |   <RR: "rr">
 |   <RS: "rs">
+|	<STATISTICS: "statistics">
 |	<SEQUENCE: "sequence">
 |	<SEQUENTIAL: "sequential">
 |	<SETS: "sets">
@@ -12222,6 +12223,7 @@ alterTableBody(TableName tableName) throws StandardException :
 												getContextManager());
 	int[]				changeType = new int[1];
 	int[]				behavior = new int[1];
+        String indexName = null;
 }
 {
 //insert special key before compress so that only internal SP can know
@@ -12233,6 +12235,41 @@ alterTableBody(TableName tableName) throws StandardException :
 	)
 	{
 		return sn;
+	}
+|
+//This means update the statistics of all the indexes on the table
+	<ALL> <UPDATE> <STATISTICS>
+	{
+		checkVersion( DataDictionary.DD_VERSION_DERBY_10_5, "SYSCS_UPDATE_STATISTICS");
+		//This will make sure that this ALTER TABLE...syntax can't be called directly.
+		//This sql can only be generated internally (right now it is done for
+		//syscs_util.SYSCS_UPDATE_STATISTICS procedure
+		checkInternalFeature("UPDATE STATISTICS");
+		return (StatementNode) nodeFactory.getNode(
+							C_NodeTypes.ALTER_TABLE_NODE,
+							tableName,
+							Boolean.TRUE,
+							null,
+							getContextManager());
+	}
+|
+//This means update the statistics of the index name supplied for the table
+	<UPDATE> <STATISTICS>
+        (
+		indexName =  identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
+        )
+	{
+		checkVersion( DataDictionary.DD_VERSION_DERBY_10_5, "SYSCS_UPDATE_STATISTICS");
+		//This will make sure that this ALTER TABLE...syntax can't be called directly.
+		//This sql can only be generated internally (right now it is done for
+		//syscs_util.SYSCS_UPDATE_STATISTICS procedure
+		checkInternalFeature("UPDATE STATISTICS");
+		return (StatementNode) nodeFactory.getNode(
+							C_NodeTypes.ALTER_TABLE_NODE,
+							tableName,
+							Boolean.FALSE,
+							indexName,
+							getContextManager());
 	}
 |
 	lockGranularity = alterTableAction( tableElementList, changeType, behavior )
@@ -13669,6 +13706,7 @@ nonReservedKeyword()  :
     |       tok = <STABILITY>
 	|	tok = <START>
 	|	tok = <STATEMENT>
+	|	tok = <STATISTICS>
 	|	tok = <STRIP>
 	|	tok = <SYNONYM>
 	|	tok = <STYLE>

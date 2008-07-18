@@ -1033,6 +1033,11 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         JDBC.assertColumnNames(rs, expColNames);
         
         JDBC.assertDrainResults(rs, 1);
+
+        cSt = samConnection.prepareCall(
+            " call SYSCS_UTIL.SYSCS_UPDATE_STATISTICS('SAM','SAMTABLE',null)");
+        assertUpdateCount(cSt, 0);
+        cSt.close();
         
         cSt = samConnection.prepareCall(
             " call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('SAM', 'SAMTABLE', 1)");
@@ -1057,6 +1062,12 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             " call "
             + "SYSCS_UTIL.SYSCS_INPLACE_COMPRESS_TABLE('SWIPER', "
             + "'MYTAB', 1, 1, 1)");
+        assertStatementError("38000", cSt);
+        cSt.close();
+
+        // Try updating statistics of table not owned.
+        cSt = samConnection.prepareCall(
+        " call SYSCS_UTIL.SYSCS_UPDATE_STATISTICS('SWIPER','MYTAB',null)");
         assertStatementError("38000", cSt);
         cSt.close();
         
@@ -7127,7 +7138,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         expColNames = new String [] {"COLPERMSID", "GRANTEE", "GRANTOR", "TABLEID", "TYPE", "COLUMNS"};
         JDBC.assertColumnNames(rs, expColNames);
         JDBC.assertDrainResults(rs, 0);
-        
+
         rs = st_user1.executeQuery(
             " select GRANTEE, GRANTOR, GRANTOPTION from sys.sysroutineperms");
         
@@ -7136,6 +7147,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         expRS = new String [][]
         {
+            {"PUBLIC", "TEST_DBO", "N"},
             {"PUBLIC", "TEST_DBO", "N"},
             {"PUBLIC", "TEST_DBO", "N"},
             {"PUBLIC", "TEST_DBO", "N"},
@@ -7171,7 +7183,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         expColNames = new String [] {"COLPERMSID", "GRANTEE", "GRANTOR", "TABLEID", "TYPE", "COLUMNS"};
         JDBC.assertColumnNames(rs, expColNames);
         JDBC.assertDrainResults(rs, 0);
-        
+
         rs = st_user1.executeQuery(
             " select GRANTEE, GRANTOR, GRANTOPTION from sys.sysroutineperms");
         
@@ -7180,6 +7192,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         expRS = new String [][]
         {
+            {"PUBLIC", "TEST_DBO", "N"},
             {"PUBLIC", "TEST_DBO", "N"},
             {"PUBLIC", "TEST_DBO", "N"},
             {"PUBLIC", "TEST_DBO", "N"},

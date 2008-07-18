@@ -39,6 +39,7 @@ import org.apache.derby.iapi.sql.execute.ExecutionContext;
 import org.apache.derby.iapi.sql.execute.ExecutionFactory;
 import org.apache.derby.iapi.types.RowLocation;
 import org.apache.derby.iapi.types.StringDataValue;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
 
 /**
  * This class extends IndexDescriptor for internal use by the
@@ -143,6 +144,33 @@ public class IndexRowGenerator implements IndexDescriptor, Formatable
 		return getExecutionFactory().getIndexableRow(
 										id.baseColumnPositions().length + 1);
 	}
+
+    /**
+     * Get a NULL Index Row for this index. This is useful to create objects
+     * that need to be passed to ScanController.
+     *
+     * @param columnList ColumnDescriptors describing the base table.
+     * @param rowLocation   empty row location.
+     *
+     * @exception StandardException thrown on error.
+     */
+    public ExecIndexRow getNullIndexRow(ColumnDescriptorList columnList,
+    		RowLocation rowLocation)
+    throws StandardException
+    {
+            int[] baseColumnPositions = id.baseColumnPositions();
+            ExecIndexRow indexRow = getIndexRowTemplate();
+
+            for (int i = 0; i < baseColumnPositions.length; i++)
+            {
+                    DataTypeDescriptor dtd =
+                            columnList.elementAt(baseColumnPositions[i] - 1).getType();
+                    indexRow.setColumn(i + 1, dtd.getNull());
+            }
+
+            indexRow.setColumn(baseColumnPositions.length + 1, rowLocation);
+            return indexRow;
+    }
 
 	/**
 	 * Get an index row for this index given a row from the base table

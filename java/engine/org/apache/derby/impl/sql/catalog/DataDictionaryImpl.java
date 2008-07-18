@@ -411,6 +411,7 @@ public final class	DataDictionaryImpl
 												"SYSCS_SET_STATISTICS_TIMING", 
 												"SYSCS_INPLACE_COMPRESS_TABLE",
 												"SYSCS_COMPRESS_TABLE",
+												"SYSCS_UPDATE_STATISTICS",
 												};
 	
 	/**
@@ -471,7 +472,7 @@ public final class	DataDictionaryImpl
 	public void boot(boolean create, Properties startParams) 
 			throws StandardException
 	{
-		softwareVersion = new DD_Version(this, DataDictionary.DD_VERSION_DERBY_10_4);
+		softwareVersion = new DD_Version(this, DataDictionary.DD_VERSION_DERBY_10_5);
 
 		startupParameters = startParams;
 
@@ -10141,6 +10142,8 @@ public final class	DataDictionaryImpl
         create_10_2_system_procedures(tc, sysUtilUUID);
         // add 10.3 specific system procedures
         create_10_3_system_procedures(tc);
+        // add 10.5 specific system procedures
+        create_10_5_system_procedures(tc);
     }
 
     /**
@@ -11281,6 +11284,46 @@ public final class	DataDictionaryImpl
                 null,
                 tc,
                 "org.apache.derby.impl.jdbc.LOBStoredProcedure");
+        }
+    }
+
+    /**
+     * Create the System procedures that are added to 10.5.
+     * 
+     * @param tc an instance of the TransactionController.
+     * @throws StandardException Standard exception policy.
+     */
+    void create_10_5_system_procedures(TransactionController tc)
+    throws StandardException
+    {
+        // Create the procedures in the SYSCS_UTIL schema.
+        UUID  sysUtilUUID = getSystemUtilSchemaDescriptor().getUUID();
+
+        // void SYSCS_UTIL.SYSCS_UPDATE_STATISTICS(varchar(128), varchar(128), varchar(128))
+        {
+            // procedure argument names
+            String[] arg_names = {"SCHEMANAME", "TABLENAME", "INDEXNAME"};
+
+            // procedure argument types
+            TypeDescriptor[] arg_types = {
+                    CATALOG_TYPE_SYSTEM_IDENTIFIER,
+                    CATALOG_TYPE_SYSTEM_IDENTIFIER,
+                    CATALOG_TYPE_SYSTEM_IDENTIFIER
+
+            };
+
+            UUID routine_uuid = createSystemProcedureOrFunction(
+                "SYSCS_UPDATE_STATISTICS",
+                sysUtilUUID,
+                arg_names,
+                arg_types,
+                0,
+                0,
+                RoutineAliasInfo.MODIFIES_SQL_DATA,
+                (TypeDescriptor) null,
+                tc);
+
+            createRoutinePermPublicDescriptor(routine_uuid, tc);
         }
     }
 
