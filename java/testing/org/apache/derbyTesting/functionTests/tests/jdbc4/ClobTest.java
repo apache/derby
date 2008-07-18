@@ -693,7 +693,7 @@ public class ClobTest
          //Doing a setString now on the Clob
          //should reflect the same extension
          //in the InputStream also.
-         clob.setString((str1.getBytes().length)+1, str2);
+         clob.setString((str1.length())+1, str2);
          
          //Now get the reader from the Clob after
          //the update has been done.

@@ -23,6 +23,7 @@ package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -33,6 +34,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.BaseTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.junit.Utilities;
@@ -166,7 +168,6 @@ public class LargeDataLocksTest extends BaseJDBCTestCase {
 
             /**
              * Create and populate table
-             * 
              * @see org.apache.derbyTesting.junit.CleanDatabaseTestSetup#decorateSQL(java.sql.Statement)
              */
             protected void decorateSQL(Statement s) throws SQLException {
@@ -184,7 +185,12 @@ public class LargeDataLocksTest extends BaseJDBCTestCase {
 
                 ps.setCharacterStream(1, new java.io.StringReader(Utilities
                         .repeatChar("a", 38000)), 38000);
-                ps.setBytes(2, Utilities.repeatChar("a", 38000).getBytes());
+                try {
+                    ps.setBytes(2, Utilities.repeatChar("a", 38000).getBytes("US-ASCII"));
+                } catch (UnsupportedEncodingException ue) {
+                    // Shouldn't happen US-ASCII should always be supported
+                	BaseTestCase.fail(ue.getMessage(),ue);
+                }
                 ps.setInt(3, 38000);
                 ps.executeUpdate();
                 ps.close();

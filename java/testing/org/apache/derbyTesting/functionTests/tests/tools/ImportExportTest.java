@@ -162,7 +162,7 @@ public class ImportExportTest extends BaseJDBCTestCase {
 	public void testEarlyEndOfFile() throws Exception {
 		Connection c = getConnection();
 		try {
-			doImportFromFile(c, "extin/EndOfFile.txt" , "T4" , null , null , null, 0);
+			doImportFromFile(c, "extin/EndOfFile.txt" , "T4" , null , null , "US-ASCII", 0);
 		} catch (SQLException e) {
 			assertSQLState("XIE0E", e);
 		}

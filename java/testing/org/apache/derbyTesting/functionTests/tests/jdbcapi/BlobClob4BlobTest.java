@@ -24,6 +24,7 @@ import java.io.CharArrayReader;
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.zip.CRC32;
@@ -1839,14 +1840,14 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
                     length = random.nextInt(blobLength - start) + 1;
                     println("start:" + start + " length:" + length);
                     searchBytes = blob.getBytes(start, length);
-                    String searchString = new String(searchBytes);
+                    String searchString = new String(searchBytes, "US-ASCII");
                     // get random position to start the search from
                     distance = random.nextInt(maxStartPointDistance);
                     startSearchPos = Math.max((start - distance), 1);
                     // make sure that the searched string does not happen
                     // before the expected position
                     byte[] tmp = blob.getBytes(startSearchPos, start);
-                    if (new String(tmp).indexOf(searchString) != -1)
+                    if (new String(tmp,"US-ASCII").indexOf(searchString) != -1)
                     {
                         startSearchPos = start;
                     }
@@ -1898,19 +1899,19 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
                     start = Math.max(random.nextInt(blobLength - 1), 1);
                     length = random.nextInt(blobLength - start) + 1;
                     println("start:" + start + " length:" + length);
-                    searchString = new String(blob.getBytes(start, length));
+                    searchString = new String(blob.getBytes(start, length),"US-ASCII");
                     // get random position to start the search from
                     distance = random.nextInt(maxStartPointDistance);
                     startSearchPos = Math.max((start - distance), 1);
                     // make sure that the searched string does not happen
                     // before the expected position
                     String tmp = new String(
-                            blob.getBytes(startSearchPos, start));
+                            blob.getBytes(startSearchPos, start),"US-ASCII");
                     if (tmp.indexOf(searchString) != -1) {
                         startSearchPos = start;
                     }
 
-                    ps.setBytes(1, searchString.getBytes());
+                    ps.setBytes(1, searchString.getBytes("US-ASCII"));
                     ps.setInt(2, startSearchPos);
                     ps.setInt(3, start);
                     ps.executeUpdate();
@@ -1926,7 +1927,7 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
                     start = rs2.getInt(3);
 
                     searchString = new String(
-                            searchBlob.getBytes(1L, (int)searchBlob.length()));
+                            searchBlob.getBytes(1L, (int)searchBlob.length()),"US-ASCII");
                     println("startSearchPos: " + startSearchPos +
                             "searchString: " + searchString);
                     foundAt = blob.position(searchBlob, startSearchPos);
@@ -2610,7 +2611,7 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
                 "insert into testBlob (b, a) values (?, ?)");
         for (int i=0; i<10; i++) {
             ps.setInt(1, i);
-            ps.setBytes(2, (blobData + i).getBytes());
+            ps.setBytes(2, (blobData + i).getBytes("US-ASCII"));
             ps.execute();
         }
         ps.close();
@@ -2640,7 +2641,7 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
     }
 
     private void checkContentsBeforeAndAfterUpdatingBlob(ResultSet rs)
-    throws SQLException {
+    throws SQLException, UnsupportedEncodingException {
         Blob b;
         byte[] value, expectedValue;
         String blobData = "initial blob ";
@@ -2649,12 +2650,12 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         b = rs.getBlob(2);
         // check contents
         value = b.getBytes(1, blobData.length() + 1);
-        expectedValue = (blobData + rs.getInt(1)).getBytes();
+        expectedValue = (blobData + rs.getInt(1)).getBytes("US-ASCII");
         assertTrue("FAIL - wrong blob value",
                 Arrays.equals(value, expectedValue));
 
         // update contents
-        value = (updatedBlobData + rs.getInt(1)).getBytes();
+        value = (updatedBlobData + rs.getInt(1)).getBytes("US-ASCII");
         b.setBytes(1, value);
         rs.updateBlob(2, b);
         rs.updateRow();
@@ -2664,7 +2665,7 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         b = rs.getBlob(2);
         // check contents
         value = b.getBytes(1, updatedBlobData.length() + 1);
-        expectedValue = (updatedBlobData + rs.getInt(1)).getBytes();
+        expectedValue = (updatedBlobData + rs.getInt(1)).getBytes("US-ASCII");
         assertTrue("FAIL - wrong blob value",
                 Arrays.equals(value, expectedValue));
     }
@@ -2685,7 +2686,7 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
                 "insert into testBlob (b, a) values (?, ?)");
         for (int i=0; i<10; i++) {
             ps.setInt(1, i);
-            ps.setBytes(2, (blobData + i).getBytes());
+            ps.setBytes(2, (blobData + i).getBytes("US-ASCII"));
             ps.execute();
         }
         ps.close();
@@ -2714,7 +2715,7 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
     }
 
     private void updateBlobWithUpdateBinaryStream(ResultSet rs)
-    throws SQLException {
+    throws SQLException, UnsupportedEncodingException {
         Blob b;
         byte[] value, expectedValue;
         String blobData = "initial blob ";
@@ -2723,12 +2724,13 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         b = rs.getBlob(2);
         // check contents
         value = b.getBytes(1, blobData.length() + 1);
-        expectedValue = (blobData + rs.getInt(1)).getBytes();
+        expectedValue = (blobData + rs.getInt(1)).getBytes("US-ASCII");
+        
         assertTrue("FAIL - wrong blob value",
                 Arrays.equals(value, expectedValue));
 
         // update contents
-        value = (updatedBlobData + rs.getInt(1)).getBytes();
+        value = (updatedBlobData + rs.getInt(1)).getBytes("US-ASCII");
         InputStream updateValue = new ByteArrayInputStream(value);
         rs.updateBinaryStream(2, updateValue, value.length);
         rs.updateRow();
@@ -2738,7 +2740,7 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         b = rs.getBlob(2);
         // check contents
         value = b.getBytes(1, updatedBlobData.length() + 1);
-        expectedValue = (updatedBlobData + rs.getInt(1)).getBytes();
+        expectedValue = (updatedBlobData + rs.getInt(1)).getBytes("US-ASCII");
         assertTrue("FAIL - wrong blob value",
                 Arrays.equals(value, expectedValue));
     }
