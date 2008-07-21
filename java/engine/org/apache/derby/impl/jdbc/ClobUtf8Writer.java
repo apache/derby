@@ -104,9 +104,7 @@ final class ClobUtf8Writer extends Writer {
                 pos += ret;
         }
         catch (SQLException e) {
-            IOException ioe = new IOException (e.getMessage());
-            ioe.initCause (e);
-            throw ioe;
+            throw Util.newIOException(e);
         }
     }
 }

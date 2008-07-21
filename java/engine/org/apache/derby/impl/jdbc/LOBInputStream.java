@@ -131,7 +131,7 @@ public class LOBInputStream extends InputStream {
                                             SQLState.BLOB_INVALID_OFFSET))) {
                 throw new ArrayIndexOutOfBoundsException(se.getMessage());
             } else {
-                throw new IOException(se.getMessage());
+                throw Util.newIOException(se);
             }
         }
     }
@@ -173,7 +173,7 @@ public class LOBInputStream extends InputStream {
                 pos += 1;
             return ret;
         } catch (StandardException se) {
-            throw new IOException (se.getMessage());
+            throw Util.newIOException(se);
         }
     }
 

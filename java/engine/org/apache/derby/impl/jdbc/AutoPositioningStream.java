@@ -156,9 +156,7 @@ final class AutoPositioningStream extends BinaryToRawStream {
             }
         }
         catch (StandardException se) {
-            IOException ioe = new IOException (se.getMessage());
-            ioe.initCause (se);
-            throw ioe;
+            throw Util.newIOException(se);
         }
     }
 }

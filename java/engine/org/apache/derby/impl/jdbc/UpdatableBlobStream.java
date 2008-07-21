@@ -110,9 +110,7 @@ class UpdatableBlobStream extends InputStream {
             try {
                 stream = blob.getBinaryStream();
             } catch (SQLException ex) {
-                IOException ioe = new IOException (ex.getMessage());
-                ioe.initCause (ex);
-                throw ioe;
+                throw Util.newIOException(ex);
             }
             long leftToSkip = pos;
             while (leftToSkip > 0) {
