@@ -189,7 +189,7 @@ public class LargeDataLocksTest extends BaseJDBCTestCase {
                     ps.setBytes(2, Utilities.repeatChar("a", 38000).getBytes("US-ASCII"));
                 } catch (UnsupportedEncodingException ue) {
                     // Shouldn't happen US-ASCII should always be supported
-                	BaseTestCase.fail(ue.getMessage(),ue);
+                    BaseTestCase.fail(ue.getMessage(), ue);
                 }
                 ps.setInt(3, 38000);
                 ps.executeUpdate();
