@@ -664,14 +664,8 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 					TransactionController.MODE_RECORD,
 					TransactionController.ISOLATION_REPEATABLE_READ);
 
-		//= null;
 		try
 		{
-/*			 heapCC = 
-				tc.openConglomerate(td.getHeapConglomerateId(), false, 0,
-					TransactionController.MODE_RECORD,
-					TransactionController.ISOLATION_REPEATABLE_READ);*/
-
 			for (int i = 0; i < cds.length; i++)
 			{
 				if (!cds[i].isIndex())
@@ -692,8 +686,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		}
 		finally
 		{
-//			if (heapCC != null)
-				heapCC.close();
+			heapCC.close();
 		}
 
 		dd.startWriting(lcc);
@@ -753,11 +746,8 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 			} // try
 			finally
 			{
-//				if (gsc != null)
-				{
-					gsc.close();
-					gsc = null;
-				}
+				gsc.close();
+				gsc = null;
 			}
 
 			if (numRows == 0)
