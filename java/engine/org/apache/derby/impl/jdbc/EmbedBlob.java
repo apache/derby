@@ -255,8 +255,8 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
      * Depending on the representation, this might result in a read from a byte
      * array, a temporary file on disk or from a Derby store stream.
      *
-     * @param pos the 0-based position in the Blob to read
-     * @return The byte at the specified position.
+     * @return the byte at the current position, or -1 if end of file has been
+     * reached
      * @throws IOException if reading from the underlying data representation
      *      fails
      */
