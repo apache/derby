@@ -156,7 +156,6 @@ public class StressMultiTest extends BaseJDBCTestCase {
      * 
      * @param threads
      * @param minutes
-     * @return
      */
     public static Test embeddedSuite(int threads, int minutes) {
         THREADS = threads;
