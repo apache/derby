@@ -173,9 +173,9 @@ final class TemporaryClob implements InternalClob {
      *      the Clob length +1
      * @throws IOException if accessing underlying I/O resources fail
      */
-    public synchronized long getBytePosition (final long charPos)
+    //@GuardedBy(this)
+    private long getBytePosition (final long charPos)
             throws IOException {
-        checkIfValid();
         long bytePos;
         if (charPos == this.posCache.getCharPos()) {
             // We already know the position.

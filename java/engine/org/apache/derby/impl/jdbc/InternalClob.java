@@ -49,22 +49,6 @@ interface InternalClob {
     long getByteLength() throws IOException, SQLException;
 
     /**
-     * Obtains the byte position for the given character position.
-     * <p>
-     * The range of valid character positions is 
-     *  <code>1 - Clob.getCharLength() +1</code>, inclusive. The upper bound is
-     * used when appending to the Clob. Note that specifying a character
-     * position that is more than one longer than the Clob raises an exception.
-     *
-     * @param charPos character position. The first position is <code>1</code>.
-     * @return A 0-based byte position.
-     * @throws EOFException if the position is bigger than the Clob
-     * @throws IOException if accessing the underlying I/O resources fail
-     * @throws SQLException if the specified character position is invalid
-     */
-    long getBytePosition(long charPos) throws IOException, SQLException;
-
-    /**
      * Gets the number of characters in the Clob.
      *
      * @return Number of characters in the Clob.

@@ -136,16 +136,6 @@ public abstract class InternalClobTest
         }
     }
 
-    public void testGetBytePositionAfterRelease()
-            throws IOException, SQLException {
-        iClob.release();
-        try {
-            iClob.getBytePosition(1L);
-            fail("Exception should have been raised, but was not");
-        } catch (IllegalStateException ise) {
-            // This is as expected.
-        }
-    }
     public void testGetCharLengthAfterRelease()
             throws IOException, SQLException {
         iClob.release();
@@ -233,48 +223,6 @@ public abstract class InternalClobTest
     public void testGetByteLength()
             throws IOException, SQLException {
         assertEquals(this.initialByteLength, iClob.getByteLength());
-    }
-
-    public void testGetBytePosition_first()
-            throws IOException, SQLException {
-        assertEquals(0L, iClob.getBytePosition(1L));
-    }
-
-    public void testGetBytePosition_second()
-            throws IOException, SQLException {
-        assertEquals(bytesPerChar, iClob.getBytePosition(2L));
-    }
-
-    public void testGetBytePosition_last()
-            throws IOException, SQLException {
-        assertEquals(initialByteLength - bytesPerChar,
-                     iClob.getBytePosition(this.initialCharLength));
-    }
-
-    public void testGetBytePosition_lastPlussOne()
-            throws IOException, SQLException {
-        assertEquals(initialByteLength,
-                     iClob.getBytePosition(this.initialCharLength +1));
-    }
-
-    public void testGetBytePosition_lastPlussTwo()
-            throws IOException, SQLException {
-        try {
-            long pos = iClob.getBytePosition(this.initialCharLength +2);
-            fail("Length +2 should have no valid byte position, got " + pos);
-        } catch (EOFException ioe) {
-            // As expected for Derby.
-        }
-    }
-
-    public void testGetBytePosition_lastPlussThousand()
-            throws IOException, SQLException {
-        try {
-            long pos = iClob.getBytePosition(this.initialCharLength +1000);
-            fail("Length +1000 should have no valid byte position, got " + pos);
-        } catch (EOFException ioe) {
-            // As expected for Derby.
-        }
     }
 
     public void testGetCharLength()

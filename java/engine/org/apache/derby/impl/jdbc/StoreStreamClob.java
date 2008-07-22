@@ -234,20 +234,6 @@ final class StoreStreamClob
     }
 
     /**
-     * Returns the byte position for the specified character position.
-     *
-     * @param charPos character position. First character is at position 1.
-     * @return Corresponding byte position. First byte is at position 0.
-     * @throws EOFException if the position is bigger then the Clob
-     * @throws IOException if accessing the underlying I/O resources fail
-     * @throws SQLException if accessing the underlying store resources fail
-     */
-    public long getBytePosition(long charPos)
-            throws IOException, SQLException {
-        return UTF8Util.skipFully(getRawByteStream(), charPos -1);
-    }
-
-    /**
      * Not supported.
      *
      * @see InternalClob#getWriter
