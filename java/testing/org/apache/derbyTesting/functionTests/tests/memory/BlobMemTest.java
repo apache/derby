@@ -71,7 +71,7 @@ public class BlobMemTest extends BaseJDBCTestCase {
      * @throws IllegalAccessException 
      * @throws IllegalArgumentException 
      */
-    private void testBlobLength(boolean lengthless) throws SQLException, IOException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+    private void testBlobLength(boolean lengthless, int extraLen) throws SQLException, IOException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
         setAutoCommit(false);
         Statement s = createStatement();
         s.executeUpdate("CREATE TABLE BLOBTAB (K INT CONSTRAINT PK PRIMARY KEY, B BLOB(" + LONG_BLOB_LENGTH + "))");
@@ -79,7 +79,8 @@ public class BlobMemTest extends BaseJDBCTestCase {
         PreparedStatement ps = prepareStatement("INSERT INTO BLOBTAB VALUES(?,?)");
         // We allocate 16MB for the test so use something bigger than that.
         ps.setInt(1,1);
-        LoopingAlphabetStream stream = new LoopingAlphabetStream(LONG_BLOB_LENGTH);
+        int blobLen = LONG_BLOB_LENGTH + extraLen;
+        LoopingAlphabetStream stream = new LoopingAlphabetStream(blobLen);
         if (lengthless) {
             Method m = null;
             try {
@@ -95,8 +96,26 @@ public class BlobMemTest extends BaseJDBCTestCase {
             m.invoke(ps, new Object[] {new Integer(2),stream});
         }
         else
-            ps.setBinaryStream(2, stream,LONG_BLOB_LENGTH);
-        ps.executeUpdate();
+            ps.setBinaryStream(2, stream,blobLen);
+        if (extraLen == 0)
+        {
+            ps.executeUpdate();
+        }
+        else
+        {
+            try
+            {
+                ps.executeUpdate();
+                fail("Expected truncation error for blob too large");
+            }
+            catch (SQLException sqlE)
+            {
+                assertSQLState("Wrong SQL State for truncation", "22001", sqlE);
+            }
+            // extraLen > 0 is just a way to force the truncation error. Once
+            // we've forced that error, we're done testing, so return.
+            return;
+        }
         // insert a zero length blob.
         ps.setInt(1, 2);
         ps.setBytes(2, new byte[] {});
@@ -168,7 +187,7 @@ public class BlobMemTest extends BaseJDBCTestCase {
      * @throws IllegalArgumentException 
      */
     public void testBlobLength() throws SQLException, IOException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {
-        testBlobLength(false);
+        testBlobLength(false, 0);
     }
     
     /**
@@ -183,7 +202,13 @@ public class BlobMemTest extends BaseJDBCTestCase {
      * @throws IllegalArgumentException 
      */
     public void testBlobLengthWithLengthlessInsert() throws SQLException, IOException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {        
-        testBlobLength(true);  
+        testBlobLength(true, 0);  
+    }
+    /**
+      * Simple test to excercise message 22001 as described in DERBY-961.
+      */
+    public void testBlobLengthTooLongDerby961() throws SQLException, IOException, IllegalArgumentException, IllegalAccessException, InvocationTargetException {        
+        testBlobLength(false, 10000);  
     }
        public static Test suite() {
         Test suite =  TestConfiguration.defaultSuite(BlobMemTest.class);

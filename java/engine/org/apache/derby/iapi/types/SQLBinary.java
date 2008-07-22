@@ -1053,7 +1053,7 @@ abstract class SQLBinary
 
 		if (variableLength != -1 && variableLength > declaredLength)
 				throw StandardException.newException(SQLState.LANG_STRING_TRUNCATION, getTypeName(), 
-							"XX-RESOLVE-XX",
+							"(Binary data value not displayed)",
 							String.valueOf(declaredLength));
 	}
 
