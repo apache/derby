@@ -25,6 +25,7 @@ package org.apache.derbyTesting.functionTests.tests.multi;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Date;
@@ -39,6 +40,7 @@ import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.BaseTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.Decorator;
+import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
@@ -514,7 +516,8 @@ public class StressMultiTest extends BaseJDBCTestCase {
         private void select(String table) throws SQLException {
             Statement s = con.createStatement();
             try {
-                s.executeQuery("select * from " + table);
+                ResultSet rs = s.executeQuery("select * from " + table);
+                JDBC.assertDrainResults(rs);
             } catch (SQLException se) {
                 String e = se.getSQLState();
                 if (e.equals("42Y55") || e.equals("42000") || e.equals("40001")
