@@ -2216,12 +2216,18 @@ public class ResultColumnList extends QueryTreeNodeVector
 			if (visibleSize() != otherRCL.visibleSize())
 			{
 				SanityManager.THROWASSERT(
-							"size() = (" +
-							size() +
-							") is expected to equal otherRCL.size (" +
-							otherRCL.size() +
+							"visibleSize() = (" +
+							visibleSize() +
+							") is expected to equal otherRCL.visibleSize (" +
+							otherRCL.visibleSize() +
 							")");
 			}
+
+            // Generated grouping columns should have been removed for the RCL
+            // of a SetOperatorNode, so that size and visible size are equal
+            // (DERBY-3764).
+            SanityManager.ASSERT(size() == visibleSize(),
+                                 "size() and visibleSize() should be equal");
 		}
 
 		/* Make a dummy TableName to be shared by all new CRs */
@@ -2344,6 +2350,18 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 */
 	public boolean isExactTypeAndLengthMatch(ResultColumnList otherRCL) throws StandardException
 	{
+
+        if (SanityManager.DEBUG) {
+            // The visible size of the two RCLs must be equal.
+            SanityManager.ASSERT(visibleSize() == otherRCL.visibleSize(),
+                                 "visibleSize() should match");
+            // The generated grouping columns should have been removed from the
+            // RCL of the SetOperatorNode, so size and visible size should be
+            // equal (DERBY-3764).
+            SanityManager.ASSERT(size() == visibleSize(),
+                                 "size() and visibleSize() should match");
+        }
+
 		int size = visibleSize();
 		for (int index = 0; index < size; index++)
 		{
