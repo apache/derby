@@ -1,0 +1,69 @@
+// Policy file with minimal set of permissions to run unit test for
+// AssertFailureTest with ThreadDump permissions.
+
+
+// The test harness sets up four variables used by this policy file
+//
+// derbyTesting.codejar - URL to the jar files when they are in the classpath
+// derbyTesting.codeclasses - URL to the classes directory when it is in the classpath
+//
+// Only one of derbyTesting.codejar and derbyTesting.codeclasses will be valid, the
+// other will be set to a bogus URL like file://unused
+//
+// derbyTesting.codedir - File location of either derbyTesting.codejar or derbyTesting.codeclasses.
+// Only required due to a BUG (see below for more info).
+//
+// derbyTesting.jaxpjar - URL to the jar file containing the JAXP implementation
+//     for XML-based tests (ex. lang/XMLBindingTest.java).
+//
+// derbyTesting.serverhost - Host name or ip where network server is started 
+// derbyTesting.clienthost - specifies the clients ip address/hostName. 
+//     when testing with networkserver on a remote host, this needs to be passed in 
+//     with the NetworkServerControl start command
+
+
+//
+// Permissions for the tests (derbyTesting.jar)
+//
+grant codeBase "${derbyTesting.testjar}derbyTesting.jar" {
+  // Allow tests to install and uninstall the security manager and
+  // to refresh the policy
+  permission java.util.PropertyPermission "java.security.policy", "read,write";
+  permission java.lang.RuntimePermission "setSecurityManager";
+  permission java.security.SecurityPermission "getPolicy";
+  
+  // derbyTesting.junit.TestConfiguration... modifies System properties
+  permission java.util.PropertyPermission "*", "read,write";
+
+  //needs to run "doAsPrivileged"
+  permission javax.security.auth.AuthPermission "doAsPrivileged";
+  
+};
+
+
+//
+// Permissions for running the test on the class files
+//
+grant codeBase "${derbyTesting.codeclasses}" {
+  // Allow tests to install and uninstall the security manager and
+  // to refresh the policy
+  permission java.util.PropertyPermission "java.security.policy", "read,write";
+  permission java.lang.RuntimePermission "setSecurityManager";
+  permission java.security.SecurityPermission "getPolicy";
+
+  // derbyTesting.junit.TestConfiguration... modifies System properties
+  permission java.util.PropertyPermission "*", "read,write";
+
+};
+
+
+// Ant's junit runner requires setOut to redirect the System output streams
+// to the forked JVM used when running junit tests inside Ant. Ant requires
+// forking the JVM if you want to run tests in a different directory than the
+// current one.
+grant codeBase "${derbyTesting.antjunit}" {
+    permission java.lang.RuntimePermission "setIO";
+    
+    // This permission is needed when running the tests using ant 1.7
+    permission java.io.FilePermission "${user.dir}${/}*", "write";
+};

@@ -119,6 +119,11 @@ permission java.util.PropertyPermission "derby.storage.jvmInstanceId",
   permission java.util.PropertyPermission "${emma.active}user.dir", "read";
   permission java.io.FilePermission "${emma.active}${user.dir}${/}coverage.ec", "read, write";
   permission java.lang.RuntimePermission "${emma.active}writeFileDescriptor";
+  
+  // These permissions are needed by AssertFailure to dump the thread stack
+  // traces upon failure.
+  permission java.lang.RuntimePermission "getStackTrace";
+  permission java.lang.RuntimePermission "modifyThreadGroup";
 };
 
 //
@@ -159,6 +164,11 @@ grant codeBase "${derbyTesting.clientjar}derbyclient.jar" {
   // to create the trace files in that directory.
   permission java.util.PropertyPermission "user.dir", "read";
   permission java.io.FilePermission "${user.dir}${/}-", "read, write"; 
+  
+  // These permissions are needed by AssertFailure to dump the thread stack
+  // traces upon failure.
+  permission java.lang.RuntimePermission "getStackTrace";
+  permission java.lang.RuntimePermission "modifyThreadGroup";
 
 };
 
@@ -204,7 +214,7 @@ grant codeBase "${derbyTesting.testjar}derbyTesting.jar" {
   permission java.security.SecurityPermission "getPolicy";
   permission java.lang.RuntimePermission "setIO";  
 
-  // These permissions are needed by stress.multi to dump the thread stack
+  // These permissions are needed to dump the thread stack
   // traces upon failure.
   permission java.lang.RuntimePermission "getStackTrace";
   permission java.lang.RuntimePermission "modifyThreadGroup";

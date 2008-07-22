@@ -24,6 +24,7 @@ package org.apache.derbyTesting.unitTests.junit;
 import java.sql.SQLException;
 
 import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.SecurityManagerSetup;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -33,7 +34,7 @@ import junit.framework.TestSuite;
  * org.apache.derbyTesting.unitTests.junit
  *
  */
-public class _Suite extends BaseTestCase  {
+public class _Suite extends BaseTestCase {
 
     /**
      * Use suite method instead.
@@ -51,6 +52,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(SystemPrivilegesPermissionTest.suite());
         suite.addTest(UTF8UtilTest.suite());
         suite.addTestSuite(CompressedNumberTest.class);
+        suite.addTest(AssertFailureTest.suite());
 
         return suite;
     }
