@@ -625,6 +625,10 @@ abstract class SetOperatorNode extends TableOperatorNode
 		 */
 		resultColumns = leftResultSet.getResultColumns().copyListAndObjects();
 
+        // The generated grouping columns of the left result set should not be
+        // part of the result from the set operation (DERBY-3764).
+        resultColumns.removeGeneratedGroupingColumns();
+
 		/* Create new expressions with the dominant types after verifying
 		 * union compatibility between left and right sides.
 		 */
