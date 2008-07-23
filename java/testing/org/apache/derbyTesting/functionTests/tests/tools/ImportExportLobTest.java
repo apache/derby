@@ -395,6 +395,7 @@ public class ImportExportLobTest extends ImportExportBaseTest
         try {
             doExportTableLobsToExtFile("APP", "BOOKS", fileName, 
                                        null, "9" , null, lobsFileName);
+            fail();
         } catch (SQLException e) {
             assertSQLState("XIE0J", e);
         }
@@ -406,6 +407,7 @@ public class ImportExportLobTest extends ImportExportBaseTest
         try {
             doExportQueryLobsToExtFile("select * from BOOKS", fileName,
                                        "|", "f", null, lobsFileName);
+            fail();
         } catch (SQLException e) {
             assertSQLState("XIE0J", e);
         }
@@ -420,6 +422,7 @@ public class ImportExportLobTest extends ImportExportBaseTest
         try {
             doImportTableLobsFromExtFile("APP", "BOOKS_IMP", fileName, "2", 
                                          null, null, 0);
+            fail();
         } catch (SQLException e) {
              assertSQLState("XIE0J", e);
         }
@@ -427,6 +430,7 @@ public class ImportExportLobTest extends ImportExportBaseTest
         try {
             doImportDataLobsFromExtFile(null, "BOOKS_IMP", null, 
                                       null,  fileName, null, "c", null, 1);
+            fail();
         } catch (SQLException e) {
             assertSQLState("XIE0J", e);
         }
@@ -449,6 +453,7 @@ public class ImportExportLobTest extends ImportExportBaseTest
             doExportTableLobsToExtFile("APP", "BOOKS", fileName, 
                                        null, null , null, 
                                        null);
+            fail();
         }catch (SQLException e) {
             assertSQLState("XIE0Q", e);
         }
@@ -467,6 +472,7 @@ public class ImportExportLobTest extends ImportExportBaseTest
             // missing lob file, refered by the main import file.
             doImportTableLobsFromExtFile("APP", "BOOKS_IMP", fileName, 
                                          null, null, null, 0);
+            fail();
         }catch (SQLException e) {
             assertSQLState("XIE0P", e);
         }

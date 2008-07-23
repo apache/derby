@@ -194,6 +194,7 @@ public class ImportExportBinaryDataTest extends ImportExportBaseTest {
     {
         try {
             doExportTable("APP", "BIN_TAB", fileName, null, "9" , null);
+            fail();
         } catch (SQLException e) {
             assertSQLState("XIE0J", e);
         }
@@ -201,12 +202,14 @@ public class ImportExportBinaryDataTest extends ImportExportBaseTest {
         try {
             doExportQuery("select * from BIN_TAB", fileName,
                           "|", "f", null);
+            fail();
         } catch (SQLException e) {
             assertSQLState("XIE0J", e);
         }
 	SupportFilesSetup.deleteFile(fileName);
         try {
             doExportTable("APP", "BIN_TAB", fileName, "B", null , null);
+            fail();
         } catch (SQLException e) {
             assertSQLState("XIE0J", e);
         }
@@ -215,6 +218,7 @@ public class ImportExportBinaryDataTest extends ImportExportBaseTest {
 
         try {
             doImportTable("APP", "BIN_TAB_IMP", fileName, "2", null, null, 0);
+            fail();
         } catch (SQLException e) {
              assertSQLState("XIE0J", e);
         }
@@ -222,6 +226,7 @@ public class ImportExportBinaryDataTest extends ImportExportBaseTest {
         try {
             doImportData(null, "BIN_TAB_IMP", null, 
                          null,  fileName, null, "c", null, 1);
+            fail();
         } catch (SQLException e) {
             assertSQLState("XIE0J", e);
         }

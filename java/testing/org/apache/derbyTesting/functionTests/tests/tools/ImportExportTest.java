@@ -90,6 +90,7 @@ public class ImportExportTest extends BaseJDBCTestCase {
 		try {
 			Connection c = getConnection();
 			doImport(c, "Z" , "T1" , null , null , null, 0);
+            fail();
 		} catch (SQLException e) {
 			assertSQLState("XIE04", e);
 		}
@@ -99,6 +100,7 @@ public class ImportExportTest extends BaseJDBCTestCase {
 		try {
 			Connection c = getConnection();
 			doImport(c, null, "T1" , null , null, null, 0);
+            fail();
 		} catch (SQLException e) {
 			assertSQLState("XIE05", e);
 		}
@@ -154,6 +156,7 @@ public class ImportExportTest extends BaseJDBCTestCase {
 		resetTables();
 		try {
 		    doImportAndExport(c, "T1", "^", "#", "INAVALID ENCODING");
+            fail();
 		} catch (SQLException e) {
 			assertSQLState("XIE0I", e);
 		}
@@ -163,6 +166,7 @@ public class ImportExportTest extends BaseJDBCTestCase {
 		Connection c = getConnection();
 		try {
 			doImportFromFile(c, "extin/EndOfFile.txt" , "T4" , null , null , "US-ASCII", 0);
+            fail();
 		} catch (SQLException e) {
 			assertSQLState("XIE0E", e);
 		}
