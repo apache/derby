@@ -26,6 +26,13 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.PreparedStatement;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -1568,6 +1575,316 @@ public class GroupByTest extends BaseJDBCTestCase {
             s.executeQuery(
                 " select distinct t.dt from t group by i, dt, b order by dt"),
             new String [][] { {"1992-01-01"}, {"1992-09-09"}, {null} });
+    }
+
+    /**
+     * Test that GROUP BY can be used in the sub-expressions of set operations
+     * (DERBY-3764).
+     */
+    public void testSetOperationsAndGroupBy() throws SQLException {
+        // turn off auto-commit to clean up test data automatically
+        getConnection().setAutoCommit(false);
+
+        Statement s = createStatement();
+
+        s.execute("CREATE TABLE D3764A (A1 INTEGER, A2 VARCHAR(10))");
+
+        int[] valuesA = { 1, 2, 3, 4, 5, 6, 5, 3, 1 };
+
+        PreparedStatement insertA =
+            prepareStatement("INSERT INTO D3764A (A1) VALUES (?)");
+
+        for (int i = 0; i < valuesA.length; i++) {
+            insertA.setInt(1, valuesA[i]);
+            insertA.executeUpdate();
+        }
+
+        s.execute("CREATE TABLE D3764B (B1 INTEGER, B2 VARCHAR(10))");
+
+        int[] valuesB = { 1, 2, 3, 3, 7, 9 };
+
+        PreparedStatement insertB =
+            prepareStatement("INSERT INTO D3764B (B1) VALUES (?)");
+
+        for (int i = 0; i < valuesB.length; i++) {
+            insertB.setInt(1, valuesB[i]);
+            insertB.executeUpdate();
+        }
+
+        // Define some queries with one result column and a varying number of
+        // grouping columns.
+        String[] singleColumnQueries = {
+            "SELECT A1 FROM D3764A",
+            "SELECT COUNT(A1) FROM D3764A",
+            "SELECT COUNT(A1) FROM D3764A GROUP BY A1",
+            "SELECT COUNT(A1) FROM D3764A GROUP BY A2",
+            "SELECT COUNT(A1) FROM D3764A GROUP BY A1, A2",
+            "SELECT B1 FROM D3764B",
+            "SELECT COUNT(B1) FROM D3764B",
+            "SELECT COUNT(B1) FROM D3764B GROUP BY B1",
+            "SELECT COUNT(B1) FROM D3764B GROUP BY B2",
+            "SELECT COUNT(B1) FROM D3764B GROUP BY B1, B2",
+            "VALUES 1, 2, 3, 4",
+        };
+
+        // The expected results from the queries above.
+        String[][][] singleColumnExpected = {
+            { {"1"}, {"2"}, {"3"}, {"4"}, {"5"}, {"6"}, {"5"}, {"3"}, {"1"} },
+            { { Integer.toString(valuesA.length) } },
+            { {"2"}, {"1"}, {"2"}, {"1"}, {"2"}, {"1"} },
+            { { Integer.toString(valuesA.length) } },
+            { {"2"}, {"1"}, {"2"}, {"1"}, {"2"}, {"1"} },
+            { {"1"}, {"2"}, {"3"}, {"3"}, {"7"}, {"9"} },
+            { { Integer.toString(valuesB.length) } },
+            { {"1"}, {"1"}, {"2"}, {"1"}, {"1"} },
+            { { Integer.toString(valuesB.length) } },
+            { {"1"}, {"1"}, {"2"}, {"1"}, {"1"} },
+            { {"1"}, {"2"}, {"3"}, {"4"} },
+        };
+
+        // Test all the set operations with all the combinations of the queries
+        // above.
+        doAllSetOperations(s, singleColumnQueries, singleColumnExpected);
+
+        // Define some queries with two result columns and a varying number of
+        // grouping columns.
+        String[] twoColumnQueries = {
+            "SELECT A1-1, A1+1 FROM D3764A",
+            "SELECT COUNT(A1), A1 FROM D3764A GROUP BY A1",
+            "SELECT COUNT(A1), LENGTH(A2) FROM D3764A GROUP BY A2",
+            "SELECT COUNT(A1), A1 FROM D3764A GROUP BY A1, A2",
+            "SELECT B1-1, B1+1 FROM D3764B",
+            "SELECT COUNT(B1), B1 FROM D3764B GROUP BY B1",
+            "SELECT COUNT(B1), LENGTH(B2) FROM D3764B GROUP BY B2",
+            "SELECT COUNT(B1), B1 FROM D3764B GROUP BY B1, B2",
+            "VALUES (1, 2), (3, 4)",
+        };
+
+        // The expected results from the queries above.
+        String[][][] twoColumnExpected = {
+            { {"0","2"}, {"1","3"}, {"2","4"}, {"3","5"}, {"4","6"},
+              {"5","7"}, {"4","6"}, {"2","4"}, {"0","2"} },
+            { {"2","1"}, {"1","2"}, {"2","3"}, {"1","4"}, {"2","5"},
+              {"1","6"} },
+            { { Integer.toString(valuesA.length), null } },
+            { {"2","1"}, {"1","2"}, {"2","3"}, {"1","4"}, {"2","5"},
+              {"1","6"} },
+            { {"0","2"}, {"1","3"}, {"2","4"}, {"2","4"}, {"6","8"},
+              {"8","10"} },
+            { {"1","1"}, {"1","2"}, {"2","3"}, {"1","7"}, {"1","9"} },
+            { { Integer.toString(valuesB.length), null } },
+            { {"1","1"}, {"1","2"}, {"2","3"}, {"1","7"}, {"1","9"} },
+            { {"1","2"}, {"3","4"} },
+        };
+
+        // Test all the set operations with all the combinations of the queries
+        // above.
+        doAllSetOperations(s, twoColumnQueries, twoColumnExpected);
+
+        // Test that set operations cannot be used on sub-queries with
+        // different number of columns.
+        assertSetOpErrors("42X58", s, singleColumnQueries, twoColumnQueries);
+        assertSetOpErrors("42X58", s, twoColumnQueries, singleColumnQueries);
+    }
+
+    /**
+     * Try all set operations (UNION [ALL], EXCEPT [ALL], INTERSECT [ALL]) on
+     * all combinations of the specified queries.
+     *
+     * @param s the statement used to execute the queries
+     * @param queries the different queries to use, all of which must be union
+     * compatible
+     * @param expectedResults the expected results from the different queries
+     */
+    private static void doAllSetOperations(Statement s, String[] queries,
+                                           String[][][] expectedResults)
+            throws SQLException {
+
+        assertEquals(queries.length, expectedResults.length);
+
+        for (int i = 0; i < queries.length; i++) {
+            final String query1 = queries[i];
+            final List rows1 = resultArrayToList(expectedResults[i]);
+
+            for (int j = 0; j < queries.length; j++) {
+                final String query2 = queries[j];
+                final List rows2 = resultArrayToList(expectedResults[j]);
+
+                String query = query1 + " UNION " + query2;
+                String[][] rows = union(rows1, rows2, false);
+                JDBC.assertUnorderedResultSet(s.executeQuery(query), rows);
+
+                query = query1 + " UNION ALL " + query2;
+                rows = union(rows1, rows2, true);
+                JDBC.assertUnorderedResultSet(s.executeQuery(query), rows);
+
+                query = query1 + " EXCEPT " + query2;
+                rows = except(rows1, rows2, false);
+                JDBC.assertUnorderedResultSet(s.executeQuery(query), rows);
+
+                query = query1 + " EXCEPT ALL " + query2;
+                rows = except(rows1, rows2, true);
+                JDBC.assertUnorderedResultSet(s.executeQuery(query), rows);
+
+                query = query1 + " INTERSECT " + query2;
+                rows = intersect(rows1, rows2, false);
+                JDBC.assertUnorderedResultSet(s.executeQuery(query), rows);
+
+                query = query1 + " INTERSECT ALL " + query2;
+                rows = intersect(rows1, rows2, true);
+                JDBC.assertUnorderedResultSet(s.executeQuery(query), rows);
+            }
+        }
+    }
+
+    /**
+     * Try all set operations with queries from {@code queries1} in the left
+     * operand and queries from {@code queries2} in the right operand. All the
+     * set operations are expected to fail with the same SQLState.
+     *
+     * @param sqlState the expected SQLState
+     * @param s the statement used to execute the queries
+     * @param queries1 queries to use as the left operand
+     * @param queries2 queries to use as the right operand
+     */
+    private static void assertSetOpErrors(String sqlState,
+                                          Statement s,
+                                          String[] queries1,
+                                          String[] queries2)
+            throws SQLException {
+
+        final String[] operators = {
+            " UNION ", " UNION ALL ", " EXCEPT ", " EXCEPT ALL ",
+            " INTERSECT ", " INTERSECT ALL "
+        };
+
+        for (int i = 0; i < queries1.length; i++) {
+            for (int j = 0; j < queries2.length; j++) {
+                for (int k = 0; k < operators.length; k++) {
+                    assertStatementError(
+                        sqlState, s, queries1[i] + operators[k] + queries2[j]);
+                }
+            }
+        }
+    }
+
+    /**
+     * Find the union between two collections of rows (each row is a list of
+     * strings). Return the union as an array of string arrays.
+     *
+     * @param rows1 the first collection of rows
+     * @param rows2 the second collection of rows
+     * @param all whether or not bag semantics (as in UNION ALL) should be used
+     * instead of set semantics
+     * @return the union of {@code rows1} and {@code rows2}, as a {@code
+     * String[][]}
+     */
+    private static String[][] union(Collection rows1,
+                                    Collection rows2,
+                                    boolean all) {
+        Collection bagOrSet = newBagOrSet(all);
+        bagOrSet.addAll(rows1);
+        bagOrSet.addAll(rows2);
+        return toResultArray(bagOrSet);
+    }
+
+    /**
+     * Find the difference between two collections of rows (each row is a list
+     * of strings). Return the difference as an array of string arrays.
+     *
+     * @param rows1 the first operand to the set difference operator
+     * @param rows2 the second operand to the set difference operator
+     * @param all whether or not bag semantics (as in EXCEPT ALL) should be
+     * used instead of set semantics
+     * @return the difference between {@code rows1} and {@code rows2}, as a
+     * {@code String[][]}
+     */
+    private static String[][] except(Collection rows1,
+                                     Collection rows2,
+                                     boolean all) {
+        Collection bagOrSet = newBagOrSet(all);
+        bagOrSet.addAll(rows1);
+        // could use removeAll() for sets, but need other behaviour for bags
+        for (Iterator it = rows2.iterator(); it.hasNext(); ) {
+            bagOrSet.remove(it.next());
+        }
+        return toResultArray(bagOrSet);
+    }
+
+    /**
+     * Find the intersection between two collections of rows (each row is a
+     * list of strings). Return the intersection as an array of string arrays.
+     *
+     * @param rows1 the first collection of rows
+     * @param rows2 the second collection of rows
+     * @param all whether or not bag semantics (as in INTERSECT ALL) should be
+     * used instead of set semantics
+     * @return the intersection between {@code rows1} and {@code rows2}, as a
+     * {@code String[][]}
+     */
+    private static String[][] intersect(Collection rows1,
+                                        Collection rows2,
+                                        boolean all) {
+        Collection bagOrSet = newBagOrSet(all);
+        List copyOfRows2 = new ArrayList(rows2);
+        // could use retainAll() for sets, but need other behaviour for bags
+        for (Iterator it = rows1.iterator(); it.hasNext(); ) {
+            Object x = it.next();
+            if (copyOfRows2.remove(x)) {
+                // x is present in both of the collections, add it
+                bagOrSet.add(x);
+            }
+        }
+        return toResultArray(bagOrSet);
+    }
+
+    /**
+     * Create a {@code Collection} that can be used as a bag or a set.
+     *
+     * @param bag tells whether or not the collection should be a bag
+     * @return a {@code List} if a bag is requested, or a {@code Set} otherwise
+     */
+    private static Collection newBagOrSet(boolean bag) {
+        if (bag) {
+            return new ArrayList();
+        } else {
+            return new HashSet();
+        }
+    }
+
+    /**
+     * Convert a {@code Collection} of rows to an array of string arrays that
+     * can be passed as an argument with expected results to
+     * {@link JDBC#assertUnorderedResultSet(ResultSet,String[][])}.
+     *
+     * @param rows a collection of rows, where each row is a list of strings
+     * @return a {@code String[][]} containing the same values as {@code rows}
+     */
+    private static String[][] toResultArray(Collection rows) {
+        String[][] results = new String[rows.size()][];
+        Iterator it = rows.iterator();
+        for (int i = 0; i < results.length; i++) {
+            List row = (List) it.next();
+            results[i] = (String[]) row.toArray(new String[row.size()]);
+        }
+        return results;
+    }
+
+    /**
+     * Return a list of lists containing the same values as the specified array
+     * of string arrays. This method can be used to make it easier to perform
+     * set operations on a two-dimensional array of strings.
+     *
+     * @param results a two dimensional array of strings (typically expected
+     * results from a query}
+     * @return the values of {@code results} in a list of lists
+     */
+    private static List resultArrayToList(String[][] results) {
+        ArrayList rows = new ArrayList(results.length);
+        for (int i = 0; i < results.length; i++) {
+            rows.add(Arrays.asList(results[i]));
+        }
+        return rows;
     }
 }
 
