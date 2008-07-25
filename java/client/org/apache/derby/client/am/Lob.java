@@ -268,11 +268,7 @@ public abstract class Lob implements UnitOfWorkListener {
                     );
         }
     }
-    
-    public static boolean isLengthObtained(Lob l){
-        return l.lengthObtained_;
-    }
-    
+
     public abstract long length() throws SQLException;
     
     protected static boolean isLayerBStreamingPossible( Agent agent ){
