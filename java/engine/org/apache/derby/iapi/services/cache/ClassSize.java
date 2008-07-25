@@ -23,11 +23,11 @@ package org.apache.derby.iapi.services.cache;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
-import java.lang.Class;
 import java.lang.reflect.Field;
-import java.lang.Runtime;
-import java.lang.InterruptedException;
 import java.lang.reflect.Modifier;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.util.Arrays;
 
 public class ClassSize
 {
@@ -67,19 +67,26 @@ public class ClassSize
             catalog = (java.util.Hashtable)
               Class.forName( "org.apache.derby.iapi.services.cache.ClassSizeCatalog").newInstance();
         }
-        catch( Exception e){};
+        catch( Exception e){}
 
         // Figure out whether this is a 32 or 64 bit machine.
-        Runtime runtime = Runtime.getRuntime();
-        runtime.gc();
-        runtime.runFinalization();
-        long memBase = runtime.totalMemory() - runtime.freeMemory();
-        Object[] junk = new Object[10000];
-        runtime.gc();
-        runtime.runFinalization();
-        long memUsed = runtime.totalMemory() - runtime.freeMemory() - memBase;
-        int sz = (int)((memUsed + junk.length/2)/junk.length);
-        refSize = ( 4 > sz) ? 4 : sz;
+        int tmpRefSize = fetchRefSizeFromSystemProperties();
+        // If we didn't understand the properties, or were not allowed to read
+        // them, use a heuristic.
+        if (tmpRefSize < 4) {
+            Runtime runtime = Runtime.getRuntime();
+            runtime.gc();
+            runtime.runFinalization();
+            long memBase = runtime.totalMemory() - runtime.freeMemory();
+            Object[] junk = new Object[10000];
+            runtime.gc();
+            runtime.runFinalization();
+            long memUsed = runtime.totalMemory() - runtime.freeMemory() - memBase;
+            int sz = (int)((memUsed + junk.length/2)/junk.length);
+            tmpRefSize = ( 4 > sz) ? 4 : sz;
+        }
+        // Assign what we have found to the final variable.
+        refSize = tmpRefSize;
         minObjectSize = 4*refSize;
     }
 
@@ -298,5 +305,61 @@ public class ClassSize
             return 0;
         // Since Java uses Unicode assume that each character takes 2 bytes
         return 2*str.length();
+    }
+
+    /**
+     * Tries to determine the reference size in bytes by checking whether the
+     * VM we're running in is 32 or 64 bit by looking at the system properties.
+     *
+     * @return The reference size in bytes as specified or implied by the VM,
+     *      or {@code -1} if the reference size couldn't be determined.
+     */
+    private static final int fetchRefSizeFromSystemProperties() {
+        // Try the direct way first, by looking for 'sun.arch.data.model'
+        String dataModel = getSystemProperty("sun.arch.data.model");
+        try {
+            return (new Integer(dataModel).intValue() / 8);
+        } catch (NumberFormatException ignoreNFE) {}
+
+        // Try 'os.arch'
+        String arch = getSystemProperty("os.arch");
+        // See if we recognize the property value.
+        if (arch != null) {
+            // Is it a known 32 bit architecture?
+            String[] b32 = new String[] {"i386", "x86", "sparc"};
+            if (Arrays.asList(b32).contains(arch)) return 4; // 4 bytes per ref
+            // Is it a known 64 bit architecture?
+            String[] b64 = new String[] {"amd64", "x86_64", "sparcv9"};
+            if (Arrays.asList(b64).contains(arch)) return 8; // 8 bytes per ref
+        }
+
+        // Didn't find out anything.
+        if (SanityManager.DEBUG) {
+            SanityManager.DEBUG_PRINT(
+                    "REFSIZE", "Bitness undetermined, sun.arch.data.model='" +
+                    dataModel + "', os.arch='" + arch + "'");
+        }
+        return -1;
+    }
+
+    /**
+     * Attempts to read the specified system property.
+     *
+     * @param propName name of the system property to read
+     * @return The property value, or {@code null} if it doesn't exist or the
+     *      required permission to read the property is missing.
+     */
+    private static final String getSystemProperty(final String propName) {
+        try {
+            return (String)AccessController.doPrivileged(
+                    new PrivilegedAction() {
+                        public Object run() {
+                            return System.getProperty(propName, null);
+                        }
+                });
+        } catch (SecurityException se) {
+            // Ignore exception and return null.
+            return null;
+        }
     }
 }
