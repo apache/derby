@@ -170,6 +170,143 @@ public class RoutineTest extends BaseJDBCTestCase {
     }
     
     /**
+     * Test that RETURNS NULL ON NULL INPUT works properly with 
+     * numeric datatypes for null and non-null values.
+     */
+    public void testFunctionReturnsNullOnNullInput() throws SQLException
+    {
+        Statement s = createStatement();
+
+        // SMALLINT -> short
+        s.executeUpdate(
+        "CREATE FUNCTION SMALLINT_P_SHORT_RN(VARCHAR(10)) RETURNS SMALLINT " +
+           "EXTERNAL NAME 'java.lang.Short.parseShort' " +
+           "LANGUAGE JAVA PARAMETER STYLE JAVA " +
+           "RETURNS NULL ON NULL INPUT");
+
+        PreparedStatement ps = prepareStatement("VALUES SMALLINT_P_SHORT_RN(?)");
+        ps.setString(1, "123");
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), "123");  
+
+        ps.setString(1,null);
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), null);
+        // SMALLINT -> Integer
+        s.executeUpdate(
+        "CREATE FUNCTION SMALLINT_O_INTEGER_RN(VARCHAR(10)) RETURNS SMALLINT " +
+           "EXTERNAL NAME 'java.lang.Integer.valueOf' " +
+           "LANGUAGE JAVA PARAMETER STYLE JAVA " +
+           "RETURNS NULL ON NULL INPUT");
+
+        ps = prepareStatement("VALUES SMALLINT_O_INTEGER_RN(?)");
+        ps.setString(1, "123");
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), "123");  
+
+        ps.setString(1, null);
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), null);
+        // INTEGER -> int
+        s.executeUpdate(
+        "CREATE FUNCTION INTEGER_P_INT_RN(VARCHAR(10)) RETURNS INTEGER " +
+           "EXTERNAL NAME 'java.lang.Integer.parseInt' " +
+           "LANGUAGE JAVA PARAMETER STYLE JAVA " +
+           "RETURNS NULL ON NULL INPUT");
+
+        ps = prepareStatement("VALUES INTEGER_P_INT_RN(?)");
+        ps.setString(1, "123");
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), "123");  
+
+        // INTEGER -> Integer
+        s.executeUpdate(
+        "CREATE FUNCTION INTEGER_O_INTEGER_RN(VARCHAR(10)) RETURNS INTEGER " +
+           "EXTERNAL NAME 'java.lang.Integer.valueOf' " +
+           "LANGUAGE JAVA PARAMETER STYLE JAVA " +
+           "RETURNS NULL ON NULL INPUT");
+
+        ps = prepareStatement("VALUES INTEGER_O_INTEGER_RN(?)");
+        ps.setString(1, "123");
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), "123");  
+        ps.setString(1, null);
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), null);
+        // BIGINT -> long
+        s.executeUpdate(
+        "CREATE FUNCTION BIGINT_P_LONG_RN(VARCHAR(10)) RETURNS BIGINT " +
+           "EXTERNAL NAME 'java.lang.Long.parseLong' " +
+           "LANGUAGE JAVA PARAMETER STYLE JAVA " +
+           "RETURNS NULL ON NULL INPUT");
+
+        ps = prepareStatement("VALUES BIGINT_P_LONG_RN(?)");
+        ps.setString(1, "123");
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), "123");  
+        ps.setString(1, null);
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), null);
+        // BIGINT -> Long
+        s.executeUpdate(
+        "CREATE FUNCTION BIGINT_O_LONG_NR(VARCHAR(10)) RETURNS BIGINT " +
+           "EXTERNAL NAME 'java.lang.Long.valueOf' " +
+           "LANGUAGE JAVA PARAMETER STYLE JAVA " +
+           "RETURNS NULL ON NULL INPUT");
+
+        ps = prepareStatement("VALUES BIGINT_O_LONG_NR(?)");
+        ps.setString(1, "123");
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), "123");  
+        ps.setString(1, null);
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), null);
+        // REAL -> float
+        s.executeUpdate(
+        "CREATE FUNCTION REAL_P_FLOAT_NR(VARCHAR(10)) RETURNS REAL " +
+           "EXTERNAL NAME 'java.lang.Float.parseFloat' " +
+           "LANGUAGE JAVA PARAMETER STYLE JAVA " +
+           "RETURNS NULL ON NULL INPUT");
+
+        ps = prepareStatement("VALUES REAL_P_FLOAT_NR(?)");
+        ps.setString(1, "123.0");
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), "123.0");  
+        ps.setString(1, null);
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), null);
+        
+        // REAL -> Float
+        s.executeUpdate(
+        "CREATE FUNCTION REAL_O_FLOAT_NR(VARCHAR(10)) RETURNS REAL " +
+           "EXTERNAL NAME 'java.lang.Float.valueOf' " +
+           "LANGUAGE JAVA PARAMETER STYLE JAVA " +
+           "RETURNS NULL ON NULL INPUT");
+
+        ps = prepareStatement("VALUES REAL_O_FLOAT_NR(?)");
+        ps.setString(1, "123.0");
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), "123.0");  
+        ps.setString(1, null);
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), null);
+        
+        // DOUBLE -> double
+        s.executeUpdate(
+        "CREATE FUNCTION DOUBLE_P_DOUBLE_NR(VARCHAR(10)) RETURNS DOUBLE " +
+           "EXTERNAL NAME 'java.lang.Double.parseDouble' " +
+           "LANGUAGE JAVA PARAMETER STYLE JAVA " +
+           "RETURNS NULL ON NULL INPUT");
+
+        ps = prepareStatement("VALUES DOUBLE_P_DOUBLE_NR(?)");
+        ps.setString(1, "123.0");
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), "123.0");  
+        ps.setString(1, null);
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), null);
+        
+        // DOBULE -> Double
+        s.executeUpdate(
+        "CREATE FUNCTION DOUBLE_O_DOUBLE_NR(VARCHAR(10)) RETURNS DOUBLE " +
+           "EXTERNAL NAME 'java.lang.Double.valueOf' " +
+           "LANGUAGE JAVA PARAMETER STYLE JAVA " +
+           "RETURNS NULL ON NULL INPUT");
+
+        ps = prepareStatement("VALUES DOUBLE_O_DOUBLE_NR(?)");
+        ps.setString(1, "123.0");
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), "123.0");
+        ps.setString(1, null);
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), null);
+        
+        ps.close();
+        s.close();
+    }
+    
+    /**
      * Test that functions handle being called or not called
      * when it is passed a NULL argument correctly.
      * A function can be declared:
