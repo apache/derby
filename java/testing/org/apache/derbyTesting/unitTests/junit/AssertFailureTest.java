@@ -1,7 +1,5 @@
 /*
-
-   Derby - Class
-   org.apache.derbyTesting.unitTests.junit.AssertFailureTest
+   Derby - Class org.apache.derbyTesting.unitTests.junit.AssertFailureTest
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -19,6 +17,7 @@
    limitations under the License.
 
  */
+
 package org.apache.derbyTesting.unitTests.junit;
 
 import junit.framework.Test;
@@ -56,14 +55,22 @@ public class AssertFailureTest extends BaseTestCase {
     public static Test suite() {
         TestSuite suite = new TestSuite("AssertFailureTest");
 
-        // Run with thread dump permissions
-        suite.addTest(new SecurityManagerSetup(new AssertFailureTest(
-            "testAssertFailureThreadDump"), POLICY_FILENAME));
+        try {
+            //Only add the tests if this is a sane build.
+            Class.forName("org.apache.derby.shared.common.sanity." +
+            		"AssertFailure");
 
-        // Run WITHOUT thread dump permissions
-        suite.addTest(new SecurityManagerSetup(new AssertFailureTest(
-            "testAssertFailureNoThreadDump"), NO_DUMP_POLICY_FILENAME));
+            // Run with thread dump permissions
+            suite.addTest(new SecurityManagerSetup(new AssertFailureTest(
+                "testAssertFailureThreadDump"), POLICY_FILENAME));
 
+            // Run WITHOUT thread dump permissions
+            suite.addTest(new SecurityManagerSetup(new AssertFailureTest(
+                "testAssertFailureNoThreadDump"), NO_DUMP_POLICY_FILENAME));
+
+        } catch (ClassNotFoundException e) {
+            //Ignore. Just return an empty suite.
+        }
         return suite;
     }
 
@@ -80,19 +87,19 @@ public class AssertFailureTest extends BaseTestCase {
 
         // Assert that the string is correct, by checking that
         // it starts the right way.
-        if (JVMInfo.JDK_ID >= 6) {
-            String expected = "---------------\n" + 
+        if (JVMInfo.JDK_ID >= JVMInfo.J2SE_15) {
+            String expected = "---------------\n" +
             		"Stack traces for all live threads:\nThread name=";
-            
-            assertTrue("String not correct. Expected to start with:\n<" 
-                + expected + ">...\nWas:\n<" + s + ">.\n" , 
+
+            assertTrue("String not correct. Expected to start with:\n<"
+                + expected + ">...\nWas:\n<" + s + ">.\n" ,
                 s.startsWith(expected));
-            
+
         } else {
             String expected = "(Skipping thread dump because it is not " +
-            		"supported on JVM 1.4)";
-                        
-            assertTrue("String not correct.", s.startsWith(expected));
+            		"supported on JVM 1.4)\n";
+
+            assertEquals("String not correct.", expected, s);
         }
     }
 
@@ -106,21 +113,21 @@ public class AssertFailureTest extends BaseTestCase {
 
         String s = new AssertFailure("AssertFailureTest").getThreadDump();
         //System.out.println(s);    //Debug failures.
-        
-        // Assert that the string is correct, by checking that is starts 
+
+        // Assert that the string is correct, by checking that is starts
         // the right way.
-        if (JVMInfo.JDK_ID >= 6) {
+        if (JVMInfo.JDK_ID >= JVMInfo.J2SE_15) {
             String expected = "(Skipping thread dump because of insufficient " +
-            		"permissions:";
-        
-            assertTrue("String not correct. Expected: <" + expected + 
+            		"permissions:\njava.security.AccessControlException:";
+
+            assertTrue("String not correct. Expected: <" + expected +
                 ">\nWas:\n<" + s + ">", s.startsWith(expected));
-            
+
         } else {
             String expected = "(Skipping thread dump because it is not " +
-                "supported on JVM 1.4)";
-            
-            assertTrue("String not correct.", s.startsWith(expected));
+                "supported on JVM 1.4)\n";
+
+            assertEquals("String not correct.", expected, s);
         }
     }
 }
