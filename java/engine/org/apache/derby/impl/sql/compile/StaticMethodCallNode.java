@@ -991,9 +991,20 @@ public class StaticMethodCallNode extends MethodCallNode
 
 		if (returnsNullOnNullState != null)
 		{
-			if (!actualMethodReturnType.equals(javaReturnType))
+			// DERBY-3360. In the case of function returning
+			// a SMALLINT if we specify RETURN NULL ON NULL INPUT
+			// the javaReturnType will be java.lang.Integer. In
+			// order to initialize the integer properly, we need
+			// to upcast the short.  This is a special case for
+			// SMALLINT functions only as other types are 
+			// compatible with their function return types.
+			if (!actualMethodReturnType.equals(javaReturnType)) {
+				if (actualMethodReturnType.equals("short") &&
+						javaReturnType.equals("java.lang.Integer"))
+					mbnc.upCast("int");
+			
 				mbnc.pushNewComplete(1);
-
+			}
 			mbnc.completeConditional();
 
 			mbnc.methodReturn();
