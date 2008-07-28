@@ -44,6 +44,7 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.cache.ClassSize;
 import org.apache.derby.iapi.services.io.ArrayInputStream;
 import org.apache.derby.iapi.util.StringUtil;
+import org.apache.derby.iapi.util.UTF8Util;
 import org.apache.derby.iapi.services.i18n.LocaleFinder;
 
 import org.apache.derby.iapi.db.DatabaseContext;
@@ -555,15 +556,54 @@ public class SQLChar
     /**
      * @exception StandardException     Thrown on error
      */
-    public int  getLength() throws StandardException
-    {
+    public int getLength() throws StandardException {
         if (rawLength != -1)
             return rawLength;
-
+        if (stream != null) {
+            if (stream instanceof Resetable && stream instanceof ObjectInput) {
+                try {
+                    int clobLength = 0;
+                    // If we have the stream length encoded.
+                    // just read that.
+                    int utf8len = readCharacterLength((ObjectInput) stream);
+                    if (utf8len != 0) {
+                        clobLength = utf8len;
+                        return clobLength;
+                    }
+                    // Otherwise we will have to read the whole stream.
+                    int skippedCharSize = (int) UTF8Util.skipUntilEOF(stream);
+                    clobLength = skippedCharSize;
+                    return clobLength;
+                } catch (IOException ioe) {
+                    throwStreamingIOException(ioe);
+                } finally {
+                    try {
+                        ((Resetable) stream).resetStream();
+                    } catch (IOException ioe) {
+                        throwStreamingIOException(ioe);
+                    }
+                }
+            }
+        }
         String tmpString = getString();
-        return (tmpString == null) ?
-            0 : tmpString.length();
+        if (tmpString == null) {
+            return 0;
+        } else {
+            int clobLength = tmpString.length();
+            return clobLength;
+        }
     }
+
+    private int readCharacterLength(ObjectInput in) throws IOException {
+         int utflen = in.readUnsignedShort();
+        return utflen;
+    }
+
+    private void throwStreamingIOException(IOException ioe) throws StandardException {
+		throw StandardException.
+			newException(SQLState.LANG_STREAMING_COLUMN_I_O_EXCEPTION,
+						 ioe, getTypeName());
+	}
 
     public String getTypeName()
     {
