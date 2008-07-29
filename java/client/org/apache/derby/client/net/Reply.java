@@ -185,8 +185,11 @@ public class Reply {
                             2); // tracepoint
                 }
             }
-            count_ += actualBytesRead;
-            totalBytesRead += actualBytesRead;
+            // DERBY-2747: only count if we actually read something
+            if (actualBytesRead > 0) {
+                count_ += actualBytesRead;
+                totalBytesRead += actualBytesRead;
+            }
 
         } while ((totalBytesRead < minimumBytesNeeded) && (actualBytesRead != -1));
 
