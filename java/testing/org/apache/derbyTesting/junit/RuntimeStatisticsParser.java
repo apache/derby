@@ -170,6 +170,19 @@ public class RuntimeStatisticsParser {
         return (statistics.indexOf("Table Scan ResultSet for " + 
                     tableName)!= -1);
     }
+
+    /**
+     * @param tableName
+     * @param indexName
+     * @return true if passed indexName was used for Index Scan ResultSet 
+     *     for the passed tableName
+     */
+    public boolean usedSpecificIndexForIndexScan(
+    		String tableName, String indexName){
+        return (statistics.indexOf("Index Scan ResultSet for " + 
+                    tableName + " using index " + indexName)!= -1);
+    }
+
     /**
      * @param tableName
      * @return true if an Index Scan ResultSet was used for tableName

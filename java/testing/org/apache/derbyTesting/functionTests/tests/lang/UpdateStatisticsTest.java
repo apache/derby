@@ -21,6 +21,7 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.ResultSet;
@@ -28,10 +29,12 @@ import junit.framework.Test;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
+import org.apache.derbyTesting.junit.RuntimeStatisticsParser;
+import org.apache.derbyTesting.junit.SQLUtilities;
 
 /**
  * Tests for updating the statistics of one index or all the indexes on a
- * table DERBY-269.
+ * table DERBY-269, DERBY-3788.
  */
 public class UpdateStatisticsTest extends BaseJDBCTestCase {
 
@@ -51,13 +54,13 @@ public class UpdateStatisticsTest extends BaseJDBCTestCase {
         //following should fail because table APP.T1 does not exist
         assertStatementError("42Y55", s, 
             "CALL SYSCS_UTIL.SYSCS_UPDATE_STATISTICS('APP','T1',null)");
-        s.execute("CREATE TABLE t1 (c11 int, c12 varchar(128))");
+        s.executeUpdate("CREATE TABLE t1 (c11 int, c12 varchar(128))");
         //following will pass now because we have created APP.T1
         s.execute("CALL SYSCS_UTIL.SYSCS_UPDATE_STATISTICS('APP','T1',null)");
         //following should fail because index I1 does not exist on table APP.T1
         assertStatementError("42X65", s, 
             "CALL SYSCS_UTIL.SYSCS_UPDATE_STATISTICS('APP','T1','I1')");
-        s.execute("CREATE INDEX i1 on t1(c12)");
+        s.executeUpdate("CREATE INDEX i1 on t1(c12)");
         //following will pass now because we have created index I1 on APP.T1
         s.execute("CALL SYSCS_UTIL.SYSCS_UPDATE_STATISTICS('APP','T1','I1')");
 
@@ -78,7 +81,7 @@ public class UpdateStatisticsTest extends BaseJDBCTestCase {
         //new index. Old index will still not have a row for it in
         //sysstatistics table
         s.executeUpdate("INSERT INTO T1 VALUES(1,'a'),(2,'b'),(3,'c'),(4,'d')");
-        s.execute("CREATE INDEX i2 on t1(c11)");
+        s.executeUpdate("CREATE INDEX i2 ON t1(c11)");
         rs = s.executeQuery("SELECT * FROM SYS.SYSSTATISTICS");
         JDBC.assertDrainResults(rs, 1);
         //Now update the statistics for the old index I1 using the new stored
@@ -95,6 +98,8 @@ public class UpdateStatisticsTest extends BaseJDBCTestCase {
             "ALTER TABLE APP.T1 ALL UPDATE STATISTICS");
         assertStatementError("42X01", s, 
             "ALTER TABLE APP.T1 UPDATE STATISTICS I1");
+        //cleanup
+        s.executeUpdate("DROP TABLE t1");
 
         //Try update statistics on global temporary table
 		s.executeUpdate("declare global temporary table SESSION.t1(c11 int, c12 int) on commit delete rows not logged");
@@ -103,5 +108,69 @@ public class UpdateStatisticsTest extends BaseJDBCTestCase {
 		//global temporary tables
         assertStatementError("42995", s, 
             "CALL SYSCS_UTIL.SYSCS_UPDATE_STATISTICS('SESSION','T1',null)");
+        
+        //Following test will show that updating the statistics will make a
+        //query pickup better index compare to prior to statistics availability.
+        //
+        //Check statistics update causes most efficient index usage
+        //Create a table with 2 non-unique indexes on 2 different columns.
+        //The indexes are created when the table is still empty and hence
+        //there are no statistics available for them in sys.sysstatistics.
+        //The table looks as follows
+        //        create table t2(c21 int, c22 char(14), c23 char(200))
+        //        create index t2i1 on t2(c21)
+        //        create index t2i2 on t2(c22)
+        //Load the data into the table and running following query will
+        //pickup index t2i1 on column c21
+        //        select * from t2 where c21=? and c22=?
+        //But once you make the statistics available for t2i2, the query
+        //will pickup index t2i2 on column c22 for the query above
+        //
+        //Start of test case for better index selection after statistics
+        //availability
+        s.executeUpdate("CREATE TABLE t2(c21 int, c22 char(14), c23 char(200))");
+        //No statistics will be created for the 2 indexes because the table is 
+        //empty
+        s.executeUpdate("CREATE INDEX t2i1 ON t2(c21)");
+        s.executeUpdate("CREATE INDEX t2i2 ON t2(c22)");
+        rs = s.executeQuery("SELECT * FROM SYS.SYSSTATISTICS");
+        JDBC.assertEmpty(rs);
+        
+        PreparedStatement ps = prepareStatement("INSERT INTO T2 VALUES(?,?,?)");
+        for (int i=0; i<1000; i++) {
+        	ps.setInt(1, i%2);
+            ps.setString(2, "Tuple " +i);
+            ps.setString(3, "any value");
+            ps.addBatch();
+        }
+        ps.executeBatch();
+
+		s.execute("call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1)");
+		
+		//Executing the query below and looking at it's plan will show that
+		//we picked index T2I1 rather than T2I2 because there are no 
+		//statistics available for T2I2 to show that it is a better index
+		ps = prepareStatement("SELECT * FROM t2 WHERE c21=? AND c22=?");
+    	ps.setInt(1, 0);
+        ps.setString(2, "Tuple 4");
+        JDBC.assertDrainResults(ps.executeQuery());
+		RuntimeStatisticsParser rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
+		assertTrue(rtsp.usedSpecificIndexForIndexScan("T2","T2I1"));
+
+		//Running the update statistics below will create statistics for T2I2
+		s.execute("CALL SYSCS_UTIL.SYSCS_UPDATE_STATISTICS('APP','T2','T2I2')");
+        rs = s.executeQuery("SELECT * FROM SYS.SYSSTATISTICS");
+        JDBC.assertDrainResults(rs, 1);
+		
+        //Rerunning the query "SELECT * FROM t2 WHERE c21=? AND c22=?" and
+        //looking at it's plan will show that this time it picked up more
+        //efficient index which is T2I2. 
+        JDBC.assertDrainResults(ps.executeQuery());
+		rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
+		assertTrue(rtsp.usedSpecificIndexForIndexScan("T2","T2I2"));
+        //cleanup
+        s.executeUpdate("DROP TABLE t2");
+        //End of test case for better index selection after statistics
+        //availability
     }
 }
