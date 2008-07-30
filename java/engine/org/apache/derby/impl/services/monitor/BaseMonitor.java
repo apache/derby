@@ -276,6 +276,11 @@ abstract class BaseMonitor
 		dontGC = new AntiGC(keepItems);
 
 		Thread dontGCthread = getDaemonThread(dontGC, "antiGC", true);
+		// DERBY-3745.  setContextClassLoader for thread to null to avoid
+		// leaking class loaders.
+		PrivilegedThreadOps.setContextClassLoaderIfPrivileged(
+						dontGCthread, null);
+
 		dontGCthread.start();
 
 		if (SanityManager.DEBUG) {
@@ -2080,11 +2085,6 @@ nextModule:
 
 	public Thread getDaemonThread(Runnable task, String name, boolean setMinPriority) {
 		Thread t =  new Thread(daemonGroup, task, "derby.".concat(name));
-		// DERBY-3745.  setContextClassLoader for thread to null to avoid
-		// leaking class loaders.
-		PrivilegedThreadOps.setContextClassLoaderIfPrivileged(
-							  t, null);
-
 		t.setDaemon(true);
 
 		if (setMinPriority) {
