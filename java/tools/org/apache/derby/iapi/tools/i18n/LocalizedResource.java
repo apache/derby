@@ -505,12 +505,6 @@ public final class LocalizedResource  implements java.security.PrivilegedAction 
 	public static String getNumber(int o){
 		return getInstance().getNumberAsString(o);
 	}
-	public static void setUnicodeEscape(boolean u){
-		getInstance().unicodeEscape = u;
-	}
-	public static boolean getUnicodeEscape(){
-		return getInstance().unicodeEscape;
-	}
 	public String toString(){
 		String s = "toString(){\n" +
 			"locale=" + (locale==null?"null":locale.toString()) + "\n" +
@@ -518,7 +512,6 @@ public final class LocalizedResource  implements java.security.PrivilegedAction 
 			"messageFile=" + messageFileName + "\n" +
 			"resourceKey=" + resourceKey + "\n" +
 			"enableLocalized=" + enableLocalized + " \n" +
-			"unicodeEscape=" + unicodeEscape + "\n" +
 			"dateSize=" + dateSize + "\n" +
 			"timeSize=" + timeSize + "\n" +
 			"timestampSize="+timestampSize+ "\n}";
