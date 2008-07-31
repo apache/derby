@@ -25,7 +25,7 @@ import org.apache.derbyTesting.junit.BaseTestCase;
 import org.apache.derbyTesting.junit.Derby;
 import org.apache.derbyTesting.junit.JDBC;
 
-import junit.framework.Test; 
+import junit.framework.Test;
 import junit.framework.TestSuite;
 
 /**
@@ -41,12 +41,12 @@ public class _Suite extends BaseTestCase  {
     private _Suite(String name) {
         super(name);
     }
-    
+
     public static Test suite() {
 
         TestSuite suite = new TestSuite("derbynet");
         suite.addTest(PrepareStatementTest.suite());
-        suite.addTest(NetworkServerControlApiTest.suite());     
+        suite.addTest(NetworkServerControlApiTest.suite());
         suite.addTest(ShutDownDBWhenNSShutsDownTest.suite());
         suite.addTest(DRDAProtocolTest.suite());
         suite.addTest(ClientSideSystemPropertiesTest.suite());
@@ -59,21 +59,22 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(NetworkServerControlClientCommandTest.suite());
         suite.addTest(ServerPropertiesTest.suite());
         suite.addTest(LOBLocatorReleaseTest.suite());
-        
-        
+        suite.addTest(OutBufferedStreamTest.suite());
+
+
         // Disabled due to "java.sql.SQLSyntaxErrorException: The class
         // 'org.apache.derbyTesting.functionTests.tests.derbynet.checkSecMgr'
         //  does not exist or is inaccessible. This can happen if the class is not public."
         //  in the nightly tests with JDK 1.6 and jar files.
         //suite.addTest(CheckSecurityManager.suite());
-        
+
         // this test refers to ConnectionPooledDataSource class
         // thus causing class not found exceptions with JSR169
         if (JDBC.vmSupportsJDBC3())
         {
             suite.addTest(NSSecurityMechanismTest.suite());
         }
-        
+
         // These tests references a client class directly
         // thus causing class not found exceptions if the
         // client code is not in the classpath.
@@ -81,8 +82,8 @@ public class _Suite extends BaseTestCase  {
             suite.addTest(ByteArrayCombinerStreamTest.suite());
             suite.addTest(SqlExceptionTest.suite());
         }
- 
+
         return suite;
     }
-    
+
 }
