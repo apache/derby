@@ -207,12 +207,16 @@ public class ProtocolTest
     private void processFile(String fileName, DDMReader reader,
                              DDMWriter writer, OutputStream monitorOs)
             throws DRDAProtocolException, IOException {
-       File incFile = SupportFilesSetup.getReadOnly(fileName);
-       assertTrue("Missing file: " + fileName,
+        File incFile = SupportFilesSetup.getReadOnly(fileName);
+        assertTrue("Missing file: " + fileName,
                PrivilegedFileOpsForTests.exists(incFile));
-       processCommands(new BufferedReader(
-               PrivilegedFileOpsForTests.getFileReader(incFile)),
-               reader, writer, monitorOs);
+        BufferedReader bIn = new BufferedReader(
+               PrivilegedFileOpsForTests.getFileReader(incFile));
+        try {
+            processCommands(bIn, reader, writer, monitorOs);
+        } finally {
+            bIn.close();
+        }
     }
 
     /**
@@ -889,6 +893,7 @@ public class ProtocolTest
             }
             currentLine++;
         }
+        bIn.close();
 
         // Copy the required include files.
         final String resourcePath = "functionTests/tests/derbynet";
