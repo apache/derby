@@ -21,6 +21,7 @@ package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
 import java.io.ByteArrayInputStream;
 import java.io.CharArrayReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
@@ -43,6 +44,7 @@ import org.apache.derbyTesting.junit.Utilities;
 import junit.framework.*;
 import java.sql.*;
 
+import org.apache.derbyTesting.functionTests.util.streams.ByteAlphabet;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
@@ -1864,6 +1866,76 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         }
         rs.close();
         stmt.close();
+    }
+
+    /**
+     * Tests the {@code Blob.position} using a deterministic sequence of
+     * actions and arguments.
+     */
+    public void testPositionBlobDeterministic()
+            throws IOException, SQLException {
+        getConnection().setAutoCommit(false);
+        final int size = 100000;
+        PreparedStatement ps = prepareStatement(
+                "INSERT INTO testBlob (a, b) VALUES (?, ?)");
+        ps.setBinaryStream(1, new LoopingAlphabetStream(size), size);
+        ps.setInt(2, size);
+        ps.executeUpdate();
+        ps.close();
+        ps = prepareStatement("select a from testBlob where b = ?");
+        ps.setInt(1, size);
+        ResultSet rs = ps.executeQuery();
+        assertTrue("No data found", rs.next());
+        Blob blob = rs.getBlob(1);
+        // Try with a one-byte pattern.
+        byte[] pattern = new byte[] {(byte)'k'}; // k number 11 in the alphabet
+        assertEquals(11, blob.position(pattern, 1));
+        // Try with a non-existing pattern.
+        pattern = new byte[] {(byte)'p', (byte)'o'};
+        assertEquals(-1, blob.position(pattern, size / 3));
+
+        // Loop through all matches 
+        pattern = new byte[] {(byte)'d', (byte)'e'};
+        long foundAtPos = 1;
+        int index = 0;
+        int stepSize = ByteAlphabet.modernLatinLowercase().byteCount();
+        while ((foundAtPos = blob.position(pattern, foundAtPos +1)) != -1) {
+            assertEquals((stepSize * index++) + 4, foundAtPos);
+            byte[] fetchedPattern = blob.getBytes(foundAtPos, pattern.length);
+            assertTrue(Arrays.equals(pattern, fetchedPattern));
+        }
+
+        // Try a longer pattern.
+        int pSize = 65*1024; // 65 KB
+        pattern = new byte[pSize];
+        assertEquals(pSize, new LoopingAlphabetStream(pSize).read(pattern));
+        assertEquals(1, blob.position(pattern, 1));
+        assertEquals(stepSize * 100 +1,
+                blob.position(pattern, stepSize * 99 + 7));
+        // Try again after getting the length.
+        assertEquals(size, blob.length());
+        assertEquals(stepSize * 100 +1,
+                blob.position(pattern, stepSize * 99 + 7));
+
+        // Try specifing a starting position that's too big.
+        try {
+            blob.position(pattern, size*2);
+            fail("Accepted position after end of Blob");
+        } catch (SQLException sqle) {
+            assertSQLState("XJ076", sqle);
+        }
+
+        // Fetch the last 5 bytes, try with a partial match at the end.
+        byte[] blobEnd = blob.getBytes(size - 4, 5);
+        pattern = new byte[6];
+        System.arraycopy(blobEnd, 0, pattern, 0, blobEnd.length);
+        pattern[5] = 'X'; // Only lowercase in the looping alphabet stream.
+        assertEquals(-1, blob.position(pattern, size - 10));
+
+        // Get the very last byte, try with a partial match at the end.
+        blobEnd = blob.getBytes(size, 1);
+        pattern = new byte[] {blobEnd[0], 'X'};
+        assertEquals(-1, blob.position(pattern, size - 5));
     }
 
     /**
