@@ -113,7 +113,8 @@ class CallableLocatorProcedures
         }
         
         try {
-            if (blobCreateLocatorCall == null) {
+            if (blobCreateLocatorCall == null ||
+                    !blobCreateLocatorCall.openOnClient_) {
                 blobCreateLocatorCall = connection.prepareCallX
                         ("? = CALL SYSIBM.BLOBCREATELOCATOR()",
                         java.sql.ResultSet.TYPE_FORWARD_ONLY,
@@ -164,7 +165,8 @@ class CallableLocatorProcedures
      */
     void blobReleaseLocator(int locator) throws SqlException
     {
-        if (blobReleaseLocatorCall == null) {
+        if (blobReleaseLocatorCall == null ||
+                !blobReleaseLocatorCall.openOnClient_) {
             blobReleaseLocatorCall = connection.prepareCallX
                 ("CALL SYSIBM.BLOBRELEASELOCATOR(?)",
                  java.sql.ResultSet.TYPE_FORWARD_ONLY, 
@@ -200,7 +202,8 @@ class CallableLocatorProcedures
                                     int searchLocator, 
                                     long fromPosition) throws SqlException
     {
-        if (blobGetPositionFromLocatorCall == null) {
+        if (blobGetPositionFromLocatorCall == null ||
+                !blobGetPositionFromLocatorCall.openOnClient_) {
             blobGetPositionFromLocatorCall = connection.prepareCallX
                 ("? = CALL SYSIBM.BLOBGETPOSITIONFROMLOCATOR(?, ?, ?)",
                  java.sql.ResultSet.TYPE_FORWARD_ONLY, 
@@ -327,7 +330,8 @@ class CallableLocatorProcedures
                                           int offset,
                                           int length) throws SqlException
     {
-        if (blobGetPositionFromBytesCall == null) {
+        if (blobGetPositionFromBytesCall == null ||
+                !blobGetPositionFromBytesCall.openOnClient_) {
             blobGetPositionFromBytesCall = connection.prepareCallX
                 ("? = CALL SYSIBM.BLOBGETPOSITIONFROMBYTES(?, ?, ?)",
                  java.sql.ResultSet.TYPE_FORWARD_ONLY, 
@@ -371,7 +375,7 @@ class CallableLocatorProcedures
      */
     long blobGetLength(int sourceLocator) throws SqlException
     {
-        if (blobGetLengthCall == null) {
+        if (blobGetLengthCall == null || !blobGetLengthCall.openOnClient_) {
             blobGetLengthCall = connection.prepareCallX
                 ("? = CALL SYSIBM.BLOBGETLENGTH(?)",
                  java.sql.ResultSet.TYPE_FORWARD_ONLY, 
@@ -421,7 +425,7 @@ class CallableLocatorProcedures
     {
         if (forLength == 0) return new byte[0];
         
-        if (blobGetBytesCall == null) {
+        if (blobGetBytesCall == null || !blobGetBytesCall.openOnClient_) {
             blobGetBytesCall = connection.prepareCallX
                 ("? = CALL SYSIBM.BLOBGETBYTES(?, ?, ?)",
                  java.sql.ResultSet.TYPE_FORWARD_ONLY, 
@@ -495,7 +499,7 @@ class CallableLocatorProcedures
                       int forLength, 
                       byte[] bytes) throws SqlException
     {
-        if (blobSetBytesCall == null) {
+        if (blobSetBytesCall == null || !blobSetBytesCall.openOnClient_) {
             blobSetBytesCall = connection.prepareCallX
                 ("CALL SYSIBM.BLOBSETBYTES(?, ?, ?, ?)",
                  java.sql.ResultSet.TYPE_FORWARD_ONLY, 
@@ -551,7 +555,7 @@ class CallableLocatorProcedures
      */
     void blobTruncate(int sourceLocator, long length) throws SqlException
     {
-        if (blobTruncateCall == null) {
+        if (blobTruncateCall == null || !blobTruncateCall.openOnClient_) {
             blobTruncateCall = connection.prepareCallX
                 ("CALL SYSIBM.BLOBTRUNCATE(?, ?)",
                  java.sql.ResultSet.TYPE_FORWARD_ONLY, 
@@ -590,7 +594,8 @@ class CallableLocatorProcedures
         }
         
         try {
-            if (clobCreateLocatorCall == null) {
+            if (clobCreateLocatorCall == null ||
+                    !clobCreateLocatorCall.openOnClient_) {
                 clobCreateLocatorCall = connection.prepareCallX
                         ("? = CALL SYSIBM.CLOBCREATELOCATOR()",
                         java.sql.ResultSet.TYPE_FORWARD_ONLY,
@@ -641,7 +646,8 @@ class CallableLocatorProcedures
      */
     void clobReleaseLocator(int locator) throws SqlException
     {
-        if (clobReleaseLocatorCall == null) {
+        if (clobReleaseLocatorCall == null ||
+                !clobReleaseLocatorCall.openOnClient_) {
             clobReleaseLocatorCall = connection.prepareCallX
                 ("CALL SYSIBM.CLOBRELEASELOCATOR(?)",
                  java.sql.ResultSet.TYPE_FORWARD_ONLY, 
@@ -760,7 +766,8 @@ class CallableLocatorProcedures
                                            int offset,
                                            int length) throws SqlException
     {
-        if (clobGetPositionFromStringCall == null) {
+        if (clobGetPositionFromStringCall == null ||
+                !clobGetPositionFromStringCall.openOnClient_) {
             clobGetPositionFromStringCall = connection.prepareCallX
                 ("? = CALL SYSIBM.CLOBGETPOSITIONFROMSTRING(?, ?, ?)",
                  java.sql.ResultSet.TYPE_FORWARD_ONLY, 
@@ -809,7 +816,8 @@ class CallableLocatorProcedures
                                     int searchLocator, 
                                     long fromPosition) throws SqlException
     {
-        if (clobGetPositionFromLocatorCall == null) {
+        if (clobGetPositionFromLocatorCall == null ||
+                !clobGetPositionFromLocatorCall.openOnClient_) {
             clobGetPositionFromLocatorCall = connection.prepareCallX
                 ("? = CALL SYSIBM.CLOBGETPOSITIONFROMLOCATOR(?, ?, ?)",
                  java.sql.ResultSet.TYPE_FORWARD_ONLY, 
@@ -843,7 +851,7 @@ class CallableLocatorProcedures
      */
     long clobGetLength(int sourceLocator) throws SqlException
     {
-        if (clobGetLengthCall == null) {
+        if (clobGetLengthCall == null || !clobGetLengthCall.openOnClient_) {
             clobGetLengthCall = connection.prepareCallX
                 ("? = CALL SYSIBM.CLOBGETLENGTH(?)",
                  java.sql.ResultSet.TYPE_FORWARD_ONLY, 
@@ -893,7 +901,8 @@ class CallableLocatorProcedures
     {
         if (forLength == 0) return "";
 
-        if (clobGetSubStringCall == null) {
+        if (clobGetSubStringCall == null ||
+                !clobGetSubStringCall.openOnClient_) {
             clobGetSubStringCall = connection.prepareCallX
                 ("? = CALL SYSIBM.CLOBGETSUBSTRING(?, ?, ?)",
                  java.sql.ResultSet.TYPE_FORWARD_ONLY, 
@@ -969,7 +978,7 @@ class CallableLocatorProcedures
                        int forLength, 
                        String string) throws SqlException
     {
-        if (clobSetStringCall == null) {
+        if (clobSetStringCall == null || !clobSetStringCall.openOnClient_) {
             clobSetStringCall = connection.prepareCallX
                 ("CALL SYSIBM.CLOBSETSTRING(?, ?, ?, ?)",
                  java.sql.ResultSet.TYPE_FORWARD_ONLY, 
@@ -1021,7 +1030,7 @@ class CallableLocatorProcedures
      */
     void clobTruncate(int sourceLocator, long length) throws SqlException
     {
-        if (clobTruncateCall == null) {
+        if (clobTruncateCall == null || !clobTruncateCall.openOnClient_) {
             clobTruncateCall = connection.prepareCallX
                 ("CALL SYSIBM.CLOBTRUNCATE(?, ?)",
                  java.sql.ResultSet.TYPE_FORWARD_ONLY, 
