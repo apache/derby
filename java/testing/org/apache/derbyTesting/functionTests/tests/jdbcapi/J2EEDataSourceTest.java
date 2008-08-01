@@ -148,6 +148,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         suite.addTest(new J2EEDataSourceTest("testPooledReuseOnClose"));
         suite.addTest(new J2EEDataSourceTest("testSchemaIsReset"));
         suite.addTest(new J2EEDataSourceTest("testSchemaIsResetWhenDeleted"));
+        suite.addTest(new J2EEDataSourceTest("testDerby3799"));
         return suite;
     }
 
@@ -236,6 +237,9 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
                             "'org.apache.derbyTesting.functionTests.tests.jdbcapi.J2EEDataSourceTest." +
                             getNestedMethodName() +
                     "'");
+                    s.execute("create table derby3799 (dClob clob)");
+                    s.executeUpdate("insert into derby3799 values (" +
+                            "'myLittleTestClob')");
                 }
             };
         }
@@ -2900,6 +2904,34 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         // END XA HOLDABILITY TEST");
     }
     
+    /**
+     * Regression test for a NullPointerException when trying to use the LOB
+     * stored procedures after closing and then getting a new logical
+     * connection. The problem was that the LOB stored procedure objects on the
+     * server side were closed and not reprepared.
+     * See Jira issue DERBY-3799.
+     */
+    public void testDerby3799() throws SQLException {
+        ConnectionPoolDataSource cpDs =
+                J2EEDataSource.getConnectionPoolDataSource();
+        PooledConnection pc = cpDs.getPooledConnection();
+        // Get first logical connection.
+        Connection con1 = pc.getConnection();
+        Statement stmt = con1.createStatement();
+        ResultSet rs = stmt.executeQuery("select dClob from derby3799");
+        assertTrue(rs.next());
+        rs.getString(1);
+        rs.close();
+        con1.close();
+        // Get second logical connection.
+        Connection con2 = pc.getConnection();
+        stmt = con2.createStatement();
+        rs = stmt.executeQuery("select dClob from derby3799");
+        assertTrue(rs.next());
+        rs.getString(1); // NPE happened here.
+        con2.close();
+    }
+
     /**
      * Tests for DERBY-1144
      * 
