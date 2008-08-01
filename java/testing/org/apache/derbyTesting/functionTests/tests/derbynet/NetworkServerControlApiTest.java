@@ -24,6 +24,7 @@ package org.apache.derbyTesting.functionTests.tests.derbynet;
 import org.apache.derby.drda.NetworkServerControl;
 import org.apache.derbyTesting.functionTests.tests.lang.SecurityPolicyReloadingTest;
 import org.apache.derbyTesting.functionTests.tests.lang.SimpleTest;
+import org.apache.derbyTesting.functionTests.util.TestUtil;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.Derby;
 import org.apache.derbyTesting.junit.NetworkServerTestSetup;
@@ -328,5 +329,150 @@ public class NetworkServerControlApiTest extends BaseJDBCTestCase {
                     traceProps2));
         
         return suite;
+    }
+
+     // test fixtures from maxthreads
+    public void testMaxThreads_0() throws Exception {
+        NetworkServerControl server = new NetworkServerControl();
+        String[] maxthreadsCmd1 = new String[]{"org.apache.derby.drda.NetworkServerControl",
+                "maxthreads", "0"};
+        // test maxthreads 0
+        assertExecJavaCmdAsExpected(new String[]
+                {"Max threads changed to 0."}, maxthreadsCmd1, 0);
+        int maxValue = server.getMaxThreads();
+        assertEquals("Fail! Max threads value incorrect!", 0, maxValue);
+    }
+
+    public void testMaxThreads_Neg1() throws Exception {
+        NetworkServerControl server = new NetworkServerControl();
+        String[] maxthreadsCmd2 = new String[]{"org.apache.derby.drda.NetworkServerControl",
+                "maxthreads", "-1", "-h", "localhost", "-p", "1527"};
+        String host = TestUtil.getHostName();
+        maxthreadsCmd2[4] = host;
+        assertExecJavaCmdAsExpected(new String[]{"Max threads changed to 0."}, maxthreadsCmd2, 0);
+        //test maxthreads -1
+        int maxValue = server.getMaxThreads();
+        assertEquals("Fail! Max threads value incorrect!", 0, maxValue);
+    }
+
+    /**
+     * Calling with -12 should fail.
+     * @throws Exception
+     */
+    public void testMaxThreads_Neg12() throws Exception {
+        NetworkServerControl server = new NetworkServerControl();
+        String[] maxthreadsCmd3 = new String[]{"org.apache.derby.drda.NetworkServerControl",
+                "maxthreads", "-12"};
+        //test maxthreads -12
+        assertExecJavaCmdAsExpected(new String[]{
+                "Invalid value, -12, for maxthreads.",
+                "Usage: NetworkServerControl <commands>",
+                "Commands:",
+                "start [-h <host>] [-p <portnumber>] [-noSecurityManager] [-ssl <sslmode>]",
+                "shutdown [-h <host>][-p <portnumber>] [-ssl <sslmode>] [-user <username>] [-password <password>]",
+                "ping [-h <host>][-p <portnumber>] [-ssl <sslmode>]",
+                "sysinfo [-h <host>][-p <portnumber>] [-ssl <sslmode>]",
+                "runtimeinfo [-h <host>][-p <portnumber>] [-ssl <sslmode>]",
+                "logconnections {on|off}[-h <host>][-p <portnumber>] [-ssl <sslmode>]",
+                "maxthreads <max>[-h <host>][-p <portnumber>] [-ssl <sslmode>]",
+                "timeslice <milliseconds>[-h <host>][-p <portnumber>] [-ssl <sslmode>]",
+                "trace {on|off} [-s <session id>][-h <host>][-p <portnumber>] [-ssl <sslmode>]",
+                "tracedirectory <traceDirectory>[-h <host>][-p <portnumber>] [-ssl <sslmode>]",
+        }, maxthreadsCmd3, 1);
+        int maxValue = server.getMaxThreads();
+        assertEquals("Fail! Max threads value incorrect!", 0, maxValue);
+    }
+
+    public void testMaxThreads_2147483647() throws Exception {
+        NetworkServerControl server = new NetworkServerControl();
+        String[] maxthreadsCmd4 = new String[]{"org.apache.derby.drda.NetworkServerControl",
+                "maxthreads", "2147483647"};
+        assertExecJavaCmdAsExpected(new String[]{"Max threads changed to 2147483647."}, maxthreadsCmd4, 0);
+        int maxValue = server.getMaxThreads();
+        assertEquals("Fail! Max threads value incorrect!", 2147483647, maxValue);
+    }
+
+    public void testMaxThreads_9000() throws Exception {
+        NetworkServerControl server = new NetworkServerControl();
+        String[] maxthreadsCmd5 = new String[]{"org.apache.derby.drda.NetworkServerControl",
+                "maxthreads", "9000"};
+        assertExecJavaCmdAsExpected(new String[]{"Max threads changed to 9000."}, maxthreadsCmd5, 0);
+        int maxValue = server.getMaxThreads();
+        assertEquals("Fail! Max threads value incorrect!", 9000, maxValue);
+    }
+
+    /**
+     * Calling with 'a' causes a NFE which results in an error.
+     * @throws Exception
+     */
+    public void testMaxThreads_Invalid() throws Exception {
+        NetworkServerControl server = new NetworkServerControl();
+        String[] maxthreadsCmd5 = new String[]{"org.apache.derby.drda.NetworkServerControl",
+                "maxthreads", "10000"};
+        assertExecJavaCmdAsExpected(new String[]{"Max threads changed to 10000."}, maxthreadsCmd5, 0);
+        int maxValue = server.getMaxThreads();
+        assertEquals("Fail! Max threads value incorrect!", 10000, maxValue);
+
+        String[] maxthreadsCmd6 = new String[]{"org.apache.derby.drda.NetworkServerControl",
+                "maxthreads", "a"};
+        assertExecJavaCmdAsExpected(new String[]{"Invalid value, a, for maxthreads.",
+                "Usage: NetworkServerControl <commands>",
+                "Commands:",
+                "start [-h <host>] [-p <portnumber>] [-noSecurityManager] [-ssl <sslmode>]",
+                "shutdown [-h <host>][-p <portnumber>] [-ssl <sslmode>] [-user <username>] [-password <password>]",
+                "ping [-h <host>][-p <portnumber>] [-ssl <sslmode>]",
+                "sysinfo [-h <host>][-p <portnumber>] [-ssl <sslmode>]",
+                "runtimeinfo [-h <host>][-p <portnumber>] [-ssl <sslmode>]",
+                "logconnections {on|off}[-h <host>][-p <portnumber>] [-ssl <sslmode>]",
+                "maxthreads <max>[-h <host>][-p <portnumber>] [-ssl <sslmode>]",
+                "timeslice <milliseconds>[-h <host>][-p <portnumber>] [-ssl <sslmode>]",
+                "trace {on|off} [-s <session id>][-h <host>][-p <portnumber>] [-ssl <sslmode>]",
+                "tracedirectory <traceDirectory>[-h <host>][-p <portnumber>] [-ssl <sslmode>]",}, maxthreadsCmd6, 1);
+
+
+        maxValue = server.getMaxThreads();
+        assertEquals("Fail! Max threads value incorrect!", 10000, maxValue);
+    }
+
+    public void testMaxThreadsCallable_0() throws Exception {
+        NetworkServerControl server = new NetworkServerControl();
+        server.setMaxThreads(0);
+        int maxValue = server.getMaxThreads();
+        assertEquals("Fail! Max threads value incorrect!", 0, maxValue);
+    }
+
+    public void testMaxThreadsCallable_Neg1() throws Exception {
+        NetworkServerControl server = new NetworkServerControl();
+        server.setMaxThreads(-1);
+        int maxValue = server.getMaxThreads();
+        assertEquals("Fail! Max threads value incorrect!", 0, maxValue);
+    }
+
+    /**
+     * Test should throw an exception.
+     * @throws Exception
+     */
+    public void testMaxThreadsCallable_Neg12() throws Exception {
+        NetworkServerControl server = new NetworkServerControl();
+        try {
+            server.setMaxThreads(-2);
+            fail("Should have thrown an exception with 'DRDA_InvalidValue.U:Invalid value, -2, for maxthreads.'");
+        } catch (Exception e) {
+            assertEquals("DRDA_InvalidValue.U:Invalid value, -2, for maxthreads.", e.getMessage());
+        }
+    }
+
+    public void testMaxThreadsCallable_2147483647() throws Exception {
+        NetworkServerControl server = new NetworkServerControl();
+        server.setMaxThreads(2147483647);
+        int maxValue = server.getMaxThreads();
+        assertEquals("Fail! Max threads value incorrect!", 2147483647, maxValue);
+    }
+
+    public void testMaxThreadsCallable_9000() throws Exception {
+        NetworkServerControl server = new NetworkServerControl();
+        server.setMaxThreads(9000);
+        int maxValue = server.getMaxThreads();
+        assertEquals("Fail! Max threads value incorrect!", 9000, maxValue);
     }
 }
