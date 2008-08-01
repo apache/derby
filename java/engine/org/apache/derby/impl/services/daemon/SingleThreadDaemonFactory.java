@@ -26,6 +26,7 @@ import org.apache.derby.iapi.services.daemon.DaemonFactory;
 import org.apache.derby.iapi.services.daemon.DaemonService;
 import org.apache.derby.impl.services.daemon.BasicDaemon;
 import org.apache.derby.iapi.services.monitor.Monitor;
+import org.apache.derby.iapi.util.PrivilegedThreadOps;
 
 public class SingleThreadDaemonFactory implements DaemonFactory
 {
@@ -46,6 +47,12 @@ public class SingleThreadDaemonFactory implements DaemonFactory
 		BasicDaemon daemon = new BasicDaemon(contextService);
 
 		Thread daemonThread = Monitor.getMonitor().getDaemonThread(daemon, name, false);
+		// DERBY-3745.  setContextClassLoader for thread to null to avoid
+		// leaking class loaders.
+		PrivilegedThreadOps.setContextClassLoaderIfPrivileged(
+							  daemonThread, null);
+
+
 		daemonThread.start();
 		return daemon;
 	}
