@@ -983,6 +983,10 @@ public abstract class Connection implements java.sql.Connection,
 
     /**
      * Checks whether the server supports locators for large objects.
+     * Note that even though the server supports LOB locators, the database
+     * that is accessed through the server may not have the necessary stored
+     * procedures to support LOB locators (e.g., because the database is
+     * soft upgraded from an earlier version).
      *
      * @return {@code true} if LOB locators are supported.
      */
