@@ -32,10 +32,10 @@ import java.sql.Statement;
 import java.util.Properties;
 
 import junit.framework.Test;
-import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
+import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
@@ -68,14 +68,13 @@ public class OutBufferedStreamTest extends BaseJDBCTestCase {
      * @return the testsuite
      */
     public static Test suite() {
-        Properties sysprops = System.getProperties();
-        sysprops.put("derby.drda.streamOutBufferSize", "131072");
+        Properties properties = new Properties();
+        properties.setProperty("derby.drda.streamOutBufferSize", "131072");
 
-        TestSuite s = new TestSuite("OutBufferedStreamTest");
-        s.addTestSuite(OutBufferedStreamTest.class);
+        Test suite = TestConfiguration.clientServerSuite (OutBufferedStreamTest.class);
+        suite = new SystemPropertyTestSetup(suite, properties);
 
-        return new CleanDatabaseTestSetup(
-                                  TestConfiguration.clientServerDecorator(s)) {
+        return new CleanDatabaseTestSetup(suite) {
             /**
              * Creates the table used in the test case.
              *
