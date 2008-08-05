@@ -37,6 +37,7 @@ public class _Suite extends BaseJDBCTestCase {
         TestSuite suite = new TestSuite("Memory Suite");
         suite.addTest(BlobMemTest.suite());
         suite.addTest(ClobMemTest.suite());
+        suite.addTest(MultiByteClobTest.suite());
                 return suite;
     }
 }
