@@ -114,9 +114,7 @@ class LOBStreamControl {
                 throw (StandardException)e;
             if (e instanceof IOException)
                 throw (IOException) e;
-            IOException ioe = new IOException (e.getMessage());
-            ioe.initCause (e);
-            throw ioe;
+            throw Util.newIOException(e);
         }
         isBytes = false;
         //now this call will write into the file
@@ -397,9 +395,7 @@ class LOBStreamControl {
                 throw (IOException) e;
             if (e instanceof RuntimeException)
                 throw (RuntimeException) e;
-            IOException ioe = new IOException(e.getMessage());
-            ioe.initCause(e);
-            throw ioe;
+            throw Util.newIOException(e);
         }
     }
     /**

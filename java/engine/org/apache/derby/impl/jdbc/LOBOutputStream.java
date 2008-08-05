@@ -68,7 +68,7 @@ public class LOBOutputStream extends OutputStream {
         try {
             pos = control.write(b, pos);
         } catch (StandardException se) {
-            throw new IOException (se.getMessage());
+            throw Util.newIOException(se);
         }
     }
 
@@ -113,7 +113,7 @@ public class LOBOutputStream extends OutputStream {
                                             SQLState.BLOB_INVALID_OFFSET))) {
                 throw new ArrayIndexOutOfBoundsException(se.getMessage());
             }
-            throw new IOException (se.getMessage());
+            throw Util.newIOException(se);
         }
     }
 

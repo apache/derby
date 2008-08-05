@@ -142,9 +142,7 @@ public final class UTF8Reader extends Reader
                     try {
                         this.positionedIn.resetStream();
                     } catch (StandardException se) {
-                        IOException ioe = new IOException(se.getMessage());
-                        ioe.initCause(se);
-                        throw ioe;
+                        throw Util.newIOException(se);
                     }
                 } else {
                     this.positionedIn = null;
@@ -567,10 +565,7 @@ readChars:
             parent.restoreContextStack();
         }
         } catch (SQLException sqle) {
-            IOException ioe =
-                new IOException(sqle.getSQLState() + ": " + sqle.getMessage());
-            ioe.initCause(sqle);
-            throw ioe;
+            throw Util.newIOException(sqle);
         }
     }
 

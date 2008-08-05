@@ -222,9 +222,7 @@ final class ClobUpdatableReader extends Reader {
                     stream = clob.getInternalClob().getRawByteStream();
                 }
                 catch (SQLException e) {
-                    IOException ioe = new IOException (e.getMessage());
-                    ioe.initCause (e);
-                    throw ioe;
+                    throw Util.newIOException(e);
                 }
                 init ((LOBInputStream) stream, pos);
                 materialized = true;

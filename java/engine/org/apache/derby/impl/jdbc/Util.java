@@ -282,6 +282,18 @@ public abstract class Util  {
 	}
 
     /**
+     * Create an {@code IOException} that wraps another {@code Throwable}.
+     *
+     * @param cause the underlying cause of the error
+     * @return an {@code IOException} linked to {@code cause}
+     */
+    static IOException newIOException(Throwable cause) {
+        IOException ioe = new IOException(cause.getMessage());
+        ioe.initCause(cause);
+        return ioe;
+    }
+
+    /**
      * this method is called to replace the exception factory to be 
      * used to generate the SQLException or the subclass
      */
