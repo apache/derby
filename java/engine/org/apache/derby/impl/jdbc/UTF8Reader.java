@@ -55,6 +55,8 @@ import org.apache.derby.iapi.types.Resetable;
 public final class UTF8Reader extends Reader
 {
     private static final String READER_CLOSED = "Reader closed";
+    /** Maximum size in number of chars for the internal character buffer. */
+    private static final int MAXIMUM_BUFFER_SIZE = 8*1024; // 8 KB
 
     /** The underlying data stream. */
     private InputStream in;
@@ -82,7 +84,7 @@ public final class UTF8Reader extends Reader
     private final long maxFieldSize;    // characters
 
     /** Internal character buffer storing characters read from the stream. */
-    private final char[]   buffer = new char[8 * 1024];
+    private final char[]   buffer;
     /** The number of characters in the internal buffer. */
     private int            charactersInBuffer; // within buffer
     /** The position of the next character to read in the internal buffer. */
@@ -131,6 +133,7 @@ public final class UTF8Reader extends Reader
         parent.setupContextStack();
         try {
             synchronized (lock) { // Synchronize access to store.
+                this.in = in; // Note the possible reassignment below.
                 if (in instanceof PositionedStoreStream) {
                     this.positionedIn = (PositionedStoreStream)in;
                     // This stream is already buffered, and buffering it again
@@ -138,7 +141,6 @@ public final class UTF8Reader extends Reader
                     // implement a special buffered reader to buffer again.
                     // Note that buffering this UTF8Reader again, does not
                     // cause any trouble...
-                    this.in = in;
                     try {
                         this.positionedIn.resetStream();
                     } catch (StandardException se) {
@@ -146,8 +148,6 @@ public final class UTF8Reader extends Reader
                     }
                 } else {
                     this.positionedIn = null;
-                    // Buffer this for improved performance.
-                    this.in = new BufferedInputStream (in);
                 }
                 this.utfLen = readUnsignedShort();
                 // Even if we are reading the encoded length, the stream may
@@ -159,6 +159,16 @@ public final class UTF8Reader extends Reader
             } // End synchronized block
         } finally {
             parent.restoreContextStack();
+        }
+        // Setup buffering.
+        int bufferSize = calculateBufferSize(utfLen, maxFieldSize);
+        this.buffer = new char[bufferSize];
+        if (this.positionedIn == null) {
+            // Buffer this for improved performance.
+            // Note that the stream buffers bytes, whereas the internal buffer
+            // buffers characters. In worst case, the stream buffer must be
+            // filled three times to fill the internal character buffer.
+            this.in = new BufferedInputStream(in, bufferSize);
         }
     }
 
@@ -192,8 +202,13 @@ public final class UTF8Reader extends Reader
             // the stream and we can't pass that out as data to the user.
             SanityManager.ASSERT(!(in instanceof Resetable));
         }
+        int bufferSize = calculateBufferSize(streamSize, maxFieldSize);
+        this.buffer = new char[bufferSize];
         // Buffer this for improved performance.
-        this.in = new BufferedInputStream(in);
+        // Note that the stream buffers bytes, whereas the internal buffer
+        // buffers characters. In worst case, the stream buffer must be filled
+        // three times to fill the internal character buffer.
+        this.in = new BufferedInputStream(in, bufferSize);
     }
 
     /*
@@ -586,5 +601,26 @@ readChars:
                                    "encoded length bytes");
 
         return (ch1 << 8) + (ch2 << 0);
+    }
+
+    /**
+     * Calculates an optimized buffer size.
+     * <p>
+     * The maximum size allowed is returned if the specified values don't give
+     * enough information to say a smaller buffer size is preferable.
+     *
+     * @param encodedSize data length in bytes
+     * @param maxFieldSize maximum data length in bytes
+     * @return An (sub)optimal buffer size.
+     */
+    private final int calculateBufferSize(long encodedSize, long maxFieldSize) {
+        int bufferSize = MAXIMUM_BUFFER_SIZE;
+        if (encodedSize > 0 && encodedSize < bufferSize) {
+            bufferSize = (int)encodedSize;
+        }
+        if (maxFieldSize > 0 && maxFieldSize < bufferSize) {
+            bufferSize = (int)maxFieldSize;
+        }
+        return bufferSize;
     }
 }
