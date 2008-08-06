@@ -49,7 +49,20 @@ public abstract class ScriptTestCase extends CanonTestCase {
 		inputEncoding = "US-ASCII";
 	}
 	
-	/**
+    /**
+     * Create a ScriptTestCase to run a single test
+     * using a connection obtained from getConnection() with a
+     * different encoding
+     * @param script Base name of the .sql script
+     * excluding the .sql suffix.
+     */
+    public ScriptTestCase(String script, String encoding)
+    {
+        super(script);
+        inputEncoding = encoding;
+    }
+
+    /**
 	 * Return the folder (last element of the package) where
 	 * the .sql script lives, e.g. lang.
 	 */

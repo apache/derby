@@ -99,6 +99,14 @@ public final class LocalizedResource  implements java.security.PrivilegedAction 
 		}
 		return local;
 	}
+    // Resets the 'local' field to null. This is not needed for normal
+    // operations, however, when executing sql files in our junit tests, we use
+    // the same jvm and thus the locale will get loaded only once, resulting
+    // in trouble when testing the localization for ij.
+    public static void resetLocalizedResourceCache()
+    {
+        local=null;
+    }
 	public void init(){
 		init(null,null,null);
 	}
