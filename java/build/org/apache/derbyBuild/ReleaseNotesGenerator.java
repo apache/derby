@@ -68,6 +68,12 @@ import org.apache.tools.ant.taskdefs.Echo;
  * <p>
  * <a href="http://issues.apache.org/jira/browse/DERBY-2570">DERBY-2570</a>
  * </p>
+ *
+ * <p>
+ * The format of the html reports changes over time. You may need to adjust this
+ * tool for each release.
+ * </p>
+ *
  */
 public class ReleaseNotesGenerator extends Task
 {
@@ -94,10 +100,14 @@ public class ReleaseNotesGenerator extends Task
         "ping issues.apache.org.\n" +
         "\n" +
         "The ReleaseNoteGenerator assumes that the two JIRA reports contain\n" +
-        "key, title, and attachments elements for each Derby issue. For each\n" +
+        "key and title information for each Derby issue. For each\n" +
         "issue in NOTES_LIST, the ReleaseNotesGenerator looks through the\n" +
-        "attachments block in that report and grabs the latest reported\n" +
+        "attachments clipped to that issue and grabs the latest reported\n" +
         "releaseNote.html.\n" +
+        "\n" +
+        "In order to parse the xml files, you may need to remove the\n" +
+        "introductory DOCTYPE preamble because it refers to a DTD which does\n" +
+        "not live in your local file system.\n" +
         "\n" +
         "For this reason, it is recommended that you freshly generate BUG_LIST\n" +
         "and NOTES_LIST just before you run this tool.\n"
@@ -158,13 +168,13 @@ public class ReleaseNotesGenerator extends Task
     private static  final   String  SUM_RELEASE_ID = "releaseID";
 
     // tags in JIRA reports
-    private static  final   String  JIRA_ATTACHMENT = "attachment";
-    private static  final   String  JIRA_ATTACHMENTS = "attachments";
-    private static  final   String  JIRA_ID = "id";
-    private static  final   String  JIRA_ITEM = "item";
-    private static  final   String  JIRA_KEY = "key";
-    private static  final   String  JIRA_NAME = "name";
-    private static  final   String  JIRA_TITLE = "title";
+    private static  final   String  JIRA_ITEM = "h3";
+
+    // positioning strings inside a JIRA
+    private static  final   String  ATTACHMENT_START = "/jira/secure/attachment/";
+    private static  final   String  ATTACHMENT_VERSION_END = "/";
+    private static  final   String  ATTACHMENT_END = "\"";
+    private static  final   String  ATTACHMENT_PREFIX = "https://issues.apache.org";
 
     // managing releaseNote.html
     private static  final   String  RN_SUMMARY_OF_CHANGE = "Summary of Change";
@@ -283,37 +293,25 @@ public class ReleaseNotesGenerator extends Task
      */
     public  static  class   JiraIssue
     {
-        public  static  final   long NO_RELEASE_NOTE = -1L;
-
         private String  _key;
         private String  _title;
-        private long         _releaseNoteAttachmentID;
 
         public  JiraIssue
             (
              String key,
-             String title,
-             long       releaseNoteAttachmentID
+             String title
              )
         {
             _key = key;
             _title = title;
-            _releaseNoteAttachmentID = releaseNoteAttachmentID;
         }
 
         public  String  getKey() { return _key; }
         public  String  getTitle() { return _title; }
-        public  long         getReleaseNoteAttachmentID() { return _releaseNoteAttachmentID; }
-        public  boolean hasReleaseNote() { return (_releaseNoteAttachmentID > NO_RELEASE_NOTE); }
         
         public  String  getJiraAddress()
         {
             return "http://issues.apache.org/jira/browse/" + _key;
-        }
-
-        public  String  getReleaseNoteAddress()
-        {
-            return "http://issues.apache.org/jira/secure/attachment/" + _releaseNoteAttachmentID + "/releaseNote.html";
         }
     }
     
@@ -697,7 +695,6 @@ public class ReleaseNotesGenerator extends Task
         }
     }
     
-    
     /**
      * <p>
      * Get the release note for an issue.
@@ -706,26 +703,114 @@ public class ReleaseNotesGenerator extends Task
     private Document   getReleaseNote( GeneratorState gs, JiraIssue issue )
         throws Exception
     {
-        if ( issue.hasReleaseNote() )
-        {
-            URL             url = null;
-            InputStream is = null;
+        // first get the issue
+        InputStream issueStream = grabDocument( gs, issue.getJiraAddress() );
+        if ( issueStream == null ) { return null; }
+        
+        String          issueDocument = readJira( issueStream );
+        String          releaseNoteAddress = getReleaseNoteAddress( issueDocument );
+        InputStream releaseNoteStream = grabDocument( gs, releaseNoteAddress );
+        if ( releaseNoteStream == null ) { return null; }
             
-            try {
-                url = new URL( issue.getReleaseNoteAddress() );
-                is = url.openStream();
-            }
-            catch (Throwable t)
-            {
-                processThrowable( t );
-                return null;
-            }
+        Document        releaseNoteDoc = gs.getReleaseNoteReader().getReleaseNote( releaseNoteStream );
 
-            Document        doc = gs.getReleaseNoteReader().getReleaseNote( is );
+        return releaseNoteDoc;
+    }
 
-            return doc;
+    /**
+     * <p>
+     * We don't even bother trying to parse an individual jira since it is html
+     * and not likely to be syntactically correct xml. We just siphon the jira
+     * into a big string.
+     * </p>
+     */
+    private String  readJira( InputStream is )
+        throws Exception
+    {
+        InputStreamReader   isr = new InputStreamReader( is, "UTF-8" );
+        LineNumberReader    lr = new LineNumberReader( isr );
+        StringBuffer            buffer = new StringBuffer();
+
+        while( true )
+        {
+            String  nextLine = lr.readLine();
+
+            if ( nextLine == null ) { break; }
+            else { buffer.append( nextLine ); }
         }
-        else { return null; }
+
+        lr.close();
+        isr.close();
+        is.close();
+
+        String  result = buffer.toString();
+
+        return result;
+    }
+    
+    /**
+     * <p>
+     * Loop through the attachment pointers in a JIRA, looking for the highest
+     * numbered release note.
+     * </p>
+     */
+    private String  getReleaseNoteAddress( String jira )
+        throws Exception
+    {
+        long    highestReleaseNoteVersion = 0;
+        String  releaseNoteAddress = null;
+        int         idx = 0;
+
+        while ( true )
+        {
+            int start = jira.indexOf( ATTACHMENT_START, idx );
+            if ( start < 0 ) { break; }
+            int end = jira.indexOf( ATTACHMENT_END, start );
+            if ( end < 0 ) { break; }
+
+            idx = end;
+
+            String  attachmentAddress = jira.substring( start, end );
+            int         versionNumberStart = ATTACHMENT_START.length();
+            int         versionNumberEnd = attachmentAddress.indexOf( ATTACHMENT_VERSION_END, versionNumberStart );
+            String  versionString = attachmentAddress.substring( versionNumberStart, versionNumberEnd );
+            long    versionNumber = Long.parseLong( versionString);
+
+            if ( versionNumber >= highestReleaseNoteVersion)
+            {
+                highestReleaseNoteVersion = versionNumber;
+                releaseNoteAddress = ATTACHMENT_PREFIX + attachmentAddress;
+            }
+        }
+
+        System.out.println( "Found release note address: " + releaseNoteAddress );
+
+        return releaseNoteAddress;
+    }
+    
+    /**
+     * <p>
+     * Grab a document off the web.
+     * </p>
+     */
+    private InputStream   grabDocument( GeneratorState gs, String urlString )
+        throws Exception
+    {
+        // first get the issue
+        URL             url = null;
+        InputStream is = null;
+            
+        try {
+            url = new URL( urlString );
+            is = url.openStream();
+
+            return is;
+        }
+        catch (Throwable t)
+        {
+            processThrowable( t );
+            return null;
+        }
     }
 
     //////////////////////////////////
@@ -1393,9 +1478,12 @@ public class ReleaseNotesGenerator extends Task
     private JiraIssue   makeJiraIssue( Element itemElement )
         throws Exception
     {
-        String  key = squeezeText( getFirstChild( itemElement, JIRA_KEY ) );
-        String  title = squeezeText( getFirstChild( itemElement, JIRA_TITLE ) );
-        long         releaseNoteAttachmentID = getReleaseNoteAttachmentID( itemElement );
+        // the text lives in an anchor
+        Element anchorElement = getFirstChild( itemElement, ANCHOR );
+        String  contents = squeezeText( anchorElement );
+
+        String  key = parseKey( contents );
+        String  title;
 
         //
         // A JIRA title has the following form:
@@ -1405,48 +1493,25 @@ public class ReleaseNotesGenerator extends Task
         // We strip off the leading JIRA id because that information already
         // lives in the key.
         //
-        title = title.substring( title.indexOf( ']' ) + 2, title.length() );        
+        title = contents.substring( contents.indexOf( ']' ) + 2, contents.length() );        
 
-        return new JiraIssue( key, title, releaseNoteAttachmentID );
+        return new JiraIssue( key, title );
     }
 
     /**
      * <p>
-     * Get the highest attachment id of all of the "releaseNote.html" documents
-     * attached to this JIRA.
+     * Parse a string, looking for an id of the form "[DERBY-2598]". Extract the
+     * bit between the brackets.
      * </p>
      */
-    private long   getReleaseNoteAttachmentID( Element itemElement )
-        throws Exception
+    private String parseKey( String raw )
     {
-        long         releaseNoteAttachmentID = JiraIssue.NO_RELEASE_NOTE;
+        int  start = raw.indexOf( '[' );
+        int  end = raw.indexOf( ']' );
 
-        Element     attachments = getOptionalChild( itemElement, JIRA_ATTACHMENTS );
-
-        if ( attachments != null )
-        {
-            NodeList    attachmentsList = attachments.getElementsByTagName( JIRA_ATTACHMENT );
-            int             count = attachmentsList.getLength();
-
-            for ( int i = 0; i < count; i++ )
-            {
-                Element     attachment = (Element) attachmentsList.item( i );
-                String          name = attachment.getAttribute( JIRA_NAME );
-
-                if ( RELEASE_NOTE_NAME.equals( name ) )
-                {
-                    String      stringID = attachment.getAttribute( JIRA_ID );
-                    int             id = Long.decode( stringID ).intValue();
-
-                    if ( id > releaseNoteAttachmentID ) { releaseNoteAttachmentID = id; }
-                }
-            }
-
-        }
-
-        return releaseNoteAttachmentID;
+        return raw.substring( start + 1, end );
     }
-    
+
     ////////////////////////////////////////////////////////
     //
     // EXCEPTION PROCESSING MINIONS
