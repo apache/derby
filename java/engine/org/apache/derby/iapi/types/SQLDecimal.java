@@ -317,7 +317,7 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 		BigDecimal localValue = getBigDecimal();
 		if (localValue == null)
 			return null;
-		else if (JVMInfo.JDK_ID < JVMInfo.J2SE_15)
+		else if (toPlainString == null)
 			return localValue.toString();
         else
         {
@@ -1157,7 +1157,7 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
             return 0;
         }
         
-        if (JVMInfo.JDK_ID >= JVMInfo.J2SE_15)
+        if (bdPrecision != null)
 		{
 	        // use reflection so we can still compile using JDK1.4
 			// if we are prepared to require 1.5 to compile then this can be a
