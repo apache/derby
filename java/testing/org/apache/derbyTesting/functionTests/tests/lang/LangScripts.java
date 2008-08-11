@@ -52,7 +52,6 @@ public final class LangScripts extends ScriptTestCase {
         "LOB",
         "bit",
         "bit2",
-        "nulls",
         "stringtypes",
         };
     

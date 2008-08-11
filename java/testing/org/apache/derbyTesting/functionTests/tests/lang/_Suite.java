@@ -171,6 +171,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(MixedCaseExpressionTest.suite());
         suite.addTest(UpdateStatisticsTest.suite());
         suite.addTest(MiscErrorsTest.suite());
+        suite.addTest(NullsTest.suite());
         suite.addTest(ArithmeticTest.suite());
         suite.addTest(ConstantExpressionTest.suite());
 
