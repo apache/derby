@@ -1853,6 +1853,16 @@ public class GenericLanguageConnectionContext
 		return s.getSchemaName();
 	}
 
+
+	/**
+	 * @see LanguageConnectionContext#isInitialDefaultSchema
+	 */
+	public boolean isInitialDefaultSchema(String schemaName) {
+		return cachedInitialDefaultSchemaDescr.getSchemaName().
+			equals(schemaName);
+	}
+
+
 	/**
 	 * @see LanguageConnectionContext#setDefaultSchema(SchemaDescriptor sd)
 	 */

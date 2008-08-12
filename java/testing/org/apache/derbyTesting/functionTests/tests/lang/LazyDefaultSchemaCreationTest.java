@@ -208,7 +208,40 @@ public class LazyDefaultSchemaCreationTest extends BaseJDBCTestCase {
         }
     }
 
-    protected void  tearDown() throws Exception {
+    /**
+     * Test that implicit schema creation of other schemas besides
+     * the initial default schema is still transactional.
+     */
+    public void testOtherImplicitSchemaCreation () throws SQLException
+    {
+        Connection c1 = openUserConnection("newuser");
+        c1.setAutoCommit(false);
+        Statement s1 = c1.createStatement();
+
+        // Will auto-create schema OTHERSCHEMA:
+        s1.executeUpdate("create table otherschema.t1(i int)");
+        s1.close();
+        
+        JDBC.assertSingleValueResultSet(
+            c1.createStatement().executeQuery(
+                "select schemaname from sys.sysschemas " +
+                "where schemaname='OTHERSCHEMA'"),
+            "OTHERSCHEMA");
+
+        c1.rollback();
+
+        JDBC.assertEmpty(
+            c1.createStatement().executeQuery(
+                "select schemaname from sys.sysschemas " +
+                "where schemaname='OTHERSCHEMA'"));
+        
+        c1.rollback();
+        c1.close();
+    }
+
+
+
+protected void  tearDown() throws Exception {
         try {
             createStatement().executeUpdate("drop schema newuser restrict");
         } catch (SQLException e) {
