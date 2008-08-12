@@ -101,88 +101,20 @@ abstract class DDLConstantAction implements ConstantAction
 		SchemaDescriptor sd = dd.getSchemaDescriptor(schemaName, tc, false);
 
 		if (sd == null || sd.getUUID() == null) {
-            CreateSchemaConstantAction csca
-                = new CreateSchemaConstantAction(schemaName, (String) null);
+			CreateSchemaConstantAction csca
+				= new CreateSchemaConstantAction(schemaName, (String) null);
 
 			if (activation.getLanguageConnectionContext().
 					isInitialDefaultSchema(schemaName)) {
-				// DERBY-48: This operation creates the user's initial default
-				// schema and we don't want to hold a lock for SYSSCHEMAS for
-				// the duration of the user transaction, so we perform the
-				// creation in a nested transaction if possible.
-				TransactionController useTc    = null;
-				TransactionController nestedTc = null;
-
-				try {
-					nestedTc = tc.startNestedUserTransaction(false);
-					useTc = nestedTc;
-				} catch (StandardException e) {
-					if (SanityManager.DEBUG) {
-						SanityManager.THROWASSERT(
-							"Unexpected: not able to start nested transaction " +
-							"to auto-create schema", e);
-					}
-					useTc = tc;
-				}
-
-				// Try max twice: if nested transaction times out, try
-				// again in the outer transaction because it may be a
-				// self-lock, that is, the outer transaction may hold some
-				// lock(s) that make the nested transaction attempt to set
-				// a write lock time out.  Trying it again in the outer
-				// transaction will then succeed. If the reason is some
-				// other transaction barring us, trying again in the outer
-				// transaction will possibly time out again.
-				//
-				// Also, if creating a nested transaction failed, only try
-				// once in the outer transaction.
-				while (true) {
-					try {
-						csca.executeConstantAction(activation, useTc);
-					} catch (StandardException se) {
-						if (se.getMessageId().equals(SQLState.LOCK_TIMEOUT)) {
-							// We don't test for SQLState.DEADLOCK or
-							// .LOCK_TIMEOUT_LOG here because a) if it is a
-							// deadlock, it may be better to expose it, and b)
-							// LOCK_TIMEOUT_LOG happens when the app has set
-							// derby.locks.deadlockTrace=true, in which case we
-							// don't want to mask the timeout.  So in both the
-							// latter cases we just throw.
-							if (useTc == nestedTc) {
-
-								// clean up after use of nested transaction,
-								// then try again in outer transaction
-								useTc = tc;
-								nestedTc.destroy();
-								continue;
-							}
-						} else if (se.getMessageId()
-									   .equals(SQLState.LANG_OBJECT_ALREADY_EXISTS)) {
-							// Ignore "Schema already exists". Another thread has
-							// probably created it after we checked for it
-							break;
-						}
-
-						// We got an non-expected exception, either in
-						// the nested transaction or in the outer
-						// transaction; we had better pass that on
-						if (useTc == nestedTc) {
-							nestedTc.destroy();
-						}
-
-						throw se;
-					}
-					break;
-				}
-
-				// We either succeeded or got LANG_OBJECT_ALREADY_EXISTS.
-				// Clean up if we did this in a nested transaction.
-				if (useTc == nestedTc) {
-					nestedTc.commit();
-					nestedTc.destroy();
-				}
+				// DERBY-48: This operation creates the user's initial
+				// default schema and we don't want to hold a lock for
+				// SYSSCHEMAS for the duration of the user transaction
+				// since connection attempts may block, so we perform
+				// the creation in a nested transaction (if possible)
+				// so we can commit at once and release locks.
+				executeCAPreferSubTrans(csca, tc, activation);
 			} else {
-				// create the schema in the user transaction always
+				// create the schema in the user transaction
 				try {
 					csca.executeConstantAction(activation);
 				} catch (StandardException se) {
@@ -201,6 +133,85 @@ abstract class DDLConstantAction implements ConstantAction
 		}
 
 		return sd;
+	}
+
+
+	private static void executeCAPreferSubTrans
+		(CreateSchemaConstantAction csca,
+		 TransactionController tc,
+		 Activation activation) throws StandardException {
+
+		TransactionController useTc    = null;
+		TransactionController nestedTc = null;
+
+		try {
+			nestedTc = tc.startNestedUserTransaction(false);
+			useTc = nestedTc;
+		} catch (StandardException e) {
+			if (SanityManager.DEBUG) {
+				SanityManager.THROWASSERT(
+					"Unexpected: not able to start nested transaction " +
+					"to auto-create schema", e);
+			}
+			useTc = tc;
+		}
+
+		// Try max twice: if nested transaction times out, try
+		// again in the outer transaction because it may be a
+		// self-lock, that is, the outer transaction may hold some
+		// lock(s) that make the nested transaction attempt to set
+		// a write lock time out.  Trying it again in the outer
+		// transaction will then succeed. If the reason is some
+		// other transaction barring us, trying again in the outer
+		// transaction will possibly time out again.
+		//
+		// Also, if creating a nested transaction failed, only try
+		// once in the outer transaction.
+		while (true) {
+			try {
+				csca.executeConstantAction(activation, useTc);
+			} catch (StandardException se) {
+				if (se.getMessageId().equals(SQLState.LOCK_TIMEOUT)) {
+					// We don't test for SQLState.DEADLOCK or
+					// .LOCK_TIMEOUT_LOG here because a) if it is a
+					// deadlock, it may be better to expose it, and b)
+					// LOCK_TIMEOUT_LOG happens when the app has set
+					// derby.locks.deadlockTrace=true, in which case we
+					// don't want to mask the timeout.  So in both the
+					// latter cases we just throw.
+					if (useTc == nestedTc) {
+
+						// clean up after use of nested transaction,
+						// then try again in outer transaction
+						useTc = tc;
+						nestedTc.destroy();
+						continue;
+					}
+				} else if (se.getMessageId()
+							   .equals(SQLState.LANG_OBJECT_ALREADY_EXISTS)) {
+					// Ignore "Schema already exists". Another thread has
+					// probably created it after we checked for it
+					break;
+				}
+
+				// We got an non-expected exception, either in
+				// the nested transaction or in the outer
+				// transaction; we had better pass that on
+				if (useTc == nestedTc) {
+					nestedTc.destroy();
+				}
+
+				throw se;
+			}
+			break;
+		}
+
+		// We either succeeded or got LANG_OBJECT_ALREADY_EXISTS.
+		// Clean up if we did this in a nested transaction.
+		if (useTc == nestedTc) {
+			nestedTc.commit();
+			nestedTc.destroy();
+		}
 	}
 
 

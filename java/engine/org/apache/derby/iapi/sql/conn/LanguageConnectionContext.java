@@ -502,7 +502,7 @@ public interface LanguageConnectionContext extends Context {
 	/**
 	 * Return true if this schema name is the initial default schema for the
 	 * current session.
-	 * @param schemaName 
+	 * @param schemaName
 	 * @return true
 	 */
 	public boolean isInitialDefaultSchema(String schemaName);

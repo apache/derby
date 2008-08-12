@@ -221,7 +221,7 @@ public class LazyDefaultSchemaCreationTest extends BaseJDBCTestCase {
         // Will auto-create schema OTHERSCHEMA:
         s1.executeUpdate("create table otherschema.t1(i int)");
         s1.close();
-        
+
         JDBC.assertSingleValueResultSet(
             c1.createStatement().executeQuery(
                 "select schemaname from sys.sysschemas " +
@@ -234,7 +234,7 @@ public class LazyDefaultSchemaCreationTest extends BaseJDBCTestCase {
             c1.createStatement().executeQuery(
                 "select schemaname from sys.sysschemas " +
                 "where schemaname='OTHERSCHEMA'"));
-        
+
         c1.rollback();
         c1.close();
     }
