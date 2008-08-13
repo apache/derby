@@ -26,7 +26,6 @@ derbynet/runtimeinfo.java
 derbynet/sysinfo.java
 derbynet/sysinfo_withproperties.java
 stress/stress.multi
-lang/optimizerOverrides.sql
 lang/wisconsin.java
 jdbcapi/derbyStress.java
 jdbcapi/maxfieldsize.java

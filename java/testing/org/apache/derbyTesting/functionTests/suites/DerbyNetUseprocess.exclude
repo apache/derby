@@ -22,6 +22,5 @@ derbynet/dblook_test_net_territory.java
 derbynet/runtimeinfo.java
 derbynet/sysinfo.java
 derbynet/sysinfo_withproperties.java
-lang/optimizerOverrides.sql
 lang/wisconsin.java
 stress/stress.multi
