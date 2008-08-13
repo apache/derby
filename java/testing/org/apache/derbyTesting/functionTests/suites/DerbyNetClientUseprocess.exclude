@@ -12,7 +12,6 @@
 # derbynet/sysinfo.java - needs other properties
 # derbynet/sysinfo_withproperties.java - needs other properties
 # following fail for various reasons, many related to not being able to connect:
-#  lang/optimizerOverrides.sql
 #  lang/wisconsin.java
 #  jdbcapi/derbyStress.java
 #  jdbcapi/maxfieldsize.java

@@ -30,7 +30,6 @@ lang/lojreorder.sql
 lang/maxMemPerTab.java
 lang/nestedCommit.sql
 lang/openScans.sql
-lang/optimizerOverrides.sql
 lang/orderbyElimination.sql
 lang/outerjoin.sql
 lang/outparams.java

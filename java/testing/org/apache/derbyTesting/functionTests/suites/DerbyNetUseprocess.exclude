@@ -10,7 +10,6 @@
 # derbynet/runtimeinfo.java - fails with already existing threads (maybe intermittent)
 # derbynet/sysinfo.java - fails because not access to java.class.path
 # derbynet/sysinfo_withproperties.java - fails because not access to java.class.path
-# lang/optimizerOverrides.sql - fails...
 # lang/wisconsin.java - checks depend on dir structure
 # jdbcapi/maxfieldsize.java - fails...??? (but not when run by itself)
 #

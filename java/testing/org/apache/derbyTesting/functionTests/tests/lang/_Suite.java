@@ -174,6 +174,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(NullsTest.suite());
         suite.addTest(ArithmeticTest.suite());
         suite.addTest(ConstantExpressionTest.suite());
+        suite.addTest(OptimizerOverridesTest.suite());
 
         return suite;
 	}
