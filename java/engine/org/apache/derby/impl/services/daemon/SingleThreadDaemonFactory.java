@@ -21,12 +21,15 @@
 
 package org.apache.derby.impl.services.daemon;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+
 import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.services.daemon.DaemonFactory;
 import org.apache.derby.iapi.services.daemon.DaemonService;
 import org.apache.derby.impl.services.daemon.BasicDaemon;
 import org.apache.derby.iapi.services.monitor.Monitor;
-import org.apache.derby.iapi.util.PrivilegedThreadOps;
+
 
 public class SingleThreadDaemonFactory implements DaemonFactory
 {
@@ -46,11 +49,23 @@ public class SingleThreadDaemonFactory implements DaemonFactory
 	{
 		BasicDaemon daemon = new BasicDaemon(contextService);
 
-		Thread daemonThread = Monitor.getMonitor().getDaemonThread(daemon, name, false);
+		final Thread daemonThread = Monitor.getMonitor().getDaemonThread(daemon, name, false);
 		// DERBY-3745.  setContextClassLoader for thread to null to avoid
 		// leaking class loaders.
-		PrivilegedThreadOps.setContextClassLoaderIfPrivileged(
-							  daemonThread, null);
+		try {
+            AccessController.doPrivileged(
+             new PrivilegedAction() {
+                public Object run()  {
+                    daemonThread.setContextClassLoader(null);
+                    return null;
+                }
+            });
+        } catch (SecurityException se) {
+            // ignore security exception.  Earlier versions of Derby, before the 
+            // DERBY-3745 fix did not require setContextClassloader permissions.
+            // We may leak class loaders if we are not able to set this, but 
+            // cannot just fail.
+        }
 
 
 		daemonThread.start();

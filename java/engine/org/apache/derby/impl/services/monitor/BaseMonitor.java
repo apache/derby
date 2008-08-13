@@ -56,7 +56,7 @@ import org.apache.derby.iapi.services.loader.ClassInfo;
 import org.apache.derby.iapi.services.loader.InstanceGetter;
 import org.apache.derby.iapi.services.io.FormatableInstanceGetter;
 import org.apache.derby.iapi.error.ExceptionSeverity;
-import org.apache.derby.iapi.util.PrivilegedThreadOps;
+
 
 import  org.apache.derby.io.StorageFactory;
 
@@ -96,6 +96,7 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.InvocationTargetException;
 
 import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.security.PrivilegedExceptionAction;
 import java.security.PrivilegedActionException;
 
@@ -275,11 +276,24 @@ abstract class BaseMonitor
 		keepItems[2] = msgService;
 		dontGC = new AntiGC(keepItems);
 
-		Thread dontGCthread = getDaemonThread(dontGC, "antiGC", true);
+		final Thread dontGCthread = getDaemonThread(dontGC, "antiGC", true);
 		// DERBY-3745.  setContextClassLoader for thread to null to avoid
 		// leaking class loaders.
-		PrivilegedThreadOps.setContextClassLoaderIfPrivileged(
-						dontGCthread, null);
+		try {
+            AccessController.doPrivileged(
+            new PrivilegedAction() {
+                public Object run()  {
+                    
+                    dontGCthread.setContextClassLoader(null);
+                    return null;
+                }
+            });
+        } catch (SecurityException se1) {
+            // ignore security exception.  Earlier versions of Derby, before the 
+            // DERBY-3745 fix did not require setContextClassloader permissions.
+            // We may leak class loaders if we are not able to set this, but 
+            // cannot just fail.
+        }
 
 		dontGCthread.start();
 

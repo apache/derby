@@ -41,7 +41,6 @@ import org.apache.derby.iapi.services.jmx.ManagementService;
 import org.apache.derby.iapi.services.monitor.ModuleControl;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.property.PropertyUtil;
-import org.apache.derby.iapi.util.PrivilegedThreadOps;
 import org.apache.derby.mbeans.ManagementMBean;
 import org.apache.derby.mbeans.VersionMBean;
 import org.apache.derby.security.SystemPermission;
@@ -168,10 +167,16 @@ public final class JMXManagementService implements ManagementService, ModuleCont
         // sure the context class loader is null before we start the MBean
         // server which will create threads that we want to have a null context
         // class loader
-        ClassLoader savecl = null;
+        
         boolean hasGetClassLoaderPerms=false;
+        ClassLoader savecl = null;
         try {
-            savecl = PrivilegedThreadOps.getContextClassLoader(Thread.currentThread());
+            savecl = (ClassLoader)AccessController.doPrivileged(
+               new PrivilegedAction() {
+                public Object run()  {
+                    return Thread.currentThread().getContextClassLoader();
+                }
+            });
             hasGetClassLoaderPerms = true;
         } catch (SecurityException se) {
            // ignore security exception.  Earlier versions of Derby, before the 
@@ -180,8 +185,21 @@ public final class JMXManagementService implements ManagementService, ModuleCont
            // cannot just fail.        
         }
         if (hasGetClassLoaderPerms)
-            PrivilegedThreadOps.setContextClassLoaderIfPrivileged(Thread.
-                          currentThread(), null);
+            try {
+                AccessController.doPrivileged(
+                new PrivilegedAction() {
+                    public Object run()  {
+                        Thread.
+                                                                  currentThread().setContextClassLoader(null);
+                        return null;
+                    }
+                });
+            } catch (SecurityException se1) {
+                // ignore security exception.  Earlier versions of Derby, before the 
+                // DERBY-3745 fix did not require setContextClassloader permissions.
+                // We may leak class loaders if we are not able to set this, but 
+                // cannot just fail.
+            }
         try {
             mbeanServer = AccessController
                     .doPrivileged(new PrivilegedAction<MBeanServer>() {
@@ -199,8 +217,21 @@ public final class JMXManagementService implements ManagementService, ModuleCont
             // starts the MBean server.
         }
         if (hasGetClassLoaderPerms)
-            PrivilegedThreadOps.setContextClassLoaderIfPrivileged(Thread.currentThread(),
-                    savecl);
+            try {
+                final ClassLoader tmpsavecl = savecl;
+                AccessController.doPrivileged(
+                new PrivilegedAction() {
+                    public Object run()  {
+                        Thread.currentThread().setContextClassLoader(tmpsavecl);
+                        return null;
+                    }
+                });
+            } catch (SecurityException se) {
+                // ignore security exception.  Earlier versions of Derby, before the 
+                // DERBY-3745 fix did not require setContextClassloader permissions.
+                // We may leak class loaders if we are not able to set this, but 
+                // cannot just fail.
+            }
     }
 
     /**
