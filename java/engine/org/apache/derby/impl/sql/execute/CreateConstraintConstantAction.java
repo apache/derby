@@ -329,7 +329,7 @@ public class CreateConstraintConstantAction extends ConstraintConstantAction
 								);
 				dd.addConstraintDescriptor(conDesc, tc);
 				storeConstraintDependenciesOnPrivileges
-					(activation, conDesc, null);
+					(activation, conDesc, null, providerInfo);
 				break;
 
 			case DataDictionary.FOREIGNKEY_CONSTRAINT:
@@ -372,7 +372,11 @@ public class CreateConstraintConstantAction extends ConstraintConstantAction
 				/* Create stored dependency on the referenced constraint */
 				dm.addDependency(conDesc, referencedConstraint, lcc.getContextManager());
 				//store constraint's dependency on REFERENCES privileges in the dependeny system
-				storeConstraintDependenciesOnPrivileges(activation, conDesc, referencedConstraint.getTableId());				
+				storeConstraintDependenciesOnPrivileges
+					(activation,
+					 conDesc,
+					 referencedConstraint.getTableId(),
+					 providerInfo);
 				break;
 
 			default:

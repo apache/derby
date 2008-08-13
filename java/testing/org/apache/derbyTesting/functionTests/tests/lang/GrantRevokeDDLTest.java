@@ -6090,7 +6090,72 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             ("X0Y25", st,
              "revoke execute on function f_abs from mamta3 restrict");
         st_mamta3.executeUpdate(" drop table dhw");
+
+
+        // DERBY-3743b, test 1: multiple constraints, one routine dep per
+        // constraint.
+        st.executeUpdate(
+            "CREATE FUNCTION F_ABS2(P1 INT) RETURNS INT NO "
+            + "SQL RETURNS NULL ON NULL INPUT EXTERNAL NAME "
+            + "'java.lang.Math.abs' LANGUAGE JAVA PARAMETER STYLE JAVA");
+        st.executeUpdate(
+            " grant execute on function f_abs to mamta3");
+        st.executeUpdate(
+            " grant execute on function f_abs2 to mamta3");
+        st_mamta3.executeUpdate(
+            "create table dhw(i int constraint a1 check(mamta1.f_abs(i) > 0)" +
+                         ",j int constraint a2 check(mamta1.f_abs2(j) > 0))");
+        assertStatementError(
+            "23513", st_mamta3, "insert into dhw values (0,0)");
+        assertStatementError
+            ("X0Y25", st,
+             "revoke execute on function f_abs from mamta3 restrict");
+        assertStatementError
+            ("X0Y25", st,
+             "revoke execute on function f_abs2 from mamta3 restrict");
+        st_mamta3.executeUpdate("alter table dhw drop constraint a2");
+        st.executeUpdate(
+            "revoke execute on function f_abs2 from mamta3 restrict");
+
+        // check that a1 is still in place
+        assertStatementError
+            ("23513", st_mamta3, "insert into dhw values (0,1)");
+        assertStatementError
+            ("X0Y25", st,
+             "revoke execute on function f_abs from mamta3 restrict");
+        // remove  final constraint
+        st_mamta3.executeUpdate("alter table dhw drop constraint a1");
+        st.executeUpdate
+            ("revoke execute on function f_abs from mamta3 restrict");
+        st_mamta3.executeUpdate("insert into dhw values (0,0)");
+
+        st_mamta3.executeUpdate(" drop table dhw");
+
+        // DERBY-3743b, test 2: one constraint, multiple routine deps
+        st.executeUpdate(
+            " grant execute on function f_abs to mamta3");
+        st.executeUpdate(
+            " grant execute on function f_abs2 to mamta3");
+        st_mamta3.executeUpdate(
+            " create table dhw(i int constraint a check(" +
+                              "mamta1.f_abs(i) + mamta1.f_abs2(i) > 0))");
+        assertStatementError
+            ("X0Y25", st,
+             "revoke execute on function f_abs from mamta3 restrict");
+        assertStatementError
+            ("X0Y25", st,
+             "revoke execute on function f_abs2 from mamta3 restrict");
+        st_mamta3.executeUpdate("alter table dhw drop constraint a");
+
+        st.executeUpdate
+            ("revoke execute on function f_abs from mamta3 restrict");
+        st.executeUpdate
+            ("revoke execute on function f_abs2 from mamta3 restrict");
+
+        st_mamta3.executeUpdate(" drop table dhw");
+
         st.executeUpdate("DROP FUNCTION F_ABS");
+        st.executeUpdate("DROP FUNCTION F_ABS2");
 
         // set connection mamta2
         //ij(MAMTA3)> -- DERBY-1847 SELECT statement asserts with 

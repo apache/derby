@@ -35,6 +35,7 @@ import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.depend.DependencyManager;
 import org.apache.derby.iapi.sql.depend.Dependent;
+import org.apache.derby.iapi.sql.depend.ProviderInfo;
 import org.apache.derby.iapi.sql.dictionary.ColPermsDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.PermissionsDescriptor;
@@ -265,8 +266,12 @@ abstract class DDLConstantAction implements ConstantAction
 	 *  equation for constraints only. The dependency collection for 
 	 *  constraints is not same as for views and triggers and hence 
 	 *  constraints are handled by this special method.
+	 *
 	 * 	Views and triggers can depend on many different kind of privileges
-	 *  where as constraints only depend on REFERENCES privilege on a table.
+	 *  where as constraints only depend on REFERENCES privilege on a table
+	 *  (FOREIGN KEY constraints) or EXECUTE privileges on one or more
+	 *  functions (CHECK constraints).
+	 *
 	 *  Another difference is only one view or trigger can be defined by a
 	 *  sql statement and hence all the dependencies collected for the sql
 	 *  statement apply to the view or trigger in question. As for constraints,
@@ -282,12 +287,15 @@ abstract class DDLConstantAction implements ConstantAction
 	 *  @param dependent Make this object depend on required privileges
 	 *  @param refTableUUID Make sure we are looking for REFERENCES privilege 
 	 * 		for right table
-	 *
+	 *  @param providers set of providers for this constraint
 	 * @exception StandardException		Thrown on failure
 	 */
 	protected void storeConstraintDependenciesOnPrivileges(
-			Activation activation, Dependent dependent, UUID refTableUUID)
-	throws StandardException
+		Activation activation,
+		Dependent dependent,
+		UUID refTableUUID,
+		ProviderInfo[] providers)
+			throws StandardException
 	{
 		LanguageConnectionContext lcc = activation.getLanguageConnectionContext();
 		DataDictionary dd = lcc.getDataDictionary();
@@ -299,11 +307,12 @@ abstract class DDLConstantAction implements ConstantAction
 		if (!(lcc.getAuthorizationId().equals(dd.getAuthorizationDatabaseOwner())))
 		{
 			PermissionsDescriptor permDesc;
-			//Now, it is time to add into dependency system, constraint's 
-			//dependency on REFERENCES privilege. If the REFERENCES privilege is 
-			//revoked from the constraint owner, the constraint will get 
-			//dropped automatically.
+			// Now, it is time to add into dependency system, constraint's
+			// dependency on REFERENCES or, if it is a CHECK constraint, any
+			// EXECUTE privileges. If the REFERENCES is revoked from the
+			// constraint owner, the constraint will get dropped automatically.
 			List requiredPermissionsList = activation.getPreparedStatement().getRequiredPermissionsList();
+
 			if (requiredPermissionsList != null && ! requiredPermissionsList.isEmpty())
 			{
 				for(Iterator iter = requiredPermissionsList.iterator();iter.hasNext();)
@@ -329,16 +338,32 @@ abstract class DDLConstantAction implements ConstantAction
 							continue;
 					} else if (statPerm instanceof StatementSchemaPermission) { 
 						continue;
+					} else {
+						if (SanityManager.DEBUG) {
+							SanityManager.ASSERT(
+								statPerm instanceof StatementRoutinePermission,
+								"only StatementRoutinePermission expected");
+						}
+
+						// skip if this permission concerns a function not
+						// referenced by this constraint
+						StatementRoutinePermission rp =
+							(StatementRoutinePermission)statPerm;
+						if (!inProviderSet(providers, rp.getRoutineUUID())) {
+							continue;
+						}
 					}
-					//We know that we are working with a REFERENCES 
-					//privilege. Find all the PermissionDescriptors for
-					//this privilege and make constraint depend on it
-					//through dependency manager.
-					//The REFERENCES privilege could be defined at the
-					//table level or it could be defined at individual
-					//column levels. In addition, individual column
-					//REFERENCES privilege could be available at the
-					//user level or PUBLIC level.
+
+
+					// We know that we are working with a REFERENCES or EXECUTE
+					// privilege. Find all the PermissionDescriptors for this
+					// privilege and make constraint depend on it through
+					// dependency manager.  The REFERENCES privilege could be
+					// defined at the table level or it could be defined at
+					// individual column levels. In addition, individual column
+					// REFERENCES privilege could be available at the user
+					// level, PUBLIC or role level.  EXECUTE privilege could be
+					// available at the user or PUBLIC level.
 					permDesc = statPerm.getPermissionDescriptor(lcc.getAuthorizationId(), dd);				
 					if (permDesc == null) 
 					{
@@ -375,11 +400,14 @@ abstract class DDLConstantAction implements ConstantAction
 								dm.addDependency(dependent, permDesc, lcc.getContextManager());	           																
 						}
 					}
-					//We have found the REFERENCES privilege for all the
-					//columns in foreign key constraint and we don't 
-					//need to go through the rest of the privileges
-					//for this sql statement.
-					break;																										
+
+					if (statPerm instanceof StatementTablePermission) {
+						//We have found the REFERENCES privilege for all the
+						//columns in foreign key constraint and we don't
+						//need to go through the rest of the privileges
+						//for this sql statement.
+						break;
+					}
 				}
 			}
 		}
@@ -501,6 +529,19 @@ abstract class DDLConstantAction implements ConstantAction
 			}
 			
 		}
+	}
+
+	private boolean inProviderSet(ProviderInfo[] providers, UUID routineId) {
+		if (providers == null) {
+			return false;
+		}
+
+		for (int i = 0; i < providers.length; i++) {
+			if (providers[i].getObjectId().equals(routineId)) {
+				return true;
+			}
+		}
+		return false;
 	}
 }
 

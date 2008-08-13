@@ -45,6 +45,16 @@ public final class StatementRoutinePermission extends StatementPermission
 	}
 									 
 	/**
+	 * Return routine UUID for this access descriptor
+	 *
+	 * @return	Routine UUID
+	 */
+	public UUID getRoutineUUID()
+	{
+		return routineUUID;
+	}
+
+	/**
 	 * @see StatementPermission#check
 	 */
 	public void check( LanguageConnectionContext lcc,
