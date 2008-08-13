@@ -475,4 +475,140 @@ public class NetworkServerControlApiTest extends BaseJDBCTestCase {
         int maxValue = server.getMaxThreads();
         assertEquals("Fail! Max threads value incorrect!", 9000, maxValue);
     }
+
+      // timeslice test fixtures
+    public void testTimeSlice_0() throws Exception {
+        int value = 0;
+        NetworkServerControl server = new NetworkServerControl();
+        String[] timesliceCmd1 = new String[]{"org.apache.derby.drda.NetworkServerControl",
+                "timeslice", "0"};
+        assertExecJavaCmdAsExpected(new String[]{"Time slice changed to 0."}, timesliceCmd1, 0);
+        int timeSliceValue = server.getTimeSlice();
+        assertEquals(value, timeSliceValue);
+    }
+
+    public void testTimeSlice_Neg1() throws Exception {
+        int value = 0;
+        NetworkServerControl server = new NetworkServerControl();
+        String[] timesliceCmd2 = new String[]{"org.apache.derby.drda.NetworkServerControl",
+                "timeslice", "-1", "-h", "localhost", "-p", "1527"};
+        String host = TestUtil.getHostName();
+        timesliceCmd2[4] = host;
+        assertExecJavaCmdAsExpected(new String[]{"Time slice changed to 0."}, timesliceCmd2, 0);
+        int timeSliceValue = server.getTimeSlice();
+        assertEquals(value, timeSliceValue);
+    }
+
+    public void testTimeSlice_Neg12() throws Exception {
+        int value = 0;
+        NetworkServerControl server = new NetworkServerControl();
+        String[] timesliceCmd3 = new String[]{"org.apache.derby.drda.NetworkServerControl",
+                "timeslice", "-12"};
+        assertExecJavaCmdAsExpected(new String[]{"Invalid value, -12, for timeslice.",
+                "Usage: NetworkServerControl <commands> ",
+                "Commands:",
+                "start [-h <host>] [-p <portnumber>] [-noSecurityManager] [-ssl <sslmode>]",
+                "shutdown [-h <host>][-p <portnumber>] [-ssl <sslmode>] [-user <username>] [-password <password>]",
+                "ping [-h <host>][-p <portnumber>] [-ssl <sslmode>]",
+                "sysinfo [-h <host>][-p <portnumber>] [-ssl <sslmode>]",
+                "runtimeinfo [-h <host>][-p <portnumber>] [-ssl <sslmode>]",
+                "logconnections {on|off}[-h <host>][-p <portnumber>] [-ssl <sslmode>]",
+                "maxthreads <max>[-h <host>][-p <portnumber>] [-ssl <sslmode>]",
+                "timeslice <milliseconds>[-h <host>][-p <portnumber>] [-ssl <sslmode>]",
+                "trace {on|off} [-s <session id>][-h <host>][-p <portnumber>] [-ssl <sslmode>]",
+                "tracedirectory <traceDirectory>[-h <host>][-p <portnumber>] [-ssl <sslmode>]"}, timesliceCmd3, 1);
+        int timeSliceValue = server.getTimeSlice();
+        assertEquals(value, timeSliceValue);
+    }
+
+    public void testTimeSlice_2147483647() throws Exception {
+        int value = 2147483647;
+        NetworkServerControl server = new NetworkServerControl();
+        String[] timesliceCmd4 = new String[]{"org.apache.derby.drda.NetworkServerControl",
+                "timeslice", "2147483647"};
+        assertExecJavaCmdAsExpected(new String[]{"Time slice changed to 2147483647."}, timesliceCmd4, 0);
+        int timeSliceValue = server.getTimeSlice();
+        assertEquals(value, timeSliceValue);
+    }
+
+    public void testTimeSlice_9000() throws Exception {
+        int value = 9000;
+        NetworkServerControl server = new NetworkServerControl();
+        String[] timesliceCmd5 = new String[]{"org.apache.derby.drda.NetworkServerControl",
+                "timeslice", "9000"};
+        assertExecJavaCmdAsExpected(new String[]{"Time slice changed to 9000."}, timesliceCmd5, 0);
+        int timeSliceValue = server.getTimeSlice();
+        assertEquals(value, timeSliceValue);
+    }
+
+    public void testTimeSlice_a() throws Exception {
+        int value = 8000;
+        NetworkServerControl server = new NetworkServerControl();
+        String[] timesliceCmd5 = new String[]{"org.apache.derby.drda.NetworkServerControl",
+                "timeslice", "8000"};
+        assertExecJavaCmdAsExpected(new String[]{"Time slice changed to 8000."}, timesliceCmd5, 0);
+        int timeSliceValue = server.getTimeSlice();
+        assertEquals(value, timeSliceValue);
+        String[] timesliceCmd6 = new String[]{"org.apache.derby.drda.NetworkServerControl",
+                "timeslice", "a"};
+        assertExecJavaCmdAsExpected(new String[]{"Invalid value, a, for timeslice.",
+                "Usage: NetworkServerControl <commands> ",
+                "Commands:",
+                "start [-h <host>] [-p <portnumber>] [-noSecurityManager] [-ssl <sslmode>]",
+                "shutdown [-h <host>][-p <portnumber>] [-ssl <sslmode>] [-user <username>] [-password <password>]",
+                "ping [-h <host>][-p <portnumber>] [-ssl <sslmode>]",
+                "sysinfo [-h <host>][-p <portnumber>] [-ssl <sslmode>]",
+                "runtimeinfo [-h <host>][-p <portnumber>] [-ssl <sslmode>]",
+                "logconnections {on|off}[-h <host>][-p <portnumber>] [-ssl <sslmode>]",
+                "maxthreads <max>[-h <host>][-p <portnumber>] [-ssl <sslmode>]",
+                "timeslice <milliseconds>[-h <host>][-p <portnumber>] [-ssl <sslmode>]",
+                "trace {on|off} [-s <session id>][-h <host>][-p <portnumber>] [-ssl <sslmode>]",
+                "tracedirectory <traceDirectory>[-h <host>][-p <portnumber>] [-ssl <sslmode>]"}, timesliceCmd6, 1);
+        timeSliceValue = server.getTimeSlice();
+        assertEquals(value, timeSliceValue);
+    }
+
+    public void testTimeSliceCallable_0() throws Exception {
+        NetworkServerControl server = new NetworkServerControl();
+        int value = 0;
+        server.setTimeSlice(0);
+        int timeSliceValue = server.getTimeSlice();
+        assertEquals(value, timeSliceValue);
+    }
+
+    public void testTimeSliceCallable_Neg1() throws Exception {
+        NetworkServerControl server = new NetworkServerControl();
+        int value = 0;
+        server.setTimeSlice(-1);
+        int timeSliceValue = server.getTimeSlice();
+        assertEquals(value, timeSliceValue);
+    }
+
+    public void testTimeSliceCallable_Neg2() throws Exception {
+        NetworkServerControl server = new NetworkServerControl();
+        int value = 0;
+        try {
+            server.setTimeSlice(-2);
+        } catch (Exception e) {
+            assertTrue(e.getMessage().indexOf("Invalid value") != -1); 
+        }
+        int timeSliceValue = server.getTimeSlice();
+        assertEquals(value, timeSliceValue);
+    }
+
+    public void testTimeSliceCallable_2147483647() throws Exception {
+        NetworkServerControl server = new NetworkServerControl();
+        int value = 2147483647;
+        server.setTimeSlice(2147483647);
+        int timeSliceValue = server.getTimeSlice();
+        assertEquals(value, timeSliceValue);
+    }
+
+    public void testTimeSliceCallable_9000() throws Exception {
+        NetworkServerControl server = new NetworkServerControl();
+        int value = 9000;
+        server.setTimeSlice(9000);
+        int timeSliceValue = server.getTimeSlice();
+        assertEquals(value, timeSliceValue);
+    }
 }

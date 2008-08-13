@@ -6,7 +6,6 @@ derbynet/runtimeinfo.java
 derbynet/sysinfo.java
 derbynet/sysinfo_withproperties.java
 derbynet/testProtocol.java
-derbynet/timeslice.java
 lang/holdCursorIJ.sql
 lang/wisconsin.java
 lang/ShutdownDatabase.java
