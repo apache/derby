@@ -3,7 +3,6 @@ derbynet/dblook_test_net_territory.java
 derbynet/getCurrentProperties.java
 derbynet/runtimeinfo.java
 derbynet/timeslice.java
-jdbcapi/metadataMultiConn.java
 lang/holdCursorIJ.sql
 store/holdCursorExternalSortJDBC30.sql
 store/holdCursorJDBC30.sql
