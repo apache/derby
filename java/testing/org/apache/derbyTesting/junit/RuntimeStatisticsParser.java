@@ -168,7 +168,7 @@ public class RuntimeStatisticsParser {
      */
     public boolean usedTableScan(String tableName){
         return (statistics.indexOf("Table Scan ResultSet for " + 
-                    tableName)!= -1);
+                    tableName + " ")!= -1);
     }
 
     /**
@@ -180,7 +180,7 @@ public class RuntimeStatisticsParser {
     public boolean usedSpecificIndexForIndexScan(
     		String tableName, String indexName){
         return (statistics.indexOf("Index Scan ResultSet for " + 
-                    tableName + " using index " + indexName)!= -1);
+                    tableName + " using index " + indexName + " ")!= -1);
     }
 
     /**
@@ -189,7 +189,7 @@ public class RuntimeStatisticsParser {
      */
     public boolean usedIndexScan(String tableName){
         return (statistics.indexOf("Index Scan ResultSet for " + 
-                    tableName)!= -1);
+                    tableName + " ")!= -1);
     }
     
     
@@ -217,18 +217,16 @@ public class RuntimeStatisticsParser {
     public boolean usedIndexRowToBaseRow(String tableName) {
        
             return (statistics.indexOf("Index Row to Base Row ResultSet for " + 
-                        tableName)!= -1);
-       
+                        tableName + ":")!= -1);       
     }
-    
-    
+        
     /**
      * @param tableName
      * @return true if Used Distinct Scan ResultSet for tablenName
      */
     public boolean usedDistinctScan(String tableName) {
         return (statistics.indexOf("Distinct Scan ResultSet for " + 
-                tableName)!= -1);
+                tableName + " ")!= -1);
 
     }
    
