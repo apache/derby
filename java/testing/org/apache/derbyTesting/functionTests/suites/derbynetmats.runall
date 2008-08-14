@@ -1,7 +1,6 @@
 derbynet/dblook_test_net.java
 derbynet/dblook_test_net_territory.java
 derbynet/DerbyNetAutoStart.java
-derbynet/getCurrentProperties.java
 derbynet/runtimeinfo.java
 derbynet/sysinfo.java
 derbynet/sysinfo_withproperties.java

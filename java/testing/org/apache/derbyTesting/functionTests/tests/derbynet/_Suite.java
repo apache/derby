@@ -60,6 +60,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(ServerPropertiesTest.suite());
         suite.addTest(LOBLocatorReleaseTest.suite());
         suite.addTest(OutBufferedStreamTest.suite());
+        suite.addTest(GetCurrentPropertiesTest.suite());
 
 
         // Disabled due to "java.sql.SQLSyntaxErrorException: The class
