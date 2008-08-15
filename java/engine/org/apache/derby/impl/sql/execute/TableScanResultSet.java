@@ -706,10 +706,8 @@ class TableScanResultSet extends ScanResultSet
 					if (past2FutureTbl != null)
 					{
 						RowLocation rowLoc = (RowLocation) currentRow.getColumn(currentRow.nColumns());
-						if (past2FutureTbl.get(rowLoc) != null)
-						{
-							past2FutureTbl.remove(rowLoc);
-							continue;
+						if (past2FutureTbl.remove(rowLoc) != null){
+						    continue;
 						}
 					}
 
@@ -1260,7 +1258,6 @@ class TableScanResultSet extends ScanResultSet
 								 GeneratedMethod positionGetter,
 								 ExecIndexRow positioner)
 	{
-                String idt = "";
 		String output = "";
 		if (positionGetter == null)
 		{
