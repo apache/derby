@@ -172,8 +172,8 @@ public final class JMXManagementService implements ManagementService, ModuleCont
         ClassLoader savecl = null;
         try {
             savecl = (ClassLoader)AccessController.doPrivileged(
-               new PrivilegedAction() {
-                public Object run()  {
+               new PrivilegedAction<ClassLoader>() {
+                public ClassLoader run()  {
                     return Thread.currentThread().getContextClassLoader();
                 }
             });
@@ -187,7 +187,7 @@ public final class JMXManagementService implements ManagementService, ModuleCont
         if (hasGetClassLoaderPerms)
             try {
                 AccessController.doPrivileged(
-                new PrivilegedAction() {
+                new PrivilegedAction<Object>() {
                     public Object run()  {
                         Thread.
                                                                   currentThread().setContextClassLoader(null);
@@ -220,7 +220,7 @@ public final class JMXManagementService implements ManagementService, ModuleCont
             try {
                 final ClassLoader tmpsavecl = savecl;
                 AccessController.doPrivileged(
-                new PrivilegedAction() {
+                new PrivilegedAction<Object>() {
                     public Object run()  {
                         Thread.currentThread().setContextClassLoader(tmpsavecl);
                         return null;
