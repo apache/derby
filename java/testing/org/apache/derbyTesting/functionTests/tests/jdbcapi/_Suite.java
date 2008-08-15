@@ -73,6 +73,7 @@ public class _Suite extends BaseTestCase  {
 		suite.addTest(SetTransactionIsolationTest.suite());
 		suite.addTest(AuthenticationTest.suite());
 		suite.addTest(DriverTest.suite());
+		suite.addTest(SURijTest.suite());
 		suite.addTest(NullSQLTextTest.suite());
 		suite.addTest(PrepStmtNullTest.suite());
 		suite.addTest(StatementJdbc30Test.suite());

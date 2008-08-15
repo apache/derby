@@ -14,7 +14,6 @@
 --   See the License for the specific language governing permissions and
 --   limitations under the License.
 --
-connect 'SURTest;create=true;';
 autocommit off;
 create table t1 (c1 int primary key, c2 int);
 insert into t1 values 
