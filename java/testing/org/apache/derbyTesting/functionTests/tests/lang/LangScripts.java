@@ -82,7 +82,6 @@ public final class LangScripts extends ScriptTestCase {
         "nonreserved",
         "orderby",
         "positionedDelUpd",
-        "precedence",
         "refActions1",
         "schemas",
         "select",
