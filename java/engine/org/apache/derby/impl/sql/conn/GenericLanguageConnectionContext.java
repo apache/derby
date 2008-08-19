@@ -1850,6 +1850,14 @@ public class GenericLanguageConnectionContext
 	}
 
 	/**
+	 * @see LanguageConnectionContext#isInitialDefaultSchema
+	 */
+	public boolean isInitialDefaultSchema(String schemaName) {
+		return cachedInitialDefaultSchemaDescr.getSchemaName().
+			equals(schemaName);
+	}
+
+	/**
 	 * Get the identity column value most recently generated.
 	 *
 	 * @return the generated identity column value

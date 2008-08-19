@@ -21,6 +21,7 @@ package org.apache.derbyTesting.junit;
 
 import junit.framework.Assert;
 import junit.framework.TestCase;
+import junit.framework.AssertionFailedError;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -526,5 +527,21 @@ public abstract class BaseTestCase
     public static void removeDirectory(File dir)
     {
         DropDatabaseSetup.removeDirectory(dir);
+    }
+
+    /**
+     * Fail; attaching an exception for more detail on cause.
+     *
+     * @param msg message explaining the failure
+     * @param e exception related to the cause
+     *
+     * @exception AssertionFailedError
+     */
+    public static void fail(String msg, Exception e)
+            throws AssertionFailedError {
+
+        AssertionFailedError ae = new AssertionFailedError(msg);
+        ae.initCause(e);
+        throw ae;
     }
 } // End class BaseTestCase

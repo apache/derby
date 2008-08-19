@@ -447,6 +447,15 @@ public interface LanguageConnectionContext extends Context {
 	 */
 	public String getCurrentSchemaName();
 
+
+	/**
+	 * Return true if this schema name is the initial default schema for the
+	 * current session.
+	 * @param schemaName
+	 * @return true
+	 */
+	public boolean isInitialDefaultSchema(String schemaName);
+
 	/**
 	 * Get the identity column value most recently generated.
 	 *
