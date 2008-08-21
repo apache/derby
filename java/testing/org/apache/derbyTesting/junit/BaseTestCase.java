@@ -492,9 +492,10 @@ public abstract class BaseTestCase
            InputStreamReader inStream;
                inStream = new InputStreamReader(is);
            // keep reading from the stream until all done
-           while ((inStream.read(ca, 0, ca.length)) != -1)
+           int charsRead;
+           while ((charsRead = inStream.read(ca, 0, ca.length)) != -1)
            {
-               output = output + new String(ca).trim();
+               output = output + new String(ca, 0, charsRead);
            }
        } catch (Exception e) {
            fail("Exception accessing inputstream from javacommand", e);
