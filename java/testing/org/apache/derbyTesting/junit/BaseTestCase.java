@@ -497,7 +497,7 @@ public abstract class BaseTestCase
                output = output + new String(ca).trim();
            }
        } catch (Exception e) {
-           fail("Exception accessing inputstream from javacommand");
+           fail("Exception accessing inputstream from javacommand", e);
        }
        
        // wait until the process exits
@@ -508,7 +508,10 @@ public abstract class BaseTestCase
        {
            for (int i=0 ; i<expectedString.length ; i++)
            {
-               assertFalse(output.indexOf(expectedString[i]) < 0);
+               if (output.indexOf(expectedString[i]) == -1) {
+                   fail("Didn't find expected string: " + expectedString[i] +
+                        "\nFull output from the command:\n" + output);
+               }
            }
        }
    }
