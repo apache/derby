@@ -29,7 +29,6 @@ import org.apache.derby.impl.sql.execute.InternalTriggerExecutionContext;
 import org.apache.derby.impl.sql.execute.AutoincrementCounter;
 import org.apache.derby.impl.sql.GenericPreparedStatement;
 import org.apache.derby.impl.sql.GenericStatement;
-import org.apache.derby.iapi.sql.Statement;
 
 import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.iapi.services.context.ContextManager;
@@ -878,13 +877,16 @@ public class GenericLanguageConnectionContext
 
 	/**
 	*  This method will remove a statement from the  statement cache.
-	*  It will be called,  for example, if there is an exception preparing
-	*  the statement.
+    *  It should only be called if there is an exception preparing
+    *  the statement. The caller must have set the flag
+    *  {@code preparedStmt.compilingStatement} in the {@code GenericStatement}
+    *  before calling this method in order to prevent race conditions when
+    *  calling {@link CacheManager#remove(Cacheable)}.
 	*
 	*  @param statement Statement to remove
 	*  @exception StandardException thrown if lookup goes wrong.
 	*/	
-	public void removeStatement(Statement statement)
+	public void removeStatement(GenericStatement statement)
 		throws StandardException {
         
         CacheManager statementCache =
@@ -893,9 +895,29 @@ public class GenericLanguageConnectionContext
 		if (statementCache == null)
 			return;
  
-			Cacheable cachedItem = statementCache.findCached(statement);
-			if (cachedItem != null)
-				statementCache.remove(cachedItem);
+        Cacheable cachedItem = statementCache.findCached(statement);
+        // No need to do anything if the statement is already removed
+        if (cachedItem != null) {
+            CachedStatement cs = (CachedStatement) cachedItem;
+            if (statement.getPreparedStatement() != cs.getPreparedStatement()) {
+                // DERBY-3786: Someone else has removed the statement from
+                // the cache, probably because of the same error that brought
+                // us here. In addition, someone else has recreated the
+                // statement. Since the recreated statement is not the same
+                // object as the one we are working on, we don't have the
+                // proper guarding (through the synchronized flag
+                // GenericStatement.preparedStmt.compilingStatement) to ensure
+                // that we're the only ones calling CacheManager.remove() on
+                // this statement. Therefore, just release the statement here
+                // so that we don't get in the way for the other thread that
+                // is trying to compile the same query.
+                statementCache.release(cachedItem);
+            } else {
+                // The statement object that we were trying to compile is still
+                // in the cache. Since the compilation failed, remove it.
+                statementCache.remove(cachedItem);
+            }
+        }
 	}
 
 	/**
