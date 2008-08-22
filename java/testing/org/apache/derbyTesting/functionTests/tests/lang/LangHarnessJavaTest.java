@@ -68,7 +68,6 @@ public class LangHarnessJavaTest extends HarnessJavaTest {
         // "errorStream", TODO: investigate/convert
         // "forbitdata", TODO: investigate/convert
         // "grantRevoke", TODO: uses TestUtil.isNetFramework()
-        // "holdCursorJavaReflection", TODO don't care holdability supported.
         "JitTest",
         // "logStream", TODO: investigate/convert
         // "maxMemPerTab", TODO: investigate/convert
