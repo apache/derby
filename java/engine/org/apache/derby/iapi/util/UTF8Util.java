@@ -118,7 +118,7 @@ public final class UTF8Util {
                 bytesSkipped++;
             } else if ((c & 0x60) == 0x40) { // 7th bit set, 6th bit unset
                 // Found char of two byte width.
-                if (skipPersistent(in, 1L) != 1L) {
+                if (StreamUtil.skipPersistent(in, 1L) != 1L) {
                     // No second byte present.
                     throw new UTFDataFormatException(
                         "Second byte in two byte character missing; byte pos " +
@@ -144,7 +144,7 @@ public final class UTF8Util {
                         skipped = 2;
                     }
                 } else {
-                    skipped = (int)skipPersistent(in, 2L);
+                    skipped = (int)StreamUtil.skipPersistent(in, 2L);
                 }
                 if (skipped != 2) {
                     // No second or third byte present
@@ -162,37 +162,6 @@ public final class UTF8Util {
         // We don't close the stream, since it might be reused. One example of
         // this is use of Resetable streams.
         return new SkipCount(charsSkipped, bytesSkipped);
-    }
-
-    /**
-     * Tries harder to skip the requested number of bytes.
-     * <p>
-     * Note that even if the method fails to skip the requested number of bytes,
-     * it will not throw an exception. If this happens, the caller can be sure
-     * that end-of-stream has been reached.
-     *
-     * @param in byte stream
-     * @param bytesToSkip the number of bytes to skip
-     * @return The number of bytes skipped.
-     * @throws IOException if reading from the stream fails
-     */
-    private static final long skipPersistent(InputStream in, long bytesToSkip)
-            throws IOException {
-        long skipped = 0;
-        while (skipped < bytesToSkip) {
-            long skippedNow = in.skip(bytesToSkip - skipped);
-            if (skippedNow <= 0) {
-                if (in.read() == -1) {
-                    // EOF, return what we have and leave it up to caller to
-                    // decide what to do about it.
-                    break;
-                } else {
-                    skippedNow = 1; // Added to count below.
-                }
-            }
-            skipped += skippedNow;
-        }
-        return skipped;
     }
 
     /**
