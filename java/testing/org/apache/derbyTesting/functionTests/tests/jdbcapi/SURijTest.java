@@ -42,7 +42,7 @@ public final class SURijTest extends ScriptTestCase {
 	/**
 	 * Constructor that runs a single script.
 	 * 
-	 * @param name
+	 * @param script - the name of the script
 	 */
 	private SURijTest(String script) {
 		super(script);
