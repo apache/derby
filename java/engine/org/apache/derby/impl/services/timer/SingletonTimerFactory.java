@@ -23,9 +23,10 @@ package org.apache.derby.impl.services.timer;
 
 import org.apache.derby.iapi.services.timer.TimerFactory;
 import org.apache.derby.iapi.services.monitor.ModuleControl;
-import org.apache.derby.iapi.util.PrivilegedThreadOps;
 import org.apache.derby.iapi.error.StandardException;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.Timer;
 import java.util.Properties;
 
@@ -67,8 +68,12 @@ public class SingletonTimerFactory
         ClassLoader savecl = null;
         boolean hasGetClassLoaderPerms = false;
         try {
-            savecl = PrivilegedThreadOps.getContextClassLoader(
-                    Thread.currentThread());
+            savecl = (ClassLoader)AccessController.doPrivileged(
+            new PrivilegedAction() {
+                public Object run()  {
+                    return Thread.currentThread().getContextClassLoader();
+                }
+            });
             hasGetClassLoaderPerms = true;
         } catch (SecurityException se) {
             // Ignore security exception. Versions of Derby before
@@ -77,12 +82,37 @@ public class SingletonTimerFactory
             // able to do this but we can't just fail.
         }
         if (hasGetClassLoaderPerms)
-            PrivilegedThreadOps.setContextClassLoaderIfPrivileged(
-                    Thread.currentThread(), null);
+            try {
+                AccessController.doPrivileged(
+                new PrivilegedAction() {
+                    public Object run()  {
+                        Thread.currentThread().setContextClassLoader(null);
+                        return null;
+                    }
+                });
+            } catch (SecurityException se) {
+                // ignore security exception.  Earlier versions of Derby, before the 
+                // DERBY-3745 fix did not require setContextClassloader permissions.
+                // We may leak class loaders if we are not able to set this, but 
+                // cannot just fail.
+            }
         singletonTimer = new Timer(true); // Run as daemon
         if (hasGetClassLoaderPerms)
-            PrivilegedThreadOps.setContextClassLoaderIfPrivileged(
-                    Thread.currentThread(), savecl);
+            try {
+                final ClassLoader tmpsavecl = savecl;
+                AccessController.doPrivileged(
+                new PrivilegedAction() {
+                    public Object run()  {
+                        Thread.currentThread().setContextClassLoader(tmpsavecl);
+                        return null;
+                    }
+                });
+            } catch (SecurityException se) {
+                // ignore security exception.  Earlier versions of Derby, before the 
+                // DERBY-3745 fix did not require setContextClassloader permissions.
+                // We may leak class loaders if we are not able to set this, but 
+                // cannot just fail.
+            }
     }
 
     /**
