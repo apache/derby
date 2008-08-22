@@ -116,8 +116,8 @@ public  class GenericQuery {
 						System.out.println("Total Rows returned = "+rowsReturned);
 					
 						System.out.println("==> "+time_taken+" milliseconds "+" OR "+TestUtils.getTime(time_taken));
-							times[i]=TestUtils.getTime(time_taken);
 					}
+					times[i]=TestUtils.getTime(time_taken);
 					rs.close();
 					if(prepare){
 						pstmt.close();
