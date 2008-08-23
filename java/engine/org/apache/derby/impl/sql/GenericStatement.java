@@ -593,6 +593,16 @@ public class GenericStatement
 		}
 	}
 
+    /**
+     * Return the {@link PreparedStatement} currently associated with this
+     * statement.
+     *
+     * @return the prepared statement that is associated with this statement
+     */
+    public PreparedStatement getPreparedStatement() {
+        return preparedStmt;
+    }
+
 	/*
 	** Identity
 	*/
