@@ -39,9 +39,10 @@ interface LockTable {
      * @param ref the object to lock
      * @param qualifier qualifier of the lock
      * @param timeout maximum time to wait in milliseconds
-     * (<code>LockFactory.NO_WAIT</code> means don't wait)
-     * @return a reference to the lock, or <code>null</code> if the timeout was
-     * <code>NO_WAIT</code> and the lock couldn't be obtained immediately
+     * ({@code C_LockFactory.NO_WAIT} means don't wait)
+     * @return a reference to the lock, or <code>null</code> if the lock
+     * couldn't be obtained immediately and the timeout was {@code NO_WAIT}
+     * or {@code LockOwner} had the {@code noWait} flag set
      * @exception StandardException if the lock could not be obtained
      */
     Lock lockObject(CompatibilitySpace compatibilitySpace, Lockable ref,
@@ -102,10 +103,10 @@ interface LockTable {
      * @param ref a reference to the locked object
      * @param qualifier qualifier of the lock
      * @param timeout maximum time to wait in milliseconds
-     * (<code>LockFactory.NO_WAIT</code> means don't wait)
+     * ({@code C_LockFactory.NO_WAIT} means don't wait)
      * @return <code>true</code> if the object was locked, or
-     * <code>false</code>if the timeout was <code>NO_WAIT</code> and the lock
-     * couldn't be obtained immediately
+     * {@code false} if the object couldn't be locked immediately and timeout
+     * was {@code NO_WAIT} or {@code LockOwner} had the {@code noWait} flag set
      * @exception StandardException if the lock could not be obtained
      */
     boolean zeroDurationLockObject(CompatibilitySpace space, Lockable ref,

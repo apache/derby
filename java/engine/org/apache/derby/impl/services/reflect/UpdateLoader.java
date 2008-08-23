@@ -23,7 +23,6 @@ package org.apache.derby.impl.services.reflect;
 
 import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.services.monitor.Monitor;
-import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
 import org.apache.derby.iapi.util.IdUtil;
 import org.apache.derby.iapi.error.StandardException;
@@ -46,6 +45,7 @@ import org.apache.derby.iapi.reference.MessageId;
 import org.apache.derby.iapi.reference.Module;
 import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.services.locks.CompatibilitySpace;
+import org.apache.derby.iapi.services.locks.LockOwner;
 
 /**
  * UpdateLoader implements then functionality of
@@ -62,7 +62,7 @@ import org.apache.derby.iapi.services.locks.CompatibilitySpace;
  * UpdateLoader will then try to load the class from each of the jars
  * in order of derby.database.classpath using the jar's installed JarLoader.
  */
-final class UpdateLoader {
+final class UpdateLoader implements LockOwner {
     
     /**
      * List of packages that Derby will not support being loaded
@@ -404,6 +404,16 @@ final class UpdateLoader {
 		}
 		return jarReader;
 	}
+
+    /**
+     * Tell the lock manager that we don't want timed waits to time out
+     * immediately.
+     *
+     * @return {@code false}
+     */
+    public boolean noWait() {
+        return false;
+    }
 }
 
 

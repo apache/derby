@@ -44,6 +44,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 //import java.util.Map;
+import java.util.Properties;
 import java.util.Random;
 import java.util.StringTokenizer;
 
@@ -210,6 +211,23 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                 // test from waiting one minute
                 DatabasePropertyTestSetup.setLockTimeouts(
                     new DatabaseMetaDataTest("initialCompilationTest"), 2, 4)));
+
+        // Test for DERBY-3693 needs a fresh database to ensure that the size
+        // of SYSTABLES is so small that creating a relatively small number of
+        // tables will cause the query plan for getTables() to be invalidated.
+        // Also, set a high lock timeout explicitly so that we can check that
+        // an internal timeout followed by a retry didn't happen, and set
+        // derby.language.stalePlanCheckInterval to a low value so that the
+        // invalidation happens earlier.
+        Properties props = new Properties();
+        props.setProperty("derby.locks.waitTimeout", "90");
+        props.setProperty("derby.language.stalePlanCheckInterval", "5");
+        suite.addTest(
+            TestConfiguration.singleUseDatabaseDecorator(
+                new DatabasePropertyTestSetup(
+                    new DatabaseMetaDataTest("recompileTimeoutTest"),
+                    props, true)));
+
         return suite;
     }
     
@@ -287,6 +305,44 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         // Re-use the previously compiled query from disk. Fails with
         // ArrayIndexOutOfBoundsException before DERBY-2584.
         getDMD().getIndexInfo(null, null, "T", false, false).close();
+    }
+
+    /**
+     * Tests that we don't get an internal timeout when a meta-data statement
+     * is recompiled because the size of the tables it queries has changed
+     * (DERBY-3693). The test must be run on a fresh database, to ensure that
+     * SYSTABLES initially has a relatively small number of records. The lock
+     * timeout must be high (more than 60 seconds) to enable us to see the
+     * difference between an internal lock timeout and slow execution.
+     * derby.language.stalePlanCheckInterval should be set to 5 (the lowest
+     * possible value) so that we don't have to wait long for the query plan
+     * to be invalidated.
+     */
+    public void recompileTimeoutTest() throws SQLException {
+        DatabaseMetaData dmd = getDMD();
+
+        // Make sure getTables() is initially compiled while SYSTABLES is small
+        JDBC.assertDrainResults(dmd.getTables(null, "%", "%", null));
+
+        // Grow SYSTABLES
+        Statement s = createStatement();
+        for (int i = 0; i < 20; i++) {
+            s.executeUpdate("create table t" + i + "(x int)");
+        }
+
+        // Execute getTables() derby.language.stalePlanCheckInterval times so
+        // that its plan is invalidated. Before DERBY-3693 was fixed, the
+        // recompilation after the invalidation would get an internal timeout
+        // and take very long time to complete.
+        for (int i = 0; i < 5; i++) {
+            long time = System.currentTimeMillis();
+            JDBC.assertDrainResults(dmd.getTables(null, "%", "T0", null));
+            time = System.currentTimeMillis() - time;
+            if (time > 60000) {
+                fail("getTables() took a very long time, possibly because " +
+                     "of an internal timeout. i=" + i + ", time=" + time);
+            }
+        }
     }
 
     /**

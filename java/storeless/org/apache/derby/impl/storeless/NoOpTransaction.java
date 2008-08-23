@@ -422,4 +422,8 @@ class NoOpTransaction implements TransactionController {
         return(null);
     }
 
+    public void setNoLockWait(boolean noWait) {
+        // TODO Auto-generated method stub
+    }
+
 }

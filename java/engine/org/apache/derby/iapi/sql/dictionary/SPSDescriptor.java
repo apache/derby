@@ -692,6 +692,10 @@ public class SPSDescriptor extends TupleDescriptor
 				try
 				{
 					nestedTC = lcc.getTransactionCompile().startNestedUserTransaction(false);
+                    // DERBY-3693: The nested transaction may run into a lock
+                    // conflict with its parent transaction, in which case we
+                    // don't want to wait for a timeout.
+                    nestedTC.setNoLockWait(true);
 				}
 				catch (StandardException se)
 				{

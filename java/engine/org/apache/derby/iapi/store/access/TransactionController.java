@@ -1482,6 +1482,15 @@ public interface TransactionController
     public CompatibilitySpace getLockSpace();
 
     /**
+     * Tell this transaction whether it should time out immediately if a lock
+     * cannot be granted without waiting.
+     *
+     * @param noWait if {@code true} never wait for a lock in this transaction,
+     * but time out immediately
+     */
+    public void setNoLockWait(boolean noWait);
+
+    /**
      * Return static information about the conglomerate to be included in a
      * a compiled plan.
      * <p>

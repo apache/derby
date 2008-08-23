@@ -58,8 +58,6 @@ import org.apache.derby.iapi.types.DataValueFactory;
 
 import org.apache.derby.iapi.services.property.PersistentSet;
 
-import org.apache.derby.catalog.UUID;
-
 import java.util.Stack;
 import java.util.Enumeration;
 import java.util.Properties;
@@ -76,11 +74,9 @@ import org.apache.derby.iapi.services.locks.CompatibilitySpace;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.iapi.reference.Property;
 
-import org.apache.derby.impl.store.raw.log.LogToFile;
-
 import org.apache.derby.iapi.services.io.LimitObjectInput;
 
-import org.apache.derby.iapi.services.context.ContextService;
+import org.apache.derby.iapi.services.locks.LockOwner;
 
 /**
 
@@ -98,7 +94,7 @@ import org.apache.derby.iapi.services.context.ContextService;
 	@see Transaction
 
 */
-public class Xact extends RawTransaction implements Limit  {
+public class Xact extends RawTransaction implements Limit, LockOwner {
 
 	/*
 	** Static Fields
@@ -252,6 +248,11 @@ public class Xact extends RawTransaction implements Limit  {
 	// backup copy.
 	private boolean backupBlocked;
 
+    /**
+     * Tells if lock requests should time out immediately if they cannot be
+     * granted without waiting.
+     */
+    private boolean dontWaitForLocks;
 
 	/*
 	** Constructor
@@ -571,6 +572,39 @@ public class Xact extends RawTransaction implements Limit  {
         return(this.compatibilitySpace);
     }
 
+    /**
+     * Tells whether lock requests should time out immediately if they can't
+     * be granted without waiting. Only works if this object is the owner of
+     * the compatibility space used in the request.
+     *
+     * @return whether waiting for locks should time out immediately
+     */
+    public boolean noWait() {
+        return dontWaitForLocks;
+    }
+
+    /**
+     * Set whether lock requests should time out immediately if they can't be
+     * granted without waiting.
+     *
+     * <p>
+     *
+     * This only works if this transaction is the owner of the compatibility
+     * space used in the request. If this transaction has inherited the
+     * compatibility space from its parent, the call to this method has no
+     * effect (except in debug builds, where an error will be raised).
+     *
+     * @param noWait whether lock requests should time out immediately if
+     * they can't be granted without waiting
+     */
+    public void setNoLockWait(boolean noWait) {
+        if (SanityManager.DEBUG) {
+            SanityManager.ASSERT(compatibilitySpace.getOwner() == this,
+                    "Trying to set no-wait mode on transaction that " +
+                    "shares compatibility space with its parent");
+        }
+        dontWaitForLocks = noWait;
+    }
 
 	/**
 		get the short (internal to raw store) transaction id that is unique

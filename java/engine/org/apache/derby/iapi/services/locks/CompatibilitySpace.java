@@ -41,5 +41,5 @@ public interface CompatibilitySpace {
      * @return object representing the owner of the compatibility space, or
      * <code>null</code> if no owner has been specified.
      */
-    Object getOwner();
+    LockOwner getOwner();
 }

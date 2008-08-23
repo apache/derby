@@ -46,7 +46,7 @@ public interface LockFactory extends PropertySetCallback {
 	 * transaction object). Might be <code>null</code>.
 	 * @return an object which represents a compatibility space
 	 */
-	public CompatibilitySpace createCompatibilitySpace(Object owner);
+	public CompatibilitySpace createCompatibilitySpace(LockOwner owner);
 
 	/**
 		Lock an object within a compatibility space
