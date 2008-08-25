@@ -771,6 +771,10 @@ public class ReleaseNotesGenerator extends Task
             idx = end;
 
             String  attachmentAddress = jira.substring( start, end );
+
+            // skip attachments that aren't release notes
+            if ( !attachmentAddress.endsWith( RELEASE_NOTE_NAME ) ) { continue; }
+
             int         versionNumberStart = ATTACHMENT_START.length();
             int         versionNumberEnd = attachmentAddress.indexOf( ATTACHMENT_VERSION_END, versionNumberStart );
             String  versionString = attachmentAddress.substring( versionNumberStart, versionNumberEnd );
