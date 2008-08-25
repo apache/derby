@@ -1483,10 +1483,17 @@ public interface TransactionController
 
     /**
      * Tell this transaction whether it should time out immediately if a lock
-     * cannot be granted without waiting.
+     * cannot be granted without waiting. This mechanism can for instance be
+     * used if an operation is first attempted in a nested transaction to
+     * reduce the lifetime of locks held in the system tables (like when
+     * a stored prepared statement is compiled and stored). In such a case,
+     * the caller must catch timeout exceptions and retry the operation in the
+     * main transaction if a lock timeout occurs.
      *
      * @param noWait if {@code true} never wait for a lock in this transaction,
      * but time out immediately
+     * @see org.apache.derby.iapi.services.locks.LockOwner#noWait()
+     * @see org.apache.derby.iapi.store.raw.Transaction#setNoLockWait(boolean)
      */
     public void setNoLockWait(boolean noWait);
 

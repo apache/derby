@@ -584,8 +584,7 @@ public class Xact extends RawTransaction implements Limit, LockOwner {
     }
 
     /**
-     * Set whether lock requests should time out immediately if they can't be
-     * granted without waiting.
+     * {@inheritDoc}
      *
      * <p>
      *
@@ -593,9 +592,6 @@ public class Xact extends RawTransaction implements Limit, LockOwner {
      * space used in the request. If this transaction has inherited the
      * compatibility space from its parent, the call to this method has no
      * effect (except in debug builds, where an error will be raised).
-     *
-     * @param noWait whether lock requests should time out immediately if
-     * they can't be granted without waiting
      */
     public void setNoLockWait(boolean noWait) {
         if (SanityManager.DEBUG) {

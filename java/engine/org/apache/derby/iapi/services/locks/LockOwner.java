@@ -29,6 +29,24 @@ public interface LockOwner {
      * cannot be granted at once, even if {@code C_LockFactory.TIMED_WAIT}
      * was specified in the lock request.
      *
+     * <p>
+     *
+     * Normally, this method should return {@code false}, but in some very
+     * special cases it could be appropriate to return {@code true}. One
+     * example is when a stored prepared statement (SPS) is compiled and stored
+     * in a system table. In order to prevent exclusive locks in the system
+     * table from being held until the transaction that triggered the
+     * compilation is finished, the SPS will be compiled in a nested
+     * transaction that is committed and releases all locks upon completion.
+     * There is however a risk that the transaction that triggered the
+     * compilation is holding locks that the nested transaction needs, in
+     * which case the nested transaction will time out. The timeout will be
+     * detected by the calling code, and the operation will be retried in the
+     * parent transaction. To avoid long waits in the cases where the nested
+     * transaction runs into a lock conflict with its parent, the nested
+     * transaction's {@code LockOwner} instance could return {@code true} and
+     * thereby making it possible to detect lock conflicts instantly.
+     *
      * @return {@code true} if timed waits should time out immediately,
      * {@code false} otherwise
      */

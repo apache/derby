@@ -2436,17 +2436,13 @@ public class RAMTransaction
 	}
 
     /**
-     * Tell this transaction whether it should skip waiting for locks and
-     * instead time out immediately.
+     * {@inheritDoc}
      *
      * <p>
      *
      * For now, this only works if the transaction has its own compatibility
      * space. If it has inherited the compatibility space from its parent,
      * the request will be ignored (or cause a failure in debug builds).
-     *
-     * @param noWait if {@code true} never wait for a lock, but time out
-     * immediately
      */
     public void setNoLockWait(boolean noWait) {
         rawtran.setNoLockWait(noWait);
