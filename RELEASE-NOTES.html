@@ -91,6 +91,9 @@ This is a maintenance release. No new features were added.
 <td><a href="http://issues.apache.org/jira/browse/DERBY-3791">DERBY-3791</a></td><td>Excessive memory usage when fetching small Clobs</td>
 </tr>
 <tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3786">DERBY-3786</a></td><td>Assert failure in CacheEntry.unkeepForRemove when running stress.multi</td>
+</tr>
+<tr>
 <td><a href="http://issues.apache.org/jira/browse/DERBY-3783">DERBY-3783</a></td><td>LOBStreamControl shouldn't throw SQLException</td>
 </tr>
 <tr>
@@ -267,6 +270,9 @@ This is a maintenance release. No new features were added.
 <tr>
 <td><a href="http://issues.apache.org/jira/browse/DERBY-1848">DERBY-1848</a></td><td>jdbcapi/SetQueryTimeoutTest.java fails on IBM  wctme 5.7</td>
 </tr>
+<tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-48">DERBY-48</a></td><td> A connection request that has a default schema that is being created by another transaction will fail to connect</td>
+</tr>
 </table>
 </blockquote>
 <h2>
@@ -280,6 +286,16 @@ This is a maintenance release. No new features were added.
   Error message will be logged to derby.log if Network Server tracing file cannot be created.
   Starting with version 10.5, Network Server will attempt to create the trace directory if it does not exist. Any intervening directories in the given path will also be created if possible.
 
+</p>
+</a>
+</li>
+<li>
+<a href="#Note for DERBY-48">
+<p>Note for DERBY-48: 
+In Derby, a user's <b>initial default schema</b> is named the same as
+the user name, or APP if a user is not provided at connect time. This
+schema is implicitly auto-created the first time a schema object is
+created in that schema.
 </p>
 </a>
 </li>
@@ -379,6 +395,141 @@ The tracing properties should not be summarily ignored or cause the client to ha
 <p>
 Applications that counted on the derby.drda.traceAll property being ignored if derby.drda.traceDirectory was set to a non-existent directory, need to turn tracing off or they may now see many errors in the derby.log or large amounts of tracing.
 
+</p>
+
+
+
+</blockquote>
+<hr>
+<h3>
+<a name="Note for DERBY-48"></a>Note for DERBY-48</h3>
+<blockquote>
+
+<!-- 
+  SUMMARIZE THE ISSUE. This is a one line summary of the issue.
+
+  For instance:
+
+  Applications may no longer open two InputStreams on the same ResultSet column.
+-->
+
+
+<h4>Summary of Change</h4>
+
+<p>
+In Derby, a user's <b>initial default schema</b> is named the same as
+the user name, or APP if a user is not provided at connect time. This
+schema is implicitly auto-created the first time a schema object is
+created in that schema.
+</p>
+
+<p>
+Previously, this auto-creation would be performed as part of the user
+transaction. This would sometimes lead to locking issues as described
+in this issue. With this change, the auto-creation is now performed
+and committed immediately in a separate sub-transaction.
+</p>
+
+
+<!-- 
+  DESCRIBE WHAT IT IS THAT THE USER ACTUALLY SEES WHEN THE PROBLEM OCCURS.
+
+  For instance:
+
+  In the previous release, applications were able to open two
+  InputStreams on the same column. Depending on how these streams
+  interacted, the value siphoned out of the column was erratic. Now
+  Derby raises a SQLException when the application attempts to create
+  the second InputStream.
+-->
+
+
+<h4>Symptoms Seen by Applications Affected by Change</h4>
+
+<p>
+The initial default schema will be present in cases where it
+previously would not yet have been created: If the user transaction
+that creates a schema object leading to auto-creation of the initial
+default schema rolls back for some reason after having created the
+schema, up till now the auto-creation of the initial default schema
+would be rolled back as well. Since it is now created and committed in
+a sub-transaction, the schema creation will not be rolled back: the
+default schema will persist.
+</p>
+
+
+<!-- 
+  OPTIONAL: DESCRIBE INCOMPATIBILITIES WITH PREVIOUS RELEASE, IF ANY.
+
+  For instance:
+
+  Applications which open two InputStreams on the ResultSet column now
+  fail.
+-->
+
+
+<h4>Incompatibilities with Previous Release</h4>
+
+<p>
+Most applications should not be impacted by this change, but there are
+some corner cases as described below:
+</p>
+
+<p>
+If the application tests for the existence of the initial default
+schema by querying Derby system tables, the results could now be
+different than in earlier releases, if the test is made after a
+rollback as described in the previous section.
+</p>
+
+<p>
+Since the initial default schema will now potentially exist in cases
+where it would previously not exist, schema operations may be
+impacted, e.g.  where before a DROP SCHEMA &lt;default schema name&gt;
+RESTRICT would fail due to it not yet existing, it could now work (if
+empty), depending on when the drop attempt is made.
+</p>
+
+<!-- 
+  DESCRIBE WHY THE CHANGE WAS MADE.
+
+  For instance:
+
+  The previous behavior violated the JDBC standard. The new behavior
+  is correct.
+-->
+
+
+<h4>Rationale for Change</h4>
+
+<p>
+Implicit schema creation is now performed in its own transaction to
+avoid deadlocks with other connections accessing the same schema.
+</p>
+
+<p>
+Doing this is a separate transaction avoids holding dictionary locks
+longer than necessary,
+cf. <a href="https://issues.apache.org/jira/browse/DERBY-48">DERBY-48</a>
+and thus reduces the chance for deadlocks.
+</p>
+
+
+<!-- 
+  OPTIONAL: DESCRIBE HOW TO REVERT TO THE PREVIOUS BEHAVIOR OR
+  OTHERWISE AVOID THE INCOMPATIBILITIES INTRODUCED BY THIS CHANGE.
+
+  For instance:
+
+  Users must recode applications which open multiple streams on the same column.
+-->
+
+
+<h4>Application Changes Required</h4>
+
+<p>
+Verify that the application code does not rely on the initial default schema
+being absent after a rollback.
 </p>
 
 
