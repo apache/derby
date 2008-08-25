@@ -355,7 +355,7 @@ final class ConcurrentLockSet implements LockTable {
 				return lockItem;
 			}
 
-			if (timeout == C_LockFactory.NO_WAIT) {
+			if (AbstractPool.noLockWait(timeout, compatibilitySpace)) {
 
     			// remove all trace of lock
     			control.giveUpWait(lockItem, this);
@@ -792,22 +792,7 @@ forever:	for (;;) {
     }
 
     /**
-     * Lock an object and release the lock immediately. Equivalent to
-     * <pre>
-     * Lock lock = lockTable.lockObject(space, ref, qualifier, timeout);
-     * lockTable.unlock(lock, 1);
-     * </pre>
-     * except that the implementation is more efficient.
-     *
-     * @param space the compatibility space
-     * @param ref a reference to the locked object
-     * @param qualifier qualifier of the lock
-     * @param timeout maximum time to wait in milliseconds
-     * (<code>LockFactory.NO_WAIT</code> means don't wait)
-     * @return <code>true</code> if the object was locked, or
-     * <code>false</code>if the timeout was <code>NO_WAIT</code> and the lock
-     * couldn't be obtained immediately
-     * @exception StandardException if the lock could not be obtained
+     * {@inheritDoc}
      */
     public boolean zeroDurationLockObject(
         CompatibilitySpace space, Lockable ref, Object qualifier, int timeout)
@@ -860,7 +845,7 @@ forever:	for (;;) {
             }
 
             // can't be granted and are not willing to wait.
-            if (timeout == C_LockFactory.NO_WAIT) {
+            if (AbstractPool.noLockWait(timeout, space)) {
                 return false;
             }
         } finally {

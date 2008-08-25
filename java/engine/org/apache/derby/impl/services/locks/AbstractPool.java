@@ -39,6 +39,8 @@ import org.apache.derby.iapi.reference.Property;
 import java.io.Serializable;
 import java.util.Dictionary;
 import java.util.Enumeration;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.locks.LockOwner;
 
 /**
  * An abstract implementation of LockFactory that allows different
@@ -120,8 +122,16 @@ abstract class AbstractPool implements LockFactory
 		// See if NO_WAIT was passed in and the lock could not be granted.
 		if (lock == null) {
 			if (SanityManager.DEBUG) {
-				SanityManager.ASSERT(timeout == C_LockFactory.NO_WAIT, "timeout not NO_WAIT");
+                SanityManager.ASSERT(noLockWait(timeout, compatibilitySpace),
+                                     "timeout not NO_WAIT");
 			}
+
+            // If this is a timed wait, we should behave as if we timed out
+            // and throw a LOCK_TIMEOUT.
+            if (timeout == C_LockFactory.TIMED_WAIT) {
+                throw StandardException.newException(SQLState.LOCK_TIMEOUT);
+            }
+
 			return false;
 		}
 
@@ -145,7 +155,7 @@ abstract class AbstractPool implements LockFactory
 	 * @param owner the owner of the compatibility space
 	 * @return an object which represents a compatibility space
 	 */
-	public CompatibilitySpace createCompatibilitySpace(Object owner) {
+	public CompatibilitySpace createCompatibilitySpace(LockOwner owner) {
 		return new LockSpace(owner);
 	}
 
@@ -284,8 +294,27 @@ abstract class AbstractPool implements LockFactory
 										  Lockable ref, Object qualifier,
 										  int timeout)
 		throws StandardException {
-		return lockTable.zeroDurationLockObject(
+		boolean success = lockTable.zeroDurationLockObject(
 			compatibilitySpace, ref, qualifier, timeout);
+
+        if (!success) {
+
+            // zeroDurationLockObject should only return false if we have
+            // requested that we shouldn't wait for locks. Otherwise, an
+            // exception should have been thrown.
+            if (SanityManager.DEBUG) {
+                SanityManager.ASSERT(noLockWait(timeout, compatibilitySpace),
+                                     "Should have timed out");
+            }
+
+            // If this is a timed wait, we should behave as if we timed out and
+            // throw LOCK_TIMEOUT.
+            if (timeout == C_LockFactory.TIMED_WAIT) {
+                throw StandardException.newException(SQLState.LOCK_TIMEOUT);
+            }
+        }
+
+        return success;
 	}
 
 	public boolean isLockHeld(CompatibilitySpace compatibilitySpace,
@@ -306,6 +335,26 @@ abstract class AbstractPool implements LockFactory
 	{
 		((LockSpace) compatibilitySpace).clearLimit(group);
 	}
+
+    /**
+     * Check if we should not wait for locks, given the specified timeout and
+     * compatibility space. If the timeout is {@code C_LockFactory.NO_WAIT} or
+     * the {@code LockOwner} has the {@code noWait} flag set, we shouldn't
+     * wait for locks.
+     *
+     * @param timeout the specified timeout
+     * @param compat the compatibility space
+     * @return {@code true} if we shouldn't wait for locks, {@code false}
+     * otherwise
+     */
+    static boolean noLockWait(int timeout, CompatibilitySpace compat) {
+        if (timeout == C_LockFactory.NO_WAIT) {
+            return true;
+        } else {
+            LockOwner owner = compat.getOwner();
+            return owner != null && owner.noWait();
+        }
+    }
 
 //EXCLUDE-START-lockdiag- 
 

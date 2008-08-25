@@ -59,6 +59,20 @@ public interface Transaction {
      **/
     CompatibilitySpace getCompatibilitySpace();
 
+    /**
+     * Tell this transaction whether it should time out immediately if a lock
+     * cannot be granted without waiting. This could be used in a nested
+     * transaction to prevent long waits if there is a lock conflict between
+     * the nested transaction and its parent. If it is used this way, the
+     * calling code should catch timeout exceptions from the nested transaction
+     * and retry the operation (without disabling waiting) in the parent
+     * transaction.
+     *
+     * @param noWait if {@code true} never wait for a lock in this transaction,
+     * but time out immediately
+     * @see org.apache.derby.iapi.services.locks.LockOwner#noWait()
+     */
+    void setNoLockWait(boolean noWait);
 
 	/**
 		Called after the transaction has been attached to an Access Manger

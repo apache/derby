@@ -32,6 +32,7 @@ import org.apache.derby.iapi.error.StandardException;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
+import org.apache.derby.iapi.services.locks.LockOwner;
 
 /**
 
@@ -53,7 +54,7 @@ final class LockSpace implements CompatibilitySpace {
 	/** Map from group references to groups of locks. */
 	private final HashMap groups;
 	/** Reference to the owner of this compatibility space. */
-	private final Object owner;
+	private final LockOwner owner;
 
 	private HashMap spareGroups[] = new HashMap[3];
 
@@ -68,7 +69,7 @@ final class LockSpace implements CompatibilitySpace {
 	 *
 	 * @param owner an object representing the owner of the compatibility space
 	 */
-	LockSpace(Object owner) {
+	LockSpace(LockOwner owner) {
 		groups = new HashMap();
 		this.owner = owner;
 	}
@@ -78,7 +79,7 @@ final class LockSpace implements CompatibilitySpace {
 	 *
 	 * @return the owner of the compatibility space
 	 */
-	public Object getOwner() {
+	public LockOwner getOwner() {
 		return owner;
 	}
 

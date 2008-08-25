@@ -2436,6 +2436,19 @@ public class RAMTransaction
 	}
 
     /**
+     * {@inheritDoc}
+     *
+     * <p>
+     *
+     * For now, this only works if the transaction has its own compatibility
+     * space. If it has inherited the compatibility space from its parent,
+     * the request will be ignored (or cause a failure in debug builds).
+     */
+    public void setNoLockWait(boolean noWait) {
+        rawtran.setNoLockWait(noWait);
+    }
+
+    /**
      * Get string id of the transaction.
      * <p>
      * This transaction "name" will be the same id which is returned in
