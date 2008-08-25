@@ -28,9 +28,8 @@ import org.apache.derby.iapi.sql.dictionary.RoleGrantDescriptor;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.ParameterValueSet;
 import org.apache.derby.iapi.sql.StatementType;
-import org.apache.derby.iapi.sql.conn.Authorizer;
+import org.apache.derby.iapi.sql.depend.DependencyManager;
 import org.apache.derby.iapi.types.DataValueDescriptor;
-import org.apache.derby.iapi.reference.Limits;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.reference.SQLState;
@@ -120,8 +119,21 @@ class SetRoleConstantAction implements ConstantAction
 
         RoleGrantDescriptor rdDef = null;
 
-        if (thisRoleName != null) {
-            try {
+        try {
+            String oldRole = lcc.getCurrentRoleId(activation);
+
+            if (oldRole != null && !oldRole.equals(thisRoleName)) {
+                rdDef = dd.getRoleDefinitionDescriptor(oldRole);
+
+                if (rdDef != null) {
+                    dd.getDependencyManager().invalidateFor(
+                        rdDef,
+                        DependencyManager.INTERNAL_RECOMPILE_REQUEST,
+                        lcc);
+                } // else: old role else no longer exists, so ignore.
+            }
+
+            if (thisRoleName != null) {
                 rdDef = dd.getRoleDefinitionDescriptor(thisRoleName);
 
                 // SQL 2003, section 18.3, General rule 4:
@@ -135,10 +147,10 @@ class SetRoleConstantAction implements ConstantAction
                               (SQLState. ROLE_INVALID_SPECIFICATION_NOT_GRANTED,
                                thisRoleName);
                 }
-            } finally {
-                // reading above changes idle state, so reestablish it
-                lcc.userCommit();
             }
+        } finally {
+            // reading above changes idle state, so reestablish it
+            lcc.userCommit();
         }
 
         lcc.setCurrentRole(activation, rdDef != null ? thisRoleName : null);

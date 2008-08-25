@@ -556,7 +556,9 @@ public abstract class ConstraintDescriptor
 			//types SELECT, UPDATE, DELETE, INSERT, REFERENCES, TRIGGER), we  
 			//don't do anything here. Later in makeInvalid method, we make  
 			//the ConstraintDescriptor drop itself. 
+			//Ditto for role grant conferring a privilege.
 		    case DependencyManager.REVOKE_PRIVILEGE:
+		    case DependencyManager.REVOKE_ROLE:
 		    case DependencyManager.INTERNAL_RECOMPILE_REQUEST:
 				break;
 
@@ -600,14 +602,22 @@ public abstract class ConstraintDescriptor
 		*  REVOKE_PRIVILEGE are the only valid actions
 		*/
 
-		//Let's handle REVOKE_PRIVILEGE first
-		if (action == DependencyManager.REVOKE_PRIVILEGE) 
+		//Let's handle REVOKE_PRIVILEGE and REVOKE_ROLE first
+		if (action == DependencyManager.REVOKE_PRIVILEGE ||
+			action == DependencyManager.REVOKE_ROLE)
 		{
 			//At this point (Derby 10.2), only a FOREIGN KEY key constraint can
 			//depend on a privilege. None of the other constraint types 
 			//can be dependent on a privilege becuse those constraint types
 			//can not reference a table/routine.
 			ConglomerateDescriptor newBackingConglomCD = drop(lcc, true);
+
+			lcc.getLastActivation().addWarning(
+				StandardException.newWarning(
+					SQLState.LANG_CONSTRAINT_DROPPED,
+					getConstraintName(),
+					getTableDescriptor().getName()));
+
 			if (newBackingConglomCD != null)
 			{
 				/* Since foreign keys can never be unique, and since

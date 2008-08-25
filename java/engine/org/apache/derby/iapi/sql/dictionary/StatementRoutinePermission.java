@@ -29,6 +29,7 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.sql.dictionary.RoutinePermsDescriptor;
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.sql.Activation;
+import org.apache.derby.iapi.sql.execute.ExecPreparedStatement;
 
 /**
  * This class describes a routine execute permission
@@ -64,6 +65,7 @@ public final class StatementRoutinePermission extends StatementPermission
 	{
 		DataDictionary dd = lcc.getDataDictionary();
 		TransactionController tc = lcc.getTransactionExecute();
+		ExecPreparedStatement ps = activation.getPreparedStatement();
 		
 		RoutinePermsDescriptor perms = dd.getRoutinePermissions( routineUUID, authorizationId);
 		if( perms == null || ! perms.getHasExecutePermission())
@@ -76,7 +78,7 @@ public final class StatementRoutinePermission extends StatementPermission
 
 		boolean resolved = false;
 
-		// Since permission does not exists for the current user or PUBLIC,
+		// Since no permission exists for the current user or PUBLIC,
 		// check if a permission exists for the current role (if set).
 		String role = lcc.getCurrentRoleId(activation);
 
@@ -84,7 +86,7 @@ public final class StatementRoutinePermission extends StatementPermission
 
 			// Check that role is still granted to current user or
 			// to PUBLIC: A revoked role which is current for this
-			// session, is lazily set to none when it is attempted
+			// session, is lazily set to none when it is attemped
 			// used.
 			String dbo = dd.getAuthorizationDatabaseOwner();
 			RoleGrantDescriptor rd = dd.getRoleGrantDescriptor
@@ -126,6 +128,20 @@ public final class StatementRoutinePermission extends StatementPermission
 						resolved = true;
 					}
 				}
+			}
+
+			if (resolved /* using a role*/) {
+				// Also add a dependency on the role (qua provider),
+				// so that if role is no longer available to the
+				// current user (e.g. grant is revoked, role is
+				// dropped, another role has been set), we are able to
+				// invalidate the the ps.
+				//
+				// FIXME: Rather invalidate Activation so other
+				// sessions sharing the same ps are not impacted!!
+				dd.getDependencyManager().
+					addDependency(ps, dd.getRoleDefinitionDescriptor(role),
+								  lcc.getContextManager());
 			}
 		}
 

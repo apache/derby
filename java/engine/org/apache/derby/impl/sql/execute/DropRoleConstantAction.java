@@ -21,13 +21,13 @@
 
 package org.apache.derby.impl.sql.execute;
 
-import org.apache.derby.iapi.sql.execute.ConstantAction;
-
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
+import org.apache.derby.iapi.sql.depend.DependencyManager;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.RoleGrantDescriptor;
+import org.apache.derby.iapi.sql.dictionary.RoleClosureIterator;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.iapi.store.access.TransactionController;
 
@@ -74,11 +74,9 @@ class DropRoleConstantAction extends DDLConstantAction
 
 
     /**
-     *  This is the guts of the Execution-time logic for DROP ROLE.
+     * This is the guts of the Execution-time logic for DROP ROLE.
      *
-     *  @see ConstantAction#executeConstantAction
-     *
-     * @exception StandardException     Thrown on failure
+     * @see org.apache.derby.iapi.sql.execute.ConstantAction#executeConstantAction
      */
     public void executeConstantAction( Activation activation )
         throws StandardException
@@ -104,6 +102,30 @@ class DropRoleConstantAction extends DDLConstantAction
         if (rdDef == null) {
             throw StandardException.newException(
                 SQLState.ROLE_INVALID_SPECIFICATION, roleName);
+        }
+
+        // When a role is dropped, for every role in its grantee closure, we
+        // call two invalidate actions.  REVOKE_ROLE and
+        // INTERNAL_RECOMPILE_REQUEST.  The latter is used to force
+        // recompilation of dependent prepared statements, the former to drop
+        // dependent objects (constraints, triggers and views).  Note that
+        // until DERBY-1632 is fixed, we risk dropping objects not really
+        // dependent on this role, but one some other role just because it
+        // inherits from this one. See also RevokeRoleConstantAction.
+        RoleClosureIterator rci =
+            dd.createRoleClosureIterator
+            (activation.getTransactionController(),
+             roleName, false);
+
+        String role;
+        while ((role = rci.next()) != null) {
+            RoleGrantDescriptor r = dd.getRoleDefinitionDescriptor(role);
+
+            dd.getDependencyManager().invalidateFor
+                (r, DependencyManager.REVOKE_ROLE, lcc);
+
+            dd.getDependencyManager().invalidateFor
+                (r, DependencyManager.INTERNAL_RECOMPILE_REQUEST, lcc);
         }
 
         rdDef.drop(lcc);

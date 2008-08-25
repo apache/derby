@@ -27,8 +27,6 @@ import java.util.List;
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.reference.Property;
-import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.conn.Authorizer;
@@ -39,15 +37,19 @@ import org.apache.derby.iapi.sql.depend.ProviderInfo;
 import org.apache.derby.iapi.sql.dictionary.ColPermsDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.PermissionsDescriptor;
+import org.apache.derby.iapi.sql.dictionary.RoleGrantDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.StatementColumnPermission;
 import org.apache.derby.iapi.sql.dictionary.StatementPermission;
-import org.apache.derby.iapi.sql.dictionary.StatementRoutinePermission;
 import org.apache.derby.iapi.sql.dictionary.StatementSchemaPermission;
+import org.apache.derby.iapi.sql.dictionary.StatementRolePermission;
+import org.apache.derby.iapi.sql.dictionary.StatementRoutinePermission;
 import org.apache.derby.iapi.sql.dictionary.StatementTablePermission;
+import org.apache.derby.iapi.sql.dictionary.RoleClosureIterator;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
 import org.apache.derby.iapi.store.access.ConglomerateController;
 import org.apache.derby.iapi.store.access.TransactionController;
+import org.apache.derby.iapi.services.sanity.SanityManager;
 
 /**
  * Abstract class that has actions that are across
@@ -282,6 +284,9 @@ abstract class DDLConstantAction implements ConstantAction
 	 *  statement. Because of these differences between constraints and views
 	 *  (and triggers), there are 2 different methods in this class to save
 	 *  their privileges in the dependency system.
+	 *
+	 *  For each required privilege, we now register a dependency on a role if
+	 *  that role was required to find an applicable privilege.
 	 *   
 	 *  @param activation The execution environment for this constant action.
 	 *  @param dependent Make this object depend on required privileges
@@ -300,17 +305,21 @@ abstract class DDLConstantAction implements ConstantAction
 		LanguageConnectionContext lcc = activation.getLanguageConnectionContext();
 		DataDictionary dd = lcc.getDataDictionary();
 		DependencyManager dm = dd.getDependencyManager();
-		
+		String dbo = dd.getAuthorizationDatabaseOwner();
+		String authId = lcc.getAuthorizationId();
+		SettableBoolean roleDepAdded = new SettableBoolean();
+
 		//If the Database Owner is creating this constraint, then no need to 
 		//collect any privilege dependencies because the Database Owner can   
 		//access any objects without any restrictions
 		if (!(lcc.getAuthorizationId().equals(dd.getAuthorizationDatabaseOwner())))
 		{
 			PermissionsDescriptor permDesc;
-			// Now, it is time to add into dependency system, constraint's
-			// dependency on REFERENCES or, if it is a CHECK constraint, any
-			// EXECUTE privileges. If the REFERENCES is revoked from the
-			// constraint owner, the constraint will get dropped automatically.
+			// Now, it is time to add into dependency system the FOREIGN
+			// constraint's dependency on REFERENCES privilege, or, if it is a
+			// CHECK constraint, any EXECUTE privileges. If the REFERENCES is
+			// revoked from the constraint owner, the constraint will get
+			// dropped automatically.
 			List requiredPermissionsList = activation.getPreparedStatement().getRequiredPermissionsList();
 
 			if (requiredPermissionsList != null && ! requiredPermissionsList.isEmpty())
@@ -336,7 +345,8 @@ abstract class DDLConstantAction implements ConstantAction
 						//privilege in the required privileges list
 						if (!statementTablePermission.getTableUUID().equals(refTableUUID))
 							continue;
-					} else if (statPerm instanceof StatementSchemaPermission) { 
+					} else if (statPerm instanceof StatementSchemaPermission
+						    || statPerm instanceof StatementRolePermission) {
 						continue;
 					} else {
 						if (SanityManager.DEBUG) {
@@ -363,18 +373,45 @@ abstract class DDLConstantAction implements ConstantAction
 					// individual column levels. In addition, individual column
 					// REFERENCES privilege could be available at the user
 					// level, PUBLIC or role level.  EXECUTE privilege could be
-					// available at the user or PUBLIC level.
+					// available at the user level, PUBLIC or role level.
 					permDesc = statPerm.getPermissionDescriptor(lcc.getAuthorizationId(), dd);				
 					if (permDesc == null) 
 					{
-						//No REFERENCES privilege exists for given 
-						//authorizer at table or column level.
-						//REFERENCES privilege has to exist at at PUBLIC level
+						// No privilege exists for given user. The privilege
+						// has to exist at at PUBLIC level....
+
 						permDesc = statPerm.getPermissionDescriptor(Authorizer.PUBLIC_AUTHORIZATION_ID, dd);
-						if (permDesc != null &&
-							!(permDesc.checkOwner(lcc.getAuthorizationId())))
-							dm.addDependency(dependent, permDesc, lcc.getContextManager());
-					} else 
+						// .... or at the role level. Additionally, for column
+						// level privileges, even if *some* were available at
+						// the PUBLIC level others may be still be missing,
+						// hence the call in the test below to
+						// allColumnsCoveredByUserOrPUBLIC.
+						boolean roleUsed = false;
+
+						if (permDesc == null ||
+							((permDesc instanceof ColPermsDescriptor) &&
+									 !(((StatementColumnPermission)statPerm).
+										   allColumnsCoveredByUserOrPUBLIC
+										   (lcc.getAuthorizationId(), dd)))) {
+							roleUsed = true;
+							permDesc = findRoleUsage(activation, statPerm);
+						}
+
+						// If the user accessing the object is the owner of
+						// that object, then no privilege tracking is needed
+						// for the owner.
+						if (!(permDesc.checkOwner(lcc.getAuthorizationId()))) {
+							dm.addDependency(dependent, permDesc,
+											 lcc.getContextManager());
+
+							if (roleUsed) {
+								// We had to rely on role, so track that
+								// dependency, too.
+								trackRoleDependency
+									(activation, dependent, roleDepAdded);
+							}
+						}
+					} else
 						//if the object on which permission is required is owned by the
 						//same user as the current user, then no need to keep that
 						//object's privilege dependency in the dependency system
@@ -383,37 +420,166 @@ abstract class DDLConstantAction implements ConstantAction
 						dm.addDependency(dependent, permDesc, lcc.getContextManager());
 						if (permDesc instanceof ColPermsDescriptor)
 						{
-							//The if statement above means we found a
-							//REFERENCES privilege at column level for
-							//the given authorizer. If this privilege
-							//doesn't cover all the column , then there 
-							//has to exisit REFERENCES for the remaining
-							//columns at PUBLIC level. Get that permission
-							//descriptor and save it in dependency system
-							StatementColumnPermission statementColumnPermission = (StatementColumnPermission) statPerm;
-							permDesc = statementColumnPermission.getPUBLIClevelColPermsDescriptor(lcc.getAuthorizationId(), dd);
+							// The if statement above means we found a
+							// REFERENCES privilege at column level for the
+							// given authorizer. If this privilege doesn't
+							// cover all the column , then there has to exisit
+							// REFERENCES for the remaining columns at PUBLIC
+							// level or at role level.  Get that permission
+							// descriptor and save it in dependency system
+							StatementColumnPermission
+								statementColumnPermission = (
+									StatementColumnPermission)statPerm;
+							permDesc = statementColumnPermission.
+								getPUBLIClevelColPermsDescriptor
+								   (lcc.getAuthorizationId(), dd);
 							//Following if checks if some column level privileges
 							//exist only at public level. If so, then the public
 							//level column privilege dependency is added
 							//into the dependency system
-							if (permDesc != null)
-								dm.addDependency(dependent, permDesc, lcc.getContextManager());	           																
+							if (permDesc != null &&
+									permDesc.getObjectID() != null) {
+								// User did not have all required column
+								// permissions and at least one column is
+								// covered by PUBLIC.
+								dm.addDependency(dependent, permDesc,
+												 lcc.getContextManager());
+							}
+							// Possibly, the current role has also been relied
+							// upon.
+							if (!statementColumnPermission.
+									allColumnsCoveredByUserOrPUBLIC
+									    (lcc.getAuthorizationId(), dd)) {
+								// Role has been relied upon, so register a
+								// dependency.
+								trackRoleDependency
+									(activation, dependent, roleDepAdded);
+							}
 						}
 					}
 
-					if (statPerm instanceof StatementTablePermission) {
+					if (!(statPerm instanceof StatementRoutinePermission)) {
 						//We have found the REFERENCES privilege for all the
 						//columns in foreign key constraint and we don't
 						//need to go through the rest of the privileges
 						//for this sql statement.
 						break;
+					} else {
+						// For EXECUTE privilege there may be several functions
+						// referenced in the constraint, so continue looking.
 					}
 				}
 			}
 		}
 		
 	}	
-	
+
+
+	/**
+	 * We have determined that the statement permission described by statPerm
+	 * is not granted to the current user nor to PUBLIC, so it must be granted
+	 * to the current role or one of the roles inherited by the current
+	 * role. Find the relevant permission descriptor and return it.
+	 *
+	 * @return the permission descriptor that yielded the privilege
+	 */
+	private static PermissionsDescriptor findRoleUsage
+		(Activation activation,
+		 StatementPermission statPerm) throws StandardException {
+
+		LanguageConnectionContext lcc =
+			activation.getLanguageConnectionContext();
+		DataDictionary dd = lcc.getDataDictionary();
+		RoleGrantDescriptor rootGrant = null;
+		String role = lcc.getCurrentRoleId(activation);
+		String dbo = dd.getAuthorizationDatabaseOwner();
+		String authId = lcc.getAuthorizationId();
+		PermissionsDescriptor permDesc = null;
+
+		if (SanityManager.DEBUG) {
+			SanityManager.ASSERT(
+				role != null,
+				"Unexpected: current role is not set");
+		}
+
+		// determine how we got to be able use this role
+		rootGrant =
+			dd.getRoleGrantDescriptor(role, authId, dbo);
+
+		if (rootGrant == null) {
+			rootGrant = dd.getRoleGrantDescriptor(
+				role,
+				Authorizer.PUBLIC_AUTHORIZATION_ID,
+				dbo);
+		}
+
+		// If not found in current role, get transitive
+		// closure of roles granted to current role and
+		// iterate over it to see if permission has
+		// been granted to any of the roles the current
+		// role inherits.
+		RoleClosureIterator rci =
+			dd.createRoleClosureIterator
+			(activation.getTransactionController(),
+			 role, true /* inverse relation*/);
+
+		String graphGrant;
+		while (permDesc == null &&
+			   (graphGrant = rci.next()) != null) {
+			permDesc =
+				statPerm.getPermissionDescriptor
+				(graphGrant, dd);
+		}
+
+		if (SanityManager.DEBUG) {
+			SanityManager.ASSERT(
+				permDesc != null,
+				"Unexpected: Permission needs to be found via role");
+		}
+
+		return permDesc;
+	}
+
+
+	/**
+	 * The statement permission needed for dependent has been found to rely on
+	 * the current role. If not already done, register the dependency so that
+	 * if the current role (or any of the roles it inherits) is revoked (or
+	 * dropped), we can invalidate dependent.
+	 *
+	 * @param activation the current activation
+	 * @param dependent the view, constraint or trigger that is dependent on the
+	 *        current role for some privilege.
+	 * @param roleDepAdded keeps track of whether a dependeny on the
+	 *        current role has aleady been registered.
+	 */
+	private static void trackRoleDependency(Activation activation,
+											Dependent dependent,
+											SettableBoolean roleDepAdded)
+			throws StandardException {
+
+		// We only register the dependency once, lest
+		// we get duplicates in SYSDEPENDS (duplicates
+		// are not healthy..invalidating more than once
+		// fails for triggers at least).
+		if (!roleDepAdded.get()) {
+			LanguageConnectionContext lcc =
+				activation.getLanguageConnectionContext();
+			DataDictionary dd = lcc.getDataDictionary();
+			DependencyManager dm = dd.getDependencyManager();
+
+			String role =
+				lcc.getCurrentRoleId(activation);
+			RoleGrantDescriptor rgd =
+				dd.getRoleDefinitionDescriptor(role);
+
+			dm.addDependency
+				(dependent, rgd,
+				 lcc.getContextManager());
+			roleDepAdded.set(true);
+		}
+	}
+
 	/**
 	 *	This method saves dependencies of views and triggers on privileges in  
 	 *  the dependency system. It gets called by CreateViewConstantAction
@@ -437,7 +603,10 @@ abstract class DDLConstantAction implements ConstantAction
 	 *  to identify right privileges for right constraints for a given sql
 	 *  statement. Because of these differences between constraints and views
 	 *  (and triggers), there are 2 different methods in this class to save
-	 *  their privileges in the dependency system.  
+	 *  their privileges in the dependency system.
+	 *
+	 *  For each required privilege, we now register of a dependency on a role
+	 *  if that role was required to find an applicable privilege.
 	 *
 	 *  @param activation The execution environment for this constant action.
 	 *  @param dependent Make this object depend on required privileges
@@ -451,11 +620,14 @@ abstract class DDLConstantAction implements ConstantAction
 		LanguageConnectionContext lcc = activation.getLanguageConnectionContext();
 		DataDictionary dd = lcc.getDataDictionary();
 		DependencyManager dm = dd.getDependencyManager();
-		
-		//If the Database Owner is creating this view/triiger, then no need to  
-		//collect any privilege dependencies because the Database Owner can  
-		//access any objects without any restrictions
-		if (!(lcc.getAuthorizationId().equals(dd.getAuthorizationDatabaseOwner())))
+		String dbo = dd.getAuthorizationDatabaseOwner();
+		String authId = lcc.getAuthorizationId();
+		SettableBoolean roleDepAdded = new SettableBoolean();
+
+		// If the Database Owner is creating this view/trigger, then no need to
+		// collect any privilege dependencies because the Database Owner can
+		// access any objects without any restrictions.
+		if (!authId.equals(dbo))
 		{
 			PermissionsDescriptor permDesc;
 			List requiredPermissionsList = activation.getPreparedStatement().getRequiredPermissionsList();
@@ -470,22 +642,55 @@ abstract class DDLConstantAction implements ConstantAction
 					//But we don't need to add schema permission to list of 
 					//permissions that the object is dependent on once it is 
 					//created.
-					if (statPerm instanceof StatementSchemaPermission)
+					//Also, StatementRolePermission should not occur here.
+					if (statPerm instanceof StatementSchemaPermission ||
+						statPerm instanceof StatementRolePermission) {
+
+						if (SanityManager.DEBUG) {
+							if (statPerm instanceof StatementRolePermission) {
+								SanityManager.THROWASSERT(
+									"Unexpected StatementRolePermission");
+							}
+						}
+
 						continue;
+					}
+
 					//See if we can find the required privilege for given authorizer?
 					permDesc = statPerm.getPermissionDescriptor(lcc.getAuthorizationId(), dd);				
 					if (permDesc == null)//privilege not found for given authorizer 
 					{
 						//The if condition above means that required privilege does 
 						//not exist at the user level. The privilege has to exist at 
-						//PUBLIC level.
-						permDesc = statPerm.getPermissionDescriptor(Authorizer.PUBLIC_AUTHORIZATION_ID, dd);
+						//PUBLIC level... ,
+						permDesc = statPerm.getPermissionDescriptor(
+							Authorizer.PUBLIC_AUTHORIZATION_ID, dd);
+
+						boolean roleUsed = false;
+
+						// .. or at role level
+						if (permDesc == null ||
+								((permDesc instanceof ColPermsDescriptor) &&
+									 !(((StatementColumnPermission)statPerm).
+									 allColumnsCoveredByUserOrPUBLIC
+										   (lcc.getAuthorizationId(), dd)))) {
+							roleUsed = true;
+							permDesc = findRoleUsage(activation, statPerm);
+						}
+
 						//If the user accessing the object is the owner of that 
 						//object, then no privilege tracking is needed for the
 						//owner.
-						if (permDesc != null &&
-							!(permDesc.checkOwner(lcc.getAuthorizationId())))
+						if (!(permDesc.checkOwner(lcc.getAuthorizationId()))) {
 							dm.addDependency(dependent, permDesc, lcc.getContextManager());
+
+							// We had to rely on role, so track that
+							// dependency, too.
+							if (roleUsed) {
+								trackRoleDependency
+									(activation, dependent, roleDepAdded);
+							}
+						}
 						continue;
 					}
 					//if the object on which permission is required is owned by the
@@ -519,15 +724,30 @@ abstract class DDLConstantAction implements ConstantAction
 							permDesc = statementColumnPermission.getPUBLIClevelColPermsDescriptor(lcc.getAuthorizationId(), dd);
 							//Following if checks if some column level privileges
 							//exist only at public level. If so, then the public
-							//level column privilege dependency of view is added
-							//into dependency system.
-							if (permDesc != null)
-								dm.addDependency(dependent, permDesc, lcc.getContextManager());	           							
+							//level column privilege, if any, dependency of
+							//view is added into dependency system.
+
+							if (permDesc != null &&
+									permDesc.getObjectID() != null) {
+								// User did not have all required column
+								// permissions and at least one column is
+								// covered by PUBLIC.
+								dm.addDependency(dependent, permDesc,
+												 lcc.getContextManager());
+							} // else nothing found for PUBLIC..
+
+							// Has the the current role has also been relied
+							// upon?
+							if (!statementColumnPermission.
+									allColumnsCoveredByUserOrPUBLIC
+									    (lcc.getAuthorizationId(), dd)) {
+								trackRoleDependency
+									(activation, dependent, roleDepAdded);
+							}
 						}
 					}
 				}
 			}
-			
 		}
 	}
 
@@ -542,6 +762,25 @@ abstract class DDLConstantAction implements ConstantAction
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Mutable Boolean wrapper, initially false
+	 */
+	private class SettableBoolean {
+		boolean value;
+
+		SettableBoolean() {
+			value = false;
+		}
+
+		void set(boolean b) {
+			value = b;
+		}
+
+		boolean get() {
+			return value;
+		}
 	}
 }
 

@@ -154,6 +154,12 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
                          "RolesConferredPrivilegesTest.s1f1' " +
                          "no sql called on null input");
                     s.execute
+                        ("create function s1.f2( ) returns int " +
+                         "language java parameter style java external name " +
+                         "'org.apache.derbyTesting.functionTests.tests.lang." +
+                         "RolesConferredPrivilegesTest.s1f1' " +
+                         "no sql called on null input");
+                    s.execute
                         ("create table s1.t1(" +
                          "c1 int unique, c2 int unique, c3 int unique, " +
                          "primary key (c1,c2,c3))");
@@ -190,6 +196,7 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
     private final static String g_u_c1 = "update (c1) on s1.t1 ";
     private final static String g_u_c2 = "update (c2) on s1.t1 ";
     private final static String g_u_c3 = "update (c3) on s1.t1 ";
+    private final static String g_u_c1_c2_c3 = "update (c1,c2,c3) on s1.t1 ";
     private final static String g_i    = "insert on s1.t1 ";
     private final static String g_s    = "select on s1.t1 ";
     private final static String g_s_c1 = "select (c1) on s1.t1 ";
@@ -198,6 +205,7 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
     private final static String g_d    = "delete on s1.t1 ";
     private final static String g_t    = "trigger on s1.t1 ";
     private final static String g_e    = "execute on function s1.f1 ";
+    private final static String g_e_f2 = "execute on function s1.f2 ";
 
     // Collections of privileges
     private final static String[] g_all =
@@ -339,6 +347,883 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
 
 
     /**
+     * When a view, a trigger or a constraint requires a privilege by way of
+     * the current role (or by way of a role inherited by the current role) at
+     * creation time (SELECT, TRIGGER or REFERENCES privilege respectively), a
+     * dependency is also registered against the current role. Whenever that
+     * role (it need no longer be current) - or indeed one of its inherited
+     * roles - is revoked (from the current user or from a role in the closure
+     * of the original current role) or dropped, the dependent view, trigger or
+     * constraint is potentially invalidated (the single dependency is against
+     * the original current role, not against the potentially n-ary set of
+     * roles in the closure of the current role used to find the required
+     * privileges). Due to DERBY-1632, currently the objects are dropped
+     * instead of being potentially revalidated.
+     *
+     * These tests check that invalidation actually happens and leads to a
+     * dropping of the dependent view (there are also no revalidation
+     * possibilities in play here, so even when DERBY-1632 is fixed these tests
+     * should work).
+     */
+    public void testViewInvalidation() throws SQLException {
+        Connection dboConn = getConnection();
+        Statement s = dboConn.createStatement();
+
+        Connection c = openUserConnection("DonaldDuck");
+        Statement cStmt = c.createStatement();
+        SQLWarning w;
+        /*
+        * 3-dimensional search space:
+        *
+        * Which role we grant the role to (direct to a role or to a role it
+        * inherits)
+        *    X
+        * Whether the role is granted directly to the session user or to PUBLIC.
+        *    X
+        * Whether we grant the entire underlying table or just the column
+        * needed.
+        */
+        String[] grantToThisRole = new String[] {"a2", "h"};
+        String[] roleGrantees = new String[] {"DonaldDuck", "public"};
+        String[] tabAndColSelectsPerms = new String[] {g_s, g_s_c1};
+        String createViewString = "create view v as select c1 from s1.t1";
+
+        for (int r = 0; r < grantToThisRole.length; r++) {
+            for (int gNo = 0; gNo < roleGrantees.length; gNo++ ) {
+                for (int i = 0; i < tabAndColSelectsPerms.length; i++) {
+                    /*
+                     * Create a view on the basis of a select privilege via a
+                     * role.
+                     */
+                    s.executeUpdate("grant h to " + roleGrantees[gNo]);
+
+                    doGrantRevoke(GRANT, "test_dbo", tabAndColSelectsPerms[i],
+                                  grantToThisRole[r]);
+
+                    setRole(c, "h");
+                    cStmt.executeUpdate(createViewString);
+
+                    assertViewExists(true, c, "v");
+
+                    /*
+                     * Setting another role does not affect the view once
+                     * defined.
+                     */
+                    setRole(c, "none");
+                    assertViewExists(true, c, "v");
+
+                    /*
+                     * Remove privileges from role, and the view should be
+                     * gone.
+                     */
+                     doGrantRevoke(REVOKE, "test_dbo", tabAndColSelectsPerms[i],
+                                   grantToThisRole[r], VIEWDROPPED);
+                    assertViewExists(false, c, "v");
+
+                    /*
+                     * Revoking the role should also invalidate view
+                     */
+                    doGrantRevoke(GRANT, "test_dbo", tabAndColSelectsPerms[i],
+                                  grantToThisRole[r]);
+
+                    setRole(c, "h");
+                    cStmt.executeUpdate(createViewString);
+                    assertViewExists(true, c, "v");
+
+                    s.executeUpdate("revoke h from " + roleGrantees[gNo]);
+                    w = s.getWarnings();
+                    assertSQLState(VIEWDROPPED, w);
+                    assertViewExists(false, c, "v");
+
+                    /*
+                     * Check that user privilege and/or PUBLIC privilege is
+                     * preferred over role privilege if available. This is not
+                     * standard SQL, but useful behavior IMHO as long as Derby
+                     * can't revalidate via another path (DERBY-1632) - lest a
+                     * role revoke or drop causes an invalidation when user has
+                     * discretionary privilege. Cf. also comment on priority of
+                     * user vs public in DERBY-1611.
+                     */
+                    String[] directGrantee = roleGrantees;
+
+                    for (int u = 0; u < directGrantee.length; u++) {
+                        s.executeUpdate("grant h to " + roleGrantees[gNo]);
+                        doGrantRevoke(GRANT, "test_dbo",
+                                      tabAndColSelectsPerms[i],
+                                      directGrantee[u]);
+
+                        setRole(c, "h");
+
+                        // Now we have select privilege two ways, via role and
+                        // via user.
+                        cStmt.executeUpdate(createViewString);
+
+                        // Now revoke role priv and see that view is still
+                        // unaffected.
+                        s.executeUpdate("revoke h from " + roleGrantees[gNo]);
+                        assertViewExists(true, c, "v");
+
+                        // Take away user privilege, too.
+                        doGrantRevoke(REVOKE, "test_dbo",
+                                      tabAndColSelectsPerms[i],
+                                      directGrantee[u],
+                                      VIEWDROPPED);
+                        assertViewExists(false, c, "v");
+                    }
+
+                    // clean up
+                    doGrantRevoke(REVOKE, "test_dbo",tabAndColSelectsPerms[i],
+                                  grantToThisRole[r]);
+                }
+            }
+        }
+
+        /*
+         * Dropping a role should also invalidate a dependent view.
+         *
+         * (We do this test outside the loop above for simplicity of
+         * reestablish role graph after the drop..)
+         */
+
+        // drop the current role
+        doGrantRevoke(GRANT, "test_dbo", g_s, "h");
+        s.executeUpdate("grant h to DonaldDuck");
+
+        setRole(c, "h");
+        cStmt.executeUpdate(createViewString);
+        assertViewExists(true, c, "v");
+
+        s.executeUpdate("drop role h");
+
+        w = s.getWarnings();
+        assertSQLState(VIEWDROPPED, w);
+        assertViewExists(false, c, "v");
+
+        doGrantRevoke(REVOKE, "test_dbo", g_s, "h");
+
+        // re-establish role graph
+        s.executeUpdate("create role h");
+        s.executeUpdate("grant e to h");
+        s.executeUpdate("grant f to h");
+
+        // drop an inherited role needed
+        doGrantRevoke(GRANT, "test_dbo", g_s, "a3");
+        s.executeUpdate("grant h to DonaldDuck");
+
+        setRole(c, "h");
+        cStmt.executeUpdate(createViewString);
+        assertViewExists(true, c, "v");
+
+        s.executeUpdate("drop role a3");
+
+        w = s.getWarnings();
+        assertSQLState(VIEWDROPPED, w);
+        assertViewExists(false, c, "v");
+
+        doGrantRevoke(REVOKE, "test_dbo", g_s, "h");
+
+        // re-establish role graph
+        s.executeUpdate("create role a3");
+        s.executeUpdate("grant a3 to d");
+
+        cStmt.close();
+        c.close();
+        s.close();
+        dboConn.close();
+    }
+
+
+    /**
+     * @see #testViewInvalidation
+     */
+    public void testTriggerInvalidation() throws SQLException {
+        Connection dboConn = getConnection();
+        Statement s = dboConn.createStatement();
+
+        Connection c = openUserConnection("DonaldDuck");
+        Statement cStmt = c.createStatement();
+        SQLWarning w;
+
+        /*
+        * 2-dimensional search space:
+        *
+        * Which role we grant the role to (direct to a role or to a role it
+        * inherits)
+        *    X
+        * Whether the role is granted directly to the session user or to PUBLIC.
+        */
+        String[] grantToThisRole = new String[] {"a2", "h"};
+        String[] roleGrantees = new String[] {"DonaldDuck", "public"};
+        String createTriggerString =
+            "create trigger t after insert on s1.t1 values 1";
+
+        for (int r = 0; r < grantToThisRole.length; r++) {
+            for (int gNo = 0; gNo < roleGrantees.length; gNo++ ) {
+                /*
+                 * Create a trigger on the basis of a trigger privilege via a
+                 * role.
+                 */
+                s.executeUpdate("grant h to " + roleGrantees[gNo]);
+
+                doGrantRevoke(GRANT, "test_dbo", g_t, grantToThisRole[r]);
+
+                setRole(c, "h");
+                cStmt.executeUpdate(createTriggerString);
+
+                assertTriggerExists(true, c, "t");
+                cStmt.executeUpdate(createTriggerString);
+                /*
+                 * Setting another role does not affect the trigger once
+                 * defined.
+                 */
+                setRole(c, "none");
+                assertTriggerExists(true, c, "t");
+
+                setRole(c, "h");
+                cStmt.executeUpdate(createTriggerString);
+
+                // Remove privileges from role, and the trigger should be
+                // gone.
+                doGrantRevoke(REVOKE, "test_dbo", g_t, grantToThisRole[r],
+                              TRIGGERDROPPED);
+
+                assertTriggerExists(false, c, "t");
+
+                /*
+                 * Revoking the role should also invalidate trigger
+                 */
+                doGrantRevoke(GRANT, "test_dbo", g_t, grantToThisRole[r]);
+
+                setRole(c, "h");
+                cStmt.executeUpdate(createTriggerString);
+                assertTriggerExists(true, c, "t");
+                cStmt.executeUpdate(createTriggerString);
+
+                s.executeUpdate("revoke h from " + roleGrantees[gNo]);
+                w = s.getWarnings();
+                assertSQLState(TRIGGERDROPPED, w);
+                assertTriggerExists(false, c, "t");
+
+                /*
+                 * Check that user privilege and/or PUBLIC privilege is
+                 * preferred over role privilege if available. This is not
+                 * standard SQL, but useful behavior IMHO as long as Derby
+                 * can't revalidate via another path (DERBY-1632) - lest a
+                 * role revoke or drop causes an invalidation when user has
+                 * discretionary privilege. Cf. also comment on priority of
+                 * user vs public in DERBY-1611.
+                 */
+                String[] directGrantee = roleGrantees;
+
+                for (int u = 0; u < directGrantee.length; u++) {
+                    s.executeUpdate("grant h to " + roleGrantees[gNo]);
+                    doGrantRevoke(GRANT, "test_dbo", g_t, directGrantee[u]);
+
+                    setRole(c, "h");
+
+                    // Now we have trigger privilege two ways,a via role and
+                    // via user.
+                    cStmt.executeUpdate(createTriggerString);
+
+                    // Now revoke role priv and see that trigger is still
+                    // unaffected.
+                    s.executeUpdate("revoke h from " + roleGrantees[gNo]);
+                    assertTriggerExists(true, c, "t");
+                    cStmt.executeUpdate(createTriggerString);
+
+                    // take away user privilege, too
+                    doGrantRevoke(REVOKE, "test_dbo",g_t,directGrantee[u],
+                                  TRIGGERDROPPED);
+                    assertTriggerExists(false, c, "t");
+                }
+
+                // clean up
+                doGrantRevoke(REVOKE, "test_dbo", g_t, grantToThisRole[r]);
+            }
+        }
+
+        /*
+         * Dropping a role should also invalidate a dependent trigger.
+         *
+         * (We do this test outside the loop above for simplicity of
+         * reestablish role graph after the drop..)
+         */
+        doGrantRevoke(GRANT, "test_dbo", g_t, "h");
+        s.executeUpdate("grant h to DonaldDuck");
+
+        setRole(c, "h");
+        cStmt.executeUpdate(createTriggerString);
+        assertTriggerExists(true, c, "t");
+        cStmt.executeUpdate(createTriggerString);
+
+        s.executeUpdate("drop role h");
+        w = s.getWarnings();
+        assertSQLState(TRIGGERDROPPED, w);
+        assertTriggerExists(false, c, "t");
+
+        doGrantRevoke(REVOKE, "test_dbo", g_t, "h");
+
+        // re-establish role graph
+        s.executeUpdate("create role h");
+        s.executeUpdate("grant e to h");
+        s.executeUpdate("grant f to h");
+
+        /*
+         * Dropping an EXECUTE privilege used in a trigger body will not drop
+         * the trigger if the EXECUTE privilege is revoked from a user
+         * directly, since this currently requires the RESTRICT
+         * keyword. However, revoking a role does not carry the RESTRICT
+         * keyword, so any execution privilege conferred through a role is
+         * revoked, too, and any dependent object, for example a trigger in
+         * example below, will be dropped.
+         */
+        doGrantRevoke(GRANT, "test_dbo", g_t, "h");
+        doGrantRevoke(GRANT, "test_dbo", g_e, "h");
+        s.executeUpdate("grant h to DonaldDuck");
+        setRole(c, "h");
+
+        cStmt.executeUpdate
+            ("create trigger t after insert on s1.t1 values s1.f1()");
+        assertTriggerExists(true, c, "t");
+
+        cStmt.executeUpdate
+            ("create trigger t after insert on s1.t1 values s1.f1()");
+
+        s.executeUpdate("revoke h from DonaldDuck");
+        w = s.getWarnings();
+        assertSQLState(TRIGGERDROPPED, w);
+        assertTriggerExists(false, c, "t");
+
+        doGrantRevoke(REVOKE, "test_dbo", g_t, "h");
+        doGrantRevoke(REVOKE, "test_dbo", g_e, "h");
+
+        /*
+         * Check that dependency on role and subsequent invalidation happens
+         * for a mix of column SELECT privileges granted to user, public and
+         * role (due to tricky logic in this implementation,
+         * cf. DDLConstantAction#storeViewTriggerDependenciesOnPrivileges
+         */
+
+        // SELECT privileges to {public, role} x
+        // TRIGGER privilege to {user, role}
+        String triggerPrivGrantees[] = new String[] {"h", "DonaldDuck"};
+        for (int i=0; i < triggerPrivGrantees.length; i++) {
+            s.executeUpdate("grant h to DonaldDuck");
+            setRole(c, "h");
+            doGrantRevoke(GRANT, "test_dbo", g_t, triggerPrivGrantees[i]);
+            doGrantRevoke(GRANT, "test_dbo", g_s_c1, "public");
+            doGrantRevoke(GRANT, "test_dbo", g_s_c2, "h");
+            cStmt.executeUpdate
+                ("create trigger t after insert on s1.t1 " +
+                 "select c1,c2 from s1.t1");
+            s.executeUpdate("revoke h from DonaldDuck");
+            w = s.getWarnings();
+            assertSQLState(TRIGGERDROPPED, w);
+            assertTriggerExists(false, c, "t");
+            doGrantRevoke(REVOKE, "test_dbo", g_t, triggerPrivGrantees[i]);
+            doGrantRevoke(REVOKE, "test_dbo", g_s_c1, "public");
+            doGrantRevoke(REVOKE, "test_dbo", g_s_c2, "h");
+        }
+
+        // SELECT privileges to {user, role} x
+        // TRIGGER privilege to {user, role}
+        for (int i=0; i < triggerPrivGrantees.length; i++) {
+            s.executeUpdate("grant h to DonaldDuck");
+            setRole(c, "h");
+            doGrantRevoke(GRANT, "test_dbo", g_t, triggerPrivGrantees[i]);
+            doGrantRevoke(GRANT, "test_dbo", g_s_c1, "DonaldDuck");
+            doGrantRevoke(GRANT, "test_dbo", g_s_c2, "h");
+            cStmt.executeUpdate
+                ("create trigger t after insert on s1.t1 " +
+                 "select c1,c2 from s1.t1");
+            s.executeUpdate("revoke h from DonaldDuck");
+            w = s.getWarnings();
+            assertSQLState(TRIGGERDROPPED, w);
+            assertTriggerExists(false, c, "t");
+            doGrantRevoke(REVOKE, "test_dbo", g_t,  triggerPrivGrantees[i]);
+            doGrantRevoke(REVOKE, "test_dbo", g_s_c1, "DonaldDuck");
+            doGrantRevoke(REVOKE, "test_dbo", g_s_c2, "h");
+        }
+
+        // SELECT privileges to {user, public, role} x
+        // TRIGGER privilege to {user, role}
+        for (int i=0; i < triggerPrivGrantees.length; i++) {
+            s.executeUpdate("grant h to DonaldDuck");
+            setRole(c, "h");
+            doGrantRevoke(GRANT, "test_dbo", g_t, triggerPrivGrantees[i]);
+            doGrantRevoke(GRANT, "test_dbo", g_s_c1, "DonaldDuck");
+            doGrantRevoke(GRANT, "test_dbo", g_s_c2, "public");
+            doGrantRevoke(GRANT, "test_dbo", g_s_c3, "h");
+            cStmt.executeUpdate
+                ("create trigger t after insert on s1.t1 " +
+                 "select c1,c2,c3 from s1.t1");
+            s.executeUpdate("revoke h from DonaldDuck");
+            w = s.getWarnings();
+            assertSQLState(TRIGGERDROPPED, w);
+            assertTriggerExists(false, c, "t");
+            doGrantRevoke(REVOKE, "test_dbo", g_t, triggerPrivGrantees[i]);
+            doGrantRevoke(REVOKE, "test_dbo", g_s_c1, "DonaldDuck");
+            doGrantRevoke(REVOKE, "test_dbo", g_s_c2, "public");
+            doGrantRevoke(REVOKE, "test_dbo", g_s_c3, "h");
+        }
+
+        cStmt.close();
+        c.close();
+        s.close();
+        dboConn.close();
+    }
+
+
+    /**
+     * @see #testViewInvalidation
+     */
+    public void testConstraintInvalidation() throws SQLException {
+        Connection dboConn = getConnection();
+        Statement s = dboConn.createStatement();
+
+        Connection c = openUserConnection("DonaldDuck");
+        Statement cStmt = c.createStatement();
+        SQLWarning w;
+        /*
+        * 3-dimensional search space:
+        *
+        * Which role we grant the role to (direct to a role or to a role it
+        * inherits)
+        *    X
+        * Whether the role is granted directly to the session user or to PUBLIC.
+        *    X
+        * Whether we grant the entire underlying table or just the column
+        * needed.
+        */
+        String[] grantToThisRole = new String[] {"a2", "h"};
+        String[] roleGrantees = new String[] {"DonaldDuck", "public"};
+        String[][] tabAndColReferencesPerms =
+            new String[][] {{g_r}, {g_r_c1, g_r_c2, g_r_c3}};
+
+        String createTableString =
+            "create table t (i int not null, j int, k int)";
+        String dropTableString = "drop table t";
+        String addConstraintString =
+            "alter table t add constraint fk " +
+            "foreign key(i,j,k) references s1.t1";
+
+        cStmt.executeUpdate(createTableString);
+
+        for (int r = 0; r < grantToThisRole.length; r++) {
+            for (int gNo = 0; gNo < roleGrantees.length; gNo++ ) {
+                for (int i = 0; i < tabAndColReferencesPerms.length; i++) {
+                    /*
+                     * Create a foreign key constraint on the basis of a
+                     * references privilege via a role.
+                     */
+                    s.executeUpdate("grant h to " + roleGrantees[gNo]);
+
+                    doGrantRevoke(GRANT, "test_dbo",
+                                  tabAndColReferencesPerms[i],
+                                  grantToThisRole[r]);
+
+                    setRole(c, "h");
+                    cStmt.executeUpdate(addConstraintString);
+
+                    assertFkConstraintExists(true, c, "t");
+
+                    /*
+                     * Setting another role does not affect the constraint once
+                     * defined.
+                     */
+                    setRole(c, "none");
+                    assertFkConstraintExists(true, c, "t");
+
+                    // Remove privileges from role, and the constraint should be
+                    // gone.
+                    doGrantRevoke
+                        (REVOKE, "test_dbo",
+                         tabAndColReferencesPerms[i],
+                         grantToThisRole[r],
+                         new String[]{CONSTRAINTDROPPED, null, null});
+
+                    assertFkConstraintExists(false, c, "t");
+
+                    /*
+                     * Revoking the role should also invalidate constraint
+                     */
+                    doGrantRevoke(GRANT, "test_dbo",
+                                  tabAndColReferencesPerms[i],
+                                  grantToThisRole[r]);
+
+                    setRole(c, "h");
+                    cStmt.executeUpdate(addConstraintString);
+                    assertFkConstraintExists(true, c, "t");
+
+                    s.executeUpdate("revoke h from " + roleGrantees[gNo]);
+                    assertFkConstraintExists(false, c, "t");
+
+                    /*
+                     * Check that user privilege and/or PUBLIC privilege is
+                     * preferred over role privilege if available. This is not
+                     * standard SQL, but useful behavior IMHO as long as Derby
+                     * can't revalidate via another path (DERBY-1632) - lest a
+                     * role revoke or drop causes an invalidation when user has
+                     * discretionary privilege. Cf. also comment on priority of
+                     * user vs public in DERBY-1611.
+                     */
+                    String[] directGrantee = roleGrantees;
+
+                    for (int u = 0; u < directGrantee.length; u++) {
+                        s.executeUpdate("grant h to " + roleGrantees[gNo]);
+                        doGrantRevoke(GRANT, "test_dbo",
+                                      tabAndColReferencesPerms[i],
+                                      directGrantee[u]);
+
+                        setRole(c, "h");
+
+                        // Now we have references privilege two ways, via role
+                        // and via user.
+                        cStmt.executeUpdate(addConstraintString);
+
+                        // Now revoke role priv and see that constraints is
+                        // still unaffected.
+                        s.executeUpdate("revoke h from " + roleGrantees[gNo]);
+                        assertFkConstraintExists(true, c, "t");
+
+                        // take away user privilege, too
+                        doGrantRevoke
+                            (REVOKE, "test_dbo",
+                             tabAndColReferencesPerms[i],
+                             directGrantee[u],
+                             new String[]{CONSTRAINTDROPPED, null, null});
+                        assertFkConstraintExists(false, c, "t");
+                    }
+
+                    // clean up
+                    doGrantRevoke
+                        (REVOKE, "test_dbo",
+                         tabAndColReferencesPerms[i],
+                         grantToThisRole[r]);
+                }
+            }
+        }
+
+        /*
+         * Dropping a role should also invalidate a dependent constraint.
+         *
+         * (We do this test outside the loop above for simplicity of
+         * reestablish role graph after the drop..)
+         */
+        doGrantRevoke(GRANT, "test_dbo", g_r, "h");
+        s.executeUpdate("grant h to DonaldDuck");
+
+        setRole(c, "h");
+        cStmt.executeUpdate(addConstraintString);
+        assertFkConstraintExists(true, c, "t");
+
+        s.executeUpdate("drop role h");
+        w = s.getWarnings();
+        assertSQLState(CONSTRAINTDROPPED, w);
+        assertFkConstraintExists(false, c, "t");
+
+
+        doGrantRevoke(REVOKE, "test_dbo", g_s, "h");
+
+
+        // re-establish role graph
+        s.executeUpdate("create role h");
+        s.executeUpdate("grant e to h");
+        s.executeUpdate("grant f to h");
+
+        /*
+         * For FOREIGN KEY constraint, check that dependency on role and
+         * subesquent invalidation happens for a mix of column privileges
+         * granted to user, public and role (due to tricky logic in this
+         * implementation,
+         * cf. DDLConstantAction#storeConstraintDependenciesOnPrivileges
+         */
+        // {role, role}
+        s.executeUpdate("grant h to DonaldDuck");
+        setRole(c, "h");
+        doGrantRevoke(GRANT, "test_dbo",
+                      new String[] {g_r_c1, g_r_c2, g_r_c3}, "h");
+        cStmt.executeUpdate
+            ("alter table t add constraint fk foreign key(i,j,k) " +
+             "references s1.t1");
+
+        s.executeUpdate("revoke h from DonaldDuck");
+        w = s.getWarnings();
+        assertSQLState(CONSTRAINTDROPPED, w);
+        assertFkConstraintExists(false, c, "t");
+        doGrantRevoke(REVOKE, "test_dbo",
+                      new String[] {g_r_c1, g_r_c2, g_r_c3}, "h");
+
+        // {public, role}
+        s.executeUpdate("grant h to DonaldDuck");
+        setRole(c, "h");
+        doGrantRevoke(GRANT, "test_dbo", g_r_c1, "public");
+        doGrantRevoke(GRANT, "test_dbo", g_r_c2, "h");
+        doGrantRevoke(GRANT, "test_dbo", g_r_c3, "h");
+        cStmt.executeUpdate("alter table t add constraint fk " +
+                            "foreign key(i,j,k) references s1.t1");
+
+        s.executeUpdate("revoke h from DonaldDuck");
+        w = s.getWarnings();
+        assertSQLState(CONSTRAINTDROPPED, w);
+        assertFkConstraintExists(false, c, "t");
+        doGrantRevoke(REVOKE, "test_dbo", g_r_c1, "public");
+        doGrantRevoke(REVOKE, "test_dbo", g_r_c2, "h");
+        doGrantRevoke(REVOKE, "test_dbo", g_r_c3, "h");
+
+        // {user, role}
+        s.executeUpdate("grant h to DonaldDuck");
+        setRole(c, "h");
+        doGrantRevoke(GRANT, "test_dbo", g_r_c1, "DonaldDuck");
+        doGrantRevoke(GRANT, "test_dbo", g_r_c2, "h");
+        doGrantRevoke(GRANT, "test_dbo", g_r_c3, "h");
+        cStmt.executeUpdate("alter table t add constraint fk " +
+                            "foreign key(i,j,k) references s1.t1");
+        s.executeUpdate("revoke h from DonaldDuck");
+        w = s.getWarnings();
+        assertSQLState(CONSTRAINTDROPPED, w);
+        assertFkConstraintExists(false, c, "t");
+        doGrantRevoke(REVOKE, "test_dbo", g_r_c1, "DonaldDuck");
+        doGrantRevoke(REVOKE, "test_dbo", g_r_c2, "h");
+        doGrantRevoke(REVOKE, "test_dbo", g_r_c3, "h");
+
+        // {user, public, role}
+        s.executeUpdate("grant h to DonaldDuck");
+        setRole(c, "h");
+        doGrantRevoke(GRANT, "test_dbo", g_r_c1, "DonaldDuck");
+        doGrantRevoke(GRANT, "test_dbo", g_r_c2, "public");
+        doGrantRevoke(GRANT, "test_dbo", g_r_c3, "h");
+        cStmt.executeUpdate("alter table t add constraint fk " +
+                            "foreign key(i,j,k) references s1.t1");
+        s.executeUpdate("revoke h from DonaldDuck");
+        w = s.getWarnings();
+        assertSQLState(CONSTRAINTDROPPED, w);
+        assertFkConstraintExists(false, c, "t");
+        doGrantRevoke(REVOKE, "test_dbo", g_r_c1, "DonaldDuck");
+        doGrantRevoke(REVOKE, "test_dbo", g_r_c2, "public");
+        doGrantRevoke(REVOKE, "test_dbo", g_r_c3, "h");
+
+        // Try the same as above but with EXECUTE privilege instead of
+        // REFERENCES for a CHECK constraint
+        s.executeUpdate("grant h to DonaldDuck");
+        setRole(c, "h");
+        doGrantRevoke(GRANT, "test_dbo", g_e, "h");
+        cStmt.executeUpdate("alter table t add constraint ch " +
+                            "check(i < s1.f1())");
+        assertCheckConstraintExists(true, c, "t");
+        s.executeUpdate("revoke h from DonaldDuck");
+        w = s.getWarnings();
+        assertSQLState(CONSTRAINTDROPPED, w);
+        assertCheckConstraintExists(false, c, "t");
+        doGrantRevoke(REVOKE, "test_dbo", g_e, "h");
+
+        // Try the same as above but with two EXECUTE privileges
+        s.executeUpdate("grant h to DonaldDuck");
+        setRole(c, "h");
+        doGrantRevoke(GRANT, "test_dbo", g_e, "h");
+        doGrantRevoke(GRANT, "test_dbo", g_e_f2, "DonaldDuck");
+        cStmt.executeUpdate("alter table t add constraint ch " +
+                            "check(i < (s1.f1() + s1.f2()))");
+        assertCheckConstraintExists(true, c, "t");
+        s.executeUpdate("revoke h from DonaldDuck");
+        w = s.getWarnings();
+        assertSQLState(CONSTRAINTDROPPED, w);
+        assertCheckConstraintExists(false, c, "t");
+        doGrantRevoke(REVOKE, "test_dbo", g_e, "h");
+        doGrantRevoke(REVOKE, "test_dbo", g_e_f2, "DonaldDuck");
+
+        // Try the same as above but with multiple CHECK constraints to verify
+        // that only those affected by a revoke are impacted.
+        s.executeUpdate("grant h to DonaldDuck");
+        setRole(c, "h");
+        doGrantRevoke(GRANT, "test_dbo", g_e, "h");
+        doGrantRevoke(GRANT, "test_dbo", g_e_f2, "DonaldDuck");
+        cStmt.executeUpdate
+            ("create table tmp(i int constraint ct1 check(i < s1.f1())," +
+             "                 j int constraint ct2 check(j < s1.f2()))");
+        s.executeUpdate("revoke h from DonaldDuck");
+
+        // This should only impact ct1
+        try {
+            cStmt.executeUpdate("insert into tmp values (6, -1)");
+        } catch (SQLException e) {
+            fail("expected success", e);
+        }
+
+        try {
+            cStmt.executeUpdate("insert into tmp values (6, 6)");
+            fail("ct2 should remain");
+        } catch (SQLException e) {
+            assertSQLState(CHECKCONSTRAINTVIOLATED, e);
+        }
+
+        cStmt.executeUpdate("alter table tmp drop constraint ct2");
+        doGrantRevoke(REVOKE, "test_dbo", g_e, "h");
+        doGrantRevoke(REVOKE, "test_dbo", g_e_f2, "DonaldDuck");
+        cStmt.executeUpdate("drop table tmp");
+
+        cStmt.executeUpdate(dropTableString);
+
+        cStmt.close();
+        c.close();
+        s.close();
+        dboConn.close();
+    }
+
+
+    /**
+     * Test that a prepared statement can no longer execute after its required
+     * privileges acquired via the current role are no longer applicable.
+     */
+    public void testPSInvalidation() throws SQLException {
+        Connection dboConn = getConnection();
+        Statement s = dboConn.createStatement();
+
+        Connection c = openUserConnection("DonaldDuck");
+        Statement cStmt = c.createStatement();
+
+        /*
+        * 3-dimensional search space:
+        *
+        * Which role we grant the role to (direct to a role or to a role it
+        * inherits)
+        *    X
+        * Whether the role is granted directly to the session user or to PUBLIC.
+        *    X
+        * Whether we grant the entire underlying table or just the column
+        * needed.
+        */
+        String[] grantToThisRole = new String[] {"a2", "h"};
+        String[] roleGrantees = new String[] {"DonaldDuck", "public"};
+        String[][] privilegeStmts =
+            new String[][] {{g_s, "select c1 from s1.t1"},
+                            {g_s_c1, "select c1 from s1.t1"},
+                            {g_e, "values s1.f1()"},
+                            {g_u, "update s1.t1 set c1=0"},
+                            {g_u_c1_c2_c3, "update s1.t1 set c1=0"},
+                            {g_i, "insert into s1.t1 values (5,5,5)"}};
+
+        PreparedStatement ps = null;
+
+        for (int r = 0; r < grantToThisRole.length; r++) {
+            for (int gNo = 0; gNo < roleGrantees.length; gNo++ ) {
+                for (int i = 0; i < privilegeStmts.length; i++) {
+                    /*
+                     * Create a ps on the basis of a select privilege via a
+                     * role.
+                     */
+                    s.executeUpdate("grant h to " + roleGrantees[gNo]);
+
+                    doGrantRevoke(GRANT, "test_dbo", privilegeStmts[i][0],
+                                  grantToThisRole[r]);
+
+                    setRole(c, "h");
+                    ps = c.prepareStatement(privilegeStmts[i][1]);
+
+                    assertPsWorks(true, ps);
+
+                    /*
+                     * Setting another role should invalidate the ps
+                     */
+                    setRole(c, "none");
+                    assertPsWorks(false, ps);
+
+                    /*
+                     * Remove privileges from role, and the execute should
+                     * fail.
+                     */
+                    setRole(c, "h");
+                    assertPsWorks(true, ps);
+                    doGrantRevoke(REVOKE, "test_dbo", privilegeStmts[i][0],
+                                  grantToThisRole[r]);
+
+                    assertPsWorks(false, ps);
+                    doGrantRevoke(GRANT, "test_dbo", privilegeStmts[i][0],
+                                  grantToThisRole[r]);
+
+                    /*
+                     * Revoking the role should also invalidate the ps
+                     */
+                    setRole(c, "h");
+                    assertPsWorks(true, ps);
+
+                    s.executeUpdate("revoke h from " + roleGrantees[gNo]);
+                    assertPsWorks(false, ps);
+
+                    /*
+                     * Check that prepared statements are reprepared if there
+                     * is another applicable privilege, when the privilege
+                     * granted via a role is used first and that role is
+                     * revoked.
+                     */
+                    String[] directGrantee = roleGrantees;
+
+                    // iterate over granting role h to {user, PUBLIC}
+                    for (int u = 0; u < directGrantee.length; u++) {
+                        s.executeUpdate("grant h to " + roleGrantees[gNo]);
+
+                        setRole(c, "h");
+                        assertPsWorks(true, ps);
+
+                        doGrantRevoke(GRANT, "test_dbo",
+                                      privilegeStmts[i][0],
+                                      directGrantee[u]);
+
+                        // Now we have select privilege two ways, via role and
+                        // via user or PUBLIC.
+                        // Now revoke role priv and see that ps is still
+                        // unaffected.
+                        s.executeUpdate("revoke h from " + roleGrantees[gNo]);
+                        assertPsWorks(true, ps);
+
+                        // Take away user privilege, too.
+                        doGrantRevoke(REVOKE, "test_dbo",
+                                      privilegeStmts[i][0],
+                                      directGrantee[u]);
+                        assertPsWorks(false, ps);
+                    }
+
+                    // clean up
+                    doGrantRevoke(REVOKE, "test_dbo",privilegeStmts[i][0],
+                                  grantToThisRole[r]);
+                }
+            }
+        }
+
+        /*
+         * Dropping a role should also invalidate a dependent ps.
+         *
+         * (We do this test outside the loop above for simplicity of
+         * reestablish role graph after the drop..)
+         *
+         */
+        for (int i=0; i < privilegeStmts.length; i++) {
+            doGrantRevoke(GRANT, "test_dbo", privilegeStmts[i][0], "h");
+            s.executeUpdate("grant h to DonaldDuck");
+
+            setRole(c, "h");
+            ps = c.prepareStatement(privilegeStmts[i][1]);
+            assertPsWorks(true, ps);
+
+            s.executeUpdate("drop role h");
+            assertPsWorks(false, ps);
+
+            doGrantRevoke(REVOKE, "test_dbo", privilegeStmts[i][0], "h");
+
+            // re-establish role graph
+            s.executeUpdate("create role h");
+            s.executeUpdate("grant e to h");
+            s.executeUpdate("grant f to h");
+        }
+
+        cStmt.close();
+        c.close();
+        s.close();
+        dboConn.close();
+    }
+
+
+    /**
      * stored function: s1.f1
      */
     public static int s1f1() {
@@ -360,6 +1245,16 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
             }
 
         }
+    }
+
+
+    private void assertEverything(int hasPrivilege,
+                                  String user,
+                                  String role) throws SQLException {
+
+        Connection c = openUserConnection(user);
+        assertEverything(hasPrivilege, c, role);
+        c.close();
     }
 
 
@@ -394,6 +1289,32 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
         assertTriggerPrivilege
             (hasPrivilege, c, schema, table);
         assertExecutePrivilege(hasPrivilege, c, schema, function);
+    }
+
+
+    /**
+     * Assert that a user has execute privilege on a given function
+     *
+     * @param hasPrivilege whether or not the user has the privilege
+     * @param user the user to check
+     * @param role to use, or null if we do not want to set the role
+     * @param schema the schema to check
+     * @param function the name of the function to check
+     * @throws SQLException throws all exceptions
+     */
+    private void assertExecutePrivilege(int hasPrivilege,
+                                        String user,
+                                        String role,
+                                        String schema,
+                                        String function) throws SQLException {
+        Connection c = openUserConnection(user);
+
+        if (role != null) {
+            setRole(c, role);
+        }
+
+        assertExecutePrivilege(hasPrivilege, c, schema, function);
+        c.close();
     }
 
 
@@ -439,7 +1360,33 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
     }
 
 
-     /**
+    /**
+     * Assert that a user has trigger privilege on a given table
+     *
+     * @param hasPrivilege whether or not the user has the privilege
+     * @param user the user to check
+     * @param role to use, or null if we do not want to set the role
+     * @param schema the schema to check
+     * @param table the name of the table to check
+     * @throws SQLException throws all exceptions
+     */
+    private void assertTriggerPrivilege(int hasPrivilege,
+                                        String user,
+                                        String role,
+                                        String schema,
+                                        String table) throws SQLException {
+        Connection c = openUserConnection(user);
+
+        if (role != null) {
+            setRole(c, role);
+        }
+
+        assertTriggerPrivilege(hasPrivilege, c, schema, table);
+        c.close();
+    }
+
+
+    /**
      * Assert that a user has trigger execute privilege on a given table /
      * column set.
      *
@@ -485,6 +1432,36 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
         assertPrivilegeMetadata
             (hasPrivilege, c, "TRIGGER", schema, table, null);
 
+    }
+
+
+    /**
+     * Assert that a user has references privilege on a given table
+     *
+     * @param hasPrivilege whether or not the user has the privilege
+     * @param user the user to check
+     * @param role to use, or null if we do not want to set the role
+     * @param schema the schema to check
+     * @param table the name of the table to check
+     * @param columns the name of the columns to check, or null
+     * @throws SQLException throws all exceptions
+     */
+    private void assertReferencesPrivilege(int hasPrivilege,
+                                           String user,
+                                           String role,
+                                           String schema,
+                                           String table,
+                                           String[] columns)
+            throws SQLException {
+
+        Connection c = openUserConnection(user);
+
+        if (role != null) {
+            setRole(c, role);
+        }
+
+        assertReferencesPrivilege(hasPrivilege, c, schema, table, columns);
+        c.close();
     }
 
 
@@ -544,7 +1521,37 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
     }
 
 
-     /**
+    /**
+     * Assert that a user has update privilege on a given table
+     *
+     * @param hasPrivilege whether or not the user has the privilege
+     * @param user the user to check
+     * @param role to use, or null if we do not want to set the role
+     * @param schema the schema to check
+     * @param table the name of the table to check
+     * @param columns the name of the columns to check, or null
+     * @throws SQLException throws all exceptions
+     */
+    private void assertUpdatePrivilege(int hasPrivilege,
+                                       String user,
+                                       String role,
+                                       String schema,
+                                       String table,
+                                       String[] columns)
+            throws SQLException {
+
+        Connection c = openUserConnection(user);
+
+        if (role != null) {
+            setRole(c, role);
+        }
+
+        assertUpdatePrivilege(hasPrivilege, c, schema, table, columns);
+        c.close();
+    }
+
+
+    /**
      * Assert that a user has update privilege on a given table / column set.
      *
      * @param hasPrivilege whether or not the user has the privilege
@@ -623,7 +1630,37 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
     }
 
 
-     /**
+    /**
+     * Assert that a user has insert privilege on a given table
+     *
+     * @param hasPrivilege whether or not the user has the privilege
+     * @param user the user to check
+     * @param role to use, or null if we do not want to set the role
+     * @param schema the schema to check
+     * @param table the name of the table to check
+     * @param columns the name of the columns to check, or null
+     * @throws SQLException throws all exceptions
+     */
+    private void assertInsertPrivilege(int hasPrivilege,
+                                       String user,
+                                       String role,
+                                       String schema,
+                                       String table,
+                                       String[] columns)
+            throws SQLException {
+
+        Connection c = openUserConnection(user);
+
+        if (role != null) {
+            setRole(c, role);
+        }
+
+        assertInsertPrivilege(hasPrivilege, c, schema, table, columns);
+        c.close();
+    }
+
+
+    /**
      * Assert that a user has insert privilege on a given table / column set.
      *
      * @param hasPrivilege whether or not the user has the privilege
@@ -662,6 +1699,36 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
 
         assertPrivilegeMetadata
             (hasPrivilege, c, "INSERT", schema, table, columns);
+    }
+
+
+    /**
+     * Assert that a user has select privilege on a given table
+     *
+     * @param hasPrivilege whether or not the user has the privilege
+     * @param user the user to check
+     * @param role to use, or null if we do not want to set the role
+     * @param schema the schema to check
+     * @param table the name of the table to check
+     * @param columns the name of the columns to check, or null
+     * @throws SQLException throws all exceptions
+     */
+    private void assertSelectPrivilege(int hasPrivilege,
+                                       String user,
+                                       String role,
+                                       String schema,
+                                       String table,
+                                       String[] columns)
+            throws SQLException {
+
+        Connection c = openUserConnection(user);
+
+        if (role != null) {
+            setRole(c, role);
+        }
+
+        assertSelectPrivilege(hasPrivilege, c, schema, table, columns);
+        c.close();
     }
 
 
@@ -725,6 +1792,174 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
 
         assertPrivilegeMetadata
             (hasPrivilege, c, "SELECT", schema, table, columns);
+    }
+
+
+    /**
+     * Check that a given view exists (select privilege assumed) or not by
+     * selecting from it. The connection user must supposed to be the owner for
+     * this to work.
+     */
+    private void assertViewExists(boolean exists,
+                                  Connection c,
+                                  String table) throws SQLException {
+        Statement s = c.createStatement();
+        try {
+            s.execute("select * from " + table);
+            if (!exists) {
+                fail("Table expected not to exist: " + table);
+            }
+         } catch (SQLException e) {
+             if (exists) {
+                 fail("Table expected to exist: " + table, e);
+             }
+             assertSQLState(TABLENOTFOUND, e);
+         }
+         s.close();
+    }
+
+
+    /**
+     * Check that a given trigger exists (select privilege assumed) or not.
+     * NOTE: It is destructive, since the test is by dropping the trigger.  The
+     * connection user must supposed to be the owner for this to work.
+     */
+    private void assertTriggerExists(boolean exists,
+                                     Connection c,
+                                     String trigger) throws SQLException {
+        Statement s = c.createStatement();
+        try {
+            s.execute("drop trigger " + trigger);
+            if (!exists) {
+                fail("Trigger expected not to exist: " + trigger);
+            }
+         } catch (SQLException e) {
+             if (exists) {
+                 fail("Trigger expected to exist: " + trigger, e);
+             }
+             assertSQLState(OBJECTNOTFOUND, e);
+         }
+         s.close();
+    }
+
+
+    /**
+     * Check that a given foregin key constraint exists by the following
+     * method: We insert a value that is not present in the referenced table so
+     * the foreign key constraint will fail if the constraint is present. The
+     * connection user must be the owner for this to work.
+     */
+    private void assertFkConstraintExists(boolean exists,
+                                        Connection c,
+                                        String table)
+            throws SQLException {
+        assertConstraintExists(exists, c, table, FKVIOLATION);
+    }
+
+    /**
+     * Check that a given check constraint exists by the following method: We
+     * insert a value that does not satify the check constraint. The connection
+     * user must be the owner for this to work.
+     */
+    private void assertCheckConstraintExists(boolean exists,
+                                        Connection c,
+                                        String table)
+            throws SQLException {
+        assertConstraintExists(exists, c, table, CHECKCONSTRAINTVIOLATED);
+    }
+
+
+    private void assertConstraintExists(boolean exists,
+                                        Connection c,
+                                        String table,
+                                        String sqlState)
+            throws SQLException {
+
+        Statement s = c.createStatement();
+        try {
+            s.execute("insert into " + table + " values (6,6,6)");
+            s.execute("delete from " + table);
+
+            if (exists) {
+                fail("Table expected to have a constraint: " + table);
+            }
+         } catch (SQLException e) {
+             if (!exists) {
+                 fail("Table expected not to have a constraint: " + table, e);
+             }
+             assertSQLState(sqlState, e);
+         }
+         s.close();
+    }
+
+
+    /**
+     * Check that a given prepared statement can be executed.
+     */
+    private void assertPsWorks(boolean works,
+                               PreparedStatement ps) throws SQLException {
+
+        ps.getConnection().setAutoCommit(false);
+
+        try {
+            boolean b = ps.execute();
+            ResultSet rs = ps.getResultSet();
+            if (rs != null) {
+                rs.next();
+                // NOTE: If we don't close the rs, invalidation of the prepared
+                // statement via set role will fail, due to
+                // verifyNoOpenResultSets called fromprepareToInvalidate. Hence
+                // setRole will fail. BUG or not? I think this behavior is
+                // OK.. OR, we could force close the rs.. Actually when we move
+                // to invalidate Activation instead it would not matter....
+                //        rs.close();
+            }
+            ps.getConnection().rollback();
+            ps.getConnection().setAutoCommit(true);
+
+            if (!works) {
+                fail("Prepared statement expected to fail.");
+            }
+         } catch (SQLException e) {
+            ps.getConnection().setAutoCommit(true);
+
+            if (works) {
+                 fail("Prepared statement expected to work.", e);
+             }
+             assertSQLState
+                 (new String[]{NOCOLUMNPERMISSION,
+                               NOEXECUTEPERMISSION,
+                               NOTABLEPERMISSION},
+                  e);
+         }
+    }
+
+
+    /**
+     * Assert that a user has delete privilege on a given table
+     *
+     * @param hasPrivilege whether or not the user has the privilege
+     * @param user the user to check
+     * @param role to use, or null if we do not want to set the role
+     * @param schema the schema to check
+     * @param table the name of the table to check
+     * @throws SQLException throws all exceptions
+     */
+    private void assertDeletePrivilege(int hasPrivilege,
+                                       String user,
+                                       String role,
+                                       String schema,
+                                       String table)
+            throws SQLException {
+
+        Connection c = openUserConnection(user);
+
+        if (role != null) {
+            setRole(c, role);
+        }
+
+        assertDeletePrivilege(hasPrivilege, c, schema, table);
+        c.close();
     }
 
 
@@ -920,7 +2155,8 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
     private String[] getAllColumns(String schema, String table)
             throws SQLException
     {
-        DatabaseMetaData dbmd = getConnection().getMetaData();
+        Connection c = getConnection();
+        DatabaseMetaData dbmd = c.getMetaData();
         ArrayList columnList = new ArrayList();
         ResultSet rs =
             dbmd.getColumns( (String) null, schema, table, (String) null);
@@ -1020,7 +2256,7 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
                                String grantor,
                                String[] actionStrings,
                                String grantee,
-                               String warningExpected)
+                               String[] warningExpected)
             throws SQLException {
         Connection c = openUserConnection(grantor);
         Statement s = c.createStatement();
@@ -1034,8 +2270,8 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
                 (action == REVOKE && actionStrings[i].startsWith
                  ("execute") ? " restrict" : ""));
 
-            if (warningExpected != null) {
-                assertSQLState(warningExpected, s.getWarnings());
+            if (warningExpected[i] != null) {
+                assertSQLState(warningExpected[i], s.getWarnings());
             }
         }
 
@@ -1052,6 +2288,67 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
                                String[] actionStrings,
                                String grantee)
             throws SQLException {
-        doGrantRevoke(action, grantor, actionStrings, grantee, null);
+        String[] warns = new String[actionStrings.length];
+        doGrantRevoke(action, grantor, actionStrings, grantee, warns);
     }
- }
+
+    /**
+     * Perform a bulk grant or revoke action for grantee
+     */
+    private void doGrantRevoke(int action,
+                               String grantor,
+                               String actionString,
+                               String grantee,
+                               String warningExpected) throws SQLException {
+        doGrantRevoke(action, grantor, new String[] {actionString}, grantee,
+                      new String[]{warningExpected});
+    }
+
+    /**
+     * Perform a bulk grant or revoke action for grantee
+     */
+    private void doGrantRevoke(int action,
+                               String grantor,
+                               String actionString,
+                               String grantee) throws SQLException {
+        doGrantRevoke(action, grantor, new String[] {actionString}, grantee);
+    }
+
+
+    private String CNFUser2user(String CNFUser) {
+        for (int i = 0; i < users.length; i++) {
+            if (JDBC.identifierToCNF(users[i]).equals(CNFUser)) {
+                return users[i];
+            }
+        }
+        fail("test error");
+        return null;
+    }
+
+    private void assertSQLState(String[] ok_states, SQLException e) {
+        String state = e.getSQLState();
+        boolean found = false;
+
+        for (int i = 0; i < ok_states.length; i++) {
+            if (ok_states[i].equals(state)) {
+                found = true;
+            }
+        }
+
+        if (!found) {
+            StringBuffer b = new StringBuffer();
+            b.append("Exception ");
+            b.append(state);
+            b.append(" found, one of ");
+            for (int i =  0; i < ok_states.length; i++) {
+                b.append(ok_states[i]);
+                if (i !=  ok_states.length - 1) {
+                    b.append('|');
+                }
+            }
+            b.append(" expected");
+            fail(b.toString());
+        }
+    }
+}
+

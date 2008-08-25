@@ -27,6 +27,7 @@ import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.sql.Activation;
+import org.apache.derby.iapi.sql.execute.ExecPreparedStatement;
 
 /**
  * This class describes a table permission required by a statement.
@@ -113,9 +114,10 @@ public class StatementTablePermission extends StatementPermission
 		throws StandardException
 	{
 		DataDictionary dd = lcc.getDataDictionary();
+		ExecPreparedStatement ps = activation.getPreparedStatement();
 
 		if (!hasPermissionOnTable(lcc, activation,
-									  authorizationId, forGrant)) {
+									  authorizationId, forGrant, ps)) {
 			TableDescriptor td = getTableDescriptor( dd);
 			throw StandardException.newException( forGrant ? SQLState.AUTH_NO_TABLE_PERMISSION_FOR_GRANT
 												  : SQLState.AUTH_NO_TABLE_PERMISSION,
@@ -134,14 +136,23 @@ public class StatementTablePermission extends StatementPermission
 		return td;
 	} // end of getTableDescriptor
 
-	/*
+	/**
 	 * Check if current session has permission on the table (current user,
-	 * PUBLIC or role).
+	 * PUBLIC or role) and, if applicable, register a dependency of ps on the
+	 * current role.
+	 *
+	 * @param lcc the current language connection context
+	 * @param activation the activation of ps
+	 * @param authorizationId the id of the current user
+	 * @param forGrant true if FOR GRANT is required
+	 * @param ps the prepared statement for which we are checking necessary
+	 *        privileges
 	 */
 	protected boolean hasPermissionOnTable(LanguageConnectionContext lcc,
 										   Activation activation,
 										   String authorizationId,
-										   boolean forGrant)
+										   boolean forGrant,
+										   ExecPreparedStatement ps)
 		throws StandardException
 	{
 		DataDictionary dd = lcc.getDataDictionary();
@@ -199,6 +210,21 @@ public class StatementTablePermission extends StatementPermission
 					while (!result && (r = rci.next()) != null) {
 						result = oneAuthHasPermissionOnTable
 							(dd, r, forGrant);
+					}
+
+					if (result) {
+						// Also add a dependency on the role (qua provider),
+						// so that if role is no longer available to the
+						// current user (e.g. grant is revoked, role is
+						// dropped, another role has been set), we are able to
+						// invalidate the the ps.
+						//
+						// FIXME: Rather invalidate Activation so other
+						// sessions sharing the same ps are not impacted!!
+						dd.getDependencyManager().
+							addDependency(ps,
+										  dd.getRoleDefinitionDescriptor(role),
+										  lcc.getContextManager());
 					}
 				}
 			}

@@ -702,8 +702,15 @@ public class TriggerDescriptor extends TupleDescriptor
 			// When REVOKE_PRIVILEGE gets sent (this happens for privilege 
 			// types SELECT, UPDATE, DELETE, INSERT, REFERENCES, TRIGGER), we  
 			// make the TriggerDescriptor drop itself. 
+			// Ditto for revoking a role conferring a privilege.
 			case DependencyManager.REVOKE_PRIVILEGE:
+			case DependencyManager.REVOKE_ROLE:
                 drop(lcc);
+
+				lcc.getLastActivation().addWarning(
+					StandardException.newWarning(
+						SQLState.LANG_TRIGGER_DROPPED,
+						this.getObjectName() ));
 				break;
 
 			default:
@@ -717,7 +724,6 @@ public class TriggerDescriptor extends TupleDescriptor
         DataDictionary dd = getDataDictionary();
         DependencyManager dm = getDataDictionary().getDependencyManager();
         TransactionController tc = lcc.getTransactionExecute();
-
         dm.invalidateFor(this, DependencyManager.DROP_TRIGGER, lcc);
 
         // Drop the trigger

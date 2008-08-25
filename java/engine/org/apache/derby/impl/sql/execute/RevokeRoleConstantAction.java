@@ -21,16 +21,16 @@
 
 package org.apache.derby.impl.sql.execute;
 
-import org.apache.derby.iapi.sql.execute.ConstantAction;
-
 import java.util.Iterator;
 import java.util.List;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
+import org.apache.derby.iapi.sql.depend.DependencyManager;
 import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.dictionary.RoleGrantDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
+import org.apache.derby.iapi.sql.dictionary.RoleClosureIterator;
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.iapi.services.sanity.SanityManager;
@@ -63,11 +63,9 @@ class RevokeRoleConstantAction extends DDLConstantAction {
     // INTERFACE METHODS
 
     /**
-     *  This is the guts of the Execution-time logic for REVOKE role.
+     * This is the guts of the Execution-time logic for REVOKE role.
      *
-     *  @see ConstantAction#executeConstantAction
-     *
-     * @exception StandardException     Thrown on failure
+     * @see org.apache.derby.iapi.sql.execute.ConstantAction#executeConstantAction
      */
     public void executeConstantAction(Activation activation)
             throws StandardException {
@@ -146,15 +144,33 @@ class RevokeRoleConstantAction extends DDLConstantAction {
                             SanityManager.NOTREACHED();
                         }
 
-                        // do some invalidation
-
-                        rd.drop(lcc);
-                        rd.setWithAdminOption(false);
-                        dd.addDescriptor(rd,
-                                         null,  // parent
-                                         DataDictionary.SYSROLES_CATALOG_NUM,
-                                         false, // no duplicatesAllowed
-                                         tc);
+                        // Do invalidation.
+                        //
+                        // RoleClosureIterator rci =
+                        //     dd.createRoleClosureIterator
+                        //     (activation.getTransactionController(),
+                        //      role, false);
+                        //
+                        // String r;
+                        // while ((r = rci.next()) != null) {
+                        //   rdDef = dd.getRoleDefinitionDescriptor(r);
+                        //
+                        //   dd.getDependencyManager().invalidateFor
+                        //       (rdDef, DependencyManager.REVOKE_ROLE, lcc);
+                        //
+                        //   dd.getDependencyManager().invalidateFor
+                        //       (rdDef,
+                        //        DependencyManager.INTERNAL_RECOMPILE_REQUEST,
+                        //        lcc);
+                        // }
+                        //
+                        // rd.drop(lcc);
+                        // rd.setWithAdminOption(false);
+                        // dd.addDescriptor(rd,
+                        //                  null,  // parent
+                        //                  DataDictionary.SYSROLES_CATALOG_NUM,
+                        //                  false, // no duplicatesAllowed
+                        //                  tc);
                     } else {
                         activation.addWarning
                             (StandardException.newWarning
@@ -162,9 +178,37 @@ class RevokeRoleConstantAction extends DDLConstantAction {
                               role, grantee));
                     }
                 } else if (rd != null) {
-                    // normal revoke of role from grantee
+                    // Normal revoke of role from grantee.
                     //
+                    // When a role is revoked, for every role in its grantee
+                    // closure, we call two invalidate actions.  REVOKE_ROLE
+                    // and INTERNAL_RECOMPILE_REQUEST.  The latter is used to
+                    // force recompilation of dependent prepared statements,
+                    // the former to drop dependent objects (constraints,
+                    // triggers and views).  Note that until DERBY-1632 is
+                    // fixed, we risk dropping objects not really dependent on
+                    // this role, but one some other role just because it
+                    // inherits from this one.
+                    RoleClosureIterator rci =
+                        dd.createRoleClosureIterator
+                        (activation.getTransactionController(),
+                         role, false);
+
+                    String r;
+                    while ((r = rci.next()) != null) {
+                        rdDef = dd.getRoleDefinitionDescriptor(r);
+
+                        dd.getDependencyManager().invalidateFor
+                            (rdDef, DependencyManager.REVOKE_ROLE, lcc);
+
+                        dd.getDependencyManager().invalidateFor
+                            (rdDef,
+                             DependencyManager.INTERNAL_RECOMPILE_REQUEST,
+                             lcc);
+                    }
+
                     rd.drop(lcc);
+
                 } else {
                     activation.addWarning
                         (StandardException.newWarning

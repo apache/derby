@@ -274,6 +274,12 @@ public final class ViewDescriptor extends TupleDescriptor
 			//the ViewDescriptor drop itself. 
 		    case DependencyManager.REVOKE_PRIVILEGE:
 
+			// When a role grant is revoked, any a view dependent on priviliges
+			// obtained through that role grant will dropped. We don't do
+			// anything here. Later in makeInvalid method, we make the
+			// ViewDescriptor drop itself.
+			case DependencyManager.REVOKE_ROLE:
+
 				// When REVOKE_PRIVILEGE gets sent to a
 				// TablePermsDescriptor we must also send
 				// INTERNAL_RECOMPILE_REQUEST to its Dependents which
@@ -352,6 +358,7 @@ public final class ViewDescriptor extends TupleDescriptor
 			//make the ViewDescriptor drop itself. 
 		    case DependencyManager.REVOKE_PRIVILEGE:
 		    case DependencyManager.DROP_COLUMN:
+		    case DependencyManager.REVOKE_ROLE:
 				drop(lcc, 
 						getDataDictionary().getTableDescriptor(uuid).getSchemaDescriptor(),
 						getDataDictionary().getTableDescriptor(uuid));

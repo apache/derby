@@ -28,6 +28,7 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.Activation;
+import org.apache.derby.iapi.sql.execute.ExecPreparedStatement;
 
 /**
  * This class describes a column permission used (required) by a statement.
@@ -92,9 +93,10 @@ public class StatementColumnPermission extends StatementTablePermission
 		throws StandardException
 	{
 		DataDictionary dd = lcc.getDataDictionary();
+		ExecPreparedStatement ps = activation.getPreparedStatement();
 
 		if (hasPermissionOnTable(lcc, activation,
-									 authorizationId, forGrant)) {
+									 authorizationId, forGrant, ps)) {
 			return;
 		}
 
@@ -121,11 +123,11 @@ public class StatementColumnPermission extends StatementTablePermission
 
 		FormatableBitSet unresolvedColumns = (FormatableBitSet)columns.clone();
 
-		for( int i = unresolvedColumns.anySetBit();
+		for (int i = unresolvedColumns.anySetBit();
 			 i >= 0;
 			 i = unresolvedColumns.anySetBit(i)) {
 
-			if( permittedColumns != null && permittedColumns.get(i)) {
+			if (permittedColumns != null && permittedColumns.get(i)) {
 				// column i (zero-based here) accounted for:
 				unresolvedColumns.clear(i);
 			}
@@ -205,7 +207,24 @@ public class StatementColumnPermission extends StatementTablePermission
 					td.getSchemaName(),
 					td.getName());
 			}
+		} else {
+			// We found and successfully applied a role to resolve the
+			// remaining required permissions.
+			//
+			// So add a dependency on the role (qua provider), so that
+			// if role is no longer available to the current user
+			// (e.g. grant to user is revoked, role is dropped,
+			// another role has been set), or it is impacted by
+			// revoked permissions or other roles granted to it, we
+			// are able to invalidate the the ps.
+			//
+			// FIXME: Rather invalidate Activation so other
+			// sessions sharing the same ps are not impacted!!
+			dd.getDependencyManager().
+				addDependency(ps, dd.getRoleDefinitionDescriptor(role),
+							  lcc.getContextManager());
 		}
+
 	} // end of check
 
 	/**
@@ -295,6 +314,65 @@ public class StatementColumnPermission extends StatementTablePermission
 		else
 			return (dd.getColumnPermissions(tableUUID, privType, false, Authorizer.PUBLIC_AUTHORIZATION_ID));	
 	}
+
+	/**
+	 * Returns false if the current role is necessary to cover
+	 * the necessary permission(s).
+	 * @param authid authentication id of the current user
+	 * @param dd data dictionary
+	 *
+	 * @return false if the current role is required
+	 */
+	public boolean allColumnsCoveredByUserOrPUBLIC(String authid,
+												   DataDictionary dd)
+			throws StandardException {
+
+		ColPermsDescriptor colsPermsDesc =
+			dd.getColumnPermissions(tableUUID, privType, false, authid);
+		FormatableBitSet permittedColumns = colsPermsDesc.getColumns();
+		FormatableBitSet unresolvedColumns = (FormatableBitSet)columns.clone();
+		boolean result = true;
+
+		if (permittedColumns != null) { // else none at user level
+			for(int i = unresolvedColumns.anySetBit();
+				i >= 0;
+				i = unresolvedColumns.anySetBit(i)) {
+
+				if(permittedColumns.get(i)) {
+					unresolvedColumns.clear(i);
+				}
+			}
+		}
+
+
+		if (unresolvedColumns.anySetBit() >= 0) {
+			colsPermsDesc =
+				dd.getColumnPermissions(
+					tableUUID, privType, false,
+					Authorizer.PUBLIC_AUTHORIZATION_ID);
+			permittedColumns = colsPermsDesc.getColumns();
+
+			if (permittedColumns != null) { // else none at public level
+				for(int i = unresolvedColumns.anySetBit();
+					i >= 0;
+					i = unresolvedColumns.anySetBit(i)) {
+
+					if(permittedColumns.get(i)) {
+						unresolvedColumns.clear(i);
+					}
+				}
+			}
+
+			if (unresolvedColumns.anySetBit() >= 0) {
+				// even after trying all grants to user and public there
+				// are unresolved columns so role must have been used.
+				result = false;
+			}
+		}
+
+		return result;
+	}
+
 
 	/**
 	 * Given the set of yet unresolved column permissions, try to use
