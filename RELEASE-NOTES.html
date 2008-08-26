@@ -73,6 +73,9 @@ This is a maintenance release. No new features were added.
 <td><b>Issue Id</b></td><td><b>Description</b></td>
 </tr>
 <tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3836">DERBY-3836</a></td><td>On 10.4 branch JMX tests fail with security exceptions when run against classes</td>
+</tr>
+<tr>
 <td><a href="http://issues.apache.org/jira/browse/DERBY-3827">DERBY-3827</a></td><td>Add Apache 2.0 license headers to a number of files</td>
 </tr>
 <tr>
@@ -133,6 +136,9 @@ This is a maintenance release. No new features were added.
 <td><a href="http://issues.apache.org/jira/browse/DERBY-3763">DERBY-3763</a></td><td>Rename BaseJDBCTestCase.usingDerbyNet</td>
 </tr>
 <tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3745">DERBY-3745</a></td><td>Derby can leak classloaders in an app server environment</td>
+</tr>
+<tr>
 <td><a href="http://issues.apache.org/jira/browse/DERBY-3741">DERBY-3741</a></td><td>SQL LENGTH function materializes CLOB into memory</td>
 </tr>
 <tr>
@@ -176,6 +182,9 @@ This is a maintenance release. No new features were added.
 </tr>
 <tr>
 <td><a href="http://issues.apache.org/jira/browse/DERBY-3695">DERBY-3695</a></td><td>NullPointerException when invoking statement event listeners if one of the listeners is null</td>
+</tr>
+<tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3693">DERBY-3693</a></td><td>Deadlocks accessing DB metadata</td>
 </tr>
 <tr>
 <td><a href="http://issues.apache.org/jira/browse/DERBY-3692">DERBY-3692</a></td><td>'javax.transaction.xa.XAException' ++  in  'J2EEDataSourceTest'</td>
@@ -283,8 +292,8 @@ This is a maintenance release. No new features were added.
 <li>
 <a href="#Note for DERBY-3701">
 <p>Note for DERBY-3701: 
-  Error message will be logged to derby.log if Network Server tracing file cannot be created.
-  Starting with version 10.5, Network Server will attempt to create the trace directory if it does not exist. Any intervening directories in the given path will also be created if possible.
+  An error message will be logged to derby.log if the Network Server tracing file cannot be created.
+  Starting with version 10.5, the Network Server will attempt to create the trace directory if it does not exist. Any intervening directories in the given path will also be created if possible.
 
 </p>
 </a>
@@ -317,8 +326,8 @@ created in that schema.
 <h4>Summary of Change</h4>
 
 <p>
-  Error message will be logged to derby.log if Network Server tracing file cannot be created.
-  Starting with version 10.5, Network Server will attempt to create the trace directory if it does not exist. Any intervening directories in the given path will also be created if possible.
+  An error message will be logged to derby.log if the Network Server tracing file cannot be created.
+  Starting with version 10.5, the Network Server will attempt to create the trace directory if it does not exist. Any intervening directories in the given path will also be created if possible.
 
 </p>
 
@@ -339,7 +348,18 @@ created in that schema.
 <h4>Symptoms Seen by Applications Affected by Change</h4>
 
 <p>
-Before the fix for DERBY-3110, if derby.drda.traceAll was set to true and the derby.drda.traceDirectory was set to a non-existent directory, no tracing would occur and no error would occur. After the fix for DERBY-3110, an error "java.lang.Exception: DRDA_UnableToAccept.S:Unable to accept connections" would occur and the client would hang and no tracing would occur.  With this fix for version 10.5 and higher, Network Server will attempt to create the trace directory if possible. For 10.3 and 10.4 it will still not try to create the directory. For all releases it will print an error on session connect if there is any problem creating the trace file, but it will not cause the session connection to fail.  Users that have trace turned on and the trace directory set to a non-existent directory may now see exceptions in the derby.log on connect indicating that the trace file is not found <b> or </b> with 10.5 or higher they may see tracing occur where it did not before.
+Before the fix for DERBY-3110, if derby.drda.traceAll was set to true
+and the derby.drda.traceDirectory was set to a non-existent directory,
+no tracing would occur and no error would occur. After the fix for
+DERBY-3110, an error "java.lang.Exception:
+DRDA_UnableToAccept.S:Unable to accept connections" would occur and
+the client would hang and no tracing would occur.  With this fix for
+version 10.5 and higher, the Network Server will attempt to create the
+trace directory if possible. For 10.4.2 (and the next release on the
+10.3 branch), the Network Server will still not try to create the directory. For all
+these releases the Network Server will print an error on session
+connect if there is any problem creating the trace file, but the
+Network Server will not cause the session connection to fail.  Users who have trace turned on and the trace directory set to a non-existent directory may now see exceptions in the derby.log on connect indicating that the trace file is not found <b> or </b> with 10.5 or higher they may see tracing occur where it did not before.
 
 </p>
 
