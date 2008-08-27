@@ -1275,7 +1275,7 @@ public class BTreeController extends OpenBTree implements ConglomerateController
 		return(true);
 	}
 
-    /*
+    /**
      * Request the system properties associated with a table. 
      * <p>
      * Request the value of properties that are associated with a table.  The
