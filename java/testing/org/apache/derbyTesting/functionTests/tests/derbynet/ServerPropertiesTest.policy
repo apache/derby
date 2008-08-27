@@ -215,6 +215,11 @@ grant codeBase "${derbyTesting.codeclasses}" {
   // streams. Currently the nist suite runs with useprocess=false.
   permission java.lang.RuntimePermission "setSecurityManager";
   permission java.lang.RuntimePermission "setIO"; 
+
+  // This permission is needed to avoid test failures in subsequent tests that
+  // may be testing JMX functionality. Without this permission, old MBeans
+  // might not be unregistered from the MBean server. See DERBY-3561.
+  permission javax.management.MBeanPermission "org.apache.derby.*#[org.apache.derby:*]","unregisterMBean";
 };
 
 // JUnit jar file tries to read junit.properties in the user's
