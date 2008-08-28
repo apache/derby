@@ -234,7 +234,6 @@ public final class UTF8Reader extends Reader
                 if (fillBuffer()) {
                     return -1;
                 }
-                readPositionInBuffer = 0;
             }
 
             return buffer[readPositionInBuffer++];
@@ -258,7 +257,6 @@ public final class UTF8Reader extends Reader
                 if (fillBuffer()) {
                     return -1;
                 }
-                readPositionInBuffer = 0;
             }
 
             int remainingInBuffer = charactersInBuffer - readPositionInBuffer;
@@ -297,7 +295,6 @@ public final class UTF8Reader extends Reader
                 if (fillBuffer()) {
                     return 0L;
                 }
-                readPositionInBuffer = 0;
             }
 
             int remainingInBuffer = charactersInBuffer - readPositionInBuffer;
@@ -348,7 +345,6 @@ public final class UTF8Reader extends Reader
                 if (fillBuffer()) {
                     return -1;
                 }
-                readPositionInBuffer = 0;
             }
 
             int remainingInBuffer = charactersInBuffer - readPositionInBuffer;
@@ -387,7 +383,6 @@ public final class UTF8Reader extends Reader
                 if (fillBuffer()) {
                     return -1;
                 }
-                readPositionInBuffer = 0;
             }
 
             int remainingInBuffer = charactersInBuffer - readPositionInBuffer;
@@ -456,6 +451,7 @@ public final class UTF8Reader extends Reader
             return true;
 
         charactersInBuffer = 0;
+        readPositionInBuffer = 0;
 
         try {
         try {
