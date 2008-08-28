@@ -87,7 +87,7 @@ interface InternalClob {
      *
      * @param characterPosition character position. The first character is at
      *      position <code>1</code>.
-     * @return A <code>Reader</coder> serving the content of the Clob.
+     * @return A {@code Reader} serving the content of the Clob.
      * @throws EOFException if the position is larger then the Clob
      * @throws IOException if accessing underlying I/O resources fail
      * @throws SQLException if accessing underlying resources fail
