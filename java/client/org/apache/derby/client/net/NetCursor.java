@@ -1083,7 +1083,7 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
             throws SqlException {
         // Only inform the tracker if the Blob is published to the user.
         if (toBePublished) {
-            netResultSet_.markLOBAsAccessed(column);
+            netResultSet_.markLOBAsPublished(column);
         }
         // Check for locator
         int locator = locator(column);
@@ -1125,7 +1125,7 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
             throws SqlException {
         // Only inform the tracker if the Clob is published to the user.
         if (toBePublished) {
-            netResultSet_.markLOBAsAccessed(column);
+            netResultSet_.markLOBAsPublished(column);
         }
         // Check for locator
         int locator = locator(column);

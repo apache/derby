@@ -6201,16 +6201,17 @@ public abstract class ResultSet implements java.sql.ResultSet,
     }
 
     /**
-     * Marks the LOB at the specified column as accessed.
+     * Marks the LOB at the specified column as published.
      * <p>
-     * When a LOB is marked as accessed, the release mechanism will not be
+     * When a LOB is marked as published, the release mechanism will not be
      * invoked by the result set. It is expected that the code accessing the
-     * LOB releases the locator when it is done with the LOB.
+     * LOB releases the locator when it is done with the LOB, or that the
+     * commit/rollback handles the release.
      *
      * @param index 1-based column index
      */
-    public final void markLOBAsAccessed(int index) {
-        this.lobState.markAccessed(index);
+    public final void markLOBAsPublished(int index) {
+        this.lobState.markAsPublished(index);
     }
 
     /**
