@@ -1123,17 +1123,19 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
                     assertPsWorks(true, ps);
 
                     /*
-                     * Setting another role should invalidate the ps
+                     * Setting another role should make the ps fail, since we
+                     * no longer have the privilege.
                      */
                     setRole(c, "none");
                     assertPsWorks(false, ps);
+                    // set it back:
+                    setRole(c, "h");
+                    assertPsWorks(true, ps);
 
                     /*
                      * Remove privileges from role, and the execute should
                      * fail.
                      */
-                    setRole(c, "h");
-                    assertPsWorks(true, ps);
                     doGrantRevoke(REVOKE, "test_dbo", privilegeStmts[i][0],
                                   grantToThisRole[r]);
 
@@ -1142,7 +1144,8 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
                                   grantToThisRole[r]);
 
                     /*
-                     * Revoking the role should also invalidate the ps
+                     * Revoking the role should also make the ps fail, since we
+                     * no longer have the privilege.
                      */
                     setRole(c, "h");
                     assertPsWorks(true, ps);
@@ -1191,7 +1194,7 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
         }
 
         /*
-         * Dropping a role should also invalidate a dependent ps.
+         * Dropping a role should also cause a dependent ps fail.
          *
          * (We do this test outside the loop above for simplicity of
          * reestablish role graph after the drop..)
@@ -1219,6 +1222,140 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
         cStmt.close();
         c.close();
         s.close();
+        dboConn.close();
+    }
+
+
+    /**
+     * Test behavior for when there are open result sets on prepared statements
+     * that require privileges obtained via the current role and something
+     * changes in the middle of accessing the result set. We should be able to
+     * finish using the result set.
+     */
+    public void testOpenRs() throws SQLException {
+        Connection dboConn = getConnection();
+        Statement s = dboConn.createStatement();
+
+        Connection c = openUserConnection("DonaldDuck");
+        Statement cStmt = c.createStatement();
+        ResultSet rs = null;
+        String select = "select * from s1.t1";
+
+        PreparedStatement ps = dboConn.prepareStatement(
+            "insert into s1.t1 values (?,?,?)");
+        for (int i=0; i < 5; i++) {
+            ps.setInt(1, i);
+            ps.setInt(2, i);
+            ps.setInt(3, i);
+            ps.execute();
+        }
+
+
+        /*
+         * Select privilege revoked
+         */
+        // Auto-commit on
+        doGrantRevoke(GRANT, "test_dbo", g_s, "h");
+        s.execute("grant h to DonaldDuck");
+        setRole(c, "h");
+        rs = cStmt.executeQuery(select);
+
+        rs.next();
+        // Now remove privilege in middle of rs reading
+        doGrantRevoke(REVOKE, "test_dbo", g_s, "h");
+
+        // check that we can read the next row
+        rs.next();
+        rs.close();
+
+        // Auto-commit off
+        c.setAutoCommit(false);
+        doGrantRevoke(GRANT, "test_dbo", g_s, "h");
+        setRole(c, "h");
+        rs = cStmt.executeQuery(select);
+
+        rs.next();
+        c.commit();
+        // Now remove privilege in middle of rs reading
+        doGrantRevoke(REVOKE, "test_dbo", g_s, "h");
+
+        // check that we can read the next row
+        rs.next();
+        rs.close();
+        c.setAutoCommit(true);
+
+        /*
+         * Role privilege revoked
+         */
+        // Auto-commit on
+        doGrantRevoke(GRANT, "test_dbo", g_s, "h");
+        s.execute("grant h to DonaldDuck");
+        setRole(c, "h");
+        rs = cStmt.executeQuery(select);
+
+        rs.next();
+        // Now remove privilege in middle of rs reading
+        s.execute("revoke h from DonaldDuck");
+
+        // check that we can read the next row
+        rs.next();
+        rs.close();
+
+        // Auto-commit off
+        c.setAutoCommit(false);
+        s.execute("grant h to DonaldDuck");
+        setRole(c, "h");
+        rs = cStmt.executeQuery(select);
+
+        rs.next();
+        c.commit();
+        // Now remove privilege in middle of rs reading
+        s.execute("revoke h from DonaldDuck");
+
+        // check that we can read the next row
+        rs.next();
+        rs.close();
+        c.setAutoCommit(true);
+        doGrantRevoke(REVOKE, "test_dbo", g_s, "h");
+
+
+        /*
+         * Current role changed
+         */
+        // Auto-commit on
+        doGrantRevoke(GRANT, "test_dbo", g_s, "h");
+        s.execute("grant h to DonaldDuck");
+        setRole(c, "h");
+        c.setAutoCommit(true);
+        rs = cStmt.executeQuery(select);
+
+        rs.next();
+        // Now change role in middle of rs reading
+        setRole(c, "none");
+
+        // check that we can read the next row
+        rs.next();
+        rs.close();
+
+        // Auto-commit off
+        c.setAutoCommit(false);
+        setRole(c, "h");
+        rs = cStmt.executeQuery(select);
+
+        rs.next();
+        // Now remove privilege in middle of rs reading
+        c.commit();
+        setRole(c, "none");
+
+        // check that we can read the next row
+        rs.next();
+        rs.close();
+        c.setAutoCommit(true);
+        doGrantRevoke(REVOKE, "test_dbo", g_s, "h");
+
+        // clean up
+        s.executeUpdate("delete from s1.t1");
+        c.close();
         dboConn.close();
     }
 
@@ -1274,14 +1411,14 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
             (hasPrivilege, c, schema, table, columns);
         assertSelectPrivilege
             (hasPrivilege, c, schema, table, null);
-        assertDeletePrivilege
-            (hasPrivilege, c, schema, table);
         assertInsertPrivilege
             (hasPrivilege, c, schema, table, null);
         assertUpdatePrivilege
             (hasPrivilege, c, schema, table, columns);
         assertUpdatePrivilege
             (hasPrivilege, c, schema, table, null);
+        assertDeletePrivilege
+            (hasPrivilege, c, schema, table);
         assertReferencesPrivilege
             (hasPrivilege, c, schema, table, columns);
         assertReferencesPrivilege
@@ -1906,13 +2043,7 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
             ResultSet rs = ps.getResultSet();
             if (rs != null) {
                 rs.next();
-                // NOTE: If we don't close the rs, invalidation of the prepared
-                // statement via set role will fail, due to
-                // verifyNoOpenResultSets called fromprepareToInvalidate. Hence
-                // setRole will fail. BUG or not? I think this behavior is
-                // OK.. OR, we could force close the rs.. Actually when we move
-                // to invalidate Activation instead it would not matter....
-                //        rs.close();
+                rs.close();
             }
             ps.getConnection().rollback();
             ps.getConnection().setAutoCommit(true);

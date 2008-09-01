@@ -280,6 +280,10 @@ public final class ViewDescriptor extends TupleDescriptor
 			// ViewDescriptor drop itself.
 			case DependencyManager.REVOKE_ROLE:
 
+			// Only used by Activations
+		    case DependencyManager.RECHECK_PRIVILEGES:
+
+				break;
 				// When REVOKE_PRIVILEGE gets sent to a
 				// TablePermsDescriptor we must also send
 				// INTERNAL_RECOMPILE_REQUEST to its Dependents which
@@ -344,6 +348,9 @@ public final class ViewDescriptor extends TupleDescriptor
 			case DependencyManager.DROP_STATISTICS:
 			case DependencyManager.TRUNCATE_TABLE:
 
+				// Only used by Activations
+			case DependencyManager.RECHECK_PRIVILEGES:
+
 				// When REVOKE_PRIVILEGE gets sent to a
 				// TablePermsDescriptor we must also send
 				// INTERNAL_RECOMPILE_REQUEST to its Dependents which
@@ -353,12 +360,13 @@ public final class ViewDescriptor extends TupleDescriptor
 		    case DependencyManager.INTERNAL_RECOMPILE_REQUEST:
 				break;
 
-			//When REVOKE_PRIVILEGE gets sent (this happens for privilege 
-			//types SELECT, UPDATE, DELETE, INSERT, REFERENCES, TRIGGER), we  
-			//make the ViewDescriptor drop itself. 
+				// When REVOKE_PRIVILEGE gets sent (this happens for privilege
+				// types SELECT, UPDATE, DELETE, INSERT, REFERENCES, TRIGGER),
+				// we make the ViewDescriptor drop itself. REVOKE_ROLE also
+				// drops the dependent view.
 		    case DependencyManager.REVOKE_PRIVILEGE:
 		    case DependencyManager.DROP_COLUMN:
-		    case DependencyManager.REVOKE_ROLE:
+			case DependencyManager.REVOKE_ROLE:
 				drop(lcc, 
 						getDataDictionary().getTableDescriptor(uuid).getSchemaDescriptor(),
 						getDataDictionary().getTableDescriptor(uuid));

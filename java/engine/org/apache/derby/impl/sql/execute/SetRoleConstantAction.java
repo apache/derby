@@ -128,7 +128,7 @@ class SetRoleConstantAction implements ConstantAction
                 if (rdDef != null) {
                     dd.getDependencyManager().invalidateFor(
                         rdDef,
-                        DependencyManager.INTERNAL_RECOMPILE_REQUEST,
+                        DependencyManager.RECHECK_PRIVILEGES,
                         lcc);
                 } // else: old role else no longer exists, so ignore.
             }

@@ -560,6 +560,8 @@ public abstract class ConstraintDescriptor
 		    case DependencyManager.REVOKE_PRIVILEGE:
 		    case DependencyManager.REVOKE_ROLE:
 		    case DependencyManager.INTERNAL_RECOMPILE_REQUEST:
+				// Only used by Activations
+		    case DependencyManager.RECHECK_PRIVILEGES:
 				break;
 
 			/*
@@ -646,7 +648,8 @@ public abstract class ConstraintDescriptor
 			(action != DependencyManager.SET_CONSTRAINTS_ENABLE) &&
 			(action != DependencyManager.SET_TRIGGERS_ENABLE) &&
 			(action != DependencyManager.SET_TRIGGERS_DISABLE) &&
-			(action != DependencyManager.INTERNAL_RECOMPILE_REQUEST)
+			(action != DependencyManager.INTERNAL_RECOMPILE_REQUEST) &&
+			(action != DependencyManager.RECHECK_PRIVILEGES)
 		   )
 		{
 			/* 

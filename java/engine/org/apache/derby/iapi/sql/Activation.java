@@ -25,6 +25,7 @@ import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.conn.SQLSessionContext;
+import org.apache.derby.iapi.sql.depend.Dependent;
 
 import org.apache.derby.iapi.sql.dictionary.IndexRowGenerator;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
@@ -71,7 +72,7 @@ import java.util.Hashtable;
  *
  */
 
-public interface Activation
+public interface Activation extends Dependent
 {
 	/**
 	 * Resets the activation to the "pre-execution" state -

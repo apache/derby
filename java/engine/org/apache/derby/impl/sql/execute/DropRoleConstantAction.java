@@ -76,7 +76,8 @@ class DropRoleConstantAction extends DDLConstantAction
     /**
      * This is the guts of the Execution-time logic for DROP ROLE.
      *
-     * @see org.apache.derby.iapi.sql.execute.ConstantAction#executeConstantAction
+     * @see org.apache.derby.iapi.sql.
+     *      execute.ConstantAction#executeConstantAction
      */
     public void executeConstantAction( Activation activation )
         throws StandardException
@@ -105,13 +106,11 @@ class DropRoleConstantAction extends DDLConstantAction
         }
 
         // When a role is dropped, for every role in its grantee closure, we
-        // call two invalidate actions.  REVOKE_ROLE and
-        // INTERNAL_RECOMPILE_REQUEST.  The latter is used to force
-        // recompilation of dependent prepared statements, the former to drop
-        // dependent objects (constraints, triggers and views).  Note that
-        // until DERBY-1632 is fixed, we risk dropping objects not really
-        // dependent on this role, but one some other role just because it
-        // inherits from this one. See also RevokeRoleConstantAction.
+        // call the REVOKE_ROLE action. It is used to invalidate dependent
+        // objects (constraints, triggers and views).  Note that until
+        // DERBY-1632 is fixed, we risk dropping objects not really dependent
+        // on this role, but one some other role just because it inherits from
+        // this one. See also RevokeRoleConstantAction.
         RoleClosureIterator rci =
             dd.createRoleClosureIterator
             (activation.getTransactionController(),
@@ -123,9 +122,6 @@ class DropRoleConstantAction extends DDLConstantAction
 
             dd.getDependencyManager().invalidateFor
                 (r, DependencyManager.REVOKE_ROLE, lcc);
-
-            dd.getDependencyManager().invalidateFor
-                (r, DependencyManager.INTERNAL_RECOMPILE_REQUEST, lcc);
         }
 
         rdDef.drop(lcc);

@@ -29,6 +29,8 @@ import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.execute.ExecPreparedStatement;
+import org.apache.derby.iapi.sql.depend.DependencyManager;
+import org.apache.derby.iapi.services.context.ContextManager;
 
 /**
  * This class describes a column permission used (required) by a statement.
@@ -209,20 +211,21 @@ public class StatementColumnPermission extends StatementTablePermission
 			}
 		} else {
 			// We found and successfully applied a role to resolve the
-			// remaining required permissions.
+			// (remaining) required permissions.
 			//
-			// So add a dependency on the role (qua provider), so that
-			// if role is no longer available to the current user
-			// (e.g. grant to user is revoked, role is dropped,
-			// another role has been set), or it is impacted by
-			// revoked permissions or other roles granted to it, we
-			// are able to invalidate the the ps.
-			//
-			// FIXME: Rather invalidate Activation so other
-			// sessions sharing the same ps are not impacted!!
-			dd.getDependencyManager().
-				addDependency(ps, dd.getRoleDefinitionDescriptor(role),
-							  lcc.getContextManager());
+			// Also add a dependency on the role (qua provider), so
+			// that if role is no longer available to the current
+			// user (e.g. grant is revoked, role is dropped,
+			// another role has been set), we are able to
+			// invalidate the ps or activation (the latter is used
+			// if the current role changes).
+			DependencyManager dm = dd.getDependencyManager();
+			RoleGrantDescriptor rgd =
+				dd.getRoleDefinitionDescriptor(role);
+			ContextManager cm = lcc.getContextManager();
+
+			dm.addDependency(ps, rgd, cm);
+			dm.addDependency(activation, rgd, cm);
 		}
 
 	} // end of check

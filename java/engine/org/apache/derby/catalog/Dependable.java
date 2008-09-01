@@ -51,6 +51,7 @@ public interface Dependable
 	public static final String HEAP							= "Heap";
 	public static final String INDEX						= "Index";
 	public static final String PREPARED_STATEMENT 			= "PreparedStatement";
+	public static final String ACTIVATION                   = "Activation";
 	public static final String FILE                         = "File";
 	public static final String STORED_PREPARED_STATEMENT	= "StoredPreparedStatement";
 	public static final String TABLE						= "Table";

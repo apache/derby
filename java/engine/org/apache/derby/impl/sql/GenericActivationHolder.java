@@ -21,6 +21,10 @@
 
 package org.apache.derby.impl.sql;
 
+import	org.apache.derby.catalog.Dependable;
+import	org.apache.derby.catalog.DependableFinder;
+import org.apache.derby.catalog.UUID;
+
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.conn.SQLSessionContext;
 
@@ -33,6 +37,9 @@ import org.apache.derby.iapi.sql.execute.NoPutResultSet;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
 
 import org.apache.derby.impl.sql.execute.BaseActivation;
+
+import org.apache.derby.iapi.sql.depend.DependencyManager;
+import org.apache.derby.iapi.sql.depend.Provider;
 
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.sql.ParameterValueSet;
@@ -97,7 +104,6 @@ final class GenericActivationHolder implements Activation
 	GeneratedClass			gc;
 	DataTypeDescriptor[]	paramTypes;
 	private final LanguageConnectionContext lcc;
-
 	/**
 	 * Constructor for an ActivationHolder
 	 *
@@ -252,30 +258,39 @@ final class GenericActivationHolder implements Activation
 		*/
 		// synchronized (ps)
 		{
-			/* Has the activation class changed? */
-			if (gc != ps.getActivationClass())
+			/* Has the activation class changed or has the activation been
+			 * invalidated? */
+			if (gc != ps.getActivationClass() || !ac.isValid())
 			{
 
                 GeneratedClass newGC;
 
-				// ensure the statement is valid by rePreparing it.
-                // DERBY-3260: If someone else reprepares the statement at the
-                // same time as we do, there's a window between the calls to
-                // rePrepare() and getActivationClass() when the activation
-                // class can be set to null, leading to NullPointerException
-                // being thrown later. Therefore, synchronize on ps to close
-                // the window.
-                synchronized (ps) {
-                    ps.rePrepare(getLanguageConnectionContext());
-                    newGC = ps.getActivationClass();
-                }
+				if (gc != ps.getActivationClass()) {
+					// ensure the statement is valid by rePreparing it.
+					// DERBY-3260: If someone else reprepares the statement at
+					// the same time as we do, there's a window between the
+					// calls to rePrepare() and getActivationClass() when the
+					// activation class can be set to null, leading to
+					// NullPointerException being thrown later. Therefore,
+					// synchronize on ps to close the window.
+					synchronized (ps) {
+						ps.rePrepare(getLanguageConnectionContext());
+						newGC = ps.getActivationClass();
+					}
+				} else {
+					// Reuse the generated class, we just want a new activation
+					// since the old is no longer valid.
+					newGC = gc;
+				}
+
 
 				/*
-				** If we get here, it means the PreparedStatement has been
-				** recompiled.  Get a new Activation and check whether the
-				** parameters are compatible.  If so, transfer the parameters
-				** from the old Activation to the new one, and make that the
-				** current Activation.  If not, throw an exception.
+				** If we get here, it means the Activation has been invalidated
+				** or the PreparedStatement has been recompiled.  Get a new
+				** Activation and check whether the parameters are compatible.
+				** If so, transfer the parameters from the old Activation to
+				** the new one, and make that the current Activation.  If not,
+				** throw an exception.
 				*/
 				BaseActivation		newAC = (BaseActivation) newGC.newInstance(lcc);
 
@@ -578,8 +593,127 @@ final class GenericActivationHolder implements Activation
 	}
 
 
-	/* Class implementation */
+	/* Dependable interface implementation */
 
+	/**
+	 * @see Dependable#getDependableFinder
+	 */
+	public DependableFinder getDependableFinder()
+	{
+		// Vacuous implementation to make class concrete, only needed for
+		// BaseActivation
+		if (SanityManager.DEBUG) {
+			SanityManager.NOTREACHED();
+		}
+
+		return null;
+	}
+
+
+	/**
+	 * @see Dependable#getObjectName
+	 */
+	public String getObjectName()
+	{
+		// Vacuous implementation to make class concrete, only needed for
+		// BaseActivation
+		if (SanityManager.DEBUG) {
+			SanityManager.NOTREACHED();
+		}
+
+		return null;
+	}
+
+
+
+	/**
+	 * @see Dependable#getObjectID
+	 */
+	public UUID getObjectID()
+	{
+		// Vacuous implementation to make class concrete, only needed for
+		// BaseActivation
+		if (SanityManager.DEBUG) {
+			SanityManager.NOTREACHED();
+		}
+
+		return null;
+	}
+
+
+	/**
+	 * @see Dependable#getClassType
+	 */
+	public String getClassType()
+	{
+		// Vacuous implementation to make class concrete, only needed for
+		// BaseActivation
+		if (SanityManager.DEBUG) {
+			SanityManager.NOTREACHED();
+		}
+
+		return null;
+	}
+
+
+	/**
+	 * @see Dependable#isPersistent
+	 */
+	public boolean isPersistent()
+	{
+		// Vacuous implementation to make class concrete, only needed for
+		// BaseActivation
+		if (SanityManager.DEBUG) {
+			SanityManager.NOTREACHED();
+		}
+
+		return false;
+	}
+
+
+	/* Dependent interface implementation */
+
+	/**
+	 * @see Dependent#isValid
+	 */
+	public boolean isValid() {
+		// Vacuous implementation to make class concrete, only needed for
+		// BaseActivation
+		if (SanityManager.DEBUG) {
+			SanityManager.NOTREACHED();
+		}
+
+		return false;
+	}
+
+	/**
+	 * @see Dependent#makeInvalid
+	 */
+	public void makeInvalid(int action,
+							LanguageConnectionContext lcc)
+			throws StandardException {
+		// Vacuous implementation to make class concrete, only needed for
+		// BaseActivation
+		if (SanityManager.DEBUG) {
+			SanityManager.NOTREACHED();
+		}
+	}
+
+	/**
+	 * @see Dependent#prepareToInvalidate
+	 */
+	public void prepareToInvalidate(Provider p, int action,
+							 LanguageConnectionContext lcc)
+			throws StandardException {
+		// Vacuous implementation to make class concrete, only needed for
+		// BaseActivation
+		if (SanityManager.DEBUG) {
+			SanityManager.NOTREACHED();
+		}
+	}
+
+
+	/* Class implementation */
 
 	/**
 	 * Mark the activation as unused.  

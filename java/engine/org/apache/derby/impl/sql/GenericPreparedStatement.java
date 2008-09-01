@@ -699,6 +699,8 @@ recompileOutOfDatePlan:
 		switch (action) {
 		case DependencyManager.CHANGED_CURSOR:
 		case DependencyManager.CREATE_INDEX:
+			// Used by activations only:
+		case DependencyManager.RECHECK_PRIVILEGES:
 			return;
 		}
 
@@ -722,7 +724,12 @@ recompileOutOfDatePlan:
 	{
 
 		boolean alreadyInvalid;
-		
+
+		switch (action) {
+		case DependencyManager.RECHECK_PRIVILEGES:
+			return;
+		}
+
 		synchronized (this) {
 
 			if (compilingStatement)

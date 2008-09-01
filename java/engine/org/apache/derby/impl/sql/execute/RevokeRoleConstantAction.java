@@ -65,7 +65,8 @@ class RevokeRoleConstantAction extends DDLConstantAction {
     /**
      * This is the guts of the Execution-time logic for REVOKE role.
      *
-     * @see org.apache.derby.iapi.sql.execute.ConstantAction#executeConstantAction
+     * @see org.apache.derby.iapi.sql.execute.
+     *      ConstantAction#executeConstantAction
      */
     public void executeConstantAction(Activation activation)
             throws StandardException {
@@ -134,17 +135,15 @@ class RevokeRoleConstantAction extends DDLConstantAction {
                     // NOTE: Never called yet, withAdminOption not yet
                     // implemented.
 
+                    if (SanityManager.DEBUG) {
+                        SanityManager.NOTREACHED();
+                    }
+
                     // revoke only the ADMIN OPTION from grantee
                     //
                     if (rd.isWithAdminOption()) {
-                        // Remove old descriptor and add a new one
-                        // without admin option.
-
-                        if (SanityManager.DEBUG) {
-                            SanityManager.NOTREACHED();
-                        }
-
-                        // Do invalidation.
+                        // Invalidate and remove old descriptor and add a new
+                        // one without admin option.
                         //
                         // RoleClosureIterator rci =
                         //     dd.createRoleClosureIterator
@@ -157,11 +156,6 @@ class RevokeRoleConstantAction extends DDLConstantAction {
                         //
                         //   dd.getDependencyManager().invalidateFor
                         //       (rdDef, DependencyManager.REVOKE_ROLE, lcc);
-                        //
-                        //   dd.getDependencyManager().invalidateFor
-                        //       (rdDef,
-                        //        DependencyManager.INTERNAL_RECOMPILE_REQUEST,
-                        //        lcc);
                         // }
                         //
                         // rd.drop(lcc);
@@ -181,14 +175,12 @@ class RevokeRoleConstantAction extends DDLConstantAction {
                     // Normal revoke of role from grantee.
                     //
                     // When a role is revoked, for every role in its grantee
-                    // closure, we call two invalidate actions.  REVOKE_ROLE
-                    // and INTERNAL_RECOMPILE_REQUEST.  The latter is used to
-                    // force recompilation of dependent prepared statements,
-                    // the former to drop dependent objects (constraints,
-                    // triggers and views).  Note that until DERBY-1632 is
-                    // fixed, we risk dropping objects not really dependent on
-                    // this role, but one some other role just because it
-                    // inherits from this one.
+                    // closure, we call the REVOKE_ROLE action. It is used to
+                    // invalidate dependent objects (constraints, triggers and
+                    // views).  Note that until DERBY-1632 is fixed, we risk
+                    // dropping objects not really dependent on this role, but
+                    // one some other role just because it inherits from this
+                    // one. See also DropRoleConstantAction.
                     RoleClosureIterator rci =
                         dd.createRoleClosureIterator
                         (activation.getTransactionController(),
@@ -200,11 +192,6 @@ class RevokeRoleConstantAction extends DDLConstantAction {
 
                         dd.getDependencyManager().invalidateFor
                             (rdDef, DependencyManager.REVOKE_ROLE, lcc);
-
-                        dd.getDependencyManager().invalidateFor
-                            (rdDef,
-                             DependencyManager.INTERNAL_RECOMPILE_REQUEST,
-                             lcc);
                     }
 
                     rd.drop(lcc);

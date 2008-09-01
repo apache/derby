@@ -326,11 +326,16 @@ public interface DependencyManager {
 	public static final int REVOKE_PRIVILEGE_RESTRICT = 45;
 	public static final int DROP_COLUMN_RESTRICT = 46;
 
-	// Revoke action when a granted role is revoked. A revoke
-	// statement causes the dependents to drop.
+	// Revoke action when a granted role is dropped/revoked. A revoke statement
+	// causes the dependents to drop.
 	public static final int REVOKE_ROLE = 47;
 
-    /**
+	// Action when the current role is changed in a session. Used to force
+	// rechecking of privileges for prepared statements that depend on the
+	// current role for privileges by recreating the activation.
+	public static final int RECHECK_PRIVILEGES = 48;
+
+	/**
      * Extensions to this interface may use action codes > MAX_ACTION_CODE without fear of
      * clashing with action codes in this base interface.
      */
