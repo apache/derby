@@ -27,6 +27,8 @@ import java.sql.Connection;
 import java.sql.Statement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import javax.sql.PooledConnection;
+import javax.sql.ConnectionPoolDataSource;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
@@ -34,6 +36,7 @@ import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
+import org.apache.derbyTesting.junit.J2EEDataSource;
 
 /**
  * This JUnit tests the SQL roles feature. This feature relies on
@@ -640,6 +643,8 @@ public class RolesTest extends BaseJDBCTestCase
         assertSysRolesRowCount(0, 4, 4);
 
         _stm.close();
+
+        testCurrentRoleIsReset();
     }
 
 
@@ -681,6 +686,79 @@ public class RolesTest extends BaseJDBCTestCase
             _stm.execute("CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY" +
                          "('derby.user.soonarole', NULL)");
         }
+    }
+
+
+    /**
+     * Verifies that the current role is reset when creating a new logical
+     * connection.
+     * <p>
+     * The test is run in a non-statement pooling configuration first,
+     * and then with statement pooling enabled if the environment supports it.
+     * <p>
+     * The test pattern is borrowed from the test case in J2EEDataSourceTest.
+     *
+     * @see org.apache.derbyTesting.functionTests.tests.jdbcapi.J2EEDataSourceTest#testSchemaIsReset
+     *
+     * @throws SQLException if something goes wrong
+     */
+    private void testCurrentRoleIsReset()
+            throws SQLException {
+
+        if (_authLevel == SQLAUTHORIZATION && isDbo() /* once is enough */) {
+            final String user = "DonaldDuck";
+            final String passwd = user.concat(pwSuffix);
+            ConnectionPoolDataSource cpDs =
+                J2EEDataSource.getConnectionPoolDataSource();
+            // Test without statement pooling first.
+            doTestCurrentRoleIsReset(cpDs.getPooledConnection(user, passwd),
+                                     user);
+
+            // Try to enable statement pooling.
+            // This is currently only implemented in the client driver.
+            if (usingDerbyNetClient()) {
+                J2EEDataSource.setBeanProperty(
+                    cpDs, "maxStatements",new Integer(7));
+                doTestCurrentRoleIsReset(cpDs.getPooledConnection(user, passwd),
+                                         user);
+            }
+        }
+    }
+
+    /**
+     * Executes a test sequence to make sure the current role is reset between
+     * logical connections.
+     *
+     * @param pc pooled connection to get logical connections from
+     * @param user name of  for the connection
+     * @throws SQLException if something goes wrong...
+     */
+    private void doTestCurrentRoleIsReset(PooledConnection pc, String user)
+            throws SQLException {
+
+        Connection con = pc.getConnection();
+        Statement stmt = con.createStatement();
+        String n_a     = null; // auth level not used for this test
+
+        JDBC.assertCurrentSchema(con, user.toUpperCase());
+
+        // Change the role.
+        stmt.execute("set role bar");
+        ResultSet rs = stmt.executeQuery("values current_role");
+        assertRoleInRs(rs, "BAR", n_a);
+        rs.close();
+        stmt.close();
+
+        // Close the logical connection and get a new one and make sure the
+        // current role has been reset.
+        con.close();
+        con = pc.getConnection();
+        stmt = con.createStatement();
+        rs = stmt.executeQuery("values current_role");
+        assertRoleInRs(rs, null, n_a);
+        rs.close();
+        stmt.close();
+        con.close();
     }
 
 

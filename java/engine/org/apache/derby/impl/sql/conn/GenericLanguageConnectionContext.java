@@ -608,6 +608,9 @@ public class GenericLanguageConnectionContext
 
         // Reset the current schema (see DERBY-3690).
         setDefaultSchema(null);
+
+		// Reset the current role
+		getCurrentSQLSessionContext().setRole(null);
 	}
 
 	/**

@@ -1936,6 +1936,11 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
      * and then with statement pooling enabled if the environment supports it.
      * <p>
      * Relevant Jira issue: DERBY-3690.
+     * <p>
+     * The current role also needs to be reset, but can't be tested here since
+     * we need to run with SQL authorization.
+     *
+     * @see org.apache.derbyTesting.functionTests.tests.lang.RolesTest#testCurrentRoleIsReset
      *
      * @throws SQLException if something goes wrong
      */
