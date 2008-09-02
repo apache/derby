@@ -39,7 +39,7 @@ import java.util.Arrays;
  *      <li>Release LOB locators on the server.</li>
  * </ul>
  * Both functionalities will be disabled if the server doesn't support locators.
- * If locators are enabled, they will be freed when {@link checkCurrentRow} is
+ * If locators are enabled, they will be freed when {@link #checkCurrentRow} is
  * called.
  * <p>
  * The tracker has a notion of current row. The current row is changed by
