@@ -27,6 +27,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UTFDataFormatException;
 
+import org.apache.derby.iapi.services.io.InputStreamUtil;
+
 /**
  * Utility methods for handling UTF-8 encoded byte streams.
  * <p>
@@ -118,7 +120,7 @@ public final class UTF8Util {
                 bytesSkipped++;
             } else if ((c & 0x60) == 0x40) { // 7th bit set, 6th bit unset
                 // Found char of two byte width.
-                if (StreamUtil.skipPersistent(in, 1L) != 1L) {
+                if (InputStreamUtil.skipPersistent(in, 1L) != 1L) {
                     // No second byte present.
                     throw new UTFDataFormatException(
                         "Second byte in two byte character missing; byte pos " +
@@ -144,7 +146,7 @@ public final class UTF8Util {
                         skipped = 2;
                     }
                 } else {
-                    skipped = (int)StreamUtil.skipPersistent(in, 2L);
+                    skipped = (int)InputStreamUtil.skipPersistent(in, 2L);
                 }
                 if (skipped != 2) {
                     // No second or third byte present

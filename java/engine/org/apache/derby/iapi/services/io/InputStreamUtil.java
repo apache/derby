@@ -29,6 +29,7 @@ import java.io.*;
 	a DataInputStream just to get this functionality.
 */
 public final class InputStreamUtil {
+    private static final int SKIP_FRAGMENT_SIZE = Integer.MAX_VALUE;
 
 	/**
 		Read an unsigned byte from an InputStream, throwing an EOFException
@@ -97,27 +98,86 @@ public final class InputStreamUtil {
         return offset - firstOffset;
 	}
 
+    /**
+     * Skips until EOF, returns number of bytes skipped.
+     * @param is
+     *      InputStream to be skipped.
+     * @return
+     *      number of bytes skipped in fact.
+     * @throws IOException
+     *      if IOException occurs. It doesn't contain EOFException.
+     * @throws NullPointerException
+     *      if the param 'is' equals null.
+     */
+    public static long skipUntilEOF(InputStream is) throws IOException {
+        if(is == null)
+            throw new NullPointerException();
 
-	/**
-		Skip a number of bytes in the stream. Note that this version takes and returns
-		a long instead of the int used by skipBytes.
+        long bytes = 0;
+        while(true){
+            long r = skipPersistent(is, SKIP_FRAGMENT_SIZE);
+            bytes += r;
+            if(r < SKIP_FRAGMENT_SIZE)
+                return bytes;
+        }
+    }
 
-		@exception IOException if an I/O error occurs.
-		@exception EOFException if the end of the stream is reached
+    /**
+     * Skips requested number of bytes,
+     * throws EOFException if there is too few bytes in the stream.
+     * @param is
+     *      InputStream to be skipped.
+     * @param skippedBytes
+     *      number of bytes to skip. if skippedBytes <= zero, do nothing.
+     * @throws EOFException
+     *      if EOF meets before requested number of bytes are skipped.
+     * @throws IOException
+     *      if IOException occurs. It doesn't contain EOFException.
+     * @throws NullPointerException
+     *      if the param 'is' equals null.
+     */
+    public static void skipFully(InputStream is, long skippedBytes)
+    throws IOException {
+        if(is == null)
+            throw new NullPointerException();
 
-		@see DataInput#skipBytes
-	*/
-	public static long skipBytes(InputStream in, long n) throws IOException {
+        if(skippedBytes <= 0)
+            return;
 
-		while (n > 0) {
-			//System.out.println(" skip n = " + n);
-			long delta = in.skip(n);
-			//System.out.println(" skipped = " + delta);
-			if (delta < 0)
-				throw new EOFException();
-			n -= delta;
-		}
+        long bytes = skipPersistent(is, skippedBytes);
 
-		return n;
-	}
+        if(bytes < skippedBytes)
+            throw new EOFException();
+    }
+
+    /**
+     * Tries harder to skip the requested number of bytes.
+     * <p>
+     * Note that even if the method fails to skip the requested number of bytes,
+     * it will not throw an exception. If this happens, the caller can be sure
+     * that end-of-stream has been reached.
+     *
+     * @param in byte stream
+     * @param bytesToSkip the number of bytes to skip
+     * @return The number of bytes skipped.
+     * @throws IOException if reading from the stream fails
+     */
+    public static final long skipPersistent(InputStream in, long bytesToSkip)
+    throws IOException {
+        long skipped = 0;
+        while (skipped < bytesToSkip) {
+            long skippedNow = in.skip(bytesToSkip - skipped);
+            if (skippedNow == 0) {
+                if (in.read() == -1) {
+                    // EOF, return what we have and leave it up to caller to
+                    // decide what to do about it.
+                    break;
+                } else {
+                    skippedNow = 1; // Added to count below.
+                }
+            }
+            skipped += skippedNow;
+        }
+        return skipped;
+    }
 }

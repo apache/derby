@@ -52,7 +52,7 @@ public class _Suite extends BaseTestCase {
         suite.addTest(UTF8UtilTest.suite());
         suite.addTestSuite(CompressedNumberTest.class);
         suite.addTest(AssertFailureTest.suite());
-        suite.addTest(StreamUtilTest.suite());
+        suite.addTest(InputStreamUtilTest.suite());
 
         return suite;
     }

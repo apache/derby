@@ -202,7 +202,7 @@ final class InputStreamContainer extends FileContainer  {
 			// no need to synchronize as each caller gets a new stream
 			is = getInputStream();
 
-			InputStreamUtil.skipBytes(is, pageOffset);
+			InputStreamUtil.skipFully(is, pageOffset);
 
 			InputStreamUtil.readFully(is, pageData, 0, pageSize);
 

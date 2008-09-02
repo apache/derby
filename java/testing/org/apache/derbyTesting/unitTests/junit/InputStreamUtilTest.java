@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derbyTesting.unitTests.junit.StreamUtilTest
+   Derby - Class org.apache.derbyTesting.unitTests.junit.InputStreamUtilTest
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -25,31 +25,31 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.apache.derby.iapi.util.StreamUtil;
+import org.apache.derby.iapi.services.io.InputStreamUtil;
 import org.apache.derbyTesting.junit.BaseTestCase;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
 /**
- * Test case for StreamUtil.
+ * Test case for InputStreamUtil.
  */
-public class StreamUtilTest extends BaseTestCase {
+public class InputStreamUtilTest extends BaseTestCase {
 
-    public StreamUtilTest(String name) {
+    public InputStreamUtilTest(String name) {
         super(name);
     }
 
     public void testNullStream() throws IOException{
         try{
-            StreamUtil.skipFully(null);
+            InputStreamUtil.skipUntilEOF(null);
             fail("Null InputStream is accepted!");
         }catch (NullPointerException e) {
             assertTrue(true);
         }
 
         try{
-            StreamUtil.skipFully(null, 0);
+            InputStreamUtil.skipFully(null, 0);
             fail("Null InputStream is accepted!");
         }catch (NullPointerException e) {
             assertTrue(true);
@@ -62,7 +62,7 @@ public class StreamUtilTest extends BaseTestCase {
         for(int i = 0; i < lengths.length; i++){
             int length = lengths[i];
             InputStream is = new ByteArrayInputStream(new byte[length]);
-            assertEquals(length, StreamUtil.skipFully(is));
+            assertEquals(length, InputStreamUtil.skipUntilEOF(is));
         }
     }
 
@@ -72,7 +72,7 @@ public class StreamUtilTest extends BaseTestCase {
         for(int i = 0; i < lengths.length; i++){
             int length = lengths[i];
             InputStream is = new ByteArrayInputStream(new byte[length]);
-            assertEquals(length, StreamUtil.skipFully(is));
+            assertEquals(length, InputStreamUtil.skipUntilEOF(is));
         }
     }
 
@@ -80,27 +80,27 @@ public class StreamUtilTest extends BaseTestCase {
         int length = 1024;
 
         InputStream is = new ByteArrayInputStream(new byte[length]);
-        StreamUtil.skipFully(is, length);
-        assertEquals(0, StreamUtil.skipFully(is));
+        InputStreamUtil.skipFully(is, length);
+        assertEquals(0, InputStreamUtil.skipUntilEOF(is));
 
         is = new ByteArrayInputStream(new byte[length]);
-        StreamUtil.skipFully(is, length - 1);
-        assertEquals(1, StreamUtil.skipFully(is));
+        InputStreamUtil.skipFully(is, length - 1);
+        assertEquals(1, InputStreamUtil.skipUntilEOF(is));
 
         is = new ByteArrayInputStream(new byte[length]);
         try {
-            StreamUtil.skipFully(is, length + 1);
+            InputStreamUtil.skipFully(is, length + 1);
             fail("Should have Meet EOF!");
         } catch (EOFException e) {
             assertTrue(true);
         }
-        assertEquals(0, StreamUtil.skipFully(is));
+        assertEquals(0, InputStreamUtil.skipUntilEOF(is));
     }
 
     /**
      * Returns a suite of tests.
      */
     public static Test suite() {
-        return new TestSuite(StreamUtilTest.class, "StreamUtil tests");
+        return new TestSuite(InputStreamUtilTest.class, "InputStreamUtil tests");
     }
 }
