@@ -63,13 +63,13 @@ public class RunOptimizerTest {
 					driverClass=StaticValues.embedClass;
 					jdbcurl=StaticValues.embedURL;
 				}
-			}else{
-
-				File dir = new File("testdb");
-				if((!dir.exists())){
-					reset=true;
-				}
 			}
+
+			File dir = new File("testdb");
+			if((!dir.exists())){
+				reset=true; // If nonexisting must always .init and .createObjects
+			}
+
 			System.out.println("Running test with url "+jdbcurl);
 			if(args.length>0){
 				for(int i=0;i<args.length;i++){
@@ -87,20 +87,21 @@ public class RunOptimizerTest {
 				}
 			
 			Class.forName(driverClass);
-			if (reset) {
-				if (verbose)
-					System.out.println("Initializing...");
+			if (reset) { // Must also be done if db nonexisting
+                System.out.println("Initializing db ...");
 				conn = DriverManager.getConnection(jdbcurl);
 				TestViews.init();
 				DataUtils.dropObjects(conn,verbose);
 				DataUtils.createObjects(conn,verbose);
 			}else{
+                System.out.println("Use existing db ...");
 				conn = DriverManager.getConnection(jdbcurl);
 			}
 			DataUtils.insertData(conn,verbose);
 			QueryList.init(conn);
 			if (verbose)
 				System.out.println(" List of query scenarios to run: "+QueryList.getQList().size());
+            System.out.println("Starting tests ...");
 			for(int i=0;i<QueryList.getQList().size();i++){
 				if (verbose)
 					System.out.println("\n______________________________________________________________________\n");
