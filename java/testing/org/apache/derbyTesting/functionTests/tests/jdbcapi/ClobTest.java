@@ -35,6 +35,7 @@ import java.io.Writer;
 
 import java.sql.Connection;
 import java.sql.Clob;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -204,6 +205,63 @@ public class ClobTest
             newContent, this.clob.getSubString(1, newContent.length()));
     }
 
+    /**
+     * Tests that Derby specific end-of-stream markers aren't passed over to
+     * the temporary Clob, which doesn't use such markers.
+     * <p>
+     * Passing the marker over will normally result in a UTF encoding exception.
+     * <p>
+     * ID USAGE: reads id 2, writes id 10002
+     */
+    public void testInsertCharacter_ReadOnlyToTemporary()
+            throws IOException, SQLException {
+        setAutoCommit(false);
+        // Insert data, a medium sized Clob to store it as a stream.
+        Statement stmt = createStatement();
+        PreparedStatement ps = prepareStatement(
+                "insert into ClobTestData values (?,?)");
+        int initalSize = 128*1024;
+        ps.setInt(1, 2);
+        ps.setCharacterStream(
+                2, new LoopingAlphabetReader(initalSize), initalSize);
+        ps.executeUpdate();
+
+        // Select the Clob, and change one character.
+        PreparedStatement psSelect = prepareStatement(
+                "select dClob from ClobTestData where id = ?");
+        psSelect.setInt(1, 2);
+        ResultSet lRs = psSelect.executeQuery();
+        lRs.next();
+        Clob lClob = lRs.getClob(1);
+        lClob.setString(1, "K");
+        Reader r = lClob.getCharacterStream();
+        assertEquals('K', r.read());
+        long length = 1;
+        while (true) {
+            // Since we're skipping characters, the bytes have to be decoded
+            // and we will detect any encoding errors.
+            long skipped = r.skip(4096);
+            if (skipped > 0) {
+                length += skipped;
+            } else {
+                break;
+            }
+        }
+        lRs.close();
+        assertEquals("Wrong length!", initalSize, length);
+        // Reports the correct length, now try to insert it.
+        ps.setInt(1, 10003);
+        ps.setClob(2, lClob);
+        ps.executeUpdate();
+        // Fetch it back.
+        psSelect.setInt(1, 10003);
+        lRs = psSelect.executeQuery();
+        lRs.next();
+        Clob lClob2 = lRs.getClob(1);
+        assertEquals(lClob.getCharacterStream(), lClob2.getCharacterStream());
+        assertEquals(initalSize, lClob2.length());
+    }
+
     public void testPositionWithString_ASCII_SimplePartialRecurringPattern()
             throws IOException, SQLException {
         String token = "xxSPOTxx";
@@ -289,7 +347,8 @@ public class ClobTest
         // Obtain a Clob containing the empty string ("").
         Statement stmt = createStatement();
         // Keep reference to the result set to be able to close it.
-        this.rs = stmt.executeQuery("select * from ClobTestData");
+        this.rs = stmt.executeQuery(
+                "select dClob from ClobTestData where id = 1");
         assertTrue(this.rs.next());
         this.clob = this.rs.getClob(1);
     }
@@ -441,8 +500,8 @@ public class ClobTest
             Connection con = getConnection();
             Statement stmt = con.createStatement();
             stmt.execute("create table ClobTestData (" +
-                    "dClob CLOB)");
-            stmt.executeUpdate("insert into ClobTestData values ('')");
+                    "id int unique, dClob CLOB)");
+            stmt.executeUpdate("insert into ClobTestData values (1, '')");
             stmt.close();
        }
 

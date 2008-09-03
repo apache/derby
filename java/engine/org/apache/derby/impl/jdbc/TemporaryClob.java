@@ -398,8 +398,8 @@ final class TemporaryClob implements InternalClob {
     private void copyClobContent(InternalClob clob)
             throws IOException, SQLException {
         try {
-            long byteLength = clob.getByteLength();
-            this.bytes.copyData(clob.getRawByteStream(), byteLength);
+            // Specify LONG.MAX_VALUE to copy data until EOF.
+            this.bytes.copyData(clob.getRawByteStream(), Long.MAX_VALUE);
         } catch (StandardException se) {
             throw Util.generateCsSQLException(se);
         }

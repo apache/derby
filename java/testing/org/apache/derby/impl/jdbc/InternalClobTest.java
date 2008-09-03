@@ -125,17 +125,6 @@ public abstract class InternalClobTest
      * UnsupportedOperationException is allowed for read-only Clobs.
      */
 
-    public void testGetByteLengthAfterRelease()
-            throws IOException, SQLException {
-        iClob.release();
-        try {
-            iClob.getByteLength();
-            fail("Exception should have been raised, but was not");
-        } catch (IllegalStateException ise) {
-            // This is as expected.
-        }
-    }
-
     public void testGetCharLengthAfterRelease()
             throws IOException, SQLException {
         iClob.release();
@@ -219,11 +208,6 @@ public abstract class InternalClobTest
     }
 
     /* End of XXXAfterRelease tests. */
-
-    public void testGetByteLength()
-            throws IOException, SQLException {
-        assertEquals(this.initialByteLength, iClob.getByteLength());
-    }
 
     public void testGetCharLength()
             throws IOException, SQLException {

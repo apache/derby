@@ -357,8 +357,14 @@ class LOBStreamControl {
 
     /**
      * Copies bytes from stream to local storage.
-     * @param inStream
-     * @param length length to be copied
+     * <p>
+     * Note that specifying the length as {@code Long.MAX_VALUE} results in
+     * reading data from the stream until EOF is reached, but no length checking
+     * will be performed.
+     *
+     * @param inStream the stream to copy from
+     * @param length number of bytes to be copied, or {@code Long.MAX_VALUE} to
+     *      copy everything until EOF is reached
      * @throws IOException, StandardException
      */
     synchronized void copyData(InputStream inStream, long length)
@@ -368,11 +374,30 @@ class LOBStreamControl {
         while (sz < length) {
             int len = (int) Math.min (length - sz, bufferSize);
             len = inStream.read(data, 0, len);
-            if (len < 0)
-                throw new EOFException("Reached end-of-stream " +
-                        "prematurely at " + sz);
+            if (len == -1) {
+                if (length != Long.MAX_VALUE) {
+                    // We reached EOF before all the requested bytes are read.
+                    throw new EOFException("Reached end-of-stream " +
+                        "prematurely at " + sz + ", expected " + length);
+                } else {
+                    // End of data, but no length checking.
+                    break;
+                }
+            }
             write(data, 0, len, sz);
             sz += len;
+        }
+        // If we copied until EOF, see if we have a Derby end-of-stream marker.
+        if (length == Long.MAX_VALUE) {
+            long curLength = getLength();
+            byte[] eos = new byte[3];
+            // Read the three last bytes, marker is 0xE0 0x00 0x00.
+            read(eos, 0, 3, curLength -3);
+            if ((eos[0] & 0xFF) == 0xE0 && (eos[1] & 0xFF) == 0x00 &&
+                    (eos[2] & 0xFF) == 0x00) {
+                // Remove Derby end-of-stream-marker.
+                truncate(curLength -3);
+            }
         }
     }
 

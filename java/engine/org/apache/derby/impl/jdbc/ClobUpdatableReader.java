@@ -114,7 +114,6 @@ final class ClobUpdatableReader extends Reader {
         InternalClob internalClob = clob.getInternalClob();
         materialized = internalClob.isWritable();        
         if (materialized) {
-            long byteLength = internalClob.getByteLength();
             this.stream = internalClob.getRawByteStream();
             // Position the stream on pos using the init method.
             init ((LOBInputStream)stream, pos);
