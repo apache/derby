@@ -1779,14 +1779,14 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 	/* Dependent interface implementation */
 
 	/**
-	 * @see Dependent#isValid
+	 * @see org.apache.derby.iapi.sql.depend.Dependent#isValid
 	 */
 	public boolean isValid() {
 		return isValid;
 	}
 
 	/**
-	 * @see Dependent#makeInvalid
+	 * @see org.apache.derby.iapi.sql.depend.Dependent#makeInvalid
 	 */
 	public void makeInvalid(int action,
 							LanguageConnectionContext lcc)
@@ -1820,7 +1820,7 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 	}
 
 	/**
-	 * @see Dependent#prepareToInvalidate
+	 * @see org.apache.derby.iapi.sql.depend.Dependent#prepareToInvalidate
 	 */
 	public void prepareToInvalidate(Provider p, int action,
 							 LanguageConnectionContext lcc)

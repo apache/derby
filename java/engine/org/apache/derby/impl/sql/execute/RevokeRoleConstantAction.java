@@ -65,8 +65,7 @@ class RevokeRoleConstantAction extends DDLConstantAction {
     /**
      * This is the guts of the Execution-time logic for REVOKE role.
      *
-     * @see org.apache.derby.iapi.sql.execute.
-     *      ConstantAction#executeConstantAction
+     * @see org.apache.derby.iapi.sql.execute.ConstantAction#executeConstantAction
      */
     public void executeConstantAction(Activation activation)
             throws StandardException {

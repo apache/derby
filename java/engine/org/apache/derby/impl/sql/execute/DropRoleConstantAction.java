@@ -76,8 +76,7 @@ class DropRoleConstantAction extends DDLConstantAction
     /**
      * This is the guts of the Execution-time logic for DROP ROLE.
      *
-     * @see org.apache.derby.iapi.sql.
-     *      execute.ConstantAction#executeConstantAction
+     * @see org.apache.derby.iapi.sql.execute.ConstantAction#executeConstantAction
      */
     public void executeConstantAction( Activation activation )
         throws StandardException

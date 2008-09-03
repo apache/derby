@@ -674,7 +674,7 @@ final class GenericActivationHolder implements Activation
 	/* Dependent interface implementation */
 
 	/**
-	 * @see Dependent#isValid
+	 * @see org.apache.derby.iapi.sql.depend.Dependent#isValid
 	 */
 	public boolean isValid() {
 		// Vacuous implementation to make class concrete, only needed for
@@ -687,7 +687,7 @@ final class GenericActivationHolder implements Activation
 	}
 
 	/**
-	 * @see Dependent#makeInvalid
+	 * @see org.apache.derby.iapi.sql.depend.Dependent#makeInvalid
 	 */
 	public void makeInvalid(int action,
 							LanguageConnectionContext lcc)
@@ -700,7 +700,7 @@ final class GenericActivationHolder implements Activation
 	}
 
 	/**
-	 * @see Dependent#prepareToInvalidate
+	 * @see org.apache.derby.iapi.sql.depend.Dependent#prepareToInvalidate
 	 */
 	public void prepareToInvalidate(Provider p, int action,
 							 LanguageConnectionContext lcc)
