@@ -1,0 +1,854 @@
+ij> --
+--   Licensed to the Apache Software Foundation (ASF) under one or more
+--   contributor license agreements.  See the NOTICE file distributed with
+--   this work for additional information regarding copyright ownership.
+--   The ASF licenses this file to You under the Apache License, Version 2.0
+--   (the "License"); you may not use this file except in compliance with
+--   the License.  You may obtain a copy of the License at
+--
+--      http://www.apache.org/licenses/LICENSE-2.0
+--
+--   Unless required by applicable law or agreed to in writing, software
+--   distributed under the License is distributed on an "AS IS" BASIS,
+--   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+--   See the License for the specific language governing permissions and
+--   limitations under the License.
+--
+-- test for import export thru command line interface
+-- first test basic import functionality
+-- ascii delimited default format
+drop table T1;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'T1' because it does not exist.
+ij> create table T1 (	Account	int,
+			Name    char(30),
+			Jobdesc char(40),
+			Company varchar(35),
+			Address1 varchar(40),
+			Address2 varchar(40),
+			City	varchar(20),
+			State	char(5),
+			Zip	char(10),
+			Country char(10),
+			Phone1  char(20),
+			Phone2  char(20),
+			email   char(30),
+			web     char(30),
+			Fname	char(30),
+			Lname	char(30),
+			Comment	char(30),
+			AccDate	char(30),
+			Payment	decimal(8,2),
+			Balance decimal(8,2));
+0 rows inserted/updated/deleted
+ij> create index T1_IndexBalance on T1 (Balance, Account, Company);
+0 rows inserted/updated/deleted
+ij> create index T1_IndexFname on T1 (Fname, Account);
+0 rows inserted/updated/deleted
+ij> create index T1_IndexLname on T1 (Lname, Account);
+0 rows inserted/updated/deleted
+ij> -- second line of data file is not complete - should give error message re EOF
+call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'T1' , 'extin/TwoLineBadEOF.dat' , 
+                                    null, null, null, 0) ;
+ERROR XIE0R: Import error on line 2 of file extin/TwoLineBadEOF.dat: Read endOfFile at unexpected place on line 2. 
+ERROR XIE0E: Read endOfFile at unexpected place on line 2.
+ij> -- should work, default format (i.e. field sep , column delimiter ".)
+-- (last two lines have extra white space (tabs, spaces) which should not matter).
+call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'T1' , 'extin/AccountData_defaultformat.dat' , 
+                                    null, null, null, 0) ;
+0 rows inserted/updated/deleted
+ij> values (SYSCS_UTIL.SYSCS_CHECK_TABLE('APP', 'T1'));
+1          
+-----------
+1          
+ij> -- Delimited with a different char but using default import format
+drop table T2;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'T2' because it does not exist.
+ij> autocommit off;
+ij> create table T2 (	Account	int,
+			Name    char(30),
+			Jobdesc char(40),
+			Company varchar(35),
+			Address1 varchar(40),
+			Address2 varchar(40),
+			City	varchar(20),
+			State	char(5),
+			Zip	char(10),
+			Country char(10),
+			Phone1  char(20),
+			Phone2  char(20),
+			email   char(30),
+			web     char(30),
+			Fname	char(30),
+			Lname	char(30),
+			Comment	char(30),
+			AccDate	char(30),
+			Payment	decimal(8,2),
+			Balance decimal(8,2));
+0 rows inserted/updated/deleted
+ij> create index T2_IndexBalance on T2 (Balance, Account, Company);
+0 rows inserted/updated/deleted
+ij> create index T2_IndexFname on T2 (Fname, Account);
+0 rows inserted/updated/deleted
+ij> create index T2_IndexLname on T2 (Lname, Account);
+0 rows inserted/updated/deleted
+ij> commit;
+ij> --this one should fail as we're still using the default import format
+call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'T2' , 'extin/AccountData_format1.dat' , 
+                                    null, null, null, 0) ;
+ERROR 38000: The exception 'java.sql.SQLException: Column 'COLUMN2' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'COLUMN2' is not a column in the target table.' was thrown while evaluating an expression.
+ERROR 42X04: Column 'COLUMN2' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'COLUMN2' is not a column in the target table.
+ij> values (SYSCS_UTIL.SYSCS_CHECK_TABLE('APP', 'T2'));
+1          
+-----------
+1          
+ij> -- so following should only commit an empty table
+commit;
+ij> -- But if we use correct specification?
+call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'T2' , 'extin/AccountData_format1.dat' , 
+				   'q', '"', 'ASCII', 0) ;
+0 rows inserted/updated/deleted
+ij> values (SYSCS_UTIL.SYSCS_CHECK_TABLE('APP', 'T2'));
+1          
+-----------
+1          
+ij> select count(*) from T2;
+1          
+-----------
+1          
+ij> rollback;
+ij> -- test remapping
+drop table T3;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'T3' because it does not exist.
+ij> create table T3 (	Lname	char(30),
+			Fname	char(30),
+			Account	int not null primary key,
+			Company varchar(35),
+			Payment	decimal(8,2),
+			Balance decimal(8,2));
+0 rows inserted/updated/deleted
+ij> create index T3_indexBalance on T3 (Balance, Company, Account);
+0 rows inserted/updated/deleted
+ij> create index T3_indexPayment on T3 (Payment, Company, Account);
+0 rows inserted/updated/deleted
+ij> --incorrect mapping of file to table ; should give error and rollback
+call SYSCS_UTIL.SYSCS_IMPORT_DATA(null, 'T3' , 
+                                  null , '16, 15, 1, 4, 19, 200' ,
+				  'extin/AccountData_defaultformat.dat' , 
+				  null, null, null, 0) ;
+ERROR 38000: The exception 'java.sql.SQLException: Column 'COLUMN200' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'COLUMN200' is not a column in the target table.' was thrown while evaluating an expression.
+ERROR 42X04: Column 'COLUMN200' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'COLUMN200' is not a column in the target table.
+ij> select count(*) from T3;
+ERROR 42X05: Table/View 'T3' does not exist.
+ij> drop table T4;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'T4' because it does not exist.
+ij> create table T4 (	Lname	char(30),
+			Fname	char(30),
+			Account	int not null primary key,
+			Company varchar(35),
+			Payment	decimal(8,2),
+			Balance decimal(8,2));
+0 rows inserted/updated/deleted
+ij> create index T4_indexBalance on T4 (Balance, Company, Account);
+0 rows inserted/updated/deleted
+ij> create index T4_indexPayment on T4 (Payment, Company, Account);
+0 rows inserted/updated/deleted
+ij> -- correctly remapped
+call SYSCS_UTIL.SYSCS_IMPORT_DATA(null, 'T4' ,  
+                                  null , '16, 15, 1, 4, 19, 20' ,
+				  'extin/AccountData_defaultformat.dat' ,
+				   null, null, null, 0) ;
+0 rows inserted/updated/deleted
+ij> values (SYSCS_UTIL.SYSCS_CHECK_TABLE('APP', 'T4'));
+1          
+-----------
+1          
+ij> commit;
+ij> -- now check results
+select count(*) from T1;
+1          
+-----------
+35         
+ij> select count(*) from T2;
+1          
+-----------
+1          
+ij> select count(*) from T3;
+ERROR 42X05: Table/View 'T3' does not exist.
+ij> select count(*) from T4;
+1          
+-----------
+35         
+ij> select * from T1 where State = 'CA';
+ACCOUNT    |NAME                          |JOBDESC                                 |COMPANY                            |ADDRESS1                                |ADDRESS2                                |CITY                |STATE|ZIP       |COUNTRY   |PHONE1              |PHONE2              |EMAIL                         |WEB                           |FNAME                         |LNAME                         |COMMENT                       |ACCDATE                       |PAYMENT   |BALANCE   
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+9          |Dizzy Ditzy                   |Director, Turnstyle Systems             |Dump Disk Systems                  |3 Highway 1                             |                                        |Round Robin         |CA   |99999     |          |533/533-5333        |                    |                              |                              |Dizzy                         |Ditzy                         |Unstable                      |2006-12-12                    |5.12      |3.33      
+15         |Bert Bobbins                  |Bobcat catcher                          |Wilden Park                        |5237 College Avenue                     |                                        |Oakland             |CA   |          |          |510/283-5183        |                    |bebob@wildenpark.com          |                              |Bert                          |Bobbins                       |Caught                        |2007-12-07                    |22100.20  |0.00      
+21         |Jason Aesonson                |V.P. Navigation                         |Argonauts                          |100 Sunset Blvd                         |                                        |Los Angeles         |CA   |90049     |          |213/213-2132        |213/213-2133        |jason@argonauts.com           |                              |Jason                         |Aesonson                      |Sailed off into sunset        |1998-01-01                    |0.00      |800.80    
+25         |Layne  Change                 |                                        |Streetwise Driving School          |                                        |Market Street                           |San Francisco       |CA   |95104     |          |415/415-4155        |                    |lach@nowhere.com              |                              |Layne                         |Change                        |Drove off                     |1998-01-01                    |0.00      |12003.27  
+28         |Les VanNess                   |Street Musician                         |Musical Temping Agency             |201 Van Ness Ave                        |                                        |San Francisco       |CA   |94102     |          |415-415-5555        |                    |                              |http://www.sfsymphonot.org    |Les                           |VanNess                       |Blown away                    |2007-01-01                    |90.93     |0.00      
+35         |Top  Hill                     |Architect                               |High Street Architects             |1001 High Street                        |                                        |Mountain View       |CA   |94041     |          |650/666-5500        |650/666-5501        |Top.Hill@higharc.com          |http://www.higharc.com        |Top                           |Hill                          |In the Clouds                 |2008-04-13                    |78.38     |0.00      
+36         |Trevor  MacGregor             |Garden Architect                        |High Street Architects             |1001 High Street                        |                                        |Mountain View       |CA   |94041     |          |650/666-5500        |650/666-5501        |Trevor.MacGregor@higharc.com  |                              |Trevor                        |MacGregor                     |Customer                      |2007-11-20                    |57.38     |0.01      
+37         |Vlad Zapad                    |                                        |Far West Trading Co.               |                                        |                                        |San Francisco       |CA   |94105     |          |415/415-1111        |415/415-1112        |vlad.zapad@fwtradingco.com    |http://www.fwtradingco.com    |Vlad                          |Zapad                         |Customer                      |2004-04-24                    |88.88     |88.88     
+38         |Marina  Fisher                |Real Estate Agent                       |Beach Realtors                     |                                        |                                        |Stinson Beach       |CA   |          |          |888 888 8888        |                    |                              |                              |Marina                        |Fisher                        |Customer                      |2007-12-13                    |777.77    |0.00      
+39         |Bill  Utterfly                |Photographer                            |Hot Shots Photography              |3 A Street, Apt. B                      |                                        |Mariposa            |CA   |95338     |          |666.666.6161        |                    |butterfly@shot.com            |http://www.shot.com           |Bill                          |Utterfly                      |Customer                      |2008-08-18                    |0.03      |0.02      
+43         |Santiago DePeru               |                                        |                                   |222 Fremont Street                      |                                        |Oakland             |CA   |94608     |U.S.A.    |510-511-5110        |510-511-5110        |santiago@nowhere.com          |Not in Peru                   |Santiago                      |DePeru                        |                              |2008-05-25                    |0.00      |0.00      
+44         |Margit Andersdottir           |                                        |                                   |333 Oakland Ave                         |                                        |Fremont             |CA   |94806     |U.S.A     |510-522-5220        |                    |                              |                              |Margit                        |Andersdottir                  |Customer                      |2008-09-19                    |15.15     |0.65      
+45         |Marie-Ange  LeCiel            |Chief Architect                         |Castle Air Structures              |                                        |1 Airport Drive                         |Castle              |CA   |95301     |          |209-209-209         |209-209-208         |                              |http://www.aircastles.com     |Marie-Ange                    |LeCiel                        |Customer                      |2008-11-13                    |200.00    |1800.00   
+ij> select * from T2 where State = 'CA';
+ACCOUNT    |NAME                          |JOBDESC                                 |COMPANY                            |ADDRESS1                                |ADDRESS2                                |CITY                |STATE|ZIP       |COUNTRY   |PHONE1              |PHONE2              |EMAIL                         |WEB                           |FNAME                         |LNAME                         |COMMENT                       |ACCDATE                       |PAYMENT   |BALANCE   
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ij> select * from T4 where Fname = 'Georgiana' or Fname = 'Michael';
+LNAME                         |FNAME                         |ACCOUNT    |COMPANY                            |PAYMENT   |BALANCE   
+-----------------------------------------------------------------------------------------------------------------------------------
+George                        |Georgiana                     |6          |Georgianas Shortcuts               |50.25     |225.00    
+Leachim                       |Michael                       |17         |Musicians Temping Agency           |65.65     |0.00      
+ij> select Balance, Account, Company from T1 order by Balance;
+BALANCE   |ACCOUNT    |COMPANY                            
+----------------------------------------------------------
+0.00      |4          |Jakes Temps                        
+0.00      |5          |Floris Flowers                     
+0.00      |11         |Musicians Temping Agency           
+0.00      |12         |Smart Tegnologies                  
+0.00      |13         |Davids Diving                      
+0.00      |15         |Wilden Park                        
+0.00      |17         |Musicians Temping Agency           
+0.00      |23         |Smart Systems Software             
+0.00      |28         |Musical Temping Agency             
+0.00      |30         |Smart Systems Software             
+0.00      |33         |Pink Parrots Pet Shop              
+0.00      |35         |High Street Architects             
+0.00      |38         |Beach Realtors                     
+0.00      |40         |Super Swings, Inc.                 
+0.00      |43         |                                   
+0.01      |8          |Musicians Temping Agency           
+0.01      |36         |High Street Architects             
+0.02      |39         |Hot Shots Photography              
+0.12      |19         |Stevedores Galores                 
+0.65      |44         |                                   
+0.80      |10         |Carrs' Cars                        
+3.33      |9          |Dump Disk Systems                  
+12.00     |29         |Smart Systems Software             
+15.00     |42         |Musicians Temping Agency           
+30.20     |7          |                                   
+50.50     |2          |Diggs Diggings                     
+88.88     |37         |Far West Trading Co.               
+200.32    |1          |ABC Co                             
+225.00    |6          |Georgianas Shortcuts               
+768.74    |14         |Pink Parrots Pet Shop              
+800.80    |21         |Argonauts                          
+1800.00   |45         |Castle Air Structures              
+3009.28   |20         |Davids Diving                      
+5005.23   |3          |Divaddavid                         
+12003.27  |25         |Streetwise Driving School          
+ij> select Balance, Account, Company from T2 order by Balance;
+BALANCE   |ACCOUNT    |COMPANY                            
+----------------------------------------------------------
+200.32    |1          |ABC Co                             
+ij> select Balance, Account, Company from T4 order by Balance;
+BALANCE   |ACCOUNT    |COMPANY                            
+----------------------------------------------------------
+0.00      |43         |                                   
+0.00      |38         |Beach Realtors                     
+0.00      |13         |Davids Diving                      
+0.00      |5          |Floris Flowers                     
+0.00      |35         |High Street Architects             
+0.00      |4          |Jakes Temps                        
+0.00      |28         |Musical Temping Agency             
+0.00      |11         |Musicians Temping Agency           
+0.00      |17         |Musicians Temping Agency           
+0.00      |33         |Pink Parrots Pet Shop              
+0.00      |23         |Smart Systems Software             
+0.00      |30         |Smart Systems Software             
+0.00      |12         |Smart Tegnologies                  
+0.00      |40         |Super Swings, Inc.                 
+0.00      |15         |Wilden Park                        
+0.01      |36         |High Street Architects             
+0.01      |8          |Musicians Temping Agency           
+0.02      |39         |Hot Shots Photography              
+0.12      |19         |Stevedores Galores                 
+0.65      |44         |                                   
+0.80      |10         |Carrs' Cars                        
+3.33      |9          |Dump Disk Systems                  
+12.00     |29         |Smart Systems Software             
+15.00     |42         |Musicians Temping Agency           
+30.20     |7          |                                   
+50.50     |2          |Diggs Diggings                     
+88.88     |37         |Far West Trading Co.               
+200.32    |1          |ABC Co                             
+225.00    |6          |Georgianas Shortcuts               
+768.74    |14         |Pink Parrots Pet Shop              
+800.80    |21         |Argonauts                          
+1800.00   |45         |Castle Air Structures              
+3009.28   |20         |Davids Diving                      
+5005.23   |3          |Divaddavid                         
+12003.27  |25         |Streetwise Driving School          
+ij> --- now check other input formats
+-- this is sample data with RecordSeperator=',', FieldStartDelimiter=(, FieldEndDelimiter=),FieldSeperator=TAB
+-- which the import can't handle (not the RecordSeparator, and there can be only one
+-- fieldDelimitor character). 
+-- The error XIE0R and 22018 are returned if the 1 line file is largish  
+autocommit on;
+ij> drop table Alt1;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'ALT1' because it does not exist.
+ij> create table Alt1 (	Account	int,
+			Name    char(30),
+			Jobdesc char(40),
+			Company varchar(35),
+			Address1 varchar(40),
+			City	varchar(20),
+			State	char(5),
+			Zip	char(10),
+			Payment	decimal(8,2),
+			Balance decimal(8,2));
+0 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'ALT1' , 'extin/UnsupportedFormat1.dat' , 
+                                      null, null, null, 0) ;
+ERROR XIE0R: Import error on line 1 of file extin/UnsupportedFormat1.dat: Invalid character string format for type INTEGER. 
+ERROR 22018: Invalid character string format for type INTEGER.
+ij> select count(*) from Alt1;
+1          
+-----------
+0          
+ij> -- But error 38000 and 42X04 are returned if the 1 line file is smaller  
+drop table Alt2;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'ALT2' because it does not exist.
+ij> create table Alt2 (	Account	int,
+			Name    char(30),
+			Jobdesc char(40),
+			Company varchar(35),
+			Address1 varchar(40),
+			City	varchar(20),
+			State	char(5),
+			Zip	char(10),
+			Payment	decimal(8,2),
+			Balance decimal(8,2));
+0 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'ALT2' , 'extin/UnsupportedFormat2.dat' , 
+                                      null, null, null, 0) ;
+ERROR 38000: The exception 'java.sql.SQLException: Column 'COLUMN10' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'COLUMN10' is not a column in the target table.' was thrown while evaluating an expression.
+ERROR 42X04: Column 'COLUMN10' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'COLUMN10' is not a column in the target table.
+ij> select count(*) from Alt2;
+1          
+-----------
+0          
+ij> -- this is sample data with some null (missing) fields
+drop table Alt3;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'ALT3' because it does not exist.
+ij> create table Alt3 (	Account	int,
+			Name    char(30),
+			Jobdesc char(40),
+			Company varchar(35),
+			Address1 varchar(40),
+			Address2 varchar(40),
+			City	varchar(20),
+			State	char(5),
+			Zip	char(10),
+			Country char(10),
+			Phone1  char(20),
+			Phone2  char(20),
+			email   char(30),
+			web     char(30),
+			Fname	char(30),
+			Lname	char(30),
+			Comment	char(30),
+			AccDate	char(30),
+			Payment	decimal(8,2),
+			Balance decimal(8,2));
+0 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'ALT3' , 'extin/AccountData_NullFields.dat' , 
+                                      null, null, null, 0) ;
+ERROR 38000: The exception 'java.sql.SQLException: Column 'COLUMN20' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'COLUMN20' is not a column in the target table.' was thrown while evaluating an expression.
+ERROR 42X04: Column 'COLUMN20' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'COLUMN20' is not a column in the target table.
+ij> select count(*) from Alt3;
+1          
+-----------
+0          
+ij> --test more remapping - size matters not
+create table Alt4(column1 varchar(1000) , column3 varchar(1000) , column9 varchar(1000));
+0 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_IMPORT_DATA (null, 'ALT4' , 
+   				   null , '2,3,9',
+				   'extin/AccountData_defaultformat.dat' , 
+				   null, null, null, 0) ;
+0 rows inserted/updated/deleted
+ij> select * from Alt4;
+COLUMN1                                                                                                                         |COLUMN3                                                                                                                         |COLUMN9                                                                                                                         
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Abby Abbott                                                                                                                     |                                                                                                                                |111-1111                                                                                                                        
+Don Diggs                                                                                                                       |Project Manager                                                                                                                 |                                                                                                                                
+David  Divad                                                                                                                    |                                                                                                                                |                                                                                                                                
+Manuela Man                                                                                                                     |Manual Laborer                                                                                                                  |12345                                                                                                                           
+Floris Fluks                                                                                                                    |Floral Arranger                                                                                                                 |33773                                                                                                                           
+Georgiana George                                                                                                                |Groomer                                                                                                                         |80303                                                                                                                           
+Jim  James                                                                                                                      |                                                                                                                                |                                                                                                                                
+Richard Lionlong                                                                                                                |Singer                                                                                                                          |                                                                                                                                
+Dizzy Ditzy                                                                                                                     |Director, Turnstyle Systems                                                                                                     |99999                                                                                                                           
+Carina Catharina Carr                                                                                                           |                                                                                                                                |                                                                                                                                
+Anton  Bismal                                                                                                                   |V.P. Sales                                                                                                                      |10006                                                                                                                           
+Fanny  Fay                                                                                                                      |                                                                                                                                |10004                                                                                                                           
+David Doo                                                                                                                       |VP Marketing                                                                                                                    |01803                                                                                                                           
+Loret  Ta                                                                                                                       |V.P. Sales                                                                                                                      |77046                                                                                                                           
+Bert Bobbins                                                                                                                    |Bobcat catcher                                                                                                                  |                                                                                                                                
+Michael  Leachim                                                                                                                |Software Developer                                                                                                              |14614                                                                                                                           
+Steven  Stevedore                                                                                                               |Stevedore                                                                                                                       |                                                                                                                                
+Zebedeus  Amadeus                                                                                                               |                                                                                                                                |01803                                                                                                                           
+Jason Aesonson                                                                                                                  |V.P. Navigation                                                                                                                 |90049                                                                                                                           
+Jesus  Lopez                                                                                                                    |CEO                                                                                                                             |                                                                                                                                
+Layne  Change                                                                                                                   |                                                                                                                                |95104                                                                                                                           
+Les VanNess                                                                                                                     |Street Musician                                                                                                                 |94102                                                                                                                           
+Marina Baikalskayova                                                                                                            |                                                                                                                                |                                                                                                                                
+Connie Ecticut                                                                                                                  |V.P. Human Resources                                                                                                            |11111-2222                                                                                                                      
+Sil  Trouble                                                                                                                    |V.P. Human Resources                                                                                                            |78787                                                                                                                           
+Top  Hill                                                                                                                       |Architect                                                                                                                       |94041                                                                                                                           
+Trevor  MacGregor                                                                                                               |Garden Architect                                                                                                                |94041                                                                                                                           
+Vlad Zapad                                                                                                                      |                                                                                                                                |94105                                                                                                                           
+Marina  Fisher                                                                                                                  |Real Estate Agent                                                                                                               |                                                                                                                                
+Bill  Utterfly                                                                                                                  |Photographer                                                                                                                    |95338                                                                                                                           
+Jacques Balonceoir                                                                                                              |Engineer                                                                                                                        |84555                                                                                                                           
+Ulrike Bach                                                                                                                     |Violinist                                                                                                                       |                                                                                                                                
+Santiago DePeru                                                                                                                 |                                                                                                                                |94608                                                                                                                           
+Margit Andersdottir                                                                                                             |                                                                                                                                |94806                                                                                                                           
+Marie-Ange  LeCiel                                                                                                              |Chief Architect                                                                                                                 |95301                                                                                                                           
+ij> --- Format with | as column separator and '' as delimiter. Also remapping
+drop table Alt5;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'ALT5' because it does not exist.
+ij> create table Alt5 (
+	Id	int,
+	Name	varchar(40),
+	Title	varchar(40),
+	Company	varchar(50),
+	Address	varchar(80),
+	City	varchar(30),
+	State	varchar(30),
+	Zip	varchar(30),
+	Country varchar(30),
+	phone1	varchar(50),
+	phone2	varchar(30),
+	email	varchar(80),
+	web	varchar(50));
+0 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_IMPORT_DATA(null, 'ALT5' ,
+                                  null , '1,2,3,4,5,7,8,9,10,11,12,13,14', 
+	 		          'extin/AccountData_format2.dat' , 
+				  '|', '''', 'ASCII', 0) ;
+0 rows inserted/updated/deleted
+ij> select Company, Country from Alt5 where country not like 'U%S%A%' and country is not null;
+COMPANY                                           |COUNTRY                       
+---------------------------------------------------------------------------------
+ABC Co                                            |                              
+Diggs Diggings                                    |                              
+Divaddavid                                        |                              
+Jakes Temps                                       |                              
+Floris Flowers                                    |                              
+Georgianas Shortcuts                              |                              
+                                                  |                              
+Musicians Temping Agency                          |                              
+Dump Disk Systems                                 |                              
+Carrs Cars                                        |                              
+Musicians Temping Agency                          |                              
+Smart Tegnologies                                 |                              
+Davids Diving                                     |                              
+Pink Parrots Pet Shop                             |                              
+Wilden Park                                       |                              
+Musicians Temping Agency                          |                              
+Davids Diving                                     |                              
+Argonauts                                         |                              
+Smart Systems Software                            |                              
+Streetwise Driving School                         |                              
+Musical Temping Agency                            |                              
+Smart Systems Software                            |                              
+Smart Systems Software                            |                              
+Pink Parrots Pet Shop                             |                              
+High Street Architects                            |                              
+High Street Architects                            |                              
+Far West Trading Co.                              |                              
+Beach Realtors                                    |                              
+Hot Shots Photography                             |                              
+Musicians Temping Agency                          |Austria                       
+Castle Air Structures                             |                              
+ij> rollback;
+ij> -- test remapping out of sequence
+drop table Alt6;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'ALT6' because it does not exist.
+ij> create table Alt6 (
+	Fname varchar(30),
+	Lname varchar(30),
+	email varchar(40),
+	phone varchar(30));
+0 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_IMPORT_DATA(null, 'ALT6' , 
+		                  null , '15, 16, 13, 11',
+			          'extin/AccountData_format2.dat' , 
+				  '|', '''', 'ASCII', 0) ;
+0 rows inserted/updated/deleted
+ij> select count(*) from Alt6;
+1          
+-----------
+35         
+ij> rollback;
+ij> -- import fails if data has delimiter character within field. 
+drop table Alt7;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'ALT7' because it does not exist.
+ij> create table Alt7 (	Account	int,
+			Name    char(30),
+			Jobdesc char(40),
+			Company varchar(35),
+			Address1 varchar(40),
+			Address2 varchar(40),
+			City	varchar(20),
+			State	char(5),
+			Zip	char(10),
+			Country char(10),
+			Phone1  char(20),
+			Phone2  char(20),
+			email   char(30),
+			web     char(30),
+			Fname	char(30),
+			Lname	char(30),
+			Comment	char(30),
+			AccDate	char(30),
+			Payment	decimal(8,2),
+			Balance decimal(8,2));
+0 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'ALT7' ,
+			          'extin/AccountData_format2oops.dat' , 
+				  '|', '''', 'ASCII', 0) ;
+ERROR XIE0R: Import error on line 1 of file extin/AccountData_format2oops.dat: Data found on line 1 for column 4 after the stop delimiter.   
+ERROR XIE03: Data found on line 1 for column 4 after the stop delimiter.  
+ij> select count(*) from Alt8;
+ERROR 42X05: Table/View 'ALT8' does not exist.
+ij> rollback;
+ij> -- if there's no end of record (CR/LF) after 1st record, rest gets ignored
+drop table Alt8;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'ALT8' because it does not exist.
+ij> create table Alt8 (	Account	int,
+			Name    char(30),
+			Jobdesc char(40),
+			Company varchar(35),
+			Address1 varchar(40),
+			Address2 varchar(40),
+			City	varchar(20),
+			State	char(5),
+			Zip	char(10),
+			Country char(10),
+			Phone1  char(20),
+			Phone2  char(20),
+			email   char(30),
+			web     char(30),
+			Fname	char(30),
+			Lname	char(30),
+			Comment	char(30),
+			AccDate	char(30),
+			Payment	decimal(8,2),
+			Balance decimal(8,2));
+0 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_IMPORT_TABLE (null, 'ALT8' , 'extin/NoEOR.dat' , 
+                                      null, null, null, 0) ;
+0 rows inserted/updated/deleted
+ij> select count(*) from Alt8;
+1          
+-----------
+1          
+ij> rollback;
+ij> autocommit off;
+ij> -- import fails if the table has more columns than named in import statement
+drop table HouseHoldItem;
+ERROR 42Y55: 'DROP TABLE' cannot be performed on 'HOUSEHOLDITEM' because it does not exist.
+ij> create table HouseHoldItem(
+	Category	int,
+	RoomId		int,
+	Description	varchar(255),
+	Model		varchar(50),
+	ModelId		varchar(50),
+	SerialNumber	varchar(50),
+	DayPurchase	date,
+	PurchasePrice	decimal(8,2),
+	Insured		decimal(8,2),
+	Note		varchar(512));
+0 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_IMPORT_DATA(null, 'HOUSEHOLDITEM' , 
+				  null , '2,3,4,5,6,7,8,11,12', 
+				  'extin/Access1.txt' , 
+				  null, null, null, 0) ;
+ERROR 38000: The exception 'java.sql.SQLException: The number of values assigned is not the same as the number of specified or implied columns.' was thrown while evaluating an expression.
+ERROR 42802: The number of values assigned is not the same as the number of specified or implied columns.
+ij> select * from HouseHoldItem;
+ERROR 42X05: Table/View 'HOUSEHOLDITEM' does not exist.
+ij> rollback;
+ij> -- import fails if datatype & format of data are not compatible
+create table HouseHoldItem(
+	Category	int,
+	RoomId		int,
+	Description	varchar(255),
+	Model		varchar(50),
+	ModelId		varchar(50),
+	SerialNumber	varchar(50),
+	DayPurchase	date,
+	PurchasePrice	decimal(8,2),
+	Insured		smallint,
+	Note		varchar(512));
+0 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_IMPORT_DATA(null, 'HOUSEHOLDITEM' , 
+				  null , '2,3,4,5,6,7,8,11,12,10', 
+				  'extin/Access1.txt' , 
+				  null, null, null, 0) ;
+ERROR XIE0R: Import error on line 1 of file extin/Access1.txt: Invalid character string format for type SMALLINT. 
+ERROR 22018: Invalid character string format for type SMALLINT.
+ij> select * from HouseHoldItem;
+ERROR 42X05: Table/View 'HOUSEHOLDITEM' does not exist.
+ij> rollback;
+ij> -- import will succeed with default format settings whether int, date, 
+-- or time fields have quotes in the import file or not
+create table HouseHoldItem(
+	Category	int,
+	RoomId		int,
+	Description	varchar(255),
+	Model		varchar(50),
+	ModelId		varchar(50),
+	SerialNumber	varchar(50),
+	DayPurchase	date,
+	PurchasePrice	decimal(8,2),
+	Insured		decimal(8,2),
+	Note		varchar(512));
+0 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_IMPORT_DATA(null, 'HOUSEHOLDITEM' , 
+				  null , '2,3,4,5,6,7,8,11,12,10', 
+				  'extin/Access1.txt' , 
+				  null, null, null, 0) ;
+0 rows inserted/updated/deleted
+ij> select * from HouseHoldItem;
+CATEGORY   |ROOMID     |DESCRIPTION                                                                                                                     |MODEL                                             |MODELID                                           |SERIALNUMBER                                      |DAYPURCHA&|PURCHASEP&|INSURED   |NOTE                                                                                                                            
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+7          |3          |Exercise Bike                                                                                                                   |Deluxe                                            |KK200                                             |1234ABCDDDD1234                                   |1993-02-06|200.00    |100.00    |Clock Tower Sporting Goods                                                                                                      
+3          |1          |Gray three-cushion sofa                                                                                                         |70" sleeper                                       |NULL                                              |NULL                                              |1975-04-01|600.00    |NULL      |The Sofa Gallery                                                                                                                
+7          |6          |Mountain Bike                                                                                                                   |NULL                                              |NULL                                              |NULL                                              |1993-08-12|1239.00   |1000.00   |Crawford & Sons Custom Bicycles                                                                                                 
+6          |4          |Computer                                                                                                                        |375                                               |1089                                              |00001                                             |NULL      |3000.00   |2500.00   |ByteComp, Inc.                                                                                                                  
+5          |6          |Cordless drill                                                                                                                  |Deluxe                                            |PK200                                             |XXX8373220                                        |1993-08-18|2000.00   |1250.00   |Costoso, Ltd.                                                                                                                   
+3          |5          |Ebony inlaid table                                                                                                              |NULL                                              |NULL                                              |NULL                                              |1990-04-01|250.00    |NULL      |NULL                                                                                                                            
+5          |6          |Table saw                                                                                                                       |NULL                                              |BKV100                                            |BKV9832355                                        |NULL      |NULL      |110.00    |NULL                                                                                                                            
+2          |4          |Baseball card collection                                                                                                        |NULL                                              |NULL                                              |NULL                                              |NULL      |NULL      |500.00    |NULL                                                                                                                            
+4          |3          |Pearl neclace                                                                                                                   |NULL                                              |NULL                                              |NULL                                              |1990-05-01|NULL      |250.00    |NULL                                                                                                                            
+6          |1          |Audio-Visual Receiver                                                                                                           |NULL                                              |AV-520                                            |AVZZZ98333257                                     |1994-10-10|800.00    |NULL      |Southridge Video Shop                                                                                                           
+ij> rollback;
+ij> ----
+---- test export 
+----
+call SYSCS_UTIL.SYSCS_EXPORT_TABLE (null, 'T1' , 'extinout/t1.dump' , 
+                                    '|','''', 'ASCII') ;
+0 rows inserted/updated/deleted
+ij> create table  imp_temp(column2 varchar(200), 
+                  column3 varchar(200), 
+                  column4 varchar(200), 
+                  column5 varchar(200),
+                  column6 varchar(200));
+0 rows inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_IMPORT_DATA(null, 'IMP_TEMP' ,null, '2, 3, 4, 5, 6',
+                                    'extinout/t1.dump', '|', '''', 'ASCII', 0) ;
+0 rows inserted/updated/deleted
+ij> select * from imp_temp ;
+COLUMN2                                                                                                                         |COLUMN3                                                                                                                         |COLUMN4                                                                                                                         |COLUMN5                                                                                                                         |COLUMN6                                                                                                                         
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Abby Abbott                                                                                                                     |                                                                                                                                |ABC Co                                                                                                                          |1 Alphabet Road                                                                                                                 |                                                                                                                                
+Don Diggs                                                                                                                       |Project Manager                                                                                                                 |Diggs Diggings                                                                                                                  |                                                                                                                                |                                                                                                                                
+David  Divad                                                                                                                    |                                                                                                                                |Divaddavid                                                                                                                      |                                                                                                                                |                                                                                                                                
+Manuela Man                                                                                                                     |Manual Laborer                                                                                                                  |Jakes Temps                                                                                                                     |New Jersey Turnpike                                                                                                             |                                                                                                                                
+Floris Fluks                                                                                                                    |Floral Arranger                                                                                                                 |Floris Flowers                                                                                                                  |22 North South West Road                                                                                                        |                                                                                                                                
+Georgiana George                                                                                                                |Groomer                                                                                                                         |Georgianas Shortcuts                                                                                                            |1 Gorgeous Gorge Lane, Suite 1                                                                                                  |                                                                                                                                
+Jim  James                                                                                                                      |                                                                                                                                |                                                                                                                                |                                                                                                                                |                                                                                                                                
+Richard Lionlong                                                                                                                |Singer                                                                                                                          |Musicians Temping Agency                                                                                                        |                                                                                                                                |                                                                                                                                
+Dizzy Ditzy                                                                                                                     |Director, Turnstyle Systems                                                                                                     |Dump Disk Systems                                                                                                               |3 Highway 1                                                                                                                     |                                                                                                                                
+Carina Catharina Carr                                                                                                           |                                                                                                                                |Carrs' Cars                                                                                                                     |                                                                                                                                |                                                                                                                                
+Anton  Bismal                                                                                                                   |V.P. Sales                                                                                                                      |Musicians Temping Agency                                                                                                        |                                                                                                                                |                                                                                                                                
+Fanny  Fay                                                                                                                      |                                                                                                                                |Smart Tegnologies                                                                                                               |10 Extra Broad Way                                                                                                              |                                                                                                                                
+David Doo                                                                                                                       |VP Marketing                                                                                                                    |Davids Diving                                                                                                                   |3 Third Street, Suite 333                                                                                                       |                                                                                                                                
+Loret  Ta                                                                                                                       |V.P. Sales                                                                                                                      |Pink Parrots Pet Shop                                                                                                           |1 Green Tree Lane                                                                                                               |                                                                                                                                
+Bert Bobbins                                                                                                                    |Bobcat catcher                                                                                                                  |Wilden Park                                                                                                                     |5237 College Avenue                                                                                                             |                                                                                                                                
+Michael  Leachim                                                                                                                |Software Developer                                                                                                              |Musicians Temping Agency                                                                                                        |5 Rocky Road                                                                                                                    |                                                                                                                                
+Steven  Stevedore                                                                                                               |Stevedore                                                                                                                       |Stevedores Galores                                                                                                              |                                                                                                                                |                                                                                                                                
+Zebedeus  Amadeus                                                                                                               |                                                                                                                                |Davids Diving                                                                                                                   |3 Third Street, Suite 333                                                                                                       |                                                                                                                                
+Jason Aesonson                                                                                                                  |V.P. Navigation                                                                                                                 |Argonauts                                                                                                                       |100 Sunset Blvd                                                                                                                 |                                                                                                                                
+Jesus  Lopez                                                                                                                    |CEO                                                                                                                             |Smart Systems Software                                                                                                          |                                                                                                                                |                                                                                                                                
+Layne  Change                                                                                                                   |                                                                                                                                |Streetwise Driving School                                                                                                       |                                                                                                                                |Market Street                                                                                                                   
+Les VanNess                                                                                                                     |Street Musician                                                                                                                 |Musical Temping Agency                                                                                                          |201 Van Ness Ave                                                                                                                |                                                                                                                                
+Marina Baikalskayova                                                                                                            |                                                                                                                                |Smart Systems Software                                                                                                          |                                                                                                                                |                                                                                                                                
+Connie Ecticut                                                                                                                  |V.P. Human Resources                                                                                                            |Smart Systems Software                                                                                                          |1 Main Street                                                                                                                   |                                                                                                                                
+Sil  Trouble                                                                                                                    |V.P. Human Resources                                                                                                            |Pink Parrots Pet Shop                                                                                                           |1 Green Tree Lane                                                                                                               |                                                                                                                                
+Top  Hill                                                                                                                       |Architect                                                                                                                       |High Street Architects                                                                                                          |1001 High Street                                                                                                                |                                                                                                                                
+Trevor  MacGregor                                                                                                               |Garden Architect                                                                                                                |High Street Architects                                                                                                          |1001 High Street                                                                                                                |                                                                                                                                
+Vlad Zapad                                                                                                                      |                                                                                                                                |Far West Trading Co.                                                                                                            |                                                                                                                                |                                                                                                                                
+Marina  Fisher                                                                                                                  |Real Estate Agent                                                                                                               |Beach Realtors                                                                                                                  |                                                                                                                                |                                                                                                                                
+Bill  Utterfly                                                                                                                  |Photographer                                                                                                                    |Hot Shots Photography                                                                                                           |3 A Street, Apt. B                                                                                                              |                                                                                                                                
+Jacques Balonceoir                                                                                                              |Engineer                                                                                                                        |Super Swings, Inc.                                                                                                              |                                                                                                                                |                                                                                                                                
+Ulrike Bach                                                                                                                     |Violinist                                                                                                                       |Musicians Temping Agency                                                                                                        |23 KaisersAllee                                                                                                                 |                                                                                                                                
+Santiago DePeru                                                                                                                 |                                                                                                                                |                                                                                                                                |222 Fremont Street                                                                                                              |                                                                                                                                
+Margit Andersdottir                                                                                                             |                                                                                                                                |                                                                                                                                |333 Oakland Ave                                                                                                                 |                                                                                                                                
+Marie-Ange  LeCiel                                                                                                              |Chief Architect                                                                                                                 |Castle Air Structures                                                                                                           |                                                                                                                                |1 Airport Drive                                                                                                                 
+ij> drop table imp_temp;
+0 rows inserted/updated/deleted
+ij> -- test case for derby-1854/derby-1641
+-- perform import into a table that has same column 
+-- as a primary key and a foreign key (ADMINS table).  
+create table users (
+ user_id int not null generated by default as identity,
+ user_login varchar(255) not null,
+ primary key (user_id));
+0 rows inserted/updated/deleted
+ij> create table admins (
+ user_id int not null,
+ primary key (user_id),
+ constraint admin_uid_fk foreign key (user_id) references users (user_id));
+0 rows inserted/updated/deleted
+ij> insert into users (user_login) values('test1');
+1 row inserted/updated/deleted
+ij> insert into users (user_login) values('test2');
+1 row inserted/updated/deleted
+ij> call SYSCS_UTIL.SYSCS_EXPORT_QUERY('select user_id from users' , 
+                    'extinout/users_id.dat', null , null , null ) ;
+0 rows inserted/updated/deleted
+ij> call syscs_util.syscs_import_table( null, 'ADMINS', 
+                    'extinout/users_id.dat', null, null, null,1);
+0 rows inserted/updated/deleted
+ij> select * from admins;
+USER_ID    
+-----------
+1          
+2          
+ij> select * from users;
+USER_ID    |USER_LOGIN                                                                                                                      
+--------------------------------------------------------------------------------------------------------------------------------------------
+1          |test1                                                                                                                           
+2          |test2                                                                                                                           
+ij> -- do consistency check on the table.
+values SYSCS_UTIL.SYSCS_CHECK_TABLE('APP', 'ADMINS');
+1          
+-----------
+1          
+ij> drop table admins;
+0 rows inserted/updated/deleted
+ij> drop table users;
+0 rows inserted/updated/deleted
+ij> -- end derby-1854/derby-1641 test case. 
+--
+-- begin test case for derby-2193:
+--
+-- Field comprised of all blank space should become a null
+--
+create table derby_2193_tab
+(
+    a  varchar( 50 ),
+    b  varchar( 50 )
+);
+0 rows inserted/updated/deleted
+ij> CALL SYSCS_UTIL.SYSCS_IMPORT_TABLE 
+( null, 'DERBY_2193_TAB', 'extin/derby-2193.txt', null, null, null, 0 );
+0 rows inserted/updated/deleted
+ij> select * from derby_2193_tab;
+A                                                 |B                                                 
+-----------------------------------------------------------------------------------------------------
+who put the bop                                   |in the bopshebop                                  
+diddywopdiddy                                     |NULL                                              
+boopdeedoo                                        |boopdeedoo                                        
+ij> select b, length(b) from derby_2193_tab;
+B                                                 |2          
+--------------------------------------------------------------
+in the bopshebop                                  |16         
+NULL                                              |NULL       
+boopdeedoo                                        |10         
+ij> --
+-- Errors should contain identifying line numbers
+--
+create table derby_2193_lineNumber
+(
+    a  int,
+    b  int
+);
+0 rows inserted/updated/deleted
+ij> CALL SYSCS_UTIL.SYSCS_IMPORT_TABLE 
+( null, 'DERBY_2193_LINENUMBER', 'extin/derby-2193-linenumber.txt', null, null, null, 0 );
+ERROR XIE0R: Import error on line 2 of file extin/derby-2193-linenumber.txt: Invalid character string format for type INTEGER. 
+ERROR 22018: Invalid character string format for type INTEGER.
+ij> select * from derby_2193_lineNumber;
+ERROR 42X05: Table/View 'DERBY_2193_LINENUMBER' does not exist.
+ij> --
+-- end test case for derby-2193:
+--
+--
+-- begin test case for derby-2925:
+--
+-- Prevent export from overwriting existing files 
+--
+create table derby_2925_tab
+(
+    a  varchar( 50 ),
+    b  varchar( 50 )
+);
+0 rows inserted/updated/deleted
+ij> --
+-- Testing SYSCS_UTIL.SYSCS_EXPORT_TABLE
+--
+CALL SYSCS_UTIL.SYSCS_EXPORT_TABLE
+( null, 'DERBY_2925_TAB', 'extout/derby-2925.txt', null, null, null);
+0 rows inserted/updated/deleted
+ij> --
+-- Errors should should happen in the second
+-- call to SYSCS_UTIL.SYSCS_EXPORT_TABLE
+-- since extout/derby-2925.txt already exists. 
+--
+CALL SYSCS_UTIL.SYSCS_EXPORT_TABLE
+( null, 'DERBY_2925_TAB', 'extout/derby-2925.txt', null, null, null);
+ERROR XIE0S: The export operation was not performed, because the specified output file (extout/derby-2925.txt) already exists. Export processing will not overwrite an existing file, even if the process has permissions to write to that file, due to security concerns, and to avoid accidental file damage. Please either change the output file name in the export procedure arguments to specify a file which does not exist, or delete the existing file, then retry the export operation.
+ij> --
+-- Testing SYSCS_UTIL.SYSCS_EXPORT_QUERY
+--
+CALL SYSCS_UTIL.SYSCS_EXPORT_QUERY
+('select * from DERBY_2925_TAB', 'extout/derby-2925-query.dat', null , null , null ) ;
+0 rows inserted/updated/deleted
+ij> --
+-- Errors should should happen in the second
+-- call to SYSCS_UTIL.SYSCS_EXPORT_QUERY
+-- since extout/derby-2925-query.dat already exists.
+--
+CALL SYSCS_UTIL.SYSCS_EXPORT_QUERY
+('select * from DERBY_2925_TAB', 'extout/derby-2925-query.dat', null , null , null ) ;
+ERROR XIE0S: The export operation was not performed, because the specified output file (extout/derby-2925-query.dat) already exists. Export processing will not overwrite an existing file, even if the process has permissions to write to that file, due to security concerns, and to avoid accidental file damage. Please either change the output file name in the export procedure arguments to specify a file which does not exist, or delete the existing file, then retry the export operation.
+ij> --
+-- Testing SYSCS_UTIL.SYSCS_EXPORT_QUERY_LOBS_TO_EXTFILE
+--
+create table derby_2925_lob
+(
+	id 	int,
+        name 	varchar(30),
+        content clob, 
+        pic 	blob 
+);
+0 rows inserted/updated/deleted
+ij> --
+-- Testing SYSCS_UTIL.SYSCS_EXPORT_QUERY_LOBS_TO_EXTFILE
+-- where data file exists.
+--
+CALL SYSCS_UTIL.SYSCS_EXPORT_QUERY_LOBS_TO_EXTFILE
+('SELECT * FROM DERBY_2925_LOB','extout/derby-2925_data.dat', '\t' ,'|','UTF-16','extout/derby-2925_lobs.dat');
+0 rows inserted/updated/deleted
+ij> --
+-- Errors should should happen in the second
+-- call to SYSCS_UTIL.SYSCS_EXPORT_QUERY_LOBS_TO_EXTFILE
+-- since extout/derby-2925_data.dat already exists.
+--
+CALL SYSCS_UTIL.SYSCS_EXPORT_QUERY_LOBS_TO_EXTFILE
+('SELECT * FROM DERBY_2925_LOB','extout/derby-2925_data.dat', '\t' ,'|','UTF-16','extout/derby-2925_lobs.dat');
+ERROR XIE0S: The export operation was not performed, because the specified output file (extout/derby-2925_data.dat) already exists. Export processing will not overwrite an existing file, even if the process has permissions to write to that file, due to security concerns, and to avoid accidental file damage. Please either change the output file name in the export procedure arguments to specify a file which does not exist, or delete the existing file, then retry the export operation.
+ij> --
+-- Testing SYSCS_UTIL.SYSCS_EXPORT_QUERY_LOBS_TO_EXTFILE
+-- where lob file exists.
+--
+-- Errors should should happen in the 
+-- call to SYSCS_UTIL.SYSCS_EXPORT_QUERY_LOBS_TO_EXTFILE
+-- since extout/derby-2925_lobs.dat already exists.
+--
+CALL SYSCS_UTIL.SYSCS_EXPORT_QUERY_LOBS_TO_EXTFILE
+('SELECT * FROM DERBY_2925_LOB','extout/derby-2925_data1.dat', '\t' ,'|','UTF-16','extout/derby-2925_lobs.dat');
+ERROR XIE0T: The export operation was not performed, because the specified large object auxiliary file (extout/derby-2925_lobs.dat) already exists. Export processing will not overwrite an existing file, even if the process has permissions to write to that file, due to security concerns, and to avoid accidental file damage. Please either change the large object auxiliary file name in the export procedure arguments to specify a file which does not exist, or delete the existing file, then retry the export operation.
+ij> --
+-- end test case for derby-2925:
+;
+ij> 
