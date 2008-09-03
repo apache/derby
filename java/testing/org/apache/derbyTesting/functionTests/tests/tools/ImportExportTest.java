@@ -64,7 +64,7 @@ public class ImportExportTest extends BaseJDBCTestCase {
 	
 	public static Test baseSuite(String name) {
 		TestSuite suite = new TestSuite(ImportExportTest.class, name);
-		Test test = new SupportFilesSetup(suite, new String[] {"functionTests/testData/ImportExport/EndOfFile.txt"} );
+		Test test = new SupportFilesSetup(suite, new String[] {"functionTests/testData/ImportExport/TwoLineBadEOF.dat"} );
 		return new CleanDatabaseTestSetup(test) {
             protected void decorateSQL(Statement s) throws SQLException {
 
@@ -78,11 +78,13 @@ public class ImportExportTest extends BaseJDBCTestCase {
 						   "COLUMN7 DOUBLE PRECISION , COLUMN8 INT , COLUMN9 BIGINT , COLUMN10 NUMERIC , " +
 						   "COLUMN11 REAL , COLUMN12 SMALLINT , COLUMN13 TIME , COLUMN14 TIMESTAMP , "+
 						   "COLUMN15 SMALLINT , COLUMN16 VARCHAR(1))");
-                s.execute("create table T4 (   Account int,    Fname   char(30),"+
-                        "Lname   char(30), Company varchar(35), Address varchar(40), City    varchar(20),"+
- 					   "State   char(5), Zip     char(10), Payment decimal(8,2), Balance decimal(8,2))");
-                
-            }
+                s.execute("create table T4 (   Account int,    Name   char(30), Jobdesc char(40), " +
+                           "Company varchar(35), Address1 varchar(40), Address2 varchar(40), " +
+                           "City    varchar(20), State   char(5), Zip char(10), Country char(10), " +
+                           "Phone1  char(20), Phone2  char(20), email   char(30), web     char(30), " +
+                           "Fname   char(30), Lname   char(30), Comment char(30), AccDate char(30), " +
+                           "Payment decimal(8,2), Balance decimal(8,2))");
+                }
         };
 	}
 	
@@ -165,7 +167,7 @@ public class ImportExportTest extends BaseJDBCTestCase {
 	public void testEarlyEndOfFile() throws Exception {
 		Connection c = getConnection();
 		try {
-			doImportFromFile(c, "extin/EndOfFile.txt" , "T4" , null , null , "US-ASCII", 0);
+			doImportFromFile(c, "extin/TwoLineBadEOF.dat" , "T4" , null , null , "US-ASCII", 0);
             fail();
 		} catch (SQLException e) {
 			assertSQLState("XIE0E", e);
