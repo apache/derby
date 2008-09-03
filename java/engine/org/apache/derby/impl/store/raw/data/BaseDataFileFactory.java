@@ -22,7 +22,6 @@
 package org.apache.derby.impl.store.raw.data;
 
 
-import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.reference.MessageId;
 
 import org.apache.derby.impl.store.raw.data.AllocationActions;
@@ -35,7 +34,6 @@ import org.apache.derby.impl.store.raw.data.RecordId;
 import org.apache.derby.impl.store.raw.data.ReclaimSpace;
 
 import org.apache.derby.iapi.services.info.ProductVersionHolder;
-import org.apache.derby.iapi.services.info.ProductGenusNames;
 
 import org.apache.derby.iapi.services.cache.CacheFactory;
 import org.apache.derby.iapi.services.cache.CacheManager;
@@ -50,7 +48,6 @@ import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.monitor.PersistentService;
 import org.apache.derby.iapi.services.diag.Performance;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.services.io.FormatIdUtil;
 import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
 
 import org.apache.derby.iapi.error.StandardException;
@@ -67,7 +64,6 @@ import org.apache.derby.iapi.store.raw.ContainerKey;
 import org.apache.derby.iapi.store.raw.LockingPolicy;
 import org.apache.derby.iapi.store.raw.Page;
 import org.apache.derby.iapi.store.raw.RawStoreFactory;
-import org.apache.derby.iapi.store.raw.RecordHandle;
 import org.apache.derby.iapi.store.raw.StreamContainerHandle;
 import org.apache.derby.iapi.store.raw.Transaction;
 import org.apache.derby.iapi.store.raw.xact.RawTransaction;
@@ -86,7 +82,6 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.util.ByteArray;
 import org.apache.derby.iapi.services.io.FileUtil;
 import org.apache.derby.iapi.util.CheapDateFormatter;
-import org.apache.derby.iapi.util.PrivilegedFileOps;
 import org.apache.derby.iapi.util.ReuseFactory;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 
@@ -95,8 +90,6 @@ import java.util.Hashtable;
 import java.util.Enumeration;
 
 import java.io.File;
-import java.io.FilePermission;
-import java.io.OutputStream;
 import java.io.IOException;
 
 import java.security.AccessController;
@@ -2469,16 +2462,21 @@ public class BaseDataFileFactory
 	private void restoreDataDirectory(String backupPath) 
         throws StandardException
 	{
-        File bsegdir;   //segment directory in the backup
-        File backupRoot = new java.io.File(backupPath);	//root dir of backup db
-		
+        // Root dir of backup db
+        final File backupRoot = new java.io.File(backupPath);		
+
         /* To be safe we first check if the backup directory exist and it has
          * atleast one seg* directory before removing the current data directory.
          *
          * This will fail with a security exception unless the database engine 
          * and all its callers have permission to read the backup directory.
          */
-        String[] bfilelist = PrivilegedFileOps.list(backupRoot);
+        String[] bfilelist = (String[])AccessController.doPrivileged(
+                                            new PrivilegedAction() {
+                                                public Object run() {
+                                                    return backupRoot.list();
+                                                }
+                                            });
         if(bfilelist !=null)
         {
             boolean segmentexist = false;
@@ -2487,12 +2485,28 @@ public class BaseDataFileFactory
                 //check if it is a  seg* directory
                 if(bfilelist[i].startsWith("seg"))
                 {
-                    bsegdir = new File(backupRoot , bfilelist[i]);
-                    if(PrivilegedFileOps.exists(bsegdir) &&
-                       PrivilegedFileOps.isDirectory(bsegdir))
-                    {
-                        segmentexist = true;
-                        break;
+                    // Segment directory in the backup
+                    final File bsegdir = new File(backupRoot , bfilelist[i]);
+                    boolean bsegdirExists = ((Boolean)
+                            AccessController.doPrivileged(
+                                new PrivilegedAction() {
+                                    public Object run() {
+                                        return new Boolean(bsegdir.exists());
+                                    }
+                            })).booleanValue();
+                    if (bsegdirExists) {
+                        // Make sure the file object points at a directory.
+                        boolean isDirectory = ((Boolean)
+                            AccessController.doPrivileged(
+                            new PrivilegedAction() {
+                                public Object run() {
+                                    return new Boolean(bsegdir.isDirectory());
+                                }
+                            })).booleanValue();
+                        if (isDirectory) {
+                            segmentexist = true;
+                            break;
+                        }
                     }
                 }
             }
@@ -2621,7 +2635,7 @@ public class BaseDataFileFactory
     }
 
     // PrivilegedExceptionAction method
-    public final Object run() throws Exception
+    public final Object run() throws IOException, StandardException
     {
         switch( actionCode)
         {

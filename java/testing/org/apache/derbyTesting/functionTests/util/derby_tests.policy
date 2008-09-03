@@ -1,5 +1,5 @@
 //
-// *  Derby - Class org.apache.derbyTesting.functionTests.tests.lang.SimpleTest
+// *  Derby - Class org.apache.derbyTesting.functionTests.util.derby_tests.policy
 // *  
 // * Licensed to the Apache Software Foundation (ASF) under one
 // * or more contributor license agreements.  See the NOTICE file
@@ -143,6 +143,7 @@ grant codeBase "${derbyTesting.codejar}derbynet.jar" {
   permission java.net.SocketPermission "${derbyTesting.serverhost}", "accept,connect";
   // Need to be able to write to trace file for NetworkServerControlApiTest
   permission java.io.FilePermission "${user.dir}${/}system${/}trace${/}-", "write"; 
+  permission java.io.FilePermission "${user.dir}${/}system${/}trace", "read,write";
     // Needed for NetworkServerMBean access (see JMX section above)
   permission org.apache.derby.security.SystemPermission "server", "control,monitor";
   

@@ -21,7 +21,6 @@
 
 package org.apache.derby.impl.services.monitor;
 
-import org.apache.derby.iapi.util.PrivilegedFileOps;
 import org.apache.derby.iapi.reference.MessageId;
 import org.apache.derby.iapi.reference.SQLState;
 
@@ -572,11 +571,11 @@ final class StorageFactoryService implements PersistentService
 		{
 			//First make sure backup service directory exists in the specified path
 			File backupRoot = new File(restoreFrom);
-			if(PrivilegedFileOps.exists(backupRoot))
+			if (fileExists(backupRoot))
 			{
 				//First make sure backup have service.properties
 				File bserviceProp = new File(restoreFrom, PersistentService.PROPERTIES_NAME);
-				if(PrivilegedFileOps.exists(bserviceProp))
+				if(fileExists(bserviceProp))
 				{
 					//create service root if required
 					if(createRoot)
@@ -822,6 +821,21 @@ final class StorageFactoryService implements PersistentService
 		return serviceName1.equals(serviceName2);
 	} // end of isSameService
 
+    /**
+     * Checks if the specified file exists.
+     *
+     * @param file the file to check
+     * @return {@code true} if the file exists, {@code false} if not.
+     * @throws SecurityException if the required privileges are missing
+     */
+    private final boolean fileExists(final File file) {
+        return ((Boolean)AccessController.doPrivileged(
+                new PrivilegedAction() {
+                    public Object run() {
+                        return new Boolean(file.exists());
+                    }
+            })).booleanValue();
+    }
 
     /**
      * Get the StorageFactory implementation for this PersistentService

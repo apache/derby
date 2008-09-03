@@ -98,7 +98,7 @@ grant codeBase "${derbyTesting.codejar}derbynet.jar" {
   permission java.net.SocketPermission "${derbyTesting.serverhost}", "accept,connect";
 
   // for testToggleTrace:
-  permission java.io.FilePermission "${derby.system.home}", "write"; 
+  permission java.io.FilePermission "${derby.system.home}", "read,write";
   permission java.io.FilePermission "${derby.system.home}${/}-", "write"; 
 };
 

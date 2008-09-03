@@ -22,12 +22,11 @@
 package org.apache.derby.impl.load;
 
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.*;    
-import org.apache.derby.iapi.util.PrivilegedFileOps;
 import java.io.File;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import org.apache.derby.iapi.error.PublicAPI;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.error.StandardException;
@@ -126,7 +125,7 @@ public class Export extends ExportAbstract{
         }
             File file = new File(fileName);
 
-            return PrivilegedFileOps.exists(file);
+            return fileExists(file);
 
         }
     /**
@@ -142,9 +141,25 @@ public class Export extends ExportAbstract{
                       SQLState.DATA_FILE_NULL));
         }
             File file = new File(fileName);
-            
-           return PrivilegedFileOps.exists(file); 
+
+            return fileExists(file);
         }
+
+    /**
+     * Checks if the specified file exists.
+     *
+     * @param file the file to check
+     * @return {@code true} if the file exists, {@code false} if not.
+     * @throws SecurityException if the required privileges are missing
+     */
+    private final boolean fileExists(final File file) {
+        return ((Boolean)AccessController.doPrivileged(
+                new PrivilegedAction() {
+                    public Object run() {
+                        return new Boolean(file.exists());
+                    }
+            })).booleanValue();
+    }
 
 	/**
 	 * SYSCS_EXPORT_TABLE  system Procedure from ij or from a Java application

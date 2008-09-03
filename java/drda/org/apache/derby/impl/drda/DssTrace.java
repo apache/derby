@@ -24,11 +24,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
-
-import org.apache.derby.iapi.util.PrivilegedFileOps;
-
 
 // Generic process and error tracing encapsulation.
 // This class also traces a DRDA communications buffer.
@@ -179,10 +177,16 @@ public class DssTrace
                 // Attempt to make the trace directory if it does not exist.
                 // If we can't create the directory the exception will occur 
                 // when trying to create the trace file.
-                File traceDirectory = new File(fileName).getParentFile();
-                if (traceDirectory != null)
-                {
-                    PrivilegedFileOps.mkdirs(traceDirectory);
+                final File traceDirectory = new File(fileName).getParentFile();
+                if (traceDirectory != null) {
+                    AccessController.doPrivileged(
+                            new PrivilegedAction() {
+                                public Object run() {
+                                    traceDirectory.mkdirs();
+                                    return null;
+                                }
+                            });
+
                 }
                 // The writer will be buffered for effeciency.
                 comBufferWriter =  ((PrintWriter)AccessController.doPrivileged(
