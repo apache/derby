@@ -522,13 +522,12 @@ public class PropertyUtil {
 
 
 	/**
-	 * Return true if username is defined as an effective property
-	 * i.e. there exists a property "<code>derby.user.</code><userid>"
-	 * in the database (or, possibly, in system properties if not
-	 * forbidden by derby.database.propertiesOnly). Note that <userid>
-	 * found in a property will be normalized to internal form before
-	 * comparison is performed against username, which is presumed
-	 * normalized already.
+	 * Return {@code true} if {@code username} is defined as a built-in user
+	 * i.e. there exists a property {@code derby.user.}&lt;userid&gt; in the
+	 * database (or, possibly, in system properties if not forbidden by {@code
+	 * derby.database.propertiesOnly}). Note that &lt;userid&gt; found in a
+	 * property will be normalized to case normal form before comparison is
+	 * performed against username, which is presumed normalized already.
 	 *
 	 * @param set object which implements PersistentSet interface
 	 *        (TransactionController)
@@ -566,9 +565,9 @@ public class PropertyUtil {
 
 	/**
 	 * Return true if username is defined as a system property
-	 * i.e. there exists a property "<code>derby.user.</code><userid>"
-	 * in the system properties. Note that <userid> will be
-	 * normalized to internal form before comparison is performed
+	 * i.e. there exists a property {@code derby.user.}&lt;userid&gt;
+	 * in the system properties. Note that &lt;userid&gt; will be
+	 * normalized to case normal form before comparison is performed
 	 * against username, which is presumed normalized already.
 	 * @param username Normalized authorization identifier
 	 * @return {@code true} if match found

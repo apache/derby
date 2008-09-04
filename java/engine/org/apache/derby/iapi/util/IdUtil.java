@@ -202,37 +202,44 @@ public abstract class IdUtil
 
 
 	/**
-	 * Given an internal SQL authorization identifier, convert it to a
+	 * Given a case normal form SQL authorization identifier, convert it to a
 	 * form that may be compared with the username of Derby builtin
-	 * authentication, which uses Java properties of the from
-	 * derby.user.<username>.
+	 * authentication, which uses Java properties of the form
+	 * {@code derby.user.}&lt;username&gt;.
+	 * <p>
+	 * The returned form is suitable for comparing against the property string,
+	 * cf.  {@code systemPropertiesExistsBuiltinUser}.
+	 * <p>
+	 * E.g.:
+	 * <p>
+	 * <pre>
+	 *  Argument -> Return
+	 *  ------------------
+	 *  EVE      -> eve       [will match Java property: derby.user.eve]
+	 *  eVe      -> "eVe"     [will match Java property: derby.user."eVe"]
+	 *  "eve"    -> """eve""" [will match Java property: derby.user."""eVe"""]
+	 *  \eve\    -> "\eve\"   [will match Java property: derby.user."\eve\"]
 	 *
-	 * The returned form is suitable for comparing to the property
-	 * string after it has been parsed by Java, e.g. any backslash
-	 * quotes has been processed. That is, this method does not add
-	 * backslash quotes, either.
+	 * The latter could look this if specified on a Unix shell command line:
 	 *
-	 * E.g.
-	 *  EVE -> eve   (never eVe, or EVE, or EVe: we use a lower case canonical
-	 *                form) [external property form: derby.user.eve]
-	 *  eVe -> "eVe"        [external property form: derby.user."eVe"]
-	 *  "eve" -> "eve"      [external property form: derby.user."\"eVe\""]
-	 *  \eve\ -> "\eve\"    [external property form: derby.user."\\eve\\"]
+	 *                      -Dderby.user.'"\eve\"'=&lt;password&gt;
 	 *
-	 * Since parseSQLIdentifier maps many-to-one, the backward mapping
-	 * is non-unique, so the chosen lower case canonical from is
-	 * arbitrary.
+	 * Note: The processing of properties specified on the command line do not
+	 * interpret backslash as escape in the way done by the
+	 * java.util.Properties#load method, so no extra backslash is needed above.
 	 *
-	 * E.g. we will not be able to correctly map back the non-canonical:
-	 *
-	 *                     [external property form: derby.user.eVe]
-	 *
-	 * since this is internally EVE (but see DERBY-3150), and maps back as eve.
-	 *
-	 * Note that the returned form is not necessarily parsable back
-	 * using parseSQLIdentifier; it may need further quoting, cf. examples
-	 * above of external property forms.
-	 *
+	 * </pre>
+	 * Since parseSQLIdentifier maps many-to-one, the backward mapping is
+	 * non-unique, so the chosen lower case canonical form is arbitrary,
+	 * e.g. we will not be able to correctly match the non-canonical:
+	 * <p>
+     * <pre>
+	 *                      [Java property: derby.user.eVe]
+	 * </pre>
+	 * since this is internally EVE (but see DERBY-3150), and maps back as eve
+	 * after the rules above.
+	 * @see org.apache.derby.iapi.services.property.PropertyUtil#propertiesContainsBuiltinUser
+	 * @see org.apache.derby.iapi.services.property.PropertyUtil#systemPropertiesExistsBuiltinUser
 	 */
 	public static String SQLIdentifier2CanonicalPropertyUsername(String authid){
 		boolean needsQuote = false;
