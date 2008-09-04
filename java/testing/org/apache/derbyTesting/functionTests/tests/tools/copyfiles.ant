@@ -9,8 +9,8 @@ iepnegativetests.sql
 iepnegativetests_app.properties
 ieptests.sql
 ieptests_app.properties
-importExportThruIJ.sql
-importExportThruIJ_app.properties
+importExportIJ.sql
+importExportIJ_app.properties
 importExport_app.properties
 importExport_sed.properties
 ij.sql

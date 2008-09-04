@@ -148,7 +148,7 @@ public class importExport {
 			//test less data case on the seconds line of input that 
 			//should throw end of file exception. 
 			try{
-				doImportFromFile("extin/EndOfFile.txt" , "T4" , null , null , null, 0);
+				doImportFromFile("extin/TwoLineBadEOF.dat" , "T4" , null , null , null, 0);
 			}catch (Exception ex) {
 				printExceptionMessage(ex);
 			}
@@ -352,10 +352,13 @@ public class importExport {
 			verifyCount(
 						stmt.executeUpdate("CREATE TABLE T3 (C1 BLOB)"), 0);
 			verifyCount(
-						stmt.executeUpdate("create table T4 (   Account int,    Fname   char(30),"+
-                        "Lname   char(30), Company varchar(35), Address varchar(40), City    varchar(20),"+
- 					   "State   char(5), Zip     char(10), Payment decimal(8,2), Balance decimal(8,2))"),0);
-			
+
+						stmt.executeUpdate("create table T4 (   Account int,  Name   char(30), Jobdesc char(40), " +
+										   "Company varchar(35), Address1 varchar(40), Address2 varchar(40), " +
+										   "City    varchar(20), State   char(5), Zip char(10), Country char(10), " +
+										   "Phone1  char(20), Phone2  char(20), email   char(30), web     char(30), " +
+										   "Fname   char(30), Lname   char(30), Comment char(30), AccDate char(30), " +
+										   "Payment decimal(8,2), Balance decimal(8,2))"),0);
 		} else {
 			verifyBoolean( stmt.execute("DELETE FROM t1"), false);
 		}
