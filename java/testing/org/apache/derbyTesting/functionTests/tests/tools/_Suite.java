@@ -50,6 +50,7 @@ public class _Suite extends BaseTestCase {
         suite.addTest(ImportExportBinaryDataTest.suite());
         suite.addTest(ImportExportLobTest.suite());
         suite.addTest(ImportExportProcedureTest.suite());
+        suite.addTest(ImportExportIJTest.suite());
         suite.addTest(ToolScripts.suite());
         suite.addTest(SysinfoCPCheckTest.suite());
         suite.addTest(SysinfoLocaleTest.suite());
