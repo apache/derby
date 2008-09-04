@@ -22,6 +22,7 @@
 package org.apache.derby.iapi.types;
 
 import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.reference.MessageId;
 
 import org.apache.derby.iapi.services.io.ArrayInputStream;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
@@ -42,6 +43,7 @@ import org.apache.derby.iapi.services.io.StreamStorable;
 import org.apache.derby.iapi.services.io.FormatIdInputStream;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.services.i18n.MessageService;
 
 import org.apache.derby.iapi.types.BooleanDataValue;
 import org.apache.derby.iapi.types.StringDataValue;
@@ -1053,7 +1055,8 @@ abstract class SQLBinary
 
 		if (variableLength != -1 && variableLength > declaredLength)
 				throw StandardException.newException(SQLState.LANG_STRING_TRUNCATION, getTypeName(), 
-							"(Binary data value not displayed)",
+							MessageService.getTextMessage(
+								MessageId.BINARY_DATA_HIDDEN),
 							String.valueOf(declaredLength));
 	}
 

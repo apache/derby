@@ -6945,6 +6945,12 @@ MessageId.java.
                 <text>Maximum depth of nested triggers was exceeded.</text>
             </msg>
 
+            <!-- Message BIN01 used in SQLBinary.java -->
+            <msg>
+                <name>BIN01</name>
+                <text>(Binary data value not displayed)</text>
+            </msg>
+
             <msg>
                 <name>S0022</name>
                 <text>Column '{0}' not found.</text>

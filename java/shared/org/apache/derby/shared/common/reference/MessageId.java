@@ -64,6 +64,11 @@ public interface MessageId {
                                                          // derby.system.durability was set to test
 
     /*
+     * SQLBinary.java internal translatable strings
+     */
+    String BINARY_DATA_HIDDEN               = "BIN01";
+
+    /*
      * Raw Store data
      */
 
