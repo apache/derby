@@ -207,10 +207,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         // meta-data queries.
         suite.addTest(
             TestConfiguration.singleUseDatabaseDecorator(
-                // until DERBY-177 is fixed, set lock timeout to prevent the
-                // test from waiting one minute
-                DatabasePropertyTestSetup.setLockTimeouts(
-                    new DatabaseMetaDataTest("initialCompilationTest"), 2, 4)));
+                new DatabaseMetaDataTest("initialCompilationTest")));
 
         // Test for DERBY-3693 needs a fresh database to ensure that the size
         // of SYSTABLES is so small that creating a relatively small number of

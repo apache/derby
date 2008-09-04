@@ -29,7 +29,6 @@ import org.apache.derbyTesting.functionTests.util.BigDecimalHandler;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
-import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
@@ -292,13 +291,7 @@ public class UpdatableResultSetTest  extends BaseJDBCTestCase {
         suite.addTest(TestConfiguration.clientServerDecorator(
                 new CleanDatabaseTestSetup(clientSuite)));
 
-        // DERBY-177: The internal transaction that tries to compile the
-        // trigger in testDeleteRowWithDeleteTrigger gets a lock timeout
-        // because the main transaction has an exclusive lock on the trigger
-        // statement. It does not fail, because the compilation is retried in
-        // the main transaction where it completes successfully. Reduce the
-        // lock timeout to make the test run faster until the bug is fixed.
-        return DatabasePropertyTestSetup.setLockTimeouts(suite, 2, 4);
+        return suite;
     }
     
     private static TestSuite baseSuite(String name) {
