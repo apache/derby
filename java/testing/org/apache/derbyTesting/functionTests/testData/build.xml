@@ -29,7 +29,7 @@
     </copy>
     <copy todir="${out.dir}/${derby.testing.functest.dir}/testData/ImportExport">
       <fileset dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/testData/ImportExport"
-        includes="*.asc,*.del,*.txt,*.utf,*.dat"/>
+        includes="*.del,*.txt,*.dat"/>
     </copy>
   </target>
 
