@@ -450,13 +450,13 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
 	}
 
 	public void addSPSDescriptor(SPSDescriptor descriptor,
-			TransactionController tc, boolean wait) throws StandardException {
+			TransactionController tc) throws StandardException {
 		// TODO Auto-generated method stub
 
 	}
 
 	public void updateSPS(SPSDescriptor spsd, TransactionController tc,
-			boolean recompile, boolean updateSYSCOLUMNS, boolean wait,
+			boolean recompile, boolean updateSYSCOLUMNS,
 			boolean firstCompilation) throws StandardException {
 		// TODO Auto-generated method stub
 
@@ -793,12 +793,6 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
-	public void addDescriptor(TupleDescriptor tuple, TupleDescriptor parent,
-			int catalogNumber, boolean allowsDuplicates,
-			TransactionController tc, boolean wait) throws StandardException {
-	}
-
 
 	public void dropDependentsStoredDependencies(UUID dependentsUUID,
 			TransactionController tc, boolean wait) throws StandardException {

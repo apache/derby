@@ -1790,23 +1790,12 @@ public final class	DataDictionaryImpl
 							  TransactionController tc)
 		throws StandardException
 	{
-		addDescriptor(td, parent, catalogNumber, duplicatesAllowed, tc, true);
-	}
-
-	/**
-	 * @inheritDoc
-	 */
-	public void addDescriptor(TupleDescriptor td, TupleDescriptor parent,
-							  int catalogNumber, boolean duplicatesAllowed,
-							  TransactionController tc, boolean wait)
-		throws StandardException
-	{
 		TabInfoImpl ti =  (catalogNumber < NUM_CORE) ? coreInfo[catalogNumber] :
 			getNonCoreTI(catalogNumber);
 
 		ExecRow row = ti.getCatalogRowFactory().makeRow(td, parent);
 
-		int insertRetCode = ti.insertRow(row, tc, wait);
+		int insertRetCode = ti.insertRow(row, tc);
 
 		if (!duplicatesAllowed)
 		{
@@ -3377,9 +3366,6 @@ public final class	DataDictionaryImpl
 	 * @param colsToSet 			Array of ints of columns to be modified,
 	 *								1 based.  May be null (all cols).
 	 * @param tc					The TransactionController to use
-	 * @param wait		If true, then the caller wants to wait for locks. False will be
-	 * when we using a nested user xaction - we want to timeout right away if the parent
-	 * holds the lock.  (bug 4821)
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
@@ -3387,8 +3373,7 @@ public final class	DataDictionaryImpl
 										UUID		formerUUID,
 										String		formerName,
 										int[]		colsToSet,
-										TransactionController tc,
-										boolean wait)
+										TransactionController tc)
 		throws StandardException
 	{
 		ExecIndexRow				keyRow1 = null;
@@ -3458,8 +3443,7 @@ public final class	DataDictionaryImpl
 					 SYSCOLUMNSRowFactory.SYSCOLUMNS_INDEX1_ID,
 					 bArray,
 					 colsToSet,
-					 tc,
-					 wait);
+					 tc);
 	}
 
 	/**
@@ -3959,8 +3943,7 @@ public final class	DataDictionaryImpl
 	public void	addSPSDescriptor
 	(
 		SPSDescriptor 			descriptor,
-		TransactionController	tc,
-		boolean wait
+		TransactionController	tc
 	) throws StandardException
 	{
 		ExecRow        			row;
@@ -3982,7 +3965,7 @@ public final class	DataDictionaryImpl
 			row = rf.makeSYSSTATEMENTSrow(compileMe, descriptor);
 	
 			// insert row into catalog and all its indices
-			insertRetCode = ti.insertRow(row, tc, wait);
+			insertRetCode = ti.insertRow(row, tc);
 		}
 
 		// Throw an exception duplicate table descriptor
@@ -3995,14 +3978,14 @@ public final class	DataDictionaryImpl
 												 descriptor.getSchemaDescriptor().getSchemaName());
 		}
 
-		addSPSParams(descriptor, tc, wait);
+		addSPSParams(descriptor, tc);
 	}
 
 	/**
 	 * Add a column in SYS.SYSCOLUMNS for each parameter in the
 	 * parameter list.
 	 */
-	private void addSPSParams(SPSDescriptor spsd, TransactionController tc, boolean wait)
+	private void addSPSParams(SPSDescriptor spsd, TransactionController tc)
 			throws StandardException
 	{
 		UUID 					uuid = spsd.getUUID();
@@ -4034,7 +4017,7 @@ public final class	DataDictionaryImpl
 										
 			addDescriptor(cd, null, SYSCOLUMNS_CATALOG_NUM, 
 						  false, // no chance of duplicates here
-						  tc, wait);
+						  tc);
 		}
 	}
 
@@ -4079,12 +4062,8 @@ public final class	DataDictionaryImpl
 	 * @param tc			The transaction controller
 	 * @param updateParamDescriptors If true, will update the
 	 *						parameter descriptors in SYS.SYSCOLUMNS.
-	 * @param wait		If true, then the caller wants to wait for locks. False will be
 	 * @param firstCompilation  true, if Statement is getting compiled for first
 	 *                          time and SPS was created with NOCOMPILE option.
-	 *
-	 * when we using a nested user xaction - we want to timeout right away if the parent
-	 * holds the lock.  (bug 4821)
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -4093,14 +4072,12 @@ public final class	DataDictionaryImpl
 			TransactionController	tc,
 			boolean                 recompile,
 			boolean					updateParamDescriptors,
-			boolean					wait,
 			boolean                 firstCompilation)
 						throws StandardException
 	{
 		ExecIndexRow				keyRow1 = null;
 		ExecRow    					row;
 		DataValueDescriptor			idOrderable;
-		DataValueDescriptor			columnNameOrderable;
 		TabInfoImpl						ti = getNonCoreTI(SYSSTATEMENTS_CATALOG_NUM);
 		SYSSTATEMENTSRowFactory  rf = (SYSSTATEMENTSRowFactory) ti.getCatalogRowFactory();
 		int[] updCols;
@@ -4148,8 +4125,7 @@ public final class	DataDictionaryImpl
 					 SYSSTATEMENTSRowFactory.SYSSTATEMENTS_INDEX1_ID,
 					 bArray,
 					 updCols,
-					 tc,
-					 wait);
+					 tc);
 
 
 		/*
@@ -4180,7 +4156,7 @@ public final class	DataDictionaryImpl
 			 *creation time. As this is the first time we are compiling paramter
 			 *infor should be inserted instead of the update.
 			 */
-			addSPSParams(spsd, tc, wait);
+			addSPSParams(spsd, tc);
 		}
 		else
 		{
@@ -4220,8 +4196,7 @@ public final class	DataDictionaryImpl
 									   cd.getReferencingUUID(), 
 									   cd.getColumnName(),
 									   columnsToSet, 
-									   tc,
-									   wait);
+									   tc);
 			}
 		}
 	}
@@ -5796,7 +5771,7 @@ public final class	DataDictionaryImpl
 		}
 
 		// insert row into catalog and all its indices
-		ti.insertRow(row, tc, true);
+		ti.insertRow(row, tc);
 	}
 
 	/**
@@ -7309,8 +7284,7 @@ public final class	DataDictionaryImpl
 								td.getUUID(),
 								columnName,
 								columnNameColArray, 
-								tc,
-								true);
+								tc);
 
 	}
 
@@ -7949,7 +7923,7 @@ public final class	DataDictionaryImpl
 		TabInfoImpl						ti = getNonCoreTI(SYSDUMMY1_CATALOG_NUM);
 		ExecRow row = ti.getCatalogRowFactory().makeRow(null, null);
 
-		int insertRetCode = ti.insertRow(row, tc, true);
+		int insertRetCode = ti.insertRow(row, tc);
 	}
 
 	/**
@@ -9388,7 +9362,7 @@ public final class	DataDictionaryImpl
 												   spsText, //sps text
 												   !nocompile );
 			
-			addSPSDescriptor(spsd, tc, true);
+			addSPSDescriptor(spsd, tc);
 		}
 	}
 
@@ -11834,7 +11808,7 @@ public final class	DataDictionaryImpl
             //so that means we have to enter a new row in system catalog for
             //this grant.
             ExecRow row = ti.getCatalogRowFactory().makeRow( perm, (TupleDescriptor) null);
-            int insertRetCode = ti.insertRow(row, tc, true /* wait */);
+            int insertRetCode = ti.insertRow(row, tc);
             if( SanityManager.DEBUG)
                 SanityManager.ASSERT( insertRetCode == TabInfoImpl.ROWNOTDUPLICATE,
                                       "Race condition in inserting table privilege.");
@@ -11883,7 +11857,8 @@ public final class	DataDictionaryImpl
                         changedColCount == colsToUpdate.length,
                         "return value of " + rf.getClass().getName() +
                         ".orPermissions does not match the number of booleans it set in colsChanged.");
-                ti.updateRow( key, existingRow, primaryIndexNumber, indicesToUpdate, colsToUpdate, tc, true /* wait */);
+                ti.updateRow(key, existingRow, primaryIndexNumber,
+                             indicesToUpdate, colsToUpdate, tc);
             }
         }
         // Remove cached permissions data. The cache may hold permissions data for this key even if

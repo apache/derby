@@ -1072,10 +1072,7 @@ public class SPSDescriptor extends TupleDescriptor
 	private void updateSYSSTATEMENTS(LanguageConnectionContext lcc, int mode, TransactionController tc)
 		throws StandardException
 	{
-		int[] 					colsToUpdate;
 		boolean					updateSYSCOLUMNS,  recompile;
-		//bug 4821 - we want to wait for locks if updating sysstatements on parent transaction
-		boolean wait = false;
 		boolean firstCompilation = false;
 		if (mode == RECOMPILE)
 		{
@@ -1106,14 +1103,12 @@ public class SPSDescriptor extends TupleDescriptor
 
 		if (tc == null) { //bug 4821 - tc will passed null if we want to use the user transaction
 			tc = lcc.getTransactionExecute();
-			wait = true;
 		}
 
 		dd.updateSPS(this,
 					 tc, 
 					 recompile,
 					 updateSYSCOLUMNS,
-					 wait,
 					 firstCompilation);
 	}
 

@@ -413,19 +413,18 @@ class TabInfoImpl
 	 *
 	 *	@param	row			row to insert
 	 *	@param	tc			transaction
-	 *	@param	wait		to wait on lock or quickly TIMEOUT
 	 *	@return	row number (>= 0) if duplicate row inserted into an index
 	 *			ROWNOTDUPLICATE otherwise
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	int insertRow( ExecRow row, TransactionController tc, boolean wait)
+	int insertRow( ExecRow row, TransactionController tc)
 		throws StandardException
 	{
 
 		RowLocation[] 			notUsed = new RowLocation[1]; 
 
-		return insertRowListImpl(new ExecRow[] {row},tc,notUsed, wait);
+		return insertRowListImpl(new ExecRow[] {row},tc,notUsed);
 	}
 
 	/**
@@ -446,7 +445,7 @@ class TabInfoImpl
 	{
 		RowLocation[] 			notUsed = new RowLocation[1]; 
 
-		return insertRowListImpl(rowList,tc,notUsed, true);
+		return insertRowListImpl(rowList,tc,notUsed);
 	}
 
 	/**
@@ -461,12 +460,11 @@ class TabInfoImpl
 	  @param tc	transaction controller
 	  @param rowLocationOut on output rowLocationOut[0] is set to the
 	         last RowLocation inserted.
-	  @param wait   to wait on lock or quickly TIMEOUT
 	  @return row number (>= 0) if duplicate row inserted into an index
 	  			ROWNOTDUPLICATE otherwise
 	 */
-	private int insertRowListImpl(ExecRow[] rowList, TransactionController tc, RowLocation[] rowLocationOut,
-								   boolean wait)
+	private int insertRowListImpl(ExecRow[] rowList, TransactionController tc,
+                                  RowLocation[] rowLocationOut)
 		throws StandardException
 	{
 		ConglomerateController		heapController;
@@ -482,8 +480,7 @@ class TabInfoImpl
             tc.openConglomerate(
                 getHeapConglomerate(), 
                 false,
-				(TransactionController.OPENMODE_FORUPDATE |
-                    ((wait) ? 0 : TransactionController.OPENMODE_LOCK_NOWAIT)),
+				TransactionController.OPENMODE_FORUPDATE,
                 TransactionController.MODE_RECORD,
                 TransactionController.ISOLATION_REPEATABLE_READ);
 		
@@ -504,8 +501,7 @@ class TabInfoImpl
 		            tc.openConglomerate( 
 			            conglomNumber, 
                         false,
-						(TransactionController.OPENMODE_FORUPDATE |
-                    		((wait) ? 0 : TransactionController.OPENMODE_LOCK_NOWAIT)),
+						TransactionController.OPENMODE_FORUPDATE,
 					    TransactionController.MODE_RECORD,
 						TransactionController.ISOLATION_REPEATABLE_READ);
 			}
@@ -935,44 +931,12 @@ class TabInfoImpl
 						   int						indexNumber,
 						   boolean[]				indicesToUpdate,
 						   int[]					colsToUpdate,
-						   TransactionController	tc )
-		throws StandardException
-	{
-		updateRow(key, newRow, indexNumber, indicesToUpdate, colsToUpdate, tc, true);
-	}
-
-	/**
-	 * Updates a base row in a catalog and updates all the corresponding
-	 * index rows.
-	 *
-	 *	@param	key			key row
-	 *	@param	newRow		new version of the row
-	 *	@param	indexNumber	index that key operates
-	 *	@param	indicesToUpdate	array of booleans, one for each index on the catalog.
-	 *							if a boolean is true, that means we must update the
-	 *							corresponding index because changes in the newRow
-	 *							affect it.
-	 *	@param  colsToUpdate	array of ints indicating which columns (1 based)
-	 *							to update.  If null, do all.
-	 *	@param	tc			transaction controller
-	 *	@param wait		If true, then the caller wants to wait for locks. False will be
-	 *	when we using a nested user xaction - we want to timeout right away if the parent
-	 *	holds the lock.  (bug 4821)
-	 *
-	 * @exception StandardException		Thrown on failure
-	 */
-	void updateRow( ExecIndexRow				key, 
-						   ExecRow					newRow, 
-						   int						indexNumber,
-						   boolean[]				indicesToUpdate,
-						   int[]					colsToUpdate,
-						   TransactionController	tc,
-						   boolean	wait )
+						   TransactionController	tc)
 		throws StandardException
 	{
 		ExecRow[] newRows = new ExecRow[1];
 		newRows[0] = newRow;
-		updateRow(key, newRows, indexNumber, indicesToUpdate, colsToUpdate, tc, wait);
+		updateRow(key, newRows, indexNumber, indicesToUpdate, colsToUpdate, tc, true);
 	}
 
 	/**

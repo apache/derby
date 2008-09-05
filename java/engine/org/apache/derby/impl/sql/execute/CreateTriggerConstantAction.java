@@ -399,7 +399,7 @@ class CreateTriggerConstantAction extends DDLSingleTableConstantAction
 		spsd.prepareAndRelease(lcc, triggerTable);
 
 
-		dd.addSPSDescriptor(spsd, tc, true);
+		dd.addSPSDescriptor(spsd, tc);
 
 		return spsd;
 	}

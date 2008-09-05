@@ -162,14 +162,16 @@ public class BasicDependencyManager implements DependencyManager {
 				/* Add a stored dependency */
 				LanguageConnectionContext	lcc = getLanguageConnectionContext(cm);
 				DependencyDescriptor		dependencyDescriptor;
-				boolean wait = (tc == null);
+                // tc == null means do it in the user transaction
+                TransactionController tcToUse =
+                        (tc == null) ? lcc.getTransactionExecute() : tc;
 			
 				dependencyDescriptor = new DependencyDescriptor(d, p);
 
 				/* We can finally call the DataDictionary to store the dependency */
 				dd.addDescriptor(dependencyDescriptor, null,
 								 DataDictionary.SYSDEPENDS_CATALOG_NUM, true,
-								 ((wait)?lcc.getTransactionExecute():tc), wait);
+								 tcToUse);
 			}
 		}
 	}
