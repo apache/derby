@@ -1911,11 +1911,6 @@ where l.resourceid = ror.id and ror.currentversion = rov.id and l.ownerid = be.i
 
 --echo === Create Users ================================================;
 
--- if we don't commit, the following insert will block due to fix of beetle 4821
-commit;
-
--- The following insert statement shouldn't block for 2 minutes!! The compile of the trigger
--- shouldn't wait for timeout!!
 insert into xr.businessentity ( ID, type, name, authID, createdate, changedate )
 	values ('26747154-0dfc-46af-a85d-1dc30c230c4e', 
 		'USER', 
