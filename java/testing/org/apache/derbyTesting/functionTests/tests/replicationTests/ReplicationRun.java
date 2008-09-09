@@ -103,7 +103,7 @@ public class ReplicationRun extends BaseTestCase
     
     final static String FS = File.separator;
     final static String PS = File.pathSeparator;
-    final static String JVMloc = FS+".."+FS+"bin"+FS+"java"; // "/../bin/java"
+    final static String JVMloc = BaseTestCase.getJavaExecutableName();
     
     static boolean showSysinfo = false;
     static long SLEEP_TIME_MILLIS = 5000L;
@@ -316,7 +316,7 @@ public class ReplicationRun extends BaseTestCase
                 // See TestConfiguration: startNetworkServer and stopNetworkServer
                 + PS + test_jars;
         
-        String clientJvm = clientVM+JVMloc;
+        String clientJvm = BaseTestCase.getJavaExecutableName();
         
         String command = null;
         
@@ -400,7 +400,7 @@ public class ReplicationRun extends BaseTestCase
                 // See TestConfiguration: startNetworkServer and stopNetworkServer
                 + PS + test_jars;
         
-        String clientJvm = clientVM+JVMloc;
+        String clientJvm = BaseTestCase.getJavaExecutableName();
         
         String command = null;
         
@@ -498,7 +498,7 @@ public class ReplicationRun extends BaseTestCase
                 // See TestConfiguration: startNetworkServer and stopNetworkServer
                 + PS + test_jars;
         
-        String clientJvm = clientVM+JVMloc;
+        String clientJvm = BaseTestCase.getJavaExecutableName();
         
         String command = null;
         
@@ -577,7 +577,7 @@ public class ReplicationRun extends BaseTestCase
                 // See TestConfiguration: startNetworkServer and stopNetworkServer
                 + PS + test_jars;
         
-        String clientJvm = clientVM+JVMloc;
+        String clientJvm = BaseTestCase.getJavaExecutableName();
         
         String command = null;
         
@@ -642,7 +642,7 @@ public class ReplicationRun extends BaseTestCase
         { // Use full classpath when running locally. Can not vary server versions!
             ijClassPath = classPath;
         }
-        String clientJvm = jvmVersion+JVMloc;
+        String clientJvm = BaseTestCase.getJavaExecutableName();
         
         String command = clientJvm 
                 + " -Dij.driver=" + DRIVER_CLASS_NAME
@@ -731,11 +731,10 @@ public class ReplicationRun extends BaseTestCase
         }
         else
         {
-            startMaster_ij(jvmVersion,
-                    dbName,
-                    masterHost, masterServerPort,
-                    slaveReplInterface, slaveReplPort,
-                    testClientHost);
+            startMaster_ij(dbName,
+                    masterHost,
+                    masterServerPort, slaveReplInterface,
+                    slaveReplPort, testClientHost);
         }
         /* else if ...
         {
@@ -760,7 +759,7 @@ public class ReplicationRun extends BaseTestCase
         
         String masterClassPath = derbyMasterVersion +FS+ "derbynet.jar";
         
-        String clientJvm = clientVM+JVMloc;
+        String clientJvm = BaseTestCase.getJavaExecutableName();
         
         if ( masterHost.equals("localhost") )
         { // Use full classpath when running locally. Can not vary server versions!
@@ -794,14 +793,12 @@ public class ReplicationRun extends BaseTestCase
                 "startMaster_CLI ");
         
     }
-    private void startMaster_ij(String jvmVersion,
-            String dbName,
-            String masterHost,  // Where the master db is run.
-            int masterServerPort, // master server interface accepting client requests
+    private void startMaster_ij(String dbName,
+            String masterHost,
+            int masterServerPort,  // Where the master db is run.
+            String slaveReplInterface, // master server interface accepting client requests
             
-            String slaveReplInterface, // slaveHost,
-            int slaveReplPort, // slavePort)
-            
+            int slaveReplPort, // slaveHost,
             String testClientHost)
             throws Exception
     {
@@ -825,7 +822,7 @@ public class ReplicationRun extends BaseTestCase
             ijClassPath = classPath;
         }
         
-        String clientJvm = jvmVersion+JVMloc;
+        String clientJvm = BaseTestCase.getJavaExecutableName();
         
         String command = clientJvm // "java"
                 + " -Dij.driver=" + DRIVER_CLASS_NAME
@@ -1002,7 +999,7 @@ public class ReplicationRun extends BaseTestCase
             slaveClassPath = classPath;
         }
         
-        String clientJvm = clientVM+JVMloc;
+        String clientJvm = BaseTestCase.getJavaExecutableName();
         
         /*
          * java -classpath ${SLAVE_LIB}/derbynet.jar org.apache.derby.drda.NetworkServerControl \
@@ -1059,7 +1056,7 @@ public class ReplicationRun extends BaseTestCase
             ijClassPath = classPath;
         }
         
-        String clientJvm = jvmVersion+JVMloc;
+        String clientJvm = BaseTestCase.getJavaExecutableName();
         
         String command = clientJvm // "java"
                 + " -Dij.driver=" + DRIVER_CLASS_NAME
@@ -1190,7 +1187,7 @@ public class ReplicationRun extends BaseTestCase
             ijClassPath = classPath;
         }
         
-        String clientJvm = jvmVersion+JVMloc;
+        String clientJvm = BaseTestCase.getJavaExecutableName();
         
         String command = clientJvm // "java"
                 + " -Dij.driver=" + DRIVER_CLASS_NAME
@@ -1250,7 +1247,7 @@ public class ReplicationRun extends BaseTestCase
             ijClassPath = classPath;
         }
         
-        String clientJvm = jvmVersion+JVMloc;
+        String clientJvm = BaseTestCase.getJavaExecutableName();
         
         String command = clientJvm // "java"
                 + " -Dij.driver=" + DRIVER_CLASS_NAME
@@ -1330,7 +1327,7 @@ public class ReplicationRun extends BaseTestCase
             ijClassPath = classPath;
         }
         
-        String clientJvm = jvmVersion+JVMloc;
+        String clientJvm = BaseTestCase.getJavaExecutableName();
         
         String command = clientJvm // "java"
                 + " -Dij.driver=" + DRIVER_CLASS_NAME
@@ -2170,8 +2167,7 @@ public class ReplicationRun extends BaseTestCase
          
         final String debugId = "startServer@" + serverHost + ":" + serverPort + " ";
         util.DEBUG(debugId+"+++ StartServer " + serverVM + " / " + serverVersion);
-        
-        String serverJvm = serverVM+JVMloc;
+                
         String serverClassPath = serverVersion + FS+"derby.jar"
                 + PS + serverVersion + FS+"derbynet.jar";
         if ( serverHost.equals("localhost") )
@@ -2186,7 +2182,7 @@ public class ReplicationRun extends BaseTestCase
         
         String workingDirName = userDir+FS+dbSubDirPath;// "system" for this server
         
-        final String[] commandElements = {serverJvm
+        final String[] commandElements = {BaseTestCase.getJavaExecutableName()
                 , " -Dderby.system.home=" + workingDirName
                 , " -Dderby.infolog.append=true"
                 // , " -Dderby.language.logStatementText=true" // Goes into derby.log: Gets HUGE!
@@ -2378,7 +2374,7 @@ public class ReplicationRun extends BaseTestCase
         util.DEBUG("+++ stopServer " + serverVM + " / " + serverVersion
                 + " " + debugId);
         
-        String serverJvm = serverVM+JVMloc;
+        String serverJvm = BaseTestCase.getJavaExecutableName();
         String serverClassPath = serverVersion + FS+"derby.jar"
                 + PS + serverVersion + FS+"derbynet.jar";
         if ( serverHost.equals("localhost") )
@@ -2695,7 +2691,7 @@ public class ReplicationRun extends BaseTestCase
         { // Use full classpath when running locally. Can not vary server versions!
             ijClassPath = classPath;
         }
-            String clientJvm = jvmVersion+JVMloc;
+            String clientJvm = BaseTestCase.getJavaExecutableName();
             String command = "rm -rf /"+masterDatabasePath+FS+dbSubPath+FS+database+";" // FIXME! for slave load!
                     + clientJvm // "java"
                     + " -Dij.driver=" + DRIVER_CLASS_NAME

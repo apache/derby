@@ -505,6 +505,20 @@ public abstract class BaseTestCase
 	    }
 	    return pr;
 	}
+
+	/**
+         * Return the executable name for spawning java commands.
+         * This will be <path to j9>/j9  for j9 jvms.
+	 * @return full path to java executable.
+         */
+         public static final String getJavaExecutableName() {
+             String vmname = getSystemProperty("com.ibm.oti.vm.exe");
+             if (vmname == null)
+                 vmname = getSystemProperty("java.home") + File.separator + "bin" +
+                 File.separator +"java";
+             return vmname;
+         }
+          
    
    /**
     * Reads output from a process and returns it as a string.

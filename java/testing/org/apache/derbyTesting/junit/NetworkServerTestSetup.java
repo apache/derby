@@ -249,7 +249,7 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
         String              classpath = BaseTestCase.getSystemProperty( "java.class.path" );
         boolean         skipHostName = false;
 
-        al.add( "java" );
+        al.add( BaseTestCase.getJavaExecutableName() );
         al.add( "-classpath" );
         al.add( classpath );
         

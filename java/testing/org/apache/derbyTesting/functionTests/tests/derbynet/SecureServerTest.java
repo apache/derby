@@ -467,7 +467,7 @@ public class SecureServerTest extends BaseJDBCTestCase
         StringBuffer    buffer = new StringBuffer();
         String          classpath = getSystemProperty( "java.class.path" );
 
-        buffer.append( "java -classpath " );
+        buffer.append( getJavaExecutableName() + " -classpath " );
         buffer.append( classpath );
         buffer.append( " -Demma.verbosity.level=silent");
         buffer.append( " org.apache.derby.drda.NetworkServerControl -p " + portNumber + " " + commandSpecifics );
