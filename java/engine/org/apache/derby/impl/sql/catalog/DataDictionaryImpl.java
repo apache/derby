@@ -205,24 +205,25 @@ public final class	DataDictionaryImpl
 	* returns a CHAR(10).
 	* 
 	* 
-	* This simple table assumes zero or a single parameter
+    * This simple table can handle an arbitrary number of arguments
 	* and RETURNS NULL ON NULL INPUT. The scheme could be expanded
 	* to handle other function options such as other parameters if needed.
-	*[0] = FUNCTION name
-	*[1] = RETURNS type
-	*[2] = Java class
-	*[3] = method name and signature
-	*[4] = parameter type (single parameter) or null for no parameters.
+    *[0]    = FUNCTION name
+    *[1]    = RETURNS type
+    *[2]    = Java class
+    *[3]    = method name and signature
+    *[4..N] = arguments (optional, if not present zero arguments is assumed)
 	*
 	*/
 	private static final String[][] SYSFUN_FUNCTIONS = {
 			{"ACOS", "DOUBLE", "java.lang.StrictMath", "acos(double)", "DOUBLE"},
 			{"ASIN", "DOUBLE", "java.lang.StrictMath", "asin(double)", "DOUBLE"},
 			{"ATAN", "DOUBLE", "java.lang.StrictMath", "atan(double)", "DOUBLE"},
+            {"ATAN2", "DOUBLE", "java.lang.StrictMath", "atan2(double,double)", "DOUBLE", "DOUBLE"},
 			{"COS", "DOUBLE", "java.lang.StrictMath", "cos(double)", "DOUBLE"},
 			{"SIN", "DOUBLE", "java.lang.StrictMath", "sin(double)", "DOUBLE"},
 			{"TAN", "DOUBLE", "java.lang.StrictMath", "tan(double)", "DOUBLE"},
-			{"PI", "DOUBLE", "org.apache.derby.catalog.SystemProcedures", "PI()", null},
+            {"PI", "DOUBLE", "org.apache.derby.catalog.SystemProcedures", "PI()"},
 			{"DEGREES", "DOUBLE", "java.lang.StrictMath", "toDegrees(double)", "DOUBLE"},
 			{"RADIANS", "DOUBLE", "java.lang.StrictMath", "toRadians(double)", "DOUBLE"},
 			{"LN", "DOUBLE", "java.lang.StrictMath", "log(double)", "DOUBLE"},
@@ -233,7 +234,7 @@ public final class	DataDictionaryImpl
 			{"CEILING", "DOUBLE", "java.lang.StrictMath", "ceil(double)", "DOUBLE"}, // Same as CEIL
 			{"FLOOR", "DOUBLE", "java.lang.StrictMath", "floor(double)", "DOUBLE"},
 			{"SIGN", "INTEGER", "org.apache.derby.catalog.SystemProcedures", "SIGN(double)", "DOUBLE"},
-			{"RANDOM", "DOUBLE", "java.lang.StrictMath", "random()", null},
+            {"RANDOM", "DOUBLE", "java.lang.StrictMath", "random()"},
 			{"RAND", "DOUBLE", "org.apache.derby.catalog.SystemProcedures", "RAND(int)", "INTEGER"}, // Escape function spec.
 			{"COT", "DOUBLE", "org.apache.derby.catalog.SystemProcedures", "COT(double)", "DOUBLE"},
 			{"COSH", "DOUBLE", "org.apache.derby.catalog.SystemProcedures", "COSH(double)", "DOUBLE"},
@@ -241,22 +242,19 @@ public final class	DataDictionaryImpl
 			{"TANH", "DOUBLE", "org.apache.derby.catalog.SystemProcedures", "TANH(double)", "DOUBLE"}
 	};
 	
+
+    /**
+     * The index of the first parameter in entries in the SYSFUN_FUNCTIONS
+     * table. Used to determine the parameter count (zero to many).
+     */
+    private static final int SYSFUN_FIRST_PARAMETER_INDEX =  4;
+
 	/**
 	 * Runtime definition of the functions from SYSFUN_FUNCTIONS.
 	 * Populated dynamically as functions are called.
 	 */
 	private static final AliasDescriptor[] SYSFUN_AD =
 		new AliasDescriptor[SYSFUN_FUNCTIONS.length];
-	
-	/**
-	 * Dummy parameter name for functions from SYSFUN_FUNCTIONS.
-	 */
-	private static final String[] SYSFUN_PNAME = {"P1"};
-	
-	/**
-	 * Parameter mode (IN as required) for functions from SYSFUN_FUNCTIONS.
-	 */	
-	private static final int[] SYSFUN_PMODE = {JDBC30Translation.PARAMETER_MODE_IN};
 
 	// the structure that holds all the core table info
 	private TabInfoImpl[] coreInfo;
@@ -6790,30 +6788,19 @@ public final class	DataDictionaryImpl
 					TypeDescriptor rt =
 						DataTypeDescriptor.getBuiltInDataTypeDescriptor(details[1]).getCatalogType();
 
-					// details[4] - zero or single argument type
-					String paramType = details[4];
-					TypeDescriptor[] pt;
-					String[] paramNames;
-					int[] paramModes;
-					int paramCount;
-					if (paramType != null)
-					{			
-						paramNames = DataDictionaryImpl.SYSFUN_PNAME;
-						paramCount = 1;
-						paramModes = DataDictionaryImpl.SYSFUN_PMODE;
-						pt = new TypeDescriptor[1];
-						pt[0] =
-							DataTypeDescriptor.getBuiltInDataTypeDescriptor(paramType).getCatalogType();
-					}
-					else
-					{
-						// no parameters
-						paramNames = null;
-						pt = null;
-						paramCount = 0;
-						paramModes = null;
-					}
-					
+                    // Determine the number of arguments (could be zero).
+                    int paramCount = details.length - SYSFUN_FIRST_PARAMETER_INDEX;
+					TypeDescriptor[] pt = new TypeDescriptor[paramCount];
+					String[] paramNames = new String[paramCount];
+					int[] paramModes = new int[paramCount];
+                    for (int i = 0; i < paramCount; i++) {
+                        pt[i] = DataTypeDescriptor.getBuiltInDataTypeDescriptor(
+                                    details[SYSFUN_FIRST_PARAMETER_INDEX +i]).getCatalogType();
+                        paramNames[i] = "P" + (i +1); // Dummy names
+                        // All parameters must be IN.
+                        paramModes[i] = JDBC30Translation.PARAMETER_MODE_IN;
+                    }
+
 					// details[3] = java method
 					RoutineAliasInfo ai = new RoutineAliasInfo(details[3],
 							paramCount, paramNames,

@@ -936,7 +936,7 @@ public class SQLParser
        a function in the SYSFUN schema.
     */
 	private static final String[] ESCAPED_SYSFUN_FUNCTIONS =
-        {"ACOS", "ASIN", "ATAN", "COS", "SIN", "TAN", "PI",
+        {"ACOS", "ASIN", "ATAN", "ATAN2", "COS", "SIN", "TAN", "PI",
          "DEGREES", "RADIANS", "EXP", "LOG", "LOG10", "CEILING", "FLOOR",
          "SIGN", "RAND", "COT" };
        
