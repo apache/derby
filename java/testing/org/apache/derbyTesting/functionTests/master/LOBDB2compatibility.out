@@ -157,4 +157,7 @@ ERROR 0A000: Feature not implemented: NCLOB.
 ij> -- BIT STRING literal is not allowed in DB2
 values cast(B'1' as blob(10));
 ERROR 42X01: Syntax error: Encountered "\'1\'" at line 2, column 14.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> 

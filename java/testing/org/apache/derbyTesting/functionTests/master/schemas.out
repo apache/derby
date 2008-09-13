@@ -30,16 +30,28 @@ ij> insert into blah.t values (2);
 ERROR 42Y07: Schema 'BLAH' does not exist
 ij> insert into blah.blah.t values (3);
 ERROR 42X01: Syntax error: Encountered "." at line 1, column 22.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> insert into blah.blah.blah.t values (3);
 ERROR 42X01: Syntax error: Encountered "." at line 1, column 22.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> select "goofy name".t.c  from "goofy name".t;
 ERROR 42Y07: Schema 'goofy name' does not exist
 ij> -- catalog name not supported:
 create table mycat.myschem.s(c int);
 ERROR 42X01: Syntax error: Encountered "." at line 2, column 27.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- name too long:
 create table myworld.mycat.myschem.s(c int);
 ERROR 42X01: Syntax error: Encountered "." at line 2, column 27.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> create table myschem.s(c int);
 0 rows inserted/updated/deleted
 ij> insert into s values (1);
@@ -48,8 +60,14 @@ ij> insert into honk.s values (2);
 ERROR 42Y07: Schema 'HONK' does not exist
 ij> insert into honk.blat.s values (3);
 ERROR 42X01: Syntax error: Encountered "." at line 1, column 22.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> insert into loud.honk.blat.s values (4);
 ERROR 42X01: Syntax error: Encountered "." at line 1, column 22.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- Catalog names in column expressions cause syntax errors.  Rather than
 -- fix this, I am checking it in this way, considering that no client we
 -- know of uses catalogs.
@@ -62,6 +80,9 @@ ERROR 42Y07: Schema 'XYZZY' does not exist
 ij> -- catalog name not supported:
 drop table goodness.gosh.s;
 ERROR 42X01: Syntax error: Encountered "." at line 2, column 25.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- finds s, schema name ignored:
 drop table gosh.s;
 ERROR 42Y07: Schema 'GOSH' does not exist
@@ -516,8 +537,14 @@ ij> drop schema "sys" RESTRICT;
 ij> -- try prepared statements, should fail
 prepare createSchema as 'create schema ?';
 ERROR 42X01: Syntax error: Encountered "?" at line 1, column 15.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> prepare dropSchema as 'drop schema ? RESTRICT';
 ERROR 42X01: Syntax error: Encountered "?" at line 1, column 13.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> --
 -- specific drop schema tests, all should fail
 --
@@ -540,6 +567,9 @@ ij> drop table x.x;
 ij> -- syntax not supported yet (but is in the parser)
 drop schema x cascade;
 ERROR 42X01: Syntax error: Encountered "cascade" at line 2, column 15.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> set schema app;
 0 rows inserted/updated/deleted
 ij> drop schema x restrict;
@@ -744,6 +774,9 @@ a
 from test.s
 order by a;
 ERROR 42X01: Syntax error: Encountered "exists" at line 4, column 9.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- negative tests
 
 -- multiple matches at parent level

@@ -19,12 +19,21 @@ ij> --
 -- ? in default
 create table neg(c1 int default ?);
 ERROR 42X01: Syntax error: Encountered "?" at line 22, column 33.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- column reference in default
 create table neg(c1 int, c2 int default c1);
 ERROR 42X01: Syntax error: Encountered "c1" at line 2, column 41.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- subquery in default
 create table neg(c1 int default (values 1));
 ERROR 42X01: Syntax error: Encountered "(" at line 2, column 33.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- type incompatibility at compile time
 create table neg(c1 date default 1);
 ERROR 42821: Columns of type 'DATE' cannot hold values of type 'INTEGER'. 
@@ -55,6 +64,9 @@ create table neg(c1 date);
 0 rows inserted/updated/deleted
 ij> alter table neg modify x default null;
 ERROR 42X01: Syntax error: Encountered "modify" at line 1, column 17.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> alter table neg add column x date default 1;
 ERROR 42821: Columns of type 'DATE' cannot hold values of type 'INTEGER'. 
 ij> -- bug 5585 - should fail at alter table statement

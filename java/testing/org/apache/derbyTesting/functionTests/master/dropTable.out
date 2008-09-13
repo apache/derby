@@ -354,8 +354,14 @@ drop view vt1;
 ERROR X0Y23: Operation 'DROP VIEW' cannot be performed on object 'VT1' because VIEW 'VVT1' is dependent on that object.
 ij> drop view vt1 restrict;
 ERROR 42X01: Syntax error: Encountered "restrict" at line 1, column 15.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> drop view vt1 cascade;
 ERROR 42X01: Syntax error: Encountered "cascade" at line 1, column 15.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- 
 -- make sure that indexes are dropped for drop table
 --

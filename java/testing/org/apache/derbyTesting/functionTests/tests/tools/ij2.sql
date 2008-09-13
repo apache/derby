@@ -126,4 +126,8 @@ set connection connection0;
 
 show connections;
 
+-- DERBY-3408: Unknown command error should suggest referring to server docs:
+show schema;
+xxx;
+
 

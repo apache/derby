@@ -81,6 +81,9 @@ I          |S     |C                             |VC                            
 ij> -- invalid operator
 select * from s where s * ANY (select c from t);
 ERROR 42X01: Syntax error: Encountered "ANY" at line 2, column 27.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- ? in select list of subquery
 select * from s where s = ANY (select ? from s);
 ERROR 42X34: There is a ? parameter in the select list.  This is not allowed.
@@ -990,6 +993,9 @@ ij> -- exists returns a boolean value and hence it can not be used to set a valu
 update u set b = exists (select * from t)
 where vc < ANY (select vc from s);
 ERROR 42X01: Syntax error: Encountered "exists" at line 2, column 18.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> select * from u;
 I          |S     |C                             |VC                            |B                   
 -----------------------------------------------------------------------------------------------------

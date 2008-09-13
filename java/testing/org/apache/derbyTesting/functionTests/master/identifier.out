@@ -414,32 +414,59 @@ ij> -- Negative tests
 -- test1
 create table "" (c1 int);
 ERROR 42X01: Syntax error: Encountered "\"" at line 4, column 14.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- test2
 create table t1111 ("" int);
 ERROR 42X01: Syntax error: Encountered "\"" at line 2, column 21.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- test3
 create schema "";
 ERROR 42X01: Syntax error: Encountered "\"" at line 2, column 15.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- identifiers can not start with "_"
 -- test4
 create table _t1(_c1 int);
 ERROR 42X01: Syntax error: Encountered "_" at line 3, column 14.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- test5
 create table t1(_c1 int);
 ERROR 42X01: Syntax error: Encountered "_" at line 2, column 17.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- test6
 create view _v1 (c1) as select * from t1;
 ERROR 42X01: Syntax error: Encountered "_" at line 2, column 13.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- test7
 create view v1 (__c1) as select * from t1;
 ERROR 42X01: Syntax error: Encountered "_" at line 2, column 17.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- test8
 create index _i1 on t1(c1);
 ERROR 42X01: Syntax error: Encountered "_" at line 2, column 14.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- test9
 create table "_"."_"(c1 int);
 0 rows inserted/updated/deleted
 ij> -- test10
 create table "".""(c1 int);
 ERROR 42X01: Syntax error: Encountered "\"" at line 2, column 14.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> 

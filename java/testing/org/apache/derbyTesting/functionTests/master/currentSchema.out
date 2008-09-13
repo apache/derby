@@ -102,6 +102,9 @@ JUDY
 ij> -- check that set sqlid doesn't work (not DB2 compatible) - should get error
 set sqlid judy;
 ERROR 42X01: Syntax error: Encountered "sqlid" at line 2, column 5.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- change schema and make sure that the current schema is correct
 set schema sys;
 0 rows inserted/updated/deleted

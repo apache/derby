@@ -619,35 +619,53 @@ ij> -- PASS:0633 If 1 row is inserted?
      FROM WEIRDPAD
      WHERE LTRIM (RTRIM (NAAM)) = 'KEITH';
 ERROR 42X01: Syntax error: Encountered "," at line 3, column 32.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- PASS:0633 If 1 row selected with value KATE ? 
 
    SELECT LTRIM (SPONSOR, 'X') 
      FROM WEIRDPAD
      WHERE RTRIM (NAAM) = '    KEITH';
 ERROR 42X01: Syntax error: Encountered "," at line 3, column 25.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- PASS:0633 If 1 row selected with value KATEXXXXXX ?
 
    SELECT LTRIM (SPONSOR, 'X') 
      FROM WEIRDPAD
      WHERE RTRIM (SPONSOR, 'X') = 'XXXXKATE';
 ERROR 42X01: Syntax error: Encountered "," at line 3, column 25.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- PASS:0633 If 1 row selected with value KATEXXXXXX ?
 
    SELECT LTRIM (B.NAAM)  FROM WEIRDPAD A,
      WEIRDPAD B WHERE RTRIM (LTRIM (A.NAAM, 'B'),'B')
                     = RTRIM (LTRIM (B.SPONSOR, 'X'),'X');
 ERROR 42X01: Syntax error: Encountered "," at line 4, column 43.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- PASS:0633 If 1 row selected with value KEITH ?
 
    SELECT COUNT(*) FROM WEIRDPAD A,
      WEIRDPAD B WHERE LTRIM (A.SPONSOR, '0')
                     = RTRIM (LTRIM (B.NAAM, ' '), ' ');
 ERROR 42X01: Syntax error: Encountered "," at line 4, column 39.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- PASS:0633 If count = 1?
 
    SELECT RTRIM (NAAM, 'BB')
      FROM WEIRDPAD WHERE NAAM LIKE 'KATE%';
 ERROR 42X01: Syntax error: Encountered "," at line 3, column 22.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- PASS:0633 If ERROR, length of trim character must be 1 ?
 
    INSERT INTO WEIRDPAD (NAAM, SPONSOR)
@@ -656,6 +674,9 @@ ij> -- PASS:0633 If ERROR, length of trim character must be 1 ?
      FROM HU.STAFF, HU.PROJ 
      WHERE EMPNAME = 'Alice';
 ERROR 42X01: Syntax error: Encountered "," at line 4, column 42.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- PASS:0633 If 3 rows are inserted?
 
    SELECT COUNT(*) FROM WEIRDPAD;
@@ -668,6 +689,9 @@ ij> -- PASS:0633 If count = 5?
      SET SPONSOR = LTRIM (RTRIM (SPONSOR, 'X'), 'X'),
              NAAM = RTRIM (NAAM, 'B');
 ERROR 42X01: Syntax error: Encountered "," at line 4, column 41.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- PASS:0633 If 5 rows are updated?
 
    SELECT COUNT(*) FROM WEIRDPAD
@@ -680,6 +704,9 @@ ij> -- PASS:0633 If count = 2?
    DELETE FROM WEIRDPAD WHERE
      LTRIM('Kest', 'K') = LTRIM(SPONSOR, 'T');
 ERROR 42X01: Syntax error: Encountered "," at line 4, column 18.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- PASS:0633 If 1 row is deleted?
 
    SELECT COUNT(*) FROM WEIRDPAD;
@@ -705,11 +732,17 @@ ij> -- PASS:0633 If 1 row is updated?
    SELECT COUNT(*) FROM WEIRDPAD
      WHERE RTRIM (SPONSOR, PADCHAR) IS NULL;
 ERROR 42X01: Syntax error: Encountered "," at line 4, column 26.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- PASS:0633 If count = 2?
 
    SELECT COUNT(*) FROM WEIRDPAD
      WHERE LTRIM (SPONSOR, PADCHAR) = 'KEITH';
 ERROR 42X01: Syntax error: Encountered "," at line 4, column 26.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- PASS:0633 If count = 1?
 
    COMMIT WORK;

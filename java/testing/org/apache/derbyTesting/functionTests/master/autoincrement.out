@@ -881,6 +881,9 @@ ij> create table ni (x int, y smallint generated always as identity (start with 
 ERROR 42Z21: Invalid increment specified for identity for column 'Y'. Increment cannot be zero.  
 ij> create table ni (x int, y int generated always as identity (increment by 0);
 ERROR 42X01: Syntax error: Encountered "<EOF>" at line 1, column 75.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> create table ni (x int, y int generated always as identity (start with 0, increment by 0));
 ERROR 42Z21: Invalid increment specified for identity for column 'Y'. Increment cannot be zero.  
 ij> create table ni (x int, y bigint generated always as identity (increment by 0));

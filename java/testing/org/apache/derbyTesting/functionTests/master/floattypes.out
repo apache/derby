@@ -1666,9 +1666,15 @@ ij> drop table tt;
 ij> -- these get errors for invalid precision values:
 create table t1 (d double precision, r real, f float(-10));
 ERROR 42X01: Syntax error: Encountered "-" at line 2, column 54.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> --
 create table t2 (d double precision, r real, f float(-1));
 ERROR 42X01: Syntax error: Encountered "-" at line 2, column 54.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> create table t3 (d double precision, r real, f float(0));
 ERROR 42X48: Value '0' is not a valid precision for FLOAT.
 ij> create table t4 (d double precision, r real, f float(100));

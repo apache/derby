@@ -484,10 +484,19 @@ I          |S     |C                             |VC                            
 ij> -- select list
 select ( i in (select i from t) ) a from s order by a;
 ERROR 42X01: Syntax error: Encountered "in" at line 2, column 12.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> select ( i in (select i from t where 1 = 0) ) a from s order by a;
 ERROR 42X01: Syntax error: Encountered "in" at line 1, column 12.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> select ( (i in (select i from t where 1 = 0)) is null ) a from s order by a;
 ERROR 42X01: Syntax error: Encountered "in" at line 1, column 13.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- subquery under an or
 select i from s where i = -1 or i in (select i from t);
 I          
@@ -714,9 +723,15 @@ ij> ----------------------------------
 -- binary list node
 select i in (1,2) from (select i from s) as tmp(i);
 ERROR 42X01: Syntax error: Encountered "in" at line 6, column 10.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- conditional expression
 select i = 1 ? 1 : i from (select i from s) as tmp(i);
 ERROR 42X01: Syntax error: Encountered "=" at line 2, column 10.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- more tests for correlated column resolution
 select * from s where i = (values i);
 I          |S     |C                             |VC                            |B                   
@@ -791,6 +806,9 @@ NULL       |NULL  |NULL                          |NULL                          
 ij> update u set b = exists (select b from t)
 where vc <> (select vc from s where vc = '1');
 ERROR 42X01: Syntax error: Encountered "exists" at line 1, column 18.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> select * from u;
 I          |S     |C                             |VC                            |B                   
 -----------------------------------------------------------------------------------------------------

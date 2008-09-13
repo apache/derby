@@ -395,6 +395,9 @@ MODIFIES SQL DATA
 EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.ProcedureTest.countRows'
 LANGUAGE JAVA PARAMETER STYLE JAVA;
 ERROR 42X01: Syntax error: MODIFIES SQL DATA.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> CREATE FUNCTION SIGNATURE_BUG_DERBY_258_D(P_VAL INT, P_RADIX INT) RETURNS VARCHAR(20)
 LANGUAGE JAVA PARAMETER STYLE JAVA NO SQL
 EXTERNAL NAME 'java.lang.Integer.toString(int, int)';

@@ -66,6 +66,9 @@ call SYSCS_UTIL.SYSCS_EXPORT_QUERY('select from t1',
                                     'extinout/t1.dat' , null, null, null) ;
 ERROR 38000: Se he generado la excepci EnC:>243< n 'java.sql.SQLException: Error de sintaxis: Encountered "from" at line 1, column 8.' al evaluar una expresi EnC:>243< n.
 ERROR 42X01: Error de sintaxis: Encountered "from" at line 1, column 8.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> --export query is null 
 call SYSCS_UTIL.SYSCS_EXPORT_QUERY(null,
                                     'extinout/t1.dat' , null, null, null) ;

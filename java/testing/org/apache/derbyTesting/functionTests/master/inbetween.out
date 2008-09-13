@@ -79,6 +79,9 @@ ERROR 42818: Comparisons between 'INTEGER' and 'DATE' are not supported. Types m
 ij> -- between null and
 select * from t where i between null and i;
 ERROR 42X01: Syntax error: Encountered "null" at line 2, column 33.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- cardinality violation on a subquery
 select * from t where i between i and (select i from s);
 ERROR 21000: Scalar subquery is only allowed to return a single row.
@@ -288,9 +291,15 @@ ij> -- negative tests
 -- empty list
 select i from t where i in ();
 ERROR 42X01: Syntax error: Encountered ")" at line 4, column 29.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- null in list
 select i from t where i in (null);
 ERROR 42X01: Syntax error: Encountered "null" at line 2, column 29.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- cardinality violation from subquery
 select i from t where i in (1, 3, 5, 6, (select i from ss));
 ERROR 21000: Scalar subquery is only allowed to return a single row.

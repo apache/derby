@@ -1559,29 +1559,65 @@ ij> -- Real
 -- beetle 5806 - support REAL built-in function
 values{fn abs( REAL( 0)                       )};
 ERROR 42X01: Syntax error: Encountered "REAL" at line 4, column 16.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> values{fn abs( REAL(-0)                       )};
 ERROR 42X01: Syntax error: Encountered "REAL" at line 1, column 16.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> values{fn abs( REAL( 1)                       )};
 ERROR 42X01: Syntax error: Encountered "REAL" at line 1, column 16.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> values{fn abs( REAL(-1)                       )};
 ERROR 42X01: Syntax error: Encountered "REAL" at line 1, column 16.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> values{fn abs( REAL( 1000000.001)             )};
 ERROR 42X01: Syntax error: Encountered "REAL" at line 1, column 16.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> values{fn abs( REAL(-1000000.001)             )};
 ERROR 42X01: Syntax error: Encountered "REAL" at line 1, column 16.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> values{fn abs( REAL( 3.402E+38)               )};
 ERROR 42X01: Syntax error: Encountered "REAL" at line 1, column 16.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> values{fn abs( REAL(-3.402E+38) + 1           )};
 ERROR 42X01: Syntax error: Encountered "REAL" at line 1, column 16.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- Error
 values{fn abs( REAL( 3.402E+38 * 2)           )};
 ERROR 42X01: Syntax error: Encountered "REAL" at line 2, column 16.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> values{fn abs(-REAL( NaN)                     )};
 ERROR 42X01: Syntax error: Encountered "REAL" at line 1, column 16.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> values{fn abs( REAL( 1.40129846432481707e-45) )};
 ERROR 42X01: Syntax error: Encountered "REAL" at line 1, column 16.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> values{fn abs( REAL( 3.40282346638528860e+38) )};
 ERROR 42X01: Syntax error: Encountered "REAL" at line 1, column 16.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- Double Precision/Double
 -- Basic
 -- beetle 5803 - support DOUBLE_[PRECISION] built-in function
@@ -1637,16 +1673,34 @@ ij> -- Decimal/Numeric
 -- beetle 5802 - support DEC[IMAL] built-in function
 values{ fn abs(DEC( 0)             )};
 ERROR 42X01: Syntax error: Encountered "DEC" at line 4, column 16.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> values{ fn abs(DEC(-0)             )};
 ERROR 42X01: Syntax error: Encountered "DEC" at line 1, column 16.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> values{ fn abs(DEC( 1)             )};
 ERROR 42X01: Syntax error: Encountered "DEC" at line 1, column 16.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> values{ fn abs(DEC(-1)             )};
 ERROR 42X01: Syntax error: Encountered "DEC" at line 1, column 16.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> values{ fn abs(DEC( 1000000000000) )};
 ERROR 42X01: Syntax error: Encountered "DEC" at line 1, column 16.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> values{ fn abs(DEC(-1000000000000) )};
 ERROR 42X01: Syntax error: Encountered "DEC" at line 1, column 16.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- More generic test
 values{ fn abs( 0-1-.1 ) };
 1              
@@ -3332,17 +3386,35 @@ create table foo( a float );
 0 rows inserted/updated/deleted
 ij> insert into foo values ( sqrt(FLOAT( 1)));
 ERROR 42X01: Syntax error: Encountered "FLOAT" at line 1, column 31.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> insert into foo values ( sqrt(FLOAT( 2)));
 ERROR 42X01: Syntax error: Encountered "FLOAT" at line 1, column 31.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> insert into foo values (-sqrt(FLOAT( 3)));
 ERROR 42X01: Syntax error: Encountered "FLOAT" at line 1, column 31.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> insert into foo values (-sqrt(FLOAT( 4)));
 ERROR 42X01: Syntax error: Encountered "FLOAT" at line 1, column 31.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> insert into foo values (     (FLOAT(-5)));
 ERROR 42X01: Syntax error: Encountered "FLOAT" at line 1, column 31.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- this insert should fail
 insert into foo values ( sqrt(FLOAT(-3)));
 ERROR 42X01: Syntax error: Encountered "FLOAT" at line 2, column 31.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> autocommit off;
 ij> prepare p1 as 'select a from foo';
 ij> prepare p2 as 'insert into foo select a*(-1) from foo';
@@ -3356,18 +3428,36 @@ A
 ----------------------
 ij> insert into foo values ( sqrt(FLOAT( 6)));
 ERROR 42X01: Syntax error: Encountered "FLOAT" at line 1, column 31.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> insert into foo values (-sqrt(FLOAT( 7)));
 ERROR 42X01: Syntax error: Encountered "FLOAT" at line 1, column 31.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> insert into foo values (-sqrt(FLOAT( 8)));
 ERROR 42X01: Syntax error: Encountered "FLOAT" at line 1, column 31.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> insert into foo values ( sqrt(FLOAT( 9)));
 ERROR 42X01: Syntax error: Encountered "FLOAT" at line 1, column 31.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> insert into foo values (     (FLOAT(10)));
 ERROR 42X01: Syntax error: Encountered "FLOAT" at line 1, column 31.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- few negative tests
 -- insert should fail
 insert into foo values ( sqrt(FLOAT(-7)));
 ERROR 42X01: Syntax error: Encountered "FLOAT" at line 3, column 31.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> prepare p3 as 'select sqrt(a) from foo';
 ij> -- executing p3 should fail
 execute p3;
@@ -3387,19 +3477,40 @@ ij> commit;
 ij> autocommit on;
 ij> insert into foo values ( sqrt(FLOAT( 11)));
 ERROR 42X01: Syntax error: Encountered "FLOAT" at line 1, column 31.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> insert into foo values (-sqrt(FLOAT( 12)));
 ERROR 42X01: Syntax error: Encountered "FLOAT" at line 1, column 31.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> insert into foo values (-sqrt(FLOAT( 13)));
 ERROR 42X01: Syntax error: Encountered "FLOAT" at line 1, column 31.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> insert into foo values (-sqrt(FLOAT( 14)));
 ERROR 42X01: Syntax error: Encountered "FLOAT" at line 1, column 31.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> insert into foo values (     (FLOAT( 15)));
 ERROR 42X01: Syntax error: Encountered "FLOAT" at line 1, column 31.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- these 2 inserts should fail
 insert into foo values (-sqrt(FLOAT(-12)));
 ERROR 42X01: Syntax error: Encountered "FLOAT" at line 2, column 31.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> insert into foo values ( sqrt(FLOAT(-13)));
 ERROR 42X01: Syntax error: Encountered "FLOAT" at line 1, column 31.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- these should pass
 autocommit off;
 ij> execute p1;
@@ -3489,29 +3600,65 @@ ij> -- Real
 -- beetle 5806 - support REAL built-in function
 values{fn sqrt( REAL( 0)                       )};
 ERROR 42X01: Syntax error: Encountered "REAL" at line 4, column 17.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> values{fn sqrt( REAL(-0)                       )};
 ERROR 42X01: Syntax error: Encountered "REAL" at line 1, column 17.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> values{fn sqrt( REAL( 1)                       )};
 ERROR 42X01: Syntax error: Encountered "REAL" at line 1, column 17.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> values{fn sqrt( REAL(-1)                       )};
 ERROR 42X01: Syntax error: Encountered "REAL" at line 1, column 17.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> values{fn sqrt( REAL( 1000000.001)             )};
 ERROR 42X01: Syntax error: Encountered "REAL" at line 1, column 17.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> values{fn sqrt( REAL(-1000000.001)             )};
 ERROR 42X01: Syntax error: Encountered "REAL" at line 1, column 17.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> values{fn sqrt( REAL( 3.402E+38)               )};
 ERROR 42X01: Syntax error: Encountered "REAL" at line 1, column 17.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> values{fn sqrt( REAL(-3.402E+38) + 1           )};
 ERROR 42X01: Syntax error: Encountered "REAL" at line 1, column 17.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- Error
 values{fn sqrt( REAL( 3.402E+38 * 2)           )};
 ERROR 42X01: Syntax error: Encountered "REAL" at line 2, column 17.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> values{fn sqrt(-REAL( NaN)                     )};
 ERROR 42X01: Syntax error: Encountered "REAL" at line 1, column 17.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> values{fn sqrt( REAL( 1.40129846432481707e-45) )};
 ERROR 42X01: Syntax error: Encountered "REAL" at line 1, column 17.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> values{fn sqrt( REAL( 3.40282346638528860e+38) )};
 ERROR 42X01: Syntax error: Encountered "REAL" at line 1, column 17.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- Double Precision/Double
 -- Basic
 -- beetle 5803 - support DOUBLE_[PRECISION] built-in function
@@ -3529,14 +3676,23 @@ ij> values{fn  sqrt( DOUBLE( 1)                      )};
 1.0                   
 ij> values{fn -sqrt( DOUBLE(1)                       )};
 ERROR 42X01: Syntax error: Encountered "-" at line 1, column 11.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> values{fn  sqrt( DOUBLE( 1000000.001)            )};
 1                     
 ----------------------
 1000.0000005          
 ij> values{fn -sqrt( DOUBLE(1000000.001)             )};
 ERROR 42X01: Syntax error: Encountered "-" at line 1, column 11.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> values{fn -sqrt( DOUBLE(1.79769E+308)            )};
 ERROR 42X01: Syntax error: Encountered "-" at line 1, column 11.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> values{fn  sqrt( DOUBLE( 1.79769E+308) + 1       )};
 1                     
 ----------------------
@@ -3573,6 +3729,9 @@ ij> -- Decimal/Numeric
 -- beetle 5802 - support DEC[IMAL] built-in function
 values{ fn sqrt(DEC('0'))};
 ERROR 42X01: Syntax error: Encountered "DEC" at line 4, column 17.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- More generic test
 values{ fn sqrt( 0+1+.1 ) };
 1                     
@@ -3625,25 +3784,49 @@ autocommit off;
 ij> prepare p1 as 'select a from myreal where ? <> 1';
 ij> execute p1 using 'values  sqrt(REAL( 0 ))';
 ERROR 42X01: Syntax error: Encountered "REAL" at line 1, column 14.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> execute p1 using 'values -sqrt(REAL( 20))';
 ERROR 42X01: Syntax error: Encountered "REAL" at line 1, column 14.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> execute p1 using 'values  sqrt(REAL( 20))';
 ERROR 42X01: Syntax error: Encountered "REAL" at line 1, column 14.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- this should fail
 execute p1 using 'values  sqrt(REAL(-20))';
 ERROR 42X01: Syntax error: Encountered "REAL" at line 1, column 14.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- Prepare Statements, should pass
 -- beetle 5806 - support REAL built-in function
 prepare p2 as 'select a from myreal where ? <> 1';
 ij> execute p2 using 'values {fn sqrt (REAL( 0 ))}';
 ERROR 42X01: Syntax error: Encountered "REAL" at line 1, column 18.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> execute p2 using 'values {fn -sqrt(REAL( 20))}';
 ERROR 42X01: Syntax error: Encountered "-" at line 1, column 12.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> execute p2 using 'values {fn sqrt (REAL( 20))}';
 ERROR 42X01: Syntax error: Encountered "REAL" at line 1, column 18.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- this should fail
 execute p2 using 'values {fn  sqrt(REAL(-20))}';
 ERROR 42X01: Syntax error: Encountered "REAL" at line 1, column 18.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> autocommit on;
 ij> -- mod function
 create table modfn(s smallint, i int, b bigint, c char(10), d decimal(6,3), r real, dbl double);

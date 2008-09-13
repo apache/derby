@@ -54,10 +54,19 @@ ij> drop table tab1;
 ij> -- simple negative test
 values(X'gg');
 ERROR 42X01: Syntax error: Encountered "\'gg\'" at line 2, column 9.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> values(X'z');
 ERROR 42X01: Syntax error: Encountered "\'z\'" at line 1, column 9.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> values(X'zz');
 ERROR 42X01: Syntax error: Encountered "\'zz\'" at line 1, column 9.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- fails after bug 5742 is fixed
 values(X'9');
 ERROR 42606: An invalid hexadecimal constant starting with 'X'9'' has been detected.

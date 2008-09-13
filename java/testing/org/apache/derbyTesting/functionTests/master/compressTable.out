@@ -940,6 +940,9 @@ insert into xena values (select a + 4, b - 4, c, d from xena);
 ERROR 42X80: VALUES clause must contain at least one element. Empty elements are not allowed. 
 ij> insert into xena values (select (a + 4, b - 4, c, d from xena);
 ERROR 42X01: Syntax error: Encountered "," at line 1, column 39.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> select 
      cast (conglomeratename as char(10)) as name, 
      cast (numallocatedpages as char(4)) as aloc, 

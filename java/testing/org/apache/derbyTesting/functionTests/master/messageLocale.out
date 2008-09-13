@@ -51,6 +51,9 @@ ij> call checkDatabaseLoc('rr_TT');
 ij> -- expect an error
 create table t1 oops (i int primary key);
 ERROR 42X01: Syntax error: Encountered "oops" at line 2, column 17.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- setup for
 create table t2 (i int);
 0 rows inserted/updated/deleted
@@ -76,6 +79,9 @@ ij> -- error (in qq_PP messages);
 -- create table t1 (i longe);
 create table t1 oops (i int primary key);
 ERROR 42X01: Error of syntax: Encountered "oops" at line 3, column 17.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- warning (in qq_PP messages);
 -- create table t2 (i java.lang.Object);
 create table t2 (i int);
@@ -97,6 +103,9 @@ connect 'jdbc:derby:enTest;create=true;territory=en_US';
 ij> -- create table t1 (i longe);
 create table t1 oops (i int primary key);
 ERROR 42X01: Syntax error: Encountered "oops" at line 2, column 17.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- create table t2 (i java.lang.Object);
 create table t2 (i int);
 0 rows inserted/updated/deleted

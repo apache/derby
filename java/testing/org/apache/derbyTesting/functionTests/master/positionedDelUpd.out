@@ -46,6 +46,9 @@ ij> -- empty table tests
 -- this should fail with a syntax error
 delete;
 ERROR 42X01: Syntax error: Encountered "<EOF>" at line 5, column 6.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- this should succeed
 get cursor c0 as 'select * from t1 for update';
 ij> next c0;
@@ -431,6 +434,9 @@ ij> -- empty table tests
 -- this should fail with a syntax error
 update set c1 = c1;
 ERROR 42X01: Syntax error: Encountered "set" at line 5, column 8.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- this should succeed
 get cursor c0 as 'select * from t1 for update';
 ij> next c0;

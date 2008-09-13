@@ -2628,6 +2628,9 @@ ij> update t2778 --derby-properties index = a_idx
         '0_col10llllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll012340_col10lllllllllllxxxxxx'
     where col00 = '0_';
 ERROR 42X01: Syntax error: DERBY-PROPERTIES.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> rollback;
 ij> -- prior to the fix col17 and col18 would come back null.
 select col01, col02, col03, col04, col05,  col06, col07, col08, col09, col10, col11, col12, col13, col14, col15, col16, col17, col18 from t2778;

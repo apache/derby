@@ -419,6 +419,9 @@ ij> create table badtab2 (x varchar(0));
 ERROR 42X44: Invalid length '0' in column specification.
 ij> create table badtab3 (x long varchar(3));
 ERROR 42X01: Syntax error: Encountered "(" at line 1, column 37.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- JDBC escape syntax for string functions
 create table trash(c1 char(10));
 0 rows inserted/updated/deleted

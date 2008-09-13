@@ -106,6 +106,9 @@ A
 ij> -- this should fail
 alter table t1 modify a null;
 ERROR 42X01: Syntax error: Encountered "modify" at line 2, column 16.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> insert into t1 values(DEFAULT);
 1 row inserted/updated/deleted
 ij> select * from t1;

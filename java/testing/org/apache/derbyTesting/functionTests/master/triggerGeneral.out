@@ -71,6 +71,9 @@ ERROR 42Y40: 'X' appears multiple times in the UPDATE OF column list for trigger
 ij> -- no params in column list
 create trigger tr NO CASCADE before update of x, ? on x for each row values 1;
 ERROR 42X01: Syntax error: Encountered "?" at line 2, column 50.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- invalid column
 create trigger tr NO CASCADE before update of doesnotexist on x for each row values 1;
 ERROR 42X14: 'DOESNOTEXIST' is not a column in table or VTI 'X'.
@@ -80,9 +83,15 @@ ERROR 42Y62: 'CREATE TRIGGER' is not allowed on '"APP"."V"' because it is a view
 ij> -- error to use table qualifier
 create trigger tr NO CASCADE before update of x.x on x for each row values 1;
 ERROR 42X01: Syntax error: Encountered "." at line 2, column 48.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- error to use schema.table qualifier
 create trigger tr NO CASCADE before update of app.x.x on x for each row values 1;
 ERROR 42X01: Syntax error: Encountered "." at line 2, column 50.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- no params in trigger action
 -- bad
 create trigger tr NO CASCADE before delete on x for each row select * from x where x = ?;
@@ -1115,6 +1124,9 @@ ij(USER1)> create table topt2 (i int);
 ij(USER1)> -- expect error
 create trigger tropt after insert on topt1 for each mode db2sql insert into topt2 values 1;
 ERROR 42X01: Syntax error: Encountered "mode" at line 2, column 53.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij(USER1)> -- ok
 create trigger tropt after insert on topt1 insert into topt2 values 1;
 0 rows inserted/updated/deleted

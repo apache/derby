@@ -686,6 +686,9 @@ None
 ij> -- unknown isolation level
 select * from t1 with rw;
 ERROR 42X01: Syntax error: Encountered "rw" at line 2, column 23.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- check the db2 isolation levels can be used as identifiers
 create table db2iso(cs int, rr int, ur int, rs int);
 0 rows inserted/updated/deleted

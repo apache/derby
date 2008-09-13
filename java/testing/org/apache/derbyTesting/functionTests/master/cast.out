@@ -1572,8 +1572,14 @@ ij> values CHAR(INTEGER(12345));
 12345      
 ij> values CHAR(DEC(67.21,4,2));
 ERROR 42X01: Syntax error: Encountered "DEC" at line 1, column 13.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> values CHAR(DECIMAL(67.10,4,2));
 ERROR 42X01: Syntax error: Encountered "DECIMAL" at line 1, column 13.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> values CHAR(DOUBLE(5.55));
 1                                                    
 -----------------------------------------------------
@@ -1619,6 +1625,9 @@ ij> -- test some casting from a java type to standard SQL types.
 -- should all fail at runtime
 select cast (aliasinfo as BOOLEAN) from sys.sysaliases;
 ERROR 42X01: Syntax error: BOOLEAN.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> select cast (aliasinfo as SMALLINT) from sys.sysaliases;
 1     
 ------

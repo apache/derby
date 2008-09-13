@@ -343,13 +343,25 @@ rollback ;
 ij> -- . order without by (error)
 select i, v from obt order i;
 ERROR 42X01: Syntax error: Encountered "i" at line 2, column 28.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> select i, v from obt by i;
 ERROR 42X01: Syntax error: Encountered "by" at line 1, column 22.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- . show order, by are reserved keywords
 select order from obt;
 ERROR 42X01: Syntax error: Encountered "order" at line 2, column 8.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> select by from obt;
 ERROR 42X01: Syntax error: Encountered "by" at line 1, column 8.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- . order by on column not in query (error)
 select i from obt order by c;
 ERROR 42X04: Column 'C' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'C' is not a column in the target table.
@@ -733,10 +745,19 @@ rollback ;
 ij> -- . order by only allowed on cursor spec, not subquerys (error) 
 select v from obt where i in (select i from obt2 order by i);
 ERROR 42X01: Syntax error: Encountered "order" at line 2, column 50.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> select v from obt where i = (select i from obt2 order by i);
 ERROR 42X01: Syntax error: Encountered "order" at line 1, column 49.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> select v from (select i,v from obt2 order by i);
 ERROR 42X01: Syntax error: Encountered "order" at line 1, column 37.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- rollback should release the prepared statements
 rollback ;
 ij> -- order by allowed on datatypes, 
@@ -1269,6 +1290,9 @@ ij> select s.* from t s order by s.d;
 ERROR 42X04: Column 'S.D' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'S.D' is not a column in the target table.
 ij> select *, d from t order by d;
 ERROR 42X01: Syntax error: Encountered "," at line 1, column 9.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> select t.*, d from t order by d;
 ERROR 42X04: Column 'D' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'D' is not a column in the target table.
 ij> select t.*, d from t order by t.d;

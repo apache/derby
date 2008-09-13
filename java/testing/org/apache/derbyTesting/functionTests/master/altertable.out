@@ -996,6 +996,9 @@ ERROR X0Y32: Column 'B' already exists in Table/View 'RENC_1'.
 ij> -- new column name is a reserved word:
 rename column renc_1.a to select;
 ERROR 42X01: Syntax error: Encountered "select" at line 2, column 27.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- attempt to rename a column in a system table. Should fali:
 rename column sys.sysconglomerates.isindex to is_an_index;
 ERROR 42X62: 'RENAME COLUMN' is not allowed in the 'SYS' schema.
@@ -1029,16 +1032,34 @@ rename column renc_1 to b;
 ERROR 42Y55: 'RENAME COLUMN' cannot be performed on 'RENC_1' because it does not exist.
 ij> rename column renc_1 rename a to b;
 ERROR 42X01: Syntax error: Encountered "rename" at line 1, column 22.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> rename column renc_1.a;
 ERROR 42X01: Syntax error: Encountered "<EOF>" at line 1, column 22.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> rename column renc_1.a b;
 ERROR 42X01: Syntax error: Encountered "b" at line 1, column 24.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> rename column renc_1.a to;
 ERROR 42X01: Syntax error: Encountered "<EOF>" at line 1, column 25.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> rename column renc_1.a to b, c;
 ERROR 42X01: Syntax error: Encountered "," at line 1, column 28.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> rename column renc_1.a to b and c to d;
 ERROR 42X01: Syntax error: Encountered "and" at line 1, column 29.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- Rename a column which is the primary key of the table:
 create table renc_2(c1 int not null constraint renc_2_p1 primary key);
 0 rows inserted/updated/deleted
@@ -1405,19 +1426,40 @@ ERROR 42X14: 'B' is not a column in table or VTI 'ATDC_2'.
 ij> -- Column name is spelled incorrectly (wrong case)
 alter table atdc_2 drop column 'a';
 ERROR 42X01: Syntax error: Encountered "\'a\'" at line 2, column 32.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- Some special reserved words to cause parser errors
 alter table atdc_2 drop column column;
 ERROR 42X01: Syntax error: Encountered "column" at line 2, column 32.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> alter table atdc_2 drop column;
 ERROR 42X01: Syntax error: Encountered "<EOF>" at line 1, column 30.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> alter table atdc_2 drop column constraint;
 ERROR 42X01: Syntax error: Encountered "constraint" at line 1, column 32.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> alter table atdc_2 drop column primary;
 ERROR 42X01: Syntax error: Encountered "primary" at line 1, column 32.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> alter table atdc_2 drop column foreign;
 ERROR 42X01: Syntax error: Encountered "foreign" at line 1, column 32.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> alter table atdc_2 drop column check;
 ERROR 42X01: Syntax error: Encountered "check" at line 1, column 32.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> create table atdc_3 (a integer);
 0 rows inserted/updated/deleted
 ij> create index atdc_3_idx_1 on atdc_3 (a);

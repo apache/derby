@@ -29,6 +29,9 @@ ij> -- negative tests
 -- table name required for positioned delete and for searched delete
 delete;
 ERROR 42X01: Syntax error: Encountered "<EOF>" at line 4, column 6.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- populate the table
 insert into t1 values (1);
 1 row inserted/updated/deleted

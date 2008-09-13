@@ -554,8 +554,12 @@ public class utilMain implements java.security.PrivilegedAction {
 			errorCode = "";
 		}
 
+		boolean syntaxErrorOccurred = false;
 		for (; e!=null; e=e.getNextException())
 		{
+			sqlState = e.getSQLState();
+			if ("42X01".equals(sqlState))
+				syntaxErrorOccurred = true;
 			/*
 			** If we are to throw errors, then throw the exceptions
 			** that aren't in the ignoreErrors list.  If
@@ -564,7 +568,6 @@ public class utilMain implements java.security.PrivilegedAction {
 			*/
 		 	if (ignoreErrors != null) 
 			{
-				sqlState = e.getSQLState();
 				if ((sqlState != null) &&
 					(ignoreErrors.get(sqlState) != null))
 				{
@@ -585,6 +588,8 @@ public class utilMain implements java.security.PrivilegedAction {
 		{
 			throw new ijFatalException(fatalException);
 		}
+		if (syntaxErrorOccurred)
+			out.println(langUtil.getTextMessage("IJ_SuggestHelp"));
 	}
 
 	/**
