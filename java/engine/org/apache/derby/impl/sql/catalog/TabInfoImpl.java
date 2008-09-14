@@ -22,18 +22,14 @@
 package org.apache.derby.impl.sql.catalog;
 
 import org.apache.derby.iapi.services.io.FormatableBitSet;
-import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.io.StreamStorable;
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.dictionary.CatalogRowFactory;
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 import org.apache.derby.iapi.sql.dictionary.IndexRowGenerator;
 import org.apache.derby.iapi.sql.execute.ExecIndexRow;
 import org.apache.derby.iapi.sql.execute.ExecRow;
-import org.apache.derby.iapi.sql.execute.ExecutionContext;
-import org.apache.derby.iapi.sql.execute.ExecutionFactory;
 import org.apache.derby.iapi.sql.execute.RowChanger;
 import org.apache.derby.iapi.sql.execute.TupleFilter;
 import org.apache.derby.iapi.sql.Activation;
@@ -46,11 +42,8 @@ import org.apache.derby.iapi.store.access.StaticCompiledOpenConglomInfo;
 import org.apache.derby.iapi.store.access.TransactionController;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
-import org.apache.derby.iapi.types.DataValueFactory;
 
 import org.apache.derby.iapi.types.RowLocation;
-import org.apache.derby.catalog.UUID;
-import java.util.Enumeration;
 import java.util.Properties;
 
 /**
@@ -936,7 +929,7 @@ class TabInfoImpl
 	{
 		ExecRow[] newRows = new ExecRow[1];
 		newRows[0] = newRow;
-		updateRow(key, newRows, indexNumber, indicesToUpdate, colsToUpdate, tc, true);
+		updateRow(key, newRows, indexNumber, indicesToUpdate, colsToUpdate, tc);
 	}
 
 	/**
@@ -964,45 +957,10 @@ class TabInfoImpl
 						   TransactionController	tc )
 		throws StandardException
 	{
-		updateRow(key, newRows, indexNumber, indicesToUpdate, colsToUpdate, tc, true);
-	}
-
-	/**
-	 * Updates a set of base rows in a catalog with the same key on an index
-	 * and updates all the corresponding index rows. If parameter wait is true,
-	 * then the caller wants to wait for locks. When using a nested user xaction
-	 * we want to timeout right away if the parent holds the lock.
-	 *
-	 *	@param	key			key row
-	 *	@param	newRows		new version of the array of rows
-	 *	@param	indexNumber	index that key operates
-	 *	@param	indicesToUpdate	array of booleans, one for each index on the catalog.
-	 *							if a boolean is true, that means we must update the
-	 *							corresponding index because changes in the newRow
-	 *							affect it.
-	 *	@param  colsToUpdate	array of ints indicating which columns (1 based)
-	 *							to update.  If null, do all.
-	 *	@param	tc			transaction controller
-	 *	@param wait		If true, then the caller wants to wait for locks. When
-	 *							using a nested user xaction we want to timeout right away
-	 *							if the parent holds the lock. (bug 4821)
-	 *
-	 * @exception StandardException		Thrown on failure
-	 */
-	private void updateRow( ExecIndexRow				key,
-						   ExecRow[]				newRows,
-						   int						indexNumber,
-						   boolean[]				indicesToUpdate,
-						   int[]					colsToUpdate,
-						   TransactionController	tc,
-						   boolean wait)
-		throws StandardException
-	{
 		ConglomerateController		heapCC;
 		ScanController				drivingScan;
 		ExecIndexRow	 			drivingIndexRow;
 		RowLocation					baseRowLocation;
-		ExecIndexRow				templateRow;
 		ExecRow						baseRow = crf.makeEmptyRow();
 
 		if (SanityManager.DEBUG)
@@ -1014,22 +972,20 @@ class TabInfoImpl
 		RowChanger 					rc  = getRowChanger( tc, colsToUpdate,baseRow );
 
 		// Row level locking
-		rc.openForUpdate(indicesToUpdate, TransactionController.MODE_RECORD, wait); 
+		rc.openForUpdate(indicesToUpdate, TransactionController.MODE_RECORD, true);
 
 		/* Open the heap conglomerate */
 		heapCC = tc.openConglomerate(
                     getHeapConglomerate(),
                     false,
-                    (TransactionController.OPENMODE_FORUPDATE |
-                    ((wait) ? 0 : TransactionController.OPENMODE_LOCK_NOWAIT)),
+                    TransactionController.OPENMODE_FORUPDATE,
                     TransactionController.MODE_RECORD,
                     TransactionController.ISOLATION_REPEATABLE_READ);
 
 		drivingScan = tc.openScan(
 			getIndexConglomerate(indexNumber),  // conglomerate to open
 			false, // don't hold open across commit
-			(TransactionController.OPENMODE_FORUPDATE |
-            ((wait) ? 0 : TransactionController.OPENMODE_LOCK_NOWAIT)), 
+			TransactionController.OPENMODE_FORUPDATE,
             TransactionController.MODE_RECORD,
             TransactionController.ISOLATION_REPEATABLE_READ,
 			(FormatableBitSet) null,     // all fields as objects
