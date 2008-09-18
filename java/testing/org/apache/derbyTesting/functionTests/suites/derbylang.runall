@@ -4,7 +4,6 @@ lang/aggregateOptimization.sql
 lang/altertable.sql
 lang/autoincrement.sql
 lang/checkConstraint.sql
-lang/closed.java
 lang/columnDefaults.sql
 lang/compressTable.sql
 lang/consistencyChecker.sql

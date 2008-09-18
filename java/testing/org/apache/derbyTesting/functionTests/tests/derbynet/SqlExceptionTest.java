@@ -21,6 +21,7 @@ package org.apache.derbyTesting.functionTests.tests.derbynet;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -106,7 +107,17 @@ public class SqlExceptionTest extends BaseJDBCTestCase
      * driver can be serialized (DERBY-790).
      */
     public void testSerializedException() throws Exception {
-
+        // DERBY-62; verify an exception using table name can be serialized.
+        try {
+            createStatement().execute("DROP TABLE APP.DERBY62_DAIN_SUNDSTROM");
+            fail("should've received an error");
+        } catch (SQLException sqle) {
+            SQLException se_ser = recreateSQLException(sqle);
+            // and that the original and serialized exceptions are equals
+            assertSQLState("Unexpected SQL State", sqle.getSQLState(), se_ser);
+            assertSQLExceptionEquals(sqle, se_ser);
+        }
+        
         try {
             Connection conn = getConnection();
             Statement stmt = conn.createStatement();
@@ -187,8 +198,10 @@ public class SqlExceptionTest extends BaseJDBCTestCase
     	if ( JDBC.vmSupportsJSR169())
     		// see DERBY-2157 for details
     		return new TestSuite("empty SqlExceptionTest - client not supported on JSR169");
-    	else 
-    		return new TestSuite(SqlExceptionTest.class,
-                "SqlExceptionTest");
+    	else
+        {
+            Test test = TestConfiguration.defaultSuite(SqlExceptionTest.class);
+            return test;
+        }
     }
 }
