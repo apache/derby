@@ -29,7 +29,6 @@ import java.security.PrivilegedExceptionAction;
 import org.apache.derby.iapi.services.info.ProductGenusNames;
 import org.apache.derby.iapi.services.info.ProductVersionHolder;
 import org.apache.derby.shared.common.reference.SQLState;
-import org.apache.derby.iapi.services.info.JVMInfo;
 
 public class Configuration {
 
@@ -205,10 +204,13 @@ public class Configuration {
      */
     
     public static boolean supportsJDBC40() {
-        if (JVMInfo.JDK_ID >= JVMInfo.J2SE_16) {
+        // use reflection to identify whether we support JDBC40
+        try {
+            Class.forName("java.sql.SQLXML");
             return true;
+        } catch (Exception e) {
+            return false;
         }
-        return false;
     }
 
 
