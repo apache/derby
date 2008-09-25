@@ -53,6 +53,7 @@ import	org.apache.derby.impl.sql.compile.CharConstantNode;
 import	org.apache.derby.impl.sql.compile.CastNode;
 import org.apache.derby.impl.sql.compile.ColumnDefinitionNode;
 import org.apache.derby.impl.sql.compile.ColumnReference;
+import org.apache.derby.impl.sql.compile.CreateAliasNode;
 import org.apache.derby.impl.sql.compile.CursorNode;
 import org.apache.derby.impl.sql.compile.FromBaseTable;
 import org.apache.derby.impl.sql.compile.FromList;
@@ -166,7 +167,7 @@ public class SQLParser
 {
 	private static final String[] SAVEPOINT_CLAUSE_NAMES = {"UNIQUE", "ON ROLLBACK RETAIN LOCKS", "ON ROLLBACK RETAIN CURSORS"};
 	private static final String[] ROUTINE_CLAUSE_NAMES =
-		{null, "SPECIFIC", "RESULT SET", "LANGUAGE", "EXTERNAL NAME", "PARAMETER STYLE", "SQL", "ON NULL INPUT"};
+		{null, "SPECIFIC", "RESULT SET", "LANGUAGE", "EXTERNAL NAME", "PARAMETER STYLE", "SQL", "DETERMINISTIC", "ON NULL INPUT"};
 	/**
 	   Clauses required for Java routines. Numbers correspond
 	   to offsets in ROUTINE_CLAUSE_NAMES.
@@ -174,7 +175,7 @@ public class SQLParser
 	   4 - "EXTERNAL NAME"
 	   5 - "PARAMETER STYLE"
 	*/
-	private static final int[] JAVA_ROUTINE_CLAUSES = {3,4,5};
+	private static final int[] JAVA_ROUTINE_CLAUSES = {CreateAliasNode.LANGUAGE,CreateAliasNode.EXTERNAL_NAME,CreateAliasNode.PARAMETER_STYLE};
 	private static final String[] TEMPORARY_TABLE_CLAUSE_NAMES = {"NOT LOGGED", "ON COMMIT", "ON ROLLBACK"};
 	/* The default length of a char or bit if the length is omitted */
 	private static final int	DEFAULT_STRING_COLUMN_LENGTH = 1;
@@ -9988,7 +9989,7 @@ StatementNode
 procedureDefinition() throws StandardException :
 {
 	TableName procedureName;
-	Object[] procedureElements = new Object[9];
+	Object[] procedureElements = new Object[CreateAliasNode.ROUTINE_ELEMENT_COUNT];
 }
 {
 		<PROCEDURE> procedureName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
@@ -9999,7 +10000,7 @@ procedureDefinition() throws StandardException :
 
 			return getCreateAliasNode(
 							procedureName,
-							(String) procedureElements[4],
+							(String) procedureElements[ CreateAliasNode.EXTERNAL_NAME ],
 							procedureElements,
 							AliasInfo.ALIAS_TYPE_PROCEDURE_AS_CHAR,
 							Boolean.FALSE);
@@ -10015,32 +10016,32 @@ void routineElement(boolean isProcedure, boolean isTableFunction, Object[] routi
 {
 	(
 		<SPECIFIC> clauseValue = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
-			{ clausePosition = 1; throw StandardException.newException(SQLState.NOT_IMPLEMENTED, "SPECIFIC identifier");}
+			{ clausePosition = CreateAliasNode.TABLE_NAME; throw StandardException.newException(SQLState.NOT_IMPLEMENTED, "SPECIFIC identifier");}
 	|
 		[ <DYNAMIC> ] <RESULT> <SETS> drs = uint_value()
 		{
 			if (!isProcedure)
 				throw StandardException.newException(SQLState.LANG_SYNTAX_ERROR, "RESULT SETS");
-			clauseValue = ReuseFactory.getInteger(drs); clausePosition = 2;
+			clauseValue = ReuseFactory.getInteger(drs); clausePosition = CreateAliasNode.DYNAMIC_RESULT_SET_COUNT;
 		}
 	|
-		<LANGUAGE>  <JAVA> { clauseValue = "JAVA"; clausePosition = 3; }
+		<LANGUAGE>  <JAVA> { clauseValue = "JAVA"; clausePosition = CreateAliasNode.LANGUAGE; }
 	|
-		<EXTERNAL> <NAME> clauseValue = string() { clausePosition = 4; }
+		<EXTERNAL> <NAME> clauseValue = string() { clausePosition = CreateAliasNode.EXTERNAL_NAME; }
 	|
-		<PARAMETER> <STYLE> clauseValue = parameterStyle( isTableFunction ) { clausePosition = 5; }
+		<PARAMETER> <STYLE> clauseValue = parameterStyle( isTableFunction ) { clausePosition = CreateAliasNode.PARAMETER_STYLE; }
 
-	|	<NO> <SQL>				{ clauseValue = ReuseFactory.getShort(RoutineAliasInfo.NO_SQL); clausePosition = 6; }
-	|	<CONTAINS> <SQL>		{ clauseValue = ReuseFactory.getShort(RoutineAliasInfo.CONTAINS_SQL); clausePosition = 6; }
-	|	<READS> <SQL> <DATA>	{ clauseValue = ReuseFactory.getShort(RoutineAliasInfo.READS_SQL_DATA); clausePosition = 6; }
+	|	<NO> <SQL>				{ clauseValue = ReuseFactory.getShort(RoutineAliasInfo.NO_SQL); clausePosition = CreateAliasNode.SQL_CONTROL; }
+	|	<CONTAINS> <SQL>		{ clauseValue = ReuseFactory.getShort(RoutineAliasInfo.CONTAINS_SQL); clausePosition = CreateAliasNode.SQL_CONTROL; }
+	|	<READS> <SQL> <DATA>	{ clauseValue = ReuseFactory.getShort(RoutineAliasInfo.READS_SQL_DATA); clausePosition = CreateAliasNode.SQL_CONTROL; }
 	|	<MODIFIES> <SQL> <DATA>
 		{
 			if (!isProcedure)
 				throw StandardException.newException(SQLState.LANG_SYNTAX_ERROR, "MODIFIES SQL DATA");
-			clauseValue = ReuseFactory.getShort(RoutineAliasInfo.MODIFIES_SQL_DATA); clausePosition = 6;
+			clauseValue = ReuseFactory.getShort(RoutineAliasInfo.MODIFIES_SQL_DATA); clausePosition = CreateAliasNode.SQL_CONTROL;
 		}
 
-	|   clauseValue = calledOnNullInput(isProcedure) { clausePosition = 7; }
+	|   clauseValue = calledOnNullInput(isProcedure) { clausePosition = CreateAliasNode.NULL_ON_NULL_INPUT; }
 	)
 
 	{
@@ -10177,7 +10178,7 @@ functionDefinition() throws StandardException :
 {
 	TableName functionName;
 	TypeDescriptor  returnType;
-	Object[] functionElements = new Object[9];
+	Object[] functionElements = new Object[CreateAliasNode.ROUTINE_ELEMENT_COUNT];
 }
 {
 		<FUNCTION> functionName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
@@ -10185,12 +10186,12 @@ functionDefinition() throws StandardException :
 		<RETURNS> returnType = functionReturnDataType() 
 		( routineElement(false, returnType.isRowMultiSet(), functionElements) ) +
 		{
-		    functionElements[8] = returnType;
+		    functionElements[CreateAliasNode.RETURN_TYPE] = returnType;
 		    checkRequiredRoutineClause(JAVA_ROUTINE_CLAUSES, functionElements);
 		    
 			return getCreateAliasNode(
 							functionName,
-							(String) functionElements[4],
+							(String) functionElements[CreateAliasNode.EXTERNAL_NAME],
 							functionElements,
 							AliasInfo.ALIAS_TYPE_FUNCTION_AS_CHAR,
 							Boolean.FALSE);

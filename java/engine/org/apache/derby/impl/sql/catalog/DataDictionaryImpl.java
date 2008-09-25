@@ -212,42 +212,49 @@ public final class	DataDictionaryImpl
     *[1]    = RETURNS type
     *[2]    = Java class
     *[3]    = method name and signature
-    *[4..N] = arguments (optional, if not present zero arguments is assumed)
+    *[4]    = "true" or "false" depending on whether the function is DETERMINSTIC
+    *[5..N] = arguments (optional, if not present zero arguments is assumed)
 	*
 	*/
 	private static final String[][] SYSFUN_FUNCTIONS = {
-			{"ACOS", "DOUBLE", "java.lang.StrictMath", "acos(double)", "DOUBLE"},
-			{"ASIN", "DOUBLE", "java.lang.StrictMath", "asin(double)", "DOUBLE"},
-			{"ATAN", "DOUBLE", "java.lang.StrictMath", "atan(double)", "DOUBLE"},
-            {"ATAN2", "DOUBLE", "java.lang.StrictMath", "atan2(double,double)", "DOUBLE", "DOUBLE"},
-			{"COS", "DOUBLE", "java.lang.StrictMath", "cos(double)", "DOUBLE"},
-			{"SIN", "DOUBLE", "java.lang.StrictMath", "sin(double)", "DOUBLE"},
-			{"TAN", "DOUBLE", "java.lang.StrictMath", "tan(double)", "DOUBLE"},
-            {"PI", "DOUBLE", "org.apache.derby.catalog.SystemProcedures", "PI()"},
-			{"DEGREES", "DOUBLE", "java.lang.StrictMath", "toDegrees(double)", "DOUBLE"},
-			{"RADIANS", "DOUBLE", "java.lang.StrictMath", "toRadians(double)", "DOUBLE"},
-			{"LN", "DOUBLE", "java.lang.StrictMath", "log(double)", "DOUBLE"},
-			{"LOG", "DOUBLE", "java.lang.StrictMath", "log(double)", "DOUBLE"}, // Same as LN
-			{"LOG10", "DOUBLE", "org.apache.derby.catalog.SystemProcedures", "LOG10(double)", "DOUBLE"},
-			{"EXP", "DOUBLE", "java.lang.StrictMath", "exp(double)", "DOUBLE"},
-			{"CEIL", "DOUBLE", "java.lang.StrictMath", "ceil(double)", "DOUBLE"},
-			{"CEILING", "DOUBLE", "java.lang.StrictMath", "ceil(double)", "DOUBLE"}, // Same as CEIL
-			{"FLOOR", "DOUBLE", "java.lang.StrictMath", "floor(double)", "DOUBLE"},
-			{"SIGN", "INTEGER", "org.apache.derby.catalog.SystemProcedures", "SIGN(double)", "DOUBLE"},
-            {"RANDOM", "DOUBLE", "java.lang.StrictMath", "random()"},
-			{"RAND", "DOUBLE", "org.apache.derby.catalog.SystemProcedures", "RAND(int)", "INTEGER"}, // Escape function spec.
-			{"COT", "DOUBLE", "org.apache.derby.catalog.SystemProcedures", "COT(double)", "DOUBLE"},
-			{"COSH", "DOUBLE", "org.apache.derby.catalog.SystemProcedures", "COSH(double)", "DOUBLE"},
-			{"SINH", "DOUBLE", "org.apache.derby.catalog.SystemProcedures", "SINH(double)", "DOUBLE"},
-			{"TANH", "DOUBLE", "org.apache.derby.catalog.SystemProcedures", "TANH(double)", "DOUBLE"}
+        {"ACOS", "DOUBLE", "java.lang.StrictMath", "acos(double)", "true", "DOUBLE"},
+			{"ASIN", "DOUBLE", "java.lang.StrictMath", "asin(double)",  "true", "DOUBLE"},
+			{"ATAN", "DOUBLE", "java.lang.StrictMath", "atan(double)",  "true", "DOUBLE"},
+            {"ATAN2", "DOUBLE", "java.lang.StrictMath", "atan2(double,double)",  "true", "DOUBLE", "DOUBLE"},
+			{"COS", "DOUBLE", "java.lang.StrictMath", "cos(double)",  "true", "DOUBLE"},
+			{"SIN", "DOUBLE", "java.lang.StrictMath", "sin(double)",  "true", "DOUBLE"},
+			{"TAN", "DOUBLE", "java.lang.StrictMath", "tan(double)",  "true", "DOUBLE"},
+            {"PI", "DOUBLE", "org.apache.derby.catalog.SystemProcedures", "PI()", "true"},
+            {"DEGREES", "DOUBLE", "java.lang.StrictMath", "toDegrees(double)", "true", "DOUBLE"},
+			{"RADIANS", "DOUBLE", "java.lang.StrictMath", "toRadians(double)",  "true", "DOUBLE"},
+			{"LN", "DOUBLE", "java.lang.StrictMath", "log(double)",  "true", "DOUBLE"},
+			{"LOG", "DOUBLE", "java.lang.StrictMath", "log(double)",  "true", "DOUBLE"}, // Same as LN
+			{"LOG10", "DOUBLE", "org.apache.derby.catalog.SystemProcedures", "LOG10(double)",  "true", "DOUBLE"},
+			{"EXP", "DOUBLE", "java.lang.StrictMath", "exp(double)",  "true", "DOUBLE"},
+			{"CEIL", "DOUBLE", "java.lang.StrictMath", "ceil(double)",  "true", "DOUBLE"},
+			{"CEILING", "DOUBLE", "java.lang.StrictMath", "ceil(double)",  "true", "DOUBLE"}, // Same as CEIL
+			{"FLOOR", "DOUBLE", "java.lang.StrictMath", "floor(double)",  "true", "DOUBLE"},
+			{"SIGN", "INTEGER", "org.apache.derby.catalog.SystemProcedures", "SIGN(double)",  "true", "DOUBLE"},
+            {"RANDOM", "DOUBLE", "java.lang.StrictMath", "random()",  "false" },
+			{"RAND", "DOUBLE", "org.apache.derby.catalog.SystemProcedures", "RAND(int)",  "false", "INTEGER"}, // Escape function spec.
+			{"COT", "DOUBLE", "org.apache.derby.catalog.SystemProcedures", "COT(double)",  "true", "DOUBLE"},
+			{"COSH", "DOUBLE", "org.apache.derby.catalog.SystemProcedures", "COSH(double)",  "true", "DOUBLE"},
+			{"SINH", "DOUBLE", "org.apache.derby.catalog.SystemProcedures", "SINH(double)",  "true", "DOUBLE"},
+			{"TANH", "DOUBLE", "org.apache.derby.catalog.SystemProcedures", "TANH(double)",  "true", "DOUBLE"}
 	};
 	
+
+    /**
+     * Index into SYSFUN_FUNCTIONS of the DETERMINISTIC indicator.
+     * Used to determine whether the system function is DETERMINISTIC
+     */
+    private static final int SYSFUN_DETERMINISTIC_INDEX =  4;
 
     /**
      * The index of the first parameter in entries in the SYSFUN_FUNCTIONS
      * table. Used to determine the parameter count (zero to many).
      */
-    private static final int SYSFUN_FIRST_PARAMETER_INDEX =  4;
+    private static final int SYSFUN_FIRST_PARAMETER_INDEX =  5;
 
 	/**
 	 * Runtime definition of the functions from SYSFUN_FUNCTIONS.
@@ -6788,6 +6795,8 @@ public final class	DataDictionaryImpl
 					TypeDescriptor rt =
 						DataTypeDescriptor.getBuiltInDataTypeDescriptor(details[1]).getCatalogType();
 
+                    boolean isDeterministic = Boolean.valueOf( details[ SYSFUN_DETERMINISTIC_INDEX ] ).booleanValue();
+                    
                     // Determine the number of arguments (could be zero).
                     int paramCount = details.length - SYSFUN_FIRST_PARAMETER_INDEX;
 					TypeDescriptor[] pt = new TypeDescriptor[paramCount];
@@ -6805,7 +6814,7 @@ public final class	DataDictionaryImpl
 					RoutineAliasInfo ai = new RoutineAliasInfo(details[3],
 							paramCount, paramNames,
 							pt, paramModes, 0,
-							RoutineAliasInfo.PS_JAVA, RoutineAliasInfo.NO_SQL,
+                            RoutineAliasInfo.PS_JAVA, RoutineAliasInfo.NO_SQL, isDeterministic,
 							false, rt);
 
 					// details[2] = class name
@@ -9376,6 +9385,8 @@ public final class	DataDictionaryImpl
      *                          CONTAINS_SQL
      *                          NO_SQL
      *
+     * @param isDeterministic True if the procedure/function is DETERMINISTIC
+     *
      * @param return_type   null for procedure.  For functions the return type
      *                      of the function.
      *
@@ -9396,6 +9407,7 @@ public final class	DataDictionaryImpl
 	int						num_out_param,
 	int						num_result_sets,
     short                   routine_sql_control,
+    boolean               isDeterministic,
     TypeDescriptor          return_type,
     TransactionController   tc,
     String procClass)
@@ -9441,6 +9453,7 @@ public final class	DataDictionaryImpl
                                                     //  READS_SQL_DATA
                                                     //  CONTAINS_SQL
                                                     //  NO_SQL
+                isDeterministic,             // whether the procedure/function is DETERMINISTIC
                 true,                               // true - calledOnNullInput
                 return_type);
 
@@ -9488,6 +9501,9 @@ public final class	DataDictionaryImpl
      *                          CONTAINS_SQL
      *                          NO_SQL
      *
+     *
+     * @param isDeterministic True if the procedure/function is DETERMINISTIC
+     *
      * @param return_type   null for procedure.  For functions the return type
      *                      of the function.
      *
@@ -9505,13 +9521,14 @@ public final class	DataDictionaryImpl
     int                     num_out_param,
     int                     num_result_sets,
     short                   routine_sql_control,
+    boolean               isDeterministic,
     TypeDescriptor          return_type,
     TransactionController   tc)
         throws StandardException
     {
         UUID routine_uuid = createSystemProcedureOrFunction(routine_name,
         schema_uuid, arg_names, arg_types,
-        num_out_param, num_result_sets, routine_sql_control,
+        num_out_param, num_result_sets, routine_sql_control, isDeterministic,
         return_type, tc, "org.apache.derby.catalog.SystemProcedures");
         return routine_uuid;
     }
@@ -9569,6 +9586,7 @@ public final class	DataDictionaryImpl
 				0,
 				0,
                 RoutineAliasInfo.MODIFIES_SQL_DATA,
+                false,
                 (TypeDescriptor) null,
                 tc);
         }
@@ -9595,6 +9613,7 @@ public final class	DataDictionaryImpl
 				0,
 				0,
                 RoutineAliasInfo.MODIFIES_SQL_DATA,
+                false,
                 (TypeDescriptor) null,
                 tc);
 
@@ -9611,6 +9630,7 @@ public final class	DataDictionaryImpl
 				0,
 				0,
                 RoutineAliasInfo.CONTAINS_SQL,
+                false,
                 (TypeDescriptor) null,
                 tc);
         }
@@ -9625,6 +9645,7 @@ public final class	DataDictionaryImpl
 				0,
 				0,
                 RoutineAliasInfo.CONTAINS_SQL,
+                false,
                 (TypeDescriptor) null,
                 tc);
         }
@@ -9639,6 +9660,7 @@ public final class	DataDictionaryImpl
 				0,
 				0,
                 RoutineAliasInfo.CONTAINS_SQL,
+                false,
                 (TypeDescriptor) null,
                 tc);
         }
@@ -9662,6 +9684,7 @@ public final class	DataDictionaryImpl
 				0,
 				0,
                 RoutineAliasInfo.MODIFIES_SQL_DATA,
+                false,
                 (TypeDescriptor) null,
                 tc);
         }
@@ -9687,6 +9710,7 @@ public final class	DataDictionaryImpl
 				0,
 				0,
                 RoutineAliasInfo.MODIFIES_SQL_DATA,
+                false,
                 (TypeDescriptor) null,
                 tc);
         }
@@ -9707,6 +9731,7 @@ public final class	DataDictionaryImpl
 				0,
 				0,
                 RoutineAliasInfo.MODIFIES_SQL_DATA,
+                false,
                 (TypeDescriptor) null,
                 tc);
         }
@@ -9727,6 +9752,7 @@ public final class	DataDictionaryImpl
 				0,
 				0,
                 RoutineAliasInfo.CONTAINS_SQL,
+                false,
                 (TypeDescriptor) null,
                 tc);
 
@@ -9749,6 +9775,7 @@ public final class	DataDictionaryImpl
 				0,
 				0,
                 RoutineAliasInfo.CONTAINS_SQL,
+                false,
                 (TypeDescriptor) null,
                 tc);
 
@@ -9780,6 +9807,7 @@ public final class	DataDictionaryImpl
 				0,
 				0,
                 RoutineAliasInfo.READS_SQL_DATA,
+                false,
                 DataTypeDescriptor.getCatalogType(
                     Types.VARCHAR, Limits.DB2_VARCHAR_MAXWIDTH),
                 tc);
@@ -9804,6 +9832,7 @@ public final class	DataDictionaryImpl
 				0,
 				0,
                 RoutineAliasInfo.READS_SQL_DATA,
+                false,
                 TypeDescriptor.INTEGER,
                 tc);
         }
@@ -9819,6 +9848,7 @@ public final class	DataDictionaryImpl
 				0,
 				0,
                 RoutineAliasInfo.CONTAINS_SQL,
+                false,
                 DataTypeDescriptor.getCatalogType(
                     Types.VARCHAR, Limits.DB2_VARCHAR_MAXWIDTH),
 
@@ -9861,6 +9891,7 @@ public final class	DataDictionaryImpl
 				0,
 				0,
                 RoutineAliasInfo.MODIFIES_SQL_DATA,
+                false,
                 (TypeDescriptor) null,
                 tc);
         }
@@ -9883,6 +9914,7 @@ public final class	DataDictionaryImpl
 				0,
 				0,
                 RoutineAliasInfo.MODIFIES_SQL_DATA,
+                false,
                 (TypeDescriptor) null,
                 tc);
         }
@@ -9904,6 +9936,7 @@ public final class	DataDictionaryImpl
 				0,
 				0,
                 RoutineAliasInfo.MODIFIES_SQL_DATA,
+                false,
                 (TypeDescriptor) null,
                 tc);
         }	
@@ -9941,6 +9974,7 @@ public final class	DataDictionaryImpl
 				0,
 				0,
 				RoutineAliasInfo.READS_SQL_DATA,
+                false,
                 (TypeDescriptor) null,
                 tc);
         }
@@ -9976,6 +10010,7 @@ public final class	DataDictionaryImpl
 				0,
 				0,
 				RoutineAliasInfo.READS_SQL_DATA,
+               false,
                 (TypeDescriptor) null,
                 tc);
         }
@@ -10016,6 +10051,7 @@ public final class	DataDictionaryImpl
 				0,
 				0,
 				RoutineAliasInfo.MODIFIES_SQL_DATA,
+               false,
                 (TypeDescriptor) null,
                 tc);
         }
@@ -10059,6 +10095,7 @@ public final class	DataDictionaryImpl
 				0,
 				0,
 				RoutineAliasInfo.MODIFIES_SQL_DATA,
+               false,
                 (TypeDescriptor) null,
                 tc);
         }
@@ -10093,6 +10130,7 @@ public final class	DataDictionaryImpl
 				0,
 				0,
 				RoutineAliasInfo.MODIFIES_SQL_DATA,
+               false,
                 (TypeDescriptor) null,
                 tc);
         }
@@ -10183,6 +10221,7 @@ public final class	DataDictionaryImpl
 				2,
 				0,
                 RoutineAliasInfo.READS_SQL_DATA,
+                false,
                 (TypeDescriptor) null,
                 tc);
         }
@@ -10212,6 +10251,7 @@ public final class	DataDictionaryImpl
 				0,
 				1,
                 RoutineAliasInfo.READS_SQL_DATA,
+                false,
                 (TypeDescriptor) null,
                 tc);
         }
@@ -10241,6 +10281,7 @@ public final class	DataDictionaryImpl
 				0,
 				1,
                 RoutineAliasInfo.READS_SQL_DATA,
+                false,
                 (TypeDescriptor) null,
                 tc);
         }
@@ -10270,6 +10311,7 @@ public final class	DataDictionaryImpl
 				0,
 				1,
                 RoutineAliasInfo.READS_SQL_DATA,
+                false,
                 (TypeDescriptor) null,
                 tc);
         }
@@ -10301,6 +10343,7 @@ public final class	DataDictionaryImpl
 				0,
 				1,
                 RoutineAliasInfo.READS_SQL_DATA,
+                false,
                 (TypeDescriptor) null,
                 tc);
         }
@@ -10333,6 +10376,7 @@ public final class	DataDictionaryImpl
 				0,
 				1,
                 RoutineAliasInfo.READS_SQL_DATA,
+                false,
                 (TypeDescriptor) null,
                 tc);
         }
@@ -10364,6 +10408,7 @@ public final class	DataDictionaryImpl
 				0,
 				1,
                 RoutineAliasInfo.READS_SQL_DATA,
+                false,
                 (TypeDescriptor) null,
                 tc);
         }
@@ -10395,6 +10440,7 @@ public final class	DataDictionaryImpl
 				0,
 				1,
                 RoutineAliasInfo.READS_SQL_DATA,
+                false,
                 (TypeDescriptor) null,
                 tc);
         }
@@ -10426,6 +10472,7 @@ public final class	DataDictionaryImpl
 				0,
 				1,
                 RoutineAliasInfo.READS_SQL_DATA,
+                false,
                 (TypeDescriptor) null,
                 tc);
         }
@@ -10462,6 +10509,7 @@ public final class	DataDictionaryImpl
 				0,
 				1,
                 RoutineAliasInfo.READS_SQL_DATA,
+                false,
                 (TypeDescriptor) null,
                 tc);
         }
@@ -10498,6 +10546,7 @@ public final class	DataDictionaryImpl
 				0,
 				1,
                 RoutineAliasInfo.READS_SQL_DATA,
+                false,
                 (TypeDescriptor) null,
                 tc);
         }
@@ -10523,6 +10572,7 @@ public final class	DataDictionaryImpl
 				0,
 				1,
                 RoutineAliasInfo.READS_SQL_DATA,
+                false,
                 (TypeDescriptor) null,
                 tc);
         }
@@ -10557,6 +10607,7 @@ public final class	DataDictionaryImpl
 				0,
 				1,
                 RoutineAliasInfo.READS_SQL_DATA,
+                false,
                 (TypeDescriptor) null,
                 tc);
         }
@@ -10571,6 +10622,7 @@ public final class	DataDictionaryImpl
 				0,
 				1,
                 RoutineAliasInfo.READS_SQL_DATA,
+                false,
                 (TypeDescriptor) null,
                 tc);
         }
@@ -10732,6 +10784,7 @@ public final class	DataDictionaryImpl
 				0,
 				0,
                 RoutineAliasInfo.MODIFIES_SQL_DATA,
+                false,
                 (TypeDescriptor) null,
                 tc);
 
@@ -10779,6 +10832,7 @@ public final class	DataDictionaryImpl
                 0,
                 0,
                 RoutineAliasInfo.MODIFIES_SQL_DATA,
+                false,
                 (TypeDescriptor) null,
                 tc);
         }
@@ -10808,6 +10862,7 @@ public final class	DataDictionaryImpl
                 0,
                 0,
                 RoutineAliasInfo.MODIFIES_SQL_DATA,
+                false,
                 (TypeDescriptor) null,
                 tc);
         }
@@ -10838,6 +10893,7 @@ public final class	DataDictionaryImpl
 				0,
 				1,
                 RoutineAliasInfo.READS_SQL_DATA,
+                false,
                 (TypeDescriptor) null,
                 tc);
         }
@@ -10870,6 +10926,7 @@ public final class	DataDictionaryImpl
 				0,
 				1,
                 RoutineAliasInfo.READS_SQL_DATA,
+                false,
                 (TypeDescriptor) null,
                 tc);
         }
@@ -10904,6 +10961,7 @@ public final class	DataDictionaryImpl
                 0,
                 0,
                 RoutineAliasInfo.CONTAINS_SQL,
+                false,
                 TypeDescriptor.INTEGER,
                 tc,
                 "org.apache.derby.impl.jdbc.LOBStoredProcedure");
@@ -10922,6 +10980,7 @@ public final class	DataDictionaryImpl
                 0,
                 0,
                 RoutineAliasInfo.CONTAINS_SQL,
+                false,
                 null,
                 tc,
                 "org.apache.derby.impl.jdbc.LOBStoredProcedure");
@@ -10946,6 +11005,7 @@ public final class	DataDictionaryImpl
                 0,
                 0,
                 RoutineAliasInfo.CONTAINS_SQL,
+                false,
                 DataTypeDescriptor.getCatalogType(
                     Types.BIGINT),
                 tc,
@@ -10970,6 +11030,7 @@ public final class	DataDictionaryImpl
                 0,
                 0,
                 RoutineAliasInfo.CONTAINS_SQL,
+                false,
                 DataTypeDescriptor.getCatalogType(
                     Types.BIGINT),
                 tc,
@@ -10989,6 +11050,7 @@ public final class	DataDictionaryImpl
                 0,
                 0,
                 RoutineAliasInfo.CONTAINS_SQL,
+                false,
                 DataTypeDescriptor.getCatalogType(
                     Types.BIGINT),
                 tc,
@@ -11013,6 +11075,7 @@ public final class	DataDictionaryImpl
                 0,
                 0,
                 RoutineAliasInfo.CONTAINS_SQL,
+                false,
                 DataTypeDescriptor.getCatalogType(
                     Types.VARCHAR,
                     LOBStoredProcedure.MAX_RETURN_LENGTH),
@@ -11040,6 +11103,7 @@ public final class	DataDictionaryImpl
                 0,
                 0,
                 RoutineAliasInfo.CONTAINS_SQL,
+                false,
                 null,
                 tc,
                 "org.apache.derby.impl.jdbc.LOBStoredProcedure");
@@ -11062,6 +11126,7 @@ public final class	DataDictionaryImpl
                 0,
                 0,
                 RoutineAliasInfo.CONTAINS_SQL,
+                false,
                 null,
                 tc,
                 "org.apache.derby.impl.jdbc.LOBStoredProcedure");
@@ -11082,6 +11147,7 @@ public final class	DataDictionaryImpl
                 0,
                 0,
                 RoutineAliasInfo.CONTAINS_SQL,
+                false,
                 TypeDescriptor.INTEGER,
                 tc,
                 "org.apache.derby.impl.jdbc.LOBStoredProcedure");
@@ -11100,6 +11166,7 @@ public final class	DataDictionaryImpl
                 0,
                 0,
                 RoutineAliasInfo.CONTAINS_SQL,
+                false,
                 null,
                 tc,
                 "org.apache.derby.impl.jdbc.LOBStoredProcedure");
@@ -11124,6 +11191,7 @@ public final class	DataDictionaryImpl
                 0,
                 0,
                 RoutineAliasInfo.CONTAINS_SQL,
+                false,
                 DataTypeDescriptor.getCatalogType(
                     Types.BIGINT),
                 tc,
@@ -11148,6 +11216,7 @@ public final class	DataDictionaryImpl
                 0,
                 0,
                 RoutineAliasInfo.CONTAINS_SQL,
+                false,
                 DataTypeDescriptor.getCatalogType(
                     Types.BIGINT),
                 tc,
@@ -11169,6 +11238,7 @@ public final class	DataDictionaryImpl
                 0,
                 0,
                 RoutineAliasInfo.CONTAINS_SQL,
+                false,
                 DataTypeDescriptor.getCatalogType(
                     Types.BIGINT),
                 tc,
@@ -11193,6 +11263,7 @@ public final class	DataDictionaryImpl
                 0,
                 0,
                 RoutineAliasInfo.CONTAINS_SQL,
+                false,
                 DataTypeDescriptor.getCatalogType(
                     Types.VARBINARY,
                     LOBStoredProcedure.MAX_RETURN_LENGTH),
@@ -11220,6 +11291,7 @@ public final class	DataDictionaryImpl
                 0,
                 0,
                 RoutineAliasInfo.CONTAINS_SQL,
+                false,
                 null,
                 tc,
                 "org.apache.derby.impl.jdbc.LOBStoredProcedure");
@@ -11242,6 +11314,7 @@ public final class	DataDictionaryImpl
                 0,
                 0,
                 RoutineAliasInfo.CONTAINS_SQL,
+                false,
                 null,
                 tc,
                 "org.apache.derby.impl.jdbc.LOBStoredProcedure");
@@ -11281,6 +11354,7 @@ public final class	DataDictionaryImpl
                 0,
                 0,
                 RoutineAliasInfo.MODIFIES_SQL_DATA,
+                false,
                 (TypeDescriptor) null,
                 tc);
 
@@ -11353,6 +11427,7 @@ public final class	DataDictionaryImpl
 				0,
 				0,
 				RoutineAliasInfo.READS_SQL_DATA,
+               false,
                 (TypeDescriptor) null,
                 tc);
         }
@@ -11393,6 +11468,7 @@ public final class	DataDictionaryImpl
                 0,
                 0,
                 RoutineAliasInfo.READS_SQL_DATA,
+                false,
                 (TypeDescriptor) null,
                 tc);
         }
@@ -11431,6 +11507,7 @@ public final class	DataDictionaryImpl
                0,
                0,
                RoutineAliasInfo.MODIFIES_SQL_DATA,
+               false,
                (TypeDescriptor) null,
                tc);
         }
@@ -11476,6 +11553,7 @@ public final class	DataDictionaryImpl
                 0,
                 0,
                 RoutineAliasInfo.MODIFIES_SQL_DATA,
+                false,
                 (TypeDescriptor) null,
                 tc);
         }
@@ -11491,6 +11569,7 @@ public final class	DataDictionaryImpl
                 0,
                 0,
                 RoutineAliasInfo.NO_SQL,
+                false,
                 (TypeDescriptor) null,
                 tc);
         }
@@ -11508,6 +11587,7 @@ public final class	DataDictionaryImpl
                 0,
                 0,
                 RoutineAliasInfo.MODIFIES_SQL_DATA,
+                false,
                 (TypeDescriptor) null,
                 tc);
         }
@@ -11524,6 +11604,7 @@ public final class	DataDictionaryImpl
                 0,
                 0,
                 RoutineAliasInfo.READS_SQL_DATA,
+                false,
                 CATALOG_TYPE_SYSTEM_IDENTIFIER,
                 tc);
         }
@@ -11538,6 +11619,7 @@ public final class	DataDictionaryImpl
                 0,
                 0,
                 RoutineAliasInfo.NO_SQL,
+                false,
                 (TypeDescriptor) null,
                 tc);
         }

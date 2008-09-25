@@ -53,6 +53,10 @@ public class RoutineAliasInfo extends MethodAliasInfo
 	/** PARAMETER STYLE DERBY_JDBC_RESULT_SET */
 	public static final short PS_DERBY_JDBC_RESULT_SET = PS_JAVA + 1;
 
+    /** Masks for the sqlOptions field */
+    private static final short SQL_ALLOWED_MASK = (short) 0xF;
+    private static final short DETERMINISTIC_MASK = (short) 0x10;
+
 	private int parameterCount;
 
     /**
@@ -84,9 +88,13 @@ public class RoutineAliasInfo extends MethodAliasInfo
 	private short parameterStyle;
 
 	/**
-		What SQL is allowed by this procedure.
-	*/
-	private short	sqlAllowed;
+		This field contains several pieces of information:
+
+        bits 0-3    sqlAllowed = MODIFIES_SQL_DATA, READS_SQL_DATA,CONTAINS_SQL, or NO_SQL
+
+        bit 4         on if function is DETERMINISTIC, off otherwise
+    */
+	private short	sqlOptions;
 
 	/**
 		SQL Specific name (future)
@@ -109,10 +117,11 @@ public class RoutineAliasInfo extends MethodAliasInfo
 		Create a RoutineAliasInfo for an internal PROCEDURE.
 	*/
 	public RoutineAliasInfo(String methodName, int parameterCount, String[] parameterNames,
-		TypeDescriptor[]	parameterTypes, int[] parameterModes, int dynamicResultSets, short parameterStyle, short sqlAllowed) {
+                            TypeDescriptor[]	parameterTypes, int[] parameterModes, int dynamicResultSets, short parameterStyle, short sqlAllowed,
+                            boolean isDeterministic ) {
 
 		this(methodName, parameterCount, parameterNames, parameterTypes, parameterModes, 
-			dynamicResultSets, parameterStyle, sqlAllowed, true, (TypeDescriptor) null);
+             dynamicResultSets, parameterStyle, sqlAllowed, isDeterministic, true, (TypeDescriptor) null);
 	}
 
 	/**
@@ -120,7 +129,7 @@ public class RoutineAliasInfo extends MethodAliasInfo
 	*/
 	public RoutineAliasInfo(String methodName, int parameterCount, String[] parameterNames,
 		TypeDescriptor[]	parameterTypes, int[] parameterModes, int dynamicResultSets, short parameterStyle, short sqlAllowed,
-		boolean calledOnNullInput, TypeDescriptor returnType)
+                            boolean isDeterministic, boolean calledOnNullInput, TypeDescriptor returnType)
 	{
 
 		super(methodName);
@@ -130,7 +139,8 @@ public class RoutineAliasInfo extends MethodAliasInfo
 		this.parameterModes = parameterModes;
 		this.dynamicResultSets = dynamicResultSets;
 		this.parameterStyle = parameterStyle;
-		this.sqlAllowed = sqlAllowed;
+		this.sqlOptions = (short) (sqlAllowed & SQL_ALLOWED_MASK);
+        if ( isDeterministic ) { this.sqlOptions = (short) (sqlOptions | DETERMINISTIC_MASK); }
 		this.calledOnNullInput = calledOnNullInput;
 		this.returnType = returnType;
 
@@ -204,8 +214,13 @@ public class RoutineAliasInfo extends MethodAliasInfo
 	}
 
 	public short getSQLAllowed() {
-		return sqlAllowed;
+		return (short) (sqlOptions & SQL_ALLOWED_MASK);
 	}
+
+    public boolean isDeterministic()
+    {
+        return ( (sqlOptions & DETERMINISTIC_MASK) != 0 );
+    }
 
 	public boolean calledOnNullInput() {
 		return calledOnNullInput;
@@ -239,7 +254,7 @@ public class RoutineAliasInfo extends MethodAliasInfo
 		dynamicResultSets = in.readInt();
 		parameterCount = in.readInt();
 		parameterStyle = in.readShort();
-		sqlAllowed = in.readShort();
+		sqlOptions = in.readShort();
 		returnType = getStoredType(in.readObject());
 		calledOnNullInput = in.readBoolean();
 		in.readInt(); // future expansion.
@@ -295,7 +310,7 @@ public class RoutineAliasInfo extends MethodAliasInfo
 		out.writeInt(dynamicResultSets);
 		out.writeInt(parameterCount);
 		out.writeShort(parameterStyle);
-		out.writeShort(sqlAllowed);
+		out.writeShort(sqlOptions);
 		out.writeObject(returnType);
 		out.writeBoolean(calledOnNullInput);
 		out.writeInt(0); // future expansion

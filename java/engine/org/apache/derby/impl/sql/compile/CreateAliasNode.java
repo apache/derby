@@ -52,6 +52,19 @@ import java.util.Vector;
 
 public class CreateAliasNode extends DDLStatementNode
 {
+    // indexes into routineElements
+    public static final int PARAMETER_ARRAY = 0;
+    public static final int TABLE_NAME = PARAMETER_ARRAY + 1;
+    public static final int DYNAMIC_RESULT_SET_COUNT = TABLE_NAME + 1;
+    public static final int LANGUAGE = DYNAMIC_RESULT_SET_COUNT + 1;
+    public static final int EXTERNAL_NAME = LANGUAGE + 1;
+    public static final int PARAMETER_STYLE = EXTERNAL_NAME + 1;
+    public static final int SQL_CONTROL = PARAMETER_STYLE + 1;
+    public static final int DETERMINISTIC = SQL_CONTROL + 1;
+    public static final int NULL_ON_NULL_INPUT = DETERMINISTIC + 1;
+    public static final int RETURN_TYPE = NULL_ON_NULL_INPUT + 1;
+    public static final int ROUTINE_ELEMENT_COUNT = RETURN_TYPE + 1;
+    
 	private String				javaClassName;
 	private String				methodName;
 	private char				aliasType; 
@@ -106,11 +119,12 @@ public class CreateAliasNode extends DDLStatementNode
 				// 4 - String external name (also passed directly to create alias node - ignore
 				// 5 - Integer parameter style 
 				// 6 - Short - SQL control
-				// 7 - Boolean - CALLED ON NULL INPUT (always TRUE for procedures)
-				// 8 - TypeDescriptor - return type (always NULL for procedures)
+				// 7 - Boolean - whether the routine is DETERMINISTIC
+				// 8 - Boolean - CALLED ON NULL INPUT (always TRUE for procedures)
+				// 9 - TypeDescriptor - return type (always NULL for procedures)
 
 				Object[] routineElements = (Object[]) aliasSpecificInfo;
-				Object[] parameters = (Object[]) routineElements[0];
+				Object[] parameters = (Object[]) routineElements[PARAMETER_ARRAY];
 				int paramCount = ((Vector) parameters[0]).size();
 				
 				// Support for Java signatures in Derby was added in 10.1
@@ -162,18 +176,21 @@ public class CreateAliasNode extends DDLStatementNode
 					}
 				}
 
-				Integer drso = (Integer) routineElements[2];
+				Integer drso = (Integer) routineElements[DYNAMIC_RESULT_SET_COUNT];
 				int drs = drso == null ? 0 : drso.intValue();
 
 				short sqlAllowed;
-				Short sqlAllowedObject = (Short) routineElements[6];
+				Short sqlAllowedObject = (Short) routineElements[SQL_CONTROL];
 				if (sqlAllowedObject != null)
 					sqlAllowed = sqlAllowedObject.shortValue();
 				else
 					sqlAllowed = (this.aliasType == AliasInfo.ALIAS_TYPE_PROCEDURE_AS_CHAR ?
 					RoutineAliasInfo.MODIFIES_SQL_DATA : RoutineAliasInfo.READS_SQL_DATA);
 
-				Boolean calledOnNullInputO = (Boolean) routineElements[7];
+				Boolean isDeterministicO = (Boolean) routineElements[DETERMINISTIC];
+                boolean isDeterministic = (isDeterministicO == null) ? false : isDeterministicO.booleanValue();
+
+				Boolean calledOnNullInputO = (Boolean) routineElements[NULL_ON_NULL_INPUT];
 				boolean calledOnNullInput;
 				if (calledOnNullInputO == null)
 					calledOnNullInput = true;
@@ -181,8 +198,8 @@ public class CreateAliasNode extends DDLStatementNode
 					calledOnNullInput = calledOnNullInputO.booleanValue();
 
 				aliasInfo = new RoutineAliasInfo(this.methodName, paramCount, names, types, modes, drs,
-						((Short) routineElements[5]).shortValue(),	// parameter style
-						sqlAllowed, calledOnNullInput, (TypeDescriptor) routineElements[8]);
+						((Short) routineElements[PARAMETER_STYLE]).shortValue(),	// parameter style
+                        sqlAllowed, isDeterministic, calledOnNullInput, (TypeDescriptor) routineElements[RETURN_TYPE]);
 
 				implicitCreateSchema = true;
 				}
