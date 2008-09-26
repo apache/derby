@@ -68,7 +68,14 @@ final class ClientThread extends Thread {
                                      }
                                  }
                                  );
-
+                        // Server may have been shut down.  If so, close this
+                        // client socket and break out of the loop.
+                        // DERBY-3869
+                        if (parent.getShutdown()) {
+                            clientSocket.close();
+                            return;
+                        }
+                            
                         clientSocket.setKeepAlive(parent.getKeepAlive());
                         
                         // Set time out: Stops DDMReader.fill() from
