@@ -1,0 +1,16 @@
+ij> -- Run via ToolScripts.java
+create role a;
+0 rows inserted/updated/deleted
+ij> create role b;
+0 rows inserted/updated/deleted
+ij> create role """eve""";
+0 rows inserted/updated/deleted
+ij> grant a to b;
+0 rows inserted/updated/deleted
+ij> show roles;
+ROLEID                        
+------------------------------
+"eve"                         
+A                             
+B                             
+ij> 

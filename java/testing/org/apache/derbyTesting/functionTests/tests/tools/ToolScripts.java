@@ -24,6 +24,7 @@ import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.functionTests.util.ScriptTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
+import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
@@ -73,6 +74,14 @@ public final class ToolScripts extends ScriptTestCase {
     private static final String[] JDBC3_TESTS = {
     };
 
+
+    /**
+     * Tests that run with authentication and SQL authorization on.
+     */
+    private static final String[][] SQLAUTHORIZATION_TESTS = {
+        {"ij_show_roles", "test_dbo"}
+    };
+
     /**
      * Run a set of tool scripts (.sql files) passed in on the
      * command line. Note the .sql suffix must not be provided as
@@ -97,10 +106,12 @@ public final class ToolScripts extends ScriptTestCase {
         suite.addTest(getSuite(EMBEDDED_TESTS));
         if (JDBC.vmSupportsJDBC3())
             suite.addTest(getSuite(JDBC3_TESTS));
+        suite.addTest(getAuthorizationSuite(SQLAUTHORIZATION_TESTS));
 
         // Set up the scripts run with the network client
         TestSuite clientTests = new TestSuite("ToolScripts:client");
         clientTests.addTest(getSuite(CLIENT_AND_EMBEDDED_TESTS));
+        clientTests.addTest(getAuthorizationSuite(SQLAUTHORIZATION_TESTS));
         clientTests.addTest(getSuite(CLIENT_TESTS));
         Test client = TestConfiguration.clientServerDecorator(clientTests);
 
@@ -131,4 +142,26 @@ public final class ToolScripts extends ScriptTestCase {
 
         return getIJConfig(suite);
     }
+
+    /**
+     * Return a suite of tool tests from the list of script names. Each test is
+     * surrounded in a decorator that cleans the database, and adds
+     * authentication and authorization given the user for each script.
+     */
+    private static Test getAuthorizationSuite(String[][] list) {
+        TestSuite suite = new TestSuite("Tool scripts w/authorization");
+        final String PWSUFFIX = "pwSuffix";
+
+        for (int i = 0; i < list.length; i++) {
+            Test clean = new CleanDatabaseTestSetup(
+                new ToolScripts(list[i][0]));
+            suite.addTest(
+                TestConfiguration.sqlAuthorizationDecorator(
+                    DatabasePropertyTestSetup.builtinAuthentication(
+                        clean, new String[]{list[i][1]}, PWSUFFIX)));
+        }
+
+        return getIJConfig(suite);
+    }
+
 }

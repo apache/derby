@@ -252,7 +252,7 @@ public class CleanDatabaseTestSetup extends BaseJDBCTestSetup {
             "cast(isdef as char(1)) = 'Y'");
 
         while (rs.next()) {
-            dropStm.executeUpdate("DROP ROLE " + rs.getString(1));
+            dropStm.executeUpdate("DROP ROLE " + JDBC.escape(rs.getString(1)));
         }
 
         stm.close();

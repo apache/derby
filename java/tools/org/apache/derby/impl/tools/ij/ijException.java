@@ -62,6 +62,7 @@ public class ijException extends RuntimeException {
 	private final static String StatementGetWarningsFailed = "IJ_UnabToGetWar_22";
 	private final static String WaitInterrupted = "IJ_WaitForStatI";
 	private final static String ZeroInvalidForAbsolute = "IJ_0IsAnInvaVal";
+	private final static String NotAvailableForDriver = "IJ_NotAvailForDriver";
 
 	public ijException(String message) {
 		super(message);
@@ -148,5 +149,9 @@ public class ijException extends RuntimeException {
 	}
 	public static ijException zeroInvalidForAbsolute() {
 		return new ijException(LocalizedResource.getMessage(ZeroInvalidForAbsolute));
+	}
+	public static ijException notAvailableForDriver(String s) {
+		return new ijException(
+			LocalizedResource.getMessage(NotAvailableForDriver, s));
 	}
 }

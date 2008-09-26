@@ -837,18 +837,24 @@ class ij {
 		try {
 			haveConnection();
 
-			rs = theConnection.createStatement().executeQuery
-				("SELECT ROLEID FROM SYS.SYSROLES WHERE ISDEF='Y' " +
-				 "ORDER BY ROLEID ASC");
+			if (currentConnEnv.getSession().getIsDNC() ||
+				currentConnEnv.getSession().getIsEmbeddedDerby()) {
+				rs = theConnection.createStatement().executeQuery
+					("SELECT ROLEID FROM SYS.SYSROLES WHERE ISDEF='Y' " +
+					 "ORDER BY ROLEID ASC");
 
-			int[] displayColumns = new int[] {
-				rs.findColumn("ROLEID")
-			};
-			int[] columnWidths = new int[] {
-				30
-			};
+				int[] displayColumns = new int[] {
+					rs.findColumn("ROLEID")
+				};
+				int[] columnWidths = new int[] {
+					30
+				};
 
-			return new ijResultSetResult(rs, displayColumns, columnWidths);
+				return new ijResultSetResult(rs, displayColumns, columnWidths);
+			} else {
+				throw ijException.notAvailableForDriver(
+					theConnection.getMetaData().getDriverName());
+			}
 		} catch (SQLException e) {
 			if(rs!=null)
 				rs.close();
