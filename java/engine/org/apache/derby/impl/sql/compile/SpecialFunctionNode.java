@@ -158,7 +158,7 @@ public class SpecialFunctionNode extends ValueNode
 
 		case C_NodeTypes.CURRENT_ROLE_NODE:
 			sqlName = "CURRENT_ROLE";
-			methodName = "getCurrentRoleIdChecked";
+			methodName = "getCurrentRoleIdDelimited";
 			methodType = "java.lang.String";
 			dtd = DataTypeDescriptor.getBuiltInDataTypeDescriptor(
 				Types.VARCHAR, true, 128);
@@ -232,7 +232,7 @@ public class SpecialFunctionNode extends ValueNode
 											 ClassName.LanguageConnectionContext, 0);
 		int argCount = 0;
 
-		if (methodName.equals("getCurrentRoleIdChecked") ||
+		if (methodName.equals("getCurrentRoleIdDelimited") ||
 			methodName.equals("getCurrentSchemaName")) {
 
 			acb.pushThisAsActivation(mb);

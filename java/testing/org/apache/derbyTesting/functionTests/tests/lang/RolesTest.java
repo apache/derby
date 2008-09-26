@@ -78,6 +78,7 @@ public class RolesTest extends BaseJDBCTestCase
     private final static String invalidPUBLIC            = "4251B";
     private final static String loginFailed              = "08004";
     private final static String roleGrantCircularity     = "4251C";
+    private final static String idParseError             = "XCXA0";
 
     private int MAX_IDENTIFIER_LENGTH = 128;
     /**
@@ -505,7 +506,7 @@ public class RolesTest extends BaseJDBCTestCase
          */
         ResultSet rs = doQuery("values current_role",
                                sqlAuthorizationRequired, null , null);
-        assertRoleInRs(rs, "ROLE", "BAR");
+        assertRoleInRs(rs, "\"ROLE\"", "\"BAR\"");
 
         if (rs != null) {
             rs.close();
@@ -745,7 +746,7 @@ public class RolesTest extends BaseJDBCTestCase
         // Change the role.
         stmt.execute("set role bar");
         ResultSet rs = stmt.executeQuery("values current_role");
-        assertRoleInRs(rs, "BAR", n_a);
+        assertRoleInRs(rs, "\"BAR\"", n_a);
         rs.close();
         stmt.close();
 
@@ -1040,12 +1041,21 @@ public class RolesTest extends BaseJDBCTestCase
 
 
         try {
+            pstmt.setString(1, "");
+            int rowcnt = pstmt.executeUpdate();
+            fail("Expected syntax error on identifier");
+        } catch (SQLException e) {
+            assertSQLState(idParseError ,e);
+        }
+
+        try {
             pstmt.setString(1, null);
             int rowcnt = pstmt.executeUpdate();
-            assertEquals("rowcount from set role ? not 0", rowcnt, 0);
+            fail("Expected syntax error on identifier");
         } catch (SQLException e) {
-            fail("execute of set role ? failed: [NONE] " + e, e);
+            assertSQLState(idParseError ,e);
         }
+
 
         if (isDbo()) {
             // not granted to non-dbo, so don't try..
@@ -1056,7 +1066,7 @@ public class RolesTest extends BaseJDBCTestCase
                 int rowcnt = pstmt.executeUpdate();
                 assertEquals("rowcount from set role ? not 0", rowcnt, 0);
                 ResultSet rs = doQuery("values current_role", n_a, null , n_a );
-                assertRoleInRs(rs, "NONE", n_a);
+                assertRoleInRs(rs, "\"NONE\"", n_a);
                 rs.close();
             } catch (SQLException e) {
                 fail("execute of set role ? failed: [NONE] " + e, e);

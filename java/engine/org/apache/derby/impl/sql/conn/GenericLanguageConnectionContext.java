@@ -3280,9 +3280,9 @@ public class GenericLanguageConnectionContext
 
 
 	/**
-	 * @see LanguageConnectionContext#getCurrentRoleIdChecked(Activation a)
+	 * @see LanguageConnectionContext#getCurrentRoleIdDelimited(Activation a)
 	 */
-	public String getCurrentRoleIdChecked(Activation a)
+	public String getCurrentRoleIdDelimited(Activation a)
 			throws StandardException {
 
 		String role = getCurrentSQLSessionContext(a.getCallActivation()).
@@ -3293,14 +3293,17 @@ public class GenericLanguageConnectionContext
 
 			try {
 				if (!roleIsSettable(role)) {
-					// invalid role, so reset it.
+					// invalid role, so lazily reset it.
 					setCurrentRole(a, null);
 					role = null;
 				}
 			} finally {
 				commitNestedTransaction();
 			}
+		}
 
+		if (role != null) {
+			role = IdUtil.normalToDelimited(role);
 		}
 
 		return role;

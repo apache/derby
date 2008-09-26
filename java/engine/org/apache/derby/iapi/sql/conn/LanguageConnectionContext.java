@@ -1111,15 +1111,16 @@ public interface LanguageConnectionContext extends Context {
 	public String getCurrentRoleId(Activation a);
 
 	/**
-	 * Get the current role authorization identifier of the dynamic
-	 * call context associated with this activation. It is checked
-	 * whether it is still valid, that is, not revoked or dropped.
+	 * Get the current role authorization identifier in external delimited form
+	 * (not case normal form) of the dynamic call context associated with this
+	 * activation.
 	 * @param a activation of statement needing current role
-	 * @return String	the role id
+	 * @return String the role id in delimited form (i.e. <b>not</b>
+	 * internal case normal form</b>)
 	 *
 	 * @throws StandardException  standard exception policy
 	 */
-	public String getCurrentRoleIdChecked(Activation a)
+	public String getCurrentRoleIdDelimited(Activation a)
 			throws StandardException;
 
 	/**

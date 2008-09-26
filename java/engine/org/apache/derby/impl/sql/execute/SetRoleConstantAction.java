@@ -34,6 +34,7 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.store.access.TransactionController;
+import org.apache.derby.iapi.util.IdUtil;
 
 /**
  *  This class describes actions that are ALWAYS performed for a
@@ -114,7 +115,18 @@ class SetRoleConstantAction implements ConstantAction
         if (type == StatementType.SET_ROLE_DYNAMIC) {
             ParameterValueSet pvs = activation.getParameterValueSet();
             DataValueDescriptor dvs = pvs.getParameter(0);
+            // SQL 2003, section 18.3, GR2: trim whitespace first, and
+            // interpret as identifier, then we convert it to case normal form
+            // here.
             thisRoleName = dvs.getString();
+
+            if (thisRoleName == null) {
+                throw StandardException.newException(SQLState.ID_PARSE_ERROR);
+            }
+
+            thisRoleName = thisRoleName.trim();
+
+            thisRoleName = IdUtil.parseSQLIdentifier(thisRoleName);
         }
 
         RoleGrantDescriptor rdDef = null;

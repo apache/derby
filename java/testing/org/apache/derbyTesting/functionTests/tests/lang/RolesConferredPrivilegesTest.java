@@ -2364,18 +2364,18 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
     }
 
     /**
-     * Set the given role for the current session, or NONE if null
+     * Set the given role for the current session.
      */
     private void setRole(Connection c, String role) throws SQLException {
-        // if (role == null) {   // Cf. discussion in DERBY-3137.
-        //     role = "none";
-        // }
-        if (role != null &&  JDBC.identifierToCNF(role).equals("NONE")) {
-            role = null;
+        PreparedStatement ps;
+
+        if (role.toUpperCase().equals("NONE")) {
+            ps = c.prepareStatement("set role none");
+        } else {
+            ps = c.prepareStatement("set role ?");
+            ps.setString(1, role);
         }
 
-        PreparedStatement ps = c.prepareStatement("set role ?");
-        ps.setString(1, JDBC.identifierToCNF(role));
         ps.execute();
         ps.close();
     }

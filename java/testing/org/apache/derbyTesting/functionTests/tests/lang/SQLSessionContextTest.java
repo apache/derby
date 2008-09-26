@@ -359,7 +359,7 @@ public class SQLSessionContextTest extends BaseJDBCTestCase
     }
 
 
-    private static void assertCurrent(String comment,
+    private static void assertCurrent(String sessionVar,
                                       ResultSet rs,
                                       String expected)
             throws SQLException
@@ -367,12 +367,19 @@ public class SQLSessionContextTest extends BaseJDBCTestCase
         assertTrue("result set empty", rs.next());
         String actualCurrent = rs.getString(1);
 
+        if (sessionVar.equals("role") && expected != null) {
+            // returned current_role is a delimited identifer, which is SQL
+            // standard compliant. current_schema returns case normal form,
+            // which is not.
+            expected = "\"" + expected + "\"";
+        }
+
         if (expected != null) {
-            assertTrue(comment + "current is " + actualCurrent +
+            assertTrue(sessionVar + ": current is " + actualCurrent +
                        ", expected " + expected,
                        expected.equals(actualCurrent));
         } else {
-            assertTrue(comment + "current is " + actualCurrent +
+            assertTrue(sessionVar + ": current is " + actualCurrent +
                        ", expected null",
                        actualCurrent == null);
         }
