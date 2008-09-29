@@ -1943,6 +1943,43 @@ create view bar."viewTwo" as select * from app.t11
 N
 APP
 ----
+========== SYSROLES ==========
+"eve"
+APP
+_SYSTEM
+Y
+Y
+----
+"eve"
+B
+APP
+N
+N
+----
+A
+APP
+_SYSTEM
+Y
+Y
+----
+A
+B
+APP
+N
+N
+----
+B
+APP
+_SYSTEM
+Y
+Y
+----
+B
+WHOMEVER
+APP
+N
+N
+----
 --
 *******************************************
 Dumping full schema for 'wombat'
@@ -3893,6 +3930,43 @@ create view bar."viewTwo" as select * from app.t11
 N
 APP
 ----
+========== SYSROLES ==========
+"eve"
+APP
+_SYSTEM
+Y
+Y
+----
+"eve"
+B
+APP
+N
+N
+----
+A
+APP
+_SYSTEM
+Y
+Y
+----
+A
+B
+APP
+N
+N
+----
+B
+APP
+_SYSTEM
+Y
+Y
+----
+B
+WHOMEVER
+APP
+N
+N
+----
 Database 'wombat_new' deleted.
 --
 *******************************************
@@ -4477,6 +4551,43 @@ OLDTABLE
 null
 ----
 ========== SYSVIEWS ==========
+========== SYSROLES ==========
+"eve"
+APP
+_SYSTEM
+Y
+Y
+----
+"eve"
+B
+APP
+N
+N
+----
+A
+APP
+_SYSTEM
+Y
+Y
+----
+A
+B
+APP
+N
+N
+----
+B
+APP
+_SYSTEM
+Y
+Y
+----
+B
+WHOMEVER
+APP
+N
+N
+----
 Database 'wombat_new' deleted.
 --
 *******************************************
@@ -4723,6 +4834,43 @@ R
 ----
 ========== SYSTRIGGERS ==========
 ========== SYSVIEWS ==========
+========== SYSROLES ==========
+"eve"
+APP
+_SYSTEM
+Y
+Y
+----
+"eve"
+B
+APP
+N
+N
+----
+A
+APP
+_SYSTEM
+Y
+Y
+----
+A
+B
+APP
+N
+N
+----
+B
+APP
+_SYSTEM
+Y
+Y
+----
+B
+WHOMEVER
+APP
+N
+N
+----
 Database 'wombat_new' deleted.
 --
 *******************************************
@@ -5016,6 +5164,43 @@ create view v2 as select * from bar.t1
 N
 APP
 ----
+========== SYSROLES ==========
+"eve"
+APP
+_SYSTEM
+Y
+Y
+----
+"eve"
+B
+APP
+N
+N
+----
+A
+APP
+_SYSTEM
+Y
+Y
+----
+A
+B
+APP
+N
+N
+----
+B
+APP
+_SYSTEM
+Y
+Y
+----
+B
+WHOMEVER
+APP
+N
+N
+----
 Database 'wombat_new' deleted.
 --
 *******************************************
@@ -5152,6 +5337,43 @@ null
 null
 ----
 ========== SYSVIEWS ==========
+========== SYSROLES ==========
+"eve"
+APP
+_SYSTEM
+Y
+Y
+----
+"eve"
+B
+APP
+N
+N
+----
+A
+APP
+_SYSTEM
+Y
+Y
+----
+A
+B
+APP
+N
+N
+----
+B
+APP
+_SYSTEM
+Y
+Y
+----
+B
+WHOMEVER
+APP
+N
+N
+----
 Database 'wombat_new' deleted.
 --
 *******************************************
@@ -5188,6 +5410,7 @@ APP
 ========== SYSTABLES ==========
 ========== SYSTRIGGERS ==========
 ========== SYSVIEWS ==========
+========== SYSROLES ==========
 Database 'wombat_new' deleted.
 -= Start dblook Message Tests =-
 Database 'wombat' deleted.

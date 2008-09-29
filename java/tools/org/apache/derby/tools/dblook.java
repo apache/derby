@@ -48,6 +48,7 @@ import org.apache.derby.impl.tools.dblook.DB_Schema;
 import org.apache.derby.impl.tools.dblook.DB_Alias;
 import org.apache.derby.impl.tools.dblook.DB_Trigger;
 import org.apache.derby.impl.tools.dblook.DB_View;
+import org.apache.derby.impl.tools.dblook.DB_Roles;
 import org.apache.derby.impl.tools.dblook.DB_GrantRevoke;
 import org.apache.derby.impl.tools.dblook.Logs;
 
@@ -539,6 +540,7 @@ public final class dblook {
 
 			DB_Trigger.doTriggers(this.conn);
 
+			DB_Roles.doRoles(this.conn);
 			DB_GrantRevoke.doAuthorizations(this.conn);
 
 			// That's it; we're done.

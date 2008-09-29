@@ -271,7 +271,9 @@ public class RunTest
 
         // Check for properties files, including derby.properties
         // and if needed, build the -p string to pass to the test
-        String propString = createPropString();
+        AppsRequiredPassword creds = new AppsRequiredPassword();
+        String propString = createPropString(creds);
+
         if ( (isSuiteRun == false) && (useprocess) )
         {
             SysInfoLog sysLog = new SysInfoLog();
@@ -314,11 +316,13 @@ public class RunTest
                 }
 
                 ns = new NetServer(baseDir, jvmnetjvm, classpathServer, null,
-                                     spacedJvmFlags,framework, startServer);
+                                   spacedJvmFlags,framework, startServer,
+                                   creds.password);
             }
             else
                 ns = new NetServer(baseDir, jvmName, classpathServer, 
-                                     javaCmd, spacedJvmFlags,framework, startServer);
+                                   javaCmd, spacedJvmFlags,framework,
+                                   startServer, creds.password);
 
             //  With useprocess=true, we have a new dir for each test, and all files for
             // the test, including a clean database, go in that directory. So, network server
@@ -1297,7 +1301,7 @@ public class RunTest
 		return jvhs;
     }
 
-    private static String createPropString()
+    private static String createPropString(AppsRequiredPassword creds)
         throws ClassNotFoundException, FileNotFoundException, IOException
     {
         // Check for existence of app properties and/or derby.properties files
@@ -1428,6 +1432,20 @@ clp.list(System.out);
             bos = new BufferedOutputStream(new FileOutputStream(clPropFile));
             clp.store(bos, "Derby Properties");
         	bos.close();
+
+            String auth = clp.getProperty(
+                "derby.connection.requireAuthentication");
+
+            if (auth != null && auth.equals("true")) {
+                // Look for password for user APP is supplied; useful for
+                // shutting down server in network mode. We only look for APP,
+                // since this will be the database owner.
+                String appPw = clp.getProperty("derby.user.app");
+
+                if (appPw != null) {
+                    creds.password = appPw;
+                }
+            }
         }
 
 		// --------------------------------- 
@@ -2987,6 +3005,9 @@ clp.list(System.out);
         }
     }
 
+    static private class AppsRequiredPassword {
+        public String password;
+    }
 }
 
 

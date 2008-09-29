@@ -166,3 +166,14 @@ create trigger """Quoted""Schema"""."""trig""One""" after insert on """Quoted""S
 create table x (x int);
 create table removed (x int);
 create trigger trigFour after update of x on x referencing old_table as old new_table as new for each statement insert into removed select * from old where x not in (select x from new where x < 10);
+
+-- ----------------------------------------------
+-- Roles
+-- ----------------------------------------------
+create role a;
+create role b;
+create role """eve""";
+grant a to b;
+grant """eve""" to b;
+grant b to whomever;
+

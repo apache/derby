@@ -1950,5 +1950,42 @@ create view bar."viewTwo" as select * from app.t11
 N
 APP
 -----
+========== SYSROLES ==========
+"eve"
+APP
+_SYSTEM
+Y
+Y
+-----
+"eve"
+B
+APP
+N
+N
+-----
+A
+APP
+_SYSTEM
+Y
+Y
+-----
+A
+B
+APP
+N
+N
+-----
+B
+APP
+_SYSTEM
+Y
+Y
+-----
+B
+WHOMEVER
+APP
+N
+N
+-----
 Database 'wombat_new' deleted.
 [ Done. ]

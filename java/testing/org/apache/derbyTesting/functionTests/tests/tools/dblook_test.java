@@ -397,17 +397,18 @@ public class dblook_test {
 		String sourceDBUrl;
 		if (TestUtil.isJCCFramework())
 			sourceDBUrl = jdbcProtocol + "\"" + dbPath +
-				separator + dbName + "\":user=someusr;password=somepwd;";
+				separator + dbName + "\":user=app;password=apppw;";
 		else
 			sourceDBUrl = jdbcProtocol + dbPath +
-			separator + dbName + ";user=someusr;password=somepwd";
+			separator + dbName + ";user=app;password=apppw";
 
 		// Make sure we're not connected to the database
 		// (we connected to it in embedded mode when we
 		// created it, so we have to shut it down).
 		try {
 			DriverManager.getConnection(
-				"jdbc:derby:" + dbName + ";shutdown=true");
+				"jdbc:derby:" + dbName +
+				";shutdown=true;user=app;password=apppw");
 		} catch (SQLException e) {}
 
 		// Run the test.
@@ -561,7 +562,7 @@ public class dblook_test {
 
 		jdbcProtocol = "jdbc:derby:";
 		String sourceDBUrl = jdbcProtocol + dbPath +
-			separator + dbName;
+			separator + dbName + ";user=app;password=apppw";
 
 		String [] fullArgs = new String[args.length+2];
 		fullArgs[0] = "-d";
@@ -664,7 +665,7 @@ public class dblook_test {
 		try {
 			Connection conn =
 				DriverManager.getConnection("jdbc:derby:" + 
-					jarPath + ";shutdown=true");
+					jarPath + ";shutdown=true,user=app;password=apppw");
 			conn.close();
 		} catch (SQLException se) {
 		// shutdown exception.
@@ -721,7 +722,7 @@ public class dblook_test {
 
 		// Connect to the database.
 		Connection conn = DriverManager.getConnection(
-				"jdbc:derby:" + dbName);
+				"jdbc:derby:" + dbName + ";user=app;password=apppw");
 		conn.setAutoCommit(false);
 
 		// Set the system schema to ensure that UCS_BASIC collation is used.
@@ -828,6 +829,14 @@ public class dblook_test {
 		rs = stmt.executeQuery("select compilationschemaid, sys.sysviews.* from sys.sysviews");
 		dumpResultSet(rs, idToNameMap, null);
 
+		writeOut("\n========== SYSROLES ==========\n");
+		rs = stmt.executeQuery
+			("select 'dummyFirstCol', " +
+			 "roleid || '_' || grantee || '_' || grantor as rgd, " +
+			 "roleid, grantee, grantor, withadminoption, isdef " +
+			 "from sys.sysroles");
+		dumpResultSet(rs, idToNameMap, null);
+
 		stmt.close();
 		rs.close();
 		conn.commit();
@@ -915,7 +924,6 @@ public class dblook_test {
 		TreeMap orderedRows = new TreeMap();
 		ArrayList rowValues = new ArrayList();
 		ArrayList duplicateRowIds = new ArrayList();
-
 		ResultSetMetaData rsmd = rs.getMetaData();
 		int cols = rsmd.getColumnCount();
 		while (rs.next()) {
@@ -957,8 +965,18 @@ public class dblook_test {
 				// it in the results.
 					continue;
 
-				String uniquePiece = dumpColumnData(colName,
-					value, mappedName, rowValues);
+
+				String uniquePiece;
+
+				if (colName.equals("RGD")) {
+					// Role Grant Descriptor: synthetic unique column, see query
+					// from SYS.SYSROLES.
+					uniquePiece = value;
+				} else {
+					uniquePiece = dumpColumnData(colName,
+												 value, mappedName, rowValues);
+				}
+
 
 				if (colName.equals("DEPENDENTID")) {
 				// Special case: rows in the "DEPENDS" table
@@ -1212,7 +1230,8 @@ public class dblook_test {
 			"' from ddl script '" + scriptName + "'");
 
 		Connection conn = DriverManager.getConnection(
-				"jdbc:derby:" + newDBName + ";create=true" + territoryBased);
+				"jdbc:derby:" + newDBName +
+				";create=true;user=app;password=apppw" + territoryBased);
 
 		Statement stmt = conn.createStatement();
 		BufferedReader ddlScript =
@@ -1458,7 +1477,7 @@ public class dblook_test {
 		try {
 			Connection conn =
 				DriverManager.getConnection("jdbc:derby:" + 
-					deletePath + ";shutdown=true");
+					deletePath + ";shutdown=true;user=app;password=apppw");
 			conn.close();
 		} catch (SQLException se) {
 		// shutdown exception.

@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.impl.tools.dblook.DB_Alias
+   Derby - Class org.apache.derby.impl.tools.dblook.DB_GrantRevoke
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -83,9 +83,12 @@ public class DB_GrantRevoke {
 				Logs.reportString("----------------------------------------------\n");
 			}
 
-			String authName = rs.getString(1);
-			String schemaName = dblook.addQuotes(dblook.expandDoubleQuotes(rs.getString(2)));
-			String tableName = dblook.addQuotes(dblook.expandDoubleQuotes(rs.getString(3)));
+			String authName = dblook.addQuotes
+				(dblook.expandDoubleQuotes(rs.getString(1)));
+			String schemaName = dblook.addQuotes
+				(dblook.expandDoubleQuotes(rs.getString(2)));
+			String tableName = dblook.addQuotes
+				(dblook.expandDoubleQuotes(rs.getString(3)));
 			String fullName = schemaName + "." + tableName;
 
 			if (dblook.isIgnorableSchema(schemaName))
@@ -175,7 +178,8 @@ public class DB_GrantRevoke {
 				Logs.reportString("----------------------------------------------\n");
 			}
 
-			String authName = rs.getString(1);
+			String authName = dblook.addQuotes
+				(dblook.expandDoubleQuotes(rs.getString(1)));
 			String schemaName = dblook.expandDoubleQuotes(rs.getString(2));
 			String tableName = dblook.expandDoubleQuotes(rs.getString(3));
 
@@ -280,9 +284,12 @@ public class DB_GrantRevoke {
 	{
 		boolean firstTime = true;
 		while (rs.next()) {
-			String authName = rs.getString(1);
-			String schemaName = dblook.addQuotes(dblook.expandDoubleQuotes(rs.getString(2)));
-			String aliasName = dblook.addQuotes(dblook.expandDoubleQuotes(rs.getString(3)));
+			String authName = dblook.addQuotes
+				(dblook.expandDoubleQuotes(rs.getString(1)));
+			String schemaName = dblook.addQuotes
+				(dblook.expandDoubleQuotes(rs.getString(2)));
+			String aliasName = dblook.addQuotes
+				(dblook.expandDoubleQuotes(rs.getString(3)));
 			String fullName = schemaName + "." + aliasName;
 			String aliasType = rs.getString(4);
 

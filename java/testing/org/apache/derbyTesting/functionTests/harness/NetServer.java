@@ -43,6 +43,7 @@ public class NetServer
     String javaCmd;
     String jvmflags;
     String framework;
+	String appsRequiredPassword;
     static String hostName;
     
     Object[] frameworkInfo;
@@ -89,6 +90,7 @@ public class NetServer
 	     null});                                        //shutdown2
 
 	url = "jdbc:derby://" + hostName + ":1527/";  
+
 	m.put("DerbyNetClient", new Object[]
 	    {url,                 //prefix
 	     "",                                            // suffix
@@ -120,8 +122,9 @@ public class NetServer
 	     null});
     }
 
-    public NetServer(File homeDir, String jvmName, String clPath, String 
-   	     javaCmd, String jvmflags, String framework, boolean startServer)
+    public NetServer(File homeDir, String jvmName, String clPath,
+					 String javaCmd, String jvmflags, String framework,
+					 boolean startServer, String appsRequiredPassword)
 	throws Exception
     {
 	this.homeDir = homeDir;
@@ -130,6 +133,10 @@ public class NetServer
         this.javaCmd = javaCmd;
         this.jvmflags = jvmflags;
 	this.framework = framework;
+
+	    // if authentication is required to shutdown server we need password
+	    // for user APP (the dbo).
+    	this.appsRequiredPassword = appsRequiredPassword;
 	frameworkInfo =  (Object[]) m.get(framework);
 	
 	this.port = Integer.parseInt((String) frameworkInfo[PORT_POS]);
@@ -285,7 +292,18 @@ public class NetServer
 	String[] stopcmd1 = (String[]) frameworkInfo[STOP_CMD1_POS];
 		if (stopcmd1 == null)
 		    return;
-		
+
+		if (appsRequiredPassword != null) {
+			String[] modifiedStopCmd = new String[stopcmd1.length + 4];
+			System.arraycopy(stopcmd1, 0, modifiedStopCmd, 0, stopcmd1.length);
+			modifiedStopCmd[stopcmd1.length]     = "-user";
+			modifiedStopCmd[stopcmd1.length + 1] = "app";
+			modifiedStopCmd[stopcmd1.length + 2] = "-password";
+			modifiedStopCmd[stopcmd1.length + 3] = appsRequiredPassword;
+			stopcmd1 = modifiedStopCmd;
+		}
+
+
 		for (int i = 0; i < stopcmd1.length; i++)
 		    connV.addElement(stopcmd1[i]);
 		
@@ -301,6 +319,7 @@ public class NetServer
 		{
 		    stopV.addElement((String)jvmCmd.elementAt(i));
 		}
+
 		Process prconn = Runtime.getRuntime().exec(connCmd);
 		// Give the server sixty seconds to shutdown.
 		TimedProcess tp = new TimedProcess(prconn);
