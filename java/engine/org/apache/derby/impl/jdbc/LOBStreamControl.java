@@ -502,9 +502,9 @@ class LOBStreamControl {
                         break;
                     tmpFile.write (tmpByte, 0, rdLen);
                 }while (true);
-                oldFile.close();
-                deleteFile(oldStoreFile);
             }            
+            oldFile.close();
+            deleteFile(oldStoreFile);
         }
         updateCount++;
         return stPos + buf.length;
