@@ -270,8 +270,9 @@ public final class MessageService {
 		
 		StringBuffer sb = new StringBuffer(messageId);
 
-		sb.append(" : ");
 		int len = arguments.length;
+		if (len > 0)
+			sb.append(" : ");
 
 		for (int i=0; i < len; i++) {
 		    // prepend a comma to all but the first

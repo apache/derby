@@ -390,8 +390,9 @@ public abstract class Sqlca {
                 // (five characters) and a colon. Extract the SQL state and
                 // clean up the token. See
                 // DRDAConnThread.buildTokenizedSqlerrmc() for more details.
-                states[i] = tokens[i].substring(0, 5);
-                tokens[i] = tokens[i].substring(6);
+                int colonpos = tokens[i].indexOf(":");
+                states[i] = tokens[i].substring(0, colonpos);
+                tokens[i] = tokens[i].substring(colonpos + 1);
             }
             sqlStates_ = states;
             sqlErrmcMessages_ = tokens;

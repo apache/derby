@@ -6005,7 +6005,7 @@ class DRDAConnThread extends Thread {
 		se = Util.getExceptionFactory().getArgumentFerry( se );
 		
 		if (se instanceof EmbedSQLException  && ! severe)
-			sqlerrmc = buildTokenizedSqlerrmc((EmbedSQLException) se);
+			sqlerrmc = buildTokenizedSqlerrmc(se);
 		else {
 			// If this is not an EmbedSQLException or is a severe excecption where
 			// we have no hope of succussfully calling the SYSIBM.SQLCAMESSAGE send
@@ -6057,17 +6057,32 @@ class DRDAConnThread extends Thread {
 	 * @param se   SQLException to print
 	 * 
 	 */
-	private String buildTokenizedSqlerrmc(EmbedSQLException se) {
+	private String buildTokenizedSqlerrmc(SQLException se) {
 		
 		String sqlerrmc = "";
 		do {
-			String messageId = se.getMessageId();
-			// arguments are variable part of a message
-			Object[] args = se.getArguments();
-			for (int i = 0; args != null &&  i < args.length; i++)
-				sqlerrmc += args[i] + SQLERRMC_TOKEN_DELIMITER;
-			sqlerrmc += messageId;
-			se = (EmbedSQLException) se.getNextException();
+			if ( se instanceof EmbedSQLException)
+			{
+				String messageId = ((EmbedSQLException)se).getMessageId();
+				// arguments are variable part of a message
+				Object[] args = ((EmbedSQLException)se).getArguments();
+				for (int i = 0; args != null &&  i < args.length; i++)
+					sqlerrmc += args[i] + SQLERRMC_TOKEN_DELIMITER;
+				sqlerrmc += messageId;
+				se = se.getNextException();
+			}
+			else
+			{   
+				// this could happen for instance if an SQLException was thrown
+				// from a stored procedure.
+				StringBuffer sb = new StringBuffer(); 
+				sb.append(se.getLocalizedMessage());
+				se = se.getNextException();
+				if (se != null)
+				sb.append(SQLERRMC_TOKEN_DELIMITER + 
+					"SQLSTATE: " + se.getSQLState());
+				sqlerrmc += sb.toString();
+			}
 			if (se != null)
 			{
 				sqlerrmc += SystemProcedures.SQLERRMC_MESSAGE_DELIMITER + se.getSQLState() + ":";				

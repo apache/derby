@@ -143,6 +143,87 @@ public class SqlExceptionTest extends BaseJDBCTestCase
             assertSQLExceptionEquals(se, se_ser);
         }
     }
+    
+    /**
+     * Verify that an SQLException thrown by a function can be returned
+     * (DERBY-790).
+     */
+    public void testDerby3390() throws Exception {
+        setAutoCommit(false);
+        Statement stmt = createStatement();
+
+        // with client/server we prefetch, so the error comes earlier
+        try {
+            if (usingDerbyNetClient())
+            {
+                stmt.execute("values badFunction1()");
+                fail("expected an error");
+            }
+            else 
+            {
+                stmt.execute("values badFunction1()");
+                ResultSet rs = stmt.getResultSet();
+                rs.next();
+                fail("expected an error");
+            }
+        } catch (SQLException e) {
+            setAutoCommit(true);
+            // if DERBY-3390 occurs, at this point, with networkserver/client, 
+            // we'd get a 08006. In the server's derby.log you'd see a 
+            // ClassCastException
+            assertSQLState("38000", e);
+            assertTrue(e.getMessage().indexOf("I refuse to return an int") > 1);
+        }
+
+        // as above, but this time the function uses the constructor for
+        // SQLException with SQLState.
+        try {
+            if (usingDerbyNetClient())
+            {
+                stmt.execute("values badFunction2()");
+                fail("expected an error");
+            }
+            else 
+            {
+                stmt.execute("values badFunction2()");
+                ResultSet rs = stmt.getResultSet();
+                rs.next();
+                fail("expected an error");
+            }
+        } catch (SQLException e) {
+            setAutoCommit(true);
+            // if DERBY-3390 occurs, at this point, with networkserver/client, 
+            // we'd get a 08006. In the server's derby.log you'd see a 
+            // ClassCastException
+            assertSQLState("38000", e);
+            assertSQLState("50000", e);
+            assertTrue(e.getMessage().indexOf("I refuse to return an int") > 1);
+        }
+
+        // test an Exception gets thrown for good measure
+        try {
+            if (usingDerbyNetClient())
+            {
+                stmt.execute("values badFunction3()");
+                fail("expected an error");
+            }
+            else 
+            {
+                stmt.execute("values badFunction3()");
+                ResultSet rs = stmt.getResultSet();
+                rs.next();
+                fail("expected an error");
+            }
+        } catch (SQLException e) {
+            setAutoCommit(true);
+            assertSQLState("38000", e);
+            assertTrue(e.getMessage().indexOf("The exception 'java.lang.Exception: I refuse to return an int!'")==0);
+        }
+        
+        stmt.close();
+        rollback();
+        setAutoCommit(true);
+    }    
 
     /**
      * Set up the connection to the database.
@@ -154,6 +235,15 @@ public class SqlExceptionTest extends BaseJDBCTestCase
                 "c2 int)";
         Statement stmt = conn.createStatement();
         stmt.execute(createTableWithPK);
+        stmt.execute("create function badFunction1() returns int language java"
+                + " parameter style java no sql external name '" +
+                SqlExceptionTest.class.getName() + ".badFunction1'");
+        stmt.execute("create function badFunction2() returns int language java"
+                + " parameter style java no sql external name '" +
+                SqlExceptionTest.class.getName() + ".badFunction2'");
+        stmt.execute("create function badFunction3() returns int language java"
+                + " parameter style java no sql external name '" +
+                SqlExceptionTest.class.getName() + ".badFunction3'");
         stmt.close();
         conn.close();
     }
@@ -165,6 +255,9 @@ public class SqlExceptionTest extends BaseJDBCTestCase
         Connection conn = getConnection();
         Statement stmt = conn.createStatement();
         stmt.executeUpdate("DROP TABLE tableWithPK");
+        stmt.executeUpdate("drop function badfunction1");
+        stmt.executeUpdate("drop function badfunction2");
+        stmt.executeUpdate("drop function badfunction3");
         stmt.close();
         conn.close();
         super.tearDown();
@@ -204,4 +297,38 @@ public class SqlExceptionTest extends BaseJDBCTestCase
             return test;
         }
     }
+    
+    /* <p> 
+     * For testing DERBY-3390
+     * This function just throws a SQLException, without SQLState 
+     * </p> 
+     */ 
+    public static int badFunction1() 
+        throws SQLException 
+    { 
+        throw new SQLException( "I refuse to return an int!" );
+    }
+
+    /* <p> 
+     * For testing DERBY-3390
+     * This function just throws a SQLException, with SQLState 
+     * </p> 
+     */ 
+    public static int badFunction2() 
+        throws SQLException 
+    { 
+        throw new SQLException( "I refuse to return an int!", "50000" );
+    }
+    
+    /* <p> 
+     * For testing DERBY-3390
+     * This function just throws an Exception 
+     * </p> 
+     */ 
+    public static int badFunction3() 
+        throws Exception 
+    { 
+        throw new Exception( "I refuse to return an int!" );
+    }
+
 }
