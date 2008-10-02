@@ -6049,7 +6049,7 @@ class DRDAConnThread extends Thread {
 
 	/**
 	 * Build Tokenized SQLERRMC to just send the tokenized arguments to the client.
-	 * for a Derby SQLException
+	 * for a Derby SQLException or an SQLException thrown by user code.
 	 * Message argument tokens are separated by SQLERRMC_TOKEN_DELIMITER 
 	 * Multiple messages are separated by SystemProcedures.SQLERRMC_MESSAGE_DELIMITER
 	 * 
