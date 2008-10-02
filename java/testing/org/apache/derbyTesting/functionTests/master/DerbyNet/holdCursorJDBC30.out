@@ -1322,21 +1322,21 @@ ij> select sum(distinct c1) from t1;
 1          
 -----
 16         
-WARNING 01003: Null values were eliminated from the argument of a column function. : 
+WARNING 01003: Null values were eliminated from the argument of a column function.
 ij> get with hold cursor test1 as 'select sum(distinct c1) from t1';
 ij> commit;
 ij> next test1;
 1          
 -----
 16         
-WARNING 01003: Null values were eliminated from the argument of a column function. : 
+WARNING 01003: Null values were eliminated from the argument of a column function.
 ij> close test1;
 ij> get with hold cursor test1 as 'select sum(distinct c1) from t1';
 ij> next test1;
 1          
 -----
 16         
-WARNING 01003: Null values were eliminated from the argument of a column function. : 
+WARNING 01003: Null values were eliminated from the argument of a column function.
 ij> commit;
 ij> next test1;
 No current row
@@ -1369,7 +1369,7 @@ ij> select sum(distinct c1) from t1 group by c2;
 6          
 10         
 NULL       
-WARNING 01003: Null values were eliminated from the argument of a column function. : 
+WARNING 01003: Null values were eliminated from the argument of a column function.
 ij> commit;
 ij> get with hold cursor test1 as 'select sum(distinct c1) from t1 group by c2';
 ij> commit;
@@ -1386,7 +1386,7 @@ ij> next test1;
 1          
 -----
 NULL       
-WARNING 01003: Null values were eliminated from the argument of a column function. : 
+WARNING 01003: Null values were eliminated from the argument of a column function.
 ij> close test1;
 ij> get with hold cursor test1 as 'select sum(distinct c1) from t1 group by c2';
 ij> next test1;
@@ -1403,7 +1403,7 @@ ij> next test1;
 1          
 -----
 NULL       
-WARNING 01003: Null values were eliminated from the argument of a column function. : 
+WARNING 01003: Null values were eliminated from the argument of a column function.
 ij> close test1;
 ij> ------------------------------------------------------------------------------
 ----- TEST 9: test scan positioned on a row which has been purged.
