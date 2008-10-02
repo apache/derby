@@ -130,9 +130,9 @@ class LOBStateTracker {
                     }
                 }
             }
+            // Reset state for the next row.
+            Arrays.fill(this.published, false);
         }
-        // Reset state for the next row.
-        Arrays.fill(this.published, false);
     }
 
     /**
@@ -143,11 +143,13 @@ class LOBStateTracker {
      * to release them from the client side in this case.
      */
     void discardState() {
-        // Force the state to published for all LOB columns.
-        // This will cause checkCurrentRow to ignore all LOBs on the next
-        // invocation. The method markAsPublished cannot be called before after
-        // checkCurrentRow has been called again.
-        Arrays.fill(this.published, true);
+        if (this.doRelease) {
+            // Force the state to published for all LOB columns.
+            // This will cause checkCurrentRow to ignore all LOBs on the next
+            // invocation. The method markAsPublished cannot be called before
+            // after checkCurrentRow has been called again.
+            Arrays.fill(this.published, true);
+        }
     }
 
     /**
@@ -160,7 +162,9 @@ class LOBStateTracker {
      * @param index 1-based column index
      */
     void markAsPublished(int index) {
-        int internalIndex = Arrays.binarySearch(this.columns, index);
-        this.published[internalIndex] = true;
+        if (this.doRelease) {
+            int internalIndex = Arrays.binarySearch(this.columns, index);
+            this.published[internalIndex] = true;
+        }
     }
 }
