@@ -366,11 +366,16 @@ public class RoutineAliasInfo extends MethodAliasInfo
 		}
 
 		sb.append(" LANGUAGE JAVA PARAMETER STYLE " );
+
 		switch( parameterStyle )
 		{
 		    case PS_JAVA:    sb.append( "JAVA " ); break;
 		    case PS_DERBY_JDBC_RESULT_SET:    sb.append( "DERBY_JDBC_RESULT_SET " ); break;
 		}
+        
+        if ( isDeterministic() )
+        { sb.append( " DETERMINISTIC " ); }
+        
 		sb.append(RoutineAliasInfo.SQL_CONTROL[getSQLAllowed()]);
 		if ((returnType == null) &&
 			(dynamicResultSets != 0))

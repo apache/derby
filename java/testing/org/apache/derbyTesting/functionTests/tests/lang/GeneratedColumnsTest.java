@@ -53,6 +53,8 @@ public class GeneratedColumnsTest extends BaseJDBCTestCase
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
+    private static  final   String  REDUNDANT_CLAUSE = "42613";
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // STATE
@@ -94,7 +96,7 @@ public class GeneratedColumnsTest extends BaseJDBCTestCase
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
-    // SUCCESSFUL RESOLUTIONS
+    // TESTS
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
@@ -102,7 +104,9 @@ public class GeneratedColumnsTest extends BaseJDBCTestCase
      * <p>
      * Test that the stored system procedures and functions are non-deterministic. If you want
      * a particular procedure/function to be deterministic, add some logic here.
+     * </p>
      *
+     * </p>
      * Also test that, by default, user-defined routines are created as NOT DETERMINISTIC.
      * </p>
      */
@@ -157,18 +161,219 @@ public class GeneratedColumnsTest extends BaseJDBCTestCase
 
             RoutineAliasInfo    rai = (RoutineAliasInfo) rs.getObject( 5 );
 
-            assertFalse( aliasName, rai.isDeterministic() );
+            if ( isSystemAlias ) { assertFalse( aliasName, rai.isDeterministic() ); }
         }
 
         rs.close();
         ps.close();
     }
 
+    /**
+     * <p>
+     * Basic positive tests for DETERMINISTIC keyword.
+     * </p>
+     */
+    public  void    test_002_determinism_positive()
+        throws Exception
+    {
+        Connection  conn = getConnection();
 
+        goodStatement
+            (
+             conn,
+             "create function f11()\n" +
+             "returns int\n" +
+             "language java\n" +
+             "parameter style java\n" +
+             "no sql\n" +
+             "external name 'foo.bar.wibble'\n"
+             );
+        assertDeterministic( conn, "F11", false );
+        
+        goodStatement
+            (
+             conn,
+             "create function f12()\n" +
+             "returns int\n" +
+             "language java\n" +
+             "parameter style java\n" +
+             "deterministic\n" +
+             "no sql\n" +
+             "external name 'foo.bar.wibble'\n"
+             );
+        assertDeterministic( conn, "F12", true );
+        
+        goodStatement
+            (
+             conn,
+             "create function f13()\n" +
+             "returns int\n" +
+             "language java\n" +
+             "parameter style java\n" +
+             "no sql\n" +
+             "not deterministic\n" +
+             "external name 'foo.bar.wibble'\n"
+             );
+        assertDeterministic( conn, "F13", false );
+        
+        goodStatement
+            (
+             conn,
+             "create procedure p11()\n" +
+             "language java\n" +
+             "parameter style java\n" +
+             "modifies sql data\n" +
+             "external name 'foo.bar.wibble'\n"
+             );
+        assertDeterministic( conn, "P11", false );
+        
+        goodStatement
+            (
+             conn,
+             "create procedure p12()\n" +
+             "deterministic\n" +
+             "language java\n" +
+             "parameter style java\n" +
+             "modifies sql data\n" +
+             "external name 'foo.bar.wibble'\n"
+             );
+        assertDeterministic( conn, "P12", true );
+        
+        goodStatement
+            (
+             conn,
+             "create procedure p13()\n" +
+             "language java\n" +
+             "not deterministic\n" +
+             "parameter style java\n" +
+             "modifies sql data\n" +
+             "external name 'foo.bar.wibble'\n"
+             );
+        assertDeterministic( conn, "P13", false );
+    }
+
+    /**
+     * <p>
+     * Verify that we get errors when there is more than one determinism clause
+     * in a routine declaration.
+     * </p>
+     */
+    public  void    test_003_determinism_redundantClause()
+        throws Exception
+    {
+        Connection  conn = getConnection();
+
+        expectError
+            (
+             REDUNDANT_CLAUSE,
+             "create function f_fail()\n" +
+             "returns int\n" +
+             "language java\n" +
+             "parameter style java\n" +
+             "deterministic\n" +
+             "deterministic\n" +
+             "no sql\n" +
+             "external name 'foo.bar.wibble'\n"
+             );
+        expectError
+            (
+             REDUNDANT_CLAUSE,
+             "create function f_fail()\n" +
+             "returns int\n" +
+             "language java\n" +
+             "parameter style java\n" +
+             "not deterministic\n" +
+             "deterministic\n" +
+             "no sql\n" +
+             "external name 'foo.bar.wibble'\n"
+             );
+        expectError
+            (
+             REDUNDANT_CLAUSE,
+             "create procedure p_fail()\n" +
+             "language java\n" +
+             "deterministic\n" +
+             "parameter style java\n" +
+             "modifies sql data\n" +
+             "deterministic\n" +
+             "external name 'foo.bar.wibble'\n"
+             );
+        expectError
+            (
+             REDUNDANT_CLAUSE,
+             "create procedure p_fail()\n" +
+             "language java\n" +
+             "not deterministic\n" +
+             "parameter style java\n" +
+             "modifies sql data\n" +
+             "not deterministic\n" +
+             "external name 'foo.bar.wibble'\n"
+             );
+    }
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // MINIONS
     //
     ///////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Run good DDL.
+     * @throws SQLException 
+     */
+    private void    goodStatement( Connection conn, String ddl ) throws SQLException
+    {
+        PreparedStatement    ps = chattyPrepare( conn, ddl );
+
+        ps.execute();
+        ps.close();
+    }
+    
+    /**
+     * Prepare a statement and report its sql text.
+     */
+    private PreparedStatement   chattyPrepare( Connection conn, String text )
+        throws SQLException
+    {
+        println( "Preparing statement:\n\t" + text );
+        
+        return conn.prepareStatement( text );
+    }
+
+    /**
+     * Assert that the statement text, when compiled, raises an exception
+     */
+    private void    expectError( String sqlState, String query )
+    {
+        println( "\nExpecting " + sqlState + " when preparing:\n\t" + query );
+
+        assertCompileError( sqlState, query );
+    }
+
+    /**
+     * <p>
+     * Assert whether a routine is expected to be DETERMINISTIC.
+     * </p>
+     */
+    public  void    assertDeterministic( Connection conn, String routineName, boolean isDeterministic )
+        throws Exception
+    {
+        PreparedStatement   ps = conn.prepareStatement
+            (
+             "select a.aliasinfo\n" +
+             "from sys.sysaliases a\n" +
+             "where alias =  ?"
+             );
+        ps.setString( 1, routineName );
+        ResultSet               rs = ps.executeQuery();
+
+        rs.next();
+        RoutineAliasInfo    rai = (RoutineAliasInfo) rs.getObject( 1 );
+
+        assertEquals( isDeterministic, rai.isDeterministic() );
+
+        rs.close();
+        ps.close();
+    }
 
 }

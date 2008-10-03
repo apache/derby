@@ -44,6 +44,8 @@ import junit.framework.TestSuite;
  */
 public class Changes10_5 extends UpgradeChange {
 
+    private static  final   String  BAD_SYNTAX = "42X01";
+
     public Changes10_5(String name) {
         super(name);
     }
@@ -108,4 +110,75 @@ public class Changes10_5 extends UpgradeChange {
             break;
         }
     }
+
+    /**
+     * Test that the DETERMINISTIC keyword is not allowed until you
+     * hard-upgrade to 10.5.
+     *
+     */
+    public void testDeterminismKeyword() throws SQLException
+    {
+        String  sqlstate = null;
+        
+        switch (getPhase())
+        {
+        case PH_SOFT_UPGRADE:
+            sqlstate = SQLSTATE_NEED_UPGRADE;
+            break;
+            
+        case PH_POST_SOFT_UPGRADE:
+            sqlstate = BAD_SYNTAX;
+            break;
+
+        case PH_HARD_UPGRADE:
+            sqlstate = null;
+            break;
+
+        default:
+            return;
+        }
+        
+        possibleError
+            (
+             sqlstate,
+             "create function f_3570_12()\n" +
+             "returns int\n" +
+             "language java\n" +
+             "parameter style java\n" +
+             "deterministic\n" +
+             "no sql\n" +
+             "external name 'foo.bar.wibble'\n"
+             );
+        possibleError
+            (
+             sqlstate,
+             "create procedure p_3570_13()\n" +
+             "language java\n" +
+             "not deterministic\n" +
+             "parameter style java\n" +
+             "modifies sql data\n" +
+             "external name 'foo.bar.wibble'\n"
+             );
+    }
+
+    /**
+     * <p>
+     * Run a statement. If the sqlstate is not null, then we expect that error.
+     * </p>
+     */
+    private void    possibleError( String sqlstate, String text )
+        throws SQLException
+    {
+        if ( sqlstate != null )
+        {
+            assertCompileError( sqlstate, text );
+        }
+        else
+        {
+            Statement   s = createStatement();
+            s.execute( text );
+            s.close();
+        }
+    }
+
 }

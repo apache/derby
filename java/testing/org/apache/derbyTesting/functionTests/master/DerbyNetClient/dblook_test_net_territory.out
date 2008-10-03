@@ -23,6 +23,26 @@ inoutparams3(INOUT A CHAR(10),IN B INTEGER) LANGUAGE JAVA PARAMETER STYLE JAVA M
 <systemname>
 -----
 <systemid>
+F_DETERMINISTIC
+APP
+foo.bar
+F
+F
+false
+wibble() RETURNS INTEGER LANGUAGE JAVA PARAMETER STYLE JAVA  DETERMINISTIC NO SQL CALLED ON NULL INPUT
+<systemname>
+-----
+<systemid>
+F_NOT_DETERMINISTIC
+APP
+foo.bar
+F
+F
+false
+wibble() RETURNS INTEGER LANGUAGE JAVA PARAMETER STYLE JAVA NO SQL CALLED ON NULL INPUT
+<systemname>
+-----
+<systemid>
 GATP2
 FOO
 org.apache.derbyTesting.functionTests.util.TestPropertyInfo
@@ -70,6 +90,26 @@ P
 P
 false
 sqlControl(OUT E1 VARCHAR(128),OUT E2 VARCHAR(128),OUT E3 VARCHAR(128),OUT E4 VARCHAR(128),OUT E5 VARCHAR(128),OUT E6 VARCHAR(128),OUT E7 VARCHAR(128)) LANGUAGE JAVA PARAMETER STYLE JAVA READS SQL DATA
+<systemname>
+-----
+<systemid>
+P_DETERMINISTIC
+APP
+foo.bar
+P
+P
+false
+wibble() LANGUAGE JAVA PARAMETER STYLE JAVA  DETERMINISTIC MODIFIES SQL DATA
+<systemname>
+-----
+<systemid>
+P_NOT_DETERMINISTIC
+APP
+foo.bar
+P
+P
+false
+wibble() LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA
 <systemname>
 -----
 <systemid>

@@ -71,6 +71,10 @@ create procedure "procTwo" (INOUT a CHAR(10), IN b int) language java external n
 
 create procedure """proc ""In Quotes with spaces""" (INOUT a CHAR(10), IN b int) language java external name 'org.apache.derbyTesting.functionTests.util.ProcedureTest.inoutparams3' parameter style java dynamic result sets 2 modifies sql data;
 
+create procedure p_deterministic() deterministic language java parameter style java modifies sql data external name 'foo.bar.wibble';
+
+create procedure p_not_deterministic() language java not deterministic parameter style java modifies sql data external name 'foo.bar.wibble';
+
 -- ----------------------------------------------
 -- Functions.
 -- ----------------------------------------------
@@ -78,6 +82,10 @@ create procedure """proc ""In Quotes with spaces""" (INOUT a CHAR(10), IN b int)
 create function gatp(SCH VARCHAR(128), TBL VARCHAR(128)) RETURNS VARCHAR(1000) EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.TestPropertyInfo.getAllTableProperties' LANGUAGE JAVA PARAMETER STYLE JAVA CONTAINS SQL;
 
 create function foo.gatp2(SCH VARCHAR(128), TBL VARCHAR(128)) RETURNS VARCHAR(1000) EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.TestPropertyInfo.getAllTableProperties' LANGUAGE JAVA PARAMETER STYLE JAVA RETURNS NULL ON NULL INPUT;
+
+create function f_deterministic() returns int language java parameter style java deterministic no sql external name 'foo.bar.wibble';
+
+create function f_not_deterministic() returns int language java parameter style java no sql not deterministic external name 'foo.bar.wibble';
 
 -- ----------------------------------------------
 -- Tables

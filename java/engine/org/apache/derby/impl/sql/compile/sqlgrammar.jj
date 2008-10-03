@@ -2151,6 +2151,7 @@ TOKEN [IGNORE_CASE] :
 |	<DATE: "date">
 |	<DAY: "day">
 |	<DEFINER: "definer">
+|	<DETERMINISTIC: "deterministic">
 |   <DYNAMIC: "dynamic">
 |	<FORTRAN: "fortran">
 |   <GENERATED: "generated">
@@ -10026,6 +10027,20 @@ void routineElement(boolean isProcedure, boolean isTableFunction, Object[] routi
 		}
 	|
 		<LANGUAGE>  <JAVA> { clauseValue = "JAVA"; clausePosition = CreateAliasNode.LANGUAGE; }
+	|
+		<DETERMINISTIC>
+        {
+            clauseValue = Boolean.TRUE;
+            clausePosition = CreateAliasNode.DETERMINISTIC;
+            checkVersion(DataDictionary.DD_VERSION_DERBY_10_5, "DETERMINISTIC");
+        }
+	|
+		<NOT> <DETERMINISTIC>
+        {
+            clauseValue = Boolean.FALSE;
+            clausePosition = CreateAliasNode.DETERMINISTIC; 
+            checkVersion(DataDictionary.DD_VERSION_DERBY_10_5, "DETERMINISTIC");
+        }
 	|
 		<EXTERNAL> <NAME> clauseValue = string() { clausePosition = CreateAliasNode.EXTERNAL_NAME; }
 	|
