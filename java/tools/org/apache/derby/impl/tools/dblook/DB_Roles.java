@@ -149,7 +149,7 @@ public class DB_Roles {
      *
      * @param rs        @{ResultSet} holding role grant information
      * @param roleName  The role granted, already quoted
-     * @param graentee The authorization id to whom the role is granted (a role
+     * @param grantee   The authorization id to whom the role is granted (a role
      *                  or a user), already quoted
      * @param isWithAdminOption @{code true} if ADMIN OPTION was used for the
      *         grant
