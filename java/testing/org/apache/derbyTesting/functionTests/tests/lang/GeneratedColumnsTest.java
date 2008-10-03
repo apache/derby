@@ -106,7 +106,7 @@ public class GeneratedColumnsTest extends BaseJDBCTestCase
      * a particular procedure/function to be deterministic, add some logic here.
      * </p>
      *
-     * </p>
+     * <p>
      * Also test that, by default, user-defined routines are created as NOT DETERMINISTIC.
      * </p>
      */
