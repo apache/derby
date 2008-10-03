@@ -337,7 +337,7 @@ public class BlobAccessTest
      */
     public void testFetchLargeBlobPieceByPieceModified()
             throws IOException, SQLException {
-        fetchBlobPieceByPiece(true, FETCH_GETBINARYSTREAM);
+        fetchBlobPieceByPiece(true, FETCH_GETBYTES);
     }
 
     /**
