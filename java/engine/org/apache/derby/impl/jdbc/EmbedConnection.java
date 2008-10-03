@@ -75,6 +75,7 @@ import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.HashMap;
@@ -150,6 +151,14 @@ public abstract class EmbedConnection implements EngineConnection
      */
     private WeakHashMap lobReferences = null;
 
+    // Set to keep track of the open LOBFiles, so they can be closed at the end of 
+    // the transaction. This would normally happen as lobReferences are freed as they
+    // get garbage collected after being removed from the WeakHashMap, but it is 
+    // possible that finalization will not have occurred before the user tries to 
+    // remove the database (DERBY-3655).  Therefore we keep this set so that we can
+    // explicitly close the files.
+    private HashSet lobFiles;
+    
 	//////////////////////////////////////////////////////////
 	// STATE (copied to new nested connections, but nesting
 	// specific)
@@ -3077,6 +3086,22 @@ public abstract class EmbedConnection implements EngineConnection
         if (rootConnection.lobHashMap != null) {
             rootConnection.lobHashMap.clear ();
         }
+		
+		synchronized (this) {   
+			if (lobFiles != null) {       
+				Iterator it = lobFiles.iterator();
+				while (it.hasNext()) {
+					try {
+						((LOBFile) it.next()).close();
+					} catch (IOException ioe) {
+						throw Util.javaException(ioe);
+					}
+					finally {
+						lobFiles.clear();
+					}
+				}
+			}
+		}
 	}
 
 	/**
@@ -3145,4 +3170,30 @@ public abstract class EmbedConnection implements EngineConnection
     public String getCurrentSchemaName() {
         return getLanguageConnection().getCurrentSchemaName();
     }
+    
+    
+	/**
+	 * Add a temporary lob file to the lobFiles set.
+	 * This will get closed at transaction end or removed as the lob is freed.
+	 * @param lobFile  LOBFile to add
+	 */
+	void addLobFile(LOBFile lobFile) {
+		synchronized (this) {
+			if (lobFiles == null)
+				lobFiles = new HashSet();
+			lobFiles.add(lobFile);
+		}
+	}
+    
+	/**
+	 * Remove LOBFile from the lobFiles set. This will occur when the lob 
+	 * is freed or at transaction end if the lobFile was removed from the 
+	 * WeakHashMap but not finalized.
+	 * @param lobFile  LOBFile to remove.
+	 */
+	void removeLobFile(LOBFile lobFile) {
+		synchronized (this) {
+			lobFiles.remove(lobFile);
+		}
+	}
 }

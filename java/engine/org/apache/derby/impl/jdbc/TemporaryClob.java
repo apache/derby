@@ -73,7 +73,7 @@ final class TemporaryClob implements InternalClob {
                                          ConnectionChild conChild,
                                          InternalClob clob)
             throws IOException, SQLException {
-        TemporaryClob newClob = new TemporaryClob(dbName, conChild);
+        TemporaryClob newClob = new TemporaryClob(conChild);
         newClob.copyClobContent(clob);
         return newClob;
     }
@@ -94,7 +94,7 @@ final class TemporaryClob implements InternalClob {
                                          InternalClob clob,
                                          long length)
             throws IOException, SQLException {
-        TemporaryClob newClob = new TemporaryClob(dbName, conChild);
+        TemporaryClob newClob = new TemporaryClob(conChild);
         newClob.copyClobContent(clob, length);
         return newClob;
     }
@@ -102,18 +102,17 @@ final class TemporaryClob implements InternalClob {
     /**
      * Constructs a <code>TemporaryClob</code> object used to perform
      * operations on a CLOB value.
-     * 
-     * @param dbName name of the database the CLOB value belongs to
      * @param conChild connection object used to obtain synchronization object
+     * 
      * @throws NullPointerException if <code>conChild</code> is
      *      <code>null</code>
      */
-    TemporaryClob (String dbName, ConnectionChild conChild) {
+    TemporaryClob (ConnectionChild conChild) {
         if (conChild == null) {
             throw new NullPointerException("conChild cannot be <null>");
         }
         this.conChild = conChild;
-        this.bytes = new LOBStreamControl(dbName);
+        this.bytes = new LOBStreamControl(conChild.getEmbedConnection());
     }
 
     /**
@@ -148,18 +147,16 @@ final class TemporaryClob implements InternalClob {
     /**
      * Constructs a <code>TemporaryClob</code> object and
      * initializes with a initial String.
-     * 
-     * @param dbName name of the database the CLOB value belongs to
      * @param data initial value in String
      * @param conChild connection object used to obtain synchronization object
      */
-    TemporaryClob (String dbName, String data, ConnectionChild conChild)
+    TemporaryClob (String data, ConnectionChild conChild)
                           throws IOException, SQLException, StandardException {
         if (conChild == null) {
             throw new NullPointerException("conChild cannot be <null>");
         }
         this.conChild = conChild;
-        bytes = new LOBStreamControl(dbName, getByteFromString (data));
+        bytes = new LOBStreamControl(conChild.getEmbedConnection(), getByteFromString (data));
     }
     /**
      * Finds the corresponding byte position for the given UTF-8 character

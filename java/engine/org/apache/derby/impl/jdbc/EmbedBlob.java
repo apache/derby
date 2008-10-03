@@ -133,7 +133,7 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
      EmbedBlob(byte [] blobBytes,EmbedConnection con) throws SQLException {
         super(con);
          try {
-             control = new LOBStreamControl (con.getDBName(), blobBytes);
+             control = new LOBStreamControl (con, blobBytes);
              materialized = true;
              streamPositionOffset = Integer.MIN_VALUE;
              //add entry in connection so it can be cleared 
@@ -173,7 +173,7 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
                 SanityManager.ASSERT(dvdBytes != null,"blob has a null value underneath");
             try {
                 control = new LOBStreamControl (
-                            getEmbedConnection().getDBName(), dvdBytes);
+                            getEmbedConnection(), dvdBytes);
             } catch (IOException e) {
                 throw StandardException.newException (
                                         SQLState.SET_STREAM_FAILURE, e);
@@ -843,7 +843,7 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
                 control.write (bytes, offset, len, pos - 1);
             }
             else {
-                control = new LOBStreamControl (getEmbedConnection().getDBName());
+                control = new LOBStreamControl (getEmbedConnection());
                 control.copyData (myStream, length());
                 control.write(bytes, offset, len, pos - 1);
                 myStream.close();
@@ -885,7 +885,7 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
                 }
                 else {
                     control = new LOBStreamControl (
-                                            getEmbedConnection().getDBName());
+                                            getEmbedConnection());
                     control.copyData (myStream, pos - 1);
                     myStream.close ();
                     streamLength = -1;
@@ -923,7 +923,7 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
                     control.truncate (len);
                 }
                 else {
-                    control = new LOBStreamControl (getEmbedConnection().getDBName());
+                    control = new LOBStreamControl (getEmbedConnection());
                     control.copyData (myStream, len);
                     myStream.close();
                     streamLength = -1;
