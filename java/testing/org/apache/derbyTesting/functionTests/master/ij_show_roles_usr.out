@@ -1,0 +1,26 @@
+ij> -- Run via ToolScripts.java
+show roles;
+ROLEID                        
+------------------------------
+"eve"                         
+A                             
+B                             
+PUBLICROLE                    
+ij> set role b;
+0 rows inserted/updated/deleted
+ij> show enabled_roles;
+ROLEID                        
+------------------------------
+A                             
+B                             
+ij> set role none;
+0 rows inserted/updated/deleted
+ij> show enabled_roles;
+ROLEID                        
+------------------------------
+ij> show settable_roles;
+ROLEID                        
+------------------------------
+B                             
+PUBLICROLE                    
+ij> 

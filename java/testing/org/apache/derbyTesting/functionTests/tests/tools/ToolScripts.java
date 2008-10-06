@@ -19,6 +19,9 @@
  */
 package org.apache.derbyTesting.functionTests.tests.tools;
 
+import java.sql.Statement;
+import java.sql.SQLException;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -78,8 +81,9 @@ public final class ToolScripts extends ScriptTestCase {
     /**
      * Tests that run with authentication and SQL authorization on.
      */
-    private static final String[][] SQLAUTHORIZATION_TESTS = {
-        {"ij_show_roles", "test_dbo"}
+    private static final String[][][] SQLAUTHORIZATION_TESTS = {
+        {{"ij_show_roles_dbo"}, {"test_dbo", "donald"}, {"test_dbo"}},
+        {{"ij_show_roles_usr"}, {"test_dbo", "donald"}, {"donald"}}
     };
 
     /**
@@ -128,6 +132,10 @@ public final class ToolScripts extends ScriptTestCase {
         super(toolTest);
     }
 
+    private ToolScripts(String toolTest, String user){
+        super(toolTest, null /* default encoding */, user);
+    }
+
     /**
      * Return a suite of tool tests from the list of
      * script names. Each test is surrounded in a decorator
@@ -146,22 +154,44 @@ public final class ToolScripts extends ScriptTestCase {
     /**
      * Return a suite of tool tests from the list of script names. Each test is
      * surrounded in a decorator that cleans the database, and adds
-     * authentication and authorization given the user for each script.
+     * authentication and authorization for each script.
+     * @param list <ul><li>list[i][0][0]: script name,
+     *                 <li>list[i][1]: users,
+     *                 <li>list[i][2][0]: run-as-user
+     *             </ul>
      */
-    private static Test getAuthorizationSuite(String[][] list) {
+    private static Test getAuthorizationSuite(String[][][] list) {
         TestSuite suite = new TestSuite("Tool scripts w/authorization");
         final String PWSUFFIX = "pwSuffix";
 
         for (int i = 0; i < list.length; i++) {
-            Test clean = new CleanDatabaseTestSetup(
-                new ToolScripts(list[i][0]));
+            Test clean;
+
+            if (list[i][0][0].startsWith("ij_show_roles")) {
+                clean = new CleanDatabaseTestSetup(
+                    new ToolScripts(list[i][0][0], list[i][2][0])) {
+                        protected void decorateSQL(Statement s)
+                                throws SQLException {
+                            s.execute("create role a");
+                            s.execute("create role b");
+                            s.execute("create role \"\"\"eve\"\"\"");
+                            s.execute("create role publicrole");
+                            s.execute("grant a to b");
+                            s.execute("grant publicrole to public");
+                            s.execute("grant b to donald");
+                        }
+                    };
+            } else {
+                clean = new CleanDatabaseTestSetup(
+                    new ToolScripts(list[i][0][0], list[i][2][0]));
+            }
+
             suite.addTest(
                 TestConfiguration.sqlAuthorizationDecorator(
                     DatabasePropertyTestSetup.builtinAuthentication(
-                        clean, new String[]{list[i][1]}, PWSUFFIX)));
+                        clean, list[i][1], PWSUFFIX)));
         }
 
         return getIJConfig(suite);
     }
-
 }

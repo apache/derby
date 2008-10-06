@@ -678,6 +678,23 @@ public final class SysDiagVTIMappingTest extends BaseJDBCTestCase {
         st.close();
     }
 
+    /**
+     * Basic sanity test for SYSCS_DIAG.ENABLED_ROLES. See also the
+     * tools/ij_show_roles.sql test for a test that actually defines roles.
+     */
+    public void testEnabledRoles() throws SQLException
+    {
+        Statement   st = createStatement();
+
+        ResultSet rs = st.executeQuery
+            ("select * from syscs_diag.enabled_roles");
+
+        JDBC.assertEmpty(rs);
+
+        rs.close();
+        st.close();
+    }
+
     /* All statements in this method should fail because a VTI table-
      * mapping that takes arguments can only be used as part of the TABLE 
      * constructor.  Any other uses of, or attempts to modify, such a

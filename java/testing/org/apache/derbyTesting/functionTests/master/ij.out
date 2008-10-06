@@ -82,6 +82,13 @@ help;
                                -- lists tables, views, procedures or synonyms
   SHOW INDEXES { IN schema | FROM table };
                                -- lists indexes in a schema, or for a table
+  SHOW ROLES;                  -- lists all defined roles in the database,
+                               -- sorted
+  SHOW ENABLED_ROLES;          -- lists the enabled roles for the current
+                               -- connection (to see current role use
+                               -- VALUES CURRENT_ROLE), sorted
+  SHOW SETTABLE_ROLES;         -- lists the roles which can be set for the
+                               -- current connection, sorted
   DESCRIBE name;               -- lists columns in the named table
   COMMIT;                      -- commits the current transaction
   ROLLBACK;                    -- rolls back the current transaction

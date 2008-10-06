@@ -36,6 +36,7 @@ import junit.framework.TestSuite;
 public abstract class ScriptTestCase extends CanonTestCase {
 	
 	private final String inputEncoding;
+	private final String user;
 
 	/**
 	 * Create a ScriptTestCase to run a single test
@@ -47,6 +48,7 @@ public abstract class ScriptTestCase extends CanonTestCase {
 	{
 		super(script);
 		inputEncoding = "US-ASCII";
+		user = null;
 	}
 	
     /**
@@ -60,6 +62,29 @@ public abstract class ScriptTestCase extends CanonTestCase {
     {
         super(script);
         inputEncoding = encoding;
+		user = null;
+    }
+
+    /**
+     * Create a ScriptTestCase to run a single test
+     * using a connection obtained from getConnection() with a
+     * different encoding.
+     * @param script     Base name of the .sql script
+     *                   excluding the .sql suffix.
+     * @param encoding   Run using encoding if not null, else use "US-ASCII".
+     * @param user       Run script as user
+     */
+    public ScriptTestCase(String script, String encoding, String user)
+    {
+        super(script);
+
+		if (encoding != null) {
+			inputEncoding = encoding;
+		} else {
+			inputEncoding = "US-ASCII";
+		}
+
+		this.user = user;
     }
 
     /**
@@ -120,8 +145,15 @@ public abstract class ScriptTestCase extends CanonTestCase {
 		assertNotNull("SQL script missing: " + resource, sql);
 		
 		InputStream sqlIn = openTestResource(sql);
-					
-		Connection conn = getConnection();
+
+		Connection conn;
+
+		if (user != null) {
+			conn = openUserConnection(user);
+		} else {
+			conn = getConnection();
+		}
+
 		org.apache.derby.tools.ij.runScript(
 				conn,
 				sqlIn,
