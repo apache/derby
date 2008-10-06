@@ -90,7 +90,7 @@ final class EmbedClob extends ConnectionChild implements Clob, EngineLOB
      */
     EmbedClob(EmbedConnection con) throws SQLException {
         super(con);
-        this.clob = new TemporaryClob (con.getDBName(), this);
+        this.clob = new TemporaryClob (this);
         con.addLOBReference (this);
     }
 
@@ -119,8 +119,8 @@ final class EmbedClob extends ConnectionChild implements Clob, EngineLOB
         // See if a String or a stream will be the source of the Clob.
         if (storeStream == null) {
             try {
-                clob = new TemporaryClob(con.getDBName(),
-                        dvd.getString(), this);
+                clob = new TemporaryClob(dvd.getString(),
+                        this);
             }
             catch (SQLException sqle) {
                 throw StandardException.newException (sqle.getSQLState(), sqle);

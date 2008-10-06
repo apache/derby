@@ -59,16 +59,16 @@ class LOBStreamControl {
     private byte [] dataBytes = new byte [0];
     private boolean isBytes = true;
     private final int bufferSize;
-    private String dbName;
+    private final EmbedConnection conn;
     private long updateCount;
     private static final int DEFAULT_MAX_BUF_SIZE = 4096;
 
     /**
      * Creates an empty LOBStreamControl.
-     * @param dbName database name
+     * @param conn Connection for this lob
      */
-    LOBStreamControl (String dbName) {
-        this.dbName = dbName;
+    LOBStreamControl (EmbedConnection conn) {
+        this.conn = conn;
         updateCount = 0;
         //default buffer size
         bufferSize = DEFAULT_MAX_BUF_SIZE;
@@ -76,12 +76,12 @@ class LOBStreamControl {
 
     /**
      * Creates a LOBStreamControl and initializes with a bytes array.
-     * @param dbName database name
+     * @param conn Connection for this lob
      * @param data initial value
      */
-    LOBStreamControl (String dbName, byte [] data)
+    LOBStreamControl (EmbedConnection conn, byte [] data)
             throws IOException, StandardException {
-        this.dbName = dbName;
+        this.conn = conn;
         updateCount = 0;
         bufferSize = Math.max (DEFAULT_MAX_BUF_SIZE, data.length);
         write (data, 0, data.length, 0);
@@ -93,7 +93,7 @@ class LOBStreamControl {
             AccessController.doPrivileged (new PrivilegedExceptionAction() {
                 public Object run() throws IOException, StandardException {
                     Object monitor = Monitor.findService(
-                            Property.DATABASE_MODULE, dbName);
+                            Property.DATABASE_MODULE, conn.getDBName());
                     DataFactory df =  (DataFactory) Monitor.findServiceModule(
                             monitor, DataFactory.MODULE);
                     //create a temporary file
@@ -104,6 +104,7 @@ class LOBStreamControl {
                     }
                     else
                         tmpFile = new LOBFile (lobFile);
+                    conn.addLobFile(tmpFile);
                     return null;
                 }
             });
@@ -348,6 +349,7 @@ class LOBStreamControl {
                 read(dataBytes, 0, dataBytes.length, 0);
                 isBytes = true;
                 tmpFile.close();
+                conn.removeLobFile(tmpFile);
                 tmpFile = null;
             } else {
                 tmpFile.setLength(size);
@@ -407,6 +409,7 @@ class LOBStreamControl {
         if (tmpFile != null) {
             tmpFile.close();
             deleteFile(lobFile);
+            conn.removeLobFile(tmpFile);
             tmpFile = null;
         }
     }
@@ -479,6 +482,7 @@ class LOBStreamControl {
                 }while (true);
             }            
             oldFile.close();
+            conn.removeLobFile(oldFile);
             deleteFile(oldStoreFile);
         }
         updateCount++;
