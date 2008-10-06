@@ -821,9 +821,10 @@ public class BlobTest
     public static void transferAlphabetData(OutputStream writer, long length)
             throws IOException {
         byte[] buffer = new byte[8*1024];
+        int bytesRead = 0;
         LoopingAlphabetStream contents = new LoopingAlphabetStream(length);
-        while (contents.read(buffer) > 0) {
-            writer.write(buffer);
+        while ((bytesRead = contents.read(buffer)) > 0) {
+            writer.write(buffer, 0, bytesRead);
         }
     }
     
