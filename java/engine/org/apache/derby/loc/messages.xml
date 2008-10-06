@@ -7398,6 +7398,16 @@ Shutting down instance {0}</text>
             </msg>
 
             <msg>
+                <name>J029</name>
+                <text>backup path for creating database from backup</text>
+            </msg>
+
+            <msg>
+                <name>J030</name>
+                <text>backup path for restoring database from backup</text>
+            </msg>
+
+            <msg>
                 <name>J031</name>
                 <text>collation for chararcter datatypes</text>
             </msg>
