@@ -46,12 +46,11 @@ import org.apache.derby.iapi.sql.ResultColumnDescriptor;
  * <p>To use it, query it as follows:
  * </p>
  * <pre> SELECT * FROM SYSCS_DIAG.ENABLED_ROLES; </pre>
- [
+ *
  * <p>The following columns will be returned:
  *    <ul><li>ROLEID -- VARCHAR(128) NOT NULL
- *        </li>
  *    </ul>
- *
+ * </p>
  */
 public final class EnabledRoles extends VTITemplate {
 
