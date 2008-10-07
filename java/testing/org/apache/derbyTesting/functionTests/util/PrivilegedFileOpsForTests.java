@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsorTests
+   Derby - Class org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -25,11 +25,12 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 
 /**
- * A set of operations on {$@link java.io.File} that wraps the
+ * A set of operations on {@link java.io.File} that wraps the
  * operations in privileged block of code. This class is intended to provide
  * these methods for testcases to reduce the hassle of having to wrap file
  * operations in privileged code blocks.
@@ -37,14 +38,13 @@ import java.security.PrivilegedExceptionAction;
  * Derby needs to use privileged blocks in some places to avoid
  * {@link SecurityException}s being thrown, as the required privileges are
  * often granted to Derby itself, but not the higher level application code.
- * <p>
  */
 public class PrivilegedFileOpsForTests {
-	
+
 	/**
      * Get the file length.
      *
-     * @return byte length of the file.
+     * @return Byte length of the file.
      * @throws SecurityException if the required permissions to read the file,
      *      or the path it is in, are missing
      * @see File#length
@@ -54,39 +54,44 @@ public class PrivilegedFileOpsForTests {
         if (file == null) {
             throw new IllegalArgumentException("file cannot be <null>");
         }
-        try {
-            return ((Long)AccessController.doPrivileged(
-                        new PrivilegedExceptionAction() {
-                            public Object run() throws SecurityException {
-                                return new Long(file.length());
-                            }
-                        })).longValue();
-        } catch (PrivilegedActionException pae) {
-            throw (SecurityException)pae.getException();
-        }
+        return ((Long)AccessController.doPrivileged(
+                    new PrivilegedAction() {
+                        public Object run() {
+                            return new Long(file.length());
+                        }
+                    })).longValue();
     }
-    
+
+    /**
+     * Returns a input stream for the specified file.
+     *
+     * @param file the file to open a stream for
+     * @return A input stream reading from the specified file.
+     * @throws SecurityException if the required permissions to read the file,
+     *      or the path it is in, are missing
+     * @throws FileNotFoundException if the specified file does not exist
+     */
     public static FileInputStream getFileInputStream(final File file) 
-    	throws SecurityException, FileNotFoundException {
+            throws FileNotFoundException {
     	if (file == null) {
             throw new IllegalArgumentException("file cannot be <null>");
         }
         try {
             return ((FileInputStream)AccessController.doPrivileged(
                         new PrivilegedExceptionAction() {
-                            public Object run() throws SecurityException, FileNotFoundException {
+                            public Object run() throws FileNotFoundException {
                                 return new FileInputStream(file);
                             }
                         }));
         } catch (PrivilegedActionException pae) {
-            throw (SecurityException)pae.getException();
+            throw (FileNotFoundException)pae.getException();
         }
     }
 
     /**
      * Check if the file exists.
      *
-     * @return <code>true</code> if file exists, <code>false</code> otherwise
+     * @return {@code true} if file exists, {@code false} otherwise
      * @throws SecurityException if the required permissions to read the file,
      *      or the path it is in, are missing
      * @see File#exists
@@ -96,16 +101,12 @@ public class PrivilegedFileOpsForTests {
         if (file == null) {
             throw new IllegalArgumentException("file cannot be <null>");
         }
-        try {
-            return ((Boolean)AccessController.doPrivileged(
-                        new PrivilegedExceptionAction() {
-                            public Object run() throws SecurityException {
-                                return new Boolean(file.exists());
-                            }
-                        })).booleanValue();
-        } catch (PrivilegedActionException pae) {
-            throw (SecurityException)pae.getException();
-        }
+        return ((Boolean)AccessController.doPrivileged(
+                    new PrivilegedAction() {
+                        public Object run() {
+                            return new Boolean(file.exists());
+                        }
+                    })).booleanValue();
     }
 
     /**
@@ -114,8 +115,8 @@ public class PrivilegedFileOpsForTests {
      * @param file the file to obtain a reader for
      * @return An unbuffered reader for the specified file.
      * @throws FileNotFoundException if the specified file does not exist
-     * @throws SecurityException if the required privileges to read the file
-     *      are missing
+     * @throws SecurityException if the required permissions to read the file,
+     *      or the path it is in, are missing
      */
     public static FileReader getFileReader(final File file)
             throws FileNotFoundException {
