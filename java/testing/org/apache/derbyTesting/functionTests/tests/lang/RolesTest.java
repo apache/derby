@@ -645,7 +645,9 @@ public class RolesTest extends BaseJDBCTestCase
 
         _stm.close();
 
-        testCurrentRoleIsReset();
+        if (!JDBC.vmSupportsJSR169()) {
+            testCurrentRoleIsReset();
+        }
     }
 
 
