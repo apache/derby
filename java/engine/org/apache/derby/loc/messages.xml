@@ -577,7 +577,7 @@ Guide.
             </msg>
 
             <msg>
-                <name>22004.S.4</name>
+                <name>22003.S.4</name>
                 <text>The length ({0}) exceeds the maximum length for the data type ({1}).</text>
                 <arg>number</arg>
                 <arg>datatypeName</arg>

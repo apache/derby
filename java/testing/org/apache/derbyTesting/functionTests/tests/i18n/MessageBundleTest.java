@@ -138,11 +138,18 @@ public class MessageBundleTest extends BaseTestCase {
             String sqlStateId = (String)it.next();
             
             if ( ! messageBundleIds.contains(sqlStateId) ) {
+                // there are some error messages that do not need to be in 
+                // messages.xml:
+                // XCL32: will never be exposed to users (see DERBY-1414)
+                // XSAX1: shared SQLState explains; not exposed to users. 
+                // 
+                if (!(sqlStateId.equalsIgnoreCase("XCL32.S") ||
+                    sqlStateId.equalsIgnoreCase("XSAX1")))
                 // Don't fail out on the first one, we want to catch
                 // all of them.  Just note there was a failure and continue
-                System.err.println("ERROR: Message id " + sqlStateId +
-                    " in SQLState.java was not found in" +
-                    " messages_en.properties");                     
+                    System.err.println("ERROR: Message id " + sqlStateId +
+                        " in SQLState.java was not found in" +
+                        " messages_en.properties");                     
              }
         }
     }

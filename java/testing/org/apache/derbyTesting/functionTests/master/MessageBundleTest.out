@@ -1,20 +1,12 @@
-.
-testSQLStateOrphanedIds ERROR: Message id 22003.S.4 in SQLState.java was not found in messages_en.properties
-ERROR: Message id XCL32.S in SQLState.java was not found in messages_en.properties
-ERROR: Message id X0RQ3.C in SQLState.java was not found in messages_en.properties
-ERROR: Message id XSAX1 in SQLState.java was not found in messages_en.properties
-used 188 ms .
-testMessageIdOrphanedIds used 0 ms .
-testMessageBundleOrphanedMessages WARNING: Message id 22004.S.4 in messages_en.properties is not referenced in either SQLState.java or MessageId.java
-WARNING: Message id J106 in messages_en.properties is not referenced in either SQLState.java or MessageId.java
+...WARNING: Message id J106 in messages_en.properties is not referenced in either SQLState.java or MessageId.java
 WARNING: Message id J107 in messages_en.properties is not referenced in either SQLState.java or MessageId.java
-WARNING: Message id J108 in messages_en.properties is not referenced in either SQLState.java or MessageId.java
-WARNING: Message id J109 in messages_en.properties is not referenced in either SQLState.java or MessageId.java
-WARNING: Message id 08000.S.1 in messages_en.properties is not referenced in either SQLState.java or MessageId.java
 WARNING: Message id XCL17.S in messages_en.properties is not referenced in either SQLState.java or MessageId.java
+WARNING: Message id 08000.S.1 in messages_en.properties is not referenced in either SQLState.java or MessageId.java
+WARNING: Message id J108 in messages_en.properties is not referenced in either SQLState.java or MessageId.java
 WARNING: Message id XJ102.S in messages_en.properties is not referenced in either SQLState.java or MessageId.java
-used 0 ms 
-Time: 0.203
+WARNING: Message id J109 in messages_en.properties is not referenced in either SQLState.java or MessageId.java
+
+Time: 0.094
 
 OK (3 tests)
 
