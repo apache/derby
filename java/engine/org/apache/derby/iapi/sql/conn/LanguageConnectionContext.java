@@ -471,7 +471,7 @@ public interface LanguageConnectionContext extends Context {
 
 	/**
 	 * Reset any occurence of schemaName as current default schema in
-	 * the SQLSessionContext stack to the initial default, presumably
+	 * the SQLSessionContext stack to the initial default,
 	 * because schemaName is no longer a valid schema.
 	 *
 	 * @param activation current activation
@@ -1137,25 +1137,55 @@ public interface LanguageConnectionContext extends Context {
 	public boolean roleIsSettable(String role) throws StandardException;
 
 	/**
-	 * Create a new SQL session context for the current activation
-	 * on the basis of the existing SQL session context (logical
-	 * session context analogue to call stack push, i.e. this happens
-	 * when a stored procedure or function that can contain SQL is
-	 * invoked. Called from generated code, see
-	 * StaticMethodCallNode#generateSetupNestedSessionContext.
-	 *
+	 * Create a new SQL session context for the current activation on the basis
+	 * of the existing SQL session context. This happens when a stored
+	 * procedure or function that can contain SQL is invoked, cf. SQL 2003
+	 * section 4.27.3, since this gives rise to a nested connection.
+	 * <p>
+	 * Called from generated code, see
+	 * {@code StaticMethodCallNode#generateSetupNestedSessionContext}.
+	 * <p>
 	 * The new SQL session context is also set in the current statement
 	 * context (of the invocation).
 	 *
 	 * @see org.apache.derby.impl.sql.compile.StaticMethodCallNode#generateSetupNestedSessionContext
 	 * @see StatementContext#getSQLSessionContext
+	 * @see #setupSubStatementSessionContext
 	 *
 	 * @param a activation of the statement which performs the call.
 	 */
 	public void setupNestedSessionContext(Activation a);
 
 	/**
-	 * Create a fresh SQLSessionContext
+	 * Get the value of top level session context of the top level connection.
+	 */
+	public SQLSessionContext getTopLevelSQLSessionContext();
+
+	/**
+	 * Used when a statement as part of its operation executes an other
+	 * statement. In contrast to setupNestedSessionContext, the activation (for
+	 * the substatement) just inherits the current session context from the
+	 * parent statements activation, it does <b>not</b> push a new copy on the
+	 * stack of session contexts.
+	 *
+	 * Currently, this is used in the following situations:
+	 * <ul>
+	 *     <li>With {@code ALTER TABLE} adding a column which has a default
+	 *         values, the default value for all the existing rows is added
+	 *         using an {@code UPDATE} substatement.
+	 *     <li>With {@code ALTER TABLE} adding a a check constraint, we will use
+	 *         a substatement {@code SELECT} to check if all rows satisfy the
+	 *         constraint.
+	 *     <li>{@code ResultSet.insertRow}, {@code updateRow}
+	 *         and {@code deleteRow}.
+	 *     <li>During trigger body execution.
+	 * </ul>
+	 * @see #setupNestedSessionContext
+	 */
+	public void setupSubStatementSessionContext(Activation a);
+
+	/**
+	 * Create a fresh SQLSessionContext for this connection.
 	 * @return new SQLSessionContext
 	 */
 	public SQLSessionContext createSQLSessionContext();

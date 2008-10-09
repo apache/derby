@@ -97,9 +97,9 @@ import java.util.Hashtable;
  *
  */
 
-final class GenericActivationHolder implements Activation
+final public class GenericActivationHolder implements Activation
 {
-	BaseActivation			ac;
+	public BaseActivation			ac;
 	ExecPreparedStatement	ps;
 	GeneratedClass			gc;
 	DataTypeDescriptor[]	paramTypes;
@@ -580,16 +580,20 @@ final class GenericActivationHolder implements Activation
 		return ac.getTargetVTI();
 	}
 
-	public SQLSessionContext getNestedSQLSessionContext() {
-		return ac.getNestedSQLSessionContext();
+	public SQLSessionContext getSQLSessionContextForChildren() {
+		return ac.getSQLSessionContextForChildren();
     }
 
-	public void setCallActivation(Activation a) {
-		ac.setCallActivation(a);
+	public SQLSessionContext setupSQLSessionContextForChildren(boolean push) {
+		return ac.setupSQLSessionContextForChildren(push);
+    }
+
+	public void setParentActivation(Activation a) {
+		ac.setParentActivation(a);
 	}
 
-	public Activation getCallActivation() {
-		return ac.getCallActivation();
+	public Activation getParentActivation() {
+		return ac.getParentActivation();
 	}
 
 

@@ -3101,7 +3101,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
         // This is a substatement; for now, we do not set any timeout
         // for it. We might change this behaviour later, by linking
         // timeout to its parent statement's timeout settings.
-		ResultSet rs = ps.execute(lcc, true, 0L);
+		ResultSet rs = ps.executeSubStatement(lcc, true, 0L);
 		rs.close();
 	}
 
@@ -3122,7 +3122,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 
         // This is a substatement, for now we do not set any timeout for it
         // We might change this later by linking timeout to parent statement
-		ResultSet rs = ps.execute(lcc, false, 0L);
+		ResultSet rs = ps.executeSubStatement(lcc, false, 0L);
 		DataValueDescriptor[] rowArray = rs.getNextRow().getRowArray();
 		rs.close();
 		rs.finish();

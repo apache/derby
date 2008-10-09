@@ -1232,9 +1232,7 @@ public class EmbedStatement extends ConnectionChild
 				//and clear existing result sets in case this has been cached
 				a.reset();
 				a.setMaxRows(maxRows);
-                ResultSet resultsToWrap = ps.execute(a,
-                                                     false,
-                                                     timeoutMillis);
+                ResultSet resultsToWrap = ps.execute(a, timeoutMillis);
 				addWarning(a.getWarnings());
 
 

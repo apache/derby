@@ -1844,8 +1844,7 @@ public class GenericLanguageConnectionContext
 	 * @see LanguageConnectionContext#getDefaultSchema(Activation a)
 	 */
 	public SchemaDescriptor getDefaultSchema(Activation a) {
-		return getCurrentSQLSessionContext(a.getCallActivation()).
-			getDefaultSchema();
+		return getCurrentSQLSessionContext(a).getDefaultSchema();
 	}
 
 	/**
@@ -1908,13 +1907,11 @@ public class GenericLanguageConnectionContext
 	public void setDefaultSchema(Activation a, SchemaDescriptor sd)
 		throws StandardException
 	{
-		Activation caller = a.getCallActivation();
-
 		if (sd == null) {
 			sd = getInitialDefaultSchemaDescriptor();
 		}
 
-		getCurrentSQLSessionContext(caller).setDefaultSchema(sd);
+		getCurrentSQLSessionContext(a).setDefaultSchema(sd);
 	}
 
 
@@ -1925,12 +1922,12 @@ public class GenericLanguageConnectionContext
 	public void resetSchemaUsages(Activation activation, String schemaName)
 			throws StandardException {
 
-		Activation caller = activation.getCallActivation();
+		Activation parent = activation.getParentActivation();
 		SchemaDescriptor defaultSchema = getInitialDefaultSchemaDescriptor();
 
 		// walk SQL session context chain
-		while (caller != null) {
-			SQLSessionContext ssc = caller.getNestedSQLSessionContext();
+		while (parent != null) {
+			SQLSessionContext ssc = parent.getSQLSessionContextForChildren();
 			SchemaDescriptor s = ssc.getDefaultSchema();
 
 			if (SanityManager.DEBUG) {
@@ -1940,7 +1937,7 @@ public class GenericLanguageConnectionContext
 			if (schemaName.equals(s.getSchemaName())) {
 				ssc.setDefaultSchema(defaultSchema);
 			}
-			caller = caller.getCallActivation();
+			parent = parent.getParentActivation();
 		}
 
 		// finally top level
@@ -3265,8 +3262,7 @@ public class GenericLanguageConnectionContext
 	 * @see LanguageConnectionContext#setCurrentRole(Activation a, String role)
 	 */
 	public void setCurrentRole(Activation a, String role) {
-		getCurrentSQLSessionContext(a.getCallActivation()).
-			setRole(role);
+		getCurrentSQLSessionContext(a).setRole(role);
 	}
 
 
@@ -3274,8 +3270,7 @@ public class GenericLanguageConnectionContext
 	 * @see LanguageConnectionContext#getCurrentRoleId(Activation a)
 	 */
 	public String getCurrentRoleId(Activation a) {
-		return getCurrentSQLSessionContext(a.getCallActivation()).
-			getRole();
+		return getCurrentSQLSessionContext(a).getRole();
 	}
 
 
@@ -3285,8 +3280,7 @@ public class GenericLanguageConnectionContext
 	public String getCurrentRoleIdDelimited(Activation a)
 			throws StandardException {
 
-		String role = getCurrentSQLSessionContext(a.getCallActivation()).
-			getRole();
+		String role = getCurrentSQLSessionContext(a).getRole();
 
 		if (role != null) {
 			beginNestedTransaction(true);
@@ -3335,22 +3329,23 @@ public class GenericLanguageConnectionContext
 	}
 
 	/**
-	 * Return the current SQL session context based on caller
+	 * Return the current SQL session context of the activation
 	 *
-	 * @param caller the activation of the caller, if any, of the
-	 * current activation
+	 * @param activation the activation
 	 */
-	private SQLSessionContext getCurrentSQLSessionContext(Activation caller) {
+	private SQLSessionContext getCurrentSQLSessionContext(Activation activation) {
 		SQLSessionContext curr;
 
-		if (caller == null ) {
+		Activation parent = activation.getParentActivation();
+
+		if (parent == null ) {
 			// top level
 			curr = getTopLevelSQLSessionContext();
 		} else {
-			// inside a nested SQL session context (stored
-			// procedure/function), the SQL session context is
-			// maintained in the activation of the caller
-			curr = caller.getNestedSQLSessionContext();
+			// inside a nested connection (stored procedure/function), or when
+			// executing a substatement the SQL session context is maintained
+			// in the activation of the parent
+			curr = parent.getSQLSessionContextForChildren();
 		}
 
 		return curr;
@@ -3386,7 +3381,12 @@ public class GenericLanguageConnectionContext
 	 * @see LanguageConnectionContext#setupNestedSessionContext(Activation a)
 	 */
 	public void setupNestedSessionContext(Activation a) {
-		SQLSessionContext sc = a.getNestedSQLSessionContext();
+		setupSessionContextMinion(a, true);
+	}
+
+	private void setupSessionContextMinion(Activation a,
+												 boolean push) {
+		SQLSessionContext sc = a.setupSQLSessionContextForChildren(push);
 
 		// Semantics for roles dictate (SQL 4.34.1.1 and 4.27.3.) that the
 		// role is initially inherited from the current session
@@ -3402,29 +3402,35 @@ public class GenericLanguageConnectionContext
 
 		StatementContext stmctx = getStatementContext();
 
-		// Since the statement is an invocation, it will now be
-		// associated with the pushed SQLSessionContext (and no longer
-		// just share that of its caller (or top).  The statement
-		// contexts of nested connection statements will inherit sc so
-		// the SQL session context is available when nested statements
-		// are compiled (and executed, for the most part).  However,
-		// for dynamic result sets, the relevant statement context
-		// (originating result set) is no longer available for
-		// execution time references to the SQL session context, so we
-		// rely on the activation of the caller for accessing it,
-		// cf. e.g. overload variants of
-		// getDefaultSchema/setDefaultSchema.  If such nested
-		// connections themselves turn out to be invocations, they in
-		// turn get a new SQLSessionContext associated with them etc.
+		// Since the statement is an invocation (iff push=true), it will now be
+		// associated with the pushed SQLSessionContext (and no longer just
+		// share that of its caller (or top).  The statement contexts of nested
+		// connection statements will inherit statement context so the SQL
+		// session context is available through it when nested statements are
+		// compiled (and executed, for the most part).  However, for dynamic
+		// result sets, the relevant statement context (originating result set)
+		// is no longer available for execution time references to the SQL
+		// session context, so we rely on the activation of the caller for
+		// accessing it, cf. e.g. overload variants of
+		// getDefaultSchema/setDefaultSchema.  If such nested connections
+		// themselves turn out to be invocations, they in turn get a new
+		// SQLSessionContext associated with them etc.
 		stmctx.setSQLSessionContext(sc);
 	}
 
 
 	/**
-	 * Get the value of topLevelSSC, possibly initializing it first.
+	 * @see LanguageConnectionContext#setupSubStatementSessionContext(Activation a)
+	 */
+	public void setupSubStatementSessionContext(Activation a) {
+		setupSessionContextMinion(a, false);
+	}
+
+
+	/**
 	 * @see GenericLanguageConnectionContext#topLevelSSC
 	 */
-	private SQLSessionContext getTopLevelSQLSessionContext() {
+	public SQLSessionContext getTopLevelSQLSessionContext() {
 		if (topLevelSSC == null) {
 			topLevelSSC = new SQLSessionContextImpl(
 				getInitialDefaultSchemaDescriptor());

@@ -3627,7 +3627,7 @@ public abstract class EmbedResultSet extends ConnectionChild
                 // Don't see any timeout when inserting rows (use 0)
                 //execute the insert
                 org.apache.derby.iapi.sql.ResultSet rs = 
-                        ps.execute(act, true, 0L); 
+					ps.executeSubStatement(activation, act, true, 0L);
                 act.close();
 
                 lcc.popStatementContext(statementContext, null);
@@ -3702,7 +3702,8 @@ public abstract class EmbedResultSet extends ConnectionChild
             }
             // Don't set any timeout when updating rows (use 0)
             // Execute the update where current of sql.
-            org.apache.derby.iapi.sql.ResultSet rs = ps.execute(act, true, 0L);
+            org.apache.derby.iapi.sql.ResultSet rs =
+				ps.executeSubStatement(activation, act, true, 0L);
             SQLWarning w = act.getWarnings();
             if (w != null) {
                 addWarning(w);
@@ -3767,7 +3768,7 @@ public abstract class EmbedResultSet extends ConnectionChild
                 // Don't set any timeout when deleting rows (use 0)
                 //execute delete where current of sql
                 org.apache.derby.iapi.sql.ResultSet rs = 
-                        ps.execute(act, true, 0L);
+					ps.executeSubStatement(activation, act, true, 0L);
                 SQLWarning w = act.getWarnings();
                 if (w != null) {
                     addWarning(w);

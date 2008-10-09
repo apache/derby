@@ -240,30 +240,63 @@ public class GenericPreparedStatement
 		// deadlock.
 		lcc.closeUnusedActivations();
 
-		Activation callingAct = null;
+		Activation parentAct = null;
 		StatementContext stmctx = lcc.getStatementContext();
 
 		if (stmctx != null) {
-			// if not null, callingAct represents the activation of
-			// a calling statement and this activation corresponds to
-			// a statement inside a stored procedure or function
-			callingAct = stmctx.getActivation();
+			// If not null, parentAct represents one of 1) the activation of a
+			// calling statement and this activation corresponds to a statement
+			// inside a stored procedure or function, and 2) the activation of
+			// a statement that performs a substatement, e.g. trigger body
+			// execution.
+			parentAct = stmctx.getActivation();
 		}
 
-		ac.setCallActivation(callingAct);
+		ac.setParentActivation(parentAct);
 
 		return ac;
 	}
 
-    public ResultSet execute(LanguageConnectionContext lcc,
-                             boolean rollbackParentContext,
-                             long timeoutMillis)
+	/**
+	 * @see PreparedStatement#executeSubStatement(LanguageConnectionContext, boolean, long)
+	 */
+    public ResultSet executeSubStatement(LanguageConnectionContext lcc,
+										 boolean rollbackParentContext,
+										 long timeoutMillis)
 		throws StandardException
 	{
+		Activation parent = lcc.getLastActivation();
 		Activation a = getActivation(lcc, false);
 		a.setSingleExecution();
-		return execute(a, rollbackParentContext, timeoutMillis);
+		lcc.setupSubStatementSessionContext(parent);
+		return executeStmt(a, rollbackParentContext, timeoutMillis);
 	}
+
+	/**
+	 * @see PreparedStatement#executeSubStatement(Activation, Activation, boolean, long)
+	 */
+    public ResultSet executeSubStatement(Activation parent,
+										 Activation activation,
+										 boolean rollbackParentContext,
+										 long timeoutMillis)
+		throws StandardException
+	{
+		parent.getLanguageConnectionContext().
+			setupSubStatementSessionContext(parent);
+		return executeStmt(activation, rollbackParentContext, timeoutMillis);
+	}
+
+
+	/**
+	 * @see PreparedStatement#execute
+	 */
+	public ResultSet execute(Activation activation,
+							 long timeoutMillis)
+			throws StandardException
+	{
+		return executeStmt(activation, false, timeoutMillis);
+	}
+
 
 	/**
 	  *	The guts of execution.
@@ -277,10 +310,9 @@ public class GenericPreparedStatement
 	  *
 	  *	@exception	StandardException thrown on error
 	  */
-
-    public ResultSet execute(Activation activation,
-                             boolean rollbackParentContext,
-                             long timeoutMillis)
+    private ResultSet executeStmt(Activation activation,
+								  boolean rollbackParentContext,
+								  long timeoutMillis)
         throws
             StandardException 
 	{

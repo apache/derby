@@ -93,7 +93,8 @@ public interface PreparedStatement
 	Activation	getActivation(LanguageConnectionContext lcc, boolean scrollable) throws StandardException;
 
 	/**
-	 * Execute the PreparedStatement and return results.
+	 * Execute the PreparedStatement and return results, used for top level
+	 * statements (not substatements) in a connection.
 	 *<p>
 	 * There is no executeQuery() or
 	 * executeUpdate(); a method is provided in
@@ -101,9 +102,6 @@ public interface PreparedStatement
 	 *
 	 * @param activation The activation containing all the local state
 	 *		to execute the plan.
- 	 * @param rollbackParentContext True if 1) the statement context is
-	 *  NOT a top-level context, AND 2) in the event of a statement-level
-	 *	 exception, the parent context needs to be rolled back, too.
      * @param timeoutMillis timeout value in milliseconds.
 	 *
 	 * @return	A ResultSet for a statement. A ResultSet represents
@@ -114,17 +112,53 @@ public interface PreparedStatement
 	 * @exception StandardException		Thrown on failure
 	 */
     ResultSet execute(Activation activation,
-                      boolean rollbackParentContext,
                       long timeoutMillis)
         throws StandardException;
 
 	/**
-		Simple form of execute(). Creates a new single use activation and executes it,
-		but also passes rollbackParentContext parameter (see above).
-	*/
-    ResultSet execute(LanguageConnectionContext lcc,
-                      boolean rollbackParentContext,
-                      long timeoutMillis)
+	 * Execute a statement as part of another statement (ithout a nested
+	 * connection) and return results.
+	 * <p>
+	 * There is no executeQuery() or
+	 * executeUpdate(); a method is provided in
+	 * ResultSet to tell whether to expect rows to be returned.
+	 *
+	 * @param parent The activation of the superstatement
+	 * @param activation The activation containing all the local state
+	 *		to execute the plan for substatement
+ 	 * @param rollbackParentContext True if in the event of a statement-level
+	 *	 exception, the parent context needs to be rolled back, too.
+     * @param timeoutMillis timeout value in milliseconds.
+	 *
+	 * @return	A ResultSet for a statement. A ResultSet represents
+	 *		the results returned from the statement, if any.
+	 *		Will return NULL if the plan for the PreparedStatement
+	 *		has aged out of cache, or the plan is out of date.
+	 *
+	 * @exception StandardException		Thrown on failure
+	 */
+    ResultSet executeSubStatement(Activation parent,
+								  Activation activation,
+								  boolean rollbackParentContext,
+								  long timeoutMillis)
+        throws StandardException;
+
+
+	/**
+	 * Execute a statement as part of another statement (without a nested
+	 * connection) and return results.
+	 * <p>
+	 * Creates a new single use activation and executes it, but also passes
+	 * rollbackParentContext parameter.
+	 * @param lcc language connection context
+	 * @param rollbackParentContext  True if in the event of a statement-level
+	 *	 exception, the parent context needs to be rolled back, too.
+	 * @param timeoutMillis timeout value in milliseconds.
+	 * @see #executeSubStatement(Activation, Activation, boolean, long)
+	 */
+    ResultSet executeSubStatement(LanguageConnectionContext lcc,
+								  boolean rollbackParentContext,
+								  long timeoutMillis)
         throws StandardException;
 
 	/**

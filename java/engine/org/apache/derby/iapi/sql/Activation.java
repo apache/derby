@@ -590,26 +590,33 @@ public interface Activation extends Dependent
 
 
 	/**
-	 * Return the current SQL session context for all immediately
-	 * nested connections stemming from the call or function
-	 * invocation of the statement corresponding to this activation.
+	 * Get the current SQL session context if in a nested connection of a
+	 * stored routine or in a substatement.
 	 */
-	public SQLSessionContext getNestedSQLSessionContext();
+	public SQLSessionContext getSQLSessionContextForChildren();
 
 	/**
-	 * This activation is created in a dynamic call context, remember
-	 * its caller's activation.
-	 *
-	 * @param a The caller's activation
+	 * Set up and return the current SQL session context for all immediately
+	 * nested connections stemming from the call or function invocation of the
+	 * statement corresponding to this activation (push=true) or for a
+	 * substatement, which shares the parents statement's session context
+	 * (push=false).
+	 * @param push true if used to push a new connection context
 	 */
-	public void setCallActivation(Activation a);
+	public SQLSessionContext setupSQLSessionContextForChildren(boolean push);
 
 	/**
-	 * This activation is created in a dynamic call context, get its
-	 * caller's activation.
+	 * This activation is created in a dynamic call context or a substatement
+	 * execution context, chain its parent statements activation..
+	 */
+	public void setParentActivation(Activation a);
+
+	/**
+	 * This activation is created in a dynamic call context, or substatement
+	 * execution context; get its caller's or superstatement's activation.
 	 *
 	 * @return The caller's activation
 	 */
-	public Activation getCallActivation();
+	public Activation getParentActivation();
 
 }

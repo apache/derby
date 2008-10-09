@@ -288,7 +288,7 @@ public abstract class ConstraintConstantAction extends DDLSingleTableConstantAct
             // This is a substatement; for now, we do not set any timeout
             // for it. We might change this behaviour later, by linking
             // timeout to its parent statement's timeout settings.
-			rs = ps.execute(lcc, false, 0L);
+			rs = ps.executeSubStatement(lcc, false, 0L);
 			ExecRow row = rs.getNextRow();
 			if (SanityManager.DEBUG)
 			{

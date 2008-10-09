@@ -270,6 +270,13 @@ public class SQLSessionContextTest extends BaseJDBCTestCase
         for (int i= 0; i < variableKeywords.length; i++) {
             ps[i].close();
         }
+
+        // DERBY-3897: See
+        //
+        // RolesConferredPrivilegesTest#testDefaultCurrentRole and
+        // RolesConferredPrivilegesTest#testCurrentRoleInWeirdContexts
+        //
+        // which are also relevant tests for SQLSessionContext.
     }
 
 

@@ -764,7 +764,7 @@ public class JDBC {
     /**
      * Asserts a ResultSet returns a single row with a single
      * column equal to the passed in String value. The value can
-     * be null to indicate SQL NULL. The comparision is make
+     * be null to indicate SQL NULL. The comparision is made
      * using assertFullResultSet in trimmed string mode.
      *  As a side effect, this method closes the ResultSet.
      */

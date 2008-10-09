@@ -28,6 +28,7 @@ import java.sql.Statement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.DatabaseMetaData;
+import java.sql.DriverManager;
 import java.util.ArrayList;
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -60,6 +61,7 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
     private final static String CONSTRAINTDROPPED    = "01500";
     private final static String VIEWDROPPED          = "01501";
     private final static String TRIGGERDROPPED       = "01502";
+    private final static String UNRELIABLE           = "42Y39";
 
     private final static String[] users = {"test_dbo", "DonaldDuck"};
 
@@ -165,6 +167,20 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
                          "primary key (c1,c2,c3))");
                     // We made columns all unique so we can test references
                     // privilege for all columns.
+                    s.execute(
+                        "create procedure s1.calledNested()" +
+                        "  language java parameter style java" +
+                        "  external name " +
+                        "'org.apache.derbyTesting.functionTests.tests.lang." +
+                        "RolesConferredPrivilegesTest.calledNested' " +
+                        "  modifies sql data");
+                    s.execute
+                        ("create function s1.getCurrentRole() " +
+                         "returns varchar(30)" +
+                         "language java parameter style java external name " +
+                         "'org.apache.derbyTesting.functionTests.tests.lang." +
+                         "RolesConferredPrivilegesTest.getCurrentRole' " +
+                         " reads sql data");
                 }
             };
 
@@ -1361,6 +1377,129 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
 
 
     /**
+     * Test that DEFAULT CURRENT_ROLE works as expected
+     * See DERBY-3897.
+     */
+    public void testDefaultCurrentRole() throws SQLException {
+        Connection dboConn = getConnection();
+        Statement s = dboConn.createStatement();
+        s.execute("grant h to DonaldDuck");
+
+        Connection c = openUserConnection("DonaldDuck");
+        Statement cStmt = c.createStatement();
+        setRole(c, "h");
+
+        // CREATE TABLE
+        cStmt.executeUpdate
+            ("create table t(role varchar(128) default current_role)");
+        cStmt.executeUpdate("insert into t values default");
+        ResultSet rs = cStmt.executeQuery("select * from t");
+        JDBC.assertSingleValueResultSet(rs, "\"H\"");
+        rs.close();
+        cStmt.executeUpdate("drop table t");
+
+        // ALTER TABLE
+        cStmt.executeUpdate("create table t(i int)");
+        cStmt.executeUpdate("insert into t values 1");
+        cStmt.executeUpdate
+            ("alter table t " +
+             "add column role varchar(10) default current_role");
+        rs = cStmt.executeQuery("select * from t");
+        JDBC.assertFullResultSet(rs, new String[][]{{"1",  "\"H\""}});
+        rs.close();
+        cStmt.executeUpdate("drop table t");
+
+        // do the same from within a stored procedure
+        s.execute("grant execute on procedure s1.calledNested to DonaldDuck");
+        cStmt.executeUpdate("call s1.calledNested()");
+        setRole(c, "none");
+
+        cStmt.close();
+        s.execute("revoke h from DonaldDuck");
+        s.execute("revoke execute on procedure s1.calledNested " +
+                  "from DonaldDuck restrict");
+        s.close();
+
+        c.close();
+        dboConn.close();
+    }
+
+
+    /**
+     * Test that CURRENT_ROLE works as expected in some miscellaneous contexts.
+     * See DERBY-3897.
+     */
+    public void testCurrentRoleInWeirdContexts() throws SQLException {
+        Connection dboConn = getConnection();
+        Statement s = dboConn.createStatement();
+        setRole(dboConn, "a1");
+        s.execute("create table trackCreds(usr varchar(30), role varchar(30))");
+        s.executeUpdate("create table t(i int)");
+        s.execute("grant insert on t to DonaldDuck");
+        s.execute("grant h to DonaldDuck");
+
+        // From within a trigger body:
+        s.execute("create trigger tr after insert on t " +
+                  "insert into trackCreds values (current_user, current_role)");
+
+        Connection c = openUserConnection("DonaldDuck");
+        Statement cStmt = c.createStatement();
+        setRole(c, "h");
+        cStmt.executeUpdate("insert into test_dbo.t values 1");
+
+        ResultSet rs = s.executeQuery("select * from trackCreds");
+        JDBC.assertFullResultSet(rs, new String[][]{{"DONALDDUCK",  "\"H\""}});
+        rs.close();
+        setRole(c, "none");
+        cStmt.close();
+
+        // From within a CHECK constraint, that we get an error
+        try {
+            s.execute("create table strange(role varchar(30) " +
+                      "check (role = current_role))");
+            fail("current_role inside a check constraint should be denied");
+        } catch (SQLException e) {
+            assertSQLState(UNRELIABLE, e);
+        }
+
+        // From within a function, called from a CHECK constraint
+        // executed as a substatement as part of ALTER TABLE.
+        // In this case, the session context stack contains two elements
+        // referenced from the three activations thus:
+        //
+        // top level "alter table" act.          -> top level session context
+        // substatement (check constraint act.)  -> top level session context
+        // nested connnection in getCurrentRole,
+        //            "values current_role" act. -> pushed session context
+        //
+        // Before DERBY-3897 the call to s1.getCurrentRole would yield null
+        // because the pushed session context for getCurrentRole would inherit
+        // a wrong (newly created) session context from the CHECK constraint
+        // substatement's activation. After DERBY-3897, the substatement
+        // correctly inherits the session context of "alter table"s
+        // activation, so the pushed session context for getCurrentRole will
+        // be correct, too.
+        //
+        s.execute("create table strange(i int)");
+        s.execute("insert into strange values null");
+        s.execute("alter table strange " +
+                  "add constraint s check (s1.getCurrentRole() = '\"A1\"')");
+
+        s.execute("revoke h from DonaldDuck");
+        s.execute("revoke insert on t from DonaldDuck");
+        setRole(dboConn, "none");
+        s.execute("drop table trackCreds");
+        s.execute("drop table t");
+        s.execute("drop table strange");
+        s.close();
+
+        c.close();
+        dboConn.close();
+    }
+
+
+
+    /**
      * stored function: s1.f1
      */
     public static int s1f1() {
@@ -2479,6 +2618,71 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
             }
             b.append(" expected");
             fail(b.toString());
+        }
+    }
+
+    public static void calledNested()
+            throws SQLException
+    {
+        Connection c = null;
+
+        try {
+            c = DriverManager.getConnection("jdbc:default:connection");
+            Statement cStmt = c.createStatement();
+
+            // CREATE TABLE
+            cStmt.executeUpdate
+                ("create table t(role varchar(128) default current_role)");
+            cStmt.executeUpdate("insert into t values default");
+            ResultSet rs = cStmt.executeQuery("select * from t");
+            JDBC.assertSingleValueResultSet(rs, "\"H\"");
+            rs.close();
+            cStmt.executeUpdate("drop table t");
+
+            // ALTER TABLE
+            cStmt.executeUpdate("create table t(i int)");
+            cStmt.executeUpdate("insert into t values 1");
+            cStmt.executeUpdate
+                ("alter table t " +
+                 "add column role varchar(10) default current_role");
+            rs = cStmt.executeQuery("select * from t");
+            JDBC.assertFullResultSet(rs, new String[][]{{"1",  "\"H\""}});
+            rs.close();
+            cStmt.executeUpdate("drop table t");
+            cStmt.close();
+        } finally {
+            if (c != null) {
+                try {
+                    c.close();
+                } catch (Exception e) {
+                }
+            }
+        }
+    }
+
+
+    public static String getCurrentRole()
+            throws SQLException
+    {
+        Connection c = null;
+
+        try {
+            c = DriverManager.getConnection("jdbc:default:connection");
+            Statement cStmt = c.createStatement();
+
+            ResultSet rs = cStmt.executeQuery("values current_role");
+            rs.next();
+            String result = rs.getString(1);
+            rs.close();
+            cStmt.close();
+            return result;
+        } finally {
+            if (c != null) {
+                try {
+                    c.close();
+                } catch (Exception e) {
+                }
+            }
         }
     }
 }

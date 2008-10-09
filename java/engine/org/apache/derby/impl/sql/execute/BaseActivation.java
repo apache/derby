@@ -173,37 +173,31 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 	protected UUID   UUIDValue;
 
 	/**
-	 * The 'callActivation' of an activation of a statement executing in
+	 * The 'parentActivation' of an activation of a statement executing in
 	 * the root connection is null.
 	 *
-	 * A non-null 'callActivation' represents the activation of the
-	 * calling statement.
+	 * A non-null 'parentActivation' represents the activation of the calling
+	 * statement (if we are in a nested connection of a stored routine), or the
+	 * activation of the parent statement (if we are executing a substatement)
 	 *
-	 * That is, if we are executing an SQL statement ('this'
-	 * activation) inside a stored procedure or function in a nested
-	 * connection, then 'callActivation' will be non-null.
-	 *
-	 * 'callActivation' is set when this activation is created (@see
+	 * 'parentActivation' is set when this activation is created (@see
 	 * GenericPreparedStatement#getActivation) based on the top of the
 	 * dynamic call stack of execution, which is tracked by
 	 * StatementContext. The nested SQL session context is initialized
-	 * by code generated for the call, after parsameters are evaluated
+	 * by code generated for the call, after parameters are evaluated
+	 * or just substatement execution starts.
 	 * @see org.apache.derby.impl.sql.compile.StaticMethodCallNode#generateSetupNestedSessionContext
+	 * @see org.apache.derby.impl.sql.GenericPreparedStatement#executeSubStatement
 	 *
 	 */
-	private Activation callActivation;
+	private Activation parentActivation;
 
 	/**
-	 * The SQL session context of a call is kept here. Also, @see
-	 * BaseActivation#callActivation.
-
-	 * A nested execution maintains its session context,
-	 * nestedSQLSessionContext, in the activation of the calling
-	 * statement's activation ('this'). While not inside a stored
-	 * procedure or function, SQL session state state is held by the
-	 * LanguageConnectionContext.
+	 * The SQL session context to be used inside a nested connection in a
+	 * stored routine or in a substatement. In the latter case, it is an alias
+	 * to the superstatement's session context.
 	 */
-	private SQLSessionContext nestedSQLSessionContext;
+	private SQLSessionContext sqlSessionContextForChildren;
 
 	//Following is the position of the session table names list in savedObjects in compiler context
 	//This is updated to be the correct value at cursor generate time if the cursor references any session table names.
@@ -1379,37 +1373,64 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 	}
 
 	/**
-	 * Return the current SQL session context for all immediately
-	 * nested connections stemming from the call or function
-	 * invocation of the statement corresponding to this activation.
+	 * @see org.apache.derby.iapi.sql.Activation#getSQLSessionContextForChildren
 	 */
-	public SQLSessionContext getNestedSQLSessionContext() {
+	public SQLSessionContext getSQLSessionContextForChildren() {
 
-		if (nestedSQLSessionContext == null) {
-			nestedSQLSessionContext = lcc.createSQLSessionContext();
+		if (SanityManager.DEBUG) {
+			SanityManager.ASSERT
+				(sqlSessionContextForChildren != null,
+				 "Expected sqlSessionContextForChildren to be non-null");
 		}
 
-		return nestedSQLSessionContext;
+		return sqlSessionContextForChildren;
 	}
 
 	/**
-	 * This activation is created in a dynamic call context, remember
-	 * its caller's activation.
-	 *
-	 * @param a The caller's activation
+	 * @see org.apache.derby.iapi.sql.Activation#setupSQLSessionContextForChildren
 	 */
-	public void setCallActivation(Activation a) {
-		callActivation = a;
+	public SQLSessionContext setupSQLSessionContextForChildren(boolean push) {
+
+		if (push) {
+			// Nested connection, so need to push a new context: SQL 2003,
+			// 4.37.1: "An SQL-session is associated with an
+			// SQL-connection.
+			sqlSessionContextForChildren = lcc.createSQLSessionContext();
+		} else {
+			// Substatement, so use current one
+			if (parentActivation != null) {
+				// The parent statement performing the substatement is
+				// itself inside a nested connection (stored routine)
+				sqlSessionContextForChildren =
+					parentActivation.getSQLSessionContextForChildren();
+			} else {
+				// The parent statement performing the substatement is on
+				// top level
+				sqlSessionContextForChildren =
+					lcc.getTopLevelSQLSessionContext();
+			}
+		}
+
+		return sqlSessionContextForChildren;
 	}
 
 	/**
-	 * This activation is created in a dynamic call context, get its
-	 * caller's activation.
+	 * This activation is created in a dynamic call context or a substatement
+	 * execution context, make note of its parent statements activation (a).
 	 *
-	 * @return The caller's activation
+	 * @param a The caller's or superstatement's activation
 	 */
-	public Activation getCallActivation() {
-		return callActivation;
+	public void setParentActivation(Activation a) {
+		parentActivation = a;
+	}
+
+	/**
+	 * Get the activation of the calling statement or parent statement.
+	 *
+	 * @return The parent's activation
+	 */
+	public Activation getParentActivation() {
+		return parentActivation;
 	}
 
 
