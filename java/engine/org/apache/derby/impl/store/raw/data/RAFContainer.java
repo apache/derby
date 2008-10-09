@@ -852,8 +852,18 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
         {
             return AccessController.doPrivileged( this) != null;
         }
-        catch( PrivilegedActionException pae){ throw (StandardException) pae.getException();}
-        finally{ actionIdentity = null; }
+        catch( PrivilegedActionException pae) { 
+            closeContainer();
+            throw (StandardException) pae.getException();
+        }
+        catch (RuntimeException e) {
+            closeContainer();
+            throw e;
+        }
+        finally
+        { 
+            actionIdentity = null; 
+        }
     }
 
 	private synchronized void stubbify(LogInstant instant)

@@ -23,6 +23,7 @@ package org.apache.derbyTesting.functionTests.util;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
@@ -129,6 +130,33 @@ public class PrivilegedFileOpsForTests {
                         public Object run()
                                 throws FileNotFoundException {
                             return new FileReader(file);
+                        }
+                    });
+        } catch (PrivilegedActionException pae) {
+            throw (FileNotFoundException)pae.getCause();
+        }
+    }
+
+    /**
+     * Returns a file output stream for the specified file.
+     *
+     * @param file the file to create a stream for
+     * @return An output stream.
+     * @throws FileNotFoundException if the specified file does not exist
+     * @throws SecurityException if the required permissions to write the file,
+     *      or the path it is in, are missing
+     */
+    public static FileOutputStream getFileOutputStream(final File file)
+            throws FileNotFoundException {
+        if (file == null) {
+            throw new IllegalArgumentException("file cannot be <null>");
+        }
+        try {
+            return (FileOutputStream)AccessController.doPrivileged(
+                    new PrivilegedExceptionAction() {
+                        public Object run()
+                                throws FileNotFoundException {
+                            return new FileOutputStream(file);
                         }
                     });
         } catch (PrivilegedActionException pae) {
