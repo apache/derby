@@ -1589,7 +1589,6 @@ public interface SQLState {
     String CONFLICTING_CREATE_ATTRIBUTES = "XJ049.C";
 	String CONFLICTING_RESTORE_ATTRIBUTES = "XJ081.C";
     String INVALID_ATTRIBUTE = "XJ05B.C";
-    String NO_SUCH_DATABASE = "X0RQ3.C";
     
     // Connection exceptions - SQL State class 08
     

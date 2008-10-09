@@ -1247,13 +1247,11 @@ class DRDAConnThread extends Thread {
 	private int getRdbAccessErrorCodePoint()
 	{
 		String sqlState = databaseAccessException.getSQLState();
-		// These tests are ok since DATABASE_NOT_FOUND,
-		// NO_SUCH_DATABASE and AUTH_INVALID_USER_NAME are not
-		// ambigious error codes (on the first five characters) in
-		// SQLState. If they were, we would have to perform a similar
-		// check as done in method isAuthenticationException
-		if (sqlState.regionMatches(0,SQLState.DATABASE_NOT_FOUND,0,5) ||
-			sqlState.regionMatches(0,SQLState.NO_SUCH_DATABASE,0,5)) {
+		// These tests are ok since DATABASE_NOT_FOUND and 
+		// AUTH_INVALID_USER_NAME are not ambigious error codes (on the first
+		// five characters) in SQLState. If they were, we would have to
+		// perform a similar check as done in method isAuthenticationException
+		if (sqlState.regionMatches(0,SQLState.DATABASE_NOT_FOUND,0,5)) {
 			// RDB not found codepoint
 			return CodePoint.RDBNFNRM;
 		} else {
