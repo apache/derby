@@ -3654,11 +3654,6 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
             </msg>
 
             <msg>
-                <name>XCL17.S</name>
-                <text>Statement not allowed in this database.</text>
-            </msg>
-
-            <msg>
                 <name>XCL18.S</name>
                 <text>Stream of column value in result cannot be retrieved twice</text>
             </msg>
@@ -7445,11 +7440,6 @@ Shutting down instance {0}</text>
             <msg>
                 <name>J105</name>
                 <text>Precision exceeds 31 digits!</text>
-            </msg>
-
-            <msg>
-                <name>J106</name>
-                <text>Caused by exception</text>
             </msg>
 
             <msg>

@@ -91,7 +91,6 @@ public class SqlException extends Exception implements Diagnosable {
     
     // Constants for message ids used in text we print out -- not used
     // in SqlExceptions
-    public static final String CAUSED_BY_EXCEPTION_ID           = "J106";
     public static final String BATCH_POSITION_ID                = "J107";
     
     //SQLException factory initialised with default factory
