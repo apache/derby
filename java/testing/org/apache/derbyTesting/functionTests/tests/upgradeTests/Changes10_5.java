@@ -22,8 +22,13 @@ package org.apache.derbyTesting.functionTests.tests.upgradeTests;
 
 import org.apache.derbyTesting.junit.SupportFilesSetup;
 
+import org.apache.derbyTesting.junit.JDBCDataSource;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Connection;
+import java.sql.CallableStatement;
+
+import javax.sql.DataSource;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -181,4 +186,211 @@ public class Changes10_5 extends UpgradeChange {
         }
     }
 
+    /**
+     * Check that you must be hard-upgraded to 10.5 or later in order to use
+     * SQL roles
+     * @throws SQLException
+     *
+     */
+    public void testSQLRolesBasic() throws SQLException
+    {
+        // The standard upgrade database doesn't have sqlAuthorization
+        // set, so we can only check if the system tables for roles is
+        // present.
+
+        Statement s = createStatement();
+        String createRoleText = "create role foo";
+
+        if (getOldMajor() == 10 && getOldMinor() == 4) {
+            // In 10.4 the roles commands were present but just gave "not
+            // implemented".
+            switch (getPhase()) {
+            case PH_CREATE:
+                assertStatementError("0A000", s, createRoleText );
+                break;
+
+            case PH_SOFT_UPGRADE:
+                // needs hard upgrade
+                assertStatementError("XCL47", s, createRoleText );
+                break;
+
+            case PH_POST_SOFT_UPGRADE:
+                assertStatementError("0A000", s, createRoleText );
+                break;
+
+            case PH_HARD_UPGRADE:
+                // not supported because SQL authorization not set
+                assertStatementError("42Z60", s, createRoleText );
+                break;
+            }
+
+        } else {
+            switch (getPhase()) {
+                case PH_CREATE:
+                    assertStatementError("42X01", s, createRoleText );
+                    break;
+
+                case PH_SOFT_UPGRADE:
+                    // needs hard upgrade
+                    assertStatementError("XCL47", s, createRoleText );
+                    break;
+
+                case PH_POST_SOFT_UPGRADE:
+                    assertStatementError("42X01", s, createRoleText );
+                    break;
+
+                case PH_HARD_UPGRADE:
+                    // not supported because SQL authorization not set
+                    assertStatementError("42Z60", s, createRoleText );
+                    break;
+            }
+        }
+
+
+        s.close();
+    }
+
+    /**
+     * Check that when hard-upgraded to 10.5 or later SQL roles can be
+     * declared if DB has sqlAuthorization.
+     * @throws SQLException
+     *
+     */
+    public void testSQLRoles() throws SQLException
+    {
+        // Do rudimentary sanity checking: that we can create, meaningfully use
+        // and drop roles. If so, we can presume SYS.SYSROLES has been upgraded
+        // correctly. If upgrading from 10.4, SYS.SYSROLES are already present,
+        // but roles were not activated, cf. test in POST_SOFT_UPGRADE.
+
+        DataSource ds = JDBCDataSource.getDataSourceLogical("ROLES_10_5");
+        Connection conn = null;
+        Statement s = null;
+        boolean supportSqlAuthorization = oldAtLeast(10, 2);
+
+        JDBCDataSource.setBeanProperty(ds, "user", "garfield");
+        JDBCDataSource.setBeanProperty(ds, "password", "theCat");
+
+        switch (getPhase()) {
+        case PH_CREATE:
+            // Create the database if it was not already created.
+            JDBCDataSource.setBeanProperty(ds, "createDatabase", "create");
+            conn = ds.getConnection();
+
+            // Make the database have std security, and define
+            // a database user for the database owner).
+            CallableStatement cs = conn.prepareCall(
+                "call syscs_util.syscs_set_database_property(?,?)");
+
+            cs.setString(1, "derby.connection.requireAuthentication");
+            cs.setString(2, "true");
+            cs.execute();
+
+            cs.setString(1, "derby.authentication.provider");
+            cs.setString(2, "BUILTIN");
+            cs.execute();
+
+            cs.setString(1, "derby.database.sqlAuthorization");
+            cs.setString(2, "true");
+            cs.execute();
+
+            cs.setString(1, "derby.database.propertiesOnly");
+            cs.setString(2, "true");
+            cs.execute();
+
+            cs.setString(1, "derby.user.garfield");
+            cs.setString(2, "theCat");
+            cs.execute();
+
+            cs.setString(1, "derby.user.jon");
+            cs.setString(2, "theOwner");
+            cs.execute();
+
+            conn.close();
+
+            JDBCDataSource.shutdownDatabase(ds);
+            break;
+
+        case PH_SOFT_UPGRADE:
+            /* We can't always do soft upgrade, because when
+             * sqlAuthorization is set and we are coming from a
+             * pre-10.2 database, connecting will fail with a message
+             * to hard upgrade before setting sqlAuthorization, so we
+             * skip this step.
+             */
+            if (oldAtLeast(10,2)) {
+                // needs hard upgrade
+                conn = ds.getConnection();
+                s = conn.createStatement();
+
+                assertStatementError("XCL47", s, "create role foo" );
+                conn.close();
+
+                JDBCDataSource.shutdownDatabase(ds);
+            }
+            break;
+
+        case PH_POST_SOFT_UPGRADE:
+            conn = ds.getConnection();
+            s = conn.createStatement();
+
+            if (getOldMajor() == 10 && getOldMinor() == 4) {
+                // not implemented
+                assertStatementError("0A000", s, "create role foo" );
+            } else {
+                // syntax error
+                assertStatementError("42X01", s, "create role foo" );
+            }
+
+            conn.close();
+
+            JDBCDataSource.shutdownDatabase(ds);
+            break;
+
+        case PH_HARD_UPGRADE:
+            JDBCDataSource.setBeanProperty(
+                ds, "connectionAttributes", "upgrade=true");
+            conn = ds.getConnection();
+            s = conn.createStatement();
+
+            // Roles should work; basic sanity test
+
+            // garfield is dbo
+            s.execute("create role foo");
+            s.execute("create table cats(specie varchar(30))");
+            s.execute("insert into cats " +
+                      "values 'lynx', 'tiger', 'persian', 'garfield'");
+            s.execute("grant select on cats to foo");
+            s.execute("grant foo to jon");
+
+            // Connect as jon (not owner) and employ jon's newfound role
+            JDBCDataSource.clearStringBeanProperty(ds, "connectionAttributes");
+            JDBCDataSource.setBeanProperty(ds, "user", "jon");
+            JDBCDataSource.setBeanProperty(ds, "password", "theOwner");
+            Connection jon = ds.getConnection();
+
+            Statement jonStm = jon.createStatement();
+            // Still, no privilege available for poor jon..
+            assertStatementError
+                ("42502", jonStm, "select * from garfield.cats");
+
+            jonStm.execute("set role foo");
+            // Now, though:
+            jonStm.execute("select * from garfield.cats");
+            jonStm.close();
+            jon.close();
+
+            s.execute("drop table cats");
+            s.execute("drop role foo");
+            conn.close();
+
+            println("Roles work after hard upgrade");
+
+            // Owner garfield shuts down
+            JDBCDataSource.setBeanProperty(ds, "user", "garfield");
+            JDBCDataSource.setBeanProperty(ds, "password", "theCat");
+            JDBCDataSource.shutdownDatabase(ds);
+            break;
+        }
+    }
 }

@@ -7476,7 +7476,7 @@ currentRoleNode() throws StandardException :
 {
 	<CURRENT_ROLE>
 	{
-		checkVersion( DataDictionary.DD_VERSION_DERBY_10_4, "ROLES");
+		checkVersion( DataDictionary.DD_VERSION_DERBY_10_5, "ROLES");
 		checkSqlStandardAccess("CURRENT_ROLE");
 		return (ValueNode) nodeFactory.getNode(
 			C_NodeTypes.CURRENT_ROLE_NODE,
@@ -9707,7 +9707,7 @@ roleDefinition() throws StandardException :
 	 */
 	<ROLE> roleName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
 	{
-		checkVersion( DataDictionary.DD_VERSION_DERBY_10_4, "ROLES");
+		checkVersion( DataDictionary.DD_VERSION_DERBY_10_5, "ROLES");
 		checkSqlStandardAccess("CREATE ROLE");
 
 		// Reserve namespace for system roles
@@ -11520,7 +11520,7 @@ StatementNode
 setRoleSpecification() throws StandardException :
 {
 	String roleName = null;
-        checkVersion( DataDictionary.DD_VERSION_DERBY_10_4, "ROLES");
+        checkVersion( DataDictionary.DD_VERSION_DERBY_10_5, "ROLES");
         checkSqlStandardAccess("SET ROLE");
 }
 {
@@ -12185,7 +12185,7 @@ dropRoleStatement() throws StandardException :
 	 */
 	<ROLE> roleName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
 	{
-		checkVersion( DataDictionary.DD_VERSION_DERBY_10_4, "ROLES");
+		checkVersion( DataDictionary.DD_VERSION_DERBY_10_5, "ROLES");
 		checkSqlStandardAccess("DROP ROLE");
 
 		return (StatementNode) nodeFactory.getNode(
@@ -13092,7 +13092,7 @@ roleGrantStatement() throws StandardException :
 	grantees = granteeList()
 	{
 		checkSqlStandardAccess("GRANT <role>");
-		checkVersion( DataDictionary.DD_VERSION_DERBY_10_4, "ROLES");
+		checkVersion( DataDictionary.DD_VERSION_DERBY_10_5, "ROLES");
 
 		return (StatementNode) nodeFactory.getNode
 			(C_NodeTypes.GRANT_ROLE_NODE,
@@ -13178,7 +13178,7 @@ revokeStatement() throws StandardException :
 				 !isPrivilegeKeywordExceptTrigger(getToken(2).kind)) } )
 	<REVOKE>
 	{
-		checkVersion( DataDictionary.DD_VERSION_DERBY_10_4, "ROLES");
+		checkVersion( DataDictionary.DD_VERSION_DERBY_10_5, "ROLES");
 		checkSqlStandardAccess("REVOKE <role>");
 	}
 	( node = roleRevokeStatement() )

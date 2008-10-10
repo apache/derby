@@ -77,7 +77,7 @@ class UpgradeRun {
                                                     // based collation
         new AdditionalDb("NO_ENCRYPT_10_2", true),
         new AdditionalDb("ENCRYPT_10_2",  true),
-        new AdditionalDb("ROLES_10_4", false)
+        new AdditionalDb("ROLES_10_5", false)
     };
     
     static final String jarPath;
