@@ -33,6 +33,7 @@ import java.security.PrivilegedExceptionAction;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.util.StringTokenizer;
 
 
 /**
@@ -239,6 +240,40 @@ public class Utilities {
         
         return new BufferedReader(new StringReader(
                 NetworkServerTestSetup.getNetworkServerControl().getSysinfo()));
+    }
+    
+    /**
+     * Splits a string around matches of the given delimiter character.
+     * Copied from org.apache.derby.iapi.util.StringUtil
+     *
+     * Where applicable, this method can be used as a substitute for
+     * <code>String.split(String regex)</code>, which is not available
+     * on a JSR169/Java ME platform.
+     *
+     * @param str the string to be split
+     * @param delim the delimiter
+     * @throws NullPointerException if str is null
+     */
+    static public String[] split(String str, char delim)
+    {
+        if (str == null) {
+            throw new NullPointerException("str can't be null");
+        }
+
+        // Note the javadoc on StringTokenizer:
+        //     StringTokenizer is a legacy class that is retained for
+        //     compatibility reasons although its use is discouraged in
+        //     new code.
+        // In other words, if StringTokenizer is ever removed from the JDK,
+        // we need to have a look at String.split() (or java.util.regex)
+        // if it is supported on a JSR169/Java ME platform by then.
+        StringTokenizer st = new StringTokenizer(str, String.valueOf(delim));
+        int n = st.countTokens();
+        String[] s = new String[n];
+        for (int i = 0; i < n; i++) {
+            s[i] = st.nextToken();
+        }
+        return s;
     }
 
 }
