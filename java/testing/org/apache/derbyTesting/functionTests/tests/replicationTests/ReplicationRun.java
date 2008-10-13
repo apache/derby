@@ -20,8 +20,6 @@ limitations under the License.
  */
 package org.apache.derbyTesting.functionTests.tests.replicationTests;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 import org.apache.derby.drda.NetworkServerControl;
 import java.net.InetAddress;
@@ -34,7 +32,6 @@ import org.apache.derby.shared.common.reference.SQLState;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.BaseTestCase;
-import org.apache.derbyTesting.junit.SecurityManagerSetup;
 
 /**
  * Framework to run replication tests.
@@ -74,7 +71,7 @@ public class ReplicationRun extends BaseTestCase
     
     static boolean runUnReplicated = false;
     
-    static int tuplesToInsert = 10000;
+    static int tuplesToInsertPerf = 10000;
     static int commitFreq = 0; // autocommit
     
     static String masterDbSubPath = "db_master";
@@ -106,7 +103,7 @@ public class ReplicationRun extends BaseTestCase
     final static String JVMloc = BaseTestCase.getJavaExecutableName();
     
     static boolean showSysinfo = false;
-    static long SLEEP_TIME_MILLIS = 5000L;
+    static long PINGSERVER_SLEEP_TIME_MILLIS = 500L;
     
     static long sleepTime = 5000L; // millisecs.
     
@@ -174,15 +171,6 @@ public class ReplicationRun extends BaseTestCase
         super.tearDown();
     }
     
-    public static Test suite()
-    {
-        
-        TestSuite suite = new TestSuite("Replication Suite");
-        
-        suite.addTestSuite( ReplicationRun.class ); // Make sure to rename in subclasses!
-        
-        return SecurityManagerSetup.noSecurityManager(suite);
-    }
     
     //////////////////////////////////////////////////////////////
     ////
@@ -220,6 +208,8 @@ public class ReplicationRun extends BaseTestCase
         String dbURL = serverURL
                 +fullDbPath;
         Connection conn = null;
+        String lastmsg = null;
+        long sleeptime = 200L;
         boolean done = false;
         int count = 0;
         while ( !done )
@@ -229,25 +219,29 @@ public class ReplicationRun extends BaseTestCase
                 Class.forName(DRIVER_CLASS_NAME); // Needed when running from classes!
                 conn = DriverManager.getConnection(dbURL);
                 done = true;
-                util.DEBUG("Connected");
+                util.DEBUG("Got connection after " 
+                        + count +" * "+ sleeptime + " ms.");
                 conn.close();
             }
             catch ( SQLException se )
             {
                 int errCode = se.getErrorCode();
-                String msg = se.getMessage();
-                String state = se.getSQLState();
+                lastmsg = se.getMessage();
+                String sState = se.getSQLState();
                 String expectedState = "08004";
-                util.DEBUG("startSlave Got SQLException: " + errCode + " " + state + " " + msg);
+                lastmsg = errCode + " " + sState + " " + lastmsg 
+                        + ". Expected: "+ expectedState;
+                util.DEBUG("Got SQLException: " + lastmsg);
                 if ( (errCode == -1)
-                && (state.equalsIgnoreCase(expectedState) ) )
+                && (sState.equalsIgnoreCase(expectedState) ) )
                 {
                     util.DEBUG("Failover not complete.");
-                    Thread.sleep(200L); // ms.
+                    Thread.sleep(sleeptime); // ms.
                 }
                 else
                 {
                     se.printStackTrace(); // FIXME!
+                    assertTrue("Connect failed. " + lastmsg, false);
                     return;
                 }
             }
@@ -256,6 +250,115 @@ public class ReplicationRun extends BaseTestCase
         }
     }
     
+    String showCurrentState(String ID, long waitTime,
+            String fullDbPath, 
+            String serverHost, int serverPort)
+        throws Exception
+    {
+        int errCode = 0;
+        String sState = "CONNECTED";
+        String msg = null;
+        Thread.sleep(waitTime); // .... until stable...
+        try
+        {
+            ClientDataSource ds = new org.apache.derby.jdbc.ClientDataSource();
+            ds.setDatabaseName(fullDbPath);
+            ds.setServerName(serverHost);
+            ds.setPortNumber(serverPort);
+            Connection conn = ds.getConnection();
+            conn.close();
+        }
+        catch ( SQLException se )
+        {
+            errCode = se.getErrorCode();
+            msg = se.getMessage();
+            sState = se.getSQLState();
+        }
+        util.DEBUG(ID+": ["+serverHost+":"+serverPort+"/"+fullDbPath+"] "
+                + errCode + " " + sState + " " + msg);
+        return sState;
+    }
+    void waitForConnect(long sleepTime, int tries,
+            String fullDbPath, 
+            String serverHost, int serverPort)
+        throws Exception
+    {
+        int count = 0;
+        String msg = null;
+        while ( count++ <= tries )
+        {
+            try
+            {
+                ClientDataSource ds = new org.apache.derby.jdbc.ClientDataSource();
+                ds.setDatabaseName(fullDbPath);
+                ds.setServerName(serverHost);
+                ds.setPortNumber(serverPort);
+                Connection conn = ds.getConnection();
+                util.DEBUG("Got connection after " 
+                        + (count-1) +" * "+ sleepTime + " ms.");
+                conn.close();
+                return;
+            }
+            catch ( SQLException se )
+            {
+                msg = se.getErrorCode() + "' '" + se.getSQLState()
+                        + "' '" + se.getMessage();
+                util.DEBUG(count  + " got '" + msg +"'.");
+                Thread.sleep(sleepTime); // ms. Sleep and try again...
+            }
+        }        
+        assertTrue(msg + ": Could NOT connect in "
+                + tries+"*"+sleepTime + "ms.",false);
+    }
+    void waitForSQLState(String expectedState, 
+            long sleepTime, int tries,
+            String fullDbPath, 
+            String serverHost, int serverPort)
+        throws Exception
+    {
+        int count = 0;
+        String msg = null;
+        while ( count++ <= tries )
+        {
+            try
+            {
+                ClientDataSource ds = new org.apache.derby.jdbc.ClientDataSource();
+                ds.setDatabaseName(fullDbPath);
+                ds.setServerName(serverHost);
+                ds.setPortNumber(serverPort);
+                Connection conn = ds.getConnection();
+                // Should never get here!
+                conn.close();
+                assertTrue("Expected SQLState'"+expectedState
+                            + "', but got connection!",
+                        false);
+            }
+            catch ( SQLException se )
+            {
+                int errCode = se.getErrorCode();
+                msg = se.getMessage();
+                String sState = se.getSQLState();
+                msg = "'" + errCode + "' '" + sState + "' '" + msg +"'";
+                util.DEBUG(count 
+                        + ": SQLState expected '"+expectedState+"'," +
+                        " got " + msg);
+                if ( sState.equals(expectedState) )
+                {
+                    util.DEBUG("Reached SQLState '" + expectedState +"' in "
+                            + (count-1)+"*"+sleepTime + "ms.");
+                    return; // Got desired SQLState.
+                }
+                else
+                {
+                    Thread.sleep(sleepTime); // ms. Sleep and try again...
+                }
+            }
+            
+        }
+        assertTrue(msg + ": SQLState '"+expectedState+"' was not reached in "
+                + tries+"*"+sleepTime + "ms.",false);
+        
+    }
     void shutdownDb(String jvmVersion, // Not yet used
             String serverHost, int serverPort, 
             String dbPath, String replicatedDb,
@@ -347,7 +450,7 @@ public class ReplicationRun extends BaseTestCase
                     // + " -Djava.security.policy=\"<NONE>\"" // Now using noSecurityManager decorator
                     + " -Dtest.serverHost=" + serverHost  // Tell the test what server
                     + " -Dtest.serverPort=" + serverPort  // and port to connect to.
-                    + " -Dtest.inserts=" + tuplesToInsert // for SimplePerfTest
+                    + " -Dtest.inserts=" + tuplesToInsertPerf // for SimplePerfTest
                     + " -Dtest.commitFreq=" +  commitFreq // for SimplePerfTest
                     + " -classpath " + testingClassPath
                     + " junit.textui.TestRunner"
@@ -436,7 +539,7 @@ public class ReplicationRun extends BaseTestCase
                     // + " -Djava.security.policy=\"<NONE>\""  // Now using noSecurityManager decorator
                     + " -Dtest.serverHost=" + serverHost  // Tell the test what server
                     + " -Dtest.serverPort=" + serverPort  // and port to connect to.
-                    + " -Dtest.inserts=" + tuplesToInsert // for SimplePerfTest
+                    + " -Dtest.inserts=" + tuplesToInsertPerf // for SimplePerfTest
                     + " -Dtest.commitFreq=" +  commitFreq // for SimplePerfTest
                     + " -classpath " + testingClassPath
                     + " junit.textui.TestRunner"
@@ -880,18 +983,18 @@ public class ReplicationRun extends BaseTestCase
                     
                     done = true;
                     conn.close();
-                    util.DEBUG("startMaster OK");
+                    util.DEBUG("startMaster_direct connected in " + count + " * 100ms.");
                 }
                 catch ( SQLException se )
                 {
                     int errCode = se.getErrorCode();
                     String msg = se.getMessage();
-                    String state = se.getSQLState();
+                    String sState = se.getSQLState();
                     String expectedState = "XRE04";
                     util.DEBUG("startMaster Got SQLException: " 
-                            + errCode + " " + state + " " + msg + ". Expected " + expectedState);
+                            + errCode + " " + sState + " " + msg + ". Expected " + expectedState);
                     if ( (errCode == -1)
-                    && (state.equalsIgnoreCase(expectedState) ) )
+                    && (sState.equalsIgnoreCase(expectedState) ) )
                     {
                         util.DEBUG("Not ready to startMaster. "
                                 +"Beware: Will also report "
@@ -901,7 +1004,7 @@ public class ReplicationRun extends BaseTestCase
                     }
                     else
                     {
-                        if (SQLState.REPLICATION_MASTER_TIMED_OUT.equals(state)) // FIXME! CANNOT_START_MASTER_ALREADY_BOOTED
+                        if (SQLState.REPLICATION_MASTER_TIMED_OUT.equals(sState)) // FIXME! CANNOT_START_MASTER_ALREADY_BOOTED
                         {
                             util.DEBUG("Master already started?");
                         }
@@ -1129,29 +1232,10 @@ public class ReplicationRun extends BaseTestCase
                     catch (SQLException se)
                     {
                         startSlaveException = se;
-                        util.DEBUG("Got: "+se.getSQLState()+" Expected: "+expectedState);
-                        /*
-                        int errCode = se.getErrorCode();
-                        String msg = se.getMessage();
-                        String state = se.getSQLState();
-                        util.DEBUG("startSlave Got SQLException: " + errCode + " " + state + " " + msg);
-                        if ( (errCode == -1)
-                        && (state.equalsIgnoreCase(expectedState) ) )
-                        {
-                            util.DEBUG("As expected.");
-                        }
-                        else
-                        {
-                            util.DEBUG("Got Exception " + msg);
-                            se.printStackTrace();
-                        }
-                        ;*/
                     }
                     catch (Exception ex)
                     {
                         startSlaveException = ex;
-                        util.DEBUG("Got Exception " + ex.getMessage()
-                            +" Expected: SQLException "+expectedState);
                     }
                 }
             }
@@ -1288,9 +1372,12 @@ public class ReplicationRun extends BaseTestCase
             {
                 int errCode = se.getErrorCode();
                 String msg = se.getMessage();
-                String state = se.getSQLState();
+                String sState = se.getSQLState();
                 String expectedState = "XRE20";
-                util.DEBUG("failOver_direct Got SQLException: " + errCode + " " + state + " " + msg);
+                msg = "failOver_direct Got SQLException: " 
+                        + errCode + " " + sState + " " + msg 
+                        + ". Expected: " + expectedState;
+                util.DEBUG(msg);
                 BaseJDBCTestCase.assertSQLState(expectedState, se);
             }
    }
@@ -2010,7 +2097,7 @@ public class ReplicationRun extends BaseTestCase
         
         util.DEBUG("--------------------------------------------------------");
         // for SimplePerfTest
-        tuplesToInsert = 10000;
+        tuplesToInsertPerf = 10000;
         commitFreq = 1000; // "0" is autocommit
         
         util.DEBUG("--------------------------------------------------------");
@@ -2292,8 +2379,8 @@ public class ReplicationRun extends BaseTestCase
             );
             util.DEBUG(debugId+"************** Do .start().");
             serverThread.start();
-            pingServer(serverHost, serverPort, 15); // Wait for the server to come up in a reasonable time....
-            
+            pingServer(serverHost, serverPort, 150); // Wait for the server to come up in a reasonable time....
+
         }
         
         util.DEBUG(debugId+"--- StartServer ");
@@ -2320,7 +2407,7 @@ public class ReplicationRun extends BaseTestCase
                 InetAddress.getByName(interfacesToListenOn), serverPort);
         
         server.start(null); 
-        pingServer(serverHost, serverPort, 15);
+        pingServer(serverHost, serverPort, 150);
         
         Properties sp = server.getCurrentProperties();
         sp.setProperty("noSecurityManager", 
@@ -2629,17 +2716,21 @@ public class ReplicationRun extends BaseTestCase
             try
             {
                 controller.ping();
-                // DEBUG("Server came up in less than " + i*(SLEEP_TIME_MILLIS/1000) + " secs.");
+                util.DEBUG("Server came up in less than "+i+" * "+PINGSERVER_SLEEP_TIME_MILLIS+"ms.");
                 return;
             }
             catch (Exception e)
             { finalException = e; }
             
-            Thread.sleep( SLEEP_TIME_MILLIS );
+            Thread.sleep( PINGSERVER_SLEEP_TIME_MILLIS  );
         }
         
-        util.DEBUG( "Server did not come up: " + finalException.getMessage() );
-        finalException.printStackTrace();
+        String msg = "Could not ping in " 
+                + iterations + " * " + PINGSERVER_SLEEP_TIME_MILLIS + "ms.: "
+                + finalException.getMessage();
+        util.DEBUG( msg );
+        finalException.printStackTrace(); // REMOVE?
+        throw new Exception(msg);
         
     }
 
@@ -3189,4 +3280,95 @@ test.postStoppedSlaveServer.return=true
         }
     }
     
+    void assertException(SQLException se, String expectedSqlState)
+    {
+        if (se == null ) // Did not get an exception
+        {
+            util.DEBUG("Got 'null' exception, expected '" + expectedSqlState + "'");
+            assertTrue("Expected exception: " + expectedSqlState + " got: 'null' exception", 
+                    expectedSqlState == null);
+            return;
+        }
+        int ec = se.getErrorCode();
+        String ss = se.getSQLState();
+        String msg = "Got " + ec + " " + ss + " " + se.getMessage()
+        + ". Expected " + expectedSqlState;
+        util.DEBUG(msg);
+        
+        if ( expectedSqlState != null ) // We expect an exception
+        {
+            assertTrue(msg, ss.equals(expectedSqlState));
+        }
+        else // We do not expect an exception, but got one.
+        {
+            assertTrue(msg, false);
+        }
+    }
+    
+    
+    void _testInsertUpdateDeleteOnMaster(String serverHost, 
+            int serverPort,
+            String dbPath,
+            int _noTuplesToInsert)
+        throws SQLException
+    {
+        util.DEBUG("_testInsertUpdateDeleteOnMaster: " + serverHost + ":" +
+                   serverPort + "/" + dbPath + " " + _noTuplesToInsert);
+        ClientDataSource ds = new org.apache.derby.jdbc.ClientDataSource();
+        ds.setDatabaseName(dbPath);
+        ds.setServerName(serverHost);
+        ds.setPortNumber(serverPort);
+        Connection conn = ds.getConnection();
+        
+        PreparedStatement ps = conn.prepareStatement("create table t(i integer primary key, s varchar(64))");
+        
+        ps.execute();
+        
+        ps = conn.prepareStatement("insert into t values (?,?)");
+        for (int i = 0; i< _noTuplesToInsert; i++)
+        {
+            ps.setInt(1,i);
+            ps.setString(2,"dilldall"+i);
+            ps.execute();
+            if ( (i % 10000) == 0 ) conn.commit();
+        }
+        
+        _verify(conn, _noTuplesToInsert);
+        
+        conn.close();
+    }
+    void _verifyDatabase(String serverHost, 
+            int serverPort,
+            String dbPath,
+            int _noTuplesInserted)
+        throws SQLException
+    {
+        util.DEBUG("_verifyDatabase: "+serverHost+":"+serverPort+"/"+dbPath);
+        ClientDataSource ds = new org.apache.derby.jdbc.ClientDataSource();
+        ds.setDatabaseName(dbPath);
+        ds.setServerName(serverHost);
+        ds.setPortNumber(serverPort);
+        Connection conn = ds.getConnection();
+        
+        _verify(conn,_noTuplesInserted);
+        
+        conn.close();
+    }
+    void _verify(Connection conn, int _noTuplesInserted)
+        throws SQLException
+    {
+        Statement s = conn.createStatement();
+        ResultSet rs = s.executeQuery("select count(*) from t");
+        rs.next();
+        int count = rs.getInt(1);
+        rs = s.executeQuery("select max(i) from t");
+        rs.next();
+        int max = rs.getInt(1);
+        util.DEBUG("_verify: " + count + "/" + _noTuplesInserted + " " + max +
+                   "/" + (_noTuplesInserted - 1));
+        assertEquals("Expected "+ _noTuplesInserted +" tuples, got "+ count +".",
+                     _noTuplesInserted, count);
+        assertEquals("Expected " +(_noTuplesInserted-1) +" max, got " + max +".",
+                     _noTuplesInserted - 1, max);
+    }
 }

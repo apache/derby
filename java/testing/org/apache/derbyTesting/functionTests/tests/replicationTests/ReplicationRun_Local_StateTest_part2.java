@@ -254,13 +254,16 @@ public class ReplicationRun_Local_StateTest_part2 extends ReplicationRun
         /* No value-adding suggestions here exept that calling startSlave 
          * should hang now. 
          */
-        util.DEBUG("_testPostStoppedSlaveServer Not yet implemented");
+        util.DEBUG("_testPostStoppedSlave Not yet implemented."
+                + " No value-adding suggestions here"
+                + " exept that calling startSlave should hang now.");
     }
 
     private void _testPostStoppedSlaveServer()
     {
         /* No value-adding suggestions here */
-        util.DEBUG("_testPostStoppedSlave Not yet implemented");
+        util.DEBUG("_testPostStoppedSlaveServer Not yet implemented."
+                + " No value-adding suggestions here.");
     }
 
     private void _testPostStoppedMaster()
@@ -268,42 +271,16 @@ public class ReplicationRun_Local_StateTest_part2 extends ReplicationRun
         /* No value-adding suggestions here since the stopMaster method will 
          * not do anything when called after failover
          */
-        util.DEBUG("_testPostStoppedMaster Not yet implemented");
+        util.DEBUG("_testPostStoppedMaster Not yet implemented."
+                + "No value-adding suggestions here since the stopMaster method"
+                + " will not do anything when called after failover");
     }
 
     private void _testPostStoppedServer()
     {
         /* No value-adding suggestions here */
-        util.DEBUG("_testPostStoppedServer Not yet implemented");
-    }
-    
-    //////////////////////////////////////////////////////////////////
-    // FIXME! The following should be moved to ReplicationRun!
-    //        Use the pattern 'assertException(replCmd()),expectedException);'
-    //        also in the other replication tests!
-    void assertException(SQLException se, String expectedSqlState)
-    {
-        if (se == null ) // Did not get an exception
-        {
-            util.DEBUG("Got 'null' exception, expected '" + expectedSqlState + "'");
-            assertTrue("Expected exception " + expectedSqlState, 
-                    expectedSqlState == null);
-            return;
-        }
-        int ec = se.getErrorCode();
-        String ss = se.getSQLState();
-        String msg = "Got " + ec + " " + ss + " " + se.getMessage()
-        + ". Expected " + expectedSqlState;
-        util.DEBUG(msg);
-        
-        if ( expectedSqlState != null ) // We expect an exception
-        {
-            assertTrue(msg, ss.equals(expectedSqlState));
-        }
-        else // We do not expect an exception, but got one.
-        {
-            assertTrue(msg, false);
-        }
+        util.DEBUG("_testPostStoppedServer Not yet implemented."
+                + " No value-adding suggestions here.");
     }
     
     SQLException startSlave(String slaveServerHost, int slaveServerPort,

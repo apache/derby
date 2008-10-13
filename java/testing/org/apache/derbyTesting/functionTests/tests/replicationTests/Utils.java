@@ -96,20 +96,22 @@ class Utils
                 {
                     // DEBUG("delete file " + f.getAbsolutePath());
                     boolean deleted = f.delete();
-                    // DEBUG("file deleted " + deleted);
+                    if (!deleted) DEBUG("file NOT deleted " + f.getAbsolutePath());
                 }
             }
             
             if (rmdir)
             {
                 DEBUG("deleting directory " + dir.getAbsolutePath());
-                dir.delete();
+                boolean deleted = dir.delete();
+                if (!deleted) DEBUG("dir NOT deleted " + dir.getAbsolutePath());
             }
         }
         else
         {
             DEBUG("deleting file " +dir.getAbsolutePath());
-            dir.delete();
+            boolean deleted = dir.delete();
+            if (!deleted) DEBUG("file NOT deleted " + dir.getAbsolutePath());
         }
     }
 

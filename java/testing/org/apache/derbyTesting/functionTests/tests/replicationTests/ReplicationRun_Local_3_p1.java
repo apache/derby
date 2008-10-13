@@ -1,6 +1,6 @@
 /*
  
-Derby - Class org.apache.derbyTesting.functionTests.tests.replicationTests.ReplicationRun
+Derby - Class org.apache.derbyTesting.functionTests.tests.replicationTests.ReplicationRun_Local_3_p1
  
 Licensed to the Apache Software Foundation (ASF) under one or more
 contributor license agreements.  See the NOTICE file distributed with
@@ -20,10 +20,8 @@ limitations under the License.
  */
 package org.apache.derbyTesting.functionTests.tests.replicationTests;
 
-import java.sql.SQLException;
 import junit.framework.Test;
 import junit.framework.TestSuite;
-import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 
 
@@ -34,14 +32,14 @@ import org.apache.derbyTesting.junit.SecurityManagerSetup;
  * 
  */
 
-public class ReplicationRun_Local extends ReplicationRun
+public class ReplicationRun_Local_3_p1 extends ReplicationRun_Local_3
 {
     
     /**
      * Creates a new instance of ReplicationRun_Local
      * @param testcaseName Identifying the test.
      */
-    public ReplicationRun_Local(String testcaseName)
+    public ReplicationRun_Local_3_p1(String testcaseName)
     {
         super(testcaseName);
     }
@@ -58,9 +56,9 @@ public class ReplicationRun_Local extends ReplicationRun
     
     public static Test suite()
     {
-        TestSuite suite = new TestSuite("ReplicationRun_Local Suite");
+        TestSuite suite = new TestSuite("ReplicationRun_Local_3_p1 Suite");
         
-        suite.addTestSuite( ReplicationRun_Local.class );
+        suite.addTestSuite( ReplicationRun_Local_3_p1.class        );
         
         return SecurityManagerSetup.noSecurityManager(suite);
 
@@ -77,7 +75,7 @@ public class ReplicationRun_Local extends ReplicationRun
     ////
     //////////////////////////////////////////////////////////////
     
-    public void testReplication_Local_existingTestsAsReplLoad()
+    public void testReplication_Local_3_p1_StateNegativeTests()
     throws Exception
     {
         cleanAllTestHosts();
@@ -109,6 +107,14 @@ public class ReplicationRun_Local extends ReplicationRun
                 null // bootLoad, // The "test" to start when booting db.
                 );
         
+        // 4. separate test
+        // master db created...
+        // slave: connect 'startSlave=true;create=true'
+        assertException(
+        _startSlaveTrueAndCreateTrue(slaveServerHost, slaveServerPort,
+            masterDatabasePath +FS+ masterDbSubPath +FS+ replicatedDb),
+            "XRE10"); // REPLICATION_CONFLICTING_ATTRIBUTES // OK to continue.
+        
         initSlave(slaveServerHost,
                 jvmVersion,
                 replicatedDb); // Trunk and Prototype V2: copy master db to db_slave.
@@ -128,28 +134,80 @@ public class ReplicationRun_Local extends ReplicationRun
                 slaveServerHost, // for slaveReplInterface
                 slaveReplPort);
         
-        
-        // Used to run positive tests.
-        // Handle negative testing in State.testPostStartedMasterAndSlave().
-        // Observe that it will not be meaningful to do runTest if State.XXXX()
-        // has led to incorrect replication state wrt. replicationTest.
-        
-        replicationTest = "org.apache.derbyTesting.functionTests.tests.replicationTests.ReplicationTestRun";
-        util.DEBUG("replicationTest: " + replicationTest);
-        replicationVerify = "org.apache.derbyTesting.functionTests.tests.replicationTests.ReplicationTestRun_Verify";
-        util.DEBUG("replicationVerify: " + replicationVerify);
-
-        runTest(replicationTest, // Returns immediatly if replicationTest is null.
+        runTest(null, // Returns immediatly if replicationTest is null.
                 jvmVersion,
                 testClientHost,
                 masterServerHost, masterServerPort,
                 replicatedDb);
         
-        failOver(jvmVersion,
+        // 1. separate test
+        // slave: stopSlave
+        assertException(
+            _stopSlave(slaveServerHost, slaveServerPort,
+                slaveDatabasePath + FS + slaveDbSubPath + FS + replicatedDb),
+            "XRE41"); // SLAVE_OPERATION_DENIED_WHILE_CONNECTED // OK to continue
+       
+        // 2. separate test
+        // master: stopSlave
+        // master: stopMaster
+        // slave: stopSlave
+        assertException(
+            _stopSlave(masterServerHost, masterServerPort,
+                masterDatabasePath + FS + masterDbSubPath + FS + replicatedDb),
+            "XRE40"); //  REPLICATION_NOT_IN_SLAVE_MODE // OK to continue
+        assertException(
+            _stopMaster(masterServerHost, masterServerPort,
+                masterDatabasePath + FS + masterDbSubPath + FS + replicatedDb),
+            null); // Implies failover. // OK to continue. We have failover.
+        /* showCurrentState("Post stopMaster", 0L,
+            slaveDatabasePath + FS + slaveDbSubPath + FS + replicatedDb, 
+            slaveServerHost, slaveServerPort);
+        showCurrentState("Post stopMaster +1s", 1000L,
+            slaveDatabasePath + FS + slaveDbSubPath + FS + replicatedDb, 
+            slaveServerHost, slaveServerPort); */
+        waitForConnect(100L, 10, 
+                slaveDatabasePath + FS + slaveDbSubPath + FS + replicatedDb, 
+                slaveServerHost, slaveServerPort);
+        assertException(
+            _stopSlave(slaveServerHost, slaveServerPort,
+                slaveDatabasePath + FS + slaveDbSubPath + FS + replicatedDb),
+            "XRE40"); // REPLICATION_NOT_IN_SLAVE_MODE // OK to continue
+        /* showCurrentState("Post stopMaster, stopSlave", 0L,
+            slaveDatabasePath + FS + slaveDbSubPath + FS + replicatedDb, 
+            slaveServerHost, slaveServerPort);
+        showCurrentState("Post stopMaster, stopSlave +1s", 1000L,
+            slaveDatabasePath + FS + slaveDbSubPath + FS + replicatedDb, 
+            slaveServerHost, slaveServerPort); */
+        /* showCurrentState("Post stopMaster, stopSlave +1s", 0L,
+            masterDatabasePath + FS + masterDbSubPath + FS + replicatedDb, 
+            masterServerHost, masterServerPort); */
+        waitForConnect(100L, 10, 
+                masterDatabasePath + FS + masterDbSubPath + FS + replicatedDb, 
+                masterServerHost, masterServerPort);
+        
+        
+        /* BEGIN In ReplicationRun_Local_3_p2.java:
+        // 3. separate test
+        // stopMaster
+        // failover on slave
+        
+        // 5. separate test
+        // slave: "normal" connect to slave db
+        
+        // 6. separate test
+        // slave: 'internal-stopslave=true'
+        END */
+        
+        /* failOver(jvmVersion,
                 masterDatabasePath, masterDbSubPath, replicatedDb,
                 masterServerHost,  // Where the master db is run.
                 masterServerPort,
                 testClientHost);
+        */
+        assertException(
+            _failOver(masterServerHost, masterServerPort, 
+                masterDatabasePath+FS+masterDbSubPath+FS+replicatedDb),
+            "XRE07"); // REPLICATION_NOT_IN_MASTER_MODE
         
         connectPing(slaveDatabasePath+FS+slaveDbSubPath+FS+replicatedDb,
                 slaveServerHost,slaveServerPort,
@@ -165,94 +223,7 @@ public class ReplicationRun_Local extends ReplicationRun
         
         stopServer(jvmVersion, derbyVersion,
                 masterServerHost, masterServerPort);
-        // As of 2008-02-06 master does not accept shutdown after replication, so:
-        // do a 'kill pid' after ending the test run
         
     }
-
-    /**
-     * DERBY-3382: Test that start replication fails if master db is updated
-     * after copying the db to the slave location
-     * @throws java.lang.Exception on test errors.
-     */
-    public void testReplication_Local_LogFilesSynched() throws Exception {
-
-        cleanAllTestHosts();
-        initEnvironment();
-        initMaster(masterServerHost, replicatedDb);
-
-        masterServer = startServer(masterJvmVersion,
-                                   derbyMasterVersion,
-                                   masterServerHost,
-                                   ALL_INTERFACES,
-                                   masterServerPort,
-                                   masterDbSubPath);
-        slaveServer = startServer(slaveJvmVersion,
-                                  derbySlaveVersion,
-                                  slaveServerHost,
-                                  ALL_INTERFACES,
-                                  slaveServerPort,
-                                  slaveDbSubPath);
-
-        startServerMonitor(slaveServerHost);
-
-        bootMasterDatabase(jvmVersion,
-                           masterDatabasePath + FS + masterDbSubPath,
-                           replicatedDb,
-                           masterServerHost,
-                           masterServerPort,
-                           null);
-
-        // copy db to slave
-        initSlave(slaveServerHost,
-                  jvmVersion,
-                  replicatedDb);
-
-        // database has now been copied to slave. Updating the master
-        // database at this point will cause unsynced log files
-        executeOnMaster("call syscs_util.syscs_unfreeze_database()");
-        executeOnMaster("create table breakLogSynch (v varchar(20))");
-        executeOnMaster("drop table breakLogSynch");
-
-        // startSlave is supposed do fail. We check the sql state in
-        // assertSqlStateSlaveConn below
-        startSlave(jvmVersion, replicatedDb,
-                   slaveServerHost,
-                   slaveServerPort,
-                   slaveServerHost,
-                   slaveReplPort,
-                   testClientHost);
-
-        SQLException sqlexception = null;
-        try {
-            startMaster(jvmVersion, replicatedDb,
-                        masterServerHost,
-                        masterServerPort,
-                        masterServerHost,
-                        slaveServerPort,
-                        slaveServerHost,
-                        slaveReplPort);
-        } catch (SQLException sqle) {
-            sqlexception = sqle;
-        }
-        // the startMaster connection attempt should fail with exception XRE05
-        if (sqlexception == null) {
-            fail("Start master did not get the expected SQL Exception XRE05");
-        } else {
-            BaseJDBCTestCase.assertSQLState("Unexpected SQL state.",
-                                            "XRE05",
-                                            sqlexception);
-        }
-
-        // The startSlave connection attempt should fail with exception XJ040
-        assertSqlStateSlaveConn("XJ040");
-
-        stopServer(jvmVersion, derbyVersion,
-                   masterServerHost, masterServerPort);
-        stopServer(jvmVersion, derbyVersion,
-                   slaveServerHost, slaveServerPort);
-
-    }
-
     
 }

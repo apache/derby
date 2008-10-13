@@ -57,6 +57,14 @@ public class ReplicationSuite extends BaseTestCase
         
 		suite.addTest(ReplicationRun_Local_StateTest_part2.suite());
         		
+		// Run this separatly as it produces extra output:
+        // suite.addTest(ReplicationRun_Local_showStateChange.suite());
+        
+        suite.addTest(ReplicationRun_Local_3_p1.suite());
+        suite.addTest(ReplicationRun_Local_3_p2.suite());
+        suite.addTest(ReplicationRun_Local_3_p3.suite());
+        suite.addTest(ReplicationRun_Local_3_p4.suite());
+        
 		return suite;
 	}
 }

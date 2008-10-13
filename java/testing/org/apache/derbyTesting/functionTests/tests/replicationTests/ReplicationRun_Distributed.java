@@ -301,7 +301,7 @@ public class ReplicationRun_Distributed extends ReplicationRun
         
         System.out.println("--------------------------------------------------------");
         // for SimplePerfTest
-        tuplesToInsert = Integer.parseInt(cp.getProperty("test.inserts","10000"));
+        tuplesToInsertPerf = Integer.parseInt(cp.getProperty("test.inserts","10000"));
         commitFreq = Integer.parseInt(cp.getProperty("test.commitFreq","0")); // "0" is autocommit
         
         System.out.println("--------------------------------------------------------");
