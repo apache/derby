@@ -36,6 +36,7 @@ public class SystemPropertyTestSetup extends TestSetup {
 	
 	protected Properties newValues;
 	private Properties oldValues;
+	private boolean staticProperties;
 	
 	/**
 	 * Create a test decorator that sets and restores the passed
@@ -45,13 +46,30 @@ public class SystemPropertyTestSetup extends TestSetup {
 	 * @param newValues properties to be set
 	 */
 	public SystemPropertyTestSetup(Test test,
+			Properties newValues,
+			boolean staticProperties)
+	{
+		super(test);
+		this.newValues = newValues;
+		this.oldValues = new Properties();
+		this.staticProperties = staticProperties;
+	}
+
+	/**
+	 * Create a test decorator that sets and restores 
+	 * System properties.  Do not shutdown engine after
+	 * setting properties
+	 * @param test
+	 * @param newValues
+	 */
+	public SystemPropertyTestSetup(Test test,
 			Properties newValues)
 	{
 		super(test);
 		this.newValues = newValues;
 		this.oldValues = new Properties();
+		this.staticProperties = false;
 	}
-
 	/**
 	 * For each property store the current value and
 	 * replace it with the new value, unless there is no change.
@@ -60,6 +78,9 @@ public class SystemPropertyTestSetup extends TestSetup {
     throws java.lang.Exception
     {
     	setProperties(newValues);
+    	// shutdown engine so static properties take effect
+    	if (staticProperties)
+    		TestConfiguration.getCurrent().shutdownEngine();
     }
 
     /**
@@ -78,6 +99,9 @@ public class SystemPropertyTestSetup extends TestSetup {
        	}
     	// and then reset nay old values
     	setProperties(oldValues);
+    	// shutdown engine to restore any static properties
+    	if (staticProperties)
+    		TestConfiguration.getCurrent().shutdownEngine();
         newValues = null;
         oldValues = null;
     }

@@ -39,8 +39,10 @@ import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.BaseTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
+import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.Decorator;
 import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
@@ -107,23 +109,35 @@ public class StressMultiTest extends BaseJDBCTestCase {
      * Default run is 10 threads for 10 minutes in each mode
      */
     public static Test suite() {
-        Properties sysprops = System.getProperties();
-        sysprops.put("derby.locks.deadlockTimeout", "2");
-        sysprops.put("derby.locks.waitTimeout", "3");
-        sysprops.put("derby.language.logStatementText", "true");
+        Properties dbprops = new Properties();
+        dbprops.put("derby.locks.deadlockTimeout", "2");
+        dbprops.put("derby.locks.waitTimeout", "3");
+
+        Properties sysprops = new Properties();
         sysprops.put("derby.storage.keepTransactionLog", "true");
+        sysprops.put("derby.language.logStatementText", "true");
         sysprops.put("derby.infolog.append", "true");
-
-        TestSuite embedded = new TestSuite("StressMultiTest:embedded");
-        embedded.addTestSuite(StressMultiTest.class);
-
-        TestSuite client = new TestSuite("StressMultiTest:client");
-        client.addTest(TestConfiguration.clientServerDecorator(
-                new TestSuite(StressMultiTest.class)));
-
-        TestSuite encrypted = new TestSuite("StressMultiTest:encrypted");
-        encrypted.addTestSuite(StressMultiTest.class);
-
+        Test embedded = new TestSuite(StressMultiTest.class);
+        embedded = new SystemPropertyTestSetup(embedded,sysprops,true);
+        embedded = new DatabasePropertyTestSetup(embedded,dbprops);
+        // make this a singleUseDatabase so the datbase and 
+        // transaction log will be preserved.
+        embedded = TestConfiguration.singleUseDatabaseDecorator(newCleanDatabase(embedded));
+        // SystemPropertyTestSetup for static properties 
+        // does not work for client because shutting down the
+        // engine causes protocol errors on the client. Run
+        // with -Dderby.storage.keepTransactionLog=true if
+        // you need to save the transaction log for client.
+        Test client = TestConfiguration.clientServerDecorator(
+        		new TestSuite(StressMultiTest.class));
+        client = newCleanDatabase(new DatabasePropertyTestSetup(client,dbprops));
+        Test encrypted = new TestSuite(StressMultiTest.class);
+        // SystemPropertyTestSetup for static properties 
+        // does not work for encrypted databases because the
+        // database has to be rebooted and we don't have access
+        // to the boot password (local to Decorator.encryptedDatabase()
+        // Run with -Dderby.storage.keepTransactionLog=true if you 
+        // need to save the transaction log for encrypted.
         TestSuite unencrypted = new TestSuite("StressMultiTest:unencrypted");
         unencrypted.addTest((embedded));
         unencrypted.addTest((client));
@@ -132,7 +146,7 @@ public class StressMultiTest extends BaseJDBCTestCase {
                 " Threads " + MINUTES + " Minutes");
         suite.addTest(newCleanDatabase(unencrypted));
         //Encrypted uses a different database so it needs its own newCleanDatabase
-        suite.addTest(Decorator.encryptedDatabase(newCleanDatabase(encrypted)));
+        suite.addTest(Decorator.encryptedDatabase(new DatabasePropertyTestSetup(newCleanDatabase(encrypted),dbprops)));
 
         return suite;
     }
@@ -163,24 +177,26 @@ public class StressMultiTest extends BaseJDBCTestCase {
         THREADS = threads;
         MINUTES = minutes;
         
-        Properties sysprops = System.getProperties();
-        sysprops.put("derby.locks.deadlockTimeout", "2");
-        sysprops.put("derby.locks.waitTimeout", "3");
-        sysprops.put("derby.language.logStatementText", "true");
+        Properties dbprops = new Properties();
+        dbprops.put("derby.locks.deadlockTimeout", "2");
+        dbprops.put("derby.locks.waitTimeout", "3");
+        dbprops.put("derby.language.logStatementText", "true");
+        dbprops.put("derby.storage.keepTransactionLog", "true");
+        Properties sysprops = new Properties();
         sysprops.put("derby.storage.keepTransactionLog", "true");
+        sysprops.put("derby.language.logStatementText", "true");
         sysprops.put("derby.infolog.append", "true");
-
-        TestSuite embedded = new TestSuite("StressMultiTest:embedded, " + THREADS +
-            " Threads " + MINUTES + " Minutes");
-        embedded.addTestSuite(StressMultiTest.class);
-        
-        return newCleanDatabase(embedded);
+        Test embedded = new TestSuite(StressMultiTest.class);
+        embedded = new SystemPropertyTestSetup(embedded,sysprops,true);
+        embedded = new DatabasePropertyTestSetup(embedded,dbprops);
+        embedded = TestConfiguration.singleUseDatabaseDecorator(newCleanDatabase(embedded));
+        return embedded;
     }
     
     /*
      * Create a CleanDatabaseTestSetup that sets up the testdatabase.
      */
-    private static Test newCleanDatabase(TestSuite s) {
+    private static Test newCleanDatabase(Test s) {
         return new CleanDatabaseTestSetup(s) {
         /**
          * Creates the database objects used in the test cases.
