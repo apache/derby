@@ -581,6 +581,69 @@ readChars:
     }
 
     /**
+     * Resets the reader.
+     * <p>
+     * This method is used internally to achieve better performance.
+     * @see #reposition(long)
+     *
+     * @throws IOException if resetting or reading from the stream fails
+     * @throws StandardException if resetting the stream fails
+     */
+    private void resetUTF8Reader()
+            throws IOException, StandardException {
+        // 2L to skip the length encoding bytes.
+        this.positionedIn.reposition(2L);
+        this.rawStreamPos = this.positionedIn.getPosition();
+        this.in = this.positionedIn;
+        this.readerCharCount = this.utfCount = 0L;
+        this.charactersInBuffer = this.readPositionInBuffer = 0;
+    }
+
+    /**
+     * Repositions the stream so that the next character read will be the
+     * character at the requested position.
+     * <p>
+     * There are three types of repositioning, ordered after increasing cost:
+     * <ol> <li>Reposition within current character buffer (small hops forwards
+     *          and potentially backwards - in range 1 char to
+     *          {@code MAXIMUM_BUFFER_SIZE} chars)</li>
+     *      <li>Forward stream from current position (hops forwards)</li>
+     *      <li>Reset stream and skip data (hops backwards)</li>
+     * </ol>
+     *
+     * @param requestedCharPos 1-based requested character position
+     * @throws IOException if resetting or reading from the stream fails
+     * @throws StandardException if resetting the stream fails
+     */
+    void reposition(long requestedCharPos)
+            throws IOException, StandardException {
+        if (SanityManager.DEBUG) {
+            SanityManager.ASSERT(this.positionedIn != null);
+            SanityManager.ASSERT(requestedCharPos > 0);
+        }
+        // See if we can continue reading, or do nothing at all, to get to the
+        // right position.
+        if (requestedCharPos > readerCharCount) {
+            // The second part corrects for the internal buffer position.
+            long toSkip = (requestedCharPos - readerCharCount) +
+                    (charactersInBuffer - readPositionInBuffer) -1;
+            persistentSkip(toSkip);
+        } else {
+            // See if the requested position is within the current buffer.
+            long lowerBufferBorder = readerCharCount - charactersInBuffer;
+            if (requestedCharPos <= lowerBufferBorder) {
+                // Have to reset and start from scratch.
+                resetUTF8Reader();
+                persistentSkip(requestedCharPos -1);
+            } else {
+                // We have the requested position in the buffer already.
+                readPositionInBuffer =
+                        (int)(requestedCharPos - lowerBufferBorder -1);
+            }
+        }
+    }
+
+    /**
      * Decode the length encoded in the stream.
      * 
      * This method came from {@link java.io.DataInputStream}
@@ -618,5 +681,30 @@ readChars:
             bufferSize = (int)maxFieldSize;
         }
         return bufferSize;
+    }
+
+    /**
+     * Skips the requested number of characters.
+     *
+     * @param toSkip number of characters to skip
+     * @throws EOFException if there are too few characters in the stream
+     * @throws IOException if reading from the stream fails
+     */
+    private final void persistentSkip(long toSkip)
+            throws IOException {
+        long remaining = toSkip;
+        while (remaining > 0) {
+            long skipped = skip(remaining);
+            if (skipped == 0) {
+                if (SanityManager.DEBUG) {
+                    // Add details to the exception in sane builds.
+                    throw new EOFException("Reached end-of-stream after " +
+                        readerCharCount + " characters, " + remaining +
+                        " remaining to skip");
+                }
+                throw new EOFException();
+            }
+            remaining -= skipped;
+        }
     }
 }

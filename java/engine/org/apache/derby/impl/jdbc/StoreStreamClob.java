@@ -24,6 +24,7 @@ package org.apache.derby.impl.jdbc;
 
 import java.io.BufferedInputStream;
 import java.io.EOFException;
+import java.io.FilterReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
@@ -68,7 +69,18 @@ final class StoreStreamClob
     private final ConnectionChild conChild;
     /** Object used for synchronizing access to the store stream. */
     private final Object synchronizationObject;
-
+    /**
+     * Shared internal reader, closed when the Clob is released.
+     * This is a performance optimization, and the stream is shared between
+     * "one time" operations, for instance {@code getSubString} calls. Often a
+     * subset, or the whole, of the Clob is read subsequently and then this
+     * optimization avoids repositioning costs (the store does not support
+     * random access for LOBs).
+     * <b>NOTE</b>: Do not publish this reader to the end-user.
+     */
+    private UTF8Reader internalReader;
+    /** The internal reader wrapped so that it cannot be closed. */
+    private FilterReader unclosableInternalReader;
 
     /**
      * Creates a new Clob based on a stream from store.
@@ -104,6 +116,9 @@ final class StoreStreamClob
      */
     public void release() {
         if (!released) {
+            if (this.internalReader != null) {
+                this.internalReader.close();
+            }
             this.positionedStoreStream.closeStream();
             this.released = true;
         }
@@ -189,6 +204,37 @@ final class StoreStreamClob
             leftToSkip -= skipped;
         }
         return reader;
+    }
+
+    /**
+     * Returns an internal reader for the Clob, initialized at the specified
+     * character position.
+     *
+     * @param characterPosition 1-based character position.
+     * @return A reader initialized at the specified position.
+     * @throws EOFException if the positions is larger than the Clob
+     * @throws IOException if accessing the I/O resources fail
+     * @throws SQLException if accessing the store resources fail
+     */
+    public Reader getInternalReader(long characterPosition)
+            throws IOException, SQLException {
+        if (this.internalReader == null) {
+            this.internalReader = new UTF8Reader(positionedStoreStream,
+                    TypeId.CLOB_MAXWIDTH, conChild, synchronizationObject);
+            this.unclosableInternalReader =
+                    new FilterReader(this.internalReader) {
+                        public void close() {
+                            // Do nothing.
+                            // Stream will be closed when the Clob is released.
+                        }
+                    };
+        }
+        try {
+            this.internalReader.reposition(characterPosition);
+        } catch (StandardException se) {
+            throw Util.generateCsSQLException(se);
+        }
+        return this.unclosableInternalReader;
     }
 
     /**

@@ -46,6 +46,7 @@ public class _Suite
         suite.addTest(BiggerTemporaryClobTest.suite());
         suite.addTest(SmallStoreStreamClobTest.suite());
         suite.addTest(BiggerStoreStreamClobTest.suite());
+        suite.addTest(UTF8ReaderTest.suite());
 
         return suite;
     }
