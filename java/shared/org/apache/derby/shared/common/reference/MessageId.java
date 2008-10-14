@@ -128,7 +128,12 @@ public interface MessageId {
     String CONN_NETWORK_SERVER_START_EXCEPTION = "J102";
     String CONN_NETWORK_SERVER_SHUTDOWN_EXCEPTION = "J103";
     String CONN_ALREADY_CLOSED                              = "J104";
-    String CONN_PRECISION_TOO_LARGE                         = "J105";
+    String CONN_PRECISION_TOO_LARGE                         = "J105";   
+    //  following only used in text we print out - see client.am.SqlException:
+    String BATCH_POSITION_ID                                = "J107";
+    // following two only used in client.am.Version
+    String SECURITY_MANAGER_NO_ACCESS_ID                    = "J108";
+    String UNKNOWN_HOST_ID                                  = "J109";
     String CONN_SECMECH_NOT_SUPPORTED                       = "J110";
     String CONN_PASSWORD_MISSING                            = "J111";
     String CONN_USERID_MISSING                              = "J112";

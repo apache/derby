@@ -22,15 +22,12 @@
 package org.apache.derby.client.am;
 
 import org.apache.derby.shared.common.i18n.MessageUtil;
+import org.apache.derby.shared.common.reference.MessageId;
 
 
 
 public abstract class Version {
     static MessageUtil msgutil = SqlException.getMessageUtil();
-    
-    // Constants for internationalized message ids
-    private static String SECURITY_MANAGER_NO_ACCESS_ID             = "J108";
-    private static String UNKNOWN_HOST_ID                           = "J109";
     
     // Same as java.sql.DatabaseMetaData.getDriverName()
     public static String getDriverName() {
@@ -152,7 +149,7 @@ public abstract class Version {
                 printWriter.flush();
             } catch (SecurityException e) {
                 printWriter.println(header + 
-                    msgutil.getTextMessage(SECURITY_MANAGER_NO_ACCESS_ID, property));
+                    msgutil.getTextMessage(MessageId.SECURITY_MANAGER_NO_ACCESS_ID, property));
                 printWriter.flush();
             }
         }
@@ -169,7 +166,7 @@ public abstract class Version {
                 printWriter.flush();
             } catch (java.net.UnknownHostException e) {
                 printWriter.println(header + 
-                    msgutil.getTextMessage(UNKNOWN_HOST_ID, e.getMessage()));
+                    msgutil.getTextMessage(MessageId.UNKNOWN_HOST_ID, e.getMessage()));
                 printWriter.flush();
             }
         }

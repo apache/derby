@@ -238,11 +238,6 @@ Guide.
             </msg>
 
             <msg>
-                <name>08000.S.1</name>
-                <text>Cannot close a connection with an active transaction.  The transaction remains open and the connection was not closed.</text>
-            </msg>
-
-            <msg>
                 <name>08001.C.10</name>
                 <text>A connection could not be established because the security token is larger than the maximum allowed by the network protocol.</text>
             </msg>
@@ -4472,11 +4467,6 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
             <msg>
                 <name>XJ100.S</name>
                 <text>The scale supplied by the registerOutParameter method does not match with the setter method. Possible loss of precision!</text>
-            </msg>
-
-            <msg>
-                <name>XJ102.S</name>
-                <text>Can not perform an insert at the current position.</text>
             </msg>
 
             <msg>

@@ -26,6 +26,7 @@ import java.util.TreeMap;
 
 import org.apache.derby.shared.common.i18n.MessageUtil;
 import org.apache.derby.shared.common.error.ExceptionUtil;
+import org.apache.derby.shared.common.reference.MessageId;
 import org.apache.derby.shared.common.reference.SQLState;
 
 
@@ -88,10 +89,6 @@ public class SqlException extends Exception implements Diagnosable {
     
     public static String CLIENT_MESSAGE_RESOURCE_NAME =
         "org.apache.derby.loc.clientmessages";
-    
-    // Constants for message ids used in text we print out -- not used
-    // in SqlExceptions
-    public static final String BATCH_POSITION_ID                = "J107";
     
     //SQLException factory initialised with default factory
     //It will be over written by the SQLException factory of the 
@@ -378,7 +375,7 @@ public class SqlException extends Exception implements Diagnosable {
     // when getMessage() is called.
     // Called by the Agent.
     void setBatchPositionLabel(int index) {
-        batchPositionLabel_ = getMessageUtil().getTextMessage(BATCH_POSITION_ID) + 
+        batchPositionLabel_ = getMessageUtil().getTextMessage(MessageId.BATCH_POSITION_ID) + 
             index + ": ";
     }
 
