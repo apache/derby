@@ -32,7 +32,7 @@
 <!-- Targets -->
 
   <target name="buildsource" depends="checkCompilerLevel,init,prebuild,setCompilerProperties,jsr169stubs,engine,storeless,tools,drda,client,build,versioninfo,localeinfo"/>
-  <target name="all" depends="buildsource,demo,testing,pptesting"/>
+  <target name="all" depends="buildsource,demo,testing,pptesting,runmessagechecktest"/>
 
 <!-- ==================================================================== -->
 <!--                       Initialize targets                             -->
@@ -470,6 +470,11 @@
     <ant dir="${derby.testing.src.dir}/org/apache/derby"/>
   </target>
 
+  <!-- Run the MessageBundleTest -->
+  <target name="runmessagechecktest" depends="junit-init">
+    <property name="derby.junit.testclass" value="org.apache.derbyTesting.functionTests.tests.i18n.MessageBundleTest"/>
+    <antcall target="junit-single"/>
+  </target>
 
 <!-- ==================================================================== -->
 <!--                     Build SanityState.java                           -->
