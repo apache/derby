@@ -26,7 +26,7 @@
 
 # At the end of each statement, check and print out an error
 # if there is a problem
-/;/a \
+/;/a\
     } catch ( Throwable t ) { \
       // We can get this on an assertion failure \
       t.printStackTrace(); \
