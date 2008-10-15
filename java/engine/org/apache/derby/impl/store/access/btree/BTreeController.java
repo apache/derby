@@ -195,8 +195,9 @@ public class BTreeController extends OpenBTree implements ConglomerateController
             if (controlRow != null)
                 controlRow.release();
 
-            return(purged_at_least_one_row);
         }
+
+        return(purged_at_least_one_row);
     }
 
     /**
