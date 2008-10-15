@@ -242,6 +242,28 @@ public class GroupByTest extends BaseJDBCTestCase {
         st.executeUpdate(
             "insert into tab1 select i, s, l, c, v, lvc, d, r, "
             + "dt, t, ts from t");
+        
+        //Following setup is for DERBY-3872
+        st.executeUpdate(
+        		"CREATE TABLE EMPTAB (EMPID INTEGER NOT NULL, "
+        		+ "SALARY DECIMAL(10, 4), DEPT_DEPTNO INTEGER)"); 
+
+        st.executeUpdate(
+        		"ALTER TABLE EMPTAB ADD CONSTRAINT " +
+        		"PK_EMPTAB PRIMARY KEY (EMPID)"); 
+
+        st.executeUpdate(
+        		"CREATE TABLE DEPTTAB (DEPTNO INTEGER NOT NULL)");
+
+      st.executeUpdate(
+    		  "ALTER TABLE DEPTTAB ADD CONSTRAINT "+
+    		  "PK_DEPTTAB PRIMARY KEY (DEPTNO)");
+
+      st.executeUpdate(
+    		  "insert into DEPTTAB values( 1 )");
+
+      st.executeUpdate(
+    		  "insert into EMPTAB values( 1, 1000, 1 )"); 
 	}
 
 	/**
@@ -1087,6 +1109,27 @@ public class GroupByTest extends BaseJDBCTestCase {
             {"0", "1992-09-09", "0", "1992-09-09"}
         };
         
+        JDBC.assertFullResultSet(rs, expRS, true);
+
+        //Test case for DERBY-3872 Prior to fix for DERBY-3872, following
+        //query resulted in NPE because of missing chain of
+        //VirtualColumn-to-ResultColumn nodes for the where clause in
+        //the HAVING clause. The reason for this that we didn't overwrite 
+        //the method "accept()" in IndexToBaseRowNode. This missing code
+        //caused Derby to associate the ResultColumn for the HAVING
+        //clause incorrectly with the ResultColumn used for the join
+        //clause. More info can be found in the jira
+        rs = st.executeQuery(
+        		"select  q1.DEPTNO from DEPTTAB q1, EMPTAB q2 where "+ 
+        		"( integer (1.1) = 1)  and  ( q2.DEPT_DEPTNO = q1.DEPTNO) "+
+        		" GROUP BY q1.DEPTNO HAVING  max( q2.SALARY) >=  "+
+        		"( select  q3.SALARY from EMPTAB q3 where  "+
+        		"(q3.EMPID =  q1.DEPTNO) )");
+        
+        expRS = new String [][]
+        {
+            {"1"}
+        };
         JDBC.assertFullResultSet(rs, expRS, true);
 		st.close();
 	}
