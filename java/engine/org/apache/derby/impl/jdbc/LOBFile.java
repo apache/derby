@@ -32,7 +32,12 @@ import org.apache.derby.io.StorageRandomAccessFile;
  * in encrypted for without having to change code.
  */
 class LOBFile {
+    /** The temporary file where the contents of the LOB should be stored. */
+    private final StorageFile storageFile;
+
+    /** An object giving random access to {@link #storageFile}. */
     private final StorageRandomAccessFile randomAccessFile;
+
     /**
      * Constructs LOBFile.
      *
@@ -41,7 +46,17 @@ class LOBFile {
      * cannot be opened
      */
     LOBFile(StorageFile lobFile) throws FileNotFoundException {
+        storageFile = lobFile;
         randomAccessFile = lobFile.getRandomAccessFile("rw");
+    }
+
+    /**
+     * Get the {@code StorageFile} which represents the file where the
+     * contents of the LOB are stored.
+     * @return a {@code StorageFile} instance
+     */
+    StorageFile getStorageFile() {
+        return storageFile;
     }
 
     /**
