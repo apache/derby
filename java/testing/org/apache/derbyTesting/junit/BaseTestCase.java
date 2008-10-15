@@ -19,6 +19,7 @@
  */
 package org.apache.derbyTesting.junit;
 
+import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
 import junit.framework.Assert;
 import junit.framework.TestCase;
 import junit.framework.AssertionFailedError;
@@ -103,36 +104,25 @@ public abstract class BaseTestCase
         try {
             super.runBare();   
         }
-        //To save the derby.log of failed tests. 
+        //To save the derby.log  and database of failed tests.
         catch (Throwable running) {
             try{
-                AccessController.doPrivileged(new PrivilegedExceptionAction() {
-                    public Object run() throws SQLException, FileNotFoundException,
-                    IOException {
-
-                        File origLogDir = new File("system", "derby.log");
-                        if (origLogDir.exists()) {
-                            File failDir = getFailureFolder();
-                            InputStream in = new FileInputStream(origLogDir);
-                            OutputStream out = new FileOutputStream(new File(failDir,
-                            "derby.log"));
-                            byte[] buf = new byte[32 * 1024];
-
-                            for (;;) {
-                                int read = in.read(buf);
-                                if (read == -1)
-                                    break;
-                                out.write(buf, 0, read);
-                            }
-                            in.close();
-                            out.close();
-                        }
-
-                        return null;
-                    }
-                });
+                String failPath = PrivilegedFileOpsForTests.getAbsolutePath(getFailureFolder());
+                File origLog = new File("system", "derby.log");
+                File newLog = new File(failPath, "derby.log");
+                PrivilegedFileOpsForTests.copy(origLog, newLog);
+                String dbName = TestConfiguration.getCurrent().getDefaultDatabaseName();
+                File dbDir = new File("system", dbName );                        
+                File newDbDir = new File(failPath, dbName);
+                PrivilegedFileOpsForTests.copy(dbDir,newDbDir);
+           }
+            catch (IOException ioe) {
+                // We need to throw the original exception so if there
+                // is an exception saving the db or derby.log we will just
+                // print it.
+                BaseTestCase.printStackTrace(ioe);
             }
-            finally{        		
+            finally {
                 throw running;
             }
         }
