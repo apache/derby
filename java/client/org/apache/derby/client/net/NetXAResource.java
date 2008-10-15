@@ -45,7 +45,6 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Vector;
 import javax.sql.XAConnection;
 import javax.transaction.xa.XAException;
 import javax.transaction.xa.XAResource;
@@ -82,16 +81,6 @@ public class NetXAResource implements XAResource {
     public static final String XAFUNCSTR_RECOVER = "XAResource.recover()";
     public static final String XAFUNCSTR_ROLLBACK = "XAResource.rollback()";
     public static final String XAFUNCSTR_START = "XAResource.start()";
-
-    public int nextElement = 0;
-
-    // XAResources with same RM group list
-    protected static Vector xaResourceSameRMGroup_ = new Vector();
-    protected int sameRMGroupIndex_ = 0;
-    protected NetXAResource nextSameRM_ = null;
-    protected boolean ignoreMe_ = false;
-
-
 
     public org.apache.derby.client.am.SqlException exceptionsOnXA = null;
 
@@ -145,9 +134,6 @@ public class NetXAResource implements XAResource {
         callInfoArray_[0].freeEntry_ = false;
         // ~~~ save conn_ connection variables in callInfoArray_[0]
         callInfoArray_[0].saveConnectionVariables();
-
-        // add this new XAResource to the list of other XAResources for the Same RM
-        initForReuse();
     }
 
     public void commit(Xid xid, boolean onePhase) throws XAException {
@@ -450,7 +436,6 @@ public class NetXAResource implements XAResource {
                 numXid = conn_.indoubtTransactions_.size();
                 xidList = new Xid[numXid];
                 int i = 0;
-                nextElement = 0;
                 for (Enumeration e = conn_.indoubtTransactions_.keys();
                      e.hasMoreElements(); i++) {
                     xidList[i] = (Xid) e.nextElement();
@@ -978,88 +963,5 @@ public class NetXAResource implements XAResource {
         }
         // not "localhost", return original server name
         return serverName;
-    }
-
-    protected void removeXaresFromSameRMchain() {
-        // check all NetXAResources on the same RM for the NetXAResource to remove
-        try {
-            this.ignoreMe_ = true; // use the ignoreMe_ flag to indicate the
-            // XAResource to remove
-            NetXAResource prevXAResource = null;
-            NetXAResource currXAResource;
-            synchronized (xaResourceSameRMGroup_) { // make sure no one changes this vector list
-                currXAResource = (NetXAResource) xaResourceSameRMGroup_.elementAt(sameRMGroupIndex_);
-                while (currXAResource != null) { // is this the XAResource to remove?
-                    if (currXAResource.ignoreMe_) { // this NetXAResource is the one to remove
-                        if (prevXAResource != null) { // this XAResource is not first in chain, just move next to prev
-                            prevXAResource.nextSameRM_ = currXAResource.nextSameRM_;
-                        } else { // this XAResource is  first in chain, just move next to root
-                            xaResourceSameRMGroup_.set(sameRMGroupIndex_,
-                                    currXAResource.nextSameRM_);
-                        }
-                        return;
-                    }
-                    // this is not the NetXAResource to remove, try the next one
-                    prevXAResource = currXAResource;
-                    currXAResource = currXAResource.nextSameRM_;
-                }
-            }
-        } finally {
-            this.ignoreMe_ = false;
-        }
-    }
-
-
-    public void initForReuse() {
-        // add this new XAResource to the list of other XAResources for the Same RM
-        // first find out if there are any other XAResources for the same RM
-        // then check to make sure it is not already in the chain
-        synchronized (xaResourceSameRMGroup_) { // make sure no one changes this vector list
-            int groupCount = xaResourceSameRMGroup_.size();
-            int index = 0;
-            int firstFreeElement = -1;
-            NetXAResource xaResourceGroup = null;
-
-            for (; index < groupCount; ++index) { // check if this group is the same RM
-                xaResourceGroup = (NetXAResource) xaResourceSameRMGroup_.elementAt(index);
-                if (xaResourceGroup == null) { // this is a free element, save its index if first found
-                    if (firstFreeElement == -1) { // first free element, save index
-                        firstFreeElement = index;
-                    }
-                    continue; // go to next element
-                }
-                try {
-                    if (xaResourceGroup.isSameRM(this)) { // it is the same RM add this XAResource to the chain if not there
-                        NetXAResource nextXares = (NetXAResource)
-                                xaResourceSameRMGroup_.elementAt(sameRMGroupIndex_);
-                        while (nextXares != null) { // is this NetXAResource the one we are trying to add?
-                            if (nextXares.equals(this)) { // the XAResource to be added already is in chain, don't add
-                                break;
-                            }
-                            // Xid was not on that NetXAResource, try the next one
-                            nextXares = nextXares.nextSameRM_;
-                        }
-
-                        if (nextXares == null) { // XAResource to be added is not in the chain already, add it
-                            // add it at the head of the chain
-                            sameRMGroupIndex_ = index;
-                            this.nextSameRM_ = xaResourceGroup.nextSameRM_;
-                            xaResourceGroup.nextSameRM_ = this;
-                        }
-                        return; // done
-                    }
-                } catch (XAException xae) {
-                }
-            }
-
-            // no other same RM was found, add this as first of new group
-            if (firstFreeElement == -1) { // no free element found, add new element to end
-                xaResourceSameRMGroup_.add(this);
-                sameRMGroupIndex_ = groupCount;
-            } else { // use first free element found
-                xaResourceSameRMGroup_.setElementAt(this, firstFreeElement);
-                sameRMGroupIndex_ = firstFreeElement;
-            }
-        }
     }
 }
