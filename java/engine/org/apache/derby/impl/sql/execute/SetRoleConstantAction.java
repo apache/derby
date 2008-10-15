@@ -35,6 +35,7 @@ import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.util.IdUtil;
+import org.apache.derby.iapi.util.StringUtil;
 
 /**
  *  This class describes actions that are ALWAYS performed for a
@@ -126,7 +127,17 @@ class SetRoleConstantAction implements ConstantAction
 
             thisRoleName = thisRoleName.trim();
 
+            // NONE is a special case and is not allowed with its special
+            // meaning in SET ROLE ?. Even if there is a role with case normal
+            // form "NONE", we require it to be delimited here, since it would
+            // have had to be delimited to get created, too. We could have
+            // chosen to be lenient here, but it seems safer to be restrictive.
+            if (StringUtil.SQLToUpperCase(thisRoleName).equals("NONE")) {
+                throw StandardException.newException(SQLState.ID_PARSE_ERROR);
+            }
+
             thisRoleName = IdUtil.parseSQLIdentifier(thisRoleName);
+
         }
 
         RoleGrantDescriptor rdDef = null;

@@ -1047,7 +1047,7 @@ public class RolesTest extends BaseJDBCTestCase
             int rowcnt = pstmt.executeUpdate();
             fail("Expected syntax error on identifier");
         } catch (SQLException e) {
-            assertSQLState(idParseError ,e);
+            assertSQLState(idParseError, e);
         }
 
         try {
@@ -1055,7 +1055,7 @@ public class RolesTest extends BaseJDBCTestCase
             int rowcnt = pstmt.executeUpdate();
             fail("Expected syntax error on identifier");
         } catch (SQLException e) {
-            assertSQLState(idParseError ,e);
+            assertSQLState(idParseError, e);
         }
 
 
@@ -1066,12 +1066,20 @@ public class RolesTest extends BaseJDBCTestCase
             try {
                 pstmt.setString(1, "NONE");
                 int rowcnt = pstmt.executeUpdate();
+                fail("NONE should not be allowed as a dynamic parameter");
+            } catch (SQLException e) {
+                assertSQLState(idParseError, e);
+            }
+
+            try {
+                pstmt.setString(1, "\"NONE\"");
+                int rowcnt = pstmt.executeUpdate();
                 assertEquals("rowcount from set role ? not 0", rowcnt, 0);
                 ResultSet rs = doQuery("values current_role", n_a, null , n_a );
                 assertRoleInRs(rs, "\"NONE\"", n_a);
                 rs.close();
             } catch (SQLException e) {
-                fail("execute of set role ? failed: [NONE] " + e, e);
+                fail("execute of set role ? failed: [\"NONE\"] " + e, e);
             }
         }
 
