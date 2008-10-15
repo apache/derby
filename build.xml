@@ -32,7 +32,7 @@
 <!-- Targets -->
 
   <target name="buildsource" depends="checkCompilerLevel,init,prebuild,setCompilerProperties,jsr169stubs,engine,storeless,tools,drda,client,build,versioninfo,localeinfo"/>
-  <target name="all" depends="buildsource,demo,testing,pptesting,runmessagechecktest"/>
+  <target name="all" depends="buildsource,demo,testing,pptesting"/>
 
 <!-- ==================================================================== -->
 <!--                       Initialize targets                             -->
