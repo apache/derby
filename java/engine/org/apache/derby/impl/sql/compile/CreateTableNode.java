@@ -290,7 +290,10 @@ public class CreateTableNode extends DDLStatementNode
 				qeRCL.copyResultColumnNames(resultColumns);
 			}
 			
-			SchemaDescriptor sd = getSchemaDescriptor();
+			SchemaDescriptor sd = getSchemaDescriptor(
+				tableType != TableDescriptor.GLOBAL_TEMPORARY_TABLE_TYPE,
+				true);
+
 			int schemaCollationType = sd.getCollationType();
 	    
 			/* Create table element list from columns in query expression */
@@ -365,7 +368,9 @@ public class CreateTableNode extends DDLStatementNode
 			//exception for 'T%' having collation of territory based and 
 			//EMPNAME having the default collation of UCS_BASIC
 			tableElementList.setCollationTypesOnCharacterStringColumns(
-					getSchemaDescriptor());
+				getSchemaDescriptor(
+					tableType != TableDescriptor.GLOBAL_TEMPORARY_TABLE_TYPE,
+					true));
 		}
 
 		tableElementList.validate(this, dataDictionary, (TableDescriptor) null);
@@ -460,7 +465,10 @@ public class CreateTableNode extends DDLStatementNode
 		throws StandardException
 	{
 		//If table being created/declared is in SESSION schema, then return true.
-		return isSessionSchema(getSchemaDescriptor());
+		return isSessionSchema(
+			getSchemaDescriptor(
+				tableType != TableDescriptor.GLOBAL_TEMPORARY_TABLE_TYPE,
+				true));
 	}
 
 	/**
@@ -480,7 +488,10 @@ public class CreateTableNode extends DDLStatementNode
 		/* If we've seen a constraint, then build a constraint list */
 		CreateConstraintConstantAction[] conActions = null;
 
-		SchemaDescriptor sd = getSchemaDescriptor();
+		SchemaDescriptor sd = getSchemaDescriptor(
+			tableType != TableDescriptor.GLOBAL_TEMPORARY_TABLE_TYPE,
+			true);
+
 		
 		if (numConstraints > 0)
 		{

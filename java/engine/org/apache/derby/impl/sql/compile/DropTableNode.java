@@ -130,11 +130,14 @@ public class DropTableNode extends DDLStatementNode
 	 */
 	public ConstantAction	makeConstantAction() throws StandardException
 	{
-		return	getGenericConstantActionFactory().getDropTableConstantAction( getFullName(),
-											 getRelativeName(),
-											 getSchemaDescriptor(),
-											 conglomerateNumber,
-											 td.getUUID(),
-											 dropBehavior);
+		return	getGenericConstantActionFactory().getDropTableConstantAction(
+			getFullName(),
+			getRelativeName(),
+			getSchemaDescriptor(td.getTableType() !=
+								TableDescriptor.GLOBAL_TEMPORARY_TABLE_TYPE,
+								true),
+			conglomerateNumber,
+			td.getUUID(),
+			dropBehavior);
 	}
 }

@@ -742,6 +742,12 @@ public class CompilerContextImpl extends ContextImpl
 		TableDescriptor td = column.getTableDescriptor();
 		if (td == null)
 			return;
+
+		if (td.getTableType() ==
+				TableDescriptor.GLOBAL_TEMPORARY_TABLE_TYPE) {
+			return; // no priv needed, it is per session anyway
+		}
+
 		UUID tableUUID = td.getUUID();
 		StatementTablePermission key = new StatementTablePermission( tableUUID, currPrivType);
 		StatementColumnPermission tableColumnPrivileges
@@ -765,6 +771,11 @@ public class CompilerContextImpl extends ContextImpl
 	{
 		if( requiredTablePrivileges == null || table == null)
 			return;
+
+		if (table.getTableType() ==
+				TableDescriptor.GLOBAL_TEMPORARY_TABLE_TYPE) {
+			return; // no priv needed, it is per session anyway
+		}
 
 		StatementTablePermission key = new StatementTablePermission( table.getUUID(), currPrivType);
 		requiredTablePrivileges.put(key, key);

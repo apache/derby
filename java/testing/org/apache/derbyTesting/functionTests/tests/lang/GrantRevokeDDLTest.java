@@ -10042,4 +10042,93 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         mamta2.close();
         mamta1.close();
     }
+
+
+    /**
+     * DERBY-3266
+     */
+    public void testGlobalTempTables() throws SQLException {
+        Connection dbo  = getConnection();
+        Statement dboSt = createStatement();
+
+        Connection george = openUserConnection("george");
+        Statement georgeSt = george.createStatement();
+
+        ResultSet rs = null;
+
+        // Dbo creates a global temporary table
+        dboSt.executeUpdate("declare global temporary table t1(i int, j int) " +
+                            "on commit preserve rows not logged");
+        dboSt.executeUpdate("insert into session.t1 values (1,1),(1,1)");
+        rs = dboSt.executeQuery("select * from session.t1");
+        JDBC.assertFullResultSet(rs, new String [][] {{"1", "1"}, {"1", "1"}} );
+        dboSt.executeUpdate("drop table session.t1");
+
+        // Dbo creates a physical schema SESSION and a table with another name
+        // than the global temporary table
+        dboSt.executeUpdate("create schema session");
+        dboSt.executeUpdate("create table session.t2(i int)");
+        dboSt.executeUpdate("insert into session.t2 values 2,22");
+        rs = dboSt.executeQuery("select * from session.t2");
+        JDBC.assertFullResultSet(rs, new String [][] {{"2"}, {"22"}} );
+
+        // Dbo creates a global temporary table with the same name as the
+        // physical table in SESSION; see that global temporary table
+        // overshadows the physical table.
+        dboSt.executeUpdate("declare global temporary table t2(i int, j int) " +
+                            "on commit preserve rows not logged");
+        dboSt.executeUpdate("insert into session.t2 values (222,222),(2,2)");
+        rs = dboSt.executeQuery("select * from session.t2");
+        JDBC.assertFullResultSet(rs,
+                                 new String [][] {{"222", "222"}, {"2", "2"}} );
+
+        // Non-dbo tries to access the physical table in SESSION schema (has no
+        // privilege, so should get authorization error).
+        assertStatementError("42502", georgeSt, "select * from session.t2");
+
+        // Non-dbo tries to create a physical table in SESSION SCHEMA (has no
+        // privilege, so should get authorization error).
+        assertStatementError("42507", georgeSt,
+                             "create table session.t3(i int)");
+
+        // Non-dbo creates a global temporary table
+        georgeSt.executeUpdate
+            ("declare global temporary table t4(i int, j int) " +
+             "on commit preserve rows not logged");
+        georgeSt.executeUpdate("insert into session.t4 values (4,4),(44,44)");
+        rs = georgeSt.executeQuery("select * from session.t4");
+        JDBC.assertFullResultSet(rs,
+                                 new String [][] {{"4", "4"}, {"44", "44"}} );
+
+        // Another non-dbo connection can not see the global temporary table
+        Connection monica = openUserConnection("monica");
+        Statement monicaSt = monica.createStatement();
+        assertStatementError("42X05",
+                             monicaSt,
+                             "select * from session.t4");
+
+        // Original non-dbo drops the temporary table
+        georgeSt.executeUpdate("drop table session.t4");
+
+
+        // Dbo in new connection can still see physical table again
+        dbo.close();
+        dbo = getConnection();
+        dboSt = dbo.createStatement();
+        rs = dboSt.executeQuery("select * from session.t2");
+        JDBC.assertFullResultSet(rs, new String [][] {{"2"}, {"22"}} );
+
+        // close result sets
+        rs.close();
+
+        // close statements
+        dboSt.close();
+        georgeSt.close();
+        monicaSt.close();
+
+        // close connections
+        dbo.close();
+        george.close();
+        monica.close();
+    }
 }
