@@ -55,7 +55,6 @@ import org.apache.derby.shared.common.error.ExceptionUtil;
 
 class LOBStreamControl {
     private LOBFile tmpFile;
-    private StorageFile lobFile;
     private byte [] dataBytes = new byte [0];
     private boolean isBytes = true;
     private final int bufferSize;
@@ -97,7 +96,7 @@ class LOBStreamControl {
                     DataFactory df =  (DataFactory) Monitor.findServiceModule(
                             monitor, DataFactory.MODULE);
                     //create a temporary file
-                    lobFile =
+                    StorageFile lobFile =
                         df.getStorageFactory().createTemporaryFile("lob", null);
                     if (df.databaseEncrypted()) {
                         tmpFile = new EncryptedLOBFile (lobFile, df);
@@ -348,8 +347,7 @@ class LOBStreamControl {
                 dataBytes = new byte [(int) size];
                 read(dataBytes, 0, dataBytes.length, 0);
                 isBytes = true;
-                tmpFile.close();
-                conn.removeLobFile(tmpFile);
+                releaseTempFile(tmpFile);
                 tmpFile = null;
             } else {
                 tmpFile.setLength(size);
@@ -407,11 +405,23 @@ class LOBStreamControl {
     void free() throws IOException {
         dataBytes = null;
         if (tmpFile != null) {
-            tmpFile.close();
-            deleteFile(lobFile);
-            conn.removeLobFile(tmpFile);
+            releaseTempFile(tmpFile);
             tmpFile = null;
         }
+    }
+
+    /**
+     * Close and release all resources held by a temporary file. The file will
+     * also be deleted from the file system and removed from the list of
+     * {@code LOBFile}s in {@code EmbedConnection}.
+     *
+     * @param file the temporary file
+     * @throws IOException if the file cannot be closed or deleted
+     */
+    private void releaseTempFile(LOBFile file) throws IOException {
+        file.close();
+        conn.removeLobFile(file);
+        deleteFile(file.getStorageFile());
     }
     
     /**
@@ -457,7 +467,6 @@ class LOBStreamControl {
             
             byte tmp [] = new byte [0];
             LOBFile oldFile = tmpFile;
-            StorageFile oldStoreFile = lobFile;
             init (tmp, 0);
             byte [] tmpByte = new byte [1024];
             long sz = stPos;
@@ -481,9 +490,7 @@ class LOBStreamControl {
                     tmpFile.write (tmpByte, 0, rdLen);
                 }while (true);
             }            
-            oldFile.close();
-            conn.removeLobFile(oldFile);
-            deleteFile(oldStoreFile);
+            releaseTempFile(oldFile);
         }
         updateCount++;
         return stPos + buf.length;
