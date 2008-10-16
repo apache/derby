@@ -32,7 +32,7 @@
 <!-- Targets -->
 
   <target name="buildsource" depends="checkCompilerLevel,init,prebuild,setCompilerProperties,jsr169stubs,engine,storeless,tools,drda,client,build,versioninfo,localeinfo"/>
-  <target name="all" depends="buildsource,demo,testing,pptesting"/>
+  <target name="all" depends="buildsource,demo,testing,pptesting,runmessagecheck"/>
 
 <!-- ==================================================================== -->
 <!--                       Initialize targets                             -->
@@ -471,9 +471,28 @@
   </target>
 
   <!-- Run the MessageBundleTest -->
-  <target name="runmessagechecktest" depends="junit-init">
+    <target name="runmessagecheck" depends="checkjunittask,runmessagechecktest,nojunittask">
+  </target>
+
+  <target name="runmessagechecktest" depends="junit-init" if="optionaljunit.available">
     <property name="derby.junit.testclass" value="org.apache.derbyTesting.functionTests.tests.i18n.MessageBundleTest"/>
     <antcall target="junit-single"/>
+    <antcall target="cleanjunit"/>
+  </target>
+
+  <!-- junit.jar must be available or we couldn't build, but can we run a junit task? -->
+  <target name="checkjunittask">
+    <available property="optionaljunit.available" 
+      classname="org.apache.tools.ant.taskdefs.optional.junit.JUnitTest"/>
+  </target>
+
+  <target name="nojunittask" unless="optionaljunit.available">
+    <echo message="no junit task available; no message check run"/>
+    <antcall target="cleanjunit"/>
+  </target>
+
+  <target name="cleanjunit">
+    <delete dir="junit_${derby.junit.timestamp}"/>
   </target>
 
 <!-- ==================================================================== -->
@@ -1867,6 +1886,7 @@
     <property name="derby.junit.jvm" value="java"/>
     <property name="derby.junit.timestamp" value="${derby.junit.DSTAMP}_${derby.junit.TSTAMP}"/>
     <mkdir dir="junit_${derby.junit.timestamp}/testout"/>
+    <property name="derby.junit.timestamp" value="${derby.junit.DSTAMP}_${derby.junit.TSTAMP}"/>
   </target>
 
   <target name="junit-sysinfo" depends="junit-init">
