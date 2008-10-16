@@ -26,6 +26,7 @@ import java.util.Random;
 import javax.sql.DataSource;
 
 import junit.framework.Test;
+import junit.framework.TestSuite;
 
 /**
  * Utility class that provides static methods to decorate tests.
@@ -60,6 +61,9 @@ public class Decorator {
      */
     public static Test encryptedDatabase(Test test)
     {
+        if (JDBC.vmSupportsJSR169())
+            return new TestSuite("no encryption support");
+        
         test = new BaseTestSetup(test) {
             
             /**
