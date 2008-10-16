@@ -68,11 +68,6 @@ public class ClientXAConnection extends ClientPooledConnection implements XAConn
         } else {
             // A new connection object is required
             logicalCon_ = super.getConnection();
-            if (this.physicalConnection_ != null) { // have a physical connection, check if a NetXAResource
-                if (netXAPhysicalConnection_ != null) { // the XAResource is a NetXAResource, re-initialize it
-                    netXares_.initForReuse();
-                }
-            }
         }
         return logicalCon_;
     }
