@@ -23,16 +23,24 @@ package org.apache.derby.client.am;
 import java.util.Arrays;
 
 /**
- * An object that tracks the state of large objects (LOBs) in a result set.
+ * An object that tracks the state of large objects (LOBs) for the current row
+ * in a result set.
  * <p>
- * This object covers two types of functionality regarding LOBs;
+ * A LOB's state is either unpublished or published. When a LOB is published, it
+ * means that the end-user has been given a reference to the LOB object. This
+ * implies that the LOB cannot be automatically freed/released when the
+ * result set position changes (i.e. typically {@code rs.next()}), because the
+ * LOB object must be kept valid/alive until the transaction is ended or the
+ * LOB object is explicitly freed.
+ * <p>
+ * This class covers two types of functionality regarding LOBs;
  * <ul>
- *      <li>Keep track of whether a LOB column has been accessed.</li>
+ *      <li>Keep track of whether a LOB column has been published or not.</li>
  *      <li>Release LOB locators on the server.</li>
  * </ul>
- * The former functionality is always present in a tracker object. The latter
- * functionality may or may not be available. This is decided by whether
- * locators are supported by the server or not.
+ * Both functionalities will be disabled if the server doesn't support locators.
+ * If locators are enabled, they will be freed when {@link #checkCurrentRow} is
+ * called.
  * <p>
  * The tracker has a notion of current row. The current row is changed by
  * calling {@link #checkCurrentRow checkCurrentRow}. The owner of the tracker
@@ -44,21 +52,23 @@ import java.util.Arrays;
  */
 class LOBStateTracker {
 
-    /** Instance to use when there are no LOBs in the result set. */
+    /**
+     * Instance to use when there are no LOBs in the result set, or when the
+     * server doesn't support locators.
+     */
     public static final LOBStateTracker NO_OP_TRACKER =
             new LOBStateTracker(new int[0], new boolean[0], false);
-
     /** 1-based column indexes for the LOBs to track. */
     private final int[] columns;
-    /** Tells whether a LOB is Blob or a Clob. */
+    /** Tells whether the LOB is Blob or a Clob. */
     private final boolean[] isBlob;
-    /** Tells whether a LOB colum has been accessed in the current row.  */
-    private final boolean[] accessed;
+    /** Tells whether the LOB colum has been published for the current row. */
+    private final boolean[] published;
     /**
      * Tells whether locators shall be released. This will be {@code false} if
      * locators are not supported by the server.
      */
-    private final boolean release;
+    private final boolean doRelease;
     /**
      * The last locator values seen when releasing. These values are used to
      * detect if {@linkplain #checkCurrentRow} is being executed more than once
@@ -71,15 +81,15 @@ class LOBStateTracker {
      *
      * @param lobIndexes the 1-based indexes of the LOB columns
      * @param isBlob whether the LOB is a Blob or a Clob
-     * @param release whether locators shall be released
+     * @param doRelease whether locators shall be released
      * @see #NO_OP_TRACKER
      */
-    LOBStateTracker(int[] lobIndexes, boolean[] isBlob, boolean release) {
+    LOBStateTracker(int[] lobIndexes, boolean[] isBlob, boolean doRelease) {
         this.columns = lobIndexes;
         this.isBlob = isBlob;
-        this.accessed = new boolean[columns.length];
-        this.release = release;
-        // Zero is an invalid locator, so don't fill with different value.
+        this.published = new boolean[columns.length];
+        this.doRelease = doRelease;
+        // Zero is an invalid locator, don't fill with a valid value.
         this.lastLocatorSeen = new int[columns.length];
     }
 
@@ -94,12 +104,12 @@ class LOBStateTracker {
      */
     void checkCurrentRow(Cursor cursor)
             throws SqlException {
-        if (this.release) {
+        if (this.doRelease) {
             CallableLocatorProcedures procs = cursor.getLocatorProcedures();
             for (int i=0; i < this.columns.length; i++) {
                 // Note the conversion from 1-based to 0-based index when
                 // checking if the column has a NULL value.
-                if (!this.accessed[i] && !cursor.isNull_[this.columns[i] -1]) {
+                if (!this.published[i] && !cursor.isNull_[this.columns[i] -1]) {
                     // Fetch the locator so we can free it.
                     int locator = cursor.locator(this.columns[i]);
                     if (locator == this.lastLocatorSeen[i]) {
@@ -120,9 +130,9 @@ class LOBStateTracker {
                     }
                 }
             }
+            // Reset state for the next row.
+            Arrays.fill(this.published, false);
         }
-        // Reset state for the next row.
-        Arrays.fill(this.accessed, false);
     }
 
     /**
@@ -133,24 +143,28 @@ class LOBStateTracker {
      * to release them from the client side in this case.
      */
     void discardState() {
-        // Force the internal state to accessed for all LOB columns.
-        // This will cause checkCurrentRow to ignore all LOBs on the next
-        // invocation. The method markAccessed cannot be called before after
-        // checkCurrentRow has been called again.
-        Arrays.fill(this.accessed, true);
+        if (this.doRelease) {
+            // Force the state to published for all LOB columns.
+            // This will cause checkCurrentRow to ignore all LOBs on the next
+            // invocation. The method markAsPublished cannot be called before
+            // after checkCurrentRow has been called again.
+            Arrays.fill(this.published, true);
+        }
     }
 
     /**
-     * Marks the specified column of the current row as accessed, which implies
+     * Marks the specified column of the current row as published, which implies
      * that the tracker should not release the associated locator.
      * <p>
-     * Columns must be marked as accessed when a LOB object is created on
+     * Columns must be marked as published when a LOB object is created on
      * the client, to avoid releasing the corresponding locator too early.
      *
      * @param index 1-based column index
      */
-    void markAccessed(int index) {
-        int internalIndex = Arrays.binarySearch(this.columns, index);
-        this.accessed[internalIndex] = true;
+    void markAsPublished(int index) {
+        if (this.doRelease) {
+            int internalIndex = Arrays.binarySearch(this.columns, index);
+            this.published[internalIndex] = true;
+        }
     }
 }

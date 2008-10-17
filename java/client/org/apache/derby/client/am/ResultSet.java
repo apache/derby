@@ -6201,29 +6201,33 @@ public abstract class ResultSet implements java.sql.ResultSet,
     }
 
     /**
-     * Marks the LOB at the specified column as accessed.
+     * Marks the LOB at the specified column as published.
      * <p>
-     * When a LOB is marked as accessed, the release mechanism will not be
+     * When a LOB is marked as published, the release mechanism will not be
      * invoked by the result set. It is expected that the code accessing the
-     * LOB releases the locator when it is done with the LOB.
+     * LOB releases the locator when it is done with the LOB, or that the
+     * commit/rollback handles the release.
      *
      * @param index 1-based column index
      */
-    public final void markLOBAsAccessed(int index) {
-        this.lobState.markAccessed(index);
+    public final void markLOBAsPublished(int index) {
+        this.lobState.markAsPublished(index);
     }
 
     /**
      * Initializes the LOB state tracker.
      * <p>
-     * The state tracker is used to free LOB locators on the server.
+     * The state tracker is used to free LOB locators on the server. If the
+     * server doesn't support locators, or there are no LOBs in the result set,
+     * a no-op tracker will be used.
      */
     final void createLOBColumnTracker() {
         if (SanityManager.DEBUG) {
             SanityManager.ASSERT(this.lobState == null,
                     "LOB state tracker already initialized.");
         }
-        if (this.resultSetMetaData_.hasLobColumns()) {
+        if (this.connection_.supportsSessionDataCaching() &&
+                this.resultSetMetaData_.hasLobColumns()) {
             final int columnCount = this.resultSetMetaData_.columns_;
             int lobCount = 0;
             int[] tmpIndexes = new int[columnCount];
@@ -6240,8 +6244,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             boolean[] isBlob = new boolean[lobCount];
             System.arraycopy(tmpIndexes, 0, lobIndexes, 0, lobCount);
             System.arraycopy(tmpIsBlob, 0, isBlob, 0, lobCount);
-            this.lobState = new LOBStateTracker(lobIndexes, isBlob,
-                    this.connection_.serverSupportsLocators());
+            this.lobState = new LOBStateTracker(lobIndexes, isBlob, true);
         } else {
             // Use a no-op state tracker to simplify code expecting a tracker.
             this.lobState = LOBStateTracker.NO_OP_TRACKER;
