@@ -139,6 +139,45 @@ public class GroupByTest extends BaseJDBCTestCase {
         String [][] expectedRows = {{"A","2"},{"B","2"}};
         JDBC.assertFullResultSet(rs, expectedRows);
         s.executeUpdate("DROP TABLE TAB");
+
+        //Following setup is for DERBY-3872
+        s.executeUpdate(
+        		"CREATE TABLE EMPTAB (EMPID INTEGER NOT NULL, "
+        		+ "SALARY DECIMAL(10, 4), DEPT_DEPTNO INTEGER)"); 
+        s.executeUpdate(
+        		"ALTER TABLE EMPTAB ADD CONSTRAINT " +
+        		"PK_EMPTAB PRIMARY KEY (EMPID)"); 
+        s.executeUpdate(
+        		"CREATE TABLE DEPTTAB (DEPTNO INTEGER NOT NULL)");
+        s.executeUpdate(
+    		  "ALTER TABLE DEPTTAB ADD CONSTRAINT "+
+    		  "PK_DEPTTAB PRIMARY KEY (DEPTNO)");
+        s.executeUpdate(
+    		  "insert into DEPTTAB values( 1 )");
+        s.executeUpdate(
+    		  "insert into EMPTAB values( 1, 1000, 1 )"); 
+
+        //Test case for DERBY-3872 Prior to fix for DERBY-3872, following
+        //query resulted in NPE because of missing chain of
+        //VirtualColumn-to-ResultColumn nodes for the where clause in
+        //the HAVING clause. The reason for this that we didn't overwrite 
+        //the method "accept()" in IndexToBaseRowNode. This missing code
+        //caused Derby to associate the ResultColumn for the HAVING
+        //clause incorrectly with the ResultColumn used for the join
+        //clause. More info can be found in the jira
+        rs = s.executeQuery(
+        		"select  q1.DEPTNO from DEPTTAB q1, EMPTAB q2 where " +
+        		"( integer (1.1) = 1)  and  ( q2.DEPT_DEPTNO = q1.DEPTNO) "+
+        		" GROUP BY q1.DEPTNO HAVING  max( q2.SALARY) >=  "+
+        		"( select  q3.SALARY from EMPTAB q3 where  "+
+        		"(q3.EMPID =  q1.DEPTNO) )");
+        
+        expectedRows = new String [][]
+        {
+            {"1"}
+        };
+        JDBC.assertFullResultSet(rs, expectedRows, true);
+
     }
 
 	public void testDerbyOrderByOnAggregate() throws SQLException
