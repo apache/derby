@@ -32,6 +32,7 @@ import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
+import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 
 /**
  * Tests the lazy creation functionality of default schema: the schema
@@ -239,6 +240,82 @@ public class LazyDefaultSchemaCreationTest extends BaseJDBCTestCase {
         c1.close();
     }
 
+    public void testDerby3043CheckConstraint() throws SQLException
+    {
+        // Demonstrate the DERBY-3043 workaround: if the table name is
+        // schema-qualified, check constraints do not cause a problem,
+        // and the named schema is automatically created if it does
+        // not yet exist:
+        Connection c0 = openUserConnection("frogs");
+        Statement s0 = c0.createStatement();
+
+        JDBC.assertEmpty( s0.executeQuery
+            ("select * from sys.sysschemas where schemaname='FROGS'"));
+        JDBC.assertEmpty( s0.executeQuery
+            ("select * from sys.sysschemas where schemaname='NOSUCH'"));
+
+        // A simple example, which should work whether or not the
+        // DERBY-3043 fix is in place
+
+        s0.executeUpdate("create table frogs.users2(username varchar(16) " +
+                        "CHECK(LENGTH(username)>7))");
+
+        // Demonstrate that any schema is lazy-created, not just the
+        // default schema which matches the username:
+
+        s0.executeUpdate("create table nosuch.users(username varchar(16) " +
+                        "CHECK(LENGTH(username)>7))");
+
+        // Schemas FROGS and NOSUCH have been lazy-created:
+
+        JDBC.assertSingleValueResultSet( s0.executeQuery(
+                "select schemaname from sys.sysschemas " +
+                "where schemaname='FROGS'"),
+            "FROGS");
+        JDBC.assertSingleValueResultSet( s0.executeQuery(
+                "select schemaname from sys.sysschemas " +
+                "where schemaname='NOSUCH'"),
+            "NOSUCH");
+        c0.close();
+
+        // Now verify that the test cases from DERBY-3043 pass:
+
+        Connection c1 = openUserConnection("blogs");
+
+        Statement s1 = c1.createStatement();
+    
+        // At the beginning, the schema 'blogs' does not exist.
+
+        JDBC.assertEmpty( s1.executeQuery
+            ("select * from sys.sysschemas where schemaname='BLOGS'"));
+
+        // Should work, but without the DERBY-3043 fix will get a
+        // "Schema blogs does not exist" error
+
+        s1.executeUpdate("create table users(username varchar(16) " +
+                        "CHECK(LENGTH(username)>7))");
+
+        // Another slightly more complicated example, which requires
+        // the DERBY-3043 fix again to work.
+
+        s1.executeUpdate("CREATE TABLE BLOGSCOM__BLOGS__USERS(" +
+                "PK INTEGER NOT NULL GENERATED ALWAYS AS IDENTITY," +
+                "username VARCHAR(16) NOT NULL " +
+                "  CONSTRAINT BLOGSCOM__BLOGS__USERS_UNIQUE_username UNIQUE " +
+                "  CONSTRAINT BLOGSCOM__BLOGS__USERS_PASSWORD_username " +
+                "    CHECK(LENGTH(username)>7)," +
+                "password VARCHAR (32672) NOT NULL , " +
+                "PRIMARY KEY(PK))"); 
+
+        // Schema BLOGS should have been lazy-created:
+
+        JDBC.assertSingleValueResultSet( s1.executeQuery(
+                "select schemaname from sys.sysschemas " +
+                "where schemaname='BLOGS'"),
+            "BLOGS");
+
+        c1.close();
+    }
 
 
 protected void  tearDown() throws Exception {
@@ -288,6 +365,10 @@ protected void  tearDown() throws Exception {
                    p, false),
                   2,   // deadlock timeout
                   1)); // wait timeout
+
+            suites[i].addTest(new CleanDatabaseTestSetup(
+                new LazyDefaultSchemaCreationTest(
+                    "testDerby3043CheckConstraint")));
 
             if (i == 0) {
                 suite.addTest(suites[i]);
