@@ -1,6 +1,6 @@
 /*
  
-   Derby - Class org.apache.derbyTesting.functionTests.tests.i18n.MessageBundleTest
+   Derby - Class org.apache.derbyMessageBundleTest
  
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -19,9 +19,8 @@
  
  */
 
-package org.apache.derbyTesting.functionTests.tests.i18n;
+package org.apache.derbyBuild;
 
-import org.apache.derbyTesting.junit.BaseTestCase;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.shared.common.reference.MessageId;
 
@@ -31,6 +30,10 @@ import java.util.ResourceBundle;
 import java.util.Locale;
 import java.util.Iterator;
 
+import org.apache.tools.ant.BuildException;
+import org.apache.tools.ant.Task;
+
+
 /**
  * This class does everything we can to validate that the messages_en.properties
  * file is in synch with SQLState.java and MessageId.java.  We want to make sure
@@ -39,11 +42,34 @@ import java.util.Iterator;
  * that don't have matching ids in the SQLState and MessageId files.   The
  * first is a bug, the second is something to be aware of.
  */
-public class MessageBundleTest extends BaseTestCase {
-    public MessageBundleTest(String name) {
-        super(name);
-    }
+public class MessageBundleTest extends Task {
 
+    static boolean failbuild = false;
+
+    /**
+     * <p>
+     * Let Ant conjure us out of thin air.
+     * </p>
+     */
+    public MessageBundleTest()
+    {}
+    
+    public void execute() throws BuildException
+    {
+        MessageBundleTest t = new MessageBundleTest();
+        try {
+            t.testMessageBundleOrphanedMessages();
+            t.testMessageIdOrphanedIds();
+            t.testSQLStateOrphanedIds();
+        } catch (Exception e) {
+            System.out.println("Message check failed: ");
+            e.printStackTrace();
+        }
+        if (failbuild) 
+            throw new BuildException("Message check failed. \n" +
+                "See error in build output or call ant runmessagecheck.");
+    }    
+    
     // The list of ids.  We use a HashSet so we can detect duplicates easily
     static HashSet sqlStateIds          = new HashSet();
     static HashSet messageIdIds         = new HashSet();
@@ -87,6 +113,7 @@ public class MessageBundleTest extends BaseTestCase {
             
             if ( ! set.add(id) )
             {
+                failbuild=true;
                 System.err.println("ERROR: The id " + id + 
                     " was found twice in " + idclass.getName());
             }
@@ -121,6 +148,7 @@ public class MessageBundleTest extends BaseTestCase {
             String key = (String)keys.nextElement();                
 
             if ( ! messageBundleIds.add(key) ) {
+                failbuild=true;
                 System.err.println("ERROR: the key " + key +
                     " exists twice in messages_en.properties");
             }
@@ -142,14 +170,15 @@ public class MessageBundleTest extends BaseTestCase {
                 // messages.xml:
                 // XCL32: will never be exposed to users (see DERBY-1414)
                 // XSAX1: shared SQLState explains; not exposed to users. 
-                // 
                 if (!(sqlStateId.equalsIgnoreCase("XCL32.S") ||
-                    sqlStateId.equalsIgnoreCase("XSAX1")))
+                    sqlStateId.equalsIgnoreCase("XSAX1"))) {
                 // Don't fail out on the first one, we want to catch
                 // all of them.  Just note there was a failure and continue
+                    failbuild=true;
                     System.err.println("ERROR: Message id " + sqlStateId +
                         " in SQLState.java was not found in" +
-                        " messages_en.properties");                     
+                        " messages_en.properties");         
+                }
              }
         }
     }
@@ -167,6 +196,7 @@ public class MessageBundleTest extends BaseTestCase {
             if ( ! messageBundleIds.contains(sqlStateId) ) {
                 // Don't fail out on the first one, we want to catch
                 // all of them.  Just note there was a failure and continue
+                failbuild=true;
                 System.err.println("ERROR: Message id " + sqlStateId +
                     " in MessageId.java was not found in" +
                     " messages_en.properties");                    
@@ -194,6 +224,7 @@ public class MessageBundleTest extends BaseTestCase {
             
             // Don't fail out on the first one, we want to catch
             // all of them.  Just note there was a failure and continue
+            failbuild=true;
             System.err.println("WARNING: Message id " + msgid + 
                 " in messages_en.properties is not " +
                 "referenced in either SQLState.java or MessageId.java");
