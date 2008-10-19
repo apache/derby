@@ -427,10 +427,18 @@ public class CreateTableNode extends DDLStatementNode
 									C_NodeTypes.FROM_LIST,
 									getNodeFactory().doJoinOrderOptimization(),
 									getContextManager());
+			// DERBY-3043: To avoid a no-such-schema error when
+			// binding the check constraint, ensure that the
+			// table we bind against has a schema name specified.
+			// If it doesn't, fill in the schema name now.
+			//
+			TableName newTN = getObjectName();
+			if (newTN.getSchemaName() == null)
+				newTN.setSchemaName(getSchemaDescriptor().getSchemaName());
 			FromBaseTable table = (FromBaseTable)
 									getNodeFactory().getNode(
 										C_NodeTypes.FROM_BASE_TABLE,
-										getObjectName(),
+										newTN,
 										null,
 										null,
 										null,
