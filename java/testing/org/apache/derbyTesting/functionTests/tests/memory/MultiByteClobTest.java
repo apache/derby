@@ -132,43 +132,44 @@ public class MultiByteClobTest extends BaseJDBCTestCase {
     }
 
     /**
-	 * Runs the test fixtures in embedded and client.
-	 *
-	 * @return test suite
-	 */
-	public static Test suite() {
-		TestSuite suite = new TestSuite("MultiByteClobTest");
-		suite.addTest(baseSuite("MultiByteClobTest:embedded"));
-                // Disable for client for now. Client clob is inordinately slow.
-		//suite.addTest(TestConfiguration
-		//		.clientServerDecorator(baseSuite("MultiByteClobTest:client")));
-                Properties p = new Properties();
-                // use small pageCacheSize so we don't run out of memory on the insert.
-                p.setProperty("derby.storage.pageCacheSize", "100");
-                return new SystemPropertyTestSetup(suite,p);	
-	}
+     * Runs the test fixtures in embedded and client.
+     *
+     * @return test suite
+     */
+    public static Test suite() {
+        TestSuite suite = new TestSuite("MultiByteClobTest");
+        suite.addTest(baseSuite("MultiByteClobTest:embedded"));
+        // Disable for client for now. Client clob is inordinately slow.
+        //suite.addTest(TestConfiguration
+        //    .clientServerDecorator(baseSuite("MultiByteClobTest:client")));
+        Properties p = new Properties();
+        // use small pageCacheSize so we don't run out of memory on the insert.
+        p.setProperty("derby.storage.pageCacheSize", "100");
+        return new SystemPropertyTestSetup(suite,p);
+    }
 
-	/**
-	 * Base suite of tests that will run in both embedded and client.
-	 *
-	 * @param name
-	 *            Name for the suite.
-	 */
-	private static Test baseSuite(String name) {
-		TestSuite suite = new TestSuite(name);
-		suite.addTestSuite(MultiByteClobTest.class);
-		return new CleanDatabaseTestSetup(DatabasePropertyTestSetup
-				.setLockTimeouts(suite, 2, 4)) {
+    /**
+     * Base suite of tests that will run in both embedded and client.
+     *
+     * @param name name for the suite.
+     */
+    private static Test baseSuite(String name) {
+        TestSuite suite = new TestSuite(name);
+        suite.addTestSuite(MultiByteClobTest.class);
+        return new CleanDatabaseTestSetup(DatabasePropertyTestSetup
+                .setLockTimeouts(suite, 2, 4)) {
 
-			/**
-			 * Creates the tables used in the test cases.
-			 *
-			 * @exception java.sql.SQLException
-			 *                if a database error occurs
-			 */
-			protected void decorateSQL(Statement stmt) throws SQLException {
-				stmt.execute("CREATE TABLE MB_CLOBTABLE (K INT CONSTRAINT PK PRIMARY KEY, C CLOB(" + LONG_CLOB_LENGTH + "))");
-			}
-		};
-	}
+            /**
+             * Creates the tables used in the test cases.
+             *
+             * @exception java.sql.SQLException
+             *                if a database error occurs
+             */
+            protected void decorateSQL(Statement stmt) throws SQLException {
+                stmt.execute("CREATE TABLE MB_CLOBTABLE " +
+                        "(K INT CONSTRAINT PK PRIMARY KEY, C CLOB(" +
+                        LONG_CLOB_LENGTH + "))");
+            }
+        };
+    }
 }
