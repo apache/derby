@@ -11078,7 +11078,7 @@ public final class	DataDictionaryImpl
                 false,
                 DataTypeDescriptor.getCatalogType(
                     Types.VARCHAR,
-                    LOBStoredProcedure.MAX_RETURN_LENGTH),
+                    LOBStoredProcedure.MAX_CLOB_RETURN_LEN),
                 tc,
                 "org.apache.derby.impl.jdbc.LOBStoredProcedure");
         }
@@ -11266,7 +11266,7 @@ public final class	DataDictionaryImpl
                 false,
                 DataTypeDescriptor.getCatalogType(
                     Types.VARBINARY,
-                    LOBStoredProcedure.MAX_RETURN_LENGTH),
+                    LOBStoredProcedure.MAX_BLOB_RETURN_LEN),
                 tc,
                 "org.apache.derby.impl.jdbc.LOBStoredProcedure");
         }

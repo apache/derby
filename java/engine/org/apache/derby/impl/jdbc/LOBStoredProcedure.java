@@ -37,13 +37,28 @@ import org.apache.derby.iapi.reference.SQLState;
 public class LOBStoredProcedure {
 
     /**
-     * The maximum length of the data returned from the LOB stored procedures.
+     * The maximum length of the data returned from the BLOB stored procedures.
      * <p>
      * This value is currently dictated by the maximum length of
      * VARCHAR/VARBINARY, because these are the return types of the stored
      * procedures.
      */
-    public static final int MAX_RETURN_LENGTH = Limits.DB2_VARCHAR_MAXWIDTH;
+    public static final int MAX_BLOB_RETURN_LEN = Limits.DB2_VARCHAR_MAXWIDTH;
+
+    /**
+     * The maximum length of the data returned from the CLOB stored procedures.
+     * <p>
+     * This value is currently dictated by the maximum length of
+     * VARCHAR/VARBINARY, because these are the return types of the stored
+     * procedures, and the modified UTF8 encoding used for CLOB data. This
+     * threshold value could be higher (equal to {@code MAX_BLOB_RETURN_LEN}),
+     * but then the procedure fetching data from the CLOB must be rewritten to
+     * have more logic.
+     * <p>
+     * For now we use the defensive assumption that all characters are
+     * represented by three bytes.
+     */
+    public static final int MAX_CLOB_RETURN_LEN = MAX_BLOB_RETURN_LEN / 3;
 
     /**
      * Creates a new empty Clob and registers it in the HashMap in the
@@ -148,7 +163,7 @@ public class LOBStoredProcedure {
      *            the substring begins.
      * @param len an integer representing the maximum length of the substring.
      *      The value will be reduced to the maximum allowed return length if
-     *      required (see {@link #MAX_RETURN_LENGTH}).
+     *      required (see {@link #MAX_CLOB_RETURN_LEN}).
      * @return A substring from the {@code Clob} starting at the given position,
      *      not longer than {@code len} characters.
      * @throws SQLException
@@ -157,7 +172,7 @@ public class LOBStoredProcedure {
         long pos, int len) throws SQLException {
         // Don't read more than what we can represent as a VARCHAR.
         // See DERBY-3769.
-        len = Math.min(len, MAX_RETURN_LENGTH);
+        len = Math.min(len, MAX_CLOB_RETURN_LEN);
         return getClobObjectCorrespondingtoLOCATOR(LOCATOR).getSubString(pos, len);
     }
 
@@ -303,7 +318,7 @@ public class LOBStoredProcedure {
      *                needs to be retrieved.
      * @param len the maximum number of bytes to read. The value will be
      *      reduced to the maximum allowed return length if required
-     *      (see {@link #MAX_RETURN_LENGTH}).
+     *      (see {@link #MAX_BLOB_RETURN_LEN}).
      * @param pos the position from which the bytes from the Blob need to be
      *            retrieved.
      * @return A byte array containing the bytes read, starting from position
@@ -315,7 +330,7 @@ public class LOBStoredProcedure {
     throws SQLException {
         // Don't read more than what we can represent as a VARBINARY.
         // See DERBY-3769.
-        len = Math.min(len, MAX_RETURN_LENGTH);
+        len = Math.min(len, MAX_BLOB_RETURN_LEN);
         return getBlobObjectCorrespondingtoLOCATOR(LOCATOR).getBytes(pos, len);
     }
 
