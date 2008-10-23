@@ -55,8 +55,10 @@ public class DefaultInfoImpl implements DefaultInfo, Formatable
 	private DataValueDescriptor	defaultValue;
 	private String				defaultText;
 	private int                     type;
+    private int[]                   referencedColumnIDs;
 
 	final private static int BITS_MASK_IS_DEFAULTVALUE_AUTOINC = 0x1 << 0;
+	final private static int BITS_MASK_IS_GENERATED_COLUMN = 0x2;
 
 	/**
 	 * Public niladic constructor. Needed for Formatable interface to work.
@@ -79,11 +81,35 @@ public class DefaultInfoImpl implements DefaultInfo, Formatable
 	}
 
 	/**
+	 * Constructor for use with generated columns
+	 */
+	public DefaultInfoImpl
+        (
+         String defaultText,
+         int[]    referencedColumnIDs
+         )
+	{
+        if ( referencedColumnIDs == null ) { referencedColumnIDs = new int[0]; }
+        
+		this.type = BITS_MASK_IS_GENERATED_COLUMN;
+		this.defaultText = defaultText;
+		this.referencedColumnIDs = referencedColumnIDs;
+	}
+
+	/**
 	 * @see DefaultInfo#getDefaultText
 	 */
 	public String getDefaultText()
 	{
 		return defaultText;
+	}
+
+	/**
+	 * @see DefaultInfo#getReferencedColumnIDs
+	 */
+	public int[] getReferencedColumnIDs()
+	{
+		return referencedColumnIDs;
 	}
 
 	public String	toString()
@@ -110,6 +136,13 @@ public class DefaultInfoImpl implements DefaultInfo, Formatable
 		defaultText = (String) in.readObject();
 		defaultValue = (DataValueDescriptor) in.readObject();
 		type = in.readInt();
+
+        if ( isGeneratedColumn() )
+        {
+            int count = in.readInt();
+            referencedColumnIDs = new int[ count ];
+            for ( int i = 0; i < count; i++ ) { referencedColumnIDs[ i ] = in.readInt(); }
+        }
 	}
 
 	/**
@@ -125,6 +158,13 @@ public class DefaultInfoImpl implements DefaultInfo, Formatable
 		out.writeObject( defaultText );
 		out.writeObject( defaultValue );
 		out.writeInt(type);
+        
+        if ( isGeneratedColumn() )
+        {
+            int count = referencedColumnIDs.length;
+            out.writeInt( count );
+            for ( int i = 0; i < count; i++ ) { out.writeInt( referencedColumnIDs[ i ] ); }
+        }
 	}
  
 	/**
@@ -161,6 +201,13 @@ public class DefaultInfoImpl implements DefaultInfo, Formatable
 	 */
 	public boolean isDefaultValueAutoinc(){
 		return (type & BITS_MASK_IS_DEFAULTVALUE_AUTOINC ) != 0;
+	}
+	
+	/**
+	 * @see DefaultInfo#isGeneratedColumn
+	 */
+	public boolean isGeneratedColumn(){
+		return (type & BITS_MASK_IS_GENERATED_COLUMN ) != 0;
 	}
 	
 	/**

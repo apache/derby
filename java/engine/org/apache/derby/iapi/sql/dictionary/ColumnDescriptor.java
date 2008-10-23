@@ -358,6 +358,15 @@ public final class ColumnDescriptor extends TupleDescriptor
 	}
 
 	/**
+	 * Is this column a generated column
+	 */
+	public boolean hasGenerationClause()
+	{
+		if ( columnDefaultInfo == null ) { return false; }
+        else { return columnDefaultInfo.isGeneratedColumn(); }
+	}
+
+	/**
 	 * Is this column to have autoincremented value always ?
 	 */
 	public boolean isAutoincAlways(){

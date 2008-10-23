@@ -889,6 +889,24 @@ public class TableDescriptor extends TupleDescriptor
 	}
 
 	/**
+	 * Gets the list of columns defined by generation clauses.
+	 */
+	public ColumnDescriptorList getGeneratedColumns()
+	{
+        ColumnDescriptorList    fullList = getColumnDescriptorList();
+        ColumnDescriptorList    result = new ColumnDescriptorList();
+        int                                 count = fullList.size();
+
+        for ( int i = 0; i < count; i++ )
+        {
+            ColumnDescriptor    cd = fullList.elementAt( i );
+            if ( cd.hasGenerationClause() ) { result.add( oid, cd ); }
+        }
+        
+		return result;
+	}
+
+	/**
 	 * Gets the constraint descriptor list
 	 *
 	 * @return	The constraint descriptor list for this table descriptor
