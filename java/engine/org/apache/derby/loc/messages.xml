@@ -1957,6 +1957,31 @@ Guide.
             </msg>
 
             <msg>
+                <name>42XA0</name>
+                <text>The generation clause for column '{0}' has data type '{1}', which cannot be assigned to the column's declared data type.</text>
+                <arg>columnName</arg>
+                <arg>datatypeName</arg>
+            </msg>
+
+            <msg>
+                <name>42XA1</name>
+                <text>The generation clause for column '{0}' contains an aggregate. This is not allowed.</text>
+                <arg>columnName</arg>
+            </msg>
+
+            <msg>
+                <name>42XA2</name>
+                <text>'{0}' may not appear in a GENERATION CLAUSE because it may return unreliable results.</text>
+                <arg>value</arg>
+            </msg>
+
+            <msg>
+                <name>42XA3</name>
+                <text>You may not override the value of generated column '{0}'.</text>
+                <arg>columnName</arg>
+            </msg>
+
+            <msg>
                 <name>42Y00</name>
                 <text>Class '{0}' does not implement org.apache.derby.iapi.db.AggregateDefinition and thus cannot be used as an aggregate expression.</text>
                 <arg>className</arg>

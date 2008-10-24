@@ -893,6 +893,10 @@ public interface SQLState {
 	String LANG_DB_CLASS_PATH_HAS_MISSING_JAR                          = "42X96";
 	String LANG_NO_PARAMS_IN_VIEWS                                     = "42X98";
 	String LANG_NO_PARAMS_IN_TABLES                                    = "42X99";
+    String LANG_UNASSIGNABLE_GENERATION_CLAUSE                  = "42XA0";
+    String LANG_AGGREGATE_IN_GENERATION_CLAUSE                  = "42XA1";
+    String LANG_NON_DETERMINISTIC_GENERATION_CLAUSE                  = "42XA2";
+    String LANG_CANT_OVERRIDE_GENERATION_CLAUSE                  = "42XA3";
 	String LANG_INVALID_USER_AGGREGATE_DEFINITION2                     = "42Y00";
 	String LANG_INVALID_CHECK_CONSTRAINT                               = "42Y01";
 	// String LANG_NO_ALTER_TABLE_COMPRESS_ON_TARGET_TABLE                = "42Y02";

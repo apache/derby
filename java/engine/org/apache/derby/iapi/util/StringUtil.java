@@ -494,4 +494,25 @@ public class StringUtil
     public static String quoteStringLiteral(String string) {
         return quoteString(string, '\'');
     }
+
+    /**
+     * Turn an array of ints into a printable string.
+     */
+    public  static  String  stringify( int[] raw )
+    {
+        if ( raw == null ) { return "null"; }
+        
+        StringBuffer    buffer = new StringBuffer();
+        int                 count = raw.length;
+
+        buffer.append( "[ " );
+        for ( int i = 0; i < count; i++ )
+        {
+            if ( i > 0 ) { buffer.append( ", " ); }
+            buffer.append( raw[ i ] );
+        }
+        buffer.append( " ]" );
+
+        return buffer.toString();
+    }
 }
