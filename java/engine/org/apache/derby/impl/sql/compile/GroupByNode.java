@@ -1186,10 +1186,13 @@ public class GroupByNode extends SingleChildResultSetNode
 							int colNum = crs[0].getColumnNumber();
 							
 							/* Check if we have an access path, this will be
-							 * null in a join case (See Beetle 4423)
+							 * null in a join case (See Beetle 4423,DERBY-3904)
 							 */
 							AccessPath accessPath= getTrulyTheBestAccessPath();
-							if (accessPath == null)
+							if (accessPath == null ||
+								accessPath.getConglomerateDescriptor()==null||
+								accessPath.getConglomerateDescriptor().
+								           getIndexDescriptor() == null)
 								return;
 							IndexDescriptor id = accessPath.
 												getConglomerateDescriptor().
