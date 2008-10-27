@@ -209,11 +209,18 @@ public class ReplicationMessageReceive {
             sendPingSemaphore.notify();
         }
 
-        if (socketConn != null) {
-            socketConn.tearDown();
-        }
-        if (serverSocket != null) {
-            serverSocket.close();
+        // socketConn.tearDown() may fail if the master has crashed. We still
+        // want to close the server socket if an exception is thrown, so that
+        // we don't prevent starting a new slave listening to the same port.
+        // Therefore, use try/finally. DERBY-3878
+        try {
+            if (socketConn != null) {
+                socketConn.tearDown();
+            }
+        } finally {
+            if (serverSocket != null) {
+                serverSocket.close();
+            }
         }
     }
     

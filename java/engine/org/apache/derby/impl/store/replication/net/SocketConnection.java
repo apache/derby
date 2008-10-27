@@ -110,8 +110,15 @@ public class SocketConnection {
      *                     the socket or the streams.
      */
     public void tearDown() throws IOException {
-        objInputStream.close();
-        objOutputStream.close();
-        socket.close();
+        // If the other party has crashed, closing the streams may fail (at
+        // least the output stream since its close() method calls flush()).
+        // In any case, we want the socket to be closed, so close it in a
+        // finally clause. DERBY-3878
+        try {
+            objInputStream.close();
+            objOutputStream.close();
+        } finally {
+            socket.close();
+        }
     }
 }
