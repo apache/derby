@@ -617,6 +617,9 @@ public class NodeFactoryImpl extends NodeFactory implements ModuleControl, Modul
           case C_NodeTypes.WINDOW_NODE:
             return C_NodeNames.WINDOW_NODE_NAME;
 
+          case C_NodeTypes.GENERATION_CLAUSE_NODE:
+            return C_NodeNames.GENERATION_CLAUSE_NODE_NAME;
+		  	
           case C_NodeTypes.ROW_NUMBER_COLUMN_NODE:
             return C_NodeNames.ROW_NUMBER_COLUMN_NODE_NAME;
 		  	

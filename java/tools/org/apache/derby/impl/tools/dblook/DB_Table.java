@@ -149,8 +149,14 @@ public class DB_Table {
 			colDef.append(rs.getString(1));
 			if (!reinstateAutoIncrement(colName, tableId, colDef) &&
 						 rs.getString(2) != null) {
-				colDef.append(" DEFAULT ");
-				colDef.append(rs.getString(2));
+
+                String defaultText = rs.getString(2);
+
+                if ( defaultText.startsWith( "GENERATED ALWAYS AS" ) )
+                { colDef.append( " " ); }
+				else { colDef.append(" DEFAULT "); }
+                
+				colDef.append( defaultText );
 			}
 		}
 

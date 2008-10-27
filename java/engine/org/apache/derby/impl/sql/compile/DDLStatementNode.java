@@ -29,6 +29,7 @@ import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.error.StandardException;
@@ -428,4 +429,71 @@ abstract class DDLStatementNode extends StatementNode
 		if (objectName != null)
 			objectName.bind( dataDictionary );
 	}
+
+	/**
+	  *	Make a from list for binding query fragments in a CREATE/ALTER TABLE
+      *     statement.
+      *
+      * @param creatingTable true if this is for CREATE TABLE. false if this is for ALTER TABLE
+      */
+	FromList	makeFromList( DataDictionary dd, TableElementList tableElementList, boolean creatingTable )
+        throws StandardException
+	{
+        // DERBY-3043: To avoid a no-such-schema error when
+        // binding the check constraint, ensure that the
+        // table we bind against has a schema name specified.
+        // If it doesn't, fill in the schema name now.
+        //
+        TableName tableName = getObjectName();
+        if (tableName.getSchemaName() == null)
+        { tableName.setSchemaName(getSchemaDescriptor().getSchemaName()); }
+        
+        FromList fromList = (FromList) getNodeFactory().getNode
+            (
+             C_NodeTypes.FROM_LIST,
+             getNodeFactory().doJoinOrderOptimization(),
+             getContextManager()
+             );
+        FromBaseTable table = (FromBaseTable) getNodeFactory().getNode
+            (
+             C_NodeTypes.FROM_BASE_TABLE,
+             tableName,
+             null,
+             null,
+             null,
+             getContextManager()
+             );
+
+        if ( creatingTable )
+        {
+            table.setTableNumber(0);
+			fromList.addFromTable(table);
+			table.setResultColumns
+                ((ResultColumnList) getNodeFactory().getNode
+                 (
+                  C_NodeTypes.RESULT_COLUMN_LIST,
+                  getContextManager()
+                  )
+                 );
+        }
+        else // ALTER TABLE
+        {
+            fromList.addFromTable(table);
+            fromList.bindTables
+                (
+                 dd,
+                 (FromList) getNodeFactory().getNode
+                 (
+                  C_NodeTypes.FROM_LIST,
+                  getNodeFactory().doJoinOrderOptimization(),
+                  getContextManager()
+                  )
+                 );
+        }
+        
+        tableElementList.appendNewColumnsToRCL(table);
+
+        return fromList;
+	}
+    
 }

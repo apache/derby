@@ -76,6 +76,7 @@ public class ColumnDefinitionNode extends TableElementNode
 	DataValueDescriptor			defaultValue;
 	DefaultInfoImpl				defaultInfo;
 	DefaultNode					defaultNode;
+    GenerationClauseNode   generationClauseNode;
 	long						autoincrementIncrement;
 	long						autoincrementStart;
 	//This variable tells if the autoincrement column is participating 
@@ -128,6 +129,10 @@ public class ColumnDefinitionNode extends TableElementNode
 					((UntypedNullConstantNode) defaultNode).
 									convertDefaultNode(this.type);
 			}
+		}
+		else if (defaultNode instanceof GenerationClauseNode)
+		{
+            generationClauseNode = (GenerationClauseNode) defaultNode;
 		}
 		else
 		{
@@ -211,6 +216,9 @@ public class ColumnDefinitionNode extends TableElementNode
 	{
 		return type;
 	}
+
+    /** Set the type of this column */
+    public void setType( DataTypeDescriptor dts ) { type = dts; }
     
     /**
      * Set the nullability of the column definition node.
@@ -255,6 +263,11 @@ public class ColumnDefinitionNode extends TableElementNode
 	}
 
 	/**
+	 * Set the generation clause (Default) bound to this column.
+	 */
+    public  void    setDefaultInfo( DefaultInfoImpl dii ) { defaultInfo = dii; }
+
+	/**
 	 * Return the DefaultNode, if any, associated with this node.
 	 *
 	 * @return The DefaultNode, if any, associated with this node.
@@ -263,6 +276,16 @@ public class ColumnDefinitionNode extends TableElementNode
 	{
 		return defaultNode;
 	}
+
+	/**
+	 * Return true if this column has a generation clause.
+	 */
+	public boolean hasGenerationClause() { return ( generationClauseNode != null ); }
+
+	/**
+	 * Get the generation clause.
+	 */
+	public GenerationClauseNode getGenerationClauseNode() { return generationClauseNode; }
 
 	/**
 	 * Is this an autoincrement column?

@@ -235,6 +235,7 @@ public class CreateTableNode extends DDLStatementNode
 		int numCheckConstraints = 0;
 		int numReferenceConstraints = 0;
 		int numUniqueConstraints = 0;
+        int numGenerationClauses = 0;
 
 		if (queryExpression != null)
 		{
@@ -403,6 +404,8 @@ public class CreateTableNode extends DDLStatementNode
 		numUniqueConstraints = tableElementList.countConstraints(
 									DataDictionary.UNIQUE_CONSTRAINT);
 
+        numGenerationClauses = tableElementList.countGenerationClauses();
+
 		//temp tables can't have primary key or check or foreign key or unique constraints defined on them
 		if ((tableType == TableDescriptor.GLOBAL_TEMPORARY_TABLE_TYPE) &&
 			(numPrimaryKeys > 0 || numCheckConstraints > 0 || numReferenceConstraints > 0 || numUniqueConstraints > 0))
@@ -418,9 +421,10 @@ public class CreateTableNode extends DDLStatementNode
 				String.valueOf(Limits.DB2_MAX_INDEXES_ON_TABLE));
 		}
 
-		if (numCheckConstraints > 0)
+		if ( (numCheckConstraints > 0) || (numGenerationClauses > 0) )
 		{
-			/* In order to check the validity of the check constraints
+			/* In order to check the validity of the check constraints and
+			 * generation clauses
 			 * we must goober up a FromList containing a single table,
 			 * the table being created, with an RCL containing the
 			 * new columns and their types.  This will allow us to
@@ -428,37 +432,13 @@ public class CreateTableNode extends DDLStatementNode
 			 * FromList.  When doing this, we verify that there are
 			 * no nodes which can return non-deterministic results.
 			 */
-			FromList fromList = (FromList) getNodeFactory().getNode(
-									C_NodeTypes.FROM_LIST,
-									getNodeFactory().doJoinOrderOptimization(),
-									getContextManager());
-			// DERBY-3043: To avoid a no-such-schema error when
-			// binding the check constraint, ensure that the
-			// table we bind against has a schema name specified.
-			// If it doesn't, fill in the schema name now.
-			//
-			TableName newTN = getObjectName();
-			if (newTN.getSchemaName() == null)
-				newTN.setSchemaName(getSchemaDescriptor().getSchemaName());
-			FromBaseTable table = (FromBaseTable)
-									getNodeFactory().getNode(
-										C_NodeTypes.FROM_BASE_TABLE,
-										newTN,
-										null,
-										null,
-										null,
-										getContextManager());
-			table.setTableNumber(0);
-			fromList.addFromTable(table);
-			table.setResultColumns((ResultColumnList) getNodeFactory().getNode(
-												C_NodeTypes.RESULT_COLUMN_LIST,
-												getContextManager()));
-			tableElementList.appendNewColumnsToRCL(table);
+			FromList fromList = makeFromList( null, tableElementList, true );
 
 			/* Now that we've finally goobered stuff up, bind and validate
-			 * the check constraints.
+			 * the check constraints and generation clauses.
 			 */
-			tableElementList.bindAndValidateCheckConstraints(fromList);
+			if  (numCheckConstraints > 0) { tableElementList.bindAndValidateCheckConstraints(fromList); }
+			if  (numGenerationClauses > 0) { tableElementList.bindAndValidateGenerationClauses(fromList); }
 		}
 	}
 

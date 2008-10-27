@@ -299,6 +299,7 @@ public class AlterTableNode extends DDLStatementNode
 	{
 		DataDictionary	dd = getDataDictionary();
 		int					numCheckConstraints = 0;
+        int numGenerationClauses = 0;
 		int numBackingIndexes = 0;
 
 		/*
@@ -365,6 +366,8 @@ public class AlterTableNode extends DDLStatementNode
 			/* Check the validity of all check constraints */
 			numCheckConstraints = tableElementList.countConstraints(
 									DataDictionary.CHECK_CONSTRAINT);
+            
+            numGenerationClauses = tableElementList.countGenerationClauses();
 		}
 
 		//If the sum of backing indexes for constraints in alter table statement and total number of indexes on the table
@@ -377,9 +380,10 @@ public class AlterTableNode extends DDLStatementNode
 				String.valueOf(Limits.DB2_MAX_INDEXES_ON_TABLE));
 		}
 
-		if (numCheckConstraints > 0)
+		if ( (numCheckConstraints > 0) || (numGenerationClauses > 0) )
 		{
-			/* In order to check the validity of the check constraints
+			/* In order to check the validity of the check constraints and
+			 * generation clauses
 			 * we must goober up a FromList containing a single table, 
 			 * the table being alter, with an RCL containing the existing and
 			 * new columns and their types.  This will allow us to
@@ -387,31 +391,13 @@ public class AlterTableNode extends DDLStatementNode
 			 * FromList.  When doing this, we verify that there are
 			 * no nodes which can return non-deterministic results.
 			 */
-			FromList fromList = (FromList) getNodeFactory().getNode(
-									C_NodeTypes.FROM_LIST,
-									getNodeFactory().doJoinOrderOptimization(),
-									getContextManager());
-			FromBaseTable table = (FromBaseTable)
-									getNodeFactory().getNode(
-										C_NodeTypes.FROM_BASE_TABLE,
-										getObjectName(),
-										null,
-										null,
-										null,
-										getContextManager());
-			fromList.addFromTable(table);
-			fromList.bindTables(dd,
-							(FromList) getNodeFactory().getNode(
-								C_NodeTypes.FROM_LIST,
-								getNodeFactory().doJoinOrderOptimization(),
-								getContextManager()));
-			tableElementList.appendNewColumnsToRCL(table);
+			FromList fromList = makeFromList( dd, tableElementList, false );
 
 			/* Now that we've finally goobered stuff up, bind and validate
-			 * the check constraints.
+			 * the check constraints and generation clauses.
 			 */
-			tableElementList.bindAndValidateCheckConstraints(fromList);
-
+			if  (numCheckConstraints > 0) { tableElementList.bindAndValidateCheckConstraints(fromList); }
+			if  (numGenerationClauses > 0) { tableElementList.bindAndValidateGenerationClauses(fromList); }
 		}
 
 		//Check if we are in alter table to update the statistics. If yes, then

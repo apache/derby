@@ -107,6 +107,12 @@ create table "Foo Bar".t5 (cost double);
 create table "Foo Bar".t6 (num integer, letter char(1));
 create table "Foo Bar".t7 (un int, deux int);
 
+-- generated columns
+create table t_genCol_1( a int, b int generated always as ( 1 ), c int );
+create table t_genCol_2( a int, b int generated always as ( -a ), c int );
+create table t_genCol_3( a int, b int generated always as ( a + c ), c int );
+
+
 -- Keys/checks.
 create table bar."tWithKeys" (c char(5) not null PRIMARY KEY, i int check (i > 0), vc varchar(10) constraint notevil check (vc != 'evil'));
 create table bar.t8 (someInt int constraint "pkOne" not null primary key, fkChar char(5) references bar."tWithKeys" (c) on delete set null);

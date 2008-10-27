@@ -117,7 +117,11 @@ public class DefaultInfoImpl implements DefaultInfo, Formatable
 		if(isDefaultValueAutoinc()){
 			return "GENERATED_BY_DEFAULT";
 		}
-		return defaultText;
+        else if ( isGeneratedColumn() )
+        {
+            return "GENERATED ALWAYS AS ( " + defaultText + " )";
+        }
+        else { return defaultText; }
 	}
 
 	// Formatable methods

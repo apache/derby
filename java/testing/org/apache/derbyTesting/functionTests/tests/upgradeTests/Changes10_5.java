@@ -167,6 +167,40 @@ public class Changes10_5 extends UpgradeChange {
     }
 
     /**
+     * Test that generation clauses are not allowed until you
+     * hard-upgrade to 10.5.
+     *
+     */
+    public void testGenerationClauses() throws SQLException
+    {
+        String  sqlstate = null;
+        
+        switch (getPhase())
+        {
+        case PH_SOFT_UPGRADE:
+            sqlstate = SQLSTATE_NEED_UPGRADE;
+            break;
+            
+        case PH_POST_SOFT_UPGRADE:
+            sqlstate = BAD_SYNTAX;
+            break;
+
+        case PH_HARD_UPGRADE:
+            sqlstate = null;
+            break;
+
+        default:
+            return;
+        }
+        
+        possibleError
+            (
+             sqlstate,
+             "create table t_genCol_2( a int, b int generated always as ( -a ), c int )"
+             );
+    }
+
+    /**
      * <p>
      * Run a statement. If the sqlstate is not null, then we expect that error.
      * </p>

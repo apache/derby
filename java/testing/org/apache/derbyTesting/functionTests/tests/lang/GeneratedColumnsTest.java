@@ -31,6 +31,8 @@ import java.sql.DriverManager;
 import java.util.ArrayList;
 import junit.framework.Test;
 import junit.framework.TestSuite;
+import org.apache.derby.iapi.util.StringUtil;
+import org.apache.derby.catalog.DefaultInfo;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
@@ -321,59 +323,59 @@ public class GeneratedColumnsTest extends BaseJDBCTestCase
              );
     }
     
-    //    /**
-    //     * <p>
-    //     * Verify basic parse/bind logic for declaring generated columns.
-    //     * </p>
-    //     */
-    //    public  void    test_004_basicParser()
-    //        throws Exception
-    //    {
-    //        Connection  conn = getConnection();
-    //
-    //        goodStatement
-    //            (
-    //             conn,
-    //             "create function f_parse_deterministic( a int )\n" +
-    //             "returns int\n" +
-    //             "language java\n" +
-    //             "deterministic\n" +
-    //             "parameter style java\n" +
-    //             "no sql\n" +
-    //             "external name 'java.lang.Math.abs'\n"
-    //             );
-    //        goodStatement
-    //            (
-    //             conn,
-    //             "create function f_parse_non_deterministic( a int )\n" +
-    //             "returns int\n" +
-    //             "language java\n" +
-    //             "parameter style java\n" +
-    //             "no sql\n" +
-    //             "external name 'java.lang.Math.abs'\n"
-    //             );
-    //        goodStatement
-    //            (
-    //             conn,
-    //             "create table t_parse_1\n" +
-    //             "(\n" +
-    //             "   a int,\n" +
-    //             "   b int generated always as ( f_parse_deterministic( a ) ),\n" +
-    //             "   c int\n" +
-    //             ")"
-    //             );
-    //
-    //        expectCompilationError
-    //            (
-    //             UNSTABLE_RESULTS,
-    //             "create table t_parse_shouldFail\n" +
-    //             "(\n" +
-    //             "   a int,\n" +
-    //             "   b int generated always as ( f_parse_non_deterministic( a ) ),\n" +
-    //             "   c int\n" +
-    //             ")\n"
-    //             );
-    //    }
+    /**
+     * <p>
+     * Verify basic parse/bind logic for declaring generated columns.
+     * </p>
+     */
+    public  void    test_004_basicParser()
+        throws Exception
+    {
+        Connection  conn = getConnection();
+        
+        goodStatement
+            (
+             conn,
+             "create function f_parse_deterministic( a int )\n" +
+             "returns int\n" +
+             "language java\n" +
+             "deterministic\n" +
+             "parameter style java\n" +
+             "no sql\n" +
+             "external name 'java.lang.Math.abs'\n"
+             );
+        goodStatement
+            (
+             conn,
+             "create function f_parse_non_deterministic( a int )\n" +
+             "returns int\n" +
+             "language java\n" +
+             "parameter style java\n" +
+             "no sql\n" +
+             "external name 'java.lang.Math.abs'\n"
+             );
+        goodStatement
+            (
+             conn,
+             "create table t_parse_1\n" +
+             "(\n" +
+             "   a int,\n" +
+             "   b int generated always as ( f_parse_deterministic( a ) ),\n" +
+             "   c int\n" +
+             ")"
+             );
+        
+        expectCompilationError
+            (
+             UNSTABLE_RESULTS,
+             "create table t_parse_shouldFail\n" +
+             "(\n" +
+             "   a int,\n" +
+             "   b int generated always as ( f_parse_non_deterministic( a ) ),\n" +
+             "   c int\n" +
+             ")\n"
+             );
+    }
 
     //    /**
     //     * <p>
@@ -897,6 +899,68 @@ public class GeneratedColumnsTest extends BaseJDBCTestCase
     //             );
     //    }
     
+    /**
+     * <p>
+     * Verify that column defaults look good for generated columns.
+     * </p>
+     */
+    public  void    test_009_basicDefaultInfo()
+        throws Exception
+    {
+        Connection  conn = getConnection();
+
+        goodStatement
+            (
+             conn,
+             "create table t_di_1\n" +
+             "(\n" +
+             "   a int,\n" +
+             "   b int generated always as ( 1 ),\n" +
+             "   c int\n" +
+             ")"
+             );
+        goodStatement
+            (
+             conn,
+             "create table t_di_2\n" +
+             "(\n" +
+             "   a int,\n" +
+             "   b int generated always as ( -a ),\n" +
+             "   c int\n" +
+             ")"
+             );
+        goodStatement
+            (
+             conn,
+             "create table t_di_3\n" +
+             "(\n" +
+             "   a int,\n" +
+             "   b int generated always as ( a + c ),\n" +
+             "   c int\n" +
+             ")"
+             );
+
+        assertDefaultInfo
+            (
+             conn, "T_DI_1", "B",
+             new int[] {},
+             "1"
+             );
+        assertDefaultInfo
+            (
+             conn, "T_DI_2", "B",
+             new int[] { 1 },
+             "-a"
+             );
+        assertDefaultInfo
+            (
+             conn, "T_DI_3", "B",
+             new int[] { 1, 3 },
+             "a + c"
+             );
+             
+    }
+        
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // MINIONS
@@ -1068,6 +1132,57 @@ public class GeneratedColumnsTest extends BaseJDBCTestCase
         return result;
     }
 
+    
+    /**
+     * <p>
+     * Assert that a column has the expected generation clause.
+     * </p>
+     */
+    private void assertDefaultInfo
+        ( Connection conn, String tableName, String columnName, int[] expectedReferenceColumns, String expectedDefaultText )
+        throws Exception
+    {
+        DefaultInfo di = getColumnDefault( conn, tableName, columnName );
+
+        assertEquals
+            ( StringUtil.stringify( expectedReferenceColumns ), StringUtil.stringify( di.getReferencedColumnIDs() ) );
+        assertEquals( expectedDefaultText, di.getDefaultText() );
+
+        assertTrue( di.isGeneratedColumn() );
+    }
+    
+    /**
+     * <p>
+     * Returns the column default for a column.
+     * </p>
+     */
+    public  DefaultInfo  getColumnDefault( Connection conn, String tableName, String columnName )
+        throws SQLException
+    {
+        PreparedStatement   ps = chattyPrepare
+            (
+             conn,
+             "select c.columndefault\n" +
+             "from sys.syscolumns c, sys.systables t\n" +
+             "where t.tableid = c.referenceid\n" +
+             "and t.tablename = ?\n" +
+             "and c.columnname = ?"
+             );
+        ps.setString( 1, tableName );
+        ps.setString( 2, columnName );
+
+        ResultSet       rs = ps.executeQuery();
+        rs.next();
+
+        DefaultInfo result = (DefaultInfo) rs.getObject( 1 );
+
+        rs.close();
+        ps.close();
+
+        return result;
+    }
+    
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // SQL FUNCTIONS
@@ -1139,5 +1254,6 @@ public class GeneratedColumnsTest extends BaseJDBCTestCase
 
         _triggerReports.add( result );
     }
+
 
 }

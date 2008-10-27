@@ -146,6 +146,8 @@ public interface C_NodeNames
 
 	static final String FROM_VTI_NAME = "org.apache.derby.impl.sql.compile.FromVTI";
 
+	static final String GENERATION_CLAUSE_NODE_NAME = "org.apache.derby.impl.sql.compile.GenerationClauseNode";
+
 	static final String GET_CURRENT_CONNECTION_NODE_NAME = "org.apache.derby.impl.sql.compile.GetCurrentConnectionNode";
 
 	static final String GRANT_NODE_NAME = "org.apache.derby.impl.sql.compile.GrantNode";

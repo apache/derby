@@ -25,6 +25,7 @@ import java.sql.Types;
 
 import org.apache.derby.catalog.AliasInfo;
 import org.apache.derby.catalog.types.SynonymAliasInfo;
+import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.reference.JDBC40Translation;
@@ -1157,12 +1158,25 @@ public abstract class QueryTreeNode implements Visitable
 	)
 		throws StandardException
 	{
-		return (TableName) getNodeFactory().getNode
+        return makeTableName
+            ( getNodeFactory(), getContextManager(), schemaName, flatName );
+	}
+
+	public	static  TableName	makeTableName
+	(
+        NodeFactory nodeFactory,
+        ContextManager contextManager,
+		String	schemaName,
+		String	flatName
+	)
+		throws StandardException
+	{
+		return (TableName) nodeFactory.getNode
 			(
 				C_NodeTypes.TABLE_NAME,
 				schemaName,
 				flatName,
-				getContextManager()
+				contextManager
 			);
 	}
 
@@ -1470,6 +1484,78 @@ public abstract class QueryTreeNode implements Visitable
 											 "void", 2);
 	}
 	
+	/**
+	  * Bind time logic. Raises an error if this ValueNode, once compiled, returns
+	  * unstable results AND if we're in a context where unstable results are
+	  * forbidden.
+	  *
+	  * Called by children who may NOT appear in the WHERE subclauses of ADD TABLE clauses.
+	  *
+	  *	@param	fragmentType	Type of fragment as a String, for inclusion in error messages.
+	  *	@param	fragmentBitMask	Type of fragment as a bitmask of possible fragment types
+	  *
+	  * @exception StandardException		Thrown on error
+	  */
+	public	void	checkReliability( String fragmentType, int fragmentBitMask )
+		throws StandardException
+	{
+		// if we're in a context that forbids unreliable fragments, raise an error
+		if ( ( getCompilerContext().getReliability() & fragmentBitMask ) != 0 )
+		{
+            throwReliabilityException( fragmentType );
+		}
+	}
+
+	/**
+	  * Bind time logic. Raises an error if this ValueNode, once compiled, returns
+	  * unstable results AND if we're in a context where unstable results are
+	  * forbidden.
+	  *
+	  * Called by children who may NOT appear in the WHERE subclauses of ADD TABLE clauses.
+	  *
+	  *	@param	fragmentBitMask	Type of fragment as a bitmask of possible fragment types
+	  *	@param	fragmentType	Type of fragment as a String, to be fetch for the error message.
+	  *
+	  * @exception StandardException		Thrown on error
+	  */
+	public	void	checkReliability( int fragmentBitMask, String fragmentType )
+		throws StandardException
+	{
+		// if we're in a context that forbids unreliable fragments, raise an error
+		if ( ( getCompilerContext().getReliability() & fragmentBitMask ) != 0 )
+		{
+            String fragmentTypeTxt = MessageService.getTextMessage( fragmentType );
+            throwReliabilityException( fragmentTypeTxt );
+		}
+	}
+
+    /**
+     * Common code for the 2 checkReliability functions.  Always throws StandardException.
+     *
+     * @param fragmentType Type of fragment as a string, for inclusion in error messages.
+     * @exception StandardException        Throws an error, always.
+     */
+    private void throwReliabilityException( String fragmentType ) throws StandardException
+    {
+        String sqlState;
+		/* Error string somewhat dependent on operation due to different
+		 * nodes being allowed for different operations.
+		 */
+		if (getCompilerContext().getReliability() == CompilerContext.DEFAULT_RESTRICTION)
+		{
+            sqlState = SQLState.LANG_INVALID_DEFAULT_DEFINITION;
+		}
+		else if (getCompilerContext().getReliability() == CompilerContext.GENERATION_CLAUSE_RESTRICTION)
+		{
+            sqlState = SQLState.LANG_NON_DETERMINISTIC_GENERATION_CLAUSE;
+		}
+		else
+		{
+            sqlState = SQLState.LANG_UNRELIABLE_QUERY_FRAGMENT;
+		}
+		throw StandardException.newException(sqlState, fragmentType);
+    }
+
 
 }
 

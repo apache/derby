@@ -30,6 +30,9 @@ import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.StringDataValue;
+import org.apache.derby.iapi.types.TypeId;
+
+import org.apache.derby.catalog.types.DefaultInfoImpl;
 
 import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
@@ -379,6 +382,35 @@ public class TableElementList extends QueryTreeNodeVector
 		return numConstraints;
 	}
 
+    /**
+	 * Count the number of generation clauses.
+	 */
+	public int countGenerationClauses()
+	{
+		int	numGenerationClauses = 0;
+		int size = size();
+
+		for (int index = 0; index < size; index++)
+		{
+			ColumnDefinitionNode cdn;
+			TableElementNode element = (TableElementNode) elementAt(index);
+
+			if (! (element instanceof ColumnDefinitionNode))
+			{
+				continue;
+			}
+
+			cdn = (ColumnDefinitionNode) element;
+
+			if ( cdn.hasGenerationClause() )
+			{
+				numGenerationClauses++;
+			}
+		}
+
+		return numGenerationClauses;
+	}
+
 	/**
 	 * Count the number of columns.
 	 *
@@ -613,6 +645,131 @@ public class TableElementList extends QueryTreeNodeVector
 			cdn.setColumnList(refRCL);
 
 			/* Clear the column references in the RCL so each check constraint
+			 * starts with a clean list.
+			 */
+			rcl.clearColumnReferences();
+		}
+	}
+
+	/**
+	 * Bind and validate all of the generation clauses in this list against
+	 * the specified FromList.  
+	 *
+	 * @param fromList		The FromList in question.
+	 *
+	 * @exception StandardException		Thrown on error
+	 */
+	void bindAndValidateGenerationClauses(FromList fromList)
+		throws StandardException
+	{
+		CompilerContext cc;
+		FromBaseTable				table = (FromBaseTable) fromList.elementAt(0);
+		int						  size = size();
+
+		cc = getCompilerContext();
+
+		Vector aggregateVector = new Vector();
+
+		for (int index = 0; index < size; index++)
+		{
+			ColumnDefinitionNode cdn;
+			TableElementNode element = (TableElementNode) elementAt(index);
+            GenerationClauseNode    generationClauseNode;
+			ValueNode	generationTree;
+
+			if (! (element instanceof ColumnDefinitionNode))
+			{
+				continue;
+			}
+
+			cdn = (ColumnDefinitionNode) element;
+
+			if (!cdn.hasGenerationClause())
+			{
+				continue;
+			}
+
+		    generationClauseNode = cdn.getGenerationClauseNode();
+
+			// bind the check condition
+			// verify that it evaluates to a boolean
+			final int previousReliability = cc.getReliability();
+			try
+			{
+				/* Each generation clause can have its own set of dependencies.
+				 * These dependencies need to be shared with the prepared
+				 * statement as well.  We create a new auxiliary provider list
+				 * for the generation clause, "push" it on the compiler context
+				 * by swapping it with the current auxiliary provider list
+				 * and the "pop" it when we're done by restoring the old 
+				 * auxiliary provider list.
+				 */
+				ProviderList apl = new ProviderList();
+
+				ProviderList prevAPL = cc.getCurrentAuxiliaryProviderList();
+				cc.setCurrentAuxiliaryProviderList(apl);
+
+				// Tell the compiler context to forbid subqueries and
+				// non-deterministic functions.
+				cc.setReliability( CompilerContext.GENERATION_CLAUSE_RESTRICTION );
+				generationTree = generationClauseNode.bindExpression(fromList, (SubqueryList) null,
+										 aggregateVector);
+
+                //
+                // If the user did not declare a type for this column, then the column type defaults
+                // to the type of the generation clause.
+                // However, if the user did declare a type for this column, then the
+                // type of the generation clause must be assignable to the declared
+                // type.
+                //
+                DataTypeDescriptor  generationClauseType = generationTree.getTypeServices();
+                DataTypeDescriptor  declaredType = cdn.getType();
+                if ( declaredType == null ) { cdn.setType( generationClauseType ); }
+                {
+                    TypeId  declaredTypeId = declaredType.getTypeId();
+                    TypeId  resolvedTypeId = generationClauseType.getTypeId();
+
+                    if ( !getTypeCompiler( resolvedTypeId ).convertible( declaredTypeId, false ) )
+                    {
+                        throw StandardException.newException
+                            ( SQLState.LANG_UNASSIGNABLE_GENERATION_CLAUSE, cdn.getName(), resolvedTypeId.getSQLTypeName() );
+                    }
+                }
+
+				// no aggregates, please
+				if (aggregateVector.size() != 0)
+				{
+					throw StandardException.newException( SQLState.LANG_AGGREGATE_IN_GENERATION_CLAUSE, cdn.getName());
+				}
+				
+				/* Save the APL off in the constraint node */
+				if (apl.size() > 0)
+				{
+					generationClauseNode.setAuxiliaryProviderList(apl);
+				}
+
+				// Restore the previous AuxiliaryProviderList
+				cc.setCurrentAuxiliaryProviderList(prevAPL);
+			}
+			finally
+			{
+				cc.setReliability(previousReliability);
+			}
+
+			/* We have a valid generation clause, now build an array of
+			 * 1-based columnIds that the clause references.
+			 */
+			ResultColumnList rcl = table.getResultColumns();
+			int		numReferenced = rcl.countReferencedColumns();
+			int[]	generationClauseColumnReferences = new int[numReferenced];
+
+			rcl.recordColumnReferences(generationClauseColumnReferences, 1);
+
+            DefaultInfoImpl dii = new DefaultInfoImpl
+                ( generationClauseNode.getExpressionText(), generationClauseColumnReferences );
+            cdn.setDefaultInfo( dii );
+
+			/* Clear the column references in the RCL so each generation clause
 			 * starts with a clean list.
 			 */
 			rcl.clearColumnReferences();

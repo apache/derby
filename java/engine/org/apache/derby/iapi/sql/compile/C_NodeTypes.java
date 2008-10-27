@@ -230,8 +230,11 @@ public interface C_NodeTypes
     static final int WINDOW_NODE = 220;
     static final int ROW_NUMBER_COLUMN_NODE = 221;
 
+    // generated columns
+    static final int GENERATION_CLAUSE_NODE = 222;
+
     // Final value in set, keep up to date!
-    static final int FINAL_VALUE = ROW_NUMBER_COLUMN_NODE;
+    static final int FINAL_VALUE = GENERATION_CLAUSE_NODE;
 
     /**
      * Extensions to this interface can use nodetypes > MAX_NODE_TYPE with out fear of collision

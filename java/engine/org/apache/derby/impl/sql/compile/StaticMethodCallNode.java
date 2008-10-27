@@ -197,7 +197,7 @@ public class StaticMethodCallNode extends MethodCallNode
             // The field methodName is used by resolveRoutine and
             // is set to the name of the routine (procedureName.getTableName()).
 			resolveRoutine(fromList, subqueryList, aggregateVector, sd);
-			
+
 			if (ad == null && noSchema && !forCallStatement)
 			{
 				// Resolve to a built-in SYSFUN function but only
@@ -210,7 +210,6 @@ public class StaticMethodCallNode extends MethodCallNode
 				resolveRoutine(fromList, subqueryList, aggregateVector, sd);
 			}
 	
-
 			/* Throw exception if no routine found */
 			if (ad == null)
 			{
@@ -218,6 +217,11 @@ public class StaticMethodCallNode extends MethodCallNode
                         SQLState.LANG_NO_SUCH_METHOD_ALIAS, procedureName);
 			}
 	
+            if ( !routineInfo.isDeterministic() )
+            {
+                checkReliability( getMethodName(), CompilerContext.NON_DETERMINISTIC_ILLEGAL );
+            }
+			
 
 
 			/* Query is dependent on the AliasDescriptor */
