@@ -67,13 +67,13 @@ public class GenericResultSetFactory implements ResultSetFactory
 		@see ResultSetFactory#getInsertResultSet
 		@exception StandardException thrown on error
 	 */
-	public ResultSet getInsertResultSet(NoPutResultSet source, 
+	public ResultSet getInsertResultSet(NoPutResultSet source, GeneratedMethod generationClauses,
 										GeneratedMethod checkGM)
 		throws StandardException
 	{
 		Activation activation = source.getActivation();
 		getAuthorizer(activation).authorize(activation, Authorizer.SQL_WRITE_OP);
-		return new InsertResultSet(source, checkGM, activation );
+		return new InsertResultSet(source, generationClauses, checkGM, activation );
 	}
 
 	/**
@@ -139,8 +139,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 		@see ResultSetFactory#getUpdateResultSet
 		@exception StandardException thrown on error
 	 */
-	public ResultSet getUpdateResultSet(NoPutResultSet source,
-										GeneratedMethod checkGM)
+	public ResultSet getUpdateResultSet(NoPutResultSet source, GeneratedMethod checkGM)
 			throws StandardException
 	{
 		Activation activation = source.getActivation();

@@ -1146,18 +1146,22 @@ public abstract class ResultSetNode extends QueryTreeNode
                   else
                 */
                 {
-                    // Generate the tree for the default
-                    String defaultText = defaultInfo.getDefaultText();
-                    ValueNode defaultTree = parseDefault(defaultText);
-                    defaultTree = defaultTree.bindExpression(
-                        getFromList(),
-                        (SubqueryList) null,
-                        (Vector) null);
-                    newResultColumn = (ResultColumn) getNodeFactory().getNode(
-                        C_NodeTypes.RESULT_COLUMN,
-                        defaultTree.getTypeServices(),
-                        defaultTree,
-                        getContextManager());
+                    if ( colDesc.hasGenerationClause() )
+                    {
+                        // later on we will revisit the generated columns and bind
+                        // their generation clauses
+                        newResultColumn = createGeneratedColumn( targetTD, colDesc );
+                    }
+                    else
+                    {
+                        // Generate the tree for the default
+                        String defaultText = defaultInfo.getDefaultText();
+                        ValueNode defaultTree = parseDefault(defaultText);
+                        defaultTree = defaultTree.bindExpression
+                            (getFromList(), (SubqueryList) null, (Vector) null);
+                        newResultColumn = (ResultColumn) getNodeFactory().getNode
+                            ( C_NodeTypes.RESULT_COLUMN, defaultTree.getTypeServices(), defaultTree, getContextManager());
+                    }
 
                     DefaultDescriptor defaultDescriptor = colDesc.getDefaultDescriptor(dataDictionary);
                     if (SanityManager.DEBUG)
@@ -1193,6 +1197,25 @@ public abstract class ResultSetNode extends QueryTreeNode
 
 		return newResultColumn;
 	}
+
+	/**
+	  * Create a ResultColumn for a column with a generation clause.
+	  */
+    private  ResultColumn    createGeneratedColumn
+        (
+         TableDescriptor    targetTD,
+         ColumnDescriptor   colDesc
+         )
+        throws StandardException
+    {
+        ValueNode       dummy = (ValueNode) getNodeFactory().getNode
+            ( C_NodeTypes.UNTYPED_NULL_CONSTANT_NODE, getContextManager());
+        ResultColumn    newResultColumn = (ResultColumn) getNodeFactory().getNode
+            ( C_NodeTypes.RESULT_COLUMN, colDesc.getType(), dummy, getContextManager());
+        newResultColumn.setColumnDescriptor( targetTD, colDesc );
+
+        return newResultColumn;
+    }
 
 	/**
 	  *	Parse a default and turn it into a query tree.

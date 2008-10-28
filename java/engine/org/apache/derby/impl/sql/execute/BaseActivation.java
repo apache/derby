@@ -35,7 +35,7 @@ import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.services.uuid.UUIDFactory;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.sql.depend.Provider;
-
+import org.apache.derby.iapi.sql.Row;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.jdbc.ConnectionContext;
 import org.apache.derby.iapi.reference.Property;
@@ -1331,7 +1331,7 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 	 * Remember the row for the specified ResultSet.
 	 */
 	public void setCurrentRow(ExecRow currentRow, int resultSetNumber)
-	{ 
+	{
 		if (SanityManager.DEBUG) 
 		{
 			SanityManager.ASSERT(!isClosed(), "closed");
@@ -1373,6 +1373,17 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 	}
 
 	/**
+	 * Get the current row at the given index.
+	 */
+	public Row getCurrentRow(int resultSetNumber)
+	{
+        return row[resultSetNumber];
+	}
+
+	/**
+	 * Return the current SQL session context for all immediately
+	 * nested connections stemming from the call or function
+	 * invocation of the statement corresponding to this activation.
 	 * @see org.apache.derby.iapi.sql.Activation#getSQLSessionContextForChildren
 	 */
 	public SQLSessionContext getSQLSessionContextForChildren() {

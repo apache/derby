@@ -149,7 +149,7 @@ public class ResultColumn extends ValueNode
 		{
 			this.name = (String) arg1;
 			this.exposedName = this.name;
-			this.expression = (ValueNode) arg2;
+			setExpression( (ValueNode) arg2 );
 		}
 		else if (arg1 instanceof ColumnReference)
 		{
@@ -162,7 +162,7 @@ public class ResultColumn extends ValueNode
 				the reference has the right table name.
 		 	*/
 			this.reference = ref; 
-			this.expression = (ValueNode) arg2;
+			setExpression( (ValueNode) arg2 );
 		}
 		else if (arg1 instanceof ColumnDescriptor)
 		{
@@ -172,13 +172,13 @@ public class ResultColumn extends ValueNode
 			this.exposedName = name;
 			setType(coldes.getType());
 			this.columnDescriptor = coldes;
-			this.expression = (ValueNode) arg2;
+			setExpression( (ValueNode) arg2 );
 			this.autoincrement = coldes.isAutoincrement();
 		}
 		else
 		{
 			setType((DataTypeDescriptor) arg1);
-			this.expression = (ValueNode) arg2;
+			setExpression( (ValueNode) arg2 );
 			if (arg2 instanceof ColumnReference)
 			{
 				reference = (ColumnReference) arg2;
@@ -355,7 +355,7 @@ public class ResultColumn extends ValueNode
 	void setExpressionToNullNode()
 		throws StandardException
 	{
-		expression = getNullNode(getTypeServices());
+		setExpression( getNullNode(getTypeServices()) );
 	}
 
 	/**
@@ -585,8 +585,8 @@ public class ResultColumn extends ValueNode
 			}
 		}
 
-		expression = expression.bindExpression(fromList, subqueryList,
-									aggregateVector);
+		setExpression( expression.bindExpression(fromList, subqueryList,
+                                                 aggregateVector) );
 
 		if (expression instanceof ColumnReference)
 		{
@@ -690,7 +690,7 @@ public class ResultColumn extends ValueNode
 		if (isPrivilegeCollectionRequired())
 			getCompilerContext().addRequiredColumnPriv( columnDescriptor);
 	}
-	
+
 	/**
 	 * Change an untyped null to a typed null.
 	 *
@@ -714,7 +714,7 @@ public class ResultColumn extends ValueNode
         	//eg insert into table1 values(1,null)
         	//When this method is executed for the sql above, we don't know
         	//the type of the null at this point.
-            expression = getNullNode(bindingRC.getTypeServices());
+            setExpression( getNullNode(bindingRC.getTypeServices()) );
         else if( ( expression instanceof ColumnReference) && expression.getTypeServices() == null)
         {
             // The expression must be a reference to a null column in a values table.
@@ -822,9 +822,9 @@ public class ResultColumn extends ValueNode
 	{
 		if (expression == null)
 			return this;
-		expression = expression.preprocess(numTables, outerFromList,
+		setExpression( expression.preprocess(numTables, outerFromList,
 										   outerSubqueryList,
-										   outerPredicateList);
+                                           outerPredicateList) );
 		return this;
 	}
 
@@ -1421,6 +1421,7 @@ public class ResultColumn extends ValueNode
   		if (isGenerated()) {
   			newResultColumn.markGenerated();
   		}
+
   		return newResultColumn;
 	}
 
@@ -1512,7 +1513,7 @@ public class ResultColumn extends ValueNode
 	
 		if (expression != null && !v.stopTraversal())
 		{
-			expression = (ValueNode)expression.accept(v);
+			setExpression( (ValueNode)expression.accept(v) );
 		}
 		return returnNode;
 	}
@@ -1770,4 +1771,15 @@ public class ResultColumn extends ValueNode
 		}
 		return false;
 	}
+
+	/**
+	 * Return true if this result column represents a generated column.
+	 */
+	public boolean hasGenerationClause()
+	{
+        if ( (columnDescriptor != null) && columnDescriptor.hasGenerationClause() ) { return true; }
+        else { return false; }
+	}
+    
 }
+

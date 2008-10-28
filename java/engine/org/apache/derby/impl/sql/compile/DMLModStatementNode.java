@@ -21,8 +21,10 @@
 
 package	org.apache.derby.impl.sql.compile;
 
+import java.lang.reflect.Modifier;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.HashSet;
 import java.util.Vector;
 
 import org.apache.derby.catalog.UUID;
@@ -30,7 +32,9 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
+import org.apache.derby.iapi.services.compiler.LocalField;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.StatementType;
@@ -400,6 +404,216 @@ abstract class DMLModStatementNode extends DMLStatementNode
 		}
 	}
 
+    /**
+     * Do not allow generation clauses to be overriden. Throws an exception
+     * if the user attempts to override the value of a generated column.
+     * The only value allowed in a generated column is DEFAULT. If we find
+     * a generated column which is being explicitly set to DEFAULT in an INSERT, we remove
+     * it from the column lists--it will be added back in during the enhance
+     * phase. For an update, addedGeneratedColumns will be non-null and we will
+     * use this list to pass through the generated columns which have already
+     * been added to the update list.
+     */
+    void forbidGenerationOverrides( ResultColumnList targetRCL, boolean forUpdate, ColumnDescriptorList addedGeneratedColumns )
+        throws StandardException
+    {
+        int  count = targetRCL.size();
+
+        ResultColumnList    resultRCL = resultSet.getResultColumns();
+        
+        for ( int i = 0; i < count; i++ )
+        {
+            ResultColumn    rc = (ResultColumn) targetRCL.elementAt( i );
+
+            if ( rc.hasGenerationClause() )
+            {
+                ValueNode   resultExpression = ((ResultColumn) resultRCL.elementAt( i )).getExpression();
+
+                if ( !( resultExpression instanceof DefaultNode) )
+                {
+                    //
+                    // For updates, we may have added the generation clause
+                    // ourselves. Here we forgive ourselves for this pro-active behavior.
+                    //
+                    boolean allIsForgiven = false;
+                    
+                    if ( forUpdate )
+                    {
+                        String      columnName = rc.getTableColumnDescriptor().getColumnName();
+                        int         addedCount = addedGeneratedColumns.size();
+
+                        for ( int j = 0; j < addedCount; j++ )
+                        {
+                            String  addedColumnName = addedGeneratedColumns.elementAt( j ).getColumnName();
+
+                            if ( columnName.equals( addedColumnName ) )
+                            {
+                                allIsForgiven = true;
+                                break;
+                            }
+                        }
+                    }
+                    if ( allIsForgiven ) { continue; }
+                    
+                    throw StandardException.newException
+                        ( SQLState.LANG_CANT_OVERRIDE_GENERATION_CLAUSE, rc.getName() );
+                }
+                else
+                {
+                    // skip this step if we're working on an update statement.
+                    // for updates, the target list has already been enhanced.
+                    if ( forUpdate ) { continue; }
+                    
+                    // Prune the generated column and its default. They will be
+                    // added back in during the enhance phase.
+                    targetRCL.removeElementAt( i );
+                    resultRCL.removeElementAt( i );
+
+                    targetRCL.resetVirtualColumnIds();
+                    resultRCL.resetVirtualColumnIds();
+
+                    // account for the dropped entries
+                    count--;
+                    i--;
+                }
+            }
+
+        }
+    }
+    
+    /**
+     * Parse and bind the generating expressions of computed columns.
+     */
+	void parseAndBindGenerationClauses
+	(
+		DataDictionary		dataDictionary,
+		TableDescriptor		targetTableDescriptor,
+		ResultColumnList	sourceRCL,
+		ResultColumnList	targetRCL,
+        boolean                 forUpdate,
+        ResultSetNode       updateResultSet
+    )
+		throws StandardException
+	{
+        int  count = targetRCL.size();
+
+        for ( int i = 0; i < count; i++ )
+        {
+            ResultColumn    rc = (ResultColumn) targetRCL.elementAt( i );
+
+            //
+            // For updates, there are two copies of the column in the row: a
+            // before image and the actual value which will be set when we
+            // update the row. We only want to compile a generation clause for
+            // the value which will be updated.
+            //
+            if ( forUpdate && !rc.updated() ) { continue; }
+            
+            if ( rc.hasGenerationClause() )
+            {
+                ColumnDescriptor    colDesc = rc.getTableColumnDescriptor();
+                ValueNode   generationClause = parseGenerationClause( colDesc.getDefaultInfo().getDefaultText(), targetTableDescriptor );
+
+                bindRowScopedExpression( getNodeFactory(), getContextManager(), targetTableDescriptor, sourceRCL, generationClause );
+
+                ResultColumn    newRC =  (ResultColumn) getNodeFactory().getNode
+                    ( C_NodeTypes.RESULT_COLUMN, generationClause.getTypeServices(), generationClause, getContextManager());
+
+                // replace the result column in place
+                newRC.setVirtualColumnId( i + 1 ); // column ids are 1-based
+                newRC.setColumnDescriptor( targetTableDescriptor, colDesc );
+                targetRCL.setElementAt( newRC, i );
+
+                // if this is an update, then the result column may appear in the
+                // source list as well. replace it there too and perform a
+                // little extra binding so that check constraints will bind and
+                // generate correctly if they reference the generated column
+                if ( forUpdate )
+                {
+                    for ( int j = 0; j < sourceRCL.size(); j++ )
+                    {
+                        if ( rc == sourceRCL.elementAt( j ) )
+                        {
+                            newRC.setName( rc.getName() );
+                            newRC.setResultSetNumber( updateResultSet.getResultSetNumber() );
+                            
+                            sourceRCL.setElementAt( newRC, j );
+                            
+                        }
+                    }   // end of loop through sourceRCL
+                }   // end if this is an update statement
+            }  // end if this is a generated column
+            
+        }   // end of loop through targetRCL
+    }
+    
+ 	/**
+	  *	Parse the generation clause for a column.
+	  *
+	  *	@param	clauseText  Text of the generation clause
+	  *
+	  * @return	The parsed expression as a query tree.
+	  *
+	  * @exception StandardException		Thrown on failure
+	  */
+	public	ValueNode	parseGenerationClause
+	(
+     String				clauseText,
+     TableDescriptor    td
+    )
+		throws StandardException
+	{
+		Parser						p;
+		ValueNode					clauseTree;
+		LanguageConnectionContext	lcc = getLanguageConnectionContext();
+		CompilerContext 			compilerContext = getCompilerContext();
+
+		/* Get a Statement to pass to the parser */
+
+		/* We're all set up to parse. We have to build a compilable SQL statement
+		 * before we can parse -  So, we goober up a VALUES defaultText.
+		 */
+		String select = "SELECT " + clauseText + " FROM " + td.getQualifiedName();
+		
+		/*
+		** Get a new compiler context, so the parsing of the select statement
+		** doesn't mess up anything in the current context (it could clobber
+		** the ParameterValueSet, for example).
+		*/
+		CompilerContext newCC = lcc.pushCompilerContext();
+
+		p = newCC.getParser();
+				
+		/* Finally, we can call the parser */
+		// Since this is always nested inside another SQL statement, so topLevel flag
+		// should be false
+		StatementNode qt = p.parseStatement(select);
+		if (SanityManager.DEBUG)
+		{
+			if (! (qt instanceof CursorNode))
+			{
+				SanityManager.THROWASSERT(
+					"qt expected to be instanceof CursorNode, not " +
+					qt.getClass().getName());
+			}
+			CursorNode cn = (CursorNode) qt;
+			if (! (cn.getResultSetNode() instanceof SelectNode))
+			{
+				SanityManager.THROWASSERT(
+					"cn.getResultSetNode() expected to be instanceof SelectNode, not " +
+					cn.getResultSetNode().getClass().getName());
+			}
+		}
+
+		clauseTree = ((ResultColumn) 
+							((CursorNode) qt).getResultSetNode().getResultColumns().elementAt(0)).
+									getExpression();
+
+		lcc.popCompilerContext(newCC);
+
+		return	clauseTree;
+	}
+
 	/**
 	 * Gets and binds all the constraints for an INSERT/UPDATE/DELETE.
 	 * First finds the constraints that are relevant to this node.
@@ -477,9 +691,9 @@ abstract class DMLModStatementNode extends DMLStatementNode
 			checkConstraints = generateCheckTree(relevantCdl,
 														targetTableDescriptor);
 
-			if (checkConstraints != null)
+            if (checkConstraints != null)
 			{
-				bindCheckConstraint(nodeFactory, 
+				bindRowScopedExpression(nodeFactory, getContextManager(),
 								targetTableDescriptor,
 								sourceRCL,
 								checkConstraints);
@@ -494,44 +708,44 @@ abstract class DMLModStatementNode extends DMLStatementNode
 	}
 
 	/**
-	 * Binds an already parsed check constraint
+	 * Binds an already parsed expression that only involves columns in a single
+	 * row. E.g., a check constraint or a generation clause.
 	 *
 	 * @param nodeFactory			Where to get query tree nodes.
 	 * @param targetTableDescriptor	The TableDescriptor for the constrained table.
 	 * @param sourceRCL		Result columns.
-	 * @param checkConstraint		Parsed query tree for check constraint
+	 * @param expression		Parsed query tree for row scoped expression
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	void	bindCheckConstraint
+	void	bindRowScopedExpression
 	(
 		NodeFactory			nodeFactory,
+        ContextManager    contextManager,
 		TableDescriptor		targetTableDescriptor,
 		ResultColumnList	sourceRCL,
-		ValueNode			checkConstraint
+		ValueNode			expression
     )
 		throws StandardException
 	{
 
-		TableName	targetTableName =
-						makeTableName(targetTableDescriptor.getSchemaName(),
-									  targetTableDescriptor.getName());
+		TableName	targetTableName = makeTableName
+            (nodeFactory, contextManager, targetTableDescriptor.getSchemaName(), targetTableDescriptor.getName());
 
-
-		/* We now have the check constraints as a query tree.  Now, we prepare
+		/* We now have the expression as a query tree.  Now, we prepare
 		 * to bind that query tree to the source's RCL.  That way, the
-		 * generated code for the check constraints will be evaluated against the
+		 * generated code for the expression will be evaluated against the
 		 * source row to be inserted into the target table or
 		 * against the after portion of the source row for the update
 		 * into the target table.
 		 *		o  Goober up a new FromList which has a single table,
 		 *		   a goobered up FromBaseTable for the target table
 		 *		   which has the source's RCL as it RCL.
-		 *		   (This allows the ColumnReferences in the check constraint
+		 *		   (This allows the ColumnReferences in the expression
 		 *		   tree to be bound to the right RCs.)
 		 *
 	 	 * Note that in some circumstances we may not actually verify
-		 * the constraint against the source RCL but against a temp
+		 * the expression against the source RCL but against a temp
 		 * row source used for deferred processing because of a trigger.
 		 * In this case, the caller of bindConstraints (UpdateNode)
 		 * has chosen to pass in the correct RCL to bind against.
@@ -540,7 +754,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 			(FromList) nodeFactory.getNode(
 							C_NodeTypes.FROM_LIST,
 							nodeFactory.doJoinOrderOptimization(),
-							getContextManager());
+							contextManager);
 		FromBaseTable table = (FromBaseTable)
 			nodeFactory.getNode(
 				C_NodeTypes.FROM_BASE_TABLE,
@@ -548,12 +762,12 @@ abstract class DMLModStatementNode extends DMLStatementNode
 				null,
 				sourceRCL,
 				null,
-				getContextManager());
+				contextManager);
 		table.setTableNumber(0);
 		fakeFromList.addFromTable(table);
 
 		// Now we can do the bind.
-		checkConstraint = checkConstraint.bindExpression(
+		expression = expression.bindExpression(
 										fakeFromList,
 										(SubqueryList) null,
 										(Vector) null);
@@ -580,6 +794,24 @@ abstract class DMLModStatementNode extends DMLStatementNode
 		ConstraintDescriptorList ccCDL = cdl.getSubList(DataDictionary.CHECK_CONSTRAINT);
 
 		return (ccCDL.size() > 0);
+	}
+
+	/**
+	 * Determine whether or not there are generated columns in the
+	 * specified table.
+	 *
+	 * @param td	The TableDescriptor for the table
+	 *
+	 * @return Whether or not there are generated columns in the specified table.
+	 *
+	 * @exception StandardException		Thrown on failure
+	 */
+	protected boolean hasGenerationClauses(TableDescriptor td)
+		throws StandardException
+	{
+		ColumnDescriptorList list= td.getGeneratedColumns();
+
+		return (list.size() > 0);
 	}
 
 
@@ -1296,6 +1528,128 @@ abstract class DMLModStatementNode extends DMLStatementNode
 		 */
 
 		checkConstraints.generateExpression(ecb, userExprFun);
+		userExprFun.methodReturn();
+		
+		// we are done modifying userExprFun, complete it.
+		userExprFun.complete();
+
+		return userExprFun;
+	}
+
+	/**
+	  *	Generate the code to evaluate all of the generation clauses. If there
+	  *	are generation clauses, this routine builds an Activation method which
+	  *	evaluates the generation clauses and fills in the computed columns.
+      *
+	  * @exception StandardException		Thrown on error
+	  */
+	public	void	generateGenerationClauses
+	(
+        ResultColumnList            rcl,
+        int                                 resultSetNumber,
+		ExpressionClassBuilder	ecb,
+		MethodBuilder			mb
+    )
+							throws StandardException
+	{
+		ResultColumn rc; 
+		int size = rcl.size();
+        boolean hasGenerationClauses = false;
+
+		for (int index = 0; index < size; index++)
+		{
+		    // generate statements of the form
+			// fieldX.setColumn(columnNumber, (DataValueDescriptor) columnExpr);
+			// and add them to exprFun.
+			rc = (ResultColumn) rcl.elementAt(index);
+
+            //
+            // Generated columns should be populated after the base row because
+            // the generation clauses may refer to base columns that have to be filled
+            // in first.
+            //
+			if ( rc.hasGenerationClause() )
+            {
+                hasGenerationClauses = true;
+                continue;
+            }
+        }
+
+		// we generate an exprFun
+		// that evaluates the generation clauses
+		// against the current row of the child's result.
+		// if there are no generation clauses, simply pass null
+		// to optimize for run time performance.
+
+   		// generate the function and initializer:
+   		// private Integer exprN()
+   		// {
+        //   ...
+   		//   return 1 or NULL;
+   		// }
+   		// static Method exprN = method pointer to exprN;
+
+		// if there are not generation clauses, we just want to pass null.
+		if ( !hasGenerationClauses )
+		{
+		   	mb.pushNull(ClassName.GeneratedMethod);
+		}
+		else
+		{
+			MethodBuilder	userExprFun = generateGenerationClauses( rcl, resultSetNumber, ecb);
+
+	   		// generation clause evaluation is used in the final result set 
+			// as an access of the new static
+   			// field holding a reference to this new method.
+   			ecb.pushMethodReference(mb, userExprFun);
+		}
+	}
+
+	/**
+	  *	Generate a method to compute all of the generation clauses in a row.
+	  */
+	public	MethodBuilder	generateGenerationClauses
+	(
+        ResultColumnList            rcl,
+        int                                 rsNumber,
+		ExpressionClassBuilder	ecb
+    )
+		throws StandardException
+	{
+		// this sets up the method and the static field.
+		// generates:
+		// 	java.lang.Object userExprFun( ) { }
+		MethodBuilder userExprFun = ecb.newUserExprFun();
+		
+		/* Declare the field and load it with the current row */
+		LocalField field = ecb.newFieldDeclaration(Modifier.PRIVATE, ClassName.ExecRow);
+        userExprFun.pushThis();
+        userExprFun.push( rsNumber );
+        userExprFun.callMethod(VMOpcode.INVOKEVIRTUAL, ClassName.BaseActivation, "getCurrentRow", ClassName.Row, 1);
+        userExprFun.putField( field );
+
+		// loop through the result columns, computing generated columns
+        // as we go
+        int     size = rcl.size();
+        for ( int i = 0; i < size; i++ )
+        {
+            ResultColumn    rc = (ResultColumn) rcl.elementAt( i );
+
+            if ( !rc.hasGenerationClause() ) { continue; }
+
+            userExprFun.getField(field); // instance
+            userExprFun.push(i + 1); // arg1
+
+            rc.generateExpression(ecb, userExprFun);
+            userExprFun.cast(ClassName.DataValueDescriptor);
+                
+            userExprFun.callMethod(VMOpcode.INVOKEINTERFACE, ClassName.Row, "setColumn", "void", 2);
+        }
+
+		/* generates:
+		 *    return;
+		 * And adds it to userExprFun
+		 */
 		userExprFun.methodReturn();
 		
 		// we are done modifying userExprFun, complete it.

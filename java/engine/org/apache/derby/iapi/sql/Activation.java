@@ -234,6 +234,11 @@ public interface Activation extends Dependent
 	void setCurrentRow(ExecRow currentRow, int resultSetNumber);
 
 	/**
+	 * Get the current row at the given index.
+	 */
+	public Row getCurrentRow(int resultSetNumber);
+    
+	/**
 	 * Generated plans have a current row field for ease in defining
 	 * the methods and finding them dynamically. The interface is
 	 * used to set the row before a dynamic method that uses it is

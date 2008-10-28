@@ -40,7 +40,10 @@ import org.apache.derby.iapi.services.loader.ClassFactory;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.ResultColumnDescriptor;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.sql.compile.CompilerContext;
+import org.apache.derby.iapi.sql.compile.Parser;
 import org.apache.derby.iapi.sql.compile.NodeFactory;
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptorList;
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
@@ -279,6 +282,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 		for (int index = 0; index < size; index++)
 		{
 			ResultColumn resultColumn = (ResultColumn) elementAt(index);
+
 			if (columnName.equals( resultColumn.getName()) )
 			{
 				/* Mark ResultColumn as referenced and return it */
@@ -607,7 +611,6 @@ public class ResultColumnList extends QueryTreeNodeVector
 		}
 		return retVal;
 	}
-
 
 	/**
 	 * Copy the result column names from the given ResultColumnList
@@ -974,7 +977,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 
 			if (rc.getTypeId().streamStorable())
 			{
-				//System.out.println("    streamStorable=true");
+                //System.out.println("    streamStorable=true");
 				ColumnDescriptor cd = rc.getTableColumnDescriptor();
 				isSS[cd.getPosition()-1] = true;
 			}
@@ -1126,6 +1129,18 @@ public class ResultColumnList extends QueryTreeNodeVector
 				}
 			}
 
+            //
+            // Generated columns should be populated after the base row because
+            // the generation clauses may refer to base columns that have to be filled
+            // in first. Population of generated columns is done in another
+            // method, which (like CHECK CONSTRAINTS) is explicitly called by
+            // InsertResultSet and UpdateResultSet.
+            //
+			if ( rc.hasGenerationClause() )
+            {
+                continue;
+            }
+            
 			// we need the expressions to be Columns exactly.
 
 			/* SPECIAL CASE:  Expression is a non-null constant.
@@ -1161,6 +1176,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 			 * is a typed null value.
 			 */
 			boolean needDVDCast = true;
+
 			if (rc.isAutoincrementGenerated())
 			{
 				// (com.ibm.db2j.impl... DataValueDescriptor)
@@ -1188,7 +1204,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 				acb.generateNullWithExpress(userExprFun, rc.getTypeCompiler(),
 						rc.getTypeServices().getCollationType());
 			}
-			else
+            else
 			{
 				rc.generateExpression(acb, userExprFun);
 			}
@@ -1197,6 +1213,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 
 			userExprFun.callMethod(VMOpcode.INVOKEINTERFACE, ClassName.Row, "setColumn", "void", 2);
 		}
+
 		userExprFun.getField(field);
 		userExprFun.methodReturn();
 
@@ -4165,5 +4182,6 @@ public class ResultColumnList extends QueryTreeNodeVector
 		 * Needed for ordering to work.
 		 */
 		resetVirtualColumnIds();
-	}	
+	}
+
 }

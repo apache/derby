@@ -284,6 +284,9 @@ public final class InsertNode extends DMLModStatementNode
 														this);
 			}
 			getCompilerContext().popCurrentPrivType();
+
+            // don't allow overriding of generation clauses
+            forbidGenerationOverrides( targetColumnList, false, null );
 		}
 
 		/* Verify that all underlying ResultSets reclaimed their FromList */
@@ -413,7 +416,7 @@ public final class InsertNode extends DMLModStatementNode
 
 		enhanceAndCheckForAutoincrement(resultSet, inOrder,
 				numTableColumns, colMap, dataDictionary,
-				targetTableDescriptor, targetVTI);
+                targetTableDescriptor, targetVTI );
 
 		resultColumnList.checkStorableExpressions(resultSet.getResultColumns());
 		/* Insert a NormalizeResultSetNode above the source if the source
@@ -432,9 +435,14 @@ public final class InsertNode extends DMLModStatementNode
 
 		if (targetTableDescriptor != null)
 		{
-			/* Get and bind all constraints on the table */
 			ResultColumnList sourceRCL = resultSet.getResultColumns();
 			sourceRCL.copyResultColumnNames(resultColumnList);
+
+            /* bind all generation clauses for generated columns */
+            parseAndBindGenerationClauses
+                ( dataDictionary, targetTableDescriptor, sourceRCL, resultColumnList, false, null );
+            
+			/* Get and bind all constraints on the table */
 			checkConstraints = bindConstraints(dataDictionary,
 												getNodeFactory(),
 												targetTableDescriptor,
@@ -536,7 +544,7 @@ public final class InsertNode extends DMLModStatementNode
 			boolean inOrder, int numTableColumns, int []colMap, 
 			DataDictionary dataDictionary,
 			TableDescriptor targetTableDescriptor,
-			FromVTI targetVTI)
+            FromVTI targetVTI)
 		throws StandardException
 	{
 		/*
@@ -584,7 +592,7 @@ public final class InsertNode extends DMLModStatementNode
 			if (! inOrder || resultSet.resultColumns.size() < numTableColumns)
 				resultSet.enhanceRCLForInsert(
 						numTableColumns, colMap, dataDictionary,
-						targetTableDescriptor, targetVTI);
+						targetTableDescriptor,targetVTI);
 		}
 		else
 		{
@@ -807,7 +815,7 @@ public final class InsertNode extends DMLModStatementNode
 	/**
 	 * Code generation for insert
 	 * creates an expression for:
-	 *   ResultSetFactory.getInsertResultSet(resultSet.generate(ps), this )
+	 *   ResultSetFactory.getInsertResultSet(resultSet.generate(ps), generationClausesResult, checkConstrainResult, this )
 	 *
 	 * @param acb	The ActivationClassBuilder for the class being built
 	 * @param mb the method  for the execute() method to be built
@@ -840,10 +848,13 @@ public final class InsertNode extends DMLModStatementNode
 			// arg 1
 			resultSet.generate(acb, mb);
 
-			// arg 2 generate code to evaluate CHECK CONSTRAINTS
+			// arg 2 generate code to evaluate generation clauses
+			generateGenerationClauses( resultColumnList, resultSet.getResultSetNumber(), acb, mb );
+
+			// arg 3 generate code to evaluate CHECK CONSTRAINTS
 			generateCheckConstraints( checkConstraints, acb, mb );
 
-			mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getInsertResultSet", ClassName.ResultSet, 2);
+			mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getInsertResultSet", ClassName.ResultSet, 3);
 		}
 		else
 		{

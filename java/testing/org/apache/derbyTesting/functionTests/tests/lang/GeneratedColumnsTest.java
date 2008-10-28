@@ -377,113 +377,113 @@ public class GeneratedColumnsTest extends BaseJDBCTestCase
              );
     }
 
-    //    /**
-    //     * <p>
-    //     * Verify basic insert behavior for generated columns.
-    //     * </p>
-    //     */
-    //    public  void    test_005_basicInsert()
-    //        throws Exception
-    //    {
-    //        Connection  conn = getConnection();
-    //
-    //        goodStatement
-    //            (
-    //             conn,
-    //             "create table t_insert_1( a int,  b int  default 1, c int )"
-    //             );
-    //        goodStatement
-    //            (
-    //             conn,
-    //             "create table t_insert_2( a int,  b int  generated always as( -a ) check ( b < 0 ), c int )"
-    //             );
-    //        goodStatement
-    //            (
-    //             conn,
-    //             "create unique index t_insert_2_b on t_insert_2( b )"
-    //             );
-    //
-    //        goodStatement
-    //            (
-    //             conn,
-    //             "insert into t_insert_1( a, c ) values ( 100, 1000 ), ( 200, 2000 ), ( 300, 3000 )"
-    //             );
-    //
-    //        // insert one row
-    //        goodStatement
-    //            (
-    //             conn,
-    //             "insert into t_insert_2( a, c ) values ( 2, 200 )"
-    //             );
-    //
-    //        // insert multiple rows
-    //        goodStatement
-    //            (
-    //             conn,
-    //             "insert into t_insert_2( a, c ) values ( 1, 100 ), ( 3, 300 ), ( 4, 400 ), ( 5, 500 )"
-    //             );
-    //
-    //        // insert by selecting from another table
-    //        goodStatement
-    //            (
-    //             conn,
-    //             "insert into t_insert_2( a, c ) select a, c from t_insert_1"
-    //             );
-    //
-    //        // insert using a default clause on the generated column
-    //        goodStatement
-    //            (
-    //             conn,
-    //             "insert into t_insert_2( a, b ) values ( 6, default )"
-    //             );
-    //
-    //        //
-    //        // Verify that all of the expected rows are in the table having the
-    //        // generated column.
-    //        //
-    //        assertResults
-    //            (
-    //             conn,
-    //             "select * from t_insert_2 order by a",
-    //             new String[][]
-    //             {
-    //                 { "1" ,         "-1" ,        "100" },
-    //                 { "2" ,         "-2" ,        "200" },
-    //                 { "3" ,         "-3" ,        "300" },
-    //                 { "4" ,         "-4" ,        "400" },
-    //                 { "5" ,         "-5" ,        "500" },
-    //                 { "6" ,         "-6" ,        null },
-    //                 { "100",        "-100" ,      "1000" },
-    //                 { "200" ,       "-200" ,      "2000" },
-    //                 { "300" ,       "-300" ,      "3000" },
-    //             },
-    //             false
-    //             );
-    //
-    //        // fails trying to override a generation clause
-    //        expectCompilationError
-    //            (
-    //             CANT_OVERRIDE_GENERATION_CLAUSE,
-    //             "insert into t_insert_2( a, b ) values ( 7, 70 )"
-    //             );
-    //        
-    //        // fails on a violation of the check constraint on the generated column
-    //        expectExecutionError
-    //            (
-    //             conn,
-    //             CONSTRAINT_VIOLATION,
-    //             "insert into t_insert_2( a ) values ( -8 )"
-    //             );
-    //        
-    //        // fails because it violates the unique index on the generated column
-    //        expectExecutionError
-    //            (
-    //             conn,
-    //             ILLEGAL_DUPLICATE,
-    //             "insert into t_insert_2( a ) values ( 2 )"
-    //             );
-    //        
-    //    }
+    /**
+     * <p>
+     * Verify basic insert behavior for generated columns.
+     * </p>
+     */
+    public  void    test_005_basicInsert()
+        throws Exception
+    {
+        Connection  conn = getConnection();
+        
+        goodStatement
+            (
+             conn,
+             "create table t_insert_1( a int,  b int  default 1, c int )"
+             );
+        goodStatement
+            (
+             conn,
+             "create table t_insert_2( a int,  b int  generated always as( -a ) check ( b < 0 ), c int )"
+             );
+        goodStatement
+            (
+             conn,
+             "create unique index t_insert_2_b on t_insert_2( b )"
+             );
+        
+        goodStatement
+            (
+             conn,
+             "insert into t_insert_1( a, c ) values ( 100, 1000 ), ( 200, 2000 ), ( 300, 3000 )"
+             );
+        
+        // insert one row
+        goodStatement
+            (
+             conn,
+             "insert into t_insert_2( a, c ) values ( 2, 200 )"
+             );
+        
+        // insert multiple rows
+        goodStatement
+            (
+             conn,
+             "insert into t_insert_2( a, c ) values ( 1, 100 ), ( 3, 300 ), ( 4, 400 ), ( 5, 500 )"
+             );
+        
+        // insert by selecting from another table
+        goodStatement
+            (
+             conn,
+             "insert into t_insert_2( a, c ) select a, c from t_insert_1"
+             );
+        
+        // insert using a default clause on the generated column
+        goodStatement
+            (
+             conn,
+             "insert into t_insert_2( a, b ) values ( 6, default )"
+             );
+        
+        //
+        // Verify that all of the expected rows are in the table having the
+        // generated column.
+        //
+        assertResults
+            (
+             conn,
+             "select * from t_insert_2 order by a",
+             new String[][]
+             {
+                 { "1" ,         "-1" ,        "100" },
+                 { "2" ,         "-2" ,        "200" },
+                 { "3" ,         "-3" ,        "300" },
+                 { "4" ,         "-4" ,        "400" },
+                 { "5" ,         "-5" ,        "500" },
+                 { "6" ,         "-6" ,        null },
+                 { "100",        "-100" ,      "1000" },
+                 { "200" ,       "-200" ,      "2000" },
+                 { "300" ,       "-300" ,      "3000" },
+             },
+             false
+             );
+        
+        // fails trying to override a generation clause
+        expectCompilationError
+            (
+             CANT_OVERRIDE_GENERATION_CLAUSE,
+             "insert into t_insert_2( a, b ) values ( 7, 70 )"
+             );
+        
+        // fails on a violation of the check constraint on the generated column
+        expectExecutionError
+            (
+             conn,
+             CONSTRAINT_VIOLATION,
+             "insert into t_insert_2( a ) values ( -8 )"
+             );
+        
+        // fails because it violates the unique index on the generated column
+        expectExecutionError
+            (
+             conn,
+             ILLEGAL_DUPLICATE,
+             "insert into t_insert_2( a ) values ( 2 )"
+             );
+        
+    }
 
     //    /**
     //     * <p>

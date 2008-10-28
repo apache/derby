@@ -45,6 +45,7 @@ import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.sql.ParameterValueSet;
 import org.apache.derby.iapi.sql.ResultSet;
 import org.apache.derby.iapi.sql.ResultDescription;
+import org.apache.derby.iapi.sql.Row;
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.execute.CursorResultSet;
 import org.apache.derby.iapi.sql.execute.TemporaryRowHolder;
@@ -370,6 +371,15 @@ final public class GenericActivationHolder implements Activation
 		ac.setCurrentRow(currentRow, resultSetNumber);
 	}
 
+	/**
+	 * @see Activation#getCurrentRow
+	 *
+	 */
+	public Row getCurrentRow(int resultSetNumber)
+    {
+        return ac.getCurrentRow( resultSetNumber );
+    }
+    
 	/**
 	 * @see Activation#clearCurrentRow
 	 */

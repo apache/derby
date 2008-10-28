@@ -110,11 +110,12 @@ public interface ResultSetFactory {
 
 		@param source the result set from which to take rows to
 			be inserted into the target table.
+		@param generationClauses	The code to compute column generation clauses if any
 		@param checkGM	The code to enforce the check constraints, if any
 		@return the insert operation as a result set.
 		@exception StandardException thrown when unable to perform the insert
 	 */
-	ResultSet getInsertResultSet(NoPutResultSet source, 
+	ResultSet getInsertResultSet(NoPutResultSet source, GeneratedMethod generationClauses,
 								 GeneratedMethod checkGM)
         throws StandardException;
 
@@ -203,8 +204,7 @@ public interface ResultSetFactory {
 		@return the update operation as a result set.
 		@exception StandardException thrown when unable to perform the update
 	 */
-	ResultSet getUpdateResultSet(NoPutResultSet source, 
-								 GeneratedMethod checkGM)
+	ResultSet getUpdateResultSet(NoPutResultSet source, GeneratedMethod checkGM)
         throws StandardException;
 
 	/**

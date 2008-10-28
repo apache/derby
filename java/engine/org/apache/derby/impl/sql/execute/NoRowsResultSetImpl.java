@@ -583,6 +583,46 @@ abstract class NoRowsResultSetImpl implements ResultSet
 	}
 
 	/**
+	  * Compute the generation clauses on the current row in order to fill in computed columns.
+	  */
+	public	void	evaluateGenerationClauses
+	(
+	  GeneratedMethod generationClauses,
+	  Activation activation,
+      NoPutResultSet    source,
+      ExecRow           newRow
+	)
+		throws StandardException
+	{
+		if (generationClauses != null)
+		{
+            ExecRow oldRow = (ExecRow) activation.getCurrentRow( source.resultSetNumber() );
+
+            //
+            // We may need to poke the current row into the Activation so that
+            // it is visible to the method which evaluates the generation
+            // clause. This is because the generation clause may refer to other
+            // columns in that row.
+            //
+            try {
+                source.setCurrentRow( newRow );
+                generationClauses.invoke(activation);
+            }
+            finally
+            {
+                //
+                // We restore the Activation to its state before we ran the generation
+                // clause. This may not be necessary but I don't understand all of
+                // the paths through the Insert and Update result sets. This
+                // defensive coding seems prudent to me.
+                //
+                if ( oldRow == null ) { source.clearCurrentRow(); }
+                else { source.setCurrentRow( oldRow ); }
+            }
+		}
+	}
+
+	/**
 	  *	Run check constraints against the current row. Raise an error if
 	  * a check constraint is violated.
 	  *
