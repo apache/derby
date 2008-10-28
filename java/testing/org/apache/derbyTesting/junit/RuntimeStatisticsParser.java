@@ -31,6 +31,7 @@ public class RuntimeStatisticsParser {
     private boolean tableScan = false;
     private final boolean indexScan;
     private final boolean indexRowToBaseRow;
+	private final boolean lastKeyIndexScan;
     private String statistics = "";
     private boolean scrollInsensitive = false;
     private final HashSet qualifiers;
@@ -65,6 +66,7 @@ public class RuntimeStatisticsParser {
         indexScan = (rts.indexOf("Index Scan ResultSet") >= 0);
         indexRowToBaseRow =
             (rts.indexOf("Index Row to Base Row ResultSet") >= 0);
+        lastKeyIndexScan = (rts.indexOf("Last Key Index Scan ResultSet") >= 0);
         
         if (rts.indexOf("Eliminate duplicates = true") > 0) {
         	eliminatedDuplicates = true;
@@ -166,6 +168,15 @@ public class RuntimeStatisticsParser {
      */
     public boolean usedIndexScan() {
         return indexScan;
+    }
+
+    /**
+     * Return whether or not a last key index scan result set was used
+	 * in the query. A last key index scan is a special optimization for
+	 * MIN and MAX queries against an indexed column (SELECT MAX(ID) FROM T).
+     */
+    public boolean usedLastKeyIndexScan() {
+        return lastKeyIndexScan;
     }
 
     /**

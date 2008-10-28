@@ -39,6 +39,8 @@ import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.RuntimeStatisticsParser;
+import org.apache.derbyTesting.junit.SQLUtilities;
 
 /**
  * Many of these test cases were converted from the old groupBy.sql
@@ -97,6 +99,16 @@ public class GroupByTest extends BaseJDBCTestCase {
         st.executeUpdate("create table d3613 (a int, b int, c int, d int)");
         st.executeUpdate("insert into d3613 values (1,2,1,2), (1,2,3,4), " +
                 "(1,3,5,6), (2,2,2,2)");
+
+		st.execute("CREATE TABLE d3904_T1( " +
+				"D1 DATE NOT NULL PRIMARY KEY, N1 VARCHAR( 10 ))");
+		st.execute("CREATE TABLE d3904_T2( " +
+				"D2 DATE NOT NULL PRIMARY KEY, N2 VARCHAR( 10 ))");
+		st.execute("INSERT INTO d3904_T1 VALUES "+
+				"( DATE( '2008-10-01' ), 'something' ), "+
+				"( DATE( '2008-10-02' ), 'something' )" );
+		st.execute("INSERT INTO d3904_T2 VALUES" +
+				"( DATE( '2008-10-01' ), 'something' )" ); 
 
         // create an all types tables
         
@@ -1886,5 +1898,53 @@ public class GroupByTest extends BaseJDBCTestCase {
         }
         return rows;
     }
+
+    /**
+      * DERBY-3904: Min/Max optimization needs to be aware of joins.
+      */
+    public void testDerby3904MinMaxOptimization() throws SQLException
+    {
+        Statement s = createStatement();
+
+        JDBC.assertFullResultSet(
+                s.executeQuery("SELECT d3904_T1.D1 " +
+					"FROM d3904_T1 LEFT JOIN d3904_T2 " +
+				    "ON d3904_T1.D1 = d3904_T2.D2 " +
+					"WHERE d3904_T2.D2 IS NULL"), 
+            new String[][] {  {"2008-10-02"} } );
+        JDBC.assertFullResultSet(
+                s.executeQuery("SELECT MAX( d3904_T1.D1 ) as D " +
+					"FROM d3904_T1 WHERE d3904_T1.D1 NOT IN " +
+					"( SELECT d3904_T2.D2 FROM d3904_T2 )"), 
+            new String[][] {  {"2008-10-02"} } );
+		//
+		// In DERBY-3904, this next query fails with a null pointer
+		// exception because GroupByNode doesn't realize that there
+		// is a join involved here
+		//
+        JDBC.assertFullResultSet(
+                s.executeQuery("SELECT MAX( d3904_T1.D1 ) AS D " +
+					"FROM d3904_T1 LEFT JOIN d3904_T2 " +
+					"ON d3904_T1.D1 = d3904_T2.D2 " +
+					"WHERE d3904_T2.D2 IS NULL"),
+            new String[][] {  {"2008-10-02"} } );
+
+		// Verify that the min/max optimization still works for the
+		// simple query SELECT MAX(D1) FROM T1:
+		s.execute("call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1)");
+        JDBC.assertFullResultSet(
+                s.executeQuery("SELECT MAX(D1) FROM D3904_T1"),
+            new String[][] {  {"2008-10-02"} } );
+		RuntimeStatisticsParser rtsp =
+			SQLUtilities.getRuntimeStatisticsParser(s);
+		assertTrue(rtsp.usedLastKeyIndexScan());
+		assertFalse(rtsp.usedIndexRowToBaseRow());
+
+		// A form of the Beetle 4423 query:
+        JDBC.assertFullResultSet(
+                s.executeQuery("SELECT MAX(D1) " +
+					"FROM d3904_T1, D3904_T2 WHERE d3904_T1.D1='2008-10-02'"),
+            new String[][] {  {"2008-10-02"} } );
+	}
 }
 
