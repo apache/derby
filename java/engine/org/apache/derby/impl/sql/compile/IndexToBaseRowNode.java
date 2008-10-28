@@ -27,6 +27,8 @@ import org.apache.derby.iapi.sql.compile.AccessPath;
 import org.apache.derby.iapi.sql.compile.CostEstimate;
 import org.apache.derby.iapi.sql.compile.Optimizable;
 import org.apache.derby.iapi.sql.compile.RequiredRowOrdering;
+import org.apache.derby.iapi.sql.compile.Visitable;
+import org.apache.derby.iapi.sql.compile.Visitor;
 
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 
@@ -407,6 +409,32 @@ public class IndexToBaseRowNode extends FromTable
 		}
 
 		return indexColMapping;
+	}
+
+	/**
+	 * Accept a visitor, and call v.visit()
+	 * on child nodes as necessary.  
+	 * 
+	 * @param v the visitor
+	 *
+	 * @exception StandardException on error
+	 */
+	public Visitable accept(Visitor v) 
+		throws StandardException
+	{
+		if (v.skipChildren(this))
+		{
+			return v.visit(this);
+		}
+
+		Visitable returnNode = super.accept(v);
+
+		if (source != null && !v.stopTraversal())
+		{
+			source = (FromBaseTable)source.accept(v);
+		}
+
+		return returnNode;
 	}
 
 }
