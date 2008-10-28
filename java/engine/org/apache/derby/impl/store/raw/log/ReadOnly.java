@@ -76,12 +76,15 @@ public class ReadOnly implements LogFactory, ModuleSupportable {
 		return null;
 	}
 
+	/** Not applicable in readonly databases */
+	public void setRawStoreFactory(RawStoreFactory rsf) {
+	}
+
 	/**
 	  MT - not needed, no work is done
 	  @exception StandardException Standard Derby Error Policy
 	*/
-	public void recover(RawStoreFactory rawStoreFactory,
-						DataFactory dataFactory,
+	public void recover(DataFactory dataFactory,
 						TransactionFactory transactionFactory)
 		 throws StandardException
 	{

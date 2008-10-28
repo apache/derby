@@ -314,6 +314,11 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
             dataFactory.setDatabaseEncrypted();
         }
 
+        // RawStoreFactory is used by LogFactory.recover() and by
+        // SlaveFactory.startSlave (for the SlaveFactory case, it is
+        // only used if the database is encrypted)
+        logFactory.setRawStoreFactory(this);
+
         // If SlaveFactory is to be booted, the boot has to happen
         // before logFactory.recover since that method will be blocked
         // when in replication slave mode.
@@ -331,7 +336,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 		// no need to tell log factory which raw store factory it belongs to
 		// since this is passed into the log factory for recovery
 		// after the factories are loaded, recover the database
-		logFactory.recover(this, dataFactory, xactFactory);
+		logFactory.recover(dataFactory, xactFactory);
 
         // if user requested to encrpty an unecrypted database or encrypt with
         // new alogorithm then do that now.  

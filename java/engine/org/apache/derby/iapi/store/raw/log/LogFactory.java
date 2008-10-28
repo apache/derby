@@ -63,19 +63,22 @@ public interface LogFactory extends Corruptable {
 	public Logger getLogger();
 
 	/**
+		Make log factory aware of which raw store factory it belongs to
+	*/
+	public void setRawStoreFactory(RawStoreFactory rsf);
+
+	/**
 		Recover the database to a consistent state using the log. 
 		Each implementation of the log factory has its own recovery algorithm,
 		please see the implementation for a description of the specific
 		recovery algorithm it uses.
 
-		@param rawStoreFactory - the raw store
 		@param dataFactory - the data factory
 		@param transactionFactory - the transaction factory
 
 		@exception StandardException - encounter exception while recovering.
 	 */
-	public void recover(RawStoreFactory rawStoreFactory,
-						DataFactory dataFactory,
+	public void recover(DataFactory dataFactory,
 						TransactionFactory transactionFactory)
 		 throws StandardException;
 

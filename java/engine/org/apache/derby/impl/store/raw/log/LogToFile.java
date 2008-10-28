@@ -409,7 +409,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 	private long logWrittenFromLastCheckPoint = 0;
 	                            // keeps track of the amout of log written between checkpoints
 	private RawStoreFactory rawStoreFactory; 
-								// use this only after recovery is finished
+	// use this only when in slave mode or after recovery is finished
 
 	protected DataFactory dataFactory;
 								// use this only after revocery is finished
@@ -644,6 +644,13 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 	}
 
 	/**
+		Make log factory aware of which raw store factory it belongs to
+	*/
+	public void setRawStoreFactory(RawStoreFactory rsf) {
+		rawStoreFactory = rsf;
+	}
+
+	/**
 		Recover the rawStore to a consistent state using the log.
 
 		<P>
@@ -666,20 +673,17 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 		@exception StandardException Standard Derby error policy
 	*/
 	public void recover(
-    RawStoreFactory     rsf, 
     DataFactory         df, 
     TransactionFactory  tf)
 		 throws StandardException
 	{
 		if (SanityManager.DEBUG)
 		{
-			SanityManager.ASSERT(rsf != null, "raw store factory == null");
 			SanityManager.ASSERT(df != null,  "data factory == null");
 		}
 
 		checkCorrupt();
 
-		rawStoreFactory = rsf;
 		dataFactory     = df;
 		
 		// initialize the log writer only after the rawstorefactory is available, 
@@ -889,7 +893,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 				// open a transaction that is used for redo and rollback
 				RawTransaction recoveryTransaction =
                     tf.startTransaction(
-                        rsf,
+                        rawStoreFactory,
                         ContextService.getFactory().getCurrentContextManager(),
                         AccessFactoryGlobals.USER_TRANS_NAME);
 
@@ -1210,7 +1214,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
                                 "In recovery undo, rollback inflight transactions");
 					}
 
-					tf.rollbackAllTransactions(recoveryTransaction, rsf);
+					tf.rollbackAllTransactions(recoveryTransaction, rawStoreFactory);
 
 					if (SanityManager.DEBUG)
 					{
@@ -1249,7 +1253,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
                             tf.getTransactionTable());
                 }
 
-                tf.handlePreparedXacts(rsf);
+                tf.handlePreparedXacts(rawStoreFactory);
 
                 if (SanityManager.DEBUG)
                 {
@@ -1301,7 +1305,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 							needCheckpoint = false;
 					}
 
-						if (needCheckpoint && !checkpoint(rsf, df, tf, false))
+						if (needCheckpoint && !checkpoint(rawStoreFactory, df, tf, false))
 							flush(logFileNumber, endPosition);
 				}
 
