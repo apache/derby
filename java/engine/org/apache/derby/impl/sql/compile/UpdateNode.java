@@ -21,14 +21,17 @@
 
 package	org.apache.derby.impl.sql.compile;
 
+import org.apache.derby.catalog.DefaultInfo;
+import org.apache.derby.catalog.UUID;
+
 import org.apache.derby.iapi.services.context.ContextManager;
 
 import org.apache.derby.iapi.services.loader.GeneratedMethod;
 
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
-
 import org.apache.derby.impl.sql.compile.ActivationClassBuilder;
 import org.apache.derby.iapi.sql.conn.Authorizer;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.impl.sql.execute.FKInfo;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
@@ -42,6 +45,8 @@ import org.apache.derby.iapi.sql.compile.Visitor;
 
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 
+import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
+import org.apache.derby.iapi.sql.dictionary.ColumnDescriptorList;
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptorList;
 import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptor;
@@ -74,6 +79,8 @@ import org.apache.derby.iapi.services.classfile.VMOpcode;
 
 import java.lang.reflect.Modifier;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Properties;
 import java.util.Vector;
 
@@ -321,6 +328,15 @@ public final class UpdateNode extends DMLModStatementNode
 				" on return from RS.bindExpressions()");
 		}
 
+        //
+        // Add generated columns whose generation clauses mention columns
+        // in the user's original update list.
+        //
+        ColumnDescriptorList    addedGeneratedColumns = new ColumnDescriptorList();
+        ColumnDescriptorList    affectedGeneratedColumns = new ColumnDescriptorList();
+        addGeneratedColumns
+            ( targetTableDescriptor, resultSet, affectedGeneratedColumns, addedGeneratedColumns );
+        
 		/*
 		** The current result column list is the one supplied by the user.
 		** Mark these columns as "updated", so we can tell later which
@@ -357,6 +373,9 @@ public final class UpdateNode extends DMLModStatementNode
 					fromList);
 		getCompilerContext().popCurrentPrivType();
 
+        // don't allow overriding of generation clauses
+        forbidGenerationOverrides( resultSet.getResultColumns(), true, addedGeneratedColumns );
+        
 		LanguageConnectionContext lcc = getLanguageConnectionContext();
 		if (lcc.getAutoincrementUpdate() == false)
 			resultSet.getResultColumns().checkAutoincrement(null);
@@ -447,7 +466,7 @@ public final class UpdateNode extends DMLModStatementNode
 
 				readColsBitSet = getReadMap(dataDictionary, 
 										targetTableDescriptor, 
-										afterColumns);
+                                        afterColumns, affectedGeneratedColumns );
 
 				afterColumns = fbt.addColsToList(afterColumns, readColsBitSet);
 				resultColumnList = fbt.addColsToList(resultColumnList, readColsBitSet);
@@ -554,7 +573,7 @@ public final class UpdateNode extends DMLModStatementNode
 			    getContextManager());
 			
 								
- 			if (hasCheckConstraints(dataDictionary, targetTableDescriptor))
+ 			if (hasCheckConstraints(dataDictionary, targetTableDescriptor) || hasGenerationClauses( targetTableDescriptor ) )
  			{
  				/* Get and bind all check constraints on the columns
 	 			 * being updated.  We want to bind the check constraints against
@@ -588,12 +607,18 @@ public final class UpdateNode extends DMLModStatementNode
             boolean hasTriggers = (getAllRelevantTriggers(dataDictionary, targetTableDescriptor, 
                                                           changedColumnIds, true).size() > 0);
 
+			ResultColumnList sourceRCL = hasTriggers ? resultColumnList : afterColumns;
+
+            /* bind all generation clauses for generated columns */
+            parseAndBindGenerationClauses
+                ( dataDictionary, targetTableDescriptor, afterColumns, resultColumnList, true, resultSet );
+
             /* Get and bind all constraints on the columns being updated */
             checkConstraints = bindConstraints( dataDictionary,
                                                 getNodeFactory(),
                                                 targetTableDescriptor,
                                                 null,
-                                                hasTriggers ? resultColumnList : afterColumns,
+                                                sourceRCL,
                                                 changedColumnIds,
                                                 readColsBitSet,
                                                 false,
@@ -817,19 +842,22 @@ public final class UpdateNode extends DMLModStatementNode
 		}
         else
         {
+			// arg 2 generate code to evaluate generation clauses
+			generateGenerationClauses( resultColumnList, resultSet.getResultSetNumber(), acb, mb );
+
             // generate code to evaluate CHECK CONSTRAINTS
-            generateCheckConstraints( checkConstraints, acb, mb ); // arg 2
+            generateCheckConstraints( checkConstraints, acb, mb ); // arg 3
 
             if(isDependentTable)
             {
                 mb.push(acb.addItem(makeConstantAction()));
                 mb.push(acb.addItem(makeResultDescription()));
                 mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getDeleteCascadeUpdateResultSet",
-                              ClassName.ResultSet, 4);
+                              ClassName.ResultSet, 5);
             }else
             {
                 mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getUpdateResultSet",
-                              ClassName.ResultSet, 2);
+                              ClassName.ResultSet, 3);
             }
         }
 	}
@@ -851,6 +879,7 @@ public final class UpdateNode extends DMLModStatementNode
 	 * These are the columns needed to<UL>:
 	 *		<LI>maintain indices</LI>
 	 *		<LI>maintain foreign keys</LI>
+	 *		<LI>maintain generated columns</LI>
 	 *		<LI>support Replication's Delta Optimization</LI></UL>
 	 * <p>
 	 * The returned map is a FormatableBitSet with 1 bit for each column in the
@@ -864,6 +893,7 @@ public final class UpdateNode extends DMLModStatementNode
 	 * @param dd				the data dictionary to look in
 	 * @param baseTable		the base table descriptor
 	 * @param updateColumnList the rcl for the update. CANNOT BE NULL
+	 * @param affectedGeneratedColumns columns whose generation clauses mention columns being updated
 	 *
 	 * @return a FormatableBitSet of columns to be read out of the base table
 	 *
@@ -873,7 +903,8 @@ public final class UpdateNode extends DMLModStatementNode
 	(
 		DataDictionary		dd,
 		TableDescriptor		baseTable,
-		ResultColumnList	updateColumnList
+		ResultColumnList	updateColumnList,
+        ColumnDescriptorList    affectedGeneratedColumns
 	)
 		throws StandardException
 	{
@@ -884,8 +915,10 @@ public final class UpdateNode extends DMLModStatementNode
 		relevantCdl = new ConstraintDescriptorList();
 		relevantTriggers =  new GenericDescriptorList();
 
-		FormatableBitSet	columnMap = UpdateNode.getUpdateReadMap(baseTable,
-			updateColumnList, conglomVector, relevantCdl, relevantTriggers, needsDeferredProcessing );
+		FormatableBitSet	columnMap = getUpdateReadMap
+            (
+             baseTable, updateColumnList, conglomVector, relevantCdl,
+             relevantTriggers, needsDeferredProcessing, affectedGeneratedColumns );
 
 		markAffectedIndexes( conglomVector );
 
@@ -919,6 +952,8 @@ public final class UpdateNode extends DMLModStatementNode
 	  *	5)	finds all triggers which overlap the updated columns.
 	  *	6)	if there are any triggers, marks all columns in the bitmap
 	  *	7)	adds the triggers to an evolving list of triggers
+	  *	8)	finds all generated columns whose generation clauses mention
+      *        the updated columns and adds all of the mentioned columns
 	  *
 	  *	@param	updateColumnList	a list of updated columns
 	  *	@param	conglomVector		OUT: vector of affected indices
@@ -928,6 +963,7 @@ public final class UpdateNode extends DMLModStatementNode
 	  *									deferred processing. set while evaluating this
 	  *									routine if a trigger or constraint requires
 	  *									deferred processing
+	  *	@param	affectedGeneratedColumns columns whose generation clauses mention updated columns
 	  *
 	  * @return a FormatableBitSet of columns to be read out of the base table
 	  *
@@ -940,7 +976,8 @@ public final class UpdateNode extends DMLModStatementNode
 		Vector						conglomVector,
 		ConstraintDescriptorList	relevantConstraints,
 		GenericDescriptorList		relevantTriggers,
-		boolean[]					needsDeferredProcessing
+		boolean[]					needsDeferredProcessing,
+        ColumnDescriptorList    affectedGeneratedColumns
 	)
 		throws StandardException
 	{
@@ -999,6 +1036,12 @@ public final class UpdateNode extends DMLModStatementNode
 			}
 		}
 
+        //
+        // Add all columns mentioned by generation clauses which are affected
+        // by the columns being updated.
+        //
+        addGeneratedColumnPrecursors( affectedGeneratedColumns, columnMap );
+        
 		/*
 	 	** If we have any triggers, then get all the columns
 		** because we don't know what the user will ultimately
@@ -1018,6 +1061,110 @@ public final class UpdateNode extends DMLModStatementNode
 
 		return	columnMap;
 	}
+
+    /**
+     * Add all of the columns mentioned by the generation clauses of generated
+     * columns. The generated columns were added when we called
+     * addGeneratedColumns earlier on.
+     */
+    private static  void    addGeneratedColumnPrecursors
+	(
+        ColumnDescriptorList    affectedGeneratedColumns,
+		FormatableBitSet        columnMap
+	)
+		throws StandardException
+	{
+        int                                 generatedColumnCount = affectedGeneratedColumns.size();
+        
+        for ( int gcIdx = 0; gcIdx < generatedColumnCount; gcIdx++ )
+        {
+            ColumnDescriptor    gc = affectedGeneratedColumns.elementAt( gcIdx );
+            int[]                       mentionedColumns = gc.getDefaultInfo().getReferencedColumnIDs();
+            int                         mentionedColumnCount = mentionedColumns.length;
+
+            for ( int mcIdx = 0; mcIdx < mentionedColumnCount; mcIdx++ )
+            {
+                columnMap.set( mentionedColumns[ mcIdx ] );
+                
+            }   // done looping through mentioned columns
+            
+        }   // done looping through affected generated columns
+
+    }
+     
+    /**
+     * Add generated columns to the update list as necessary. We add
+     * any column whose generation clause mentions columns already
+     * in the update list. We fill in a list of all generated columns affected
+     * by this update. We also fill in a list of all generated columns which we
+     * added to the update list.
+     */
+    private void    addGeneratedColumns
+	(
+		TableDescriptor				baseTable,
+        ResultSetNode               updateSet,
+        ColumnDescriptorList    affectedGeneratedColumns,
+        ColumnDescriptorList    addedGeneratedColumns
+	)
+		throws StandardException
+	{
+        ResultColumnList        updateColumnList = updateSet.getResultColumns();
+        ColumnDescriptorList    generatedColumns = baseTable.getGeneratedColumns();
+        int                                 generatedColumnCount = generatedColumns.size();
+		int		                        columnCount = baseTable.getMaxColumnID();
+		FormatableBitSet	        columnMap = new FormatableBitSet(columnCount + 1);
+        UUID                            tableID = baseTable.getObjectID();
+        
+		int[]	changedColumnIds = updateColumnList.sortMe();
+
+		for (int ix = 0; ix < changedColumnIds.length; ix++)
+		{
+			columnMap.set(changedColumnIds[ix]);
+		}
+
+        for ( int gcIdx = 0; gcIdx < generatedColumnCount; gcIdx++ )
+        {
+            ColumnDescriptor    gc = generatedColumns.elementAt( gcIdx );
+            DefaultInfo             defaultInfo = gc.getDefaultInfo();
+            int[]                       mentionedColumns = defaultInfo.getReferencedColumnIDs();
+            int                         mentionedColumnCount = mentionedColumns.length;
+
+            // figure out if this generated column is affected by the
+            // update
+            for ( int mcIdx = 0; mcIdx < mentionedColumnCount; mcIdx++ )
+            {
+                int             mentionedColumnID = mentionedColumns[ mcIdx ];
+
+                if ( columnMap.isSet( mentionedColumnID ) )
+                {
+                    // Yes, we are updating one of the columns mentioned in
+                    // this generation clause.
+                    affectedGeneratedColumns.add( tableID, gc );
+                    
+                    // If the generated column isn't in the update list yet,
+                    // add it.
+                    if ( !columnMap.isSet( gc.getPosition() ) )
+                    {
+                        addedGeneratedColumns.add( tableID, gc );
+                        
+                        // we will fill in the real value later on in parseAndBindGenerationClauses();
+                        ValueNode       dummy = (ValueNode) getNodeFactory().getNode
+                            ( C_NodeTypes.UNTYPED_NULL_CONSTANT_NODE, getContextManager());
+                       ResultColumn    newResultColumn = (ResultColumn) getNodeFactory().getNode
+                            ( C_NodeTypes.RESULT_COLUMN, gc.getType(), dummy, getContextManager());
+                        newResultColumn.setColumnDescriptor( baseTable, gc );
+                        newResultColumn.setName( gc.getColumnName() );
+
+                        updateColumnList.addResultColumn( newResultColumn );
+                    }
+                    
+                    break;
+                }
+            }   // done looping through mentioned columns
+
+        }   // done looping through generated columns
+    }
+     
 
 	/*
 	 * Force correlated column references in the SET clause to have the
@@ -1137,5 +1284,5 @@ public final class UpdateNode extends DMLModStatementNode
 		
 		super.normalizeSynonymColumns(rcl, tableNameNode);
 	}
-	
+    
 } // end of UpdateNode

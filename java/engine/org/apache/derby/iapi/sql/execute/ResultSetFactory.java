@@ -200,11 +200,13 @@ public interface ResultSetFactory {
 			updated in the target table. This result set must contain 
 			a column which provides RowLocations that are valid in the 
 			target table, and new values to be placed in those rows.
+		@param generationClauses	The code to compute column generation clauses if any
 		@param checkGM	The code to enforce the check constraints, if any
 		@return the update operation as a result set.
 		@exception StandardException thrown when unable to perform the update
 	 */
-	ResultSet getUpdateResultSet(NoPutResultSet source, GeneratedMethod checkGM)
+	ResultSet getUpdateResultSet(NoPutResultSet source, GeneratedMethod generationClauses,
+								 GeneratedMethod checkGM)
         throws StandardException;
 
 	/**
@@ -226,6 +228,7 @@ public interface ResultSetFactory {
 			updated in the target table. This result set must contain 
 			a column which provides RowLocations that are valid in the 
 			target table, and new values to be placed in those rows.
+		@param generationClauses	The code to compute generated columns, if any
 		@param checkGM	The code to enforce the check constraints, if any
 		@param constantActionItem a constant action saved object reference
 		@param rsdItem   result Description, saved object id. 				
@@ -233,6 +236,7 @@ public interface ResultSetFactory {
 		@exception StandardException thrown when unable to perform the update
 	 */
 	ResultSet getDeleteCascadeUpdateResultSet(NoPutResultSet source, 
+								 GeneratedMethod generationClauses,
 								 GeneratedMethod checkGM,
 								 int constantActionItem,
 								 int rsdItem)

@@ -85,6 +85,7 @@ class UpdateResultSet extends DMLWriteResultSet
 	private long					heapConglom; 
 	private FKInfo[]				fkInfoArray;
 	private FormatableBitSet 				baseRowReadList;
+    private GeneratedMethod         generationClauses;
 	private GeneratedMethod			checkGM;
 	private int						resultWidth;
 	private int						numberOfBaseColumns;
@@ -103,15 +104,17 @@ class UpdateResultSet extends DMLWriteResultSet
      */
     /**
 	 * @param source update rows come from source
+	 * @param generationClauses	Generated method for computed generation clauses
 	 * @param checkGM	Generated method for enforcing check constraints
 	 * @exception StandardException thrown on error
      */
     UpdateResultSet(NoPutResultSet source,
+						   GeneratedMethod generationClauses,
 						   GeneratedMethod checkGM,
 						   Activation activation)
       throws StandardException
     {
-		this(source, checkGM , activation, activation.getConstantAction(),null);
+		this(source, generationClauses, checkGM , activation, activation.getConstantAction(),null);
 	}
 
     /*
@@ -120,6 +123,7 @@ class UpdateResultSet extends DMLWriteResultSet
      */
     /**
 	 * @param source update rows come from source
+	 * @param generationClauses	Generated method for computed generation clauses
 	 * @param checkGM	Generated method for enforcing check constraints
 	 * @param activation Activation
 	 * @param constantActionItem  id of the update constant action saved objec
@@ -127,13 +131,14 @@ class UpdateResultSet extends DMLWriteResultSet
 	 * @exception StandardException thrown on error
      */
     UpdateResultSet(NoPutResultSet source,
+						   GeneratedMethod generationClauses,
 						   GeneratedMethod checkGM,
 						   Activation activation, 
 						   int constantActionItem,
 						   int rsdItem)
       throws StandardException
     {
-		this(source, checkGM , activation,
+		this(source, generationClauses, checkGM , activation,
 			  ((ConstantAction)activation.getPreparedStatement().getSavedObject(constantActionItem)),
 			 (ResultDescription) activation.getPreparedStatement().getSavedObject(rsdItem));
 	
@@ -148,10 +153,12 @@ class UpdateResultSet extends DMLWriteResultSet
      */
     /**
 	 * @param source update rows come from source
+	 * @param generationClauses	Generated method for computed generation clauses
 	 * @param checkGM	Generated method for enforcing check constraints
 	 * @exception StandardException thrown on error
      */
     UpdateResultSet(NoPutResultSet source,
+						   GeneratedMethod generationClauses,
 						   GeneratedMethod checkGM,
 						   Activation activation,
 						   ConstantAction passedInConstantAction,
@@ -163,6 +170,7 @@ class UpdateResultSet extends DMLWriteResultSet
 		// Get the current transaction controller
         tc = activation.getTransactionController();
 		this.source = source;
+        this.generationClauses = generationClauses;
 		this.checkGM = checkGM;
 
 		constants = (UpdateConstantAction) constantAction;
@@ -440,6 +448,7 @@ class UpdateResultSet extends DMLWriteResultSet
 
         while ( row != null )
         {
+            evaluateGenerationClauses( generationClauses, activation, source, row );
 
 			/* By convention, the last column in the result set for an
 			 * update contains a SQLRef containing the RowLocation of

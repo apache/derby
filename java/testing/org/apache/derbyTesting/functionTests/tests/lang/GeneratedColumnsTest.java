@@ -485,419 +485,419 @@ public class GeneratedColumnsTest extends BaseJDBCTestCase
         
     }
 
-    //    /**
-    //     * <p>
-    //     * Verify basic update behavior for generated columns.
-    //     * </p>
-    //     */
-    //    public  void    test_006_basicUpdate()
-    //        throws Exception
-    //    {
-    //        Connection  conn = getConnection();
-    //        int             counter;
-    //
-    //        goodStatement
-    //            (
-    //             conn,
-    //             "create function f_minus\n" +
-    //             "(\n" +
-    //             "    a int\n" +
-    //             ")\n" +
-    //             "returns int\n" +
-    //             "language java\n" +
-    //             "deterministic\n" +
-    //             "parameter style java\n" +
-    //             "no sql\n" +
-    //             "external name 'org.apache.derbyTesting.functionTests.tests.lang.GeneratedColumnsTest.minus'\n"
-    //             );
-    //        goodStatement
-    //            (
-    //             conn,
-    //             "create function f_readMinusCounter()\n" +
-    //             "returns int\n" +
-    //             "language java\n" +
-    //             "parameter style java\n" +
-    //             "no sql\n" +
-    //             "external name 'org.apache.derbyTesting.functionTests.tests.lang.GeneratedColumnsTest.readMinusCounter'\n"
-    //             );
-    //        goodStatement
-    //            (
-    //             conn,
-    //             "create table t_update_1( a int,  b int  generated always as( f_minus(a) ) check ( b < 0 ), c int )"
-    //             );
-    //        goodStatement
-    //            (
-    //             conn,
-    //             "create unique index t_update_1_b on t_update_1( b )"
-    //             );
-    //
-    //        counter = readMinusCounter( conn );
-    //        goodStatement
-    //            (
-    //             conn,
-    //             "insert into t_update_1( a, c ) values ( 1, 100 ), ( 2, 200 ), ( 3, 300 )"
-    //             );
-    //        assertEquals( counter + 3, readMinusCounter( conn ) );
-    //
-    //        counter = readMinusCounter( conn );
-    //        goodStatement
-    //            (
-    //             conn,
-    //             "update t_update_1\n" +
-    //             "set a = a + 10 where a > 1\n"
-    //             );
-    //        assertEquals( counter + 2, readMinusCounter( conn ) );
-    //
-    //        // you can use the DEFAULT keyword to set a generated column
-    //        goodStatement
-    //            (
-    //             conn,
-    //             "update t_update_1\n" +
-    //             "set a = a + 10, b = default where c = 300\n"
-    //             );
-    //
-    //        // fails trying to override a generation clause
-    //        expectCompilationError
-    //            (
-    //             CANT_OVERRIDE_GENERATION_CLAUSE,
-    //             "update t_update_1\n" +
-    //             "set a = a + 10, b = -3 where c = 300\n"
-    //             );
-    //        
-    //        // fails on a violation of the check constraint on the generated column
-    //        expectExecutionError
-    //            (
-    //             conn,
-    //             CONSTRAINT_VIOLATION,
-    //             "update t_update_1\n" +
-    //             "set a = -100\n" +
-    //             "where a = 1\n"
-    //             );
-    //        
-    //        // fails because it violates the unique index on the generated column
-    //        expectExecutionError
-    //            (
-    //             conn,
-    //             ILLEGAL_DUPLICATE,
-    //             "update t_update_1\n" +
-    //             "set a = 12\n" +
-    //             "where a = 1\n"
-    //             );
-    //        
-    //        //
-    //        // Verify that all of the expected rows are in the table having the
-    //        // generated column.
-    //        //
-    //        assertResults
-    //            (
-    //             conn,
-    //             "select * from t_update_1 order by c",
-    //             new String[][]
-    //             {
-    //                 { "1" ,         "-1" ,        "100" },
-    //                 { "12" ,         "-12" ,        "200" },
-    //                 { "23" ,         "-23" ,        "300" },
-    //             },
-    //             false
-    //             );
-    //    }
+    /**
+     * <p>
+     * Verify basic update behavior for generated columns.
+     * </p>
+     */
+    public  void    test_006_basicUpdate()
+        throws Exception
+    {
+        Connection  conn = getConnection();
+        int             counter;
+        
+        goodStatement
+            (
+             conn,
+             "create function f_minus\n" +
+             "(\n" +
+             "    a int\n" +
+             ")\n" +
+             "returns int\n" +
+             "language java\n" +
+             "deterministic\n" +
+             "parameter style java\n" +
+             "no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.GeneratedColumnsTest.minus'\n"
+             );
+        goodStatement
+            (
+             conn,
+             "create function f_readMinusCounter()\n" +
+             "returns int\n" +
+             "language java\n" +
+             "parameter style java\n" +
+             "no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.GeneratedColumnsTest.readMinusCounter'\n"
+             );
+        goodStatement
+            (
+             conn,
+             "create table t_update_1( a int,  b int  generated always as( f_minus(a) ) check ( b < 0 ), c int )"
+             );
+        goodStatement
+            (
+             conn,
+             "create unique index t_update_1_b on t_update_1( b )"
+             );
+        
+        counter = readMinusCounter( conn );
+        goodStatement
+            (
+             conn,
+             "insert into t_update_1( a, c ) values ( 1, 100 ), ( 2, 200 ), ( 3, 300 )"
+             );
+        assertEquals( counter + 3, readMinusCounter( conn ) );
+        
+        counter = readMinusCounter( conn );
+        goodStatement
+            (
+             conn,
+             "update t_update_1\n" +
+             "set a = a + 10 where a > 1\n"
+             );
+        assertEquals( counter + 2, readMinusCounter( conn ) );
+        
+        // you can use the DEFAULT keyword to set a generated column
+        goodStatement
+            (
+             conn,
+             "update t_update_1\n" +
+             "set a = a + 10, b = default where c = 300\n"
+             );
+        
+        // fails trying to override a generation clause
+        expectCompilationError
+            (
+             CANT_OVERRIDE_GENERATION_CLAUSE,
+             "update t_update_1\n" +
+             "set a = a + 10, b = -3 where c = 300\n"
+             );
+        
+        // fails on a violation of the check constraint on the generated column
+        expectExecutionError
+            (
+             conn,
+             CONSTRAINT_VIOLATION,
+             "update t_update_1\n" +
+             "set a = -100\n" +
+             "where a = 1\n"
+             );
+        
+        // fails because it violates the unique index on the generated column
+        expectExecutionError
+            (
+             conn,
+             ILLEGAL_DUPLICATE,
+             "update t_update_1\n" +
+             "set a = 12\n" +
+             "where a = 1\n"
+             );
+        
+        //
+        // Verify that all of the expected rows are in the table having the
+        // generated column.
+        //
+        assertResults
+            (
+             conn,
+             "select * from t_update_1 order by c",
+             new String[][]
+             {
+                 { "1" ,         "-1" ,        "100" },
+                 { "12" ,         "-12" ,        "200" },
+                 { "23" ,         "-23" ,        "300" },
+             },
+             false
+             );
+    }
 
-    //    /**
-    //     * <p>
-    //     * Verify basic trigger interaction with generated columns
-    //     * </p>
-    //     */
-    //    public  void    test_007_basicTriggers()
-    //        throws Exception
-    //    {
-    //        Connection  conn = getConnection();
-    //
-    //        //
-    //        // Setup schema for test
-    //        //
-    //        goodStatement
-    //            (
-    //             conn,
-    //             "create function triggerReports()\n" +
-    //             "returns TABLE\n" +
-    //             "  (\n" +
-    //             "     contents varchar( 100 )\n" +
-    //             "  )\n" +
-    //             "language java\n" +
-    //             "parameter style DERBY_JDBC_RESULT_SET\n" +
-    //             "no sql\n" +
-    //             "external name 'org.apache.derbyTesting.functionTests.tests.lang.GeneratedColumnsTest.triggerReport'\n"
-    //             );
-    //        goodStatement
-    //            (
-    //             conn,
-    //             "create procedure clearTriggerReports\n" +
-    //             "()\n" +
-    //             "language java\n" +
-    //             "parameter style java\n" +
-    //             "no sql\n" +
-    //             "external name 'org.apache.derbyTesting.functionTests.tests.lang.GeneratedColumnsTest.clearTriggerReports'\n"
-    //             );
-    //        goodStatement
-    //            (
-    //             conn,
-    //             "create procedure report_proc\n" +
-    //             "( tag varchar( 40 ), a int, b int, c int )\n" +
-    //             "language java\n" +
-    //             "parameter style java\n" +
-    //             "no sql\n" +
-    //             "external name 'org.apache.derbyTesting.functionTests.tests.lang.GeneratedColumnsTest.showValues'\n"
-    //             );
-    //        goodStatement
-    //            (
-    //             conn,
-    //             "create procedure wide_report_proc\n" +
-    //             "( tag varchar( 40 ), old_a int, old_b int, old_c int, new_a int, new_b int, new_c int )\n" +
-    //             "language java\n" +
-    //             "parameter style java\n" +
-    //             "no sql\n" +
-    //             "external name 'org.apache.derbyTesting.functionTests.tests.lang.GeneratedColumnsTest.showValues'\n"
-    //             );
-    //        goodStatement
-    //            (
-    //             conn,
-    //             "create table t1_trig( a int, b int generated always as ( f_minus(a) ), c int )\n"
-    //             );
-    //        goodStatement
-    //            (
-    //             conn,
-    //             "create trigger t1_trig_before_insert_row_trigger\n" +
-    //             "no cascade before insert on t1_trig\n" +
-    //             "referencing new as ar\n" +
-    //             "for each row\n" +
-    //             "call report_proc( 'before_insert_row_trigger', ar.a, ar.b, ar.c )\n"
-    //             );
-    //        goodStatement
-    //            (
-    //             conn,
-    //             "create trigger t1_trig_after_insert_row_trigger\n" +
-    //             "after insert on t1_trig\n" +
-    //             "referencing new as ar\n" +
-    //             "for each row\n" +
-    //             "call report_proc( 'after_insert_row_trigger', ar.a, ar.b, ar.c ) \n"
-    //             );
-    //        goodStatement
-    //            (
-    //             conn,
-    //             "create trigger t1_trig_before_update_row_trigger\n" +
-    //             "no cascade before update on t1_trig\n" +
-    //             "referencing old as br new as ar\n" +
-    //             "for each row\n" +
-    //             "call wide_report_proc( 'before_update_row_trigger', br.a, br.b, br.c, ar.a, ar.b, ar.c )\n"
-    //             );
-    //        goodStatement
-    //            (
-    //             conn,
-    //             "create trigger t1_trig_after_update_row_trigger\n" +
-    //             "after update on t1_trig\n" +
-    //             "referencing old as br new as ar\n" +
-    //             "for each row\n" +
-    //             "call wide_report_proc( 'after_update_row_trigger', br.a, br.b, br.c, ar.a, ar.b, ar.c )\n"
-    //             );
-    //        goodStatement
-    //            (
-    //             conn,
-    //             "create trigger t1_trig_before_delete_row_trigger\n" +
-    //             "no cascade before delete on t1_trig\n" +
-    //             "referencing old as br\n" +
-    //             "for each row\n" +
-    //             "call report_proc( 'before_delete_row_trigger', br.a, br.b, br.c )\n"
-    //             );
-    //        goodStatement
-    //            (
-    //             conn,
-    //             "create trigger t1_trig_after_delete_row_trigger\n" +
-    //             "after delete on t1_trig\n" +
-    //             "referencing old as br\n" +
-    //             "for each row\n" +
-    //             "call report_proc( 'after_delete_row_trigger', br.a, br.b, br.c )\n"
-    //             );
-    //        goodStatement
-    //            (
-    //             conn,
-    //             "create trigger t1_trig_before_insert_statement_trigger\n" +
-    //             "no cascade before insert on t1_trig\n" +
-    //             "for each statement\n" +
-    //             "call report_proc( 'before_insert_statement_trigger', -1, -1, -1 )\n"
-    //             );
-    //        goodStatement
-    //            (
-    //             conn,
-    //             "create trigger t1_trig_after_insert_statement_trigger\n" +
-    //             "after insert on t1_trig\n" +
-    //             "for each statement\n" +
-    //             "call report_proc( 'after_insert_statement_trigger', -1, -1, -1 )\n"
-    //             );
-    //        goodStatement
-    //            (
-    //             conn,
-    //             "create trigger t1_trig_before_update_statement_trigger\n" +
-    //             "no cascade before update on t1_trig\n" +
-    //             "for each statement\n" +
-    //             "call report_proc( 'before_update_statement_trigger', -1, -1, -1 )\n"
-    //             );
-    //        goodStatement
-    //            (
-    //             conn,
-    //             "create trigger t1_trig_before_delete_statement_trigger\n" +
-    //             "no cascade before delete on t1_trig\n" +
-    //             "for each statement\n" +
-    //             "call report_proc( 'before_delete_statement_trigger', -1, -1, -1 )\n"
-    //             );
-    //        goodStatement
-    //            (
-    //             conn,
-    //             "create trigger t1_trig_after_update_statement_trigger\n" +
-    //             "after update on t1_trig\n" +
-    //             "for each statement\n" +
-    //             "call report_proc( 'after_update_statement_trigger', -1, -1, -1 )\n"
-    //             );
-    //        goodStatement
-    //            (
-    //             conn,
-    //             "create trigger t1_trig_after_delete_statement_trigger\n" +
-    //             "after delete on t1_trig\n" +
-    //             "for each statement\n" +
-    //             "call report_proc( 'after_delete_statement_trigger', -1, -1, -1 )\n"
-    //             );
-    //
-    //        //
-    //        // Now run the tests.
-    //        //
-    //        assertTriggerStatus
-    //            (
-    //             conn,
-    //             "insert into t1_trig( a ) values ( 1 ), ( 2 ), ( 3 )",
-    //             new String[][]
-    //             {
-    //                 { "before_insert_row_trigger: [ 1, -1, null ]" },
-    //                 { "before_insert_row_trigger: [ 2, -2, null ]" },
-    //                 { "before_insert_row_trigger: [ 3, -3, null ]" },
-    //                 { "before_insert_statement_trigger: [ -1, -1, -1 ]" },
-    //                 { "after_insert_row_trigger: [ 1, -1, null ]" },
-    //                 { "after_insert_row_trigger: [ 2, -2, null ]" },
-    //                 { "after_insert_row_trigger: [ 3, -3, null ]" },                                                           
-    //                 { "after_insert_statement_trigger: [ -1, -1, -1 ]" },
-    //             }
-    //             );
-    //        assertTriggerStatus
-    //            (
-    //             conn,
-    //             "update t1_trig set a = a + 10",
-    //             new String[][]
-    //             {
-    //                 { "before_update_row_trigger: [ 1, -1, null, 11, -11, null ]" },
-    //                 { "before_update_row_trigger: [ 2, -2, null, 12, -12, null ]" },
-    //                 { "before_update_row_trigger: [ 3, -3, null, 13, -13, null ]" },
-    //                 { "before_update_statement_trigger: [ -1, -1, -1 ]" },
-    //                 { "after_update_row_trigger: [ 1, -1, null, 11, -11, null ]" },
-    //                 { "after_update_row_trigger: [ 2, -2, null, 12, -12, null ]" },
-    //                 { "after_update_row_trigger: [ 3, -3, null, 13, -13, null ]" },
-    //                 { "after_update_statement_trigger: [ -1, -1, -1 ]" },
-    //             }
-    //             );
-    //        assertTriggerStatus
-    //            (
-    //             conn,
-    //             "delete from t1_trig where a > 11",
-    //             new String[][]
-    //             {
-    //                 { "before_delete_row_trigger: [ 12, -12, null ]" },
-    //                 { "before_delete_row_trigger: [ 13, -13, null ]" },
-    //                 { "before_delete_statement_trigger: [ -1, -1, -1 ]" },
-    //                 { "after_delete_row_trigger: [ 12, -12, null ]" },
-    //                 { "after_delete_row_trigger: [ 13, -13, null ]" },
-    //                 { "after_delete_statement_trigger: [ -1, -1, -1 ]" },
-    //             }
-    //             );
-    //
-    //    }
+    /**
+     * <p>
+     * Verify basic trigger interaction with generated columns
+     * </p>
+     */
+    public  void    test_007_basicTriggers()
+        throws Exception
+    {
+        Connection  conn = getConnection();
+        
+        //
+        // Setup schema for test
+        //
+        goodStatement
+            (
+             conn,
+             "create function triggerReports()\n" +
+             "returns TABLE\n" +
+             "  (\n" +
+             "     contents varchar( 100 )\n" +
+             "  )\n" +
+             "language java\n" +
+             "parameter style DERBY_JDBC_RESULT_SET\n" +
+             "no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.GeneratedColumnsTest.triggerReport'\n"
+             );
+        goodStatement
+            (
+             conn,
+             "create procedure clearTriggerReports\n" +
+             "()\n" +
+             "language java\n" +
+             "parameter style java\n" +
+             "no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.GeneratedColumnsTest.clearTriggerReports'\n"
+             );
+        goodStatement
+            (
+             conn,
+             "create procedure report_proc\n" +
+             "( tag varchar( 40 ), a int, b int, c int )\n" +
+             "language java\n" +
+             "parameter style java\n" +
+             "no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.GeneratedColumnsTest.showValues'\n"
+             );
+        goodStatement
+            (
+             conn,
+             "create procedure wide_report_proc\n" +
+             "( tag varchar( 40 ), old_a int, old_b int, old_c int, new_a int, new_b int, new_c int )\n" +
+             "language java\n" +
+             "parameter style java\n" +
+             "no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.GeneratedColumnsTest.showValues'\n"
+             );
+        goodStatement
+            (
+             conn,
+             "create table t1_trig( a int, b int generated always as ( f_minus(a) ), c int )\n"
+             );
+        goodStatement
+            (
+             conn,
+             "create trigger t1_trig_before_insert_row_trigger\n" +
+             "no cascade before insert on t1_trig\n" +
+             "referencing new as ar\n" +
+             "for each row\n" +
+             "call report_proc( 'before_insert_row_trigger', ar.a, ar.b, ar.c )\n"
+             );
+        goodStatement
+            (
+             conn,
+             "create trigger t1_trig_after_insert_row_trigger\n" +
+             "after insert on t1_trig\n" +
+             "referencing new as ar\n" +
+             "for each row\n" +
+             "call report_proc( 'after_insert_row_trigger', ar.a, ar.b, ar.c ) \n"
+             );
+        goodStatement
+            (
+             conn,
+             "create trigger t1_trig_before_update_row_trigger\n" +
+             "no cascade before update on t1_trig\n" +
+             "referencing old as br new as ar\n" +
+             "for each row\n" +
+             "call wide_report_proc( 'before_update_row_trigger', br.a, br.b, br.c, ar.a, ar.b, ar.c )\n"
+             );
+        goodStatement
+            (
+             conn,
+             "create trigger t1_trig_after_update_row_trigger\n" +
+             "after update on t1_trig\n" +
+             "referencing old as br new as ar\n" +
+             "for each row\n" +
+             "call wide_report_proc( 'after_update_row_trigger', br.a, br.b, br.c, ar.a, ar.b, ar.c )\n"
+             );
+        goodStatement
+            (
+             conn,
+             "create trigger t1_trig_before_delete_row_trigger\n" +
+             "no cascade before delete on t1_trig\n" +
+             "referencing old as br\n" +
+             "for each row\n" +
+             "call report_proc( 'before_delete_row_trigger', br.a, br.b, br.c )\n"
+             );
+        goodStatement
+            (
+             conn,
+             "create trigger t1_trig_after_delete_row_trigger\n" +
+             "after delete on t1_trig\n" +
+             "referencing old as br\n" +
+             "for each row\n" +
+             "call report_proc( 'after_delete_row_trigger', br.a, br.b, br.c )\n"
+             );
+        goodStatement
+            (
+             conn,
+             "create trigger t1_trig_before_insert_statement_trigger\n" +
+             "no cascade before insert on t1_trig\n" +
+             "for each statement\n" +
+             "call report_proc( 'before_insert_statement_trigger', -1, -1, -1 )\n"
+             );
+        goodStatement
+            (
+             conn,
+             "create trigger t1_trig_after_insert_statement_trigger\n" +
+             "after insert on t1_trig\n" +
+             "for each statement\n" +
+             "call report_proc( 'after_insert_statement_trigger', -1, -1, -1 )\n"
+             );
+        goodStatement
+            (
+             conn,
+             "create trigger t1_trig_before_update_statement_trigger\n" +
+             "no cascade before update on t1_trig\n" +
+             "for each statement\n" +
+             "call report_proc( 'before_update_statement_trigger', -1, -1, -1 )\n"
+             );
+        goodStatement
+            (
+             conn,
+             "create trigger t1_trig_before_delete_statement_trigger\n" +
+             "no cascade before delete on t1_trig\n" +
+             "for each statement\n" +
+             "call report_proc( 'before_delete_statement_trigger', -1, -1, -1 )\n"
+             );
+        goodStatement
+            (
+             conn,
+             "create trigger t1_trig_after_update_statement_trigger\n" +
+             "after update on t1_trig\n" +
+             "for each statement\n" +
+             "call report_proc( 'after_update_statement_trigger', -1, -1, -1 )\n"
+             );
+        goodStatement
+            (
+             conn,
+             "create trigger t1_trig_after_delete_statement_trigger\n" +
+             "after delete on t1_trig\n" +
+             "for each statement\n" +
+             "call report_proc( 'after_delete_statement_trigger', -1, -1, -1 )\n"
+             );
+        
+        //
+        // Now run the tests.
+        //
+        assertTriggerStatus
+            (
+             conn,
+             "insert into t1_trig( a ) values ( 1 ), ( 2 ), ( 3 )",
+             new String[][]
+             {
+                 { "before_insert_row_trigger: [ 1, -1, null ]" },
+                 { "before_insert_row_trigger: [ 2, -2, null ]" },
+                 { "before_insert_row_trigger: [ 3, -3, null ]" },
+                 { "before_insert_statement_trigger: [ -1, -1, -1 ]" },
+                 { "after_insert_row_trigger: [ 1, -1, null ]" },
+                 { "after_insert_row_trigger: [ 2, -2, null ]" },
+                 { "after_insert_row_trigger: [ 3, -3, null ]" },                                                           
+                 { "after_insert_statement_trigger: [ -1, -1, -1 ]" },
+             }
+             );
+        assertTriggerStatus
+            (
+             conn,
+             "update t1_trig set a = a + 10",
+             new String[][]
+             {
+                 { "before_update_row_trigger: [ 1, -1, null, 11, -11, null ]" },
+                 { "before_update_row_trigger: [ 2, -2, null, 12, -12, null ]" },
+                 { "before_update_row_trigger: [ 3, -3, null, 13, -13, null ]" },
+                 { "before_update_statement_trigger: [ -1, -1, -1 ]" },
+                 { "after_update_row_trigger: [ 1, -1, null, 11, -11, null ]" },
+                 { "after_update_row_trigger: [ 2, -2, null, 12, -12, null ]" },
+                 { "after_update_row_trigger: [ 3, -3, null, 13, -13, null ]" },
+                 { "after_update_statement_trigger: [ -1, -1, -1 ]" },
+             }
+             );
+        assertTriggerStatus
+            (
+             conn,
+             "delete from t1_trig where a > 11",
+             new String[][]
+             {
+                 { "before_delete_row_trigger: [ 12, -12, null ]" },
+                 { "before_delete_row_trigger: [ 13, -13, null ]" },
+                 { "before_delete_statement_trigger: [ -1, -1, -1 ]" },
+                 { "after_delete_row_trigger: [ 12, -12, null ]" },
+                 { "after_delete_row_trigger: [ 13, -13, null ]" },
+                 { "after_delete_statement_trigger: [ -1, -1, -1 ]" },
+             }
+             );
+        
+    }
     
-    //    /**
-    //     * <p>
-    //     * Verify basic interaction of foreign keys with generated columns
-    //     * </p>
-    //     */
-    //    public  void    test_008_basicForeignKeys()
-    //        throws Exception
-    //    {
-    //        Connection  conn = getConnection();
-    //
-    //        //
-    //        // Setup schema for test
-    //        //
-    //        goodStatement
-    //            (
-    //             conn,
-    //             "create table t1_for( a int, b int generated always as ( f_minus(a) ) primary key, c int )"
-    //             );
-    //        goodStatement
-    //            (
-    //             conn,
-    //             "create table t2_for( a int, b int references t1_for( b ), c int )"
-    //             );
-    //        goodStatement
-    //            (
-    //             conn,
-    //             "create table t3_for( a int, b int primary key, c int )"
-    //             );
-    //        goodStatement
-    //            (
-    //             conn,
-    //             "create table t4_for( a int, b int generated always as ( f_minus(a) ) references t3_for( b ), c int )"
-    //             );
-    //
-    //        //
-    //        // Initial data.
-    //        //
-    //        goodStatement
-    //            (
-    //             conn,
-    //             "insert into t1_for( a ) values ( 1 ), ( 2 ), ( 3 )"
-    //             );
-    //        goodStatement
-    //            (
-    //             conn,
-    //             "insert into t2_for( b ) values ( -1 ), ( -3 )"
-    //             );
-    //        goodStatement
-    //            (
-    //             conn,
-    //             "insert into t3_for( b ) values ( 1 ), ( 2 ), ( 3 )"
-    //             );
-    //        goodStatement
-    //            (
-    //             conn,
-    //             "insert into t4_for( a ) values ( -1 ), ( -2 ), ( -3 )"
-    //             );
-    //
-    //        //
-    //        // Let's violate some foreign keys.
-    //        //
-    //        expectExecutionError
-    //            (
-    //             conn,
-    //             FOREIGN_KEY_VIOLATION,
-    //             "update t1_for set a = a + 10 where a = 1"
-    //             );
-    //        expectExecutionError
-    //            (
-    //             conn,
-    //             FOREIGN_KEY_VIOLATION,
-    //             "update t4_for set a = a + 10 where a = -1"
-    //             );
-    //        expectExecutionError
-    //            (
-    //             conn,
-    //             FOREIGN_KEY_VIOLATION,
-    //             "insert into t4_for( a ) values ( -4 )"
-    //             );
-    //    }
+    /**
+     * <p>
+     * Verify basic interaction of foreign keys with generated columns
+     * </p>
+     */
+    public  void    test_008_basicForeignKeys()
+        throws Exception
+    {
+        Connection  conn = getConnection();
+        
+        //
+        // Setup schema for test
+        //
+        goodStatement
+            (
+             conn,
+             "create table t1_for( a int, b int generated always as ( f_minus(a) ) primary key, c int )"
+             );
+        goodStatement
+            (
+             conn,
+             "create table t2_for( a int, b int references t1_for( b ), c int )"
+             );
+        goodStatement
+            (
+             conn,
+             "create table t3_for( a int, b int primary key, c int )"
+             );
+        goodStatement
+            (
+             conn,
+             "create table t4_for( a int, b int generated always as ( f_minus(a) ) references t3_for( b ), c int )"
+             );
+        
+        //
+        // Initial data.
+        //
+        goodStatement
+            (
+             conn,
+             "insert into t1_for( a ) values ( 1 ), ( 2 ), ( 3 )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t2_for( b ) values ( -1 ), ( -3 )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t3_for( b ) values ( 1 ), ( 2 ), ( 3 )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t4_for( a ) values ( -1 ), ( -2 ), ( -3 )"
+             );
+        
+        //
+        // Let's violate some foreign keys.
+        //
+        expectExecutionError
+            (
+             conn,
+             FOREIGN_KEY_VIOLATION,
+             "update t1_for set a = a + 10 where a = 1"
+             );
+        expectExecutionError
+            (
+             conn,
+             FOREIGN_KEY_VIOLATION,
+             "update t4_for set a = a + 10 where a = -1"
+             );
+        expectExecutionError
+            (
+             conn,
+             FOREIGN_KEY_VIOLATION,
+             "insert into t4_for( a ) values ( -4 )"
+             );
+    }
     
     /**
      * <p>

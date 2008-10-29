@@ -139,7 +139,8 @@ public class GenericResultSetFactory implements ResultSetFactory
 		@see ResultSetFactory#getUpdateResultSet
 		@exception StandardException thrown on error
 	 */
-	public ResultSet getUpdateResultSet(NoPutResultSet source, GeneratedMethod checkGM)
+	public ResultSet getUpdateResultSet(NoPutResultSet source, GeneratedMethod generationClauses,
+										GeneratedMethod checkGM)
 			throws StandardException
 	{
 		Activation activation = source.getActivation();
@@ -155,7 +156,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 			SanityManager.ASSERT(getAuthorizer(activation) != null, "Authorizer is null");
 		}
 		getAuthorizer(activation).authorize(activation, Authorizer.SQL_WRITE_OP);
-		return new UpdateResultSet(source, checkGM, activation);
+		return new UpdateResultSet(source, generationClauses, checkGM, activation);
 	}
 
 	/**
@@ -177,6 +178,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 		@exception StandardException thrown on error
 	 */
 	public ResultSet getDeleteCascadeUpdateResultSet(NoPutResultSet source,
+                                                     GeneratedMethod generationClauses,
 													 GeneratedMethod checkGM,
 													 int constantActionItem,
 													 int rsdItem)
@@ -184,7 +186,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 	{
 		Activation activation = source.getActivation();
 		getAuthorizer(activation).authorize(activation, Authorizer.SQL_WRITE_OP);
-		return new UpdateResultSet(source, checkGM, activation,
+		return new UpdateResultSet(source, generationClauses, checkGM, activation,
 								   constantActionItem, rsdItem);
 	}
 
