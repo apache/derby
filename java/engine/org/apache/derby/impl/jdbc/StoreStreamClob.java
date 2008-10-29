@@ -65,6 +65,14 @@ final class StoreStreamClob
      */
     //@GuardedBy("synchronizationObject")
     private final PositionedStoreStream positionedStoreStream;
+    /**
+     * The cached length of the store stream in number of characters.
+     * A value of {@code 0} means the length is unknown, and zero is an invalid
+     * length for a store stream Clob. It is set to zero because that is the
+     * value encoded as length in the store stream (on disk format) when the
+     * length is unknown or cannot be represented.
+     */
+    private long cachedCharLength = 0;
     /** The connection (child) this Clob belongs to. */
     private final ConnectionChild conChild;
     /** Object used for synchronizing access to the store stream. */
@@ -134,17 +142,21 @@ final class StoreStreamClob
     public long getCharLength()
             throws SQLException {
         checkIfValid();
-        synchronized (this.synchronizationObject) {
-            this.conChild.setupContextStack();
-            try {
-                return UTF8Util.skipUntilEOF(
-                                new BufferedInputStream(getRawByteStream()));
-            } catch (Throwable t) {
-                throw noStateChangeLOB(t);
-            } finally {
-                this.conChild.restoreContextStack();
+        if (this.cachedCharLength == 0) {
+            // Decode the stream to find the length.
+            synchronized (this.synchronizationObject) {
+                this.conChild.setupContextStack();
+                try {
+                    this.cachedCharLength = UTF8Util.skipUntilEOF(
+                            new BufferedInputStream(getRawByteStream()));
+                } catch (Throwable t) {
+                    throw noStateChangeLOB(t);
+                } finally {
+                    this.conChild.restoreContextStack();
+                }
             }
         }
+        return this.cachedCharLength;
     }
 
     /**
