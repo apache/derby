@@ -139,9 +139,8 @@ public class MultiByteClobTest extends BaseJDBCTestCase {
     public static Test suite() {
         TestSuite suite = new TestSuite("MultiByteClobTest");
         suite.addTest(baseSuite("MultiByteClobTest:embedded"));
-        // Disable for client for now. Client clob is inordinately slow.
-        //suite.addTest(TestConfiguration
-        //    .clientServerDecorator(baseSuite("MultiByteClobTest:client")));
+        suite.addTest(TestConfiguration
+            .clientServerDecorator(baseSuite("MultiByteClobTest:client")));
         Properties p = new Properties();
         // use small pageCacheSize so we don't run out of memory on the insert.
         p.setProperty("derby.storage.pageCacheSize", "100");
