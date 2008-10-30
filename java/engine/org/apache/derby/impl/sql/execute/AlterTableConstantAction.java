@@ -28,6 +28,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 
+import org.apache.derby.catalog.DefaultInfo;
 import org.apache.derby.catalog.DependableFinder;
 import org.apache.derby.catalog.IndexDescriptor;
 import org.apache.derby.catalog.UUID;
@@ -1339,10 +1340,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		// Update the new column to its default, if it has a non-null default
 		if (columnDescriptor.hasNonNullDefault())
 		{
-			updateNewColumnToDefault(activation,
-								columnInfo[ix].name,
-								columnInfo[ix].defaultInfo.getDefaultText(),
-								lcc);
+			updateNewColumnToDefault(activation, columnDescriptor, lcc);
 		}	
 
 		// Update SYSCOLPERMS table which tracks the permissions granted
@@ -3068,8 +3066,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 	 * instead we get a nested connection and
 	 * issue the appropriate update statement.
 	 *
-	 * @param columnName		column name
-	 * @param defaultText		default text
+	 * @param columnDescriptor  catalog descriptor for the column
 	 * @param lcc				the language connection context
 	 *
 	 * @exception StandardException if update to default fails
@@ -3077,12 +3074,18 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 	private void updateNewColumnToDefault
 	(
 		Activation activation,
-		String							columnName,
-		String							defaultText,
+        ColumnDescriptor    columnDescriptor,
 		LanguageConnectionContext		lcc
 	)
 		throws StandardException
 	{
+        DefaultInfo defaultInfo = columnDescriptor.getDefaultInfo();
+        String  columnName = columnDescriptor.getColumnName();
+        String  defaultText;
+
+        if ( defaultInfo.isGeneratedColumn() ) { defaultText = "default"; }
+        else { defaultText = columnDescriptor.getDefaultInfo().getDefaultText(); }
+            
 		/* Need to use delimited identifiers for all object names
 		 * to ensure correctness.
 		 */

@@ -961,6 +961,319 @@ public class GeneratedColumnsTest extends BaseJDBCTestCase
              
     }
         
+    /**
+     * <p>
+     * Various tests involving the DEFAULT literal in UPDATE statements.
+     * </p>
+     */
+    public  void    test_010_updateDefaultLiteral()
+        throws Exception
+    {
+        Connection  conn = getConnection();
+
+        //
+        // Schema
+        //
+        goodStatement
+            (
+             conn,
+             "create table t_ud_1( a int, b int generated always as ( a*a ) , c int )"
+             );
+        goodStatement
+            (
+             conn,
+             "create table t_ud_2( a int, b int generated always as ( a*c ) , c int )"
+             );
+
+        // initial values
+        goodStatement
+            (
+             conn,
+             "insert into t_ud_1( a ) values ( 1 ), ( 2 )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_ud_2( a ) values ( 1 ), ( 2 )"
+             );
+
+        //
+        // Tests of generated column depending on one other column.
+        //
+        expectCompilationError
+            (
+             CANT_OVERRIDE_GENERATION_CLAUSE,
+             "update t_ud_1 set b = a*a"
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_ud_1 order by a",
+             new String[][]
+             {
+                 { "1" ,         "1" ,        null },
+                 { "2" ,         "4" ,        null },
+             },
+             false
+             );
+        
+        goodStatement
+            (
+             conn,
+             "update t_ud_1 set c = -1, b = default"
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_ud_1 order by a",
+             new String[][]
+             {
+                 { "1" ,         "1" ,        "-1" },
+                 { "2" ,         "4" ,        "-1" },
+             },
+             false
+             );
+
+        goodStatement
+            (
+             conn,
+             "update t_ud_1 set a = 2*a, b = default"
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_ud_1 order by a",
+             new String[][]
+             {
+                 { "2" ,         "4" ,        "-1" },
+                 { "4" ,         "16" ,        "-1" },
+             },
+             false
+             );
+
+
+        //
+        // Tests of generated column depending on two other columns.
+        //
+        expectCompilationError
+            (
+             CANT_OVERRIDE_GENERATION_CLAUSE,
+             "update t_ud_2 set b = a*c"
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_ud_2 order by a",
+             new String[][]
+             {
+                 { "1" ,         null,        null },
+                 { "2" ,         null,        null },
+             },
+             false
+             );
+        
+        goodStatement
+            (
+             conn,
+             "update t_ud_2 set b = default"
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_ud_2 order by a",
+             new String[][]
+             {
+                 { "1" ,         null,        null },
+                 { "2" ,         null,        null },
+             },
+             false
+             );
+
+        goodStatement
+            (
+             conn,
+             "update t_ud_2 set c = -5"
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_ud_2 order by a",
+             new String[][]
+             {
+                 { "1" ,         "-5" ,        "-5" },
+                 { "2" ,         "-10" ,        "-5" },
+             },
+             false
+             );
+
+        goodStatement
+            (
+             conn,
+             "update t_ud_2 set c = -3, b = default"
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_ud_2 order by a",
+             new String[][]
+             {
+                 { "1" ,         "-3" ,        "-3" },
+                 { "2" ,         "-6" ,        "-3" },
+             },
+             false
+             );
+
+        goodStatement
+            (
+             conn,
+             "update t_ud_2 set a = 2*a, b = default"
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_ud_2 order by a",
+             new String[][]
+             {
+                 { "2" ,         "-6" ,        "-3" },
+                 { "4" ,         "-12" ,        "-3" },
+             },
+             false
+             );
+
+        goodStatement
+            (
+             conn,
+             "update t_ud_2 set a = a - 1, b = default, c = 4"
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_ud_2 order by a",
+             new String[][]
+             {
+                 { "1" ,         "4" ,        "4" },
+                 { "3" ,         "12" ,        "4" },
+             },
+             false
+             );
+
+    }
+
+    /**
+     * <p>
+     * Basic tests for altering a table and adding a generated column.
+     * </p>
+     */
+    public  void    test_011_basicAlter()
+        throws Exception
+    {
+        Connection  conn = getConnection();
+
+        //
+        // Schema
+        //
+        goodStatement
+            (
+             conn,
+             "create table t_alt_1( a int, c int )"
+             );
+        goodStatement
+            (
+             conn,
+             "create function f_alt_deterministic( a int )\n" +
+             "returns int\n" +
+             "language java\n" +
+             "deterministic\n" +
+             "parameter style java\n" +
+             "no sql\n" +
+             "external name 'java.lang.Math.abs'\n"
+             );
+        goodStatement
+            (
+             conn,
+             "create function f_alt_non_deterministic( a int )\n" +
+             "returns int\n" +
+             "language java\n" +
+             "parameter style java\n" +
+             "no sql\n" +
+             "external name 'java.lang.Math.abs'\n"
+             );
+
+        //
+        // Initial values
+        //
+        goodStatement
+            (
+             conn,
+             "insert into t_alt_1( a ) values ( 1 ), ( 2 )"
+             );
+
+        //
+        // Now alter the table and add a generated column.
+        //
+        goodStatement
+            (
+             conn,
+             "alter table t_alt_1 add column b int generated always as ( -a )"
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_alt_1 order by a",
+             new String[][]
+             {
+                 { "1" ,         null,        "-1" },
+                 { "2" ,         null,        "-2" },
+             },
+             false
+             );
+
+        goodStatement
+            (
+             conn,
+             "insert into t_alt_1( a ) values ( 3 ), ( 4 )"
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_alt_1 order by a",
+             new String[][]
+             {
+                 { "1" ,         null,        "-1" },
+                 { "2" ,         null,        "-2" },
+                 { "3" ,         null,        "-3" },
+                 { "4" ,         null,        "-4" },
+             },
+             false
+             );
+
+        expectCompilationError
+            (
+             UNSTABLE_RESULTS,
+             "alter table t_alt_1 add column d int generated always as ( f_alt_non_deterministic( a ) )"
+             );
+
+        goodStatement
+            (
+             conn,
+             "alter table t_alt_1 add column d int generated always as ( f_alt_deterministic( a ) )"
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_alt_1 order by a",
+             new String[][]
+             {
+                 { "1" ,         null,        "-1",    "1" },
+                 { "2" ,         null,        "-2",    "2" },
+                 { "3" ,         null,        "-3",    "3" },
+                 { "4" ,         null,        "-4",    "4" },
+             },
+             false
+             );
+
+    }
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // MINIONS

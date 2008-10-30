@@ -81,6 +81,7 @@ import java.lang.reflect.Modifier;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Properties;
 import java.util.Vector;
 
@@ -1109,17 +1110,18 @@ public final class UpdateNode extends DMLModStatementNode
 		throws StandardException
 	{
         ResultColumnList        updateColumnList = updateSet.getResultColumns();
+        int                             count = updateColumnList.size();
         ColumnDescriptorList    generatedColumns = baseTable.getGeneratedColumns();
         int                                 generatedColumnCount = generatedColumns.size();
 		int		                        columnCount = baseTable.getMaxColumnID();
-		FormatableBitSet	        columnMap = new FormatableBitSet(columnCount + 1);
+        HashSet                     updatedColumns = new HashSet();
         UUID                            tableID = baseTable.getObjectID();
         
-		int[]	changedColumnIds = updateColumnList.sortMe();
-
-		for (int ix = 0; ix < changedColumnIds.length; ix++)
+		for (int ix = 0; ix < count; ix++)
 		{
-			columnMap.set(changedColumnIds[ix]);
+			String      name = ((ResultColumn)updateColumnList.elementAt( ix )).getName();
+
+            updatedColumns.add( name );
 		}
 
         for ( int gcIdx = 0; gcIdx < generatedColumnCount; gcIdx++ )
@@ -1129,13 +1131,18 @@ public final class UpdateNode extends DMLModStatementNode
             int[]                       mentionedColumns = defaultInfo.getReferencedColumnIDs();
             int                         mentionedColumnCount = mentionedColumns.length;
 
+            // handle the case of setting a generated column to the DEFAULT
+            // literal
+            if ( updatedColumns.contains( gc.getColumnName() ) ) { affectedGeneratedColumns.add( tableID, gc ); }
+
             // figure out if this generated column is affected by the
             // update
             for ( int mcIdx = 0; mcIdx < mentionedColumnCount; mcIdx++ )
             {
-                int             mentionedColumnID = mentionedColumns[ mcIdx ];
+                ColumnDescriptor    mentionedColumn = baseTable.getColumnDescriptor( mentionedColumns[ mcIdx ] );
+                String                      mentionedColumnName = mentionedColumn.getColumnName();
 
-                if ( columnMap.isSet( mentionedColumnID ) )
+                if ( updatedColumns.contains( mentionedColumnName ) )
                 {
                     // Yes, we are updating one of the columns mentioned in
                     // this generation clause.
@@ -1143,7 +1150,7 @@ public final class UpdateNode extends DMLModStatementNode
                     
                     // If the generated column isn't in the update list yet,
                     // add it.
-                    if ( !columnMap.isSet( gc.getPosition() ) )
+                    if ( !updatedColumns.contains( gc.getColumnName() ) )
                     {
                         addedGeneratedColumns.add( tableID, gc );
                         
