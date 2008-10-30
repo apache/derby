@@ -864,7 +864,8 @@ class ij {
 
 	/**
 	 * Return a resultset of enabled roles, sorted on ROLEID. No information
-	 * schema is available, we select from VTI SYSCS_DIAG.ENABLED_ROLES instead.
+	 * schema is available, we select from VTI SYSCS_DIAG.CONTAINED_ROLES
+	 * instead.
 	 */
 	public ijResult showEnabledRoles() throws SQLException {
 		ResultSet rs = null;
@@ -874,7 +875,10 @@ class ij {
 			if (currentConnEnv.getSession().getIsDNC() ||
 				currentConnEnv.getSession().getIsEmbeddedDerby()) {
 				rs = theConnection.createStatement().executeQuery
-					("SELECT * FROM SYSCS_DIAG.ENABLED_ROLES ORDER BY ROLEID");
+					("SELECT * FROM" +
+					"	 TABLE(" +
+					"	   SYSCS_DIAG.CONTAINED_ROLES(CURRENT_ROLE)) T " +
+					"ORDER BY ROLEID");
 
 				int[] displayColumns = new int[] {
 					rs.findColumn("ROLEID")

@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.diag.EnabledRoles
+   Derby - Class org.apache.derby.diag.ContainedRoles
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -28,37 +28,74 @@ import org.apache.derby.iapi.sql.conn.ConnectionUtil;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.RoleClosureIterator;
+import org.apache.derby.iapi.sql.dictionary.RoleGrantDescriptor;
+import org.apache.derby.iapi.sql.ResultColumnDescriptor;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.Limits;
 import org.apache.derby.iapi.error.PublicAPI;
-
+import org.apache.derby.iapi.util.IdUtil;
 import org.apache.derby.vti.VTITemplate;
-import org.apache.derby.vti.VTICosting;
-import org.apache.derby.vti.VTIEnvironment;
 
 import org.apache.derby.impl.jdbc.EmbedResultSetMetaData;
-import org.apache.derby.iapi.sql.ResultColumnDescriptor;
 
 
 /**
- * EnabledRoles shows all enabled roles for the current session.
+ * Contained roles shows all roles contained in the given identifier, or if the
+ * second argument, if given, is not 0, the inverse relation; all roles who
+ * contain the given role identifier.
  *
  * <p>To use it, query it as follows:
  * </p>
- * <pre> SELECT * FROM SYSCS_DIAG.ENABLED_ROLES; </pre>
+ * <pre> SELECT * FROM TABLE(SUSCS_DIAG.CONTAINED_ROLES('FOO')) t; </pre>
+ * <pre> SELECT * FROM TABLE(CONTAINED_ROLES('FOO', 1)) t; </pre>
  *
  * <p>The following columns will be returned:
  *    <ul><li>ROLEID -- VARCHAR(128) NOT NULL
  *    </ul>
  * </p>
  */
-public final class EnabledRoles extends VTITemplate {
+public class ContainedRoles extends VTITemplate {
 
     RoleClosureIterator rci;
     String nextRole;
     boolean initialized;
+    String role;
+    boolean inverse;
 
-    public EnabledRoles() {
+    /**
+     * Constructor.
+     *
+     * @param roleid The role identifier for which we want to find the set of
+     *               contained roles (inclusive). The identifier is expected to
+     *               be in SQL form (not case normal form).
+     * @param inverse If != 0, use the inverse relation: find those roles which
+     *                all contain roleid (inclusive).
+     * @throws SQLException This is a public API, so the internal exception is
+     *                      wrapped in SQLException.
+     */
+    public ContainedRoles(String roleid, int inverse) throws SQLException {
+        try {
+            if (roleid != null) {
+                role = IdUtil.parseSQLIdentifier(roleid);
+            }
+
+            this.inverse = (inverse != 0);
+        } catch (StandardException e) {
+            throw PublicAPI.wrapStandardException(e);
+        }
+    }
+
+    /**
+     * Constructor.
+     *
+     * @param roleid The role identifier for which we want to find the set of
+     *               contained roles (inclusive). The identifier is expected to
+     *               be in SQL form (not case normal form).
+     * @throws SQLException This is a public API, so the internal exception is
+     *                      wrapped in SQLException.
+     */
+    public ContainedRoles(String roleid)  throws SQLException {
+        this(roleid, 0);
     }
 
     /**
@@ -66,15 +103,16 @@ public final class EnabledRoles extends VTITemplate {
      */
     public boolean next() throws SQLException {
         try {
-			// Need to defer initialization here to make sure we have an
-			// activation.
+            // Need to defer initialization here to make sure we have an
+            // activation.
             if (!initialized) {
                 initialized = true;
                 LanguageConnectionContext lcc = ConnectionUtil.getCurrentLCC();
-                String role = lcc.getCurrentRoleId(lcc.getLastActivation());
+                DataDictionary dd = lcc.getDataDictionary();
+                RoleGrantDescriptor rdDef =
+                    dd.getRoleDefinitionDescriptor(role);
 
-                if (role != null) {
-                    DataDictionary dd = lcc.getDataDictionary();
+                if (rdDef != null) {
                     lcc.beginNestedTransaction(true);
                     try {
                         int mode = dd.startReading(lcc);
@@ -82,7 +120,7 @@ public final class EnabledRoles extends VTITemplate {
                             rci = dd.createRoleClosureIterator
                                 (lcc.getLastActivation().
                                      getTransactionController(),
-                                 role, true);
+                                 role, !inverse);
                         } finally {
                             dd.doneReading(mode, lcc);
                         }
@@ -133,6 +171,6 @@ public final class EnabledRoles extends VTITemplate {
     };
 
     private static final ResultSetMetaData metadata =
-		new EmbedResultSetMetaData(columnInfo);
+        new EmbedResultSetMetaData(columnInfo);
 
 }

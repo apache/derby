@@ -12060,8 +12060,6 @@ public final class	DataDictionaryImpl
 			{"STATEMENT_CACHE", "org.apache.derby.diag.StatementCache"},
 			{"TRANSACTION_TABLE", "org.apache.derby.diag.TransactionTable"},
 			{"ERROR_MESSAGES", "org.apache.derby.diag.ErrorMessages"},
-			{"ENABLED_ROLES", "org.apache.derby.diag.EnabledRoles"},
-			
 	};
 	
 	private String[][] DIAG_VTI_TABLE_FUNCTION_CLASSES =
@@ -12069,6 +12067,7 @@ public final class	DataDictionaryImpl
 			{"SPACE_TABLE", "org.apache.derby.diag.SpaceTable"},
 			{"ERROR_LOG_READER", "org.apache.derby.diag.ErrorLogReader"},
 			{"STATEMENT_DURATION", "org.apache.derby.diag.StatementDuration"},
+			{"CONTAINED_ROLES", "org.apache.derby.diag.ContainedRoles"},
 	};
 
 	/**

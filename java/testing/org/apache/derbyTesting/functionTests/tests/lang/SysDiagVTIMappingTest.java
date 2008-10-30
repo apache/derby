@@ -679,15 +679,23 @@ public final class SysDiagVTIMappingTest extends BaseJDBCTestCase {
     }
 
     /**
-     * Basic sanity test for SYSCS_DIAG.ENABLED_ROLES. See also the
-     * tools/ij_show_roles.sql test for a test that actually defines roles.
+     * Basic sanity test for SYSCS_DIAG.CONTAINED_ROLES. See also the
+     * tools/ij_show_roles.sql test for a test that actually defines and uses
+     * roles with this VTI.
      */
-    public void testEnabledRoles() throws SQLException
+    public void testContainedRoles() throws SQLException
     {
         Statement   st = createStatement();
 
+        // 2-arg version
         ResultSet rs = st.executeQuery
-            ("select * from syscs_diag.enabled_roles");
+            ("select * from table(syscs_diag.contained_roles(null, 0))t");
+
+        JDBC.assertEmpty(rs);
+
+        // 1-arg version
+        rs = st.executeQuery
+            ("select * from table(syscs_diag.contained_roles(null))t");
 
         JDBC.assertEmpty(rs);
 

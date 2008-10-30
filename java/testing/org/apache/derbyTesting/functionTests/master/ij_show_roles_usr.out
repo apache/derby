@@ -13,6 +13,33 @@ ROLEID
 ------------------------------
 A                             
 B                             
+ij> select * from table(syscs_diag.contained_roles(current_role, 0)) t order by roleid;
+ROLEID                                                                                                                          
+--------------------------------------------------------------------------------------------------------------------------------
+A                                                                                                                               
+B                                                                                                                               
+ij> select * from table(syscs_diag.contained_roles(current_role)) t order by roleid;
+ROLEID                                                                                                                          
+--------------------------------------------------------------------------------------------------------------------------------
+A                                                                                                                               
+B                                                                                                                               
+ij> select * from table(syscs_diag.contained_roles(current_role, 1)) t order by roleid;
+ROLEID                                                                                                                          
+--------------------------------------------------------------------------------------------------------------------------------
+B                                                                                                                               
+ij> select * from table(syscs_diag.contained_roles('a', 0)) t order by roleid;
+ROLEID                                                                                                                          
+--------------------------------------------------------------------------------------------------------------------------------
+A                                                                                                                               
+ij> select * from table(syscs_diag.contained_roles('a')) t order by roleid;
+ROLEID                                                                                                                          
+--------------------------------------------------------------------------------------------------------------------------------
+A                                                                                                                               
+ij> select * from table(syscs_diag.contained_roles('a', 1)) t order by roleid;
+ROLEID                                                                                                                          
+--------------------------------------------------------------------------------------------------------------------------------
+A                                                                                                                               
+B                                                                                                                               
 ij> set role none;
 0 rows inserted/updated/deleted
 ij> show enabled_roles;
