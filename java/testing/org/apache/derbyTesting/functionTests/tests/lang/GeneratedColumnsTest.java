@@ -618,6 +618,20 @@ public class GeneratedColumnsTest extends BaseJDBCTestCase
         goodStatement
             (
              conn,
+             "create function f_bt_minus\n" +
+             "(\n" +
+             "    a int\n" +
+             ")\n" +
+             "returns int\n" +
+             "language java\n" +
+             "deterministic\n" +
+             "parameter style java\n" +
+             "no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.GeneratedColumnsTest.minus'\n"
+             );
+        goodStatement
+            (
+             conn,
              "create function triggerReports()\n" +
              "returns TABLE\n" +
              "  (\n" +
@@ -661,7 +675,7 @@ public class GeneratedColumnsTest extends BaseJDBCTestCase
         goodStatement
             (
              conn,
-             "create table t1_trig( a int, b int generated always as ( f_minus(a) ), c int )\n"
+             "create table t1_trig( a int, b int generated always as ( f_bt_minus(a) ), c int )\n"
              );
         goodStatement
             (
@@ -834,7 +848,21 @@ public class GeneratedColumnsTest extends BaseJDBCTestCase
         goodStatement
             (
              conn,
-             "create table t1_for( a int, b int generated always as ( f_minus(a) ) primary key, c int )"
+             "create function f_bfk_minus\n" +
+             "(\n" +
+             "    a int\n" +
+             ")\n" +
+             "returns int\n" +
+             "language java\n" +
+             "deterministic\n" +
+             "parameter style java\n" +
+             "no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.GeneratedColumnsTest.minus'\n"
+             );
+        goodStatement
+            (
+             conn,
+             "create table t1_for( a int, b int generated always as ( f_bfk_minus(a) ) primary key, c int )"
              );
         goodStatement
             (
@@ -849,7 +877,7 @@ public class GeneratedColumnsTest extends BaseJDBCTestCase
         goodStatement
             (
              conn,
-             "create table t4_for( a int, b int generated always as ( f_minus(a) ) references t3_for( b ), c int )"
+             "create table t4_for( a int, b int generated always as ( f_bfk_minus(a) ) references t3_for( b ), c int )"
              );
         
         //
