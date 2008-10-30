@@ -397,7 +397,8 @@ public class AlterTableNode extends DDLStatementNode
 			 * the check constraints and generation clauses.
 			 */
 			if  (numCheckConstraints > 0) { tableElementList.bindAndValidateCheckConstraints(fromList); }
-			if  (numGenerationClauses > 0) { tableElementList.bindAndValidateGenerationClauses(fromList); }
+			if  (numGenerationClauses > 0)
+            { tableElementList.bindAndValidateGenerationClauses(fromList, baseTable.makeColumnMap( baseTable.getGeneratedColumns() ) ); }
 		}
 
 		//Check if we are in alter table to update the statistics. If yes, then

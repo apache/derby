@@ -25,6 +25,7 @@ import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.reference.Limits;
 
+import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
@@ -438,7 +439,7 @@ public class CreateTableNode extends DDLStatementNode
 			 * the check constraints and generation clauses.
 			 */
 			if  (numCheckConstraints > 0) { tableElementList.bindAndValidateCheckConstraints(fromList); }
-			if  (numGenerationClauses > 0) { tableElementList.bindAndValidateGenerationClauses(fromList); }
+			if  (numGenerationClauses > 0) { tableElementList.bindAndValidateGenerationClauses(fromList, new FormatableBitSet() ); }
 		}
 	}
 

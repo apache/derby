@@ -1982,6 +1982,12 @@ Guide.
             </msg>
 
             <msg>
+                <name>42XA4</name>
+                <text>The generation clause for column '{0}' references other generated columns. This is not allowed.</text>
+                <arg>columnName</arg>
+            </msg>
+
+            <msg>
                 <name>42Y00</name>
                 <text>Class '{0}' does not implement org.apache.derby.iapi.db.AggregateDefinition and thus cannot be used as an aggregate expression.</text>
                 <arg>className</arg>

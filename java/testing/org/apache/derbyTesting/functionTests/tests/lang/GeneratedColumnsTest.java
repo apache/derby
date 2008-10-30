@@ -59,9 +59,12 @@ public class GeneratedColumnsTest extends BaseJDBCTestCase
     private static  final   String  REDUNDANT_CLAUSE = "42613";
     private static  final   String  UNSTABLE_RESULTS = "42XA2";
     private static  final   String  CANT_OVERRIDE_GENERATION_CLAUSE = "42XA3";
+    private static  final   String  CANT_REFERENCE_GENERATED_COLUMN = "42XA4";
     private static  final   String  CONSTRAINT_VIOLATION = "23513";
     private static  final   String  FOREIGN_KEY_VIOLATION = "23503";
     private static  final   String  ILLEGAL_DUPLICATE = "23505";
+    private static  final   String  MISPLACED_SELECT = "42X01";
+    private static  final   String  COLUMN_OUT_OF_SCOPE = "42X04";
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -1302,6 +1305,87 @@ public class GeneratedColumnsTest extends BaseJDBCTestCase
 
     }
     
+    /**
+     * <p>
+     * Verify that generated columns can't refer to one another.
+     * </p>
+     */
+    public  void    test_012_referencedColumns()
+        throws Exception
+    {
+        Connection  conn = getConnection();
+
+        expectCompilationError
+            (
+             CANT_REFERENCE_GENERATED_COLUMN,
+             "create table t_recurse_1( a int, b int generated always as ( -a ), c int generated always as ( b*b) )"
+             );
+        expectCompilationError
+            (
+             CANT_REFERENCE_GENERATED_COLUMN,
+             "create table t_recurse_1( a int, b int generated always as ( -b ) )"
+             );
+        
+        goodStatement
+            (
+             conn,
+             "create table t_recurse_1( a int, b int generated always as ( -a ) )"
+             );
+        expectCompilationError
+            (
+             CANT_REFERENCE_GENERATED_COLUMN,
+             "alter table t_recurse_1 add column c int generated always as ( b*b )"
+             );
+        expectCompilationError
+            (
+             CANT_REFERENCE_GENERATED_COLUMN,
+             "alter table t_recurse_1 add column c int generated always as ( -c )"
+             );
+    }
+
+    /**
+     * <p>
+     * Various miscellaneous illegal create/alter table statements.
+     * </p>
+     */
+    public  void    test_013_badReferences()
+        throws Exception
+    {
+        Connection  conn = getConnection();
+
+        goodStatement
+            (
+             conn,
+             "create table t_br_1( a int )"
+             );
+        goodStatement
+            (
+             conn,
+             "create table t_br_3( a int )"
+             );
+        
+        expectCompilationError
+            (
+             COLUMN_OUT_OF_SCOPE,
+             "create table t_br_2( a int, b int generated always as ( t_br_1.a ) )"
+             );
+        expectCompilationError
+            (
+             MISPLACED_SELECT,
+             "create table t_br_2( a int, b int generated always as ( select a from t_br_1 ) )"
+             );
+        expectCompilationError
+            (
+             COLUMN_OUT_OF_SCOPE,
+             "alter table t_br_3 add column b int generated always as ( t_br_1.a )"
+             );
+        expectCompilationError
+            (
+             MISPLACED_SELECT,
+             "alter table t_br_3 add column b int generated always as ( select a from t_br_1 )"
+             );
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // MINIONS

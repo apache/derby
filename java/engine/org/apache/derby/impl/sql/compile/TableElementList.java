@@ -21,6 +21,7 @@
 
 package	org.apache.derby.impl.sql.compile;
 
+import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.error.StandardException;
@@ -656,16 +657,20 @@ public class TableElementList extends QueryTreeNodeVector
 	 * the specified FromList.  
 	 *
 	 * @param fromList		The FromList in question.
+	 * @param generatedColumns Bitmap of generated columns in the table. Vacuous for CREATE TABLE, but may be non-trivial for ALTER TABLE. This routine may set bits for new generated columns.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	void bindAndValidateGenerationClauses(FromList fromList)
+	void bindAndValidateGenerationClauses(FromList fromList, FormatableBitSet generatedColumns )
 		throws StandardException
 	{
 		CompilerContext cc;
 		FromBaseTable				table = (FromBaseTable) fromList.elementAt(0);
+        int                                 columnCount = table.getResultColumns().size();
 		int						  size = size();
 
+        generatedColumns.grow( columnCount + 1 );
+        
 		cc = getCompilerContext();
 
 		Vector aggregateVector = new Vector();
@@ -689,7 +694,7 @@ public class TableElementList extends QueryTreeNodeVector
 				continue;
 			}
 
-		    generationClauseNode = cdn.getGenerationClauseNode();
+            generationClauseNode = cdn.getGenerationClauseNode();
 
 			// bind the check condition
 			// verify that it evaluates to a boolean
@@ -763,6 +768,9 @@ public class TableElementList extends QueryTreeNodeVector
 			int		numReferenced = rcl.countReferencedColumns();
 			int[]	generationClauseColumnReferences = new int[numReferenced];
 
+            int     position = rcl.getPosition( cdn.getColumnName(), 1 );
+            generatedColumns.set( position );
+        
 			rcl.recordColumnReferences(generationClauseColumnReferences, 1);
 
             DefaultInfoImpl dii = new DefaultInfoImpl
@@ -774,6 +782,36 @@ public class TableElementList extends QueryTreeNodeVector
 			 */
 			rcl.clearColumnReferences();
 		}
+
+        //
+        // Now verify that none of the generated columns reference other
+        // generated columns.
+        //
+		for (int index = 0; index < size; index++)
+		{
+			ColumnDefinitionNode cdn;
+			TableElementNode element = (TableElementNode) elementAt(index);
+
+			if (! (element instanceof ColumnDefinitionNode)) { continue; }
+
+			cdn = (ColumnDefinitionNode) element;
+
+			if (!cdn.hasGenerationClause()) { continue; }
+
+            int[]   referencedColumns = cdn.getDefaultInfo().getReferencedColumnIDs();
+            int     count = referencedColumns.length;
+
+            for ( int i = 0; i < count; i++ )
+            {
+                int         referencedColumnID = referencedColumns[ i ];
+                if ( generatedColumns.isSet( referencedColumnID ) )
+                {
+                    throw StandardException.newException(SQLState.LANG_CANT_REFERENCE_GENERATED_COLUMN, cdn.getColumnName());
+                }
+            }   // end of loop through referenced columns
+
+        }       // end of loop through generated columns
+
 	}
 
 	/**

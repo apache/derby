@@ -411,6 +411,25 @@ public class TableDescriptor extends TupleDescriptor
 	}
 
 	/**
+	 * Given a list of columns in the table, construct a bit  map of those
+	 * columns' ids.
+	 */
+	public FormatableBitSet makeColumnMap( ColumnDescriptorList cdl )
+	{
+		FormatableBitSet    result = new FormatableBitSet( columnDescriptorList.size() + 1 );
+        int                         count = cdl.size();
+
+        for ( int i = 0; i < count; i++ )
+        {
+            ColumnDescriptor    cd = cdl.elementAt( i );
+
+            result.set( cd.getPosition() );
+        }
+
+        return result;
+	}
+
+	/**
 	 * Gets the highest column id in the table. For now this is the same as
 	 * the number of columns. However, in the future, after we implement
 	 * ALTER TABLE DROP COLUMN, this correspondence won't hold any longer.

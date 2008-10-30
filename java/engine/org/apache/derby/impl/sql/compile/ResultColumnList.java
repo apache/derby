@@ -3015,6 +3015,28 @@ public class ResultColumnList extends QueryTreeNodeVector
 	}
 
 	/**
+	 * Get the position of first result column with the given name.
+	 *
+	 * @param name       Name of the column
+	 * @param basis		0 (for 0-based ids) or 1 (for 1-based ids)
+	 */
+	public int getPosition( String name, int basis )
+	{
+		int size = size();
+		for (int index = 0; index < size; index++)
+		{
+			ResultColumn rc = (ResultColumn) elementAt(index);
+
+			if ( name.equals( rc.getName() ) )
+			{
+				return index + basis;
+			}
+		}
+
+        return -1;
+	}
+
+	/**
 	 * Record the top level ColumnReferences in the specified array
 	 * and table map
 	 * This is useful when checking for uniqueness conditions.
