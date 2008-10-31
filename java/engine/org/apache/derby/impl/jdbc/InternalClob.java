@@ -40,31 +40,6 @@ import java.sql.SQLException;
 interface InternalClob {
 
     /**
-     * Gets the number of bytes contained in the Clob.
-     *
-     * @return Number of bytes in the Clob.
-     * @throws IOException if accessing underlying I/O resources fail
-     * @throws SQLException if accessing underlying resources fail
-     */
-    long getByteLength() throws IOException, SQLException;
-
-    /**
-     * Obtains the byte position for the given character position.
-     * <p>
-     * The range of valid character positions is 
-     *  <code>1 - Clob.getCharLength() +1</code>, inclusive. The upper bound is
-     * used when appending to the Clob. Note that specifying a character
-     * position that is more than one longer than the Clob raises an exception.
-     *
-     * @param charPos character position. The first position is <code>1</code>.
-     * @return A 0-based byte position.
-     * @throws EOFException if the position is bigger than the Clob
-     * @throws IOException if accessing the underlying I/O resources fail
-     * @throws SQLException if the specified character position is invalid
-     */
-    long getBytePosition(long charPos) throws IOException, SQLException;
-
-    /**
      * Gets the number of characters in the Clob.
      *
      * @return Number of characters in the Clob.
@@ -81,10 +56,15 @@ interface InternalClob {
      * stream, it is up to the Clob representation which one it uses.
      * <p>
      * This stream may be an internal store stream, and should not be directly
-     * published to the end user (returned through the JDBC API). There are two
-     * motivations for this; the stream may be closed by the end user when it is
-     * not supposed to, and operations on the stream might throw exceptions we
-     * do not want to present to the end user unwrapped.
+     * published to the end user (returned through the JDBC API). There are
+     * three reasons for this:
+     * <ul> <li>the stream may be closed by the end user when it is
+     *          not supposed to</li>
+     *      <li>operations on the stream might throw exceptions we don't want to
+     *          present to the end user unwrapped</li>
+     *      <li>the stream may contain a Derby specific end-of-stream marker
+     *      </li>
+     * </ul>
      * <p>
      * The primary use of this method is to clone the Clob contents without
      * going via char (or String). Make sure the clone uses the same encoding

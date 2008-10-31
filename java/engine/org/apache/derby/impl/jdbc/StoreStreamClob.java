@@ -53,9 +53,6 @@ import org.apache.derby.iapi.util.UTF8Util;
 final class StoreStreamClob
     implements InternalClob {
 
-    /** Maximum value used when requesting bytes/chars to be skipped. */
-    private static final long SKIP_BUFFER_SIZE = 8*1024; // 8 KB
-
     /** Tells whether this Clob has been released or not. */
     private volatile boolean released = false;
 
@@ -109,45 +106,6 @@ final class StoreStreamClob
         if (!released) {
             this.positionedStoreStream.closeStream();
             this.released = true;
-        }
-    }
-
-    /**
-     * Returns the number of bytes in the Clob.
-     *
-     * @return The number of bytes in the Clob.
-     * @throws IOException if accessing the I/O resources fail
-     * @throws SQLException if accessing the store resources fail
-     */
-    public long getByteLength()
-            throws IOException, SQLException {
-        checkIfValid();
-        // Read through the whole stream to get the length.
-        long byteLength = 0;
-        try {
-            this.conChild.setupContextStack();
-            this.positionedStoreStream.reposition(0L);
-            // See if length is encoded in the stream.
-            int us1 = this.positionedStoreStream.read();
-            int us2 = this.positionedStoreStream.read();
-            byteLength = (us1 << 8) + (us2 << 0);
-            if (byteLength == 0) {
-                while (true) {
-                    long skipped =
-                        this.positionedStoreStream.skip(SKIP_BUFFER_SIZE);
-                    if (skipped <= 0) {
-                        break;
-                    }
-                    byteLength += skipped;
-                }
-                // Subtract 3 bytes for the end-of-stream marker.
-                byteLength -= 3;
-            }
-            return byteLength;
-        } catch (StandardException se) {
-            throw Util.generateCsSQLException(se);
-        } finally {
-            this.conChild.restoreContextStack();
         }
     }
 
@@ -231,20 +189,6 @@ final class StoreStreamClob
             leftToSkip -= skipped;
         }
         return reader;
-    }
-
-    /**
-     * Returns the byte position for the specified character position.
-     *
-     * @param charPos character position. First character is at position 1.
-     * @return Corresponding byte position. First byte is at position 0.
-     * @throws EOFException if the position is bigger then the Clob
-     * @throws IOException if accessing the underlying I/O resources fail
-     * @throws SQLException if accessing the underlying store resources fail
-     */
-    public long getBytePosition(long charPos)
-            throws IOException, SQLException {
-        return UTF8Util.skipFully(getRawByteStream(), charPos -1);
     }
 
     /**

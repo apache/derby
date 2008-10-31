@@ -170,9 +170,9 @@ final class TemporaryClob implements InternalClob {
      *      the Clob length +1
      * @throws IOException if accessing underlying I/O resources fail
      */
-    public synchronized long getBytePosition (final long charPos)
+    //@GuardedBy(this)
+    private long getBytePosition (final long charPos)
             throws IOException {
-        checkIfValid();
         long bytePos;
         if (charPos == this.posCache.getCharPos()) {
             // We already know the position.
@@ -395,8 +395,8 @@ final class TemporaryClob implements InternalClob {
     private void copyClobContent(InternalClob clob)
             throws IOException, SQLException {
         try {
-            long byteLength = clob.getByteLength();
-            this.bytes.copyData(clob.getRawByteStream(), byteLength);
+            // Specify LONG.MAX_VALUE to copy data until EOF.
+            this.bytes.copyData(clob.getRawByteStream(), Long.MAX_VALUE);
         } catch (StandardException se) {
             throw Util.generateCsSQLException(se);
         }
