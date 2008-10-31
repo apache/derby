@@ -610,6 +610,76 @@ public class BlobTest
      }
      
     /**
+     * Tests the return count on insertion when the Blob is represented as a
+     * byte array in memory.
+     */
+    public void testSetBytesReturnValueSmall()
+            throws SQLException {
+        Blob myBlob = getConnection().createBlob();
+        byte[] byteBatch = new byte[] {
+                    0x65, 0x66, 0x67, 0x68, 0x69,
+                    0x65, 0x66, 0x67, 0x68, 0x69
+                };
+        assertEquals("Wrong insertion count",
+                byteBatch.length, myBlob.setBytes(1, byteBatch));
+        // Try again, overwrites the bytes.
+        assertEquals("Wrong insertion count",
+                byteBatch.length, myBlob.setBytes(1, byteBatch));
+        // Last time, start at a different index.
+        assertEquals("Wrong insertion count",
+                byteBatch.length, myBlob.setBytes(4, byteBatch));
+    }
+
+    /**
+     * Tests the return count on insertion when the Blob is represented as a
+     * temporary file on disk.
+     */
+    public void testSetBytesReturnValueLarge()
+            throws IOException, SQLException {
+        Blob myBlob = getConnection().createBlob();
+        // Insert one MB, should cause Blob to spill to disk.
+        OutputStream blobWriter = myBlob.setBinaryStream(1);
+        transferAlphabetData(blobWriter, 1*1024*1024);
+        byte[] byteBatch = new byte[] {
+                    0x65, 0x66, 0x67, 0x68, 0x69,
+                    0x65, 0x66, 0x67, 0x68, 0x69
+                };
+        assertEquals("Wrong insertion count",
+                byteBatch.length, myBlob.setBytes(1, byteBatch));
+        // Try again, overwrites the bytes.
+        assertEquals("Wrong insertion count",
+                byteBatch.length, myBlob.setBytes(1, byteBatch));
+        // Start at a different, low index.
+        assertEquals("Wrong insertion count",
+                byteBatch.length, myBlob.setBytes(4, byteBatch));
+        // Start at a different, higher index.
+        assertEquals("Wrong insertion count",
+                byteBatch.length, myBlob.setBytes(512*1024, byteBatch));
+    }
+
+    /**
+     * Tests the return count on insertion when the Blob is fetched from the
+     * database and then modified.
+     * <p>
+     * The main point for this test is to provoke the transition from a
+     * read-only internal representation to a writable representation.
+     * For a Blob of "considerable" size, this involved going from a store
+     * stream representation to a {@code LOBStreamControl} representation using
+     * a temporary file.
+     */
+    public void testSetBytesReturnValueLargeStateChange()
+            throws IOException, SQLException {
+        // Get a Blob from the database, don't create an empty one.
+        initializeLongBlob(); // Ignoring id for now, use instance variable.
+        assertEquals("Wrong insertion count",
+                1, blob.setBytes(30000, new byte[] {0x69}));
+        assertEquals("Wrong insertion count",
+                1, blob.setBytes(1, new byte[] {0x69}));
+        assertEquals("Wrong insertion count",
+                2, blob.setBytes(1235, new byte[] {0x69, 0x69}));
+    }
+
+    /**
      * Test that a lock held on the corresponding row is released when free() is
      * called on the Blob object.
      * @throws java.sql.SQLException 
@@ -740,6 +810,23 @@ public class BlobTest
         }
     }
 
+    /**
+     * Transfers the specified number of bytes generated from the modern latin
+     * alphabet (lowercase) to the destination stream.
+     *
+     * @param writer the destination
+     * @param length number of bytes to write
+     * @throws IOException if writing to the destination stream fails
+     */
+    public static void transferAlphabetData(OutputStream writer, long length)
+            throws IOException {
+        byte[] buffer = new byte[8*1024];
+        int bytesRead = 0;
+        LoopingAlphabetStream contents = new LoopingAlphabetStream(length);
+        while ((bytesRead = contents.read(buffer)) > 0) {
+            writer.write(buffer, 0, bytesRead);
+        }
+    }
     
     /**
      * Create test suite for this test.

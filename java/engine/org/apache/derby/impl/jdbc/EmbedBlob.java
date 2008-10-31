@@ -793,39 +793,40 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
 	/////////////////////////////////////////////////////////////////////////
 
 	/**
-    * JDBC 3.0
-    *
-    * Writes the given array of bytes to the BLOB value that this Blob object
-    * represents, starting at position pos, and returns the number of bytes written.
-    *
-    * @param pos - the position in the BLOB object at which to start writing
-    * @param bytes - the array of bytes to be written to the BLOB value that this
-    * Blob object represents
-    * @return the number of bytes written
-    * @exception SQLException Feature not implemented for now.
-	*/
+     * Writes the given array of bytes to the BLOB value that this Blob object
+     * represents, starting at position pos, and returns the number of bytes
+     * written.
+     *
+     * @param pos the position in the BLOB object at which to start writing
+     * @param bytes the array of bytes to be written to the BLOB value that this
+     *       Blob object represents
+     * @return The number of bytes written to the BLOB.
+     * @throws SQLException if writing the bytes to the BLOB fails
+     * @since 1.4
+	 */
 	public int setBytes(long pos, byte[] bytes) throws SQLException {
             return setBytes(pos, bytes, 0, bytes.length);
 	}
 
-   /**
-    * JDBC 3.0
-    *
-    * Writes all or part of the given array of byte array to the BLOB value that
-    * this Blob object represents and returns the number of bytes written.
-    * Writing starts at position pos in the BLOB value; len bytes from the given
-    * byte array are written.
-    *
-    * @param pos - the position in the BLOB object at which to start writing
-    * @param bytes - the array of bytes to be written to the BLOB value that this
-    * Blob object represents
-    * @param offset - the offset into the array bytes at which to start reading
-    * the bytes to be set
-    * @param len - the number of bytes to be written to the BLOB value from the
-    * array of bytes bytes
-    * @return the number of bytes written
-    * @exception SQLException Feature not implemented for now.
-	*/
+    /**
+     * Writes all or part of the given array of byte array to the BLOB value
+     * that this Blob object represents and returns the number of bytes written.
+     * Writing starts at position pos in the BLOB value; len bytes from the
+     * given byte array are written.
+     *
+     * @param pos the position in the BLOB object at which to start writing
+     * @param bytes the array of bytes to be written to the BLOB value that this
+     *       Blob object represents
+     * @param offset the offset into the byte array at which to start reading
+     *       the bytes to be written
+     * @param len the number of bytes to be written to the BLOB value from the
+     *       array of bytes bytes
+     * @return The number of bytes written to the BLOB.
+     * @throws SQLException if writing the bytes to the BLOB fails
+     * @throws IndexOutOfBoundsException if {@code len} is larger than
+     *       {@code bytes.length - offset}
+     * @since 1.4
+	 */
     public int setBytes(long pos,
             byte[] bytes,
             int offset,
@@ -839,12 +840,12 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
                 if (pos < 1)
                     throw Util.generateCsSQLException(
                         SQLState.BLOB_BAD_POSITION, new Long(pos));
-                len = (int) control.write (bytes, offset, len, pos - 1);
+                control.write (bytes, offset, len, pos - 1);
             }
             else {
                 control = new LOBStreamControl (getEmbedConnection());
                 control.copyData (myStream, length());
-                len = (int) control.write(bytes, offset, len, pos - 1);
+                control.write(bytes, offset, len, pos - 1);
                 myStream.close();
                 streamLength = -1;
                 materialized = true;

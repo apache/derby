@@ -214,13 +214,17 @@ class LOBStreamControl {
     }
 
     /**
-     * Writes part of the byte array.
+     * Writes {@code len} bytes from the specified byte array to the LOB.
+     *
      * @param b byte array
      * @param off offset from where to read from the byte array
-     * @param len number of bytes to be copied
-     * @param pos starting postion
-     * @return new postion
-     * @throws IOException, StandardException
+     * @param len number of bytes to be written
+     * @param pos starting position
+     * @return The position after the bytes have been written to the LOB.
+     * @throws IOException if writing to the LOB fails
+     * @throws StandardException if writing to the LOB fails
+     * @throws IndexOutOfBoundsException if {@code len} is larger than
+     *       {@code b.length - off}
      */
     synchronized long write(byte[] b, int off, int len, long pos)
             throws IOException, StandardException {
