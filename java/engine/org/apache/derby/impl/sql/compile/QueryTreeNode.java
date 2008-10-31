@@ -1502,7 +1502,7 @@ public abstract class QueryTreeNode implements Visitable
 		// if we're in a context that forbids unreliable fragments, raise an error
 		if ( ( getCompilerContext().getReliability() & fragmentBitMask ) != 0 )
 		{
-            throwReliabilityException( fragmentType );
+            throwReliabilityException( fragmentType, fragmentBitMask );
 		}
 	}
 
@@ -1525,7 +1525,7 @@ public abstract class QueryTreeNode implements Visitable
 		if ( ( getCompilerContext().getReliability() & fragmentBitMask ) != 0 )
 		{
             String fragmentTypeTxt = MessageService.getTextMessage( fragmentType );
-            throwReliabilityException( fragmentTypeTxt );
+            throwReliabilityException( fragmentTypeTxt, fragmentBitMask );
 		}
 	}
 
@@ -1535,7 +1535,7 @@ public abstract class QueryTreeNode implements Visitable
      * @param fragmentType Type of fragment as a string, for inclusion in error messages.
      * @exception StandardException        Throws an error, always.
      */
-    private void throwReliabilityException( String fragmentType ) throws StandardException
+    private void throwReliabilityException( String fragmentType, int fragmentBitMask ) throws StandardException
     {
         String sqlState;
 		/* Error string somewhat dependent on operation due to different
@@ -1547,7 +1547,16 @@ public abstract class QueryTreeNode implements Visitable
 		}
 		else if (getCompilerContext().getReliability() == CompilerContext.GENERATION_CLAUSE_RESTRICTION)
 		{
-            sqlState = SQLState.LANG_NON_DETERMINISTIC_GENERATION_CLAUSE;
+            switch ( fragmentBitMask )
+            {
+            case CompilerContext.SQL_IN_ROUTINES_ILLEGAL:
+                sqlState = SQLState.LANG_ROUTINE_CANT_PERMIT_SQL;
+                break;
+
+            default:
+                sqlState = SQLState.LANG_NON_DETERMINISTIC_GENERATION_CLAUSE;
+                break;
+            }
 		}
 		else
 		{

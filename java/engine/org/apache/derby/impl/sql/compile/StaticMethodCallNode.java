@@ -221,6 +221,10 @@ public class StaticMethodCallNode extends MethodCallNode
             {
                 checkReliability( getMethodName(), CompilerContext.NON_DETERMINISTIC_ILLEGAL );
             }
+            if ( permitsSQL( routineInfo ) )
+            {
+                checkReliability( getMethodName(), CompilerContext.SQL_IN_ROUTINES_ILLEGAL );
+            }
 			
 
 
@@ -315,6 +319,24 @@ public class StaticMethodCallNode extends MethodCallNode
 		return this;
 	}
 
+	/**
+	 * Returns true if the routine permits SQL.
+	 */
+    private boolean permitsSQL( RoutineAliasInfo rai )
+    {
+        short       sqlAllowed = rai.getSQLAllowed();
+
+        switch( sqlAllowed )
+        {
+        case RoutineAliasInfo.MODIFIES_SQL_DATA:
+        case RoutineAliasInfo.READS_SQL_DATA:
+        case RoutineAliasInfo.CONTAINS_SQL:
+            return true;
+
+        default:    return false;
+        }
+    }
+    
 	/**
 	 * If this SQL function has parameters which are SQLToJavaValueNode over
 	 * JavaToSQLValueNode and the java value node underneath is a SQL function

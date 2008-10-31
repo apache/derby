@@ -100,6 +100,7 @@ public interface CompilerContext extends Context
 	public  static  final   int			MODIFIES_SQL_DATA_PROCEDURE_ILLEGAL	=	0x00000800;
 
 	public  static  final   int			NON_DETERMINISTIC_ILLEGAL		=	0x00001000;
+	public  static  final   int			SQL_IN_ROUTINES_ILLEGAL		=	0x00002000;
 
 	/** Standard SQL is legal */
 	public	static	final	int			SQL_LEGAL					=	(INTERNAL_SQL_ILLEGAL);
@@ -126,7 +127,8 @@ public interface CompilerContext extends Context
 
 	public	static	final	int			GENERATION_CLAUSE_RESTRICTION		= (
 		                                                                    CHECK_CONSTRAINT |
-																			NON_DETERMINISTIC_ILLEGAL
+																			NON_DETERMINISTIC_ILLEGAL |
+                                                                            SQL_IN_ROUTINES_ILLEGAL
 																			);
 
 

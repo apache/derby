@@ -57,9 +57,11 @@ public class GeneratedColumnsTest extends BaseJDBCTestCase
     ///////////////////////////////////////////////////////////////////////////////////
 
     private static  final   String  REDUNDANT_CLAUSE = "42613";
+    private static  final   String  ILLEGAL_AGGREGATE = "42XA1";
     private static  final   String  UNSTABLE_RESULTS = "42XA2";
     private static  final   String  CANT_OVERRIDE_GENERATION_CLAUSE = "42XA3";
     private static  final   String  CANT_REFERENCE_GENERATED_COLUMN = "42XA4";
+    private static  final   String  ROUTINE_CANT_ISSUE_SQL = "42XA5";
     private static  final   String  CONSTRAINT_VIOLATION = "23513";
     private static  final   String  FOREIGN_KEY_VIOLATION = "23503";
     private static  final   String  ILLEGAL_DUPLICATE = "23505";
@@ -1363,6 +1365,28 @@ public class GeneratedColumnsTest extends BaseJDBCTestCase
              conn,
              "create table t_br_3( a int )"
              );
+        goodStatement
+            (
+             conn,
+             "create function f_br_reads_sql( a int )\n" +
+             "returns int\n" +
+             "language java\n" +
+             "deterministic\n" +
+             "parameter style java\n" +
+             "reads sql data\n" +
+             "external name 'java.lang.Math.abs'\n"
+             );
+        goodStatement
+            (
+             conn,
+             "create function f_br_contains_sql( a int )\n" +
+             "returns int\n" +
+             "language java\n" +
+             "deterministic\n" +
+             "parameter style java\n" +
+             "contains sql\n" +
+             "external name 'java.lang.Math.abs'\n"
+             );
         
         expectCompilationError
             (
@@ -1383,6 +1407,61 @@ public class GeneratedColumnsTest extends BaseJDBCTestCase
             (
              MISPLACED_SELECT,
              "alter table t_br_3 add column b int generated always as ( select a from t_br_1 )"
+             );
+        expectCompilationError
+            (
+             ROUTINE_CANT_ISSUE_SQL,
+             "create table t_br_2( a int, b int generated always as ( f_br_reads_sql( a ) ) )"
+             );
+        expectCompilationError
+            (
+             ROUTINE_CANT_ISSUE_SQL,
+             "create table t_br_2( a int, b int generated always as ( f_br_contains_sql( a ) ) )"
+             );
+        expectCompilationError
+            (
+             ILLEGAL_AGGREGATE,
+             "create table t_br_2( a int, b int generated always as ( sum( a ) ) )"
+             );
+        expectCompilationError
+            (
+             ILLEGAL_AGGREGATE,
+             "create table t_br_2( a int, b int generated always as ( max( a ) ) )"
+             );
+        expectCompilationError
+            (
+             ILLEGAL_AGGREGATE,
+             "create table t_br_2( a int, b int generated always as ( min( a ) ) )"
+             );
+        expectCompilationError
+            (
+             ILLEGAL_AGGREGATE,
+             "create table t_br_2( a int, b int generated always as ( count( a ) ) )"
+             );
+        expectCompilationError
+            (
+             UNSTABLE_RESULTS,
+             "create table t_br_2( a int, b date generated always as ( current_date ) )"
+             );
+        expectCompilationError
+            (
+             UNSTABLE_RESULTS,
+             "create table t_br_2( a int, b time generated always as ( current_time ) )"
+             );
+        expectCompilationError
+            (
+             UNSTABLE_RESULTS,
+             "create table t_br_2( a int, b timestamp generated always as ( current_timestamp ) )"
+             );
+        expectCompilationError
+            (
+             UNSTABLE_RESULTS,
+             "create table t_br_2( a int, b varchar( 128 ) generated always as ( current_user ) )"
+             );
+        expectCompilationError
+            (
+             UNSTABLE_RESULTS,
+             "create table t_br_2( a int, b varchar( 128 ) generated always as ( session_user ) )"
              );
     }
 

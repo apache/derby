@@ -1971,7 +1971,7 @@ Guide.
 
             <msg>
                 <name>42XA2</name>
-                <text>'{0}' may not appear in a GENERATION CLAUSE because it may return unreliable results.</text>
+                <text>'{0}' cannot appear in a GENERATION CLAUSE because it may return unreliable results.</text>
                 <arg>value</arg>
             </msg>
 
@@ -1985,6 +1985,12 @@ Guide.
                 <name>42XA4</name>
                 <text>The generation clause for column '{0}' references other generated columns. This is not allowed.</text>
                 <arg>columnName</arg>
+            </msg>
+
+            <msg>
+                <name>42XA5</name>
+                <text>Routine '{0}' may issue SQL and therefore cannot appear in a GENERATION CLAUSE.</text>
+                <arg>value</arg>
             </msg>
 
             <msg>
