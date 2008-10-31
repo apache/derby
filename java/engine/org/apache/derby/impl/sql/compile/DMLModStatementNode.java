@@ -58,6 +58,7 @@ import org.apache.derby.iapi.sql.dictionary.ReferencedKeyConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TriggerDescriptor;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.impl.sql.execute.FKInfo;
 import org.apache.derby.impl.sql.execute.TriggerInfo;
@@ -512,7 +513,18 @@ abstract class DMLModStatementNode extends DMLStatementNode
             if ( rc.hasGenerationClause() )
             {
                 ColumnDescriptor    colDesc = rc.getTableColumnDescriptor();
+                DataTypeDescriptor  dtd = colDesc.getType();
                 ValueNode   generationClause = parseGenerationClause( colDesc.getDefaultInfo().getDefaultText(), targetTableDescriptor );
+
+                // insert CAST in case column data type is not same as the
+                // resolved type of the generation clause
+                generationClause = (ValueNode) getNodeFactory().getNode
+                    (
+                     C_NodeTypes.CAST_NODE,
+                     generationClause,
+                     dtd,
+                     getContextManager()
+                     );
 
                 bindRowScopedExpression( getNodeFactory(), getContextManager(), targetTableDescriptor, sourceRCL, generationClause );
 

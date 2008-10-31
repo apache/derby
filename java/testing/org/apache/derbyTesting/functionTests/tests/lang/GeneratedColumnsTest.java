@@ -1465,6 +1465,529 @@ public class GeneratedColumnsTest extends BaseJDBCTestCase
              );
     }
 
+    /**
+     * <p>
+     * Test that the declared datatype of a generated column can be anything that the
+     * generation clause can be assigned to.
+     * </p>
+     */
+    public  void    test_014_assignment()
+        throws Exception
+    {
+        Connection  conn = getConnection();
+
+        //
+        // Schema
+        //
+        goodStatement
+            (
+             conn,
+             "create table t_dt_smallint\n" +
+             "(\n" +
+             "   a  smallint,\n" +
+             "   b  smallint generated always as ( -a ),\n" +
+             "   c  int generated always as ( -a ),\n" +
+             "   d bigint generated always as ( -a ),\n" +
+             "   e decimal generated always as ( -a ),\n" +
+             "   f real generated always as ( -a ),\n" +
+             "   g double generated always as ( -a ),\n" +
+             "   h float generated always as ( -a )\n" +
+             ")\n"
+            );
+        goodStatement
+            (
+             conn,
+             "create table t_dt_int\n" +
+             "(\n" +
+             "   a  int,\n" +
+             "   b  smallint generated always as ( -a ),\n" +
+             "   c  int generated always as ( -a ),\n" +
+             "   d bigint generated always as ( -a ),\n" +
+             "   e decimal generated always as ( -a ),\n" +
+             "   f real generated always as ( -a ),\n" +
+             "   g double generated always as ( -a ),\n" +
+             "   h float generated always as ( -a )\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             conn,
+             "create table t_dt_bigint\n" +
+             "(\n" +
+             "   a  bigint,\n" +
+             "   b  smallint generated always as ( -a ),\n" +
+             "   c  int generated always as ( -a ),\n" +
+             "   d bigint generated always as ( -a ),\n" +
+             "   e decimal generated always as ( -a ),\n" +
+             "   f real generated always as ( -a ),\n" +
+             "   g double generated always as ( -a ),\n" +
+             "   h float generated always as ( -a )\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             conn,
+             "create table t_dt_decimal\n" +
+             "(\n" +
+             "   a  decimal,\n" +
+             "   b  smallint generated always as ( -a ),\n" +
+             "   c  int generated always as ( -a ),\n" +
+             "   d bigint generated always as ( -a ),\n" +
+             "   e decimal generated always as ( -a ),\n" +
+             "   f real generated always as ( -a ),\n" +
+             "   g double generated always as ( -a ),\n" +
+             "   h float generated always as ( -a )\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             conn,
+             "create table t_dt_real\n" +
+             "(\n" +
+             "   a  real,\n" +
+             "   b  smallint generated always as ( -a ),\n" +
+             "   c  int generated always as ( -a ),\n" +
+             "   d bigint generated always as ( -a ),\n" +
+             "   e decimal generated always as ( -a ),\n" +
+             "   f real generated always as ( -a ),\n" +
+             "   g double generated always as ( -a ),\n" +
+             "   h float generated always as ( -a )\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             conn,
+             "create table t_dt_double\n" +
+             "(\n" +
+             "   a  double,\n" +
+             "   b  smallint generated always as ( -a ),\n" +
+             "   c  int generated always as ( -a ),\n" +
+             "   d bigint generated always as ( -a ),\n" +
+             "   e decimal generated always as ( -a ),\n" +
+             "   f real generated always as ( -a ),\n" +
+             "   g double generated always as ( -a ),\n" +
+             "   h float generated always as ( -a )\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             conn,
+             "create table t_dt_float\n" +
+             "(\n" +
+             "   a  float,\n" +
+             "   b  smallint generated always as ( -a ),\n" +
+             "   c  int generated always as ( -a ),\n" +
+             "   d bigint generated always as ( -a ),\n" +
+             "   e decimal generated always as ( -a ),\n" +
+             "   f real generated always as ( -a ),\n" +
+             "   g double generated always as ( -a ),\n" +
+             "   h float generated always as ( -a )\n" +
+             ")\n"
+             );
+
+        goodStatement
+            (
+             conn,
+             "create table t_dt_char\n" +
+             "(\n" +
+             "   a  char( 20 ),\n" +
+             "   b  char( 20 ) generated always as ( upper( a ) ),\n" +
+             "   c  varchar( 20 ) generated always as ( upper( a ) ),\n" +
+             "   d long varchar generated always as ( upper( a ) ),\n" +
+             "   e clob generated always as ( upper( a ) ),\n" +
+             "   f date generated always as ( a ),\n" +
+             "   g time generated always as ( '15:09:02' ),\n" +
+             "   h timestamp generated always as ( trim( a ) || ' 03:23:34.234' )\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             conn,
+             "create table t_dt_varchar\n" +
+             "(\n" +
+             "   a  char( 20 ),\n" +
+             "   b  char( 20 ) generated always as ( upper( a ) ),\n" +
+             "   c  varchar( 20 ) generated always as ( upper( a ) ),\n" +
+             "   d long varchar generated always as ( upper( a ) ),\n" +
+             "   e clob generated always as ( upper( a ) ),\n" +
+             "   f date generated always as ( a ),\n" +
+             "   g time generated always as ( '15:09:02' ),\n" +
+             "   h timestamp generated always as ( trim( a ) || ' 03:23:34.234' )\n" +
+             ")\n"
+             );
+        
+        goodStatement
+            (
+             conn,
+             "create table t_dt_longvarchar\n" +
+             "(\n" +
+             "   a  long varchar,\n" +
+             "   b  char( 20 ) generated always as ( upper( a ) ),\n" +
+             "   c  varchar( 20 ) generated always as ( upper( a ) ),\n" +
+             "   d long varchar generated always as ( upper( a ) ),\n" +
+             "   e clob generated always as ( upper( a ) )\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             conn,
+             "create table t_dt_clob\n" +
+             "(\n" +
+             "   a  clob,\n" +
+             "   b  char( 20 ) generated always as ( upper( a ) ),\n" +
+             "   c  varchar( 20 ) generated always as ( upper( a ) ),\n" +
+             "   d long varchar generated always as ( upper( a ) ),\n" +
+             "   e clob generated always as ( upper( a ) )\n" +
+             ")\n"
+             );
+        
+        goodStatement
+            (
+             conn,
+             "create table t_dt_charforbitdata\n" +
+             "(\n" +
+             "   a  char( 4 ) for bit data,\n" +
+             "   b  char( 4) for bit data generated always as ( a ),\n" +
+             "   c  varchar( 4 ) for bit data generated always as ( a ),\n" +
+             "   d long varchar for bit data generated always as ( a )\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             conn,
+             "create table t_dt_varcharforbitdata\n" +
+             "(\n" +
+             "   a  varchar( 4 ) for bit data,\n" +
+             "   b  char( 4) for bit data generated always as ( a ),\n" +
+             "   c  varchar( 4 ) for bit data generated always as ( a ),\n" +
+             "   d long varchar for bit data generated always as ( a )\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             conn,
+             "create table t_dt_longvarcharforbitdata\n" +
+             "(\n" +
+             "   a  long varchar for bit data,\n" +
+             "   b  char( 4) for bit data generated always as ( a ),\n" +
+             "   c  varchar( 4 ) for bit data generated always as ( a ),\n" +
+             "   d long varchar for bit data generated always as ( a )\n" +
+             ")\n"
+             );
+        
+        goodStatement
+            (
+             conn,
+             "create table t_dt_date\n" +
+             "(\n" +
+             "   a  date,\n" +
+             "   b  char( 20 ) generated always as ( a ),\n" +
+             "   c  varchar( 20 ) generated always as ( a ),\n" +
+             "   d date generated always as ( a )\n" +
+             ")\n"
+             );
+
+        goodStatement
+            (
+             conn,
+             "create table t_dt_time\n" +
+             "(\n" +
+             "   a  time,\n" +
+             "   b  char( 20 ) generated always as ( a ),\n" +
+             "   c  varchar( 20 ) generated always as ( a ),\n" +
+             "   d time generated always as ( a )\n" +
+             ")\n"
+             );
+
+        goodStatement
+            (
+             conn,
+             "create table t_dt_timestamp\n" +
+             "(\n" +
+             "   a  timestamp,\n" +
+             "   b  char( 30 ) generated always as ( a ),\n" +
+             "   c  varchar( 30 ) generated always as ( a ),\n" +
+             "   d timestamp generated always as ( a )\n" +
+             ")\n"
+             );
+
+        //
+        // Populate
+        //
+        goodStatement
+            (
+             conn,
+             "insert into t_dt_smallint( a ) values ( 1 )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_dt_int( a ) values ( 1 )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_dt_bigint( a ) values ( 1 )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_dt_decimal( a ) values ( 1.0 )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_dt_real( a ) values ( 1.0 )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_dt_double( a ) values ( 1.0 )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_dt_float( a ) values ( 1.0 )"
+             );
+        
+        goodStatement
+            (
+             conn,
+             "insert into t_dt_char( a ) values ( '1994-02-23' )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_dt_varchar( a ) values ( '1994-02-23' )"
+             );
+        
+        goodStatement
+            (
+             conn,
+             "insert into t_dt_longvarchar( a ) values ( 'foo' )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_dt_clob( a ) values ( 'foo' )"
+             );
+        
+        goodStatement
+            (
+             conn,
+             "insert into t_dt_charforbitdata( a ) values ( X'ABCDEFAB' )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_dt_varcharforbitdata( a ) values ( X'ABCDEFAB' )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_dt_longvarcharforbitdata( a ) values ( X'ABCDEFAB' )"
+             );
+        
+        goodStatement
+            (
+             conn,
+             "insert into t_dt_date( a ) values ( date('1994-02-23') )"
+             );
+        
+        goodStatement
+            (
+             conn,
+             "insert into t_dt_time( a ) values ( time('15:09:02') )"
+             );
+        
+        goodStatement
+            (
+             conn,
+             "insert into t_dt_timestamp( a ) values ( timestamp('1962-09-23 03:23:34.234') )"
+             );
+        
+        //
+        // Verify that the correct results were inserted.
+        //
+        assertResults
+            (
+             conn,
+             "select * from t_dt_smallint order by a",
+             new String[][]
+             {
+                 { "1" , "-1", "-1", "-1", "-1", "-1.0", "-1.0", "-1.0" },
+             },
+             false
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_dt_int order by a",
+             new String[][]
+             {
+                 { "1" , "-1", "-1", "-1", "-1", "-1.0", "-1.0", "-1.0" },
+             },
+             false
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_dt_bigint order by a",
+             new String[][]
+             {
+                 { "1" , "-1", "-1", "-1", "-1", "-1.0", "-1.0", "-1.0" },
+             },
+             false
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_dt_decimal order by a",
+             new String[][]
+             {
+                 { "1" , "-1", "-1", "-1", "-1", "-1.0", "-1.0", "-1.0" },
+             },
+             false
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_dt_real order by a",
+             new String[][]
+             {
+                 { "1.0" , "-1", "-1", "-1", "-1", "-1.0", "-1.0", "-1.0" },
+             },
+             false
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_dt_double order by a",
+             new String[][]
+             {
+                 { "1.0" , "-1", "-1", "-1", "-1", "-1.0", "-1.0", "-1.0" },
+             },
+             false
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_dt_float order by a",
+             new String[][]
+             {
+                 { "1.0" , "-1", "-1", "-1", "-1", "-1.0", "-1.0", "-1.0" },
+             },
+             false
+             );
+        
+        assertResults
+            (
+             conn,
+             "select * from t_dt_char order by a",
+             new String[][]
+             {
+                 { "1994-02-23", "1994-02-23", "1994-02-23", "1994-02-23", "1994-02-23", "1994-02-23", "15:09:02", "1994-02-23 03:23:34.234" },
+             },
+             true
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_dt_varchar order by a",
+             new String[][]
+             {
+                 { "1994-02-23", "1994-02-23", "1994-02-23", "1994-02-23", "1994-02-23", "1994-02-23", "15:09:02", "1994-02-23 03:23:34.234" },
+             },
+             true
+             );
+
+        assertResults
+            (
+             conn,
+             "select * from t_dt_longvarchar",
+             new String[][]
+             {
+                 { "foo", "FOO", "FOO", "FOO", "FOO", },
+             },
+             true
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_dt_clob",
+             new String[][]
+             {
+                 { "foo", "FOO", "FOO", "FOO", "FOO", },
+             },
+             true
+             );
+
+        assertResults
+            (
+             conn,
+             "select * from t_dt_charforbitdata",
+             new String[][]
+             {
+                 { "abcdefab", "abcdefab", "abcdefab", "abcdefab", },
+             },
+             true
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_dt_varcharforbitdata",
+             new String[][]
+             {
+                 { "abcdefab", "abcdefab", "abcdefab", "abcdefab", },
+             },
+             true
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_dt_longvarcharforbitdata",
+             new String[][]
+             {
+                 { "abcdefab", "abcdefab", "abcdefab", "abcdefab", },
+             },
+             true
+             );
+
+        assertResults
+            (
+             conn,
+             "select * from t_dt_date order by a",
+             new String[][]
+             {
+                 { "1994-02-23", "1994-02-23", "1994-02-23", "1994-02-23", },
+             },
+             true
+             );
+
+        assertResults
+            (
+             conn,
+             "select * from t_dt_time order by a",
+             new String[][]
+             {
+                 { "15:09:02", "15:09:02", "15:09:02", "15:09:02", },
+             },
+             true
+             );
+
+        assertResults
+            (
+             conn,
+             "select * from t_dt_timestamp order by a",
+             new String[][]
+             {
+                 { "1962-09-23 03:23:34.234", "1962-09-23 03:23:34.234", "1962-09-23 03:23:34.234", "1962-09-23 03:23:34.234", },
+             },
+             true
+             );
+
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // MINIONS
