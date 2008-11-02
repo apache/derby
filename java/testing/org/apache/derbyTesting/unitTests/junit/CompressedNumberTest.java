@@ -189,16 +189,6 @@ public class CompressedNumberTest extends TestCase {
 
         assertEquals("MISMATCH frome readInt(byte[], offset)", i,
                      CompressedNumber.readInt(holder, 0));
-
-        ais.setPosition(0);
-        assertEquals("MISMATCH skip length", length,
-                     CompressedNumber.skipInt(in));
-
-        assertEquals("MISMATCH readIntAndReturnIntPlusOverhead() return",
-                     length + i + 1,
-                CompressedNumber.readIntAndReturnIntPlusOverhead(holder, 0));
-
-        assertEquals("MISMATCH skip position", length, ais.getPosition());
     }
 
 
@@ -235,11 +225,5 @@ public class CompressedNumberTest extends TestCase {
         ais.setPosition(0);
         assertEquals("MISMATCH value in readLong(DataInput)", l,
                      CompressedNumber.readLong(in));
-
-        ais.setPosition(0);
-        assertEquals("MISMATCH skip length", length,
-                     CompressedNumber.skipLong(in));
-
-        assertEquals("MISMATCH skip position", length, ais.getPosition());
     }
 }
