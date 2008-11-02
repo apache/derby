@@ -26,8 +26,7 @@ package org.apache.derby.impl.jdbc;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
-import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.iapi.services.io.InputStreamUtil;
 
 /**
  * Updatable blob stream is a wrapper stream over dvd stream
@@ -112,22 +111,7 @@ class UpdatableBlobStream extends InputStream {
             } catch (SQLException ex) {
                 throw Util.newIOException(ex);
             }
-            long leftToSkip = pos;
-            while (leftToSkip > 0) {
-                long skipped = stream.skip (leftToSkip);
-                if (skipped == 0) {
-                    //skipping zero byte check stream has reached eof
-                    if (stream.read() < 0) {
-                         throw new IOException (
-                                 MessageService.getCompleteMessage (
-                                 SQLState.STREAM_EOF, new Object [0]));
-                    }
-                    else {
-                        skipped = 1;
-                    }
-                }
-                leftToSkip -= skipped;
-            }
+            InputStreamUtil.skipFully(stream, pos);
         }
     }
 

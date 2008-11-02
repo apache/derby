@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.services.io.InputStreamUtil;
 import org.apache.derby.iapi.types.Resetable;
 
 /**
@@ -199,7 +200,7 @@ public class PositionedStoreStream
         }
         if (this.pos < requestedPos) {
             try {
-                skipFully(requestedPos - this.pos);
+                InputStreamUtil.skipFully(stream, requestedPos - pos);
             } catch (EOFException eofe) {
                 // A position after the end of the stream was requested.
                 // To recover, and for consistency, reset to position zero.
@@ -220,26 +221,4 @@ public class PositionedStoreStream
         return this.pos;
     }
 
-    /**
-     * Skip exactly the requested number of bytes.
-     *
-     * @throws EOFException if EOF is reached before all bytes are skipped
-     * @throws IOException if reading from the stream fails
-     */
-    private void skipFully(long toSkip)
-            throws IOException {
-        long remaining = toSkip;
-        while (remaining > 0) {
-            long skippedNow = this.stream.skip(remaining);
-            if (skippedNow == 0) {
-                if (this.stream.read() == -1) {
-                    throw new EOFException("Reached end-of-stream prematurely" +
-                        ", with " + remaining + " byte(s) to go");
-                } else {
-                    skippedNow = 1;
-                }
-            }
-            remaining -= skippedNow;
-        }
-    }
 } // End class PositionedStoreStream

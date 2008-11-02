@@ -25,7 +25,6 @@ package org.apache.derby.impl.jdbc;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.jdbc.EngineLOB;
-import org.apache.derby.iapi.reference.Limits;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.Resetable;
@@ -339,27 +338,12 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
                 myStream.resetStream();
                 BinaryToRawStream tmpStream =
                         new BinaryToRawStream(myStream, this);
-                streamLength = 0;
                 if (SanityManager.DEBUG) {
                     SanityManager.ASSERT(tmpStream.getLength() == -1);
                 }
 
-                for (;;)
-                {
-                    long skipped = tmpStream.skip(Limits.DB2_LOB_MAXWIDTH);
-                    if (SanityManager.DEBUG) {
-                        SanityManager.ASSERT(skipped >= 0);
-                    }
-                    streamLength += skipped;
-                    // If skip reports zero bytes skipped, verify EOF.
-                    if (skipped == 0) {
-                        if (tmpStream.read() == -1) {
-                            break; // Exit the loop, no more data.
-                        } else {
-                            streamLength++;
-                        }
-                    }
-                }
+                streamLength = InputStreamUtil.skipUntilEOF(tmpStream);
+
                 tmpStream.close();
                 // Save for future uses.
                 return streamLength;
