@@ -407,6 +407,11 @@ public class GeneratedColumnsTest extends BaseJDBCTestCase
              conn,
              "create unique index t_insert_2_b on t_insert_2( b )"
              );
+        goodStatement
+            (
+             conn,
+             "create table t_insert_3( a int, b int generated always as ( -a ) )"
+             );
         
         goodStatement
             (
@@ -442,6 +447,17 @@ public class GeneratedColumnsTest extends BaseJDBCTestCase
              "insert into t_insert_2( a, b ) values ( 6, default )"
              );
         
+        goodStatement
+            (
+             conn,
+             "insert into t_insert_3 values ( 1, default )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_insert_3 values ( 2, default ), ( 3, default ), ( 4, default )"
+             );
+        
         //
         // Verify that all of the expected rows are in the table having the
         // generated column.
@@ -461,6 +477,20 @@ public class GeneratedColumnsTest extends BaseJDBCTestCase
                  { "100",        "-100" ,      "1000" },
                  { "200" ,       "-200" ,      "2000" },
                  { "300" ,       "-300" ,      "3000" },
+             },
+             false
+             );
+        
+        assertResults
+            (
+             conn,
+             "select * from t_insert_3 order by a",
+             new String[][]
+             {
+                 { "1" ,         "-1" },
+                 { "2" ,         "-2" },
+                 { "3" ,         "-3" },
+                 { "4" ,         "-4" },
              },
              false
              );

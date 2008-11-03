@@ -3899,7 +3899,16 @@ public class ResultColumnList extends QueryTreeNodeVector
 				} // end of if ()
 				
 				DefaultInfoImpl defaultInfo = (DefaultInfoImpl) cd.getDefaultInfo();
-				if (defaultInfo != null)
+
+                //
+                // For generated columns, we don't have enough context at this
+                // point to bind the generation clause (the default) and
+                // unfortunately that step occurs very soon after defaults are substituted in. The
+                // parsing and binding of generation clauses happens considerably
+                // later on. At this juncture, we can be patient and just plug
+                // in a NULL literal as a placeholder.
+                //
+				if ( (defaultInfo != null) && !defaultInfo.isGeneratedColumn() )
 				{
 					/* Query is dependent on the DefaultDescriptor */
 					DefaultDescriptor defaultDescriptor = cd.getDefaultDescriptor(getDataDictionary());
