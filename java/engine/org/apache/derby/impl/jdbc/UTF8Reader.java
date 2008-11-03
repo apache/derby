@@ -621,25 +621,22 @@ readChars:
             SanityManager.ASSERT(this.positionedIn != null);
             SanityManager.ASSERT(requestedCharPos > 0);
         }
-        // See if we can continue reading, or do nothing at all, to get to the
-        // right position.
-        if (requestedCharPos > readerCharCount) {
-            // The second part corrects for the internal buffer position.
-            long toSkip = (requestedCharPos - readerCharCount) +
-                    (charactersInBuffer - readPositionInBuffer) -1;
-            persistentSkip(toSkip);
+        if (requestedCharPos <= readerCharCount - charactersInBuffer) {
+            // The stream must be reset, because the requested position is
+            // before the current lower buffer boundary.
+            resetUTF8Reader();
+        }
+
+        long currentCharPos =
+            readerCharCount - charactersInBuffer + readPositionInBuffer;
+        long difference = (requestedCharPos - 1) - currentCharPos;
+
+        if (difference <= 0) {
+            // Move back in the buffer.
+            readPositionInBuffer += difference;
         } else {
-            // See if the requested position is within the current buffer.
-            long lowerBufferBorder = readerCharCount - charactersInBuffer;
-            if (requestedCharPos <= lowerBufferBorder) {
-                // Have to reset and start from scratch.
-                resetUTF8Reader();
-                persistentSkip(requestedCharPos -1);
-            } else {
-                // We have the requested position in the buffer already.
-                readPositionInBuffer =
-                        (int)(requestedCharPos - lowerBufferBorder -1);
-            }
+            // Skip forward.
+            persistentSkip(difference);
         }
     }
 
