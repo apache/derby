@@ -249,6 +249,15 @@ final class TemporaryClob implements InternalClob {
     }
 
     /**
+     * @see #getReader
+     */
+    public Reader getInternalReader(long characterPosition)
+            throws IOException, SQLException {
+        // TODO: See if we can optimize for a shared internal reader.
+        return getReader(characterPosition);
+    }
+
+    /**
      * Returns number of characters in the Clob.
      *
      * @return The length of the Clob in number of characters.

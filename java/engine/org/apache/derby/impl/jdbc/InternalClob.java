@@ -91,6 +91,25 @@ interface InternalClob {
     Reader getReader(long characterPosition) throws IOException, SQLException;
 
     /**
+     * Returns an internal reader for the Clob content, initialized at the
+     * specified character position.
+     * <p>
+     * This method can return a shared reader object, avoiding instantiation and
+     * repositioning costs for internal operations where the stream itself is
+     * not published to the end-user. One such example is
+     * {@code Clob.getSubString}.
+     *
+     * @param characterPosition character position. The first character is at
+     *      position {@code 1}.
+     * @return A {@code Reader} serving the content of the Clob.
+     * @throws EOFException if the position is larger then the Clob
+     * @throws IOException if accessing underlying I/O resources fail
+     * @throws SQLException if accessing underlying resources fail
+     */
+    Reader getInternalReader(long characterPosition)
+            throws IOException, SQLException;
+
+    /**
      * Returns a writer to write data into the Clob.
      * <p>
      * The semantics of the writer is the same as for {@link #insertString}.

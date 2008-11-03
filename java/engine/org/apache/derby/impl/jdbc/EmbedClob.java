@@ -217,8 +217,14 @@ final class EmbedClob extends ConnectionChild implements Clob, EngineLOB
 
         String result;
         // An exception will be thrown if the position is larger than the Clob.
+        Reader reader;
         try {
-            Reader reader = this.clob.getReader(pos);
+            try {
+                reader = this.clob.getInternalReader(pos);
+            } catch (EOFException eofe) {
+                throw Util.generateCsSQLException(
+                        SQLState.BLOB_POSITION_TOO_LARGE, new Long(pos), eofe);
+            }
             char[] chars = new char[length];
             int charsRead = 0;
             // Read all the characters requested, or until EOF is reached.
@@ -236,9 +242,6 @@ final class EmbedClob extends ConnectionChild implements Clob, EngineLOB
             } else {
                 result = String.copyValueOf(chars, 0, charsRead);
             }
-        } catch (EOFException eofe) {
-            throw Util.generateCsSQLException(
-                                        SQLState.BLOB_POSITION_TOO_LARGE, eofe);
         } catch (IOException ioe) {
             throw Util.setStreamFailure(ioe);
         }
@@ -342,7 +345,7 @@ final class EmbedClob extends ConnectionChild implements Clob, EngineLOB
                 int matchCount = 0;
                 long pos = start;
                 long newStart = -1;
-                Reader reader = this.clob.getReader(start);
+                Reader reader = this.clob.getInternalReader(start);
                 char [] tmpClob = new char [4096];
                 boolean reset;
                 for (;;) {
@@ -381,7 +384,8 @@ final class EmbedClob extends ConnectionChild implements Clob, EngineLOB
                                 if (newStart < pos) {
                                     pos = newStart;
                                     reader.close();
-                                    reader = this.clob.getReader(newStart);
+                                    reader = this.clob.getInternalReader(
+                                                                    newStart);
                                     newStart = -1;
                                     reset = true;
                                     break;
@@ -398,6 +402,9 @@ final class EmbedClob extends ConnectionChild implements Clob, EngineLOB
                 }
 
             }
+        } catch (EOFException eofe) {
+            throw Util.generateCsSQLException(
+                                        SQLState.BLOB_POSITION_TOO_LARGE, eofe);
         } catch (IOException ioe) {
             throw Util.setStreamFailure(ioe);
         } finally {
