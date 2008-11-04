@@ -54,7 +54,7 @@ public class UTF8ReaderTest
      */
     public void testRepositioningSimple()
             throws IOException, SQLException, StandardException {
-        setAutoCommit(false);
+        getConnection().setAutoCommit(false);
         Statement stmt = createStatement();
         ResultSet rs = stmt.executeQuery(
                 "select * from Utf8ReaderTest where id = 101");
@@ -85,7 +85,7 @@ public class UTF8ReaderTest
      */
     public void testRepositioningWithinBuffer()
             throws IOException, SQLException, StandardException {
-        setAutoCommit(false);
+        getConnection().setAutoCommit(false);
         Statement stmt = createStatement();
         ResultSet rs = stmt.executeQuery(
                 "select * from Utf8ReaderTest where id = 100");
@@ -123,7 +123,7 @@ public class UTF8ReaderTest
      */
     public void testRepositioningWithinBufferRealText()
             throws IOException, SQLException, StandardException {
-        setAutoCommit(false);
+        getConnection().setAutoCommit(false);
         Statement stmt = createStatement();
         ResultSet rs = stmt.executeQuery(
                 // See insertTestData
