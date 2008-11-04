@@ -24,6 +24,7 @@ package	org.apache.derby.impl.sql.compile;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.reference.Limits;
 
+import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.error.StandardException;
@@ -299,6 +300,7 @@ public class AlterTableNode extends DDLStatementNode
 	{
 		DataDictionary	dd = getDataDictionary();
 		int					numCheckConstraints = 0;
+		int numReferenceConstraints = 0;
         int numGenerationClauses = 0;
 		int numBackingIndexes = 0;
 
@@ -367,6 +369,9 @@ public class AlterTableNode extends DDLStatementNode
 			numCheckConstraints = tableElementList.countConstraints(
 									DataDictionary.CHECK_CONSTRAINT);
             
+            numReferenceConstraints = tableElementList.countConstraints(
+									DataDictionary.FOREIGNKEY_CONSTRAINT);
+            
             numGenerationClauses = tableElementList.countGenerationClauses();
 		}
 
@@ -380,7 +385,7 @@ public class AlterTableNode extends DDLStatementNode
 				String.valueOf(Limits.DB2_MAX_INDEXES_ON_TABLE));
 		}
 
-		if ( (numCheckConstraints > 0) || (numGenerationClauses > 0) )
+		if ( (numCheckConstraints > 0) || (numGenerationClauses > 0) || (numReferenceConstraints > 0))
 		{
 			/* In order to check the validity of the check constraints and
 			 * generation clauses
@@ -392,13 +397,15 @@ public class AlterTableNode extends DDLStatementNode
 			 * no nodes which can return non-deterministic results.
 			 */
 			FromList fromList = makeFromList( dd, tableElementList, false );
+            FormatableBitSet    generatedColumns = baseTable.makeColumnMap( baseTable.getGeneratedColumns() );
 
 			/* Now that we've finally goobered stuff up, bind and validate
 			 * the check constraints and generation clauses.
 			 */
 			if  (numCheckConstraints > 0) { tableElementList.bindAndValidateCheckConstraints(fromList); }
 			if  (numGenerationClauses > 0)
-            { tableElementList.bindAndValidateGenerationClauses(fromList, baseTable.makeColumnMap( baseTable.getGeneratedColumns() ) ); }
+            { tableElementList.bindAndValidateGenerationClauses(fromList, generatedColumns ); }
+            if ( numReferenceConstraints > 0) { tableElementList.validateForeignKeysOnGenerationClauses( fromList, generatedColumns ); }
 		}
 
 		//Check if we are in alter table to update the statistics. If yes, then

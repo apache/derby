@@ -26,6 +26,7 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.error.StandardException;
 
+import org.apache.derby.iapi.sql.StatementType;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
@@ -803,17 +804,96 @@ public class TableElementList extends QueryTreeNodeVector
 
             for ( int i = 0; i < count; i++ )
             {
-                int         referencedColumnID = referencedColumns[ i ];
+                int         referencedColumnID = referencedColumns[ i ]; 
                 if ( generatedColumns.isSet( referencedColumnID ) )
                 {
                     throw StandardException.newException(SQLState.LANG_CANT_REFERENCE_GENERATED_COLUMN, cdn.getColumnName());
                 }
-            }   // end of loop through referenced columns
+           }   // end of loop through referenced columns
 
         }       // end of loop through generated columns
-
+        
 	}
 
+	/**
+	 * Prevent foreign keys on generated columns from violating the SQL spec,
+	 * part 2, section 11.8 (<column definition>), syntax rule 12: the
+	 * referential action may not specify SET NULL or SET DEFAULT and the update
+	 * rule may not specify ON UPDATE CASCADE.  
+	 *
+	 * @param fromList		The FromList in question.
+	 * @param generatedColumns Bitmap of generated columns in the table.
+	 *
+	 * @exception StandardException		Thrown on error
+	 */
+	void validateForeignKeysOnGenerationClauses(FromList fromList, FormatableBitSet generatedColumns )
+		throws StandardException
+	{
+        // nothing to do if there are no generated columns
+        if ( generatedColumns.getNumBitsSet() <= 0 ) { return; }
+        
+		FromBaseTable				table = (FromBaseTable) fromList.elementAt(0);
+        ResultColumnList        tableColumns = table.getResultColumns();
+		int						  size = size();
+
+        // loop through the foreign keys, looking for keys which violate the
+        // rulse we're enforcing
+		for (int index = 0; index < size; index++)
+		{
+			TableElementNode element = (TableElementNode) elementAt(index);
+
+			if (! (element instanceof FKConstraintDefinitionNode))
+			{
+				continue;
+			}
+
+			FKConstraintDefinitionNode fk = (FKConstraintDefinitionNode) element;
+            ConstraintInfo                      ci = fk.getReferencedConstraintInfo();
+            int                                     deleteRule = ci.getReferentialActionDeleteRule();
+            int                                     updateRule = ci.getReferentialActionUpdateRule();
+
+            //
+            // Currently we don't support ON UPDATE CASCADE. Someday we might.
+            // We're laying a trip-wire here so that we won't neglect to code the appropriate check
+            // when we support ON UPDATE CASCADE.
+            //
+            if (
+                ( updateRule != StatementType.RA_RESTRICT ) &&
+                ( updateRule != StatementType.RA_NOACTION )
+                )
+            {
+                throw StandardException.newException( SQLState.BTREE_UNIMPLEMENTED_FEATURE );
+            }
+            
+            if (
+                ( deleteRule != StatementType.RA_SETNULL ) &&
+                ( deleteRule != StatementType.RA_SETDEFAULT )
+                )
+            { continue; }
+
+            //
+            // OK, we have found a foreign key whose referential action is SET NULL or
+            // SET DEFAULT or whose update rule is ON UPDATE CASCADE.
+            // See if any of the key columns are generated columns.
+            //
+            ResultColumnList                keyCols = fk.getColumnList();
+            int                                     keyCount = keyCols.size();
+
+            for ( int i = 0; i < keyCount; i++ )
+            {
+                ResultColumn    keyCol = (ResultColumn) keyCols.elementAt( i );
+                String                  keyColName = keyCol.getName();
+                int     position = tableColumns.getPosition( keyColName, 1 );
+
+                if ( generatedColumns.isSet(  position ) )
+                {
+                    throw StandardException.newException(SQLState.LANG_BAD_FK_ON_GENERATED_COLUMN, keyColName );
+                }
+            }
+
+        }   // end of loop through table elements
+    }
+    
 	/**
 	 * Fill in the ConstraintConstantAction[] for this create/alter table.
 	 * 

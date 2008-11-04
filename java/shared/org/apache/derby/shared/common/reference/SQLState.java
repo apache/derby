@@ -899,6 +899,7 @@ public interface SQLState {
     String LANG_CANT_OVERRIDE_GENERATION_CLAUSE                  = "42XA3";
     String LANG_CANT_REFERENCE_GENERATED_COLUMN                  = "42XA4";
     String LANG_ROUTINE_CANT_PERMIT_SQL                                   = "42XA5";
+    String LANG_BAD_FK_ON_GENERATED_COLUMN                           = "42XA6";
 	String LANG_INVALID_USER_AGGREGATE_DEFINITION2                     = "42Y00";
 	String LANG_INVALID_CHECK_CONSTRAINT                               = "42Y01";
 	// String LANG_NO_ALTER_TABLE_COMPRESS_ON_TARGET_TABLE                = "42Y02";

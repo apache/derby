@@ -422,7 +422,7 @@ public class CreateTableNode extends DDLStatementNode
 				String.valueOf(Limits.DB2_MAX_INDEXES_ON_TABLE));
 		}
 
-		if ( (numCheckConstraints > 0) || (numGenerationClauses > 0) )
+		if ( (numCheckConstraints > 0) || (numGenerationClauses > 0) || (numReferenceConstraints > 0) )
 		{
 			/* In order to check the validity of the check constraints and
 			 * generation clauses
@@ -434,12 +434,14 @@ public class CreateTableNode extends DDLStatementNode
 			 * no nodes which can return non-deterministic results.
 			 */
 			FromList fromList = makeFromList( null, tableElementList, true );
+            FormatableBitSet    generatedColumns = new FormatableBitSet();
 
 			/* Now that we've finally goobered stuff up, bind and validate
 			 * the check constraints and generation clauses.
 			 */
 			if  (numCheckConstraints > 0) { tableElementList.bindAndValidateCheckConstraints(fromList); }
-			if  (numGenerationClauses > 0) { tableElementList.bindAndValidateGenerationClauses(fromList, new FormatableBitSet() ); }
+			if  (numGenerationClauses > 0) { tableElementList.bindAndValidateGenerationClauses(fromList, generatedColumns ); }
+            if ( numReferenceConstraints > 0) { tableElementList.validateForeignKeysOnGenerationClauses( fromList, generatedColumns ); }
 		}
 	}
 

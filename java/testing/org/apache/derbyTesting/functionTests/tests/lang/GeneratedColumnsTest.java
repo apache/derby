@@ -62,10 +62,11 @@ public class GeneratedColumnsTest extends BaseJDBCTestCase
     private static  final   String  CANT_OVERRIDE_GENERATION_CLAUSE = "42XA3";
     private static  final   String  CANT_REFERENCE_GENERATED_COLUMN = "42XA4";
     private static  final   String  ROUTINE_CANT_ISSUE_SQL = "42XA5";
+    private static  final   String  BAD_FOREIGN_KEY_ACTION = "42XA6";
     private static  final   String  CONSTRAINT_VIOLATION = "23513";
     private static  final   String  FOREIGN_KEY_VIOLATION = "23503";
     private static  final   String  ILLEGAL_DUPLICATE = "23505";
-    private static  final   String  MISPLACED_SELECT = "42X01";
+    private static  final   String  SYNTAX_ERROR = "42X01";
     private static  final   String  COLUMN_OUT_OF_SCOPE = "42X04";
 
     ///////////////////////////////////////////////////////////////////////////////////
@@ -1425,7 +1426,7 @@ public class GeneratedColumnsTest extends BaseJDBCTestCase
              );
         expectCompilationError
             (
-             MISPLACED_SELECT,
+             SYNTAX_ERROR,
              "create table t_br_2( a int, b int generated always as ( select a from t_br_1 ) )"
              );
         expectCompilationError
@@ -1435,7 +1436,7 @@ public class GeneratedColumnsTest extends BaseJDBCTestCase
              );
         expectCompilationError
             (
-             MISPLACED_SELECT,
+             SYNTAX_ERROR,
              "alter table t_br_3 add column b int generated always as ( select a from t_br_1 )"
              );
         expectCompilationError
@@ -2018,6 +2019,96 @@ public class GeneratedColumnsTest extends BaseJDBCTestCase
 
     }
 
+    /**
+     * <p>
+     * Test that delete/update referential actions don't override generated columns.
+     * </p>
+     */
+    public  void    test_015_foreignKeyActions()
+        throws Exception
+    {
+        Connection  conn = getConnection();
+
+        //
+        // Schema
+        //
+        goodStatement
+            (
+             conn,
+             "create table t1_for_ra( a int, b int primary key )"
+             );
+        goodStatement
+            (
+             conn,
+             "create table t3_for_ra( a int, b int, constraint t3_for_ra_pk primary key( a, b ) )"
+             );
+        goodStatement
+            (
+             conn,
+             "create table t6_for_ra( a int, b int generated always as (-a) )"
+             );
+
+        //
+        // Can't override a generated value via a cascading foreign key action.
+        //
+        expectCompilationError
+            (
+             BAD_FOREIGN_KEY_ACTION,
+             "create table t2_for_ra( a int, b int generated always as ( -a ) references t1_for_ra( b ) on delete set null )"
+             );
+        expectCompilationError
+            (
+             BAD_FOREIGN_KEY_ACTION,
+             "create table t2_for_ra( a int, b int generated always as ( -a ) references t1_for_ra( b ) on delete set default )"
+             );
+        expectCompilationError
+            (
+             BAD_FOREIGN_KEY_ACTION,
+             "create table t4_for_ra\n" +
+             "(\n" +
+             "   aa int,\n" +
+             "   bb int generated always as ( -aa ),\n" +
+             "   cc int,\n" +
+             "   constraint t4_for_ra_fk foreign key( aa, bb ) references t3_for_ra( a, b ) on delete set null\n" +
+             ")\n"
+             );
+        expectCompilationError
+            (
+             BAD_FOREIGN_KEY_ACTION,
+             "create table t4_for_ra\n" +
+             "(\n" +
+             "   aa int,\n" +
+             "   bb int generated always as ( -aa ),\n" +
+             "   cc int,\n" +
+             "   constraint t4_for_ra_fk foreign key( aa, bb ) references t3_for_ra( a, b ) on delete set default\n" +
+             ")\n"
+             );
+        expectCompilationError
+            (
+             BAD_FOREIGN_KEY_ACTION,
+             "alter table t6_for_ra\n" +
+             "  add constraint t6_for_ra_fk foreign key( b ) references t1_for_ra( b ) on delete set null\n"
+             );
+        expectCompilationError
+            (
+             BAD_FOREIGN_KEY_ACTION,
+             "alter table t6_for_ra\n" +
+             "  add constraint t6_for_ra_fk foreign key( b ) references t1_for_ra( b ) on delete set default\n"
+             );
+
+        //
+        // We don't currently support this syntax. But when we do, we want to
+        // make sure that we remember to disallow this use of generated columns.
+        // This will involve adding some more logic to TableElementList.validateForeignKeysOnGenerationClauses().
+        //
+        expectCompilationError
+            (
+             SYNTAX_ERROR,
+             "alter table t6_for_ra\n" +
+             "  add constraint t6_for_ra_fk foreign key( b ) references t1_for_ra( b ) on update cascade\n"
+             );
+    }
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // MINIONS

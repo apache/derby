@@ -1990,7 +1990,13 @@ Guide.
             <msg>
                 <name>42XA5</name>
                 <text>Routine '{0}' may issue SQL and therefore cannot appear in a GENERATION CLAUSE.</text>
-                <arg>value</arg>
+                <arg>routineName</arg>
+            </msg>
+
+            <msg>
+                <name>42XA6</name>
+                <text>'{0}' is a generated column. It cannot be part of a foreign key whose referential action is SET NULL or SET DEFAULT or whose update rule is ON UPDATE CASCADE.</text>
+                <arg>columnName</arg>
             </msg>
 
             <msg>
