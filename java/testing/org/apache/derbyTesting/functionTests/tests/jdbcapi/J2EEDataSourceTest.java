@@ -134,6 +134,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         TestSuite suite = new TestSuite("ClientAndEmbedded" + postfix);
         suite.addTest(new J2EEDataSourceTest("testGlobalLocalInterleaf"));
         suite.addTest(new J2EEDataSourceTest("testSetIsolationWithStatement"));
+        suite.addTest(new J2EEDataSourceTest("testJira95pds"));
         suite.addTest(new J2EEDataSourceTest("testJira95xads"));
         suite.addTest(new J2EEDataSourceTest("testBadConnectionAttributeSyntax"));
         suite.addTest(new J2EEDataSourceTest("testCloseActiveConnection_DS"));
@@ -183,8 +184,6 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
     private static Test getEmbeddedSuite(String postfix) {
         TestSuite suite = new TestSuite("Embedded" + postfix);
         suite.addTest(new J2EEDataSourceTest("testDSRequestAuthentication"));
-        // when DERBY-2498 gets fixed, move this one to baseSuite
-        suite.addTest(new J2EEDataSourceTest("testJira95pds"));
         // Following cannot run with client because of DERBY-2533; it hangs
         // when fixed, this can be moved to baseSuite.
         suite.addTest(new J2EEDataSourceTest("testReuseAcrossGlobalLocal"));
@@ -2203,13 +2202,9 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
             pds.getPooledConnection();
             fail ("expected an SQLException!");
         } catch (SQLException sqle) {
-            // DERBY-2498 - when fixed, remove if
-            if (usingEmbedded())
-                assertSQLState("XCY00", sqle);
+            assertSQLState("XCY00", sqle);
         } catch (Exception e) {
-            // DERBY-2498 - when fixed, remove if
-            if (usingEmbedded())
-                throw e;
+            throw e;
         }
     }
     

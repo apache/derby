@@ -118,6 +118,7 @@ public class splitmessages {
         clientMessageIds.add(SQLState.NET_VCM_VCS_LENGTHS_INVALID);
         clientMessageIds.add(SQLState.LANG_STRING_TOO_LONG);
         clientMessageIds.add(SQLState.INVALID_COLUMN_ARRAY_LENGTH);
+        clientMessageIds.add(SQLState.PROPERTY_INVALID_VALUE);
     }
 
 	public static void main(String[] args) throws Exception {

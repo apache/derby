@@ -33,6 +33,7 @@ import org.apache.derby.shared.common.reference.MessageId;
 import org.apache.derby.shared.common.i18n.MessageUtil;
 import org.apache.derby.client.am.Statement;
 import org.apache.derby.client.am.Utils;
+import org.apache.derby.iapi.reference.Attribute;
 import org.apache.derby.jdbc.ClientBaseDataSource;
 import org.apache.derby.jdbc.ClientDriver;
 import org.apache.derby.client.ClientPooledConnection;
@@ -299,8 +300,19 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
         this.rmId_ = rmId;
         this.isXAConnection_ = isXAConn;
         flowConnect(password, securityMechanism_);
-        completeConnect();
-
+        // it's possible that the internal Driver.connect() calls returned null,
+        // thus, a null connection, e.g. when the databasename has a : in it
+        // (which the InternalDriver assumes means there's a subsubprotocol)  
+        // and it's not a subsubprotocol recognized by our drivers.
+        // If so, bail out here.
+        if(!isConnectionNull())
+            completeConnect();
+        else
+        {
+            agent_.accumulateChainBreakingReadExceptionAndThrow(new DisconnectException(agent_,
+                    new ClientMessageId(SQLState.PROPERTY_INVALID_VALUE),
+                    Attribute.DBNAME_ATTR,databaseName_));
+        }
     }
 
     // preferably without password in the method signature.

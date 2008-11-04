@@ -103,6 +103,7 @@ public class DataSourceTest extends BaseJDBCTestCase {
         suite.addTest(new DataSourceTest("testBadConnectionAttributeSyntax"));
         suite.addTest(new DataSourceTest("testDescriptionProperty"));
         suite.addTest(new DataSourceTest("testAllDataSources"));
+        suite.addTest(new DataSourceTest("testJira95ds"));
         return suite;
     }
 
@@ -130,8 +131,6 @@ public class DataSourceTest extends BaseJDBCTestCase {
     private static Test getEmbeddedSuite(String postfix) {
         TestSuite suite = new TestSuite("Embedded" + postfix);
         suite.addTest(new DataSourceTest("testDSRequestAuthentication"));
-        // when DERBY-2498 gets fixed, move this one to baseSuite
-        suite.addTest(new DataSourceTest("testJira95ds"));
         return suite;
     }
     
@@ -231,15 +230,9 @@ public class DataSourceTest extends BaseJDBCTestCase {
             ds.getConnection();
             fail ("expected an SQLException!");
         } catch (SQLException sqle) {
-            // DERBY-2498: with client, getting a NullPointerException.
-            // Note also: the NPE does not occur with XADataSource - see
-            // testJira95xads().
-            if (usingEmbedded())
-                assertSQLState("XCY00", sqle);
+            assertSQLState("XCY00", sqle);
         } catch (Exception e) {
-            // DERBY-2498, when fixed, remove 'if'
-            if (usingEmbedded())
-                fail ("unexpected exception: " + e.toString());
+            fail ("unexpected exception: " + e.toString());
         }
     } 
 
