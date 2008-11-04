@@ -276,6 +276,16 @@ public class GroupByTest extends BaseJDBCTestCase {
 
       st.executeUpdate(
     		  "insert into EMPTAB values( 1, 1000, 1 )"); 
+	
+      // tables for DERBY-3880 testing
+      st.executeUpdate("CREATE TABLE T1_D3880(i int, c varchar(20))");
+      st.executeUpdate("create table t2_D3880(i int, c2 varchar(20), i2 int)");
+      st.executeUpdate("insert into t1_D3880 values(1, 'abc')");
+      st.executeUpdate("insert into t1_D3880 values(2, 'abc')");
+      st.executeUpdate("insert into t2_D3880 values(1, 'xyz', 10)");
+      st.executeUpdate("insert into t2_D3880 values(1, 'aaa', 20)");
+      st.executeUpdate("insert into t2_D3880 values(2, 'xxx', 30)");
+      
 	}
 
 	/**
@@ -1446,6 +1456,16 @@ public class GroupByTest extends BaseJDBCTestCase {
 		JDBC.assertEmpty(s.executeQuery("select orderID from session.ztemp group by orderID"));
 	}
 
+	public void testHavingWithInnerJoinDerby3880() throws SQLException {
+		Statement s = createStatement();
+		ResultSet rs = s.executeQuery("select   t1_D3880.i, avg(t2_D3880.i2)  from t1_D3880 " +
+				"inner join t2_D3880 on (t1_D3880.i = t2_D3880.i) group by t1_D3880.i having "  +
+						"avg(t2_D3880.i2) > 0");
+		String[][] expRs = new String[][] {{"1","15"},{"2","30"}};
+		JDBC.assertFullResultSet(rs,expRs);
+
+	}
+	
 	/**
 	 * DERBY-280: Wrong result from select when aliasing to same name as used
 	 * in group by
