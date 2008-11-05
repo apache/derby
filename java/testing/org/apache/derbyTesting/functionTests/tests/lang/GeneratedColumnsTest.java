@@ -2332,6 +2332,165 @@ public class GeneratedColumnsTest extends BaseJDBCTestCase
              );
     }
     
+    /**
+     * <p>
+     * Test datatype alteration
+     * </p>
+     */
+    public  void    test_018_alterDatatype()
+        throws Exception
+    {
+        Connection  conn = getConnection();
+
+        //
+        // Schema
+        //
+        goodStatement
+            (
+             conn,
+             "create table t_atac_1( a char( 5 ), b varchar( 5 ) generated always as ( upper( a )  ) )"
+             );
+        goodStatement
+            (
+             conn,
+             "create table t_atac_2( a char( 5 ) for bit data,  b varchar( 5 ) for bit data generated always as ( a )  )"
+             );
+        goodStatement
+            (
+             conn,
+             "create table t_atac_3( a varchar( 5 ), b varchar( 5 ) generated always as ( upper( a )  ) )"
+             );
+        goodStatement
+            (
+             conn,
+             "create table t_atac_4( a varchar( 5 ) for bit data,  b varchar( 5 ) for bit data generated always as ( a )  )"
+             );
+
+        //
+        // Populate
+        //
+        goodStatement
+            (
+             conn,
+             "insert into t_atac_1( a ) values ( 'abc' )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_atac_2( a ) values ( X'AB' )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_atac_3( a ) values ( 'abc' )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_atac_3( a ) values ( 'abcde' )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_atac_4( a ) values ( X'AB' )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_atac_4( a ) values ( X'ABCDEFABCD' )"
+             );
+        
+        //
+        // Change the lengths of columns
+        //
+        goodStatement
+            (
+             conn,
+             "alter table t_atac_1\n" +
+             "  alter column b set data type varchar( 10 )\n"
+             );
+        goodStatement
+            (
+             conn,
+             "alter table t_atac_2\n" +
+             "  alter column b set data type varchar( 10 ) for bit data\n"
+             );
+        goodStatement
+            (
+             conn,
+             "alter table t_atac_3\n" +
+             "  alter column a set data type varchar( 10 )\n"
+             );
+        goodStatement
+            (
+             conn,
+             "alter table t_atac_4\n" +
+             "  alter column a set data type varchar( 10 ) for bit data\n"
+             );
+        
+        //
+        // Insert some more data
+        //
+        goodStatement
+            (
+             conn,
+             "insert into t_atac_3( a ) values ( 'abcdefg' )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_atac_4( a ) values ( X'ABCDEFABCDAB' )"
+             );
+        
+        //
+        // Verify contents
+        //
+        assertResults
+            (
+             conn,
+             "select * from t_atac_1 order by a",
+             new String[][]
+             {
+                 { "abc  ", "ABC  " },
+             },
+             false
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_atac_2 order by a",
+             new String[][]
+             {
+                 { "ab20202020", "ab20202020" },
+             },
+             false
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_atac_3 order by a",
+             new String[][]
+             {
+                 { "abc", "ABC" },
+                 { "abcde", "ABCDE" },
+                 { "abcdefg", "ABCDE" },
+             },
+             false
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_atac_4 order by a",
+             new String[][]
+             {
+                 { "ab", "ab" },
+                 { "abcdefabcd", "abcdefabcd" }, 
+                 { "abcdefabcdab", "abcdefabcd" },
+             },
+             false
+             );
+    }
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // MINIONS
