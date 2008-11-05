@@ -104,16 +104,7 @@ class NormalizeResultSet extends NoPutResultSetImpl
 
 		numCols = resultDescription.getColumnCount();
 		
-		/*
-		  An update row, for an update statement which sets n columns; i.e
-		     UPDATE tab set x,y,z=.... where ...;
-		  has,
-		  before values of x,y,z after values of x,y,z and rowlocation.
-		  need only normalize after values of x,y,z.
-		  i.e insead of starting at index = 1, I need to start at index = 4.
-		  also I needn't normalize the last value in the row.
-	*/
-		startCol = (forUpdate) ? ((numCols - 1)/ 2) + 1 : 1;
+		startCol = computeStartColumn( forUpdate, resultDescription );
 		normalizedRow = activation.getExecutionFactory().getValueRow(numCols);
 		recordConstructorTime();
 	}
@@ -278,6 +269,65 @@ class NormalizeResultSet extends NoPutResultSetImpl
 		return currentRow;
 	}
 
+    /**
+     * <p>
+     * Compute the start column for an update/insert.
+     * </p>
+     */
+    public  static  int computeStartColumn( boolean isUpdate, ResultDescription desc )
+    {
+		int count = desc.getColumnCount();
+        
+		/*
+		  An update row, for an update statement which sets n columns; i.e
+		     UPDATE tab set x,y,z=.... where ...;
+		  has,
+		  before values of x,y,z after values of x,y,z and rowlocation.
+		  need only normalize after values of x,y,z.
+		  i.e insead of starting at index = 1, I need to start at index = 4.
+		  also I needn't normalize the last value in the row.
+        */
+		return (isUpdate) ? ((count - 1)/ 2) + 1 : 1;
+    }
+
+    
+	/**
+	 * Normalize a row.  For now, this means calling constructors through
+	 * the type services to normalize a type to itself.  For example,
+	 * if you're putting a char(30) value into a char(15) column, it
+	 * calls a SQLChar constructor with the char(30) value, and the
+	 * constructor truncates the value and makes sure that no non-blank
+	 * characters are truncated.
+	 *
+	 * In the future, this mechanism will be extended to do type conversions,
+	 * as well.  I didn't implement type conversions yet because it looks
+	 * like a lot of work, and we needed char and varchar right away.
+	 *
+ 	 * @exception StandardException thrown on failure 
+	 */
+	public  static  DataValueDescriptor normalizeColumn
+        (DataTypeDescriptor dtd, ExecRow sourceRow, int sourceColumnPosition, DataValueDescriptor resultCol, ResultDescription desc )
+        throws StandardException
+	{
+        DataValueDescriptor sourceCol = sourceRow.getColumn( sourceColumnPosition );
+
+        try {
+            DataValueDescriptor returnValue = dtd.normalize( sourceCol, resultCol );
+
+            return returnValue;
+        } catch (StandardException se) {
+            // Catch illegal null insert and add column info
+            if (se.getMessageId().startsWith(SQLState.LANG_NULL_INTO_NON_NULL))
+            {
+                ResultColumnDescriptor columnDescriptor = desc.getColumnDescriptor( sourceColumnPosition );
+                throw StandardException.newException
+                    (SQLState.LANG_NULL_INTO_NON_NULL, columnDescriptor.getName());
+            }
+            //just rethrow if not LANG_NULL_INTO_NON_NULL
+            throw se;
+        }
+    }
+    
 	//
 	// class implementation
 	//
@@ -303,52 +353,54 @@ class NormalizeResultSet extends NoPutResultSetImpl
 	{
 		int					whichCol;
 
-		if (desiredTypes == null)
+		if (desiredTypes == null) { desiredTypes = fetchResultTypes( resultDescription ); }
+
+        int                     count = resultDescription.getColumnCount();
+
+		for (int i = 1; i <= count; i++)
 		{
-			desiredTypes = new DataTypeDescriptor[numCols];
-			for (whichCol = 1; whichCol <= numCols; whichCol++)
-			{
-				DataTypeDescriptor dtd = resultDescription.getColumnDescriptor(whichCol).getType();
-
-				desiredTypes[whichCol - 1] = dtd;
-			}
-
-		}
-
-		for (whichCol = 1; whichCol <= numCols; whichCol++)
-		{
-			DataValueDescriptor sourceCol = sourceRow.getColumn(whichCol);
+			DataValueDescriptor sourceCol = sourceRow.getColumn( i );
 			if (sourceCol != null)
 			{
 				DataValueDescriptor	normalizedCol;
 				// skip the before values in case of update
-				if (whichCol < startCol)
-					normalizedCol = sourceCol;
+				if (i < startCol)
+                { normalizedCol = sourceCol; }
 				else
-					try {
-						normalizedCol = 
-						desiredTypes[whichCol - 1].normalize(sourceCol, 
-									normalizedRow.getColumn(whichCol));
-					} catch (StandardException se) {
-						// Catch illegal null insert and add column info
-						if (se.getMessageId().startsWith(SQLState.LANG_NULL_INTO_NON_NULL))
-						{
-							ResultColumnDescriptor columnDescriptor =
-								resultDescription.getColumnDescriptor(whichCol);
-							throw
-								StandardException.newException(SQLState.LANG_NULL_INTO_NON_NULL, 
-															   columnDescriptor.getName());
-						}
-						//just rethrow if not LANG_NULL_INTO_NON_NULL
-						throw se;
-					}
+                {
+                    normalizedCol = normalizeColumn
+                        ( desiredTypes[i - 1], sourceRow, i, normalizedRow.getColumn(i), resultDescription );
+                }
 
-				normalizedRow.setColumn(whichCol, normalizedCol);
+				normalizedRow.setColumn(i, normalizedCol);
 			}
 		}
 
 		return normalizedRow;
 	}
+
+    /**
+     * <p>
+     * Fetch the result datatypes out of the activation.
+     * </p>
+     */
+    private  DataTypeDescriptor[]    fetchResultTypes( ResultDescription desc )
+        throws StandardException
+    {
+        int     count = desc.getColumnCount();
+
+        DataTypeDescriptor[]    result = new DataTypeDescriptor[ count ];
+        
+        for ( int i = 1; i <= count; i++)
+        {
+            ResultColumnDescriptor  colDesc = desc.getColumnDescriptor(  i );
+            DataTypeDescriptor dtd = colDesc.getType();
+
+            result[i - 1] = dtd;
+        }
+
+        return result;
+    }
 
 	/**
 	 * @see NoPutResultSet#updateRow

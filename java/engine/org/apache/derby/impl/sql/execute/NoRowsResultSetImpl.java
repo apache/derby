@@ -31,6 +31,7 @@ import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
 import org.apache.derby.iapi.sql.Activation;
+import org.apache.derby.iapi.sql.ResultColumnDescriptor;
 import org.apache.derby.iapi.sql.ResultDescription;
 import org.apache.derby.iapi.sql.ResultSet;
 import org.apache.derby.iapi.sql.Row;
@@ -42,6 +43,7 @@ import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.execute.ExecRow;
 import org.apache.derby.iapi.sql.execute.NoPutResultSet;
 import org.apache.derby.iapi.sql.execute.ResultSetStatisticsFactory;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 
 /**
@@ -71,6 +73,10 @@ abstract class NoRowsResultSetImpl implements ResultSet
 	protected long endTime;
 	protected long beginExecutionTime;
 	protected long endExecutionTime;
+
+    private int                             firstColumn = -1;
+    private int[]                           generatedColumnPositions; // 1-based positions
+    private DataValueDescriptor[]  normalizedGeneratedValues; // one for  each slot in generatedColumnPositions
 
 	NoRowsResultSetImpl(Activation activation)
 		throws StandardException
@@ -590,7 +596,8 @@ abstract class NoRowsResultSetImpl implements ResultSet
 	  GeneratedMethod generationClauses,
 	  Activation activation,
       NoPutResultSet    source,
-      ExecRow           newRow
+      ExecRow           newRow,
+      boolean           isUpdate
 	)
 		throws StandardException
 	{
@@ -607,6 +614,32 @@ abstract class NoRowsResultSetImpl implements ResultSet
             try {
                 source.setCurrentRow( newRow );
                 generationClauses.invoke(activation);
+
+                //
+                // Now apply NOT NULL checks and other coercions. For non-generated columns, these
+                // are performed in the driving ResultSet.
+                //
+                if ( firstColumn < 0 ) { firstColumn = NormalizeResultSet.computeStartColumn( isUpdate, activation.getResultDescription() ); }
+                if ( generatedColumnPositions == null ) { setupGeneratedColumns( activation, (ValueRow) newRow ); }
+                
+                ResultDescription   resultDescription = activation.getResultDescription();
+                int                         count = generatedColumnPositions.length;
+
+                for ( int i = 0; i < count; i++ )
+                {
+                    int         position = generatedColumnPositions[ i ];
+
+                    DataValueDescriptor normalizedColumn = NormalizeResultSet.normalizeColumn
+                        (
+                         resultDescription.getColumnDescriptor( position ).getType(),
+                         newRow,
+                         position,
+                         normalizedGeneratedValues[ i ],
+                         resultDescription
+                         );
+
+                    newRow.setColumn( position, normalizedColumn );
+                }
             }
             finally
             {
@@ -622,6 +655,48 @@ abstract class NoRowsResultSetImpl implements ResultSet
 		}
 	}
 
+	/**
+	  * Construct support for normalizing generated columns.
+	  */
+    private void    setupGeneratedColumns( Activation activation, ValueRow newRow )
+        throws StandardException
+    {
+        ResultDescription   resultDescription = activation.getResultDescription();
+        int                         columnCount = resultDescription.getColumnCount();
+        ExecRow                 emptyRow = newRow.getNewNullRow();
+        int                         generatedColumnCount = 0;
+
+        // first count the number of generated columns
+        for ( int i = 1; i <= columnCount; i++ )
+        {
+            if ( i < firstColumn ) { continue; }
+            
+            ResultColumnDescriptor  rcd = resultDescription.getColumnDescriptor( i );
+
+            if ( rcd.hasGenerationClause() ) { generatedColumnCount++; }
+        }
+
+        // now allocate and populate support structures
+        generatedColumnPositions = new int[ generatedColumnCount ];
+        normalizedGeneratedValues = new DataValueDescriptor[ generatedColumnCount ];
+
+        int     idx = 0;
+        for ( int i = 1; i <= columnCount; i++ )
+        {
+            if ( i < firstColumn ) { continue; }
+            
+            ResultColumnDescriptor  rcd = resultDescription.getColumnDescriptor( i );
+
+            if ( rcd.hasGenerationClause() )
+            {
+                generatedColumnPositions[ idx ] = i;
+                normalizedGeneratedValues[ idx ] = emptyRow.getColumn( i );
+
+                idx++;
+            }
+        }
+    }
+    
 	/**
 	  *	Run check constraints against the current row. Raise an error if
 	  * a check constraint is violated.

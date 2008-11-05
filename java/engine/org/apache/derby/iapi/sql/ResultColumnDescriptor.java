@@ -98,6 +98,11 @@ public interface ResultColumnDescriptor
 	 */
 	boolean isAutoincrement();
 
+	/**
+	 * Return true if this result column represents a generated column.
+	 */
+	public boolean hasGenerationClause();
+    
 	/*
 	 * NOTE: These interfaces are intended to support JDBC. There are some
 	 * JDBC methods on java.sql.ResultSetMetaData that have no equivalent

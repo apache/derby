@@ -448,7 +448,7 @@ class UpdateResultSet extends DMLWriteResultSet
 
         while ( row != null )
         {
-            evaluateGenerationClauses( generationClauses, activation, source, row );
+            evaluateGenerationClauses( generationClauses, activation, source, row, true );
 
 			/* By convention, the last column in the result set for an
 			 * update contains a SQLRef containing the RowLocation of

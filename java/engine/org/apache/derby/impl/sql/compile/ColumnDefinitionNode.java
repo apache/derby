@@ -454,7 +454,7 @@ public class ColumnDefinitionNode extends TableElementNode
 		/* DB2 requires non-nullable columns to have a default in ALTER TABLE */
 		if (td != null && !getType().isNullable() && defaultNode == null)
 		{
-			if (!isAutoincrement)
+			if (!isAutoincrement && !hasGenerationClause())
 				throw StandardException.newException(SQLState.LANG_DB2_NOT_NULL_COLUMN_INVALID_DEFAULT, getColumnName());
 		}
 			

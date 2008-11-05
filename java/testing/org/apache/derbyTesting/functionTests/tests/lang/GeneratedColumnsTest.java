@@ -63,6 +63,7 @@ public class GeneratedColumnsTest extends BaseJDBCTestCase
     private static  final   String  CANT_REFERENCE_GENERATED_COLUMN = "42XA4";
     private static  final   String  ROUTINE_CANT_ISSUE_SQL = "42XA5";
     private static  final   String  BAD_FOREIGN_KEY_ACTION = "42XA6";
+    private static  final   String  NOT_NULL_VIOLATION = "23502";
     private static  final   String  CONSTRAINT_VIOLATION = "23513";
     private static  final   String  FOREIGN_KEY_VIOLATION = "23503";
     private static  final   String  ILLEGAL_DUPLICATE = "23505";
@@ -1636,7 +1637,7 @@ public class GeneratedColumnsTest extends BaseJDBCTestCase
              conn,
              "create table t_dt_varchar\n" +
              "(\n" +
-             "   a  char( 20 ),\n" +
+             "   a  varchar( 20 ),\n" +
              "   b  char( 20 ) generated always as ( upper( a ) ),\n" +
              "   c  varchar( 20 ) generated always as ( upper( a ) ),\n" +
              "   d long varchar generated always as ( upper( a ) ),\n" +
@@ -2109,6 +2110,116 @@ public class GeneratedColumnsTest extends BaseJDBCTestCase
              );
     }
     
+    /**
+     * <p>
+     * Test NOT NULL constraints on generated columns.
+     * </p>
+     */
+    public  void    test_016_notNull()
+        throws Exception
+    {
+        Connection  conn = getConnection();
+
+        //
+        // Schema
+        //
+        goodStatement
+            (
+             conn,
+             "create table t1_nn( a int, b int generated always as (-a) not null, c int )"
+             );
+        goodStatement
+            (
+             conn,
+             "create table t2_nn( a int, c int )"
+             );
+
+        //
+        // Populate first table
+        //
+        goodStatement
+            (
+             conn,
+             "insert into t1_nn( a ) values ( 1 )"
+             );
+        expectExecutionError
+            (
+             conn,
+             NOT_NULL_VIOLATION,
+             "insert into t1_nn( c ) values ( 1 )"
+             );
+        goodStatement
+            (
+             conn,
+             "update t1_nn set a = a + 1"
+             );
+        expectExecutionError
+            (
+             conn,
+             NOT_NULL_VIOLATION,
+             "update t1_nn set a = null"
+             );
+        assertResults
+            (
+             conn,
+             "select * from t1_nn order by a",
+             new String[][]
+             {
+                 { "2", "-2", null, },
+             },
+             true
+             );
+        
+        //
+        // Populate and alter second table
+        //
+        goodStatement
+            (
+             conn,
+             "insert into t2_nn values ( 1, 1 )"
+             );
+        goodStatement
+            (
+             conn,
+             "alter table t2_nn\n" +
+             "  add column b int generated always as (-a) not null\n"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t2_nn( a ) values ( 2 )"
+             );
+        expectExecutionError
+            (
+             conn,
+             NOT_NULL_VIOLATION,
+             "insert into t2_nn( c ) values ( 10 )"
+             );
+        goodStatement
+            (
+             conn,
+             "update t2_nn set a = a + 1"
+             );
+        expectExecutionError
+            (
+             conn,
+             NOT_NULL_VIOLATION,
+             "update t2_nn set a = null"
+             );
+        assertResults
+            (
+             conn,
+             "select * from t2_nn order by a",
+             new String[][]
+             {
+                 { "2", "1",   "-2", },
+                 { "3", null, "-3", },
+             },
+             true
+             );
+    }
+
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // MINIONS
@@ -2155,6 +2266,7 @@ public class GeneratedColumnsTest extends BaseJDBCTestCase
     private void    expectExecutionError( Connection conn, String sqlState, String query )
         throws Exception
     {
+        println( "\nExpecting " + sqlState + " when executing:\n\t"  );
         PreparedStatement   ps = chattyPrepare( conn, query );
 
         assertStatementError( sqlState, ps );

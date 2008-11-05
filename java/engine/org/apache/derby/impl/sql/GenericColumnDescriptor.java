@@ -67,6 +67,7 @@ public final class GenericColumnDescriptor
 	private DataTypeDescriptor	type;
 	private boolean 			isAutoincrement;
 	private boolean 			updatableByCursor;
+    private boolean             hasGenerationClause;
 
 	/**
 	 * Niladic constructor for Formatable
@@ -98,6 +99,7 @@ public final class GenericColumnDescriptor
 		type = rcd.getType();
 		isAutoincrement = rcd.isAutoincrement();
 		updatableByCursor = rcd.updatableByCursor();
+        hasGenerationClause = rcd.hasGenerationClause();
 	}
 
 	/**
@@ -173,6 +175,8 @@ public final class GenericColumnDescriptor
 	{
 		return updatableByCursor;
 	}
+
+    public boolean hasGenerationClause() { return hasGenerationClause; }
 
 	//////////////////////////////////////////////
 	//
