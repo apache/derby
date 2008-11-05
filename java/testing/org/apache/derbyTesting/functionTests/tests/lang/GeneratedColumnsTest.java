@@ -2219,6 +2219,118 @@ public class GeneratedColumnsTest extends BaseJDBCTestCase
              );
     }
 
+    /**
+     * <p>
+     * Test padding and truncation of character and fixed decimal data.
+     * </p>
+     */
+    public  void    test_017_padding()
+        throws Exception
+    {
+        Connection  conn = getConnection();
+
+        //
+        // Schema
+        //
+        goodStatement
+            (
+             conn,
+             "create table t_cc_char\n" +
+             "(\n" +
+             "    a char( 10 ),\n" +
+             "    b char( 5 ) generated always as( upper( a ) ),\n" +
+             "    c char( 10 ) generated always as( upper( a ) ),\n" +
+             "    d char( 15 ) generated always as( upper( a ) ),\n" +
+             "    e varchar( 5 ) generated always as( upper( a ) ),\n" +
+             "    f varchar( 10 ) generated always as( upper( a ) ),\n" +
+             "    g varchar( 15 ) generated always as( upper( a ) )\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             conn,
+             "create table t_cc_varchar\n" +
+             "(\n" +
+             "    a char( 10 ),\n" +
+             "    b char( 5 ) generated always as( upper( a ) ),\n" +
+             "    c char( 10 ) generated always as( upper( a ) ),\n" +
+             "    d char( 15 ) generated always as( upper( a ) ),\n" +
+             "    e varchar( 5 ) generated always as( upper( a ) ),\n" +
+             "    f varchar( 10 ) generated always as( upper( a ) ),\n" +
+             "    g varchar( 15 ) generated always as( upper( a ) )\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             conn,
+             "create table t_cc_decimal\n" +
+             "(\n" +
+             "    a decimal( 6, 2 ),\n" +
+             "    b decimal( 5, 1 ) generated always as ( a ),\n" +
+             "    c decimal( 5, 2 ) generated always as ( a ),\n" +
+             "    d decimal( 5, 3 ) generated always as ( a ),\n" +
+             "    e decimal( 6, 1 ) generated always as ( a ),\n" +
+             "    f decimal( 6, 2 ) generated always as ( a ),\n" +
+             "    g decimal( 6, 3 ) generated always as ( a ),\n" +
+             "    h decimal( 7, 1 ) generated always as ( a ),\n" +
+             "    i decimal( 7, 2 ) generated always as ( a ),\n" +
+             "    j decimal( 7, 3 ) generated always as ( a )\n" +
+             ")\n"
+             );
+
+        //
+        // Populate
+        //
+        goodStatement
+            (
+             conn,
+             "insert into t_cc_char( a ) values ( 'abcdefghij' )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_cc_varchar( a ) values ( 'abcdefghij' )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_cc_decimal( a ) values ( 12.345 )"
+             );
+
+        //
+        // Verify
+        //
+        assertResults
+            (
+             conn,
+             "select * from t_cc_char order by a",
+             new String[][]
+             {
+                 { "abcdefghij", "ABCDE", "ABCDEFGHIJ", "ABCDEFGHIJ     ", "ABCDE", "ABCDEFGHIJ", "ABCDEFGHIJ", },
+             },
+             false
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_cc_varchar order by a",
+             new String[][]
+             {
+                 { "abcdefghij", "ABCDE", "ABCDEFGHIJ", "ABCDEFGHIJ     ", "ABCDE", "ABCDEFGHIJ", "ABCDEFGHIJ", },
+             },
+             false
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_cc_decimal order by a",
+             new String[][]
+             {
+                 { "12.34", "12.3", "12.34", "12.340", "12.3", "12.34", "12.340", "12.3", "12.34", "12.340", },
+             },
+             true
+             );
+    }
     
     ///////////////////////////////////////////////////////////////////////////////////
     //
