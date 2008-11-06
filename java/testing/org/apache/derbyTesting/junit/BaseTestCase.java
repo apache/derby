@@ -468,7 +468,7 @@ public abstract class BaseTestCase
 	public Process execJavaCmd(String[] cmd) throws IOException {
 	    int totalSize = 3 + cmd.length;
 	    String[] tcmd = new String[totalSize];
-	    tcmd[0] = "java";
+	    tcmd[0] = getJavaExecutableName();
 	    tcmd[1] = "-classpath";
 	    tcmd[2] = BaseTestCase.getSystemProperty("java.class.path");
 
