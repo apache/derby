@@ -588,5 +588,28 @@ public class GroupByTest extends BaseJDBCTestCase {
         }
         return rows;
     }
+
+    public void testHavingWithInnerJoinDerby3880() throws SQLException {
+        Statement s = createStatement();
+        // tables for DERBY-3880 testing
+        s.executeUpdate("CREATE TABLE T1_D3880(i int, c varchar(20))");
+        s.executeUpdate("create table t2_D3880(i int, c2 varchar(20), i2 int)");
+        s.executeUpdate("insert into t1_D3880 values(1, 'abc')");
+        s.executeUpdate("insert into t1_D3880 values(2, 'abc')");
+        s.executeUpdate("insert into t2_D3880 values(1, 'xyz', 10)");
+        s.executeUpdate("insert into t2_D3880 values(1, 'aaa', 20)");
+        s.executeUpdate("insert into t2_D3880 values(2, 'xxx', 30)");
+        
+        ResultSet rs = s.executeQuery("select   t1_D3880.i, avg(t2_D3880.i2)  from t1_D3880 " +
+                "inner join t2_D3880 on (t1_D3880.i = t2_D3880.i) group by t1_D3880.i having "  +
+                        "avg(t2_D3880.i2) > 0");
+        String[][] expRs = new String[][] {{"1","15"},{"2","30"}};
+        JDBC.assertFullResultSet(rs,expRs);
+        s.executeUpdate("DROP TABLE T1_D3880");
+        s.executeUpdate("DROP TABLE T2_D3880");
+    
+    }
+
+
 }
 
