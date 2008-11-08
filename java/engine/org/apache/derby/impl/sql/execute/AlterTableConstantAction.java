@@ -499,7 +499,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 				}
 				else if (columnInfo[ix].action == ColumnInfo.DROP)
 				{
-					dropColumnFromTable(activation, ix);
+					dropColumnFromTable(activation, columnInfo[ix].name);
 				}
 				else if (SanityManager.DEBUG)
 				{
@@ -1407,22 +1407,89 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 	 *    entire index is dropped. 
 	 *
      * @param   activation  the current activation
-	 * @param   ix 			the index of the column specfication in the ALTER 
+	 * @param   columnName the name of the column specfication in the ALTER 
 	 *						statement-- currently we allow only one.
 	 * @exception StandardException 	thrown on failure.
 	 */
-	private void dropColumnFromTable(Activation activation,
-									 int ix) 
+	private void dropColumnFromTable(Activation activation, String columnName )
 	        throws StandardException
 	{
 		LanguageConnectionContext lcc = activation.getLanguageConnectionContext();
 		DataDictionary dd = lcc.getDataDictionary();
 		DependencyManager dm = dd.getDependencyManager();
 		TransactionController tc = lcc.getTransactionExecute();
+		boolean cascade = (behavior == StatementType.DROP_CASCADE);
 
+        // drop any generated columns which reference this column
+        ColumnDescriptorList    generatedColumnList = td.getGeneratedColumns();
+        int                                 generatedColumnCount = generatedColumnList.size();
+        ArrayList                   cascadedDroppedColumns = new ArrayList();
+        for ( int i = 0; i < generatedColumnCount; i++ )
+        {
+            ColumnDescriptor    generatedColumn = generatedColumnList.elementAt( i );
+            String[]                       referencedColumnNames = generatedColumn.getDefaultInfo().getReferencedColumnNames();
+            int                         referencedColumnCount = referencedColumnNames.length;
+            for ( int j = 0; j < referencedColumnCount; j++ )
+            {
+                if ( columnName.equals( referencedColumnNames[ j ] ) )
+                {
+                    String      generatedColumnName = generatedColumn.getColumnName();
+                    
+                    // ok, the current generated column references the column
+                    // we're trying to drop
+                    if (! cascade)
+                    {
+                        // Reject the DROP COLUMN, because there exists a
+                        // generated column which references this column.
+                        //
+                        throw StandardException.newException
+                            (
+                             SQLState.LANG_PROVIDER_HAS_DEPENDENT_OBJECT,
+                             dm.getActionString(DependencyManager.DROP_COLUMN),
+                             columnName, "GENERATED COLUMN",
+                             generatedColumnName
+                             );
+                    }
+                    else
+                    {
+                        cascadedDroppedColumns.add( generatedColumnName );
+                    }
+                }
+            }
+        }
 
-		ColumnDescriptor columnDescriptor = 
-			td.getColumnDescriptor(columnInfo[ix].name);
+		DataDescriptorGenerator ddg = dd.getDataDescriptorGenerator();
+        int                             cascadedDrops = cascadedDroppedColumns.size();
+		int sizeAfterCascadedDrops = td.getColumnDescriptorList().size() - cascadedDrops;
+
+		// can NOT drop a column if it is the only one in the table
+		if (sizeAfterCascadedDrops == 1)
+		{
+			throw StandardException.newException(
+                    SQLState.LANG_PROVIDER_HAS_DEPENDENT_OBJECT,
+                    dm.getActionString(DependencyManager.DROP_COLUMN),
+                    "THE *LAST* COLUMN " + columnName,
+                    "TABLE",
+                    td.getQualifiedName() );
+		}
+
+        // now drop dependent generated columns
+        for ( int i = 0; i < cascadedDrops; i++ )
+        {
+            String      generatedColumnName = (String) cascadedDroppedColumns.get( i );
+            
+            activation.addWarning
+                ( StandardException.newWarning( SQLState.LANG_GEN_COL_DROPPED, generatedColumnName, td.getName() ) );
+            dropColumnFromTable( activation, generatedColumnName );
+        }
+
+        /*
+         * Cascaded drops of dependent generated columns may require us to
+         * rebuild the table descriptor.
+         */
+		td = dd.getTableDescriptor(tableId);
+
+		ColumnDescriptor columnDescriptor = td.getColumnDescriptor( columnName );
 
 		// We already verified this in bind, but do it again
 		if (columnDescriptor == null)
@@ -1430,27 +1497,12 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 			throw 
 				StandardException.newException(
                     SQLState.LANG_COLUMN_NOT_FOUND_IN_TABLE, 
-                    columnInfo[ix].name,
+                    columnName,
                     td.getQualifiedName());
 		}
 
-		DataDescriptorGenerator ddg = dd.getDataDescriptorGenerator();
-		ColumnDescriptorList tab_cdl = td.getColumnDescriptorList();
-		int size = tab_cdl.size();
-
-		// can NOT drop a column if it is the only one in the table
-		if (size == 1)
-		{
-			throw StandardException.newException(
-                    SQLState.LANG_PROVIDER_HAS_DEPENDENT_OBJECT,
-                    dm.getActionString(DependencyManager.DROP_COLUMN),
-                    "THE *LAST* COLUMN " + columnInfo[ix].name,
-                    "TABLE",
-                    td.getQualifiedName() );
-		}
-
+		int size = td.getColumnDescriptorList().size();
 		droppedColumnPosition = columnDescriptor.getPosition();
-		boolean cascade = (behavior == StatementType.DROP_CASCADE);
 
 		FormatableBitSet toDrop = new FormatableBitSet(size + 1);
 		toDrop.set(droppedColumnPosition);
@@ -1501,7 +1553,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 						throw StandardException.newException(
                             SQLState.LANG_PROVIDER_HAS_DEPENDENT_OBJECT,
                             dm.getActionString(DependencyManager.DROP_COLUMN),
-                            columnInfo[ix].name, "TRIGGER",
+                            columnName, "TRIGGER",
                             trd.getName() );
 					}
 					break;
@@ -1573,7 +1625,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 				throw StandardException.newException(
                         SQLState.LANG_PROVIDER_HAS_DEPENDENT_OBJECT,
                         dm.getActionString(DependencyManager.DROP_COLUMN),
-                        columnInfo[ix].name, "CONSTRAINT",
+                        columnName, "CONSTRAINT",
                         cd.getConstraintName() );
 			}
 
@@ -1656,8 +1708,10 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 
 		compressTable(activation);
 
+		ColumnDescriptorList tab_cdl = td.getColumnDescriptorList();
+
 		// drop the column from syscolumns 
-		dd.dropColumnDescriptor(td.getUUID(), columnInfo[ix].name, tc);
+		dd.dropColumnDescriptor(td.getUUID(), columnName, tc);
 		ColumnDescriptor[] cdlArray = 
             new ColumnDescriptor[size - columnDescriptor.getPosition()];
 
@@ -1677,6 +1731,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 				cd.setAutoinc_create_or_modify_Start_Increment(
 						ColumnDefinitionNode.CREATE_AUTOINCREMENT);
 			}
+
 			cdlArray[j] = cd;
 		}
 		dd.addDescriptorArray(cdlArray, td,
@@ -1719,6 +1774,11 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		// Adjust the column permissions rows in SYSCOLPERMS to reflect the
 		// changed column positions due to the dropped column:
 		dd.updateSYSCOLPERMSforDropColumn(td.getUUID(), tc, columnDescriptor);
+
+        // remove column descriptor from table descriptor. this fixes up the
+        // list in case we were called recursively in order to cascade-drop a
+        // dependent generated column.
+        tab_cdl.remove( td.getColumnDescriptor( columnName ) );
 	}
 
 	private void modifyColumnType(Activation activation,

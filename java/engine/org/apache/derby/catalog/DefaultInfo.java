@@ -34,10 +34,10 @@ public interface DefaultInfo
 	public String getDefaultText();
 	
 	/**
-	 * If this default is a generation clause, then return the 1-based ids of
+	 * If this default is a generation clause, then return the names of
 	 * other columns in the row which the generation clause references.
 	 */
-	public int[] getReferencedColumnIDs();
+	public String[] getReferencedColumnNames();
 	
 	
 	/**

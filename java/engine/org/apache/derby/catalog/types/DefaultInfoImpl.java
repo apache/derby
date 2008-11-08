@@ -55,7 +55,7 @@ public class DefaultInfoImpl implements DefaultInfo, Formatable
 	private DataValueDescriptor	defaultValue;
 	private String				defaultText;
 	private int                     type;
-    private int[]                   referencedColumnIDs;
+    private String[]                   referencedColumnNames;
 
 	final private static int BITS_MASK_IS_DEFAULTVALUE_AUTOINC = 0x1 << 0;
 	final private static int BITS_MASK_IS_GENERATED_COLUMN = 0x2;
@@ -86,14 +86,14 @@ public class DefaultInfoImpl implements DefaultInfo, Formatable
 	public DefaultInfoImpl
         (
          String defaultText,
-         int[]    referencedColumnIDs
+         String[]    referencedColumnNames
          )
 	{
-        if ( referencedColumnIDs == null ) { referencedColumnIDs = new int[0]; }
+        if ( referencedColumnNames == null ) { referencedColumnNames = new String[0]; }
         
 		this.type = BITS_MASK_IS_GENERATED_COLUMN;
 		this.defaultText = defaultText;
-		this.referencedColumnIDs = referencedColumnIDs;
+		this.referencedColumnNames = referencedColumnNames;
 	}
 
 	/**
@@ -105,11 +105,11 @@ public class DefaultInfoImpl implements DefaultInfo, Formatable
 	}
 
 	/**
-	 * @see DefaultInfo#getReferencedColumnIDs
+	 * @see DefaultInfo#getReferencedColumnNames
 	 */
-	public int[] getReferencedColumnIDs()
+	public String[] getReferencedColumnNames()
 	{
-		return referencedColumnIDs;
+		return referencedColumnNames;
 	}
 
 	public String	toString()
@@ -144,8 +144,8 @@ public class DefaultInfoImpl implements DefaultInfo, Formatable
         if ( isGeneratedColumn() )
         {
             int count = in.readInt();
-            referencedColumnIDs = new int[ count ];
-            for ( int i = 0; i < count; i++ ) { referencedColumnIDs[ i ] = in.readInt(); }
+            referencedColumnNames = new String[ count ];
+            for ( int i = 0; i < count; i++ ) { referencedColumnNames[ i ] = (String) in.readObject(); }
         }
 	}
 
@@ -165,9 +165,9 @@ public class DefaultInfoImpl implements DefaultInfo, Formatable
         
         if ( isGeneratedColumn() )
         {
-            int count = referencedColumnIDs.length;
+            int count = referencedColumnNames.length;
             out.writeInt( count );
-            for ( int i = 0; i < count; i++ ) { out.writeInt( referencedColumnIDs[ i ] ); }
+            for ( int i = 0; i < count; i++ ) { out.writeObject( referencedColumnNames[ i ] ); }
         }
 	}
  

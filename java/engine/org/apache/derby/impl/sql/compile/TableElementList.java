@@ -768,14 +768,21 @@ public class TableElementList extends QueryTreeNodeVector
 			ResultColumnList rcl = table.getResultColumns();
 			int		numReferenced = rcl.countReferencedColumns();
 			int[]	generationClauseColumnReferences = new int[numReferenced];
-
             int     position = rcl.getPosition( cdn.getColumnName(), 1 );
+
             generatedColumns.set( position );
         
 			rcl.recordColumnReferences(generationClauseColumnReferences, 1);
 
+            String[]    referencedColumnNames = new String[ numReferenced ];
+
+            for ( int i = 0; i < numReferenced; i++ )
+            {
+                referencedColumnNames[ i ] = ((ResultColumn)rcl.elementAt( generationClauseColumnReferences[ i ] - 1 )).getName();
+            }
+
             DefaultInfoImpl dii = new DefaultInfoImpl
-                ( generationClauseNode.getExpressionText(), generationClauseColumnReferences );
+                ( generationClauseNode.getExpressionText(), referencedColumnNames );
             cdn.setDefaultInfo( dii );
 
 			/* Clear the column references in the RCL so each generation clause
@@ -788,6 +795,7 @@ public class TableElementList extends QueryTreeNodeVector
         // Now verify that none of the generated columns reference other
         // generated columns.
         //
+        ResultColumnList rcl = table.getResultColumns();
 		for (int index = 0; index < size; index++)
 		{
 			ColumnDefinitionNode cdn;
@@ -799,12 +807,14 @@ public class TableElementList extends QueryTreeNodeVector
 
 			if (!cdn.hasGenerationClause()) { continue; }
 
-            int[]   referencedColumns = cdn.getDefaultInfo().getReferencedColumnIDs();
-            int     count = referencedColumns.length;
+            String[]   referencedColumnNames = cdn.getDefaultInfo().getReferencedColumnNames();
+            int     count = referencedColumnNames.length;
 
             for ( int i = 0; i < count; i++ )
             {
-                int         referencedColumnID = referencedColumns[ i ]; 
+                String      name = referencedColumnNames[ i ];
+                int         referencedColumnID = rcl.getPosition( name, 1 );
+
                 if ( generatedColumns.isSet( referencedColumnID ) )
                 {
                     throw StandardException.newException(SQLState.LANG_CANT_REFERENCE_GENERATED_COLUMN, cdn.getColumnName());

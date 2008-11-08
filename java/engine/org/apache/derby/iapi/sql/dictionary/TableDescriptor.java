@@ -926,6 +926,22 @@ public class TableDescriptor extends TupleDescriptor
 	}
 
 	/**
+	 * Turn an array of column names into the corresponding 1-based column positions.
+	 */
+	public int[]    getColumnIDs( String[] names )
+	{
+        int     count = names.length;
+        int[]    result = new int[ count];
+        
+        for ( int i = 0; i < count; i++ )
+        {
+            result[ i ] = getColumnDescriptor( names[ i ] ).getPosition();
+        }
+        
+		return result;
+	}
+
+	/**
 	 * Gets the constraint descriptor list
 	 *
 	 * @return	The constraint descriptor list for this table descriptor

@@ -1041,7 +1041,7 @@ public final class UpdateNode extends DMLModStatementNode
         // Add all columns mentioned by generation clauses which are affected
         // by the columns being updated.
         //
-        addGeneratedColumnPrecursors( affectedGeneratedColumns, columnMap );
+        addGeneratedColumnPrecursors( baseTable, affectedGeneratedColumns, columnMap );
         
 		/*
 	 	** If we have any triggers, then get all the columns
@@ -1070,8 +1070,9 @@ public final class UpdateNode extends DMLModStatementNode
      */
     private static  void    addGeneratedColumnPrecursors
 	(
-        ColumnDescriptorList    affectedGeneratedColumns,
-		FormatableBitSet        columnMap
+     TableDescriptor         baseTable,
+     ColumnDescriptorList    affectedGeneratedColumns,
+     FormatableBitSet        columnMap
 	)
 		throws StandardException
 	{
@@ -1080,7 +1081,8 @@ public final class UpdateNode extends DMLModStatementNode
         for ( int gcIdx = 0; gcIdx < generatedColumnCount; gcIdx++ )
         {
             ColumnDescriptor    gc = affectedGeneratedColumns.elementAt( gcIdx );
-            int[]                       mentionedColumns = gc.getDefaultInfo().getReferencedColumnIDs();
+            String[]                       mentionedColumnNames = gc.getDefaultInfo().getReferencedColumnNames();
+            int[]                       mentionedColumns = baseTable.getColumnIDs( mentionedColumnNames );
             int                         mentionedColumnCount = mentionedColumns.length;
 
             for ( int mcIdx = 0; mcIdx < mentionedColumnCount; mcIdx++ )
@@ -1128,8 +1130,8 @@ public final class UpdateNode extends DMLModStatementNode
         {
             ColumnDescriptor    gc = generatedColumns.elementAt( gcIdx );
             DefaultInfo             defaultInfo = gc.getDefaultInfo();
-            int[]                       mentionedColumns = defaultInfo.getReferencedColumnIDs();
-            int                         mentionedColumnCount = mentionedColumns.length;
+            String[]                       mentionedColumnNames = defaultInfo.getReferencedColumnNames();
+            int                         mentionedColumnCount = mentionedColumnNames.length;
 
             // handle the case of setting a generated column to the DEFAULT
             // literal
@@ -1139,8 +1141,7 @@ public final class UpdateNode extends DMLModStatementNode
             // update
             for ( int mcIdx = 0; mcIdx < mentionedColumnCount; mcIdx++ )
             {
-                ColumnDescriptor    mentionedColumn = baseTable.getColumnDescriptor( mentionedColumns[ mcIdx ] );
-                String                      mentionedColumnName = mentionedColumn.getColumnName();
+                String                      mentionedColumnName = mentionedColumnNames[ mcIdx ];
 
                 if ( updatedColumns.contains( mentionedColumnName ) )
                 {

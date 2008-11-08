@@ -657,6 +657,7 @@ public interface SQLState {
 	String LANG_PRIVILEGE_NOT_REVOKED						   		   = "01006";
 	String LANG_ROLE_NOT_REVOKED                                       = "01007";
 	String LANG_WITH_ADMIN_OPTION_NOT_REVOKED                          = "01008";
+	String LANG_GEN_COL_DROPPED                                         = "01009";
 
 	String LANG_NO_ROW_FOUND									   	   = "02000";
 
@@ -900,6 +901,7 @@ public interface SQLState {
     String LANG_CANT_REFERENCE_GENERATED_COLUMN                  = "42XA4";
     String LANG_ROUTINE_CANT_PERMIT_SQL                                   = "42XA5";
     String LANG_BAD_FK_ON_GENERATED_COLUMN                           = "42XA6";
+    String LANG_CASCADED_GEN_COL_DROP                                     = "42XA7";
 	String LANG_INVALID_USER_AGGREGATE_DEFINITION2                     = "42Y00";
 	String LANG_INVALID_CHECK_CONSTRAINT                               = "42Y01";
 	// String LANG_NO_ALTER_TABLE_COMPRESS_ON_TARGET_TABLE                = "42Y02";

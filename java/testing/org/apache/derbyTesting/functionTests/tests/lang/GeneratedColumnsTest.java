@@ -69,7 +69,12 @@ public class GeneratedColumnsTest extends BaseJDBCTestCase
     private static  final   String  ILLEGAL_DUPLICATE = "23505";
     private static  final   String  SYNTAX_ERROR = "42X01";
     private static  final   String  COLUMN_OUT_OF_SCOPE = "42X04";
+    private static  final   String  OPERATION_FORBIDDEN = "X0Y25";
 
+    private static  final   String  CASCADED_COLUMN_DROP_WARNING = "01009";
+    private static  final   String  CONSTRAINT_DROPPED_WARNING = "01500";
+    private static  final   String  TRIGGER_DROPPED_WARNING = "01502";
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // STATE
@@ -79,6 +84,9 @@ public class GeneratedColumnsTest extends BaseJDBCTestCase
     private static  int _minusCounter;
 
     private static  ArrayList   _triggerReports = new ArrayList();
+
+    private String  _clearingProcName;
+    private String  _triggerReportVTIName;
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -816,6 +824,9 @@ public class GeneratedColumnsTest extends BaseJDBCTestCase
              "for each statement\n" +
              "call report_proc( 'after_delete_statement_trigger', -1, -1, -1 )\n"
              );
+
+        _clearingProcName = "clearTriggerReports";
+        _triggerReportVTIName = "triggerReports";
         
         //
         // Now run the tests.
@@ -1008,19 +1019,19 @@ public class GeneratedColumnsTest extends BaseJDBCTestCase
         assertDefaultInfo
             (
              conn, "T_DI_1", "B",
-             new int[] {},
+             new String[] {},
              "1"
              );
         assertDefaultInfo
             (
              conn, "T_DI_2", "B",
-             new int[] { 1 },
+             new String[] { "A" },
              "-a"
              );
         assertDefaultInfo
             (
              conn, "T_DI_3", "B",
-             new int[] { 1, 3 },
+             new String[] { "A", "C" },
              "a + c"
              );
              
@@ -2491,6 +2502,692 @@ public class GeneratedColumnsTest extends BaseJDBCTestCase
              );
     }
     
+    /**
+     * <p>
+     * Test ALTER TABLE DROP COLUMN
+     * </p>
+     */
+    public  void    test_019_dropColumn()
+        throws Exception
+    {
+        Connection  conn = getConnection();
+
+        //
+        // Verify that you can directly drop generated columns
+        //
+        goodStatement
+            (
+             conn,
+             "create table t_dc_1( a int, b int, c int generated always as ( -b ), d int )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_dc_1( b, d ) values ( 1, 1 )"
+             );
+        goodStatement
+            (
+             conn,
+             "alter table t_dc_1 drop column c restrict"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_dc_1( b, d ) values ( 1, 1 )"
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_dc_1 order by d",
+             new String[][]
+             {
+                 { null, "1", "1", },
+                 { null, "1", "1", },
+             },
+             false
+             );
+
+        //
+        // Verify that a generated column blocks the RESTRICTed drop of columns
+        // that it references.
+        //
+        goodStatement
+            (
+             conn,
+             "create table t_dc_2( a int, b int, c int generated always as ( -b ), d int )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_dc_2( b, d ) values ( 1, 1 )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_dc_2( d ) values ( 2 )"
+             );
+        expectExecutionError
+            (
+             conn,
+             OPERATION_FORBIDDEN,
+             "alter table t_dc_2 drop column b restrict"
+             );
+        expectExecutionWarning
+            (
+             conn,
+             CASCADED_COLUMN_DROP_WARNING,
+             "alter table t_dc_2 drop column b"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_dc_2( d ) values ( 2 )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_dc_2( a, d ) values ( 3, 3 )"
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_dc_2 order by d",
+             new String[][]
+             {
+                 { null, "1", },
+                 { null, "2", },
+                 { null, "2", },
+                 { "3", "3", },
+             },
+             false
+             );
+        goodStatement
+            (
+             conn,
+             "alter table t_dc_2 drop column a restrict"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_dc_2( d ) values ( 4 )"
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_dc_2 order by d",
+             new String[][]
+             {
+                 { "1", },
+                 { "2", },
+                 { "2", },
+                 { "3", },
+                 { "4", },
+             },
+             false
+             );
+
+        //
+        // Verify that dropping columns before and after a generated column
+        // correctly recompiles INSERT statements on the table.
+        //        
+        goodStatement
+            (
+             conn,
+             "create table t_dc_3( a int, b int, c int, d int generated always as ( -c ), e int, f int )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_dc_3( b, c, f ) values ( 1, 1, 1 )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_dc_3( c ) values ( 2 )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_dc_3( f ) values ( 3 )"
+             );
+        goodStatement
+            (
+             conn,
+             "alter table t_dc_3 drop column a restrict"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_dc_3( b, c, f ) values ( 1, 1, 1 )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_dc_3( c ) values ( 2 )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_dc_3( f ) values ( 3 )"
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_dc_3 order by f",
+             new String[][]
+             {
+                 { "1", "1", "-1", null, "1", },
+                 { "1", "1", "-1", null, "1", },
+                 { null, null, null, null, "3", },
+                 { null, null, null, null, "3", },
+                 { null, "2", "-2", null, null, },
+                 { null, "2", "-2", null, null, },
+             },
+             false
+             );
+        goodStatement
+            (
+             conn,
+             "alter table t_dc_3 drop column e restrict"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_dc_3( b, c, f ) values ( 1, 1, 1 )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_dc_3( c ) values ( 2 )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_dc_3( f ) values ( 3 )"
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_dc_3 order by f",
+             new String[][]
+             {
+                 { "1", "1", "-1", "1", },
+                 { "1", "1", "-1", "1", },
+                 { "1", "1", "-1", "1", },
+                 { null, null, null, "3", },
+                 { null, null, null, "3", },
+                 { null, null, null, "3", },
+                 { null, "2", "-2", null, },
+                 { null, "2", "-2", null, },
+                 { null, "2", "-2", null, },
+             },
+             false
+             );
+        goodStatement
+            (
+             conn,
+             "alter table t_dc_3 drop column c"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_dc_3( f ) values ( 3 )"
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_dc_3 order by f",
+             new String[][]
+             {
+                 { "1", "1", },
+                 { "1", "1", },
+                 { "1", "1", },
+                 { null, "3", },
+                 { null, "3", },
+                 { null, "3", },
+                 { null, "3", },
+                 { null, null, },
+                 { null, null, },
+                 { null, null, },
+             },
+             false
+             );
+        
+        //
+        // Verify that a generated column blocks the RESTRICTed drop of the
+        // columns it depends on even when there's more than one.
+        //        
+        goodStatement
+            (
+             conn,
+             "create table t_dc_4( a int, b int, c int, d int generated always as ( -(a + e) ), e int, f int )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_dc_4( a, f ) values ( 1, 1 )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_dc_4( a, e, f ) values ( 2, 2, 2 )"
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_dc_4 order by f",
+             new String[][]
+             {
+                 { "1", null, null, null, null, "1", },
+                 { "2", null, null, "-4", "2", "2", },
+             },
+             false
+             );
+        expectExecutionError
+            (
+             conn,
+             OPERATION_FORBIDDEN,
+             "alter table t_dc_4 drop column a restrict"
+             );
+        expectExecutionError
+            (
+             conn,
+             OPERATION_FORBIDDEN,
+             "alter table t_dc_4 drop column e restrict"
+             );
+        expectExecutionWarning
+            (
+             conn,
+             CASCADED_COLUMN_DROP_WARNING,
+             "alter table t_dc_4 drop column e"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_dc_4( a, f ) values ( 1, 1 )"
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_dc_4 order by f",
+             new String[][]
+             {
+                 { "1", null, null, "1", },
+                 { "1", null, null, "1", },
+                 { "2", null, null, "2", },
+             },
+             false
+             );
+        
+        //
+        // Verify that the cascaded drop of a generated column raises a warning
+        // noting that the dependent column was dropped.
+        //        
+        goodStatement
+            (
+             conn,
+             "create table t_dc_5( a int generated always as ( -b ), b int, c int )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_dc_5( b, c ) values ( 100, 1 )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_dc_5( c ) values ( 2 )"
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_dc_5 order by c",
+             new String[][]
+             {
+                 { "-100", "100", "1", },
+                 { null, null, "2", },
+             },
+             false
+             );
+        expectExecutionError
+            (
+             conn,
+             OPERATION_FORBIDDEN,
+             "alter table t_dc_5 drop column b restrict"
+             );
+        expectExecutionWarning
+            (
+             conn,
+             CASCADED_COLUMN_DROP_WARNING,
+             "alter table t_dc_5 drop column b"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_dc_5( c ) values ( 2 )"
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_dc_5 order by c",
+             new String[][]
+             {
+                 { "1", },
+                 { "2", },
+                 { "2", },
+             },
+             false
+             );
+
+        //
+        // Verify that the cascaded drop of a generated column also drops
+        // primary and foreign keys which depend on it.
+        //        
+        goodStatement
+            (
+             conn,
+             "create table t_dc_6_prim( a int generated always as ( -b ) primary key, b int, c int )"
+             );
+        goodStatement
+            (
+             conn,
+             "create table t_dc_6_for( a int references t_dc_6_prim( a ) )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_dc_6_prim( b, c ) values ( 100, 1 )"
+             );
+        expectExecutionError
+            (
+             conn,
+             ILLEGAL_DUPLICATE,
+             "insert into t_dc_6_prim( b, c ) values ( 100, 2 )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_dc_6_for( a ) values ( -100 )"
+             );
+        expectExecutionError
+            (
+             conn,
+             FOREIGN_KEY_VIOLATION,
+             "insert into t_dc_6_for( a ) values ( -101 )"
+             );
+        expectExecutionWarnings
+            (
+             conn,
+             new String[] { CASCADED_COLUMN_DROP_WARNING, CONSTRAINT_DROPPED_WARNING, CONSTRAINT_DROPPED_WARNING, },
+             "alter table t_dc_6_prim drop column b"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_dc_6_prim( c ) values ( 2 )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_dc_6_for( a ) values ( -101 )"
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_dc_6_prim order by c",
+             new String[][]
+             {
+                 { "1", },
+                 { "2", },
+             },
+             false
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_dc_6_for order by a",
+             new String[][]
+             {
+                 { "-101", },
+                 { "-100", },
+             },
+             false
+             );
+        
+        //
+        // Verify that cascaded drops of generated columns drop triggers which
+        // mention the generated columns in their UPDATE OF clauses.
+        //        
+        goodStatement
+            (
+             conn,
+             "create table t_dc_7( a int generated always as ( -b ), b int, c int )"
+             );
+        goodStatement
+            (
+             conn,
+             "create function dc_triggerReports()\n" +
+             "returns TABLE\n" +
+             "  (\n" +
+             "     contents varchar( 100 )\n" +
+             "  )\n" +
+             "language java\n" +
+             "parameter style DERBY_JDBC_RESULT_SET\n" +
+             "no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.GeneratedColumnsTest.triggerReport'\n"
+             );
+        goodStatement
+            (
+             conn,
+             "create procedure dc_clearTriggerReports\n" +
+             "()\n" +
+             "language java\n" +
+             "parameter style java\n" +
+             "no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.GeneratedColumnsTest.clearTriggerReports'\n"
+             );
+        goodStatement
+            (
+             conn,
+             "create procedure dc_report_proc\n" +
+             "( tag varchar( 40 ), a int, b int, c int )\n" +
+             "language java\n" +
+             "parameter style java\n" +
+             "no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.GeneratedColumnsTest.showValues'\n"
+             );
+        goodStatement
+            (
+             conn,
+             "create trigger t_dc_7_trig_after_update\n" +
+             "after update of a\n" +
+             "on t_dc_7\n" +
+             "referencing new as ar\n" +
+             "for each row\n" +
+             "call dc_report_proc( 'after_update_row_trigger', ar.a, ar.a, ar.a ) \n"
+             );
+        _clearingProcName = "dc_clearTriggerReports";
+        _triggerReportVTIName = "dc_triggerReports";
+        goodStatement
+            (
+             conn,
+             "insert into t_dc_7( b, c ) values ( 100, 1 )"
+             );
+        assertTriggerStatus
+            (
+             conn,
+             "update t_dc_7 set b = 101",
+             new String[][]
+             {
+                 { "after_update_row_trigger: [ -101, -101, -101 ]" },
+             }
+             );
+        
+        expectExecutionWarnings
+            (
+             conn,
+             new String[] { CASCADED_COLUMN_DROP_WARNING, TRIGGER_DROPPED_WARNING, },
+             "alter table t_dc_7 drop column b"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_dc_7( c ) values ( 2 )"
+             );
+        assertTriggerStatus
+            (
+             conn,
+             "update t_dc_7 set c = c + 1000",
+             new String[][] {}
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_dc_7 order by c",
+             new String[][]
+             {
+                 { "1001", },
+                 { "1002", },
+             },
+             false
+             );
+
+        //
+        // Verify that cascaded drops of generated columns prevent you from
+        // dropping columns that they reference if you would end up with a table
+        // that has no columns in it.
+        //        
+        goodStatement
+            (
+             conn,
+             "create table t_dc_8( a int generated always as ( -b ), b int )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_dc_8( b ) values ( 1 )"
+             );
+        expectExecutionError
+            (
+             conn,
+             OPERATION_FORBIDDEN,
+             "alter table t_dc_8 drop column b"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_dc_8( b ) values ( 2 )"
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_dc_8 order by b",
+             new String[][]
+             {
+                 { "-1", "1", },
+                 { "-2", "2", },
+             },
+             false
+             );
+        
+        //
+        // Verify that cascaded drops of generated columns drop the indexes
+        // built on them.
+        //        
+        goodStatement
+            (
+             conn,
+             "create table t_dc_9( a int generated always as ( -b ), b int, c int )"
+             );
+        goodStatement
+            (
+             conn,
+             "create unique index t_dc_9_a_idx on t_dc_9( a )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_dc_9( c ) values ( 1 )"
+             );
+        expectExecutionError
+            (
+             conn,
+             ILLEGAL_DUPLICATE,
+             "insert into t_dc_9( c ) values ( 1 )"
+             );
+        expectExecutionWarning
+            (
+             conn,
+             CASCADED_COLUMN_DROP_WARNING,
+             "alter table t_dc_9 drop column b"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_dc_9( c ) values ( 1 )"
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_dc_9 order by c",
+             new String[][]
+             {
+                 { "1", },
+                 { "1", },
+             },
+             false
+             );
+        
+        //
+        // Verify that dropping a generated column also drops check constraints
+        // on it.
+        //        
+        goodStatement
+            (
+             conn,
+             "create table t_dc_10( a int generated always as ( -b ) check ( a is not null ), b int, c int )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_dc_10( b, c ) values ( 1, 1 )"
+             );
+        expectExecutionError
+            (
+             conn,
+             CONSTRAINT_VIOLATION,
+             "insert into t_dc_10( c ) values ( 2 )"
+             );
+        expectExecutionError
+            (
+             conn,
+             OPERATION_FORBIDDEN,
+             "alter table t_dc_10 drop column a restrict"
+             );
+        expectExecutionWarnings
+            (
+             conn,
+             new String[] { CASCADED_COLUMN_DROP_WARNING, CONSTRAINT_DROPPED_WARNING, },
+             "alter table t_dc_10 drop column b"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_dc_10( c ) values ( 2 )"
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_dc_10 order by c",
+             new String[][]
+             {
+                 { "1", },
+                 { "2", },
+             },
+             false
+             );
+    }
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // MINIONS
@@ -2544,6 +3241,47 @@ public class GeneratedColumnsTest extends BaseJDBCTestCase
     }
 
     /**
+     * Assert that the statement text, when executed, raises a warning.
+     */
+    private void    expectExecutionWarning( Connection conn, String sqlState, String query )
+        throws Exception
+    {
+        expectExecutionWarnings( conn, new String[] { sqlState }, query );
+    }
+
+    /**
+     * Assert that the statement text, when executed, raises a warning.
+     */
+    private void    expectExecutionWarnings( Connection conn, String[] sqlStates, String query )
+        throws Exception
+    {
+        println( "\nExpecting warnings " + fill( sqlStates ).toString() + " when executing:\n\t"  );
+        PreparedStatement   ps = chattyPrepare( conn, query );
+
+        ps.execute();
+
+        int idx = 0;
+
+        for ( SQLWarning sqlWarning = ps.getWarnings(); sqlWarning != null; sqlWarning = sqlWarning.getNextWarning() )
+        {
+            String          actualSQLState = sqlWarning.getSQLState();
+
+            if ( idx >= sqlStates.length )
+            {
+                fail( "Got more warnings than we expected." );
+            }
+
+            String  expectedSqlState = sqlStates[ idx++ ];
+
+            assertEquals( expectedSqlState, actualSQLState );
+        }
+
+        assertEquals( idx, sqlStates.length );
+
+        ps.close();
+    }
+
+    /**
      * Assert that triggers fire correctly
      */
     private void assertTriggerStatus( Connection conn, String query, String[][] rows )
@@ -2552,14 +3290,14 @@ public class GeneratedColumnsTest extends BaseJDBCTestCase
         goodStatement
             (
              conn,
-             "call clearTriggerReports()\n"
+             "call " + _clearingProcName + "()\n"
              );
         goodStatement
             (
              conn,
              query
              );
-        PreparedStatement   ps = chattyPrepare( conn, "select * from table( triggerReports() ) s" );
+        PreparedStatement   ps = chattyPrepare( conn, "select * from table( " + _triggerReportVTIName + "() ) s" );
         ResultSet                   rs = ps.executeQuery();
 
         assertResults( rs, rows, true );
@@ -2670,16 +3408,32 @@ public class GeneratedColumnsTest extends BaseJDBCTestCase
      * </p>
      */
     private void assertDefaultInfo
-        ( Connection conn, String tableName, String columnName, int[] expectedReferenceColumns, String expectedDefaultText )
+        ( Connection conn, String tableName, String columnName, String[] expectedReferenceColumns, String expectedDefaultText )
         throws Exception
     {
         DefaultInfo di = getColumnDefault( conn, tableName, columnName );
+        String[]        actualReferenceColumns = di.getReferencedColumnNames();
 
         assertEquals
-            ( StringUtil.stringify( expectedReferenceColumns ), StringUtil.stringify( di.getReferencedColumnIDs() ) );
+            ( fill( expectedReferenceColumns ).toString(), fill( actualReferenceColumns ).toString() );
         assertEquals( expectedDefaultText, di.getDefaultText() );
 
         assertTrue( di.isGeneratedColumn() );
+    }
+    
+    /**
+     * <p>
+     * Fill an ArrayList from an array.
+     * </p>
+     */
+    private ArrayList   fill( Object[] raw )
+    {
+        ArrayList   result = new ArrayList();
+        int             count = raw.length;
+
+        for ( int i = 0; i < count; i++ ) { result.add( raw[ i ] ); }
+
+        return result;
     }
     
     /**

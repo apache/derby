@@ -93,6 +93,13 @@ Guide.
             </msg>
 
             <msg>
+                <name>01009</name>
+                <text>Generated column {0} dropped from table {1}.</text>
+                <arg>columnName</arg>
+                <arg>tableName</arg>
+            </msg>
+
+            <msg>
                 <name>0100E</name>
                 <text>XX Attempt to return too many result sets. </text>
             </msg>
@@ -1996,6 +2003,13 @@ Guide.
             <msg>
                 <name>42XA6</name>
                 <text>'{0}' is a generated column. It cannot be part of a foreign key whose referential action is SET NULL or SET DEFAULT or whose update rule is ON UPDATE CASCADE.</text>
+                <arg>columnName</arg>
+            </msg>
+
+            <msg>
+                <name>42XA7</name>
+                <text>Dropping column '{0}' would orphan the generated column '{1}' which references it. You must drop the generated column first.</text>
+                <arg>columnName</arg>
                 <arg>columnName</arg>
             </msg>
 
