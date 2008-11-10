@@ -1295,6 +1295,46 @@ public abstract class BaseJDBCTestCase
      fail("types:" + expectedType + " and " + type + " are not equivalent");
      
     }
+  
+
+    /**
+     * Check consistency of all tables
+     * 
+     * @param conn
+     * @throws SQLException
+     */
+    protected void  checkAllConsistency(
+            Connection  conn)
+    throws SQLException
+    {
+        Statement s = createStatement();
+
+        ResultSet rs = 
+            s.executeQuery(
+                    "select schemaname, tablename, SYSCS_UTIL.SYSCS_CHECK_TABLE(schemaname, tablename) " + 
+            "from sys.systables a,  sys.sysschemas b where a.schemaid = b.schemaid");
+
+        int table_count = 0;
+
+        while (rs.next())
+        {
+            table_count++;
+
+            if (rs.getInt(3) != 1)
+            {
+                assertEquals("Bad return from consistency check of " +
+                        rs.getString(1) + "." + rs.getString(2),1,rs.getInt(3));
+
+            }
+        }
+        assertTrue("Something wrong with consistency check query, found only " +
+                table_count + " tables.",table_count >= 5);
+
+        rs.close();
+        s.close();
+
+        conn.commit();
+    }
     
 } // End class BaseJDBCTestCase
 
