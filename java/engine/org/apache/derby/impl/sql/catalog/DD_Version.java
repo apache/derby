@@ -340,8 +340,7 @@ public	class DD_Version implements	Formatable
 		//Drop and recreate the stored versions of the JDBC database metadata queries
 		//This is to make sure that we have the stored versions of JDBC database
 		//metadata queries matching with this release of the engine.
-		dropJDBCMetadataSPSes(tc, false);
-		bootingDictionary.createSystemSps(tc);
+		bootingDictionary.updateMetadataSPSes(tc);
 
 		/*
 		 * OLD Cloudscape 5.1 upgrade code, Derby does not support
@@ -450,7 +449,15 @@ public	class DD_Version implements	Formatable
 		boolean isReadOnly = bootingDictionary.af.isReadOnly();
 
 		if (!isReadOnly) {
-			bootingDictionary.clearSPSPlans();
+			// Once a database is version 10.5 we will start updating metadata SPSes
+			// on any version change,up or down.  This will ensure that metadata queries 
+			// match the version we are using.  We don't want to do this for lower 
+			// database versions because on reverting to the previous version the 
+			// SPSes won't be restored.
+			if (fromVersion.majorVersionNumber >= DataDictionary.DD_VERSION_DERBY_10_5)
+				bootingDictionary.updateMetadataSPSes(tc);
+			else
+				bootingDictionary.clearSPSPlans();
 
 			DD_Version lastRun;
 			
@@ -485,49 +492,7 @@ public	class DD_Version implements	Formatable
 
 		bootingDictionary.clearCaches();
 	}
-
-	/**
-	 * Drop all jdbc metadata spses.  This
-	 * it to ensure that we don't have any problems
-	 * with old metadata queries that have outdated
-	 * query text (the plans are always cleared out
-	 * on upgrade time).
-	 *
-	 * @param tc the xact
-	 * @param removeSYSIBMonly if <code>true</code>, remove stored
-	 * prepared statements in the SYSIBM schema only; otherwise,
-	 * remove stored prepared statements in all system schemas
-	 * (including SYSIBM)
-	 *
-	 * @exception StandardException  Standard Derby error policy.
-	 */
-	protected void dropJDBCMetadataSPSes(TransactionController tc, boolean removeSYSIBMonly)
-		throws StandardException
-	{
-		for (java.util.Iterator it = bootingDictionary.getAllSPSDescriptors().iterator(); it.hasNext(); )
-		{
-			SPSDescriptor spsd = (SPSDescriptor) it.next();
-			SchemaDescriptor sd = spsd.getSchemaDescriptor();
-			// need to compare the name, old SYSIBM is not built-in
-			boolean isSYSIBM = sd.getSchemaName().equals(SchemaDescriptor.IBM_SYSTEM_SCHEMA_NAME);
-
-			// don't drop statements in non-system schemas
-			if (!sd.isSystemSchema() && !isSYSIBM) {
-				continue;
-			}
-
-			// don't drop statements outside the SYSIBM schema if
-			// we're told not to
-			if (removeSYSIBMonly && !isSYSIBM) {
-				continue;
-			}
-
-			bootingDictionary.dropSPSDescriptor(spsd, tc);
-			bootingDictionary.dropDependentsStoredDependencies(spsd.getUUID(),
-															   tc);
-		}
-	}
-
+	
 	/**
  	 * Make a catalog.
 	 *	@param	tc	TransactionController

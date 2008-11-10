@@ -12295,4 +12295,42 @@ public final class	DataDictionaryImpl
 				 GRANTEE_COL_NUM_IN_GRANTEE_ALIAS_GRANTOR_INDEX) ||
 			 existsRoleGrantByGrantee(authId, tc));
 	}
+
+
+	/**
+	 * Remove metadata stored prepared statements.
+	 * @param tc the xact
+	 * 
+	 *
+	 */
+	private void dropJDBCMetadataSPSes(TransactionController tc) throws StandardException
+	{
+		for (java.util.Iterator it = getAllSPSDescriptors().iterator(); it.hasNext(); )
+		{
+			SPSDescriptor spsd = (SPSDescriptor) it.next();
+			SchemaDescriptor sd = spsd.getSchemaDescriptor();
+
+			// don't drop statements in non-system schemas
+			if (!sd.isSystemSchema()) {
+				continue;
+			}
+
+			dropSPSDescriptor(spsd, tc);
+			dropDependentsStoredDependencies(spsd.getUUID(),                                                                                                              tc);
+
+		}
+	}
+
+
+	/**
+	 * Drop and recreate metadata stored prepared statements.
+	 * 
+	 * @param tc the xact
+	 * @throws StandardException
+	 */
+	public void updateMetadataSPSes(TransactionController tc) throws StandardException {
+		dropJDBCMetadataSPSes(tc);
+		createSystemSps(tc);		
+	}
+
 }

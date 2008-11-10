@@ -1969,4 +1969,14 @@ public interface DataDictionary
 	public boolean existsGrantToAuthid(String authId,
 									   TransactionController tc)
 				throws StandardException;
+
+	
+	/**
+	 * Drop and recreate metadata stored prepared statements.
+	 * 
+     * @param tc the xact
+	 * @throws StandardException
+	 */
+	public void updateMetadataSPSes(TransactionController tc) throws StandardException;
+	
 }

@@ -814,4 +814,8 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
         // TODO Auto-generated method stub
         return null;
     }
+
+	public void updateMetadataSPSes(TransactionController tc) throws StandardException {
+		// TODO Auto-generated method stub		
+	}
 }
