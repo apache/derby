@@ -344,7 +344,14 @@ public class ModifyColumnNode extends ColumnDefinitionNode
 		// aspects of the autoincrement settings that it intends to change,
 		// and does not lose the other aspecs.
 		if (defaultNode == null)
-			defaultInfo = (DefaultInfoImpl)cd.getDefaultInfo();
+        { defaultInfo = (DefaultInfoImpl)cd.getDefaultInfo(); }
+        else
+        {
+            if ( cd.hasGenerationClause() )
+            {
+				throw StandardException.newException( SQLState.LANG_GEN_COL_DEFAULT, cd.getColumnName() );
+            }
+        }
 		if (autoinc_create_or_modify_Start_Increment ==
 				ColumnDefinitionNode.MODIFY_AUTOINCREMENT_RESTART_VALUE)
 			autoincrementIncrement = cd.getAutoincInc();

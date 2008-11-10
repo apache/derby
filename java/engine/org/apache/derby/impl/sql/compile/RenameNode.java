@@ -372,6 +372,27 @@ public class RenameNode extends DDLStatementNode
   		if (cd != null)
   			throw descriptorExistsException(cd, td);
 
+        //
+		// You cannot rename a column which is referenced by the generation
+        // clause of a generated column.
+        //
+        ColumnDescriptorList    generatedColumns = td.getGeneratedColumns();
+        int                                 generatedColumnCount = generatedColumns.size();
+        for ( int i = 0; i < generatedColumnCount; i++ )
+        {
+            ColumnDescriptor    gc = generatedColumns.elementAt( i );
+            String[]                    referencedColumns = gc.getDefaultInfo().getReferencedColumnNames();
+            int                         refColCount = referencedColumns.length;
+            for ( int j = 0; j < refColCount; j++ )
+            {
+                String      refName = referencedColumns[ j ];
+                if ( oldObjectName.equals( refName ) )
+                {
+                    throw StandardException.newException( SQLState.LANG_GEN_COL_BAD_RENAME, oldObjectName, gc.getColumnName() );
+                }
+            }
+        }
+
 		/* Verify that there are no check constraints using the column being renamed */
 		ConstraintDescriptorList constraintDescriptorList =
 			dd.getConstraintDescriptors(td);

@@ -2008,7 +2008,13 @@ Guide.
 
             <msg>
                 <name>42XA7</name>
-                <text>Dropping column '{0}' would orphan the generated column '{1}' which references it. You must drop the generated column first.</text>
+                <text>'{0}' is a generated column. You cannot change its default value.</text>
+                <arg>columnName</arg>
+            </msg>
+
+            <msg>
+                <name>42XA8</name>
+                <text>You cannot rename '{0}' because it is referenced by the generation clause of column '{1}'.</text>
                 <arg>columnName</arg>
                 <arg>columnName</arg>
             </msg>

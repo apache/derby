@@ -63,6 +63,8 @@ public class GeneratedColumnsTest extends BaseJDBCTestCase
     private static  final   String  CANT_REFERENCE_GENERATED_COLUMN = "42XA4";
     private static  final   String  ROUTINE_CANT_ISSUE_SQL = "42XA5";
     private static  final   String  BAD_FOREIGN_KEY_ACTION = "42XA6";
+    private static  final   String  ILLEGAL_ADD_DEFAULT = "42XA7";
+    private static  final   String  ILLEGAL_RENAME = "42XA8";
     private static  final   String  NOT_NULL_VIOLATION = "23502";
     private static  final   String  CONSTRAINT_VIOLATION = "23513";
     private static  final   String  FOREIGN_KEY_VIOLATION = "23503";
@@ -3188,6 +3190,41 @@ public class GeneratedColumnsTest extends BaseJDBCTestCase
              );
     }
     
+    /**
+     * <p>
+     * Test ALTER TABLE ALTER COLUMN
+     * </p>
+     */
+    public  void    test_020_alterColumn()
+        throws Exception
+    {
+        Connection  conn = getConnection();
+
+        //
+        // Verify that you can't add a default to a generated column.
+        //        
+        goodStatement
+            (
+             conn,
+             "create table t_ad_1( a int generated always as ( -b ), b int, c int )"
+             );
+        expectCompilationError
+            (
+             ILLEGAL_ADD_DEFAULT,
+             "alter table t_ad_1 alter column a with default 1"
+             );
+        
+        //
+        // Verify that you can't rename a column which is mentioned by a
+        // generation clause.
+        //        
+        expectCompilationError
+            (
+             ILLEGAL_RENAME,
+             "rename column t_ad_1.b to d"
+             );
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // MINIONS
@@ -3474,11 +3511,12 @@ public class GeneratedColumnsTest extends BaseJDBCTestCase
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
-    public static   int minus( int a )
+    public static   Integer minus( Integer a )
     {
         _minusCounter++;
 
-        return -a;
+        if ( a == null ) { return null; }
+        else { return new Integer( -a.intValue() ); }
     }
     
     public static   int readMinusCounter()
