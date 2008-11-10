@@ -507,6 +507,7 @@ public class AlterTableNode extends DDLStatementNode
 	  *	Generate the ColumnInfo argument for the constant action. Return the number of constraints.
 	  */
 	public	void	genColumnInfo()
+        throws StandardException
 	{
 		// for each column, stuff system.column
 		colInfos = new ColumnInfo[tableElementList.countNumberOfColumns()]; 

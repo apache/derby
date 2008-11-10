@@ -22,7 +22,6 @@
 package org.apache.derby.impl.sql.execute;
 
 import org.apache.derby.iapi.sql.execute.ConstantAction;
-
 import org.apache.derby.iapi.store.access.TransactionController;
 
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
@@ -49,6 +48,7 @@ import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
+import org.apache.derby.catalog.DependableFinder;
 import org.apache.derby.catalog.UUID;
 
 import org.apache.derby.catalog.types.DefaultInfoImpl;
@@ -357,6 +357,16 @@ class CreateTableConstantAction extends DDLConstantAction
 				}
 			}
 		}
+
+        //
+        // Add dependencies. These can arise if a generated column depends
+        // on a user created function.
+        //
+		for (int ix = 0; ix < columnInfo.length; ix++)
+		{
+            addColumnDependencies( lcc, dd, td, columnInfo[ ix ] );
+        }
+        
 		if ( tableType == TableDescriptor.GLOBAL_TEMPORARY_TABLE_TYPE )
 		{
 			lcc.addDeclaredGlobalTempTable(td);

@@ -3225,6 +3225,131 @@ public class GeneratedColumnsTest extends BaseJDBCTestCase
              );
     }
 
+    /**
+     * <p>
+     * Test that generation clauses block the dropping of routines that they
+     * depend on.
+     * </p>
+     */
+    public  void    test_021_dropFunction()
+        throws Exception
+    {
+        Connection  conn = getConnection();
+
+        goodStatement
+            (
+             conn,
+             "create function f_fd_minus\n" +
+             "(\n" +
+             "    a int\n" +
+             ")\n" +
+             "returns int\n" +
+             "language java\n" +
+             "deterministic\n" +
+             "parameter style java\n" +
+             "no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.GeneratedColumnsTest.minus'\n"
+             );
+        goodStatement
+            (
+             conn,
+             "create function f_fd_minus_2\n" +
+             "(\n" +
+             "    a int\n" +
+             ")\n" +
+             "returns int\n" +
+             "language java\n" +
+             "deterministic\n" +
+             "parameter style java\n" +
+             "no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.GeneratedColumnsTest.minus'\n"
+             );
+        goodStatement
+            (
+             conn,
+             "create table t_fd_1( a int generated always as ( f_fd_minus( b ) ), b int )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_fd_1( b ) values ( 1 )"
+             );
+        
+        //
+        // Verify that the generation clause blocks our dropping the function.
+        //
+        expectExecutionError
+            (
+             conn,
+             OPERATION_FORBIDDEN,
+             "drop function f_fd_minus"
+             );
+        goodStatement
+            (
+             conn,
+             "alter table t_fd_1 drop column a"
+             );
+        goodStatement
+            (
+             conn,
+             "drop function f_fd_minus"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_fd_1( b ) values ( 1 )"
+             );
+        
+        //
+        // Verify that same behavior in case the generated column was added via
+        // an ALTER TABLE statement.
+        //
+        goodStatement
+            (
+             conn,
+             "alter table t_fd_1 add column c int generated always as ( f_fd_minus_2( b ) )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_fd_1( b ) values ( 1 )"
+             );
+        expectExecutionError
+            (
+             conn,
+             OPERATION_FORBIDDEN,
+             "drop function f_fd_minus_2"
+             );
+        goodStatement
+            (
+             conn,
+             "alter table t_fd_1 drop column c"
+             );
+        goodStatement
+            (
+             conn,
+             "drop function f_fd_minus_2"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_fd_1( b ) values ( 1 )"
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_fd_1 order by b",
+             new String[][]
+             {
+                 { "1", },
+                 { "1", },
+                 { "1", },
+                 { "1", },
+             },
+             false
+             );
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // MINIONS

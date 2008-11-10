@@ -430,7 +430,8 @@ public class TableElementList extends QueryTreeNodeVector
 	 *
 	 * @return int		The number of constraints in the create table.
 	 */
-	public int genColumnInfos(ColumnInfo[] colInfos)
+	public int genColumnInfos( ColumnInfo[] colInfos)
+        throws StandardException
 	{
 		int	numConstraints = 0;
 		int size = size();
@@ -441,7 +442,7 @@ public class TableElementList extends QueryTreeNodeVector
 			{
 				colInfos[index] = new ColumnInfo(
 								((TableElementNode) elementAt(index)).getName(),
-								null, null, null, null, null,
+								null, null, null, null, null, null,
 								ColumnInfo.DROP, 0, 0, 0);
 				break;
 			}
@@ -455,18 +456,35 @@ public class TableElementList extends QueryTreeNodeVector
 						"ConstraintDefinitionNode");
 				}
 
-				/* Remember how many constraints that we've seen */
+				/* Remember how many constraints we've seen */
 				numConstraints++;
 				continue;
 			}
 
 			ColumnDefinitionNode coldef = (ColumnDefinitionNode) elementAt(index);
 
+            //
+            // Generated columns may depend on functions mentioned in their
+            // generation clauses.
+            //
+            ProviderList apl = null;
+            ProviderInfo[]	providerInfos = null;
+			if ( coldef.hasGenerationClause() )
+			{
+				apl = coldef.getGenerationClauseNode().getAuxiliaryProviderList();
+			}
+            if (apl != null && apl.size() > 0)
+            {
+                DependencyManager dm = getDataDictionary().getDependencyManager();
+                providerInfos = dm.getPersistentProviderInfos(apl);
+            }
+            
 			colInfos[index - numConstraints] = 
 				new ColumnInfo(coldef.getColumnName(),
 							   coldef.getType(),
 							   coldef.getDefaultValue(),
 							   coldef.getDefaultInfo(),
+							   providerInfos,
 							   (UUID) null,
 							   coldef.getOldDefaultUUID(),
 							   coldef.getAction(),

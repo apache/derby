@@ -357,6 +357,7 @@ public class CreateViewNode extends DDLStatementNode
 											 null,
 											 null,
 											 null,
+											 null,
 											 ColumnInfo.CREATE,
 											 0, 0, 0);
 		}

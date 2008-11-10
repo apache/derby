@@ -29,12 +29,13 @@ import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataValueDescriptor;
-
+import org.apache.derby.iapi.sql.depend.ProviderInfo;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.catalog.DefaultInfo;
 import org.apache.derby.catalog.UUID;
 
+import org.apache.derby.iapi.services.io.FormatableArrayHolder;
 import org.apache.derby.iapi.services.io.FormatableHashtable;
 import org.apache.derby.iapi.services.io.FormatableIntHolder;
 import org.apache.derby.iapi.services.io.FormatableLongHolder;
@@ -70,6 +71,7 @@ public class ColumnInfo implements Formatable
 	public	String						name;
 	public	DataTypeDescriptor			dataType;
 	public	DefaultInfo					defaultInfo;
+    public    ProviderInfo[]            providers;
 	public	DataValueDescriptor			defaultValue;
 	public	UUID						newDefaultUUID;
 	public	UUID						oldDefaultUUID;
@@ -107,6 +109,7 @@ public class ColumnInfo implements Formatable
 	 *  @param dataType		Column type.
 	 *  @param defaultValue	Column default value.
 	 *  @param defaultInfo	Column default info.
+	 *  @param providers   Array of providers that this column depends on.
 	 *  @param newDefaultUUID	New UUID for default.
 	 *  @param oldDefaultUUID	Old UUID for default.
 	 *	@param action		Action (create, modify default, etc.)
@@ -120,6 +123,7 @@ public class ColumnInfo implements Formatable
 					   DataTypeDescriptor			dataType,
 					   DataValueDescriptor			defaultValue,
 					   DefaultInfo					defaultInfo,
+					   ProviderInfo[]					providers,
 					   UUID							newDefaultUUID,
 					   UUID							oldDefaultUUID,
 					   int							action,
@@ -131,6 +135,7 @@ public class ColumnInfo implements Formatable
 		this.dataType = dataType;
 		this.defaultValue = defaultValue;
 		this.defaultInfo = defaultInfo;
+        this.providers = providers;
 		this.newDefaultUUID = newDefaultUUID;
 		this.oldDefaultUUID = oldDefaultUUID;
 		this.action = action;
@@ -173,6 +178,12 @@ public class ColumnInfo implements Formatable
 		{
 			autoincInc = autoincStart = 0;
 		}
+
+        FormatableArrayHolder   fah = (FormatableArrayHolder) fh.get( "providers" );
+        if ( fah != null )
+        {
+            providers = (ProviderInfo[]) fah.getArray( ProviderInfo.class );
+        }
 	}
 
 	/**
@@ -200,6 +211,13 @@ public class ColumnInfo implements Formatable
 			fh.putLong("autoincStart", autoincStart);
 			fh.putLong("autoincInc", autoincInc);
 		}
+
+        if ( providers != null )
+        {
+            FormatableArrayHolder   fah = new FormatableArrayHolder( providers );
+            fh.put( "providers", fah );
+        }
+        
 		out.writeObject(fh);
 	}
  

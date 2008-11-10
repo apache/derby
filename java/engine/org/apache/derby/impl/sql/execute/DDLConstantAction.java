@@ -24,18 +24,24 @@ package org.apache.derby.impl.sql.execute;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.derby.catalog.DependableFinder;
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.depend.DependencyManager;
 import org.apache.derby.iapi.sql.depend.Dependent;
+import org.apache.derby.iapi.sql.depend.Provider;
 import org.apache.derby.iapi.sql.depend.ProviderInfo;
 import org.apache.derby.iapi.sql.dictionary.ColPermsDescriptor;
+import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
+import org.apache.derby.iapi.sql.dictionary.DefaultDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
+import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.dictionary.PermissionsDescriptor;
 import org.apache.derby.iapi.sql.dictionary.RoleGrantDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
@@ -763,6 +769,41 @@ abstract class DDLConstantAction implements ConstantAction
 		}
 		return false;
 	}
+
+    /**
+     * Add dependencies of a column on providers. These can arise if a generated column depends
+     * on a user created function.
+     */
+    protected   void    addColumnDependencies
+        (
+         LanguageConnectionContext  lcc,
+         DataDictionary     dd,
+         TableDescriptor    td,
+         ColumnInfo         ci
+         )
+        throws StandardException
+    {
+        ProviderInfo[]  providers = ci.providers;
+
+        if ( providers != null )
+        {
+            DependencyManager   dm = dd.getDependencyManager();
+            ContextManager      cm = lcc.getContextManager();
+            int                         providerCount = providers.length;
+            ColumnDescriptor    cd = td.getColumnDescriptor( ci.name );
+            DefaultDescriptor   defDesc = cd.getDefaultDescriptor( dd );
+
+            for ( int px = 0; px < providerCount; px++ )
+            {
+                ProviderInfo            pi = providers[ px ];
+                DependableFinder    finder = pi.getDependableFinder();
+                UUID                        providerID = pi.getObjectId();
+                Provider                    provider = (Provider) finder.getDependable( dd, providerID );
+
+                dm.addDependency( defDesc, provider, cm );
+            }   // end loop through providers
+        }
+    }
 
 	/**
 	 * Mutable Boolean wrapper, initially false

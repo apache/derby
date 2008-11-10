@@ -1343,6 +1343,12 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 			updateNewColumnToDefault(activation, columnDescriptor, lcc);
 		}	
 
+        //
+        // Add dependencies. These can arise if a generated column depends
+        // on a user created function.
+        //
+        addColumnDependencies( lcc, dd, td, columnInfo[ix] );
+
 		// Update SYSCOLPERMS table which tracks the permissions granted
 		// at columns level. The sytem table has a bit map of all the columns
 		// in the user table to help determine which columns have the 
