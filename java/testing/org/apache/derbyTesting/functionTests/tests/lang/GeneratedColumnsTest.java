@@ -48,7 +48,7 @@ import org.apache.derby.catalog.types.RoutineAliasInfo;
  * Test generated columns. See DERBY-481.
  * </p>
  */
-public class GeneratedColumnsTest extends BaseJDBCTestCase
+public class GeneratedColumnsTest extends GeneratedColumnsHelper
 {
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -56,27 +56,6 @@ public class GeneratedColumnsTest extends BaseJDBCTestCase
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
-    private static  final   String  REDUNDANT_CLAUSE = "42613";
-    private static  final   String  ILLEGAL_AGGREGATE = "42XA1";
-    private static  final   String  UNSTABLE_RESULTS = "42XA2";
-    private static  final   String  CANT_OVERRIDE_GENERATION_CLAUSE = "42XA3";
-    private static  final   String  CANT_REFERENCE_GENERATED_COLUMN = "42XA4";
-    private static  final   String  ROUTINE_CANT_ISSUE_SQL = "42XA5";
-    private static  final   String  BAD_FOREIGN_KEY_ACTION = "42XA6";
-    private static  final   String  ILLEGAL_ADD_DEFAULT = "42XA7";
-    private static  final   String  ILLEGAL_RENAME = "42XA8";
-    private static  final   String  NOT_NULL_VIOLATION = "23502";
-    private static  final   String  CONSTRAINT_VIOLATION = "23513";
-    private static  final   String  FOREIGN_KEY_VIOLATION = "23503";
-    private static  final   String  ILLEGAL_DUPLICATE = "23505";
-    private static  final   String  SYNTAX_ERROR = "42X01";
-    private static  final   String  COLUMN_OUT_OF_SCOPE = "42X04";
-    private static  final   String  OPERATION_FORBIDDEN = "X0Y25";
-
-    private static  final   String  CASCADED_COLUMN_DROP_WARNING = "01009";
-    private static  final   String  CONSTRAINT_DROPPED_WARNING = "01500";
-    private static  final   String  TRIGGER_DROPPED_WARNING = "01502";
-    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // STATE
@@ -3357,90 +3336,22 @@ public class GeneratedColumnsTest extends BaseJDBCTestCase
     ///////////////////////////////////////////////////////////////////////////////////
 
 
-    /**
-     * Run good DDL.
-     * @throws SQLException 
-     */
-    private void    goodStatement( Connection conn, String ddl ) throws SQLException
+    // read the counter of the number of times that the minus function has been
+    // called
+    private int readMinusCounter( Connection conn )
+        throws Exception
     {
-        PreparedStatement    ps = chattyPrepare( conn, ddl );
+        PreparedStatement   ps = chattyPrepare( conn, "values ( f_readMinusCounter() )" );
+        ResultSet                   rs = ps.executeQuery();
 
-        ps.execute();
+        rs.next();
+
+        int     result = rs.getInt( 1 );
+
+        rs.close();
         ps.close();
-    }
-    
-    /**
-     * Prepare a statement and report its sql text.
-     */
-    private PreparedStatement   chattyPrepare( Connection conn, String text )
-        throws SQLException
-    {
-        println( "Preparing statement:\n\t" + text );
-        
-        return conn.prepareStatement( text );
-    }
 
-    /**
-     * Assert that the statement text, when compiled, raises an exception
-     */
-    private void    expectCompilationError( String sqlState, String query )
-    {
-        println( "\nExpecting " + sqlState + " when preparing:\n\t" + query );
-
-        assertCompileError( sqlState, query );
-    }
-
-    /**
-     * Assert that the statement text, when executed, raises an error.
-     */
-    private void    expectExecutionError( Connection conn, String sqlState, String query )
-        throws Exception
-    {
-        println( "\nExpecting " + sqlState + " when executing:\n\t"  );
-        PreparedStatement   ps = chattyPrepare( conn, query );
-
-        assertStatementError( sqlState, ps );
-    }
-
-    /**
-     * Assert that the statement text, when executed, raises a warning.
-     */
-    private void    expectExecutionWarning( Connection conn, String sqlState, String query )
-        throws Exception
-    {
-        expectExecutionWarnings( conn, new String[] { sqlState }, query );
-    }
-
-    /**
-     * Assert that the statement text, when executed, raises a warning.
-     */
-    private void    expectExecutionWarnings( Connection conn, String[] sqlStates, String query )
-        throws Exception
-    {
-        println( "\nExpecting warnings " + fill( sqlStates ).toString() + " when executing:\n\t"  );
-        PreparedStatement   ps = chattyPrepare( conn, query );
-
-        ps.execute();
-
-        int idx = 0;
-
-        for ( SQLWarning sqlWarning = ps.getWarnings(); sqlWarning != null; sqlWarning = sqlWarning.getNextWarning() )
-        {
-            String          actualSQLState = sqlWarning.getSQLState();
-
-            if ( idx >= sqlStates.length )
-            {
-                fail( "Got more warnings than we expected." );
-            }
-
-            String  expectedSqlState = sqlStates[ idx++ ];
-
-            assertEquals( expectedSqlState, actualSQLState );
-        }
-
-        assertEquals( idx, sqlStates.length );
-
-        ps.close();
+        return result;
     }
 
     /**
@@ -3468,101 +3379,6 @@ public class GeneratedColumnsTest extends BaseJDBCTestCase
         ps.close();
     }
 
-    /**
-     * <p>
-     * Assert whether a routine is expected to be DETERMINISTIC.
-     * </p>
-     */
-    public  void    assertDeterministic( Connection conn, String routineName, boolean isDeterministic )
-        throws Exception
-    {
-        PreparedStatement   ps = conn.prepareStatement
-            (
-             "select a.aliasinfo\n" +
-             "from sys.sysaliases a\n" +
-             "where alias =  ?"
-             );
-        ps.setString( 1, routineName );
-        ResultSet               rs = ps.executeQuery();
-
-        rs.next();
-        RoutineAliasInfo    rai = (RoutineAliasInfo) rs.getObject( 1 );
-
-        assertEquals( isDeterministic, rai.isDeterministic() );
-
-        rs.close();
-        ps.close();
-    }
-
-    /**
-     * Assert that the statement returns the correct results.
-     */
-    private void assertResults( Connection conn, String query, String[][] rows, boolean trimResults )
-        throws Exception
-    {
-        PreparedStatement   ps = chattyPrepare( conn, query );
-        ResultSet                   rs = ps.executeQuery();
-
-        assertResults( rs, rows, trimResults );
-
-        rs.close();
-        ps.close();
-    }
-        
-    /**
-     * Assert that the ResultSet returns the desired rows.
-     */
-    private void assertResults( ResultSet rs, String[][] rows, boolean trimResults )
-        throws Exception
-    {
-        int     rowCount = rows.length;
-
-        for ( int i = 0; i < rowCount; i++ )
-        {
-            String[]    row = rows[ i ];
-            int             columnCount = row.length;
-
-            assertTrue( rs.next() );
-
-            for ( int j = 0; j < columnCount; j++ )
-            {
-                String  expectedValue =  row[ j ];
-                String  actualValue = null;
-                int         column = j+1;
-
-                actualValue = rs.getString( column );
-                if ( rs.wasNull() ) { actualValue = null; }
-
-                if ( (actualValue != null) && trimResults ) { actualValue = actualValue.trim(); }
-                
-                assertEquals( (expectedValue == null), rs.wasNull() );
-                
-                if ( expectedValue == null )    { assertNull( actualValue ); }
-                else { assertEquals(expectedValue, actualValue); }
-            }
-        }
-
-        assertFalse( rs.next() );
-    }
-
-    // read the counter of the number of times that the minus function has been
-    // called
-    private int readMinusCounter( Connection conn )
-        throws Exception
-    {
-        PreparedStatement   ps = chattyPrepare( conn, "values ( f_readMinusCounter() )" );
-        ResultSet                   rs = ps.executeQuery();
-
-        rs.next();
-
-        int     result = rs.getInt( 1 );
-
-        rs.close();
-        ps.close();
-
-        return result;
-    }
-
     
     /**
      * <p>
@@ -3581,21 +3397,6 @@ public class GeneratedColumnsTest extends BaseJDBCTestCase
         assertEquals( expectedDefaultText, di.getDefaultText() );
 
         assertTrue( di.isGeneratedColumn() );
-    }
-    
-    /**
-     * <p>
-     * Fill an ArrayList from an array.
-     * </p>
-     */
-    private ArrayList   fill( Object[] raw )
-    {
-        ArrayList   result = new ArrayList();
-        int             count = raw.length;
-
-        for ( int i = 0; i < count; i++ ) { result.add( raw[ i ] ); }
-
-        return result;
     }
     
     /**
