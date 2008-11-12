@@ -1410,8 +1410,17 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
         cStmt.executeUpdate("drop table t");
 
         // do the same from within a stored procedure
+
         s.execute("grant execute on procedure s1.calledNested to DonaldDuck");
-        cStmt.executeUpdate("call s1.calledNested()");
+
+        if (!JDBC.vmSupportsJSR169()) {
+            // JSR169 cannot run with tests with stored procedures
+            // that do database access - for they require a
+            // DriverManager connection to jdbc:default:connection;
+            // DriverManager is not supported with JSR169.
+            cStmt.executeUpdate("call s1.calledNested()");
+        }
+
         setRole(c, "none");
 
         cStmt.close();
@@ -1430,6 +1439,14 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
      * See DERBY-3897.
      */
     public void testCurrentRoleInWeirdContexts() throws SQLException {
+        if (JDBC.vmSupportsJSR169()) {
+            // JSR169 cannot run with tests with stored procedures
+            // that do database access - for they require a
+            // DriverManager connection to jdbc:default:connection;
+            // DriverManager is not supported with JSR169.
+            return;
+        }
+
         Connection dboConn = getConnection();
         Statement s = dboConn.createStatement();
         setRole(dboConn, "a1");
