@@ -25,6 +25,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
@@ -158,4 +161,97 @@ public class PrivilegedFileOpsForTests {
             throw (FileNotFoundException)pae.getCause();
         }
     }
+
+    /**
+     * In a priv block, do a recursive copy from source to target.  
+     * If target exists it will be overwritten. Parent directory for 
+     * target will be created if it does not exist. 
+     * If source does not exist this will be a noop.
+     * 
+     * @param source  Source file or directory to copy
+     * @param target  Target file or directory to copy
+     * @throws IOException
+     * @throws SecurityException
+     */    
+    public static void copy(final File source, final File target) throws IOException {
+        try {
+            AccessController.doPrivileged(new PrivilegedExceptionAction() {
+                public Object run() throws IOException {
+                    recursiveCopy(source,target);
+                    return null;
+                }
+                });
+        } catch (PrivilegedActionException pae) {
+            throw (IOException) pae.getException();
+        
+        }
+        
+    }
+    /**
+     * Do a recursive copy from source to target.  If target exists it will 
+     * be overwritten. Parent directory for target will be created if it does
+     * not exist. If source does not exist this will be a noop.
+     * 
+     * @param source  Source file or directory to copy
+     * @param target  Target file or directory to copy
+     * @throws IOException
+     * @throws FileNotFoundException
+     */
+    private static void  recursiveCopy(File source, File target) throws IOException, FileNotFoundException{
+    
+        if (source.isFile()) {
+            copySingleFile(source,target);
+            return;
+        }
+            
+        String[] list = source.list();
+
+        // Some JVMs return null for File.list() when the
+        // directory is empty.
+        if (list != null) {
+            for (int i = 0; i < list.length; i++) {
+                File entry = new File(source, list[i]);
+                File targetEntry = new File(target, list[i]);
+                if (entry.isDirectory()) {
+                    copy(entry,targetEntry);
+                } else {
+                    copySingleFile(entry, targetEntry);
+                }
+            }
+
+        }
+    }
+
+    /**
+     * Copy a single file from source to target.  If target exists it will be 
+     * overwritten.  If source does not exist, this will be a noop.
+     * 
+     * @param source  Source file to copy
+     * @param target  Destination file for copy
+     * @throws IOException
+     * @throws FileNotFoundException
+     */
+    private static void copySingleFile (File source, File target) throws IOException, FileNotFoundException {
+
+        File targetParent = target.getParentFile();
+        if (targetParent != null && ! targetParent.exists())
+            target.getParentFile().mkdirs();
+        
+                
+        InputStream in = new FileInputStream(source);
+        OutputStream out = new FileOutputStream(target);
+        byte[] buf = new byte[32 * 1024];
+        
+        for (;;) {
+            int read = in.read(buf);
+            if (read == -1)
+                break;
+            out.write(buf, 0, read);
+        }
+        in.close();
+        out.close();
+    }
+    
+
+
 }
