@@ -232,6 +232,7 @@ public class ReplicationRun_Local_3_p2 extends ReplicationRun_Local_3
     {
         replication_Local_3_p2_StateTests(true, true); 
     }
+    /* Comment out fixture: Avoid attempt to call teardown! Hangs on Windows, but passes on Unixes...
     public void testReplication_Local_3_p2_StateTests_smallInsert_immediateStopMaster_DISABLED()
     throws Exception
     {
@@ -240,6 +241,7 @@ public class ReplicationRun_Local_3_p2 extends ReplicationRun_Local_3
         // And then we experience hang again...
         // replication_Local_3_p2_StateTests(false, true);
     }
+    */
     public void testReplication_Local_3_p2_StateTests_bigInsert_sleepBeforeStopMaster()
     throws Exception
     {
