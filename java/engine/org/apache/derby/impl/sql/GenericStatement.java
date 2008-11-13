@@ -290,6 +290,8 @@ public class GenericStatement
 
 					if (SanityManager.DEBUG_ON("StopAfterParsing")) 
 					{
+                        lcc.setLastQueryTree( qt );
+                        
 						throw StandardException.newException(SQLState.LANG_STOP_AFTER_PARSING);
 					}
 				}

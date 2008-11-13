@@ -1189,4 +1189,15 @@ public interface LanguageConnectionContext extends Context {
 	 * @return new SQLSessionContext
 	 */
 	public SQLSessionContext createSQLSessionContext();
+
+	/**
+     * Debug method for remembering the last query tree.
+	 */
+    public  void    setLastQueryTree( Object queryTree );
+
+	/**
+     * Debug method for retrieving the last query tree.
+	 */
+    public  Object    getLastQueryTree();
+
 }

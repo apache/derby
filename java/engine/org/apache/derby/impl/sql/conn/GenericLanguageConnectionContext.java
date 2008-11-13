@@ -135,6 +135,8 @@ public class GenericLanguageConnectionContext
 	private final int instanceNumber;
 	private String drdaID;
 	private String dbname;
+
+    private Object lastQueryTree; // for debugging
     
 	/**
 	The transaction to use within this language connection context.  It may
@@ -612,6 +614,10 @@ public class GenericLanguageConnectionContext
 		// Reset the current role
 		getCurrentSQLSessionContext().setRole(null);
 	}
+
+    // debug methods
+    public  void    setLastQueryTree( Object queryTree ) { lastQueryTree = queryTree; }
+    public  Object    getLastQueryTree() { return lastQueryTree; }
 
 	/**
 	 * Drop all the declared global temporary tables associated with this connection. This gets called
