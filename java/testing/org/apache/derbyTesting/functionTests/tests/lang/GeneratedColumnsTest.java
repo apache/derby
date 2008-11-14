@@ -1487,6 +1487,16 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
              UNSTABLE_RESULTS,
              "create table t_br_2( a int, b varchar( 128 ) generated always as ( session_user ) )"
              );
+        expectCompilationError
+            (
+             UNSTABLE_RESULTS,
+             "create table t_br_2( a int, b date generated always as ( current schema ) )"
+             );
+        expectCompilationError
+            (
+             UNSTABLE_RESULTS,
+             "create table t_br_2( a int, b date generated always as ( current sqlid ) )"
+             );
     }
 
     /**
