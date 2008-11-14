@@ -1008,7 +1008,10 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 		// if this is a roll-forward recovery, backup history file 
 		// will already there in the database and will be the latest 
 		// copy; if it exists, do not copy from backup.
-		if (!privExists(dbHistoryFile))
+		// Backup history may not exist at all if we did an offline
+		// backup with os copy commands. In that case, don't try to 
+		// copy the history file. (DERBY-3035)
+		if (privExists(backupHistoryFile) && !privExists(dbHistoryFile))
 			if (!privCopyFile(backupHistoryFile, dbHistoryFile))
 				throw StandardException. 
 					newException(SQLState.RAWSTORE_ERROR_COPYING_FILE,
