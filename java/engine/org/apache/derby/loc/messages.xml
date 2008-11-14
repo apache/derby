@@ -2020,6 +2020,12 @@ Guide.
             </msg>
 
             <msg>
+                <name>42XA9</name>
+                <text>Column '{0}' needs an explicit datatype. The datatype can be omitted only for columns with generation clauses.</text>
+                <arg>columnName</arg>
+            </msg>
+
+            <msg>
                 <name>42Y00</name>
                 <text>Class '{0}' does not implement org.apache.derby.iapi.db.AggregateDefinition and thus cannot be used as an aggregate expression.</text>
                 <arg>className</arg>

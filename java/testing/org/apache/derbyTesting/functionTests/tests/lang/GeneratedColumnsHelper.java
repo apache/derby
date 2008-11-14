@@ -65,6 +65,7 @@ public class GeneratedColumnsHelper extends BaseJDBCTestCase
     protected static  final   String  BAD_FOREIGN_KEY_ACTION = "42XA6";
     protected static  final   String  ILLEGAL_ADD_DEFAULT = "42XA7";
     protected static  final   String  ILLEGAL_RENAME = "42XA8";
+    protected static  final   String  NEED_EXPLICIT_DATATYPE = "42XA9";
     
     protected static  final   String  NOT_NULL_VIOLATION = "23502";
     protected static  final   String  CONSTRAINT_VIOLATION = "23513";
@@ -77,6 +78,7 @@ public class GeneratedColumnsHelper extends BaseJDBCTestCase
     protected static  final   String  LACK_TABLE_PRIV = "42500";
     protected static  final   String  LACK_COLUMN_PRIV = "42502";
     protected static  final   String  LACK_EXECUTE_PRIV = "42504";
+    protected static  final   String  CANT_ADD_IDENTITY = "42601";
     
     protected static  final   String  CASCADED_COLUMN_DROP_WARNING = "01009";
     protected static  final   String  CONSTRAINT_DROPPED_WARNING = "01500";
@@ -223,6 +225,30 @@ public class GeneratedColumnsHelper extends BaseJDBCTestCase
     }
 
     /**
+     * Assert that a table has the correct column types.
+     */
+    protected void assertColumnTypes( Connection conn, String tableName, String[][] columnTypes )
+        throws Exception
+    {
+        PreparedStatement   ps = chattyPrepare
+            (
+             conn,
+             "select c.columnname, c.columndatatype\n" +
+             "from sys.syscolumns c, sys.systables t\n" +
+             "where t.tablename = ?\n" +
+             "and t.tableid = c.referenceid\n" +
+             "order by c.columnname\n"
+             );
+        ps.setString( 1, tableName );
+        ResultSet                   rs = ps.executeQuery();
+
+        assertResults( rs, columnTypes, true );
+
+        rs.close();
+        ps.close();
+    }
+        
+    /**
      * Assert that the statement returns the correct results.
      */
     protected void assertResults( Connection conn, String query, String[][] rows, boolean trimResults )
@@ -255,6 +281,7 @@ public class GeneratedColumnsHelper extends BaseJDBCTestCase
             for ( int j = 0; j < columnCount; j++ )
             {
                 String  expectedValue =  row[ j ];
+                //println( "(row, column ) ( " + i + ", " +  j + " ) should be " + expectedValue );
                 String  actualValue = null;
                 int         column = j+1;
 

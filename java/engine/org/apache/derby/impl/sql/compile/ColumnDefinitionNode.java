@@ -379,6 +379,10 @@ public class ColumnDefinitionNode extends TableElementNode
 	{
 		String			columnTypeName;
 
+        // continue if this is a generated column and the datatype has been
+        // omitted. we can't check generation clauses until later on
+        if ( hasGenerationClause() && (getType() == null ) ) { return; }
+
 		/* Built-in types need no checking */
 		if (!getType().getTypeId().userType())
 			return;
@@ -452,9 +456,9 @@ public class ColumnDefinitionNode extends TableElementNode
 		throws StandardException
 	{
 		/* DB2 requires non-nullable columns to have a default in ALTER TABLE */
-		if (td != null && !getType().isNullable() && defaultNode == null)
+		if (td != null && !hasGenerationClause() && !getType().isNullable() && defaultNode == null)
 		{
-			if (!isAutoincrement && !hasGenerationClause())
+			if (!isAutoincrement )
 				throw StandardException.newException(SQLState.LANG_DB2_NOT_NULL_COLUMN_INVALID_DEFAULT, getColumnName());
 		}
 			

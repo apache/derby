@@ -118,7 +118,9 @@ public class TableElementList extends QueryTreeNodeVector
 	 * of the character string types in create table node
 	 * @param sd
 	 */
-	void setCollationTypesOnCharacterStringColumns(SchemaDescriptor sd) {
+	void setCollationTypesOnCharacterStringColumns(SchemaDescriptor sd)
+        throws StandardException
+    {
 		int			size = size();
 		int collationType = sd.getCollationType();
 		for (int index = 0; index < size; index++)
@@ -128,13 +130,46 @@ public class TableElementList extends QueryTreeNodeVector
 			if (tableElement instanceof ColumnDefinitionNode)
 			{
 				ColumnDefinitionNode cdn = (ColumnDefinitionNode) elementAt(index);
-				if (cdn.getType().getTypeId().isStringTypeId()) {
-					cdn.setCollationType(collationType);
-				}
+
+                setCollationTypeOnCharacterStringColumn( sd, cdn );
 			}
 		}
 	}
 
+	/**
+	 * Use the passed schema descriptor's collation type to set the collation
+	 * of a character string column.
+	 * @param sd
+	 */
+	void setCollationTypeOnCharacterStringColumn(SchemaDescriptor sd, ColumnDefinitionNode cdn )
+        throws StandardException
+    {
+		int collationType = sd.getCollationType();
+
+        //
+        // Only generated columns can omit the datatype specification during the
+        // early phases of binding--before we have been able to bind the
+        // generation clause.
+        //
+        DataTypeDescriptor  dtd = cdn.getType();
+        if ( dtd == null )
+        {
+            if ( cdn.hasGenerationClause() )
+            {
+                return;
+            }
+            else
+            {
+                throw StandardException.newException
+                    ( SQLState.LANG_NEEDS_DATATYPE, cdn.getColumnName() );
+            }
+        }
+        else
+        {
+            if ( dtd.getTypeId().isStringTypeId() ) { cdn.setCollationType(collationType); }
+        }
+    }
+    
 	/**
 	 * Validate this TableElementList.  This includes checking for
 	 * duplicate columns names, and checking that user types really exist.
@@ -675,12 +710,13 @@ public class TableElementList extends QueryTreeNodeVector
 	 * Bind and validate all of the generation clauses in this list against
 	 * the specified FromList.  
 	 *
+	 * @param fromList		Schema where the table lives.
 	 * @param fromList		The FromList in question.
 	 * @param generatedColumns Bitmap of generated columns in the table. Vacuous for CREATE TABLE, but may be non-trivial for ALTER TABLE. This routine may set bits for new generated columns.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	void bindAndValidateGenerationClauses(FromList fromList, FormatableBitSet generatedColumns )
+	void bindAndValidateGenerationClauses( SchemaDescriptor sd, FromList fromList, FormatableBitSet generatedColumns )
 		throws StandardException
 	{
 		CompilerContext cc;
@@ -748,7 +784,19 @@ public class TableElementList extends QueryTreeNodeVector
                 //
                 DataTypeDescriptor  generationClauseType = generationTree.getTypeServices();
                 DataTypeDescriptor  declaredType = cdn.getType();
-                if ( declaredType == null ) { cdn.setType( generationClauseType ); }
+                if ( declaredType == null )
+                {
+                    cdn.setType( generationClauseType );
+
+                    //
+                    // We skipped these steps earlier on because we didn't have
+                    // a datatype. Now that we have a datatype, revisit these
+                    // steps.
+                    //
+                    setCollationTypeOnCharacterStringColumn( sd, cdn );
+                    cdn.checkUserType( table.getTableDescriptor() );
+                }
+                else
                 {
                     TypeId  declaredTypeId = declaredType.getTypeId();
                     TypeId  resolvedTypeId = generationClauseType.getTypeId();

@@ -238,6 +238,9 @@ public class CreateTableNode extends DDLStatementNode
 		int numUniqueConstraints = 0;
         int numGenerationClauses = 0;
 
+        SchemaDescriptor sd = getSchemaDescriptor
+            ( tableType != TableDescriptor.GLOBAL_TEMPORARY_TABLE_TYPE, true);
+
 		if (queryExpression != null)
 		{
 			FromList fromList = (FromList) getNodeFactory().getNode(
@@ -292,10 +295,6 @@ public class CreateTableNode extends DDLStatementNode
 				qeRCL.copyResultColumnNames(resultColumns);
 			}
 			
-			SchemaDescriptor sd = getSchemaDescriptor(
-				tableType != TableDescriptor.GLOBAL_TEMPORARY_TABLE_TYPE,
-				true);
-
 			int schemaCollationType = sd.getCollationType();
 	    
 			/* Create table element list from columns in query expression */
@@ -440,7 +439,7 @@ public class CreateTableNode extends DDLStatementNode
 			 * the check constraints and generation clauses.
 			 */
 			if  (numCheckConstraints > 0) { tableElementList.bindAndValidateCheckConstraints(fromList); }
-			if  (numGenerationClauses > 0) { tableElementList.bindAndValidateGenerationClauses(fromList, generatedColumns ); }
+			if  (numGenerationClauses > 0) { tableElementList.bindAndValidateGenerationClauses( sd, fromList, generatedColumns ); }
             if ( numReferenceConstraints > 0) { tableElementList.validateForeignKeysOnGenerationClauses( fromList, generatedColumns ); }
 		}
 	}

@@ -903,6 +903,7 @@ public interface SQLState {
     String LANG_BAD_FK_ON_GENERATED_COLUMN                           = "42XA6";
     String LANG_GEN_COL_DEFAULT                                                 = "42XA7";
     String LANG_GEN_COL_BAD_RENAME                                           = "42XA8";
+    String LANG_NEEDS_DATATYPE                                                      = "42XA9";
 	String LANG_INVALID_USER_AGGREGATE_DEFINITION2                     = "42Y00";
 	String LANG_INVALID_CHECK_CONSTRAINT                               = "42Y01";
 	// String LANG_NO_ALTER_TABLE_COMPRESS_ON_TARGET_TABLE                = "42Y02";

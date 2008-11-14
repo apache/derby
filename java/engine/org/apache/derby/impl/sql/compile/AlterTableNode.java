@@ -337,6 +337,14 @@ public class AlterTableNode extends DDLStatementNode
 					if (tableElementList.elementAt(i) instanceof ColumnDefinitionNode) {
 						ColumnDefinitionNode cdn = (ColumnDefinitionNode) tableElementList.elementAt(i);
 						//check if we are dealing with add character column
+                        //
+                        // For generated columns which omit an explicit
+                        // datatype, we have to defer this work until we bind
+                        // the generation clause
+                        //
+
+                        if ( cdn.hasGenerationClause() && ( cdn.getType() == null ) ) { continue; }
+                        
 						if (cdn.getType().getTypeId().isStringTypeId()) {
 							//we found what we are looking for. Set the 
 							//collation type of this column to be the same as
@@ -404,7 +412,7 @@ public class AlterTableNode extends DDLStatementNode
 			 */
 			if  (numCheckConstraints > 0) { tableElementList.bindAndValidateCheckConstraints(fromList); }
 			if  (numGenerationClauses > 0)
-            { tableElementList.bindAndValidateGenerationClauses(fromList, generatedColumns ); }
+            { tableElementList.bindAndValidateGenerationClauses( schemaDescriptor, fromList, generatedColumns ); }
             if ( numReferenceConstraints > 0) { tableElementList.validateForeignKeysOnGenerationClauses( fromList, generatedColumns ); }
 		}
 

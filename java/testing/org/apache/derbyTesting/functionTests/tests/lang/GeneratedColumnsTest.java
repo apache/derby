@@ -3329,6 +3329,848 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
              );
     }
 
+    /**
+     * <p>
+     * Test that CREATE/ALTER TABLE can omit the column datatype if there is a
+     * generation clause.
+     * </p>
+     */
+    public  void    test_022_omitDatatype()
+        throws Exception
+    {
+        Connection  conn = getConnection();
+
+        //
+        // Verify basic ALTER TABLE without a column datatype
+        //
+        goodStatement
+            (
+             conn,
+             "create table t_nd_1( a int )"
+             );
+        goodStatement
+            (
+             conn,
+             "alter table t_nd_1 add b generated always as ( -a )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_nd_1( a ) values ( 1 )"
+             );
+        assertColumnTypes
+            (
+             conn,
+             "T_ND_1",
+             new String[][]
+             {
+                 { "A", "INTEGER" },
+                 { "B", "INTEGER" },
+             }
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_nd_1 order by a",
+             new String[][]
+             {
+                 { "1", "-1" },
+             },
+             false
+             );
+
+        //
+        // Verify that you can't omit the datatype for other types of columns.
+        //
+        expectCompilationError
+            (
+             NEED_EXPLICIT_DATATYPE,
+             "create table t_nd_2( a generated always as identity )"
+             );
+        expectCompilationError
+            (
+             CANT_ADD_IDENTITY,
+             "alter table t_nd_1 add c generated always as identity"
+             );
+
+        //
+        // Verify basic CREATE TABLE omitting datatype on generated column
+        //
+        goodStatement
+            (
+             conn,
+             "create table t_nd_3( a int, b generated always as ( -a ) )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_nd_3( a ) values ( 100 )"
+             );
+        assertColumnTypes
+            (
+             conn,
+             "T_ND_3",
+             new String[][]
+             {
+                 { "A", "INTEGER" },
+                 { "B", "INTEGER" },
+             }
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_nd_3 order by a",
+             new String[][]
+             {
+                 { "100", "-100" },
+             },
+             false
+             );
+
+        //
+        // Now verify various datatypes are correctly resolved.
+        //
+        goodStatement
+            (
+             conn,
+             "create table t_nd_smallint\n" +
+             "(\n" +
+             "   a smallint,\n" +
+             "   b generated always as ( cast ( -a  as smallint ) ),\n" +
+             "   c generated always as ( cast ( -a as int ) ),\n" +
+             "   d generated always as ( cast( -a as bigint ) ),\n" +
+             "   e generated always as ( cast ( -a as decimal ) ),\n" +
+             "   f generated always as ( cast ( -a as real ) ),\n" +
+             "   g generated always as ( cast ( -a as double ) ),\n" +
+             "   h generated always as ( cast ( -a as float ) )\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_nd_smallint( a ) values ( 1 )"
+             );
+        assertColumnTypes
+            (
+             conn,
+             "T_ND_SMALLINT",
+             new String[][]
+             {
+                 { "A", "SMALLINT" },
+                 { "B", "SMALLINT" },
+                 { "C", "INTEGER" },
+                 { "D", "BIGINT" },
+                 { "E", "DECIMAL(5,0)" },
+                 { "F", "REAL" },
+                 { "G", "DOUBLE" },
+                 { "H", "DOUBLE" },
+             }
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_nd_smallint order by a",
+             new String[][]
+             {
+                 { "1" , "-1", "-1", "-1", "-1", "-1.0", "-1.0", "-1.0" },
+             },
+             false
+             );
+        
+        goodStatement
+            (
+             conn,
+             "create table t_nd_int\n" +
+             "(\n" +
+             "   a int,\n" +
+             "   b generated always as ( cast ( -a  as smallint ) ),\n" +
+             "   c generated always as ( cast ( -a as int ) ),\n" +
+             "   d generated always as ( cast( -a as bigint ) ),\n" +
+             "   e generated always as ( cast ( -a as decimal ) ),\n" +
+             "   f generated always as ( cast ( -a as real ) ),\n" +
+             "   g generated always as ( cast ( -a as double ) ),\n" +
+             "   h generated always as ( cast ( -a as float ) )\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_nd_int( a ) values ( 1 )"
+             );
+        assertColumnTypes
+            (
+             conn,
+             "T_ND_INT",
+             new String[][]
+             {
+                 { "A", "INTEGER" },
+                 { "B", "SMALLINT" },
+                 { "C", "INTEGER" },
+                 { "D", "BIGINT" },
+                 { "E", "DECIMAL(5,0)" },
+                 { "F", "REAL" },
+                 { "G", "DOUBLE" },
+                 { "H", "DOUBLE" },
+             }
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_nd_int order by a",
+             new String[][]
+             {
+                 { "1" , "-1", "-1", "-1", "-1", "-1.0", "-1.0", "-1.0" },
+             },
+             false
+             );
+        
+        goodStatement
+            (
+             conn,
+             "create table t_nd_bigint\n" +
+             "(\n" +
+             "   a bigint,\n" +
+             "   b generated always as ( cast ( -a  as smallint ) ),\n" +
+             "   c generated always as ( cast ( -a as int ) ),\n" +
+             "   d generated always as ( cast( -a as bigint ) ),\n" +
+             "   e generated always as ( cast ( -a as decimal ) ),\n" +
+             "   f generated always as ( cast ( -a as real ) ),\n" +
+             "   g generated always as ( cast ( -a as double ) ),\n" +
+             "   h generated always as ( cast ( -a as float ) )\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_nd_bigint( a ) values ( 1 )"
+             );
+        assertColumnTypes
+            (
+             conn,
+             "T_ND_BIGINT",
+             new String[][]
+             {
+                 { "A", "BIGINT" },
+                 { "B", "SMALLINT" },
+                 { "C", "INTEGER" },
+                 { "D", "BIGINT" },
+                 { "E", "DECIMAL(5,0)" },
+                 { "F", "REAL" },
+                 { "G", "DOUBLE" },
+                 { "H", "DOUBLE" },
+             }
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_nd_bigint order by a",
+             new String[][]
+             {
+                 { "1" , "-1", "-1", "-1", "-1", "-1.0", "-1.0", "-1.0" },
+             },
+             false
+             );
+        
+        goodStatement
+            (
+             conn,
+             "create table t_nd_decimal\n" +
+             "(\n" +
+             "   a decimal,\n" +
+             "   b generated always as ( cast ( -a  as smallint ) ),\n" +
+             "   c generated always as ( cast ( -a as int ) ),\n" +
+             "   d generated always as ( cast( -a as bigint ) ),\n" +
+             "   e generated always as ( cast ( -a as decimal ) ),\n" +
+             "   f generated always as ( cast ( -a as real ) ),\n" +
+             "   g generated always as ( cast ( -a as double ) ),\n" +
+             "   h generated always as ( cast ( -a as float ) )\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_nd_decimal( a ) values ( 1.0 )"
+             );
+        assertColumnTypes
+            (
+             conn,
+             "T_ND_DECIMAL",
+             new String[][]
+             {
+                 { "A", "DECIMAL(5,0)" },
+                 { "B", "SMALLINT" },
+                 { "C", "INTEGER" },
+                 { "D", "BIGINT" },
+                 { "E", "DECIMAL(5,0)" },
+                 { "F", "REAL" },
+                 { "G", "DOUBLE" },
+                 { "H", "DOUBLE" },
+             }
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_nd_decimal order by a",
+             new String[][]
+             {
+                 { "1" , "-1", "-1", "-1", "-1", "-1.0", "-1.0", "-1.0" },
+             },
+             false
+             );
+        
+        goodStatement
+            (
+             conn,
+             "create table t_nd_real\n" +
+             "(\n" +
+             "   a real,\n" +
+             "   b generated always as ( cast ( -a  as smallint ) ),\n" +
+             "   c generated always as ( cast ( -a as int ) ),\n" +
+             "   d generated always as ( cast( -a as bigint ) ),\n" +
+             "   e generated always as ( cast ( -a as decimal ) ),\n" +
+             "   f generated always as ( cast ( -a as real ) ),\n" +
+             "   g generated always as ( cast ( -a as double ) ),\n" +
+             "   h generated always as ( cast ( -a as float ) )\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_nd_real( a ) values ( 1.0 )"
+             );
+        assertColumnTypes
+            (
+             conn,
+             "T_ND_REAL",
+             new String[][]
+             {
+                 { "A", "REAL" },
+                 { "B", "SMALLINT" },
+                 { "C", "INTEGER" },
+                 { "D", "BIGINT" },
+                 { "E", "DECIMAL(5,0)" },
+                 { "F", "REAL" },
+                 { "G", "DOUBLE" },
+                 { "H", "DOUBLE" },
+             }
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_nd_real order by a",
+             new String[][]
+             {
+                 { "1.0" , "-1", "-1", "-1", "-1", "-1.0", "-1.0", "-1.0" },
+             },
+             false
+             );
+        
+        goodStatement
+            (
+             conn,
+             "create table t_nd_double\n" +
+             "(\n" +
+             "   a double,\n" +
+             "   b generated always as ( cast ( -a  as smallint ) ),\n" +
+             "   c generated always as ( cast ( -a as int ) ),\n" +
+             "   d generated always as ( cast( -a as bigint ) ),\n" +
+             "   e generated always as ( cast ( -a as decimal ) ),\n" +
+             "   f generated always as ( cast ( -a as real ) ),\n" +
+             "   g generated always as ( cast ( -a as double ) ),\n" +
+             "   h generated always as ( cast ( -a as float ) )\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_nd_double( a ) values ( 1.0 )"
+             );
+        assertColumnTypes
+            (
+             conn,
+             "T_ND_DOUBLE",
+             new String[][]
+             {
+                 { "A", "DOUBLE" },
+                 { "B", "SMALLINT" },
+                 { "C", "INTEGER" },
+                 { "D", "BIGINT" },
+                 { "E", "DECIMAL(5,0)" },
+                 { "F", "REAL" },
+                 { "G", "DOUBLE" },
+                 { "H", "DOUBLE" },
+             }
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_nd_double order by a",
+             new String[][]
+             {
+                 { "1.0" , "-1", "-1", "-1", "-1", "-1.0", "-1.0", "-1.0" },
+             },
+             false
+             );
+        
+        goodStatement
+            (
+             conn,
+             "create table t_nd_float\n" +
+             "(\n" +
+             "   a float,\n" +
+             "   b generated always as ( cast ( -a  as smallint ) ),\n" +
+             "   c generated always as ( cast ( -a as int ) ),\n" +
+             "   d generated always as ( cast( -a as bigint ) ),\n" +
+             "   e generated always as ( cast ( -a as decimal ) ),\n" +
+             "   f generated always as ( cast ( -a as real ) ),\n" +
+             "   g generated always as ( cast ( -a as double ) ),\n" +
+             "   h generated always as ( cast ( -a as float ) )\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_nd_float( a ) values ( 1.0 )"
+             );
+        assertColumnTypes
+            (
+             conn,
+             "T_ND_FLOAT",
+             new String[][]
+             {
+                 { "A", "DOUBLE" },
+                 { "B", "SMALLINT" },
+                 { "C", "INTEGER" },
+                 { "D", "BIGINT" },
+                 { "E", "DECIMAL(5,0)" },
+                 { "F", "REAL" },
+                 { "G", "DOUBLE" },
+                 { "H", "DOUBLE" },
+             }
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_nd_float order by a",
+             new String[][]
+             {
+                 { "1.0" , "-1", "-1", "-1", "-1", "-1.0", "-1.0", "-1.0" },
+             },
+             false
+             );
+        
+        goodStatement
+            (
+             conn,
+             "create table t_nd_char\n" +
+             "(\n" +
+             "   a char( 20 ),\n" +
+             "   b generated always as ( cast ( upper( a ) as char( 20 ) ) ),\n" +
+             "   c generated always as ( cast ( upper( a ) as varchar( 20 ) ) ),\n" +
+             "   d generated always as ( cast ( upper( a ) as long varchar ) ),\n" +
+             "   e generated always as ( cast ( upper( a ) as clob ) ),\n" +
+             "   f generated always as ( cast( a as date ) ),\n" +
+             "   g generated always as ( cast( '15:09:02' as time ) ),\n" +
+             "   h generated always as ( cast( ( trim( a ) || ' 03:23:34.234' ) as timestamp ) )\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_nd_char( a ) values ( '1994-02-23' )"
+             );
+        assertColumnTypes
+            (
+             conn,
+             "T_ND_CHAR",
+             new String[][]
+             {
+                 { "A", "CHAR(20)" },
+                 { "B", "CHAR(20)" },
+                 { "C", "VARCHAR(20)" },
+                 { "D", "LONG VARCHAR" },
+                 { "E", "CLOB(2147483647)" },
+                 { "F", "DATE" },
+                 { "G", "TIME NOT NULL" },
+                 { "H", "TIMESTAMP" },
+             }
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_nd_char order by a",
+             new String[][]
+             {
+                 { "1994-02-23          " , "1994-02-23          ", "1994-02-23          ", "1994-02-23          ", "1994-02-23          ", "1994-02-23", "15:09:02", "1994-02-23 03:23:34.234" },
+             },
+             false
+             );
+
+        goodStatement
+            (
+             conn,
+             "create table t_nd_varchar\n" +
+             "(\n" +
+             "   a varchar( 20 ),\n" +
+             "   b generated always as ( cast ( upper( a ) as char( 20 ) ) ),\n" +
+             "   c generated always as ( cast ( upper( a ) as varchar( 20 ) ) ),\n" +
+             "   d generated always as ( cast ( upper( a ) as long varchar ) ),\n" +
+             "   e generated always as ( cast ( upper( a ) as clob ) ),\n" +
+             "   f generated always as ( cast( a as date ) ),\n" +
+             "   g generated always as ( cast( '15:09:02' as time ) ),\n" +
+             "   h generated always as ( cast( ( trim( a ) || ' 03:23:34.234' ) as timestamp ) )\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_nd_varchar( a ) values ( '1994-02-23' )"
+             );
+        assertColumnTypes
+            (
+             conn,
+             "T_ND_VARCHAR",
+             new String[][]
+             {
+                 { "A", "VARCHAR(20)" },
+                 { "B", "CHAR(20)" },
+                 { "C", "VARCHAR(20)" },
+                 { "D", "LONG VARCHAR" },
+                 { "E", "CLOB(2147483647)" },
+                 { "F", "DATE" },
+                 { "G", "TIME NOT NULL" },
+                 { "H", "TIMESTAMP" },
+             }
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_nd_varchar order by a",
+             new String[][]
+             {
+                 { "1994-02-23" , "1994-02-23          ", "1994-02-23", "1994-02-23", "1994-02-23", "1994-02-23", "15:09:02", "1994-02-23 03:23:34.234" },
+             },
+             false
+             );
+
+        goodStatement
+            (
+             conn,
+             "create table t_nd_longvarchar\n" +
+             "(\n" +
+             "   a long varchar,\n" +
+             "   b generated always as ( cast ( upper( a ) as char( 20 ) ) ),\n" +
+             "   c generated always as ( cast ( upper( a ) as varchar( 20 ) ) ),\n" +
+             "   d generated always as ( cast ( upper( a ) as long varchar ) ),\n" +
+             "   e generated always as ( cast ( upper( a ) as clob ) )\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_nd_longvarchar( a ) values ( 'foo' )"
+             );
+        assertColumnTypes
+            (
+             conn,
+             "T_ND_LONGVARCHAR",
+             new String[][]
+             {
+                 { "A", "LONG VARCHAR" },
+                 { "B", "CHAR(20)" },
+                 { "C", "VARCHAR(20)" },
+                 { "D", "LONG VARCHAR" },
+                 { "E", "CLOB(2147483647)" },
+             }
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_nd_longvarchar",
+             new String[][]
+             {
+                 { "foo" , "FOO                 ", "FOO", "FOO", "FOO", },
+             },
+             false
+             );
+
+        goodStatement
+            (
+             conn,
+             "create table t_nd_clob\n" +
+             "(\n" +
+             "   a clob,\n" +
+             "   b generated always as ( cast ( upper( a ) as char( 20 ) ) ),\n" +
+             "   c generated always as ( cast ( upper( a ) as varchar( 20 ) ) ),\n" +
+             "   d generated always as ( cast ( upper( a ) as long varchar ) ),\n" +
+             "   e generated always as ( cast ( upper( a ) as clob ) )\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_nd_clob( a ) values ( 'foo' )"
+             );
+        assertColumnTypes
+            (
+             conn,
+             "T_ND_CLOB",
+             new String[][]
+             {
+                 { "A", "CLOB(2147483647)" },
+                 { "B", "CHAR(20)" },
+                 { "C", "VARCHAR(20)" },
+                 { "D", "LONG VARCHAR" },
+                 { "E", "CLOB(2147483647)" },
+             }
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_nd_clob",
+             new String[][]
+             {
+                 { "foo" , "FOO                 ", "FOO", "FOO", "FOO", },
+             },
+             false
+             );
+
+        goodStatement
+            (
+             conn,
+             "create table t_nd_charforbitdata\n" +
+             "(\n" +
+             "   a char( 4 ) for bit data,\n" +
+             "   b generated always as ( cast ( a as char( 4 ) for bit data ) ),\n" +
+             "   c generated always as ( cast ( a as varchar( 4 ) for bit data ) ),\n" +
+             "   d generated always as ( cast ( a as long varchar for bit data ) )\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_nd_charforbitdata( a ) values ( X'ABCDEFAB' )"
+             );
+        assertColumnTypes
+            (
+             conn,
+             "T_ND_CHARFORBITDATA",
+             new String[][]
+             {
+                 { "A", "CHAR (4) FOR BIT DATA" },
+                 { "B", "CHAR (4) FOR BIT DATA" },
+                 { "C", "VARCHAR (4) FOR BIT DATA" },
+                 { "D", "LONG VARCHAR FOR BIT DATA" },
+             }
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_nd_charforbitdata",
+             new String[][]
+             {
+                 { "abcdefab", "abcdefab", "abcdefab", "abcdefab", },
+             },
+             false
+             );
+
+        goodStatement
+            (
+             conn,
+             "create table t_nd_varcharforbitdata\n" +
+             "(\n" +
+             "   a varchar( 4 ) for bit data,\n" +
+             "   b generated always as ( cast ( a as char( 4 ) for bit data ) ),\n" +
+             "   c generated always as ( cast ( a as varchar( 4 ) for bit data ) ),\n" +
+             "   d generated always as ( cast ( a as long varchar for bit data ) )\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_nd_varcharforbitdata( a ) values ( X'ABCDEFAB' )"
+             );
+        assertColumnTypes
+            (
+             conn,
+             "T_ND_VARCHARFORBITDATA",
+             new String[][]
+             {
+                 { "A", "VARCHAR (4) FOR BIT DATA" },
+                 { "B", "CHAR (4) FOR BIT DATA" },
+                 { "C", "VARCHAR (4) FOR BIT DATA" },
+                 { "D", "LONG VARCHAR FOR BIT DATA" },
+             }
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_nd_varcharforbitdata",
+             new String[][]
+             {
+                 { "abcdefab", "abcdefab", "abcdefab", "abcdefab", },
+             },
+             false
+             );
+
+        goodStatement
+            (
+             conn,
+             "create table t_nd_longvarcharforbitdata\n" +
+             "(\n" +
+             "   a long varchar for bit data,\n" +
+             "   b generated always as ( cast ( a as char( 4 ) for bit data ) ),\n" +
+             "   c generated always as ( cast ( a as varchar( 4 ) for bit data ) ),\n" +
+             "   d generated always as ( cast ( a as long varchar for bit data ) )\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_nd_longvarcharforbitdata( a ) values ( X'ABCDEFAB' )"
+             );
+        assertColumnTypes
+            (
+             conn,
+             "T_ND_LONGVARCHARFORBITDATA",
+             new String[][]
+             {
+                 { "A", "LONG VARCHAR FOR BIT DATA" },
+                 { "B", "CHAR (4) FOR BIT DATA" },
+                 { "C", "VARCHAR (4) FOR BIT DATA" },
+                 { "D", "LONG VARCHAR FOR BIT DATA" },
+             }
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_nd_longvarcharforbitdata",
+             new String[][]
+             {
+                 { "abcdefab", "abcdefab", "abcdefab", "abcdefab", },
+             },
+             false
+             );
+
+        goodStatement
+            (
+             conn,
+             "create table t_nd_date\n" +
+             "(\n" +
+             "   a date,\n" +
+             "   b generated always as ( cast ( a as char( 20 ) ) ),\n" +
+             "   c generated always as ( cast ( a as varchar( 20 ) ) ),\n" +
+             "   d generated always as ( cast ( a as date ) )\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_nd_date( a ) values ( date('1994-02-23') )"
+             );
+        assertColumnTypes
+            (
+             conn,
+             "T_ND_DATE",
+             new String[][]
+             {
+                 { "A", "DATE" },
+                 { "B", "CHAR(20)" },
+                 { "C", "VARCHAR(20)" },
+                 { "D", "DATE" },
+             }
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_nd_date",
+             new String[][]
+             {
+                 { "1994-02-23", "1994-02-23          ", "1994-02-23", "1994-02-23", },
+             },
+             false
+             );
+
+        goodStatement
+            (
+             conn,
+             "create table t_nd_time\n" +
+             "(\n" +
+             "   a time,\n" +
+             "   b generated always as ( cast ( a as char( 20 ) ) ),\n" +
+             "   c generated always as ( cast ( a as varchar( 20 ) ) ),\n" +
+             "   d generated always as ( cast ( a as time ) )\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_nd_time( a ) values (  time('15:09:02')  )"
+             );
+        assertColumnTypes
+            (
+             conn,
+             "T_ND_TIME",
+             new String[][]
+             {
+                 { "A", "TIME" },
+                 { "B", "CHAR(20)" },
+                 { "C", "VARCHAR(20)" },
+                 { "D", "TIME" },
+             }
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_nd_time",
+             new String[][]
+             {
+                 { "15:09:02", "15:09:02            ", "15:09:02", "15:09:02", },
+             },
+             false
+             );
+
+        goodStatement
+            (
+             conn,
+             "create table t_nd_timestamp\n" +
+             "(\n" +
+             "   a  timestamp,\n" +
+             "   b  char( 30 ) generated always as ( cast( a as char( 30 ) ) ),\n" +
+             "   c  varchar( 30 ) generated always as ( cast ( a as varchar( 30 ) ) ),\n" +
+             "   d timestamp generated always as ( cast ( a as timestamp ) )\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_nd_timestamp( a ) values (  timestamp('1962-09-23 03:23:34.234')  )"
+             );
+        assertColumnTypes
+            (
+             conn,
+             "T_ND_TIMESTAMP",
+             new String[][]
+             {
+                 { "A", "TIMESTAMP" },
+                 { "B", "CHAR(30)" },
+                 { "C", "VARCHAR(30)" },
+                 { "D", "TIMESTAMP" },
+             }
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_nd_timestamp",
+             new String[][]
+             {
+                 { "1962-09-23 03:23:34.234", "1962-09-23 03:23:34.234       ", "1962-09-23 03:23:34.234", "1962-09-23 03:23:34.234", },
+             },
+             false
+             );
+
+    }
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // MINIONS

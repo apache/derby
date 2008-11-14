@@ -3647,8 +3647,7 @@ columnDefinition(TableElementList tableElementList) throws StandardException :
 
 	/* identifier() used to be columnName() */
 	columnName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true) 
-		( typeDescriptor[0] = dataTypeDDL() 
-		)
+	[ ( typeDescriptor[0] = dataTypeDDL() ) ]
 	[ defaultNode = defaultAndConstraints(typeDescriptor, tableElementList, columnName, autoIncrementInfo) ]
 	{
 		// Only pass autoincrement info for autoincrement columns
