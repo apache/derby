@@ -710,7 +710,7 @@ public class TableElementList extends QueryTreeNodeVector
 	 * Bind and validate all of the generation clauses in this list against
 	 * the specified FromList.  
 	 *
-	 * @param fromList		Schema where the table lives.
+	 * @param sd			Schema where the table lives.
 	 * @param fromList		The FromList in question.
 	 * @param generatedColumns Bitmap of generated columns in the table. Vacuous for CREATE TABLE, but may be non-trivial for ALTER TABLE. This routine may set bits for new generated columns.
 	 *
