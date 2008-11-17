@@ -3919,7 +3919,6 @@ public class ResultColumnList extends QueryTreeNodeVector
 							defaultInfo.getDefaultText(),
 							getLanguageConnectionContext(),
 							getCompilerContext()));
-
 				}
 				else
 				{
@@ -3927,8 +3926,9 @@ public class ResultColumnList extends QueryTreeNodeVector
 						(ValueNode) getNodeFactory().getNode(
 										C_NodeTypes.UNTYPED_NULL_CONSTANT_NODE,
 										getContextManager()));
+                    rc.setWasDefaultColumn( true );
 				}
-				rc.setDefaultColumn(false);
+                rc.setDefaultColumn(false);
 			}
 		}
 	}
@@ -4056,13 +4056,13 @@ public class ResultColumnList extends QueryTreeNodeVector
 	}
 	
 	/**
-	 * check if any autoincrement columns exist in the result column list.
+	 * check if any autoincrement or generated columns exist in the result column list.
 	 * called from insert or update where you cannot insert/update the value
-	 * of an autoincrement column.
+	 * of a generated or autoincrement column.
 	 *
 	 * @exception StandardException		If the column is an ai column
 	 */
-	public void checkAutoincrement(ResultColumnList sourceRSRCL)
+	public void forbidOverrides(ResultColumnList sourceRSRCL)
 		throws StandardException
 	{
 		int size = size();
@@ -4073,6 +4073,14 @@ public class ResultColumnList extends QueryTreeNodeVector
 			ResultColumn sourceRC = 
 				(ResultColumn)((sourceRSRCL == null) ? null : sourceRSRCL.elementAt(index));
 			ColumnDescriptor cd = rc.getTableColumnDescriptor();
+
+            if ( (cd != null) && cd.hasGenerationClause() )
+            {
+                if ( (sourceRC != null) && !sourceRC.hasGenerationClause() && !sourceRC.wasDefaultColumn() )
+                {
+                    throw StandardException.newException(SQLState.LANG_CANT_OVERRIDE_GENERATION_CLAUSE, rc.getName());
+                }
+            }
 			
 			if ((cd != null) && (cd.isAutoincrement()))
 			{

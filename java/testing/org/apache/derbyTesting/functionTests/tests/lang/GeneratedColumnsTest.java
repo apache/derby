@@ -4181,6 +4181,156 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
 
     }
     
+    /**
+     * <p>
+     * Test that you cannot override the value of a generated column via
+     * a driving SELECT--except where the value in the driving SELECT is the
+     * DEFAULT literal. Make sure that generation clauses behave like
+     * autoincrement columns in this respect.
+     * </p>
+     */
+    public  void    test_023_drivingSelect()
+        throws Exception
+    {
+        Connection  conn = getConnection();
+
+        //
+        // Schema and pre-population.
+        //
+        goodStatement
+            (
+             conn,
+             "create table t_ds_source( a int, b int )"
+             );
+        goodStatement
+            (
+             conn,
+             "create table t_ds_id( a int, b int generated always as identity )"
+             );
+        goodStatement
+            (
+             conn,
+             "create table t_ds_gc( a int, b generated always as ( -a ) )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_ds_source( a, b ) values ( 1, 1 )"
+             );
+        
+        //
+        // DEFAULT literals ok.
+        //
+        goodStatement
+            (
+             conn,
+             "insert into t_ds_id values ( 3, default )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_ds_gc values ( 3, default )"
+             );
+        
+        //
+        // Inserts into non-generated columns OK.
+        //
+        goodStatement
+            (
+             conn,
+             "insert into t_ds_id( a ) select a from t_ds_source"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_ds_gc( a ) select a from t_ds_source"
+             );
+        
+        //
+        // Other literals raise an error.
+        //
+        expectCompilationError
+            (
+             CANT_MODIFY_IDENTITY,
+             "insert into t_ds_id values ( 2, 2 )"
+             );
+        expectCompilationError
+            (
+             CANT_OVERRIDE_GENERATION_CLAUSE,
+             "insert into t_ds_gc values ( 2, 2 )"
+             );
+        
+        //
+        // You can't stuff an overriding value from a nested SELECT
+        //
+        expectCompilationError
+            (
+             CANT_MODIFY_IDENTITY,
+             "insert into t_ds_id select * from t_ds_source"
+             );
+        expectCompilationError
+            (
+             CANT_OVERRIDE_GENERATION_CLAUSE,
+             "insert into t_ds_gc select * from t_ds_source"
+             );
+        
+        //
+        // You can't stuff an overriding value from a literal in a nested SELECT
+        //
+        expectCompilationError
+            (
+             CANT_MODIFY_IDENTITY,
+             "insert into t_ds_id select a, 3 from t_ds_source"
+             );
+        expectCompilationError
+            (
+             CANT_OVERRIDE_GENERATION_CLAUSE,
+             "insert into t_ds_gc select a, 3 from t_ds_source"
+             );
+
+        //
+        // DEFAULT literal in the SELECT list is just a syntax error.
+        //
+        expectCompilationError
+            (
+             SYNTAX_ERROR,
+             "insert into t_ds_id select a, default from t_ds_source"
+             );
+        expectCompilationError
+            (
+             SYNTAX_ERROR,
+             "insert into t_ds_gc select a, default from t_ds_source"
+             );
+
+        //
+        // Verify contents of tables.
+        //
+        assertResults
+            (
+             conn,
+             "select * from t_ds_id order by b",
+             new String[][]
+             {
+                 { "3", "1", },
+                 { "1", "2", },
+             },
+             false
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_ds_gc order by b",
+             new String[][]
+             {
+                 { "3", "-3", },
+                 { "1", "-1", },
+             },
+             false
+             );
+
+    }
+    
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // MINIONS

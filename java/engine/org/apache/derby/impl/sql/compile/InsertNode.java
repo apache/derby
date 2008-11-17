@@ -600,7 +600,7 @@ public final class InsertNode extends DMLModStatementNode
 				resultSet.enhanceRCLForInsert(
 						numTableColumns, colMap, dataDictionary,
 						targetTableDescriptor, targetVTI);
-			resultColumnList.checkAutoincrement(resultSet.getResultColumns());
+			resultColumnList.forbidOverrides(resultSet.getResultColumns());
 		}
 	}
 

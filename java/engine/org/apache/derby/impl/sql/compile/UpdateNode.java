@@ -379,7 +379,7 @@ public final class UpdateNode extends DMLModStatementNode
         
 		LanguageConnectionContext lcc = getLanguageConnectionContext();
 		if (lcc.getAutoincrementUpdate() == false)
-			resultSet.getResultColumns().checkAutoincrement(null);
+			resultSet.getResultColumns().forbidOverrides(null);
 
 		/*
 		** Mark the columns in this UpdateNode's result column list as

@@ -88,6 +88,7 @@ public class ResultColumn extends ValueNode
 	boolean			updated;
 	boolean			updatableByCursor;
 	private boolean defaultColumn;
+    private boolean wasDefault;
 
 	// tells us if this ResultColumn is a placeholder for a generated
 	// autoincrement value for an insert statement.
@@ -205,6 +206,20 @@ public class ResultColumn extends ValueNode
 	public void setDefaultColumn(boolean value)
 	{
 		defaultColumn = value;
+	}
+
+	/**
+	 * Returns TRUE if the ResultColumn used to stand in for a DEFAULT keyword in
+	 * an insert/update statement.
+	 */
+	public boolean wasDefaultColumn()
+	{
+		return wasDefault;
+	}
+
+	public void setWasDefaultColumn(boolean value)
+	{
+		wasDefault = value;
 	}
 
 	/**
@@ -505,6 +520,8 @@ public class ResultColumn extends ValueNode
 			return "exposedName: " + exposedName + "\n" +
 				"name: " + name + "\n" +
 				"tableName: " + tableName + "\n" +
+				"isDefaultColumn: " + defaultColumn + "\n" +
+				"wasDefaultColumn: " + wasDefault + "\n" +
 				"isNameGenerated: " + isNameGenerated + "\n" +
 				"sourceTableName: " + sourceTableName + "\n" +
 				"type: " + getTypeServices() + "\n" +
