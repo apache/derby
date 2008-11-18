@@ -710,7 +710,7 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
              "no cascade before insert on t1_trig\n" +
              "referencing new as ar\n" +
              "for each row\n" +
-             "call report_proc( 'before_insert_row_trigger', ar.a, ar.b, ar.c )\n"
+             "call report_proc( 'before_insert_row_trigger', ar.a, ar.a, ar.c )\n"
              );
         goodStatement
             (
@@ -728,7 +728,7 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
              "no cascade before update on t1_trig\n" +
              "referencing old as br new as ar\n" +
              "for each row\n" +
-             "call wide_report_proc( 'before_update_row_trigger', br.a, br.b, br.c, ar.a, ar.b, ar.c )\n"
+             "call wide_report_proc( 'before_update_row_trigger', br.a, br.b, br.c, ar.a, ar.a, ar.c )\n"
              );
         goodStatement
             (
@@ -818,9 +818,9 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
              "insert into t1_trig( a ) values ( 1 ), ( 2 ), ( 3 )",
              new String[][]
              {
-                 { "before_insert_row_trigger: [ 1, -1, null ]" },
-                 { "before_insert_row_trigger: [ 2, -2, null ]" },
-                 { "before_insert_row_trigger: [ 3, -3, null ]" },
+                 { "before_insert_row_trigger: [ 1, 1, null ]" },
+                 { "before_insert_row_trigger: [ 2, 2, null ]" },
+                 { "before_insert_row_trigger: [ 3, 3, null ]" },
                  { "before_insert_statement_trigger: [ -1, -1, -1 ]" },
                  { "after_insert_row_trigger: [ 1, -1, null ]" },
                  { "after_insert_row_trigger: [ 2, -2, null ]" },
@@ -834,9 +834,9 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
              "update t1_trig set a = a + 10",
              new String[][]
              {
-                 { "before_update_row_trigger: [ 1, -1, null, 11, -11, null ]" },
-                 { "before_update_row_trigger: [ 2, -2, null, 12, -12, null ]" },
-                 { "before_update_row_trigger: [ 3, -3, null, 13, -13, null ]" },
+                 { "before_update_row_trigger: [ 1, -1, null, 11, 11, null ]" },
+                 { "before_update_row_trigger: [ 2, -2, null, 12, 12, null ]" },
+                 { "before_update_row_trigger: [ 3, -3, null, 13, 13, null ]" },
                  { "before_update_statement_trigger: [ -1, -1, -1 ]" },
                  { "after_update_row_trigger: [ 1, -1, null, 11, -11, null ]" },
                  { "after_update_row_trigger: [ 2, -2, null, 12, -12, null ]" },
@@ -4330,6 +4330,125 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
 
     }
     
+    /**
+     * <p>
+     * Test that the NEW variables of BEFORE triggers do not mention generated columns.
+     * </p>
+     */
+    public  void    test_024_beforeTriggers()
+        throws Exception
+    {
+        Connection  conn = getConnection();
+
+        //
+        // Schema.
+        //
+        goodStatement
+            (
+             conn,
+             "create procedure t_tba_report_proc\n" +
+             "( tag varchar( 40 ), a int, b int, c int )\n" +
+             "language java\n" +
+             "parameter style java\n" +
+             "no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.GeneratedColumnsTest.showValues'\n"
+             );
+        goodStatement
+            (
+             conn,
+             "create procedure t_tba_wide_report_proc\n" +
+             "( tag varchar( 40 ), old_a int, old_b int, old_c int, new_a int, new_b int, new_c int )\n" +
+             "language java\n" +
+             "parameter style java\n" +
+             "no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.GeneratedColumnsTest.showValues'\n"
+             );
+        goodStatement
+            (
+             conn,
+             "create table t_tba_1( a int, b int generated always as ( -a ), c int )"
+             );
+
+        // BEFORE INSERT trigger that DOESN'T mention generated columns
+        goodStatement
+            (
+             conn,
+             "create trigger trig_tba_good_before_insert\n" +
+             "no cascade before insert on t_tba_1\n" +
+             "referencing new as ar\n" +
+             "for each row\n" +
+             "call t_tba_report_proc( 'before_insert_row_trigger', ar.a, ar.a, ar.a )\n"
+             );
+
+        // BEFORE INSERT trigger that DOES mention generated columns
+        expectCompilationError
+            (
+             BAD_BEFORE_TRIGGER,
+             "create trigger trig_tba_bad_before_insert\n" +
+             "no cascade before insert on t_tba_1\n" +
+             "referencing new as ar\n" +
+             "for each row\n" +
+             "call t_tba_report_proc( 'before_insert_row_trigger', ar.a, ar.b, ar.c )\n"
+             );
+
+        // AFTER INSERT trigger that DOES mention generated columns
+        goodStatement
+            (
+             conn,
+             "create trigger trig_tba_good_after_insert\n" +
+             "after insert on t_tba_1\n" +
+             "referencing new as ar\n" +
+             "for each row\n" +
+             "call t_tba_report_proc( 'after_insert_row_trigger', ar.a, ar.b, ar.c ) \n"
+             );
+
+        // BEFORE UPDATE trigger that DOESN'T mention generated columns in its
+        // NEW variable
+        goodStatement
+            (
+             conn,
+             "create trigger trig_tba_good_before_update\n" +
+             "no cascade before update on t_tba_1\n" +
+             "referencing old as br new as ar\n" +
+             "for each row\n" +
+             "call t_tba_wide_report_proc( 'before_update_row_trigger', br.a, br.b, br.c, ar.a, ar.a, ar.a )\n"
+             );
+
+        // BEFORE UPDATE trigger that DOES mention generated columns in its NEW variable
+        expectCompilationError
+            (
+             BAD_BEFORE_TRIGGER,
+             "create trigger trig_tba_bad_before_update\n" +
+             "no cascade before update on t_tba_1\n" +
+             "referencing old as br new as ar\n" +
+             "for each row\n" +
+             "call t_tba_wide_report_proc( 'before_update_row_trigger', br.a, br.b, br.c, ar.a, ar.b, ar.c )\n"
+             );
+
+        // AFTER UPDATE trigger that DOES mention generated columns in its NEW
+        // variable
+        goodStatement
+            (
+             conn,
+             "create trigger trig_tba_good_after_update\n" +
+             "after update on t_tba_1\n" +
+             "referencing old as br new as ar\n" +
+             "for each row\n" +
+             "call t_tba_wide_report_proc( 'after_update_row_trigger', br.a, br.b, br.c, ar.a, ar.b, ar.c )\n"
+             );
+
+        // BEFORE DELETE trigger which DOES mention generated columns
+        goodStatement
+            (
+             conn,
+             "create trigger trig_tba_before_delete\n" +
+             "no cascade before delete on t_tba_1\n" +
+             "referencing old as br\n" +
+             "for each row\n" +
+             "call t_tba_report_proc( 'before_delete_row_trigger', br.a, br.b, br.c )\n"
+             );
+
+    }
 
     ///////////////////////////////////////////////////////////////////////////////////
     //

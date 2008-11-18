@@ -34,6 +34,7 @@ import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
+import org.apache.derby.iapi.sql.dictionary.ColumnDescriptorList;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
@@ -369,6 +370,9 @@ public class CreateTriggerNode extends DDLStatementNode
 	{
 		validateReferencesClause(dd);
 
+        // the actions of before triggers may not reference generated columns
+        if ( isBefore ) { forbidActionsOnGenCols(); }
+        
 		StringBuffer newText = new StringBuffer();
 		boolean regenNode = false;
 		int start = 0;
@@ -551,6 +555,64 @@ public class CreateTriggerNode extends DDLStatementNode
 		return sorted;
 	}
 
+    /*
+     * Forbid references to generated columns in the actions of BEFORE triggers.
+     * This is DERBY-3948, enforcing the following section of the SQL standard:
+     * part 2, section 11.39 (<trigger definition>), syntax rule 12c:
+     *
+     * <blockquote>
+     *    12) If BEFORE is specified, then:
+     * :
+     * c) The <triggered action> shall not contain a <field reference> that
+     * references a field in the new transition variable corresponding to a
+     * generated column of T. 
+     * </blockquote>
+     */
+    private void    forbidActionsOnGenCols()
+        throws StandardException
+    {
+        ColumnDescriptorList    generatedColumns = triggerTableDescriptor.getGeneratedColumns();
+        int                                 genColCount = generatedColumns.size();
+
+        if ( genColCount == 0 ) { return; }
+
+        CollectNodesVisitor     visitor = new CollectNodesVisitor( ColumnReference.class );
+
+        actionNode.accept( visitor );
+
+        Vector                   columnRefs = visitor.getList();
+        int                             colRefCount = columnRefs.size();
+
+        for ( int crf_idx = 0; crf_idx < colRefCount; crf_idx++ )
+        {
+            ColumnReference     cr = (ColumnReference) columnRefs.get( crf_idx );
+            String  colRefName = cr.getColumnName();
+            String  tabRefName = cr.getTableName();
+
+            for ( int gc_idx = 0; gc_idx < genColCount; gc_idx++ )
+            {
+                String  genColName = generatedColumns.elementAt( gc_idx ).getColumnName();
+
+                if ( genColName.equals( colRefName ) && equals( newTableName, tabRefName ) )
+                {
+                    throw StandardException.newException( SQLState.LANG_GEN_COL_BEFORE_TRIG, genColName );
+                }
+            }
+        }
+    }
+
+    /*
+     * Compare two strings.
+     */
+    private boolean equals( String left, String right )
+    {
+        if ( left == null ) { return (right == null); }
+        else
+        {
+            return left.equals( right );
+        }
+    }
+    
 	/*
 	** Make sure the given column name is found in the trigger
 	** target table.  Generate the appropriate SQL to get it.

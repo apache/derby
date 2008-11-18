@@ -2026,6 +2026,12 @@ Guide.
             </msg>
 
             <msg>
+                <name>42XAA</name>
+                <text>The NEW value of generated column '{0}' is mentioned in the BEFORE action of a trigger. This is not allowed.</text>
+                <arg>columnName</arg>
+            </msg>
+
+            <msg>
                 <name>42Y00</name>
                 <text>Class '{0}' does not implement org.apache.derby.iapi.db.AggregateDefinition and thus cannot be used as an aggregate expression.</text>
                 <arg>className</arg>

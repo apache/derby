@@ -66,6 +66,7 @@ public class GeneratedColumnsHelper extends BaseJDBCTestCase
     protected static  final   String  ILLEGAL_ADD_DEFAULT = "42XA7";
     protected static  final   String  ILLEGAL_RENAME = "42XA8";
     protected static  final   String  NEED_EXPLICIT_DATATYPE = "42XA9";
+    protected static  final   String  BAD_BEFORE_TRIGGER = "42XAA";
     
     protected static  final   String  NOT_NULL_VIOLATION = "23502";
     protected static  final   String  CONSTRAINT_VIOLATION = "23513";
