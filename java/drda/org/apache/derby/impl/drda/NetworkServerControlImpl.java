@@ -232,6 +232,7 @@ public final class NetworkServerControlImpl {
 	private String encPrvArg;
 	private String hostArg = DEFAULT_HOST;	
 	private InetAddress hostAddress;
+	private Exception runtimeException=null;
 	private int sessionArg;
 	private boolean unsecureArg;
 
@@ -332,6 +333,13 @@ public final class NetworkServerControlImpl {
 	private static final int SSL_PEER_AUTHENTICATION = 2;
 
 	private int sslMode = SSL_OFF;
+    
+	/* object to wait on and notify; so we can monitor if a server
+	 * was successfully started */
+	private Object serverStartComplete = new Object();
+
+	/* for flagging complete boot */
+	private boolean completedBoot = false;
 
     /**
      * Can EUSRIDPWD security mechanism be used with 
@@ -636,14 +644,37 @@ public final class NetworkServerControlImpl {
 	 *		   
 	 * @exception Exception	throws an exception if an error occurs
 	 */
-	public void start(PrintWriter consoleWriter)
+	public void start(final PrintWriter consoleWriter)
 		throws Exception
 	{
-		DRDAServerStarter starter = new DRDAServerStarter();
-		starter.setStartInfo(hostAddress,portNumber,consoleWriter);
-        this.setLogWriter(consoleWriter);
-		startNetworkServer();
-		starter.boot(false,null);
+		// creating a new thread and calling blockingStart on it
+		// This is similar to calling DRDAServerStarter.boot().
+		// We save any exception from the blockingStart and 
+		// return to the user later. See DERBY-1465.
+		Thread t = new Thread("NetworkServerControl") {
+
+		public void run() {
+			try {
+				blockingStart(consoleWriter);
+			} catch (Exception e) {
+				runtimeException = e;
+			}
+		}
+	};
+		// make it a daemon thread so it exits when the jvm exits
+		t.setDaemon(true);
+		// if there was an immediate error like
+		// another server already running, throw it here.
+		// ping is still required to verify the server is
+		// up.     
+
+		t.start();
+		synchronized(serverStartComplete){
+		while (!completedBoot )
+			serverStartComplete.wait();
+		}
+		if (runtimeException != null)
+			throw runtimeException; 
 	}
 
 	/**
@@ -700,8 +731,8 @@ public final class NetworkServerControlImpl {
 	public void blockingStart(PrintWriter consoleWriter)
 		throws Exception
 	{
-		startNetworkServer();
 		setLogWriter(consoleWriter);
+		startNetworkServer();
 		cloudscapeLogWriter = Monitor.getStream().getPrintWriter();
 		if (SanityManager.DEBUG && debugOutput)
 		{
@@ -746,6 +777,11 @@ public final class NetworkServerControlImpl {
 		// If we find other (unexpected) errors, we ultimately exit--so make
 		// sure we print the error message before doing so (Beetle 5033).
 			throwUnexpectedException(e);
+		} finally {
+			synchronized (serverStartComplete) {
+				completedBoot = true;
+				serverStartComplete.notifyAll();
+			}
 		}
         
 		switch (getSSLMode()) {

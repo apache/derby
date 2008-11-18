@@ -54,6 +54,16 @@ public class NSinSameJVMTest extends BaseJDBCTestCase {
         ResultSet rs = stmt
         .executeQuery("Select  tablename   from  sys.systables");
         JDBC.assertDrainResults(rs);
+        
+        // DERBY-1465 - starting another server on the same
+        // port fails and should throw an exception as well as log it
+        try { 
+            serverControl.start(null);
+            fail ("Should have gotten an exception - see DERBY-1465");
+        } catch (Exception e) {
+            assertTrue(e.getMessage().indexOf("java.net.BindException") > 1);
+        }
+        
         // Leave the connection open before shutdown
         serverControl.shutdown();
     }
