@@ -53,6 +53,7 @@ public class _Suite extends BaseTestCase {
         suite.addTestSuite(CompressedNumberTest.class);
         suite.addTest(AssertFailureTest.suite());
         suite.addTest(InputStreamUtilTest.suite());
+        suite.addTest(CharacterStreamDescriptorTest.suite());
 
         return suite;
     }
