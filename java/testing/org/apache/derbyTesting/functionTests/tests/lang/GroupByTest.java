@@ -286,6 +286,13 @@ public class GroupByTest extends BaseJDBCTestCase {
       st.executeUpdate("insert into t2_D3880 values(1, 'aaa', 20)");
       st.executeUpdate("insert into t2_D3880 values(2, 'xxx', 30)");
       
+      // for DERBY-3631 testing
+      st.executeUpdate("CREATE FUNCTION MAXOF2(ONE DOUBLE, TWO DOUBLE) RETURNS DOUBLE PARAMETER STYLE JAVA NO SQL LANGUAGE JAVA EXTERNAL NAME 'java.lang.Math.max'");
+      st.executeUpdate("CREATE TABLE Testd3631( GroupCol INT, Value1 INT, Value2 INT )");
+      st.executeUpdate("INSERT INTO Testd3631 VALUES (1, 1, 5)");
+      st.executeUpdate("INSERT INTO Testd3631 VALUES (2, -7, 2)");
+      st.executeUpdate("INSERT INTO Testd3631 VALUES (2, 1, -5)");
+      
 	}
 
 	/**
@@ -2198,5 +2205,17 @@ public class GroupByTest extends BaseJDBCTestCase {
 					"FROM d3904_T1, D3904_T2 WHERE d3904_T1.D1='2008-10-02'"),
             new String[][] {  {"2008-10-02"} } );
 	}
-}
 
+
+    /**
+     * Test aggregate used in group by query.
+     * @throws SQLException
+     */
+    public void testDerby3631AggregateInGroupByQuery() throws SQLException {
+         Statement s = createStatement();
+         ResultSet rs = s.executeQuery("SELECT GroupCol, MAXOF2(CAST(SUM(Value1) AS DOUBLE), CAST(SUM(Value2) AS DOUBLE)) AS MaxOf2 FROM Testd3631 GROUP BY GroupCol ");
+         JDBC.assertFullResultSet(rs, new String[][] {{"1","5.0"},{"2","-3.0"}});
+         rs = s.executeQuery("SELECT GroupCol, MAXOF2(SUM(Value1), SUM(Value2)) AS MaxOf2 FROM Testd3631 GROUP BY GroupCol");
+         JDBC.assertFullResultSet(rs, new String[][] {{"1","5.0"},{"2","-3.0"}});
+    }
+}
