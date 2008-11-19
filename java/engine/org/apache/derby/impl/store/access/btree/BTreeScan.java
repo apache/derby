@@ -1541,10 +1541,6 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
         {
             SanityManager.ASSERT(this.container != null,
                 "BTreeScan.fetch() called on a closed scan.");
-            
-            TemplateRow.checkPartialColumnTypes(
-                this.getConglomerate().format_ids, 
-                init_scanColumnList, (int []) null, row);
         }
 
         try
@@ -1796,13 +1792,6 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
 		throws StandardException
 	{
         boolean ret_val;
-
-        if (SanityManager.DEBUG)
-        {
-            TemplateRow.checkPartialColumnTypes(
-                this.getConglomerate().format_ids, 
-                init_scanColumnList, (int[]) null, row);
-        }
 
         // Turn this call into a group fetch of a 1 element group.
         fetchNext_one_slot_array[0] = row;

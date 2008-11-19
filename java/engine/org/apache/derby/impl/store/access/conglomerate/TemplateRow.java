@@ -21,8 +21,6 @@
 
 package org.apache.derby.impl.store.access.conglomerate;
 
-import org.apache.derby.iapi.reference.SQLState;
-
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.io.ArrayUtil;
 import org.apache.derby.iapi.services.io.Storable;
@@ -318,29 +316,6 @@ public final class TemplateRow
             }
             break;
         }
-
-        return(ret_val);
-	}
-
-    /**
-     * Check that columns in the row conform to a set of format id's, 
-     * both in number and type.
-     *
-	 * @return boolean indicating if template matches format id's
-     *
-     * @param format_ids array of format ids which are the types of cols in row
-     * @param row        the array of columns that make up the row.
-     *
-	 * @exception  StandardException  Standard exception policy.
-     **/
-	static public boolean checkPartialColumnTypes(
-    int[]                   format_ids, 
-    FormatableBitSet        validColumns,
-    int[]                   fieldStates,
-    DataValueDescriptor[]   row)
-		throws StandardException
-	{
-        boolean ret_val = true;
 
         return(ret_val);
 	}

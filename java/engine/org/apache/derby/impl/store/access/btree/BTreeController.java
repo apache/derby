@@ -1256,10 +1256,6 @@ public class BTreeController extends OpenBTree implements ConglomerateController
         if (SanityManager.DEBUG)
         {
             SanityManager.ASSERT(this.container != null);
-
-            TemplateRow.checkPartialColumnTypes(
-                this.getConglomerate().format_ids, 
-                (FormatableBitSet) null, (int []) null, row);
         }
 
 		return doIns(row);
