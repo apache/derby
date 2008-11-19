@@ -363,6 +363,33 @@ t3538 left outer join
     (select -1 a, 1 b from t3538) x0 --DERBY-PROPERTIES joinStrategy=NESTEDLOOP
    on x0.a = t3538.i; 
 
+--- regression test for an old optimizer problem; when the bug occurred,
+-- hash join queries with 'or' would return incorrect results. 
+create table t5929_1 ( i int, j int, k int);
+create table t5929_2 ( i int, j int, k int);
+insert into t5929_1 values (1, 1, 1), (2, 1, 2);
+insert into t5929_1 select i+2, j, k from t5929_1;
+insert into t5929_1 select i+4, j, k from t5929_1;
+insert into t5929_2 select * from t5929_1;
+
+-- This query should return 32 rows, but it returned 64 before fix
+select * from --DERBY-PROPERTIES joinOrder=fixed 
+t5929_1, t5929_2 --DERBY-PROPERTIES joinStrategy=nestedLoop
+where t5929_1.j=t5929_2.j and (t5929_2.j=1 and (t5929_2.k=1 or t5929_2.j=4));
+
+-- This query should return identical to the above query
+select * from --DERBY-PROPERTIES joinOrder=fixed 
+t5929_1, t5929_2 --DERBY-PROPERTIES joinStrategy=hash 
+where t5929_1.j=t5929_2.j and (t5929_2.j=1 and t5929_2.k=1);
+
+select * from --DERBY-PROPERTIES joinOrder=fixed 
+t5929_1, t5929_2 --DERBY-PROPERTIES joinStrategy=hash 
+where t5929_1.j=t5929_2.j and (t5929_2.j=1 and (t5929_2.k=1 or t5929_2.j+1=5));
+
+select * from --DERBY-PROPERTIES joinOrder=fixed 
+t5929_2, t5929_1 --DERBY-PROPERTIES joinStrategy=hash 
+where t5929_1.j=t5929_2.j and (t5929_2.j=1 and (t5929_2.k=1 or t5929_2.j=4));
+
 -----------------------------------
 -- clean up
 ----------------------------------
@@ -380,3 +407,5 @@ drop table y;
 drop table j1089_source;
 drop table j1089_dest;
 drop table t3538;
+drop table t5929_1;
+drop table t5929_2;
