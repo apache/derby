@@ -453,6 +453,190 @@ public class GeneratedColumnsPermsTest extends GeneratedColumnsHelper
              );
     }
     
+    /**
+     * <p>
+     * Test that unqualified function references in generation clauses resolve
+     * to the current schema in effect when the generated column was added.
+     * See DERBY-3945.
+     * </p>
+     */
+    public  void    test_004_functionSchema()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+        Connection  janetConnection = openUserConnection( JANET );
+
+        //
+        // Schema.
+        //
+        goodStatement
+            (
+             dboConnection,
+             "create function f_fsch_1\n" +
+             "(\n" +
+             "    a int\n" +
+             ")\n" +
+             "returns int\n" +
+             "language java\n" +
+             "deterministic\n" +
+             "parameter style java\n" +
+             "no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.GeneratedColumnsTest.minus'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table t_fsch_1( a int, b generated always as ( f_fsch_1( a ) ) )"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table t_fsch_2( a int )"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "alter table t_fsch_2 add column b generated always as ( f_fsch_1( a ) )"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "grant execute on function f_fsch_1 to public"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "grant select on t_fsch_1 to public"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "grant insert on t_fsch_1 to public"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "grant update on t_fsch_1 to public"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "grant select on t_fsch_2 to public"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "grant insert on t_fsch_2 to public"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "grant update on t_fsch_2 to public"
+             );
+
+        goodStatement
+            (
+             janetConnection,
+             "create function f_fsch_1\n" +
+             "(\n" +
+             "    a int\n" +
+             ")\n" +
+             "returns int\n" +
+             "language java\n" +
+             "deterministic\n" +
+             "parameter style java\n" +
+             "no sql\n" +
+             "external name 'java.lang.Math.abs'\n"
+             );
+
+        //
+        // Populate
+        //
+        goodStatement
+            (
+             dboConnection,
+             "insert into test_dbo.t_fsch_1( a ) values ( 1 )"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "insert into test_dbo.t_fsch_2( a ) values ( 2 )"
+             );
+
+        //
+        // Verify insert by other user
+        //
+        goodStatement
+            (
+             janetConnection,
+             "insert into test_dbo.t_fsch_1( a ) values ( 1 )"
+             );
+        assertResults
+            (
+             janetConnection,
+             "select * from test_dbo.t_fsch_1 order by a",
+             new String[][]
+             {
+                 { "1", "-1", },
+                 { "1", "-1", },
+             },
+             false
+             );
+        goodStatement
+            (
+             janetConnection,
+             "insert into test_dbo.t_fsch_2( a ) values ( 2 )"
+             );
+        assertResults
+            (
+             janetConnection,
+             "select * from test_dbo.t_fsch_2 order by a",
+             new String[][]
+             {
+                 { "2", "-2", },
+                 { "2", "-2", },
+             },
+             false
+             );
+
+        //
+        // Verify update by other user
+        //
+        goodStatement
+            (
+             janetConnection,
+             "update test_dbo.t_fsch_1 set a = 100 + a"
+             );
+        assertResults
+            (
+             janetConnection,
+             "select * from test_dbo.t_fsch_1 order by a",
+             new String[][]
+             {
+                 { "101", "-101", },
+                 { "101", "-101", },
+             },
+             false
+             );
+        goodStatement
+            (
+             janetConnection,
+             "update test_dbo.t_fsch_2 set a = 100 + a"
+             );
+        assertResults
+            (
+             janetConnection,
+             "select * from test_dbo.t_fsch_2 order by a",
+             new String[][]
+             {
+                 { "102", "-102", },
+                 { "102", "-102", },
+             },
+             false
+             );
+
+    }
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // MINIONS

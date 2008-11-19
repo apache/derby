@@ -58,5 +58,11 @@ public interface DefaultInfo
 	 */
 	public boolean isGeneratedColumn();
 	
+	/**
+	 * Return the name of the current schema when the default was created. This
+	 * is filled in for generated columns.
+	 */
+	public String   getOriginalCurrentSchema();
+	
 
 }

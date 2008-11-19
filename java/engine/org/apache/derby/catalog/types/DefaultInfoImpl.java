@@ -56,6 +56,7 @@ public class DefaultInfoImpl implements DefaultInfo, Formatable
 	private String				defaultText;
 	private int                     type;
     private String[]                   referencedColumnNames;
+    private String                  originalCurrentSchema;
 
 	final private static int BITS_MASK_IS_DEFAULTVALUE_AUTOINC = 0x1 << 0;
 	final private static int BITS_MASK_IS_GENERATED_COLUMN = 0x2;
@@ -86,7 +87,8 @@ public class DefaultInfoImpl implements DefaultInfo, Formatable
 	public DefaultInfoImpl
         (
          String defaultText,
-         String[]    referencedColumnNames
+         String[]    referencedColumnNames,
+         String originalCurrentSchema
          )
 	{
         if ( referencedColumnNames == null ) { referencedColumnNames = new String[0]; }
@@ -94,6 +96,7 @@ public class DefaultInfoImpl implements DefaultInfo, Formatable
 		this.type = BITS_MASK_IS_GENERATED_COLUMN;
 		this.defaultText = defaultText;
 		this.referencedColumnNames = referencedColumnNames;
+        this.originalCurrentSchema = originalCurrentSchema;
 	}
 
 	/**
@@ -110,6 +113,14 @@ public class DefaultInfoImpl implements DefaultInfo, Formatable
 	public String[] getReferencedColumnNames()
 	{
 		return referencedColumnNames;
+	}
+
+	/**
+	 * @see DefaultInfo#getOriginalCurrentSchema
+	 */
+	public String   getOriginalCurrentSchema()
+	{
+		return originalCurrentSchema;
 	}
 
 	public String	toString()
@@ -146,6 +157,7 @@ public class DefaultInfoImpl implements DefaultInfo, Formatable
             int count = in.readInt();
             referencedColumnNames = new String[ count ];
             for ( int i = 0; i < count; i++ ) { referencedColumnNames[ i ] = (String) in.readObject(); }
+            originalCurrentSchema = (String) in.readObject();
         }
 	}
 
@@ -168,6 +180,7 @@ public class DefaultInfoImpl implements DefaultInfo, Formatable
             int count = referencedColumnNames.length;
             out.writeInt( count );
             for ( int i = 0; i < count; i++ ) { out.writeObject( referencedColumnNames[ i ] ); }
+            out.writeObject( originalCurrentSchema );
         }
 	}
  

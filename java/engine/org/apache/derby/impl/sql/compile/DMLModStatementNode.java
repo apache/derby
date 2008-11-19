@@ -27,6 +27,7 @@ import java.util.Hashtable;
 import java.util.HashSet;
 import java.util.Vector;
 
+import org.apache.derby.catalog.DefaultInfo;
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.ClassName;
@@ -496,6 +497,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
     )
 		throws StandardException
 	{
+		CompilerContext 			compilerContext = getCompilerContext();
         int  count = targetRCL.size();
 
         for ( int i = 0; i < count; i++ )
@@ -514,7 +516,8 @@ abstract class DMLModStatementNode extends DMLStatementNode
             {
                 ColumnDescriptor    colDesc = rc.getTableColumnDescriptor();
                 DataTypeDescriptor  dtd = colDesc.getType();
-                ValueNode   generationClause = parseGenerationClause( colDesc.getDefaultInfo().getDefaultText(), targetTableDescriptor );
+                DefaultInfo             di = colDesc.getDefaultInfo();
+                ValueNode   generationClause = parseGenerationClause( di.getDefaultText(), targetTableDescriptor );
 
                 // insert CAST in case column data type is not same as the
                 // resolved type of the generation clause
@@ -526,7 +529,20 @@ abstract class DMLModStatementNode extends DMLStatementNode
                      getContextManager()
                      );
 
-                bindRowScopedExpression( getNodeFactory(), getContextManager(), targetTableDescriptor, sourceRCL, generationClause );
+                //
+                // Unqualified function references should resolve to the
+                // current schema at the time that the table was
+                // created/altered. See DERBY-3945.
+                //
+                SchemaDescriptor    originalCurrentSchema = getSchemaDescriptor( di.getOriginalCurrentSchema(), true );
+                SchemaDescriptor    previousSchema = compilerContext.setCompilationSchema( originalCurrentSchema );
+                try {
+                    bindRowScopedExpression( getNodeFactory(), getContextManager(), targetTableDescriptor, sourceRCL, generationClause );
+                }
+                finally
+                {
+                    compilerContext.setCompilationSchema( previousSchema );
+                }
 
                 ResultColumn    newRC =  (ResultColumn) getNodeFactory().getNode
                     ( C_NodeTypes.RESULT_COLUMN, generationClause.getTypeServices(), generationClause, getContextManager());

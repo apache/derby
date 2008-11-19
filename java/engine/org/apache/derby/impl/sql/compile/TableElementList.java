@@ -847,8 +847,9 @@ public class TableElementList extends QueryTreeNodeVector
                 referencedColumnNames[ i ] = ((ResultColumn)rcl.elementAt( generationClauseColumnReferences[ i ] - 1 )).getName();
             }
 
+            String              currentSchemaName = getLanguageConnectionContext().getCurrentSchemaName();
             DefaultInfoImpl dii = new DefaultInfoImpl
-                ( generationClauseNode.getExpressionText(), referencedColumnNames );
+                ( generationClauseNode.getExpressionText(), referencedColumnNames, currentSchemaName );
             cdn.setDefaultInfo( dii );
 
 			/* Clear the column references in the RCL so each generation clause
