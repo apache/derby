@@ -126,6 +126,14 @@ public class GeneratedColumnsHelper extends BaseJDBCTestCase
         ps.close();
     }
     
+	protected	static	ResultSet	executeQuery( Statement stmt, String text )
+		throws SQLException
+	{
+		println( "Executing '" + text + "'" );
+
+        return stmt.executeQuery( text );
+	}
+
     /**
      * Prepare a statement and report its sql text.
      */
@@ -157,6 +165,42 @@ public class GeneratedColumnsHelper extends BaseJDBCTestCase
         PreparedStatement   ps = chattyPrepare( conn, query );
 
         assertStatementError( sqlState, ps );
+    }
+
+    /**
+     * Assert that the in-place update raises the expected error.
+     */
+    protected void    expectUpdateRowError( ResultSet rs, String sqlState )
+        throws Exception
+    {
+        println( "\nExpecting " + sqlState + " when updating row" );
+
+        try {
+            rs.updateRow();
+            fail( "Expected error: " + sqlState );
+        }
+        catch (SQLException se)
+        {
+            assertSQLState( sqlState, se );
+        }
+    }
+
+    /**
+     * Assert that the in-place insert raises the expected error.
+     */
+    protected void    expectInsertRowError( ResultSet rs, String sqlState )
+        throws Exception
+    {
+        println( "\nExpecting " + sqlState + " when inserting row" );
+
+        try {
+            rs.insertRow();
+            fail( "Expected error: " + sqlState );
+        }
+        catch (SQLException se)
+        {
+            assertSQLState( sqlState, se );
+        }
     }
 
     /**

@@ -4450,6 +4450,129 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
 
     }
 
+    /**
+     * <p>
+     * Test that you can't use updatable ResultSets to corrupt generated columns.
+     * </p>
+     */
+    public  void    test_025_basicUpdatableResultSets()
+        throws Exception
+    {
+        Connection  conn = getConnection();
+
+        //
+        // Setup
+        //
+        conn.setAutoCommit( false );
+        goodStatement
+            (
+             conn,
+             "create table t_urs_1 ( a int, b generated always as ( -a ) )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_urs_1( a ) values ( 1 )"
+             );
+        conn.commit();
+        Statement   stmt = conn.createStatement( ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE );
+        ResultSet   rs = null;
+        
+        //
+        // Verify that updates to the updatable column trigger the generation clause.
+        //
+        rs = executeQuery( stmt, "select * from t_urs_1 for update" );
+        rs.next();
+        println( "Initially ( a, b ) = ( " + rs.getInt( 1 ) + ", " + rs.getInt( 2 ) + " )" );
+        rs.updateInt( 1, 2 );
+        rs.updateRow();
+        rs.close();
+        conn.commit();
+        assertResults
+            (
+             conn,
+             "select * from t_urs_1 order by a",
+             new String[][]
+             {
+                 { "2", "-2" },
+             },
+             false
+             );
+        conn.commit();
+
+        //
+        // Verify that updates to the generated column raise an exception.
+        //
+        rs = executeQuery( stmt, "select * from t_urs_1 for update" );
+        rs.next();
+        println( "Initially ( a, b ) = ( " + rs.getInt( 1 ) + ", " + rs.getInt( 2 ) + " )" );
+        rs.updateInt( 2, 2 );
+        expectUpdateRowError( rs, CANT_OVERRIDE_GENERATION_CLAUSE );
+        rs.close();
+        conn.commit();
+        assertResults
+            (
+             conn,
+             "select * from t_urs_1 order by a",
+             new String[][]
+             {
+                 { "2", "-2" },
+             },
+             false
+             );
+        conn.commit();
+
+        //
+        // Verify that inserts succeed and trigger the generation clause if they
+        // just poke values into non-generated columns.
+        //
+        rs = executeQuery( stmt, "select * from t_urs_1 for update" );
+        rs.next();
+        rs.moveToInsertRow();
+        rs.updateInt( 1, 10 );
+        rs.insertRow();
+        rs.close();
+        conn.commit();
+        assertResults
+            (
+             conn,
+             "select * from t_urs_1 order by a",
+             new String[][]
+             {
+                 { "2", "-2" },
+                 { "10", "-10" },
+             },
+             false
+             );
+        conn.commit();
+
+        //
+        // Verify that in-place inserts raise an exception if you try to poke a
+        // value into a generated column.
+        //
+        rs = executeQuery( stmt, "select * from t_urs_1 for update" );
+        rs.next();
+        rs.moveToInsertRow();
+        rs.updateInt( 2, 10 );
+        expectInsertRowError( rs, CANT_OVERRIDE_GENERATION_CLAUSE );
+        rs.close();
+        conn.commit();
+        assertResults
+            (
+             conn,
+             "select * from t_urs_1 order by a",
+             new String[][]
+             {
+                 { "2", "-2" },
+                 { "10", "-10" },
+             },
+             false
+             );
+        conn.commit();
+
+        stmt.close();
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // MINIONS
