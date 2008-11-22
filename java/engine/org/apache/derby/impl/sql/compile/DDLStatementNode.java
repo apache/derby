@@ -434,6 +434,8 @@ abstract class DDLStatementNode extends StatementNode
 	  *	Make a from list for binding query fragments in a CREATE/ALTER TABLE
       *     statement.
       *
+      * @param dd  Metadata.
+      * @param tableElementList the parenthesized list of columns and constraints in a CREATE/ALTER TABLE statement
       * @param creatingTable true if this is for CREATE TABLE. false if this is for ALTER TABLE
       */
 	FromList	makeFromList( DataDictionary dd, TableElementList tableElementList, boolean creatingTable )

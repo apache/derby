@@ -165,6 +165,7 @@ public class GeneratedColumnsHelper extends BaseJDBCTestCase
         PreparedStatement   ps = chattyPrepare( conn, query );
 
         assertStatementError( sqlState, ps );
+        ps.close();
     }
 
     /**

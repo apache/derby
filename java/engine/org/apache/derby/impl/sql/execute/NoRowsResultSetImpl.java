@@ -589,7 +589,14 @@ abstract class NoRowsResultSetImpl implements ResultSet
 	}
 
 	/**
-	  * Compute the generation clauses on the current row in order to fill in computed columns.
+	  * Compute the generation clauses on the current row in order to fill in
+	  * computed columns.
+      *
+      * @param generationClauses    the generated method which evaluates generation clauses
+      * @param activation               the thread-specific instance of the generated class
+      * @param source                   the tuple stream driving this INSERT/UPDATE
+      * @param newRow                   the base row being stuffed
+      * @param isUpdate                 true if this is an UPDATE. false otherwise.
 	  */
 	public	void	evaluateGenerationClauses
 	(

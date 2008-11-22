@@ -1533,6 +1533,7 @@ public abstract class QueryTreeNode implements Visitable
      * Common code for the 2 checkReliability functions.  Always throws StandardException.
      *
      * @param fragmentType Type of fragment as a string, for inclusion in error messages.
+     * @param fragmentBitMask Describes the kinds of expressions we ar suspicious of
      * @exception StandardException        Throws an error, always.
      */
     private void throwReliabilityException( String fragmentType, int fragmentBitMask ) throws StandardException

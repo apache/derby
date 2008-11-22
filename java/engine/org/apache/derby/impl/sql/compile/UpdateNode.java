@@ -39,7 +39,6 @@ import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
-import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.Visitable;
 import org.apache.derby.iapi.sql.compile.Visitor;
 
@@ -576,8 +575,9 @@ public final class UpdateNode extends DMLModStatementNode
 								
  			if (hasCheckConstraints(dataDictionary, targetTableDescriptor) || hasGenerationClauses( targetTableDescriptor ) )
  			{
- 				/* Get and bind all check constraints on the columns
-	 			 * being updated.  We want to bind the check constraints against
+ 				/* Get and bind all check constraints and generated columns on the columns
+	 			 * being updated.  We want to bind the check constraints and
+	 			 * generated columns against
 	 			 * the after columns.  We need to bind against the portion of the
 	 			 * resultColumns in the new NormalizeResultSet that point to 
 	 			 * afterColumns.  Create an RCL composed of just those RCs in

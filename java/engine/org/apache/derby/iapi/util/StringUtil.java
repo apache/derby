@@ -496,7 +496,8 @@ public class StringUtil
     }
 
     /**
-     * Turn an array of ints into a printable string.
+     * Turn an array of ints into a printable string. Returns what's returned
+     * in Java 5 by java.util.Arrays.toString(int[]).
      */
     public  static  String  stringify( int[] raw )
     {

@@ -149,7 +149,7 @@ public class GenerationClauseNode extends ValueNode
 	 */
 	public String toString()
     {
-        return "GENERATED ALWAYS( " + _expressionText + " )";
+        return "GENERATED ALWAYS AS ( " + _expressionText + " )";
 	}
         
     ///////////////////////////////////////////////////////////////////////////////////

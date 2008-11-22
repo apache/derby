@@ -413,6 +413,8 @@ public class TableDescriptor extends TupleDescriptor
 	/**
 	 * Given a list of columns in the table, construct a bit  map of those
 	 * columns' ids.
+     *
+     * @param cdl list of columns whose positions we want to record in the bit map
 	 */
 	public FormatableBitSet makeColumnMap( ColumnDescriptorList cdl )
 	{

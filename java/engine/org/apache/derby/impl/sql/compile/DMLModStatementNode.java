@@ -415,6 +415,10 @@ abstract class DMLModStatementNode extends DMLStatementNode
      * phase. For an update, addedGeneratedColumns will be non-null and we will
      * use this list to pass through the generated columns which have already
      * been added to the update list.
+     *
+     * @param targetRCL  the row in the table being INSERTed or UPDATEd
+     * @param forUpdate  true if this is an UPDATE. false otherwise.
+     * @param addedGeneratedColumns generated columns which the compiler added earlier on
      */
     void forbidGenerationOverrides( ResultColumnList targetRCL, boolean forUpdate, ColumnDescriptorList addedGeneratedColumns )
         throws StandardException
@@ -485,6 +489,13 @@ abstract class DMLModStatementNode extends DMLStatementNode
     
     /**
      * Parse and bind the generating expressions of computed columns.
+     *
+     * @param dataDictionary    metadata
+     * @param targetTableDescriptor metadata for the table that has the generated columns
+     * @param sourceRCL  the tuple stream which drives the INSERT or UPDATE
+     * @param targetRCL  the row in the table that's being INSERTed or UPDATEd
+     * @param forUpdate true if this is an UPDATE. false otherwise.
+     * @param updateResultSet more information on the tuple stream driving the UPDATE
      */
 	void parseAndBindGenerationClauses
 	(
@@ -1569,6 +1580,11 @@ abstract class DMLModStatementNode extends DMLStatementNode
 	  *	are generation clauses, this routine builds an Activation method which
 	  *	evaluates the generation clauses and fills in the computed columns.
       *
+      * @param rcl  describes the row of expressions to be put into the bas table
+      * @param resultSetNumber  index of base table into array of ResultSets
+      * @param ecb code generation state variable
+      * @param mb the method being generated
+      *
 	  * @exception StandardException		Thrown on error
 	  */
 	public	void	generateGenerationClauses
@@ -1586,9 +1602,6 @@ abstract class DMLModStatementNode extends DMLStatementNode
 
 		for (int index = 0; index < size; index++)
 		{
-		    // generate statements of the form
-			// fieldX.setColumn(columnNumber, (DataValueDescriptor) columnExpr);
-			// and add them to exprFun.
 			rc = (ResultColumn) rcl.elementAt(index);
 
             //
@@ -1599,7 +1612,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 			if ( rc.hasGenerationClause() )
             {
                 hasGenerationClauses = true;
-                continue;
+                break;
             }
         }
 
@@ -1635,8 +1648,13 @@ abstract class DMLModStatementNode extends DMLStatementNode
 
 	/**
 	  *	Generate a method to compute all of the generation clauses in a row.
+      *
+      * @param rcl  describes the row of expressions to be put into the bas table
+      * @param rsNumber  index of base table into array of ResultSets
+      * @param ecb code generation state variable
+      *
 	  */
-	public	MethodBuilder	generateGenerationClauses
+	private	MethodBuilder	generateGenerationClauses
 	(
         ResultColumnList            rcl,
         int                                 rsNumber,

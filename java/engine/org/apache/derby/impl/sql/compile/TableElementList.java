@@ -751,9 +751,9 @@ public class TableElementList extends QueryTreeNodeVector
 
             generationClauseNode = cdn.getGenerationClauseNode();
 
-			// bind the check condition
-			// verify that it evaluates to a boolean
+			// bind the generation clause
 			final int previousReliability = cc.getReliability();
+            ProviderList prevAPL = cc.getCurrentAuxiliaryProviderList();
 			try
 			{
 				/* Each generation clause can have its own set of dependencies.
@@ -766,7 +766,6 @@ public class TableElementList extends QueryTreeNodeVector
 				 */
 				ProviderList apl = new ProviderList();
 
-				ProviderList prevAPL = cc.getCurrentAuxiliaryProviderList();
 				cc.setCurrentAuxiliaryProviderList(apl);
 
 				// Tell the compiler context to forbid subqueries and
@@ -820,11 +819,11 @@ public class TableElementList extends QueryTreeNodeVector
 					generationClauseNode.setAuxiliaryProviderList(apl);
 				}
 
-				// Restore the previous AuxiliaryProviderList
-				cc.setCurrentAuxiliaryProviderList(prevAPL);
 			}
 			finally
 			{
+				// Restore previous compiler state
+				cc.setCurrentAuxiliaryProviderList(prevAPL);
 				cc.setReliability(previousReliability);
 			}
 
