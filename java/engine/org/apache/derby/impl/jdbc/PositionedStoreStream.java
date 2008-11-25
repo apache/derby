@@ -28,6 +28,8 @@ import java.io.InputStream;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.io.InputStreamUtil;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.types.PositionedStream;
 import org.apache.derby.iapi.types.Resetable;
 
 /**
@@ -56,7 +58,7 @@ import org.apache.derby.iapi.types.Resetable;
 //@NotThreadSafe
 public class PositionedStoreStream
     extends InputStream
-    implements Resetable {
+    implements PositionedStream, Resetable {
 
     /** Underlying store stream serving bytes. */
     //@GuardedBy("EmbedConnection.getConnectionSynchronization()")
@@ -194,6 +196,11 @@ public class PositionedStoreStream
      */
     public void reposition(final long requestedPos)
             throws IOException, StandardException {
+        if (SanityManager.DEBUG) {
+            if (requestedPos < 0) {
+                SanityManager.THROWASSERT("Negative position: " + requestedPos);
+            }
+        }
         if (this.pos > requestedPos) {
             // Reset stream to reposition from start.
             resetStream();
@@ -219,6 +226,10 @@ public class PositionedStoreStream
      */
     public long getPosition() {
         return this.pos;
+    }
+
+    public InputStream asInputStream() {
+        return this;
     }
 
 } // End class PositionedStoreStream

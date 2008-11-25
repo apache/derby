@@ -22,11 +22,14 @@
  */
 package org.apache.derby.impl.jdbc;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.types.PositionedStream;
 import org.apache.derby.shared.common.error.ExceptionUtil;
 
 /**
@@ -35,7 +38,9 @@ import org.apache.derby.shared.common.error.ExceptionUtil;
  * All the read methods are routed to {@link LOBStreamControl}.
  */
 
-public class LOBInputStream extends InputStream {
+public class LOBInputStream
+    extends InputStream
+    implements PositionedStream {
 
     private boolean closed;
     private final LOBStreamControl control;
@@ -199,5 +204,44 @@ public class LOBInputStream extends InputStream {
      */
     long length () throws IOException {
         return control.getLength();
+    }
+
+    // Implementation of the PositionedStream interface:
+    //   - asInputStream
+    //   - getPosition
+    //   - reposition
+
+    public InputStream asInputStream() {
+        return this;
+    }
+
+    /**
+     * Returns the current byte position.
+     *
+     * @return The current byte position.
+     */
+    public long getPosition() {
+        return pos;
+    }
+
+    /**
+     * Repositions the stream to the requested byte position.
+     *
+     * @param requestedPos the requested position, starting at {@code 0}
+     * @throws EOFException if the requested position is larger than the length
+     * @throws IOException if obtaining the stream length fails
+     */
+    public void reposition(long requestedPos)
+            throws IOException{
+        if (SanityManager.DEBUG) {
+            if (requestedPos < 0) {
+                SanityManager.THROWASSERT("Negative position: " + requestedPos);
+            }
+        }
+        if (requestedPos > length()) {
+            pos = 0;
+            throw new EOFException();
+        }
+        pos = requestedPos;
     }
 }
