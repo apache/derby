@@ -19,22 +19,22 @@ create table localtab(	ndec decimal(5,3),
 							ndatec date , 
 							ntimec time , 
 							ncharc varchar(500));
-insert into localtab values(12.345, date('2000-05-25'),'15:30:15','僀儀儞僩傾儔乕儉偑桳岠偱偡丅');
-insert into localtab values(32.432, date('2000-05-18'),'15:32:10','DR:DRAUTO偼0 (Off)偱偡丅');
-insert into localtab values(54.846, date('2000-01-28'),'15:32:28','INFORMIX-OnLine偑弶婜壔偝傟丄僨傿僗僋偺弶婜壔偑姰椆偟傑偟偨丅');
-insert into localtab values(39.003, date('2000-11-11'),'15:32:29','僠僃僢僋億僀儞僩偑姰椆偟傑偟偨:宲懕帪娫偼 0昩偱偟偨');
-insert into localtab values(79.406, date('2000-06-05'),'15:32:29','偡傋偰偺DB椞堟偺僨乕僞僗僉僢僾偼尰嵼僆僼偵側偭偰偄傑偡丅');
-insert into localtab values(94.999, date('2000-07-30'),'15:32:30','On-Line儌乕僪');
-insert into localtab values(18.849, date('2000-10-22'),'15:32:31','sysmaster僨乕僞儀乕僗傪嶌惉拞偱偡...');
-insert into localtab values(35.444, date('2000-02-29'),'15:33:22','榑棟儘僌 1偑姰椆偟傑偟偨丅');
-insert into localtab values(84.391, date('2000-01-21'),'15:33:23','儕僞乕儞僐乕僪 1傪栠偟偰僾儘僙僗偑廔椆偟傑偟偨:/bin/sh /bin/sh -c /work1/MOSES_7.22.UC1A5_27/sqldist/etc/log_full.sh 2 23 榑棟儘僌 1偑姰椆偟傑偟偨丅 榑棟');
-insert into localtab values(56.664, date('2000-04-16'),'15:33:40','榑棟儘僌 2偑姰椆偟傑偟偨丅');
-insert into localtab values(22.393, date('2000-03-01'),'15:33;42','儕僞乕儞僐乕僪 1傪栠偟偰僾儘僙僗偑廔椆偟傑偟偨:/bin/sh /bin/sh -c /work1/MOSES_7.22.UC1A5_27/sqldist/etc/log_full.sh 2 23 榑棟儘僌 2偑姰椆偟傑偟偨丅 榑棟');
-insert into localtab values(90.007, date('2000-11-27'),'15:33:43','僠僃僢僋億僀儞僩偑姰椆偟傑偟偨:宲懕帪娫偼 2昩偱偟偨');
-insert into localtab values(30.496, date('2000-04-03'),'15:34:29','榑棟儘僌 3偑姰椆偟傑偟偨丅');
-insert into localtab values(66.295, date('2000-10-15'),'15:34:30','儕僞乕儞僐乕僪 1傪栠偟偰僾儘僙僗偑廔椆偟傑偟偨:/bin/sh /bin/sh -c /work1/MOSES_7.22.UC1A5_27/sqldist/etc/log_full.sh 2 23 榑棟儘僌 3偑姰椆偟傑偟偨丅 榑棟');
-insert into localtab values(54.332, date('2000-09-01'),'15:35:35','sysmaster僨乕僞儀乕僗偺嶌惉偼姰椆偟傑偟偨丅');
-insert into localtab values(11.105, date('2000-07-09'),'15:39:10','僠僃僢僋億僀儞僩偑姰椆偟傑偟偨:宲懕帪娫偼 8昩偱偟偨');
+insert into localtab values(12.345, date('2000-05-25'),'15:30:15','イベントアラ〖ムが铜跟です。');
+insert into localtab values(32.432, date('2000-05-18'),'15:32:10','DR:DRAUTOは0 (Off)です。');
+insert into localtab values(54.846, date('2000-01-28'),'15:32:28','INFORMIX-OnLineが介袋步され、ディスクの介袋步が窗位しました。');
+insert into localtab values(39.003, date('2000-11-11'),'15:32:29','チェックポイントが窗位しました:费鲁箕粗は 0擅でした');
+insert into localtab values(79.406, date('2000-06-05'),'15:32:29','すべてのDB挝拌のデ〖タスキップは附哼オフになっています。');
+insert into localtab values(94.999, date('2000-07-30'),'15:32:30','On-Lineモ〖ド');
+insert into localtab values(18.849, date('2000-10-22'),'15:32:31','sysmasterデ〖タベ〖スを侯喇面です...');
+insert into localtab values(35.444, date('2000-02-29'),'15:33:22','侠妄ログ 1が窗位しました。');
+insert into localtab values(84.391, date('2000-01-21'),'15:33:23','リタ〖ンコ〖ド 1を提してプロセスが姜位しました:/bin/sh /bin/sh -c /work1/MOSES_7.22.UC1A5_27/sqldist/etc/log_full.sh 2 23 侠妄ログ 1が窗位しました。 侠妄');
+insert into localtab values(56.664, date('2000-04-16'),'15:33:40','侠妄ログ 2が窗位しました。');
+insert into localtab values(22.393, date('2000-03-01'),'15:33;42','リタ〖ンコ〖ド 1を提してプロセスが姜位しました:/bin/sh /bin/sh -c /work1/MOSES_7.22.UC1A5_27/sqldist/etc/log_full.sh 2 23 侠妄ログ 2が窗位しました。 侠妄');
+insert into localtab values(90.007, date('2000-11-27'),'15:33:43','チェックポイントが窗位しました:费鲁箕粗は 2擅でした');
+insert into localtab values(30.496, date('2000-04-03'),'15:34:29','侠妄ログ 3が窗位しました。');
+insert into localtab values(66.295, date('2000-10-15'),'15:34:30','リタ〖ンコ〖ド 1を提してプロセスが姜位しました:/bin/sh /bin/sh -c /work1/MOSES_7.22.UC1A5_27/sqldist/etc/log_full.sh 2 23 侠妄ログ 3が窗位しました。 侠妄');
+insert into localtab values(54.332, date('2000-09-01'),'15:35:35','sysmasterデ〖タベ〖スの侯喇は窗位しました。');
+insert into localtab values(11.105, date('2000-07-09'),'15:39:10','チェックポイントが窗位しました:费鲁箕粗は 8擅でした');
 
 -- display in non localized format
 select * from localtab;

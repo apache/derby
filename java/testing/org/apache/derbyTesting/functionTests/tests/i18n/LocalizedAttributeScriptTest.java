@@ -66,12 +66,6 @@ public final class LocalizedAttributeScriptTest extends ScriptTestCase {
 
         TestSuite suite = new TestSuite("LocalizedScripts");
 
-        // First ensure that we are running in english locale; the output
-        // master has been created in that locale, and thus, running in any
-        // other locale will fail.
-        if (!getSystemProperty("user.language").equalsIgnoreCase("en"))
-            return suite;
-        
         // Note that it doesn't really make sense to run with network 
         // server/client, as LocalizedConnectionAttributes.sql has a hardcoded
         // connect with protocol, so we can test connect 'as' with a us-ascii
@@ -94,7 +88,7 @@ public final class LocalizedAttributeScriptTest extends ScriptTestCase {
     /*
      * A single JUnit test that runs a single Localized script, specifying the
      * desired input encoding.
-     * Needs input encoding Cp850, or we get a syntax error on connecting to 
+     * Needs ISO-8859-1 encoding, or we get a syntax error on connecting to
      * the database with the u-umlaut in the 'as' clause.
      */
     private LocalizedAttributeScriptTest(String localizedTest){

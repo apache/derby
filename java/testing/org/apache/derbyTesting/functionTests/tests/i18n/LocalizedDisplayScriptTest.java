@@ -65,11 +65,6 @@ public final class LocalizedDisplayScriptTest extends ScriptTestCase {
         
         TestSuite suite = new TestSuite("LocalizedDisplay");
 
-        // First ensure that we are running in english locale; the output
-        // master has been created in that locale, and thus, running in any
-        // other locale will fail.
-        if (!getSystemProperty("user.language").equalsIgnoreCase("en"))
-            return suite;
         // This test will fail with JSR169, because lack of support for 
         // rs.getBigDecimal() will prevent the localization of numeric and
         // decimal datatypes, and this test includes a decimal datatype
@@ -102,7 +97,7 @@ public final class LocalizedDisplayScriptTest extends ScriptTestCase {
      * A single JUnit test that runs a single Localized script.
      */
     private LocalizedDisplayScriptTest(String localizedTest){
-        super(localizedTest);
+        super(localizedTest, "EUC_JP");
     }
 
     /**

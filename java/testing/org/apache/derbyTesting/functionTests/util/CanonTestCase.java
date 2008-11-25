@@ -44,12 +44,18 @@ import org.apache.derbyTesting.junit.BaseJDBCTestCase;
  */
 abstract class CanonTestCase extends BaseJDBCTestCase {
 
-    final String outputEncoding = "US-ASCII";
+    final static String DEFAULT_ENCODING = "US-ASCII";
+    final String outputEncoding;
 
     private ByteArrayOutputStream rawBytes;
 
     CanonTestCase(String name) {
+        this(name, null);
+    }
+
+    CanonTestCase(String name, String encoding) {
         super(name);
+        outputEncoding = (encoding == null) ? DEFAULT_ENCODING : encoding;
     }
 
     OutputStream getOutputStream() {

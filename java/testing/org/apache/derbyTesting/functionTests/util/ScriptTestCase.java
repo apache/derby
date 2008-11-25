@@ -34,7 +34,7 @@ import junit.framework.TestSuite;
  *
  */
 public abstract class ScriptTestCase extends CanonTestCase {
-	
+
 	private final String inputEncoding;
 	private final String user;
 
@@ -46,9 +46,7 @@ public abstract class ScriptTestCase extends CanonTestCase {
 	 */
 	public ScriptTestCase(String script)
 	{
-		super(script);
-		inputEncoding = "US-ASCII";
-		user = null;
+        this(script, null, null, null);
 	}
 	
     /**
@@ -60,9 +58,7 @@ public abstract class ScriptTestCase extends CanonTestCase {
      */
     public ScriptTestCase(String script, String encoding)
     {
-        super(script);
-        inputEncoding = encoding;
-		user = null;
+        this(script, encoding, encoding, null);
     }
 
     /**
@@ -71,18 +67,18 @@ public abstract class ScriptTestCase extends CanonTestCase {
      * different encoding.
      * @param script     Base name of the .sql script
      *                   excluding the .sql suffix.
-     * @param encoding   Run using encoding if not null, else use "US-ASCII".
+     * @param inputEnc   The encoding for the script, if not null,
+     *                   else use "US-ASCII"
+     * @param outputEnc  The encoding for the ouput from the script,
+     *                   if not null, else use "US-ASCII"
      * @param user       Run script as user
      */
-    public ScriptTestCase(String script, String encoding, String user)
+    public ScriptTestCase(String script,
+            String inputEnc, String outputEnc, String user)
     {
-        super(script);
+        super(script, outputEnc);
 
-		if (encoding != null) {
-			inputEncoding = encoding;
-		} else {
-			inputEncoding = "US-ASCII";
-		}
+        inputEncoding = (inputEnc == null) ? DEFAULT_ENCODING : inputEnc;
 
 		this.user = user;
     }
@@ -154,12 +150,30 @@ public abstract class ScriptTestCase extends CanonTestCase {
 			conn = getConnection();
 		}
 
+        final String outputEnc;
+        final String derby_ui_codeset = getSystemProperty("derby.ui.codeset");
+
+        if (derby_ui_codeset != null) {
+            // IJ should format output according to the derby.ui.codeset
+            // variable. If we pass in an encoding explicitly to runScript(),
+            // we won't test that derby.ui.codeset is obeyed. Therefore,
+            // leave it as null.
+            outputEnc = null;
+            assertEquals(
+                    "Requested output encoding and derby.ui.codeset differ",
+                    outputEncoding, derby_ui_codeset);
+        } else {
+            // derby.ui.codeset isn't set. Tell runScript() which output
+            // encoding to use.
+            outputEnc = outputEncoding;
+        }
+
 		org.apache.derby.tools.ij.runScript(
 				conn,
 				sqlIn,
 				inputEncoding,
                 getOutputStream(),
-				outputEncoding);
+				outputEnc);
 		
 		if (!conn.isClosed() && !conn.getAutoCommit())
 		    conn.commit();

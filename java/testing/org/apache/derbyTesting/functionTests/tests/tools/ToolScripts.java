@@ -133,7 +133,10 @@ public final class ToolScripts extends ScriptTestCase {
     }
 
     private ToolScripts(String toolTest, String user){
-        super(toolTest, null /* default encoding */, user);
+        super(toolTest,
+              null /* default input encoding */,
+              null /* default output encoding */,
+              user);
     }
 
     /**

@@ -21,75 +21,75 @@ ij> create table localtab(	ndec decimal(5,3),
 							ntimec time , 
 							ncharc varchar(500));
 0 filas insertadas/actualizadas/suprimidas
-ij> insert into localtab values(12.345, date('2000-05-25'),'15:30:15','?C?x???g?A???[?????L???????B');
+ij> insert into localtab values(12.345, date('2000-05-25'),'15:30:15','イベントアラームが有効です。');
 1 fila insertada/actualizada/suprimida
-ij> insert into localtab values(32.432, date('2000-05-18'),'15:32:10','DR:DRAUTO??0 (Off)?????B');
+ij> insert into localtab values(32.432, date('2000-05-18'),'15:32:10','DR:DRAUTOは0 (Off)です。');
 1 fila insertada/actualizada/suprimida
-ij> insert into localtab values(54.846, date('2000-01-28'),'15:32:28','INFORMIX-OnLine?????????????A?f?B?X?N???????????????????????B');
+ij> insert into localtab values(54.846, date('2000-01-28'),'15:32:28','INFORMIX-OnLineが初期化され、ディスクの初期化が完了しました。');
 1 fila insertada/actualizada/suprimida
-ij> insert into localtab values(39.003, date('2000-11-11'),'15:32:29','?`?F?b?N?|?C???g??????????????:?p???????? 0?b??????');
+ij> insert into localtab values(39.003, date('2000-11-11'),'15:32:29','チェックポイントが完了しました:継続時間は 0秒でした');
 1 fila insertada/actualizada/suprimida
-ij> insert into localtab values(79.406, date('2000-06-05'),'15:32:29','????????DB???????f?[?^?X?L?b?v???????I?t???????????????B');
+ij> insert into localtab values(79.406, date('2000-06-05'),'15:32:29','すべてのDB領域のデータスキップは現在オフになっています。');
 1 fila insertada/actualizada/suprimida
-ij> insert into localtab values(94.999, date('2000-07-30'),'15:32:30','On-Line???[?h');
+ij> insert into localtab values(94.999, date('2000-07-30'),'15:32:30','On-Lineモード');
 1 fila insertada/actualizada/suprimida
-ij> insert into localtab values(18.849, date('2000-10-22'),'15:32:31','sysmaster?f?[?^?x?[?X????????????...');
+ij> insert into localtab values(18.849, date('2000-10-22'),'15:32:31','sysmasterデータベースを作成中です...');
 1 fila insertada/actualizada/suprimida
-ij> insert into localtab values(35.444, date('2000-02-29'),'15:33:22','?_?????O 1???????????????B');
+ij> insert into localtab values(35.444, date('2000-02-29'),'15:33:22','論理ログ 1が完了しました。');
 1 fila insertada/actualizada/suprimida
-ij> insert into localtab values(84.391, date('2000-01-21'),'15:33:23','???^?[???R?[?h 1?????????v???Z?X???I??????????:/bin/sh /bin/sh -c /work1/MOSES_7.22.UC1A5_27/sqldist/etc/log_full.sh 2 23 ?_?????O 1???????????????B ?_??');
+ij> insert into localtab values(84.391, date('2000-01-21'),'15:33:23','リターンコード 1を戻してプロセスが終了しました:/bin/sh /bin/sh -c /work1/MOSES_7.22.UC1A5_27/sqldist/etc/log_full.sh 2 23 論理ログ 1が完了しました。 論理');
 1 fila insertada/actualizada/suprimida
-ij> insert into localtab values(56.664, date('2000-04-16'),'15:33:40','?_?????O 2???????????????B');
+ij> insert into localtab values(56.664, date('2000-04-16'),'15:33:40','論理ログ 2が完了しました。');
 1 fila insertada/actualizada/suprimida
-ij> insert into localtab values(22.393, date('2000-03-01'),'15:33;42','???^?[???R?[?h 1?????????v???Z?X???I??????????:/bin/sh /bin/sh -c /work1/MOSES_7.22.UC1A5_27/sqldist/etc/log_full.sh 2 23 ?_?????O 2???????????????B ?_??');
+ij> insert into localtab values(22.393, date('2000-03-01'),'15:33;42','リターンコード 1を戻してプロセスが終了しました:/bin/sh /bin/sh -c /work1/MOSES_7.22.UC1A5_27/sqldist/etc/log_full.sh 2 23 論理ログ 2が完了しました。 論理');
 ERROR 22007: The syntax of the string representation of a datetime value is incorrect.
-ij> insert into localtab values(90.007, date('2000-11-27'),'15:33:43','?`?F?b?N?|?C???g??????????????:?p???????? 2?b??????');
+ij> insert into localtab values(90.007, date('2000-11-27'),'15:33:43','チェックポイントが完了しました:継続時間は 2秒でした');
 1 fila insertada/actualizada/suprimida
-ij> insert into localtab values(30.496, date('2000-04-03'),'15:34:29','?_?????O 3???????????????B');
+ij> insert into localtab values(30.496, date('2000-04-03'),'15:34:29','論理ログ 3が完了しました。');
 1 fila insertada/actualizada/suprimida
-ij> insert into localtab values(66.295, date('2000-10-15'),'15:34:30','???^?[???R?[?h 1?????????v???Z?X???I??????????:/bin/sh /bin/sh -c /work1/MOSES_7.22.UC1A5_27/sqldist/etc/log_full.sh 2 23 ?_?????O 3???????????????B ?_??');
+ij> insert into localtab values(66.295, date('2000-10-15'),'15:34:30','リターンコード 1を戻してプロセスが終了しました:/bin/sh /bin/sh -c /work1/MOSES_7.22.UC1A5_27/sqldist/etc/log_full.sh 2 23 論理ログ 3が完了しました。 論理');
 1 fila insertada/actualizada/suprimida
-ij> insert into localtab values(54.332, date('2000-09-01'),'15:35:35','sysmaster?f?[?^?x?[?X?????????????????????B');
+ij> insert into localtab values(54.332, date('2000-09-01'),'15:35:35','sysmasterデータベースの作成は完了しました。');
 1 fila insertada/actualizada/suprimida
-ij> insert into localtab values(11.105, date('2000-07-09'),'15:39:10','?`?F?b?N?|?C???g??????????????:?p???????? 8?b??????');
+ij> insert into localtab values(11.105, date('2000-07-09'),'15:39:10','チェックポイントが完了しました:継続時間は 8秒でした');
 1 fila insertada/actualizada/suprimida
 ij> -- display in non localized format
 select * from localtab;
 NDEC   |NDATEC    |NTIMEC  |NCHARC                                                                                                                          
 ------------------------------------------------------------------------------------------------------------------------------------------------------------
-12.345 |2000-05-25|15:30:15|?C?x???g?A???[?????L???????B                                                                                                    
-32.432 |2000-05-18|15:32:10|DR:DRAUTO??0 (Off)?????B                                                                                                        
-54.846 |2000-01-28|15:32:28|INFORMIX-OnLine?????????????A?f?B?X?N???????????????????????B                                                                   
-39.003 |2000-11-11|15:32:29|?`?F?b?N?|?C???g??????????????:?p???????? 0?b??????                                                                             
-79.406 |2000-06-05|15:32:29|????????DB???????f?[?^?X?L?b?v???????I?t???????????????B                                                                        
-94.999 |2000-07-30|15:32:30|On-Line???[?h                                                                                                                   
-18.849 |2000-10-22|15:32:31|sysmaster?f?[?^?x?[?X????????????...                                                                                            
-35.444 |2000-02-29|15:33:22|?_?????O 1???????????????B                                                                                                      
-84.391 |2000-01-21|15:33:23|???^?[???R?[?h 1?????????v???Z?X???I??????????:/bin/sh /bin/sh -c /work1/MOSES_7.22.UC1A5_27/sqldist/etc/log_full.sh 2 23 ?_???&
-56.664 |2000-04-16|15:33:40|?_?????O 2???????????????B                                                                                                      
-90.007 |2000-11-27|15:33:43|?`?F?b?N?|?C???g??????????????:?p???????? 2?b??????                                                                             
-30.496 |2000-04-03|15:34:29|?_?????O 3???????????????B                                                                                                      
-66.295 |2000-10-15|15:34:30|???^?[???R?[?h 1?????????v???Z?X???I??????????:/bin/sh /bin/sh -c /work1/MOSES_7.22.UC1A5_27/sqldist/etc/log_full.sh 2 23 ?_???&
-54.332 |2000-09-01|15:35:35|sysmaster?f?[?^?x?[?X?????????????????????B                                                                                     
-11.105 |2000-07-09|15:39:10|?`?F?b?N?|?C???g??????????????:?p???????? 8?b??????                                                                             
+12.345 |2000-05-25|15:30:15|イベントアラームが有効です。                                                                                                                  
+32.432 |2000-05-18|15:32:10|DR:DRAUTOは0 (Off)です。                                                                                                            
+54.846 |2000-01-28|15:32:28|INFORMIX-OnLineが初期化され、ディスクの初期化が完了しました。                                                                                          
+39.003 |2000-11-11|15:32:29|チェックポイントが完了しました:継続時間は 0秒でした                                                                                                     
+79.406 |2000-06-05|15:32:29|すべてのDB領域のデータスキップは現在オフになっています。                                                                                                   
+94.999 |2000-07-30|15:32:30|On-Lineモード                                                                                                                      
+18.849 |2000-10-22|15:32:31|sysmasterデータベースを作成中です...                                                                                                        
+35.444 |2000-02-29|15:33:22|論理ログ 1が完了しました。                                                                                                                  
+84.391 |2000-01-21|15:33:23|リターンコード 1を戻してプロセスが終了しました:/bin/sh /bin/sh -c /work1/MOSES_7.22.UC1A5_27/sqldist/etc/log_full.sh 2 23 論理ログ 1が完了しました。 論理           
+56.664 |2000-04-16|15:33:40|論理ログ 2が完了しました。                                                                                                                  
+90.007 |2000-11-27|15:33:43|チェックポイントが完了しました:継続時間は 2秒でした                                                                                                     
+30.496 |2000-04-03|15:34:29|論理ログ 3が完了しました。                                                                                                                  
+66.295 |2000-10-15|15:34:30|リターンコード 1を戻してプロセスが終了しました:/bin/sh /bin/sh -c /work1/MOSES_7.22.UC1A5_27/sqldist/etc/log_full.sh 2 23 論理ログ 3が完了しました。 論理           
+54.332 |2000-09-01|15:35:35|sysmasterデータベースの作成は完了しました。                                                                                                      
+11.105 |2000-07-09|15:39:10|チェックポイントが完了しました:継続時間は 8秒でした                                                                                                     
 ij> -- display in localized format
 LOCALIZEDDISPLAY ON;
 ij> select * from localtab;
 NDEC   |NDATEC                  |NTIMEC            |NCHARC                                                                                                                          
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-12,345 |25 de mayo de 2000      |15:30:15 PST      |?C?x???g?A???[?????L???????B                                                                                                    
-32,432 |18 de mayo de 2000      |15:32:10 PST      |DR:DRAUTO??0 (Off)?????B                                                                                                        
-54,846 |28 de enero de 2000     |15:32:28 PST      |INFORMIX-OnLine?????????????A?f?B?X?N???????????????????????B                                                                   
-39,003 |11 de noviembre de 2000 |15:32:29 PST      |?`?F?b?N?|?C???g??????????????:?p???????? 0?b??????                                                                             
-79,406 |5 de junio de 2000      |15:32:29 PST      |????????DB???????f?[?^?X?L?b?v???????I?t???????????????B                                                                        
-94,999 |30 de julio de 2000     |15:32:30 PST      |On-Line???[?h                                                                                                                   
-18,849 |22 de octubre de 2000   |15:32:31 PST      |sysmaster?f?[?^?x?[?X????????????...                                                                                            
-35,444 |29 de febrero de 2000   |15:33:22 PST      |?_?????O 1???????????????B                                                                                                      
-84,391 |21 de enero de 2000     |15:33:23 PST      |???^?[???R?[?h 1?????????v???Z?X???I??????????:/bin/sh /bin/sh -c /work1/MOSES_7.22.UC1A5_27/sqldist/etc/log_full.sh 2 23 ?_???&
-56,664 |16 de abril de 2000     |15:33:40 PST      |?_?????O 2???????????????B                                                                                                      
-90,007 |27 de noviembre de 2000 |15:33:43 PST      |?`?F?b?N?|?C???g??????????????:?p???????? 2?b??????                                                                             
-30,496 |3 de abril de 2000      |15:34:29 PST      |?_?????O 3???????????????B                                                                                                      
-66,295 |15 de octubre de 2000   |15:34:30 PST      |???^?[???R?[?h 1?????????v???Z?X???I??????????:/bin/sh /bin/sh -c /work1/MOSES_7.22.UC1A5_27/sqldist/etc/log_full.sh 2 23 ?_???&
-54,332 |1 de septiembre de 2000 |15:35:35 PST      |sysmaster?f?[?^?x?[?X?????????????????????B                                                                                     
-11,105 |9 de julio de 2000      |15:39:10 PST      |?`?F?b?N?|?C???g??????????????:?p???????? 8?b??????                                                                             
+12,345 |25 de mayo de 2000      |15:30:15 PST      |イベントアラームが有効です。                                                                                                                  
+32,432 |18 de mayo de 2000      |15:32:10 PST      |DR:DRAUTOは0 (Off)です。                                                                                                            
+54,846 |28 de enero de 2000     |15:32:28 PST      |INFORMIX-OnLineが初期化され、ディスクの初期化が完了しました。                                                                                          
+39,003 |11 de noviembre de 2000 |15:32:29 PST      |チェックポイントが完了しました:継続時間は 0秒でした                                                                                                     
+79,406 |5 de junio de 2000      |15:32:29 PST      |すべてのDB領域のデータスキップは現在オフになっています。                                                                                                   
+94,999 |30 de julio de 2000     |15:32:30 PST      |On-Lineモード                                                                                                                      
+18,849 |22 de octubre de 2000   |15:32:31 PST      |sysmasterデータベースを作成中です...                                                                                                        
+35,444 |29 de febrero de 2000   |15:33:22 PST      |論理ログ 1が完了しました。                                                                                                                  
+84,391 |21 de enero de 2000     |15:33:23 PST      |リターンコード 1を戻してプロセスが終了しました:/bin/sh /bin/sh -c /work1/MOSES_7.22.UC1A5_27/sqldist/etc/log_full.sh 2 23 論理ログ 1が完了しました。 論理           
+56,664 |16 de abril de 2000     |15:33:40 PST      |論理ログ 2が完了しました。                                                                                                                  
+90,007 |27 de noviembre de 2000 |15:33:43 PST      |チェックポイントが完了しました:継続時間は 2秒でした                                                                                                     
+30,496 |3 de abril de 2000      |15:34:29 PST      |論理ログ 3が完了しました。                                                                                                                  
+66,295 |15 de octubre de 2000   |15:34:30 PST      |リターンコード 1を戻してプロセスが終了しました:/bin/sh /bin/sh -c /work1/MOSES_7.22.UC1A5_27/sqldist/etc/log_full.sh 2 23 論理ログ 3が完了しました。 論理           
+54,332 |1 de septiembre de 2000 |15:35:35 PST      |sysmasterデータベースの作成は完了しました。                                                                                                      
+11,105 |9 de julio de 2000      |15:39:10 PST      |チェックポイントが完了しました:継続時間は 8秒でした                                                                                                     
 ij> 
