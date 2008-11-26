@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
+import java.io.StringReader;
 import java.io.Writer;
 
 import java.sql.Connection;
@@ -203,6 +204,48 @@ public class ClobTest
         assertEquals(1, this.clob.setString(6, "b"));
 	    assertEquals("Clob content is incorrect",
             newContent, this.clob.getSubString(1, newContent.length()));
+    }
+
+    public void testReplaceMultibyteWithSingleByteForwards()
+            throws IOException, SQLException {
+        // Add some content to work on first.
+        this.clob.setString(1, NORWEGIAN_LETTERS);
+        assertEquals(NORWEGIAN_LETTERS,
+            this.clob.getSubString(1, NORWEGIAN_LETTERS.length()));
+
+        // Replace chars one by one from the start.
+        char[] modifiedContent = NORWEGIAN_LETTERS.toCharArray();
+        String toInsert = "abcdefghijklmnopqr";
+        for (int iz=0; iz < toInsert.length(); iz++) {
+            modifiedContent[iz] = toInsert.charAt(iz);
+            assertEquals(1, this.clob.setString(iz +1,
+                    toInsert.substring(iz, iz +1)));
+            assertEquals(String.copyValueOf(modifiedContent),
+                    this.clob.getSubString(1, 100));
+            assertEquals(new StringReader(String.copyValueOf(modifiedContent)),
+                    this.clob.getCharacterStream());
+        }
+    }
+
+    public void testReplaceMultibyteWithSingleByteBackwards()
+            throws IOException, SQLException {
+        // Add some content to work on first.
+        this.clob.setString(1, NORWEGIAN_LETTERS);
+        assertEquals(NORWEGIAN_LETTERS,
+            this.clob.getSubString(1, NORWEGIAN_LETTERS.length()));
+
+        // Replace chars one by one from the end.
+        char[] modifiedContent = NORWEGIAN_LETTERS.toCharArray();
+        String toInsert = "abcdefghijklmnopqr";
+        for (int iz=toInsert.length() -1; iz >= 0; iz--) {
+            modifiedContent[iz] = toInsert.charAt(iz);
+            assertEquals(1, this.clob.setString(iz +1,
+                    toInsert.substring(iz, iz +1)));
+            assertEquals(String.copyValueOf(modifiedContent),
+                    this.clob.getSubString(1, 100));
+            assertEquals(new StringReader(String.copyValueOf(modifiedContent)),
+                    this.clob.getCharacterStream());
+        }
     }
 
     /**
@@ -449,7 +492,6 @@ public class ClobTest
     private void insertDataWithToken(String token, 
                                      long pre, long post, int mode)
             throws IOException, SQLException {
-        int TRANSFER_BUFFER_SIZE = 4*1024; // Byte and char array size.
         long total = 0;
         switch (mode) {
             case SET_STRING: {
