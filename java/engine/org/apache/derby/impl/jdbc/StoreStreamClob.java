@@ -250,6 +250,17 @@ final class StoreStreamClob
     }
 
     /**
+     * Returns the update count of this Clob.
+     * <p>
+     * Always returns zero, as this Clob cannot be updated.
+     *
+     * @return Zero (read-only Clob).
+     */
+    public long getUpdateCount() {
+        return 0L;
+    }
+
+    /**
      * Not supported.
      *
      * @see InternalClob#getWriter
@@ -267,6 +278,15 @@ final class StoreStreamClob
     public long insertString(String str, long pos) {
         throw new UnsupportedOperationException(
             "A StoreStreamClob object is not updatable");
+    }
+
+    /**
+     * Tells if this Clob has been released.
+     *
+     * @return {@code true} if released, {@code false} if not.
+     */
+    public boolean isReleased() {
+        return released;
     }
 
     /**

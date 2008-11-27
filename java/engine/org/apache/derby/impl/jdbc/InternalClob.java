@@ -110,6 +110,16 @@ interface InternalClob {
             throws IOException, SQLException;
 
     /**
+     * Returns the update count of the Clob.
+     * <p>
+     * The update count is increased each time a modification of the Clob
+     * content is made.
+     *
+     * @return Update count, starting at zero.
+     */
+    long getUpdateCount();
+
+    /**
      * Returns a writer to write data into the Clob.
      * <p>
      * The semantics of the writer is the same as for {@link #insertString}.
@@ -147,6 +157,20 @@ interface InternalClob {
      *      read-only
      */
     long insertString(String str, long pos) throws IOException, SQLException;
+
+    /**
+     * Tells if the the Clob has been released.
+     * <p>
+     * Depending on the context, a Clob is released either because the internal
+     * representation has been changed, or because the Clob itself has been
+     * closed. The former can happen when a user modifies a stream that is
+     * currently represented as a store stream. The latter can happen if
+     * {@code Clob.free} has been called, or if Derby implicitly closes the
+     * Clob.
+     *
+     * @return {@code true} if released, {@code false} if not.
+     */
+    boolean isReleased();
 
     /**
      * Tells if the Clob representation is intended to be writable.

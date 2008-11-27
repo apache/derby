@@ -196,6 +196,15 @@ final class TemporaryClob implements InternalClob {
     }
 
     /**
+     * Returns the update count of this Clob.
+     *
+     * @return Update count.
+     */
+    public long getUpdateCount() {
+        return bytes.getUpdateCount();
+    }
+
+    /**
      * Constructs and returns a <code>Writer</code> for the CLOB value.
      *
      * @param pos the initial position in bytes for the <code>Writer</code>
@@ -329,6 +338,15 @@ final class TemporaryClob implements InternalClob {
             }
         }
         return str.length();
+    }
+
+    /**
+     * Tells if this Clob has been released.
+     *
+     * @return {@code true} if released, {@code false} if not.
+     */
+    public boolean isReleased() {
+        return released;
     }
 
     /**
