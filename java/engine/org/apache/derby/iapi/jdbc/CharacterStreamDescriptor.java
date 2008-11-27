@@ -28,7 +28,7 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
  * included in the description, because all internal byte streams are expected
  * to be using the modified UTF-8 encoding (see DataInput).
  * <p>
- * The information in the description is only guranteed to be valid at the
+ * The information in the description is only guaranteed to be valid at the
  * moment it is passed to the decoder object. As the decoder works on the
  * stream, the information in the descriptor will be outdated.
  * <p>
@@ -102,7 +102,7 @@ public class CharacterStreamDescriptor {
 
     /**
      * Tells if the described stream is aware of its own position, and that it
-     * can reposition itself on requrest.
+     * can reposition itself on request.
      *
      * @return {@code true} if the stream is position aware, @{code false}
      *      otherwise.
@@ -205,41 +205,102 @@ public class CharacterStreamDescriptor {
          */
         public Builder() {}
 
+        /**
+         * Sets if the stream should be buffered, defaults to {@code false}.
+         *
+         * @param bufferable {@code true} if buffering is advised, {@code false}
+         *      if not
+         * @return The builder.
+         */
         public Builder bufferable(boolean bufferable) {
             this.bufferable = bufferable;
             return this;
         }
 
+        /**
+         * Sets if the stream can reposition itself or not, defaults to
+         * {@code false}.
+         *
+         * @param positionAware {@code true} if the stream can reposition
+         *      itself, {@code false} if not
+         * @return The builder.
+         */
         public Builder positionAware(boolean positionAware) {
             this.positionAware = positionAware;
             return this;
         }
 
+        /**
+         * Sets the current byte position, defaults to {@code 0}.
+         *
+         * @param pos the current byte position
+         * @return The builder.
+         */
         public Builder curBytePos(long pos) {
             this.curBytePos = pos;
             return this;
         }
 
+        /**
+         * Sets the current character position, defaults to {@code 1}.
+         * <p>
+         * There is a special value for when the stream is position in the
+         * header area - {@code BEFORE_FIRST}.
+         *
+         * @param pos the current character position,starting at {@code 1}
+         * @return The builder.
+         * @see #BEFORE_FIRST
+         */
         public Builder curCharPos(long pos) {
             this.curCharPos = pos;
             return this;
         }
 
+        /**
+         * Sets the byte length of the stream, defaults to {@code 0}.
+         * <p>
+         * A length of {@code 0} means the length is unknown.
+         *
+         * @param length the byte length of the stream (including header)
+         * @return The builder.
+         */
         public Builder byteLength(long length) {
             this.byteLength = length;
             return this;
         }
 
+        /**
+         * Sets the character length of the stream, defaults to {@code 0}.
+         * <p>
+         * Headers are not included in this length, only the user data.
+         * A length of {@code 0} means the length is unknown.
+         *
+         * @param length the character length of the stream
+         * @return The builder.
+         */
         public Builder charLength(long length) {
             this.charLength = length;
             return this;
         }
 
+        /**
+         * Sets the offset of the user data, defaults to {@code 0}.
+         *
+         * @param offset first index with user data, zero based
+         * @return The builder.
+         */
         public Builder dataOffset(long offset) {
             this.dataOffset = offset;
             return this;
         }
 
+        /**
+         * Imposes a length limit on the stream, expressed in number of
+         * characters, defaults to {@code Long.MAX_VALUE}.
+         *
+         * @param length maximum number of characters
+         * @return The builder.
+         */
         public Builder maxCharLength(long length) {
             this.maxCharLength = length;
             return this;
@@ -279,7 +340,7 @@ public class CharacterStreamDescriptor {
                             curBytePos + "/" + curCharPos);
                 }
                 // The byte position cannot be smaller than the character
-                // position minues one (at least one byte per char).
+                // position minus one (at least one byte per char).
                 SanityManager.ASSERT(curBytePos >= curCharPos -1);
                 // If we're in the header section, the character position must
                 // be before the first character.
