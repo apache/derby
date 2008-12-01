@@ -1502,7 +1502,11 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
     /**
      * <p>
      * Test that the declared datatype of a generated column can be anything that the
-     * generation clause can be assigned to.
+     * generation clause can be assigned to. The legal assignments are described
+     * in the Reference Guide in the section titled "Data type assignments and comparison, sorting, and ordering".
+     * Note that this is a subset of the legal casts described for the CAST
+     * operator. Here we are verifying the behavior described in the SQL
+     * standard, Part 2, section 11.4, syntax rule 9.
      * </p>
      */
     public  void    test_014_assignment()
@@ -2253,7 +2257,7 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
              conn,
              "create table t_cc_varchar\n" +
              "(\n" +
-             "    a char( 10 ),\n" +
+             "    a varchar( 10 ),\n" +
              "    b char( 5 ) generated always as( upper( a ) ),\n" +
              "    c char( 10 ) generated always as( upper( a ) ),\n" +
              "    d char( 15 ) generated always as( upper( a ) ),\n" +

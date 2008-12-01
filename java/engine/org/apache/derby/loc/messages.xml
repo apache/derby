@@ -2002,7 +2002,7 @@ Guide.
 
             <msg>
                 <name>42XA6</name>
-                <text>'{0}' is a generated column. It cannot be part of a foreign key whose referential action is SET NULL or SET DEFAULT or whose update rule is ON UPDATE CASCADE.</text>
+                <text>'{0}' is a generated column. It cannot be part of a foreign key whose referential action for DELETE is SET NULL or SET DEFAULT, or whose referential action for UPDATE is CASCADE.</text>
                 <arg>columnName</arg>
             </msg>
 

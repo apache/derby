@@ -3906,7 +3906,8 @@ public class ResultColumnList extends QueryTreeNodeVector
                 // unfortunately that step occurs very soon after defaults are substituted in. The
                 // parsing and binding of generation clauses happens considerably
                 // later on. At this juncture, we can be patient and just plug
-                // in a NULL literal as a placeholder.
+                // in a NULL literal as a placeholder. For generated columns,
+                // the generation clause tree is plugged in in DMLModStatementNode.parseAndBindGenerationClauses().
                 //
 				if ( (defaultInfo != null) && !defaultInfo.isGeneratedColumn() )
 				{

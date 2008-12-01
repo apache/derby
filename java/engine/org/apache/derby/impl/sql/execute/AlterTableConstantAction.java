@@ -1486,6 +1486,11 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
             
             activation.addWarning
                 ( StandardException.newWarning( SQLState.LANG_GEN_COL_DROPPED, generatedColumnName, td.getName() ) );
+
+            //
+            // We can only recurse 2 levels since a generation clause cannot
+            // refer to other generated columns.
+            //
             dropColumnFromTable( activation, generatedColumnName );
         }
 

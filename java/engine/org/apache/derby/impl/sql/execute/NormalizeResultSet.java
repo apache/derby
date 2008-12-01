@@ -272,6 +272,9 @@ class NormalizeResultSet extends NoPutResultSetImpl
     /**
      * <p>
      * Compute the start column for an update/insert.
+     *
+     * @param isUpdate  True if we are executing an UPDATE statement
+     * @param desc Metadata describing a result row
      * </p>
      */
     public  static  int computeStartColumn( boolean isUpdate, ResultDescription desc )
@@ -292,17 +295,20 @@ class NormalizeResultSet extends NoPutResultSetImpl
 
     
 	/**
-	 * Normalize a row.  For now, this means calling constructors through
+	 * Normalize a column.  For now, this means calling constructors through
 	 * the type services to normalize a type to itself.  For example,
 	 * if you're putting a char(30) value into a char(15) column, it
 	 * calls a SQLChar constructor with the char(30) value, and the
 	 * constructor truncates the value and makes sure that no non-blank
 	 * characters are truncated.
 	 *
-	 * In the future, this mechanism will be extended to do type conversions,
-	 * as well.  I didn't implement type conversions yet because it looks
-	 * like a lot of work, and we needed char and varchar right away.
-	 *
+     *
+     * @param dtd Data type to coerce to
+     * @param sourceRow row holding the source column
+     * @param sourceColumnPosition position of column in row
+     * @param resultCol where to stuff the coerced value
+     * @param desc Additional metadata for error reporting if necessary
+     *
  	 * @exception StandardException thrown on failure 
 	 */
 	public  static  DataValueDescriptor normalizeColumn
@@ -331,17 +337,9 @@ class NormalizeResultSet extends NoPutResultSetImpl
 	//
 	// class implementation
 	//
+    
 	/**
-	 * Normalize a row.  For now, this means calling constructors through
-	 * the type services to normalize a type to itself.  For example,
-	 * if you're putting a char(30) value into a char(15) column, it
-	 * calls a SQLChar constructor with the char(30) value, and the
-	 * constructor truncates the value and makes sure that no non-blank
-	 * characters are truncated.
-	 *
-	 * In the future, this mechanism will be extended to do type conversions,
-	 * as well.  I didn't implement type conversions yet because it looks
-	 * like a lot of work, and we needed char and varchar right away.
+	 * Normalize a row.
 	 *
 	 * @param sourceRow		The row to normalize
 	 *

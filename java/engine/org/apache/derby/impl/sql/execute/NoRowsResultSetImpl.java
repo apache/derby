@@ -74,9 +74,13 @@ abstract class NoRowsResultSetImpl implements ResultSet
 	protected long beginExecutionTime;
 	protected long endExecutionTime;
 
-    private int                             firstColumn = -1;
-    private int[]                           generatedColumnPositions; // 1-based positions
-    private DataValueDescriptor[]  normalizedGeneratedValues; // one for  each slot in generatedColumnPositions
+    private int                             firstColumn = -1;    // First column being stuffed. For UPDATES, this lies in the second half of the row.
+    private int[]                           generatedColumnPositions; // 1-based positions of generated columns in the target row
+
+    // One cell for  each slot in generatedColumnPositions. These are temporary
+    // values which hold the result of running the generation clause before we
+    // stuff the result into the target row.
+    private DataValueDescriptor[]  normalizedGeneratedValues;
 
 	NoRowsResultSetImpl(Activation activation)
 		throws StandardException
@@ -663,7 +667,8 @@ abstract class NoRowsResultSetImpl implements ResultSet
 	}
 
 	/**
-	  * Construct support for normalizing generated columns.
+	  * Construct support for normalizing generated columns. This figures out
+	  * which columns in the target row have generation clauses which need to be run.
 	  */
     private void    setupGeneratedColumns( Activation activation, ValueRow newRow )
         throws StandardException
