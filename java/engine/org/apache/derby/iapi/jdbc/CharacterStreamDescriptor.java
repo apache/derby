@@ -20,7 +20,9 @@
  */
 package org.apache.derby.iapi.jdbc;
 
+import java.io.InputStream;
 import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.types.PositionedStream;
 
 /**
  * A description of a byte stream representing characters. The description is
@@ -63,8 +65,8 @@ public class CharacterStreamDescriptor {
     private final boolean bufferable;
     /** Tells if the stream is aware of its own position. */
     private final boolean positionAware;
-    /** A (mostly) unique id for the associated stream. */
-    private final int id;
+    /** Reference to the stream we are describing. */
+    private final InputStream stream;
 
     /**
      * Creates a character stream descriptor, using the supplied builder.
@@ -83,7 +85,7 @@ public class CharacterStreamDescriptor {
         byteLength = b.byteLength;
         charLength = b.charLength;
         maxCharLength = b.maxCharLength;
-        id = b.id;
+        stream = b.stream;
     }
 
     /**
@@ -157,16 +159,33 @@ public class CharacterStreamDescriptor {
     public long getMaxCharLength() {
         return maxCharLength;
     }
-    
+
     /**
-     * Returns an id that can be used to identify the associated stream.
-     * <p>
-     * Mostly used for debugging and verification purposes.
+     * Returns the associated stream.
      *
-     * @return An integer id.
+     * @return An {@code InputStream} reference.
      */
-    public int getStreamId() {
-        return id;
+    public InputStream getStream() {
+        return stream;
+    }
+
+    /**
+     * Returns the associated positioned stream, if the stream is position
+     * aware.
+     *
+     * @return A {@code PositionedStream} reference.
+     * @throws ClassCastException if the stream cannot be cast to
+     *      {@code PositionedStream}
+     * @throws IllegalArgumentException if the method is called and the
+     *      assoicated stream isn't described as position aware.
+     * @see #isPositionAware
+     */
+    public PositionedStream getPositionedStream() {
+        if (!positionAware) {
+            throw new IllegalStateException("stream is not position aware: " +
+                    stream.getClass().getName());
+        }
+        return (PositionedStream)stream;
     }
 
     public String toString() {
@@ -174,7 +193,8 @@ public class CharacterStreamDescriptor {
                 bufferable + ":positionAware=" +
                 positionAware + ":byteLength=" + byteLength + ":charLength=" +
                 charLength + ":curBytePos=" + curBytePos + ":curCharPos=" +
-                curCharPos + ":dataOffset=" + dataOffset + ":id=" + id);
+                curCharPos + ":dataOffset=" + dataOffset + ":stream=" +
+                stream.getClass());
     }
 
     /**
@@ -198,7 +218,7 @@ public class CharacterStreamDescriptor {
         private long charLength = 0;
         private long dataOffset = 0;
         private long maxCharLength = DEFAULT_MAX_CHAR_LENGTH;
-        private int id = -1;
+        private InputStream stream;
 
         /**
          * Creates a builder object.
@@ -270,6 +290,25 @@ public class CharacterStreamDescriptor {
         }
 
         /**
+         * Copies the state of the specified descriptor.
+         *
+         * @param csd the descriptor to copy
+         * @return The builder.
+         */
+        public Builder copyState(CharacterStreamDescriptor csd) {
+            this.bufferable = csd.bufferable;
+            this.byteLength = csd.byteLength;
+            this.charLength = csd.charLength;
+            this.curBytePos = csd.curBytePos;
+            this.curCharPos = csd.curCharPos;
+            this.dataOffset = csd.dataOffset;
+            this.maxCharLength = csd.maxCharLength;
+            this.positionAware = csd.positionAware;
+            this.stream = csd.stream;
+            return this;
+        }
+
+        /**
          * Sets the character length of the stream, defaults to {@code 0}.
          * <p>
          * Headers are not included in this length, only the user data.
@@ -306,8 +345,19 @@ public class CharacterStreamDescriptor {
             return this;
         }
 
-        public Builder id(int id) {
-            this.id = id;
+        /**
+         * Sets the stream described by the descriptor.
+         * <p>
+         * The stream is not allowed to be {@code null}.
+         *
+         * @param stream the stream
+         * @return The builder.
+         */
+        public Builder stream(InputStream stream) {
+            if (SanityManager.DEBUG) {
+                SanityManager.ASSERT(stream != null);
+            }
+            this.stream = stream;
             return this;
         }
 
@@ -347,6 +397,18 @@ public class CharacterStreamDescriptor {
                 if (curBytePos < dataOffset) {
                     SanityManager.ASSERT(curCharPos == BEFORE_FIRST);
                 }
+                // Byte length minus data offset must be equal to or greater
+                // then the character length.
+                if (byteLength > 0 && charLength > 0) {
+                    SanityManager.ASSERT(byteLength - dataOffset >= charLength);
+                }
+                SanityManager.ASSERT(stream != null, "Stream cannot be null");
+                if (positionAware) {
+                    SanityManager.ASSERT(stream instanceof PositionedStream);
+                }
+                // Note that the character position can be greater than the
+                // maximum character length, because the limit might be imposed
+                // as part of extracting a substring of the contents.
             }
             return new CharacterStreamDescriptor(this);
         }
