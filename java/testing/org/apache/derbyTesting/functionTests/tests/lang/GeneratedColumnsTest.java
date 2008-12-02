@@ -4573,10 +4573,77 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
              false
              );
         conn.commit();
+        conn.setAutoCommit( true );
 
         stmt.close();
     }
 
+    /**
+     * <p>
+     * Test that we correctly handle foreign keys with ON DELETE SET NULL
+     * clauses. DERBY-3964.
+     * </p>
+     */
+    public  void    test_026_onDeleteSetNull()
+        throws Exception
+    {
+        Connection  conn = getConnection();
+
+        //
+        // Setup
+        //
+        goodStatement
+            (
+             conn,
+             "create table t_dhw_1( a int primary key )"
+             );
+        goodStatement
+            (
+             conn,
+             "create table t_dhw_2( a int references t_dhw_1( a ) on delete set null check ( a is null or a > 0 ), b int generated always as ( -a ) check ( b is null or b < 0 ) )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_dhw_1( a ) values ( 1 ), ( 2 )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_dhw_2( a ) values( 1 )"
+             );
+
+        //
+        // Verify that when you delete from the primary table, the foreign key
+        // table is updated and the update percolates through to the generated column.
+        //
+        goodStatement
+            (
+             conn,
+             "delete from t_dhw_1 where a = 1"
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_dhw_1 order by a",
+             new String[][]
+             {
+                 { "2", },
+             },
+             false
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_dhw_2 order by a",
+             new String[][]
+             {
+                 { null, null, },
+             },
+             false
+             );
+    }
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // MINIONS

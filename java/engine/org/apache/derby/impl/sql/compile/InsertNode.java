@@ -849,7 +849,7 @@ public final class InsertNode extends DMLModStatementNode
 			resultSet.generate(acb, mb);
 
 			// arg 2 generate code to evaluate generation clauses
-			generateGenerationClauses( resultColumnList, resultSet.getResultSetNumber(), acb, mb );
+			generateGenerationClauses( resultColumnList, resultSet.getResultSetNumber(), false, acb, mb );
 
 			// arg 3 generate code to evaluate CHECK CONSTRAINTS
 			generateCheckConstraints( checkConstraints, acb, mb );

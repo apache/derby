@@ -575,7 +575,6 @@ abstract class DMLModStatementNode extends DMLStatementNode
                         {
                             newRC.setName( rc.getName() );
                             newRC.setResultSetNumber( updateResultSet.getResultSetNumber() );
-                            
                             sourceRCL.setElementAt( newRC, j );
                             
                         }
@@ -1582,6 +1581,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
       *
       * @param rcl  describes the row of expressions to be put into the bas table
       * @param resultSetNumber  index of base table into array of ResultSets
+      * @param isUpdate true if this is for an UPDATE statement
       * @param ecb code generation state variable
       * @param mb the method being generated
       *
@@ -1591,6 +1591,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 	(
         ResultColumnList            rcl,
         int                                 resultSetNumber,
+        boolean                         isUpdate,
 		ExpressionClassBuilder	ecb,
 		MethodBuilder			mb
     )
@@ -1637,7 +1638,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 		}
 		else
 		{
-			MethodBuilder	userExprFun = generateGenerationClauses( rcl, resultSetNumber, ecb);
+			MethodBuilder	userExprFun = generateGenerationClauses( rcl, resultSetNumber, isUpdate, ecb);
 
 	   		// generation clause evaluation is used in the final result set 
 			// as an access of the new static
@@ -1651,6 +1652,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
       *
       * @param rcl  describes the row of expressions to be put into the bas table
       * @param rsNumber  index of base table into array of ResultSets
+      * @param isUpdate true if this is for an UPDATE statement
       * @param ecb code generation state variable
       *
 	  */
@@ -1658,6 +1660,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 	(
         ResultColumnList            rcl,
         int                                 rsNumber,
+        boolean                         isUpdate,
 		ExpressionClassBuilder	ecb
     )
 		throws StandardException
@@ -1666,7 +1669,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 		// generates:
 		// 	java.lang.Object userExprFun( ) { }
 		MethodBuilder userExprFun = ecb.newUserExprFun();
-		
+
 		/* Declare the field and load it with the current row */
 		LocalField field = ecb.newFieldDeclaration(Modifier.PRIVATE, ClassName.ExecRow);
         userExprFun.pushThis();
@@ -1674,10 +1677,21 @@ abstract class DMLModStatementNode extends DMLStatementNode
         userExprFun.callMethod(VMOpcode.INVOKEVIRTUAL, ClassName.BaseActivation, "getCurrentRow", ClassName.Row, 1);
         userExprFun.putField( field );
 
-		// loop through the result columns, computing generated columns
-        // as we go
+		// Loop through the result columns, computing generated columns
+        // as we go. 
         int     size = rcl.size();
-        for ( int i = 0; i < size; i++ )
+        int     startColumn = 0;
+        // For UPDATEs, we only compute the updated value for the
+        // column. The updated value lives in the second half of the row.
+        // This means we ignore the first half of the row, which holds
+        // the before-images of the columns.
+        if ( isUpdate )
+        {
+            // throw away the last cell in the row, which is the row id
+            startColumn = size - 1;
+            startColumn = startColumn / 2;
+        }
+        for ( int i = startColumn; i < size; i++ )
         {
             ResultColumn    rc = (ResultColumn) rcl.elementAt( i );
 

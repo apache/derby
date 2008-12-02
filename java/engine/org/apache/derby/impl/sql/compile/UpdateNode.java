@@ -844,7 +844,7 @@ public final class UpdateNode extends DMLModStatementNode
         else
         {
 			// arg 2 generate code to evaluate generation clauses
-			generateGenerationClauses( resultColumnList, resultSet.getResultSetNumber(), acb, mb );
+			generateGenerationClauses( resultColumnList, resultSet.getResultSetNumber(), true, acb, mb );
 
             // generate code to evaluate CHECK CONSTRAINTS
             generateCheckConstraints( checkConstraints, acb, mb ); // arg 3
