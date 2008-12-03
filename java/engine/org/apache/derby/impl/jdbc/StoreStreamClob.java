@@ -113,10 +113,21 @@ final class StoreStreamClob
      */
     public StoreStreamClob(InputStream stream, ConnectionChild conChild)
             throws StandardException {
-        this.positionedStoreStream = new PositionedStoreStream(stream);
+        try {
+            this.positionedStoreStream = new PositionedStoreStream(stream);
+        } catch (StandardException se) {
+            if (se.getMessageId().equals(SQLState.DATA_CONTAINER_CLOSED)) {
+                throw StandardException
+                        .newException(SQLState.BLOB_ACCESSED_AFTER_COMMIT);
+            } else {
+                throw se;
+            }
+        } catch (IOException ioe) {
+            throw StandardException.newException(
+                    SQLState.LANG_STREAMING_COLUMN_I_O_EXCEPTION, ioe, "CLOB");
+        }
         this.conChild = conChild;
         this.synchronizationObject = conChild.getConnectionSynchronization();
-        this.positionedStoreStream.initStream();
     }
 
     /**
