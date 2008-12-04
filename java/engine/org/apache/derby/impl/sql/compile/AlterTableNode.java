@@ -410,11 +410,14 @@ public class AlterTableNode extends DDLStatementNode
 			/* Now that we've finally goobered stuff up, bind and validate
 			 * the check constraints and generation clauses.
 			 */
-			if  (numCheckConstraints > 0) { tableElementList.bindAndValidateCheckConstraints(fromList); }
 			if  (numGenerationClauses > 0)
             { tableElementList.bindAndValidateGenerationClauses( schemaDescriptor, fromList, generatedColumns ); }
+			if  (numCheckConstraints > 0) { tableElementList.bindAndValidateCheckConstraints(fromList); }
             if ( numReferenceConstraints > 0) { tableElementList.validateForeignKeysOnGenerationClauses( fromList, generatedColumns ); }
 		}
+
+        // must be done after resolving the datatypes of the generation clauses
+        if (tableElementList != null) { tableElementList.validatePrimaryKeyNullability(); }
 
 		//Check if we are in alter table to update the statistics. If yes, then
 		//check if we are here to update the statistics of a specific index. If

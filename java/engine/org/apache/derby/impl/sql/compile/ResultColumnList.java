@@ -278,6 +278,21 @@ public class ResultColumnList extends QueryTreeNodeVector
 
 	public ResultColumn getResultColumn(String columnName)
 	{
+        return getResultColumn( columnName, true );
+	}
+
+	/**
+	 * Get a ResultColumn that matches the specified columnName. If requested
+	 * to, mark the column as referenced.
+	 *
+	 * @param columnName	The ResultColumn to get from the list
+	 * @param markIfReferenced True if we should mark this column as referenced.
+	 *
+	 * @return	the column that matches that name.
+	 */
+
+	public ResultColumn getResultColumn(String columnName, boolean markIfReferenced )
+	{
 		int size = size();
 		for (int index = 0; index < size; index++)
 		{
@@ -285,8 +300,8 @@ public class ResultColumnList extends QueryTreeNodeVector
 
 			if (columnName.equals( resultColumn.getName()) )
 			{
-				/* Mark ResultColumn as referenced and return it */
-				resultColumn.setReferenced();
+                /* Mark ResultColumn as referenced and return it */
+                if ( markIfReferenced ) { resultColumn.setReferenced(); }
 				return resultColumn;
 			}
 		}

@@ -905,6 +905,7 @@ public interface SQLState {
     String LANG_GEN_COL_BAD_RENAME                                           = "42XA8";
     String LANG_NEEDS_DATATYPE                                                      = "42XA9";
     String LANG_GEN_COL_BEFORE_TRIG                                             = "42XAA";
+    String LANG_NOT_NULL_NEEDS_DATATYPE                                    = "42XAB";
 	String LANG_INVALID_USER_AGGREGATE_DEFINITION2                     = "42Y00";
 	String LANG_INVALID_CHECK_CONSTRAINT                               = "42Y01";
 	// String LANG_NO_ALTER_TABLE_COMPRESS_ON_TARGET_TABLE                = "42Y02";

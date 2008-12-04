@@ -12195,6 +12195,10 @@ columnConstraint(TableName constraintName,
 		//throw an exception
 		if (explicitNull) 
                    throw StandardException.newException(SQLState.LANG_ADDING_COLUMN_WITH_NULL_AND_NOT_NULL_CONSTRAINT, columnName); 
+
+		// columns with generation clauses can omit the datatype
+		if ( dataTypeDescriptor[0] == null ) { throw StandardException.newException(SQLState.LANG_NOT_NULL_NEEDS_DATATYPE); }
+
 		dataTypeDescriptor[0] = dataTypeDescriptor[0].getNullabilityType(false);
 		return null;
 	}

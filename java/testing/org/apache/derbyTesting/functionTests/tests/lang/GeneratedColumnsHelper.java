@@ -57,6 +57,7 @@ public class GeneratedColumnsHelper extends BaseJDBCTestCase
     ///////////////////////////////////////////////////////////////////////////////////
 
     protected static  final   String  REDUNDANT_CLAUSE = "42613";
+    protected static  final   String  CANT_CONTAIN_NULLS = "42831";
     protected static  final   String  ILLEGAL_AGGREGATE = "42XA1";
     protected static  final   String  UNSTABLE_RESULTS = "42XA2";
     protected static  final   String  CANT_OVERRIDE_GENERATION_CLAUSE = "42XA3";
@@ -67,6 +68,7 @@ public class GeneratedColumnsHelper extends BaseJDBCTestCase
     protected static  final   String  ILLEGAL_RENAME = "42XA8";
     protected static  final   String  NEED_EXPLICIT_DATATYPE = "42XA9";
     protected static  final   String  BAD_BEFORE_TRIGGER = "42XAA";
+    protected static  final   String  NOT_NULL_NEEDS_DATATYPE = "42XAB";
     
     protected static  final   String  NOT_NULL_VIOLATION = "23502";
     protected static  final   String  CONSTRAINT_VIOLATION = "23513";

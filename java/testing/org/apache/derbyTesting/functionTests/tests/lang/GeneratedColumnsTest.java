@@ -4644,6 +4644,387 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
              );
     }
     
+    /**
+     * <p>
+     * Test that we can put constraints on generated columns when we omit the datatype.
+     * DERBY-3969.
+     * </p>
+     */
+    public  void    test_027_constraintsNoDatatype()
+        throws Exception
+    {
+        Connection  conn = getConnection();
+
+        //
+        // Verify that we can declare check constraints on generated columns
+        // which omit the datatype.
+        //
+        goodStatement
+            (
+             conn,
+             "create table t_ccnd_1( a int, b generated always as ( -a ) check ( b < 0 ) )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_ccnd_1( a ) values ( 1 )"
+             );
+        expectExecutionError
+            (
+             conn,
+             CONSTRAINT_VIOLATION,
+             "insert into t_ccnd_1( a ) values ( -1 )"
+             );
+        goodStatement
+            (
+             conn,
+             "alter table t_ccnd_1 add column c generated always as ( -a ) check ( c > -10 )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_ccnd_1( a ) values ( 2 )"
+             );
+        expectExecutionError
+            (
+             conn,
+             CONSTRAINT_VIOLATION,
+             "insert into t_ccnd_1( a ) values ( 20 )"
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_ccnd_1 order by a",
+             new String[][]
+             {
+                 { "1", "-1", "-1" },
+                 { "2", "-2", "-2" },
+             },
+             false
+             );
+
+        //
+        // Verify that we can declare foreign keys on generated columns
+        // which omit the datatype.
+        //
+        goodStatement
+            (
+             conn,
+             "create table t_ccnd_2( b int primary key )"
+             );
+        goodStatement
+            (
+             conn,
+             "create table t_ccnd_3( a int, b generated always as ( -a ) references t_ccnd_2( b ) )"
+             );
+        goodStatement
+            (
+             conn,
+             "create table t_ccnd_4( a int )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_ccnd_2( b ) values ( 1 )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_ccnd_3( a ) values ( -1 )"
+             );
+        expectExecutionError
+            (
+             conn,
+             FOREIGN_KEY_VIOLATION,
+             "insert into t_ccnd_3( a ) values ( -2 )"
+             );
+        goodStatement
+            (
+             conn,
+             "alter table t_ccnd_4 add column b generated always as ( -a ) references t_ccnd_2( b )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_ccnd_4( a ) values ( -1 )"
+             );
+        expectExecutionError
+            (
+             conn,
+             FOREIGN_KEY_VIOLATION,
+             "insert into t_ccnd_4( a ) values ( -2 )"
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_ccnd_3 order by a",
+             new String[][]
+             {
+                 { "-1", "1", },
+             },
+             false
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_ccnd_4 order by a",
+             new String[][]
+             {
+                 { "-1", "1", },
+             },
+             false
+             );
+
+        //
+        // Verify that we can declare primary keys on generated columns
+        // which omit the datatype.
+        //
+        goodStatement
+            (
+             conn,
+             "create table t_ccnd_5( a int, b generated always as ( -a ) primary key )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_ccnd_5( a ) values ( 1 )"
+             );
+        expectExecutionError
+            (
+             conn,
+             ILLEGAL_DUPLICATE,
+             "insert into t_ccnd_5( a ) values ( 1 )"
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_ccnd_5 order by a",
+             new String[][]
+             {
+                 { "1", "-1", },
+             },
+             false
+             );
+        
+        //
+        // Verify that you CANNOT declare a generated column to be NOT NULL
+        // if you omit the datatype.
+        //
+        expectCompilationError
+            (
+             NOT_NULL_NEEDS_DATATYPE,
+             "create table t_ccnd_6( a int, b generated always as ( -a ) not null )"
+             );
+        goodStatement
+            (
+             conn,
+             "create table t_ccnd_6( a int )"
+             );
+        expectCompilationError
+            (
+             NOT_NULL_NEEDS_DATATYPE,
+             "alter table t_ccnd_6 add column b generated always as ( -a ) not null"
+             );
+        
+        //
+        // Verify that you CAN declare a generated column to be NOT NULL
+        // if you include the datatype.
+        //
+        goodStatement
+            (
+             conn,
+             "create table t_ccnd_7( a int, b int generated always as ( -a ) not null )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_ccnd_7( a ) values ( 1 )"
+             );
+        expectExecutionError
+            (
+             conn,
+             NOT_NULL_VIOLATION,
+             "insert into t_ccnd_7( a ) values ( null )"
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_ccnd_7 order by a",
+             new String[][]
+             {
+                 { "1", "-1", },
+             },
+             false
+             );
+        
+        //
+        // Verify that we can add generated columns with primary keys
+        // but only if you include the datatype or if the resolved datatype
+        // is not nullable.
+        //
+        goodStatement
+            (
+             conn,
+             "create table t_ccnd_8( a int )"
+             );
+        goodStatement
+            (
+             conn,
+             "create table t_ccnd_9( a int not null )"
+             );
+        expectCompilationError
+            (
+             CANT_CONTAIN_NULLS,
+             "alter table t_ccnd_8 add column b generated always as ( -a ) primary key"
+             );
+        goodStatement
+            (
+             conn,
+             "alter table t_ccnd_8 add column b int not null generated always as ( -a ) primary key"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_ccnd_8( a ) values ( 1 )"
+             );
+        expectExecutionError
+            (
+             conn,
+             NOT_NULL_VIOLATION,
+             "insert into t_ccnd_8( a ) values ( null )"
+             );
+        expectExecutionError
+            (
+             conn,
+             ILLEGAL_DUPLICATE,
+             "insert into t_ccnd_8( a ) values ( 1 )"
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_ccnd_8 order by a",
+             new String[][]
+             {
+                 { "1", "-1", },
+             },
+             false
+             );
+
+        goodStatement
+            (
+             conn,
+             "alter table t_ccnd_9 add column b generated always as ( -a ) primary key"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_ccnd_9( a ) values ( 1 )"
+             );
+        expectExecutionError
+            (
+             conn,
+             ILLEGAL_DUPLICATE,
+             "insert into t_ccnd_9( a ) values ( 1 )"
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_ccnd_9 order by a",
+             new String[][]
+             {
+                 { "1", "-1", },
+             },
+             false
+             );
+        
+        //
+        // Verify that we can create generated columns with unique constraints.
+        //
+        goodStatement
+            (
+             conn,
+             "create table t_ccnd_10( a int, b generated always as ( -a ) unique )"
+             );
+        goodStatement
+            (
+             conn,
+             "create table t_ccnd_11( a int )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_ccnd_10( a ) values ( 1 )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_ccnd_10( a ) values ( null )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_ccnd_10( a ) values ( null )"
+             );
+        expectExecutionError
+            (
+             conn,
+             ILLEGAL_DUPLICATE,
+             "insert into t_ccnd_10( a ) values ( 1 )"
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_ccnd_10 order by a",
+             new String[][]
+             {
+                 { "1", "-1", },
+                 { null, null, },
+                 { null, null, },
+             },
+             false
+             );
+
+        goodStatement
+            (
+             conn,
+             "alter table t_ccnd_11 add column b generated always as ( -a ) unique"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_ccnd_11( a ) values ( 1 )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_ccnd_11( a ) values ( null )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_ccnd_11( a ) values ( null )"
+             );
+        expectExecutionError
+            (
+             conn,
+             ILLEGAL_DUPLICATE,
+             "insert into t_ccnd_11( a ) values ( 1 )"
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_ccnd_11 order by a",
+             new String[][]
+             {
+                 { "1", "-1", },
+                 { null, null, },
+                 { null, null, },
+             },
+             false
+             );
+
+    }
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // MINIONS

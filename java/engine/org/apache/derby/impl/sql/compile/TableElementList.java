@@ -344,21 +344,11 @@ public class TableElementList extends QueryTreeNodeVector
 				}
 			}
 
+            // validation of primary key nullability moved to validatePrimaryKeyNullability().
             if (cdn.hasPrimaryKeyConstraint())
             {
                 // for PRIMARY KEY, check that columns are unique
                 verifyUniqueColumnList(ddlStmt, cdn);
-
-                if (td == null)
-                {
-                    // in CREATE TABLE so set PRIMARY KEY columns to NOT NULL
-                    setColumnListToNotNull(cdn);
-                }
-                else
-                {
-                    // in ALTER TABLE so raise error if any columns are nullable
-                    checkForNullColumns(cdn, td);
-                }
             }
             else if (cdn.hasUniqueKeyConstraint())
             {
@@ -386,6 +376,44 @@ public class TableElementList extends QueryTreeNodeVector
 
 	}
 
+    /**
+	 * Validate nullability of primary keys. This logic was moved out of the main validate
+	 * method so that it can be called after binding generation clauses. We need
+	 * to perform the nullability checks later on because the datatype may be
+	 * omitted on the generation clause--we can't set/vet the nullability of the
+	 * datatype until we determine what the datatype is.
+	 */
+    public  void    validatePrimaryKeyNullability()
+        throws StandardException
+    {
+		int			size = size();
+		for (int index = 0; index < size; index++)
+		{
+			TableElementNode tableElement = (TableElementNode) elementAt(index);
+
+			if (! (tableElement.hasConstraint()))
+			{
+				continue;
+			}
+            
+			ConstraintDefinitionNode cdn = (ConstraintDefinitionNode) tableElement;
+
+            if (cdn.hasPrimaryKeyConstraint())
+            {
+                if (td == null)
+                {
+                    // in CREATE TABLE so set PRIMARY KEY columns to NOT NULL
+                    setColumnListToNotNull(cdn);
+                }
+                else
+                {
+                    // in ALTER TABLE so raise error if any columns are nullable
+                    checkForNullColumns(cdn, td);
+                }
+            }
+        }
+    }
+    
     /**
 	 * Count the number of constraints of the specified type.
 	 *
@@ -721,6 +749,7 @@ public class TableElementList extends QueryTreeNodeVector
 	{
 		CompilerContext cc;
 		FromBaseTable				table = (FromBaseTable) fromList.elementAt(0);
+        ResultColumnList            tableColumns = table.getResultColumns();
         int                                 columnCount = table.getResultColumns().size();
 		int						  size = size();
 
@@ -786,6 +815,12 @@ public class TableElementList extends QueryTreeNodeVector
                 if ( declaredType == null )
                 {
                     cdn.setType( generationClauseType );
+
+                    //
+                    // Poke the type into the FromTable so that constraints will
+                    // compile.
+                    //
+                    tableColumns.getResultColumn( cdn.getColumnName(), false ).setType( generationClauseType );
 
                     //
                     // We skipped these steps earlier on because we didn't have

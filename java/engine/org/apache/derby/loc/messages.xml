@@ -2032,6 +2032,11 @@ Guide.
             </msg>
 
             <msg>
+                <name>42XAB</name>
+                <text>NOT NULL is allowed only if you explicitly declare a datatype.</text>
+            </msg>
+
+            <msg>
                 <name>42Y00</name>
                 <text>Class '{0}' does not implement org.apache.derby.iapi.db.AggregateDefinition and thus cannot be used as an aggregate expression.</text>
                 <arg>className</arg>
