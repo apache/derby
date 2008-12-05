@@ -85,7 +85,7 @@ public class DefaultInfoImpl implements DefaultInfo, Formatable
 	 * Constructor for use with generated columns
      *
      * @param   defaultText Text of generation clause.
-     * @param   referencedColumnsNames  names of other columns in the base row which are mentioned in the generation clause.
+     * @param   referencedColumnNames   names of other columns in the base row which are mentioned in the generation clause.
      * @param   originalCurrentSchema   Schema in effect when the generate column was added to the table.
 	 */
 	public DefaultInfoImpl
