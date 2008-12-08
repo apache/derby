@@ -30,6 +30,7 @@ import java.io.Reader;
 import java.io.Writer;
 import java.sql.SQLException;
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.jdbc.CharacterStreamDescriptor;
 import org.apache.derby.iapi.util.UTF8Util;
 
 /**
@@ -240,8 +241,15 @@ final class TemporaryClob implements InternalClob {
             throw new IllegalArgumentException(
                 "Position must be positive: " + pos);
         }
-        Reader isr = new ClobUpdatableReader (
-                (LOBInputStream) getRawByteStream(), conChild);
+        // Describe the stream to allow the reader to configure itself.
+        CharacterStreamDescriptor csd = new CharacterStreamDescriptor.Builder().
+                stream(this.bytes.getInputStream(0)).
+                positionAware(true).
+                bufferable(this.bytes.getLength() > 4096). // Cache if on disk.
+                byteLength(this.bytes.getLength()).
+                build();
+        Reader isr = new UTF8Reader(
+                csd, conChild, conChild.getConnectionSynchronization());
 
         long leftToSkip = pos -1;
         long skipped;

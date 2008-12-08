@@ -32,6 +32,7 @@ import java.io.Writer;
 
 import java.sql.SQLException;
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.jdbc.CharacterStreamDescriptor;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.types.Resetable;
 import org.apache.derby.iapi.types.TypeId;
@@ -212,9 +213,17 @@ final class StoreStreamClob
         } catch (StandardException se) {
             throw Util.generateCsSQLException(se);
         }
-        Reader reader = new UTF8Reader(this.positionedStoreStream,
-                                TypeId.CLOB_MAXWIDTH, this.conChild,
-                                this.synchronizationObject);
+        // Describe the stream to allow the reader to configure itself.
+        CharacterStreamDescriptor csd =
+                new CharacterStreamDescriptor.Builder().
+                stream(positionedStoreStream).bufferable(false).
+                positionAware(true).dataOffset(2L). // TODO
+                curCharPos(CharacterStreamDescriptor.BEFORE_FIRST).
+                maxCharLength(TypeId.CLOB_MAXWIDTH).
+                charLength(cachedCharLength). // 0 means unknown.
+                build();
+        Reader reader = new UTF8Reader(
+                csd, this.conChild, this.synchronizationObject);
         long leftToSkip = pos -1;
         long skipped;
         while (leftToSkip > 0) {
@@ -242,8 +251,24 @@ final class StoreStreamClob
     public Reader getInternalReader(long characterPosition)
             throws IOException, SQLException {
         if (this.internalReader == null) {
-            this.internalReader = new UTF8Reader(positionedStoreStream,
-                    TypeId.CLOB_MAXWIDTH, conChild, synchronizationObject);
+            if (positionedStoreStream.getPosition() != 0) {
+                try {
+                    positionedStoreStream.resetStream();
+                } catch (StandardException se) {
+                    throw Util.generateCsSQLException(se);
+                }
+            }
+            // Describe the stream to allow the reader to configure itself.
+            CharacterStreamDescriptor csd =
+                    new CharacterStreamDescriptor.Builder().
+                    stream(positionedStoreStream).bufferable(false).
+                    positionAware(true).dataOffset(2L). // TODO: Fix offset.
+                    curCharPos(CharacterStreamDescriptor.BEFORE_FIRST).
+                    maxCharLength(TypeId.CLOB_MAXWIDTH).
+                    charLength(cachedCharLength). // 0 means unknown.
+                    build();
+            this.internalReader =
+                    new UTF8Reader(csd, conChild, synchronizationObject);
             this.unclosableInternalReader =
                     new FilterReader(this.internalReader) {
                         public void close() {

@@ -718,9 +718,7 @@ restartScan:
         }
         
         try {
-            return new ClobUpdatableReader(this,
-                                            pos-1,
-                                            length);
+            return new ClobUpdatableReader(this, pos, length);
         } catch (IOException ioe) {
             throw Util.setStreamFailure(ioe);
         } 

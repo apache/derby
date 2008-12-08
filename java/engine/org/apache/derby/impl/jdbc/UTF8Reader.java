@@ -30,7 +30,9 @@ import java.io.EOFException;
 import java.sql.SQLException;
 
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.jdbc.CharacterStreamDescriptor;
 import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.types.PositionedStream;
 import org.apache.derby.iapi.types.Resetable;
 
 /**
@@ -60,28 +62,14 @@ public final class UTF8Reader extends Reader
 
     /** The underlying data stream. */
     private InputStream in;
-    /** Store stream that can reposition itself on request. */
-    private final PositionedStoreStream positionedIn;
+    /** Stream that can reposition itself on request. */
+    private final PositionedStream positionedIn;
     /** Store last visited position in the store stream. */
     private long rawStreamPos = 0L;
-    /**
-     * The expected number of bytes in the stream, if known.
-     * <p>
-     * A value of <code>0<code> means the length is unknown, and that the end
-     * of the stream is marked with a Derby-specific end of stream marker.
-     */
-    private final long utfLen;          // bytes
     /** Number of bytes read from the stream. */
     private long       utfCount;        // bytes
     /** Number of characters read from the stream. */
     private long       readerCharCount; // characters
-    /** 
-     * The maximum number of characters allowed for the column
-     * represented by the passed stream.
-     * <p>
-     * A value of <code>0</code> means there is no associated maximum length.
-     */
-    private final long maxFieldSize;    // characters
 
     /** Internal character buffer storing characters read from the stream. */
     private final char[]   buffer;
@@ -102,6 +90,16 @@ public final class UTF8Reader extends Reader
     private ConnectionChild parent;
 
     /**
+     * Descriptor containing information about the stream.
+     * Except for the current positions, the information in this object is
+     * considered permanent and valid for the life-time of the stream.
+     */
+    private final CharacterStreamDescriptor csd;
+
+    /**
+     * TODO: This constructor will be removed! Is is currently retrofitted to
+     *  use a CharacterStreamDescriptor.
+     *
      * Constructs a reader and consumes the encoded length bytes from the
      * stream.
      * <p>
@@ -127,8 +125,8 @@ public final class UTF8Reader extends Reader
             throws IOException, SQLException
     {
         super(synchronization);
-        this.maxFieldSize = maxFieldSize;
         this.parent = parent;
+        long utfLen = 0;
 
         parent.setupContextStack();
         try {
@@ -142,14 +140,14 @@ public final class UTF8Reader extends Reader
                     // Note that buffering this UTF8Reader again, does not
                     // cause any trouble...
                     try {
-                        this.positionedIn.resetStream();
+                        ((Resetable)this.positionedIn).resetStream();
                     } catch (StandardException se) {
                         throw Util.newIOException(se);
                     }
                 } else {
                     this.positionedIn = null;
                 }
-                this.utfLen = readUnsignedShort();
+                utfLen = readUnsignedShort();
                 // Even if we are reading the encoded length, the stream may
                 // not be a positioned stream. This is currently true when a
                 // stream is passed in after a ResultSet.getXXXStream method.
@@ -170,45 +168,43 @@ public final class UTF8Reader extends Reader
             // filled three times to fill the internal character buffer.
             this.in = new BufferedInputStream(in, bufferSize);
         }
+        this.csd = new CharacterStreamDescriptor.Builder().
+                bufferable(positionedIn == null).
+                positionAware(positionedIn != null).byteLength(utfLen).
+                dataOffset(2).curBytePos(2).stream(in).
+                build();
     }
 
-    /**
-     * Constructs a <code>UTF8Reader</code> using a stream.
-     * <p>
-     * This consturctor accepts the stream size as parameter and doesn't
-     * attempt to read the length from the stream.
-     *
-     * @param in the underlying stream
-     * @param maxFieldSize the maximum allowed length for the associated column
-     * @param streamSize size of the underlying stream in bytes
-     * @param parent the connection child this stream is associated with
-     * @param synchronization object to synchronize on
-     */
-    public UTF8Reader(
-            InputStream in,
-            long maxFieldSize,
-            long streamSize,
-            ConnectionChild parent,
-            Object synchronization) {
-        super(synchronization);
-        this.maxFieldSize = maxFieldSize;
-        this.parent = parent;
-        this.utfLen = streamSize;
-        this.positionedIn = null;
+    public UTF8Reader(CharacterStreamDescriptor csd, ConnectionChild conChild,
+            Object sync) {
+        super(sync);
+        this.csd = csd;
+        this.positionedIn =
+                (csd.isPositionAware() ? csd.getPositionedStream() : null);
+        this.parent = conChild;
 
-        if (SanityManager.DEBUG) {
-            // Do not allow the inputstream here to be a Resetable, as this
-            // means (currently, not by design...) that the length is encoded in
-            // the stream and we can't pass that out as data to the user.
-            SanityManager.ASSERT(!(in instanceof Resetable));
+        int buffersize = calculateBufferSize(csd);
+        this.buffer = new char[buffersize];
+
+        // Check and save the stream state.
+        if (SanityManager.DEBUG) { 
+            if (csd.isPositionAware()) {
+                SanityManager.ASSERT(
+                        csd.getCurBytePos() == positionedIn.getPosition());
+            }
         }
-        int bufferSize = calculateBufferSize(streamSize, maxFieldSize);
-        this.buffer = new char[bufferSize];
-        // Buffer this for improved performance.
-        // Note that the stream buffers bytes, whereas the internal buffer
-        // buffers characters. In worst case, the stream buffer must be filled
-        // three times to fill the internal character buffer.
-        this.in = new BufferedInputStream(in, bufferSize);
+        this.rawStreamPos = positionedIn.getPosition();
+        // Make sure we start at the first data byte, not in the header.
+        if (rawStreamPos < csd.getDataOffset()) {
+            rawStreamPos = csd.getDataOffset();
+        }
+
+        // Buffer stream for improved performance, if appropriate.
+        if (csd.isBufferable()) {
+            this.in = new BufferedInputStream(csd.getStream(), buffersize);
+        } else {
+            this.in = csd.getStream();
+        }
     }
 
     /*
@@ -465,6 +461,9 @@ public final class UTF8Reader extends Reader
                     throw Util.generateCsSQLException(se);
                 }
             }
+            // Keep track of how much we are allowed to read.
+            long utfLen = csd.getByteLength();
+            long maxFieldSize = csd.getMaxCharLength();
 readChars:
         while (
                 (charactersInBuffer < buffer.length) &&
@@ -475,7 +474,10 @@ readChars:
             int c = in.read();
             if (c == -1) {
                 if (utfLen == 0) {
-                    closeIn();
+                    // Close the stream if it cannot be reset.
+                    if (!csd.isPositionAware()) {
+                        closeIn();
+                    }
                     break readChars;
                 }
                 throw utfFormatException("Reached EOF prematurely, " +
@@ -528,7 +530,10 @@ readChars:
                             // we reached the end of a long string,
                             // that was terminated with
                             // (11100000, 00000000, 00000000)
-                            closeIn();
+                            // Close the stream if it cannot be reset.
+                            if (!csd.isPositionAware()) {
+                                closeIn();
+                            }
                             break readChars;
                         }
                         throw utfFormatException("Internal error: Derby-" +
@@ -570,7 +575,10 @@ readChars:
             return false;
         }
 
-        closeIn();
+        // Close the stream if it cannot be reset.
+        if (!csd.isPositionAware()) {
+            closeIn();
+        }
         return true;
         } finally {
             parent.restoreContextStack();
@@ -591,10 +599,13 @@ readChars:
      */
     private void resetUTF8Reader()
             throws IOException, StandardException {
-        // 2L to skip the length encoding bytes.
-        this.positionedIn.reposition(2L);
+        // Skip the length encoding bytes.
+        this.positionedIn.reposition(csd.getDataOffset());
         this.rawStreamPos = this.positionedIn.getPosition();
-        this.in = this.positionedIn;
+        // If bufferable, discard buffered stream and create a new one.
+        if (csd.isBufferable()) {
+            this.in = new BufferedInputStream(csd.getStream(), buffer.length);
+        }
         this.readerCharCount = this.utfCount = 0L;
         this.charactersInBuffer = this.readPositionInBuffer = 0;
     }
@@ -660,6 +671,8 @@ readChars:
     }
 
     /**
+     * TODO: Remove this when CSD is fully integrated.
+     *
      * Calculates an optimized buffer size.
      * <p>
      * The maximum size allowed is returned if the specified values don't give
@@ -676,6 +689,34 @@ readChars:
         }
         if (maxFieldSize > 0 && maxFieldSize < bufferSize) {
             bufferSize = (int)maxFieldSize;
+        }
+        return bufferSize;
+    }
+
+    /**
+     * Calculates an optimized buffer size.
+     * <p>
+     * The maximum size allowed is returned if the specified values don't give
+     * enough information to say a smaller buffer size is preferable.
+     *
+     * @param csd stream descriptor
+     * @return An (sub)optimal buffer size.
+     */
+    private final int calculateBufferSize(CharacterStreamDescriptor csd) {
+        // Using the maximum buffer size will be optimal,
+        // unless the data is smaller than the maximum buffer.
+        int bufferSize = MAXIMUM_BUFFER_SIZE;
+        long knownLength = csd.getCharLength();
+        long maxCharLength = csd.getMaxCharLength();
+        if (knownLength < 1) {
+            // Unknown char length, use byte count instead (might be zero too).
+            knownLength = csd.getByteLength();
+        }
+        if (knownLength > 0 && knownLength < bufferSize) {
+            bufferSize = (int)knownLength;
+        }
+        if (maxCharLength > 0 && maxCharLength < bufferSize) {
+            bufferSize = (int)maxCharLength;
         }
         return bufferSize;
     }
