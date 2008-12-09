@@ -346,6 +346,96 @@ public class ClobTest
         executeTestPositionWithStringToken(token, prefix);
     }
 
+    /**
+     * Truncating a Clob to the current length should work.
+     */
+    public void testTruncateExactOnDisk()
+            throws IOException, SQLException {
+        long size = 33*1024+7;
+        insertDataWithToken("", size, 0, SET_CHARACTER_STREAM);
+        assertEquals(size, this.clob.length());
+        this.clob.truncate(size);
+        assertEquals(size, this.clob.length());
+    }
+
+    /**
+     * Truncating a Clob to the current length should work.
+     */
+    public void testTruncateExactInMemory()
+            throws IOException, SQLException {
+        long size = 33;
+        insertDataWithToken("", size, 0, SET_STRING);
+        assertEquals(size, this.clob.length());
+        this.clob.truncate(size);
+        assertEquals(size, this.clob.length());
+    }
+
+    /**
+     * Specify a position that is larger then the Clob length.
+     * <p>
+     * This operation should fail and raise an exception.
+     */
+    public void testTruncateTooLongOnDisk()
+            throws IOException, SQLException {
+        long size = 44*1024+8;
+        insertDataWithToken("", size, 0, SET_CHARACTER_STREAM);
+        try {
+            this.clob.truncate(size * 2);
+            fail("Truncate should have failed, position too large");
+        } catch (SQLException sqle) {
+            // See DERBY-3977
+            if (usingEmbedded()) {
+                assertSQLState("XJ076", sqle);
+            } else {
+                assertSQLState("XJ079", sqle);
+            }
+        }
+    }
+
+    /**
+     * Specify a position that is larger then the Clob length.
+     * <p>
+     * This operation should fail and raise an exception.
+     */
+    public void testTruncateTooLongInMemory()
+            throws IOException, SQLException {
+        long size = 44;
+        insertDataWithToken("", size, 0, SET_STRING);
+        try {
+            this.clob.truncate(size * 2);
+            fail("Truncate should have failed, position too large");
+        } catch (SQLException sqle) {
+            // See DERBY-3977
+            if (usingEmbedded()) {
+                assertSQLState("XJ076", sqle);
+            } else {
+                assertSQLState("XJ079", sqle);
+            }
+        }
+    }
+
+    /**
+     * Tests that the length of a Clob isn't cached in such a way that the
+     * length isn't updated after truncation.
+     */
+    public void testGetLengthAfterTruncate()
+            throws IOException, SQLException {
+        final long initialSize =87*1024-2;
+        final long truncateOnceSize = 85*1024+9;
+        final long truncateTwiceSize = 2*1024+17;
+        insertDataWithToken("", initialSize, 0, SET_ASCII_STREAM);
+        // Check initial length.
+        assertEquals(initialSize, clob.length());
+        clob.truncate(truncateOnceSize);
+        assertEquals(truncateOnceSize, clob.length());
+        // This should bring the Clob over into memory again.
+        clob.truncate(truncateTwiceSize);
+        assertEquals(truncateTwiceSize, clob.length());
+        // Truncate again, same length.
+        clob.truncate(truncateTwiceSize);
+        assertEquals(truncateTwiceSize, clob.length());
+    }
+
     /* Test ideas for more tests
      *
      * truncate:
@@ -489,6 +579,20 @@ public class ClobTest
         return total;
     }
 
+    /**
+     * Inserts data into the test Clob, referenced by {@code this.clob}.
+     *
+     * @param token a token to insert into the Clob, cannot be {@code null} but
+     *      the empty string is accepted
+     * @param pre number of characters to insert before the token, using the
+     *      repeating alphabet stream (latin lower-case)
+     * @param post number of characters to insert after the token, using the
+     *      repeating alphabet stream (latin lower-case)
+     * @param mode insertion mode; SET_STRING, SET_ASCII_STREAM or
+     *      SET_CHARACTER_STREAM
+     * @throws IOException if inserting data fails for some reason
+     * @throws SQLException if inserting data fails for some reason
+     */
     private void insertDataWithToken(String token, 
                                      long pre, long post, int mode)
             throws IOException, SQLException {
