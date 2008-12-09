@@ -888,7 +888,7 @@ public class concateTests
 			System.arraycopy(bData, 0, bConcatenatedData, bData1.length, bData.length);
 			//Prior to fix for Derby-124, the ? was getting bound to VARCHAR FOR BIT DATA with max length of 32670
 			//And when ps.setBytes() set 32700 bytes into the ? parameter, at ps.execute() time, you got following exception
-			//ERROR 22001: A truncation error was encountered trying to shrink VARCHAR () FOR BIT DATA 'XX-RESOLVE-XX' to length 32672.
+			//ERROR 22001: A truncation error was encountered trying to shrink VARCHAR () FOR BIT DATA '(Binary data value not displayed)' to length 32672.
 			//As a fix for this, if one of the operands of concatenation is BLOB, then the ? parameter would be bound to BLOB as well      
 			System.out.println("  preapre statement with blob||?");
 			ps = conn.prepareStatement("insert into bt values (cast (x'1010' as BLOB) || ?)");
