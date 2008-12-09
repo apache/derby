@@ -31,7 +31,7 @@
 
 <!-- Targets -->
 
-  <target name="buildsource" depends="checkCompilerLevel,init,prebuild,setCompilerProperties,jsr169stubs,engine,storeless,tools,drda,client,build,versioninfo,localeinfo"/>
+  <target name="buildsource" depends="checkCompilerLevel,init,prebuild,setCompilerProperties,jsr169stubs,jdbc3stubs,jdbc4stubs,engine,storeless,tools,drda,client,build,versioninfo,localeinfo"/>
   <target name="all" depends="buildsource,demo,testing,pptesting,runmessagecheck"/>
 
 <!-- ==================================================================== -->
@@ -607,6 +607,60 @@
       destdir="${out.jsr169.dir}">
       <classpath>
         <pathelement path="${compile.classpath}"/>
+      </classpath>
+     </javac>
+
+  </target>
+
+<!-- =================================================================== -->
+<!--                     Build the stub implementation of JDBC3                  -->
+<!-- =================================================================== -->
+  <target name="jdbc3stubs">
+    <mkdir dir="${out.stubs.dir}"/>
+    <mkdir dir="${out.jdbc3.dir}"/>
+
+    <javac
+      source="1.4"
+      target="1.4"
+      bootclasspath="${empty}"
+      nowarn="on"
+      debug="${debug}"
+      depend="${depend}"
+      deprecation="${deprecation}"
+      optimize="${optimize}"
+      proceed="${proceed}"
+      verbose="${verbose}"
+      srcdir="${derby.jdbc3.src.dir}"
+      destdir="${out.jdbc3.dir}">
+      <classpath>
+        <pathelement path="${compile.classpath}"/>
+      </classpath>
+     </javac>
+
+  </target>
+
+<!-- =================================================================== -->
+<!--                     Build the stub implementation of JDBC4                  -->
+<!-- =================================================================== -->
+  <target name="jdbc4stubs">
+    <mkdir dir="${out.stubs.dir}"/>
+    <mkdir dir="${out.jdbc4.dir}"/>
+
+    <javac
+      source="1.5"
+      target="1.5"
+      bootclasspath="${empty}"
+      nowarn="on"
+      debug="${debug}"
+      depend="${depend}"
+      deprecation="${deprecation}"
+      optimize="${optimize}"
+      proceed="${proceed}"
+      verbose="${verbose}"
+      srcdir="${derby.jdbc4.src.dir}"
+      destdir="${out.jdbc4.dir}">
+      <classpath>
+        <pathelement path="${java15compile.classpath}"/>
       </classpath>
      </javac>
 
