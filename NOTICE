@@ -30,9 +30,9 @@ Software Acknowledgment and Redistribution document at
 http://www.itl.nist.gov/div897/ctg/sql_form.htm
 
 
-The JDBC api for small devices (under java/stubs/jsr169) was produced by
-trimming sources supplied by the Apache Harmony project. The following
-notice covers the Harmony sources:
+The JDBC apis for small devices and JDBC3 (under java/stubs/jsr169 and
+java/stubs/jdbc3) were produced by trimming sources supplied by the
+Apache Harmony project. The following notice covers the Harmony sources:
 
 Portions of Harmony were originally developed by
 Intel Corporation and are licensed to the Apache Software
