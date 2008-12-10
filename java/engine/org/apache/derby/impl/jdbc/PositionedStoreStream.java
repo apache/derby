@@ -73,11 +73,18 @@ public class PositionedStoreStream
     /**
      * Creates a positioned store stream on top of the specified resettable
      * stream.
+     * <p>
+     * Upon creation, the underlying stream is initiated and reset to make
+     * sure the states of the streams are in sync with each other.
      *
      * @param in a {@link Resetable}-stream
      */
-    public PositionedStoreStream(InputStream in) {
+    public PositionedStoreStream(InputStream in)
+            throws IOException, StandardException {
         this.stream = in;
+        // We need to know the stream is in a consistent state.
+        ((Resetable)in).initStream();
+        ((Resetable)in).resetStream();
     }
 
     /**
@@ -160,7 +167,6 @@ public class PositionedStoreStream
     public void initStream()
             throws StandardException {
         ((Resetable)this.stream).initStream();
-        this.pos = 0L;
     }
 
     /**

@@ -196,18 +196,8 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
             }
             // Create a position aware stream on top of dvdStream so we can
             // more easily move back and forth in the Blob.
-            myStream = new PositionedStoreStream(dvdStream);
             try {
-                myStream.initStream();
-            } catch (StandardException se) {
-                if (se.getMessageId().equals(SQLState.DATA_CONTAINER_CLOSED)) {
-                    throw StandardException
-                            .newException(SQLState.BLOB_ACCESSED_AFTER_COMMIT);
-                } else {
-                    throw se;
-                }
-            }
-            try {
+                myStream = new PositionedStoreStream(dvdStream);
                 // The BinaryToRawStream will read the encoded length bytes.
                 BinaryToRawStream tmpStream =
                         new BinaryToRawStream(myStream, con);
@@ -215,9 +205,16 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
                 // Check up front if the stream length is specified.
                 streamLength = tmpStream.getLength();
                 tmpStream.close();
+            } catch (StandardException se) {
+                if (se.getMessageId().equals(SQLState.DATA_CONTAINER_CLOSED)) {
+                    throw StandardException
+                            .newException(SQLState.BLOB_ACCESSED_AFTER_COMMIT);
+                } else {
+                    throw se;
+                }
             } catch (IOException ioe) {
                 throw StandardException.newException(
-                        SQLState.LANG_STREAMING_COLUMN_I_O_EXCEPTION, ioe);
+                     SQLState.LANG_STREAMING_COLUMN_I_O_EXCEPTION, ioe, "BLOB");
             }
         }
         //add entry in connection so it can be cleared 
