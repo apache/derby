@@ -776,10 +776,10 @@ public class Clob extends Lob implements java.sql.Clob {
                     //procedure CLOBTRUNCATE to truncate this Lob.
                     agent_.connection_.locatorProcedureCall().
                             clobTruncate(locator_, len);
-                    //The Clob value has been
-                    //modified. Increment the
-                    //update count.
+                    // The Clob value has been modified.
+                    // Increment the update count and update the length.
                     incrementUpdateCount();
+                    setSqlLength(len);
                 }
                 else {
                     //The Lob is not locator enabled.
