@@ -48,6 +48,15 @@ class Deadlock  {
 	/**
 	 * Look for a deadlock.
 	 * <BR>
+	 * Walk through the graph of all locks and search for cycles among
+	 * the waiting lock requests which would indicate a deadlock. A simple
+	 * deadlock cycle is where the granted locks of waiting compatibility
+	 * space A is blocking compatibility space B and space B holds locks causing
+	 * space A to wait.
+	 * <p>
+	 * Would be nice to get a better high level description of deadlock
+	 * search.
+	 * <p> 
 	 * MT - if the <code>LockTable</code> is a <code>LockSet</code> object, the
 	 * callers must be synchronized on the <code>LockSet</code> object in order
 	 * to satisfy the syncronization requirements of
@@ -56,6 +65,26 @@ class Deadlock  {
 	 * the <code>ReentrantLock</code>s guarding the entries in the lock table,
 	 * and the callers must make sure that only a single thread calls
 	 * <code>look()</code> at a time.
+	 *
+	 *
+	 * @param factory The locking system factory
+	 * @param set The complete lock table. A lock table is a hash
+	 * table keyed by a Lockable and with a LockControl as
+	 * the data element.
+	 * @param control A LockControl contains a reference to the item being
+	 * locked and doubly linked lists for the granted locks
+	 * and the waiting locks. The passed in value is the
+	 * lock that the caller was waiting on when woken up
+	 * to do the deadlock check.
+	 * @param startingLock represents the specific waiting lock request that
+	 * the caller has been waiting on, before just being
+	 * woken up to do this search.
+	 * @param deadlockWake Either Constants.WAITING_LOCK_IN_WAIT, or
+	 * Constants.WAITING_LOCK_DEADLOCK. 
+	 *
+	 * @return The identifier to be used to open the conglomerate later.
+	 *
+	 * @exception StandardException Standard exception policy.
 	 */
 	static Object[] look(AbstractPool factory, LockTable set,
 						 LockControl control, ActiveLock startingLock,
