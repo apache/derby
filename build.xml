@@ -188,7 +188,7 @@
           description="Set the ant variables which identify the compiler classpaths. Remove the autosetProps logic when this target becomes mandatory."
           depends="prebuild">
 
-<!--     <antcall target="printCompilerProperties"> <param name="checkEvent" value="Before"/> </antcall> -->
+    <antcall target="printCompilerProperties"> <param name="checkEvent" value="Before setting properties: "/> </antcall>
 
     <taskdef
       name="setJdkProperties"
@@ -198,12 +198,16 @@
 
     <setJdkProperties/>
 
-<!--     <antcall target="printCompilerProperties"> <param name="checkEvent" value="After"/> </antcall> -->
-
     <property file="${properties.dir}/defaultcompiler.properties"/>
     <property file="${properties.dir}/${build.compiler}.properties"/>
     <!-- Compile-time classpath`< properties files -->
     <property file="${properties.dir}/extrapath.properties"/>
+
+    <!-- 
+            If a 1.4 JDK is not present, then use the Java 5 environment to build the 1.4 support
+    -->
+    <property name="java14compile.classpath" value="${java15compile.classpath}:${xalan}:${serializer}"/>
+
     <property file="${properties.dir}/compilepath.properties"/>
     <!-- Release and version info -->
     <property file="${properties.dir}/release.properties"/>
@@ -213,6 +217,8 @@
             implementation of JSR169.
     -->
     <property name="jsr169compile.classpath" value="${out.jsr169.dir}:${java14compile.classpath}"/>
+
+    <antcall target="printCompilerProperties"> <param name="checkEvent" value="After setting properties: "/> </antcall>
 
   </target>
 
@@ -230,12 +236,15 @@
 
   </target>
 
-  <target name="printCompilerProperties">
+  <target name="printCompilerProperties" if="printCompilerProperties">
 
+    <echo message="${checkEvent} jsr169compile.classpath = ${jsr169compile.classpath}"/>
     <echo message="${checkEvent} j14lib = ${j14lib}"/>
     <echo message="${checkEvent} java14compile.classpath = ${java14compile.classpath}"/>
     <echo message="${checkEvent} j15lib = ${j15lib}"/>
     <echo message="${checkEvent} java15compile.classpath = ${java15compile.classpath}"/>
+    <echo message="${checkEvent} jdk16 = ${jdk16}"/>
+    <echo message="${checkEvent} java16compile.classpath = ${java16compile.classpath}"/>
 
   </target>
 

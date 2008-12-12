@@ -204,8 +204,8 @@ public class PropertySetter extends Task
             String  j14lib = getProperty( J14LIB );
             String  j15lib = getProperty( J15LIB );
 
-            if ( j14lib != null ) { setClasspathFromLib(J14CLASSPATH, j14lib ); }
-            if ( j15lib != null ) { setClasspathFromLib(J15CLASSPATH, j15lib ); }
+            if ( j14lib != null ) { setClasspathFromLib(J14CLASSPATH, j14lib, true ); }
+            if ( j15lib != null ) { setClasspathFromLib(J15CLASSPATH, j15lib, true ); }
 
             //
             // If the library properties were not set, the following
@@ -236,8 +236,12 @@ public class PropertySetter extends Task
         //
         refreshProperties();
 
+        //
+        // We now allow J14CLASSPATH to not be set. If a 1.4 JDK can't be found,
+        // then the calling script will set J14CLASSPATH, based on J15CLASSPATH.
+        //
+
         // Require that these be set now.
-        requireProperty( J14CLASSPATH );
         requireProperty( J15CLASSPATH );
     }
 
@@ -313,10 +317,10 @@ public class PropertySetter extends Task
         String  default_j15lib = getProperty( J15LIB );
         
         if ( default_j14lib == null )
-        { default_j14lib = searchForJreLib(jdkParents, seed14); }
+        { default_j14lib = searchForJreLib(jdkParents, seed14, false ); }
 
         if ( default_j15lib == null )
-        { default_j15lib = searchForJreLib(jdkParents, seed15); }
+        { default_j15lib = searchForJreLib(jdkParents, seed15, true ); }
 
         defaultSetter( default_j14lib, default_j15lib );
     }
@@ -328,9 +332,9 @@ public class PropertySetter extends Task
      * @param seed search string which identifies a given JDK version
      * @return a library directory, or <code>null</code> if not found
      */
-    private String searchForJreLib(List<File> parents, String seed) {
+    private String searchForJreLib(List<File> parents, String seed, boolean squawkIfEmpty) {
         for (File parent : parents) {
-            String jreLib = getJreLib(parent, seed);
+            String jreLib = getJreLib(parent, seed, squawkIfEmpty);
             if (jreLib != null) {
                 return jreLib;
             }
@@ -407,7 +411,7 @@ public class PropertySetter extends Task
      * Get the path name of the library directory in the latest version of this jre
      * </p>
      */
-    private String    getJreLib( File jdkParentDirectory, String jdkName )
+    private String    getJreLib( File jdkParentDirectory, String jdkName, boolean squawkIfEmpty )
         throws BuildException
     {
         if ( jdkParentDirectory == null ) { return null; }
@@ -417,7 +421,9 @@ public class PropertySetter extends Task
 
         if ( count <= 0 )
         {
-            echo( "Directory '" + jdkParentDirectory.getAbsolutePath() + "' does not have any child directories containing the string '" + jdkName + "'." );
+            if ( squawkIfEmpty )
+            { echo( "Directory '" + jdkParentDirectory.getAbsolutePath() + "' does not have any child directories containing the string '" + jdkName + "'." ); }
+            
             return null;
         }
 
@@ -458,8 +464,8 @@ public class PropertySetter extends Task
         String  j14lib = getProperty( J14LIB, default_j14lib );
         String  j15lib = getProperty( J15LIB, default_j15lib );
 
-        setClasspathFromLib( J14CLASSPATH, j14lib );
-        setClasspathFromLib( J15CLASSPATH, j15lib );
+        setClasspathFromLib( J14CLASSPATH, j14lib, false );
+        setClasspathFromLib( J15CLASSPATH, j15lib, true );
     }
     
     /**
@@ -469,7 +475,7 @@ public class PropertySetter extends Task
      * Throws a BuildException if there's a problem.
      * </p>
      */
-    private void    setClasspathFromLib( String classpathProperty, String libraryDirectory )
+    private void    setClasspathFromLib( String classpathProperty, String libraryDirectory, boolean squawkIfEmpty )
         throws BuildException
     {
         String      classpath = getProperty( classpathProperty );
@@ -477,14 +483,14 @@ public class PropertySetter extends Task
         // nothing to do if the property is already set. we can't override it.
         if ( classpath != null ) { return; }
 
-        String      jars = listJars( libraryDirectory );
+        String      jars = listJars( libraryDirectory, squawkIfEmpty );
 
-        if ( jars == null )
+        if ( squawkIfEmpty && (jars == null) )
         {
             throw couldntSetProperty( classpathProperty );
         }
 
-        setProperty( classpathProperty, jars );
+        if ( jars != null ) { setProperty( classpathProperty, jars ); }
     }
 
     /**
@@ -495,7 +501,7 @@ public class PropertySetter extends Task
      * a valid directory.
      * </p>
      */
-    private String    listJars( String dirName )
+    private String    listJars( String dirName, boolean squawkIfEmpty )
     {
         if ( dirName == null ) { return null; }
 
@@ -503,12 +509,12 @@ public class PropertySetter extends Task
 
         if ( !dir.exists() )
         {
-            echo( "Directory " + dirName + " does not exist." );
+            if ( squawkIfEmpty) { echo( "Directory " + dirName + " does not exist." ); }
             return null;
         }
         if ( !dir.isDirectory() )
         {
-            echo( dirName + " is not a directory." );
+            if ( squawkIfEmpty) { echo( dirName + " is not a directory." ); }
             return null;
         }
 

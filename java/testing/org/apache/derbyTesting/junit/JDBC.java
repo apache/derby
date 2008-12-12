@@ -130,7 +130,7 @@ public class JDBC {
         try {
             Class.forName(className);
             return true;
-        } catch (Exception e) {
+        } catch (Throwable e) {
         	return false;
         }    	
     }
