@@ -24,6 +24,7 @@ package org.apache.derby.impl.jdbc;
 
 import java.io.BufferedInputStream;
 import java.io.EOFException;
+import java.io.FilterReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
@@ -31,6 +32,7 @@ import java.io.Writer;
 import java.sql.SQLException;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.jdbc.CharacterStreamDescriptor;
+import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.util.UTF8Util;
 
 /**
@@ -54,6 +56,26 @@ final class TemporaryClob implements InternalClob {
     /** Tells whether this Clob has been released or not. */
     // GuardedBy("this")
     private boolean released = false;
+    /**
+     * Cached character length of the Clob.
+     * <p>
+     * A value of {@code 0} is interpreted as unknown length, even though it is
+     * a valid value. If the length is requested and the value is zero, an
+     * attempt to obtain the length is made by draining the source.
+     */
+    private long cachedCharLength;
+    /**
+     * Shared internal reader, closed when the Clob is released.
+     * This is a performance optimization, and the stream is shared between
+     * "one time" operations, for instance {@code getSubString} calls. Often a
+     * subset, or the whole, of the Clob is read subsequently and then this
+     * optimization avoids repositioning costs (the store does not support
+     * random access for LOBs).
+     * <b>NOTE</b>: Do not publish this reader to the end-user.
+     */
+    private UTF8Reader internalReader;
+    /** The internal reader wrapped so that it cannot be closed. */
+    private FilterReader unclosableInternalReader;
 
     /** Simple one-entry cache for character-byte position. */
     // @GuardedBy("this")
@@ -126,6 +148,11 @@ final class TemporaryClob implements InternalClob {
         if (!this.released) {
             this.released = true;
             this.bytes.free();
+            if (internalReader != null) {
+                internalReader.close();
+                internalReader = null;
+                unclosableInternalReader = null;
+            }
         }
     }
 
@@ -241,15 +268,10 @@ final class TemporaryClob implements InternalClob {
             throw new IllegalArgumentException(
                 "Position must be positive: " + pos);
         }
-        // Describe the stream to allow the reader to configure itself.
-        CharacterStreamDescriptor csd = new CharacterStreamDescriptor.Builder().
-                stream(this.bytes.getInputStream(0)).
-                positionAware(true).
-                bufferable(this.bytes.getLength() > 4096). // Cache if on disk.
-                byteLength(this.bytes.getLength()).
-                build();
-        Reader isr = new UTF8Reader(
-                csd, conChild, conChild.getConnectionSynchronization());
+        // getCSD obtains a descriptor for the stream to allow the reader
+        // to configure itself.
+        Reader isr = new UTF8Reader(getCSD(), conChild,
+                conChild.getConnectionSynchronization());
 
         long leftToSkip = pos -1;
         long skipped;
@@ -270,8 +292,25 @@ final class TemporaryClob implements InternalClob {
      */
     public Reader getInternalReader(long characterPosition)
             throws IOException, SQLException {
-        // TODO: See if we can optimize for a shared internal reader.
-        return getReader(characterPosition);
+        if (this.internalReader == null) {
+            // getCSD obtains a descriptor for the stream to allow the reader
+            // to configure itself.
+            this.internalReader = new UTF8Reader(getCSD(), conChild,
+                    conChild.getConnectionSynchronization());
+            this.unclosableInternalReader =
+                    new FilterReader(this.internalReader) {
+                        public void close() {
+                            // Do nothing.
+                            // Stream will be closed when the Clob is released.
+                        }
+                    };
+        }
+        try {
+            this.internalReader.reposition(characterPosition);
+        } catch (StandardException se) {
+            throw Util.generateCsSQLException(se);
+        }
+        return this.unclosableInternalReader;
     }
 
     /**
@@ -282,8 +321,11 @@ final class TemporaryClob implements InternalClob {
      */
     public synchronized long getCharLength() throws IOException {
         checkIfValid();
-        return
-            UTF8Util.skipUntilEOF(new BufferedInputStream(getRawByteStream()));
+        if (cachedCharLength == 0) {
+            cachedCharLength = UTF8Util.skipUntilEOF(
+                    new BufferedInputStream(getRawByteStream()));
+        }
+        return cachedCharLength;
     }
 
     /**
@@ -314,6 +356,8 @@ final class TemporaryClob implements InternalClob {
             throw new IllegalArgumentException(
                 "Position must be positive: " + insertionPoint);
         }
+        long prevLength = cachedCharLength;
+        updateInternalState(insertionPoint);
         long byteInsertionPoint = getBytePosition(insertionPoint);
         long curByteLength = this.bytes.getLength();
         byte[] newBytes = getByteFromString(str);
@@ -344,6 +388,16 @@ final class TemporaryClob implements InternalClob {
             } catch (StandardException se) {
                 throw Util.generateCsSQLException(se);
             }
+            // Update the length if we know the previous length.
+            if (prevLength != 0) {
+                long newLength = (insertionPoint -1) + str.length();
+                if (newLength > prevLength) {
+                    cachedCharLength = newLength; // The Clob grew.
+                } else {
+                    // We only wrote over existing characters, length unchanged.
+                    cachedCharLength = prevLength;
+                }
+            }
         }
         return str.length();
     }
@@ -353,7 +407,7 @@ final class TemporaryClob implements InternalClob {
      *
      * @return {@code true} if released, {@code false} if not.
      */
-    public boolean isReleased() {
+    public synchronized boolean isReleased() {
         return released;
     }
 
@@ -380,10 +434,9 @@ final class TemporaryClob implements InternalClob {
             long byteLength = UTF8Util.skipFully (
                     new BufferedInputStream(getRawByteStream()), newCharLength);
             this.bytes.truncate(byteLength);
-            if (newCharLength <= this.posCache.getCharPos()) {
-                // Reset the cache if last cached position has been cut away.
-                this.posCache.reset();
-            }
+            // Reset the internal state, and then update the length.
+            updateInternalState(newCharLength);
+            cachedCharLength = newCharLength;
         } catch (StandardException se) {
             throw Util.generateCsSQLException(se);
         }
@@ -471,6 +524,56 @@ final class TemporaryClob implements InternalClob {
             throw new IllegalStateException(
                 "The Clob has been released and is not valid");
         }
+    }
+
+    /**
+     * Updates the internal state after a modification has been performed on
+     * the Clob content.
+     * <p>
+     * Currently the state update consists of dicarding the internal reader to
+     * stop it from delivering stale data, to reset the byte/char position
+     * cache if necessary, and to reset the cached length.
+     *
+     * @param charChangePosition the position where the Clob change started
+     */
+    private final void updateInternalState(long charChangePosition) {
+        // Discard the internal reader, don't want to deliver stale data.
+        if (internalReader != null) {
+            internalReader.close();
+            internalReader = null;
+            unclosableInternalReader = null;
+        }
+        // Reset the cache if last cached position has been cut away.
+        if (charChangePosition < posCache.getCharPos()) {
+            posCache.reset();
+        }
+        // Reset the cached length.
+        cachedCharLength = 0;
+    }
+
+    /**
+     * Returns a character stream descriptor for the stream.
+     * <p>
+     * All streams from the underlying source ({@code LOBStreamControl}) are
+     * position aware and can be moved to a specific byte position cheaply.
+     * The maximum length is not really needed, nor known, at the moment, so
+     * the maximum allowed Clob length in Derby is used.
+     *
+     * @return A character stream descriptor.
+     * @throws IOException if obtaining the length of the stream fails
+     */
+    private final CharacterStreamDescriptor getCSD()
+            throws IOException {
+        return new CharacterStreamDescriptor.Builder().
+                    // Static values.
+                    positionAware(true).
+                    maxCharLength(TypeId.CLOB_MAXWIDTH).
+                    // Values depending on content and/or state.
+                    stream(bytes.getInputStream(0)).
+                    bufferable(bytes.getLength() > 4096).
+                    byteLength(bytes.getLength()).
+                    charLength(cachedCharLength). // 0 means unknown
+                    build();
     }
 
     /**

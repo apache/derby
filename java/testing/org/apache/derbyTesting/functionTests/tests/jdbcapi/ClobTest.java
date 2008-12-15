@@ -78,8 +78,6 @@ public class ClobTest
             "\u00e6\u00f8\u00e5\u00e6\u00f8\u00e5\u00e6\u00f8\u00e5" +
             "\u00e6\u00f8\u00e5\u00e6\u00f8\u00e5\u00e6\u00f8\u00e5";
 
-    /** Result set used to obtain Clob. */
-    private ResultSet rs = null;
     /**
      * The Clob used for testing.
      * It is reinitialized to a Clob containing the empty string for each test.
@@ -204,6 +202,49 @@ public class ClobTest
         assertEquals(1, this.clob.setString(6, "b"));
 	    assertEquals("Clob content is incorrect",
             newContent, this.clob.getSubString(1, newContent.length()));
+    }
+
+    /**
+     * Tests that the length is updated correctly when inserting data.
+     */
+    public void testLengthAfterInsertOnEmpty()
+            throws IOException, SQLException {
+        insertDataWithToken("", 0, 0, SET_STRING);
+        assertEquals(0L, clob.length());
+        clob.setString(1, "TEST");
+        assertEquals(4L, clob.length());
+        clob.setString(1, "TEST");
+        assertEquals(4L, clob.length());
+        clob.setString(5, "TEST");
+        assertEquals(8L, clob.length());
+        clob.setString(7, "TEST");
+        assertEquals(10L, clob.length());
+        clob.truncate(4L);
+        assertEquals(4L, clob.length());
+        clob.setString(4, "TEST");
+        assertEquals(7L, clob.length());
+    }
+
+    /**
+     * Tests that the length is updated correctly when inserting data.
+     */
+    public void testLengthAfterInsertOnLarge()
+            throws IOException, SQLException {
+        final String token = "SWEETSPOT";
+        long curLength = (32+9) * 1024 + token.length();
+        insertDataWithToken(token, 32*1024, 9*1024, SET_CHARACTER_STREAM);
+        assertEquals(curLength, clob.length());
+        clob.setString(1, "TEST");
+        assertEquals(curLength, clob.length());
+        clob.setString(curLength, "X");
+        assertEquals(curLength, clob.length());
+        assertEquals(32*1024+1, clob.position(token, 17*1024));
+        clob.setString(32*1024+1, "FUNNYSPOT");
+        assertEquals(curLength, clob.length());
+        assertEquals(-1, clob.position(token, 17*1024));
+        clob.setString(curLength +1, "TEST");
+        curLength += 4;
+        assertEquals(curLength, clob.length());
     }
 
     public void testReplaceMultibyteWithSingleByteForwards()
@@ -480,19 +521,19 @@ public class ClobTest
         // Obtain a Clob containing the empty string ("").
         Statement stmt = createStatement();
         // Keep reference to the result set to be able to close it.
-        this.rs = stmt.executeQuery(
+        ResultSet rs = stmt.executeQuery(
                 "select dClob from ClobTestData where id = 1");
-        assertTrue(this.rs.next());
-        this.clob = this.rs.getClob(1);
+        assertTrue(rs.next());
+        this.clob = rs.getClob(1);
+        // Leave the result set open to keep the Clob alive.
     }
 
     /**
-     * Nullify reference to Clob, close the parent result set.
+     * Nullify reference to Clob.
      */
     protected void tearDown()
             throws Exception {
         this.clob = null;
-        this.rs.close();
         super.tearDown();
     }
 
