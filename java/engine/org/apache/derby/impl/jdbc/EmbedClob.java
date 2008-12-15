@@ -639,8 +639,8 @@ restartScan:
         }
         catch (EOFException eofe) {
             throw Util.generateCsSQLException(
-                        SQLState.BLOB_POSITION_TOO_LARGE,
-                        new Long(len));
+                        SQLState.BLOB_LENGTH_TOO_LONG,
+                        new Long(len), eofe);
         } catch (IOException e) {
             throw Util.setStreamFailure(e);
         }

@@ -424,12 +424,7 @@ public class ClobTest
             this.clob.truncate(size * 2);
             fail("Truncate should have failed, position too large");
         } catch (SQLException sqle) {
-            // See DERBY-3977
-            if (usingEmbedded()) {
-                assertSQLState("XJ076", sqle);
-            } else {
-                assertSQLState("XJ079", sqle);
-            }
+            assertSQLState("XJ079", sqle);
         }
     }
 
@@ -446,12 +441,7 @@ public class ClobTest
             this.clob.truncate(size * 2);
             fail("Truncate should have failed, position too large");
         } catch (SQLException sqle) {
-            // See DERBY-3977
-            if (usingEmbedded()) {
-                assertSQLState("XJ076", sqle);
-            } else {
-                assertSQLState("XJ079", sqle);
-            }
+            assertSQLState("XJ079", sqle);
         }
     }
 
