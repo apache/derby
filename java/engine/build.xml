@@ -50,7 +50,7 @@
 
 <!--             ============ Begin Targets ==============                -->
  
-  <target name="engine" depends="engine_j2se,engine_169,engine_169_opt,jdbc4_modules_edit"
+  <target name="engine" depends="engine_j2se,engine_169,engine_169_opt"
           description="Build Derby engine">
 	</target>
     <target name="engine_j2se" depends="engine_169"
@@ -112,13 +112,6 @@
 	  </condition>
 	</target> 
 
-	<target name="jdbc4_modules_edit" 
-                 if="jdk16">
-                <replaceregexp file="${out.dir}/${derby.dir}/modules.properties"
-                              match="^#jdbc4_optional_(.*)"
-                              replace="\1"
-                              byline="true" />
-        </target>
 
 <!--             ============= End Targets ==============                -->
 
