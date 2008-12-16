@@ -413,7 +413,7 @@ public class ResultSetStreamTest extends BaseJDBCTestCase {
         Test test = new SupportFilesSetup(suite, new String[] {
                 "functionTests/testData/ResultSetStream/littleclob.utf",
                 "functionTests/testData/ResultSetStream/short.utf",
-                "functionTests/testData/ResultSetStream/resultsetstream.gif" });
+                "functionTests/testData/ResultSetStream/resultsetStream.gif" });
 
         return new CleanDatabaseTestSetup(test) {
             protected void decorateSQL(Statement s) throws SQLException {
