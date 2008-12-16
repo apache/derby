@@ -122,8 +122,7 @@ public class LiveLockTest extends BaseJDBCTestCase {
 
         try {
             if (delay > 0)
-                ;
-            Thread.sleep(delay);
+                Thread.sleep(delay);
             threadConnection = openDefaultConnection();
             Statement stmt = threadConnection.createStatement();
 
@@ -138,7 +137,7 @@ public class LiveLockTest extends BaseJDBCTestCase {
             // a lock timeout by then, so we will get a test failure.
             // We don't want it to run forever if live lock ever breaks.
             int tries = 0;
-            while (!isUpdateDone() && tries <= 10) {
+            while (!isUpdateDone()) {
                 ResultSet rs = stmt.executeQuery("select * from t");
                 while (rs.next())
                     ;
