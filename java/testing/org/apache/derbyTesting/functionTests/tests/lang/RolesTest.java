@@ -74,7 +74,7 @@ public class RolesTest extends BaseJDBCTestCase
     private final static String notIdle                  = "25001";
     private final static String invalidRoleName          = "4293A";
     private final static String userException            = "38000";
-    private final static String userAlreadyExists        = "X0Y68";
+    private final static String objectAlreadyExists      = "X0Y68";
     private final static String invalidPUBLIC            = "4251B";
     private final static String loginFailed              = "08004";
     private final static String roleGrantCircularity     = "4251C";
@@ -408,33 +408,37 @@ public class RolesTest extends BaseJDBCTestCase
         doStmt("create role \"NONE\"", // quoted role id should work
                 sqlAuthorizationRequired, null , roleDboOnly);
 
+        // Verify that we can't create a role which already exists
+        doStmt("create role foo",
+               sqlAuthorizationRequired, objectAlreadyExists, roleDboOnly);
+
         // Verify that we can't create a role which has the same auth
         // id as a known user (DERBY-3673).
         //
         // a) built-in user:
         doStmt("create role " + users[dboIndex], sqlAuthorizationRequired,
-               userAlreadyExists, roleDboOnly);
+               objectAlreadyExists, roleDboOnly);
 
         // specified with mixed case : DonaldDuck
         doStmt("create role " + users[nonDboIndex],
-                sqlAuthorizationRequired, userAlreadyExists, roleDboOnly);
+                sqlAuthorizationRequired, objectAlreadyExists, roleDboOnly);
 
         // delimited identifier with embedded text quote inside
         doStmt("create role " + users[additionaluserIndex],
-                sqlAuthorizationRequired, userAlreadyExists, roleDboOnly);
+                sqlAuthorizationRequired, objectAlreadyExists, roleDboOnly);
 
 
         // b) A grant to this auth id exists (see setup), even though
         // it is not a built-in user, so the presumption is, it is a
         // user defined externally:
         doStmt("create role whoever", sqlAuthorizationRequired,
-               userAlreadyExists, roleDboOnly);
+               objectAlreadyExists, roleDboOnly);
 
         // c) A schema exists which has an authid we did not see
         // through properties; user has been removed, but his schema
         // lingers..
         doStmt("create role schemaowner", sqlAuthorizationRequired,
-               userAlreadyExists, roleDboOnly);
+               objectAlreadyExists, roleDboOnly);
 
         testLoginWithUsernameWhichIsARole();
 
