@@ -46,10 +46,12 @@
     <property file="${user.home}/properties/derbytesting.properties"/>
     <property name="this.dir" value="${derby.testing.functest.dir}/tests/jdbc4"/>
 
-    <target name="compile_jdbc4" depends="copyfiles">
+    <target name="compile_jdbc4" if="jdk16" depends="copyfiles">
         <javac
-          source="${compilerLevel16}"
-          target="${compilerLevel16}"
+          source="1.6"
+          target="1.6"
+            fork="yes"
+            executable="${jdk16}/bin/javac"
             bootclasspath="${empty}"
             nowarn="on"
             debug="true"

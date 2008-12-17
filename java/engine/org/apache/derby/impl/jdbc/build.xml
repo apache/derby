@@ -111,10 +111,12 @@
     </javac>
   </target>
 
-<target name="compile_jdbc4" depends="compile_jdbc3" >
+<target name="compile_jdbc4" depends="compile_jdbc3" if="jdk16">
     <javac
-      source="${compilerLevel16}"
-      target="${compilerLevel16}"
+      source="1.6"
+      target="1.6"
+        fork="yes"
+        executable="${jdk16}/bin/javac"
         bootclasspath="${empty}"
         nowarn="on"
         debug="${debug}"
