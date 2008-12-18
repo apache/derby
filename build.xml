@@ -99,19 +99,11 @@
 
   <target name="checkCompilerLevel" description="Make sure compiler level is Java 5 level or higher.">
 
-    <property name="dummy.src" value="z.java"/>
-    <property name="dummy.class" value="z.class"/>
-    <echo file="${dummy.src}" message="public class z {}"/>
-    <delete file="${dummy.class}"/>
-
     <javac source="1.5" srcdir="${basedir}" failonerror="false">
       <include name="${dummy.src}"/>
     </javac>
 
-    <available property="compilerAtCorrectLevel" file="${dummy.class}"/>
-
-    <delete file="${dummy.src}"/>
-    <delete file="${dummy.class}"/>
+    <available property="compilerAtCorrectLevel" classname="java.util.Queue"/>
 
     <fail unless="compilerAtCorrectLevel" message="Compiler level must be Java 5 or later."/>
   </target>
