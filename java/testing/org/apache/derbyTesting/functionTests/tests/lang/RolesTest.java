@@ -401,6 +401,8 @@ public class RolesTest extends BaseJDBCTestCase
                sqlAuthorizationRequired, null , roleDboOnly);
         doStmt("create role bar",
                sqlAuthorizationRequired, null , roleDboOnly);
+        doStmt("create role notGranted",
+               sqlAuthorizationRequired, null , roleDboOnly);
         doStmt("create role role", // role is not reserved word
                sqlAuthorizationRequired, null , roleDboOnly);
         doStmt("create role admin",
@@ -468,12 +470,12 @@ public class RolesTest extends BaseJDBCTestCase
         doStmt("grant foo,bar to admin",
                sqlAuthorizationRequired, null , roleDboOnly);
 
-        assertSysRolesRowCount(0, 23,
-                               // nonDbo run: foo, bar still in
-                               // place, used for testing SET ROLE for
-                               // non-dbo user. foo granted to public,
-                               // bar granted to nonDbo, so 4!
-                               4);
+        assertSysRolesRowCount(0, 24,
+                               // nonDbo run: foo, bar, notGranted still in
+                               // place, used for testing SET ROLE for non-dbo
+                               // user. foo granted to public, bar granted to
+                               // nonDbo, notGranted not granted at all, so 5!
+                               5);
 
         checkGrantCircularity();
 
@@ -492,8 +494,10 @@ public class RolesTest extends BaseJDBCTestCase
 
         doStmt("set role bar",
                sqlAuthorizationRequired, null , null /* direct grant */);
+        doStmt("set role notGranted",
+               sqlAuthorizationRequired, null , invalidRole /* not granted */);
         doStmt("set role role",
-               sqlAuthorizationRequired, null , invalidRole);
+               sqlAuthorizationRequired, null , invalidRole /* not exists */);
 
         /* Test that we cannot set role while in non-idle state */
         _conn.setAutoCommit(false);
@@ -645,7 +649,7 @@ public class RolesTest extends BaseJDBCTestCase
         assertSysRoutinePermsRowCount(6,6,6);
 
         // roles foo and bar survive to nonDbo run and beyond:
-        assertSysRolesRowCount(0, 4, 4);
+        assertSysRolesRowCount(0, 5, 5);
 
         _stm.close();
 
@@ -847,6 +851,7 @@ public class RolesTest extends BaseJDBCTestCase
             try {
                 _stm.executeUpdate("drop role foo");
                 _stm.executeUpdate("drop role bar");
+                _stm.executeUpdate("drop role notGranted");
             } catch (SQLException se) {
             }
         }
