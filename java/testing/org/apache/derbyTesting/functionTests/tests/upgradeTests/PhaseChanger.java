@@ -20,6 +20,7 @@ limitations under the License.
 */
 package org.apache.derbyTesting.functionTests.tests.upgradeTests;
 
+import java.io.PrintStream;
 import java.security.AccessController;
 import java.sql.SQLException;
 
@@ -28,6 +29,7 @@ import javax.sql.DataSource;
 import junit.extensions.TestSetup;
 import junit.framework.Test;
 
+import org.apache.derbyTesting.junit.BaseTestCase;
 import org.apache.derbyTesting.junit.BaseTestSetup;
 import org.apache.derbyTesting.junit.JDBCDataSource;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -42,6 +44,7 @@ final class PhaseChanger extends BaseTestSetup {
     private final int[] version;
     private ClassLoader loader;
     private ClassLoader previousLoader;
+    private boolean trace = false;
     
     public PhaseChanger(Test test, int phase,
             ClassLoader loader, int[] version) {
@@ -62,6 +65,17 @@ final class PhaseChanger extends BaseTestSetup {
         UpgradeChange.phase.set(new Integer(phase));
         UpgradeChange.oldVersion.set(version);
         
+        TestConfiguration config = TestConfiguration.getCurrent();
+        trace = config.doTrace();
+        if ( trace )
+        {
+            String versStr = ((int[]) UpgradeChange.oldVersion.get())[0] 
+                    + "." +  ((int[]) UpgradeChange.oldVersion.get())[1]
+                    + "." +  ((int[]) UpgradeChange.oldVersion.get())[2]
+                    + "." +  ((int[]) UpgradeChange.oldVersion.get())[3];
+            BaseTestCase.traceit("Test upgrade from: " + versStr + ", phase: " 
+                    + UpgradeChange.PHASES[phase]);
+        }
         
         if (loader != null) {
             previousLoader = Thread.currentThread().getContextClassLoader();
@@ -102,6 +116,7 @@ final class PhaseChanger extends BaseTestSetup {
      */
     protected void tearDown() throws InterruptedException
     {
+        if ( trace ) BaseTestCase.traceit(" Test upgrade done.");
         if (phase != UpgradeChange.PH_POST_HARD_UPGRADE) {
             DataSource ds = JDBCDataSource.getDataSource();
             JDBCDataSource.shutdownDatabase(ds);

@@ -172,6 +172,16 @@ public abstract class BaseTestCase
     }
 
     /**
+     * Print trace string.
+     * @param text String to print
+     */
+    public static void traceit(final String text) {
+        if (TestConfiguration.getCurrent().doTrace()) {
+            out.println(text);
+        }
+    }
+
+    /**
      * Print debug string.
      * @param t Throwable object to print stack trace from
      */

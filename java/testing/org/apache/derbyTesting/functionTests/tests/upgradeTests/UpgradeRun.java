@@ -21,6 +21,7 @@ limitations under the License.
 package org.apache.derbyTesting.functionTests.tests.upgradeTests;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -34,6 +35,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.functionTests.tests.jdbcapi.DatabaseMetaDataTest;
+import org.apache.derbyTesting.junit.BaseTestCase;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -80,10 +82,23 @@ class UpgradeRun {
         new AdditionalDb("ROLES_10_5", false)
     };
     
+    static final String oldVersionsPath;
     static final String jarPath;
     
     static {
-        jarPath = (String ) AccessController.doPrivileged
+         
+        oldVersionsPath = (String) AccessController.doPrivileged
+        (new java.security.PrivilegedAction(){
+
+            public Object run(){
+            return System.getProperty(_Suite.OLD_VERSIONS_PATH_PROPERTY);
+
+            }
+
+        }
+         );
+
+         jarPath = (String ) AccessController.doPrivileged
         (new java.security.PrivilegedAction(){
 
             public Object run(){
@@ -120,12 +135,14 @@ class UpgradeRun {
         {
             TestSuite suite = new TestSuite(
                     "Empty: Skipped upgrade Tests (no jars) for " + getTextVersion(version));
+            BaseTestCase.traceit("Empty: Skip upgrade Tests (no jars) for " + getTextVersion(version));
             return suite;
         }
         
-        
+
         TestSuite suite = new TestSuite(
                 "Upgrade Tests from " + getTextVersion(version));
+        BaseTestCase.traceit("Prepare to run upgrade tests from " + getTextVersion(version));
 
         
         for (int phase = 0;
@@ -144,8 +161,8 @@ class UpgradeRun {
                 break;
                 
             }
-            Test phaseTests = baseSuite(
-                    "Upgrade Phase: " + UpgradeChange.PHASES[phase],
+            Test phaseTests = baseSuite(getTextVersion(version)
+                    + " Upgrade Phase: " + UpgradeChange.PHASES[phase] + " ",
                     phase, version);
             
             Test phaseSet = new PhaseChanger(phaseTests, phase, loader, version);
@@ -201,7 +218,7 @@ class UpgradeRun {
         
         int oldMajor = version[0];
         int oldMinor = version[1];
-          
+
         // No connection is expected in the post hard upgrade
         // phase, so don't bother adding test fixtures.
         if (phase != UpgradeChange.PH_POST_HARD_UPGRADE)
@@ -318,8 +335,11 @@ class UpgradeRun {
 
             // If the jars do not exist then return null
             // and the caller will set up to skip this.
-            if (!lib.exists())
+            if (!lib.exists()){
+                BaseTestCase.alarm("Non-existing location for jar files: '" 
+                    + jarLocation + "'. Upgrade tests can NOT be run!");
                 return null;
+            }
 
             for (int i=0; i < jarFiles.length; i++) {
                 try {
@@ -341,9 +361,15 @@ class UpgradeRun {
             for (int i=0; i < jarFiles.length; i++) {
                 try {
                     url[i] = new URL(oldURLJarLocation + "/" + jarFiles[i]);
+                    Object dummy = url[i].getContent(); // IOException if not available.
                 } catch (MalformedURLException e) {
                     Assert.fail(e.toString());
+                } catch (IOException e) {
+                    BaseTestCase.alarm("IOException msg: '" + e.getMessage() + "'." 
+                        + " Upgrade tests can NOT be run!");
+                    return null;
                 }
+
             }
         }
         
