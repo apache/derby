@@ -96,6 +96,8 @@ public class PropertySetter extends Task
     private static  final   String  J14CLASSPATH = "java14compile.classpath";
     private static  final   String  J15LIB = "j15lib";
     private static  final   String  J15CLASSPATH = "java15compile.classpath";
+    private static  final   String  J16LIB = "j16lib";
+    private static  final   String  J16CLASSPATH = "java16compile.classpath";
 
     private static  final   String  JDK_VENDOR = "java.vendor";
     private static  final   String  JAVA_HOME = "java.home";
@@ -108,7 +110,8 @@ public class PropertySetter extends Task
     private static  final   String  JDK_SUN = "Sun Microsystems Inc.";
 
     private static  final   String  APPLE_JAVA_ROOT = "/System/Library/Frameworks/JavaVM.framework/Versions";
-    
+
+    private static  final   String  JAVA_5 = "1.5";
 
     /////////////////////////////////////////////////////////////////////////
     //
@@ -193,6 +196,11 @@ public class PropertySetter extends Task
 
         try {
             //
+            // Check for settings which are known to cause problems.
+            //
+            checkForProblematicSettings();
+            
+            //
             // There's nothing to do if the classpath properties are already set.
             //
             if ( isSet( J14CLASSPATH ) && isSet( J15CLASSPATH ) ) { return; }
@@ -219,7 +227,7 @@ public class PropertySetter extends Task
             if ( jdkVendor == null ) { jdkVendor = ""; }
 
             if (  jdkVendor.startsWith( JDK_APPLE ) ) { setForAppleJDKs(); }
-            else if ( JDK_IBM.equals( jdkVendor ) ) { setForIbmJDKs(); }
+            else if ( usingIBMjdk( jdkVendor ) ) { setForIbmJDKs(); }
             else if ( JDK_SUN.equals( jdkVendor ) ) { setForSunJDKs(); }
             
         } catch (Throwable t)
@@ -586,6 +594,40 @@ public class PropertySetter extends Task
         PropertyHelper  helper = PropertyHelper.getPropertyHelper( getProject() );
         
         _propertiesSnapshot = helper.getProperties();
+    }
+    
+    /**
+     * <p>
+     * Check for settings which are known to cause problems.
+     * </p>
+     */
+    private void  checkForProblematicSettings()
+    {
+        //
+        // The IBM Java 5 compiler raises version mismatch errors when used
+        // with the IBM Java 6 libraries.
+        //
+        String  jdkVendor = getProperty( JDK_VENDOR );
+        String  javaVersion = getProperty( JAVA_VERSION );
+        if ( usingIBMjdk( jdkVendor ) && javaVersion.startsWith( JAVA_5 ) && isSet( J16CLASSPATH ) )
+        {
+            throw new BuildException
+                (
+                 "\nThe build raises version mismatch errors when using the IBM Java 5 compiler with Java 6 libraries.\n" +
+                 "Please either use a Java 6 (or later) compiler or do not set the '" +  J16CLASSPATH + "' variable.\n"
+                 );
+        }
+
+    }
+    
+    /**
+     * <p>
+     * Return true if we are using an IBM JDK.
+     * </p>
+     */
+    private boolean usingIBMjdk( String jdkVendor )
+    {
+        return JDK_IBM.equals( jdkVendor );
     }
     
     /**
