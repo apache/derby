@@ -2655,6 +2655,11 @@ readingLoop:
      */
     public int hashCode()
     {
+        if (SanityManager.DEBUG) {
+            SanityManager.ASSERT(!(this instanceof CollationElementsInterface),
+                    "SQLChar.hashCode() does not work with collation");
+        }
+
         try {
             if (getString() == null)
             {
@@ -2700,6 +2705,24 @@ readingLoop:
         }
 
         return hashcode;
+    }
+
+    /**
+     * Hash code implementation for collator sensitive subclasses.
+     */
+    int hashCodeForCollation() {
+        CollationKey key = null;
+
+        try {
+            key = getCollationKey();
+        } catch (StandardException se) {
+            // ignore exceptions, like we do in hashCode()
+            if (SanityManager.DEBUG) {
+                SanityManager.THROWASSERT("Unexpected exception", se);
+            }
+        }
+
+        return key == null ? 0 : key.hashCode();
     }
 
     /**

@@ -257,39 +257,58 @@ public void testDefaultCollation() throws SQLException {
       //End of parameter testing
       
       s.close();
-      compareAgrave(1,1);
+      compareAgrave(1, 1, 2);
       }
       
 
 public void testFrenchCollation() throws SQLException {
-    compareAgrave(2,1);    
+    compareAgrave(2, 1, 1);
 }
 
 
 
- /**
- * For a TERRITORY_BASED collation french database, differences between pre-composed accents such 
- * as "\u00C0" (A-grave) and combining accents such as "A\u0300" (A, combining-grave) should match
- * for = and like. But they do not match for UCS_BASIC. We insert both into a table and search
- * based on equal and like. 
+/**
+ * For a TERRITORY_BASED collation french database, differences between
+ * pre-composed accents such as "\u00C0" (A-grave) and combining accents
+ * such as "A\u0300" (A, combining-grave) should match for {@code =}, but
+ * not for {@code LIKE}. They should never match for UCS_BASIC. We insert
+ * both into a table and search based on {@code =} and {@code LIKE}.
  *  
  * @param expectedMatchCountForEqual  number of rows we expect back for =. 
  * 	2 for French, 1 for English 
  * @param expectedMatchCountForLike  number of rows we expect back for LIKE. 
  * 	1 for French and English 
+ * @param expectedDistinctRows number of rows expected from SELECT DISTINCT
  * @throws SQLException
  */
 private void compareAgrave(int expectedMatchCountForEqual,
-		int expectedMatchCountForLike) throws SQLException {
-      
+        int expectedMatchCountForLike, int expectedDistinctRows)
+            throws SQLException {
+    String[] dataTypes = {"VARCHAR(5)", "CHAR(5)"};
+    for (int i = 0; i < dataTypes.length; i++) {
+        compareAgrave(dataTypes[i], expectedMatchCountForEqual,
+                expectedMatchCountForLike, expectedDistinctRows);
+    }
+}
+
+/**
+ * Helper for {@link #compareAgrave(int, int, int)} which performs the test
+ * for one data type.
+ */
+private void compareAgrave(String dataType, int expectedMatchCountForEqual,
+		int expectedMatchCountForLike, int expectedDistinctRows)
+            throws SQLException {
+
+      // Create the two strings that are supposed to be equal in French locale.
       String agrave = "\u00C0";
       String agraveCombined ="A\u0300";
+
       Statement s = createStatement();
       
       try {
           s.executeUpdate("DROP TABLE T");
       }catch (SQLException se) {}
-      s.executeUpdate("CREATE TABLE T (vc varchar(30))");
+      s.executeUpdate("CREATE TABLE T (vc " + dataType + ")");
       PreparedStatement ps = prepareStatement("INSERT INTO T VALUES (?)");
       ps.setString(1,agrave);
       ps.executeUpdate();
@@ -300,12 +319,18 @@ private void compareAgrave(int expectedMatchCountForEqual,
       ps.setString(1, agrave);
       ResultSet rs = ps.executeQuery();
       JDBC.assertSingleValueResultSet(rs, Integer.toString(expectedMatchCountForEqual));
-      ps = prepareStatement("SELECT COUNT(*) FROM T WHERE VC LIKE ?");
+      // Use '%' at the end of the pattern so that we also match the trailing
+      // blanks if the data type is CHAR instead of VARCHAR.
+      ps = prepareStatement("SELECT COUNT(*) FROM T WHERE VC LIKE ? || '%'");
       ps.setString(1, agrave);
       rs = ps.executeQuery();
       JDBC.assertSingleValueResultSet(rs, Integer.toString(expectedMatchCountForLike));
 
-
+      // DERBY-3975: They should match for distinct, the same way as for =
+      int distinctRows = JDBC.assertDrainResults(
+              s.executeQuery("SELECT DISTINCT VC FROM T"));
+      assertEquals("Unexpected number of distinct rows",
+              expectedDistinctRows, distinctRows);
   }
 
 

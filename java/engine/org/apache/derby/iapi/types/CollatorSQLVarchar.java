@@ -171,6 +171,16 @@ class CollatorSQLVarchar extends SQLVarchar implements CollationElementsInterfac
 		 return holderForCollationSensitiveInfo.stringCompare(char1, char2);
 	 }
 
+     /**
+      * Return a hash code that is consistent with
+      * {@link #stringCompare(SQLChar, SQLChar)}.
+      *
+      * @return hash code
+      */
+     public int hashCode() {
+         return hashCodeForCollation();
+     }
+
 	/**
 	 * This method implements the like function for char (with no escape value).
 	 * The difference in this method and the same method in superclass is that
