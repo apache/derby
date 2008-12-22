@@ -161,7 +161,9 @@ public class SpecialFunctionNode extends ValueNode
 			methodName = "getCurrentRoleIdDelimited";
 			methodType = "java.lang.String";
 			dtd = DataTypeDescriptor.getBuiltInDataTypeDescriptor(
-				Types.VARCHAR, true, 128);
+				// size: 2+(2*128) start and end text quote plus max # of
+				// escapes
+				Types.VARCHAR, true, 2+(2*128)); 
 			//SQL spec Section 6.4 Syntax Rule 4 says that the collation type
 			//of these functions will be the collation of character set
 			//SQL_IDENTIFIER. In Derby's case, that will mean, the collation of

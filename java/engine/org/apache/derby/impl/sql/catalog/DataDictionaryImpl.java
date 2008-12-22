@@ -12210,7 +12210,7 @@ public final class	DataDictionaryImpl
 	/**
 	 * Get the target role by searching for a matching row
 	 * in SYSROLES by rolename, grantee and grantor.  Read only scan.
-     * Uses index on roleid, grantee and grantor columns.
+	 * Uses index on roleid, grantee and grantor columns.
 	 *
 	 * @param roleName	    The name of the role we're interested in.
 	 * @param grantee       The grantee
