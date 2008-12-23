@@ -19,18 +19,15 @@ package javax.sql;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Array;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.Date;
-import java.sql.Ref;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Map;
 import java.io.InputStream;
 import java.io.Reader;
 import java.util.Calendar;
-import java.math.BigDecimal;
 
 /**
  * A RowSet is an interface which provides access to data being sent from/to a
