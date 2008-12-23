@@ -1966,10 +1966,9 @@ public class Xact extends RawTransaction implements Limit, LockOwner {
         {
 			if (countObservers() != 0)
             {
-				System.out.println(
+                SanityManager.THROWASSERT(
                     "There should be 0 observers, but we still have "
 					+ countObservers() + " observers.");
-				notifyObservers(null);
             }
 		}
 	}
