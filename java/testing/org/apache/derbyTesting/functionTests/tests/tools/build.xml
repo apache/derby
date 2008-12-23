@@ -81,7 +81,7 @@
       destdir="${out.dir}">
       <classpath>
         <!--pathelement location="${oro}"/-->
-        <pathelement path="${java14compile.classpath};${junit}"/>
+        <pathelement path="${compile.classpath};${junit}"/>
       </classpath>
       <include name="${this.dir}/*.java"/>
       <!--exclude name=""/-->

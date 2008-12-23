@@ -88,7 +88,7 @@
       srcdir="${derby.testing.src.dir}"
       destdir="${out.dir}">
       <classpath>
-        <pathelement path="${java14compile.classpath}"/>
+        <pathelement path="${compile.classpath}"/>
         <pathelement path="${junit}"/>
       </classpath>
       <exclude name="${derby.testing.perf.dir}/basic/jdbc/ValuesTest.java"/>

@@ -58,7 +58,6 @@
     <!-- We only compile junit/JAXPFinder.java against JDK 1.4   -->
     <!-- because it relies on a JAXP class that is part of 1.4   -->
     <!-- but it is not part of 1.3.                              -->
-    <!-- This needs to be revisited. The second javac invocation fails against the jsr169 classpath -->
     <javac
       source="1.4"
       target="1.4"
@@ -92,7 +91,7 @@
       srcdir="${derby.testing.src.dir}"
       destdir="${out.dir}">
       <classpath>
-        <pathelement path="${java14compile.classpath}"/>
+        <pathelement path="${compile.classpath}"/>
         <pathelement path="${junit}"/>
       </classpath>
       <include name="${derby.testing.junit.dir}/**/*.java"/>
