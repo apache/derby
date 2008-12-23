@@ -50,7 +50,7 @@
       srcdir="${derby.engine.src.dir}"
       destdir="${out.dir}">
       <classpath>
-        <pathelement path="${java14compile.classpath}"/>
+        <pathelement path="${compile.classpath}"/>
       </classpath>
       <include name="${derby.dir}/security/**"/>
     </javac>

@@ -17,6 +17,7 @@
 
 package java.sql;
 
+import java.math.BigDecimal;
 import java.util.Calendar;
 import java.util.Map;
 import java.net.URL;
