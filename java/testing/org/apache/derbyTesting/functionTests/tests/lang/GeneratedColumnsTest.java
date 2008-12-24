@@ -40,6 +40,7 @@ import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.SupportFilesSetup;
 
 import org.apache.derby.catalog.types.RoutineAliasInfo;
 
@@ -55,6 +56,8 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
     // CONSTANTS
     //
     ///////////////////////////////////////////////////////////////////////////////////
+
+    private static  final   String  IMPORT_FILE_NAME = "t_bi_1.dat";
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -98,8 +101,18 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
     public static Test suite()
     {
         TestSuite suite = (TestSuite) TestConfiguration.embeddedSuite(GeneratedColumnsTest.class);
+        Test        cleanDatabaseSuite = new CleanDatabaseTestSetup( suite );
 
-        return new CleanDatabaseTestSetup( suite );
+        //
+        // Copies the data file to a location which can be read.
+        //
+        Test        result = new SupportFilesSetup
+            (
+             cleanDatabaseSuite,
+             new String [] { "functionTests/tests/lang/" + IMPORT_FILE_NAME }
+             );
+
+        return result;
     }
 
     ///////////////////////////////////////////////////////////////////////////////////
@@ -5025,6 +5038,69 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
 
     }
     
+    /**
+     * <p>
+     * Test that bulk import works with generated columns.
+     * </p>
+     */
+    public  void    test_028_bulkImport()
+        throws Exception
+    {
+        Connection  conn = getConnection();
+
+        //
+        // Initial setup
+        //
+        goodStatement
+            (
+             conn,
+             "create table t_bi_1( a int, b int, c generated always as ( a + b ) )"
+             );
+
+        //
+        // Should fail because we can't override the value of a generated column.
+        //
+        expectExecutionError
+            (
+             conn,
+             CANT_OVERRIDE_GENERATION_CLAUSE,
+             "call syscs_util.syscs_import_table( null, 'T_BI_1', 'extin/" + IMPORT_FILE_NAME + "', null, null, null, 0 )"
+             );
+
+        //
+        // Should be able to import partial column list which doesn't include
+        // generated column. In this case, one of the referenced columns is not
+        // imported so it is stuffed with a null, which then propagates through
+        // the generation clause.
+        //
+        goodStatement
+            (
+             conn,
+             "call syscs_util.syscs_import_data( null, 'T_BI_1', 'A', '1',  'extin/" + IMPORT_FILE_NAME + "', null, null, null, 0 )"
+             );
+
+        //
+        // Partial import including all of the referenced columns.
+        //
+        goodStatement
+            (
+             conn,
+             "call syscs_util.syscs_import_data( null, 'T_BI_1', 'A, B', '1, 2', 'extin/" + IMPORT_FILE_NAME + "', null, null, null, 0 )"
+             );
+
+        assertResults
+            (
+             conn,
+             "select * from t_bi_1 order by a, b",
+             new String[][]
+             {
+                 { "2", "3", "5", },
+                 { "2", null, null, },
+             },
+             false
+             );
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // MINIONS
