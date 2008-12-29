@@ -62,7 +62,6 @@ import java.util.Vector;
 import org.apache.derby.drda.NetworkServerControl;
 import org.apache.derby.security.SystemPermission;
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.jdbc.DRDAServerStarter;
 import org.apache.derby.iapi.reference.Attribute;
 import org.apache.derby.iapi.reference.DRDAConstants;
 import org.apache.derby.iapi.reference.Module;
@@ -84,7 +83,6 @@ import org.apache.derby.impl.jdbc.EmbedSQLException;
 import org.apache.derby.impl.jdbc.Util;
 import org.apache.derby.iapi.jdbc.AuthenticationService;
 import org.apache.derby.iapi.reference.MessageId;
-import org.apache.derby.iapi.security.SecurityUtil;
 import org.apache.derby.mbeans.VersionMBean;
 import org.apache.derby.mbeans.drda.NetworkServerMBean;
 
@@ -332,6 +330,13 @@ public final class NetworkServerControlImpl {
 	private static final int SSL_PEER_AUTHENTICATION = 2;
 
 	private int sslMode = SSL_OFF;
+    
+	/* object to wait on and notify; so we can monitor if a server
+	 * was successfully started */
+	private Object serverStartComplete = new Object();
+
+	/* for flagging complete boot */
+	private boolean completedBoot = false;
 
     /**
      * Can EUSRIDPWD security mechanism be used with 
@@ -636,14 +641,47 @@ public final class NetworkServerControlImpl {
 	 *		   
 	 * @exception Exception	throws an exception if an error occurs
 	 */
-	public void start(PrintWriter consoleWriter)
+	public void start(final PrintWriter consoleWriter)
 		throws Exception
 	{
-		DRDAServerStarter starter = new DRDAServerStarter();
-		starter.setStartInfo(hostAddress,portNumber,consoleWriter);
-        this.setLogWriter(consoleWriter);
-		startNetworkServer();
-		starter.boot(false,null);
+		completedBoot = false; // reset before we boot 
+		final Exception[] exceptionHolder = new Exception[1]; 
+
+		// creating a new thread and calling blockingStart on it
+		// This is similar to calling DRDAServerStarter.boot().
+		// We save any exception from the blockingStart and 
+		// return to the user later. See DERBY-1465.
+		Thread t = new Thread("NetworkServerControl") { 
+			public void run() { 
+				try { 
+					blockingStart(consoleWriter); 
+				} catch (Exception e) { 
+					synchronized (serverStartComplete) {
+						exceptionHolder[0] = e; 
+						serverStartComplete.notifyAll(); 
+					} 
+				} 
+			} 
+		}; 
+
+		// make it a daemon thread so it exits when the jvm exits
+		t.setDaemon(true);
+
+		// if there was an immediate error like
+		// another server already running, throw it here.
+		// ping is still required to verify the server is up.     
+		t.start(); 
+		// wait until the server has started successfully 
+		// or an error has been detected 
+		synchronized (serverStartComplete) { 
+			while (!completedBoot && exceptionHolder[0] == null) { 
+				serverStartComplete.wait(); 
+			} 
+		} 
+		if (!completedBoot) { 
+			// boot was not successful, throw the exception 
+			throw exceptionHolder[0]; 
+		} 
 	}
 
 	/**
@@ -700,8 +738,8 @@ public final class NetworkServerControlImpl {
 	public void blockingStart(PrintWriter consoleWriter)
 		throws Exception
 	{
-		startNetworkServer();
 		setLogWriter(consoleWriter);
+		startNetworkServer();
 		cloudscapeLogWriter = Monitor.getStream().getPrintWriter();
 		if (SanityManager.DEBUG && debugOutput)
 		{
@@ -719,6 +757,11 @@ public final class NetworkServerControlImpl {
 							return createServerSocket();
 						}
 					});
+			synchronized (serverStartComplete) {
+				// now we're sure the boot has completed, so set the flag
+				completedBoot = true;
+				serverStartComplete.notifyAll();
+			}
 		} catch (PrivilegedActionException e) {
 			Exception e1 = e.getException();
 
