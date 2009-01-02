@@ -30,6 +30,7 @@ import java.io.StringReader;
 import java.util.Vector;
 import java.util.HashSet;
 import java.util.Properties;
+import org.apache.derby.iapi.reference.Limits;
 
 /**
   Utility class for parsing and producing string representations of
@@ -734,4 +735,48 @@ public abstract class IdUtil
 		else
 			return list+","+delimitedId;
 	}
+
+	/**
+	 * Parse role identifier to internal, case normal form. It should not be
+	 * NONE nor exceed Limits.MAX_IDENTIFIER_LENGTH.
+	 *
+	 * @param roleName role identifier to check (SQL form, has possible quoting)
+	 * @return the role name to use (internal, case normal form).
+	 * @exception StandardException normal error policy
+	 */
+	public static String parseRoleId(String roleName) throws StandardException
+	{
+		roleName.trim();
+		// NONE is a special case and is not allowed with its special
+		// meaning in SET ROLE <value specification>. Even if there is
+		// a role with case normal form "NONE", we require it to be
+		// delimited here, since it would have had to be delimited to
+		// get created, too. We could have chosen to be lenient here,
+		// but it seems safer to be restrictive.
+		if (StringUtil.SQLToUpperCase(roleName).equals("NONE")) {
+			throw StandardException.newException(SQLState.ID_PARSE_ERROR);
+		}
+
+		roleName = parseSQLIdentifier(roleName);
+		checkIdentifierLengthLimit(roleName, Limits.MAX_IDENTIFIER_LENGTH);
+
+		return roleName;
+	}
+
+	/**
+	 * Check that identifier is not too long
+	 * @param identifier identifier (in case normal form) to check
+	 * @param identifier_length_limit maximum legal length
+	 * @exception StandardException normal error policy
+	 */
+	public static void checkIdentifierLengthLimit(String identifier,
+												  int identifier_length_limit)
+			throws StandardException
+	{
+		if (identifier.length() > identifier_length_limit)
+			throw StandardException.newException
+				(SQLState.LANG_IDENTIFIER_TOO_LONG,
+				 identifier,
+				 String.valueOf(identifier_length_limit));
+    }
 }

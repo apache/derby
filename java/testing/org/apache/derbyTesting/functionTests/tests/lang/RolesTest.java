@@ -492,6 +492,16 @@ public class RolesTest extends BaseJDBCTestCase
 
         doDynamicSetRole(_conn);
 
+        doStmt("set role 'NONE'",
+               sqlAuthorizationRequired, idParseError, idParseError);
+        doStmt("set role 'none'",
+               sqlAuthorizationRequired, idParseError, idParseError);
+        doStmt("set role '\"NONE\"'",
+               sqlAuthorizationRequired, null, invalidRole);
+        doStmt("set role ' '",
+               sqlAuthorizationRequired, idParseError, idParseError);
+
+
         doStmt("set role bar",
                sqlAuthorizationRequired, null , null /* direct grant */);
         doStmt("set role notGranted",
@@ -1060,6 +1070,14 @@ public class RolesTest extends BaseJDBCTestCase
         }
 
         try {
+            pstmt.setString(1, " ");
+            int rowcnt = pstmt.executeUpdate();
+            fail("Expected syntax error on identifier");
+        } catch (SQLException e) {
+            assertSQLState(idParseError, e);
+        }
+
+        try {
             pstmt.setString(1, null);
             int rowcnt = pstmt.executeUpdate();
             fail("Expected syntax error on identifier");
@@ -1074,6 +1092,14 @@ public class RolesTest extends BaseJDBCTestCase
 
             try {
                 pstmt.setString(1, "NONE");
+                int rowcnt = pstmt.executeUpdate();
+                fail("NONE should not be allowed as a dynamic parameter");
+            } catch (SQLException e) {
+                assertSQLState(idParseError, e);
+            }
+
+            try {
+                pstmt.setString(1, "none");
                 int rowcnt = pstmt.executeUpdate();
                 fail("NONE should not be allowed as a dynamic parameter");
             } catch (SQLException e) {

@@ -119,25 +119,13 @@ class SetRoleConstantAction implements ConstantAction
             // SQL 2003, section 18.3, GR2: trim whitespace first, and
             // interpret as identifier, then we convert it to case normal form
             // here.
-            thisRoleName = dvs.getString();
+            String roleId = dvs.getString();
 
-            if (thisRoleName == null) {
+            if (roleId == null) {
                 throw StandardException.newException(SQLState.ID_PARSE_ERROR);
             }
 
-            thisRoleName = thisRoleName.trim();
-
-            // NONE is a special case and is not allowed with its special
-            // meaning in SET ROLE ?. Even if there is a role with case normal
-            // form "NONE", we require it to be delimited here, since it would
-            // have had to be delimited to get created, too. We could have
-            // chosen to be lenient here, but it seems safer to be restrictive.
-            if (StringUtil.SQLToUpperCase(thisRoleName).equals("NONE")) {
-                throw StandardException.newException(SQLState.ID_PARSE_ERROR);
-            }
-
-            thisRoleName = IdUtil.parseSQLIdentifier(thisRoleName);
-
+            thisRoleName = IdUtil.parseRoleId(roleId);
         }
 
         RoleGrantDescriptor rdDef = null;

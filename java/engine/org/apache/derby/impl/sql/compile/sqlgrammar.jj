@@ -153,6 +153,7 @@ import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.util.ReuseFactory;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.util.StringUtil;
+import org.apache.derby.iapi.util.IdUtil;
 
 import java.sql.Types;
 import java.util.List;
@@ -1608,13 +1609,6 @@ public class SQLParser
         nodeFactory = getNodeFactory();
         initUnnamedParameterList();
     } // End of initStatement
-
-    private void checkIdentifierLengthLimit( String identifier, int identifier_length_limit) 
-        throws StandardException
-    {
-	if (identifier.length() > identifier_length_limit)
-		throw StandardException.newException(SQLState.LANG_IDENTIFIER_TOO_LONG, identifier, String.valueOf(identifier_length_limit));
-    }
 
     private ValueNode getJdbcIntervalNode( int intervalType) throws StandardException
     {
@@ -4597,9 +4591,9 @@ qualifiedName( int nodeType, int id_length_limit) throws StandardException :
 		}
 
 		//limit the qualifiedId to the id length limit passed to this method
-		checkIdentifierLengthLimit(qualifiedId, id_length_limit);
+		IdUtil.checkIdentifierLengthLimit(qualifiedId, id_length_limit);
 		if (schemaName != null)
-			checkIdentifierLengthLimit(schemaName, Limits.MAX_IDENTIFIER_LENGTH);
+			IdUtil.checkIdentifierLengthLimit(schemaName, Limits.MAX_IDENTIFIER_LENGTH);
 
 		return (TableName) nodeFactory.getNode(
 								nodeType,
@@ -7860,11 +7854,11 @@ columnReference() throws StandardException :
 			columnName = thirdName;
 		}
 
-		checkIdentifierLengthLimit(columnName, Limits.MAX_IDENTIFIER_LENGTH);
+		IdUtil.checkIdentifierLengthLimit(columnName, Limits.MAX_IDENTIFIER_LENGTH);
 		if (schemaName != null)
-			checkIdentifierLengthLimit(schemaName, Limits.MAX_IDENTIFIER_LENGTH);
+			IdUtil.checkIdentifierLengthLimit(schemaName, Limits.MAX_IDENTIFIER_LENGTH);
 		if (tableName != null)
-			checkIdentifierLengthLimit(tableName, Limits.MAX_IDENTIFIER_LENGTH);
+			IdUtil.checkIdentifierLengthLimit(tableName, Limits.MAX_IDENTIFIER_LENGTH);
 
 		if (tableName != null)
 		{
@@ -11645,7 +11639,8 @@ setRoleSpecification() throws StandardException :
 |
 	roleName = string()
 	{
-		checkIdentifierLengthLimit(roleName, Limits.MAX_IDENTIFIER_LENGTH);
+		roleName = IdUtil.parseRoleId(roleName);
+
 		return (StatementNode) nodeFactory.getNode(
 			C_NodeTypes.SET_ROLE_NODE,
 			roleName,
@@ -11718,7 +11713,7 @@ setSchemaValues() throws StandardException :
 |	schemaName = string()
 	{
 		/* Max length for schema name is Limits.MAX_IDENTIFIER_LENGTH */
-		checkIdentifierLengthLimit(schemaName, Limits.MAX_IDENTIFIER_LENGTH);
+		IdUtil.checkIdentifierLengthLimit(schemaName, Limits.MAX_IDENTIFIER_LENGTH);
 		return (StatementNode) nodeFactory.getNode(
 								C_NodeTypes.SET_SCHEMA_NODE,
 								schemaName,
@@ -13365,7 +13360,7 @@ internalIdentifier( int id_length_limit, boolean checkLength) throws StandardExc
  
  		if (checkLength) {//if checkLength false, then calling method would do the length limit checks
 			//limit the identifier to the id length limit passed to this method
-			checkIdentifierLengthLimit(str, id_length_limit);
+			IdUtil.checkIdentifierLengthLimit(str, id_length_limit);
 		}
 		// Remember whether last token was a delimited identifier
 		nextToLastTokenDelimitedIdentifier = lastTokenDelimitedIdentifier;
@@ -13379,7 +13374,7 @@ internalIdentifier( int id_length_limit, boolean checkLength) throws StandardExc
 	{
 		if (checkLength) {//if checkLength false, then calling method would do the length limit checks
 			//limit the identifier to the id length limit passed to this method
-			checkIdentifierLengthLimit(str, id_length_limit);
+			IdUtil.checkIdentifierLengthLimit(str, id_length_limit);
 		} 
 		return str;
 	}
