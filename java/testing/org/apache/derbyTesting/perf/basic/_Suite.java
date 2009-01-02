@@ -41,6 +41,7 @@ public class _Suite extends BaseTestCase{
         suite.addTest(HeapScan.suite());
         suite.addTest(CoveredIdxScan.suite());
         suite.addTest(SortTest.suite());
+        suite.addTest(SelectDistinctTest.suite());
 
         return suite;
     }
