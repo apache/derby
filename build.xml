@@ -223,6 +223,12 @@
     -->
     <property name="jsr169compile.classpath" value="${out.jsr169.dir}:${java14compile.classpath}"/>
 
+    <!-- 
+            The lowest common denominator compile path for Derby. We expect that
+            the bulk of the Derby product will run on small device platforms (CDC/FP 1.1).
+    -->
+    <property name="compile.classpath" value="${jsr169compile.classpath}"/>
+
     <antcall target="printCompilerProperties"> <param name="checkEvent" value="After setting properties: "/> </antcall>
 
   </target>
@@ -647,7 +653,7 @@
       srcdir="${derby.jdbc3.src.dir}"
       destdir="${out.jdbc3.dir}">
       <classpath>
-        <pathelement path="${compile.classpath}"/>
+        <pathelement path="${java14compile.classpath}"/>
       </classpath>
      </javac>
 
@@ -674,7 +680,7 @@
       srcdir="${derby.jdbc4.src.dir}"
       destdir="${out.jdbc4.dir}">
       <classpath>
-        <pathelement path="${java15compile.classpath}"/>
+        <pathelement path="${java16compile.classpath}"/>
       </classpath>
      </javac>
 

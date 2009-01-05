@@ -70,7 +70,7 @@
       srcdir="${derby.tools.src.dir}"
       destdir="${out.dir}">
       <classpath>
-        <pathelement path="${compile.classpath}"/>
+        <pathelement path="${java14compile.classpath}"/>
       </classpath>
       <include name="${derby.dir}/impl/tools/**"/>
     </javac>
