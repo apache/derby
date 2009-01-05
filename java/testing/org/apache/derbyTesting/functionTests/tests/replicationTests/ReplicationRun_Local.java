@@ -1,6 +1,6 @@
 /*
  
-Derby - Class org.apache.derbyTesting.functionTests.tests.replicationTests.ReplicationRun
+Derby - Class org.apache.derbyTesting.functionTests.tests.replicationTests.ReplicationRun_Local
  
 Licensed to the Apache Software Foundation (ASF) under one or more
 contributor license agreements.  See the NOTICE file distributed with
