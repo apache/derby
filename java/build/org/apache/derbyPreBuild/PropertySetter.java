@@ -720,7 +720,7 @@ public class PropertySetter extends Task
         appendProperty( buffer, OPERATING_SYSTEM );
         appendProperty( buffer, J14LIB );
         appendProperty( buffer, J15LIB );
-        buffer.append( "\nPlease consult BUILDING.txt for instructions on how to set the jdk-library and compiler-classpath properties." );
+        buffer.append( "\nPlease consult BUILDING.html for instructions on how to set the compiler-classpath properties." );
         
         return new BuildException( buffer.toString() );
     }

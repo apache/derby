@@ -1,0 +1,541 @@
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <link rel="SHORTCUT ICON" href="https://issues.apache.org/jira/secure/attachment/12322581/12322581_final_logo64.png">
+<!--
+Licensed to the Apache Software Foundation (ASF) under one or more
+contributor license agreements.  See the NOTICE file distributed with
+this work for additional information regarding copyright ownership.
+The ASF licenses this file to you under the Apache License, Version 2.0
+(the "License"); you may not use this file except in compliance with
+the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<title>Building Derby</title>
+</head>
+<body>
+<TABLE>
+  <TBODY>
+
+    <TR>
+      <TD><img src="https://issues.apache.org/jira/secure/attachment/12322583/12322583_final_logo.png" alt="Derby Hat"/></TD>
+      <TD><h1>Building Derby</h1></TD>
+    </TR>
+
+  </TBODY>
+</TABLE>
+
+
+<ul>
+<li><a href="#About This Document">About This Document</a></li>
+<li><a href="#Downloads">Downloads</a></li>
+<li><a href="#Simple Build">Simple Build</a>
+  <ul>
+  <li><a href="#Verifying the Build">Verifying the Build</a></li>
+  <li><a href="#Testing Derby">Testing Derby</a></li>
+  </ul>
+</li>
+<li><a href="#Customized Build">Customized Build</a>
+  <ul>
+  <li><a href="#Advanced Build">Advanced Build</a></li>
+  </ul>
+</li>
+</ul>
+
+<br/><br/><br/><hr color="blue"/>
+<h2><a name="About This Document">About This Document</a></h2>
+
+<p>
+These are the instructions for building the Derby jar files
+from the Derby sources.
+</p>
+
+<br/><br/><br/><hr color="blue"/>
+<h2><a name="Downloads">Downloads</a></h2>
+
+<p>
+Before building Derby, you need to download the following:
+</p>
+
+<TABLE border="2">
+  <TBODY>
+
+    <TR>
+      <TD><b>Prerequisite</b></TD>
+      <TD><b>Description</b></TD>
+    </TR>
+
+    <TR>
+      <TD><b><i>Derby Source</i></b></TD>
+      <TD>
+If you are reading these instructions, chances
+  are you have already unpacked a Derby source distribution. However,
+  if you don't have the Derby source yet, get the development source tree from subversion by following these
+      <a href="http://db.apache.org/derby/dev/derby_source.html">instructions</a>.
+      </TD>
+    </TR>
+
+    <TR>
+      <TD><b><i>Java Development Kit</i></b></TD>
+      <TD>You need to install a Java 5 or later JDK. Probably, your machine
+      already has this JDK. If not, Sun and IBM supply free Java
+      5 JDKs for many machines.</TD>
+    </TR>
+
+    <TR>
+      <TD><b><i>Ant</i></b></TD>
+      <TD>You need to install the Ant build tool, version 1.7.0 or
+      higher. You can get Ant <a href="http://ant.apache.org/">here</a>.</TD>
+    </TR>
+
+  </TBODY>
+</TABLE>
+
+<br/>
+<a name="Downloading JUnit"/>
+<p>
+If you are going to run the Derby tests, then you will need to download the JUnit
+test harness also:
+</p>
+
+<TABLE border="2">
+  <TBODY>
+
+    <TR>
+      <TD><b>Prerequisite</b></TD>
+      <TD><b>Description</b></TD>
+    </TR>
+
+    <TR>
+      <TD><b><i>JUnit</i></b></TD>
+      <TD>You need the JUnit test tool, version 3.8.1.
+      You can get JUnit 3.8.1 <a href="http://www.junit.org/">here</a>.
+      Copy junit.jar jar into your Derby source tree, in the
+      <i>tools/java</i> directory.
+      </TD>
+    </TR>
+
+  </TBODY>
+</TABLE>
+
+<br/>
+<br/><br/><br/><hr color="blue"/>
+<h2><a name="Simple Build">Simple Build</a></h2>
+
+<p>
+Before building Derby, cd
+to the root of your Derby source distribution. That is the top level
+directory which contains the LICENSE and NOTICE files. In addition,
+make sure that the version of Java which you are using is Java 5 or
+later. You can verify this by checking the output of the following command:
+</p>
+
+<blockquote>
+<pre><b><font color="blue" size="+2">
+java -version
+</font></b></pre>
+</blockquote>
+
+<p>
+Now use the following Ant targets to build Derby.:
+</p>
+
+<TABLE border="2">
+  <TBODY>
+
+    <TR>
+      <TD><b>Target</b></TD>
+      <TD><b>Description</b></TD>
+      <TD><b>Command</b></TD>
+    </TR>
+
+    <TR>
+      <TD><b><i>clobber</i></b></TD>
+      <TD>This target deletes all build artifacts.</TD>
+      <TD>
+<blockquote>
+<pre><b><font color="blue" size="+2">
+ant -quiet clobber
+</font></b></pre>
+</blockquote>
+      </TD>
+    </TR>
+
+    <TR>
+      <TD><b><i>buildsource</i></b></TD>
+      <TD>This target compiles all source files needed for the Derby
+      product. Don't be alarmed by all of the compiler warnings. We'll
+      show you how to tidy those up <a href="#Customized Build">later on</a>.
+      </TD>
+      <TD>
+<blockquote>
+<pre><b><font color="blue" size="+2">
+ant -quiet buildsource
+</font></b></pre>
+</blockquote>
+      </TD>
+    </TR>
+
+    <TR>
+      <TD><b><i>buildjars</i></b></TD>
+      <TD>This target builds the Derby jar files.</TD>
+      <TD>
+<blockquote>
+<pre><b><font color="blue" size="+2">
+ant -quiet buildjars
+</font></b></pre>
+</blockquote>
+      </TD>
+    </TR>
+
+  </TBODY>
+</TABLE>
+
+<br/>
+<p>
+So, do this:
+</p>
+
+<blockquote>
+<pre><b><font color="blue" size="+2">
+ant -quiet clobber
+ant -quiet buildsource
+ant -quiet buildjars
+</font></b></pre>
+</blockquote>
+
+<p>
+In order to build the Derby javadoc, you will need to run another target:
+</p>
+
+<TABLE border="2">
+  <TBODY>
+
+    <TR>
+      <TD><b>Target</b></TD>
+      <TD><b>Description</b></TD>
+      <TD><b>Command</b></TD>
+    </TR>
+
+    <TR>
+      <TD><b><i>javadoc</i></b></TD>
+      <TD>This target builds the Derby javadoc. Be patient. The
+      <i>javadoc</i> target takes a while.</TD>
+      <TD>
+<blockquote>
+<pre><b><font color="blue" size="+2">
+ant -quiet javadoc
+</font></b></pre>
+</blockquote>
+      </TD>
+    </TR>
+
+  </TBODY>
+</TABLE>
+
+<blockquote>
+
+<br/>
+<br/>
+<h3><a name="Verifying the Build">Verifying the Build</a></h3>
+
+<p>
+Run the <i>sysinfo</i> command to verify that the jars built
+correctly. This program will print out the Derby build information:
+</p>
+
+<blockquote>
+<pre><b><font color="blue" size="+2">
+java -jar jars/sane/derbyrun.jar sysinfo
+</font></b></pre>
+</blockquote>
+
+<br/>
+<h3><a name="Testing Derby">Testing Derby</a></h3>
+
+<p>
+If you want to build and run the Derby tests, make sure that you have downloaded
+the
+<a href="#Downloading JUnit">JUnit</a>
+test framework. Then build all of the Derby sources, including the test classes:
+</p>
+
+<TABLE border="2">
+  <TBODY>
+
+    <TR>
+      <TD><b>Target</b></TD>
+      <TD><b>Description</b></TD>
+      <TD><b>Command</b></TD>
+    </TR>
+
+    <TR>
+      <TD><b><i>all</i></b></TD>
+      <TD>This target compiles all Derby source files.</TD>
+      <TD>
+<blockquote>
+<pre><b><font color="blue" size="+2">
+ant -quiet all
+</font></b></pre>
+</blockquote>
+      </TD>
+    </TR>
+
+  </TBODY>
+</TABLE>
+
+<p>
+Putting all of this together, here's how you build the tests:
+</p>
+
+<blockquote>
+<pre><b><font color="blue" size="+2">
+ant -quiet clobber
+ant -quiet all
+ant -quiet buildjars
+</font></b></pre>
+</blockquote>
+
+<p>
+To run the tests, consult the testing
+<a href="./java/testing/README.htm">README</a>.
+</p>
+
+</blockquote>
+
+<br/><br/><br/><hr color="blue"/>
+<h2><a name="Customized Build">Customized Build</a></h2>
+
+<p>
+You can customize the Derby build by setting variables in a file
+called <i>ant.properties</i>. The Ant tool looks for this file in your
+home directory. To find out where Ant thinks your home directory is,
+issue the following command and look for "user.home" in the output:
+</p>
+
+<blockquote>
+<pre><b><font color="blue" size="+2">
+ant -diagnostics
+</font></b></pre>
+</blockquote>
+
+<br/>
+<p>
+Here are some Derby-specific variables which you may want to set in <i>ant.properties</i>:
+</p>
+
+<TABLE border="2">
+  <TBODY>
+
+    <TR>
+      <TD><b>Variable</b></TD>
+      <TD><b>Description</b></TD>
+      <TD><b>Default</b></TD>
+      <TD><b>Example</b></TD>
+    </TR>
+
+    <TR>
+      <TD><b><i>deprecation</i></b></TD>
+      <TD>Turn this flag off if you don't want to see pages of
+      warnings generated when the compiler encounters references to
+      deprecated methods.</TD>
+      <TD><blockquote><i>on</i></blockquote></TD>
+      <TD>
+<blockquote>
+<pre><b><font color="blue" size="+2">
+deprecation=off
+</font></b></pre>
+</blockquote>
+      </TD>
+    </TR>
+
+    <TR>
+      <TD><b><i>sane</i></b></TD>
+      <TD>By default, this variable is set to <i>true</i>. This builds
+      extra assertion and debugging logic into Derby classes. If you
+      set this variable to false, then the Derby jar files will be
+      smaller and Derby will run faster. During typical development,
+      you will leave this variable set to <i>true</i>. However, this
+      variable is set to <i>false</i> when building official Derby releases.</TD>
+      <TD><blockquote><i>true</i></blockquote></TD>
+      <TD>
+<blockquote>
+<pre><b><font color="blue" size="+2">
+sane=false
+</font></b></pre>
+</blockquote>
+      </TD>
+    </TR>
+
+  </TBODY>
+</TABLE>
+
+<br/>
+<br/>
+<blockquote>
+
+<h3><a name="Advanced Build">Advanced Build</a></h3>
+
+<p>
+Derby is supposed to run in all of the following environments:
+</p>
+
+<TABLE border="2">
+  <TBODY>
+
+    <TR>
+      <TD><b>Platform</b></TD>
+      <TD><b>JDBC Level</b></TD>
+    </TR>
+
+    <TR>
+      <TD><b><i>Java 6</i></b></TD>
+      <TD><b><i>JDBC 4</i></b></TD>
+    </TR>
+
+    <TR>
+      <TD><b><i>Java 5</i></b></TD>
+      <TD><b><i>JDBC 3</i></b></TD>
+    </TR>
+
+    <TR>
+      <TD><b><i>JDK 1.4.2</i></b></TD>
+      <TD><b><i>JDBC 3</i></b></TD>
+    </TR>
+
+    <TR>
+      <TD><b><i>Small Device (CDC/FP 1.1)</i></b></TD>
+      <TD><b><i>JSR169</i></b></TD>
+    </TR>
+
+  </TBODY>
+</TABLE>
+
+<br/>
+<p>
+The default Derby build does NOT necessarily verify that the compile-time contract is
+satisifed for any of these platforms. To get compile-time checks, you
+need to make sure that the following variables are set correctly. To
+see the values which the Derby build uses for these variables, build
+Derby after setting the
+following debug variable in your <i>ant.properties</i>:
+</p>
+
+<blockquote>
+<pre><b><font color="blue" size="+2">
+printCompilerProperties=true
+</font></b></pre>
+</blockquote>
+
+<br/>
+<p>
+Here are the variables which determine whether the Derby build
+enforces compile-time contracts for the supported platforms:
+</p>
+
+<TABLE border="2">
+  <TBODY>
+
+    <TR>
+      <TD><b>Platform</b></TD>
+      <TD><b>Compiler Variable</b></TD>
+      <TD><b>Description</b></TD>
+      <TD><b>Default Value</b></TD>
+    </TR>
+
+    <TR>
+      <TD><b><i>Java 6</i></b></TD>
+      <TD><b><i>java16compile.classpath</i></b></TD>
+      <TD>If you have a Java 6 JDK on your machine, this should be the list of all the
+      Java 6 jars. Sun and IBM provide free Java 6 JDKs for many machines.</TD>
+      <TD><i>classes/stubs/jdbc4:${java15compile.classpath}</i></TD>
+    </TR>
+
+    <TR>
+      <TD><b><i>Java 5</i></b></TD>
+      <TD><b><i>java15compile.classpath</i></b></TD>
+      <TD>The Derby build tries to find a Java 5
+      JDK on your machine. The build fails if it can't find this JDK.</TD>
+      <TD>The jars in your Java 5 JDK.</TD>
+    </TR>
+
+    <TR>
+      <TD><b><i>JDK 1.4.2</i></b></TD>
+      <TD><b><i>java14compile.classpath</i></b></TD>
+      <TD>The Derby build tries to find a 1.4 JDK
+      on your machine. If the build finds that JDK, then this
+      variable is set to the list of jars there. Again, Sun and IBM supply free 1.4.2 JDKs for many machines.</TD>
+      <TD>The list of jars in your 1.4 JDK if the build can find
+      them. Otherwise,
+      <i>${java15compile.classpath}:tools/java/xalan.jar:tools/java/serializer.jar</i>
+      </TD>
+    </TR>
+
+    <TR>
+      <TD><b><i>Small Device (CDC/FP 1.1)</i></b></TD>
+      <TD><b><i>jsr169compile.classpath</i></b></TD>
+      <TD>This should be set to the list of small device libraries on
+      your machine--if you have them. That is, the CDC/FP 1.1 jars and
+      the jsr169 jar. To get a set of small device libraries, see
+      <a href="http://blogs.sun.com/wittyman/entry/javadb_on_sun_javame_cdc">Sun's instructions</a>
+      or download IBM's WCTME 5.7.
+      </TD>
+      <TD><i>classes/stubs/jsr169:${java14compile.classpath}</i></TD>
+    </TR>
+
+  </TBODY>
+</TABLE>
+
+<p>
+The preceding variables are mandatory for the Derby build.
+For Mac OS X, Solaris, and many Linux and IBM machines, Derby
+can figure out where the JDKs live and can therefore set the
+preceding variables to reasonable values if you don't set them. For
+other platforms, the Derby build may not be able to figure out where the JDKs
+live. You can help the Derby build by setting the following optional
+variables in <i>ant.properties</i>:
+</p>
+
+<TABLE border="2">
+  <TBODY>
+
+    <TR>
+      <TD><b>Compiler Variable</b></TD>
+      <TD><b>Description</b></TD>
+      <TD><b>Default Value</b></TD>
+    </TR>
+
+    <TR>
+      <TD><b><i>j14lib</i></b></TD>
+      <TD>If you set this variable to be the directory which contains
+      your 1.4 jars, then the Derby build will set
+      <i>java14compile.classpath</i> to be the list of jars in that directory.
+      </TD>
+      <TD>Optional variable. No default value.</TD>
+    </TR>
+
+    <TR>
+      <TD><b><i>j145ib</i></b></TD>
+      <TD>If you set this variable to be the directory which contains
+      your Java 5 jars, then the Derby build will set
+      <i>java15compile.classpath</i> to be the list of jars in that directory.
+      </TD>
+      <TD>Optional variable. No default value.</TD>
+    </TR>
+
+  </TBODY>
+</TABLE>
+
+</blockquote>
+
+<br/><br/><br/><hr color="blue"/>
+
+</body>
+</html>

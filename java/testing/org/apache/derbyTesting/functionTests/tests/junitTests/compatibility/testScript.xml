@@ -34,8 +34,8 @@
 	This script assumes that you have set the following variables
 	in the ant.properties file in your user home directory:
 
-	j13lib          Set as you would to compile Derby (see trunk/BUILDING.txt).
-	j14lib          Set as you would to compile Derby (see trunk/BUILDING.txt).
+	j13lib          The library directory of your 1.3 JRE
+	j14lib          The library directory of your 1.4 JRE
 	jdk15           The JAVA_HOME of your 1.5 vm.
     jdk16           The JAVA_HOME of your 1.6 vm.
 
