@@ -113,6 +113,11 @@ public class SQLChar
      */
 
     /**
+     * The pad character (space).
+     */
+    private static final char PAD = '\u0020';
+
+    /**
      * threshold, that decides when we return space back to the VM
      * see getString() where it is used
      */
@@ -2681,27 +2686,25 @@ readingLoop:
          * since it will create a new object, so here's what we do:
          *      o  Walk from the right until we've found the 1st
          *         non-blank character.
-         *      o  Add up the characters from that character to the 1st in
-         *         the string and return that as the hash code.
+         *      o  Calculate the hash code based on the characters from the
+         *         start up to the first non-blank character from the right.
          */
-        int index;
-        int hashcode = 0;
 
         // value will have been set by the getString() above
         String lvalue = value;
 
         // Find 1st non-blank from the right
-        for (index = lvalue.length() - 1; 
-             index >= 0 && lvalue.charAt(index) == ' '; 
-             index--)
-        {
-            ;
+        int lastNonPadChar = lvalue.length() - 1;
+        while (lastNonPadChar >= 0 && lvalue.charAt(lastNonPadChar) == PAD) {
+            lastNonPadChar--;
         }
 
-        // Build the hash code
-        for ( ; index >= 0; index--)
-        {
-            hashcode += lvalue.charAt(index);
+        // Build the hash code. It should be identical to what we get from
+        // lvalue.substring(0, lastNonPadChar+1).hashCode(), but it should be
+        // cheaper this way since we don't allocate a new string.
+        int hashcode = 0;
+        for (int i = 0; i <= lastNonPadChar; i++) {
+            hashcode = hashcode * 31 + lvalue.charAt(i);
         }
 
         return hashcode;

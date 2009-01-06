@@ -1088,17 +1088,19 @@ abstract class SQLBinary
 			return 0;
 		}
 
-		/* Hash code is simply the sum of all of the bytes */
+		// Hash code should ignore trailing PAD bytes.
 		byte[] bytes = dataValue;
-		int hashcode = 0;
+        int lastNonPadByte = bytes.length - 1;
+        while (lastNonPadByte >= 0 && bytes[lastNonPadByte] == PAD) {
+            lastNonPadByte--;
+        }
 
-		// Build the hash code
-		for (int index = 0 ; index < bytes.length; index++)
-		{
-			byte bv = bytes[index];
-			if (bv != SQLBinary.PAD)
-				hashcode += bytes[index];
-		}
+        // Build the hash code in a way similar to String.hashCode() and
+        // SQLChar.hashCode()
+        int hashcode = 0;
+        for (int i = 0; i <= lastNonPadByte; i++) {
+            hashcode = hashcode * 31 + bytes[i];
+        }
 
 		return hashcode;
 	}
