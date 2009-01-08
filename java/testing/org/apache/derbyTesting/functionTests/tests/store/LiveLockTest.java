@@ -141,7 +141,7 @@ public class LiveLockTest extends BaseJDBCTestCase {
                 ResultSet rs = stmt.executeQuery("select * from t");
                 while (rs.next())
                     ;
-                Thread.sleep(3000);
+                Thread.sleep(4000);
                 threadConnection.commit();
                 tries++;
                 if (tries == 10)
@@ -178,7 +178,7 @@ public class LiveLockTest extends BaseJDBCTestCase {
         Test suite = TestConfiguration
                 .embeddedSuite(LiveLockTest.class);
         return new CleanDatabaseTestSetup(DatabasePropertyTestSetup
-                .setLockTimeouts(suite, 5, 10)) {
+                .setLockTimeouts(suite, 1, 10)) {
             /**
              * Creates the table used in the test cases.
              * 
