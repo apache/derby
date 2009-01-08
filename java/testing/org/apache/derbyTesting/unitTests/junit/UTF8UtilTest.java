@@ -59,6 +59,9 @@ import org.apache.derbyTesting.junit.BaseTestCase;
 public class UTF8UtilTest
     extends BaseTestCase {
 
+    /** Type name passed to {@code ReaderToUTF8Stream}. */
+    private static final String TYPENAME = "VARCHAR";
+
     /**
      * Creates a test of the specified name.
      */
@@ -78,7 +81,7 @@ public class UTF8UtilTest
         InputStream ascii = new LoopingAlphabetStream(length);
         InputStream modUTF8 = new ReaderToUTF8Stream(
                                     new LoopingAlphabetReader(length),
-                                    length, 0, "ignored-test-type");
+                                    length, 0, TYPENAME);
         modUTF8.skip(2L); // Skip encoded length added by ReaderToUTF8Stream.
         assertEquals(ascii, modUTF8);
     }
@@ -98,7 +101,7 @@ public class UTF8UtilTest
         final int charLength = 5;
         InputStream in = new ReaderToUTF8Stream(
                 new LoopingAlphabetReader(charLength, CharAlphabet.cjkSubset()),
-                charLength, 0, "ignored-test-type");
+                charLength, 0, TYPENAME);
         in.skip(2L); // Skip encoded length added by ReaderToUTF8Stream.
         assertEquals(charLength, UTF8Util.skipUntilEOF(in));
     }
@@ -114,7 +117,7 @@ public class UTF8UtilTest
         final int charLength = 127019;
         InputStream in = new ReaderToUTF8Stream(
                 new LoopingAlphabetReader(charLength, CharAlphabet.cjkSubset()),
-                charLength, 0, "ignored-test-type");
+                charLength, 0, TYPENAME);
         in.skip(2L); // Skip encoded length added by ReaderToUTF8Stream.
         assertEquals(charLength, UTF8Util.skipUntilEOF(in));
     }
@@ -130,7 +133,7 @@ public class UTF8UtilTest
         final int charLength = 161019;
         InputStream in = new ReaderToUTF8Stream(
                 new LoopingAlphabetReader(charLength, CharAlphabet.cjkSubset()),
-                charLength, 0, "ignored-test-type");
+                charLength, 0, TYPENAME);
         in.skip(2L); // Skip encoded length added by ReaderToUTF8Stream.
         // Returns count in bytes, we are using CJK chars so multiply length
         // with 3 to get expected number of bytes.
@@ -148,7 +151,7 @@ public class UTF8UtilTest
         final int charLength = 161019;
         InputStream in = new ReaderToUTF8Stream(
                 new LoopingAlphabetReader(charLength, CharAlphabet.cjkSubset()),
-                charLength, 0, "ignored-test-type");
+                charLength, 0, TYPENAME);
         in.skip(2L); // Skip encoded length added by ReaderToUTF8Stream.
         try {
             UTF8Util.skipFully(in, charLength + 100);
@@ -169,7 +172,7 @@ public class UTF8UtilTest
         final int charLength = 10;
         InputStream in = new ReaderToUTF8Stream(
                 new LoopingAlphabetReader(charLength, CharAlphabet.cjkSubset()),
-                charLength, 0, "ignored-test-type");
+                charLength, 0, TYPENAME);
         in.skip(2L); // Skip encoded length added by ReaderToUTF8Stream.
         in.skip(1L); // Skip one more byte to trigger a UTF error.
         try {
@@ -188,7 +191,7 @@ public class UTF8UtilTest
         final int charLength = 161019;
         InputStream in = new ReaderToUTF8Stream(
                 new LoopingAlphabetReader(charLength, CharAlphabet.tamil()),
-                charLength, 0, "ignored-test-type");
+                charLength, 0, TYPENAME);
         in.skip(2L); // Skip encoded length added by ReaderToUTF8Stream.
         int firstSkip = 10078;
         assertEquals(firstSkip*3, UTF8Util.skipFully(in, firstSkip));

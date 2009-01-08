@@ -25,17 +25,20 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.io.EOFException;
 import java.io.Reader;
-import java.io.UTFDataFormatException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.services.io.DerbyIOException;
 import org.apache.derby.iapi.services.io.LimitReader;
-import org.apache.derby.iapi.types.TypeId;
+import org.apache.derby.iapi.services.sanity.SanityManager;
 
 /**
-	Converts a java.io.Reader to the on-disk UTF8 format used by Derby
-    for character types.
-*/
+ * Converts the characters served by a {@code java.io.Reader} to a stream
+ * returning the data in the on-disk modified UTF-8 encoded representation used
+ * by Derby.
+ * <p>
+ * Length validation is performed. If required and allowed by the target column
+ * type, truncation of blanks will also be performed.
+ */
 public final class ReaderToUTF8Stream
 	extends InputStream
 {
@@ -44,33 +47,36 @@ public final class ReaderToUTF8Stream
      */
 	private LimitReader reader;
 
-	private byte[] buffer;
-	private int boff;
-	private int blen;
-	private boolean eof;
-	private boolean multipleBuffer;
-    // buffer to hold the data read from stream 
-    // and converted to UTF8 format
+    /**
+     * Size of buffer to hold the data read from stream and converted to the
+     * modified UTF-8 format.
+     */
     private final static int BUFSIZE = 32768;
+    private byte[] buffer = new byte[BUFSIZE];
+	private int boff;
+    private int blen = -1;
+	private boolean eof;
+    /** Tells if the stream content is/was larger than the buffer size. */
+	private boolean multipleBuffer;
     
-    /** Number of characters to truncate from this stream
-     The SQL standard allows for truncation of trailing spaces 
-     for clobs,varchar,char.
-     If zero, no characters are truncated.
+    /**
+     * Number of characters to truncate from this stream.
+     * The SQL standard allows for truncation of trailing spaces for CLOB,
+     * VARCHAR and CHAR. If zero, no characters are truncated, unless the
+     * stream length execeeds the maximum length of the column we are inserting
+     * into.
      */
     private final int charsToTruncate;
     private static final char SPACE = ' ';
     
     /**
-     * Length of the final value, after truncation if any,
-     * in characters.
-     this stream needs to fit into a column of colWidth
-     if truncation error happens ,then the error message includes 
-     information about the column width.
-    */
+     * If positive, length of the expected final value, after truncation if any,
+     * in characters. If negative, the maximum length allowed in the column we
+     * are inserting into. A negative value means we are working with a stream
+     * of unknown length, inserted through one of the JDBC 4.0 "lengthless
+     * override" methods.
+     */
     private final int valueLength; 
-    /** The maximum allowed length of the stream. */
-    private final int maximumLength;
     /** The type name for the column data is inserted into. */
     private final String typeName;
     
@@ -83,7 +89,9 @@ public final class ReaderToUTF8Stream
      * an exception is thrown during read.
      *
      * @param appReader application reader
-     * @param valueLength the length of the reader in characters
+     * @param valueLength the expected length of the reader in characters
+     *      (positive), or the inverse (maxColWidth * -1) of the maximum column
+     *      width if the expected stream length is unknown
      * @param numCharsToTruncate the number of trailing blanks to truncate
      * @param typeName type name of the column data is inserted into
      */
@@ -93,52 +101,58 @@ public final class ReaderToUTF8Stream
                               String typeName) {
         this.reader = new LimitReader(appReader);
         reader.setLimit(valueLength);
-        buffer = new byte[BUFSIZE];
-        blen = -1;        
         this.charsToTruncate = numCharsToTruncate;
         this.valueLength = valueLength;
-        this.maximumLength = -1;
         this.typeName = typeName;
+        if (SanityManager.DEBUG) {
+            // Check the type name
+            // The national types (i.e. NVARCHAR) are not used/supported.
+            SanityManager.ASSERT(typeName != null && (
+                    typeName.equals(TypeId.CHAR_NAME) ||
+                    typeName.equals(TypeId.VARCHAR_NAME) ||
+                    typeName.equals(TypeId.CLOB_NAME)) ||
+                    typeName.equals(TypeId.LONGVARCHAR_NAME));
+        }
     }
 
     /**
-     * Create a UTF-8 stream for a length less application reader.
-     *
-     * A limit is placed on the length of the reader. If the reader exceeds
-     * the maximum length, truncation of trailing blanks is attempted. If
-     * truncation fails, an exception is thrown.
+     * Creates a UTF-8 stream for an application reader whose length isn't
+     * known at insertion time.
+     * <p>
+     * The application reader is coming in through one of the "lengthless
+     * overrides" added in JDBC 4.0, for instance
+     * {@link java.sql.PreparedStatement#setCharacterStream(int,Reader)}.
+     * A limit is placed on the length of the application reader. If the reader
+     * exceeds the maximum length, truncation of trailing blanks is attempted.
+     * If truncation fails, an exception is thrown.
      *
      * @param appReader application reader
      * @param maximumLength maximum allowed length in number of characters for
-     *      the reader
+     *      the reader, typically the maximum field size
      * @param typeName type name of the column data is inserted into
-     * @throws IllegalArgumentException if maximum length is negative, or type
-     *      name is <code>null<code>
+     * @throws IllegalArgumentException if maximum length is negative
      */
     public ReaderToUTF8Stream(Reader appReader,
                               int maximumLength,
                               String typeName) {
+        this(appReader, -1 * maximumLength, 0, typeName);
         if (maximumLength < 0) {
             throw new IllegalArgumentException("Maximum length for a capped " +
                     "stream cannot be negative: " + maximumLength);
         }
-        if (typeName == null) {
-            throw new IllegalArgumentException("Type name cannot be null");
-        }
-        this.reader = new LimitReader(appReader);
         reader.setLimit(maximumLength);
-        buffer = new byte[BUFSIZE];
-        blen = -1;
-        this.maximumLength = maximumLength;
-        this.typeName = typeName;
-        this.charsToTruncate = -1;
-        this.valueLength = -1;
     }
 
     /**
-     * read from stream; characters converted to utf-8 derby specific encoding.
-     * If stream has been read, and eof reached, in that case any subsequent
-     * read will throw an EOFException
+     * Reads a byte from the stream.
+     * <p>
+     * Characters read from the source stream are converted to the UTF-8 Derby
+     * specific encoding.
+     *
+     * @return The byte read, or {@code -1} if the end-of-stream is reached.
+     * @throws EOFException if the end-of-stream has already been reached or
+     *      the stream has been closed
+     * @throws IOException if reading from the source stream fails
      * @see java.io.InputStream#read()
      */
 	public int read() throws IOException {
@@ -175,6 +189,19 @@ public final class ReaderToUTF8Stream
 
 	}
 
+    /**
+     * Reads up to {@code len} bytes from the stream.
+     * <p>
+     * Characters read from the source stream are converted to the UTF-8 Derby
+     * specific encoding.
+     *
+     * @return The number of bytes read, or {@code -1} if the end-of-stream is
+     *      reached.
+     * @throws EOFException if the end-of-stream has already been reached or
+     *      the stream has been closed
+     * @throws IOException if reading from the source stream fails
+     * @see java.io.InputStream#read(byte[],int,int)
+     */
 	public int read(byte b[], int off, int len) throws IOException {
         
         // when stream has been read and eof reached, stream is closed
@@ -230,6 +257,18 @@ public final class ReaderToUTF8Stream
 		return readCount;
 	}
 
+    /**
+     * Fills the internal buffer with data read from the source stream.
+     * <p>
+     * The characters read from the source are converted to the modified UTF-8
+     * encoding, used as the on-disk format by Derby.
+     *
+     * @param startingOffset offset at which to start filling the buffer, used
+     *      to avoid overwriting the stream header data on the first iteration
+     * @throws DerbyIOException if the source stream has an invalid length
+     *      (different than specified), or if truncation of blanks fails
+     * @throws IOException if reading from the source stream fails
+     */
 	private void fillBuffer(int startingOffset) throws IOException
 	{
 		int off = boff = startingOffset;
@@ -322,7 +361,10 @@ public final class ReaderToUTF8Stream
                 } else {
                     throw new DerbyIOException(
                             MessageService.getTextMessage(
-                                SQLState.LANG_STRING_TRUNCATION),
+                                SQLState.LANG_STRING_TRUNCATION,
+                                typeName,
+                                "<stream-value>", // Don't show the whole value.
+                                String.valueOf(Math.abs(valueLength))),
                             SQLState.LANG_STRING_TRUNCATION);
                 }
             }
@@ -354,6 +396,8 @@ public final class ReaderToUTF8Stream
             return true;
         } else if (typeName.equals(TypeId.VARCHAR_NAME)) {
             return true;
+        } else if (typeName.equals(TypeId.CHAR_NAME)) {
+            return true;
         }
         return false;
     }
@@ -374,8 +418,8 @@ public final class ReaderToUTF8Stream
                     MessageService.getTextMessage(
                         SQLState.LANG_STRING_TRUNCATION,
                         typeName, 
-                        "XXXX", 
-                        String.valueOf(valueLength)),
+                        "<stream-value>", // Don't show the whole value.
+                        String.valueOf(Math.abs(valueLength))),
                     SQLState.LANG_STRING_TRUNCATION);
             }
         }
@@ -384,8 +428,7 @@ public final class ReaderToUTF8Stream
     /**
      * return resources 
      */
-	public void close() throws IOException
-	{
+    public void close() {
         // since stream has been read and eof reached, return buffer back to 
         // the vm.
         // Instead of using another variable to indicate stream is closed
@@ -395,8 +438,9 @@ public final class ReaderToUTF8Stream
 
     /**
      * Return an optimized version of bytes available to read from 
-     * the stream 
-     * Note, it is not exactly per java.io.InputStream#available()
+     * the stream.
+     * <p>
+     * Note, it is not exactly per {@code java.io.InputStream#available()}.
      */
     public final int available()
     {
@@ -409,4 +453,3 @@ public final class ReaderToUTF8Stream
        return (BUFSIZE > remainingBytes ? remainingBytes : BUFSIZE);
     }
   }
-
