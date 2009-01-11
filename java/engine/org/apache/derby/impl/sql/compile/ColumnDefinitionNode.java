@@ -76,6 +76,7 @@ public class ColumnDefinitionNode extends TableElementNode
 	DataValueDescriptor			defaultValue;
 	DefaultInfoImpl				defaultInfo;
 	DefaultNode					defaultNode;
+	boolean						keepCurrentDefault;
     GenerationClauseNode   generationClauseNode;
 	long						autoincrementIncrement;
 	long						autoincrementStart;
@@ -174,6 +175,17 @@ public class ColumnDefinitionNode extends TableElementNode
                     setNullability(false);
 			}
 		}
+		// ColumnDefinitionNode instances can be subclassed by
+		// ModifyColumnNode for use in ALTER TABLE .. ALTER COLUMN
+		// statements, in which case the node represents the intended
+		// changes to the column definition. For such a case, we
+		// record whether or not the statement specified that the
+		// column's default value should be changed. If we are to
+		// keep the current default, ModifyColumnNode will re-read
+		// the current default from the system catalogs prior to
+		// performing the column alteration. See DERBY-4006
+		// for more discussion of this behavior.
+		this.keepCurrentDefault = (defaultNode == null);
 	}
 
 	/**

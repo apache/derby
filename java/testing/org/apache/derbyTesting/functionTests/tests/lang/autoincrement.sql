@@ -1095,3 +1095,27 @@ drop table t2902_a;
 drop table t2902_b;
 drop table t2902_c;
 
+-- DERBY-4006: can't alter a column's default value to NULL. This problem
+-- was a regression from the fixes for DERBY-1495 and DERBY-1645, and
+-- involved an inability to distinguish between not specifying the DEFAULT
+-- clause on the ALTER COLUMN statement at all, versus specify the clause
+-- DEFAULT NULL
+create table d4006 (x varchar(5) default 'abc');
+insert into d4006 values default;
+alter table d4006 alter column x with default null;
+insert into d4006 values default;
+alter table d4006 alter column x with default 'def';
+insert into d4006 values default;
+select * from d4006;
+-- Demonstrate that you can't change the default value for a generated column:
+alter table d4006 add column y int generated always as (-1);
+alter table d4006 alter column y default 42;
+alter table d4006 alter column y default null;
+drop table d4006;
+-- Note that if the column is GENERATED ALWAYS the default CAN be altered,
+-- but this is probably incorrect. See DERBY-4011 for more discussion.
+create table d4006_a (z int generated always as identity);
+alter table d4006_a alter column z default 99; -- should fail DERBY-4011
+alter table d4006_a alter column z default null; -- should fail DERBY-4011
+drop table d4006_a;
+
