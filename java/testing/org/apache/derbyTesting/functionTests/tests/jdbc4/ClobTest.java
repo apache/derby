@@ -1,23 +1,22 @@
-
 /*
- 
-   Derby - Class ClobTest
- 
+
+   Derby - Class org.apache.derbyTesting.functionTests.tests.jdbc4.ClobTest
+
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
    this work for additional information regarding copyright ownership.
    The ASF licenses this file to you under the Apache License, Version 2.0
    (the "License"); you may not use this file except in compliance with
    the License.  You may obtain a copy of the License at
- 
+
       http://www.apache.org/licenses/LICENSE-2.0
- 
+
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
- 
+
  */
 
 package org.apache.derbyTesting.functionTests.tests.jdbc4;
@@ -47,31 +46,30 @@ import java.util.*;
 import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetReader;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 class ExemptClobMD {
-    // The Name of the method
+    /** The Name of the method. */
     private String methodName_;
-    
-    // The parameters of the method
+
+    /** The parameters of the method. */
     private Class [] params_;
-    
-    //Whether it is exempted in the 
-    //Client or the Embedded framework
+
+    /** Tells if exempted in the client framework. */
     private boolean isClientFramework_;
+    /** Tells if exempted in the embedded framework. */
     private boolean isEmbeddedFramework_;
-    
+
     /**
      * The Constructor for the ExemptClobMD class that
-     * initialized the object with the details of the 
+     * initialized the object with the details of the
      * methods that have been exempted
      *
      * @param methodName          A String that contains the name of the method
      *                            that has been exempted.
-     * @param params              A array of Class that contains the parameters 
+     * @param params              A array of Class that contains the parameters
      *                            of the methods.
-     * @param isClientFramework   true if the method is exempted in the 
+     * @param isClientFramework   true if the method is exempted in the
      *                            Client framework.
-     * @param isEmbeddedFramework true if the method is exempted in the 
+     * @param isEmbeddedFramework true if the method is exempted in the
      *                            Embedded framework.
-     *
      */
     public ExemptClobMD(String methodName,Class [] params,
                             boolean isClientFramework,
@@ -81,7 +79,7 @@ class ExemptClobMD {
         isClientFramework_ = isClientFramework;
         isEmbeddedFramework_ = isEmbeddedFramework;
     }
-    
+
     /**
      *
      * Returns the name of the method.
@@ -90,23 +88,23 @@ class ExemptClobMD {
      *
      */
     public String getMethodName() { return methodName_; }
-    
+
     /**
      * Returns a array of Class containing the type of the parameters
-     * of this method. 
+     * of this method.
      *
-     * @return A array of Class containing the type of the parameters 
+     * @return A array of Class containing the type of the parameters
      *         of the method.
      */
     public Class [] getParams() { return params_; }
-    
+
     /**
      * Returns if the method is exempted from the Client Framework.
      *
      * @return true if the method is exempted from the Client Framework.
      */
     public boolean getIfClientFramework() { return isClientFramework_; }
-    
+
     /**
      * Returns if the method is exempted from the Embedded Framework.
      *
@@ -123,25 +121,29 @@ public class ClobTest
 
     /** Default Clob object used by the tests. */
     private Clob clob = null;
-    
-    // Initialize with the details of the method that are exempted from 
+
+    // Initialize with the details of the method that are exempted from
     //throwing a SQLException when they are called after calling free()
     //on a LOB.
-    
+
     private static final ExemptClobMD [] emd = new ExemptClobMD [] {
-        new ExemptClobMD( "getCharacterStream", new Class[] { long.class, long.class } ,true,true),
-	new ExemptClobMD( "setString",          new Class[] { long.class, String.class } ,false,true),
-	new ExemptClobMD( "truncate",           new Class[] { long.class },false,true),
-        new ExemptClobMD( "free",               null,true,true)
+        new ExemptClobMD( "getCharacterStream",
+                new Class[] { long.class, long.class } ,true,true),
+        new ExemptClobMD( "setString",
+                new Class[] { long.class, String.class } ,false,true),
+        new ExemptClobMD( "truncate",
+                new Class[] { long.class },false,true),
+        new ExemptClobMD( "free",
+                null,true,true)
     };
-    
+
     // An HashMap that is indexed by the Method which facilitated easy
     //search for whether the given method has been exempted from the
     //LOB interface.
-    
-    private HashMap<Method,ExemptClobMD> excludedMethodSet = 
+
+    private HashMap<Method,ExemptClobMD> excludedMethodSet =
                             new HashMap<Method,ExemptClobMD>();
-    
+
     /**
      * Create the test with the given name.
      *
@@ -150,8 +152,8 @@ public class ClobTest
     public ClobTest(String name) {
         super(name);
     }
-    
-    public void setUp() 
+
+    public void setUp()
         throws SQLException {
         // Life span of Clob objects are limited by the transaction.  Need
         // autocommit off so Clob objects survive closing of result set.
@@ -166,7 +168,7 @@ public class ClobTest
         excludedMethodSet = null;
         super.tearDown();
     }
-    
+
     /**
      * Builds the HashSet which will be used to test whether the given methods
      * can be exempted or not
@@ -184,26 +186,26 @@ public class ClobTest
             }
         }
     }
-    
+
     /**
      * Tests the implementation for the free() method in the
      * Clob interface.
-     * 
+     *
      * @throws SQLException if an error occurs during releasing
      *         the Clob resources
      *
      */
     public void testFreeandMethodsAfterCallingFree()
-          throws IllegalAccessException, InvocationTargetException, SQLException 
+          throws IllegalAccessException, InvocationTargetException, SQLException
     {
         clob = BlobClobTestSetup.getSampleClob(getConnection());
-        
-        //call the buildHashSetMethod to initialize the 
-        //HashSet with the method signatures that are exempted 
+
+        //call the buildHashSetMethod to initialize the
+        //HashSet with the method signatures that are exempted
         //from throwing a SQLException after free has been called
         //on the Clob object.
         buildHashSet();
-        
+
         InputStream asciiStream = clob.getAsciiStream();
         Reader charStream = clob.getCharacterStream();
         clob.free();
@@ -219,51 +221,50 @@ public class ClobTest
         //an SQLException
         buildMethodList(clob);
     }
-    
-    /*
-     * 
-     * Enumerate the methods of the Clob interface and 
+
+    /**
+     * Enumerate the methods of the Clob interface and
      * get the list of methods present in the interface
      * @param LOB an instance of the Clob interface implementation
      */
     void buildMethodList(Object LOB)
             throws IllegalAccessException, InvocationTargetException {
         //If the given method throws the correct exception
-        //set this to true and add it to the 
+        //set this to true and add it to the
         boolean valid = true;
-        
+
         //create a list of the methods that fail the test
         Vector<Method> methodList = new Vector<Method>();
-        
+
         //The class whose methods are to be verified
         Class clazz = Clob.class;
-        
+
         //The list of the methods in the class that need to be invoked
         //and verified
         Method [] methods = clazz.getMethods();
-        
+
         //Check each of the methods to ensure that
         //they throw the required exception
         for(int i=0;i<methods.length;i++) {
             if(!checkIfExempted(methods[i])) {
                 valid = checkIfMethodThrowsSQLException(LOB,methods[i]);
-                
+
                 //add the method to the list if the method does
                 //not throw the required exception
                 if(valid == false) methodList.add(methods[i]);
-                
+
                 //reset valid
                 valid = true;
             }
         }
-        
+
         if(!methodList.isEmpty()) {
             int c=0;
             String failureMessage = "The Following methods don't throw " +
                 "required exception - ";
             for (Method m : methodList) {
                 c = c + 1;
-                if(c == methodList.size() && c != 1) 
+                if(c == methodList.size() && c != 1)
                     failureMessage += " & ";
                 else if(c != 1)
                     failureMessage += " , ";
@@ -272,7 +273,7 @@ public class ClobTest
             fail(failureMessage);
         }
     }
-    
+
     /**
      * Checks if the method is to be exempted from testing or not.
      *
@@ -295,7 +296,7 @@ public class ClobTest
         return isExempted;
     }
 
-    /*
+    /**
      * Checks if the invocation of the method throws a SQLExceptio
      * as expected.
      * @param LOB    the Object that implements the Blob interface
@@ -304,7 +305,6 @@ public class ClobTest
      * @return true  If the method throws the SQLException required
      *               after the free method has been called on the
      *               LOB object
-     *
      */
     boolean checkIfMethodThrowsSQLException(Object LOB,Method method)
             throws IllegalAccessException, InvocationTargetException {
@@ -320,16 +320,16 @@ public class ClobTest
         return false;
     }
 
-    /*
+    /**
      * Return a array of objects containing the default values for
      * the objects passed in as parameters
-     * 
-     * @param parameterTypes an array containing the types of the parameter 
+     *
+     * @param parameterTypes an array containing the types of the parameter
      *                       to the method
-     * @return an array of Objects containing the null values for the 
+     * @return an array of Objects containing the null values for the
      *         parameter inputs
      */
-    
+
     Object[] getNullValues(Class<?> [] params) {
         Object[] args = new Object[params.length];
         for (int i = 0; i < params.length; i++) {
@@ -337,17 +337,15 @@ public class ClobTest
         }
         return args;
     }
-    
-    /*
+
+    /**
      * Returns the null value for the specific type
-     * 
+     *
      * @param type the type of the parameter for which the null
      *             value is required
      * @return the null value for the specific type
-     * 
      */
-     Object getNullValueForType(Class type)
-	{
+     Object getNullValueForType(Class type) {
         if (!type.isPrimitive()) {
             return null;
         }
@@ -378,10 +376,10 @@ public class ClobTest
         fail("Don't know how to handle type " + type);
         return null;            // unreachable statement
     }
-    
+
     /**
      * Tests the implementation of getCharacterStream(long pos, long length).
-     * 
+     *
      * @throws Exception
      */
     public void testGetCharacterStreamLong()
@@ -539,7 +537,7 @@ public class ClobTest
             assertSQLState("XJ087", sqle);
         }
     }
-    
+
     /**
      * Tests that the InputStream got from
      * a empty Clob reflects new data in the
@@ -552,29 +550,29 @@ public class ClobTest
          //to do the inserts into the
          //Clob.
          String str = "Hi I am the insert String";
-         
+
          //Create the InputStream that will
          //be used for comparing the Stream
          //that is obtained from the Blob after
          //the update.
          ByteArrayInputStream str_is = new ByteArrayInputStream
                  (str.getBytes("US-ASCII"));
-         
+
          //create the empty Clob.
          Clob clob = getConnection().createClob();
-         
+
          //Get the InputStream from this
          //Clob
          InputStream is = clob.getAsciiStream();
-         
+
          //set the String into the clob.
          clob.setString(1, str);
-         
+
          //Ensure that the Stream obtained from
          //the clob contains the expected bytes
          assertEquals(str_is, is);
      }
-     
+
      /**
      * Tests that the Reader got from
      * a empty Clob reflects new data in the
@@ -591,23 +589,23 @@ public class ClobTest
          //The string reader corresponding to this
          //string that will be used in the comparison.
          StringReader r_string = new StringReader(str);
-         
+
          //create the empty Clob.
          Clob clob = getConnection().createClob();
-         
+
          //Get the Reader from this
          //Clob
          Reader r_clob = clob.getCharacterStream();
-         
+
          //set the String into the clob.
          clob.setString(1, str);
-         
+
          //Now compare the reader corresponding
          //to the string and the reader obtained
          //form the clob to see if they match.
          assertEquals(r_string, r_clob);
      }
-     
+
     /**
      * Tests that the data updated in a Clob
      * is always reflected in the InputStream
@@ -622,41 +620,41 @@ public class ClobTest
          //to do the inserts into the
          //Clob.
          String str1 = "Hi I am the insert string";
-         
-         //Stores the byte array representation of 
+
+         //Stores the byte array representation of
          //the insert string.
          byte[] str1_bytes = str1.getBytes();
-         
+
          //The String that will be used in the
          //second series of updates
          String str2 = "Hi I am the update string";
-         
+
          //create the empty Clob.
          Clob clob = getConnection().createClob();
-         
+
          //Get the InputStream from this
          //Clob before any writes happen.
          InputStream is_BeforeWrite = clob.getAsciiStream();
-         
+
          //Get an OutputStream from this Clob
          //into which the data can be written
          OutputStream os = clob.setAsciiStream(1);
          os.write(str1_bytes);
-         
+
          //Doing a setString now on the Clob
          //should reflect the same extension
          //in the InputStream also.
          clob.setString((str1_bytes.length)+1, str2);
-         
+
          //Get the input stream from the
          //Clob after the update
          InputStream is_AfterWrite = clob.getAsciiStream();
-         
+
          //Now check if the two InputStreams
          //match
          assertEquals(is_BeforeWrite, is_AfterWrite);
      }
-     
+
     /**
      * Tests that the data updated in a Clob
      * is always reflected in the Reader
@@ -671,34 +669,34 @@ public class ClobTest
          //to do the inserts into the
          //Clob.
          String str1 = "Hi I am the insert string";
-         
+
          //The String that will be used in the
          //second series of updates
          String str2 = "Hi I am the update string";
-         
+
          //create the empty Clob.
          Clob clob = getConnection().createClob();
-         
+
          //Get the Reader from this
          //Clob
          Reader r_BeforeWrite = clob.getCharacterStream();
-         
+
          //Get a writer from this Clob
          //into which the data can be written
          Writer w = clob.setCharacterStream(1);
          char [] chars_str1 = new char[str1.length()];
          str2.getChars(0, str1.length(), chars_str1, 0);
          w.write(chars_str1);
-         
+
          //Doing a setString now on the Clob
          //should reflect the same extension
          //in the InputStream also.
          clob.setString((str1.length())+1, str2);
-         
+
          //Now get the reader from the Clob after
          //the update has been done.
          Reader r_AfterWrite = clob.getCharacterStream();
-         
+
          //Now compare the two readers to see that they
          //contain the same data.
          assertEquals(r_BeforeWrite, r_AfterWrite);
@@ -708,21 +706,20 @@ public class ClobTest
     /**
      * Test that a lock held on the corresponding row is released when free() is
      * called on the Clob object.
-     * @throws java.sql.SQLException 
+     * @throws java.sql.SQLException
      */
     public void testLockingAfterFree() throws SQLException
     {
         int id = initializeLongClob();  // Opens clob object
         executeParallelUpdate(id, true); // Test that timeout occurs
-        
+
         // Test that update goes through after the clob is closed
         clob.free();
         executeParallelUpdate(id, false);
-        
+
         commit();
     }
-    
-    
+
     /**
      * Test that a lock held on the corresponding row is NOT released when
      * free() is called on the Clob object if the isolation level is
@@ -735,17 +732,17 @@ public class ClobTest
                 setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
         int id = initializeLongClob(); // Opens clob object
         executeParallelUpdate(id, true); // Test that timeout occurs
-        
+
         // Test that update still times out after the clob is closed
         clob.free();
         executeParallelUpdate(id, true);
-        
+
         // Test that the update goes through after the transaction has committed
         commit();
         executeParallelUpdate(id, false);
     }
 
-    
+
      /**
      * Test that a lock held on the corresponding row is released when
      * free() is called on the Clob object if the isolation level is
@@ -758,26 +755,26 @@ public class ClobTest
                 setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
         int id = initializeLongClob(); // Opens clob object
         executeParallelUpdate(id, true); // Test that timeout occurs
-        
+
        // Test that update goes through after the clob is closed
         clob.free();
         executeParallelUpdate(id, false);
-        
+
         commit();
     }
 
 
     /**
-     * Insert a row with a large clob into the test table.  Read the row from 
+     * Insert a row with a large clob into the test table.  Read the row from
      * the database and assign the clob value to <code>clob</code>.
      * @return The id of the row that was inserted
-     * @throws java.sql.SQLException 
+     * @throws java.sql.SQLException
      */
     private int initializeLongClob() throws SQLException
     {
-        // Clob needs to be larger than one page for locking to occur 
+        // Clob needs to be larger than one page for locking to occur
         final int lobLength = 40000;
- 
+
         // Insert a long Clob
         PreparedStatement ps = prepareStatement(
                 "insert into BLOBCLOB(ID, CLOBDATA) values(?,?)");
@@ -787,28 +784,28 @@ public class ClobTest
         ps.execute();
         ps.close();
         commit();
-        
+
         // Fetch the Clob object from the database
         Statement st = createStatement();
-        ResultSet rs = 
+        ResultSet rs =
                 st.executeQuery("select CLOBDATA from BLOBCLOB where ID=" + id);
         rs.next();
         clob = rs.getClob(1);
         rs.close();
         st.close();
-       
+
         return id;
     }
-     
+
 
     /**
-     * Try to update the row with the given error.  Flag a failure if a 
+     * Try to update the row with the given error.  Flag a failure if a
      * timeout occurs when not expected, and vice versa.
      * @param id The id of the row to be updated
      * @param timeoutExpected true if it is expected that the update times out
-     * @throws java.sql.SQLException 
+     * @throws java.sql.SQLException
      */
-    private void executeParallelUpdate(int id, boolean timeoutExpected) 
+    private void executeParallelUpdate(int id, boolean timeoutExpected)
             throws SQLException
     {
         Connection conn2 = openDefaultConnection();
@@ -829,13 +826,12 @@ public class ClobTest
             conn2.close();
             if (timeoutExpected) {
                 assertSQLState(LOCK_TIMEOUT, se);
-            } else {               
+            } else {
                 throw se;
             }
         }
     }
 
-    
     /**
      * Create test suite for this test.
      */
@@ -844,10 +840,10 @@ public class ClobTest
         return new BlobClobTestSetup(
                 // Reduce lock timeouts so lock test case does not take too long
                 DatabasePropertyTestSetup.setLockTimeouts(
-                        TestConfiguration.defaultSuite(ClobTest.class, false), 
-                        2, 
+                        TestConfiguration.defaultSuite(ClobTest.class, false),
+                        2,
                         4));
     }
-    
+
     private static final String LOCK_TIMEOUT = "40XL1";
 } // End class ClobTest
