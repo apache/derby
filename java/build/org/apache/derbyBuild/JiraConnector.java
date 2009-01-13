@@ -41,7 +41,9 @@ public class JiraConnector {
 	// filenames of files to be created.
 	static String fixedBugsListFileName="fixedBugsList.xml";
 	static String releaseNotesListFileName="ReleaseNotesList.xml";
+	static String allJiraListFileName="all_JIRA_ISSUES.xml";
 
+    
 	public static String jira_releaseNotesSource =
 		"http://issues.apache.org/jira/secure/IssueNavigator.jspa?view=rss" +
 		"&pid=10594&sorter/field=issuekey&sorter/order=DESC&tempMax=50" +
@@ -53,6 +55,8 @@ public class JiraConnector {
 		"searchrequest-xml/temp/SearchRequest.xml?&pid=10594&resolution=1&" +
 		"fixVersion=10.3.0.0&sorter/field=issuekey&sorter/order=DESC&" +
 		"tempMax=1000&reset=true&decorator=none";
+
+	public static String jira_allBugsSource= "http://issues.apache.org/jira/secure/IssueNavigator.jspa?view=rss&pid=10594&sorter/field=issuekey&sorter/order=DESC&tempMax=6000&reset=true&decorator=none";
 
 	// other urls to some cute jira reports in xml.
 	// all 
@@ -67,8 +71,13 @@ public class JiraConnector {
 
 	public static void main(String[] args) {
 		try{
-			refreshJiraIssues(fixedBugsListFileName, jira_fixedBugsSource);
-			refreshJiraIssues(releaseNotesListFileName, jira_releaseNotesSource);
+			if (args.length > 0 && args[0].equals("all"))
+				// don't use this too often it is hard on Apache infrastructure.
+				refreshJiraIssues(allJiraListFileName, jira_allBugsSource);
+			else {
+				refreshJiraIssues(fixedBugsListFileName, jira_fixedBugsSource);
+				refreshJiraIssues(releaseNotesListFileName, jira_releaseNotesSource);
+			}
 		}catch(IOException ex){
 			ex.printStackTrace();
 		}catch(Exception exe){

@@ -94,8 +94,8 @@ public  class   VTIs
     @XMLRow
         (
          rowTag = "item",
-         childTags = { "key", "type", "priority", "status", "component", "title" },
-         childTypes = { "varchar(12)", "varchar(10)", "varchar(10)", "varchar(10)", "varchar(50)", "varchar(200)" },
+         childTags = { "key", "type", "priority", "status", "component", "title", "reporter", "assignee", "resolution", "created", "updated", "votes", "version", "fixVersion" },
+         childTypes = { "varchar(12)", "varchar(10)", "varchar(10)", "varchar(10)", "varchar(50)", "varchar(200)", "varchar(50)", "varchar(50)", "varchar(20)", "varchar(50)", "varchar(50)", "integer", "varchar(200)", "varchar(200)" },
          vtiClassName = "org.apache.derbyDemo.vtis.core.XmlVTI"
          )
     public  static  ResultSet   apacheVanillaJiraReport( String xmlResource ) throws SQLException

@@ -331,7 +331,9 @@ public  class   XmlVTI  extends StringColumnVTI
                     for ( int j = 0; j < childCount; j++ )
                     {
                         Element     child = (Element) children.item( j );
-                    
+                        // separate values with spaces.
+                        if (j != 0)
+                            buffer.append(" ");
                         buffer.append( squeezeText( child ) );
                     }
                     contents = buffer.toString();
