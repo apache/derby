@@ -902,6 +902,8 @@ public class ProtocolTest
                         resourcePath + "/connect.inc",
                         resourcePath + "/excsat_accsecrd1.inc",
                         resourcePath + "/excsat_accsecrd2.inc",
+                        resourcePath + "/excsat_accsecrd_nordb.inc",
+                        resourcePath + "/excsat_secchk_nordbonaccsec.inc",
                         resourcePath + "/excsat_secchk.inc",
                         resourcePath + "/values1.inc",
                         resourcePath + "/values64kblksz.inc",

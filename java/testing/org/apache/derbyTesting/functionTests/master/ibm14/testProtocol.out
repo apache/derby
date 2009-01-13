@@ -31,8 +31,6 @@ Test trying too small on SECMEC
 PASSED
 Test non null SECMGRNM
 PASSED
-Test missing RDBNAM on ACCSEC
-PASSED
 Test specifying encrypted security mechanism without a security token
 SECMEC=9 SECCHKCD=14
 PASSED
@@ -62,6 +60,10 @@ PASSED
 Test missing RDBACCCL from ACCRDB
 PASSED
 Test missing CRRTKN
+PASSED
+Test no RDBNAM on ACCSEC. Sent with SECCHK
+PASSED
+Test missing RDBNAM on  SECCHK
 PASSED
 Test too small value for RDBACCCL
 PASSED

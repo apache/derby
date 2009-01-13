@@ -1910,7 +1910,7 @@ class DRDAConnThread extends Thread {
 					String dbname = parseRDBNAM();
 					Database d = session.getDatabase(dbname);
 					if (d == null)
-						addDatabase(dbname);
+						initializeDatabase(dbname);
 					else
                     {
                         // reset database for connection re-use 
@@ -1940,13 +1940,8 @@ class DRDAConnThread extends Thread {
 			missingCodePoint(CodePoint.SECMEC);
 
 
-		// RESOLVE - when we look further into security we might want to
-		// handle this part of the protocol at the session level without
-		// requiring a database for when authentication is used but there
-		// is no database level security
 		if (database == null)
-			missingCodePoint(CodePoint.RDBNAM);
-
+			initializeDatabase(null);
 		database.securityMechanism = securityMechanism;
 		database.secTokenIn = secTokenIn;
 
@@ -3113,7 +3108,13 @@ class DRDAConnThread extends Thread {
 					String dbname = parseRDBNAM();
 					if (database != null) 
 					{
-						if (!database.dbName.equals(dbname))
+						if (database.dbName == null) {
+							// we didn't get the RDBNAM on ACCSEC. Set it here
+							database.setDatabaseName(dbname);
+							session.addDatabase(database);
+							session.database = database;
+						}
+						else if (!database.dbName.equals(dbname))
 							rdbnamMismatch(CodePoint.SECCHK);
 					}
 					else
@@ -3121,7 +3122,7 @@ class DRDAConnThread extends Thread {
 						// we should already have added the database in ACCSEC
 						// added code here in case we make the SECMEC session rather
 						// than database wide
-						addDatabase(dbname);
+						initializeDatabase(dbname);
 					}
 					break;
 				default:
@@ -3133,6 +3134,10 @@ class DRDAConnThread extends Thread {
 		// check for SECMEC which is required
 		if (securityMechanism == 0)
 			missingCodePoint(CodePoint.SECMEC);
+
+		// Check that we have a database name.
+		if (database == null  || database.dbName == null)
+			missingCodePoint(CodePoint.RDBNAM);
 
 		//check if we have a userid and password when we need it
 		if (securityCheckCode == 0 && 
@@ -3327,7 +3332,7 @@ class DRDAConnThread extends Thread {
 						//first time we have seen a database name
 						Database d = session.getDatabase(dbname);
 						if (d == null)
-							addDatabase(dbname);
+							initializeDatabase(dbname);
 						else
 						{
 							database = d;
@@ -8148,10 +8153,14 @@ class DRDAConnThread extends Thread {
 		return false;	//to shut the compiler up
 	}
 	/**
-	 * Add a database to the current session
+	 * Create a new database and intialize the 
+     * DRDAConnThread database.
+     * 
+     * @param dbname database name to initialize. If 
+     * dbnam is non null, add database to the current session
 	 *
 	 */
-	private void addDatabase(String dbname)
+	private void initializeDatabase(String dbname)
 	{
 		Database db;
 		if (appRequester.isXARequester())
@@ -8160,8 +8169,10 @@ class DRDAConnThread extends Thread {
 		}
 		else
 			db = new Database(dbname);
-		session.addDatabase(db);
-		session.database = db;
+		if (dbname != null) {
+			session.addDatabase(db);
+			session.database = db;
+		}
 		database = db;
 	}
 	/**
