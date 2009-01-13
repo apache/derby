@@ -1234,15 +1234,6 @@
   </target>
 
 
-  <target name="jdbc4_classlist_edit" if="jdk16">
-    <!-- uncomment jdbc4 classes if jdk 1.6 is available -->
-    <echo level="info" message="uncommenting jdbc4 classes"/>
-    <replaceregexp file="${jar.classlist}"
-     match="^#jdbc4_optional_(.*)"
-     replace="\1"
-     byline="true"/>
-  </target>
-
 <!-- - - - - - - - - - - - - - - derby.jar target - - - - - - - - - - - -->
 
   <target name="derbyjar" depends="initjars">
@@ -1257,10 +1248,6 @@
     <concat destfile="${derby.jar.dir}/lists/otherDerbyClasses.properties">
       <fileset dir="${basedir}/tools/jar" includes="*DBMS*.properties"/>
     </concat>
-
-    <antcall target="jdbc4_classlist_edit">
-      <param name="jar.classlist" value="${derby.jar.dir}/lists/otherDerbyClasses.properties"/>
-    </antcall>
 
     <mkdir dir="${derby.jar.dir}/lists/org/apache/derby"/>
     <java classname="org.apache.derbyBuild.propertyconfig" fork="yes">
@@ -1580,10 +1567,6 @@
 
     <copy file="${basedir}/tools/jar/dnc.properties"
           tofile="${derby.jar.dir}/lists/dnc.properties"/>
-
-    <antcall target="jdbc4_classlist_edit">
-      <param name="jar.classlist" value="${derby.jar.dir}/lists/dnc.properties"/>
-    </antcall>
 
     <java classname="org.apache.derbyBuild.classlister" fork="yes">
       <jvmarg value="-Doutputfile=${derby.jar.dir}/lists/dnc.list"/>
