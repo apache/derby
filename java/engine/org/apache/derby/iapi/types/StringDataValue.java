@@ -194,4 +194,17 @@ public interface StringDataValue extends ConcatableDataValue
 	 * subcalss.
 	 */
 	public StringDataValue getValue(RuleBasedCollator collatorForComparison);
+
+    /**
+     * Generates the stream header for a stream with the given character length.
+     *
+     * @param charLength the character length of the stream, or {@code -1} if
+     *      unknown. If unknown, it is expected that an end-of-stream byte
+     *      sequence is appended to the stream.
+     * @return A holder object with the stream header. A holder object is used
+     *      because more information than the raw header itself is required,
+     *      for instance whether the stream should be ended with a Derby-
+     *      specific end-of-stream marker.
+     */
+    public StreamHeaderHolder generateStreamHeader(long charLength);
 }

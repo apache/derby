@@ -25,11 +25,8 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.types.VariableSizeDataValue;
 
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.PreparedStatement;
 import org.apache.derby.iapi.sql.execute.ExecPreparedStatement;
-import org.apache.derby.iapi.sql.ResultSet;
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.ParameterValueSet;
 import org.apache.derby.iapi.sql.ResultDescription;
@@ -39,8 +36,6 @@ import org.apache.derby.iapi.types.RawToBinaryFormatStream;
 import org.apache.derby.iapi.types.ReaderToUTF8Stream;
 
 import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.services.io.LimitReader;
 
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.reference.JDBC40Translation;
@@ -63,15 +58,13 @@ import java.sql.Clob;
 import java.sql.Blob;
 
 import java.io.InputStream;
-import java.io.DataInputStream;
-import java.io.IOException;
-import java.io.EOFException;
 import java.io.Reader;
 import java.sql.Types;
 
 import org.apache.derby.iapi.jdbc.BrokeredConnectionControl;
 import org.apache.derby.iapi.jdbc.EngineParameterMetaData;
 import org.apache.derby.iapi.jdbc.EnginePreparedStatement;
+import org.apache.derby.iapi.types.StringDataValue;
 
 /**
  *
@@ -740,7 +733,8 @@ public abstract class EmbedPreparedStatement
 
         try {
             ReaderToUTF8Stream utfIn;
-            ParameterValueSet pvs = getParms();
+            final StringDataValue dvd = (StringDataValue)
+                    getParms().getParameter(parameterIndex -1);
             // Need column width to figure out if truncation is needed
             DataTypeDescriptor dtd[] = preparedStatement
                     .getParameterTypes();
@@ -787,12 +781,14 @@ public abstract class EmbedPreparedStatement
                 }
                 // Create a stream with truncation.
                 utfIn = new ReaderToUTF8Stream(reader, usableLength,
-                        truncationLength, getParameterSQLType(parameterIndex));
+                        truncationLength, getParameterSQLType(parameterIndex),
+                        dvd.generateStreamHeader(length));
             } else {
                 // Create a stream without exactness checks,
                 // but with a maximum limit.
                 utfIn = new ReaderToUTF8Stream(reader, colWidth,
-                                getParameterSQLType(parameterIndex));
+                                getParameterSQLType(parameterIndex),
+                                dvd.generateStreamHeader(-1));
             }
 
             // JDBC is one-based, DBMS is zero-based.
@@ -800,8 +796,8 @@ public abstract class EmbedPreparedStatement
             // the maximum length for the column. 
             // This is okay, based on the observation that
             // setValue does not use the value for anything at all.
-            pvs.getParameterForSet(
-                parameterIndex - 1).setValue(utfIn, usableLength);
+            getParms().getParameterForSet(parameterIndex - 1).
+                    setValue(utfIn, usableLength);
 
 		} catch (StandardException t) {
 			throw EmbedResultSet.noStateChangeException(t);

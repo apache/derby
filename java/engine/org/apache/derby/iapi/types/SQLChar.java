@@ -144,6 +144,17 @@ public class SQLChar
         }
     }
 
+    /**
+     * Static stream header holder with the header used for a 10.4 (and earlier)
+     * stream with unknown byte length. This header will be used with 10.4 or
+     * earlier databases, and sometimes also in newer databases for the other
+     * string data types beside of Clob. The expected EOF marker is
+     * '0xE0 0x00 0x00'.
+     */
+    protected static final StreamHeaderHolder UNKNOWN_LEN_10_4_HEADER_HOLDER =
+            new StreamHeaderHolder(
+                    new byte[] {0x00, 0x00}, new byte[] {8, 0}, false, true);
+
     /**************************************************************************
      * Fields of the class
      **************************************************************************
@@ -2842,5 +2853,27 @@ readingLoop:
         }
 
         return (toString());
+    }
+
+    /**
+     * Generates the stream header for a stream with the given character length.
+     *
+     * @param charLength the character length of the stream, or {@code -1} if
+     *      unknown. If unknown, it is expected that a specifiec end-of-stream
+     *      byte sequence is appended to the stream.
+     * @return A holder object with the stream header. A holder object is used
+     *      because more information than the raw header itself is required,
+     *      for instance whether the stream should be ended with a Derby-
+     *      specific end-of-stream marker
+     */
+    public StreamHeaderHolder generateStreamHeader(long charLength) {
+        // Support for old (pre 10.5) deprecated format, which expects the
+        // header to contain the number of bytes in the value.
+        // We don't know that (due to the varying number of bytes per char), so
+        // say we don't know and instruct that the stream must be ended with a
+        // Derby-specific end-of-stream marker.
+        // Note that there are other code paths were the byte length is known
+        // and can be written to the stream.
+        return UNKNOWN_LEN_10_4_HEADER_HOLDER;
     }
 }

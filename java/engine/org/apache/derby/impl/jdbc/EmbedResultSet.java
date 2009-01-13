@@ -75,6 +75,7 @@ import java.net.URL;
 
 import java.util.Arrays;
 import java.util.Calendar;
+import org.apache.derby.iapi.types.StringDataValue;
 
 /**
  * A EmbedResultSet for results from the EmbedStatement family. 
@@ -2918,6 +2919,8 @@ public abstract class EmbedResultSet extends ConnectionChild
                 return;
             }
             
+            final StringDataValue dvd = (StringDataValue)
+                    getDVDforColumnToBeUpdated(columnIndex, updateMethodName);
             ReaderToUTF8Stream utfIn;
             int usableLength = -1;
             if (!lengthLess) {
@@ -2967,17 +2970,18 @@ public abstract class EmbedResultSet extends ConnectionChild
                 }
 
                 utfIn = new ReaderToUTF8Stream(reader, usableLength,
-                        truncationLength, getColumnSQLType(columnIndex));
+                        truncationLength, getColumnSQLType(columnIndex),
+                        dvd.generateStreamHeader(length));
             } else {
                 int colWidth = getMaxColumnWidth(columnIndex);
                 utfIn = new ReaderToUTF8Stream(
-                            reader, colWidth, getColumnSQLType(columnIndex));
+                            reader, colWidth, getColumnSQLType(columnIndex),
+                            dvd.generateStreamHeader(-1));
             }
 
             // NOTE: The length argument to setValue is not used. If that
             //       changes, the value might also have to change.
-            getDVDforColumnToBeUpdated(columnIndex, updateMethodName).setValue(
-                    utfIn, (int) usableLength);
+            dvd.setValue(utfIn, usableLength);
         } catch (StandardException t) {
             throw noStateChangeException(t);
         }

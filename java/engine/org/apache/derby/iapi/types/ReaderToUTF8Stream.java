@@ -58,6 +58,19 @@ public final class ReaderToUTF8Stream
 	private boolean eof;
     /** Tells if the stream content is/was larger than the buffer size. */
 	private boolean multipleBuffer;
+    /**
+     * The stream header to use for this stream.
+     * <p>
+     * The holder object is immutable, and the header should not have to be
+     * changed, but we may replace it as an optimizataion. If the length of
+     * the stream is unknown at the start of the insertion and the whole stream
+     * content fits into the buffer, the header is updated with the length
+     * after the source stream has been drained. This means that even though
+     * the object is immutable and the reference final, another header may be
+     * written to the stream.
+     * @see #checkSufficientData()
+     */
+    private final StreamHeaderHolder header;
     
     /**
      * Number of characters to truncate from this stream.
@@ -98,12 +111,14 @@ public final class ReaderToUTF8Stream
     public ReaderToUTF8Stream(Reader appReader,
                               int valueLength,
                               int numCharsToTruncate,
-                              String typeName) {
+                              String typeName,
+                              StreamHeaderHolder headerHolder) {
         this.reader = new LimitReader(appReader);
         reader.setLimit(valueLength);
         this.charsToTruncate = numCharsToTruncate;
         this.valueLength = valueLength;
         this.typeName = typeName;
+        this.header = headerHolder;
         if (SanityManager.DEBUG) {
             // Check the type name
             // The national types (i.e. NVARCHAR) are not used/supported.
@@ -134,8 +149,9 @@ public final class ReaderToUTF8Stream
      */
     public ReaderToUTF8Stream(Reader appReader,
                               int maximumLength,
-                              String typeName) {
-        this(appReader, -1 * maximumLength, 0, typeName);
+                              String typeName,
+                              StreamHeaderHolder headerHolder) {
+        this(appReader, -1 * maximumLength, 0, typeName, headerHolder);
         if (maximumLength < 0) {
             throw new IllegalArgumentException("Maximum length for a capped " +
                     "stream cannot be negative: " + maximumLength);
@@ -167,7 +183,7 @@ public final class ReaderToUTF8Stream
         
 		// first read
 		if (blen < 0)
-			fillBuffer(2);
+            fillBuffer(header.copyInto(buffer, 0));
 
 		while (boff == blen)
 		{
@@ -214,7 +230,7 @@ public final class ReaderToUTF8Stream
 
         // first read
 		if (blen < 0)
-			fillBuffer(2);
+            fillBuffer(header.copyInto(buffer, 0));
 
 		int readCount = 0;
 
@@ -369,23 +385,42 @@ public final class ReaderToUTF8Stream
                 }
             }
         }
-		
-		// can put the correct length into the stream.
-		if (!multipleBuffer)
-		{
-			int utflen = blen - 2;
 
-			buffer[0] = (byte) ((utflen >>> 8) & 0xFF);
-			buffer[1] = (byte) ((utflen >>> 0) & 0xFF);
-
-		}
-		else
-		{
-			buffer[blen++] = (byte) 0xE0;
-			buffer[blen++] = (byte) 0x00;
-			buffer[blen++] = (byte) 0x00;
-		}
-	}
+        // can put the correct length into the stream.
+        if (!multipleBuffer) {
+            StreamHeaderHolder tmpHeader = header;
+            if (header.expectsCharLength()) {
+                if (SanityManager.DEBUG) {
+                    SanityManager.THROWASSERT("Header update with character " +
+                            "length is not yet supported");
+                }
+            } else {
+                int utflen = blen - header.headerLength(); // Length in bytes
+                tmpHeader = header.updateLength(utflen, false);
+                // Update the header we have already written to our buffer,
+                // still at postition zero.
+                tmpHeader.copyInto(buffer, 0);
+                if (SanityManager.DEBUG) {
+                    // Check that we didn't overwrite any of the user data.
+                    SanityManager.ASSERT(
+                            header.headerLength() == tmpHeader.headerLength());
+                }
+            }
+            // The if below is temporary, it won't be necessary when support
+            // for writing the new header has been added.
+            if (tmpHeader.writeEOF()) {
+                // Write the end-of-stream marker.
+                buffer[blen++] = (byte) 0xE0;
+                buffer[blen++] = (byte) 0x00;
+                buffer[blen++] = (byte) 0x00;
+            }
+        } else if (header.writeEOF()) {
+            // Write the end-of-stream marker.
+            buffer[blen++] = (byte) 0xE0;
+            buffer[blen++] = (byte) 0x00;
+            buffer[blen++] = (byte) 0x00;
+        }
+    }
 
     /**
      * Determine if trailing blank truncation is allowed.
@@ -452,4 +487,4 @@ public final class ReaderToUTF8Stream
        // on this stream
        return (BUFSIZE > remainingBytes ? remainingBytes : BUFSIZE);
     }
-  }
+}

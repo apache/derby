@@ -47,6 +47,17 @@ import java.util.Calendar;
 public class SQLClob
 	extends SQLVarchar
 {
+
+    /**
+     * Static stream header holder with the header used for a 10.5
+     * stream with unknown char length. This header will be used with 10.5, and
+     * possibly later databases. The expected EOF marker is '0xE0 0x00 0x00'.
+     */
+    protected static final StreamHeaderHolder UNKNOWN_LEN_10_5_HEADER_HOLDER =
+            new StreamHeaderHolder(
+                    new byte[] {0x00, 0x00, (byte)0xF0, 0x00, 0x00},
+                    new byte[] {24, 16, -1, 8, 0}, true, true);
+
 	/*
 	 * DataValueDescriptor interface.
 	 *
@@ -342,10 +353,11 @@ public class SQLClob
             long vcl = vc.length();
             if (vcl < 0L || vcl > Integer.MAX_VALUE)
                 throw this.outOfRange();
-            
-            setValue(new ReaderToUTF8Stream(vc.getCharacterStream(),
-                    (int) vcl, 0, TypeId.CLOB_NAME), (int) vcl);
-            
+
+            ReaderToUTF8Stream utfIn = new ReaderToUTF8Stream(
+                    vc.getCharacterStream(), (int) vcl, 0, TypeId.CLOB_NAME,
+                    generateStreamHeader(vcl));
+            setValue(utfIn, (int) vcl);
         } catch (SQLException e) {
             throw dataTypeConversion("DAN-438-tmp");
        }

@@ -763,9 +763,100 @@ public class ClobTest
         commit();
     }
 
+    /** Inserts, fetches and checks the length of a Clob using a stream. */
+    public void testInsertAndFetchZeroLength()
+            throws IOException, SQLException {
+        insertAndFetchTest(0);
+    }
+
+    /** Inserts, fetches and checks the length of a Clob using a stream. */
+    public void testInsertAndFetchVerySmall()
+            throws IOException, SQLException {
+        insertAndFetchTest(7);
+    }
+
+    /** Inserts, fetches and checks the length of a Clob using a stream. */
+    public void testInsertAndFetchSmall()
+            throws IOException, SQLException {
+        insertAndFetchTest(1587);
+    }
+
+    /** Inserts, fetches and checks the length of a Clob using a stream. */
+    public void testInsertAndFetchMedium()
+            throws IOException, SQLException {
+        insertAndFetchTest(32000);
+    }
+
+    /** Inserts, fetches and checks the length of a Clob using a stream. */
+    public void testInsertAndFetchMediumPlus()
+            throws IOException, SQLException {
+        insertAndFetchTest(64000);
+    }
+
+    /** Inserts, fetches and checks the length of a Clob using a stream. */
+    public void testInsertAndFetchLarge()
+            throws IOException, SQLException {
+        insertAndFetchTest(128022);
+    }
+
+    /** Inserts, fetches and checks the length of a Clob using a stream. */
+    public void testInsertAndFetchLarger()
+            throws IOException, SQLException {
+        insertAndFetchTest(3*1024*1024);
+    }
 
     /**
-     * Insert a row with a large clob into the test table.  Read the row from
+     * Inserts a Clob with the specified length, using a stream source, then
+     * fetches it from the database and checks the length.
+     *
+     * @param length number of characters in the Clob
+     * @throws IOException if reading from the source fails
+     * @throws SQLException if something goes wrong
+     */
+    private void insertAndFetchTest(long length)
+            throws IOException, SQLException {
+        PreparedStatement ps = prepareStatement(
+                "insert into BLOBCLOB(ID, CLOBDATA) values(?,?)");
+        int id = BlobClobTestSetup.getID();
+        ps.setInt(1, id);
+        ps.setCharacterStream(2, new LoopingAlphabetReader(length), length);
+        long tsStart = System.currentTimeMillis();
+        ps.execute();
+        println("Inserted " + length + " chars (length specified) in " +
+                (System.currentTimeMillis() - tsStart) + " ms");
+        Statement stmt = createStatement();
+        tsStart = System.currentTimeMillis();
+        ResultSet rs = stmt.executeQuery(
+                "select CLOBDATA from BLOBCLOB where id = " + id);
+        assertTrue("Clob not inserted", rs.next());
+        Clob aClob = rs.getClob(1);
+        assertEquals("Invalid length", length, aClob.length());
+        println("Fetched length (" + length + ") in " +
+                (System.currentTimeMillis() - tsStart) + " ms");
+        rs.close();
+
+        // Insert same Clob again, using the lengthless override.
+        id = BlobClobTestSetup.getID();
+        ps.setInt(1, id);
+        ps.setCharacterStream(2, new LoopingAlphabetReader(length));
+        tsStart = System.currentTimeMillis();
+        ps.executeUpdate();
+        println("Inserted " + length + " chars (length unspecified) in " +
+                (System.currentTimeMillis() - tsStart) + " ms");
+        rs = stmt.executeQuery(
+                "select CLOBDATA from BLOBCLOB where id = " + id);
+        assertTrue("Clob not inserted", rs.next());
+        aClob = rs.getClob(1);
+        assertEquals("Invalid length", length, aClob.length());
+        println("Fetched length (" + length + ") in " +
+                (System.currentTimeMillis() - tsStart) + " ms");
+        rs.close();
+
+        rollback();
+    }
+
+    /**
+     * Insert a row with a large clob into the test table.  Read the row from 
      * the database and assign the clob value to <code>clob</code>.
      * @return The id of the row that was inserted
      * @throws java.sql.SQLException
