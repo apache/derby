@@ -24,6 +24,7 @@ package org.apache.derby.iapi.types;
 import org.apache.derby.iapi.error.StandardException;
 
 import java.text.RuleBasedCollator;
+import org.apache.derby.iapi.jdbc.CharacterStreamDescriptor;
 
 public interface StringDataValue extends ConcatableDataValue
 {
@@ -207,4 +208,19 @@ public interface StringDataValue extends ConcatableDataValue
      *      specific end-of-stream marker.
      */
     public StreamHeaderHolder generateStreamHeader(long charLength);
+
+    /**
+     * Returns a descriptor for the input stream for this data value.
+     * <p>
+     * The descriptor contains information about header data, current positions,
+     * length, whether the stream should be buffered or not, and if the stream
+     * is capable of repositioning itself.
+     *
+     * @return A descriptor for the stream, which includes a reference to the
+     *      stream itself, or {@code null} if the value cannot be represented
+     *      as a stream.
+     * @throws StandardException if obtaining the descriptor fails
+     */
+    public CharacterStreamDescriptor getStreamWithDescriptor()
+            throws StandardException;
 }

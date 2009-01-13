@@ -40,6 +40,7 @@ import org.apache.derby.iapi.types.ConcatableDataValue;
 import org.apache.derby.iapi.reference.SQLState;
 
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.jdbc.CharacterStreamDescriptor;
 
 import org.apache.derby.iapi.services.cache.ClassSize;
 import org.apache.derby.iapi.services.io.ArrayInputStream;
@@ -66,7 +67,6 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.text.CollationElementIterator;
 import java.text.RuleBasedCollator;
 import java.text.CollationKey;
 import java.text.DateFormat;
@@ -531,8 +531,7 @@ public class SQLChar
     /**
      * Set this value to the on-disk format stream.
      */
-    public final void setStream(InputStream newStream)
-    {
+    public void setStream(InputStream newStream) {
         this.value = null;
         this.rawLength = -1;
         this.stream = newStream;
@@ -560,6 +559,22 @@ public class SQLChar
     {
         return stream;
     }
+
+    /**
+     * Returns a descriptor for the input stream for this character data value.
+     *
+     * @return Unless the method is overridden, {@code null} is returned.
+     * @throws StandardException if obtaining the descriptor fails
+     * @see SQLClob#getStreamWithDescriptor()
+     */
+    public CharacterStreamDescriptor getStreamWithDescriptor()
+            throws StandardException {
+        // For now return null for all non-Clob types.
+        // TODO: Is this what we want, or do we want to treat some of the other
+        //       string types as streams as well?
+        return null;
+    }
+
     /**
      * CHAR/VARCHAR/LONG VARCHAR implementation. 
      * Convert to a BigDecimal using getString.
@@ -615,7 +630,15 @@ public class SQLChar
         return utflen;
     }
 
-    private void throwStreamingIOException(IOException ioe) throws StandardException {
+    /**
+     * Wraps an {@code IOException} in a {@code StandardException} then throws
+     * the wrapping exception.
+     *
+     * @param ioe the {@code IOException} to wrap
+     * @throws StandardException the wrapping exception
+     */
+    protected void throwStreamingIOException(IOException ioe)
+            throws StandardException {
 		throw StandardException.
 			newException(SQLState.LANG_STREAMING_COLUMN_I_O_EXCEPTION,
 						 ioe, getTypeName());

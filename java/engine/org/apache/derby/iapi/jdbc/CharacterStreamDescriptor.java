@@ -375,13 +375,14 @@ public class CharacterStreamDescriptor {
         public CharacterStreamDescriptor build() {
             // Do validation only in sane builds.
             if (SanityManager.DEBUG) {
-                SanityManager.ASSERT(curBytePos >= 0);
+                SanityManager.ASSERT(curBytePos >= 0, "Negative curBytePos");
                 SanityManager.ASSERT(curCharPos >= 1 ||
-                        curCharPos == BEFORE_FIRST);
-                SanityManager.ASSERT(byteLength >= 0);
-                SanityManager.ASSERT(charLength >= 0);
-                SanityManager.ASSERT(dataOffset >= 0);
-                SanityManager.ASSERT(maxCharLength >= 0);
+                        curCharPos == BEFORE_FIRST, "Invalid curCharPos " +
+                        "(BEFORE_FIRST=" + BEFORE_FIRST + "), " + toString());
+                SanityManager.ASSERT(byteLength >= 0, "Negative byteLength");
+                SanityManager.ASSERT(charLength >= 0, "Negative charLength");
+                SanityManager.ASSERT(dataOffset >= 0, "Negative dataOffset");
+                SanityManager.ASSERT(maxCharLength >= 0, "Negative max length");
 
                 // If current byte pos is set, require char pos to be set too.
                 if ((curBytePos != 0 && curCharPos == 0) || 
@@ -395,22 +396,41 @@ public class CharacterStreamDescriptor {
                 // If we're in the header section, the character position must
                 // be before the first character.
                 if (curBytePos < dataOffset) {
-                    SanityManager.ASSERT(curCharPos == BEFORE_FIRST);
+                    SanityManager.ASSERT(curCharPos == BEFORE_FIRST,
+                            "curCharPos in header, " + toString());
                 }
                 // Byte length minus data offset must be equal to or greater
                 // then the character length.
                 if (byteLength > 0 && charLength > 0) {
-                    SanityManager.ASSERT(byteLength - dataOffset >= charLength);
+                    SanityManager.ASSERT(byteLength - dataOffset >= charLength,
+                            "Less than one byte per char, " + toString());
                 }
                 SanityManager.ASSERT(stream != null, "Stream cannot be null");
                 if (positionAware) {
-                    SanityManager.ASSERT(stream instanceof PositionedStream);
+                    SanityManager.ASSERT(stream instanceof PositionedStream,
+                            "Stream not a positioned stream, " + toString());
                 }
                 // Note that the character position can be greater than the
                 // maximum character length, because the limit might be imposed
                 // as part of extracting a substring of the contents.
             }
             return new CharacterStreamDescriptor(this);
+        }
+
+        /**
+         * Returns a textual representation of the builder.
+         *
+         * @return The textual representation of the builder.
+         */
+        public String toString() {
+            String str = "CharacterStreamBuiler@"  + hashCode() +
+                    ":bufferable=" + bufferable + ", isPositionAware=" +
+                    positionAware + ", curBytePos=" + curBytePos +
+                    ", curCharPos=" + curCharPos + ", dataOffset=" +
+                    dataOffset + ", byteLength=" + byteLength +
+                    ", charLength=" + charLength + ", maxCharLength=" +
+                    maxCharLength + ", stream=" + stream.getClass();
+            return str;
         }
     }
 }

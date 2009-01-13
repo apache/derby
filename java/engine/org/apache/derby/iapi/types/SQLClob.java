@@ -21,16 +21,16 @@
 
 package org.apache.derby.iapi.types;
 
-import org.apache.derby.iapi.types.DataValueDescriptor;
-import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.error.StandardException;
 
-import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.jdbc.CharacterStreamDescriptor;
+
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
-import java.sql.Blob;
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Clob;
 import java.sql.Date;
 import java.sql.SQLException;
@@ -57,6 +57,13 @@ public class SQLClob
             new StreamHeaderHolder(
                     new byte[] {0x00, 0x00, (byte)0xF0, 0x00, 0x00},
                     new byte[] {24, 16, -1, 8, 0}, true, true);
+
+    /**
+     * The descriptor for the stream. If there is no stream this should be
+     * {@code null}, which is also true if the descriptor hasen't been
+     * constructed yet.
+     */
+    private CharacterStreamDescriptor csd;
 
 	/*
 	 * DataValueDescriptor interface.
@@ -209,6 +216,80 @@ public class SQLClob
 		throw dataTypeConversion("java.sql.Date");
 	}
 
+    /**
+     * Returns a descriptor for the input stream for this CLOB value.
+     * <p>
+     * The descriptor contains information about header data, current positions,
+     * length, whether the stream should be buffered or not, and if the stream
+     * is capable of repositioning itself.
+     *
+     * @return A descriptor for the stream, which includes a reference to the
+     *      stream itself. If the value cannot be represented as a stream,
+     *      {@code null} is returned instead of a decsriptor.
+     * @throws StandardException if obtaining the descriptor fails
+     */
+    public CharacterStreamDescriptor getStreamWithDescriptor()
+            throws StandardException {
+        if (stream == null) {
+            // Lazily reset the descriptor here, to avoid further changes in
+            // {@code SQLChar}.
+            csd = null;
+            return null;
+        }
+        // NOTE: Getting down here several times is potentially dangerous.
+        // When the stream is published, we can't assume we know the position
+        // any more. The best we can do, which may hurt performance to some
+        // degree in some non-recommended use-cases, is to reset the stream if
+        // possible.
+        if (csd != null) {
+            if (stream instanceof Resetable) {
+                try {
+                    ((Resetable)stream).resetStream();
+                    } catch (IOException ioe) {
+                        throwStreamingIOException(ioe);
+                    }
+            } else {
+                if (SanityManager.DEBUG) {
+                    SanityManager.THROWASSERT("Unable to reset stream when " +
+                            "fetched the second time: " + stream.getClass());
+                }
+            }
+        }
+
+        if (csd == null) {
+            // First time, read the header format of the stream.
+            // NOTE: For now, just read the old header format.
+            try {
+                final int dataOffset = 2;
+                byte[] header = new byte[dataOffset];
+                int read = stream.read(header);
+                if (read != dataOffset) {
+                    String hdr = "[";
+                    for (int i=0; i < read; i++) {
+                        hdr += Integer.toHexString(header[i] & 0xff);
+                    }
+                    throw new IOException("Invalid stream header length " +
+                            read + ", got " + hdr + "]");
+                }
+
+                // Note that we add the two bytes holding the header *ONLY* if
+                // we know how long the user data is.
+                long utflen = ((header[0] & 0xff) << 8) | ((header[1] & 0xff));
+                if (utflen > 0) {
+                    utflen += dataOffset;
+                }
+
+                csd = new CharacterStreamDescriptor.Builder().stream(stream).
+                    bufferable(false).positionAware(false).
+                    curCharPos(1).curBytePos(dataOffset).
+                    dataOffset(dataOffset).byteLength(utflen).build();
+            } catch (IOException ioe) {
+                throwStreamingIOException(ioe);
+            }
+        }
+        return this.csd;
+    }
+
 	public Time	getTime(java.util.Calendar cal) throws StandardException
 	{
 		throw dataTypeConversion("java.sql.Time");
@@ -299,6 +380,17 @@ public class SQLClob
 	{
 		throwLangSetMismatch("java.math.BigDecimal");
 	}
+
+    /**
+     * Sets a new stream for this CLOB.
+     *
+     * @param stream the new stream
+     */
+    public final void setStream(InputStream stream) {
+        super.setStream(stream);
+        // Discard the old stream descriptor.
+        this.csd = null;
+    }
 
 	public void setValue(int theValue) throws StandardException
 	{
