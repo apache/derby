@@ -301,7 +301,6 @@ public class ClobTest
             throws IOException, SQLException {
         setAutoCommit(false);
         // Insert data, a medium sized Clob to store it as a stream.
-        Statement stmt = createStatement();
         PreparedStatement ps = prepareStatement(
                 "insert into ClobTestData values (?,?)");
         int initalSize = 128*1024;
