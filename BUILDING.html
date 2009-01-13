@@ -85,8 +85,7 @@ If you are reading these instructions, chances
     <TR>
       <TD><b><i>Java Development Kit</i></b></TD>
       <TD>You need to install a Java 5 or later JDK. Probably, your machine
-      already has this JDK. If not, Sun and IBM supply free Java
-      5 JDKs for many machines.</TD>
+      already has this JDK. If not, Sun and IBM supply free JDKs for many machines.</TD>
     </TR>
 
     <TR>
@@ -453,25 +452,28 @@ enforces compile-time contracts for the supported platforms:
     <TR>
       <TD><b><i>Java 6</i></b></TD>
       <TD><b><i>java16compile.classpath</i></b></TD>
-      <TD>If you have a Java 6 JDK on your machine, this should be the list of all the
-      Java 6 jars. Sun and IBM provide free Java 6 JDKs for many machines.</TD>
-      <TD><i>classes/stubs/jdbc4:${java15compile.classpath}</i></TD>
+      <TD>The Derby build tries to find a Java 6
+      JDK on your machine. The build fails if it can't find a Java 5
+      or Java 6 JDK.</TD>
+      <TD>The list of jars in your Java 6 JDK if the build can find them. Otherwise,
+      <i>classes/stubs/jdbc4:${java15compile.classpath}</i></TD>
     </TR>
 
     <TR>
       <TD><b><i>Java 5</i></b></TD>
       <TD><b><i>java15compile.classpath</i></b></TD>
       <TD>The Derby build tries to find a Java 5
-      JDK on your machine. The build fails if it can't find this JDK.</TD>
-      <TD>The jars in your Java 5 JDK.</TD>
+      JDK on your machine. The build fails if it can't find a Java 5
+      or Java 6 JDK.</TD>
+      <TD>The list of jars in your Java 5 JDK if the build can find them. Otherwise,
+      <i>classes/stubs/jdbc3:${java16compile.classpath}</i></TD>
     </TR>
 
     <TR>
       <TD><b><i>JDK 1.4.2</i></b></TD>
       <TD><b><i>java14compile.classpath</i></b></TD>
       <TD>The Derby build tries to find a 1.4 JDK
-      on your machine. If the build finds that JDK, then this
-      variable is set to the list of jars there. Again, Sun and IBM supply free 1.4.2 JDKs for many machines.</TD>
+      on your machine. Note that Sun and IBM supply free 1.4.2 JDKs for many machines.</TD>
       <TD>The list of jars in your 1.4 JDK if the build can find
       them. Otherwise,
       <i>${java15compile.classpath}:tools/java/xalan.jar:tools/java/serializer.jar</i>
@@ -527,6 +529,15 @@ variables in <i>ant.properties</i>:
       <TD>If you set this variable to be the directory which contains
       your Java 5 jars, then the Derby build will set
       <i>java15compile.classpath</i> to be the list of jars in that directory.
+      </TD>
+      <TD>Optional variable. No default value.</TD>
+    </TR>
+
+    <TR>
+      <TD><b><i>j16lib</i></b></TD>
+      <TD>If you set this variable to be the directory which contains
+      your Java 6 jars, then the Derby build will set
+      <i>java16compile.classpath</i> to be the list of jars in that directory.
       </TD>
       <TD>Optional variable. No default value.</TD>
     </TR>

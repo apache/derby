@@ -46,6 +46,7 @@ import org.apache.tools.ant.taskdefs.Property;
  * <ul>
  * <li>java14compile.classpath</li>
  * <li>java15compile.classpath</li>
+ * <li>java16compile.classpath</li>
  * </ul>
  *
  * <p>
@@ -56,6 +57,7 @@ import org.apache.tools.ant.taskdefs.Property;
  * <ul>
  * <li>j14lib</li>
  * <li>j15lib</li>
+ * <li>j16lib</li>
  * </ul>
  *
  * <p>
@@ -112,6 +114,8 @@ public class PropertySetter extends Task
     private static  final   String  APPLE_JAVA_ROOT = "/System/Library/Frameworks/JavaVM.framework/Versions";
 
     private static  final   String  JAVA_5 = "1.5";
+
+    private static  final   String  PROPERTY_SETTER_DEBUG_FLAG = "propertySetterDebug";
 
     /////////////////////////////////////////////////////////////////////////
     //
@@ -194,6 +198,11 @@ public class PropertySetter extends Task
     {
         refreshProperties();
 
+        if ( isSet( PROPERTY_SETTER_DEBUG_FLAG ) )
+        {
+            echo( "\nPropertySetter environment =\n\n" + showEnvironment() + "\n\n" );
+        }
+
         try {
             //
             // Check for settings which are known to cause problems.
@@ -203,7 +212,7 @@ public class PropertySetter extends Task
             //
             // There's nothing to do if the classpath properties are already set.
             //
-            if ( isSet( J14CLASSPATH ) && isSet( J15CLASSPATH ) ) { return; }
+            if ( isSet( J14CLASSPATH ) && isSet( J15CLASSPATH ) && isSet( J16CLASSPATH ) ) { return; }
             
             //
             // If the library properties are set, then use them to set the
@@ -211,9 +220,11 @@ public class PropertySetter extends Task
             //
             String  j14lib = getProperty( J14LIB );
             String  j15lib = getProperty( J15LIB );
+            String  j16lib = getProperty( J16LIB );
 
             if ( j14lib != null ) { setClasspathFromLib(J14CLASSPATH, j14lib, true ); }
             if ( j15lib != null ) { setClasspathFromLib(J15CLASSPATH, j15lib, true ); }
+            if ( j16lib != null ) { setClasspathFromLib(J16CLASSPATH, j16lib, true ); }
 
             //
             // If the library properties were not set, the following
@@ -249,8 +260,8 @@ public class PropertySetter extends Task
         // then the calling script will set J14CLASSPATH, based on J15CLASSPATH.
         //
 
-        // Require that these be set now.
-        requireProperty( J15CLASSPATH );
+        // Require that at least one of these be set now.
+        requireAtLeastOneProperty( J15CLASSPATH, J16CLASSPATH );
     }
 
     /////////////////////////////////////////////////////////////////////////
@@ -267,7 +278,7 @@ public class PropertySetter extends Task
     private void    setForAppleJDKs()
         throws BuildException
     {
-        defaultSetter( APPLE_JAVA_ROOT + "/1.4/Classes", APPLE_JAVA_ROOT + "/1.5/Classes" );
+        defaultSetter( APPLE_JAVA_ROOT + "/1.4/Classes", APPLE_JAVA_ROOT + "/1.5/Classes", APPLE_JAVA_ROOT + "/1.6/Classes" );
     }
     
     /////////////////////////////////////////////////////////////////////////
@@ -284,7 +295,7 @@ public class PropertySetter extends Task
     private void    setForIbmJDKs()
         throws Exception
     {
-        setForMostJDKs( "142", "50" );
+        setForMostJDKs( "142", "50", "60" );
     }
     
     /////////////////////////////////////////////////////////////////////////
@@ -302,7 +313,7 @@ public class PropertySetter extends Task
     private void    setForSunJDKs()
         throws Exception
     {
-        setForMostJDKs( "1.4.", "1.5." );
+        setForMostJDKs( "1.4.", "1.5.", "1.6" );
     }
     
     /////////////////////////////////////////////////////////////////////////
@@ -316,21 +327,25 @@ public class PropertySetter extends Task
      * Set the properties needed to compile using most JDKs
      * </p>
      */
-    private void    setForMostJDKs( String seed14, String seed15)
+    private void    setForMostJDKs( String seed14, String seed15, String seed16 )
         throws Exception
     {
         List<File> jdkParents = getJdkSearchPath();
-        
+
         String  default_j14lib = getProperty( J14LIB );
         String  default_j15lib = getProperty( J15LIB );
+        String  default_j16lib = getProperty( J16LIB );
         
         if ( default_j14lib == null )
         { default_j14lib = searchForJreLib(jdkParents, seed14, false ); }
 
         if ( default_j15lib == null )
-        { default_j15lib = searchForJreLib(jdkParents, seed15, true ); }
+        { default_j15lib = searchForJreLib(jdkParents, seed15, false ); }
 
-        defaultSetter( default_j14lib, default_j15lib );
+        if ( default_j16lib == null )
+        { default_j16lib = searchForJreLib(jdkParents, seed16, false ); }
+
+        defaultSetter( default_j14lib, default_j15lib, default_j16lib );
     }
 
     /**
@@ -466,20 +481,24 @@ public class PropertySetter extends Task
      * values will override the defaults that are passed in to this method.
      * </p>
      */
-    private void    defaultSetter( String default_j14lib, String default_j15lib )
+    private void    defaultSetter( String default_j14lib, String default_j15lib, String default_j16lib )
         throws  BuildException
     {
         String  j14lib = getProperty( J14LIB, default_j14lib );
         String  j15lib = getProperty( J15LIB, default_j15lib );
+        String  j16lib = getProperty( J16LIB, default_j16lib );
 
         setClasspathFromLib( J14CLASSPATH, j14lib, false );
-        setClasspathFromLib( J15CLASSPATH, j15lib, true );
+        setClasspathFromLib( J15CLASSPATH, j15lib, false );
+        setClasspathFromLib( J16CLASSPATH, j16lib, false );
     }
     
     /**
      * <p>
      * Set a classpath property to all of the jars in a directory.
      * If the classpath property is already set, then it is not overridden.
+     * However, refuse to set certain properties if they will cause problems
+     * later on.
      * Throws a BuildException if there's a problem.
      * </p>
      */
@@ -490,6 +509,9 @@ public class PropertySetter extends Task
 
         // nothing to do if the property is already set. we can't override it.
         if ( classpath != null ) { return; }
+
+        // refuse to set certain properties
+        if ( shouldNotSet( classpathProperty ) ) { return; }
 
         String      jars = listJars( libraryDirectory, squawkIfEmpty );
 
@@ -603,21 +625,35 @@ public class PropertySetter extends Task
      */
     private void  checkForProblematicSettings()
     {
+        if (
+            shouldNotSet( J16CLASSPATH ) &&
+            ( isSet( J16CLASSPATH ) || isSet( J16LIB ) )
+           )
+        {
+            throw new BuildException
+                (
+                 "\nThe build raises version mismatch errors when using the IBM Java 5 compiler with Java 6 libraries.\n" +
+                 "Please either use a Java 6 (or later) compiler or do not set the '" +  J16CLASSPATH + "' and '" + J16LIB + "' variables.\n"
+                 );
+        }
+
+    }
+    
+    /**
+     * <p>
+     * Returns true if the given property should not be set.
+     * </p>
+     */
+    private boolean shouldNotSet( String property )
+    {
         //
         // The IBM Java 5 compiler raises version mismatch errors when used
         // with the IBM Java 6 libraries.
         //
         String  jdkVendor = getProperty( JDK_VENDOR );
         String  javaVersion = getProperty( JAVA_VERSION );
-        if ( usingIBMjdk( jdkVendor ) && javaVersion.startsWith( JAVA_5 ) && isSet( J16CLASSPATH ) )
-        {
-            throw new BuildException
-                (
-                 "\nThe build raises version mismatch errors when using the IBM Java 5 compiler with Java 6 libraries.\n" +
-                 "Please either use a Java 6 (or later) compiler or do not set the '" +  J16CLASSPATH + "' variable.\n"
-                 );
-        }
-
+        
+        return ( usingIBMjdk( jdkVendor ) && javaVersion.startsWith( JAVA_5 ) &&  J16CLASSPATH.equals( property  ) );
     }
     
     /**
@@ -694,6 +730,24 @@ public class PropertySetter extends Task
 
     /**
      * <p>
+     * Require that at least one of the passed in properties be set.
+     * </p>
+     */
+    private void  requireAtLeastOneProperty( String... properties )
+        throws BuildException
+    {
+        int             count = properties.length;
+
+        for ( String property : properties )
+        {
+            if ( getProperty( property ) != null ) { return; }
+        }
+
+        throw couldntSetProperty( properties );
+    }
+
+    /**
+     * <p>
      * Require that a property be set.
      * </p>
      */
@@ -705,26 +759,47 @@ public class PropertySetter extends Task
 
     /**
      * <p>
-     * Object that we couldn't set a property.
+     * Object that we couldn't set some properties.
      * </p>
      */
-    private BuildException  couldntSetProperty( String property )
+    private BuildException  couldntSetProperty( String... properties )
+    {
+        StringBuffer    buffer = new StringBuffer();
+        int             count = properties.length;
+        
+        buffer.append( "Don't know how to set " );
+        for ( int i = 0; i < count; i++ )
+        {
+            if ( i > 0 ) { buffer.append( ", " ); }
+            buffer.append( properties[ i ] );
+        }
+        buffer.append( " using this environment:\n\n" );
+        buffer.append( showEnvironment() );
+        buffer.append( "\nPlease consult BUILDING.html for instructions on how to set the compiler-classpath properties." );
+        
+        return new BuildException( buffer.toString() );
+    }
+
+    /**
+     * <p>
+     * Display the environment.
+     * </p>
+     */
+    private String  showEnvironment()
     {
         StringBuffer    buffer = new StringBuffer();
 
-        buffer.append( "Don't know how to set " + property );
-        buffer.append( " using this environment:\n\n" );
         appendProperty( buffer, JDK_VENDOR );
         appendProperty( buffer, JAVA_HOME );
         appendProperty( buffer, JAVA_VERSION );
         appendProperty( buffer, OPERATING_SYSTEM );
         appendProperty( buffer, J14LIB );
         appendProperty( buffer, J15LIB );
-        buffer.append( "\nPlease consult BUILDING.html for instructions on how to set the compiler-classpath properties." );
-        
-        return new BuildException( buffer.toString() );
-    }
+        appendProperty( buffer, J16LIB );
 
+        return buffer.toString();
+    }
+    
     /**
      * <p>
      * Append the value of a property to an evolving string buffer.
