@@ -25,6 +25,7 @@ import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.jdbc.CharacterStreamDescriptor;
 
+import org.apache.derby.iapi.services.io.InputStreamUtil;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
@@ -245,9 +246,11 @@ public class SQLClob
             if (stream instanceof Resetable) {
                 try {
                     ((Resetable)stream).resetStream();
-                    } catch (IOException ioe) {
-                        throwStreamingIOException(ioe);
-                    }
+                    // Make sure the stream is in sync with the descriptor.
+                    InputStreamUtil.skipFully(stream, csd.getCurBytePos());
+                } catch (IOException ioe) {
+                    throwStreamingIOException(ioe);
+                }
             } else {
                 if (SanityManager.DEBUG) {
                     SanityManager.THROWASSERT("Unable to reset stream when " +
