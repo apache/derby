@@ -43,7 +43,7 @@ import java.util.zip.CRC32;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.apache.derby.tools.JDBCDisplayUtil;
+import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetReader;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
@@ -408,6 +408,74 @@ public class ResultSetStreamTest extends BaseJDBCTestCase {
         
     }
     
+    /**
+     * Tests that the max field size limit is handled correctly when accessing
+     * values as streams. The limit should apply for VARCHAR, but not for CLOB.
+     *
+     * @throws IOException if something goes wrong
+     * @throws SQLException if something goes wrong
+     */
+    public void testSetMaxFieldSizeLarge()
+            throws IOException, SQLException {
+        // Insert test data.
+        int id = 1;
+        int clobSize = 2*1024*1024; // 2 MB
+        int vcSize = 32672;
+        int limit = 10;
+        PreparedStatement ps = prepareStatement(
+                "insert into setMaxFieldSize values (?,?,?)");
+        ps.setInt(1, id);
+        ps.setCharacterStream(2, new LoopingAlphabetReader(vcSize), vcSize);
+        ps.setCharacterStream(3, new LoopingAlphabetReader(clobSize), clobSize);
+        ps.executeUpdate();
+
+        // Fetch data back with a limit.
+        Statement stmt = createStatement();
+        stmt.setMaxFieldSize(limit);
+        ResultSet rs = stmt.executeQuery("select dVarchar, dClob from " +
+                "setMaxFieldSize where id = " + id);
+        assertTrue(rs.next());
+        String vcStr = drainStringFromSource(rs.getCharacterStream(1));
+        // Limit should apply to VARCHAR.
+        assertEquals(limit, vcStr.length());
+        // Limit should *not* apply to CLOB.
+        String vsClob = drainStringFromSource(rs.getCharacterStream(2));
+        assertEquals(clobSize, vsClob.length());
+        rs.close();
+
+        // Again, but without a limit.
+        stmt = createStatement();
+        rs = stmt.executeQuery("select dVarchar, dClob from " +
+                "setMaxFieldSize where id = " + id);
+        assertTrue(rs.next());
+        vcStr = drainStringFromSource(rs.getCharacterStream(1));
+        assertEquals(vcSize, vcStr.length());
+        vsClob = drainStringFromSource(rs.getCharacterStream(2));
+        assertEquals(clobSize, vsClob.length());
+        rs.close();
+    }
+
+    /**
+     * Drains the specified reader and returns a string.
+     *
+     * @param src the reader to drain
+     * @return The reader content as a string.
+     * @throws IOException if reading from the source fails
+     */
+    private static String drainStringFromSource(Reader src)
+            throws IOException {
+        StringBuffer str = new StringBuffer();
+        char[] buf = new char[1024];
+        while (true) {
+            int read = src.read(buf);
+            if (read == -1) {
+                break;
+            }
+            str.append(buf, 0, read);
+        }
+        return str.toString();
+    }
+
     public static Test basesuite(String name) {
         TestSuite suite = new TestSuite(ResultSetStreamTest.class, name);
         Test test = new SupportFilesSetup(suite, new String[] {
@@ -420,6 +488,8 @@ public class ResultSetStreamTest extends BaseJDBCTestCase {
 
                 s.execute("create table t2 (len int, data LONG VARCHAR FOR BIT DATA)");
                 s.execute("create table t3(text_data clob)");
+                s.execute("create table setMaxFieldSize(id int unique, " +
+                        "dVarchar VARCHAR(32672), dClob clob)");
 
             }
         };

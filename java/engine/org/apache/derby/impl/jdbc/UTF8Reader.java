@@ -62,11 +62,14 @@ public final class UTF8Reader extends Reader
 
     /** The underlying data stream. */
     private InputStream in;
-    /** Stream that can reposition itself on request. */
+    /** Stream that can reposition itself on request (may be {@code null}). */
     private final PositionedStream positionedIn;
-    /** Store last visited position in the store stream. */
+    /**
+     * Store the last visited position in the store stream, if it is capable of
+     * repositioning itself ({@code positionedIn != null}).
+     */
     private long rawStreamPos = 0L;
-    /** Number of bytes read from the stream. */
+    /** Number of bytes read from the stream, including any header bytes. */
     private long       utfCount;        // bytes
     /** Number of characters read from the stream. */
     private long       readerCharCount; // characters
@@ -170,13 +173,16 @@ public final class UTF8Reader extends Reader
         }
         this.csd = new CharacterStreamDescriptor.Builder().
                 bufferable(positionedIn == null).
-                positionAware(positionedIn != null).byteLength(utfLen).
+                positionAware(positionedIn != null).
+                byteLength(utfLen == 0 ? 0 : utfLen +2). // Add header bytes
                 dataOffset(2).curBytePos(2).stream(in).
                 build();
+        utfCount = 2;
     }
 
     public UTF8Reader(CharacterStreamDescriptor csd, ConnectionChild conChild,
-            Object sync) {
+            Object sync)
+            throws IOException {
         super(sync);
         this.csd = csd;
         this.positionedIn =
@@ -186,17 +192,23 @@ public final class UTF8Reader extends Reader
         int buffersize = calculateBufferSize(csd);
         this.buffer = new char[buffersize];
 
-        // Check and save the stream state.
-        if (SanityManager.DEBUG) { 
-            if (csd.isPositionAware()) {
+        if (csd.isPositionAware()) {
+            // Check and save the stream state.
+            if (SanityManager.DEBUG) {
                 SanityManager.ASSERT(
                         csd.getCurBytePos() == positionedIn.getPosition());
             }
-        }
-        this.rawStreamPos = positionedIn.getPosition();
-        // Make sure we start at the first data byte, not in the header.
-        if (rawStreamPos < csd.getDataOffset()) {
-            rawStreamPos = csd.getDataOffset();
+            this.rawStreamPos = positionedIn.getPosition();
+            // Make sure we start at the first data byte, not in the header.
+            // The position will be changed on the next buffer fill.
+            if (rawStreamPos < csd.getDataOffset()) {
+                rawStreamPos = csd.getDataOffset();
+            }
+        } else {
+            // Skip the header if required.
+            if (csd.getCurBytePos() < csd.getDataOffset()) {
+                csd.getStream().skip(csd.getDataOffset() - csd.getCurBytePos());
+            }
         }
 
         // Buffer stream for improved performance, if appropriate.
@@ -205,6 +217,8 @@ public final class UTF8Reader extends Reader
         } else {
             this.in = csd.getStream();
         }
+        // Add the header portion to the utfCount.
+        utfCount = csd.getDataOffset();
     }
 
     /*
@@ -462,8 +476,8 @@ public final class UTF8Reader extends Reader
                 }
             }
             // Keep track of how much we are allowed to read.
-            long utfLen = csd.getByteLength();
-            long maxFieldSize = csd.getMaxCharLength();
+            final long utfLen = csd.getByteLength();
+            final long maxFieldSize = csd.getMaxCharLength();
 readChars:
         while (
                 (charactersInBuffer < buffer.length) &&
@@ -601,12 +615,12 @@ readChars:
             throws IOException, StandardException {
         // Skip the length encoding bytes.
         this.positionedIn.reposition(csd.getDataOffset());
-        this.rawStreamPos = this.positionedIn.getPosition();
+        this.utfCount = this.rawStreamPos = this.positionedIn.getPosition();
         // If bufferable, discard buffered stream and create a new one.
         if (csd.isBufferable()) {
             this.in = new BufferedInputStream(csd.getStream(), buffer.length);
         }
-        this.readerCharCount = this.utfCount = 0L;
+        this.readerCharCount = 0L;
         this.charactersInBuffer = this.readPositionInBuffer = 0;
     }
 

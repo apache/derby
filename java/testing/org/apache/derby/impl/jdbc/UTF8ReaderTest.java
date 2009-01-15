@@ -34,7 +34,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.types.DataValueDescriptor;
+import org.apache.derby.iapi.types.StringDataValue;
 import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetReader;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
@@ -60,9 +60,10 @@ public class UTF8ReaderTest
                 "select * from Utf8ReaderTest where id = 101");
         rs.next();
         final int size = rs.getInt(2);
-        DataValueDescriptor dvd = ((EmbedResultSet)rs).getColumn(3);
+        StringDataValue dvd = (StringDataValue)
+                                            ((EmbedResultSet)rs).getColumn(3);
         StoreStreamClob ssClob = new StoreStreamClob(
-                dvd.getStream(), (EmbedResultSet)rs);
+                dvd.getStreamWithDescriptor(), (EmbedResultSet)rs);
         Reader reader = ssClob.getInternalReader(1);
         assertEquals('a', reader.read());
         // Get internal readers and do stuff.
@@ -90,9 +91,10 @@ public class UTF8ReaderTest
         ResultSet rs = stmt.executeQuery(
                 "select * from Utf8ReaderTest where id = 100");
         rs.next();
-        DataValueDescriptor dvd = ((EmbedResultSet)rs).getColumn(3);
+        StringDataValue dvd = (StringDataValue)
+                                            ((EmbedResultSet)rs).getColumn(3);
         StoreStreamClob ssClob = new StoreStreamClob(
-                dvd.getStream(), (EmbedResultSet)rs);
+                dvd.getStreamWithDescriptor(), (EmbedResultSet)rs);
         Reader reader = ssClob.getInternalReader(1);
         assertEquals('a', reader.read());
         int bufSize = 26000;
@@ -129,9 +131,10 @@ public class UTF8ReaderTest
                 // See insertTestData
                 "select * from Utf8ReaderTest where id = 1");
         rs.next();
-        DataValueDescriptor dvd = ((EmbedResultSet)rs).getColumn(3);
+        StringDataValue dvd = (StringDataValue)
+                                            ((EmbedResultSet)rs).getColumn(3);
         StoreStreamClob ssClob = new StoreStreamClob(
-                dvd.getStream(), (EmbedResultSet)rs);
+                dvd.getStreamWithDescriptor(), (EmbedResultSet)rs);
         Reader reader = ssClob.getInternalReader(1);
         assertEquals('B', reader.read());
         reader = ssClob.getInternalReader(24);

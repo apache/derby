@@ -78,6 +78,7 @@ public abstract class InternalClobTest
     protected long initialByteLength = Long.MIN_VALUE;
     protected long initialCharLength = Long.MIN_VALUE;
     protected long bytesPerChar = Long.MIN_VALUE;
+    protected long headerLength = Long.MIN_VALUE;
 
     InternalClobTest(String name) {
         super(name);
@@ -116,7 +117,8 @@ public abstract class InternalClobTest
      * when using UTF-8 as encoding.
      */
     public void testSanity() {
-        assertEquals(initialByteLength, initialCharLength * bytesPerChar);
+        assertEquals(initialByteLength,
+                initialCharLength * bytesPerChar + headerLength);
         assertTrue(initialCharLength > 25);
     }
 

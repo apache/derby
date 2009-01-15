@@ -75,6 +75,8 @@ import java.net.URL;
 
 import java.util.Arrays;
 import java.util.Calendar;
+
+import org.apache.derby.iapi.jdbc.CharacterStreamDescriptor;
 import org.apache.derby.iapi.types.StringDataValue;
 
 /**
@@ -1123,18 +1125,16 @@ public abstract class EmbedResultSet extends ConnectionChild
 
 		    useStream(columnIndex);
 
-			DataValueDescriptor dvd = getColumn(columnIndex);
+            StringDataValue dvd = (StringDataValue)getColumn(columnIndex);
 
 			if (wasNull = dvd.isNull()) { return null; }
 
 			pushStack = true;
 			setupContextStack();
 
-			StreamStorable ss = (StreamStorable) dvd;
+            CharacterStreamDescriptor csd = dvd.getStreamWithDescriptor();
 
-			InputStream stream = ss.returnStream();
-
-			if (stream == null) {
+            if (csd == null) {
 
 				String val = dvd.getString();
 				if (lmfs > 0) {
@@ -1146,7 +1146,12 @@ public abstract class EmbedResultSet extends ConnectionChild
 				return ret;
 			}
 
-			java.io.Reader ret = new UTF8Reader(stream, lmfs, this, syncLock);
+            // See if we have to enforce a max field size.
+            if (lmfs > 0) {
+                csd = new CharacterStreamDescriptor.Builder().copyState(csd).
+                        maxCharLength(lmfs).build();
+            }
+            java.io.Reader ret = new UTF8Reader(csd, this, syncLock);
 			currentStream = ret;
 			return ret;
 
@@ -4020,13 +4025,13 @@ public abstract class EmbedResultSet extends ConnectionChild
 			boolean pushStack = false;
 			try {
 
-				DataValueDescriptor dvd = getColumn(columnIndex);
+				StringDataValue dvd = (StringDataValue)getColumn(columnIndex);
 
 				if (wasNull = dvd.isNull())
 					return null;
 
 				// should set up a context stack if we have a long column,
-				// since a blob may keep a pointer to a long column in the
+				// since a Clob may keep a pointer to a long column in the
 				// database
 				if (dvd.getStream() != null)
 					pushStack = true;
@@ -4034,7 +4039,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 				if (pushStack)
 					setupContextStack();
 
-				return new EmbedClob(getEmbedConnection(), dvd);
+                return new EmbedClob(getEmbedConnection(), dvd);
 			} catch (Throwable t) {
 				throw handleException(t);
 			} finally {

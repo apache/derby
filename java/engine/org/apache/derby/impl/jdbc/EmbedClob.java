@@ -25,15 +25,11 @@ package org.apache.derby.impl.jdbc;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.jdbc.EngineLOB;
+import org.apache.derby.iapi.jdbc.CharacterStreamDescriptor;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.Resetable;
-import org.apache.derby.impl.jdbc.ConnectionChild;
-import org.apache.derby.impl.jdbc.EmbedConnection;
-import org.apache.derby.impl.jdbc.Util;
-import org.apache.derby.impl.jdbc.ReaderToAscii;
+import org.apache.derby.iapi.types.StringDataValue;
 
-import java.io.InputStream;
 import java.io.Reader;
 import java.io.IOException;
 import java.io.EOFException;
@@ -101,11 +97,11 @@ final class EmbedClob extends ConnectionChild implements Clob, EngineLOB
      * The data value descriptor may provide a <code>String</code> or a stream
      * as the source of the Clob.
      *
-     * @param dvd data value descriptor providing the Clob source
+     * @param dvd string data value descriptor providing the Clob source
      * @param con associated connection for the Clob
      * @throws StandardException
      */
-    protected EmbedClob(EmbedConnection con, DataValueDescriptor dvd)
+    protected EmbedClob(EmbedConnection con, StringDataValue dvd)
         throws StandardException
     {
         super(con);
@@ -115,9 +111,9 @@ final class EmbedClob extends ConnectionChild implements Clob, EngineLOB
             SanityManager.ASSERT(!dvd.isNull(),
                                  "clob is created on top of a null column");
 
-        InputStream storeStream = dvd.getStream();
+        CharacterStreamDescriptor csd = dvd.getStreamWithDescriptor();
         // See if a String or a stream will be the source of the Clob.
-        if (storeStream == null) {
+        if (csd == null) {
             try {
                 clob = new TemporaryClob(dvd.getString(),
                         this);
@@ -144,10 +140,10 @@ final class EmbedClob extends ConnectionChild implements Clob, EngineLOB
              should not break the ASSERT below.
              */
             if (SanityManager.DEBUG)
-                SanityManager.ASSERT(storeStream instanceof Resetable);
+                SanityManager.ASSERT(csd.getStream() instanceof Resetable);
 
             try {
-                this.clob = new StoreStreamClob(storeStream, this);
+                this.clob = new StoreStreamClob(csd, this);
             } catch (StandardException se) {
                 if (se.getMessageId().equals(SQLState.DATA_CONTAINER_CLOSED)) {
                     throw StandardException

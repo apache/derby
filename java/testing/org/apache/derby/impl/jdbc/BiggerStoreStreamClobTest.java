@@ -22,8 +22,10 @@
  */
 package org.apache.derby.impl.jdbc;
 
+import java.io.InputStream;
 import junit.framework.Test;
 import junit.framework.TestSuite;
+import org.apache.derby.iapi.jdbc.CharacterStreamDescriptor;
 
 /**
  * Tests basic operations on a bigger read-only Clob from the store module.
@@ -41,10 +43,18 @@ public class BiggerStoreStreamClobTest
     public void setUp()
             throws Exception {
         super.initialCharLength = CLOBLENGTH;
-        super.initialByteLength = CLOBLENGTH; // The fake stream uses ascii.
+        super.headerLength = 2 +3;
+        // The fake stream uses ascii. Add header and EOF marker.
+        super.initialByteLength = CLOBLENGTH + headerLength;
         super.bytesPerChar = BYTES_PER_CHAR;
         EmbedStatement embStmt = (EmbedStatement)createStatement();
-        iClob = new StoreStreamClob(new FakeStoreStream(CLOBLENGTH), embStmt);
+        InputStream is = new FakeStoreStream(CLOBLENGTH);
+        CharacterStreamDescriptor csd =
+                new CharacterStreamDescriptor.Builder().stream(is).
+                    charLength(initialCharLength).byteLength(0L).
+                    curCharPos(CharacterStreamDescriptor.BEFORE_FIRST).
+                    dataOffset(2L).build();
+        iClob = new StoreStreamClob(csd, embStmt);
         assertEquals(CLOBLENGTH, iClob.getCharLength());
     }
 

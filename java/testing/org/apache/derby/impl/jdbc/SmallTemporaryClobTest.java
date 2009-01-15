@@ -51,10 +51,11 @@ public class SmallTemporaryClobTest
     public void setUp()
             throws Exception {
         super.initialCharLength = CLOBLENGTH;
-        super.initialByteLength = CLOBLENGTH *3; // All tamil letters.
+        super.headerLength = 2 + 3;
+       // All tamil letters. Also add the header bytes.
+        super.initialByteLength = CLOBLENGTH *3 + headerLength;
         super.bytesPerChar = BYTES_PER_CHAR;
         EmbedStatement embStmt = (EmbedStatement)createStatement();
-        EmbedConnection embCon =(EmbedConnection)getConnection();
         iClob = new TemporaryClob(embStmt);
         transferData(
             new LoopingAlphabetReader(CLOBLENGTH, CharAlphabet.tamil()),

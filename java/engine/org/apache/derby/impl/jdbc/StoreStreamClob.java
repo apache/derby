@@ -34,8 +34,8 @@ import java.sql.SQLException;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.jdbc.CharacterStreamDescriptor;
 import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.types.Resetable;
-import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.util.UTF8Util;
 
 /**
@@ -44,10 +44,8 @@ import org.apache.derby.iapi.util.UTF8Util;
  * <p>
  * Note that the streams from the store are expected to have the following
  * properties:
- * <ol> <li>The first two bytes are used for length encoding. Note that due to
- *          the inadequate max number of this format, it is always ignored. This
- *          is also true if there actually is a length encoded there. The two
- *          bytes are excluded from the length of the stream.
+ * <ol> <li>The first few bytes are used for length encoding. Currently the
+ *          number of bytes is either 2 or 5.
  *      <li>A Derby-specific end-of-stream marker at the end of the stream can
  *          be present. The marker is expected to be <code>0xe0 0x00 0x00</code>
  * </ol>
@@ -66,14 +64,8 @@ final class StoreStreamClob
      */
     //@GuardedBy("synchronizationObject")
     private final PositionedStoreStream positionedStoreStream;
-    /**
-     * The cached length of the store stream in number of characters.
-     * A value of {@code 0} means the length is unknown, and zero is an invalid
-     * length for a store stream Clob. It is set to zero because that is the
-     * value encoded as length in the store stream (on disk format) when the
-     * length is unknown or cannot be represented.
-     */
-    private long cachedCharLength = 0;
+    /** The descriptor used to describe the underlying source stream. */
+    private CharacterStreamDescriptor csd;
     /** The connection (child) this Clob belongs to. */
     private final ConnectionChild conChild;
     /** Object used for synchronizing access to the store stream. */
@@ -94,28 +86,26 @@ final class StoreStreamClob
     /**
      * Creates a new Clob based on a stream from store.
      * <p>
-     * Note that the stream passed in have to fulfill certain requirements,
-     * which are not currently totally enforced by Java (the language).
+     * The stream used as a source for this Clob has to implement the interface
+     * {@code Resetable}, as the stream interface from store only allows for
+     * movement forwards. If the stream has been advanced too far with regards
+     * to the user request, the stream must be reset and we start from the
+     * beginning.
      *
-     * @param stream the stream containing the Clob value. This stream is
-     *      expected to implement {@link Resetable} and to be a
-     *      {@link org.apache.derby.iapi.services.io.FormatIdInputStream} with
-     *      an ${link org.apache.derby.impl.store.raw.data.OverflowInputStream}
-     *      inside. However, the available interfaces does not guarantee this.
-     *      See the class JavaDoc for more information about this stream.
+     * @param csd descriptor for the source stream, including a reference to it
      * @param conChild the connection (child) this Clob belongs to
-     * @throws StandardException if initializing the store stream fails
-     * @throws NullPointerException if <code>stream</code> or
-     *      <code>conChild</code> is null
-     * @throws ClassCastException if <code>stream</code> is not an instance
-     *      of <code>Resetable</code>
-     * @see org.apache.derby.iapi.services.io.FormatIdInputStream
-     * @see org.apache.derby.impl.store.raw.data.OverflowInputStream
      */
-    public StoreStreamClob(InputStream stream, ConnectionChild conChild)
+    public StoreStreamClob(CharacterStreamDescriptor csd,
+                           ConnectionChild conChild)
             throws StandardException {
+        if (SanityManager.DEBUG) {
+            // We create a position aware stream below, the stream is not
+            // supposed to be a position aware stream already!
+            SanityManager.ASSERT(!csd.isPositionAware());
+        }
         try {
-            this.positionedStoreStream = new PositionedStoreStream(stream);
+            this.positionedStoreStream = 
+                    new PositionedStoreStream(csd.getStream());
         } catch (StandardException se) {
             if (se.getMessageId().equals(SQLState.DATA_CONTAINER_CLOSED)) {
                 throw StandardException
@@ -129,6 +119,16 @@ final class StoreStreamClob
         }
         this.conChild = conChild;
         this.synchronizationObject = conChild.getConnectionSynchronization();
+        if (SanityManager.DEBUG) {
+            // Creating the positioned stream should reset the stream.
+            SanityManager.ASSERT(positionedStoreStream.getPosition() == 0);
+        }
+        this.csd = new CharacterStreamDescriptor.Builder().copyState(csd).
+                stream(positionedStoreStream). // Replace with positioned stream
+                positionAware(true). // Update description
+                curBytePos(0L).
+                curCharPos(CharacterStreamDescriptor.BEFORE_FIRST).
+                build();
     }
 
     /**
@@ -154,12 +154,13 @@ final class StoreStreamClob
     public long getCharLength()
             throws SQLException {
         checkIfValid();
-        if (this.cachedCharLength == 0) {
+        if (this.csd.getCharLength() == 0) {
             // Decode the stream to find the length.
+            long charLength = 0;
             synchronized (this.synchronizationObject) {
                 this.conChild.setupContextStack();
                 try {
-                    this.cachedCharLength = UTF8Util.skipUntilEOF(
+                    charLength = UTF8Util.skipUntilEOF(
                             new BufferedInputStream(getRawByteStream()));
                 } catch (Throwable t) {
                     throw noStateChangeLOB(t);
@@ -167,8 +168,11 @@ final class StoreStreamClob
                     this.conChild.restoreContextStack();
                 }
             }
+            // Update the stream descriptor.
+            this.csd = new CharacterStreamDescriptor.Builder().
+                    copyState(this.csd).charLength(charLength).build();
         }
-        return this.cachedCharLength;
+        return this.csd.getCharLength();
     }
 
     /**
@@ -188,7 +192,7 @@ final class StoreStreamClob
         checkIfValid();
         try {
             // Skip the encoded length.
-            this.positionedStoreStream.reposition(2L);
+            this.positionedStoreStream.reposition(this.csd.getDataOffset());
         } catch (StandardException se) {
             throw Util.generateCsSQLException(se);
         }
@@ -213,15 +217,6 @@ final class StoreStreamClob
         } catch (StandardException se) {
             throw Util.generateCsSQLException(se);
         }
-        // Describe the stream to allow the reader to configure itself.
-        CharacterStreamDescriptor csd =
-                new CharacterStreamDescriptor.Builder().
-                stream(positionedStoreStream).bufferable(false).
-                positionAware(true).dataOffset(2L). // TODO
-                curCharPos(CharacterStreamDescriptor.BEFORE_FIRST).
-                maxCharLength(TypeId.CLOB_MAXWIDTH).
-                charLength(cachedCharLength). // 0 means unknown.
-                build();
         Reader reader = new UTF8Reader(
                 csd, this.conChild, this.synchronizationObject);
         long leftToSkip = pos -1;
@@ -258,15 +253,6 @@ final class StoreStreamClob
                     throw Util.generateCsSQLException(se);
                 }
             }
-            // Describe the stream to allow the reader to configure itself.
-            CharacterStreamDescriptor csd =
-                    new CharacterStreamDescriptor.Builder().
-                    stream(positionedStoreStream).bufferable(false).
-                    positionAware(true).dataOffset(2L). // TODO: Fix offset.
-                    curCharPos(CharacterStreamDescriptor.BEFORE_FIRST).
-                    maxCharLength(TypeId.CLOB_MAXWIDTH).
-                    charLength(cachedCharLength). // 0 means unknown.
-                    build();
             this.internalReader =
                     new UTF8Reader(csd, conChild, synchronizationObject);
             this.unclosableInternalReader =
