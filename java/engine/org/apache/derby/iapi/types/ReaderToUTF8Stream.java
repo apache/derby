@@ -136,7 +136,7 @@ public final class ReaderToUTF8Stream
      * <p>
      * The application reader is coming in through one of the "lengthless
      * overrides" added in JDBC 4.0, for instance
-     * {@link java.sql.PreparedStatement#setCharacterStream(int,Reader)}.
+     * java.sql.PreparedStatement.setCharacterStream(int,Reader).
      * A limit is placed on the length of the application reader. If the reader
      * exceeds the maximum length, truncation of trailing blanks is attempted.
      * If truncation fails, an exception is thrown.

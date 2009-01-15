@@ -1068,8 +1068,6 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
      *
      * @return Maximum number of statements to cache, or <code>0</code> if
      *      caching is disabled (default).
-     *
-     * @see ClientConnectionPoolDataSource
      */
     public int maxStatementsToPool() {
         return 0;
