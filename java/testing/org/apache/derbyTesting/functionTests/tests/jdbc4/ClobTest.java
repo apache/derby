@@ -324,8 +324,7 @@ public class ClobTest
      * Return a array of objects containing the default values for
      * the objects passed in as parameters
      *
-     * @param parameterTypes an array containing the types of the parameter
-     *                       to the method
+     * @param params an array containing the types of the parames to the method
      * @return an array of Objects containing the null values for the
      *         parameter inputs
      */
