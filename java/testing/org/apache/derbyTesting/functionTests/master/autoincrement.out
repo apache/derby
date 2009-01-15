@@ -2065,4 +2065,41 @@ ij(CONN2)> drop table t2902_b;
 0 rows inserted/updated/deleted
 ij(CONN2)> drop table t2902_c;
 0 rows inserted/updated/deleted
+ij(CONN2)> -- DERBY-4006: can't alter a column's default value to NULL. This problem
+-- was a regression from the fixes for DERBY-1495 and DERBY-1645, and
+-- involved an inability to distinguish between not specifying the DEFAULT
+-- clause on the ALTER COLUMN statement at all, versus specify the clause
+-- DEFAULT NULL
+create table d4006 (x varchar(5) default 'abc');
+0 rows inserted/updated/deleted
+ij(CONN2)> insert into d4006 values default;
+1 row inserted/updated/deleted
+ij(CONN2)> alter table d4006 alter column x with default null;
+0 rows inserted/updated/deleted
+ij(CONN2)> insert into d4006 values default;
+1 row inserted/updated/deleted
+ij(CONN2)> alter table d4006 alter column x with default 'def';
+0 rows inserted/updated/deleted
+ij(CONN2)> insert into d4006 values default;
+1 row inserted/updated/deleted
+ij(CONN2)> select * from d4006;
+X    
+-----
+abc  
+NULL 
+def  
+ij(CONN2)> drop table d4006;
+0 rows inserted/updated/deleted
+ij(CONN2)> -- Note that if the column is GENERATED ALWAYS the default CAN be altered,
+-- but this is probably incorrect. See DERBY-4011 for more discussion.
+create table d4006_a (z int generated always as identity);
+0 rows inserted/updated/deleted
+ij(CONN2)> alter table d4006_a alter column z default 99;
+0 rows inserted/updated/deleted
+ij(CONN2)> -- should fail DERBY-4011
+alter table d4006_a alter column z default null;
+0 rows inserted/updated/deleted
+ij(CONN2)> -- should fail DERBY-4011
+drop table d4006_a;
+0 rows inserted/updated/deleted
 ij(CONN2)> 

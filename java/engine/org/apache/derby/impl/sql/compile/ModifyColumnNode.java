@@ -338,7 +338,7 @@ public class ModifyColumnNode extends ColumnDefinitionNode
 		// and re-use it. This way, the column alteration only changes the
 		// aspects of the autoincrement settings that it intends to change,
 		// and does not lose the other aspecs.
-		if (defaultNode == null)
+		if (keepCurrentDefault)
 			defaultInfo = (DefaultInfoImpl)cd.getDefaultInfo();
 		if (autoinc_create_or_modify_Start_Increment ==
 				ColumnDefinitionNode.MODIFY_AUTOINCREMENT_RESTART_VALUE)
