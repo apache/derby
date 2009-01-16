@@ -546,13 +546,14 @@ abstract class DMLModStatementNode extends DMLStatementNode
                 // created/altered. See DERBY-3945.
                 //
                 SchemaDescriptor    originalCurrentSchema = getSchemaDescriptor( di.getOriginalCurrentSchema(), true );
-                SchemaDescriptor    previousSchema = compilerContext.setCompilationSchema( originalCurrentSchema );
-                try {
+                compilerContext.pushCompilationSchema( originalCurrentSchema );
+
+				try {
                     bindRowScopedExpression( getNodeFactory(), getContextManager(), targetTableDescriptor, sourceRCL, generationClause );
                 }
                 finally
                 {
-                    compilerContext.setCompilationSchema( previousSchema );
+                    compilerContext.popCompilationSchema();
                 }
 
                 ResultColumn    newRC =  (ResultColumn) getNodeFactory().getNode

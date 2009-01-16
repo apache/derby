@@ -403,6 +403,25 @@ public interface CompilerContext extends Context
 	public SchemaDescriptor setCompilationSchema(SchemaDescriptor newDefault);
 
 	/**
+	 * Push a default schema to use when compiling.
+	 * <p>
+	 * Sometimes, we need to temporarily change the default schema, for example
+	 * when recompiling a view, since the execution time default schema may
+	 * differ from the required default schema when the view was defined.
+	 * Another case is when compiling generated columns which reference
+	 * unqualified user functions.
+	 * </p>
+	 * @param sd schema to use
+	 */
+	public void pushCompilationSchema(SchemaDescriptor sd);
+
+
+	/**
+	 * Pop the default schema to use when compiling.
+	 */
+	public void popCompilationSchema();
+
+	/**
 	 * Get a StoreCostController for the given conglomerate.
 	 *
 	 * @param conglomerateNumber	The conglomerate for which to get a

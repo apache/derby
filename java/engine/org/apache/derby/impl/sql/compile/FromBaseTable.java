@@ -78,6 +78,7 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
 
 import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
 import org.apache.derby.impl.sql.compile.ActivationClassBuilder;
+import org.apache.derby.impl.sql.compile.FromSubquery;
 
 import java.util.Enumeration;
 import java.util.Properties;
@@ -2204,12 +2205,11 @@ public class FromBaseTable extends FromTable
 		/* Resolve the view, if this is a view */
 		if (tableDescriptor.getTableType() == TableDescriptor.VIEW_TYPE)
 		{
-			FromTable					fsq;
+			FromSubquery                fsq;
 			ResultSetNode				rsn;
 			ViewDescriptor				vd;
 			CreateViewNode				cvn;
 			SchemaDescriptor			compSchema;
-			SchemaDescriptor			prevCompSchema;
 
 			/* Get the associated ViewDescriptor so that we can get 
 			 * the view definition text.
@@ -2224,7 +2224,7 @@ public class FromBaseTable extends FromTable
 			*/
 			compSchema = dataDictionary.getSchemaDescriptor(vd.getCompSchemaId(), null);
 
-			prevCompSchema = compilerContext.setCompilationSchema(compSchema);
+			compilerContext.pushCompilationSchema(compSchema);
 	
 			try
 			{
@@ -2269,7 +2269,7 @@ public class FromBaseTable extends FromTable
 						compilerContext.addRequiredColumnPriv( rc.getTableColumnDescriptor());
 				}
 
-				fsq = (FromTable) getNodeFactory().getNode(
+				fsq = (FromSubquery) getNodeFactory().getNode(
 					C_NodeTypes.FROM_SUBQUERY,
 					rsn, 
 					(correlationName != null) ? 
@@ -2287,11 +2287,16 @@ public class FromBaseTable extends FromTable
 				//any privilege requirement for it.
 				fsq.disablePrivilegeCollection();
 				fsq.setOrigTableName(this.getOrigTableName());
+
+				// since we reset the compilation schema when we return, we
+				// need to save it for use when we bind expressions:
+				fsq.setOrigCompilationSchema(compSchema);
+
 				return fsq.bindNonVTITables(dataDictionary, fromListParam);
 			}
 			finally
 			{
-				compilerContext.setCompilationSchema(prevCompSchema);
+				compilerContext.popCompilationSchema();
 			}
 		}
 		else

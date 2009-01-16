@@ -24,7 +24,9 @@ package	org.apache.derby.impl.sql.compile;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
+import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
@@ -44,6 +46,12 @@ import org.apache.derby.iapi.util.JBitSet;
 public class FromSubquery extends FromTable
 {
 	ResultSetNode	subquery;
+
+	/**
+	 * DERBY-3270: If this subquery represents an expanded view, this holds the
+	 * current compilation schema at view definition time.
+	 */
+	private SchemaDescriptor origCompilationSchema = null;
 
 	/**
 	 * Intializer for a table in a FROM list.
@@ -213,8 +221,22 @@ public class FromSubquery extends FromTable
 		 */
 		
 		nestedFromList = emptyFromList;
-		subquery.bindExpressions(nestedFromList);
-		subquery.bindResultColumns(nestedFromList);
+
+		CompilerContext compilerContext = getCompilerContext();
+
+		if (origCompilationSchema != null) {
+			// View expansion needs the definition time schema
+			compilerContext.pushCompilationSchema(origCompilationSchema);
+		}
+
+		try {
+			subquery.bindExpressions(nestedFromList);
+			subquery.bindResultColumns(nestedFromList);
+		} finally {
+			if (origCompilationSchema != null) {
+				compilerContext.popCompilationSchema();
+			}
+		}
 
 		/* Now that we've bound the expressions in the subquery, we 
 		 * can propagate the subquery's RCL up to the FromSubquery.
@@ -640,5 +662,15 @@ public class FromSubquery extends FromTable
 	{
 		super.decrementLevel(decrement);
 		subquery.decrementLevel(decrement);
+	}
+
+	/**
+	 * Associate this subquery with the original compilation schema of a view.
+	 *
+	 * @param sd schema descriptor of the original compilation schema of the
+	 * view.
+	 */
+	public void setOrigCompilationSchema(SchemaDescriptor sd) {
+		origCompilationSchema = sd;
 	}
 }

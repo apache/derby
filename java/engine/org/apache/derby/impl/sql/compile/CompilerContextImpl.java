@@ -1,3 +1,4 @@
+
 /*
 
    Derby - Class org.apache.derby.impl.sql.compile.CompilerContextImpl
@@ -157,6 +158,7 @@ public class CompilerContextImpl extends ContextImpl
 		reliability = CompilerContext.SQL_LEGAL;
 		returnParameterFlag = false;
 		initRequiredPriv();
+		defaultSchemaStack = null;
 	}
 
 	//
@@ -554,6 +556,31 @@ public class CompilerContextImpl extends ContextImpl
 	}
 
 	/**
+	 * @see CompilerContext#pushCompilationSchema
+	 */
+	public void pushCompilationSchema(SchemaDescriptor sd)
+	{
+		if (defaultSchemaStack == null) {
+			defaultSchemaStack = new ArrayList(2);
+		}
+
+		defaultSchemaStack.add(defaultSchemaStack.size(),
+							   getCompilationSchema());
+		setCompilationSchema(sd);
+	}
+
+	/**
+	 * @see CompilerContext#popCompilationSchema
+	 */
+	public void popCompilationSchema()
+	{
+		SchemaDescriptor sd =
+			(SchemaDescriptor)defaultSchemaStack.remove(
+				defaultSchemaStack.size() - 1);
+		setCompilationSchema(sd);
+	}
+
+	/**
 	 * @see CompilerContext#setParameterList
 	 */
 	public void setParameterList(Vector parameterList)
@@ -916,6 +943,13 @@ public class CompilerContextImpl extends ContextImpl
 	private Vector				savedObjects;
 	private String				classPrefix;
 	private SchemaDescriptor	compilationSchema;
+
+	/**
+	 * Saved execution time default schema, if we need to change it
+	 * temporarily.
+	 */
+	private ArrayList        	defaultSchemaStack;
+
 	private ProviderList		currentAPL;
 	private boolean returnParameterFlag;
 

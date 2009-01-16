@@ -1,5 +1,6 @@
 package org.apache.derbyTesting.functionTests.tests.lang;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -9,6 +10,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
@@ -27,7 +29,7 @@ public final class ViewsTest extends BaseJDBCTestCase {
     {
         TestSuite suite = new TestSuite("views Test");
         suite.addTest(TestConfiguration.embeddedSuite(ViewsTest.class));
-        return suite;
+        return new CleanDatabaseTestSetup(suite);
     }
 
     public void test_views() throws Exception
@@ -758,4 +760,30 @@ public final class ViewsTest extends BaseJDBCTestCase {
         getConnection().rollback();
         st.close();
     }
+
+   /**
+    * DERBY-3270 Test that we can select from a view in another schema if the
+    * default schema does not exist.
+    *
+    * @throws SQLException
+    */
+    public void testSelectViewFromOtherSchemaWithNoDefaultSchema()
+            throws SQLException {
+        Connection conn = openDefaultConnection("joe","joepass");
+        Statement st = conn.createStatement();
+        st.execute("create table mytable(a int)");
+        st.execute("insert into mytable values (99)");
+        st.execute("create view myview as select * from mytable");
+        st.close();
+        conn.close();
+        Connection conn2 = openDefaultConnection("bill","billpass");
+        Statement st2 = conn2.createStatement();
+        ResultSet rs = st2.executeQuery("SELECT * FROM JOE.MYVIEW");
+        JDBC.assertFullResultSet(rs,new String[][] {{"99"}});
+        st2.executeUpdate("drop view joe.myview");
+        st2.executeUpdate("drop table joe.mytable");
+        st2.close();
+        conn2.close();
+   }
+
 }
