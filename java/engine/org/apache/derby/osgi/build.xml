@@ -35,7 +35,7 @@
 <!-- Targets -->
   <target name="osgi" depends="compile_osgi"/>
 
-  <target name="compile_osgi" depends="checkosgijar" if="osgijar.available">
+  <target name="compile_osgi">
     <javac
       source="1.4"
       target="1.4"
@@ -57,9 +57,6 @@
     </javac>
   </target>
 
-  <target name="checkosgijar">
-    <available property="osgijar.available" file="${osgi}"/>
-  </target>
 
 </project>
 

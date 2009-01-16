@@ -1218,9 +1218,6 @@
       </classpath>
     </java>
 
-    <!-- filter out EmbeddedActivator if osgi.jar is not available -->
-    <antcall target="filteractivator"/>
-
     <echo level="info" message=" creating derby.jar class list "/>
     <java classname="org.apache.derbyBuild.classlister" fork="yes">
       <jvmarg value="-DcloudscapeOnly=true"/>
@@ -1257,10 +1254,7 @@
       <param name="driver.name" value="org.apache.derby.jdbc.AutoloadedDriver"/>
     </antcall>
 
-    <!-- the next two targets are orthogonal. Only one will be executed, -->
-    <!-- depending on whether or not osgi.jar is available.              -->
     <antcall target="derbyjarwithosgi"/>
-    <antcall target="derbyjarwithoutosgi"/>
 
     <!-- add non-class files to jar -->
 
@@ -1283,30 +1277,7 @@
 
   </target>
 
-  <target name="filteractivator" depends="checkosgijar" if="osgijar.unavailable">
-
-    <replaceregexp file="${derby.jar.dir}/lists/otherDerbyClasses.properties"
-                   match="derby.module.osgi.activator=org.apache.derby.osgi.EmbeddedActivator"
-                   replace=""/>
-
-  </target>
-
-  <target name="derbyjarwithoutosgi" depends="checkosgijar" if="osgijar.unavailable">
-
-    <antcall target="make-core-derbyjar-manifest">
-      <param name="manifest.file" value="${derby.jar.dir}/lists/smf.mf"/>
-    </antcall>
-
-    <jar destfile="${derby.jar.dir}/derby.jar"
-         basedir="${out.dir}"
-	 includesfile="${derby.jar.dir}/lists/derby.list"
-         compress="true"
-         filesonly="true"
-         manifest="${derby.jar.dir}/lists/smf.mf"/>
-
-  </target>
-
-  <target name="derbyjarwithosgi" depends="checkosgijar" if="osgijar.available">
+  <target name="derbyjarwithosgi">
 
     <antcall target="make-core-derbyjar-manifest">
       <param name="manifest.file" value="${derby.jar.dir}/lists/smf.mf"/>
@@ -1733,19 +1704,6 @@
     <property name="sanity.name" value="insane"/>
   </target>
 
-  <target name="checkosgijar" depends="setosgiavailable,setosgiunavailable"/>
-  <target name="setosgiavailable">
-    <condition property="osgijar.available">
-      <available file="${osgi}"/>
-    </condition>
-  </target>
-  <target name="setosgiunavailable">
-    <condition property="osgijar.unavailable">
-      <not>
-        <available file="${osgi}"/>
-      </not>
-    </condition>
-  </target>
 
    <target name="getsvnversion">
      <exec executable="svnversion"
