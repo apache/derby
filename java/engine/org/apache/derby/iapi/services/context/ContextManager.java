@@ -251,8 +251,9 @@ public class ContextManager
 		if (error instanceof ThreadDeath)
 			seenThreadDeath = (ThreadDeath) error;
 
-		if (error instanceof PassThroughException)
-			error = ((PassThroughException) error).getException();
+        if (error instanceof PassThroughException) {
+            error = error.getCause();
+        }
 
 		boolean reportError = reportError(error);
 

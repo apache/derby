@@ -21,16 +21,21 @@
 
 package org.apache.derby.iapi.error;
 
+/**
+ * Unchecked exception class that can be used to pass checked exceptions out
+ * of methods that are not declared to throw any checked exception.
+ */
 public final class PassThroughException extends RuntimeException {
 
-	private final Exception nested;
+    /**
+     * Wrap a {@code Throwable} in this unchecked exception to allow it
+     * to pass through methods that are not declared to raise this kind of
+     * condition.
+     *
+     * @param cause the {@code Throwable} to pass through
+     */
+    public PassThroughException(Throwable cause) {
+        super(cause);
+    }
 
-	public PassThroughException(Exception e) {
-		super(e.getMessage());
-		nested = e;
-	}
-
-	public Exception getException() {
-		return nested;
-	}
 }
