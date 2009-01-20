@@ -115,7 +115,7 @@
 
     <fail unless="compilerAtCorrectLevel" message="Compiler level must be Java 5 or later."/>
   </target>
-  
+
   <!-- checkVMLevel:
        This target determines to some degree the JVM version used to run ant.
        The resulting properties will indicate the VM level, and may for instance
@@ -123,8 +123,8 @@
   -->
   <target name="checkVMLevel">
     <!-- The java.lang.ManagementFactory class was new in J2SE 5.0 -->
-    <available classname="java.lang.management.ManagementFactory" 
-               property="vmLevelIsAtLeast1.5"/>
+    <available classname="java.lang.management.ManagementFactory" property="vmLevelIsAtLeast1.5"/>
+    <available classname="java.sql.Wrapper" property="vmLevelIsAtLeast1.6" value="true"/>
   </target>
 
 <!-- ==================================================================== -->
@@ -1976,8 +1976,15 @@
          </junit>
   </target>
 	  
-  <!-- only execute jdbc4 suite if we have a pointer to a 1.6 VM -->
-  <target name="junit-jdbc4" if="jdk16" depends="junit-init">
+  <target name="junit-jdbc4" depends="checkVMLevel,junit-init">
+    <antcall target="junit-jdbc4-workhorse"/>
+  </target>
+
+  <!--
+    Only execute jdbc4 suite if we have a pointer to a 1.6 VM.
+    This target is called by junit-jdbc after reading the VM level.
+  -->
+  <target name="junit-jdbc4-workhorse" if="vmLevelIsAtLeast1.6" depends="junit-init">
     <condition property="derby.junit.classpath" value="">
       <not>
         <isset property="derby.junit.classpath"/>
@@ -1985,7 +1992,6 @@
     </condition>
   	 <junit printsummary="on"
            fork="yes" forkmode="perTest"
-           jvm="${jdk16}/bin/java"
            showoutput="yes"
            dir="junit_${derby.junit.timestamp}"
            tempdir="junit_${derby.junit.timestamp}"
