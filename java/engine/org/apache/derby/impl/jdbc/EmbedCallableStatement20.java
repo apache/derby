@@ -35,7 +35,6 @@ import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.Ref;
 
-import java.net.URL;
 import java.util.Map;
 
 import java.io.ByteArrayInputStream;
@@ -49,11 +48,12 @@ import java.util.Calendar;
 
 import org.apache.derby.iapi.error.StandardException;
 
+import org.apache.derby.iapi.jdbc.CharacterStreamDescriptor;
 import org.apache.derby.iapi.services.io.StreamStorable;
-import org.apache.derby.iapi.sql.conn.StatementContext;
 import org.apache.derby.iapi.reference.JDBC30Translation;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.types.DataValueDescriptor;
+import org.apache.derby.iapi.types.StringDataValue;
 
 import org.apache.derby.impl.jdbc.Util;
 import org.apache.derby.impl.jdbc.EmbedConnection;
@@ -1124,7 +1124,7 @@ public abstract class EmbedCallableStatement20
                 Object syncObject = getConnectionSynchronization();
                 synchronized (syncObject) {
                 try {
-                    DataValueDescriptor param = 
+                    StringDataValue param = (StringDataValue)
                         getParms().getParameterForGet(parameterIndex -1);
                     if (param.isNull()) {
                         break;
@@ -1132,12 +1132,12 @@ public abstract class EmbedCallableStatement20
                     pushStack = true;
                     setupContextStack();
 
-                    StreamStorable ss = (StreamStorable)param;
-                    InputStream stream = ss.returnStream();
-                    if (stream == null) {
+                    CharacterStreamDescriptor csd =
+                            param.getStreamWithDescriptor();
+                    if (csd == null) {
                         reader = new StringReader(param.getString());
                     } else {
-                        reader = new UTF8Reader(stream, 0, this, syncObject);
+                        reader = new UTF8Reader(csd, this, syncObject);
                     }
                 } catch (Throwable t) {
                     throw EmbedResultSet.noStateChangeException(t);

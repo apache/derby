@@ -33,7 +33,6 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.jdbc.CharacterStreamDescriptor;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.types.PositionedStream;
-import org.apache.derby.iapi.types.Resetable;
 
 /**
  * Class for reading characters from streams encoded in the modified UTF-8
@@ -100,86 +99,14 @@ public final class UTF8Reader extends Reader
     private final CharacterStreamDescriptor csd;
 
     /**
-     * TODO: This constructor will be removed! Is is currently retrofitted to
-     *  use a CharacterStreamDescriptor.
+     * Constructs a reader on top of the source UTF-8 encoded stream.
      *
-     * Constructs a reader and consumes the encoded length bytes from the
-     * stream.
-     * <p>
-     * The encoded length bytes either state the number of bytes in the stream,
-     * or it is <code>0</code> which informs us the length is unknown or could
-     * not be represented and that we have to look for the Derby-specific
-     * end of stream marker.
-     * 
-     * @param in the underlying stream
-     * @param maxFieldSize the maximum allowed column length in characters
-     * @param parent the parent object / connection child
-     * @param synchronization synchronization object used when accessing the
-     *      underlying data stream
-     * 
+     * @param csd a description of and reference to the source stream
+     * @param conChild the parent object / connection child
+     * @param sync synchronization object used when accessing the underlying
+     *      data stream
      * @throws IOException if reading from the underlying stream fails
-     * @throws SQLException if setting up or restoring the context stack fails
      */
-    public UTF8Reader(
-        InputStream in,
-        long maxFieldSize,
-        ConnectionChild parent,
-        Object synchronization)
-            throws IOException, SQLException
-    {
-        super(synchronization);
-        this.parent = parent;
-        long utfLen = 0;
-
-        parent.setupContextStack();
-        try {
-            synchronized (lock) { // Synchronize access to store.
-                this.in = in; // Note the possible reassignment below.
-                if (in instanceof PositionedStoreStream) {
-                    this.positionedIn = (PositionedStoreStream)in;
-                    // This stream is already buffered, and buffering it again
-                    // this high up complicates the handling a lot. Must
-                    // implement a special buffered reader to buffer again.
-                    // Note that buffering this UTF8Reader again, does not
-                    // cause any trouble...
-                    try {
-                        ((Resetable)this.positionedIn).resetStream();
-                    } catch (StandardException se) {
-                        throw Util.newIOException(se);
-                    }
-                } else {
-                    this.positionedIn = null;
-                }
-                utfLen = readUnsignedShort();
-                // Even if we are reading the encoded length, the stream may
-                // not be a positioned stream. This is currently true when a
-                // stream is passed in after a ResultSet.getXXXStream method.
-                if (this.positionedIn != null) {
-                    this.rawStreamPos = this.positionedIn.getPosition();
-                }
-            } // End synchronized block
-        } finally {
-            parent.restoreContextStack();
-        }
-        // Setup buffering.
-        int bufferSize = calculateBufferSize(utfLen, maxFieldSize);
-        this.buffer = new char[bufferSize];
-        if (this.positionedIn == null) {
-            // Buffer this for improved performance.
-            // Note that the stream buffers bytes, whereas the internal buffer
-            // buffers characters. In worst case, the stream buffer must be
-            // filled three times to fill the internal character buffer.
-            this.in = new BufferedInputStream(in, bufferSize);
-        }
-        this.csd = new CharacterStreamDescriptor.Builder().
-                bufferable(positionedIn == null).
-                positionAware(positionedIn != null).
-                byteLength(utfLen == 0 ? 0 : utfLen +2). // Add header bytes
-                dataOffset(2).curBytePos(2).stream(in).
-                build();
-        utfCount = 2;
-    }
-
     public UTF8Reader(CharacterStreamDescriptor csd, ConnectionChild conChild,
             Object sync)
             throws IOException {
@@ -682,29 +609,6 @@ readChars:
                                    "encoded length bytes");
 
         return (ch1 << 8) + (ch2 << 0);
-    }
-
-    /**
-     * TODO: Remove this when CSD is fully integrated.
-     *
-     * Calculates an optimized buffer size.
-     * <p>
-     * The maximum size allowed is returned if the specified values don't give
-     * enough information to say a smaller buffer size is preferable.
-     *
-     * @param encodedSize data length in bytes
-     * @param maxFieldSize maximum data length in bytes
-     * @return An (sub)optimal buffer size.
-     */
-    private final int calculateBufferSize(long encodedSize, long maxFieldSize) {
-        int bufferSize = MAXIMUM_BUFFER_SIZE;
-        if (encodedSize > 0 && encodedSize < bufferSize) {
-            bufferSize = (int)encodedSize;
-        }
-        if (maxFieldSize > 0 && maxFieldSize < bufferSize) {
-            bufferSize = (int)maxFieldSize;
-        }
-        return bufferSize;
     }
 
     /**
