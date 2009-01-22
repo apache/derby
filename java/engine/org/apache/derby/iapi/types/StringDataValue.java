@@ -197,17 +197,28 @@ public interface StringDataValue extends ConcatableDataValue
 	public StringDataValue getValue(RuleBasedCollator collatorForComparison);
 
     /**
-     * Generates the stream header for a stream with the given character length.
-     *
-     * @param charLength the character length of the stream, or {@code -1} if
-     *      unknown. If unknown, it is expected that an end-of-stream byte
-     *      sequence is appended to the stream.
-     * @return A holder object with the stream header. A holder object is used
-     *      because more information than the raw header itself is required,
-     *      for instance whether the stream should be ended with a Derby-
-     *      specific end-of-stream marker.
+     * Returns the stream header generator for the string data value.
+     * <p>
+     * The generator writes the correct header into the destination buffer or
+     * stream and also keeps track of whether appending an end-of-stream marker
+     * is required or not.
+     * <p>
+     * Note that the generator may fail to generate a header if there is no
+     * context at the time the header is asked for, and the mode hasn't been
+     * set explicitly.
+     * @see #setSoftUpgradeMode
      */
-    public StreamHeaderHolder generateStreamHeader(long charLength);
+    public StreamHeaderGenerator getStreamHeaderGenerator();
+
+    /**
+     * Tells the data value descriptor whether the database is being accessed
+     * in soft upgrade mode or not.
+     *
+     * @param inSoftUpgradeMode {@code true} if the database is being accessed
+     *      in soft upgrade mode, {@code false} if not, and {@code null} if
+     *      unknown
+     */
+    public void setSoftUpgradeMode(Boolean inSoftUpgradeMode);
 
     /**
      * Returns a descriptor for the input stream for this data value.

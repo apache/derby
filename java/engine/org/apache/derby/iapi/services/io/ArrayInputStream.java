@@ -23,7 +23,6 @@ package org.apache.derby.iapi.services.io;
 
 import java.io.InputStream;
 import java.io.IOException;
-import java.io.ObjectInput;
 import java.io.EOFException;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
@@ -373,6 +372,9 @@ public final class ArrayInputStream extends InputStream implements LimitObjectIn
      * The routine returns the number of char's read into the returned
      * char[], note that this length may smaller than the actual length
      * of the char[] array.
+     * <p>
+     * The stream must be positioned on the first user byte when this method
+     * is invoked.
      *
 	 * @return The the number of valid char's in the returned char[].
      *
@@ -385,28 +387,17 @@ public final class ArrayInputStream extends InputStream implements LimitObjectIn
      *                      the filled in char[] - caller must allow that
      *                      the array may or may not be different from the
      *                      one passed in.
+     * @param utflen the byte length of the value, or {@code 0} if unknown
      *
 	 * @exception  StandardException  Standard exception policy.
      **/
-    public final int readDerbyUTF(char[][] rawData_array) 
+    public final int readDerbyUTF(char[][] rawData_array, int utflen)
         throws IOException
 	{
         // copy globals locally, to give compiler chance to optimize.
         byte[]  data    = pageData;
         int     end_pos = end;
  		int     pos     = position;
-
-        // get header length - stored as an unsigned short.
-
-		int utflen;
-        if (pos + 1 < end_pos) 
-        {
-            utflen = (((data[pos++] & 0xff) << 8) | (data[pos++] & 0xff));
-        }
-        else
-        {
-			throw new EOFException(); // end of file
-        }
 
         /**
          * 3 cases - can they all happen?

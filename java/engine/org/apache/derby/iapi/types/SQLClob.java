@@ -451,7 +451,7 @@ public class SQLClob
 
             ReaderToUTF8Stream utfIn = new ReaderToUTF8Stream(
                     vc.getCharacterStream(), (int) vcl, 0, TypeId.CLOB_NAME,
-                    generateStreamHeader(vcl));
+                    getStreamHeaderGenerator());
             setValue(utfIn, (int) vcl);
         } catch (SQLException e) {
             throw dataTypeConversion("DAN-438-tmp");

@@ -47,6 +47,8 @@ public final class ReaderToUTF8Stream
      */
 	private LimitReader reader;
 
+    /** Constant indicating the first iteration of {@code fillBuffer}. */
+    private final static int FIRST_READ = Integer.MIN_VALUE;
     /**
      * Size of buffer to hold the data read from stream and converted to the
      * modified UTF-8 format.
@@ -59,19 +61,13 @@ public final class ReaderToUTF8Stream
     /** Tells if the stream content is/was larger than the buffer size. */
 	private boolean multipleBuffer;
     /**
-     * The stream header to use for this stream.
-     * <p>
-     * The holder object is immutable, and the header should not have to be
-     * changed, but we may replace it as an optimizataion. If the length of
-     * the stream is unknown at the start of the insertion and the whole stream
-     * content fits into the buffer, the header is updated with the length
-     * after the source stream has been drained. This means that even though
-     * the object is immutable and the reference final, another header may be
-     * written to the stream.
+     * The generator for the stream header to use for this stream.
      * @see #checkSufficientData()
      */
-    private final StreamHeaderHolder header;
-    
+    private final StreamHeaderGenerator hdrGen;
+    /** The length of the header. */
+    private int headerLength;
+
     /**
      * Number of characters to truncate from this stream.
      * The SQL standard allows for truncation of trailing spaces for CLOB,
@@ -92,6 +88,8 @@ public final class ReaderToUTF8Stream
     private final int valueLength; 
     /** The type name for the column data is inserted into. */
     private final String typeName;
+    /** The number of chars encoded. */
+    private int charCount;
     
     /**
      * Create a stream that will truncate trailing blanks if required/allowed.
@@ -107,18 +105,19 @@ public final class ReaderToUTF8Stream
      *      width if the expected stream length is unknown
      * @param numCharsToTruncate the number of trailing blanks to truncate
      * @param typeName type name of the column data is inserted into
+     * @param headerGenerator the stream header generator
      */
     public ReaderToUTF8Stream(Reader appReader,
                               int valueLength,
                               int numCharsToTruncate,
                               String typeName,
-                              StreamHeaderHolder headerHolder) {
+                              StreamHeaderGenerator headerGenerator) {
         this.reader = new LimitReader(appReader);
         reader.setLimit(valueLength);
         this.charsToTruncate = numCharsToTruncate;
         this.valueLength = valueLength;
         this.typeName = typeName;
-        this.header = headerHolder;
+        this.hdrGen = headerGenerator;
         if (SanityManager.DEBUG) {
             // Check the type name
             // The national types (i.e. NVARCHAR) are not used/supported.
@@ -145,13 +144,14 @@ public final class ReaderToUTF8Stream
      * @param maximumLength maximum allowed length in number of characters for
      *      the reader, typically the maximum field size
      * @param typeName type name of the column data is inserted into
+     * @param headerGenerator the stream header generator
      * @throws IllegalArgumentException if maximum length is negative
      */
     public ReaderToUTF8Stream(Reader appReader,
                               int maximumLength,
                               String typeName,
-                              StreamHeaderHolder headerHolder) {
-        this(appReader, -1 * maximumLength, 0, typeName, headerHolder);
+                              StreamHeaderGenerator headerGenerator) {
+        this(appReader, -1 * maximumLength, 0, typeName, headerGenerator);
         if (maximumLength < 0) {
             throw new IllegalArgumentException("Maximum length for a capped " +
                     "stream cannot be negative: " + maximumLength);
@@ -183,7 +183,7 @@ public final class ReaderToUTF8Stream
         
 		// first read
 		if (blen < 0)
-            fillBuffer(header.copyInto(buffer, 0));
+            fillBuffer(FIRST_READ);
 
 		while (boff == blen)
 		{
@@ -230,7 +230,7 @@ public final class ReaderToUTF8Stream
 
         // first read
 		if (blen < 0)
-            fillBuffer(header.copyInto(buffer, 0));
+            fillBuffer(FIRST_READ);
 
 		int readCount = 0;
 
@@ -287,6 +287,17 @@ public final class ReaderToUTF8Stream
      */
 	private void fillBuffer(int startingOffset) throws IOException
 	{
+        if (startingOffset == FIRST_READ) {
+            // Generate the header. Provide the char length only if the header
+            // encodes a char count and we actually know the char count.
+            if (hdrGen.expectsCharCount() && valueLength >= 0) {
+                headerLength = hdrGen.generateInto(buffer, 0, valueLength);
+            } else {
+                headerLength = hdrGen.generateInto(buffer, 0, -1);
+            }
+            // Make startingOffset point at the first byte after the header.
+            startingOffset = headerLength;
+        }
 		int off = boff = startingOffset;
 
 		if (off == 0)
@@ -301,6 +312,7 @@ public final class ReaderToUTF8Stream
 				eof = true;
 				break;
 			}
+            charCount++; // Increment the character count.
 
 			if ((c >= 0x0001) && (c <= 0x007F))
             {
@@ -388,37 +400,27 @@ public final class ReaderToUTF8Stream
 
         // can put the correct length into the stream.
         if (!multipleBuffer) {
-            StreamHeaderHolder tmpHeader = header;
-            if (header.expectsCharLength()) {
-                if (SanityManager.DEBUG) {
-                    SanityManager.THROWASSERT("Header update with character " +
-                            "length is not yet supported");
+            int newValueLen = -1;
+            if (hdrGen.expectsCharCount()) {
+                if (SanityManager.DEBUG && charCount == 0) {
+                    SanityManager.ASSERT(eof);
                 }
+                newValueLen = charCount;
             } else {
-                int utflen = blen - header.headerLength(); // Length in bytes
-                tmpHeader = header.updateLength(utflen, false);
-                // Update the header we have already written to our buffer,
-                // still at postition zero.
-                tmpHeader.copyInto(buffer, 0);
-                if (SanityManager.DEBUG) {
-                    // Check that we didn't overwrite any of the user data.
-                    SanityManager.ASSERT(
-                            header.headerLength() == tmpHeader.headerLength());
-                }
+                // Store the byte length of the user data (exclude the header).
+                newValueLen = blen - headerLength;
             }
-            // The if below is temporary, it won't be necessary when support
-            // for writing the new header has been added.
-            if (tmpHeader.writeEOF()) {
-                // Write the end-of-stream marker.
-                buffer[blen++] = (byte) 0xE0;
-                buffer[blen++] = (byte) 0x00;
-                buffer[blen++] = (byte) 0x00;
+            int newHeaderLength = hdrGen.generateInto(buffer, 0, newValueLen);
+            // Check that we didn't overwrite any of the user data.
+            if (newHeaderLength != headerLength) {
+                throw new IOException("Data corruption detected; user data " +
+                        "overwritten by header bytes");
             }
-        } else if (header.writeEOF()) {
-            // Write the end-of-stream marker.
-            buffer[blen++] = (byte) 0xE0;
-            buffer[blen++] = (byte) 0x00;
-            buffer[blen++] = (byte) 0x00;
+            // Write the end-of-stream marker (if required).
+            blen += hdrGen.writeEOF(buffer, blen, newValueLen);
+        } else {
+            // Write the end-of-stream marker (if required).
+            blen += hdrGen.writeEOF(buffer, blen, Math.max(valueLength, -1));
         }
     }
 

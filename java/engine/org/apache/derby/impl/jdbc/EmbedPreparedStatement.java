@@ -782,13 +782,13 @@ public abstract class EmbedPreparedStatement
                 // Create a stream with truncation.
                 utfIn = new ReaderToUTF8Stream(reader, usableLength,
                         truncationLength, getParameterSQLType(parameterIndex),
-                        dvd.generateStreamHeader(length));
+                        dvd.getStreamHeaderGenerator());
             } else {
                 // Create a stream without exactness checks,
                 // but with a maximum limit.
                 utfIn = new ReaderToUTF8Stream(reader, colWidth,
-                                getParameterSQLType(parameterIndex),
-                                dvd.generateStreamHeader(-1));
+                        getParameterSQLType(parameterIndex),
+                        dvd.getStreamHeaderGenerator());
             }
 
             // JDBC is one-based, DBMS is zero-based.

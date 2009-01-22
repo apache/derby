@@ -32,8 +32,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UTFDataFormatException;
 
+import org.apache.derby.iapi.types.CharStreamHeaderGenerator;
+import org.apache.derby.iapi.types.ClobStreamHeaderGenerator;
 import org.apache.derby.iapi.types.ReaderToUTF8Stream;
-import org.apache.derby.iapi.types.StreamHeaderHolder;
 import org.apache.derby.iapi.util.UTF8Util;
 
 import org.apache.derbyTesting.functionTests.util.streams.CharAlphabet;
@@ -63,10 +64,11 @@ public class UTF8UtilTest
     /** Type name passed to {@code ReaderToUTF8Stream}. */
     private static final String TYPENAME = "VARCHAR";
 
-    /** Default header for stream with unknown length. */
-    private static final StreamHeaderHolder HDR = new StreamHeaderHolder(
-            new byte[] {0x00, 0x00}, new byte[] {8, 0}, false, true);
-    private static final int HEADER_LENGTH = HDR.headerLength();
+    /**
+     * Hardcoded header length. This is why the Clob stream header generator
+     * is invoked with {@code true} in the constructor.
+     */
+    private static final int HEADER_LENGTH = 2;
 
     /**
      * Creates a test of the specified name.
@@ -87,7 +89,8 @@ public class UTF8UtilTest
         InputStream ascii = new LoopingAlphabetStream(length);
         InputStream modUTF8 = new ReaderToUTF8Stream(
                                     new LoopingAlphabetReader(length),
-                                    length, 0, TYPENAME, HDR);
+                                    length, 0, TYPENAME,
+                                    new CharStreamHeaderGenerator());
         modUTF8.skip(HEADER_LENGTH); // Skip encoded length added by ReaderToUTF8Stream.
         assertEquals(ascii, modUTF8);
     }
@@ -107,7 +110,7 @@ public class UTF8UtilTest
         final int charLength = 5;
         InputStream in = new ReaderToUTF8Stream(
                 new LoopingAlphabetReader(charLength, CharAlphabet.cjkSubset()),
-                charLength, 0, TYPENAME, HDR);
+                charLength, 0, TYPENAME, new CharStreamHeaderGenerator());
         in.skip(HEADER_LENGTH); // Skip encoded length added by ReaderToUTF8Stream.
         assertEquals(charLength, UTF8Util.skipUntilEOF(in));
     }
@@ -123,7 +126,7 @@ public class UTF8UtilTest
         final int charLength = 127019;
         InputStream in = new ReaderToUTF8Stream(
                 new LoopingAlphabetReader(charLength, CharAlphabet.cjkSubset()),
-                charLength, 0, TYPENAME, HDR);
+                charLength, 0, TYPENAME, new ClobStreamHeaderGenerator(true));
         in.skip(HEADER_LENGTH); // Skip encoded length added by ReaderToUTF8Stream.
         assertEquals(charLength, UTF8Util.skipUntilEOF(in));
     }
@@ -139,7 +142,7 @@ public class UTF8UtilTest
         final int charLength = 161019;
         InputStream in = new ReaderToUTF8Stream(
                 new LoopingAlphabetReader(charLength, CharAlphabet.cjkSubset()),
-                charLength, 0, TYPENAME, HDR);
+                charLength, 0, TYPENAME, new CharStreamHeaderGenerator());
         in.skip(HEADER_LENGTH); // Skip encoded length added by ReaderToUTF8Stream.
         // Returns count in bytes, we are using CJK chars so multiply length
         // with 3 to get expected number of bytes.
@@ -157,7 +160,7 @@ public class UTF8UtilTest
         final int charLength = 161019;
         InputStream in = new ReaderToUTF8Stream(
                 new LoopingAlphabetReader(charLength, CharAlphabet.cjkSubset()),
-                charLength, 0, TYPENAME, HDR);
+                charLength, 0, TYPENAME, new ClobStreamHeaderGenerator(true));
         in.skip(HEADER_LENGTH); // Skip encoded length added by ReaderToUTF8Stream.
         try {
             UTF8Util.skipFully(in, charLength + 100);
@@ -178,7 +181,7 @@ public class UTF8UtilTest
         final int charLength = 10;
         InputStream in = new ReaderToUTF8Stream(
                 new LoopingAlphabetReader(charLength, CharAlphabet.cjkSubset()),
-                charLength, 0, TYPENAME, HDR);
+                charLength, 0, TYPENAME, new CharStreamHeaderGenerator());
         in.skip(HEADER_LENGTH); // Skip encoded length added by ReaderToUTF8Stream.
         in.skip(1L); // Skip one more byte to trigger a UTF error.
         try {
@@ -197,7 +200,7 @@ public class UTF8UtilTest
         final int charLength = 161019;
         InputStream in = new ReaderToUTF8Stream(
                 new LoopingAlphabetReader(charLength, CharAlphabet.tamil()),
-                charLength, 0, TYPENAME, HDR);
+                charLength, 0, TYPENAME, new CharStreamHeaderGenerator());
         // Skip encoded length added by ReaderToUTF8Stream.
         in.skip(HEADER_LENGTH);
         int firstSkip = 10078;

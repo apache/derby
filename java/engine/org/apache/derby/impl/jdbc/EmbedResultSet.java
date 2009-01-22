@@ -77,6 +77,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 
 import org.apache.derby.iapi.jdbc.CharacterStreamDescriptor;
+import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.types.StringDataValue;
 
 /**
@@ -2926,6 +2927,13 @@ public abstract class EmbedResultSet extends ConnectionChild
             
             final StringDataValue dvd = (StringDataValue)
                     getDVDforColumnToBeUpdated(columnIndex, updateMethodName);
+            // In the case of updatable result sets, we cannot guarantee that a
+            // context is pushed when the header needs to be generated. To fix
+            // this, tell the DVD/generator whether we are running in soft
+            // upgrade mode or not.
+            dvd.setSoftUpgradeMode(Boolean.valueOf(
+                    !getEmbedConnection().getDatabase().getDataDictionary().
+                    checkVersion(DataDictionary.DD_VERSION_CURRENT, null)));
             ReaderToUTF8Stream utfIn;
             int usableLength = -1;
             if (!lengthLess) {
@@ -2976,12 +2984,12 @@ public abstract class EmbedResultSet extends ConnectionChild
 
                 utfIn = new ReaderToUTF8Stream(reader, usableLength,
                         truncationLength, getColumnSQLType(columnIndex),
-                        dvd.generateStreamHeader(length));
+                        dvd.getStreamHeaderGenerator());
             } else {
                 int colWidth = getMaxColumnWidth(columnIndex);
-                utfIn = new ReaderToUTF8Stream(
-                            reader, colWidth, getColumnSQLType(columnIndex),
-                            dvd.generateStreamHeader(-1));
+                utfIn = new ReaderToUTF8Stream(reader, colWidth,
+                                               getColumnSQLType(columnIndex),
+                                               dvd.getStreamHeaderGenerator());
             }
 
             // NOTE: The length argument to setValue is not used. If that

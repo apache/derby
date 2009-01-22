@@ -145,15 +145,11 @@ public class SQLChar
     }
 
     /**
-     * Static stream header holder with the header used for a 10.4 (and earlier)
-     * stream with unknown byte length. This header will be used with 10.4 or
-     * earlier databases, and sometimes also in newer databases for the other
-     * string data types beside of Clob. The expected EOF marker is
-     * '0xE0 0x00 0x00'.
+     * Stream header generator for CHAR, VARCHAR and LONG VARCHAR. Currently,
+     * only one header format is used for these data types.
      */
-    protected static final StreamHeaderHolder UNKNOWN_LEN_10_4_HEADER_HOLDER =
-            new StreamHeaderHolder(
-                    new byte[] {0x00, 0x00}, new byte[] {8, 0}, false, true);
+    protected static final StreamHeaderGenerator CHAR_HEADER_GENERATOR =
+            new CharStreamHeaderGenerator();
 
     /**************************************************************************
      * Fields of the class
@@ -765,6 +761,8 @@ public class SQLChar
     }
 
     /**
+        Writes a non-Clob data value to the modified UTF-8 format used by Derby.
+
         The maximum stored size is based upon the UTF format
         used to stored the String. The format consists of
         a two byte length field and a maximum number of three
@@ -853,18 +851,35 @@ public class SQLChar
             }
         }
 
-        boolean isLongUTF = false;
-        // for length than 64K, see format description above
-        if (utflen > 65535)
-        {
-            isLongUTF = true;
-            utflen = 0;
+        StreamHeaderGenerator header = getStreamHeaderGenerator();
+        if (SanityManager.DEBUG) {
+            SanityManager.ASSERT(!header.expectsCharCount());
         }
+        // Generate the header, write it to the destination stream, write the
+        // user data and finally write an EOF-marker is required.
+        header.generateInto(out, utflen);
+        writeUTF(out, strlen, isRaw);
+        header.writeEOF(out, utflen);
+    }
 
-        out.write((utflen >>> 8) & 0xFF);
-        out.write((utflen >>> 0) & 0xFF);
-        for (int i = 0 ; i < strlen ; i++)
-        {
+    /**
+     * Writes the user data value to a stream in the modified UTF-8 format.
+     *
+     * @param out destination stream
+     * @param strLen string length of the value
+     * @param isRaw {@code true} if the source is {@code rawData}, {@code false}
+     *      if the source is {@code value}
+     * @throws IOException if writing to the destination stream fails
+     */
+    private final void writeUTF(ObjectOutput out, int strLen,
+                                final boolean isRaw)
+            throws IOException {
+        // Copy the source reference into a local variable (optimization).
+        final char[] data = isRaw ? rawData : null;
+        final String lvalue = isRaw ? null : value;
+
+        // Iterate through the value and write it as modified UTF-8.
+        for (int i = 0 ; i < strLen ; i++) {
             int c = isRaw ? data[i] : lvalue.charAt(i);
             if ((c >= 0x0001) && (c <= 0x007F))
             {
@@ -881,15 +896,6 @@ public class SQLChar
                 out.write(0xC0 | ((c >>  6) & 0x1F));
                 out.write(0x80 | ((c >>  0) & 0x3F));
             }
-        }
-
-        if (isLongUTF)
-        {
-            // write the following 3 bytes to terminate the string:
-            // (11100000, 00000000, 00000000)
-            out.write(0xE0);
-            out.write(0);
-            out.write(0);
         }
     }
 
@@ -920,26 +926,52 @@ public class SQLChar
     public void readExternalFromArray(ArrayInputStream in) 
         throws IOException
     {
+        resetForMaterialization();
+        int utfLen = (((in.read() & 0xFF) << 8) | (in.read() & 0xFF));
+        if (rawData == null || rawData.length < utfLen) {
+            // This array may be as much as three times too big. This happens
+            // if the content is only 3-byte characters (i.e. CJK).
+            // TODO: Decide if a threshold should be introduced, where the
+            //       content is copied to a smaller array if the number of
+            //       unused array positions exceeds the threshold.
+            rawData = new char[utfLen];
+        }
         arg_passer[0]        = rawData;
 
-        rawLength = in.readDerbyUTF(arg_passer);
-
+        rawLength = in.readDerbyUTF(arg_passer, utfLen);
         rawData = arg_passer[0];
-
-        // restoreToNull();
-        value  = null;
-        stream = null;
-
-        cKey = null;
     }
     char[][] arg_passer = new char[1][];
 
+    /**
+     * Resets state after materializing value from an array.
+     */
+    private void resetForMaterialization() {
+        value  = null;
+        stream = null;
+        cKey = null;
+    }
+
     public void readExternal(ObjectInput in) throws IOException
     {
-        // if in.available() blocked at 0, use this default string size 
-
+        // Read the stored length in the stream header.
         int utflen = in.readUnsignedShort();
+        readExternal(in, utflen, 0);
+    }
 
+    /**
+     * Restores the data value from the source stream, materializing the value
+     * in memory.
+     *
+     * @param in the source stream
+     * @param utflen the byte length, or {@code 0} if unknown
+     * @param knownStrLen the char length, or {@code 0} if unknown
+     * @throws UTFDataFormatException if an encoding error is detected
+     * @throws IOException if reading the stream fails
+     */
+    protected void readExternal(ObjectInput in, int utflen,
+                                final int knownStrLen)
+            throws IOException {
         int requiredLength;
         // minimum amount that is reasonable to grow the array
         // when we know the array needs to growby at least one
@@ -974,13 +1006,13 @@ public class SQLChar
 
         // Set these to null to allow GC of the array if required.
         rawData = null;
-        restoreToNull();
-
+        resetForMaterialization();
         int count = 0;
         int strlen = 0;
 
 readingLoop:
-        while ( ((count < utflen) || (utflen == 0)))
+        while (((strlen < knownStrLen) || (knownStrLen == 0)) &&
+                ((count < utflen) || (utflen == 0)))
         {
             int c;
 
@@ -1106,8 +1138,8 @@ readingLoop:
                                            ((char3 & 0x3F) << 0));
             }
             else {
-
-                throw new UTFDataFormatException();
+                throw new UTFDataFormatException(
+                        "Invalid code point: " + Integer.toHexString(c));
             }
 
             str[strlen++] = actualChar;
@@ -1116,8 +1148,6 @@ readingLoop:
 
         rawData = str;
         rawLength = strlen;
-                        
-        cKey = null;
     }
 
     /**
@@ -2879,24 +2909,22 @@ readingLoop:
     }
 
     /**
-     * Generates the stream header for a stream with the given character length.
+     * Returns the default stream header generator for the string data types.
      *
-     * @param charLength the character length of the stream, or {@code -1} if
-     *      unknown. If unknown, it is expected that a specifiec end-of-stream
-     *      byte sequence is appended to the stream.
-     * @return A holder object with the stream header. A holder object is used
-     *      because more information than the raw header itself is required,
-     *      for instance whether the stream should be ended with a Derby-
-     *      specific end-of-stream marker
+     * @return A stream header generator.
      */
-    public StreamHeaderHolder generateStreamHeader(long charLength) {
-        // Support for old (pre 10.5) deprecated format, which expects the
-        // header to contain the number of bytes in the value.
-        // We don't know that (due to the varying number of bytes per char), so
-        // say we don't know and instruct that the stream must be ended with a
-        // Derby-specific end-of-stream marker.
-        // Note that there are other code paths were the byte length is known
-        // and can be written to the stream.
-        return UNKNOWN_LEN_10_4_HEADER_HOLDER;
+    public StreamHeaderGenerator getStreamHeaderGenerator() {
+        return CHAR_HEADER_GENERATOR;
+    }
+
+    /**
+     * Sets the mode for the database being accessed.
+     *
+     * @param inSoftUpgradeMode {@code true} if the database is being accessed
+     *      in soft upgrade mode, {@code false} if not, and {@code null} if
+     *      unknown
+     */
+    public void setSoftUpgradeMode(Boolean inSoftUpgradeMode) {
+        // Ignore this for CHAR, VARCHAR and LONG VARCHAR.
     }
 }
