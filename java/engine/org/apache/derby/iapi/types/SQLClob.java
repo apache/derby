@@ -59,6 +59,10 @@ public class SQLClob
                     new byte[] {0x00, 0x00, (byte)0xF0, 0x00, 0x00},
                     new byte[] {24, 16, -1, 8, 0}, true, true);
 
+    /** The header generator used for 10.5 databases. */
+    private static final StreamHeaderGenerator TEN_FIVE_CLOB_HEADER_GENERATOR =
+            new ClobStreamHeaderGenerator(false);
+
     /**
      * The descriptor for the stream. If there is no stream this should be
      * {@code null}, which is also true if the descriptor hasen't been
