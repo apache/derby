@@ -185,6 +185,7 @@ final class TemporaryClob implements InternalClob {
         }
         this.conChild = conChild;
         bytes = new LOBStreamControl(conChild.getEmbedConnection(), getByteFromString (data));
+        this.cachedCharLength = data.length();
     }
     /**
      * Finds the corresponding byte position for the given UTF-8 character
@@ -495,6 +496,8 @@ final class TemporaryClob implements InternalClob {
      *
      * @param clob the Clob to copy from
      * @param charLength number of chars to copy
+     * @throws EOFException if the length of the stream is shorter than the
+     *      specified length
      * @throws IOException if accessing I/O resources fail (both read and write)
      * @throws SQLException if accessing underlying resources fail
      */
@@ -507,6 +510,7 @@ final class TemporaryClob implements InternalClob {
             this.bytes.copyData(
                     new BufferedInputStream(clob.getRawByteStream()),
                     byteLength);
+            this.cachedCharLength = charLength;
         } catch (StandardException se) {
             throw Util.generateCsSQLException(se);
         }
