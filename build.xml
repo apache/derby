@@ -31,7 +31,7 @@
 
 <!-- Targets -->
 
-  <target name="buildsource" depends="checkCompilerLevel,init,prebuild,setCompilerProperties,jsr169stubs,jdbc3stubs,jdbc4stubs,engine,storeless,tools,drda,client,build,versioninfo,localeinfo"/>
+  <target name="buildsource" depends="checkCompilerLevel,init,prebuild,setCompilerProperties,jsr169stubs,jdbc3stubs,jdbc4stubs,felixStubs,engine,storeless,tools,drda,client,build,versioninfo,localeinfo"/>
   <target name="all" depends="buildsource,demo,testing,pptesting,runmessagecheck"/>
 
 <!-- ==================================================================== -->
@@ -695,6 +695,33 @@
       destdir="${out.jdbc4.dir}">
       <classpath>
         <pathelement path="${java16compile.classpath}"/>
+      </classpath>
+     </javac>
+
+  </target>
+
+<!-- =================================================================== -->
+<!--                     Build the stub FELIX (OSGI) implementation                 -->
+<!-- =================================================================== -->
+  <target name="felixStubs">
+    <mkdir dir="${out.stubs.dir}"/>
+    <mkdir dir="${out.felix.dir}"/>
+
+    <javac
+      source="1.4"
+      target="1.4"
+      bootclasspath="${empty}"
+      nowarn="on"
+      debug="${debug}"
+      depend="${depend}"
+      deprecation="${deprecation}"
+      optimize="${optimize}"
+      proceed="${proceed}"
+      verbose="${verbose}"
+      srcdir="${derby.felix.src.dir}"
+      destdir="${out.felix.dir}">
+      <classpath>
+        <pathelement path="${java14compile.classpath}"/>
       </classpath>
      </javac>
 
