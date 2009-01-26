@@ -116,8 +116,6 @@ ls -l ${BRANCH_DIR}/tools/java
 echo ""
 echo "Remember to run buildDerby and updateBuildTestDerby with your correct ant property file:"
 echo " Default: ~/ant.properties"
-echo " E.g. Set jdk16 to build for JDK 6."
-echo "      Set jsr169compile.classpath to build for JSR 169."
 
 exit
 
