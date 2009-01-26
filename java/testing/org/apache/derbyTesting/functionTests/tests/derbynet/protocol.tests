@@ -194,22 +194,6 @@ skipDss		// don't care about the EXCSATRM so just skip
 checkError SYNTAXRM 8 11 SECMGRNM
 endTest
 //
-DISPLAY "Test missing RDBNAM on ACCSEC"
-createDssRequest
-startDdm EXCSAT
-writeScalarString EXTNAM "test"
-endDdm
-endDss
-createDssRequest
-startDdm ACCSEC
-writeScalar2Bytes SECMEC 9 // Encrypted userid password
-endDdm
-endDss
-flush
-skipDss		// don't care about the EXCSATRM so just skip
-checkerror SYNTAXRM 8 14 RDBNAM
-endTest
-//
 DISPLAY "Test specifying encrypted security mechanism without a security token"
 createDssRequest
 startDdm EXCSAT
@@ -439,6 +423,36 @@ endDss
 flush
 skipDdm // don't care about SECCHKRM so just skip
 checkError SYNTAXRM 8 14 CRRTKN
+endTest
+//
+DISPLAY "Test no RDBNAM on ACCSEC. Sent with SECCHK"
+include "excsat_secchk_nordbonaccsec.inc"
+createDssRequest
+startDdm ACCRDB
+writeScalar2Bytes RDBACCCL SQLAM
+writeScalarBytes CRRTKN "0xd5c6f0f0f0f0f0f14bc7c3c2f600ec774aa60e"
+writeScalarString PRDID "TST01000"
+writeScalarString TYPDEFNAM QTDSQLJVM
+startDdm TYPDEFOVR
+writeScalar2Bytes  CCSIDSBC 1208
+endDdm
+endDdm
+endDss
+flush
+skipDdm // don't care about SECCHKRM so just skip
+skipDss // don't care about ACCRDBRM
+endTest
+DISPLAY "Test missing RDBNAM on  SECCHK"
+include "excsat_accsecrd_nordb.inc"
+createDssRequest
+startDdm  SECCHK
+writeScalar2Bytes SECMEC 3 // userid password
+writeScalarString USRID test
+writeScalarString PASSWORD test
+endDdm
+endDss
+flush
+checkError SYNTAXRM 8 14 RDBNAM
 endTest
 //
 DISPLAY "Test too small value for RDBACCCL"

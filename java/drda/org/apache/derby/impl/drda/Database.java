@@ -90,6 +90,18 @@ class Database
 	 */
 	Database (String dbName)
 	{
+		setDatabaseName(dbName);
+		this.stmtTable = new Hashtable();
+		initializeDefaultStatement();
+	}
+
+	/**
+	 * Take database name including attributes and set
+	 * attrString and shortDbName accordingly.
+	 * 
+	 * @param dbName database name, including attributes.
+	 */
+	public void setDatabaseName(String dbName) {
 		if (dbName != null)
 		{
 			int attrOffset = dbName.indexOf(';');
@@ -103,11 +115,9 @@ class Database
 		}
 
 		this.dbName = dbName;
-		this.stmtTable = new Hashtable();
-		initializeDefaultStatement();
+
 	}
-
-
+	
 	private void initializeDefaultStatement()
 	{
 		this.defaultStatement = new DRDAStatement(this);
