@@ -252,6 +252,9 @@ public class NetConnectionReply extends Reply
             return;
         }
         parseACCSECRD(netConnection, securityMechanism);
+        // if we didn't get a SYNTAXRM on parseACCSECRD. Reset the conversion exception
+        // if any.
+        netAgent_.exceptionConvertingRdbnam = null;
 
         peekCP = peekCodePoint();
         if (peekCP == Reply.END_OF_SAME_ID_CHAIN) {

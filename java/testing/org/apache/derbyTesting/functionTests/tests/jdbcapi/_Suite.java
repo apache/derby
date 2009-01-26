@@ -87,7 +87,8 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(SavepointJdbc30Test.suite());
         suite.addTest(RelativeTest.suite());
         suite.addTest(metadataMultiConnTest.suite());
-	suite.addTest(ResultSetStreamTest.suite());
+        suite.addTest(ResultSetStreamTest.suite());
+        suite.addTest(InternationalConnectSimpleDSTest.suite());
         
         // Old harness .java tests that run using the HarnessJavaTest
         // adapter and continue to use a single master file.
@@ -155,6 +156,10 @@ public class _Suite extends BaseTestCase  {
                 suite.addTest(XAJNDITest.suite());
             }
             suite.addTest(InvalidLDAPServerAuthenticationTest.suite());
+            
+            // XA and ConnectionPool Datasource are not available with
+            // JSR169 so can't run InternationalConnectTest. 
+            suite.addTest(InternationalConnectTest.suite());
         }
 
         return suite;

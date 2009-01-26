@@ -949,12 +949,22 @@ public class Reply {
     //          transaction is rolled back and the application is disconnected
     //          from the remote database.
     final void doSyntaxrmSemantics(int syntaxErrorCode) throws DisconnectException {
-        agent_.accumulateChainBreakingReadExceptionAndThrow(
-            new DisconnectException(agent_,
+        DisconnectException e = new DisconnectException(agent_,
                 new ClientMessageId(SQLState.DRDA_CONNECTION_TERMINATED),
                 SqlException.getMessageUtil().getTextMessage(
                     MessageId.CONN_DRDA_DATASTREAM_SYNTAX_ERROR,
-                    new Integer(syntaxErrorCode))));
+                    new Integer(syntaxErrorCode)));
+            
+        // if we are communicating to an older server, we may get a SYNTAXRM on
+        // ACCSEC (missing codepoint RDBNAM) if we were unable to convert to
+        // EBCDIC (See DERBY-4008/DERBY-4004).  In that case we should chain 
+        // the original conversion exception, so it is clear to the user what
+        // the problem was.
+        if (netAgent_.exceptionConvertingRdbnam != null) {
+            e.setNextException(netAgent_.exceptionConvertingRdbnam);
+            netAgent_.exceptionConvertingRdbnam = null;
+        }
+        agent_.accumulateChainBreakingReadExceptionAndThrow(e);
     }
 
 

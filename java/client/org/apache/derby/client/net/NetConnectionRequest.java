@@ -291,8 +291,9 @@ public class NetConnectionRequest extends Request implements ConnectionRequestIn
         // the rdbnam will be built and sent.  different sqlam levels support
         // different lengths.  at this point the length has been checked against
         // the maximum allowable length.  so write the bytes and padd up to the
-        // minimum length if needed.
-        buildRDBNAM(rdbnam);
+        // minimum length if needed.  We want to defer sending the rdbnam if an
+        // EBCDIC conversion is not possible.
+        buildRDBNAM(rdbnam,true);
 
         if (sectkn != null) {
             buildSECTKN(sectkn);
@@ -319,7 +320,7 @@ public class NetConnectionRequest extends Request implements ConnectionRequestIn
         // different lengths.  at this point the length has been checked against
         // the maximum allowable length.  so write the bytes and padd up to the
         // minimum length if needed.
-        buildRDBNAM(rdbnam);
+        buildRDBNAM(rdbnam,false);
         if (user != null) {
             buildUSRID(user);
         }
@@ -355,7 +356,7 @@ public class NetConnectionRequest extends Request implements ConnectionRequestIn
         // support.  the size will have ben previously checked so at this point just
         // write the data and pad with the correct number of bytes as needed.
         // this instance variable is always required.
-        buildRDBNAM(rdbnam);
+        buildRDBNAM(rdbnam,false);
 
         // the rdb access manager class specifies an instance of the SQLAM
         // that accesses the RDB.  the sqlam manager class codepoint
@@ -462,17 +463,33 @@ public class NetConnectionRequest extends Request implements ConnectionRequestIn
         writeScalar2Bytes(CodePoint.SECMEC, secmec);
     }
 
-    // Relational Database Name specifies the name of a relational database
-    // of the server.
-    // if length of RDB name <= 18 characters, there is not change to the format
-    // of the RDB name.  The length of the RDBNAM remains fixed at 18 which includes
-    // any right bland padding if necessary.
-    // if length of the RDB name is > 18 characters, the length of the RDB name is
-    // identical to the length of the RDB name.  No right blank padding is required.
-    private void buildRDBNAM(String rdbnam) throws SqlException {
+    /**
+     * 
+     * Relational Database Name specifies the name of a relational database
+     * of the server.
+     * if length of RDB name <= 18 characters, there is not change to the format
+     * of the RDB name.  The length of the RDBNAM remains fixed at 18 which includes
+     * any right bland padding if necessary.
+     * if length of the RDB name is > 18 characters, the length of the RDB name is
+     * identical to the length of the RDB name.  No right blank padding is required.
+     * @param rdbnam  name of the database.
+     * @param dontSendOnConversionError omit sending the RDBNAM if there is an
+     * exception converting to EBCDIC.  This will be used by ACCSEC to defer
+     * sending the RDBNAM to SECCHK if it can't be converted.
+     *
+     */
+    private void buildRDBNAM(String rdbnam, boolean dontSendOnConversionError) throws SqlException {
         // since this gets built more than once on the connect flow,
         // see if we can optimize
-
+        if (dontSendOnConversionError) {
+            try {
+                ccsidManager_.convertFromUCS2(rdbnam, netAgent_);
+            } catch (SqlException se)  {
+                netAgent_.exceptionConvertingRdbnam = se;
+                return;
+            }
+            
+        }
         int rdbnamLength = rdbnam.length();
         if (rdbnamLength <= NetConfiguration.PKG_IDENTIFIER_FIXED_LEN) {
             writeScalarPaddedString(CodePoint.RDBNAM,

@@ -96,7 +96,8 @@ public class NetAgent extends Agent {
     public int targetSqlam_ = orignalTargetSqlam_;
 
     public SqlException exceptionOpeningSocket_ = null;
-
+    public SqlException exceptionConvertingRdbnam = null;
+    
     //---------------------constructors/finalizer---------------------------------
     public NetAgent(NetConnection netConnection,
                     org.apache.derby.client.am.LogWriter logWriter) throws SqlException {
@@ -227,7 +228,8 @@ public class NetAgent extends Agent {
                                int loginTimeout,
                                String server,
                                int port) throws SqlException {
-
+        
+        exceptionConvertingRdbnam = null;
         // most properties will remain unchanged on connect reset.
         targetTypdef_ = originalTargetTypdef_;
         svrcod_ = 0;
