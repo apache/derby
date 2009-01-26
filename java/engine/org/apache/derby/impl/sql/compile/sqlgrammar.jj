@@ -1647,6 +1647,37 @@ public class SQLParser
 				tokenKind == EXECUTE ||
 				tokenKind == ALL);
 	}
+
+
+	/**
+	 * Construct a TableElementNode of type
+	 * C_NodeTypes.MODIFY_COLUMN_DEFAULT_NODE.
+	 *
+	 * @param defaultNode the new default value node
+	 * @param columnName  the name of the column to be altered
+	 * @param autoIncrementInfo autoincrement information collected, if any.
+	 *
+	 * @return the new node constructed
+	 * @exception StandardException standard error policy
+	 */
+	TableElementNode wrapAlterColumnDefaultValue(
+		ValueNode defaultNode,
+		String columnName,
+		long[] autoIncrementInfo) throws StandardException {
+
+		if (autoIncrementInfo
+				[QueryTreeNode.AUTOINCREMENT_IS_AUTOINCREMENT_INDEX] == 0) {
+			autoIncrementInfo = null;
+		}
+
+		return (TableElementNode) nodeFactory.getNode(
+			C_NodeTypes.MODIFY_COLUMN_DEFAULT_NODE,
+			columnName,
+			defaultNode,
+			null,
+			autoIncrementInfo,
+			getContextManager());
+	}
 }
 
 PARSER_END(SQLParser)
@@ -12600,7 +12631,8 @@ addColumnDefinition(TableElementList tableElementList) throws StandardException 
  *		SET DATA TYPE data_type
  *		SET INCREMENT BY increment_value
  *		RESTART WITH increment_restart_value
- *		[WITH] DEFAULT default_value
+ *		[SET | WITH] DEFAULT default_value
+ *      DROP DEFAULT
  *      [NOT] NULL
  */
 TableElementNode
@@ -12646,20 +12678,24 @@ columnAlterClause(String columnName) throws StandardException :
 						getContextManager());
 	}
 |
-	LOOKAHEAD( {getToken(1).kind == WITH || getToken(1).kind == _DEFAULT })
-	defaultNode = defaultClause(autoIncrementInfo, columnName)
+	LOOKAHEAD( {getToken(1).kind == WITH || getToken(1).kind == _DEFAULT ||
+                    (getToken(1).kind == SET && getToken(2).kind == _DEFAULT) })
+	[<SET>] defaultNode = defaultClause(autoIncrementInfo, columnName)
 	{
-		if (autoIncrementInfo[QueryTreeNode.AUTOINCREMENT_IS_AUTOINCREMENT_INDEX]
-				 == 0)
-		{
-			autoIncrementInfo = null;
-		}
+		return wrapAlterColumnDefaultValue(defaultNode,
+										   columnName,
+										   autoIncrementInfo);
+	}
+|
+	<DROP> <_DEFAULT>
+    {
 
-		return (TableElementNode) nodeFactory.getNode(
-								C_NodeTypes.MODIFY_COLUMN_DEFAULT_NODE,
-								columnName,
-								defaultNode, null, autoIncrementInfo,
-								getContextManager());
+		defaultNode = (ValueNode) nodeFactory.getNode(
+			C_NodeTypes.UNTYPED_NULL_CONSTANT_NODE, getContextManager());
+
+		return wrapAlterColumnDefaultValue(defaultNode,
+										   columnName,
+										   autoIncrementInfo);
 	}
 |
 	LOOKAHEAD ({getToken(1).kind == NULL })

@@ -179,6 +179,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(PrecedenceTest.suite());
         suite.addTest(GeneratedColumnsTest.suite());
         suite.addTest(GeneratedColumnsPermsTest.suite());
+        suite.addTest(AlterColumnTest.suite());
 
         return suite;
 	}
