@@ -1735,11 +1735,7 @@ throws SQLException
 
 		// If no ATTRIBUTES on the connection get them from the
 		// defaults
-		if (connInfo == null)
-			connInfo = util.updateConnInfo(userS,passwordS, 
-			utilInstance.getConnAttributeDefaults());
-		else
-			connInfo = util.updateConnInfo(userS,passwordS, connInfo);
+		connInfo = util.updateConnInfo(userS,passwordS, connInfo);
 
 	   
 		theConnection = DriverManager.getConnection(sVal,connInfo);

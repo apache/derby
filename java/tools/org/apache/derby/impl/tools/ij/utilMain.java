@@ -65,7 +65,6 @@ public class utilMain implements java.security.PrivilegedAction {
 	private boolean mtUse;
 	private boolean firstRun = true;
 	private LocalizedOutput out = null;
-	private Properties connAttributeDefaults;
 	private Hashtable ignoreErrors;
 	/**
 	 * True if to display the error code when
@@ -182,13 +181,11 @@ public class utilMain implements java.security.PrivilegedAction {
 	 *
 	 * @param in source for input to ij
 	 * @param out sink for output from ij
-	 * @param connAttributeDefaults  connection attributes from -ca ij arg
 	 */
-	public void go(LocalizedInput[] in, LocalizedOutput out,
-				   Properties connAttributeDefaults) throws ijFatalException
+	public void go(LocalizedInput[] in, LocalizedOutput out)
+				   throws ijFatalException
 	{
 		this.out = out;
-		this.connAttributeDefaults = connAttributeDefaults;
 		
 		ijParser.setConnection(connEnv[currCE], (numConnections > 1));
 		fileInput = initialFileInput = (!in[currCE].isStandardInput());
@@ -808,11 +805,6 @@ public class utilMain implements java.security.PrivilegedAction {
 	{
         checkScrollableCursor(rs, "GETCURRENTROWNUMBER");
 		return rs.getRow();
-	}
-
-	Properties getConnAttributeDefaults ()
-	{
-		return connAttributeDefaults;
 	}
 
 	public final Object run() {

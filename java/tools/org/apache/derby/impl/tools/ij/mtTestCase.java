@@ -243,7 +243,7 @@ public class mtTestCase
 		utilInstance = new utilMain(1, out, ignoreErrors);
 		utilInstance.initFromEnvironment();
 		utilInstance.setMtUse(true);
-		utilInstance.go(in, out, (java.util.Properties) null);
+		utilInstance.go(in, out);
 		log.flush();
 		out.flush();
 	}

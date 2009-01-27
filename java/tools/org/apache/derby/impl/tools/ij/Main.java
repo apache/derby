@@ -82,7 +82,6 @@ public class Main {
 		String file;
 		String inputResourceName;
 		boolean gotProp;
-		Properties connAttributeDefaults = null;
 
 		LocalizedResource langUtil = LocalizedResource.getInstance();
 		LocalizedOutput out = langUtil.getNewOutput(System.out);
@@ -95,9 +94,6 @@ public class Main {
 
 		// load the property file if specified
 		gotProp = util.getPropertyArg(args);
-
-		// get the default connection attributes
-		connAttributeDefaults = util.getConnAttributeArg(args);
 
 		// readjust output to derby.ui.locale and derby.ui.codeset if 
                 // they were loaded from a property file.
@@ -178,7 +174,7 @@ public class Main {
 		me = main.getMain(out);
 
 		/* Let the processing begin! */
-		me.go(in, out, connAttributeDefaults);
+		me.go(in, out);
 		in.close(); out.close();
 	}
 
@@ -208,11 +204,10 @@ public class Main {
 		Give a shortcut to go on the utilInstance so
 		we don't expose utilMain.
 	 */
-	private void go(LocalizedInput in, LocalizedOutput out , 
-				   Properties connAttributeDefaults)
+	private void go(LocalizedInput in, LocalizedOutput out )
 	{
 		LocalizedInput[] inA = { in } ;
-		utilInstance.go(inA, out,connAttributeDefaults);
+		utilInstance.go(inA, out);
 	}
 
 	/**

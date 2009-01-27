@@ -142,46 +142,6 @@ public final class util implements java.security.PrivilegedAction {
 		return true;
 	}
 
-	/**
-		ij is started with "-ca[r] file OtherArgs";
-		the file contains connection attibute properties 
-		to pass to getConnection
-		<p>
-		getConnAttributeArg will look at the args and take out a 
-		"-ca[r] <file>" pair and returning the Properties
-		<p>
-
-		@exception IOException thrown if file not found
-
-		@param args	the argument list to consider.
-		@return  properties in the file
-	 */
-	static public Properties getConnAttributeArg(String[] args) 
-		throws IOException 
-	{
-		String n;
-		InputStream in1;
-		Properties p = new Properties();
-
-		if ((n = getArg("-ca", args))!= null){
-			in1 = new FileInputStream(n);
-			in1 = new BufferedInputStream(in1);
-		}
-		else if ((n = getArg("-car", args)) != null) {
-			in1 = getResourceAsStream(n);
-			if (in1 == null) throw ijException.resourceNotFound();
-		}
-		else
-			return null;
-
-		// Trim off excess whitespace in property file, if any, and
-		// then load those properties into 'p'.
-		util.loadWithTrimmedValues(in1, p);
-
-		return p;
-	}
-
-
 
 	/**
 	  Convenience routine to qualify a resource name with "ij.defaultPackageName"
@@ -270,8 +230,6 @@ public final class util implements java.security.PrivilegedAction {
 		for (int ix=0; ix < args.length; ix++)
 			if(args[ix].equals("-f")  ||
 			   args[ix].equals("-fr") ||
-			   args[ix].equals("-ca")  ||
-			   args[ix].equals("-car")  ||
 			   args[ix].equals("-p")  ||
 			   args[ix].equals("-pr"))
 				ix++; //skip the parameter to these args
@@ -310,8 +268,7 @@ public final class util implements java.security.PrivilegedAction {
 				if (ix >= args.length) return true;
 			}
 
-			else if ((args[ix].equals("-p") || args[ix].equals("-pr") ||
-					  args[ix].equals("-ca") || args[ix].equals("-car") ))
+			else if ((args[ix].equals("-p") || args[ix].equals("-pr") ))
 			{
 				// next arg is the file/resource name
 				ix++;
