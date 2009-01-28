@@ -263,9 +263,7 @@ public final class ClobStreamHeaderGenerator
             // being accessed in. It is assumed that a DVD is only shared
             // within a single database, i.e. the mode doesn't change during
             // the lifetime of the DVD.
-            // NOTE: Disabled until the StringDataValue interface has been
-            //       changed.
-            // callbackDVD.setSoftUpgradeMode(inSoftUpgradeMode);
+            callbackDVD.setSoftUpgradeMode(inSoftUpgradeMode);
         }
     }
 }

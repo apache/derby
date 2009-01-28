@@ -25,13 +25,17 @@ import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.jdbc.CharacterStreamDescriptor;
 
+import org.apache.derby.iapi.services.io.ArrayInputStream;
 import org.apache.derby.iapi.services.io.InputStreamUtil;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.util.UTF8Util;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.sql.Clob;
 import java.sql.Date;
 import java.sql.SQLException;
@@ -49,15 +53,12 @@ public class SQLClob
 	extends SQLVarchar
 {
 
-    /**
-     * Static stream header holder with the header used for a 10.5
-     * stream with unknown char length. This header will be used with 10.5, and
-     * possibly later databases. The expected EOF marker is '0xE0 0x00 0x00'.
-     */
-    protected static final StreamHeaderHolder UNKNOWN_LEN_10_5_HEADER_HOLDER =
-            new StreamHeaderHolder(
-                    new byte[] {0x00, 0x00, (byte)0xF0, 0x00, 0x00},
-                    new byte[] {24, 16, -1, 8, 0}, true, true);
+    /** The maximum number of bytes used by the stream header. */
+    private static final int MAX_STREAM_HEADER_LENGTH = 5;
+
+    /** The header generator used for 10.4 (or older) databases. */
+    private static final StreamHeaderGenerator TEN_FOUR_CLOB_HEADER_GENERATOR =
+            new ClobStreamHeaderGenerator(true);
 
     /** The header generator used for 10.5 databases. */
     private static final StreamHeaderGenerator TEN_FIVE_CLOB_HEADER_GENERATOR =
@@ -67,8 +68,13 @@ public class SQLClob
      * The descriptor for the stream. If there is no stream this should be
      * {@code null}, which is also true if the descriptor hasen't been
      * constructed yet.
+     * <em>Note</em>: Always check if {@code stream} is non-null before using
+     * the information stored in the descriptor internally.
      */
     private CharacterStreamDescriptor csd;
+
+    /** Tells if the database is being accessed in soft upgrade mode. */
+    private Boolean inSoftUpgradeMode = null;
 
 	/*
 	 * DataValueDescriptor interface.
@@ -90,6 +96,8 @@ public class SQLClob
 	/** @see DataValueDescriptor#getClone */
 	public DataValueDescriptor getClone()
 	{
+        // TODO: Should this be rewritten to clone the stream instead of
+        //       materializing the value if possible?
 		try
 		{
 			return new SQLClob(getString());
@@ -193,6 +201,56 @@ public class SQLClob
 		throw dataTypeConversion("int");
 	}
 
+    /**
+     * Returns the character length of this Clob.
+     * <p>
+     * If the value is stored as a stream, the stream header will be read. If
+     * the stream header doesn't contain the stream length, the whole stream
+     * will be decoded to determine the length.
+     *
+     * @return The character length of this Clob.
+     * @throws StandardException if obtaining the length fails
+     */
+    public int getLength() throws StandardException {
+        if (stream == null) {
+            return super.getLength();
+        }
+        // The Clob is represented as a stream.
+        // Make sure we have a stream descriptor.
+        boolean repositionStream = (csd != null);
+        if (csd == null) {
+            getStreamWithDescriptor();
+            // We know the stream is at the first char position here.
+        }
+        if (csd.getCharLength() != 0) {
+            return (int)csd.getCharLength();
+        }
+        // We now know that the Clob is represented as a stream, but not if the
+        // length is unknown or actually zero. Check.
+        if (SanityManager.DEBUG) {
+            // The stream isn't expecetd to be position aware here.
+            SanityManager.ASSERT(!csd.isPositionAware());
+        }
+        long charLength = 0;
+        try {
+            if (repositionStream) {
+                rewindStream(csd.getDataOffset());
+            }
+            charLength = UTF8Util.skipUntilEOF(stream);
+            // We just drained the whole stream. Reset it.
+            rewindStream(0);
+        } catch (IOException ioe) {
+            throwStreamingIOException(ioe);
+        }
+        // Update the descriptor in two ways;
+        //   (1) Set the char length, whether it is zero or not.
+        //   (2) Set the current byte pos to zero.
+        csd = new CharacterStreamDescriptor.Builder().copyState(csd).
+                charLength(charLength).curBytePos(0).
+                curCharPos(CharacterStreamDescriptor.BEFORE_FIRST).build();
+        return (int)charLength;
+    }
+
 	public long	getLong() throws StandardException
 	{
 		throw dataTypeConversion("long");
@@ -227,6 +285,10 @@ public class SQLClob
      * The descriptor contains information about header data, current positions,
      * length, whether the stream should be buffered or not, and if the stream
      * is capable of repositioning itself.
+     * <p>
+     * When this method returns, the stream is positioned on the first
+     * character position, such that the next read will return the first
+     * character in the stream.
      *
      * @return A descriptor for the stream, which includes a reference to the
      *      stream itself. If the value cannot be represented as a stream,
@@ -265,31 +327,24 @@ public class SQLClob
 
         if (csd == null) {
             // First time, read the header format of the stream.
-            // NOTE: For now, just read the old header format.
             try {
-                final int dataOffset = 2;
-                byte[] header = new byte[dataOffset];
+                // Assume new header format, adjust later if necessary.
+                byte[] header = new byte[MAX_STREAM_HEADER_LENGTH];
                 int read = stream.read(header);
-                if (read != dataOffset) {
-                    String hdr = "[";
-                    for (int i=0; i < read; i++) {
-                        hdr += Integer.toHexString(header[i] & 0xff);
-                    }
-                    throw new IOException("Invalid stream header length " +
-                            read + ", got " + hdr + "]");
+                HeaderInfo hdrInfo = investigateHeader(header, read);
+                if (read > hdrInfo.headerLength()) {
+                    // We have read too much. Reset the stream.
+                    ((Resetable)stream).resetStream();
+                    read = 0;
                 }
-
-                // Note that we add the two bytes holding the header *ONLY* if
-                // we know how long the user data is.
-                long utflen = ((header[0] & 0xff) << 8) | ((header[1] & 0xff));
-                if (utflen > 0) {
-                    utflen += dataOffset;
-                }
-
                 csd = new CharacterStreamDescriptor.Builder().stream(stream).
                     bufferable(false).positionAware(false).
-                    curCharPos(1).curBytePos(dataOffset).
-                    dataOffset(dataOffset).byteLength(utflen).build();
+                    curCharPos(read == 0 ?
+                        CharacterStreamDescriptor.BEFORE_FIRST : 1).
+                    curBytePos(read).
+                    dataOffset(hdrInfo.headerLength()).
+                    byteLength(hdrInfo.byteLength()).
+                    charLength(hdrInfo.charLength()).build();
             } catch (IOException ioe) {
                 throwStreamingIOException(ioe);
             }
@@ -399,6 +454,11 @@ public class SQLClob
         this.csd = null;
     }
 
+    public final void restoreToNull() {
+        this.csd = null;
+        super.restoreToNull();
+    }
+
 	public void setValue(int theValue) throws StandardException
 	{
 		throwLangSetMismatch("int");
@@ -459,6 +519,276 @@ public class SQLClob
             setValue(utfIn, (int) vcl);
         } catch (SQLException e) {
             throw dataTypeConversion("DAN-438-tmp");
+       }
+    }
+
+    /**
+     * Writes the CLOB data value to the given destination stream using the
+     * modified UTF-8 format.
+     *
+     * @param out destination stream
+     * @throws IOException if writing to the destination stream fails
+     */
+    public void writeExternal(ObjectOutput out)
+            throws IOException {
+        super.writeClobUTF(out);
+    }
+
+    /**
+     * Returns a stream header generator for a Clob.
+     * <p>
+     * <em>NOTE</em>: To guarantee a successful generation, one of the following
+     * two conditions must be met at header or EOF generation time:
+     * <ul> <li>{@code setSoftUpgradeMode} has been invoked before the header
+     *          generator was obtained.</li>
+     *      <li>There is context at generation time, such that the mode can be
+     *          determined by obtaining the database context and by consulting
+     *          the data dictionary.</li>
+     * </ul>
+     *
+     * @return A stream header generator.
+     */
+    public StreamHeaderGenerator getStreamHeaderGenerator() {
+        if (inSoftUpgradeMode == null) {
+            // We don't know which mode we are running in, return a generator
+            // the will check this when asked to generate the header.
+            return new ClobStreamHeaderGenerator(this);
+        } else {
+            if (inSoftUpgradeMode == Boolean.TRUE) {
+                return TEN_FOUR_CLOB_HEADER_GENERATOR;
+            } else {
+                return TEN_FIVE_CLOB_HEADER_GENERATOR;
+            }
+        }
+    }
+
+    /**
+     * Tells whether the database is being accessed in soft upgrade mode or not.
+     *
+     * @param inSoftUpgradeMode {@code TRUE} if the database is accessed in
+     *      soft upgrade mode, {@code FALSE} is not, or {@code null} if unknown
+     */
+    public void setSoftUpgradeMode(Boolean inSoftUpgradeMode) {
+        this.inSoftUpgradeMode = inSoftUpgradeMode;
+    }
+
+    /**
+     * Investigates the header and returns length information.
+     *
+     * @param hdr the raw header bytes
+     * @param bytesRead number of bytes written into the raw header bytes array
+     * @return The information obtained from the header.
+     * @throws IOException if the header format is invalid, or the stream
+     *      seems to have been corrupted
+     */
+    private HeaderInfo investigateHeader(byte[] hdr, int bytesRead)
+            throws IOException {
+        int dataOffset = MAX_STREAM_HEADER_LENGTH;
+        int utfLen = -1;
+        int strLen = -1;
+
+        // Peek at the magic byte.
+        if (bytesRead < dataOffset || (hdr[2] & 0xF0) != 0xF0) {
+            // We either have a very short value with the old header
+            // format, or the stream is corrupted.
+            // Assume the former and check later (see further down).
+            dataOffset = 2;
+        }
+
+        // Do we have a pre 10.5 header?
+        if (dataOffset == 2) {
+            // Note that we add the two bytes holding the header to the total
+            // length only if we know how long the user data is.
+            utfLen = ((hdr[0] & 0xFF) << 8) | ((hdr[1] & 0xFF));
+            // Sanity check for small streams:
+            // The header length pluss the encoded length must be equal to the
+            // number of bytes read.
+            if (bytesRead < MAX_STREAM_HEADER_LENGTH) {
+                if (dataOffset + utfLen != bytesRead) {
+                    throw new IOException("Corrupted stream; headerLength=" +
+                            dataOffset + ", utfLen=" + utfLen + ", bytesRead=" +
+                            bytesRead);
+                }
+            }
+            if (utfLen > 0) {
+                utfLen += dataOffset;
+            }
+        } else if (dataOffset == 5) {
+            // We are dealing with the 10.5 stream header format.
+            int hdrFormat = hdr[2] & 0x0F;
+            switch (hdrFormat) {
+                case 0: // 0xF0
+                    strLen = (
+                                ((hdr[0] & 0xFF) << 24) |
+                                ((hdr[1] & 0xFF) << 16) |
+                                // Ignore the third byte (index 2).
+                                ((hdr[3] & 0xFF) <<  8) |
+                                ((hdr[4] & 0xFF) <<  0)
+                             );
+                    break;
+                default:
+                    // We don't know how to handle this header format.
+                    throw new IOException("Invalid header format " +
+                            "identifier: " + hdrFormat + "(magic byte is 0x" +
+                            Integer.toHexString(hdr[2] & 0xFF) + ")");
+            }
+        }
+        if (SanityManager.DEBUG) {
+            SanityManager.ASSERT(utfLen > -1 || strLen > -1);
+        }
+        return new HeaderInfo(dataOffset, dataOffset == 5 ? strLen : utfLen);
+    }
+
+    /**
+     * Reads and materializes the CLOB value from the stream.
+     *
+     * @param in source stream
+     * @throws java.io.UTFDataFormatException if an encoding error is detected
+     * @throws IOException if reading from the stream fails, or the content of
+     *      the stream header is invalid
+     */
+    public void readExternal(ObjectInput in)
+            throws IOException {
+        HeaderInfo hdrInfo;
+        if (csd != null) {
+            int hdrLen = (int)csd.getDataOffset();
+            int valueLength = (hdrLen == 5) ? (int)csd.getCharLength()
+                                            : (int)csd.getByteLength();
+            hdrInfo = new HeaderInfo(hdrLen, valueLength);
+            // Make sure the stream is correctly positioned.
+            rewindStream(hdrLen);
+        } else {
+            byte[] header = new byte[MAX_STREAM_HEADER_LENGTH];
+            int read = in.read(header);
+            hdrInfo = investigateHeader(header, read);
+            if (read > hdrInfo.headerLength()) {
+                // We read too much data, reset and position on the first byte
+                // of the user data.
+                rewindStream(hdrInfo.headerLength());
+            }
+        }
+        // The data will be materialized in memory, in a char array.
+        super.readExternal(in, hdrInfo.byteLength(), hdrInfo.charLength());
+    }
+
+    /**
+     * Reads and materializes the CLOB value from the stream.
+     *
+     * @param in source stream
+     * @throws java.io.UTFDataFormatException if an encoding error is detected
+     * @throws IOException if reading from the stream fails, or the content of
+     *      the stream header is invalid
+     */
+    public void readExternalFromArray(ArrayInputStream in)
+            throws IOException {
+        // It is expected that the position of the array input stream has been
+        // set to the correct position before this method is invoked.
+        int prevPos = in.getPosition();
+        byte[] header = new byte[MAX_STREAM_HEADER_LENGTH];
+        int read = in.read(header);
+        HeaderInfo hdrInfo = investigateHeader(header, read);
+        if (read > hdrInfo.headerLength()) {
+            // Reset stream. This path will only be taken for Clobs stored
+            // with the pre 10.5 stream header format.
+            // Note that we set the position to before the header again, since
+            // we know the header will be read again.
+            in.setPosition(prevPos);
+            super.readExternalFromArray(in);
+        } else {
+            // We read only header bytes, next byte is user data.
+            super.readExternalClobFromArray(in, hdrInfo.charLength());
+        }
+    }
+
+    /**
+     * Rewinds the stream to the beginning and then skips the specified number
+     * of bytes.
+     *
+     * @param pos number of bytes to skip
+     * @throws IOException if resetting or reading from the stream fails
+     */
+    private void rewindStream(long pos)
+            throws IOException {
+        try {
+            ((Resetable)stream).resetStream();
+            InputStreamUtil.skipFully(stream, pos);
+        } catch (StandardException se) {
+            IOException ioe = new IOException(se.getMessage());
+            ioe.initCause(se);
+            throw ioe;
+        }
+    }
+
+    /**
+     * Holder class for header information gathered from the raw byte header in 
+     * the stream.
+     */
+    //@Immutable
+    private static class HeaderInfo {
+
+        /** The value length, either in bytes or characters. */
+        private final int valueLength;
+        /** The header length in bytes. */
+        private final int headerLength;
+
+        /**
+         * Creates a new header info object.
+         *
+         * @param headerLength the header length in bytes
+         * @param valueLength the value length (chars or bytes)
+         */
+        HeaderInfo(int headerLength, int valueLength) {
+            this.headerLength = headerLength;
+            this.valueLength = valueLength;
+        }
+
+        /**
+         * Returns the header length in bytes.
+         *
+         * @return Number of bytes occupied by the header.
+         */
+       int headerLength() {
+           return this.headerLength;
+       }
+
+       /**
+        * Returns the character length encoded in the header, if any.
+        *
+        * @return A positive integer if a character count was encoded in the
+        *       header, or {@code 0} (zero) if the header contained byte length
+        *       information.
+        */
+       int charLength() {
+           return isCharLength() ? valueLength : 0;
+       }
+
+       /**
+        * Returns the byte length encoded in the header, if any.
+        *
+        * @return A positive integer if a byte count was encoded in the
+        *       header, or {@code 0} (zero) if the header contained character
+        *       length information.
+        */
+       int byteLength() {
+           return isCharLength() ? 0 : valueLength;
+       }
+
+       /**
+        * Tells whether the encoded length was in characters or bytes.
+        *
+        * @return {@code true} if the header contained a character count,
+        *       {@code false} if it contained a byte count.
+        */
+       boolean isCharLength() {
+           return (headerLength == 5);
+       }
+
+       /**
+        * Returns a textual representation.
+        */
+       public String toString() {
+           return ("headerLength=" + headerLength + ", valueLength= " +
+                   valueLength + ", isCharLength=" + isCharLength());
        }
     }
 }

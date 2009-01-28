@@ -900,6 +900,32 @@ public class SQLChar
     }
 
     /**
+     * Writes the header and the user data for a CLOB to the destination stream.
+     *
+     * @param out destination stream
+     * @throws IOException if writing to the destination stream fails
+     */
+    protected final void writeClobUTF(ObjectOutput out)
+            throws IOException {
+        if (SanityManager.DEBUG) {
+            SanityManager.ASSERT(!isNull());
+            SanityManager.ASSERT(stream == null, "Stream not null!");
+        }
+        boolean isRaw = rawLength >= 0;
+        // Assume isRaw, update afterwards if required.
+        int strLen = rawLength;
+        if (!isRaw) {
+            strLen = value.length();
+        }
+        // Generate the header and invoke the encoding routine.
+        StreamHeaderGenerator header = getStreamHeaderGenerator();
+        int toEncodeLen = header.expectsCharCount() ? strLen : -1;
+        header.generateInto(out, toEncodeLen);
+        writeUTF(out, strLen, isRaw);
+        header.writeEOF(out, toEncodeLen);
+    }
+
+    /**
      * Reads in a string from the specified data input stream. The 
      * string has been encoded using a modified UTF-8 format. 
      * <p>
@@ -942,6 +968,25 @@ public class SQLChar
         rawData = arg_passer[0];
     }
     char[][] arg_passer = new char[1][];
+
+    /**
+     * Reads a CLOB from the source stream and materializes the value in a
+     * character array.
+     *
+     * @param in source stream
+     * @param charLen the char length of the value, or {@code 0} if unknown
+     * @throws IOException if reading from the source fails
+     */
+    protected void readExternalClobFromArray(ArrayInputStream in, int charLen)
+            throws IOException {
+        resetForMaterialization();
+        if (rawData == null || rawData.length < charLen) {
+            rawData = new char[charLen];
+        }
+        arg_passer[0] = rawData;
+        rawLength = in.readDerbyUTF(arg_passer, 0);
+        rawData = arg_passer[0];
+    }
 
     /**
      * Resets state after materializing value from an array.
