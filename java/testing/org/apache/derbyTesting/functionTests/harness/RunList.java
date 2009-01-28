@@ -716,6 +716,9 @@ public class RunList
 				jvmName="j9_foundation11";
 			else if (j9config.equals("max"))
 				jvmName="j9_13";
+			else if (j9config.equals("dee"))
+				jvmName="j9dee15";
+
 		if (jversion == null)
 		    javaVersion = System.getProperty("java.version");
 		else

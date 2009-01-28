@@ -1014,6 +1014,10 @@ public class RunTest
                         {
                             jvmName = "j9_foundation11";
                         }
+                        else if (System.getProperty("com.ibm.oti.configuration").equals("dee"))
+                        {
+                            jvmName = "j9dee15";
+                        }
                         else
                         {
                             // for reporting; first extend javaVersion
@@ -1369,7 +1373,7 @@ clp.list(System.out);
 
         // j9 will run out of memory with the default cache size (100), so
         // forcing it lower unless set in _derby.properties file for a specific test
-        if (jvmName.startsWith("j9"))
+        if (jvmName.startsWith("j9") && (!jvmName.equalsIgnoreCase("j9dee15")))
         {
             if (clp.getProperty("derby.language.statementCacheSize")==null)
                 clp.put("derby.language.statementCacheSize", J9_STATEMENTCACHESIZE);
@@ -1712,6 +1716,8 @@ clp.list(System.out);
             		testJVM = "foundation";
             	else if (jvmName.equals("j9_foundation11"))
             		testJVM = "foundation";
+                else if (jvmName.equalsIgnoreCase("j9dee15"))
+                    testJVM = "j9dee15";
             	else
             		testJVM = "j9";
             }

@@ -103,6 +103,8 @@ public class RunSuite
 				jvmName="j9_foundation11";
 			else if (j9config.equals("max"))
 				jvmName="j9_13";
+			else if (j9config.equals("dee"))
+				jvmName="j9dee15";
 
 	    String suiteName = args[0];
 	    if ( suiteName == null )

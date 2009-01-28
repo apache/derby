@@ -384,11 +384,12 @@ public class FileCompare
 	// first search jvmName (to support unnamed/non-IBM or Sun JVMs)
 	// if vendor == IBM, search ibm+rev then jdk+rev, decrementing rev by one until rev=13,
 	// in each dir, search framework and driver version if applicable.
-	// BUT, if it's j9, first j9_foundation, then search j9_22 for 22, otherwise, j9_13 then
+	// BUT, if it's j9, unless j9dee, first j9_foundation, then search j9_22 for 22, otherwise, j9_13 then
 	// the normal ibm13 search pattern: ibm13 then jdk13.
 
 	String newprefix;
-	if (jvmName.startsWith("j9") || (serverJvm != null && serverJvm.startsWith("j9")))
+	if ((jvmName.startsWith("j9") || (serverJvm != null && serverJvm.startsWith("j9")))
+            && (!jvmName.startsWith("j9dee")))
 	{
 	    if (jvmName.startsWith("j9_foundation"))
             {
