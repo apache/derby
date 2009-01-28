@@ -115,7 +115,7 @@ public class PropertySetter extends Task
 
     private static  final   String  JAVA_5 = "1.5";
 
-    private static  final   String  PROPERTY_SETTER_DEBUG_FLAG = "propertySetterDebug";
+    private static  final   String  PROPERTY_SETTER_DEBUG_FLAG = "printCompilerProperties";
 
     /////////////////////////////////////////////////////////////////////////
     //
