@@ -231,7 +231,7 @@ final class ExportWriteData extends ExportWriteDataAbstract
 
 
 	
-    /*
+    /**
      * Writes the binary data in the given input stream to an 
      * external lob export file, and return it's location 
      * information in the file as string. Location information 
@@ -288,7 +288,7 @@ final class ExportWriteData extends ExportWriteDataAbstract
         return lobLocation;
     }
 
-    /*
+    /**
      * Writes the clob data in the given input Reader to an 
      * external lob export file, and return it's location 
      * information in the file as string. Location information 
@@ -395,7 +395,7 @@ final class ExportWriteData extends ExportWriteDataAbstract
   }
 
 
-	/*
+	/**
 	 * Convert the input string into double delimiter format for export.
 	 * double character delimiter recognition in delimited format
 	 * files applies to the export and import utilities. Character delimiters are
