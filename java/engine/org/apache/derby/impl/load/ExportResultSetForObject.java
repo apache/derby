@@ -27,6 +27,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
+import org.apache.derby.iapi.util.IdUtil;
 
 //uses the passed connection and table/view name to make the resultset on
 //that entity. If the entity to be exported has non-sql types in it, an
@@ -64,9 +65,8 @@ class ExportResultSetForObject {
 			// undelimited names are passed in upper case, because that is
 			// the form database stores them. 
 			
-			this.selectQuery = "select * from " + 
-				(schemaName == null ? "\"" + tableName + "\"" : 
-				 "\"" + schemaName + "\"" + "." + "\"" + tableName + "\""); 
+			this.selectQuery = "select * from " +
+                    IdUtil.mkQualifiedName(schemaName, tableName);
 		}
         else
 		{

@@ -21,8 +21,6 @@
 
 package org.apache.derbyTesting.functionTests.tests.tools;
 
-import java.io.File;
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
@@ -90,8 +88,7 @@ public class ImportExportTest extends BaseJDBCTestCase {
 	
 	public void testImportFromNonExistantFile() {
 		try {
-			Connection c = getConnection();
-			doImport(c, "Z" , "T1" , null , null , null, 0);
+            doImport("Z", null, "T1", null, null, null, 0);
             fail();
 		} catch (SQLException e) {
 			assertSQLState("XIE04", e);
@@ -100,8 +97,7 @@ public class ImportExportTest extends BaseJDBCTestCase {
 	
 	public void testNullDataFile() {
 		try {
-			Connection c = getConnection();
-			doImport(c, null, "T1" , null , null, null, 0);
+            doImport(null, null, "T1", null, null, null, 0);
             fail();
 		} catch (SQLException e) {
 			assertSQLState("XIE05", e);
@@ -109,55 +105,46 @@ public class ImportExportTest extends BaseJDBCTestCase {
 	}
 	
 	public void testEmptyTable() throws SQLException {
-		Connection c = getConnection();
-		doImportAndExport(c, "T1", null, null , null);
+        doImportAndExport(null, "T1", null, null, null);
 	}
 
 	public void testEmptyTableWithDelimitedFormat() throws SQLException {
-		Connection c = getConnection();
-		doImportAndExport(c, "T1", null, null , "8859_1");
+        doImportAndExport(null, "T1", null, null, "8859_1");
 	}
 
 	public void testEmptyTableWithFieldCharDelimiters() throws SQLException {
-		Connection c = getConnection();
-		doImportAndExport(c, "T1", "\t", "|" , "8859_1");
+        doImportAndExport(null, "T1", "\t", "|", "8859_1");
 	}
 	
 	public void testWithDefaultOptions() throws Exception {
-		Connection c = getConnection();
 		resetTables();
-		doImportAndExport(c, "T1", null, null, null);
+        doImportAndExport(null, "T1", null, null, null);
 	}
 	
 	public void testWithCodeset() throws Exception {
-		Connection c = getConnection();
 		resetTables();
-		doImportAndExport(c, "T1", null, null , "8859_1");
+        doImportAndExport(null, "T1", null, null, "8859_1");
 	}
 
 	public void testDelimiterAndCodeset() throws Exception {
-		Connection c = getConnection();
 		resetTables();
-		doImportAndExport(c, "T1", "\t", "|", "8859_1");
+        doImportAndExport(null, "T1", "\t", "|", "8859_1");
 	}
 	
 	public void testSpecialDelimitersAndCodeset() throws Exception {
-		Connection c = getConnection();
 		resetTables();
-		doImportAndExport(c, "T1", "%", "&", "Cp1252");
+        doImportAndExport(null, "T1", "%", "&", "Cp1252");
 	}
 
 	public void testSpecialDelimitersAndUTF16() throws Exception {
-		Connection c = getConnection();
 		resetTables();
-		doImportAndExport(c, "T1", "%", "&", "UTF-16");
+        doImportAndExport(null, "T1", "%", "&", "UTF-16");
 	}
 	
 	public void testInvalidEncoding() throws Exception {
-		Connection c = getConnection();
 		resetTables();
 		try {
-		    doImportAndExport(c, "T1", "^", "#", "INAVALID ENCODING");
+            doImportAndExport(null, "T1", "^", "#", "INAVALID ENCODING");
             fail();
 		} catch (SQLException e) {
 			assertSQLState("XIE0I", e);
@@ -165,22 +152,49 @@ public class ImportExportTest extends BaseJDBCTestCase {
 	}
 	
 	public void testEarlyEndOfFile() throws Exception {
-		Connection c = getConnection();
 		try {
-			doImportFromFile(c, "extin/TwoLineBadEOF.dat" , "T4" , null , null , "US-ASCII", 0);
+            doImportFromFile("extin/TwoLineBadEOF.dat", null, "T4",
+                             null, null, "US-ASCII", 0);
             fail();
 		} catch (SQLException e) {
 			assertSQLState("XIE0E", e);
 		}
 	}
-	
-	private void doImport(Connection c, String fromTable, String toTable, 
+
+    /**
+     * Test that quotes in the arguments to the export and import procedures
+     * are handled properly (DERBY-4042).
+     */
+    public void testQuotesInArguments() throws Exception {
+        resetTables();
+
+        // Create schema names and table names containing both single quotes
+        // and double quotes to expose bugs both for internally generated
+        // string literals (enclosed in single quotes) and SQL identifiers
+        // (enclosed in double quotes). This will also indirectly test that
+        // the export/import system procedures handle those characters in
+        // file names (which they didn't do very well before the fix for
+        // DERBY-4042), as doExport() and doImportAndVerify() use a file name
+        // derived from the table name.
+        final String schema = "s'\"";
+        final String table = "t'\"";
+        final String escapedName = JDBC.escape(schema, table);
+
+        Statement s = createStatement();
+        s.execute("create table " + escapedName +
+                  " as select * from T1 with no data");
+        s.execute("insert into " + escapedName + " select * from t1");
+
+        doImportAndExport(schema, table, "'", "\"", "US-ASCII");
+    }
+
+    private void doImport(String fromTable, String toSchema, String toTable,
 			 String colDel, String charDel , 
 			 String codeset, int replace) throws SQLException 
     {
 		String impsql = "call SYSCS_UTIL.SYSCS_IMPORT_TABLE (? , ? , ? , ?, ? , ?, ?)";
-		PreparedStatement ps = c.prepareStatement(impsql);
-		ps.setString(1 , "APP");
+        PreparedStatement ps = prepareStatement(impsql);
+        ps.setString(1, toSchema);
 		ps.setString(2, toTable);
 		ps.setString(3, (fromTable==null ?  fromTable : "extinout/" + fromTable + ".dat" ));
 		ps.setString(4 , colDel);
@@ -191,13 +205,14 @@ public class ImportExportTest extends BaseJDBCTestCase {
 		ps.close();
     }
 	
-	private void doImportFromFile(Connection c, String fileName, String toTable, 
+    private void doImportFromFile(
+             String fileName, String toSchema, String toTable,
 			 String colDel, String charDel , 
 			 String codeset, int replace) throws Exception 
     {
 		String impsql = "call SYSCS_UTIL.SYSCS_IMPORT_TABLE (? , ? , ? , ?, ? , ?, ?)";
-		PreparedStatement ps = c.prepareStatement(impsql);
-		ps.setString(1 , "APP");
+        PreparedStatement ps = prepareStatement(impsql);
+        ps.setString(1, toSchema);
 		ps.setString(2, toTable);
 		ps.setString(3, fileName);
 		ps.setString(4 , colDel);
@@ -209,25 +224,26 @@ public class ImportExportTest extends BaseJDBCTestCase {
 
     }
 
-	private void doImportAndExport(Connection c, String fromTable, String colDel , 
+	private void doImportAndExport(
+              String fromSchema, String fromTable, String colDel,
 			  String charDel, 
 			  String codeset) throws SQLException 
     {
-		doExport(c, fromTable , colDel , charDel , codeset);
-		doImportAndVerify(c, fromTable, colDel , charDel, codeset,  0);
+        doExport(fromSchema, fromTable, colDel, charDel, codeset);
+        doImportAndVerify(fromSchema, fromTable, colDel, charDel, codeset, 0);
         // also test with replace
-		doImportAndVerify(c, fromTable, colDel , charDel, codeset,  1);
+        doImportAndVerify(fromSchema, fromTable, colDel, charDel, codeset, 1);
     }
 	
-	private void doExport(Connection c, String fromTable, String colDel , 
+    private void doExport(String fromSchema, String fromTable, String colDel,
 			 String charDel, 
 			 String codeset) throws SQLException 
 	{
 		 //DERBY-2925: need to delete existing files first.
         	 SupportFilesSetup.deleteFile("extinout/" + fromTable + ".dat");
 		 String expsql = "call SYSCS_UTIL.SYSCS_EXPORT_TABLE (? , ? , ? , ?, ? , ?)";
-		 PreparedStatement ps = c.prepareStatement(expsql);
-		 ps.setString(1 , "APP");
+         PreparedStatement ps = prepareStatement(expsql);
+         ps.setString(1, fromSchema);
 		 ps.setString(2, fromTable);
 		 ps.setString(3, (fromTable==null ?  fromTable : "extinout/" + fromTable + ".dat" ));
 		 ps.setString(4 , colDel);
@@ -245,15 +261,19 @@ public class ImportExportTest extends BaseJDBCTestCase {
 	 * of the two files is then made to verify that the data has been
 	 * gone through the import/export process intact.
 	 */
-	private void doImportAndVerify(Connection c, String fromTable,  String colDel, 
+	private void doImportAndVerify(
+              String fromSchema, String fromTable, String colDel,
 			  String charDel , String codeset, 
 			  int replace) throws SQLException 
     {
 
-		doImport(c, fromTable , "T2" , colDel , charDel , codeset , replace);
+        doImport(fromTable, null, "T2", colDel, charDel, codeset, replace);
 
-		Statement stmt = c.createStatement();
-		ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM " + fromTable);
+        Statement stmt = createStatement();
+        ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM " +
+                ((fromSchema == null) ?
+                    JDBC.escape(fromTable) :
+                    JDBC.escape(fromSchema, fromTable)));
 		rs.next();
 		int numberOfRowsInT1 = rs.getInt(1);
 		rs.close();
@@ -264,7 +284,7 @@ public class ImportExportTest extends BaseJDBCTestCase {
 		stmt.close();
 		assertEquals(numberOfRowsInT1, numberOfRowsInT2);
 
-		doExport(c, "T2" , colDel , charDel , codeset);
+		doExport(null, "T2" , colDel , charDel , codeset);
 
         //check whether the  exported files from T1 and T2  are same now.
 		assertEquals(SupportFilesSetup.getReadWrite(fromTable + ".dat"),

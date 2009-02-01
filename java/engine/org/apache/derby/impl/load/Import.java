@@ -21,19 +21,17 @@
 
 package org.apache.derby.impl.load;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.SQLWarning;
 import java.sql.Statement;
 import java.sql.PreparedStatement;
 import java.sql.Connection;
-import java.sql.ResultSetMetaData;
-import java.sql.DatabaseMetaData;
 import java.util.*;
 
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.error.PublicAPI;
+import org.apache.derby.iapi.util.IdUtil;
+import org.apache.derby.iapi.util.StringUtil;
 
 /**
  * This class implements import of data from a URL into a table.
@@ -206,32 +204,22 @@ public class Import extends ImportAbstract{
             ColumnInfo columnInfo = new ColumnInfo(connection , schemaName ,
                                                    tableName, insertColumnList, 
                                                    columnIndexes, COLUMNNAMEPREFIX);
-            
-            /* special handling of single quote delimiters
-             * Single quote should be writeen with an extra quote otherwise sql will
-             * throw syntac error.
-             * i.e  to recognize a quote  it has to be appended with extra  quote ('')
-             */
-            if(characterDelimiter!=null && characterDelimiter.equals("'"))
-                characterDelimiter = "''";
-            if(columnDelimiter !=null && columnDelimiter.equals("'"))
-                columnDelimiter = "''";
-            
-            
+
             StringBuffer sb = new StringBuffer("new ");
             sb.append("org.apache.derby.impl.load.Import");
-            sb.append("(") ; 
-            sb.append(	(inputFileName !=null ? "'" + inputFileName + "'" : null));
+            sb.append("(") ;
+            sb.append(quoteStringArgument(inputFileName));
             sb.append(",") ;
-            sb.append(	(columnDelimiter !=null ? "'" + columnDelimiter + "'" : null));
+            sb.append(quoteStringArgument(columnDelimiter));
             sb.append(",") ;
-            sb.append(	(characterDelimiter !=null ? "'" + characterDelimiter + "'" : null));
+            sb.append(quoteStringArgument(characterDelimiter));
             sb.append(",") ;
-            sb.append(	(codeset !=null ? "'" + codeset + "'" : null));
+            sb.append(quoteStringArgument(codeset));
             sb.append(", ");
             sb.append( columnInfo.getExpectedNumberOfColumnsInFile());
             sb.append(", ");
-            sb.append( "'" + columnInfo.getExpectedVtiColumnTypesAsString() + "'");
+            sb.append(quoteStringArgument(
+                    columnInfo.getExpectedVtiColumnTypesAsString()));
             sb.append(", ");
             sb.append(lobsInExtFile);
             sb.append(", ");
@@ -250,8 +238,7 @@ public class Import extends ImportAbstract{
             // case, because all undelimited names are stored in the upper case 
             // in the database. 
             
-            String entityName = (schemaName == null ? "\""+ tableName + "\"" : 
-                                 "\"" + schemaName + "\"" + "." + "\"" + tableName + "\""); 
+            String entityName = IdUtil.mkQualifiedName(schemaName, tableName);
             
             String insertModeValue;
             if(replace > 0)
@@ -334,5 +321,20 @@ public class Import extends ImportAbstract{
 
         return PublicAPI.wrapStandardException(se);
     }
-    
+
+    /**
+     * Quote a string argument so that it can be used as a literal in an
+     * SQL statement. If the string argument is {@code null} an SQL NULL token
+     * is returned.
+     *
+     * @param string a string or {@code null}
+     * @return the string in quotes and with proper escape sequences for
+     * special characters, or "NULL" if the string is {@code null}
+     */
+    private static String quoteStringArgument(String string) {
+        if (string == null) {
+            return "NULL";
+        }
+        return StringUtil.quoteStringLiteral(string);
+    }
 }
