@@ -22,6 +22,8 @@
 package org.apache.derby.impl.tools.ij;
 
 import org.apache.derby.iapi.tools.i18n.LocalizedResource;
+
+import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Locale;
@@ -79,7 +81,13 @@ class xaHelper implements xaAbstractHelper
 		
 	private Xid makeXid(int xid)
 	{
-		return new ijXid(xid, databaseName.getBytes());
+		try {
+			return new ijXid(xid, databaseName.getBytes("UTF-8"));
+		} catch (UnsupportedEncodingException e) {
+			// UTF-8 is a required encoding. We should never get here.
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 	public void XADataSourceStatement(ij parser, Token dbname, Token shutdown,
