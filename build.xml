@@ -196,10 +196,6 @@
       classpath="${out.dir}"
     />
 
-    <!-- 
-            After setting the JDK properties, we expect that java15compile.classpath or
-            java16compile.classpath will be set. If neither is set, PropertySetter aborts the build.
-    -->
     <setJdkProperties/>
 
     <property file="${properties.dir}/defaultcompiler.properties"/>
@@ -207,16 +203,10 @@
     <!-- Compile-time classpath`< properties files -->
     <property file="${properties.dir}/extrapath.properties"/>
 
-
     <!-- 
             If a Java 6 JDK isn't present, then use the Java 5 environment to build the JDBC 4 support
     -->
     <property name="java16compile.classpath" value="${out.jdbc4.dir}:${java15compile.classpath}"/>
-
-    <!-- 
-            If a Java 5 JDK isn't present, then use the Java 6 environment to build the Java 5 support
-    -->
-    <property name="java15compile.classpath" value="${out.jdbc3.dir}:${java16compile.classpath}"/>
 
     <!-- 
             If a 1.4 JDK is not present, then use the Java 5 environment to build the 1.4 support
@@ -268,7 +258,6 @@
     <echo message="${checkEvent} java14compile.classpath = ${java14compile.classpath}"/>
     <echo message="${checkEvent} j15lib = ${j15lib}"/>
     <echo message="${checkEvent} java15compile.classpath = ${java15compile.classpath}"/>
-    <echo message="${checkEvent} j16lib = ${j16lib}"/>
     <echo message="${checkEvent} java16compile.classpath = ${java16compile.classpath}"/>
 
   </target>
@@ -1220,6 +1209,15 @@
   </target>
 
 
+  <target name="jdbc4_classlist_edit" if="jdk16">
+    <!-- uncomment jdbc4 classes if jdk 1.6 is available -->
+    <echo level="info" message="uncommenting jdbc4 classes"/>
+    <replaceregexp file="${jar.classlist}"
+     match="^#jdbc4_optional_(.*)"
+     replace="\1"
+     byline="true"/>
+  </target>
+
 <!-- - - - - - - - - - - - - - - derby.jar target - - - - - - - - - - - -->
 
   <target name="derbyjar" depends="initjars">
@@ -1234,6 +1232,10 @@
     <concat destfile="${derby.jar.dir}/lists/otherDerbyClasses.properties">
       <fileset dir="${basedir}/tools/jar" includes="*DBMS*.properties"/>
     </concat>
+
+    <antcall target="jdbc4_classlist_edit">
+      <param name="jar.classlist" value="${derby.jar.dir}/lists/otherDerbyClasses.properties"/>
+    </antcall>
 
     <mkdir dir="${derby.jar.dir}/lists/org/apache/derby"/>
     <java classname="org.apache.derbyBuild.propertyconfig" fork="yes">
@@ -1524,6 +1526,10 @@
 
     <copy file="${basedir}/tools/jar/dnc.properties"
           tofile="${derby.jar.dir}/lists/dnc.properties"/>
+
+    <antcall target="jdbc4_classlist_edit">
+      <param name="jar.classlist" value="${derby.jar.dir}/lists/dnc.properties"/>
+    </antcall>
 
     <java classname="org.apache.derbyBuild.classlister" fork="yes">
       <jvmarg value="-Doutputfile=${derby.jar.dir}/lists/dnc.list"/>
