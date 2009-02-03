@@ -686,7 +686,7 @@ public class RunList
 	        runwithj9 = parentProps.getProperty("runwithj9");
             runwithibmjvm = parentProps.getProperty("runwithibmjvm");
             String testJVM = jvmName;
-            if (jvmName.startsWith("j9"))
+            if (jvmName.startsWith("j9") && (!jvmName.startsWith("j9dee")))
             	testJVM = (jvmName.startsWith("j9_foundation") ? "foundation" : "j9");            
             runwithjvm = parentProps.getProperty("runwith" + testJVM);
             excludeJCC = parentProps.getProperty("excludeJCC");
@@ -788,7 +788,7 @@ public class RunList
 		runwithj9 = suiteProperties.getProperty("runwithj9");
                 derbyTestingXaSingle = suiteProperties.getProperty("derbyTesting.xa.single");
         String testJVM = jvmName;
-        if (jvmName.startsWith("j9"))
+        if (jvmName.startsWith("j9") && (!jvmName.startsWith("j9dee")))
         	testJVM = (jvmName.startsWith("j9_foundation") ? "foundation" : "j9");
         runwithjvm = suiteProperties.getProperty("runwith" + testJVM);
 		excludeJCC = suiteProperties.getProperty("excludeJCC");
@@ -961,7 +961,7 @@ public class RunList
 
         // runwithjvm may be set at the top or just for a subsuite
 	    String testJVM = jvmName;
-        if (jvmName.startsWith("j9"))
+        if (jvmName.startsWith("j9") && (!jvmName.startsWith("j9dee")))
         	testJVM = (jvmName.startsWith("j9_foundation") ? "foundation" : "j9");
 	    if ( parentProperties.getProperty("runwith" + testJVM) != null )
 		    p.put("runwith" + testJVM, runwithjvm);
