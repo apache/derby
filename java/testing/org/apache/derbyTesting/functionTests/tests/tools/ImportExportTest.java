@@ -171,11 +171,8 @@ public class ImportExportTest extends BaseJDBCTestCase {
         // Create schema names and table names containing both single quotes
         // and double quotes to expose bugs both for internally generated
         // string literals (enclosed in single quotes) and SQL identifiers
-        // (enclosed in double quotes). This will also indirectly test that
-        // the export/import system procedures handle those characters in
-        // file names (which they didn't do very well before the fix for
-        // DERBY-4042), as doExport() and doImportAndVerify() use a file name
-        // derived from the table name.
+        // (enclosed in double quotes). Both single and double quotes used
+        // to cause problems.
         final String schema = "s'\"";
         final String table = "t'\"";
         final String escapedName = JDBC.escape(schema, table);
@@ -185,30 +182,48 @@ public class ImportExportTest extends BaseJDBCTestCase {
                   " as select * from T1 with no data");
         s.execute("insert into " + escapedName + " select * from t1");
 
-        doImportAndExport(schema, table, "'", "\"", "US-ASCII");
+        // Quotes in the delimiters didn't use to be a problem, but test
+        // it anyway
+        final String colDel = "'";
+        final String charDel = "\"";
+        final String encoding = "US-ASCII";
+
+        // Single quotes in file name used to cause syntax errors
+        final String fileName = SupportFilesSetup.
+                getReadWrite("please don't fail.dat").getPath();
+
+        // Export used to fail with a syntax error
+        doExportToFile(fileName, schema, table, colDel, charDel, encoding);
+
+        // Empty the table so that we can see that it was imported later
+        int rowsInTable = s.executeUpdate("delete from " + escapedName);
+
+        // Import used to fail with a syntax error
+        doImportFromFile(fileName, schema, table, colDel, charDel, encoding, 0);
+
+        // Verify that the table was imported
+        JDBC.assertSingleValueResultSet(
+                s.executeQuery("select count(*) from " + escapedName),
+                Integer.toString(rowsInTable));
+        JDBC.assertEmpty(s.executeQuery(
+                "select * from " + escapedName +
+                " except all select * from T1"));
     }
 
     private void doImport(String fromTable, String toSchema, String toTable,
 			 String colDel, String charDel , 
 			 String codeset, int replace) throws SQLException 
     {
-		String impsql = "call SYSCS_UTIL.SYSCS_IMPORT_TABLE (? , ? , ? , ?, ? , ?, ?)";
-        PreparedStatement ps = prepareStatement(impsql);
-        ps.setString(1, toSchema);
-		ps.setString(2, toTable);
-		ps.setString(3, (fromTable==null ?  fromTable : "extinout/" + fromTable + ".dat" ));
-		ps.setString(4 , colDel);
-		ps.setString(5 , charDel);
-		ps.setString(6 , codeset);
-		ps.setInt(7, replace);
-		ps.execute();
-		ps.close();
+        String fileName = (fromTable == null) ?
+            null : SupportFilesSetup.getReadWrite(fromTable + ".dat").getPath();
+        doImportFromFile(fileName, toSchema, toTable,
+                colDel, charDel, codeset, replace);
     }
 	
     private void doImportFromFile(
              String fileName, String toSchema, String toTable,
 			 String colDel, String charDel , 
-			 String codeset, int replace) throws Exception 
+			 String codeset, int replace) throws SQLException
     {
 		String impsql = "call SYSCS_UTIL.SYSCS_IMPORT_TABLE (? , ? , ? , ?, ? , ?, ?)";
         PreparedStatement ps = prepareStatement(impsql);
@@ -236,16 +251,28 @@ public class ImportExportTest extends BaseJDBCTestCase {
     }
 	
     private void doExport(String fromSchema, String fromTable, String colDel,
-			 String charDel, 
-			 String codeset) throws SQLException 
+			 String charDel,
+			 String codeset) throws SQLException
 	{
+        String fileName = (fromTable == null) ?
+            null : SupportFilesSetup.getReadWrite(fromTable + ".dat").getPath();
+        doExportToFile(
+                fileName, fromSchema, fromTable, colDel, charDel, codeset);
+    }
+
+    private void doExportToFile(
+            String fileName, String fromSchema, String fromTable,
+            String colDel, String charDel, String codeset) throws SQLException
+    {
 		 //DERBY-2925: need to delete existing files first.
-        	 SupportFilesSetup.deleteFile("extinout/" + fromTable + ".dat");
+         if (fileName != null) {
+             SupportFilesSetup.deleteFile(fileName);
+         }
 		 String expsql = "call SYSCS_UTIL.SYSCS_EXPORT_TABLE (? , ? , ? , ?, ? , ?)";
          PreparedStatement ps = prepareStatement(expsql);
          ps.setString(1, fromSchema);
 		 ps.setString(2, fromTable);
-		 ps.setString(3, (fromTable==null ?  fromTable : "extinout/" + fromTable + ".dat" ));
+         ps.setString(3, fileName);
 		 ps.setString(4 , colDel);
 		 ps.setString(5 , charDel);
 		 ps.setString(6 , codeset);
