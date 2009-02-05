@@ -638,7 +638,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 	{
 		LanguageConnectionContext lcc = activation.getLanguageConnectionContext();
 		DataDictionary dd = lcc.getDataDictionary();
-		TransactionController tc = lcc.getTransactionCompile();
+		TransactionController tc = lcc.getTransactionExecute();
 		ConglomerateDescriptor[] cds;
 		long[] conglomerateNumber;
 		ExecIndexRow[] indexRow;
