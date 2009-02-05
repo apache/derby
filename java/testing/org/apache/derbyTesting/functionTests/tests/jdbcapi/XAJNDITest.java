@@ -79,8 +79,12 @@ public class XAJNDITest extends BaseJDBCTestCase {
     {
         try {
             Hashtable env = new Hashtable();
-            env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
-            // using a property - these will have to be passed in somehow.
+            // using properties - these will have been passed in.
+            String ldapContextFactory=getSystemProperty("derbyTesting.ldapContextFactory");
+            if (ldapContextFactory == null || ldapContextFactory.length() < 1)
+                env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
+            else
+                env.put(Context.INITIAL_CONTEXT_FACTORY, ldapContextFactory);
             env.put(Context.PROVIDER_URL, "ldap://" + ldapServer + ":" + ldapPort);
             env.put(Context.SECURITY_AUTHENTICATION, "simple");
             return new InitialDirContext(env);

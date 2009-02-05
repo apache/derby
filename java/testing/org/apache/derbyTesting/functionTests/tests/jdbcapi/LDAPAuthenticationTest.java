@@ -57,6 +57,8 @@ public class LDAPAuthenticationTest extends BaseJDBCTestCase {
     private static String dnString;
     private static String ldapUser; // existing valid user on ldap server
     private static String ldapPassword; // password for existing valid user on ldap server
+    private static String ldapContextFactory; // optional initial context factory
+        // if not passed in with -DderbyTesting.ldapContextFactory, uses sun's
 
     // create own policy file, so we can connect to the ldap server
     private static String POLICY_FILE_NAME = 
@@ -104,6 +106,7 @@ public class LDAPAuthenticationTest extends BaseJDBCTestCase {
             return new TestSuite("LDAPAuthenticationTest requires property " +
                 "derbyTesting.dnString for setting o=, eg: " +
                 "-DderbyTesting.dnString=myJNDIstring");
+        ldapContextFactory=getSystemProperty("derbyTesting.ldapContextFactory");
 
         TestSuite suite = new TestSuite("LDAPAuthenticationTest");
         suite.addTest(baseSuite("LDAPAuthenticationTest:embedded",
@@ -212,6 +215,12 @@ public class LDAPAuthenticationTest extends BaseJDBCTestCase {
         setDatabaseProperty("derby.authentication.server", ldapServer, conn);
         setDatabaseProperty("derby.authentication.ldap.searchBase", "o=" + dnString, conn);
         setDatabaseProperty("derby.authentication.ldap.searchFilter","(&(objectClass=inetOrgPerson)(uid=%USERNAME%))", conn);
+        // java.naming.factory.initial is Context.INITIAL_CONTEXT_FACTORY
+        // but using literal string here to avoid unnecessary import.
+        // If the initial context factory is not provided it'll default to 
+        // com.sun.jndi.ldap.LdapCtxFactory in LDAPAuthenticationSchemeImpl.
+        if ((ldapContextFactory != null) && (ldapContextFactory.length() > 0))
+            setDatabaseProperty("java.naming.factory.initial", ldapContextFactory, conn);
         commit();
         // shutdown the database as system, so the properties take effect
         TestConfiguration.getCurrent().shutdownDatabase();
