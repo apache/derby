@@ -44,6 +44,7 @@ import org.apache.derby.iapi.jdbc.CharacterStreamDescriptor;
 
 import org.apache.derby.iapi.services.cache.ClassSize;
 import org.apache.derby.iapi.services.io.ArrayInputStream;
+import org.apache.derby.iapi.services.io.InputStreamUtil;
 import org.apache.derby.iapi.util.StringUtil;
 import org.apache.derby.iapi.util.UTF8Util;
 import org.apache.derby.iapi.services.i18n.LocaleFinder;
@@ -589,18 +590,10 @@ public class SQLChar
         if (stream != null) {
             if (stream instanceof Resetable && stream instanceof ObjectInput) {
                 try {
-                    int clobLength = 0;
-                    // If we have the stream length encoded.
-                    // just read that.
-                    int utf8len = readCharacterLength((ObjectInput) stream);
-                    if (utf8len != 0) {
-                        clobLength = utf8len;
-                        return clobLength;
-                    }
-                    // Otherwise we will have to read the whole stream.
-                    int skippedCharSize = (int) UTF8Util.skipUntilEOF(stream);
-                    clobLength = skippedCharSize;
-                    return clobLength;
+                    // Skip the encoded byte length.
+                    InputStreamUtil.skipFully(stream, 2);
+                    // Decode the whole stream to find the character length.
+                    return (int)UTF8Util.skipUntilEOF(stream);
                 } catch (IOException ioe) {
                     throwStreamingIOException(ioe);
                 } finally {

@@ -29,6 +29,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import junit.framework.Test;
+import org.apache.derbyTesting.functionTests.util.streams.CharAlphabet;
+import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetReader;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
@@ -219,14 +221,23 @@ public class CharacterStreamsTest extends BaseJDBCTestCase {
                 "insert into charstream(c, vc, lvc, lob) " +
                 "values(?,?,?,?)");
         PreparedStatement psDel = prepareStatement("DELETE FROM charstream");
+        PreparedStatement psqSQLLength = prepareStatement(
+                "select length(c), length(vc), length(lvc), length(lob) " +
+                "from charstream");
         PreparedStatement psq2 =
                 prepareStatement("select c, vc, lvc, lob from charstream");
 
         println("setCharacterStream(LONG CHARACTER STREAMS WITH UNICODE)");
-        checkCharacterStreams(psDel, psi, psq2, 14, 93, 55, 55);
-        checkCharacterStreams(psDel, psi, psq2, 25, 19332, 18733, 18733);
-        checkCharacterStreams(psDel, psi, psq2, 1, 32433, 32673, 32673);
-        checkCharacterStreams(psDel, psi, psq2, 0, 32532, 32700, 32700);
+        checkCharacterStreams(
+                psDel, psi, psq2, psqSQLLength, 14, 93, 55, 55, 0);
+        checkCharacterStreams(
+                psDel, psi, psq2, psqSQLLength, 21, 10887, 10887, 10887, 3);
+        checkCharacterStreams(
+                psDel, psi, psq2, psqSQLLength, 25, 19332, 18733, 18733, 0);
+        checkCharacterStreams(
+                psDel, psi, psq2, psqSQLLength, 1, 32433, 32673, 32673, 0);
+        checkCharacterStreams(
+                psDel, psi, psq2, psqSQLLength, 0, 32532, 32700, 32700, 0);
 
         psi.close();
         psDel.close();
@@ -555,34 +566,64 @@ public class CharacterStreamsTest extends BaseJDBCTestCase {
         rs.close();
     }
 
+    private Reader getSourceStream(int length, int bytesPerChar) {
+        switch (bytesPerChar) {
+            case 0:
+                return new c3Reader(length);
+            case 1:
+                return new LoopingAlphabetReader(length,
+                        CharAlphabet.modernLatinLowercase());
+            case 2:
+                return new LoopingAlphabetReader(length,
+                        CharAlphabet.tamil());
+            case 3:
+                return new LoopingAlphabetReader(length,
+                        CharAlphabet.cjkSubset());
+            default:
+                fail("Illegal value of bytesPerChar: " + bytesPerChar);
+                return null;
+        }
+    }
+
     private void checkCharacterStreams(
             PreparedStatement psDel,
             PreparedStatement psi,
             PreparedStatement psq2,
-            int cl, int vcl, int lvcl, int lob)
+            PreparedStatement psqSQLLength,
+            int cl, int vcl, int lvcl, int lob,
+            int bytesPerChar)
             throws SQLException, IOException {
         psDel.executeUpdate();
 
-        psi.setCharacterStream(1, new c3Reader(cl), cl);
-        psi.setCharacterStream(2, new c3Reader(vcl), vcl);
-        psi.setCharacterStream(3, new c3Reader(lvcl), lvcl);
-        psi.setCharacterStream(4, new c3Reader(lob), lob);
+        psi.setCharacterStream(1, getSourceStream(cl, bytesPerChar), cl);
+        psi.setCharacterStream(2, getSourceStream(vcl, bytesPerChar), vcl);
+        psi.setCharacterStream(3, getSourceStream(lvcl, bytesPerChar), lvcl);
+        psi.setCharacterStream(4, getSourceStream(lob, bytesPerChar), lob);
         psi.executeUpdate();
+
+        ResultSet rsLength = psqSQLLength.executeQuery();
+        assertTrue(rsLength.next());
+        assertEquals(25, rsLength.getInt(1));   // CHAR
+        assertEquals(vcl, rsLength.getInt(2));  // VARCHAR
+        assertEquals(lvcl, rsLength.getInt(3)); // LONG VARCHAR
+        assertEquals(lob, rsLength.getInt(4));  //CLOB
+        assertFalse(rsLength.next());
+        rsLength.close();
 
         ResultSet rs = psq2.executeQuery();
         rs.next();
 
         InputStream is = rs.getAsciiStream(1);
-        checkCharStream(is, cl, 25);
+        checkCharStream(is, cl, 25, bytesPerChar);
 
         is = rs.getAsciiStream(2);
-        checkCharStream(is, vcl, -1);
+        checkCharStream(is, vcl, -1, bytesPerChar);
 
         is = rs.getAsciiStream(3);
-        checkCharStream(is, lvcl, -1);
+        checkCharStream(is, lvcl, -1, bytesPerChar);
 
         is = rs.getAsciiStream(4);
-        checkCharStream(is, lob, -1);
+        checkCharStream(is, lob, -1, bytesPerChar);
 
         rs.close();
 
@@ -590,16 +631,16 @@ public class CharacterStreamsTest extends BaseJDBCTestCase {
         rs.next();
 
         Reader r = rs.getCharacterStream(1);
-        checkCharStream(r, cl, 25);
+        checkCharStream(r, cl, 25, bytesPerChar);
 
         r = rs.getCharacterStream(2);
-        checkCharStream(r, vcl, -1);
+        checkCharStream(r, vcl, -1, bytesPerChar);
 
         r = rs.getCharacterStream(3);
-        checkCharStream(r, lvcl, -1);
+        checkCharStream(r, lvcl, -1, bytesPerChar);
 
         r = rs.getCharacterStream(4);
-        checkCharStream(r, lob, -1);
+        checkCharStream(r, lob, -1, bytesPerChar);
 
         rs.close();
 
@@ -609,19 +650,19 @@ public class CharacterStreamsTest extends BaseJDBCTestCase {
 
         String suv = rs.getString(1);
         r = new StringReader(suv);
-        checkCharStream(r, cl, 25);
+        checkCharStream(r, cl, 25, bytesPerChar);
 
         suv = rs.getString(2);
         r = new StringReader(suv);
-        checkCharStream(r, vcl, -1);
+        checkCharStream(r, vcl, -1, bytesPerChar);
 
         suv = rs.getString(3);
         r = new StringReader(suv);
-        checkCharStream(r, lvcl, -1);
+        checkCharStream(r, lvcl, -1, bytesPerChar);
 
         suv = rs.getString(4);
         r = new StringReader(suv);
-        checkCharStream(r, lob, -1);
+        checkCharStream(r, lob, -1, bytesPerChar);
 
         rs.close();
 
@@ -703,11 +744,12 @@ public class CharacterStreamsTest extends BaseJDBCTestCase {
         r.close();
     }
 
-    private void checkCharStream(InputStream is, int length, int fixedLen)
+    private void checkCharStream(InputStream is, int length, int fixedLen,
+                                 int bytesPerChar)
             throws IOException
     {
 
-        Reader orig = new c3Reader(length);
+        Reader orig = getSourceStream(length, bytesPerChar);
 
         int count = 0;
         for (;;) {
@@ -748,11 +790,12 @@ public class CharacterStreamsTest extends BaseJDBCTestCase {
         is.close();
     }
 
-    private void checkCharStream(Reader r, int length, int fixedLen)
+    private void checkCharStream(Reader r, int length, int fixedLen,
+                                 int bytesPerChar)
             throws IOException
     {
 
-        Reader orig = new c3Reader(length);
+        Reader orig = getSourceStream(length, bytesPerChar);
 
         int count = 0;
         for (;;) {
