@@ -593,25 +593,6 @@ readChars:
     }
 
     /**
-     * Decode the length encoded in the stream.
-     * 
-     * This method came from {@link java.io.DataInputStream}
-     * 
-     * @return The number of bytes in the stream, or <code>0</code> if the
-     *      length is unknown and the end of stream must be marked by the
-     *      Derby-specific end of stream marker.
-     */
-    private final int readUnsignedShort() throws IOException {
-        int ch1 = in.read();
-        int ch2 = in.read();
-        if ((ch1 | ch2) < 0)
-            throw new EOFException("Reached EOF when reading" +
-                                   "encoded length bytes");
-
-        return (ch1 << 8) + (ch2 << 0);
-    }
-
-    /**
      * Calculates an optimized buffer size.
      * <p>
      * The maximum size allowed is returned if the specified values don't give
