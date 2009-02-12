@@ -259,9 +259,28 @@ public class ReclaimSpaceHelper
             }
 
 			if (work.incrAttempts() < 3) // retry this for serveral times
+            {
 				return Serviceable.REQUEUE;
+            }
 			else
+            {
+                // If code gets here, the space will be lost forever, and
+                // can only be reclaimed by a full offline compress of the
+                // table/index.
+
+                if (SanityManager.DEBUG)
+                {
+                    if (SanityManager.DEBUG_ON(DaemonService.DaemonTrace))
+                    {
+                        SanityManager.DEBUG(
+                            DaemonService.DaemonTrace, 
+                            "  gave up after 3 tries to get container lock " + 
+                            work);
+                    }
+                }
+
 				return Serviceable.DONE;
+            }
 		}	
 
 		// At this point, container is opened with IX lock.
@@ -281,8 +300,8 @@ public class ReclaimSpaceHelper
 			return Serviceable.DONE;
 		}
 
-		// We are reclaiming row space or long column.  First get an xlock on the
-		// head row piece.
+		// We are reclaiming row space or long column.  
+		// First get an xlock on the head row piece.
 		RecordHandle headRecord = work.getHeadRowHandle();
 
 		if (!container_rlock.lockRecordForWrite(
@@ -291,9 +310,27 @@ public class ReclaimSpaceHelper
 			// cannot get the row lock, retry
 			tran.abort();
 			if (work.incrAttempts() < 3)
+            {
 				return Serviceable.REQUEUE;
+            }
 			else
+            {
+                // If code gets here, the space will be lost forever, and
+                // can only be reclaimed by a full offline compress of the
+                // table/index.
+
+                if (SanityManager.DEBUG)
+                {
+                    if (SanityManager.DEBUG_ON(DaemonService.DaemonTrace))
+                    {
+                        SanityManager.DEBUG(
+                            DaemonService.DaemonTrace, 
+                            "  gave up after 3 tries to get row lock " + 
+                            work);
+                    }
+                }
 				return Serviceable.DONE;
+            }
 		}
 
 		// The exclusive lock on the head row has been gotten.
@@ -332,19 +369,33 @@ public class ReclaimSpaceHelper
 			// operation.  
 			// 
 			long headPageId = ((PageKey)headRecord.getPageId()).getPageNumber();
+			//DERBY-4050 - we wait for the page so we don't have to retry.
+			// prior to the 4050 fix, we called getPageNoWait and just 
+			// retried 3 times.  This left unreclaimed space if we were 
+			// not successful after three tries.
 			StoredPage headRowPage = 
-				(StoredPage)containerHdl.getPageNoWait(headPageId);
-
+				(StoredPage)containerHdl.getPage(headPageId);
 			if (headRowPage == null)
 			{
-				// Cannot get page no wait, try again later.
-				tran.abort();
-				if (work.incrAttempts() < 3)
-					return Serviceable.REQUEUE;
-				else
-					return Serviceable.DONE;
-			}
+				// It is not clear why headRowPage would be null,
+				// but logging the failure in case it happens.
+				// If code gets here, the space will be lost forever, and
+				// can only be reclaimed by a full offline compress of the
+				// table/index.
 
+				if (SanityManager.DEBUG)
+				{
+					if (SanityManager.DEBUG_ON(DaemonService.DaemonTrace))
+					{
+						SanityManager.DEBUG(
+								DaemonService.DaemonTrace, 
+								"gave up because hadRowPage was null" + 
+								work);
+					}
+				}
+				tran.abort();
+				return Serviceable.DONE;
+			}
 			try
 			{
 				headRowPage.removeOrphanedColumnChain(work, containerHdl);
