@@ -61,7 +61,7 @@ public class ClobReclamationTest extends BaseJDBCTestCase {
      * @throws SQLException
      * @throws InterruptedException
      */
-    public void testMultiThreadedUpdate() throws SQLException,
+    public void testMultiThreadedUpdate(final boolean lockTable) throws SQLException,
             InterruptedException {
         // need to do a getConnection or we get a
         // junit assertion that driver is not registered.
@@ -74,8 +74,9 @@ public class ClobReclamationTest extends BaseJDBCTestCase {
                 public void run() {
                     try {
                         Connection conn = openDefaultConnection();
+                        conn.setAutoCommit(false);
                         ClobReclamationTest.fiveHundredUpdates(conn,
-                                updateString, key);
+                                updateString, key, lockTable);                      
                     } catch (SQLException e) {
                         fail(e.getMessage());
                     }
@@ -100,16 +101,42 @@ public class ClobReclamationTest extends BaseJDBCTestCase {
     }
 
     private static void fiveHundredUpdates(Connection conn,
-            String updateString, int key) throws SQLException {
+            String updateString, int key, boolean lockTable) throws SQLException {
         PreparedStatement ps = conn
                 .prepareStatement("UPDATE CLOBTAB SET C = ? WHERE I = ?");
         for (int i = 0; i < 500; i++) {
+            if (lockTable) {
+                Statement s = conn.createStatement();
+                s.executeUpdate("LOCK TABLE CLOBTAB IN EXCLUSIVE MODE");
+             }
             ps.setString(1, updateString);
             ps.setInt(2, key);
             ps.executeUpdate();
+            conn.commit();
         }
     }
 
+    /**
+     * Test multithreaded clob update using standard row locking
+     * @throws SQLException
+     * @throws InterruptedException
+     */
+    public void testMultiThreadedUpdateRowLocking() throws SQLException, InterruptedException {
+        testMultiThreadedUpdate(false);
+    }
+    
+    /**
+     * Test multithreaded clob update but get an exclusive lock on the
+     * table for each update. We can't enable this teset until DERBY-4054 
+     * is fixed.
+     * 
+     * @throws SQLException
+     * @throws InterruptedException
+     */
+    public void xtestMultiThreadedUpdateTableLocking() throws SQLException, InterruptedException {
+        testMultiThreadedUpdate(true);
+    }
+    
     public static Test suite() {
 
         Properties sysProps = new Properties();
