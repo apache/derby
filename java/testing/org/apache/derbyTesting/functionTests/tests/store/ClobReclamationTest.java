@@ -58,10 +58,15 @@ public class ClobReclamationTest extends BaseJDBCTestCase {
      * a long value (>32K) Thread 2 updates row with a short clob ("hello");
      * NUMALLOCATEDPAGES should be only 3 after each does 500 updates
      * 
+     * @param lockTable true if we should get an exclusive lock on the table
+     * before update
+     * @param updateSingleRow true if we should try updating a single row 
+     * instead of different rows
+     * 
      * @throws SQLException
      * @throws InterruptedException
      */
-    public void testMultiThreadedUpdate(final boolean lockTable) throws SQLException,
+    public void testMultiThreadedUpdate(final boolean lockTable, boolean updateSingleRow) throws SQLException,
             InterruptedException {
         // need to do a getConnection or we get a
         // junit assertion that driver is not registered.
@@ -69,7 +74,7 @@ public class ClobReclamationTest extends BaseJDBCTestCase {
         final String updateString = Formatters.repeatChar("a", 33000);
         Thread[] threads = new Thread[NUM_THREADS];
         for (int i = 0; i < NUM_THREADS; i++) {
-            final int key = i + 1;
+            final int key = updateSingleRow ? 1 : i + 1;
             threads[i] = new Thread() {
                 public void run() {
                     try {
@@ -122,7 +127,7 @@ public class ClobReclamationTest extends BaseJDBCTestCase {
      * @throws InterruptedException
      */
     public void testMultiThreadedUpdateRowLocking() throws SQLException, InterruptedException {
-        testMultiThreadedUpdate(false);
+        testMultiThreadedUpdate(false /* don't lock table */, false /*don't update single row*/);
     }
     
     /**
@@ -134,7 +139,18 @@ public class ClobReclamationTest extends BaseJDBCTestCase {
      * @throws InterruptedException
      */
     public void xtestMultiThreadedUpdateTableLocking() throws SQLException, InterruptedException {
-        testMultiThreadedUpdate(true);
+        testMultiThreadedUpdate(true /*lock table */, false /* don't update single row */ );
+    }
+    
+    /**
+     * Test multiThreaded update of single row to cause lock contention
+     * This will trigger the row lock retry case of DERBY-4055
+     * 
+     * @throws SQLException
+     * @throws InterruptedException
+     */
+    public void xtestMultiThreadUpdateSingleRow() throws SQLException, InterruptedException {
+        testMultiThreadedUpdate(false /*don't lock table */, true /* update single row */ );
     }
     
     public static Test suite() {
