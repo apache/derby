@@ -54,9 +54,10 @@ public class ClobReclamationTest extends BaseJDBCTestCase {
     }
 
     /**
-     * Two threads simultaneously updating a table. Thread 1 updates row 1 with
-     * a long value (>32K) Thread 2 updates row with a short clob ("hello");
-     * NUMALLOCATEDPAGES should be only 3 after each does 500 updates
+     * Two threads simultaneously updating a table. Threads each
+     * update a separate row with a long value (>32K). NUMALLOCATED
+     * pages should not grow past expected value after 500 updates
+     * by each thread.
      * 
      * @param lockTable true if we should get an exclusive lock on the table
      * before update
@@ -94,15 +95,28 @@ public class ClobReclamationTest extends BaseJDBCTestCase {
         for (int i = 0; i < NUM_THREADS; i++) {
             threads[i].join();
         }
+        checkNumAllocatedPages("CLOBTAB",expectedNumAllocated);
+    }
 
-        Statement s = createStatement();
+    /**
+     * Check that table has specified number of allocated pages.
+     * 
+     * @param table
+     * @param expectedAlloc
+     * @throws SQLException
+     */
+    private void checkNumAllocatedPages(String table, int expectedAlloc) throws SQLException {        
         // Check the space table 
         // Should not have grown.
-        ResultSet rs = s.executeQuery("SELECT NUMALLOCATEDPAGES FROM "
-                + " new org.apache.derby.diag.SpaceTable('APP','CLOBTAB') t"
-                + " WHERE CONGLOMERATENAME = 'CLOBTAB'");
+
+        PreparedStatement ps = prepareStatement("SELECT NUMALLOCATEDPAGES FROM "
+                + " new org.apache.derby.diag.SpaceTable('APP',?) t"
+                + " WHERE CONGLOMERATENAME = ?");
+        ps.setString(1,table);
+        ps.setString(2, table);
+        ResultSet rs = ps.executeQuery();
         JDBC.assertFullResultSet(rs, new String[][] { { ""
-                + expectedNumAllocated } });
+                + expectedAlloc } });
     }
 
     private static void fiveHundredUpdates(Connection conn,
@@ -153,6 +167,25 @@ public class ClobReclamationTest extends BaseJDBCTestCase {
         testMultiThreadedUpdate(false /*don't lock table */, true /* update single row */ );
     }
     
+    /**
+     * Make sure we reclaim space on rollback. Cannot enable this test 
+     * until DERBY-4057 is fixed.
+     * 
+     * @throws SQLException
+     */
+    public void xtestReclamationOnRollback() throws SQLException {
+        setAutoCommit(false);
+        String insertString = Formatters.repeatChar("a", 33000);
+        PreparedStatement ps = prepareStatement("INSERT INTO CLOBTAB2 VALUES(?,?)");
+        for (int i = 0; i < 500; i++) {            
+            ps.setInt(1, i);
+            ps.setString(2, insertString);   
+            ps.executeUpdate();
+            rollback();
+        }
+        checkNumAllocatedPages("CLOBTAB2",1);
+    }
+    
     public static Test suite() {
 
         Properties sysProps = new Properties();
@@ -176,6 +209,7 @@ public class ClobReclamationTest extends BaseJDBCTestCase {
                     ps.setString(2, insertString);
                     ps.executeUpdate();
                 }
+                s.executeUpdate("CREATE TABLE CLOBTAB2 (I INT, C CLOB)");                
             }
 
         };
