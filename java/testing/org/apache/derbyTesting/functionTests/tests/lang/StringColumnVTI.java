@@ -83,7 +83,13 @@ public  abstract    class   StringColumnVTI extends VTITemplate
             return new ByteArrayInputStream( _bytes );
         }
         
-        public	byte[]	getBytes( long position, int length ) { return _bytes; }
+        public	byte[]	getBytes( long position, int length )
+        {
+            byte[]  result = new byte[ length ];
+            System.arraycopy( _bytes, ((int) position) - 1, result, 0, length );
+            
+            return result;
+        }
         
         public	long	length()
         {
@@ -171,7 +177,7 @@ public  abstract    class   StringColumnVTI extends VTITemplate
         
         public	String	getSubString( long position, int length )
         {
-            return _contents.substring( (int) position, length );
+            return _contents.substring( ((int) position) - 1, length );
         }
 		
         public	long	length()

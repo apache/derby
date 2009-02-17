@@ -58,6 +58,11 @@ public class SQLBlob extends SQLBinary
 			super(val);
         }
 	
+	public SQLBlob(Blob val)
+        {
+			super(val);
+        }
+	
 	public String getTypeName()
         {
 			return TypeId.BLOB_NAME;

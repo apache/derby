@@ -742,10 +742,10 @@ public class T_Recovery extends T_Generic {
 
 			RecordHandle rh = t_util.t_insert(page, row);
 
-			DataValueDescriptor col0 = new SQLChar(null);
+			DataValueDescriptor col0 = new SQLChar((String)null);
 			DataValueDescriptor col1 = new SQLChar(REC_001);
 			DataValueDescriptor col2 = new SQLChar(REC_002);
-			DataValueDescriptor col3 = new SQLChar(null);
+			DataValueDescriptor col3 = new SQLChar((String)null);
 
 			if (page.updateFieldAtSlot(page.FIRST_SLOT_NUMBER, 0, col0, null) == null ||
 				page.updateFieldAtSlot(page.FIRST_SLOT_NUMBER, 1, col1, null) == null ||

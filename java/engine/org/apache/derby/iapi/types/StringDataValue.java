@@ -21,6 +21,8 @@
 
 package org.apache.derby.iapi.types;
 
+import java.sql.Clob;
+
 import org.apache.derby.iapi.error.StandardException;
 
 import java.text.RuleBasedCollator;
@@ -234,4 +236,11 @@ public interface StringDataValue extends ConcatableDataValue
      */
     public CharacterStreamDescriptor getStreamWithDescriptor()
             throws StandardException;
+
+
+	/**
+	 * Stuff a StringDataValue with a Clob.
+	 */
+	public void setValue( Clob value )
+		throws StandardException;
 }

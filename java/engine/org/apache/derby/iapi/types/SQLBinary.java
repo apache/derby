@@ -49,6 +49,7 @@ import java.io.ObjectInput;
 import java.io.IOException;
 import java.io.InputStream;
 
+import java.sql.Blob;
 import java.sql.SQLException;
 import java.sql.PreparedStatement;
 import org.apache.derby.iapi.services.io.InputStreamUtil;
@@ -120,6 +121,11 @@ abstract class SQLBinary
 	abstract int getMaxMemoryUsage();
 
 	 /*
+	 * value as a blob
+	 */
+    Blob _blobValue;
+    
+	 /*
 	 * object state
 	 */
 	byte[] dataValue;
@@ -154,10 +160,25 @@ abstract class SQLBinary
 		dataValue = val;
 	}
 
+	SQLBinary(Blob val)
+	{
+		setValue( val );
+	}
+
+   
 
 	public final void setValue(byte[] theValue)
 	{
 		dataValue = theValue;
+        _blobValue = null;
+		stream = null;
+		streamValueLength = -1;
+	}
+
+	public final void setValue(Blob theValue)
+	{
+		dataValue = null;
+        _blobValue = theValue;
 		stream = null;
 		streamValueLength = -1;
 	}
@@ -188,7 +209,7 @@ abstract class SQLBinary
 	/**
 	 * @exception StandardException		Thrown on error
 	 */
-	public final InputStream	getStream()
+	public final InputStream	getStream() throws StandardException
 	{
 		return (stream);
 	}
@@ -206,14 +227,23 @@ abstract class SQLBinary
 	{
 		try
 		{
-			if ((dataValue == null) && (stream != null)) {
-        
+			if ((dataValue == null) && (_blobValue != null) )
+            {
+                dataValue = _blobValue.getBytes( 1L,  getBlobLength() );
+                
+                _blobValue = null;
+ 				stream = null;
+				streamValueLength = -1;
+            }
+			else if ((dataValue == null) && (stream != null) )
+            {
 				if (stream instanceof FormatIdInputStream) {
 					readExternal((FormatIdInputStream) stream);
 				}
 				else {
 					readExternal(new FormatIdInputStream(stream));
 				}
+                _blobValue = null;
  				stream = null;
 				streamValueLength = -1;
 
@@ -223,9 +253,24 @@ abstract class SQLBinary
 		{
 			throwStreamingIOException(ioe);
 		}
+		catch (SQLException se) { throw StandardException.plainWrapException( se ); }
+
 		return dataValue;
 	}
 	
+     /**
+      * Return a JDBC Blob. Only implemented to support DERBY-2201.
+      */
+    public Object getObject()
+        throws StandardException
+    {
+        // the generated code for the DERBY-2201 codepath expects to get a Blob
+        // back.
+
+        if ( _blobValue != null ) { return _blobValue; }
+        else { return super.getObject(); }
+    }
+    
 	/**
 	 * length in bytes
 	 *
@@ -233,7 +278,8 @@ abstract class SQLBinary
 	 */
 	public final int	getLength() throws StandardException
 	{
-		if (stream != null) {
+        if ( _blobValue != null ) { return getBlobLength(); }
+		else if (stream != null) {
 			if (streamValueLength != -1)
 				return streamValueLength;
 			else if (stream instanceof Resetable){
@@ -284,7 +330,7 @@ abstract class SQLBinary
 	 */
 	public final boolean isNull()
 	{
-		return (dataValue == null) && (stream == null);
+		return (dataValue == null) && (stream == null) && (_blobValue == null);
 	}
 
 	/** 
@@ -295,8 +341,47 @@ abstract class SQLBinary
 	 */
 	public final void writeExternal(ObjectOutput out) throws IOException
 	{
+        if ( _blobValue != null )
+        {
+            writeBlob(  out );
+            return;
+        }
+        int len = dataValue.length;
 
-		int len = dataValue.length;
+        writeLength( out, len );
+		out.write(dataValue, 0, dataValue.length);
+	}
+
+	/** 
+		Serialize a blob using the 8.1 encoding. Not called if null.
+
+	 * @exception IOException		io exception
+	 */
+	private void writeBlob(ObjectOutput out) throws IOException
+	{
+        try {
+            int                 len = getBlobLength();
+            InputStream         is = _blobValue.getBinaryStream();
+            
+            writeLength( out, len );
+
+            for ( int i = 0; i < len; i++ )
+            {
+                out.write( is.read() );
+            }
+        }
+        catch (StandardException se) { throw new IOException( se.getMessage() ); }
+        catch (SQLException se) { throw new IOException( se.getMessage() ); }
+    }
+    
+	/** 
+		Write the length if
+		using the 8.1 encoding.
+
+	 * @exception IOException		io exception
+	 */
+    private void writeLength( ObjectOutput out, int len ) throws IOException
+    {
 		if (len <= 31)
 		{
 			out.write((byte) (0x80 | (len & 0xff)));
@@ -312,8 +397,7 @@ abstract class SQLBinary
 			out.writeInt(len);
 
 		}
-		out.write(dataValue, 0, dataValue.length);
-	}
+    }
 
 	/** 
 	 * delegated to bit 
@@ -327,6 +411,7 @@ abstract class SQLBinary
 		// stream is set by previous use.  Track 3794.
 		stream = null;
 		streamValueLength = -1;
+        _blobValue = null;
 
 
 		int len = SQLBinary.readBinaryLength(in);
@@ -347,6 +432,7 @@ abstract class SQLBinary
 		// stream is set by previous use.  Track 3794.
 		stream = null;
 		streamValueLength = -1;
+        _blobValue = null;
 
 		int len = SQLBinary.readBinaryLength(in);
 
@@ -451,6 +537,7 @@ abstract class SQLBinary
 	public final void restoreToNull()
 	{
 		dataValue = null;
+        _blobValue = null;
 		stream = null;
 		streamValueLength = -1;
 	}
@@ -532,8 +619,14 @@ abstract class SQLBinary
 	 */
 	public final Object cloneObject()
 	{
-		if (stream == null)
-			return getClone();
+        if ( _blobValue != null )
+        {
+            SQLBinary self = (SQLBinary) getNewNull();
+            self.setValue(_blobValue);
+            return self;
+        }
+		if (stream == null) { return getClone(); }
+        
 		SQLBinary self = (SQLBinary) getNewNull();
 		self.setValue(stream, streamValueLength);
 		return self;
@@ -582,6 +675,7 @@ abstract class SQLBinary
 	public final void setStream(InputStream newStream)
 	{
 		this.dataValue = null;
+        _blobValue = null;
 		this.stream = newStream;
 		streamValueLength = -1;
 	}
@@ -613,6 +707,7 @@ abstract class SQLBinary
 	public final void setValue(InputStream theStream, int valueLength)
 	{
 		dataValue = null;
+        _blobValue = null;
 		stream = theStream;
 		this.streamValueLength = valueLength;
 	}
@@ -623,6 +718,7 @@ abstract class SQLBinary
 		{
 			SQLBinary theValueBinary = (SQLBinary) theValue;
 			dataValue = theValueBinary.dataValue;
+            _blobValue = theValueBinary._blobValue;
 			stream = theValueBinary.stream;
 			streamValueLength = theValueBinary.streamValueLength;
 		}
@@ -1027,7 +1123,8 @@ abstract class SQLBinary
 	{
 		// stream length checking occurs at the JDBC layer
 		int variableLength = -1;
-		if (stream == null)
+        if ( _blobValue != null ) { variableLength = -1; }
+		else if (stream == null)
 		{
 			if (dataValue != null)
 				variableLength = dataValue.length;
@@ -1052,7 +1149,7 @@ abstract class SQLBinary
 	{
 		if (dataValue == null)
 		{
-			if (stream == null)
+			if ((stream == null) && (_blobValue == null) )
 			{
 				return "NULL";
 			}
@@ -1060,7 +1157,7 @@ abstract class SQLBinary
 			{
 				if (SanityManager.DEBUG)
 					SanityManager.THROWASSERT(
-						"value is null, stream is not null");
+						"value is null, stream or blob is not null");
 				return "";
 			}
 		}
@@ -1169,4 +1266,21 @@ abstract class SQLBinary
 
         return (getTypeName() + ":Length=" + getLength());
     }
+
+    private int getBlobLength() throws StandardException
+    {
+        try {
+            long   maxLength = Integer.MAX_VALUE;
+            long   length = _blobValue.length();
+            if ( length > Integer.MAX_VALUE )
+            {
+                throw StandardException.newException
+                    ( SQLState.BLOB_TOO_LARGE_FOR_CLIENT, Long.toString( length ), Long.toString( maxLength ) );
+            }
+
+            return (int) length;
+        }
+        catch (SQLException se) { throw StandardException.plainWrapException( se ); }
+    }
+    
 }

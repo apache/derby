@@ -62,6 +62,8 @@ import java.io.ObjectInput;
 import java.io.IOException;
 import java.io.UTFDataFormatException;
 import java.io.EOFException;
+import java.io.Reader;
+import java.sql.Clob;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.PreparedStatement;
@@ -83,7 +85,7 @@ The SQLChar represents a CHAR value with UCS_BASIC collation.
 SQLChar may be used directly by any code when it is guaranteed
 that the required collation is UCS_BASIC, e.g. system columns.
 <p>
-The state may be in char[], a String, or an unread stream, depending
+The state may be in char[], a String, a Clob, or an unread stream, depending
 on how the datatype was created.  
 <p>
 Stream notes:
@@ -178,6 +180,11 @@ public class SQLChar
     private CollationKey cKey; 
 
     /**
+     * The value as a user-created Clob
+     */
+    protected Clob _clobValue;
+    
+    /**
      * The value as a stream in the on-disk format.
      */
     InputStream stream;
@@ -201,6 +208,11 @@ public class SQLChar
     public SQLChar(String val)
     {
         value = val;
+    }
+
+    public SQLChar(Clob val)
+    {
+        setValue( val );
     }
 
     /**************************************************************************
@@ -533,6 +545,7 @@ public class SQLChar
         this.rawLength = -1;
         this.stream = newStream;
         cKey = null;
+        _clobValue = null;
     }
 
     public void loadStream() throws StandardException
@@ -546,7 +559,8 @@ public class SQLChar
      */
     public Object   getObject() throws StandardException
     {
-        return getString();
+        if ( _clobValue != null ) { return _clobValue; }
+        else { return getString(); }
     }
 
     /**
@@ -585,6 +599,7 @@ public class SQLChar
      * @exception StandardException     Thrown on error
      */
     public int getLength() throws StandardException {
+        if ( _clobValue != null ) { return getClobLength(); }
         if (rawLength != -1)
             return rawLength;
         if (stream != null) {
@@ -665,6 +680,14 @@ public class SQLChar
                     cKey = null;
                 }
 
+            } else if (_clobValue != null) {
+
+                try {
+                    value = _clobValue.getSubString( 1L, getClobLength() );
+                    _clobValue = null;
+                }
+                catch (SQLException se) { throw StandardException.plainWrapException( se ); }
+                
             } else if (stream != null) {
 
                 // data stored as a stream
@@ -750,7 +773,7 @@ public class SQLChar
     */
     public boolean isNull()
     {
-        return ((value == null) && (rawLength == -1) && (stream == null));
+        return ((value == null) && (rawLength == -1) && (stream == null) && (_clobValue == null));
     }
 
     /**
@@ -809,6 +832,16 @@ public class SQLChar
         if (SanityManager.DEBUG)
             SanityManager.ASSERT(!isNull());
 
+        //
+        // This handles the case that a CHAR or VARCHAR value was populated from
+        // a user Clob.
+        //
+        if ( _clobValue != null )
+        {
+            writeClobUTF( out );
+            return;
+        }
+        
         String lvalue = null;
         char[] data = null;
 
@@ -851,7 +884,7 @@ public class SQLChar
         // Generate the header, write it to the destination stream, write the
         // user data and finally write an EOF-marker is required.
         header.generateInto(out, utflen);
-        writeUTF(out, strlen, isRaw);
+        writeUTF(out, strlen, isRaw, null );
         header.writeEOF(out, utflen);
     }
 
@@ -862,10 +895,11 @@ public class SQLChar
      * @param strLen string length of the value
      * @param isRaw {@code true} if the source is {@code rawData}, {@code false}
      *      if the source is {@code value}
+     * @param characterReader Reader from _clobValue if it exists
      * @throws IOException if writing to the destination stream fails
      */
     private final void writeUTF(ObjectOutput out, int strLen,
-                                final boolean isRaw)
+                                final boolean isRaw, Reader characterReader)
             throws IOException {
         // Copy the source reference into a local variable (optimization).
         final char[] data = isRaw ? rawData : null;
@@ -873,7 +907,11 @@ public class SQLChar
 
         // Iterate through the value and write it as modified UTF-8.
         for (int i = 0 ; i < strLen ; i++) {
-            int c = isRaw ? data[i] : lvalue.charAt(i);
+            int c;
+
+            if ( characterReader != null ) { c = characterReader.read(); }
+            else { c = isRaw ? data[i] : lvalue.charAt(i); }
+            
             if ((c >= 0x0001) && (c <= 0x007F))
             {
                 out.write(c);
@@ -904,18 +942,38 @@ public class SQLChar
             SanityManager.ASSERT(!isNull());
             SanityManager.ASSERT(stream == null, "Stream not null!");
         }
-        boolean isRaw = rawLength >= 0;
-        // Assume isRaw, update afterwards if required.
-        int strLen = rawLength;
-        if (!isRaw) {
-            strLen = value.length();
+
+        boolean  isUserClob = ( _clobValue != null );
+
+        try {
+
+            boolean isRaw = rawLength >= 0;
+            // Assume isRaw, update afterwards if required.
+            int strLen = rawLength;
+            if (!isRaw) {
+                if ( isUserClob ) { strLen = rawGetClobLength(); }
+                else { strLen = value.length(); }
+            }
+            // Generate the header and invoke the encoding routine.
+            StreamHeaderGenerator header = getStreamHeaderGenerator();
+            int toEncodeLen = header.expectsCharCount() ? strLen : -1;
+            header.generateInto(out, toEncodeLen);
+
+            Reader characterReader = null;
+            if ( isUserClob ) { characterReader = _clobValue.getCharacterStream(); }
+            
+            writeUTF(out, strLen, isRaw, characterReader );
+            header.writeEOF(out, toEncodeLen);
+            
+            if ( isUserClob ) { characterReader.close(); }
         }
-        // Generate the header and invoke the encoding routine.
-        StreamHeaderGenerator header = getStreamHeaderGenerator();
-        int toEncodeLen = header.expectsCharCount() ? strLen : -1;
-        header.generateInto(out, toEncodeLen);
-        writeUTF(out, strLen, isRaw);
-        header.writeEOF(out, toEncodeLen);
+        catch (SQLException se)
+        {
+            IOException ioe = new IOException( se.getMessage() );
+            ioe.initCause( se );
+
+            throw ioe;
+        }
     }
 
     /**
@@ -1268,10 +1326,11 @@ readingLoop:
      */
     public Object cloneObject()
     {
-        if (stream == null)
-            return getClone();
+        if ((stream == null) && (_clobValue == null)) {  return getClone(); }
+        
         SQLChar self = (SQLChar) getNewNull();
         self.copyState(this);
+
         return self;
     }
 
@@ -1343,11 +1402,22 @@ readingLoop:
 
 
 
+    public void setValue(Clob theValue)
+    {
+        stream = null;
+        rawLength = -1;
+        cKey = null;
+        value = null;
+
+        _clobValue = theValue;
+    }
+
     public void setValue(String theValue)
     {
         stream = null;
         rawLength = -1;
         cKey = null;
+        _clobValue = null;
 
         value = theValue;
     }
@@ -1585,6 +1655,16 @@ readingLoop:
     protected void setFrom(DataValueDescriptor theValue) 
         throws StandardException 
     {
+        if ( theValue instanceof SQLChar )
+        {
+            SQLChar that = (SQLChar) theValue;
+
+            if ( that._clobValue != null )
+            {
+                setValue( that._clobValue );
+                return;
+            }
+        }
         setValue(theValue.getString());
     }
 
@@ -1719,7 +1799,7 @@ readingLoop:
         /*
         ** If the input is NULL, nothing to do.
         */
-        if (getString() == null)
+        if ( (_clobValue == null ) && (getString() == null) )
         {
             return;
         }
@@ -2929,6 +3009,7 @@ readingLoop:
         this.rawLength = other.rawLength;
         this.cKey = other.cKey;
         this.stream = other.stream;
+        this._clobValue = other._clobValue;
         this.localeFinder = localeFinder;
     }
 
@@ -2965,4 +3046,29 @@ readingLoop:
     public void setSoftUpgradeMode(Boolean inSoftUpgradeMode) {
         // Ignore this for CHAR, VARCHAR and LONG VARCHAR.
     }
+    
+    private int getClobLength() throws StandardException
+    {
+        try {
+            return rawGetClobLength();
+        }
+        catch (SQLException se) { throw StandardException.plainWrapException( se ); }
+    }
+
+    private int rawGetClobLength() throws SQLException
+    {
+        long   maxLength = Integer.MAX_VALUE;
+        long   length = _clobValue.length();
+        if ( length > Integer.MAX_VALUE )
+        {
+            StandardException se = StandardException.newException
+                ( SQLState.BLOB_TOO_LARGE_FOR_CLIENT, Long.toString( length ), Long.toString( maxLength ) );
+
+            throw new SQLException( se.getMessage() );
+        }
+
+        return (int) length;
+    }
+
+
 }

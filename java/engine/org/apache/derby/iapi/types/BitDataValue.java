@@ -21,6 +21,8 @@
 
 package org.apache.derby.iapi.types;
 
+import java.sql.Blob;
+
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 
@@ -48,6 +50,12 @@ public interface BitDataValue extends ConcatableDataValue, StreamStorable
 				BitDataValue leftOperand,
 				BitDataValue rightOperand,
 				BitDataValue result)
+		throws StandardException;
+
+	/**
+	 * Stuff a BitDataValue with a Blob.
+	 */
+	public void setValue( Blob value )
 		throws StandardException;
 
 }

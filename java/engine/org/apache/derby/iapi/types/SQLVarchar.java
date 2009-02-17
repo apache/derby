@@ -21,6 +21,7 @@
 
 package org.apache.derby.iapi.types;
 
+import java.sql.Clob;
 import java.text.RuleBasedCollator;
 
 import org.apache.derby.iapi.types.DataTypeDescriptor;
@@ -124,6 +125,11 @@ public class SQLVarchar
 	}
 
 	public SQLVarchar(String val)
+	{
+		super(val);
+	}
+
+	public SQLVarchar(Clob val)
 	{
 		super(val);
 	}

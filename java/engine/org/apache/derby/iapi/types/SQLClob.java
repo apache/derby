@@ -160,6 +160,11 @@ public class SQLClob
 		super(val);
 	}
 
+	public SQLClob(Clob val)
+	{
+		super(val);
+	}
+
 	/*
 	 * DataValueDescriptor interface
 	 */
@@ -175,11 +180,6 @@ public class SQLClob
 	** TEMP - real fix is to re-work class hierachy so
 	** that CLOB is towards the root, not at the leaf.
 	*/
-
-	public Object	getObject() throws StandardException
-	{
-		throw dataTypeConversion("java.lang.Object");
-	}
 
 	public boolean	getBoolean() throws StandardException
 	{

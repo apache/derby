@@ -363,21 +363,19 @@ public class AnsiSignaturesTest extends BaseJDBCTestCase
             ( "timestamp_Timestamp_Timestamp", "timestamp", new String[] { "timestamp" }, "timestamp('1962-09-23 03:23:34.234')", "1962-09-23 03:23:34.234" );
     }
 
-    // FIXME
-    //    public  void    test_clob_Clob_String()
-    //        throws Exception
-    //    {
-    //        declareAndRunFunction
-    //            ( "clob_Clob_String", "clob", new String[] { "varchar( 10 )" }, "'3'", "3" );
-    //    }
+    public  void    test_clob_Clob_String()
+        throws Exception
+    {
+        declareAndRunFunction
+            ( "clob_Clob_String", "clob", new String[] { "varchar( 10 )" }, "'3'", "3" );
+    }
 
-    // FIXME
-    //    public  void    test_blob_Blob_String()
-    //        throws Exception
-    //    {
-    //        declareAndRunFunction
-    //            ( "blob_Blob_String", "blob", new String[] { "varchar( 10 )" }, "'3'", "3" );
-    //    }
+    public  void    test_blob_Blob_String()
+        throws Exception
+    {
+        declareAndRunFunction
+            ( "blob_Blob_String", "blob", new String[] { "varchar( 10 )" }, "'3'", "33" );
+    }
 
     ///////////////////////////////////////////////////////////////////////////////////
     //

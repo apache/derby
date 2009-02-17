@@ -54,7 +54,10 @@ import org.apache.derby.iapi.reference.Attribute;
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.SQLState;
 
+import java.sql.Blob;
+import java.sql.Clob;
 import java.sql.Date;
+import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
 
@@ -469,6 +472,14 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
                 return previous;
         }
 
+        public BitDataValue getBlobDataValue(Blob value, BitDataValue previous)
+                        throws StandardException
+        {
+            if (previous == null) { return new SQLBlob(value); }
+            previous.setValue(value);
+            return previous;
+        }
+
         // CHAR
         public StringDataValue getCharDataValue(String value)
         {
@@ -581,6 +592,15 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
                 return previous;
         }
         
+        public StringDataValue getClobDataValue(Clob value, StringDataValue previous) throws StandardException
+        {
+            if (previous == null) { return new SQLClob(value); }
+            
+            previous.setValue(value);
+            return previous;
+        }
+
+    
         /**
          * Return a StringDataValue to represent a SQL CLOB
          * with the given collation re-using previous if not null.

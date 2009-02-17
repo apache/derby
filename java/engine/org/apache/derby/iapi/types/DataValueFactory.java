@@ -25,6 +25,8 @@ import org.apache.derby.iapi.types.RowLocation;
 
 import org.apache.derby.iapi.error.StandardException;
 
+import java.sql.Blob;
+import java.sql.Clob;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
@@ -144,6 +146,17 @@ public interface DataValueFactory
         BitDataValue            getBlobDataValue(byte[] value,
                                                                                                 BitDataValue previous)
                                                         throws StandardException;
+
+        /**
+         * Get a SQL Blob with the given value.  A null argument means
+         * get a SQL null value.  Uses the previous value (if
+         * non-null) to hold the return value.
+         *
+         * @exception StandardException         Thrown on error
+         */
+        BitDataValue            getBlobDataValue(Blob value,
+                                                                                                BitDataValue previous)
+                                                        throws StandardException;
         // ------ BOOLEAN
         /**
          * Get a SQL boolean with the given value.  A null argument means get
@@ -225,6 +238,16 @@ public interface DataValueFactory
          *
          */
         StringDataValue getClobDataValue(String value, StringDataValue previous) throws StandardException;
+
+        /**
+         * Get a SQLClob object to represent a SQL CLOB  (UCS_BASIC)
+         * with the given value. A null argument means get a SQL NULL value.
+         * If previous is not null (Java reference) then it will be set
+         * to the value passed in and returned, otherwise a new SQLLongvarchar
+         * will be created and set to the value.
+         *
+         */
+        StringDataValue getClobDataValue(Clob value, StringDataValue previous) throws StandardException;
 
         /**
          * Get a StringDataValue to represent a SQL LONG VARCHAR with the
