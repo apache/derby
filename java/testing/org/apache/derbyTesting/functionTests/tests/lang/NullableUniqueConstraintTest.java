@@ -456,6 +456,33 @@ public class NullableUniqueConstraintTest extends BaseJDBCTestCase {
                 stmt.executeUpdate("update constraintest set " +
                 "val1 = val2, val2 = val1"));
     }
+
+    /**
+     * Test that repeatedly performing multi-row inserts and deletes spanning
+     * multiple pages works correctly with nullable unique constraint. This
+     * used to cause <tt>ERROR XSDA1: An attempt was made to access an out of
+     * range slot on a page</tt> (DERBY-4027).
+     */
+    public void testMixedInsertDelete() throws SQLException {
+        createStatement().execute(
+                "alter table constraintest add constraint uc unique (val1)");
+        PreparedStatement insert = prepareStatement(
+                "insert into constraintest(val1) values ?");
+        PreparedStatement delete = prepareStatement(
+                "delete from constraintest");
+        // The error happened most frequently in the second iteration, but
+        // it didn't always, so we repeat it ten times to increase the
+        // likelihood of triggering the bug.
+        for (int i = 0; i < 10; i++) {
+            for (int j = 0; j < 1000; j++) {
+                insert.setInt(1, j);
+                insert.addBatch();
+            }
+            insert.executeBatch();
+            assertEquals(1000, delete.executeUpdate());
+        }
+    }
+
     public static void main(String [] args) {
         TestResult tr = new TestResult();
         Test t = suite();

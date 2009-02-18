@@ -392,6 +392,11 @@ public class BTreeController extends OpenBTree implements ConglomerateController
                     if (newLeaf)
                         oldLeaf.release();
                     newLeaf = true;
+                    // DERBY-4027: We have moved to the previous page and need
+                    // to recheck that the slot number is valid (it won't be
+                    // if the page we moved to is empty). Restart from the top
+                    // of the loop body to get the slot number rechecked.
+                    continue;
                 } catch (WaitError we) {
                     throw StandardException.plainWrapException(we);
                 }
@@ -450,6 +455,11 @@ public class BTreeController extends OpenBTree implements ConglomerateController
                     return NO_MATCH;
                 //point slot to the first record of new leaf
                 slot = 1;
+                // DERBY-4027: We have moved to the next page and need
+                // to recheck that the slot number is valid (it won't be
+                // if the page we moved to is empty). Restart from the top
+                // of the loop body to get the slot number rechecked.
+                continue;
             }
             rh = leaf.page.fetchFromSlot(null, slot, rows, null, true);
             if (rh != null) {
