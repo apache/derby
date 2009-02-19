@@ -562,18 +562,10 @@ public class SQLChar
         if (stream != null) {
             if (stream instanceof Resetable && stream instanceof ObjectInput) {
                 try {
-                    int clobLength = 0;
-                    // If we have the stream length encoded.
-                    // just read that.
-                    int utf8len = readCharacterLength((ObjectInput) stream);
-                    if (utf8len != 0) {
-                        clobLength = utf8len;
-                        return clobLength;
-                    }
-                    // Otherwise we will have to read the whole stream.
-                    int skippedCharSize = (int) UTF8Util.skipUntilEOF(stream);
-                    clobLength = skippedCharSize;
-                    return clobLength;
+                    // Skip the encoded byte length.
+                    stream.skip(2);
+                    // Decode the whole stream to find the character length.
+                    return (int)UTF8Util.skipUntilEOF(stream);
                 } catch (IOException ioe) {
                     throwStreamingIOException(ioe);
                 } finally {
