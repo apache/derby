@@ -42,6 +42,7 @@ import org.apache.derby.iapi.store.raw.Transaction;
 
 import org.apache.derby.iapi.store.raw.xact.RawTransaction;
 import org.apache.derby.iapi.store.raw.data.RawContainerHandle;
+import org.apache.derby.shared.common.reference.SQLState;
 
 
 /**
@@ -259,6 +260,9 @@ public class ReclaimSpaceHelper
             }
 
 			if (work.incrAttempts() < 3) // retry this for serveral times
+				// it is however, unlikely that three tries will be 
+				// enough because there is no delay between retries.
+				// See DERBY-4059 and DERBY-4055 for details.
             {
 				return Serviceable.REQUEUE;
             }
@@ -509,17 +513,34 @@ public class ReclaimSpaceHelper
 
 
 	/**
-		Open container shared no wait
+	 *	Open container shared no wait
+	 *
+	 * @param tran   Transaction
+	 * @param rlock  LockingPolicy
+	 * @param containerId container id.
+	 * 
+	 * @return ContainerHandle or null if it could not obtain lock.
+	 * 
+	 * @throws StandardException
 	 */
 	private static ContainerHandle openContainerNW(Transaction tran,
 		LockingPolicy rlock, ContainerKey containerId)
 		throws StandardException
 	{
-		ContainerHandle containerHdl = tran.openContainer
-			(containerId, rlock,
-			 ContainerHandle.MODE_FORUPDATE |
-			 ContainerHandle.MODE_LOCK_NOWAIT); 
-
+		ContainerHandle containerHdl = null;
+		try {
+				containerHdl = tran.openContainer
+				(containerId, rlock,
+						ContainerHandle.MODE_FORUPDATE |
+						ContainerHandle.MODE_LOCK_NOWAIT); 
+		} catch (StandardException se) {
+			// DERBY-4059
+			// if this is a lock timeout just return null.
+			// otherwise throw the exception
+			if (!se.getSQLState().equals(SQLState.LOCK_TIMEOUT)) {
+				throw se;
+			}
+		}
 		return containerHdl;
 	}
 
