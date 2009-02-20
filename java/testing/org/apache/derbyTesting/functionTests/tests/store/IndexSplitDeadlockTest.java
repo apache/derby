@@ -131,7 +131,8 @@ public class IndexSplitDeadlockTest extends BaseJDBCTestCase {
      * This call happens when a new batch of rows is requested from a scan
      * that's in progress.
      */
-    public void testBTreeForwardScan_fetchRows1() throws SQLException {
+    public void testBTreeForwardScan_fetchRows_resumeAfterSplit()
+            throws SQLException {
 
         // Create a table and an index and populate them
         Statement s = createStatement();
@@ -172,7 +173,204 @@ public class IndexSplitDeadlockTest extends BaseJDBCTestCase {
             assertEquals(i, rs.getInt(1));
         }
         assertFalse(rs.next());
+        rs.close();
     }
+
+    /**
+     * Test that we can reposition on a holdable cursor after a commit and
+     * a split on the leaf page of the current position. This tests the
+     * second call to reposition() in BTreeForwardScan.fetchRows().
+     */
+    public void testBTreeForwardScan_fetchRows_resumeScanAfterCommitAndSplit()
+            throws SQLException {
+
+        getConnection().setAutoCommit(false);
+
+        // Create a table and an index and populate them
+        Statement s1 = createStatement();
+        s1.executeUpdate("create table t (x int)");
+        s1.executeUpdate("create index idx on t(x)");
+        PreparedStatement ins = prepareStatement("insert into t values ?");
+        for (int i = 0; i < 1000; i++) {
+            ins.setInt(1, i);
+            ins.executeUpdate();
+        }
+        commit();
+
+        // Start an index scan with a holdable cursor, and fetch some rows
+        // to move the position to the middle of the index.
+        assertEquals("This test must use a holdable cursor",
+                     ResultSet.HOLD_CURSORS_OVER_COMMIT,
+                     s1.getResultSetHoldability());
+        ResultSet rs = s1.executeQuery(
+                "select * from t --DERBY-PROPERTIES index=IDX");
+        for (int i = 0; i < 500; i++) {
+            assertTrue(rs.next());
+            assertEquals(i, rs.getInt(1));
+        }
+        commit();
+
+        // Insert rows right before the one we're positioned on in order to
+        // split that page.
+        Statement s2 = createStatement();
+        for (int i = 0; i < 300; i++) {
+            s2.executeUpdate("insert into t values 498");
+        }
+
+        // Check that the index scan can continue where we left it, even
+        // though we committed and released the latches.
+        for (int i = 500; i < 1000; i++) {
+            assertTrue(rs.next());
+            assertEquals(i, rs.getInt(1));
+        }
+        assertFalse(rs.next());
+        rs.close();
+
+    }
+
+    /**
+     * Test that we can reposition on a holdable cursor after a commit and
+     * a compress that removes the leaf page of the current position. This
+     * tests the second call to reposition() in BTreeForwardScan.fetchRows().
+     */
+    public void testBTreeForwardScan_fetchRows_resumeScanAfterCompress()
+            throws Exception {
+
+        getConnection().setAutoCommit(false);
+
+        // Create a table and an index and populate them
+        Statement s1 = createStatement();
+        s1.executeUpdate("create table t (x int)");
+        s1.executeUpdate("create index idx on t(x)");
+        PreparedStatement ins = prepareStatement("insert into t values ?");
+        for (int i = 0; i < 1000; i++) {
+            ins.setInt(1, i);
+            ins.executeUpdate();
+        }
+        commit();
+
+        // Start an index scan with a holdable cursor, and fetch some rows
+        // to move the position to the middle of the index.
+        assertEquals("This test must use a holdable cursor",
+                     ResultSet.HOLD_CURSORS_OVER_COMMIT,
+                     s1.getResultSetHoldability());
+        ResultSet rs = s1.executeQuery(
+                "select * from t --DERBY-PROPERTIES index=IDX");
+        for (int i = 0; i < 500; i++) {
+            assertTrue(rs.next());
+            assertEquals(i, rs.getInt(1));
+        }
+        commit();
+
+        // Delete all rows and compress the table so that the leaf page on
+        // which the result set is positioned disappears.
+        Statement s2 = createStatement();
+        s2.executeUpdate("delete from t");
+        commit();
+        // Sleep for a little while, otherwise SYSCS_INPLACE_COMPRESS_TABLE
+        // doesn't free any space in the index (waiting for the background
+        // thread to perform post-commit work?)
+        Thread.sleep(1000);
+        s2.execute("call syscs_util.syscs_inplace_compress_table" +
+                   "('APP','T',1,1,1)");
+        commit();
+
+        // Check that we are able to reposition. We may or may not see more
+        // rows, since some rows may still be available in the cache in the
+        // result set. The point of the code below is to see that calls to
+        // ResultSet.next() don't fail when the page has disappeared, not to
+        // test how many of the deleted rows are returned.
+        int expected = 500;
+        while (rs.next()) {
+            assertTrue(expected < 1000);
+            assertEquals(expected, rs.getInt(1));
+            expected++;
+        }
+        rs.close();
+    }
+
+    /**
+     * Test that BTreeForwardScan.fetchRows() can reposition after releasing
+     * latches because it had to wait for a lock. This tests the third call
+     * to reposition() in fetchRows(), which is only called if the index is
+     * unique.
+     */
+    public void testBTreeForwardScan_fetchRows_resumeAfterWait_unique()
+            throws Exception {
+        getConnection().setAutoCommit(false);
+
+        // Populate a table with a unique index
+        Statement s = createStatement();
+        s.executeUpdate("create table t (x int, constraint c primary key(x))");
+        PreparedStatement ins = prepareStatement("insert into t values ?");
+        for (int i = 0; i < 300; i++) {
+            ins.setInt(1, i);
+            ins.executeUpdate();
+        }
+        commit();
+
+        // Hold a lock in a different thread to stop the index scan
+        obstruct("delete from t where x = 100", 2000);
+
+        // Give the other thread time to obtain the lock
+        Thread.sleep(1000);
+
+        // Perform an index scan. Will be blocked for a while when fetching
+        // the row where x=100, but should be able to resume the scan.
+        ResultSet rs = s.executeQuery(
+                "select * from t --DERBY-PROPERTIES constraint=C");
+        for (int i = 0; i < 300; i++) {
+            assertTrue(rs.next());
+            assertEquals(i, rs.getInt(1));
+        }
+        assertFalse(rs.next());
+        rs.close();
+    }
+
+    // TODO: add a similar case as the one above, only that it should
+    // cause a split before the index scan wakes up
+
+    /**
+     * Test that BTreeForwardScan.fetchRows() can reposition after releasing
+     * latches because it had to wait for a lock. This tests the fourth call
+     * to reposition() in fetchRows(), which is only called if the index is
+     * non-unique.
+     */
+    public void testBTreeForwardScan_fetchRows_resumeAfterWait_nonUnique()
+            throws Exception {
+        getConnection().setAutoCommit(false);
+
+        // Populate a table with a non-unique index
+        Statement s = createStatement();
+        s.executeUpdate("create table t (x int)");
+        s.executeUpdate("create index idx on t(x)");
+        PreparedStatement ins = prepareStatement("insert into t values ?");
+        for (int i = 0; i < 300; i++) {
+            ins.setInt(1, i);
+            ins.executeUpdate();
+        }
+        commit();
+
+        // Hold a lock in a different thread to stop the index scan
+        obstruct("delete from t where x = 100", 2000);
+
+        // Give the other thread time to obtain the lock
+        Thread.sleep(1000);
+
+        // Perform an index scan. Will be blocked for a while when fetching
+        // the row where x=100, but should be able to resume the scan.
+        ResultSet rs = s.executeQuery(
+                "select * from t --DERBY-PROPERTIES index=IDX");
+        for (int i = 0; i < 300; i++) {
+            assertTrue(rs.next());
+            assertEquals(i, rs.getInt(1));
+        }
+        assertFalse(rs.next());
+        rs.close();
+    }
+
+    // TODO: add a similar case as the one above, only that it should
+    // cause a split before the index scan wakes up
 
     // --------------------------------------------------------------------
     // Helpers
