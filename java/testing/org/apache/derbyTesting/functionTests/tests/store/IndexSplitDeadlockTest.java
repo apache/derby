@@ -63,7 +63,7 @@ public class IndexSplitDeadlockTest extends BaseJDBCTestCase {
 
     protected void tearDown() throws Exception {
         rollback();
-        getConnection().setAutoCommit(false); // required by JDBC.dropSchema()
+        setAutoCommit(false); // required by JDBC.dropSchema()
         JDBC.dropSchema(getConnection().getMetaData(), "APP");
 
         // Go through all the threads and call waitFor() so that we
@@ -87,7 +87,7 @@ public class IndexSplitDeadlockTest extends BaseJDBCTestCase {
     // there's no test case for fetchMax().
 
     public void testBTreeMaxScan_fetchMaxRowFromBeginning() throws Exception {
-        getConnection().setAutoCommit(false);
+        setAutoCommit(false);
 
         Statement s = createStatement();
         s.executeUpdate("create table max_scan(x int)");
@@ -184,7 +184,7 @@ public class IndexSplitDeadlockTest extends BaseJDBCTestCase {
     public void testBTreeForwardScan_fetchRows_resumeScanAfterCommitAndSplit()
             throws SQLException {
 
-        getConnection().setAutoCommit(false);
+        setAutoCommit(false);
 
         // Create a table and an index and populate them
         Statement s1 = createStatement();
@@ -236,7 +236,7 @@ public class IndexSplitDeadlockTest extends BaseJDBCTestCase {
     public void testBTreeForwardScan_fetchRows_resumeScanAfterCompress()
             throws Exception {
 
-        getConnection().setAutoCommit(false);
+        setAutoCommit(false);
 
         // Create a table and an index and populate them
         Statement s1 = createStatement();
@@ -297,7 +297,7 @@ public class IndexSplitDeadlockTest extends BaseJDBCTestCase {
      */
     public void testBTreeForwardScan_fetchRows_resumeAfterWait_unique()
             throws Exception {
-        getConnection().setAutoCommit(false);
+        setAutoCommit(false);
 
         // Populate a table with a unique index
         Statement s = createStatement();
@@ -336,7 +336,7 @@ public class IndexSplitDeadlockTest extends BaseJDBCTestCase {
      */
     public void testBTreeForwardScan_fetchRows_resumeAfterWait_unique_split()
             throws Exception {
-        getConnection().setAutoCommit(false);
+        setAutoCommit(false);
 
         // Populate a table with a unique index
         Statement s = createStatement();
@@ -397,7 +397,7 @@ public class IndexSplitDeadlockTest extends BaseJDBCTestCase {
      */
     public void testBTreeForwardScan_fetchRows_resumeAfterWait_nonUnique()
             throws Exception {
-        getConnection().setAutoCommit(false);
+        setAutoCommit(false);
 
         // Populate a table with a non-unique index
         Statement s = createStatement();
@@ -437,7 +437,7 @@ public class IndexSplitDeadlockTest extends BaseJDBCTestCase {
      */
     public void testBTreeForwardScan_fetchRows_resumeAfterWait_nonUnique_split()
             throws Exception {
-        getConnection().setAutoCommit(false);
+        setAutoCommit(false);
 
         // Populate a table with a non-unique index
         Statement s = createStatement();
