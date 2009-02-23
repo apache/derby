@@ -44,8 +44,10 @@ import org.apache.derbyTesting.junit.TestConfiguration;
  */
 public class IndexSplitDeadlockTest extends BaseJDBCTestCase {
 
-    /** List of obstructor threads to wait for after running the test. */
-    private List obstructors;
+    /**
+     * List of threads (AsyncThread objects) to wait for after running the test.
+     */
+    private List threads = new ArrayList();
 
     public IndexSplitDeadlockTest(String name) {
         super(name);
@@ -64,15 +66,13 @@ public class IndexSplitDeadlockTest extends BaseJDBCTestCase {
         getConnection().setAutoCommit(false); // required by JDBC.dropSchema()
         JDBC.dropSchema(getConnection().getMetaData(), "APP");
 
-        // Go through all the obstructors and call waitFor() so that we
+        // Go through all the threads and call waitFor() so that we
         // detect errors that happened in another thread.
-        if (obstructors != null) {
-            for (Iterator it = obstructors.iterator(); it.hasNext(); ) {
-                Obstructor o = (Obstructor) it.next();
-                o.waitFor();
-            }
+        for (Iterator it = threads.iterator(); it.hasNext();) {
+            AsyncThread thread = (AsyncThread) it.next();
+            thread.waitFor();
         }
-        obstructors = null;
+        threads = null;
 
         super.tearDown();
     }
@@ -327,8 +327,67 @@ public class IndexSplitDeadlockTest extends BaseJDBCTestCase {
         rs.close();
     }
 
-    // TODO: add a similar case as the one above, only that it should
-    // cause a split before the index scan wakes up
+    /**
+     * Test that BTreeForwardScan.fetchRows() can reposition after releasing
+     * latches because it had to wait for a lock, and the leaf page on which
+     * the scan is positioned has been split. This tests the third call
+     * to reposition() in fetchRows(), which is only called if the index is
+     * unique.
+     */
+    public void testBTreeForwardScan_fetchRows_resumeAfterWait_unique_split()
+            throws Exception {
+        getConnection().setAutoCommit(false);
+
+        // Populate a table with a unique index
+        Statement s = createStatement();
+        s.executeUpdate("create table t (x int, constraint c primary key(x))");
+        PreparedStatement ins = prepareStatement("insert into t values ?");
+        for (int i = 0; i < 300; i++) {
+            ins.setInt(1, i);
+            ins.executeUpdate();
+        }
+        commit();
+
+        // Lock a row on the first page in a different thread to stop the
+        // index scan. Then split the first leaf by inserting many values
+        // less than zero.
+        new AsyncThread(new AsyncTask() {
+            public void doWork(Connection conn) throws Exception {
+                conn.setAutoCommit(false);
+                Statement s = conn.createStatement();
+                s.executeUpdate("update t set x = x where x = 40");
+                s.close();
+                // Give the index scan time to start and position on
+                // the row we have locked. (Give it two seconds, since the
+                // main thread sleeps for one second first before it starts
+                // the index scan.)
+                Thread.sleep(2000);
+                // Split the first leaf
+                PreparedStatement ps = conn.prepareStatement(
+                        "insert into t values ?");
+                for (int i = -1; i > -300; i--) {
+                    ps.setInt(1, i);
+                    ps.executeUpdate();
+                }
+                ps.close();
+                conn.commit();
+            }
+        });
+
+        // Give the other thread time to obtain the lock
+        Thread.sleep(1000);
+
+        // Perform an index scan. Will be blocked for a while when fetching
+        // the row where x=100, but should be able to resume the scan.
+        ResultSet rs = s.executeQuery(
+                "select * from t --DERBY-PROPERTIES constraint=C");
+        for (int i = 0; i < 300; i++) {
+            assertTrue(rs.next());
+            assertEquals(i, rs.getInt(1));
+        }
+        assertFalse(rs.next());
+        rs.close();
+    }
 
     /**
      * Test that BTreeForwardScan.fetchRows() can reposition after releasing
@@ -369,8 +428,64 @@ public class IndexSplitDeadlockTest extends BaseJDBCTestCase {
         rs.close();
     }
 
-    // TODO: add a similar case as the one above, only that it should
-    // cause a split before the index scan wakes up
+    /**
+     * Test that BTreeForwardScan.fetchRows() can reposition after releasing
+     * latches because it had to wait for a lock, and the leaf page on which
+     * the scan is positioned has been split. This tests the fourth call
+     * to reposition() in fetchRows(), which is only called if the index is
+     * non-unique.
+     */
+    public void testBTreeForwardScan_fetchRows_resumeAfterWait_nonUnique_split()
+            throws Exception {
+        getConnection().setAutoCommit(false);
+
+        // Populate a table with a non-unique index
+        Statement s = createStatement();
+        s.executeUpdate("create table t (x int)");
+        s.executeUpdate("create index idx on t(x)");
+        PreparedStatement ins = prepareStatement("insert into t values ?");
+        for (int i = 0; i < 300; i++) {
+            ins.setInt(1, i);
+            ins.executeUpdate();
+        }
+        commit();
+
+        // Hold a lock in a different thread to stop the index scan, then
+        // split the first leaf (on which the scan is positioned) before the
+        // lock is released.
+        new AsyncThread(new AsyncTask() {
+            public void doWork(Connection conn) throws Exception {
+                conn.setAutoCommit(false);
+                Statement s = conn.createStatement();
+                s.executeUpdate("update t set x = x where x = 40");
+                // Give the index scan time to start and position on
+                // the row we have locked. (Give it two seconds, since the
+                // main thread sleeps for one second first before it starts
+                // the index scan.)
+                Thread.sleep(2000);
+                // Split the first leaf by inserting more zeros
+                for (int i = -1; i > -300; i--) {
+                    s.executeUpdate("insert into t values 0");
+                }
+                s.close();
+                conn.commit();
+            }
+        });
+
+        // Give the other thread time to obtain the lock
+        Thread.sleep(1000);
+
+        // Perform an index scan. Will be blocked for a while when fetching
+        // the row where x=100, but should be able to resume the scan.
+        ResultSet rs = s.executeQuery(
+                "select * from t --DERBY-PROPERTIES index=IDX");
+        for (int i = 0; i < 300; i++) {
+            assertTrue(rs.next());
+            assertEquals(i, rs.getInt(1));
+        }
+        assertFalse(rs.next());
+        rs.close();
+    }
 
     // --------------------------------------------------------------------
     // Helpers
@@ -394,52 +509,63 @@ public class IndexSplitDeadlockTest extends BaseJDBCTestCase {
      * @param blockMillis how many milliseconds to wait until the transaction
      * is rolled back
      */
-    private void obstruct(String sql, long blockMillis) {
-        if (obstructors == null) {
-            obstructors = new ArrayList();
-        }
-        obstructors.add(new Obstructor(sql, blockMillis));
+    private void obstruct(final String sql, final long blockMillis) {
+        AsyncTask task = new AsyncTask() {
+            public void doWork(Connection conn) throws Exception {
+                conn.setAutoCommit(false);
+                Statement s = conn.createStatement();
+                s.execute(sql);
+                s.close();
+                Thread.sleep(blockMillis);
+            }
+        };
+        new AsyncThread(task);
     }
 
     /**
-     * Helper class for the obstruct() method. Executes SQL in a separate
-     * thread and stores any exceptions thrown.
+     * Interface that should be implemented by classes that define a
+     * database task that is to be executed asynchronously in a separate
+     * transaction.
      */
-    private class Obstructor implements Runnable {
-        private final String sql;
-        private final long blockMillis;
-        private final Thread thread;
+    private static interface AsyncTask {
+        void doWork(Connection conn) throws Exception;
+    }
+
+    /**
+     * Class that executes an {@code AsyncTask} object.
+     */
+    private class AsyncThread implements Runnable {
+
+        private final Thread thread = new Thread(this);
+        private final AsyncTask task;
         private Exception error;
 
         /**
-         * Create and start an obstructor thread.
-         * @param sql the SQL text to execute
-         * @param blockMillis the time in milliseconds to keep the
-         * transaction active
+         * Create an {@code AsyncThread} object and starts a thread executing
+         * the task. Also put the {@code AsyncThread} object in the list of
+         * threads in the parent object to make sure the thread is waited for
+         * and its errors detected in the {@code tearDown()} method.
+         *
+         * @param task the task to perform
          */
-        Obstructor(String sql, long blockMillis) {
-            this.sql = sql;
-            this.blockMillis = blockMillis;
-            thread = new Thread(this);
+        public AsyncThread(AsyncTask task) {
+            this.task = task;
             thread.start();
+            threads.add(this);
         }
 
         /**
-         * Run the SQL in a separate transaction and block for the specified
-         * amount of time.
+         * Open a database connection and perform the task. Roll back the
+         * transaction when finished. Any exception thrown will be caught and
+         * rethrown when the {@code waitFor()} method is called.
          */
         public void run() {
             try {
-                Connection c = openDefaultConnection();
+                Connection conn = openDefaultConnection();
                 try {
-                    c.setAutoCommit(false);
-                    Statement s = c.createStatement();
-                    s.execute(sql);
-                    s.close();
-                    Thread.sleep(blockMillis);
+                    task.doWork(conn);
                 } finally {
-                    c.rollback();
-                    c.close();
+                    JDBC.cleanup(conn);
                 }
             } catch (Exception e) {
                 error = e;
@@ -447,21 +573,15 @@ public class IndexSplitDeadlockTest extends BaseJDBCTestCase {
         }
 
         /**
-         * Wait for the obstructor thread to complete. If an error occurred
-         * while the thread was running, the exception will be rethrown by
-         * this method.
-         *
-         * @throws Exception if an error occurred while the thread was running
+         * Wait for the thread to complete. If an error was thrown during
+         * execution, rethrow the execption here.
+         * @throws Exception if an error happened while performing the task
          */
         void waitFor() throws Exception {
             thread.join();
-            Exception e = error;
-            error = null;
-            if (e != null) {
-                throw e;
+            if (error != null) {
+                throw error;
             }
         }
-
     }
-
 }
