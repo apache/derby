@@ -488,6 +488,50 @@ public class IndexSplitDeadlockTest extends BaseJDBCTestCase {
     }
 
     // --------------------------------------------------------------------
+    // Test cases for calls to BTreeScan.reposition() in BTreeScan
+    // --------------------------------------------------------------------
+
+    // There's a call to reposition() from positionAtDoneScanFromClose(), but
+    // I'm not sure how to reach it. According to the code coverage reports
+    // there's no other tests that reach that call to reposition().
+    //
+    // Not testing the first call to reposition() in delete() since it will
+    // be exercised by all code that deletes or modifies index rows, so it's
+    // already exercised by other tests. The existing tests do not make the
+    // this call do a full repositioning from the root of the B-tree, but
+    // this is very difficult to test because a page split needs to happen in
+    // the very short window between the scan releases the latch and delete()
+    // reobtains the latch.
+    //
+    // The other call to reposition() in delete() is only used if
+    // init_useUpdateLocks is true. No other tests reach that call, according
+    // to the code coverage reports, and I'm not sure how/if it can be
+    // reached from the public API. Leaving it untested for now.
+    //
+    // There's a call to reposition() in BTreeScan.doesCurrentPositionQualify()
+    // too. The only caller (except test code bypassing the public API) is
+    // TableScanResultSet.getCurrentRow(), which is only called from trigger
+    // code (for before and after result sets) and CurrentOfResultSets. It
+    // doesn't look like these will ever use a TableScanResultSet wrapping a
+    // index scan, so there's no test for this method here. (The method is
+    // exercised from T_b2i by using the internal API directly.)
+    //
+    // Same comment as above goes for BTreeScan.isCurrentPositionDeleted(), as
+    // it is used the same places as doesCurrentPositionQualify().
+    //
+    // The call to reposition() from BTreeScan.fetch() is also hard to reach.
+    // It can be reached from getConstraintDescriptorViaIndex(), which is
+    // frequently exercised by other tests, so I'm not adding a test case here.
+    // In order to test repositioning after a split in this method, we should
+    // rather have a test case calls the internal API directly (e.g., in
+    // T_b2i).
+    //
+    // Similarly, BTreeScan.reopenScan() has a call to reposition() that's
+    // exercised frequently by other tests, but to test a split right before
+    // the repositioning, we'd probably need to use the internal API for that
+    // method too.
+
+    // --------------------------------------------------------------------
     // Helpers
     // --------------------------------------------------------------------
 
