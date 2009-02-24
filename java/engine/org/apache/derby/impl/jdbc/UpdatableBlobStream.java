@@ -190,7 +190,13 @@ class UpdatableBlobStream extends InputStream {
      */
     public int read(byte[] b, int off, int len) throws IOException {
         updateIfRequired();
-        int actualLength = (int) Math.min(len, maxPos - pos);
+        long remaining = maxPos - pos;
+        // Return EOF if the maximum allowed position has been reached,
+        // and we're trying to read at least one byte.
+        if (remaining == 0 && len > 0) {
+            return -1;
+        }
+        int actualLength = (int) Math.min(len, remaining);
         int retValue = stream.read(b, off, actualLength);
         if (retValue > 0)
             pos += retValue;
@@ -217,12 +223,7 @@ class UpdatableBlobStream extends InputStream {
      * @see java.io.InputStream#read(byte[])
      */
     public int read(byte[] b) throws IOException {
-        updateIfRequired();
-        int actualLength = (int) Math.min(b.length, maxPos - pos);
-        int retValue = stream.read(b, 0, actualLength);
-        if (retValue > 0)
-            pos += retValue;
-        return retValue;
+        return read(b, 0, b.length);
     }
 
     /**
