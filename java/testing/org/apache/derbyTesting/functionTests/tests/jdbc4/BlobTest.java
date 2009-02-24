@@ -519,6 +519,22 @@ public class BlobTest
         }
     }
 
+    /**
+     * Tests that draining a "sub-stream" from the Blob works.
+     * This is a repro for DERBY-4061, where we ended up with an infinite loop.
+     */
+    public void testGetBinaryStreamLongDrain()
+            throws IOException, SQLException {
+        initializeLongBlob(); // Ignoring id for now, use instance variable.
+        InputStream in = blob.getBinaryStream(2000, 5000);
+        byte[] buf = new byte[256];
+        while (in.read(buf, 0, buf.length) != -1) {
+            // This should end when we have read all the bytes in the stream.
+            // If the code hangs here, see DERBY-4061.
+        }
+        in.close();
+        blob.free();
+    }
     
     /**
      * Tests that the InputStream got from
