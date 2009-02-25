@@ -490,20 +490,12 @@ public class NetConnectionRequest extends Request implements ConnectionRequestIn
             }
             
         }
-        int rdbnamLength = rdbnam.length();
-        if (rdbnamLength <= NetConfiguration.PKG_IDENTIFIER_FIXED_LEN) {
-            writeScalarPaddedString(CodePoint.RDBNAM,
-                    rdbnam,
-                    NetConfiguration.PKG_IDENTIFIER_FIXED_LEN);  // minimum length of RDBNAM
-        } else {
-            if (rdbnamLength <= NetConfiguration.PKG_IDENTIFIER_MAX_LEN) {
-                writeScalarString(CodePoint.RDBNAM, rdbnam);
-            } else {
-                throw new SqlException(netAgent_.logWriter_, 
-                    new ClientMessageId(SQLState.NET_DBNAME_TOO_LONG), rdbnam);
-            }
-            //"at SQLAM level " + netAgent_.targetSqlam_);
-        }
+        
+        writeScalarString(CodePoint.RDBNAM, rdbnam,
+                NetConfiguration.PKG_IDENTIFIER_FIXED_LEN, //minimum RDBNAM length in bytes
+                NetConfiguration.PKG_IDENTIFIER_MAX_LEN,   //maximum RDBNAM length in bytes
+                SQLState.NET_DBNAME_TOO_LONG);
+                
     }
 
     private void buildSECTKN(byte[] sectkn) throws SqlException {
@@ -515,18 +507,14 @@ public class NetConnectionRequest extends Request implements ConnectionRequestIn
     }
 
     private void buildUSRID(String usrid) throws SqlException {
-        int usridLength = usrid.length();
-        if ((usridLength == 0) || (usridLength > NetConfiguration.USRID_MAXSIZE)) {
-            throw new SqlException(netAgent_.logWriter_, 
-                new ClientMessageId(SQLState.NET_USERID_TOO_LONG));
-        }
-
-        writeScalarString(CodePoint.USRID, usrid);
+        
+        writeScalarString(CodePoint.USRID, usrid,0,NetConfiguration.USRID_MAXSIZE,
+                SQLState.NET_USERID_TOO_LONG);
     }
 
     private void buildPASSWORD(String password) throws SqlException {
         int passwordLength = password.length();
-        if ((passwordLength == 0) || (passwordLength > NetConfiguration.PASSWORD_MAXSIZE)) {
+        if ((passwordLength == 0) ) {
             throw new SqlException(netAgent_.logWriter_, 
                 new ClientMessageId(SQLState.NET_PASSWORD_TOO_LONG));
         }
@@ -535,9 +523,12 @@ public class NetConnectionRequest extends Request implements ConnectionRequestIn
             // mask it out in trace (see Request.sendBytes()).
             passwordIncluded_ = true;
             passwordStart_ = offset_ + 4;
-            passwordLength_ = passwordLength;
         }
-        writeScalarString(CodePoint.PASSWORD, password);
+        writeScalarString(CodePoint.PASSWORD, password, 0, NetConfiguration.PASSWORD_MAXSIZE,
+                SQLState.NET_PASSWORD_TOO_LONG);
+        if (netAgent_.logWriter_ != null) {
+            passwordLength_ = offset_ - passwordStart_;
+        }
     }
 
     private void buildRDBACCCL() throws SqlException {

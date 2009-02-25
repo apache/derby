@@ -1246,50 +1246,72 @@ public class Request {
         bytes_[offset_++] = (byte) (codePoint & 0xff);
     }
 
-    // insert a 4 byte length/codepoint pair plus ddm character data into
-    // the buffer.  This method assumes that the String argument can be
-    // converted by the ccsid manager.  This should be fine because usually
-    // there are restrictions on the characters which can be used for ddm
-    // character data. This method also assumes that the string.length() will
-    // be the number of bytes following the conversion.
-    // The two byte length field will contain the length of the character data
-    // and the length of the 4 byte llcp.  This method does not handle
-    // scenarios which require extended length bytes.
+    /**
+     * Write string with no minimum or maximum limit.
+     * @param codePoint codepoint to write  
+     * @param string    value to write
+     * @throws SqlException
+     */
     final void writeScalarString(int codePoint, String string) throws SqlException {
-        int stringLength = string.length();
-        ensureLength(offset_ + stringLength + 4);
-        bytes_[offset_++] = (byte) (((stringLength + 4) >>> 8) & 0xff);
-        bytes_[offset_++] = (byte) ((stringLength + 4) & 0xff);
+        writeScalarString(codePoint, string, 0,Integer.MAX_VALUE,null);
+        
+    } 
+   
+    /**
+     *  insert a 4 byte length/codepoint pair plus ddm character data into
+     * the buffer.  This method assumes that the String argument can be
+     * converted by the ccsid manager.  This should be fine because usually
+     * there are restrictions on the characters which can be used for ddm
+     * character data. 
+     * The two byte length field will contain the length of the character data
+     * and the length of the 4 byte llcp.  This method does not handle
+     * scenarios which require extended length bytes.
+     * 
+     * @param codePoint  codepoint to write 
+     * @param string     value
+     * @param byteMinLength minimum length. String will be padded with spaces 
+     * if value is too short. Assumes space character is one byte.
+     * @param byteLengthLimit  Limit to string length. SQLException will be 
+     * thrown if we exceed this limit.
+     * @param sqlState  SQLState to throw with string as param if byteLengthLimit
+     * is exceeded.
+     * @throws SqlException if string exceeds byteLengthLimit
+     */
+    final void writeScalarString(int codePoint, String string, int byteMinLength,
+            int byteLengthLimit, String sqlState) throws SqlException {        
+        int maxByteLength = ccsidManager_.maxBytesPerChar() * string.length();
+        ensureLength(offset_ + maxByteLength + 4);
+        // Skip length for now until we know actual length
+        int lengthOffset = offset_;
+        offset_ += 2;
+        
         bytes_[offset_++] = (byte) ((codePoint >>> 8) & 0xff);
         bytes_[offset_++] = (byte) (codePoint & 0xff);
+        
         offset_ = ccsidManager_.convertFromUCS2(string, bytes_, offset_, netAgent_);
+       
+        int stringByteLength = offset_ - lengthOffset - 4;
+        // reset the buffer and throw an SQLException if the length is too long
+        if (stringByteLength > byteLengthLimit) {
+            offset_ = lengthOffset;
+            throw new SqlException(netAgent_.logWriter_, 
+                    new ClientMessageId(sqlState), string);
+        }
+        // pad if we don't reach the byteMinLength limit
+        if (stringByteLength < byteMinLength) {
+            for (int i = stringByteLength ; i < byteMinLength; i++) {
+                bytes_[offset_++] = ccsidManager_.space_;
+            }
+            stringByteLength = byteMinLength;
+        }
+        // now write the length.  We have the string byte length plus
+        // 4 bytes, 2 for length and 2 for codepoint.
+        int totalLength = stringByteLength + 4;
+        bytes_[lengthOffset] = (byte) ((totalLength >>> 8) & 0xff);
+        bytes_[lengthOffset + 1] = (byte) ((totalLength) & 0xff);
     }
 
-    // insert a 4 byte length/codepoint pair plus ddm character data into the
-    // buffer.  The ddm character data is padded if needed with the ccsid manager's
-    // space character if the length of the character data is less than paddedLength.
-    // Note: this method is not to be used for String truncation and the string length
-    // must be <= paddedLength.
-    // This method assumes that the String argument can be
-    // converted by the ccsid manager.  This should be fine because usually
-    // there are restrictions on the characters which can be used for ddm
-    // character data. This method also assumes that the string.length() will
-    // be the number of bytes following the conversion.  The two byte length field
-    // of the llcp will contain the length of the character data including the pad
-    // and the length of the llcp or 4.  This method will not handle extended length
-    // scenarios.
-    final void writeScalarPaddedString(int codePoint, String string, int paddedLength) throws SqlException {
-        int stringLength = string.length();
-        ensureLength(offset_ + paddedLength + 4);
-        bytes_[offset_++] = (byte) (((paddedLength + 4) >>> 8) & 0xff);
-        bytes_[offset_++] = (byte) ((paddedLength + 4) & 0xff);
-        bytes_[offset_++] = (byte) ((codePoint >>> 8) & 0xff);
-        bytes_[offset_++] = (byte) (codePoint & 0xff);
-        offset_ = ccsidManager_.convertFromUCS2(string, bytes_, offset_, netAgent_);
-        for (int i = 0; i < paddedLength - stringLength; i++) {
-            bytes_[offset_++] = ccsidManager_.space_;
-        }
-    }
+    
 
     // this method inserts ddm character data into the buffer and pad's the
     // data with the ccsid manager's space character if the character data length

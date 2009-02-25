@@ -182,5 +182,13 @@ public class EbcdicCcsidManager extends CcsidManager {
         return (char) conversionArrayToUCS2[(sourceByte < 0) ? (sourceByte + 256) : sourceByte];
     }
 
+    
+    /* (non-Javadoc)
+     * @see org.apache.derby.client.net.CcsidManager#maxBytesPerChar()
+     */
+    int maxBytesPerChar() {
+        return 1;
+    }
+
 }
 

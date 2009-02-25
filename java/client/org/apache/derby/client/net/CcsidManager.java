@@ -89,5 +89,13 @@ public abstract class CcsidManager {
     // @return The converted Java char.
     abstract char convertToUCS2Char(byte sourceByte);
 
+
+    
+    /**
+     * 
+     * @return Maximum number of bytes per character
+     */
+    abstract int maxBytesPerChar();
+
 }
 
