@@ -1,7 +1,7 @@
 /*
  
    Derby - Class 
-       org.apache.derbyTesting.functionTests.lang.UpdatableResultSetTest
+       org.apache.derbyTesting.functionTests.tests.lang.UpdatableResultSetTest
  
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
