@@ -317,7 +317,7 @@ public abstract class Lob implements UnitOfWorkListener {
      *         a) pos <= 0
      *         b) pos > (length of LOB)
      *         c) length < 0
-     *         d) pos + length > (length of LOB)
+     *         d) (pos -1) + length > (length of LOB)
      */
     protected void checkPosAndLength(long pos, long length)
     throws SQLException {
@@ -331,7 +331,7 @@ public abstract class Lob implements UnitOfWorkListener {
                 new ClientMessageId(SQLState.BLOB_NONPOSITIVE_LENGTH),
                 new Integer((int)length)).getSQLException();
         }
-        if (length > (this.length() - pos)) {
+        if (length > (this.length() - (pos -1))) {
             throw new SqlException(agent_.logWriter_,
                 new ClientMessageId(SQLState.POS_AND_LENGTH_GREATER_THAN_LOB),
                 new Long(pos), new Long(length)).getSQLException();
