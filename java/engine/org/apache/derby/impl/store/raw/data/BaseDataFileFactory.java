@@ -326,12 +326,16 @@ public final class BaseDataFileFactory
 
 		logMsg(LINE);
 		long bootTime = System.currentTimeMillis();
+        String readOnlyMsg = (isReadOnly()) 
+            ? MessageService.getTextMessage(MessageId.STORE_BOOT_READONLY_MSG)
+            : "";
 
 		logMsg(CheapDateFormatter.formatDate(bootTime) +
 			   MessageService.getTextMessage(MessageId.STORE_BOOT_MSG,
-			   									jbmsVersion,
-												identifier,
-												dataDirectory));
+                                             jbmsVersion,
+                                             identifier,
+                                             dataDirectory,
+                                             readOnlyMsg));
 
 		uf = null;
 

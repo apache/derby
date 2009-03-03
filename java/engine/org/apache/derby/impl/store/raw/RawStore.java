@@ -274,8 +274,10 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 		String logDevice = properties.getProperty(Attribute.LOG_DEVICE);
 		if (logDevice !=null)
 		{
-			if (create || !logDevice.equals(logFactory.getCanonicalLogPath()) ||
-				restoreFromBackup!=null)
+            if (!isReadOnly() // We do not care about log location if read only
+                && (create 
+                    || !logDevice.equals(logFactory.getCanonicalLogPath()) 
+                    || restoreFromBackup!=null))
 			{
 				// get the real location from the log factory
 				properties.put(Attribute.LOG_DEVICE, logFactory.getCanonicalLogPath());

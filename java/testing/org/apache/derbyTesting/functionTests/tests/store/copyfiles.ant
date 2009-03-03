@@ -23,6 +23,7 @@ TableLockBasic_derby.properties
 TransactionTable.sql
 TransactionTable_app.properties
 TransactionTable_derby.properties
+TurnsReadOnly_app.properties
 access.sql
 access_app.properties
 access_derby.properties
