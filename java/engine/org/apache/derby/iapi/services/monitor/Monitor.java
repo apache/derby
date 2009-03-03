@@ -680,6 +680,13 @@ public class Monitor {
 		getStream().println(MessageService.getTextMessage(messageID, a1, a2, a3, a4));
 	}
 
+	 /**
+	  * Logs the stack trace of the specified throwable object.
+	  */
+	public static void logThrowable(Throwable t) {
+		t.printStackTrace(getStream().getPrintWriter());
+	}
+    
 	/**
 	 *  Translate a localeDescription of the form ll[_CC[_variant]] to
 	 *  a Locale object.
