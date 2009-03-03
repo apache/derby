@@ -865,7 +865,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 							logFile = getLogFileName(++logFileNumber);
 						}
 					}
-
+					IOException accessException = null;
 					try
 					{
                         theLog =   privRandomAccessFile(logFile, "rw");
@@ -873,6 +873,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 					catch (IOException ioe)
 					{
 						theLog = null;
+						accessException = ioe;
 					}
 
                     if (theLog == null || !privCanWrite(logFile))
@@ -881,7 +882,9 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 							theLog.close();
 
 						theLog = null;
-
+						Monitor.logTextMessage(MessageId.LOG_CHANGED_DB_TO_READ_ONLY);
+						if (accessException != null)
+							Monitor.logThrowable(accessException);
 						ReadOnlyDB = true;
 					}
 					else
@@ -951,6 +954,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 					{
 						// if datafactory doesn't think it is readonly, we can
 						// do some futher test of our own
+						IOException accessException = null;
 						try
 						{
 							if(isWriteSynced)
@@ -961,14 +965,18 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 						catch (IOException ioe)
 						{
 							theLog = null;
+                            accessException = ioe;
 						}
                         if (theLog == null || !privCanWrite(logFile))
 						{
 							if (theLog != null)
 								theLog.close();
 							theLog = null;
-
+							Monitor.logTextMessage(MessageId.LOG_CHANGED_DB_TO_READ_ONLY);
+							if (accessException != null)
+								Monitor.logThrowable(accessException);	
 							ReadOnlyDB = true;
+											
 						}
 					}
 
@@ -3132,6 +3140,8 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 				}
 				else
 				{
+					Monitor.logTextMessage(MessageId.LOG_CHANGED_DB_TO_READ_ONLY);
+					Monitor.logThrowable(new Exception("Error writing control file"));
 					// read only database
 					ReadOnlyDB = true;
 					logOut = null;

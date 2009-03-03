@@ -63,6 +63,9 @@ public interface MessageId {
     String LOG_DURABILITY_TESTMODE_NO_SYNC_ERR = "L021"; // hint that error could be because 
                                                          // derby.system.durability was set to test
 
+    String LOG_CHANGED_DB_TO_READ_ONLY        = "L022"; // a permissions error on log caused us
+    													// to change db to read only.
+    
     /*
      * Raw Store data
      */

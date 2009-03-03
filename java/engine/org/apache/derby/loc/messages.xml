@@ -7439,7 +7439,11 @@ Shutting down instance {0}</text>
                 <arg>testModeProperty</arg>
                 <arg>testMode</arg>
             </msg>
-
+            <msg>
+               <name>L022</name>
+               <text>WARNING: Due to a permissions issue accessing the log files, the status of the database has been changed to read only. 
+               </text>
+           </msg>
         </family>
 
 
