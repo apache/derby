@@ -63,11 +63,20 @@ import org.apache.derbyTesting.perf.clients.SingleRecordSelectClient;
  * tested with the tests that modify the Clob content.
  * <p>
  * System properties controlling test behavior:
- * <lu><li>derby.tests.disableSmallClobs</li>
- *     <li>derby.tests.disableLargeClobs</li>
- *     <li>derby.tests.disableConcurrencyTest</li>
- *     <li>derby.tests.largeClobSize (in MB, 15 is the default)</li>
- * </ul>
+ * <dl>
+ *      <dt>derby.tests.disableSmallClobs</dt>
+ *      <dd>Whether or not to disable the testing of small Clobs.</dd>
+ *      <dt>derby.tests.disableLargeClobs</dt>
+ *      <dd>Whether or not to disable the testing of large Clobs.</dd>
+ *      <dt>derby.tests.disableConcurrencyTest</dt>
+ *      <dd>Whether or not to disable the concurrency test.</dd>
+ *      <dt>derby.tests.largeClobSize</dt>
+ *      <dd>Size of the large Clobs in MB, 15 MB is the default.</dd>
+ *      <dt>derby.tests.runLargeClobTests</dt>
+ *      <dd>A list of one or more tests to run. Only tests using large Clobs
+ *          should be specified, but this is not enforced. Example:
+ *          <tt>testFetchLargeClobPieceByPiece,testLargeClobGetLength</tt></dd>
+ * </dl>
  *
  * <p>
  * <b>NOTE</b>: Currently there are no tests for the client driver (network)
@@ -82,6 +91,12 @@ public class ClobAccessTest
             Boolean.getBoolean("derby.tests.disableLargeClobs");
     private static final boolean disableConcurrencyTest =
             Boolean.getBoolean("derby.tests.disableConcurrencyTest");
+    /**
+     * A list of one or more tests to be run. Only tests using a large Clob
+     * should be specified.
+     */
+    private static final String runLargeClobTests =
+            System.getProperty("derby.tests.runLargeClobTests", null);
     private static final int largeClobSizeMB =
             Integer.getInteger("derby.tests.largeClobSize", 15).intValue();
 
@@ -127,28 +142,31 @@ public class ClobAccessTest
         if (!disableLargeClobs) {
             int iters = 5;
             int reps = 1;
-            println("Adding large Clob tests.");
+            String[] tests = new String[] {
+                    "testFetchLargeClobs",
+                    "testFetchLargeClobsModified",
+                    "testFetchLargeClobWithStream",
+                    "testFetchLargeClobOneByOneCharBaseline",
+                    "testFetchLargeClobOneByOneCharModified",
+                    "testFetchLargeClobOneByOneChar",
+                    "testFetchLargeClobPieceByPiece",
+                    "testFetchLargeClobPieceByPieceModified",
+                    "testLargeClobGetLength",
+                    "testLargeClobGetLengthModified",
+                    "testFetchLargeClobPieceByPieceBackwards",
+                };
+            // See if the user has overridden which tests to run.
+            if (runLargeClobTests != null) {
+                String[] specifiedTests = runLargeClobTests.split(",");
+                if (specifiedTests.length > 0) {
+                    tests = specifiedTests;
+                }
+            }
+            println("Adding " + tests.length + " large Clob tests.");
             TestSuite largeSuite = new TestSuite("Large Clob suite");
-            largeSuite.addTest(new ClobAccessTest(
-                    "testFetchLargeClobs", iters, reps));
-            largeSuite.addTest(new ClobAccessTest(
-                    "testFetchLargeClobsModified", iters, reps));
-            largeSuite.addTest(new ClobAccessTest(
-                    "testFetchLargeClobWithStream", iters, reps));
-            largeSuite.addTest(new ClobAccessTest(
-                    "testFetchLargeClobOneByOneCharBaseline", iters, reps));
-            largeSuite.addTest(new ClobAccessTest(
-                    "testFetchLargeClobOneByOneCharModified", iters, reps));
-            largeSuite.addTest(new ClobAccessTest(
-                    "testFetchLargeClobOneByOneChar", iters, reps));
-            largeSuite.addTest(new ClobAccessTest(
-                    "testFetchLargeClobPieceByPiece", iters, reps));
-            largeSuite.addTest(new ClobAccessTest(
-                    "testFetchLargeClobPieceByPieceModified", iters, reps));
-            largeSuite.addTest(new ClobAccessTest(
-                    "testLargeClobGetLength", iters, reps));
-            largeSuite.addTest(new ClobAccessTest(
-                    "testFetchLargeClobPieceByPieceBackwards", iters, reps));
+            for (int i=0; i < tests.length; i++) {
+                largeSuite.addTest(new ClobAccessTest(tests[i] , iters, reps));
+            }
             mainSuite.addTest(largeSuite);
         }
         if (!disableConcurrencyTest) {
