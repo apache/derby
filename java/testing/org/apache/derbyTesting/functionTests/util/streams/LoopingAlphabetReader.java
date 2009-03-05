@@ -112,7 +112,7 @@ public class LoopingAlphabetReader
         this.trailingBlanks = trailingBlanks;
         this.remainingNonBlanks = length - trailingBlanks;
         this.remainingBlanks = trailingBlanks;
-        this.alphabet = alphabet;
+        this.alphabet = alphabet.getClone();
         fillBuffer(alphabet.charCount());
     }
 

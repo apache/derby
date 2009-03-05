@@ -44,6 +44,7 @@ import java.util.*;
  * d) Whether the method is exempted in the NetworkClient
  *
  */
+import org.apache.derbyTesting.functionTests.util.streams.CharAlphabet;
 import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetReader;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 class ExemptClobMD {
@@ -413,6 +414,111 @@ public class ClobTest
 
         rs.close();
         st.close();
+    }
+
+    /**
+     * Obtains streams from the Clob reading portions of the content, always
+     * including the last character in the Clob.
+     * <p>
+     * This case fills the Clob with latin lowercase characters.
+     */
+    public void testGetCharacterStreamLongLastCharLatin()
+            throws IOException, SQLException {
+        CharAlphabet alphabet = CharAlphabet.modernLatinLowercase();
+        // Insert a Clob
+        int length = 5000;
+        PreparedStatement ps = prepareStatement(
+            "insert into BLOBCLOB(ID, CLOBDATA) values(?,?)");
+        int id = BlobClobTestSetup.getID();
+        ps.setInt(1, id);
+        ps.setCharacterStream(2,
+                new LoopingAlphabetReader(length, alphabet), length);
+        ps.execute();
+        ps.close();
+        // Perform the actual test.
+        getCharacterStreamLongLastChar(id, length, alphabet);
+    }
+
+    /**
+     * Obtains streams from the Clob reading portions of the content, always
+     * including the last character in the Clob.
+     * <p>
+     * This case fills the Clob with Chinese/Japanese/Korean characters.
+     */
+    public void testGetCharacterStreamLongLastCharCJK()
+            throws IOException, SQLException {
+        CharAlphabet alphabet = CharAlphabet.cjkSubset();
+        // Insert a Clob
+        int length = 9001;
+        PreparedStatement ps = prepareStatement(
+            "insert into BLOBCLOB(ID, CLOBDATA) values(?,?)");
+        int id = BlobClobTestSetup.getID();
+        ps.setInt(1, id);
+        ps.setCharacterStream(2,
+                new LoopingAlphabetReader(length, alphabet), length);
+        ps.execute();
+        ps.close();
+        // Perform the actual test.
+        getCharacterStreamLongLastChar(id, length, alphabet);
+    }
+
+    /**
+     * Obtains streams from the Clob and makes sure we can always read the
+     * last char in the Clob.
+     * <p>
+     * See DERBY-4060.
+     *
+     * @param id id of the Clob to use
+     * @param length the length of the Clob
+     * @param alphabet the alphabet used to create the content
+     * @throws IOException if reading from a stream fails
+     * @throws SQLException if something goes wrong
+     */
+    private void getCharacterStreamLongLastChar(int id, int length,
+                                                CharAlphabet alphabet)
+            throws IOException, SQLException {
+        // Get last char from the source stream.
+        Reader cmpReader = new LoopingAlphabetReader(length, alphabet);
+        cmpReader.skip(length -1);
+        char srcLastChar = (char)cmpReader.read();
+        assertTrue(cmpReader.read() == -1);
+
+        PreparedStatement ps = prepareStatement(
+                "select CLOBDATA from BLOBCLOB where ID=?");
+        ps.setInt(1, id);
+        // Read everything first.
+        int charsToRead = length;
+        ResultSet rs = ps.executeQuery();
+        rs.next();
+        Reader reader = rs.getClob(1).getCharacterStream(
+                                        length - charsToRead +1, charsToRead);
+        // Drain the stream, and make sure we are able to read the last char.
+        char lastCharRead = getLastCharInStream(reader, charsToRead);
+        assertEquals(srcLastChar, lastCharRead);
+        reader.close();
+        rs.close();
+
+        // Read a portion of the stream.
+        charsToRead = length / 4;
+        rs = ps.executeQuery();
+        rs.next();
+        reader = rs.getClob(1).getCharacterStream(
+                                        length - charsToRead +1, charsToRead);
+        lastCharRead = getLastCharInStream(reader, charsToRead);
+        assertEquals(srcLastChar, lastCharRead);
+        reader.close();
+        rs.close();
+
+        // Read a very small portion of the stream.
+        charsToRead = 1;
+        rs = ps.executeQuery();
+        rs.next();
+        reader = rs.getClob(1).getCharacterStream(
+                                        length - charsToRead +1, charsToRead);
+        lastCharRead = getLastCharInStream(reader, charsToRead);
+        assertEquals(srcLastChar, lastCharRead);
+        reader.close();
+        rs.close();
     }
 
     /**
@@ -836,6 +942,42 @@ public class ClobTest
     }
 
     
+    /**
+     * Drains the stream and returns the last char read from the stream.
+     *
+     * @param reader stream to drain
+     * @param expectedCount expected number of chars (remaining) in the stream
+     * @return The last char read.
+     * @throws AssertionError if there are too many/few chars in the stream
+     * @throws IOException if reading from the stream fails
+     */
+    public static char getLastCharInStream(Reader reader, int expectedCount)
+            throws IOException {
+        int read = 0;
+        final char[] buf = new char[256];
+        assertTrue(buf.length > 0); // Do not allow an infinite loop here.
+        while (true) {
+            int readThisTime = reader.read(buf, 0, buf.length);
+            // -1 is expected, but catch all cases with a negative return value.
+            if (readThisTime < 0) {
+                assertEquals("Invalid return value from stream",
+                        -1, readThisTime);
+                fail("Reached EOF prematurely, expected " + expectedCount +
+                        ", got " + read);
+            } else if (readThisTime == 0) {
+                // Another special case that should not happen.
+                fail("Stream breaks contract, read zero chars: " + reader);
+            }
+            read += readThisTime;
+            if (read == expectedCount) {
+                return buf[readThisTime -1];
+            } else if (read > expectedCount) {
+                fail("Too many chars in stream, expected " + expectedCount +
+                        "have " + read + "(EOF not reached/confirmed)");
+            }
+        }
+    }
+
     /**
      * Create test suite for this test.
      */
