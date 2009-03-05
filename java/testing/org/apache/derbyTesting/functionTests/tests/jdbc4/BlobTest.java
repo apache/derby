@@ -431,6 +431,69 @@ public class BlobTest
     }
     
     /**
+     * Obtains a binary stream and tries to drain it to read the last byte in
+     * the Blob.
+     * <p>
+     * See DERBY-4060.
+     *
+     * @throws IOException if reading from a stream fails
+     * @throws SQLException if something goes wrong
+     */
+    public void testGetBinaryStreamLongLastByte()
+            throws IOException, SQLException {
+        int length = 5000;
+        // Insert a Blob
+        PreparedStatement ps = prepareStatement(
+            "insert into BLOBCLOB(ID, BLOBDATA) values(?,?)");
+        int id = BlobClobTestSetup.getID();
+        ps.setInt(1, id);
+        ps.setBinaryStream(2, new LoopingAlphabetStream(length), length);
+        ps.execute();
+        ps.close();
+
+        // Get last byte from the source stream.
+        InputStream cmpIs = new LoopingAlphabetStream(length);
+        cmpIs.skip(length -1);
+        int srcLastByte = cmpIs.read();
+        assertTrue(cmpIs.read() == -1);
+
+        // Read everything first.
+        int bytesToRead = 5000;
+        ps = prepareStatement("select BLOBDATA from BLOBCLOB where ID=?");
+        ps.setInt(1, id);
+        ResultSet rs = ps.executeQuery();
+        rs.next();
+        InputStream is = rs.getBlob(1).getBinaryStream(
+                                        length - bytesToRead +1, bytesToRead);
+
+        // Drain the stream, and make sure we are able to read the last byte.
+        int lastByteRead = getLastByteInStream(is, bytesToRead);
+        assertEquals(srcLastByte, lastByteRead);
+        is.close();
+        rs.close();
+
+        // Read a portion of the stream.
+        bytesToRead = 2000;
+        rs = ps.executeQuery();
+        rs.next();
+        is = rs.getBlob(1).getBinaryStream(
+                                        length - bytesToRead +1, bytesToRead);
+        assertEquals(srcLastByte, lastByteRead);
+        is.close();
+        rs.close();
+
+        // Read a very small portion of the stream.
+        bytesToRead = 1;
+        rs = ps.executeQuery();
+        rs.next();
+        is = rs.getBlob(1).getBinaryStream(
+                                        length - bytesToRead +1, bytesToRead);
+        assertEquals(srcLastByte, lastByteRead);
+        is.close();
+        rs.close();
+    }
+
+    /**
      * Tests the exceptions thrown by the getBinaryStream
      * (long pos, long length) for the following conditions
      * a) pos <= 0
@@ -757,6 +820,42 @@ public class BlobTest
     }
 
     
+    /**
+     * Drains the stream and returns the last byte read from the stream.
+     *
+     * @param is stream to drain
+     * @param expectedCount expected number of bytes (remaining) in the stream
+     * @return The last byte read.
+     * @throws AssertionError if there are too many/few bytes in the stream
+     * @throws IOException if reading from the stream fails
+     */
+    public static int getLastByteInStream(InputStream is, int expectedCount)
+            throws IOException {
+        int read = 0;
+        byte[] buf = new byte[256];
+        assertTrue(buf.length > 0); // Do not allow an infinite loop here.
+        while (true) {
+            int readThisTime = is.read(buf, 0, buf.length);
+            // -1 is expected, but catch all cases with a negative return value.
+            if (readThisTime < 0) {
+                assertTrue("Invalid return value from stream",
+                        readThisTime == -1);
+                fail("Reached EOF prematurely, expected " + expectedCount +
+                        ", got " + read);
+            } else if (readThisTime == 0) {
+                // Another special case that should not happen.
+                fail("Stream breaks contract, read zero bytes " + is);
+            }
+            read += readThisTime;
+            if (read == expectedCount) {
+                return buf[readThisTime -1];
+            } else if (read > expectedCount) {
+                fail("Too many bytes in stream, expected " + expectedCount +
+                        "have " + read + "(EOF not reached/confirmed)");
+            }
+        }
+    }
+
     /**
      * Create test suite for this test.
      */

@@ -957,7 +957,7 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
                     SQLState.BLOB_NONPOSITIVE_LENGTH,
                     new Long(length));
         }
-        if (length > (this.length() - pos)) {
+        if (length > (this.length() - (pos -1))) {
             throw Util.generateCsSQLException(
                     SQLState.POS_AND_LENGTH_GREATER_THAN_LOB,
                     new Long(pos), new Long(length));

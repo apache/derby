@@ -173,4 +173,21 @@ public class CharAlphabet {
     public void reset() {
         off = 0;
     }
+
+    /**
+     * Returns a clone of the alphabet.
+     *
+     * @return A clone.
+     */
+    public CharAlphabet getClone() {
+        return new CharAlphabet(name, chars);
+    }
+
+    /**
+     * Returns a friendlier textual representation of the alphabet.
+     */
+    public String toString() {
+        return (name + "@" + hashCode() + "(charCount=" + charCount + ")");
+    }
+
 } // Enc class CharAlphabet
