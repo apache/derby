@@ -74,6 +74,15 @@ commit;
 delete from a where a = 2 or a = 4 or a = 6;
 commit;
 
+-- The above delete and commit can allow post commit processing to run before
+-- the subsequent select is run, most likely if this run is on a table where
+-- there is one row per page.  To get reproducible results from the subsequent
+-- lock calls, wait for post commit to finish before running the select.  
+-- Without this wait "extra" locks sometimes might show up - these are locks
+-- on the committed deleted rows which have not been cleaned yet depending
+-- on timing.
+CALL WAIT_FOR_POST_COMMIT();
+
 select a from a;
 select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 commit;
