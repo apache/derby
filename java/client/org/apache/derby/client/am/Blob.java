@@ -648,8 +648,8 @@ public class Blob extends Lob implements java.sql.Blob {
      * @return <code>InputStream</code> through which the partial
      * <code>Blob</code> value can be read.
      * @throws SQLException if pos is less than 1 or if pos is greater than
-     * the number of bytes in the <code>Blob</code> or if pos + length is
-     * greater than the number of bytes in the <code>Blob</code>
+     * the number of bytes in the {@code Blob} or if {@code pos + length} is
+     * greater than {@code Blob.length() +1}
      */
     public InputStream getBinaryStream(long pos, long length)
         throws SQLException {

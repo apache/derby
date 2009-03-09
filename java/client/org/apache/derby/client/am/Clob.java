@@ -897,9 +897,8 @@ public class Clob extends Lob implements java.sql.Clob {
      * value can be read.
      * @throws SQLException if pos is less than 1 or if pos is greater than the
      * number of
-     * characters in the <code>Clob</code> or if pos + length is greater than
-     * the number of
-     * characters in the <code>Clob</code>
+     * characters in the {@code Clob} or if {@code pos + length} is greater than
+     * {@code Clob.length() +1}
      *
      * @throws SQLException.
      */
