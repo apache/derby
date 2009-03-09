@@ -4483,7 +4483,7 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
 
             <msg>
                 <name>XJ087.S</name>
-                <text>Sum of position('{0}') and length('{1}') is greater than the size of the LOB.</text>
+                <text>Sum of position('{0}') and length('{1}') is greater than the size of the LOB plus one.</text>
                 <arg>pos</arg>
                 <arg>length</arg>
             </msg>
