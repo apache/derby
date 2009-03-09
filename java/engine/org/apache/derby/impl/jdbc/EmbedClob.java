@@ -689,11 +689,8 @@ restartScan:
      * value can be read.
      * @throws SQLException if pos is less than 1 or if pos is greater than the
      * number of
-     * characters in the <code>Clob</code> or if pos + length is greater than
-     * the number of
-     * characters in the <code>Clob</code>
-     *
-     * @throws SQLException.
+     * characters in the {@code Clob} or if {@code pos + length} is greater than
+     * {@code Clob.length() +1}
      */
     public java.io.Reader getCharacterStream(long pos, long length)
         throws SQLException {
