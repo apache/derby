@@ -80,6 +80,8 @@ public interface PersistentService {
 	public static final String HTTP = "http";
 	public static final String HTTPS = "https";
 
+    /** Service stored in memory only (not persistent), virtual file memory. */
+    public static final String INMEMORY = "in-memory";
 
 	/**
 		The typical name for the service's properties file.

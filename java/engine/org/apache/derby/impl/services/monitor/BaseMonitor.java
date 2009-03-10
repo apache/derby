@@ -1705,6 +1705,8 @@ nextModule:
                                 "org.apache.derby.impl.io.URLStorageFactory");
         storageFactories.put( PersistentService.HTTPS,
                                 "org.apache.derby.impl.io.URLStorageFactory");
+        storageFactories.put( PersistentService.INMEMORY,
+                            "org.apache.derby.impl.io.VFMemoryStorageFactory");
     }
 
 	/**

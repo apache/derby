@@ -54,6 +54,9 @@ public class _Suite extends BaseTestCase {
         suite.addTest(AssertFailureTest.suite());
         suite.addTest(InputStreamUtilTest.suite());
         suite.addTest(CharacterStreamDescriptorTest.suite());
+        suite.addTest(BlockedByteArrayTest.suite());
+        suite.addTest(PathUtilTest.suite());
+        suite.addTest(VirtualFileTest.suite());
 
         return suite;
     }
