@@ -1695,21 +1695,23 @@ class DDMReader
 		throws DRDAProtocolException
 	{
 
-		
+        // Offset from the start of the valid region of the byte buffer,
+        // pointing to the start of the DSS we're looking at.
+        int tempOffset = 0;
+
 		// jump to the last continuation header.
-		int tempPos = 0;
 		for (int i = 0; i < continueDssHeaderCount; i++) 
 		{
 			// the first may be less than the size of a full DSS
 			if (i == 0) 
 			{
 				// only jump by the number of bytes remaining in the current DSS
-				tempPos = pos + dssLength;
+				tempOffset = dssLength;
 			}
 			else 
 			{
 				// all other jumps are for a full continued DSS
-				tempPos += DssConstants.MAX_DSS_LENGTH;
+				tempOffset += DssConstants.MAX_DSS_LENGTH;
 			}
 		}
 
@@ -1725,8 +1727,13 @@ class DDMReader
 
 		for (int i = 0; i < continueDssHeaderCount; i++) 
 		{
-			continueHeaderLength = ((buffer[tempPos] & 0xff) << 8) +
-				((buffer[tempPos + 1] & 0xff) << 0);
+            // Get the length of the DSS. Make sure that we have enough data
+            // in the buffer to actually see the length (may not have enough
+            // bytes if this is not the first DSS).
+            ensureALayerDataInBuffer(tempOffset + 1);
+            continueHeaderLength =
+                    ((buffer[pos + tempOffset] & 0xff) << 8) +
+                    (buffer[pos + tempOffset + 1] & 0xff);
 
 			if (i == 0) 
 			{
@@ -1746,6 +1753,13 @@ class DDMReader
 				}
 				// the very first shift size is 2
 				shiftSize = 2;
+
+                // Make sure we have all of the last DSS in the buffer
+                // (DERBY-4088). Since we look at the last DSS first,
+                // we don't need to do this for the other DSSs, as they
+                // will also be fetched into the buffer when we fetch the
+                // last one.
+                ensureALayerDataInBuffer(tempOffset + continueHeaderLength);
 			}
 			else 
 			{
@@ -1784,12 +1798,12 @@ class DDMReader
 			else
 				bytesToShift = dssLength;
 
-			tempPos -= (bytesToShift - 2);
-			System.arraycopy(buffer, tempPos - shiftSize, buffer, tempPos,
-							 bytesToShift);
+			tempOffset -= (bytesToShift - 2);
+			System.arraycopy(buffer, pos + tempOffset - shiftSize,
+                             buffer, pos + tempOffset, bytesToShift);
 		}
 		// reposition the start of the data after the final DSS shift.
-		pos = tempPos;
+		pos += tempOffset;
 		dssLength += newdssLength;
 	}
 

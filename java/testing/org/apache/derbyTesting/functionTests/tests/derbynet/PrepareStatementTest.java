@@ -32,11 +32,14 @@ import java.sql.Timestamp;
 
 import java.math.BigDecimal;
 import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Arrays;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
+import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetStream;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.junit.JDBC;
@@ -1296,4 +1299,31 @@ public class PrepareStatementTest extends BaseJDBCTestCase
         for (int i = 0; i < length; ++i) buf.append("X");
         return buf.toString();
     }
+
+    /**
+     * Test fix for DERBY-4088 where an ArrayIndexOutOfBoundsException was
+     * thrown by DDMReader.readBytes() when reading a BLOB value whose length
+     * was close to the maximum length of a DSS.
+     */
+    public void testReadBlobCloseToMaxDssLength() throws Exception {
+        final int length = 32766; // max DSS length is 32767
+
+        // Create test data with the requested length
+        DataInputStream stream1 =
+                new DataInputStream(new LoopingAlphabetStream(length));
+        byte[] bytes = new byte[length];
+        stream1.readFully(bytes);
+
+        // See if the test data can be sent to the server and back with
+        // no errors.
+        PreparedStatement ps = prepareStatement("values cast(? as blob)");
+        ps.setBytes(1, bytes);
+        ResultSet rs = ps.executeQuery();
+        assertTrue("empty result set", rs.next());
+        InputStream stream2 = rs.getBinaryStream(1);
+        assertEquals(new LoopingAlphabetStream(length), stream2);
+        assertFalse("too many rows", rs.next());
+        rs.close();
+    }
+
 }
