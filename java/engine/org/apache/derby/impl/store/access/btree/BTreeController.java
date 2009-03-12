@@ -405,16 +405,37 @@ public class BTreeController extends OpenBTree implements ConglomerateController
             rh = leaf.page.fetchFromSlot(null, slot, rows, null, true);
             if (rh != null) {
                 int ret = compareRowsForInsert(rows, oldRows, leaf, slot);
-                //release the page if required
-                if (ret == RESCAN_REQUIRED && newLeaf) {
-                    originalLeaf.release();
+
+                // If we found a deleted row, we don't know whether there
+                // is a duplicate, so we need to continue the search.
+                final boolean continueSearch =
+                        (ret == MATCH_FOUND && leaf.page.isDeletedAtSlot(slot));
+
+                if (!continueSearch) {
+                    if (newLeaf) {
+                        // Since we have moved away from the original leaf,
+                        // we need some logic to make sure we don't hold
+                        // latches that we're not supposed to hold.
+                        if (ret == RESCAN_REQUIRED) {
+                            // When a rescan is required, we must release the
+                            // original leaf, since the callers expect all
+                            // latches to have been released (and so they
+                            // should have been, so this is probably a bug -
+                            // see DERBY-4080).
+                            originalLeaf.release();
+                        }
+                        if (ret != RESCAN_REQUIRED) {
+                            // Since a rescan is not required, we still hold
+                            // the latch on the non-original leaf. No other
+                            // leaves than the original one should be latched
+                            // when we return, so release the current leaf.
+                            leaf.release();
+                        }
+                    }
+                    return ret;
                 }
-                if (ret != RESCAN_REQUIRED && newLeaf) {
-                    leaf.release();
-                }
-                return ret;
             }
-            slot++;
+            slot--;
         }
         return NO_MATCH;
     }
@@ -465,13 +486,35 @@ public class BTreeController extends OpenBTree implements ConglomerateController
             rh = leaf.page.fetchFromSlot(null, slot, rows, null, true);
             if (rh != null) {
                 int ret =  compareRowsForInsert(rows, oldRows, leaf, slot);
-                if (ret == RESCAN_REQUIRED && newLeaf) {
-                    originalLeaf.release();
+
+                // If we found a deleted row, we don't know whether there
+                // is a duplicate, so we need to continue the search.
+                final boolean continueSearch =
+                        (ret == MATCH_FOUND && leaf.page.isDeletedAtSlot(slot));
+
+                if (!continueSearch) {
+                    if (newLeaf) {
+                        // Since we have moved away from the original leaf,
+                        // we need some logic to make sure we don't hold
+                        // latches that we're not supposed to hold.
+                        if (ret == RESCAN_REQUIRED) {
+                            // When a rescan is required, we must release the
+                            // original leaf, since the callers expect all
+                            // latches to have been released (and so they
+                            // should have been, so this is probably a bug -
+                            // see DERBY-4080).
+                            originalLeaf.release();
+                        }
+                        if (ret != RESCAN_REQUIRED) {
+                            // Since a rescan is not required, we still hold
+                            // the latch on the non-original leaf. No other
+                            // leaves than the original one should be latched
+                            // when we return, so release the current leaf.
+                            leaf.release();
+                        }
+                    }
+                    return ret;
                 }
-                if (ret != RESCAN_REQUIRED && newLeaf) {
-                    leaf.release();
-                }
-                return ret;
             }
             slot++;
         }
@@ -479,22 +522,31 @@ public class BTreeController extends OpenBTree implements ConglomerateController
     }
     
     /**
-     * Compares two row for insert. If the two rows are equal it checks if the 
-     * row in tree is deleted. If not MATCH_FOUND is returned. If the row is 
-     * deleted it tries to get a lock on that. If a lock is obtained without 
-     * waiting (ie without losing the latch) the row was deleted within the 
-     * same transaction and its safe to insert. NO_MATCH is returned in this 
-     * case. If latch is released while waiting for lock rescaning the tree 
-     * is required as the tree might have been rearanged by some other 
-     * transaction. RESCAN_REQUIRED is returned in this case.
-     * In case of NO_MATCH and MATCH_FOUND latch is also released.
+     * Compares two rows for insert. If the two rows are not equal,
+     * {@link #NO_MATCH} is returned. Otherwise, it tries to get a lock on
+     * the row in the tree. If the lock is obtained without waiting,
+     * {@link #MATCH_FOUND} is returned (even if the row has been deleted).
+     * Otherwise, {@link #RESCAN_REQUIRED} is returned to indicate that the
+     * latches have been released and the B-tree must be rescanned.
+     *
+     * If {@code MATCH_FOUND} is returned, the caller should check whether
+     * the row has been deleted. If so, it may have to move to check the
+     * adjacent rows to be sure that there is no non-deleted duplicate row.
+     *
+     * If {@code MATCH_FOUND} or {@code RESCAN_REQUIRED} is returned, the
+     * transaction will hold an update lock on the specified record when
+     * the method returns.
+     *
+     * <b>Note!</b> This method should only be called when the index is almost
+     * unique (that is, a non-unique index backing a unique constraint).
+     *
      * @param originalRow row from the tree
      * @param newRow row to be inserted
      * @param leaf leaf where originalRow resides
      * @param slot slot where originalRow
-     * @return  0 if no duplicate
-     *          1 if duplicate 
-     *          2 if rescan required
+     * @return  {@code NO_MATCH} if no duplicate is found,
+     *          {@code MATCH_FOUND} if a duplicate is found, or
+     *          {@code RESCAN_REQUIRED} if the B-tree must be rescanned
      */
     private int compareRowsForInsert (DataValueDescriptor [] originalRow,
                                       DataValueDescriptor [] newRow,
@@ -517,14 +569,8 @@ public class BTreeController extends OpenBTree implements ConglomerateController
         //record and might have changed the tree by now
         if (latch_released)
             return RESCAN_REQUIRED;
-        //there is match check if its not deleted
-        if (!leaf.page.isDeletedAtSlot(slot)) {
-            //its a genuine match
-            return MATCH_FOUND;
-        }
-        //it is a deleted record within same transaction
-        //safe to insert
-        return NO_MATCH;
+
+        return MATCH_FOUND;
     }
     
     /**
