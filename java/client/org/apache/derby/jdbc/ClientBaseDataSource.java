@@ -173,25 +173,48 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
 
     //---------------------- client SSL ----------------
 
+    /** The constant indicating that SSL encryption won't be used. */
     public final static int SSL_OFF = 0;
+    private final static String SSL_OFF_STR = "off";
+    /** The constant indicating that SSL encryption will be used. */
     public final static int SSL_BASIC = 1;
+    private final static String SSL_BASIC_STR = "basic";
+    /**
+     * The constant indicating that SSL encryption with peer authentication
+     * will be used.
+     */
     public final static int SSL_PEER_AUTHENTICATION = 2;
+    private final static String SSL_PEER_AUTHENTICATION_STR =
+            "peerAuthentication";
 
+    /**
+     * Parses the string and returns the corresponding constant for the SSL
+     * mode denoted.
+     * <p>
+     * Valid values are <tt>off</tt>, <tt>basic</tt> and
+     * <tt>peerAuthentication</tt>.
+     *
+     * @param s string denoting the SSL mode
+     * @return A constant indicating the SSL mode denoted by the string. If the
+     *      string is {@code null}, {@link #SSL_OFF} is returned.
+     * @throws SqlException if the string has an invalid value
+     */
     public static final int getSSLModeFromString(String s) 
         throws SqlException
     {
         
 		if (s != null){
-			if (s.equalsIgnoreCase("off")) {
+			if (s.equalsIgnoreCase(SSL_OFF_STR)) {
 				return SSL_OFF;
-            } else if (s.equalsIgnoreCase("basic")) {
+            } else if (s.equalsIgnoreCase(SSL_BASIC_STR)) {
 				return SSL_BASIC;
-			} else if (s.equalsIgnoreCase("peerAuthentication")) {
+			} else if (s.equalsIgnoreCase(SSL_PEER_AUTHENTICATION_STR)) {
 				return SSL_PEER_AUTHENTICATION;
 			} else {
-                throw new SqlException(null, 
-                                       new ClientMessageId(SQLState.INVALID_ATTRIBUTE),
-                                       Attribute.SSL_ATTR, s, "off, basic, peerAuthentication");
+                throw new SqlException(null,
+                        new ClientMessageId(SQLState.INVALID_ATTRIBUTE),
+                        Attribute.SSL_ATTR, s, SSL_OFF_STR + ", " +
+                        SSL_BASIC_STR + ", " + SSL_PEER_AUTHENTICATION_STR);
 			}
 		} else {
 			// Default
@@ -199,6 +222,15 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
 		}
     }
     
+    /**
+     * Returns the SSL mode specified by the property object.
+     *
+     * @param properties data source properties
+     * @return A constant indicating the SSL mode to use. Defaults to
+     *      {@link #SSL_OFF} if the SSL attribute isn't specified.
+     * @throws SqlException if an invalid value for the SSL mode is specified
+     *      in the property object
+     */
     public static final int getClientSSLMode(Properties properties)
         throws SqlException
     {
@@ -877,25 +909,36 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
 
     private int sslMode;
 
+    /**
+     * Specifices the SSL encryption mode to use.
+     * <p>
+     * Valid values are <tt>off</tt>, <tt>basic</tt> and
+     * <tt>peerAuthentication</tt>.
+     *
+     * @param mode the SSL mode to use (<tt>off</tt>, <tt>basic</tt> or
+     *      <tt>peerAuthentication</tt>)
+     * @throws SqlException if the specified mode is invalid
+     */
     public void setSsl(String mode) 
         throws SqlException
     {
         sslMode = getSSLModeFromString(mode);
     }
 
-    public void setSsl(int mode) {
-        sslMode = mode;
-    }
-
+    /**
+     * Returns the SSL encryption mode specified for the data source.
+     *
+     * @return <tt>off</tt>, <tt>basic</tt> or <tt>peerAuthentication</tt>.
+     */
     public String getSsl() {
         switch(sslMode) {
         case SSL_OFF: 
         default: 
-            return "off";
+            return SSL_OFF_STR;
         case SSL_BASIC: 
-            return "basic";
+            return SSL_BASIC_STR;
         case SSL_PEER_AUTHENTICATION: 
-            return "peerAuthentication";
+            return SSL_PEER_AUTHENTICATION_STR;
         }
     }
 
@@ -1090,7 +1133,7 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
             setRetrieveMessageText(getRetrieveMessageText(prop));
         }
         if (prop.containsKey(Attribute.SSL_ATTR)) {
-            setSsl(getClientSSLMode(prop));
+            sslMode = getClientSSLMode(prop);
         }
     }
 }
