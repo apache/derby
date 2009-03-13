@@ -65,7 +65,7 @@ public class VFMemoryStorageFactory
         }
     }
 
-    /** The canonical (unique) name of the database. */
+    /** The canonical (unique) name of the database (absolute path). */
     private String canonicalName;
     /** The data directory of the database. */
     private StorageFile dataDirectory;
@@ -125,7 +125,7 @@ public class VFMemoryStorageFactory
             }
             // Specify the data directory and the temp directory.
             dataDirectory = new VirtualFile(canonicalName, dbData);
-            tempDir = new VirtualFile(PathUtil.join(canonicalName, "tmp"),
+            tempDir = new VirtualFile(normalizePath(canonicalName, "tmp"),
                                       dbData);
 
         // Handle cases where the database name is null, but a system home
@@ -180,7 +180,7 @@ public class VFMemoryStorageFactory
             // Return the database directory as described by StorageFactory.
             return dataDirectory;
         }
-        return new VirtualFile(path, dbData);
+        return new VirtualFile(normalizePath(path), dbData);
     }
 
     /**
@@ -191,7 +191,8 @@ public class VFMemoryStorageFactory
      * @return A path handle.
      */
     public StorageFile newStorageFile(String directoryName, String fileName) {
-        return new VirtualFile(PathUtil.join(directoryName, fileName), dbData);
+            return new VirtualFile(
+                                normalizePath(directoryName, fileName), dbData);
     }
 
     /**
@@ -203,7 +204,9 @@ public class VFMemoryStorageFactory
      */
     public StorageFile newStorageFile(StorageFile directoryName,
                                       String fileName) {
-        return newStorageFile(directoryName.getPath(), fileName);
+        return newStorageFile(directoryName == null ? null
+                                                    : directoryName.getPath(),
+                              fileName);
     }
 
     /**
@@ -290,5 +293,41 @@ public class VFMemoryStorageFactory
     public boolean supportsWriteSync() {
         // TODO: What will give us the best performance here?
         return true;
+    }
+
+    /**
+     * Returns a normalized absolute path.
+     *
+     * @param dir parent directory, if {@code null} the {@code dataDirectory}
+     *      will be used
+     * @param file the file name ({@code null} not allowed)
+     * @return A path.
+     * @throws NullPointerException if {@code file} is {@code null}
+     */
+    private String normalizePath(String dir, String file) {
+        if (dir == null || dir.equals("")) {
+            dir = dataDirectory.getPath();
+        } else if (dir.charAt(0) != getSeparator()) {
+            dir = new File(dataDirectory.getPath(), dir).getPath();
+        }
+        // We now have an absolute path for the directory.
+        // Use java.io.File to get consistent behavior.
+        return (new File(dir, file).getPath());
+    }
+
+    /**
+     * Returns a normalized absolute path.
+     *
+     * @param path path, if {@code null} the {@code dataDirectory} will be used
+     * @return A path.
+     */
+    private String normalizePath(String path) {
+        if (path == null || path.equals("")) {
+            return dataDirectory.getPath();
+        } else if (path.charAt(0) == getSeparator()) {
+            return path;
+        } else {
+            return new File(dataDirectory.getPath(), path).getPath();
+        }
     }
 }
