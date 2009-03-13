@@ -79,6 +79,7 @@
     <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/perf"/> 
     <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/management"/>
     <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/memory"/>
+    <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/memorydb"/>
   	<ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/multi"/>
   	<ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/upgradeTests"/> 
   	<ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/replicationTests"/> 
