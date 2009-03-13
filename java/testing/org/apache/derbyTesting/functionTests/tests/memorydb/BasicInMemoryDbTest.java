@@ -165,6 +165,46 @@ public class BasicInMemoryDbTest
         // How to fix that?
     }
 
+    /**
+     * Makes sure shutting down an in-memory database works.
+     *
+     * @throws SQLException if something goes wrong
+     */
+    public void testShutdown()
+            throws SQLException {
+        DriverManager.getConnection("jdbc:derby:memory:/tmp/myDB;create=true");
+        try {
+            DriverManager.getConnection(
+                    "jdbc:derby:memory:/tmp/myDB;shutdown=true");
+            fail("Engine shutdown should have caused exception");
+        } catch (SQLException sqle) {
+            assertSQLState("08006", sqle);
+        }
+    }
+
+    /**
+     * Makes sure shutting down the Derby engine with an in-memory database
+     * already booted works.
+     * <p>
+     * Related to DERBY-4093
+     *
+     * @throws SQLException if something goes wrong
+     */
+    public void testEnginehutdown()
+            throws SQLException {
+        DriverManager.getConnection("jdbc:derby:memory:/tmp/myDB;create=true");
+        try {
+            DriverManager.getConnection(
+                    "jdbc:derby:;shutdown=true");
+            fail("Engine shutdown should have caused exception");
+        } catch (SQLException sqle) {
+            assertSQLState("XJ015", sqle);
+        }
+        // Another hack, to make sure later tests in this class doesn't fail.
+        // Get a connection to the default database to reload the engine.
+        getConnection();
+    }
+
     public static Test suite() {
         // Run only in embedded-mode for now.
         return new SupportFilesSetup(new TestSuite(BasicInMemoryDbTest.class));

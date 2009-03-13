@@ -69,7 +69,7 @@ public class VFMemoryStorageFactory
     private String canonicalName;
     /** The data directory of the database. */
     private StorageFile dataDirectory;
-    /** The temporary directory for the database. */
+    /** The temporary directory for the database (absolute path). */
     private StorageFile tempDir;
     /** The data store used for the database. */
     private DataStore dbData;
@@ -94,12 +94,13 @@ public class VFMemoryStorageFactory
      * @param databaseName the name of the database, all relative pathnames are
      *      relative to this name
      * @param tempDirNameIgnored ignored
-     * @param uniqueNameIgnored ignored
+     * @param uniqueName used to determine when the temporary directory can be
+     *      created, but not to name the temporary directory itself
      *
      * @exception IOException on an error (unexpected).
      */
     public void init(String home, String databaseName,
-                     String tempDirNameIgnored, String uniqueNameIgnored)
+                     String tempDirNameIgnored, String uniqueName)
             throws IOException {
         // Handle cases where a database name is specified.
         if (databaseName != null) {
@@ -124,7 +125,8 @@ public class VFMemoryStorageFactory
             }
             // Specify the data directory and the temp directory.
             dataDirectory = new VirtualFile(canonicalName, dbData);
-            tempDir = new VirtualFile(getSeparator() + "tmp", dbData);
+            tempDir = new VirtualFile(PathUtil.join(canonicalName, "tmp"),
+                                      dbData);
 
         // Handle cases where the database name is null, but a system home
         // directory has been specified.
@@ -145,7 +147,10 @@ public class VFMemoryStorageFactory
         }
 
         // Create the temporary directory, if one has been specified.
-        if (tempDir != null && !tempDir.exists()) {
+        // Creating the temporary directory too early casues the
+        // BaseDataFileFactory to fail, hence the check for uniqueName.
+        // This check is also used by BaseStorageFactory.
+        if (uniqueName != null && tempDir != null && !tempDir.exists()) {
             tempDir.mkdirs();
         }
     }
