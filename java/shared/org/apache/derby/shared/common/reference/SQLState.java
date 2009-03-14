@@ -711,7 +711,8 @@ public interface SQLState {
 	String LANG_INVALID_TRIM_SET                                       = "22027";
     String LANG_STRING_TOO_LONG                                        = "22028";
 	String LANG_ESCAPE_IS_NULL                                  	   = "22501";
-
+	String LANG_INVALID_ROW_COUNT_OFFSET                               = "2201X";
+	String LANG_INVALID_ROW_COUNT_FIRST                                = "2201W";
 
 	/*
 	** Integrity violations.
@@ -816,6 +817,7 @@ public interface SQLState {
 	String LANG_INVALID_JOIN_ORDER_SPEC                                = "42X17";
 	String LANG_NOT_COMPARABLE                                         = "42818";
 	String LANG_NON_BOOLEAN_WHERE_CLAUSE                               = "42X19";
+	String LANG_INTEGER_LITERAL_EXPECTED                               = "42X20";
 	String LANG_CURSOR_NOT_UPDATABLE                                   = "42X23";
 	String LANG_INVALID_COL_HAVING_CLAUSE                              = "42X24";
 	String LANG_UNARY_FUNCTION_BAD_TYPE                                = "42X25";
@@ -1203,6 +1205,8 @@ public interface SQLState {
 	String RTS_PROJECTION_TIME										   = "43X97.U";
 	String RTS_PR													   = "43X98.U";
 	String RTS_ROW_RS												   = "43X99.U";
+	String RTS_RC                                                      = "43X9A.U";
+	String RTS_RC_RS                                                   = "43X9B.U";
 
 	String RTS_SCALAR_AGG_RS										   = "43Y00.U";
 	String RTS_INDEX_KEY_OPT										   = "43Y01.U";

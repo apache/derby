@@ -299,12 +299,47 @@ abstract class DMLStatementNode extends StatementNode
 	 */
 	public void optimizeStatement() throws StandardException
 	{
+		optimizeStatement(null, null);
+	}
+
+	/**
+	 * This overload variant of optimizeStatement is used by subclass
+	 * CursorNode (as well as a minion for the no-arg variant).
+	 *
+	 * @param offset     Any OFFSET row count, or null
+	 * @param fetchFirst Any FETCH FIRST row count or null
+	 *
+	 * @exception StandardException		Thrown on error
+	 * @see DMLStatementNode#optimizeStatement()
+	 */
+	protected void optimizeStatement(ValueNode offset, ValueNode fetchFirst)
+			throws StandardException
+	{
 		resultSet = resultSet.preprocess(getCompilerContext().getNumTables(),
 										 null,
 										 (FromList) null);
 		resultSet = resultSet.optimize(getDataDictionary(), null, 1.0d);
 
 		resultSet = resultSet.modifyAccessPaths();
+
+		// Any OFFSET/FETCH FIRST narrowing must be done *after* any rewrite of
+		// the query tree (if not, underlying GROUP BY fails), but *before* the
+		// final scroll insensitive result node set is added - that one needs
+		// to sit on top - so now is the time.
+		// 
+		// This example statement fails if we wrap *before* the optimization
+		// above:
+		//     select max(a) from t1 group by b fetch first row only
+		//
+		// A java.sql.ResultSet#previous on a scrollable result set will fail
+		// if we don't wrap *after* the ScrollInsensitiveResultSetNode below.
+		//
+		// We need only wrap the RowCountNode set if at least one of the
+		// clauses is present.
+		
+		if (offset != null || fetchFirst != null) {
+			resultSet = wrapRowCountNode(resultSet, offset, fetchFirst);
+		}
 
 		/* If this is a cursor, then we
 		 * need to generate a new ResultSetNode to enable the scrolling
@@ -343,7 +378,29 @@ abstract class DMLStatementNode extends StatementNode
 				resultSet.setReferencedTableMap((JBitSet) siChild.getReferencedTableMap().clone());
 			}
 		}
+
 	}
+
+
+	private ResultSetNode wrapRowCountNode(
+		ResultSetNode resultSet,
+		ValueNode offset,
+		ValueNode fetchFirst) throws StandardException {
+
+		ResultSetNode topRS = resultSet;
+		ResultColumnList selectRCs =
+			topRS.getResultColumns().copyListAndObjects();
+		selectRCs.genVirtualColumnNodes(topRS, topRS.getResultColumns());
+
+		return (RowCountNode)getNodeFactory().getNode(
+			C_NodeTypes.ROW_COUNT_NODE,
+			topRS,
+			selectRCs,
+			offset,
+			fetchFirst,
+			getContextManager());
+	}
+
 
 	/**
 	 * Make a ResultDescription for use in a PreparedStatement.

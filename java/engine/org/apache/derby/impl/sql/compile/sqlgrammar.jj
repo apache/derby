@@ -578,16 +578,20 @@ public class SQLParser
 	 * Translate a String containing a number into the appropriate type
 	 * of Numeric node.
 	 *
+	 * @param num      the string containing the number
+	 * @param intsOnly accept only integers (not decimal)
+	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	ValueNode getNumericNode(String num) throws StandardException
+	NumericConstantNode getNumericNode(String num, boolean intsOnly)
+		throws StandardException
 	{
 		ContextManager cm = getContextManager();
 
 		// first, see if it might be an integer
 		try
 		{
-			return (ValueNode) nodeFactory.getNode(
+			return (NumericConstantNode) nodeFactory.getNode(
 										C_NodeTypes.INT_CONSTANT_NODE,
 										new Integer(num),
 										cm);
@@ -600,17 +604,20 @@ public class SQLParser
 		// next, see if it might be a long
 		try
 		{
-			return (ValueNode) nodeFactory.getNode(
+			return (NumericConstantNode) nodeFactory.getNode(
 										C_NodeTypes.LONGINT_CONSTANT_NODE,
 										new Long(num),
 										cm);
 		}
 		catch (NumberFormatException nfe)
 		{
-			// we catch because we want to continue on below
+			if (intsOnly) {
+				throw nfe;
+			}
+			// else we want to continue on below
 		}
 
-		return (ValueNode) nodeFactory.getNode(
+		return (NumericConstantNode) nodeFactory.getNode(
 									C_NodeTypes.DECIMAL_CONSTANT_NODE,
 									num,
 									cm);
@@ -2205,6 +2212,7 @@ TOKEN [IGNORE_CASE] :
 |	<NULLS: "nulls">
 |	<NUMBER: "number">
 |	<OBJECT: "object">
+|	<OFFSET: "offset">
 |	<PASCAL: "pascal">
 |	<PLI: "pli">
 |	<PRECISION: "precision">
@@ -3107,10 +3115,14 @@ preparableSelectStatement(boolean checkParams) throws StandardException :
 	int				  isolationLevel = ExecutionContext.UNSPECIFIED_ISOLATION_LEVEL;
 	CursorNode		  retval;
 	OrderByList orderCols = null;
+	NumericConstantNode offset = null;
+	NumericConstantNode fetchFirst = null;
 }
 {
 	queryExpression = queryExpression(null, NO_SET_OP) 
 		[ orderCols = orderByClause() ]
+		[ offset = offsetClause() ]
+		[ fetchFirst = fetchFirstClause() ]
 		[ <FOR> forUpdateState = forUpdateClause(updateColumns) ]
 		[ isolationLevel = atIsolationLevel() ]
 	{
@@ -3124,6 +3136,8 @@ preparableSelectStatement(boolean checkParams) throws StandardException :
 				queryExpression,
 				null,
 				orderCols,
+				offset,
+				fetchFirst,
 				ReuseFactory.getInteger(forUpdateState),
 				(forUpdateState == CursorNode.READ_ONLY ? null : updateColumns ),
 				getContextManager());
@@ -3390,6 +3404,8 @@ bareCallStatement() throws StandardException :
 						C_NodeTypes.CURSOR_NODE,
 						"SELECT",
 						resultSetNode,
+						null,
+						null,
 						null,
 						null,
 						ReuseFactory.getInteger(CursorNode.READ_ONLY),
@@ -8049,6 +8065,45 @@ nullOrdering(OrderByColumn orderCol) :
         }
 }
 
+
+/*
+ * <A NAME="offsetClause">offsetClause</A>
+ */
+NumericConstantNode
+offsetClause() throws StandardException :
+{
+	NumericConstantNode result;
+}
+{
+	// Since OFFSET is not yet a reserved keyword, cf. disambiguation
+	// look-ahead for it w.r.t. offsetClause in method nonReservedKeyword.
+	// This solves the shift/reduce conflict, and allows us to use OFFSET as an
+	// identifier in all contexts.
+	<OFFSET> result = intLiteral() ( <ROW> | <ROWS> )
+    {
+		return result;
+	}
+}
+
+
+/*
+ * <A NAME="fetchFirstClause">fetchFirstClause</A>
+ */
+NumericConstantNode
+fetchFirstClause() throws StandardException :
+{
+	// The default number of rows to fetch if the literal is omitted is 1:
+	NumericConstantNode result = getNumericNode("1", true);
+}
+{
+	<FETCH> ( <FIRST> | <NEXT> )
+		[ result = intLiteral() ] ( <ROW> | <ROWS> ) <ONLY>
+    {
+		return result;
+	}
+}
+
+
 /*
  * <A NAME="forUpdateClause">forUpdateClause</A>
  */
@@ -10974,6 +11029,42 @@ literal() throws StandardException :
 */
 }
 
+
+/*
+ * <A NAME="int">intLiteral</A>
+ */
+NumericConstantNode
+intLiteral() throws StandardException :
+{
+	Token	tok;
+	String sign = null;
+	NumericConstantNode result;
+}
+{
+	[ sign = sign() ] tok = <EXACT_NUMERIC>
+	{
+		/*
+		** The various java parse utilities can't handle leading +,
+		** so only concatenate leading -.
+		*/
+
+		String num = tok.image;
+
+		if (sign != null && sign.equals("-"))
+			num = sign.concat(num);
+
+		try {
+			result = getNumericNode(num, true);
+		} catch (NumberFormatException e) {
+			throw StandardException.newException(
+				SQLState.LANG_INTEGER_LITERAL_EXPECTED);
+		}
+
+		return result;
+	}
+}
+
+
 /*
  * <A NAME="numericLiteral">numericLiteral</A>
  */
@@ -10995,7 +11086,7 @@ numericLiteral(String sign) throws StandardException :
 		if (sign.equals("-"))
 			num = sign.concat(num);
 
-		return getNumericNode(num);
+		return getNumericNode(num, false);
 	}
 |
 	tok = <APPROXIMATE_NUMERIC>
@@ -13798,6 +13889,13 @@ nonReservedKeyword()  :
 	|	tok = <NUMBER>
 	|	tok = <OBJECT>
 	|	tok = <OFF>
+	|	LOOKAHEAD({
+			getToken(1).kind == OFFSET &&
+			!(getToken(2).kind == PLUS_SIGN ||
+			  getToken(2).kind == MINUS_SIGN ||
+			  getToken(2).kind == EXACT_NUMERIC)
+		})
+		tok = <OFFSET>
 	|	tok = <OLD>
 	|	tok = <OLD_TABLE>
 	|	tok = <OJ>

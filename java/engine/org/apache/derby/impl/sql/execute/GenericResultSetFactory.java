@@ -1266,6 +1266,29 @@ public class GenericResultSetFactory implements ResultSetFactory
 								rltItem);
 	}
 	
+	/**
+	 * @see ResultSetFactory#getRowCountResultSet
+	 */
+	public NoPutResultSet getRowCountResultSet(
+		NoPutResultSet source,
+		Activation activation,
+		int resultSetNumber,
+		long offset,
+		long fetchFirst,
+		double optimizerEstimatedRowCount,
+		double optimizerEstimatedCost)
+		throws StandardException
+	{
+		return new RowCountResultSet(source,
+									 activation,
+									 resultSetNumber,
+									 offset,
+									 fetchFirst,
+									 optimizerEstimatedRowCount,
+									 optimizerEstimatedCost);
+	}
+
+
 	static private Authorizer getAuthorizer(Activation activation)
 	{
 		LanguageConnectionContext lcc = activation.getLanguageConnectionContext();

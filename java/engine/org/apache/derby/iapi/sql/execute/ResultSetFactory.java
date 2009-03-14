@@ -1608,4 +1608,34 @@ public interface ResultSetFactory {
 									int fkColArrayItem,
 									int rltItem)
 		throws StandardException;
+
+
+	/**
+	 * This result sets implements the filtering needed by <result offset
+	 * clause> and <fetch first clause>. It is only ever generated if at least
+	 * one of the two clauses is present.
+	 *
+	 * @param source          The source result set being filtered
+	 * @param activation      The activation for this result set,
+	 *		                  which provides the context for the row
+	 *                        allocation operation
+	 * @param resultSetNumber The resultSetNumber for the ResultSet
+	 * @param offset          The offset value (0 by default)
+	 * @param fetchFirst      The fetch first value (-1 if not in use)
+	 * @param optimizerEstimatedRowCount
+	 *                        Estimated total # of rows by optimizer
+	 * @param optimizerEstimatedCost
+	 *                        Estimated total cost by optimizer
+	 * @exception StandardException Standard error policy
+	 */
+
+	public NoPutResultSet getRowCountResultSet(
+		NoPutResultSet source,
+		Activation activation,
+		int resultSetNumber,
+		long offset,
+		long fetchFirst,
+		double optimizerEstimatedRowCount,
+		double optimizerEstimatedCost) throws StandardException;
+
 }

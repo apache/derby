@@ -34,6 +34,7 @@ import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.impl.sql.CursorInfo;
 import org.apache.derby.impl.sql.CursorTableReference;
+import org.apache.derby.iapi.types.DataValueDescriptor;
 
 /**
  * A CursorNode represents a result set that can be returned to a client.
@@ -52,6 +53,8 @@ public class CursorNode extends DMLStatementNode
 
 	private String		name;
 	private OrderByList	orderByList;
+	private NumericConstantNode   offset;     // <result offset clause> value
+	private NumericConstantNode   fetchFirst; // <fetch first clause> value
 	private String		statementType;
 	private int		updateMode;
 	private boolean		needTarget;
@@ -78,6 +81,8 @@ public class CursorNode extends DMLStatementNode
 	 * @param name		The name of the cursor, null if no name
 	 * @param orderByList	The order by list for the cursor, null if no
 	 *			order by list
+	 * @param offset The value of a <result offset clause> if present
+	 * @param fetchFirst The value of a <fetch first clause> if present
 	 * @param updateMode	The user-specified update mode for the cursor,
 	 *			for example, CursorNode.READ_ONLY
 	 * @param updatableColumns The list of updatable columns specified by
@@ -92,6 +97,8 @@ public class CursorNode extends DMLStatementNode
 		Object resultSet,
 		Object name,
 		Object orderByList,
+		Object offset,
+		Object fetchFirst,
 		Object updateMode,
 		Object updatableColumns)
 	{
@@ -99,6 +106,8 @@ public class CursorNode extends DMLStatementNode
 		this.name = (String) name;
 		this.statementType = (String) statementType;
 		this.orderByList = (OrderByList) orderByList;
+		this.offset = (NumericConstantNode)offset;
+		this.fetchFirst = (NumericConstantNode)fetchFirst;
 
 		this.updateMode = ((Integer) updateMode).intValue();
 		this.updatableColumns = (Vector) updatableColumns;
@@ -266,6 +275,9 @@ public class CursorNode extends DMLStatementNode
 			orderByList.bindOrderByColumns(resultSet);
 		}
 
+
+		bindOffsetFetch();
+
 		// bind the updatability
 
 		// if it says it is updatable, verify it.
@@ -346,6 +358,34 @@ public class CursorNode extends DMLStatementNode
 		}
 
 	}
+
+
+	private void bindOffsetFetch() throws StandardException {
+
+		if (offset != null) {
+			DataValueDescriptor dvd = ((ConstantNode)offset).getValue();
+			long val = dvd.getLong();
+
+			if (val < 0) {
+				throw StandardException.newException(
+					SQLState.LANG_INVALID_ROW_COUNT_OFFSET,
+					Long.toString(val) );
+			}
+		}
+
+		if (fetchFirst != null) {
+			DataValueDescriptor dvd = ((ConstantNode)fetchFirst).getValue();
+			long val = dvd.getLong();
+
+			if (val < 1) {
+				throw StandardException.newException(
+					SQLState.LANG_INVALID_ROW_COUNT_FIRST,
+					Long.toString(val) );
+			}
+		}
+	}
+
+
 
 	/**
 	 * Return true if the node references SESSION schema tables (temporary or permanent)
@@ -512,7 +552,9 @@ public class CursorNode extends DMLStatementNode
 			resultSet.pushOrderByList(orderByList);
 			orderByList = null;
 		}
-		super.optimizeStatement();
+
+		super.optimizeStatement(offset, fetchFirst);
+
 	}
 
 	/**

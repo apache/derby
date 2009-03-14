@@ -1101,12 +1101,22 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 	public void updateRow(ExecRow row) throws StandardException {
 		ExecRow newRow = row;
 		boolean undoProjection = false;
-		
+
+		ProjectRestrictResultSet prRS = null;
+
 		if (source instanceof ProjectRestrictResultSet) {
-			newRow = ((ProjectRestrictResultSet)source).
-				doBaseRowProjection(row);
+			prRS = (ProjectRestrictResultSet)source;
+		} else if (source instanceof RowCountResultSet) {
+			// To do any projection in the presence of an intervening
+			// RowCountResultSet, we get its child.
+			prRS = ((RowCountResultSet)source).getUnderlyingProjectRestrictRS();
+		}
+
+		if (prRS != null) {
+			newRow = prRS.doBaseRowProjection(row);
 			undoProjection = true;
 		}
+
 		positionInHashTable.setValue(currentPosition);
 		DataValueDescriptor[] hashRowArray = (DataValueDescriptor[]) 
 				ht.get(positionInHashTable);
@@ -1124,8 +1134,7 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 			final DataValueDescriptor[] newRowData = newRow.getRowArray();
 			
 			// Array of original position in row
-			final int[] origPos =((ProjectRestrictResultSet)source).
-				getBaseProjectMapping(); 
+			final int[] origPos = prRS.getBaseProjectMapping();
 			
 			// We want the row to contain data backed in BackingStoreHashtable
 			final DataValueDescriptor[] backedData = 

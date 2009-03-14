@@ -302,6 +302,8 @@ public interface C_NodeNames
 
 	static final String XML_CONSTANT_NODE_NAME = "org.apache.derby.impl.sql.compile.XMLConstantNode";
 
+	static final String ROW_COUNT_NODE_NAME = "org.apache.derby.impl.sql.compile.RowCountNode";
+
 	// The names are in alphabetic order.
 	//
     // WARNING: WHEN ADDING NODE TYPES HERE, YOU MUST ALSO ADD

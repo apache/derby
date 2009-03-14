@@ -746,6 +746,16 @@ Guide.
                 <text>An ESCAPE clause of NULL returns undefined results and is not allowed.</text>
             </msg>
 
+            <msg>
+                <name>2201X</name>
+                <text>Invalid row count for OFFSET, must be >= 0.</text>
+            </msg>
+
+            <msg>
+                <name>2201W</name>
+                <text>Invalid row count for FIRST/NEXT, must be >= 1.</text>
+            </msg>
+
         </family>
 
 
@@ -1509,6 +1519,11 @@ Guide.
                 <name>42X19</name>
                 <text>The WHERE or HAVING clause or CHECK CONSTRAINT definition is a '{0}' expression.  It must be a BOOLEAN expression.</text>
                 <arg>value</arg>
+            </msg>
+
+            <msg>
+                <name>42X20</name>
+                <text>Syntax error; integer literal expected.</text>
             </msg>
 
             <msg>
@@ -6671,6 +6686,16 @@ MessageId.java.
             <msg>
                 <name>43X99.U</name>
                 <text>Row ResultSet</text>
+            </msg>
+
+            <msg>
+                <name>43X9A.U</name>
+                <text>Row Count ResultSet</text>
+            </msg>
+
+            <msg>
+                <name>43X9B.U</name>
+                <text>Row Count</text>
             </msg>
 
             <msg>

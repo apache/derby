@@ -106,6 +106,7 @@ import org.apache.derby.impl.sql.execute.rts.RealUnionResultSetStatistics;
 import org.apache.derby.impl.sql.execute.rts.RealUpdateResultSetStatistics;
 import org.apache.derby.impl.sql.execute.rts.RealVTIStatistics;
 import org.apache.derby.impl.sql.execute.rts.RealWindowResultSetStatistics;
+import org.apache.derby.impl.sql.execute.rts.RealRowCountStatistics;
 import org.apache.derby.impl.sql.execute.rts.ResultSetStatistics;
 import org.apache.derby.impl.sql.execute.rts.RunTimeStatisticsImpl;
 
@@ -406,6 +407,23 @@ public class RealResultSetStatisticsFactory
 											prrs.optimizerEstimatedCost,
 											getResultSetStatistics(prrs.source)
 											);
+		}
+		else if (rs instanceof RowCountResultSet)
+		{
+			RowCountResultSet rcrs = (RowCountResultSet) rs;
+
+			return new RealRowCountStatistics(
+				rcrs.numOpens,
+				rcrs.rowsSeen,
+				rcrs.rowsFiltered,
+				rcrs.constructorTime,
+				rcrs.openTime,
+				rcrs.nextTime,
+				rcrs.closeTime,
+				rcrs.resultSetNumber,
+				rcrs.optimizerEstimatedRowCount,
+				rcrs.optimizerEstimatedCost,
+				getResultSetStatistics(rcrs.source) );
 		}
 		else if (rs instanceof SortResultSet)
 		{

@@ -317,7 +317,7 @@ extends BasicNoPutResultSetImpl
 	 * Clear the current row
 	 *
 	 */
-	public final void clearCurrentRow()
+	public void clearCurrentRow()
 	{
 		currentRow = null;
 		activation.clearCurrentRow(resultSetNumber);

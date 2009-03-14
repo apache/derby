@@ -816,6 +816,23 @@ public class ResultColumn extends ValueNode
 		}
 	}
 
+
+	/**
+	 * Set the column source's table name
+	 * @param t The source table name
+	 */
+	public void setSourceTableName(String t) {
+		sourceTableName = t;
+	}
+
+	/**
+	 * Set the column source's schema name
+	 * @param s The source schema name
+	 */
+	public void setSourceSchemaName(String s) {
+		sourceSchemaName = s;
+	}
+
 	/**
 	 * Preprocess an expression tree.  We do a number of transformations
 	 * here (including subqueries, IN lists, LIKE and BETWEEN) plus
@@ -1409,6 +1426,12 @@ public class ResultColumn extends ValueNode
 		newResultColumn.setName(getName());
 		newResultColumn.setType(getTypeServices());
 		newResultColumn.setNameGenerated(isNameGenerated());
+
+		// For OFFSET/FETCH we need the also clone table name to avoid failing
+		// check #2 in EmbedResultSet#checksBeforeUpdateXXX. Clone schema for
+		// good measure...
+		newResultColumn.setSourceTableName(getSourceTableName());
+		newResultColumn.setSourceSchemaName(getSourceSchemaName());
 
 		/* Set the "is generated for unmatched column in insert" status in the new node
 		This if for bug 4194*/
