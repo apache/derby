@@ -125,6 +125,15 @@ public class GroupByTest extends BaseJDBCTestCase {
         st.executeUpdate("insert into d2457_a values (1, 12), (2, 23), " +
                 "(3, 34), (4, 45), (5, 56)");
 
+        st.executeUpdate("create table d4071(i int, v char(10))");
+        st.executeUpdate("insert into d4071 " +
+                         "       values (1, '0123456789')," +
+                         "              (1, '1234567890')," +
+                         "              (3, '2345678901')," +
+                         "              (4, '0123456789')," +
+                         "              (5, '1234567890')");
+
+
         // create an all types tables
         
         st.executeUpdate(
@@ -2217,5 +2226,21 @@ public class GroupByTest extends BaseJDBCTestCase {
          JDBC.assertFullResultSet(rs, new String[][] {{"1","5.0"},{"2","-3.0"}});
          rs = s.executeQuery("SELECT GroupCol, MAXOF2(SUM(Value1), SUM(Value2)) AS MaxOf2 FROM Testd3631 GROUP BY GroupCol");
          JDBC.assertFullResultSet(rs, new String[][] {{"1","5.0"},{"2","-3.0"}});
+    }
+
+
+    /**
+     * Test aggregate function on a GROUP BY column also present in a HAVING
+     * clause.  Iff the GROUP BY column is not the first column in the table,
+     * this would fail before DERBY-4071 was fixed.
+     *
+     * @throws SQLException
+     */
+    public void testDerby4071AggregateOnGroupByColumnInHaving() throws SQLException {
+         Statement s = createStatement();
+         ResultSet rs = s.executeQuery("SELECT MAX(i), COUNT(T.V) FROM d4071 T " +
+                                       "    GROUP BY T.V HAVING COUNT(T.V) > 1");
+         
+         JDBC.assertFullResultSet(rs, new String[][] {{"4","2"},{"5","2"}});
     }
 }
