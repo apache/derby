@@ -181,6 +181,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(GeneratedColumnsPermsTest.suite());
         suite.addTest(AlterColumnTest.suite());
         suite.addTest(UserLobTest.suite());
+        suite.addTest(OffsetFetchNextTest.suite());
 
         return suite;
 	}
