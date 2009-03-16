@@ -483,6 +483,50 @@ public class NullableUniqueConstraintTest extends BaseJDBCTestCase {
         }
     }
 
+    /**
+     * Test that a deleted duplicate value on the right side of the slot
+     * into which a new value is inserted does not hide a non-deleted
+     * duplicate two slots to the right. DERBY-4028
+     */
+    public void testDeletedDuplicateHidesDuplicateOnRightSide()
+            throws SQLException {
+        Statement s = createStatement();
+        s.execute("alter table constraintest add constraint c unique(val1)");
+        s.execute("insert into constraintest(val1) values '1','2','3'");
+        // Make sure there's a deleted index entry for val1 = 2
+        s.execute("delete from constraintest where val1 = '2'");
+        // Make sure there's an index entry for val1 = 2 after the deleted one
+        // (the third row will be located after the deleted one because it
+        // was inserted later and its record id is greater)
+        s.execute("update constraintest set val1 = '2' where val1 = '3'");
+        // Insert an index entry in front of the deleted one. It should fail,
+        // but before DERBY-4028 it was successfully inserted.
+        assertStatementError("23505", s,
+                "update constraintest set val1 = '2' where val1 = '1'");
+    }
+
+    /**
+     * Test that a deleted duplicate value on the left side of the slot
+     * into which a new value is inserted does not hide a non-deleted
+     * duplicate two slots to the left. DERBY-4028
+     */
+    public void testDeletedDuplicateHidesDuplicateOnLeftSide()
+            throws SQLException {
+        Statement s = createStatement();
+        s.execute("alter table constraintest add constraint c unique(val1)");
+        s.execute("insert into constraintest(val1) values '1','2','3'");
+        // Make sure there's a deleted index entry for val1 = 2
+        s.execute("delete from constraintest where val1 = '2'");
+        // Make sure there's an index entry for val1 = 2 in front of the
+        // deleted one (the first row will be located in front of the deleted
+        // one because it was inserted before and its record id is smaller)
+        s.execute("update constraintest set val1 = '2' where val1 = '1'");
+        // Insert an index entry after the deleted one. It should fail,
+        // but before DERBY-4028 it was successfully inserted.
+        assertStatementError("23505", s,
+                "update constraintest set val1 = '2' where val1 = '3'");
+    }
+
     public static void main(String [] args) {
         TestResult tr = new TestResult();
         Test t = suite();
