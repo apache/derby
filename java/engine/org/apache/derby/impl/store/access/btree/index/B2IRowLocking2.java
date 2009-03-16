@@ -83,8 +83,6 @@ class B2IRowLocking2 extends B2IRowLockingRR implements BTreeLockingPolicy
 		{
 			SanityManager.ASSERT(open_btree != null, "open_btree is null");
 
-			SanityManager.ASSERT(pos.current_leaf != null , "leaf is null");
-
 			SanityManager.ASSERT(
                 pos.current_lock_row_loc != null , 
                 "pos.current_lock_row_loc is null");

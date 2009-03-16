@@ -1262,7 +1262,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(1,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,9)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(1,9)     |GRANT|ACTIVE  
 ij> next scan_cursor;
@@ -1271,7 +1270,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(1,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,9)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(1,9)     |GRANT|ACTIVE  
 ij> close scan_cursor;
@@ -1318,7 +1316,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(1,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,9)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(1,9)     |GRANT|ACTIVE  
 ij> close scan_cursor;
@@ -1511,7 +1508,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |3   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(1,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |2   |X   |A           |(1,7)     |GRANT|ACTIVE  
 ij> next scan_cursor;
@@ -1520,7 +1516,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |3   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(1,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |2   |X   |A           |(1,7)     |GRANT|ACTIVE  
 ij> close scan_cursor;
@@ -1615,7 +1610,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(1,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,9)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(1,9)     |GRANT|ACTIVE  
 ij> next scan_cursor;
@@ -1626,7 +1620,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(1,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,11)    |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(1,9)     |GRANT|ACTIVE  
 ij> close scan_cursor;
@@ -1669,7 +1662,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(1,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,9)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(1,9)     |GRANT|ACTIVE  
 ij> next scan_cursor;
@@ -1682,7 +1674,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |4   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(1,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,11)    |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(1,9)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |2   |X   |A           |(1,11)    |GRANT|ACTIVE  
@@ -2163,7 +2154,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(1,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,9)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(1,9)     |GRANT|ACTIVE  
 ij> next scan_cursor;
@@ -2217,7 +2207,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(1,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,9)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(1,9)     |GRANT|ACTIVE  
 ij> close scan_cursor;
@@ -2410,7 +2399,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |3   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(1,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |2   |X   |A           |(1,7)     |GRANT|ACTIVE  
 ij> next scan_cursor;
@@ -2512,7 +2500,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(1,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,9)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(1,9)     |GRANT|ACTIVE  
 ij> next scan_cursor;
@@ -2523,7 +2510,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(1,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,11)    |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(1,9)     |GRANT|ACTIVE  
 ij> close scan_cursor;
@@ -2566,7 +2552,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(1,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,9)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(1,9)     |GRANT|ACTIVE  
 ij> next scan_cursor;
@@ -2579,7 +2564,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |4   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(1,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,11)    |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(1,9)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |2   |X   |A           |(1,11)    |GRANT|ACTIVE  
@@ -3392,7 +3376,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 ij> next scan_cursor;
 A          |B          |C                                                                                                                               
@@ -3402,7 +3385,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
 ij> next scan_cursor;
 A          |B          |C                                                                                                                               
@@ -3412,7 +3394,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
 ij> next scan_cursor;
 A          |B          |C                                                                                                                               
@@ -3422,7 +3403,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(4,6)     |GRANT|ACTIVE  
 ij> next scan_cursor;
 A          |B          |C                                                                                                                               
@@ -3432,7 +3412,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(5,6)     |GRANT|ACTIVE  
 ij> next scan_cursor;
 A          |B          |C                                                                                                                               
@@ -3442,7 +3421,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(3,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(6,6)     |GRANT|ACTIVE  
 ij> next scan_cursor;
 A          |B          |C                                                                                                                               
@@ -3452,7 +3430,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(3,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(7,6)     |GRANT|ACTIVE  
 ij> next scan_cursor;
 No current row
@@ -3487,7 +3464,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 ij> next scan_cursor;
 A          |B          |C                                                                                                                               
@@ -3497,7 +3473,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
 ij> next scan_cursor;
 A          |B          |C                                                                                                                               
@@ -3507,7 +3482,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
 ij> next scan_cursor;
 A          |B          |C                                                                                                                               
@@ -3517,7 +3491,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(4,6)     |GRANT|ACTIVE  
 ij> close scan_cursor;
 ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
@@ -3546,7 +3519,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 ij> next scan_cursor;
 A          |B          |C                                                                                                                               
@@ -3556,7 +3528,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
 ij> delete from a where current of scan_cursor;
 1 row inserted/updated/deleted
@@ -3564,7 +3535,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |3   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |2   |X   |A           |(2,6)     |GRANT|ACTIVE  
 ij> next scan_cursor;
@@ -3575,7 +3545,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |3   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |2   |X   |A           |(2,6)     |GRANT|ACTIVE  
 ij> next scan_cursor;
@@ -3588,7 +3557,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |5   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(4,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |2   |X   |A           |(2,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |2   |X   |A           |(4,6)     |GRANT|ACTIVE  
@@ -3600,7 +3568,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |5   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(5,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |2   |X   |A           |(2,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |2   |X   |A           |(4,6)     |GRANT|ACTIVE  
@@ -3614,7 +3581,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |7   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(3,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(6,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |2   |X   |A           |(2,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |2   |X   |A           |(4,6)     |GRANT|ACTIVE  
@@ -3627,7 +3593,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |7   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(3,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(7,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |2   |X   |A           |(2,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |2   |X   |A           |(4,6)     |GRANT|ACTIVE  
@@ -3693,7 +3658,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 ij> next scan_cursor;
 A          |B          |C                                                                                                                               
@@ -3703,7 +3667,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
 ij> next scan_cursor;
 A          |B          |C                                                                                                                               
@@ -3713,7 +3676,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(5,6)     |GRANT|ACTIVE  
 ij> next scan_cursor;
 A          |B          |C                                                                                                                               
@@ -3723,7 +3685,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(3,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(7,6)     |GRANT|ACTIVE  
 ij> next scan_cursor;
 No current row
@@ -3774,7 +3735,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(3,6)     |GRANT|ACTIVE  
 ij> next scan_cursor;
@@ -3828,7 +3788,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(3,6)     |GRANT|ACTIVE  
 ij> close scan_cursor;
@@ -3874,7 +3833,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 ij> next scan_cursor;
 A          |B          |C                                                                                                                               
@@ -3886,7 +3844,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(3,6)     |GRANT|ACTIVE  
 ij> next scan_cursor;
@@ -3899,7 +3856,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |3   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(5,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(3,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(5,6)     |GRANT|ACTIVE  
@@ -3911,7 +3867,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |3   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(3,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(7,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(3,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(5,6)     |GRANT|ACTIVE  
@@ -3966,7 +3921,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
 ij> next scan_cursor;
 A          
@@ -3976,7 +3930,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(5,6)     |GRANT|ACTIVE  
 ij> next scan_cursor;
 No current row
@@ -4027,7 +3980,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |3   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |2   |X   |A           |(1,7)     |GRANT|ACTIVE  
 ij> next scan_cursor;
@@ -4129,7 +4081,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(3,6)     |GRANT|ACTIVE  
 ij> next scan_cursor;
@@ -4140,7 +4091,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(5,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(3,6)     |GRANT|ACTIVE  
 ij> close scan_cursor;
@@ -4183,7 +4133,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(3,6)     |GRANT|ACTIVE  
 ij> next scan_cursor;
@@ -4196,7 +4145,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |4   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(5,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(3,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |2   |X   |A           |(5,6)     |GRANT|ACTIVE  
@@ -4314,7 +4262,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 ij> next scan_cursor;
 A          |B          |C                                                                                                                               
@@ -4324,7 +4271,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
 ij> next scan_cursor;
 A          |B          |C                                                                                                                               
@@ -4334,7 +4280,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
 ij> next scan_cursor;
 A          |B          |C                                                                                                                               
@@ -4344,7 +4289,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(4,6)     |GRANT|ACTIVE  
 ij> next scan_cursor;
 A          |B          |C                                                                                                                               
@@ -4354,7 +4298,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(3,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(5,6)     |GRANT|ACTIVE  
 ij> next scan_cursor;
 A          |B          |C                                                                                                                               
@@ -4364,7 +4307,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(3,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(6,6)     |GRANT|ACTIVE  
 ij> next scan_cursor;
 A          |B          |C                                                                                                                               
@@ -4374,7 +4316,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(3,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(7,6)     |GRANT|ACTIVE  
 ij> next scan_cursor;
 No current row
@@ -4409,7 +4350,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 ij> next scan_cursor;
 A          |B          |C                                                                                                                               
@@ -4419,7 +4359,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
 ij> next scan_cursor;
 A          |B          |C                                                                                                                               
@@ -4429,7 +4368,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
 ij> next scan_cursor;
 A          |B          |C                                                                                                                               
@@ -4439,7 +4377,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(4,6)     |GRANT|ACTIVE  
 ij> close scan_cursor;
 ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
@@ -4468,7 +4405,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 ij> next scan_cursor;
 A          |B          |C                                                                                                                               
@@ -4478,7 +4414,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
 ij> delete from a where current of scan_cursor;
 1 row inserted/updated/deleted
@@ -4486,7 +4421,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |3   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |2   |X   |A           |(2,6)     |GRANT|ACTIVE  
 ij> next scan_cursor;
@@ -4497,7 +4431,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |3   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |2   |X   |A           |(2,6)     |GRANT|ACTIVE  
 ij> next scan_cursor;
@@ -4510,7 +4443,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |5   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(4,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |2   |X   |A           |(2,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |2   |X   |A           |(4,6)     |GRANT|ACTIVE  
@@ -4522,7 +4454,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |5   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(3,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(5,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |2   |X   |A           |(2,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |2   |X   |A           |(4,6)     |GRANT|ACTIVE  
@@ -4536,7 +4467,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |7   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(3,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(6,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |2   |X   |A           |(2,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |2   |X   |A           |(4,6)     |GRANT|ACTIVE  
@@ -4549,7 +4479,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |7   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(3,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(7,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |2   |X   |A           |(2,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |2   |X   |A           |(4,6)     |GRANT|ACTIVE  
@@ -4615,7 +4544,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 ij> next scan_cursor;
 A          |B          |C                                                                                                                               
@@ -4625,7 +4553,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
 ij> next scan_cursor;
 A          |B          |C                                                                                                                               
@@ -4635,7 +4562,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(3,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(5,6)     |GRANT|ACTIVE  
 ij> next scan_cursor;
 A          |B          |C                                                                                                                               
@@ -4645,7 +4571,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(3,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(7,6)     |GRANT|ACTIVE  
 ij> next scan_cursor;
 No current row
@@ -4696,7 +4621,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(3,6)     |GRANT|ACTIVE  
 ij> next scan_cursor;
@@ -4750,7 +4674,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(3,6)     |GRANT|ACTIVE  
 ij> close scan_cursor;
@@ -4796,7 +4719,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 ij> next scan_cursor;
 A          |B          |C                                                                                                                               
@@ -4808,7 +4730,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(3,6)     |GRANT|ACTIVE  
 ij> next scan_cursor;
@@ -4821,7 +4742,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |3   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(3,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(5,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(3,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(5,6)     |GRANT|ACTIVE  
@@ -4833,7 +4753,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |3   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(3,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(7,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(3,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(5,6)     |GRANT|ACTIVE  
@@ -4888,7 +4807,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
 ij> next scan_cursor;
 A          
@@ -4898,7 +4816,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(3,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(5,6)     |GRANT|ACTIVE  
 ij> next scan_cursor;
 No current row
@@ -4949,7 +4866,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |3   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |2   |X   |A           |(1,7)     |GRANT|ACTIVE  
 ij> next scan_cursor;
@@ -5051,7 +4967,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(3,6)     |GRANT|ACTIVE  
 ij> next scan_cursor;
@@ -5062,7 +4977,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(3,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(5,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(3,6)     |GRANT|ACTIVE  
 ij> close scan_cursor;
@@ -5105,7 +5019,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(3,6)     |GRANT|ACTIVE  
 ij> next scan_cursor;
@@ -5118,7 +5031,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |4   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(3,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(5,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(3,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |2   |X   |A           |(5,6)     |GRANT|ACTIVE  
@@ -6512,7 +6424,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(1,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,9)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(1,9)     |GRANT|ACTIVE  
 ij> next scan_cursor;
@@ -6521,7 +6432,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(1,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,9)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(1,9)     |GRANT|ACTIVE  
 ij> close scan_cursor;
@@ -6569,7 +6479,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(1,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,9)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(1,9)     |GRANT|ACTIVE  
 ij> close scan_cursor;
@@ -6782,7 +6691,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |3   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(1,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |2   |X   |A           |(1,7)     |GRANT|ACTIVE  
 ij> next scan_cursor;
@@ -6791,7 +6699,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |3   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(1,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |2   |X   |A           |(1,7)     |GRANT|ACTIVE  
 ij> close scan_cursor;
@@ -6889,7 +6796,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(1,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,9)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(1,9)     |GRANT|ACTIVE  
 ij> next scan_cursor;
@@ -6900,7 +6806,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(1,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,11)    |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,9)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(1,9)     |GRANT|ACTIVE  
@@ -6946,7 +6851,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(1,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,9)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(1,9)     |GRANT|ACTIVE  
 ij> next scan_cursor;
@@ -6959,7 +6863,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |4   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(1,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,11)    |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,9)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(1,9)     |GRANT|ACTIVE  
@@ -7538,7 +7441,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(1,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,9)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(1,9)     |GRANT|ACTIVE  
 ij> next scan_cursor;
@@ -7594,7 +7496,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(1,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,9)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(1,9)     |GRANT|ACTIVE  
 ij> close scan_cursor;
@@ -7807,7 +7708,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |3   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(1,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |2   |X   |A           |(1,7)     |GRANT|ACTIVE  
 ij> next scan_cursor;
@@ -7913,7 +7813,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(1,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,9)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(1,9)     |GRANT|ACTIVE  
 ij> next scan_cursor;
@@ -7924,7 +7823,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(1,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,11)    |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,9)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(1,9)     |GRANT|ACTIVE  
@@ -7970,7 +7868,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(1,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,9)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(1,9)     |GRANT|ACTIVE  
 ij> next scan_cursor;
@@ -7983,7 +7880,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |4   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(1,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,11)    |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,9)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(1,9)     |GRANT|ACTIVE  
@@ -8913,7 +8809,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 ij> next scan_cursor;
 A          |B          |C                                                                                                                               
@@ -8923,7 +8818,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
 ij> next scan_cursor;
@@ -8934,7 +8828,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
@@ -8946,7 +8839,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
@@ -8959,7 +8851,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
@@ -8973,7 +8864,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(3,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
@@ -8988,7 +8878,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(3,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
@@ -9043,7 +8932,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 ij> next scan_cursor;
 A          |B          |C                                                                                                                               
@@ -9053,7 +8941,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
 ij> next scan_cursor;
@@ -9064,7 +8951,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
@@ -9076,7 +8962,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
@@ -9112,7 +8997,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 ij> next scan_cursor;
 A          |B          |C                                                                                                                               
@@ -9122,7 +9006,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
 ij> delete from a where current of scan_cursor;
@@ -9131,7 +9014,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |3   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |2   |X   |A           |(2,6)     |GRANT|ACTIVE  
@@ -9143,7 +9025,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |3   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
@@ -9158,7 +9039,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |5   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
@@ -9173,7 +9053,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |5   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
@@ -9191,7 +9070,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |7   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(3,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
@@ -9209,7 +9087,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |7   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(3,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
@@ -9295,7 +9172,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 ij> next scan_cursor;
 A          |B          |C                                                                                                                               
@@ -9305,7 +9181,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
 ij> next scan_cursor;
@@ -9316,7 +9191,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(5,6)     |GRANT|ACTIVE  
@@ -9328,7 +9202,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(3,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(5,6)     |GRANT|ACTIVE  
@@ -9390,7 +9263,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(3,6)     |GRANT|ACTIVE  
 ij> next scan_cursor;
@@ -9446,7 +9318,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(3,6)     |GRANT|ACTIVE  
 ij> close scan_cursor;
@@ -9493,7 +9364,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 ij> next scan_cursor;
 A          |B          |C                                                                                                                               
@@ -9505,7 +9375,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(3,6)     |GRANT|ACTIVE  
@@ -9519,7 +9388,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |3   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(5,6)     |GRANT|ACTIVE  
@@ -9533,7 +9401,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |3   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(3,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(5,6)     |GRANT|ACTIVE  
@@ -9599,7 +9466,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
 ij> next scan_cursor;
@@ -9610,7 +9476,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(5,6)     |GRANT|ACTIVE  
@@ -9671,7 +9536,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |3   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |2   |X   |A           |(1,7)     |GRANT|ACTIVE  
 ij> next scan_cursor;
@@ -9777,7 +9641,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(3,6)     |GRANT|ACTIVE  
 ij> next scan_cursor;
@@ -9788,7 +9651,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(5,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(3,6)     |GRANT|ACTIVE  
@@ -9834,7 +9696,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(3,6)     |GRANT|ACTIVE  
 ij> next scan_cursor;
@@ -9847,7 +9708,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |4   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(5,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(3,6)     |GRANT|ACTIVE  
@@ -9968,7 +9828,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 ij> next scan_cursor;
 A          |B          |C                                                                                                                               
@@ -9978,7 +9837,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
 ij> next scan_cursor;
@@ -9989,7 +9847,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
@@ -10001,7 +9858,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
@@ -10014,7 +9870,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(3,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
@@ -10028,7 +9883,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(3,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
@@ -10043,7 +9897,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(3,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
@@ -10098,7 +9951,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 ij> next scan_cursor;
 A          |B          |C                                                                                                                               
@@ -10108,7 +9960,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
 ij> next scan_cursor;
@@ -10119,7 +9970,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
@@ -10131,7 +9981,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
@@ -10167,7 +10016,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 ij> next scan_cursor;
 A          |B          |C                                                                                                                               
@@ -10177,7 +10025,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
 ij> delete from a where current of scan_cursor;
@@ -10186,7 +10033,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |3   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |2   |X   |A           |(2,6)     |GRANT|ACTIVE  
@@ -10198,7 +10044,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |3   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
@@ -10213,7 +10058,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |5   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
@@ -10228,7 +10072,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |5   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(3,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
@@ -10246,7 +10089,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |7   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(3,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
@@ -10264,7 +10106,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |7   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(3,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
@@ -10350,7 +10191,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 ij> next scan_cursor;
 A          |B          |C                                                                                                                               
@@ -10360,7 +10200,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
 ij> next scan_cursor;
@@ -10371,7 +10210,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(3,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(5,6)     |GRANT|ACTIVE  
@@ -10383,7 +10221,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(3,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(5,6)     |GRANT|ACTIVE  
@@ -10445,7 +10282,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(3,6)     |GRANT|ACTIVE  
 ij> next scan_cursor;
@@ -10501,7 +10337,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(3,6)     |GRANT|ACTIVE  
 ij> close scan_cursor;
@@ -10548,7 +10383,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 ij> next scan_cursor;
 A          |B          |C                                                                                                                               
@@ -10560,7 +10394,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(3,6)     |GRANT|ACTIVE  
@@ -10574,7 +10407,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |3   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(3,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(5,6)     |GRANT|ACTIVE  
@@ -10588,7 +10420,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |3   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(3,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(5,6)     |GRANT|ACTIVE  
@@ -10654,7 +10485,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
 ij> next scan_cursor;
@@ -10665,7 +10495,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(3,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(5,6)     |GRANT|ACTIVE  
@@ -10726,7 +10555,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |3   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |2   |X   |A           |(1,7)     |GRANT|ACTIVE  
 ij> next scan_cursor;
@@ -10832,7 +10660,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(3,6)     |GRANT|ACTIVE  
 ij> next scan_cursor;
@@ -10843,7 +10670,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(3,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(5,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(3,6)     |GRANT|ACTIVE  
@@ -10889,7 +10715,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(3,6)     |GRANT|ACTIVE  
 ij> next scan_cursor;
@@ -10902,7 +10727,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |4   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(3,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(5,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(3,6)     |GRANT|ACTIVE  
@@ -12007,7 +11831,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(1,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,9)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(1,9)     |GRANT|ACTIVE  
 ij> next scan_cursor;
@@ -12016,7 +11839,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(1,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,9)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(1,9)     |GRANT|ACTIVE  
 ij> close scan_cursor;
@@ -12064,7 +11886,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(1,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,9)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(1,9)     |GRANT|ACTIVE  
 ij> close scan_cursor;
@@ -12248,7 +12069,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |3   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(1,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |2   |X   |A           |(1,7)     |GRANT|ACTIVE  
 ij> next scan_cursor;
@@ -12257,7 +12077,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |3   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(1,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |2   |X   |A           |(1,7)     |GRANT|ACTIVE  
 ij> close scan_cursor;
@@ -12352,7 +12171,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(1,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,8)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,9)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(1,9)     |GRANT|ACTIVE  
@@ -12364,7 +12182,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(1,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,10)    |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,11)    |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,8)     |GRANT|ACTIVE  
@@ -12414,7 +12231,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(1,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,8)     |GRANT|ACTIVE  
@@ -12430,7 +12246,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |4   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(1,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,10)    |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,11)    |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
@@ -12889,7 +12704,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(1,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,8)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,9)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(1,9)     |GRANT|ACTIVE  
@@ -12948,7 +12762,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(1,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,8)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,9)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(1,9)     |GRANT|ACTIVE  
@@ -13134,7 +12947,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |3   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(1,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(1,3)     |GRANT|ACTIVE  
@@ -13243,7 +13055,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(1,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,8)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,9)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(1,9)     |GRANT|ACTIVE  
@@ -13255,7 +13066,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(1,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,10)    |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,11)    |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,8)     |GRANT|ACTIVE  
@@ -13305,7 +13115,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(1,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,8)     |GRANT|ACTIVE  
@@ -13321,7 +13130,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |4   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(1,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,10)    |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,11)    |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
@@ -14098,7 +13906,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 ij> next scan_cursor;
@@ -14109,7 +13916,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
@@ -14121,7 +13927,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
@@ -14134,7 +13939,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
@@ -14148,7 +13952,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
@@ -14163,7 +13966,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(3,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
@@ -14179,7 +13981,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(3,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
@@ -14237,7 +14038,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 ij> next scan_cursor;
@@ -14248,7 +14048,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
@@ -14260,7 +14059,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
@@ -14273,7 +14071,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
@@ -14311,7 +14108,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 ij> next scan_cursor;
@@ -14322,7 +14118,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
@@ -14332,7 +14127,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |3   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
@@ -14345,7 +14139,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |3   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
@@ -14361,7 +14154,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |5   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
@@ -14377,7 +14169,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |5   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
@@ -14396,7 +14187,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |7   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(3,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
@@ -14415,7 +14205,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |7   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(3,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
@@ -14504,7 +14293,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 ij> next scan_cursor;
@@ -14515,7 +14303,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
@@ -14528,7 +14315,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
@@ -14543,7 +14329,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(3,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
@@ -14617,7 +14402,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(3,6)     |GRANT|ACTIVE  
@@ -14676,7 +14460,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(3,6)     |GRANT|ACTIVE  
@@ -14725,7 +14508,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 ij> next scan_cursor;
@@ -14738,7 +14520,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
@@ -14754,7 +14535,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |3   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
@@ -14771,7 +14551,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |3   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(3,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
@@ -14849,7 +14628,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
@@ -14862,7 +14640,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
@@ -14934,7 +14711,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |3   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |2   |X   |A           |(1,7)     |GRANT|ACTIVE  
@@ -15040,7 +14816,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(3,6)     |GRANT|ACTIVE  
@@ -15052,7 +14827,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(4,6)     |GRANT|ACTIVE  
@@ -15102,7 +14876,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
@@ -15118,7 +14891,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |4   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
@@ -15247,7 +15019,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 ij> next scan_cursor;
@@ -15258,7 +15029,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
@@ -15270,7 +15040,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
@@ -15283,7 +15052,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
@@ -15297,7 +15065,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(3,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
@@ -15312,7 +15079,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(3,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
@@ -15328,7 +15094,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(3,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
@@ -15386,7 +15151,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 ij> next scan_cursor;
@@ -15397,7 +15161,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
@@ -15409,7 +15172,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
@@ -15422,7 +15184,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
@@ -15460,7 +15221,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 ij> next scan_cursor;
@@ -15471,7 +15231,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
@@ -15481,7 +15240,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |3   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
@@ -15495,7 +15253,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |3   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
@@ -15512,7 +15269,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |5   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
@@ -15530,7 +15286,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |5   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(3,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
@@ -15551,7 +15306,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |7   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(3,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
@@ -15573,7 +15327,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |7   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(3,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
@@ -15671,7 +15424,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 ij> next scan_cursor;
@@ -15682,7 +15434,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
@@ -15695,7 +15446,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(3,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
@@ -15710,7 +15460,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(3,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
@@ -15784,7 +15533,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(3,6)     |GRANT|ACTIVE  
@@ -15843,7 +15591,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(3,6)     |GRANT|ACTIVE  
@@ -15892,7 +15639,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 ij> next scan_cursor;
@@ -15905,7 +15651,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
@@ -15921,7 +15666,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |3   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(3,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
@@ -15938,7 +15682,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |3   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(3,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
@@ -16016,7 +15759,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
@@ -16029,7 +15771,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(3,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
@@ -16101,7 +15842,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |3   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(1,3)     |GRANT|ACTIVE  
@@ -16210,7 +15950,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(3,6)     |GRANT|ACTIVE  
@@ -16222,7 +15961,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(3,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(4,6)     |GRANT|ACTIVE  
@@ -16272,7 +16010,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(2,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  
@@ -16288,7 +16025,6 @@ ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |4   |IX  |A           |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |A           |(3,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |A           |(2,6)     |GRANT|ACTIVE  

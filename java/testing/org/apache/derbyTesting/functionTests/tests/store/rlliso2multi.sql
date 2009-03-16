@@ -119,11 +119,13 @@ call SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('derby.language.bulkFetchDefault', '
 next scan_cursor;
 
 --------------------------------------------------------------------------------
--- This should block and timeout on the scan lock held by the scanner on the first page.
+-- Before DERBY-2991 the attempt to split the root would time out because the
+-- scan had locked the first page.
 --------------------------------------------------------------------------------
 set connection rootgrower;
 autocommit off;
 insert into a values (PADSTRING('d',1200), PADSTRING('d',1000));
+rollback;
 
 --------------------------------------------------------------------------------
 -- The scan should continue unaffected.
@@ -141,6 +143,7 @@ insert into a values (PADSTRING('ab',1200), PADSTRING('ab',1000));
 --------------------------------------------------------------------------------
 -- Now the grow root should be allowed (note that cursor scan has locks
 -- on the leaf page being grown - just not the scan lock).
+-- (Scan locks are no longer used after DERBY-2991.)
 --------------------------------------------------------------------------------
 set connection rootgrower;
 insert into a values (PADSTRING('d',1200), PADSTRING('d',1000));
@@ -693,6 +696,7 @@ disconnect;
 --------------------------------------------------------------------------------
 -- Test 9: Make sure scan positioning in the beginning of a unique scan
 --         properly gets the scan lock to block with splits.
+--         (Scan locks are no longer used after DERBY-2991.)
 --
 --------------------------------------------------------------------------------
 
@@ -743,8 +747,9 @@ insert into test_9 values (0, 10, PADSTRING('ab',1000), 'test 9.1');
 commit;
 
 -- insert ahead in the cursor to make sure we pick it up later.
+-- This would time out before DERBY-2991.
 insert into test_9 values (0, 10, PADSTRING('dd',1000), 'test 9.1');
-commit;
+rollback;
 
 set connection scanner;
 next scan_cursor;

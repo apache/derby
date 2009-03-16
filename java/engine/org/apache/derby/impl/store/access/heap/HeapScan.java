@@ -34,7 +34,6 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.error.StandardException;
 
-import org.apache.derby.iapi.store.access.conglomerate.Conglomerate;
 import org.apache.derby.iapi.store.access.conglomerate.ScanManager;
 import org.apache.derby.iapi.store.access.conglomerate.TransactionManager;
 
@@ -43,7 +42,6 @@ import org.apache.derby.iapi.store.access.Qualifier;
 import org.apache.derby.iapi.store.access.RowUtil;
 import org.apache.derby.iapi.store.access.ScanInfo;
 
-import org.apache.derby.iapi.store.raw.Page;
 import org.apache.derby.iapi.store.raw.RecordHandle;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
@@ -400,33 +398,4 @@ class HeapScan
                  open_conglom.getContainer()),
             qualifier);
     }
-
-
-	/*
-	** Methods of ScanManager
-	*/
-
-    /**
-     * Do work necessary to maintain the current position in the scan.
-     * <p>
-     * The latched page in the conglomerate "congomid" is changing, do
-     * whatever is necessary to maintain the current position of the scan.
-     * For some conglomerates this may be a no-op.
-     * <p>
-     *
-     * @param conglom   Conglomerate being changed.
-     * @param page      Page in the conglomerate being changed.
-     *
-	 * @exception  StandardException  Standard exception policy.
-     **/
-    public void savePosition(Conglomerate conglom, Page page)
-        throws StandardException
-	{
-        // RESOLVE (mikem), under the current implementation all scans within
-        // a transaction are called rather than just the ones with the right
-        // conglom.  For now just have heaps ignore the call. 
-        
-		// throw HeapOperationException.unimplementedFeature();
-        return;
-	}
 }

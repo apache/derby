@@ -629,38 +629,6 @@ public class LeafControlRow extends ControlRow
                     branchrow.getRow(), splitrow, flag));
 
         }
-        // Before moving the rows on the page, while having the latch on the
-        // page, notify btree scans that the rows on this page may be moving
-        // onto another page.
-        //
-        // RESOLVE (mikem) - need to pass conlgomid.
-        // RESOLVE (mikem) - some optimization later, we only need to notify
-        // the scans which are positioned on moving rows.
-        if (SanityManager.DEBUG)
-            SanityManager.ASSERT(open_btree.init_open_user_scans != null);
-
-        open_btree.init_open_user_scans.saveScanPositions(
-                open_btree.getConglomerate(), this.page);
-
-        // Get exclusive RECORD_ID_PROTECTION_HANDLE lock to make sure that
-        // we wait for scans in other transactions to move off of this page
-        // before we split.
-
-        if (!open_btree.getLockingPolicy().lockScan(
-                this, parent_page, true /* for update */, 
-                ConglomerateController.LOCK_UPD))
-        {
-            // we had to give up latches on this and parent_page to get the
-            // split lock.  Redo the whole split pass as we have lost our
-            // latches.  Just returning is ok, as the caller can not assume
-            // that split has succeeded in making space.  Note that at this
-            // point in the split no write work has been done in the current
-            // internal transaction, so giving up here is fairly cheap.
-
-            // RESOLVE RLL PERFORMANCE - we could keep a stack of visited
-            // pages so as to not have to redo the complete search.
-            return(current_leaf_pageno);
-        }
 
         // Create a new leaf page under the parent.
         LeafControlRow newleaf = 
@@ -786,6 +754,10 @@ public class LeafControlRow extends ControlRow
             }
         }
 
+        // Set a hint in the page that any scan positioned on it needs
+        // to reposition because rows may have moved off the page.
+        page.setRepositionNeeded();
+
         // At this point a unit of work in the split down the tree has
         // been performed in an internal transaction.  This work must
         // be committed before any latches are released.
@@ -826,36 +798,6 @@ public class LeafControlRow extends ControlRow
 	{
 		BranchControlRow branchroot =  null;
 		LeafControlRow   newleaf    =  null; 
-
-
-        // Before moving the rows on the page, while having the latch on the
-        // page, notify btree scans that the rows on this page may be moving
-        // onto another page.
-        //
-        open_btree.init_open_user_scans.saveScanPositions(
-                open_btree.getConglomerate(), leafroot.page);
-
-        // Get exclusive RECORD_ID_PROTECTION_HANDLE lock to make sure that
-        // we wait for scans in other transactions to move off of this page
-        // before we grow root.  If we don't wait, scanners in other 
-        // transactions may be positioned on the leaf page which we are 
-        // about to make into a branch page.
-
-        if (!open_btree.getLockingPolicy().lockScan(
-                leafroot, (ControlRow) null, 
-                true /* for update */,
-                ConglomerateController.LOCK_UPD))
-        {
-            // We had to give up latches on leafroot to get the
-            // split lock.  Redo the whole split pass as we have lost our
-            // latches - which may mean that the root has grown when we gave
-            // up the latch.  Just returning is ok, as the caller can not assume
-            // that grow root has succeeded in making space.  Note that at this
-            // point in the split no write work has been done in the current
-            // internal transaction, so giving up here is fairly cheap.
-
-            return;
-        }
 
         // Allocate a new leaf page under the existing leaf root.
 
@@ -941,6 +883,10 @@ public class LeafControlRow extends ControlRow
                 branchroot.checkConsistency(open_btree, null, false);
             }
         }
+
+        // Set a hint in the page that any scan positioned on it needs
+        // to reposition because the page is no longer a leaf.
+        branchroot.page.setRepositionNeeded();
         
         // At this point a unit of work in the split down the tree has
         // been performed in an internal transaction.  This work must

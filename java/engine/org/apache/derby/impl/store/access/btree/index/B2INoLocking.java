@@ -83,52 +83,10 @@ public class B2INoLocking implements BTreeLockingPolicy
 
     /**************************************************************************
      * Abstract Protected lockScan*() locking methods of BTree:
-     *     lockScan                 - lock the scan page
-     *     lockScanForReclaimSpace  - lock page for reclaiming deleted rows.
-     *     lockScanRow              - lock row and possibly the scan page
-     *     unlockScan               - unlock the scan page
+     *     lockScanRow              - lock row
      *     unlockScanRecordAfterRead- unlock the scan record
      **************************************************************************
      */
-
-
-    /**
-     * Lock a control row page for scan.
-     * <p>
-     * See BTree.lockScan() for more info.
-     *
-	 * @exception  StandardException  Standard exception policy.
-     **/
-    public boolean lockScan(
-    LeafControlRow          current_leaf,
-    ControlRow              aux_control_row,
-    boolean                 forUpdate,
-    int                     lock_operation)
-		throws StandardException
-    {
-        return(true);
-    }
-
-    /**
-     * Lock a control row page for reclaiming deleted rows.
-     * <p>
-     * When reclaiming deleted rows during split need to get an exclusive
-     * scan lock on the page, which will mean there are no other scans 
-     * positioned on the page.  If there are other scans positioned, just
-     * give up on reclaiming space now.
-     *
-	 * @return true if lock was granted nowait, else false and not lock was
-     *         granted.
-     *
-	 * @exception  StandardException  Standard exception policy.
-     **/
-    public boolean lockScanForReclaimSpace(
-    LeafControlRow          current_leaf)
-		throws StandardException
-    {
-        // if doing no locking don't allow reclaiming space.
-        return(false);
-    }
 
     /**
      * Lock a btree row to determine if it is a committed deleted row.
@@ -159,22 +117,16 @@ public class B2INoLocking implements BTreeLockingPolicy
      * Lock a row as part of doing the scan.
      * <p>
      * Lock the row at the given slot (or the previous row if slot is 0).
-     * Get the scan lock on the page if "request_scan_lock" is true.
      * <p>
      * If this routine returns true all locks were acquired while maintaining
      * the latch on leaf.  If this routine returns false, locks may or may
      * not have been acquired, and the routine should be called again after
      * the client has researched the tree to reget the latch on the 
      * appropriate page.
-     * (p>
-     * As a sided effect stores the value of the record handle of the current
-     * scan lock.
      *
 	 * @return Whether locks were acquired without releasing latch on leaf.
      *
      * @param pos               The position of the row to lock.
-     * @param request_scan_lock Whether to request the page scan lock, should
-     *                          only be requested once per page in the scan.
      *
 	 * @exception  StandardException  Standard exception policy.
      **/
@@ -182,7 +134,6 @@ public class B2INoLocking implements BTreeLockingPolicy
     OpenBTree               open_btree,
     BTree                   btree,
     BTreeRowPosition        pos,
-    boolean                 request_scan_lock,
     FetchDescriptor         lock_fetch_desc,
     DataValueDescriptor[]   lock_template,
     RowLocation             lock_row_loc,
@@ -209,16 +160,6 @@ public class B2INoLocking implements BTreeLockingPolicy
         return;
     }
 
-
-    /**
-     * Unlock the lock gotten by lockScan().
-     * <p>
-     * See BTree.unlockScan() for more info.
-     *
-     **/
-    public void unlockScan(RecordHandle protectionHandle)
-    {
-    }
 
     /**************************************************************************
      * Abstract Protected lockNonScan*() locking methods of BTree:

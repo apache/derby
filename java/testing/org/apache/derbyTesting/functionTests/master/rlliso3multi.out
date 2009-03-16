@@ -142,12 +142,13 @@ A
 --------------------------------------------------------------------------------------------------------------------------------
 a                                                                                                                              &
 ij(SCANNER)> --------------------------------------------------------------------------------
--- This should block on the scan lock held by the scanner on the first page.
+-- Before DERBY-2991 the attempt to split the root would time out because the
+-- scan had locked the first page.
 --------------------------------------------------------------------------------
 set connection rootgrower;
 ij(ROOTGROWER)> autocommit off;
 ij(ROOTGROWER)> insert into a values (PADSTRING('d',1000), PADSTRING('d',1000));
-ERROR 40XL1: A lock could not be obtained within the time requested
+1 row inserted/updated/deleted
 ij(ROOTGROWER)> --------------------------------------------------------------------------------
 -- The scan should continue unaffected.
 --------------------------------------------------------------------------------
@@ -167,6 +168,7 @@ ERROR 40XL1: A lock could not be obtained within the time requested
 ij(ROOTGROWER)> --------------------------------------------------------------------------------
 -- Now the grow root should be allowed (note that cursor scan has locks
 -- on the leaf page being grown - just not the scan lock).
+-- (Scan locks are no longer used after DERBY-2991.)
 --------------------------------------------------------------------------------
 set connection rootgrower;
 ij(ROOTGROWER)> insert into a values (PADSTRING('d',1000), PADSTRING('d',1000));
@@ -504,7 +506,6 @@ ij(T6UPDATER)> select * from lock_table order by tabname, type desc, mode, cnt, 
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |TEST_6      |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |TEST_6      |(1,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |TEST_6      |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |TEST_6      |(1,7)     |GRANT|ACTIVE  
 ij(T6UPDATER)> set connection t6scanner;
@@ -519,7 +520,6 @@ ij(T6SCANNER)> select * from lock_table order by tabname, type desc, mode, cnt, 
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |TEST_6      |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |TEST_6      |(1,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |TEST_6      |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |TEST_6      |(1,7)     |GRANT|ACTIVE  
 ij(T6SCANNER)> --
@@ -545,7 +545,6 @@ USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |TEST_6      |Tablelock |GRANT|ACTIVE  
 APP     |UserTran|TABLE   |2   |IX  |TEST_6      |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |TEST_6      |(1,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |TEST_6      |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |TEST_6      |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |TEST_6      |(1,8)     |GRANT|ACTIVE  
@@ -555,7 +554,6 @@ ij(T6SCANNER)> select * from lock_table order by tabname, type desc, mode, cnt, 
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |TEST_6      |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |TEST_6      |(1,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |TEST_6      |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |TEST_6      |(1,7)     |GRANT|ACTIVE  
 ij(T6SCANNER)> --
@@ -569,7 +567,6 @@ USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |TEST_6      |Tablelock |GRANT|ACTIVE  
 APP     |UserTran|TABLE   |1   |IX  |TEST_6      |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |TEST_6      |(1,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |TEST_6      |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |TEST_6      |(1,7)     |GRANT|ACTIVE  
 ij(T6SCANNER)> --
@@ -582,7 +579,6 @@ ij(T6SCANNER)> select * from lock_table order by tabname, type desc, mode, cnt, 
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |TEST_6      |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |TEST_6      |(1,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |TEST_6      |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |TEST_6      |(1,7)     |GRANT|ACTIVE  
 ij(T6SCANNER)> --
@@ -596,7 +592,6 @@ TYPE    |CNT|MODE|TABNAME     |LOCKNAME  |STATE
 -----------------------------------------------
 TABLE   |1  |IX  |TEST_6      |Tablelock |GRANT
 TABLE   |1  |IX  |TEST_6      |Tablelock |GRANT
-ROW     |1  |S   |TEST_6      |(1,1)     |GRANT
 ROW     |1  |U   |TEST_6      |(1,3)     |GRANT
 ROW     |1  |U   |TEST_6      |(1,7)     |GRANT
 ij(T6SCANNER)> next update_cursor3;
@@ -608,8 +603,6 @@ USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |TEST_6      |Tablelock |GRANT|ACTIVE  
 APP     |UserTran|TABLE   |1   |IX  |TEST_6      |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |TEST_6      |(1,1)     |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |TEST_6      |(1,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |TEST_6      |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |TEST_6      |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |TEST_6      |(1,8)     |GRANT|ACTIVE  
@@ -654,7 +647,6 @@ USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IS  |TEST_6      |Tablelock |GRANT|ACTIVE  
 APP     |UserTran|TABLE   |1   |IX  |TEST_6      |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |TEST_6      |(1,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |S   |TEST_6      |(1,3)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |S   |TEST_6      |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |TEST_6      |(1,3)     |GRANT|ACTIVE  

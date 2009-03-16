@@ -139,14 +139,6 @@ public interface Page
 	public RecordHandle getInvalidRecordHandle();
 
     /**
-     * Get a record id protection handle.
-     *
-     * @return a record id protection handle
-     * @see RecordHandle#RECORD_ID_PROTECTION_HANDLE
-     */
-    public RecordHandle getProtectionRecordHandle();
-
-    /**
      * Return a record handle for the given constant record id.
      * <p>
      * Return a record handle that doesn't represent a record but rather has 
@@ -1081,6 +1073,30 @@ public interface Page
 		MT - latched
 	*/
 
+    /**
+     * Set a hint in the page object to indicate that scans positioned on it
+     * need to reposition. Only called on B-tree pages.
+     */
+    void setRepositionNeeded();
+
+    /**
+     * Check if this page has been changed in such a way that scans that are
+     * positioned on it will have to reposition. Only called on B-tree pages.
+     *
+     * @param version the version number of the page when the scan positioned
+     * on it (after which version the page should not have changed in a way
+     * that requires repositioning)
+     * @return {@code true} if a scan that was positioned on the page at page
+     * version {@code version} needs to reposition; {@code false} otherwise
+     */
+    boolean isRepositionNeeded(long version);
+
+    /**
+     * Get the current version number of the page.
+     *
+     * @return page version number
+     */
+    long getPageVersion();
 
 	/*
 	 * time stamp - for those implmentation that supports it

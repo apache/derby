@@ -106,13 +106,6 @@ abstract class BasePage implements Page, Observer, TypedFormat
 	private int   recordCount;
 
 	/**
-	 * A record handle that, when locked, protects all the record ids on the
-	 * page.
-	 * @see RecordHandle#RECORD_ID_PROTECTION_HANDLE
-	 */
-	private RecordId protectionHandle;
-
-	/**
 		Page owner during exclusive access.
 
 		MT - mutable : single thread required, provided by Lockable single thread required. 
@@ -152,6 +145,14 @@ abstract class BasePage implements Page, Observer, TypedFormat
 		<BR> MT - mutable : latched
 	*/
 	private LogInstant lastLog;
+
+    /**
+     * The oldest version where we know that any record id that was on the
+     * page at that version, must still be on the page. This is used by the
+     * B-tree code to decide whether or not it needs to reposition when
+     * resuming a scan.
+     */
+    private long repositionNeededAfterVersion;
 
 	/**
 		Version of the page.
@@ -226,9 +227,9 @@ abstract class BasePage implements Page, Observer, TypedFormat
 	{
 		setAuxObject(null);
 		identity = null;
-		protectionHandle = null;
 		recordCount = 0;
 		clearLastLogInstant();
+        repositionNeededAfterVersion = 0;
 
 		if (SanityManager.DEBUG)
 		{
@@ -268,10 +269,11 @@ abstract class BasePage implements Page, Observer, TypedFormat
 	protected void fillInIdentity(PageKey key) {
 		if (SanityManager.DEBUG) {
 			SanityManager.ASSERT(identity == null);
-			SanityManager.ASSERT(protectionHandle == null);
+            SanityManager.ASSERT(repositionNeededAfterVersion == 0);
 		}
 
 		identity = key;
+        repositionNeededAfterVersion = pageVersion;
 	}
 
 	public void clearIdentity() {
@@ -292,8 +294,8 @@ abstract class BasePage implements Page, Observer, TypedFormat
 	protected void cleanPageForReuse()
 	{
 		setAuxObject(null);
-		protectionHandle = null;
 		recordCount = 0;
+        repositionNeededAfterVersion = 0;
 	}
 
 
@@ -319,29 +321,6 @@ abstract class BasePage implements Page, Observer, TypedFormat
 		// a static invalid record handle
 		return InvalidRecordHandle;
 	}
-
-    /**
-     * Get the record id protection handle for the page.
-     *
-     * @return protection handle
-     * @see RecordHandle#RECORD_ID_PROTECTION_HANDLE
-     */
-    public final RecordHandle getProtectionRecordHandle() {
-        // only allocate a new handle the first time the method is called
-        if (protectionHandle == null) {
-            protectionHandle =
-                new RecordId(getPageId(),
-                             RecordHandle.RECORD_ID_PROTECTION_HANDLE);
-        }
-
-        if (SanityManager.DEBUG) {
-            SanityManager.ASSERT(
-                getPageId().equals(protectionHandle.getPageId()),
-                "PageKey for cached protection handle doesn't match identity");
-        }
-
-        return protectionHandle;
-    }
 
 	public static final RecordHandle MakeRecordHandle(PageKey pkey, int recordHandleConstant)
 		 throws StandardException
@@ -1515,6 +1494,35 @@ abstract class BasePage implements Page, Observer, TypedFormat
 
 		return auxObj;
 	}
+
+    /**
+     * Set a hint in this page to make B-tree scans positioned on it
+     * reposition before they continue. This method is typically called
+     * when rows are removed from a B-tree leaf page (for instance in a
+     * page split).
+     */
+    public void setRepositionNeeded() {
+        if (SanityManager.DEBUG) {
+            SanityManager.ASSERT(isLatched());
+        }
+        repositionNeededAfterVersion = getPageVersion();
+    }
+
+    /**
+     * Check if a B-tree scan positioned on this page needs to reposition.
+     *
+     * @param version the last version on which the B-tree scan had a valid
+     * position on this page
+     * @return {@code true} if a repositioning is needed because the row
+     * on the current position may have been removed from this page after
+     * the specified version; {@code false} otherwise
+     */
+    public boolean isRepositionNeeded(long version) {
+        if (SanityManager.DEBUG) {
+            SanityManager.ASSERT(isLatched());
+        }
+        return repositionNeededAfterVersion > version;
+    }
 
 	/*
 	** Methods of Observer.

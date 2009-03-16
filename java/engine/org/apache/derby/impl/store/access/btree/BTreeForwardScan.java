@@ -29,7 +29,6 @@ import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.store.access.ScanController;
 
-import org.apache.derby.iapi.store.raw.Page;
 import org.apache.derby.iapi.store.raw.RecordHandle;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
@@ -199,12 +198,14 @@ public class BTreeForwardScan extends BTreeScan
         // will be null), or when stopKeyValue is reached/passed.  Along the
         // way apply qualifiers to skip rows which don't qualify.
 
+        leaf_loop:
 		while (pos.current_leaf != null)
 		{
             // System.out.println(
               //   "1 of fetchSet loop, ret_row_count = " + ret_row_count +
                 // "fetch_row = " + fetch_row);
 
+            slot_loop:
 			while ((pos.current_slot + 1) < pos.current_leaf.page.recordCount())
 			{
 
@@ -304,7 +305,6 @@ public class BTreeForwardScan extends BTreeScan
                 boolean latch_released =
                     !this.getLockingPolicy().lockScanRow(
                         this, this.getConglomerate(), pos, 
-                        false, 
                         init_lock_fetch_desc,
                         pos.current_lock_template,
                         pos.current_lock_row_loc,
@@ -316,7 +316,7 @@ public class BTreeForwardScan extends BTreeScan
                     latch_released = 
                         test_errors(
                             this,
-                            "BTreeScan_fetchNextGroup", false, 
+                            "BTreeScan_fetchNextGroup", pos,
                             this.getLockingPolicy(),
                             pos.current_leaf, latch_released);
                 }
@@ -328,15 +328,42 @@ public class BTreeForwardScan extends BTreeScan
                 // is null until after the lock is granted.
                 pos.current_rh = rh;
 
-                if (latch_released)
+                while (latch_released)
                 {
                     // lost latch on page in order to wait for row lock.
-                    // Because we have scan lock on page, we need only
-                    // call reposition() which will use the saved record
-                    // handle to reposition to the same spot on the page.
-                    // We don't have to search the
-                    // tree again, as we have the a scan lock on the page
-                    // which means the current_rh is valid to reposition on.
+                    // reposition() will take care of the complexity with
+                    // finding the correct spot to position on if the row
+                    // has been moved to another page.
+
+                    if (!reposition(pos, false))
+                    {
+                        // Could not position on the exact same row that was
+                        // saved, which means that it has been purged.
+                        // Reposition on the row immediately to the left of
+                        // the purged row instead.
+                        if (!reposition(pos, true))
+                        {
+                            if (SanityManager.DEBUG)
+                            {
+                                SanityManager.THROWASSERT(
+                                        "Cannot fail with 2nd param true");
+                            }
+                            // reposition will set pos.current_leaf to null if
+                            // it returns false, so if this ever does fail in
+                            // delivered code, expect a NullPointerException at
+                            // the top of this loop when we call recordCount().
+                        }
+
+                        // Now we're positioned to the left of our saved
+                        // position. Go to the top of the loop so that we move
+                        // the scan to the next row and release the lock on
+                        // the purged row.
+                        continue slot_loop;
+                    }
+
+                    // At this point, the scan is positioned and the latch
+                    // is held.
+                    latch_released = false;
 
                     if (this.getConglomerate().isUnique())
                     {
@@ -355,25 +382,6 @@ public class BTreeForwardScan extends BTreeScan
                         // lock, and the row location we fetched earlier in
                         // this loop is invalid.
 
-                        while (latch_released)
-                        {
-                            if (!reposition(pos, false))
-                            {
-                                if (SanityManager.DEBUG)
-                                {
-                                    // can't fail while with scan lock
-                                    SanityManager.THROWASSERT(
-                                        "can not fail holding scan lock.");
-                                }
-
-                                // reposition will set pos.current_leaf to 
-                                // null, if it returns false so if the this
-                                // ever does fail in delivered code, expect
-                                // a null pointer exception on the next line,
-                                // trying to call fetchFromSlot().
-
-                            }
-
                             pos.current_leaf.page.fetchFromSlot(
                                 (RecordHandle) null,
                                 pos.current_slot, fetch_row, 
@@ -385,32 +393,10 @@ public class BTreeForwardScan extends BTreeScan
                                     this, 
                                     this.getConglomerate(), 
                                     pos, 
-                                    false, 
                                     init_lock_fetch_desc,
                                     pos.current_lock_template,
                                     pos.current_lock_row_loc,
                                     false, init_forUpdate, lock_operation);
-                        }
-                    }
-                    else
-                    {
-                        if (!reposition(pos, false))
-                        {
-                            if (SanityManager.DEBUG)
-                            {
-                                // can't fail while with scan lock
-                                SanityManager.THROWASSERT(
-                                    "can not fail holding scan lock.");
-                            }
-
-                            // reposition will set pos.current_leaf to 
-                            // null, if it returns false so if the this
-                            // ever does fail in delivered code, expect
-                            // a null pointer exception on the next line,
-                            // trying to call isDeletedAtSlot().
-
-                        }
-
                     }
                 }
 
@@ -446,6 +432,16 @@ public class BTreeForwardScan extends BTreeScan
                     ret_row_count++;
                     stat_numrows_qualified++;
 
+                    final boolean doneWithGroup = max_rowcnt <= ret_row_count;
+
+                    if (doneWithGroup) {
+                        if (SanityManager.DEBUG) {
+                            SanityManager.ASSERT(pos == scan_position);
+                        }
+                        int[] vcols = init_fetchDesc.getValidColumnsArray();
+                        savePositionAndReleasePage(fetch_row, vcols);
+                    }
+
                     if (hash_table != null)
                     {
                         if (hash_table.putRow(false, fetch_row))
@@ -456,15 +452,8 @@ public class BTreeForwardScan extends BTreeScan
                         fetch_row = null;
                     }
 
-                    if (max_rowcnt <= ret_row_count) 
+                    if (doneWithGroup)
                     {
-                        // current_slot is invalid after releasing latch
-                        pos.current_slot = Page.INVALID_SLOT_NUMBER;
-
-                        // exit fetch row loop and return to the client.
-                        pos.current_leaf.release();
-                        pos.current_leaf = null;
-
                         return(ret_row_count);
                     }
                 }

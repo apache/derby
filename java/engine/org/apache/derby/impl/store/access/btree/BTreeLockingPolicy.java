@@ -73,94 +73,10 @@ public interface BTreeLockingPolicy
 {
     /**************************************************************************
      * Abstract Protected lockScan*() locking methods of BTree:
-     *     lockScan                 - lock the scan page
-     *     lockScanForReclaimSpace  - lock page for reclaiming deleted rows.
-     *     lockScanRow              - lock row and possibly the scan page
-     *     unlockScan               - unlock the scan page
+     *     lockScanRow              - lock row
      *     unlockScanRecordAfterRead- unlock the scan record
      **************************************************************************
      */
-
-    /**
-     * Lock the current leaf page.
-     * <p>
-     * Logically lock the record id's on a leaf page.  This protocol is used
-     * by splits/row purgers and scans to coordinate between themselves.
-     * <p>
-     * Anyone who wants to either move rows off of a btree page or, purge
-     * them from existence must first call this routine with "forUpdate" 
-     * true.  This will result in a lock request which will block on other
-     * processes which cannot work if rows move off the page or disappear.
-     * It is expected that the this routine will only be called for update
-     * by very short term internal transactions which will commit immediately
-     * after doing their work and give up the exclusive lock quickly.
-     * <p>
-     * Currently scans can position themselves in one of 2 ways, either by
-     * saving the record handle of a record when they give up the latch on 
-     * the page, or by saving the entire row.  If they save the record handle
-     * then they must call this routine with "forUpdate" false, to get a 
-     * lock which will protect the record handle they are using from moving
-     * off the page or disapearing.  This is also why aborts of inserts must
-     * be done by marking the rows deleted, rather than purging them.
-     * It is expected that scanner's will release this lock once they move
-     * off the page they are looking at.  They do this by calling 
-     * unlockScan().
-     * <p>
-     * This lock enforces the same lock/latch protocol as btree row locks.
-     * On return the lock has been obtained.  Return status indicates if the
-     * lock was waited for, which will mean a latch(s) were dropped while 
-     * waiting.
-     * In general a false status means that the caller will either have 
-     * to research the tree unless some protocol has been implemented that
-     * insures that the row will not have moved while the latch was dropped.
-     * <p>
-     * This routine requests a special row on the RECORD_ID_PROTECTION_HANDLE 
-     * row id.  If the lock is granted the routine will return true.
-     * If the lock cannot be granted NOWAIT, then the routine will release
-     * the latch on "current_leaf" and "aux_control_row" (if 
-     * aux_control_row is non-null), and then it will request a WAIT lock on 
-     * the row.  
-     *
-     * @param current_leaf      The lock is associated with this page in the
-     *                          btree.  This control row is unlatched if the
-     *                          routine has to wait on the lock.
-     * @param aux_control_row   If non-null, this control row is unlatched 
-     *                          if the routine has to wait on the lock.
-     * @param forUpdate         Whether to wait for lock.
-     * @param lock_operation    For what operation are we requesting the lock, 
-     *                          this should be one of the following 4 options:
-     *                          LOCK_READ [read lock], 
-     *                          (LOCK_INS | LOCK_UPD) [ lock for insert], 
-     *                          (LOCK_INSERT_PREVKEY | LOCK_UPD) [lock for 
-     *                          previous key to insert],
-     *                          (LOCK_UPD) [lock for delete or replace]
-     *
-	 * @exception  StandardException  Standard exception policy.
-     **/
-    abstract public boolean lockScan(
-    LeafControlRow          current_leaf,
-    ControlRow              aux_control_row,
-    boolean                 forUpdate,
-    int                     lock_operation)
-		throws StandardException;
-
-
-    /**
-     * Lock a control row page for reclaiming deleted rows.
-     * <p>
-     * When reclaiming deleted rows during split need to get an exclusive
-     * scan lock on the page, which will mean there are no other scans 
-     * positioned on the page.  If there are other scans positioned, just
-     * give up on reclaiming space now.
-     *
-	 * @return true if lock was granted nowait, else false and not lock was
-     *         granted.
-     *
-	 * @exception  StandardException  Standard exception policy.
-     **/
-    abstract public boolean lockScanForReclaimSpace(
-    LeafControlRow          current_leaf)
-		throws StandardException;
 
     /**
      * Lock a btree row to determine if it is a committed deleted row.
@@ -188,16 +104,12 @@ public interface BTreeLockingPolicy
      * Lock a row as part of doing the scan.
      * <p>
      * Lock the row at the given slot (or the previous row if slot is 0).
-     * Get the scan lock on the page if "request_scan_lock" is true.
      * <p>
      * If this routine returns true all locks were acquired while maintaining
      * the latch on leaf.  If this routine returns false, locks may or may
      * not have been acquired, and the routine should be called again after
      * the client has researched the tree to reget the latch on the 
      * appropriate page.
-     * (p>
-     * As a side effect stores the value of the record handle of the current
-     * scan lock.
      *
 	 * @return Whether locks were acquired without releasing latch on leaf.
      *
@@ -205,8 +117,6 @@ public interface BTreeLockingPolicy
      *                          used if routine has to scan backward.
      * @param btree             the conglomerate info.
      * @param pos               Description of position of row to lock.
-     * @param request_scan_lock Whether to request the page scan lock, should
-     *                          only be requested once per page in the scan.
      * @param lock_template     A scratch area to use to read in rows.
      * @param previous_key_lock Is this a previous key lock call?
      * @param forUpdate         Is the scan for update or for read only.
@@ -224,7 +134,6 @@ public interface BTreeLockingPolicy
     OpenBTree               open_btree,
     BTree                   btree,
     BTreeRowPosition        pos,
-    boolean                 request_scan_lock,
     FetchDescriptor         lock_fetch_desc,
     DataValueDescriptor[]   lock_template,
     RowLocation             lock_row_loc,
@@ -247,19 +156,6 @@ public interface BTreeLockingPolicy
     BTreeRowPosition        pos,
     boolean                 forUpdate)
 		throws StandardException;
-
-    /**
-     * Release the lock gotten by calling lockScan.  This call can only be
-     * made to release read scan locks, write scan locks must be held until
-     * end of transaction.
-     * <p>
-     *
-     * @param protectionHandle a <code>RecordHandle</code> that, when locked,
-     * protects all the record ids on a page
-     * @see RecordHandle#RECORD_ID_PROTECTION_HANDLE
-     *
-     **/
-    abstract public void unlockScan(RecordHandle protectionHandle);
 
 
     /**************************************************************************

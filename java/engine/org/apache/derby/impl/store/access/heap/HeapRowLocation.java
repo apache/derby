@@ -358,7 +358,12 @@ public class HeapRowLocation extends DataType implements RowLocation
     }
 	protected void setFrom(DataValueDescriptor theValue)  {
         if (SanityManager.DEBUG)
-            SanityManager.THROWASSERT("SHOULD NOT BE CALLED");
+            SanityManager.ASSERT(theValue instanceof HeapRowLocation,
+                    "Should only be set from another HeapRowLocation");
+        HeapRowLocation that = (HeapRowLocation) theValue;
+        this.pageno = that.pageno;
+        this.recid = that.recid;
+        this.rh = that.rh;
 	}
 	/*
 	**		Methods of Object

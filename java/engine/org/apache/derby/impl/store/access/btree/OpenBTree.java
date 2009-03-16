@@ -110,15 +110,7 @@ public class OpenBTree
     **/
     protected long  err_containerid;
 
-    /**
-    In the case of splits, notify all scans in this transaction to save their
-    current position by key, because the split may move the row they are 
-    positioned on.  This is done by calling open_user_scans.saveScanPositions().
-    Note that not all OpenBTree's will have a non-null open_user_scans.  For
-    instance logical undo of btree operations will get a OpenBTree with a null
-    open_user_scans, this is all right because this operation should never need
-    to call saveScanPositions() (ie. it will never do a split).
-    **/
+    /** The user transaction that opened this B-tree. */
     protected TransactionManager init_open_user_scans = null;
 
 
@@ -427,7 +419,6 @@ public class OpenBTree
         init_hold           = hold;
 
 
-        // Remember the transaction manager so saveScanPositions() can be called
         this.init_open_user_scans = open_user_scans;
 
         // Logical undo class to pass to raw store, on inserts/deletes.
@@ -618,6 +609,8 @@ public class OpenBTree
      * hard to cause paths through the code.  
      * <p>
      *
+     * @param pos the current scan position if the condition simulated by
+     * this call would have resulted in the position being saved
 	 * @return whether the latch has been released by this routine.
      *
 	 * @exception  StandardException  Standard exception policy.
@@ -625,7 +618,7 @@ public class OpenBTree
     public static boolean test_errors(
     OpenBTree           open_btree,
     String              debug_string,
-    boolean             release_scan_lock,
+    BTreeRowPosition    pos,
     BTreeLockingPolicy  btree_locking_policy,
     LeafControlRow      leaf,
     boolean             input_latch_released)
@@ -643,12 +636,12 @@ public class OpenBTree
                 // Simulate a lost latch because of a wait for a lock.
                 if (!latch_released)
                 {
-                    if (release_scan_lock)
-                    {
-                        btree_locking_policy.unlockScan(
-                            leaf.page.getProtectionRecordHandle());
+                    if (pos != null) {
+                        SanityManager.ASSERT(pos.current_leaf == leaf);
+                        pos.saveMeAndReleasePage();
+                    } else {
+                        leaf.release();
                     }
-                    leaf.release();
 
                     latch_released = true;
                     SanityManager.DEBUG_PRINT(

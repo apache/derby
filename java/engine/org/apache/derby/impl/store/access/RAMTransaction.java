@@ -35,7 +35,6 @@ import org.apache.derby.iapi.services.io.Storable;
 
 import org.apache.derby.iapi.services.daemon.Serviceable;
 import org.apache.derby.iapi.services.locks.CompatibilitySpace;
-import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.store.access.conglomerate.Conglomerate;
@@ -71,7 +70,6 @@ import org.apache.derby.iapi.store.raw.LockingPolicy;
 
 
 import org.apache.derby.iapi.store.raw.Loggable;
-import org.apache.derby.iapi.store.raw.Page;
 import org.apache.derby.iapi.store.raw.Transaction;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
@@ -86,7 +84,6 @@ import org.apache.derby.iapi.services.io.FormatableBitSet;
 import java.io.Serializable;
 
 // debugging
-import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
 
 public class RAMTransaction 
     implements XATransactionController, TransactionManager
@@ -2370,53 +2367,6 @@ public class RAMTransaction
     public Transaction getRawStoreXact()
 	{
         return(rawtran);
-    }
-
-
-    /**
-     * Do work necessary to maintain the current position in all the scans.
-     * <p>
-     * The latched page in the conglomerate "congomid" is changing, do
-     * whatever is necessary to maintain the current position of all the
-     * scans open in this transaction.
-     * <p>
-     * For some conglomerates this may be a no-op.
-     * <p>
-     *
-     * @param conglom   Conglomerate being changed.
-     * @param page      Page in the conglomerate being changed.
-     *
-	 * @exception  StandardException  Standard exception policy.
-     **/
-    public void saveScanPositions(Conglomerate conglom, Page page)
-        throws StandardException
-    {
-        for (Iterator it = scanControllers.iterator(); it.hasNext(); )
-		{
-            Object o = it.next();
-
-            if (SanityManager.DEBUG)
-            {
-                // The following debugging code is here because the following 
-                // (ScanManager) cast is occasionally causing a 
-                // java.lang.ClassCastException.
-
-                if (!(o instanceof ScanManager))
-                {
-                    HeaderPrintWriter istream = Monitor.getStream();
-                    
-                    if (o == null)
-                        istream.println("next element was null\n");
-                    else
-                        istream.println("non ScanManager on list: " + o);
-
-                    istream.println(
-                        "Current list of open scans: " +  debugOpened());
-                }
-            }
-			ScanManager sm = (ScanManager) o;
-            sm.savePosition(conglom, page);
-		}
     }
 
 	public FileResource getFileHandler() {

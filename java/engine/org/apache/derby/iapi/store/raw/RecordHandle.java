@@ -47,11 +47,10 @@ public interface RecordHandle extends Lockable {
 	public static final int INVALID_RECORD_HANDLE = 0;
  
 	/**
-		A lock with this recordHandle protects all the recordIds in the page.
-		No recordId can disappear while this lock is held. 
-		New recordIds may appear while this lock is held.
-	*/
-	public static final int RECORD_ID_PROTECTION_HANDLE = 1;
+     * Reserved for future use - name it and define it when you have a need
+     * to use one.
+     */
+	public static final int RESERVED1_RECORD_HANDLE = 1;
 
 	/**
 		A lock with this recordHandle protects this deallocated page from

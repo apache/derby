@@ -141,13 +141,8 @@ public class BTreeController extends OpenBTree implements ConglomerateController
             int num_possible_commit_delete = 
                 leaf.page.recordCount() - 1 - leaf.page.nonDeletedRecordCount();
 
-            if ((num_possible_commit_delete > 0) &&
-                (btree_locking_policy.lockScanForReclaimSpace(leaf)))
+            if (num_possible_commit_delete > 0)
             {
-                // Need to get an exclusive scan lock on the page before we can
-                // do any sort of purges, otherwise other concurrent scans would
-                // not work.  If we can't get the lock NOWAIT, just give up on
-                // purging rows and do the split without reclaiming rows.
 
                 Page page   = leaf.page;
 
@@ -192,9 +187,15 @@ public class BTreeController extends OpenBTree implements ConglomerateController
         }
         finally
         {
-            if (controlRow != null)
+            if (controlRow != null) {
+                if (purged_at_least_one_row) {
+                    // Set a hint in the page that scans positioned on it
+                    // need to reposition because rows have disappeared from
+                    // the page.
+                    controlRow.page.setRepositionNeeded();
+                }
                 controlRow.release();
-
+            }
         }
 
         return(purged_at_least_one_row);
@@ -724,7 +725,7 @@ public class BTreeController extends OpenBTree implements ConglomerateController
                 latch_released = 
                     test_errors(
                         this,
-                        "BTreeController_doIns", false,
+                        "BTreeController_doIns", null,
                         this.getLockingPolicy(), 
                         targetleaf, latch_released);
             }

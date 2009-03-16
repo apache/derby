@@ -143,12 +143,14 @@ A
 --------------------------------------------------------------------------------------------------------------------------------
 a                                                                                                                              &
 ij(SCANNER)> --------------------------------------------------------------------------------
--- This should block and timeout on the scan lock held by the scanner on the first page.
+-- Before DERBY-2991 the attempt to split the root would time out because the
+-- scan had locked the first page.
 --------------------------------------------------------------------------------
 set connection rootgrower;
 ij(ROOTGROWER)> autocommit off;
 ij(ROOTGROWER)> insert into a values (PADSTRING('d',1200), PADSTRING('d',1000));
-ERROR 40XL1: A lock could not be obtained within the time requested
+1 row inserted/updated/deleted
+ij(ROOTGROWER)> rollback;
 ij(ROOTGROWER)> --------------------------------------------------------------------------------
 -- The scan should continue unaffected.
 --------------------------------------------------------------------------------
@@ -168,6 +170,7 @@ ij(ROOTGROWER)> insert into a values (PADSTRING('ab',1200), PADSTRING('ab',1000)
 ij(ROOTGROWER)> --------------------------------------------------------------------------------
 -- Now the grow root should be allowed (note that cursor scan has locks
 -- on the leaf page being grown - just not the scan lock).
+-- (Scan locks are no longer used after DERBY-2991.)
 --------------------------------------------------------------------------------
 set connection rootgrower;
 ij(ROOTGROWER)> insert into a values (PADSTRING('d',1200), PADSTRING('d',1000));
@@ -819,6 +822,7 @@ ij(CLIENT_2)> disconnect;
 ij> --------------------------------------------------------------------------------
 -- Test 9: Make sure scan positioning in the beginning of a unique scan
 --         properly gets the scan lock to block with splits.
+--         (Scan locks are no longer used after DERBY-2991.)
 --
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
@@ -879,9 +883,10 @@ ij(SPLITTER)> insert into test_9 values (0, 10, PADSTRING('ab',1000), 'test 9.1'
 1 row inserted/updated/deleted
 ij(SPLITTER)> commit;
 ij(SPLITTER)> -- insert ahead in the cursor to make sure we pick it up later.
+-- This would time out before DERBY-2991.
 insert into test_9 values (0, 10, PADSTRING('dd',1000), 'test 9.1');
-ERROR 40XL1: A lock could not be obtained within the time requested
-ij(SPLITTER)> commit;
+1 row inserted/updated/deleted
+ij(SPLITTER)> rollback;
 ij(SPLITTER)> set connection scanner;
 ij(SCANNER)> next scan_cursor;
 B                                                                                                                               
@@ -1079,7 +1084,6 @@ ij(T11UPDATER)> select * from lock_table order by tabname, type desc, mode, cnt,
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |TEST_11     |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |TEST_11     |(1,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |TEST_11     |(1,7)     |GRANT|ACTIVE  
 ij(T11UPDATER)> set connection t11scanner;
 ij(T11SCANNER)> autocommit off;
@@ -1097,7 +1101,6 @@ ij(T11SCANNER)> select * from lock_table order by tabname, type desc, mode, cnt,
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |TEST_11     |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |TEST_11     |(1,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |TEST_11     |(1,7)     |GRANT|ACTIVE  
 ij(T11SCANNER)> --
 --------------------------------------------------
@@ -1116,7 +1119,6 @@ USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |TEST_11     |Tablelock |GRANT|ACTIVE  
 APP     |UserTran|TABLE   |2   |IX  |TEST_11     |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |TEST_11     |(1,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |TEST_11     |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |3   |X   |TEST_11     |(1,9)     |GRANT|ACTIVE  
 ij(T11SCANNER)> commit;
@@ -1124,7 +1126,6 @@ ij(T11SCANNER)> select * from lock_table order by tabname, type desc, mode, cnt,
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |TEST_11     |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |TEST_11     |(1,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |TEST_11     |(1,7)     |GRANT|ACTIVE  
 ij(T11SCANNER)> --
 --------------------------------------------------
@@ -1137,7 +1138,6 @@ USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |TEST_11     |Tablelock |GRANT|ACTIVE  
 APP     |UserTran|TABLE   |1   |IX  |TEST_11     |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |TEST_11     |(1,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |TEST_11     |(1,7)     |GRANT|ACTIVE  
 ij(T11SCANNER)> --
 --------------------------------------------------
@@ -1149,7 +1149,6 @@ ij(T11SCANNER)> select * from lock_table order by tabname, type desc, mode, cnt,
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |TEST_11     |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |TEST_11     |(1,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |TEST_11     |(1,7)     |GRANT|ACTIVE  
 ij(T11SCANNER)> --
 --------------------------------------------------
@@ -1162,7 +1161,6 @@ TYPE    |CNT|MODE|TABNAME     |LOCKNAME  |STATE
 -----------------------------------------------
 TABLE   |1  |IX  |TEST_11     |Tablelock |GRANT
 TABLE   |1  |IX  |TEST_11     |Tablelock |GRANT
-ROW     |1  |S   |TEST_11     |(1,1)     |GRANT
 ROW     |1  |U   |TEST_11     |(1,7)     |GRANT
 ij(T11SCANNER)> next update_cursor3;
 B          
@@ -1173,8 +1171,6 @@ USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |TEST_11     |Tablelock |GRANT|ACTIVE  
 APP     |UserTran|TABLE   |1   |IX  |TEST_11     |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |TEST_11     |(1,1)     |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |TEST_11     |(1,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |TEST_11     |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |TEST_11     |(1,9)     |GRANT|ACTIVE  
 ij(T11SCANNER)> commit;
@@ -1213,7 +1209,6 @@ ij(T11UPDATER)> select * from lock_table order by tabname, type desc, mode, cnt,
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
 APP     |UserTran|TABLE   |1   |IX  |TEST_11     |Tablelock |GRANT|ACTIVE  
-APP     |UserTran|ROW     |1   |S   |TEST_11     |(1,1)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |U   |TEST_11     |(1,7)     |GRANT|ACTIVE  
 ij(T11UPDATER)> commit;
 ij(T11UPDATER)> close update_cursor;

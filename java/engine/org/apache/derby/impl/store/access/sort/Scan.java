@@ -31,13 +31,11 @@ import org.apache.derby.iapi.types.RowLocation;
 
 import org.apache.derby.iapi.error.StandardException;
 
-import org.apache.derby.iapi.store.access.conglomerate.Conglomerate;
 import org.apache.derby.iapi.store.access.conglomerate.ScanManager;
 
 import org.apache.derby.iapi.store.access.Qualifier;
 import org.apache.derby.iapi.store.access.ScanInfo;
 
-import org.apache.derby.iapi.store.raw.Page;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
 
@@ -328,33 +326,6 @@ public abstract class Scan implements ScanManager, ScanInfo
         throw StandardException.newException(
                 SQLState.SORT_IMPROPER_SCAN_METHOD);
     }
-
-	/*
-	** Methods of ScanManager
-	*/
-
-    /**
-     * Do work necessary to maintain the current position in the scan.
-     * <p>
-     * The latched page in the conglomerate "congomid" is changing, do
-     * whatever is necessary to maintain the current position of the scan.
-     * For some conglomerates this may be a no-op.
-     * <p>
-     *
-     * @param conglom   Conglomerate object of the conglomerate being changed.
-     * @param page      Page in the conglomerate being changed.
-     *
-	 * @exception  StandardException  Standard exception policy.
-     **/
-    public void savePosition(Conglomerate conglom, Page page)
-        throws StandardException
-	{
-        // RESOLVE (mikem), under the current implementation all scans within
-        // a transaction are called rather than just the ones with the right
-        // conglomid.  For now just have sort scans ignore the call. 
-        
-        return;
-	}
 
 	/*
 	 * Methods of ScanInfo

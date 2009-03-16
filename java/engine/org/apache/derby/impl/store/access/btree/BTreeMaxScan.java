@@ -77,7 +77,6 @@ public class BTreeMaxScan extends BTreeScan
 	 * @exception  StandardException  Standard exception policy.
      **/
     private boolean fetchMaxRowFromBeginning(
-    BTreeRowPosition        pos,
     DataValueDescriptor[]   fetch_row)
         throws StandardException
 	{
@@ -99,6 +98,8 @@ public class BTreeMaxScan extends BTreeScan
             (DataValueDescriptor[]) null,
             ScanController.NA);
 
+        BTreeRowPosition pos = scan_position;
+
         positionAtStartForForwardScan(pos);
 
         // At this point:
@@ -111,8 +112,10 @@ public class BTreeMaxScan extends BTreeScan
         // seen.
 
         boolean nulls_not_reached = true;
+        leaf_loop:
 		while ((pos.current_leaf != null) && nulls_not_reached)
 		{
+            slot_loop:
 			while ((pos.current_slot + 1) < pos.current_leaf.page.recordCount())
 			{
                 // unlock the previous row if doing read.
@@ -145,7 +148,6 @@ public class BTreeMaxScan extends BTreeScan
                 boolean latch_released =
                     !this.getLockingPolicy().lockScanRow(
                         this, this.getConglomerate(), pos,
-                        false, 
                         init_lock_fetch_desc,
                         pos.current_lock_template,
                         pos.current_lock_row_loc,
@@ -157,7 +159,7 @@ public class BTreeMaxScan extends BTreeScan
                     latch_released = 
                         test_errors(
                             this,
-                            "BTreeMaxScan_fetchNextGroup", false, 
+                            "BTreeMaxScan_fetchNextGroup", pos,
                             this.getLockingPolicy(),
                             pos.current_leaf, latch_released);
                 }
@@ -172,20 +174,35 @@ public class BTreeMaxScan extends BTreeScan
                 if (latch_released)
                 {
                     // lost latch on page in order to wait for row lock.
-                    // Because we have scan lock on page, we need only
-                    // call reposition() which will use the saved record
+                    // Call reposition() which will use the saved record
                     // handle to reposition to the same spot on the page.
-                    // We don't have to search the
-                    // tree again, as we have the a scan lock on the page
-                    // which means the current_rh is valid to reposition on.
+                    // If the row is no longer on the page, reposition()
+                    // will take care of searching the tree and position
+                    // on the correct page.
                     if (!reposition(pos, false))
                     {
-                        if (SanityManager.DEBUG)
+                        // Could not position on the exact same row that was
+                        // saved, which means that it has been purged.
+                        // Reposition on the row immediately to the left of
+                        // the purged row instead.
+                        if (!reposition(pos, true))
                         {
-                            // can't fail while with scan lock
-                            SanityManager.THROWASSERT(
-                                "can not fail holding scan lock.");
+                            if (SanityManager.DEBUG)
+                            {
+                                SanityManager.THROWASSERT(
+                                        "Cannot fail with 2nd param true");
+                            }
+                            // reposition will set pos.current_leaf to null if
+                            // it returns false, so if this ever does fail in
+                            // delivered code, expect a NullPointerException at
+                            // the top of this loop when we call recordCount().
                         }
+
+                        // Now we're positioned to the left of our saved
+                        // position. Go to the top of the loop so that we move
+                        // the scan to the next row and release the lock on
+                        // the purged row.
+                        continue slot_loop;
                     }
                 }
 
@@ -285,7 +302,6 @@ public class BTreeMaxScan extends BTreeScan
             SanityManager.ASSERT(this.scan_state          == SCAN_INIT);
             SanityManager.ASSERT(pos.current_rh          == null);
             SanityManager.ASSERT(pos.current_positionKey         == null);
-            SanityManager.ASSERT(pos.current_scan_protectionHandle == null);
         }
 
         // Loop until you can lock the row previous to the first row to be
@@ -325,14 +341,12 @@ public class BTreeMaxScan extends BTreeScan
             // can be made depending on isolation level.
             // 
             // Note that this is not a "previous key" lock as the row we are
-            // locking is the max row to return.  Get the scan lock at the
-            // same time.
+            // locking is the max row to return.
 
             pos.current_slot--;
             boolean latch_released = 
                 !this.getLockingPolicy().lockScanRow(
                     this, this.getConglomerate(), pos,
-                    true, 
                     init_lock_fetch_desc,
                     pos.current_lock_template,
                     pos.current_lock_row_loc,
@@ -345,7 +359,7 @@ public class BTreeMaxScan extends BTreeScan
                 latch_released = 
                     test_errors(
                         this,
-                        "BTreeMaxScan_positionAtStartPosition", true,
+                        "BTreeMaxScan_positionAtStartPosition", pos,
                         this.getLockingPolicy(), pos.current_leaf, latch_released);
             }
 
@@ -363,8 +377,6 @@ public class BTreeMaxScan extends BTreeScan
         }
 
         this.scan_state          = SCAN_INPROGRESS;
-        pos.current_scan_protectionHandle =
-            pos.current_leaf.page.getProtectionRecordHandle();
 
         if (SanityManager.DEBUG)
             SanityManager.ASSERT(pos.current_leaf != null);
@@ -460,7 +472,6 @@ public class BTreeMaxScan extends BTreeScan
                 boolean latch_released =
                     !this.getLockingPolicy().lockScanRow(
                         this, this.getConglomerate(), pos, 
-                        false, 
                         init_lock_fetch_desc,
                         pos.current_lock_template,
                         pos.current_lock_row_loc,
@@ -531,7 +542,7 @@ public class BTreeMaxScan extends BTreeScan
         if (!max_found)
         {
             // max row in table was not last row in table
-            max_found = fetchMaxRowFromBeginning(scan_position, fetch_row);
+            max_found = fetchMaxRowFromBeginning(fetch_row);
         }
 
         return(max_found);

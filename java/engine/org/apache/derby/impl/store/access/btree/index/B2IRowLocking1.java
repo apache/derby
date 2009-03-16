@@ -79,18 +79,8 @@ class B2IRowLocking1 extends B2IRowLocking2 implements BTreeLockingPolicy
 
     /**************************************************************************
      * Abstract Protected lockScan*() locking methods of BTree:
-     *     lockScan                 - lock the scan page
-     *                                (inherit from B2IRowLocking2, we still
-     *                                 get page control locks).
-     *     lockScanForReclaimSpace  - lock page for reclaiming deleted rows.
-     *                                (inherit from B2IRowLocking2, should never
-     *                                 be called while in read uncommitted).
-     *     lockScanRow              - lock row and possibly the scan page, only
-     *                                if row is forUpdate and not a previous key
-     *                                lock.
-     *     unlockScan               - unlock the scan page
-     *                                (inherit from B2IRowLocking2, should never
-     *                                 be called while in read uncommitted).
+     *     lockScanRow              - lock row, only if row is forUpdate and
+     *                                not a previous key lock.
      *     unlockScanRecordAfterRead- unlock the scan record if we locked it in
      *                                lockScanRow.
      *                                 
@@ -103,16 +93,12 @@ class B2IRowLocking1 extends B2IRowLocking2 implements BTreeLockingPolicy
      * Lock a row as part of doing the scan.
      * <p>
      * Lock the row at the given slot (or the previous row if slot is 0).
-     * Get the scan lock on the page if "request_scan_lock" is true.
      * <p>
      * If this routine returns true all locks were acquired while maintaining
      * the latch on leaf.  If this routine returns false, locks may or may
      * not have been acquired, and the routine should be called again after
      * the client has researched the tree to reget the latch on the 
      * appropriate page.
-     * (p>
-     * As a side effect stores the value of the record handle of the current
-     * scan lock.
      *
 	 * @return Whether locks were acquired without releasing latch on leaf.
      *
@@ -120,8 +106,6 @@ class B2IRowLocking1 extends B2IRowLocking2 implements BTreeLockingPolicy
      *                          used if routine has to scan backward.
      * @param btree             the conglomerate info.
      * @param pos               The position of the row to lock.
-     * @param request_scan_lock Whether to request the page scan lock, should
-     *                          only be requested once per page in the scan.
      * @param lock_template     A scratch area to use to read in rows.
      * @param previous_key_lock Is this a previous key lock call?
      * @param forUpdate         Is the scan for update or for read only.
@@ -132,7 +116,6 @@ class B2IRowLocking1 extends B2IRowLocking2 implements BTreeLockingPolicy
     OpenBTree               open_btree,
     BTree                   btree,
     BTreeRowPosition        pos,
-    boolean                 request_scan_lock,
     FetchDescriptor         lock_fetch_desc,
     DataValueDescriptor[]   lock_template,
     RowLocation             lock_row_loc,
@@ -141,7 +124,6 @@ class B2IRowLocking1 extends B2IRowLocking2 implements BTreeLockingPolicy
     int                     lock_operation)
 		throws StandardException
     {
-        // request the scan lock if necessary.
         // only get the row lock if it is not a previous key lock and iff
         // it is an update lock.
         return(
@@ -150,7 +132,6 @@ class B2IRowLocking1 extends B2IRowLocking2 implements BTreeLockingPolicy
                  btree,
                  pos,
                  (forUpdate && !previous_key_lock), // only get update row lock
-                 request_scan_lock,
                  lock_fetch_desc, lock_template, lock_row_loc,
                  previous_key_lock,
                  forUpdate,

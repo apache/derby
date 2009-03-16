@@ -22,12 +22,9 @@
 package org.apache.derby.iapi.store.access.conglomerate;
 
 import org.apache.derby.iapi.services.daemon.Serviceable;
-import org.apache.derby.iapi.store.access.AccessFactory;
 import org.apache.derby.iapi.store.access.ConglomerateController;
 import org.apache.derby.iapi.store.access.SortController;
 import org.apache.derby.iapi.store.access.TransactionController;
-import org.apache.derby.iapi.store.raw.LockingPolicy;
-import org.apache.derby.iapi.store.raw.Page;
 import org.apache.derby.iapi.store.raw.Transaction;
 import org.apache.derby.iapi.error.StandardException;
 
@@ -171,24 +168,5 @@ public interface TransactionManager extends TransactionController
 	 * @exception  StandardException  Standard exception policy.
      **/
     public Transaction getRawStoreXact()
-        throws StandardException;
-
-
-    /**
-     * Do work necessary to maintain the current position in all the scans.
-     * <p>
-     * The latched page in the conglomerate "congomid" is changing, do
-     * whatever is necessary to maintain the current position of all the
-     * scans open in this transaction.
-     * <p>
-     * For some conglomerates this may be a no-op.
-     * <p>
-     *
-     * @param conglom   Conglomerate object of the conglomerate being changed.
-     * @param page      Page in the conglomerate being changed.
-     *
-	 * @exception  StandardException  Standard exception policy.
-     **/
-    public void saveScanPositions(Conglomerate conglom, Page page)
         throws StandardException;
 }

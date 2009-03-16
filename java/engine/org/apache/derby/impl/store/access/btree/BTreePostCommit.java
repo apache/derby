@@ -384,6 +384,10 @@ class BTreePostCommit implements Serviceable
                             }
 
                             page.purgeAtSlot(slot_no, 1, true);
+                            // Tell scans positioned on this page to reposition
+                            // because the row they are positioned on may have
+                            // disappeared.
+                            page.setRepositionNeeded();
 
                             if (SanityManager.DEBUG)
                             {
@@ -474,17 +478,12 @@ class BTreePostCommit implements Serviceable
             int num_possible_commit_delete = 
                 leaf.page.recordCount() - 1 - leaf.page.nonDeletedRecordCount();
 
-            if ((num_possible_commit_delete > 0) &&
-                (btree_locking_policy.lockScanForReclaimSpace(leaf)))
+            if (num_possible_commit_delete > 0)
             {
                 DataValueDescriptor[] scratch_template = 
                     open_btree.getRuntimeMem().get_template(
                         open_btree.getRawTran());
 
-                // Need to get an exclusive scan lock on the page before we can
-                // do any sort of purges, otherwise other concurrent scans would
-                // not work.  If we can't get the lock NOWAIT, just give up on
-                // purging rows. 
                 Page page   = leaf.page;
 
 
@@ -511,6 +510,10 @@ class BTreePostCommit implements Serviceable
                         {
                             // the row is a committed deleted row, purge it.
                             page.purgeAtSlot(slot_no, 1, true);
+                            // Tell scans positioned on this page to reposition
+                            // because the row they are positioned on may have
+                            // disappeared.
+                            page.setRepositionNeeded();
                         }
                     }
                 }

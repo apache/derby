@@ -3069,11 +3069,10 @@ public class T_RawStoreFactory extends T_MultiThreadedIterations {
 		T_RawStoreRow row1 = new T_RawStoreRow(REC_001);
 
 		RecordHandle valid = t_util.t_insert(page1, row1);
-		RecordHandle special = page1.makeRecordHandle(RecordHandle.RECORD_ID_PROTECTION_HANDLE);
 
 		RecordHandle[] rhs = new RecordHandle[RecordHandle.FIRST_RECORD_ID];
 		rhs[0] = page1.getInvalidRecordHandle();
-		rhs[1] = page1.makeRecordHandle(RecordHandle.RECORD_ID_PROTECTION_HANDLE);
+		rhs[1] = page1.makeRecordHandle(RecordHandle.RESERVED1_RECORD_HANDLE);
 		rhs[2] = page1.makeRecordHandle(RecordHandle.DEALLOCATE_PROTECTION_HANDLE);
 		rhs[3] = page1.makeRecordHandle(RecordHandle.PREVIOUS_KEY_HANDLE);
 		rhs[4] = page1.makeRecordHandle(RecordHandle.RESERVED4_RECORD_HANDLE);

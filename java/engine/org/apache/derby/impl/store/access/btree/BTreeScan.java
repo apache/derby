@@ -27,7 +27,6 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.error.StandardException;
 
-import org.apache.derby.iapi.store.access.conglomerate.Conglomerate;
 import org.apache.derby.iapi.store.access.conglomerate.LogicalUndo;
 import org.apache.derby.iapi.store.access.conglomerate.ScanManager;
 import org.apache.derby.iapi.store.access.conglomerate.TransactionManager;
@@ -257,7 +256,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
 
         // reset the "current" position to starting condition.
         // RESOLVE (mmm) - "compile" this.
-        scan_position = new BTreeRowPosition();
+        scan_position = new BTreeRowPosition(this);
 
         scan_position.init();
 
@@ -348,7 +347,6 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
                 (scan_state == SCAN_INIT) || (scan_state == SCAN_HOLD_INIT));
             SanityManager.ASSERT(pos.current_rh          == null);
             SanityManager.ASSERT(pos.current_positionKey == null);
-            SanityManager.ASSERT(pos.current_scan_protectionHandle == null);
         }
 
         // Loop until you can lock the row previous to the first row to be
@@ -436,24 +434,11 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
                 latch_released = 
                     !this.getLockingPolicy().lockScanRow(
                         this, this.getConglomerate(), pos,
-                        true, 
                         init_lock_fetch_desc,
                         pos.current_lock_template,
                         pos.current_lock_row_loc,
                         true, init_forUpdate, 
                         lock_operation);
-            }
-            else
-            {
-                // Don't need to lock the "previous key" but still need to get
-                // the scan lock to protect the position in the btree.
-
-                latch_released =
-                    !this.getLockingPolicy().lockScan(
-                        pos.current_leaf,   // the page we are positioned on.
-                        (ControlRow) null,  // no other page to unlatch
-                        false,              // lock for read.
-                        lock_operation);    // not used.
             }
 
             // special test to see if latch release code works
@@ -462,7 +447,9 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
                 latch_released = 
                     test_errors(
                         this,
-                        "BTreeScan_positionAtStartPosition", true,
+                        "BTreeScan_positionAtStartPosition",
+                        null, // no need to save the position, since we'll
+                              // retry the operation if the latch is released
                         this.getLockingPolicy(), 
                         pos.current_leaf, latch_released);
             }
@@ -481,8 +468,6 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
         }
 
         this.scan_state         = SCAN_INPROGRESS;
-        pos.current_scan_protectionHandle =
-            pos.current_leaf.page.getProtectionRecordHandle();
 
         if (SanityManager.DEBUG)
             SanityManager.ASSERT(pos.current_leaf != null);
@@ -514,7 +499,6 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
 
             SanityManager.ASSERT(pos.current_rh          == null);
             SanityManager.ASSERT(pos.current_positionKey         == null);
-            SanityManager.ASSERT(pos.current_scan_protectionHandle == null);
         }
 
         // Loop until you can lock the row previous to the first row to be
@@ -609,7 +593,6 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
             boolean latch_released = 
                 !this.getLockingPolicy().lockScanRow(
                     this, this.getConglomerate(), pos,
-                    true, 
                     init_lock_fetch_desc,
                     pos.current_lock_template,
                     pos.current_lock_row_loc,
@@ -621,7 +604,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
                 latch_released = 
                     test_errors(
                         this,
-                        "BTreeScan_positionAtStartPosition", true,
+                        "BTreeScan_positionAtStartPosition", pos,
                         this.getLockingPolicy(), pos.current_leaf, latch_released);
             }
 
@@ -639,8 +622,6 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
         }
 
         this.scan_state          = SCAN_INPROGRESS;
-        pos.current_scan_protectionHandle =
-            pos.current_leaf.page.getProtectionRecordHandle();
 
         if (SanityManager.DEBUG)
             SanityManager.ASSERT(pos.current_leaf != null);
@@ -654,8 +635,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
      * <p>
      * Position to next page, keeping latch on previous page until we have 
      * latch on next page.  This routine releases the latch on current_page
-     * once it has successfully gotten both the latch on the next page and
-     * the scan lock on the next page.
+     * once it has successfully gotten the latch on the next page.
      *
      * @param pos           current row position of the scan.
      *
@@ -665,55 +645,11 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
     BTreeRowPosition    pos)
         throws StandardException
     {
-        // RESOLVE (mikem) - not sure but someday in the future this
-        // assert may not be true, but for now we always have the scan
-        // lock when we call this routine.
-        if (SanityManager.DEBUG)
-            SanityManager.ASSERT(pos.current_scan_protectionHandle != null);
 
-        while (true)
-        {
-            if ((pos.next_leaf = 
-                 (LeafControlRow) pos.current_leaf.getRightSibling(this)) == null)
-            {
-                break;
-            }
+        pos.next_leaf = (LeafControlRow) pos.current_leaf.getRightSibling(this);
 
-            boolean latch_released = 
-                !this.getLockingPolicy().lockScan(
-                    pos.next_leaf,
-                    (LeafControlRow) null, // no other latch currently
-                    false /* not for update */,
-                    ConglomerateController.LOCK_READ); // get read scan lock.
-
-            // TESTING CODE:
-            if (SanityManager.DEBUG)
-            {
-                latch_released = 
-                    test_errors(
-                        this,
-                        "BTreeScan_positionAtNextPage", true,
-                        this.getLockingPolicy(), pos.next_leaf, latch_released);
-            }
-
-            if (!latch_released)
-            {
-                break;
-            }
-        }
-
-        // Now that we either have both latch and scan lock on next leaf, or 
-        // there is no next leaf we can release scan and latch on current page.
-        if (SanityManager.DEBUG)
-        {
-			if (pos.current_scan_protectionHandle.getPageNumber() !=
-                         pos.current_leaf.page.getPageNumber()) {
-				SanityManager.THROWASSERT(
-                "pos.current_scan_protectionHandle = " +
-                pos.current_scan_protectionHandle +
-                "pos.current_leaf = " + pos.current_leaf);
-            }
-        }
+        // Now that we either have the latch on next leaf, or there is no next
+        // leaf, we can release the latch on the current page.
 
         // unlock the previous row if doing read.
         if (pos.current_rh != null)
@@ -722,13 +658,8 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
                 pos, init_forUpdate);
         }
 
-        unlockCurrentScan(pos);
         pos.current_leaf.release();
         pos.current_leaf        = pos.next_leaf;
-
-        pos.current_scan_protectionHandle =
-            (pos.current_leaf == null) ?
-            null : pos.current_leaf.page.getProtectionRecordHandle();
 
         // set up for scan to continue at beginning of next page.
         pos.current_slot        = Page.FIRST_SLOT_NUMBER;
@@ -782,33 +713,10 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
                 // unlock (thus why we only do the following code if we
                 // "don't" have lock, ie. pos.current_leaf== null).
 
-                if (!reposition(pos, false))
-                {
-                    if (SanityManager.DEBUG)
-                    {
-                        SanityManager.THROWASSERT(
-                            "can not fail while holding update row lock.");
-                    }
-                }
-
                 this.getLockingPolicy().unlockScanRecordAfterRead(
                     pos, init_forUpdate);
-
-                pos.current_rh   = null;
-                pos.current_leaf.release();
-                pos.current_leaf = null;
             }
         }
-
-
-        // Need to do this unlock in any case, until lock manager provides
-        // a way to release locks associated with a compatibility space.  This
-        // scan lock is special, as it is a lock on the btree container rather
-        // than the heap container.  The open container on the btree actually
-        // has a null locking policy so the close of that container does not
-        // release this lock, need to explicitly unlock it here or when the
-        // scan is closed as part of the abort the lock will not be released.
-        unlockCurrentScan(pos);
 
         pos.current_slot = Page.INVALID_SLOT_NUMBER;
         pos.current_rh   = null;
@@ -834,15 +742,6 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
     BTreeRowPosition    pos)
         throws StandardException
     {
-
-        // Need to do this unlock in any case, until lock manager provides
-        // a way to release locks associated with a compatibility space.  This
-        // scan lock is special, as it is a lock on the btree container rather
-        // than the heap container.  The open container on the btree actually
-        // has a null locking policy so the close of that container does not
-        // release this lock, need to explicitly unlock it here or when the
-        // scan is closed as part of the abort the lock will not be released.
-        unlockCurrentScan(pos);
 
         pos.current_slot        = Page.INVALID_SLOT_NUMBER;
         pos.current_rh          = null;
@@ -1000,8 +899,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
      *       scan it is necessary to research the tree from the top using
      *       the copy of the row.
      *
-     * If the scan has saved it's position by key (and thus has given up the
-     * scan lock on the page), there are a few cases where it is possible that
+     * There are a few cases where it is possible that
      * the key no longer exists in the table.  In the case of a scan held 
      * open across commit it is easy to imagine that the row the scan was 
      * positioned on could be deleted and subsequently purged from the table 
@@ -1011,7 +909,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
      * opens scan and positions on row (1,2), transaction 2 deletes (1,2) and
      * commits, transaction 1 inserts (1,3) which goes to same page as (1,2)
      * and is going to cause a split, transaction 1 saves scan position as
-     * key, gives up scan lock and then purges row (1, 2), when transaction 
+     * key, and then purges row (1, 2), when transaction
      * 1 resumes scan (1, 2) no longer exists.  missing_row_for_key_ok 
      * parameter is added as a sanity check to make sure it ok that 
      * repositioning does not go to same row that we were repositioned on.
@@ -1048,17 +946,17 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
                 new Integer(this.scan_state));
         }
 
-        // Either current_rh or positionKey is valid - the other is null.
+        // positionKey is always valid
         if (SanityManager.DEBUG)
         {
-			if ((pos.current_rh == null) != (pos.current_positionKey != null))
+            if (pos.current_positionKey == null)
             	SanityManager.THROWASSERT(
                 	"pos.current_rh  = (" + pos.current_rh + "), " +
                 	"pos.current_positionKey = (" + 
                     pos.current_positionKey + ").");
         }
 
-        if (!((pos.current_rh == null) == (pos.current_positionKey != null)))
+        if (pos.current_positionKey == null)
         {
             throw StandardException.newException(
                     SQLState.BTREE_SCAN_INTERNAL_ERROR, 
@@ -1066,101 +964,71 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
                     new Boolean(pos.current_positionKey == null));
         }
 
-        if (pos.current_positionKey == null)
+        // If current_rh is non-null, we know the exact physical position of
+        // the scan before the latch on the leaf was released. Check if the
+        // row is still on that position so that we don't need to renavigate
+        // from the root of the B-tree in the common case.
+        if (pos.current_rh != null)
         {
             // Reposition to remembered spot on page.
-            if (SanityManager.DEBUG)
-                SanityManager.ASSERT(pos.current_scan_protectionHandle != null);
 
-            pos.current_leaf = (LeafControlRow)
-                ControlRow.get(this, pos.current_rh.getPageNumber());
-            pos.current_slot =
-                pos.current_leaf.page.getSlotNumber(pos.current_rh);
+            // Get the page object. If getPage() returns null, the page is
+            // not valid (could for instance have been removed by compress
+            // table) so we need to reposition by key instead.
+            Page page = container.getPage(pos.current_rh.getPageNumber());
+            if (page != null) {
+                ControlRow row =
+                        ControlRow.getControlRowForPage(container, page);
+                if (row instanceof LeafControlRow &&
+                        !row.page.isRepositionNeeded(pos.versionWhenSaved)) {
+                    // No rows have been moved off the page after we released
+                    // the latch, and the page is still a leaf page. No need
+                    // to reposition by key.
+                    pos.current_leaf = (LeafControlRow) row;
+                    pos.current_slot = row.page.getSlotNumber(pos.current_rh);
+                    pos.current_positionKey = null;
+                    return true;
+                }
+                // We couldn't use the position specified by current_rh, so we
+                // need to reposition by key and may find the row on another
+                // page. Therefore, give up the latch on this page.
+                row.release();
+            }
         }
-        else
-        {
-            // RESOLVE (mikem) - not sure but someday in the future this
-            // assert may not be true, but for now we always release the 
-            // scan lock when we save the row away as the current position.
-            if (SanityManager.DEBUG)
-                SanityManager.ASSERT(pos.current_scan_protectionHandle == null);
 
-            SearchParameters sp =
+        SearchParameters sp =
                 new SearchParameters(
                     pos.current_positionKey, 
                     // this is a full key search, so this arg is not used.
                     SearchParameters.POSITION_LEFT_OF_PARTIAL_KEY_MATCH,
                     init_template, this, false);
 
-            // latch/lock loop, continue until you can get scan lock on page
-            // while holding page latched without waiting.
-
-
-            boolean latch_released;
-            do
-            {
-                pos.current_leaf = (LeafControlRow)
+        pos.current_leaf = (LeafControlRow)
                     ControlRow.get(this, BTree.ROOTPAGEID).search(sp);
 
-                if (sp.resultExact || missing_row_for_key_ok)
-                {
-                    // RESOLVE (mikem) - we could have a scan which always 
-                    // maintained it's position by key value, or we could 
-                    // optimize and delay this lock until we were about to 
-                    // give up the latch.  But it is VERY likely we will get 
-                    // the lock since we have the latch on the page.
-                    //
-                    // In order to be successfully positioned we must get the 
-                    // scan lock again.
-                    latch_released = 
-                        !this.getLockingPolicy().lockScan(
-                            pos.current_leaf, 
-                            (LeafControlRow) null, // no other latch currently
-                            false /* not for update */,
-                            ConglomerateController.LOCK_READ); // read lock on scan position
+        if (!sp.resultExact && !missing_row_for_key_ok)
+        {
+            // Did not find key to exactly position on.
 
-                    // TESTING CODE:
-                    if (SanityManager.DEBUG)
-                    {
-                        latch_released = 
-                            test_errors(
-                                this,
-                                "BTreeScan_reposition", true, 
-                                this.getLockingPolicy(),
-                                pos.current_leaf, latch_released);
-                    }
-                }
-                else
-                {
-                    // Did not find key to exactly position on.
-
-                    pos.current_leaf.release();
-                    pos.current_leaf = null;
-                    return(false);
-                }
-
-            } while (latch_released);
-
-            pos.current_scan_protectionHandle =
-                pos.current_leaf.page.getProtectionRecordHandle();
-            pos.current_slot        = sp.resultSlot;
-            pos.current_positionKey = null;
+            pos.current_leaf.release();
+            pos.current_leaf = null;
+            return (false);
         }
+
+        pos.current_slot = sp.resultSlot;
+
+        // Need to update current_rh to the new position. current_rh should
+        // only be non-null if the row was locked when the position was saved,
+        // so we don't set it here if its old value is null.
+        if (pos.current_rh != null) {
+            pos.current_rh = pos.current_leaf.page.
+                    getRecordHandleAtSlot(pos.current_slot);
+        }
+
+        pos.current_positionKey = null;
 
         return(true);
 	}
-
-    /**
-     * Unlock the scan protection row for the current scan.
-     *
-     * @param pos position of the scan
-     */
-    private void unlockCurrentScan(BTreeRowPosition pos) {
-        if (pos.current_scan_protectionHandle != null) {
-            getLockingPolicy().unlockScan(pos.current_scan_protectionHandle);
-            pos.current_scan_protectionHandle = null;
-        }
-    }
 
 	/*
 	** Public Methods of BTreeScan
@@ -1340,7 +1208,6 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
                 boolean latch_released =
                     !this.getLockingPolicy().lockScanRow(
                         this, this.getConglomerate(), scan_position,
-                        false, 
                         init_lock_fetch_desc,
                         scan_position.current_lock_template,
                         scan_position.current_lock_row_loc,
@@ -1349,12 +1216,9 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
                 if (latch_released)
                 {
                     // lost latch on page in order to wait for row lock.
-                    // Because we have scan lock on page, we need only
-                    // call reposition() which will use the saved record
-                    // handle to reposition to the same spot on the page.
-                    // We don't have to search the
-                    // tree again, as we have the a scan lock on the page
-                    // which means the current_rh is valid to reposition on.
+                    // reposition() will take care of the complexity of
+                    // positioning on the correct page if the row has been
+                    // moved to another page.
                     if (reposition(scan_position, false))
                     {
                         throw StandardException.newException(
@@ -1414,8 +1278,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
             if (scan_position.current_leaf != null)
             {
                 // release latch on page
-                scan_position.current_leaf.release();
-                scan_position.current_leaf = null;
+                savePositionAndReleasePage();
             }
         }
 
@@ -1515,8 +1378,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
             if (scan_position.current_leaf != null)
             {
                 // release latch on page.
-                scan_position.current_leaf.release();
-                scan_position.current_leaf = null;
+                savePositionAndReleasePage();
             }
         }
     }
@@ -1592,8 +1454,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
             if (scan_position.current_leaf != null)
             {
                 // release latch on page.
-                scan_position.current_leaf.release();
-                scan_position.current_leaf = null;
+                savePositionAndReleasePage();
             }
         }
 
@@ -1707,8 +1568,7 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
             if (scan_position.current_leaf != null)
             {
                 // release latch on page.
-                scan_position.current_leaf.release();
-                scan_position.current_leaf = null;
+                savePositionAndReleasePage();
             }
         }
 
@@ -2097,34 +1957,9 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
         
         if (scan_position.current_rh != null)
         {
-            // reposition to get record handle if we don't have it.
-
-            if (!reposition(scan_position, false))
-            {
-                if (SanityManager.DEBUG)
-                {
-                    SanityManager.THROWASSERT(
-                        "can not fail while holding update row lock.");
-                }
-            }
-
             this.getLockingPolicy().unlockScanRecordAfterRead(
                 scan_position, init_forUpdate);
-
-            scan_position.current_rh   = null;
-            scan_position.current_leaf.release();
-            scan_position.current_leaf = null;
         }
-
-
-        // Need to do this unlock in any case, until lock manager provides
-        // a way to release locks associated with a compatibility space.  This
-        // scan lock is special, as it is a lock on the btree container rather
-        // than the heap container.  The open container on the btree actually
-        // has a null locking policy so the close of that container does not
-        // release this lock, need to explicitly unlock it here or when the
-        // scan is closed as part of the abort the lock will not be released.
-        unlockCurrentScan(scan_position);
 
         scan_position.current_slot = Page.INVALID_SLOT_NUMBER;
         scan_position.current_rh   = null;
@@ -2263,16 +2098,16 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
                 if (SanityManager.DEBUG)
                 {
                     SanityManager.ASSERT(scan_position != null);
+                    SanityManager.ASSERT(
+                            scan_position.current_positionKey != null,
+                            "Position must be saved by key when tx ends");
                 }
 
-                if (scan_position.current_positionKey == null)
-                {
-                    // save position of scan by key rather than location so 
-                    // that we can recover if the page with the position 
-                    // disappears while we don't have a scan lock.
+                // When the transaction ends, we release all the locks
+                // obtained in this scan, so the row we're positioned on is
+                // no longer locked.
+                scan_position.current_rh = null;
 
-                    savePosition();
-                }
                 this.scan_state = SCAN_HOLD_INPROGRESS;
             }
             else if (this.scan_state == SCAN_INIT)
@@ -2287,181 +2122,95 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
 	}
 
     /**
-     * Do work necessary to maintain the current position in the scan.
-     * <p>
-     * Save the current position of the scan as a key.
-     * Do whatever is necessary to maintain the current position of the scan.
-     * For some conglomerates this may be a no-op.
+     * Save the current scan position by key and release the latch on the leaf
+     * that's being scanned. This method should be called if the latch on a
+     * leaf needs to be released in the middle of the scan. The scan can
+     * later reposition to the saved position by calling {@code reposition()}.
      *
-     * <p>
-	 * @exception  StandardException  Standard exception policy.
-     **/
-    private void savePosition()
-		throws StandardException
-    {
-        if (this.scan_state == SCAN_INPROGRESS)
-        {
-            // Either current_rh or positionKey is valid - the other is null.
-            if (SanityManager.DEBUG)
-            {
-                SanityManager.ASSERT(
-                    (scan_position.current_rh == null) == 
-                    (scan_position.current_positionKey != null));
+     * @param partialKey known parts of the key that should be saved, or
+     * {@code null} if the entire key is unknown and will have to be fetched
+     * from the page
+     * @param vcols an array which tells which columns of the partial key are
+     * valid (key columns that have 0 in this array are not valid, and their
+     * values must be fetched from the page), or {@code null} if all the
+     * columns are valid
+     * @throws StandardException if an error occurs while saving the position
+     * @see #reposition(BTreeRowPosition, boolean)
+     */
+    void savePositionAndReleasePage(DataValueDescriptor[] partialKey,
+                                    int[] vcols)
+            throws StandardException {
+
+        final Page page = scan_position.current_leaf.getPage();
+
+        if (SanityManager.DEBUG) {
+            SanityManager.ASSERT(page.isLatched(), "Page is not latched");
+            SanityManager.ASSERT(scan_position.current_positionKey == null,
+                                 "Scan position already saved");
+
+            if (partialKey == null) {
+                SanityManager.ASSERT(vcols == null);
             }
-
-            try
-            {
-                if (scan_position.current_rh != null)
-                {
-                    // if scan position is not saved by key, then make it so.
-
-                    // must reposition to get the page latched.
-
-                    if (reposition(scan_position, false))
-                    {
-                        scan_position.current_positionKey = 
-                            runtime_mem.get_row_for_export(getRawTran());
-
-
-                        Page page = scan_position.current_leaf.getPage();
-
-
-                        RecordHandle rh =
-                            page.fetchFromSlot(
-                                (RecordHandle) null,
-                                page.getSlotNumber(scan_position.current_rh), 
-                                scan_position.current_positionKey, 
-                                (FetchDescriptor) null,
-                                true);
-
-                        if (SanityManager.DEBUG)
-                        {
-                            SanityManager.ASSERT(rh != null);
-                        }
-
-                        scan_position.current_rh = null;
-                        scan_position.current_slot = Page.INVALID_SLOT_NUMBER;
-
-                        // release scan lock now that the row is saved away.
-                        unlockCurrentScan(scan_position);
-
-                    }
-                    else
-                    {
-                        // this should never happen as we hold the scan lock
-                        // on the page while maintaining the position by 
-                        // recordhandle - reposition should always work in this
-                        // case.
-
-                        if (SanityManager.DEBUG)
-                            SanityManager.THROWASSERT(
-                                "Must always be able to reposition.");
-                    }
-                }
-
-            }
-            finally
-            {
-
-                if (scan_position.current_leaf != null)
-                {
-                    // release latch on page
-                    scan_position.current_leaf.release();
-                    scan_position.current_leaf = null;
-                }
+            if (vcols != null) {
+                SanityManager.ASSERT(partialKey != null);
+                SanityManager.ASSERT(vcols.length <= partialKey.length);
             }
         }
 
-    }
+        try {
+            DataValueDescriptor[] fullKey = scan_position.getKeyTemplate();
 
-    /**
-     * Do work necessary to maintain the current position in the scan.
-     * <p>
-     * The latched page in the conglomerate "congomid" is changing, do
-     * whatever is necessary to maintain the current position of the scan.
-     * For some conglomerates this may be a no-op.
-     * <p>
-     *
-     * @param conglom  Conglomerate object of the conglomerate being changed.
-     * @param page      Page in the conglomerate being changed.
-     *
-	 * @exception  StandardException  Standard exception policy.
-     **/
-    public void savePosition(Conglomerate conglom, Page page)
-        throws StandardException
-	{
-        // page should be latched by split.  This scan is assuming that latch
-        // and reading off it's key from the page under the split's latch.
-        // A lock should have already been gotten on this row.
-
-
-        if (SanityManager.DEBUG)
-        {
-            SanityManager.ASSERT(page.isLatched());
-        }
-
-        /*
-        System.out.println(
-            "Saving position in btree at top: " +
-            " this.conglomerate = " +  this.conglomerate        +
-            " this.scan_state   = " +  this.scan_state);
-        SanityManager.DEBUG_PRINT("savePosition()", 
-            "Saving position in btree at top: " +
-            " this.conglomerate = " +  this.conglomerate        +
-            " this.scan_state   = " +  this.scan_state);
-        */
-
-
-        if ((this.getConglomerate() == conglom) &&
-            (this.scan_state == SCAN_INPROGRESS))
-        {
-            // Either current_rh or positionKey is valid - the other is null.
-            if (SanityManager.DEBUG)
-            {
-                SanityManager.ASSERT(
-                    (scan_position.current_rh == null) == 
-                    (scan_position.current_positionKey != null));
+            FetchDescriptor fetchDescriptor = null;
+            boolean haveAllColumns = false;
+            if (partialKey != null) {
+                int copiedCols = 0;
+                final int partialKeyLength =
+                        (vcols == null) ? partialKey.length : vcols.length;
+                for (int i = 0; i < partialKeyLength; i++) {
+                    if (vcols == null || vcols[i] != 0) {
+                        fullKey[i].setValue(partialKey[i]);
+                        copiedCols++;
+                    }
+                }
+                if (copiedCols < fullKey.length) {
+                    fetchDescriptor =
+                            scan_position.getFetchDescriptorForSaveKey(
+                            vcols, fullKey.length);
+                } else {
+                    haveAllColumns = true;
+                }
             }
 
-            /*
-            SanityManager.DEBUG_PRINT("savePosition()", 
-                "Saving position in btree: " +
-                ";current_scan_pageno = " + this.current_scan_pageno +
-                "this.current_rh = " + this.current_rh +
-                ";page.getPageNumber() = " + page.getPageNumber() +
-                ((this.current_rh != null) ?
-                    (";this.current_rh.getPageNumber() = " +
-                     this.current_rh.getPageNumber()) : ""));
-            */
-
-            if (scan_position.current_rh != null &&
-                page.getPageNumber() == 
-                    scan_position.current_rh.getPageNumber())
-            {
-                scan_position.current_positionKey = 
-                    runtime_mem.get_row_for_export(getRawTran());
-
-                RecordHandle rh =
-                    page.fetchFromSlot(
+            if (!haveAllColumns) {
+                RecordHandle rh = page.fetchFromSlot(
                         (RecordHandle) null,
-                        page.getSlotNumber(scan_position.current_rh), 
-                        scan_position.current_positionKey, 
-                        (FetchDescriptor) null,
+                        scan_position.current_slot,
+                        fullKey,
+                        fetchDescriptor,
                         true);
 
-                if (SanityManager.DEBUG)
-                {
-                    SanityManager.ASSERT(rh != null);
+                if (SanityManager.DEBUG) {
+                    SanityManager.ASSERT(rh != null, "Row not found");
                 }
-
-                scan_position.current_rh = null;
-                scan_position.current_slot = Page.INVALID_SLOT_NUMBER;
-
-                // release the scan lock now that we have saved away the row.
-                unlockCurrentScan(scan_position);
             }
+
+            scan_position.current_positionKey = fullKey;
+            // Don't null out current_rh, we might be able to use it later if
+            // no rows are moved off the page.
+            //scan_position.current_rh = null;
+            scan_position.versionWhenSaved = page.getPageVersion();
+            scan_position.current_slot = Page.INVALID_SLOT_NUMBER;
+
+        } finally {
+            scan_position.current_leaf.release();
+            scan_position.current_leaf = null;
         }
-	}
+    }
+
+    /** Shortcut for for savePositionAndReleasePage(null,null). */
+    void savePositionAndReleasePage() throws StandardException {
+        savePositionAndReleasePage(null, null);
+    }
 
     public RecordHandle getCurrentRecordHandleForDebugging()
     {

@@ -29,8 +29,6 @@ import org.apache.derby.iapi.store.access.conglomerate.TransactionManager;
 
 import org.apache.derby.iapi.store.access.ConglomerateController;
 
-import org.apache.derby.iapi.store.access.TransactionController;
-
 import org.apache.derby.iapi.store.raw.FetchDescriptor;
 import org.apache.derby.iapi.store.raw.LockingPolicy;
 import org.apache.derby.iapi.store.raw.RecordHandle;
@@ -77,12 +75,6 @@ class B2IRowLocking3 implements BTreeLockingPolicy
     protected OpenBTree                     open_btree;
 
     /**
-     * The locking policy to use to get and release the scan locks.  We could
-     * cache this somewhere better.
-     **/
-    private LockingPolicy                   scan_locking_policy;
-
-    /**
      * The transaction to associate lock requests with.
      **/
     private Transaction                     rawtran;
@@ -101,43 +93,12 @@ class B2IRowLocking3 implements BTreeLockingPolicy
         this.rawtran             = rawtran;
         this.base_cc             = base_cc;
         this.open_btree          = open_btree;
-        this.scan_locking_policy = 
-            rawtran.newLockingPolicy(
-                LockingPolicy.MODE_RECORD, 
-                TransactionController.ISOLATION_READ_COMMITTED, true);
     }
 
     /**************************************************************************
      * Private methods of This class:
      **************************************************************************
      */
-
-    private boolean _lockScan(
-    RecordHandle    rh,
-    boolean         forUpdate,
-    boolean         wait)
-		throws StandardException
-    {
-        boolean ret_val = true;
-
-        // only get the scan lock if we are record locking.
-        
-        if (!forUpdate)
-        {
-            ret_val = 
-                scan_locking_policy.lockRecordForRead(
-                    rawtran, open_btree.getContainerHandle(), 
-                    rh, wait, false);
-        }
-        else
-        {
-            ret_val = 
-                scan_locking_policy.lockRecordForWrite(
-                    rawtran, rh, false, wait);
-        }
-
-        return(ret_val);
-    }
 
     /**
      * Lock key previous to first key in btree.
@@ -247,8 +208,8 @@ class B2IRowLocking3 implements BTreeLockingPolicy
      * @param current_slot      Slot of row to lock.
      * @param lock_fetch_desc   Descriptor for fetching just the RowLocation,
      *                          used for locking.
-     * @param check_changed_rowloc
-     *                          whether to check for the changed rowloc or not.
+     * @param position          The position to lock if the lock is requested
+     *                          while performing a scan, null otherwise.
      * @param lock_operation    Whether lock is for key prev to insert or not.
      * @param lock_duration     For what duration should the lock be held,
      *                          if INSTANT_DURATION, then the routine will
@@ -265,7 +226,7 @@ class B2IRowLocking3 implements BTreeLockingPolicy
     LeafControlRow          current_leaf,
     LeafControlRow          aux_leaf,
     int                     current_slot,
-    boolean                 check_changed_rowloc,
+    BTreeRowPosition        position,
     FetchDescriptor         lock_fetch_desc,
     DataValueDescriptor[]   lock_template,
     RowLocation             lock_row_loc,
@@ -302,6 +263,11 @@ class B2IRowLocking3 implements BTreeLockingPolicy
             SanityManager.ASSERT(
                 lock_row_loc == lock_template[lock_template.length - 1], 
                 "row_loc is not the object in last column of lock_template.");
+
+            if (position != null) {
+                SanityManager.ASSERT(current_leaf == position.current_leaf);
+                SanityManager.ASSERT(current_slot == position.current_slot);
+            }
         }
 
         // Fetch the row location to lock.
@@ -321,8 +287,16 @@ class B2IRowLocking3 implements BTreeLockingPolicy
         {
             // Could not get the lock NOWAIT, release latch and wait for lock.
 
-            if (current_leaf != null)
+            if (position != null)
             {
+                // since we're releasing the lock in the middle of a scan,
+                // save the current position of the scan before releasing the
+                // latch
+                position.saveMeAndReleasePage();
+            }
+            else if (current_leaf != null)
+            {
+                // otherwise, just release the latch
                 current_leaf.release();
                 current_leaf = null;
             }
@@ -436,7 +410,7 @@ class B2IRowLocking3 implements BTreeLockingPolicy
                             prev_leaf, 
                             current_leaf, 
                             prev_leaf.getPage().recordCount() - 1, 
-                            false, 
+                            null,
                             lock_fetch_desc,
                             lock_template,
                             lock_row_loc,
@@ -535,16 +509,12 @@ class B2IRowLocking3 implements BTreeLockingPolicy
      * Lock a row as part of doing the scan.
      * <p>
      * Lock the row at the given slot (or the previous row if slot is 0).
-     * Get the scan lock on the page if "request_scan_lock" is true.
      * <p>
      * If this routine returns true all locks were acquired while maintaining
      * the latch on leaf.  If this routine returns false, locks may or may
      * not have been acquired, and the routine should be called again after
      * the client has researched the tree to reget the latch on the 
      * appropriate page.
-     * (p>
-     * As a sided effect stores the value of the record handle of the current
-     * scan lock.
      *
 	 * @return Whether locks were acquired without releasing latch on leaf.
      *
@@ -553,8 +523,6 @@ class B2IRowLocking3 implements BTreeLockingPolicy
      * @param btree             the conglomerate info.
      * @param pos               The position of the row to lock.
      * @param request_row_lock  Whether to request the row lock, should
-     *                          only be requested once per page in the scan.
-     * @param request_scan_lock Whether to request the page scan lock, should
      *                          only be requested once per page in the scan.
      * @param lock_fetch_desc   The fetch descriptor to use to fetch the
      *                          row location for the lock request.
@@ -569,7 +537,6 @@ class B2IRowLocking3 implements BTreeLockingPolicy
     BTree                   btree,
     BTreeRowPosition        pos,
     boolean                 request_row_lock,
-    boolean                 request_scan_lock,
     FetchDescriptor         lock_fetch_desc,
     DataValueDescriptor[]   lock_template,
     RowLocation             lock_row_loc,
@@ -617,7 +584,11 @@ class B2IRowLocking3 implements BTreeLockingPolicy
                     latch_released = 
                         OpenBTree.test_errors(
                             open_btree,
-                            "B2iRowLocking3_1_lockScanRow",  false,
+                            "B2iRowLocking3_1_lockScanRow",
+                            null, // Don't save position since the operation
+                                  // will be retried if the latch was released.
+                                  // See also comment above call to
+                                  // lockNonScanPreviousRow().
                             this, pos.current_leaf, latch_released);
                 }
             }
@@ -631,7 +602,7 @@ class B2IRowLocking3 implements BTreeLockingPolicy
                         pos.current_leaf, 
                         (LeafControlRow) null /* no other latch currently */,
                         pos.current_slot, 
-                        true,
+                        pos,
                         lock_fetch_desc,
                         lock_template,
                         lock_row_loc,
@@ -644,37 +615,9 @@ class B2IRowLocking3 implements BTreeLockingPolicy
                     latch_released = 
                         OpenBTree.test_errors(
                             open_btree,
-                            "B2iRowLocking3_2_lockScanRow", false,
+                            "B2iRowLocking3_2_lockScanRow", pos,
                             this, pos.current_leaf, latch_released);
                 }
-            }
-        }
-
-        if (request_scan_lock && !latch_released)
-        {
-            // Get the scan lock on the start page.
-
-            // Get shared RECORD_ID_PROTECTION_HANDLE lock to make sure that
-            // we wait for scans in other transactions to move off of this page
-            // before we split.
-
-
-            latch_released = 
-                !lockScan(
-                    pos.current_leaf, 
-                    (LeafControlRow) null, // no other latch currently
-                    false,
-                    ConglomerateController.LOCK_READ);// read scan lock position
-
-            // special test to see if latch release code works
-            if (SanityManager.DEBUG)
-            {
-                /* RESOLVE - need to get a container here */
-                latch_released = 
-                    OpenBTree.test_errors(
-                        open_btree,
-                        "B2iRowLocking3_3_lockScanRow", true, 
-                        this, pos.current_leaf, latch_released);
             }
         }
 
@@ -689,104 +632,10 @@ class B2IRowLocking3 implements BTreeLockingPolicy
 
     /**************************************************************************
      * Abstract Protected lockScan*() locking methods of BTree:
-     *     lockScan                 - lock the scan page
-     *     lockScanForReclaimSpace  - lock page for reclaiming deleted rows.
-     *     lockScanRow              - lock row and possibly the scan page
-     *     unlockScan               - unlock the scan page
+     *     lockScanRow              - lock row
      *     unlockScanRecordAfterRead- unlock the scan record
      **************************************************************************
      */
-
-    /**
-     * Lock a control row page for scan.
-     * <p>
-     * Scanners get shared lock on the page while positioned on a row within
-     * the page, splitter/purgers/mergers get exclusive lock on the page.
-     *
-     * See BTree.lockScan() for more info.
-     *
-	 * @exception  StandardException  Standard exception policy.
-     **/
-    public boolean lockScan(
-    LeafControlRow          current_leaf,
-    ControlRow              aux_control_row,
-    boolean                 forUpdate,
-    int                     lock_operation)
-		throws StandardException
-    {
-        // The scan page lock is implemented as a row lock on the reserved
-        // row id on the page (RecordHandle.RECORD_ID_PROTECTION_HANDLE).
-        RecordHandle scan_lock_rh = 
-            current_leaf.getPage().getProtectionRecordHandle();
-
-        // First try to get the lock NOWAIT, while latch is held.
-        boolean ret_status = 
-            _lockScan(scan_lock_rh, forUpdate, false /* NOWAIT */);
-
-        if (!ret_status)
-        {
-            current_leaf.release();
-            current_leaf = null;
-
-            if (aux_control_row != null)
-            {
-                aux_control_row.release();
-                aux_control_row = null;
-            }
-
-            // Could not get the lock NOWAIT, release latch and wait
-            // for the lock.
-            _lockScan(scan_lock_rh, forUpdate, true /* WAIT */);
-
-            // once we get the lock, give it up as we need to get the lock
-            // while we have the latch.  When the lock manager gives us the
-            // ability to do instantaneous locks do that.  We just wait on the
-            // lock to give the split a chance to finish before we interfere.
-
-            if (!forUpdate)
-            {
-                scan_locking_policy.unlockRecordAfterRead(
-                    rawtran, open_btree.getContainerHandle(), 
-                    scan_lock_rh, false, true);
-            }
-            else
-            {
-                // RESOLVE - need instantaneous locks as there is no way 
-                // currently to release a write lock.  This lock will only
-                // be requested by split, and will be released by internal
-                // transaction.
-            }
-        }
-
-        return(ret_status);
-    }
-
-    /**
-     * Lock a control row page for reclaiming deleted rows.
-     * <p>
-     * When reclaiming deleted rows during split need to get an exclusive
-     * scan lock on the page, which will mean there are no other scans 
-     * positioned on the page.  If there are other scans positioned, just
-     * give up on reclaiming space now.
-     *
-	 * @return true if lock was granted nowait, else false and not lock was
-     *         granted.
-     *
-	 * @exception  StandardException  Standard exception policy.
-     **/
-    public boolean lockScanForReclaimSpace(
-    LeafControlRow          current_leaf)
-		throws StandardException
-    {
-        // The scan page lock is implemented as a row lock on the reserved
-        // row id on the page (RecordHandle.RECORD_ID_PROTECTION_HANDLE).
-        RecordHandle scan_lock_rh = 
-            current_leaf.getPage().getProtectionRecordHandle();
-
-        // First try to get the lock NOWAIT, while latch is held.
-        return(
-            _lockScan(scan_lock_rh, true /* update */, false /* NOWAIT */));
-    }
 
     /**
      * Lock a btree row to determine if it is a committed deleted row.
@@ -837,16 +686,12 @@ class B2IRowLocking3 implements BTreeLockingPolicy
      * Lock a row as part of doing the scan.
      * <p>
      * Lock the row at the given slot (or the previous row if slot is 0).
-     * Get the scan lock on the page if "request_scan_lock" is true.
      * <p>
      * If this routine returns true all locks were acquired while maintaining
      * the latch on leaf.  If this routine returns false, locks may or may
      * not have been acquired, and the routine should be called again after
      * the client has researched the tree to reget the latch on the 
      * appropriate page.
-     * (p>
-     * As a sided effect stores the value of the record handle of the current
-     * scan lock.
      *
 	 * @return Whether locks were acquired without releasing latch on leaf.
      *
@@ -854,8 +699,6 @@ class B2IRowLocking3 implements BTreeLockingPolicy
      *                          used if routine has to scan backward.
      * @param btree             the conglomerate info.
      * @param pos               The position of the row to lock.
-     * @param request_scan_lock Whether to request the page scan lock, should
-     *                          only be requested once per page in the scan.
      * @param lock_template     A scratch area to use to read in rows.
      * @param previous_key_lock Is this a previous key lock call?
      * @param forUpdate         Is the scan for update or for read only.
@@ -866,7 +709,6 @@ class B2IRowLocking3 implements BTreeLockingPolicy
     OpenBTree               open_btree,
     BTree                   btree,
     BTreeRowPosition        pos,
-    boolean                 request_scan_lock,
     FetchDescriptor         lock_fetch_desc,
     DataValueDescriptor[]   lock_template,
     RowLocation             lock_row_loc,
@@ -881,7 +723,6 @@ class B2IRowLocking3 implements BTreeLockingPolicy
                 btree,
                 pos,
                 true,  // request the row lock (always true for iso 3 )
-                request_scan_lock,
                 lock_fetch_desc,
                 lock_template,
                 lock_row_loc,
@@ -903,32 +744,6 @@ class B2IRowLocking3 implements BTreeLockingPolicy
 		throws StandardException
     {
         return;
-    }
-
-    /**
-     * Release the lock gotten by calling lockScan.  This call can only be
-     * made to release read scan locks, write scan locks must be held until
-     * end of transaction.
-     * <p>
-     * See BTree.unlockScan() for more info.
-     *
-     **/
-    public void unlockScan(RecordHandle scan_lock_rh)
-    {
-        // This is first row in table, lock the special key that 
-        // represents the key previous to the first key of the table.
-        try
-        {
-            scan_locking_policy.unlockRecordAfterRead(
-                rawtran, open_btree.getContainerHandle(), 
-                scan_lock_rh, false, true);
-        }
-        catch (StandardException se)
-        {
-			if (SanityManager.DEBUG)
-				SanityManager.THROWASSERT(se);
-        }
-
     }
 
     /**************************************************************************
@@ -976,7 +791,7 @@ class B2IRowLocking3 implements BTreeLockingPolicy
                     btree,
                     current_leaf, (LeafControlRow) null, 
                     current_slot - 1,
-                    false,
+                    null,
                     lock_fetch_desc,
                     lock_template,
                     lock_row_loc,
@@ -1094,7 +909,7 @@ class B2IRowLocking3 implements BTreeLockingPolicy
                 current_leaf,
                 null,
                 current_slot,
-                false,
+                null,
                 lock_fetch_desc,
                 lock_template,
                 lock_row_loc,

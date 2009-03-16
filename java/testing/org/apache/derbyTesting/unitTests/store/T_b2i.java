@@ -3064,9 +3064,7 @@ public class T_b2i extends T_MultiIterations
         String[] latch_debug_strings = {
             "B2iRowLocking3_1_lockScanRow1",
             "B2iRowLocking3_2_lockScanRow1",
-            "B2iRowLocking3_3_lockScanRow1",
             "BTreeScan_positionAtStartPosition1",
-            "BTreeScan_positionAtNextPage1",
             // "BTreeScan_reposition1",
             "BTreeScan_fetchNextGroup1",
         };
@@ -3210,10 +3208,8 @@ public class T_b2i extends T_MultiIterations
         String[] deadlock_debug_strings = {
             "B2iRowLocking3_1_lockScanRow2",
             "B2iRowLocking3_2_lockScanRow2",
-            "B2iRowLocking3_3_lockScanRow2",
             // "BTreeController_doIns2",
             "BTreeScan_positionAtStartPosition2",
-            "BTreeScan_positionAtNextPage2",
             // "BTreeScan_reposition2",
             "BTreeScan_fetchNextGroup2"
         };

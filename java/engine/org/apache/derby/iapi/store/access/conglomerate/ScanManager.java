@@ -170,21 +170,4 @@ public interface ScanManager extends ScanController, GroupFetchScanController
     int[]                   key_column_numbers,
     BackingStoreHashtable   hash_table)
         throws StandardException;
-
-
-    /**
-     * Do work necessary to maintain the current position in the scan.
-     * <p>
-     * The latched page in the conglomerate "congomid" is changing, do
-     * whatever is necessary to maintain the current position of the scan.
-     * For some conglomerates this may be a no-op.
-     * <p>
-     *
-     * @param conglom   Conglomerate object of the conglomerate being changed.
-     * @param page      Page in the conglomerate being changed.
-     *
-	 * @exception  StandardException  Standard exception policy.
-     **/
-    public void savePosition(Conglomerate conglom, Page page)
-        throws StandardException;
 }

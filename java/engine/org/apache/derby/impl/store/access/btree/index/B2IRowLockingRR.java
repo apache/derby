@@ -69,16 +69,12 @@ class B2IRowLockingRR extends B2IRowLocking3 implements BTreeLockingPolicy
      * Lock a row as part of doing the scan.
      * <p>
      * Lock the row at the given slot (or the previous row if slot is 0).
-     * Get the scan lock on the page if "request_scan_lock" is true.
      * <p>
      * If this routine returns true all locks were acquired while maintaining
      * the latch on leaf.  If this routine returns false, locks may or may
      * not have been acquired, and the routine should be called again after
      * the client has researched the tree to reget the latch on the 
      * appropriate page.
-     * (p>
-     * As a side effect stores the value of the record handle of the current
-     * scan lock.
      *
 	 * @return Whether locks were acquired without releasing latch on leaf.
      *
@@ -86,8 +82,6 @@ class B2IRowLockingRR extends B2IRowLocking3 implements BTreeLockingPolicy
      *                          used if routine has to scan backward.
      * @param btree             the conglomerate info.
      * @param pos               The position of the row to lock.
-     * @param request_scan_lock Whether to request the page scan lock, should
-     *                          only be requested once per page in the scan.
      * @param lock_template     A scratch area to use to read in rows.
      * @param previous_key_lock Is this a previous key lock call?
      * @param forUpdate         Is the scan for update or for read only.
@@ -98,7 +92,6 @@ class B2IRowLockingRR extends B2IRowLocking3 implements BTreeLockingPolicy
     OpenBTree               open_btree,
     BTree                   btree,
     BTreeRowPosition        pos,
-    boolean                 request_scan_lock,
     FetchDescriptor         lock_fetch_desc,
     DataValueDescriptor[]   lock_template,
     RowLocation             lock_row_loc,
@@ -115,7 +108,6 @@ class B2IRowLockingRR extends B2IRowLocking3 implements BTreeLockingPolicy
                 btree,
                 pos,
                 !previous_key_lock, // request row lock iff not prev key lock 
-                request_scan_lock,
                 lock_fetch_desc, lock_template, lock_row_loc,
                 previous_key_lock,
                 forUpdate,
@@ -148,8 +140,6 @@ class B2IRowLockingRR extends B2IRowLocking3 implements BTreeLockingPolicy
         {
             if (SanityManager.DEBUG)
             {
-                SanityManager.ASSERT(pos.current_leaf != null , "leaf is null");
-
                 SanityManager.ASSERT(
                     pos.current_lock_row_loc != null , "row_loc is null");
             }
