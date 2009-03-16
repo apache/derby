@@ -60,9 +60,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(OfflineBackupTest.suite());
         suite.addTest(LiveLockTest.suite());
         suite.addTest(ClobReclamationTest.suite());
-
-        // Disabled until DERBY-2991 has been fixed
-        //suite.addTest(IndexSplitDeadlockTest.suite());
+        suite.addTest(IndexSplitDeadlockTest.suite());
 
         // Encryption only supported for Derby in J2SE/J2EE environments.
         // J2ME (JSR169) does not support encryption.
