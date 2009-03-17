@@ -599,12 +599,10 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
         rs.next();
         String plan = rs.getString(1);
 
-        String nl = System.getProperty("line.separator");
-
         // Verify that the plan shows the filtering (2 rows of 3 seen):
-        assertTrue(plan.indexOf("Row Count (1):" + nl +
-                                "Number of opens = 1" + nl +
-                                "Rows seen = 3" + nl +
+        assertTrue(plan.indexOf("Row Count (1):\n" +
+                                "Number of opens = 1\n" +
+                                "Rows seen = 3\n" +
                                 "Rows filtered = 2") != -1);
 
         rs.close();
