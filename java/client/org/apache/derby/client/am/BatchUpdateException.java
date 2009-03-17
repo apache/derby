@@ -37,7 +37,7 @@ public class BatchUpdateException extends java.sql.BatchUpdateException {
         SqlException.getMessageUtil();
 
     public BatchUpdateException(LogWriter logWriter, ClientMessageId msgid,
-        Object[] args, int[] updateCounts)
+        Object[] args, int[] updateCounts, SqlException cause)
     {
         super(
             msgutil_.getCompleteMessage(
@@ -50,10 +50,20 @@ public class BatchUpdateException extends java.sql.BatchUpdateException {
         if (logWriter != null) {
             logWriter.traceDiagnosable(this);
         }
+
+        if (cause != null) {
+            initCause(cause);
+            setNextException(cause.getSQLException());
+        }
     }
     
     // Syntactic sugar constructors to make it easier to create
     // a BatchUpdateException with substitution parameters
+    public BatchUpdateException(LogWriter logWriter, ClientMessageId msgid,
+        Object[] args, int[] updateCounts) {
+        this(logWriter, msgid, args, updateCounts, null);
+    }
+
     public BatchUpdateException(LogWriter logWriter, ClientMessageId msgid,
         int[] updateCounts)
     {
