@@ -22,6 +22,8 @@
 
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.sql.BatchUpdateException;
 import java.sql.CallableStatement;
 import java.sql.Connection;
@@ -1487,5 +1489,36 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
         rollback();
         conn2.rollback();
         conn2.close();
+    }
+
+    /**
+     * Test that the underlying exception is included in the output when we
+     * call printStackTrace() on a BatchUpdateException. Earlier, with the
+     * client driver, the underlying cause of a BatchUpdateException could not
+     * be seen without calling getNextException().
+     */
+    public void testUnderlyingExceptionIsVisible() throws SQLException {
+        setAutoCommit(false);
+        Statement s = createStatement();
+        s.addBatch("create table t(x int unique not null)");
+        for (int i = 0; i < 3; i++) {
+            s.addBatch("insert into t values 1");
+        }
+
+        BatchUpdateException bue = null;
+        try {
+            s.executeBatch();
+        } catch (BatchUpdateException e) {
+            bue = e;
+        }
+        assertNotNull("Did not get duplicate key exception", bue);
+
+        StringWriter w = new StringWriter();
+        bue.printStackTrace(new PrintWriter(w, true));
+
+        String stackTrace = w.toString();
+        if (stackTrace.indexOf("duplicate key") == -1) {
+            fail("Could not see 'duplicate key' in printStackTrace()", bue);
+        }
     }
 }

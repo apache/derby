@@ -267,11 +267,9 @@ public abstract class Agent {
             }
         }
         if (accumulatedExceptions != null) {
-            BatchUpdateException bue = new BatchUpdateException(logWriter_,
+            throw new BatchUpdateException(logWriter_,
                 new ClientMessageId(SQLState.BATCH_NON_ATOMIC_FAILURE),
-                updateCounts);
-            bue.setNextException(accumulatedExceptions.getSQLException());
-            throw bue;
+                null, updateCounts, accumulatedExceptions);
         }
     }
 }
