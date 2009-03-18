@@ -30,9 +30,6 @@ grant codeBase "${derby.install.url}derby.jar"
   permission java.util.PropertyPermission "user.dir", "read";
   permission java.util.PropertyPermission "derby.storage.jvmInstanceId", 
       "write"; 
-  // The next two properties are used to determine if the VM is 32 or 64 bit.
-  permission java.util.PropertyPermission "sun.arch.data.model", "read";
-  permission java.util.PropertyPermission "os.arch", "read";
   permission java.io.FilePermission "${derby.system.home}","read";
   permission java.io.FilePermission "${derby.system.home}${/}-", "read,write,delete";
 
