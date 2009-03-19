@@ -1669,16 +1669,18 @@ class DDMReader
 	private void ensureBLayerDataInBuffer (int desiredDataSize, boolean adjustLen) 
 		throws DRDAProtocolException
 	{
-		ensureALayerDataInBuffer (desiredDataSize);
-		if (dssIsContinued) 
-		{
-			if (desiredDataSize > dssLength) 
-			{
-				int continueDssHeaderCount =
-					(((desiredDataSize - dssLength) / DssConstants.MAX_DSS_LENGTH) + 1);
-				compressBLayerData (continueDssHeaderCount);
-			}
-		}
+        if (dssIsContinued && (desiredDataSize > dssLength)) {
+            // The data that we want is split across multiple DSSs
+            int continueDssHeaderCount =
+                (desiredDataSize - dssLength) / DssConstants.MAX_DSS_LENGTH + 1;
+            // Account for the extra header bytes (2 length bytes per DSS)
+            ensureALayerDataInBuffer(
+                    desiredDataSize + 2 * continueDssHeaderCount);
+            compressBLayerData(continueDssHeaderCount);
+        } else {
+            ensureALayerDataInBuffer(desiredDataSize);
+        }
+
 		if (adjustLen)
 			adjustLengths(desiredDataSize);
 	}
