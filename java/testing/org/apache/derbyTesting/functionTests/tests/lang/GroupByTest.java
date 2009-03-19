@@ -110,6 +110,15 @@ public class GroupByTest extends BaseJDBCTestCase {
 		st.execute("INSERT INTO d3904_T2 VALUES" +
 				"( DATE( '2008-10-01' ), 'something' )" ); 
 
+        st.executeUpdate("create table d4071(i int, v char(10))");
+        st.executeUpdate("insert into d4071 " +
+                         "       values (1, '0123456789')," +
+                         "              (1, '1234567890')," +
+                         "              (3, '2345678901')," +
+                         "              (4, '0123456789')," +
+                         "              (5, '1234567890')");
+
+
         // create an all types tables
         
         st.executeUpdate(
@@ -2010,5 +2019,20 @@ public class GroupByTest extends BaseJDBCTestCase {
 					"FROM d3904_T1, D3904_T2 WHERE d3904_T1.D1='2008-10-02'"),
             new String[][] {  {"2008-10-02"} } );
 	}
-}
 
+
+    /**
+     * Test aggregate function on a GROUP BY column also present in a HAVING
+     * clause.  Iff the GROUP BY column is not the first column in the table,
+     * this would fail before DERBY-4071 was fixed.
+     *
+     * @throws SQLException
+     */
+    public void testDerby4071AggregateOnGroupByColumnInHaving() throws SQLException {
+         Statement s = createStatement();
+         ResultSet rs = s.executeQuery("SELECT MAX(i), COUNT(T.V) FROM d4071 T " +
+                                       "    GROUP BY T.V HAVING COUNT(T.V) > 1");
+         
+         JDBC.assertFullResultSet(rs, new String[][] {{"4","2"},{"5","2"}});
+    }
+}

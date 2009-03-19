@@ -336,12 +336,17 @@ public class GroupByNode extends SingleChildResultSetNode
 	}
 
 	/**
-	 * In the query rewrite for group by, add the columns on which
-	 * we are doing the group by.
-
+	 * In the query rewrite for group by, add the columns on which we are doing
+	 * the group by.
+	 *
+	 * @return havingRefsToSubstitute visitors array. Return any
+	 *         havingRefsToSubstitute visitors since it is too early to apply
+	 *         them yet; we need the AggregateNodes unmodified until after
+	 *         we add the new columns for aggregation (DERBY-4071).
+	 *
 	 * @see #addNewColumnsForAggregation
 	 */
-	private void addUnAggColumns() throws StandardException
+	private ArrayList addUnAggColumns() throws StandardException
 	{
 		ResultColumnList bottomRCL  = childResult.getResultColumns();
 		ResultColumnList groupByRCL = resultColumns;
@@ -452,10 +457,13 @@ public class GroupByNode extends SingleChildResultSetNode
 		if (havingRefsToSubstitute != null)
 		{
 			Collections.sort(havingRefsToSubstitute,sorter);
-			for (int r = 0; r < havingRefsToSubstitute.size(); r++)
-				havingClause.accept(
-					(SubstituteExpressionVisitor)havingRefsToSubstitute.get(r));
-}
+			// DERBY-4071 Don't substitute quite yet; we need the AggrateNodes
+			// undisturbed until after we have had the chance to build the
+			// other columns.  (The AggrateNodes are shared via an alias from
+			// aggregateVector and from the expression tree under
+			// havingClause).
+		}
+		return havingRefsToSubstitute;
 	}
 
 	/**
@@ -535,11 +543,26 @@ public class GroupByNode extends SingleChildResultSetNode
 		throws StandardException
 	{
 		aggInfo = new AggregatorInfoList();
+		ArrayList havingRefsToSubstitute = null;
+
 		if (groupingList != null)
 		{
-			addUnAggColumns();
+			havingRefsToSubstitute = addUnAggColumns();
 		}
+
+		addAggregateColumns();
+
 		if (havingClause != null) {
+
+			// Now do the substitution of the group by expressions in the
+			// having clause.
+			if (havingRefsToSubstitute != null) {
+				for (int r = 0; r < havingRefsToSubstitute.size(); r++) {
+					havingClause.accept(
+						(SubstituteExpressionVisitor)havingRefsToSubstitute.get(r));
+				}
+			}
+
 			// we have replaced group by expressions in the having clause.
 			// there should be no column references in the having clause 
 			// referencing this table. Skip over aggregate nodes.
@@ -565,7 +588,7 @@ public class GroupByNode extends SingleChildResultSetNode
 				}
 			}
 		}
-		addAggregateColumns();
+
 	}
 	
 	/**
@@ -650,7 +673,7 @@ public class GroupByNode extends SingleChildResultSetNode
 			** Set the GB aggregrate result column to
 			** point to this.  The GB aggregate result
 			** was created when we called
-			** ReplaceAggregatesWithColumnReferencesVisitor()
+			** ReplaceAggregatesWithCRVisitor()
 			*/
 			newColumnRef = (ColumnReference) getNodeFactory().getNode(
 					C_NodeTypes.COLUMN_REFERENCE,
