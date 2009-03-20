@@ -136,6 +136,31 @@ public class BlockedByteArrayTest
         assertEquals(44444, src.length());
     }
 
+    /**
+     * Performs a series of capacity changes.
+     *
+     * @throws IOException if something goes wrong
+     */
+    public void testCapacityGrowth()
+            throws IOException {
+        BlockedByteArray src = createBlockedByteArray(0);
+        src.setLength(1*1024*1024); // 1 MB
+        src.setLength(10*1024*1024); // 10 MB
+        src.setLength(5*1024*1024); // 5 MB
+        src.setLength(7*1024*1024); // 7 MB
+        assertEquals(7*1024*1024L, src.length());
+        src.setLength(75*1024*1024); // 75 MB
+        src.setLength(0); // 0 bytes
+        assertEquals(0L, src.length());
+        src.setLength(39*1024*1024); // 39 MB
+        src.setLength(39*1024*1024+1); // 39 MB +1 B
+        assertEquals(39*1024*1024+1L, src.length());
+        src.setLength(39*1024*1024); // 39 MB
+        src.setLength(39*1024*1024); // 39 MB
+        src.setLength(-1); // Invalid value - causes array to be truncated.
+        assertEquals(0L, src.length());
+    }
+
     public static Test suite() {
         return new TestSuite(BlockedByteArrayTest.class);
     }

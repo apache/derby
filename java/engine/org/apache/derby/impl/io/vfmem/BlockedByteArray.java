@@ -21,20 +21,13 @@
 
 package org.apache.derby.impl.io.vfmem;
 
+import org.apache.derby.shared.common.sanity.SanityManager;
+
 /**
  * Stores data in blocks, and supports reading/writing data from/into these
  * blocks.
  * <p>
  * The blocked array is expanded and shrunk as required.
- * <p>
- * The current implementation has a size limit of
- * {@code INITIAL_BLOCK_HOLDER_SIZE * blockSize}. For the default values, this
- * gives:
- * <ul> <li>4 KB blocks: 256 MB
- *      <li>8 KB blocks: 512 MB
- *      <li>16 KB blocks: 1024 MB
- *      <li>32 KB blocks: 2048 MB
- * </ul>
  */
 public class BlockedByteArray {
 
@@ -50,7 +43,12 @@ public class BlockedByteArray {
     private static final int DEFAULT_BLOCKSIZE = _4K;
 
     /** The default number of slots for holding a block of data. */
-    private static final int INITIAL_BLOCK_HOLDER_SIZE = 64*1024;
+    private static final int INITIAL_BLOCK_HOLDER_SIZE = 1024;
+    /**
+     * Minimum number of holder slots to grow with when the block holder array
+     * has to grow to be able to reference all the data arrays.
+     */
+    private static final int MIN_HOLDER_GROWTH = 1024;
 
     /** References to blocks of data. */
     private byte[][] blocks;
@@ -89,7 +87,7 @@ public class BlockedByteArray {
     }
 
     /**
-     * Reads the up to {@code len} bytes.
+     * Reads up to {@code len} bytes.
      *
      * @param pos the position to start reading at
      * @param buf the destination buffer
@@ -141,6 +139,10 @@ public class BlockedByteArray {
      * @param newLength the new length of the allocated data in bytes
      */
     public synchronized void setLength(final long newLength) {
+        // If capacity is requested before any writes has taken place.
+        if (blockSize == 0) {
+            checkBlockSize((int)Math.min(Integer.MAX_VALUE, newLength));
+        }
         final long currentCapacity = allocatedBlocks * blockSize;
         if (newLength > currentCapacity) {
             // Allocate more blocks.
@@ -157,6 +159,8 @@ public class BlockedByteArray {
                     blocks[i] = null;
                 }
                 allocatedBlocks = Math.min(allocatedBlocks, blocksToKeep);
+                // We keep the holder slots around, since the overhead for
+                // doing so is pretty small.
             }
         }
         length = Math.max(0L, newLength);
@@ -293,6 +297,9 @@ public class BlockedByteArray {
      */
     //@GuardedBy("this")
     private void increaseCapacity(long lastIndex) {
+        if (SanityManager.DEBUG) {
+            SanityManager.ASSERT(blockSize > 0, "Invalid/unset block size");
+        }
         // Safe-guard to avoid overwriting existing data.
         if (lastIndex < allocatedBlocks * blockSize) {
             return;
@@ -301,13 +308,20 @@ public class BlockedByteArray {
         // We may allocate one more array than required.
         final int blocksRequired = (int)((lastIndex) / blockSize) +1;
         if (blocksRequired > blocks.length) {
-            // TODO: Thrown an OOME or do something else here?
-            //       If we let the array grow unbounded, the JVM would throw
-            //       the OOME when get into the situation that all the
-            //       available memory is exhausted.
-            throw new IllegalStateException("Too big: ~" +
-                    ((lastIndex) / 1024 / 1024) + " MB");
+            // Grow the block holder array.
+            // Make sure we have enough slots. Note that we only grow the block
+            // holder array, we don't fill it with data blocks before needed.
+            int growTo = Math.max(
+                    // Grow at least ~33%.
+                    blocks.length + (blocks.length / 3),
+                    // For cases where we need to grow more than 33%.
+                    blocksRequired + MIN_HOLDER_GROWTH);
+            byte[][] tmpBlocks = blocks;
+            blocks = new byte[growTo][];
+            // Copy the data array references.
+            System.arraycopy(tmpBlocks, 0, blocks, 0, allocatedBlocks);
         }
+        // Allocate new data arrays to accomodate lastIndex bytes.
         for (int i=allocatedBlocks; i < blocksRequired; i++) {
             blocks[i] = new byte[blockSize];
         }
