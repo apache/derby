@@ -196,7 +196,7 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
      *
      * @param s string denoting the SSL mode
      * @return A constant indicating the SSL mode denoted by the string. If the
-     *      string is {@code null}, {@link #SSL_OFF} is returned.
+     *      string is <code>null</code>, {@link #SSL_OFF} is returned.
      * @throws SqlException if the string has an invalid value
      */
     public static final int getSSLModeFromString(String s) 
