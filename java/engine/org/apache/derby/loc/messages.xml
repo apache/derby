@@ -4434,7 +4434,7 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
 
             <msg>
                 <name>XJ073.S</name>
-                <text>The data in this BLOB or CLOB is no longer available.  The BLOB/CLOB's transaction may be committed, or its connection is closed.</text>
+                <text>The data in this BLOB or CLOB is no longer available.  The BLOB/CLOB's transaction may be committed, its connection closed or it has been freed.</text>
             </msg>
 
             <msg>
