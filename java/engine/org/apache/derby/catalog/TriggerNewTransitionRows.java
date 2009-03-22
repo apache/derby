@@ -62,6 +62,13 @@ public final class TriggerNewTransitionRows extends org.apache.derby.vti.Updatab
 	 */
 	public TriggerNewTransitionRows() throws SQLException
 	{
+		initializeResultSet();
+	}
+
+	private ResultSet initializeResultSet() throws SQLException {
+		if (resultSet != null)
+			resultSet.close();
+		
 		TriggerExecutionContext tec = Factory.getTriggerExecutionContext();
 		if (tec == null)
 		{
@@ -73,15 +80,18 @@ public final class TriggerNewTransitionRows extends org.apache.derby.vti.Updatab
 		{
 			throw new SQLException("There is no new transition rows result set for this trigger", "38000");
 		}
-    }
+		return resultSet;
+	}
     
     public ResultSetMetaData getMetaData() throws SQLException
     {
         return resultSet.getMetaData();
     }
     
-   public ResultSet executeQuery() {
-       return resultSet;
+   public ResultSet executeQuery() throws SQLException {
+	   //DERBY-4095. Need to reinititialize ResultSet on 
+       //executeQuery, in case it was closed in a NESTEDLOOP join.
+       return initializeResultSet();
    }
     
    public int getResultSetConcurrency() {
