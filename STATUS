@@ -28,7 +28,7 @@ Project info
 
 Releases from trunk:
 
- * 10.5.0.0 : In development 
+ * 10.5.0.0 : 10.5 branch created on 2009-03-16
  * 10.4.2.0 : Released 2008-09-05
  * 10.4.1.3 : Released 2008-04-24
  * 10.3.3.0 : Released 2008-05-12
@@ -49,46 +49,22 @@ None.
 RESOLVED ISSUES SINCE LAST STATUS
 =================================
 
-New committers:
-
-V. Narayanan
-Jørgen Løland
-Thomas Nielsen
-John Embretsen
-Camilla Haase
+None.
 
 RECENT VOTES
 =================================
-V. Narayanan elected as a committer
-   April 11, 2008
-   See http://www.nabble.com/-RESULT---VOTE--V.-Narayanan-as-a-committer--tt16622866.html#a16622866
 
-Jørgen Løland elected as a committer
-   April 11, 2008
-   See http://www.nabble.com/-RESULT---VOTE--J%C3%B8rgen-L%C3%B8land-as-a-committer--tt16622854.html#a16622854
-
-Thomas Nielsen elected as a committer
-   April 5, 2008
-   See http://www.nabble.com/-RESULT---VOTE--Thomas-Nielsen-as-a-Derby-committer-tt16508562.html#a16508562
-
-John Embretsen elected as a committer
-   April 4, 2008
-   See http://www.nabble.com/-VOTE--John-H-Embretsen-as-a-Derby-committer-tt16308653.html#a16500937
-
-Camilla Haase elected as a committer
-   March 11, 2008
-   See http://www.nabble.com/-RESULT---VOTE--Kim-Haase-as-a-committer-tt15982963.html#a15982963
-  
+None.  
 
 OTHER NEWS
 ==========
 
-
+The 10.5 release will introduce an experimental in-memory database. User feedback is welcome. See http://wiki.apache.org/db-derby/InMemoryBackEndPrimer
 
 RELEASE STATUS
 ==============
 
-Derby 10.5.0.0 is open for development.
+A 10.5 branch was created on 2009-03-16.
 
 No currently outstanding issues.
 
