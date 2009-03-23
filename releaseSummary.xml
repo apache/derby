@@ -31,7 +31,7 @@ with real information.
 
     E.g.: 10.3.0.3
 -->
-<releaseID>10.3.0.0</releaseID>
+<releaseID>10.5.1.0</releaseID>
 
 <!--
     Identifier of previous release. The release notes describe the
@@ -40,30 +40,30 @@ with real information.
     E.g.: 10.2.1.7
 
 -->
-<previousReleaseID>10.2.2.0</previousReleaseID>
+<previousReleaseID>10.4.2.0</previousReleaseID>
+
+<!--
+    Information on the system used to build the release.
+-->
 
 <buildInfo>
 
   <!-- Name of the branch. E.g.: 10.3 -->
-  <branch>10.3</branch>
+  <branch>10.5</branch>
 
   <!-- Machine environment. E.g.:  Cygwin on Microsoft Windows XP Professional Version 2002 Service Pack 2. -->
-  <machine>Cygwin on Microsoft Windows XP Professional Version 2002 Service Pack 2.</machine>
+  <machine>Microsoft Windows XP Professional Version 2002 Service Pack 2.</machine>
 
   <!-- Ant version. E.g.:  Apache Ant version 1.6.5 compiled on June 2 2005. -->
-  <antVersion>Apache Ant version 1.6.5 compiled on June 2 2005.</antVersion>
+  <antVersion>Apache Ant version 1.7.0 compiled on December 13 2006.</antVersion>
 
   <!-- Output of "java -version" run from your jdk1.4 installation. E.g.:  Java(TM) 2 Runtime Environment, Standard Edition (build 1.4.2_12-b03). -->
-  <jdk1.4>Java(TM) 2 Runtime Environment, Standard Edition (build 1.4.2_12-b03).</jdk1.4>
+  <jdk1.4>Java(TM) 2 Runtime Environment, Standard Edition (build 1.4.2)
+Classic VM (build 1.4.2, J2RE 1.4.2 IBM Windows 32 build cn142-20061124 (SR7)</jdk1.4>
 
-  <!-- Output of "java -version" run from your Java 6 installation. E.g.:  Java(TM) 2 Runtime Environment, Standard Edition (build 1.6.0-b105). -->
-  <java6> Java(TM) 2 Runtime Environment, Standard Edition (build 1.6.0-b105).</java6>
-
-  <!--
-         Say here whether you used osgi.jar to build org.apache.derby.osgi.EmbeddedActivator.
-         E.g.:  The osgi.jar was used to build org.apache.derby.osgi.EmbeddedActivator.
-  -->
-  <osgi>The osgi.jar was used to build org.apache.derby.osgi.EmbeddedActivator.</osgi>
+  <!-- Output of "java -version" run from your Java 6 installation. E.g.: Java(TM) 2 Runtime Environment, Standard Edition (build 1.6.0-b105). -->
+  <java6>Java(TM) SE Runtime Environment (build pwi3260sr3-20081106_07(SR3))
+IBM J9 VM (build 2.4, J2RE 1.6.0 IBM J9 2.4 Windows XP x86-32 jvmwi3260-20081105_25433</java6>
 
   <!--
          Say which compilers you used.
@@ -72,19 +72,23 @@ with real information.
            The 1.4.2_12-b03 javac was used to compile all classes
            except for the JDBC4 drivers. The JDBC4 driver classes were compiled using the 1.6.0-b105 javac.
   -->
-  <compilers>The 1.4.2_12-b03 javac was used to compile all classes
-           except for the JDBC4 drivers. The JDBC4 driver classes were compiled using the 1.6.0-b105 javac.</compilers>
+  <compilers>The 1.6 compiler was used to compile all classes, but java 1.4.2 classes were used to compile appropriate 1.4.2 support</compilers>
 
   <!--
          Say here whether you built the J2ME support and, if so, which
          tookit you used.
          E.g.: J2ME support was built using java.sun.com/j2me (j2me_cdc_fp-1_0_2).
   -->
-  <jsr169>J2ME support was built using java.sun.com/j2me (j2me_cdc_fp-1_0_2).</jsr169>
+  <jsr169>J2ME support was built using IBM's j9 jvm from WEME6.1</jsr169>
 
 </buildInfo>
 
-<overview>
+<!--
+    Here include a freeform section, describing the release. In this
+    section, all instances of the special tags <releaseID/> and
+    <previousReleaseID/> will be replaced with the values specified above.
+
+    E.g.:
 
 <p>
 Derby is a pure Java relational database engine using standard SQL and
@@ -102,14 +106,66 @@ Derby functionality includes:
 <li>Command line tools: ij (SQL scripting), dblook (schema dump) and sysinfo (system info)</li>
 </ul>
 
-</overview>
+-->
 
-<newFeatures>
-
+<overview>
 <p>
-This is a minor release. The following new features were added:
+Derby is a pure Java relational database engine using standard SQL and JDBC as its APIs.
 </p>
 
+<p>
+Derby functionality includes:
+</p>
+
+<ul>
+<li>Embedded engine with JDBC drivers</li>
+<li>Network Server</li>
+<li>Network client JDBC drivers</li>
+<li>Command line tools: ij (SQL scripting), dblook (schema dump) and sysinfo (system info)</li>
+</ul>
+</overview>
+
+<!--
+    Here describe the new features of this release. E.g.:
+
+<p>
+This is a bug fix release. No new features features were added.
+</p>
+
+-->
+
+<newFeatures>
+<p>
+This is a feature release. The following features were added.
+</p>
+<ul>
+<li>
+SQL Roles. SQL roles (as described in SQL 2003 and errata) are useful for administering privileges for groups of users. Administering roles is generally less error-prone than administering privileges for individual users. SQL Roles are defined in Feature T331 "Basic roles" and Feature T332 "Extended roles". Derby 10.5 implements a subset of T331, plus support for CURRENT_ROLE, which is a part of T332.
+</li>
+<li>
+Generated Columns. Generated Columns is a feature which instructs Derby to fill a column with an expression built out of other columns in the row. Derby constructs these column values at INSERT and UPDATE time. The user declares indexes on these columns. This in turn improves SELECT performance since it lets users declare indexes on pre-computed pieces of the WHERE clause. This feature satisfies support for SQL Feature T175.
+</li>
+<li>
+LOB Improvements. There were many performance and usability improvements for BLOBs and CLOBs.  
+</li>
+<li>
+Replication of encrypted databases. With 10.5 it is possible to replicate encrypted databases. 
+</li>
+<li>
+OFFSET/FETCH FIRST. SQL 2008 has added new syntax to support a direct way to limit the 
+returned set of rows in a result set, through the fetch first and offset clauses. 
+</li>
+<li>
+In-memory back end. Initial implementation of a storage engine for Derby where all data is kept in memory. There is no documentation for this feature. This functionality itself is not yet fully implemented, but users are welcome to experiment with it. For details, see: http://wiki.apache.org/db-derby/InMemoryBackEndPrimer
+</li>
+<li>
+Allow standard SQL "SET" keyword in ALTER COLUMN syntax, like so:
+ "ALTER TABLE ALTER [COLUMN] columnname SET DEFAULT default-value"
+</li>
+<li>
+SYSCS_UTIL.SYSCS_UPDATE_STATISTICS: New system procedure that updates cardinality statistics (or creates them if they do not exist) for a table's index or for all the indexes on a table, allowing a user to ensure that a query plan based on the most recent state of the table can be created.
+</li>
+</ul>
 </newFeatures>
 
 </summary>

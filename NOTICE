@@ -4,7 +4,7 @@
 =========================================================================
 
 Apache Derby
-Copyright 2004-2008 The Apache Software Foundation
+Copyright 2004-2009 The Apache Software Foundation
 
 This product includes software developed by
 The Apache Software Foundation (http://www.apache.org/).
@@ -50,7 +50,7 @@ The Derby build relies on source files supplied by the Apache Felix
 project. The following notice covers the Felix files:
 
   Apache Felix Main
-  Copyright 2008 The Apache Software Foundation
+  Copyright 2009 The Apache Software Foundation
 
 
   I. Included Software

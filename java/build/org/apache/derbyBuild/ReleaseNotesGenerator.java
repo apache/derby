@@ -135,7 +135,6 @@ public class ReleaseNotesGenerator extends Task
     private static  final   String  JDK14_HEADLINE = "JDK 1.4";
     private static  final   String  JSR169_HEADLINE = "JSR 169";
     private static  final   String  MACHINE_HEADLINE = "Machine";
-    private static  final   String  OSGI_HEADLINE = "OSGi";
 
     // formatting tags
     private static  final   String  ANCHOR = "a";
@@ -162,7 +161,6 @@ public class ReleaseNotesGenerator extends Task
     private static  final   String  SUM_JSR169 = "jsr169";
     private static  final   String  SUM_MACHINE = "machine";
     private static  final   String  SUM_NEW_FEATURES = "newFeatures";
-    private static  final   String  SUM_OSGI = "osgi";
     private static  final   String  SUM_OVERVIEW = "overview";
     private static  final   String  SUM_PREVIOUS_RELEASE_ID = "previousReleaseID";
     private static  final   String  SUM_RELEASE_ID = "releaseID";
@@ -631,8 +629,8 @@ public class ReleaseNotesGenerator extends Task
         String          previousReleaseID = getPreviousReleaseID( gs );
         String          deltaStatement =
             "Compared with the previous release (" + previousReleaseID +
-            "), Derby release " + releaseID + " introduces the following new features " +
-            "and incompatibilities. These merit your special attention.";
+            "), Derby release " + releaseID + " introduces the following " +
+            "incompatibilities. These merit your special attention.";
         
         addParagraph( issuesSection, deltaStatement );
 
@@ -856,9 +854,6 @@ public class ReleaseNotesGenerator extends Task
 
         String          java6Version = squeezeText( getFirstChild( summaryRoot, SUM_JAVA6 ) );
         addHeadlinedItem( list, JAVA6_HEADLINE, java6Version );
-
-        String          osgiText = squeezeText( getFirstChild( summaryRoot, SUM_OSGI ) );
-        addHeadlinedItem( list, OSGI_HEADLINE, osgiText );
 
         String          compilerText = squeezeText( getFirstChild( summaryRoot, SUM_COMPILER ) );
         addHeadlinedItem( list, COMPILER_HEADLINE, compilerText );

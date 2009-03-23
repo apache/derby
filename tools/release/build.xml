@@ -38,7 +38,7 @@
 
 
   <!-- Files to be included with and excluded from the source distribution -->
-  <property name="src.top.includes" value="BUILDING.html,README,CHANGES.html,COPYRIGHT,KEYS,LICENSE,NOTICE,RELEASE-NOTES.html,STATUS,build.xml,index.html,published_api_overview.html"/>
+  <property name="src.top.includes" value="BUILDING.html,README,COPYRIGHT,KEYS,LICENSE,NOTICE,RELEASE-NOTES.html,STATUS,build.xml,index.html,published_api_overview.html"/>
   <property name="src.tools.includes" value="tools/ant/**,tools/j2ee/**,tools/jar/**,tools/java/**,tools/javadoc/**,tools/jdbc4/**,tools/testing/**,tools/release/build.xml"/>
   <property name="src.dirs.includes" value="java/**,plugins/**,bin/**,maven/**"/>
   <property name="src.includes" value="${src.top.includes},${src.tools.includes},${src.dirs.includes}"/>
@@ -57,19 +57,11 @@
   <property name="relnotes.src.buglist" value="${relnotes.src.reports}/fixedBugsList.xml" />
   <property name="relnotes.src.notes" value="${relnotes.src.reports}/releaseNotesList.xml" />
   <property name="relnotes.out.pamphlet" value="${basedir}/RELEASE-NOTES.html" />
-  <property name="changesfile.out.pamphlet" value="${basedir}/CHANGES.html" />
 
 <!-- Define the task which generates the release notes -->
   <taskdef
     name="generateReleaseNotes"
     classname="org.apache.derbyBuild.ReleaseNotesGenerator"
-    classpath="${out.dir}"
-  />
-
-<!-- Define the task which generates the release notes -->
-  <taskdef
-    name="generateChangesFile"
-    classname="org.apache.derbyBuild.ChangesFileGenerator"
     classpath="${out.dir}"
   />
 
@@ -98,9 +90,9 @@
     <mkdir dir="${crlf.dir}"/>
     <mkdir dir="${lf.dir}"/>
     <fixcrlf srcdir="${basedir}" destdir="${crlf.dir}" eol="crlf"
-             includes="CHANGES.html,COPYRIGHT,LICENSE,KEYS,NOTICE,RELEASE-NOTES.html"/>
+             includes="COPYRIGHT,LICENSE,KEYS,NOTICE,RELEASE-NOTES.html"/>
     <fixcrlf srcdir="${basedir}" destdir="${lf.dir}" eol="lf"
-             includes="CHANGES.html,COPYRIGHT,LICENSE,KEYS,NOTICE,RELEASE-NOTES.html"/>
+             includes="COPYRIGHT,LICENSE,KEYS,NOTICE,RELEASE-NOTES.html"/>
 
   </target>
 
@@ -125,32 +117,13 @@
 
   </target>
 
-<!--
-   Generate the Changes File Notes
-
-   The ${relnotes.src.reports} property must point at a
-   directory containing the following JIRA report:
-
-     fixedBugsList.xml  - This is a JIRA xml report of issues fixed in the release.
-
--->
-  <target name="genchanges">
-
-     <generateChangesFile
-       summaryFileName="${relnotes.src.summary}"
-       bugListFileName="${relnotes.src.buglist}"
-       pamphletFileName="${changesfile.out.pamphlet}"
-     />
-
-  </target>
-
   <!-- bin distribution -->
   <target name="bin" depends="bin.zip,bin.tgz"/>
   <target name="bin.zip" depends="init">    
     <zip destfile="${release.dir}/${derby.bin}.zip"
          compress="true">
       <!-- top-level -->
-      <zipfileset dir="${crlf.dir}" includes="CHANGES.html,COPYRIGHT,LICENSE,KEYS,NOTICE,RELEASE-NOTES.html"
+      <zipfileset dir="${crlf.dir}" includes="COPYRIGHT,LICENSE,KEYS,NOTICE,RELEASE-NOTES.html"
                   prefix="${derby.bin}/"/>
       <zipfileset dir="${basedir}" includes="index.html" prefix="${derby.bin}/"/>
       <!-- bin -->
@@ -203,7 +176,7 @@
     <tar destfile="${release.dir}/${derby.bin}.tar.gz"
          compression="gzip" longfile="gnu">
       <!-- top-level -->
-      <tarfileset dir="${lf.dir}" includes="CHANGES.html,COPYRIGHT,LICENSE,KEYS,NOTICE,RELEASE-NOTES.html"
+      <tarfileset dir="${lf.dir}" includes="COPYRIGHT,LICENSE,KEYS,NOTICE,RELEASE-NOTES.html"
                   prefix="${derby.bin}/"/>
       <tarfileset dir="${basedir}" includes="index.html" prefix="${derby.bin}/"/>
       <!-- bin -->
@@ -256,7 +229,7 @@
   <target name="lib.zip" depends="init">
     <zip destfile="${release.dir}/${derby.lib}.zip"
 	     compress="true">
-      <zipfileset dir="${crlf.dir}" includes="CHANGES.html,COPYRIGHT,LICENSE,KEYS,NOTICE,RELEASE-NOTES.html"
+      <zipfileset dir="${crlf.dir}" includes="COPYRIGHT,LICENSE,KEYS,NOTICE,RELEASE-NOTES.html"
       			  prefix="${derby.lib}/"/>
       <zipfileset dir="${basedir}/jars/insane" prefix="${derby.lib}/lib" includes="derby*.*"
 	              excludes="derby_core_plugin*,derbyTesting.jar"/>
@@ -270,7 +243,7 @@
   <target name="lib.tgz">
     <tar destfile="${release.dir}/${derby.lib}.tar.gz"
 	     compression="gzip">
-      <tarfileset dir="${lf.dir}" includes="CHANGES.html,COPYRIGHT,LICENSE,KEYS,NOTICE,RELEASE-NOTES.html"
+      <tarfileset dir="${lf.dir}" includes="COPYRIGHT,LICENSE,KEYS,NOTICE,RELEASE-NOTES.html"
       			  prefix="${derby.lib}/"/>
       <tarfileset dir="${basedir}/jars/insane" prefix="${derby.lib}/lib" includes="derby*.*"
 	              excludes="derby_core_plugin*,derbyTesting.jar"/>
@@ -287,7 +260,7 @@
   <target name="lib-debug.zip" depends="init">
     <zip destfile="${release.dir}/${derby.lib-debug}.zip"
 	     compress="true">
-      <zipfileset dir="${crlf.dir}" includes="CHANGES.html,COPYRIGHT,LICENSE,KEYS,NOTICE,RELEASE-NOTES.html"
+      <zipfileset dir="${crlf.dir}" includes="COPYRIGHT,LICENSE,KEYS,NOTICE,RELEASE-NOTES.html"
       			  prefix="${derby.lib-debug}/"/>
       <zipfileset dir="${basedir}/jars/sane" prefix="${derby.lib-debug}/lib" includes="derby*.*"
 	              excludes="derby_core_plugin*,derbyTesting.jar"/>
@@ -301,7 +274,7 @@
   <target name="lib-debug.tgz">
     <tar destfile="${release.dir}/${derby.lib-debug}.tar.gz"
 	     compression="gzip">
-      <tarfileset dir="${lf.dir}" includes="CHANGES.html,COPYRIGHT,LICENSE,KEYS,NOTICE,RELEASE-NOTES.html"
+      <tarfileset dir="${lf.dir}" includes="COPYRIGHT,LICENSE,KEYS,NOTICE,RELEASE-NOTES.html"
       			  prefix="${derby.lib-debug}/"/>
       <tarfileset dir="${basedir}/jars/sane" prefix="${derby.lib-debug}/lib" includes="derby*.*"
 	              excludes="derby_core_plugin*,derbyTesting.jar"/>
