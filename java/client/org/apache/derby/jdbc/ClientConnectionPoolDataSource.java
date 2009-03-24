@@ -71,9 +71,10 @@ public class ClientConnectionPoolDataSource extends ClientDataSource
 
     // Attempt to establish a physical database connection that can be used as a pooled connection.
     public PooledConnection getPooledConnection() throws SQLException {
+        LogWriter dncLogWriter = null;
         try
         {
-            LogWriter dncLogWriter = super.computeDncLogWriterForNewConnection("_cpds");
+            dncLogWriter = super.computeDncLogWriterForNewConnection("_cpds");
             if (dncLogWriter != null) {
                 dncLogWriter.traceEntry(this, "getPooledConnection");
             }
@@ -85,15 +86,19 @@ public class ClientConnectionPoolDataSource extends ClientDataSource
         }
         catch ( SqlException se )
         {
+            // The method below may throw an exception.
+            handleConnectionException(dncLogWriter, se);
+            // If the exception wasn't handled so far, re-throw it.
             throw se.getSQLException();
         }
     }
 
     // Standard method that establishes the initial physical connection using CPDS properties.
     public PooledConnection getPooledConnection(String user, String password) throws SQLException {
+        LogWriter dncLogWriter = null;
         try
         {
-            LogWriter dncLogWriter = super.computeDncLogWriterForNewConnection("_cpds");
+            dncLogWriter = super.computeDncLogWriterForNewConnection("_cpds");
             if (dncLogWriter != null) {
                 dncLogWriter.traceEntry(this, "getPooledConnection", user, "<escaped>");
             }
@@ -105,6 +110,9 @@ public class ClientConnectionPoolDataSource extends ClientDataSource
         }
         catch ( SqlException se )
         {
+            // The method below may throw an exception.
+            handleConnectionException(dncLogWriter, se);
+            // If the exception wasn't handled so far, re-throw it.
             throw se.getSQLException();
         }
     }

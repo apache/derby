@@ -66,13 +66,18 @@ public class ClientXADataSource extends ClientDataSource implements XADataSource
     }
 
     public XAConnection getXAConnection(String user, String password) throws SQLException {
+        NetLogWriter dncLogWriter = null;
         try
         {
-            NetLogWriter dncLogWriter = (NetLogWriter) super.computeDncLogWriterForNewConnection("_xads");
+            dncLogWriter = (NetLogWriter)
+                    super.computeDncLogWriterForNewConnection("_xads");
             return getXAConnectionX(dncLogWriter, this, user, password);
         }
         catch ( SqlException se )
         {
+            // The method below may throw an exception.
+            handleConnectionException(dncLogWriter, se);
+            // If the exception wasn't handled so far, re-throw it.
             throw se.getSQLException();
         }
     }    

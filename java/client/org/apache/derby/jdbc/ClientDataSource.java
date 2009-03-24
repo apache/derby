@@ -25,10 +25,12 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import javax.sql.DataSource;
 
+import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.client.am.LogWriter;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.net.NetConnection;
 import org.apache.derby.client.net.NetLogWriter;
+import org.apache.derby.shared.common.error.ExceptionUtil;
 
 /**
  * ClientDataSource is a simple data source implementation
@@ -179,9 +181,10 @@ public class ClientDataSource extends ClientBaseDataSource implements DataSource
         // This log writer may be narrowed to the connection-level
         // This log writer will be passed to the agent constructor.
         
+        LogWriter dncLogWriter = null;
         try
         {
-            LogWriter dncLogWriter = super.computeDncLogWriterForNewConnection("_sds");
+            dncLogWriter = super.computeDncLogWriterForNewConnection("_sds");
             updateDataSourceValues(tokenizeAttributes(getConnectionAttributes(), null));
             return ClientDriver.getFactory().newNetConnection
                     ((NetLogWriter) dncLogWriter, user,
@@ -189,6 +192,9 @@ public class ClientDataSource extends ClientBaseDataSource implements DataSource
         }
         catch(SqlException se)
         {
+            // The method below may throw an exception.
+            handleConnectionException(dncLogWriter, se);
+            // If the exception wasn't handled so far, re-throw it.
             throw se.getSQLException();
         }
         
