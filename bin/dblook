@@ -25,5 +25,4 @@ fi
 
 . $DERBY_HOME/bin/derby_common.sh
 
-derby_exec_command="exec \"$JAVACMD\" $DERBY_OPTS -classpath \"$LOCALCLASSPATH\" org.apache.derby.tools.dblook $@"
-eval $derby_exec_command
+exec "$JAVACMD" $DERBY_OPTS -classpath "$LOCALCLASSPATH" org.apache.derby.tools.dblook "$@"
