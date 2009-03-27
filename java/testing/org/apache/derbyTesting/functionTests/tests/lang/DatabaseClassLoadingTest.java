@@ -105,6 +105,7 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
                 "testLoadJavaClassDirectly3",
                 "testLoadDerbyClassIndirectly",
                 "testIndirectLoading",
+                "testTableFunctionInJar",
             };
             
             for (int i = 0; i < orderedTests.length; i++)
@@ -138,6 +139,7 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
                    "functionTests/tests/lang/dcl_ot2.jar",
                    "functionTests/tests/lang/dcl_ot3.jar",
                    "functionTests/tests/lang/dcl_id.jar",
+                   "functionTests/tests/lang/dummy_vti.jar",
                    });
            
            }
@@ -992,6 +994,90 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
         
     }
 
+    /**
+     * Test that table functions can be invoked from inside jar files stored in
+     * the database.
+     */
+    public void testTableFunctionInJar() throws SQLException, MalformedURLException
+    {
+        
+        String jarName = "EMC.DUMMY_VTI";
+
+        installJar("dummy_vti.jar", jarName );
+
+        setDBClasspath( jarName );
+
+        Statement s = createStatement();
+
+        // register a scalar function
+        s.executeUpdate
+            (
+             "create function reciprocal( original double ) returns double\n" +
+             "language java\n" +
+             "parameter style java\n" +
+             "no sql\n" +
+             "external name 'DummyVTI.reciprocal'"
+             );
+
+        // register the table function
+        s.executeUpdate
+            (
+             "create function dummyVTI()\n" +
+             "returns table( tablename varchar( 128 ) )\n" +
+             "language java\n" +
+             "parameter style DERBY_JDBC_RESULT_SET\n" +
+             "reads sql data\n" +
+             "external name 'DummyVTI.dummyVTI'\n"
+             );
+
+        // register another table function in a class which doesn't exist
+        s.executeUpdate
+            (
+             "create function dummyVTI2()\n" +
+             "returns table( tablename varchar( 128 ) )\n" +
+             "language java\n" +
+             "parameter style DERBY_JDBC_RESULT_SET\n" +
+             "reads sql data\n" +
+             "external name 'DummyVTI2.dummyVTI'\n"
+             );
+
+        // invoke the scalar function
+        JDBC.assertFullResultSet(
+                s.executeQuery
+                (
+                 "values ( reciprocal( 2.0 ) )"
+                 ),
+                new String[][] {
+                    {"0.5"},
+                    });
+
+        
+        // invoke the table function
+        JDBC.assertFullResultSet(
+                s.executeQuery
+                (
+                 "select * from table( dummyVTI() ) s where tablename='SYSTABLES'"
+                 ),
+                new String[][] {
+                    {"SYSTABLES"},
+                    });
+
+        // verify that a missing class raises an exception
+        try {
+            s.executeQuery
+                (
+                 "select * from table( dummyVTI2() ) s where tablename='SYSTABLES'"
+                 );
+            fail( "Should have seen a ClassNotFoundException." );
+        } catch (SQLException e) {
+            assertSQLState("XJ001", e);
+        }
+        
+        setDBClasspath(null);
+        
+        s.close();
+    }
+    
             
   
     private void installJar(String resource, String jarName) throws SQLException, MalformedURLException
