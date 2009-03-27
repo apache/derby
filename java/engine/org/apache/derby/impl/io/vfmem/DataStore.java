@@ -21,6 +21,8 @@
 
 package org.apache.derby.impl.io.vfmem;
 
+import java.io.File;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -31,6 +33,8 @@ import org.apache.derby.io.StorageFile;
 /**
  * A virtual data store, keeping track of all the virtual files existing and
  * offering a set of high-level operations on virtual files.
+ * <p>
+ * A newly created data store doesn't contain a single existing directory.
  */
 public final class DataStore {
 
@@ -64,9 +68,6 @@ public final class DataStore {
      */
     public DataStore(String databaseName) {
         this.databaseName = databaseName;
-        // Create the absolute root.
-        createEntry(String.valueOf(SEP), true);
-
     }
 
     /**
@@ -91,23 +92,24 @@ public final class DataStore {
      *      created, {@code null} otherwise
      */
     public DataStoreEntry createEntry(String iPath, boolean isDir) {
+        // Normalize the path.
+        final String nPath = new File(iPath).getPath();
         synchronized (LOCK) {
-            if (files.containsKey(iPath)) {
+            if (files.containsKey(nPath)) {
                 return null;
             }
             // Make sure the the parent directories exists.
-            String parent = PathUtil.getParent(iPath);
-            while (parent != null) {
-                DataStoreEntry entry = (DataStoreEntry)files.get(parent);
+            String[] parents = getParentList(nPath);
+            for (int i=parents.length -1; i >= 0; i--) {
+                DataStoreEntry entry = (DataStoreEntry)files.get(parents[i]);
                 if (entry == null) {
                     return null;
                 } else if (!entry.isDirectory()) {
                     return null;
                 }
-                parent = PathUtil.getParent(parent);
             }
-            DataStoreEntry newEntry = new DataStoreEntry(iPath, isDir);
-            files.put(iPath, newEntry);
+            DataStoreEntry newEntry = new DataStoreEntry(nPath, isDir);
+            files.put(nPath, newEntry);
             return newEntry;
         }
     }
@@ -119,25 +121,19 @@ public final class DataStore {
      *      or were created, {@code false} otherwise
      */
     public boolean createAllParents(String path) {
-        if (path.charAt(path.length() -1) == SEP) {
-            path = path.substring(0, path.length() -1);
-        }
-        // If there is no path separator, only one entry will be created.
-        if (path.indexOf(SEP) == -1) {
-            return true;
-        }
+        final String nPath = new File(path).getPath();
+        // Iterate through the list and create the missing parents.
+        String[] parents = getParentList(nPath);
         synchronized (LOCK) {
-            int index = path.indexOf(SEP, 1); // The root always exists
-
-            while (index > 0) {
-                String subPath = path.substring(0, index);
+            for (int i=parents.length -1; i >= 0; i--) {
+                String subPath = parents[i];
                 DataStoreEntry entry = (DataStoreEntry)files.get(subPath);
                 if (entry == null) {
                     createEntry(subPath, true);
                 } else if (!entry.isDirectory()) {
+                    // Fail if one of the parents is a regular file.
                     return false;
                 }
-                index = path.indexOf(SEP, index +1);
             }
         }
         return true;
@@ -153,21 +149,20 @@ public final class DataStore {
      * @return {@code true} if the entry was deleted, {@code false} otherwise.
      */
     public boolean deleteEntry(String iPath) {
+        final String nPath = new File(iPath).getPath();
         DataStoreEntry entry;
         synchronized (LOCK) {
-            entry = (DataStoreEntry)files.remove(iPath);
+            entry = (DataStoreEntry)files.remove(nPath);
             if (entry != null) {
                 if (entry.isDirectory()) {
-                    String[] children = listChildren(iPath);
-                    if (children == null || children.length == 0){
-                        entry.release();
+                    String[] children = listChildren(nPath);
+                    if (children.length > 0) {
                         // Re-add the entry.
-                        files.put(iPath, entry);
+                        files.put(nPath, entry);
                         return false;
                     }
-                } else {
-                    entry.release();
                 }
+                entry.release();
             }
         }
         return (entry != null);
@@ -182,7 +177,8 @@ public final class DataStore {
      */
     public DataStoreEntry getEntry(String iPath) {
         synchronized (LOCK) {
-            return (DataStoreEntry)files.get(iPath);
+            // Use java.io.File to normalize the path.
+            return (DataStoreEntry)files.get(new File(iPath).getPath());
         }
     }
 
@@ -194,14 +190,15 @@ public final class DataStore {
      *      {@code false} if the root doesn't exist.
      */
     public boolean deleteAll(String iPath) {
+        final String nPath = new File(iPath).getPath();
         synchronized (LOCK) {
-            DataStoreEntry entry = (DataStoreEntry)files.remove(iPath);
+            DataStoreEntry entry = (DataStoreEntry)files.remove(nPath);
             if (entry == null) {
                 // Delete root doesn't exist.
                 return false;
             } else if (entry.isDirectory()) {
                 // Delete root is a directory.
-                return _deleteAll(iPath);
+                return _deleteAll(nPath);
             } else {
                 // Delete root is a file.
                 entry.release();
@@ -222,9 +219,10 @@ public final class DataStore {
             throw new IllegalArgumentException(
                     "The empty string is not a valid path");
         }
+        String nPath = new File(iPath).getPath();
         // Make sure the search path ends with the separator.
-        if (iPath.charAt(iPath.length() -1) != SEP) {
-            iPath += SEP;
+        if (nPath.charAt(nPath.length() -1) != SEP) {
+            nPath += SEP;
         }
         ArrayList children = new ArrayList();
         synchronized (LOCK) {
@@ -232,8 +230,8 @@ public final class DataStore {
             String candidate;
             while (paths.hasNext()) {
                 candidate = (String)paths.next();
-                if (candidate.startsWith(iPath)) {
-                    children.add(candidate.substring(iPath.length()));
+                if (candidate.startsWith(nPath)) {
+                    children.add(candidate.substring(nPath.length()));
                 }
             }
         }
@@ -249,17 +247,33 @@ public final class DataStore {
      *      file already existed or the existing file doesn't exist.
      */
     public boolean move(StorageFile currentFile, StorageFile newFile) {
+        final String currentPath = new File(currentFile.getPath()).getPath();
+        final String newPath = new File(newFile.getPath()).getPath();
         synchronized (LOCK) {
-            if (files.containsKey(newFile.getPath())) {
+            if (files.containsKey(newPath)) {
                 return false;
             }
             DataStoreEntry current = (DataStoreEntry)
-                    files.remove(currentFile.getPath());
+                    files.remove(currentPath);
             if (current == null) {
                 return false;
             }
-            files.put(newFile.getPath(), current);
+            files.put(newPath, current);
             return true;
+        }
+    }
+
+    /**
+     * Purges the database and releases all files associated with it.
+     */
+    public void purge() {
+        synchronized (LOCK) {
+            Iterator fileIter = files.values().iterator();
+            while (fileIter.hasNext()) {
+                ((DataStoreEntry)fileIter.next()).release();
+            }
+            // Clear all the mappings.
+            files.clear();
         }
     }
 
@@ -268,11 +282,16 @@ public final class DataStore {
      * <p>
      * Note that the root itself must be removed outside of this method.
      *
-     * @param prefixPath the root path to start deleting from
+     * @param prefixPath the normalized root path to start deleting from
      * @return {@code true} if all children of the root path were deleted,
      *      {@code false} otherwise.
      */
+    //@GuardedBy("LOCK")
     private boolean _deleteAll(String prefixPath) {
+        // Make sure the search path ends with the separator.
+        if (prefixPath.charAt(prefixPath.length() -1) != SEP) {
+            prefixPath += SEP;
+        }
         ArrayList toDelete = new ArrayList();
         Iterator paths = files.keySet().iterator();
         // Find all the entries to delete.
@@ -289,9 +308,7 @@ public final class DataStore {
         while (keys.hasNext()) {
             DataStoreEntry entry = (DataStoreEntry)
                     files.remove((String)keys.next());
-            if (!entry.isDirectory()) {
-                entry.release();
-            }
+            entry.release();
         }
         return true;
     }
@@ -305,5 +322,24 @@ public final class DataStore {
         synchronized (TMP_COUNTER_LOCK) {
             return ++tmpFileCounter;
         }
+    }
+
+    /**
+     * Returns the list of parents for the specified path.
+     * <p>
+     * The lowest level parent is listed first in the list, so all absolute
+     * paths will have the root listed as the last element.
+     *
+     * @param path the normalized path to create a parent list for
+     * @return A list of parents.
+     */
+    private String[] getParentList(String path) {
+        ArrayList parents = new ArrayList();
+        String parent = path;
+        // Build the list of parents.
+        while ((parent = new File(parent).getParent()) != null) {
+            parents.add(parent);
+        }
+        return (String[])parents.toArray(new String[parents.size()]);
     }
 }

@@ -147,7 +147,9 @@ public class DataStoreEntry {
      */
     void release() {
         released = true;
-        src.release();
+        if (src != null) {
+            src.release();
+        }
     }
 
     /**

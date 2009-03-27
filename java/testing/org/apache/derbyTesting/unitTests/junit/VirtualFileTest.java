@@ -272,6 +272,70 @@ public class VirtualFileTest
         assertTrue(vFile.isDirectory());
     }
 
+    /**
+     * Tests that {@code listChildren} doesn't include too many entries.
+     */
+    public void testListChilderen() {
+        DataStore store = getStore();
+        VirtualFile dir1 = new VirtualFile(PathUtilTest.abs("mydir"), store);
+        VirtualFile dir2 = new VirtualFile(
+                PathUtilTest.abs("mydirectory"), store);
+        VirtualFile file1 = new VirtualFile(
+                PathUtilTest.joinAbs("mydir", "file1.txt"), store);
+        VirtualFile file2 = new VirtualFile(
+                PathUtilTest.joinAbs("mydirectory", "file2.txt"), store);
+        assertTrue(dir1.mkdirs());
+        assertTrue(dir1.exists());
+        assertTrue(dir1.isDirectory());
+        assertTrue(dir2.mkdirs());
+        assertTrue(dir2.exists());
+        assertTrue(dir2.isDirectory());
+        assertTrue(file1.createNewFile());
+        assertTrue(file1.exists());
+        assertFalse(file1.isDirectory());
+        assertTrue(file2.createNewFile());
+        assertTrue(file2.exists());
+        assertFalse(file2.isDirectory());
+        // We should only get one child; file1.txt
+        String[] children = dir1.list();
+        assertEquals(1, children.length);
+        assertEquals(file1.getName(), children[0]);
+        // Test that the same path ending with the separator results in the
+        // same list being returned.
+        VirtualFile dir1abs = new VirtualFile(
+                PathUtilTest.joinAbs("mydir", ""), store);
+        assertFalse(dir1.getName().equals(dir1abs.getName()));
+        String[] childrenAbs = dir1abs.list();
+        assertEquals(1, childrenAbs.length);
+        assertEquals(children[0], childrenAbs[0]);
+        // The deleteAll below shouldn't delete "mydirectory" and "file2.txt"..
+        assertFalse(dir1.delete());
+        assertTrue(dir1.deleteAll());
+        assertTrue(dir2.exists());
+        assertTrue(file2.exists());
+    }
+
+    /**
+     * Makes sure that the root can be created.
+     */
+    public void testCreateRoot() {
+        DataStore store = new DataStore("testCreateRootStore");
+        String path = PathUtilTest.joinAbs("these", "are", "directories");
+        assertTrue(store.createAllParents(path));
+        assertNotNull(store.createEntry(path, true));
+        VirtualFile vf = new VirtualFile(path, store);
+        assertTrue(vf.exists());
+        assertTrue(vf.isDirectory());
+
+        // Also test one Windows specific root.
+        path = PathUtilTest.join("c:", "Documents and Settings", "directories");
+        assertTrue(store.createAllParents(path));
+        assertNotNull(store.createEntry(path, true));
+        vf = new VirtualFile(path, store);
+        assertTrue(vf.exists());
+        assertTrue(vf.isDirectory());
+    }
+
     public static Test suite() {
         return new TestSuite(VirtualFileTest.class);
     }
@@ -280,6 +344,9 @@ public class VirtualFileTest
     private static int dbStoreIndex = 0;
     /** Utility method returning a fresh data store. */
     private static synchronized DataStore getStore() {
-        return new DataStore("testVFMemDB-" + dbStoreIndex++);
+        DataStore store = new DataStore("testVFMemDB-" + dbStoreIndex++);
+        // We need the root to exist.
+        assertNotNull(store.createEntry(java.io.File.separator, true));
+        return store;
     }
 }
