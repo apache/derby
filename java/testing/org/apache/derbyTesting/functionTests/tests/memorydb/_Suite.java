@@ -22,6 +22,7 @@
 package org.apache.derbyTesting.functionTests.tests.memorydb;
 
 import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.JDBC;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -42,8 +43,11 @@ public class _Suite extends BaseTestCase  {
     public static Test suite() {
 
         TestSuite suite = new TestSuite("In-memory db test suite");
-        suite.addTest(BasicInMemoryDbTest.suite());
-
+        // Tests are not yet compatible with JSR169 / JavaME
+        if (!JDBC.vmSupportsJSR169()) {
+            suite.addTest(BasicInMemoryDbTest.suite());
+            suite.addTest(MogTest.suite());
+        }
         return suite;
     }
 }
