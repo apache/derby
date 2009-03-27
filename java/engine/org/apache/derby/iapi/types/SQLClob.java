@@ -334,8 +334,8 @@ public class SQLClob
                 HeaderInfo hdrInfo = investigateHeader(header, read);
                 if (read > hdrInfo.headerLength()) {
                     // We have read too much. Reset the stream.
-                    ((Resetable)stream).resetStream();
-                    read = 0;
+                    read = hdrInfo.headerLength();
+                    rewindStream(read);
                 }
                 csd = new CharacterStreamDescriptor.Builder().stream(stream).
                     bufferable(false).positionAware(false).
