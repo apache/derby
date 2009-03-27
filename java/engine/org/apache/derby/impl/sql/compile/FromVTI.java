@@ -1632,12 +1632,11 @@ public class FromVTI extends FromTable implements VTIEnvironment
         throws StandardException
     {
         Constructor     constructor = null;
-        Class           vtiClass = null;
-        
-        try {
-            vtiClass = Class.forName( className );
+        Class           vtiClass = lookupClass( className );
+        Class           vtiCostingClass = lookupClass( VTICosting.class.getName() );
 
-            if ( !VTICosting.class.isAssignableFrom( vtiClass ) ) { return false; }
+        try {
+            if ( !vtiCostingClass.isAssignableFrom( vtiClass ) ) { return false; }
         }
         catch (Throwable t)
         {
@@ -1669,9 +1668,10 @@ public class FromVTI extends FromTable implements VTIEnvironment
     {
         if ( !isDerbyStyleTableFunction ) { return (version2) ? (VTICosting) ps : (VTICosting) rs; }
         
+        String              className = methodCall.getJavaClassName();
+        Class               vtiClass = lookupClass( className );
+        
         try {
-            String              className = methodCall.getJavaClassName();
-            Class               vtiClass = Class.forName( className );
             Constructor         constructor = vtiClass.getConstructor( new Class[] {} );
             VTICosting          result = (VTICosting) constructor.newInstance( null );
 
@@ -1682,4 +1682,20 @@ public class FromVTI extends FromTable implements VTIEnvironment
             throw StandardException.unexpectedUserException( t );
         }
     }
+
+    /**
+     * Lookup the class that holds the VTI.
+     */
+    private Class lookupClass( String className )
+        throws StandardException
+    {
+        try {
+            return getClassFactory().getClassInspector().getClass( className );
+        }
+        catch (ClassNotFoundException t)
+        {
+            throw StandardException.unexpectedUserException( t );
+        }
+    }
+
 }
