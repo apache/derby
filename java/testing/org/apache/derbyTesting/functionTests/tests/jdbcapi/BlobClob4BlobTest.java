@@ -408,7 +408,7 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         ResultSet trigARS = trigASt.executeQuery(
                 "select a, length(a), b from testClobTriggerA order by b");
         ResultSet trigBRS = trigBSt.executeQuery(
-                "select a, length(a), b from testClobTriggerA order by b");
+                "select a, length(a), b from testClobTriggerB order by b");
 
         int count = 0;
         while (origRS.next()) {
