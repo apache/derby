@@ -60,6 +60,7 @@ public class AllPackages extends BaseTestCase {
         suite.addTest(org.apache.derbyTesting.functionTests.tests.engine._Suite.suite());
         suite.addTest(org.apache.derbyTesting.functionTests.tests.demo._Suite.suite());
         suite.addTest(org.apache.derbyTesting.functionTests.tests.memory._Suite.suite());
+        suite.addTest(org.apache.derbyTesting.functionTests.tests.memorydb._Suite.suite());
         suite.addTest(org.apache.derbyTesting.functionTests.tests.i18n._Suite.suite());
         suite.addTest(org.apache.derbyTesting.functionTests.tests.multi.StressMultiTest.suite());
 
