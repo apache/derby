@@ -140,30 +140,31 @@ This is a feature release. The following features were added.
 </p>
 <ul>
 <li>
-SQL Roles. SQL roles (as described in SQL 2003 and errata) are useful for administering privileges for groups of users. Administering roles is generally less error-prone than administering privileges for individual users. SQL Roles are defined in Feature T331 "Basic roles" and Feature T332 "Extended roles". Derby 10.5 implements a subset of T331, plus support for CURRENT_ROLE, which is a part of T332.
+<b>SQL Roles</b> - SQL roles (as described in SQL 2003 and errata) are useful for administering privileges for groups of users. Administering roles is generally less error-prone than administering privileges for individual users. SQL Roles are defined in Feature T331 "Basic roles" and Feature T332 "Extended roles". Derby 10.5 implements a subset of T331, plus support for CURRENT_ROLE, which is a part of T332.
 </li>
 <li>
-Generated Columns. Generated Columns is a feature which instructs Derby to fill a column with an expression built out of other columns in the row. Derby constructs these column values at INSERT and UPDATE time. The user declares indexes on these columns. This in turn improves SELECT performance since it lets users declare indexes on pre-computed pieces of the WHERE clause. This feature satisfies support for SQL Feature T175.
+<b>Generated Columns</b> - Generated Columns is a feature which instructs Derby to fill a column with an expression built out of other columns in the row. Derby constructs these column values at INSERT and UPDATE time. The user declares indexes on these columns. This in turn improves SELECT performance since it lets users declare indexes on pre-computed pieces of the WHERE clause. This feature satisfies support for SQL Feature T175.
 </li>
 <li>
-LOB Improvements. There were many performance and usability improvements for BLOBs and CLOBs.  
+<b>LOB Improvements</b> - There were many performance and usability improvements for BLOBs and CLOBs.  
 </li>
 <li>
-Replication of encrypted databases. With 10.5 it is possible to replicate encrypted databases. 
+<b>Replication of encrypted databases</b> - With 10.5 it is possible to replicate encrypted databases. 
 </li>
 <li>
-OFFSET/FETCH FIRST. SQL 2008 has added new syntax to support a direct way to limit the 
+<b>OFFSET/FETCH FIRST</b> - SQL 2008 has added new syntax to support a direct way to limit the 
 returned set of rows in a result set, through the fetch first and offset clauses. 
 </li>
 <li>
-In-memory back end. Initial implementation of a storage engine for Derby where all data is kept in memory. There is no documentation for this feature. This functionality itself is not yet fully implemented, but users are welcome to experiment with it. For details, see: http://wiki.apache.org/db-derby/InMemoryBackEndPrimer
+<b>In-memory back end</b> - Initial implementation of a storage engine for Derby where all data is kept in memory. There is no documentation for this feature. This functionality itself is not yet fully implemented, but users are welcome to experiment with it. For details, see the
+<a href="http://wiki.apache.org/db-derby/InMemoryBackEndPrimer">Primer for In-memory Back Ends</a>.
 </li>
 <li>
-Allow standard SQL "SET" keyword in ALTER COLUMN syntax, like so:
+<b>Standard ALTER COLUMN syntax</b> - Allow standard SQL "SET" keyword in ALTER COLUMN syntax, like so:
  "ALTER TABLE ALTER [COLUMN] columnname SET DEFAULT default-value"
 </li>
 <li>
-SYSCS_UTIL.SYSCS_UPDATE_STATISTICS: New system procedure that updates cardinality statistics (or creates them if they do not exist) for a table's index or for all the indexes on a table, allowing a user to ensure that a query plan based on the most recent state of the table can be created.
+<b>SYSCS_UTIL.SYSCS_UPDATE_STATISTICS</b> - New system procedure that updates cardinality statistics (or creates them if they do not exist) for a table's index or for all the indexes on a table, allowing a user to ensure that a query plan based on the most recent state of the table can be created.
 </li>
 </ul>
 </newFeatures>
