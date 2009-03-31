@@ -152,7 +152,10 @@ public class MogTest extends BaseJDBCTestCase {
       final double oth = oths[i];
       final double dif = Math.abs(one - oth);
       final double err = dif / (1.0 + Math.abs(one));
-      assertTrue(err < thresh);
+      // Use if to avoid unnecessary string concatenation.
+      if (err >= thresh) {
+        fail("Error too big;" + err + " >= " + thresh);
+      }
     }
   }
 
