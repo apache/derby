@@ -38,6 +38,8 @@ import java.util.List;
 import junit.framework.AssertionFailedError;
 
 import org.apache.derby.iapi.services.info.JVMInfo;
+import org.apache.derby.iapi.sql.execute.RunTimeStatistics;
+import org.apache.derby.impl.jdbc.EmbedConnection;
 import org.apache.derby.tools.ij;
 
 
@@ -1296,6 +1298,25 @@ public abstract class BaseJDBCTestCase
      
     }
   
+
+    /**
+     * Return estimated row count for runtime statistics.  
+     * Requires caller first turned on RuntimeStatistics, executed a query and closed the ResultSet.
+     * 
+     * For client calls we just return as we can't find out this information.
+     * @param conn
+     * @param expectedCount
+     * @throws SQLException
+     */
+    public static void checkEstimatedRowCount(Connection conn, double expectedCount) throws SQLException {
+	if (! (conn instanceof EmbedConnection))
+	    return;
+	
+	EmbedConnection econn = (EmbedConnection) conn;
+	RunTimeStatistics rts = econn.getLanguageConnection().getRunTimeStatisticsObject();
+	assertNotNull(" RuntimeStatistics is null. Did you call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1)?",rts);
+	assertEquals((long) expectedCount, (long) rts.getEstimatedRowCount());
+	}
 
     /**
      * Check consistency of all tables

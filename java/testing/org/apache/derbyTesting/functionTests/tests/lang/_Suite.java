@@ -137,6 +137,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(AnsiSignaturesTest.suite());
         suite.addTest(PredicatePushdownTest.suite());
         suite.addTest(UngroupedAggregatesNegativeTest.suite());
+        suite.addTest(SelectivityTest.suite());
         // Add the XML tests, which exist as a separate suite
         // so that users can "run all XML tests" easily.
         suite.addTest(XMLSuite.suite());
