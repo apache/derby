@@ -26,6 +26,7 @@ import org.apache.derbyTesting.junit.JDBC;
 
 import junit.framework.Test; 
 import junit.framework.TestSuite;
+import org.apache.derby.iapi.services.sanity.SanityManager;
 
 /**
  * Suite to run all JUnit tests in this package:
@@ -61,6 +62,11 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(LiveLockTest.suite());
         suite.addTest(ClobReclamationTest.suite());
         suite.addTest(IndexSplitDeadlockTest.suite());
+        
+        /* Tests that only run in sane builds */
+        if (SanityManager.DEBUG) {
+            suite.addTest(HoldCursorExternalSortJDBC30Test.suite());
+        }
 
         // Encryption only supported for Derby in J2SE/J2EE environments.
         // J2ME (JSR169) does not support encryption.

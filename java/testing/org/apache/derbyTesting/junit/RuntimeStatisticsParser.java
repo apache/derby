@@ -321,5 +321,13 @@ public class RuntimeStatisticsParser {
             return (foundCount >=instances);
                 
         }
+
+    public boolean usedExternalSort() {
+        return (statistics.indexOf("Sort type=external") != -1 );
+    }
+
+    public String toString() {
+        return statistics;
+    }
 }
     
