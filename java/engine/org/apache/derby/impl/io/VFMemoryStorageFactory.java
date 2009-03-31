@@ -58,7 +58,7 @@ public class VFMemoryStorageFactory
             DataStore store = (DataStore)DATABASES.remove(dbName);
             if (store != null) {
                 // Delete everything.
-                store.deleteAll("/");
+                store.purge();
                 return true;
             }
             return false;
@@ -104,11 +104,8 @@ public class VFMemoryStorageFactory
             throws IOException {
         // Handle cases where a database name is specified.
         if (databaseName != null) {
-            // TODO: Is using java.io.File the right thing to do?
-            //       Should we just set the canonical name equal to the
-            //       specified database name instead?
             if (home != null &&
-                    !databaseName.startsWith(String.valueOf(getSeparator()))) {
+                    !new File(databaseName).isAbsolute()) {
                 canonicalName = new File(home, databaseName).getCanonicalPath();
             } else {
                 canonicalName = new File(databaseName).getCanonicalPath();
@@ -307,7 +304,7 @@ public class VFMemoryStorageFactory
     private String normalizePath(String dir, String file) {
         if (dir == null || dir.equals("")) {
             dir = dataDirectory.getPath();
-        } else if (dir.charAt(0) != getSeparator()) {
+        } else if (!new File(dir).isAbsolute()) {
             dir = new File(dataDirectory.getPath(), dir).getPath();
         }
         // We now have an absolute path for the directory.
@@ -324,7 +321,7 @@ public class VFMemoryStorageFactory
     private String normalizePath(String path) {
         if (path == null || path.equals("")) {
             return dataDirectory.getPath();
-        } else if (path.charAt(0) == getSeparator()) {
+        } else if (new File(path).isAbsolute()) {
             return path;
         } else {
             return new File(dataDirectory.getPath(), path).getPath();
