@@ -75,12 +75,29 @@ final class NodeAllocator
 			if (array.length >= maxSize)
 				return null;
 
+            // Calculate the new length. The new array should be no longer
+            // than maxSize. Use a long for the intermediate result to prevent
+            // newLength from going negative due to integer overflow when
+            // array.length is close to Integer.MAX_VALUE.
+            int newLength = (int) Math.min(
+                    (long) array.length * GROWTH_MULTIPLIER,
+                    (long) maxSize);
+
 			// Attempt to allocate a new array.  If the allocation
 			// fails, tell the caller that there are no more
-			// nodes available.
-			Node[] newArray = new Node[array.length * GROWTH_MULTIPLIER];
-			if (newArray == null)
-				return null;
+            // nodes available. The allocation may fail if there's
+            // not enough memory to allocate a new array, or if the
+            // JVM doesn't support that big arrays (some JVMs have
+            // a limit on the array length that is different from
+            // Integer.MAX_VALUE --- DERBY-4119).
+            Node[] newArray;
+            try {
+                newArray = new Node[newLength];
+            } catch (OutOfMemoryError oome) {
+                // Could not allocate a larger array, so tell the caller that
+                // there are no nodes available.
+                return null;
+            }
 
 			// The new array was successfully allocated.  Copy the
 			// nodes from the original array into it, and make the
@@ -152,8 +169,14 @@ final class NodeAllocator
 	**/
 	public void grow(int percent)
 	{
-		if (percent > 0)		// cannot shrink
-			maxSize = maxSize * (100+percent)/100;
+        if (percent > 0) { // cannot shrink
+            // Calculate the new maximum size. Use long arithmetic so that
+            // intermediate results don't overflow and make maxSize go
+            // negative (DERBY-4119).
+            maxSize = (int) Math.min(
+                    (long) maxSize * (100 + percent) / 100,
+                    (long) Integer.MAX_VALUE);
+        }
 	}
 
 	/**
