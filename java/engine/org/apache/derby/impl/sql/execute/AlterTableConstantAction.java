@@ -645,7 +645,9 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		UUID[] objectUUID;
 		GroupFetchScanController gsc;
 		DependencyManager dm = dd.getDependencyManager();
-
+		//initialize numRows to -1 so we can tell if we scanned an index.	
+		long numRows = -1;		
+		
 		td = dd.getTableDescriptor(tableId);
 		if (updateStatisticsAll)
 		{
@@ -702,7 +704,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 
 			int numCols = indexRow[indexNumber].nColumns() - 1;
 			long[] cardinality = new long[numCols];
-			long numRows = 0;
+			numRows = 0;
 			initializeRowBuffers(indexRow[indexNumber]);
 
 			/* Read uncommited, with record locking. Actually CS store may
@@ -744,6 +746,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 					rowBufferArray[GROUP_FETCH_SIZE - 1] = lastUniqueKey;
 					lastUniqueKey = tmp;
 				} // while
+				gsc.setEstimatedRowCount(numRows);
 			} // try
 			finally
 			{
@@ -754,7 +757,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 			if (numRows == 0)
 			{
 				/* if there is no data in the table: no need to write anything
-				 * to sys.systatstics.
+				 * to sys.sysstatstics
 				 */
 				break;			
 			}
@@ -779,6 +782,33 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 			} // for each leading column (c1) (c1,c2)....
 
 		} // for each index.
+
+		// DERBY-4116 if there were indexes we scanned, we now know the row count.
+		// Update statistics should update the store estimated row count for the table.
+		// If we didn't scan an index and don't know, numRows will still be -1 and
+		// we skip the estimatedRowCount update.
+		
+		if (numRows == -1)
+			return;
+		
+		ScanController heapSC = tc.openScan(td.getHeapConglomerateId(),
+				false,  // hold
+				0,      // openMode: for read
+				TransactionController.MODE_RECORD, // locking
+				TransactionController.ISOLATION_READ_UNCOMMITTED, //isolation level
+				null,   // scancolumnlist-- want everything.
+				null,   // startkeyvalue-- start from the beginning.
+				0,
+				null,   // qualifiers, none!
+				null,   // stopkeyvalue,
+				0);
+		
+		try {	
+			heapSC.setEstimatedRowCount(numRows);
+		} finally {			
+			heapSC.close();
+		}
+
 	}
 
 	private void initializeRowBuffers(ExecIndexRow ir)
