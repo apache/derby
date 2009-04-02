@@ -89,7 +89,7 @@ public class MogTest extends BaseJDBCTestCase {
           throws SQLException {
 
     // Initialize test objects.
-    long _seed = System.currentTimeMillis();
+    final long _seed = System.currentTimeMillis();
     java.util.Random rng = new java.util.Random(_seed);
     /** MOG generator being tested */
     GenMog genMog = new GenMog(rng);
@@ -124,10 +124,11 @@ public class MogTest extends BaseJDBCTestCase {
       // Cluster the samples again, using SQL.
       clusMogSql.clusterSQL(genMog.n, center, ns, sample);
       // Compare the computed MOG configurations.
-      assertEquals(clusMog.n, clusMogSql.n);
-      compare(clusMog.n, clusMog.weight, clusMogSql.weight);
-      compare(clusMog.n, clusMog.mean, clusMogSql.mean);
-      compare(clusMog.n, clusMog.var, clusMogSql.var);
+      assertEquals("MOG configurations differ, seed=" + _seed,
+              clusMog.n, clusMogSql.n);
+      compare(clusMog.n, clusMog.weight, clusMogSql.weight, _seed);
+      compare(clusMog.n, clusMog.mean, clusMogSql.mean, _seed);
+      compare(clusMog.n, clusMog.var, clusMogSql.var, _seed);
 
       // Produce another initial cluster center configuration.
       ClusMog.random(genMog.n, center, ns, sample, rng);
@@ -136,15 +137,16 @@ public class MogTest extends BaseJDBCTestCase {
       // Cluster the samples again, using SQL.
       clusMogSql.clusterSQL(genMog.n, center, ns, sample);
       // Compare the computed MOG configurations.
-      assertEquals(clusMog.n, clusMogSql.n);
-      compare(clusMog.n, clusMog.weight, clusMogSql.weight);
-      compare(clusMog.n, clusMog.mean, clusMogSql.mean);
-      compare(clusMog.n, clusMog.var, clusMogSql.var);
+      assertEquals("MOG configurations differ, seed=" + _seed,
+              clusMog.n, clusMogSql.n);
+      compare(clusMog.n, clusMog.weight, clusMogSql.weight, _seed);
+      compare(clusMog.n, clusMog.mean, clusMogSql.mean, _seed);
+      compare(clusMog.n, clusMog.var, clusMogSql.var, _seed);
     }
   }
 
   /** Compare two floating-point arrays, with tolerance. */
-  private void compare(int n, double ones[], double oths[])
+  private void compare(int n, double ones[], double oths[], final long seed)
   {
     final double thresh = 1.0e-6;
     for (int i=0; i<n; ++i) {
@@ -154,7 +156,7 @@ public class MogTest extends BaseJDBCTestCase {
       final double err = dif / (1.0 + Math.abs(one));
       // Use if to avoid unnecessary string concatenation.
       if (err >= thresh) {
-        fail("Error too big;" + err + " >= " + thresh);
+        fail("Error too big;" + err + " >= " + thresh + ", seed=" + seed);
       }
     }
   }
