@@ -38,7 +38,7 @@ public class ClusMog
    * Compute/recover the parameters of a mixture-of-Gaussian distribution
    * from given independent samples.
    * @param n number of clusters (Gaussian components) to output
-   * @param mean initial cluster centers for iterative refinement
+   * @param center initial cluster centers for iterative refinement
    * @param ns number of input samples
    * @param sample input samples; will be sorted in ascending order during use
    */
