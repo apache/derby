@@ -2174,7 +2174,7 @@ Guide.
 
             <msg>
                 <name>42Y32</name>
-                <text>Aggregator class '{0}' for aggregate '{1}' on type {2} does not implement com.ibm.db2j.aggregates.Aggregator. </text>
+                <text>Aggregator class '{0}' for aggregate '{1}' on type {2} does not implement org.apache.derby.iapi.sql.execute.ExecAggregator. </text>
                 <arg>className</arg>
                 <arg>aggregateName</arg>
                 <arg>type</arg>
